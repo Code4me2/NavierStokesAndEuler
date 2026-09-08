@@ -17,9 +17,6 @@ open scoped ContDiff Topology BigOperators
 
 namespace NavierStokes.SignedStressPrimitive
 
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
-
 structure Patch where
   a : ℝ
   b : ℝ

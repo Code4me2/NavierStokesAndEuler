@@ -95,8 +95,7 @@ theorem physicalPressure_hessian (a k : ℝ) (hk : k ≠ 0) (t : Icc (0 : ℝ) D
       coefficient τ hτ hτT B ξ hs a t (Y x) * deriv (profile δ) (k*⟪D.m₀,Y x⟫_ℝ) := by
     rw [angularSecond_eq_deriv hq]
     exact scalar_second_deriv τ hτ hτT B δ hδ ξ hs a t (Y x) (k*⟪D.m₀,Y x⟫_ℝ)
-  rw [ha] at hh
-  exact hh
+  rwa [ha] at hh
 
 theorem physicalPressure_hessian_of_inverse (a k : ℝ) (hk : k ≠ 0)
     (X Y : Icc (0 : ℝ) D.T → Space → Space)

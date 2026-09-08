@@ -142,8 +142,7 @@ theorem smooth_eq_zero_of_compact_test_integrals (q : LiftDomain period → ℝ)
         (spatialCutoff_compact period n).mul_right
         (fun y => (spatialCutoff_smooth period n y).mul (hq y))
       rw [← hh]
-      apply integral_congr_ae
-      exact Filter.Eventually.of_forall (fun y => by ring)
+      exact integral_congr_ae (Filter.Eventually.of_forall (fun y => by ring))
     have hAE : (fun y => spatialCutoff period n y * (q y) ^ 2) =ᵐ[liftMeasure period] 0 :=
       (integral_eq_zero_iff_of_nonneg
         (fun y => mul_nonneg (spatialCutoff_bounds period n y).1 (sq_nonneg (q y)))

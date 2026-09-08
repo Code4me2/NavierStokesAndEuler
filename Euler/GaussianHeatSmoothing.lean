@@ -64,8 +64,7 @@ theorem lineHeat_hasDerivAt (a : LiftTangent) {v : ℝ≥0} (hv : 0 < v) (f : Li
   have hmem (n : ℕ) : (lineHeat period a v (fn n), lineHeatDerivative period a v (fn n)) ∈
       translationDerivativeGraph period a := by
     have h := lineHeat_strongDerivative period a a v (fn n) (gn n) (hDn n)
-    rw [lineHeat_derivative_identity period a hv.ne' (fn n) (gn n) (hDn n)] at h
-    exact h
+    rwa [lineHeat_derivative_identity period a hv.ne' (fn n) (gn n) (hDn n)] at h
   have hlim : Filter.Tendsto (fun n => (lineHeat period a v (fn n), lineHeatDerivative period a v (fn n)))
       Filter.atTop (𝓝 (lineHeat period a v f, lineHeatDerivative period a v f)) :=
     ((lineHeatOperator period a v).continuous.continuousAt.tendsto.comp (mollify_tendsto period f)).prodMk_nhds

@@ -4,6 +4,7 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.Angle
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.Normed.Group.Bounded
 import Mathlib.Tactic.FinCases
+import NavierStokes.WithTopLemmas
 
 /-!
 # Four genuine polar charts with uniform finite-jet bounds
@@ -22,9 +23,6 @@ open scoped ContDiff Topology BigOperators
 
 abbrev Plane := ℝ × ℝ
 abbrev Index := Fin 4
-
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 /-- Rotation by the negative of the chart offset. -/
 noncomputable def rotate (j : Index) (p : Plane) : Plane :=
@@ -263,7 +261,7 @@ theorem chart_finiteJets_uniform {a : ℝ} (ha : 0 < a) (b : ℝ) (m : ℕ) :
       ∀ p ∈ Metric.closedBall (0 : Plane) b,
         ‖iteratedFDeriv ℝ (i.2 : ℕ) (chart a i.1) p‖ ≤ C :=
     (isCompact_closedBall (0 : Plane) b).exists_bound_of_continuousOn
-      (((chart_contDiff ha i.1).continuous_iteratedFDeriv (nat_le_smooth i.2)).continuousOn)
+      (((chart_contDiff ha i.1).continuous_iteratedFDeriv (natCast_le_infty i.2)).continuousOn)
   choose B hB using hbound
   refine ⟨1 + ∑ i : Index × Fin (m + 1), |B i|, ?_, ?_⟩
   · have hs : 0 ≤ ∑ i : Index × Fin (m + 1), |B i| := Finset.sum_nonneg (fun i _ => abs_nonneg _)
@@ -283,7 +281,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 theorem norm_jet_comp_linear {f : Plane → Plane} (hf : ContDiff ℝ ∞ f)
     (L : E →L[ℝ] Plane) (p : E) (k : ℕ) :
     ‖iteratedFDeriv ℝ k (f ∘ L) p‖ ≤ ‖iteratedFDeriv ℝ k f (L p)‖ * ‖L‖ ^ k := by
-  rw [L.iteratedFDeriv_comp_right hf p (nat_le_smooth k)]
+  rw [L.iteratedFDeriv_comp_right hf p (natCast_le_infty k)]
   simpa using (iteratedFDeriv ℝ k f (L p)).norm_compContinuousLinearMap_le (fun _ => L)
 
 

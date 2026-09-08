@@ -5,6 +5,7 @@ import NavierStokes.OutgoingDilation
 import NavierStokes.HeatedOutgoing
 import Mathlib.MeasureTheory.Function.Jacobian
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import NavierStokes.WithTopLemmas
 
 /-!
 # The renormalized angular moment and physical axial viscosity
@@ -20,9 +21,6 @@ open Set Filter MeasureTheory
 open scoped Topology ContDiff
 
 namespace NavierStokes.RenormalizedHeatMoment
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 /-! ## Smooth integrals of locally uniformly supported differences -/
 
@@ -134,7 +132,7 @@ theorem centered_jet {u : ℝ × ℝ → ℝ} (hu : ContDiff ℝ ∞ u) (z0 : �
       r ^ 2 * iteratedDeriv n (fun y => u (y, r)) z := by
   have hc : ContDiff ℝ ∞ (fun y => u (y, r)) := hu.comp (contDiff_id.prodMk contDiff_const)
   change iteratedDeriv n (fun y => r ^ 2 * (u (y, r) - u (z0, r))) z = _
-  rw [iteratedDeriv_const_mul _ ((hc.sub contDiff_const).contDiffAt.of_le (nat_le_infty n))]
+  rw [iteratedDeriv_const_mul _ ((hc.sub contDiff_const).contDiffAt.of_le (natCast_le_infty n))]
   congr 1
   have he : (fun y => u (y, r) - u (z0, r)) = fun y => -u (z0, r) + u (y, r) := by
     funext y

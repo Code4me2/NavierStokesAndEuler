@@ -35,8 +35,7 @@ theorem initial_frame_derivative_norm :
   have h := coefficient_derivative_bound m R G.frame.toSmoothCoefficientPath 1
     (frameAmplitude L.K*majorant L.scaledRadius 0 1) (L.frame_scaled_bound 1)
     (initialInclusion G.T τ hτT.le t) x
-  rw [L.scaled_first_majorant] at h
-  exact h
+  rwa [L.scaled_first_majorant] at h
 
 omit [CompleteSpace U] in
 theorem initial_first_derivative_norm :
@@ -50,8 +49,7 @@ theorem initial_first_derivative_norm :
   have h := coefficient_derivative_bound m R G.first.toSmoothCoefficientPath 1
     (gradientAmplitude L.K*majorant L.scaledRadius 0 1) (L.first_scaled_bound 1)
     (initialInclusion G.T τ hτT.le t) x
-  rw [L.scaled_first_majorant] at h
-  exact h
+  rwa [L.scaled_first_majorant] at h
 
 omit [CompleteSpace U] in
 theorem initial_curvature_derivative_norm :
@@ -63,8 +61,7 @@ theorem initial_curvature_derivative_norm :
   apply SmoothCoefficientPath.derivative_norm_le_of_bound _ _ (by unfold strainDifferenceCost; positivity)
   intro t x
   have h := L.curvature_scaled_bound 1 (initialInclusion G.T τ hτT.le t) x
-  rw [L.scaled_first_majorant] at h
-  exact h
+  rwa [L.scaled_first_majorant] at h
 
 /-- The coefficient of the label scale in the actual history difference
 bound.  All zeroth norms belong to the restricted source coefficients. -/

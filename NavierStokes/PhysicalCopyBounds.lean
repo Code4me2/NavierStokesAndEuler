@@ -1,5 +1,6 @@
 import NavierStokes.PhysicalClassBounds
 import NavierStokes.PeriodizedWaveBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical bounds for locally finite native copies
@@ -327,9 +328,6 @@ open WeightedClasses
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {ι : Type*}
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-
 /-- Actual cutoff amplitudes, pulled from their weighted native coefficient
 through the common-coordinate map.  Only the map's positive jets are bounded;
 its values and the copy centers may be unbounded. -/
@@ -381,7 +379,7 @@ theorem CommonChart.amplitude_bound {s : StripData D} {α σ : ℝ}
   rw [hchart.amplitude_eq k I]
   change ‖iteratedFDeriv ℝ j (fun x => (ChartScales.Q I.1.val.1 ^ σ) •
     (source (hchart.sourceIndex k I) I.1.val.1 ∘ hchart.map k I) x) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (nat_le_infty j)),
+  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (natCast_le_infty j)),
     norm_smul (ChartScales.Q I.1.val.1 ^ σ)
       (iteratedFDeriv ℝ j (source (hchart.sourceIndex k I) I.1.val.1 ∘ hchart.map k I) x),
     Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ σ).le]
@@ -428,7 +426,7 @@ theorem CarrierBounds.profile_bound {hc : SupportCells f}
   have hpair := (hb.jets.smooth (k, L)).contDiffAt ((hb.open_region k L).mem_nhds hx)
   have he := hp (k, L) j hj x hx
   rw [PhysicalGraphBounds.iteratedFDeriv_pair
-    (hpair.fst.of_le (nat_le_infty j)) (hpair.snd.of_le (nat_le_infty j)),
+    (hpair.fst.of_le (natCast_le_infty j)) (hpair.snd.of_le (natCast_le_infty j)),
     ContinuousMultilinearMap.opNorm_prod] at he
   exact ⟨(le_max_left _ _).trans he, (le_max_right _ _).trans he⟩
 

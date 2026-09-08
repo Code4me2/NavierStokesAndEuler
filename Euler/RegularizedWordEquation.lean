@@ -66,8 +66,7 @@ theorem regularized_word_hasDerivAt {q m : ℕ} (hm : m ≤ q+1) (n : ℕ) (w : 
   have h := viscous_mild_block_hasDerivAt period (le_refl 2)
     (regularizedWordBlock period hm n w) (regularizedWordBlock_heat period hm n w)
     ν hν T hT u₀ (fun t _ => f t) (f.continuous.comp continuous_fst) u hsol t ht
-  rw [laplacianEvaluation_two] at h
-  exact h
+  rwa [laplacianEvaluation_two] at h
 
 /-- Actual energy-order word regularization preserves lifted divergence-freeness. -/
 theorem regularized_word_divergenceFree {q m : ℕ} (hm : m ≤ q+1) (n : ℕ) (w : Fin m → Fin 4)

@@ -1,5 +1,6 @@
 import NavierStokes.PhysicalCopyBounds
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical copy bounds from local native smoothness
@@ -513,9 +514,6 @@ open WeightedClasses LabelSumBounds
 variable {D E : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E] {ι : Type*}
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-
 /-- The lower weighted input is only smooth on its actual open native
 strip.  No global smoothness or global support condition on its raw
 totalization is included. -/
@@ -563,7 +561,7 @@ theorem composition_jet_bound_on {X : Type*} [NormedAddCommGroup X] [NormedSpace
     (hφb : ∀ i, 1 ≤ i → i ≤ m → ‖iteratedFDeriv ℝ i φ x‖ ≤ B) :
     ∀ j ≤ m, ‖iteratedFDeriv ℝ j (g ∘ φ) x‖ ≤ (m.factorial : ℝ) * A * B ^ m := by
   intro j hj
-  have hb := norm_iteratedFDerivWithin_comp_le hg hφ (nat_le_infty j)
+  have hb := norm_iteratedFDerivWithin_comp_le hg hφ (natCast_le_infty j)
     hV.uniqueDiffOn hU.uniqueDiffOn hmap hx (C := A) (D := B)
     (fun i hi => by
       rw [iteratedFDerivWithin_of_isOpen i hV (hmap hx)]
@@ -632,7 +630,7 @@ theorem commonChart_amplitude_bound {s : StripData D} {α σ : ℝ}
   rw [iteratedFDeriv_eq_of_eventuallyEq he j]
   change ‖iteratedFDeriv ℝ j (fun x => (ChartScales.Q I.1.val.1 ^ σ) •
     (source (hchart.sourceIndex k I) I.1.val.1 ∘ hchart.map k I) x) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (nat_le_infty j)),
+  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (natCast_le_infty j)),
     norm_smul (ChartScales.Q I.1.val.1 ^ σ)
       (iteratedFDeriv ℝ j (source (hchart.sourceIndex k I) I.1.val.1 ∘ hchart.map k I) x),
     Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ σ).le]

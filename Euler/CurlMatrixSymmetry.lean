@@ -15,8 +15,7 @@ theorem curlMatrix_eq_zero_iff_isSymmetric (A : Space →L[ℝ] Space) :
   · intro h
     have hc (i : Fin 3) :
         (A (EuclideanSpace.single (i+1) 1)) (i+2) -
-          (A (EuclideanSpace.single (i+2) 1)) (i+1) = 0 := by
-      exact congrArg (fun v : Space => v i) h
+          (A (EuclideanSpace.single (i+2) 1)) (i+1) = 0 := congrArg (fun v : Space => v i) h
     have h0 := hc 0
     have h1 := hc 1
     have h2 := hc 2

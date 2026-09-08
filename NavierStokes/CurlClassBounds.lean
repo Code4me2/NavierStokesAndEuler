@@ -5,6 +5,7 @@ import NavierStokes.PhaseJetBounds
 import NavierStokes.Scaling
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import NavierStokes.WithTopLemmas
 
 /-!
 # Weighted classes of actual cylindrical curl corrections
@@ -24,9 +25,6 @@ open scoped Topology ContDiff BigOperators InnerProductSpace
 
 abbrev RealVector := ProblemStatement.Space
 abbrev ComplexVector := HarmonicCalculus.ComplexVector
-
-private theorem nat_le_smooth (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 section Classes
 
@@ -424,7 +422,7 @@ theorem along_commute {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (hbracket : fderiv ℝ W x (V x) = fderiv ℝ V x (W x)) :
     HarmonicCalculus.along V (HarmonicCalculus.along W f) x =
       HarmonicCalculus.along W (HarmonicCalculus.along V f) x := by
-  have hf2 : ContDiffAt ℝ 2 f x := hf.of_le (nat_le_smooth 2)
+  have hf2 : ContDiffAt ℝ 2 f x := hf.of_le (natCast_le_infty 2)
   have hDF := (hf2.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)
   unfold HarmonicCalculus.along
   rw [fderiv_clm_apply hDF hW, fderiv_clm_apply hDF hV]

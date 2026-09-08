@@ -67,17 +67,14 @@ def homogeneousTranslation (a : Space) : homogeneousSpace →ₗᵢ[ℝ] homogen
 
 theorem homogeneousTranslation_add (a b : Space) (u : homogeneousSpace) :
     homogeneousTranslation a (homogeneousTranslation b u) = homogeneousTranslation (a+b) u := by
-  apply Subtype.ext
-  exact gradientTranslation_add a b (u : GradientTensor)
+  exact Subtype.ext (gradientTranslation_add a b (u : GradientTensor))
 
 theorem homogeneousTranslation_zero (u : homogeneousSpace) : homogeneousTranslation 0 u = u := by
-  apply Subtype.ext
-  exact gradientTranslation_zero (u : GradientTensor)
+  exact Subtype.ext (gradientTranslation_zero (u : GradientTensor))
 
 theorem homogeneousTranslation_test (a : Space) (f : Test) :
     homogeneousTranslation a (homogeneousGradient f) = homogeneousGradient (translatedTest a f) := by
-  apply Subtype.ext
-  exact (testGradient_translated a f).symm
+  exact Subtype.ext ((testGradient_translated a f).symm)
 
 theorem homogeneousTranslation_inner_shift (a : Space) (u v : homogeneousSpace) :
     ⟪homogeneousTranslation a u, v⟫_ℝ = ⟪u, homogeneousTranslation (-a) v⟫_ℝ := by

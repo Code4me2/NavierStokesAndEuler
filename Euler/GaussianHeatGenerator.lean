@@ -98,8 +98,7 @@ theorem varianceMoment_eq_half_derivative (a : LiftTangent) {t : ℝ} (ht : 0 < 
       apply Subtype.ext
       change Real.sqrt t ^ 2 * 1 = t
       rw [mul_one, Real.sq_sqrt ht.le]
-    rw [mul_zero, he] at h
-    exact h
+    rwa [mul_zero, he] at h
   change (∫ x : ℝ, (x / (2 * Real.sqrt t)) • lineOrbit period a g (Real.sqrt t * x) ∂gaussianReal 0 1) =
     (1/2 : ℝ) • (t⁻¹ • ∫ x : ℝ, x • lineOrbit period a g x ∂gaussianReal 0 ⟨t, ht.le⟩)
   have hm := integral_map_of_stronglyMeasurable

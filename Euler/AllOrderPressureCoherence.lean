@@ -38,8 +38,7 @@ theorem rawSourcePath_truncate {T : ℝ} (hT : 0 < T) (A : Data period T) (B : B
   have he := congrArg (fun f => f t) (solution_compatible period hT A B q hq)
   change truncateOperator period (q+1) (solution period hT A B (q+1) (hq.trans (Nat.le_succ q)) t)=
     solution period hT A B q hq t at he
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 /-- Adjacent genuine raw sources represent the same actual L² field. -/
 theorem rawSourcePath_value_succ {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)

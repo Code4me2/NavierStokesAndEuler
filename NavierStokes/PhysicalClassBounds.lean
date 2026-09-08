@@ -2,6 +2,7 @@ import NavierStokes.LabelSumBounds
 import NavierStokes.WeightedRadialPrimitive
 import NavierStokes.LocalSignedRequest
 import NavierStokes.SpatialCurl
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform weighted coefficients and physical wave sums
@@ -20,9 +21,6 @@ namespace NavierStokes.PhysicalClassBounds
 open Set Function Filter WeightedClasses LabelSumBounds
 open scoped Topology ContDiff BigOperators
 
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -123,7 +121,7 @@ theorem jets_bound_global_of_support {f : D → E} {U : Set D} {B : ℝ}
   intro x
   by_cases hx : x ∈ closure U
   · exact (closure_minimal hb (isClosed_le
-      (hf.continuous_iteratedFDeriv (nat_le_infty m)).norm continuous_const)) hx
+      (hf.continuous_iteratedFDeriv (natCast_le_infty m)).norm continuous_const)) hx
   · rw [PhysicalWaveSum.jet_zero_off_tsupport f m (fun ht => hx (hs ht)), norm_zero]
     exact hB
 
@@ -263,7 +261,7 @@ theorem composition_jet_bound {g : D → E} {φ : X → D} {U : Set X}
     (hφb : ∀ i, 1 ≤ i → i ≤ m → ‖iteratedFDeriv ℝ i φ x‖ ≤ B) :
     ∀ j ≤ m, ‖iteratedFDeriv ℝ j (g ∘ φ) x‖ ≤ (m.factorial : ℝ) * A * B ^ m := by
   intro j hj
-  have hb := norm_iteratedFDerivWithin_comp_le hg.contDiffOn hφ (nat_le_infty j)
+  have hb := norm_iteratedFDerivWithin_comp_le hg.contDiffOn hφ (natCast_le_infty j)
     uniqueDiffOn_univ hU.uniqueDiffOn (mapsTo_univ φ U) hx
     (C := A) (D := B)
     (fun i hi => by rw [iteratedFDerivWithin_univ]; exact hgb i (hi.trans hj))
@@ -326,7 +324,7 @@ theorem CommonChart.amplitude_bound {s : StripData D} {h α σ a b r0 : ℝ}
   rw [hc.amplitude_eq I]
   change ‖iteratedFDeriv ℝ j (fun x => (ChartScales.Q I.1.val.1 ^ σ) •
     (f (hc.sourceIndex I) I.1.val.1 ∘ hc.map I) x) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (nat_le_infty j)),
+  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (natCast_le_infty j)),
     norm_smul (ChartScales.Q I.1.val.1 ^ σ)
       (iteratedFDeriv ℝ j (f (hc.sourceIndex I) I.1.val.1 ∘ hc.map I) x),
     Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ σ).le]
@@ -378,7 +376,7 @@ theorem CarrierBounds.profile_bound {H : ℕ} {F : PhysicalWaveSum.WaveFamily H}
   have hpair := (hb.jets.smooth L).contDiffAt ((hb.open_region L).mem_nhds hx)
   have he := hp L j hj x hx
   rw [PhysicalGraphBounds.iteratedFDeriv_pair
-    (hpair.fst.of_le (nat_le_infty j)) (hpair.snd.of_le (nat_le_infty j)),
+    (hpair.fst.of_le (natCast_le_infty j)) (hpair.snd.of_le (natCast_le_infty j)),
     ContinuousMultilinearMap.opNorm_prod] at he
   exact ⟨(le_max_left _ _).trans he, (le_max_right _ _).trans he⟩
 
@@ -501,7 +499,7 @@ theorem spatialCurl_jet_bound {A : ProblemStatement.VelocityField}
   rw [PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq he m]
   have hd : ContDiffAt ℝ ∞ (fderiv ℝ A) z :=
     (hA.contDiffAt (hU.mem_nhds hz)).fderiv_right (by simp)
-  have hb := PhysicalWaveSum.norm_jet_linear_comp_at (hd.of_le (nat_le_infty m)) jointCurl
+  have hb := PhysicalWaveSum.norm_jet_linear_comp_at (hd.of_le (natCast_le_infty m)) jointCurl
   simpa only [norm_iteratedFDeriv_fderiv] using hb
 
 
@@ -602,8 +600,8 @@ theorem cylindricalMap_positiveJets {a b : ℝ} (ha : 0 < a) (m : ℕ) :
         (by positivity) (zero_le_one.trans hB)).trans_eq (mul_one B))
   change ‖iteratedFDeriv ℝ j
     (fun y => ((cartesianRadius ∘ PhysicalGraphBounds.liftXY) y, slowFast y)) x‖ ≤ B
-  rw [PhysicalGraphBounds.iteratedFDeriv_pair (hrad.of_le (nat_le_infty j))
-    (slowFast.contDiff.contDiffAt.of_le (nat_le_infty j)), ContinuousMultilinearMap.opNorm_prod]
+  rw [PhysicalGraphBounds.iteratedFDeriv_pair (hrad.of_le (natCast_le_infty j))
+    (slowFast.contDiff.contDiffAt.of_le (natCast_le_infty j)), ContinuousMultilinearMap.opNorm_prod]
   exact max_le hrb ((PhysicalGraphBounds.norm_positive_jet_linear_le slowFast x hj).trans
     (norm_slowFast_le.trans hB))
 

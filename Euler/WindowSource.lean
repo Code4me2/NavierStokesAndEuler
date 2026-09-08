@@ -33,8 +33,7 @@ theorem windowSource_zero {S T : ℝ} (C : Coefficients (Icc (0 : ℝ) S) X Y)
     extendPath T hT (windowSource C 0 T le_rfl (by simpa using hTS) u) r =
       C.apply (timeInclusion hTS (projIcc 0 T hT r)) (extendPath T hT u r) := by
   apply congrArg (fun t => C.apply t (extendPath T hT u r))
-  apply Subtype.ext
-  exact zero_add _
+  exact Subtype.ext (zero_add _)
 
 /-- Before the restart, the literal nonlinear source of the pasted solution is the old source. -/
 theorem windowSource_glue_left {S : ℝ} (C : Coefficients (Icc (0 : ℝ) S) X Y)

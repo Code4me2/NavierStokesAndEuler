@@ -6,6 +6,7 @@ import NavierStokes.CopyAngularInvariance
 import NavierStokes.PrimaryODE
 import NavierStokes.PrimaryCopyBridge
 import NavierStokes.LinearWaveBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Particular waves from the actual forced copy-path solve
@@ -692,9 +693,6 @@ open PrimaryODE
 
 variable {Q : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
-
 noncomputable def ambientJetConstant (N : ℕ) : ℝ :=
   2 ^ N * (‖(EuclideanSpace.proj (0 : Fin 2) : PrimaryODE.State →L[ℝ] ℝ)‖ +
     ‖(EuclideanSpace.proj (1 : Fin 2) : PrimaryODE.State →L[ℝ] ℝ)‖)
@@ -713,7 +711,7 @@ theorem ambient_jet_bound (d : FrameData Q) {T : Set (Q × ℝ)} (hT : IsOpen T)
   have hcompj (i : Fin 2) (k : ℕ) (hk : k ≤ N) :
       ‖iteratedFDeriv ℝ k (fun y => u y i) x‖ ≤ ‖(EuclideanSpace.proj i : PrimaryODE.State →L[ℝ] ℝ)‖ * A := by
     change ‖iteratedFDeriv ℝ k ((EuclideanSpace.proj i : PrimaryODE.State →L[ℝ] ℝ) ∘ u) x‖ ≤ _
-    rw [(EuclideanSpace.proj i : PrimaryODE.State →L[ℝ] ℝ).iteratedFDeriv_comp_left (hu.contDiffAt (hT.mem_nhds hx)) (nat_le_infty k)]
+    rw [(EuclideanSpace.proj i : PrimaryODE.State →L[ℝ] ℝ).iteratedFDeriv_comp_left (hu.contDiffAt (hT.mem_nhds hx)) (natCast_le_infty k)]
     exact ((EuclideanSpace.proj i : PrimaryODE.State →L[ℝ] ℝ).norm_compContinuousMultilinearMap_le _).trans
       (mul_le_mul_of_nonneg_left (huj k hk) (norm_nonneg _))
   have hb (i : Fin 2) := smul_jet_bound hT (hcomp i) (hc i) hx hj
@@ -728,8 +726,8 @@ theorem ambient_jet_bound (d : FrameData Q) {T : Set (Q × ℝ)} (hT : IsOpen T)
   rw [iteratedFDeriv_add_apply
     (f := fun y => u y 0 • synthesisColumn d 0 y)
     (g := fun y => u y 1 • synthesisColumn d 1 y)
-    (((hcomp 0).smul (hc 0)).contDiffAt (hT.mem_nhds hx) |>.of_le (nat_le_infty j))
-    (((hcomp 1).smul (hc 1)).contDiffAt (hT.mem_nhds hx) |>.of_le (nat_le_infty j))]
+    (((hcomp 0).smul (hc 0)).contDiffAt (hT.mem_nhds hx) |>.of_le (natCast_le_infty j))
+    (((hcomp 1).smul (hc 1)).contDiffAt (hT.mem_nhds hx) |>.of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖iteratedFDeriv ℝ j (fun y => u y 0 • synthesisColumn d 0 y) x‖ +
         ‖iteratedFDeriv ℝ j (fun y => u y 1 • synthesisColumn d 1 y) x‖ := norm_add_le _ _

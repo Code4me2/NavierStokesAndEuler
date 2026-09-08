@@ -69,8 +69,7 @@ theorem pressureConstant_le_six {q : ℕ} (hq : q ≤ 6) {A : SmoothCoefficient 
     (c L : ℝ) (hc : 0 < c) (hL : 1 ≤ L) (hcL : c⁻¹ ≤ L)
     (hcoeff : ∀ r ≤ q, boundLevel period K r ≤ L) : K.pressureConstant c ≤ (9*L)^729 := by
   have h := pressureConstant_polynomial K c L hc hL hcL hcoeff
-  have he : 3^q ≤ 729 := by
-    exact (Nat.pow_le_pow_right (by norm_num : 1 ≤ 3) hq).trans (by norm_num)
+  have he : 3^q ≤ 729 := (Nat.pow_le_pow_right (by norm_num : 1 ≤ 3) hq).trans (by norm_num)
   exact h.trans (pow_le_pow_right₀ (by linarith : 1 ≤ 9*L) he)
 
 omit [Fact (0 < period)] in

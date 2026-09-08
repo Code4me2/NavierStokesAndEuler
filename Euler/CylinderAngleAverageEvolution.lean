@@ -25,8 +25,7 @@ variable {E F : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [Complet
 theorem supportedAverage_operator (A : Space →ᵇ E →L[ℝ] F) (u : Supported P E S hS) :
     supportedAverage P S hS (supportedOperatorMap P S hS A u) =
       supportedOperatorMap P S hS A (supportedAverage P S hS u) := by
-  apply Subtype.ext
-  exact average_fullOperator P A (u : CylinderL2 P E)
+  exact Subtype.ext (average_fullOperator P A (u : CylinderL2 P E))
 
 end Coefficients
 
@@ -78,9 +77,7 @@ theorem solution_average_zero (f : C(Icc (0 : ℝ) T,Supported P V S hS))
     (hf : ∀ t, supportedAverage P S hS (f t) = 0)
     (ha₀ : supportedAverage P S hS a₀ = 0) (t : Icc (0 : ℝ) T) :
     supportedAverage P S hS (U.solution f a₀ t) = 0 := by
-  have hfp : supportedPathAverage P S hS f = 0 := by
-    apply ContinuousMap.ext
-    exact hf
+  have hfp : supportedPathAverage P S hS f = 0 := ContinuousMap.ext (hf)
   have he := solution_average P S hS T hT B U f a₀
   have hz : U.solution 0 0 = 0 := by
     rw [U.solution_eq_operators, map_zero, map_zero, add_zero]

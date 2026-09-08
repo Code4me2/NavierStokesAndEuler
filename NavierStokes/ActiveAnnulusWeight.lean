@@ -5,6 +5,7 @@ import NavierStokes.EdgeWeightJets
 import NavierStokes.TerminalEdgeFactor
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Topology.Separation.Hausdorff
+import NavierStokes.WithTopLemmas
 
 /-!
 # One flat weight on the active annulus
@@ -336,8 +337,8 @@ theorem iteratedFDeriv_eq_of_eqOn {S : Set (E × ℝ)} (hS : UniqueDiffOn ℝ S)
     {f g : E × ℝ → V} (he : EqOn f g S) {q : E × ℝ} (hq : q ∈ S)
     (hf : ContDiffAt ℝ ∞ f q) (hg : ContDiffAt ℝ ∞ g q) (n : ℕ) :
     iteratedFDeriv ℝ n f q = iteratedFDeriv ℝ n g q := by
-  rw [← iteratedFDerivWithin_eq_iteratedFDeriv hS (hf.of_le (EdgeWeightJets.nat_le_infty n)) hq,
-    ← iteratedFDerivWithin_eq_iteratedFDeriv hS (hg.of_le (EdgeWeightJets.nat_le_infty n)) hq]
+  rw [← iteratedFDerivWithin_eq_iteratedFDeriv hS (hf.of_le (natCast_le_infty n)) hq,
+    ← iteratedFDerivWithin_eq_iteratedFDeriv hS (hg.of_le (natCast_le_infty n)) hq]
   exact iteratedFDerivWithin_congr he hq n
 
 /-- The local derivative estimates are consequences of the actual factor
@@ -573,7 +574,7 @@ theorem exists_radial_derivative_bound {K : Set E} (hK : IsCompact K)
     exact (hjets i hin (p,X) ⟨hp,hX.1.le,hX.2.le⟩).trans
       (hBD.trans (by simpa only [pow_one] using pow_le_pow_right₀ hD hi))
   have hh := norm_iteratedFDerivWithin_comp_le hT (hlog.mono inter_subset_left)
-    (EdgeWeightJets.nat_le_infty n) hO.uniqueDiffOn hQ.uniqueDiffOn hmap hqx houter hinner
+    (natCast_le_infty n) hO.uniqueDiffOn hQ.uniqueDiffOn hmap hqx houter hinner
   rw [iteratedFDerivWithin_of_isOpen n hQ hqx] at hh
   calc
     ‖iteratedFDeriv ℝ n (radialPullback T) (p,X)‖ ≤

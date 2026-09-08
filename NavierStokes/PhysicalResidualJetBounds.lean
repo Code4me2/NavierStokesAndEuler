@@ -4,6 +4,7 @@ import NavierStokes.UniformHarmonicInteraction
 import NavierStokes.AnnularEndpoint
 import NavierStokes.DiagonalResidual
 import NavierStokes.ResidualPolarGraph
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical jets of the actual finite-state residual
@@ -25,9 +26,6 @@ abbrev Point := PhysicalMeanJetBounds.Point
 abbrev Cylinder := Point × ℝ
 abbrev Components := Fin 3 → ℝ
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-
 /-! ## Local harmonic calculus -/
 
 /-- A constant shift of the phase costs nothing: only positive phase jets
@@ -47,7 +45,7 @@ theorem character_positive_jet_bound {E : Type} [NormedAddCommGroup E] [NormedSp
   intro k hk
   rw [iteratedFDeriv_eq_of_eventuallyEq hec k]
   have hb := norm_iteratedFDeriv_comp_le (PhysicalGraphBounds.character_smooth c) hG
-    (nat_le_infty k) x (C := M ^ m) (D := B)
+    (natCast_le_infty k) x (C := M ^ m) (D := B)
     (fun i hi => by
       rw [PhysicalGraphBounds.norm_character_jet]
       exact (pow_le_pow_left₀ (abs_nonneg _) hc i).trans
@@ -165,7 +163,7 @@ theorem polarLift_positiveJets {a b : ℝ} (ha : 0 < a) (m : ℕ) :
       ((PolarCharts.chart a j ∘ PhysicalGraphBounds.liftXY) y, PhysicalClassBounds.slowFast y)) x‖ ≤ B
     rw [PhysicalGraphBounds.iteratedFDeriv_pair
       (((PolarCharts.chart_contDiff ha j).comp PhysicalGraphBounds.liftXY.contDiff).contDiffAt.of_le
-        (nat_le_infty k)) (PhysicalClassBounds.slowFast.contDiff.contDiffAt.of_le (nat_le_infty k)),
+        (natCast_le_infty k)) (PhysicalClassBounds.slowFast.contDiff.contDiffAt.of_le (natCast_le_infty k)),
       ContinuousMultilinearMap.opNorm_prod]
     exact max_le hc ((PhysicalGraphBounds.norm_positive_jet_linear_le
       PhysicalClassBounds.slowFast x hk).trans (PhysicalClassBounds.norm_slowFast_le.trans hB))
@@ -176,7 +174,7 @@ theorem polarLift_positiveJets {a b : ℝ} (ha : 0 < a) (m : ℕ) :
     rw [polarAssoc.norm_map, one_mul]
   have he := norm_jet_linear_comp_at (w := x)
     ((((PolarCharts.chart_contDiff ha j).comp PhysicalGraphBounds.liftXY.contDiff).prodMk
-      PhysicalClassBounds.slowFast.contDiff).contDiffAt.of_le (nat_le_infty k))
+      PhysicalClassBounds.slowFast.contDiff).contDiffAt.of_le (natCast_le_infty k))
     polarAssoc.toContinuousLinearEquiv.toContinuousLinearMap
   change ‖iteratedFDeriv ℝ k
     (polarAssoc.toContinuousLinearEquiv.toContinuousLinearMap ∘
@@ -228,7 +226,7 @@ theorem clm_apply_jet_bound {D E F : Type*}
     (hfa : ∀ i ≤ m, ‖iteratedFDeriv ℝ i f x‖ ≤ A)
     (hgb : ∀ i ≤ m, ‖iteratedFDeriv ℝ i g x‖ ≤ B) :
     ‖iteratedFDeriv ℝ k (fun y => f y (g y)) x‖ ≤ (2 : ℝ) ^ m * A * B := by
-  apply (norm_iteratedFDeriv_clm_apply hf hg x (nat_le_infty k)).trans
+  apply (norm_iteratedFDeriv_clm_apply hf hg x (natCast_le_infty k)).trans
   calc
     _ ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * A * B := by
       apply Finset.sum_le_sum
@@ -313,7 +311,7 @@ theorem cartesianPull_jet_bound {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2)
     intro i hi
     change ‖iteratedFDeriv ℝ i (fun y => ChartScales.Q n ^ (-degree) • r y (f y))
       (commonLift h n d w)‖ ≤ _
-    rw [iteratedFDeriv_const_smul_apply' ((hr.clm_apply hf).contDiffAt.of_le (nat_le_infty i)),
+    rw [iteratedFDeriv_const_smul_apply' ((hr.clm_apply hf).contDiffAt.of_le (natCast_le_infty i)),
       norm_smul (ChartScales.Q n ^ (-degree))
         (iteratedFDeriv ℝ i (fun x => r x (f x)) (commonLift h n d w)),
       Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ _).le]
@@ -390,7 +388,7 @@ theorem map (hf : NativeBounds N U gain loss f) (hU : IsOpen U) (L : E →L[ℝ]
   calc
     _ ≤ ‖L‖ * ‖iteratedFDeriv ℝ j (f l n) x‖ :=
       norm_jet_linear_comp_at (((hf.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le
-        (nat_le_infty j)) L
+        (natCast_le_infty j)) L
     _ ≤ ‖L‖ * (A * ChartScales.Q n ^ (gain - loss m) * ChartScales.S n ^ p) :=
       mul_le_mul_of_nonneg_left (hb l n hn x hx j hj) (norm_nonneg _)
     _ = _ := by ring
@@ -407,8 +405,8 @@ theorem add (hN : 1 ≤ N) (hU : IsOpen U) (hf : NativeBounds N U gain loss f)
   have hS := PhysicalGraphBounds.S_ge_one (hN.trans hn)
   have hQ : 0 ≤ ChartScales.Q n ^ (gain - loss m) := Real.rpow_pos_of_pos (ChartScales.Q_pos n) _ |>.le
   rw [fun_iteratedFDeriv_add_apply
-    (((hf.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (nat_le_infty j))
-    (((hg.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (nat_le_infty j))]
+    (((hf.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (natCast_le_infty j))
+    (((hg.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖iteratedFDeriv ℝ j (f l n) x‖ + ‖iteratedFDeriv ℝ j (g l n) x‖ := norm_add_le _ _
     _ ≤ A * ChartScales.Q n ^ (gain - loss m) * ChartScales.S n ^ p +
@@ -500,7 +498,7 @@ theorem window_sum (hU : IsOpen U) (hf : NativeBounds N U gain loss f)
   have hS : 0 ≤ ChartScales.S n := by unfold ChartScales.S; positivity
   have h := LabelSumBounds.finite_sum_jet_bound hU hx (labels n) (label n) (hinj n hn)
     (hlevel n hn) d (χ n) ((hχ n hn).continuousAt (hU.mem_nhds hx)) (fun l => f l n) j
-    (fun l _ => ((hf.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (nat_le_infty j))
+    (fun l _ => ((hf.smooth l n hn).contDiffAt (hU.mem_nhds hx)).of_le (natCast_le_infty j))
     (hs n hn) (by positivity : 0 ≤ A * ChartScales.Q n ^ (gain - loss m) * ChartScales.S n ^ p)
     (fun l _ _ => hb l n hn x hx j hj)
   exact h.trans_eq (by ring)
@@ -591,7 +589,7 @@ theorem NativeBounds.pi {D ι κ : Type*} [NormedAddCommGroup D] [NormedSpace �
   have hSp : 0 ≤ ChartScales.S n ^ (∑ i, p i) := pow_nonneg (zero_le_one.trans hS) _
   apply finite_pi_iteratedFDeriv_norm_le
     ((contDiffOn_pi.mpr (fun i => (hf i).smooth l n hn)).contDiffAt
-      (hU.mem_nhds hx) |>.of_le (nat_le_infty j)) (by positivity)
+      (hU.mem_nhds hx) |>.of_le (natCast_le_infty j)) (by positivity)
   intro i
   exact (hb i l n hn x hx j hj).trans (mul_le_mul
     (mul_le_mul_of_nonneg_right

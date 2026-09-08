@@ -33,8 +33,7 @@ theorem pointField_scalarDerivativeProductPath (t : K) (x : LiftDomain P) :
         fieldFDeriv P (pointField P q hq t) x (standardDirection i) := by
   have h := pointField_scalarProductPath P L hL p (derivativePath P q i)
     hp (derivativePath_orbit P q hq i) t x
-  rw [pointField_derivativePath P q hq] at h
-  exact h
+  rwa [pointField_derivativePath P q hq] at h
 
 /-- Fixed-H6 external word bounds preserve the same radius, with one derivative shift. -/
 theorem scalarDerivativeProductPath_majorant (R A C : ℝ)

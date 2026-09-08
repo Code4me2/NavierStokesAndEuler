@@ -74,8 +74,7 @@ theorem coefficientJet_boundLevel_le_words (s n : ℕ) (t : K) :
       have he : translateCoefficientPath (orbitDerivativePath A (coefficientDirections i)) =
           directional coefficientDirections (translateCoefficientPath A) i :=
         funext (orbitDerivativePath_translation A hA (coefficientDirections i))
-      rw [he] at hh
-      exact hh
+      rwa [he] at hh
 
 
 theorem coefficientJet_block_le_words (s q n : ℕ) (t : K) :

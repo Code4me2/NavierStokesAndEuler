@@ -49,15 +49,13 @@ theorem realCylinderHeat_generator_pos {f : LiftL2 period} (J : SpatialJet perio
       funext j
       fin_cases j
       rfl
-    rw [he, SpatialJet.word_zero] at h
-    exact h
+    rwa [he, SpatialJet.word_zero] at h
   have hDD (i : Fin 4) : HasDerivAt (lineOrbit period (standardDirection i) (df i)) (ddf i) 0 := by
     have h := J.word_hasDerivAt (show 1 < 2 by omega) (fun _ : Fin 1 => i) i
     have he : Fin.cons i (fun _ : Fin 1 => i) = (fun _ : Fin 2 => i) := by
       funext j
       fin_cases j <;> rfl
-    rw [he] at h
-    exact h
+    rwa [he] at h
   have h := realHeatList_generator_pos period (List.ofFn (fun i : Fin 4 => i)) standardDirection f df ddf
     (fun i _ => hD i) (fun i _ => hDD i) ht
   simpa only [List.map_ofFn, Function.comp_def, List.sum_ofFn, realCylinderHeat_apply,

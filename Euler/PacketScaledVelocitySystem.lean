@@ -85,11 +85,9 @@ theorem scaledVelocity_firstTwo_hasDerivWithinAt (B M : Space →L[ℝ] Space)
     (scaled_pairing_zero m v r w hs₀ hε hm0 hv0 hmv hrw)
   constructor
   · have h := scaledVelocity_hasDerivWithinAt B M ha hε hs₀ hmap hm hv hw hm0 hv0 hmv hr0 0
-    rw [scaledVelocityRhs_first _ _ _ _ _ hthird] at h
-    exact h
+    rwa [scaledVelocityRhs_first _ _ _ _ _ hthird] at h
   · have h := scaledVelocity_hasDerivWithinAt B M ha hε hs₀ hmap hm hv hw hm0 hv0 hmv hr0 1
-    rw [scaledVelocityRhs_second _ _ _ _ _ hthird] at h
-    exact h
+    rwa [scaledVelocityRhs_second _ _ _ _ _ hthird] at h
 
 
 end EulerPacketMovingFrame

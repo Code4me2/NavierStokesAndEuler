@@ -54,7 +54,6 @@ theorem scaled_mean_boundary_lower_bound (ℓ : ℝ) (hℓ : 0 < ℓ)
     exact le_of_not_gt hx
   · intro x hx
     apply hcore x
-    rw [← physical_ball_eq ℓ r hℓ] at hx
-    exact hx
+    rwa [← physical_ball_eq ℓ r hℓ] at hx
 
 end EulerMeanHarmonic

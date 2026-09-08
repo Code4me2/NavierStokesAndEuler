@@ -45,8 +45,7 @@ theorem initial_nonzero (L : FiniteLifespan A) : A.field ≠ (0 : Space → Spac
   intro hz
   apply L.no_endpoint
   refine ⟨L.duration_pos,zeroEvolution L.duration L.duration_pos.le,?_⟩
-  apply field_ext
-  exact hz.symm
+  exact field_ext (hz.symm)
 
 end FiniteLifespan
 end EulerOrdinarySobolev

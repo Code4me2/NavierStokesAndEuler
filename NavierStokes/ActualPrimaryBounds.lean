@@ -2,6 +2,7 @@ import NavierStokes.CorrectionInitialization
 import NavierStokes.LocalizedWaveBounds
 import NavierStokes.UniformBlockBounds
 import NavierStokes.ActualPhaseDefect
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform estimates for the chosen primary waves
@@ -208,9 +209,6 @@ section NativeCopyEstimates
 
 variable {B N0 : ℕ}
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
-
 theorem copyPoint_radial (l : SignedLabel B N0) (n : ℕ) (k : TorusInverse.Frequency)
     {x : Native} (hx : x ∈ nativeStrip.domain) :
     copyPoint l n k x ∈ NativeBandExtension.radialInterior ActualPrimary.nominal := by
@@ -370,7 +368,7 @@ theorem copied_uniformLocalJets {E : Type*} [NormedAddCommGroup E] [NormedSpace 
             ring
       rw [show copied a f l n k = fun y => coefficientScale a l n • f l (copyPoint l n k y) from
         funext (fun y => ite_eq_left hn)]
-      rw [iteratedFDeriv_const_smul_apply' ((hs l n k x hx).of_le (nat_le_infty j)),
+      rw [iteratedFDeriv_const_smul_apply' ((hs l n k x hx).of_le (natCast_le_infty j)),
         norm_smul (coefficientScale a l n) (iteratedFDeriv ℝ j (fun y => f l (copyPoint l n k y)) x),
         Real.norm_of_nonneg (coefficientScale_pos a l n).le]
       have hnative : nativeWeight α l (copyPoint l n k x) =

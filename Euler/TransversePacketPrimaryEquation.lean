@@ -50,8 +50,7 @@ theorem balance_ae (t : Icc (0 : ℝ) D.T) :
       change D.normal.field (tailInclusion D.T τ hτ.le tf) = D.normal.field t
       rw [hidx]
     have he := future_balance_ae τ hτ hτT B Y tf
-    rw [hM,hm,← hv,← hd] at he
-    exact he
+    rwa [hM,hm,← hv,← hd] at he
 
 theorem tangent_ae (t : Icc (0 : ℝ) D.T) :
     ∀ᵐ x ∂liftMeasure P,

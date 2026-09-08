@@ -61,8 +61,7 @@ theorem linearODE_eq_zero (w : ℝ → E) (B : ℝ → E →L[ℝ] E) (T : ℝ)
     have hz : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, ht.1.trans ht.2⟩
     simpa only [q, hzero, norm_zero, zero_pow (by norm_num : 2 ≠ 0), mul_zero] using
       hanti hz ht ht.1
-  have hsq : ‖w t‖ ^ 2 ≤ 0 := by
-    exact nonpos_of_mul_nonpos_right hqt (Real.exp_pos _)
+  have hsq : ‖w t‖ ^ 2 ≤ 0 := nonpos_of_mul_nonpos_right hqt (Real.exp_pos _)
   have hn : ‖w t‖ = 0 := by nlinarith [norm_nonneg (w t)]
   exact norm_eq_zero.mp hn
 

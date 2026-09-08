@@ -42,8 +42,7 @@ theorem zero_of_energy_equation (T : ℝ) (hT : 0 ≤ T) (hTpos : 0 < T)
     rw [primitive_eq_path T hT p u hp hzero]
   have hparts : ⟪pu,pu⟫_ℝ = -⟪pq,pp⟫_ℝ := by
     have hh := pathLp_inner_zero_trace T hT u q hu pu htrace
-    rw [hprimitive] at hh
-    exact hh
+    rwa [hprimitive] at hh
   have horth : ⟪pq+timeMultiplier T hT H pp,pp⟫_ℝ = 0 := by
     rw [L2.inner_def]
     apply integral_eq_zero_of_ae

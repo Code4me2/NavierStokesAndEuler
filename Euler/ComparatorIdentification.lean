@@ -30,8 +30,7 @@ theorem maximalVelocity_eq_of_local_evolution
     exact hcompact _
   have he := evolution_field_eq_of_local_evolution (L.evolution S hS hSL) h
     (L.evolution_initial S hS hSL) hc hlocal (L.intermediateTime t)
-  rw [← L.maximalVelocity_eq_evolution S hS hSL (L.intermediateTime t)] at he
-  exact he
+  rwa [← L.maximalVelocity_eq_evolution S hS hSL (L.intermediateTime t)] at he
 
 /-- The local analytic bridge suffices to identify the Comparator with the
 canonical maximal solution, without additional time or space assumptions. -/

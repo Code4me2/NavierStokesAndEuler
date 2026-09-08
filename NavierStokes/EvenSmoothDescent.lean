@@ -4,6 +4,7 @@ import Mathlib.Analysis.Calculus.FDeriv.Extend
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Algebra.Group.EvenFunction
+import NavierStokes.WithTopLemmas
 
 /-!
 # Descent of an even smooth curve through the square map
@@ -22,9 +23,6 @@ namespace NavierStokes.EvenSmoothDescent
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
-
 
 omit [CompleteSpace E] in
 theorem contDiff_iteratedDeriv {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
@@ -39,14 +37,14 @@ omit [CompleteSpace E] in
 theorem iteratedDeriv_scale {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
     (n : ℕ) (x t : ℝ) :
     iteratedDeriv n (fun y => f (t * y)) x = t ^ n • iteratedDeriv n f (t * x) :=
-  congrFun (iteratedDeriv_comp_const_smul (hf.of_le (nat_le_infty n)) t) x
+  congrFun (iteratedDeriv_comp_const_smul (hf.of_le (natCast_le_infty n)) t) x
 
 omit [CompleteSpace E] in
 theorem continuous_scaled_jet {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
     Continuous (fun z : ℝ × ℝ => iteratedDeriv n (fun x => f (z.2 * x)) z.1) := by
   simp_rw [iteratedDeriv_scale hf]
   exact (continuous_snd.pow n).smul
-    ((hf.continuous_iteratedDeriv n (nat_le_infty n)).comp
+    ((hf.continuous_iteratedDeriv n (natCast_le_infty n)).comp
       (continuous_snd.mul continuous_fst))
 
 omit [CompleteSpace E] in

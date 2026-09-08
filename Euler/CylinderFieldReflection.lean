@@ -131,8 +131,7 @@ theorem supportedReflection_operator (A : Space →ᵇ E →L[ℝ] F)
     (hA : ∀ x, A (-x) = A x) (u : Supported P E S hS) :
     supportedReflection P S hS hSym (supportedOperatorMap P S hS A u) =
       supportedOperatorMap P S hS A (supportedReflection P S hS hSym u) := by
-  apply Subtype.ext
-  exact reflection_fullOperator P A hA (u : CylinderL2 P E)
+  exact Subtype.ext (reflection_fullOperator P A hA (u : CylinderL2 P E))
 
 end SupportedCoefficients
 end EulerCylinderFieldReflection

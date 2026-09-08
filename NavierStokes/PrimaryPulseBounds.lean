@@ -6,6 +6,7 @@ import NavierStokes.JointODE
 import NavierStokes.CurlClassBounds
 import NavierStokes.SignedCovariance
 import NavierStokes.GaussianTailFlat
+import NavierStokes.WithTopLemmas
 
 /-!
 # Weighted bounds for the actual primary pulses
@@ -21,9 +22,6 @@ namespace NavierStokes.PrimaryPulseBounds
 
 open Set Function
 open scoped ContDiff Topology InnerProductSpace BigOperators
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 section TimeRescaling
 
@@ -87,7 +85,7 @@ theorem smul_jet_bound {A : Q → ℝ} {B : Q → E} {U : Set Q}
     ‖iteratedFDeriv ℝ j (fun y => A y • B y) x‖ ≤
       (2 : ℝ) ^ N * C * D := by
   have h := JetBounds.norm_iteratedFDeriv_bilinear_le_on
-    (ContinuousLinearMap.lsmul ℝ ℝ (E := E)) hU hA hB hx (nat_le_infty j)
+    (ContinuousLinearMap.lsmul ℝ ℝ (E := E)) hU hA hB hx (natCast_le_infty j)
   have hs : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) *
       ‖iteratedFDeriv ℝ i A x‖ * ‖iteratedFDeriv ℝ (j - i) B x‖) ≤ 2 ^ N * C * D := by
     calc
@@ -307,7 +305,7 @@ theorem EnvelopeJets.comp {f : ι → F → G} {w : ι → F → ℝ}
   have hC : 1 ≤ B * D.scale i ^ k :=
     one_le_mul_of_one_le_of_one_le hB (one_le_pow₀ (D.one_le_scale i))
   have hw := hf.nonneg i (g i x) (hmap i hx)
-  have h := norm_iteratedFDerivWithin_comp_le (hf.smooth i) (hg.smooth i) (nat_le_infty j)
+  have h := norm_iteratedFDerivWithin_comp_le (hf.smooth i) (hg.smooth i) (natCast_le_infty j)
     (D'.isOpen i).uniqueDiffOn (D.isOpen i).uniqueDiffOn (hmap i) hx
     (C := A * D'.scale i ^ m * w i (g i x)) (D := B * D.scale i ^ k)
     (fun a haj => ?_) (fun a ha1 haj => ?_)
@@ -1030,7 +1028,7 @@ theorem EnvelopeJets.map {f : ι → E → F} (hf : EnvelopeJets D w f)
   intro i x hx j hj
   change ‖iteratedFDeriv ℝ j (L ∘ f i) x‖ ≤ _
   rw [L.iteratedFDeriv_comp_left ((hf.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx))
-    (nat_le_infty j)]
+    (natCast_le_infty j)]
   calc
     _ ≤ ‖L‖ * ‖iteratedFDeriv ℝ j (f i) x‖ := L.norm_compContinuousMultilinearMap_le _
     _ ≤ ‖L‖ * (C * D.scale i ^ m * w i x) :=
@@ -1051,8 +1049,8 @@ theorem EnvelopeJets.add {f g : ι → E → F}
   refine ⟨A + B, by linarith, m + k, ?_⟩
   intro i x hx j hj
   rw [fun_iteratedFDeriv_add_apply
-    (((hf.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)).of_le (nat_le_infty j))
-    (((hg.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)).of_le (nat_le_infty j))]
+    (((hf.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)).of_le (natCast_le_infty j))
+    (((hg.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)).of_le (natCast_le_infty j))]
   have hsm := pow_le_pow_right₀ (D.one_le_scale i) (Nat.le_add_right m k)
   have hsk := pow_le_pow_right₀ (D.one_le_scale i) (Nat.le_add_left k m)
   have hw := hf.nonneg i x hx

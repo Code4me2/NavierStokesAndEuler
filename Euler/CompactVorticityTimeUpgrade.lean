@@ -193,7 +193,6 @@ theorem isSmoothScalarEuler_of_weak_projectedEquation
   have h := solenoidalSpace.subtypeL.hasFDerivAt.comp_hasDerivAt t hdu
   change HasDerivAt (fun r => (A (projIcc 0 T hT.le r)).toLp)
     (projectedRhs (A (projIcc 0 T hT.le t))).toLp t at h
-  rw [projIcc_of_mem hT.le ⟨ht.1.le, ht.2.le⟩] at h
-  exact h
+  rwa [projIcc_of_mem hT.le ⟨ht.1.le, ht.2.le⟩] at h
 
 end Euler.ComparatorBridge

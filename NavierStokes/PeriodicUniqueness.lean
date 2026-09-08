@@ -9,6 +9,7 @@ import Mathlib.Algebra.Order.Floor.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
+import NavierStokes.WithTopLemmas
 
 /-!
 # Classical uniqueness for periodic Navier--Stokes fields
@@ -25,12 +26,6 @@ open scoped Topology BigOperators ContDiff InnerProductSpace
 namespace NavierStokes.PeriodicUniqueness
 
 open ProblemStatement
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 noncomputable def slab (a b : ℝ) : Set SpaceTime := Icc a b ×ˢ univ
 
@@ -78,10 +73,10 @@ theorem spatialLaplacian_sub {u v : VelocityField} {t : ℝ}
   rw [← Finset.sum_sub_distrib]
   apply Finset.sum_congr rfl
   intro i _
-  have hdu := ((hu.fderiv_right infty_add_one_le).clm_apply
+  have hdu := ((hu.fderiv_right infty_add_one_le_infty).clm_apply
     (contDiff_const : ContDiff ℝ ∞ (fun _ : Space => coordinateVector i))).differentiable
       (by simp) x
-  have hdv := ((hv.fderiv_right infty_add_one_le).clm_apply
+  have hdv := ((hv.fderiv_right infty_add_one_le_infty).clm_apply
     (contDiff_const : ContDiff ℝ ∞ (fun _ : Space => coordinateVector i))).differentiable
       (by simp) x
   dsimp only [spatialDerivative]
@@ -203,7 +198,7 @@ theorem exists_gradient_bound {a b : ℝ} (hab : a < b) {u : VelocityField}
     (hu : ContDiffOn ℝ ∞ u (slab a b)) {K : Set Space} (hK : IsCompact K) :
     ∃ B : ℝ, 0 < B ∧ ∀ t ∈ Icc a b, ∀ x ∈ K, ‖spatialDerivative u t x‖ ≤ B := by
   have hs : UniqueDiffOn ℝ (slab a b) := (uniqueDiffOn_Icc hab).prod uniqueDiffOn_univ
-  have hD := (hu.fderivWithin hs infty_add_one_le).continuousOn
+  have hD := (hu.fderivWithin hs infty_add_one_le_infty).continuousOn
   have hDK : ContinuousOn (fderivWithin ℝ u (slab a b)) (Icc a b ×ˢ K) :=
     hD.mono (fun z hz => ⟨hz.1, mem_univ z.2⟩)
   obtain ⟨B, hBpos, hB⟩ := ((isCompact_Icc.prod hK).image_of_continuousOn hDK).isBounded.exists_pos_norm_le
@@ -271,7 +266,7 @@ theorem periodic_fderiv {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 theorem spatial_partial_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     {f : Space → V} (hf : ContDiff ℝ ∞ f) (i : Fin 3) :
     ContDiff ℝ ∞ (fun x => fderiv ℝ f x (coordinateVector i)) :=
-  (hf.fderiv_right infty_add_one_le).clm_apply contDiff_const
+  (hf.fderiv_right infty_add_one_le_infty).clm_apply contDiff_const
 
 theorem component_contDiff {f : Space → Space} (hf : ContDiff ℝ ∞ f) (j : Fin 3) :
     ContDiff ℝ ∞ (fun x => f x j) :=
@@ -360,8 +355,8 @@ theorem cubeIntegral_fderiv_apply {f : Space → ℝ} {v : Space → Space}
     ← Finset.sum_neg_distrib]
   apply Finset.sum_congr rfl
   intro i _
-  have h := cubeIntegral_mul_partial ((component_contDiff hv i).of_le (nat_le_infty 1))
-    (hf.of_le (nat_le_infty 1)) (component_periodic hpv i) hpf i
+  have h := cubeIntegral_mul_partial ((component_contDiff hv i).of_le (natCast_le_infty 1))
+    (hf.of_le (natCast_le_infty 1)) (component_periodic hpv i) hpf i
   simpa only [spatialPartial, fderiv_component hv] using h
 
 theorem cubeIntegral_fderiv_apply_zero {f : Space → ℝ} {v : Space → Space}
@@ -397,7 +392,7 @@ theorem cubeIntegral_inner_partial {f g : Space → Space}
     intro x j
     change ⟪f (x + coordinateVector j), g (x + coordinateVector j)⟫_ℝ = _
     rw [hpf x j, hpg x j]
-  have h := cubeIntegral_partial_eq_zero ((hf.inner ℝ hg).of_le (nat_le_infty 1)) hp i
+  have h := cubeIntegral_partial_eq_zero ((hf.inner ℝ hg).of_le (natCast_le_infty 1)) hp i
   have hfun : spatialPartial i (fun x => ⟪f x, g x⟫_ℝ) =
       (fun x => ⟪f x, spatialPartial i g x⟫_ℝ + ⟪spatialPartial i f x, g x⟫_ℝ) := by
     funext x
@@ -509,8 +504,8 @@ theorem energy_balance {u v : VelocityField} {p q : PressureField} {t : ℝ}
     intro x
     rw [spatialDivergence_sub hu hv, hdu x, hdv x, sub_self]
   have hL := (hw.inner ℝ (spatialLaplacian_contDiff hw)).continuous
-  have hN := (hw.inner ℝ ((hu.fderiv_right infty_add_one_le).clm_apply hw)).continuous
-  have hT := (hw.inner ℝ ((hw.fderiv_right infty_add_one_le).clm_apply hv)).continuous
+  have hN := (hw.inner ℝ ((hu.fderiv_right infty_add_one_le_infty).clm_apply hw)).continuous
+  have hT := (hw.inner ℝ ((hw.fderiv_right infty_add_one_le_infty).clm_apply hv)).continuous
   have hP := (hw.inner ℝ (pressureGradient_contDiff (p := p - q) (t := t) (hp.sub hq))).continuous
   have hEq : (fun x => ⟪(u - v) (t, x), temporalDerivative (u - v) t x⟫_ℝ) =
       (fun x => ⟪(u - v) (t, x), spatialLaplacian (u - v) t x⟫_ℝ -
@@ -545,7 +540,7 @@ theorem neg_coupling_le_energy {u v : VelocityField} {t B : ℝ}
   unfold coupling energy
   rw [← cubeIntegral_neg, ← cubeIntegral_const_mul]
   apply cubeIntegral_mono_on_cube
-    (hw.inner ℝ ((hu.fderiv_right infty_add_one_le).clm_apply hw)).continuous.neg
+    (hw.inner ℝ ((hu.fderiv_right infty_add_one_le_infty).clm_apply hw)).continuous.neg
     (continuous_const.mul (hw.norm_sq ℝ).continuous)
   intro y hy
   exact nonlinear_energy_bound _ _ (hB y hy)
@@ -592,7 +587,7 @@ theorem energy_hasDerivAt {a b t : ℝ} {u v : VelocityField}
     (ht : t ∈ Ioo a b) : HasDerivAt (energy u v) (energyRate u v t) t := by
   have hF : ContDiffOn ℝ 1 (fun z : SpaceTime => ‖(u - v) z‖ ^ 2)
       (Ioo a b ×ˢ univ) :=
-    (((hu.sub hv).norm_sq ℝ).of_le (nat_le_infty 1)).mono
+    (((hu.sub hv).norm_sq ℝ).of_le (natCast_le_infty 1)).mono
       (fun z hz => ⟨⟨hz.1.1.le, hz.1.2.le⟩, hz.2⟩)
   have h := hasDerivAt_cubeIntegral_of_contDiffOn isOpen_Ioo hF ht
   have hrate : (fun x => deriv (fun s : ℝ => ‖(u - v) (s, x)‖ ^ 2) t) =

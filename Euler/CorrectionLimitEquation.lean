@@ -69,7 +69,6 @@ theorem correction_limit_equation {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤
   have hder := hasDerivAt_of_integral_equation T hT (valuePath period T e) g heq t ht
   change HasDerivAt (fun r => value period (extendPath T hT e r))
     (value period ((Dlow.coefficients period hq).apply (projIcc 0 T hT t) (e (projIcc 0 T hT t)))) t at hder
-  rw [projIcc_of_mem hT ⟨ht.1.le,ht.2.le⟩] at hder
-  exact hder
+  rwa [projIcc_of_mem hT ⟨ht.1.le,ht.2.le⟩] at hder
 
 end EulerCorrectionLimitEquation

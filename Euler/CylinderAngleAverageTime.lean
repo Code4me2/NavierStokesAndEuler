@@ -30,8 +30,7 @@ theorem pathAverage_eq_zero_iff (p : C(K,LiftL2 P))
       ∀ t y, (∫ s in (0 : ℝ)..P, pointField P p hp t (y,(s : AddCircle P))) = 0 := by
   constructor
   · intro h t
-    apply (pointField_mean_zero_iff P p hp t).mp
-    exact congrArg (fun q : C(K,LiftL2 P) => q t) h
+    exact (pointField_mean_zero_iff P p hp t).mp (congrArg (fun q : C(K,LiftL2 P) => q t) h)
   · intro h
     apply ContinuousMap.ext
     intro t

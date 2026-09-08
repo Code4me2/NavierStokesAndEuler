@@ -60,8 +60,7 @@ theorem realPosition_hasFDerivAt (t : Icc (0 : ℝ) A.T) (ht : (t : ℝ) ∈ Ioo
     change v.2+(v.1 • A.velocity.field t x+A.displacement.derivativeField t x v.2) = _
     rw [A.displacement.derivativeField_eq]
     abel
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 def packetPositionDerivative (t : Icc (0 : ℝ) A.T) (x : Space) : (ℝ × Space) →L[ℝ] Space :=
   (toSpanSingleton ℝ (A.ell⁻¹ • A.velocity.field t (A.ell • x))).coprod (A.frame.field t x)
@@ -86,8 +85,7 @@ theorem packetPosition_hasFDerivAt (t : Icc (0 : ℝ) A.T) (ht : (t : ℝ) ∈ I
     apply congrArg₂ (fun a b : Space => a+b)
     · exact smul_comm A.ell⁻¹ v.1 _
     · rw [map_smul,smul_smul,inv_mul_cancel₀ A.ell_pos.ne',one_smul,A.frame_apply]
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 theorem packetPosition_spatial (t : Icc (0 : ℝ) A.T) (x : Space) :
     HasFDerivAt (fun y => A.packetPosition (t,y)) (A.frame.field t x) x := by
@@ -170,8 +168,7 @@ theorem packetLift_hasFDerivAt (t : Icc (0 : ℝ) A.T) (ht : (t : ℝ) ∈ Ioo 0
     intro v
     apply Prod.ext rfl
     rfl
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 theorem packetInverseLift_contDiffAt_two (Y : Icc (0 : ℝ) A.T → Space → Space)
     (hXY : ∀ t x, A.position t (Y t x)=x)

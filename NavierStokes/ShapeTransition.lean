@@ -4,6 +4,7 @@ import NavierStokes.ParametricFlatFactor
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+import NavierStokes.WithTopLemmas
 
 /-!
 # The explicit shape transition and its reset-prefix debts
@@ -494,9 +495,6 @@ theorem shapeField_jet_bound {Xi C T X B K : ℝ} (hXi : 0 < Xi) (hC : 0 < C)
 
 /-! ## Actual compact integrals and their parameter jets -/
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
-
 theorem partial_jet_continuous {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ ∞ F) (n : ℕ) :
     Continuous (fun p : ℝ × ℝ => iteratedDeriv n (fun e => F (p.1, e)) p.2) := by
   have hd : Continuous (fun p : ℝ × ℝ => iteratedFDeriv ℝ n (fun e => F (p.1, e)) p.2) := by
@@ -544,7 +542,7 @@ theorem product_jet_bound {f g : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (hg : Co
     (hfb : ∀ k ≤ n, |iteratedDeriv k f eta| ≤ A)
     (hgb : ∀ k ≤ n, |iteratedDeriv k g eta| ≤ B) :
     |iteratedDeriv n (fun e => f e * g e) eta| ≤ 2 ^ n * A * B := by
-  have h := norm_iteratedFDeriv_mul_le hf hg eta (nat_le_infty n)
+  have h := norm_iteratedFDeriv_mul_le hf hg eta (natCast_le_infty n)
   simp only [norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs] at h
   refine h.trans ?_
   calc
@@ -679,7 +677,7 @@ theorem rows_jet_bounds {R r B K C : ℝ} (hR : 0 ≤ R) (hr : 0 ≤ r)
     · intro x hx
       have hx0 : 0 ≤ x := hx.1.le
       dsimp only
-      rw [iteratedDeriv_const_mul _ ((hfs x).of_le (nat_le_infty n)).contDiffAt,
+      rw [iteratedDeriv_const_mul _ ((hfs x).of_le (natCast_le_infty n)).contDiffAt,
         abs_mul, abs_of_nonneg (by positivity : 0 ≤ 2 * Real.sqrt R * x)]
       exact mul_le_mul (mul_le_mul_of_nonneg_left hx.2 (by positivity))
         (hfb x hx n le_rfl) (abs_nonneg _) (by positivity)
@@ -695,7 +693,7 @@ theorem rows_jet_bounds {R r B K C : ℝ} (hR : 0 ≤ R) (hr : 0 ≤ r)
     · intro x hx
       have hx0 : 0 ≤ x := hx.1.le
       dsimp only
-      rw [iteratedDeriv_const_mul _ (((hus x).mul (hfs x)).of_le (nat_le_infty n)).contDiffAt,
+      rw [iteratedDeriv_const_mul _ (((hus x).mul (hfs x)).of_le (natCast_le_infty n)).contDiffAt,
         abs_mul, abs_of_nonneg (by positivity : 0 ≤ 2 * Real.sqrt R * x)]
       exact mul_le_mul (mul_le_mul_of_nonneg_left hx.2 (by positivity))
         (huf x hx) (abs_nonneg _) (by positivity)
@@ -704,11 +702,11 @@ theorem rows_jet_bounds {R r B K C : ℝ} (hR : 0 ≤ R) (hr : 0 ≤ r)
     rw [he]
     apply integral_jet_bound ((hu.pow 2).sub ((contDiff_const.mul contDiff_fst).mul (hf.pow 2))) hr n eta
     intro x hx
-    have hsub := iteratedDeriv_sub (x := eta) (((hus x).pow 2).of_le (nat_le_infty n)).contDiffAt
+    have hsub := iteratedDeriv_sub (x := eta) (((hus x).pow 2).of_le (natCast_le_infty n)).contDiffAt
       (((contDiff_const : ContDiff ℝ ∞ (fun _ : ℝ => R * x)).mul
-        ((hfs x).pow 2)).of_le (nat_le_infty n)).contDiffAt
+        ((hfs x).pow 2)).of_le (natCast_le_infty n)).contDiffAt
     change |iteratedDeriv n ((fun e => u (x, e) ^ 2) - (fun e => (R * x) * f (x, e) ^ 2)) eta| ≤ _
-    rw [hsub, iteratedDeriv_const_mul _ (((hfs x).pow 2).of_le (nat_le_infty n)).contDiffAt]
+    rw [hsub, iteratedDeriv_const_mul _ (((hfs x).pow 2).of_le (natCast_le_infty n)).contDiffAt]
     apply (abs_sub _ _).trans
     rw [abs_mul, abs_of_nonneg (mul_nonneg hR hx.1.le)]
     exact add_le_add (huu x hx) (mul_le_mul (mul_le_mul_of_nonneg_left hx.2 hR)
@@ -718,7 +716,7 @@ theorem rows_jet_bounds {R r B K C : ℝ} (hR : 0 ≤ R) (hr : 0 ≤ r)
     rw [he]
     apply integral_jet_bound (contDiff_const.mul (hf.pow 2)) hr n eta
     intro x hx
-    rw [iteratedDeriv_const_mul _ (((hfs x).pow 2).of_le (nat_le_infty n)).contDiffAt,
+    rw [iteratedDeriv_const_mul _ (((hfs x).pow 2).of_le (natCast_le_infty n)).contDiffAt,
       abs_mul, abs_of_nonneg hR]
     exact mul_le_mul_of_nonneg_left (hff x hx) hR
 
@@ -921,25 +919,25 @@ theorem idealPrefixJetSize_bound {r B K : ℝ} (hr : 0 ≤ r) (hr1 : r ≤ 1)
   have hGA := product_jet_bound hG hA n eta hB hK hGb hAb
   have hm : |iteratedDeriv n (idealM G r) eta| ≤ B * r := by
     change |iteratedDeriv n (fun e => r * G e) eta| ≤ _
-    rw [iteratedDeriv_const_mul _ (hG.of_le (nat_le_infty n)).contDiffAt,
+    rw [iteratedDeriv_const_mul _ (hG.of_le (natCast_le_infty n)).contDiffAt,
       abs_mul, abs_of_nonneg hr]
     simpa only [mul_comm] using mul_le_mul_of_nonneg_left (hGb n le_rfl) hr
   have hi : |iteratedDeriv n (idealI A r) eta| ≤ 2 * K * r := by
     change |iteratedDeriv n (fun e => idealWeightI r * A e) eta| ≤ _
-    rw [iteratedDeriv_const_mul _ (hA.of_le (nat_le_infty n)).contDiffAt, abs_mul]
+    rw [iteratedDeriv_const_mul _ (hA.of_le (natCast_le_infty n)).contDiffAt, abs_mul]
     convert! mul_le_mul (idealWeightI_bound hr hr1) (hAb n le_rfl)
       (abs_nonneg _) (by positivity) using 1 ; ring
   have hj : |iteratedDeriv n (idealJ G A r) eta| ≤ 2 * (2 ^ n * B * K) * r := by
     change |iteratedDeriv n (fun e => idealWeightI r * (G e * A e)) eta| ≤ _
-    rw [iteratedDeriv_const_mul _ ((hG.mul hA).of_le (nat_le_infty n)).contDiffAt, abs_mul]
+    rw [iteratedDeriv_const_mul _ ((hG.mul hA).of_le (natCast_le_infty n)).contDiffAt, abs_mul]
     convert! mul_le_mul (idealWeightI_bound hr hr1) hGA (abs_nonneg _) (by positivity) using 1 ; ring
   have hs : |iteratedDeriv n (idealS G A r) eta| ≤
       (2 ^ n * B ^ 2 + (2 ^ n * K ^ 2) / 2) * r := by
     change |iteratedDeriv n ((fun e => r * G e ^ 2) - (fun e => idealWeightS r * A e ^ 2)) eta| ≤ _
-    rw [iteratedDeriv_sub ((contDiff_const.mul (hG.pow 2)).of_le (nat_le_infty n)).contDiffAt
-      ((contDiff_const.mul (hA.pow 2)).of_le (nat_le_infty n)).contDiffAt,
-      iteratedDeriv_const_mul _ ((hG.pow 2).of_le (nat_le_infty n)).contDiffAt,
-      iteratedDeriv_const_mul _ ((hA.pow 2).of_le (nat_le_infty n)).contDiffAt]
+    rw [iteratedDeriv_sub ((contDiff_const.mul (hG.pow 2)).of_le (natCast_le_infty n)).contDiffAt
+      ((contDiff_const.mul (hA.pow 2)).of_le (natCast_le_infty n)).contDiffAt,
+      iteratedDeriv_const_mul _ ((hG.pow 2).of_le (natCast_le_infty n)).contDiffAt,
+      iteratedDeriv_const_mul _ ((hA.pow 2).of_le (natCast_le_infty n)).contDiffAt]
     apply (abs_sub _ _).trans
     rw [abs_mul, abs_mul, abs_of_nonneg hr]
     have hleft := mul_le_mul_of_nonneg_left hGG hr
@@ -948,7 +946,7 @@ theorem idealPrefixJetSize_bound {r B K : ℝ} (hr : 0 ≤ r) (hr1 : r ≤ 1)
   have hp : |iteratedDeriv n (idealP A r) eta| ≤
       (5 / 2) * (2 ^ n * K ^ 2) * r ^ (1 / 5 : ℝ) := by
     change |iteratedDeriv n (fun e => idealWeightP r * A e ^ 2) eta| ≤ _
-    rw [iteratedDeriv_const_mul _ ((hA.pow 2).of_le (nat_le_infty n)).contDiffAt,
+    rw [iteratedDeriv_const_mul _ ((hA.pow 2).of_le (natCast_le_infty n)).contDiffAt,
       abs_mul, idealWeightP_eq hr, abs_of_nonneg (by positivity)]
     convert! mul_le_mul_of_nonneg_left hAA
       (show 0 ≤ (5 / 2 : ℝ) * r ^ (1 / 5 : ℝ) by positivity) using 1 ; ring
@@ -1083,9 +1081,9 @@ theorem restoreJetSize_bound {a b B K delta : ℝ} (ha : 0 < a) (hab : a ≤ b) 
       ring
     have hg4 : ContDiff ℝ ∞ (fun e : ℝ => 4 * e) := contDiff_const.mul contDiff_id
     have hg8 : ContDiff ℝ ∞ (fun e : ℝ => 2 * (4 * e)) := contDiff_const.mul hg4
-    rw [he, iteratedDeriv_add ((hdSmooth x).of_le (nat_le_infty k)).contDiffAt
-      (hg8.of_le (nat_le_infty k)).contDiffAt,
-      iteratedDeriv_const_mul _ (hg4.of_le (nat_le_infty k)).contDiffAt]
+    rw [he, iteratedDeriv_add ((hdSmooth x).of_le (natCast_le_infty k)).contDiffAt
+      (hg8.of_le (natCast_le_infty k)).contDiffAt,
+      iteratedDeriv_const_mul _ (hg4.of_le (natCast_le_infty k)).contDiffAt]
     apply (abs_add_le _ _).trans
     rw [abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 2)]
     exact add_le_add (hdb x k hk) (mul_le_mul_of_nonneg_left (hgb k hk) (by norm_num))
@@ -1107,7 +1105,7 @@ theorem restoreJetSize_bound {a b B K delta : ℝ} (ha : 0 < a) (hab : a ≤ b) 
         (Real.rpow_nonneg hx0 _) (by norm_num)).trans_eq (by ring)
     change |iteratedDeriv n (fun e => (Real.sqrt (2 * x) * x ^ (1 / 10 : ℝ)) *
       (restoreDefect Gi (x, e) * A e)) eta| ≤ _
-    rw [iteratedDeriv_const_mul _ (((hdSmooth x).mul hA).of_le (nat_le_infty n)).contDiffAt, abs_mul]
+    rw [iteratedDeriv_const_mul _ (((hdSmooth x).mul hA).of_le (natCast_le_infty n)).contDiffAt, abs_mul]
     exact mul_le_mul hw (product_jet_bound (hdSmooth x) hA n eta hd hK (hdb x) habound)
       (abs_nonneg _) (by norm_num)
   have hs : |iteratedDeriv n (restoreDebtS Gi a b) eta| ≤
@@ -1161,9 +1159,9 @@ theorem abs_jet_sub_add_le {F G H : ℝ → ℝ} (hF : ContDiff ℝ ∞ F) (hG :
     |iteratedDeriv n (fun e => F e - G e + H e) eta| ≤
       |iteratedDeriv n F eta| + |iteratedDeriv n G eta| + |iteratedDeriv n H eta| := by
   change |iteratedDeriv n ((F - G) + H) eta| ≤ _
-  rw [iteratedDeriv_add (f := F - G) (g := H) ((hF.sub hG).of_le (nat_le_infty n)).contDiffAt
-    (hH.of_le (nat_le_infty n)).contDiffAt,
-    iteratedDeriv_sub (hF.of_le (nat_le_infty n)).contDiffAt (hG.of_le (nat_le_infty n)).contDiffAt]
+  rw [iteratedDeriv_add (f := F - G) (g := H) ((hF.sub hG).of_le (natCast_le_infty n)).contDiffAt
+    (hH.of_le (natCast_le_infty n)).contDiffAt,
+    iteratedDeriv_sub (hF.of_le (natCast_le_infty n)).contDiffAt (hG.of_le (natCast_le_infty n)).contDiffAt]
   exact (abs_add_le _ _).trans (add_le_add_left (abs_sub _ _) _)
 
 theorem abs_jet_sub_le {F G : ℝ → ℝ} (hF : ContDiff ℝ ∞ F) (hG : ContDiff ℝ ∞ G)
@@ -1171,7 +1169,7 @@ theorem abs_jet_sub_le {F G : ℝ → ℝ} (hF : ContDiff ℝ ∞ F) (hG : ContD
     |iteratedDeriv n (fun e => F e - G e) eta| ≤
       |iteratedDeriv n F eta| + |iteratedDeriv n G eta| := by
   change |iteratedDeriv n (F - G) eta| ≤ _
-  rw [iteratedDeriv_sub (hF.of_le (nat_le_infty n)).contDiffAt (hG.of_le (nat_le_infty n)).contDiffAt]
+  rw [iteratedDeriv_sub (hF.of_le (natCast_le_infty n)).contDiffAt (hG.of_le (natCast_le_infty n)).contDiffAt]
   exact abs_sub _ _
 
 noncomputable def resetDebtM (u : ℝ × ℝ → ℝ) (Gi : ℝ → ℝ) (r b eta : ℝ) : ℝ :=

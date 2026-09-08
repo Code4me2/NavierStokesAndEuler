@@ -1,5 +1,6 @@
 import NavierStokes.R3.ConservativeDifference
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+import NavierStokes.WithTopLemmas
 
 /-!
 # Compact time tests of the conservative pressure identity
@@ -22,12 +23,6 @@ open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
 open ConservativeDifference
 open Comparison (tensorDiff)
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 /-- A time cutoff supported in an open set turns a continuous function on
 that set into a globally continuous product, regardless of its values outside. -/
@@ -60,7 +55,7 @@ theorem component_time_test_continuousOn {T : ℝ} {w : VelocityField} {ψ : Spa
   have htime : ContinuousOn (fun z : SpaceTime => temporalDerivative w z.1 z.2)
       (Ioo 0 T ×ˢ univ) := by
     simpa only [temporalDerivative, deriv] using
-      CompactTimeIntegral.continuousOn_timeDeriv_of_contDiffOn (hw.of_le (nat_le_infty 1))
+      CompactTimeIntegral.continuousOn_timeDeriv_of_contDiffOn (hw.of_le (natCast_le_infty 1))
   have hF : ContinuousOn (fun z : SpaceTime => temporalDerivative w z.1 z.2 k * ψ z.2)
       (Ioo 0 T ×ˢ univ) :=
     ((EuclideanSpace.proj k : Space →L[ℝ] ℝ).continuous.comp_continuousOn htime).mul
@@ -95,7 +90,7 @@ theorem compact_time_integration_by_parts {T : ℝ} {a F D : ℝ → ℝ}
     (∫ t in (0 : ℝ)..T, a t * D t) = -(∫ t in (0 : ℝ)..T, deriv a t * F t) := by
   have hda : Continuous (deriv a) := by
     change Continuous (fun t => fderiv ℝ a t 1)
-    exact ((ha.fderiv_right infty_add_one_le).clm_apply contDiff_const).continuous
+    exact ((ha.fderiv_right infty_add_one_le_infty).clm_apply contDiff_const).continuous
   have hi₁ : IntervalIntegrable (fun t => deriv a t * F t) volume 0 T :=
     ContinuousOn.intervalIntegrable_of_Icc hT.le (hda.continuousOn.mul hF)
   have hi₂ : IntervalIntegrable (fun t => a t * D t) volume 0 T :=

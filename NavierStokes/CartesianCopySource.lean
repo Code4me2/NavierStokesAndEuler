@@ -22,9 +22,6 @@ abbrev LiftPoint := PhysicalWaveSum.LiftPoint
 abbrev Native := PhysicalClassBounds.CylindricalPoint
 abbrev ComplexVector := HarmonicCalculus.ComplexVector
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-
 theorem cylindricalMap_continuous : Continuous cylindricalMap :=
   ((Real.continuous_sqrt.comp ((continuous_fst.pow 2).add (continuous_snd.pow 2))).comp
     PhysicalGraphBounds.liftXY.continuous).prodMk slowFast.continuous

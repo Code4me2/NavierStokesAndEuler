@@ -119,7 +119,6 @@ theorem mild_majorized_energy_subinterval {α β : Type*} [Fintype α] [Fintype 
     (regularizedWeightedForcing_tendsto period d w hw T hT weights A Gp u f p U F P hU hF hP)
   intro n i j r _
   have h := forcingWordPath_equation period (hw i j) n (w i j) T ν A Gp u f p (projIcc 0 T hT r)
-  rw [transportL2Path_apply] at h
-  exact h
+  rwa [transportL2Path_apply] at h
 
 end EulerMildMajorantEnergy

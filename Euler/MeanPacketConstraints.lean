@@ -58,8 +58,7 @@ theorem inverse_vector_eq_coordinate (t : Icc (0 : ℝ) D.T) (x : Space) (θ : �
       multiplier_ae (D.FInv t) (G.velocityPath t)] with y hB hv hM
     have he := congrArg (fun z : L2 => z y) (G.inverse_velocityPath t)
     change multiplier (D.FInv t) (G.velocityPath t) y = G.coordinateOrdinaryPath t y at he
-    rw [hM, hB, hv] at he
-    exact he
+    rwa [hM, hB, hv] at he
   have he := congrFun (Measure.eq_of_ae_eq hae
     ((D.FInv t).continuous.clm_apply
       (pathRepresentative_smooth D.T G.velocityPath G.velocityPath_orbit t).continuous)

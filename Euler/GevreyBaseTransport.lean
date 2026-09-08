@@ -67,8 +67,7 @@ theorem baseTransportForcing_family_bound {s : ℕ} (N : ℕ) (hN : N+6 ≤ s)
     have h := baseCommutator_bound period a.1.val (by have := a.1.isLt; omega) a.2 L hL
       (restrictOperator period (by omega : 7 ≤ s+1) u)
       (wordAtLevel period 7 I.1.val I.2 (by have := I.1.isLt; omega : I.1.val+7 ≤ s+1) v)
-    rw [restrictOperator_comp, restrict_wordAtLevel] at h
-    exact h
+    rwa [restrictOperator_comp, restrict_wordAtLevel] at h
   have hsum := Finset.sum_le_sum (s := (Finset.univ : Finset (BaseWord 6))) (fun a _ => hb a)
   exact (familyNorm_le_sum_norm _).trans (hsum.trans_eq (by
     simp only [Finset.sum_const, Finset.card_univ, card_baseWord_six, nsmul_eq_mul]; ring))

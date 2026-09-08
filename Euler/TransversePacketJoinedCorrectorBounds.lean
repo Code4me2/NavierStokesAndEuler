@@ -13,7 +13,7 @@ open Set EulerTransversePacketProvider EulerSmoothLimit EulerLiftedGradientSpace
   EulerCylinderSmoothOrbit EulerLpCylinderTranslation EulerContinuousTimeWeight
 open scoped ContDiff
 
-private theorem direction_norm_bound (i : Fin 4) : ‖standardDirection i‖ ≤ 1 := by
+theorem direction_norm_bound (i : Fin 4) : ‖standardDirection i‖ ≤ 1 := by
   cases i using Fin.cases <;> simp [Prod.norm_def]
 
 variable {P : ℝ} [Fact (0 < P)]

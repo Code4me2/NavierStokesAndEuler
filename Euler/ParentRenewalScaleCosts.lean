@@ -107,8 +107,7 @@ theorem physical_error_le_maximum {ι : Type*} (G : PhysicalGeometryData ι)
   have htheta0 : 0 ≤ sourceTheta J C (scaleSequence J X) n := zero_le_one.trans hthetaOne
   have he : G.ε ≤ epsilon J X 2 n := by
     rw [heps]
-    apply Real.sqrt_le_sqrt
-    exact div_le_div_of_nonneg_right ha (previousShear_pos J hXp n).le
+    exact Real.sqrt_le_sqrt (div_le_div_of_nonneg_right ha (previousShear_pos J hXp n).le)
   have he0 : 0 ≤ epsilon J X 2 n := Real.sqrt_nonneg _
   have hmain : G.ε*G.Θ*(4*G.G)^2 ≤
       CF^2*(epsilon J X 2 n*sourceTheta J C (scaleSequence J X) n*

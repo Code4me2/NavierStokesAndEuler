@@ -19,9 +19,6 @@ open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
 /-- The divergence of a scalar-weighted vector field. -/
 theorem divergence_weighted {χ : Space → ℝ} {v : Space → Space}
     (hχ : ContDiff ℝ ∞ χ) (hv : ContDiff ℝ ∞ v) (x : Space) :

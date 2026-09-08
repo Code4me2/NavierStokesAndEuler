@@ -1,5 +1,6 @@
 import NavierStokes.NominalProfile
 import NavierStokes.ActivationContinuation
+import NavierStokes.WithTopLemmas
 
 /-!
 # Quantitative bounds for the actual five-row matching debt
@@ -19,9 +20,6 @@ namespace NavierStokes.MatchingDebtBounds
 abbrev Point := ℝ × ℝ
 abbrev Field := Point → ℝ
 abbrev Debt := FiveProfileMoments.Debt
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)
 
 /-! ## Smooth extensions which preserve the entire parameter germ
 
@@ -170,7 +168,7 @@ theorem iteratedDeriv_component {d : ℝ → Debt} (hd : ContDiff ℝ ∞ d)
     (n : ℕ) (eta : ℝ) (i : Fin 5) :
     (iteratedDeriv n d eta) i = iteratedDeriv n (fun e => d e i) eta := by
   have he := (ContinuousLinearMap.proj i : Debt →L[ℝ] ℝ).iteratedFDeriv_comp_left (x := eta)
-    hd.contDiffAt (nat_le_infty n)
+    hd.contDiffAt (natCast_le_infty n)
   have h := (congrArg (fun L => L (fun _ : Fin n => (1 : ℝ))) he).symm
   simp only [ContinuousLinearMap.compContinuousMultilinearMap_coe, Function.comp_def] at h
   exact h

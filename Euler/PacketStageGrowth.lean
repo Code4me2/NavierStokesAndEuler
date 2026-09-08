@@ -61,8 +61,7 @@ theorem gradient_lower (hn : n ≠ 0) : previousShear S.J S.X n/2 ≤ P.activati
       unit_norm (P.frame.ray_nonzero P.time ⟨le_rfl,P.time_lt.le⟩),mul_one]
   have hr : ‖M-P.frame.B P.time-Q‖ ≤ P.frame.error := by
     have h := P.frame.remainder_bound P.time ⟨le_rfl,P.time_lt.le⟩
-    rw [Data.clamp_coe (frameData P.parent) t] at h
-    exact h
+    rwa [Data.clamp_coe (frameData P.parent) t] at h
   have hB := P.frame.B_bound P.time ⟨le_rfl,P.time_lt.le⟩
   have hM : previousShear S.J S.X n ≤ ‖M‖+P.frame.G+P.frame.error := by
     calc

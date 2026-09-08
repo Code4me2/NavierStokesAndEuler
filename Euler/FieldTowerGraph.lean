@@ -34,8 +34,7 @@ theorem derivativeWordPath_ae (s n : ℕ) (w : Fin n → Fin 4) (hn : n ≤ s)
   have h := jet_word_ae P hn (value P (A.realization s t))
     (toJet P (A.realization s t)) w (f t)
     (by simpa only [A.value_eq] using hrep t) (hf t)
-  rw [toJet_word P (A.realization s t) hn w] at h
-  exact h
+  rwa [toJet_word P (A.realization s t) hn w] at h
 
 theorem derivativeWordPath_norm_le (s n : ℕ) (w : Fin n → Fin 4) (hn : n ≤ s)
     (t : Icc (0 : ℝ) T) :

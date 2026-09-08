@@ -39,8 +39,7 @@ theorem velocity_toLp_hasDerivWithinAt_projected (hpos : 0 < T) (t : Icc (0 : �
       (projectedRhs (U.velocity t)).toLp (Icc (0 : ℝ) T) t := by
   rw [← U.derivative_toLp_projected hpos t]
   have h := U.velocityPath_hasDerivWithinAt t
-  rw [U.velocityPath_extend] at h
-  exact h
+  rwa [U.velocityPath_extend] at h
 
 theorem joinedVelocity_derivative (hTpos : 0 < T) (hSpos : 0 < S)
     (hmatch : U.velocity ⟨T,hT,le_rfl⟩=V.velocity ⟨0,le_rfl,hS⟩)

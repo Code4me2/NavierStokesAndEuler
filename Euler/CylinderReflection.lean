@@ -51,11 +51,8 @@ theorem reflection_translation (a : LiftDomain period) (f : LiftL2 period) :
   congr 1
   abel
 
-omit [Fact (0 < period)] in
-/-- Negating a translation parameter negates its point on the cylinder. -/
-@[simp] theorem translationPath_neg (a : LiftTangent) (t : ℝ) :
-    translationPath period a (-t) = -translationPath period a t := by
-  simp [translationPath, coveringMap, neg_smul]
+-- Negating a translation parameter negates its point on the cylinder.
+attribute [simp] EulerLiftedWeakDerivative.translationPath_neg
 
 /-- Strong translation derivatives reverse sign under actual reflection. -/
 theorem reflection_hasDerivAt (a : LiftTangent) {f g : LiftL2 period}
@@ -70,7 +67,7 @@ theorem reflection_hasDerivAt (a : LiftTangent) {f g : LiftL2 period}
   · funext t
     change translation period (translationPath period a t) (reflection period f) =
       reflection period (translation period (translationPath period a (-t)) f)
-    rw [reflection_translation, translationPath_neg, neg_neg]
+    rw [reflection_translation, EulerLiftedWeakDerivative.translationPath_neg, neg_neg]
   · simp
 
 /-- A scalar test pulled back by joint negation. -/

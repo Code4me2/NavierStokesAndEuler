@@ -27,6 +27,22 @@ lemma innerPartitionBound_nonneg {n : ℕ} (B R : ℝ) (hB : 0 ≤ B) (hR : 0 �
   unfold innerPartitionBound
   exact Finset.prod_nonneg fun i _ => mul_nonneg (mul_nonneg hB (pow_nonneg hR _)) (sq_nonneg _)
 
+theorem taylorComp_partition_bound
+    (P : FormalMultilinearSeries ℝ E E) (Q : FormalMultilinearSeries ℝ E F)
+    (n : ℕ) (B R : ℝ)
+    (hP : ∀ j, 0 < j → j ≤ n → ‖P j‖ ≤ B*R^j*(j.factorial : ℝ)^2) :
+    ‖Q.taylorComp P n‖ ≤ ∑ c : OrderedFinpartition n, innerPartitionBound B R c*‖Q c.length‖ := by
+  apply (norm_sum_le _ _).trans
+  apply Finset.sum_le_sum
+  intro c _
+  calc
+    _ ≤ ‖Q c.length‖*∏ i, ‖P (c.partSize i)‖ := c.norm_compAlongOrderedFinpartition_le _ _
+    _ ≤ ‖Q c.length‖*innerPartitionBound B R c := by
+      apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
+      exact Finset.prod_le_prod (fun i _ => norm_nonneg _)
+        (fun i _ => hP _ (c.partSize_pos i) (c.partSize_le i))
+    _ = _ := mul_comm _ _
+
 theorem composition_partition_bound (f : E → E) (g : E → F)
     (n : ℕ) (x : E) (hf : ContDiffAt ℝ n f x) (hg : ContDiffAt ℝ n g (f x))
     (B R : ℝ) (_hB : 0 ≤ B) (_hR : 0 ≤ R)
@@ -36,18 +52,7 @@ theorem composition_partition_bound (f : E → E) (g : E → F)
       ∑ c : OrderedFinpartition n,
         innerPartitionBound B R c*‖iteratedFDeriv ℝ c.length g (f x)‖ := by
   rw [iteratedFDeriv_comp hg hf le_rfl]
-  apply (norm_sum_le _ _).trans
-  apply Finset.sum_le_sum
-  intro c _
-  calc
-    _ ≤ ‖iteratedFDeriv ℝ c.length g (f x)‖ *
-        ∏ i, ‖iteratedFDeriv ℝ (c.partSize i) f x‖ :=
-      c.norm_compAlongOrderedFinpartition_le _ _
-    _ ≤ ‖iteratedFDeriv ℝ c.length g (f x)‖*innerPartitionBound B R c := by
-      apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
-      exact Finset.prod_le_prod (fun i _ => norm_nonneg _)
-        (fun i _ => hfjet _ (c.partSize_pos i) (c.partSize_le i))
-    _ = _ := mul_comm _ _
+  exact taylorComp_partition_bound (ftaylorSeries ℝ f x) (ftaylorSeries ℝ g (f x)) n B R hfjet
 
 variable [MeasurableSpace E]
 

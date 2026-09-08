@@ -80,13 +80,11 @@ theorem physical_euler_momentum_of_flow
   have hXt : HasDerivAt (fun s => X (s,x)) (u (t,X (t,x))) t := by
     have h := (hX.differentiableAt two_ne_zero).hasFDerivAt.comp_hasDerivAt t
       ((hasDerivAt_id t).prodMk (hasDerivAt_const t x))
-    rw [hflow.eq_of_nhds] at h
-    exact h
+    rwa [hflow.eq_of_nhds] at h
   have hXs : HasFDerivAt (fun y => X (t,y)) A.toContinuousLinearMap x := by
     have h := (hX.differentiableAt two_ne_zero).hasFDerivAt.comp x (hasFDerivAt_prodMk_right t x)
     change HasFDerivAt (fun y => X (t,y)) ((fderiv ℝ X (t,x)).comp (inr ℝ ℝ E)) x at h
-    rw [← hframe.eq_of_nhds,hA] at h
-    exact h
+    rwa [← hframe.eq_of_nhds,hA] at h
   have hstrain (v : E) : Du (0,v) = DF (1,0) (A.symm v) := by
     have h := parent_frame_time X u F (t,x) DF Du hX hF hu hframe hflow (A.symm v)
     simpa only [hA,ContinuousLinearEquiv.coe_coe,ContinuousLinearEquiv.apply_symm_apply] using h.symm

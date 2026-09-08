@@ -1,6 +1,7 @@
 import NavierStokes.PrimaryTargetBounds
 import NavierStokes.UniformPrimaryWeights
 import NavierStokes.PeriodizedWaveBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Weighted native estimates for the constructed primary copies
@@ -16,9 +17,6 @@ namespace NavierStokes.PrimaryCopyBounds
 
 open Set Function Filter PhaseJetBounds PrimaryPulseBounds WeightedClasses
 open scoped Topology ContDiff BigOperators InnerProductSpace
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 variable {ι : Type*} {D : Type} {E F G : Type*}
   [NormedAddCommGroup D] [NormedSpace ℝ D]
@@ -82,7 +80,7 @@ theorem map (hf : NativeJets V w f) (L : E →L[ℝ] F) :
   refine ⟨(‖L‖ + 1) * C, one_le_mul_of_one_le_of_one_le (by linarith [norm_nonneg L]) hC, p, ?_⟩
   intro i x hx j hj
   have hc := L.iteratedFDeriv_comp_left
-    ((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)) (nat_le_infty j)
+    ((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)) (natCast_le_infty j)
   change ‖iteratedFDeriv ℝ j (L ∘ f i) x‖ ≤ _
   rw [hc]
   calc
@@ -103,8 +101,8 @@ theorem add (hf : NativeJets V w f) (hg : NativeJets V w g) :
   have hG := V.one_le_growth i hx
   have hw := hf.nonneg i x hx
   rw [fun_iteratedFDeriv_add_apply
-    (((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (nat_le_infty j))
-    (((hg.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (nat_le_infty j))]
+    (((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (natCast_le_infty j))
+    (((hg.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖iteratedFDeriv ℝ j (f i) x‖ + ‖iteratedFDeriv ℝ j (g i) x‖ := norm_add_le _ _
     _ ≤ A * V.growth i x ^ p * w i x + B * V.growth i x ^ q * w i x :=
@@ -179,7 +177,7 @@ theorem band_smul (hf : NativeJets V w f) (a : ι → ℝ) (ha : ∀ i, 0 ≤ a 
   refine ⟨C, hC, p, ?_⟩
   intro i x hx j hj
   rw [iteratedFDeriv_const_smul_apply'
-    (((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (nat_le_infty j)),
+    (((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hx)).of_le (natCast_le_infty j)),
     norm_smul (a i) (iteratedFDeriv ℝ j (f i) x), Real.norm_of_nonneg (ha i)]
   exact (mul_le_mul_of_nonneg_left (hb i x hx j hj) (ha i)).trans_eq (by ring)
 
@@ -846,7 +844,7 @@ theorem comp {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
     one_le_mul_of_one_le_of_one_le hB (one_le_pow₀ hgrowth)
   have hw := hg.nonneg i (χ i x) (hmap i hx)
   have h := norm_iteratedFDerivWithin_comp_le (hg.smooth i) (hχ.smooth i)
-    (nat_le_infty j) (U.isOpen i).uniqueDiffOn (V.isOpen i).uniqueDiffOn (hmap i) hx
+    (natCast_le_infty j) (U.isOpen i).uniqueDiffOn (V.isOpen i).uniqueDiffOn (hmap i) hx
     (C := A * V.growth i x ^ p * v i (χ i x)) (D := B * V.growth i x ^ q)
     (fun a haj => ?_) (fun a ha1 haj => ?_)
   · rw [iteratedFDerivWithin_of_isOpen j (V.isOpen i) hx] at h

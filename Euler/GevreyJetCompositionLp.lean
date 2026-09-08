@@ -18,22 +18,6 @@ variable {X E F : Type*} [MeasurableSpace X]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-theorem taylorComp_partition_bound
-    (P : FormalMultilinearSeries ℝ E E) (Q : FormalMultilinearSeries ℝ E F)
-    (n : ℕ) (B R : ℝ)
-    (hP : ∀ j, 0 < j → j ≤ n → ‖P j‖ ≤ B*R^j*(j.factorial : ℝ)^2) :
-    ‖Q.taylorComp P n‖ ≤ ∑ c : OrderedFinpartition n, innerPartitionBound B R c*‖Q c.length‖ := by
-  apply (norm_sum_le _ _).trans
-  apply Finset.sum_le_sum
-  intro c _
-  calc
-    _ ≤ ‖Q c.length‖*∏ i, ‖P (c.partSize i)‖ := c.norm_compAlongOrderedFinpartition_le _ _
-    _ ≤ ‖Q c.length‖*innerPartitionBound B R c := by
-      apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
-      exact Finset.prod_le_prod (fun i _ => norm_nonneg _)
-        (fun i _ => hP _ (c.partSize_pos i) (c.partSize_le i))
-    _ = _ := mul_comm _ _
-
 /-- Outer tensors are transported in L² by the actual measure-preserving
 map; only the positive inner tensors use uniform bounds. -/
 theorem composition_memLp_and_bound

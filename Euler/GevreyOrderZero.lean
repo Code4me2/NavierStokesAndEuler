@@ -104,8 +104,7 @@ theorem orderZeroSource_bound {s : ℕ} (hs : 6 ≤ s) (N : ℕ) (hN : N+6 ≤ s
     apply (weightedNorm_add_le period 6 N hN ρ hρ _ a).trans
     apply add_le_add _ le_rfl
     apply (weightedNorm_add_le period 6 N hN ρ hρ _ l).trans
-    apply add_le_add _ le_rfl
-    exact weightedNorm_add_le period 6 N hN ρ hρ r d
+    exact add_le_add (weightedNorm_add_le period 6 N hN ρ hρ r d) le_rfl
   have hd := backgroundDrift_bound period hs N hN ρ hρ L hL background e
   have hl := weightedNorm_coefficient period K0 6 N hN ρ hρ e
   have ha := algebraicAt_bound period hs N hN ρ hρ C K z e

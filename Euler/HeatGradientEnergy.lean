@@ -60,8 +60,7 @@ theorem gradient_energy_hasDerivAt (u : ℝ → SobolevSpace period 2) (v : Sobo
       -2 * ⟪laplacianEvaluation period 2 (by norm_num) (u t), value period v⟫_ℝ := by
     rw [← Finset.mul_sum, gradient_pairing]
     ring
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 omit [Fact (0 < period)] in
 /-- The scalar Young bound with the exact viscosity scaling used by maximal regularity. -/
@@ -89,8 +88,7 @@ theorem heat_gradient_energy_hasDerivAt (u : ℝ → SobolevSpace period 3)
     rfl
   change HasDerivAt _ (-2 * ⟪laplacianEvaluation period 2 _ (truncateOperator period 2 (u t)),
     ν • value period (laplacianOperator period 1 (u t)) + value period f⟫_ℝ) t at h
-  rw [he, laplacianOperator_value] at h
-  exact h
+  rwa [he, laplacianOperator_value] at h
 
 /-- The actual derivative of gradient energy controls the full L² Laplacian with no source derivative loss. -/
 theorem heat_gradient_energy_bound (u : ℝ → SobolevSpace period 3)

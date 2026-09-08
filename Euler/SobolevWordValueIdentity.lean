@@ -47,7 +47,6 @@ theorem reindexMaximalTime_restriction {q : ℕ} (T : ℝ) (hT : 0 ≤ T)
       extendPath T hT u := by
   filter_upwards [reindexMaximalTime_value period q T U,
     maximal_limit_restriction period T hT u U hU] with t hv hu
-  apply value_injective period
-  exact hv.trans (congrArg (value period) hu)
+  exact value_injective period (hv.trans (congrArg (value period) hu))
 
 end EulerSobolevWordValueIdentity

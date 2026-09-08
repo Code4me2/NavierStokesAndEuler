@@ -53,8 +53,7 @@ theorem perturbed_difference_energy (A B : SmoothL2Field Space)
   let W := B.toLp-A.toLp
   let e := (RB-(projectedRhs B).toLp)-(RA-(projectedRhs A).toLp)
   have he : RB-RA=((projectedRhs B).toLp-(projectedRhs A).toLp)+e := by dsimp [e]; abel
-  have hn : ‖e‖ ≤ ea+eb := by
-    exact (norm_sub_le _ _).trans ((add_le_add hb ha).trans_eq (add_comm eb ea))
+  have hn : ‖e‖ ≤ ea+eb := (norm_sub_le _ _).trans ((add_le_add hb ha).trans_eq (add_comm eb ea))
   have he0 : 0 ≤ ea+eb := (norm_nonneg e).trans hn
   have hpair : 2*⟪W,e⟫_ℝ ≤ ‖W‖^2+(ea+eb)^2 := by
     have hi : ⟪W,e⟫_ℝ ≤ ‖W‖*(ea+eb) :=

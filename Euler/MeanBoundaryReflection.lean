@@ -75,13 +75,11 @@ def homogeneousReflection : homogeneousSpace →ₗᵢ[ℝ] homogeneousSpace whe
 
 theorem homogeneousReflection_involutive (u : homogeneousSpace) :
     homogeneousReflection (homogeneousReflection u) = u := by
-  apply Subtype.ext
-  exact gradientReflection_involutive (u : GradientTensor)
+  exact Subtype.ext (gradientReflection_involutive (u : GradientTensor))
 
 theorem homogeneousReflection_test (f : Test) :
     homogeneousReflection (homogeneousGradient f) = homogeneousGradient (reflectedTest f) := by
-  apply Subtype.ext
-  exact (testGradient_reflected f).symm
+  exact Subtype.ext ((testGradient_reflected f).symm)
 
 theorem homogeneousReflection_inner_shift (u v : homogeneousSpace) :
     ⟪homogeneousReflection u, v⟫_ℝ = ⟪u, homogeneousReflection v⟫_ℝ := by

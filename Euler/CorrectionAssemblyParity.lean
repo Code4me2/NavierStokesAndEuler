@@ -61,8 +61,7 @@ theorem FiniteFamily.commonPath_odd (F : FiniteFamily period hT A)
     (C : ComparisonData period hT A) (P : ParityData period A) (t : Icc (0 : ℝ) T) :
     -reflection period (F.commonPath period t) = F.commonPath period t := by
   have h := congrArg (value period (q := 7)) (F.solution_odd period C P 6 le_rfl t)
-  rw [value_oddReflection] at h
-  exact h
+  rwa [value_oddReflection] at h
 
 /-- A continuous representative of an actual odd L² field is pointwise odd. -/
 theorem continuous_representative_odd (u : LiftL2 period) (g : LiftDomain period → Vector3)
@@ -108,8 +107,7 @@ theorem FiniteFamily.commonPressure_odd (F : FiniteFamily period hT A)
     (C : ComparisonData period hT A) (P : ParityData period A) (t : Icc (0 : ℝ) T) :
     -reflection period (F.commonPressure period t) = F.commonPressure period t := by
   have h := congrArg (value period (q := 6)) (F.signedPressurePath_odd period C P 6 le_rfl t)
-  rw [value_oddReflection] at h
-  exact h
+  rwa [value_oddReflection] at h
 
 /-- Every realization of the assembled correction tower is odd. -/
 theorem FiniteFamily.fieldTower_odd (F : FiniteFamily period hT A)

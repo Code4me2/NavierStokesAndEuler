@@ -2,6 +2,7 @@ import NavierStokes.PhysicalMeanDomain
 import NavierStokes.SignedWaveUpdate
 import NavierStokes.MeanChartCompatibility
 import NavierStokes.HarmonicWaveInteraction
+import NavierStokes.WithTopLemmas
 
 /-!
 # A physical signed request on its moving radial shell
@@ -22,9 +23,6 @@ open scoped ContDiff Topology Interval BigOperators
 
 abbrev Plane := PressureStream.Plane
 abbrev Point := PressureStream.Lift Plane
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 section Composition
 
@@ -71,7 +69,7 @@ theorem class_comp {s : StripData D} {t : StripData E} {w : ℕ → D → ℝ}
   intro n x hx j hj
   have hA : 0 ≤ majorant s w α C p n (Φ x) :=
     majorant_nonneg s w α hC p n (Φ x) (hf.weight_nonneg n (Φ x) (hmap hx))
-  have hbound := norm_iteratedFDerivWithin_comp_le (hf.smooth n) hΦ (nat_le_infty j)
+  have hbound := norm_iteratedFDerivWithin_comp_le (hf.smooth n) hΦ (natCast_le_infty j)
     s.isOpen_domain.uniqueDiffOn t.isOpen_domain.uniqueDiffOn hmap hx
     (C := majorant s w α C p n (Φ x)) (D := B)
     (fun i hi => by
@@ -219,7 +217,7 @@ private theorem radialMap_positiveJets {U : Set Plane} (hU : IsOpen U)
   refine ⟨C + 1, by linarith, ?_⟩
   intro j hj hjm x hx
   have hφx := (hφ.contDiffAt ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds (hS hx))).of_le
-    (nat_le_infty j)
+    (natCast_le_infty j)
   rw [PhysicalGraphBounds.iteratedFDeriv_pair hφx contDiffAt_snd,
     ContinuousMultilinearMap.opNorm_prod]
   apply max_le

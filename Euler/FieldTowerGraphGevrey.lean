@@ -55,8 +55,7 @@ def zeroGraphCoefficient : SmoothTimeField (Icc (0 : ℝ) T) Space Space :=
 
 theorem zeroGraphField_jetLp (n : ℕ) (t : Icc (0 : ℝ) T) :
     (A.zeroGraphField t).jetLp n=A.physicalTensorPath 1 0 n t := by
-  apply Lp.ext
-  exact (SmoothL2Field.jetLp_ae _ n).trans (A.physicalTensorPath_ae 1 0 n t).symm
+  exact Lp.ext ((SmoothL2Field.jetLp_ae _ n).trans (A.physicalTensorPath_ae 1 0 n t).symm)
 
 theorem zeroGraphField_jetLp_continuous (n : ℕ) :
     Continuous (fun t => (A.zeroGraphField t).jetLp n) := by

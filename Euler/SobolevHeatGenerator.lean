@@ -91,8 +91,7 @@ theorem realHeat_value_hasDerivWithinAt {q : ℕ} (hq : 2 ≤ q) (u : SobolevSpa
     simpa only [realCylinderHeat, Real.toNNReal_zero, cylinderHeat_zero] using h
   · have hp : 0 < t := lt_of_le_of_ne ht (Ne.symm hzero)
     have h := (realCylinderHeat_generator_pos period J hp).hasDerivWithinAt (s := Set.Ici 0)
-    rw [← laplacianEvaluation_eq_jet period hq u] at h
-    exact h
+    rwa [← laplacianEvaluation_eq_jet period hq u] at h
 
 /-- The heat orbit is Lipschitz in nonnegative variance with a bound from the actual Hq norm. -/
 theorem heat_value_lipschitz {q : ℕ} (hq : 2 ≤ q) (u : SobolevSpace period q) :

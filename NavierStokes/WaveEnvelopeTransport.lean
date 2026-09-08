@@ -1,5 +1,6 @@
 import NavierStokes.GaussianTailFlat
 import NavierStokes.CommonCoverClass
+import NavierStokes.WithTopLemmas
 
 /-!
 # Source envelopes along an entire common-cover slot path
@@ -16,9 +17,6 @@ namespace NavierStokes.WaveEnvelopeTransport
 open Set Function Filter
 open scoped ContDiff Topology BigOperators
 open CommonCoverSolve CommonCoverClass TorusInverse
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 /-- The full padded integration rectangle, including both time endpoints. -/
 noncomputable def rectangle (r L : ℝ) : Set Plane := Icc (-r) r ×ˢ Icc 0 L
@@ -163,7 +161,7 @@ theorem clm_apply_jet_bound_on {U : Set X} (hU : IsOpen U)
     (hAj : ∀ j ≤ N, ‖iteratedFDeriv ℝ j A x‖ ≤ C)
     (hfj : ∀ j ≤ N, ‖iteratedFDeriv ℝ j f x‖ ≤ D) (j : ℕ) (hj : j ≤ N) :
     ‖iteratedFDeriv ℝ j (fun y => A y (f y)) x‖ ≤ (2 : ℝ) ^ N * C * D := by
-  have hb := norm_iteratedFDerivWithin_clm_apply hA hf hU.uniqueDiffOn hx (nat_le_infty j)
+  have hb := norm_iteratedFDerivWithin_clm_apply hA hf hU.uniqueDiffOn hx (natCast_le_infty j)
   simp only [iteratedFDerivWithin_of_isOpen _ hU hx] at hb
   apply hb.trans
   calc

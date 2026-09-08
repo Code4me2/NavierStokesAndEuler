@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import NavierStokes.SpacetimeEndpoint
 import NavierStokes.SpatialBorelExtension
+import NavierStokes.WithTopLemmas
 
 /-!
 # Joint smooth gluing from matching normal time jets
@@ -24,12 +25,6 @@ abbrev SpaceTime := ProblemStatement.SpaceTime
 
 noncomputable def timeVector : SpaceTime := (1, 0)
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
-
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
 noncomputable def directional (s : Set SpaceTime) (f : SpaceTime → V) (v : SpaceTime)
@@ -42,7 +37,7 @@ noncomputable def normalIter (s : Set SpaceTime) (f : SpaceTime → V) : ℕ →
 theorem directional_contDiffOn {s : Set SpaceTime} {f : SpaceTime → V}
     (hf : ContDiffOn ℝ ∞ f s) (hs : UniqueDiffOn ℝ s) (v : SpaceTime) :
     ContDiffOn ℝ ∞ (directional s f v) s :=
-  (hf.fderivWithin hs infty_add_one_le).clm_apply contDiffOn_const
+  (hf.fderivWithin hs infty_add_one_le_infty).clm_apply contDiffOn_const
 
 theorem normalIter_contDiffOn {s : Set SpaceTime} {f : SpaceTime → V}
     (hf : ContDiffOn ℝ ∞ f s) (hs : UniqueDiffOn ℝ s) (n : ℕ) :
@@ -59,7 +54,7 @@ theorem directional_commute {s : Set SpaceTime} {f : SpaceTime → V}
     (v w : SpaceTime) :
     directional s (directional s f v) w z =
       directional s (directional s f w) v z := by
-  have hd := ((hf.fderivWithin hs infty_add_one_le).differentiableOn (by simp)) z hz
+  have hd := ((hf.fderivWithin hs infty_add_one_le_infty).differentiableOn (by simp)) z hz
   have hv := fderivWithin_clm_apply (c := fderivWithin ℝ f s) (u := fun _ => v)
     (hs z hz) hd (differentiableWithinAt_const v)
   have hw := fderivWithin_clm_apply (c := fderivWithin ℝ f s) (u := fun _ => w)
@@ -369,7 +364,7 @@ theorem smoothExtension_iteratedFDeriv {T : ℝ} {f : SpaceTime → V}
     (hf : ContDiffOn ℝ ∞ f (past T)) (n : ℕ) {z : SpaceTime} (hz : z ∈ past T) :
     iteratedFDeriv ℝ n (smoothExtension T f hf) z = iteratedFDerivWithin ℝ n f (past T) z := by
   rw [← iteratedFDerivWithin_eq_iteratedFDeriv (past_uniqueDiff T)
-    ((smoothExtension_contDiff hf).of_le (nat_le_infty n)).contDiffAt hz]
+    ((smoothExtension_contDiff hf).of_le (natCast_le_infty n)).contDiffAt hz]
   exact iteratedFDerivWithin_congr (smoothExtension_eqOn_past hf) hz n
 
 omit [CompleteSpace V] in

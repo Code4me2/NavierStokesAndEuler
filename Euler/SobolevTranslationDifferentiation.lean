@@ -37,9 +37,7 @@ theorem sobolevTranslation_hasDerivAt {q : ℕ} (i : Fin 4) (u : SobolevSpace pe
   have hval : HasDerivAt (fun t => value period (f t)) (value period v) 0 :=
     (valueOperator period q).hasFDerivAt.comp_hasDerivAt 0 hv
   have he : v = derivativeOperator period q i u := by
-    apply value_injective period
-    exact hval.unique (derivativeOperator_hasDerivAt period i u)
-  rw [he] at hv
-  exact hv
+    exact value_injective period (hval.unique (derivativeOperator_hasDerivAt period i u))
+  rwa [he] at hv
 
 end EulerCylinderSobolevSpace

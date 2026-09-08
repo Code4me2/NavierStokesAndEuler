@@ -53,8 +53,7 @@ theorem inverseFlow_finiteOrderBound (n i : ℕ) (hi : 1 ≤ i) (hin : i ≤ n)
   calc
     _ ≤ 9*C^2*(sourceInverseRadius C R)^j*(j.factorial : ℝ)^2 :=
       inverseFlow_gevrey D X Y hX hY hXY R C hR hC hdet hF j t x
-    _ ≤ finiteOrderConstant C R n := by
-      exact hbound.trans (by unfold finiteOrderConstant; linarith)
+    _ ≤ finiteOrderConstant C R n := hbound.trans (by unfold finiteOrderConstant; linarith)
     _ = (finiteOrderConstant C R n)^1 := (pow_one _).symm
     _ ≤ _ := pow_le_pow_right₀ hD hi
 

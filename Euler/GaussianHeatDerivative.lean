@@ -124,8 +124,7 @@ theorem lineHeat_strongDerivative (a b : LiftTangent) (v : ℝ≥0) (f g : LiftL
     exact (lineHeat_translation period a v (translationPath period b t) f).symm
   change HasDerivAt (fun t => lineHeatOperator period a v (lineOrbit period b f t))
     (lineHeatOperator period a v g) 0 at h
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 /-- Gaussian integration by parts identifies the averaged strong derivative with the bounded moment operator. -/
 theorem lineHeat_derivative_identity (a : LiftTangent) {v : ℝ≥0} (hv : v ≠ 0)

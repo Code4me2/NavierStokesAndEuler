@@ -1,5 +1,6 @@
 import NavierStokes.WaveEdgeExtension
 import NavierStokes.ActualSignedGeometry
+import NavierStokes.WithTopLemmas
 
 /-!
 # Smooth attachment at the native dyadic band boundaries
@@ -25,9 +26,6 @@ noncomputable local instance : NormedAddCommGroup SmoothCovariance.Mat2 :=
 noncomputable local instance : NormedSpace ℝ SmoothCovariance.Mat2 :=
   inferInstanceAs (NormedSpace ℝ (Fin 2 → Fin 2 → ℝ))
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
-
 section FlatJets
 
 variable {D E : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
@@ -36,7 +34,7 @@ variable {D E : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
 private theorem finite_smooth_neighborhood {f : D → E} {x : D}
     (hf : ContDiffAt ℝ ∞ f x) (n : ℕ) :
     ∃ s : Set D, IsOpen s ∧ x ∈ s ∧ ContDiffOn ℝ n f s := by
-  obtain ⟨s, hs, hfs⟩ := hf.contDiffOn (nat_le_infty n) (by simp)
+  obtain ⟨s, hs, hfs⟩ := hf.contDiffOn (natCast_le_infty n) (by simp)
   obtain ⟨u, hus, hu, hxu⟩ := mem_nhds_iff.mp hs
   exact ⟨u, hu, hxu, hfs.mono hus⟩
 
@@ -101,7 +99,7 @@ theorem flat_comp_jets {g : ℝ → ℝ} {q : D → ℝ} {x : D}
     have hb := Finset.single_le_sum (f := fun j => ‖iteratedFDeriv ℝ j q x‖)
       (fun _ _ => norm_nonneg _) (Finset.mem_range.mpr (Nat.lt_succ_of_le hj))
     exact hb.trans (le_add_of_nonneg_left (by norm_num))
-  have hb := norm_iteratedFDerivWithin_comp_le (hg.of_le (nat_le_infty n)).contDiffOn hqs
+  have hb := norm_iteratedFDerivWithin_comp_le (hg.of_le (natCast_le_infty n)).contDiffOn hqs
     (n := n) (by rfl) uniqueDiffOn_univ hs.uniqueDiffOn (mapsTo_univ q s) hxs
     (C := 0) (D := K)
     (by intro j hj; simp only [iteratedFDerivWithin_univ, hz, norm_zero, le_refl])

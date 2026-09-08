@@ -1,4 +1,5 @@
 import NavierStokes.NativeBandExtension
+import NavierStokes.WithTopLemmas
 
 /-!
 # Literal flat dyadic products from locally bounded interior jets
@@ -19,9 +20,6 @@ open scoped Topology ContDiff BigOperators
 
 variable {D E : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 /-- The constant and neighborhood may depend on the face point and finite
 jet order.  Values and derivatives of `g` outside the open band are unused. -/
@@ -88,7 +86,7 @@ theorem product_jet_extension_isLittleO {Ω : Set D} (hΩ : IsOpen Ω)
     change y ∈ Ω ∩ window q a b at hyU
     have hprod := norm_iteratedFDerivWithin_smul_le
       (hφ.mono (inter_subset_left (t := window q a b))) hg hU.uniqueDiffOn hyU
-      (n := m) (nat_le_infty m)
+      (n := m) (natCast_le_infty m)
     simp only [iteratedFDerivWithin_of_isOpen _ hU hyU] at hprod
     calc
       _ ≤ ∑ j ∈ Finset.range (m + 1), (m.choose j : ℝ) *

@@ -3,6 +3,7 @@ import NavierStokes.CommonCoverSolve
 import NavierStokes.SquaredPartition
 import NavierStokes.SimilarityProfile
 import Mathlib.Data.Set.Card
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical waves on common covers and locally finite label sums
@@ -24,9 +25,6 @@ abbrev Plane := PhysicalGraphBounds.Plane
 abbrev LiftPoint := PhysicalGraphBounds.LiftPoint
 abbrev Label := SlotColoring.Label
 abbrev Position := SlotColoring.Position
-
-private theorem nat_le_infty (k : ℕ) : (k : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 /-- Change only the auxiliary coordinate from native to common level. -/
 noncomputable def downLift (d : ℕ) : LiftPoint →L[ℝ] LiftPoint :=
@@ -512,7 +510,7 @@ theorem masked_finsum_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace 
   classical
   obtain ⟨s, hs, he⟩ := masked_finsum_eventually hh hh1 f hsupp hw
   rw [iteratedFDeriv_eq_of_eventuallyEq he m,
-    iteratedFDeriv_finset_sum_at s (fun I _ => (hf I w hw).of_le (nat_le_infty m))]
+    iteratedFDeriv_finset_sum_at s (fun I _ => (hf I w hw).of_le (natCast_le_infty m))]
   calc
     _ ≤ ∑ I ∈ s, ‖iteratedFDeriv ℝ m (f I) w‖ := norm_sum_le _ _
     _ ≤ ∑ _I ∈ s, B := Finset.sum_le_sum (fun I hI => hb I ((hs I).mp hI))
@@ -919,7 +917,7 @@ theorem vectorSum_jet_bound {H : ℕ} {f : Fin 3 → WaveFamily H} {a b h r0 Z :
     (hb : ∀ i, ‖iteratedFDeriv ℝ m ((f i).sum a h r0) w‖ ≤ B) :
     ‖iteratedFDeriv ℝ m (vectorSum f a h r0) w‖ ≤ 3 * B := by
   have hlocal (i : Fin 3) : ContDiffAt ℝ m ((f i).sum a h r0) w :=
-    (((hf i).sum_smooth ha hh hh1).contDiffAt (preterminal_open.mem_nhds hw)).of_le (nat_le_infty m)
+    (((hf i).sum_smooth ha hh hh1).contDiffAt (preterminal_open.mem_nhds hw)).of_le (natCast_le_infty m)
   unfold vectorSum
   rw [iteratedFDeriv_finset_sum_at (f := fun i y => realCoordinate i ((f i).sum a h r0 y)) Finset.univ
     (fun i _ => (realCoordinate i).contDiff.contDiffAt.comp w (hlocal i))]

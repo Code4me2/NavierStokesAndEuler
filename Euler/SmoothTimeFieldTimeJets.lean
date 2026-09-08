@@ -55,8 +55,7 @@ theorem TimeDerivative.jet_pointwise (htime : TimeDerivative T hT A A₁)
       fun s => extendPath T hT (A.jet n) s x := by
     funext s
     exact sliceFamily_jet T A n x (projIcc 0 T hT s)
-  rw [he, sliceFamily_jet] at h
-  exact h
+  rwa [he, sliceFamily_jet] at h
 
 theorem TimeDerivative.derivative (htime : TimeDerivative T hT A A₁) :
     TimeDerivative T hT A.derivative A₁.derivative := by

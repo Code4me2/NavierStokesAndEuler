@@ -1,6 +1,7 @@
 import NavierStokes.ParticularWaveAssembly
 import NavierStokes.WaveEnvelopeTransport
 import NavierStokes.LabelSumBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Whole-lift bounds from the actual native copies
@@ -328,9 +329,6 @@ variable {D E F G : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] {I : Type*}
 
-private theorem finite_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
-
 private theorem bilinear_jet_at (L : E →L[ℝ] F →L[ℝ] G)
     {u : D → E} {v : D → F} {x : D} (hu : ContDiffAt ℝ ∞ u x)
     (hv : ContDiffAt ℝ ∞ v x) {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B)
@@ -338,8 +336,8 @@ private theorem bilinear_jet_at (L : E →L[ℝ] F →L[ℝ] G)
     (hbu : ∀ k ≤ m, ‖iteratedFDeriv ℝ k u x‖ ≤ A)
     (hbv : ∀ k ≤ m, ‖iteratedFDeriv ℝ k v x‖ ≤ B) :
     ‖iteratedFDeriv ℝ j (fun y => L (u y) (v y)) x‖ ≤ ‖L‖ * (2 : ℝ) ^ m * A * B := by
-  obtain ⟨U, hU, huU⟩ := hu.contDiffOn (finite_le_infty j) (by simp)
-  obtain ⟨V, hV, hvV⟩ := hv.contDiffOn (finite_le_infty j) (by simp)
+  obtain ⟨U, hU, huU⟩ := hu.contDiffOn (natCast_le_infty j) (by simp)
+  obtain ⟨V, hV, hvV⟩ := hv.contDiffOn (natCast_le_infty j) (by simp)
   obtain ⟨O, hOsub, hO, hxO⟩ := mem_nhds_iff.mp (inter_mem hU hV)
   have hle := JetBounds.norm_iteratedFDeriv_bilinear_le_on L hO
     (huU.mono (hOsub.trans inter_subset_left))
@@ -386,7 +384,7 @@ theorem map (hf : LocalJets s w α K f) (L : E →L[ℝ] F) :
   refine ⟨‖L‖ * C, mul_nonneg (norm_nonneg _) hC, p, ?_⟩
   intro n i x hx hi j hj
   change ‖iteratedFDeriv ℝ j (L ∘ f n i) x‖ ≤ _
-  rw [L.iteratedFDeriv_comp_left ((hf.smooth n i x hx hi).of_le (finite_le_infty j)) le_rfl]
+  rw [L.iteratedFDeriv_comp_left ((hf.smooth n i x hx hi).of_le (natCast_le_infty j)) le_rfl]
   calc
     _ ≤ ‖L‖ * ‖iteratedFDeriv ℝ j (f n i) x‖ := L.norm_compContinuousMultilinearMap_le _
     _ ≤ ‖L‖ * majorant s w α C p n x := mul_le_mul_of_nonneg_left (hb n i x hx hi j hj) (norm_nonneg _)
@@ -401,8 +399,8 @@ theorem add (hf : LocalJets s w α K f) (hg : LocalJets s w α K g)
   obtain ⟨B, hB, q, hb⟩ := hg.bounds m
   refine ⟨A + B, add_nonneg hA hB, p + q, ?_⟩
   intro n i x hx hi j hj
-  rw [fun_iteratedFDeriv_add_apply ((hf.smooth n i x hx hi).of_le (finite_le_infty j))
-    ((hg.smooth n i x hx hi).of_le (finite_le_infty j))]
+  rw [fun_iteratedFDeriv_add_apply ((hf.smooth n i x hx hi).of_le (natCast_le_infty j))
+    ((hg.smooth n i x hx hi).of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖iteratedFDeriv ℝ j (f n i) x‖ + ‖iteratedFDeriv ℝ j (g n i) x‖ := norm_add_le _ _
     _ ≤ majorant s w α A p n x + majorant s w α B q n x :=

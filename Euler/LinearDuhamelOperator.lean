@@ -146,8 +146,7 @@ theorem volterraOperator_injective : Function.Injective (volterraOperator T hT B
 /-- The constructed inverse is also a left inverse. -/
 theorem volterra_inverse_operator (h : C(Icc (0 : ℝ) T,E)) :
     U.volterraInverse (volterraOperator T hT B h) = h := by
-  apply U.volterraOperator_injective
-  exact U.volterra_operator_inverse _
+  exact U.volterraOperator_injective (U.volterra_operator_inverse _)
 
 /-- The actual two-sided Volterra equivalence. -/
 def volterraEquiv : C(Icc (0 : ℝ) T,E) ≃L[ℝ] C(Icc (0 : ℝ) T,E) :=

@@ -27,13 +27,11 @@ theorem Cutoff.directional_translate (χ : Cutoff) (a b : Space) :
 
 theorem Cutoff.directional_add (χ : Cutoff) (a b : Space) :
     χ.directional (a+b) = (χ.directional a).add (χ.directional b) := by
-  apply Cutoff.ext
-  exact funext fun x => (fderiv ℝ χ.field x).map_add a b
+  exact Cutoff.ext (funext fun x => (fderiv ℝ χ.field x).map_add a b)
 
 theorem Cutoff.directional_smul (χ : Cutoff) (c : ℝ) (a : Space) :
     χ.directional (c • a) = (χ.directional a).scale c := by
-  apply Cutoff.ext
-  exact funext fun x => (fderiv ℝ χ.field x).map_smul c a
+  exact Cutoff.ext (funext fun x => (fderiv ℝ χ.field x).map_smul c a)
 
 section LinearCutoffOperation
 

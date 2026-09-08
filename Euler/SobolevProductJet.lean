@@ -39,8 +39,7 @@ theorem scalarProduct_hasDerivAt (L : Vector3 →L[ℝ] ℝ) (i : Fin 4)
       (truncateOperator period 3 u)) (translation period (translationPath period (standardDirection i) t) v))
       (B (sobolevTranslation period 3 (translationPath period (standardDirection i) 0) (truncateOperator period 3 u)) v' +
         B (derivativeOperator period 3 i u) (translation period (translationPath period (standardDirection i) 0) v)) 0 at h
-  rw [he, hzero, translationPath_zero, translation_zero] at h
-  exact h
+  rwa [he, hzero, translationPath_zero, translation_zero] at h
 
 /-- Pointwise multiplication with q+3 coefficient derivatives produces a genuine q-jet. -/
 def productJet (L : Vector3 →L[ℝ] ℝ) {q : ℕ} (u : SobolevSpace period (q+3))
@@ -74,8 +73,7 @@ def productJet (L : Vector3 →L[ℝ] ℝ) {q : ℕ} (u : SobolevSpace period (q
         apply value_injective period
         rfl
       have h := scalarProduct_hasDerivAt period L i u4 v (dv i) (hd i)
-      rw [h0, h1, ← hbase] at h
-      exact h
+      rwa [h0, h1, ← hbase] at h
 
 /-- The output Sobolev array of an actual pointwise scalar-vector product. -/
 def productHighLow (L : Vector3 →L[ℝ] ℝ) {q : ℕ}

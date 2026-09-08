@@ -1,5 +1,6 @@
 import NavierStokes.WeightedRadialPrimitive
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical power-coordinate pullback of the weighted radial inverse
@@ -17,9 +18,6 @@ namespace NavierStokes.RadialPullback
 open Set Filter MeasureTheory
 open scoped Topology ContDiff BigOperators
 open WeightedRadialPrimitive
-
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  le_of_lt (WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n))
 
 /-- A globally smooth positive radius, identical to the radius above `2ℓ`. -/
 noncomputable def positiveRadius (ℓ x : ℝ) : ℝ :=
@@ -584,7 +582,7 @@ theorem liftChart_jet_aux_independent {φ : ℝ → ℝ} (hφ : ContDiff ℝ ∞
     _ = iteratedFDeriv ℝ (n + 1) (fun z : ℝ × E => liftChart φ z + (0, Y)) (R, 0) := by rw [hmap]
     _ = iteratedFDeriv ℝ (n + 1) (liftChart φ) (R, (0 : E)) := by
       rw [fun_iteratedFDeriv_add_apply
-        (((liftChart_contDiff hφ).of_le (nat_le_smooth (n + 1))).contDiffAt)
+        (((liftChart_contDiff hφ).of_le (natCast_le_infty (n + 1))).contDiffAt)
         contDiffAt_const, iteratedFDeriv_succ_const]
       simp
 
@@ -597,7 +595,7 @@ theorem liftChart_positive_jets_bound (a b : ℝ) {φ : ℝ → ℝ}
       ∀ z ∈ (Icc a b) ×ˢ ({0} : Set E), ‖iteratedFDeriv ℝ (j : ℕ) (liftChart φ) z‖ ≤ C := by
     intro j
     obtain ⟨C, hC⟩ := (isCompact_Icc.prod isCompact_singleton).exists_bound_of_continuousOn
-      (((liftChart_contDiff hφ).continuous_iteratedFDeriv (nat_le_smooth j)).continuousOn :
+      (((liftChart_contDiff hφ).continuous_iteratedFDeriv (natCast_le_infty j)).continuousOn :
         ContinuousOn (iteratedFDeriv ℝ (j : ℕ) (liftChart φ)) ((Icc a b) ×ˢ ({0} : Set E)))
     exact ⟨max C 0, le_max_right _ _, fun z hz => (hC z hz).trans (le_max_left _ _)⟩
   choose C hC hb using hex
@@ -621,7 +619,7 @@ theorem radial_comp_finiteJets_uniform (a b : ℝ) {φ : ℝ → ℝ}
   obtain ⟨B, hB, hb⟩ := liftChart_positive_jets_bound (E := E) a b hφ m
   refine ⟨(m.factorial : ℝ) * B ^ m, mul_nonneg (Nat.cast_nonneg _) (pow_nonneg (zero_le_one.trans hB) _), ?_⟩
   intro F hF z hz C hC hsource j hj
-  have h := norm_iteratedFDeriv_comp_le hF (liftChart_contDiff hφ) (nat_le_smooth j) z
+  have h := norm_iteratedFDeriv_comp_le hF (liftChart_contDiff hφ) (natCast_le_infty j) z
     (fun i hi => hsource i (hi.trans hj)) (fun i hi hij =>
       (hb i hi (hij.trans hj) z hz).trans (by
         calc
@@ -650,7 +648,7 @@ theorem radial_multiplier_finiteJets_uniform (a b : ℝ) {h : ℝ → ℝ}
   calc
     _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) *
         ‖iteratedFDeriv ℝ i (fun y : ℝ × E => h y.1) z‖ * ‖iteratedFDeriv ℝ (j - i) F z‖ :=
-      norm_iteratedFDeriv_smul_le (hh.comp contDiff_fst) hF z (nat_le_smooth j)
+      norm_iteratedFDeriv_smul_le (hh.comp contDiff_fst) hF z (natCast_le_infty j)
     _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * B * C := by
       apply Finset.sum_le_sum
       intro i hi

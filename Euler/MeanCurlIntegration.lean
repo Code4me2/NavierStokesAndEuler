@@ -152,8 +152,7 @@ theorem integral_curl_selfadjoint (f g : Test) :
 
 theorem curlTensor_test_eq (f : Test) :
     curlTensor (EulerMeanGradientTest.testGradient f) = testValue (curlTest f) := by
-  apply Lp.ext
-  exact (curlTensor_test_ae f).trans (testValue_ae (curlTest f)).symm
+  exact Lp.ext ((curlTensor_test_ae f).trans (testValue_ae (curlTest f)).symm)
 
 theorem test_gradient_curl_pairing (f g : Test) :
     ⟪EulerMeanGradientTest.testGradient f, EulerMeanGradientTest.testGradient (curlTest g)⟫_ℝ =

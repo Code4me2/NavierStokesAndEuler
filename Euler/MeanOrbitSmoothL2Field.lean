@@ -48,13 +48,11 @@ def smoothL2Field (u : L2) (hu : SmoothOrbit u) : EulerLpTranslation.SmoothL2Fie
 
 @[simp] theorem smoothL2Field_toLp (u : L2) (hu : SmoothOrbit u) :
     (smoothL2Field u hu).toLp = u := by
-  apply Lp.ext
-  exact (smoothL2Field u hu).toLp_ae.trans (representative_ae u hu).symm
+  exact Lp.ext ((smoothL2Field u hu).toLp_ae.trans (representative_ae u hu).symm)
 
 @[simp] theorem smoothL2Field_jetLp (u : L2) (hu : SmoothOrbit u) (n : ℕ) :
     (smoothL2Field u hu).jetLp n = orbitTensorLp u n := by
-  apply Lp.ext
-  exact ((smoothL2Field u hu).jetLp_ae n).trans (orbitTensorLp_ae u hu n).symm
+  exact Lp.ext (((smoothL2Field u hu).jetLp_ae n).trans (orbitTensorLp_ae u hu n).symm)
 
 /-- A finite coordinate family is all that the qualitative tensor reconstruction uses. -/
 theorem orbitTensorLp_continuous {K : Type*} [TopologicalSpace K]

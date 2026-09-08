@@ -81,8 +81,7 @@ theorem ordinaryPath_block_le (p : C(Icc (0 : ℝ) T,L2))
     rw [spatialEmbeddingPath_translation, pathMean_spatialEmbeddingPath]
     rfl
   have hh := pathMean_block_bound P standardDirection q g (spatialEmbeddingPath_orbit P T p hp) n (a,0)
-  rw [he, block_comp_right standardDirection fstMap q f hp] at hh
-  exact hh
+  rwa [he, block_comp_right standardDirection fstMap q f hp] at hh
 
 theorem ordinaryPath_majorant (p : C(Icc (0 : ℝ) T,L2))
     (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p))

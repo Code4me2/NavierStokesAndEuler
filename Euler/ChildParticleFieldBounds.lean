@@ -179,8 +179,7 @@ theorem quadraticTerm_bound :
     (mul_nonneg (mul_nonneg (by norm_num) G.secondAmplitude_nonneg) G.amp_nonneg) G.amp_nonneg G.radius_nonneg
     G.quadraticCoefficient_bound G.velocity_bound_radius
   have he : 3*(3*G.secondAmplitude*G.amp)*G.amp = 9*G.secondAmplitude*G.amp^2 := by ring
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 def accelerationTerm : SmoothL2Field Space :=
   productField (G.firstCoefficient G.parentDisplacement) (G.firstCoefficient_smooth G.parentDisplacement)
@@ -230,8 +229,7 @@ theorem childAcceleration_bound : G.childAcceleration.HasJetBound G.amplitude G.
       9*G.secondAmplitude*G.amp^2+G.amp+3*G.firstAmplitude*G.amp = G.amplitude := by
     unfold amplitude
     ring
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 theorem childDisplacement_apply (x : Space) :
     G.childDisplacement.field x = G.parentDisplacement.field (G.inner x)+G.displacement.field x := rfl

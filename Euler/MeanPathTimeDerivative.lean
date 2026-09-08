@@ -102,12 +102,6 @@ theorem spatialJetPath_hasDerivWithinAt (n : ℕ) (v : Fin n → Space) (t : Icc
   rw [hfun]
   exact hd
 
-private theorem hasDerivWithinAt_submodule_iff {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (S : Submodule ℝ E) (f : ℝ → S) (v : S) (U : Set ℝ) (t : ℝ) :
-    HasDerivWithinAt f v U t ↔ HasDerivWithinAt (fun s => (f s : E)) (v : E) U t := by
-  rw [hasDerivWithinAt_iff_tendsto, hasDerivWithinAt_iff_tendsto]
-  rfl
-
 private local instance : Fact (0 < (1 : ℝ)) := ⟨by norm_num⟩
 
 include hder hp hq in

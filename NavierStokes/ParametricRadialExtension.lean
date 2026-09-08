@@ -25,9 +25,6 @@ abbrev Plane := ℝ × ℝ
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
 /-- The same window can be used for every order and every field component. -/
 structure ParameterWindow (S : Set ℝ) where
   inner : ℝ

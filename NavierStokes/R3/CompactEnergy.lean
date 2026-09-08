@@ -9,6 +9,7 @@ import NavierStokes.ProblemStatement
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 import Mathlib.Topology.Algebra.Support
+import NavierStokes.WithTopLemmas
 
 /-!
 # Energy of compactly supported fields on Euclidean three-space
@@ -29,12 +30,6 @@ namespace NavierStokesR3.CompactEnergy
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 theorem compact_inner_left {f g : Space → Space} (hf : HasCompactSupport f) :
     HasCompactSupport (fun x => ⟪f x, g x⟫_ℝ) := by
@@ -214,7 +209,7 @@ theorem energy_balance {u f : VelocityField} {p : PressureField} {t : ℝ}
     (hNS : ∀ x, navierStokesResidual u p t x = f (t, x)) :
     energyRate u t = -2 * dissipation u t + 2 * ∫ x, ⟪u (t, x), f (t, x)⟫_ℝ := by
   have hL := (hu.inner ℝ (spatialLaplacian_contDiff hu)).continuous
-  have hN := (hu.inner ℝ ((hu.fderiv_right infty_add_one_le).clm_apply hu)).continuous
+  have hN := (hu.inner ℝ ((hu.fderiv_right infty_add_one_le_infty).clm_apply hu)).continuous
   have hP := (hu.inner ℝ (pressureGradient_contDiff hp)).continuous
   have hF : Continuous (fun x : Space => ⟪u (t, x), f (t, x)⟫_ℝ) := hu.continuous.inner hf
   have hiL : Integrable (fun x => ⟪u (t, x), spatialLaplacian u t x⟫_ℝ) :=
@@ -300,7 +295,7 @@ theorem energy_hasDerivAt {a b t : ℝ} {u : VelocityField} {K : Set Space}
     (hsupp : ∀ r ∈ Icc a b, tsupport (fun x => u (r, x)) ⊆ K)
     (ht : t ∈ Ioo a b) : HasDerivAt (l2Sq u) (energyRate u t) t := by
   have hF : ContDiffOn ℝ 1 (fun z : SpaceTime => ‖u z‖ ^ 2) (Icc a b ×ˢ univ) :=
-    (hu.norm_sq ℝ).of_le (nat_le_infty 1)
+    (hu.norm_sq ℝ).of_le (natCast_le_infty 1)
   refine CompactTimeIntegral.hasDerivAt_integral_of_contDiffOn_of_hasDerivAt hK hF ?_ ht ?_
   · intro r hr x hx
     rw [zero_outside (hsupp r hr) hx]

@@ -48,8 +48,7 @@ theorem endpoint_coordinate_equation_ae (t : Icc (0 : ℝ) T) :
   change fullOperatorMap P (adjointMap (D.Q t)) r x = (D.Q t x.1).adjoint (r x) at hr
   change r x = (-2 : ℝ) • (fullOperatorMap P (D.Q₁ t) v x) at hs
   change fullOperatorMap P (D.Q₁ t) v x = D.Q₁ t x.1 (v x) at hq₁
-  rw [hl,hq,hr,hs,hq₁] at hp
-  exact hp
+  rwa [hl,hq,hr,hs,hq₁] at hp
 
 theorem endpointVelocity_ae (t : Icc (0 : ℝ) T) :
     D.endpointVelocity P Y t =ᵐ[liftMeasure P] fun x =>

@@ -83,18 +83,6 @@ theorem uncutVelocity_tangent (ξ : U) (t : Icc (0 : ℝ) D.T) (x : Space) :
     ⟪D.normal.field t x,uncutVelocity D ξ t x⟫_ℝ=0 :=
   physical_tangent D ⟨0,le_rfl,D.T_pos.le⟩ t x ξ
 
-private theorem homogeneous_unique (T : ℝ) (hT : 0 ≤ T)
-    (G : C(Icc (0 : ℝ) T,Space →L[ℝ] Space)) (f g : ℝ → Space)
-    (hf : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt f (G t (f t)) (Icc (0 : ℝ) T) t)
-    (hg : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt g (G t (g t)) (Icc (0 : ℝ) T) t)
-    (h0 : f 0=g 0) (t : Icc (0 : ℝ) T) : f t=g t := by
-  let E := constructedEvolution T hT G
-  have he (a : ℝ → Space) (ha : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt a (G t (a t)) (Icc (0 : ℝ) T) t) : a t=E.solution 0 (a 0) t :=
-    E.solution_unique 0 (a 0) a
-      (fun s => by simpa only [ContinuousMap.zero_apply,add_zero] using ha s) rfl t
-  rw [he f hf,he g hg,h0]
-
 theorem vector_initial (δ : ℝ) (hδ : 0 < δ) (ξ : U)
     (hs : tsupport innerCutoff ⊆ D.support) (x : Space) (θ : ℝ) :
     vector D (initialData D δ hδ ξ hs) (0,(x,θ)) =

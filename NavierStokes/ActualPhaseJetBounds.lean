@@ -1,6 +1,7 @@
 import NavierStokes.ActualPrimaryBounds
 import NavierStokes.ActualGaussianCoverage
 import NavierStokes.ActualPrimaryCoherence
+import NavierStokes.WithTopLemmas
 
 /-!
 # Ordinary jets of the selected primary phase
@@ -20,9 +21,6 @@ open CorrectionInitialization
 open scoped Topology ContDiff
 
 
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 /-- Affine values may be unbounded; every positive jet is bounded by the
 linear part alone. -/
@@ -380,8 +378,8 @@ theorem localPhase_positive_jets (m : ℕ) :
       nativeRemainder i.1 ((ActualPrimaryBounds.fullCopy i.1 n i.2 y).1,
         (ActualPrimaryBounds.fullCopy i.1 n i.2 y).2.2) := funext (localPhase_decomposition n i)
   rw [he, fun_iteratedFDeriv_add_apply
-    ((((phaseLinear i.1 n).contDiff.contDiffAt).add contDiffAt_const).of_le (nat_le_infty j))
-    (hr.of_le (nat_le_infty j))]
+    ((((phaseLinear i.1 n).contDiff.contDiffAt).add contDiffAt_const).of_le (natCast_le_infty j))
+    (hr.of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖iteratedFDeriv ℝ j (fun y => phaseLinear i.1 n y + phaseOffset n i) x‖ +
         ‖iteratedFDeriv ℝ j (fun y => nativeRemainder i.1
@@ -473,7 +471,7 @@ theorem weightedPhase_positive_jets (m : ℕ) :
         ‖iteratedFDeriv ℝ j (localPhase n i) x‖ := by
     change ‖iteratedFDeriv ℝ j
       ((ChartScales.carrier ActualPrimary.h (BaseChartJets.cellBand i.1.2) : ℝ) • localPhase n i) x‖ ≤ _
-    rw [iteratedFDeriv_const_smul_apply ((localPhase_smooth hx).of_le (nat_le_infty j))]
+    rw [iteratedFDeriv_const_smul_apply ((localPhase_smooth hx).of_le (natCast_le_infty j))]
     have hk0 : 0 ≤ (ChartScales.carrier ActualPrimary.h (BaseChartJets.cellBand i.1.2) : ℝ) :=
       Nat.cast_nonneg _
     simpa only [Real.norm_eq_abs, abs_of_nonneg hk0] using
@@ -537,7 +535,7 @@ theorem phase_jet_le_weighted {n : ℕ} {i : CopyIndex B N0} {x : ActualPrimary.
     funext y
     simp only [weightedPhase, smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ hk.ne', one_mul]
   rw [he, iteratedFDeriv_const_smul_apply'
-    ((weightedPhase_smooth hx).of_le (nat_le_infty j))]
+    ((weightedPhase_smooth hx).of_le (natCast_le_infty j))]
   have hnorm : ‖((ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n)⁻¹‖ ≤ 1 := by
     rw [Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hk)]
     exact (inv_le_one₀ hk).mpr hk1
@@ -568,7 +566,7 @@ theorem harmonicPhase_positive_jets (H : ℝ) (hH : 1 ≤ H) (m : ℕ) :
   intro a ha n i x hx j hj hjm
   have hn : ‖a‖ ≤ H := by simpa only [Real.norm_eq_abs] using ha
   change ‖iteratedFDeriv ℝ j (fun y => a • weightedPhase i.1 n y) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' ((weightedPhase_smooth hx).of_le (nat_le_infty j))]
+  rw [iteratedFDeriv_const_smul_apply' ((weightedPhase_smooth hx).of_le (natCast_le_infty j))]
   calc
     _ ≤ ‖a‖ * ‖iteratedFDeriv ℝ j (weightedPhase i.1 n) x‖ := norm_smul_le _ _
     _ ≤ H * (C * ChartScales.S n ^ p * ChartScales.Q n ^ (-(2 * ActualPrimary.h))) :=

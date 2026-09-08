@@ -133,8 +133,7 @@ theorem Budget.correctedFieldTower_hasDerivAt (B : Budget period hT A)
   have hsum := (hz.add he).congr_deriv hcancel
   have hp := B.pressure_eq_realization period q hq ⟨t, ht.1.le, ht.2.le⟩
   rw [B.solution_eq_realization period q hq] at hp
-  rw [hp] at hsum
-  exact hsum
+  rwa [hp] at hsum
 
 
 end EulerAllOrderDriftCorrection

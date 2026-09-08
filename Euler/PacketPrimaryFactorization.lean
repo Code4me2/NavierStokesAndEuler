@@ -71,7 +71,7 @@ theorem vector_homogeneous_time {P : ℝ} [Fact (0 < P)] (Y : InitialData P D)
     exact (eq_sub_of_add_eq hh).trans (by abel)
   rwa [he] at h
 
-private theorem homogeneous_unique (T : ℝ) (hT : 0 ≤ T)
+theorem homogeneous_unique (T : ℝ) (hT : 0 ≤ T)
     (G : C(Icc (0 : ℝ) T,Space →L[ℝ] Space)) (f g : ℝ → Space)
     (hf : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt f (G t (f t)) (Icc (0 : ℝ) T) t)
     (hg : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt g (G t (g t)) (Icc (0 : ℝ) T) t)

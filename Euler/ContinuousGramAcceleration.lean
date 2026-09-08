@@ -57,7 +57,6 @@ theorem accelerationPath_ae (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T E)
   filter_upwards [heq, hv, hf] with t ht hvt hft
   dsimp only [extendPath] at ht hvt hft ⊢
   have hi := congrArg (gramInverse (Q (projIcc 0 T hT t)) c hc (hQ _)) ht
-  rw [inverse_gram_apply, hvt, hft] at hi
-  exact hi
+  rwa [inverse_gram_apply, hvt, hft] at hi
 
 end EulerContinuousGramAcceleration

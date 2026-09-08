@@ -82,8 +82,7 @@ theorem rawVelocity_hasFDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) (z : LiftTangent)
     change HasDerivAt (fun r => S.velocity.pointField (projIcc 0 T hT.le r) (coveringMap P z)) _ t at h
     exact h.unique (S.pointField_hasDerivAt (coveringMap P z) t ht)
   have h := S.velocity.rawField_hasFDerivAt hT.le t ⟨ht.1.le,ht.2.le⟩ u' hd z
-  rw [hv] at h
-  exact h
+  rwa [hv] at h
 
 /-- The normalized equation now uses the genuine full Fréchet derivative of
 the actual covering-space field, as required by physical coordinate change. -/

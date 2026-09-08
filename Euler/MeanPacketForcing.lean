@@ -39,11 +39,9 @@ theorem opF₁_orbit : ContDiff ℝ ∞ (fun a : Space => translatePath D.T a D.
   simpa only [opF₁, translatePath_operatorPath] using operatorPathTranslation_contDiff D.T D.F₁
 
 theorem opF_initial : D.opF ⟨0, le_rfl, D.T_pos.le⟩ = ContinuousLinearMap.id ℝ L2 := by
-  apply ContinuousLinearMap.ext
-  intro v
-  have hi := D.opInv_left ⟨0, le_rfl, D.T_pos.le⟩ v
-  rw [D.opInv_initial] at hi
-  exact hi
+  refine ContinuousLinearMap.ext fun v => ?_
+  simpa only [D.opInv_initial, ContinuousLinearMap.id_apply]
+    using D.opInv_left ⟨0, le_rfl, D.T_pos.le⟩ v
 
 end Data
 

@@ -51,16 +51,14 @@ omit [CompleteSpace V] in
 theorem cylinder_translation_inner (a : LiftTangent) (u v : CylinderL2 P V) :
     inner ℝ (translate P a u) v = inner ℝ u (translate P (-a) v) := by
   have h := (translate P a).inner_map_map u (translate P (-a) v)
-  rw [translate_add, add_neg_cancel, translate_zero] at h
-  exact h
+  rwa [translate_add, add_neg_cancel, translate_zero] at h
 
 omit [Fact (0 < P)] [CompleteSpace V] in
 theorem spatial_translation_inner (a : Space) (u v : SpatialL2 V) :
     inner ℝ (EulerLpTranslation.translation a u) v =
       inner ℝ u (EulerLpTranslation.translation (-a) v) := by
   have h := (EulerLpTranslation.translation a).inner_map_map u (EulerLpTranslation.translation (-a) v)
-  rw [EulerLpTranslation.translation_add, add_neg_cancel, EulerLpTranslation.translation_zero] at h
-  exact h
+  rwa [EulerLpTranslation.translation_add, add_neg_cancel, EulerLpTranslation.translation_zero] at h
 
 /-- The bounded mean commutes with actual spatial translations and removes angular translations. -/
 theorem mean_translate (a : LiftTangent) (u : CylinderL2 P V) :

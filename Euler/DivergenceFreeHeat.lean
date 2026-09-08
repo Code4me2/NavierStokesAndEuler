@@ -53,8 +53,7 @@ theorem gradientEvaluation_zero_iff {q : ℕ} (κ : ℝ) (m : Vector3) (u : Sobo
   constructor
   · intro h
     apply (gradientSpace period κ m).orthogonalProjectionOnto_eq_zero_iff.mp
-    apply Subtype.ext
-    exact h
+    exact Subtype.ext (h)
   · intro h
     have hz := (gradientSpace period κ m).orthogonalProjectionOnto_eq_zero_iff.mpr h
     exact congrArg Subtype.val hz

@@ -28,8 +28,7 @@ theorem graphVelocity_trace (hf : Differentiable ℝ f)
     · exact (sub_eq_zero.mp (hgraph z)).symm
   have hD : D = J.comp (F.comp D) := by
     have hd := ((J.comp F).hasFDerivAt.comp (J x) (hf (J x)).hasFDerivAt).fderiv
-    rw [hfun] at hd
-    exact hd
+    rwa [hfun] at hd
   have hg := (F.hasFDerivAt.comp x ((hf (J x)).hasFDerivAt.comp x J.hasFDerivAt)).fderiv
   change fderiv ℝ (graphVelocity k m f) x = F.comp (D.comp J) at hg
   rw [hg]

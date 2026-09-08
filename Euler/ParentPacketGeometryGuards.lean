@@ -28,8 +28,7 @@ theorem activation_normal_le (hτ : 0 < τ) (hτT : τ < D.T) :
     exact unit_inner_zero (P.tangent τ ⟨le_rfl,hτT.le⟩)
   have hE : ‖E‖ ≤ P.error := by
     have h := P.remainder_bound τ ⟨le_rfl,hτT.le⟩
-    rw [Data.clamp_coe D t] at h
-    exact h
+    rwa [Data.clamp_coe D t] at h
   have hu : ‖E (unit (P.m τ))‖ ≤ P.error :=
     (E.le_opNorm _).trans (by simpa only [hn,mul_one] using hE)
   have habs : |⟪E (unit (P.m τ)),unit (P.m τ)⟫_ℝ| ≤ ‖E (unit (P.m τ))‖ := by

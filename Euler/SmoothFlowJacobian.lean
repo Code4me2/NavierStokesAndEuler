@@ -71,8 +71,7 @@ theorem forward_hasFDerivAt_label (t : Icc (0 : ℝ) T) (x : E) :
       ((jacobianEvolution T hT A x).forward t) x := by
   have h := (ContinuousMap.evalCLM ℝ t).hasFDerivAt.comp x
     (((pathFamily_contDiff T hT A).differentiable (by simp) x).hasFDerivAt)
-  rw [pathFamily_fderiv, initialOperator_evaluation] at h
-  exact h
+  rwa [pathFamily_fderiv, initialOperator_evaluation] at h
 
 theorem forward_fderiv (t : Icc (0 : ℝ) T) (x : E) :
     fderiv ℝ (fun y => (flowData T hT A).forward t y) x =

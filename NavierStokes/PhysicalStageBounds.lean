@@ -1,6 +1,7 @@
 import NavierStokes.PhysicalMeanJetBounds
 import NavierStokes.MixedDiagonalSchedule
 import NavierStokes.TailGaugePotential
+import NavierStokes.WithTopLemmas
 
 /-!
 # Raw physical stage estimates from native wave and mean data
@@ -16,9 +17,6 @@ namespace NavierStokes.PhysicalStageBounds
 
 open Set Function Filter ProblemStatement
 open scoped Topology ContDiff BigOperators
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 /-- Small physical q automatically restricts time to the interval on which
 the existing physical-copy estimates are uniform. -/
@@ -143,7 +141,7 @@ theorem WaveData.pressure_bound (W : WaveData h D I K Unit)
   refine ⟨‖Complex.reCLM‖ * C, mul_nonneg (norm_nonneg _) hC, ?_⟩
   intro w hw hq
   have hs := ((W.scalar_smooth hh hh1 ()).contDiffAt
-    (PhysicalWaveSum.preterminal_open.mem_nhds hw)).of_le (nat_le_infty m)
+    (PhysicalWaveSum.preterminal_open.mem_nhds hw)).of_le (natCast_le_infty m)
   have hc := PhysicalWaveSum.norm_jet_linear_comp_at hs Complex.reCLM
   exact hc.trans ((mul_le_mul_of_nonneg_left (hb w hw hq) (norm_nonneg _)).trans_eq (by ring))
 
@@ -309,7 +307,7 @@ private theorem norm_add_jet_le {E V : Type*} [NormedAddCommGroup E] [NormedSpac
     (hf : ContDiffAt ℝ ∞ f x) (hg : ContDiffAt ℝ ∞ g x) (m : ℕ) :
     ‖iteratedFDeriv ℝ m (fun y => f y + g y) x‖ ≤
       ‖iteratedFDeriv ℝ m f x‖ + ‖iteratedFDeriv ℝ m g x‖ := by
-  rw [fun_iteratedFDeriv_add_apply (hf.of_le (nat_le_infty m)) (hg.of_le (nat_le_infty m))]
+  rw [fun_iteratedFDeriv_add_apply (hf.of_le (natCast_le_infty m)) (hg.of_le (natCast_le_infty m))]
   exact norm_add_le _ _
 
 theorem potentialIncrement_smooth {qbig : ℝ} (W : WaveData h D I K (Fin 3))

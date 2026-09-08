@@ -25,9 +25,6 @@ open NavierStokes.PeriodicUniqueness
 open Comparison (ComplexTest tensorDiff)
 open ConservativeDifference HarmonicTestFunctionals
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
 /-- The canonical complex Schwartz test associated to a real compact test. -/
 def realTest (ψ : Space → ℝ) (hψ : ContDiff ℝ ∞ ψ) (hcψ : HasCompactSupport ψ) :
     ComplexTest :=

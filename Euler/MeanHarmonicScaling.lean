@@ -20,8 +20,7 @@ theorem laplacian_comp_const_smul (f : Space → ℝ) (hf : ContDiff ℝ ∞ f)
 def halfScale (f : Space → ℝ) : Space → ℝ := fun x => f ((1/2 : ℝ) • x)
 
 theorem halfScale_smooth (f : Space → ℝ) (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (halfScale f) := by
-  exact hf.comp (contDiff_id.const_smul (1/2 : ℝ))
+    ContDiff ℝ ∞ (halfScale f) := hf.comp (contDiff_id.const_smul (1/2 : ℝ))
 
 theorem halfScale_memLp (f : Space → ℝ) (hf : ContDiff ℝ ∞ f)
     (hLp : MemLp f 2 volume) : MemLp (halfScale f) 2 volume := by

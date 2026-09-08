@@ -2,6 +2,7 @@ import NavierStokes.ParametricModulation
 import NavierStokes.ShapeTransition
 import NavierStokes.FiveProfileMoments
 import NavierStokes.ActivationStocks
+import NavierStokes.WithTopLemmas
 
 /-!
 # Actual histories and moment repair for radial modulation
@@ -21,9 +22,6 @@ abbrev Point := ℝ × ℝ
 abbrev Field := Point → ℝ
 abbrev Debt := FiveProfileMoments.Debt
 abbrev Coeff := FiveProfileMoments.Coeff
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 structure Window where
   left : ℝ
@@ -261,15 +259,15 @@ theorem historyDifference_scalar_jets (W : Window)
       (density_contDiff f U hf hU i).comp (contDiff_const.prodMk contDiff_id)
     change |iteratedDeriv j ((fun e => density (rawF r f N) (rawU r E U N) (s, e) i) -
       (fun e => density f U (s, e) i)) eta| ≤ C / N
-    rw [iteratedDeriv_sub (hraw.of_le (nat_le_infty j)).contDiffAt
-      (hnom.of_le (nat_le_infty j)).contDiffAt]
+    rw [iteratedDeriv_sub (hraw.of_le (natCast_le_infty j)).contDiffAt
+      (hnom.of_le (natCast_le_infty j)).contDiffAt]
     exact hbound N hN s ⟨hs.1.le, hs.2.trans (W.clamp_mem X).2⟩ eta heta j hj i
 
 theorem clm_iteratedDeriv {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] (L : F →L[ℝ] G)
     {v : ℝ → F} (hv : ContDiff ℝ ∞ v) (j : ℕ) (eta : ℝ) :
     iteratedDeriv j (fun e => L (v e)) eta = L (iteratedDeriv j v eta) := by
-  have h := L.iteratedFDeriv_comp_left (x := eta) hv.contDiffAt (nat_le_infty j)
+  have h := L.iteratedFDeriv_comp_left (x := eta) hv.contDiffAt (natCast_le_infty j)
   rw [iteratedDeriv_eq_iteratedFDeriv, iteratedDeriv_eq_iteratedFDeriv]
   exact congrArg (fun T => T (fun _ : Fin j => (1 : ℝ))) h
 
@@ -457,7 +455,7 @@ theorem iteratedFDeriv_comp_clm_on {F G H : Type*}
       (iteratedFDeriv ℝ j g (L x)).compContinuousLinearMap (fun _ => L) := by
   have hpre := hV.preimage L.continuous
   have he := L.iteratedFDerivWithin_comp_right hg hV.uniqueDiffOn hpre.uniqueDiffOn hx
-    (nat_le_infty j)
+    (natCast_le_infty j)
   rw [iteratedFDerivWithin_of_isOpen j hpre hx,
     iteratedFDerivWithin_of_isOpen j hV hx] at he
   exact he
@@ -504,7 +502,7 @@ theorem smooth_solver_linear_jets {g : Coeff → Coeff} {r C : ℝ}
     rwa [hLv]
   have hinner (k : ℕ) (hk : k ≤ q) : ‖iteratedFDeriv ℝ k v eta‖ ≤ 1 := by
     dsimp [v]
-    rw [iteratedFDeriv_const_smul_apply' (hf.of_le (nat_le_infty k)).contDiffAt,
+    rw [iteratedFDeriv_const_smul_apply' (hf.of_le (natCast_le_infty k)).contDiffAt,
       norm_smul (delta⁻¹) (iteratedFDeriv ℝ k f eta), Real.norm_of_nonneg (inv_nonneg.mpr hd.le)]
     calc
       _ ≤ delta⁻¹ * delta := mul_le_mul_of_nonneg_left (hfj k hk) (inv_nonneg.mpr hd.le)
@@ -533,7 +531,7 @@ theorem smooth_solver_linear_jets {g : Coeff → Coeff} {r C : ℝ}
           (pow_le_pow_left₀ (norm_nonneg _) hLnorm k) (pow_nonneg (norm_nonneg _) k) hD.le
         _ ≤ D * delta := mul_le_mul_of_nonneg_left hp hD.le
         _ ≤ (C + D) * delta := mul_le_mul_of_nonneg_right (le_add_of_nonneg_left hC.le) hd.le
-  have hchain := norm_iteratedFDerivWithin_comp_le hG hv.contDiffOn (nat_le_infty j)
+  have hchain := norm_iteratedFDerivWithin_comp_le hG hv.contDiffOn (natCast_le_infty j)
     hV.uniqueDiffOn hT.uniqueDiffOn (show MapsTo v T V from fun _ hx => hx) heta
     (C := (C + D) * delta) (D := 1)
     (fun k hk => ?_) (fun k _ hk => ?_)
@@ -760,7 +758,7 @@ theorem finiteJet_smul {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   calc
     _ ≤ ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) *
         ‖iteratedFDeriv ℝ i A eta‖ * ‖iteratedFDeriv ℝ (n - i) c eta‖ :=
-      norm_iteratedFDeriv_smul_le hA hc eta (nat_le_infty n)
+      norm_iteratedFDeriv_smul_le hA hc eta (natCast_le_infty n)
     _ ≤ ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) * B * C := by
       apply Finset.sum_le_sum
       intro i hi
@@ -1006,7 +1004,7 @@ theorem deriv_add_bound {f g : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (hg : Cont
     (hC : |iteratedDeriv n g eta| ≤ C) :
     |iteratedDeriv n (fun e => f e + g e) eta| ≤ B + C := by
   rw [show (fun e => f e + g e) = f + g from rfl,
-    iteratedDeriv_add (hf.of_le (nat_le_infty n)).contDiffAt (hg.of_le (nat_le_infty n)).contDiffAt]
+    iteratedDeriv_add (hf.of_le (natCast_le_infty n)).contDiffAt (hg.of_le (natCast_le_infty n)).contDiffAt]
   exact (abs_add_le _ _).trans (add_le_add hB hC)
 
 theorem deriv_sub_bound {f g : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
@@ -1014,13 +1012,13 @@ theorem deriv_sub_bound {f g : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (hg : Cont
     (hC : |iteratedDeriv n g eta| ≤ C) :
     |iteratedDeriv n (fun e => f e - g e) eta| ≤ B + C := by
   rw [show (fun e => f e - g e) = f - g from rfl,
-    iteratedDeriv_sub (hf.of_le (nat_le_infty n)).contDiffAt (hg.of_le (nat_le_infty n)).contDiffAt]
+    iteratedDeriv_sub (hf.of_le (natCast_le_infty n)).contDiffAt (hg.of_le (natCast_le_infty n)).contDiffAt]
   exact (abs_sub _ _).trans (add_le_add hB hC)
 
 theorem deriv_const_mul_bound {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (n : ℕ) (eta t B : ℝ) (hB : |iteratedDeriv n f eta| ≤ B) :
     |iteratedDeriv n (fun e => t * f e) eta| ≤ |t| * B := by
-  rw [iteratedDeriv_const_mul _ (hf.of_le (nat_le_infty n)).contDiffAt, abs_mul]
+  rw [iteratedDeriv_const_mul _ (hf.of_le (natCast_le_infty n)).contDiffAt, abs_mul]
   exact mul_le_mul_of_nonneg_left hB (abs_nonneg _)
 
 theorem density_perturbation_jet_bound (f U df dU : ℝ → ℝ)
@@ -1368,8 +1366,8 @@ theorem repaired_axisHistory_jets (W : Window)
   rw [heq]
   intro j hj eta heta
   rw [fun_iteratedFDeriv_add_apply
-    ((historyDifference_smooth W r f E U ha hm hp₂ hf hE hU N X).of_le (nat_le_infty j)).contDiffAt
-    ((repairHistory_smooth P A c f U hA hc hf hU X).of_le (nat_le_infty j)).contDiffAt]
+    ((historyDifference_smooth W r f E U ha hm hp₂ hf hE hU N X).of_le (natCast_le_infty j)).contDiffAt
+    ((repairHistory_smooth P A c f U hA hc hf hU X).of_le (natCast_le_infty j)).contDiffAt]
   exact (norm_add_le _ _).trans (add_le_add (hb1 N hN X j hj eta heta)
     (hb2 c hc eps heps hed hcb X j hj eta heta))
 

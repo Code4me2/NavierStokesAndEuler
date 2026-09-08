@@ -11,12 +11,6 @@ open scoped Topology
 
 variable (period : ℝ) [Fact (0 < period)]
 
-omit [Fact (0 < period)] in
-/-- A covering-space direction gives an additive one-parameter cylinder translation. -/
-theorem translationPath_add (a : LiftTangent) (s t : ℝ) :
-    translationPath period a (s + t) = translationPath period a s + translationPath period a t := by
-  ext <;> simp [translationPath, coveringMap, add_smul]
-
 /-- Strong differentiation of a translation orbit at zero determines its derivative everywhere. -/
 theorem translation_hasDerivAt_all (a : LiftTangent) (f g : LiftL2 period)
     (h : HasDerivAt (fun s => translation period (translationPath period a s) f) g 0) (t : ℝ) :
@@ -32,7 +26,7 @@ theorem translation_hasDerivAt_all (a : LiftTangent) (f g : LiftL2 period)
       (translation period (translationPath period a (s - t)) f)) =
       fun s => translation period (translationPath period a s) f := by
     funext s
-    rw [translation_add, ← translationPath_add]
+    rw [translation_add, ← EulerLiftedWeakDerivative.translationPath_add]
     rw [show t + (s - t) = s by ring]
   simpa only [Function.comp_def, id_eq, hshape, one_smul] using hd
 

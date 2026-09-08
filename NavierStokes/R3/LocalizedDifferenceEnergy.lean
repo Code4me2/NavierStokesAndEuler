@@ -2,6 +2,7 @@ import NavierStokes.R3.CompactEnergy
 import NavierStokes.R3.ComparisonSetup
 import NavierStokes.R3.LocalizedLaplacian
 import NavierStokes.R3.LocalizedTransport
+import NavierStokes.WithTopLemmas
 
 /-!
 # The compactly weighted difference-energy identity on R³
@@ -23,12 +24,6 @@ open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
 open Comparison (weightedEnergy weightedEnergyRate weightedDissipation gradientSq)
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 /-- A continuous factor needs no decay when multiplied by the compact cutoff. -/
 theorem integrable_cutoff_mul {χ f : Space → ℝ}
@@ -68,7 +63,7 @@ theorem weightedEnergy_hasDerivAt {a b t : ℝ} {χ : Space → ℝ} {w : Veloci
     HasDerivAt (weightedEnergy χ w) (weightedEnergyRate χ w t) t := by
   have hF : ContDiffOn ℝ 1 (fun z : SpaceTime => χ z.2 * ‖w z‖ ^ 2)
       (Icc a b ×ˢ univ) :=
-    (((hχ.comp contDiff_snd).contDiffOn).mul (hw.norm_sq ℝ)).of_le (nat_le_infty 1)
+    (((hχ.comp contDiff_snd).contDiffOn).mul (hw.norm_sq ℝ)).of_le (natCast_le_infty 1)
   refine CompactTimeIntegral.hasDerivAt_integral_of_contDiffOn_of_hasDerivAt hcχ hF ?_ ht ?_
   · intro r hr x hx
     rw [image_eq_zero_of_notMem_tsupport hx, zero_mul]
@@ -109,11 +104,11 @@ theorem difference_energy_balance {χ : Space → ℝ} {u v : VelocityField}
   have hiC : Integrable (fun x : Space =>
       χ x * ⟪(u - v) (t, x), spatialDerivative u t x ((u - v) (t, x))⟫_ℝ) :=
     integrable_cutoff_mul hχ.continuous hcχ
-      (hw.inner ℝ ((hu.fderiv_right infty_add_one_le).clm_apply hw)).continuous
+      (hw.inner ℝ ((hu.fderiv_right infty_add_one_le_infty).clm_apply hw)).continuous
   have hiT : Integrable (fun x : Space =>
       χ x * ⟪(u - v) (t, x), spatialDerivative (u - v) t x (v (t, x))⟫_ℝ) :=
     integrable_cutoff_mul hχ.continuous hcχ
-      (hw.inner ℝ ((hw.fderiv_right infty_add_one_le).clm_apply hv)).continuous
+      (hw.inner ℝ ((hw.fderiv_right infty_add_one_le_infty).clm_apply hv)).continuous
   have hiP : Integrable (fun x : Space =>
       χ x * ⟪(u - v) (t, x), pressureGradient (p - q) t x⟫_ℝ) :=
     integrable_cutoff_mul hχ.continuous hcχ (hw.inner ℝ (pressureGradient_contDiff hπ)).continuous

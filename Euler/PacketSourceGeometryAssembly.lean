@@ -58,8 +58,7 @@ theorem sourceVelocity_equation (x : Space) (t : ℝ) (ht : t ∈ Icc τ D.T) :
   unfold sourceVelocity sourceRay sourceMatrix
   rw [hclamp]
   have he := (uncutVelocity_equation τ hτ hτT H A.terminal ⟨t,hsub ht⟩ x).mono hsub
-  rw [EulerPacketPrimaryFactorization.physicalGenerator_apply] at he
-  exact he
+  rwa [EulerPacketPrimaryFactorization.physicalGenerator_apply] at he
 
 theorem source_initial_tangent (x : Space) : ⟪sourceRay D x τ,A.sourceVelocity x τ⟫_ℝ=0 := by
   have hclamp : D.clamp τ=⟨τ,hτ.le,hτT.le⟩ := Data.clamp_coe D ⟨τ,hτ.le,hτT.le⟩

@@ -1,4 +1,5 @@
 import NavierStokes.TerminalEdgeFactor
+import NavierStokes.WithTopLemmas
 
 /-!
 # The first slow-order stress at the terminal edge
@@ -288,7 +289,7 @@ theorem stressX_jets (C : ℝ) (d : TailData) (y0 : ℝ) (n : ℕ)
   have hδ : 0 < y0 + 3 - Real.log X := by linarith
   have hδb : y0 + 3 - Real.log X ≤ b := by linarith
   have hc := norm_iteratedFDerivWithin_comp_le (profileStress_contDiff C d y0).contDiffOn
-    (xChart_contDiffOn y0) (EdgeWeightJets.nat_le_infty n) uniqueDiffOn_univ hS.uniqueDiffOn
+    (xChart_contDiffOn y0) (natCast_le_infty n) uniqueDiffOn_univ hS.uniqueDiffOn
     (mapsTo_univ _ _) (show (X, η) ∈ {w : ℝ × ℝ | 0 < w.1} from hXp)
     (C := A * FlatCutoff.edge 4 (y0 + 3 - Real.log X) / (y0 + 3 - Real.log X) ^ N)
     (D := D)

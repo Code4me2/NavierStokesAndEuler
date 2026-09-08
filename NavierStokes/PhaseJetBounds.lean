@@ -1,5 +1,6 @@
 import NavierStokes.JetBounds
 import NavierStokes.PrimaryODE
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform slow jets of the actual phase geometry
@@ -31,9 +32,6 @@ structure PolynomialJets {ι E F : Type*} [NormedAddCommGroup E] [NormedSpace �
   smooth : ∀ i, ContDiffOn ℝ ∞ (f i) (D.carrier i)
   bound : ∀ N : ℕ, ∃ C : ℝ, 1 ≤ C ∧ ∃ m : ℕ,
     ∀ i, JetBounds.FiniteJetBound N (f i) (D.carrier i) (C * D.scale i ^ m)
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 private theorem one_le_mul' {a b : ℝ} (ha : 1 ≤ a) (hb : 1 ≤ b) : 1 ≤ a * b := by
   nlinarith
@@ -89,7 +87,7 @@ theorem PolynomialJets.clm {f : ι → E → F} (hf : PolynomialJets D f)
   · nlinarith [norm_nonneg L]
   intro i n hn x hx
   have he := L.iteratedFDeriv_comp_left
-    ((hf.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)) (nat_le_infty n)
+    ((hf.smooth i).contDiffAt ((D.isOpen i).mem_nhds hx)) (natCast_le_infty n)
   change ‖iteratedFDeriv ℝ n (L ∘ f i) x‖ ≤ _
   rw [he]
   calc
@@ -110,7 +108,7 @@ theorem PolynomialJets.add {f g : ι → E → F}
   refine ⟨A + B, by linarith, a + b, ?_⟩
   intro i
   apply (JetBounds.FiniteJetBound.add (D.isOpen i)
-    ((hf.smooth i).of_le (nat_le_infty N)) ((hg.smooth i).of_le (nat_le_infty N))
+    ((hf.smooth i).of_le (natCast_le_infty N)) ((hg.smooth i).of_le (natCast_le_infty N))
     (ha i) (hb i)).mono
   have hsa := pow_le_pow_right₀ (D.one_le_scale i) (Nat.le_add_right a b)
   have hsb := pow_le_pow_right₀ (D.one_le_scale i) (Nat.le_add_left b a)
@@ -146,7 +144,7 @@ theorem PolynomialJets.bilinear {f : ι → E → F} {g : ι → E → G}
     exact one_le_mul' (one_le_mul' hba hA) hC
   intro i
   apply (JetBounds.FiniteJetBound.bilinear B (D.isOpen i)
-    ((hf.smooth i).of_le (nat_le_infty N)) ((hg.smooth i).of_le (nat_le_infty N))
+    ((hf.smooth i).of_le (natCast_le_infty N)) ((hg.smooth i).of_le (natCast_le_infty N))
     (ha i) (hc i)).mono
   rw [pow_add]
   have hs := le_trans zero_le_one (D.one_le_scale i)
@@ -209,7 +207,7 @@ theorem norm_jet_comp_linear {f : F → G} {U : Set F}
     ‖iteratedFDeriv ℝ n (f ∘ L) x‖ ≤ ‖iteratedFDeriv ℝ n f (L x)‖ * ‖L‖ ^ n := by
   have hp := hU.preimage L.continuous
   have he := L.iteratedFDerivWithin_comp_right hf hU.uniqueDiffOn hp.uniqueDiffOn hx
-    (i := n) (nat_le_infty n)
+    (i := n) (natCast_le_infty n)
   rw [iteratedFDerivWithin_of_isOpen n hp hx,
     iteratedFDerivWithin_of_isOpen n hU hx] at he
   rw [he]
@@ -255,7 +253,7 @@ theorem compact_jet_bound {g : F → G} {U K : Set F}
     (N : ℕ) : ∃ C : ℝ, 1 ≤ C ∧ JetBounds.FiniteJetBound N g K C := by
   have hsingle (k : ℕ) : ∃ C : ℝ, ∀ y ∈ K, ‖iteratedFDeriv ℝ k g y‖ ≤ C := by
     have hc := (hg.continuousOn_iteratedFDerivWithin
-      (m := k) (nat_le_infty k) hU.uniqueDiffOn).mono hKU
+      (m := k) (natCast_le_infty k) hU.uniqueDiffOn).mono hKU
     have he : ContinuousOn (iteratedFDeriv ℝ k g) K := by
       apply hc.congr
       intro y hy
@@ -298,7 +296,7 @@ theorem PolynomialJets.compact_comp {f : ι → E → F} (hf : PolynomialJets D 
   intro i n hn x hx
   have hs : 1 ≤ D.scale i ^ m := one_le_pow₀ (D.one_le_scale i)
   have hD : 1 ≤ A * D.scale i ^ m := one_le_mul' hA hs
-  have h := norm_iteratedFDerivWithin_comp_le hg (hf.smooth i) (nat_le_infty n)
+  have h := norm_iteratedFDerivWithin_comp_le hg (hf.smooth i) (natCast_le_infty n)
     hU.uniqueDiffOn (D.isOpen i).uniqueDiffOn (hmapU i) hx
     (C := C) (D := A * D.scale i ^ m) (fun k hk => ?_) (fun k hk hkn => ?_)
   · rw [iteratedFDerivWithin_of_isOpen n (D.isOpen i) hx] at h

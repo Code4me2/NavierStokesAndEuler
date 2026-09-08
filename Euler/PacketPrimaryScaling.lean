@@ -29,8 +29,7 @@ theorem terminal_smul (δ : ℝ) (hδ : 0 < δ) (ξ : U) (a : ℝ) :
 theorem initialData_value_smul (D : Data U) (δ : ℝ) (hδ : 0 < δ) (ξ : U)
     (hs : tsupport innerCutoff ⊆ D.support) (a : ℝ) :
     (initialData D δ hδ (a • ξ) hs).value = a • (initialData D δ hδ ξ hs).value := by
-  apply Subtype.ext
-  exact terminal_smul δ hδ ξ a
+  exact Subtype.ext (terminal_smul δ hδ ξ a)
 
 end EulerPacketTerminalDatum
 

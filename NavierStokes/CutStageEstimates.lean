@@ -1,6 +1,7 @@
 import NavierStokes.DiagonalJetBounds
 import NavierStokes.PhysicalCoordinateBounds
 import NavierStokes.PhysicalWaveSum
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical jet estimates for the actual diagonal cutoff stages
@@ -17,9 +18,6 @@ namespace NavierStokes.CutStageEstimates
 
 open Set Function Filter
 open scoped Topology ContDiff BigOperators
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 /-- A concrete finite bound, used only for constants and derivative losses. -/
 noncomputable def finiteBound (f : ℕ → ℝ) (m : ℕ) : ℝ :=
@@ -67,7 +65,7 @@ theorem cutoff_jets_zero_of_one_le (m : ℕ) {x : ℝ} (hx : 1 ≤ x) :
     have hg := SmoothCutoffs.cutoff_eventually_zero (hy.trans_le (le_abs_self y))
     simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply] using
       (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hg m).self_of_nhds
-  have hc := SmoothCutoffs.cutoff_contDiff.continuous_iteratedFDeriv (nat_le_infty m)
+  have hc := SmoothCutoffs.cutoff_contDiff.continuous_iteratedFDeriv (natCast_le_infty m)
   exact he.closure hc continuous_const (by simpa only [closure_Ioi, mem_Ici] using hx)
 
 section General
@@ -82,7 +80,7 @@ theorem composition_jet_bound {f : E → ℝ} {g : ℝ → V} {U : Set E}
     (hC : ∀ k ≤ m, ‖iteratedFDeriv ℝ k g (f x)‖ ≤ C)
     (hD : ∀ k, 1 ≤ k → k ≤ m → ‖iteratedFDeriv ℝ k f x‖ ≤ D ^ k) :
     ‖iteratedFDeriv ℝ m (g ∘ f) x‖ ≤ m.factorial * C * D ^ m := by
-  have hb := norm_iteratedFDerivWithin_comp_le hg.contDiffOn hf (nat_le_infty m)
+  have hb := norm_iteratedFDerivWithin_comp_le hg.contDiffOn hf (natCast_le_infty m)
     uniqueDiffOn_univ hU.uniqueDiffOn (mapsTo_univ _ _) hx
     (fun k hk => by simpa only [iteratedFDerivWithin_univ] using hC k hk)
     (fun k hk hkm => by
@@ -125,7 +123,7 @@ theorem cutoff_jet_bound {U S : Set E} (hU : IsOpen U) (hSU : S ⊆ U)
       ‖iteratedFDeriv ℝ k f x‖ = (q x)⁻¹ * ‖iteratedFDeriv ℝ k q x‖ := by
         dsimp only [f]
         rw [iteratedFDeriv_const_smul_apply' ((hq.contDiffAt (hU.mem_nhds (hSU hx))).of_le
-          (nat_le_infty k)), norm_smul (q x)⁻¹ (iteratedFDeriv ℝ k q x),
+          (natCast_le_infty k)), norm_smul (q x)⁻¹ (iteratedFDeriv ℝ k q x),
           Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hqx)]
       _ ≤ (q x)⁻¹ * (B k * q x ^ (1 - (k : ℝ))) :=
         mul_le_mul_of_nonneg_left (hB k x hx) (inv_nonneg.mpr hqx.le)
@@ -155,7 +153,7 @@ theorem smul_jet_bound {f : E → ℝ} {g : E → V} {U : Set E}
     ‖iteratedFDeriv ℝ m (fun y => f y • g y) x‖ ≤
       ∑ i ∈ Finset.range (m + 1), (m.choose i : ℝ) *
         ‖iteratedFDeriv ℝ i f x‖ * ‖iteratedFDeriv ℝ (m - i) g x‖ := by
-  have hb := norm_iteratedFDerivWithin_smul_le hf hg hU.uniqueDiffOn hx (nat_le_infty m)
+  have hb := norm_iteratedFDerivWithin_smul_le hf hg hU.uniqueDiffOn hx (natCast_le_infty m)
   simpa only [iteratedFDerivWithin_of_isOpen _ hU hx] using hb
 
 /-- All jets of the composed cutoff vanish on and beyond its boundary.

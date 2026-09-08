@@ -5,6 +5,7 @@ import Mathlib.Algebra.Order.Algebra
 import Mathlib.Analysis.Normed.Group.Basic
 import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Data.EReal.Inv
+import NavierStokes.WithTopLemmas
 
 /-!
 # Joint parameter derivatives of the normalized flat kernel
@@ -21,9 +22,6 @@ open scoped ContDiff BigOperators
 namespace NavierStokes.ParametricKernelBounds
 
 open FlatKernelBounds
-
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  le_of_lt (WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n))
 
 /-- Combine finitely many polynomial bounds, allowing distinct initial constants and degrees. -/
 theorem finite_polynomial_majorant {X : Type*} [NormedAddCommGroup X]
@@ -76,9 +74,9 @@ theorem norm_iteratedFDeriv_pair_le {f : X → F} {g : X → G}
       ‖iteratedFDeriv ℝ n f x‖ + ‖iteratedFDeriv ℝ n g x‖ := by
   have hp := hf.prodMk hg
   have hfst := (ContinuousLinearMap.fst ℝ F G).iteratedFDeriv_comp_left
-    (hp.contDiffAt (x := x)) (nat_le_smooth n)
+    (hp.contDiffAt (x := x)) (natCast_le_infty n)
   have hsnd := (ContinuousLinearMap.snd ℝ F G).iteratedFDeriv_comp_left
-    (hp.contDiffAt (x := x)) (nat_le_smooth n)
+    (hp.contDiffAt (x := x)) (natCast_le_infty n)
   have heq : iteratedFDeriv ℝ n (fun y => (f y, g y)) x =
       (iteratedFDeriv ℝ n f x).prod (iteratedFDeriv ℝ n g x) := by
     apply ContinuousMultilinearMap.ext
@@ -110,7 +108,7 @@ theorem norm_iteratedFDeriv_mul_le_of_bounds {f g : X → ℝ}
     (hgb : ∀ i ≤ n, ‖iteratedFDeriv ℝ i g x‖ ≤ D) :
     ‖iteratedFDeriv ℝ n (fun y => f y * g y) x‖ ≤
       (∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ)) * C * D := by
-  apply (norm_iteratedFDeriv_mul_le hf hg x (nat_le_smooth n)).trans
+  apply (norm_iteratedFDeriv_mul_le hf hg x (natCast_le_infty n)).trans
   calc
     (∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) *
         ‖iteratedFDeriv ℝ i f x‖ * ‖iteratedFDeriv ℝ (n - i) g x‖) ≤
@@ -134,7 +132,7 @@ theorem norm_iteratedFDeriv_scalar_snd_le {f : ℝ → ℝ}
     ‖iteratedFDeriv ℝ n (fun z : E × ℝ => f z.2) y‖ ≤
       |iteratedDeriv n f y.2| := by
   have heq := (ContinuousLinearMap.snd ℝ E ℝ).iteratedFDeriv_comp_right
-    hf y (nat_le_smooth n)
+    hf y (natCast_le_infty n)
   change ‖iteratedFDeriv ℝ n (f ∘ (ContinuousLinearMap.snd ℝ E ℝ)) y‖ ≤ _
   rw [heq]
   exact (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans_eq
@@ -267,7 +265,7 @@ theorem profile_comp_derivative_bound {b : E × ℝ → ℝ} (hb : ContDiff ℝ 
     simpa using pow_le_pow_right₀ ht1 (Nat.zero_le M)
   have hD : 1 ≤ (1 + A) * (1 + t) ^ M := by nlinarith
   have hcomp := norm_iteratedFDeriv_comp_le hb (transform_contDiff ht)
-    (nat_le_smooth n) y
+    (natCast_le_infty n) y
     (fun k hk => hjets k hk (transform t y) ((norm_transform_le ht y).trans hy))
     (D := (1 + A) * (1 + t) ^ M) (fun k hk1 hkn => ?_)
   · calc
@@ -337,7 +335,7 @@ theorem kernel_iteratedFDeriv_bound_of_jetBounds {b : E × ℝ → ℝ}
     funext z
     exact kernel_eq_raw c j b z t
   have hs : ContDiff ℝ n (fun z => rawKernel j b z t) :=
-    (rawKernel_contDiff j hb ht).of_le (nat_le_smooth n)
+    (rawKernel_contDiff j hb ht).of_le (natCast_le_infty n)
   rw [heq, iteratedFDeriv_const_smul_apply hs.contDiffAt]
   apply (ContinuousMultilinearMap.opNorm_smul_le
     ((1 / 2 : ℝ) * Real.exp (-c * t))

@@ -13,32 +13,6 @@ open Real EulerPacketSourceScaleChoice EulerPacketSourceScaleSequence
   EulerPacketSourceParameterScales EulerPacketSourceScaleActual
   EulerPacketNestedHorizons EulerPacketBaseGuardScales
 
-theorem frequency_monotone (J : ℕ) (hJ : 2 ≤ J) (X : ℝ) (hX : 0 ≤ X) :
-    Monotone (frequency J X) := by
-  apply monotone_nat_of_le_succ
-  intro n
-  let j : ℝ := (J+n : ℕ)
-  have hj2 : (2 : ℝ) ≤ j := by
-    dsimp [j]
-    exact_mod_cast (show 2 ≤ J+n by omega)
-  have hj0 : 0 < j := by linarith only [hj2]
-  have hx : 0 ≤ scaleSequence J X n :=
-    hX.trans (sequence_initial_le J (by omega) X hX n)
-  have hadd : ((J+(n+1) : ℕ) : ℝ)=j+1 := by
-    dsimp [j]
-    push_cast
-    ring
-  have hstep : j+1 ≤ j^2 := by nlinarith only [hj2,sq_nonneg (j-2)]
-  have hsq : (j+1)^2 ≤ (j^2)^2 := pow_le_pow_left₀ (by positivity) hstep 2
-  apply exp_le_exp.mpr
-  change scaleSequence J X n/j^2 ≤ scaleSequence J X (n+1)/((J+(n+1) : ℕ) : ℝ)^2
-  rw [scaleSequence_succ,hadd]
-  apply (div_le_div_iff₀ (sq_pos_of_pos hj0) (sq_pos_of_pos (by positivity))).2
-  calc
-    scaleSequence J X n*(j+1)^2 ≤ scaleSequence J X n*(j^2)^2 :=
-      mul_le_mul_of_nonneg_left hsq hx
-    _ = (j^2*scaleSequence J X n)*j^2 := by ring
-
 theorem initial_frequency_le_first (J D : ℕ) (hJ : 3 ≤ J) (X : ℝ) (hX : 0 ≤ X)
     (hbase : X^D ≤ exp (X/((J-1 : ℕ) : ℝ)^4)) :
     X^D ≤ frequency J X 0 := by
@@ -65,7 +39,7 @@ theorem initial_frequency_le_previous (J D : ℕ) (hJ : 3 ≤ J) (X : ℝ) (hX :
   | zero => exact le_rfl
   | succ n =>
     exact (initial_frequency_le_first J D hJ X hX hbase).trans
-      (frequency_monotone J (by omega) X hX (Nat.zero_le n))
+      (EulerPacketUniformFrequencyScales.frequency_monotone J (by omega) X hX (Nat.zero_le n))
 
 theorem previousFrequency_one_le (J D : ℕ) (hJ : 3 ≤ J) (X : ℝ) (hX : 1 ≤ X)
     (hbase : X^D ≤ exp (X/((J-1 : ℕ) : ℝ)^4)) (n : ℕ) :

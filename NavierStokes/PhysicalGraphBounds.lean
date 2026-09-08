@@ -10,6 +10,7 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.Normed.Group.Bounded
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical derivatives of the native graph
@@ -25,9 +26,6 @@ namespace NavierStokes.PhysicalGraphBounds
 open Set Function
 open ProblemStatement
 open scoped ContDiff Topology BigOperators
-
-private theorem nat_le_infty (k : ℕ) : (k : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 abbrev Plane := ℝ × ℝ
 
@@ -178,7 +176,7 @@ theorem compact_jet_bound {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ 
     (hU : IsOpen U) (hf : ContDiffOn ℝ ∞ f U) (hK : IsCompact K) (hKU : K ⊆ U)
     (m : ℕ) : ∃ C : ℝ, 1 ≤ C ∧ ∀ k ≤ m, ∀ y ∈ K, ‖iteratedFDeriv ℝ k f y‖ ≤ C := by
   have hsingle (k : ℕ) : ∃ C : ℝ, ∀ y ∈ K, ‖iteratedFDeriv ℝ k f y‖ ≤ C := by
-    have hc := (hf.continuousOn_iteratedFDerivWithin (m := k) (nat_le_infty k) hU.uniqueDiffOn).mono hKU
+    have hc := (hf.continuousOn_iteratedFDerivWithin (m := k) (natCast_le_infty k) hU.uniqueDiffOn).mono hKU
     have he : ContinuousOn (iteratedFDeriv ℝ k f) K := by
       apply hc.congr
       intro y hy
@@ -211,7 +209,7 @@ theorem norm_jet_comp_linear {E F G : Type*} [NormedAddCommGroup E] [NormedSpace
     ‖iteratedFDeriv ℝ k (f ∘ L) x‖ ≤ ‖iteratedFDeriv ℝ k f (L x)‖ * ‖L‖ ^ k := by
   have hp := hU.preimage L.continuous
   have he := L.iteratedFDerivWithin_comp_right hf hU.uniqueDiffOn hp.uniqueDiffOn hx
-    (i := k) (nat_le_infty k)
+    (i := k) (natCast_le_infty k)
   rw [iteratedFDerivWithin_of_isOpen k hp hx,
     iteratedFDerivWithin_of_isOpen k hU hx] at he
   rw [he]
@@ -329,7 +327,7 @@ theorem nativeGraph_jet_bound {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1) (ha :
       (radialProfile (ChartScales.radialExponent h) ∘ scaledRadial n) p :=
     (((contDiffOn_radialProfile (ChartScales.radialExponent h)).contDiffAt
       (axisFree_open.mem_nhds haxis)).comp p (scaledRadial n).contDiff.contDiffAt).of_le
-        (nat_le_infty k)
+        (natCast_le_infty k)
   have he : nativeGraph h n = fun z =>
       ChartScales.radialCoefficient h n •
         (radialProfile (ChartScales.radialExponent h) ∘ scaledRadial n) z +
@@ -494,8 +492,8 @@ theorem physicalLift_positive_jet_bound {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h �
   have haxis := scaledRadial_ne_zero (annulus_axisFree ha hp)
   change ‖iteratedFDeriv ℝ k (fun z => (physicalChart h n z, nativeGraph h n z)) p‖ ≤ _
   rw [iteratedFDeriv_pair
-    ((physicalChart_smooth h n).contDiffAt.of_le (nat_le_infty k))
-    ((contDiffAt_nativeGraph h n haxis).of_le (nat_le_infty k)),
+    ((physicalChart_smooth h n).contDiffAt.of_le (natCast_le_infty k))
+    ((contDiffAt_nativeGraph h n haxis).of_le (natCast_le_infty k)),
     ContinuousMultilinearMap.opNorm_prod]
   apply max_le
   · calc
@@ -537,7 +535,7 @@ theorem graphRestriction_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpa
     simpa only [Real.rpow_zero] using he
   have hD : 1 ≤ D := by dsimp [D]; nlinarith
   have hj := norm_iteratedFDerivWithin_comp_le hF.contDiffOn (physicalLift_smooth h n)
-    (nat_le_infty m) uniqueDiffOn_univ hU.uniqueDiffOn (mapsTo_univ _ _) hx
+    (natCast_le_infty m) uniqueDiffOn_univ hU.uniqueDiffOn (mapsTo_univ _ _) hx
     (C := B) (D := D)
     (fun k hk => by simpa only [iteratedFDerivWithin_univ] using hFB k hk)
     (fun k hk hkm => by
@@ -645,7 +643,7 @@ theorem pointwise_product_jet_bound {E A : Type*} [NormedAddCommGroup E] [Normed
     (hfb : ∀ i ≤ m, ‖iteratedFDeriv ℝ i f x‖ ≤ P)
     (hgb : ∀ i ≤ m, ‖iteratedFDeriv ℝ i g x‖ ≤ Q) :
     ‖iteratedFDeriv ℝ k (fun y => f y * g y) x‖ ≤ (2 : ℝ) ^ m * P * Q := by
-  apply (norm_iteratedFDeriv_mul_le hf hg x (nat_le_infty k)).trans
+  apply (norm_iteratedFDeriv_mul_le hf hg x (natCast_le_infty k)).trans
   calc
     _ ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * P * Q := by
       apply Finset.sum_le_sum
@@ -671,7 +669,7 @@ theorem character_comp_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace
     ∀ k ≤ m, ‖iteratedFDeriv ℝ k (character c ∘ Φ) x‖ ≤
       (m.factorial : ℝ) * M ^ m * B ^ m := by
   intro k hk
-  have hbound := norm_iteratedFDeriv_comp_le (character_smooth c) hΦ (nat_le_infty k) x
+  have hbound := norm_iteratedFDeriv_comp_le (character_smooth c) hΦ (natCast_le_infty k) x
     (C := M ^ m) (D := B)
     (fun i hi => by
       rw [norm_character_jet]
@@ -818,7 +816,7 @@ theorem norm_jet_const_mul {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
     {f : E → ℝ} (hf : ContDiff ℝ ∞ f) (x : E) (c : ℝ) (k : ℕ) :
     ‖iteratedFDeriv ℝ k (fun y => c * f y) x‖ = |c| * ‖iteratedFDeriv ℝ k f x‖ := by
   change ‖iteratedFDeriv ℝ k (fun y => c • f y) x‖ = _
-  rw [iteratedFDeriv_const_smul_apply' (hf.contDiffAt.of_le (nat_le_infty k)),
+  rw [iteratedFDeriv_const_smul_apply' (hf.contDiffAt.of_le (natCast_le_infty k)),
     norm_smul c (iteratedFDeriv ℝ k f x), Real.norm_eq_abs]
 
 theorem linear_jet_bound {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -910,8 +908,8 @@ theorem phase_slot_jet_bound (ε p pz x0 : ℝ) {F G : Slow → ℝ}
   have hAb : ∀ k ≤ m, ‖iteratedFDeriv ℝ k A q‖ ≤ (|p| + |pz|) * B := by
     intro k hk
     change ‖iteratedFDeriv ℝ k (fun y => p * (F ∘ L) y + pz * (G ∘ L) y) q‖ ≤ _
-    rw [fun_iteratedFDeriv_add_apply ((contDiff_const.mul hFl).contDiffAt.of_le (nat_le_infty k))
-      ((contDiff_const.mul hGl).contDiffAt.of_le (nat_le_infty k))]
+    rw [fun_iteratedFDeriv_add_apply ((contDiff_const.mul hFl).contDiffAt.of_le (natCast_le_infty k))
+      ((contDiff_const.mul hGl).contDiffAt.of_le (natCast_le_infty k))]
     apply (norm_add_le _ _).trans
     rw [norm_jet_const_mul hFl q p k, norm_jet_const_mul hGl q pz k]
     calc
@@ -926,8 +924,8 @@ theorem phase_slot_jet_bound (ε p pz x0 : ℝ) {F G : Slow → ℝ}
   intro k hk
   rw [he]
   simp only [sub_eq_add_neg]
-  rw [fun_iteratedFDeriv_add_apply ((phaseLinear ε p pz x0).contDiff.contDiffAt.of_le (nat_le_infty k))
-    ((slotV.contDiff.mul hA).neg.contDiffAt.of_le (nat_le_infty k))]
+  rw [fun_iteratedFDeriv_add_apply ((phaseLinear ε p pz x0).contDiff.contDiffAt.of_le (natCast_le_infty k))
+    ((slotV.contDiff.mul hA).neg.contDiffAt.of_le (natCast_le_infty k))]
   have hneg : iteratedFDeriv ℝ k (fun y : Slot => -(slotV y * A y)) q =
       -iteratedFDeriv ℝ k (fun y : Slot => slotV y * A y) q :=
     iteratedFDeriv_neg_apply
@@ -946,7 +944,7 @@ theorem pointwise_composition_jet_bound {E F G : Type*} [NormedAddCommGroup E] [
     (hfb : ∀ i, 1 ≤ i → i ≤ m → ‖iteratedFDeriv ℝ i f x‖ ≤ D) :
     ∀ k ≤ m, ‖iteratedFDeriv ℝ k (g ∘ f) x‖ ≤ (m.factorial : ℝ) * B * D ^ m := by
   intro k hk
-  have he := norm_iteratedFDeriv_comp_le hg hf (nat_le_infty k) x
+  have he := norm_iteratedFDeriv_comp_le hg hf (natCast_le_infty k) x
     (fun i hi => hgb i (hi.trans hk))
     (fun i hi him => (hfb i hi (him.trans hk)).trans (by
       simpa only [pow_one] using pow_le_pow_right₀ hD hi))
@@ -958,7 +956,7 @@ theorem norm_jet_linear_comp {E F G : Type*} [NormedAddCommGroup E] [NormedSpace
     [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G]
     {f : E → F} (hf : ContDiff ℝ ∞ f) (L : F →L[ℝ] G) (x : E) (k : ℕ) :
     ‖iteratedFDeriv ℝ k (L ∘ f) x‖ ≤ ‖L‖ * ‖iteratedFDeriv ℝ k f x‖ := by
-  rw [L.iteratedFDeriv_comp_left (hf.contDiffAt.of_le (nat_le_infty k)) le_rfl]
+  rw [L.iteratedFDeriv_comp_left (hf.contDiffAt.of_le (natCast_le_infty k)) le_rfl]
   exact L.norm_compContinuousMultilinearMap_le _
 
 noncomputable def liftXY : LiftPoint →L[ℝ] Plane :=
@@ -1074,8 +1072,8 @@ theorem slotMap_positive_jet_bound {κ : Plane → Plane} (hκ : ContDiff ℝ �
   have hrightsmooth : ContDiff ℝ ∞ (fun z : LiftPoint => slotLinear ci z + slotConstant ci center r0) :=
     (slotLinear ci).contDiff.add contDiff_const
   rw [he, fun_iteratedFDeriv_add_apply
-    (hleftsmooth.contDiffAt.of_le (nat_le_infty i))
-    (hrightsmooth.contDiffAt.of_le (nat_le_infty i))]
+    (hleftsmooth.contDiffAt.of_le (natCast_le_infty i))
+    (hrightsmooth.contDiffAt.of_le (natCast_le_infty i))]
   apply (norm_add_le _ _).trans
   have hleft := norm_jet_linear_comp hbase embedPolar y i
   have hright := (positive_jet_affine_bound (slotLinear ci) (slotConstant ci center r0) y hi).trans

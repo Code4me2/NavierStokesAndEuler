@@ -42,10 +42,8 @@ theorem translate_ae (a : LiftTangent) (u : CylinderL2 period V) :
 
 omit [Fact (0 < period)] in
 theorem coveringMap_add (a b : LiftTangent) :
-    coveringMap period (a+b) = coveringMap period a+coveringMap period b := by
-  apply Prod.ext
-  · rfl
-  · simp only [coveringMap, Prod.snd_add, QuotientAddGroup.mk_add]
+    coveringMap period (a+b) = coveringMap period a+coveringMap period b :=
+  Prod.ext rfl (by simp only [coveringMap, Prod.snd_add, QuotientAddGroup.mk_add])
 
 theorem translate_add (a b : LiftTangent) (u : CylinderL2 period V) :
     translate period a (translate period b u) = translate period (a+b) u := by

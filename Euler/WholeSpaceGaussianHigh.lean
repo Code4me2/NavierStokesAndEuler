@@ -50,7 +50,6 @@ theorem derivative_high_remainder (A : SmoothL2Field V) (j : Fin 3) (x : Space)
     ring
   rw [he] at h
   change ‖scaledAverage ε D.field x-scaledAverage 0 D.field x‖ ≤ _ at h
-  rw [scaledAverage_eq hε, scaledAverage_zero, norm_sub_rev] at h
-  exact h
+  rwa [scaledAverage_eq hε, scaledAverage_zero, norm_sub_rev] at h
 
 end EulerWholeSpaceGaussian

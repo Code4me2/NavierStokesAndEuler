@@ -9,6 +9,7 @@ import Mathlib.Analysis.Normed.Group.Basic
 import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Data.EReal.Inv
 import Mathlib.Tactic.GCongr
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform flat-weight estimates for radial primitives
@@ -25,9 +26,6 @@ namespace NavierStokes.WeightedRadialPrimitive
 open Set Filter MeasureTheory
 open scoped Topology ContDiff BigOperators
 open FlatCutoff
-
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  le_of_lt (WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n))
 
 def delta (L x : ℝ) : ℝ := min 1 (min x (L - x))
 def zeta (cL cR L x : ℝ) : ℝ := edge cL x * edge cR (L - x)
@@ -568,7 +566,7 @@ theorem cutoff_finiteJet_bound (a b : ℝ) (χ : ℝ → ℝ) (hχ : ContDiff �
       ∀ x ∈ Icc a b, ‖iteratedFDeriv ℝ (j : ℕ) χ x‖ ≤ C := by
     intro j
     obtain ⟨C, hC⟩ := isCompact_Icc.exists_bound_of_continuousOn
-      ((hχ.continuous_iteratedFDeriv (m := (j : ℕ)) (nat_le_smooth j)).continuousOn :
+      ((hχ.continuous_iteratedFDeriv (m := (j : ℕ)) (natCast_le_infty j)).continuousOn :
         ContinuousOn (iteratedFDeriv ℝ (j : ℕ) χ) (Icc a b))
     exact ⟨max C 0, le_max_right _ _, fun x hx => (hC x hx).trans (le_max_left _ _)⟩
   choose C hC hb using hex
@@ -577,7 +575,7 @@ theorem cutoff_finiteJet_bound (a b : ℝ) (χ : ℝ → ℝ) (hχ : ContDiff �
   let j' : Fin (m + 1) := ⟨j, Nat.lt_succ_of_le hj⟩
   have hCj : C j' ≤ ∑ k, C k := Finset.single_le_sum (fun k _ => hC k) (Finset.mem_univ j')
   have hcomp := (ContinuousLinearMap.fst ℝ ℝ E).iteratedFDeriv_comp_right hχ z
-    (i := j) (nat_le_smooth j)
+    (i := j) (natCast_le_infty j)
   change iteratedFDeriv ℝ j (fun y : ℝ × E => χ y.1) z = _ at hcomp
   rw [hcomp]
   calc

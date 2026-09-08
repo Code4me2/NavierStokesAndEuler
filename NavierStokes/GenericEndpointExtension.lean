@@ -5,6 +5,7 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Topology.ExtendFrom
 import NavierStokes.SpatialBorelExtension
+import NavierStokes.WithTopLemmas
 
 /-!
 # A dimension-independent smooth extension of a bounded-jet open strip
@@ -27,12 +28,6 @@ variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 noncomputable def timeVector : (ℝ × X) := (1, 0)
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
-
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
 noncomputable def directional (s : Set (ℝ × X)) (f : (ℝ × X) → V) (v : (ℝ × X))
@@ -46,7 +41,7 @@ omit [FiniteDimensional ℝ X] in
 theorem directional_contDiffOn {s : Set (ℝ × X)} {f : (ℝ × X) → V}
     (hf : ContDiffOn ℝ ∞ f s) (hs : UniqueDiffOn ℝ s) (v : (ℝ × X)) :
     ContDiffOn ℝ ∞ (directional s f v) s :=
-  (hf.fderivWithin hs infty_add_one_le).clm_apply contDiffOn_const
+  (hf.fderivWithin hs infty_add_one_le_infty).clm_apply contDiffOn_const
 
 omit [FiniteDimensional ℝ X] in
 theorem normalIter_contDiffOn {s : Set (ℝ × X)} {f : (ℝ × X) → V}
@@ -65,7 +60,7 @@ theorem directional_commute {s : Set (ℝ × X)} {f : (ℝ × X) → V}
     (v w : (ℝ × X)) :
     directional s (directional s f v) w z =
       directional s (directional s f w) v z := by
-  have hd := ((hf.fderivWithin hs infty_add_one_le).differentiableOn (by simp)) z hz
+  have hd := ((hf.fderivWithin hs infty_add_one_le_infty).differentiableOn (by simp)) z hz
   have hv := fderivWithin_clm_apply (c := fderivWithin ℝ f s) (u := fun _ => v)
     (hs z hz) hd (differentiableWithinAt_const v)
   have hw := fderivWithin_clm_apply (c := fderivWithin ℝ f s) (u := fun _ => w)
@@ -391,7 +386,7 @@ theorem smoothExtension_iteratedFDeriv {T : ℝ} {f : (ℝ × X) → V}
     (hf : ContDiffOn ℝ ∞ f (past T)) (n : ℕ) {z : (ℝ × X)} (hz : z ∈ past T) :
     iteratedFDeriv ℝ n (smoothExtension T f hf) z = iteratedFDerivWithin ℝ n f (past T) z := by
   rw [← iteratedFDerivWithin_eq_iteratedFDeriv (past_uniqueDiff T)
-    ((smoothExtension_contDiff hf).of_le (nat_le_infty n)).contDiffAt hz]
+    ((smoothExtension_contDiff hf).of_le (natCast_le_infty n)).contDiffAt hz]
   exact iteratedFDerivWithin_congr (smoothExtension_eqOn_past hf) hz n
 
 omit [CompleteSpace V] in
@@ -414,9 +409,6 @@ namespace NavierStokes.GenericEndpointExtension
 
 open Set Filter
 open scoped Topology ContDiff
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 section Closure
 
@@ -444,7 +436,7 @@ theorem actualJet_hasFDerivAt {s : Set Y} {f : Y → V}
     HasFDerivAt (iteratedFDeriv ℝ n f)
       (iteratedFDeriv ℝ (n + 1) f x).curryLeft x := by
   have horder : (1 : WithTop ℕ∞) + n ≤ ∞ := by
-    simpa only [Nat.cast_add, Nat.cast_one] using nat_le_infty (1 + n)
+    simpa only [Nat.cast_add, Nat.cast_one] using natCast_le_infty (1 + n)
   have hsm : ContDiffAt ℝ 1 (iteratedFDeriv ℝ n f) x :=
     ((hf x hx).contDiffAt (hs.mem_nhds hx)).iteratedFDeriv_right horder
   exact (hsm.differentiableAt (by norm_num)).hasFDerivAt

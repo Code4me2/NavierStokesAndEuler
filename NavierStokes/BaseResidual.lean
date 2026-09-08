@@ -7,6 +7,7 @@ import NavierStokes.ParametricRadialExtension
 import NavierStokes.ActiveAnnulusWeight
 import NavierStokes.AxisTailRegularity
 import NavierStokes.SlowFirstOrderEdge
+import NavierStokes.WithTopLemmas
 
 /-!
 # Residual and axis values of the asymptotically summed slow base
@@ -23,9 +24,6 @@ open scoped Topology ContDiff BigOperators
 namespace NavierStokes.BaseResidual
 
 open SlowBorelBase
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 section Axis
 
@@ -275,7 +273,7 @@ theorem norm_jet_sum_le {D V : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
     ‖iteratedFDeriv ℝ m (fun y => ∑ i ∈ s, f i y) x‖ ≤
       ∑ i ∈ s, ‖iteratedFDeriv ℝ m (f i) x‖ := by
   have hs : ∀ i ∈ s, ContDiffWithinAt ℝ m (f i) univ x :=
-    fun i hi => ((hf i hi).of_le (nat_le_infty m)).contDiffWithinAt
+    fun i hi => ((hf i hi).of_le (natCast_le_infty m)).contDiffWithinAt
   have he := iteratedFDerivWithin_fun_sum_apply uniqueDiffOn_univ (mem_univ x) hs
   simp only [iteratedFDerivWithin_univ] at he
   rw [he]
@@ -1427,7 +1425,7 @@ theorem innerLift_blown_le {f : Inner → V} (hf : ContDiff ℝ ∞ f)
     ‖blownJet m (fun y : Chart => f y.2) (q, w)‖ ≤ ‖iteratedFDeriv ℝ m f w‖ := by
   let L : Chart →L[ℝ] Inner := ContinuousLinearMap.snd ℝ ℝ Inner
   change ‖iteratedFDeriv ℝ m (f ∘ L) (1, w)‖ ≤ _
-  rw [L.iteratedFDeriv_comp_right hf (1, w) (nat_le_infty m)]
+  rw [L.iteratedFDeriv_comp_right hf (1, w) (natCast_le_infty m)]
   have hL : ‖L‖ ≤ 1 := by
     apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
     intro y
@@ -2408,7 +2406,7 @@ theorem compact_weighted_jet_bound {V : Type} [NormedAddCommGroup V] [NormedSpac
     {K : Set Inner} (hK : IsCompact K) (hp : ∀ w ∈ K, 0 < zeta w) (m : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ w ∈ K, ‖iteratedFDeriv ℝ m f w‖ ≤ C * zeta w := by
   have hj : Continuous (iteratedFDeriv ℝ m f) :=
-    (hf.iteratedFDeriv_right (m := 0) (by simpa only [zero_add] using nat_le_infty m)).continuous
+    (hf.iteratedFDeriv_right (m := 0) (by simpa only [zero_add] using natCast_le_infty m)).continuous
   have hc : ContinuousOn (fun w => ‖iteratedFDeriv ℝ m f w‖ / zeta w) K :=
     hj.norm.continuousOn.div hz.continuousOn (fun w hw => (hp w hw).ne')
   obtain ⟨B, hB⟩ := hK.exists_bound_of_continuousOn hc

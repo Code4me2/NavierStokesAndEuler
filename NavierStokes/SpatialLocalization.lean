@@ -3,6 +3,7 @@ import NavierStokes.SolenoidalDiagonal
 import NavierStokes.CylindricalResidual
 import NavierStokes.ResidualRegularity
 import NavierStokes.TimeLocalization
+import NavierStokes.WithTopLemmas
 
 /-!
 # Spatial localization through actual Cartesian potentials
@@ -24,9 +25,6 @@ noncomputable section
 open ProblemStatement Set Filter
 open AxisymmetricFields (projection)
 open scoped ContDiff Topology
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 /-- Squared distance to the symmetry axis, with no square-root singularity. -/
 noncomputable def radialSquare (x : Space) : ℝ := (x 0) ^ 2 + (x 1) ^ 2
@@ -218,7 +216,7 @@ theorem periodicVelocity_divergence_free {A : VelocityField} {times : Set ℝ}
     (hA : ContDiffOn ℝ ∞ A (times ×ˢ (univ : Set Space))) {t : ℝ}
     (ht : t ∈ times) (x : Space) : spatialDivergence (periodicVelocity A) t x = 0 :=
   SpatialCurl.spatialDivergence_spatialCurl_on
-    ((periodicPotential_smoothOn hA).of_le (nat_le_infty 2)) ht x
+    ((periodicPotential_smoothOn hA).of_le (natCast_le_infty 2)) ht x
 
 /-- Throughout the central no-overlap cube, periodization agrees locally
 with the actual cut field, including its cutoff derivative terms. -/

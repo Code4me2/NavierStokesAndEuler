@@ -64,7 +64,6 @@ theorem scalarWeakHarmonicOn_dilation (f : Space → ℝ) (R : ℝ) (hR : 0 < R)
   have heval (x : Space) : R⁻¹ • (R • x) = x := by
     rw [smul_smul, inv_mul_cancel₀ hR.ne', one_smul]
   simp_rw [heval] at hi
-  rw [hz, smul_zero] at hi
-  exact hi
+  rwa [hz, smul_zero] at hi
 
 end EulerMeanHarmonic

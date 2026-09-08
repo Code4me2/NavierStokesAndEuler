@@ -35,8 +35,7 @@ theorem fieldL2_sum_le {ι F : Type*} [NormedAddCommGroup F] (S : Finset ι)
   have hfin : (∑ i ∈ S, eLpNorm (f i) 2 (liftMeasure period)) ≠ ⊤ :=
     ENNReal.sum_ne_top.mpr (fun i hi => (hf i hi).eLpNorm_ne_top)
   have h := ENNReal.toReal_mono hfin he
-  rw [ENNReal.toReal_sum (fun i hi => (hf i hi).eLpNorm_ne_top)] at h
-  exact h
+  rwa [ENNReal.toReal_sum (fun i hi => (hf i hi).eLpNorm_ne_top)] at h
 
 /-- The literal transport commutator through six base derivatives is in L² and bounded using only the two H⁶ norms. -/
 theorem transport_base_L2 {n : ℕ} (hn : n ≤ 6) (w : Fin n → Fin 4)

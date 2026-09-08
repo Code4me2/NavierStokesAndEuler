@@ -135,8 +135,7 @@ theorem gradientIntegral_logarithmic_bound (t : Icc (0 : ℝ) T) :
       ((extendPath_continuous T hT W).intervalIntegrable 0 t)]
     simp only [intervalIntegral.integral_const,sub_zero,smul_eq_mul,mul_one]
     rfl
-  rw [hX0,one_mul,hK] at h
-  exact h
+  rwa [hX0,one_mul,hK] at h
 
 theorem gradientIntegral_logarithmic_uniform (Tmax G : ℝ) (hTmax : T ≤ Tmax)
     (hG : ∀ t : Icc (0 : ℝ) T, realIntegral T hT W t ≤ G) (t : Icc (0 : ℝ) T) :

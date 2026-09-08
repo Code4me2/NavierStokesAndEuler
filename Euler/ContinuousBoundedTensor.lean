@@ -9,6 +9,7 @@ and therefore has constant one. -/
 noncomputable section
 
 
+open EulerFinitePathTensor (coordinates reassembly reassembly_coordinates)
 open scoped ContDiff BoundedContinuousFunction
 
 namespace EulerContinuousBoundedTensor
@@ -22,30 +23,6 @@ private local instance (n : ℕ) : NormedAddCommGroup (E [×n]→L[ℝ] V) := in
 private local instance (n : ℕ) : NormedSpace ℝ (E [×n]→L[ℝ] V) := inferInstance
 private local instance (n : ℕ) : NormedAddCommGroup (X →ᵇ (E [×n]→L[ℝ] V)) := inferInstance
 private local instance (n : ℕ) : NormedSpace ℝ (X →ᵇ (E [×n]→L[ℝ] V)) := inferInstance
-
-private def coordinates (n : ℕ) :
-    (E [×n]→L[ℝ] V) →L[ℝ] ((Fin n → Fin (Module.finrank ℝ E)) → V) :=
-  ContinuousLinearMap.pi (fun w =>
-    (ContinuousLinearMap.id ℝ (E [×n]→L[ℝ] V)).flipMultilinear
-      (fun i => Module.finBasis ℝ E (w i)))
-
-omit [FiniteDimensional ℝ V] in
-private theorem coordinates_injective (n : ℕ) :
-    Function.Injective (coordinates (E := E) (V := V) n) := by
-  intro A B h
-  apply ContinuousMultilinearMap.toMultilinearMap_injective
-  apply Module.Basis.ext_multilinear (fun _ : Fin n => Module.finBasis ℝ E)
-  intro w
-  exact congrFun h w
-
-private def reassembly (n : ℕ) :
-    ((Fin n → Fin (Module.finrank ℝ E)) → V) →L[ℝ] (E [×n]→L[ℝ] V) :=
-  ((coordinates (E := E) (V := V) n).toLinearMap.leftInverse).toContinuousLinearMap
-
-private theorem reassembly_coordinates (n : ℕ) (A : E [×n]→L[ℝ] V) :
-    reassembly n (coordinates n A) = A :=
-  LinearMap.leftInverse_apply_of_inj
-    (LinearMap.ker_eq_bot.mpr (coordinates_injective n)) A
 
 private def tupleBounded {ι : Type*} [Fintype ι] :
     (ι → (X →ᵇ V)) →L[ℝ] (X →ᵇ (ι → V)) := by

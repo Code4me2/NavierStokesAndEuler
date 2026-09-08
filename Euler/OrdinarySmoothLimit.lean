@@ -77,8 +77,7 @@ theorem field_continuous (n : ℕ) : Continuous (fun t => (L.field t).jetLp n) :
   L.tower.smoothField_jet_continuous n
 
 theorem fieldPath_eq : fieldPath L.field L.field_continuous=L.tower.field := by
-  apply ContinuousMap.ext
-  exact L.tower.smoothField_toLp
+  exact ContinuousMap.ext (L.tower.smoothField_toLp)
 
 theorem fieldPath_convergence :
     Tendsto (fun k => fieldPath (A k) (hA k)) atTop (𝓝 (fieldPath L.field L.field_continuous)) := by
@@ -94,8 +93,7 @@ theorem jetPath_convergence (n : ℕ) :
     intro t
     exact ordinaryTensorOperator_apply (A k t) n
   have hb : C (L.tower.realization n)=jetPath L.field L.field_continuous n := by
-    apply ContinuousMap.ext
-    exact L.tower.tensorOperator_realization n
+    exact ContinuousMap.ext (L.tower.tensorOperator_realization n)
   simpa only [Function.comp_def,ha,hb] using h
 
 theorem jet_convergence (n : ℕ) (t : Icc (0 : ℝ) T) :

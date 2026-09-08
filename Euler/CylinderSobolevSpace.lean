@@ -137,7 +137,6 @@ theorem value_injective {q : ℕ} : Function.Injective (value period : SobolevSp
 /-- Reconstructing a jet and then its array is the identity. -/
 @[simp]
 theorem ofJet_toJet {q : ℕ} (u : SobolevSpace period q) : ofJet period (toJet period u) = u := by
-  apply value_injective period
-  exact value_ofJet period (toJet period u)
+  exact value_injective period (value_ofJet period (toJet period u))
 
 end EulerCylinderSobolevSpace

@@ -79,8 +79,7 @@ theorem gramSolver_eq_multiplier (T : ℝ) (hT : 0 ≤ T)
     exact gram_inverse_apply (Q (projIcc 0 T hT t)) c hc (hQ _) (f t)
   have hi := inverse_operator_apply (gramOperator T hT Q) c hc
     (gramOperator_coercive T hT Q c hQ) (timeMultiplier T hT (gramInversePath T Q c hc hQ) f)
-  rw [he] at hi
-  exact hi
+  rwa [he] at hi
 
 /-- The lower frame bound controls the true operator inverse. -/
 theorem gramSolver_norm (T : ℝ) (hT : 0 ≤ T)

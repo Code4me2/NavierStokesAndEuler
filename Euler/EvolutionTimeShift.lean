@@ -65,8 +65,7 @@ def shiftTime (U : Evolution S hS) (a : ℝ) (ha : 0 ≤ a)
       U.velocity ⟨a, ha, (le_add_of_nonneg_right hT).trans haT⟩ := by
   rw [shiftTime_velocity]
   congr 1
-  apply Subtype.ext
-  exact add_zero a
+  exact Subtype.ext (add_zero a)
 
 end Evolution
 end EulerOrdinarySobolev

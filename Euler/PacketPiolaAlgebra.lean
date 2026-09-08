@@ -116,7 +116,6 @@ theorem curlMatrix_piola (F : Space ≃L[ℝ] Space)
   have he : (B.comp F.symm.toContinuousLinearMap).comp F.toContinuousLinearMap = B := by
     ext x
     simp
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 end EulerPacketPiola

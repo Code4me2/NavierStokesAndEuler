@@ -26,8 +26,7 @@ def pointField (t : Icc (0 : ℝ) T) (x : LiftDomain P) : Vector3 :=
 theorem pointField_ae (t : Icc (0 : ℝ) T) :
     (A.field t : LiftDomain P → Vector3) =ᵐ[liftMeasure P] A.pointField t := by
   have h := representative_ae P (A.realization 3 t)
-  rw [A.value_eq] at h
-  exact h
+  rwa [A.value_eq] at h
 
 theorem pointField_joint_continuous : Continuous A.pointField.uncurry :=
   path_representative_joint_continuous P (A.realization 3)

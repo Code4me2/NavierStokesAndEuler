@@ -126,8 +126,7 @@ theorem sumField_sobolev_tendsto (q : ℕ) :
     ((limitData A hA).sobolev_convergence q)
   have he := (limitData A hA).tower.smoothField_realization q t
   simp only [ContinuousMap.evalCLM_apply,Function.comp_def] at h
-  rw [← he] at h
-  exact h
+  rwa [← he] at h
 
 theorem sumField_pointwise_tendsto (x : Space) :
     Tendsto (fun n => (partialSum A n).field x) atTop (𝓝 ((sumField A hA).field x)) := by

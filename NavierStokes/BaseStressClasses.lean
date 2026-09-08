@@ -1,4 +1,5 @@
 import NavierStokes.BaseContextAssembly
+import NavierStokes.WithTopLemmas
 
 /-!
 # Weighted classes of the actual base stress
@@ -18,9 +19,6 @@ open scoped ContDiff Topology BigOperators
 abbrev Point := BaseContextAssembly.Point
 abbrev Chart := SlowBorelBase.Chart
 abbrev Inner := SlowBorelBase.Inner
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 section Composition
 
@@ -79,7 +77,7 @@ theorem class_comp_of_outer_jets {s : StripData D} {w : ℕ → D → ℝ} {α :
   have hD : 1 ≤ (B+1) * s.growth n x ^ q :=
     one_le_mul_of_one_le_of_one_le (by linarith) (one_le_pow₀ hG)
   have hA : 0 ≤ majorant s w α C p n x := majorant_nonneg s w α hC _ _ _ (hw n x hx)
-  have hcomp := norm_iteratedFDerivWithin_comp_le (hf n) (hg.smooth n) (nat_le_infty j)
+  have hcomp := norm_iteratedFDerivWithin_comp_le (hf n) (hg.smooth n) (natCast_le_infty j)
     hU.uniqueDiffOn s.isOpen_domain.uniqueDiffOn (hmap n) hx
     (C := majorant s w α C p n x) (D := (B+1) * s.growth n x ^ q)
     (fun i hi => by

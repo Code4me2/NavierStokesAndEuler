@@ -17,7 +17,7 @@ variable {K E V : Type*} [TopologicalSpace K] [CompactSpace K]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
 
-private def coordinates (n : ℕ) :
+def coordinates (n : ℕ) :
     (E [×n]→L[ℝ] V) →L[ℝ] ((Fin n → Fin (Module.finrank ℝ E)) → V) :=
   ContinuousLinearMap.pi (fun w =>
     (ContinuousLinearMap.id ℝ (E [×n]→L[ℝ] V)).flipMultilinear
@@ -32,11 +32,11 @@ private theorem coordinates_injective (n : ℕ) :
   intro w
   exact congrFun h w
 
-private def reassembly (n : ℕ) :
+def reassembly (n : ℕ) :
     ((Fin n → Fin (Module.finrank ℝ E)) → V) →L[ℝ] (E [×n]→L[ℝ] V) :=
   ((coordinates (E := E) (V := V) n).toLinearMap.leftInverse).toContinuousLinearMap
 
-private theorem reassembly_coordinates (n : ℕ) (A : E [×n]→L[ℝ] V) :
+theorem reassembly_coordinates (n : ℕ) (A : E [×n]→L[ℝ] V) :
     reassembly n (coordinates n A) = A :=
   LinearMap.leftInverse_apply_of_inj
     (LinearMap.ker_eq_bot.mpr (coordinates_injective n)) A

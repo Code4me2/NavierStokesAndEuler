@@ -57,8 +57,7 @@ theorem coordinate_equation_ae (t : Icc (0 : ℝ) T) :
   change r x = f t x-((2 : ℝ) • fullOperatorMap P (D.Q₁ t) v) x at hsub
   change ((2 : ℝ) • fullOperatorMap P (D.Q₁ t) v) x =
     (2 : ℝ) • (fullOperatorMap P (D.Q₁ t) v x) at hsmul
-  rw [hsub,hsmul,hq₁] at hp
-  exact hp
+  rwa [hsub,hsmul,hq₁] at hp
 
 theorem physicalVelocity_ae (t : Icc (0 : ℝ) T) :
     D.physicalVelocity P f t =ᵐ[liftMeasure P] fun x =>

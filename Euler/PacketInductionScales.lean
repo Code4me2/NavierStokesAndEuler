@@ -117,8 +117,7 @@ theorem exists_base_power : ∃ D : ℕ, 2000 ≤ D ∧
     norm_num [theta]
   obtain ⟨d,hd⟩ := exists_nat_gt ((firstFrequencyPower : ℝ)/(theta/100))
   refine ⟨max 2000 d,le_max_left _ _,?_⟩
-  apply (div_lt_iff₀ ht).mp
-  exact hd.trans_le (by exact_mod_cast (le_max_right 2000 d))
+  exact (div_lt_iff₀ ht).mp (hd.trans_le (by exact_mod_cast (le_max_right 2000 d)))
 
 theorem exists_scales (c B : ℝ) (hc : 0 ≤ c) : Nonempty (Scales c B) := by
   obtain ⟨D,hD,hDfreq⟩ := exists_base_power

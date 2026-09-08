@@ -21,9 +21,6 @@ open Set Filter MeasureTheory Function
 open TorusInverse
 open scoped Topology ContDiff BigOperators Interval
 
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  le_of_lt (WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n))
-
 noncomputable def partialY (f : Plane → ℂ) (z : Plane) : ℂ := fderiv ℝ f z (0, 1)
 noncomputable def timeDerivative (f : Plane → ℂ) (z : Plane) : ℂ :=
   fderiv ℝ f z (vector .temporal)

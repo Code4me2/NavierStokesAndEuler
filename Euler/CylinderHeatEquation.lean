@@ -95,8 +95,7 @@ theorem realHeatList_generator_pos {ι : Type*} (indices : List ι) (direction :
       rw [realLineHeat_smul, ← smul_add, ← realLineHeat_add, ← realHeatList_add]
       simp only [List.map_cons, List.sum_cons, realHeatList]
       rw [add_comm ((tail.map ddf).sum)]
-    rw [halg] at h
-    exact h
+    rwa [halg] at h
 
 
 end EulerGaussianCylinderHeat

@@ -4,6 +4,7 @@ import Mathlib.Algebra.Order.Algebra
 import Mathlib.Analysis.Normed.Group.Basic
 import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Data.EReal.Inv
+import NavierStokes.WithTopLemmas
 
 /-!
 # Jointly smooth Taylor–Borel extension of spatially smooth jets
@@ -22,9 +23,6 @@ namespace NavierStokes.SpatialBorelExtension
 
 variable {X V : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   [FiniteDimensional ℝ X] [NormedAddCommGroup V] [NormedSpace ℝ V]
-
-private theorem nat_le_infty (k : ℕ) : (k : WithTop ℕ∞) ≤ ∞ := by
-  exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤)
 
 def spatialBump (m : ℕ) : ContDiffBump (0 : X) where
   rIn := (m : ℝ) + 1
@@ -123,7 +121,7 @@ theorem localizedTerm_eq_scaled {b : ℝ} (hb : b ≠ 0) (m j : ℕ) (a : X → 
 theorem exists_template_bound {a : X → V} (ha : ContDiff ℝ ∞ a) (m j k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ z : ℝ × X, ‖iteratedFDeriv ℝ k (template m j a) z‖ ≤ C := by
   obtain ⟨C, hC⟩ := ((template_hasCompactSupport m j a).iteratedFDeriv k).exists_bound_of_continuous
-    ((template_contDiff ha m j).continuous_iteratedFDeriv (nat_le_infty k))
+    ((template_contDiff ha m j).continuous_iteratedFDeriv (natCast_le_infty k))
   exact ⟨max C 0, le_max_right _ _, fun z => (hC z).trans (le_max_left _ _)⟩
 
 def templateBound {a : X → V} (ha : ContDiff ℝ ∞ a) (m j k : ℕ) : ℝ :=
@@ -143,12 +141,12 @@ theorem localizedTerm_deriv_bound {a : X → V} (ha : ContDiff ℝ ∞ a)
   have hbpos : 0 < b := lt_of_lt_of_le zero_lt_one hb
   have ht := template_contDiff ha m j
   have hc : ContDiff ℝ (k : WithTop ℕ∞) (template m j a ∘ timeScale b) :=
-    ht.comp_continuousLinearMap.of_le (nat_le_infty k)
+    ht.comp_continuousLinearMap.of_le (natCast_le_infty k)
   rw [localizedTerm_eq_scaled (ne_of_gt hbpos),
     iteratedFDeriv_const_smul_apply hc.contDiffAt]
   rw [norm_smul ((b ^ j)⁻¹ : ℝ) (iteratedFDeriv ℝ k (template m j a ∘ timeScale b) z),
     Real.norm_of_nonneg (by positivity : 0 ≤ (b ^ j)⁻¹),
-    (timeScale b).iteratedFDeriv_comp_right ht z (nat_le_infty k)]
+    (timeScale b).iteratedFDeriv_comp_right ht z (natCast_le_infty k)]
   have hcomp :
       ‖(iteratedFDeriv ℝ k (template m j a) (timeScale b z)).compContinuousLinearMap
         (fun _ => timeScale b)‖ ≤ templateBound ha m j k * b ^ k := by
@@ -360,7 +358,7 @@ theorem time_iteratedDeriv {f : (ℝ × X) → V} (hf : ContDiff ℝ ∞ f)
     funext s
     simp [g, L]
   rw [heq, iteratedDeriv_eq_iteratedFDeriv,
-    L.iteratedFDeriv_comp_right hg t (nat_le_infty k)]
+    L.iteratedFDeriv_comp_right hg t (natCast_le_infty k)]
   change iteratedFDeriv ℝ k (fun z => f (z + (0, x))) (t, 0)
     (fun _ : Fin k => (1, (0 : X))) = _
   rw [iteratedFDeriv_comp_add_right]
@@ -437,7 +435,7 @@ theorem rightExtension_right_jets (T : ℝ) (k : ℕ) (x : X) :
     (rightExtension_contDiff a ha T).comp (contDiff_id.prodMk contDiff_const)
   rw [iteratedDerivWithin_eq_iteratedFDerivWithin,
     iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici T)
-      (hs.of_le (nat_le_infty k)).contDiffAt (mem_Ici.mpr le_rfl)]
+      (hs.of_le (natCast_le_infty k)).contDiffAt (mem_Ici.mpr le_rfl)]
   exact rightExtension_time_jets a ha T k x
 
 omit [CompleteSpace V] in

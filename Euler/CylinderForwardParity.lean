@@ -37,9 +37,7 @@ theorem solution_reflection_neg (f : C(Icc (0 : ℝ) T,Supported P V S hS))
     (hf : ∀ t, supportedReflection P S hS hSym (f t) = -f t)
     (ha₀ : supportedReflection P S hS hSym a₀ = -a₀) (t : Icc (0 : ℝ) T) :
     supportedReflection P S hS hSym (U.solution f a₀ t) = -U.solution f a₀ t := by
-  have hfp : supportedPathReflection P S hS hSym f = -f := by
-    apply ContinuousMap.ext
-    exact hf
+  have hfp : supportedPathReflection P S hS hSym f = -f := ContinuousMap.ext (hf)
   have he := solution_reflection P S hS hSym T hT B hB U f a₀
   rw [hfp,ha₀,U.solution_neg] at he
   exact congrArg (fun p : C(Icc (0 : ℝ) T,Supported P V S hS) => p t) he

@@ -46,8 +46,7 @@ theorem laplacian_gradient_pairing (u : SobolevSpace period 3) :
       laplacianEvaluation period 3 (by norm_num) u := by
     rw [laplacianEvaluation_apply, laplacianEvaluation_apply]
     rfl
-  rw [he, laplacianOperator_value, real_inner_self_eq_norm_sq] at hp
-  exact hp
+  rwa [he, laplacianOperator_value, real_inner_self_eq_norm_sq] at hp
 
 /-- All genuine second-coordinate derivatives are controlled exactly by the Laplacian. -/
 theorem hessianEnergy_eq_laplacian (u : SobolevSpace period 3) :

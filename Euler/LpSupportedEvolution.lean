@@ -108,8 +108,7 @@ def liftEvolution : Evolution T hT (operatorPath μ S hS T B) where
     have hd := operatorPath_hasDerivWithinAt μ S hS T hT Φ D hΦ t
     change HasDerivWithinAt (extendPath T hT (operatorPath μ S hS T Φ))
       (operator μ S hS (B t * Φ t)) (Icc (0 : ℝ) T) t at hd
-    rw [operator_mul] at hd
-    exact hd
+    rwa [operator_mul] at hd
 
 
 

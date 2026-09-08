@@ -56,8 +56,7 @@ theorem derivative_bound (A : CompactField P V) :
   refine ⟨C,hC.le,fun x a => ?_⟩
   have hx := hb (A.derivative.field (x.1+a.1,x.2+(a.2 : AddCircle P))) (mem_range_self _)
   change ‖fieldFDeriv P A.field (x.1+a.1,x.2+(a.2 : AddCircle P))‖ ≤ C at hx
-  rw [fieldFDeriv,fderiv_localFieldLift_shift] at hx
-  exact hx
+  rwa [fieldFDeriv,fderiv_localFieldLift_shift] at hx
 
 omit [Fact (0 < P)] in
 /-- One compact set contains every translate by a covering vector of norm at most one. -/

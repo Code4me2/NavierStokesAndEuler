@@ -47,7 +47,6 @@ theorem smoothApprox_representative_all {q : ℕ} (n : ℕ) (u : SobolevSpace pe
   refine ⟨f, ?_, smoothMollifier_smooth period n _, mollified_heat_all_memLp period n v hv (value period u)⟩
   have h := sobolevMollifier_representative period n
     (heatGainThree period q (smoothingVariance n) (smoothingVariance_pos n) u)
-  rw [heatGainThree_value] at h
-  exact h
+  rwa [heatGainThree_value] at h
 
 end EulerSobolevHeat

@@ -53,7 +53,6 @@ theorem H2_norm_sq_le_laplacian (u : SobolevSpace period 3) :
     ‖truncateOperator period 2 u‖^2 ≤ ‖restrictOperator period (by norm_num : 1 ≤ 3) u‖^2 +
       ‖laplacianEvaluation period 3 (by norm_num) u‖^2 := by
   have h := H2_norm_sq_le period (truncateOperator period 2 u)
-  rw [hessianEnergy_eq_laplacian] at h
-  exact h
+  rwa [hessianEnergy_eq_laplacian] at h
 
 end EulerSobolevEllipticBound

@@ -1,5 +1,6 @@
 import NavierStokes.ActualSlowAxis
 import NavierStokes.SlowResidualMatching
+import NavierStokes.WithTopLemmas
 
 /-!
 # The natural core solves the actual order-zero residual equations
@@ -19,9 +20,6 @@ namespace NavierStokes.NaturalCoefficientBridge
 
 open SimilarityProfile (InnerPoint InnerProfile partialX partialEta T Z)
 open SlowExpansionResidual
-
-theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 theorem partialX_eq_slice {f : InnerProfile} {w : InnerPoint}
     (hf : DifferentiableAt ℝ f w) :
@@ -47,7 +45,7 @@ theorem secondX_eq_slice {f : InnerProfile} {w : InnerPoint}
   have he : (fun x => partialX f (x, w.2)) =ᶠ[𝓝 w.1]
       deriv (fun x => f (x, w.2)) := by
     have hn := (continuous_id.prodMk continuous_const).continuousAt
-      ((hf.of_le (nat_le_infty 1)).eventually (by norm_num))
+      ((hf.of_le (natCast_le_infty 1)).eventually (by norm_num))
     filter_upwards [hn] with x hx
     exact partialX_eq_slice
       ((show ContDiffAt ℝ 1 f (x, w.2) from hx).differentiableAt (by norm_num))
@@ -75,7 +73,7 @@ theorem secondX_const_mul (C : ℝ) {f : InnerProfile} {w : InnerPoint}
     partialX (partialX (fun p => C * f p)) w = C * partialX (partialX f) w := by
   rw [secondX_eq_slice (contDiffAt_const.mul hf), secondX_eq_slice hf]
   exact iteratedDeriv_const_mul
-    C ((hf.comp w.1 (contDiffAt_id.prodMk contDiffAt_const)).of_le (nat_le_infty 2))
+    C ((hf.comp w.1 (contDiffAt_id.prodMk contDiffAt_const)).of_le (natCast_le_infty 2))
 
 /-- Flux reconstructed from the actual natural radial average. -/
 noncomputable def naturalFlux (h : ℝ) (U V : InnerProfile) (w : InnerPoint) : ℝ :=

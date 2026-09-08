@@ -22,12 +22,6 @@ namespace NavierStokes.NaturalCore
 
 open ProblemStatement AxisymmetricFields
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
-
 noncomputable def physicalQ (h : ℝ) (p : ProfilePoint) : ℝ :=
   SimilarityCoordinates.coordinateQ (2 * h) (1 - p.1, p.2.2)
 

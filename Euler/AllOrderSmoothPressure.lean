@@ -31,8 +31,7 @@ theorem commonPath_pressure_equation {T : ℝ} (hT : 0 < T) (A : Data period T) 
         (A.metric.coefficient ⟨t,ht.1.le,ht.2.le⟩).operator
           (commonPressure period hT A B ⟨t,ht.1.le,ht.2.le⟩)) t := by
   have h := commonPath_hasDerivAt period hT A B t ht
-  rw [(A.atOrder period 6).source_value period le_rfl] at h
-  exact h
+  rwa [(A.atOrder period 6).source_value period le_rfl] at h
 
 
 

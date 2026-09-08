@@ -20,9 +20,6 @@ namespace NavierStokes.PeriodicSobolev
 
 open ProblemStatement PeriodicIntegration
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
 def replaceCoord (i : Fin 3) (x : Space) (s : ℝ) : Space :=
   x + (s - x i) • coordinateVector i
 

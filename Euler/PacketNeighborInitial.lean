@@ -30,8 +30,7 @@ theorem frame_pair_difference_le {p q x y : Space} {ε D : ℝ}
   have hV : |⟪q,x⟫_ℝ-⟪q,y⟫_ℝ| ≤ ‖x-y‖/ε := by
     rw [← inner_sub_right]
     apply hq'.trans
-    apply (le_div_iff₀ hε).mpr
-    exact mul_le_of_le_one_right (norm_nonneg _) hε1
+    exact (le_div_iff₀ hε).mpr (mul_le_of_le_one_right (norm_nonneg _) hε1)
   have hD := div_le_div_of_nonneg_right hxy hε.le
   calc
     _ ≤ D/ε+D/ε := add_le_add (hU.trans hD) (hV.trans hD)

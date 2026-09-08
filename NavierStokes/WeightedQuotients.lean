@@ -4,6 +4,7 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import NavierStokes.WithTopLemmas
 
 /-!
 # Square roots and signed quotients from weighted derivative bounds
@@ -19,9 +20,6 @@ open Set Filter
 open scoped Topology ContDiff BigOperators
 
 namespace NavierStokes.WeightedQuotients
-
-theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 noncomputable def rpowCoeff (p : ℝ) : ℕ → ℝ
   | 0 => 1
@@ -105,7 +103,7 @@ theorem comp_jet_bound {f : E → ℝ} {g : ℝ → ℝ} {s : Set E} {t : Set �
     (hC : ∀ i ≤ n, ‖iteratedFDeriv ℝ i g (f x)‖ ≤ C)
     (hD : ∀ i, 1 ≤ i → i ≤ n → ‖iteratedFDeriv ℝ i f x‖ ≤ D ^ i) :
     ‖iteratedFDeriv ℝ n (g ∘ f) x‖ ≤ n.factorial * C * D ^ n := by
-  have h := norm_iteratedFDerivWithin_comp_le hg hf (nat_le_infty n)
+  have h := norm_iteratedFDerivWithin_comp_le hg hf (natCast_le_infty n)
     ht.uniqueDiffOn hs.uniqueDiffOn hmap hx
     (by
       intro i hi
@@ -142,7 +140,7 @@ theorem norm_jet_const_mul {f : E → ℝ} {x : E} (hf : ContDiffAt ℝ ∞ f x)
     ‖iteratedFDeriv ℝ n (fun y => c * f y) x‖ = |c| * ‖iteratedFDeriv ℝ n f x‖ := by
   have he : iteratedFDeriv ℝ n (fun y => c * f y) x = c • iteratedFDeriv ℝ n f x := by
     simpa only [smul_eq_mul] using
-      iteratedFDeriv_const_smul_apply' (a := c) (hf.of_le (nat_le_infty n))
+      iteratedFDeriv_const_smul_apply' (a := c) (hf.of_le (natCast_le_infty n))
   rw [he]
   exact norm_smul c (iteratedFDeriv ℝ n f x)
 
@@ -265,7 +263,7 @@ theorem mul_jets_bound {f g : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hfj : ∀ i ≤ n, ‖iteratedFDeriv ℝ i f x‖ ≤ C)
     (hgj : ∀ i ≤ n, ‖iteratedFDeriv ℝ i g x‖ ≤ D) :
     ‖iteratedFDeriv ℝ n (fun y => f y * g y) x‖ ≤ chooseSum n * C * D := by
-  have h := norm_iteratedFDerivWithin_mul_le hf hg hs.uniqueDiffOn hx (nat_le_infty n)
+  have h := norm_iteratedFDerivWithin_mul_le hf hg hs.uniqueDiffOn hx (natCast_le_infty n)
   simp only [iteratedFDerivWithin_of_isOpen _ hs hx] at h
   apply h.trans
   calc

@@ -1,6 +1,7 @@
 import NavierStokes.R3.ComparisonSetup
 import NavierStokes.R3.CompactEnergy
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import NavierStokes.WithTopLemmas
 
 /-!
 # Conservative difference equations tested on compactly supported functions
@@ -22,12 +23,6 @@ open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
 open Comparison (tensorDiff)
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 /-- The ordinary scalar Laplacian, with the same coordinate directions as the
 vector Laplacian in the Navier--Stokes residual. -/
@@ -303,7 +298,7 @@ theorem partial_partial_eq_fderiv {f : Space → ℝ} (hf : ContDiff ℝ ∞ f)
     (i j : Fin 3) (x : Space) :
     spatialPartial i (spatialPartial j f) x =
       fderiv ℝ (fderiv ℝ f) x (coordinateVector i) (coordinateVector j) := by
-  have hdf := (hf.fderiv_right infty_add_one_le).differentiable (by simp) x
+  have hdf := (hf.fderiv_right infty_add_one_le_infty).differentiable (by simp) x
   change fderiv ℝ (fun y => fderiv ℝ f y (coordinateVector j)) x (coordinateVector i) = _
   rw [fderiv_clm_apply hdf (differentiableAt_const (coordinateVector j))]
   simp
@@ -313,7 +308,7 @@ theorem partial_comm {f : Space → ℝ} (hf : ContDiff ℝ ∞ f)
     spatialPartial i (spatialPartial j f) x =
       spatialPartial j (spatialPartial i f) x := by
   rw [partial_partial_eq_fderiv hf, partial_partial_eq_fderiv hf]
-  exact ((hf.of_le (nat_le_infty 2)).contDiffAt.isSymmSndFDerivAt (by simp)) _ _
+  exact ((hf.of_le (natCast_le_infty 2)).contDiffAt.isSymmSndFDerivAt (by simp)) _ _
 
 theorem partial_sum {f : Fin 3 → Space → ℝ}
     (hf : ∀ i, ContDiff ℝ ∞ (f i)) (k : Fin 3) (x : Space) :
@@ -370,7 +365,7 @@ theorem component_test_hasDerivAt {a b t : ℝ} {w : VelocityField} {ψ : Space 
   have hF : ContDiffOn ℝ 1 (fun z : SpaceTime => w z k * ψ z.2)
       (Icc a b ×ˢ univ) :=
     (((EuclideanSpace.proj k : Space →L[ℝ] ℝ).contDiff.comp_contDiffOn hw).mul
-      (hψ.comp contDiff_snd).contDiffOn).of_le (nat_le_infty 1)
+      (hψ.comp contDiff_snd).contDiffOn).of_le (natCast_le_infty 1)
   refine CompactTimeIntegral.hasDerivAt_integral_of_contDiffOn_of_hasDerivAt
     hcψ hF ?_ ht ?_
   · intro s hs x hx

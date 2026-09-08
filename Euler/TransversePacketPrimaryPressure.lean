@@ -181,8 +181,7 @@ theorem field_balance (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) :
       pointField_ae P (velocityPath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y) t,
       pointField_ae P (derivativePath τ hτ hτT B Y) (derivativePath_orbit τ hτ hτT B Y) t]
       with y he hv hd
-    rw [hv,hd] at he
-    exact he
+    rwa [hv,hd] at he
   have hA := smoothField_continuous P _
     (pointField_smooth P (velocityPath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y) t)
   have hD := smoothField_continuous P _

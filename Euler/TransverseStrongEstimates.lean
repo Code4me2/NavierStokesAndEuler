@@ -148,8 +148,7 @@ theorem acceleration_eq_inverse (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T 
   rw [hB, hp, hr, hs, hQ₁]
   have hinv := congrArg (gramInverse (Q (projIcc 0 T hT t)) c hc (hQ (projIcc 0 T hT t))) ht
   dsimp only [extendPath] at hinv
-  rw [inverse_gram_apply] at hinv
-  exact hinv
+  rwa [inverse_gram_apply] at hinv
 
 include hc hQ in
 /-- The strong acceleration bound pays one inverse Gram factor and no derivative

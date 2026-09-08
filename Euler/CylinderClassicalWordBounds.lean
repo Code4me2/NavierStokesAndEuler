@@ -72,8 +72,7 @@ theorem strongWord_ae (u : LiftL2 period) (hu : SmoothOrbit period u)
       iteratedFieldDerivative period w (representative period u hu) := by
   have h := jet_word_ae period (le_refl n) u (spatialJet period n u hu) w
     (representative period u hu) (representative_ae period u hu) (representative_smooth period u hu)
-  rw [spatialJet_word period n n (le_refl n)] at h
-  exact h
+  rwa [spatialJet_word period n n (le_refl n)] at h
 
 /-- The reconstructed derivative representative equals the actual classical derivative pointwise. -/
 theorem representative_strongWord (u : LiftL2 period) (hu : SmoothOrbit period u)

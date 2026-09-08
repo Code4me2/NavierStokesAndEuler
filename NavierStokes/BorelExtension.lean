@@ -2,6 +2,7 @@ import NavierStokes.SmoothCutoffs
 import NavierStokes.DiagonalScale
 import Mathlib.Analysis.Calculus.SmoothSeries
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import NavierStokes.WithTopLemmas
 
 /-!
 # A constructed compactly supported Taylor–Borel extension
@@ -19,9 +20,6 @@ open scoped Topology ContDiff BigOperators
 namespace NavierStokes.BorelExtension
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ := by
-  exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)
 
 def monomial (j : ℕ) (v : E) (s : ℝ) : E := (s ^ j / (j.factorial : ℝ)) • v
 
@@ -102,7 +100,7 @@ theorem template_iteratedDeriv_hasCompactSupport (j k : ℕ) (v : E) :
 theorem exists_template_bound (j k : ℕ) (v : E) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ, ‖iteratedDeriv k (template j v) s‖ ≤ C := by
   obtain ⟨C, hC⟩ := (template_iteratedDeriv_hasCompactSupport j k v).exists_bound_of_continuous
-    ((template_contDiff j v).continuous_iteratedDeriv k (nat_le_infty k))
+    ((template_contDiff j v).continuous_iteratedDeriv k (natCast_le_infty k))
   exact ⟨max C 0, le_max_right _ _, fun s => (hC s).trans (le_max_left _ _)⟩
 
 def templateBound (j k : ℕ) (v : E) : ℝ :=
@@ -127,7 +125,7 @@ theorem iteratedDeriv_term {b : ℝ} (hb : b ≠ 0) (j k : ℕ) (v : E) (s : ℝ
       (b ^ k / b ^ j) • iteratedDeriv k (template j v) (b * s) := by
   rw [term_eq_scaled_template hb]
   have ht : ContDiff ℝ (k : WithTop ℕ∞) (template j v) :=
-    (template_contDiff j v).of_le (nat_le_infty k)
+    (template_contDiff j v).of_le (natCast_le_infty k)
   have hc : ContDiff ℝ (k : WithTop ℕ∞) (fun x : ℝ => template j v (b * x)) :=
     ht.comp (contDiff_const.mul contDiff_id)
   change iteratedDeriv k ((b ^ j)⁻¹ • (fun x : ℝ => template j v (b * x))) s = _
@@ -338,7 +336,7 @@ theorem rightExtension_right_jets (T : ℝ) (a : ℕ → E) (k : ℕ) :
     iteratedDerivWithin k (rightExtension T a) (Ici T) T = a k := by
   rw [iteratedDerivWithin_eq_iteratedFDerivWithin,
     iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici T)
-      ((rightExtension_contDiff T a).of_le (nat_le_infty k)).contDiffAt
+      ((rightExtension_contDiff T a).of_le (natCast_le_infty k)).contDiffAt
       (mem_Ici.mpr le_rfl)]
   exact rightExtension_jets T a k
 

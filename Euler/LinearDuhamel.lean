@@ -178,8 +178,7 @@ theorem solution_unique (f : C(Icc (0 : ℝ) T,E)) (a₀ : E) (a : ℝ → E)
     simpa only [q, w, extendPath, projIcc_of_mem hT t.property, solution, ContinuousMap.coe_mk] using hconst.trans hq₀
   have hr := congrArg (U.forward t) hqt
   change ((U.forward t).comp (U.backward t)) (a t - U.solution f a₀ t) = U.forward t 0 at hr
-  rw [U.forward_backward, id_apply, map_zero, sub_eq_zero] at hr
-  exact hr
+  rwa [U.forward_backward, id_apply, map_zero, sub_eq_zero] at hr
 
 /-- A relative homogeneous propagator bound yields the forced bound with the
 same profile. No exponential in the coefficient norm is introduced. -/

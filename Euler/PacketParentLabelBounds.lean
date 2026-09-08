@@ -57,8 +57,7 @@ theorem representative_tensor_le_block (u : L2) (hu : SmoothOrbit u)
   have he : (fun a : Space => translation a (ordinaryWord direction u w)) =
       wordDerivative direction (fun a : Space => translation a u) w :=
     funext (ordinaryWord_translation direction u hu w)
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 /-- The bound applies to the actual continuous representative, not merely
 to a field chosen by the Sobolev reconstruction. -/

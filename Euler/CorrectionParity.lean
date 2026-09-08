@@ -41,8 +41,7 @@ theorem value_oddReflection {q : ℕ} (u : SobolevSpace period q) :
 theorem truncate_oddReflection {q : ℕ} (u : SobolevSpace period (q+1)) :
     truncateOperator period q (oddReflection period (q+1) u) =
       oddReflection period q (truncateOperator period q u) := by
-  simp only [oddReflection_apply, map_neg]
-  exact congrArg Neg.neg (truncate_reflection period u)
+  simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (truncate_reflection period u)
 
 /-- An actual even coefficient commutes with signed reflection. -/
 theorem coefficient_oddReflection {q : ℕ} {A : SmoothCoefficient period}
@@ -50,8 +49,7 @@ theorem coefficient_oddReflection {q : ℕ} {A : SmoothCoefficient period}
     (hA : ∀ x, A.coefficient (-x) = A.coefficient x) (u : SobolevSpace period q) :
     oddReflection period q (coefficientSobolevOperator period K u) =
       coefficientSobolevOperator period K (oddReflection period q u) := by
-  simp only [oddReflection_apply, map_neg]
-  exact congrArg Neg.neg (coefficient_reflection period K hA u)
+  simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (coefficient_reflection period K hA u)
 
 /-- The actual pressure inverse commutes with signed reflection for an even metric. -/
 theorem pressure_oddReflection {q : ℕ} {A : SmoothCoefficient period}
@@ -61,8 +59,7 @@ theorem pressure_oddReflection {q : ℕ} {A : SmoothCoefficient period}
     (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v,v⟫_ℝ) (u : SobolevSpace period q) :
     oddReflection period q (pressureSobolevOperator period K κ m c hc hpos u) =
       pressureSobolevOperator period K κ m c hc hpos (oddReflection period q u) := by
-  simp only [oddReflection_apply, map_neg]
-  exact congrArg Neg.neg (pressureSobolev_reflection period K hA κ m c hc hpos u)
+  simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (pressureSobolev_reflection period K hA κ m c hc hpos u)
 
 /-- The actual pressure-corrected source commutes with signed reflection. -/
 theorem projectedSource_oddReflection {q : ℕ} {A : SmoothCoefficient period}
@@ -72,8 +69,7 @@ theorem projectedSource_oddReflection {q : ℕ} {A : SmoothCoefficient period}
     (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v,v⟫_ℝ) (u : SobolevSpace period q) :
     oddReflection period q (projectedSourceOperator period K κ m c hc hpos u) =
       projectedSourceOperator period K κ m c hc hpos (oddReflection period q u) := by
-  simp only [oddReflection_apply, map_neg]
-  exact congrArg Neg.neg (projectedSource_reflection period K hA κ m c hc hpos u)
+  simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (projectedSource_reflection period K hA κ m c hc hpos u)
 
 /-- The literal non-pressure correction source has odd-reflection symmetry
 under the source's actual even linear and odd quadratic coefficients. -/

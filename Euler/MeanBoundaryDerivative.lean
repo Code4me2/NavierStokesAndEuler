@@ -17,8 +17,7 @@ private local instance : NormedAddCommGroup (Space →L[ℝ] Space →L[ℝ] ℝ
 private local instance : NormedSpace ℝ (Space →L[ℝ] Space →L[ℝ] ℝ) := inferInstance
 
 @[simp] theorem Cutoff.translate_zero (χ : Cutoff) : χ.translate 0 = χ := by
-  apply Cutoff.ext
-  exact funext fun x => congrArg χ.field (add_zero x)
+  exact Cutoff.ext (funext fun x => congrArg χ.field (add_zero x))
 
 theorem cutoffCurl_differenceError (χ : Cutoff) (a : Space) (h : ℝ) :
     cutoffCurl (χ.differenceError a h) =

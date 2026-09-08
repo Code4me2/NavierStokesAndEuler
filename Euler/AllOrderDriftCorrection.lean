@@ -134,8 +134,7 @@ theorem Budget.fieldTower_hasDerivAt (B : Budget period hT A)
       extendPath T hT.le ((B.fieldTower period).realization q) := by
     funext r
     exact congrArg (fun f => f (projIcc 0 T hT.le r)) hpath
-  rw [heq] at hs
-  exact hs
+  rwa [heq] at hs
 
 /-- The common realization's actual derivative is the literal raw source plus signed pressure. -/
 theorem Budget.fieldTower_hasDerivAt_pressure (B : Budget period hT A)

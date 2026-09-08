@@ -83,8 +83,7 @@ def forwardGeometryFrame (η : U) (hη : η ≠ 0)
   intro t ht
   have htG : t ∈ Icc (0 : ℝ) G.T := ⟨hτ.trans ht.1,by simpa only [hTime] using ht.2⟩
   have h := hsource20 ⟨t,htG⟩ ht.1
-  rw [G.forward_primary_center_term m hm R S hS η δ hδ α k ⟨t,htG⟩ (Y ⟨t,htG⟩) (hY _)] at h
-  exact h
+  rwa [G.forward_primary_center_term m hm R S hS η δ hδ α k ⟨t,htG⟩ (Y ⟨t,htG⟩) (hY _)] at h
 
 def joinedGeometryFrame
     (s : ℝ) (hs : 0 < s) (hsT : s < G.T)

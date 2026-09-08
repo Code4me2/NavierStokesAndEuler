@@ -48,12 +48,10 @@ theorem amplitude_bound
     rw [ht] at hf
     have hfull : HistoryData.forcingPath G = 0 := by
       have he := congrArg (weight g) hf
-      rw [weight_normalize,map_zero] at he
-      exact he
+      rwa [weight_normalize,map_zero] at he
     have hp : G.path = 0 := by
       have he := congrArg (projectPath P D.support D.support_measurable) hfull
-      rw [project_include,map_zero] at he
-      exact he
+      rwa [project_include,map_zero] at he
     have hS : S G = 0 := by
       have he := hm G G 0 (hp.trans (zero_smul ℝ G.path).symm)
       simpa only [zero_smul] using he

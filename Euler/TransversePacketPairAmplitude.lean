@@ -49,12 +49,10 @@ theorem pair_amplitude_bound
     rw [ht] at hf
     have hfull : HistoryData.forcingPath G = 0 := by
       have he := congrArg (weight g) hf
-      rw [weight_normalize,map_zero] at he
-      exact he
+      rwa [weight_normalize,map_zero] at he
     have hp : G.path = 0 := by
       have he := congrArg (projectPath P D.support D.support_measurable) hfull
-      rw [project_include,map_zero] at he
-      exact he
+      rwa [project_include,map_zero] at he
     have hinitial := value_zero_of_block_zero_bound directions q
       (fun a => translate P a (I.value : CylinderL2 P U)) 0
       (by simpa only [hz,zero_mul] using hi 0)

@@ -18,18 +18,6 @@ open scoped ContDiff
 
 variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
 
-private theorem physical_homogeneous_unique (T : ℝ) (hT : 0 ≤ T)
-    (G : C(Icc (0 : ℝ) T,Space →L[ℝ] Space)) (f g : ℝ → Space)
-    (hf : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt f (G t (f t)) (Icc (0 : ℝ) T) t)
-    (hg : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt g (G t (g t)) (Icc (0 : ℝ) T) t)
-    (h0 : f 0=g 0) (t : Icc (0 : ℝ) T) : f t=g t := by
-  let E := constructedEvolution T hT G
-  have he (a : ℝ → Space) (ha : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt a (G t (a t)) (Icc (0 : ℝ) T) t) : a t=E.solution 0 (a 0) t :=
-    E.solution_unique 0 (a 0) a
-      (fun s => by simpa only [ContinuousMap.zero_apply,add_zero] using ha s) rfl t
-  rw [he f hf,he g hg,h0]
-
 theorem historyVelocity_homogeneous {D : Data U} (B : HistoryData D)
     (ξ : U) (x : Space) (t : Icc (0 : ℝ) D.T) :
     HasDerivWithinAt (extendPath D.T D.T_pos.le (B.coefficients.labelVelocity x ξ))
@@ -117,7 +105,7 @@ theorem uncutVelocity_history (t : Icc (0 : ℝ) τ) (x : Space) :
     dsimp only [extendPath]
     rw [projIcc_of_mem hτ.le (show (0 : ℝ) ∈ Icc 0 τ from ⟨le_rfl,hτ.le⟩)]
     rfl
-  have he := physical_homogeneous_unique τ hτ.le (physicalGenerator (D.initial τ hτ hτT.le) x)
+  have he := homogeneous_unique τ hτ.le (physicalGenerator (D.initial τ hτ hτT.le) x)
     (fun s => uncutVelocity τ hτ hτT B ξ s x)
     (extendPath τ hτ.le (B.coefficients.labelVelocity x ξ)) hu hh h0 t
   calc
@@ -130,7 +118,7 @@ theorem uncutVelocity_history (t : Icc (0 : ℝ) τ) (x : Space) :
 theorem canonicalVelocity_eq_cutoff_uncut (hs : tsupport innerCutoff ⊆ D.support)
     (t : Icc (0 : ℝ) D.T) (x : Space) :
     canonicalVelocity τ hτ hτT B ξ hs t x = innerCutoff x • uncutVelocity τ hτ hτT B ξ t x := by
-  apply physical_homogeneous_unique D.T D.T_pos.le (physicalGenerator D x)
+  apply homogeneous_unique D.T D.T_pos.le (physicalGenerator D x)
     (fun s => canonicalVelocity τ hτ hτT B ξ hs s x)
     (fun s => innerCutoff x • uncutVelocity τ hτ hτT B ξ s x)
     (fun s => canonicalVelocity_homogeneous_time τ hτ hτT B ξ hs s x) _ _ t

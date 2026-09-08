@@ -67,8 +67,7 @@ theorem gramSolver_intertwines (A : U →L[ℝ] V) (B : E →L[ℝ] F)
   rw [operator_inverse_apply] at he
   have hi := inverse_operator_apply (gramOperator T hT R) d hd
     (gramOperator_coercive T hT R d hR) (timeLift T A (gramSolver T hT Q c hc hQ f))
-  rw [he] at hi
-  exact hi
+  rwa [he] at hi
 
 variable (A : U →L[ℝ] V) (B : E →L[ℝ] F)
   (Q Q₁ : C(Icc (0 : ℝ) T,U →L[ℝ] E)) (R R₁ : C(Icc (0 : ℝ) T,V →L[ℝ] F))

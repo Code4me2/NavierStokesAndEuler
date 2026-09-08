@@ -3,6 +3,7 @@ import NavierStokes.SmoothCutoffs
 import NavierStokes.WeightedRadialPrimitive
 import NavierStokes.WeightedClasses
 import NavierStokes.PhysicalGraphBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # The actual Gaussian slot-cutoff errors
@@ -18,9 +19,6 @@ namespace NavierStokes.GaussianTailFlat
 
 open Set Filter Function
 open scoped ContDiff Topology BigOperators
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 /-- The fixed profile has plateau radius `1/5` and support radius `1/3`. -/
 noncomputable def profileBump : ContDiffBump (1 / 2 : ℝ) where
@@ -66,7 +64,7 @@ theorem profile_iteratedDeriv_compact (m : ℕ) :
 theorem profile_jet_bounded (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ v : ℝ, ‖iteratedFDeriv ℝ m profile v‖ ≤ C := by
   obtain ⟨C, hC⟩ := (profile_iteratedDeriv_compact m).exists_bound_of_continuous
-    (profile_contDiff.continuous_iteratedDeriv m (nat_le_infty m))
+    (profile_contDiff.continuous_iteratedDeriv m (natCast_le_infty m))
   refine ⟨max C 0, le_max_right _ _, fun v => ?_⟩
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv]
   exact (hC v).trans (le_max_left _ _)
@@ -254,7 +252,7 @@ theorem norm_affine_comp_jet_le {g : ℝ → ℝ} (hg : ContDiff ℝ ∞ g)
       ‖iteratedFDeriv ℝ j g (b + A x)‖ * ‖A‖ ^ j := by
   have hh : ContDiff ℝ ∞ (fun z => g (b + z)) :=
     hg.comp (contDiff_const.add contDiff_id)
-  have hd := A.iteratedFDeriv_comp_right hh x (i := j) (nat_le_infty j)
+  have hd := A.iteratedFDeriv_comp_right hh x (i := j) (natCast_le_infty j)
   change ‖iteratedFDeriv ℝ j ((fun z => g (b + z)) ∘ A) x‖ ≤ _
   rw [hd]
   simpa only [iteratedFDeriv_comp_add_left, Finset.prod_const, Finset.card_univ,

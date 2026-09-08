@@ -23,8 +23,7 @@ def transportedOperator (D : V →L[ℝ] W) (A : W →L[ℝ] W) : V →L[ℝ] V 
 
 /-- The transported bilinear form is exactly the original form on the image. -/
 theorem transportedOperator_inner (D : V →L[ℝ] W) (A : W →L[ℝ] W) (u v : V) :
-    ⟪transportedOperator D A u, v⟫_ℝ = ⟪A (D u), D v⟫_ℝ := by
-  exact adjoint_inner_left D v (A (D u))
+    ⟪transportedOperator D A u, v⟫_ℝ = ⟪A (D u), D v⟫_ℝ := adjoint_inner_left D v (A (D u))
 
 
 

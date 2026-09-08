@@ -61,8 +61,7 @@ theorem terminal_supported {U : Type*} [NormedAddCommGroup U] [InnerProductSpace
     (spatialSet_measurable period S hS) _).2
   filter_upwards [terminal_ae δ hδ ξ] with x hx hn
   rw [hx]
-  apply field_zero_outside δ ξ x
-  exact fun hh => hn (hs hh)
+  exact field_zero_outside δ ξ x (fun hh => hn (hs hh))
 
 theorem terminal_reflection {U : Type*} [NormedAddCommGroup U] [NormedSpace ℝ U]
     (δ : ℝ) (hδ : 0 < δ) (ξ : U) :

@@ -45,8 +45,7 @@ theorem forwardInitialized_primary_budget :
   have hD := forwardPrimary_profile_budget L NB δ hδ hδ1 ξ hs α hα hR WP
     (sourceOperators period M D (InitialData.zero period D)) rfl (S.changeTime hTime) hg
   have hM := hD.changeTime hTime.symm M.T_pos.le
-  rw [Scales.changeTime_roundtrip] at hM
-  exact hM
+  rwa [Scales.changeTime_roundtrip] at hM
 
 include NB W LM WM BC hRc hcost hδ1 hα hR WP hgrowth in
 theorem forwardInitialized_profile_budgets (p : ℕ) (hp : 1 ≤ p) :

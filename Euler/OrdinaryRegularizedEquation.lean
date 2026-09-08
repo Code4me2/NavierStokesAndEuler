@@ -17,8 +17,7 @@ open scoped ContDiff Topology
 
 theorem advection_add_left (A B C : SmoothL2Field Space) :
     advectionField (addField A B) C=addField (advectionField A C) (advectionField B C) := by
-  apply field_ext
-  exact funext (fun x => by simp only [advectionField_field,addField_field,map_add])
+  exact field_ext (funext (fun x => by simp only [advectionField_field,addField_field,map_add]))
 
 theorem advection_add_right (A B C : SmoothL2Field Space) :
     advectionField A (addField B C)=addField (advectionField A B) (advectionField A C) := by

@@ -93,8 +93,7 @@ def integral : C(Icc (0 : ℝ) T,E) →L[ℝ] C(Icc (0 : ℝ) T,E) :=
 
 
 @[simp] theorem integral_initial (f : C(Icc (0 : ℝ) T,E)) :
-    integral T hT f ⟨0,le_rfl,hT⟩ = 0 := by
-  exact intervalIntegral.integral_same
+    integral T hT f ⟨0,le_rfl,hT⟩ = 0 := intervalIntegral.integral_same
 
 /-- The primitive has the prescribed within-interval derivative at every time. -/
 theorem integral_hasDerivWithinAt (f : C(Icc (0 : ℝ) T,E)) (t : Icc (0 : ℝ) T) :

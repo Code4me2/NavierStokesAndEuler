@@ -48,8 +48,7 @@ theorem sobolevMollifier_word_ae {q k : ℕ} (hk : k ≤ q) (n : ℕ) (u : Sobol
     (word period (sobolevMollifier period q n u) hk w : LiftDomain period → Vector3) =ᵐ[liftMeasure period]
       iteratedFieldDerivative period w (smoothMollifier period n (value period u)) := by
   have h := smoothMollifier_word_ae period hk (value period u) (toJet period u) n w
-  rw [toJet_word period u hk] at h
-  exact h
+  rwa [toJet_word period u hk] at h
 
 
 end EulerCylinderSobolevSpace

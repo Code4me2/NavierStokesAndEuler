@@ -1,5 +1,6 @@
 import NavierStokes.WeightedQuotients
 import NavierStokes.ParametricFlatFactor
+import NavierStokes.WithTopLemmas
 
 /-!
 # Genuine derivative bounds for polynomially weighted Gaussian edges
@@ -15,9 +16,6 @@ open Set Function Filter Polynomial
 open scoped BigOperators ContDiff Topology
 
 namespace NavierStokes.EdgeWeightJets
-
-theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
 
 noncomputable def coefficientMass (p : ℝ[X]) : ℝ :=
   ∑ i ∈ Finset.range (p.natDegree + 1), |p.coeff i|
@@ -125,7 +123,7 @@ theorem norm_iteratedFDeriv_snd_le {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     ‖iteratedFDeriv ℝ n (fun y : E × ℝ => f y.2) y‖ ≤ ‖iteratedFDeriv ℝ n f y.2‖ := by
   let L : E × ℝ →L[ℝ] ℝ := ContinuousLinearMap.snd ℝ E ℝ
   change ‖iteratedFDeriv ℝ n (f ∘ L) y‖ ≤ _
-  rw [L.iteratedFDeriv_comp_right hf y (nat_le_infty n)]
+  rw [L.iteratedFDeriv_comp_right hf y (natCast_le_infty n)]
   apply (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans
   have hprod : (∏ _i : Fin n, ‖L‖) ≤ 1 := by
     exact Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun _ _ => ContinuousLinearMap.norm_snd_le _ _ _)
@@ -140,7 +138,7 @@ theorem compact_coefficient_jets {F : Type*} [NormedAddCommGroup F] [NormedSpace
       ‖iteratedFDeriv ℝ i B y‖ ≤ C := by
     intro i
     obtain ⟨C, hC⟩ := (hS.prod isCompact_Icc).exists_bound_of_continuousOn
-      (hB.continuous_iteratedFDeriv (nat_le_infty i)).continuousOn
+      (hB.continuous_iteratedFDeriv (natCast_le_infty i)).continuousOn
     exact ⟨max C 0, le_max_right _ _, fun y hy => (hC y hy).trans (le_max_left _ _)⟩
   choose C hC hbound using hb
   refine ⟨1 + ∑ i ∈ Finset.range (n + 1), C i, ?_, ?_⟩
@@ -282,7 +280,7 @@ theorem edge_smul_iteratedFDeriv_bound_on {c : ℝ} (hc : 0 < c) (j : ℕ)
     intro k hk
     exact (norm_iteratedFDeriv_snd_le (FlatCutoff.edge_div_pow_contDiff hc j) k (p, x)).trans
       (hweight k (hk.trans hi) x hx hxd)
-  have hprod := norm_iteratedFDerivWithin_smul_le hw.contDiffOn hB hV.uniqueDiffOn hy (nat_le_infty i)
+  have hprod := norm_iteratedFDerivWithin_smul_le hw.contDiffOn hB hV.uniqueDiffOn hy (natCast_le_infty i)
   simp only [iteratedFDerivWithin_of_isOpen _ hV hy] at hprod
   apply hprod.trans
   calc

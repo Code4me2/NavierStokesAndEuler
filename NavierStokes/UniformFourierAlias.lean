@@ -2,6 +2,7 @@ import NavierStokes.FourierAlias
 import NavierStokes.WeightedRadialPrimitive
 import NavierStokes.RadialPullback
 import NavierStokes.SmoothFamilyTorusInverse
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform seminorm bounds for families of exact Fourier aliases
@@ -19,9 +20,6 @@ namespace NavierStokes.UniformFourierAlias
 
 open TorusInverse JetBounds
 
-private theorem nat_le_smooth (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  le_of_lt (WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n))
-
 section JetOperations
 
 variable {D E F : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
@@ -31,7 +29,7 @@ variable {D E F : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 theorem norm_iteratedFDeriv_map (L : E →L[ℝ] F) {f : D → E}
     (hf : ContDiff ℝ ∞ f) (m : ℕ) (z : D) :
     ‖iteratedFDeriv ℝ m (fun x => L (f x)) z‖ ≤ ‖L‖ * ‖iteratedFDeriv ℝ m f z‖ := by
-  have he := L.iteratedFDeriv_comp_left hf.contDiffAt (nat_le_smooth m) (x := z)
+  have he := L.iteratedFDeriv_comp_left hf.contDiffAt (natCast_le_infty m) (x := z)
   change iteratedFDeriv ℝ m (fun x => L (f x)) z = _ at he
   rw [he]
   exact L.norm_compContinuousMultilinearMap_le _
@@ -42,7 +40,7 @@ theorem finiteJetBound_fixedPartial {f : D → E} (hf : ContDiff ℝ ∞ f)
     FiniteJetBound m (fun x => fderiv ℝ f x v) s C := by
   intro j hj z hz
   have h := norm_iteratedFDeriv_clm_apply_const (𝕜 := ℝ) (c := v)
-    (hf.fderiv_right (by simp)).contDiffAt (nat_le_smooth j) (x := z)
+    (hf.fderiv_right (by simp)).contDiffAt (natCast_le_infty j) (x := z)
   rw [norm_iteratedFDeriv_fderiv] at h
   exact h.trans ((mul_le_mul_of_nonneg_right hv (norm_nonneg _)).trans
     (by simpa only [one_mul] using hb (j + 1) (Nat.add_le_add_right hj 1) z hz))
@@ -175,7 +173,7 @@ theorem totalIntegral_sourceJet_bound {a b M C : ℝ} {v : E}
     exact RadialAlias.wholeAlias_sourceJet J f p hM
       (fun n hn => (hJ n hn).of_le (by simp)) hsJ hr
   rw [heq, iteratedFDeriv_const_smul_apply'
-    ((TransportPrimitive.totalIntegral_contDiff hg hsg).of_le (nat_le_smooth j)).contDiffAt]
+    ((TransportPrimitive.totalIntegral_contDiff hg hsg).of_le (natCast_le_infty j)).contDiffAt]
   have hn := norm_smul ((-M⁻¹) ^ p : ℝ)
     (iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M v (RadialAlias.sourceJet J f p)) z)
   rw [hn, Real.norm_eq_abs, abs_pow, abs_neg, abs_inv, mul_comm]
@@ -265,7 +263,7 @@ theorem complexify_smooth {f : D → ℝ} (hf : ContDiff ℝ ∞ f) :
 theorem norm_iteratedFDeriv_complexify {f : D → ℝ} (hf : ContDiff ℝ ∞ f)
     (m : ℕ) (z : D) :
     ‖iteratedFDeriv ℝ m (complexify f) z‖ = ‖iteratedFDeriv ℝ m f z‖ :=
-  Complex.ofRealLI.norm_iteratedFDeriv_comp_left hf.contDiffAt (nat_le_smooth m)
+  Complex.ofRealLI.norm_iteratedFDeriv_comp_left hf.contDiffAt (natCast_le_infty m)
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem complexify_supported {a b : ℝ} {f : ℝ × E → ℝ}

@@ -151,8 +151,7 @@ theorem radialAverage_radial_identity
   have hd2 : Continuous (fun t : ℝ => t ^ 2 • fderiv ℝ u (t • x) x) := by
     simpa only [smul_apply] using hd
   have hcont : Continuous (fun t : ℝ =>
-      (2 * t) • u (t • x) + t ^ 2 • fderiv ℝ u (t • x) x) := by
-    exact hv2.add hd2
+      (2 * t) • u (t • x) + t ^ 2 • fderiv ℝ u (t • x) x) := hv2.add hd2
   have ht : (∫ t in (0 : ℝ)..1,
       (2 * t) • u (t • x) + t ^ 2 • fderiv ℝ u (t • x) x) =
       (1 : ℝ) ^ 2 • u ((1 : ℝ) • x) - (0 : ℝ) ^ 2 • u ((0 : ℝ) • x) :=

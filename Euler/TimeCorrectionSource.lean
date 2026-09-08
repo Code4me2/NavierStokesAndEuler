@@ -71,8 +71,7 @@ theorem restrict_transport_state {q : ℕ} (hq : 6 ≤ q)
   have hb : restrictOperator period (by omega : q ≤ q+1) b = truncateOperator period q b := by
     apply value_injective period
     rfl
-  have hUr : restrictOperator period (by omega : q+1 ≤ (q+1)+1) U = e := by
-    exact hU
+  have hUr : restrictOperator period (by omega : q+1 ≤ (q+1)+1) U = e := hU
   have h := restrict_asymmetricTransport period (by omega : 6 ≤ q+1) hq (by omega : q ≤ q+1) L hL b U
   have he := congrArg₂ (fun x : SobolevSpace period q => fun y : SobolevSpace period (q+1) =>
     asymmetricTransport period hq L hL x y) hb hUr

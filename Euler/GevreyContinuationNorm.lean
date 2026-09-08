@@ -27,8 +27,7 @@ theorem word_le_level {s : ℕ} (u : SobolevSpace period s) (w : SobolevWord s) 
   rw [levelNorm_eq_words]
   have h := Finset.single_le_sum (s := (Finset.univ : Finset (Fin w.1.val → Fin 4)))
     (fun v _ => norm_nonneg ((toJet period u).word v)) (Finset.mem_univ w.2)
-  rw [toJet_word period u (by have := w.1.isLt; omega) w.2] at h
-  exact h
+  rwa [toJet_word period u (by have := w.1.isLt; omega) w.2] at h
 
 /-- Every derivative coordinate through the full energy order is contained in one retained external/base block. -/
 theorem level_le_block {s : ℕ} (u : SobolevSpace period s) (N m : ℕ) (hm : m ≤ N+6) :
@@ -40,8 +39,7 @@ theorem level_le_block {s : ℕ} (u : SobolevSpace period s) (N m : ℕ) (hm : m
   have h := Finset.single_le_sum (s := Finset.range 7)
     (fun r _ => (levelNorm_nonneg (toJet period u) : 0 ≤ levelNorm period (toJet period u) (n+r)))
     (show m-n ∈ Finset.range 7 by exact Finset.mem_range.mpr (by omega))
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 /-- A finite actual Gevrey bound controls the complete energy-order Sobolev norm on every positive-radius interval. -/
 theorem norm_le_weighted {s : ℕ} (N : ℕ) (hS : s ≤ N+6) (ρ δ : ℝ)

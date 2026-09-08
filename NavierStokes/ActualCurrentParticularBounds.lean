@@ -8,6 +8,7 @@ import NavierStokes.CurrentPhysicalChartJets
 import NavierStokes.CurrentPhysicalModeGerms
 import NavierStokes.CurrentParticularLabelBounds
 import NavierStokes.CurrentModeGeometry
+import NavierStokes.WithTopLemmas
 
 /-!
 # Quantitative bounds for actual current-band particular fields
@@ -24,9 +25,6 @@ namespace NavierStokes.ActualCurrentParticularBounds
 open Set Function Filter ProblemStatement WeightedClasses HarmonicCalculus LinearWaveBounds
 open scoped Topology ContDiff BigOperators
 
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 /-! ## The literal native potential coefficient -/
 
@@ -287,7 +285,7 @@ theorem character_comp_positive_jets {Φ : E → ℝ} (hΦ : ContDiff ℝ ∞ Φ
       (m.factorial : ℝ) * M ^ m * B ^ m := by
   intro k hk
   have he := norm_iteratedFDeriv_comp_le (PhysicalGraphBounds.character_smooth c) hΦ
-    (nat_le_infty k) x (C := M ^ m) (D := B)
+    (natCast_le_infty k) x (C := M ^ m) (D := B)
     (fun i hi => by
       rw [PhysicalGraphBounds.norm_character_jet]
       exact (pow_le_pow_left₀ (abs_nonneg _) hc i).trans
@@ -356,7 +354,7 @@ theorem smul_mode_jet_bound_local {V : Type*} [NormedAddCommGroup V]
   intro k hk
   rw [PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq hprod k]
   apply (norm_iteratedFDeriv_smul_le
-    ((PhysicalGraphBounds.character_smooth c).comp hΦ') ha' x (nat_le_infty k)).trans
+    ((PhysicalGraphBounds.character_smooth c).comp hΦ') ha' x (natCast_le_infty k)).trans
   calc
     _ ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * D * A := by
       apply Finset.sum_le_sum
@@ -591,7 +589,7 @@ theorem actual_native_pressure_re_bound (x : CycleState (Label B N0))
   have hc := (actual_native_pressure_smoothNear x hx hs hN j hj H l n hz).contDiffAt
   rw [show (fun y => (ActualCurrentParticularPhysical.nativePressure x l j n y).re) =
     Complex.reCLM ∘ ActualCurrentParticularPhysical.nativePressure x l j n from rfl,
-    Complex.reCLM.iteratedFDeriv_comp_left (hc.of_le (nat_le_infty i)) le_rfl]
+    Complex.reCLM.iteratedFDeriv_comp_left (hc.of_le (natCast_le_infty i)) le_rfl]
   have hr : ‖Complex.reCLM‖ ≤ 1 := by
     apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
     intro z
@@ -680,7 +678,7 @@ theorem scaled_common_bound {h a b : ℝ}
   apply hb n hn d hd w hann ht q hq hlo hhi G hG
   intro i hi
   change ‖iteratedFDeriv ℝ i (fun y => ChartScales.Q n ^ (-degree) • F y) _‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hF.contDiffAt.of_le (nat_le_infty i)),
+  rw [iteratedFDeriv_const_smul_apply' (hF.contDiffAt.of_le (natCast_le_infty i)),
     norm_smul (ChartScales.Q n ^ (-degree) : ℝ)
       (iteratedFDeriv ℝ i F (PhysicalWaveSum.commonLift h n d w)),
     Real.norm_of_nonneg (Real.rpow_pos_of_pos (ChartScales.Q_pos n) (-degree)).le,
@@ -762,7 +760,7 @@ theorem vector_chart_physical_bound {h a b : ℝ}
       (pow_nonneg (zero_le_one.trans hS) _)
   change ‖iteratedFDeriv ℝ i (CurrentPhysicalChartJets.realVectorCLM ∘ _) _‖ ≤ _
   rw [CurrentPhysicalChartJets.realVectorCLM.iteratedFDeriv_comp_left
-    (hrot.contDiffAt.of_le (nat_le_infty i)) le_rfl]
+    (hrot.contDiffAt.of_le (natCast_le_infty i)) le_rfl]
   apply (CurrentPhysicalChartJets.realVectorCLM.norm_compContinuousMultilinearMap_le _).trans
   have hb := mul_le_mul CurrentPhysicalChartJets.norm_realVectorCLM_le
     (hm chart _ hdoma f hf _ ha' hfb i hi) (norm_nonneg _) (by norm_num : (0 : ℝ) ≤ 3)

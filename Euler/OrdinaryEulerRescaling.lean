@@ -84,8 +84,7 @@ theorem rescale_initial (U : Evolution S hS) (T : ℝ) (hT : 0 ≤ T)
       scaleField c (U.velocity ⟨0,le_rfl,hS⟩) := by
   rw [rescale_velocity]
   congr 2
-  apply Subtype.ext
-  exact mul_zero c
+  exact Subtype.ext (mul_zero c)
 
 end Evolution
 end EulerOrdinarySobolev

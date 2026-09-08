@@ -24,9 +24,6 @@ open scoped Topology ContDiff InnerProductSpace BigOperators
 abbrev Plane := TorusInverse.Plane
 
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
-
 section SelectedFrame
 
 variable {ι : Type*} {D : PhaseJetBounds.Domain ι PhaseCalculus.Slow}

@@ -97,8 +97,7 @@ theorem normalizedExact_euler (t : ℝ) (ht : t ∈ Ioo 0 A.T) (x : Space) :
       (hu t ht (A.ell • A.packetPosition (t,y)))
       (hp ⟨t,ht.1.le,ht.2.le⟩ (A.ell • A.packetPosition (t,y)))
       (heuler t ht (A.ell • A.packetPosition (t,y)))) hd
-  rw [hy] at hh
-  exact hh
+  rwa [hy] at hh
 
 include hYX hXY hY hvelocity hu hp heuler hdiv hk in
 theorem exactPacket_euler (t : ℝ) (ht : t ∈ Ioo 0 A.T) (x : Space) :

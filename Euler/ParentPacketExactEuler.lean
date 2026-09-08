@@ -120,8 +120,7 @@ theorem normalizedExact_momentum (t : ℝ) (ht : t ∈ Ioo 0 A.T) (x : Space) :
       (hu t ht (A.ell • A.packetPosition (t,y)))
       (hp ⟨t,ht.1.le,ht.2.le⟩ (A.ell • A.packetPosition (t,y)))
       (heuler t ht (A.ell • A.packetPosition (t,y))))
-  rw [hy] at hh
-  exact hh
+  rwa [hy] at hh
 
 include hYX hXY hY hu in
 theorem exactPacketVelocity_differentiableAt (t : ℝ) (ht : t ∈ Ioo 0 A.T) (x : Space) :

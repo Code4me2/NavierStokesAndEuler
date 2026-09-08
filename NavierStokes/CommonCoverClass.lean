@@ -2,6 +2,7 @@ import NavierStokes.CommonCoverSolve
 import NavierStokes.PhysicalGraphBounds
 import NavierStokes.WeightedClasses
 import NavierStokes.SimilarityHomogeneity
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform stripped jets on a common cover
@@ -22,9 +23,6 @@ open scoped ContDiff BigOperators Topology
 open TorusInverse
 
 abbrev CCS := CommonCoverSolve.Geometry
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 section Envelopes
 
@@ -75,7 +73,7 @@ theorem clm_apply_jet_bound {f : X → V →L[ℝ] W} {g : X → V}
   have hA0 : 0 ≤ A := (norm_nonneg _).trans (hA 0 (Nat.zero_le _))
   have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0 (Nat.zero_le _))
   intro j hj
-  refine (norm_iteratedFDeriv_clm_apply hf hg x (nat_le_infty j)).trans ?_
+  refine (norm_iteratedFDeriv_clm_apply hf hg x (natCast_le_infty j)).trans ?_
   calc
     _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * A * B := by
       apply Finset.sum_le_sum

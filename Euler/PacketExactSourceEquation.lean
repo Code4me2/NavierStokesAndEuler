@@ -76,8 +76,7 @@ theorem source_equation (t : ℝ) (ht : t ∈ Ioo 0 D.T) (z : LiftTangent) :
   have hquad := algebraic_formula D κ S.rawVelocity (t,z)
   simp only [algebraic,rawQuadratic,rawFrame,rawInverse,EulerTransversePacketProvider.Data.clamp,
     projIcc_of_mem D.T_pos.le ⟨ht.1.le,ht.2.le⟩,smul_apply,comp_apply] at hquad
-  rw [hquad] at h
-  exact h
+  rwa [hquad] at h
 
 theorem source_equation_of_frame (F : ℝ × Space → Space →L[ℝ] Space)
     (hmatch : ∀ s : Icc (0 : ℝ) D.T, ∀ x, F (s,x) = D.F.field s x)

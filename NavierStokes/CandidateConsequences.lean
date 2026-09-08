@@ -3,6 +3,7 @@ import NavierStokes.PeriodicSobolev
 import NavierStokes.CompactForceDecay
 import NavierStokes.CandidateFromLimits
 import NavierStokes.MixedPeriodicAssembly
+import NavierStokes.WithTopLemmas
 
 /-!
 # Consequences of the actual candidate fields
@@ -20,9 +21,6 @@ namespace NavierStokes.CandidateConsequences
 open Set Filter Function ProblemStatement
 open scoped ContDiff Topology BigOperators Pointwise
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl m).le
-
 theorem future_uniqueDiff : UniqueDiffOn ℝ futureDomain :=
   (uniqueDiffOn_Ici 0).prod uniqueDiffOn_univ
 
@@ -33,7 +31,7 @@ noncomputable def futureJet (f : VelocityField) (m : ℕ) :=
 theorem futureJet_continuous {f : VelocityField}
     (hf : ContDiffOn ℝ ∞ f futureDomain) (m : ℕ) :
     ContinuousOn (futureJet f m) futureDomain :=
-  hf.continuousOn_iteratedFDerivWithin (nat_le_infty m) future_uniqueDiff
+  hf.continuousOn_iteratedFDerivWithin (natCast_le_infty m) future_uniqueDiff
 
 private theorem future_spatial_translate (e : Space) :
     ((0, e) : SpaceTime) +ᵥ futureDomain = futureDomain := by
@@ -65,7 +63,7 @@ theorem futureJet_periodic {f : VelocityField}
 theorem futureJet_eq_full {f : VelocityField} {t : ℝ} (ht : 0 ≤ t) (x : Space)
     (m : ℕ) (hf : ContDiffAt ℝ ∞ f (t, x)) :
     futureJet f m (t, x) = iteratedFDeriv ℝ m f (t, x) :=
-  iteratedFDerivWithin_eq_iteratedFDeriv future_uniqueDiff (hf.of_le (nat_le_infty m))
+  iteratedFDerivWithin_eq_iteratedFDeriv future_uniqueDiff (hf.of_le (natCast_le_infty m))
     ⟨ht, mem_univ _⟩
 
 theorem futureJet_eq_full_of_pos {f : VelocityField}

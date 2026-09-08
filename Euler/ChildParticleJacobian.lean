@@ -21,8 +21,7 @@ theorem displacement_jacobian (P D : SmoothTimeField K E E) (t : K) (x : E) :
   have hh := (hasFDerivAt_id x).add
     (((displacement P D).smooth t).differentiable (by simp) x).hasFDerivAt
   apply hh.unique
-  apply hc.congr_of_eventuallyEq
-  exact Filter.Eventually.of_forall (fun y => map_composition P D t y)
+  exact hc.congr_of_eventuallyEq (Filter.Eventually.of_forall (fun y => map_composition P D t y))
 
 theorem displacement_det_one [FiniteDimensional ℝ E]
     (P D : SmoothTimeField K E E) (t : K)

@@ -1,4 +1,5 @@
 import Euler.SobolevTransportCommutator
+import Euler.SmoothInequalityTransfer
 
 /-! The actual finite-Sobolev external transport commutator satisfies the Gevrey radius-loss bound. -/
 
@@ -10,7 +11,7 @@ open MeasureTheory EulerLiftedGradientSpace EulerCylinderSobolevSpace EulerCylin
   EulerSpatialSobolevInverse EulerMetricTransport EulerH6Pressure EulerPacketWeights
   EulerSobolevGevreyOperators EulerSobolevWordLevel EulerSobolevTransport EulerSobolevL2Product
   EulerFunctionalVelocity EulerH6Nonlinear EulerVectorCylinder EulerExternalTransportCommutator
-  EulerSobolevGevreyProduct EulerSobolevHeat
+  EulerSobolevGevreyProduct EulerSobolevHeat EulerSmoothInequalityTransfer
 open scoped ContDiff ENNReal Topology
 
 variable (period : ℝ) [Fact (0 < period)]
@@ -119,26 +120,15 @@ theorem weightedCommutator_bound {s : ℕ} (hs : 6 ≤ s) (N : ℕ) (hN : N+6 �
     (u v : SobolevSpace period (s+1)) :
     weightedCommutatorNorm period hs N hN ρ L hL u v ≤
       (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ u*weightedLoss period 6 N ρ v := by
-  let U : ℕ → SobolevSpace period (s+1) := fun n => restrictOperator period (by omega : s+1 ≤ s+1+3) (smoothApprox period (s+1) n u)
-  let V : ℕ → SobolevSpace period (s+1) := fun n => restrictOperator period (by omega : s+1 ≤ s+1+3) (smoothApprox period (s+1) n v)
-  have hU : Filter.Tendsto U Filter.atTop (𝓝 u) := smoothApprox_tendsto period u
-  have hV : Filter.Tendsto V Filter.atTop (𝓝 v) := smoothApprox_tendsto period v
-  have hpairs : Filter.Tendsto (fun n => (U n,V n)) Filter.atTop (𝓝 (u,v)) := hU.prodMk_nhds hV
-  have hC : Filter.Tendsto
-      (fun p : SobolevSpace period (s+1) × SobolevSpace period (s+1) => weightedCommutatorNorm period hs N hN ρ L hL p.1 p.2)
-      (𝓝 (u,v)) (𝓝 (weightedCommutatorNorm period hs N hN ρ L hL u v)) :=
-    (continuous_weightedCommutatorNorm period hs N hN ρ L hL).tendsto (u,v)
-  have hleft := hC.comp hpairs
   have hW : Continuous (weightedNorm period (s := s+1) 6 N ρ) := continuous_weighted_blockNorm period N (by omega) ρ
   have hY : Continuous (weightedLoss period (s := s+1) 6 N ρ) := continuous_weightedLoss period 6 N (by omega) ρ
-  have hright : Filter.Tendsto (fun n => (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ (U n)*weightedLoss period 6 N ρ (V n))
-      Filter.atTop (𝓝 ((4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ u*weightedLoss period 6 N ρ v)) :=
-    ((hW.tendsto u |>.comp hU).const_mul ((4*productConstant period 3)*ρ⁻¹)).mul (hY.tendsto v |>.comp hV)
-  apply le_of_tendsto_of_tendsto hleft hright
-  apply Filter.Eventually.of_forall
-  intro n
-  obtain ⟨f,hf,hfs,hfL⟩ := smoothApprox_representative_all period n u
-  obtain ⟨g,hg,hgs,hgL⟩ := smoothApprox_representative_all period n v
-  exact weightedCommutator_smooth_bound period hs N hN ρ hρ L hL (U n) (V n) f g hf hg hfs hgs hfL hgL
+  exact binary_le_of_smooth period
+    (fun p => weightedCommutatorNorm period hs N hN ρ L hL p.1 p.2)
+    (fun p => (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ p.1*
+      weightedLoss period 6 N ρ p.2)
+    (continuous_weightedCommutatorNorm period hs N hN ρ L hL)
+    (((hW.comp continuous_fst).const_mul ((4*productConstant period 3)*ρ⁻¹)).mul (hY.comp continuous_snd))
+    (fun a b f g hf hg hfs hgs hfL hgL =>
+      weightedCommutator_smooth_bound period hs N hN ρ hρ L hL a b f g hf hg hfs hgs hfL hgL) u v
 
 end EulerSobolevTransportCommutator

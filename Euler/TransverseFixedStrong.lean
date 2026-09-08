@@ -85,7 +85,6 @@ theorem exists_strong (hTpos : 0 < T) (f : TimeLp T E) :
   refine ⟨v,hv,?_,hder,heq⟩
   change (coordinateDerivative T hT Q Q₁ c hc hQ
     (physicalDerivative T hT Q Q₁ H c hc hQ hd K hK hH hsmall f) : ℝ → U) =ᵐ[timeMeasure T] v at hrep
-  rw [coordinateDerivative_eq T hT Q Q₁ H c hc hQ hd K hK hH hsmall f] at hrep
-  exact hrep
+  rwa [coordinateDerivative_eq T hT Q Q₁ H c hc hQ hd K hK hH hsmall f] at hrep
 
 end EulerTransverseFixedStrong

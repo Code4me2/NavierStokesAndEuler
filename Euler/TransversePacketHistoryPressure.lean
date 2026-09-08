@@ -166,8 +166,7 @@ theorem field_balance (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) :
       B.normalResidual G t y • D.normal.field t y.1) =ᵐ[liftMeasure P] forceField G t := by
     filter_upwards [B.balance_ae G t,B.field_ae G t,B.derivativeField_ae G t,
       pointField_ae P (forcingPath G) G.path_orbit t] with y he ha hd hf
-    rw [ha,hd,hf] at he
-    exact he
+    rwa [ha,hd,hf] at he
   have hA := smoothField_continuous P _ (B.field_smooth G t)
   have hD := smoothField_continuous P _ (B.derivativeField_smooth G t)
   have hF := smoothField_continuous P _ (pointField_smooth P (forcingPath G) G.path_orbit t)

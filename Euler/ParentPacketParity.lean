@@ -130,8 +130,7 @@ include O
 theorem odd (t : Icc (0 : ℝ) A.T) : Function.Odd (I.field t) := by
   intro x
   have h := I.left_inverse t (-I.field t x)
-  rw [O.position_odd t (I.field t x),I.right_inverse] at h
-  exact h
+  rwa [O.position_odd t (I.field t x),I.right_inverse] at h
 
 theorem zero (t : Icc (0 : ℝ) A.T) : I.field t 0=0 := by
   ext i

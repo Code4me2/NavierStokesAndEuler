@@ -124,8 +124,7 @@ include hRange in
 theorem transverseForward_backward (u : transverseDerivatives T hT m) :
     transverseForward T hT Q Q₁ hd m hTangent
       (transverseBackward T hT Q Q₁ c hc hQ hd m u) = u := by
-  apply Subtype.ext
-  exact coordinateDerivative_reconstruct T hT Q Q₁ c hc hQ hd m hRange u
+  exact Subtype.ext (coordinateDerivative_reconstruct T hT Q Q₁ c hc hQ hd m hRange u)
 
 
 end EulerTimeH1FrameTransport

@@ -1,6 +1,7 @@
 import NavierStokes.SimilarityCoordinates
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Normed.Group.Bounded
+import NavierStokes.WithTopLemmas
 
 /-!
 # Fixed-order bounds for the physical similarity coordinates
@@ -21,12 +22,6 @@ namespace NavierStokes.PhysicalCoordinateBounds
 open SimilarityCoordinates
 
 abbrev Point := ℝ × (ℝ × ℝ)
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-
-private theorem infty_add_one_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-  simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
 
 noncomputable def D (a : ℝ) : ℝ := (1 - a) / 2
 
@@ -129,7 +124,7 @@ theorem inverseJet_contDiffAt {a : ℝ} {g : Point → ℝ} {y : Point}
     exact hg.continuousLinearMap_comp
       ((continuousMultilinearCurryFin0 ℝ Point ℝ).symm : ℝ →L[ℝ] Point[×0]→L[ℝ] ℝ)
   | succ n ih =>
-    exact ((ih.fderiv_right infty_add_one_le).clm_comp
+    exact ((ih.fderiv_right infty_add_one_le_infty).clm_comp
       (inverseDifferential_contDiffAt hy hs)).continuousLinearMap_comp
         ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => Point) ℝ).symm :
           (Point →L[ℝ] Point[×n]→L[ℝ] ℝ) →L[ℝ] Point[×(n + 1)]→L[ℝ] ℝ)
@@ -255,7 +250,7 @@ theorem iteratedFDeriv_comp_linear_open {F : Point → ℝ} {s : Set Point}
       (iteratedFDeriv ℝ n F (L p)).compContinuousLinearMap (fun _ => L) := by
   have hs' := hs.preimage L.continuous
   have hd := L.iteratedFDerivWithin_comp_right hF hs.uniqueDiffOn hs'.uniqueDiffOn hp
-    (nat_le_infty n)
+    (natCast_le_infty n)
   rwa [iteratedFDerivWithin_of_isOpen n hs' hp, iteratedFDerivWithin_of_isOpen n hs hp] at hd
 
 theorem iteratedFDeriv_eq_of_eventuallyEq {F G : Point → ℝ} {p : Point}
@@ -336,7 +331,7 @@ theorem homogeneous_derivative_bound {a b : ℝ} (ha : 0 < a) (ha1 : a < 1)
     rwa [dilation_inv_cancel hq] at he
   have hcomp : ContDiffAt ℝ (n : WithTop ℕ∞) (F ∘ L) p :=
     ((hF.contDiffAt (positiveTime_isOpen.mem_nhds hLp)).comp p L.contDiff.contDiffAt).of_le
-      (nat_le_infty n)
+      (natCast_le_infty n)
   have hjet : ‖iteratedFDeriv ℝ n F (L p)‖ ≤ K := by
     rw [iteratedFDeriv_comp_inverse ha ha1 hg n hLp]
     exact hbound _ (normalized_mem ha ha1 hp hx)

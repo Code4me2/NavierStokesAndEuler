@@ -99,8 +99,7 @@ theorem field_balance (hm : ∀ t x, m.field t x ≠ 0)
       derivativeField_ae period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ t,
       pointField_ae period (includePath period S hS f) hf t] with y he ha hd hforce
     change (f t : CylinderL2 period Space) y = pointField period (includePath period S hS f) hf t y at hforce
-    rw [ha,hd,hforce] at he
-    exact he
+    rwa [ha,hd,hforce] at he
   have hA := smoothField_continuous period _ (field_smooth period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ t)
   have hD := smoothField_continuous period _ (derivativeField_smooth period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ t)
   have hF := smoothField_continuous period _ (pointField_smooth period (includePath period S hS f) hf t)

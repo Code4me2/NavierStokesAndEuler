@@ -72,8 +72,7 @@ theorem wordPath_square_bound {s n : ℕ} (h : n+2 ≤ s) (w : Fin n → Fin 4) 
       (mul_le_mul ((wordPathOperator period (by omega : n ≤ s) w T u).norm_coe_le_norm t)
         (u.norm_coe_le_norm t) (norm_nonneg _) (norm_nonneg _))
   have hs := (sq_le_sq₀ (norm_nonneg _) (Real.sqrt_nonneg A)).mpr hb
-  rw [Real.sq_sqrt hA] at hs
-  exact hs
+  rwa [Real.sq_sqrt hA] at hs
 
 
 /-- The actual difference interpolation estimate depends only on the two given uniform state bounds. -/

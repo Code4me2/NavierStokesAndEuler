@@ -84,8 +84,7 @@ theorem derivative_elliptic_middle (A G H : SmoothL2Field ℝ) (a b j : Fin 3)
     ring
   rw [he] at h
   change ‖scaledAverage 1 D.field x-scaledAverage ε D.field x‖ ≤ _ at h
-  rw [scaledAverage_eq (by norm_num : (0:ℝ)<1), scaledAverage_eq hε, norm_sub_rev] at h
-  exact h
+  rwa [scaledAverage_eq (by norm_num : (0:ℝ)<1), scaledAverage_eq hε, norm_sub_rev] at h
 
 /-- The three heat scales, with every term attached to the original field. -/
 theorem elliptic_derivative_split (A G H : SmoothL2Field ℝ) (a b j : Fin 3)

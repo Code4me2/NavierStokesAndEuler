@@ -125,7 +125,6 @@ theorem projection_norm : ‖projection (V := V) μ S hS‖ ≤ 1 := by
 /-- Inclusion after projection fixes every already supported field. -/
 theorem projection_supported (u : supportedSpace (V := V) μ S hS) :
     projection μ S hS (u : Lp V 2 μ) = u := by
-  apply Subtype.ext
-  exact ((mem_supportedSpace_iff μ S hS (u : Lp V 2 μ)).1 u.property).symm
+  exact Subtype.ext (((mem_supportedSpace_iff μ S hS (u : Lp V 2 μ)).1 u.property).symm)
 
 end EulerLpSupportedSubspace

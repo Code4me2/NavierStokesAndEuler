@@ -1,5 +1,6 @@
 import NavierStokes.ActualCurrentWaveSupport
 import NavierStokes.LabelSumBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Physical jet bounds for the actual current particular label sum
@@ -317,10 +318,6 @@ theorem current_modes_contDiffAt (l : Label B N0) (j : ℤ) (hj : j ≠ 0) (n : 
         (PhysicalGraphBounds.radialProjection w)) hc hm
 
 
-omit H hN in
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-
 theorem localPotential_jet_bound_of_invariant (n m : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band h n) (C : ℤ → ℝ)
     (hC : ∀ j ∈ ParticularWaveAssembly.modes x.coefficients.residualBand, 0 ≤ C j)
@@ -335,7 +332,7 @@ theorem localPotential_jet_bound_of_invariant (n m : ℕ) {w : SpaceTime}
   localPotential_jet_bound hN (ActualCycleParameters.particularState x)
     (fun l => H.inputSupport (l.2, l.1)) n m hw C hC
     (fun l _ j hj => (current_modes_contDiffAt H hN l j
-      ((ParticularWaveAssembly.mem_modes _ _).mp hj).1 n hw).1.of_le (nat_le_infty m)) hb
+      ((ParticularWaveAssembly.mem_modes _ _).mp hj).1 n hw).1.of_le (natCast_le_infty m)) hb
 
 theorem localPressure_jet_bound_of_invariant (n m : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band h n) (C : ℤ → ℝ)
@@ -351,7 +348,7 @@ theorem localPressure_jet_bound_of_invariant (n m : ℕ) {w : SpaceTime}
   localPressure_jet_bound hN (ActualCycleParameters.particularState x)
     (fun l => H.inputSupport (l.2, l.1)) n m hw C hC
     (fun l _ j hj => (current_modes_contDiffAt H hN l j
-      ((ParticularWaveAssembly.mem_modes _ _).mp hj).1 n hw).2.of_le (nat_le_infty m)) hb
+      ((ParticularWaveAssembly.mem_modes _ _).mp hj).1 n hw).2.of_le (natCast_le_infty m)) hb
 
 
 

@@ -1,6 +1,7 @@
 import NavierStokes.PeriodizedWaveBounds
 import NavierStokes.UniformPrimaryWeights
 import NavierStokes.SignedWaveUpdate
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform native-cell bounds for actual signed coefficients
@@ -23,9 +24,6 @@ variable {D E F G I : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr le_top
-
 /-- The quantitative chain rule needs only the actual finite jet at the
 point. No common smooth extension of the native copies is required. -/
 theorem comp_jet_bound_at {f : D → ℝ} {g : ℝ → ℝ} {x : D}
@@ -34,8 +32,8 @@ theorem comp_jet_bound_at {f : D → ℝ} {g : ℝ → ℝ} {x : D}
     (hC : ∀ i ≤ n, ‖iteratedFDeriv ℝ i g (f x)‖ ≤ C)
     (hB : ∀ i, 1 ≤ i → i ≤ n → ‖iteratedFDeriv ℝ i f x‖ ≤ B ^ i) :
     ‖iteratedFDeriv ℝ n (g ∘ f) x‖ ≤ n.factorial * C * B ^ n := by
-  obtain ⟨U, hU, hfU⟩ := hf.contDiffOn (nat_le_infty n) (by simp)
-  obtain ⟨V, hV, hgV⟩ := hg.contDiffOn (nat_le_infty n) (by simp)
+  obtain ⟨U, hU, hfU⟩ := hf.contDiffOn (natCast_le_infty n) (by simp)
+  obtain ⟨V, hV, hgV⟩ := hg.contDiffOn (natCast_le_infty n) (by simp)
   obtain ⟨T, hTV, hT, hfxT⟩ := mem_nhds_iff.mp hV
   obtain ⟨O, hOsub, hO, hxO⟩ := mem_nhds_iff.mp
     (inter_mem hU (hf.continuousAt.eventually (hT.mem_nhds hfxT)))
@@ -221,8 +219,8 @@ theorem mul_jets_at {f g : D → ℝ} {x : D}
     (hfj : ∀ i ≤ n, ‖iteratedFDeriv ℝ i f x‖ ≤ A)
     (hgj : ∀ i ≤ n, ‖iteratedFDeriv ℝ i g x‖ ≤ B) :
     ‖iteratedFDeriv ℝ n (fun y => f y * g y) x‖ ≤ chooseSum n * A * B := by
-  obtain ⟨U, hU, hfU⟩ := hf.contDiffOn (nat_le_infty n) (by simp)
-  obtain ⟨V, hV, hgV⟩ := hg.contDiffOn (nat_le_infty n) (by simp)
+  obtain ⟨U, hU, hfU⟩ := hf.contDiffOn (natCast_le_infty n) (by simp)
+  obtain ⟨V, hV, hgV⟩ := hg.contDiffOn (natCast_le_infty n) (by simp)
   obtain ⟨O, hsub, hO, hxO⟩ := mem_nhds_iff.mp (inter_mem hU hV)
   have hh := norm_iteratedFDerivWithin_mul_le (hfU.mono (hsub.trans inter_subset_left))
     (hgV.mono (hsub.trans inter_subset_right)) hO.uniqueDiffOn hxO (le_refl (n : WithTop ℕ∞))

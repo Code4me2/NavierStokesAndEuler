@@ -22,9 +22,6 @@ abbrev Slow := PhaseCalculus.Slow
 abbrev Plane := TorusInverse.Plane
 abbrev Native := Slow × Plane
 
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
-
 /-! ## The positive native annulus and the actual pulse coordinate -/
 
 noncomputable def standardSlowRegion {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :

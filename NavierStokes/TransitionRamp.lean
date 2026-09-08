@@ -1,6 +1,7 @@
 import NavierStokes.ActivationStocks
 import NavierStokes.ReferenceJetBounds
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # The stock-driven ACT continuation and its final two ramps
@@ -1453,9 +1454,6 @@ end EndpointEstimates
 
 /-! ## Uniform higher jets before choosing the normalization -/
 
-theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  WithTop.coe_le_coe.mpr (show (n : ℕ∞) ≤ ⊤ from le_top)
-
 theorem compact_scalar_jets {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K)
     (hKJ : K ⊆ J) {g : ℝ → ℝ} (hg : ContDiffOn ℝ ∞ g J) (N : ℕ) :
     ∃ M ≥ 0, ∀ n ≤ N, ∀ η ∈ K, |iteratedDeriv n g η| ≤ M := by
@@ -1477,20 +1475,20 @@ theorem local_composition_jet_bound {S U : Set ℝ} (hS : IsOpen S) (hU : IsOpen
   have hC : ∀ i ≤ n, ‖iteratedFDerivWithin ℝ i g U (f x)‖ ≤ B := by
     intro i hi
     rw [iteratedFDerivWithin_eq_iteratedFDeriv hU.uniqueDiffOn
-      ((hg.contDiffAt (hU.mem_nhds (hmap hx))).of_le (nat_le_infty i)) (hmap hx),
+      ((hg.contDiffAt (hU.mem_nhds (hmap hx))).of_le (natCast_le_infty i)) (hmap hx),
       norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs]
     exact hB i hi
   have hI : ∀ i, 1 ≤ i → i ≤ n → ‖iteratedFDerivWithin ℝ i f S x‖ ≤ D ^ i := by
     intro i hi hin
     rw [iteratedFDerivWithin_eq_iteratedFDeriv hS.uniqueDiffOn
-      ((hf.contDiffAt (hS.mem_nhds hx)).of_le (nat_le_infty i)) hx,
+      ((hf.contDiffAt (hS.mem_nhds hx)).of_le (natCast_le_infty i)) hx,
       norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs]
     exact hD i hi hin
-  have hb := norm_iteratedFDerivWithin_comp_le hg hf (nat_le_infty n) hU.uniqueDiffOn
+  have hb := norm_iteratedFDerivWithin_comp_le hg hf (natCast_le_infty n) hU.uniqueDiffOn
     hS.uniqueDiffOn hmap hx hC hI
   rw [iteratedFDerivWithin_eq_iteratedFDeriv hS.uniqueDiffOn
     (((hg.contDiffAt (hU.mem_nhds (hmap hx))).comp x (hf.contDiffAt (hS.mem_nhds hx))).of_le
-      (nat_le_infty n)) hx, norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs] at hb
+      (natCast_le_infty n)) hx, norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs] at hb
   exact hb
 
 theorem finite_majorant (v : ℕ → ℝ) (N : ℕ) :
@@ -1597,14 +1595,14 @@ theorem exists_normalized_natural_jets (hΛ : 0 < Λ) (hσ : 0 < σ)
   refine ⟨1 + Λ * A + L, by nlinarith [mul_nonneg hΛ.le hA], ?_⟩
   intro C E Y hY n hn η hη
   have hηJ := original_interval_interior hη
-  have hphase := ((phase_smooth d).contDiffAt (parameterInterval_open.mem_nhds hηJ)).of_le (nat_le_infty n)
+  have hphase := ((phase_smooth d).contDiffAt (parameterInterval_open.mem_nhds hηJ)).of_le (natCast_le_infty n)
   have hY20 : Y ∈ Ioo (-20 : ℝ) 20 := by constructor <;> linarith [hY.1, hY.2]
   have hφ := ((AxisEvaluation.profile_smooth window d.coefficients.epsilon_pos E.coefficients.1).contDiffAt
     ((AxisEvaluation.strip_isOpen window 20).mem_nhds ⟨hY20, hηJ⟩)).comp η
       (contDiffAt_const.prodMk contDiffAt_id)
   have hφpos := NaturalEntrance.coefficient_phi_lower d.coefficients hσ
     (NaturalEntrance.profileErrorConstant_nonneg d) hscale E.coefficients E.norm_error hY.1 hY.2 hηJ
-  have hlog := (hφ.log (lt_trans (by norm_num : (0 : ℝ) < 1 / 8) hφpos).ne').of_le (nat_le_infty n)
+  have hlog := (hφ.log (lt_trans (by norm_num : (0 : ℝ) < 1 / 8) hφpos).ne').of_le (natCast_le_infty n)
   have hlog' : ContDiffAt ℝ n
       (fun ξ => Real.log (AxisEvaluation.profile window d.coefficients.epsilon E.coefficients.1 (Y, ξ))) η := by
     simpa only [Function.comp_apply, id_eq] using hlog
@@ -1666,7 +1664,7 @@ theorem jet_transfer {A B : ℝ → ℝ} {η M ε : ℝ} (n : ℕ)
     (he : |iteratedDeriv n (fun ξ => A ξ - B ξ) η| ≤ ε)
     (hb : |iteratedDeriv n B η| ≤ M) : |iteratedDeriv n A η| ≤ M + ε := by
   have hd : iteratedDeriv n (fun ξ => A ξ - B ξ) η = iteratedDeriv n A η - iteratedDeriv n B η :=
-    iteratedDeriv_sub (hA.of_le (nat_le_infty n)) (hB.of_le (nat_le_infty n))
+    iteratedDeriv_sub (hA.of_le (natCast_le_infty n)) (hB.of_le (natCast_le_infty n))
   rw [hd] at he
   calc
     _ = |(iteratedDeriv n A η - iteratedDeriv n B η) + iteratedDeriv n B η| := by ring_nf
@@ -1861,7 +1859,7 @@ theorem physicalF_postaxis_jet_bound (hJ : IsOpen J) {K : Set ℝ} (hKJ : K ⊆ 
     rfl
   have hs := R.normalizedLog_smooth hJ T κ w₁ w₂ C y
   rw [he, iteratedDeriv_const_mul
-    C⁻¹ ((hs.exp.contDiffAt (hJ.mem_nhds (hKJ hη))).of_le (nat_le_infty n)),
+    C⁻¹ ((hs.exp.contDiffAt (hJ.mem_nhds (hKJ hη))).of_le (natCast_le_infty n)),
     abs_mul, abs_of_pos (inv_pos.mpr hC)]
   have hexb := exp_jet_bound_local_of_upper hJ hs (hKJ hη) n (by linarith) hbounds.1
     (fun i hi hin => hbounds.2 i (hin.trans hn) hi)
@@ -1912,7 +1910,7 @@ theorem naturalU_error_jet {C : ℝ} (E : NaturalEntrance.CoefficientProfile d �
       ((AxisEvaluation.strip_isOpen window 20).mem_nhds
         (show (Λ * X, η) ∈ AxisEvaluation.strip window 20 from ⟨hY, hη⟩))).comp η
           (contDiffAt_const.prodMk contDiffAt_id)
-  rw [he, iteratedDeriv_const_mul (1 / Λ) (hs.of_le (nat_le_infty n))]
+  rw [he, iteratedDeriv_const_mul (1 / Λ) (hs.of_le (natCast_le_infty n))]
   congr 1
   simpa only [AxisEvaluation.mixedSeries_zero, Nat.zero_add] using
     AxisEvaluation.iteratedDeriv_eta window d.coefficients.epsilon_pos E.coefficients.2 0 0 n hY hη
@@ -1957,7 +1955,7 @@ theorem naturalF_jet_bound (hσ : 0 < σ)
       (NaturalEntrance.coefficient_phi_lower d.coefficients hσ
         (NaturalEntrance.profileErrorConstant_nonneg d) hscale E.coefficients E.norm_error hY.1 hY.2 hξ))
   rw [he.iteratedDeriv_eq n, iteratedDeriv_const_mul
-    C⁻¹ ((hs.exp.contDiffAt (parameterInterval_open.mem_nhds hηJ)).of_le (nat_le_infty n)),
+    C⁻¹ ((hs.exp.contDiffAt (parameterInterval_open.mem_nhds hηJ)).of_le (natCast_le_infty n)),
     abs_mul, abs_of_pos (inv_pos.mpr hC)]
   have hbexp := exp_jet_bound_local parameterInterval_open hs hηJ n (by linarith : 1 ≤ B + 1)
     (fun i hi => (hb i (hi.trans hn) η hη).trans (by linarith))

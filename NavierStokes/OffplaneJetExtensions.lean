@@ -2,6 +2,7 @@ import NavierStokes.GenericEndpointExtension
 import NavierStokes.MixedDiagonalExtensions
 import NavierStokes.CutStageEstimates
 import NavierStokes.ActualPhysicalStageBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Off-plane endpoint extensions from actual raw jets
@@ -18,9 +19,6 @@ namespace NavierStokes.OffplaneJetExtensions
 
 open Set Function Filter Metric ProblemStatement
 open scoped Topology ContDiff BigOperators
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl n
 
 noncomputable def pastBall (x : Space) (r : ℝ) : Set SpaceTime :=
   Metric.ball (1, x) r ∩ SpacetimeEndpoint.openPast 1
@@ -42,7 +40,7 @@ theorem localBump_support (x : Space) {r : ℝ} (hr : 0 < r) :
 theorem localBump_jet_bounded (x : Space) {r : ℝ} (hr : 0 < r) (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ w : SpaceTime, ‖iteratedFDeriv ℝ m (localBump x hr) w‖ ≤ C := by
   obtain ⟨C, hC⟩ := ((localBump x hr).hasCompactSupport.iteratedFDeriv (𝕜 := ℝ) m).exists_bound_of_continuous
-    ((localBump x hr).contDiff.continuous_iteratedFDeriv (nat_le_infty m))
+    ((localBump x hr).contDiff.continuous_iteratedFDeriv (natCast_le_infty m))
   exact ⟨max C 0, le_max_right _ _, fun w => (hC w).trans (le_max_left _ _)⟩
 
 section LocalExtension
@@ -90,7 +88,7 @@ theorem localized_jets_bounded {f : SpaceTime → V} {x : Space} {r : ℝ} (hr :
       ⟨localBump_support x hr hs, hw.1.2, mem_univ _⟩
     have hprod := norm_iteratedFDerivWithin_smul_le (𝕜 := ℝ)
       (localBump x hr).contDiff.contDiffOn hf (pastBall_open x r).uniqueDiffOn
-      hlocal (nat_le_infty m)
+      hlocal (natCast_le_infty m)
     simp only [iteratedFDerivWithin_of_isOpen _ (pastBall_open x r) hlocal] at hprod
     apply hprod.trans
     apply Finset.sum_le_sum

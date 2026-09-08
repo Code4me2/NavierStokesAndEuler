@@ -197,10 +197,7 @@ theorem productDerivative_norm_le (u : TimeLp T E) :
       norm_add_le _ _
     _ ≤ ‖A'‖ * ‖primitiveTimeLp T hT u‖ + ‖A‖ * ‖u‖ :=
       add_le_add (timeApply_bound T hT A' _) (timeApply_bound T hT A u)
-    _ ≤ ‖A'‖ * (Real.sqrt (T^2/2) * ‖u‖) + ‖A‖ * ‖u‖ := by
-      apply add_le_add _ le_rfl
-      apply mul_le_mul_of_nonneg_left _ (norm_nonneg A')
-      exact hp
+    _ ≤ ‖A'‖ * (Real.sqrt (T^2/2) * ‖u‖) + ‖A‖ * ‖u‖ := by gcongr
     _ = _ := by ring
 
 end EulerTimeH1OperatorProduct

@@ -1,6 +1,7 @@
 import NavierStokes.PhysicalWaveSum
 import NavierStokes.HarmonicCovariance
 import NavierStokes.PrimaryPulseBounds
+import NavierStokes.WithTopLemmas
 
 /-!
 # Uniform weighted bounds for actual label sums
@@ -18,9 +19,6 @@ open scoped ContDiff Topology BigOperators
 namespace NavierStokes.LabelSumBounds
 
 open WeightedClasses
-
-private theorem nat_le_infty (m : ℕ) : (m : WithTop ℕ∞) ≤ ∞ :=
-  ENat.natCast_le_of_coe_top_le_withTop le_rfl m
 
 variable {ι κ E F G : Type*} {D : Type}
 variable [NormedAddCommGroup D] [NormedSpace ℝ D]
@@ -177,7 +175,7 @@ theorem bilinear_jet_bound (L : E →L[ℝ] F →L[ℝ] G) {U : Set D} (hU : IsO
     (ha : ∀ i ≤ m, ‖iteratedFDeriv ℝ i f x‖ ≤ A)
     (hb : ∀ i ≤ m, ‖iteratedFDeriv ℝ i g x‖ ≤ B) :
     ‖iteratedFDeriv ℝ j (fun y => L (f y) (g y)) x‖ ≤ ‖L‖ * 2 ^ m * A * B := by
-  have h := JetBounds.norm_iteratedFDeriv_bilinear_le_on L hU hf hg hx (nat_le_infty j)
+  have h := JetBounds.norm_iteratedFDeriv_bilinear_le_on L hU hf hg hx (natCast_le_infty j)
   have hs : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) *
       ‖iteratedFDeriv ℝ i f x‖ * ‖iteratedFDeriv ℝ (j - i) g x‖) ≤ 2 ^ m * A * B := by
     calc

@@ -114,8 +114,7 @@ def lowBoundsOn (S : ℝ) (hS : 0 < S) (hST : S ≤ G.T)
   exterior_lower x _ v := by
     rw [G.restrictTime_initialStrain]
     exact (inner_bounds_of_norm _ _ (initialStrain_norm L x) v).1
-  core_lower x hx _ := by
-    exact False.elim ((not_lt_of_ge (norm_nonneg _)) hx)
+  core_lower x hx _ := False.elim ((not_lt_of_ge (norm_nonneg _)) hx)
   curvature_upper t x v := by
     erw [G.restrictTime_curvature]
     exact (inner_bounds_of_norm _ _ (curvature_norm L (initialInclusion G.T S hST t) x) v).2

@@ -15,8 +15,7 @@ variable (period : ℝ) [Fact (0 < period)]
 /-- Forgetting a top derivative is injective on the actual compatible Sobolev arrays. -/
 theorem truncate_injective (q : ℕ) : Function.Injective (truncateOperator period q) := by
   intro u v h
-  apply value_injective period
-  exact congrArg (value period (q := q)) h
+  exact value_injective period (congrArg (value period (q := q)) h)
 
 /-- The genuine heat-plus-gained-Duhamel construction as an actual continuous Sobolev path. -/
 def mildPath (q : ℕ) (ν : ℝ) (hν : 0 < ν) (T : ℝ) (hT : 0 ≤ T)

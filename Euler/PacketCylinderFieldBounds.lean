@@ -70,8 +70,7 @@ theorem WordBound.sub (hG : G.WordBound q R A d) (hH : H.WordBound q R B d) :
       fun a : LiftTangent => pathTranslate P a G.path + -pathTranslate P a H.path := by
     funext a
     exact sub_eq_add_neg _ _
-  rw [he] at hb
-  exact hb
+  rwa [he] at hb
 
 theorem WordBound.smul (hG : G.WordBound q R A d) (c : ℝ) :
     (G.smul c).WordBound q R (|c| * A) d := by

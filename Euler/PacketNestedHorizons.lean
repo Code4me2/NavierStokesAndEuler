@@ -25,8 +25,7 @@ def horizonTime (J : ℕ) (X : ℝ) (a β : ℕ → ℝ) (n : ℕ) : ℝ :=
     activationTime J X a β 0=0 := by simp [activationTime]
 
 theorem activationTime_succ (J : ℕ) (X : ℝ) (a β : ℕ → ℝ) (n : ℕ) :
-    activationTime J X a β (n+1)=activationTime J X a β n+stepLength J X a β n := by
-  exact sum_range_succ _ n
+    activationTime J X a β (n+1)=activationTime J X a β n+stepLength J X a β n := sum_range_succ _ n
 
 @[simp] theorem horizonTime_zero (J : ℕ) {X : ℝ} (hX : 0 < X) (a β : ℕ → ℝ) :
     horizonTime J X a β 0=baseHorizon J X := by

@@ -108,9 +108,6 @@ open Set ContinuousLinearMap EulerSmoothLimit EulerTransversePacketProvider
   EulerSourceCylinderTimeBounds EulerCylinderDirichlet.Coefficients EulerTransverseForwardCoefficientGevrey
 open scoped ContDiff
 
-private theorem standard_norm (i : Fin 4) : ‖standardDirection i‖ ≤ 1 := by
-  cases i using Fin.cases <;> simp [Prod.norm_def]
-
 variable {P : ℝ} [Fact (0 < P)]
   {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
   {D : Data U} {τ : ℝ} {hτ : 0 < τ} {hτT : τ < D.T}
@@ -185,7 +182,7 @@ theorem velocity_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (velocityPath τ hτ hτT B Y))) n 0 ≤
         (H.commonCost*A)*majorant L.R (d+3) n :=
-  (H.velocity_bound Y standardDirection standard_norm A hA d hYb n).trans
+  (H.velocity_bound Y standardDirection direction_norm_bound A hA d hYb n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right H.velocityCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -193,7 +190,7 @@ theorem derivative_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (derivativePath τ hτ hτT B Y))) n 0 ≤
         (H.commonCost*A)*majorant L.R (d+3) n :=
-  (H.derivative_bound Y standardDirection standard_norm A hA d hYb n).trans
+  (H.derivative_bound Y standardDirection direction_norm_bound A hA d hYb n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right H.derivativeCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -214,7 +211,7 @@ theorem pressure_bound (n : ℕ) :
       (fun _ : LiftTangent => (0 : C(Icc (0 : ℝ) D.T,LiftL2 P))))
   have h := sourcePressure_block_bound P D.M D.normal D.normalLower D.normalLower_pos D.normal_lower
     0 (normalize L.fullProfile L.fullProfile_pos (velocityPath τ hτ hτT B Y))
-    standardDirection standard_norm q hzero
+    standardDirection direction_norm_bound q hzero
     (normalize_orbit_contDiff P L.fullProfile L.fullProfile_pos _ (velocityPath_orbit τ hτ hτT B Y))
     N.Rc N.C N.C N.Ri L.R 0 (H.commonCost*A) N.Rc_nonneg N.C_nonneg N.C_nonneg le_rfl
     (mul_nonneg H.commonCost_nonneg hA) N.inverse_radius N.pressure_radius N.normal_bound N.strain_bound

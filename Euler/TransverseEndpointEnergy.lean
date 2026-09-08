@@ -146,8 +146,7 @@ theorem endpointDisplacement_tangent (L : U →L[ℝ] TimeLp T E)
     exact v.property.2 t
   change ⟪m t, initialPrimitive T hT
     (endpointDerivative T hT m H K hK hH hsmall L Y - L Y) t⟫_ℝ = 0 at hv
-  rw [map_sub, ContinuousMap.sub_apply, inner_sub_right, hL, sub_zero] at hv
-  exact hv
+  rwa [map_sub, ContinuousMap.sub_apply, inner_sub_right, hL, sub_zero] at hv
 
 omit [CompleteSpace U] in
 /-- Every zero-endpoint transverse test satisfies the literal stationary weak equation. -/
@@ -160,8 +159,7 @@ theorem endpointDerivative_weak (L : U →L[ℝ] TimeLp T E) (Y : U)
   have hh := stationaryPart_orthogonal (transverseDerivatives T hT m)
     (energyOperator T hT H) (1 / 2) (by norm_num)
     (energyOperator_coercive T hT H K hK hH hsmall) (L Y) v
-  rw [energyOperator_inner, initialPrimitiveTimeLp_transverse] at hh
-  exact hh
+  rwa [energyOperator_inner, initialPrimitiveTimeLp_transverse] at hh
 
 /-- The endpoint pairing is the actual kinetic-minus-potential energy pairing. -/
 theorem dirichletToNeumann_inner (L : U →L[ℝ] TimeLp T E) (Y Z : U) :

@@ -65,8 +65,7 @@ theorem source_normal_derivative_norm :
   intro t x
   have h := normalCoefficient_derivative_bound m G.inverse.toSmoothCoefficientPath hm 1
     ((9*(frameAmplitude L.K)^2)*majorant L.scaledRadius 0 1) (L.inverse_scaled_bound 1) t x
-  rw [L.scaled_first_majorant] at h
-  exact h
+  rwa [L.scaled_first_majorant] at h
 
 theorem source_strain_derivative_norm :
     ‖(G.transverseData m hm R S hS).M.derivative.field‖ ≤ L.strainDifferenceCost*G.ell := by
@@ -76,8 +75,7 @@ theorem source_strain_derivative_norm :
   apply SmoothCoefficientPath.derivative_norm_le_of_bound _ _ (by unfold strainDifferenceCost; positivity)
   intro t x
   have h := L.strain_scaled_bound 1 t x
-  rw [L.scaled_first_majorant] at h
-  exact h
+  rwa [L.scaled_first_majorant] at h
 
 
 variable [CompleteSpace U]

@@ -3,6 +3,7 @@ import NavierStokes.PhysicalHeatCoordinates
 import NavierStokes.TerminalPressure
 import NavierStokes.HeatProfileExtension
 import NavierStokes.AssembledSlowBase
+import NavierStokes.WithTopLemmas
 
 /-!
 # The actual pure-heat exterior of the summed slow base
@@ -20,9 +21,6 @@ open scoped Topology ContDiff BigOperators
 namespace NavierStokes.BaseExterior
 
 open SimilarityProfile ProblemStatement SlowBorelBase
-
-private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 section PureHeat
 
@@ -150,7 +148,7 @@ theorem heat_navierStokesResidual_zero (C : ℝ) {h : ℝ} (hh : 0 < h) (hh1 : h
     navierStokesResidual (heatVelocity C h) (heatPressureField C h) t x = 0 := by
   unfold heatVelocity heatPressureField
   rw [TerminalStress.pureSwirl_navierStokesResidual
-    ((heatCoefficient_smoothAt C hh ht hs).of_le (nat_le_infty 2))
+    ((heatCoefficient_smoothAt C hh ht hs).of_le (natCast_le_infty 2))
     ((heatPressure_smoothAt C hh hh1 ht hs).differentiableAt (by simp)),
     heatPressure_partialS C hh hh1 ht hs, heatPressure_partialZ C hh hh1 ht hs,
     heatCoefficient_residual_zero C hh hh1 ht hs]

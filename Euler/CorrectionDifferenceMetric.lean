@@ -111,11 +111,8 @@ theorem difference_metric_deriv_bound {q : ℕ} {T : Type*} [TopologicalSpace T]
         _ = ν*(4*Kx^2/c^2) := by ring
         _ ≤ 1*(4*Kx^2/c^2) := mul_le_mul_of_nonneg_right hν1 (by positivity)
         _ = _ := one_mul _
-    have hk : 2*‖K t‖*L ≤ 2*Kb*L := by
-      have h := mul_le_mul_of_nonneg_right hkn (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hL)
-      nlinarith only [h]
-    have hsum := add_le_add (add_le_add (add_le_add hKt (le_refl (2*(Kx*V)))) hh) hk
-    exact (add_le_add hsum (le_refl 1)).trans_eq (by ring)
+    have hk : 2*‖K t‖*L ≤ 2*Kb*L := by gcongr
+    linarith [hKt, hh, hk]
   have hd : (‖K t‖*(4*R))^2 ≤ defectConstant Kb R := by
     have h := mul_le_mul_of_nonneg_right hkn (mul_nonneg (by norm_num : (0 : ℝ) ≤ 4) hr0)
     exact pow_le_pow_left₀ (mul_nonneg (norm_nonneg (K t))

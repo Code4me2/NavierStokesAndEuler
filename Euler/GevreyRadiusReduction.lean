@@ -14,8 +14,7 @@ variable (period : ℝ) [Fact (0 < period)]
 
 omit [Fact (0 < period)] in
 theorem weight_mono_radius {r R : ℝ} (hr : 0 ≤ r) (hR : r ≤ R) (n : ℕ) :
-    weight r n ≤ weight R n := by
-  exact div_le_div_of_nonneg_right (pow_le_pow_left₀ hr hR n) (sq_nonneg _)
+    weight r n ≤ weight R n := div_le_div_of_nonneg_right (pow_le_pow_left₀ hr hR n) (sq_nonneg _)
 
 theorem weightedNorm_mono_radius {s : ℕ} (q N : ℕ) {r R : ℝ}
     (hr : 0 ≤ r) (hR : r ≤ R) (u : SobolevSpace period s) :

@@ -101,8 +101,7 @@ theorem meanTrace_mem (T : ℝ) (hT : 0 ≤ T)
     (hF0 : FInv ⟨0, le_rfl, hT⟩ = ContinuousLinearMap.id ℝ L2)
     (u : meanDerivatives T hT FInv) : meanTrace T hT FInv u ∈ solenoidalSpace := by
   have hu := u.property ⟨0, le_rfl, hT⟩
-  rw [hF0, id_apply] at hu
-  exact hu
+  rwa [hF0, id_apply] at hu
 
 /-- Only the boundary lower bound on actual solenoidal traces is needed. -/
 theorem meanTrace_boundary (T : ℝ) (hT : 0 ≤ T)

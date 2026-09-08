@@ -1,4 +1,5 @@
 import Euler.GevreyPressureTransport
+import Euler.SmoothInequalityTransfer
 
 /-! Cutoff-independent nonlinear pressure bounds for actual finite-Sobolev transport sources. -/
 
@@ -10,7 +11,7 @@ open MeasureTheory InnerProductSpace EulerLiftedGradientSpace EulerCylinderSobol
   EulerSpatialSobolevInverse EulerMetricTransport EulerH6Pressure EulerPacketWeights
   EulerSobolevGevreyOperators EulerSobolevTransport EulerSobolevL2Product EulerFunctionalVelocity
   EulerH6Nonlinear EulerVectorCylinder EulerSobolevTransportCommutator EulerSobolevCoefficientPressure
-  EulerSobolevGevreyProduct EulerSobolevHeat
+  EulerSobolevGevreyProduct EulerSobolevHeat EulerSmoothInequalityTransfer
 open scoped ContDiff ENNReal Topology
 
 variable (period : ℝ) [Fact (0 < period)]
@@ -85,30 +86,18 @@ theorem transportPressure_shifted {s : ℕ} (hs : 6 ≤ s) {A : SmoothCoefficien
     (u v : SobolevSpace period (s+1)) :
     shiftedPressureNorm period N ρ (transportPressure period hs K κ m c hc hpos L hL u v) ≤
       (16*M*productConstant period 3)*weightedNorm period 6 (N+1) ρ u*weightedLoss period 6 (N+1) ρ v := by
-  let U : ℕ → SobolevSpace period (s+1) := fun n => restrictOperator period (by omega : s+1 ≤ s+1+3) (smoothApprox period (s+1) n u)
-  let V : ℕ → SobolevSpace period (s+1) := fun n => restrictOperator period (by omega : s+1 ≤ s+1+3) (smoothApprox period (s+1) n v)
-  have hU : Filter.Tendsto U Filter.atTop (𝓝 u) := smoothApprox_tendsto period u
-  have hV : Filter.Tendsto V Filter.atTop (𝓝 v) := smoothApprox_tendsto period v
-  have hpairs : Filter.Tendsto (fun n => (U n,V n)) Filter.atTop (𝓝 (u,v)) := hU.prodMk_nhds hV
-  have hP : Filter.Tendsto
-      (fun p : SobolevSpace period (s+1) × SobolevSpace period (s+1) => transportPressure period hs K κ m c hc hpos L hL p.1 p.2)
-      (𝓝 (u,v)) (𝓝 (transportPressure period hs K κ m c hc hpos L hL u v)) :=
-    (transportPressure_continuous period hs K κ m c hc hpos L hL).tendsto (u,v)
-  have hpress := hP.comp hpairs
-  have hW5 : Continuous (shiftedPressureNorm period (s := s) N ρ) := continuous_shiftedPressureNorm period N hN ρ
-  have hleft := (hW5.tendsto _).comp hpress
   have hW : Continuous (weightedNorm period (s := s+1) 6 (N+1) ρ) := continuous_weighted_blockNorm period (N+1) (by omega) ρ
   have hY : Continuous (weightedLoss period (s := s+1) 6 (N+1) ρ) := continuous_weightedLoss period 6 (N+1) (by omega) ρ
-  have hright : Filter.Tendsto (fun n => (16*M*productConstant period 3)*weightedNorm period 6 (N+1) ρ (U n)*weightedLoss period 6 (N+1) ρ (V n))
-      Filter.atTop (𝓝 ((16*M*productConstant period 3)*weightedNorm period 6 (N+1) ρ u*weightedLoss period 6 (N+1) ρ v)) :=
-    ((hW.tendsto u |>.comp hU).const_mul (16*M*productConstant period 3)).mul (hY.tendsto v |>.comp hV)
-  apply le_of_tendsto_of_tendsto hleft hright
-  apply Filter.Eventually.of_forall
-  intro n
-  obtain ⟨f,hf,hfs,hfL⟩ := smoothApprox_representative_all period n u
-  obtain ⟨g,hg,hgs,hgL⟩ := smoothApprox_representative_all period n v
-  exact transportPressure_shifted_smooth period hs K κ m c hc hpos N hN ρ Rc M hρ hRc hM hbase hsmall hcoeff
-    L hL (U n) (V n) f g hf hg hfs hgs hfL hgL
+  exact binary_le_of_smooth period
+    (fun p => shiftedPressureNorm period N ρ (transportPressure period hs K κ m c hc hpos L hL p.1 p.2))
+    (fun p => (16*M*productConstant period 3)*weightedNorm period 6 (N+1) ρ p.1*
+      weightedLoss period 6 (N+1) ρ p.2)
+    ((continuous_shiftedPressureNorm period N hN ρ).comp
+      (transportPressure_continuous period hs K κ m c hc hpos L hL))
+    (((hW.comp continuous_fst).const_mul (16*M*productConstant period 3)).mul (hY.comp continuous_snd))
+    (fun a b f g hf hg hfs hgs hfL hgL =>
+      transportPressure_shifted_smooth period hs K κ m c hc hpos N hN ρ Rc M hρ hRc hM hbase hsmall
+        hcoeff L hL a b f g hf hg hfs hgs hfL hgL) u v
 
 
 end EulerGevreyPressureTransport

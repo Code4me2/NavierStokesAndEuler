@@ -23,8 +23,7 @@ theorem source_normal_initial (x : Space) :
     (G.transverseData m hm R S hS).normal.field G.zeroTime x=m := by
   change (G.inverse.field G.zeroTime x).adjoint m=m
   have hi : G.inverse.field G.zeroTime x=ContinuousLinearMap.id ℝ Space := by
-    apply ContinuousLinearMap.ext
-    exact G.inverse_initial x
+    exact ContinuousLinearMap.ext (G.inverse_initial x)
   rw [hi,adjoint_id,id_apply]
 
 omit [CompleteSpace U] in

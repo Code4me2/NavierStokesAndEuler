@@ -38,8 +38,7 @@ theorem FiniteFamily.rawSourcePath_truncate (F : FiniteFamily period hT A) (C : 
   have he := congrArg (fun f => f t) (F.compatible period C q hq)
   change truncateOperator period (q+1) (F.solution (q+1) (hq.trans (Nat.le_succ q)) t) =
     F.solution q hq t at he
-  rw [he] at h
-  exact h
+  rwa [he] at h
 
 /-- Adjacent nonlinear source realizations have the same actual L² value. -/
 theorem FiniteFamily.rawSourcePath_value_succ (F : FiniteFamily period hT A) (C : ComparisonData period hT A)
@@ -99,7 +98,6 @@ theorem FiniteFamily.commonPath_pressure_equation (F : FiniteFamily period hT A)
         (A.metric.coefficient ⟨t, ht.1.le, ht.2.le⟩).operator
           (F.commonPressure period ⟨t, ht.1.le, ht.2.le⟩)) t := by
   have h := F.commonPath_hasDerivAt period t ht
-  rw [(A.atOrder period 6).source_value period le_rfl] at h
-  exact h
+  rwa [(A.atOrder period 6).source_value period le_rfl] at h
 
 end EulerCorrectionAssembly

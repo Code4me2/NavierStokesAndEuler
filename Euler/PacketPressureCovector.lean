@@ -97,7 +97,6 @@ theorem gradient_physical_covector (k : ℝ) (m : Space) (p : ScalarField) (t : 
   have hg : DifferentiableAt ℝ (fun y => p (t,(y,k*⟪m,y⟫_ℝ))) (Y x) :=
     hp.comp (Y x) (graphMap k m).differentiableAt
   have h := EulerLagrangian.gradient_pullback (fun y => p (t,(y,k*⟪m,y⟫_ℝ))) Y J x hY hg
-  rw [gradient_graph_covector k m p t (Y x) hp] at h
-  exact h
+  rwa [gradient_graph_covector k m p t (Y x) hp] at h
 
 end EulerPacketPressure
