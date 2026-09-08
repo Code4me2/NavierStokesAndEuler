@@ -576,26 +576,6 @@ theorem physicalSource_radial_scaled (C : ℝ) (d : TailData) (y0 : ℝ)
     scaledRadius_identity (physicalScale_pos d ht)]
   rfl
 
-/-- Backward radial integration contributes exactly one half power of `q`. -/
-theorem backwardStress_scale (b : ℝ) {Q r : ℝ} (hQ : 0 < Q) (hr : 0 < r) (g : ℝ → ℝ) :
-    backwardStress (fun u => Q ^ b * g (u / Real.sqrt Q)) r =
-      Q ^ (b + 1 / 2) * backwardStress g (r / Real.sqrt Q) := by
-  have hf : (fun u => u ^ 2 * (Q ^ b * g (u / Real.sqrt Q))) =
-      fun u => (Q * Q ^ b) * ((u / Real.sqrt Q) ^ 2 * g (u / Real.sqrt Q)) := by
-    funext u
-    rw [div_pow, Real.sq_sqrt hQ.le]
-    field_simp [hQ.ne']
-  unfold backwardStress
-  rw [hf, integral_const_mul]
-  have hs := integral_comp_mul_right_Ioi (fun R => R ^ 2 * g R) r
-    (inv_pos.mpr (Real.sqrt_pos.mpr hQ))
-  simp only [inv_inv, smul_eq_mul, ← div_eq_mul_inv] at hs
-  rw [hs]
-  have hp : Q * Q ^ b * Real.sqrt Q = Q * Q ^ (b + 1 / 2) := by
-    rw [Real.sqrt_eq_rpow, Real.rpow_add hQ]
-    ring
-  rw [← mul_assoc, hp, div_pow, Real.sq_sqrt hQ.le]
-  field_simp [hQ.ne', hr.ne']
 
 noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 t z r : ℝ) : ℝ :=
   backwardStress (fun u => physicalSource C d y0 (radiusPoint t u z)) r

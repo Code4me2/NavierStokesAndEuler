@@ -264,15 +264,6 @@ theorem pressure_change_moment (lam : ℝ) (c : Coeff) :
     (weighted_relative_sq_integrable _ c), integral_const_mul, relative_moment, relative_square_moment]
   ring
 
-/-- The quadratic coefficient map equals the two actual integral changes. -/
-theorem moment_map_identity (lam : ℝ) (hlam : 0 < lam) (c : Coeff) :
-    linearEquiv lam hlam c + quadraticCLM lam c c =
-      ![∫ y, Real.exp (angularSlope lam * y) * relative c y,
-        ∫ y, Real.exp (pressureSlope lam * y) * ((1 + relative c y) ^ 2 - 1)] := by
-  rw [linearEquiv_apply, quadraticCLM_apply, relative_moment, pressure_change_moment]
-  ext i
-  fin_cases i <;> simp [linearMatrix, dotProduct, Fin.sum_univ_two]
-  ring
 
 def debt (δ : ℝ) : Coeff := ![δ, 0]
 
@@ -566,8 +557,6 @@ end ResetBranch
 
 /-! ## Finite-interval moments, including an arbitrary earlier prefix -/
 
-theorem radiusX_continuous (X0 : ℝ) : Continuous (radiusX X0) :=
-  continuous_const.mul Real.continuous_exp
 
 
 

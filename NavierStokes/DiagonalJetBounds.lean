@@ -192,26 +192,6 @@ theorem potential_tail_jet_bound {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     (SolenoidalDiagonal.cutStage_contDiffAt hqAt hAAt) g hg (L m) (q x) hqx hqx1
     J m (fun j hj => hb j (by omega) m (by omega) x hx)
 
-/-- Given a finite derivative ceiling and a target power, choose one prefix
-uniformly for every point in the positive unit-scale domain. -/
-theorem exists_potential_tail_order {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : E → ℝ} {A : ℕ → E → V} {g L : ℕ → ℝ} {U : Set E}
-    (hU : IsOpen U) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) (hg : Monotone g)
-    (hgtop : Tendsto g atTop atTop) (hb : CutStageBounds a q A g L U)
-    (M Jmin : ℕ) (N : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∀ m ≤ M, ∀ x ∈ U,
-      0 < q x → q x ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (fun y => SolenoidalDiagonal.potentialSum a q A y -
-          SolenoidalDiagonal.partialPotential a q A (J + 1) y) x‖ ≤
-        (1 / 2 : ℝ) ^ J * (q x) ^ N := by
-  obtain ⟨J, hJmin, hJM, hgain⟩ := exists_prefix_gain g L hgtop M Jmin N
-  refine ⟨J, hJmin, hJM, ?_⟩
-  intro m hm x hx hqx hqx1
-  have htail := potential_tail_jet_bound ha hU hq hA hg hb hx hqx hqx1 J m (by omega)
-  exact htail.trans (mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_exponent_ge hqx hqx1 (hgain m hm)) (by positivity))
 
 end Quantitative
 

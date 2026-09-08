@@ -239,8 +239,6 @@ theorem slowOrder_mono {h : ℝ} (hh : 0 ≤ h) : Monotone (slowOrder h) := by
   unfold slowOrder
   exact mul_le_mul_of_nonneg_right (by exact_mod_cast (Nat.mul_le_mul_left 2 hij)) hh
 
-noncomputable def pairTailSize (N : ℕ) (K : ℕ → ℕ → ℝ) : ℝ :=
-  ∑ ij ∈ (pairs N).filter (fun ij => N < ij.1 + ij.2), |K ij.1 ij.2|
 
 
 

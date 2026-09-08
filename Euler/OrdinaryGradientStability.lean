@@ -60,15 +60,5 @@ theorem l2_stability_gradientIntegral (U V : Evolution T hT) (t : Icc (0 : ℝ) 
     positivity
   nlinarith [norm_nonneg (U.difference V t).toLp]
 
-theorem velocityPath_norm_sub_le_gradientIntegral (U V : Evolution T hT) (G : ℝ)
-    (hG : ∀ t, U.gradientIntegral t ≤ G) :
-    ‖V.velocityPath-U.velocityPath‖ ≤
-      ‖V.velocityPath ⟨0,le_rfl,hT⟩-U.velocityPath ⟨0,le_rfl,hT⟩‖*Real.exp G := by
-  apply (ContinuousMap.norm_le _ (by positivity)).2
-  intro t
-  have h := U.l2_stability_gradientIntegral V t
-  simp only [difference,toLp_fieldSub] at h
-  simpa only [ContinuousMap.sub_apply,velocityPath_apply] using h.trans
-    (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (hG t)) (norm_nonneg _))
 
 end EulerOrdinarySobolev.Evolution

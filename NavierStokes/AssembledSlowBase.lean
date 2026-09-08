@@ -50,10 +50,6 @@ theorem extendEven_pullback {S : Set ℝ} (w : ParametricRadialExtension.Paramet
 
 
 
-theorem extendEven_support {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
-    (f : EvenProfile S) {B : ℝ} (hB : 0 ≤ B) (hs : Exterior B S f) :
-    tsupport (extendEven w f) ⊆ Icc (-1 : ℝ) (B ^ 2 / 2) ×ˢ Icc (-w.outer) w.outer :=
-  ParametricRadialExtension.extension_tsupport w f.smooth (fun _ he R => f.even he R) hB hs
 
 /-- For a profile already zero on a fixed axis neighborhood, remove the
 unused negative-X extension without changing any physical value. -/
@@ -1237,43 +1233,8 @@ theorem nominalCoefficients_stress_eq {p : ℝ × ℝ}
 
 
 
-theorem nominal_pressureCoefficient (n : ℕ) {p : ℝ × ℝ}
-    (hX : 0 < p.1) (heta : p.2 ∈ nominalParameters W) :
-    SlowExpansionResidual.pressureCoefficient F.data.h W.axis.normalization
-      (asSlowProfiles (nominalScheme W)) n p = 0 := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · have hpg : (asSlowProfiles (nominalScheme W)).pressure 0 =ᶠ[𝓝 p] W.profiles.pressure := by
-      filter_upwards [continuous_fst.continuousAt (Ioi_mem_nhds hX)] with q hq
-      change xProfile (profiles (nominalScheme W) 0).pressure q = _
-      rw [profiles_zero]
-      exact baseFields_pressure (nominalDomain W) W.axis.normalization W.profiles
-        (nominalParameters_domain W) hq.le
-    have hpr : SimilarityProfile.partialX ((asSlowProfiles (nominalScheme W)).pressure 0) p =
-        W.profiles.f p ^ 2 := by
-      rw [SimilarityProfile.partialX, hpg.fderiv_eq]
-      exact W.profiles.radialPartial_pressure (nominalParameters_domain W p.1 hX.le p.2 heta)
-    have hphi : (asSlowProfiles (nominalScheme W)).phi 0 p = W.axis.normalization * W.profiles.f p := by
-      change xProfile (profiles (nominalScheme W) 0).phi p = _
-      rw [profiles_zero]
-      exact baseFields_phi (nominalDomain W) W.axis.normalization W.profiles
-        (nominalParameters_domain W) hX.le
-    simp only [SlowExpansionResidual.pressureCoefficient, SlowExpansionResidual.previous,
-      SlowExpansionResidual.convolution, Finset.Nat.antidiagonal_zero, Finset.sum_singleton,
-      hpr, hphi, zero_div, add_zero]
-    field_simp [W.axis.normalization_pos.ne'] ; ring
-  · exact profiles_pressureCoefficient (nominalScheme W) hn hX heta
 
 
-theorem nominalCoefficients_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |eta| ≤ 1) :
-    (nominalCoefficients W).phi n (0, eta) = 0 ∧
-    (nominalCoefficients W).axial n (0, eta) = 0 ∧
-    (nominalCoefficients W).pressure n (0, eta) = 0 :=
-  ⟨extendedCoefficient_axis (nominalLocalization W) (nominalBaseAgreement W)
-      (nominalParameters_contains W) hn 0 heta,
-   extendedCoefficient_axis (nominalLocalization W) (nominalBaseAgreement W)
-      (nominalParameters_contains W) hn 1 heta,
-   extendedCoefficient_axis (nominalLocalization W) (nominalBaseAgreement W)
-      (nominalParameters_contains W) hn 3 heta⟩
 
 
 theorem nominalCoefficients_positive_exterior {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}

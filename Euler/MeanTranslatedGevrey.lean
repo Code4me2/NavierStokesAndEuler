@@ -34,8 +34,6 @@ private local instance (T : ℝ) : InnerProductSpace ℝ (TimeLp T solenoidalSpa
 def operatorAmplitude (T CF CF₁ CH CM CA L : ℝ) : ℝ :=
   9*(T*CF₁+CF)^2*(1+(T^2/2)*CH+T*(CM+|L| * CA))
 
-/-- The proved polynomial amplitude of the actual forcing pullback. -/
-def forcingAmplitude (T CF CF₁ Cf : ℝ) : ℝ := 3*(T*(T*CF₁+CF))*Cf
 
 theorem operatorAmplitude_nonneg (T CF CF₁ CH CM CA L : ℝ)
     (hT : 0 ≤ T) (hCH : 0 ≤ CH) (hCM : 0 ≤ CM) (hCA : 0 ≤ CA) :

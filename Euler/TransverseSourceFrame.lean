@@ -28,10 +28,6 @@ variable (m₀ : E) (R : U ≃ₗᵢ[ℝ] referencePlane m₀)
 def referenceEmbedding : U →L[ℝ] E :=
   (referencePlane m₀).subtypeL.comp R.toContinuousLinearEquiv.toContinuousLinearMap
 
-/-- Applying the source deformation to the fixed orthonormal reference plane. -/
-def framePath (T : ℝ) (F : C(Icc (0 : ℝ) T, E →L[ℝ] E)) :
-    C(Icc (0 : ℝ) T, U →L[ℝ] E) :=
-  ⟨fun t => (F t).comp (referenceEmbedding m₀ R), F.continuous.clm_comp continuous_const⟩
 
 
 

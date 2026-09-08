@@ -2460,23 +2460,6 @@ theorem vectorSum_apply {H : ℕ} {K : Type*} (f : Fin 3 → PhysicalCopyBounds.
   fin_cases i <;> simp [PhysicalWaveSum.realCoordinate_apply,
     ProblemStatement.coordinateVector]
 
-theorem graph_smooth_of_strip (n d : ℕ) {w : ProblemStatement.SpaceTime}
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    ContDiffAt ℝ ∞ (PhysicalMeanJetBounds.graph ActualPrimary.h n d) w := by
-  have hr := BaseContextAssembly.nativeStrip_radius ActualPrimary.nominal region hx
-  have hne : PhysicalGraphBounds.scaledRadial n w ≠ 0 := by
-    intro he
-    rw [PhysicalMeanJetBounds.graph_radius, he] at hr
-    simp [PolarCharts.radius] at hr
-  let a := ‖PhysicalGraphBounds.scaledRadial n w‖
-  have ha : 0 < a := norm_pos_iff.mpr hne
-  have hann : PhysicalGraphBounds.scaledRadial n w ∈ PhysicalGraphBounds.annulus a a := by
-    constructor
-    · change dist (PhysicalGraphBounds.scaledRadial n w) 0 ≤ a
-      rw [dist_zero_right]
-    · change a ≤ ‖PhysicalGraphBounds.scaledRadial n w‖
-      exact le_rfl
-  exact PhysicalMeanJetBounds.graph_smoothAt ha ActualPrimary.h n d hann
 
 theorem spatialCurl_finset_sum {I : Type*} (s : Finset I)
     (A : I → ProblemStatement.VelocityField) {w : ProblemStatement.SpaceTime}
@@ -2499,27 +2482,6 @@ theorem primary_cartesianCurl_sum (s : Finset (ActualPrimary.Label B N0 × Fin 2
   exact ((ActualPrimaryCoherence.cartesianPotential_smooth l.2 l.1).contDiffAt
     (PhysicalWaveSum.preterminal_open.mem_nhds hw)).differentiableAt (by simp)
 
-/-- The constructed global potential is the literal finite primary sum on
-every valid current-band chart. -/
-theorem potential_eq_active (n d : ℕ) (w : ProblemStatement.SpaceTime)
-    (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    potential B N0 w =
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        ActualPrimaryCoherence.cartesianPotential l.2 l.1 w := by
-  ext i
-  change PhysicalCopyBounds.vectorSum (potentialFamily B N0) innerRadius ActualPrimary.h
-    ActualPrimary.slots.radius w i = _
-  rw [vectorSum_apply, potential_sum_eq_active i n d w hw hx]
-  change Complex.reCLM (∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-    (potentialFamily B N0 i).periodized innerRadius ActualPrimary.h ActualPrimary.slots.radius
-      (primaryIndex l) w) =
-    AxisymmetricFields.projection i (∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-      ActualPrimaryCoherence.cartesianPotential l.2 l.1 w)
-  rw [map_sum, map_sum]
-  apply Finset.sum_congr rfl
-  intro l hl
-  exact potential_periodized_eq (l.2, l.1) i w hw
 
 
 

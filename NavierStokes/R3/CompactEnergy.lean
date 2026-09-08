@@ -1,7 +1,10 @@
 import NavierStokes.PeriodicUniqueness
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 import NavierStokes.R3.CompactTimeIntegral
-import NavierStokes.R3.ScalarEnergyBound
+import Mathlib.Analysis.Calculus.Deriv.MeanValue
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 import NavierStokes.ProblemStatement
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace

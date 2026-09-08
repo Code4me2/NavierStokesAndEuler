@@ -434,15 +434,6 @@ entire square of the exact increment. -/
 noncomputable def covarianceIncrement (u v : Oscillation D) : Tensor D :=
   bilinearCovariance u v + bilinearCovariance v u + bilinearCovariance v v
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem covariance_add {u v : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) :
-    bilinearCovariance (u + v) (u + v) =
-      bilinearCovariance u u + covarianceIncrement u v := by
-  rw [bilinearCovariance_add_left hu hv (hu.add hv),
-    bilinearCovariance_add_right hu hu hv, bilinearCovariance_add_right hv hu hv]
-  unfold covarianceIncrement
-  abel
 
 
 end ActualCovariance
@@ -456,8 +447,6 @@ noncomputable def complexIncrement (m : Triple D) (v : Oscillation D)
   ![(m.radial n x.1 + v n x 0 : ℝ), (m.angular n x.1 + v n x 1 : ℝ),
     (m.axial n x.1 + v n x 2 : ℝ)]
 
-noncomputable def complexPressureIncrement (p : ScalarField D) (q : OscillatoryScalar D)
-    (n : ℕ) (x : D × ℝ) : ℂ := (p n x.1 + q n x : ℝ)
 
 
 
@@ -477,22 +466,6 @@ noncomputable def meanBar (f : ScalarField (PressureStream.Lift S)) :
   fun n x => PressureStream.torusAverage (f n) (x.1, x.2.1)
 
 
-theorem temporalIncrement_smooth (r : ReconstructionData) (h : ℝ)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) (U : Set (PressureStream.Lift S))
-    (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported r.inner r.outer (u.axialResidual c n)) :
-    SmoothTriple U (temporalIncrement r h axial c u) := by
-  refine ⟨fun n => ?_, fun n => ?_, fun n => ?_⟩
-  · exact (TemporalMeanUpdate.radialUpdate_smooth ha r.inner_lt_outer hd r.radialDirection
-      (c.operators.epsilon n • axial) h n (hz n) (hpz n) (hsz n)).contDiffOn
-  · exact (TemporalMeanUpdate.desiredIncrement_smooth h n (hθ n) (hpθ n)).contDiffOn
-  · exact (TemporalMeanUpdate.axialUpdate_smooth ha r.inner_lt_outer hd r.radialDirection
-      h n (hz n) (hpz n) (hsz n)).contDiffOn
 
 
 
@@ -699,17 +672,6 @@ section ConcreteRankConstruction
 
 open CorrectionState
 
-/-- The concrete normalized five-row inverse uses the physical coordinate
-functions of the current slow point, with no dependence on the torus slot. -/
-noncomputable def normalizedRankData (coord A B lam a b : ℝ) :
-    RankData PressureStream.Plane where
-  lambda := lam
-  inner := a
-  outer := b
-  length := fun _ z => Real.sqrt (MeanRankUpdate.chartQ coord (0, z, 0))
-  velocity := fun _ z => MeanRankUpdate.chartQ coord (0, z, 0) ^ (-A)
-  coefficient := fun _ z => MeanRankUpdate.shapedAmplitude B
-    (MeanRankUpdate.chartEta coord (0, z, 0))
 
 
 
@@ -772,23 +734,6 @@ open CorrectionState MeasureTheory
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
-/-- The actual angular and reconstructed axial temporal increments have
-zero torus mean before taking either radial moment. -/
-theorem temporalIncrement_torusMean (p : ReconstructionData) (h : ℝ)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S))
-    (ha : 0 < p.inner) (hd : 0 < p.exponent)
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported p.inner p.outer (u.axialResidual c n))
-    (n : ℕ) (x : ℝ × S) :
-    PressureStream.torusAverage ((temporalIncrement p h axial c u).angular n) x = 0 ∧
-      PressureStream.torusAverage ((temporalIncrement p h axial c u).axial n) x = 0 := by
-  exact ⟨TemporalMeanUpdate.desiredIncrement_zeroMean h n (hθ n) (hpθ n) x,
-    TemporalMeanUpdate.axialUpdate_zeroMean ha p.inner_lt_outer hd p.radialDirection h n
-      (hz n) (hpz n) (hsz n) x⟩
 
 
 end TemporalMasses
@@ -922,11 +867,6 @@ noncomputable def reconstructPressureFamily (r : ℕ → ReconstructionData)
     State (PressureStream.Lift S) :=
   { u with pressure := fun n => (reconstructPressure (r n) c u).pressure n }
 
-noncomputable def commonTemporalError (r : ℕ → ReconstructionData) (h : ℝ)
-    (index : ℕ → ℕ) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) : Oscillation (PressureStream.Lift S) :=
-  fun n x => ![0, 0, -MeanChartCompatibility.fastAtIndex h n (index n)
-    (MeanChartCompatibility.commonTemporalAlias r h index (u.axialResidual c) n) x.1]
 
 
 
@@ -1080,27 +1020,11 @@ theorem bilinearCovariance_neg_right (u v : Oscillation D) :
   change -bilinearCovariance v u j i = -bilinearCovariance u v i j
   rw [bilinearCovariance_comm v u j i]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_sub_left {u v w : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) (hw : AngularContinuous w) :
-    bilinearCovariance (u - v) w = bilinearCovariance u w - bilinearCovariance v w := by
-  rw [sub_eq_add_neg, bilinearCovariance_add_left hu hv.neg hw,
-    bilinearCovariance_neg_left, sub_eq_add_neg]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_sub_right {u v w : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) (hw : AngularContinuous w) :
-    bilinearCovariance u (v - w) = bilinearCovariance u v - bilinearCovariance u w := by
-  rw [sub_eq_add_neg, bilinearCovariance_add_right hu hv hw.neg,
-    bilinearCovariance_neg_right, sub_eq_add_neg]
 
 noncomputable def symmetricCovariance (u v : Oscillation D) : Tensor D :=
   bilinearCovariance u v + bilinearCovariance v u
 
-/-- The signed update is separated at the level of actual angular
-integrals. The square contains the entire tangent plus curl increment. -/
-noncomputable def signedTensorRemainder (primary old tangent curl : Oscillation D) : Tensor D :=
-  covarianceIncrement old (tangent + curl) - symmetricCovariance primary tangent
 
 
 noncomputable def subBlock (a b : HarmonicBlock D) : HarmonicBlock D :=
@@ -4910,11 +4834,7 @@ noncomputable def iterate (p : ℕ → CycleParameters ι) (c : Context CyclePoi
   | 0 => seed
   | n + 1 => (iterate p c seed n).step (p n) c
 
-theorem iterate_zero (p : ℕ → CycleParameters ι) (c : Context CyclePoint) (seed : CycleState ι) :
-    iterate p c seed 0 = seed := rfl
 
-theorem iterate_succ (p : ℕ → CycleParameters ι) (c : Context CyclePoint) (seed : CycleState ι) (n : ℕ) :
-    iterate p c seed (n+1) = (iterate p c seed n).step (p n) c := rfl
 
 theorem iterate_representation (p : ℕ → CycleParameters ι) (c : Context CyclePoint) (seed : CycleState ι)
     (hseed : CycleRepresentation seed.coefficients seed.state seed.axisymmetricAlias)

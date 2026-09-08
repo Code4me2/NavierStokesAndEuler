@@ -1024,23 +1024,6 @@ theorem label_physical_velocity (D : AssemblyData Parameter) {h Q Qr : ℝ}
   intro j hj
   exact band_physical_velocity D hQ hQr i gap H (C j hj) (hfrequency j hj) hU (R j hj) hz hdelta chart hchart component
 
-theorem label_physical_pressure (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (i gap : ℕ) {N : ℕ} (frequency : ℤ → ℝ)
-    (hfrequency : ∀ j ∈ modes N, frequency j ≠ 0)
-    (hreference : ∀ j ∈ modes N, referenceFrequency D j ≠ 0) {U : Set Parameter}
-    (R : ∀ j ∈ modes N, ReferenceODE D j U) {z : SpaceTime} (hz : 0 < z.2 0)
-    (hp : parameterChange h Q Qr (nativeMap h Q i z).1.1 ∈ U)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    labelBandPressure D h hQ hQr gap frequency N ((PhysicalResidualBridge.commonGraph Q h i).map z) =
-      Q ^ (2 * CoordinateAlgebra.A h) *
-        labelPressure D h Qr (i + gap) delta N (z.1, CylindricalResidual.chart z.2) := by
-  unfold labelBandPressure labelPressure
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro j hj
-  exact band_physical_pressure D h hQ hQr i gap (hfrequency j hj) j (hreference j hj)
-    (R j hj) hz hp hdelta chart hchart
 
 /-! ## Axis preservation follows from vanishing of the actual source -/
 
@@ -1051,23 +1034,6 @@ theorem label_physical_pressure (D : AssemblyData Parameter) (h : ℝ) {Q Qr : �
 
 /-! ## Regularity of the constructed physical fields -/
 
-theorem referenceRawPressure_eq_common (D : AssemblyData Parameter) (H : ReferenceIdentity D)
-    {j : ℤ} (hj : j ≠ 0) (hfrequency : ∀ n, D.carrierBlock.frequency n ≠ 0) :
-    referenceRawPressure D j = (rawCommon D j).pressure D.reference.band := by
-  have hs : residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j D.reference.band =
-      transportSource (residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j D.reference.band)
-        (D.charts.parameter D.reference.band) (D.charts.gap D.reference.band)
-        (D.charts.amplitude D.reference.band) := by
-    rw [H.parameter, H.gap, H.amplitude]
-    funext p
-    simp [transportSource, coverPower]
-  funext x
-  have he := actualBandPressure_eq_reference D.reference D.charts D.context D.state D.carrierBlock
-    D.gaussianInput D.aliasInput hj D.reference.band hfrequency hs x.1.1 x.2
-  rw [H.parameter, H.gap, H.amplitude] at he
-  simp only [id_eq, coverPower, ContinuousLinearEquiv.refl_apply, one_mul,
-    div_self (hfrequency D.reference.band), one_smul] at he
-  exact he.symm
 
 section PhysicalRegularity
 

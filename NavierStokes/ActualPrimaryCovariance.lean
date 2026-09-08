@@ -1118,15 +1118,6 @@ theorem cutAmplitude_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hl
     l.1.val.property.1 m.1.val.property.1 hne hwl hwm)) hsl hsm
 
 
-theorem velocity_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hlm : l ≠ m) :
-    Disjoint
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport ((piece standardRegion l.2 l.1).velocity n))
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport ((piece standardRegion m.2 m.1).velocity n)) :=
-  (cutAmplitude_tsupport_disjoint n hlm).mono
-    (inter_subset_inter_right _ ((piece standardRegion l.2 l.1).velocity_tsupport_subset_tangent n))
-    (inter_subset_inter_right _ ((piece standardRegion m.2 m.1).velocity_tsupport_subset_tangent n))
 
 /-! ## Inactive physical labels vanish on entire slow fibers
 

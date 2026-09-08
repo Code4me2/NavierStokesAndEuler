@@ -827,12 +827,6 @@ theorem physicalMeanPressure_naturality {h d a b : ℝ} (hh : 0 < h) (hh1 : h < 
   rw [pressure_unit_factor] at he
   exact he
 
-theorem stream_unit_factor (h : ℝ) (n : ℕ) :
-    ChartScales.Q n ^ (-CoordinateAlgebra.A h) / chartScale n =
-      ChartScales.Q n ^ (-(CoordinateAlgebra.A h - 1 / 2)) := by
-  rw [chartScale, ← Real.rpow_sub (ChartScales.Q_pos n)]
-  congr 1
-  ring
 
 
 end ActualChart

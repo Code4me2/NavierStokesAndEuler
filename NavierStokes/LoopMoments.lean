@@ -191,9 +191,6 @@ def TwoPoint.mean (q : TwoPoint) : ℝ :=
 
 
 
-/-- For any nonnegative variance, equal masses at `m ± √V` realize it. -/
-def symmetricPair (m V : ℝ) : TwoPoint :=
-  ⟨1 / 2, 1 / 2, m - Real.sqrt V, m + Real.sqrt V⟩
 
 
 

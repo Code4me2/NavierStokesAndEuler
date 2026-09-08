@@ -303,13 +303,7 @@ theorem heated_fields (F : Profile) (XR : ℝ) (hXR : 0 < XR)
 
 /-! ## The heat correction lies in its own closed interior support region -/
 
-theorem terminal_lower_min (P : TerminalCompensation.Patch) (j : Fin 3) :
-    TerminalCompensation.lower P 0 ≤ TerminalCompensation.lower P j := by
-  fin_cases j <;> norm_num [TerminalCompensation.lower] <;> linarith [P.ordered]
 
-theorem terminal_upper_max (P : TerminalCompensation.Patch) (j : Fin 3) :
-    TerminalCompensation.upper P j ≤ TerminalCompensation.upper P 2 := by
-  fin_cases j <;> norm_num [TerminalCompensation.upper] <;> linarith [P.ordered]
 
 
 
@@ -424,12 +418,6 @@ def Supported (F : Profile) (XR : ℝ) (s : Slot) (v : ℝ × ℝ → ℝ) : Pro
 
 
 
-theorem supported_vanishes (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) {v : ℝ × ℝ → ℝ} (hv : Supported F XR s v)
-    (eta : ℝ) {X : ℝ} (hX : X ∈ window F XR t) : v (X, eta) = 0 := by
-  by_contra hn
-  have hs := closedPatch_subset F XR hXR s (hv eta hn)
-  exact Set.disjoint_left.mp (windows_disjoint F XR hXR hst) hs hX
 
 
 

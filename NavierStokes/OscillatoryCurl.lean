@@ -64,11 +64,6 @@ theorem inner_coordinates (u v : Space) :
   simp [PiLp.inner_apply, Fin.sum_univ_three, mul_comm]
 
 
-theorem cross_triple (n a : Space) :
-    cross n (cross n a) = ⟪n, a⟫_ℝ • n - ‖n‖ ^ 2 • a := by
-  rw [EuclideanSpace.real_norm_sq_eq]
-  ext i
-  fin_cases i <;> simp [inner_coordinates, Fin.sum_univ_three] <;> ring
 
 /-- The inverse-square-normal coefficient used by the real potential. -/
 def normalCoefficient (n a : Space) : Space := (‖n‖ ^ 2)⁻¹ • cross n a

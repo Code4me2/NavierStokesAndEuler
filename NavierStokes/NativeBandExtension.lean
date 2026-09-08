@@ -727,19 +727,6 @@ theorem band_pair_zero_jets_off_native (M : ClosedMargins H v a vr vt)
   · have hz := band_pair_zero_germ_cell H v a hr0 vr vt j L hx.1 hp
     exact ⟨(zero_germ_jets hz.1).2 n, (zero_germ_jets hz.2).2 n⟩
 
-theorem band_pair_band_edge_jets (M : ClosedMargins H v a vr vt)
-    (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) {x : Native}
-    (hx : x ∈ radialInterior W) (he : nativeQ F.data.h x = 1 / 2 ∨ nativeQ F.data.h x = 2) (n : ℕ) :
-    iteratedFDeriv ℝ n (bandVelocity H v a hr0 vr vt j L) x = 0 ∧
-      iteratedFDeriv ℝ n (bandPressure H v a hr0 vr vt j L) x = 0 := by
-  apply band_pair_zero_jets_off_native H v a hr0 vr vt M j L hx _ n
-  intro hi
-  have hq := native_mem_band H v a L hi
-  rcases he with he | he
-  · rw [he] at hq
-    exact (lt_irrefl _ hq.1)
-  · rw [he] at hq
-    exact (lt_irrefl _ hq.2)
 
 /-- The full open radial domain, preserving the original native growth
 function exactly and adding the flat band/transverse boundary points. -/

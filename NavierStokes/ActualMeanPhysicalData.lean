@@ -819,14 +819,6 @@ theorem Atlas.physical_add {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
   · simp only [Atlas.physical, dite_eq_left hz, Pi.add_apply, mul_add]
   · simp only [Atlas.physical, dite_eq_right hz, Pi.add_apply, zero_add]
 
-theorem Atlas.physical_sub {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
-    (U : Set Plane) (d : ℝ) (f g : Scalar) :
-    A.physical U d (f - g) = A.physical U d f - A.physical U d g := by
-  classical
-  funext z
-  by_cases hz : ∃ n, A.Valid U z n
-  · simp only [Atlas.physical, dite_eq_left hz, Pi.sub_apply, mul_sub]
-  · simp only [Atlas.physical, dite_eq_right hz, Pi.sub_apply, sub_self]
 
 noncomputable def initialStreamFamily (B N0 N : ℕ) :=
   (initialAtlas N).family ((initialTemporal_overlap B N0 N).add (initialRank_overlap B N0 N))

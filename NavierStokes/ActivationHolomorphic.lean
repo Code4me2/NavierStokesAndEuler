@@ -1061,13 +1061,6 @@ theorem exists_initialTube {h j σ Λ C : ℝ} {g a : ℝ → ℝ} {cap : ℝ}
 
 
 
-theorem iteratedDeriv_smooth {S : Set ℝ} (hS : IsOpen S) {g : ℝ → ℝ}
-    (hg : ContDiffOn ℝ ∞ g S) (k : ℕ) : ContDiffOn ℝ ∞ (iteratedDeriv k g) S := by
-  induction k with
-  | zero => simpa only [iteratedDeriv_zero] using hg
-  | succ k ih =>
-    rw [iteratedDeriv_succ]
-    exact ih.deriv_of_isOpen hS (by simp)
 
 
 

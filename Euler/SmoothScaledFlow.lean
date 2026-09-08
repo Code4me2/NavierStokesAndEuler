@@ -78,14 +78,6 @@ theorem scaledCoefficient_fderiv (hell : ell ≠ 0) (t : Icc (0 : ℝ) T) (x : E
   ext v
   simp only [FunLike.coe_smul,Pi.smul_apply,comp_apply,id_apply,map_smul,smul_smul,mul_inv_cancel₀ hell,one_smul]
 
-omit [FiniteDimensional ℝ E] in
-theorem scaled_accelerationField_eq
-    (A₁ : SmoothTimeField (Icc (0 : ℝ) T) E E) (hell : ell ≠ 0)
-    (t : Icc (0 : ℝ) T) (x : E) :
-    accelerationField T (scaledCoefficient T A ell) (scaledCoefficient T A₁ ell) t x =
-      ell • accelerationField T A A₁ t (ell⁻¹ • x) := by
-  simp only [accelerationField,scaledCoefficient_apply,scaledCoefficient_fderiv T A ell hell,
-    map_smul,smul_add]
 
 
 omit [FiniteDimensional ℝ E] in

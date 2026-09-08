@@ -22,14 +22,6 @@ open Finset Set
 
 variable {E : Type*} [NormedAddCommGroup E]
 
-theorem displacement_comp_le (X Y : E → E) {M δ : ℝ}
-    (hX : ∀ x, ‖X x - x‖ ≤ M) (hY : ∀ x, ‖Y x - x‖ ≤ δ) (x : E) :
-    ‖X (Y x) - x‖ ≤ M + δ := by
-  calc
-    ‖X (Y x) - x‖ = ‖(X (Y x) - Y x) + (Y x - x)‖ := by
-      rw [sub_add_sub_cancel]
-    _ ≤ ‖X (Y x) - Y x‖ + ‖Y x - x‖ := norm_add_le _ _
-    _ ≤ M + δ := add_le_add (hX _) (hY _)
 
 omit [NormedAddCommGroup E] in
 /-- A transported quantity that starts supported in `K` remains supported in

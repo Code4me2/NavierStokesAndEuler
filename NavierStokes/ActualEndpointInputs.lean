@@ -38,23 +38,8 @@ section InitialModels
 variable {DA DP : Type} [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP] {IA KA IP KP : Type*}
 
-/-- The exact base and bounded finite initial potential correction. -/
-noncomputable def initialPotentialModel (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WA : PhysicalStageBounds.WaveData h DA IA KA (Fin 3)) : VelocityField :=
-  ActualPhysicalStageBounds.initialPotential certificate modulation upper B WA
-    (ActualPhysicalStageBounds.actualInitialTemporalInput B N0 N hN)
-    (ActualPhysicalStageBounds.actualInitialRankInput B N0 N hN)
 
-noncomputable def initialDirectModel (B N0 N : ℕ) : VelocityField :=
-  (ActualMeanPhysicalData.initialAngularFamily B N0 N).angularField
 
-/-- The pressure of the same summed base and the actual finite initial
-wave and mean-pressure correction. -/
-noncomputable def initialPressureModel (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit) : PressureField :=
-  fun w => FinalSlowBase.pressure certificate modulation upper B w +
-    ActualPhysicalStageBounds.initialPressureIncrement WP
-      (ActualPhysicalStageBounds.actualInitialPressureInput B N0 N hN) w
 
 
 

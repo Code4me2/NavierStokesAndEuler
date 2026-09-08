@@ -130,11 +130,6 @@ theorem meanPrimitive_norm_le (T : ℝ) (hT : 0 ≤ T)
       nlinarith only [sq_nonneg T]
     _ = (T*‖u‖)^2 := by ring
 
-/-- The mean-space primitive has the same genuine integral representative. -/
-theorem meanPrimitive_ae (T : ℝ) (hT : 0 ≤ T)
-    (FInv : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (u : meanDerivatives T hT FInv) :
-    (meanPrimitive T hT FInv u : ℝ → L2) =ᵐ[timeMeasure T] realPrimitive T (u : TimeLp T L2) :=
-  primitiveTimeLp_ae T hT (u : TimeLp T L2)
 
 
 

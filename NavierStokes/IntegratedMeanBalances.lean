@@ -215,12 +215,6 @@ theorem moment_axial_viscosity {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
   norm_num [moment] at h1
   linarith
 
-theorem positive_integral_eq_integral {a b : ℝ} (ha : 0 < a) {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) : (∫ r in Ioi (0 : ℝ), f r) = ∫ r, f r := by
-  apply setIntegral_eq_integral_of_forall_compl_eq_zero
-  intro r hr
-  by_contra hf
-  exact hr (ha.trans_le (hs hf).1)
 
 /-! ## Smooth compact radial families and their moments -/
 
@@ -572,41 +566,6 @@ noncomputable def axialBalance (ε : ℝ) (γ radialFlux axialFlux pressure virt
     radialDivergence 1 (fun r => virtualFlux (r, x.2)) x.1
 
 
-/-- The second tangential integral, before eliminating the pressure moment. -/
-theorem integrated_axial_balance {a b : ℝ} (ε : ℝ)
-    {γ radialFlux axialFlux pressure virtualFlux : MeanField}
-    (hγ : SmoothShell a b γ) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hp : SmoothShell a b pressure)
-    (hT : SmoothShell a b virtualFlux)
-    (hmass : radialMoment 1 γ = 0) (p : MeanParameter) :
-    radialMoment 1 (axialBalance ε γ radialFlux axialFlux pressure virtualFlux) p =
-      ε * fderiv ℝ (radialMoment 1 (fun x => axialFlux x + pressure x)) p (0, 1) := by
-  have halg := moment_balance_algebra 1 (-ε) ε (ε ^ 2)
-    (fun r => parameterPartial (1, 0) γ (r, p))
-    (radialDivergence 1 (fun r => radialFlux (r, p)))
-    (fun r => parameterPartial (0, 1) (fun x => axialFlux x + pressure x) (r, p))
-    (axialRadialViscosity (fun r => γ (r, p)))
-    (fun r => parameterPartial (0, 1) (parameterPartial (0, 1) γ) (r, p))
-    (radialDivergence 1 (fun r => virtualFlux (r, p)))
-    ((hγ.partial (1, 0)).weighted_integrable 1 p)
-    (by simpa only [pow_one] using axial_divergence_integrable (hr.slice_smooth p) (hr.slice_compact p))
-    (((hz.add hp).partial (0, 1)).weighted_integrable 1 p)
-    (by simpa only [pow_one] using axial_viscosity_integrable (hγ.slice_smooth p) (hγ.slice_compact p))
-    (((hγ.partial (0, 1)).partial (0, 1)).weighted_integrable 1 p)
-    (by simpa only [pow_one] using axial_divergence_integrable (hT.slice_smooth p) (hT.slice_compact p))
-  have ht := zero_mass_parameterPartial hγ.smooth hγ.supported 1 hmass p (1, 0)
-  have hzz := zero_mass_parameterPartial_twice hγ.smooth hγ.supported 1 hmass p (0, 1) (0, 1)
-  have hd := radialMoment_parameterPartial (hz.add hp).smooth (hz.add hp).supported 1 p (0, 1)
-  change moment 1 _ = _
-  simp only [axialBalance]
-  rw [halg, moment_axial_divergence (hr.slice_smooth p) (hr.slice_compact p),
-    moment_axial_divergence (hT.slice_smooth p) (hT.slice_compact p),
-    moment_axial_viscosity (hγ.slice_smooth p) (hγ.slice_compact p)]
-  change (-ε) * radialMoment 1 (parameterPartial (1, 0) γ) p + 0 +
-    ε * radialMoment 1 (parameterPartial (0, 1) (fun x => axialFlux x + pressure x)) p -
-    ε * (0 + ε ^ 2 * radialMoment 1 (parameterPartial (0, 1) (parameterPartial (0, 1) γ)) p) - 0 = _
-  rw [ht, hzz, ← hd]
-  ring
 
 noncomputable def pressureTotal (gr : MeanField) : MeanParameter → ℝ := radialMoment 0 gr
 
@@ -616,21 +575,6 @@ noncomputable def pressureCoefficient (ρ : MeanField) (p : MeanParameter) : ℝ
 noncomputable def axialDefect (axialFlux gr : MeanField) (p : MeanParameter) : ℝ :=
   radialMoment 1 axialFlux p - (1 / 2 : ℝ) * radialMoment 2 gr p
 
-theorem flux_pressure_moment {a b : ℝ} {axialFlux pressure gr ρ : MeanField}
-    (hz : SmoothShell a b axialFlux) (hp : SmoothShell a b pressure)
-    (hg : SmoothShell a b gr) (hρ : SmoothShell a b ρ)
-    (hderiv : ∀ r p, deriv (fun s => pressure (s, p)) r =
-      gr (r, p) - ρ (r, p) * pressureTotal gr p) :
-    radialMoment 1 (fun x => axialFlux x + pressure x) =
-      (fun p => axialDefect axialFlux gr p + pressureCoefficient ρ p * pressureTotal gr p) := by
-  funext p
-  change moment 1 (fun r => axialFlux (r, p) + pressure (r, p)) = _
-  rw [moment_add 1 (hz.weighted_integrable 1 p) (hp.weighted_integrable 1 p),
-    pressure_moment_reconstructed (pressureTotal gr p) (hp.slice_smooth p) (hp.slice_compact p)
-      (hg.slice_smooth p).continuous (hg.slice_compact p)
-      (hρ.slice_smooth p).continuous (hρ.slice_compact p) (fun r => hderiv r p)]
-  unfold axialDefect pressureCoefficient radialMoment
-  ring
 
 
 /-! ## Restriction to the physical positive radial half-line -/
@@ -644,27 +588,9 @@ theorem deriv_support_interval {a b : ℝ} {f : ℝ → ℝ}
     (hs : support f ⊆ Icc a b) : support (deriv f) ⊆ Icc a b :=
   support_deriv_subset.trans (closure_minimal hs isClosed_Icc)
 
-theorem radialDivergence_supported {a b : ℝ} {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) (c : ℝ) :
-    support (radialDivergence c f) ⊆ Icc a b := by
-  intro r hr
-  by_contra hn
-  apply hr
-  simp [radialDivergence, zero_of_not_mem_interval hs hn,
-    zero_of_not_mem_interval (deriv_support_interval hs) hn]
 
 
-theorem axialViscosity_supported {a b : ℝ} {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) : support (axialRadialViscosity f) ⊆ Icc a b := by
-  intro r hr
-  by_contra hn
-  apply hr
-  simp [axialRadialViscosity, zero_of_not_mem_interval (deriv_support_interval hs) hn,
-    zero_of_not_mem_interval (deriv_support_interval (deriv_support_interval hs)) hn]
 
-theorem SmoothShell.slice_support {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    (p : MeanParameter) : support (fun r => F (r, p)) ⊆ Icc a b :=
-  fun _ hr => hF.supported hr
 
 theorem SmoothShell.zero_of_not_mem {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
     {x : MeanPoint} (hx : x.1 ∉ Icc a b) : F x = 0 := by

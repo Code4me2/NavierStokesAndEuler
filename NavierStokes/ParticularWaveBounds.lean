@@ -1317,52 +1317,6 @@ private theorem shear_at_constant (R F G : E → ℝ) (Vr : E → E)
     LinearWaveResidual.shear R F G Vr (fun _ => a x) x =
       LinearWaveResidual.shear R F G Vr a x := rfl
 
-/-- Exact cancellation for an arbitrary complex source, obtained from
-the two actual real copy solves. -/
-theorem complexCopy_principal (t : TangentData P ProblemStatement.Space)
-    (source : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    {U : Set P} (hU : IsOpen U) (copy : Frequency)
-    (hA : ContDiffOn ℝ ∞ t.linearData.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ t.linearData.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ source (U ×ˢ univ))
-    (ε frequency : ℝ) (hfrequency : frequency ≠ 0)
-    (R F G Φ : P × Plane → ℝ) (Vr Vθ Vz : P × Plane → P × Plane)
-    {p : P} (hp : p ∈ U) (Y : Plane) (heta : (g.coordinates copy Y).2 ∈ Ioo a b)
-    (hN : phaseNormal R Vr Vθ Vz Φ (p, Y) = t.normal (p, g.coordinates copy Y))
-    (hδ : t.damping (p, g.coordinates copy Y) =
-      ε * frequency ^ 2 * ‖phaseNormal R Vr Vθ Vz Φ (p, Y)‖ ^ 2)
-    (hK : ∀ v : ProblemStatement.Space,
-      CurlClassBounds.complexify (t.action (p, g.coordinates copy Y) v) =
-        LinearWaveResidual.shear R F G Vr (fun _ => CurlClassBounds.complexify v) (p, Y)) :
-    LinearWaveResidual.principal ε frequency R F G Vr Vθ Vz
-      (fun _ => ((0 : P), slotDirection g)) Φ (complexCopyVelocity t source g hab copy)
-      (complexCopyPressure t source g hab copy frequency) (p, Y) = -source (p, Y) := by
-  rw [complexCopyVelocity_eq_parts, complexCopyPressure_eq_parts]
-  have hfr : ContDiffOn ℝ ∞ (realData t source).source (U ×ˢ univ) := realPart.contDiff.comp_contDiffOn hf
-  have hfi : ContDiffOn ℝ ∞ (imagData t source).source (U ×ˢ univ) := imagPart.contDiff.comp_contDiffOn hf
-  have hr := copySolve_principal (realData t source) g hab hU copy hA hB hfr ε frequency hfrequency R F G Φ Vr Vθ Vz
-    (p := p) hp Y heta hN hδ (
-      (hK ((realData t source).linearData.copySolve g hab copy (p, Y))).trans
-        (shear_at_constant R F G Vr (copyVelocity (realData t source) g hab copy) (p, Y)))
-  have hi := copySolve_principal (imagData t source) g hab hU copy hA hB hfi ε frequency hfrequency R F G Φ Vr Vθ Vz
-    (p := p) hp Y heta hN hδ (
-      (hK ((imagData t source).linearData.copySolve g hab copy (p, Y))).trans
-        (shear_at_constant R F G Vr (copyVelocity (imagData t source) g hab copy) (p, Y)))
-  have hur : DifferentiableAt ℝ ((realData t source).linearData.copySolve g hab copy) (p, Y) :=
-    ((realData t source).linearData.copySolve_contDiffAt g hab hU copy hA hB hfr (p := (p, Y)) hp heta).differentiableAt (by simp)
-  have hui : DifferentiableAt ℝ ((imagData t source).linearData.copySolve g hab copy) (p, Y) :=
-    ((imagData t source).linearData.copySolve_contDiffAt g hab hU copy hA hB hfi (p := (p, Y)) hp heta).differentiableAt (by simp)
-  have hvr := copyVelocity_component_differentiable (realData t source) g hab copy (p := (p, Y)) hur
-  have hvi := copyVelocity_component_differentiable (imagData t source) g hab copy (p := (p, Y)) hui
-  have hc := principal_parts_cancel ε frequency R F G Φ Vr Vθ Vz
-    (fun _ => ((0 : P), slotDirection g)) (copyVelocity (realData t source) g hab copy) (copyVelocity (imagData t source) g hab copy)
-    (copyPressure (realData t source) g hab copy frequency) (copyPressure (imagData t source) g hab copy frequency)
-    (CurlClassBounds.complexify ((realData t source).source (p, Y))) (CurlClassBounds.complexify ((imagData t source).source (p, Y)))
-    (x := (p, Y)) hvr hvi hr hi
-  have hparts : CurlClassBounds.complexify ((realData t source).source (p, Y)) +
-      Complex.I • CurlClassBounds.complexify ((imagData t source).source (p, Y)) = source (p, Y) :=
-    complex_parts (source (p, Y))
-  exact hc.trans (congrArg Neg.neg hparts)
 
 /-- The same exact cancellation with regularity required only along the
 actual finite copy paths. -/
@@ -1613,8 +1567,6 @@ open CommonCoverSolve TorusInverse HarmonicCalculus
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-noncomputable def scaleTangentSource (t : TangentData P ProblemStatement.Space) (c : ℝ) :
-    TangentData P ProblemStatement.Space := { t with source := fun p => c • t.source p }
 
 
 

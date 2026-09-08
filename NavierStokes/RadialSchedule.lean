@@ -39,16 +39,8 @@ def idealTransport (h η : ℝ) : ℝ :=
 def logShapeDerivative (η : ℝ) : ℝ := -(2 * η / (1 + η ^ 2))
 
 
-def idealSource (h η : ℝ) : ℝ :=
-  -(3 / 5) * idealTransport h η - h * (1 - 2 * η * idealAxialVelocity η) -
-    (axialExponent h * η + axialShape η * idealAxialVelocity η) *
-      logShapeDerivative η
 
 
-theorem ideal_transport_eq (h η : ℝ) :
-    idealTransport h η = 1 - 4 * coordinateFactor h η := by
-  unfold idealTransport axialExponent axialShape idealAxialVelocity coordinateFactor
-  ring
 
 
 

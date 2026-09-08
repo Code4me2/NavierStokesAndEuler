@@ -503,41 +503,11 @@ theorem divergence_cylindrical {u : VelocityField} {t : ℝ} {q : Space}
       vectorDivergence (fun y => velocityComponents u (t, y)) q :=
   cartesianDivergence_components hu (ne_of_gt hr)
 
-theorem vectorAdvection_radial (w : Space → Space) (q : Space) :
-    vectorAdvection w q 0 =
-      w q 0 * dCoord 0 w q 0 + w q 1 / q 0 * dCoord 1 w q 0 +
-        w q 2 * dCoord 2 w q 0 - (w q 1) ^ 2 / q 0 := by
-  simp [vectorAdvection, connection_apply]
-  ring
 
-theorem vectorAdvection_angular (w : Space → Space) (q : Space) :
-    vectorAdvection w q 1 =
-      w q 0 * dCoord 0 w q 1 + w q 1 / q 0 * dCoord 1 w q 1 +
-        w q 2 * dCoord 2 w q 1 + w q 0 * w q 1 / q 0 := by
-  simp [vectorAdvection, connection_apply]
-  ring
 
-theorem vectorAdvection_axial (w : Space → Space) (q : Space) :
-    vectorAdvection w q 2 =
-      w q 0 * dCoord 0 w q 2 + w q 1 / q 0 * dCoord 1 w q 2 +
-        w q 2 * dCoord 2 w q 2 := by
-  simp [vectorAdvection, connection_apply]
 
-theorem vectorLaplacian_radial (w : Space → Space) (q : Space) :
-    vectorLaplacian w q 0 = scalarLaplacian w q 0 -
-      w q 0 / (q 0) ^ 2 - 2 * dCoord 1 w q 1 / (q 0) ^ 2 := by
-  simp [vectorLaplacian, connection_apply]
-  ring
 
-theorem vectorLaplacian_angular (w : Space → Space) (q : Space) :
-    vectorLaplacian w q 1 = scalarLaplacian w q 1 -
-      w q 1 / (q 0) ^ 2 + 2 * dCoord 1 w q 0 / (q 0) ^ 2 := by
-  simp [vectorLaplacian, connection_apply]
-  ring
 
-theorem vectorLaplacian_axial (w : Space → Space) (q : Space) :
-    vectorLaplacian w q 2 = scalarLaplacian w q 2 := by
-  simp [vectorLaplacian, connection_apply]
 
 theorem dCoord_eventuallyEq {f g : Space → E} {q : Space}
     (h : f =ᶠ[𝓝 q] g) (i : Fin 3) : dCoord i f =ᶠ[𝓝 q] dCoord i g := by

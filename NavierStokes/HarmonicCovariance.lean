@@ -114,20 +114,6 @@ theorem realAngularProduct_mem {s : StripData D} {P : ℕ → D → ℝ} {α β 
   exact (realAngularProduct_eq (a n) (b n) (k n) (Φ n) (hkp n) x).symm
 
 
-theorem mixedBlockCovariance_mem {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
-    (a b : HarmonicBlock D) (N : ℕ) (hband : a.BandLimited N)
-    (hfreq : b.frequency = a.frequency) (hphase : b.phase = a.phase)
-    (hangular : b.angularFrequency = a.angularFrequency)
-    (ha : ∀ i j, WaveClass s P α (fun n x => a.velocity n i j x))
-    (hb : ∀ i j, WaveClass s P β (fun n x => b.velocity n i j x))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (hkp : ∀ n, a.angularFrequency n ≠ 0) (i j : Fin 3) :
-    MeanClass s (α + β) (bilinearCovariance a.oscillation b.oscillation i j) := by
-  simpa only [bilinearCovariance, HarmonicBlock.oscillation, hfreq, hphase, hangular] using
-    realAngularProduct_mem (fun n => a.velocity n i) (fun n => b.velocity n j) N
-      (fun n => hband.1 n i) (ha i) (hb j) hP0 hP1
-      a.frequency a.phase a.angularFrequency hkp
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem angularAverage_add {f g : OscillatoryScalar D}

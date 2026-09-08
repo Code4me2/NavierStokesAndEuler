@@ -493,11 +493,6 @@ theorem controlled_continuation_independent {R δ₁ δ₂ : ℝ} (hR : 0 < R)
     continuation_radialPartial hR hδ₂ hδ₂R hJ hG (p := (t, p.2)) hη,
     ReferencePath.slopeCutoff_one hδ₁ ht₁, ReferencePath.slopeCutoff_one hδ₂ ht₂]
 
-theorem profileInitial_congr {D : RadialDomain} (P Q : Profiles D)
-    (h0 : ∀ η, P.pressure0 η = Q.pressure0 η) (r : HistoryRow) (η : ℝ) :
-    profileInitial P r η = profileInitial Q r η := by
-  cases r <;> simp only [profileInitial]
-  exact h0 η
 
 namespace NaturalOverlap
 
@@ -505,39 +500,7 @@ open ReferencePath
 
 variable (N : ReferencePath.Input)
 
-theorem f_independent {T δ₁ δ₂ : ℝ} (hT : 0 < T)
-    (hδ₁ : 0 < δ₁) (hδ₁R : 2 * δ₁ < rampLimit)
-    (hδ₂ : 0 < δ₂) (hδ₂R : 2 * δ₂ < rampLimit) (κ : ℝ)
-    {p : Point} (hη : p.2 ∈ parameterInterval)
-    (hp₁ : p.1 ≤ radius N.endpoint δ₁) (hp₂ : p.1 ≤ radius N.endpoint δ₂) :
-    FromReference.f N T κ δ₁ p = FromReference.f N T κ δ₂ p := by
-  by_cases hx : p.1 ≤ N.endpoint
-  · rw [FromReference.f_eq_reference N T κ δ₁ hx, FromReference.f_eq_reference N T κ δ₂ hx,
-      N.refF_eq_natural_initial δ₁ hx, N.refF_eq_natural_initial δ₂ hx]
-  · have hX : 0 < p.1 := N.endpoint_pos.trans (lt_of_not_ge hx)
-    rw [FromReference.f_eq_logtime N hT hδ₁ hδ₁R κ hη hX,
-      FromReference.f_eq_logtime N hT hδ₂ hδ₂R κ hη hX]
-    unfold activatedAngular FromReference.refLog
-    congr 1
-    exact controlled_continuation_independent rampLimit_pos hδ₁ hδ₁R hδ₂ hδ₂R
-      parameterInterval_open N.logF_smooth T κ (p := (N.logTime p.1, p.2)) hη
-        ((N.logTime_le_iff hX).2 hp₁) ((N.logTime_le_iff hX).2 hp₂)
 
-theorem U_independent {T δ₁ δ₂ : ℝ} (hT : 0 < T)
-    (hδ₁ : 0 < δ₁) (hδ₁R : 2 * δ₁ < rampLimit)
-    (hδ₂ : 0 < δ₂) (hδ₂R : 2 * δ₂ < rampLimit) (κ : ℝ)
-    {p : Point} (hη : p.2 ∈ parameterInterval)
-    (hp₁ : p.1 ≤ radius N.endpoint δ₁) (hp₂ : p.1 ≤ radius N.endpoint δ₂) :
-    FromReference.U N T κ δ₁ p = FromReference.U N T κ δ₂ p := by
-  by_cases hx : p.1 ≤ N.endpoint
-  · rw [FromReference.U_eq_reference N T κ δ₁ hx, FromReference.U_eq_reference N T κ δ₂ hx,
-      N.refU_eq_natural_initial δ₁ hx, N.refU_eq_natural_initial δ₂ hx]
-  · have hX : 0 < p.1 := N.endpoint_pos.trans (lt_of_not_ge hx)
-    rw [FromReference.U_eq_logtime N hT hδ₁ hδ₁R κ hη hX,
-      FromReference.U_eq_logtime N hT hδ₂ hδ₂R κ hη hX]
-    exact controlled_continuation_independent rampLimit_pos hδ₁ hδ₁R hδ₂ hδ₂R
-      parameterInterval_open N.logU_smooth T κ (p := (N.logTime p.1, p.2)) hη
-        ((N.logTime_le_iff hX).2 hp₁) ((N.logTime_le_iff hX).2 hp₂)
 
 
 

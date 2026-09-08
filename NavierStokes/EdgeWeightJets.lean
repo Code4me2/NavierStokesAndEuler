@@ -214,33 +214,13 @@ section MixedDerivatives
 variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-theorem norm_iteratedFDeriv_comp_linear_le {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
-    {f : F → ℝ} (hf : ContDiff ℝ ∞ f) (L : G →L[ℝ] F) (hL : ‖L‖ ≤ 1)
-    (n : ℕ) (x : G) :
-    ‖iteratedFDeriv ℝ n (f ∘ L) x‖ ≤ ‖iteratedFDeriv ℝ n f (L x)‖ := by
-  rw [L.iteratedFDeriv_comp_right hf x (nat_le_infty n)]
-  apply (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans
-  have hp : (∏ _i : Fin n, ‖L‖) ≤ 1 :=
-    Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun _ _ => hL)
-  simpa only [mul_one] using mul_le_mul_of_nonneg_left hp (norm_nonneg (iteratedFDeriv ℝ n f (L x)))
 
 
 noncomputable def radialIterate (f : E × ℝ → ℝ) : ℕ → E × ℝ → ℝ
   | 0 => f
   | n + 1 => fun y => fderiv ℝ (radialIterate f n) y (0, 1)
 
-theorem radialIterate_contDiff {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
-    ContDiff ℝ ∞ (radialIterate f n) := by
-  induction n with
-  | zero => exact hf
-  | succ n ih =>
-      exact (ih.fderiv_right (by simp)).clm_apply contDiff_const
 
-theorem deriv_slice {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (p : E) (x : ℝ) :
-    deriv (fun t => f (p, t)) x = fderiv ℝ f (p, x) (0, 1) := by
-  have hpair : HasDerivAt (fun t : ℝ => (p, t)) (0, 1) x :=
-    (hasDerivAt_const x p).prodMk (hasDerivAt_id x)
-  exact ((hf.differentiable (by simp) (p, x)).hasFDerivAt.comp_hasDerivAt x hpair).deriv
 
 
 

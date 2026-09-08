@@ -721,13 +721,6 @@ theorem lowerClosed_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStr
   rw [upperClosed_eq (reflect_contDiffOn hf) (by linarith) (by linarith)]
   simp only [reflect, neg_neg]
 
-omit [CompleteSpace V] in
-theorem lowerClosed_zero {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)
-    {x : X} (hz : ∀ t ∈ Icc (-1 : ℝ) 1, f (t, x) = 0) (t : ℝ) :
-    lowerClosed f hf (t, x) = 0 := by
-  apply upperClosed_zero (reflect_contDiffOn hf)
-  intro s hs
-  exact hz (-s) ⟨by linarith [hs.2], by linarith [hs.1]⟩
 
 omit [CompleteSpace V] in
 theorem lowerClosed_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)

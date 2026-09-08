@@ -47,15 +47,6 @@ theorem modulated_frequency_eq {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) :
     (EntranceAlignedBase.modulated_zero_fields H v hX.le heta.le).1]
   field_simp [W.axis.normalization_pos.ne']
 
-theorem modulated_frequency_pos {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) :
-    0 < BaseChartJets.leadingFrequency F.data.h W.axis.normalization
-      (EntranceAlignedBase.modulatedCoefficients H v) p := by
-  have hh := ConstructedSlowBase.height_pos W
-  have hh1 := ConstructedSlowBase.height_lt_half W
-  rw [modulated_frequency_eq H v hT hR]
-  exact mul_pos (Real.rpow_pos_of_pos (BaseChartJets.normalizedCoordinates_q_pos hh hh1 hT) _)
-    (v.positive_f (normalized_X_pos hh hh1 hT hR)
-      (abs_le.mp (BaseChartJets.normalizedCoordinates_eta hh hh1 hT).le))
 
 theorem modulated_shear_eq {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) :
     PhaseEstimates.shearVector

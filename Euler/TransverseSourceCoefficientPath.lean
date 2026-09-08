@@ -54,20 +54,7 @@ theorem pointPath_apply (A : SmoothCoefficientPath K V) (x : Space) (t : K) :
   change A.field t (0+x) = A.field t x
   rw [zero_add]
 
-/-- Genuine smooth position dependence, in the uniform time-path norm. -/
-theorem pointPath_contDiff (A : SmoothCoefficientPath K V) : ContDiff ℝ ∞ (pointPath A) := by
-  exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞)
-    (E := C(K,Space →ᵇ V)) (F := C(K,V)) (pathEvaluation 0)).comp A.translation_contDiff
 
-/-- Source pointwise derivative bounds give actual operator-norm derivatives of the time path. -/
-theorem pointPath_derivative_bound (A : SmoothCoefficientPath K V)
-    (n : ℕ) (C : ℝ) (hC : 0 ≤ C)
-    (hb : ∀ t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C) (x : Space) :
-    ‖iteratedFDeriv ℝ n (pointPath A) x‖ ≤ C := by
-  have h := (pathEvaluation (K := K) (V := V) 0).norm_iteratedFDeriv_comp_left
-    (A.translation_contDiff.contDiffAt (x := x)) (n := n) (by simp)
-  exact h.trans ((mul_le_mul_of_nonneg_right (pathEvaluation_norm (K := K) (V := V) 0)
-    (norm_nonneg _)).trans (by simpa only [one_mul] using A.norm_iteratedFDeriv_translation_le n C hC hb x))
 
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]

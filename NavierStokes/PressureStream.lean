@@ -45,8 +45,6 @@ theorem rho_integrable (a b : ℝ) (hab : a < b) : Integrable (rho a b hab) :=
 theorem rho_integral (a b : ℝ) (hab : a < b) : (∫ r, rho a b hab r) = 1 :=
   (meanBump a b hab).integral_normed
 
-theorem rho_nonneg (a b : ℝ) (hab : a < b) (r : ℝ) : 0 ≤ rho a b hab r :=
-  (meanBump a b hab).nonneg_normed r
 
 theorem rho_support (a b : ℝ) (hab : a < b) : support (rho a b hab) ⊆ Icc a b := by
   intro r hr

@@ -52,12 +52,6 @@ theorem stationaryPart_sub_mem (x : E) : stationaryPart S A c hc hA x - x ∈ S 
   rw [he]
   exact S.neg_mem (correction S A c hc hA x).property
 
-theorem stationaryPart_subspace (v : S) : stationaryPart S A c hc hA (v : E) = 0 := by
-  have hcorr : correction S A c hc hA (v : E) = v := by
-    change coerciveInverse (projectedOperator S A) c hc
-      (projectedOperator_coercive S A c hA) (projectedOperator S A v) = v
-    exact inverse_operator_apply _ _ _ _ v
-  rw [stationaryPart_eq, hcorr, sub_self]
 
 
 /-- Energy splits orthogonally along the stationary extension and zero-trace variations. -/

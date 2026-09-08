@@ -34,11 +34,6 @@ theorem triple_product {R : Type*} [CommRing R] (n a : Vec3 R) :
   funext j
   fin_cases j <;> simp [cross, dot] <;> ring
 
-/-- Tangency is exactly the hypothesis eliminating the longitudinal term. -/
-theorem tangent_double_cross {R : Type*} [CommRing R] (n a : Vec3 R)
-    (ha : dot n a = 0) :
-    cross n (cross n a) = -(dot n n • a) := by
-  rw [triple_product, ha, zero_smul, zero_sub]
 
 
 

@@ -55,30 +55,6 @@ theorem frameApply_translation_contDiff (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)
   exact Eq.mpr (congrArg (fun g : Space → TimeLp T L2 => ContDiff ℝ n g)
     (frameApply_orbit_eq T hT F v)) hp
 
-/-- Frame multiplication has one fixed factorial amplitude, independent of order. -/
-theorem frameApply_translation_gevrey (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
-    (v : TimeLp T solenoidalSpace)
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a v))
-    (R CF Cv : ℝ) (hR : 0 ≤ R) (hCF : 0 ≤ CF) (hCv : 0 ≤ Cv) (d : ℕ)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant R 0 n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b v) a‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space =>
-      timeTranslation T b (timeMultiplier T hT (solenoidalFrame T F) v)) a‖ ≤
-        (3*CF*Cv)*majorant R d n := by
-  let Q := fun b : Space => solenoidalFrame T (translatePath T b F)
-  have hQ : ContDiff ℝ ∞ Q := contDiff_solenoidalFrame T (fun b => translatePath T b F) hF
-  have hbQ : ∀ k b, ‖iteratedFDeriv ℝ k Q b‖ ≤ CF*majorant R 0 k :=
-    solenoidalFrame_bound T (fun b => translatePath T b F) hF R CF hR hCF 0 hFb
-  have hp := clm_apply_bound (fun b => timeMultiplier T hT (Q b))
-    (fun b => timeSolenoidalTranslation T b v) (contDiff_timeMultiplier T hT Q hQ) hv
-    R CF Cv hR hCF hCv 0 d (timeMultiplier_bound T hT Q hQ R CF hR hCF 0 hbQ) hvb n a
-  have hp' : ‖iteratedFDeriv ℝ n (fun b : Space =>
-      timeMultiplier T hT (Q b) (timeSolenoidalTranslation T b v)) a‖ ≤
-      (3*CF*Cv)*majorant R d n := by simpa only [Nat.zero_add] using hp
-  exact (congrArg (fun g : Space → TimeLp T L2 => ‖iteratedFDeriv ℝ n g a‖)
-    (frameApply_orbit_eq T hT F v)).trans_le hp'
 
 end EulerMeanPhysicalTranslation
 

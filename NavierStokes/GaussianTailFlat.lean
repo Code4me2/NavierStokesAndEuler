@@ -560,21 +560,6 @@ theorem error_stripped_bound {s : StripData D} (g : SlotFamily s)
     _ ≤ A * (B * ChartScales.Q n ^ N) := mul_le_mul_of_nonneg_left (hb n) hA
     _ = _ := by ring
 
-/-- The excluded field belongs to every unweighted decay class. Its bound
-has polynomial degree zero, so no inverse-edge factor remains hidden. -/
-theorem error_all_gains {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {u f : ℕ → D → E}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (N : ℝ) : UnweightedClass s N (g.error u f) := by
-  refine ⟨fun _ _ _ => zero_le_one, (g.error_mem_wave hu hf).smooth, ?_⟩
-  intro m
-  obtain ⟨C, hC, hb⟩ := g.error_stripped_bound edges scales hu hf hc hP m (scales.power * N)
-  refine ⟨C, hC, 0, fun n x hx j hj => ?_⟩
-  simpa only [majorant, pow_zero, mul_one, scales.epsilon_eq,
-    ← Real.rpow_mul (ChartScales.Q_pos n).le] using hb n x hx j hj
 
 end SlotFamily
 

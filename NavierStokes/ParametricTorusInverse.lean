@@ -565,13 +565,6 @@ theorem iterateInverse_succ (d : Direction) (n : ℕ) (f : Source) :
     iterateInverse d (n + 1) f = inverse d (iterateInverse d n f) :=
   Function.iterate_succ_apply' _ _ _
 
-theorem iterateInverse_periodic (d : Direction) {f : Source} (hp : Periodic f)
-    (n : ℕ) : Periodic (iterateInverse d n f) := by
-  induction n with
-  | zero => exact hp
-  | succ n ih =>
-      rw [iterateInverse_succ]
-      exact inverse_periodic d _
 
 
 

@@ -149,22 +149,6 @@ of common-cover fields, with no substitution of a native-periodic source. -/
 noncomputable def grouped (F : Frequency → P × Plane → V) (z : P × Plane) : V :=
   ∑' k : Frequency, F k z
 
-omit [NormedSpace ℝ P] [NormedSpace ℝ V] in
-theorem grouped_eventually_eq_copy {g : Geometry} {r L : ℝ}
-    (hsep : Separated g r L) (F : Frequency → P × Plane → V)
-    (hsupport : ∀ k, support (F k) ⊆ copyCell g r L k)
-    {k : Frequency} {z : P × Plane} (hz : z ∈ copyCell g r L k) :
-    grouped F =ᶠ[𝓝 z] F k := by
-  classical
-  have hn := (copyCell_locallyFinite (P := P) g r L).iInter_compl_mem_nhds
-    (copyCell_closed g r L) z
-  filter_upwards [hn] with y hy
-  apply tsum_eq_single k
-  intro l hl
-  have hznot : z ∉ copyCell g r L l := fun hzl => hl (copy_unique hsep hzl hz)
-  have hynot := mem_iInter₂.mp hy l hznot
-  by_contra hne
-  exact hynot (hsupport l hne)
 
 
 

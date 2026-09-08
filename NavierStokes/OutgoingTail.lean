@@ -662,9 +662,6 @@ theorem finalAngular_eventual_power (d : TailData) (eta : ℝ) {y : ℝ}
 
 def tailRate (d : TailData) (t : ℝ) : ℝ := 1 + tailLogSlope d t
 
-theorem tailRate_contDiff (d : TailData) : ContDiff ℝ ∞ (tailRate d) :=
-  contDiff_const.add (contDiff_const.add
-    ((tailShapeDeriv_contDiff d).div (tailShape_contDiff d) (fun t => (tailShape_pos d t).ne')))
 
 def weightedTailDerivative (d : TailData) (t : ℝ) : ℝ :=
   Real.exp ((1 - d.h) * t) * tailShapeDeriv d t

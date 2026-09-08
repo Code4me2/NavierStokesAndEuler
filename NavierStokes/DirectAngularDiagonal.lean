@@ -401,14 +401,6 @@ noncomputable def graphCoefficient (G : PhysicalResidualBridge.ScaledGraph) (f :
 theorem graphSlow_smooth (G : PhysicalResidualBridge.ScaledGraph) : ContDiff ℝ ∞ (graphSlow G) :=
   (contDiff_const.mul (contDiff_const.sub contDiff_fst)).prodMk (contDiff_const.mul contDiff_snd)
 
-theorem graphPoint_smoothAt (G : PhysicalResidualBridge.ScaledGraph) (hG : 0 < G.radialScale)
-    {p : CylPoint} (hp : 0 < p.2.1) : ContDiffAt ℝ ∞ (graphPoint G) p := by
-  have hr : ContDiffAt ℝ ∞ (fun p : CylPoint => (G.radialScale * p.2.1) ^ G.exponent) p :=
-    (contDiffAt_const.mul contDiffAt_snd.fst).rpow_const_of_ne (mul_pos hG hp).ne'
-  exact (contDiffAt_const.mul contDiffAt_snd.fst).prodMk
-    (((graphSlow_smooth G).contDiffAt.comp p (contDiffAt_fst.prodMk contDiffAt_snd.snd)).prodMk
-      (((contDiffAt_const.mul hr).smul contDiffAt_const).add
-        ((contDiffAt_const.mul contDiffAt_fst).smul contDiffAt_const)))
 
 
 
@@ -417,15 +409,6 @@ theorem graphPoint_smoothAt (G : PhysicalResidualBridge.ScaledGraph) (hG : 0 < G
 
 /-! ## Agreement with the actual offplane continuation fields -/
 
-noncomputable def nativeGraphData (h : ℝ) (n : ℕ) : PhysicalResidualBridge.ScaledGraph where
-  radialScale := 1
-  velocityScale := 1
-  epsilon := 1
-  exponent := ChartScales.radialExponent h
-  frequency := ChartScales.Lambda ^ ChartScales.nativeIndex h n
-  fastCoefficient := ChartScales.Tg ^ ChartScales.nativeIndex h n
-  radialVector := PhysicalGraphBounds.radialDirection
-  temporalVector := PhysicalGraphBounds.timeDirection
 
 
 

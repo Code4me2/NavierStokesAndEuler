@@ -27,28 +27,6 @@ theorem slicedJet_assembledVelocity_finite (O : Operators) (N : ℕ) (a : ℕ �
   · rw [truncate_of_le _ _ _ hi,truncate_of_le _ _ _ hi,slicedJet_add (hA i hi) (hB i hi)]
   · rw [truncate_of_gt _ _ _ (by omega),truncate_of_gt _ _ _ (by omega)]
 
-theorem slicedMomentumGrade_tail_eq_recursive (O : Operators) (N n : ℕ) (hn : N+1 ≤ n)
-    (a : ℕ → Profile) (z : Domain)
-    (hA : ∀ i ≤ N, SliceDifferentiable O.interval (a i).high z)
-    (hB : ∀ i ≤ N, SliceDifferentiable O.interval (a i).mean z)
-    (hC : ∀ i ≤ N, SliceDifferentiable O.interval (a i).corrector z) :
-    slicedMomentumGrade O.interval (N+1) (O.inverseFrame z) (O.strain z) (O.normal z)
-      (assembledVelocity N a) (assembledPressure N a) z n = recursiveGrade O N a z n := by
-  have hv : (fun i => slicedJet O.interval (assembledVelocity N a i) z) = assembledJets O N a z :=
-    funext (slicedJet_assembledVelocity_finite O N a z hA hB hC)
-  have hg : truncate (N+1)
-      (fun i => slowPressure (O.inverseFrame z) (pressureJet (assembledPressure N a i) z)) n =
-      truncate (N+1) (fun i => slowPressure (O.inverseFrame z) (pressureJets N a z i)) n := by
-    by_cases he : n=N+1
-    · subst n
-      rw [truncate_of_le _ _ _ le_rfl,truncate_of_le _ _ _ le_rfl]
-      unfold assembledPressure pressureJets
-      rw [assemble_last,assemble_last]
-    · rw [truncate_of_gt _ _ _ (by omega),truncate_of_gt _ _ _ (by omega)]
-  unfold slicedMomentumGrade
-  rw [hv]
-  unfold recursiveGrade coefficient
-  rw [hg,shiftDown_above (N+1) n _ hn,shiftDown_above (N+1) n _ hn]
 
 
 end EulerPacketProfileRecursion

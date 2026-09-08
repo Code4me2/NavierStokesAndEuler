@@ -146,13 +146,6 @@ theorem laplaceWeighted_radialB {V : Profile} {p : ProfilePoint}
   unfold radialB
   field_simp [hs] ; ring
 
-theorem divergence_coefficient {V : Profile} (U : Profile) {p : ProfilePoint}
-    (hV : DifferentiableAt ℝ V p) (hs : p.2.1 ≠ 0) :
-    partialZ U p - 2 * radialB V p - 2 * p.2.1 * partialS (radialB V) p =
-      partialS V p + partialZ U p := by
-  rw [partialS_radialB_explicit hV hs]
-  unfold radialB
-  field_simp [hs] ; ring
 
 private theorem hasFDerivAt_velocity_at {B F U : Profile} {t : ℝ} {x : Space}
     (hB : DifferentiableAt ℝ B (profilePoint t x))
@@ -167,18 +160,6 @@ private theorem hasFDerivAt_velocity_at {B F U : Profile} {t : ℝ} {x : Space}
     ((((projection 0).hasFDerivAt.mul hb).add ((projection 1).hasFDerivAt.mul hf)).neg)
     (((projection 0).hasFDerivAt.mul hf).sub ((projection 1).hasFDerivAt.mul hb)) hu
 
-theorem divergence_velocity_at {B F U : Profile} {t : ℝ} {x : Space}
-    (hB : DifferentiableAt ℝ B (profilePoint t x))
-    (hF : DifferentiableAt ℝ F (profilePoint t x))
-    (hU : DifferentiableAt ℝ U (profilePoint t x)) :
-    spatialDivergence (AxisymmetricResidual.velocity B F U) t x =
-      partialZ U (profilePoint t x) - 2 * B (profilePoint t x) -
-        2 * radialEnergy x * partialS B (profilePoint t x) := by
-  unfold spatialDivergence spatialDerivative
-  rw [(hasFDerivAt_velocity_at hB hF hU).fderiv, Fin.sum_univ_three]
-  simp [velocityJacobian, packDerivative_apply, profileDerivative_apply,
-    coordinateVector, profilePoint, radialEnergy, lift]
-  ring
 
 
 

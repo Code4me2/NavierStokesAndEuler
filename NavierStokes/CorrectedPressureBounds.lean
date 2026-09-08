@@ -55,11 +55,6 @@ theorem relative_abs_le_two_norm (c : Coeff) (t : ℝ) : |relative c t| ≤ 2 * 
       (mul_le_mul h1 (hb 1) (abs_nonneg _) (norm_nonneg _))
     _ = _ := by ring
 
-theorem relative_coefficient_bound {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) (eta t : ℝ) :
-    |relative (w.coefficients eta) t| ≤ 2 * editSize d K :=
-  (relative_abs_le_two_norm _ _).trans
-    (mul_le_mul_of_nonneg_left (w.coefficient_bound eta) (by norm_num))
 
 theorem relative_eta_hasDerivAt {d : TailData} {K : ℝ}
     (w : ResetWitness d K) (eta t : ℝ) :
@@ -134,10 +129,6 @@ theorem editDensity_eq {d : TailData} {K : ℝ} (w : ResetWitness d K) (t eta : 
   unfold modifiedE
   ring
 
-theorem editDensity_zero_outside {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) (eta : ℝ) {t : ℝ}
-    (ht : t ∉ Ioo (d.releaseStart - 4) d.releaseStart) : editDensity w (t, eta) = 0 := by
-  rw [editDensity, correctedAngular_unchanged d w.coefficients eta ht, sub_self]
 
 noncomputable def editDensityEta {d : TailData} {K : ℝ}
     (w : ResetWitness d K) (p : ℝ × ℝ) : ℝ :=

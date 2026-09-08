@@ -532,14 +532,6 @@ theorem nuConstant_nonneg (d : TailData) (square : Bool) {q : ℝ}
   exact div_nonneg (mul_nonneg (tailSize_nonneg d square)
     (editBound_nonneg d.h_pos (by norm_num) square n)) (by linarith)
 
-theorem nuDebtJet_derivative (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) {ν : ℝ} (hν : 0 ≤ ν) :
-    HasDerivWithinAt (nuDebtJet d K square q n) (nuDebtJet d K square q (n + 1) ν)
-      (Ici 0) ν :=
-  weightedDebtJet_derivative d.h_pos hK
-    (tailWeight_continuousOn d (lt_of_lt_of_le zero_lt_one hK) square)
-    (tailSize_nonneg d square) (tailWeight_bound d (lt_of_lt_of_le zero_lt_one hK) square)
-    hq square n hν
 
 theorem nuDebt_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
     {q : ℝ} (hq : tailDecay d square + q < 0) :

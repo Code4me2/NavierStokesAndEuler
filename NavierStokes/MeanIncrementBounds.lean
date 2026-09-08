@@ -992,11 +992,6 @@ theorem meanClass_meanPressure_change
   intro n x _
   exact (congrFun (meanPressure_sub ha hab hd (hf n) (hg n) (hsf n) (hsg n) (M n) (v n)) x).symm
 
-noncomputable def reconstructedPressure (d a b : ℝ) (hab : a < b)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (o : Operators (PressureStream.Lift P))
-    (base mean : Triple (PressureStream.Lift P))
-    (W : Fin 3 → Fin 3 → Field (PressureStream.Lift P)) : Field (PressureStream.Lift P) :=
-  fun n => PressureStream.meanPressure d a b (M n) hab (v n) (gr o base mean W n)
 
 
 section ReconstructedTangential
@@ -1028,20 +1023,6 @@ section PhysicalIdentification
 
 open ProblemStatement
 
-/-- The physical-coordinate instance identifies the chart expressions above
-with the already formalized equation (32). The slow time direction is `-∂t`
-because the chart's slow time term has a minus sign. -/
-noncomputable def physicalOperators : Operators SpaceTime where
-  epsilon := fun _ => 1
-  radialFrequency := fun _ => 0
-  fastCoefficient := fun _ => 0
-  radius := MeanResidual.radius
-  radialProfile := fun _ => 0
-  eR := (0, coordinateVector 0)
-  eZ := (0, coordinateVector 2)
-  eT := -(1, 0)
-  vR := 0
-  vT := 0
 
 noncomputable def physicalField (f : MeanResidual.Scalar) : Field SpaceTime := fun _ => f
 

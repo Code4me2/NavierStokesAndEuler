@@ -238,8 +238,6 @@ theorem nominal_leading_axis {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
     _ = _ := W.axis.natural.profile.family.natural.U_axis eta
       (NaturalAxisCoefficients.original_interval_interior heta)
 
-theorem nominal_leading_origin : (nominalCoefficients W).axial 0 (0, 0) = W.axis.j := by
-  simpa using nominal_leading_axis W (eta := 0) (by constructor <;> norm_num)
 
 
 
@@ -464,14 +462,6 @@ noncomputable def nominalScales : ℕ → ℕ :=
     (weightedBundle_smooth (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
       W.axis.normalization) (height_pos W) (innerBox_isCompact 0 (scaleUpper W upper)) B)
 
-theorem nominalScales_spec : B ≤ nominalScales W c hc upper B 0 ∧
-    AdmissibleScales F.data.h
-      (weightedBundle W.axis.normalization (nominalCoefficients W)
-        (activeZeta c (activeLeft W) (activeRight W)))
-      (innerBox 0 (scaleUpper W upper)) (nominalScales W c hc upper B) :=
-  Classical.choose_spec (exists_admissibleScales
-    (weightedBundle_smooth (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
-      W.axis.normalization) (height_pos W) (innerBox_isCompact 0 (scaleUpper W upper)) B)
 
 
 

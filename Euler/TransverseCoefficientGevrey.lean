@@ -147,30 +147,5 @@ theorem fixedFrameOperator_bound (T : ℝ) (hT : 0 ≤ T)
   convert h using 1
   rfl
 
-/-- The genuine weak right side has the input shift with a fixed polynomial cost. -/
-theorem fixedForcing_bound (T : ℝ) (hT : 0 ≤ T)
-    (Q Q₁ : P → C(Icc (0 : ℝ) T, U →L[ℝ] E))
-    (hQ : ContDiff ℝ ∞ Q) (hQ₁ : ContDiff ℝ ∞ Q₁)
-    (R C₀ C₁ : ℝ) (hR : 0 ≤ R) (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
-    (hbQ : ∀ n x, ‖iteratedFDeriv ℝ n Q x‖ ≤ C₀ * majorant R 0 n)
-    (hbQ₁ : ∀ n x, ‖iteratedFDeriv ℝ n Q₁ x‖ ≤ C₁ * majorant R 0 n)
-    (f : P → TimeLp T E) (hf : ContDiff ℝ ∞ f) (d : ℕ)
-    (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n
-      (fun y => (-(fixedFramePrimitive T hT (Q y) (Q₁ y)).adjoint) (f y)) x‖ ≤
-      forcingCost T C₀ C₁ * majorant R d n := by
-  let Z := fun y => fixedFramePrimitive T hT (Q y) (Q₁ y)
-  have hZ : ContDiff ℝ ∞ Z := contDiff_fixedFramePrimitive T hT Q Q₁ hQ hQ₁
-  have hZT : ContDiff ℝ ∞ (fun y => (Z y).adjoint) :=
-    contDiff_adjoint hZ
-  have hC : 0 ≤ T * derivativeCost T C₀ C₁ := by unfold derivativeCost; positivity
-  have hbound := adjoint_bound Z hZ R (T * derivativeCost T C₀ C₁) hR hC 0
-    (fixedFramePrimitive_bound T hT Q Q₁ hQ hQ₁ R C₀ C₁ hR hC₀ hC₁ hbQ hbQ₁)
-  have hp (k : ℕ) (y : P) := clm_apply_bound (fun z => -(Z z).adjoint) f
-    hZT.neg hf R (T * derivativeCost T C₀ C₁) 1 hR hC zero_le_one 0 d
-    (neg_bound (fun z => (Z z).adjoint) R _ 0 hbound)
-    (by simpa only [one_mul] using hbf) k y
-  simpa only [forcingCost, mul_one, Nat.zero_add] using hp n x
 
 end EulerTransverseCoefficientGevrey

@@ -596,10 +596,6 @@ theorem pastIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E
 theorem totalIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
     totalIntegral M v (fun x => c • f x) z = c • totalIntegral M v f z := integral_smul c _
 
-theorem compactIntegral_smul (χ : ℝ → ℝ) (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
-    compactIntegral χ M v (fun x => c • f x) z = c • compactIntegral χ M v f z := by
-  simp only [compactIntegral, pastIntegral_smul, totalIntegral_smul, smul_sub]
-  rw [smul_comm]
 
 theorem iteratedFDeriv_supported {a b : ℝ} {f : ℝ × E → F}
     (hs : RadialAlias.RadiallySupported a b f) (n : ℕ) :

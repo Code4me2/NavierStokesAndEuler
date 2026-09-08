@@ -429,15 +429,6 @@ theorem requested_cross_tail (B N0 : ℕ) (c : CorrectionState.Context Point)
 
 open CorrectionStep CorrectionState
 
-/-- This is the actual cycle constructor with its particular solver left
-as a parameter.  Both fixed and state-dependent actual particular solvers
-use this very signed subsystem. -/
-noncomputable def cycleParameters
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow) :
-    CycleParameters (Label B N0 × Fin 2) :=
-  CycleParameters.ofGeometry ActualInitialization.geometry h
-    (CorrectionInitialization.CommonWindow.index h) ActualInitialization.axial
-    particular ActualSignedStageControls.parameters rankData
 
 
 

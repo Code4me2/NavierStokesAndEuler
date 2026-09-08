@@ -1331,23 +1331,6 @@ theorem EnvelopeJets.localize {D D' : PhaseJetBounds.Domain ι E}
       exact mul_nonneg (mul_nonneg (zero_le_one.trans hC)
         (pow_nonneg (zero_le_one.trans (D'.one_le_scale i)) m)) (hw i x hx)
 
-/-- All profile jets are obtained from the constructed compact smooth bump. -/
-theorem profile_linear_polynomial (D : PhaseJetBounds.Domain ι E) (L : E →L[ℝ] ℝ) :
-    PhaseJetBounds.PolynomialJets D (fun _ x => GaussianTailFlat.profile (L x)) := by
-  let R : PhaseJetBounds.Domain ι ℝ := {
-    scale := D.scale
-    carrier := fun _ => univ
-    isOpen := fun _ => isOpen_univ
-    one_le_scale := D.one_le_scale }
-  have hp : PhaseJetBounds.PolynomialJets R (fun _ => GaussianTailFlat.profile) := by
-    refine ⟨fun _ => GaussianTailFlat.profile_contDiff.contDiffOn, ?_⟩
-    intro N
-    obtain ⟨C, hC, hc⟩ := GaussianTailFlat.finite_jet_bounds GaussianTailFlat.profile_jet_bounded N
-    refine ⟨C + 1, by linarith, 0, ?_⟩
-    intro i j hj x hx
-    simpa only [pow_zero, mul_one] using (hc j hj x).trans (le_add_of_nonneg_right zero_le_one)
-  simpa only [add_zero] using hp.precomp_affine (D := D) L (fun _ => 0) (fun _ => rfl)
-    (fun _ _ _ => mem_univ _)
 
 end Localization
 
@@ -1359,19 +1342,6 @@ noncomputable def cutoffPulse (d : PrimaryODE.FrameData Q) (lam u L : ℝ)
     (z : Q × ℝ) : Space :=
   GaussianTailFlat.profile z.2 • normalizedPulse d lam u L z
 
-omit [NormedSpace ℝ Q] in
-theorem profile_tsupport_slot :
-    tsupport (fun z : Q × ℝ => GaussianTailFlat.profile z.2) ⊆
-      {z : Q × ℝ | z.2 ∈ Ioo (0 : ℝ) 1} := by
-  have hcl : tsupport (fun z : Q × ℝ => GaussianTailFlat.profile z.2) ⊆
-      {z : Q × ℝ | z.2 ∈ Icc (1 / 10 : ℝ) (9 / 10)} := by
-    apply closure_minimal _ (isClosed_Icc.preimage continuous_snd)
-    intro z hz
-    exact ⟨(profile_support_covariance_interval hz).1.le,
-      (profile_support_covariance_interval hz).2⟩
-  intro z hz
-  obtain ⟨hl, hr⟩ := hcl hz
-  constructor <;> linarith
 
 
 end CutoffPulse
@@ -1445,13 +1415,6 @@ noncomputable def chartCovariance
     (lam u L : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Q × ℝ) :
     ℕ → E → SmoothCovariance.Mat2 := fun n x => primaryCovariance pref d lam u L n (χ n x).1
 
-noncomputable def primaryWave (s : StripData E)
-    (pref : Fin 2 → ℕ → ℝ) (d : Fin 2 → ℕ → PrimaryODE.FrameData Q)
-    (lam u L : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Q × ℝ)
-    (T : ℕ → E → SmoothCovariance.Vec2) (mask : ℕ → E → ℝ) (c : Fin 2) :
-    ℕ → E → HarmonicCalculus.ComplexVector :=
-  primaryCoefficient s (chartCovariance pref d lam u L χ) T mask
-    (fun n x => cutoffPulse (d c n) (lam c n) (u c n) (L c n) (χ n x)) c
 
 
 end ChartAssembly
@@ -1867,13 +1830,6 @@ open WeightedClasses
 variable {Q E : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-noncomputable def uncutPrimaryWave (s : StripData E)
-    (pref : Fin 2 → ℕ → ℝ) (d : Fin 2 → ℕ → PrimaryODE.FrameData Q)
-    (lam u L : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Q × ℝ)
-    (T : ℕ → E → SmoothCovariance.Vec2) (mask : ℕ → E → ℝ) (c : Fin 2) :
-    ℕ → E → HarmonicCalculus.ComplexVector :=
-  primaryCoefficient s (chartCovariance pref d lam u L χ) T mask
-    (fun n x => normalizedPulse (d c n) (lam c n) (u c n) (L c n) (χ n x)) c
 
 
 

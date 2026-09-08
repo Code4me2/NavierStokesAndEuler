@@ -44,17 +44,6 @@ theorem unit_velocity_odd (t : ℝ) (x : Space) :
   simpa only [Prod.neg_mk,neg_zero,EulerConstantEuler.velocity,ExactLiftedPacket.rawVelocity,
     FieldTower.rawField,coveringMap,AddCircle.coe_zero] using h
 
-omit hodd in
-theorem unit_pressure_point (t : Icc (0 : ℝ) 1) (x : LiftDomain P) :
-    (exactPacket P u C R hC hR hu hdiv).pressure.pointField t x =
-      (correctionBudget P u C R hC hR hu hdiv).pointPressure P t x := by
-  erw [exactPacket,exactPacketOfResidual_pressure_pointField]
-  have hz : (Field.zero P 1).toFieldTower.pointField t x=0 := by
-    change EulerSobolevPointEvaluation.pointEvaluation P x
-      ((Field.zero P 1).toFieldTower.realization 3 t)=0
-    rw [EulerSmallCorrection.zero_tower,map_zero]
-  change (Field.zero P 1).toFieldTower.pointField t x+_=_
-  rw [hz,zero_add]
 
 
 

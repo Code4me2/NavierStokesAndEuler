@@ -602,12 +602,6 @@ theorem MatchingBounds.of_heq {F : OutgoingProfile.Profile}
   cases hc
   exact hb
 
-theorem shapeTime_eq_of_heq {F : OutgoingProfile.Profile}
-    {A B : NominalProfile.AxisStage F} {c : NominalProfile.Controls A} {d : NominalProfile.Controls B}
-    (hA : B = A) (hc : HEq d c) : d.shapeTime = c.shapeTime := by
-  cases hA
-  cases hc
-  rfl
 
 /-- Actual finite jets of the coefficients produced by the fixed nonlinear
 inverse.  The constant depends only on the requested order and that inverse.
@@ -798,54 +792,6 @@ theorem exists_ordered_matching_continuation (F : OutgoingProfile.Profile) (N : 
     hmatchC C hClarge hCm E c rfl ((hc.of_le (le_max_left _ _)).mono (min_le_left _ _))
   exact ⟨w, hm, fun _ hη => hm.smallDebt hradius hη⟩
 
-/-- The late heat-completion radius is met by increasing the same `C` before
-selecting the entrance profile.  The assembled witness keeps that profile and
-its exact continuation controls.  No separation or final-debt hypothesis is
-left as an input. -/
-theorem exists_ordered_assembled_profile {F : OutgoingProfile.Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) (N : ℕ)
-    {rho : ℝ} (hrho : 0 < rho) (hradius : rho ≤ NominalProfile.resetSolver.radius) :
-    ∃ eps : ℝ, 0 < eps ∧ eps ≤ 1 ∧
-      ∀ j : ℝ, |j| ≤ eps → ∀ hj : NaturalAxisData.SmallParameters F.data.h j,
-      ∀ prep : NominalProfile.AxisPreparation F j,
-      ∀ nu : ℝ, 0 < nu →
-      (∀ eta ∈ Icc (-1 : ℝ) 1, |NaturalAxisData.Z F.data.h j F.axisDatum eta| ≤ nu →
-        99 / 100 < NaturalAxisData.chi F.data.h j prep.sigma eta) →
-      ∃ Λ0 : ℝ, 1 ≤ Λ0 ∧ ∀ Λ : ℝ, ∀ hΛ : 0 < Λ, Λ0 ≤ Λ →
-        ∃ T : ℝ, ∃ hT : 0 < T, ∃ C0 : ℝ, 1 ≤ C0 ∧ ∀ C : ℝ, C0 ≤ C →
-          ∃ hΛlarge : prep.scaleBound ≤ Λ,
-          ∃ hClarge : NaturalEntrance.entranceNormalization prep.inputs Λ prep.delta ≤ C,
-          ∃ E : NaturalEntrance.EntranceProfile prep.inputs Λ C,
-          ∀ J : ℕ, ∀ epsilon : ℝ, 0 < epsilon →
-            ∃ w : ActivationContinuation.ContinuationWitness E hΛ hj F.axisDatum_contDiff
-              (max N J) (min eps epsilon),
-            ∃ W : NominalProfile.Witness F,
-              let A := NominalProfile.AxisStage.ofEntrance hj prep Λ C hΛlarge hClarge E
-              let c := NominalProfile.Controls.ofContinuation A w T hT
-              W.axis = A ∧ HEq W.controls c ∧ MatchingBounds W.controls N rho := by
-  obtain ⟨eps, heps, heps1, hmatched⟩ := exists_ordered_matching_continuation F N hrho hradius
-  obtain ⟨R0, _hR0, hassemble⟩ := NominalProfile.exists_assembly_threshold_preserving hF
-  refine ⟨eps, heps, heps1, ?_⟩
-  intro j hjbound hj prep nu hnu hcut
-  obtain ⟨Λ0, hΛ0, hscale⟩ := hmatched j hjbound hj prep nu hnu hcut
-  refine ⟨Λ0, hΛ0, ?_⟩
-  intro Λ hΛ hΛlarge
-  obtain ⟨T, hT, Cbase, hCbase, hnormalization⟩ := hscale Λ hΛ hΛlarge
-  obtain ⟨Cgeo, hgeo⟩ := eventually_atTop.mp
-    (NominalProfile.eventually_matching_geometry F T R0 Cbase)
-  refine ⟨T, hT, max Cbase Cgeo, hCbase.trans (le_max_left _ _), ?_⟩
-  intro C hC
-  have hCb : Cbase ≤ C := (le_max_left _ _).trans hC
-  have hCg := hgeo C ((le_max_right _ _).trans hC)
-  obtain ⟨hL, hCl, E, hcontrols⟩ := hnormalization C hCb
-  refine ⟨hL, hCl, E, ?_⟩
-  intro J epsilon hepsilon
-  obtain ⟨w, hmatch, hsmall⟩ := hcontrols J epsilon hepsilon
-  let A := NominalProfile.AxisStage.ofEntrance hj prep Λ C hL hCl E
-  let c := NominalProfile.Controls.ofContinuation A w T hT
-  have hR : R0 ≤ c.radius := hCg.2.2.1.le
-  obtain ⟨W, hWA, hWc⟩ := hassemble A c hR hmatch.separation.le hsmall
-  exact ⟨w, W, hWA, hWc, hmatch.of_heq hWA hWc⟩
 
 
 

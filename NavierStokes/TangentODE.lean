@@ -138,18 +138,6 @@ theorem exists_fixed : ∃ f : C(Icc v.left v.right, E), v.next f = f := by
   obtain ⟨N, K, hK⟩ := v.exists_contracting_iterate
   exact ⟨_, hK.isFixedPt_fixedPoint_iterate⟩
 
-/-- Finite-interval existence with no smallness condition on interval length or
-Lipschitz constant. The resulting extension is differentiable at the endpoints too. -/
-theorem exists_solution :
-    ∃ u : ℝ → E, u v.left = v.initial ∧
-      ∀ t ∈ Icc v.left v.right, HasDerivAt u (v.field t (u t)) t := by
-  obtain ⟨f, hf⟩ := v.exists_fixed
-  refine ⟨v.integralCurve f, by simp [integralCurve], fun t ht => ?_⟩
-  have hval : v.integralCurve f t = f (v.proj t) := by
-    have hh := congrArg (fun g : C(Icc v.left v.right, E) => g (v.proj t)) hf
-    simpa only [next, ContinuousMap.coe_mk, v.proj_of_mem ht] using hh
-  have hd := v.hasDerivAt_integralCurve f t
-  simpa only [composeField, v.proj_of_mem ht, hval] using hd
 
 end IntervalSystem
 

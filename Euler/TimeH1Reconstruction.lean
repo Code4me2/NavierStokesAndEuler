@@ -143,34 +143,5 @@ theorem reconstruction_contDiff (T : ℝ) (hT : 0 ≤ T)
   exact ((valuePart (E := E) T hT).contDiff.comp hp).add
     ((derivativePart (E := E) T hT).contDiff.comp hq)
 
-omit [CompleteSpace E] in
-/-- Every actual parameter derivative has the uniform time-trace estimate;
-the trace costs a fixed polynomial multiplier, independent of the order. -/
-theorem reconstruction_gevrey (T : ℝ) (hT : 0 < T)
-    (p q : P → TimeLp T E) (hp : ContDiff ℝ ∞ p) (hq : ContDiff ℝ ∞ q)
-    (R C D : ℝ) (hR : 0 ≤ R) (hC : 0 ≤ C) (hD : 0 ≤ D) (d : ℕ)
-    (hbp : ∀ n x, ‖iteratedFDeriv ℝ n p x‖ ≤ C*majorant R d n)
-    (hbq : ∀ n x, ‖iteratedFDeriv ℝ n q x‖ ≤ D*majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => reconstruction T hT.le (p y,q y)) x‖ ≤
-      ((T⁻¹*Real.sqrt T)*C + (2*Real.sqrt T)*D) * majorant R d n := by
-  have hvalue (k : ℕ) (y : P) :
-      ‖iteratedFDeriv ℝ k (fun z => valuePart T hT.le (p z)) y‖ ≤
-      ((T⁻¹*Real.sqrt T)*C) * majorant R d k := by
-    exact (linear_bound (valuePart (E := E) T hT.le) p hp R C d hbp k y).trans
-      (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right (valuePart_norm_le (E := E) T hT) hC)
-        (majorant_nonneg R hR d k))
-  have hderivative (k : ℕ) (y : P) :
-      ‖iteratedFDeriv ℝ k (fun z => derivativePart T hT.le (q z)) y‖ ≤
-      ((2*Real.sqrt T)*D) * majorant R d k := by
-    exact (linear_bound (derivativePart (E := E) T hT.le) q hq R D d hbq k y).trans
-      (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right (derivativePart_norm_le (E := E) T hT) hD)
-        (majorant_nonneg R hR d k))
-  exact add_bound (fun z => valuePart T hT.le (p z)) (fun z => derivativePart T hT.le (q z))
-    ((valuePart (E := E) T hT.le).contDiff.comp hp)
-    ((derivativePart (E := E) T hT.le).contDiff.comp hq)
-    R ((T⁻¹*Real.sqrt T)*C) ((2*Real.sqrt T)*D) d hvalue hderivative n x
 
 end EulerTimeH1Reconstruction

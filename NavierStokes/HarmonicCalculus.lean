@@ -419,20 +419,6 @@ theorem norm_strippedDivergence_le (R : E → ℝ) (Vr Vz : E → E)
           ‖along Vz (fun y => a y 2) x‖ := add_le_add_left (norm_add_le _ _) _
     _ = _ := by simp only [norm_smul, norm_inv, Real.norm_eq_abs, div_eq_mul_inv]; ring
 
-/-- Exact divergence supplies the frequency gain; the identity is proved
-above from the actual harmonic derivative, not assumed here. -/
-theorem normalDot_norm_eq_div (R : E → ℝ) (Vr Vθ Vz : E → E)
-    (κ : ℝ) {Φ : E → ℝ} {a : E → ComplexVector} {x : E}
-    (hκ : κ ≠ 0) (hΦ : DifferentiableAt ℝ Φ x)
-    (ha : ∀ i, DifferentiableAt ℝ (fun y => a y i) x)
-    (haθ : along Vθ (fun y => a y 1) x = 0)
-    (hdiv : cylindricalDivergence R Vr Vθ Vz (vectorMode κ Φ a) x = 0) :
-    ‖normalDot (phaseNormal R Vr Vθ Vz Φ x) (a x)‖ =
-      ‖strippedDivergence R Vr Vz a x‖ / |κ| := by
-  have he := congrArg norm (longitudinal_identity R Vr Vθ Vz κ hΦ ha haθ hdiv)
-  simp only [norm_mul, norm_phaseFactor, norm_neg] at he
-  apply (eq_div_iff (abs_ne_zero.mpr hκ)).mpr
-  simpa only [mul_comm] using he
 
 
 

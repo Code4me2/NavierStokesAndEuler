@@ -546,32 +546,6 @@ theorem local_gaussian_tail_bound {s : StripData D} {K : ℕ → I → Set D}
       rw [show c * ell / 25 / 2 = c * ell / 50 by ring]
       ring
 
-theorem local_gaussian_all_gains {s : StripData D} {K : ℕ → I → Set D}
-    {W : ℕ → D → ℝ} {α c : ℝ} {f : ℕ → I → D → E}
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K f)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : ℕ → I → D → ℝ) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n, ell * ChartScales.S n ≤ L n) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      W n x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n))
-    (hzero : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      |θ n i x - 1 / 2| < 1 / 5 → f n i =ᶠ[𝓝 x] fun _ => 0)
-    (β : ℝ) : LocalJets s (fun _ _ => 1) β K f := by
-  refine ⟨hf.smooth, ?_⟩
-  intro m
-  obtain ⟨A, hA, p, hb⟩ := local_gaussian_tail_bound hf edges scales θ L hL ell hell hLell hc hW hzero m
-  obtain ⟨B, hB, hflat⟩ := gaussian_beats_Q_power (by positivity : 0 < c * ell / 50) p (scales.power * β)
-  refine ⟨A * B, mul_nonneg hA hB.le, 0, ?_⟩
-  intro n i x hx hi j hj
-  have ht := (hb n i x hx hi j hj).trans
-    (show A * (1 + ChartScales.S n) ^ p * Real.exp (-(c * ell / 50) * ChartScales.S n) ≤
-      (A * B) * ChartScales.Q n ^ (scales.power * β) by
-        calc
-          _ = A * ((1 + ChartScales.S n) ^ p * Real.exp (-(c * ell / 50) * ChartScales.S n)) := by ring
-          _ ≤ A * (B * ChartScales.Q n ^ (scales.power * β)) := mul_le_mul_of_nonneg_left (hflat n) hA
-          _ = _ := by ring)
-  simpa only [majorant, pow_zero, mul_one, scales.epsilon_eq,
-    ← Real.rpow_mul (ChartScales.Q_pos n).le] using ht
 
 end NativeGaussianEstimates
 
@@ -1051,12 +1025,6 @@ theorem globalGood_class_of_native (K : Cells D I)
 
 
 
-/-- The global differential formula corresponding to the sum of native
-good terms.  Its equality with that sum is proved from actual germs. -/
-noncomputable def differentialGood (s : StripData D) (d : GraphDirections D) (n : ℕ) (x : D) :
-    ComplexVector :=
-  a.common.principalVelocity s d (a.common.curlCorrection s d) n x +
-    (a.commonCorrected s d).remainder s d n x
 
 
 

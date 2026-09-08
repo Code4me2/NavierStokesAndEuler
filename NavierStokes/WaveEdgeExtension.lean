@@ -508,43 +508,6 @@ theorem NativeJets.native_zero_extension {F : OutgoingProfile.Profile} (W : Nomi
 
 /-! ## Exact comparison with the inner-coordinate edge distance -/
 
-theorem inner_edgeDistance_eq {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {r : ℝ} (hr : 0 < r) (η : ℝ) :
-    FinalSlowBase.edgeDistance W (r ^ 2 / 2, η) =
-      min 1 (min (2 * WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) r)
-        (2 * (WeightedRadialPrimitive.logLength (PrimaryTargetBounds.leftRadius W)
-          (PrimaryTargetBounds.rightRadius W) -
-            WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) r))) := by
-  have ha := PrimaryTargetBounds.leftRadius_pos W
-  have hb := PrimaryTargetBounds.rightRadius_pos W
-  have hasq : (PrimaryTargetBounds.leftRadius W) ^ 2 / 2 = NominalConeAssembly.activeLeft W := by
-    rw [PrimaryTargetBounds.leftRadius,
-      Real.sq_sqrt (mul_nonneg (by norm_num) (NominalConeAssembly.activeLeft_pos W).le)]
-    ring
-  have hbsq : (PrimaryTargetBounds.rightRadius W) ^ 2 / 2 = NominalConeAssembly.activeRight W := by
-    rw [PrimaryTargetBounds.rightRadius,
-      Real.sq_sqrt (mul_nonneg (by norm_num) (LeadingStressWeights.activeRight_pos W).le)]
-    ring
-  have halog := PrimaryTargetBounds.log_square_half ha
-  have hblog := PrimaryTargetBounds.log_square_half hb
-  rw [hasq] at halog
-  rw [hbsq] at hblog
-  have hl : Real.log (r ^ 2 / 2) - FinalSlowBase.logLeft W =
-      2 * WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) r := by
-    rw [FinalSlowBase.logLeft, WeightedRadialPrimitive.logPosition,
-      Real.log_div hr.ne' ha.ne', PrimaryTargetBounds.log_square_half hr, halog]
-    ring
-  have hh : FinalSlowBase.logRight W - Real.log (r ^ 2 / 2) =
-      2 * (WeightedRadialPrimitive.logLength (PrimaryTargetBounds.leftRadius W)
-        (PrimaryTargetBounds.rightRadius W) -
-          WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) r) := by
-    rw [FinalSlowBase.logRight, WeightedRadialPrimitive.logLength,
-      WeightedRadialPrimitive.logPosition, Real.log_div hb.ne' ha.ne',
-      Real.log_div hr.ne' ha.ne', PrimaryTargetBounds.log_square_half hr, hblog]
-    ring
-  change min 1 (min (Real.log (r ^ 2 / 2) - FinalSlowBase.logLeft W)
-    (FinalSlowBase.logRight W - Real.log (r ^ 2 / 2))) = _
-  rw [hl, hh]
 
 
 /-- Regularity of the literal native extension, including its exact

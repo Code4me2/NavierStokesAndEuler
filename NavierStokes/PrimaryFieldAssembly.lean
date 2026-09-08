@@ -235,21 +235,6 @@ theorem principalField_apply {N : ℕ}
   exact finsum_vector_apply _ F
     (fun a ha => slotVelocity_mask_zero (P a.1) hdet _ _ _ q x (hF a ha) _ Y θ) i
 
-theorem principalField_components {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position)
-    (Y : Plane) (θ : ℝ) :
-    principalField P hdet outer ε T q x Y θ 0 =
-      assembledRadial P hdet outer ε T q x Y θ ∧
-    ∀ i : Fin 2, principalField P hdet outer ε T q x Y θ i.succ =
-      assembledTangent P hdet outer ε T q x i Y θ := by
-  constructor
-  · simp only [principalField_apply P hdet outer ε T hq x, slotVelocity_zero,
-      assembledRadial]
-  · intro i
-    simp only [principalField_apply P hdet outer ε T hq x, slotVelocity_succ,
-      assembledTangent]
 
 
 /-! ## A single cutoff, before periodization -/
@@ -292,10 +277,6 @@ open LinearWaveBounds WeightedClasses
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
-noncomputable def cutoffVelocity (a : WaveCoefficients X) (ψ : ℕ → X → ℝ)
-    (n : ℕ) (x : X) : Vector :=
-  fun i => (vectorMode (a.frequency n) (a.phase n)
-    ((a.withCutoff ψ).amplitude n) x i).re
 
 
 
@@ -303,26 +284,9 @@ noncomputable def cutoffVelocity (a : WaveCoefficients X) (ψ : ℕ → X → �
 
 end CurlCorrection
 
-noncomputable def covarianceError (V R : Plane → ℝ → Vector) (i : Fin 2)
-    (Y : Plane) (θ : ℝ) : ℝ :=
-  V Y θ 0 * R Y θ i.succ + R Y θ 0 * V Y θ i.succ + R Y θ 0 * R Y θ i.succ
 
 
-private theorem continuous_angularMean {f : Plane → ℝ → ℝ}
-    (hf : Continuous f.uncurry) : Continuous (fun Y => SmoothLoop.angularMean (f Y)) :=
-  (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hf
-    0 (2 * Real.pi)).div_const _
 
-private theorem squareAverage_add {f g : Plane → ℝ} (hf : Continuous f) (hg : Continuous g) :
-    TorusAverages.squareAverage (fun Y => f Y + g Y) =
-      TorusAverages.squareAverage f + TorusAverages.squareAverage g := by
-  rw [TorusAverages.squareAverage_eq_setIntegral (hf.fun_add hg),
-    TorusAverages.squareAverage_eq_setIntegral hf, TorusAverages.squareAverage_eq_setIntegral hg]
-  apply MeasureTheory.integral_add
-  · exact (hf.continuousOn.integrableOn_compact (isCompact_Icc.prod isCompact_Icc)).mono_set
-      (Set.prod_mono Ico_subset_Icc_self Ico_subset_Icc_self)
-  · exact (hg.continuousOn.integrableOn_compact (isCompact_Icc.prod isCompact_Icc)).mono_set
-      (Set.prod_mono Ico_subset_Icc_self Ico_subset_Icc_self)
 
 
 
@@ -526,10 +490,6 @@ private theorem covering_iterate_add_lattice (n : ℕ) (Y : Plane) (k : TorusInv
       rw [Function.iterate_succ_apply', ih, covering_add_lattice,
         Function.iterate_succ_apply', Function.iterate_succ_apply']
 
-theorem covered_periodic (n : ℕ) (f : Plane → ℝ) (Y : Plane) (k : TorusInverse.Frequency) :
-    covered n f (Y + TorusAverages.latticePoint k) = covered n f Y := by
-  unfold covered
-  rw [covering_iterate_add_lattice, TorusAverages.periodize_periodic]
 
 theorem slot_cross_zero {N : ℕ} (hN : 1 ≤ N)
     (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
@@ -561,49 +521,10 @@ noncomputable def diagonalCovariance {N : ℕ}
     covered (SlotColoring.nativeIndex h (tailLabel N a.1).1) ((P a.1).rawRadial hdet a.2) Y *
       covered (SlotColoring.nativeIndex h (tailLabel N a.1).1) ((P a.1).rawTangent hdet a.2 i) Y * (1 / 2)
 
-/-- Both off-diagonal elimination and angular integration are performed
-on the actual finite active family, before descending to the torus. -/
-theorem angular_principal_finite {N : ℕ} (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position) (i : Fin 2) :
-    ∃ F : Finset SignedIndex, ∀ Y,
-      SmoothLoop.angularMean (fun θ => principalField P hdet outer ε T q x Y θ 0 *
-        principalField P hdet outer ε T q x Y θ i.succ) =
-      ∑ a ∈ F, diagonalCovariance P hdet outer ε T q x a i Y := by
-  classical
-  obtain ⟨F, hF⟩ := principalField_finite P hdet outer ε T hq x
-  refine ⟨F, ?_⟩
-  intro Y
-  have hprod (θ : ℝ) : principalField P hdet outer ε T q x Y θ 0 *
-      principalField P hdet outer ε T q x Y θ i.succ =
-      ∑ a ∈ F, slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ 0 *
-        slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ i.succ := by
-    simp only [hF Y θ, Finset.sum_apply]
-    apply sum_product_diagonal
-    intro a _ b _ hab
-    exact slot_cross_zero hN P hdet outer ε T hq x hab Y θ i
-  simp_rw [hprod]
-  rw [angularMean_sum F]
-  · apply Finset.sum_congr rfl
-    intro a _
-    simp only [slotVelocity_zero, slotVelocity_succ, PairData.radialWave, PairData.tangentWave]
-    exact angularMean_wave_product _ _ _ _ _ ((P a.1).modes_ne a.2) _ _
-  · intro a _
-    simp only [slotVelocity_zero, slotVelocity_succ, PairData.radialWave, PairData.tangentWave]
-    exact (wave_continuous_theta _ _ _ _ _ _).mul (wave_continuous_theta _ _ _ _ _ _)
 
 
 
 
-theorem nativeVector_continuous {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2) :
-    Continuous (nativeVector P hdet j) := by
-  apply continuous_pi
-  intro i
-  refine Fin.cases ?_ (fun k => ?_) i
-  · exact P.rawRadial_continuous hdet j
-  · exact P.rawTangent_continuous hdet j k
 
 
 

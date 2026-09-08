@@ -576,20 +576,6 @@ noncomputable def slotTime (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ)
     (p : SpaceTime) : ℝ :=
   (etaCoordinate (nativeGraph h n p - center) + r0) / ChartScales.timeCoefficient h n
 
-theorem slotTime_affine (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ) (p : SpaceTime) :
-    slotTime h n center r0 p =
-      ChartScales.Q n ^ (-1 - h) * p.1 +
-        (r0 - etaCoordinate center) / ChartScales.timeCoefficient h n := by
-  have ht : ChartScales.Tg ^ ChartScales.nativeIndex h n ≠ 0 :=
-    (pow_pos ChartScales.Tg_pos _).ne'
-  have hQ : ChartScales.Q n ^ (1 + h) ≠ 0 :=
-    (Real.rpow_pos_of_pos (ChartScales.Q_pos n) _).ne'
-  have hp : ChartScales.Q n ^ (-1 - h) = (ChartScales.Q n ^ (1 + h))⁻¹ := by
-    rw [show -1 - h = -(1 + h) by ring, Real.rpow_neg (ChartScales.Q_pos n).le]
-  unfold slotTime
-  rw [map_sub, etaCoordinate_nativeGraph, hp]
-  unfold ChartScales.timeCoefficient
-  field_simp ; ring
 
 
 

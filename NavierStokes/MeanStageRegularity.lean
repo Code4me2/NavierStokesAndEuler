@@ -247,10 +247,6 @@ theorem rankStage_primitive (H : PrimitiveData U g.radial.inner g.radial.outer c
   rw [LocalRankDefect.rankStage_covariance]
   exact H.covariance i j
 
-theorem rankStage_reconstructed (g : VariableGaugeMean.GaugeData Plane) (r : RankData Plane)
-    (c : Context Point) (u : State Point) (axial : Plane × Plane) :
-    VariableGaugeMean.reconstructState g c (VariableGaugeMean.rankStageState g r axial c u) =
-      VariableGaugeMean.rankStageState g r axial c u := rfl
 
 
 

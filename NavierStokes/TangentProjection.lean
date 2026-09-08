@@ -73,15 +73,6 @@ theorem pressure_cancellation (n n' t Kt f : E) (δ : ℝ) :
   abel
 
 
-/-- Along any differentiable solution of (27), the tangency defect solves `h' = -δ h`. -/
-theorem tangency_defect_derivative {n t : ℝ → E} {n' : E} {x : ℝ}
-    {Kt f : E} {δ : ℝ} (hn0 : n x ≠ 0)
-    (hn : HasDerivAt n n' x)
-    (ht : HasDerivAt t (projectedRhs (n x) n' (t x) Kt f δ) x) :
-    HasDerivAt (fun y => ⟪n y, t y⟫_ℝ) (-δ * ⟪n x, t x⟫_ℝ) x := by
-  convert! hn.inner ℝ ht using 1
-  rw [normal_projectedRhs hn0]
-  ring
 
 
 

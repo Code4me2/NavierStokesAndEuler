@@ -713,24 +713,6 @@ theorem axialUpdate_fast_residual {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd
       (axialAlias_smooth ha hab hd v h n hf hp hs), desiredIncrement_fastDerivative h n hf hp]
   ring
 
-/-- The actual two-component fast-time update and incompressible stream,
-with the exact axial alias in the resulting residual. -/
-theorem temporal_mean_update {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (w : S × Plane) (h : ℝ) (n : ℕ) {fθ fz : PressureStream.Lift S → ℝ}
-    (hθ : ContDiff ℝ ∞ fθ) (hz : ContDiff ℝ ∞ fz)
-    (hpθ : PressureStream.TorusPeriodicLift fθ) (hpz : PressureStream.TorusPeriodicLift fz)
-    (hsz : RadialAlias.RadiallySupported a b fz) (z : PressureStream.Lift S) :
-    fastDerivative h n (desiredIncrement h n fθ) z + centered fθ z = 0 ∧
-    fastDerivative h n (axialUpdate d a b M v h n fz) z + centered fz z =
-      -fastDerivative h n (axialAlias d a b M v h n fz) z ∧
-    PressureStream.graphDivergence (PressureStream.physicalSpeed d M) (0, v) w
-      (radialUpdate d a b M v w h n fz) (axialUpdate d a b M v h n fz) z = 0 ∧
-    PressureStream.torusAverage (desiredIncrement h n fθ) (z.1, z.2.1) = 0 ∧
-    PressureStream.torusAverage (axialUpdate d a b M v h n fz) (z.1, z.2.1) = 0 := by
-  refine ⟨?_, axialUpdate_fast_residual ha hab hd v h n hz hpz hsz z,
-    update_divergence_zero ha hab hd v w h n hz hpz hsz z,
-    desiredIncrement_zeroMean h n hθ hpθ _, axialUpdate_zeroMean ha hab hd v h n hz hpz hsz _⟩
-  rw [desiredIncrement_fastDerivative h n hθ hpθ, neg_add_cancel]
 
 end AxialReconstruction
 

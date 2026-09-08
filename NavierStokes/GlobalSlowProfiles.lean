@@ -1718,20 +1718,6 @@ theorem profiles_x_pressure_derivative {S : Set ℝ} {h C : ℝ} (s : Scheme S h
   rw [← profiles_pressure_eq s hn] at hd
   exact hp.unique hd
 
-theorem radialZ_eq_axialOp {S : Set ℝ} {h : ℝ} (d : Domain S h) (b : ℝ) (u : EvenProfile S)
-    {w : ℝ × ℝ} (heta : w.2 ∈ S) :
-    PositiveOrderMoments.radialZ h b u w = axialOp d b u w := by
-  have hx := radius_mul_xDerivative d.isOpen u heta w.1
-  change w.1 * xDerivative d.isOpen u w = ProfileHistories.radialPartial u w at hx
-  simp only [PositiveOrderMoments.radialZ, axialOp, mul_apply, add_apply, sub_apply,
-    constant_apply, inverseDenominator_apply]
-  change (2 * w.2 * b * u w + PositiveAxisSystem.edge w.2 * etaDerivative d.isOpen u w -
-    w.2 * w.1 * ProfileHistories.radialPartial u w) / PositiveAxisSystem.ell h w.2 =
-    (2 * b * w.2 * u w + (1 - w.2 ^ 2) * etaDerivative d.isOpen u w -
-      2 * w.2 * (w.1 ^ 2 / 2) * xDerivative d.isOpen u w) * (PositiveAxisSystem.ell h w.2)⁻¹
-  rw [← hx]
-  simp only [PositiveAxisSystem.edge, div_eq_mul_inv]
-  ring
 
 
 noncomputable def asSlowProfiles {S : Set ℝ} {h C : ℝ} (s : Scheme S h C) :

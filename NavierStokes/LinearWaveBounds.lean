@@ -823,15 +823,6 @@ theorem constructed_linear_wave_with_excluded {s : StripData D}
   exact ⟨h.constructed_goodCoefficient_class hκ hψ hR hN hb hlower hupper hK,
     fun n x hx => harmonicResidual_eq_good_add_excluded h hκ hψ hci hg n hx (hsolve n x hx)⟩
 
-/-- The cutoff error in the differential identity is precisely the field
-whose Gaussian estimates are proved in `GaussianTailFlat`. -/
-theorem excludedSlotError_eq_gaussianError {s : StripData D}
-    (g : GaussianTailFlat.SlotFamily s) (d : GraphDirections D)
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (a source : ℕ → D → ComplexVector) :
-    excludedSlotError d g.cutoff a source = g.error a source := by
-  funext n x
-  exact (g.error_eq_directional a source n x (d.fastScale n • d.fast) (hfast n)).symm
 
 
 

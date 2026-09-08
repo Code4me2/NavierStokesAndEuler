@@ -522,40 +522,9 @@ theorem localizedCopy_deck (κ : Plane → ℝ) (k n : Frequency)
   unfold localizedCopy
   rw [g.coordinates_deck, d.copySolve_deck g hab k n p hp]
 
-/-- Common-torus periodicity follows by reindexing the actual copy sum.
-The source is required to be periodic only in the common variable. -/
-theorem commonSolve_periodic (κ : Plane → ℝ) (p : P) (hp : PeriodicAt d.source p)
-    (Y : Plane) (n : Frequency) :
-    d.commonSolve g hab κ (p, Y + TorusAverages.latticePoint n) =
-      d.commonSolve g hab κ (p, Y) := by
-  unfold commonSolve
-  calc
-    (∑' k : Frequency, d.localizedCopy g hab κ k (p, Y + TorusAverages.latticePoint n)) =
-        ∑' k : Frequency, d.localizedCopy g hab κ (k + coverIndex g.gap n)
-          (p, Y + TorusAverages.latticePoint n) :=
-      ((Equiv.addRight (coverIndex g.gap n)).tsum_eq
-        (fun k => d.localizedCopy g hab κ k (p, Y + TorusAverages.latticePoint n))).symm
-    _ = ∑' k : Frequency, d.localizedCopy g hab κ k (p, Y) := by
-      apply tsum_congr
-      intro k
-      exact d.localizedCopy_deck g hab κ k n p hp Y
 
 
 
-omit [NormedSpace ℝ P] in
-theorem commonSolve_eventually_eq_sum {κ : Plane → ℝ} (hκ : HasCompactSupport κ)
-    (p : P × Plane) :
-    ∃ s : Finset Frequency,
-      d.commonSolve g hab κ =ᶠ[𝓝 p] fun q => ∑ k ∈ s, d.localizedCopy g hab κ k q := by
-  obtain ⟨s, hs⟩ := g.finite_copy_cutoffs hκ (‖p.2‖ + 1)
-  refine ⟨s, ?_⟩
-  have hn : {q : P × Plane | ‖q.2‖ < ‖p.2‖ + 1} ∈ 𝓝 p :=
-    (isOpen_lt continuous_snd.norm continuous_const).mem_nhds (by simp)
-  filter_upwards [hn] with q hq
-  apply tsum_eq_sum
-  intro k hk
-  unfold localizedCopy
-  rw [hs q.2 hq.le k hk, zero_smul]
 
 
 end LinearData
@@ -587,8 +556,6 @@ theorem firstDescent_periodic {W : Type} (f : Plane → W) (hf : LatticePeriodic
   change f (x, y + 1) = f (x, y)
   exact latticePeriodic_second hf x y
 
-noncomputable def torusDescent {W : Type} (f : Plane → W) (hf : LatticePeriodic f)
-    (z : Torus) : W := (firstDescent_periodic f hf z.1).lift z.2
 
 
 

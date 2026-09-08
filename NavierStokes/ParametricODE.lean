@@ -300,10 +300,6 @@ variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
 
-omit [CompleteSpace E] in
-theorem norm_constantCurve_le (x : E) :
-    ‖constantCurve (a := a) (b := b) x‖ ≤ ‖x‖ :=
-  (ContinuousMap.norm_le _ (norm_nonneg x)).mpr (fun _ => le_rfl)
 
 
 

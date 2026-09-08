@@ -1302,17 +1302,6 @@ theorem initialized_errors_formula (B N0 : ℕ) :
   simp only [CorrectionState.ExcludedErrors.total, hb, hg]
   rfl
 
-/-- The remaining Gaussian premise is an estimate for the literal full
-field; the base and both aliases in this formula are already constructed. -/
-theorem initializedErrors_all_gains_of_gaussian (B N0 : ℕ) (β : ℝ) (i : Fin 3)
-    (hg : UnweightedClass gaussianStrip β (fun n x => initialGaussian B N0 n x i)) :
-    UnweightedClass gaussianStrip β (fun n x => (ActualInitialMean.initialized B N0).errors.total n x i) := by
-  have hb := baseError_angle_component_class ActualPrimary.certificate ActualPrimary.modulation
-    ActualPrimary.upper B ActualPrimary.standardRegion β i
-  have ha := (initializedAlias_unweighted B N0 β).map (ContinuousLinearMap.proj i)
-  apply WaveInteractionBounds.class_congr ((hb.add hg).add ha)
-  intro n x _
-  exact (congrArg (fun f => f n x i) (initialized_errors_formula B N0)).symm
 
 end TotalExcluded
 
@@ -1329,9 +1318,6 @@ theorem gaussianField_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
     (ActualPhaseJetBounds.carrier_jets_cut (B := B) (N0 := N0)) β i
 
 
-theorem initialGaussian_unweighted (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
-    UnweightedClass gaussianStrip β (fun n x => initialGaussian B N0 n x i) :=
-  initialGaussian_unweighted_of_fields β i (gaussianField_all_gains B N0 β i)
 
 
 

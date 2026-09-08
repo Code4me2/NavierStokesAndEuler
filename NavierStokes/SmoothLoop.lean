@@ -371,12 +371,6 @@ def phaseHomeomorph (d : CircleDensity) : ℝ ≃ₜ ℝ :=
 theorem phaseHomeomorph_apply (d : CircleDensity) (θ : ℝ) :
     phaseHomeomorph d θ = phaseMap d θ := rfl
 
-theorem phaseInverse_contDiff (d : CircleDensity) :
-    ContDiff ℝ (∞ : WithTop ℕ∞) (phaseHomeomorph d).symm := by
-  apply (phaseHomeomorph d).contDiff_symm_deriv
-    (fun θ => ne_of_gt (d.positive θ))
-  · exact phaseMap_hasDerivAt d
-  · exact phaseMap_contDiff d
 
 theorem phaseInverse_add_one (d : CircleDensity) (φ : ℝ) :
     (phaseHomeomorph d).symm (φ + 1) = (phaseHomeomorph d).symm φ + 2 * Real.pi := by

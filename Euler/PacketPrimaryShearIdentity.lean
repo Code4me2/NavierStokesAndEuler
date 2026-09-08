@@ -73,9 +73,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteS
   (B : HistoryData (D.initial τ hτ hτT.le))
   (δ : ℝ) (hδ : 0 < δ) (ξ : U) (hs : tsupport innerCutoff ⊆ D.support)
 
-/-- The literal leading primary on the physical phase graph in label coordinates. -/
-def historyWave (α k : ℝ) (t : Icc (0 : ℝ) τ) (y : Space) : Space :=
-  (α/k) • vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(y,k*⟪D.m₀,y⟫_ℝ))
 
 
 

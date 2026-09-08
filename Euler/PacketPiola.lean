@@ -24,9 +24,6 @@ theorem adjoint_apply_coordinate (A : Space →L[ℝ] Space) (q : Space) (i : Fi
   simpa only [EuclideanSpace.inner_single_left, conj_trivial, one_mul] using
     A.adjoint_inner_right (EuclideanSpace.single i 1) q
 
-/-- Pull back a Euclidean covector field by the actual derivative of the coordinate map. -/
-def pullbackCovector (Ξ Q : Space → Space) (x : Space) : Space :=
-  (fderiv ℝ Ξ x).adjoint (Q x)
 
 
 

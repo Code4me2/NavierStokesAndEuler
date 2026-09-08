@@ -582,8 +582,6 @@ theorem rowMoment_lower (c : Parameters) (i : Fin 2) : rowFloor ≤ rowMoment (c
   apply (rowMoment_bounds ?_ ?_).1
   all_goals fin_cases i <;> norm_num [Parameters.exponents] <;> linarith [c.lam_pos, c.lam_lt]
 
-theorem rowMoment_pos (c : Parameters) (i : Fin 2) : 0 < rowMoment (c.exponents i) :=
-  rowFloor_pos.trans_le (rowMoment_lower c i)
 
 theorem separation_exponential_bounds (c : Parameters) (i : Fin 2) :
     1 ≤ Real.exp (2 * beta c i) ∧ Real.exp (2 * beta c i) ≤ Real.exp 1 := by

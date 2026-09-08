@@ -464,25 +464,7 @@ theorem normalizeDebt_rescale {ell U L W : ℝ} (hl : ell ≠ 0) (hU : U ≠ 0)
   ext i
   fin_cases i <;> simp [normalizeDebt, scaleDebt] <;> field_simp
 
-theorem angularIncrement_rescale {ell U L W : ℝ} (hl : ell ≠ 0) (hU : U ≠ 0)
-    (hL : L ≠ 0) (hW : W ≠ 0) (lam C a b : ℝ) (d : Debt) (r : ℝ) :
-    angularIncrement lam C a b ell U (scaleDebt L W d) (L * r) / W =
-      angularIncrement lam C a b (ell / L) (U / W) d r := by
-  unfold angularIncrement scaleField
-  rw [normalizeDebt_rescale hl hU hL hW]
-  have he : L * r / ell = r / (ell / L) := by field_simp
-  rw [he]
-  ring
 
-theorem desiredAxialIncrement_rescale {ell U L W : ℝ} (hl : ell ≠ 0) (hU : U ≠ 0)
-    (hL : L ≠ 0) (hW : W ≠ 0) (lam C a b : ℝ) (d : Debt) (r : ℝ) :
-    desiredAxialIncrement lam C a b ell U (scaleDebt L W d) (L * r) / W =
-      desiredAxialIncrement lam C a b (ell / L) (U / W) d r := by
-  unfold desiredAxialIncrement scaleField
-  rw [normalizeDebt_rescale hl hU hL hW]
-  have he : L * r / ell = r / (ell / L) := by field_simp
-  rw [he]
-  ring
 
 
 
@@ -919,21 +901,6 @@ theorem normalizedDomain_isOpen {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
     (isOpen_Ioo.preimage continuous_fst).mem_nhds hp.2.2
   exact inter_mem ht (inter_mem hq hr)
 
-/-- The concrete logarithmic radial weights, restricted to one normalized
-physical `q/Q` strip. The torus variables remain unrestricted. -/
-noncomputable def normalizedStripData (coord qlo qhi rlo rhi cL cR : ℝ)
-    (hc : 0 < coord) (hc1 : coord < 1) (hrlo : 0 < rlo) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n) :
-    WeightedClasses.StripData ChartPoint :=
-  { WeightedRadialPrimitive.logStripData rlo rhi cL cR hrlo hcL hcR ε S hε hεone hS with
-    domain := normalizedDomain coord qlo qhi rlo rhi
-    isOpen_domain := normalizedDomain_isOpen hc hc1 qlo qhi rlo rhi
-    delta_pos := fun _ hp => WeightedRadialPrimitive.delta_pos
-      (WeightedRadialPrimitive.logPosition_mem hrlo hp.2.2)
-    zeta_smooth := (WeightedRadialPrimitive.logStripData rlo rhi cL cR hrlo hcL hcR
-      ε S hε hεone hS).zeta_smooth.mono (fun _ hp => hp.2.2)
-    zeta_nonneg := fun _ hp => (WeightedRadialPrimitive.zeta_pos cL cR
-      (WeightedRadialPrimitive.logPosition_mem hrlo hp.2.2)).le }
 
 
 
@@ -1052,11 +1019,6 @@ theorem desired_supported (F : SmoothFamily E) {lo hi : ℝ}
 theorem desired_mass_zero (F : SmoothFamily E) (s : E) : (∫ r, r * F.desired (r, s)) = 0 :=
   (F.prescribed_five_rows s).2.1
 
-theorem desired_zero_outside (F : SmoothFamily E) (s : E) {r : ℝ}
-    (hr : r ∉ Ioo (F.length s * F.a) (F.length s * F.b)) : F.desired (r, s) = 0 := by
-  by_contra hn
-  exact hr (desiredAxialIncrement_tsupport F.lam (F.amplitude s) F.a F.b (F.velocity s)
-    (F.length_pos s) F.ordered (F.debt s) (subset_closure hn))
 
 theorem potential_smooth (F : SmoothFamily E) {power lo hi M : ℝ}
     (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
@@ -1482,33 +1444,6 @@ theorem actualChartPotential_eq_chartPotential {coord A B lam a b power lo hi M 
     (slowChartDesired coord A B lam a b d) p hf hs hm
   exact he.trans (chartPotential_eq_scaledPrimitive coord A B lam a b (fun z => d z.2.1) p).symm
 
-/-- The full slow stream estimate is for the actual `PressureStream`
-operator. The proof does not extend data outside the positive-time domain. -/
-theorem actual_rank_stream_meanClass (s : WeightedClasses.StripData ChartPoint)
-    {coord A B lam a b power lo hi qlo qhi α : ℝ}
-    (hc : 0 < coord) (hc1 : coord < 1) (hlam : 0 < lam) (ha : 0 < a) (hab : a < b)
-    (hB : B ≠ 0) (hp : 0 < power) (hlo : 0 < lo) (horder : lo < hi) (hqlo : 0 < qlo)
-    (hleft : lo ≤ Real.sqrt qlo * a) (hright : Real.sqrt qhi * b ≤ hi)
-    (hT : ∀ p ∈ s.domain, chartInput p ∈ PhysicalCoordinateBounds.positiveTime)
-    (hq : ∀ p ∈ s.domain, chartQ coord p ∈ Icc qlo qhi)
-    (hR : ∀ p ∈ s.domain, p.1 ∈ Icc lo hi)
-    (hz : ∃ δ : ℝ, 0 < δ ∧ ∀ p ∈ s.domain, p ∈ supportBand a b qlo qhi → δ ≤ s.zeta p)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (w : PressureStream.Plane × PressureStream.Plane)
-    {d : ℕ → PressureStream.Plane → Debt}
-    (hd : WeightedClasses.UnweightedClass s α (fun n p => d n p.2.1)) :
-    WeightedClasses.MeanClass s α (fun n => actualChartPotential coord A B lam a b power lo hi (M n) (v n) (d n)) ∧
-      WeightedClasses.MeanClass s α (fun n => actualChartRadial coord A B lam a b power lo hi (M n) (v n) w (d n)) := by
-  have h := (rank_stream_meanClass (A := A) (B := B) (lam := lam) s hc hc1 hlam ha hab hB hqlo
-    hT hq hR hz w hd).1
-  have hpot : WeightedClasses.MeanClass s α
-      (fun n => actualChartPotential coord A B lam a b power lo hi (M n) (v n) (d n)) :=
-    meanClass_congr_on h (fun n p hps => actualChartPotential_eq_chartPotential
-      hlam hB ha hab hp hlo horder hqlo hleft hright (v n) (d n) (hq p hps))
-  refine ⟨hpot, ?_⟩
-  have hder := (hpot.directional (0, w)).map (-ContinuousLinearMap.id ℝ ℝ)
-  simp only [actualChartRadial,
-    _root_.neg_apply, ContinuousLinearMap.id_apply] at hder ⊢
-  exact hder
 
 end ActualChartStream
 
@@ -1567,30 +1502,6 @@ noncomputable def actualChartAxial (coord A B lam a b power lo hi M : ℝ)
   PressureStream.streamGamma (PressureStream.physicalSpeed power M) ((0 : PressureStream.Plane), v)
     (actualChartPotential coord A B lam a b power lo hi M v d)
 
-theorem actualChartAxial_eq_desired {coord A B lam a b power lo hi M qlo qhi : ℝ}
-    (hlam : 0 < lam) (hB : B ≠ 0) (ha : 0 < a) (hab : a < b)
-    (hp : 0 < power) (hlo : 0 < lo) (horder : lo < hi) (hqlo : 0 < qlo)
-    (hleft : lo ≤ Real.sqrt qlo * a) (hright : Real.sqrt qhi * b ≤ hi)
-    (v : PressureStream.Plane) (d : PressureStream.Plane → Debt) {p : ChartPoint}
-    (hq : chartQ coord p ∈ Icc qlo qhi)
-    (hΨ : DifferentiableAt ℝ (actualChartPotential coord A B lam a b power lo hi M v d) p) :
-    actualChartAxial coord A B lam a b power lo hi M v d p = slowChartDesired coord A B lam a b d (p.1, p.2.1) := by
-  have hqp : 0 < chartQ coord p := hqlo.trans_le hq.1
-  have hf : ContDiff ℝ ∞ (fun r => slowChartDesired coord A B lam a b d (r, p.2.1)) :=
-    desiredAxialIncrement_smooth lam (shapedAmplitude B (chartEta coord p)) a b
-      (Real.sqrt (chartQ coord p)) (chartQ coord p ^ (-A)) (d p.2.1)
-  have hs : support (fun r => slowChartDesired coord A B lam a b d (r, p.2.1)) ⊆ Icc lo hi := by
-    intro r hr
-    have ht := desiredAxialIncrement_tsupport lam (shapedAmplitude B (chartEta coord p)) a b
-      (chartQ coord p ^ (-A)) (Real.sqrt_pos.mpr hqp) hab (d p.2.1) (subset_closure hr)
-    exact ⟨(hleft.trans (mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt hq.1) ha.le)).trans ht.1.le,
-      ht.2.le.trans ((mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt hq.2) (ha.trans hab).le).trans hright)⟩
-  have hm : (∫ r, r * slowChartDesired coord A B lam a b d (r, p.2.1)) = 0 :=
-    (physical_five_rows (C := shapedAmplitude B (chartEta coord p)) (ell := Real.sqrt (chartQ coord p))
-      (U := chartQ coord p ^ (-A)) hlam (shapedAmplitude_ne_zero hB _) ha hab
-      (Real.sqrt_pos.mpr hqp) (Real.rpow_pos_of_pos hqp _).ne' (d p.2.1)).2.1
-  exact slow_streamGamma_eq_desired_slice hlo horder hp v
-    (slowChartDesired coord A B lam a b d) p hf hs hm hΨ
 
 
 end ActualChartIdentities

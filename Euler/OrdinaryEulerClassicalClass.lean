@@ -72,20 +72,6 @@ theorem isSmoothProjectedEuler_of_scalarEuler
     exact eq_neg_of_add_eq_zero_left (neg_eq_zero.mp hzero)
   exact hR ▸ hd t ht
 
-def evolutionOfScalarEuler
-    (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n))
-    (hd : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (fun r => (A (projIcc 0 T hT r)).toLp)
-        (B ⟨t,ht.1.le,ht.2.le⟩).toLp t)
-    (p : ℝ → Space → ℝ)
-    (hdiv : ∀ t x, divergence (A t).field x=0)
-    (hp : ∀ t ∈ Ioo 0 T, Differentiable ℝ (p t))
-    (he : ∀ t (ht : t ∈ Ioo 0 T) x,
-      (B ⟨t,ht.1.le,ht.2.le⟩).field x+
-        fderiv ℝ (A ⟨t,ht.1.le,ht.2.le⟩).field x
-          ((A ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0) : Evolution T hT :=
-  evolutionOfProjectedEquation A (isSmoothProjectedEuler_of_scalarEuler A B hA hd p hdiv hp he)
 
 section Identification
 

@@ -140,16 +140,6 @@ theorem convolution_linear (β q A y : ℝ) {f g : ℝ → ℝ}
     ((continuous_const.fun_mul ((kernel_continuous β y).fun_mul hg)).intervalIntegrable 0 y),
     intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
 
-theorem lag_eq_linearLag (β m₀ : ℝ) (f : ℝ → ℝ) (y : ℝ) :
-    lag β m₀ f y = OutgoingTail.linearLag (fun _ => β) f m₀ y := by
-  have hp (t : ℝ) : OutgoingSchedule.primitive (fun _ => β) t = β * t := by
-    simp only [OutgoingSchedule.primitive, intervalIntegral.integral_const, sub_zero, smul_eq_mul]
-    ring
-  rw [lag, convolution_eq_weighted, OutgoingTail.linearLag]
-  simp only [hp]
-  rw [show -(β * y) = -β * y by ring]
-  simp only [OutgoingSchedule.primitive]
-  ring
 
 
 section ActualPulse

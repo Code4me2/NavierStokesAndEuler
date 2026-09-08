@@ -189,11 +189,6 @@ theorem one_add_mul_alternatingResolvent (Q : R) {K : ℝ} (hK : 0 ≤ K)
   simpa only [alternatingResolvent, sub_neg_eq_add] using
     one_sub_mul_tsum_pow (summable_neg_pow_of_factorial_bound Q hK hQ)
 
-theorem alternatingResolvent_mul_one_add (Q : R) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) :
-    alternatingResolvent Q * (1 + Q) = 1 := by
-  simpa only [alternatingResolvent, sub_neg_eq_add] using
-    tsum_pow_mul_one_sub (summable_neg_pow_of_factorial_bound Q hK hQ)
 
 
 end BanachRing

@@ -156,18 +156,6 @@ theorem Pulse.wave_covariance (P : Pulse) (vr vt center : Plane)
       congrArg (fun z : ℝ => a ^ 2 * z) havg
     _ = _ := by ring
 
-/-- The free angular phase used above includes the manuscript's actual (26).
-The integer frequency is the actual nonzero rounded product `k*p`. -/
-theorem cosine_actual_phase (k ε p pz x0 : ℝ) (F G : PhaseCalculus.Slow → ℝ)
-    (s : PhaseCalculus.Slow) (v : Plane → ℝ) (mode : ℤ) (hmode : k * p = (mode : ℝ))
-    (Y : Plane) (θ : ℝ) :
-    Real.cos (k * PhaseCalculus.phase ε p pz x0 F G (s, θ, v Y)) =
-      Real.cos ((mode : ℝ) * θ + k * ((pz / ε) * s.2.1 + x0 * s.1 -
-        v Y * (p * F s + pz * G s))) := by
-  congr 1
-  unfold PhaseCalculus.phase
-  rw [← hmode]
-  ring
 
 /-! ## The actual rational slot system and vanishing cross-label products -/
 
@@ -350,28 +338,8 @@ theorem tangentExtension_continuous {r a A b B c₀ s₀ slope E : ℝ}
     (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) :
     Continuous (tangentExtension P) := ParametricODE.continuous_extend _ _
 
-theorem tangentExtension_eq {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) {v : ℝ} (hv : v ∈ Icc 0 (r ^ 2)) :
-    tangentExtension P v = P.tangent v :=
-  ParametricODE.extend_coe (sq_nonneg r) _ ⟨v, hv⟩
 
-noncomputable def ofTangentPulse {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) : Pulse where
-  ψ := P.cutoff
-  x := P.component
-  t := tangentExtension P
-  ψ_continuous := P.bounds.cutoff_continuous
-  x_continuous := P.bounds.component_continuous
-  t_continuous := tangentExtension_continuous P
-  ψ_compact := P.bounds.cutoff_compact
 
-theorem cutoff_zero_outside_slot {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) {v : ℝ}
-    (hv : v ∉ Icc 0 (r ^ 2)) : P.cutoff v = 0 := by
-  apply P.bounds.cutoff_zero
-  intro hmid
-  apply hv
-  constructor <;> nlinarith [hmid.1, hmid.2, sq_nonneg r]
 
 
 
@@ -889,48 +857,11 @@ noncomputable def physicalViscosity (h : ℝ) (N : ℕ) (U : UnsignedLabel) : �
 noncomputable def chartTarget (h q : ℝ) (N : ℕ) (T0 : Vec2) (U : UnsignedLabel) : Vec2 :=
   (ChartScales.Q (U.1 + N) / q) ^ (velocityExponent h + 1 / 2) • T0
 
-/-- Exact leading radial/tangential physical covariance of the assembled
-primary velocities. The matrix entries are the actual native pulse integrals,
-the masks are the constructed physical partitions, and the cross terms vanish
-by the constructed padded slots. -/
-theorem physical_primary_covariance {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (P U).matrix (chartTarget h q N T0 U)) (i : Fin 2) :
-    doubleAverage (fun Y θ =>
-      assembledRadial P hdet (physicalOuter h N) (physicalViscosity h N) (chartTarget h q N T0) q x Y θ *
-      assembledTangent P hdet (physicalOuter h N) (physicalViscosity h N) (chartTarget h q N T0) q x i Y θ) =
-      q ^ (-velocityExponent h - 1 / 2) * T0 i := by
-  rw [assembled_covariance sys hdet N hN P (physicalOuter h N) (physicalViscosity h N)
-    (chartTarget h q N T0) hq x (fun U _ => (ChartScales.epsilon_pos h (U.1 + N)).le) hcone i]
-  have heq (U : UnsignedLabel) : physicalOuter h N U ^ 2 * physicalViscosity h N U *
-      mask D (tailLabel N U) q x ^ 2 * chartTarget h q N T0 U i =
-      mask D (tailLabel N U) q x ^ 2 * (q ^ (-velocityExponent h - 1 / 2) * T0 i) := by
-    unfold physicalOuter physicalViscosity chartTarget ChartScales.epsilon
-    simp only [Pi.smul_apply, smul_eq_mul]
-    calc
-      _ = mask D (tailLabel N U) q x ^ 2 *
-        ((ChartScales.Q (U.1 + N) ^ (-velocityExponent h)) ^ 2 *
-          ChartScales.Q (U.1 + N) ^ h *
-          (ChartScales.Q (U.1 + N) / q) ^ (velocityExponent h + 1 / 2)) * T0 i := by ring
-      _ = _ := by rw [physical_scale_identity (ChartScales.Q_pos _) hq h]; ring
-  simp_rw [heq]
-  have hf : (support (fun U : UnsignedLabel => mask D (tailLabel N U) q x ^ 2)).Finite := by
-    apply (finite_active_masks D N hq x).subset
-    intro U hU hz
-    exact hU (by simp [hz])
-  rw [← finsum_mul _ _, physical_mask_tail_sum_sq D N hq hqN x, one_mul]
 
 /-! ## Instantiation by the actual pulse and rounding interfaces -/
 
 
 
-noncomputable def roundedPhaseRemainder (k ε target pz x0 : ℝ) (F G : PhaseCalculus.Slow → ℝ)
-    (s : PhaseCalculus.Slow) (v : Plane → ℝ) (Y : Plane) : ℝ :=
-  k * ((pz / ε) * s.2.1 + x0 * s.1 -
-    v Y * (PhaseEstimates.roundedFrequency k target * F s + pz * G s))
 
 
 

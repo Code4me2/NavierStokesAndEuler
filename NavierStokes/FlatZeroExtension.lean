@@ -178,13 +178,6 @@ theorem iteratedFDeriv_zeroExtension {c : ℝ} (hc : 0 < c)
     (hU.prod isOpen_univ).uniqueDiffOn hp).symm
   rwa [iteratedFDerivWithin_of_isOpen n (hU.prod isOpen_univ) hp] at he
 
-theorem iteratedFDeriv_zeroExtension_nonpos {c : ℝ} (hc : 0 < c)
-    {U : Set E} (hU : IsOpen U) {f : E × ℝ → F}
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ Ioi 0)) (hB : LocalGaussianJets c U f)
-    (n : ℕ) {p : E × ℝ} (hp : p.1 ∈ U) (hδ : p.2 ≤ 0) :
-    iteratedFDeriv ℝ n (zeroExtension f) p = 0 := by
-  rw [iteratedFDeriv_zeroExtension hc hU hf hB n ⟨hp, mem_univ _⟩,
-    zeroExtension_of_nonpos _ hδ]
 
 
 

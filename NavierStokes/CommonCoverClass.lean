@@ -169,22 +169,6 @@ theorem one_le_argumentCost (g : CCS) : 1 ≤ argumentCost g := by
   have h : 0 ≤ ‖g.pointLinear‖ * (1 + ‖g.coordinateLinear‖) := by positivity
   linarith [norm_nonneg g.coordinateLinear]
 
-theorem norm_nativeLinear_le (g : CCS) : ‖nativeLinear P g‖ ≤ argumentCost g := by
-  apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (one_le_argumentCost g))
-  intro w
-  rw [nativeLinear_apply, Prod.norm_def, Prod.norm_def]
-  have hcoord : ‖(g.coordinateLinear w.1.2).1‖ ≤ ‖g.coordinateLinear‖ * ‖w‖ :=
-    (norm_fst_le _).trans ((g.coordinateLinear.le_opNorm _).trans
-      (mul_le_mul_of_nonneg_left ((norm_snd_le w.1).trans (norm_fst_le w)) (norm_nonneg _)))
-  have hc : ‖g.coordinateLinear‖ ≤ argumentCost g := by
-    unfold argumentCost
-    have h : 0 ≤ ‖g.pointLinear‖ * (1 + ‖g.coordinateLinear‖) := by positivity
-    linarith
-  have h1 : ‖w‖ ≤ argumentCost g * ‖w‖ :=
-    le_mul_of_one_le_left (norm_nonneg _) (one_le_argumentCost g)
-  exact max_le ((norm_fst_le w.1).trans ((norm_fst_le w).trans h1))
-    (max_le (hcoord.trans (mul_le_mul_of_nonneg_right hc (norm_nonneg _)))
-      ((norm_snd_le w).trans h1))
 
 theorem norm_sourceLinear_le (g : CCS) : ‖sourceLinear P g‖ ≤ argumentCost g := by
   apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (one_le_argumentCost g))
@@ -468,24 +452,7 @@ theorem bandRatio_le (a : ℝ) {n m : ℕ} (hnm : n ≤ m + 4) (hmn : m ≤ n + 
     _ = |(m : ℝ) - (n : ℝ)| * |a| := abs_mul _ _
     _ ≤ 4 * |a| := mul_le_mul_of_nonneg_right hdiff (abs_nonneg _)
 
-/-- Transfer of the actual small-scale factor across overlapping bands.
-The exponent is identical on both sides. -/
-theorem epsilon_power_transfer (h α : ℝ) {n m : ℕ}
-    (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    ChartScales.epsilon h n ^ α ≤
-      (2 : ℝ) ^ (4 * |h * α|) * ChartScales.epsilon h m ^ α := by
-  unfold ChartScales.epsilon
-  rw [← Real.rpow_mul (ChartScales.Q_pos n).le, ← Real.rpow_mul (ChartScales.Q_pos m).le]
-  rw [← bandRatio_mul_power (h * α) n m]
-  exact mul_le_mul_of_nonneg_right (bandRatio_le (h * α) hnm hmn)
-    (Real.rpow_pos_of_pos (ChartScales.Q_pos m) (h * α)).le
 
-theorem slow_scale_transfer {n m : ℕ} (hm : 1 ≤ m) (hnm : n ≤ m + 4) :
-    ChartScales.S n ≤ 25 * ChartScales.S m := by
-  have h : (n : ℝ) ≤ 5 * (m : ℝ) := by exact_mod_cast (show n ≤ 5 * m by omega)
-  have hs := mul_self_le_mul_self (Nat.cast_nonneg n) h
-  unfold ChartScales.S
-  nlinarith
 
 
 abbrev SlowPoint := ℝ × (ℝ × ℝ)
@@ -694,31 +661,6 @@ theorem commonChartCost_one_le (D : ℝ) (gapBound : ℕ) : 1 ≤ commonChartCos
   unfold commonChartCost
   linarith [chartCost_one_le D, CommonCoverSolve.coveringBound_pos gapBound]
 
-theorem norm_bandCommonChart_le (D : ℝ) {n m gap gapBound : ℕ}
-    (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) (forward : Bool) (hgap : gap ≤ gapBound) :
-    ‖bandCommonChart D n m forward gap‖ ≤ commonChartCost D gapBound := by
-  apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (commonChartCost_one_le _ _))
-  intro x
-  rw [bandCommonChart_apply, Prod.norm_def]
-  have hC : 0 ≤ CommonCoverSolve.coveringBound gapBound := (CommonCoverSolve.coveringBound_pos _).le
-  have hD : 0 ≤ chartCost D := zero_le_one.trans (chartCost_one_le D)
-  apply max_le
-  · calc
-      _ ≤ ‖bandChart D n m‖ * ‖x.1‖ := (bandChart D n m).le_opNorm _
-      _ ≤ chartCost D * ‖x‖ := mul_le_mul (norm_bandChart_le D hnm hmn)
-          (norm_fst_le x) (norm_nonneg _) hD
-      _ ≤ commonChartCost D gapBound * ‖x‖ := by
-        apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
-        unfold commonChartCost
-        linarith
-  · calc
-      _ ≤ ‖coverChange forward gap‖ * ‖x.2‖ := (coverChange forward gap).le_opNorm _
-      _ ≤ CommonCoverSolve.coveringBound gapBound * ‖x‖ :=
-        mul_le_mul (norm_coverChange_le forward hgap) (norm_snd_le x) (norm_nonneg _) hC
-      _ ≤ commonChartCost D gapBound * ‖x‖ := by
-        apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
-        unfold commonChartCost
-        linarith
 
 
 
@@ -731,12 +673,6 @@ theorem bandChart_eq_transition (h : ℝ) (n m : ℕ) (x : SlowPoint) :
       SimilarityHomogeneity.chartTransition h (ChartScales.Q n) (ChartScales.Q m) x :=
   bandChart_formula _ _ _ _
 
-theorem profileX_bandChart {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (n m : ℕ) {x : SlowPoint} (hx : 0 < x.2.2) :
-    SimilarityHomogeneity.chartX h (bandChart (CoordinateAlgebra.D h) n m x) =
-      SimilarityHomogeneity.chartX h x := by
-  rw [bandChart_eq_transition]
-  exact SimilarityHomogeneity.chartX_transition hh hh1 (ChartScales.Q_pos n) (ChartScales.Q_pos m) hx
 
 
 noncomputable def profileDomain (h a b : ℝ) : Set SlowPoint :=
@@ -746,12 +682,6 @@ theorem profileX_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {x : SlowPoint} (hx : 0 < x.2.2) : ContDiffAt ℝ ∞ (SimilarityHomogeneity.chartX h) x :=
   (SimilarityHomogeneity.chartInner_smoothAt hh hh1 hx).fst
 
-theorem isOpen_profileDomain {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (a b : ℝ) :
-    IsOpen (profileDomain h a b) := by
-  apply isOpen_iff_mem_nhds.mpr
-  intro x hx
-  exact Filter.inter_mem (SimilarityHomogeneity.isOpen_chartDomain.mem_nhds hx.1)
-    ((profileX_smoothAt hh hh1 hx.1.2).continuousAt (isOpen_Ioo.mem_nhds hx.2))
 
 
 
@@ -791,14 +721,6 @@ end MeshChanges
 
 section NativeInstantiation
 
-/-- The actual radial/time eigenvector basis, not an abstract invertible
-basis supplied as an assumption. -/
-noncomputable def nativeBasis : Plane ≃L[ℝ] Plane :=
-  TorusAverages.slotChart PhysicalGraphBounds.radialDirection PhysicalGraphBounds.timeDirection
-    (by
-      unfold PhysicalGraphBounds.radialDirection PhysicalGraphBounds.timeDirection
-      dsimp only
-      nlinarith [sq_nonneg (Real.sqrt 2 - 1)])
 
 
 

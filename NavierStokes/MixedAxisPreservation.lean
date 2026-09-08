@@ -435,15 +435,6 @@ theorem anchored_base_axis_tendsto (upper : ℝ) (B : ℕ) :
   rw [TailGaugePotential.finalPotential_sameCurl H v upper B (w := (t, 0)) ht]
 
 
-theorem final_origin_blowup (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
-    (p : ℕ → PotentialStage.{u} F.data.h Ω) (D : ℕ → AngularSupport Ω)
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω) :
-    Tendsto (fun t : ℝ =>
-      ‖mixedDiagonal (TailGaugePotential.finalPotential H v upper B) p D scales (t, 0)‖)
-      (𝓝[<] 1) atTop :=
-  origin_blowup _ p D F.data.h_pos F.data.h_lt_half hs hΩ hΩaxis
-    (anchored_base_axis_tendsto H v upper B)
 
 
 

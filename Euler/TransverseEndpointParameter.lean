@@ -45,21 +45,6 @@ variable (c : ℝ) (hc : 0 < c) (hLower : ∀ x t v, c * ‖v‖ ^ 2 ≤ ‖Q x 
   (K : ℝ) (hK : 0 ≤ K) (hPotential : ∀ x t v, ⟪H x t v, v⟫_ℝ ≤ K * ‖v‖ ^ 2)
   (hsmall : K * (T ^ 2 / 2) ≤ 1 / 2)
 
-theorem contDiff_fixedEndpointCorrection
-    (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) (hH : ContDiff ℝ n H)
-    (L : P → V →L[ℝ] TimeLp T E) (hL : ContDiff ℝ n L) :
-    ContDiff ℝ n (fun x => fixedEndpointCorrection T hT (Q x) (Q₁ x) (H x)
-      c hc (hLower x) (hd x) K hK (hPotential x) hsmall (L x)) := by
-  have hA := contDiff_fixedFrameOperator T hT Q Q₁ H hQ hQ₁ hH
-  have hi := contDiff_coerciveInverse_variable
-    (fun x => fixedFrameOperator T hT (Q x) (Q₁ x) (H x))
-    (fun x => fixedCoercivity T (Q x) (Q₁ x) c)
-    (fun x => fixedCoercivity_pos T hT (Q x) (Q₁ x) c hc)
-    (fun x => fixedFrameOperator_coercive T hT (Q x) (Q₁ x) (H x)
-      c hc (hLower x) (hd x) K hK (hPotential x) hsmall) hA
-  have hD := contDiff_fixedFrameDerivative T hT Q Q₁ hQ hQ₁
-  have hE := contDiff_initialEnergy T hT H hH
-  exact hi.clm_comp ((contDiff_adjoint hD).clm_comp (hE.clm_comp hL))
 
 
 

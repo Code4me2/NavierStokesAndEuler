@@ -169,16 +169,6 @@ theorem zeroMeanPrimitive_hasDerivAt
     HasDerivAt (zeroMeanPrimitive q) (q θ) θ := by
   exact (periodicPrimitive_hasDerivAt q hq θ).sub_const _
 
-theorem zeroMeanPrimitive_integral
-    (q : ℝ → ℝ) (hq : Continuous q) :
-    intervalIntegral (zeroMeanPrimitive q) 0 1 volume = 0 := by
-  have hd : Differentiable ℝ (periodicPrimitive q) :=
-    fun θ => (periodicPrimitive_hasDerivAt q hq θ).differentiableAt
-  have hc : Continuous (periodicPrimitive q) := hd.continuous
-  unfold zeroMeanPrimitive
-  rw [intervalIntegral.integral_sub (hc.intervalIntegrable 0 1)
-    (continuous_const.intervalIntegrable 0 1)]
-  simp
 
 
 

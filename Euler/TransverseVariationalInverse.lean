@@ -124,17 +124,6 @@ def transverseDisplacement : TimeLp T E →L[ℝ] C(Icc (0 : ℝ) T, E) :=
 
 
 
-/-- The actual weak transverse displacement equation, tested against every
-zero-endpoint displacement in the same moving plane. -/
-theorem transverseSolver_weak (f : TimeLp T E) (v : transverseDerivatives T hT m) :
-    let u := transverseSolver T hT m H K hK hH hsmall f
-    ⟪(u : TimeLp T E), (v : TimeLp T E)⟫_ℝ -
-        ⟪timeMultiplier T hT H (transversePrimitive T hT m u),
-          transversePrimitive T hT m v⟫_ℝ =
-      -⟪f, transversePrimitive T hT m v⟫_ℝ :=
-  dirichletSolver_weak (transversePrimitive T hT m) (timeMultiplier T hT H)
-    (T ^ 2 / 2) K hK (transversePrimitive_norm_sq T hT m)
-    (timeMultiplier_quadratic_upper T hT H K hH) hsmall f v
 
 
 

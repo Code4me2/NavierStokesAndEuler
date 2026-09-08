@@ -6,7 +6,8 @@ import Euler.PacketGraphFlowFieldBounds
 import Euler.PacketGraphFlowSupBounds
 import Euler.PacketExactGlobalShear
 import Euler.PacketExactPressureError
-import Euler.PacketInitializedPointwiseChoice
+import Euler.PacketInitializedCorrectionEstimateChoice
+import Euler.AllOrderDriftPointwiseBounds
 import Euler.PacketPhysicalFrequencyBounds
 import Euler.PacketContinuousInverse
 import Euler.PacketPhysicalPressureGevrey

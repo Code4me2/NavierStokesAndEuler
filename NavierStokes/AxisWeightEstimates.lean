@@ -411,36 +411,7 @@ theorem shiftedProductWeightSum_le {ε : ℝ} (hε : 0 < ε) (n m : ℕ) :
       (weight_pos hε _ _).le
   exact hsub.trans (productWeightSum_le hε (n + 1) m)
 
-/-- A single mixed term after applying the inverse radial divisor. -/
-theorem mixed_weight_term_le {ε : ℝ} (hε : 0 < ε) {r n i j : ℕ}
-    (hr : 1 ≤ r) (hij : i + j = n) (m k l : ℕ) :
-    (((m.choose k : ℝ) * j) / radialDivisor r n) * weight ε i (k + 1) * weight ε j l ≤
-      (80 / ε) * ((m.choose k : ℝ) * weight ε (i + 1) k * weight ε j l) := by
-  have hD := radialDivisor_pos hr n
-  have hcoef : 0 ≤ ((m.choose k : ℝ) * j) / radialDivisor r n := by positivity
-  have hfactor : (((i : ℝ) + 1) * j) / radialDivisor r n ≤ 1 := by
-    apply (div_le_iff₀ hD).2
-    simpa only [one_mul] using mixed_factors_le_divisor hr hij
-  have hnonneg : 0 ≤ (80 / ε) *
-      ((m.choose k : ℝ) * weight ε (i + 1) k * weight ε j l) := by
-    exact mul_nonneg (by positivity)
-      (mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (weight_pos hε _ _).le) (weight_pos hε _ _).le)
-  calc
-    _ ≤ (((m.choose k : ℝ) * j) / radialDivisor r n) *
-        ((80 / ε) * ((i : ℝ) + 1) * weight ε (i + 1) k) * weight ε j l := by
-      exact mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left (weight_parameter_radial_shift hε i k) hcoef)
-        (weight_pos hε _ _).le
-    _ = ((80 / ε) * ((m.choose k : ℝ) * weight ε (i + 1) k * weight ε j l)) *
-        ((((i : ℝ) + 1) * j) / radialDivisor r n) := by ring
-    _ ≤ ((80 / ε) * ((m.choose k : ℝ) * weight ε (i + 1) k * weight ε j l)) * 1 :=
-      mul_le_mul_of_nonneg_left hfactor hnonneg
-    _ = _ := mul_one _
 
-def mixedWeightSum (ε : ℝ) (r n m : ℕ) : ℝ :=
-  ∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-    (((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
-      weight ε ij.1 (kl.1 + 1) * weight ε ij.2 kl.2
 
 
 

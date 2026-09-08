@@ -652,47 +652,6 @@ theorem linear_good_class (j : ℤ) (i : Fin 3) :
   intro n x hx
   exact (h.linear_gaussian_coefficient n x hx i j).symm
 
-/-- The actual extracted residual of the initial primary wave. The alias is
-retained in the literal formula; its proved zero-mode property is used only
-after the nonconstant coefficient is selected. -/
-theorem initial_residual_class (u : CorrectionState.State D)
-    (hmean : u.mean = ⟨0, 0, 0⟩) (A : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i j, j ≠ 0 → A n i j = 0) :
-    (HarmonicResidual.residualBlock c u (primaryBlock s c a ψ kp)
-      (gaussianCoefficients c a ψ) A).WaveBounds s P (7 / 10) := by
-  intro i j hj
-  have hl := (h.linear_good_class j i).mono_exponent (show (7 / 10 : ℝ) ≤ 1 - 3 * κ by linarith [h.loss_le])
-  have hc (m : ℤ) := (h.convection_class m i).mono_exponent
-    (show (7 / 10 : ℝ) ≤ 1 - κ by linarith [h.loss_le])
-  have hcr := HarmonicMeanInteraction.realCoefficient_class
-    (fun n => HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-      (a.frequency n) (fun y => a.phase n (y, 0)) (kp n)
-      (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n)
-      (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n) i)
-    j (hc j) (hc (-j))
-  apply LinearWaveBounds.class_congr (hl.add hcr)
-  intro n x hx
-  have hz : HarmonicResidual.stateMean u n = 0 := by
-    funext y k
-    fin_cases k <;> simp [HarmonicResidual.stateMean, hmean]
-  change _ = HarmonicResidual.nonconstant
-    ((HarmonicResidual.ofBlock (primaryBlock s c a ψ kp) (gaussianCoefficients c a ψ) A n).residualCoefficients
-      (HarmonicResidual.contextFrame c n) (HarmonicResidual.contextBase c n) (HarmonicResidual.stateMean u n) i) j x
-  rw [HarmonicMeanInteraction.nonconstant_apply_of_ne _ hj, hz, HarmonicResidual.LabelData.residualCoefficients]
-  simp only [add_zero]
-  let L := linearCoefficients s c a ψ kp n i
-  let T := HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (fun y => a.phase n (y, 0)) (kp n)
-    (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n)
-    (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n) i
-  change HarmonicResidual.realCoefficients (L - gaussianCoefficients c a ψ n i) j x +
-    HarmonicResidual.realCoefficients T j x =
-      HarmonicResidual.realCoefficients (L + T - gaussianCoefficients c a ψ n i - A n i) j x
-  simp only [
-    HarmonicResidual.realCoefficients_apply, HarmonicMeanInteraction.coeff_add,
-    HarmonicMeanInteraction.coeff_sub, hA n i j hj, hA n i (-j) (neg_ne_zero.mpr hj),
-    Pi.zero_apply, map_sub, map_add, sub_zero]
-  ring
 
 
 

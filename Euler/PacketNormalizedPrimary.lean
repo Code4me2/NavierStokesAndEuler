@@ -86,30 +86,7 @@ def rayRate (B : E →L[ℝ] E) (p : E) : E := -B.adjoint p + ⟪p,B p⟫_ℝ �
 def velocityRate (B : E →L[ℝ] E) (p q : E) : E :=
   -B q + (2*⟪p,B q⟫_ℝ) • p + ⟪q,B q⟫_ℝ • q
 
-theorem normalized_ray_hasDerivAt (B : E →L[ℝ] E) {m : ℝ → E} {t : ℝ}
-    (hm : HasDerivAt m (-B.adjoint (m t)) t) (hm0 : m t ≠ 0) :
-    HasDerivAt (fun s => unit (m s)) (rayRate B (unit (m t))) t := by
-  have h := unit_hasDerivAt hm hm0
-  convert h using 1
-  unfold rayRate unit
-  rw [inner_neg_right, adjoint_inner_right, real_inner_comm (m t) (B (m t))]
-  simp only [map_smul, real_inner_smul_left, real_inner_smul_right, smul_smul,
-    div_eq_mul_inv, neg_mul, neg_smul, smul_neg]
-  module
 
-omit [CompleteSpace E] in
-theorem normalized_velocity_hasDerivAt (B : E →L[ℝ] E) {m v : ℝ → E} {t : ℝ}
-    (hv : HasDerivAt v (-B (v t) + (2*⟪m t,B (v t)⟫_ℝ / ‖m t‖^2) • m t) t)
-    (hv0 : v t ≠ 0) (hmv : ⟪m t,v t⟫_ℝ = 0) :
-    HasDerivAt (fun s => unit (v s)) (velocityRate B (unit (m t)) (unit (v t))) t := by
-  have h := unit_hasDerivAt hv hv0
-  have hvm : ⟪v t,m t⟫_ℝ = 0 := (real_inner_comm _ _).trans hmv
-  convert h using 1
-  unfold velocityRate unit
-  simp only [inner_add_right, inner_neg_right, real_inner_smul_right, hvm, mul_zero,
-    add_zero, map_smul, real_inner_smul_left, smul_smul, smul_add, div_eq_mul_inv,
-    neg_mul, neg_smul, smul_neg]
-  module
 
 theorem normalized_ray_hasDerivWithinAt (B : E →L[ℝ] E) {m : ℝ → E} {t : ℝ} {S : Set ℝ}
     (hm : HasDerivWithinAt m (-B.adjoint (m t)) S t) (hm0 : m t ≠ 0) :

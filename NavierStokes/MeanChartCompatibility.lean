@@ -274,25 +274,7 @@ theorem physicalSpeed_vector {l R : ℝ} (hl : 0 < l) (hR : 0 ≤ R)
         d * R ^ (d - 1) * N * (l * l ^ (d - 1)) by ring, hpow]
       ring
 
-theorem streamGamma_pull {l : ℝ} (hl : l ≠ 0) (C : E →L[ℝ] F) (u : ℝ)
-    (knew kold : ℝ → ℝ) (v : E) (w : F) {f : ℝ × F → ℝ} {z : ℝ × E}
-    (hf : DifferentiableAt ℝ f (chartLinear l C z))
-    (hvector : C (knew z.1 • v) = l • (kold (l * z.1) • w)) :
-    PressureStream.streamGamma knew v (pull l C u f) z =
-      (u * l) * PressureStream.streamGamma kold w f (chartLinear l C z) := by
-  rw [PressureStream.streamGamma, graphDr_pull l C u knew kold v w hf hvector,
-    divideRadius_pull hl]
-  simp only [PressureStream.streamGamma]
-  ring
 
-theorem streamBeta_pull (l : ℝ) (C : E →L[ℝ] F) (u k : ℝ) (v : E) (w : F)
-    {f : ℝ × F → ℝ} {z : ℝ × E}
-    (hf : DifferentiableAt ℝ f (chartLinear l C z)) (hvector : C v = k • w) :
-    PressureStream.streamBeta v (pull l C u f) z =
-      (u * k) * PressureStream.streamBeta w f (chartLinear l C z) := by
-  rw [PressureStream.streamBeta, graphDz_pull l C u k v w hf hvector]
-  simp only [PressureStream.streamBeta]
-  ring
 
 end Pullback
 
@@ -465,9 +447,6 @@ noncomputable def temporalAtIndex (h : ℝ) (n i : ℕ)
     TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f) z
 
 
-noncomputable def physicalTemporal (f : PressureStream.Lift S → ℝ)
-    (z : PressureStream.Lift S) : ℝ :=
-  -TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f) z
 
 
 end TorusPullback
@@ -774,12 +753,6 @@ noncomputable def commonTemporalAlias (r : ℕ → CorrectionState.Reconstructio
     (r n).outer ((r n).frequency n) ((0 : S), (r n).radialDirection)
     (PressureStream.weightedSource (temporalAtIndex h n (index n) (f n))))
 
-noncomputable def commonTemporalIncrement (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (axial : S × Plane)
-    (c : CorrectionState.Context (PressureStream.Lift S))
-    (u : CorrectionState.State (PressureStream.Lift S)) :
-    MeanIncrementBounds.Triple (PressureStream.Lift S) :=
-  commonTemporalFields r h index c.operators.epsilon axial (u.thetaResidual c) (u.axialResidual c)
 
 variable [FiniteDimensional ℝ S]
 
@@ -795,10 +768,7 @@ section PhysicalTemporalFields
 
 open TorusInverse
 
-noncomputable def physicalAuxiliary (h : ℝ) (n i : ℕ) : Plane × Plane →L[ℝ] Plane × Plane :=
-  (slowToChart h n).prodMap (TemporalMeanUpdate.coverMap i)
 
-noncomputable def axialUnit : Plane × Plane := ((1, 0), (0, 0))
 
 
 

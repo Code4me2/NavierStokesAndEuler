@@ -141,13 +141,7 @@ theorem mixedBoundaryOperator_diagonal (χ : Cutoff) :
 
 
 
-theorem mixedBoundaryOperator_scale_left (χ ψ : Cutoff) (c : ℝ) :
-    mixedBoundaryOperator (χ.scale c) ψ = c • mixedBoundaryOperator χ ψ := by
-  simp only [mixedBoundaryOperator, cutoffCurl_scale, ContinuousLinearMap.smul_comp]
 
-theorem mixedBoundaryOperator_scale_right (χ ψ : Cutoff) (c : ℝ) :
-    mixedBoundaryOperator χ (ψ.scale c) = c • mixedBoundaryOperator χ ψ := by
-  simp only [mixedBoundaryOperator, weakPotential_scale, ContinuousLinearMap.comp_smul]
 
 theorem mixedBoundaryOperator_sub_left (χ ψ ρ : Cutoff) :
     mixedBoundaryOperator (χ.sub ψ) ρ = mixedBoundaryOperator χ ρ - mixedBoundaryOperator ψ ρ := by

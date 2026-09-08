@@ -47,27 +47,11 @@ theorem mean_eq_wave_add_half (σ : ℝ) :
 
 
 
-theorem wave_increment (σ : ℝ) :
-    waveExponent (σ + 1 / 10) = waveExponent σ + 1 / 10 := by
-  unfold waveExponent
-  ring
 
-theorem mean_increment (σ : ℝ) :
-    meanExponent (σ + 1 / 10) = meanExponent σ + 1 / 10 := by
-  unfold meanExponent
-  ring
 
 
 /-! ## Step 1: particular correction -/
 
-/-- The displayed lower bound is in fact equality for the stated parameter range. -/
-theorem particular_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    particularGain σ κ = 2 / 5 := by
-  unfold particularGain waveExponent
-  apply le_antisymm (min_le_right _ _)
-  simp only [le_min_iff]
-  exact ⟨⟨⟨by linarith, by linarith⟩, by linarith⟩, le_refl _⟩
 
 
 
@@ -76,14 +60,6 @@ theorem particular_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
 
 /-! ## Step 2: signed correction -/
 
-theorem signed_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    signedGain σ κ = 2 / 5 - κ := by
-  unfold signedGain waveExponent
-  apply le_antisymm
-  · exact le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
-  · simp only [le_min_iff]
-    exact ⟨⟨⟨by linarith, le_refl _⟩, by linarith⟩, by linarith⟩
 
 
 
@@ -99,17 +75,9 @@ theorem signed_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
 
 /-! ## Steps 3 and 4: mean and defect updates -/
 
-theorem mean_update_wave_identity (σ κ : ℝ) :
-    meanUpdateExponent σ κ = waveExponent σ + 1 / 2 - 2 * κ := by
-  unfold meanUpdateExponent
-  rw [mean_eq_wave_add_half]
 
 
 
-theorem completed_mean_gain_eq {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    min (17 / 100) (1 - 4 * κ) = 17 / 100 := by
-  apply min_eq_left
-  linarith
 
 
 

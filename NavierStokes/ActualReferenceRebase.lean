@@ -460,20 +460,6 @@ theorem associatedChart_stateChart (n m k : ℕ) (z : PhysicalResidualNaturality
     parameterChange, ratioPower, Real.rpow_one,
     Real.div_rpow (ChartScales.Q_pos n).le (ChartScales.Q_pos m).le]
 
-theorem commonReferenceChart_forward (l : ActualParticularStageControls.Label B N0)
-    (n k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h (BaseChartJets.cellBand l.2))
-    (z : PhysicalResidualNaturality.Associated) :
-    CorrectionStep.cycleAssoc.symm (commonReferenceChart l n z) =
-      GaugeStateCoherence.bandChartEquiv h n (BaseChartJets.cellBand l.2) k
-        (CorrectionStep.cycleAssoc.symm z) := by
-  have hg : ActualParticularStageControls.gap l n =
-      ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2) + k := by
-    have hm := CommonWindow.index_le_native h (BaseChartJets.cellBand l.2)
-    unfold ActualParticularStageControls.gap
-    omega
-  rw [commonReferenceChart_apply, hg, CopySolveCompatibility.coverPower_add,
-    ContinuousLinearEquiv.symm_apply_apply]
-  exact associatedChart_stateChart n (BaseChartJets.cellBand l.2) k z
 
 theorem assembly_source
     (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
@@ -490,21 +476,6 @@ theorem assembly_source
     (StateReindex.residualBlock_pull CorrectionStep.cycleAssoc.symm (commonContext B) x.state
       (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
 
-theorem transportedSource_eq_commonReference
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) (j : ℤ) (n : ℕ)
-    (z : PhysicalResidualNaturality.Associated) :
-    PhysicalParticularWave.transportedResidualSource (nativeAssembly x l) h (ChartScales.Q n)
-      (ChartScales.Q (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n) j z =
-      sourceWeight h (ChartScales.Q n) (ChartScales.Q (BaseChartJets.cellBand l.2)) •
-        ParticularWaveAssembly.residualSource (commonContext B) x.state (x.coefficients.blocks l)
-          (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) j (BaseChartJets.cellBand l.2)
-          (CorrectionStep.cycleAssoc.symm (commonReferenceChart l n z)) := by
-  rw [PhysicalParticularWave.transportedResidualSource_apply _ h (ChartScales.Q_pos n)
-    (ChartScales.Q_pos (BaseChartJets.cellBand l.2)), nativeAssembly_source]
-  exact congrArg (fun v : ComplexVector => sourceWeight h (ChartScales.Q n)
-    (ChartScales.Q (BaseChartJets.cellBand l.2)) • v)
-      (assembly_source x l j (BaseChartJets.cellBand l.2) (commonReferenceChart l n z))
 
 theorem state_sourceWeight (n m : ℕ) :
     GaugeStateCoherence.bandVelocityScale h n m * GaugeStateCoherence.bandVelocityScale h n m *
@@ -551,9 +522,6 @@ theorem ratioPower_reverse_mul {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (a : ℝ
   unfold ratioPower
   field_simp [(Real.rpow_pos_of_pos hQ a).ne', (Real.rpow_pos_of_pos hQr a).ne']
 
-theorem parameterChange_inverse (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
-    (p : Parameter) : parameterChange h Qr Q (parameterChange h Q Qr p) = p := by
-  ext <;> simp only [parameterChange, ← mul_assoc, ratioPower_reverse_mul hQr hQ, one_mul]
 
 
 abbrev StateComparison (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
@@ -577,18 +545,6 @@ abbrev BlockComparison (x : CorrectionStep.CycleState (ActualParticularStageCont
 
 /-! ## The unchanged target solve uses this native reference -/
 
-theorem residualBandAmplitude_rebase_at (D : ParticularWaveAssembly.AssemblyData Parameter)
-    (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (kr gap : ℕ)
-    (K : ℝ) (j : ℤ) (n : ℕ) (p : Parameter)
-    (hf : ∀ Y, ParticularWaveAssembly.residualSource D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j n (p,Y) =
-        PhysicalParticularWave.transportedResidualSource (rebaseAssembly D kr) h Q Qr gap j (p,Y))
-    (Y : Plane) :
-    PhysicalParticularWave.residualBandAmplitude D h hQ hQr gap K j n (p,Y) =
-      PhysicalParticularWave.bandAmplitude (rebaseAssembly D kr) h hQ hQr gap K j (p,Y) := by
-  unfold PhysicalParticularWave.residualBandAmplitude PhysicalParticularWave.bandAmplitude
-  apply commonVelocity_source_congr
-  exact hf
 
 
 /-- The literal current-source common coefficient in the actual stage. -/

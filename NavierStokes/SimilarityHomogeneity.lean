@@ -172,10 +172,6 @@ theorem chartInner_transition {h Q Q' : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     chartInner h (chartTransition h Q Q' p) = chartInner h p :=
   Prod.ext (chartX_transition hh hh1 hQ hQ' hp) (chartEta_transition hh hh1 hQ hQ' hp)
 
-/-- The genuine chart-to-physical map, with radial variable `s=r²/2`. -/
-noncomputable def chartToPhysical (h Q : ℝ) (p : ChartPoint) :
-    SimilarityProfile.PhysicalPoint :=
-  (1 - Q * p.2.2, (Q * (p.1 ^ 2 / 2), Q ^ D h * p.2.1))
 
 
 
@@ -196,12 +192,6 @@ theorem isOpen_chartDomain : IsOpen chartDomain :=
   (isOpen_lt continuous_const continuous_fst).inter
     (isOpen_lt continuous_const continuous_snd.snd)
 
-theorem chartTransition_mem_iff {h Q Q' : ℝ} (hQ : 0 < Q) (hQ' : 0 < Q')
-    (p : ChartPoint) : chartTransition h Q Q' p ∈ chartDomain ↔ p ∈ chartDomain := by
-  change (0 < (Q / Q') ^ (1 / 2 : ℝ) * p.1 ∧ 0 < (Q / Q') * p.2.2) ↔ _
-  rw [mul_pos_iff_of_pos_left (Real.rpow_pos_of_pos (div_pos hQ hQ') _),
-    mul_pos_iff_of_pos_left (div_pos hQ hQ')]
-  rfl
 
 theorem chartInner_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : ChartPoint} (hp : 0 < p.2.2) : ContDiffAt ℝ ∞ (chartInner h) p := by
@@ -224,13 +214,7 @@ edges. Positivity is asserted only inside a positive profile interval. -/
 noncomputable def profileLogDistance (left right X : ℝ) : ℝ :=
   min 1 (min (Real.log X - Real.log left) (Real.log right - Real.log X))
 
-theorem profileLogDistance_pos {left right X : ℝ} (hl : 0 < left)
-    (hLX : left < X) (hXR : X < right) : 0 < profileLogDistance left right X := by
-  exact lt_min zero_lt_one (lt_min (sub_pos.mpr (Real.log_lt_log hl hLX))
-    (sub_pos.mpr (Real.log_lt_log (hl.trans hLX) hXR)))
 
-noncomputable def chartLogDistance (h left right : ℝ) (p : ChartPoint) : ℝ :=
-  profileLogDistance left right (chartX h p)
 
 
 

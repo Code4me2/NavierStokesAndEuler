@@ -59,20 +59,5 @@ variable (T : ℝ) (hT : 0 ≤ T) (p f : C(Icc (0 : ℝ) T,LiftL2 P))
   (hf : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a f))
   (hd : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt (extendPath T hT p) (f t) (Icc (0 : ℝ) T) t)
 
-include hd in
-/-- Differentiating the full covering derivative in time gives the covering derivative of the true RHS. -/
-theorem pointField_fderiv_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P) :
-    HasDerivWithinAt
-      (fun r => fieldFDeriv P (pointField P p hp (projIcc 0 T hT r)) x)
-      (fieldFDeriv P (pointField P f hf t) x) (Icc (0 : ℝ) T) t := by
-  have hD : HasDerivWithinAt
-      (fun r => fun i : Fin 4 => fieldFDeriv P (pointField P p hp (projIcc 0 T hT r)) x (standardDirection i))
-      (fun i : Fin 4 => fieldFDeriv P (pointField P f hf t) x (standardDirection i))
-      (Icc (0 : ℝ) T) t := by
-    apply hasDerivWithinAt_pi.mpr
-    intro i
-    exact pointField_word_hasDerivWithinAt P T hT p f hp hf hd 1 (fun _ => i) t x
-  have h := fromCoordinates.hasFDerivAt.comp_hasDerivWithinAt (t : ℝ) hD
-  simpa only [Function.comp_def, fromCoordinates_eq] using h
 
 end EulerCylinderSmoothOrbit

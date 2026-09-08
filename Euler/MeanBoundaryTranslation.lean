@@ -141,19 +141,6 @@ theorem mixedBoundaryOperator_translation (a : Space) (χ ψ : Cutoff) (z : L2) 
 def translationCommutator (a : Space) (A : L2 →L[ℝ] L2) : L2 →L[ℝ] L2 :=
   (translation a).toContinuousLinearMap.comp A - A.comp (translation a).toContinuousLinearMap
 
-/-- Both cutoff positions, and only those positions, contribute to the spatial commutator. -/
-theorem mixedBoundaryOperator_translationCommutator (a : Space) (χ ψ : Cutoff) :
-    translationCommutator a (mixedBoundaryOperator χ ψ) =
-      (mixedBoundaryOperator ((χ.translate a).sub χ) (ψ.translate a) +
-        mixedBoundaryOperator χ ((ψ.translate a).sub ψ)).comp (translation a).toContinuousLinearMap := by
-  apply ContinuousLinearMap.ext
-  intro z
-  change translation a (mixedBoundaryOperator χ ψ z) - mixedBoundaryOperator χ ψ (translation a z) =
-    mixedBoundaryOperator ((χ.translate a).sub χ) (ψ.translate a) (translation a z) +
-      mixedBoundaryOperator χ ((ψ.translate a).sub ψ) (translation a z)
-  rw [mixedBoundaryOperator_translation]
-  exact congrArg (fun A : L2 →L[ℝ] L2 => A (translation a z))
-    (mixedBoundaryOperator_difference (χ.translate a) χ (ψ.translate a) ψ)
 
 
 end EulerMeanBoundary

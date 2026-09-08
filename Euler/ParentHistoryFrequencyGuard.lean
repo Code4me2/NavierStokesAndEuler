@@ -100,9 +100,6 @@ theorem base_inverse_le_previous_frequency_pow80 (J D : ℕ) (hJ : 3 ≤ J) (hD 
   exact (base_inverse_le_previous_frequency J D hJ hD X hX hbase n).trans (by
     simpa only [pow_one] using pow_le_pow_right₀ hk (by decide : 1 ≤ 80))
 
-theorem stepLength_nonneg (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0 ≤ X)
-    (a β : ℕ → ℝ) (n : ℕ) : 0 ≤ stepLength J X a β n :=
-  div_nonneg (hX.trans (sequence_initial_le J hJ X hX (n+1))) (sqrt_nonneg _)
 
 
 

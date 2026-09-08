@@ -147,21 +147,6 @@ theorem velocitySum_contDiffOn {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
   exact (velocitySum_contDiffAt ha (hqpos z hz) (hq.contDiffAt (hU.mem_nhds hz))
     (fun j => (hA j).contDiffAt (hU.mem_nhds hz))).contDiffWithinAt
 
-/-- Incompressibility follows from actual second-derivative symmetry, already
-proved in `SpatialCurl`, applied to the constructed smooth potential. -/
-theorem divergence_velocitySum {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : SpaceTime → ℝ} {A : ℕ → VelocityField} {z : SpaceTime}
-    (hqz : 0 < q z) (hq : ContDiffAt ℝ ∞ q z)
-    (hA : ∀ j, ContDiffAt ℝ ∞ (A j) z) :
-    spatialDivergence (velocitySum a q A) z.1 z.2 = 0 := by
-  have hsum : ContDiffAt ℝ ∞ (potentialSum a q A) z :=
-    potentialSum_contDiffAt ha hqz hq hA
-  have hslice : ContDiffAt ℝ ∞ (fun y : Space => potentialSum a q A (z.1, y)) z.2 :=
-    hsum.comp (f := fun y : Space => (z.1, y)) z.2
-      (contDiffAt_const.prodMk contDiffAt_id)
-  have hslice2 : ContDiffAt ℝ 2 (fun y : Space => potentialSum a q A (z.1, y)) z.2 :=
-    hslice.of_le (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
-  exact SpatialCurl.spatialDivergence_spatialCurl (potentialSum a q A) z.1 z.2 hslice2
 
 
 theorem spatialCurl_eq_of_eventuallyEq {A B : VelocityField} {z : SpaceTime}

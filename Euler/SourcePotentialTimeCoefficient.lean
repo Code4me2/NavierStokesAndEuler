@@ -105,8 +105,6 @@ end Families
 variable (m m₁ : SmoothCoefficientPath K Space) (c : ℝ) (hc : 0 < c)
   (hm : ∀ t y, c ≤ ‖m.field t y‖^2)
 
-def potentialTimeCoefficient : C(K,PotentialField) :=
-  potentialPathMap (timeNormalPath (normalFunctional m c hc hm) (normalColumn m₁).field)
 
 
 

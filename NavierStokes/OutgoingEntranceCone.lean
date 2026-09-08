@@ -612,24 +612,7 @@ theorem angular_square_lower (c : Parameters) {y η : ℝ} (hy : 0 ≤ y)
     (clockEnergy_pos c y).le
   simpa only [angular, clockEnergy, mul_pow, div_eq_mul_inv, one_mul, mul_comm, mul_left_comm, mul_assoc] using hm
 
-theorem integral_exp_mul_real {a : ℝ} (ha : a ≠ 0) (y : ℝ) :
-    (∫ t in (0 : ℝ)..y, Real.exp (a * t)) = (Real.exp (a * y) - 1) / a := by
-  have hd : ∀ t, HasDerivAt (fun x => Real.exp (a * x) / a) (Real.exp (a * t)) t := by
-    intro t
-    convert! (((hasDerivAt_id t).const_mul a).exp).div_const a using 1
-    simp only [id_eq]
-    field_simp
-  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t)
-    ((Real.continuous_exp.comp (continuous_const.mul continuous_id)).intervalIntegrable 0 y)
-  simpa only [mul_zero, Real.exp_zero, sub_div] using hi
 
-theorem clockEnergy_ideal (c : Parameters) {y : ℝ} (hy : y ≤ 0) :
-    clockEnergy c y = c.P ^ 2 * Real.exp ((1 / 5 : ℝ) * y) := by
-  simp only [clockEnergy, radialAmplitude, logAmplitude_ideal c.dropLength_pos.le hy, mul_pow,
-    ← Real.exp_nat_mul]
-  congr 2
-  norm_num
-  ring
 
 
 /-! ## Pressure and the axial lag with the full ideal incoming history -/
@@ -1867,16 +1850,6 @@ theorem coneB_continuous {v : TailData} {K : ℝ} (w : UniformAngularReset.Reset
   exact (continuous_const.mul (OutgoingHistories.dY_smooth (OutgoingHistories.U_smooth v ha)).continuous).div
     (OutgoingHistories.E_smooth w).continuous (fun p => (OutgoingHistories.E_pos w p).ne')
 
-theorem coneRatio_continuousOn {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (hh1 : v.h ≤ 1 / 100)
-    (hhT : v.h ≤ Real.exp (-(v.core.holdStart + 3 / 5)) / 8) :
-    ContinuousOn (coneRatio w Amp) (preliminaryWindow v) := by
-  apply (OutgoingHistories.Ns_smooth w ha).continuous.continuousOn.div
-    ((OutgoingHistories.E_smooth w).continuous.mul (OutgoingHistories.Qs_smooth w ha).continuous).continuousOn
-  rintro ⟨y, η⟩ ⟨hy, hη⟩
-  exact (mul_pos (OutgoingHistories.E_pos w (y, η))
-    (canonical_Qs_pos w ha hh1 hy.1 hy.2 (abs_le.mpr hη) hhT)).ne'
 
 theorem actual_preliminary_margins {v : TailData} {K : ℝ}
     (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ}

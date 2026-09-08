@@ -1037,27 +1037,6 @@ theorem realMeanClass_alias_superflat (d : Direction) {a b cL cR h α : ℝ}
   rw [← norm_iteratedFDeriv_exactAlias_complexify hχ (hfc n) (hs n)]
   exact hn j hj z
 
-theorem radial_realMeanClass_alias_superflat {a b cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {f : ℕ → ℝ × (S × Plane) → ℝ}
-    (hf : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, SourcePeriodic (f n))
-    (hm : ∀ n p, sourceMean (f n) p = 0)
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-      ‖iteratedFDeriv ℝ j
-        (exactAlias χ (ChartScales.radialCoefficient h n) ((0 : S), vector .radial) (f n)) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  apply realMeanClass_alias_superflat .radial (A := ChartScales.Lambda) (growth := ChartScales.rho)
-    ha hab hcL hcR hh hχ hleft hright hf hfc hp hm hs
-    (show 0 < ChartScales.kappa by norm_num [ChartScales.kappa])
-    (Filter.Eventually.of_forall (fun n => ne_of_gt (ChartScales.radialCoefficient_pos h n)))
-    _ m N
-  filter_upwards [eventually_ge_atTop 4] with n hn
-  simpa only [abs_of_pos (ChartScales.radialCoefficient_pos h n)] using
-    ChartScales.radialCoefficient_inv_upper h hh.le hn
 
 
 

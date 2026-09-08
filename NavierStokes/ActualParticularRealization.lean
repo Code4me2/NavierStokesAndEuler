@@ -333,19 +333,6 @@ theorem block_velocity_eq_band (T : TargetChart D s h n i) {N : ℕ}
   intro j hmem
   rw [angleShuffle_associatedCylinder, corrected_velocity_eq_band D s h gap n i H hn hr T j (hj j hmem) hf hx]
 
-include H hn hr in
-theorem block_pressure_eq_band {N : ℕ}
-    (hj : ∀ j ∈ modes N, j ≠ 0) (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    {x : Cylinder} (hx : 0 < x.1.1) :
-    (block D s h gap N).oscillatoryPressure n (associatedCylinder x) =
-      PhysicalParticularWave.labelBandPressure D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) (gap n)
-        (fun j => (j : ℝ) * D.carrierBlock.frequency n) N x := by
-  rw [block_pressure_represents D s h gap hj hf]
-  unfold PhysicalParticularWave.labelBandPressure
-  apply Finset.sum_congr rfl
-  intro j hmem
-  rw [angleShuffle_associatedCylinder, corrected_pressure_eq_band D s h gap n i H hn hr j (hj j hmem) hf hx]
 
 end Assembly
 
@@ -368,38 +355,6 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
   {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
   (hstrip : D.strip = CorrectionStep.ParticularParameters.nativeStrip s)
 
-include H hn hr T C hstrip in
-theorem block_velocity_physical
-    (Href : ReferenceChart D h (ChartScales.Q D.reference.band) (i + gap n))
-    {U : Set Parameter} (hU : IsOpen U) (R : ∀ j ∈ modes N, ReferenceODE D j U)
-    {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).source
-      (bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U))
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) (k : Fin 3) :
-    (block D s h gap N).oscillation n
-      (associatedCylinder ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).map z)) k =
-        (ChartScales.Q n) ^ CoordinateAlgebra.A h * CylindricalResidual.frame (-(z.2 1))
-          (labelVelocity D h (ChartScales.Q D.reference.band) (i + gap n) delta N
-            (z.1, CylindricalResidual.chart z.2)) k := by
-  by_cases hN : N = 0
-  · subst N
-    simp [block, CorrectionStep.ParticularParameters.updateBlock, assembledBlock_value,
-      modes, labelVelocity, labelPotential, SpatialCurl.spatialCurl,
-      SpatialCurl.curl, CylindricalResidual.frame]
-  have hm : ∃ j, j ∈ modes N := by
-    refine ⟨1, ?_⟩
-    simp only [modes, Finset.mem_erase, ne_eq, one_ne_zero, not_false_eq_true,
-      Finset.mem_Icc, true_and]
-    constructor <;> omega
-  obtain ⟨j, hj⟩ := hm
-  rw [block_velocity_eq_band D s h gap n i H hn hr T
-    (fun j hj => hstrip ▸ (C j hj).background)
-    (fun j hj => (C j hj).harmonic_ne) (C j hj).frequency_ne hz.2.1 k]
-  exact label_physical_velocity D (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-    i (gap n) Href C (fun j => (j : ℝ) * D.carrierBlock.frequency n)
-    (fun j hj => mul_ne_zero (by exact_mod_cast (C j hj).harmonic_ne) ((C j hj).frequency_ne n))
-    hU R hz hdelta chart hchart k
 
 
 end Physical
@@ -410,12 +365,6 @@ noncomputable def cycleBlock (D : AssemblyData Parameter) (s : WeightedClasses.S
     (h : ℝ) (gap : ℕ → ℕ) (N : ℕ) : HarmonicBlock CorrectionStep.CyclePoint :=
   StateReindex.block CorrectionStep.cycleAssoc (block D s h gap N)
 
-theorem cycleBlock_velocity (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
-    (h : ℝ) (gap : ℕ → ℕ) (N n : ℕ) (x : Cylinder) :
-    (cycleBlock D s h gap N).oscillation n (PhysicalResidualTZ.swapCylinder x) =
-      (block D s h gap N).oscillation n (associatedCylinder x) := by
-  rw [cycleBlock, StateReindex.block_oscillation]
-  rfl
 
 
 section CyclePhysical
@@ -528,18 +477,6 @@ theorem realizedCoefficient_scaled :
   rw [← mul_assoc (inverseCarrier K), ← mul_assoc (inverseCarrier K), hs]
   ring
 
-/-- Full lifted corrected-mode covariance, before evaluation on any
-physical graph. The integer-carrier matching is `K * b = L`. -/
-theorem correctedMode_scaled :
-    vectorMode K (fun y => b * Φ (Γ y))
-      (realizedCoefficient K r Sr Sθ Sz (fun y => b * Φ (Γ y)) (fun y => c • a (Γ y))) x =
-        c • vectorMode L Φ (realizedCoefficient L R Vr Vθ Vz Φ a) (Γ x) := by
-  have ha := realizedCoefficient_scaled G c hK hb hKL hΦ hx hB
-  have hc : carrier K (fun y => b * Φ (Γ y)) x = carrier L Φ (Γ x) :=
-    PhysicalCurlCovariance.carrier_eq_of_products (by rw [← mul_assoc, hKL])
-  ext k
-  simp only [vectorMode, mode, ha, hc, Pi.smul_apply, Complex.real_smul]
-  ring
 
 end FullVariable
 
@@ -547,26 +484,6 @@ namespace SpatialScaling
 
 open PhysicalParticularWave
 
-theorem commonChart {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) (i gap : ℕ)
-    {U : Set Cylinder} (hU : IsOpen U) (hpos : ∀ x ∈ U, 0 < x.1.1) :
-    SpatialScaling (cylinderChange h Q Qr gap) PhysicalResidualBridge.ScaledGraph.radius
-      PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Q h i).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Q h i).axial
-      (PhysicalResidualBridge.commonGraph Qr h (i + gap)).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Qr h (i + gap)).axial
-      (ratioPower Q Qr (1/2)) U where
-  isOpen := hU
-  scale_ne := (ratioPower_pos hQ hQr (1/2)).ne'
-  radius_ne x hx := (hpos x hx).ne'
-  differentiable _ _ := (cylinderChange h Q Qr gap).differentiableAt
-  radial x hx := by
-    simpa only [ContinuousLinearMap.fderiv] using cylinderChange_radial hQ hQr h i gap (hpos x hx)
-  angular x _ := by
-    simpa only [ContinuousLinearMap.fderiv] using cylinderChange_angular h Q Qr gap x
-  axial x _ := by
-    simpa only [ContinuousLinearMap.fderiv] using cylinderChange_axial hQ hQr h i gap x
-  radius _ _ := rfl
 
 end SpatialScaling
 
@@ -579,51 +496,7 @@ variable (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ}
   (C : LocalControl D.reference D.charts D.context D.state D.carrierBlock
     D.gaussianInput D.aliasInput j D.background D.copy D.strip D.directions α κ)
 
-include H C in
-theorem liftCoefficient_smooth :
-    ContDiffOn ℝ ∞ (coefficient PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Qr h I).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Qr h I).axial (liftPhase D j) (liftRaw D j)) (referenceDomain D) := by
-  have hs : ContDiffOn ℝ ∞
-      (coefficient (D.background.radius D.reference.band) (D.directions.radialField D.reference.band)
-        (fun _ => D.directions.angular) (D.directions.axialField D.strip D.reference.band)
-        ((rawCommon D j).phase D.reference.band) ((rawCommon D j).amplitude D.reference.band)) D.strip.domain :=
-    normalCoefficient_contDiffOn
-      (phaseNormal_contDiffOn (C.background.cylindrical D.reference.band)
-        (C.background.phase_smooth D.reference.band))
-      (commonRaw_smooth D C D.reference.band) (C.normal_nonzero D.reference.band)
-  have he : coefficient PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Qr h I).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Qr h I).axial (liftPhase D j) (liftRaw D j) =
-        fun x => coefficient (D.background.radius D.reference.band) (D.directions.radialField D.reference.band)
-          (fun _ => D.directions.angular) (D.directions.axialField D.strip D.reference.band)
-          ((rawCommon D j).phase D.reference.band) ((rawCommon D j).amplitude D.reference.band) (waveEquiv x) := by
-    have hn := normal_pull waveEquiv (D.background.radius D.reference.band)
-      ((rawCommon D j).phase D.reference.band) (D.directions.radialField D.reference.band)
-      (fun _ => D.directions.angular) (D.directions.axialField D.strip D.reference.band)
-    have hR : (fun x => D.background.radius D.reference.band (waveEquiv x)) =
-        PhysicalResidualBridge.ScaledGraph.radius := H.radius
-    have hr : StateReindex.vector waveEquiv (D.directions.radialField D.reference.band) =
-        (PhysicalResidualBridge.commonGraph Qr h I).radial := H.radial
-    have ht : StateReindex.vector waveEquiv (fun _ => D.directions.angular) =
-        PhysicalResidualBridge.ScaledGraph.angular := H.angular
-    have hz : StateReindex.vector waveEquiv (D.directions.axialField D.strip D.reference.band) =
-        (PhysicalResidualBridge.commonGraph Qr h I).axial := H.axial
-    rw [hR, hr, ht, hz] at hn
-    funext x
-    simp only [coefficient, liftRaw, referenceRaw_eq_common D H.identity]
-    exact congrArg₂ normalCoefficient (congrFun hn x) rfl
-  rw [he]
-  exact hs.comp waveEquiv.contDiff.contDiffOn (fun _ hx => hx)
 
-/-- The same reference corrected wave as a function of all free lifted
-variables. No graph evaluation occurs in this definition. -/
-noncomputable def referenceLiftVelocity (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ) :
-    Cylinder → ComplexVector :=
-  vectorMode (referenceFrequency D j) (liftPhase D j)
-    (realizedCoefficient (referenceFrequency D j) PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Qr h I).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Qr h I).axial (liftPhase D j) (liftRaw D j))
 
 
 end LiftedReference
@@ -641,9 +514,6 @@ variable (D : AssemblyData Parameter) {h Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
 
 end FullBand
 
-noncomputable def referenceLiftPressure (D : AssemblyData Parameter) (j : ℤ) : Cylinder → ℂ :=
-  mode (PhysicalParticularWave.referenceFrequency D j) (PhysicalParticularWave.liftPhase D j)
-    (fun x => PhysicalParticularWave.referenceRawPressure D j (PhysicalParticularWave.waveEquiv x))
 
 
 

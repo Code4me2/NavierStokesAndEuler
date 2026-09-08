@@ -56,25 +56,6 @@ theorem repartition_pressure (n : ℕ) (x : D) :
     Complex.real_smul, Complex.ofReal_mul]
   ring
 
-/-- Moving a scalar cutoff from the raw signed mask to the final cutoff
-preserves both coefficients, before any differentiation. -/
-theorem coefficients_repartition :
-    (SignedWaveUpdate.coefficients a s d H T R (fun n x => mask n x * factor n x)
-      unit Ndot A j).withCutoff cutoff =
-    (SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).withCutoff
-      (fun n x => cutoff n x * factor n x) := by
-  let u := (SignedWaveUpdate.coefficients a s d H T R (fun n x => mask n x * factor n x)
-    unit Ndot A j).withCutoff cutoff
-  let v := (SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).withCutoff
-    (fun n x => cutoff n x * factor n x)
-  have ha : u.amplitude = v.amplitude := funext fun n => funext fun x =>
-    repartition_amplitude a s d H T R mask factor cutoff unit Ndot A j n x
-  have hp : u.pressure = v.pressure := funext fun n => funext fun x =>
-    repartition_pressure a s d H T R mask factor cutoff unit Ndot A j n x
-  calc
-    u = {a with amplitude := u.amplitude, pressure := u.pressure} := rfl
-    _ = {a with amplitude := v.amplitude, pressure := v.pressure} := by rw [ha, hp]
-    _ = v := rfl
 
 
 
@@ -84,24 +65,6 @@ section Copies
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {K : Type}
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- Equality of every actual localized copy is enough for equality of the
-whole common coefficients.  Summability is not assumed here. -/
-theorem common_eq_of_localized (f g : PeriodizedWaveBounds.CopyData D K)
-    (hb : f.background = g.background) (he : ∀ k, f.localized k = g.localized k) :
-    f.common = g.common := by
-  have ha : f.common.amplitude = g.common.amplitude := by
-    funext n x
-    change (∑' k, (f.localized k).amplitude n x) = ∑' k, (g.localized k).amplitude n x
-    exact tsum_congr fun k => congrArg (fun a : WaveCoefficients D => a.amplitude n x) (he k)
-  have hp : f.common.pressure = g.common.pressure := by
-    funext n x
-    change (∑' k, (f.localized k).pressure n x) = ∑' k, (g.localized k).pressure n x
-    exact tsum_congr fun k => congrArg (fun a : WaveCoefficients D => a.pressure n x) (he k)
-  calc
-    f.common = {f.background with amplitude := f.common.amplitude, pressure := f.common.pressure} := rfl
-    _ = {g.background with amplitude := g.common.amplitude, pressure := g.common.pressure} := by rw [hb, ha, hp]
-    _ = g.common := rfl
 
 
 end Copies
@@ -1071,49 +1034,6 @@ theorem referencePotential_eq_mode (L : NativeLabel f.active)
     ← (G.chart L).normal] at he ⊢
   exact he
 
-/-- Equality with the same signed Cartesian potential. Every native copy,
-cutoff and the potential's actual derivative normalization is retained. -/
-theorem potential_periodized_physical (L : NativeLabel f.active) (i : Fin 3)
-    (hPhi : ContDiffOn ℝ ∞ ((f.primary L).base.phase L.val.1) (f.primary L).strip.domain)
-    {a b delta : ℝ} (ha : 0 < a) (hdelta : 0 < delta) (j : PolarCharts.Index) (z : SpaceTime)
-    (hz : z ∈ PhysicalCurlCovariance.validCylindrical delta j)
-    (hsource : (PhysicalResidualBridge.commonGraph (ChartScales.Q L.val.1) h
-      (ChartScales.nativeIndex h L.val.1)).map z ∈ (f.primary L).strip.domain)
-    (hw : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PhysicalGraphBounds.annulus a b)
-    (hj : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PolarCharts.chartDomain a j) :
-    ((potentialFamily sys hh f i).periodized a h sys.radius (positiveIndex L)
-      (z.1, CylindricalResidual.chart z.2)).re =
-      ActualPeriodizedSignedRealization.physicalPotential (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta
-        (z.1, CylindricalResidual.chart z.2) i := by
-  let V := ActualPeriodizedSignedRealization.views (f.primary L)
-    (layout sys hh L.val L.property 0) (f.view L)
-  have hK : (f.primary L).base.frequency L.val.1 ≠ 0 := by
-    rw [G.frequency L]
-    exact PartitionedCovariance.actual_carrier_ne_zero _ _
-  have hmap := cylinderAt_physical_forward h L.val.1 ha j z hz.1 hz.2.1 hj
-  have hc : PhysicalGraphBounds.liftXY
-      (PhysicalGraphBounds.physicalLift h L.val.1 (z.1, CylindricalResidual.chart z.2)) ∈
-      PolarCharts.chartDomain a j := by simpa only [PhysicalGraphBounds.liftXY_physicalLift] using hj
-  have hangle : (PolarCharts.chart a j (PhysicalGraphBounds.liftXY
-      (PhysicalGraphBounds.physicalLift h L.val.1 (z.1, CylindricalResidual.chart z.2)))).2 = z.2 1 :=
-    congrArg Prod.snd hmap
-  rw [potential_periodized_of_chart sys hh f G L i ha _ hw j hj,
-    ← rotateCoefficient_vectorMode]
-  have he := rotateCoefficient_chart_re ha j hc
-    ((ChartScales.Q L.val.1 ^ (-h) : ℝ) • HarmonicCalculus.vectorMode
-      ((f.primary L).base.frequency L.val.1) ((f.primary L).base.phase L.val.1)
-      (referencePotentialCoefficient sys hh f L)
-      (cylinderAt a j (PhysicalGraphBounds.physicalLift h L.val.1 (z.1, CylindricalResidual.chart z.2)))) i
-  rw [rotateCoefficient_real_smul, Pi.smul_apply] at he
-  rw [he, hangle, hmap, ← referencePotential_eq_mode sys hh f G L hPhi z hz.1 hsource]
-  have hf := (PhysicalCurlCovariance.globalCartesianPotential_forward_germ hdelta j
-    (V.referencePotential (f.state L).referenceRequest (f.column L))
-    (V.referencePotential_periodic (ActualPeriodizedSignedRealization.periodizedAngular
-      (f.primary L) (layout sys hh L.val L.property 0) (G.angular L)) hK (f.column L)) hz).eq_of_nhds
-  exact (congrArg (fun v : Space => v i) hf).symm
 
 end PhysicalFamilies
 
@@ -1941,16 +1861,6 @@ noncomputable def labelPotential (L : NativeLabel f.active) (a : ℝ) : Velocity
 noncomputable def labelPressure (L : NativeLabel f.active) (a : ℝ) : PressureField :=
   fun x => ((pressureFamily sys hh f).periodized a h sys.radius (positiveIndex L) x).re
 
-/-- Only coordinate domains and the original native phase domain occur in
-this set. Its definition contains no output-field equality. -/
-noncomputable def referencePatch (L : NativeLabel f.active) (a b delta : ℝ)
-    (j : PolarCharts.Index) : Set SpaceTime :=
-  {x | PhysicalGraphBounds.radialProjection x ∈ PolarCharts.chartDomain delta j ∧
-    PhysicalGraphBounds.scaledRadial L.val.1 x ∈ PhysicalGraphBounds.annulus a b ∧
-    PhysicalGraphBounds.scaledRadial L.val.1 x ∈ PolarCharts.chartDomain a j ∧
-    (PhysicalResidualBridge.commonGraph (ChartScales.Q L.val.1) h
-      (ChartScales.nativeIndex h L.val.1)).map (PhysicalCurlCovariance.polarCoordinates delta j x) ∈
-        (f.primary L).strip.domain}
 
 variable (G : ReferenceGeometry sys f) (L : NativeLabel f.active)
   (hPhi : ContDiffOn ℝ ∞ ((f.primary L).base.phase L.val.1) (f.primary L).strip.domain)

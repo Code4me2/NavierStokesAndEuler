@@ -308,17 +308,7 @@ noncomputable def localizedPressure (p : PressureField) : PressureField :=
 
 
 
-theorem localizedVelocity_eventuallyEq (A : VelocityField) {z : SpaceTime}
-    (ht : 3 / 4 < z.1) (hz : z.2 ∈ plateau) :
-    localizedVelocity A =ᶠ[𝓝 z] SpatialCurl.spatialCurl A :=
-  (TimeLocalization.activatedVelocity_eventuallyEq_late _ ht z.2).trans
-    (periodicVelocity_eventuallyEq A hz)
 
-theorem localizedPressure_eventuallyEq (p : PressureField) {z : SpaceTime}
-    (ht : 3 / 4 < z.1) (hz : z.2 ∈ plateau) :
-    localizedPressure p =ᶠ[𝓝 z] p :=
-  (TimeLocalization.activatedPressure_eventuallyEq_late _ ht z.2).trans
-    (periodicPressure_eventuallyEq p hz)
 
 theorem localizedVelocity_eq (A : VelocityField) {z : SpaceTime}
     (ht : 3 / 4 ≤ z.1) (hz : z.2 ∈ plateau) :

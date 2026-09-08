@@ -346,11 +346,6 @@ theorem angularDebt_rescale (C : ℝ) (d : Debt) :
   fin_cases i <;>
     simp [angularDebt, Pi.smul_apply, smul_eq_mul, div_eq_mul_inv, mul_inv_rev] <;> ring
 
-theorem axialDebt_rescale (C : ℝ) (d : Debt) : axialDebt C d = C⁻¹ • axialDebt 1 d := by
-  ext i
-  fin_cases i <;>
-    simp [axialDebt, Pi.smul_apply, smul_eq_mul, div_eq_mul_inv]
-  ring
 
 
 
@@ -358,24 +353,7 @@ end Linearity
 
 section JetBounds
 
-theorem angularDebt_one_norm (d : Debt) : ‖angularDebt 1 d‖ ≤ ‖d‖ := by
-  apply (pi_norm_le_iff_of_nonneg (norm_nonneg d)).mpr
-  intro i
-  fin_cases i
-  · simp [angularDebt]
-  · change ‖-(d 0) / (2 * 1 : ℝ)‖ ≤ ‖d‖
-    have hd : |d 0| ≤ ‖d‖ := by simpa only [Real.norm_eq_abs] using norm_le_pi_norm d 0
-    rw [norm_div, norm_neg]
-    norm_num
-    nlinarith [abs_nonneg (d 0)]
-  · simpa [angularDebt] using norm_le_pi_norm d 2
 
-theorem axialDebt_one_norm (d : Debt) : ‖axialDebt 1 d‖ ≤ ‖d‖ := by
-  apply (pi_norm_le_iff_of_nonneg (norm_nonneg d)).mpr
-  intro i
-  fin_cases i
-  · simp [axialDebt]
-  · simpa [axialDebt] using norm_le_pi_norm d 1
 
 
 

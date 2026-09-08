@@ -737,11 +737,6 @@ theorem primary_coefficients_smooth {B N0 : ℕ} (l : Index B N0) (n : ℕ) (i :
   exact (exact_amplitude_smooth_full l n i).comp
     (HarmonicWaveInteraction.inclusion (D := Point)).contDiff.contDiffOn (fun _ hx => ⟨hx, trivial⟩)
 
-theorem primary_pressure_smooth {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
-    SmoothCoefficients strip.domain ((primaryBlock l).pressure n) := by
-  apply smooth_conjugatePair
-  exact (exact_pressure_smooth_full l n).comp
-    (HarmonicWaveInteraction.inclusion (D := Point)).contDiff.contDiffOn (fun _ hx => ⟨hx, trivial⟩)
 
 theorem gaussian_coefficients_smooth {B N0 : ℕ} (l : Index B N0) (n : ℕ) (i : Fin 3) :
     SmoothCoefficients strip.domain ((gaussianBlock l).velocity n i) := by

@@ -79,13 +79,6 @@ theorem forward_fderiv (t : Icc (0 : ℝ) T) (x : E) :
       (jacobianEvolution T hT A x).forward t :=
   (forward_hasFDerivAt_label T hT A t x).fderiv
 
-def jacobianEquiv (t : Icc (0 : ℝ) T) (x : E) : E ≃L[ℝ] E :=
-  ContinuousLinearEquiv.equivOfInverse ((jacobianEvolution T hT A x).forward t)
-    ((jacobianEvolution T hT A x).backward t)
-    (fun v => congrArg (fun L : E →L[ℝ] E => L v)
-      ((jacobianEvolution T hT A x).backward_forward t))
-    (fun v => congrArg (fun L : E →L[ℝ] E => L v)
-      ((jacobianEvolution T hT A x).forward_backward t))
 
 
 

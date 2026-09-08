@@ -162,12 +162,6 @@ theorem tangentVelocity_tsupport_subset (p : PrimaryPiece X) (n : ℕ) :
   funext i
   simp [tangentVelocity, vectorMode, mode, ha]
 
-theorem exactAmplitude_tsupport_subset (p : PrimaryPiece X) (n : ℕ) :
-    tsupport (p.exactCoefficients.amplitude n) ⊆ tsupport (p.cutoff n) := by
-  have hcut : tsupport ((p.coefficients.withCutoff p.cutoff).amplitude n) ⊆
-      tsupport (p.cutoff n) := tsupport_smul_subset_left _ _
-  exact (tsupport_add _ _).trans (union_subset hcut
-    ((curlCorrection_tsupport_subset _ p.strip p.directions n).trans hcut))
 
 
 
@@ -210,17 +204,6 @@ noncomputable def piece (a : WaveCoefficients X) (s : StripData X)
     (cutoff : ℕ → X → ℝ) (j : Fin 2) : PrimaryPiece X :=
   ⟨s, d, coefficients a s d H T mask v Ndot A j, cutoff⟩
 
-theorem amplitude_eq_primary (a : WaveCoefficients X) (s : StripData X)
-    (d : GraphDirections X) (H : ℕ → X → SmoothCovariance.Mat2)
-    (T : ℕ → X → SmoothCovariance.Vec2) (mask : ℕ → X → ℝ)
-    (v Ndot : ℕ → X → PrimaryODE.Space)
-    (A : ℕ → X → PrimaryODE.Space →L[ℝ] PrimaryODE.Space) (j : Fin 2)
-    (n : ℕ) (x : X) (hc : SmoothCovariance.StrictCone (H n x) (T n x)) :
-    (coefficients a s d H T mask v Ndot A j).amplitude n x =
-      PrimaryPulseBounds.primaryCoefficient s H T mask v j n x := by
-  simp only [coefficients, SignedWaveUpdate.coefficients, SignedWaveUpdate.homogeneousCoefficients,
-    SignedWaveUpdate.signedVector, SignedWaveUpdate.signedScalar, increment_twice_target hc,
-    map_smul, PrimaryPulseBounds.primaryCoefficient, PartitionedCovariance.amplitude]
 
 theorem twice_target_class {s : StripData X} {T : ℕ → X → SmoothCovariance.Vec2}
     (hT : ∀ i, MeanClass s 0 (fun n x => T n x i)) (i : Fin 2) :
@@ -1269,50 +1252,6 @@ open VariableGaugeMean
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- The band-dependent physical-gauge construction retains exactly the two
-current aliases. The base error cancels once and each primary Gaussian has
-zero actual angular mean. -/
-theorem initializedBands_meanGood (g : GaugeData S) (r : RankData S) (h : ℝ)
-    (index : ℕ → ℕ) (axial : S × PressureStream.Plane) (c : Context (Lift S))
-    (labels : ℕ → Finset ι) (pieces : ι → PrimaryPiece (Lift S × ℝ))
-    (baseError : Oscillation (Lift S))
-    (hb : CorrectionStep.AngularContinuous baseError)
-    (hg : ∀ n l, l ∈ labels n → ∀ x i,
-      Continuous (fun θ : ℝ => (pieces l).excluded n (x, θ) i))
-    (hz : ∀ n l, l ∈ labels n → ∀ x,
-      CorrectionStep.angularMeanVector (pieces l).excluded n x = 0) :
-    (initializedBands g r h index axial c labels pieces baseError).meanGoodResidual c =
-      (initializedBands g r h index axial c labels pieces baseError).reducedMeanResidual c -
-        (fun n x => temporalAliasState g h index c (primaryBands g c labels pieces baseError) n (x, 0) +
-          pressureAliasState g c (rankBands g r h index axial c labels pieces baseError) n (x, 0)) := by
-  let u := initializedBands g r h index axial c labels pieces baseError
-  obtain ⟨hb', hg', ha'⟩ := initializedBands_error_components g r h index axial c labels pieces baseError
-  have hgc : CorrectionStep.AngularContinuous u.errors.gaussian := by
-    rw [show u.errors.gaussian = _ from hg']
-    intro n x i
-    exact continuous_finsetSum (labels n) (fun l hl => hg n l hl x i)
-  have hac : CorrectionStep.AngularContinuous u.errors.aliasError := by
-    rw [show u.errors.aliasError = _ from ha']
-    intro n x i
-    change Continuous (fun _ : ℝ =>
-      temporalAliasState g h index c (primaryBands g c labels pieces baseError) n (x, 0) i +
-        pressureAliasState g c (rankBands g r h index axial c labels pieces baseError) n (x, 0) i)
-    exact continuous_const
-  have hgz : CorrectionStep.angularMeanVector u.errors.gaussian = 0 := by
-    rw [show u.errors.gaussian = _ from hg',
-      angularMeanVector_fieldSum labels (fun l => (pieces l).excluded) hg]
-    funext n x i
-    exact Finset.sum_eq_zero (fun l hl => congrFun (hz n l hl x) i)
-  have hbc : CorrectionStep.AngularContinuous u.errors.base := by
-    rwa [show u.errors.base = _ from hb']
-  rw [CorrectionStep.meanGoodResidual_exact_errors c u hbc hgc hac, hgz, sub_zero]
-  congr 1
-  funext n x i
-  rw [show u.errors.aliasError = _ from ha']
-  change HarmonicResidual.realAngularMean (fun _ : ℝ =>
-    temporalAliasState g h index c (primaryBands g c labels pieces baseError) n (x, 0) i +
-      pressureAliasState g c (rankBands g r h index axial c labels pieces baseError) n (x, 0) i) = _
-  exact HarmonicResidual.realAngularMean_const _
 
 
 end GaugeInitialization
@@ -1370,10 +1309,6 @@ theorem class_restrict {s : StripData (D × ℝ)} {w : ℕ → D × ℝ → ℝ}
       mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) norm_insert_le)
     _ ≤ _ := hb n (x, 0) hx j hj
 
-theorem waveClass_restrict {s : StripData (D × ℝ)} {P : ℕ → D × ℝ → ℝ} {α : ℝ}
-    {f : ℕ → D × ℝ → E} (hf : WaveClass s P α f) :
-    WaveClass (strip s) (fun n x => P n (x, 0)) α (fun n x => f n (x, 0)) :=
-  class_restrict hf
 
 end AngularRestriction
 
@@ -4484,10 +4419,6 @@ theorem outerRawPressure_core (j : Fin 2) (L : Label B N0) (x : ActualSignedGeom
     exact hx (by simp [outerRawPressure, hz])
   exact outerRawVelocity_core j L x (smul_ne_zero ho hu)
 
-theorem cutPressure_eq_outer (j : Fin 2) (L : Label B N0) (x : ActualSignedGeometry.Native) :
-    cutPressure j L x = gaussian L x • outerRawPressure j L x := by
-  simp only [cutPressure, gaussian, outerRawPressure, smul_smul,
-    PrimaryCopyBounds.profile_mul_outerCutoff]
 
 
 

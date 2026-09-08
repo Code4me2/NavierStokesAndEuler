@@ -95,19 +95,6 @@ def ratioBound (D : ℝ) : ℝ := (5 : ℝ) ^ 6 * (2 : ℝ) ^ (4 * (1 + |D|))
 theorem width_pos (D : ℝ) (j : Fin 3) {n : ℕ} (hn : 1 ≤ n) : 0 < width D j n :=
   spacing_pos _ hn
 
-theorem width_ratio_le (D : ℝ) (j : Fin 3) {n m : ℕ}
-    (hn : 1 ≤ n) (hm : 1 ≤ m) (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    width D j n / width D j m ≤ ratioBound D := by
-  apply spacing_ratio_le _ _ hn hm hnm hmn
-  fin_cases j
-  · change |(1 / 2 : ℝ)| ≤ 1 + |D|
-    rw [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
-    linarith [abs_nonneg D]
-  · change |D| ≤ 1 + |D|
-    linarith
-  · change |(1 : ℝ)| ≤ 1 + |D|
-    rw [abs_one]
-    linarith [abs_nonneg D]
 
 def physicalBox (D : ℝ) (L : Label) : Set Position :=
   {x | ∀ j, |x j - width D j L.1 * (L.2.1 j : ℝ)| ≤ 2 * width D j L.1}
@@ -186,31 +173,7 @@ theorem color_proper (D : ℝ) {L M : Label} (h : Adj D L M) : color L ≠ color
   intro hc
   exact colorData_proper D h ((Fintype.equivFin Palette).injective hc)
 
-/-- A reusable one-dimensional bound: overlapping intervals force the finer
-grid index to lie within a fixed distance of the rescaled reference index. -/
-theorem normalized_index_gap (h h' B : ℝ) (i j : ℤ) (hh' : 0 < h')
-    (hratio : h / h' ≤ B)
-    (hgap : |h * (i : ℝ) - h' * (j : ℝ)| ≤ 2 * (h + h')) :
-    |h / h' * (i : ℝ) - (j : ℝ)| ≤ 2 * (B + 1) := by
-  calc
-    |h / h' * (i : ℝ) - (j : ℝ)| = |(h * (i : ℝ) - h' * (j : ℝ)) / h'| := by
-      congr 1
-      field_simp
-    _ = |h * (i : ℝ) - h' * (j : ℝ)| / h' := by rw [abs_div, abs_of_pos hh']
-    _ ≤ (2 * (h + h')) / h' := div_le_div_of_nonneg_right hgap hh'.le
-    _ = 2 * (h / h' + 1) := by field_simp
-    _ ≤ 2 * (B + 1) := by linarith
 
-theorem index_near_floor (c A : ℝ) (j : ℤ) (K : ℕ)
-    (hgap : |c - (j : ℝ)| ≤ A) (hK : A + 1 ≤ (K : ℝ)) :
-    |j - ⌊c⌋| ≤ (K : ℤ) := by
-  have hfloor : |c - (⌊c⌋ : ℝ)| ≤ 1 := by
-    rw [abs_of_nonneg (sub_nonneg.mpr (Int.floor_le c))]
-    linarith [Int.lt_floor_add_one c]
-  have ht := abs_sub_le (j : ℝ) c (⌊c⌋ : ℝ)
-  rw [abs_sub_comm (j : ℝ) c] at ht
-  have hreal : |(j : ℝ) - (⌊c⌋ : ℝ)| ≤ (K : ℝ) := by linarith
-  exact_mod_cast hreal
 
 def indexRadius (D : ℝ) : ℕ := ⌈2 * (ratioBound D + 1) + 1⌉₊
 
@@ -221,8 +184,6 @@ def candidateGrids (D : ℝ) (L : Label) (m : ℕ) : Finset Grid :=
   Fintype.piFinset (fun j => Finset.Icc (indexCenter D L m j - (indexRadius D : ℤ))
     (indexCenter D L m j + (indexRadius D : ℤ)))
 
-def candidatesAtLevel (D : ℝ) (L : Label) (m : ℕ) : Finset Label :=
-  ((candidateGrids D L m).product (Finset.univ : Finset Bool)).image (fun gs => (m, gs))
 
 
 
@@ -232,11 +193,6 @@ theorem integer_interval_card (c : ℤ) (K : ℕ) :
   rw [Int.card_Icc]
   omega
 
-theorem candidateGrids_card (D : ℝ) (L : Label) (m : ℕ) :
-    (candidateGrids D L m).card = (2 * indexRadius D + 1) ^ 3 := by
-  unfold candidateGrids
-  rw [Fintype.card_piFinset]
-  simp only [integer_interval_card, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
 
 

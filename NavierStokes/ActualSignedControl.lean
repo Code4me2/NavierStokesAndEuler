@@ -109,16 +109,7 @@ theorem matrix_jets (j k : Fin 2) :
   pulseMatrix_jets F pref χ h.scale h.coordinate_jets
     (fun i x hx => (h.coordinate_mem i x hx).1) h.prefactor_jets j k
 
-theorem unit_jets (j : Fin 2) : NativeJets V (pulseEnvelope F χ j) (pulseVector F χ j) :=
-  pulseVector_jets F χ h.scale h.coordinate_jets h.coordinate_mem j
 
-theorem geometry_jets (j : Fin 2) :
-    PolynomialJets V.toDomain (phaseNormal (F j) χ) ∧
-    PolynomialJets V.toDomain (phaseMotion (F j) χ) ∧
-    PolynomialJets V.toDomain (phaseAction (F j) χ) ∧
-    (∀ i x, x ∈ V.carrier i → (F j).b ≤ ‖phaseNormal (F j) χ i x‖) ∧
-    (∀ i x, x ∈ V.carrier i → ‖phaseNormal (F j) χ i x‖ ≤ (F j).M ^ 2 + 3 * (F j).M) :=
-  phase_geometry_jets (F j) χ h.scale h.coordinate_jets h.coordinate_mem
 
 theorem cutoff_jets : PolynomialJets V.toDomain
     (fun i x => GaussianTailFlat.profile (χ i x).2) := by
@@ -329,11 +320,6 @@ variable (a b : PositiveScale Λ)
 
 theorem value_pos (l : Λ) (n : ℕ) : 0 < a.value l n := a.lower_pos.trans_le (a.bounds l n).1
 
-theorem bandBound (s : StripData X) : UniformPrimaryWeights.UniformBandBound s 0 a.value := by
-  refine ⟨a.upper, zero_le_one.trans a.upper_one, 0, ?_⟩
-  intro l n
-  simpa only [Real.norm_eq_abs, abs_of_pos (a.value_pos l n), Real.rpow_zero,
-    pow_zero, mul_one] using (a.bounds l n).2
 
 theorem square_bandBound (s : StripData X) :
     UniformPrimaryWeights.UniformBandBound s 0 (fun l n => a.value l n ^ 2) := by

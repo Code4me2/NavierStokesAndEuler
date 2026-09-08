@@ -200,33 +200,8 @@ theorem radialJet_joint_contDiffOn {U : Set P} (hU : IsOpen U) {F : ℝ × P →
     simp only [radialJet_succ]
     exact h
 
-omit [CompleteSpace E] [ProperSpace P] in
-theorem localized_joint_contDiffOn {R : ℝ} (hR : 0 < R) {U : Set P} (hU : IsOpen U)
-    {F : ℝ × P → E} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U)) :
-    ContDiffOn ℝ ∞ (localized R F) (univ ×ˢ U) := by
-  intro p hp
-  by_cases hr : |p.1| < R
-  · exact (((EvenSmoothDescent.contDiff_evenCutoff R).comp contDiff_fst).contDiffAt.smul
-      (hF.contDiffAt ((isOpen_Ioo.prod hU).mem_nhds ⟨abs_lt.mp hr, hp.2⟩))).contDiffWithinAt
-  · have hz := (EvenSmoothDescent.localized_eventually_zero hR (le_of_not_gt hr)
-        (fun _ => (1 : ℝ))).comp_tendsto (continuous_fst.tendsto p)
-    apply ContDiffAt.contDiffWithinAt
-    apply (contDiffAt_const : ContDiffAt ℝ ∞ (fun _ : ℝ × P => (0 : E)) p).congr_of_eventuallyEq
-    filter_upwards [hz] with q hq
-    change EvenSmoothDescent.evenCutoff R q.1 * 1 = 0 at hq
-    simp only [mul_one] at hq
-    simp only [localized, EvenSmoothDescent.localized, hq, zero_smul]
 
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] [ProperSpace P] in
-omit [CompleteSpace E] in
-theorem radialJet_even_local {R : ℝ} (hR : 0 < R) {F : ℝ × P → E} {z : P}
-    (he : ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k : ℕ)
-    {r : ℝ} (hr : r ∈ Ioo (-(R / 4)) (R / 4)) :
-    radialJet F k (-r) z = radialJet F k r z := by
-  have hnr : -r ∈ Ioo (-(R / 4)) (R / 4) := by constructor <;> linarith [hr.1, hr.2]
-  rw [← radialJet_localized_eq hR F z k hnr, ← radialJet_localized_eq hR F z k hr]
-  exact radialJet_even (EvenSmoothDescent.even_localized (f := fun r => F (r, z)) hR he) k r
 
 
 
@@ -375,21 +350,6 @@ theorem radialJet_holomorphic {U : Set ℂ} (hU : IsOpen U) {F : ℝ × ℂ → 
     simp only [radialJet_succ]
     exact h
 
-omit [CompleteSpace B] in
-theorem localized_holomorphic {R : ℝ} (hR : 0 < R) {U : Set ℂ} {F : ℝ × ℂ → B}
-    (hhol : ∀ r ∈ Ioo (-R) R, DifferentiableOn ℂ (fun z => F (r, z)) U) (r : ℝ) :
-    DifferentiableOn ℂ (fun z => localized R F (r, z)) U := by
-  by_cases hr : |r| < R
-  · exact (hhol r (abs_lt.mp hr)).const_smul (EvenSmoothDescent.evenCutoff R r)
-  · have hz := (EvenSmoothDescent.localized_eventually_zero hR (le_of_not_gt hr)
-      (fun _ => (1 : ℝ))).eq_of_nhds
-    change EvenSmoothDescent.evenCutoff R r * 1 = 0 at hz
-    simp only [mul_one] at hz
-    have heq : (fun z => localized R F (r, z)) = (fun _ => 0) := by
-      funext z
-      simp only [localized, EvenSmoothDescent.localized, hz, zero_smul]
-    rw [heq]
-    exact differentiableOn_const _
 
 
 
@@ -429,8 +389,6 @@ theorem complexPartial_contDiffOn {S : Set ℝ} {U : Set ℂ} (hS : IsOpen S) (h
   exact complexPartial_eq_real_fderiv hU (hhol q.1 hq.1) hq.2
 
 
-noncomputable def mixedAxisJet (F : ℝ × ℂ → B) (k m : ℕ) (p : ℝ × ℂ) : B :=
-  iteratedDeriv m (fun z => axisJet F k (p.1, z)) p.2
 
 
 
@@ -570,15 +528,6 @@ theorem radialJet_even_full {R : ℝ} (hR : 0 < R) {F : ℝ × ℂ → B} {z : �
     ← radialJet_interiorLocalized_eq hS hSR F z k hrS]
   exact radialJet_even (interiorLocalized_even hS hSR he) k r
 
-omit [CompleteSpace B] in
-theorem axisJet_square_full {R : ℝ} (hR : 0 < R) {F : ℝ × ℂ → B} {z : ℂ}
-    (he : ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k : ℕ)
-    {r : ℝ} (hr : r ∈ Ioo (-R) R) : axisJet F k (r ^ 2, z) = radialJet F k r z := by
-  change radialJet F k (Real.sqrt (r ^ 2)) z = _
-  rw [Real.sqrt_sq_eq_abs]
-  rcases le_or_gt 0 r with hs | hs
-  · rw [abs_of_nonneg hs]
-  · rw [abs_of_neg hs, radialJet_even_full hR he k hr]
 
 
 

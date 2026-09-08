@@ -29,15 +29,7 @@ theorem strip_roundtrip (e : D ≃ₗᵢ[ℝ] E) (s : StripData D) :
 
 
 
-theorem meanClass_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E} {α : ℝ}
-    {f : MeanIncrementBounds.Field E} (hf : MeanClass s α f) :
-    MeanClass (ParticularWaveBounds.reindexStrip e s) α (StateReindex.field e f) :=
-  ParticularWaveBounds.memClass_reindex e hf
 
-theorem unweightedClass_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E} {α : ℝ}
-    {f : MeanIncrementBounds.Field E} (hf : UnweightedClass s α f) :
-    UnweightedClass (ParticularWaveBounds.reindexStrip e s) α (StateReindex.field e f) :=
-  ParticularWaveBounds.memClass_reindex e hf
 
 
 

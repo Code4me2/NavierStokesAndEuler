@@ -55,16 +55,6 @@ theorem fixedCoercivity_inv_le (T : ℝ) (hT : 0 ≤ T)
   rw [he]
   exact mul_le_mul_of_nonneg_left (pow_le_pow_left₀ ht0 ht 2) (by norm_num)
 
-/-- The top constant is at least one for all nonnegative coefficient bounds. -/
-theorem solveCost_one_le (T C₀ C₁ CH c : ℝ)
-    (hT : 0 ≤ T) (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁) (hCH : 0 ≤ CH) :
-    1 ≤ solveCost T C₀ C₁ CH c := by
-  unfold solveCost
-  have h : 0 ≤ inverseCost T C₀ C₁ c *
-      (formCost T C₀ C₁ CH + forcingCost T C₀ C₁ + 1) := by
-    unfold inverseCost formCost forcingCost derivativeCost
-    positivity
-  linarith
 
 variable (T : ℝ) (hT : 0 ≤ T)
   (Q Q₁ : P → C(Icc (0 : ℝ) T, U →L[ℝ] E))

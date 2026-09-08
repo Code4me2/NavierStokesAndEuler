@@ -142,8 +142,6 @@ noncomputable def graph (n : ℕ) : PhysicalResidualBridge.ScaledGraph :=
 noncomputable def basePressure (B n : ℕ) : Full → ℝ :=
   ActualBaseResidual.basePressure certificate modulation upper B n
 
-noncomputable def chartVelocity (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n j : ℕ) : VelocityField :=
-  CyclePhysicalPrefixes.velocity a i (graph n) n (commonContext B) (cycle B N0 j).state
 
 noncomputable def chartPressure (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n j : ℕ) : PressureField :=
   CyclePhysicalPrefixes.pressure a i (graph n) n (basePressure B n) (cycle B N0 j).state
@@ -162,11 +160,6 @@ noncomputable def chartDirectStages (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Inde
     (ActualInitialization.initialCycleState B N0) a i (graph n) n
 
 
-theorem chart_pressure_prefix (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n J : ℕ) :
-    DiagonalJetBounds.uncutPrefix (chartPressureStages B N0 a i n) (J + 1) =
-      chartPressure B N0 a i n J :=
-  CyclePhysicalPrefixes.pressure_prefix (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) a i (graph n) n (basePressure B n) J
 
 
 /-! The global physical representatives need only agree with an individual

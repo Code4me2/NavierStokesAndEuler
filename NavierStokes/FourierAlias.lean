@@ -143,24 +143,6 @@ theorem torusMean_intervalIntegral {g : State → F} (hg : Continuous g)
   simp_rw [hx]
   exact intervalIntegral_comm hc hab (by norm_num)
 
-/-- The shifted total integral has exactly the radially integrated source mean. -/
-theorem torusMean_totalIntegral {a b M : ℝ} {v : Plane} {f : State → F}
-    (hab : a ≤ b) (hf : Continuous f) (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y)))
-    (hs : RadialAlias.RadiallySupported a b f) (U : ℝ) :
-    sliceMean (TransportPrimitive.totalIntegral M v f) U = ∫ s in a..b, sliceMean f s := by
-  have heq : (fun Y => TransportPrimitive.totalIntegral M v f (U, Y)) =
-      (fun Y => ∫ s in a..b, f (s, Y + (M * (s - U)) • v)) := by
-    funext Y
-    exact TransportPrimitive.totalIntegral_eq_radialInterval hf hs (U, Y)
-  have hc : Continuous (fun z : State => f (z.1, z.2 + (M * (z.1 - U)) • v)) := by
-    exact hf.comp (continuous_fst.prodMk
-      (continuous_snd.add ((continuous_const.mul (continuous_fst.sub continuous_const)).smul
-        continuous_const)))
-  change torusMean (fun Y => TransportPrimitive.totalIntegral M v f (U, Y)) = _
-  rw [heq, torusMean_intervalIntegral hc hab]
-  apply intervalIntegral.integral_congr
-  intro s _
-  exact torusMean_translate (hp s) ((M * (s - U)) • v)
 
 
 
@@ -223,12 +205,6 @@ theorem periodic_finiteJet_bound {f : State → F} (hf : ContDiff ℝ ∞ f)
 
 variable [CompleteSpace F]
 
-theorem cutoffAlias_smooth {a b M : ℝ} {v : Plane} {f : State → F} {χ : ℝ → ℝ}
-    (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) :
-    ContDiff ℝ ∞ (cutoffAlias χ M v f) :=
-  (((contDiff_infty_iff_deriv.mp hχ).2).comp contDiff_fst).smul
-    (TransportPrimitive.totalIntegral_contDiff hf hs)
 
 theorem cutoffAlias_supported {a b M : ℝ} {v : Plane} {f : State → F} {χ : ℝ → ℝ}
     (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
@@ -251,58 +227,6 @@ theorem cutoffAlias_supported {a b M : ℝ} {v : Plane} {f : State → F} {χ : 
   have ha : -cutoffAlias χ M v f z = 0 := by simpa [hfz, hdz] using heq.symm
   exact hz (neg_eq_zero.mp ha)
 
-/-- Before using oscillation, every finite prefix of alias jets has a bound
-uniform in both the frequency and the translation direction. -/
-theorem cutoffAlias_finiteJet_bound {a b : ℝ} {f : State → F} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y)))
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ M : ℝ, ∀ v : Plane, ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j (cutoffAlias χ M v f) z‖ ≤ C := by
-  obtain ⟨A, hA, hsource⟩ := periodic_finiteJet_bound hf hp a b m
-  have hc : ContDiff ℝ ∞ (fun z : State => deriv χ z.1) :=
-    ((contDiff_infty_iff_deriv.mp hχ).2).comp contDiff_fst
-  obtain ⟨B, hB, hcutoff⟩ := periodic_finiteJet_bound hc (fun _ _ _ => rfl) a b m
-  have hL : 0 ≤ b - a := sub_nonneg.mpr hab
-  refine ⟨(2 : ℝ) ^ m * (B * (A * (b - a))), by positivity, ?_⟩
-  intro M v j hj z
-  by_cases hz : z.1 ∈ Icc a b
-  · have hb := norm_iteratedFDeriv_smul_le (𝕜 := ℝ) hc
-      (TransportPrimitive.totalIntegral_contDiff (M := M) (v := v) hf hs) z
-      (n := j) (by exact_mod_cast (le_top : (j : ℕ∞) ≤ ⊤))
-    change ‖iteratedFDeriv ℝ j (cutoffAlias χ M v f) z‖ ≤ _ at hb
-    calc
-      _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) *
-          ‖iteratedFDeriv ℝ i (fun y : State => deriv χ y.1) z‖ *
-          ‖iteratedFDeriv ℝ (j - i) (TransportPrimitive.totalIntegral M v f) z‖ := hb
-      _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * B * (A * (b - a)) := by
-        apply Finset.sum_le_sum
-        intro i hi
-        have hi' : i ≤ m := (Nat.le_of_lt_succ (Finset.mem_range.mp hi)).trans hj
-        have hni : j - i ≤ m := (Nat.sub_le _ _).trans hj
-        exact mul_le_mul
-          (mul_le_mul_of_nonneg_left (hcutoff i hi' z.1 hz z.2) (Nat.cast_nonneg _))
-          (TransportPrimitive.iteratedFDeriv_totalIntegral_norm_le hab hf hs (j - i)
-            (hsource (j - i) hni) z)
-          (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg _) hB)
-      _ = (2 : ℝ) ^ j * (B * (A * (b - a))) := by
-        have hsum : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) = (2 : ℝ) ^ j := by
-          exact_mod_cast Nat.sum_range_choose j
-        rw [← hsum, Finset.sum_mul]
-        apply Finset.sum_congr rfl
-        intro i _
-        ring
-      _ ≤ (2 : ℝ) ^ m * (B * (A * (b - a))) := by
-        exact mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num) hj)
-          (by positivity)
-  · have hsj := TransportPrimitive.iteratedFDeriv_supported
-      (cutoffAlias_supported (M := M) (v := v) hχ hf hs hleft hright) j
-    have heq : iteratedFDeriv ℝ j (cutoffAlias χ M v f) z = 0 := by
-      by_contra hnz
-      exact hz (hsj hnz)
-    rw [heq, norm_zero]
-    positivity
 
 end Averages
 
@@ -376,19 +300,6 @@ theorem nonbarPart_zeroMean {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
   have heq : sliceMean f U = mean f U := (mean_eq_integral f U).symm
   rw [heq, sub_self]
 
-theorem nonbarPart_radiallySupported {a b : ℝ} {f : State → ℂ}
-    (hs : RadialAlias.RadiallySupported a b f) :
-    RadialAlias.RadiallySupported a b (nonbarPart f) := by
-  intro z hz
-  by_contra hn
-  have hsource : ∀ Y : Plane, f (z.1, Y) = 0 := by
-    intro Y
-    by_contra hY
-    exact hn (@hs (z.1, Y) hY)
-  have hmean : mean f z.1 = 0 := by
-    rw [mean_eq_integral]
-    simp only [hsource, intervalIntegral.integral_zero]
-  exact hz (by change f z - mean f z.1 = 0; rw [hmean, sub_zero]; exact hsource z.2)
 
 
 
@@ -427,23 +338,6 @@ theorem fourierSourceJet_properties (d : Direction) {a b : ℝ} {f : State → �
       parameterPartial_zeroMean hi (inverse_zeroMean d ih.1 ih.2.1),
       RadialAlias.radialSupport_slowDeriv (inverse_radiallySupported d ih.2.2.2)⟩
 
-/-- Exact arbitrary-order IBP with the Fourier inverse constructed from the
-given source's own coefficients. No antiderivative or decay premise remains. -/
-theorem cutoffAlias_fourierSourceJet (d : Direction) {a b M : ℝ} {f : State → ℂ}
-    (χ : ℝ → ℝ) (hf : ContDiff ℝ ∞ f) (hp : ParametricTorusInverse.Periodic f)
-    (hm : ZeroMean f) (hs : RadialAlias.RadiallySupported a b f)
-    (p : ℕ) (hM : M ≠ 0) (z : State) :
-    cutoffAlias χ M (vector d) f z = (-M⁻¹) ^ p •
-      cutoffAlias χ M (vector d) (fourierSourceJet d f p) z := by
-  apply cutoffAlias_sourceJet χ (inverse d) f p hM hf hs
-  · intro n _
-    have hn := fourierSourceJet_properties d hf hp hm hs n
-    exact inverse_smooth d hn.1 hn.2.1
-  · intro n _
-    exact inverse_radiallySupported d (fourierSourceJet_properties d hf hp hm hs n).2.2.2
-  · intro n _
-    have hn := fourierSourceJet_properties d hf hp hm hs n
-    exact inverse_solves d hn.1 hn.2.1 hn.2.2.1
 
 
 

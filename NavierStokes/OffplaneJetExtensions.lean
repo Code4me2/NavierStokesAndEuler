@@ -285,44 +285,10 @@ section FiniteInitialPieces
 open ActualPhysicalStageBounds
 
 
-theorem mean_angular_extension {h degree qbig : ℝ} (M : MeanInput h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension M.family.angularField x) := by
-  apply extension_of_power_jets hh hh1 hqbig (M.angular_smooth hh hh1 hq) _ hx hqx
-  intro m
-  obtain ⟨C, _, hb⟩ := M.angular_bound hh hh1 hq m
-  exact ⟨C, h * M.alpha - PhysicalMeanJetBounds.loss degree m, hb⟩
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
 
-/-- The finite initialized potential correction has its own derived
-estimate. This theorem does not apply the positive-stage bound to index zero. -/
-theorem initialIncrement_extension {h qbig : ℝ}
-    (W : PhysicalStageBounds.WaveData h D I K (Fin 3))
-    (MT MR : MeanInput h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)
-    (hqT : qbig ≤ ChartScales.Q MT.firstBand) (hqR : qbig ≤ ChartScales.Q MR.firstBand)
-    {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (initialIncrement W MT MR) x) := by
-  apply extension_of_power_jets hh hh1 hqbig (initialIncrement_smooth W MT MR hh hh1 hqT hqR) _ hx hqx
-  intro m
-  obtain ⟨C, _, hb⟩ := initialIncrement_bound W MT MR hh hh1 hqT hqR m
-  exact ⟨C, -InitializedPhysicalBackground.seedPotentialLoss h W.alpha W.shift (min MT.alpha MR.alpha) m, hb⟩
 
-theorem initialPressureIncrement_extension {h qbig : ℝ}
-    (W : PhysicalStageBounds.WaveData h D I K Unit)
-    (M : MeanInput h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (initialPressureIncrement W M) x) := by
-  apply extension_of_power_jets hh hh1 hqbig (initialPressureIncrement_smooth W M hh hh1 hq) _ hx hqx
-  intro m
-  obtain ⟨C, _, hb⟩ := initialPressureIncrement_bound W M hh hh1 hq m
-  exact ⟨C, -initialPressureLoss h W.alpha W.shift M.alpha m, hb⟩
 
 end FiniteInitialPieces
 

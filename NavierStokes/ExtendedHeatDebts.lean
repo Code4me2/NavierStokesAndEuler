@@ -555,18 +555,6 @@ theorem nuDebt_scale (d : TailData) {K : ℝ} (hK : 0 < K)
   rw [heq, Real.rpow_add_one hK.ne']
   ring
 
-theorem nuDebt_joint_contDiffOn (d : TailData) (square : Bool) {q : ℝ}
-    (hq : tailDecay d square + q < 0) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => nuDebtJet d p.1 square q 0 p.2)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) := by
-  have hp : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => p.1 ^ (q + 1))
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-    contDiffOn_fst.rpow_const_of_ne (fun p hp => (show 0 < p.1 from hp.1).ne')
-  have hr : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => p.2 / p.1)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-    contDiffOn_snd.div contDiffOn_fst (fun p hp => (show 0 < p.1 from hp.1).ne')
-  have hout := hp.mul ((nuDebt_contDiff d (K := 1) le_rfl square hq).comp_contDiffOn hr)
-  exact hout.congr (fun p hp => nuDebt_scale d hp.1 square q p.2)
 
 noncomputable def etaDebt (d : TailData) (K : ℝ) (square : Bool) (q η : ℝ) : ℝ :=
   nuDebtJet d K square q 0 (diffusion η)

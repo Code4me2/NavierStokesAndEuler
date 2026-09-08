@@ -134,13 +134,6 @@ theorem theta_divergence_coefficient (h : ℝ) {w : Point} (hw : w ∈ Ω.carrie
   unfold theta Profiles.H
   field_simp ; ring
 
-/-- The angular profile divergence in Proposition 3.2. -/
-theorem theta_divergence (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
-    (hX : 0 < w.1) (hf : P.f w ≠ 0) (hL : L h w.2 ≠ 0) :
-    Real.sqrt (2 * w.1) * (partialX (theta P h) w + theta P h w / w.1) =
-      Real.sqrt (2 * w.1) * (P.f w * sourceTheta P h w / L h w.2 +
-        2 * (w.1 * partialX (partialX P.f) w + 2 * partialX P.f w)) := by
-  rw [theta_divergence_coefficient P h hw hX.ne' hf hL]
 
 theorem partialX_axial (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
     (hX : 0 < w.1) (hL : L h w.2 ≠ 0) :
@@ -278,16 +271,6 @@ theorem radius_mul_rpow {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
         Real.sqrt (2 * (inner h p).1) := by ring
     _ = _ := by rw [← Real.rpow_add (SimilarityProfile.q_pos hh hh1 hp), add_comm]
 
-theorem sqrt_radial_two {X : ℝ} (hX : 0 < X) (S SX : ℝ) :
-    Real.sqrt (2 * X) * SX + 2 * S / Real.sqrt (2 * X) =
-      Real.sqrt (2 * X) * (SX + S / X) := by
-  have hr : Real.sqrt (2 * X) ≠ 0 := ne_of_gt (Real.sqrt_pos.2 (by positivity))
-  have hr2 : Real.sqrt (2 * X) ^ 2 = 2 * X := Real.sq_sqrt (by positivity)
-  generalize hrdef : Real.sqrt (2 * X) = r at *
-  field_simp
-  ring_nf
-  rw [hr2]
-  ring
 
 noncomputable def fluxProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
   pullback h 0 (SlowDivergence.radialFlux h 0 P.U)
@@ -301,11 +284,7 @@ noncomputable def axialProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
 noncomputable def pressureProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
   pullback h (-2 * A h) P.pressure
 
-noncomputable def physicalStressTheta (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h (-A h - 1 / 2) (theta P h)
 
-noncomputable def physicalStressAxial (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h (-A h - 1 / 2) (axial P h)
 
 noncomputable def physicalVelocity (h : ℝ) : ProblemStatement.VelocityField :=
   AxisymmetricResidual.velocity (RadialFluxResidual.radialB (fluxProfile P h))

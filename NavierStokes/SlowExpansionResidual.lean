@@ -552,8 +552,6 @@ def axialCoefficient (h : ℝ) (f : SlowProfiles) (n : ℕ) : InnerProfile :=
   transportCoefficient h (axialExponent h) 0 1 f.flux f.axial f.axial (axialPressureSource h f) n
 def omegaCoefficient (h : ℝ) (f : SlowProfiles) (n : ℕ) : InnerProfile :=
   transportCoefficient h 0 (-(1 / 2)) 0 f.flux f.axial f.flux (fun _ _ => 0) n
-def divergenceCoefficient (h : ℝ) (f : SlowProfiles) (n : ℕ) (w : InnerPoint) : ℝ :=
-  partialX (f.flux n) w + Z h (axialExponent h + slowOrder h n) (f.axial n) w
 def pressureCoefficient (h C : ℝ) (f : SlowProfiles) (n : ℕ) (w : InnerPoint) : ℝ :=
   partialX (f.pressure n) w - C⁻¹ ^ 2 * convolution (fun i j => f.phi i w * f.phi j w) n +
     previous (fun j => omegaCoefficient h f j w) n / (2 * w.1)

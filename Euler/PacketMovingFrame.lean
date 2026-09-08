@@ -31,11 +31,6 @@ def crossBilinear : Space →L[ℝ] Space →L[ℝ] Space :=
 
 theorem crossBilinear_apply (a b : Space) : crossBilinear a b = cross a b := rfl
 
-theorem cross_hasDerivAt {p q : ℝ → Space} {p' q' : Space} {t : ℝ}
-    (hp : HasDerivAt p p' t) (hq : HasDerivAt q q' t) :
-    HasDerivAt (fun s => cross (p s) (q s)) (cross p' (q t) + cross (p t) q') t := by
-  have h := (crossBilinear.hasFDerivAt.comp_hasDerivAt t hp).clm_apply hq
-  simpa only [Function.comp_def, crossBilinear_apply] using h
 
 theorem cross_hasDerivWithinAt {p q : ℝ → Space} {p' q' : Space} {t : ℝ} {S : Set ℝ}
     (hp : HasDerivWithinAt p p' S t) (hq : HasDerivWithinAt q q' S t) :

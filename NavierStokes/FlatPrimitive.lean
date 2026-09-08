@@ -114,10 +114,6 @@ theorem scale_hasDerivAt {c : ℝ} (hc : 0 < c) (j : ℕ) (x : ℝ) :
         Nat.cast_ofNat, mul_one, pow_succ]
       field_simp; ring
 
-/-- The coefficient produced when differentiating `scale c j * a`.
-This is an explicit differential expression in the chosen smooth factor. -/
-def sourceCoefficient (c : ℝ) (j : ℕ) (a : ℝ → ℝ) (x : ℝ) : ℝ :=
-  (2 * c + (3 - (j : ℝ)) * x ^ 2) * a x + x ^ 3 * deriv a x
 
 
 

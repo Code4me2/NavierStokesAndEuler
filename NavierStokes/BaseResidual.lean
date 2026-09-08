@@ -1326,32 +1326,7 @@ theorem transportTailField_eq (N : ℕ) (h e α : ℝ) (v u f : ℕ → Inner �
   funext z
   exact transportTail_eq_finite_monomials N (cartesianChart h z).1 h e α v u f (cartesianChart h z).2
 
-theorem transportTailField_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {O : Set Inner} (hO : IsOpen O) (N : ℕ) (e α : ℝ) (v u f : ℕ → Inner → ℝ)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (v j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) :
-    ContDiffOn ℝ ∞ (transportTailField N h e α v u f) (chartedDomain h O) := by
-  rw [transportTailField_eq]
-  exact ContDiffOn.sum (fun i hi => monomial_smoothOn hh hh1 hO
-    (transportTerm_smoothOn hO N h e α v u f hv hu hf hX hL hi))
 
-theorem transportTailField_rate {l : Filter SpaceTime} {h lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h lo hi)
-    {O : Set Inner} (hO : IsOpen O) (hKO : innerBox lo hi ⊆ O)
-    (N : ℕ) (e α : ℝ) (v u f : ℕ → Inner → ℝ)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (v j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) (M : ℕ) :
-    FiniteJetRate l (fun z => (cartesianChart h z).1) (transportTailField N h e α v u f)
-      M (e - 1 + slowOrder h (N + 1) - M) := by
-  rw [transportTailField_eq]
-  exact finset_monomial_rate hh hh1 A hO hKO (transportIndices N)
-    (transportTerm N h e α v u f) (transportPower N h e) (e - 1 + slowOrder h (N + 1))
-    (fun _ hi => transportTerm_smoothOn hO N h e α v u f hv hu hf hX hL hi)
-    (fun _ hi => transportPower_lower hh.le N e hi) M
 
 end FiniteTailRates
 
@@ -1368,38 +1343,7 @@ theorem radialTailExpression_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     radialTailExpression N h C f z = radialTailField N h C f z :=
   (radialTail_eq_finite_monomials hh hh1 N C f hz.1 hz.2).symm
 
-theorem radialTailExpression_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {O : Set Inner} (hO : IsOpen O) (N : ℕ) (C : ℝ) (f : SlowProfiles)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) :
-    ContDiffOn ℝ ∞ (radialTailExpression N h C f) (chartedDomain h O) := by
-  apply ContDiffOn.sum
-  intro i hi
-  apply monomial_smoothOn hh hh1 hO
-  exact (pressureTerm_smoothOn hO N h C f hv hu hf hX hL hi).div
-    (contDiffOn_const.mul contDiffOn_fst) (fun w hw => mul_ne_zero (by norm_num) (hX w hw))
 
-theorem radialTailExpression_rate {l : Filter SpaceTime} {h lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h lo hi)
-    {O : Set Inner} (hO : IsOpen O) (hKO : innerBox lo hi ⊆ O)
-    (N : ℕ) (C : ℝ) (f : SlowProfiles)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) (M : ℕ) :
-    FiniteJetRate l (fun z => (cartesianChart h z).1) (radialTailExpression N h C f)
-      M (pressureExponent h - 1 + slowOrder h (N + 1) - M) := by
-  apply finset_monomial_rate hh hh1 A hO hKO (pressureIndices N)
-    (fun i w => pressureTerm N h C f i w / (2 * w.1)) (fun i => pressurePower N h i - 1)
-    (pressureExponent h - 1 + slowOrder h (N + 1))
-  · intro i hi
-    exact (pressureTerm_smoothOn hO N h C f hv hu hf hX hL hi).div
-      (contDiffOn_const.mul contDiffOn_fst) (fun w hw => mul_ne_zero (by norm_num) (hX w hw))
-  · intro i hi
-    have hp := pressurePower_lower hh.le N hi
-    linarith
 
 
 end TruncationRate

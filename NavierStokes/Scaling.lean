@@ -23,19 +23,12 @@ namespace NavierStokes.Scaling
 /-- The core velocity scale, with the fixed profile coefficient omitted. -/
 def coreVelocity (q h : ℝ) : ℝ := q ^ (-(1 / 2 + h))
 
-/-- The radial length scale. -/
-def radialLength (q : ℝ) : ℝ := q ^ (1 / 2 : ℝ)
 
 
 
 
 
 
-theorem sqrt_viscosity {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    Real.sqrt (Q ^ h) = Q ^ (h / 2) := by
-  rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hQ.le]
-  congr 1
-  ring
 
 
 

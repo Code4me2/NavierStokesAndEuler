@@ -88,11 +88,6 @@ theorem familyMetricNorm_lower (K : H →L[ℝ] H) (v : ι → H) (c : ℝ) (hc 
   change c * familyNorm v ≤ √(familyEnergy K v)
   nlinarith
 
-/-- The upper metric comparison is independent of the number of external derivatives. -/
-theorem familyMetricNorm_upper (K : H →L[ℝ] H) (v : ι → H) :
-    familyMetricNorm K v ≤ √‖K‖ * familyNorm v := by
-  exact (sqrt_le_sqrt (familyEnergy_upper K v)).trans_eq
-    (sqrt_mul (norm_nonneg K) (familySquaredNorm v))
 
 /-- The exact derivative of the finite quadratic energy for a transport-pressure-heat system. -/
 theorem family_energy_hasDerivAt (K : ℝ → H →L[ℝ] H) (e : ι → ℝ → H)

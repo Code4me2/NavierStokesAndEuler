@@ -66,15 +66,7 @@ theorem fastCoefficient_mono (h : ℝ) {i j : ℕ → ℕ} {n : ℕ} (hij : i n 
   mul_le_mul_of_nonneg_right (pow_le_pow_right₀ ChartScales.Tg_one_lt.le hij)
     (Real.rpow_nonneg (ChartScales.Q_pos n).le _)
 
-theorem radialFrequency_add (h : ℝ) (i k : ℕ → ℕ) (n : ℕ) :
-    radialFrequency h (fun m => i m + k m) n = ChartScales.Lambda ^ k n * radialFrequency h i n := by
-  simp only [radialFrequency, pow_add]
-  ring
 
-theorem fastCoefficient_add (h : ℝ) (i k : ℕ → ℕ) (n : ℕ) :
-    fastCoefficient h (fun m => i m + k m) n = ChartScales.Tg ^ k n * fastCoefficient h i n := by
-  simp only [fastCoefficient, pow_add]
-  ring
 
 
 
@@ -155,15 +147,7 @@ theorem coverPower_temporal (k : ℕ) :
   rw [CommonCoverSolve.coverPower_apply]
   exact PhysicalGraphBounds.cover_pow_timeDirection k
 
-theorem coverLift_vR (k : ℕ) : coverLift k (0,(0,TorusInverse.vector .radial)) =
-    ChartScales.Lambda ^ k • (0,(0,TorusInverse.vector .radial)) := by
-  rw [coverLift_apply, coverPower_radial]
-  simp
 
-theorem coverLift_vT (k : ℕ) : coverLift k (0,(0,TorusInverse.vector .temporal)) =
-    ChartScales.Tg ^ k • (0,(0,TorusInverse.vector .temporal)) := by
-  rw [coverLift_apply, coverPower_temporal]
-  simp
 
 theorem coverPower_comp (i k : ℕ) (Y : Plane) :
     CommonCoverSolve.coverPower k (CommonCoverSolve.coverPower i Y) =
@@ -193,10 +177,6 @@ theorem IndexBounds.physicalToChart {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
 noncomputable def pull {E : Type*} (gap : ℕ → ℕ) (f : ℕ → Point → E) (n : ℕ) (x : Point) : E :=
   f n (coverLift (gap n) x)
 
-theorem pull_fderiv {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (gap : ℕ → ℕ) (f : ℕ → Point → E) (n : ℕ) (x v : Point) :
-    fderiv ℝ (pull gap f n) x v = fderiv ℝ (f n) (coverLift (gap n) x) (coverLift (gap n) v) :=
-  PhysicalResidualTZ.fderiv_reindex (coverLift (gap n)) (f n) x v
 
 
 

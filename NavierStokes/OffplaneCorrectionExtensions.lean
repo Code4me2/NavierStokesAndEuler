@@ -95,10 +95,6 @@ theorem exists_window_at {coord a b : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
   · intro s hsU
     exact mul_le_mul_of_nonneg_right (hUsub hsU).2.2.le (ha.trans hab).le
 
-theorem exists_endpoint_window {coord a b Z : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
-    (ha : 0 < a) (hab : a < b) (hZ : Z ≠ 0) :
-    ∃ W : Window coord a b, (0, Z) ∈ W.carrier :=
-  exists_window_at hc hc1 ha hab (EndpointCoordinates.zeroTime_mem_stableTarget hc hc1 hZ)
 
 namespace Window
 
@@ -336,12 +332,6 @@ namespace SupportedContinuation
 
 variable {coord a b : ℝ} {W : Window coord a b} (hc : 0 < coord) (hc1 : coord < 1)
 
-noncomputable def ofModel (F : Model → ℝ) (hF : ContDiffOn ℝ ∞ F modelDomain)
-    (hs : ModelSupported a b F) : SupportedContinuation W (physicalSource coord F) where
-  value := continuedSource coord F
-  smooth := (continuedSource_smooth hc hc1 hF).mono (fun _ hp => W.stable hp)
-  supported := continuedSource_supported hs W.stable
-  agrees := continuedSource_agreement hc hc1 F W.carrier
 
 noncomputable def primitive {f : Lift → ℝ} (e : SupportedContinuation W f)
     (ha : 0 < a) (hab : a < b) {d : ℝ} (hd : 0 < d) (M : ℝ) (v : Slow) :
@@ -415,13 +405,6 @@ variable {P Q V E : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [NormedAddCommGroup V] [NormedSpace ℝ V]
     [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-- Reparameterize primitive ODE coefficients and forcing, while keeping
-the native-copy path and its entry point unchanged. -/
-noncomputable def pullLinearData (φ : P → Q) (d : CommonCoverSolve.LinearData Q V E) :
-    CommonCoverSolve.LinearData P V E where
-  coefficient := fun p => d.coefficient (φ p.1, p.2)
-  forcingMap := fun p => d.forcingMap (φ p.1, p.2)
-  source := fun p => d.source (φ p.1, p.2)
 
 
 
@@ -434,11 +417,7 @@ section ContinuedReferenceODE
 variable {V E : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
     [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-noncomputable def stableParameter (coord : ℝ) (p : ℝ × Slow) : MeanRankUpdate.ModelPoint :=
-  (stableQ coord p.2, (p.1, p.2.2))
 
-noncomputable def physicalParameter (coord : ℝ) (p : ℝ × Slow) : MeanRankUpdate.ModelPoint :=
-  (SimilarityCoordinates.coordinateQ coord p.2, (p.1, p.2.2))
 
 
 
@@ -597,20 +576,6 @@ noncomputable def physicalExtension (e : SupportedContinuation W f) (h : ℝ) (n
     intro w hw
     exact e.agrees ⟨hw.1, show 0 < 1 - w.1 from sub_pos.mpr hw.2.1⟩
 
-noncomputable def azimuthalExtension (e : SupportedContinuation W f) (h : ℝ) (n : ℕ)
-    {x : Space} (hx : (0, x 2) ∈ W.carrier) :
-    JointResidualLimits.OneSidedExtension (azimuthalPotential h n f) x where
-  value := azimuthalPotential h n e.value
-  domain := physicalDomain W.carrier
-  isOpen := physicalDomain_open W.isOpen
-  mem := by simpa only [physicalDomain, mem_preimage, physicalSlow, sub_self] using hx
-  smooth := azimuthalPotential_smooth h n W.isOpen W.lower_pos e.smooth (W.fixed_support e.supported)
-  agrees := by
-    intro w hw
-    have he := (e.physicalExtension h n hx).agrees hw
-    change physicalScalar h n e.value w = physicalScalar h n f w at he
-    dsimp only [azimuthalPotential]
-    rw [he]
 
 
 end SupportedContinuation

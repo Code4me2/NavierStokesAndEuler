@@ -503,11 +503,6 @@ theorem field_roundtrip (e : D ≃ₗᵢ[ℝ] E) (f : MeanIncrementBounds.Field 
   funext n x
   exact congrArg (f n) (e.symm_apply_apply x)
 
-theorem oscillation_roundtrip (e : D ≃ₗᵢ[ℝ] E) (f : CorrectionState.Oscillation D) :
-    oscillation e (oscillation e.symm f) = f := by
-  funext n x
-  change f n (e.symm (e x.1), x.2) = f n x
-  rw [e.symm_apply_apply]
 
 
 theorem context_roundtrip (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context D) :
@@ -581,12 +576,6 @@ theorem radialResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Contex
   rw [dr_pull]
   rfl
 
-theorem reducedMeanResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) (n : ℕ) (x : D) :
-    (state e u).reducedMeanResidual (context e c) n x = u.reducedMeanResidual c n (e x) := by
-  unfold CorrectionState.State.reducedMeanResidual
-  rw [radialResidual_pull, thetaResidual_pull, axialResidual_pull]
-  rfl
 
 
 

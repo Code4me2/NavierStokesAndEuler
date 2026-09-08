@@ -190,30 +190,6 @@ theorem AllJetsFlat.sum {ι : Type*} (s : Finset ι) (f : ι → D → E)
           (hs i (Finset.mem_insert_self _ _))
           (ContDiffOn.sum (fun j hj => hs j (Finset.mem_insert_of_mem hj)))
 
-/-- Leibniz plus a fixed power loss in one factor gives flatness of the actual
-bilinear product. The bound uses only jets through the requested order. -/
-theorem AllJetsFlat.bilinear_growth_left (hg : AllJetsFlat l q g)
-    (hf : AllJetsGrowth l q f) (L : E →L[ℝ] F →L[ℝ] G)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hq : ∀ᶠ x in l, q x ≠ 0)
-    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
-    AllJetsFlat l q (fun x => L (f x) (g x)) := by
-  intro m
-  have hterm (i : ℕ) : Flatness.PowerFlat l q (fun x => (m.choose i : ℝ) *
-      ‖iteratedFDeriv ℝ i f x‖ * ‖iteratedFDeriv ℝ (m - i) g x‖) := by
-    obtain ⟨K, C, hC, hb⟩ := hf i
-    have hprod := (hg (m - i)).mul_of_power_bound
-      (g := fun x => ‖iteratedFDeriv ℝ i f x‖) hq K hC
-      (by simpa only [abs_norm] using hb)
-    have hscale := scalarFlat_const_mul (m.choose i : ℝ) hprod
-    convert! hscale using 1
-    ext x
-    ring
-  apply scalarFlat_mono (scalarFlat_const_mul ‖L‖
-    (scalarFlat_sum (Finset.range (m + 1)) _ (fun i _ => hterm i)))
-  filter_upwards [hl] with x hx
-  rw [abs_norm]
-  exact (JetBounds.norm_iteratedFDeriv_bilinear_le_on L hU hsf hsg hx
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)).trans (le_abs_self _)
 
 
 end Jets

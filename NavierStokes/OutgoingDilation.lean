@@ -156,7 +156,6 @@ theorem H_contDiffOn (F : Profile) (XR : ℝ) (hXR : 0 < XR) : ContDiffOn ℝ �
 theorem Pi_contDiffOn (F : Profile) (XR : ℝ) (hXR : 0 < XR) : ContDiffOn ℝ ∞ (Pi F XR) domain :=
   F.Pi_contDiffOn.comp (dilation_contDiffOn XR) (dilation_mapsTo XR hXR)
 
-def familyDomain : Set (ℝ × (ℝ × ℝ)) := Ioi 0 ×ˢ domain
 
 
 

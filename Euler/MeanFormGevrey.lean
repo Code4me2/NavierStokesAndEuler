@@ -109,27 +109,5 @@ theorem pullbackMeanOperator_bound
       simpa only [transportedOperator, Nat.zero_add] using h
     _ = _ := by ring
 
-/-- The genuine forcing pullback has the matching factorial shift. -/
-theorem pullbackMeanForcing_bound (f : P → W) (hD : ContDiff ℝ ∞ D) (hf : ContDiff ℝ ∞ f)
-    (r CD CF : ℝ) (hr : 0 ≤ r) (hCD : 0 ≤ CD) (hCF : 0 ≤ CF) (d : ℕ)
-    (hDb : ∀ n x, ‖iteratedFDeriv ℝ n D x‖ ≤ CD * majorant r 0 n)
-    (hfb : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ CF * majorant r d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun p => -((J.comp (D p)).adjoint (f p))) x‖ ≤
-      (3*(‖J‖*CD)*CF) * majorant r d n := by
-  have hK : ContDiff ℝ ∞ (fun p => J.comp (D p)) :=
-    (show ContDiff ℝ ∞ (fun _ : P => J) from contDiff_const).clm_comp hD
-  have hKb := clm_comp_const_left_bound J D hD r CD hr hCD 0 hDb
-  have hKa := (realAdjoint (U := V) (E := W)).contDiff.comp hK
-  have hKab := adjoint_bound (fun p => J.comp (D p)) hK r (‖J‖*CD) hr
-    (mul_nonneg (norm_nonneg _) hCD) 0 hKb
-  have happ : ∀ k y,
-      ‖iteratedFDeriv ℝ k (fun p => (J.comp (D p)).adjoint (f p)) y‖ ≤
-        (3*(‖J‖*CD)*CF) * majorant r d k := by
-    intro k y
-    simpa only [Nat.zero_add] using clm_apply_bound
-      (fun p => (J.comp (D p)).adjoint) f hKa hf r (‖J‖*CD) CF hr
-      (mul_nonneg (norm_nonneg _) hCD) hCF 0 d hKab hfb k y
-  exact neg_bound (fun p => (J.comp (D p)).adjoint (f p)) r (3*(‖J‖*CD)*CF) d happ n x
 
 end EulerMeanFormGevrey

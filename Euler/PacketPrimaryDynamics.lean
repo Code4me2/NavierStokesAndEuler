@@ -119,17 +119,6 @@ theorem canonicalNormal_equation (t : Icc (0 : ℝ) D.T) (x : Space) :
 
 
 
-theorem canonicalVelocity_ne_zero (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T)
-    (x : Space) (hx : innerCutoff x ≠ 0) : canonicalVelocity τ hτ hτT B ξ hs t x ≠ 0 := by
-  intro ht
-  obtain ⟨s,hs0⟩ := B.coefficients.labelVelocity_exists_ne_zero x ξ hξ
-  let sd : Icc (0 : ℝ) D.T := ⟨s,s.property.1,s.property.2.trans hτT.le⟩
-  have hz := (constructedEvolution D.T D.T_pos.le (physicalGenerator D x)).homogeneous_zero_at
-    (fun r => canonicalVelocity τ hτ hτT B ξ hs r x)
-    (fun r => canonicalVelocity_homogeneous_time τ hτ hτT B ξ hs r x) t sd ht
-  change canonicalVelocity τ hτ hτT B ξ hs s x = 0 at hz
-  rw [canonicalVelocity_history τ hτ hτT B ξ hs s x] at hz
-  exact hs0 ((smul_eq_zero.mp hz).resolve_left hx)
 
 
 

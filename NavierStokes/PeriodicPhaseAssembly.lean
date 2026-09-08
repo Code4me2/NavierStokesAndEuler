@@ -186,14 +186,6 @@ theorem periodicClock_refine (g : Geometry) (χ : Plane → ℝ) (d : ℕ) (Y : 
       periodicClock g χ (coverPower d Y) :=
   periodizeScalar_refine g _ d Y
 
-/-- Clock reparametrization transports the compact native scalar as a whole.
-The shift is multiplied by the cutoff as well. -/
-theorem periodicClock_transport (g : Geometry) (χ : Plane → ℝ) (d : ℕ)
-    (shift rate : ℝ) (hrate : rate ≠ 0) (Y : Plane) :
-    periodizeScalar (CopySolveCompatibility.transportGeometry g d shift rate hrate)
-      (fun z => χ (CopySolveCompatibility.nativeTimeMap shift rate z) * (shift + rate * z.2)) Y =
-      periodicClock g χ (coverPower d Y) :=
-  periodizeScalar_transport g (fun z => χ z * z.2) d shift rate hrate Y
 
 section Germs
 
@@ -283,14 +275,6 @@ theorem angularLift_germ {Φ Ψ : P × Plane → ℝ} (angular : ℝ)
   filter_upwards [ht.eventually hΦ] with y hy
   exact congrArg (fun t => t + angular * y.1.2) hy
 
-omit [NormedSpace ℝ P] in
-theorem fullPhase_germ (g : Geometry) (w : ClockWindow)
-    (hinj : InjOn quotientPoint ((fun z => g.center + g.basis z) '' w.outer))
-    (A B : P → ℝ) (angular : ℝ) (k : Frequency) {x : (P × ℝ) × Plane}
-    (hx : g.coordinates k x.2 ∈ w.core) :
-    angularLift (phase g w.cutoff A B) angular =ᶠ[𝓝 x]
-      angularLift (nativePhase g A B k) angular :=
-  angularLift_germ angular (phase_germ g w hinj A B k hx)
 
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
@@ -316,7 +300,6 @@ end Phases
 
 abbrev Parameter := PhysicalParticularWave.Parameter
 
-noncomputable def slowSwap (p : Parameter) : PhaseCalculus.Slow := (p.1, (p.2.2, p.2.1))
 
 noncomputable def profileIntercept (ε pz x0 : ℝ) (s : Parameter) : ℝ :=
   (pz / ε) * s.2.2 + x0 * s.1

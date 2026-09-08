@@ -182,21 +182,6 @@ variable {P V E : Type}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
   {a b : ℝ}
 
-theorem anchoredSolve_recenter (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (l j : Frequency) (p : P) (Y : Plane) (s : ℝ) :
-    d.anchoredSolve (recenterGeometry g l) hab j (p, Y) s =
-      d.anchoredSolve g hab (j + l) (p, Y) s := by
-  have hA : d.coefficientPath (a := a) (b := b) (recenterGeometry g l) j (p, Y) =
-      d.coefficientPath g (j + l) (p, Y) := by
-    apply pathFamily_congr
-    intro t
-    simp only [LinearData.coefficientAlong, coordinates_recenter]
-  have hf : d.forcingPath (a := a) (b := b) (recenterGeometry g l) j (p, Y) =
-      d.forcingPath g (j + l) (p, Y) := by
-    apply pathFamily_congr
-    intro t
-    simp only [LinearData.forcingAlong, coordinates_recenter, path_recenter]
-  simp only [LinearData.anchoredSolve, hA, hf]
 
 
 

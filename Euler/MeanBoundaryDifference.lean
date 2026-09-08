@@ -41,14 +41,6 @@ def Cutoff.differenceQuotient (χ : Cutoff) (a : Space) (h : ℝ) : Cutoff :=
 theorem Cutoff.differenceQuotient_field (χ : Cutoff) (a : Space) (h : ℝ) (x : Space) :
     (χ.differenceQuotient a h).field x = h⁻¹ * (χ.field (x + h • a) - χ.field x) := rfl
 
-theorem spatialDifference_commutator (a : Space) (h : ℝ) (A : L2 →L[ℝ] L2) :
-    (spatialDifference a h).comp A - A.comp (spatialDifference a h) =
-      h⁻¹ • translationCommutator (h • a) A := by
-  unfold spatialDifference translationCommutator
-  simp only [ContinuousLinearMap.smul_comp, ContinuousLinearMap.comp_smul,
-    ContinuousLinearMap.sub_comp, ContinuousLinearMap.comp_sub, ContinuousLinearMap.id_comp,
-    ContinuousLinearMap.comp_id, smul_sub]
-  abel
 
 
 

@@ -186,16 +186,6 @@ theorem realCoefficients_sub (c d : HarmonicFields.Coefficients D) :
   rw [map_sub]
   ring
 
-theorem nonlinear_ofBlock_supported {K : Set D} (hK : IsClosed K)
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (b.velocity n i)) (hp : NonzeroSupported K (b.pressure n)) :
-    ∀ i, NonzeroSupported K
-      (HarmonicResidual.nonlinearResidual (contextFrame c n) (b.frequency n) (b.phase n)
-        (b.angularFrequency n) (constantVector (contextBase c n + stateMean u n))
-        (ofBlock b G A n).velocity (ofBlock b G A n).pressure i) :=
-  nonlinearResidual_supported hK _ _ _ _ (fun _ => NonzeroSupported.constant _)
-    (fun i => (hv i).realProjection) hp.realProjection
 
 /-- The exact excluded nonzero coefficient.  Its mean part is removed
 even when that part is not localized in a native slot. -/

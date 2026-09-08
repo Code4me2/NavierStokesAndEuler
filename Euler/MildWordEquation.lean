@@ -83,10 +83,6 @@ theorem viscous_mild_block_hasDerivAt {p q : ℕ} (hp : 2 ≤ p)
   exact ordinary_mild_hasDerivAt period hp ν hν T hT (A (truncateOperator period q u₀))
     (mapPath period T A f) v hv t ht
 
-/-- The actual derivative block of a field with enough total Sobolev regularity. -/
-def availableWordBlock {q n : ℕ} (h : n + 2 ≤ q) (w : Fin n → Fin 4) :
-    SobolevSpace period q →L[ℝ] SobolevSpace period 2 :=
-  (wordBlock period 2 n w).comp (restrictOperator period (by omega : 2+n ≤ q))
 
 
 

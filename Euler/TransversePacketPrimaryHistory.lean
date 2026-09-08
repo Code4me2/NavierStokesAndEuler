@@ -48,19 +48,6 @@ theorem vector_compact_wave_history (δ : ℝ) (hδ : 0 < δ) (ξ : U)
   rw [field_coe,map_smul]
   rfl
 
-omit P [Fact (0 < P)] Y in
-theorem angular_derivative_zero_history (δ : ℝ) (hδ : 0 < δ) (ξ : U)
-    (hs : tsupport innerCutoff ⊆ D.support)
-    (t : Icc (0 : ℝ) τ) (x : Space) :
-    HasDerivAt (fun θ : ℝ => vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(x,θ)))
-      ((innerCutoff x*δ⁻¹) • B.coefficients.labelVelocity x ξ t) 0 := by
-  have he : (fun θ : ℝ => vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(x,θ))) =
-      (fun θ => (innerCutoff x*profile δ θ) • B.coefficients.labelVelocity x ξ t) :=
-    funext (vector_compact_wave_history τ hτ hτT B δ hδ ξ hs t x)
-  rw [he]
-  have hp := (profile_hasDerivAt δ hδ 0).differentiableAt.hasDerivAt
-  rw [profile_deriv_zero δ hδ] at hp
-  exact (hp.const_mul (innerCutoff x)).smul_const (B.coefficients.labelVelocity x ξ t)
 
 
 

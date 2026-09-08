@@ -482,41 +482,6 @@ theorem envelope_polyBound {s : Set E} {S T w g r : E → ℝ}
   exact PolyBound.sum (Finset.range (n + 1)) _ hS hT
     (fun i _ => PolyBound.add hS hT (hg i) (hr i))
 
-/-- All input jets carry `w`; the square root and arbitrary signed quotient
-carry exactly `sqrt w`, with only polynomial changes in the allowed scales. -/
-theorem weighted_half_control {s : Set E} {S T w g r : E → ℝ}
-    (hs : IsOpen s) (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hw : ∀ x ∈ s, 0 < w x) (hpos : ∀ x ∈ s, 0 < g x)
-    (hg : ContDiffOn ℝ ∞ g s) (hr : ContDiffOn ℝ ∞ r s)
-    (hlower : PolyBound s S T (fun x => w x / g x))
-    (hgj : ∀ n, PolyBound s S T (fun x => ‖iteratedFDeriv ℝ n g x‖ / w x))
-    (hrj : ∀ n, PolyBound s S T (fun x => ‖iteratedFDeriv ℝ n r x‖ / w x)) :
-    (∀ n, PolyBound s S T (fun x =>
-      ‖iteratedFDeriv ℝ n (fun y => Real.sqrt (g y)) x‖ / Real.sqrt (w x))) ∧
-    (∀ n, PolyBound s S T (fun x =>
-      ‖iteratedFDeriv ℝ n (fun y => r y / (2 * Real.sqrt (g y))) x‖ / Real.sqrt (w x))) := by
-  have henv (n : ℕ) := envelope_polyBound hS hT hlower hgj hrj n
-  have hnonneg (n : ℕ) (x : E) (hx : x ∈ s) : 0 ≤ envelope w g r n x :=
-    zero_le_one.trans (envelope_bounds (hw x hx) (hpos x hx) n).1
-  constructor
-  · intro n
-    have hc : 0 ≤ (n.factorial : ℝ) * coeffBound (1 / 2) n :=
-      mul_nonneg (Nat.cast_nonneg _) (coeffBound_nonneg _ _)
-    apply ((henv n).pow hS hT (hnonneg n) (2 * n + 1)).const_mul hS hT hc |>.mono
-    intro x hx
-    obtain ⟨hB, hlo, hG, hR⟩ := envelope_bounds (hw x hx) (hpos x hx) n
-    have h := sqrt_jet_bound hs hg hpos hx (hw x hx) hB n hlo hG
-    apply (div_le_iff₀ (Real.sqrt_pos.mpr (hw x hx))).2
-    simpa only [mul_assoc, mul_left_comm, mul_comm] using h
-  · intro n
-    have hc : 0 ≤ chooseSum n * orderBound (-(1 / 2 : ℝ)) n / 2 :=
-      div_nonneg (mul_nonneg (chooseSum_nonneg n) (orderBound_nonneg _ _)) (by norm_num)
-    apply ((henv n).pow hS hT (hnonneg n) (2 * n + 2)).const_mul hS hT hc |>.mono
-    intro x hx
-    obtain ⟨hB, hlo, hG, hR⟩ := envelope_bounds (hw x hx) (hpos x hx) n
-    have h := signed_jet_bound hs hg hr hpos hx (hw x hx) hB n hlo hG hR
-    apply (div_le_iff₀ (Real.sqrt_pos.mpr (hw x hx))).2
-    simpa only [mul_assoc, mul_left_comm, mul_comm] using h
 
 
 
@@ -549,9 +514,6 @@ theorem sqrt_edge (c δ : ℝ) : Real.sqrt (FlatCutoff.edge c δ) = FlatCutoff.e
     congr 1
     ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem inverse_distance_one_le {U : Set E} {p : E × ℝ} (hp : p ∈ edgeStrip U) :
-    1 ≤ p.2⁻¹ := (one_le_inv₀ hp.2.1).mpr hp.2.2.le
 
 
 

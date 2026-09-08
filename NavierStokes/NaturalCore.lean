@@ -53,8 +53,6 @@ noncomputable def meridionalPotential (h : ℝ) (V : ℝ × ℝ → ℝ) : Profi
 noncomputable def swirlPotential (h : ℝ) (f : ℝ × ℝ → ℝ) : Profile := fun p =>
   -(physicalQ h p ^ (-h)) * radialPrimitive f (similarityPoint h p)
 
-noncomputable def corePotential (h : ℝ) (f V : ℝ × ℝ → ℝ) : VelocityField :=
-  potential (meridionalPotential h V) (swirlPotential h f)
 
 noncomputable def coreVelocity (h : ℝ) (f V : ℝ × ℝ → ℝ) : VelocityField :=
   velocity (meridionalPotential h V) (swirlPotential h f)
@@ -185,32 +183,7 @@ theorem radial_interval_mem_domain {Λ : ℝ} {p : ℝ × ℝ}
     simpa only [abs_mul] using mul_le_mul_of_nonneg_left hr' (abs_nonneg Λ)
   exact abs_lt.mp (hbound.trans_lt (abs_lt.mpr hp.1))
 
-/-- The radial primitive has the claimed ordinary derivative by the
-fundamental theorem of calculus on its actual profile domain. -/
-theorem radialPrimitive_hasDerivAt {Λ : ℝ} {f : ℝ × ℝ → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    {p : ℝ × ℝ} (hp : p ∈ NaturalProfile.domain Λ) :
-    HasDerivAt (fun r => radialPrimitive f (r, p.2)) (f p) p.1 := by
-  let I : Set ℝ := {r | (r, p.2) ∈ NaturalProfile.domain Λ}
-  have hI : IsOpen I := (NaturalProfile.domain_isOpen Λ).preimage
-    (continuous_id.prodMk continuous_const)
-  have hcont : ∀ r ∈ I, ContinuousAt (fun s => f (s, p.2)) r := by
-    intro r hr
-    exact ((hf.contDiffAt ((NaturalProfile.domain_isOpen Λ).mem_nhds hr)).comp r
-      (contDiffAt_id.prodMk contDiffAt_const)).continuousAt
-  have hsegment : ContinuousOn (fun r => f (r, p.2)) (uIcc 0 p.1) := by
-    intro r hr
-    exact (hcont r (radial_interval_mem_domain hp hr)).continuousWithinAt
-  exact intervalIntegral.integral_hasDerivAt_right hsegment.intervalIntegrable
-    (ContinuousAt.stronglyMeasurableAtFilter hI hcont p.1 hp) (hcont p.1 hp)
 
-theorem partialS_eq_deriv_slice {F : Profile} {p : ProfilePoint}
-    (hF : DifferentiableAt ℝ F p) :
-    partialS F p = deriv (fun s => F (p.1, (s, p.2.2))) p.2.1 := by
-  symm
-  exact (hF.hasFDerivAt.comp_hasDerivAt p.2.1
-    ((hasDerivAt_const p.2.1 p.1).prodMk
-      ((hasDerivAt_id p.2.1).prodMk (hasDerivAt_const p.2.1 p.2.2)))).deriv
 
 theorem meridionalPotential_contDiffAt {h Λ : ℝ} {V : ℝ × ℝ → ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2) (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
@@ -259,15 +232,6 @@ theorem coreVelocity_at_origin {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
     V (0 / physicalQ h (t, (0, 0)), physicalEta h (t, (0, 0)))) • coordinateVector 2 = _
   rw [physicalQ_at_zero_z hh hh1 ht, physicalEta_at_zero_z, zero_div, haxis]
 
-theorem coreVelocity_norm_at_origin {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hj : 0 < j)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr)
-    {t : ℝ} (ht : t < 1) :
-    ‖coreVelocity h f V (t, 0)‖ = (1 - t) ^ (-NaturalAxisData.A h) * j := by
-  rw [coreVelocity_at_origin hh hh1 hs ht, norm_smul]
-  simp only [coordinateVector, PiLp.norm_single, norm_one, mul_one,
-    Real.norm_eq_abs]
-  exact abs_of_pos (mul_pos (Real.rpow_pos_of_pos (sub_pos.mpr ht) _) hj)
 
 
 theorem speedUnbounded_of_axis_tendsto {u : VelocityField}

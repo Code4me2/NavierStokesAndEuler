@@ -484,23 +484,6 @@ theorem nominalExteriorRadius_gt_switch : nominalHeatSwitch W < nominalExteriorR
   exact (lt_mul_of_one_lt_right (nominalHeatSwitch_pos W) he).trans_le
     (nominalExteriorRadius_ge_late W)
 
-/-- All required original coefficient support and mass identities are
-discharged for the actual repaired nominal sequence. -/
-theorem nominal_exterior_coefficients :
-    ExteriorCoefficients (nominalCoefficients W) (nominalExteriorRadius W) := by
-  constructor
-  · intro n w hw he
-    exact nominalCoefficients_axial_zero_all W n
-      ((nominalExteriorRadius_ge_outer W).trans hw.le) (abs_le.mpr he)
-  · intro n w hw he
-    exact nominal_axial_primitive_zero_all W n
-      ((nominalExteriorRadius_ge_outer W).trans hw.le) (abs_le.mpr he)
-  · intro n hn w hw _
-    exact (nominalCoefficients_positive_exterior W hn
-      ((nominalExteriorRadius_ge_outer W).trans hw.le)).1
-  · intro n hn w hw _
-    exact (nominalCoefficients_positive_exterior W hn
-      ((nominalExteriorRadius_ge_outer W).trans hw.le)).2.2
 
 theorem nominal_leadingAngular_eq_pullback {p : PhysicalPoint}
     (ht : p.1 < 1) (hX : 0 ≤ X F.data.h p) :

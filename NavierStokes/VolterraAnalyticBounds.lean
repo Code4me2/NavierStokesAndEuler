@@ -525,9 +525,6 @@ theorem summable_wordLayers {a b B : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
   rw [mul_pow]
   ring
 
-/-- The actual finite sum of all words of a fixed length. -/
-noncomputable def wordLayer (A₀ A₁ : Coeff) (F : Field) (k : ℕ) : Field :=
-  fun r z i => ∑ v : Fin k → Bool, word A₀ A₁ (List.ofFn v) F r z i
 
 
 

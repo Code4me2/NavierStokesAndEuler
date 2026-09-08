@@ -62,15 +62,6 @@ theorem spatialDivergence_add
   rw [spatialDerivative_add u e t x hu he]
   simp only [add_apply, PiLp.add_apply, Finset.sum_add_distrib]
 
-/-- The spatial C² hypothesis gives differentiability of each first directional
-derivative. This is the second-derivative fact needed for the Laplacian. -/
-theorem differentiable_spatial_direction
-    (u : VelocityField) (t : ℝ)
-    (hu : ContDiff ℝ 2 (fun y : Space => u (t, y))) (v : Space) :
-    Differentiable ℝ (fun y : Space => spatialDerivative u t y v) := by
-  have hfirst : ContDiff ℝ 1 (fderiv ℝ (fun y : Space => u (t, y))) :=
-    hu.fderiv_right (by norm_num)
-  exact (hfirst.clm_apply contDiff_const).differentiable (by norm_num)
 
 
 /-- The quadratic advection term produces exactly its two cross terms and the

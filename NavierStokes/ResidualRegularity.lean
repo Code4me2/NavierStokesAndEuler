@@ -258,11 +258,6 @@ theorem residual_eq_zero_of_eventually_zero {u : VelocityField} {p : PressureFie
     (hp : p =ᶠ[𝓝 z] (fun _ => 0)) : navierStokesResidual u p z.1 z.2 = 0 := by
   simpa only [zero_residual] using residual_congr hu hp
 
-theorem residual_eventually_zero {u : VelocityField} {p : PressureField}
-    {z : SpaceTime} (hu : u =ᶠ[𝓝 z] (fun _ => 0))
-    (hp : p =ᶠ[𝓝 z] (fun _ => 0)) :
-    (fun w => navierStokesResidual u p w.1 w.2) =ᶠ[𝓝 z] (fun _ => 0) := by
-  simpa only [zero_residual] using residual_eventuallyEq hu hp
 
 end
 

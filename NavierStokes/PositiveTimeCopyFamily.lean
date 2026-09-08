@@ -100,11 +100,6 @@ theorem term_eq (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∈ pretermina
   simp only [CopyFamily.term, CopyFamily.copy, PhysicalWaveSum.WaveFamily.term,
     PhysicalWaveSum.globalWave, PhysicalWaveSum.commonWave, gate, ite_eq_left hl]
 
-theorem term_zero (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∉ preterminal) :
-    (gate f).term a h r0 I k w = 0 := by
-  apply PhysicalWaveSum.globalWave_eq_zero
-  exact gate_amplitude_zero f k I (fun hl => hw ((commonLift_mem_liftPast_iff h
-    I.1.val.1 (f.gap I.1) w).mp hl))
 
 
 

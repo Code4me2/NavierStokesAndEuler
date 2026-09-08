@@ -161,15 +161,6 @@ theorem isOpen_trueCone : IsOpen trueCone := by
       (isOpen_lt (continuous_snd.comp continuous_snd) continuous_coneBound))
 
 
-/-- Every compact subset of the true cone has one positive metric
-perturbation tolerance, including perturbations outside the original image. -/
-theorem compact_trueCone_stable {S : Set ConeDatum} (hS : IsCompact S)
-    (hcone : S ⊆ trueCone) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ z ∈ S, ∀ z' : ConeDatum,
-      dist z' z ≤ ρ → z' ∈ trueCone := by
-  obtain ⟨ρ, hρ, hsub⟩ := hS.exists_cthickening_subset_open isOpen_trueCone hcone
-  exact ⟨ρ, hρ, fun z hz z' hdist =>
-    hsub (Metric.mem_cthickening_of_dist_le z' z ρ S hz hdist)⟩
 
 
 

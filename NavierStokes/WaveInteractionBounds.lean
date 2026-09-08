@@ -92,10 +92,6 @@ theorem class_along {s : StripData D} {w : ℕ → D → ℝ} {α β : ℝ}
   simp only [one_mul, add_comm β α, ContinuousLinearMap.apply_apply] at h
   exact h
 
-theorem bandBound_const (s : StripData D) (c : ℝ) : BandBound s 0 (fun _ => c) := by
-  refine ⟨‖c‖, norm_nonneg c, 0, ?_⟩
-  intro n
-  simp
 
 /-- Actual geometric coefficient fields, rather than assumed derivative closure. -/
 structure Geometry (s : StripData D) (κ : ℝ) where
@@ -151,12 +147,6 @@ noncomputable def strippedTransport {s : StripData D} {κ : ℝ}
     (a n x 1 / (G.radius n x : ℂ)) * angularGenerator (b n x) i +
     a n x 2 * along (G.axial n) (fun y => b n y i) x
 
-theorem transport_eq_stripped {s : StripData D} {κ : ℝ} (G : Geometry s κ)
-    (a b : Family D) (hb : AngularIndependent G b) (n : ℕ) {x : D} (hx : x ∈ s.domain) :
-    LinearWaveResidual.transport (G.radius n) (G.radial n) (G.angular n) (G.axial n)
-      (a n) (b n) x = strippedTransport G a b n x := by
-  funext i
-  simp only [LinearWaveResidual.transport, hb n i x hx, zero_add, strippedTransport]
 
 theorem generator_class {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ} {a : Family D}
     (ha : ∀ i, MemClass s w α (fun n x => a n x i)) (i : Fin 3) :
@@ -304,18 +294,6 @@ theorem transport_mode_right (R : D → ℝ) (Vr Vθ Vz : D → D) (κ : ℝ)
   simp only [LinearWaveResidual.transport, hd]
   fin_cases i <;> simp [angularGenerator, vectorMode, mode, normalDot, phaseNormal, div_eq_mul_inv] <;> ring
 
-/-- The exact phase-sum coefficient of the actual bilinear differential operator. -/
-theorem transport_modes (R : D → ℝ) (Vr Vθ Vz : D → D) (κ κ' : ℝ)
-    {Φ : D → ℝ} (a : D → ComplexVector) {b : D → ComplexVector} {x : D}
-    (hΦ : DifferentiableAt ℝ Φ x) (hb : ∀ i, DifferentiableAt ℝ (fun y => b y i) x)
-    (i : Fin 3) :
-    LinearWaveResidual.transport R Vr Vθ Vz (vectorMode κ Φ a) (vectorMode κ' Φ b) x i =
-      (LinearWaveResidual.transport R Vr Vθ Vz a b x i +
-        phaseFactor κ' * normalDot (phaseNormal R Vr Vθ Vz Φ x) (a x) * b x i) *
-          carrier (κ + κ') Φ x := by
-  rw [transport_mode_left, transport_mode_right R Vr Vθ Vz κ' a hΦ hb,
-    ← carrier_add]
-  ring
 
 theorem normalDot_class {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
     {N : ℕ → D → EuclideanSpace ℝ (Fin 3)} {a : Family D}
@@ -430,17 +408,6 @@ theorem same_label_raw_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ
   exact (strippedTransport_class G hκ ha hb i).add hp
 
 
-theorem same_label_mean_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ : ℝ}
-    (G : Geometry s κ) (hκ : 0 ≤ κ) {Φ : ℕ → D → ℝ} {ν ξ : ℕ → ℝ}
-    {a b : Family D} (ha : WaveVector s P α a) (hb : WaveVector s P β b)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (Φ n) s.domain) (hν : ∀ n, ν n ≠ 0)
-    (hratio : BandBound s 0 (fun n => ξ n / ν n)) (haθ : AngularIndependent G a)
-    (hdiv : ∀ n x, x ∈ s.domain → cylindricalDivergence
-      (G.radius n) (G.radial n) (G.angular n) (G.axial n) (vectorMode (ν n) (Φ n) (a n)) x = 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (i : Fin 3) :
-    MeanClass s (α + β - κ) (fun n x => sameCoefficient G Φ ξ a b n x i) :=
-  wave_square_weight_mean (same_label_raw_bound G hκ ha hb hΦ hν hratio haθ hdiv i) hP0 hP1
 
 theorem int_abs_cast_one_le {j : ℤ} (hj : j ≠ 0) : (1 : ℝ) ≤ |(j : ℝ)| := by
   have hpos : (0 : ℤ) < |j| := abs_pos.mpr hj
@@ -490,16 +457,8 @@ theorem bandBound_frequency {s : StripData D} {β : ℝ} {k : ℕ → ℝ} {j : 
 
 
 
-noncomputable def conjugateFamily (a : Family D) : Family D := fun n x i => star (a n x i)
 
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem carrier_neg (ν : ℝ) (Φ : D → ℝ) (x : D) : carrier (-ν) Φ x = star (carrier ν Φ x) := by
-  change Complex.exp (phaseFactor (-ν) * (Φ x : ℂ)) = (starRingEnd ℂ) (Complex.exp (phaseFactor ν * (Φ x : ℂ)))
-  rw [← Complex.exp_conj]
-  congr 1
-  simp only [phaseFactor, map_mul, Complex.conj_ofReal, Complex.conj_I, Complex.ofReal_neg]
-  ring
 
 
 
@@ -557,34 +516,6 @@ theorem divergence_congr {U : Set D} (hU : IsOpen U)
 
 
 
-/-- Multiplying by the actual curl of the second field still vanishes on
-disjoint supports; this includes every coefficient derivative and frame term. -/
-theorem product_curl_zero {U : Set D} (hU : IsOpen U)
-    (R : D → ℝ) (Vr Vθ Vz : D → D) {a b : D → ComplexVector}
-    (ha : ∀ i, ContinuousOn (fun y => a y i) U)
-    (hab : ∀ i j y, y ∈ U → a y i * b y j = 0)
-    {x : D} (hx : x ∈ U) (i j : Fin 3) :
-    a x i * CurlClassBounds.cylindricalCurl R Vr Vθ Vz b x j = 0 := by
-  have hD (V : D → D) (k : Fin 3) :=
-    mul_along_zero hU hx ((ha i x hx).continuousAt (hU.mem_nhds hx)) (hab i k) V
-  fin_cases j
-  · change a x i * ((R x)⁻¹ • along Vθ (fun y => b y 2) x - along Vz (fun y => b y 1) x) = 0
-    rw [Complex.real_smul]
-    calc
-      _ = ((R x)⁻¹ : ℂ) * (a x i * along Vθ (fun y => b y 2) x) -
-          a x i * along Vz (fun y => b y 1) x := by simp only [Complex.ofReal_inv]; ring
-      _ = 0 := by rw [hD Vθ 2, hD Vz 1]; ring
-  · change a x i * (along Vz (fun y => b y 0) x - along Vr (fun y => b y 2) x) = 0
-    rw [mul_sub, hD Vz 0, hD Vr 2, sub_self]
-  · change a x i * (along Vr (fun y => b y 1) x + (R x)⁻¹ • b x 1 -
-      (R x)⁻¹ • along Vθ (fun y => b y 0) x) = 0
-    simp only [Complex.real_smul]
-    calc
-      _ = a x i * along Vr (fun y => b y 1) x + ((R x)⁻¹ : ℂ) * (a x i * b x 1) -
-          ((R x)⁻¹ : ℂ) * (a x i * along Vθ (fun y => b y 0) x) := by
-            simp only [Complex.ofReal_inv]
-            ring
-      _ = 0 := by rw [hD Vr 1, hab i 1 x hx, hD Vθ 0]; ring
 
 
 

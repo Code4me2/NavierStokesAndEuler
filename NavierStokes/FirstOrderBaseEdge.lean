@@ -323,16 +323,6 @@ theorem nominal_axial_mass_zero {eta : ℝ} (heta : eta ∈ nominalParameters W)
   rw [baseFields_mass _ _ _ _ (nominalOuterRadius_pos W).le heta]
   exact nominal_mass_exterior W (nominalParameters_domain W) eta heta
 
-theorem nominal_first_axial_zero {p : ℝ × ℝ} (hX : nominalOuterX W ≤ p.1) :
-    (nominalCoefficients W).stressAxial 1 p = 0 := by
-  have hz := first_axial_exterior (nominalScheme W) (nominal_base_beta W)
-    (fun _ he => nominal_axial_mass_zero W he)
-  change extendCoreZero _ _ _ p = 0
-  apply extendCoreZero_zero_right _ _ _ (nominalOuterRadius_pos W).le _
-    (by simpa only [nominalOuterRadius_square] using hX)
-  intro eta heta R hR
-  rw [zEven_eq _ _ _ _ ((nominalOuterRadius_pos W).le.trans hR)]
-  exact hz eta heta R hR
 
 theorem nominal_first_angular_eq {p : ℝ × ℝ} (hX : nominalOuterX W < p.1)
     (heta : p.2 ∈ Ioo (-1 : ℝ) 1)

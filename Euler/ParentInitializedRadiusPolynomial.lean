@@ -88,12 +88,7 @@ def fullEnvelope (X : ℝ) : ℝ := radiusEnvelope (sourceEnvelope X)
 def fullPolynomial : Polynomial ℝ :=
   radiusPolynomial.comp (sourceRadiusPolynomial.comp inputPolynomial)
 
-theorem fullPolynomial_eval (X : ℝ) : fullPolynomial.eval X=fullEnvelope X := by
-  simp only [fullPolynomial,fullEnvelope,sourceEnvelope,Polynomial.eval_comp,radiusPolynomial_eval,
-    sourceRadiusPolynomial_eval,inputPolynomial_eval]
 
-def fullConstant : ℝ := coefficientCost fullPolynomial
-def fullPower : ℕ := fullPolynomial.natDegree
 
 
 

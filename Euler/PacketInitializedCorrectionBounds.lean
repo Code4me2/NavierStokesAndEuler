@@ -1,5 +1,5 @@
 import Euler.PacketInitializedAllOrderBudget
-import Euler.AllOrderDriftResidualBounds
+import Euler.AllOrderDriftPressureBounds
 
 /-! Fixed source constants in the smaller-radius estimates for the actual
 initialized all-order correction. They do not depend on the cutoff or frequency. -/

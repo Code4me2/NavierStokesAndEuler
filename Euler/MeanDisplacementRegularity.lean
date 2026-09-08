@@ -96,10 +96,5 @@ theorem meanTestMap_trace (v : TimeLp T solenoidalSpace) :
   initialTrace_productDerivative T hT (solenoidalFrame T F) (solenoidalFrame T F')
     (solenoidalFrame_hasDerivWithinAt T hT F F' hF) v
 
-/-- Therefore zero-endpoint label tests remove both actual initial boundary terms. -/
-theorem meanTestMap_trace_zero (v : TimeLp T solenoidalSpace) (hv : initialTrace T hT v = 0) :
-    meanTrace T hT FInv (meanTestMap T hT FInv F F' hF hInv v) = 0 := by
-  rw [meanTestMap_trace T hT FInv F F' hF hInv v, hv]
-  exact map_zero _
 
 end EulerMeanVariationalInverse

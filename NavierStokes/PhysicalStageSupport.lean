@@ -113,14 +113,6 @@ theorem mean_field_support (M : MeanData h degree)
   dsimp only [outerConstant]
   nlinarith [Real.sqrt_nonneg (2 : ℝ)]
 
-/-- The Cartesian angular reconstruction is pointwise zero-preserving. -/
-theorem mean_angular_support (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q M.firstBand) (hR : M.upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig M.family.angularField := by
-  exact support_map_zero (mean_field_support M hh hh1 hq hR)
-    (fun w c => c • PhysicalMeanJetBounds.angularVector (PhysicalGraphBounds.radialProjection w))
-    (fun _ => zero_smul _ _)
 
 end Means
 

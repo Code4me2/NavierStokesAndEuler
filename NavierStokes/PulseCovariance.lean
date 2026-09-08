@@ -607,35 +607,7 @@ theorem columnScales_pos {r a A b B c₀ u E : ℝ}
     (j : Fin 2) : 0 < columnScales pulses ci j :=
   mul_pos (hci j) (pulses j).bounds.mass_pos
 
-theorem normalizedMatrix_entry_error {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) (hE : 0 ≤ E) (i j : Fin 2) :
-    |normalizedMatrix pulses i j - signedModel c₀ u i j| ≤
-      (E + ((|c₀| + 1) * |u|) * concentrationConstant a A b B) / r := by
-  have hi := (pulses j).bounds.normalizedColumn_error
-    (pulses j).tangent_continuous hE (pulses j).tangent_model i
-  unfold normalizedMatrix signedModel
-  simpa only [signedSlopes_abs] using hi
 
-theorem actualMatrix_positive_of_normalized {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) {ci : Vec2} (hci : ∀ j, 0 < ci j)
-    (T : Vec2) (hdet : (normalizedMatrix pulses).det ≠ 0)
-    (hw : ∀ i, 0 < SmoothCovariance.weights (normalizedMatrix pulses) T i) :
-    (actualMatrix pulses ci).det ≠ 0 ∧
-      (∀ i, 0 < SmoothCovariance.weights (actualMatrix pulses ci) T i) ∧
-      (∀ i, 0 < SmoothCovariance.amplitudes (actualMatrix pulses ci) T i) := by
-  have hs : ∀ j, 0 < columnScales pulses ci j := columnScales_pos pulses hci
-  have hsn : ∀ j, columnScales pulses ci j ≠ 0 := fun j => (hs j).ne'
-  have hT : FlatCovariance.scaledTarget 1 T = T := by
-    ext i
-    simp [FlatCovariance.scaledTarget]
-  rw [actualMatrix_factorization]
-  have hweight : ∀ i, 0 < SmoothCovariance.weights
-      (FlatCovariance.columns (normalizedMatrix pulses) (columnScales pulses ci)) T i := by
-    intro i
-    rw [← hT, FlatCovariance.weights_columns _ _ _ _ hdet hsn]
-    exact mul_pos (div_pos zero_lt_one (hs i)) (hw i)
-  exact ⟨FlatCovariance.columns_det_ne_zero hdet hsn, hweight,
-    fun i => Real.sqrt_pos.mpr (hweight i)⟩
 
 /- This is the same entrywise norm used by SmoothCovariance's compact
 perturbation theorem. -/

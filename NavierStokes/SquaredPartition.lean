@@ -170,8 +170,6 @@ theorem lineMask_eq_translate (k : ℤ) (x : ℝ) :
 
 def gridMask (δ : ℝ) (k : ℤ) (x : ℝ) : ℝ := lineMask k (x / δ)
 
-theorem gridMask_nonneg (δ : ℝ) (k : ℤ) (x : ℝ) : 0 ≤ gridMask δ k x :=
-  lineMask_nonneg _ _
 
 theorem gridMask_smooth (δ : ℝ) (k : ℤ) : ContDiff ℝ ∞ (gridMask δ k) :=
   (lineMask_smooth k).comp (contDiff_id.div_const δ)

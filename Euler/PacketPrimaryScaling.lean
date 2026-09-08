@@ -64,19 +64,5 @@ theorem scaled_terminal_wave_eq (a k : ℝ) (t : Icc (0 : ℝ) D.T) :
   rw [vector_terminal_smul τ hτ hτT B δ hδ ξ hs]
   simp only [fullWave,smul_smul,div_eq_mul_inv,mul_comm]
 
-/-- This derivative belongs to the literal primary used by the initialized
-packet, where the amplitude is inserted in its terminal datum. -/
-theorem scaled_terminal_physical_gradient (a k : ℝ) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    fderiv ℝ (fun x => k⁻¹ • vector τ hτ hτT B (initialData D δ hδ (a • ξ) hs)
-      (t,(Y x,k*⟪D.m₀,Y x⟫_ℝ))) (X 0) =
-      (a/δ) • rankOne ℝ (canonicalVelocity τ hτ hτT B ξ hs t 0) (D.normal.field t 0) := by
-  have he := scaled_terminal_wave_eq τ hτ hτT B δ hδ ξ hs a k t
-  change fderiv ℝ ((fun x : Space => k⁻¹ • vector τ hτ hτT B
-    (initialData D δ hδ (a • ξ) hs) (t,(x,k*⟪D.m₀,x⟫_ℝ))) ∘ Y) (X 0) = _
-  rw [he]
-  exact fullWave_physical_canonical_gradient τ hτ hτT B δ hδ ξ hs a k hk t X Y hX hY hleft
 
 end EulerPacketPrimaryShear

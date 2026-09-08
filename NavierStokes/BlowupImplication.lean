@@ -32,16 +32,6 @@ theorem negative_power_tendsto_atTop {ι : Type*} {l : Filter ι}
   change (q t)⁻¹ ^ A = q t ^ (-A)
   rw [Real.inv_rpow (le_of_lt ht), Real.rpow_neg (le_of_lt ht)]
 
-/-- The manuscript's positive scalar profile remains divergent with a vanishing
-relative error. The error is inside the factor multiplied by `q ^ (-A)`. -/
-theorem positive_profile_tendsto_atTop {ι : Type*} {l : Filter ι}
-    {q error : ι → ℝ} {A E : ℝ} (hA : 0 < A) (hE : 0 < E)
-    (hq : Tendsto q l (𝓝[>] (0 : ℝ)))
-    (herror : Tendsto error l (𝓝 0)) :
-    Tendsto (fun t => q t ^ (-A) * (E + error t)) l atTop := by
-  have hfactor : Tendsto (fun t => E + error t) l (𝓝 E) := by
-    simpa only [add_zero] using tendsto_const_nhds.add herror
-  exact (negative_power_tendsto_atTop hA hq).atTop_mul_pos hE hfactor
 
 
 

@@ -119,13 +119,6 @@ theorem ShrinkingSupport.map_zero {W : Type*} [Zero W] {h C : ℝ}
   exact hn (by simpa only [hz] using hT w)
 
 
-theorem exists_zero_neighborhood {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : SpaceTime → V} (hf : ShrinkingSupport h C f) {x : Space}
-    (hx : x ≠ 0) (hz : x 2 = 0) :
-    ∃ U : Set SpaceTime, IsOpen U ∧ (1, x) ∈ U ∧
-      EqOn f (fun _ => 0) (U ∩ SpacetimeEndpoint.openPast 1) := by
-  obtain ⟨U, hU, hxU, hs⟩ := exists_separating_neighborhood hh hh1 C hx hz
-  exact ⟨U, hU, hxU, fun w hw => hf.zero_of_separated hw.2.1 (hs w hw.1 hw.2.1)⟩
 
 end Support
 
@@ -273,14 +266,6 @@ theorem ShrinkingSupport.derivative_support {h C : ℝ} (hh : 0 < h) (hh1 : h < 
   apply hn
   simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply] using he
 
-/-- Actual joint derivatives vanish on the same open past neighborhood. -/
-theorem jets_zero_of_eqOn {f : SpaceTime → V} {U : Set SpaceTime}
-    (hU : IsOpen U) (hf : EqOn f (fun _ => 0) (U ∩ SpacetimeEndpoint.openPast 1))
-    (m : ℕ) : EqOn (iteratedFDeriv ℝ m f) (fun _ => 0)
-      (U ∩ SpacetimeEndpoint.openPast 1) := by
-  intro w hw
-  have he := (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq (zero_germ_of_eqOn hU hf hw.1 hw.2.1) m).self_of_nhds
-  simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply] using he
 
 /-- The extension is the literal zero function on an actual ambient open
 neighborhood, not only a limiting boundary value. -/
@@ -299,23 +284,6 @@ noncomputable def zeroExtension {f : SpaceTime → V} {x : Space} {U : Set Space
 
 
 
-/-- Adding a correction which vanishes on a past neighborhood preserves
-the literal extension of the base field on the intersection. -/
-noncomputable def addZeroExtension {f g : SpaceTime → V} {x : Space}
-    (e : JointResidualLimits.OneSidedExtension f x) {U : Set SpaceTime}
-    (hU : IsOpen U) (hxU : (1, x) ∈ U)
-    (hg : EqOn g (fun _ => 0) (U ∩ SpacetimeEndpoint.openPast 1)) :
-    JointResidualLimits.OneSidedExtension (fun w => f w + g w) x where
-  value := e.value
-  domain := e.domain ∩ U
-  isOpen := e.isOpen.inter hU
-  mem := ⟨e.mem, hxU⟩
-  smooth := e.smooth.mono inter_subset_left
-  agrees := by
-    intro w hw
-    change e.value w = f w + g w
-    rw [hg ⟨hw.1.2, hw.2⟩, add_zero]
-    exact e.agrees ⟨hw.1.1, hw.2⟩
 
 
 end Extensions
@@ -331,25 +299,6 @@ theorem ShrinkingSupport.spatialCurl {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (hA.zero_germ hh hh1 ht (lt_of_not_ge hs))
   exact hn (he.trans (SpatialCurl.curl_zero _))
 
-/-- The extension of a potential yields the extension of its actual
-Cartesian spatial curl. -/
-noncomputable def curlExtension {A : SpaceTime → Space} {x : Space}
-    (e : JointResidualLimits.OneSidedExtension A x) :
-    JointResidualLimits.OneSidedExtension (SpatialCurl.spatialCurl A) x where
-  value := SpatialCurl.spatialCurl e.value
-  domain := e.domain
-  isOpen := e.isOpen
-  mem := e.mem
-  smooth := by
-    intro w hw
-    exact (SpatialCurl.contDiffAt_spatialCurl
-      (e.smooth.contDiffAt (e.isOpen.mem_nhds hw)) (by simp)).contDiffWithinAt
-  agrees := by
-    intro w hw
-    apply SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq
-    filter_upwards [(e.isOpen.inter (SpacetimeEndpoint.openPast_isOpen 1)).mem_nhds hw]
-      with y hy
-    exact e.agrees hy
 
 end Curl
 

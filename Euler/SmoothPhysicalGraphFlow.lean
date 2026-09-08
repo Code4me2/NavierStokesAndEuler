@@ -26,24 +26,6 @@ theorem graph_materialVelocity_eq (t : Icc (0 : ℝ) T) (x : Vector3) :
   rw [← graph_flow_cover k m T hT A hgraph]
   rfl
 
-include hgraph in
-theorem graph_accelerationField_eq (t : Icc (0 : ℝ) T) (x : Vector3) :
-    accelerationField T (graphCoefficient k m T A) (graphCoefficient k m T A₁) t x =
-      (accelerationField T A A₁ t (graphLinear k m x)).1 := by
-  let J := graphLinear k m
-  let L := fst ℝ Vector3 ℝ
-  have hd := (L.hasFDerivAt.comp x
-    (((A.smooth t).differentiable (by simp) (J x)).hasFDerivAt.comp x J.hasFDerivAt)).fderiv
-  change fderiv ℝ ((graphCoefficient k m T A).field t : Vector3 → Vector3) x =
-    L.comp ((fderiv ℝ (A.field t : LiftTangent → LiftTangent) (J x)).comp J) at hd
-  have hval : J (A.field t (J x)).1 = A.field t (J x) := by
-    apply Prod.ext
-    · rfl
-    · exact (sub_eq_zero.mp (hgraph t (J x))).symm
-  change (A₁.field t (J x)).1+
-    fderiv ℝ ((graphCoefficient k m T A).field t : Vector3 → Vector3) x (A.field t (J x)).1 = _
-  rw [hd,comp_apply,comp_apply,hval]
-  rfl
 
 
 def physicalCoefficient (ell : ℝ) : SmoothTimeField (Icc (0 : ℝ) T) Vector3 Vector3 :=

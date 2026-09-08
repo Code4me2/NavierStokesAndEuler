@@ -586,25 +586,6 @@ theorem exists_log_plateau_width
       _ ≤ expCoordinate a s :=
         mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) ha.le
 
-/-- The cutoff can be specified directly in the physical radial coordinate.
-No logarithmic cutoff regularity or assumed inverse bound is required. -/
-theorem radial_compact_primitive_uniform
-    {a b c d cL cR : ℝ} (ha : 0 < a) (hac : a < c) (hcd : c < d) (hdb : d < b)
-    (hcL : 0 < cL) (hcR : 0 < cR) (m : ℕ) (χ : ℝ → ℝ)
-    (hχ : ∀ X, |χ X| ≤ 1)
-    (hleft : ∀ X, X ≤ c → χ X = 0) (hright : ∀ X, d ≤ X → χ X = 1) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ → V), Continuous f → ∀ A : ℝ, 0 ≤ A →
-      (∀ X ∈ Ioo a b, ‖f X‖ ≤ A * logWeight cL cR a b m X) →
-      ∀ X ∈ Ioo a b,
-        ‖radialCompactPrimitive χ f a b X‖ ≤ K * A * logWeight cL cR a b m X := by
-  obtain ⟨ρ, hρ, hρL, hl, hr⟩ := exists_log_plateau_width ha hac hcd hdb χ hleft hright
-  obtain ⟨K, hK, hbound⟩ := log_compact_primitive_uniform (V := V) ha (hac.trans (hcd.trans hdb))
-    hcL hcR hρ hρL m (fun s => χ (expCoordinate a s)) (fun s => hχ _) hl hr
-  refine ⟨K, hK, ?_⟩
-  intro f hfc A hA hf X hX
-  have h := hbound f hfc A hA hf X hX
-  simpa only [logCompactPrimitive, radialCompactPrimitive,
-    expCoordinate_logPosition ha (ha.trans hX.1)] using h
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 

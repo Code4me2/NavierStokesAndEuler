@@ -50,25 +50,7 @@ def timeTranslateIsometry (T : ℝ) (a : LiftTangent) :
     TimeLp T (CylinderL2 P V) →ₗᵢ[ℝ] TimeLp T (CylinderL2 P V) :=
   timeLiftIsometry T (translate P a)
 
-theorem timeTranslateIsometry_add (T : ℝ) (a b : LiftTangent) (f : TimeLp T (CylinderL2 P V)) :
-    timeTranslateIsometry P T a (timeTranslateIsometry P T b f) = timeTranslateIsometry P T (a+b) f := by
-  apply Lp.ext
-  filter_upwards [timeLift_ae T (translate P a).toContinuousLinearMap (timeTranslateIsometry P T b f),
-    timeLift_ae T (translate P b).toContinuousLinearMap f,
-    timeLift_ae T (translate P (a+b)).toContinuousLinearMap f] with t ha hb hab
-  change timeTranslateIsometry P T a (timeTranslateIsometry P T b f) t = _ at ha
-  change timeTranslateIsometry P T b f t = _ at hb
-  change timeTranslateIsometry P T (a+b) f t = _ at hab
-  rw [ha,hb,hab]
-  exact translate_add P a b (f t)
 
-theorem timeTranslateIsometry_zero (T : ℝ) (f : TimeLp T (CylinderL2 P V)) :
-    timeTranslateIsometry P T 0 f = f := by
-  apply Lp.ext
-  filter_upwards [timeLift_ae T (translate P 0).toContinuousLinearMap f] with t ht
-  change timeTranslateIsometry P T 0 f t = _ at ht
-  rw [ht]
-  exact translate_zero P (f t)
 
 
 

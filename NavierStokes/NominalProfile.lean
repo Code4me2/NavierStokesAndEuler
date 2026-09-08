@@ -1595,12 +1595,6 @@ theorem outgoing_pressure_halfKernel (F : Profile) (R eta : ℝ) (hR : 0 < R)
   rw [integral_div]
   ring
 
-theorem outgoing_pressure_prefix (F : Profile) (R eta : ℝ) (hR : 0 < R)
-    {X : ℝ} (hX : 0 < X) :
-    F.axisDatum eta + moments (OutgoingDilation.U F R) (OutgoingDilation.E F R) X eta 4 =
-      OutgoingDilation.Pi F R (X, eta) := by
-  rw [outgoing_axis_halfKernel F R eta hR, outgoing_pressure_halfKernel F R eta hR hX]
-  exact canonical_past_identity (outgoing_halfKernel_integrable F R eta hR) hX.le
 
 namespace Controls
 
@@ -1685,8 +1679,6 @@ noncomputable def heatedE (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : �
   c.E p + c.heatBlend p.1 * (HeatedOutgoing.E F c.radius coef p - c.E p)
 noncomputable def heatedPi (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
   F.axisDatum p.2 + moments c.U (c.heatedE coef) p.1 p.2 4
-noncomputable def heatedf (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
-  if p.1 ≤ Xi then c.f p else c.heatedE coef p / Real.sqrt (2 * p.1)
 
 theorem heatJoin_pos : 0 < c.heatJoin := mul_pos c.radius_pos matchFraction_pos
 theorem heatJoin_lt_radius : c.heatJoin < c.radius :=

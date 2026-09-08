@@ -36,38 +36,6 @@ theorem gramSolution_contDiff (T : ℝ) (hT : 0 ≤ T)
     (fun _ => hc) (fun x => gramOperator_coercive T hT (Q x) c (hLower x)) f
     (gramOperator_contDiff T hT Q hQ) hf
 
-/-- One factorial shift for the genuine Gram inverse, with an explicit polynomial radius condition. -/
-theorem gramSolution_gevrey (T : ℝ) (hT : 0 ≤ T)
-    (Q : P → C(Icc (0 : ℝ) T, U →L[ℝ] E))
-    (c : ℝ) (hc : 0 < c) (hLower : ∀ x t v, c*‖v‖^2 ≤ ‖Q x t v‖^2)
-    (hQ : ContDiff ℝ ∞ Q)
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C)
-    (hbQ : ∀ n x, ‖iteratedFDeriv ℝ n Q x‖ ≤ C*majorant Rc 0 n)
-    (f : P → TimeLp T U) (hf : ContDiff ℝ ∞ f)
-    (D R : ℝ) (hD : 0 ≤ D) (hR : 2*gramCost c C D*(Rc+1) ≤ R)
-    (d : ℕ) (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ D*majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => gramSolver T hT (Q y) c hc (hLower y) (f y)) x‖ ≤
-      majorant R (d+1) n := by
-  have hci : 0 ≤ c⁻¹ := inv_nonneg.mpr hc.le
-  have hM : 1 ≤ gramCost c C D := by
-    unfold gramCost
-    have : 0 ≤ c⁻¹*(3*C^2+D+1) := by positivity
-    linarith
-  have hMC : c⁻¹*(3*C^2) ≤ gramCost c C D := by
-    unfold gramCost
-    nlinarith
-  have hMD : c⁻¹*D ≤ gramCost c C D := by
-    unfold gramCost
-    nlinarith [sq_nonneg C]
-  have hb (j : ℕ) (y : P) :
-      ‖iteratedFDeriv ℝ (j+1) (fun z => gramOperator T hT (Q z)) y‖ ≤
-        (3*C^2)*(Rc^(j+1)*((j+1).factorial : ℝ)^2) := by
-    simpa only [majorant, Nat.add_zero] using gramOperator_bound T hT Q hQ Rc C hRc hC hbQ (j+1) y
-  exact coerciveSolution_gevrey_amplitudes (fun y => gramOperator T hT (Q y)) (fun _ => c)
-    (fun _ => hc) (fun y => gramOperator_coercive T hT (Q y) c (hLower y)) f
-    (gramOperator_contDiff T hT Q hQ) hf c⁻¹ (3*C^2) D (gramCost c C D) Rc R
-    (by positivity) hD hM hMC hMD hRc hR (fun _ => le_rfl) hb d hbf n x
 
 
 end EulerTimeLpGramGevrey

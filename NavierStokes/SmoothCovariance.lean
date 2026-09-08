@@ -259,30 +259,5 @@ theorem compact_perturbation_stability {S : Set Datum} (hS : IsCompact S)
   exact ⟨ρ, hρ, fun z hz z' hdist =>
     hsub (Metric.mem_cthickening_of_dist_le z' z ρ S hz hdist)⟩
 
-/-- Uniform perturbation stability for a continuous family on a compact
-parameter set. Competing matrices need not form a continuous family. -/
-theorem compact_family_perturbation_stability
-    {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsCompact K)
-    {H : X → Mat2} {T : X → Vec2}
-    (hH : ∀ i j, ContinuousOn (fun x => H x i j) K)
-    (hT : ∀ i, ContinuousOn (fun x => T x i) K)
-    (hcone : ∀ x ∈ K, StrictCone (H x) (T x)) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ x ∈ K, ∀ H' : Mat2, ∀ T' : Vec2,
-      dist (H', T') (H x, T x) ≤ ρ →
-        H'.det ≠ 0 ∧ (∀ i, 0 < weights H' T' i) ∧
-          (∀ i, 0 < amplitudes H' T' i) := by
-  let f : X → Datum := fun x => (H x, T x)
-  have hf : ContinuousOn f K :=
-    (continuousOn_pi.mpr (fun i => continuousOn_pi.mpr (hH i))).prodMk
-      (continuousOn_pi.mpr hT)
-  have himage : f '' K ⊆ strictConeRegion := by
-    rintro z ⟨x, hx, rfl⟩
-    exact hcone x hx
-  obtain ⟨ρ, hρ, hstable⟩ :=
-    compact_perturbation_stability (hK.image_of_continuousOn hf) himage
-  refine ⟨ρ, hρ, ?_⟩
-  intro x hx H' T' hdist
-  have hc := hstable (f x) (mem_image_of_mem f hx) (H', T') hdist
-  exact ⟨hc.det_ne_zero, hc.weights_pos, hc.amplitudes_pos⟩
 
 end NavierStokes.SmoothCovariance

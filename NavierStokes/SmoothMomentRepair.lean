@@ -207,28 +207,6 @@ theorem exists_local_bounded_analytic_solver [CompleteSpace E]
   · exact hsmall
   · exact hgeq z hs.1
 
-/-- Smooth coefficient and debt families produce a genuinely smooth exact small branch. -/
-theorem exists_smooth_parameter_branch [CompleteSpace E]
-    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
-    (p₀ : P) (B : P → E →L[ℝ] E) (A : P → E →L[ℝ] E →L[ℝ] E) (d : P → E)
-    (hB : ContDiff ℝ ∞ B) (hA : ContDiff ℝ ∞ A) (hd : ContDiff ℝ ∞ d)
-    (B₀ : E ≃L[ℝ] E) (hB₀ : B p₀ = B₀.toContinuousLinearMap) (hd₀ : d p₀ = 0) :
-    ∃ (c : P → E) (U : Set P) (C : ℝ), IsOpen U ∧ p₀ ∈ U ∧ 0 < C ∧
-      ContDiffOn ℝ ∞ c U ∧ c p₀ = 0 ∧
-      ∀ p ∈ U, B p (c p) + A p (c p) (c p) = d p ∧ ‖c p‖ ≤ C * ‖d p‖ := by
-  obtain ⟨g, V, C, hVopen, hVbase, hC, hg, hgbase, hgeq⟩ :=
-    exists_local_bounded_analytic_solver B₀ (A p₀)
-  let data : P → RepairData E := fun p => ((B p, A p), d p)
-  have hdata : ContDiff ℝ ∞ data := (hB.prodMk hA).prodMk hd
-  have hbase : data p₀ = base B₀ (A p₀) := by simp [data, base, hB₀, hd₀]
-  refine ⟨g ∘ data, data ⁻¹' V, C, hVopen.preimage hdata.continuous, ?_, hC, ?_, ?_, ?_⟩
-  · change data p₀ ∈ V
-    rwa [hbase]
-  · exact (hg.of_le le_top).comp hdata.contDiffOn (fun p hp => hp)
-  · change g (data p₀) = 0
-    rw [hbase, hgbase]
-  · intro p hp
-    exact hgeq (data p) hp
 
 /-- The quadratic growth constant is the actual norm of the bilinear coefficient. -/
 theorem quadratic_norm_le (A : E →L[ℝ] E →L[ℝ] E) (c : E) :

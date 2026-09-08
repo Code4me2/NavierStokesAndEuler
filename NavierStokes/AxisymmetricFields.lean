@@ -222,21 +222,6 @@ theorem velocity_on_axis (H K : Profile) (t : ℝ) (x : Space)
     rw [velocity_two H K t x hH hK]
     simp [profilePoint, radialEnergy, hx0, hx1, coordinateVector]
 
-/-- The potential's closed spatial support is controlled by the two profile
-supports, pulled back under the smooth `(t,s,z)` coordinate map. -/
-theorem tsupport_potential_slice_subset (H K : Profile) (t : ℝ) :
-    tsupport (fun x : Space => potential H K (t, x)) ⊆
-      profilePoint t ⁻¹' (tsupport H ∪ tsupport K) := by
-  apply closure_minimal
-  · intro x hx
-    by_contra hn
-    have hnH : profilePoint t x ∉ tsupport H := fun h => hn (Or.inl h)
-    have hnK : profilePoint t x ∉ tsupport K := fun h => hn (Or.inr h)
-    have hHzero := image_eq_zero_of_notMem_tsupport hnH
-    have hKzero := image_eq_zero_of_notMem_tsupport hnK
-    exact hx (by simp [potential, hHzero, hKzero])
-  · exact ((isClosed_tsupport H).union (isClosed_tsupport K)).preimage
-      (contDiff_profilePoint_slice t (n := 0)).continuous
 
 
 

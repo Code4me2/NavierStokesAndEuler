@@ -146,46 +146,18 @@ section CommonFields
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-theorem commonVelocity_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (K : Frequency) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint K) = f (p,Y)) (Y : Plane) :
-    commonVelocity t f g hab κ (p, Y + TorusAverages.latticePoint K) =
-      commonVelocity t f g hab κ (p,Y) :=
-  periodizedCopies_shift g κ _ K p (fun j Y => complexCopyVelocity_shift t f g hab j K p hf Y) Y
 
-theorem commonPressure_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (frequency : ℝ) (K : Frequency) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint K) = f (p,Y)) (Y : Plane) :
-    commonPressure t f g hab κ frequency (p, Y + TorusAverages.latticePoint K) =
-      commonPressure t f g hab κ frequency (p,Y) :=
-  periodizedCopies_shift g κ _ K p
-    (fun j Y => complexCopyPressure_shift t f g hab j K frequency p hf Y) Y
 
 
 end CommonFields
 
 /-! ## The inherited sublattice, without a unit-lattice assertion -/
 
-/-- Periodicity on the image of the integer lattice under the d-fold
-cover. The parameter is fixed throughout the statement. -/
-def SubcoverPeriodicAt {P V : Type} (d : ℕ) (f : P × Plane → V) (p : P) : Prop :=
-  ∀ Y : Plane, ∀ k : Frequency,
-    f (p, Y + TorusAverages.latticePoint (coverIndex d k)) = f (p,Y)
 
 /-- The actual inverse-cover pullback of a source. -/
 noncomputable def inverseCoverSource {P V : Type} (d : ℕ) (f : P × Plane → V) : P × Plane → V :=
   fun x => f (x.1, (coverPower d).symm x.2)
 
-theorem inverseCoverSource_shift {P V : Type} (d : ℕ) (f : P × Plane → V)
-    (p : P) (k : Frequency)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint k) = f (p,Y)) (Y : Plane) :
-    inverseCoverSource d f (p, Y + TorusAverages.latticePoint (coverIndex d k)) =
-      inverseCoverSource d f (p,Y) := by
-  unfold inverseCoverSource
-  rw [← coverPower_lattice, map_add, ContinuousLinearEquiv.symm_apply_apply]
-  exact hf _
 
 
 

@@ -468,13 +468,6 @@ theorem residualDifferenceBlock_class {s : StripData D} {κ α H : ℝ} {P : ℕ
 /-! ## Frequency support and physical cross-advection -/
 
 
-noncomputable def transportDifference (g : HarmonicResidual.Frame D)
-    (k : ℝ) (Φ : D → ℝ) (kp : ℤ) (B₀ B₁ : D → ComplexVector)
-    (a : HarmonicResidual.VectorCoefficients D) (i : Fin 3) : Coefficients D :=
-  (HarmonicResidual.transport g k Φ kp (HarmonicResidual.constantVector B₁) a i -
-    HarmonicResidual.transport g k Φ kp (HarmonicResidual.constantVector B₀) a i) +
-  (HarmonicResidual.transport g k Φ kp a (HarmonicResidual.constantVector B₁) i -
-    HarmonicResidual.transport g k Φ kp a (HarmonicResidual.constantVector B₀) i)
 
 
 

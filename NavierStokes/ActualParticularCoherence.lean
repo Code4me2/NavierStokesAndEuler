@@ -42,7 +42,6 @@ noncomputable def corrected (x : CorrectionStep.CycleState (Label B N0))
   ActualParticularRealization.corrected (ActualParticularStageControls.assembly x l)
     ActualParticularStageControls.associatedStrip h (ActualParticularStageControls.gap l) j
 
-noncomputable def cylinderParameter (z : Cylinder) : Parameter := (waveEquiv z).1.1
 
 
 

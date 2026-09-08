@@ -322,24 +322,6 @@ theorem graphOperators_dz (r : ReconstructionData) (epsilon fast : ℕ → ℝ)
   rfl
 
 
-theorem reconstructed_radial_residual (r : ReconstructionData)
-    (ha : 0 < r.inner) (hd : 0 < r.exponent) (c : Context (Lift S))
-    (u : State (Lift S))
-    (hoperator : ∀ f : ScalarField (Lift S), ∀ n x, c.operators.dr f n x =
-      PressureStream.graphDr (PressureStream.physicalSpeed r.exponent (r.frequency n))
-        (0, r.radialDirection) (f n) x)
-    (hsmooth : ∀ n, ContDiff ℝ ∞ (u.gr c n))
-    (hsupport : ∀ n, RadialAlias.RadiallySupported r.inner r.outer (u.gr c n))
-    (n : ℕ) (x : Lift S) :
-    (reconstructPressure r c u).radialResidual c n x =
-      -PressureStream.rho r.inner r.outer r.inner_lt_outer x.1 * pressureDefect c u n x.2.1 +
-        pressureAlias r c u n (x, 0) 0 := by
-  rw [State.radialResidual, Pi.sub_apply, Pi.sub_apply, hoperator]
-  change PressureStream.graphDr _ _
-      (PressureStream.meanPressure _ _ _ _ _ _ (u.gr c n)) x - u.gr c n x = _
-  rw [PressureStream.meanPressure_radial_residual_global ha r.inner_lt_outer hd
-    r.radialDirection (hsmooth n) (hsupport n)]
-  simp [pressureDefect, radialMoment, pressureAlias, sub_eq_add_neg]
 
 end Fields
 

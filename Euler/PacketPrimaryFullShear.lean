@@ -77,15 +77,6 @@ theorem fullWave_physical_hasFDerivAt (α k : ℝ) (hk : k ≠ 0)
   congr 2
   exact (D.FInv.field t 0).adjoint_inner_left v D.m₀
 
-theorem fullWave_physical_norm (α k : ℝ) (hα : 0 ≤ α) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    ‖fderiv ℝ (fun x => fullWave τ hτ hτT B δ hδ ξ hs α k t (Y x)) (X 0)‖ =
-      (α/δ) * (‖D.normal.field t 0‖ * ‖envelopedVelocity τ hτ hτT B δ hδ ξ hs t 0‖) := by
-  rw [(fullWave_physical_hasFDerivAt τ hτ hτT B δ hδ ξ hs α k hk t X Y hX hY hleft).fderiv,
-    norm_smul,Real.norm_eq_abs,abs_of_nonneg (div_nonneg hα hδ.le),norm_rankOne,mul_comm
-      ‖envelopedVelocity τ hτ hτT B δ hδ ξ hs t 0‖ ‖D.normal.field t 0‖]
 
 
 theorem fullWave_physical_canonical_gradient (α k : ℝ) (hk : k ≠ 0)

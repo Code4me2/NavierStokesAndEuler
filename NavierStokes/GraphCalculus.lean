@@ -38,27 +38,15 @@ def timeVector (vt : Plane) : Lift := ((0, 1), vt)
 def along (V : Lift → Lift) (F : Lift → ℝ) (p : Lift) : ℝ :=
   fderiv ℝ F p (V p)
 
-def radialOp (d : ℝ) (vr : Plane) (F : Lift → ℝ) : Lift → ℝ :=
-  along (radialVector d vr) F
 
 def timeOp (vt : Plane) (F : Lift → ℝ) : Lift → ℝ :=
   along (fun _ => timeVector vt) F
 
-def partialR (u : Plane → ℝ) (q : Plane) : ℝ :=
-  deriv (fun r => u (r, q.2)) q.1
 
 def partialT (u : Plane → ℝ) (q : Plane) : ℝ :=
   deriv (fun t => u (q.1, t)) q.2
 
 
-/-- Exact derivative of the graph along a radial coordinate line. -/
-theorem hasDerivAt_graph_radial (d : ℝ) (vr vt : Plane) (r t : ℝ) (hr : r ≠ 0) :
-    HasDerivAt (fun s => graph d vr vt (s, t))
-      (radialVector d vr (graph d vr vt (r, t))) r := by
-  have hp := (Real.hasDerivAt_rpow_const (p := d) (Or.inl hr)).smul_const vr
-  have hb := hp.add (hasDerivAt_const r (t • vt))
-  have hq := (hasDerivAt_id r).prodMk (hasDerivAt_const r t)
-  simpa [graph, radialVector, radialSpeed] using hq.prodMk hb
 
 /-- The time direction has constant graph velocity. -/
 theorem hasDerivAt_graph_time (d : ℝ) (vr vt : Plane) (r t : ℝ) :
@@ -97,9 +85,6 @@ private theorem hasFDerivAt_radialVector (d : ℝ) (vr : Plane) (p : Lift)
       hpow.fun_const_smul d
   exact (hasFDerivAt_const (1, 0) p).prodMk (hs.smul_const vr)
 
-theorem differentiableAt_radialVector (d : ℝ) (vr : Plane) (p : Lift)
-    (hr : p.1.1 ≠ 0) : DifferentiableAt ℝ (radialVector d vr) p :=
-  (hasFDerivAt_radialVector d vr p hr).differentiableAt
 
 
 

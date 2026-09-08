@@ -169,7 +169,6 @@ noncomputable def offsets (h : ℝ) : Offsets :=
 /-! ## Residual indexing after a finite number of cycles -/
 
 noncomputable def residualWave (J : ℕ) : ℝ := ExponentLedger.waveExponent (sigma J)
-noncomputable def residualMean (J : ℕ) : ℝ := ExponentLedger.meanExponent (sigma J)
 
 theorem residualWave_formula (J : ℕ) : residualWave J = (J : ℝ) / 10 + 7 / 10 := by
   rw [residualWave, ExponentLedger.waveExponent, sigma_formula]
@@ -199,8 +198,6 @@ stage-dependent loss. -/
 noncomputable def residualLoss (h beta : ℝ) (m : ℕ) : ℝ :=
   PhysicalGraphBounds.graphLoss m + 1 + (2 * CoordinateAlgebra.A h + 1 / 2) + beta * m
 
-noncomputable def residualRate (h beta : ℝ) (J m : ℕ) : ℝ :=
-  h * residualWave J - residualLoss h beta m
 
 
 

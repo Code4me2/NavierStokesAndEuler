@@ -554,27 +554,6 @@ noncomputable def densityDifferenceFamily (T X0 : ℝ) (L U : Field)
   | .energy => x * (du * (ua + ur) - x * df * (fa + fr))
   | .pressure => x * df * (fa + fr)
 
-theorem densityDifferenceFamily_smooth {T : ℝ} (hT : 0 < T) (X0 : ℝ)
-    {J : Set ℝ} (hJ : IsOpen J) {L U : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) (r : HistoryRow) :
-    ContDiffOn ℝ ∞ (densityDifferenceFamily T X0 L U r)
-      ((univ : Set (ℝ × ℝ)) ×ˢ J) := by
-  have hx := ((radius_smooth X0).comp contDiff_fst.snd).contDiffOn
-    (s := ((univ : Set (ℝ × ℝ)) ×ˢ J))
-  have hdf := angularDifferenceFamily_smooth hT hJ hL
-  have hdu := differenceFamily_smooth hT hJ hU
-  have hfa := angularFamily_smooth T hJ hL
-  have hfr := fieldFamily_smooth hJ hL.exp
-  have hua := controlledFamily_smooth T hJ hU
-  have hur := fieldFamily_smooth hJ hU
-  cases r with
-  | mass => exact hx.mul hdu
-  | angular => exact (contDiffOn_const.mul (hx.pow 2)).mul hdf
-  | transport =>
-    exact (contDiffOn_const.mul (hx.pow 2)).mul ((hdf.mul hua).add (hfr.mul hdu))
-  | energy => exact hx.mul ((hdu.mul (hua.add hur)).sub ((hx.mul hdf).mul (hfa.add hfr)))
-  | pressure => exact (hx.mul hdf).mul (hfa.add hfr)
 
 theorem density_difference_factorization {T : ℝ} (hT : 0 < T) (κ X0 : ℝ)
     {J : Set ℝ} (hJ : IsOpen J) {L U : Field}

@@ -840,25 +840,7 @@ theorem Pi_eq_future_integral (w : ResetWitness d K) (y eta : ℝ) :
 
 
 
-theorem angular_source_continuous (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    Continuous (fun y => X (y, eta) * angularSource w Amp (y, eta)) := by
-  have hc : Continuous (deriv (fun y => angularStock w Amp (y, eta))) :=
-    ((angularStock_smooth w ha).comp (contDiff_id.prodMk contDiff_const)).continuous_deriv (by simp)
-  have he : deriv (fun y => angularStock w Amp (y, eta)) =
-      (fun y => X (y, eta) * angularSource w Amp (y, eta)) :=
-    funext (fun y => (angularStock_hasDerivAt w ha (y, eta)).deriv)
-  rwa [he] at hc
 
-theorem axial_source_continuous (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    Continuous (fun y => X (y, eta) * Sn w Amp (y, eta)) := by
-  have hc : Continuous (deriv (fun y => axialStock w Amp (y, eta))) :=
-    ((axialStock_smooth w ha).comp (contDiff_id.prodMk contDiff_const)).continuous_deriv (by simp)
-  have he : deriv (fun y => axialStock w Amp (y, eta)) =
-      (fun y => X (y, eta) * Sn w Amp (y, eta)) :=
-    funext (fun y => (axialStock_hasDerivAt w ha (y, eta)).deriv)
-  rwa [he] at hc
 
 
 
@@ -971,17 +953,7 @@ noncomputable def incomingSq (d : TailData) (eta : ℝ) : ℝ :=
   (3 / 5) * (4 * (1 - 2 * d.h * eta ^ 2) - 1) - d.h * (1 - 8 * eta ^ 2) +
     (axialExponent d.h + 4 * coordinateFactor eta) * eta * shapeRate eta
 
-theorem Sq_ideal (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : Sq w Amp (y, eta) = incomingSq d eta := by
-  rw [Sq_formula, W_ideal d ha eta hy, U_ideal d Amp eta hy,
-    dY_H_ideal w eta hy, dEta_E_ideal w eta hy]
-  unfold incomingSq
-  field_simp [(H_pos w (y, eta)).ne', (E_pos w (y, eta)).ne'] ; ring
 
-theorem angularSource_weight (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) :
-    X p * angularSource w Amp p = angularWeight w p * Sq w Amp p := by
-  unfold angularWeight Sq
-  field_simp [(H_pos w p).ne']
 
 
 
@@ -996,19 +968,6 @@ noncomputable def incomingSnGrowing (d : TailData) (eta : ℝ) : ℝ :=
   d.core.P ^ 2 * shape eta ^ 2 *
     (5 * coordinateFactor eta * shapeRate eta + (10 * velocityExponent d.h + 1) * eta)
 
-theorem Sn_ideal (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    Sn w Amp (y, eta) = incomingSnConstant d eta + incomingSnGrowing d eta * Real.exp (y / 5) := by
-  unfold Sn
-  rw [dY_U_ideal d ha eta hy, U_ideal d Amp eta hy, dEta_U_ideal d ha eta hy,
-    Pi_ideal w eta hy, dEta_Pi_ideal w eta hy, dY_Pi, E_ideal w eta hy]
-  have he : Real.exp (y / 10) ^ 2 = Real.exp (y / 5) := by
-    rw [pow_two, ← Real.exp_add]
-    congr 1
-    ring
-  simp only [mul_pow, he]
-  unfold incomingSnConstant incomingSnGrowing
-  ring
 
 theorem dEta_S_zero (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
     dEta (S w Amp) (0, eta) = 32 * eta +
@@ -1022,29 +981,7 @@ theorem dEta_S_zero (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff �
   simp only [Nat.cast_ofNat, pow_one, Nat.reduceSub, id_eq]
   ring
 
-theorem axialStock_initial (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    axialStock w Amp (0, eta) = incomingSnConstant d eta + (5 / 6) * incomingSnGrowing d eta := by
-  unfold axialStock XW
-  rw [X_zero, M_zero, dEta_M_zero d ha, U_ideal d Amp eta le_rfl, S_zero,
-    dEta_S_zero w ha, Pi_ideal w eta le_rfl, dEta_Pi_ideal w eta le_rfl]
-  simp only [zero_div, Real.exp_zero, mul_one, one_mul]
-  unfold initialM initialS incomingSnConstant incomingSnGrowing axialExponent velocityExponent coordinateFactor
-  ring
 
-theorem exponential_sum_past {f : ℝ → ℝ} (a b c e : ℝ) (hb : 0 < b) (he : 0 < e)
-    (hf : ∀ y ≤ 0, f y = a * Real.exp (b * y) + c * Real.exp (e * y)) :
-    IntegrableOn f (Iic (0 : ℝ)) ∧ (∫ y in Iic (0 : ℝ), f y) = a / b + c / e := by
-  have h1 := (integrableOn_exp_mul_Iic hb 0).const_mul a
-  have h2 := (integrableOn_exp_mul_Iic he 0).const_mul c
-  refine ⟨IntegrableOn.congr_fun (h1.add h2) (fun y hy => (hf y hy).symm) measurableSet_Iic, ?_⟩
-  calc
-    _ = ∫ y in Iic (0 : ℝ), a * Real.exp (b * y) + c * Real.exp (e * y) :=
-      setIntegral_congr_fun measurableSet_Iic (fun y hy => hf y hy)
-    _ = _ := by
-      rw [integral_add h1 h2, integral_const_mul, integral_const_mul,
-        integral_exp_mul_Iic hb, integral_exp_mul_Iic he]
-      simp [div_eq_mul_inv]
 
 
 

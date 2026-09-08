@@ -380,21 +380,5 @@ theorem descent_square_local {r : ℝ} {f : ℝ → E}
   · rw [abs_of_nonneg h]
   · rw [abs_of_neg h, he x hx]
 
-/-- The exact endpoint jets of the local descent, using actual within
-derivatives on the closed positive half-line. -/
-theorem iteratedDerivWithin_descent_zero_local {r : ℝ} (hr : 0 < r) {f : ℝ → E}
-    (hf : ContDiffOn ℝ ∞ f (Ioo (-r) r))
-    (he : ∀ x ∈ Ioo (-r) r, f (-x) = f x) (n : ℕ) :
-    iteratedDerivWithin n (descent f) (Ici 0) 0 =
-      ((n.factorial : ℝ) / ((2 * n).factorial : ℝ)) • iteratedDeriv (2 * n) f 0 := by
-  have h := iteratedDerivWithin_descent_zero
-    (contDiff_localized hr hf) (even_localized hr he) n
-  have hEq := descent_localized_eventuallyEq r f
-  have hd : iteratedDerivWithin n (descent (localized r f)) (Ici 0) 0 =
-      iteratedDerivWithin n (descent f) (Ici 0) 0 := by
-    simp only [iteratedDerivWithin_eq_iteratedFDerivWithin]
-    rw [(hEq.filter_mono nhdsWithin_le_nhds).iteratedFDerivWithin_eq hEq.eq_of_nhds n]
-  rw [hd, (localized_eventuallyEq r f).iteratedDeriv_eq (2 * n)] at h
-  exact h
 
 end NavierStokes.EvenSmoothDescent

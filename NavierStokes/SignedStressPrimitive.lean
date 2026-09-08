@@ -200,10 +200,6 @@ theorem sigma_contDiff (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : ContDi
     (hs : RadialAlias.RadiallySupported P.a P.b F) : ContDiff ℝ ∞ (sigma P e F) :=
   (((inversePower_contDiff P e).comp contDiff_fst).neg).mul (primitive_contDiff P e hF hs)
 
-theorem sigma_supported (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : Continuous F)
-    (hs : RadialAlias.RadiallySupported P.a P.b F) :
-    RadialAlias.RadiallySupported P.a P.b (sigma P e F) :=
-  fun _ h => primitive_supported P e hF hs (right_ne_zero_of_mul h)
 
 theorem total_weightedSource (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : Continuous F)
     (hs : RadialAlias.RadiallySupported P.a P.b F) (z : ℝ × E) :

@@ -1120,9 +1120,6 @@ open CommonCoverSolve TorusInverse
 variable {P H : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup H] [NormedSpace ℝ H] {Λ : Type*}
 
-noncomputable def nativePointLinear (g : Geometry) : (P × TorusInverse.Plane) →L[ℝ] (P × TorusInverse.Plane) :=
-  (ContinuousLinearMap.fst ℝ P TorusInverse.Plane).prod
-    (g.coordinateLinear.comp (ContinuousLinearMap.snd ℝ P TorusInverse.Plane))
 
 
 

@@ -153,14 +153,6 @@ theorem quotientPoint_lattice_add (k : Frequency) (z : Plane) :
     quotientPoint (latticePoint k + z) = quotientPoint z := by
   simp [quotientPoint, latticePoint, circle_int_eq_zero]
 
-/-- Each translated half-open unit square is an injective coordinate chart
-for the quotient to the torus. -/
-theorem quotientPoint_injOn_square (a : Plane) :
-    InjOn quotientPoint (Ico a.1 (a.1 + 1) ×ˢ Ico a.2 (a.2 + 1)) := by
-  intro x hx y hy hxy
-  apply Prod.ext
-  · exact (AddCircle.coe_eq_coe_iff_of_mem_Ico hx.1 hy.1).mp (congrArg Prod.fst hxy)
-  · exact (AddCircle.coe_eq_coe_iff_of_mem_Ico hx.2 hy.2).mp (congrArg Prod.snd hxy)
 
 
 

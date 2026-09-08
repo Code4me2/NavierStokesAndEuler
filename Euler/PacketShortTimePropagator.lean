@@ -21,7 +21,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteS
 private local instance : NormedRing (U →L[ℝ] U) := inferInstance
 private local instance : NormedRing (Space →ᵇ U →L[ℝ] U) := inferInstance
 
-def shortTimeRate (C C₁ : ℝ) : ℝ := 2*(1+3*C^2)^2*C*C₁
 
 
 variable (D : Data U)

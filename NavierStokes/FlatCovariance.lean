@@ -132,25 +132,6 @@ theorem primaryAmplitude_factor (σ : ℝ) (κ : Vec2)
     Real.sqrt_mul (FlatCutoff.edge_nonneg (σ - κ i) x), sqrt_edge]
   rfl
 
-/-- The signed update retains the explicitly computed exponential margin;
-the target `R` may have either sign. -/
-theorem signedAmplitude_factor (σ τ : ℝ) (κ : Vec2)
-    (G : ℝ → Mat2) (T R : ℝ → Vec2) {x : ℝ} (hG : (G x).det ≠ 0) (i : Fin 2) :
-    signedAmplitude σ τ κ G T R x i = edge (τ - (σ + κ i) / 2) x *
-      (SmoothCovariance.weights (G x) (R x) i /
-        (2 * SmoothCovariance.amplitudes (G x) (T x) i)) := by
-  unfold signedAmplitude
-  rw [inverseCoefficients_factor τ κ G R hG i, primaryAmplitude_factor σ κ G T hG i]
-  calc
-    _ = (edge (τ - κ i) x / edge ((σ - κ i) / 2) x) *
-        (SmoothCovariance.weights (G x) (R x) i /
-          (2 * SmoothCovariance.amplitudes (G x) (T x) i)) := by
-      simp only [div_eq_mul_inv, _root_.mul_inv_rev]
-      ring
-    _ = _ := by
-      rw [congrFun (FlatCutoff.edge_div_edge (τ - κ i) ((σ - κ i) / 2)) x]
-      congr 2
-      ring
 
 
 
@@ -214,20 +195,6 @@ variable {G : ℝ → Mat2} {T R : ℝ → Vec2}
 
 
 
-/-- The normalized signed quotient is smooth because its denominator is
-proved strictly positive from the explicit normalized cone. -/
-theorem signed_normal_contDiffOn
-    (hG : ∀ i j, ContDiffOn ℝ ∞ (fun x => G x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hR : ∀ i, ContDiffOn ℝ ∞ (fun x => R x i) s)
-    (hcone : ∀ x ∈ s, SmoothCovariance.StrictCone (G x) (T x)) (i : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => SmoothCovariance.weights (G x) (R x) i /
-      (2 * SmoothCovariance.amplitudes (G x) (T x) i)) s := by
-  apply (SmoothCovariance.contDiffOn_weights hG hR
-    (fun x hx => (hcone x hx).det_ne_zero) i).div
-      (contDiffOn_const.mul (SmoothCovariance.contDiffOn_amplitudes hG hT hcone i))
-  intro x hx
-  exact mul_ne_zero (by norm_num) (ne_of_gt ((hcone x hx).amplitudes_pos i))
 
 
 

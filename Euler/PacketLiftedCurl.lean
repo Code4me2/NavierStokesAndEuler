@@ -79,23 +79,7 @@ theorem liftedCurl_eq_tests (κ : ℝ) (m : Vector3) (Q : LiftDomain period → 
         fieldDerivative period (coordinateDirection κ m 0) (fun y => Q y 1) x
     ring
 
-theorem liftedCurl_smooth (κ : ℝ) (m : Vector3) (Q : LiftDomain period → Vector3)
-    (hQ : ∀ x, ContDiff ℝ ∞ (localFieldLift period Q x)) (x : LiftDomain period) :
-    ContDiff ℝ ∞ (localFieldLift period (liftedCurl period κ m Q) x) := by
-  rw [liftedCurl_eq_tests period κ m Q hQ]
-  exact ((curlTest_smooth period κ m 0 1 _ (component_smooth period Q hQ 2) x).add
-    (curlTest_smooth period κ m 1 2 _ (component_smooth period Q hQ 0) x)).add
-    (curlTest_smooth period κ m 2 0 _ (component_smooth period Q hQ 1) x)
 
-theorem scalar_fieldDerivative_sub (a : LiftTangent) (f g : LiftDomain period → ℝ)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) (x : LiftDomain period) :
-    fieldDerivative period a (fun y => f y - g y) x =
-      fieldDerivative period a f x - fieldDerivative period a g x := by
-  change (fderiv ℝ (fun z => localFieldLift period f x z - localFieldLift period g x z) 0) a = _
-  rw [fderiv_fun_sub (((hf x).differentiable (by simp)) 0)
-    (((hg x).differentiable (by simp)) 0)]
-  rfl
 
 
 

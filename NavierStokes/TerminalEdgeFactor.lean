@@ -299,11 +299,6 @@ noncomputable def correctionCoefficient (C : ℝ) (d : TailData) (y0 : ℝ)
   (radius d y0 y * carrier C d y0 y - radius d y0 y ^ 2 * carrierRadial C d y0 y) *
     taperSlopeFactor d y.2
 
-theorem boundaryCoefficient_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (boundaryCoefficient C d y0) :=
-  (((contDiff_const.mul (carrier_contDiff C d y0)).div (radius_contDiff d y0)
-    (fun y => (radius_pos d y0 y).ne')).mul
-      ((taperSlopeFactor_contDiff d).comp contDiff_snd))
 
 theorem timeCoefficient_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
     ContDiff ℝ ∞ (timeCoefficient C d y0) :=

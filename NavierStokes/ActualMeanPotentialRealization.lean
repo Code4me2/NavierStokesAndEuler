@@ -474,11 +474,6 @@ theorem initializedBands_mean {ι : Type}
 
 /-! ## Finite prefixes of the literal iteration -/
 
-noncomputable def meanIncrementComponents {ι : Type} (p : CycleParameters ι)
-    (v : CycleCoefficients ι) (c : Context Point) (u : State Point) (n : ℕ) :
-    CyclePhysicalPrefixes.Components :=
-  CyclePhysicalPrefixes.meridionalComponents (p.temporalIncrement v c u) n +
-    CyclePhysicalPrefixes.meridionalComponents (p.rankIncrement v c u) n
 
 
 

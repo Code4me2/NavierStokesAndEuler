@@ -84,10 +84,6 @@ theorem pairedBlock_band {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D 
   intro n l hl
   simp [pairedBlock] at hl
 
-theorem pairedBlock_symmetric {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ)
-    (kp : ℕ → ℤ) (a : ℕ → D → HarmonicCalculus.ComplexVector) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((pairedBlock j k Φ kp a).velocity n i) :=
-  conjugatePair_symmetric j (fun x => a n x i)
 
 theorem pairedBlock_evaluation {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ)
     (kp : ℕ → ℤ) (a : ℕ → D → HarmonicCalculus.ComplexVector) (n : ℕ) (p : D × ℝ) (i : Fin 3) :
@@ -317,9 +313,6 @@ theorem GaussianData.block_represents (g : GaussianData D)
   gaussianBlock_represents g.directions g.harmonic k Φ g.phase kp
     hg.1 hg.2.1 hg.2.2.1 hg.2.2.2.1 hg.2.2.2.2
 
-noncomputable def accumulatedGaussianBlock (steps : ℕ) (g : ℕ → GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) : HarmonicBlock D :=
-  sumBlock (Finset.range steps) k Φ kp (fun s => (g s).block k Φ kp)
 
 
 
@@ -331,12 +324,6 @@ section AliasStages
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- Actual saved aliases after finitely many temporal stages and the current
-pressure reconstruction. The state path may be produced by any correction rule. -/
-noncomputable def accumulatedAlias (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S)) : Oscillation (Lift S) :=
-  CorrectionState.pressureAlias r c (u steps) +
-    ∑ s ∈ Finset.range steps, CorrectionState.temporalAlias r h c (u s)
 
 
 
@@ -355,18 +342,9 @@ section AxisymmetricBase
 
 open ProblemStatement AxisymmetricFields
 
-/-- Cartesian location of the cylindrical point `(r,z,θ)`. -/
-noncomputable def polarSpace (r z θ : ℝ) : Space :=
-  AxisymmetricResidual.pack (r * Real.cos θ) (r * Real.sin θ) z
-
-noncomputable def polarProfile (q : ProfilePoint) : ProfilePoint :=
-  (q.1, (q.2.1 ^ 2 / 2, q.2.2))
 
 
-/-- Components in the actual orthonormal radial/angular/axial frame. -/
-noncomputable def cylindricalComponents (θ : ℝ) (v : Space) : Fin 3 → ℝ :=
-  ![Real.cos θ * v 0 + Real.sin θ * v 1,
-    -Real.sin θ * v 0 + Real.cos θ * v 1, v 2]
+
 
 
 

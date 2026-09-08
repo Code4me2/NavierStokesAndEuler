@@ -760,11 +760,6 @@ def iteratedRingCommutator {R : Type*} [Ring R] (D T : R) : ℕ → R
   | 0 => T
   | n + 1 => D * iteratedRingCommutator D T n - iteratedRingCommutator D T n * D
 
-theorem mul_iteratedRingCommutator {R : Type*} [Ring R] (D T : R) (n : ℕ) :
-    D * iteratedRingCommutator D T n =
-      iteratedRingCommutator D T n * D + iteratedRingCommutator D T (n + 1) := by
-  simp only [iteratedRingCommutator]
-  abel
 
 
 
@@ -1718,10 +1713,6 @@ variable {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
 def fieldDerivative (a : LiftTangent) (f : LiftDomain period → W)
     (x : LiftDomain period) : W := fderiv ℝ (localFieldLift period f x) 0 a
 
-/-- The actual directional transport operator on a cylinder field. -/
-def fieldTransport (b : LiftDomain period → LiftTangent)
-    (f : LiftDomain period → W) (x : LiftDomain period) : W :=
-  fderiv ℝ (localFieldLift period f x) 0 (b x)
 
 omit [NormedAddCommGroup W] [NormedSpace ℝ W] in
 theorem localFieldLift_shift (f : LiftDomain period → W) (x : LiftDomain period)
@@ -4237,25 +4228,6 @@ theorem pressure_word_inverse {s n : ℕ} {A : SmoothCoefficient period}
     rw [map_sub, map_sub, hp]
     abel
 
-/-- The rigorous triangular pressure estimate before its product commutator is summed. -/
-theorem pressure_word_norm_le {s n : ℕ} {A : SmoothCoefficient period}
-    {f : LiftL2 period} (K : CoefficientJet period directions s A)
-    (J : EulerSpatialSobolevInverse.SpatialJet period directions s f)
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v, v⟫_ℝ)
-    (hn : n ≤ s) (w : Fin n → Fin 4) :
-    ‖(J.solvePressure K κ m c hc hpos).word w‖ ≤ c⁻¹ *
-      (‖J.word w‖ + ‖(EulerSpatialSobolevInverse.SpatialJet.multiply K
-        (J.solvePressure K κ m c hc hpos)).word w -
-          A.operator ((J.solvePressure K κ m c hc hpos).word w)‖) := by
-  calc
-    _ = ‖A.pressure κ m c hc hpos (J.word w -
-        ((EulerSpatialSobolevInverse.SpatialJet.multiply K (J.solvePressure K κ m c hc hpos)).word w -
-          A.operator ((J.solvePressure K κ m c hc hpos).word w)))‖ := by
-      congr 1
-      exact pressure_word_inverse K J κ m c hc hpos hn w
-    _ ≤ _ := (A.pressure_norm κ m c hc hpos _).trans
-      (mul_le_mul_of_nonneg_left (norm_sub_le _ _) (inv_nonneg.mpr hc.le))
 
 end SpatialJet
 
@@ -4584,56 +4556,6 @@ theorem commutatorLevel_succ_le {s n : ℕ} {A : SmoothCoefficient period} {f : 
         (SpatialJet.multiply (lowerA i) (SpatialJet.succ df lowerF hF).truncate).word w := by abel
   rw [heq]
   exact norm_add_le _ _
-/-- Sharp all-order commutator estimate, with only positive coefficient derivative orders. -/
-theorem commutatorLevel_le {s n : ℕ} {A : SmoothCoefficient period} {f : LiftL2 period}
-    (K : CoefficientJet period directions s A) (J : SpatialJet period directions s f)
-    (hn : n ≤ s) :
-    commutatorLevel K J n ≤
-      commutatorConvolution (boundLevel period K) (levelNorm period J) n := by
-  induction n generalizing s A f with
-  | zero => simp [commutatorLevel, commutatorConvolution_eq_sum]
-  | succ n ih =>
-    cases s with
-    | zero => omega
-    | succ s =>
-      cases K with
-      | succ dA lowerA hA =>
-        cases J with
-        | succ df lowerF hF =>
-          let K := CoefficientJet.succ dA lowerA hA
-          let J := SpatialJet.succ df lowerF hF
-          have hterm : ∀ i,
-              commutatorLevel K.truncate (lowerF i) n +
-                levelNorm period (SpatialJet.multiply (lowerA i) J.truncate) n ≤
-              commutatorConvolution (boundLevel period K) (levelNorm period (lowerF i)) n +
-                leibnizConvolution (boundLevel period (lowerA i)) (levelNorm period J) n := by
-            intro i
-            have hleft := ih K.truncate (lowerF i) (by omega : n ≤ s)
-            have hright := multiply_levelNorm_le (lowerA i) J.truncate (by omega : n ≤ s)
-            have heqL := commutatorConvolution_congr (boundLevel period K.truncate)
-              (levelNorm period (lowerF i)) (boundLevel period K) (levelNorm period (lowerF i)) n
-              (fun l hl => boundLevel_truncate K (by omega)) (fun _ _ => rfl)
-            have heqR := leibnizConvolution_congr (boundLevel period (lowerA i))
-              (levelNorm period J.truncate) (boundLevel period (lowerA i)) (levelNorm period J) n
-              (fun _ _ => rfl) (fun l hl => levelNorm_truncate J (by omega))
-            rw [heqL] at hleft
-            rw [heqR] at hright
-            exact add_le_add hleft hright
-          calc
-            _ ≤ ∑ i, (commutatorLevel K.truncate (lowerF i) n +
-                levelNorm period (SpatialJet.multiply (lowerA i) J.truncate) n) :=
-              commutatorLevel_succ_le dA lowerA hA df lowerF hF
-            _ ≤ ∑ i, (commutatorConvolution (boundLevel period K) (levelNorm period (lowerF i)) n +
-                leibnizConvolution (boundLevel period (lowerA i)) (levelNorm period J) n) :=
-              Finset.sum_le_sum fun i _ => hterm i
-            _ = commutatorConvolution (boundLevel period K)
-                  (fun l => ∑ i, levelNorm period (lowerF i) l) n +
-                leibnizConvolution (fun l => ∑ i, boundLevel period (lowerA i) l)
-                  (levelNorm period J) n := by
-              rw [Finset.sum_add_distrib, sum_commutatorConvolution_right, sum_leibnizConvolution_left]
-            _ = commutatorConvolution (boundLevel period K) (levelNorm period J) (n + 1) := by
-              rw [commutatorConvolution_succ]
-              congr 2 <;> funext l <;> simp only [K, J, levelNorm, boundLevel]
 
 
 
@@ -4738,30 +4660,8 @@ theorem compactSupport_sum (f : ℕ → Space → Space) (K : Set Space) (hK : I
     HasCompactSupport (fun x => ∑' n, f n x) :=
   hK.of_isClosed_subset (isClosed_tsupport _) (tsupport_sum_subset f K hK.isClosed hsupp)
 
-/-- The divergence of the series is the series of the divergences. -/
-theorem divergence_sum (f : ℕ → Space → Space) (v : ℕ → ℕ → ℝ)
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (hv : ∀ k, Summable (v k))
-    (hb : ∀ k n x, ‖iteratedFDeriv ℝ k (f n) x‖ ≤ v k n) (x : Space) :
-    divergence (fun y => ∑' n, f n y) x = ∑' n, divergence (f n) x := by
-  have hd : ∀ n y, ‖fderiv ℝ (f n) y‖ ≤ v 1 n := by
-    intro n y
-    simpa only [norm_iteratedFDeriv_one] using hb 1 n y
-  have hsd : Summable (fun n => fderiv ℝ (f n) x) :=
-    Summable.of_norm_bounded (hv 1) (fun n => hd n x)
-  simp only [divergence, ← coordinateTrace_eq_linearTrace]
-  rw [fderiv_tsum_apply (hv 1) (fun n => (hf n).differentiable (by simp)) hd
-    (summable_values f v hv hb (0 : Space)) x]
-  exact coordinateTrace.map_tsum hsd
 
 
-/-- The common-support smooth limit belongs to every `L^p`, in particular to `L²`. -/
-theorem memLp_sum (f : ℕ → Space → Space) (v : ℕ → ℕ → ℝ)
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (hv : ∀ k, Summable (v k))
-    (hb : ∀ k n x, ‖iteratedFDeriv ℝ k (f n) x‖ ≤ v k n)
-    (K : Set Space) (hK : IsCompact K) (hsupp : ∀ n, Function.support (f n) ⊆ K)
-    (p : ℝ≥0∞) : MemLp (fun x => ∑' n, f n x) p volume :=
-  (contDiff_sum f v hf hv hb).continuous.memLp_of_hasCompactSupport
-    (compactSupport_sum f K hK hsupp)
 
 
 
@@ -5015,13 +4915,6 @@ theorem complexifySchwartz_iteratedFDeriv_norm (d q k : ℕ)
   change ‖iteratedFDeriv ℝ k ((complexify q) ∘ f) x‖ = _
   exact (complexify q).norm_iteratedFDeriv_comp_left f.smooth'.contDiffAt (by simp)
 
-/-- Sobolev embedding for genuine real Euclidean vector fields and all derivative orders. -/
-theorem real_iteratedFDeriv_norm_le_sobolevNorm (d q k : ℕ) (s : ℝ)
-    (hs : (d : ℝ) < 2 * s) (f : 𝓢(Domain d, Domain q)) (x : Domain d) :
-    ‖iteratedFDeriv ℝ k f x‖ ≤
-      embeddingConstant d s hs * (2 * Real.pi) ^ k * realSobolevNorm d q (s + k) f := by
-  rw [← complexifySchwartz_iteratedFDeriv_norm d q k f x]
-  exact iteratedFDeriv_norm_le_sobolevNorm d k s hs (complexifySchwartz d q f) x
 
 
 
@@ -5109,22 +5002,6 @@ theorem directional_L2_le (d n : ℕ) (v : Domain d) (f : 𝓢(Domain d, ℂ)) :
   rw [← sobolevNorm_zero]
   simpa [directional] using sobolevNorm_iteratedLineDeriv_le d n 0 f (fun _ => v)
 
-theorem besselWeight_six_le_pure_six (d : ℕ) (ξ : Domain d) :
-    besselWeight d 6 ξ ≤ ((d : ℝ) + 1) ^ 2 * (1 + ∑ i, ‖ξ i‖ ^ 6) := by
-  let a : Option (Fin d) → ℝ := fun i => match i with
-    | none => 1
-    | some i => ‖ξ i‖ ^ 2
-  have ha : ∀ i ∈ (Finset.univ : Finset (Option (Fin d))), 0 ≤ a i := by
-    intro i _
-    cases i <;> simp only [a] <;> positivity
-  have h := pow_sum_le_card_mul_sum_pow ha 2
-  have he : besselWeight d 6 ξ = (1 + ∑ i, ‖ξ i‖ ^ 2) ^ 3 := by
-    norm_num [besselWeight, EuclideanSpace.norm_sq_eq]
-  rw [he]
-  have hp (i : Fin d) : ‖ξ i‖ ^ 6 = (ξ i) ^ 6 := by
-    exact (by decide : Even 6).pow_abs (ξ i)
-  simp only [hp]
-  simpa [a, Fintype.sum_option, ← pow_mul, Nat.mul_comm] using h
 
 theorem fourier_directional_norm (d n : ℕ) (v : Domain d)
     (f : 𝓢(Domain d, ℂ)) (ξ : Domain d) :
@@ -5237,21 +5114,6 @@ theorem product_directional_L2_le_left (d j k : ℕ) (hd : (d : ℝ) < 2 * 3)
       C * p ^ (j+k) * A * B := by rw [pow_add]; ring
   exact hA.trans (hB.trans_eq (harith _ _ _ _))
 
-theorem product_directional_L2_le (d j k : ℕ) (hd : (d : ℝ) < 2 * 3) (hjk : j+k ≤ 6)
-    (v : Domain d) (hv : ‖v‖ ≤ 1) (f g : 𝓢(Domain d, ℂ)) :
-    ‖(product d (directional d j v f) (directional d k v g)).toLp 2‖ ≤
-      embeddingConstant d 3 hd * (2 * Real.pi) ^ (j+k) *
-        sobolevNorm d 6 f * sobolevNorm d 6 g := by
-  by_cases hj : j ≤ 3
-  · exact product_directional_L2_le_left d j k hd hj (by omega) v hv f g
-  · have he : product d (directional d j v f) (directional d k v g) =
-        product d (directional d k v g) (directional d j v f) := by
-      ext x
-      simp [mul_comm]
-    rw [he]
-    have h := product_directional_L2_le_left d k j hd (by omega) (by omega) v hv g f
-    rw [Nat.add_comm k j] at h
-    convert h using 1; ring
 
 
 
@@ -5274,38 +5136,7 @@ open MeasureTheory FourierTransform EulerSobolev EulerSobolevProducts
 open scoped SchwartzMap ENNReal ContDiff LineDeriv
 
 
-theorem directional_sup_le_H5 (d j : ℕ) (hd : (d : ℝ) < 2 * 3) (hj : j ≤ 2)
-    (v : Domain d) (hv : ‖v‖ ≤ 1) (f : 𝓢(Domain d, ℂ)) (x : Domain d) :
-    ‖directional d j v f x‖ ≤
-      embeddingConstant d 3 hd * (2 * Real.pi) ^ j * sobolevNorm d 5 f := by
-  have hC : 0 ≤ embeddingConstant d 3 hd := norm_nonneg _
-  have hS : 0 ≤ sobolevNorm d (3+j) f := norm_nonneg _
-  have hb := sobolevNorm_iteratedLineDeriv_le d j 3 f (fun _ : Fin j => v)
-  simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at hb
-  have hvp : ‖v‖ ^ j ≤ 1 := pow_le_one₀ (norm_nonneg _) hv
-  have hs : sobolevNorm d (3 + j) f ≤ sobolevNorm d 5 f :=
-    sobolevNorm_mono d (by exact_mod_cast (show 3 + j ≤ 5 by omega)) f
-  calc
-    _ ≤ embeddingConstant d 3 hd * sobolevNorm d 3 (directional d j v f) :=
-      norm_apply_le_sobolevNorm d 3 hd _ x
-    _ ≤ embeddingConstant d 3 hd *
-        ((2 * Real.pi) ^ j * ‖v‖ ^ j * sobolevNorm d (3 + j) f) :=
-      mul_le_mul_of_nonneg_left hb hC
-    _ ≤ embeddingConstant d 3 hd * ((2 * Real.pi) ^ j * 1 * sobolevNorm d 5 f) := by
-      gcongr
-    _ = _ := by ring
 
-theorem directional_L2_le_H5 (d j : ℕ) (hj : j ≤ 5) (v : Domain d) (hv : ‖v‖ ≤ 1)
-    (f : 𝓢(Domain d, ℂ)) :
-    ‖(directional d j v f).toLp 2‖ ≤ (2 * Real.pi) ^ j * sobolevNorm d 5 f := by
-  have hvp : ‖v‖ ^ j ≤ 1 := pow_le_one₀ (norm_nonneg _) hv
-  have hS : 0 ≤ sobolevNorm d j f := norm_nonneg _
-  have hmono : sobolevNorm d j f ≤ sobolevNorm d 5 f :=
-    sobolevNorm_mono d (s := (j : ℝ)) (t := 5) (by exact_mod_cast hj) f
-  calc
-    _ ≤ (2 * Real.pi) ^ j * ‖v‖ ^ j * sobolevNorm d j f := directional_L2_le d j v f
-    _ ≤ (2 * Real.pi) ^ j * 1 * sobolevNorm d 5 f := by gcongr
-    _ = _ := by ring
 
 attribute [local irreducible] sobolevNorm embeddingConstant
 
@@ -6743,33 +6574,8 @@ theorem pureFieldDerivative_eq_iteratedDeriv (n : ℕ) (i : Fin 4) (f : LiftDoma
   rw [hB]
   simp [L, ContinuousMultilinearMap.compContinuousLinearMap_apply]
 
-theorem pureFieldDerivative_product (n : ℕ) (i : Fin 4) (f g : LiftDomain period → ℂ)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    pureFieldDerivative period n i (f*g) =
-      ∑ j ∈ Finset.range (n+1), (n.choose j : ℂ) •
-        (pureFieldDerivative period j i f * pureFieldDerivative period (n-j) i g) := by
-  funext x
-  rw [pureFieldDerivative_eq_iteratedDeriv period n i (f*g) (product_smooth period f g hf hg)]
-  have hline : ContDiff ℝ ∞ (fun t : ℝ => t • (EuclideanSpace.single i 1 : Domain 4)) :=
-    contDiff_id.smul contDiff_const
-  have hF := ((euclideanLift_smooth period f hf x).comp hline).of_le
-    (by simp : (n : ℕ∞ω) ≤ (∞ : ℕ∞ω))
-  have hG := ((euclideanLift_smooth period g hg x).comp hline).of_le
-    (by simp : (n : ℕ∞ω) ≤ (∞ : ℕ∞ω))
-  have h := iteratedDeriv_mul (x := (0 : ℝ)) hF.contDiffAt hG.contDiffAt
-  have he : (fun t : ℝ => euclideanLift period (f*g) x (t • EuclideanSpace.single i 1)) =
-      (euclideanLift period f x ∘ (fun t : ℝ => t • EuclideanSpace.single i 1)) *
-      (euclideanLift period g x ∘ (fun t : ℝ => t • EuclideanSpace.single i 1)) := rfl
-  rw [he]
-  simpa only [Function.comp_def, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.mul_apply,
-    pureFieldDerivative_eq_iteratedDeriv period _ i f hf,
-    pureFieldDerivative_eq_iteratedDeriv period _ i g hg, mul_assoc] using h
 
 
-/-- The actual commutator of pure coordinate differentiation with multiplication. -/
-noncomputable def coordinateCommutator (n : ℕ) (i : Fin 4) (b h : LiftDomain period → ℂ) :=
-  pureFieldDerivative period n i (b*h) - b * pureFieldDerivative period n i h
 
 
 variable [Fact (0 < period)]
@@ -6793,19 +6599,6 @@ theorem word_H3_le_H5 {m : ℕ} (hm : m ≤ 2) (w : Fin m → Fin 4)
     ring
   exact hA.trans_eq (he _)
 
-theorem pureFieldDerivative_le_H5 {m : ℕ} (hm : m ≤ 2) (i : Fin 4)
-    (f : LiftDomain period → ℂ) (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hfL2 : ∀ j ≤ 5, ∀ w : Fin j → Fin 4,
-      MemLp (iteratedFieldDerivative period w f) 2 (liftMeasure period)) (x : LiftDomain period) :
-    ‖pureFieldDerivative period m i f x‖ ≤
-      (85 * cylinderEmbeddingConstant period) * liftSobolevNorm period 5 f := by
-  have hA := cylinder_pointwise_le_H3 period (pureFieldDerivative period m i f)
-    (iteratedFieldDerivative_smooth period _ f hf)
-    (fun j hj v => word_memLp period (by omega : m+j ≤ 5) v (fun _ => i) f hfL2) x
-  have hB := mul_le_mul_of_nonneg_left (word_H3_le_H5 period hm (fun _ => i) f)
-    (cylinderEmbeddingConstant_nonneg period)
-  have he (C A : ℝ) : C*(85*A) = (85*C)*A := by ring
-  exact hA.trans (hB.trans_eq (he _ _))
 
 /-- An L² envelope depending only on five derivatives of each argument. -/
 noncomputable def commutatorEnvelope (f g : LiftDomain period → ℂ) : LiftDomain period → ℝ :=
@@ -6817,14 +6610,6 @@ theorem commutatorEnvelope_nonneg (f g : LiftDomain period → ℂ) (x : LiftDom
   add_nonneg (mul_nonneg (liftSobolevNorm_nonneg period 5 f) (totalMagnitude_nonneg period 5 g x))
     (mul_nonneg (liftSobolevNorm_nonneg period 5 g) (totalMagnitude_nonneg period 5 f x))
 
-omit [Fact (0 < period)] in
-theorem pureFieldDerivative_le_total {n : ℕ} (hn : n ≤ 5) (i : Fin 4)
-    (f : LiftDomain period → ℂ) (x : LiftDomain period) :
-    ‖pureFieldDerivative period n i f x‖ ≤ totalMagnitude period 5 f x := by
-  have hA : ‖pureFieldDerivative period n i f x‖ ≤ wordMagnitude period n f x :=
-    Finset.single_le_sum (f := fun w : Fin n → Fin 4 => ‖iteratedFieldDerivative period w f x‖)
-      (fun _ _ => norm_nonneg _) (Finset.mem_univ (fun _ => i))
-  exact hA.trans (wordMagnitude_le_total period 5 n hn f x)
 
 
 
@@ -6849,30 +6634,7 @@ open scoped ContDiff ENNReal
 
 variable (period : ℝ) [Fact (0 < period)]
 
-omit [Fact (0 < period)] in
-theorem iteratedFieldDerivative_compact {n : ℕ} (w : Fin n → Fin 4)
-    (f : LiftDomain period → Vector3) (hfc : HasCompactSupport f) :
-    HasCompactSupport (iteratedFieldDerivative period w f) := by
-  induction n with
-  | zero => exact hfc
-  | succ n ih => exact fieldDerivative_compact period _ _ (ih (Fin.tail w))
 
-omit [Fact (0 < period)] in
-/-- Splitting off the last direction agrees with the jet's derivative-word convention. -/
-theorem iteratedFieldDerivative_init_last {n : ℕ} (w : Fin (n+1) → Fin 4)
-    (f : LiftDomain period → Vector3) :
-    iteratedFieldDerivative period w f = iteratedFieldDerivative period (Fin.init w)
-      (fieldDerivative period (standardDirection (w (Fin.last n))) f) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    change fieldDerivative period (standardDirection (w 0))
-      (iteratedFieldDerivative period (Fin.tail w) f) =
-      fieldDerivative period (standardDirection (w 0))
-        (iteratedFieldDerivative period (Fin.tail (Fin.init w))
-          (fieldDerivative period (standardDirection (w (Fin.last (n+1)))) f))
-    rw [ih (Fin.tail w)]
-    rfl
 
 theorem translation_hasDerivAt_smoothFieldLp (a : LiftTangent)
     (f : LiftDomain period → Vector3) (hfc : HasCompactSupport f)
@@ -6895,13 +6657,6 @@ noncomputable def compactSmoothJet (n : ℕ) (f : LiftDomain period → Vector3)
         (fieldDerivative_compact period _ f hfc) (fieldDerivative_smooth period _ f hf))
       (fun i => translation_hasDerivAt_smoothFieldLp period (standardDirection i) f hfc hf)
 
-theorem smoothFieldLp_congr (f g : LiftDomain period → Vector3) (he : f = g)
-    (hfc : HasCompactSupport f) (hgc : HasCompactSupport g)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    smoothFieldLp period f hfc hf = smoothFieldLp period g hgc hg := by
-  subst g
-  rfl
 
 
 
@@ -7862,40 +7617,7 @@ theorem mixedCommutator_pointwise_le (l : List (Fin 4)) (hl : l.length ≤ 6)
   exact hA.trans hB
 
 
-/-- The full mixed coordinate commutator bound, with no derivative loss. -/
-theorem mixed_transport_commutator_L2 (l : List (Fin 4)) (hl : l.length ≤ 6)
-    (b h : LiftDomain period → ℂ)
-    (hb : ∀ x, ContDiff ℝ ∞ (localFieldLift period b x))
-    (hh : ∀ x, ContDiff ℝ ∞ (localFieldLift period h x))
-    (hbL2 : ∀ i : Fin 4, ∀ r ≤ 5, ∀ w : Fin r → Fin 4,
-      MemLp (iteratedFieldDerivative period w (fieldDerivative period (standardDirection i) b)) 2 (liftMeasure period))
-    (hhL2 : ∀ r ≤ 5, ∀ w : Fin r → Fin 4, MemLp (iteratedFieldDerivative period w h) 2 (liftMeasure period)) :
-    (eLpNorm (mixedCommutator period l b h) 2 (liftMeasure period)).toReal ≤
-      (12 * mixedProductConstant period) * gradientSobolevNorm period b * liftSobolevNorm period 5 h := by
-  have hq := mixedEnvelope_memLp period b h hbL2 hhL2
-  have hA := eLpNorm_le_mul_eLpNorm_of_ae_le_mul (μ := liftMeasure period)
-    (Filter.Eventually.of_forall (fun x => show ‖mixedCommutator period l b h x‖ ≤
-      (6 * mixedProductConstant period) * ‖mixedEnvelope period b h x‖ by
-      rw [Real.norm_of_nonneg (mixedEnvelope_nonneg period b h x)]
-      exact mixedCommutator_pointwise_le period l hl b h hb hh hbL2 hhL2 x)) (2 : ℝ≥0∞)
-  have hc : 0 ≤ 6 * mixedProductConstant period := mul_nonneg (by norm_num) (mixedProductConstant_nonneg period)
-  have hfin : ENNReal.ofReal (6 * mixedProductConstant period) *
-      eLpNorm (mixedEnvelope period b h) 2 (liftMeasure period) ≠ ⊤ := by finiteness
-  have hB := ENNReal.toReal_mono hfin hA
-  simp only [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc] at hB
-  have hC := mul_le_mul_of_nonneg_left (mixedEnvelope_L2_le period b h hbL2 hhL2) hc
-  rw [Lp.norm_toLp] at hC
-  have he (C A B : ℝ) : (6*C)*(2*A*B)=(12*C)*A*B := by ring
-  exact hB.trans (hC.trans_eq (he _ _ _))
 
-omit [Fact (0 < period)] in
-theorem listDerivative_ofFn {n : ℕ} (w : Fin n → Fin 4) (f : LiftDomain period → ℂ) :
-    listDerivative period (List.ofFn w) f = iteratedFieldDerivative period w f := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [List.ofFn_succ, listDerivative_cons, ih]
-    rfl
 
 
 end EulerMixedCylinderTransport
@@ -7985,30 +7707,11 @@ open scoped ENNReal ContDiff
 
 variable (period : ℝ) [Fact (0 < period)]
 
-/-- The sum of H⁵ norms of the four real coordinate derivatives of a scalar coefficient. -/
-noncomputable def realGradientSobolevNorm (b : LiftDomain period → ℝ) : ℝ :=
-  ∑ i : Fin 4, liftSobolevNorm period 5 (fieldDerivative period (standardDirection i) b)
 
 
-omit [Fact (0 < period)] in
-theorem complexField_fieldDerivative (i : Fin 4) (b : LiftDomain period → ℝ)
-    (hb : ∀ x, ContDiff ℝ ∞ (localFieldLift period b x)) :
-    fieldDerivative period (standardDirection i) (complexField period b) =
-      complexField period (fieldDerivative period (standardDirection i) b) :=
-  fieldDerivative_postcomp period Complex.ofRealCLM (standardDirection i) b hb
 
 
-omit [Fact (0 < period)] in
-theorem complexField_mul (f g : LiftDomain period → ℝ) :
-    complexField period f * complexField period g = complexField period (f*g) := by
-  funext x
-  exact (Complex.ofReal_mul _ _).symm
 
-omit [Fact (0 < period)] in
-theorem complexField_sub (f g : LiftDomain period → ℝ) :
-    complexField period f - complexField period g = complexField period (f-g) := by
-  funext x
-  exact (Complex.ofReal_sub _ _).symm
 
 
 
@@ -14994,80 +14697,6 @@ theorem continuousOn_velocity_rhs
   · exact ((((hCc 1 0).mul hU).add ((hCc 1 1).mul hV)).add
       ((hCc 1 2).mul hW)).neg.add (((hQ.const_mul (2 * ε ^ 2)).mul hJ).div hD hDne)
 
-/-- The complete finite-dimensional stability bridge: actual ray and
-velocity equations with controlled matrix coefficients imply the relative
-`Θ^29` error.  All denominator and Duhamel bounds are derived above. -/
-theorem controlled_velocity_relative_error
-    {σ Θ T e ε lam : ℝ} {F F₁ G G₁ Z Z₁ U V P Q N : ℝ → ℝ}
-    {R A C : ℝ → Fin 3 → Fin 3 → ℝ}
-    (hσ : 0 < σ) (hσsmall : σ ≤ 1 / 4) (hΘ : 1 ≤ Θ)
-    (hT0 : 0 ≤ T) (hT : T ≤ Θ) (he : 0 ≤ e) (hε : 0 ≤ ε) (hεe : ε ≤ e)
-    (hlam : 0 ≤ lam) (hsmall : 8000000 * e * Θ ^ 21 ≤ 1)
-    (hF : ∀ t, 0 ≤ t → HasDerivAt F (F₁ t) t)
-    (hG : ∀ t, 0 ≤ t → HasDerivAt G (G₁ t) t)
-    (hfluxF : ∀ t, 0 ≤ t →
-      HasDerivAt (fun s => (1 + (σ ^ 2 * s ^ 2) ^ 2) * F₁ s)
-        (2 * (1 - σ ^ 2 * (σ ^ 2 * t ^ 2)) * F t) t)
-    (hfluxG : ∀ t, 0 ≤ t →
-      HasDerivAt (fun s => (1 + (σ ^ 2 * s ^ 2) ^ 2) * G₁ s)
-        (2 * (1 - σ ^ 2 * (σ ^ 2 * t ^ 2)) * G t) t)
-    (hF0 : F 0 = 1) (hF₁0 : F₁ 0 = 0) (hG₁0 : G₁ 0 = 1)
-    (hRc : ∀ i j, ContinuousOn (fun t => R t i j) (Icc 0 T))
-    (hAc : ∀ i j, ContinuousOn (fun t => A t i j) (Icc 0 T))
-    (hCc : ∀ i j, ContinuousOn (fun t => C t i j) (Icc 0 T))
-    (hP : ∀ t ∈ Icc 0 T, HasDerivAt P
-      (R t 0 0 * P t + R t 0 1 * Q t + R t 0 2 * N t) t)
-    (hQ : ∀ t ∈ Icc 0 T, HasDerivAt Q
-      (R t 1 0 * P t + R t 1 1 * Q t + R t 1 2 * N t) t)
-    (hN : ∀ t ∈ Icc 0 T, HasDerivAt N
-      (R t 2 0 * P t + R t 2 1 * Q t + R t 2 2 * N t) t)
-    (hU : ∀ t ∈ Icc 0 T, HasDerivAt U
-      (velocityFirstRhs (A t) (C t) ε (P t) (Q t) (N t) (U t) (V t)) t)
-    (hV : ∀ t ∈ Icc 0 T, HasDerivAt V
-      (velocitySecondRhs (A t) (C t) ε (P t) (Q t) (N t) (U t) (V t)) t)
-    (hRclose : ∀ t ∈ Icc 0 T, ∀ i j, |R t i j - idealRayEntry (σ ^ 2) i j| ≤ 4 * e)
-    (hAclose : ∀ t ∈ Icc 0 T, ∀ i j, |A t i j - idealVelocityEntry (σ ^ 2) i j| ≤ 3 * e)
-    (hCclose : ∀ t ∈ Icc 0 T, ∀ i j, |C t i j - idealUnprojectedEntry i j| ≤ 5 * e)
-    (hZ : ∀ t ∈ Icc 0 T, HasDerivAt Z (Z₁ t) t)
-    (hfluxZ : ∀ t ∈ Icc 0 T,
-      HasDerivAt (fun s => (1 + (σ ^ 2 * s ^ 2) ^ 2) * Z₁ s)
-        (2 * (1 - σ ^ 2 * (σ ^ 2 * t ^ 2)) * Z t) t)
-    (hrayInitial : norm3 (P 0) (Q 0) (N 0 - 1) ≤ e)
-    (hU0 : U 0 = -lam) (hV0 : V 0 = 1) (hZ0 : Z 0 = 1) (hZ₁0 : Z₁ 0 = lam) :
-    ∀ t ∈ Icc 0 T,
-      |V t - Z t| + |U t + Z₁ t| ≤ 160000000 * e * Θ ^ 29 * (1 + lam) * F t := by
-  have hσsq : σ ^ 2 ≤ 1 := by nlinarith only [hσ, hσsmall]
-  have hgeomSmall : 10000 * e * Θ ^ 5 ≤ 1 := by
-    have hh := pow_le_pow_right₀ hΘ (show 5 ≤ 21 by decide)
-    have hm := mul_le_mul_of_nonneg_left hh he
-    have hp : 0 ≤ e * Θ ^ 21 := by positivity
-    nlinarith only [hsmall, hm, hp]
-  have hcontrol := ray_controlled_velocity_error (sq_nonneg σ) hσsq hΘ hT0 hT he hε hεe
-    hgeomSmall hRc hP hQ hN hRclose hAclose hCclose hrayInitial
-  have hPc : ContinuousOn P (Icc 0 T) := fun t ht => (hP t ht).continuousAt.continuousWithinAt
-  have hQc : ContinuousOn Q (Icc 0 T) := fun t ht => (hQ t ht).continuousAt.continuousWithinAt
-  have hNc : ContinuousOn N (Icc 0 T) := fun t ht => (hN t ht).continuousAt.continuousWithinAt
-  have hUc : ContinuousOn U (Icc 0 T) := fun t ht => (hU t ht).continuousAt.continuousWithinAt
-  have hVc : ContinuousOn V (Icc 0 T) := fun t ht => (hV t ht).continuousAt.continuousWithinAt
-  have hNne : ∀ t ∈ Icc 0 T, N t ≠ 0 := by
-    intro t ht
-    have hh := (hcontrol t ht).1
-    linarith
-  obtain ⟨hU₁c, hV₁c⟩ := continuousOn_velocity_rhs (ε := ε) hAc hCc hPc hQc hNc hUc hVc hNne
-  have hsmall' : 40 * (200000 * e) * Θ ^ 21 ≤ 1 := by nlinarith only [hsmall]
-  have herror : ∀ t ∈ Icc 0 T,
-      |velocityFirstRhs (A t) (C t) ε (P t) (Q t) (N t) (U t) (V t) -
-        idealVelocityFirst (σ ^ 2) t (U t) (V t)| +
-      |velocitySecondRhs (A t) (C t) ε (P t) (Q t) (N t) (U t) (V t) + U t| ≤
-        ((200000 * e) * Θ ^ 12) * (|U t| + |V t|) := by
-    intro t ht
-    exact (hcontrol t ht).2 (U t) (V t)
-  have hh := velocity_relative_error_order29 hσ hσsmall hΘ hT0 hT
-    (by positivity : 0 ≤ 200000 * e) hlam hsmall'
-    hF hG hfluxF hfluxG hF0 hF₁0 hG₁0 hU hV hU₁c hV₁c hZ hfluxZ hU0 hV0 hZ0 hZ₁0 herror
-  intro t ht
-  have h := hh t ht
-  nlinarith only [h]
 
 end EulerPacketBridge
 
@@ -16517,10 +16146,6 @@ open Real EulerPacketGrowth EulerPacketRay EulerPacketBridge EulerPacketFrameSta
 bound and the primary-solution lower comparison. -/
 noncomputable def stabilityConstant : ℝ := 320000000 * exp 6
 
-theorem stabilityConstant_ge : 320000000 ≤ stabilityConstant := by
-  have hh : (1 : ℝ) ≤ exp 6 := one_le_exp_iff.mpr (by norm_num)
-  unfold stabilityConstant
-  nlinarith only [hh]
 
 
 /-- Early forward amplitudes are exponentially small relative to target
@@ -17047,24 +16672,6 @@ theorem polynomial_log_over_growth_summable (J : ℕ) (hJ : 1 ≤ J) (x : ℕ �
   have hd := div_le_div_of_nonneg_right h (hxp n).le
   simpa only [pow_add, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using hd
 
-/-- The logarithmic term on the right side of (39) tends to zero with every fixed polynomial weight. -/
-theorem polynomial_log_over_growth_tendsto_zero (J : ℕ) (hJ : 1 ≤ J) (x : ℕ → ℝ)
-    (hx0 : 0 < x 0) (hx : ∀ n, x (n + 1) = ((J + n : ℕ) : ℝ) ^ 2 * x n)
-    (A : ℕ) :
-    Tendsto (fun n => ((J + n : ℕ) : ℝ) ^ A * Real.log (x n) / x n) atTop (𝓝 0) := by
-  have hs := polynomial_log_over_growth_summable J hJ x hx0 hx A
-  have hn : Tendsto (fun n => -(((J + n : ℕ) : ℝ) ^ A * |Real.log (x n)| / x n))
-      atTop (𝓝 0) := by simpa using hs.tendsto_atTop_zero.neg
-  apply tendsto_of_tendsto_of_tendsto_of_le_of_le hn hs.tendsto_atTop_zero
-  · intro n
-    have hxp := quadratic_growth_pos J hJ x hx0 hx n
-    have h := mul_le_mul_of_nonneg_left (neg_abs_le (Real.log (x n)))
-      (show 0 ≤ ((J + n : ℕ) : ℝ) ^ A by positivity)
-    simpa only [mul_neg, neg_div] using div_le_div_of_nonneg_right h hxp.le
-  · intro n
-    have hxp := quadratic_growth_pos J hJ x hx0 hx n
-    exact div_le_div_of_nonneg_right
-      (mul_le_mul_of_nonneg_left (le_abs_self (Real.log (x n))) (by positivity)) hxp.le
 
 /-- The logarithm of the stage index is also harmless in every polynomially weighted scale sum. -/
 theorem polynomial_stage_log_over_growth_summable (J : ℕ) (hJ : 1 ≤ J) (x : ℕ → ℝ)
@@ -17085,76 +16692,8 @@ theorem polynomial_stage_log_over_growth_summable (J : ℕ) (hJ : 1 ≤ J) (x : 
     simpa only [pow_succ] using div_le_div_of_nonneg_right
       (mul_le_mul_of_nonneg_left hl (show 0 ≤ ((J + n : ℕ) : ℝ) ^ A by positivity)) (hxp n).le
 
-/-- A power at least three in the denominator dominates the square from `1/log k_j`. -/
-theorem stage_sq_div_real_power_tendsto_zero (J : ℕ) (hJ : 1 ≤ J)
-    (A : ℝ) (hA : 3 ≤ A) :
-    Tendsto (fun n : ℕ => ((J + n : ℕ) : ℝ) ^ 2 / ((J + n : ℕ) : ℝ) ^ A)
-      atTop (𝓝 0) := by
-  apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds (stage_inv_tendsto_zero J)
-  · intro n
-    positivity
-  · intro n
-    have hj1 : (1 : ℝ) ≤ (J + n : ℕ) := by exact_mod_cast (show 1 ≤ J + n by omega)
-    have hjp : (0 : ℝ) < (J + n : ℕ) := lt_of_lt_of_le zero_lt_one hj1
-    have hp : ((J + n : ℕ) : ℝ) ^ 3 ≤ ((J + n : ℕ) : ℝ) ^ A := by
-      simpa only [Real.rpow_ofNat] using Real.rpow_le_rpow_of_exponent_le hj1 hA
-    calc
-      _ ≤ ((J + n : ℕ) : ℝ) ^ 2 / ((J + n : ℕ) : ℝ) ^ 3 :=
-        div_le_div_of_nonneg_left (sq_nonneg _) (pow_pos hjp _) hp
-      _ = _ := by field_simp
 
-/-- The previous-stage frequency and shear terms have vanishing relative logarithms. -/
-theorem stage_sq_div_predecessor_power_tendsto_zero (J : ℕ) (hJ : 2 ≤ J)
-    (A : ℕ) (hA : 3 ≤ A) :
-    Tendsto (fun n : ℕ => ((J + n : ℕ) : ℝ) ^ 2 / ((J - 1 + n : ℕ) : ℝ) ^ A)
-      atTop (𝓝 0) := by
-  have hlim : Tendsto
-      (fun n : ℕ => (1 + (((J - 1 + n : ℕ) : ℝ))⁻¹) ^ 2 *
-        ((((J - 1 + n : ℕ) : ℝ))⁻¹) ^ (A - 2)) atTop (𝓝 0) := by
-    have h := (((tendsto_const_nhds (x := (1 : ℝ))).add
-      (stage_inv_tendsto_zero (J - 1))).pow 2).mul
-      ((stage_inv_tendsto_zero (J - 1)).pow (A - 2))
-    simpa only [add_zero, one_pow, zero_pow (show A - 2 ≠ 0 by omega), mul_zero] using h
-  apply hlim.congr'
-  apply Eventually.of_forall
-  intro n
-  dsimp only
-  have hp : (0 : ℝ) < (J - 1 + n : ℕ) := by exact_mod_cast (show 0 < J - 1 + n by omega)
-  have hj : (((J + n : ℕ) : ℝ)) = ((J - 1 + n : ℕ) : ℝ) + 1 := by
-    exact_mod_cast (show J + n = (J - 1 + n) + 1 by omega)
-  have hi : 1 + (((J - 1 + n : ℕ) : ℝ))⁻¹ =
-      (((J - 1 + n : ℕ) : ℝ) + 1) / ((J - 1 + n : ℕ) : ℝ) := by field_simp
-  have hpow : ((J - 1 + n : ℕ) : ℝ) ^ A =
-      ((J - 1 + n : ℕ) : ℝ) ^ 2 * ((J - 1 + n : ℕ) : ℝ) ^ (A - 2) := by
-    rw [← pow_add, show 2 + (A - 2) = A by omega]
-  rw [hj, hi, hpow, div_pow]
-  field_simp [hp.ne']
-  simp only [one_div, ← mul_pow, inv_mul_cancel₀ hp.ne', one_pow]
 
-/-- A finite sum of positive exponential scales has an explicit logarithmic upper bound. -/
-theorem log_sum_exp_bounds {ι : Type*} [Fintype ι] [Nonempty ι]
-    (a : ι → ℝ) (ha : ∀ i, 0 ≤ a i) :
-    0 ≤ Real.log (∑ i, Real.exp (a i)) ∧
-      Real.log (∑ i, Real.exp (a i)) ≤ Real.log (Fintype.card ι : ℝ) + ∑ i, a i := by
-  classical
-  have hpos : 0 < ∑ i, Real.exp (a i) :=
-    Finset.sum_pos (fun i _ => Real.exp_pos (a i)) Finset.univ_nonempty
-  have hcard : (0 : ℝ) < Fintype.card ι := by exact_mod_cast Fintype.card_pos
-  have hone : 1 ≤ ∑ i, Real.exp (a i) :=
-    (Real.one_le_exp (ha (Classical.arbitrary ι))).trans
-      (Finset.single_le_sum (fun i _ => (Real.exp_pos (a i)).le) (Finset.mem_univ _))
-  constructor
-  · exact Real.log_nonneg hone
-  · have hs : (∑ i, Real.exp (a i)) ≤ (Fintype.card ι : ℝ) * Real.exp (∑ i, a i) := by
-      calc
-        _ ≤ ∑ _i : ι, Real.exp (∑ i, a i) := by
-          apply Finset.sum_le_sum
-          intro i _hi
-          exact Real.exp_monotone (Finset.single_le_sum (fun j _ => ha j) (Finset.mem_univ i))
-        _ = _ := by simp
-    calc
-      _ ≤ Real.log ((Fintype.card ι : ℝ) * Real.exp (∑ i, a i)) := Real.log_le_log hpos hs
-      _ = _ := by rw [Real.log_mul hcard.ne' (Real.exp_ne_zero _), Real.log_exp]
 
 
 /-- A starting scale at least one stays at least one. -/
@@ -17169,20 +16708,6 @@ theorem quadratic_growth_one_le (J : ℕ) (hJ : 1 ≤ J) (x : ℕ → ℝ)
       have hj : (1 : ℝ) ≤ (J + n : ℕ) := by exact_mod_cast (show 1 ≤ J + n by omega)
       exact one_le_mul_of_one_le_of_one_le (one_le_pow₀ hj) ih
 
-/--
-The logarithms of the eight terms in the source's aggregate parameter: the fixed
-base constant; the previous frequency power; inverse support and spike scales;
-the present and previous shears; and the present and previous geometric sizes.
--/
-noncomputable def sourceParameterExponent (J : ℕ) (Cbase Cstar : ℝ) (x : ℕ → ℝ) (i : Fin 8) (n : ℕ) : ℝ :=
-  ![Real.log Cbase,
-    Cstar * x n / ((J - 1 + n : ℕ) : ℝ) ^ 4,
-    x n / ((J + n : ℕ) : ℝ) ^ (7 / 2 : ℝ),
-    x n / ((J + n : ℕ) : ℝ) ^ 3,
-    x n / ((J + n : ℕ) : ℝ) ^ 5,
-    x n / ((J - 1 + n : ℕ) : ℝ) ^ 7,
-    Real.log (((J + n : ℕ) : ℝ) ^ 2 * x n),
-    Real.log (x n)] i
 
 
 
@@ -17261,11 +16786,6 @@ theorem activation_time_bounds
     have hh := mul_le_mul_of_nonneg_left hlo hX
     nlinarith only [hh]
 
-/-- A sufficiently small next time width makes the packet horizons nest. -/
-theorem nested_horizon_of_width_ratio
-    {t Δ W Wnext : ℝ} (hW : 0 ≤ W)
-    (hΔ : Δ ≤ 2 * W / 3) (hnext : Wnext ≤ W / 2) :
-    t + Δ + 2 * Wnext ≤ t + 2 * W := by linarith
 
 
 
@@ -17463,29 +16983,6 @@ theorem polynomial_source_scale_summable
   ring
 
 
-/-- Multiplying any decaying source exponential by a fixed horizon power
-preserves summability. -/
-theorem theta_weighted_source_exponential_summable
-    (J d B : ℕ) (hJ : d < J) (x : ℕ → ℝ) (hx0 : 1 ≤ x 0)
-    (hx : ∀ n, x (n + 1) = ((J + n : ℕ) : ℝ) ^ 2 * x n)
-    (C a b c : ℝ) (hC : 1 ≤ C) (ha : 0 ≤ a) (haB : a < B) (hb : 0 < b) (A : ℕ) :
-    Summable (fun n => sourceTheta J C x n ^ A *
-      exp (-b * (x n / ((J + n : ℕ) : ℝ) ^ a) +
-        c * (x n / ((J - d + n : ℕ) : ℝ) ^ B))) := by
-  have hJ1 : 1 ≤ J := by omega
-  have hx1 := quadratic_growth_one_le J hJ1 x hx0 hx
-  have hsum := polynomial_source_scale_summable J d B hJ x (by linarith) hx a b c
-    ((2 * C) ^ A) (2 * A) (2 * A) ha haB hb (by positivity)
-  apply hsum.of_nonneg_of_le
-  · intro n
-    exact mul_nonneg (pow_nonneg (le_trans zero_le_one (sourceTheta_bounds hJ1 hC hx1 n).1) A) (exp_pos _).le
-  · intro n
-    have hθ := pow_le_pow_left₀ (le_trans zero_le_one (sourceTheta_bounds hJ1 hC hx1 n).1)
-      (sourceTheta_bounds hJ1 hC hx1 n).2 A
-    have hh := mul_le_mul_of_nonneg_right hθ (exp_pos
-      (-b * (x n / ((J + n : ℕ) : ℝ) ^ a) + c * (x n / ((J - d + n : ℕ) : ℝ) ^ B))).le
-    convert! hh using 1
-    simp only [mul_pow, ← pow_mul]
 
 
 /-- The source shear/older-gradient product has an explicit decaying
