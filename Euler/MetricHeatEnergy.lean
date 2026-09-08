@@ -160,10 +160,6 @@ theorem metric_heat_bound (K : SmoothCoefficient period) (f : LiftL2 period)
       (2 * (K.firstBound : ℝ) ^ 2 / c ^ 2) * ‖f‖ ^ 2 := by ring
   simpa only [Nat.cast_ofNat, harith] using hsum
 
-/-- The sum of the four actual classical second coordinate derivatives on the cylinder. -/
-def classicalLaplacian (g : LiftDomain period → Vector3) : LiftDomain period → Vector3 :=
-  fun x => ∑ i : Fin 4, fieldDerivative period (standardDirection i)
-    (fieldDerivative period (standardDirection i) g) x
 
 
 

@@ -219,9 +219,6 @@ theorem locallyFinite_iInter {ι κ X : Type*} [Fintype ι] [TopologicalSpace X]
 def productMask {d : ℕ} (δ : ℝ) (k : Fin d → ℤ) (x : Fin d → ℝ) : ℝ :=
   ∏ j, gridMask δ (k j) (x j)
 
-theorem productMask_nonneg {d : ℕ} (δ : ℝ) (k : Fin d → ℤ) (x : Fin d → ℝ) :
-    0 ≤ productMask δ k x :=
-  Finset.prod_nonneg fun _ _ => gridMask_nonneg _ _ _
 
 theorem productMask_smooth {d : ℕ} (δ : ℝ) (k : Fin d → ℤ) :
     ContDiff ℝ ∞ (productMask δ k) := by
@@ -371,9 +368,6 @@ theorem logCoordinate_window {q : ℝ} (hq : 0 < q) :
 /-- A single compact annular profile; its zero extension is smooth at zero. -/
 def dyadicProfile (q : ℝ) : ℝ := if 0 < q then lineMask 0 (logCoordinate q) else 0
 
-theorem dyadicProfile_nonneg (q : ℝ) : 0 ≤ dyadicProfile q := by
-  unfold dyadicProfile
-  split_ifs <;> first | exact lineMask_nonneg _ _ | exact le_rfl
 
 theorem dyadicProfile_support : support dyadicProfile = Ioo (1 / 2 : ℝ) 2 := by
   ext q
@@ -578,9 +572,6 @@ theorem slowCoordinates_smooth (D : ℝ) (n : ℕ) : ContDiff ℝ ∞ (slowCoord
 def physicalSlowMask (D : ℝ) (n : ℕ) (k : SlotColoring.Grid) (x : SlotColoring.Position) : ℝ :=
   slowMask n k (slowCoordinates D n x)
 
-theorem physicalSlowMask_smooth (D : ℝ) (n : ℕ) (k : SlotColoring.Grid) :
-    ContDiff ℝ ∞ (physicalSlowMask D n k) :=
-  (slowMask_smooth n k).comp (slowCoordinates_smooth D n)
 
 theorem physicalSlowMask_sum_sq (D : ℝ) (n : ℕ) (x : SlotColoring.Position) :
     (∑ᶠ k : SlotColoring.Grid, physicalSlowMask D n k x ^ 2) = 1 :=
@@ -620,10 +611,6 @@ theorem physicalSlowMask_tsupport_smallBox (D : ℝ) {n : ℕ} (hn : 1 ≤ n)
     constructor <;> nlinarith
   · exact (isCompact_univ_pi fun _ => isCompact_Icc).isClosed
 
-theorem physicalSlowMask_compactSupport (D : ℝ) {n : ℕ} (hn : 1 ≤ n)
-    (k : SlotColoring.Grid) : HasCompactSupport (physicalSlowMask D n k) :=
-  (isCompact_univ_pi fun _ => isCompact_Icc).of_isClosed_subset isClosed_closure
-    (physicalSlowMask_tsupport_smallBox D hn k)
 
 /-- The constructed masks fit inside the exact enlarged boxes already colored
 in `SlotColoring`, for either pulse sign. -/
@@ -638,8 +625,6 @@ theorem physicalSlowMask_tsupport_subset_physicalBox (D : ℝ) {n : ℕ} (hn : 1
   constructor <;> linarith [hj.1, hj.2]
 
 
-def labelMask (n : ℕ) (k : SlotColoring.Grid) (p : ℝ × SlotColoring.Position) : ℝ :=
-  dyadicMask (n : ℤ) p.1 * slowMask n k p.2
 
 
 

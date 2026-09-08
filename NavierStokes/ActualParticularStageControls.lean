@@ -1353,16 +1353,6 @@ theorem nativeEnvelope_le_one (l : Label B N0) (n : ℕ) (z : Native) :
     nativeEnvelope l n z ≤ 1 :=
   ActualPrimaryBounds.fullEnvelope_le_one l n (nativeToFull z)
 
-theorem native_wave_to_weighted {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {α : ℝ} {f : Label B N0 → ℕ → Native → E}
-    (hf : LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip)) nativeEnvelope α f) :
-    LabelSumBounds.UniformClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
-      (fun _ _ z => Real.sqrt ((CommonCoverClass.sourceStrip
-        (ActualParticularControl.angleStrip slowStrip)).zeta z)) α f :=
-  hf.mono_weight (fun _ _ _ _ => Real.sqrt_nonneg _)
-    (fun l n z _ => mul_le_of_le_one_right (Real.sqrt_nonneg _) (nativeEnvelope_le_one l n z))
 
 abbrev ResidualBounds (x : CycleState (Label B N0)) (α : ℝ) : Prop :=
   UniformHarmonicInteraction.UniformVelocity

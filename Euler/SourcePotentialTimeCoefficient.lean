@@ -108,16 +108,6 @@ variable (m m₁ : SmoothCoefficientPath K Space) (c : ℝ) (hc : 0 < c)
 def potentialTimeCoefficient : C(K,PotentialField) :=
   potentialPathMap (timeNormalPath (normalFunctional m c hc hm) (normalColumn m₁).field)
 
-theorem potentialTimeCoefficient_apply (t : K) (y : Space) :
-    potentialTimeCoefficient m m₁ c hc hm t y =
-      potentialMultiplierDerivative (m.field t y) (m₁.field t y) := by
-  have hn : m.field t y ≠ 0 := by
-    intro hz
-    have h := hm t y
-    rw [hz, norm_zero, zero_pow (by decide : 2 ≠ 0)] at h
-    linarith
-  exact normalTimeMap_potential (m.field t y) (m₁.field t y)
-    (normalFunctional m c hc hm t y) hn (normalFunctional_apply m c hc hm t y)
 
 
 

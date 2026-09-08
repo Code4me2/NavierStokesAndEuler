@@ -50,13 +50,5 @@ theorem graphWordPath_hasDerivWithinAt (hT : 0 ≤ T) (n : ℕ) (w : Fin n → F
   · exact (wordOperator P (⟨⟨n+1,by omega⟩,Fin.cons 0 w⟩ : SobolevWord (n+1))).hasFDerivAt.comp_hasDerivWithinAt
       (t : ℝ) hd
 
-theorem graphWordPath_hasDerivAt (hT : 0 ≤ T) (n : ℕ) (w : Fin n → Fin 4)
-    (t : ℝ) (ht : t ∈ Ioo 0 T)
-    (hd : HasDerivAt (extendPath T hT (A.realization (n+1)))
-      (B.realization (n+1) ⟨t,ht.1.le,ht.2.le⟩) t) :
-    HasDerivAt (extendPath T hT (A.graphWordPath f hf ha θ hθ n w))
-      (B.graphWordPath g hg hb θ hθ n w ⟨t,ht.1.le,ht.2.le⟩) t :=
-  (A.graphWordPath_hasDerivWithinAt B f g hf hg ha hb θ hθ hT n w
-    ⟨t,ht.1.le,ht.2.le⟩ hd.hasDerivWithinAt).hasDerivAt (Icc_mem_nhds ht.1 ht.2)
 
 end EulerAllOrderCorrectionData.FieldTower

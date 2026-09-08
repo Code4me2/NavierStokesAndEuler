@@ -180,25 +180,9 @@ theorem amplitude_ne_zero (g : ℂ → ℂ) (Λ : ℂ) {C : ℂ} (hC : C ≠ 0) 
     amplitude g Λ C z ≠ 0 :=
   div_ne_zero (Complex.exp_ne_zero _) hC
 
-/-- Normalization is constant in the spatial variable, so the differential
-equation is valid for any normalization scalar. -/
-theorem hasDerivAt_amplitude {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) (Λ C : ℂ) {z : ℂ} (hz : z ∈ U) :
-    HasDerivAt (amplitude g Λ C) ((Λ * g z) * amplitude g Λ C z) z := by
-  have hd := (((hasDerivAt_primitive ho hU h0 hg hz).const_mul Λ).cexp).div_const C
-  convert! hd using 1
-  unfold amplitude
-  ring
 
 
 
-theorem amplitude_ofReal (g : ℂ → ℂ) (f : ℝ → ℝ)
-    (hreal : ∀ x : ℝ, g x = (f x : ℂ)) (Λ C x : ℝ) :
-    amplitude g Λ C x =
-      ((Real.exp (Λ * (x * ∫ t in (0 : ℝ)..1, f (t * x))) / C : ℝ) : ℂ) := by
-  rw [amplitude, primitive_ofReal g f hreal x, ← Complex.ofReal_mul,
-    ← Complex.ofReal_exp, ← Complex.ofReal_div]
 
 
 

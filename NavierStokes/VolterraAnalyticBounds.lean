@@ -529,24 +529,6 @@ theorem summable_wordLayers {a b B : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
 noncomputable def wordLayer (A₀ A₁ : Coeff) (F : Field) (k : ℕ) : Field :=
   fun r z i => ∑ v : Fin k → Bool, word A₀ A₁ (List.ofFn v) F r z i
 
-theorem norm_wordLayer_le {A₀ A₁ : Coeff} {F : Field} {T ρ σ B M : ℝ} {c : ℂ}
-    (hB : 0 ≤ B) (hM : 0 ≤ M) (hT : 0 ≤ T) (hgap : ρ < σ)
-    (hshape : DerivativeShape A₁)
-    (hA₀ : MatrixBound A₀ T c σ M) (hA₁ : MatrixBound A₁ T c σ M)
-    (hF : RadialBound F T c σ B 0)
-    (ha : ∀ v, AnalyticField (word A₀ A₁ v F) T c σ)
-    (k : ℕ) {r : ℝ} (hr : r ∈ Icc 0 T)
-    {z : ℂ} (hz : z ∈ closedBall c ρ) (i : Fin 6) :
-    ‖wordLayer A₀ A₁ F k r z i‖ ≤
-      B * (2 : ℝ) ^ k * wordMajorant (M * T) (max 1 (σ - ρ)⁻¹) k := by
-  unfold wordLayer
-  calc
-    _ ≤ ∑ v : Fin k → Bool, ‖word A₀ A₁ (List.ofFn v) F r z i‖ := norm_sum_le _ _
-    _ ≤ ∑ _v : Fin k → Bool, B * wordMajorant (M * T) (max 1 (σ - ρ)⁻¹) k := by
-      apply Finset.sum_le_sum
-      intro v hv
-      simpa using norm_word_le hB hM hT hgap hshape hA₀ hA₁ hF ha (List.ofFn v) hr hz i
-    _ = _ := by simp [mul_assoc, mul_comm, mul_left_comm]
 
 
 

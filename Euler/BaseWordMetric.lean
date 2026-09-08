@@ -50,13 +50,5 @@ theorem sobolevNorm_le_baseWordMetric {s : ℕ} {f : LiftL2 period}
   have hh := mul_le_mul_of_nonneg_left hn (Real.sqrt_nonneg (Fintype.card (BaseWord s) : ℝ))
   exact hsum.trans (hh.trans_eq (by ring))
 
-/-- The metric root is controlled by the actual base Sobolev sum with no extra word-count factor. -/
-theorem baseWordMetric_le_sobolevNorm {s : ℕ} {f : LiftL2 period}
-    (K : LiftL2 period →L[ℝ] LiftL2 period) (J : SpatialJet period standardDirection s f) :
-    baseWordMetricNorm period K J ≤ Real.sqrt ‖K‖ * J.sobolevNorm := by
-  have h := familyMetricNorm_upper K (baseWordValues period J)
-  have hn := familyNorm_le_sum_norm (baseWordValues period J)
-  rw [sum_baseWordValues_norm period J] at hn
-  exact h.trans (mul_le_mul_of_nonneg_left hn (Real.sqrt_nonneg _))
 
 end EulerBaseWordMetric

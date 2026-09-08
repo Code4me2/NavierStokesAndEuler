@@ -164,13 +164,6 @@ noncomputable def nativePhase (K : ℝ) (copy : TorusInverse.Frequency) (x : Cyl
     (fun p => C.F (p.1, (p.2.2, p.2.1))) (fun p => C.G (p.1, (p.2.2, p.2.1)))
     ((x.1.1, x.1.2.1), (x.2, (C.geometry.coordinates copy x.1.2.2).2))
 
-theorem phase_affine (K : ℝ) :
-    CopyAngularInvariance.AffinePhase (0, 1) (C.angularMode / K) (C.phase K) := by
-  intro x t
-  simp only [phase, PeriodicPhaseAssembly.angularLift, PhysicalParticularWave.waveEquiv_apply,
-    Prod.fst_add, Prod.snd_add, Prod.smul_fst, Prod.smul_snd, smul_zero, add_zero,
-    smul_eq_mul, mul_one]
-  ring
 
 theorem phase_periodic (K : ℝ) (x : Cylinder) (k : TorusInverse.Frequency) :
     C.phase K (fastTranslate x k) = C.phase K x := by
@@ -443,8 +436,6 @@ namespace PrimaryData
 
 variable {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow} (B : PrimaryData U)
 
-noncomputable def withReferencePhase (C : ReferencePhase) : PrimaryData U :=
-  { B with base := C.base B.base }
 
 noncomputable def matrix : ℕ → Cylinder → Mat2 :=
   SignedWaveUpdate.phaseMatrix B.pulse B.prefactor B.coordinate
@@ -1306,8 +1297,6 @@ theorem primaryCoefficients_eq_signed (j : Fin 2) :
   rw [he]
 
 
-noncomputable def primaryPhysicalPotential (delta : ℝ) (j : Fin 2) : VelocityField :=
-  V.physicalPotential B.primaryRequest j delta
 
 
 

@@ -242,37 +242,13 @@ theorem slowOrder_mono {h : ℝ} (hh : 0 ≤ h) : Monotone (slowOrder h) := by
 noncomputable def pairTailSize (N : ℕ) (K : ℕ → ℕ → ℝ) : ℝ :=
   ∑ ij ∈ (pairs N).filter (fun ij => N < ij.1 + ij.2), |K ij.1 ij.2|
 
-theorem pairTailSize_nonneg (N : ℕ) (K : ℕ → ℕ → ℝ) : 0 ≤ pairTailSize N K :=
-  Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-theorem pairTail_bound {q h : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) (hh : 0 ≤ h)
-    (N : ℕ) (b : ℝ) (K : ℕ → ℕ → ℝ) :
-    |pairTail N (fun n => q ^ (b + slowOrder h n)) K| ≤
-      pairTailSize N K * q ^ (b + slowOrder h (N + 1)) := by
-  unfold pairTail pairTailSize
-  calc
-    _ ≤ ∑ ij ∈ (pairs N).filter (fun ij => N < ij.1 + ij.2),
-        |q ^ (b + slowOrder h (ij.1 + ij.2)) * K ij.1 ij.2| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ ij ∈ (pairs N).filter (fun ij => N < ij.1 + ij.2),
-        |K ij.1 ij.2| * q ^ (b + slowOrder h (N + 1)) := by
-      apply Finset.sum_le_sum
-      intro ij hij
-      rw [abs_mul, abs_of_pos (Real.rpow_pos_of_pos hq _), mul_comm]
-      apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
-      apply Real.rpow_le_rpow_of_exponent_ge hq hq1
-      exact add_le_add_right (slowOrder_mono hh (Finset.mem_filter.mp hij).2) b
-    _ = _ := (Finset.sum_mul _ _ _).symm
 
 noncomputable def transportKernel (h e α : ℝ) (v u f : ℕ → InnerProfile)
     (w : InnerPoint) : ℕ → ℕ → ℝ :=
   transportPair w.1 α (fun j => v j w) (fun j => u j w) (fun j => f j w)
     (fun j => partialX (f j) w) (fun j => Z h (e + slowOrder h j) (f j) w)
 
-noncomputable def transportTailSize (N : ℕ) (h e α : ℝ)
-    (v u f : ℕ → InnerProfile) (w : InnerPoint) : ℝ :=
-  pairTailSize N (transportKernel h e α v u f w) +
-    |Z2 h (e + slowOrder h N) (f N) w|
 
 
 
@@ -1181,12 +1157,6 @@ theorem zDensity_eq_axialDensity {S : Set ℝ} (hS : IsOpen S)
     rw [hdz (n-j) (Nat.sub_le _ _), mul_zero]
   · exact (axialWeighted_eq_zDensity h f hn (hf w hw.2 hR) (hp' w hw.2 hR) (hL w.2 hw.2)).symm
 
-theorem primitive_stress_congr_slice (m : ℕ) {F G : InnerProfile} {R eta : ℝ}
-    (hFG : ∀ r : ℝ, F (r, eta) = G (r, eta)) :
-    SlowStressSupport.stress m F (R, eta) = SlowStressSupport.stress m G (R, eta) := by
-  have hp : ProfileHistories.primitive F (R, eta) = ProfileHistories.primitive G (R, eta) :=
-    intervalIntegral.integral_congr (fun r _ => hFG r)
-  simp only [SlowStressSupport.stress, hp]
 
 
 

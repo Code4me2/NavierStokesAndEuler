@@ -63,33 +63,6 @@ theorem radialFlux_smoothAt (Ω : RadialDomain) {U : Field}
           ((contDiffAt_const.sub (contDiffAt_snd.pow 2)).mul hη))
 
 
-/-- The first identity in (21), derived by FTC from the actual histories.
-The scalar radial statement also holds under total division when L=0. -/
-theorem radialFlux_hasDerivAt (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h lam : ℝ) {p : Point} (hp : p ∈ Ω.carrier) :
-    HasDerivAt (fun x => radialFlux h lam U (x, p.2))
-      (-SimilarityProfile.Z h (-CoordinateAlgebra.A h + lam) U p) p.1 := by
-  have hd := (((((hasDerivAt_id p.1).mul (radialPartial_hasDerivAt Ω hU hp)).const_mul
-    (2 * p.2)).sub ((primitive_hasDerivAt Ω hU hp).const_mul
-      (2 * p.2 * (CoordinateAlgebra.D h + lam)))).sub
-        ((primitive_hasDerivAt Ω (parameterPartial_smooth Ω hU) hp).const_mul
-          (CoordinateAlgebra.d p.2))).div_const (CoordinateAlgebra.L h p.2)
-  have hd' : HasDerivAt (fun x =>
-      (2 * p.2 * (x * U (x, p.2)) -
-        2 * p.2 * (CoordinateAlgebra.D h + lam) * primitive U (x, p.2) -
-          CoordinateAlgebra.d p.2 * primitive (parameterPartial U) (x, p.2)) /
-            CoordinateAlgebra.L h p.2)
-      (-SimilarityProfile.Z h (-CoordinateAlgebra.A h + lam) U p) p.1 := by
-    apply hd.congr_deriv
-    dsimp [SimilarityProfile.Z, CoordinateAlgebra.axialCoeff, CoordinateAlgebra.A,
-      CoordinateAlgebra.D, SimilarityProfile.partialX, SimilarityProfile.partialEta,
-        radialPartial, parameterPartial]
-    ring
-  apply hd'.congr_of_eventuallyEq
-  have hn : ∀ᶠ x in 𝓝 p.1, (x, p.2) ∈ Ω.carrier :=
-    (continuous_id.prodMk continuous_const).continuousAt (Ω.isOpen.mem_nhds hp)
-  filter_upwards [hn] with x hx
-  exact radialFlux_eq_histories Ω hU h lam hx
 
 
 

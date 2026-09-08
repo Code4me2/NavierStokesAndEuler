@@ -1,6 +1,7 @@
 import Euler.CylinderPotentialPath
 import Euler.LpCylinderFullTime
-import Euler.PacketCurlTime
+import Euler.CylinderTimeGradient
+import Euler.PacketPotentialRegularity
 
 /-! Genuine time derivatives of the constructed vector potential and its slow curl. -/
 

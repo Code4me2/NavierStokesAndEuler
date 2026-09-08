@@ -373,21 +373,6 @@ theorem cutoff_zero_outside_slot {r a A b B c₀ s₀ slope E : ℝ}
   apply hv
   constructor <;> nlinarith [hmid.1, hmid.2, sq_nonneg r]
 
-/-- Clamping the tangent component outside the pulse interval changes neither
-the cut-off velocity nor its actual covariance column. -/
-theorem ofTangentPulse_column {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) (ci : ℝ) :
-    (ofTangentPulse P).column ci =
-      PulseCovariance.actualColumn ci P.cutoff P.component P.tangent := by
-  funext i
-  unfold Pulse.column PulseCovariance.actualColumn
-  apply congrArg (fun z : ℝ => ci * z)
-  apply integral_congr_ae
-  filter_upwards [] with v
-  by_cases hv : v ∈ Icc 0 (r ^ 2)
-  · change P.cutoff v ^ 2 * P.component v * tangentExtension P v i = _
-    rw [tangentExtension_eq P hv]
-  · simp [ofTangentPulse, cutoff_zero_outside_slot P hv]
 
 
 noncomputable def pairMatrix (vr vt : Plane) (r : ℝ) (ci : Vec2) (P : Fin 2 → Pulse) : Mat2 :=
@@ -947,13 +932,6 @@ noncomputable def roundedPhaseRemainder (k ε target pz x0 : ℝ) (F G : PhaseCa
   k * ((pz / ε) * s.2.1 + x0 * s.1 -
     v Y * (PhaseEstimates.roundedFrequency k target * F s + pz * G s))
 
-theorem cosine_rounded_phase (k ε target pz x0 : ℝ) (hk : k ≠ 0)
-    (F G : PhaseCalculus.Slow → ℝ) (s : PhaseCalculus.Slow) (v : Plane → ℝ) (Y : Plane) (θ : ℝ) :
-    Real.cos (k * PhaseCalculus.phase ε (PhaseEstimates.roundedFrequency k target) pz x0 F G
-      (s, θ, v Y)) =
-    Real.cos ((PhaseEstimates.nonzeroRound (k * target) : ℝ) * θ +
-      roundedPhaseRemainder k ε target pz x0 F G s v Y) :=
-  cosine_actual_phase k ε _ pz x0 F G s v _ (PhaseEstimates.roundedFrequency_integer hk target) Y θ
 
 
 theorem actual_carrier_ne_zero (h : ℝ) (n : ℕ) : (ChartScales.carrier h n : ℝ) ≠ 0 :=

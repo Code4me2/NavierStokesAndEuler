@@ -653,19 +653,6 @@ end Weighted
 
 /-! ## A quantitative bound for the complete assembled signed square -/
 
-theorem increment_sq_bound (H : Mat2) (T R : Vec2)
-    (hcone : SmoothCovariance.StrictCone H T) (j : Fin 2)
-    {l d : ℝ} (hl : 0 < l) (_hd : 0 ≤ d)
-    (hY : l ≤ (H⁻¹.mulVec T) j) (hR : |(H⁻¹.mulVec R) j| ≤ d) :
-    increment H T R j ^ 2 ≤ d ^ 2 / (4 * l) := by
-  have hpos := (amplitudes_are_inverse_weights hcone j).1
-  have hr2 : ((H⁻¹.mulVec R) j) ^ 2 ≤ d ^ 2 := by
-    simpa only [sq_abs] using pow_le_pow_left₀ (abs_nonneg _) hR 2
-  rw [increment_eq_inverse H T R hcone j, div_pow, mul_pow, Real.sq_sqrt hpos.le]
-  norm_num only [OfNat.ofNat, Nat.cast_ofNat]
-  calc
-    _ ≤ d ^ 2 / (4 * (H⁻¹.mulVec T) j) := div_le_div_of_nonneg_right hr2 (by positivity)
-    _ ≤ _ := div_le_div_of_nonneg_left (sq_nonneg d) (by positivity) (by linarith)
 
 
 
@@ -676,10 +663,6 @@ section Edge
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-noncomputable def extendedIncrement (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2)
-    (j : Fin 2) : E × ℝ → ℝ :=
-  FlatZeroExtension.zeroExtension (fun p => ((H p)⁻¹.mulVec (R p)) j /
-    (2 * Real.sqrt (((H p)⁻¹.mulVec (T p)) j)))
 
 
 

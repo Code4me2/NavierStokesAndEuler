@@ -57,13 +57,6 @@ theorem profile_axis (I : Window) (ε : ℝ) (A : AxisSpace I ε) (η : ℝ) :
   · intro n hn
     simp [zero_pow hn]
 
-theorem profile_deriv_Y (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) {Y η : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
-    (hη : η ∈ Ioo I.left I.right) :
-    deriv (fun y => profile I ε A (y, η)) Y = mixedSeries I ε A 1 0 (Y, η) := by
-  have hd := mixedSeries_hasDerivAt_Y I hε A 0 0 hY hη
-  rw [mixedSeries_zero] at hd
-  exact hd.deriv
 
 theorem profile_deriv_eta (I : Window) {ε : ℝ} (hε : 0 < ε)
     (A : AxisSpace I ε) {Y η : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
@@ -73,11 +66,6 @@ theorem profile_deriv_eta (I : Window) {ε : ℝ} (hε : 0 < ε)
   rw [mixedSeries_zero] at hd
   exact hd.deriv
 
-theorem profile_iteratedDeriv_Y (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) (k : ℕ) {Y η : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
-    (hη : η ∈ Ioo I.left I.right) :
-    iteratedDeriv k (fun y => profile I ε A (y, η)) Y = mixedSeries I ε A k 0 (Y, η) := by
-  simpa only [mixedSeries_zero, Nat.zero_add] using iteratedDeriv_Y I hε A 0 0 k hY hη
 
 def radialValue (I : Window) (ε : ℝ) (r : ℕ) (A : AxisSpace I ε) (p : ℝ × ℝ) : ℝ :=
   p.1 * mixedSeries I ε A 2 0 p + (r : ℝ) * mixedSeries I ε A 1 0 p

@@ -27,12 +27,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
   (D : Data U) (τ : ℝ) (hτ : 0 < τ) (hτT : τ < D.T)
   (B : HistoryData (D.initial τ hτ hτT.le))
 
-def activatedData (m v : ℝ → Space) (hm : m τ ≠ 0) (hv : v τ ≠ 0)
-    (hmv : ⟪m τ,v τ⟫_ℝ=0) :
-    Data (referencePlane (activationDirection (D.deformationEquiv ⟨τ,hτ.le,hτT.le⟩ 0)
-      (cross (unit (m τ)) (unit (v τ))))) :=
-  D.activation ⟨τ,hτ.le,hτT.le⟩ (cross (unit (m τ)) (unit (v τ)))
-    (activation_cross_ne_zero _ _ hm hv hmv)
 
 
 

@@ -191,16 +191,6 @@ theorem initializedVelocity_rate (upper : ℝ) (B : ℕ)
     (initializedVelocity_decomposition H v upper B WA MA MB hqA).symm
 
 
-theorem uncutVelocity_zero_eq_initialized (upper : ℝ) (B : ℕ)
-    (WA : ℕ → WaveData F.data.h D I K (Fin 3))
-    (MA : ℕ → MeanData F.data.h (CoordinateAlgebra.A F.data.h - 1 / 2))
-    (MB : ℕ → MeanData F.data.h (CoordinateAlgebra.A F.data.h)) :
-    MixedDiagonalResidual.uncutVelocity
-        (potentialStages (TailGaugePotential.finalPotential H v upper B) WA MA)
-        (directStages MB) 0 =
-      initializedVelocity H v upper B (WA 0) (MA 0) (MB 0) := by
-  rw [MixedFiniteBackground.uncutVelocity_zero]
-  rfl
 
 
 /-- An exact representation adapter for initialization assembled elsewhere.

@@ -657,13 +657,6 @@ theorem finalAngular_eventual_power (d : TailData) (eta : ℝ) {y : ℝ}
   rw [finalAngular_tail d eta hy', tailShape_late d ht, mul_one]
 
 
-theorem axial_product_unchanged (d : TailData) (amp : ℝ → ℝ) (eta y : ℝ) :
-    finalAngular d (y, eta) * axial d.core amp (y, eta) =
-      angular d.core.P d.core.dropLength d.core.lam (y, eta) * axial d.core amp (y, eta) := by
-  by_cases hy : y ≤ d.core.endpoint
-  · rw [finalAngular_before d eta hy]
-  · rw [axial_after_pulse d.core amp eta (le_of_not_ge hy)]
-    simp
 
 /-! ## The prescribed taper is an actual backward lag solution -/
 
@@ -680,19 +673,6 @@ theorem weightedTailDerivative_contDiff (d : TailData) :
     ContDiff ℝ ∞ (weightedTailDerivative d) :=
   (contDiff_const.mul contDiff_id).exp.mul (tailShapeDeriv_contDiff d)
 
-theorem tailRate_primitive (d : TailData) (t : ℝ) :
-    primitive (tailRate d) t =
-      (1 - d.h) * t + Real.log (tailShape d t) - Real.log (1 - d.rho) := by
-  have hd : ∀ v : ℝ, HasDerivAt
-      (fun x : ℝ => (1 - d.h) * x + Real.log (tailShape d x)) (tailRate d v) v := by
-    intro v
-    convert! ((hasDerivAt_id v).const_mul (1 - d.h)).add
-      ((tailShape_hasDerivAt d v).log (tailShape_pos d v).ne') using 1
-    unfold tailRate tailLogSlope
-    ring
-  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun v _ => hd v)
-    ((tailRate_contDiff d).continuous.intervalIntegrable 0 t)
-  simpa [primitive, tailShape_early d (show (0 : ℝ) ≤ 1 by norm_num)] using hi
 
 
 
@@ -808,10 +788,6 @@ theorem flattened_hasDerivAt (d : TailData) (eta : ℝ) {y : ℝ}
   ring
 
 
-def extendedAngularMoment (d : TailData) (amp : ℝ → ℝ) (eta y : ℝ) : ℝ :=
-  (5 / 2) * Real.sqrt 2 * d.core.P * eta * shape eta +
-    ∫ t in (0 : ℝ)..y,
-      Real.sqrt 2 * Real.exp (3 * t / 2) * finalAngular d (t, eta) * axial d.core amp (t, eta)
 
 
 

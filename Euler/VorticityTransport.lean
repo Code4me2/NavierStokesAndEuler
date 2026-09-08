@@ -93,23 +93,6 @@ theorem transport_eq_zero_along_trajectory
   · exact hzero
   · exact ht
 
-omit [InnerProductSpace ℝ E] in
-/-- Compact initial support remains in its compact image whenever zero
-initial values are propagated along every trajectory and the flow has a
-right inverse at the specified time. -/
-theorem tsupport_subset_flow_image
-    (ω : ℝ → E → E) (X : ℝ → E → E) (Y : E → E) (t : ℝ)
-    (hc : HasCompactSupport (ω 0)) (hX : Continuous (X t))
-    (hXY : ∀ x, X t (Y x) = x)
-    (hzero : ∀ a, ω 0 a = 0 → ω t (X t a) = 0) :
-    tsupport (ω t) ⊆ X t '' tsupport (ω 0) := by
-  apply closure_minimal _ (hc.image hX).isClosed
-  intro x hx
-  by_contra hnot
-  have hz : ω 0 (Y x) = 0 := by
-    by_contra hnz
-    exact hnot ⟨Y x, subset_tsupport _ hnz, hXY x⟩
-  exact hx (by simpa only [hXY x] using hzero (Y x) hz)
 
 
 end Euler.ComparatorBridge

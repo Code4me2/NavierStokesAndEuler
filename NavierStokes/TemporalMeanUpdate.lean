@@ -594,13 +594,6 @@ noncomputable def pullbackCover (i : ℕ) (f : PressureStream.Lift S → ℝ)
     (z : PressureStream.Lift S) : ℝ := f (z.1, (z.2.1, coverMap i z.2.2))
 
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem pullbackCover_periodic (i : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hp : PressureStream.TorusPeriodicLift f) : PressureStream.TorusPeriodicLift (pullbackCover i f) := by
-  intro r s Y k
-  change f (r, (s, coverMap i (Y + ((k.1 : ℝ), (k.2 : ℝ))))) = f (r, (s, coverMap i Y))
-  rw [map_add, coverMap_lattice]
-  exact hp r s _ _
 
 theorem torusAverage_pullbackCover (i : ℕ) {f : PressureStream.Lift S → ℝ}
     (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f) (p : ℝ × S) :
@@ -649,12 +642,6 @@ noncomputable def axialAlias (d a b M : ℝ) (v : Plane) (h : ℝ) (n : ℕ)
     (PressureStream.weightedSource (desiredIncrement h n f)))
 
 
-theorem axialPotential_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) : ContDiff ℝ ∞ (axialPotential d a b M v h n f) :=
-  PressureStream.streamPotential_contDiff ha hab hd (0, v)
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
 
 
 theorem axialUpdate_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
@@ -1058,54 +1045,6 @@ theorem normalizeSource_torusAverage (d a : ℝ) (g : PressureStream.Lift S → 
     RadialPullback.normalizeSource, RadialPullback.liftChart, smul_eq_mul,
     intervalIntegral.integral_const_mul]
 
-/-- The actual physical divided alias is uniformly superflat for the
-manuscript's radial frequencies and any jointly smooth zero-bar source family. -/
-theorem dividedAlias_superflat {a b d cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {g : ℕ → PressureStream.Lift S → ℝ}
-    (hg : WeightedClasses.MeanClass (UniformFourierAlias.chartStrip a b cL cR ha hcL hcR h hh) α g)
-    (hgc : ∀ n, ContDiff ℝ ∞ (g n)) (hgp : ∀ n, PressureStream.TorusPeriodicLift (g n))
-    (hgm : ∀ n p, PressureStream.torusAverage (g n) p = 0)
-    (hgs : ∀ n, RadialAlias.RadiallySupported a b (g n)) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : PressureStream.Lift S,
-      ‖iteratedFDeriv ℝ j (PressureStream.divideRadius
-        (RadialPullback.physicalAlias d a b (ChartScales.radialCoefficient h n)
-          ((0 : S), vector .radial) (g n))) z‖ ≤ C * ChartScales.epsilon h n ^ N := by
-  have haU : 0 < a ^ d := Real.rpow_pos_of_pos ha d
-  have habU : a ^ d < b ^ d := Real.rpow_lt_rpow ha.le hab hd
-  have hcLU : 0 < d ^ 2 * cL := mul_pos (sq_pos_of_pos hd) hcL
-  have hcRU : 0 < d ^ 2 * cR := mul_pos (sq_pos_of_pos hd) hcR
-  let G := fun n => RadialPullback.normalizeSource d a (g n)
-  have hG : WeightedClasses.MeanClass
-      (UniformFourierAlias.chartStrip (a ^ d) (b ^ d) (d ^ 2 * cL) (d ^ 2 * cR)
-        haU hcLU hcRU h hh) α G :=
-    UniformFourierAlias.meanClass_normalizeSource ha hab hd hcL hcR
-      (ChartScales.epsilon h) UniformFourierAlias.bandSlow (ChartScales.epsilon_pos h)
-      (ChartScales.epsilon_le_one h hh.le) UniformFourierAlias.one_le_bandSlow hg hgc
-  have hGc : ∀ n, ContDiff ℝ ∞ (G n) := fun n => RadialPullback.normalizeSource_contDiff ha hd (hgc n)
-  have hGp : ∀ n, UniformFourierAlias.SourcePeriodic (G n) := fun n => normalizeSource_periodic d a (hgp n)
-  have hGm : ∀ n p, UniformFourierAlias.sourceMean (G n) p = 0 := by
-    intro n p
-    change PressureStream.torusAverage (RadialPullback.normalizeSource d a (g n)) p = 0
-    rw [normalizeSource_torusAverage, hgm, mul_zero]
-  have hGs := fun n => RadialPullback.normalizeSource_supported ha hab hd (hgs n)
-  let χ := TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)
-  have hχ : ContDiff ℝ ∞ χ := TransportPrimitive.interiorCutoff_contDiff _ _
-  have hleft : ∀ U ≤ a ^ d, χ U = 0 := fun U hU =>
-    TransportPrimitive.interiorCutoff_zero habU (by linarith)
-  have hright : ∀ U, b ^ d ≤ U → χ U = 1 := fun U hU =>
-    TransportPrimitive.interiorCutoff_one habU (by linarith)
-  obtain ⟨C, hC, hb⟩ := UniformFourierAlias.radial_realMeanClass_alias_superflat
-    haU habU.le hcLU hcRU hh hχ hleft hright hG hGc hGp hGm hGs m N
-  obtain ⟨K, hK, ht⟩ := dividedAlias_finiteJets_transfer (E := S × Plane) ha hab hd m
-  refine ⟨K * C, mul_nonneg hK hC, ?_⟩
-  filter_upwards [hb] with n hn
-  intro j hj z
-  have hcε : 0 ≤ C * ChartScales.epsilon h n ^ N :=
-    mul_nonneg hC (pow_nonneg (ChartScales.epsilon_pos h n).le _)
-  have he := ht (ChartScales.radialCoefficient h n) ((0 : S), vector .radial) (g n)
-    (hgc n) (hgs n) (C * ChartScales.epsilon h n ^ N) hcε hn j hj z
-  exact he.trans_eq (by ring)
 
 
 

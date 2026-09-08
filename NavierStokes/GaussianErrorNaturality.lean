@@ -334,43 +334,6 @@ open CommonCoverSolve TorusInverse ParticularWaveAssembly ParticularWaveBounds
 open CorrectionState PhysicalParticularWave
 open scoped BigOperators
 
-/-- A single actual Gaussian Fourier contribution transports with its
-full angular carrier. The reference phase relation is primitive block
-coherence; the Gaussian coefficient relation is proved from the solve. -/
-theorem fromReference_gaussian_character (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    {U : Set Parameter} (R : ReferenceODE D j U) (hcutoff : ContDiff ℝ ∞ D.reference.cutoff)
-    (hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) (hKr : referenceFrequency D j ≠ 0)
-    (hfast : waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n)
-      (D.directions.fastScale n • D.directions.fast) =
-      clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (D.directions.fastScale D.reference.band • D.directions.fast))
-    (x : Parameter × Plane) (hxpos : 0 < x.1.1)
-    (hx : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) x.1 ∈ U)
-    (θ : ℝ) (k : Fin 3) :
-    ((nativeData D h gap j).globalGaussian D.directions n (angleShuffle (x, 0)) k *
-      HarmonicFields.character j (D.carrierBlock.frequency n * D.carrierBlock.phase n x +
-        (D.carrierBlock.angularFrequency n : ℝ) * θ)).re =
-      sourceWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-      ((referenceData D j).globalGaussian D.directions D.reference.band
-        (angleShuffle (PhysicalResidualNaturality.associatedChart h (ChartScales.Q_pos n)
-          (ChartScales.Q_pos D.reference.band) (gap n) x, 0)) k *
-        HarmonicFields.character j (D.carrierBlock.frequency D.reference.band *
-          D.carrierBlock.phase D.reference.band
-            (PhysicalResidualNaturality.associatedChart h (ChartScales.Q_pos n)
-              (ChartScales.Q_pos D.reference.band) (gap n) x) +
-          (D.carrierBlock.angularFrequency D.reference.band : ℝ) * θ)).re := by
-  have hg := fromReference_globalGaussian D h gap j n i H hn hr R hcutoff hK hKr hfast
-    (angleShuffle (x, 0)) hx
-  have hp := H.block.phase (x := x) hxpos
-  dsimp only at hp
-  rw [hg, hp, H.block.angular]
-  simp only [Pi.smul_apply, smul_mul_assoc, Complex.smul_re, smul_eq_mul]
-  rfl
 
 
 

@@ -73,17 +73,6 @@ theorem pointPath_derivative_bound (A : SmoothCoefficientPath K V)
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
-/-- A spatial projection of norm at most one preserves the literal source derivative bounds. -/
-theorem pointPath_pullback_derivative_bound (L : P →L[ℝ] Space) (hL : ‖L‖ ≤ 1)
-    (A : SmoothCoefficientPath K V) (n : ℕ) (C : ℝ) (hC : 0 ≤ C)
-    (hb : ∀ t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => pointPath A (L y)) x‖ ≤ C := by
-  change ‖iteratedFDeriv ℝ n ((pointPath A) ∘ L) x‖ ≤ C
-  rw [L.iteratedFDeriv_comp_right (pointPath_contDiff A) x (by simp)]
-  have h := (iteratedFDeriv ℝ n (pointPath A) (L x)).norm_compContinuousLinearMap_le (fun _ => L)
-  simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h
-  exact h.trans ((mul_le_mul (pointPath_derivative_bound A n C hC hb (L x))
-    (pow_le_one₀ (norm_nonneg L) hL) (pow_nonneg (norm_nonneg L) n) hC).trans_eq (mul_one C))
 
 
 end Evaluation
@@ -112,10 +101,6 @@ theorem referenceEmbedding_norm : ‖referenceEmbedding m₀ Rperp‖ ≤ 1 := b
 def referenceRestriction : (Space →L[ℝ] Space) →L[ℝ] (U →L[ℝ] Space) :=
   (compL ℝ U Space Space).flip (referenceEmbedding m₀ Rperp)
 
-/-- The time-path reference restriction is a genuine bounded linear map. -/
-def framePathMap (T : ℝ) : C(Icc (0 : ℝ) T,Space →L[ℝ] Space) →L[ℝ]
-    C(Icc (0 : ℝ) T,U →L[ℝ] Space) :=
-  (referenceRestriction m₀ Rperp).compLeftContinuous ℝ (Icc (0 : ℝ) T)
 
 
 

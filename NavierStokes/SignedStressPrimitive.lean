@@ -499,13 +499,6 @@ theorem sigma_slow_mul (P : Patch) (e : ℕ) (k : E → ℝ) (F : ℝ × E → �
   simp only [smul_eq_mul]
   ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem mass_slow_mul (e : ℕ) (k : E → ℝ) (F : ℝ × E → ℝ) (p : E) :
-    mass e (fun y => k y.2 * F y) p = k p * mass e F p := by
-  change (∫ r, r ^ e * (k p * F (r, p))) = k p * ∫ r, r ^ e * F (r, p)
-  rw [← integral_const_mul]
-  apply integral_congr_ae
-  exact Filter.Eventually.of_forall (fun _ => by ring)
 
 
 end Primitive
@@ -614,12 +607,6 @@ theorem physicalSigma_contDiff (P : Patch) (e : ℕ) {q : E → ℝ}
     (nativeSource_supported P hpos hs)).comp
       ((contDiff_fst.div hl (fun z => (lengthScale_pos hpos z.2).ne')).prodMk contDiff_snd))
 
-theorem physicalSigma_supported (P : Patch) (e : ℕ) {q : E → ℝ}
-    (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : PhysicalSupport P q F) : PhysicalSupport P q (physicalSigma P e q F) := by
-  intro z hz
-  exact sigma_supported P e (nativeSource_contDiff hq hpos hF).continuous
-    (nativeSource_supported P hpos hs) (right_ne_zero_of_mul hz)
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem native_adjusted_eq (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
@@ -763,37 +750,15 @@ theorem physicalBarSigma_eq_negative_primitive (P : Patch) (e : ℕ) {q : E → 
 noncomputable def normalizedResidual (q : E → ℝ) (A : ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
   q z.2 ^ (2 * A + 1 / 2) * nativeSource q F z
 
-noncomputable def qChartTensor (P : Patch) (e : ℕ) (q : E → ℝ) (A : ℝ)
-    (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
-  q z.2 ^ (2 * A) * physicalSigma P e q F (lengthScale q z.2 * z.1, z.2)
-
-
-
-theorem tensor_units_identity (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
-    (A : ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) :
-    q z.2 ^ (2 * A) * physicalSigma P e q F z =
-      sigma P e (normalizedResidual q A F) (z.1 / lengthScale q z.2, z.2) := by
-  unfold normalizedResidual
-  rw [sigma_slow_mul P e (fun p => q p ^ (2 * A + 1 / 2)) (nativeSource q F)]
-  unfold physicalSigma lengthScale
-  rw [← mul_assoc, Real.sqrt_eq_rpow, ← Real.rpow_add (hq z.2)]
 
 
 
 
 
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem fixedQ_density_identity (P : Patch) (e : ℕ) (q : E → ℝ)
-    (Q R : ℝ) (p : E) :
-    Real.sqrt Q ^ (e + 1) * physicalDensity P e q (Real.sqrt Q * R, p) =
-      (Real.sqrt Q / Real.sqrt (q p)) ^ (e + 1) *
-        momentDensity P e ((Real.sqrt Q / Real.sqrt (q p)) * R) := by
-  unfold physicalDensity lengthScale
-  rw [div_pow]
-  have hc : (Real.sqrt Q * R) / Real.sqrt (q p) = (Real.sqrt Q / Real.sqrt (q p)) * R := by ring
-  rw [hc]
-  ring
+
+
+
 
 end Physical
 
@@ -802,8 +767,6 @@ section IntegratedBalances
 open IntegratedMeanBalances
 
 
-noncomputable def axialMomentPotential (axialFlux gr ρ : MeanField) (p : MeanParameter) : ℝ :=
-  axialDefect axialFlux gr p + pressureCoefficient ρ p * pressureTotal gr p
 
 
 
@@ -816,22 +779,6 @@ section ChartComparison
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem compact_jet_bounds {X Y : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    [NormedAddCommGroup Y] [NormedSpace ℝ Y] {K : Set X} (hK : IsCompact K)
-    {f : X → Y} (hf : ContDiff ℝ ∞ f) (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∀ j ≤ m, ∀ x ∈ K, ‖iteratedFDeriv ℝ j f x‖ ≤ C := by
-  have hb : ∀ j : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ K, ‖iteratedFDeriv ℝ j f x‖ ≤ C := by
-    intro j
-    obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn
-      (hf.continuous_iteratedFDeriv (nat_le_smooth j)).continuousOn
-    exact ⟨max C 0, le_max_right _ _, fun x hx => (hC x hx).trans (le_max_left _ _)⟩
-  choose C hC hbound using hb
-  refine ⟨1 + ∑ j ∈ Finset.range (m + 1), C j, ?_, ?_⟩
-  · have h := Finset.sum_nonneg (s := Finset.range (m + 1)) (fun j _ => hC j)
-    linarith
-  · intro j hj x hx
-    have h := Finset.single_le_sum (fun j _ => hC j) (Finset.mem_range.mpr (Nat.lt_succ_of_le hj))
-    exact (hbound j x hx).trans (by linarith)
 
 
 

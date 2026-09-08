@@ -1,5 +1,5 @@
 import Euler.PacketProfileRegularity
-import Euler.TransverseHighSolveFields
+import Euler.TransversePacketCorrectorOperator
 import Euler.TransversePacketPressureGradientProperties
 
 /-! One literal profile-recursion step carries genuine path, time-derivative and locality witnesses. -/

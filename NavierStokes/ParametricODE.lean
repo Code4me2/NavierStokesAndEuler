@@ -297,43 +297,6 @@ theorem solution_hasDerivWithinAt (A : Coefficient a b E) (x₀ : E)
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-/-- Differentiating the actual inverse equation gives the first variation in
-every direction of an arbitrary normed parameter space. -/
-theorem fderiv_resolvent_family (A : P → Coefficient a b E) (g : P → Curve a b E)
-    {p : P} {A' : P →L[ℝ] Coefficient a b E} {g' : P →L[ℝ] Curve a b E}
-    (hA : HasFDerivAt A A' p) (hg : HasFDerivAt g g' p) (v : P) :
-    fderiv ℝ (fun q => resolvent hab (A q) (g q)) p v =
-      resolvent hab (A p) (g' v + volterra (E := E) hab (A' v)
-        (resolvent hab (A p) (g p))) := by
-  let u := fun q => resolvent hab (A q) (g q)
-  have hr : DifferentiableAt ℝ (fun q => resolvent hab (A q)) p :=
-    ((contDiff_resolvent hab).differentiable (by simp) (A p)).comp p hA.differentiableAt
-  have hu : DifferentiableAt ℝ u p := hr.clm_apply hg.differentiableAt
-  have hV : HasFDerivAt (fun q => volterra (E := E) hab (A q))
-      ((volterra (E := E) hab).comp A') p := by
-    have hlin : HasFDerivAt (fun B : Coefficient a b E => volterra (E := E) hab B)
-        (volterra (E := E) hab) (A p) :=
-      ContinuousLinearMap.hasFDerivAt (𝕜 := ℝ)
-        (E := Coefficient a b E) (F := Curve a b E →L[ℝ] Curve a b E)
-        (volterra (E := E) hab)
-    exact HasFDerivAt.comp (𝕜 := ℝ) (E := P) (F := Coefficient a b E)
-      (G := Curve a b E →L[ℝ] Curve a b E) p hlin hA
-  have hd := hu.hasFDerivAt.fun_sub (hV.clm_apply hu.hasFDerivAt)
-  have heq : (fun q => u q - volterra (E := E) hab (A q) (u q)) = g := by
-    funext q
-    exact resolvent_equation hab (A q) (g q)
-  rw [heq] at hd
-  have hdir := congrArg (fun D : P →L[ℝ] Curve a b E => D v) (hd.unique hg)
-  change fderiv ℝ u p v - (volterra (E := E) hab (A p) (fderiv ℝ u p v) +
-    volterra (E := E) hab (A' v) (u p)) = g' v at hdir
-  change fderiv ℝ u p v = (equationOperator hab (A p)).inverse
-    (g' v + volterra (E := E) hab (A' v) (u p))
-  symm
-  apply (equationOperator_isInvertible hab (A p)).inverse_apply_eq.mpr
-  change g' v + volterra (E := E) hab (A' v) (u p) =
-    fderiv ℝ u p v - volterra (E := E) hab (A p) (fderiv ℝ u p v)
-  rw [sub_add_eq_sub_sub] at hdir
-  exact (sub_eq_iff_eq_add.mp hdir).symm
 
 
 
@@ -342,9 +305,6 @@ theorem norm_constantCurve_le (x : E) :
     ‖constantCurve (a := a) (b := b) x‖ ≤ ‖x‖ :=
   (ContinuousMap.norm_le _ (norm_nonneg x)).mpr (fun _ => le_rfl)
 
-theorem norm_source_le (x₀ : E) (f : Curve a b E) :
-    ‖source hab x₀ f‖ ≤ ‖x₀‖ + (b - a) * ‖f‖ :=
-  (norm_add_le _ _).trans (add_le_add (norm_constantCurve_le x₀) (norm_integralPath_le hab f))
 
 
 

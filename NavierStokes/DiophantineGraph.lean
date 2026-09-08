@@ -160,10 +160,6 @@ theorem frequencyL1_le_twice_length (m n : ℤ) :
   unfold frequencyL1
   linarith
 
-theorem lower_of_conjugate_bound {a b D : ℝ} (hprod : 1 ≤ |a| * |b|)
-    (hD : 0 < D) (hb : |b| ≤ D) : 1 / D ≤ |a| := by
-  apply (div_le_iff₀ hD).mpr
-  exact hprod.trans (mul_le_mul_of_nonneg_left hb (abs_nonneg a))
 
 
 

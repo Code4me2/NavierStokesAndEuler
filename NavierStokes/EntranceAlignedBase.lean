@@ -31,11 +31,6 @@ noncomputable def trueWidth : ℝ := H.initial.choose
 
 theorem trueWidth_pos : 0 < trueWidth W H := H.initial.choose_spec.1
 
-theorem trueWidth_spec {y eta : ℝ} (hy : 0 < y) (ht : y ≤ trueWidth W H)
-    (heta : eta ∈ HeatedOutgoing.parameterDomain) :
-    NominalConeAssembly.IsTrue W.profiles F.data.h
-      (NominalConeAssembly.chart (NominalConeAssembly.activeLeft W) (y, eta)) :=
-  H.initial.choose_spec.2.2 y eta hy ht heta
 
 noncomputable def analyticEnd : ℝ :=
   NominalConeAssembly.activeLeft W * Real.exp W.controls.referenceWidth
@@ -75,9 +70,6 @@ theorem cutoffStop_lt_lo {lo : ℝ} (hlo : NominalConeAssembly.activeLeft W < lo
     cutoffStop W H lo < lo :=
   (window_order W H hlo).2.2.2.trans_le (min_le_left _ _)
 
-theorem cutoffStop_lt_trueEnd {lo : ℝ} (hlo : NominalConeAssembly.activeLeft W < lo) :
-    cutoffStop W H lo < NominalConeAssembly.activeLeft W * Real.exp (trueWidth W H) :=
-  (window_order W H hlo).2.2.2.trans_le ((min_le_right _ _).trans (min_le_left _ _))
 
 theorem cutoffStop_lt_analyticEnd {lo : ℝ} (hlo : NominalConeAssembly.activeLeft W < lo) :
     cutoffStop W H lo < analyticEnd W :=
@@ -542,33 +534,6 @@ theorem zero_fields_eq :
     (asSlowProfiles (scheme W H Q M hlo)).pressure 0 = (asSlowProfiles (modifiedScheme W Q M)).pressure 0 := by
   simp only [asSlowProfiles, SlowResidualMatching.ofBeta, profiles_zero, scheme_base, and_self]
 
-theorem zero_residuals_eq (p : ℝ × ℝ) :
-    SlowExpansionResidual.angularCoefficient F.data.h (asSlowProfiles (scheme W H Q M hlo)) 0 p =
-      SlowExpansionResidual.angularCoefficient F.data.h (asSlowProfiles (modifiedScheme W Q M)) 0 p ∧
-    SlowExpansionResidual.axialCoefficient F.data.h (asSlowProfiles (scheme W H Q M hlo)) 0 p =
-      SlowExpansionResidual.axialCoefficient F.data.h (asSlowProfiles (modifiedScheme W Q M)) 0 p := by
-  have hf := zero_fields_eq W H Q M hlo
-  have hv : ∀ j ≤ 0, (asSlowProfiles (scheme W H Q M hlo)).flux j =ᶠ[𝓝 p]
-      (asSlowProfiles (modifiedScheme W Q M)).flux j := by
-    intro j hj
-    have h0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    exact Filter.Eventually.of_forall (fun y => congrFun hf.2.2.1 y)
-  have hu : ∀ j ≤ 0, (asSlowProfiles (scheme W H Q M hlo)).axial j =ᶠ[𝓝 p]
-      (asSlowProfiles (modifiedScheme W Q M)).axial j := by
-    intro j hj
-    have h0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    exact Filter.Eventually.of_forall (fun y => congrFun hf.2.1 y)
-  have hphi : ∀ j ≤ 0, (asSlowProfiles (scheme W H Q M hlo)).phi j =ᶠ[𝓝 p]
-      (asSlowProfiles (modifiedScheme W Q M)).phi j := by
-    intro j hj
-    have h0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    exact Filter.Eventually.of_forall (fun y => congrFun hf.1 y)
-  exact ⟨SlowResidualMatching.angularCoefficient_congr_germ F.data.h 0 hv hu hphi,
-    SlowResidualMatching.axialCoefficient_congr_germ F.data.h 0 hv hu
-      (Filter.Eventually.of_forall (fun y => congrFun hf.2.2.2 y))⟩
 
 
 

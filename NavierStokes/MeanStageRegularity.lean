@@ -252,14 +252,6 @@ theorem rankStage_reconstructed (g : VariableGaugeMean.GaugeData Plane) (r : Ran
     VariableGaugeMean.reconstructState g c (VariableGaugeMean.rankStageState g r axial c u) =
       VariableGaugeMean.rankStageState g r axial c u := rfl
 
-theorem rankStage_preserves (H : PrimitiveData U g.radial.inner g.radial.outer c u)
-    (hg : LocalRankDefect.RankGeometry g r U.carrier c u)
-    (hell : ∀ n, g.length n = VariableGaugeMean.qLength coord) (axial : Plane × Plane) :
-    PrimitiveData U g.radial.inner g.radial.outer c
-        (VariableGaugeMean.rankStageState g r axial c u) ∧
-      VariableGaugeMean.reconstructState g c (VariableGaugeMean.rankStageState g r axial c u) =
-        VariableGaugeMean.rankStageState g r axial c u :=
-  ⟨rankStage_primitive H hg hell axial, rankStage_reconstructed g r c u axial⟩
 
 
 end Rank

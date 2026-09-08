@@ -162,26 +162,6 @@ theorem quotientPoint_injOn_square (a : Plane) :
   · exact (AddCircle.coe_eq_coe_iff_of_mem_Ico hx.1 hy.1).mp (congrArg Prod.fst hxy)
   · exact (AddCircle.coe_eq_coe_iff_of_mem_Ico hx.2 hy.2).mp (congrArg Prod.snd hxy)
 
-/-- A concrete smallness criterion for the native parallelogram. The product
-norm on `Plane` is the maximum norm, so `ball 0 r` is the open native square. -/
-theorem quotientPoint_injOn_small_chart (L : Plane ≃L[ℝ] Plane) (center : Plane)
-    (r : ℝ) (hr : ‖(L : Plane →L[ℝ] Plane)‖ * r < 1 / 2) :
-    InjOn quotientPoint ((fun z => center + L z) '' Metric.ball (0 : Plane) r) := by
-  apply (quotientPoint_injOn_square (center - (1 / 2, 1 / 2))).mono
-  rintro _ ⟨z, hz, rfl⟩
-  have hz' : ‖z‖ < r := by simpa using hz
-  have hnorm : ‖L z‖ < 1 / 2 :=
-    ((L : Plane →L[ℝ] Plane).le_opNorm z).trans_lt
-      ((mul_le_mul_of_nonneg_left hz'.le (norm_nonneg _)).trans_lt hr)
-  have h1 : |(L z).1| < 1 / 2 := (norm_fst_le (L z)).trans_lt hnorm
-  have h2 : |(L z).2| < 1 / 2 := (norm_snd_le (L z)).trans_lt hnorm
-  change (center.1 + (L z).1 ∈ Ico (center.1 - 1 / 2) (center.1 - 1 / 2 + 1)) ∧
-    (center.2 + (L z).2 ∈ Ico (center.2 - 1 / 2) (center.2 - 1 / 2 + 1))
-  constructor <;> constructor
-  · linarith [(abs_lt.mp h1).1]
-  · linarith [(abs_lt.mp h1).2]
-  · linarith [(abs_lt.mp h2).1]
-  · linarith [(abs_lt.mp h2).2]
 
 
 theorem latticeTranslate_unique {s : Set Plane} (hs : InjOn quotientPoint s)

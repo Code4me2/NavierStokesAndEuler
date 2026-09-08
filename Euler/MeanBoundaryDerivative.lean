@@ -41,17 +41,6 @@ theorem Cutoff.exists_taylor_controls (χ : Cutoff) :
   exact ⟨R, M₂, M₃, (norm_nonneg _).trans (h₂ 0), (norm_nonneg _).trans (h₃ 0), hR, h₂, h₃⟩
 
 
-theorem weakPotential_differenceError (χ : Cutoff) (a : Space) (h : ℝ) :
-    weakPotential (χ.differenceError a h) =
-      h⁻¹ • (weakPotential (χ.translate (h • a)) - weakPotential χ) - weakPotential (χ.directional a) := by
-  calc
-    _ = weakPotential (χ.differenceQuotient a h) - weakPotential (χ.directional a) :=
-      weakPotential_sub _ _
-    _ = h⁻¹ • weakPotential ((χ.translate (h • a)).sub χ) - weakPotential (χ.directional a) :=
-      congrArg (fun B : L2 →L[ℝ] homogeneousSpace => B - weakPotential (χ.directional a))
-        (weakPotential_scale ((χ.translate (h • a)).sub χ) h⁻¹)
-    _ = _ := congrArg (fun B : L2 →L[ℝ] homogeneousSpace => h⁻¹ • B - weakPotential (χ.directional a))
-      (weakPotential_sub (χ.translate (h • a)) χ)
 
 theorem weakPotential_operatorNorm_le (χ : Cutoff) : ‖weakPotential χ‖ ≤ cutoffBound χ := by
   change ‖(cutoffCurl χ).adjoint‖ ≤ _

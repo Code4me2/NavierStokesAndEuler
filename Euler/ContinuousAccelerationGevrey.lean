@@ -47,35 +47,5 @@ theorem acceleration_contDiff {n : ℕ∞ω}
     (solve_contDiff T c hc Q hLower (forcing Q Q₁ f v) hQ
       (forcing_contDiff Q Q₁ f v hQ hQ₁ hf hv))
 
-/-- The actual continuous acceleration has one factorial shift relative to
-its velocity and forcing data, with a polynomial radius condition. -/
-theorem acceleration_gevrey
-    (hQ : ContDiff ℝ ∞ Q) (hQ₁ : ContDiff ℝ ∞ Q₁)
-    (hv : ContDiff ℝ ∞ v) (hf : ContDiff ℝ ∞ f)
-    (Rc R C₀ C₁ Cf Cv : ℝ) (hRc : 0 ≤ Rc) (hR : 0 ≤ R) (hRcR : Rc ≤ R)
-    (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁) (hCf : 0 ≤ Cf) (hCv : 0 ≤ Cv)
-    (hstrong : 2*gramCost c C₀ (3*C₀*(Cf+6*C₁*Cv))*(Rc+1) ≤ R)
-    (hQb : ∀ n x, ‖iteratedFDeriv ℝ n Q x‖ ≤ C₀*majorant Rc 0 n)
-    (hQ₁b : ∀ n x, ‖iteratedFDeriv ℝ n Q₁ x‖ ≤ C₁*majorant Rc 0 n)
-    (d : ℕ)
-    (hfb : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ Cf*majorant R d n)
-    (hvb : ∀ n x, ‖iteratedFDeriv ℝ n v x‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n
-      (fun y => accelerationPath T (Q y) (Q₁ y) c hc (hLower y) (v y) (f y)) x‖ ≤
-      majorant R (d+1) n := by
-  have hbQR (k y) : ‖iteratedFDeriv ℝ k Q y‖ ≤ C₀*majorant R 0 k :=
-    (hQb k y).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 k) hC₀)
-  have hbQ₁R (k y) : ‖iteratedFDeriv ℝ k Q₁ y‖ ≤ C₁*majorant R 0 k :=
-    (hQ₁b k y).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 k) hC₁)
-  let g := forcing Q Q₁ f v
-  have hg : ContDiff ℝ ∞ g := forcing_contDiff Q Q₁ f v hQ hQ₁ hf hv
-  have hgb : ∀ k y, ‖iteratedFDeriv ℝ k g y‖ ≤ (3*C₀*(Cf+6*C₁*Cv))*majorant R d k :=
-    forcing_bound Q Q₁ f v hQ hQ₁ hf hv R C₀ C₁ Cf Cv hR hC₀ hC₁ hCf hCv d
-      hbQR hbQ₁R hfb hvb
-  have hs := EulerContinuousGramGevrey.solution_gevrey T Q c hc hLower hQ
-    Rc C₀ hRc hC₀ hQb g hg (3*C₀*(Cf+6*C₁*Cv)) R (by positivity) hstrong d hgb n x
-  exact (congrArg (fun g : P → C(Icc (0 : ℝ) T,U) => ‖iteratedFDeriv ℝ n g x‖)
-    (acceleration_eq_solve T Q Q₁ c hc hLower v f)).trans_le hs
 
 end EulerContinuousAccelerationGevrey

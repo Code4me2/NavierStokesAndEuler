@@ -511,28 +511,12 @@ theorem pureSwirl_navierStokesResidual {F P : PhysicalProfile} {t : ℝ} {x : Pr
   · ring
   · ring
 
-/-- Exact axial viscosity retained in the terminal physical residual. -/
-noncomputable def axialViscosity (C h : ℝ) (f : ℝ → ℝ) (p : PhysicalPoint) : ℝ :=
-  Real.sqrt (2 * p.2.1) * partialZ (partialZ (swirlCoefficient C h f)) p
-
-noncomputable def terminalVelocity (C h : ℝ) (f : ℝ → ℝ) : ProblemStatement.VelocityField :=
-  AxisymmetricResidual.velocity (fun _ => 0) (swirlCoefficient C h f) (fun _ => 0)
-
-noncomputable def terminalPressure (C h : ℝ) (f : ℝ → ℝ) : ProblemStatement.PressureField :=
-  AxisymmetricResidual.pressure (canonicalPressure (swirlCoefficient C h f))
-
-theorem radiusPoint_profilePoint {t : ℝ} {x : ProblemStatement.Space}
-    (hs : 0 ≤ AxisymmetricFields.radialEnergy x) :
-    radiusPoint t (Real.sqrt (2 * AxisymmetricFields.radialEnergy x)) (x 2) =
-      AxisymmetricFields.profilePoint t x := by
-  unfold radiusPoint AxisymmetricFields.profilePoint
-  rw [Real.sq_sqrt (show 0 ≤ 2 * AxisymmetricFields.radialEnergy x by positivity)]
-  simp
 
 
 
-noncomputable def forwardStress (R : ℝ → ℝ) (r : ℝ) : ℝ :=
-  -(∫ u in (0 : ℝ)..r, u ^ 2 * R u) / r ^ 2
+
+
+
 
 
 noncomputable def timeDenominator (h t z : ℝ) : ℝ :=
@@ -553,22 +537,7 @@ theorem leadingResidual_eq_time_add (C h : ℝ) (f : ℝ → ℝ) (t r z : ℝ) 
   rw [mul_div_assoc]
   rfl
 
-theorem timeResidual_nonneg {C h t r z : ℝ} (hC : 0 < C) (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ht : t < 1) (hr : 0 < r) {f : ℝ → ℝ}
-    (hf : 0 ≤ deriv f (Real.log (SimilarityProfile.X h (radiusPoint t r z)))) :
-    0 ≤ timeResidual C h f t z r :=
-  div_nonneg (mul_nonneg (heatAmplitude_pos hC (by linarith) ht hr).le hf)
-    (timeDenominator_pos hh hh1 ht).le
 
-theorem terminal_correction_nonneg {C h t r z : ℝ} (hC : 0 < C) (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ht : t < 1) (hr : 0 < r) {f : ℝ → ℝ}
-    (hf : DifferentiableAt ℝ f (Real.log (SimilarityProfile.X h (radiusPoint t r z))))
-    (hfpos : 0 ≤ deriv f (Real.log (SimilarityProfile.X h (radiusPoint t r z)))) :
-    0 ≤ correction (heatAmplitude C (1 + h) t) (radialSlice (flattening h f) t z) r := by
-  apply correction_nonneg hr.le (heatAmplitude_pos hC (by linarith) ht hr).le
-    (heatAmplitude_deriv_neg hC (by linarith) ht hr).le
-  rw [(flattening_radial_hasDerivAt hh hh1 ht hr hf).deriv]
-  exact div_nonneg (mul_nonneg (by norm_num) hfpos) hr.le
 
 theorem heatAmplitude_antitoneOn {C a t : ℝ} (hC : 0 < C) (ha : 1 < a) (ht : t < 1) :
     AntitoneOn (heatAmplitude C a t) (Ioi 0) := by
@@ -786,8 +755,6 @@ section ParametricEdge
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 
 
-noncomputable def normalizedEdgeStress (c : ℝ) (b a : E × ℝ → ℝ) (y : E × ℝ) : ℝ :=
-  b y + y.2 ^ 3 * ParametricFlatFactor.factor c 3 a y
 
 
 

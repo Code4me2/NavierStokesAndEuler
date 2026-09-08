@@ -159,13 +159,6 @@ theorem periodicPrimitive_periodic
   simpa only [periodicPrimitive, zero_add, hzero, add_zero] using
     hperiodic.intervalIntegral_add_eq_add 0 θ (fun a b => hq.intervalIntegrable a b)
 
-/-- The integral primitive inherits all finite smoothness orders from q. -/
-theorem periodicPrimitive_contDiff
-    (q : ℝ → ℝ) (hq : ContDiff ℝ ∞ q) : ContDiff ℝ ∞ (periodicPrimitive q) := by
-  apply contDiff_infty_iff_deriv.mpr
-  have hd : deriv (periodicPrimitive q) = q :=
-    funext (fun θ => (periodicPrimitive_hasDerivAt q hq.continuous θ).deriv)
-  exact ⟨fun θ => (periodicPrimitive_hasDerivAt q hq.continuous θ).differentiableAt, hd.symm ▸ hq⟩
 
 /-- Subtracting the primitive's mean fixes the zero-mean normalization. -/
 def zeroMeanPrimitive (q : ℝ → ℝ) (θ : ℝ) : ℝ :=

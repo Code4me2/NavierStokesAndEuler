@@ -53,17 +53,6 @@ theorem path_representative_joint_continuous (T : ℝ)
   have H := (EulerSobolevJointEvaluation.pointEvaluation_joint_continuous 1).comp hpair
   simpa only [Function.comp_def, pointEvaluation_ordinary] using H
 
-theorem path_representative_smooth (T : ℝ)
-    (p : C(Icc (0 : ℝ) T, EulerMeanSolenoidal.L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p)) (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ ∞ (representative (p t) (pathTranslation_evaluation_contDiff T p hp t)) :=
-  representative_smooth _ _
 
-theorem path_representative_ae (T : ℝ)
-    (p : C(Icc (0 : ℝ) T, EulerMeanSolenoidal.L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p)) (t : Icc (0 : ℝ) T) :
-    (p t : Space → Space) =ᵐ[volume]
-      representative (p t) (pathTranslation_evaluation_contDiff T p hp t) :=
-  representative_ae _ _
 
 end EulerMeanSmoothRepresentative

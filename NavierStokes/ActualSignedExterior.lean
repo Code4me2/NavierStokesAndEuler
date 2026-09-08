@@ -344,8 +344,6 @@ noncomputable def cycleNativeStates (l : Label B N0) :
     ((ActualCycleParameters.fixedParameters B N0).afterParticular
       x.coefficients (commonContext B) x.state) H hp
 
-noncomputable def cycleFamily : DependentSignedPhysicalFamily.Family :=
-  family (cycleNativeStates x H hp)
 
 noncomputable def cyclePotential : VelocityField := potential (cycleNativeStates x H hp)
 

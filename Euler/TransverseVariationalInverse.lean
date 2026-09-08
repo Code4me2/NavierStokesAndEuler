@@ -99,19 +99,6 @@ theorem transversePrimitive_norm_sq (T : ℝ) (hT : 0 ≤ T)
     ‖transversePrimitive T hT m u‖ ^ 2 ≤ T ^ 2 / 2 * ‖u‖ ^ 2 :=
   primitiveTimeLp_norm_sq_le T hT (u : TimeLp T E)
 
-/-- A convenient polynomial operator bound for the terminal primitive. -/
-theorem transversePrimitive_norm_le (T : ℝ) (hT : 0 ≤ T)
-    (m : Icc (0 : ℝ) T → E) : ‖transversePrimitive T hT m‖ ≤ T := by
-  apply ContinuousLinearMap.opNorm_le_bound _ hT
-  intro u
-  apply (sq_le_sq₀ (norm_nonneg _) (mul_nonneg hT (norm_nonneg u))).1
-  calc
-    ‖transversePrimitive T hT m u‖ ^ 2 ≤ T ^ 2 / 2 * ‖u‖ ^ 2 :=
-      transversePrimitive_norm_sq T hT m u
-    _ ≤ T ^ 2 * ‖u‖ ^ 2 := by
-      apply mul_le_mul_of_nonneg_right _ (sq_nonneg ‖u‖)
-      nlinarith only [sq_nonneg T]
-    _ = (T * ‖u‖) ^ 2 := by ring
 
 variable [CompleteSpace E]
 variable (T : ℝ) (hT : 0 ≤ T) (m : Icc (0 : ℝ) T → E)

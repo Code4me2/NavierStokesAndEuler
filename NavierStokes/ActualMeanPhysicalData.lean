@@ -997,11 +997,6 @@ theorem Atlas.family_add_angular {h d : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
   simp only [PhysicalMeanJetBounds.CoherentFamily.angularField, A.family_add_field Hf Hg,
     Pi.add_apply, add_smul]
 
-theorem Atlas.family_sub_field {h d : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
-    {U : Set Plane} {f g : Scalar} (Hf : A.OverlapLaw U d f) (Hg : A.OverlapLaw U d g) :
-    (A.family (Hf.sub Hg)).field = (A.family Hf).field - (A.family Hg).field := by
-  funext w
-  exact congrFun (A.physical_sub U d f g) (PhysicalMeanJetBounds.physicalPoint h w)
 
 
 theorem initialStream_angularField (B N0 N : ℕ) :

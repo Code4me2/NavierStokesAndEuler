@@ -81,16 +81,6 @@ theorem similarityPoint_contDiffAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   (contDiffAt_snd.fst.div (physicalQ_contDiffAt hh hh1 hp)
     (physicalQ_pos hh hh1 hp).ne').prodMk (physicalEta_contDiffAt hh hh1 hp)
 
-theorem profileDomain_isOpen {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (Λ : ℝ) :
-    IsOpen (profileDomain h Λ) := by
-  apply isOpen_iff_mem_nhds.mpr
-  intro p hp
-  have ht : {q : ProfilePoint | q.1 < 1} ∈ 𝓝 p :=
-    (isOpen_lt continuous_fst continuous_const).mem_nhds hp.1
-  have hs : similarityPoint h ⁻¹' NaturalProfile.domain Λ ∈ 𝓝 p :=
-    (similarityPoint_contDiffAt hh hh1 hp.1).continuousAt.preimage_mem_nhds
-      ((NaturalProfile.domain_isOpen Λ).mem_nhds hp.2)
-  exact inter_mem ht hs
 
 
 theorem physicalQ_at_zero_z {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
@@ -242,39 +232,7 @@ theorem swirlPotential_contDiffAt {h Λ : ℝ} {f : ℝ × ℝ → ℝ}
           (similarityPoint_contDiffAt hh hh1 hp.1))
 
 
-theorem swirlPotential_partialS {h Λ : ℝ} {f : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    {p : ProfilePoint} (hp : p ∈ profileDomain h Λ) :
-    partialS (swirlPotential h f) p =
-      -(physicalQ h p ^ (-h) / physicalQ h p) * f (similarityPoint h p) := by
-  rw [partialS_eq_deriv_slice
-    ((swirlPotential_contDiffAt hh hh1 hf hp).differentiableAt (by simp))]
-  have hd := ((radialPrimitive_hasDerivAt hf hp.2).comp p.2.1
-    ((hasDerivAt_id p.2.1).div_const (physicalQ h p))).const_mul
-      (-(physicalQ h p ^ (-h)))
-  convert! hd.deriv using 1
-  dsimp only [swirlPotential, similarityPoint, physicalQ, physicalEta]
-  ring
 
-/-- The potential is genuinely jointly smooth in Cartesian spacetime,
-including the axis, throughout the explicitly stated core domain. -/
-theorem corePotential_contDiffAt {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
-    {z : SpaceTime} (hz : z ∈ coreDomain h Λ) :
-    ContDiffAt ℝ ∞ (corePotential h f V) z := by
-  have hmap : ContDiffAt ℝ ∞ (fun w : SpaceTime => profilePoint w.1 w.2) z :=
-    (contDiff_profilePoint (n := ∞)).contDiffAt
-  have hH := (meridionalPotential_contDiffAt hh hh1 hV hz).comp z hmap
-  have hK := (swirlPotential_contDiffAt hh hh1 hf hz).comp z hmap
-  have h0 : ContDiffAt ℝ ∞ (fun w : SpaceTime => w.2 0) z :=
-    (projection 0).contDiff.contDiffAt.comp z contDiffAt_snd
-  have h1 : ContDiffAt ℝ ∞ (fun w : SpaceTime => w.2 1) z :=
-    (projection 1).contDiff.contDiffAt.comp z contDiffAt_snd
-  exact (((contDiffAt_const.mul (h1.mul hH)).smul contDiffAt_const).add
-    ((contDiffAt_const.mul (h0.mul hH)).smul contDiffAt_const)).add
-      (hK.smul contDiffAt_const)
 
 
 
@@ -311,18 +269,6 @@ theorem coreVelocity_norm_at_origin {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
     Real.norm_eq_abs]
   exact abs_of_pos (mul_pos (Real.rpow_pos_of_pos (sub_pos.mpr ht) _) hj)
 
-theorem coreVelocity_axis_tendsto_atTop {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hj : 0 < j)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr) :
-    Tendsto (fun t : ℝ => ‖coreVelocity h f V (t, 0)‖) (𝓝[<] 1) atTop := by
-  have hA : 0 < NaturalAxisData.A h := by dsimp [NaturalAxisData.A]; linarith
-  have hlim : Tendsto (fun t : ℝ => (1 - t) ^ (-NaturalAxisData.A h) * j)
-      (𝓝[<] 1) atTop :=
-    (BlowupImplication.negative_power_tendsto_atTop hA
-      (BlowupImplication.remaining_time_tendsto 1)).atTop_mul_pos hj tendsto_const_nhds
-  apply hlim.congr'
-  filter_upwards [self_mem_nhdsWithin] with t ht
-  exact (coreVelocity_norm_at_origin hh hh1 hj hs ht).symm
 
 theorem speedUnbounded_of_axis_tendsto {u : VelocityField}
     (hu : Tendsto (fun t : ℝ => ‖u (t, 0)‖) (𝓝[<] 1) atTop) :

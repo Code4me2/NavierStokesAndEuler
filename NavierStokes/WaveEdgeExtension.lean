@@ -546,35 +546,6 @@ theorem inner_edgeDistance_eq {F : OutgoingProfile.Profile} (W : NominalProfile.
     (FinalSlowBase.logRight W - Real.log (r ^ 2 / 2))) = _
   rw [hl, hh]
 
-/-- The inverse edge factor in the actual inner-coordinate estimates is
-bounded by the radial logarithmic factor, with constant exactly one. -/
-theorem inner_edgeGrowth_le_native {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {x : NativePoint} (hT : x ∈ nativeSlowDomain)
-    (hx : nativeRadius F.data.h x ∈ Ioo (PrimaryTargetBounds.leftRadius W)
-      (PrimaryTargetBounds.rightRadius W)) :
-    max 1 (FinalSlowBase.edgeDistance W
-      (BaseChartJets.normalizedCoordinates F.data.h x.1).2)⁻¹ ≤
-        edgeGrowth (nativeRadius F.data.h) (PrimaryTargetBounds.leftRadius W)
-          (PrimaryTargetBounds.rightRadius W) x := by
-  have hr : 0 < nativeRadius F.data.h x := (PrimaryTargetBounds.leftRadius_pos W).trans hx.1
-  have hpair : (BaseChartJets.normalizedCoordinates F.data.h x.1).2 =
-      ((nativeRadius F.data.h x) ^ 2 / 2,
-        (BaseChartJets.normalizedCoordinates F.data.h x.1).2.2) :=
-    Prod.ext (PrimaryTargetBounds.profileRadius_sq hT).symm rfl
-  rw [hpair, inner_edgeDistance_eq W hr]
-  have ht := WeightedRadialPrimitive.logPosition_mem (PrimaryTargetBounds.leftRadius_pos W) hx
-  have hd := WeightedRadialPrimitive.delta_pos ht
-  have hcomp : WeightedRadialPrimitive.delta
-      (WeightedRadialPrimitive.logLength (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W))
-      (WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) (nativeRadius F.data.h x)) ≤
-      min 1 (min
-        (2 * WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) (nativeRadius F.data.h x))
-        (2 * (WeightedRadialPrimitive.logLength (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) -
-          WeightedRadialPrimitive.logPosition (PrimaryTargetBounds.leftRadius W) (nativeRadius F.data.h x)))) := by
-    apply min_le_min le_rfl
-    apply min_le_min <;> linarith [ht.1, ht.2]
-  apply max_le_max le_rfl
-  simpa only [one_div, logCoordinate] using one_div_le_one_div_of_le hd hcomp
 
 /-- Regularity of the literal native extension, including its exact
 full-tensor values at both moving edges. -/
@@ -622,34 +593,6 @@ section ZeroGermCover
 
 variable {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X] {ι : Type*}
 
-/-- Enlarge only the domain of an already localized coefficient. The same
-constants bound every derivative; outside the native chart its actual zero
-germ supplies all zero tensors. -/
-theorem NativeJets.on_zero_germ_cover {V V' : JetDomain ι X}
-    {w : ι → X → ℝ} {f : ι → X → E} (hf : NativeJets V w f)
-    (hcover : ∀ i x, x ∈ V'.carrier i →
-      x ∈ V.carrier i ∨ f i =ᶠ[𝓝 x] fun _ => 0)
-    (hw : ∀ i x, x ∈ V'.carrier i → 0 ≤ w i x)
-    (hG : ∀ i x, x ∈ V'.carrier i → x ∈ V.carrier i →
-      V.growth i x ≤ V'.growth i x) : NativeJets V' w f := by
-  refine ⟨hw, ?_, ?_⟩
-  · intro i x hx
-    rcases hcover i x hx with hi | hz
-    · exact ((hf.smooth i).contDiffAt ((V.isOpen i).mem_nhds hi)).contDiffWithinAt
-    · exact (contDiffAt_const.congr_of_eventuallyEq hz).contDiffWithinAt
-  · intro m
-    obtain ⟨C, hC, p, hb⟩ := hf.bound m
-    refine ⟨C, hC, p, ?_⟩
-    intro i x hx j hj
-    rcases hcover i x hx with hi | hz
-    · exact (hb i x hi j hj).trans (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left
-          (pow_le_pow_left₀ (zero_le_one.trans (V.one_le_growth i hi)) (hG i x hx hi) p)
-          (zero_le_one.trans hC)) (hw i x hx))
-    · rw [PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq hz j, iteratedFDeriv_fun_zero]
-      simp only [Pi.zero_apply, norm_zero]
-      exact mul_nonneg (mul_nonneg (zero_le_one.trans hC)
-        (pow_nonneg (zero_le_one.trans (V'.one_le_growth i hx)) _)) (hw i x hx)
 
 end ZeroGermCover
 
@@ -706,8 +649,6 @@ noncomputable def meanNative : LocalSignedRequest.Point ≃ₗᵢ[ℝ] NativePoi
       max ‖x.1‖ (max (max ‖x.2.1.1‖ ‖x.2.1.2‖) ‖x.2.2‖)
     rw [max_comm ‖x.2.1.2‖ ‖x.2.1.1‖, max_assoc]
 
-theorem meanNative_apply (x : LocalSignedRequest.Point) :
-    meanNative x = (PrimaryTargetBounds.meanPoint x, x.2.2) := rfl
 
 
 noncomputable def meanExtension {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)

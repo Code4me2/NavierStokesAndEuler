@@ -175,9 +175,6 @@ theorem residualWave_formula (J : ℕ) : residualWave J = (J : ℝ) / 10 + 7 / 1
   rw [residualWave, ExponentLedger.waveExponent, sigma_formula]
   ring
 
-theorem residualMean_formula (J : ℕ) : residualMean J = (J : ℝ) / 10 + 6 / 5 := by
-  rw [residualMean, ExponentLedger.meanExponent, sigma_formula]
-  ring
 
 
 
@@ -205,10 +202,6 @@ noncomputable def residualLoss (h beta : ℝ) (m : ℕ) : ℝ :=
 noncomputable def residualRate (h beta : ℝ) (J m : ℕ) : ℝ :=
   h * residualWave J - residualLoss h beta m
 
-theorem residualRate_eq (h beta : ℝ) (J m : ℕ) :
-    residualRate h beta J m = gain h J + (7 * h / 10 - residualLoss h beta m) := by
-  rw [residualRate, residual_physical_gap]
-  ring
 
 
 

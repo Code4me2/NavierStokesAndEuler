@@ -343,52 +343,8 @@ theorem scalarLaplacian_velocity {w : Components} (hw : ∀ i, ContDiff ℝ ∞ 
   rw [← CylindricalResidual.scalarLaplacian_component hs i]
   simpa only [velocity_apply] using scalarLaplacian_eq (hw i) q
 
-theorem cylindricalResidual_radial {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p) (q : SpaceTime) :
-    CylindricalResidual.cylindricalResidual (velocity w) p q.1 q.2 0 =
-      residualRadial w p q := by
-  change (temporalDerivative (velocity w) q.1 q.2) 0 +
-    CylindricalResidual.vectorAdvection (fun y => velocity w (q.1, y)) q.2 0 -
-    CylindricalResidual.vectorLaplacian (fun y => velocity w (q.1, y)) q.2 0 +
-    CylindricalResidual.scalarGradient (fun y => p (q.1, y)) q.2 0 = _
-  rw [CylindricalResidual.vectorAdvection_radial, CylindricalResidual.vectorLaplacian_radial,
-    scalarLaplacian_velocity hw q 0]
-  simp only [temporalDerivative, temporal_direction (velocity_smooth hw), dt,
-    direction_velocity_component hw, spatial_direction (velocity_smooth hw),
-    velocity_apply, CylindricalResidual.scalarGradient, pack_zero, spatial_direction hp,
-    residualRadial, transport, dr, dtheta, dz, angularVector, radius]
-  ring
 
-theorem cylindricalResidual_angular {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p) (q : SpaceTime) :
-    CylindricalResidual.cylindricalResidual (velocity w) p q.1 q.2 1 =
-      residualAngular w p q := by
-  change (temporalDerivative (velocity w) q.1 q.2) 1 +
-    CylindricalResidual.vectorAdvection (fun y => velocity w (q.1, y)) q.2 1 -
-    CylindricalResidual.vectorLaplacian (fun y => velocity w (q.1, y)) q.2 1 +
-    CylindricalResidual.scalarGradient (fun y => p (q.1, y)) q.2 1 = _
-  rw [CylindricalResidual.vectorAdvection_angular, CylindricalResidual.vectorLaplacian_angular,
-    scalarLaplacian_velocity hw q 1]
-  simp only [temporalDerivative, temporal_direction (velocity_smooth hw), dt,
-    direction_velocity_component hw, spatial_direction (velocity_smooth hw),
-    velocity_apply, CylindricalResidual.scalarGradient, pack_one, spatial_direction hp,
-    residualAngular, transport, dr, dtheta, dz, angularVector, radius]
-  ring
 
-theorem cylindricalResidual_axial {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p) (q : SpaceTime) :
-    CylindricalResidual.cylindricalResidual (velocity w) p q.1 q.2 2 =
-      residualAxial w p q := by
-  change (temporalDerivative (velocity w) q.1 q.2) 2 +
-    CylindricalResidual.vectorAdvection (fun y => velocity w (q.1, y)) q.2 2 -
-    CylindricalResidual.vectorLaplacian (fun y => velocity w (q.1, y)) q.2 2 +
-    CylindricalResidual.scalarGradient (fun y => p (q.1, y)) q.2 2 = _
-  rw [CylindricalResidual.vectorAdvection_axial, CylindricalResidual.vectorLaplacian_axial,
-    scalarLaplacian_velocity hw q 2]
-  simp only [temporalDerivative, temporal_direction (velocity_smooth hw), dt,
-    direction_velocity_component hw, spatial_direction (velocity_smooth hw),
-    velocity_apply, CylindricalResidual.scalarGradient, pack_two, spatial_direction hp,
-    residualAxial, transport, dr, dtheta, dz, angularVector, radius]
 
 noncomputable def conservativeRadial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
   dt (w 0) q + radialDivergence 1 (fun y => w 0 y * w 0 y) q +
@@ -682,10 +638,6 @@ theorem covariance_smooth {osc : Components} (ho : ∀ i, ContDiff ℝ ∞ (osc 
 theorem covariance_symm (osc : Components) (i j : Fin 3) : covariance osc i j = covariance osc j i := by
   simp only [covariance, mul_comm]
 
-theorem total_smooth {base mean osc : Components}
-    (hb : ∀ i, ContDiff ℝ ∞ (base i)) (hm : ∀ i, ContDiff ℝ ∞ (mean i))
-    (ho : ∀ i, ContDiff ℝ ∞ (osc i)) (i : Fin 3) :
-    ContDiff ℝ ∞ (total base mean osc i) := ((hb i).add (hm i)).add (ho i)
 
 theorem fluxDifference_smooth {base mean osc : Components}
     (hb : ∀ i, ContDiff ℝ ∞ (base i)) (hm : ∀ i, ContDiff ℝ ∞ (mean i))
@@ -694,12 +646,6 @@ theorem fluxDifference_smooth {base mean osc : Components}
   ((((hb i).mul (hm j)).add ((hm i).mul (hb j))).add ((hm i).mul (hm j))).add
     (covariance_smooth ho i j)
 
-theorem total_periodic {base mean osc : Components}
-    (hb : ∀ i, AngularInvariant (base i)) (hm : ∀ i, AngularInvariant (mean i))
-    (ho : ∀ i, AngularPeriodic (osc i)) (i : Fin 3) :
-    AngularPeriodic (total base mean osc i) :=
-  AngularPeriodic.add (AngularPeriodic.add (fun q => hb i q period)
-    (fun q => hm i q period)) (ho i)
 
 theorem average_affine_product {a b f g : Scalar}
     (ha : AngularInvariant a) (hb : AngularInvariant b)
@@ -797,57 +743,8 @@ noncomputable def gr (b m o : Components) (q : SpaceTime) : ℝ :=
     dz (fluxDifference b m o 2 0) q - fluxDifference b m o 1 1 q / radius q -
     meanLaplacian (m 0) q + m 0 q / radius q ^ 2)
 
-theorem reynoldsAngular_total_sub {b m o : Components}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hm : ∀ i, ContDiff ℝ ∞ (m i))
-    (ho : ∀ i, ContDiff ℝ ∞ (o i))
-    (hbi : ∀ i, AngularInvariant (b i)) (hmi : ∀ i, AngularInvariant (m i))
-    (hz : ∀ i q, average (o i) q = 0) (Ttheta : Scalar) (q : SpaceTime) :
-    reynoldsAngular (total b m o) q - baseAngular b q - radialDivergence 2 Ttheta q =
-      Etheta b m o Ttheta q := by
-  have hoc i := angularContinuous_of_continuous (ho i).continuous
-  have hflux := fluxDifference_smooth hb hm ho
-  unfold reynoldsAngular baseAngular Etheta
-  rw [average_total hbi hmi hoc hz 1, average_total_product hbi hmi hoc hz 0 1,
-    average_total_product hbi hmi hoc hz 2 1,
-    radialDivergence_add ((hb 0).mul (hb 1)) (hflux 0 1), meanLaplacian_add (hb 1) (hm 1)]
-  simp only [dt, dz, direction_add (hb 1) (hm 1), direction_add ((hb 2).mul (hb 1)) (hflux 2 1)]
-  ring
 
-theorem reynoldsRadial_total_sub {b m o : Components} {p pb pm : Scalar}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hm : ∀ i, ContDiff ℝ ∞ (m i))
-    (ho : ∀ i, ContDiff ℝ ∞ (o i)) (hpb : ContDiff ℝ ∞ pb) (hpm : ContDiff ℝ ∞ pm)
-    (hbi : ∀ i, AngularInvariant (b i)) (hmi : ∀ i, AngularInvariant (m i))
-    (hz : ∀ i q, average (o i) q = 0)
-    (hpavg : average p = fun q => pb q + pm q) (q : SpaceTime) :
-    reynoldsRadial (total b m o) p q - baseRadial b pb q = dr pm q - gr b m o q := by
-  have hoc i := angularContinuous_of_continuous (ho i).continuous
-  have hflux := fluxDifference_smooth hb hm ho
-  unfold reynoldsRadial baseRadial gr
-  rw [average_total hbi hmi hoc hz 0, average_total_product hbi hmi hoc hz 0 0,
-    average_total_product hbi hmi hoc hz 2 0, average_total_product hbi hmi hoc hz 1 1,
-    hpavg, radialDivergence_add ((hb 0).mul (hb 0)) (hflux 0 0),
-    meanLaplacian_add (hb 0) (hm 0)]
-  simp only [dt, dr, dz, direction_add (hb 0) (hm 0), direction_add ((hb 2).mul (hb 0)) (hflux 2 0),
-    direction_add hpb hpm]
-  ring
 
-theorem reynoldsAxial_total_sub {b m o : Components} {p pb pm : Scalar}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hm : ∀ i, ContDiff ℝ ∞ (m i))
-    (ho : ∀ i, ContDiff ℝ ∞ (o i)) (hpb : ContDiff ℝ ∞ pb) (hpm : ContDiff ℝ ∞ pm)
-    (hbi : ∀ i, AngularInvariant (b i)) (hmi : ∀ i, AngularInvariant (m i))
-    (hz : ∀ i q, average (o i) q = 0)
-    (hpavg : average p = fun q => pb q + pm q) (Tz : Scalar) (q : SpaceTime) :
-    reynoldsAxial (total b m o) p q - baseAxial b pb q - radialDivergence 1 Tz q =
-      Ez b m o pm Tz q := by
-  have hoc i := angularContinuous_of_continuous (ho i).continuous
-  have hflux := fluxDifference_smooth hb hm ho
-  unfold reynoldsAxial baseAxial Ez
-  rw [average_total hbi hmi hoc hz 2, average_total_product hbi hmi hoc hz 0 2,
-    average_total_product hbi hmi hoc hz 2 2, hpavg,
-    radialDivergence_add ((hb 0).mul (hb 2)) (hflux 0 2), meanLaplacian_add (hb 2) (hm 2)]
-  simp only [dt, dz, direction_add (hb 2) (hm 2), direction_add ((hb 2).mul (hb 2)) (hflux 2 2),
-    direction_add hpb hpm, direction_add (hflux 2 2) hpm]
-  ring
 
 theorem reynoldsAngular_invariant {b : Components} (hbi : ∀ i, AngularInvariant (b i))
     (q : SpaceTime) : reynoldsAngular b q = baseAngular b q := by
@@ -891,22 +788,6 @@ theorem residuals_invariant {b : Components} {p : Scalar}
     simp only [residualRadial, residualAngular, residualAxial, transport, laplacian,
       dt, dr, dtheta, dz, radius_angularShift, h0, h1, h2, h3]
 
-theorem base_residuals {b : Components} {p : Scalar}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hp : ContDiff ℝ ∞ p)
-    (hbi : ∀ i, AngularInvariant (b i)) (hpi : AngularInvariant p)
-    (hdiv : ∀ y, 0 < radius y → divergence b y = 0)
-    (q : SpaceTime) (hr : 0 < radius q) :
-    residualRadial b p q = baseRadial b p q ∧
-      residualAngular b p q = baseAngular b q ∧ residualAxial b p q = baseAxial b p q := by
-  have hper : ∀ i, AngularPeriodic (b i) := fun i y => hbi i y period
-  have hip := residuals_invariant hbi hpi
-  have hR := average_residualRadial hb hp hper hdiv q hr
-  have hA := average_residualAngular hb hp hper (fun y => hpi y period) hdiv q hr
-  have hZ := average_residualAxial hb hp hper hdiv q hr
-  rw [average_invariant hip.1, reynoldsRadial_invariant hbi hpi] at hR
-  rw [average_invariant hip.2.1, reynoldsAngular_invariant hbi] at hA
-  rw [average_invariant hip.2.2, reynoldsAxial_invariant hbi hpi] at hZ
-  exact ⟨hR, hA, hZ⟩
 
 
 
@@ -919,11 +800,6 @@ theorem meanPressure_smooth {p pb : Scalar} (hp : ContDiff ℝ ∞ p) (hpb : Con
     ContDiff ℝ ∞ (meanPressure p pb) := (average_smooth hp).sub hpb
 
 
-theorem cylindricalDivergence_eq {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
-    (q : SpaceTime) :
-    CylindricalResidual.vectorDivergence (fun y => velocity w (q.1, y)) q.2 = divergence w q := by
-  simp only [CylindricalResidual.vectorDivergence, spatial_direction (velocity_smooth hw),
-    direction_velocity_component hw, velocity_apply, divergence, dr, dtheta, dz, angularVector, radius]
 
 def Represents (u : VelocityField) (w : Components) : Prop :=
   ∀ q : SpaceTime, u (q.1, CylindricalResidual.chart q.2) =
@@ -941,17 +817,6 @@ noncomputable def cartesianResidual (u : VelocityField) (p : PressureField)
   (CylindricalResidual.frame (-(q.2 1))
     (navierStokesResidual u p q.1 (CylindricalResidual.chart q.2))) i
 
-theorem cartesianResidual_eq {u : VelocityField} {p : PressureField}
-    {w : Components} {P : Scalar} (hrep : Represents u w)
-    (hpull : CylindricalResidual.pressurePullback p = P)
-    (q : SpaceTime) (hr : 0 < radius q)
-    (hu : ContDiffAt ℝ 2 u (q.1, CylindricalResidual.chart q.2))
-    (hp : DifferentiableAt ℝ p (q.1, CylindricalResidual.chart q.2)) (i : Fin 3) :
-    cartesianResidual u p i q =
-      CylindricalResidual.cylindricalResidual (velocity w) P q.1 q.2 i := by
-  unfold cartesianResidual
-  rw [CylindricalResidual.navierStokesResidual_cylindrical hu hp hr,
-    hrep.components, hpull, CylindricalResidual.frame_inverse]
 
 
 

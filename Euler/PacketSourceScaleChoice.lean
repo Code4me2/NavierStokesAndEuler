@@ -232,15 +232,5 @@ def scaleSequence (J : ℕ) (X : ℝ) : ℕ → ℝ
 theorem scaleSequence_succ (J : ℕ) (X : ℝ) (n : ℕ) :
     scaleSequence J X (n+1) = ((J+n : ℕ) : ℝ)^2*scaleSequence J X n := rfl
 
-/-- In particular the explicit sequence allows the same simultaneous choice;
-no recurrence or asymptotic conclusion remains as an input. -/
-theorem explicit_sequence_uniform_choice (C c : ℝ) (hC : 1 ≤ C) (hc : 0 ≤ c) (A : ℕ) :
-    ∃ J : ℕ, 3 ≤ J ∧ ∀ δ : ℝ, 0 < δ → ∃ X₀ : ℝ, 8 ≤ X₀ ∧
-      ∀ X : ℝ, X₀ ≤ X → UniformBounds J C c A (scaleSequence J X) δ := by
-  obtain ⟨J, hJ, hchoice⟩ := source_uniform_choice C c hC hc A
-  refine ⟨J, hJ, ?_⟩
-  intro δ hδ
-  obtain ⟨X₀, hX₀, hX⟩ := hchoice δ hδ
-  exact ⟨X₀, hX₀, fun X hX' => hX (scaleSequence J X) hX' (scaleSequence_succ J X)⟩
 
 end EulerPacketSourceScaleChoice

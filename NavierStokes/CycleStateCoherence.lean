@@ -598,32 +598,6 @@ noncomputable def temporalAliasAt {ι : Type} (p : ℕ → CycleParameters ι)
   VariableGaugeMean.temporalAliasState (p j).gauge (p j).timeExponent (p j).commonIndex c
     ((p j).afterSigned x.coefficients c x.state)
 
-/-- The obsolete pressure alias cancels at every step. The initial alias,
-every earlier temporal alias, and exactly one current pressure alias are
-retained with their actual signs. This is an identity of full fields. -/
-theorem iterate_alias_error {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)
-    (seed : CycleState ι) (g : VariableGaugeMean.GaugeData Plane)
-    (hg : ∀ j, (p j).gauge = g) (J : ℕ) :
-    (CycleState.iterate p c seed J).state.errors.aliasError =
-      seed.state.errors.aliasError + (∑ j ∈ Finset.range J, temporalAliasAt p c seed j) +
-        (VariableGaugeMean.pressureAliasState g c (CycleState.iterate p c seed J).state -
-          VariableGaugeMean.pressureAliasState g c seed.state) := by
-  induction J with
-  | zero => simp only [CycleState.iterate_zero, Finset.sum_range_zero, add_zero, sub_self]
-  | succ J ih =>
-    let x := CycleState.iterate p c seed J
-    have hstep : (x.step (p J) c).state.errors.aliasError =
-        x.state.errors.aliasError + temporalAliasAt p c seed J +
-          (VariableGaugeMean.pressureAliasState g c (x.step (p J) c).state -
-            VariableGaugeMean.pressureAliasState g c x.state) := by
-      rw [show (x.step (p J) c).state = (p J).next x.coefficients c x.state from rfl,
-        (p J).next_alias_error x.coefficients c x.state]
-      simp only [temporalAliasAt, hg J]
-      rfl
-    rw [CycleState.iterate_succ, hstep, Finset.sum_range_succ]
-    change x.state.errors.aliasError + _ + _ = _
-    rw [show x.state.errors.aliasError = _ from ih]
-    abel
 
 
 

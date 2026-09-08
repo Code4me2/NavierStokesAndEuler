@@ -77,32 +77,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteS
 def historyWave (α k : ℝ) (t : Icc (0 : ℝ) τ) (y : Space) : Space :=
   (α/k) • vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(y,k*⟪D.m₀,y⟫_ℝ))
 
-theorem historyWave_hasFDerivAt (α k : ℝ) (hk : k ≠ 0) (t : Icc (0 : ℝ) τ) :
-    HasFDerivAt (historyWave τ hτ hτT B δ hδ ξ hs α k t)
-      ((α/δ) • rankOne ℝ (B.coefficients.labelVelocity 0 ξ t) D.m₀) 0 := by
-  let A : Space × ℝ → Space := fun z =>
-    vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,z)
-  have hA : DifferentiableAt ℝ A (0,0) :=
-    ((vectorField τ hτ hτT B (initialData D δ hδ ξ hs)).raw_smooth
-      ⟨t,t.property.1,t.property.2.trans hτT.le⟩).differentiable (by simp) (0,0)
-  have hzero : ∀ y, A (y,0)=0 := by
-    intro y
-    change vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(y,0))=0
-    rw [vector_compact_wave_history]
-    simp [profile]
-  have ha : HasDerivAt (fun θ : ℝ => A (0,θ)) (δ⁻¹ • B.coefficients.labelVelocity 0 ξ t) 0 := by
-    simpa only [A,innerCutoff_zero,one_mul] using
-      angular_derivative_zero_history τ hτ hτT B δ hδ ξ hs t 0
-  have h := zero_phase_graph_hasFDerivAt A _ D.m₀ hA hzero ha (α/k) k
-  have hc : α/k*k=α := by field_simp
-  rw [hc] at h
-  convert! h using 1
-  apply ContinuousLinearMap.ext
-  intro v
-  simp only [smul_apply,rankOne_apply,smul_smul]
-  congr 1
-  rw [div_eq_mul_inv]
-  ring
 
 
 

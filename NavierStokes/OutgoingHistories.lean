@@ -860,23 +860,7 @@ theorem axial_source_continuous (w : ResetWitness d K) {Amp : ℝ → ℝ}
     funext (fun y => (axialStock_hasDerivAt w ha (y, eta)).deriv)
   rwa [he] at hc
 
-theorem angularStock_eq_source_primitive (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    angularStock w Amp (y, eta) = angularStock w Amp (0, eta) +
-      ∫ t in (0 : ℝ)..y, X (t, eta) * angularSource w Amp (t, eta) := by
-  have he := intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun y => angularStock w Amp (y, eta))
-    (fun t _ => angularStock_hasDerivAt w ha (t, eta))
-    ((angular_source_continuous w ha eta).intervalIntegrable 0 y)
-  linarith
 
-theorem axialStock_eq_source_primitive (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    axialStock w Amp (y, eta) = axialStock w Amp (0, eta) +
-      ∫ t in (0 : ℝ)..y, X (t, eta) * Sn w Amp (t, eta) := by
-  have he := intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun y => axialStock w Amp (y, eta))
-    (fun t _ => axialStock_hasDerivAt w ha (t, eta))
-    ((axial_source_continuous w ha eta).intervalIntegrable 0 y)
-  linarith
 
 theorem exponential_integral_left {f : ℝ → ℝ} (a b : ℝ) (hb : 0 < b)
     (he : ∀ t ≤ 0, f t = a * Real.exp (b * t)) {y : ℝ} (hy : y ≤ 0) :
@@ -999,22 +983,6 @@ theorem angularSource_weight (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Poi
   unfold angularWeight Sq
   field_simp [(H_pos w p).ne']
 
-theorem angular_source_past (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    IntegrableOn (fun y => X (y, eta) * angularSource w Amp (y, eta)) (Iic (0 : ℝ)) ∧
-      (∫ y in Iic (0 : ℝ), X (y, eta) * angularSource w Amp (y, eta)) =
-        angularStock w Amp (0, eta) := by
-  have hp := exponential_past (f := fun y => X (y, eta) * angularSource w Amp (y, eta))
-    (d.core.P * shape eta * incomingSq d eta) (8 / 5) (by norm_num) (by
-      intro y hy
-      rw [angularSource_weight, angularWeight_ideal w eta hy, Sq_ideal w ha eta hy]
-      ring)
-  refine ⟨hp.1, hp.2.trans ?_⟩
-  have hq := Qs_initial w ha eta
-  change angularStock w Amp (0, eta) / (X (0, eta) * H w (0, eta)) = incomingSq d eta / (8 / 5) at hq
-  rw [X_zero, H_zero, one_mul] at hq
-  rw [(div_eq_iff (mul_pos d.core.P_pos (shape_pos eta)).ne').mp hq]
-  ring
 
 
 
@@ -1078,27 +1046,6 @@ theorem exponential_sum_past {f : ℝ → ℝ} (a b c e : ℝ) (hb : 0 < b) (he 
         integral_exp_mul_Iic hb, integral_exp_mul_Iic he]
       simp [div_eq_mul_inv]
 
-theorem axial_source_past (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    IntegrableOn (fun y => X (y, eta) * Sn w Amp (y, eta)) (Iic (0 : ℝ)) ∧
-      (∫ y in Iic (0 : ℝ), X (y, eta) * Sn w Amp (y, eta)) = axialStock w Amp (0, eta) := by
-  have hp := exponential_sum_past (f := fun y => X (y, eta) * Sn w Amp (y, eta))
-    (incomingSnConstant d eta) 1 (incomingSnGrowing d eta) (6 / 5) (by norm_num) (by norm_num) (by
-      intro y hy
-      rw [Sn_ideal w ha eta hy]
-      have he : Real.exp y * Real.exp (y / 5) = Real.exp ((6 / 5 : ℝ) * y) := by
-        rw [← Real.exp_add]
-        congr 1
-        ring
-      unfold X
-      rw [one_mul]
-      calc
-        _ = incomingSnConstant d eta * Real.exp y +
-            incomingSnGrowing d eta * (Real.exp y * Real.exp (y / 5)) := by ring
-        _ = _ := by rw [he])
-  refine ⟨hp.1, hp.2.trans ?_⟩
-  rw [axialStock_initial w ha]
-  ring
 
 
 

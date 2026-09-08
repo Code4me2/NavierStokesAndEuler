@@ -97,14 +97,6 @@ theorem quarticUpper_lt_neg_eighteen_hundredths
 def leadingAxial (Z L Y : ℝ) : ℝ := -Y * Z / (2 * L)
 
 
-theorem hasDerivAt_leadingAxial (Z L Y : ℝ) :
-    HasDerivAt (leadingAxial Z L) (-Z / (2 * L)) Y := by
-  have hfun : leadingAxial Z L = fun x : ℝ => (-Z / (2 * L)) * x := by
-    funext x
-    unfold leadingAxial
-    ring
-  rw [hfun]
-  simpa only [id_eq, mul_one] using (hasDerivAt_id Y).const_mul (-Z / (2 * L))
 
 
 

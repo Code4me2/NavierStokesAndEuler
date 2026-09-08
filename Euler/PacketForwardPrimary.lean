@@ -90,14 +90,6 @@ def forwardPrimaryRegularity (O : Operators) (hcorrector : O.curlCorrector = D.c
 
 
 
-theorem forwardPrimary_initial (O : Operators) (x : Space) (θ : ℝ) :
-    (forwardPrimary D δ hδ ξ hs O).high (0,(x,θ)) =
-      (innerCutoff x*profile δ θ) • D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ x ξ := by
-  change (EulerPacketForwardPrimary.forcing D).vector (initialData D δ hδ ξ hs) (0,(x,θ)) = _
-  rw [(EulerPacketForwardPrimary.forcing D).vector_initial_of_representative
-    (initialData D δ hδ ξ hs) (field δ ξ)
-    (smoothField_continuous period _ (field_smooth δ hδ ξ)) (terminal_ae δ hδ ξ),
-    field_coe,map_smul]
 
 
 

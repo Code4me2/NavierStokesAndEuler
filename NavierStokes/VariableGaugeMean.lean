@@ -173,11 +173,7 @@ theorem qLength_contDiffOn {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1) :
   exact ((SimilarityCoordinates.coordinateQ_smooth hc hc1 hs).sqrt
     (SimilarityCoordinates.coordinateQ_spec hc hc1 hs).1.ne').contDiffWithinAt
 
-noncomputable def cutoffModel (d a b : ℝ) (y : MeanRankUpdate.ModelPoint) : ℝ :=
-  RadialPullback.physicalCutoff d a b (y.2.1 / Real.sqrt y.1)
 
-noncomputable def densityModel (a b : ℝ) (hab : a < b) (y : MeanRankUpdate.ModelPoint) : ℝ :=
-  (Real.sqrt y.1)⁻¹ * PressureStream.rho a b hab (y.2.1 / Real.sqrt y.1)
 
 
 
@@ -838,25 +834,6 @@ theorem stream_unit_factor (h : ℝ) (n : ℕ) :
   congr 1
   ring
 
-theorem physicalStreamPotential_naturality {h d a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (n i : ℕ) (M : ℝ)
-    {U : Set Plane} (hU : IsOpen U) {f : PressureStream.Lift Plane → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U))
-    (hs : SupportedGauge a b (qLength (2 * h)) U f)
-    (z : PressureStream.Lift Plane) (hz : 0 < z.2.1.1) (hzU : slowToChartTZ h n z.2.1 ∈ U) :
-    streamPotential d a b M (qLength (2 * h)) (vector .radial)
-      (fieldOnPhysicalTZ h n i (CoordinateAlgebra.A h) f) z =
-    fieldOnPhysicalTZ h n i (CoordinateAlgebra.A h - 1 / 2)
-      (streamPotential d a b (radialFrequency h n i d M) (qLength (2 * h)) (vector .radial) f) z := by
-  have hc : 0 < 2 * h := by linarith
-  have hc1 : 2 * h < 1 := by linarith
-  have he := streamPotential_coverPull (chartScale_pos n) ha hab hd (slowToChartTZ h n) i M
-    (radialFrequency h n i d M) (ChartScales.Q n ^ (-CoordinateAlgebra.A h))
-    (vector .radial) (vector .radial) (radialFrequency_shift h n i d M)
-    (qLength (2 * h)) (qLength (2 * h)) hU hf hs z hzU
-    (qLength_pos hc hc1 hz) (qLength_chart hh hh1 n hz)
-  rw [stream_unit_factor] at he
-  exact he
 
 end ActualChart
 

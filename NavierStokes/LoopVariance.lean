@@ -646,10 +646,6 @@ theorem solveScale_nonneg (d p r : ℝ) (hd : 0 < d) (hr : 0 ≤ r) : 0 ≤ solv
   rw [scaledRoot_zero, solveScale_spec d p r (ne_of_gt hd)]
   exact hr
 
-theorem solveScale_unique (d p r μ : ℝ) (hd : 0 < d)
-    (hμ : scaledRoot d p μ = r) : μ = solveScale d p r := by
-  apply (scaledRoot_strictMono d p hd).injective
-  rw [hμ, solveScale_spec d p r (ne_of_gt hd)]
 
 /-- Smooth dependence on the prescribed *signed square root* of variance,
 including at `p=0` and `r=0`. -/

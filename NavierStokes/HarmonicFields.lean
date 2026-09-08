@@ -206,13 +206,6 @@ noncomputable def coefficientMass {α : Type*} (c : Coefficients α) (x : α) : 
 theorem coefficientMass_nonneg {α : Type*} (c : Coefficients α) (x : α) :
     0 ≤ coefficientMass c x := Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
-/-- A value estimate with constant one, independent of every frequency
-and of the largest occupied harmonic. -/
-theorem norm_evaluate_le_mass {α : Type*} (c : Coefficients α) (x : α) (φ : ℝ) :
-    ‖evaluate c x φ‖ ≤ coefficientMass c x := by
-  calc
-    _ ≤ ∑ j ∈ c.support, ‖c j x * character j φ‖ := norm_sum_le _ _
-    _ = _ := by simp only [norm_mul, norm_character, mul_one, coefficientMass]
 
 
 
@@ -317,14 +310,6 @@ noncomputable def quadraticStep {α : Type*} (A B C : α → ℂ) (c : Coefficie
     Coefficients α :=
   constantCoefficient A + constantCoefficient B * c + constantCoefficient C * (c * c)
 
-theorem band_quadraticStep {α : Type*} (A B C : α → ℂ) {c : Coefficients α} {N : ℕ}
-    (hc : BandLimited c N) : BandLimited (quadraticStep A B C c) (N + N) := by
-  have hB : BandLimited (constantCoefficient B * c) N := by
-    simpa only [zero_add] using (band_constantCoefficient B).mul hc
-  have hC : BandLimited (constantCoefficient C * (c * c)) (N + N) := by
-    simpa only [zero_add] using (band_constantCoefficient C).mul (hc.mul hc)
-  exact ((band_constantCoefficient A).mono (Nat.zero_le _) |>.add
-    (hB.mono (Nat.le_add_right _ _))).add hC
 
 noncomputable def quadraticIterate {α : Type*} (A B C : ℕ → α → ℂ) (c : Coefficients α) :
     ℕ → Coefficients α
@@ -390,19 +375,6 @@ theorem BandLimited.differentiate (V : E → E) (k : ℝ) (Φ : E → ℝ)
     BandLimited (differentiate V k Φ c) N :=
   fun j hj => hc j (support_differentiate V k Φ c hj)
 
-theorem wave_differentiate_expansion (V : E → E) (k : ℝ) (Φ : E → ℝ)
-    (c : Coefficients E) (x : E) :
-    wave (differentiate V k Φ c) k Φ x =
-      ∑ j ∈ c.support, derivativeCoefficient V k Φ j (c j) x *
-        HarmonicCalculus.carrier (k * (j : ℝ)) Φ x := by
-  unfold wave Coefficients.sum Finsupp.sum
-  have hs := Finset.sum_subset (support_differentiate V k Φ c) (f := fun j : ℤ =>
-    HarmonicCalculus.mode (k * (j : ℝ)) Φ (differentiate V k Φ c j) x) (by
-      intro j hj hnot
-      change HarmonicCalculus.mode (k * (j : ℝ)) Φ (differentiate V k Φ c j) x = 0
-      rw [Finsupp.notMem_support_iff.mp hnot]
-      simp [HarmonicCalculus.mode])
-  exact hs
 
 
 theorem along_field_slow (V : E → E) (k : ℝ) (Φ : E → ℝ) (kp : ℤ)
@@ -442,12 +414,6 @@ theorem derivativeCoefficient_contDiffOn {U : Set E} (hU : IsOpen U)
     ((contDiffOn_const.mul (Complex.ofRealCLM.contDiff.comp_contDiffOn
       (HarmonicCalculus.contDiffOn_along hU hV hΦ))).mul ha)
 
-theorem differentiate_contDiffOn {U : Set E} (hU : IsOpen U)
-    {V : E → E} {Φ : E → ℝ} (hV : ContDiffOn ℝ ∞ V U) (hΦ : ContDiffOn ℝ ∞ Φ U)
-    (k : ℝ) {c : Coefficients E} (hc : ∀ j ∈ c.support, ContDiffOn ℝ ∞ (c j) U) :
-    ∀ j ∈ (differentiate V k Φ c).support, ContDiffOn ℝ ∞ (differentiate V k Φ c j) U := by
-  intro j hj
-  exact derivativeCoefficient_contDiffOn hU hV hΦ (hc j (support_differentiate V k Φ c hj)) k j
 
 noncomputable def iteratedCoefficients (V : E → E) (k : ℝ) (Φ : E → ℝ) (c : Coefficients E) :
     ℕ → Coefficients E

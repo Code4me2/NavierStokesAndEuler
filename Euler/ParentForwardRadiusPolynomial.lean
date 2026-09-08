@@ -31,8 +31,6 @@ local notation "BC" => forwardCoefficientBudget period (A.meanData H) (A.transve
   rfl (ForwardInputs.normal J)
 local notation "Cp" => (560*P.horizon^10/P.epsilon)
 
-def geometryCanonicalRadius (δ : ℝ) (ξ : U) : ℝ :=
-  EulerPacketForwardRadius.canonicalRadius (J).linear (J).mean (J).normal BC δ ξ
 
 theorem geometryForward_radius_primitives (δ : ℝ) (ξ : U) (X : ℝ)
     (hKX : L.K ≤ X) (hTiX : Ti ≤ X) (hCpX : Cp ≤ X)

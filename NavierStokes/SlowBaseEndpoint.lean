@@ -153,18 +153,6 @@ theorem pressureExtension_eventuallyEq (a : ℕ → ℕ) {h : ℝ} (hh : 0 < h) 
   exact profileExtension_eq_physical a hh hh1 (-2 * CoordinateAlgebra.A h)
     (bundleComponent C d 2) hy
 
-/-- The original forward-integral potential extends at every nonzero
-axial endpoint, with exactly the original cutoff schedule. -/
-noncomputable def potentialNonzeroAxial {a : ℕ → ℕ} (ha : StrictMono a) {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) {d : Coefficients} (hd : SmoothCoefficients d)
-    (C : ℝ) {x : Space} (hx : x 2 ≠ 0) :
-    JointResidualLimits.OneSidedExtension (BaseResidual.summedPotential a h C d) x where
-  value := potentialExtension a h C d
-  domain := EndpointCoordinates.cartesianDomain h
-  isOpen := EndpointCoordinates.cartesianDomain_open h
-  mem := EndpointCoordinates.cartesian_endpoint_mem hh hh1 hx
-  smooth := potentialExtension_smoothOn ha hh hh1 hd C
-  agrees := fun _ hz => potentialExtension_eq a hh hh1 C d hz.2.1
 
 noncomputable def velocityNonzeroAxial {a : ℕ → ℕ} (ha : StrictMono a) {h : ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2) {d : Coefficients} (hd : SmoothCoefficients d)

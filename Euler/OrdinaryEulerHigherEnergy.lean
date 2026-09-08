@@ -91,12 +91,6 @@ theorem integer_energy_uniform (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
   exact mul_le_mul_of_nonneg_left t.property.2
     (mul_nonneg (tameEnergyConstant_nonneg m) (wordBound_nonneg (hM t)))
 
-theorem tensorNorm_uniform (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
-    (M : ℝ) (hM : ∀ t, WordBound 3 M (U.velocity t)) (t : Icc (0 : ℝ) T) :
-    tensorNorm m (U.velocity t) ≤ wordCount m*
-      Real.sqrt (wordEnergy m (U.velocity ⟨0,le_rfl,hT⟩)*Real.exp (tameEnergyConstant m*M*T)) :=
-  (tensorNorm_le_energy _ m).trans (mul_le_mul_of_nonneg_left
-    (Real.sqrt_le_sqrt (U.integer_energy_uniform m hm M hM t)) (wordCount_nonneg m))
 
 theorem higher_energy_of_h3 (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
     (M : ℝ) (hM : ∀ t, tensorNorm 3 (U.velocity t) ≤ M) (t : Icc (0 : ℝ) T) :

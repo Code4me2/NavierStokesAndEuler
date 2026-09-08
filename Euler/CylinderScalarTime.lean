@@ -22,11 +22,6 @@ def scalarPointField (t : K) (x : LiftDomain P) : ℝ :=
   scalarProject (pointField P (pathMap P scalarEmbed p)
     (pathMap_orbit_contDiff P scalarEmbed p hp) t x)
 
-theorem scalarPointField_joint_continuous :
-    Continuous (fun z : K × LiftDomain P => scalarPointField P p hp z.1 z.2) :=
-  scalarProject.continuous.comp
-    (pointField_joint_continuous P (pathMap P scalarEmbed p)
-      (pathMap_orbit_contDiff P scalarEmbed p hp))
 
 theorem scalarPointField_smooth (t : K) (x : LiftDomain P) :
     ContDiff ℝ ∞ (localFieldLift P (scalarPointField P p hp t) x) :=

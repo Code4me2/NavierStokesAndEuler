@@ -96,15 +96,6 @@ theorem contDiff_curl {A : Space → Space} {m n : WithTop ℕ∞}
     (hA : ContDiff ℝ n A) (hmn : m + 1 ≤ n) : ContDiff ℝ m (curl A) :=
   curlLinear.contDiff.comp (hA.fderiv_right hmn)
 
-/-- Joint spacetime smoothness is preserved, with loss of one derivative. -/
-theorem contDiff_spatialCurl {A : VelocityField} {m n : WithTop ℕ∞}
-    (hA : ContDiff ℝ n A) (hmn : m + 1 ≤ n) : ContDiff ℝ m (spatialCurl A) := by
-  have hp : ContDiff ℝ n (fun p : SpaceTime × Space => A (p.1.1, p.2)) :=
-    hA.comp (contDiff_fst.fst.prodMk contDiff_snd)
-  have hd : ContDiff ℝ m
-      (fun z : SpaceTime => fderiv ℝ (fun y : Space => A (z.1, y)) z.2) :=
-    hp.fderiv contDiff_snd hmn
-  exact curlLinear.contDiff.comp hd
 
 theorem contDiffAt_spatialCurl {A : VelocityField} {z : SpaceTime} {m n : WithTop ℕ∞}
     (hA : ContDiffAt ℝ n A z) (hmn : m + 1 ≤ n) :

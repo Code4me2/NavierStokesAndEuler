@@ -650,42 +650,5 @@ theorem first_components_even {W : Field} {R : ℝ} {U : Set ℂ}
 
 
 
-/-- Uniqueness of the glued actual lifts in the holomorphic path class.
-Both sides are compared by the proved positive Volterra uniqueness
-theorem; no uniqueness premise is introduced. -/
-theorem glued_solution_unique {R : ℝ} (hR : 0 ≤ R) {U : Set ℂ} (hU : IsOpen U)
-    {A₀ A₁ : Bool → ℂ → NilpotentVolterra.CoefficientPath R}
-    {f W₀ W₁ : Bool → ℂ → NilpotentVolterra.Path R}
-    (hA₀ : ∀ b, DifferentiableOn ℂ (A₀ b) U)
-    (hA₁ : ∀ b, DifferentiableOn ℂ (A₁ b) U)
-    (hW₀ : ∀ b, DifferentiableOn ℂ (W₀ b) U)
-    (hW₁ : ∀ b, DifferentiableOn ℂ (W₁ b) U)
-    (hshape : ∀ b, DerivativeShape (NilpotentVolterra.rawCoefficient hR (A₁ b)))
-    (heq₀ : ∀ b z, z ∈ U → W₀ b z = NilpotentVolterra.pathInverse hR exponent
-      (NilpotentVolterra.rhsPath (A₀ b) (A₁ b) (f b) (W₀ b) z))
-    (heq₁ : ∀ b z, z ∈ U → W₁ b z = NilpotentVolterra.pathInverse hR exponent
-      (NilpotentVolterra.rhsPath (A₀ b) (A₁ b) (f b) (W₁ b) z))
-    (r : ℝ) {z : ℂ} (hz : z ∈ U) :
-    glue (NilpotentVolterra.liftedField hR (A₀ false) (A₁ false) (f false) (W₀ false))
-      (NilpotentVolterra.liftedField hR (A₀ true) (A₁ true) (f true) (W₀ true)) r z =
-    glue (NilpotentVolterra.liftedField hR (A₀ false) (A₁ false) (f false) (W₁ false))
-      (NilpotentVolterra.liftedField hR (A₀ true) (A₁ true) (f true) (W₁ true)) r z := by
-  have heq (b : Bool) : EqOn (W₀ b) (W₁ b) U :=
-    NilpotentVolterra.integral_solution_unique hR hU (hA₀ b) (hA₁ b) (hW₀ b) (hW₁ b)
-      (hshape b) (heq₀ b) (heq₁ b)
-  have hboth (b : Bool) (s : ℝ) :
-      NilpotentVolterra.liftedField hR (A₀ b) (A₁ b) (f b) (W₀ b) s z =
-      NilpotentVolterra.liftedField hR (A₀ b) (A₁ b) (f b) (W₁ b) s z := by
-    have hder : deriv (W₀ b) z = deriv (W₁ b) z :=
-      (show W₀ b =ᶠ[𝓝 z] W₁ b from Filter.eventuallyEq_of_mem (hU.mem_nhds hz) (heq b)).deriv_eq
-    have hrhs : NilpotentVolterra.rhsPath (A₀ b) (A₁ b) (f b) (W₀ b) z =
-        NilpotentVolterra.rhsPath (A₀ b) (A₁ b) (f b) (W₁ b) z := by
-      simp only [NilpotentVolterra.rhsPath, heq b hz, hder]
-    unfold NilpotentVolterra.liftedField
-    rw [hrhs]
-  unfold glue
-  split_ifs
-  · exact hboth false r
-  · exact hboth true (-r)
 
 end NavierStokes.VolterraParity

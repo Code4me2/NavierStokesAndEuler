@@ -797,42 +797,6 @@ theorem holdCoefficient_deriv_bound (c : Parameters) {h η : ℝ} (hh : 0 ≤ h)
     _ ≤ 4 * (1 / 100) * 1 * 4 := by gcongr
     _ ≤ _ := by norm_num
 
-theorem angularLag_hold_deriv_error (v : TailData) {η t : ℝ}
-    (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) :
-    |deriv (fun θ => angularLag v.core v.h θ (v.core.holdStart + t) - equilibrium v.core v.h θ) η| ≤
-      206 * Real.exp (-(1 - v.core.lam) * t) := by
-  have hq := angularLag_deriv_eta_bound v.core v.h_pos.le hh1 v.core.holdStart_pos.le hη
-  have heq := equilibrium_deriv_bound v hh1 hη
-  have hc := holdCoefficient_deriv_bound v.core v.h_pos.le hh1 hη
-  have hf : (fun θ => angularLag v.core v.h θ (v.core.holdStart + t) - equilibrium v.core v.h θ) =
-      fun θ => (angularLag v.core v.h θ v.core.holdStart - equilibrium v.core v.h θ - holdCoefficient v.core v.h θ) *
-        Real.exp (-(1 - v.core.lam) * t) + holdCoefficient v.core v.h θ * Real.exp (-t) := by
-    funext θ
-    rw [angularLag_hold_formula v.core v.h θ ht]
-    unfold holdFormula
-    ring
-  have hdq := (angularLag_hasDerivAt_eta v.core v.h η v.core.holdStart).differentiableAt.hasDerivAt
-  have hde := (equilibrium_hasDerivAt v.core v.h η).differentiableAt.hasDerivAt
-  have hdc := (holdCoefficient_hasDerivAt v.core v.h η).differentiableAt.hasDerivAt
-  have hd := ((((hdq.fun_sub hde).fun_sub hdc).mul_const (Real.exp (-(1 - v.core.lam) * t))).fun_add
-    (hdc.mul_const (Real.exp (-t))))
-  rw [hf, hd.deriv]
-  have hb : |deriv (fun θ => angularLag v.core v.h θ v.core.holdStart) η -
-      deriv (equilibrium v.core v.h) η - deriv (holdCoefficient v.core v.h) η| ≤ 205 := by
-    have htri := (abs_sub (deriv (fun θ => angularLag v.core v.h θ v.core.holdStart) η -
-      deriv (equilibrium v.core v.h) η) (deriv (holdCoefficient v.core v.h) η)).trans
-      (add_le_add_left (abs_sub _ _) _)
-    linarith
-  have hex : Real.exp (-t) ≤ Real.exp (-(1 - v.core.lam) * t) :=
-    Real.exp_le_exp.mpr (by nlinarith [mul_nonneg v.core.lam_pos.le ht])
-  have htri := abs_add_le
-    ((deriv (fun θ => angularLag v.core v.h θ v.core.holdStart) η - deriv (equilibrium v.core v.h) η -
-      deriv (holdCoefficient v.core v.h) η) * Real.exp (-(1 - v.core.lam) * t))
-    (deriv (holdCoefficient v.core v.h) η * Real.exp (-t))
-  simp only [abs_mul, abs_of_pos (Real.exp_pos _)] at htri
-  have hfirst := mul_le_mul_of_nonneg_right hb (Real.exp_pos (-(1 - v.core.lam) * t)).le
-  have hsecond := mul_le_mul hc hex (Real.exp_pos (-t)).le (by norm_num : (0 : ℝ) ≤ 1)
-  nlinarith
 
 /-! ## The axial parameter derivative at the beginning of the hold -/
 
@@ -1080,10 +1044,6 @@ theorem axialDerivativeWaitConstant_pos {P : ℝ} (hP : 0 < P) (m : ℝ) :
   exact add_pos (div_pos (initialAxialDerivativeBound_pos _ _) (initialEnergyLower_pos hP _))
     (mul_pos pressureSourceBound_pos (initialEnergyUpper_pos hP _))
 
-theorem axialRatioDerivativeWaitConstant_pos {P : ℝ} (hP : 0 < P) (m : ℝ) :
-    0 < axialRatioDerivativeWaitConstant P m := by
-  exact add_pos (axialDerivativeWaitConstant_pos hP _)
-    (mul_pos (by norm_num) (axialWaitConstant_pos hP _))
 
 theorem axialLag_hold_deriv_ratio_bound (v : TailData) {η t : ℝ}
     (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
@@ -1111,31 +1071,6 @@ theorem normalizedAxial_hasDerivAt (v : TailData) (η : ℝ) {t : ℝ} (ht : 0 �
   convert! hN.div hE hpos.ne' using 1
   field_simp [hpos.ne'] ; ring
 
-theorem axialLag_hold_ratio_deriv_bound (v : TailData) {η t : ℝ}
-    (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
-    |deriv (fun θ => axialLag v (v.core.holdStart + t) θ /
-      angular v.core.P v.core.dropLength v.core.lam (v.core.holdStart + t, θ)) η| ≤
-      axialRatioDerivativeWaitConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) := by
-  rw [(normalizedAxial_hasDerivAt v η ht).deriv]
-  have hD := axialLag_hold_deriv_ratio_bound v hh1 hη ht htw
-  have hN := axialLag_hold_ratio_bound v hh1 hη ht htw
-  have hC := axialWaitConstant_pos v.core.P_pos v.core.m
-  have hpol : 0 ≤ (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) := by positivity
-  have hN' : |axialLag v (v.core.holdStart + t) η /
-      angular v.core.P v.core.dropLength v.core.lam (v.core.holdStart + t, η)| ≤
-      axialWaitConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) := by
-    have hm := mul_le_mul_of_nonneg_left hη (mul_nonneg hC.le hpol)
-    nlinarith
-  have hJ : |shapeGradient η| ≤ 2 := (abs_shapeGradient_le η).trans (by linarith)
-  have hm := mul_le_mul hJ hN' (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 2)
-  have htri := abs_add_le
-    (deriv (fun θ => axialLag v (v.core.holdStart + t) θ) η /
-      angular v.core.P v.core.dropLength v.core.lam (v.core.holdStart + t, η))
-    (shapeGradient η * (axialLag v (v.core.holdStart + t) η /
-      angular v.core.P v.core.dropLength v.core.lam (v.core.holdStart + t, η)))
-  rw [abs_mul] at htri
-  unfold axialRatioDerivativeWaitConstant
-  nlinarith
 
 
 /-! ## Canonical combined statements and pulse-entry powers -/
@@ -1155,8 +1090,6 @@ theorem canonical_Qs_hold_lower {v : TailData} {K : ℝ}
 
 
 
-noncomputable def holdConstant (P m : ℝ) : ℝ :=
-  206 + axialWaitConstant P m + axialRatioDerivativeWaitConstant P m
 
 
 

@@ -430,13 +430,6 @@ theorem terminalInner_full {F : OutgoingProfile.Profile} (W : NominalProfile.Wit
   unfold terminalShift TerminalHistoryBridge.shift at hl
   linarith
 
-theorem nominal_first_pair_eq {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F) :
-    EqOn (BaseResidual.stressPair (nominalCoefficients W) 1)
-      (fun p => (SlowFirstOrderEdge.stressX (terminalAmplitude W) F.data (terminalShift W) p, 0))
-      (Ioi (terminalInner W) ×ˢ Ioo (-1 : ℝ) 1) := by
-  intro p hp
-  have hc := terminalInner_full W hp.1
-  exact Prod.ext (nominal_first_angular_eq W hc.1 hp.2 hc.2) (nominal_first_axial_zero W hc.1.le)
 
 /-- The scalar terminal factor has the same entire derivative tensor as the
 actual stress through both physical parameter endpoints.  The proof uses

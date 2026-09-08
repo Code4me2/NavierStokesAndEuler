@@ -44,8 +44,6 @@ noncomputable def corrected (x : CorrectionStep.CycleState (Label B N0))
 
 noncomputable def cylinderParameter (z : Cylinder) : Parameter := (waveEquiv z).1.1
 
-noncomputable def cylinderDomain (V : Set Plane) : Set Cylinder :=
-  {z | (cylinderParameter z).2 ∈ V}
 
 
 /-- The target operator is the literal common-cover graph at the target
@@ -72,28 +70,6 @@ theorem targetChart (x : CorrectionStep.CycleState (Label B N0))
       ActualReferenceRebase.associatedContext_frame]
     rfl
 
-theorem corrected_amplitude_chart (x : CorrectionStep.CycleState (Label B N0))
-    (l : Label B N0) (j : ℤ) (n : ℕ) :
-    (fun z => (corrected x l j).amplitude n (waveEquiv z)) =
-      CurlClassBounds.realizedCoefficient ((j : ℝ) * (x.coefficients.blocks l).frequency n)
-        PhysicalResidualBridge.ScaledGraph.radius
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (CommonWindow.index h n)).radial
-        PhysicalResidualBridge.ScaledGraph.angular
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (CommonWindow.index h n)).axial
-        (fun z => (ActualReferenceRebase.actualCoefficients x l j).phase n (waveEquiv z))
-        (fun z => (ActualReferenceRebase.actualCoefficients x l j).amplitude n (waveEquiv z)) := by
-  have hp := ActualParticularRealization.realizedCoefficient_pull waveEquiv
-    ((j : ℝ) * (x.coefficients.blocks l).frequency n)
-    ((ActualParticularStageControls.assembly x l).background.radius n)
-    ((ActualReferenceRebase.actualCoefficients x l j).phase n)
-    ((ActualParticularStageControls.assembly x l).directions.radialField n)
-    (fun _ => (ActualParticularStageControls.assembly x l).directions.angular)
-    ((ActualParticularStageControls.assembly x l).directions.axialField
-      (CorrectionStep.ParticularParameters.nativeStrip ActualParticularStageControls.associatedStrip) n)
-    ((ActualReferenceRebase.actualCoefficients x l j).amplitude n)
-  rw [(targetChart x l n).radius, (targetChart x l n).radial,
-    (targetChart x l n).angular, (targetChart x l n).axial] at hp
-  exact hp.symm
 
 
 

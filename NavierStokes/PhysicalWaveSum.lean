@@ -242,9 +242,6 @@ theorem physicalMask_support_subset (D : ℝ) (L : Label) :
   obtain ⟨hd, hs⟩ := mul_ne_zero_iff.mp hz
   exact ⟨subset_tsupport _ hd, subset_tsupport _ hs⟩
 
-theorem physicalMask_tsupport_subset (D : ℝ) (L : Label) :
-    tsupport (physicalMask D L) ⊆ labelRegion D L :=
-  closure_minimal (physicalMask_support_subset D L) (labelRegion_closed D L)
 
 theorem labelRegion_band {D : ℝ} {L : Label} {z : ℝ × Position}
     (hz : z ∈ labelRegion D L) :
@@ -859,9 +856,6 @@ theorem physical_sum_jet_bound {h a b Z r0 P B eBase : ℝ}
 noncomputable def coverChange (d e : ℕ) : LiftPoint →L[ℝ] LiftPoint :=
   (downLift e).comp (upLift d)
 
-theorem coverChange_common (h : ℝ) (n d e : ℕ) (w : SpaceTime) :
-    coverChange d e (commonLift h n d w) = commonLift h n e w := by
-  simp only [coverChange, commonLift, ContinuousLinearMap.comp_apply, Function.comp_apply, up_down]
 
 theorem norm_coverChange_le {d e Δ : ℕ} (hd : d ≤ Δ) (he : e ≤ Δ) :
     ‖coverChange d e‖ ≤ coverBound Δ ^ 2 := by

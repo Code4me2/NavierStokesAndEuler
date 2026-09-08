@@ -19,21 +19,8 @@ theorem jet_add (f g : Domain → E) (z : Domain)
     jet (f+g) z = jet f z+jet g z := by
   simp only [jet, Pi.add_apply, fderiv_add hf hg, Prod.mk_add_mk]
 
-theorem jet_truncate (N n : ℕ) (u : ℕ → Domain → E) (z : Domain) :
-    jet (truncate N u n) z = truncate N (fun i => jet (u i) z) n := by
-  by_cases hn : n ≤ N
-  · simp only [truncate_of_le N n _ hn]
-  · simp only [truncate_of_gt N n _ (by omega), Pi.zero_def]
-    exact jet_zero z
 
 
-theorem differentiableAt_truncate (N n : ℕ) (u : ℕ → Domain → E) (z : Domain)
-    (hu : ∀ i ≤ N, DifferentiableAt ℝ (u i) z) :
-    DifferentiableAt ℝ (truncate N u n) z := by
-  by_cases hn : n ≤ N
-  · simpa only [truncate_of_le N n _ hn] using hu n hn
-  · simpa only [truncate_of_gt N n _ (by omega), Pi.zero_def] using
-      (differentiableAt_const (c := (0 : E)))
 
 
 

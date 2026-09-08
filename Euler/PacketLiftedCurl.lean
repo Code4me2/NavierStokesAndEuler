@@ -97,25 +97,6 @@ theorem scalar_fieldDerivative_sub (a : LiftTangent) (f g : LiftDomain period �
     (((hg x).differentiable (by simp)) 0)]
   rfl
 
-theorem fieldDerivative_liftedCurl_component (κ : ℝ) (m : Vector3)
-    (Q : LiftDomain period → Vector3) (hQ : ∀ x, ContDiff ℝ ∞ (localFieldLift period Q x))
-    (a : LiftTangent) (x : LiftDomain period) (i : Fin 3) :
-    (fieldDerivative period a (liftedCurl period κ m Q) x) i =
-      fieldDerivative period a
-        (fieldDerivative period (coordinateDirection κ m (i + 1)) (fun y => Q y (i + 2))) x -
-      fieldDerivative period a
-        (fieldDerivative period (coordinateDirection κ m (i + 2)) (fun y => Q y (i + 1))) x := by
-  change (EuclideanSpace.proj i) (fieldDerivative period a (liftedCurl period κ m Q) x) = _
-  rw [← fieldDerivative_linear period (EuclideanSpace.proj i) (liftedCurl period κ m Q)
-    (liftedCurl_smooth period κ m Q hQ) a x]
-  have he : (fun y => (EuclideanSpace.proj i) (liftedCurl period κ m Q y)) =
-      fun y => fieldDerivative period (coordinateDirection κ m (i + 1)) (fun z => Q z (i + 2)) y -
-        fieldDerivative period (coordinateDirection κ m (i + 2)) (fun z => Q z (i + 1)) y :=
-    funext fun y => liftedCurl_component_scalar period κ m Q hQ y i
-  rw [he]
-  exact scalar_fieldDerivative_sub period a _ _
-    (fieldDerivative_smooth period _ _ (component_smooth period Q hQ (i + 2)))
-    (fieldDerivative_smooth period _ _ (component_smooth period Q hQ (i + 1))) x
 
 
 theorem component_compact (Q : LiftDomain period → Vector3) (hQ : HasCompactSupport Q)

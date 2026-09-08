@@ -225,35 +225,6 @@ theorem axial_transport_coefficient (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier
     CoordinateAlgebra.d, partialX, partialEta, radialPartial, parameterPartial]
   field_simp ; ring
 
-/-- The exact zeroth-order transport formula. The added term is the full
-axial viscosity, not an estimate or a discarded remainder. -/
-theorem transport_pullback_add_axialViscosity {h e : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (α m : ℝ) (v u f source : Field) {p : SimilarityProfile.PhysicalPoint}
-    (hp : p.1 < 1) (hs : 0 < p.2.1) (hf : ContDiffAt ℝ 2 f (inner h p)) :
-    SlowExpansionResidual.transportResidual α m (pullback h 0 v) (pullback h (-A h) u)
-        (pullback h e f) (pullback h (e - 1) source) p +
-        SimilarityProfile.partialZ (SimilarityProfile.partialZ (pullback h e f)) p =
-      SimilarityProfile.q h p ^ (e - 1) *
-        (SimilarityProfile.T h e f (inner h p) +
-          v (inner h p) * (partialX f (inner h p) + α * f (inner h p) / (inner h p).1) +
-          u (inner h p) * SimilarityProfile.Z h e f (inner h p) -
-          2 * ((inner h p).1 * partialX (partialX f) (inner h p) + m * partialX f (inner h p)) +
-          source (inner h p)) := by
-  have he := SlowExpansionResidual.transport_finiteProfile (e := e) hh hh1 0 α m
-    (fun _ => v) (fun _ => u) (fun _ => f) (fun _ => source) hp hs (fun _ _ => hf)
-  simp only [SlowExpansionResidual.finiteProfile_order_zero,
-    SlowExpansionResidual.finiteSeries_order_zero, SlowExpansionResidual.transportTail_order_zero,
-    SlowExpansionResidual.transportCoefficient, SlowExpansionResidual.recurrence,
-    SlowExpansionResidual.previous_zero, sub_zero, SlowExpansionResidual.convolution,
-    Finset.Nat.antidiagonal_zero, Finset.sum_singleton, SlowExpansionResidual.slowOrder_zero,
-    add_zero, SlowExpansionResidual.transportLinear, SlowExpansionResidual.transportPair] at he
-  rw [he, SimilarityProfile.partialZ_partialZ_pullback hh hh1 hp hf]
-  have hexp : e - 2 * CoordinateAlgebra.D h = e - 1 + 2 * h := by
-    unfold CoordinateAlgebra.D
-    ring
-  rw [hexp]
-  unfold pullback SlowExpansionResidual.Z2
-  ring
 
 /-- Cylindrical radial divergence `(∂r + k/r)S`, in the regular coordinate `s=r²/2`. -/
 noncomputable def radialDivergence (k : ℝ) (S : SimilarityProfile.PhysicalProfile)
@@ -343,73 +314,20 @@ noncomputable def physicalVelocity (h : ℝ) : ProblemStatement.VelocityField :=
 noncomputable def physicalPressure (h : ℝ) : ProblemStatement.PressureField :=
   AxisymmetricResidual.pressure (pressureProfile P h)
 
-/-- The angular axial-viscosity term omitted from the leading radial balance. -/
-noncomputable def thetaAxialViscosity (h : ℝ) (p : SimilarityProfile.PhysicalPoint) : ℝ :=
-  Real.sqrt (2 * p.2.1) *
-    SimilarityProfile.partialZ (SimilarityProfile.partialZ (swirlProfile P h)) p
 
-/-- The axial axial-viscosity term omitted from the leading radial balance. -/
-noncomputable def axialAxialViscosity (h : ℝ) (p : SimilarityProfile.PhysicalPoint) : ℝ :=
-  SimilarityProfile.partialZ (SimilarityProfile.partialZ (axialProfile P h)) p
 
 theorem inner_X_pos {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hs : 0 < p.2.1) :
     0 < (inner h p).1 := div_pos hs (SimilarityProfile.q_pos hh hh1 hp)
 
-theorem radialDivergence_physicalStressTheta {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hs : 0 < p.2.1)
-    (hw : inner h p ∈ Ω.carrier) (hf : P.f (inner h p) ≠ 0) :
-    radialDivergence 2 (physicalStressTheta P h) p =
-      SimilarityProfile.q h p ^ (-A h - 1) * (Real.sqrt (2 * (inner h p).1) *
-        (P.f (inner h p) * sourceTheta P h (inner h p) / L h (inner h p).2 +
-          2 * ((inner h p).1 * partialX (partialX P.f) (inner h p) +
-            2 * partialX P.f (inner h p)))) := by
-  have hX := inner_X_pos hh hh1 hp hs
-  have hL : L h (inner h p).2 ≠ 0 := (SimilarityProfile.L_pos hh hh1 hp).ne'
-  unfold physicalStressTheta
-  rw [radialDivergence_pullback hh hh1 2 hp
-    ((theta_smoothAt P h hw hX.ne' hf hL).differentiableAt (by simp)),
-    sqrt_radial_two hX, theta_divergence P h hw hX hf hL]
-  congr 2
-  ring
-
-theorem radialDivergence_physicalStressAxial {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hs : 0 < p.2.1)
-    (hw : inner h p ∈ Ω.carrier) :
-    radialDivergence 1 (physicalStressAxial P h) p =
-      SimilarityProfile.q h p ^ (-A h - 1) *
-        (sourceAxial P h (inner h p) / L h (inner h p).2 +
-          2 * ((inner h p).1 * partialX (partialX P.U) (inner h p) +
-            partialX P.U (inner h p))) := by
-  have hX := inner_X_pos hh hh1 hp hs
-  have hL : L h (inner h p).2 ≠ 0 := (SimilarityProfile.L_pos hh hh1 hp).ne'
-  unfold physicalStressAxial
-  rw [radialDivergence_pullback hh hh1 1 hp
-    ((axial_smoothAt P h hw hX.ne' hL).differentiableAt (by simp)), one_mul,
-    axial_divergence P h hw hX hL]
-  congr 2
-  ring
 
 
 
 
-theorem partialZ_pressureProfile {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hw : inner h p ∈ Ω.carrier) :
-    SimilarityProfile.partialZ (pressureProfile P h) p =
-      pullback h (-A h - 1) (SimilarityProfile.Z h (-2 * A h) P.pressure) p := by
-  unfold pressureProfile
-  rw [SimilarityProfile.partialZ_pullback hh hh1 hp
-    ((P.pressure_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp))]
-  have he : -2 * A h - CoordinateAlgebra.D h = -A h - 1 := by
-    unfold CoordinateAlgebra.A CoordinateAlgebra.D
-    ring
-  rw [he]
 
 
 
-/-- Cylindrical angular component of a genuine Cartesian vector. -/
-noncomputable def angularComponent (x v : ProblemStatement.Space) : ℝ :=
-  (x 0 * v 1 - x 1 * v 0) / Real.sqrt (2 * AxisymmetricFields.radialEnergy x)
+
 
 
 

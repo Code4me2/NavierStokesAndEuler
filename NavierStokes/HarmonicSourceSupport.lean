@@ -218,23 +218,6 @@ theorem residualSource_apply_ne_zero (c : CorrectionState.Context D) (u : Correc
     AddMonoidAlgebra.coeff_sub, Finsupp.sub_apply, Pi.sub_apply]
   rfl
 
-/-- Outside the wave and pressure cells, the literal residual source is
-exactly the negative excluded nonzero coefficient.  No error is discarded. -/
-theorem residualSource_outside (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (b.velocity n i)) (hp : NonzeroSupported K (b.pressure n))
-    (j : ℤ) {x : D} (hx : x ∉ K) :
-    ParticularWaveAssembly.residualSource c u b G A j n x = excludedSource G A j n x := by
-  by_cases hj : j = 0
-  · subst j
-    rw [ParticularWaveAssembly.residualSource_zero]
-    ext i
-    simp [excludedSource, HarmonicResidual.nonconstant]
-  · ext i
-    rw [residualSource_apply_ne_zero c u b G A hj]
-    have hn := ((nonlinear_ofBlock_supported hK c u b G A n hv hp i).realProjection) j hj x hx
-    simp only [hn, excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj, zero_sub]
 
 
 
@@ -271,16 +254,6 @@ theorem residualSource_outside_of_real
       j hj x hx
     simp only [hn, excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj, zero_sub]
 
-theorem residualSource_complement_germ_of_real
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (realCoefficients (b.velocity n i)))
-    (hp : NonzeroSupported K (realCoefficients (b.pressure n)))
-    (j : ℤ) {x : D} (hx : x ∉ K) :
-    ParticularWaveAssembly.residualSource c u b G A j n =ᶠ[𝓝 x] excludedSource G A j n := by
-  filter_upwards [hK.isOpen_compl.mem_nhds hx] with y hy
-  exact residualSource_outside_of_real c u b G A hK n hv hp j hy
 
 theorem residualSource_support_of_real
     (c : CorrectionState.Context D) (u : CorrectionState.State D)
@@ -334,74 +307,12 @@ theorem nativeUnion_closed (g : Geometry) {K : Set Plane} (hK : IsCompact K) :
   (PeriodizedWaveBounds.nativeCell_locallyFinite g hK).isClosed_iUnion
     (PeriodizedWaveBounds.nativeCell_closed g hK.isClosed)
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-/-- The union of copy-coordinate cells is precisely the periodic lift of
-the native cell's actual geometric image. -/
-theorem mem_nativeUnion_iff (g : Geometry) (K : Set Plane) (z : P × Plane) :
-    z ∈ nativeUnion g K ↔ z.2 ∈ SlotGeometry.liftedSupport g.gap
-      ((fun w => g.center + g.basis w) '' K) := by
-  constructor
-  · intro hz
-    obtain ⟨k, hk⟩ := mem_iUnion.mp hz
-    refine ⟨g.center + g.basis (g.coordinates k z.2), ⟨g.coordinates k z.2, hk, rfl⟩, ?_⟩
-    have he : coverPower g.gap z.2 - (g.center + g.basis (g.coordinates k z.2)) =
-        latticePoint k := by
-      rw [ParticularWaveAssembly.native_coordinate_image]
-      have hn : latticePoint (-k) = -latticePoint k := by ext <;> simp [latticePoint]
-      rw [hn]
-      abel
-    change (SlotGeometry.cover ^ g.gap) z.2 -
-      (g.center + g.basis (g.coordinates k z.2)) ∈ SlotGeometry.lattice
-    rw [← coverPower_apply, he]
-    exact ⟨⟨k.1, rfl⟩, ⟨k.2, rfl⟩⟩
-  · rintro ⟨w, ⟨v, hv, rfl⟩, hz⟩
-    obtain ⟨⟨a, ha⟩, ⟨b, hb⟩⟩ := hz
-    have he : coverPower g.gap z.2 - (g.center + g.basis v) = latticePoint (a, b) := by
-      rw [coverPower_apply]
-      exact Prod.ext ha.symm hb.symm
-    refine mem_iUnion.mpr ⟨(a, b), ?_⟩
-    change g.coordinates (a, b) z.2 ∈ K
-    have hc : g.coordinates (a, b) z.2 = v := by
-      unfold Geometry.coordinates
-      rw [show coverPower g.gap z.2 - g.center - latticePoint (a, b) = g.basis v from by
-        rw [(sub_eq_iff_eq_add).mp he]
-        abel]
-      exact g.basis.symm_apply_apply v
-    rwa [hc]
 
 
 end NativeCoverage
 
 /-! ## Different labels: genuine derivative products vanish on separated slots -/
 
-/-- Pointwise disjoint products on a neighborhood give the zero germ of
-the right factor whenever a component of the left factor is nonzero.
-This handles boundary points without imposing globally disjoint supports. -/
-theorem transport_zero_of_product_germ (R : D → ℝ) (Vr Vθ Vz : D → D)
-    {u v : D → ComplexVector} {x : D}
-    (hc : ∀ i, ContinuousAt (fun y => u y i) x)
-    (hp : ∀ᶠ y in 𝓝 x, ∀ i j, u y i * v y j = 0) :
-    LinearWaveResidual.transport R Vr Vθ Vz u v x = 0 := by
-  classical
-  by_cases hu : u x = 0
-  · ext i
-    simp [LinearWaveResidual.transport, hu]
-  · obtain ⟨i, hi⟩ : ∃ i, u x i ≠ 0 := by
-      by_contra h
-      push Not at h
-      exact hu (funext h)
-    have he : v =ᶠ[𝓝 x] fun _ => 0 := by
-      filter_upwards [hp, (hc i).eventually_ne hi] with y hy hne
-      funext j
-      exact (mul_eq_zero.mp (hy i j)).resolve_left hne
-    have hv : v x = 0 := he.self_of_nhds
-    have hd (j : Fin 3) (V : D → D) : along V (fun y => v y j) x = 0 := by
-      have hej : (fun y => v y j) =ᶠ[𝓝 x] fun _ => (0 : ℂ) :=
-        he.mono (fun _ hy => congrFun hy j)
-      simp only [along, hej.fderiv_eq, fderiv_fun_const, Pi.zero_apply,
-        _root_.zero_apply]
-    ext j
-    fin_cases j <;> simp [LinearWaveResidual.transport, hv, hd, angularGenerator]
 
 
 section ColoredSlots
@@ -537,20 +448,6 @@ theorem residualSource_zero_germ_on
       (fun i => (hs.gaussian n i).enlarge) (fun i => (hs.aliasError n i).enlarge) j
   · simpa using And.intro hx hn
 
-theorem zero_complementJets_of_germs
-    {E I : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (s : WeightedClasses.StripData D) (w : ℕ → D → ℝ) (α : ℝ)
-    (K : ℕ → I → Set D) (f : ℕ → D → E)
-    (hg : ∀ n x, x ∈ s.domain → (∀ i, x ∉ K n i) → f n =ᶠ[𝓝 x] fun _ => 0) :
-    PeriodizedWaveBounds.ComplementJets s w α K f := by
-  constructor
-  · intro n x hx hn
-    exact contDiffAt_const.congr_of_eventuallyEq (hg n x hx hn)
-  · intro m
-    refine ⟨0, le_rfl, 0, ?_⟩
-    intro n x hx hn j hj
-    rw [PeriodizedWaveBounds.jets_eq_of_germ (hg n x hx hn) j]
-    simp [WeightedClasses.majorant]
 
 
 

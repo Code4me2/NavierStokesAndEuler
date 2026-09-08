@@ -129,8 +129,6 @@ noncomputable def selectedThreshold : ℕ := ActualCarrierGeometry.startingThres
 theorem selectedThreshold_geometry : ActualCarrierGeometry.geometricThreshold ≤ selectedThreshold :=
   ActualCarrierGeometry.geometricThreshold_le_startingThreshold 0
 
-noncomputable def selectedCycle : ℕ → CycleState (Index selectedBudget selectedThreshold) :=
-  cycle selectedBudget selectedThreshold
 
 
 
@@ -182,26 +180,7 @@ theorem uncutPrefix_eqOn {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
   intro z hz
   exact Finset.sum_congr rfl (fun j _ => hf j hz)
 
-theorem chart_velocity_of_stage_realizations (B N0 : ℕ) (a : ℝ)
-    (i : PolarCharts.Index) (n : ℕ) {U : Set SpaceTime} (hU : IsOpen U)
-    (AP BP : ℕ → VelocityField) (hA : ∀ k, DifferentiableOn ℝ (AP k) U)
-    (hcurl : ∀ k, EqOn (SpatialCurl.spatialCurl (AP k))
-      (chartPotentialParts B N0 a i n k) U)
-    (hB : ∀ k, EqOn (BP k) (chartDirectStages B N0 a i n k) U) (J : ℕ) :
-    EqOn (MixedDiagonalResidual.uncutVelocity AP BP J) (chartVelocity B N0 a i n J) U := by
-  intro z hz
-  change SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix AP (J + 1)) z +
-    DiagonalJetBounds.uncutPrefix BP (J + 1) z = _
-  rw [uncutPrefix_eqOn hB (J + 1) hz]
-  exact CyclePhysicalPrefixes.mixedVelocity_prefix (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) a i (graph n) n hU AP hA hcurl J hz
 
-theorem chart_pressure_of_stage_realizations (B N0 : ℕ) (a : ℝ)
-    (i : PolarCharts.Index) (n : ℕ) {U : Set SpaceTime} (PP : ℕ → PressureField)
-    (hP : ∀ k, EqOn (PP k) (chartPressureStages B N0 a i n k) U) (J : ℕ) :
-    EqOn (DiagonalJetBounds.uncutPrefix PP (J + 1)) (chartPressure B N0 a i n J) U := by
-  rw [← chart_pressure_prefix B N0 a i n J]
-  exact uncutPrefix_eqOn hP (J + 1)
 
 
 
@@ -226,11 +205,6 @@ noncomputable def meanAngularField (B N0 : ℕ) (degree : ℝ)
     PhysicalMeanJetBounds.angularVector (PhysicalGraphBounds.radialProjection w)
 
 
-theorem meanField_sub (B N0 : ℕ) (degree : ℝ) (f g : ActualMeanPhysicalData.Scalar) :
-    meanField B N0 degree (f - g) = meanField B N0 degree f - meanField B N0 degree g := by
-  funext w
-  exact congrFun ((meanAtlas B N0).physical_sub standardRegion.carrier degree f g)
-    (PhysicalMeanJetBounds.physicalPoint h w)
 
 
 

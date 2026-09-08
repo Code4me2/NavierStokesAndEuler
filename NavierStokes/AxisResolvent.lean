@@ -244,12 +244,6 @@ theorem one_add_apply_alternatingResolvent (Q : E →L[ℝ] E) {K : ℝ} (hK : 0
     (one_add_mul_alternatingResolvent Q hK hQ)
   simpa only [_root_.mul_apply_eq_comp, _root_.one_apply_eq_self] using h
 
-theorem alternatingResolvent_apply_one_add (Q : E →L[ℝ] E) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) (x : E) :
-    alternatingResolvent Q ((1 + Q) x) = x := by
-  have h := congrArg (fun T : E →L[ℝ] E => T x)
-    (alternatingResolvent_mul_one_add Q hK hQ)
-  simpa only [_root_.mul_apply_eq_comp, _root_.one_apply_eq_self] using h
 
 theorem alternatingResolvent_equation (Q : E →L[ℝ] E) {K : ℝ} (hK : 0 ≤ K)
     (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) (x : E) :

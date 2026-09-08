@@ -143,44 +143,6 @@ theorem pressureResidual_translation_contDiff {n : ℕ∞ω}
     ((hf.sub (frameApply_translation_contDiff T hT F s.acceleration hF ha)).sub
       ((frameApply_translation_contDiff T hT F₁ s.velocityLp hF₁ hv).const_smul (2 : ℝ)))
 
-/-- A genuine all-order bound for the physical mean velocity. -/
-theorem velocityField_translation_gevrey
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.velocityLp))
-    (R CF Cv : ℝ) (hR : 0 ≤ R) (hCF : 0 ≤ CF) (hCv : 0 ≤ Cv) (d : ℕ)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant R 0 n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.velocityLp) a‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityField) a‖ ≤
-      (3*CF*Cv)*majorant R d n :=
-  frameApply_translation_gevrey T hT F s.velocityLp hF hv R CF Cv hR hCF hCv d hFb hvb n a
 
-/-- The actual B_t has a fixed polynomial factorial amplitude. -/
-theorem velocityDerivative_translation_gevrey
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hF₁ : ContDiff ℝ ∞ (fun a : Space => translatePath T a F₁))
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.velocityLp))
-    (ha : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.acceleration))
-    (R CF CF₁ Cv Ca : ℝ) (hR : 0 ≤ R)
-    (hCF : 0 ≤ CF) (hCF₁ : 0 ≤ CF₁) (hCv : 0 ≤ Cv) (hCa : 0 ≤ Ca) (d : ℕ)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant R 0 n)
-    (hF₁b : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F₁) a‖ ≤ CF₁*majorant R 0 n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.velocityLp) a‖ ≤ Cv*majorant R d n)
-    (hab : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.acceleration) a‖ ≤ Ca*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityDerivative) a‖ ≤
-      (3*(CF₁*Cv+CF*Ca))*majorant R d n := by
-  have hvreg := frameApply_translation_contDiff T hT F₁ s.velocityLp hF₁ hv
-  have hareg := frameApply_translation_contDiff T hT F s.acceleration hF ha
-  have hvb' := frameApply_translation_gevrey T hT F₁ s.velocityLp hF₁ hv
-    R CF₁ Cv hR hCF₁ hCv d hF₁b hvb
-  have hab' := frameApply_translation_gevrey T hT F s.acceleration hF ha
-    R CF Ca hR hCF hCa d hFb hab
-  have hs := add_bound
-    (fun b : Space => timeTranslation T b (timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp))
-    (fun b : Space => timeTranslation T b (timeMultiplier T hT (solenoidalFrame T F) s.acceleration))
-    hvreg hareg R (3*CF₁*Cv) (3*CF*Ca) d hvb' hab' n a
-  exact ((congrArg (fun g : Space → TimeLp T L2 => ‖iteratedFDeriv ℝ n g a‖)
-    s.velocityDerivative_orbit_eq).trans_le hs).trans_eq (by ring)
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

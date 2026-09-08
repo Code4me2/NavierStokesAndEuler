@@ -13,11 +13,6 @@ open scoped ContDiff
 
 private local instance : Fact (0 < (1 : ℝ)) := ⟨by norm_num⟩
 
-private theorem hasDerivAt_submodule_iff {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (S : Submodule ℝ E) (f : ℝ → S) (v : S) (t : ℝ) :
-    HasDerivAt f v t ↔ HasDerivAt (fun s => (f s : E)) (v : E) t := by
-  rw [hasDerivAt_iff_tendsto, hasDerivAt_iff_tendsto]
-  rfl
 
 private theorem hasDerivWithinAt_submodule_iff {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (S : Submodule ℝ E) (f : ℝ → S) (v : S) (U : Set ℝ) (t : ℝ) :

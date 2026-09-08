@@ -302,20 +302,6 @@ theorem angularSum_axis (a : ℕ → ℝ) (q : SpaceTime → ℝ) (b : ℕ → C
   simp only [angularSum, SolenoidalDiagonal.potentialSum, SolenoidalDiagonal.cutStage,
     angularField_axis _ _ _ h0 h1, smul_zero, tsum_zero]
 
-theorem angularSum_axis_zero_germ {U : Set Slow} (hU : IsOpen U) (D : ℕ → AngularData U)
-    {a : ℕ → ℝ} (ha : Tendsto a atTop atTop) {q : SpaceTime → ℝ}
-    {x : SpaceTime} (hq : ContinuousAt q x) (hpos : 0 < q x) (hx : x ∈ physicalDomain U)
-    (haxis : radius x = 0) :
-    angularSum a q (fun j => (D j).scalar) =ᶠ[𝓝 x] fun _ => 0 := by
-  obtain ⟨N, hN⟩ := angularSum_eventuallyEq_partial ha hq hpos (fun j => (D j).scalar)
-  have hz (j : ℕ) : (fun y => SolenoidalDiagonal.cutStage a q
-      (fun j => angularField (D j).scalar) j y) =ᶠ[𝓝 x] fun _ => 0 := by
-    filter_upwards [(D j).field_zero_germ hU hx (haxis ▸ (D j).inner_pos _ hx)] with y hy
-    simp only [SolenoidalDiagonal.cutStage, hy, smul_zero]
-  have hsum : angularPartial a q (fun j => (D j).scalar) N =ᶠ[𝓝 x] fun _ => 0 := by
-    filter_upwards [(Filter.eventually_all_finset (Finset.range N)).2 (fun j _ => hz j)] with y hy
-    exact Finset.sum_eq_zero hy
-  exact hN.trans hsum
 
 /-! ## Curl potentials plus direct angular velocity -/
 
@@ -334,8 +320,6 @@ theorem preterminalSlow_open : IsOpen preterminalSlow := isOpen_lt continuous_fs
 
 noncomputable def qCoefficient (h : ℝ) : Coefficient := SimilarityProfile.q h
 
-theorem qCoefficient_physical (h : ℝ) (w : SpaceTime) :
-    qCoefficient h (cylPoint w) = PhysicalWaveSum.physicalQ h w := rfl
 
 
 theorem qCoefficient_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :
@@ -412,12 +396,6 @@ noncomputable def graphPoint (G : PhysicalResidualBridge.ScaledGraph) (p : CylPo
 noncomputable def graphCoefficient (G : PhysicalResidualBridge.ScaledGraph) (f : Lift → ℝ) : Coefficient :=
   fun p => G.velocityScale * f (graphPoint G p)
 
-theorem graphPoint_actual (G : PhysicalResidualBridge.ScaledGraph) (p : CylPoint) (theta : ℝ) :
-    graphPoint G p = PhysicalResidualTZ.swapSlow
-      (G.map (p.1, AxisymmetricResidual.pack p.2.1 theta p.2.2)).1 := by
-  simp only [graphPoint, graphSlow, slowOfCyl, PhysicalResidualTZ.swapSlow_apply,
-    PhysicalResidualBridge.ScaledGraph.map, AxisymmetricResidual.pack_zero,
-    AxisymmetricResidual.pack_one, AxisymmetricResidual.pack_two]
 
 
 theorem graphSlow_smooth (G : PhysicalResidualBridge.ScaledGraph) : ContDiff ℝ ∞ (graphSlow G) :=
@@ -432,33 +410,6 @@ theorem graphPoint_smoothAt (G : PhysicalResidualBridge.ScaledGraph) (hG : 0 < G
       (((contDiffAt_const.mul hr).smul contDiffAt_const).add
         ((contDiffAt_const.mul contDiffAt_fst).smul contDiffAt_const)))
 
-/-- Smoothness and the positive moving support of the actual mean field
-produce the angular data. No divergence or physical output is assumed. -/
-noncomputable def graphAngularData (G : PhysicalResidualBridge.ScaledGraph) (hG : 0 < G.radialScale)
-    {U : Set Slow} (hU : IsOpen U) {a b : ℝ} (ha : 0 < a) (ell : Slow → ℝ)
-    (hell : ContinuousOn ell U) (hpos : ∀ s ∈ U, 0 < ell s)
-    (f : Lift → ℝ) (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U))
-    (hs : VariableGaugeMean.SupportedGauge a b ell U f) : AngularData (graphSlow G ⁻¹' U) where
-  scalar := graphCoefficient G f
-  smooth := by
-    intro p hp
-    have hfAt : ContDiffAt ℝ ∞ f (graphPoint G p) :=
-      hf.contDiffAt ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds hp.1)
-    exact (contDiffAt_const.mul (hfAt.comp p (graphPoint_smoothAt G hG hp.2))).contDiffWithinAt
-  inner s := ell (graphSlow G s) * a / G.radialScale
-  inner_continuous := ((hell.comp (graphSlow_smooth G).continuous.continuousOn (fun _ hx => hx)).mul
-    continuousOn_const).div_const _
-  inner_pos s hs := div_pos (mul_pos (hpos _ hs) ha) hG
-  vanishes := by
-    classical
-    intro p hp _ hi
-    have hz : f (graphPoint G p) = 0 := by
-      by_contra hn
-      have hbound := (hs (graphPoint G p) hp hn).1
-      have hlt := (lt_div_iff₀ hG).mp hi
-      apply (not_lt_of_ge hbound)
-      simpa only [graphPoint, mul_comm G.radialScale p.2.1] using hlt
-    simp only [graphCoefficient, hz, mul_zero]
 
 
 
@@ -476,13 +427,6 @@ noncomputable def nativeGraphData (h : ℝ) (n : ℕ) : PhysicalResidualBridge.S
   radialVector := PhysicalGraphBounds.radialDirection
   temporalVector := PhysicalGraphBounds.timeDirection
 
-theorem native_graphPoint (h : ℝ) (n : ℕ) (w : SpaceTime) :
-    graphPoint (nativeGraphData h n) (cylPoint w) = OffplaneCorrectionExtensions.physicalLift h n w := by
-  simp only [graphPoint, nativeGraphData, cylPoint, graphSlow, slowOfCyl, one_mul,
-    OffplaneCorrectionExtensions.physicalLift, OffplaneCorrectionExtensions.physicalSlow,
-    PhysicalGraphBounds.nativeGraph_eq, PhysicalGraphBounds.radialProfile,
-    PhysicalGraphBounds.radiusPower_eq, smul_smul]
-  rfl
 
 
 

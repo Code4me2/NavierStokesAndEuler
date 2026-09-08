@@ -589,19 +589,6 @@ variable {B N0 : ℕ} (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
 theorem parameterDomain_open : IsOpen ActualCarrierTransport.parameterDomain :=
   ActualPrimary.standardRegion.isOpen.preimage continuous_snd
 
-include hN in
-theorem associated_inputSupport
-    {b : HarmonicBlock Point} {G A : HarmonicResidual.BlockCoefficients Point}
-    (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualInitialization.labelCarrier l) b G A) :
-    HarmonicSourceSupport.InputSupportOn (ActualCarrierTransport.parameterDomain ×ˢ Set.univ)
-      (ActualCarrierTransport.canonicalSourceRegion l) (StateReindex.block cycleAssoc.symm b)
-      (StateReindex.blockCoefficients cycleAssoc.symm G) (StateReindex.blockCoefficients cycleAssoc.symm A) := by
-  apply inputSupport_reindex_on cycleAssoc.symm hs
-  · intro z hz
-    exact hz.1
-  · intro n z hz hk
-    exact (ActualCarrierTransport.labelCarrier_iff_canonicalSourceRegion hN l n hz.1 z.2).mp hk
 
 theorem canonical_copyData_eq_scalar
     (c : Context (CycleSlow × TorusInverse.Plane)) (u : State (CycleSlow × TorusInverse.Plane))

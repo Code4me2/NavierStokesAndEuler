@@ -1373,35 +1373,6 @@ theorem profile_tsupport_slot :
   obtain ⟨hl, hr⟩ := hcl hz
   constructor <;> linarith
 
-/-- The actual cutoff pulse has global slot-coordinate jets with the
-zero-extended Gaussian envelope. This is the form used in physical charts. -/
-theorem cutoffPulse_envelope_jets
-    (D : PhaseJetBounds.Domain ι Q) (d : ι → PrimaryODE.FrameData Q) (lam u L : ι → ℝ)
-    (hp : EnvelopeJets (productDomain D (fun _ => Ioo (0 : ℝ) 1) (fun _ => isOpen_Ioo))
-      (fun i z => referenceP (lam i) (u i) (L i) (L i * z.2))
-      (fun i => normalizedPulse (d i) (lam i) (u i) (L i))) :
-    EnvelopeJets (productDomain D (fun _ => (univ : Set ℝ)) (fun _ => isOpen_univ))
-      (fun i z => GaussianTailFlat.referenceSlotEnvelope (lam i) (u i) (L i) z.2)
-      (fun i => cutoffPulse (d i) (lam i) (u i) (L i)) := by
-  have hweight : ∀ i (z : Q × ℝ),
-      0 ≤ GaussianTailFlat.referenceSlotEnvelope (lam i) (u i) (L i) z.2 := by
-    intro i z
-    unfold GaussianTailFlat.referenceSlotEnvelope
-    split_ifs
-    · exact (GaussianEnvelope.envelope_pos _ _ _).le
-    · rfl
-  have hp' := hp.mono_weight (v := fun i z =>
-      GaussianTailFlat.referenceSlotEnvelope (lam i) (u i) (L i) z.2) (by
-    intro i z hz
-    rw [GaussianTailFlat.referenceSlotEnvelope, ite_eq_left ⟨hz.2.1.le, hz.2.2.le⟩]
-    rfl)
-  apply hp'.localize
-    (profile_linear_polynomial
-      (productDomain D (fun _ => (univ : Set ℝ)) (fun _ => isOpen_univ))
-      (ContinuousLinearMap.snd ℝ Q ℝ)) (fun _ => rfl)
-      (fun _ z hz => ⟨hz.1, mem_univ _⟩) (fun i z _ => hweight i z)
-  intro i z hz
-  exact ⟨hz.2.1, profile_tsupport_slot hz.1⟩
 
 end CutoffPulse
 
@@ -1582,12 +1553,6 @@ noncomputable def phaseCovariance {D : Domain ℕ Slow} (F : Fin 2 → PhaseCons
   primaryCovariance pref (fun c => (F c).frame) (fun c => (F c).lam)
     (fun c => (F c).u) (fun c => (F c).L)
 
-noncomputable def phaseWave (s : StripData E) {D : Domain ℕ Slow}
-    (F : Fin 2 → PhaseConstruction D) (pref : Fin 2 → ℕ → ℝ)
-    (χ : ℕ → E → Slow × ℝ) (T : ℕ → E → SmoothCovariance.Vec2)
-    (mask : ℕ → E → ℝ) (c : Fin 2) : ℕ → E → HarmonicCalculus.ComplexVector :=
-  primaryWave s pref (fun c => (F c).frame) (fun c => (F c).lam)
-    (fun c => (F c).u) (fun c => (F c).L) χ T mask c
 
 
 end PhaseConstruction
@@ -1910,17 +1875,6 @@ noncomputable def uncutPrimaryWave (s : StripData E)
   primaryCoefficient s (chartCovariance pref d lam u L χ) T mask
     (fun n x => normalizedPulse (d c n) (lam c n) (u c n) (L c n) (χ n x)) c
 
-omit [NormedAddCommGroup Q] [NormedSpace ℝ Q] in
-/-- The slot cutoff occurs exactly once. This identity matches a linear-wave
-coefficient's external `withCutoff` operation to the physical primary. -/
-theorem primaryWave_eq_cutoff (s : StripData E)
-    (pref : Fin 2 → ℕ → ℝ) (d : Fin 2 → ℕ → PrimaryODE.FrameData Q)
-    (lam u L : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Q × ℝ)
-    (T : ℕ → E → SmoothCovariance.Vec2) (mask : ℕ → E → ℝ) (c : Fin 2) (n : ℕ) (x : E) :
-    primaryWave s pref d lam u L χ T mask c n x =
-      GaussianTailFlat.profile (χ n x).2 • uncutPrimaryWave s pref d lam u L χ T mask c n x := by
-  simp only [primaryWave, uncutPrimaryWave, primaryCoefficient, cutoffPulse, map_smul,
-    smul_smul, mul_comm]
 
 
 end CutoffFactorization

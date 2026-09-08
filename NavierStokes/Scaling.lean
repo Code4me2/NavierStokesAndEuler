@@ -27,8 +27,6 @@ def coreVelocity (q h : ℝ) : ℝ := q ^ (-(1 / 2 + h))
 def radialLength (q : ℝ) : ℝ := q ^ (1 / 2 : ℝ)
 
 
-/-- Reynolds number at physical viscosity one. -/
-def reynolds (velocity length : ℝ) : ℝ := velocity * length
 
 
 
@@ -39,27 +37,8 @@ theorem sqrt_viscosity {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
   congr 1
   ring
 
-/-- The physical amplitude prefactor of the primary wave. -/
-theorem wave_amplitude_power {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    coreVelocity Q h * Real.sqrt (Q ^ h) = Q ^ (-1 / 2 - h / 2) := by
-  rw [sqrt_viscosity hQ]
-  unfold coreVelocity
-  rw [← Real.rpow_add hQ]
-  congr 1
-  ring
 
-/-- The continuum wavelength scale, before rounding the frequency. -/
-theorem wave_length_power {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    radialLength Q * Real.sqrt (Q ^ h) = Q ^ (1 / 2 + h / 2) := by
-  rw [sqrt_viscosity hQ]
-  unfold radialLength
-  rw [← Real.rpow_add hQ]
 
-theorem wave_power_cancellation {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    Q ^ (-1 / 2 - h / 2) * Q ^ (1 / 2 + h / 2) = 1 := by
-  rw [← Real.rpow_add hQ]
-  have he : (-1 / 2 - h / 2) + (1 / 2 + h / 2) = (0 : ℝ) := by ring
-  rw [he, Real.rpow_zero]
 
 /-- The integer carrier frequency is the natural ceiling of `ε ^ (-1/2)`. -/
 def carrierFrequency (ε : ℝ) : ℕ := ⌈ε ^ (-(1 / 2 : ℝ))⌉₊
@@ -134,14 +113,8 @@ theorem reciprocal_frequency_bounds {ε : ℝ} (hε : 0 < ε) (hε₁ : ε ≤ 1
   · apply (div_le_iff₀ hk).mpr
     nlinarith
 
-/-- The physical wavelength with the actual integer carrier frequency. -/
-def waveLength (Q h : ℝ) : ℝ :=
-  radialLength Q / (carrierFrequency (Q ^ h) : ℝ)
 
 
-/-- The primary velocity includes an arbitrary real envelope coefficient. -/
-def waveVelocity (Q h envelope : ℝ) : ℝ :=
-  coreVelocity Q h * Real.sqrt (Q ^ h) * envelope
 
 
 

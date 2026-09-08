@@ -1017,9 +1017,6 @@ noncomputable def distance (_v : ModulatedProfileAssembly.Witness d) (X : ℝ) :
   edgeDistance (leftEdge W) (rightEdge W) (Real.log X)
 
 
-theorem radialPullback_eq {D : RadialDomain} (P : Profiles D) (h : ℝ) {q : ℝ × ℝ}
-    (hX : 0 < q.2) : radialPullback (logStress P h) q = stress P h (q.2, q.1) := by
-  simp only [radialPullback, logChart, logStress, logPoint, Function.comp_apply, Real.exp_log hX]
 
 
 

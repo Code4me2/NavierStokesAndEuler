@@ -86,13 +86,6 @@ theorem shifted_frameDerivative_back (a : LiftTangent) (t : Icc (0 : ℝ) T) (u 
       ((translate P a).toContinuousLinearMap).adjoint ((D.shifted a.1).frameDerivative P t u) :=
   fullOperator_translation_back P a (D.Q₁ t) u
 
-theorem velocityLp_translation (a : LiftTangent) (f : TimeLp T (CylinderL2 P E)) :
-    (D.shifted a.1).velocityLp P (timeLift T (translate P a).toContinuousLinearMap f) =
-      timeLift T (translate P a).toContinuousLinearMap (D.velocityLp P f) :=
-  D.velocityLp_intertwines P (D.shifted a.1)
-    (translate P a).toContinuousLinearMap (translate P a).toContinuousLinearMap
-    (D.shifted_frame P a) (D.shifted_frameDerivative P a)
-    (D.shifted_frame_back P a) (D.shifted_frameDerivative_back P a) (D.shifted_hessian P a) f
 
 
 theorem continuousVelocity_translation (a : LiftTangent)

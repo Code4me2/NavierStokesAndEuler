@@ -44,12 +44,6 @@ theorem parameterDomain_real {Ω : Set ℂ}
 theorem parameterDomain_real_interval {Ω : Set ℂ} {eta : ℝ}
     (heta : (eta : ℂ) ∈ parameterDomain Ω) : eta ∈ ReferencePath.parameterInterval := heta.2
 
-theorem parameterTube_conjugate (J : AxisCoefficientSpace.Window) {ρ : ℝ} {z : ℂ}
-    (hz : z ∈ AxisHolomorphic.parameterTube J ρ) :
-    starRingEnd ℂ z ∈ AxisHolomorphic.parameterTube J ρ := by
-  rcases hz with ⟨x, hx, hd⟩
-  refine ⟨x, hx, ?_⟩
-  simpa only [Complex.dist_conj_comm, Complex.conj_ofReal] using hd
 
 
 theorem histories_congr_below {D D' : ProfileHistories.RadialDomain}

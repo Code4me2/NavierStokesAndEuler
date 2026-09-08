@@ -238,12 +238,6 @@ theorem tsupport_potential_slice_subset (H K : Profile) (t : ℝ) :
   · exact ((isClosed_tsupport H).union (isClosed_tsupport K)).preimage
       (contDiff_profilePoint_slice t (n := 0)).continuous
 
-/-- Taking the actual curl does not enlarge this closed spatial support. -/
-theorem tsupport_velocity_slice_subset (H K : Profile) (t : ℝ) :
-    tsupport (fun x : Space => velocity H K (t, x)) ⊆
-      profilePoint t ⁻¹' (tsupport H ∪ tsupport K) :=
-  (SpatialCurl.tsupport_curl_subset (fun x : Space => potential H K (t, x))).trans
-    (tsupport_potential_slice_subset H K t)
 
 
 /-- The Cartesian cylinder cut out by bounds on `s` and `z` is compact. -/

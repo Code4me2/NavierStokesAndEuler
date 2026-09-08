@@ -117,16 +117,6 @@ theorem extendedCoefficient_eq {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
     extendedCoefficient s hI n i p = xProfile (component (profiles s n) i) p :=
   extendEven_eq _ _ hX (heta.trans (commonWindow s hI).one_lt_inner.le)
 
-theorem extendedCoefficient_support {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) (i : Fin 4) :
-    tsupport (extendedCoefficient s hI n i) ⊆
-      Icc (-1 : ℝ) (s.B ^ 2 / 2) ×ˢ Icc (-(commonWindow s hI).outer) (commonWindow s hI).outer := by
-  apply extendEven_support _ _ s.B_pos.le
-  fin_cases i
-  · exact profiles_phi_exterior s hn
-  · exact profiles_axial_exterior s n
-  · exact profiles_beta_exterior s n
-  · exact profiles_pressure_exterior s hn
 
 
 theorem extendedCoefficient_zero_exterior {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)

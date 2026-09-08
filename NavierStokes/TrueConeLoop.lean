@@ -272,11 +272,6 @@ def InTrueCone (p₁ p₂ A C : ℝ) : Prop :=
   0 < A ∧ 2 < A * (1 + (C / A) ^ 2) ∧ 2 < p₁ + p₂ * (C / A) ∧
     A * (1 + (C / A) ^ 2) < coneBound (p₁ + p₂ * (C / A)) (p₂ - p₁ * (C / A))
 
-/-- Positive additive margins for all four scalar inequalities, including
-the positive first shear component. -/
-def HasConeMargin (ε p₁ p₂ A C : ℝ) : Prop :=
-  ε ≤ A ∧ ε ≤ A * (1 + (C / A) ^ 2) - 2 ∧ ε ≤ p₁ + p₂ * (C / A) - 2 ∧
-    ε ≤ coneBound (p₁ + p₂ * (C / A)) (p₂ - p₁ * (C / A)) - A * (1 + (C / A) ^ 2)
 
 
 

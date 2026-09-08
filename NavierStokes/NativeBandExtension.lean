@@ -955,23 +955,6 @@ theorem band_pair_native_regular_of_raw_jets (M : ClosedMargins H v a vr vt) (j 
   · exact (hp.polynomial_smul (outerCutoff_native_polynomial H v a hr0)).congr
       (fun L x _ => (bandPressure_eq_outer H v a hr0 vr vt j L x).symm)
 
-/-- The band boundary tensors remain zero after the radial attachment,
-including the intersections of the band and radial boundaries. -/
-theorem attached_pair_band_edge_jets (M : ClosedMargins H v a vr vt) (j : Fin 2)
-    (hu : NativeJets (ActualSignedGeometry.nativeDomain H v a) (velocityWeight H v a hr0 j)
-      (preOuterVelocity H v a hr0 vr vt j))
-    (hp : NativeJets (ActualSignedGeometry.nativeDomain H v a) (pressureWeight H v a hr0 j)
-      (preOuterPressure H v a hr0 vr vt j))
-    (L : PrimaryGeometryAssembly.Index W a.N) {x : Native}
-    (hT : 0 < x.1.2.2) (he : nativeQ F.data.h x = 1 / 2 ∨ nativeQ F.data.h x = 2) (n : ℕ) :
-    iteratedFDeriv ℝ n (WaveEdgeExtension.nativeExtension W (bandVelocity H v a hr0 vr vt j L)) x = 0 ∧
-      iteratedFDeriv ℝ n (WaveEdgeExtension.nativeExtension W (bandPressure H v a hr0 vr vt j L)) x = 0 := by
-  obtain ⟨hv, hp'⟩ := band_pair_native_regular_of_raw_jets H v a hr0 vr vt M j hu hp L
-  by_cases hi : WaveEdgeExtension.nativeRadius F.data.h x ∈
-      Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
-  · rw [hv.jet_inside n hT hi, hp'.jet_inside n hT hi]
-    exact band_pair_band_edge_jets H v a hr0 vr vt M j L ⟨hT, hi⟩ he n
-  · exact ⟨hv.jet_outside n hT hi, hp'.jet_outside n hT hi⟩
 
 end Attachment
 

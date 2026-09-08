@@ -693,39 +693,13 @@ def ExtendsPositiveOrder (h C : ℝ) (n : ℕ) (phi u beta : ℕ → InnerProfil
     (precedingDiffusion h (angularPower h) phi' n w)
     (precedingDiffusion h (axialPower h) u' n w) (omegaQuotient w)
 
-theorem profileSystem_lowerHistoryData (h lam C r eta : ℝ) (n : ℕ)
-    (phi u beta : ℕ → InnerProfile) (omegaQuotient phiNew uNew k p : InnerProfile) :
-    ProfileSystem h lam C r eta
-      (realBase (lowerHistoryData h n phi u beta omegaQuotient) (r ^ 2, eta))
-      (realSource (lowerHistoryData h n phi u beta omegaQuotient) (r ^ 2, eta))
-      phiNew uNew k p ↔
-    ProfileSystem h lam C r eta
-      (baseAtOrderZero (fun j => actualJet (phi j) (r ^ 2, eta))
-        (fun j => actualJet (u j) (r ^ 2, eta)) (fun j => beta j (r ^ 2, eta)))
-      (actualLowerSource h n phi u beta omegaQuotient (r ^ 2, eta)) phiNew uNew k p := by
-  rfl
 
 
 end PositiveOrder
 
 section Uniqueness
 
-/-- A competing solution is given by actual holomorphic continuous paths
-on the positive and reflected negative radial intervals. -/
-def SidePathSolution {R : ℝ} (hR : 0 ≤ R) (U : Set ℂ) (A₀ A₁ : Coeff) (f : Field)
-    (V : Bool → ℂ → NilpotentVolterra.Path R) : Prop :=
-  (∀ b, DifferentiableOn ℂ (V b) U) ∧
-  ∀ b z, z ∈ U → V b z = NilpotentVolterra.pathInverse hR exponent
-    (NilpotentVolterra.rhsPath (sideData hR b (matrixPath R A₀))
-      (sideData hR b (matrixPath R A₁)) (sideData hR b (forcingPath R f)) (V b) z)
 
-noncomputable def candidateLift {R : ℝ} (hR : 0 ≤ R) (A₀ A₁ : Coeff) (f : Field)
-    (V : Bool → ℂ → NilpotentVolterra.Path R) : Field :=
-  glue
-    (NilpotentVolterra.liftedField hR (sideData hR false (matrixPath R A₀))
-      (sideData hR false (matrixPath R A₁)) (sideData hR false (forcingPath R f)) (V false))
-    (NilpotentVolterra.liftedField hR (sideData hR true (matrixPath R A₀))
-      (sideData hR true (matrixPath R A₁)) (sideData hR true (forcingPath R f)) (V true))
 
 
 end Uniqueness

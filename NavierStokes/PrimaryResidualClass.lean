@@ -694,28 +694,7 @@ theorem initial_residual_class (u : CorrectionState.State D)
     Pi.zero_apply, map_sub, map_add, sub_zero]
   ring
 
-theorem initial_residual_class_of_zero_mode (u : CorrectionState.State D)
-    (hmean : u.mean = ⟨0, 0, 0⟩) (A : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, HarmonicFields.BandLimited (A n i) 0) :
-    (HarmonicResidual.residualBlock c u (primaryBlock s c a ψ kp)
-      (gaussianCoefficients c a ψ) A).WaveBounds s P (7 / 10) := by
-  apply h.initial_residual_class u hmean A
-  intro n i j hj
-  rw [HarmonicResidual.band_zero_eq_constant (hA n i)]
-  simp [constantCoefficient, hj]
 
-omit h in
-theorem initial_residual_band (u : CorrectionState.State D)
-    (A : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, HarmonicFields.BandLimited (A n i) 0) :
-    (HarmonicResidual.residualBlock c u (primaryBlock s c a ψ kp)
-      (gaussianCoefficients c a ψ) A).BandLimited 2 := by
-  have hg : ∀ n i, HarmonicFields.BandLimited (gaussianCoefficients c a ψ n i) 1 :=
-    fun n i => ErrorHarmonics.band_conjugatePair 1 _
-  have ha : ∀ n i, HarmonicFields.BandLimited (A n i) 1 := fun n i => (hA n i).mono (by decide)
-  simpa using HarmonicResidual.residualBlock_band c u (primaryBlock s c a ψ kp)
-    (gaussianCoefficients c a ψ) A
-    (primary_band (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp)) hg ha
 
 end Inputs
 

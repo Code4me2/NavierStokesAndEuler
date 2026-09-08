@@ -446,17 +446,6 @@ theorem final_origin_blowup (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
     (anchored_base_axis_tendsto H v upper B)
 
 
-/-- Raw stage support is needed only where `q < qbig`.  The concrete base,
-the actual cutoff scale, and the literal mixed sums are kept throughout. -/
-theorem local_final_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (p : ℕ → PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (D : ℕ → AngularSupport (localDomain F.data.h qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    Tendsto (fun t : ℝ =>
-      ‖mixedDiagonal (TailGaugePotential.finalPotential H v upper B) p D scales (t, 0)‖)
-      (𝓝[<] 1) atTop :=
-  final_origin_blowup H v upper B p D hs (localDomain_open F.data.h_pos F.data.h_lt_half qbig)
-    (origin_eventually_localDomain F.data.h_pos F.data.h_lt_half hqbig)
 
 
 theorem local_initialized_final_origin_blowup (upper : ℝ) (B : ℕ)
@@ -476,8 +465,6 @@ theorem local_initialized_final_origin_blowup (upper : ℝ) (B : ℕ)
 
 end FinalBase
 
-/-- The exponent belongs to the already selected, constructed profile. -/
-noncomputable def constructedExponent : ℝ := FinalSlowBase.actualProfile.outgoing.data.h
 
 
 

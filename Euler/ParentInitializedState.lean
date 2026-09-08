@@ -1,10 +1,24 @@
 import Euler.ParentState
 import Euler.ParentParticleInverse
 import Euler.ParentPacketJoinedInput
-import Euler.PacketInitializedFlowAndShear
+import Euler.PacketLiftedFlowData
+import Euler.PacketWeightedPhysicalErrors
+import Euler.PacketGraphFlowFieldBounds
+import Euler.PacketGraphFlowSupBounds
+import Euler.PacketExactGlobalShear
+import Euler.PacketExactPressureError
+import Euler.PacketInitializedPointwiseChoice
+import Euler.PacketPhysicalFrequencyBounds
+import Euler.PacketContinuousInverse
+import Euler.PacketPhysicalPressureGevrey
+import Euler.PacketPhysicalCorrectionPotential
+import Euler.PacketInitializedTimeBounds
+import Euler.PacketLiftedSmallness
 import Euler.PhysicalChildSourceBound
 import Euler.ParentPacketForwardInput
-import Euler.PacketForwardInitializedFlowAndShear
+import Euler.PacketForwardInitializedFlowBounds
+import Euler.PacketForwardGlobalShear
+import Euler.PacketForwardExactPressureError
 
 /-! Both actual initialized packet branches produce the same recursive
 physical state. Their residual and parity proofs are supplied by their

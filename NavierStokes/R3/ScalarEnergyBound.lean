@@ -45,22 +45,6 @@ theorem forced_gronwall_weighted {T C : ℝ} {E E' : ℝ → ℝ}
   have hle := hG ⟨le_rfl, hT⟩ ht ht.1
   simpa [G, hinitial, mul_comm] using hle
 
-/-- The scalar forced Gronwall estimate with zero initial energy. -/
-theorem forced_gronwall {T C : ℝ} {E E' : ℝ → ℝ}
-    (hT : 0 ≤ T) (hcont : ContinuousOn E (Icc 0 T)) (hinitial : E 0 = 0)
-    (hderiv : ∀ t ∈ Ioo 0 T, HasDerivAt E (E' t) t)
-    (hbound : ∀ t ∈ Ioo 0 T, E' t ≤ E t + C) :
-    ∀ t ∈ Icc 0 T, E t ≤ C * (Real.exp t - 1) := by
-  intro t ht
-  have hweighted := forced_gronwall_weighted hT hcont hinitial hderiv hbound t ht
-  have hmul := mul_le_mul_of_nonneg_right hweighted (Real.exp_pos t).le
-  have hexp : Real.exp (-t) * Real.exp t = 1 := by
-    rw [← Real.exp_add]
-    simp
-  rw [mul_assoc, hexp, mul_one] at hmul
-  calc
-    E t ≤ C * Real.exp t - C := by linarith
-    _ = C * (Real.exp t - 1) := by ring
 
 
 end NavierStokesR3.ScalarEnergyBound

@@ -235,14 +235,6 @@ theorem weightedDriftNorm_eq_classical {s : ℕ} (q N : ℕ) (hN : N+q ≤ s) (�
   intro n hn
   rw [driftBlockNorm_eq_classical period (by have := Finset.mem_range.mp hn; omega) L u f hu hf]
 
-/-- Restriction of the finite Sobolev ambient space preserves each retained drift coordinate. -/
-theorem driftLevelNorm_restrict {s t n : ℕ} (h : t ≤ s) (hn : n ≤ t)
-    (L : Vector3 →L[ℝ] Domain 4) (u : SobolevSpace period s) :
-    driftLevelNorm period n L (restrictOperator period h u) = driftLevelNorm period n L u := by
-  apply Finset.sum_congr rfl
-  intro w _
-  rw [toJet_word period (restrictOperator period h u) hn, toJet_word period u (hn.trans h)]
-  rfl
 
 
 

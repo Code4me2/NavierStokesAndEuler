@@ -190,16 +190,6 @@ theorem pastResidual_periodic (u : VelocityField) (p : PressureField)
     UnitSpatialPeriodsOn (Iio (1 : ℝ)) (pastResidual u p) :=
   residual_periods isOpen_Iio (pastVelocity_periodic u hu) (pastPressure_periodic p hp)
 
-theorem pastResidual_eventually_zero_nonpos (u : VelocityField) (p : PressureField)
-    {t : ℝ} (ht : t ≤ 0) (x : Space) :
-    pastResidual u p =ᶠ[𝓝 (t, x)] (fun _ => 0) := by
-  rcases lt_or_eq_of_le ht with hneg | heq
-  · exact residual_eventually_zero
-      (zeroBefore_eventually_zero_neg hneg) (zeroBefore_eventually_zero_neg hneg)
-  · subst t
-    exact residual_eventually_zero
-      (zeroBefore_eventually_zero_at_zero x (activatedVelocity_zero_germ u x))
-      (zeroBefore_eventually_zero_at_zero x (activatedPressure_zero_germ p x))
 
 
 theorem pastResidual_eq_activated (u : VelocityField) (p : PressureField)

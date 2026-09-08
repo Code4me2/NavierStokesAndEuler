@@ -88,12 +88,6 @@ theorem contDiffOn_residual {s : Set SpaceTime} {u : VelocityField} {p : Pressur
   (((contDiffOn_temporalDerivative hs hu).add (contDiffOn_advection hs hu)).sub
     (contDiffOn_spatialLaplacian hs hu)).add (contDiffOn_pressureGradient hs hp)
 
-theorem contDiffOn_residual_product {times : Set ℝ} {u : VelocityField} {p : PressureField}
-    (ht : IsOpen times) (hu : ContDiffOn ℝ ∞ u (times ×ˢ (univ : Set Space)))
-    (hp : ContDiffOn ℝ ∞ p (times ×ˢ (univ : Set Space))) :
-    ContDiffOn ℝ ∞ (fun z => navierStokesResidual u p z.1 z.2)
-      (times ×ˢ (univ : Set Space)) :=
-  contDiffOn_residual (ht.prod isOpen_univ) hu hp
 
 
 /-! ## Exact spatial periods -/

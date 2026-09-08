@@ -597,15 +597,7 @@ theorem axial_attach_regular (hΩ : IsOpen Ω) {G : CField} (hG : Regular univ �
   change E.U (expPoint N (logPoint N p)) = E.U p
   rw [expPoint_logPoint N hp]
 
-theorem refF_regular (hΩ : IsOpen Ω) {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit) :
-    Regular (Ioi (-R)) Ω (E.refF δ) :=
-  E.angular_attach_regular hΩ (E.refLog_regular hΩ hδ hδT)
-    (fun _ hp ht => E.refLog_initial hΩ hδ hδT hp ht)
 
-theorem refU_regular (hΩ : IsOpen Ω) {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit) :
-    Regular (Ioi (-R)) Ω (E.refU δ) :=
-  E.axial_attach_regular hΩ (E.refAxial_regular hΩ hδ hδT)
-    (fun _ hp ht => E.refAxial_initial hΩ hδ hδT hp ht)
 
 theorem actF_regular (hΩ : IsOpen Ω) {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2*δ < ReferencePath.rampLimit) (κ : ℝ) : Regular (Ioi (-R)) Ω (E.actF T κ δ) := by
@@ -1077,30 +1069,9 @@ theorem iteratedDeriv_smooth {S : Set ℝ} (hS : IsOpen S) {g : ℝ → ℝ}
     rw [iteratedDeriv_succ]
     exact ih.deriv_of_isOpen hS (by simp)
 
-theorem iteratedDeriv_ofReal {S : Set ℝ} (hS : IsOpen S) {g : ℝ → ℝ}
-    (hg : ContDiffOn ℝ ∞ g S) (k : ℕ) {x : ℝ} (hx : x ∈ S) :
-    iteratedDeriv k (fun y => (g y : ℂ)) x = ((iteratedDeriv k g x : ℝ) : ℂ) := by
-  induction k generalizing x with
-  | zero => rfl
-  | succ k ih =>
-    rw [iteratedDeriv_succ,iteratedDeriv_succ]
-    have heq : iteratedDeriv k (fun y => (g y : ℂ)) =ᶠ[𝓝 x]
-        (fun y => ((iteratedDeriv k g y : ℝ) : ℂ)) := by
-      filter_upwards [hS.mem_nhds hx] with y hy
-      exact ih hy
-    rw [heq.deriv_eq]
-    exact (((iteratedDeriv_smooth hS hg k).contDiffAt (hS.mem_nhds hx)).differentiableAt
-      (by simp)).hasDerivAt.ofReal_comp.deriv
 
 
 
-theorem scale_symmetric_interval {R x t : ℝ} (hx : x ∈ Ioo (-R) R) (ht : t ∈ Icc (0 : ℝ) 1) :
-    t*x ∈ Ioo (-R) R := by
-  apply abs_lt.mp
-  calc
-    |t*x| = t*|x| := by rw [abs_mul,abs_of_nonneg ht.1]
-    _ ≤ |x| := mul_le_of_le_one_left (abs_nonneg x) ht.2
-    _ < R := abs_lt.mpr hx
 
 
 

@@ -39,28 +39,6 @@ theorem meanVelocityMap_ae (T : ℝ) (hT : 0 ≤ T)
   change (u-timeMultiplier T hT F₁ (timeMultiplier T hT FInv (primitiveTimeLp T hT u))) t = _
   rw [hsub, hF₁, hInv, hp]
 
-/-- A quantitative bound for the actual linear velocity formula. -/
-theorem meanVelocityMap_apply_norm (T : ℝ) (hT : 0 ≤ T)
-    (FInv F₁ : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (u : TimeLp T L2) :
-    ‖meanVelocityMap T hT FInv F₁ u‖ ≤
-      (1+‖F₁‖*‖FInv‖*Real.sqrt (T^2/2))*‖u‖ := by
-  have hp : ‖primitiveTimeLp T hT u‖ ≤ Real.sqrt (T^2/2)*‖u‖ := by
-    apply (sq_le_sq₀ (norm_nonneg _) (mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _))).1
-    calc
-      _ ≤ (T^2/2)*‖u‖^2 := primitiveTimeLp_norm_sq_le T hT u
-      _ = _ := by rw [mul_pow, Real.sq_sqrt (by positivity)]
-  change ‖u-timeMultiplier T hT F₁ (timeMultiplier T hT FInv (primitiveTimeLp T hT u))‖ ≤ _
-  calc
-    _ ≤ ‖u‖+‖timeMultiplier T hT F₁ (timeMultiplier T hT FInv (primitiveTimeLp T hT u))‖ :=
-      norm_sub_le _ _
-    _ ≤ ‖u‖+‖F₁‖*‖timeMultiplier T hT FInv (primitiveTimeLp T hT u)‖ :=
-      add_le_add le_rfl (timeApply_bound T hT F₁ _)
-    _ ≤ ‖u‖+‖F₁‖*(‖FInv‖*‖primitiveTimeLp T hT u‖) := by
-      gcongr
-      exact timeApply_bound T hT FInv _
-    _ ≤ ‖u‖+‖F₁‖*(‖FInv‖*(Real.sqrt (T^2/2)*‖u‖)) := by
-      gcongr
-    _ = _ := by ring
 
 namespace StrongMeanEvolution
 
@@ -92,21 +70,6 @@ theorem kinetic_ae
     simpa only [extendPath, projIcc_of_mem hT hr] using h
   exact hut.unique (hprod.congr_of_eventuallyEq heq)
 
-/-- The actual velocity constructed by strong regularity equals the bounded
-linear formula on the original solved derivative field. -/
-theorem velocityField_eq_meanVelocityMap
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F₁ t) (Icc (0 : ℝ) T) t)
-    (hRight : ∀ (t : Icc (0 : ℝ) T) (x : L2), F t (FInv t x) = x) :
-    s.velocityField = meanVelocityMap T hT FInv F₁ u := by
-  apply Lp.ext
-  have hmem : ∀ᵐ t ∂timeMeasure T, t ∈ Icc (0 : ℝ) T := ae_restrict_mem measurableSet_Icc
-  filter_upwards [hmem, s.kinetic_ae hF hRight, (s.physical_h1 hF).2.1,
-    meanVelocityMap_ae T hT FInv F₁ u] with t ht hk hB hv
-  have hz : (s.label t : L2) = extendPath T hT FInv t (realPrimitive T u t) := by
-    simpa only [extendPath, projIcc_of_mem hT ht] using s.label_eq ⟨t, ht⟩
-  rw [hB, hv, hk, ← hz]
-  abel
 
 end StrongMeanEvolution
 

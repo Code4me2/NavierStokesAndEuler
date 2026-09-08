@@ -1044,19 +1044,6 @@ theorem label_physical_pressure (D : AssemblyData Parameter) (h : ℝ) {Q Qr : �
 
 /-! ## Axis preservation follows from vanishing of the actual source -/
 
-theorem referenceVelocity_zero_of_source (D : AssemblyData Parameter) (j : ℤ) (p : Parameter)
-    (hf : ∀ Y : Plane, referenceSource D j (p, Y) = 0) (Y : Plane) :
-    referenceVelocity D.reference D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j (p, Y) = 0 := by
-  unfold referenceVelocity ParticularWaveBounds.commonVelocity periodizedCopies
-  trans ∑' _ : Frequency, (0 : ComplexVector)
-  · apply tsum_congr
-    intro copy
-    change D.reference.cutoff (D.reference.geometry.coordinates copy Y) •
-      complexCopyVelocity (D.reference.tangent j) (referenceSource D j)
-        D.reference.geometry D.reference.length_pos.le copy (p, Y) = 0
-    rw [complexCopyVelocity_zero_of_path (D.reference.tangent j) (referenceSource D j)
-      D.reference.geometry D.reference.length_pos.le copy p Y (fun v hv => hf _), smul_zero]
-  · exact tsum_zero
 
 
 
@@ -1101,19 +1088,6 @@ theorem physicalPotential_smoothAt : ContDiffAt ℝ ∞ (physicalPotential D h Q
     (referencePotential_smoothAt D H C hQr hz hx)
 
 
-omit hdelta hchart in
-theorem complexPhysicalPressure_smoothAt : ContDiffAt ℝ ∞ (complexPhysicalPressure D h Qr I j) z := by
-  let G := PhysicalResidualBridge.commonGraph Qr h I
-  have hm : ContDiffAt ℝ ∞ (nativeMap h Qr I) z := waveEquiv.contDiff.contDiffAt.comp z
-    (G.map_smoothAt (mul_pos (Real.rpow_pos_of_pos hQr _) hz).ne')
-  have hpref : ContDiffAt ℝ ∞ (referenceRawPressure D j) (nativeMap h Qr I z) := by
-    rw [referenceRawPressure_eq_common D H.identity C.harmonic_ne C.frequency_ne]
-    exact (C.common_classes.2.smooth D.reference.band).contDiffAt (D.strip.isOpen_domain.mem_nhds hx)
-  have hp : ContDiffAt ℝ ∞ (physicalPressureCoefficient D h Qr I j) z :=
-    (hpref.comp z hm).const_smul (Qr ^ (-(2 * CoordinateAlgebra.A h)))
-  have hphi : ContDiffAt ℝ ∞ (physicalPhase D h Qr I j) z :=
-    ((C.background.phase_smooth D.reference.band).contDiffAt (D.strip.isOpen_domain.mem_nhds hx)).comp z hm
-  exact hp.mul ((contDiffAt_const.mul (Complex.ofRealCLM.contDiff.comp_contDiffAt z hphi)).cexp)
 
 
 end PhysicalRegularity

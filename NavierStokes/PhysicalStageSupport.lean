@@ -59,9 +59,6 @@ end SupportAlgebra
 /-- This constant is shared by the entire stage sequence. -/
 noncomputable def outerConstant (R : ℝ) : ℝ := 4 * R * Real.sqrt 2
 
-theorem outerConstant_pos {R : ℝ} (hR : 0 < R) : 0 < outerConstant R := by
-  unfold outerConstant
-  positivity
 
 section Waves
 
@@ -188,21 +185,7 @@ section Increments
 
 variable {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
 
-theorem potentialIncrement_support (W : WaveData h D I K (Fin 3))
-    (M : MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hW : W.upperRadius ≤ 2 * R) (hM : M.upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig (potentialIncrement W M) :=
-  support_add (wave_vector_support W hW) (mean_angular_support M hh hh1 hq hM)
 
-theorem pressureIncrement_support (W : WaveData h D I K Unit)
-    (M : MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hW : W.upperRadius ≤ 2 * R) (hM : M.upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig (pressureIncrement W M) :=
-  support_add (wave_pressure_support W hW) (mean_field_support M hh hh1 hq hM)
 
 end Increments
 
@@ -295,11 +278,6 @@ variable {DA DP : Type} [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP] {IA KA IP KP : Type*}
 
 
-/-- The actual mean-domain type retains the strict normalized range
-`(1/2,2)` used by the construction. -/
-abbrev ActualMeanFamily (degree : ℝ) (N gap : ℕ) :=
-  PhysicalMeanJetBounds.CoherentFamily CorrectionInitialization.ActualPrimary.h degree N gap
-    CorrectionInitialization.ActualPrimary.standardRegion.carrier ℝ
 
 
 

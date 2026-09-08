@@ -216,18 +216,7 @@ theorem pressure_field_eq {w : SpaceTime} (hw : w ∈ preterminal) :
       ActualSignedExterior.pressure s w :=
   congrArg Complex.re (PositiveTimeCopyFamily.sum_eq _ _ _ _ hw)
 
-theorem potential_field_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    vectorSum (potentialCopies s) ActualPolarCoverage.inner h slots.radius =ᶠ[𝓝 w]
-      ActualSignedExterior.potential s :=
-  PositiveTimeCopyFamily.vectorSum_germ _ _ _ _ hw
 
-theorem pressure_field_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (fun w => ((pressureCopies s).sum ActualPolarCoverage.inner h slots.radius w).re) =ᶠ[𝓝 w]
-      ActualSignedExterior.pressure s := by
-  filter_upwards [PositiveTimeCopyFamily.sum_germ
-    ((ActualSignedExterior.family s).pressureCopies slots outgoing.data.h_pos.le)
-    ActualPolarCoverage.inner h slots.radius hw] with y hy
-  exact congrArg Complex.re hy
 
 
 /-- The carrier coefficients remain jointly bounded after label selection

@@ -51,9 +51,6 @@ noncomputable def pressureGradient (n : ℕ) (e : History) (omega : Profile) (R 
   (cauchy n e e R - omega R) / R
 
 
-/-- The angular similarity coefficient in (22), reconstructed from E. -/
-noncomputable def phiHistory (C : ℝ) (e : History) : History :=
-  fun j R => C * e j R / R
 
 
 
@@ -272,15 +269,7 @@ theorem moments_repair_target (lam A a b : ℝ) (target : Debt) {n : ℕ} (hn : 
 
 
 
-theorem repairU_zero_outside (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ}
-    (hR : R ∉ Ioo a b) : repairU lam A a b d R = 0 := by
-  by_contra h
-  exact hR (repairU_tsupport lam A a b d hab (subset_closure h))
 
-theorem repairE_zero_outside (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ}
-    (hR : R ∉ Ioo a b) : repairE lam A a b d R = 0 := by
-  by_contra h
-  exact hR (repairE_tsupport lam A a b d hab (subset_closure h))
 
 
 

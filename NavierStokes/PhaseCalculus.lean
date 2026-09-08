@@ -244,20 +244,6 @@ theorem vec3_norm_sq (w : Vec3) :
     ‖w‖ ^ 2 = (w 0) ^ 2 + (w 1) ^ 2 + (w 2) ^ 2 := by
   simp only [EuclideanSpace.real_norm_sq_eq, Fin.sum_univ_three]
 
-/-- A unit tangential direction forces the reference vector to have norm at least `B`. -/
-theorem referenceNormal_norm_ge (B s Kθ Kz : ℝ)
-    (hK : Kθ ^ 2 + Kz ^ 2 = 1) :
-    B ≤ ‖referenceNormal B s Kθ Kz‖ := by
-  have hn : ‖referenceNormal B s Kθ Kz‖ ^ 2 =
-      (B * s) ^ 2 + (B * Kθ) ^ 2 + (B * Kz) ^ 2 := by
-    simpa [referenceNormal] using vec3_norm_sq (referenceNormal B s Kθ Kz)
-  have htan : (B * Kθ) ^ 2 + (B * Kz) ^ 2 = B ^ 2 := by
-    calc
-      (B * Kθ) ^ 2 + (B * Kz) ^ 2 = B ^ 2 * (Kθ ^ 2 + Kz ^ 2) := by ring
-      _ = B ^ 2 := by rw [hK, mul_one]
-  have hsq : B ^ 2 ≤ ‖referenceNormal B s Kθ Kz‖ ^ 2 := by
-    nlinarith [sq_nonneg (B * s)]
-  nlinarith [norm_nonneg (referenceNormal B s Kθ Kz)]
 
 
 

@@ -484,16 +484,7 @@ noncomputable def phaseEnvelope (A : Fin 2 → PhaseConstruction U)
   referenceP ((A j).lam (n, l)) ((A j).u (n, l)) ((A j).L (n, l))
     ((A j).L (n, l) * (χ (n, l) x).2)
 
-noncomputable def phaseCutoffFundamental (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ) (j : Fin 2) :
-    ι → ℕ → D → ProblemStatement.Space := fun l n x =>
-  cutoffPulse ((A j).frame (n, l)) ((A j).lam (n, l)) ((A j).u (n, l))
-    ((A j).L (n, l)) (χ (n, l) x)
 
-noncomputable def phaseSlotEnvelope (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ) (j : Fin 2) : ι → ℕ → D → ℝ := fun l n x =>
-  GaussianTailFlat.referenceSlotEnvelope ((A j).lam (n, l)) ((A j).u (n, l))
-    ((A j).L (n, l)) (χ (n, l) x).2
 
 /-- The matrix jets come from the actual parameter-dependent ODE and
 its actual middle-cutoff covariance integral, uniformly in both indices. -/

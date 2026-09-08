@@ -367,12 +367,6 @@ theorem exists_candidate_force {A v : VelocityField} {p : PressureField}
   intro t ht x
   exact periodicVelocity_divergence_free hA hv hd ht.2 x
 
-/-- The actual angular stage sum, with the manuscript's implicit physical
-similarity scale and the same cutoff schedule as the other components. -/
-def angularDiagonal (h : ℝ) (a : ℕ → ℝ)
-    (D : ℕ → DirectAngularDiagonal.AngularData DirectAngularDiagonal.preterminalSlow) :
-    VelocityField :=
-  DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar)
 
 
 

@@ -215,12 +215,6 @@ theorem AllJetsFlat.bilinear_growth_left (hg : AllJetsFlat l q g)
   exact (JetBounds.norm_iteratedFDeriv_bilinear_le_on L hU hsf hsg hx
     (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)).trans (le_abs_self _)
 
-theorem AllJetsFlat.bilinear_growth_right (hf : AllJetsFlat l q f)
-    (hg : AllJetsGrowth l q g) (L : E →L[ℝ] F →L[ℝ] G)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hq : ∀ᶠ x in l, q x ≠ 0)
-    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
-    AllJetsFlat l q (fun x => L (f x) (g x)) :=
-  hf.bilinear_growth_left hg L.flip hU hl hq hsg hsf
 
 end Jets
 
@@ -646,9 +640,6 @@ section ScaleDomain
 
 open ProblemStatement
 
-/-- Approach `q = 0` through positive scales while staying in the domain. -/
-def scaleFilter (U : Set SpaceTime) (q : SpaceTime → ℝ) : Filter SpaceTime :=
-  Filter.principal U ⊓ Filter.comap q (𝓝[>] (0 : ℝ))
 
 
 

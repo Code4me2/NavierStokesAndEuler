@@ -998,31 +998,6 @@ noncomputable def reconstructedPressure (d a b : ℝ) (hab : a < b)
     (W : Fin 3 → Fin 3 → Field (PressureStream.Lift P)) : Field (PressureStream.Lift P) :=
   fun n => PressureStream.meanPressure d a b (M n) hab (v n) (gr o base mean W n)
 
-/-- Pressure is recomputed from the literal `gr`; its change class is a
-conclusion, obtained from the centrifugal term and the exact remainder. -/
-theorem reconstructedPressure_change_mem
-    {a b d cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1)
-    (hS : ∀ n, 1 ≤ S n) {κ H : ℝ}
-    {o : Operators (PressureStream.Lift P)} {base mean inc : Triple (PressureStream.Lift P)}
-    (ho : OperatorBounds (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) o κ)
-    (hb : BaseBounds (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) base)
-    (hm : CumulativeBounds (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) mean)
-    (hh : IncrementBounds (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) H inc)
-    (hH : 9 / 10 ≤ H) (hκ : 2 * κ ≤ 9 / 10)
-    (W : Fin 3 → Fin 3 → Field (PressureStream.Lift P))
-    (hW : ∀ i j, SmoothOn (logStripData a b cL cR ha hcL hcR ε S hε hεone hS).domain (W i j))
-    (hf : ∀ n, ContDiff ℝ ∞ (gr o base (updated mean inc) W n))
-    (hg : ∀ n, ContDiff ℝ ∞ (gr o base mean W n))
-    (hsf : ∀ n, RadialAlias.RadiallySupported a b (gr o base (updated mean inc) W n))
-    (hsg : ∀ n, RadialAlias.RadiallySupported a b (gr o base mean W n))
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) H
-      (reconstructedPressure d a b hab M v o base (updated mean inc) W -
-        reconstructedPressure d a b hab M v o base mean W) := by
-  exact meanClass_meanPressure_change ha hab hd hcL hcR ε S hε hεone hS hf hg hsf hsg
-    (gr_change_mem ho hb hm hh hH W hW hκ) M v
 
 section ReconstructedTangential
 
@@ -1070,22 +1045,9 @@ noncomputable def physicalOperators : Operators SpaceTime where
 
 noncomputable def physicalField (f : MeanResidual.Scalar) : Field SpaceTime := fun _ => f
 
-noncomputable def physicalTriple (b : MeanResidual.Components) : Triple SpaceTime :=
-  ⟨physicalField (b 0), physicalField (b 1), physicalField (b 2)⟩
 
-noncomputable def physicalCovariance (w : MeanResidual.Components) :
-    Fin 3 → Fin 3 → Field SpaceTime := fun i j => physicalField (MeanResidual.covariance w i j)
 
-theorem physical_dr (f : Field SpaceTime) :
-    physicalOperators.dr f = fun n => MeanResidual.dr (f n) := by
-  ext n q
-  simp only [Operators.dr, graphDerivative, physicalOperators, zero_smul, add_zero,
-    MeanResidual.dr, MeanResidual.direction]
 
-theorem physical_dz (f : Field SpaceTime) :
-    physicalOperators.dz f = fun n => MeanResidual.dz (f n) := by
-  ext n q
-  simp only [Operators.dz, physicalOperators, one_mul, MeanResidual.dz, MeanResidual.direction]
 
 
 

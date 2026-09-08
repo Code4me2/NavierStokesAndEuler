@@ -363,16 +363,5 @@ theorem descend_square_local {U : Set ℝ} {R : ℝ} {F : Plane → E}
     descend F (p, r ^ 2) = F (p, r) :=
   EvenSmoothDescent.descent_square_local (f := fun r => F (p, r)) (he p hp) hr
 
-/-- The radial right jets in the joint descent are the exact even radial jets. -/
-theorem iteratedDerivWithin_descend_axis_local {U : Set ℝ} {R : ℝ} (hR : 0 < R)
-    {F : Plane → E} (hF : ContDiffOn ℝ ∞ F (U ×ˢ Ioo (-R) R))
-    (he : ∀ p ∈ U, ∀ r ∈ Ioo (-R) R, F (p, -r) = F (p, r))
-    {p : ℝ} (hp : p ∈ U) (n : ℕ) :
-    iteratedDerivWithin n (fun X => descend F (p, X)) (Ici 0) 0 =
-      ((n.factorial : ℝ) / ((2 * n).factorial : ℝ)) •
-        iteratedDeriv (2 * n) (fun r => F (p, r)) 0 := by
-  apply EvenSmoothDescent.iteratedDerivWithin_descent_zero_local (f := fun r => F (p, r)) hR
-  · exact hF.comp (contDiff_const.prodMk contDiff_id).contDiffOn (fun r hr => ⟨hp, hr⟩)
-  · exact he p hp
 
 end NavierStokes.ParametricEvenDescent

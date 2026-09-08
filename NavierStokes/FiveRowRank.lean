@@ -377,14 +377,7 @@ theorem axialDebt_one_norm (d : Debt) : ‖axialDebt 1 d‖ ≤ ‖d‖ := by
   · simp [axialDebt]
   · simpa [axialDebt] using norm_le_pi_norm d 1
 
-/-- The normalization loses at most the explicit factor `‖C⁻¹‖`. -/
-theorem angularDebt_norm_le (C : ℝ) (d : Debt) : ‖angularDebt C d‖ ≤ ‖C⁻¹‖ * ‖d‖ := by
-  rw [angularDebt_rescale, norm_smul]
-  exact mul_le_mul_of_nonneg_left (angularDebt_one_norm d) (norm_nonneg _)
 
-theorem axialDebt_norm_le (C : ℝ) (d : Debt) : ‖axialDebt C d‖ ≤ ‖C⁻¹‖ * ‖d‖ := by
-  rw [axialDebt_rescale, norm_smul]
-  exact mul_le_mul_of_nonneg_left (axialDebt_one_norm d) (norm_nonneg _)
 
 
 

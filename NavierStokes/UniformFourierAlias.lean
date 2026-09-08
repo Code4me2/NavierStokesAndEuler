@@ -219,33 +219,6 @@ theorem exactAlias_sourceJet_bound {a b : ℝ} {χ : ℝ → ℝ}
     rw [heq, norm_zero]
     positivity
 
-theorem totalIntegral_uniform_of_inverse {a b : ℝ} {v : E}
-    (G : (ℝ × E → F) → Prop) (J : (ℝ × E → F) → ℝ × E → F) (loss : ℕ)
-    (hab : a ≤ b)
-    (hregular : ∀ f, G f → ContDiff ℝ ∞ f ∧ RadialAlias.RadiallySupported a b f)
-    (hsmooth : ∀ f, G f → ContDiff ℝ ∞ (J f))
-    (hsupport : ∀ f, G f → RadialAlias.RadiallySupported a b (J f))
-    (hsolve : ∀ f, G f → RadialAlias.directionalDeriv v (J f) = f)
-    (hclosed : ∀ f, G f → G (RadialAlias.slowDeriv (J f)))
-    (htame : ∀ m : ℕ, ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + loss) f (Prod.fst ⁻¹' Icc a b) C →
-        FiniteJetBound m (J f) (Prod.fst ⁻¹' Icc a b) (K * C)) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + (loss + 1) * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × E,
-        ‖iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M v f) z‖ ≤
-          K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨B, hB, hbound⟩ := sourceJet_uniform_finiteJets G J (Prod.fst ⁻¹' Icc a b)
-    loss hclosed hsmooth htame p m
-  refine ⟨B * (b - a), mul_nonneg hB (sub_nonneg.mpr hab), ?_⟩
-  intro f hf C hC hb M hM j hj z
-  have h := totalIntegral_sourceJet_bound J f p m hab hM (hregular f hf).1 (hregular f hf).2
-    (fun n _ => hsmooth _ (sourceJet_mem G J hclosed n hf))
-    (fun n _ => hsupport _ (sourceJet_mem G J hclosed n hf))
-    (fun n _ => hsolve _ (sourceJet_mem G J hclosed n hf))
-    (hbound f hf C hC hb) j hj z
-  convert! h using 1
-  ring
 
 theorem exactAlias_uniform_of_inverse {a b : ℝ} {v : E} {χ : ℝ → ℝ}
     (G : (ℝ × E → F) → Prop) (J : (ℝ × E → F) → ℝ × E → F) (loss : ℕ)
@@ -383,24 +356,8 @@ noncomputable def SourcePeriodic (f : ℝ × (S × Plane) → F) : Prop :=
 noncomputable def radialSlice (f : ℝ × (S × Plane) → F) (s : S) (z : ℝ × Plane) : F :=
   f (z.1, (s, z.2))
 
-theorem radialSlice_smooth {f : ℝ × (S × Plane) → F} (hf : ContDiff ℝ ∞ f) (s : S) :
-    ContDiff ℝ ∞ (radialSlice f s) :=
-  hf.comp (contDiff_fst.prodMk (contDiff_const.prodMk contDiff_snd))
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] [NormedSpace ℝ F] in
-theorem radialSlice_supported {a b : ℝ} {f : ℝ × (S × Plane) → F}
-    (hs : RadialAlias.RadiallySupported a b f) (s : S) :
-    RadialAlias.RadiallySupported a b (radialSlice f s) :=
-  fun z hz => @hs (z.1, (s, z.2)) hz
 
-theorem totalIntegral_radialSlice (M : ℝ) (v : Plane) (f : ℝ × (S × Plane) → F)
-    (U : ℝ) (s : S) (Y : Plane) :
-    TransportPrimitive.totalIntegral M ((0 : S), v) f (U, (s, Y)) =
-      TransportPrimitive.totalIntegral M v (radialSlice f s) (U, Y) := by
-  apply integral_congr_ae
-  filter_upwards [] with u
-  simp only [TransportPrimitive.shift, radialSlice, Prod.mk_add_mk, Prod.smul_mk,
-    smul_zero, add_zero]
 
 
 
@@ -626,14 +583,6 @@ theorem totalIntegral_realCenterSource {a b M : ℝ} {v : Plane}
     (g := fun U => sourceMean f (U, z.2.1)) (hc.intervalIntegrable _ _) (hmc.intervalIntegrable _ _),
     hm z.2.1, sub_zero]
 
-theorem exactAlias_eq_realCenterSource {a b M : ℝ} {v : Plane}
-    {f : ℝ × (S × Plane) → ℝ} (χ : ℝ → ℝ)
-    (hf : ContDiff ℝ ∞ f) (hp : SourcePeriodic f) (hs : RadialAlias.RadiallySupported a b f)
-    (hm : ∀ s, (∫ U in a..b, sourceMean f (U, s)) = 0) :
-    exactAlias χ M ((0 : S), v) f = exactAlias χ M ((0 : S), v) (realCenterSource f) := by
-  funext z
-  unfold exactAlias
-  rw [totalIntegral_realCenterSource hf hp hs hm]
 
 
 theorem familyInverse_smooth (d : Direction) {f : ℝ × (S × Plane) → ℂ}

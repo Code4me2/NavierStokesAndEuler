@@ -164,13 +164,6 @@ theorem hasFTaylorSeriesUpToOn_zeroExtension {c : ℝ} (hc : 0 < c)
   · intro n _ p hp
     exact (extendedJets_hasFDerivAt hc hU hf hB n hp).continuousAt.continuousWithinAt
 
-/-- Main gluing theorem. Neither the parameter space nor the target needs a
-finite-dimensionality or completeness hypothesis. -/
-theorem contDiffOn_zeroExtension {c : ℝ} (hc : 0 < c)
-    {U : Set E} (hU : IsOpen U) {f : E × ℝ → F}
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ Ioi 0)) (hB : LocalGaussianJets c U f) :
-    ContDiffOn ℝ ∞ (zeroExtension f) (U ×ˢ univ) :=
-  (hasFTaylorSeriesUpToOn_zeroExtension hc hU hf hB).contDiffOn
 
 /-- The ordinary full tensors of the extension equal the zero extensions
 of the original ordinary full tensors. -/
@@ -193,13 +186,6 @@ theorem iteratedFDeriv_zeroExtension_nonpos {c : ℝ} (hc : 0 < c)
   rw [iteratedFDeriv_zeroExtension hc hU hf hB n ⟨hp, mem_univ _⟩,
     zeroExtension_of_nonpos _ hδ]
 
-/-- In particular every mixed derivative at the joining edge is zero. -/
-theorem iteratedFDeriv_zeroExtension_edge {c : ℝ} (hc : 0 < c)
-    {U : Set E} (hU : IsOpen U) {f : E × ℝ → F}
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ Ioi 0)) (hB : LocalGaussianJets c U f)
-    (n : ℕ) {x : E} (hx : x ∈ U) :
-    iteratedFDeriv ℝ n (zeroExtension f) (x, 0) = 0 :=
-  iteratedFDeriv_zeroExtension_nonpos hc hU hf hB n hx le_rfl
 
 
 

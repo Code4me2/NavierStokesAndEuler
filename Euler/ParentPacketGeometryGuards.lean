@@ -68,9 +68,6 @@ variable {G : Parent} (L : LabelData G)
   (S : Set Space) (hS : IsCompact S) (H : LowBounds G)
   (τ : ℝ) (hτ : 0 < τ) (hτT : τ < G.T)
 
-/-- One explicit parent coefficient amplitude controls both the actual
-strain and pressure Hessian throughout the history interval. -/
-def historyAmplitude : ℝ := 27*(frameAmplitude L.K)^2*gradientAmplitude L.K
 
 
 

@@ -676,41 +676,6 @@ theorem referenceSlotEnvelope_bound {lam u L : ℝ}
 namespace SlotFamily
 
 
-/-- The fundamental need only be smooth in the open slot. Away from that
-slot the exact error agrees locally with the smooth source. This avoids any
-smoothness assertion for a clamped ODE extension across its endpoints. -/
-theorem error_contDiff_of_slot {s : StripData D} (g : SlotFamily s) {u f : ℕ → D → E}
-    (hu : ∀ n, ContDiffOn ℝ ∞ (u n) {x | g.coordinate n x ∈ Ioo (0 : ℝ) 1})
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (n : ℕ) :
-    ContDiff ℝ ∞ (g.error u f n) := by
-  classical
-  rw [contDiff_iff_contDiffAt]
-  intro x
-  by_cases hx : g.coordinate n x ∈ Ioo (0 : ℝ) 1
-  · have hU : IsOpen {y | g.coordinate n y ∈ Ioo (0 : ℝ) 1} :=
-      isOpen_Ioo.preimage (g.coordinate_contDiff n).continuous
-    have hus := (hu n).contDiffAt (hU.mem_nhds hx)
-    have ht : ContDiffAt ℝ ∞ (g.coordinate n) x := (g.coordinate_contDiff n).contDiffAt
-    exact ((contDiffAt_const.mul (profileDeriv_contDiff.contDiffAt.comp x ht)).smul hus).add
-      ((contDiffAt_const.sub (profile_contDiff.contDiffAt.comp x ht)).smul (hf n).contDiffAt)
-  · have hout : 1 / 3 < |g.coordinate n x - 1 / 2| := by
-      have hx' : g.coordinate n x ≤ 0 ∨ 1 ≤ g.coordinate n x := by
-        simpa only [mem_Ioo, not_and_or, not_lt] using hx
-      rcases hx' with hx' | hx'
-      · rw [abs_of_nonpos (by linarith)]
-        linarith
-      · rw [abs_of_nonneg (by linarith)]
-        linarith
-    have hp := (profile_eventually_zero hout).comp_tendsto
-      (g.coordinate_contDiff n).continuous.continuousAt
-    have hd := (profile_eventually_zero hout).deriv.comp_tendsto
-      (g.coordinate_contDiff n).continuous.continuousAt
-    have he : g.error u f n =ᶠ[𝓝 x] f n := by
-      filter_upwards [hp, hd] with y hpy hdy
-      have hp' : profile (g.coordinate n y) = 0 := hpy
-      have hd' : deriv profile (g.coordinate n y) = 0 := by simpa using hdy
-      simp [error, cutoffError, hp', hd']
-    exact (hf n).contDiffAt.congr_of_eventuallyEq he
 
 open PhysicalGraphBounds ProblemStatement
 
@@ -724,9 +689,6 @@ end SlotFamily
 
 namespace SlotFamily
 
-noncomputable def derivativeError {s : StripData D} (g : SlotFamily s)
-    (u : ℕ → D → E) (n : ℕ) (x : D) : E :=
-  ((g.length n)⁻¹ * deriv profile (g.coordinate n x)) • u n x
 
 
 

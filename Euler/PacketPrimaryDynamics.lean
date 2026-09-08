@@ -131,9 +131,6 @@ theorem canonicalVelocity_ne_zero (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T)
   rw [canonicalVelocity_history τ hτ hτT B ξ hs s x] at hz
   exact hs0 ((smul_eq_zero.mp hz).resolve_left hx)
 
-theorem canonicalVelocity_center_ne_zero (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T) :
-    canonicalVelocity τ hτ hτT B ξ hs t 0 ≠ 0 :=
-  canonicalVelocity_ne_zero τ hτ hτT B ξ hs hξ t 0 (by rw [innerCutoff_zero]; exact one_ne_zero)
 
 
 

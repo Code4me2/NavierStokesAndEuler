@@ -602,17 +602,6 @@ theorem separation_exponential_gap (c : Parameters) :
   nlinarith [mul_nonneg (by linarith : 0 ≤ Real.exp (2 * beta c 1) - 1)
     (by linarith [c.lam_pos] : 0 ≤ Real.exp (2 * c.lam) - 1)]
 
-theorem normalizedMatrix_det_ne_zero (c : Parameters) : (normalizedMatrix c).det ≠ 0 := by
-  rw [Matrix.det_fin_two]
-  simp only [normalizedMatrix_entry]
-  norm_num
-  have h0 := rowMoment_pos c 0
-  have h1 := rowMoment_pos c 1
-  have hg := separation_exponential_gap c
-  have hgap : Real.exp (2 * beta c 1) - Real.exp (2 * beta c 0) < 0 := by
-    linarith [c.lam_pos]
-  have hprod := mul_neg_of_pos_of_neg (mul_pos h0 h1) hgap
-  nlinarith
 
 /-- A uniform inverse estimate from the actual exponential column separation. -/
 noncomputable def inverseBound : ℝ := (1 + Real.exp 1) / rowFloor
@@ -1074,30 +1063,8 @@ theorem correctionJet_bound (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
         (mul_nonneg (correctionJetBound_pos c.P_pos c.m k).le (Real.exp_pos _).le)
     _ = _ := by ring
 
-theorem correctionJet_eta_hasDerivAt (c : Parameters) {amp : ℝ → ℝ}
-    {eta amp' : ℝ} (ha : HasDerivAt amp amp' eta) (k : ℕ) (y : ℝ) :
-    HasDerivAt (fun t => correctionJet c amp k t y)
-      (iteratedDeriv k (affineProfile c (1 + 3 * eta ^ 2) amp') y) eta := by
-  have heq : (fun t => correctionJet c amp k t y) =
-      (fun t => parameterPolynomial t * iteratedDeriv k (affineProfile c 1 0) y +
-        amp t * iteratedDeriv k (affineProfile c 0 1) y) := by
-    funext t
-    rw [correctionJet_eq, affineProfile_jet_decomposition]
-  rw [heq, affineProfile_jet_decomposition c (1 + 3 * eta ^ 2) amp' k y]
-  exact ((parameterPolynomial_hasDerivAt eta).mul_const _).add (ha.mul_const _)
 
 
-theorem normalized_mass_prefix_hasDerivAt (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) :
-    HasDerivAt (fun t => massMoment c amp t c.pulseStart /
-      (Real.exp c.pulseStart * angular c.P c.dropLength c.lam (c.pulseStart, t)))
-      (prefixCoefficient c 0 * (1 + 3 * eta ^ 2)) eta := by
-  have heq : (fun t => massMoment c amp t c.pulseStart /
-      (Real.exp c.pulseStart * angular c.P c.dropLength c.lam (c.pulseStart, t))) =
-      (fun t => prefixCoefficient c 0 * parameterPolynomial t) := by
-    funext t
-    exact normalized_mass_prefix c amp t
-  rw [heq]
-  exact (parameterPolynomial_hasDerivAt eta).const_mul _
 
 
 

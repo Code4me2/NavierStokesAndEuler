@@ -72,48 +72,5 @@ theorem meanAcceleration_translation_contDiff {n : ℕ∞ω}
   exact Eq.mpr (congrArg (fun g : Space → TimeLp T solenoidalSpace => ContDiff ℝ n g)
     (meanAcceleration_orbit_eq T hT F F₁ c hc hLower v f)) hs
 
-/-- The genuine acceleration gains one factorial shift relative to its
-velocity and forcing inputs, with an explicit polynomial radius condition. -/
-theorem meanAcceleration_translation_gevrey
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hF₁ : ContDiff ℝ ∞ (fun a : Space => translatePath T a F₁))
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a v))
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f))
-    (Rc R CF CF₁ Cf Cv : ℝ) (hRc : 0 ≤ Rc) (hR : 0 ≤ R) (hRcR : Rc ≤ R)
-    (hCF : 0 ≤ CF) (hCF₁ : 0 ≤ CF₁) (hCf : 0 ≤ Cf) (hCv : 0 ≤ Cv)
-    (hstrong : 2*gramCost c CF (3*CF*(Cf+6*CF₁*Cv))*(Rc+1) ≤ R)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant Rc 0 n)
-    (hF₁b : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F₁) a‖ ≤ CF₁*majorant Rc 0 n)
-    (d : ℕ)
-    (hfb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b f) a‖ ≤ Cf*majorant R d n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b v) a‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space =>
-      timeSolenoidalTranslation T b (meanAcceleration T hT F F₁ c hc hLower v f)) a‖ ≤
-        majorant R (d+1) n := by
-  let Q := fun b : Space => solenoidalFrame T (translatePath T b F)
-  let Q₁ := fun b : Space => solenoidalFrame T (translatePath T b F₁)
-  have hQ : ContDiff ℝ ∞ Q := contDiff_solenoidalFrame T (fun b => translatePath T b F) hF
-  have hQ₁ : ContDiff ℝ ∞ Q₁ := contDiff_solenoidalFrame T (fun b => translatePath T b F₁) hF₁
-  have hbQ : ∀ k b, ‖iteratedFDeriv ℝ k Q b‖ ≤ CF*majorant Rc 0 k :=
-    solenoidalFrame_bound T (fun b => translatePath T b F) hF Rc CF hRc hCF 0 hFb
-  have hbQ₁ : ∀ k b, ‖iteratedFDeriv ℝ k Q₁ b‖ ≤ CF₁*majorant Rc 0 k :=
-    solenoidalFrame_bound T (fun b => translatePath T b F₁) hF₁ Rc CF₁ hRc hCF₁ 0 hF₁b
-  have hbQR (k b) : ‖iteratedFDeriv ℝ k Q b‖ ≤ CF*majorant R 0 k :=
-    (hbQ k b).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 k) hCF)
-  have hbQ₁R (k b) : ‖iteratedFDeriv ℝ k Q₁ b‖ ≤ CF₁*majorant R 0 k :=
-    (hbQ₁ k b).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 k) hCF₁)
-  let g := EulerTimeLpAccelerationForcing.forcing T hT Q Q₁
-    (fun b => timeTranslation T b f) (fun b => timeSolenoidalTranslation T b v)
-  have hg : ContDiff ℝ ∞ g := EulerTimeLpAccelerationForcing.forcing_contDiff T hT Q Q₁
-    (fun b => timeTranslation T b f) (fun b => timeSolenoidalTranslation T b v) hQ hQ₁ hf hv
-  have hgb : ∀ k b, ‖iteratedFDeriv ℝ k g b‖ ≤ (3*CF*(Cf+6*CF₁*Cv))*majorant R d k :=
-    EulerTimeLpAccelerationForcing.forcing_bound T hT Q Q₁
-      (fun b => timeTranslation T b f) (fun b => timeSolenoidalTranslation T b v)
-      hQ hQ₁ hf hv R CF CF₁ Cf Cv hR hCF hCF₁ hCf hCv d hbQR hbQ₁R hfb hvb
-  have hs := gramSolution_gevrey T hT Q c hc (translatedFrame_lower T F c hLower) hQ
-    Rc CF hRc hCF hbQ g hg (3*CF*(Cf+6*CF₁*Cv)) R (by positivity) hstrong d hgb n a
-  exact (congrArg (fun g : Space → TimeLp T solenoidalSpace => ‖iteratedFDeriv ℝ n g a‖)
-    (meanAcceleration_orbit_eq T hT F F₁ c hc hLower v f)).trans_le hs
 
 end EulerMeanAccelerationGevrey

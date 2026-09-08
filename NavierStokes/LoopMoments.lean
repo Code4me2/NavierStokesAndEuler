@@ -50,10 +50,6 @@ theorem avg_const (s : Finset ι) (w : ι → ℝ) (c : ℝ)
     avg s w (fun _ => c) = c := by
   simp only [avg, ← Finset.sum_mul, hmass, one_mul]
 
-theorem avg_nonneg (s : Finset ι) (w f : ι → ℝ)
-    (hw : ∀ i ∈ s, 0 ≤ w i) (hf : ∀ i ∈ s, 0 ≤ f i) :
-    0 ≤ avg s w f := by
-  exact Finset.sum_nonneg (fun i hi => mul_nonneg (hw i hi) (hf i hi))
 
 /-- The standard variance expansion, with mass and first moment explicit. -/
 theorem variance_identity (s : Finset ι) (w t : ι → ℝ) (m : ℝ)
@@ -193,11 +189,7 @@ structure TwoPoint where
 def TwoPoint.mean (q : TwoPoint) : ℝ :=
   q.leftWeight * q.leftValue + q.rightWeight * q.rightValue
 
-def TwoPoint.centeredSecond (q : TwoPoint) (m : ℝ) : ℝ :=
-  q.leftWeight * (q.leftValue - m) ^ 2 + q.rightWeight * (q.rightValue - m) ^ 2
 
-def TwoPoint.IsProbability (q : TwoPoint) : Prop :=
-  0 ≤ q.leftWeight ∧ 0 ≤ q.rightWeight ∧ q.leftWeight + q.rightWeight = 1
 
 /-- For any nonnegative variance, equal masses at `m ± √V` realize it. -/
 def symmetricPair (m V : ℝ) : TwoPoint :=
@@ -206,17 +198,7 @@ def symmetricPair (m V : ℝ) : TwoPoint :=
 
 
 
-/-- An asymmetric law preserves a lower bound on the projection `p*t`,
-while allowing any nonnegative variance. For `p = 0`, use `symmetricPair`.
-The lower projected deviation is `-d`, and the upper one is `V*p²/d`. -/
-def oneSidedPair (m p d V : ℝ) : TwoPoint :=
-  ⟨V * p ^ 2 / (d ^ 2 + V * p ^ 2), d ^ 2 / (d ^ 2 + V * p ^ 2),
-    m - d / p, m + V * p / d⟩
 
-theorem oneSidedPair_denom_pos (p d V : ℝ) (hd : 0 < d) (hV : 0 ≤ V) :
-    0 < d ^ 2 + V * p ^ 2 := by
-  have hprod := mul_nonneg hV (sq_nonneg p)
-  nlinarith
 
 
 

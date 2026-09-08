@@ -74,21 +74,6 @@ theorem summable_cutStage {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
   intro j hj
   exact hN.self_of_nhds j (Nat.le_of_not_gt (by simpa only [Finset.mem_range] using hj))
 
-/-- The family of supports is locally finite on every domain on which `q`
-is continuous and positive. -/
-theorem locallyFinite_cutStage_support {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : X → ℝ} (hq : Continuous q) (hqpos : ∀ x, 0 < q x)
-    (A : ℕ → X → V) : LocallyFinite (fun j => support (cutStage a q A j)) := by
-  intro x
-  obtain ⟨N, hN⟩ := eventually_zero_tail ha hq.continuousAt (hqpos x) A
-  refine ⟨{y | ∀ j : ℕ, N ≤ j → cutStage a q A j y = 0}, hN, ?_⟩
-  apply (Finset.range N).finite_toSet.subset
-  intro j hj
-  rcases hj with ⟨y, hy, hzero⟩
-  change j ∈ Finset.range N
-  apply Finset.mem_range.mpr
-  by_contra hlt
-  exact hy (hzero j (Nat.le_of_not_gt hlt))
 
 
 end Topological
@@ -131,28 +116,7 @@ theorem iteratedFDeriv_eventuallyEq {f g : E → V} {x : E}
   simpa only [nhdsWithin_univ, iteratedFDerivWithin_univ] using
     h'.iteratedFDerivWithin (𝕜 := ℝ) k
 
-theorem potentialSum_allJets_eventuallyEq_partial {a : ℕ → ℝ}
-    (ha : Tendsto a atTop atTop) {q : E → ℝ} {A : ℕ → E → V} {x : E}
-    (hq : ContinuousAt q x) (hqx : 0 < q x) :
-    ∃ N : ℕ, ∀ k : ℕ,
-      iteratedFDeriv ℝ k (potentialSum a q A) =ᶠ[𝓝 x]
-        iteratedFDeriv ℝ k (partialPotential a q A N) := by
-  obtain ⟨N, hN⟩ := potentialSum_eventuallyEq_partial ha hq hqx A
-  exact ⟨N, fun k => iteratedFDeriv_eventuallyEq hN k⟩
 
-theorem iteratedFDeriv_partialPotential {a : ℕ → ℝ} {q : E → ℝ}
-    {A : ℕ → E → V} {x : E} (hq : ContDiffAt ℝ ∞ q x)
-    (hA : ∀ j, ContDiffAt ℝ ∞ (A j) x) (N k : ℕ) :
-    iteratedFDeriv ℝ k (partialPotential a q A N) x =
-      ∑ j ∈ Finset.range N, iteratedFDeriv ℝ k (cutStage a q A j) x := by
-  have hstage : ∀ j ∈ Finset.range N,
-      ContDiffWithinAt ℝ k (cutStage a q A j) univ x := by
-    intro j _
-    exact ((cutStage_contDiffAt hq hA j).of_le
-      (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffWithinAt
-  unfold partialPotential
-  simpa only [iteratedFDerivWithin_univ] using
-    iteratedFDerivWithin_fun_sum_apply uniqueDiffOn_univ (mem_univ x) hstage
 
 
 end Smooth
@@ -199,14 +163,6 @@ theorem divergence_velocitySum {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     hslice.of_le (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
   exact SpatialCurl.spatialDivergence_spatialCurl (potentialSum a q A) z.1 z.2 hslice2
 
-theorem divergence_velocitySum_on {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : SpaceTime → ℝ} {A : ℕ → VelocityField} {U : Set SpaceTime}
-    (hU : IsOpen U) (hqpos : ∀ z ∈ U, 0 < q z) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) :
-    ∀ z ∈ U, spatialDivergence (velocitySum a q A) z.1 z.2 = 0 := by
-  intro z hz
-  exact divergence_velocitySum ha (hqpos z hz) (hq.contDiffAt (hU.mem_nhds hz))
-    (fun j => (hA j).contDiffAt (hU.mem_nhds hz))
 
 theorem spatialCurl_eq_of_eventuallyEq {A B : VelocityField} {z : SpaceTime}
     (h : A =ᶠ[𝓝 z] B) : SpatialCurl.spatialCurl A z = SpatialCurl.spatialCurl B z := by
@@ -217,18 +173,6 @@ theorem spatialCurl_eventuallyEq {A B : VelocityField} {z : SpaceTime}
     (h : A =ᶠ[𝓝 z] B) : SpatialCurl.spatialCurl A =ᶠ[𝓝 z] SpatialCurl.spatialCurl B :=
   h.eventuallyEq_nhds.mono fun _ hz => spatialCurl_eq_of_eventuallyEq hz
 
-theorem spatialCurl_partialPotential {a : ℕ → ℝ} {q : SpaceTime → ℝ}
-    {A : ℕ → VelocityField} {z : SpaceTime} (hq : ContDiffAt ℝ ∞ q z)
-    (hA : ∀ j, ContDiffAt ℝ ∞ (A j) z) (N : ℕ) :
-    SpatialCurl.spatialCurl (partialPotential a q A N) z =
-      ∑ j ∈ Finset.range N, SpatialCurl.spatialCurl (cutStage a q A j) z := by
-  have hstage : ∀ j ∈ Finset.range N,
-      DifferentiableAt ℝ (fun y : Space => cutStage a q A j (z.1, y)) z.2 := by
-    intro j _
-    exact ((cutStage_contDiffAt hq hA j).comp z.2
-      (contDiffAt_const.prodMk contDiffAt_id)).differentiableAt (by simp)
-  simpa only [partialPotential, SpatialCurl.spatialCurl, SpatialCurl.curl, map_sum] using
-    congrArg SpatialCurl.curlLinear (fderiv_fun_sum hstage)
 
 
 

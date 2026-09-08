@@ -505,12 +505,6 @@ theorem nativeGraph_eq_cover_commonLift (h : ℝ) (n d : ℕ) (w : SpaceTime) :
     coverPower d ((coverPower d).symm (PhysicalGraphBounds.nativeGraph h n w))
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-theorem physical_native_offset (g : Geometry) (k : TorusInverse.Frequency)
-    (h : ℝ) (n d : ℕ) (hgap : g.gap = d) (w : SpaceTime) :
-    PhysicalGraphBounds.nativeGraph h n w - nativeCenter g k =
-      g.basis (g.coordinates k (commonLift h n d w).2) := by
-  rw [nativeGraph_eq_cover_commonLift h n d w]
-  simpa only [hgap] using native_offset g k (commonLift h n d w).2
 
 
 variable {F : CopyFamily H TorusInverse.Frequency}

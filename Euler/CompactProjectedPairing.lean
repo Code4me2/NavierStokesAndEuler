@@ -32,18 +32,6 @@ theorem inner_projectedRhs (φ : L2) (hφ : φ ∈ solenoidalSpace)
     ⟪φ, (projectedRhs A).toLp⟫_ℝ = -⟪φ, (advectionField A A).toLp⟫_ℝ := by
   rw [projectedRhs_toLp, inner_neg_right, inner_solenoidalProjection _ _ hφ]
 
-/-- Integral form of the projected pairing for an arbitrary solenoidal
-`L²` representative. -/
-theorem inner_projectedRhs_eq_integral (φ : Space → Space)
-    (hLp : MemLp φ 2 (volume : Measure Space))
-    (hφ : hLp.toLp φ ∈ solenoidalSpace) (A : SmoothL2Field Space) :
-    ⟪hLp.toLp φ, (projectedRhs A).toLp⟫_ℝ =
-      -∫ x, ⟪φ x, fderiv ℝ A.field x (A.field x)⟫_ℝ := by
-  rw [inner_projectedRhs _ hφ, MeasureTheory.L2.inner_def]
-  congr 1
-  apply integral_congr_ae
-  filter_upwards [hLp.coeFn_toLp, (advectionField A A).toLp_ae] with x hφx hAx
-  rw [hφx, hAx, advectionField_field]
 
 
 

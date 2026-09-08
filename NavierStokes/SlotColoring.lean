@@ -224,16 +224,7 @@ def candidateGrids (D : ℝ) (L : Label) (m : ℕ) : Finset Grid :=
 def candidatesAtLevel (D : ℝ) (L : Label) (m : ℕ) : Finset Label :=
   ((candidateGrids D L m).product (Finset.univ : Finset Bool)).image (fun gs => (m, gs))
 
-def candidates (D : ℝ) (L : Label) : Finset Label :=
-  (Finset.Icc (L.1 - 4) (L.1 + 4)).biUnion (candidatesAtLevel D L)
 
-theorem adj_index_bound (D : ℝ) {L M : Label} (h : Adj D L M) (j : Fin 3) :
-    |M.2.1 j - indexCenter D L M.1 j| ≤ (indexRadius D : ℤ) := by
-  apply index_near_floor
-  · exact normalized_index_gap _ _ _ _ _ (width_pos D j h.right_positive)
-      (width_ratio_le D j h.left_positive h.right_positive h.left_level_le h.right_level_le)
-      (overlapping_centers D L M h.overlap j)
-  · exact Nat.le_ceil _
 
 
 theorem integer_interval_card (c : ℤ) (K : ℕ) :
@@ -247,17 +238,7 @@ theorem candidateGrids_card (D : ℝ) (L : Label) (m : ℕ) :
   rw [Fintype.card_piFinset]
   simp only [integer_interval_card, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
-theorem candidatesAtLevel_card_le (D : ℝ) (L : Label) (m : ℕ) :
-    (candidatesAtLevel D L m).card ≤ (2 * indexRadius D + 1) ^ 3 * 2 := by
-  calc
-    (candidatesAtLevel D L m).card ≤
-        ((candidateGrids D L m).product (Finset.univ : Finset Bool)).card := Finset.card_image_le
-    _ = (2 * indexRadius D + 1) ^ 3 * 2 := by
-      change ((candidateGrids D L m) ×ˢ (Finset.univ : Finset Bool)).card = _
-      simpa only [candidateGrids_card, Finset.card_univ, Fintype.card_bool] using
-        Finset.card_product (candidateGrids D L m) (Finset.univ : Finset Bool)
 
-def degreeBound (D : ℝ) : ℕ := 18 * (2 * indexRadius D + 1) ^ 3
 
 
 

@@ -39,9 +39,6 @@ def graphPotential (k : ℝ) (t : Icc (0 : ℝ) T) : Vector3 → ℝ :=
 theorem graphPotential_zero (k : ℝ) (t : Icc (0 : ℝ) T) :
     S.graphPotential k t 0 = 0 := radialPotential_zero _
 
-theorem graphPotential_joint_continuous (k : ℝ) :
-    Continuous (S.graphPotential k).uncurry :=
-  radialPotential_joint_continuous _ (S.graphPressure_joint_continuous k)
 
 theorem graphPotential_smooth (k : ℝ) (hk : k*A.κ=1) (t : Icc (0 : ℝ) T) :
     ContDiff ℝ ∞ (S.graphPotential k t) := by

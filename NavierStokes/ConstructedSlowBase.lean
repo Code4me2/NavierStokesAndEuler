@@ -214,19 +214,7 @@ theorem height_pos : 0 < F.data.h := W.axis.small.h_pos
 theorem height_lt_half : F.data.h < 1 / 2 := by linarith [W.axis.small.h_le]
 
 
-theorem nominal_finiteIdentities :
-    BaseResidual.FiniteIdentities F.data.h W.axis.normalization
-      (nominalCoefficients W) (asSlowProfiles (nominalScheme W)) := by
-  apply repaired_finiteIdentities (nominalLocalization W) (nominalBaseAgreement W)
-    (nominalZeroOrder W) (nominalParameters_contains W) (height_pos W) (height_lt_half W) rfl
-  intro n w hw
-  exact nominal_pressureCoefficient W n hw.1
-    (nominalParameters_contains W ⟨hw.2.1.le, hw.2.2.le⟩)
 
-theorem nominal_stressZeroCore :
-    BaseResidual.StressZeroCore (nominalCoefficients W) (nominalInner W / 8) :=
-  repaired_stressZeroCore (nominalLocalization W) (nominalBaseAgreement W)
-    (nominalZeroOrder W) (nominalParameters_contains W)
 
 
 
@@ -254,14 +242,6 @@ theorem nominal_leading_origin : (nominalCoefficients W).axial 0 (0, 0) = W.axis
   simpa using nominal_leading_axis W (eta := 0) (by constructor <;> norm_num)
 
 
-theorem nominal_axis_tendsto {a : ℕ → ℕ} (ha : StrictMono a) :
-    Tendsto (fun t : ℝ => ‖baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) (t, 0)‖)
-      (𝓝[<] 1) atTop := by
-  apply BaseResidual.baseVelocity_axis_tendsto_atTop ha (height_pos W) (height_lt_half W)
-    (nominalCoefficients_smooth W) W.axis.normalization
-    (fun _ hn => (nominalCoefficients_axis W hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1)
-  rw [nominal_leading_origin]
-  exact W.axis.small.j_pos
 
 
 
@@ -493,11 +473,6 @@ theorem nominalScales_spec : B ≤ nominalScales W c hc upper B 0 ∧
     (weightedBundle_smooth (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
       W.axis.normalization) (height_pos W) (innerBox_isCompact 0 (scaleUpper W upper)) B)
 
-theorem nominalScales_admissible :
-    AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (nominalCoefficients W))
-      (innerBox 0 (scaleUpper W upper)) (nominalScales W c hc upper B) :=
-  weightedBundle_base_scales (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
-    (nominalScales_spec W c hc upper B).2
 
 
 
@@ -558,22 +533,6 @@ theorem modifiedScales_speedUnbounded :
         (modifiedCoefficients W Q M)) :=
   modified_speedUnbounded W Q M (modifiedScales_strictMono W c hc upper B Q M)
 
-theorem modifiedScales_smooth_and_divergence :
-    ContDiffOn ℝ ∞
-      (baseVelocity (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-        (modifiedCoefficients W Q M)) past ∧
-    ContDiffOn ℝ ∞
-      (basePressure (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-        (modifiedCoefficients W Q M)) past ∧
-    ∀ t < (1 : ℝ), ∀ x : ProblemStatement.Space,
-      ProblemStatement.spatialDivergence
-        (baseVelocity (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-          (modifiedCoefficients W Q M)) t x = 0 := by
-  have ha := modifiedScales_strictMono W c hc upper B Q M
-  exact ⟨baseVelocity_smooth ha (height_pos W) (height_lt_half W) (modifiedCoefficients_smooth W Q M) _,
-    basePressure_smooth ha (height_pos W) (height_lt_half W) (modifiedCoefficients_smooth W Q M) _,
-    fun _ ht x => baseVelocity_divergence_zero ha (height_pos W) (height_lt_half W)
-      (modifiedCoefficients_smooth W Q M) _ ht x⟩
 
 theorem modifiedScales_potential_smooth :
     ContDiffOn ℝ ∞

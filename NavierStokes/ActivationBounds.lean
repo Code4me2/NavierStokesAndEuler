@@ -539,69 +539,9 @@ theorem U_independent {T δ₁ δ₂ : ℝ} (hT : 0 < T)
       parameterInterval_open N.logU_smooth T κ (p := (N.logTime p.1, p.2)) hη
         ((N.logTime_le_iff hX).2 hp₁) ((N.logTime_le_iff hX).2 hp₂)
 
-/-- Equality is from the axis up to the comparison radius, so all recomputed
-histories are equal, not just their endpoint fields. -/
-theorem histories_independent {T δ₁ δ₂ : ℝ} (hT : 0 < T)
-    (hδ₁ : 0 < δ₁) (hδ₁R : 2 * δ₁ < rampLimit)
-    (hδ₂ : 0 < δ₂) (hδ₂R : 2 * δ₂ < rampLimit) (κ : ℝ)
-    (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0) (r : HistoryRow)
-    {p : Point} (hη : p.2 ∈ parameterInterval) (hX : 0 ≤ p.1)
-    (hp₁ : p.1 ≤ radius N.endpoint δ₁) (hp₂ : p.1 ≤ radius N.endpoint δ₂) :
-    profileHistory (FromReference.histories N hT hδ₁ hδ₁R κ P0 hP0) r p =
-      profileHistory (FromReference.histories N hT hδ₂ hδ₂R κ P0 hP0) r p := by
-  let A := FromReference.histories N hT hδ₁ hδ₁R κ P0 hP0
-  let B := FromReference.histories N hT hδ₂ hδ₂R κ P0 hP0
-  have h0 : profileInitial A r p.2 = profileInitial B r p.2 :=
-    profileInitial_congr A B (fun _ => rfl) r p.2
-  have hf : ∀ x ∈ Icc (0 : ℝ) p.1, A.f (x, p.2) = B.f (x, p.2) := by
-    intro x hx
-    exact f_independent N hT hδ₁ hδ₁R hδ₂ hδ₂R κ (p := (x, p.2)) hη
-      (hx.2.trans hp₁) (hx.2.trans hp₂)
-  have hu : ∀ x ∈ Icc (0 : ℝ) p.1, A.U (x, p.2) = B.U (x, p.2) := by
-    intro x hx
-    exact U_independent N hT hδ₁ hδ₁R hδ₂ hδ₂R κ (p := (x, p.2)) hη
-      (hx.2.trans hp₁) (hx.2.trans hp₂)
-  exact profileHistory_congr_up_to A B r hX h0 hf hu
 
-theorem reference_histories_independent {δ₁ δ₂ : ℝ}
-    (hδ₁ : 0 < δ₁) (hδ₁R : 2 * δ₁ < rampLimit)
-    (hδ₂ : 0 < δ₂) (hδ₂R : 2 * δ₂ < rampLimit)
-    (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0) (r : HistoryRow)
-    {p : Point} (hη : p.2 ∈ parameterInterval) (hX : 0 ≤ p.1)
-    (hp₁ : p.1 ≤ radius N.endpoint δ₁) (hp₂ : p.1 ≤ radius N.endpoint δ₂) :
-    profileHistory (N.histories hδ₁ hδ₁R P0 hP0) r p =
-      profileHistory (N.histories hδ₂ hδ₂R P0 hP0) r p := by
-  let A := N.histories hδ₁ hδ₁R P0 hP0
-  let B := N.histories hδ₂ hδ₂R P0 hP0
-  have h0 : profileInitial A r p.2 = profileInitial B r p.2 :=
-    profileInitial_congr A B (fun _ => rfl) r p.2
-  have hf : ∀ x ∈ Icc (0 : ℝ) p.1, A.f (x, p.2) = B.f (x, p.2) := by
-    intro x hx
-    exact (N.refF_eq_natural hδ₁ hδ₁R (p := (x, p.2)) hη (hx.2.trans hp₁)).trans
-      (N.refF_eq_natural hδ₂ hδ₂R (p := (x, p.2)) hη (hx.2.trans hp₂)).symm
-  have hu : ∀ x ∈ Icc (0 : ℝ) p.1, A.U (x, p.2) = B.U (x, p.2) := by
-    intro x hx
-    exact (N.refU_eq_natural hδ₁ hδ₁R (p := (x, p.2)) hη (hx.2.trans hp₁)).trans
-      (N.refU_eq_natural hδ₂ hδ₂R (p := (x, p.2)) hη (hx.2.trans hp₂)).symm
-  exact profileHistory_congr_up_to A B r hX h0 hf hu
 
-theorem radius_mono {s t : ℝ} (hst : s ≤ t) : radius N.endpoint s ≤ radius N.endpoint t :=
-  mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hst) N.endpoint_pos.le
 
-theorem fixed_history_scaled_factor {T δ : ℝ} (hT : 0 < T)
-    (hδ : 0 < δ) (hδR : 2 * δ < rampLimit) (κ : ℝ)
-    (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0) (r : HistoryRow)
-    (u : ℝ) {η : ℝ} (hη : η ∈ parameterInterval) :
-    profileHistory (FromReference.histories N hT hδ hδR κ P0 hP0) r
-        (radius N.endpoint (T * u), η) -
-      profileHistory (N.histories hδ hδR P0 hP0) r (radius N.endpoint (T * u), η) =
-        scaledDistance ((κ, T), (u, η)) *
-          historyErrorFactor N.endpoint (FromReference.refLog N δ) (FromReference.refAxial N δ) r
-            ((κ, T), (u, η)) := by
-  rw [FromReference.histories_log_formula N hT hδ hδR κ P0 hP0 r (T * u) hη,
-    FromReference.reference_histories_log_formula N hδ hδR P0 hP0 r (T * u) hη]
-  exact history_scaled_factor hT.ne' κ N.endpoint _ parameterInterval_open
-    (FromReference.refLog_smooth N hδ hδR) (FromReference.refAxial_smooth N hδ hδR) r u hη
 
 
 

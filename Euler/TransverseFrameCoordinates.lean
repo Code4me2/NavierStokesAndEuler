@@ -54,13 +54,6 @@ def frameCoordinates (F : E ≃L[ℝ] E) (m₀ : E)
     (R : U ≃ₗᵢ[ℝ] referencePlane m₀) : E →L[ℝ] U :=
   R.symm.toContinuousLinearEquiv.toContinuousLinearMap.comp (coordinates F m₀)
 
-/-- The full source reconstruction `η = F R⊥ ξ` follows from moving tangency. -/
-theorem frame_reconstruct (F : E ≃L[ℝ] E) (m₀ η : E)
-    (R : U ≃ₗᵢ[ℝ] referencePlane m₀) (hη : ⟪movingNormal F m₀, η⟫_ℝ = 0) :
-    F (R (frameCoordinates F m₀ R η) : E) = η := by
-  change F (R (R.symm (coordinates F m₀ η)) : E) = η
-  rw [R.apply_symm_apply]
-  exact reconstruct F m₀ η hη
 
 
 section Paths

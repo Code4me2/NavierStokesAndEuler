@@ -214,29 +214,7 @@ theorem norm_sourceLinear_le (g : CCS) : ‖sourceLinear P g‖ ≤ argumentCost
       unfold argumentCost
       linarith [norm_nonneg g.coordinateLinear]
 
-theorem nativeArgument_jet_bound (g : CCS) (k : Frequency) {f : P × Plane → V}
-    (hf : ContDiff ℝ ∞ f) (m : ℕ) (w : Joint P) {A : ℝ}
-    (hb : ∀ j ≤ m, ‖iteratedFDeriv ℝ j f (nativeArgument g k w)‖ ≤ A) :
-    ∀ j ≤ m, ‖iteratedFDeriv ℝ j (fun z => f (nativeArgument g k z)) w‖ ≤
-      A * argumentCost g ^ m := by
-  have he : (fun z => f (nativeArgument g k z)) =
-      fun z => f (nativeArgument g k 0 + nativeLinear P g z) := by
-    funext z; rw [nativeArgument_affine]
-  rw [he]
-  apply affine_jet_bound hf _ _ (one_le_argumentCost g) (norm_nativeLinear_le g) m w
-  simpa only [← nativeArgument_affine] using hb
 
-theorem sourceArgument_jet_bound (g : CCS) (k : Frequency) {f : P × Plane → V}
-    (hf : ContDiff ℝ ∞ f) (m : ℕ) (w : Joint P) {A : ℝ}
-    (hb : ∀ j ≤ m, ‖iteratedFDeriv ℝ j f (sourceArgument g k w)‖ ≤ A) :
-    ∀ j ≤ m, ‖iteratedFDeriv ℝ j (fun z => f (sourceArgument g k z)) w‖ ≤
-      A * argumentCost g ^ m := by
-  have he : (fun z => f (sourceArgument g k z)) =
-      fun z => f (sourceArgument g k 0 + sourceLinear P g z) := by
-    funext z; rw [sourceArgument_affine]
-  rw [he]
-  apply affine_jet_bound hf _ _ (one_le_argumentCost g) (norm_sourceLinear_le g) m w
-  simpa only [← sourceArgument_affine] using hb
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
 @[simp] theorem sourceArgument_slow (g : CCS) (k : Frequency) (w : Joint P) :
@@ -309,16 +287,6 @@ noncomputable def bandGeometry (B : Plane ≃L[ℝ] Plane) (h : ℝ) (n gap : �
   basis := scaledBasis B (ChartScales.timeCoefficient h n) (ChartScales.timeCoefficient_pos h n).ne'
   center := center
 
-theorem bandGeometry_path (B : Plane ≃L[ℝ] Plane) (h : ℝ) (n gap : ℕ)
-    (center : Plane) (k : Frequency) (Y : Plane) (s : ℝ) :
-    (bandGeometry B h n gap center).path k Y s =
-      Y + (CommonCoverSolve.coverPower gap).symm
-        ((ChartScales.timeCoefficient h n *
-          (s - ((bandGeometry B h n gap center).coordinates k Y).2)) • B (0, 1)) := by
-  rw [CommonCoverSolve.Geometry.path_eq_shift]
-  change Y + (CommonCoverSolve.coverPower gap).symm
-    ((s - _) • scaledBasis B _ _ (0, 1)) = _
-  rw [scaledBasis_transverse, smul_smul, mul_comm]
 
 noncomputable def geometryCost (B : Plane ≃L[ℝ] Plane) (D : ℕ) : ℝ :=
   1 + CommonCoverSolve.coveringBound D * ‖(B : Plane →L[ℝ] Plane)‖ +
@@ -577,13 +545,6 @@ theorem norm_bandChart_le (D : ℝ) {n m : ℕ} (hnm : n ≤ m + 4) (hmn : m ≤
 /-- Coarsest of a pair of simultaneously active levels. -/
 noncomputable def commonIndex (h : ℝ) (n m : ℕ) : ℕ := min (ChartScales.nativeIndex h n) (ChartScales.nativeIndex h m)
 
-theorem commonIndex_gap_le (h : ℝ) (hh : 0 ≤ h) {n m : ℕ}
-    (hn : 1 ≤ n) (hm : 1 ≤ m) (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    ChartScales.nativeIndex h n - commonIndex h n m ≤ SlotColoring.nativeGap h ∧
-      ChartScales.nativeIndex h m - commonIndex h n m ≤ SlotColoring.nativeGap h := by
-  have hg := SlotColoring.nativeIndex_gap h hh hn hm hnm hmn
-  simp only [commonIndex, ChartScales.nativeIndex]
-  omega
 
 
 end DyadicChanges
@@ -760,49 +721,6 @@ theorem norm_bandCommonChart_le (D : ℝ) {n m gap gapBound : ℕ}
         linarith
 
 
-/-- Class transport under the actual simultaneous slow-chart and bounded
-covering change. The weight/edge identities express the same physical
-profile in the two charts; they are geometric identities, not jet bounds. -/
-theorem memClass_bandCommonChart {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (s : WeightedClasses.StripData (SlowPoint × Plane))
-    {w v : ℕ → SlowPoint × Plane → ℝ} {α h : ℝ} {f : ℕ → SlowPoint × Plane → V}
-    (hf : WeightedClasses.MemClass s w α f) (D : ℝ) (gapBound : ℕ)
-    (band index gap : ℕ → ℕ) (forward : ℕ → Bool)
-    (hband : ∀ n, 1 ≤ band n)
-    (hoverlap : ∀ n, band n ≤ band (index n) + 4 ∧ band (index n) ≤ band n + 4)
-    (hgap : ∀ n, gap n ≤ gapBound)
-    (hepsilon : ∀ n, s.epsilon n = ChartScales.epsilon h (band n))
-    (hslow : ∀ n, s.slow n = ChartScales.S (band n))
-    (hmap : ∀ n x, x ∈ s.domain →
-      bandCommonChart D (band n) (band (index n)) (forward n) (gap n) x ∈ s.domain)
-    (hdelta : ∀ n x, x ∈ s.domain →
-      s.delta (bandCommonChart D (band n) (band (index n)) (forward n) (gap n) x) = s.delta x)
-    (hweight : ∀ n x, x ∈ s.domain →
-      w (index n) (bandCommonChart D (band n) (band (index n)) (forward n) (gap n) x) = v n x) :
-    WeightedClasses.MemClass s v α
-      (fun n x => f (index n) (bandCommonChart D (band n) (band (index n)) (forward n) (gap n) x)) := by
-  let L n := bandCommonChart D (band n) (band (index n)) (forward n) (gap n)
-  have heps (n : ℕ) : s.epsilon (index n) ^ α ≤
-      (2 : ℝ) ^ (4 * |h * α|) * s.epsilon n ^ α := by
-    rw [hepsilon, hepsilon]
-    exact epsilon_power_transfer h α (hoverlap n).2 (hoverlap n).1
-  have hgrowth (n : ℕ) (x : SlowPoint × Plane) (hx : x ∈ s.domain) :
-      s.growth (index n) (0 + L n x) ≤ 25 * s.growth n x ^ 1 := by
-    simp only [zero_add, pow_one, WeightedClasses.StripData.growth]
-    rw [hdelta n x hx, hslow, hslow]
-    simpa only [mul_assoc] using mul_le_mul_of_nonneg_right
-      (slow_scale_transfer (hband n) (hoverlap n).2)
-      (show 0 ≤ max 1 (s.delta x)⁻¹ from zero_le_one.trans (le_max_left _ _))
-  have hlin (n : ℕ) (x : SlowPoint × Plane) (_hx : x ∈ s.domain) :
-      ‖L n‖ ≤ commonChartCost D gapBound * s.growth n x ^ 0 := by
-    simpa only [pow_zero, mul_one] using norm_bandCommonChart_le D
-      (hoverlap n).1 (hoverlap n).2 (forward n) (hgap n)
-  have ht := memClass_affine_transport s s hf index L (fun _ => 0)
-    (by simpa only [zero_add] using hmap)
-    (by simpa only [zero_add] using hweight)
-    (Real.rpow_pos_of_pos (by norm_num : (0 : ℝ) < 2) _).le
-    (by norm_num : (1 : ℝ) ≤ 25) (commonChartCost_one_le D gapBound) 1 0 heps hgrowth hlin
-  simpa only [zero_add] using ht
 
 end CommonBandChanges
 
@@ -835,33 +753,7 @@ theorem isOpen_profileDomain {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (a b : ℝ
   exact Filter.inter_mem (SimilarityHomogeneity.isOpen_chartDomain.mem_nhds hx.1)
     ((profileX_smoothAt hh hh1 hx.1.2).continuousAt (isOpen_Ioo.mem_nhds hx.2))
 
-theorem profileDomain_bandChart {h a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (n m : ℕ) {x : SlowPoint} (hx : x ∈ profileDomain h a b) :
-    bandChart (CoordinateAlgebra.D h) n m x ∈ profileDomain h a b := by
-  constructor
-  · rw [bandChart_eq_transition]
-    exact (SimilarityHomogeneity.chartTransition_mem_iff (ChartScales.Q_pos n) (ChartScales.Q_pos m) x).mpr hx.1
-  · rw [profileX_bandChart hh hh1 n m hx.1.2]
-    exact hx.2
 
-/-- A concrete strip with the physical profile weight and logarithmic
-distance. The independent index chooses the actual dyadic band. -/
-noncomputable def profileSlowStrip {h a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (band : ℕ → ℕ) (hband : ∀ n, 1 ≤ band n)
-    (ζ : ℝ → ℝ) (hζ : ContDiff ℝ ∞ ζ) (hζ0 : ∀ X ∈ Ioo a b, 0 ≤ ζ X) :
-    WeightedClasses.StripData SlowPoint where
-  domain := profileDomain h a b
-  isOpen_domain := isOpen_profileDomain hh hh1 a b
-  epsilon n := ChartScales.epsilon h (band n)
-  epsilon_pos n := ChartScales.epsilon_pos h (band n)
-  epsilon_le_one n := ChartScales.epsilon_le_one h hh.le (band n)
-  slow n := ChartScales.S (band n)
-  one_le_slow n := PhysicalGraphBounds.S_ge_one (hband n)
-  delta := SimilarityHomogeneity.chartLogDistance h a b
-  delta_pos _ hx := SimilarityHomogeneity.profileLogDistance_pos ha hx.2.1 hx.2.2
-  zeta x := ζ (SimilarityHomogeneity.chartX h x)
-  zeta_smooth x hx := (hζ.contDiffAt.comp x (profileX_smoothAt hh hh1 hx.1.2)).contDiffWithinAt
-  zeta_nonneg _ hx := hζ0 _ hx.2
 
 
 
@@ -878,9 +770,6 @@ noncomputable def meshLinear (D : ℝ) (L M : SlotColoring.Label) :
     (SlotColoring.width D j L.1 / SlotColoring.width D j M.1) •
       (ContinuousLinearMap.proj j : SlotColoring.Position →L[ℝ] ℝ))
 
-noncomputable def meshOffset (D : ℝ) (L M : SlotColoring.Label) : SlotColoring.Position :=
-  fun j => (SlotColoring.width D j L.1 * (L.2.1 j : ℝ) -
-    SlotColoring.width D j M.1 * (M.2.1 j : ℝ)) / SlotColoring.width D j M.1
 
 
 @[simp] theorem meshLinear_apply (D : ℝ) (L M : SlotColoring.Label)
@@ -912,9 +801,6 @@ noncomputable def nativeBasis : Plane ≃L[ℝ] Plane :=
       nlinarith [sq_nonneg (Real.sqrt 2 - 1)])
 
 
-theorem nativeBasis_temporal : nativeBasis (0, 1) = PhysicalGraphBounds.timeDirection := by
-  rw [nativeBasis, TorusAverages.slotChart_apply]
-  simp
 
 
 

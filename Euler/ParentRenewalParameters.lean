@@ -23,9 +23,6 @@ def tiltError : ℝ := 1500*G.σ+30000000*neighborStabilityConstant*G.error*G.Θ
 /-- A lower bound for the magnitude of the leading compressive term. -/
 def compressionScale : ℝ := G.a/(20*G.ε*G.target)
 
-theorem start_lt_targetTime : G.t₀ < G.targetTime := by
-  change G.t₀ < G.t₀+(G.ε/G.a)*G.target
-  exact lt_add_of_pos_right _ (mul_pos (div_pos G.epsilon_pos G.a_pos) G.target_pos)
 
 
 theorem nextCoupling_pos : 0 < G.nextCoupling := by

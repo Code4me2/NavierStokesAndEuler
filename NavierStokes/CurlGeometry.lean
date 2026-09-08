@@ -40,23 +40,9 @@ theorem tangent_double_cross {R : Type*} [CommRing R] (n a : Vec3 R)
     cross n (cross n a) = -(dot n n • a) := by
   rw [triple_product, ha, zero_smul, zero_sub]
 
-theorem cross_smul {R : Type*} [CommRing R] (s t : R) (u v : Vec3 R) :
-    cross (s • u) (t • v) = (s * t) • cross u v := by
-  funext j
-  fin_cases j <;> simp [cross] <;> ring
 
 
-/-- The normalized double cross product displayed in Lemma 8.8. -/
-theorem normalized_double_cross {R : Type*} [Field R] (n a : Vec3 R)
-    (hn : dot n n ≠ 0) (ha : dot n a = 0) :
-    (-1 / dot n n) • cross n (cross n a) = a := by
-  rw [tangent_double_cross n a ha]
-  funext j
-  simp only [Pi.smul_apply, Pi.neg_apply, smul_eq_mul]
-  field_simp
 
-noncomputable def curlSymbol (ξ A : Vec3 ℂ) : Vec3 ℂ :=
-  cross (Complex.I • ξ) A
 
 /-- The coefficient of the potential (30), with the oscillatory exponential
 factored out. `k` is its nonzero frequency and `n` its phase normal. -/

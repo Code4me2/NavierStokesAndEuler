@@ -361,12 +361,6 @@ theorem weightedJet_integrable (square : Bool) (n : ℕ) (ν : ℝ) :
   chain_integrable (weightedJet_measurable hh hK hW square)
     (weightedJet_dominated hh hK hB hweight hpq square) n ν
 
-theorem weightedDebtJet_hasDerivAt (square : Bool) (n : ℕ) (ν : ℝ) :
-    HasDerivAt (weightedDebtJet W square h K q n)
-      (weightedDebtJet W square h K q (n + 1) ν) ν :=
-  integral_chain_hasDerivAt (weightedJet_derivative hh square)
-    (weightedJet_measurable hh hK hW square)
-    (weightedJet_dominated hh hK hB hweight hpq square) n ν
 
 theorem weightedDebtJet_eq_iteratedDeriv (square : Bool) (n : ℕ) (ν : ℝ) :
     iteratedDeriv n (weightedDebtJet W square h K q 0) ν =
@@ -582,13 +576,6 @@ theorem etaDebt_contDiff (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
   (nuDebt_contDiff d hK square hq).comp diffusion_contDiff
 
 
-theorem etaDebt_joint_contDiffOn (d : TailData) (square : Bool) {q : ℝ}
-    (hq : tailDecay d square + q < 0) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => etaDebt d p.1 square q p.2)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) := by
-  exact (nuDebt_joint_contDiffOn d square hq).comp
-    (contDiffOn_fst.prodMk (diffusion_contDiff.comp_contDiffOn contDiffOn_snd))
-    (fun p hp => ⟨hp.1, mem_univ _⟩)
 
 
 
@@ -968,17 +955,6 @@ theorem etaIntegrandJet_dominated (d : TailData) {K : ℝ} (hK : 1 ≤ K)
   · intro i hi _
     exact diffusion_iterated_bound hL.le hη i hi
 
-theorem etaIntegrandJet_derivative (d : TailData) (K : ℝ) (square : Bool) (q : ℝ) :
-    ∀ᵐ X ∂volume.restrict (Ioi K), ∀ n η,
-      HasDerivAt (fun θ => etaIntegrandJet d K square q n θ X)
-        (etaIntegrandJet d K square q (n + 1) η X) η := by
-  apply Eventually.of_forall
-  intro X n η
-  have hc := (weightedJet_zero_contDiff d.h_pos (tailWeight d K square) K q X square).comp
-    diffusion_contDiff
-  have hd := hc.differentiable_iteratedDeriv n
-    (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n) η
-  simpa only [etaIntegrandJet, iteratedDeriv_succ, Function.comp_def] using hd.hasDerivAt
 
 theorem etaIntegrandJet_integrable (d : TailData) {K : ℝ} (hK : 1 ≤ K)
     (square : Bool) {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) (η : ℝ) :

@@ -604,15 +604,6 @@ theorem nominal_pressure_pure_heat {p : PhysicalPoint}
   exact nominal_angular_pure_heat W hpt
 
 
-/-- Exact zero residual in the actual summed exterior. No exterior
-solution property is supplied as a premise. -/
-theorem nominal_base_residual_zero {a : ℕ → ℕ} (ha : StrictMono a)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) :
-    navierStokesResidual (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-      (basePressure a F.data.h W.axis.normalization (nominalCoefficients W)) z.1 z.2 = 0 :=
-  exterior_base_residual_zero ha F.data.h_pos F.data.h_lt_half (nominalExteriorRadius_pos W).le
-    (nominalCoefficients_smooth W) (nominal_exterior_coefficients W)
-    (fun _ hp => nominal_angular_pure_heat W hp) (fun _ hp => nominal_pressure_pure_heat W hp) hz
 
 
 

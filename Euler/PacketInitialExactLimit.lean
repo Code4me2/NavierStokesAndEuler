@@ -39,8 +39,6 @@ variable {U : ℕ → Type} [∀ n, NormedAddCommGroup (U n)] [∀ n, InnerProdu
   (hk : ∀ n, 4 ≤ frequency J X n) (hn : ∀ n, 1 ≤ truncation (frequency J X n))
   (Q : ∀ n, (A n).correctionBudget (frequency J X n) (hk n) (hn n))
 
-def exactPartial (N : ℕ) : Space → Space :=
-  fun x => ∑ n ∈ range N, (A n).exactInitial (frequency J X n) (hk n) (hn n) (Q n) x
 
 
 variable (hJ : 2 ≤ J) (C c : ℝ) (hC : 0 < C) (hc : 0 ≤ c)

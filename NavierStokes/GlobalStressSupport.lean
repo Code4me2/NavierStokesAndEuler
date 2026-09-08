@@ -400,14 +400,6 @@ order zero, so the generic extra input is discharged definitionally. -/
 theorem nominal_base_beta : (nominalScheme W).base.beta =
     betaFromU (nominalScheme W).domain 0 (nominalScheme W).base.axial := rfl
 
-theorem nominal_stresses_exterior {n : ℕ} (hn : 2 ≤ n) :
-    Exterior (nominalOuterRadius W) (nominalParameters W)
-      (SlowStressSupport.stress 2 (SlowResidualMatching.thetaDensity F.data.h W.axis.normalization
-        (asSlowProfiles (nominalScheme W)) n)) ∧
-    Exterior (nominalOuterRadius W) (nominalParameters W)
-      (SlowStressSupport.stress 1 (SlowResidualMatching.zDensity F.data.h
-        (asSlowProfiles (nominalScheme W)) n)) :=
-  raw_stresses_exterior (nominalScheme W) (nominal_base_beta W) hn
 
 
 

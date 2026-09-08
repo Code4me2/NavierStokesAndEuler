@@ -31,19 +31,8 @@ abbrev Frequency := TorusInverse.Frequency
 
 /-! ## The legacy normalized-tail input cannot describe this chart -/
 
-theorem Q_le_half {n : ℕ} (hn : 1 ≤ n) : ChartScales.Q n ≤ 1 / 2 := by
-  calc
-    ChartScales.Q n ≤ (2 : ℝ) ^ (-1 : ℝ) :=
-      Real.rpow_le_rpow_of_exponent_le (by norm_num)
-        (neg_le_neg (by exact_mod_cast hn : (1 : ℝ) ≤ n))
-    _ = 1 / 2 := by norm_num
 
 
-theorem normalized_axis_scale : SimilarityCoordinates.coordinateQ (2 * h) (1, 0) = 1 := by
-  symm
-  exact SimilarityCoordinates.eq_coordinateQ (by linarith [outgoing.data.h_pos])
-    (by linarith [outgoing.data.h_lt_half]) (by norm_num) (by norm_num)
-    (by simp [SimilarityCoordinates.forwardScalar])
 
 
 
@@ -462,17 +451,6 @@ noncomputable def cycleParameters
 `SignedFamily` proof object.  Its coefficient projections are all that the
 covariance uses. -/
 
-theorem cycle_cross_eq
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (hlabels : v.labels = activeLabels standardRegion B N0) :
-    LabelSumBounds.symmetricCovariance
-      (LabelSumBounds.fieldSum v.labels (fun l => (ActualInitialization.tangentBlock l).oscillation))
-      (LabelSumBounds.fieldSum v.labels
-        (fun l => ((cycleParameters particular).signedTangent v c u l).oscillation)) =
-      actualCross B N0 c ((cycleParameters particular).afterParticular v c u) := by
-  rw [hlabels]
-  rfl
 
 
 

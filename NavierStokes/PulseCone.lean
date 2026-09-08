@@ -485,9 +485,6 @@ theorem Qs_endpoint_lower_of_nonnegative_entry (w : ResetWitness d K)
       ((ha.differentiable (by simp) eta).hasDerivAt) heta hamp hamp' ht.1)
   exact h
 
-/-- A positive threshold selected from the two fixed prefix parameters. -/
-noncomputable def sourceThreshold (P m : ℝ) : ℝ :=
-  min (1 / 120) (1 / (8 * sourceConstant P m))
 
 
 

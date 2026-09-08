@@ -59,15 +59,6 @@ variable {Time : Type*} (H : ℕ → Time → Prop)
   (hstep : ∀ n t, H (n + 1) t → ∀ x, X (n + 1) t x = X n t (Y n t x))
   (hsmall : ∀ n t, H (n + 1) t → ∀ x, ‖Y n t x - x‖ ≤ δ n)
 
-include hbase hnest hstep hsmall in
-theorem stage_displacement_le_partial_sum (n : ℕ) (t : Time) (ht : H n t) (x : E) :
-    ‖X n t x - x‖ ≤ M + ∑ i ∈ range n, δ i := by
-  induction n generalizing x with
-  | zero => simpa using hbase t ht x
-  | succ n ih =>
-    rw [hstep n t ht, sum_range_succ, ← add_assoc]
-    exact displacement_comp_le (X n t) (Y n t)
-      (fun y => ih (hnest n t ht) y) (hsmall n t ht) x
 
 
 

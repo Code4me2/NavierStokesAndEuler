@@ -538,12 +538,6 @@ section PeriodicTranslation
 
 open HarmonicCalculus
 
-theorem jets_of_translate {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup V] [NormedSpace ℝ V] {f g : E → V} (a : E)
-    (he : ∀ y, f (y+a) = g y) (m : ℕ) (x : E) :
-    iteratedFDeriv ℝ m f (x+a) = iteratedFDeriv ℝ m g x := by
-  rw [← iteratedFDeriv_comp_add_right]
-  exact congrArg (fun f => iteratedFDeriv ℝ m f x) (funext he)
 
 
 

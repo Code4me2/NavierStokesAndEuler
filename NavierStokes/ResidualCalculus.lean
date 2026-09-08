@@ -72,25 +72,6 @@ theorem differentiable_spatial_direction
     hu.fderiv_right (by norm_num)
   exact (hfirst.clm_apply contDiff_const).differentiable (by norm_num)
 
-/-- Additivity of the concrete iterated-derivative Laplacian on C² slices. -/
-theorem spatialLaplacian_add
-    (u e : VelocityField) (t : ℝ) (x : Space)
-    (hu : ContDiff ℝ 2 (fun y : Space => u (t, y)))
-    (he : ContDiff ℝ 2 (fun y : Space => e (t, y))) :
-    spatialLaplacian (fun z => u z + e z) t x =
-      spatialLaplacian u t x + spatialLaplacian e t x := by
-  have hdu := hu.differentiable (by norm_num)
-  have hde := he.differentiable (by norm_num)
-  have hsum : ∀ y : Space,
-      spatialDerivative (fun z => u z + e z) t y =
-        spatialDerivative u t y + spatialDerivative e t y :=
-    fun y => spatialDerivative_add u e t y (hdu y) (hde y)
-  unfold spatialLaplacian
-  simp_rw [hsum, add_apply]
-  simp_rw [fderiv_fun_add
-    (differentiable_spatial_direction u t hu _ x)
-    (differentiable_spatial_direction e t he _ x), add_apply]
-  exact Finset.sum_add_distrib
 
 /-- The quadratic advection term produces exactly its two cross terms and the
 self-advection of the perturbation. -/
@@ -117,14 +98,6 @@ theorem spatialDerivative_const_smul
     spatialDerivative (fun z => c • u z) t x = c • spatialDerivative u t x := by
   exact fderiv_fun_const_smul hu c
 
-/-- Constant-scalar linearity of the actual pressure gradient. -/
-theorem pressureGradient_const_smul
-    (p : PressureField) (t : ℝ) (x : Space) (c : ℝ)
-    (hp : DifferentiableAt ℝ (fun y : Space => p (t, y)) x) :
-    pressureGradient (fun z => c • p z) t x = c • pressureGradient p t x := by
-  unfold pressureGradient
-  rw [fderiv_fun_const_smul hp c]
-  simp only [smul_apply, smul_eq_mul, mul_smul, Finset.smul_sum]
 
 /-- Constant-scalar linearity of divergence, using coordinate evaluation. -/
 theorem spatialDivergence_const_smul
@@ -135,42 +108,8 @@ theorem spatialDivergence_const_smul
   rw [spatialDerivative_const_smul u t x c hu]
   simp only [smul_apply, PiLp.smul_apply, smul_eq_mul, Finset.mul_sum]
 
-/-- Constant-scalar linearity of the concrete second spatial derivative. -/
-theorem spatialLaplacian_const_smul
-    (u : VelocityField) (t : ℝ) (x : Space) (c : ℝ)
-    (hu : ContDiff ℝ 2 (fun y : Space => u (t, y))) :
-    spatialLaplacian (fun z => c • u z) t x = c • spatialLaplacian u t x := by
-  have hdu := hu.differentiable (by norm_num)
-  have hscale : ∀ y : Space,
-      spatialDerivative (fun z => c • u z) t y = c • spatialDerivative u t y :=
-    fun y => spatialDerivative_const_smul u t y c (hdu y)
-  unfold spatialLaplacian
-  simp_rw [hscale, smul_apply]
-  simp_rw [fderiv_fun_const_smul (differentiable_spatial_direction u t hu _ x) c,
-    smul_apply]
-  exact (Finset.smul_sum).symm
 
-/-- Velocity scaling squares in advection, because both the direction and the
-spatial derivative scale. -/
-theorem advection_const_smul
-    (u : VelocityField) (t : ℝ) (x : Space) (c : ℝ)
-    (hu : DifferentiableAt ℝ (fun y : Space => u (t, y)) x) :
-    advection (fun z => c • u z) t x = (c * c) • advection u t x := by
-  unfold advection
-  rw [spatialDerivative_const_smul u t x c hu]
-  simp only [smul_apply, map_smul, smul_smul]
 
-/-- The time derivative of a switched velocity includes the derivative of the
-switch; it is proved using the Frechet derivative product rule. -/
-theorem temporalDerivative_time_smul
-    (u : VelocityField) (a : ℝ → ℝ) (t : ℝ) (x : Space)
-    (ha : DifferentiableAt ℝ a t)
-    (hu : DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t) :
-    temporalDerivative (fun z => a z.1 • u z) t x =
-      a t • temporalDerivative u t x + (fderiv ℝ a t 1) • u (t, x) := by
-  unfold temporalDerivative
-  rw [fderiv_fun_smul ha hu]
-  rfl
 
 
 

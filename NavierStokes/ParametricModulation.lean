@@ -84,11 +84,6 @@ theorem normalizedPrimitiveFamily_periodic
   dsimp only
   rw [RadialModulation.periodicPrimitive_periodic _ hq hper hmean θ]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P] in
-theorem normalizedPrimitiveFamily_mean_zero
-    (q : P × ℝ → ℝ) (p : P) (hq : Continuous (fun θ => q (p, θ))) :
-    intervalIntegral (fun θ => normalizedPrimitiveFamily q (p, θ)) 0 1 volume = 0 :=
-  RadialModulation.zeroMeanPrimitive_integral _ hq
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P] in
 /-- Exact vanishing, including the mean normalization, when the loop is nominal. -/

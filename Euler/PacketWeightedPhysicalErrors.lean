@@ -1,4 +1,7 @@
-import Euler.PacketInitializedPhysicalFieldsChoice
+import Euler.PacketInitializedPointwiseChoice
+import Euler.PacketPhysicalFrequencyBounds
+import Euler.PacketContinuousInverse
+import Euler.PacketPhysicalPressureGevrey
 import Euler.PacketPhysicalCorrectionPotential
 
 /-! Actual weighted correction and pressure norms bound the physical

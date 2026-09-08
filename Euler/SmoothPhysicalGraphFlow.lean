@@ -45,16 +45,6 @@ theorem graph_accelerationField_eq (t : Icc (0 : ℝ) T) (x : Vector3) :
   rw [hd,comp_apply,comp_apply,hval]
   rfl
 
-include hgraph in
-theorem graph_materialAcceleration_eq (t : Icc (0 : ℝ) T) (x : Vector3) :
-    materialAcceleration T hT (graphCoefficient k m T A) (graphCoefficient k m T A₁) t x =
-      (materialAcceleration T hT A A₁ t (graphLinear k m x)).1 := by
-  unfold materialAcceleration
-  rw [graph_accelerationField_eq k m T A A₁ hgraph]
-  change (accelerationField T A A₁ t (graphLinear k m
-    ((flowData T hT (graphCoefficient k m T A)).flow 0 t x))).1 = _
-  rw [← graph_flow_cover k m T hT A hgraph]
-  rfl
 
 def physicalCoefficient (ell : ℝ) : SmoothTimeField (Icc (0 : ℝ) T) Vector3 Vector3 :=
   scaledCoefficient T (graphCoefficient k m T A) ell

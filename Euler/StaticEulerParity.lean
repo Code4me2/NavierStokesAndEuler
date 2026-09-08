@@ -56,16 +56,6 @@ theorem unit_pressure_point (t : Icc (0 : ℝ) 1) (x : LiftDomain P) :
   change (Field.zero P 1).toFieldTower.pointField t x+_=_
   rw [hz,zero_add]
 
-theorem unit_force_odd (t : ℝ) (x : Space) :
-    EulerConstantEuler.force (exactPacket P u C R hC hR hu hdiv) (t,-x) =
-      -EulerConstantEuler.force (exactPacket P u C R hC hR hu hdiv) (t,x) := by
-  change (exactPacket P u C R hC hR hu hdiv).pressure.pointField
-      (projIcc 0 1 zero_le_one t) (-x,0) =
-    -(exactPacket P u C R hC hR hu hdiv).pressure.pointField (projIcc 0 1 zero_le_one t) (x,0)
-  rw [unit_pressure_point,unit_pressure_point]
-  have h := (correctionBudget P u C R hC hR hu hdiv).pointPressure_odd P
-    (symmetry P u C R hC hR hodd) (projIcc 0 1 zero_le_one t) (x,0)
-  simpa only [Prod.neg_mk,neg_zero] using h
 
 
 theorem localVelocity_odd (t : ℝ) (x : Space) :

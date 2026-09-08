@@ -104,18 +104,6 @@ theorem cosineTilt_variance (m amplitude : ℝ) :
   ring
 
 
-/-- The full range is controlled by the amplitude, uniformly in the angle. -/
-theorem cosineTilt_projection_bound (p₁ p₂ m amplitude θ : ℝ) :
-    p₁ + p₂ * m - |p₂ * amplitude| ≤ p₁ + p₂ * cosineTilt m amplitude θ := by
-  have habs : |(p₂ * amplitude) * Real.cos θ| ≤ |p₂ * amplitude| := by
-    calc
-      |(p₂ * amplitude) * Real.cos θ| = |p₂ * amplitude| * |Real.cos θ| := abs_mul _ _
-      _ ≤ |p₂ * amplitude| * 1 :=
-        mul_le_mul_of_nonneg_left (Real.abs_cos_le_one θ) (abs_nonneg _)
-      _ = |p₂ * amplitude| := mul_one _
-  have hlow := (abs_le.mp habs).1
-  dsimp [cosineTilt]
-  nlinarith
 
 
 
@@ -400,9 +388,6 @@ theorem phaseInverse_add_one (d : CircleDensity) (φ : ℝ) :
 def rephase (d : CircleDensity) (f : ℝ → ℝ) (φ : ℝ) : ℝ :=
   f ((phaseHomeomorph d).symm φ)
 
-theorem rephase_contDiff (d : CircleDensity) (f : ℝ → ℝ)
-    (hf : ContDiff ℝ (∞ : WithTop ℕ∞) f) :
-    ContDiff ℝ (∞ : WithTop ℕ∞) (rephase d f) := hf.comp (phaseInverse_contDiff d)
 
 theorem rephase_periodic (d : CircleDensity) (f : ℝ → ℝ)
     (hf : Function.Periodic f (2 * Real.pi)) : Function.Periodic (rephase d f) 1 := by
@@ -443,11 +428,6 @@ def densityOfTilt (t : ℝ → ℝ) (a m ρ v : ℝ)
       ht.continuous hmean hvar hspeed).1
 
 
-open LoopMoments in
-theorem rephase_slope (d : CircleDensity) (t : ℝ → ℝ) (v φ : ℝ) (hv : v ≠ 0) :
-    rephase d (fun θ => loopC v (t θ)) φ /
-      rephase d (fun θ => loopA v (t θ)) φ = t ((phaseHomeomorph d).symm φ) := by
-  exact loop_slope v (t ((phaseHomeomorph d).symm φ)) hv
 
 
 

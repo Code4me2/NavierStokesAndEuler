@@ -480,26 +480,9 @@ theorem angularDirection_pull (e : D ≃ₗᵢ[ℝ] E) :
   change (e.symm 0, 1) = (0, 1)
   rw [map_zero]
 
-theorem complexBase_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E) (n : ℕ) :
-    LiftedMeanResidual.complexBase (context e c) n =
-      fun x => LiftedMeanResidual.complexBase c n (cylinder e x) := rfl
 
-theorem complexPerturbation_pull (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State E) (n : ℕ) :
-    LiftedMeanResidual.complexPerturbation (state e u) n =
-      fun x => LiftedMeanResidual.complexPerturbation u n (cylinder e x) := rfl
 
-theorem complexPressure_pull (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State E) (n : ℕ) :
-    LiftedMeanResidual.complexPressure (state e u) n =
-      fun x => LiftedMeanResidual.complexPressure u n (cylinder e x) := rfl
 
-theorem virtualDivergence_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (n : ℕ) (x : D × ℝ) :
-    LiftedMeanResidual.virtualDivergence (context e c) n x =
-      LiftedMeanResidual.virtualDivergence c n (cylinder e x) := by
-  change ![0, -((operators e c.operators).radialDiv 2 (field e c.virtualTheta) n x.1),
-    -((operators e c.operators).radialDiv 1 (field e c.virtualAxial) n x.1)] = _
-  rw [radialDiv_pull, radialDiv_pull]
-  rfl
 
 
 
@@ -526,14 +509,6 @@ theorem oscillation_roundtrip (e : D ≃ₗᵢ[ℝ] E) (f : CorrectionState.Osci
   change f n (e.symm (e x.1), x.2) = f n x
   rw [e.symm_apply_apply]
 
-theorem state_roundtrip (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State D) :
-    state e (state e.symm u) = u := by
-  cases u with
-  | mk m p a q r =>
-    cases m
-    cases r
-    simp only [state, triple, errors, cylinder_apply, e.symm_apply_apply,
-      field_roundtrip, oscillation_roundtrip]
 
 theorem context_roundtrip (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context D) :
     context e (context e.symm c) = c := by
@@ -613,12 +588,6 @@ theorem reducedMeanResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.C
   rw [radialResidual_pull, thetaResidual_pull, axialResidual_pull]
   rfl
 
-theorem meanResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) (n : ℕ) (x : D) (i : Fin 3) :
-    (state e u).meanResidual (context e c) n x i = u.meanResidual c n (e x) i := by
-  change (state e u).reducedMeanResidual (context e c) n x i + _ = _
-  rw [reducedMeanResidual_pull]
-  rfl
 
 
 theorem block_bandLimited (e : D ≃ₗᵢ[ℝ] E) {b : CorrectionState.HarmonicBlock E} {N : ℕ}
@@ -633,9 +602,6 @@ variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
 abbrev Associated (S : Type) := (ℝ × S) × TorusInverse.Plane
 
-/-- The actual auxiliary torus integral in the associated layout. -/
-noncomputable def associatedTorusAverage (f : Associated S → ℝ) (p : ℝ × S) : ℝ :=
-  ∫ y in (0 : ℝ)..1, ∫ x in (0 : ℝ)..1, f (p, (x, y))
 
 
 

@@ -60,17 +60,6 @@ theorem forward_jointDerivative_contDiffAt_one
     (E := (ℝ →L[ℝ] E) × (E →L[ℝ] E)) (F := (ℝ × E) →L[ℝ] E) L).contDiffAt.comp
     (t,x) (hs.prodMk hJ)
 
-theorem forward_joint_contDiffAt_two
-    (htime : SmoothTimeField.TimeDerivative T hT A A₁)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
-    ContDiffAt ℝ 2 (Function.uncurry (flowData T hT A).forward) (t,x) := by
-  rw [show (2 : ℕ∞ω) = ((1 : ℕ) + 1) from rfl, contDiffAt_succ_iff_hasFDerivAt]
-  refine ⟨Function.uncurry (jointDerivative T hT (pathFamily T hT A) (velocityFamily T hT A)),
-    ⟨{p : ℝ × E | p.1 ∈ Ioo 0 T}, ?_, ?_⟩,
-    forward_jointDerivative_contDiffAt_one T hT A A₁ htime t ht x⟩
-  · exact (continuous_fst.tendsto (t,x)).eventually (Ioo_mem_nhds ht.1 ht.2)
-  · intro p hp
-    exact forward_joint_hasFDerivAt T hT A p.1 hp p.2
 
 omit [FiniteDimensional ℝ E] in
 def timeLiftEquiv (J : E ≃L[ℝ] E) (v : E) : (ℝ × E) ≃L[ℝ] (ℝ × E) :=
@@ -86,36 +75,7 @@ def timeLiftEquiv (J : E ≃L[ℝ] E) (v : E) : (ℝ × E) ≃L[ℝ] (ℝ × E) 
     (by intro p; ext <;> simp)
 
 def liftForward (p : ℝ × E) : ℝ × E := (p.1, (flowData T hT A).forward p.1 p.2)
-def liftBackward (p : ℝ × E) : ℝ × E := (p.1, (flowData T hT A).backward p.1 p.2)
 
-theorem liftForward_hasFDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
-    HasFDerivAt (liftForward T hT A)
-      (timeLiftEquiv (jacobianEquiv T hT A ⟨t,ht.1.le,ht.2.le⟩ x)
-        (velocityFamily T hT A x ⟨t,ht.1.le,ht.2.le⟩)).toContinuousLinearMap (t,x) := by
-  have h : HasFDerivAt (liftForward T hT A)
-      ((ContinuousLinearMap.fst ℝ ℝ E).prod
-        (jointDerivative T hT (pathFamily T hT A) (velocityFamily T hT A) t x)) (t,x) :=
-    hasFDerivAt_fst.prodMk (forward_joint_hasFDerivAt T hT A t ht x)
-  have he : (timeLiftEquiv (jacobianEquiv T hT A ⟨t,ht.1.le,ht.2.le⟩ x)
-      (velocityFamily T hT A x ⟨t,ht.1.le,ht.2.le⟩)).toContinuousLinearMap =
-      (ContinuousLinearMap.fst ℝ ℝ E).prod
-        (jointDerivative T hT (pathFamily T hT A) (velocityFamily T hT A) t x) := by
-    apply ContinuousLinearMap.ext
-    intro p
-    ext
-    · rfl
-    · change p.1 • velocityFamily T hT A x ⟨t,ht.1.le,ht.2.le⟩ +
-        (jacobianEvolution T hT A x).forward ⟨t,ht.1.le,ht.2.le⟩ p.2 =
-        (jointDerivative T hT (pathFamily T hT A) (velocityFamily T hT A) t x) p
-      simp only [jointDerivative, timeSlice, extendPath,
-        projIcc_of_mem hT ⟨ht.1.le,ht.2.le⟩, ContinuousLinearMap.coprod_apply,
-        ContinuousLinearMap.toSpanSingleton_apply]
-      rw [spatialDerivative_apply T _ (pathFamily_contDiff T hT A)]
-      change _ = p.1 • velocityFamily T hT A x ⟨t,ht.1.le,ht.2.le⟩ +
-        fderiv ℝ (fun y => (flowData T hT A).forward t y) x p.2
-      rw [forward_fderiv T hT A ⟨t,ht.1.le,ht.2.le⟩ x]
-  rw [he]
-  exact h
 
 
 

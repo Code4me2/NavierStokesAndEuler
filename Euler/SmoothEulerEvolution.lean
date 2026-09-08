@@ -56,19 +56,6 @@ variable (T : ℝ) (hT : 0 ≤ T)
   (hU : ∀ n, Continuous (fun t => (U t).jetLp n))
   (hG : ∀ n, Continuous (fun t => (G t).jetLp n))
 
-theorem sobolev_evolution
-    (hd : ∀ t (ht : t ∈ Ioo 0 T) x,
-      HasDerivAt (fun r => (U (projIcc 0 T hT r)).field x)
-        (-fderiv ℝ (U ⟨t,ht.1.le,ht.2.le⟩).field x ((U ⟨t,ht.1.le,ht.2.le⟩).field x)-
-          (G ⟨t,ht.1.le,ht.2.le⟩).field x) t)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (sobolevPath U hU q))
-      (sobolevPath (rhs U hU G) (rhs_jet_continuous U hU G hG) q t)
-      (Icc (0 : ℝ) T) t := by
-  apply sobolevPath_hasDerivWithinAt T hT U (rhs U hU G) hU (rhs_jet_continuous U hU G hG)
-  intro r hr x
-  rw [rhs_field]
-  exact hd r hr x
 
 theorem pointwise_time_derivative_of_classical
     (u : ℝ × Space → Space) (p : ℝ × Space → ℝ)

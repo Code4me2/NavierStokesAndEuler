@@ -311,21 +311,6 @@ theorem terminal_upper_max (P : TerminalCompensation.Patch) (j : Fin 3) :
     TerminalCompensation.upper P j ≤ TerminalCompensation.upper P 2 := by
   fin_cases j <;> norm_num [TerminalCompensation.upper] <;> linarith [P.ordered]
 
-theorem terminal_correction_inner_support (P : TerminalCompensation.Patch)
-    (c : TerminalCompensation.Coeff) :
-    support (TerminalCompensation.correction P c) ⊆
-      Icc (TerminalCompensation.lower P 0) (TerminalCompensation.upper P 2) := by
-  intro x hx
-  by_contra hn
-  apply hx
-  apply Finset.sum_eq_zero
-  intro j _
-  have hb : TerminalCompensation.bump P j x = 0 := by
-    by_contra hne
-    have ht := TerminalCompensation.bump_tsupport P j (subset_tsupport _ hne)
-    exact hn ⟨(terminal_lower_min P j).trans ht.1.le,
-      ht.2.le.trans (terminal_upper_max P j)⟩
-  rw [hb, mul_zero]
 
 
 
@@ -400,12 +385,6 @@ theorem radial_closedPatch_subset (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : S
   obtain ⟨hl, _, hr⟩ := radial_support_margins F XR hXR s
   exact ⟨hl.trans_le hR.1, hR.2.trans_lt hr⟩
 
-theorem radial_windows_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) : Disjoint (radialWindow F XR s) (radialWindow F XR t) := by
-  apply Set.disjoint_left.mpr
-  intro R hRs hRt
-  exact Set.disjoint_left.mp (windows_disjoint F XR hXR hst)
-    (radial_mem_window F XR hXR s hRs) (radial_mem_window F XR hXR t hRt)
 
 
 noncomputable def radialAmplitude (F : Profile) (XR eta : ℝ) : ℝ :=
@@ -452,21 +431,11 @@ theorem supported_vanishes (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   have hs := closedPatch_subset F XR hXR s (hv eta hn)
   exact Set.disjoint_left.mp (windows_disjoint F XR hXR hst) hs hX
 
-theorem supported_update_eqOn (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) {v : ℝ × ℝ → ℝ} (hv : Supported F XR s v)
-    (g : ℝ × ℝ → ℝ) :
-    EqOn (fun p => g p + v p) g (window F XR t ×ˢ (univ : Set ℝ)) := by
-  intro p hp
-  change g p + v p = g p
-  have hz : v p = 0 := supported_vanishes F XR hXR hst hv p.2 hp.1
-  rw [hz, add_zero]
 
 
 
 
 
-def RadialSupported (F : Profile) (XR : ℝ) (s : Slot) (v : ℝ × ℝ → ℝ) : Prop :=
-  ∀ eta, support (fun R => v (R, eta)) ⊆ radialWindow F XR s
 
 
 

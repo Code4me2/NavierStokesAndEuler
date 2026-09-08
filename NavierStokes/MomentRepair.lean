@@ -104,9 +104,6 @@ theorem repair_support_subset (L : ι → (X → ℝ) →ₗ[ℝ] ℝ) (b : ι �
 
 end Support
 
-/-- The two-row weighted evaluation matrix for exponents `0` and `1`. -/
-def twoPointMatrix (x₁ x₂ w₁ w₂ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
-  !![w₁, w₂; x₁ * w₁, x₂ * w₂]
 
 
 

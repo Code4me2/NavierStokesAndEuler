@@ -436,34 +436,6 @@ theorem cutPrefix_eventually_uncut (a : ℕ → ℕ) (h : ℝ)
   filter_upwards [hb y continuous_fst.continuousAt hy] with z hz
   exact congrArg (fun v => f 0 z.2 + v) hz
 
-/-- Every requested finite ordinary jet has a sufficiently late *uncut*
-prefix with any prescribed remainder power. The prefix depends on both
-requests; this does not assert that one fixed tail is flat to all orders. -/
-theorem exists_ordinary_uncut_tail {a : ℕ → ℕ} {h : ℝ} (hh : 0 < h)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j))
-    {K : Set Inner} (ha : AdmissibleScales h f K a) (M Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∃ δ : ℝ, 0 < δ ∧
-      ∀ m ≤ M, ∀ q : ℝ, 0 < q → q < δ → ∀ w ∈ K,
-        ‖iteratedFDeriv ℝ m (fun y => slowSum a h f y - uncutPrefix h f J y) (q, w)‖ ≤
-          (1 / 2 : ℝ) ^ J * q ^ P := by
-  have htop : Tendsto (fun j : ℕ => h * j) atTop atTop :=
-    tendsto_natCast_atTop_atTop.const_mul_atTop hh
-  obtain ⟨J, hJmin, hJM, hgain⟩ :=
-    DiagonalJetBounds.exists_prefix_gain (fun j => h * j) (fun m => (m : ℝ)) htop M Jmin P
-  obtain ⟨δ, hδ, hprefix⟩ := cutPrefix_eventually_uncut a h f J
-  refine ⟨J, hJmin, hJM, min δ 1, lt_min hδ (by norm_num), ?_⟩
-  intro m hm q hq hsmall w hw
-  have hq1 : q ≤ 1 := (hsmall.trans_le (min_le_right _ _)).le
-  have hp := hprefix (q, w) (by simpa only [abs_of_pos hq] using
-    (hsmall.trans_le (min_le_left _ _)))
-  have hdiff : (fun y => slowSum a h f y - cutPrefix a h f J y) =ᶠ[𝓝 (q, w)]
-      (fun y => slowSum a h f y - uncutPrefix h f J y) :=
-    hp.mono (fun y hy => congrArg (fun z => slowSum a h f y - z) hy)
-  have he := (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hdiff m).self_of_nhds
-  rw [← he]
-  exact (ordinary_tail_bound hh hf ha hq hq1 hw J m (by omega)).trans
-    (mul_le_mul_of_nonneg_left
-      (Real.rpow_le_rpow_of_exponent_ge hq hq1 (by simpa using hgain m hm)) (by positivity))
 
 
 /-- A fixed stage keeps its full q^(2hj) order. Only the tail estimates spend

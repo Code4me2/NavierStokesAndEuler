@@ -186,20 +186,6 @@ theorem complexField_analytic {g a : ℝ → ℝ} {cap : ℝ}
       complexZ, complexChi, complexGradient, denominator] <;>
     fun_prop (disch := assumption)
 
-/-- One compact complex neighborhood for the whole finite family. -/
-theorem exists_common_neighborhood {h j σ : ℝ}
-    (hp : NaturalAxisData.SmallParameters h j) (hσ : 0 < σ) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∃ K : Set ℂ, IsCompact K ∧
-      (∀ x ∈ window.interval, closedBall (x : ℂ) ρ ⊆ K) ∧ K ⊆ regularSet h j σ := by
-  let R : Set ℂ := Complex.ofReal '' window.interval
-  have hR : IsCompact R := isCompact_Icc.image Complex.continuous_ofReal
-  have hsub : R ⊆ regularSet h j σ := by
-    rintro z ⟨x, hx, rfl⟩
-    exact real_mem_regularSet hp hσ hx
-  obtain ⟨ρ, hρ, hρU⟩ := hR.exists_cthickening_subset_open (regularSet_open h j σ) hsub
-  refine ⟨ρ, hρ, cthickening ρ R, hR.cthickening, ?_, hρU⟩
-  intro x hx
-  exact closedBall_subset_cthickening (mem_image_of_mem Complex.ofReal hx) ρ
 
 /-- A convex open outer neighborhood and compact inner neighborhood.
 The inner radius can be used for both the fixed fields and an analytic primitive. -/

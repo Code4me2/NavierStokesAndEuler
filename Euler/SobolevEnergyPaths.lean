@@ -16,10 +16,6 @@ open scoped Topology
 
 variable (period : ℝ) [Fact (0 < period)]
 
-/-- Underlying L² values of a finite actual Sobolev family form a bounded linear map. -/
-def familyValueOperator (q : ℕ) {I : Type*} :
-    (I → SobolevSpace period q) →L[ℝ] (I → LiftL2 period) :=
-  ContinuousLinearMap.pi (fun i => (valueOperator period q).comp (ContinuousLinearMap.proj i))
 
 
 

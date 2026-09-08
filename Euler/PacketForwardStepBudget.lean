@@ -2,7 +2,7 @@ import Euler.PacketBudgetTimeChange
 import Euler.PacketForcingBounds
 import Euler.PacketForwardForcedBounds
 import Euler.PacketMeanGradeBounds
-import Euler.TransverseHighSolveFields
+import Euler.TransversePacketCorrectorOperator
 
 /-! One complete quantitative recursion step, using the actual mean and zero-initial direct-forward transverse solvers. -/
 

@@ -56,29 +56,5 @@ theorem continuousAt_of_resolvent {α : Type*} [TopologicalSpace α] (P M : α �
 
 variable [NormedAlgebra ℝ R]
 
-/-- Differentiating the actual resolvent identity gives the inverse derivative, after continuity has been proved from the same identity. -/
-theorem hasDerivAt_of_resolvent (P M : ℝ → R)
-    (hres : ∀ s t, P s - P t = P s * ((M t - M s) * P t))
-    (t : ℝ) (M' : R) (hM : HasDerivAt M M' t) :
-    HasDerivAt P (-(P t * (M' * P t))) t := by
-  have hP := continuousAt_of_resolvent P M hres t hM.continuousAt
-  have hshift : Filter.Tendsto (fun r => P (t + r)) (𝓝[≠] 0) (𝓝 (P t)) := by
-    have h : Filter.Tendsto (fun r => P (t + r)) (𝓝 (0 : ℝ)) (𝓝 (P t)) := by
-      have hadd : Filter.Tendsto (fun r : ℝ => t + r) (𝓝 (0 : ℝ)) (𝓝 t) := by
-        simpa only [add_zero, id_eq] using (tendsto_const_nhds.add (Filter.tendsto_id : Filter.Tendsto id (𝓝 (0 : ℝ)) (𝓝 0)))
-      exact hP.tendsto.comp hadd
-    exact h.mono_left nhdsWithin_le_nhds
-  have hneg : Filter.Tendsto (fun r : ℝ => r⁻¹ • (M t - M (t + r))) (𝓝[≠] 0) (𝓝 (-M')) := by
-    simpa only [← smul_neg, neg_sub] using hM.tendsto_slope_zero.neg
-  have hlim : Filter.Tendsto (fun r : ℝ => P (t + r) * ((r⁻¹ • (M t - M (t + r))) * P t))
-      (𝓝[≠] 0) (𝓝 (P t * ((-M') * P t))) := hshift.mul (hneg.mul tendsto_const_nhds)
-  apply hasDerivAt_iff_tendsto_slope_zero.mpr
-  have he : (fun r : ℝ => r⁻¹ • (P (t + r) - P t)) =
-      fun r : ℝ => P (t + r) * ((r⁻¹ • (M t - M (t + r))) * P t) := by
-    funext r
-    rw [hres]
-    simp only [smul_mul_assoc, mul_smul_comm]
-  rw [he]
-  simpa only [neg_mul, mul_neg] using hlim
 
 end EulerResolventCalculus

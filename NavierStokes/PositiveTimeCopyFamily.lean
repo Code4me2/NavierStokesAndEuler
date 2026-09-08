@@ -116,9 +116,6 @@ theorem periodized_eq (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ preterminal)
   intro k
   exact term_eq f a h r0 I k hw
 
-theorem periodized_zero (I : WaveIndex H) {w : SpaceTime} (hw : w ∉ preterminal) :
-    (gate f).periodized a h r0 I w = 0 := by
-  simp only [CopyFamily.periodized, term_zero f a h r0 I _ hw, tsum_zero]
 
 
 

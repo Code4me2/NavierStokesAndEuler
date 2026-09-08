@@ -600,24 +600,6 @@ theorem backwardStress_scale (b : ℝ) {Q r : ℝ} (hQ : 0 < Q) (hr : 0 < r) (g 
 noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 t z r : ℝ) : ℝ :=
   backwardStress (fun u => physicalSource C d y0 (radiusPoint t u z)) r
 
-theorem physicalStress_scaled_radial (C : ℝ) (d : TailData) (y0 : ℝ)
-    {t r z : ℝ} (ht : t < 1) (hr : 0 < r) :
-    physicalStress C d y0 t z r =
-      physicalScale d t z ^ (-CoordinateAlgebra.A d.h - 1 / 2 + 2 * d.h) *
-        radialStress C d y0 (physicalEta d t z) (r / Real.sqrt (physicalScale d t z)) := by
-  have hi : physicalStress C d y0 t z r =
-      backwardStress (fun u => physicalScale d t z ^ (-CoordinateAlgebra.A d.h - 1 + 2 * d.h) *
-        radialSource C d y0 (physicalEta d t z) (u / Real.sqrt (physicalScale d t z))) r := by
-    unfold physicalStress backwardStress
-    congr 1
-    apply setIntegral_congr_fun measurableSet_Ioi
-    intro u hu
-    dsimp only
-    rw [physicalSource_radial_scaled C d y0 ht (hr.trans hu)]
-  rw [hi, backwardStress_scale _ (physicalScale_pos d ht) hr]
-  rw [show -CoordinateAlgebra.A d.h - 1 + 2 * d.h + 1 / 2 =
-    -CoordinateAlgebra.A d.h - 1 / 2 + 2 * d.h by ring]
-  rfl
 
 
 

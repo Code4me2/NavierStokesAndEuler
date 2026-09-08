@@ -50,21 +50,6 @@ def partialR (u : Plane → ℝ) (q : Plane) : ℝ :=
 def partialT (u : Plane → ℝ) (q : Plane) : ℝ :=
   deriv (fun t => u (q.1, t)) q.2
 
-/-- A general commutator identity when both cross derivatives of the vector
-fields vanish. The regularity assumption is ordinary `C²` regularity. -/
-theorem along_comm_of_cross_zero (F : Lift → ℝ) (V W : Lift → Lift) (p : Lift)
-    (hF : ContDiffAt ℝ 2 F p)
-    (hV : DifferentiableAt ℝ V p) (hW : DifferentiableAt ℝ W p)
-    (hVW : fderiv ℝ V p (W p) = 0)
-    (hWV : fderiv ℝ W p (V p) = 0) :
-    along V (along W F) p = along W (along V F) p := by
-  have hDF : DifferentiableAt ℝ (fderiv ℝ F) p :=
-    (hF.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)
-  unfold along
-  rw [fderiv_clm_apply hDF hW, fderiv_clm_apply hDF hV]
-  simp only [add_apply, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.flip_apply, hVW, hWV, map_zero, zero_add]
-  exact (hF.isSymmSndFDerivAt (by simp)).eq (V p) (W p)
 
 /-- Exact derivative of the graph along a radial coordinate line. -/
 theorem hasDerivAt_graph_radial (d : ℝ) (vr vt : Plane) (r t : ℝ) (hr : r ≠ 0) :
@@ -82,12 +67,6 @@ theorem hasDerivAt_graph_time (d : ℝ) (vr vt : Plane) (r t : ℝ) :
   have hq := (hasDerivAt_const t r).prodMk (hasDerivAt_id t)
   simpa [graph, timeVector] using hq.prodMk hb
 
-/-- First radial derivative of the physical pullback equals the exact graph operator. -/
-theorem partialR_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ) (q : Plane)
-    (hr : q.1 ≠ 0) (hF : DifferentiableAt ℝ F (graph d vr vt q)) :
-    partialR (pullback d vr vt F) q = radialOp d vr F (graph d vr vt q) := by
-  exact (hF.hasFDerivAt.comp_hasDerivAt q.1
-    (hasDerivAt_graph_radial d vr vt q.1 q.2 hr)).deriv
 
 /-- First time derivative of the physical pullback equals the exact graph operator. -/
 theorem partialT_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ) (q : Plane)
@@ -122,25 +101,9 @@ theorem differentiableAt_radialVector (d : ℝ) (vr : Plane) (p : Lift)
     (hr : p.1.1 ≠ 0) : DifferentiableAt ℝ (radialVector d vr) p :=
   (hasFDerivAt_radialVector d vr p hr).differentiableAt
 
-/-- The radial graph coefficient is independent of both time and the
-auxiliary coordinates. Its derivative in the time graph direction is zero. -/
-theorem fderiv_radialVector_timeVector (d : ℝ) (vr vt : Plane) (p : Lift)
-    (hr : p.1.1 ≠ 0) :
-    fderiv ℝ (radialVector d vr) p (timeVector vt) = 0 := by
-  rw [(hasFDerivAt_radialVector d vr p hr).fderiv]
-  simp [radiusProjection, timeVector]
 
 
-theorem differentiableAt_timeOp (vt : Plane) (F : Lift → ℝ) (p : Lift)
-    (hF : ContDiffAt ℝ 2 F p) : DifferentiableAt ℝ (timeOp vt F) p := by
-  exact ((hF.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).clm_apply
-    (differentiableAt_const (timeVector vt))
 
-theorem differentiableAt_radialOp (d : ℝ) (vr : Plane) (F : Lift → ℝ) (p : Lift)
-    (hr : p.1.1 ≠ 0) (hF : ContDiffAt ℝ 2 F p) :
-    DifferentiableAt ℝ (radialOp d vr F) p := by
-  exact ((hF.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).clm_apply
-    (differentiableAt_radialVector d vr p hr)
 
 
 

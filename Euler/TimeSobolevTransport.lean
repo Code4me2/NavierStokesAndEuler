@@ -1,6 +1,7 @@
 import Euler.AsymmetricTransport
 import Euler.TimeLpMultiplier
-import Euler.SobolevTimeRegularization
+import Euler.TimeLpStrongOperators
+import Euler.HeatRegularizedPaths
 
 /-! Actual derivative-losing transport on continuous coefficients and square-integrable higher Sobolev states. -/
 
@@ -9,7 +10,7 @@ noncomputable section
 namespace EulerTimeSobolevTransport
 
 open MeasureTheory Set EulerLiftedGradientSpace EulerCylinderSobolevSpace EulerAsymmetricTransport
-  EulerTimeLp EulerVolterraConvolution EulerSobolevTimeRegularization EulerHeatRegularizedPaths
+  EulerTimeLp EulerVolterraConvolution EulerHeatRegularizedPaths
   EulerSobolevHeat
 open scoped Topology
 

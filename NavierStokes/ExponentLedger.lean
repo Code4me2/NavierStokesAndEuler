@@ -45,10 +45,6 @@ theorem mean_eq_wave_add_half (σ : ℝ) :
   unfold meanExponent waveExponent
   ring
 
-theorem wave_at_least_seven_tenths {σ : ℝ} (hσ : 1 / 5 ≤ σ) :
-    7 / 10 ≤ waveExponent σ := by
-  unfold waveExponent
-  linarith
 
 
 theorem wave_increment (σ : ℝ) :
@@ -76,11 +72,6 @@ theorem particular_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
 
 
 
-theorem particular_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    waveExponent (σ + 1 / 10) < waveExponent σ + particularGain σ κ := by
-  rw [particular_gain_eq hσ hκ, wave_increment]
-  linarith
 
 
 /-! ## Step 2: signed correction -/
@@ -94,11 +85,6 @@ theorem signed_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
   · simp only [le_min_iff]
     exact ⟨⟨⟨by linarith, le_refl _⟩, by linarith⟩, by linarith⟩
 
-theorem signed_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    waveExponent (σ + 1 / 10) < waveExponent σ + signedGain σ κ := by
-  rw [signed_gain_eq hσ hκ, wave_increment]
-  linarith
 
 
 
@@ -118,10 +104,6 @@ theorem mean_update_wave_identity (σ κ : ℝ) :
   unfold meanUpdateExponent
   rw [mean_eq_wave_add_half]
 
-theorem mean_update_wave_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    waveExponent (σ + 1 / 10) < meanUpdateExponent σ κ := by
-  rw [mean_update_wave_identity, wave_increment]
-  linarith
 
 
 theorem completed_mean_gain_eq {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
@@ -129,25 +111,11 @@ theorem completed_mean_gain_eq {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
   apply min_eq_left
   linarith
 
-theorem completed_mean_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    meanExponent (σ + 1 / 10) <
-      meanExponent σ + min (17 / 100) (1 - 4 * κ) := by
-  rw [completed_mean_gain_eq hκ, mean_increment]
-  linarith
 
 
-theorem completed_defect_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    meanExponent (σ + 1 / 10) < meanExponent σ + 9 / 10 - 4 * κ := by
-  rw [mean_increment]
-  linarith
 
 /-! ## Cumulative exponent bounds -/
 
-theorem signed_increment_lower_bound {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    69999 / 100000 ≤ waveExponent σ - κ := by
-  unfold waveExponent
-  linarith
 
 
 

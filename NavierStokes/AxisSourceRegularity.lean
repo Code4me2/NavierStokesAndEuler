@@ -220,12 +220,6 @@ theorem partialEta_analytic {v : InnerProfile} {w : InnerPoint}
     (hv : AnalyticAt ℝ v w) : AnalyticAt ℝ (partialEta v) w :=
   ((ContinuousLinearMap.apply ℝ ℝ ((0, 1) : InnerPoint)).analyticAt _).comp hv.fderiv
 
-theorem T_analytic (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
-    (hv : AnalyticAt ℝ v w) (hL : L h w.2 ≠ 0) : AnalyticAt ℝ (T h b v) w := by
-  exact (((analyticAt_const.mul hv).add
-    ((analyticAt_const.mul analyticAt_snd).mul (partialEta_analytic hv))).add
-    (analyticAt_fst.mul (partialX_analytic hv))).fun_div
-    (analyticAt_const.sub (analyticAt_const.mul (analyticAt_snd.pow 2))) hL
 
 theorem Z_analytic (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
     (hv : AnalyticAt ℝ v w) (hL : L h w.2 ≠ 0) : AnalyticAt ℝ (Z h b v) w := by
@@ -234,9 +228,6 @@ theorem Z_analytic (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
     (((analyticAt_const.mul analyticAt_snd).mul analyticAt_fst).mul (partialX_analytic hv))).fun_div
     (analyticAt_const.sub (analyticAt_const.mul (analyticAt_snd.pow 2))) hL
 
-theorem Z2_analytic (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
-    (hv : AnalyticAt ℝ v w) (hL : L h w.2 ≠ 0) : AnalyticAt ℝ (Z2 h b v) w :=
-  Z_analytic h (b - D h) (Z_analytic h b hv hL) hL
 
 
 /-! ## Explicit finite jets and parameter-analytic source formulas -/
@@ -347,16 +338,6 @@ noncomputable def jetOmegaDivX {K : Type*} [Field K] (h X e : K)
         U ij.1 * jetZ h (2 * (ij.2 : K) * h - 1) X e (v ij.2))) -
     (4 * (v k).dx + 2 * X * (v k).dxx) - jetShifted h X e v k
 
-theorem omegaDivX_eq_jet (h : ℝ) (U v : ℕ → InnerProfile) (k : ℕ) (w : InnerPoint)
-    (hv : ∀ j, j ≤ k → ContDiffAt ℝ 2 (v j) w) (hL : L h w.2 ≠ 0) :
-    omegaDivX h U v k w = jetOmegaDivX h w.1 w.2 (fun j => U j w)
-      (fun j => profileJet (v j) w) k := by
-  cases k with
-  | zero => rfl
-  | succ k =>
-    simp only [omegaDivX, jetOmegaDivX, shiftedAxialFactor, jetShifted]
-    rw [Z2_eq_jet h (slowOrder h k - 1) (hv k (Nat.le_succ k)) hL]
-    rfl
 
 /-- Holomorphic extensions of the seven actual input jets. This is stronger
 than separate analyticity of v alone and is the precise parameter hypothesis used. -/
@@ -372,12 +353,6 @@ structure AnalyticJetAt (J : ℂ → Jet2 ℂ) (e : ℂ) : Prop where
 theorem jetL_analytic (h e : ℂ) : AnalyticAt ℂ (jetL h) e :=
   analyticAt_const.sub (analyticAt_const.mul (analyticAt_id.pow 2))
 
-theorem jetT_analytic (h b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
-    (hJ : AnalyticJetAt J e) (hL : jetL h e ≠ 0) :
-    AnalyticAt ℂ (fun z => jetT h b X z (J z)) e := by
-  exact (((analyticAt_const.mul hJ.value).add
-    ((analyticAt_const.mul analyticAt_id).mul hJ.de)).add
-    (analyticAt_const.mul hJ.dx)).fun_div (jetL_analytic h e) hL
 
 theorem jetZNumerator_analytic (b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
     (hJ : AnalyticJetAt J e) : AnalyticAt ℂ (fun z => jetZNumerator b X z (J z)) e := by
@@ -417,14 +392,6 @@ theorem jetZE_analytic (h b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
     ((analyticAt_const.mul analyticAt_id).mul (jetZNumerator_analytic b X hJ))).fun_div
     ((jetL_analytic h e).pow 2) (pow_ne_zero _ hL)
 
-theorem jetZ2_analytic (h b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
-    (hJ : AnalyticJetAt J e) (hL : jetL h e ≠ 0) :
-    AnalyticAt ℂ (fun z => jetZ2 h b X z (J z)) e := by
-  exact (((((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul
-    (jetZ_analytic h b X hJ hL)).add
-    ((analyticAt_const.sub (analyticAt_id.pow 2)).mul (jetZE_analytic h b X hJ hL))).sub
-    (((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul
-      (jetZX_analytic h b X hJ hL))).fun_div (jetL_analytic h e) hL
 
 
 noncomputable def complexifyJet (j : Jet2 ℝ) : Jet2 ℂ where
@@ -436,22 +403,11 @@ noncomputable def complexifyJet (j : Jet2 ℝ) : Jet2 ℂ where
   dex := j.dex
   dee := j.dee
 
-/-- The holomorphic algebra uses the exact real source formula on real inputs. -/
-theorem jetOmegaDivX_ofReal (h X e : ℝ) (U : ℕ → ℝ) (v : ℕ → Jet2 ℝ) (k : ℕ) :
-    ((jetOmegaDivX h X e U v k : ℝ) : ℂ) =
-      jetOmegaDivX (h : ℂ) (X : ℂ) (e : ℂ) (fun j => (U j : ℂ))
-        (fun j => complexifyJet (v j)) k := by
-  cases k <;> simp [jetOmegaDivX, jetShifted, jetT, jetZ2, jetZ, jetZE, jetZX,
-    jetZNumerator, jetZNumeratorX, jetZNumeratorE, jetL, complexifyJet]
 
 
 noncomputable def lowerPairs (n : ℕ) : Finset (ℕ × ℕ) :=
   (Finset.antidiagonal n).filter (fun ij => 0 < ij.1 ∧ 0 < ij.2)
 
-theorem lowerPairs_lt {n i j : ℕ} (hij : (i, j) ∈ lowerPairs n) : i < n ∧ j < n := by
-  obtain ⟨ha, hi, hj⟩ := Finset.mem_filter.mp hij
-  have he := Finset.mem_antidiagonal.mp ha
-  omega
 
 noncomputable def lowerConvolution (a b : ℕ → InnerProfile) (n : ℕ) (w : InnerPoint) : ℝ :=
   ∑ ij ∈ lowerPairs n, a ij.1 w * b ij.2 w
@@ -460,10 +416,6 @@ noncomputable def previousOmegaDivX (h : ℝ) (U v : ℕ → InnerProfile) : ℕ
   | 0 => fun _ => 0
   | k + 1 => omegaDivX h U v k
 
-/-- The known lower-order pressure source after its radial cancellation. -/
-noncomputable def lowerPressureSource (h C : ℝ) (φ U v : ℕ → InnerProfile)
-    (n : ℕ) (w : InnerPoint) : ℝ :=
-  C⁻¹ ^ 2 * lowerConvolution φ φ n w - previousOmegaDivX h U v n w / 2
 
 
 
@@ -475,11 +427,6 @@ noncomputable def jetPreviousOmega {K : Type*} [Field K] (h X e : K)
   | 0 => 0
   | k + 1 => jetOmegaDivX h X e U v k
 
-/-- Parameter-analytic algebra for the same finite lower pressure source. -/
-noncomputable def jetLowerPressureSource {K : Type*} [Field K] (h C X e : K)
-    (φ U : ℕ → K) (v : ℕ → Jet2 K) (n : ℕ) : K :=
-  C⁻¹ ^ 2 * (∑ ij ∈ lowerPairs n, φ ij.1 * φ ij.2) -
-    jetPreviousOmega h X e U v n / 2
 
 
 
@@ -492,14 +439,6 @@ noncomputable def shiftedProfileAxial (h b : ℝ) (f : ℕ → InnerProfile) : �
   | 0 => fun _ => 0
   | k + 1 => Z2 h (b + slowOrder h k) (f k)
 
-/-- The finite known transport part of the angular row has σ=1, and that of
-the axial row has σ=0. The base exponents b are supplied separately. -/
-noncomputable def lowerTransportSource (h b σ : ℝ) (v U f : ℕ → InnerProfile)
-    (n : ℕ) (w : InnerPoint) : ℝ :=
-  (∑ ij ∈ lowerPairs n,
-    (v ij.1 w * (w.1 * partialX (f ij.2) w + σ * f ij.2 w) +
-      U ij.1 w * Z h (b + slowOrder h ij.2) (f ij.2) w)) -
-    shiftedProfileAxial h b f n w
 
 
 
@@ -509,12 +448,6 @@ noncomputable def jetShiftedProfileAxial {K : Type*} [Field K] (h b X e : K)
   | 0 => 0
   | k + 1 => jetZ2 h (b + 2 * (k : K) * h) X e (f k)
 
-noncomputable def jetLowerTransportSource {K : Type*} [Field K] (h b σ X e : K)
-    (v U : ℕ → K) (f : ℕ → Jet2 K) (n : ℕ) : K :=
-  (∑ ij ∈ lowerPairs n,
-    (v ij.1 * (X * (f ij.2).dx + σ * (f ij.2).value) +
-      U ij.1 * jetZ h (b + 2 * (ij.2 : K) * h) X e (f ij.2))) -
-    jetShiftedProfileAxial h b X e f n
 
 
 

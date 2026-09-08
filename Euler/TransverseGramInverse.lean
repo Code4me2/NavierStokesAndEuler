@@ -77,11 +77,6 @@ theorem frameLeftInverse_apply (Q : U →L[ℝ] E) (c : ℝ) (hc : 0 < c)
     frameLeftInverse Q c hc hQ (Q x) = x :=
   inverse_gram_apply Q c hc hQ x
 
-/-- Differentiating the actual adjoint commutes with the real derivative. -/
-theorem hasDerivAt_adjoint (Q : ℝ → U →L[ℝ] E) (Q₁ : U →L[ℝ] E) (t : ℝ)
-    (hQ : HasDerivAt Q Q₁ t) :
-    HasDerivAt (fun s => (Q s).adjoint) Q₁.adjoint t := by
-  exact ((realAdjoint (U := U) (E := E)).hasFDerivAt).comp_hasDerivAt t hQ
 
 
 

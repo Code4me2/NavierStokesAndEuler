@@ -119,11 +119,6 @@ This is an explicit differential expression in the chosen smooth factor. -/
 def sourceCoefficient (c : ℝ) (j : ℕ) (a : ℝ → ℝ) (x : ℝ) : ℝ :=
   (2 * c + (3 - (j : ℝ)) * x ^ 2) * a x + x ^ 3 * deriv a x
 
-theorem sourceCoefficient_contDiff (c : ℝ) (j : ℕ) {a : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ a) : ContDiff ℝ ∞ (sourceCoefficient c j a) := by
-  have hd : ContDiff ℝ ∞ (deriv a) := (contDiff_infty_iff_deriv.mp ha).2
-  exact ((contDiff_const.add (contDiff_const.mul (contDiff_id.pow 2))).mul ha).add
-    ((contDiff_id.pow 3).mul hd)
 
 
 

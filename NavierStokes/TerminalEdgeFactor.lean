@@ -448,15 +448,6 @@ noncomputable def angularFactor (C : ℝ) (d : TailData) (y0 : ℝ) (y : EdgePar
     (ParametricFlatFactor.factor 4 3 (timeCoefficient C d y0) y +
       ParametricFlatFactor.factor 4 3 (correctionCoefficient C d y0) y)
 
-theorem angularFactor_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (angularFactor C d y0) :=
-  (boundaryCoefficient_contDiff C d y0).add
-    (((contDiff_snd.pow 3).div ((radius_contDiff d y0).pow 2)
-      (fun y => (sq_pos_of_pos (radius_pos d y0 y)).ne')).mul
-        ((ParametricFlatFactor.factor_contDiff (by norm_num : (0 : ℝ) < 4) 3
-          (timeCoefficient_contDiff C d y0)).add
-          (ParametricFlatFactor.factor_contDiff (by norm_num : (0 : ℝ) < 4) 3
-            (correctionCoefficient_contDiff C d y0))))
 
 /-- The leading angular stress itself, with all backward-integral hypotheses
 proved for the actual heat carrier and actual outgoing taper. -/
@@ -484,11 +475,6 @@ theorem angularStress_factorization (C : ℝ) (d : TailData) (y0 : ℝ) (y : Edg
   unfold angularFactor boundaryCoefficient FlatPrimitive.scale
   ring
 
-theorem angularFactor_zero (C : ℝ) (d : TailData) (y0 : ℝ) (p : EdgeParam) :
-    angularFactor C d y0 (p, 0) =
-      (2 * carrier C d y0 (p, 0) / radius d y0 (p, 0)) * taperSlopeFactor d 0 := by
-  simp only [angularFactor, zero_pow (by norm_num : 3 ≠ 0), zero_div, zero_mul,
-    add_zero, boundaryCoefficient]
 
 
 
@@ -635,11 +621,6 @@ theorem axialCoefficient_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
 noncomputable def axialFactor (C : ℝ) (d : TailData) (y0 : ℝ) (y : EdgeParam × ℝ) : ℝ :=
   ParametricFlatFactor.factor 4 0 (axialCoefficient C d y0) y / radius d y0 y
 
-theorem axialFactor_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (axialFactor C d y0) :=
-  (ParametricFlatFactor.factor_contDiff (by norm_num : (0 : ℝ) < 4) 0
-    (axialCoefficient_contDiff C d y0)).div (radius_contDiff d y0)
-      (fun y => (radius_pos d y0 y).ne')
 
 /-- The actual canonical pressure gradient on the physical chart. -/
 noncomputable def pressureGradient (C : ℝ) (d : TailData) (y0 : ℝ)
@@ -1515,8 +1496,6 @@ theorem profile_relative_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
 noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 : ℝ)
     (y : EdgeParam × ℝ) : ℝ × ℝ := (angularStress C d y0 y, axialStress C d y0 y)
 
-noncomputable def physicalStressFactor (C : ℝ) (d : TailData) (y0 : ℝ)
-    (y : EdgeParam × ℝ) : ℝ × ℝ := (angularFactor C d y0 y, y.2 ^ 6 * axialFactor C d y0 y)
 
 
 

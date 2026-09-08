@@ -173,34 +173,6 @@ theorem editDensityEta_continuous_t {d : TailData} {K : ℝ}
   · exact (relative_contDiff (deriv w.coefficients eta)).continuous.comp
       (continuous_id.sub continuous_const)
 
-theorem editDensity_abs_le {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) (t eta : ℝ) :
-    |editDensity w (t, eta)| ≤ 5 * editSize d K * Real.exp 5 * releaseSquare d := by
-  have hR := releaseSquare_pos d
-  by_cases ht : t ∈ Ioo (d.releaseStart - 4) d.releaseStart
-  · have hs := (w.small_jets eta (t - correctionCenter d)).1
-    have hr := relative_coefficient_bound w eta (t - correctionCenter d)
-    have hsize := editSize_nonneg w
-    have hprod : |(1 + relative (w.coefficients eta) (t - correctionCenter d)) ^ 2 - 1| ≤
-        5 * editSize d K := by
-      rw [show (1 + relative (w.coefficients eta) (t - correctionCenter d)) ^ 2 - 1 =
-        relative (w.coefficients eta) (t - correctionCenter d) *
-          (2 + relative (w.coefficients eta) (t - correctionCenter d)) by ring, abs_mul]
-      have ha : |2 + relative (w.coefficients eta) (t - correctionCenter d)| ≤ 5 / 2 := by
-        have h := abs_add_le (2 : ℝ) (relative (w.coefficients eta) (t - correctionCenter d))
-        norm_num at h
-        linarith
-      have hh := mul_le_mul hr ha (abs_nonneg _) (by positivity : 0 ≤ 2 * editSize d K)
-      nlinarith
-    rw [editDensity_eq, abs_mul, abs_of_nonneg (sq_nonneg _)]
-    have hbase : baseE d.core.lam (referenceAmplitude d) t ^ 2 ≤ Real.exp 5 * releaseSquare d := by
-      rw [← original_matches_reference d eta ⟨ht.1.le, ht.2.le⟩]
-      exact (window_square_bounds d ⟨ht.1.le, ht.2.le⟩ eta).2
-    have hb := mul_le_mul hbase hprod (abs_nonneg _) (by positivity : 0 ≤ Real.exp 5 * releaseSquare d)
-    nlinarith
-  · rw [editDensity_zero_outside w eta ht, abs_zero]
-    exact mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (editSize_nonneg w))
-      (Real.exp_pos _).le) (releaseSquare_pos d).le
 
 theorem editDensityEta_abs_le {d : TailData} {K : ℝ}
     (w : ResetWitness d K) (t eta : ℝ) :
@@ -293,22 +265,6 @@ theorem pressureChange_zero_after {d : TailData} {K : ℝ}
     (w : ResetWitness d K) {y : ℝ} (hy : d.releaseStart ≤ y) (eta : ℝ) :
     pressureChange w y eta = 0 := by rw [pressureChange, correctedPi_eq_after w hy, sub_self]
 
-/-- Joint smoothness of a finite integral with a variable upper limit. -/
-theorem intervalPrimitive_contDiff {f : ℝ × ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (a : ℝ) :
-    ContDiff ℝ ∞ (fun p : ℝ × ℝ => ∫ t in a..p.1, f (t, p.2)) := by
-  let g : (ℝ × ℝ) × ℝ → ℝ := fun z => f (a + (z.1.1 - a) * z.2, z.1.2)
-  have hg : ContDiff ℝ ∞ g := hf.comp
-    ((contDiff_const.add ((contDiff_fst.fst.sub contDiff_const).mul contDiff_snd)).prodMk
-      contDiff_fst.snd)
-  have heq : (fun p : ℝ × ℝ => ∫ t in a..p.1, f (t, p.2)) =
-      fun p : ℝ × ℝ => (p.1 - a) * ∫ u in (0 : ℝ)..1, g (p, u) := by
-    funext p
-    have h := intervalIntegral.smul_integral_comp_mul_add
-      (f := fun t => f (t, p.2)) (a := (0 : ℝ)) (b := 1) (p.1 - a) a
-    simpa [g, smul_eq_mul, add_comm] using h.symm
-  rw [heq]
-  exact (contDiff_fst.sub contDiff_const).mul
-    (TransportPrimitive.parameterIntegral_contDiff hg 0 1)
 
 
 

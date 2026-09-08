@@ -152,11 +152,6 @@ theorem referenceMinSlope_pos {lam u : ℝ} (hlam : 0 < lam) (hu : 0 < u) :
   unfold referenceMinSlope
   exact div_pos (mul_pos hlam hu) (PulseGrowth.dampingDenominator_pos u)
 
-theorem referenceMaxSlope_pos {lam u : ℝ} (hlam : 0 < lam) (hu : 0 < u) :
-    0 < referenceMaxSlope lam u := by
-  unfold referenceMaxSlope
-  exact add_pos (div_pos (mul_pos (mul_pos (by norm_num) hlam) hu) (by norm_num))
-    (div_pos (mul_pos (mul_pos (by norm_num) hlam) hu) (PulseGrowth.dampingDenominator_pos u))
 
 /-- Explicit, slot-length-independent bounds on the reference derivative. -/
 theorem referenceSlope_bounds {lam u s : ℝ} (hlam : 0 < lam) (hu : 0 < u)

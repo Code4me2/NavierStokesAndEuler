@@ -96,12 +96,6 @@ theorem representative_iteratedFDeriv_eq (hU : ∀ i, IsOpen (U i)) (hf : Compat
     iteratedFDeriv ℝ m (representative U f) x = iteratedFDeriv ℝ m (f i) x :=
   (representative_iteratedFDeriv_germ hU hf hx m).self_of_nhds
 
-theorem representative_jet_bound (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    {i : ι} {x : D} (hx : x ∈ U i) (m : ℕ) {B : ℝ}
-    (hb : ‖iteratedFDeriv ℝ m (f i) x‖ ≤ B) :
-    ‖iteratedFDeriv ℝ m (representative U f) x‖ ≤ B := by
-  rw [representative_iteratedFDeriv_eq hU hf hx m]
-  exact hb
 
 
 
@@ -112,13 +106,6 @@ section PhysicalCurl
 
 open ProblemStatement
 
-theorem spatialCurl_eq_of_germ {A B : VelocityField} {x : SpaceTime}
-    (h : A =ᶠ[𝓝 x] B) : SpatialCurl.spatialCurl A x = SpatialCurl.spatialCurl B x := by
-  have hs : (fun y : Space => A (x.1, y)) =ᶠ[𝓝 x.2] fun y => B (x.1, y) :=
-    h.comp_tendsto (by
-      change Tendsto (fun y : Space => (x.1, y)) (𝓝 x.2) (𝓝 (x.1, x.2))
-      exact continuousAt_const.prodMk continuousAt_id)
-  exact congrArg SpatialCurl.curlLinear hs.fderiv_eq
 
 
 

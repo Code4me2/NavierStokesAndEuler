@@ -59,15 +59,6 @@ theorem sqrt_edge (c x : ℝ) : Real.sqrt (edge c x) = edge (c / 2) x := by
     congr 1
     ring
 
-theorem edge_mul (c d x : ℝ) : edge c x * edge d x = edge (c + d) x := by
-  by_cases hx : x ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos c hx, FlatCutoff.edge_of_nonpos d hx,
-      FlatCutoff.edge_of_nonpos (c + d) hx]
-  · have hp : 0 < x := lt_of_not_ge hx
-    rw [FlatCutoff.edge_of_pos c hp, FlatCutoff.edge_of_pos d hp,
-      FlatCutoff.edge_of_pos (c + d) hp, ← Real.exp_add]
-    congr 1
-    ring
 
 
 
@@ -161,15 +152,6 @@ theorem signedAmplitude_factor (σ τ : ℝ) (κ : Vec2)
       congr 2
       ring
 
-/-- Exact linearity in a scalar target factor, with no regularity or
-nonvanishing assumption on that factor. -/
-theorem inverseCoefficients_target_factor (σ : ℝ) (κ : Vec2)
-    (G : ℝ → Mat2) (T : ℝ → Vec2) (f : ℝ → ℝ) (x : ℝ) (i : Fin 2) :
-    inverseCoefficients σ κ G (fun y j => f y * T y j) x i =
-      f x * inverseCoefficients σ κ G T x i := by
-  simp only [inverseCoefficients, edgeTarget, scaledTarget, Matrix.mulVec,
-    dotProduct, Fin.sum_univ_two]
-  ring
 
 
 theorem inverseCoefficients_pos {σ : ℝ} {κ : Vec2}
@@ -231,20 +213,6 @@ variable {G : ℝ → Mat2} {T R : ℝ → Vec2}
 
 
 
-/-- Every fixed inverse-power loss is absorbed by the concrete primary
-exponential, including at zero. -/
-theorem primaryAmplitude_div_pow_contDiffOn
-    (hG : ∀ i j, ContDiffOn ℝ ∞ (fun x => G x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hcone : ∀ x ∈ s, SmoothCovariance.StrictCone (G x) (T x))
-    (hgap : ∀ i, κ i < σ) (i : Fin 2) (loss : ℕ) :
-    ContDiffOn ℝ ∞ (fun x => primaryAmplitude σ κ G T x i / x ^ loss) s := by
-  have hp : 0 < (σ - κ i) / 2 := by linarith [hgap i]
-  apply ((FlatCutoff.edge_div_pow_contDiff hp loss (n := ⊤)).contDiffOn.mul
-    (SmoothCovariance.contDiffOn_amplitudes hG hT hcone i)).congr
-  intro x hx
-  rw [primaryAmplitude_factor σ κ G T (hcone x hx).det_ne_zero i]
-  ring
 
 /-- The normalized signed quotient is smooth because its denominator is
 proved strictly positive from the explicit normalized cone. -/
@@ -262,18 +230,6 @@ theorem signed_normal_contDiffOn
   exact mul_ne_zero (by norm_num) (ne_of_gt ((hcone x hx).amplitudes_pos i))
 
 
-theorem signedAmplitude_div_pow_contDiffOn
-    (hG : ∀ i j, ContDiffOn ℝ ∞ (fun x => G x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hR : ∀ i, ContDiffOn ℝ ∞ (fun x => R x i) s)
-    (hcone : ∀ x ∈ s, SmoothCovariance.StrictCone (G x) (T x))
-    (hgap : ∀ i, (σ + κ i) / 2 < τ) (i : Fin 2) (loss : ℕ) :
-    ContDiffOn ℝ ∞ (fun x => signedAmplitude σ τ κ G T R x i / x ^ loss) s := by
-  apply ((FlatCutoff.edge_div_pow_contDiff (sub_pos.mpr (hgap i)) loss (n := ⊤)).contDiffOn.mul
-    (signed_normal_contDiffOn hG hT hR hcone i)).congr
-  intro x hx
-  rw [signedAmplitude_factor σ τ κ G T R (hcone x hx).det_ne_zero i]
-  ring
 
 
 

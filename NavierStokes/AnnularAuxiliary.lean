@@ -46,11 +46,6 @@ noncomputable def auxiliary {S : Set ℝ}
   F (positiveMap a p.1, w.parameterMap p.2)
 
 
-theorem auxiliary_eq {S : Set ℝ}
-    (w : ParametricRadialExtension.ParameterWindow S) {a : ℝ} (ha : 0 < a)
-    (F : ℝ × ℝ → ℝ) {p : ℝ × ℝ} (hX : a ≤ p.1) (heta : |p.2| ≤ w.inner) :
-    auxiliary w a F p = F p := by
-  rw [auxiliary, positiveMap_eq ha hX, w.parameterMap_eq heta]
 
 
 

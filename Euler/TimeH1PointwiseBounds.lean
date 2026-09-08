@@ -72,17 +72,6 @@ theorem increment_norm_le (s t : ℝ) (hs : s ∈ Icc (0 : ℝ) T)
   rw [mul_pow, Real.sq_sqrt (sub_nonneg.mpr hst)]
   exact increment_norm_sq_le T hT g η hη hder s t hs ht hst
 
-include hT hη hder in
-/-- The actual initial trace and L² derivative control the whole time path. -/
-theorem norm_le_initial_add (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
-    ‖η t‖ ≤ ‖η 0‖+Real.sqrt t*‖g‖ := by
-  have hi := increment_norm_le T hT g η hη hder 0 t ⟨le_rfl, hT⟩ ht ht.1
-  simp only [sub_zero] at hi
-  calc
-    ‖η t‖ = ‖(η t-η 0)+η 0‖ := congrArg norm (sub_add_cancel (η t) (η 0)).symm
-    _ ≤ ‖η t-η 0‖+‖η 0‖ := norm_add_le _ _
-    _ ≤ Real.sqrt t*‖g‖+‖η 0‖ := add_le_add hi le_rfl
-    _ = ‖η 0‖+Real.sqrt t*‖g‖ := add_comm _ _
 
 
 

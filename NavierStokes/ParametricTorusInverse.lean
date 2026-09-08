@@ -573,13 +573,6 @@ theorem iterateInverse_periodic (d : Direction) {f : Source} (hp : Periodic f)
       rw [iterateInverse_succ]
       exact inverse_periodic d _
 
-theorem iterateInverse_smooth (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (n : ℕ) : ContDiff ℝ ∞ (iterateInverse d n f) := by
-  induction n with
-  | zero => exact hf
-  | succ n ih =>
-      rw [iterateInverse_succ]
-      exact inverse_smooth d ih (iterateInverse_periodic d hp n)
 
 
 

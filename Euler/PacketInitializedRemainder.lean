@@ -51,39 +51,6 @@ def initializedPrimaryRemainderField (N : ℕ) (hN : 1 ≤ N) (κ : ℝ) :
     (initializedProfiles_one_mean M D τ hτ hτT B δ hδ ξ hs α) κ).changeTime hTime).congr
       (fun _ _ _ => by rw [initializedProfiles_one_high]; rfl)
 
-include hTime in
-/-- The exact derivative split, with the primary's genuine canonical
-velocity and transported normal. -/
-theorem initializedVelocity_gradient_split (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    fderiv ℝ (fun y => initializedVelocity M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-      (t,(Y y,k*inner ℝ D.m₀ (Y y)))) (X 0) =
-      (α/δ) • rankOne ℝ (canonicalVelocity τ hτ hτT B ξ hs t 0) (D.normal.field t 0) +
-      fderiv ℝ (fun y => initializedPrimaryRemainder M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-        (t,(Y y,k*inner ℝ D.m₀ (Y y)))) (X 0) := by
-  let V := vectorField τ hτ hτT B (initialData D δ hδ (α • ξ) hs)
-  have hp := ((V.smul k⁻¹).raw_graph_contDiff t k D.m₀).differentiable (by simp)
-  have hr := ((initializedPrimaryRemainderField M D hTime τ hτ hτT B δ hδ ξ hs α N hN k⁻¹).raw_graph_contDiff
-    t k D.m₀).differentiable (by simp)
-  have hp' : DifferentiableAt ℝ (fun y => k⁻¹ • vector τ hτ hτT B
-      (initialData D δ hδ (α • ξ) hs) (t,(Y y,k*inner ℝ D.m₀ (Y y)))) (X 0) := by
-    simpa only [Function.comp_def,Pi.smul_apply] using (hp (Y (X 0))).comp (X 0) hY
-  have hr' : DifferentiableAt ℝ (fun y => initializedPrimaryRemainder M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-      (t,(Y y,k*inner ℝ D.m₀ (Y y)))) (X 0) := by
-    simpa only [Function.comp_def] using (hr (Y (X 0))).comp (X 0) hY
-  have he : (fun y => initializedVelocity M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-      (t,(Y y,k*inner ℝ D.m₀ (Y y)))) =
-      (fun y => k⁻¹ • vector τ hτ hτT B (initialData D δ hδ (α • ξ) hs)
-        (t,(Y y,k*inner ℝ D.m₀ (Y y)))) +
-      (fun y => initializedPrimaryRemainder M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-        (t,(Y y,k*inner ℝ D.m₀ (Y y)))) := by
-    funext y
-    dsimp only [initializedPrimaryRemainder,Pi.add_apply,Pi.sub_apply,Pi.smul_apply]
-    abel
-  rw [he,fderiv_add hp' hr',
-    scaled_terminal_physical_gradient τ hτ hτT B δ hδ ξ hs α k hk t X Y hX hY hleft]
 
 variable
   (L : EulerTransversePacketJoin.Budget D τ hτ hτT B (Fin 4) 6)

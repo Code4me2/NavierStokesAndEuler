@@ -104,47 +104,11 @@ variable (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
         ((A ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0)
 
 
-include hB in
-theorem evolutionOfScalarEuler_derivative (hpos : 0 < T) (t : Icc (0 : ℝ) T) :
-    (evolutionOfScalarEuler A B hA hd p hdiv hp he).derivative t=B t := by
-  let U := evolutionOfScalarEuler A B hA hd p hdiv hp he
-  have h₁ := U.sobolevTimeDerivative 3 t
-  have h₂ := sobolev_derivative_of_l2 T hT A B hA hB hd 3 t
-  change HasDerivWithinAt (extendPath T hT (sobolevPath A hA 3))
-    (sobolevPath U.derivative U.derivative_continuous 3 t) (Icc (0 : ℝ) T) t at h₁
-  have hh := (h₁.derivWithin (uniqueDiffOn_Icc hpos t t.property)).symm.trans
-    (h₂.derivWithin (uniqueDiffOn_Icc hpos t t.property))
-  apply field_ext
-  funext x
-  have h := congrArg (observation 3 (le_refl 3) (x,(0 : AddCircle (1 : ℝ)))) hh
-  simpa only [sobolevPath,ContinuousMap.coe_mk,observation_apply] using h
 
 
 
 end Identification
 
-/-- A strong time derivative in any genuine spatial Sobolev order gives
-the L² derivative used above. In the source class one can take order two. -/
-theorem l2_timeDerivative_of_sobolev
-    (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n))
-    (hB : ∀ n, Continuous (fun t => (B t).jetLp n)) (q : ℕ)
-    (hd : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (extendPath T hT (sobolevPath A hA q))
-        (sobolevPath B hB q ⟨t,ht.1.le,ht.2.le⟩) t)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (fun r => (A (projIcc 0 T hT r)).toLp)
-      (B ⟨t,ht.1.le,ht.2.le⟩).toLp t := by
-  let L : SobolevSpace 1 q →L[ℝ] L2 :=
-    ordinaryLift.toContinuousLinearMap.adjoint.comp (valueOperator 1 q)
-  have hL (C : SmoothL2Field Space) :
-      L (ordinarySobolev q C.toLp C.translation_contDiff)=C.toLp := by
-    change ordinaryLift.toContinuousLinearMap.adjoint
-      (value 1 (ordinarySobolev q C.toLp C.translation_contDiff))=C.toLp
-    erw [ordinarySobolev_value]
-    exact congrArg (fun M : L2 →L[ℝ] L2 => M C.toLp) ordinaryLift.adjoint_comp_self
-  have h := L.hasFDerivAt.comp_hasDerivAt t (hd t ht)
-  simpa only [Function.comp_def,extendPath,sobolevPath,ContinuousMap.coe_mk,hL] using h
 
 /-- The scalar-pressure form of the smooth ordinary Euler class. The
 all-order spatial paths represent `C H^m` for every finite `m`. A single

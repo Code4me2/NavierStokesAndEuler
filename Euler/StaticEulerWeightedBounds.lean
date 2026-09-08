@@ -41,7 +41,6 @@ def staticSourceCost (R : ℝ) : ℝ :=
 
 def staticTimeCost (R : ℝ) : ℝ := (1+2*pressureBound*(448*1+1))*staticSourceCost P R
 
-def staticPressureCost (R : ℝ) : ℝ := 2*pressureBound*staticSourceCost P R
 
 theorem staticSourceCost_nonneg (R : ℝ) (hR : 0 ≤ R) : 0 ≤ staticSourceCost P R :=
   sourceBound_nonneg P zero_le_one zero_le_one le_rfl le_rfl zero_le_one baseErrorFactor_nonneg

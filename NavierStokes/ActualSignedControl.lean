@@ -470,45 +470,8 @@ noncomputable def nativeCovariance (hzeta : ∀ x ∈ s.domain, 0 < s.zeta x) :
 
 include h
 
-omit [Countable Λ] [Nonempty Λ] in
-theorem copied_unit_jets (j : Fin 2) {W : Λ → ℕ → X → ℝ}
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (henv : ∀ l n i x, x ∈ s.domain → x ∈ K l n i →
-      c.pull (pulseEnvelope F χ j) l n i x ≤ W l n x) :
-    UniformLocalJets s W 0 K (c.pull (pulseVector F χ j)) :=
-  c.envelope (h.unit_jets j) hW henv
 
-/-- The modeled normal, normal motion and action are the transported
-ones from the selected primary phase, with its actual clock factors. -/
-theorem copied_geometry_jets (normal clock : PositiveScale Λ) (j : Fin 2) :
-    UniformLocalJets s (fun _ _ _ => 1) 0 K
-      (fun l n i x => normal.value l n • c.pull (phaseNormal (F j) χ) l n i x) ∧
-    UniformLocalJets s (fun _ _ _ => 1) 0 K
-      (fun l n i x => (normal.value l n * clock.value l n) • c.pull (phaseMotion (F j) χ) l n i x) ∧
-    UniformLocalJets s (fun _ _ _ => 1) 0 K
-      (fun l n i x => clock.value l n • c.pull (phaseAction (F j) χ) l n i x) := by
-  have hg := h.geometry_jets j
-  refine ⟨?_, ?_, ?_⟩
-  · simpa only [zero_add] using uniform_band_smul (c.unweighted hg.1) (normal.bandBound s)
-      (fun _ _ _ _ => zero_le_one)
-  · simpa only [zero_add, PositiveScale.mul] using
-      uniform_band_smul (c.unweighted hg.2.1) ((normal.mul clock).bandBound s)
-        (fun _ _ _ _ => zero_le_one)
-  · simpa only [zero_add] using uniform_band_smul (c.unweighted hg.2.2.1) (clock.bandBound s)
-      (fun _ _ _ _ => zero_le_one)
 
-omit [Countable Λ] [Nonempty Λ] in
-theorem copied_normal_bounds (normal : PositiveScale Λ) (j : Fin 2)
-    (l : Λ) (n : ℕ) (i : I) {x : X} (hx : x ∈ s.domain) (hi : x ∈ K l n i) :
-    normal.lower * (F j).b ≤ ‖normal.value l n • c.pull (phaseNormal (F j) χ) l n i x‖ ∧
-    ‖normal.value l n • c.pull (phaseNormal (F j) χ) l n i x‖ ≤
-      normal.upper * ((F j).M ^ 2 + 3 * (F j).M) := by
-  have hg := h.geometry_jets j
-  have hlo := hg.2.2.2.1 (c.index l n) _ (c.maps l n i x hx hi)
-  have hhi := hg.2.2.2.2 (c.index l n) _ (c.maps l n i x hx hi)
-  simp only [norm_smul, Real.norm_eq_abs, abs_of_pos (normal.value_pos l n)]
-  exact ⟨mul_le_mul (normal.bounds l n).1 hlo (F j).b_pos.le (normal.value_pos l n).le,
-    mul_le_mul (normal.bounds l n).2 hhi (norm_nonneg _) (zero_le_one.trans normal.upper_one)⟩
 
 end ReferenceBounds
 

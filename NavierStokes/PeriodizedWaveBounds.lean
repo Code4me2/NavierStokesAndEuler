@@ -1058,55 +1058,9 @@ noncomputable def differentialGood (s : StripData D) (d : GraphDirections D) (n 
   a.common.principalVelocity s d (a.common.curlCorrection s d) n x +
     (a.commonCorrected s d).remainder s d n x
 
-theorem differentialGood_germ (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) (n : ℕ) {i : I} {x : D}
-    (hx : x ∈ K.carrier n i) :
-    a.differentialGood s d n =ᶠ[𝓝 x] a.localGood s d n i := by
-  have hc := curlCorrection_germ (a.common_amplitude_germ K hs n hx)
-    (a.background.frequency n) (a.background.radius n) (a.background.phase n)
-    (d.radialField n) (fun _ => d.angular) (d.axialField s n)
-  have hp := principal_germ hc (Filter.EventuallyEq.refl (𝓝 x) (fun _ : D => (0 : ℂ)))
-    (s.epsilon n) (a.background.frequency n) (a.background.radius n)
-    (a.background.frequencyBase n) (a.background.axialBase n) (a.background.phase n)
-    (d.radialField n) (fun _ => d.angular) (d.axialField s n) (d.fastField n)
-  have hr := remainder_germ (a.commonCorrected_amplitude_germ K hs s d n hx)
-    (a.common_pressure_germ K hs n hx)
-    (s.epsilon n) (a.background.frequency n) (a.background.radius n)
-    (a.background.radialBase n) (a.background.frequencyBase n) (a.background.axialBase n)
-    (a.background.phase n) (d.radialField n) (fun _ => d.angular) (d.axialField s n)
-    (d.fastField n) (fun _ => d.slow)
-  filter_upwards [hp, hr] with y hpy hry
-  exact congrArg₂ (· + ·) hpy hry
-
-theorem differentialGood_zero_germ (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) {n : ℕ} {x : D}
-    (hx : ∀ i, x ∉ K.carrier n i) :
-    a.differentialGood s d n =ᶠ[𝓝 x] fun _ => 0 := by
-  have hc := curlCorrection_germ (a.common_zero_germs K hs hx).1
-    (a.background.frequency n) (a.background.radius n) (a.background.phase n)
-    (d.radialField n) (fun _ => d.angular) (d.axialField s n)
-  simp only [coefficient_zero, curlRemainder_zero] at hc
-  have hp := principal_germ hc (Filter.EventuallyEq.refl (𝓝 x) (fun _ : D => (0 : ℂ)))
-    (s.epsilon n) (a.background.frequency n) (a.background.radius n)
-    (a.background.frequencyBase n) (a.background.axialBase n) (a.background.phase n)
-    (d.radialField n) (fun _ => d.angular) (d.axialField s n) (d.fastField n)
-  have hr := remainder_germ (a.commonCorrected_zero_germ K hs s d hx) (a.common_zero_germs K hs hx).2
-    (s.epsilon n) (a.background.frequency n) (a.background.radius n)
-    (a.background.radialBase n) (a.background.frequencyBase n) (a.background.axialBase n)
-    (a.background.phase n) (d.radialField n) (fun _ => d.angular) (d.axialField s n)
-    (d.fastField n) (fun _ => d.slow)
-  simp only [principal_zero] at hp
-  simp only [remainder_zero] at hr
-  filter_upwards [hp, hr] with y hpy hry
-  exact (congrArg₂ (· + ·) hpy hry).trans (zero_add 0)
 
 
-/-- Only the carrier, geometry, and base fields of this coefficient are
-used in the background estimates. -/
-noncomputable def backgroundOnly : WaveCoefficients D :=
-  { a.background with amplitude := fun _ _ => 0, pressure := fun _ _ => 0 }
+
 
 
 
@@ -1149,32 +1103,6 @@ theorem localGaussian_zero_of_fields (d : GraphDirections D)
   filter_upwards [hu, hf] with y huy hfy
   simp only [localGaussian, excludedSlotError, huy, hfy, smul_zero, add_zero]
 
-/-- Primitive native amplitude/source/cutoff jets and a Gaussian envelope
-prove flatness of the actual two cutoff products, uniformly over every copy.
-The central alternative allows transverse regions where both fields vanish. -/
-theorem localGaussian_all_gains_from_native {s : StripData D} (d : GraphDirections D)
-    {K : ℕ → I → Set D} {W : ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hψ : LocalJets s (fun _ _ => 1) 0 K a.cutoff)
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K a.amplitude)
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K (fun n _ => a.source n))
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    (θ : ℕ → I → D → ℝ) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n, ell * ChartScales.S n ≤ L n) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      W n x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n))
-    (hcentral : ∀ n i x, x ∈ s.domain → x ∈ K n i → |θ n i x - 1 / 2| < 1 / 5 →
-      (a.cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ) : LocalJets s (fun _ _ => 1) β K (a.localGaussian d) := by
-  have hj := a.localGaussian_wave_jets d
-    (fun n x hx => mul_nonneg (Real.sqrt_nonneg _) (hWnonneg n x hx)) hψ hfast hu hf
-  apply local_gaussian_all_gains hj edges scales θ L hL ell hell hLell hc hW _ β
-  intro n i x hx hi hmid
-  rcases hcentral n i x hx hi hmid with hone | ⟨hu0, hf0⟩
-  · exact a.localGaussian_zero_of_cutoff_one d hone
-  · exact a.localGaussian_zero_of_fields d hu0 hf0
 
 
 theorem common_potential_germ (K : Cells D I)

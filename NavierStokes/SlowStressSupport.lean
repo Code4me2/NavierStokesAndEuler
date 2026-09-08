@@ -758,16 +758,6 @@ theorem stress_weighted_hasDerivAt {S : Set ℝ} (hS : IsOpen S) {F : Field} (hF
   field_simp [pow_ne_zero m (ne_of_gt (show 0 < r from hr))]
 
 
-theorem stress_slice_support (m : ℕ) {F : Field} {S : Set ℝ} {a B : ℝ} (hB : 0 ≤ B)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, F (R, eta) = 0)
-    (hs : exterior B S F) (hm : ∀ eta ∈ S, moment B 0 F eta = 0)
-    {eta : ℝ} (heta : eta ∈ S) : support (fun R => stress m F (R, eta)) ⊆ Icc a B := by
-  intro R hR
-  constructor
-  · by_contra hh
-    exact hR (stress_inner m hinner (le_of_not_ge hh) heta)
-  · by_contra hh
-    exact hR (stress_exterior m hB hs hm (le_of_not_ge hh) heta)
 
 noncomputable def radialSupport (S : Set ℝ) (a b : ℝ) (f : Field) : Prop :=
   ∀ eta ∈ S, ∀ R, R ∉ Icc a b → f (R, eta) = 0
@@ -889,11 +879,6 @@ noncomputable def axialStress (h : ℝ) (n : ℕ) (v u : History) (p : Field) : 
 
 
 
-/-- A concrete two-edge weight of the form prescribed in (20). -/
-noncomputable def logFlatWeight (l r cL cR R : ℝ) : ℝ :=
-  if R ∈ Ioo l r then
-    FlatCutoff.edge cL (Real.log (R / l)) * FlatCutoff.edge cR (Real.log (r / R))
-  else 0
 
 
 

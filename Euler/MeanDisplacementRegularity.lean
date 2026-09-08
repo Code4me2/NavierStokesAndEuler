@@ -23,13 +23,7 @@ open scoped Topology
 variable (T : ℝ) (hT : 0 ≤ T)
   (FInv FInv' : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
 
-/-- The actual L² time derivative of the label path `FInv η`. -/
-def labelDerivative : meanDerivatives T hT FInv →L[ℝ] TimeLp T L2 :=
-  (productDerivative T hT FInv FInv').comp (meanDerivatives T hT FInv).subtypeL
 
-/-- The real representative of the label displacement. -/
-def labelPath (u : meanDerivatives T hT FInv) : ℝ → L2 :=
-  productPrimitive T hT FInv (u : TimeLp T L2)
 
 
 variable (hFInv : ∀ t : Icc (0 : ℝ) T,

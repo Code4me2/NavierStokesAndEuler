@@ -1333,13 +1333,6 @@ theorem initialGaussian_unweighted (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
     UnweightedClass gaussianStrip β (fun n x => initialGaussian B N0 n x i) :=
   initialGaussian_unweighted_of_fields β i (gaussianField_all_gains B N0 β i)
 
-/-- The actual full excluded error of the literal initialized state has
-every positive power (indeed every real power), on the whole angular and
-free auxiliary lift. There is no supplied output-bound premise. -/
-theorem initializedErrors_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
-    UnweightedClass gaussianStrip β
-      (fun n x => (ActualInitialMean.initialized B N0).errors.total n x i) :=
-  initializedErrors_all_gains_of_gaussian B N0 β i (initialGaussian_unweighted B N0 β i)
 
 
 end ConstructedEndpoint

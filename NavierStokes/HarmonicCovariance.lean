@@ -113,16 +113,6 @@ theorem realAngularProduct_mem {s : StripData D} {P : ℕ → D → ℝ} {α β 
   intro n x _
   exact (realAngularProduct_eq (a n) (b n) (k n) (Φ n) (hkp n) x).symm
 
-theorem blockCovariance_mem {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
-    (b : HarmonicBlock D) (N : ℕ) (hband : b.BandLimited N)
-    (hcoef : ∀ i j, WaveClass s P α (fun n x => b.velocity n i j x))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (hkp : ∀ n, b.angularFrequency n ≠ 0) (i j : Fin 3) :
-    MeanClass s (α + α) (bilinearCovariance b.oscillation b.oscillation i j) :=
-  realAngularProduct_mem (fun n => b.velocity n i) (fun n => b.velocity n j) N
-    (fun n => hband.1 n i) (hcoef i) (hcoef j) hP0 hP1
-    b.frequency b.phase b.angularFrequency hkp
 
 theorem mixedBlockCovariance_mem {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
     (a b : HarmonicBlock D) (N : ℕ) (hband : a.BandLimited N)

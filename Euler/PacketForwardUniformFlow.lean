@@ -1,6 +1,8 @@
 import Euler.PacketForwardOutputCosts
 import Euler.PacketGraphFlowExplicitBounds
-import Euler.PacketForwardInitializedFlowAndShear
+import Euler.PacketForwardInitializedFlowBounds
+import Euler.PacketForwardGlobalShear
+import Euler.PacketForwardExactPressureError
 
 /-! A single polynomial comparison gives the actual canonical correction,
 the physical shear and pressure errors, and the three flow fields. Only

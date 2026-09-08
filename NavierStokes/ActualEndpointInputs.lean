@@ -58,39 +58,8 @@ noncomputable def initialPressureModel (B N0 N : ℕ) (hN : 4 ≤ N)
 
 
 
-theorem initialPotentialModel_extension (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WA : PhysicalStageBounds.WaveData h DA IA KA (Fin 3))
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (initialPotentialModel B N0 N hN WA) x) := by
-  have hx0 : x ≠ 0 := by intro he; exact hx (by simp [he])
-  have hb := TailGaugePotential.finalPotential_awayExtensions certificate modulation upper B x hx0
-  have hi := OffplaneJetExtensions.initialIncrement_extension WA
-    (ActualPhysicalStageBounds.actualInitialTemporalInput B N0 N hN)
-    (ActualPhysicalStageBounds.actualInitialRankInput B N0 N hN)
-    outgoing.data.h_pos outgoing.data.h_lt_half (hq.trans (ChartScales.Q_le_one N)) hq hq hx hqx
-  exact OffplaneJetExtensions.extension_add hb hi
 
-theorem initialDirectModel_extension (B N0 N : ℕ) (hN : 4 ≤ N)
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (initialDirectModel B N0 N) x) :=
-  OffplaneJetExtensions.mean_angular_extension
-    (ActualPhysicalStageBounds.actualInitialAngularInput B N0 N hN)
-    outgoing.data.h_pos outgoing.data.h_lt_half (hq.trans (ChartScales.Q_le_one N)) hq hx hqx
 
-theorem initialPressureModel_extension (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit)
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (initialPressureModel B N0 N hN WP) x) := by
-  have hb : Nonempty (JointResidualLimits.OneSidedExtension
-      (FinalSlowBase.pressure certificate modulation upper B) x) :=
-    ⟨SlowBaseEndpoint.finalPressureNonzeroAxial certificate modulation upper B hx⟩
-  have hi := OffplaneJetExtensions.initialPressureIncrement_extension WP
-    (ActualPhysicalStageBounds.actualInitialPressureInput B N0 N hN)
-    outgoing.data.h_pos outgoing.data.h_lt_half (hq.trans (ChartScales.Q_le_one N)) hq hx hqx
-  exact OffplaneJetExtensions.extension_add hb hi
 
 end InitialModels
 

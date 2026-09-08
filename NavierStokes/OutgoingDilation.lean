@@ -158,16 +158,7 @@ theorem Pi_contDiffOn (F : Profile) (XR : ℝ) (hXR : 0 < XR) : ContDiffOn ℝ �
 
 def familyDomain : Set (ℝ × (ℝ × ℝ)) := Ioi 0 ×ˢ domain
 
-theorem dilation_family_contDiffOn :
-    ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => (z.2.1 / z.1, z.2.2)) familyDomain :=
-  (contDiff_snd.fst.contDiffOn.div contDiff_fst.contDiffOn
-    (fun _ hz => ne_of_gt hz.1)).prodMk contDiff_snd.snd.contDiffOn
 
-theorem dilation_family_mapsTo :
-    MapsTo (fun z : ℝ × (ℝ × ℝ) => (z.2.1 / z.1, z.2.2)) familyDomain domain := by
-  intro z hz
-  change 0 < z.2.1 / z.1 ∧ z.2.2 ∈ (univ : Set ℝ)
-  exact ⟨div_pos hz.2.1 hz.1, mem_univ _⟩
 
 
 

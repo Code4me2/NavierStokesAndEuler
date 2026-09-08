@@ -942,39 +942,7 @@ theorem waveBounds_smooth {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
 
 /-! ## Finite harmonic values, realness, and actual label reconstruction -/
 
-theorem nonlinearCoefficients_band (c : CorrectionState.Context D)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.BandLimited M) (hb : b.BandLimited N) (n : ℕ) (i : Fin 3) :
-    BandLimited (nonlinearCoefficients c a b n i) (max (M + N) (N + N)) := by
-  have ha' r := HarmonicResidual.band_realCoefficients (ha.1 n r)
-  have hb' r := HarmonicResidual.band_realCoefficients (hb.1 n r)
-  have hab := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) ha' hb' i
-  have hba := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) hb' ha' i
-  have hbb := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) hb' hb' i
-  exact ((hab.mono (le_max_left _ _)).add (hba.mono (by omega))).add
-    (hbb.mono (le_max_right _ _))
 
-theorem crossCoefficients_band (g : HarmonicResidual.Frame D)
-    (k : ℝ) (Φ : D → ℝ) (kp : ℤ) (m : D → ComplexVector)
-    {a : HarmonicResidual.VectorCoefficients D} {N : ℕ}
-    (ha : ∀ i, BandLimited (a i) N) (i : Fin 3) :
-    BandLimited (crossCoefficients g k Φ kp m a i) N := by
-  have hleft : BandLimited (HarmonicResidual.transport g k Φ kp
-      (HarmonicResidual.constantVector m) a i) N := by
-    have h := HarmonicResidual.band_transport g k Φ kp
-      (fun j => band_constantCoefficient (fun x => m x j)) ha i
-    simp only [zero_add] at h
-    exact h
-  have hright : BandLimited (HarmonicResidual.transport g k Φ kp a
-      (HarmonicResidual.constantVector m) i) N := by
-    have h := HarmonicResidual.band_transport g k Φ kp
-      ha (fun j => band_constantCoefficient (fun x => m x j)) i
-    simp only [add_zero] at h
-    exact h
-  exact hleft.add hright
 
 
 

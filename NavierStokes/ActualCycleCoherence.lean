@@ -787,18 +787,6 @@ variable (B N0 : ℕ) (sigma : ℕ → ℝ) (S : Index B N0 → ℕ → Set Poin
     (hcover : ∀ l n z, z ∈ ActualInitialization.geometry.domain → z ∈ S l n →
       l ∈ activeLabels standardRegion B N0 n)
 
-include H W hS hcore hcover in
-/-- The geometric induction uses the same fixed recurrence and supplied
-analytic stage data; no sequence of coherent states is assumed. -/
-theorem iterate_coherent (j : ℕ) : Coherent (state B N0 j) := by
-  induction j with
-  | zero => exact initial B N0
-  | succ j ih =>
-    exact step (H j) (W j) ih
-      (fun l n z hz hs => by
-        change l ∈ (state B N0 j).coefficients.labels n
-        rw [state_labels]
-        exact hcover l n z hz hs) hS hcore
 
 
 

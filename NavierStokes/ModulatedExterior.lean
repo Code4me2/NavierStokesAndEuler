@@ -275,14 +275,6 @@ theorem realized_base_residual_zero (hds : SmoothCoefficients d)
     (fun _ hp => realized_angular_pure_heat W Q M hd hbase hp)
     (fun _ hp => realized_pressure_pure_heat W Q M hd hbase henergy hp) hz
 
-theorem realized_residual_germ_zero (hds : SmoothCoefficients d)
-    (henergy : RestoredSquaredSwirl W Q (S := S)) {a : ℕ → ℕ} (ha : StrictMono a)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) :
-    (fun y => navierStokesResidual (baseVelocity a F.data.h W.axis.normalization d)
-      (basePressure a F.data.h W.axis.normalization d) y.1 y.2) =ᶠ[𝓝 z] (fun _ => 0) := by
-  filter_upwards [(cartesianExterior_isOpen F.data.h_pos F.data.h_lt_half
-    (nominalExteriorRadius W)).mem_nhds hz] with y hy
-  exact realized_base_residual_zero W Q M hd hbase houter hds henergy ha hy
 
 
 end SchemeRealization
@@ -309,17 +301,6 @@ theorem actual_exterior_coefficients :
     ExteriorCoefficients (ConstructedSlowBase.Modulated.coefficients v) (nominalExteriorRadius W) :=
   realized_exterior_coefficients W v.profiles v.finiteModification (actual_realizes v) rfl rfl
 
-/-- Exact heat exterior for this actual modulated sequence and any strictly
-increasing cutoff schedule.  The pressure anchor is discharged internally. -/
-theorem actual_base_eq_heat {a : ℕ → ℕ} (ha : StrictMono a) :
-    EqOn (baseVelocity a F.data.h W.axis.normalization (ConstructedSlowBase.Modulated.coefficients v))
-      (heatVelocity (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) ∧
-    EqOn (basePressure a F.data.h W.axis.normalization (ConstructedSlowBase.Modulated.coefficients v))
-      (heatPressureField (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) :=
-  realized_base_eq_heat W v.profiles v.finiteModification (actual_realizes v) rfl rfl
-    (ConstructedSlowBase.Modulated.coefficients_smooth v) (actual_squared_swirl_restored v) ha
 
 
 

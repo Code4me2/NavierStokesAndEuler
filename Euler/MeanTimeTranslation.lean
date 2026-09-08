@@ -1,4 +1,5 @@
-import Euler.TimeLpStrongContinuity
+import Euler.TimeLpBoundedMap
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Euler.MeanSolenoidalTranslation
 import Mathlib.MeasureTheory.Function.LpSpace.ContinuousCompMeasurePreserving
 

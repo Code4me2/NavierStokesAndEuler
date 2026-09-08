@@ -467,15 +467,6 @@ theorem residualDifferenceBlock_class {s : StripData D} {κ α H : ℝ} {P : ℕ
 
 /-! ## Frequency support and physical cross-advection -/
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem nonconstant_sub (a b : Coefficients D) :
-    HarmonicResidual.nonconstant (a - b) =
-      HarmonicResidual.nonconstant a - HarmonicResidual.nonconstant b := by
-  ext j x
-  by_cases hj : j = 0
-  · subst j
-    simp [HarmonicResidual.nonconstant]
-  · simp only [nonconstant_apply_of_ne _ hj, coeff_sub]
 
 noncomputable def transportDifference (g : HarmonicResidual.Frame D)
     (k : ℝ) (Φ : D → ℝ) (kp : ℤ) (B₀ B₁ : D → ComplexVector)
@@ -485,14 +476,6 @@ noncomputable def transportDifference (g : HarmonicResidual.Frame D)
   (HarmonicResidual.transport g k Φ kp a (HarmonicResidual.constantVector B₁) i -
     HarmonicResidual.transport g k Φ kp a (HarmonicResidual.constantVector B₀) i)
 
-theorem nonlinear_difference_algebra (g : HarmonicResidual.Frame D)
-    (k : ℝ) (Φ : D → ℝ) (kp : ℤ) (B₀ B₁ : D → ComplexVector)
-    (a : HarmonicResidual.VectorCoefficients D) (p : Coefficients D) (i : Fin 3) :
-    HarmonicResidual.nonlinearResidual g k Φ kp (HarmonicResidual.constantVector B₁) a p i -
-      HarmonicResidual.nonlinearResidual g k Φ kp (HarmonicResidual.constantVector B₀) a p i =
-        transportDifference g k Φ kp B₀ B₁ a i := by
-  unfold HarmonicResidual.nonlinearResidual HarmonicResidual.linearResidual transportDifference
-  abel
 
 
 

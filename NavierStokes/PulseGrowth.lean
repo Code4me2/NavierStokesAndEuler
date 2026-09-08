@@ -39,23 +39,7 @@ theorem netGrowth_at_threshold (lam u : ℝ) : netGrowth lam u u = 0 := by
   unfold netGrowth
   field_simp [ne_of_gt (one_add_sq_pos u), ne_of_gt (radius_pos u)]; ring
 
-/-- Strict decrease in squared distance from zero, for a positive reference rate. -/
-theorem netGrowth_strictAnti_sq {lam u s t : ℝ} (hlam : 0 < lam)
-    (hst : s ^ 2 < t ^ 2) : netGrowth lam u t < netGrowth lam u s := by
-  have hst' : 1 + s ^ 2 < 1 + t ^ 2 := by linarith
-  have hr : Real.sqrt (1 + s ^ 2) < Real.sqrt (1 + t ^ 2) :=
-    Real.sqrt_lt_sqrt (le_of_lt (one_add_sq_pos s)) hst'
-  have hg : lam / Real.sqrt (1 + t ^ 2) < lam / Real.sqrt (1 + s ^ 2) := by
-    apply (div_lt_div_iff₀ (radius_pos t) (radius_pos s)).2
-    exact mul_lt_mul_of_pos_left hr hlam
-  have hd : lam * (1 + s ^ 2) / ((1 + u ^ 2) * Real.sqrt (1 + u ^ 2)) <
-      lam * (1 + t ^ 2) / ((1 + u ^ 2) * Real.sqrt (1 + u ^ 2)) :=
-    div_lt_div_of_pos_right (mul_lt_mul_of_pos_left hst' hlam) (dampingDenominator_pos u)
-  exact sub_lt_sub hg hd
 
-theorem netGrowth_eq_of_sq_eq {lam u s t : ℝ} (hst : s ^ 2 = t ^ 2) :
-    netGrowth lam u s = netGrowth lam u t := by
-  simp only [netGrowth, hst]
 
 
 

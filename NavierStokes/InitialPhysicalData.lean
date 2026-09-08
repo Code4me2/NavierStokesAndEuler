@@ -2451,15 +2451,6 @@ theorem potential_sum_eq_active (i : Fin 3) (n d : ℕ) (w : ProblemStatement.Sp
   periodized_sum_eq_active _ (potential_periodized_index i)
     (potential_support B N0 i).periodized_support n d w hw hx
 
-theorem pressure_sum_eq_active (n d : ℕ) (w : ProblemStatement.SpaceTime)
-    (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    (pressureFamily B N0).sum innerRadius ActualPrimary.h ActualPrimary.slots.radius w =
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        (pressureFamily B N0).periodized innerRadius ActualPrimary.h ActualPrimary.slots.radius
-          (primaryIndex l) w :=
-  periodized_sum_eq_active _ pressure_periodized_index
-    (pressure_support B N0).periodized_support n d w hw hx
 
 theorem vectorSum_apply {H : ℕ} {K : Type*} (f : Fin 3 → PhysicalCopyBounds.CopyFamily H K)
     (a h r0 : ℝ) (w : ProblemStatement.SpaceTime) (i : Fin 3) :
@@ -2530,17 +2521,6 @@ theorem potential_eq_active (n d : ℕ) (w : ProblemStatement.SpaceTime)
   intro l hl
   exact potential_periodized_eq (l.2, l.1) i w hw
 
-/-- The same fixed finite family represents the potential on a full
-spacetime neighborhood; hence its spatial curl may be taken termwise. -/
-theorem potential_germ_eq_active (n d : ℕ) {w : ProblemStatement.SpaceTime}
-    (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    potential B N0 =ᶠ[𝓝 w] fun z =>
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        ActualPrimaryCoherence.cartesianPotential l.2 l.1 z := by
-  have hn := (graph_smooth_of_strip n d hx).continuousAt (strip.isOpen_domain.mem_nhds hx)
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw, hn] with z hzt hzx
-  exact potential_eq_active n d z hzt hzx
 
 
 

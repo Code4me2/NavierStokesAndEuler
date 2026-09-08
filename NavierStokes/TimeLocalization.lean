@@ -58,9 +58,6 @@ theorem activatedVelocity_zero_early (u : VelocityField) {t : ℝ}
     (ht : |t| ≤ 3 / 8) (x : Space) : activatedVelocity u (t, x) = 0 := by
   simp only [activatedVelocity, timeSwitch_zero_of_abs_le ht, zero_smul]
 
-theorem activatedPressure_zero_early (p : PressureField) {t : ℝ}
-    (ht : |t| ≤ 3 / 8) (x : Space) : activatedPressure p (t, x) = 0 := by
-  simp only [activatedPressure, timeSwitch_zero_of_abs_le ht, zero_mul]
 
 /-- No hypothesis on `u (0,x)` is required. -/
 theorem activatedVelocity_zero_initial (u : VelocityField) (x : Space) :
@@ -72,9 +69,6 @@ theorem activatedVelocity_eq_late (u : VelocityField) {t : ℝ}
     (ht : 3 / 4 ≤ t) (x : Space) : activatedVelocity u (t, x) = u (t, x) := by
   simp only [activatedVelocity, timeSwitch_one_of_three_quarters_le ht, one_smul]
 
-theorem activatedPressure_eq_late (p : PressureField) {t : ℝ}
-    (ht : 3 / 4 ≤ t) (x : Space) : activatedPressure p (t, x) = p (t, x) := by
-  simp only [activatedPressure, timeSwitch_one_of_three_quarters_le ht, one_mul]
 
 /-- The entire spacetime field agrees locally, so all its existing local jets
 agree at every time strictly later than `3/4`. -/
@@ -122,15 +116,6 @@ theorem activatedVelocity_divergence_free (u : VelocityField)
   rw [activatedVelocity_divergence u hu t ht x, hdiv t ht x, mul_zero]
 
 
-theorem activated_temporalDerivative_eq_late (u : VelocityField) {t : ℝ}
-    (ht : 3 / 4 < t) (x : Space) :
-    temporalDerivative (activatedVelocity u) t x = temporalDerivative u t x := by
-  have he : (fun s : ℝ => activatedVelocity u (s, x)) =ᶠ[𝓝 t]
-      (fun s : ℝ => u (s, x)) := by
-    filter_upwards [timeSwitch_eventually_one ht] with s hs
-    simp only [activatedVelocity, hs, one_smul]
-  unfold temporalDerivative
-  rw [he.fderiv_eq]
 
 
 theorem activatedVelocity_norm_le (u : VelocityField) (z : SpaceTime) :

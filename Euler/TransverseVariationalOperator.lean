@@ -67,39 +67,7 @@ theorem dirichletSolver_weak (J : V →L[ℝ] W) (H : W →L[ℝ] W)
       (dirichletOperator_coercive J H L K hK hJ hH hsmall) (-J.adjoint f)), v⟫_ℝ = _
   rw [operator_inverse_apply, inner_neg_left, adjoint_inner_left]
 
-/-- No other derivative in the same Hilbert displacement space solves this form. -/
-theorem dirichletSolver_unique (J : V →L[ℝ] W) (H : W →L[ℝ] W)
-    (L K : ℝ) (hK : 0 ≤ K)
-    (hJ : ∀ u, ‖J u‖ ^ 2 ≤ L * ‖u‖ ^ 2)
-    (hH : ∀ w, ⟪H w, w⟫_ℝ ≤ K * ‖w‖ ^ 2)
-    (hsmall : K * L ≤ 1 / 2) (f : W) (u : V)
-    (hu : ∀ v, ⟪u, v⟫_ℝ - ⟪H (J u), J v⟫_ℝ = -⟪f, J v⟫_ℝ) :
-    u = dirichletSolver J H L K hK hJ hH hsmall f := by
-  apply (coerciveEquiv (dirichletOperator J H) (1 / 2) (by norm_num)
-    (dirichletOperator_coercive J H L K hK hJ hH hsmall)).injective
-  simp only [coerciveEquiv_apply]
-  apply ext_inner_right ℝ
-  intro v
-  rw [dirichletOperator_inner, hu, dirichletOperator_inner,
-    dirichletSolver_weak]
 
-/-- Quantitative boundedness of the genuinely constructed solution map. -/
-theorem dirichletSolver_norm (J : V →L[ℝ] W) (H : W →L[ℝ] W)
-    (L K : ℝ) (hK : 0 ≤ K)
-    (hJ : ∀ u, ‖J u‖ ^ 2 ≤ L * ‖u‖ ^ 2)
-    (hH : ∀ w, ⟪H w, w⟫_ℝ ≤ K * ‖w‖ ^ 2)
-    (hsmall : K * L ≤ 1 / 2) (f : W) :
-    ‖dirichletSolver J H L K hK hJ hH hsmall f‖ ≤ 2 * ‖J‖ * ‖f‖ := by
-  have hi := coerciveInverse_apply_norm_le (dirichletOperator J H) (1 / 2)
-    (by norm_num) (dirichletOperator_coercive J H L K hK hJ hH hsmall)
-    (-J.adjoint f)
-  change ‖dirichletSolver J H L K hK hJ hH hsmall f‖ ≤ _ at hi
-  have ha := J.adjoint.le_opNorm f
-  simp only [norm_neg, inv_div, div_one, LinearIsometryEquiv.norm_map] at hi ha
-  calc
-    ‖dirichletSolver J H L K hK hJ hH hsmall f‖ ≤ 2 * ‖J.adjoint f‖ := hi
-    _ ≤ 2 * (‖J‖ * ‖f‖) := mul_le_mul_of_nonneg_left ha (by norm_num)
-    _ = 2 * ‖J‖ * ‖f‖ := by ring
 
 
 open MeasureTheory Set EulerTimeLp EulerVolterraConvolution

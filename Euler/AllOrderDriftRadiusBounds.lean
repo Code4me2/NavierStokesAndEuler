@@ -51,24 +51,6 @@ theorem Budget.correctionSize_nonneg (B : Budget period hT A) : 0 ≤ B.correcti
   dsimp [Budget.correctionSize]
   positivity
 
-/-- The actual common correction retains the quantitative residual energy
-of any finite realization containing the requested words. -/
-theorem Budget.fieldTower_weightedNorm_residual (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (N : ℕ) (hN : N ≤ q-4) (hNq : N+6 ≤ q+1)
-    (s : ℕ) (hs : N+6 ≤ s) (t : Icc (0 : ℝ) T) :
-    weightedNorm period 6 N (B.radius t) ((B.fieldTower period).realization s t) ≤
-      metricAmplification B.metric.c *
-        (2*(B.spatial q hq).full.residual*Real.exp (3*B.growthCoefficient*t.val)) := by
-  have hv : value period ((B.fieldTower period).realization s t) =
-      value period (B.solution period q hq t) := by
-    rw [(B.fieldTower period).value_eq]
-    exact (B.solution_value_common period q hq t).symm
-  rw [weightedNorm_unique period 6 N (B.radius t) _ _ hv hs hNq]
-  have h := weightedNorm_le_energy period N hNq (B.radius t)
-    ((B.spatial q hq).full.radius_pos t) (B.metric.operatorPath period t)
-    (B.solution period q hq t) B.metric.c B.metric.c_pos (B.metric.operator_coercive period t)
-  exact h.trans (mul_le_mul_of_nonneg_left (B.solution_energy period q hq N hN hNq t).1
-    (zero_le_one.trans (metricAmplification_one_le B.metric.c_pos)))
 
 /-- At every finite cutoff, the norm bounds the one constructed common field. -/
 theorem Budget.fieldTower_weightedNorm_delta (B : Budget period hT A)

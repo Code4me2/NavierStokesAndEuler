@@ -1149,22 +1149,6 @@ theorem exists_entranceProfile {h j σ δ : ℝ} {P0 : ℝ → ℝ}
   exact F.cone_at_four hsmall hδ hΛone hΛN hC hcut hη
     (ha (4 / Λ, η) hpoint (by positivity))
 
-/-- Ideal-prefix pressure data produce the actual initial stress-free
-cone test in the prescribed order: cutoff, common analytic radius, scale,
-and only then normalization. -/
-theorem ideal_prefix_entranceProfile {h j : ℝ}
-    (hsmall : NaturalAxisData.SmallParameters h j)
-    {g a : ℝ → ℝ} {cap B : ℝ}
-    (hp : PressureDatum.Admissible g a cap) (hB : 2 ≤ B)
-    (hg : ∀ y ≤ 0, g y = B ^ 2 * Real.exp ((1 / 5 : ℝ) * y))
-    (ha : ∀ y ≤ 0, a y = 1) :
-    ∃ δ σ : ℝ, 0 < δ ∧ 0 < σ ∧
-      ∃ d : AnalyticInputs h j σ (PressureDatum.pressure g a),
-        ∃ M : ℝ, 0 < M ∧ ∀ Λ : ℝ, M ≤ Λ → ∀ C : ℝ,
-          entranceNormalization d Λ δ ≤ C → Nonempty (EntranceProfile d Λ C) := by
-  obtain ⟨δ, σ, hδ, hσ, hcut, ⟨d⟩⟩ := ideal_prefix_analytic_inputs hsmall hp hB hg ha
-  exact ⟨δ, σ, hδ, hσ, d,
-    exists_entranceProfile d hsmall hσ (PressureDatum.pressure_contDiff hp) hδ hcut⟩
 
 private theorem first_two_derivatives_continuous {g : ℝ → ℝ} {x : ℝ}
     (hg : ContDiffAt ℝ 2 g x) :

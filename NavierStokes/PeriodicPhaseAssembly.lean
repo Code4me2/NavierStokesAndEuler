@@ -308,16 +308,6 @@ theorem carrier_periodic (g : Geometry) (χ : Plane → ℝ) (A B : P → ℝ)
   simp only [HarmonicCalculus.carrier, fullPhase_periodic]
 
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem carrier_angularLift_eq_character (Φ : P × Plane → ℝ) {K : ℝ} (hK : K ≠ 0)
-    (m j : ℤ) (x : (P × ℝ) × Plane) :
-    HarmonicCalculus.carrier ((j : ℝ) * K) (angularLift Φ ((m : ℝ) / K)) x =
-      HarmonicFields.character j (K * Φ (x.1.1, x.2) + (m : ℝ) * x.1.2) := by
-  unfold HarmonicCalculus.carrier HarmonicCalculus.phaseFactor angularLift HarmonicFields.character
-  congr 1
-  push_cast
-  have hKc : (K : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hK
-  field_simp [hKc]
 
 
 end Phases
@@ -339,39 +329,10 @@ noncomputable def profilePhase (g : Geometry) (χ : Plane → ℝ) (ε p pz x0 :
   phase g χ (profileIntercept ε pz x0) (profileRate p pz F G)
 
 
-theorem profilePhase_germ (g : Geometry) (w : ClockWindow)
-    (hinj : InjOn quotientPoint ((fun z => g.center + g.basis z) '' w.outer))
-    (ε p pz x0 : ℝ) (F G : Parameter → ℝ) (k : Frequency)
-    {x : (Parameter × ℝ) × Plane} (hx : g.coordinates k x.2 ∈ w.core) :
-    angularLift (profilePhase g w.cutoff ε p pz x0 F G) p =ᶠ[𝓝 x]
-      (fun y => PhaseCalculus.phase ε p pz x0 (fun s => F (s.1, (s.2.2, s.2.1)))
-        (fun s => G (s.1, (s.2.2, s.2.1)))
-        (slowSwap y.1.1, (y.1.2, (g.coordinates k y.2).2))) := by
-  have he := fullPhase_germ g w hinj (profileIntercept ε pz x0) (profileRate p pz F G) p k hx
-  filter_upwards [he] with y hy
-  unfold profilePhase
-  rw [hy]
-  unfold angularLift nativePhase profileIntercept profileRate slowSwap PhaseCalculus.phase
-  ring
 
 
 /-! ## One reference phase under actual clock and common-cover changes -/
 
-theorem periodicClock_scale_transport (g : Geometry) (χ : Plane → ℝ) (d : ℕ)
-    (rate : ℝ) (hrate : rate ≠ 0) (Y : Plane) :
-    rate * periodicClock (CopySolveCompatibility.transportGeometry g d 0 rate hrate)
-      (χ ∘ CopySolveCompatibility.nativeTimeMap 0 rate) Y =
-      periodicClock g χ (coverPower d Y) := by
-  calc
-    _ = periodizeScalar (CopySolveCompatibility.transportGeometry g d 0 rate hrate)
-        (fun z => χ (CopySolveCompatibility.nativeTimeMap 0 rate z) * (0 + rate * z.2)) Y := by
-      unfold periodicClock periodizeScalar
-      rw [← tsum_mul_left]
-      apply tsum_congr
-      intro k
-      simp only [comp_apply, zero_add]
-      ring
-    _ = _ := periodicClock_transport g χ d 0 rate hrate Y
 
 section Transport
 
@@ -485,11 +446,6 @@ section CarrierAdapters
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
-omit [NormedSpace ℝ P] in
-theorem carrier_germ {Φ Ψ : P → ℝ} {x : P} (hΦ : Φ =ᶠ[𝓝 x] Ψ) (K : ℝ) :
-    HarmonicCalculus.carrier K Φ =ᶠ[𝓝 x] HarmonicCalculus.carrier K Ψ := by
-  filter_upwards [hΦ] with y hy
-  simp only [HarmonicCalculus.carrier, hy]
 
 
 

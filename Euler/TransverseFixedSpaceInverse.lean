@@ -128,31 +128,5 @@ theorem fixedFrameSolver_unique (f : TimeLp T E) (u : zeroTraceDerivatives (U :=
   intro v
   rw [fixedFrameOperator_inner, hu, fixedFrameOperator_inner, fixedFrameSolver_weak]
 
-/-- The new fixed-space inverse is exactly the coordinates of the original
-physical transverse solve, rather than a separate unconnected construction. -/
-theorem fixedFrameSolver_eq_transverse (m : Icc (0 : ℝ) T → E)
-    (hTangent : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ x : U, Q t x = η)
-    (f : TimeLp T E) :
-    fixedFrameSolver T hT Q Q₁ H c hc hQ hd K hK hH hsmall f =
-      transverseBackward T hT Q Q₁ c hc hQ hd m
-        (transverseSolver T hT m H K hK hH hsmall f) := by
-  symm
-  apply fixedFrameSolver_unique T hT Q Q₁ H c hc hQ hd K hK hH hsmall
-  intro v
-  let u := transverseSolver T hT m H K hK hH hsmall f
-  have h := transverseSolver_weak T hT m H K hK hH hsmall f
-    (transverseForward T hT Q Q₁ hd m hTangent v)
-  have hu := congrArg (fun z : transverseDerivatives T hT m => (z : TimeLp T E))
-    (transverseForward_backward T hT Q Q₁ c hc hQ hd m hTangent hRange u)
-  change fixedFrameDerivative T hT Q Q₁ (transverseBackward T hT Q Q₁ c hc hQ hd m u) =
-    (u : TimeLp T E) at hu
-  change ⟪fixedFrameDerivative T hT Q Q₁ (transverseBackward T hT Q Q₁ c hc hQ hd m u),
-      fixedFrameDerivative T hT Q Q₁ v⟫_ℝ -
-    ⟪timeMultiplier T hT H (primitiveTimeLp T hT
-        (fixedFrameDerivative T hT Q Q₁ (transverseBackward T hT Q Q₁ c hc hQ hd m u))),
-      fixedFramePrimitive T hT Q Q₁ v⟫_ℝ = _
-  rw [hu]
-  exact h
 
 end EulerTransverseFixedSpaceInverse

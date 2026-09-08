@@ -234,20 +234,6 @@ theorem extension_of_power_jets {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   refine ⟨C, 0, e, fun w hw _ hq1 => ?_⟩
   simpa only [Real.rpow_zero, mul_one] using hm w hw hq1
 
-/-- Positive raw stages extend directly from `RawStageBounds`. The stage
-index hypothesis is retained exactly: no stage-zero estimate is inferred. -/
-theorem rawStage_extension {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hqbig : qbig ≤ 1) {F : ℕ → SpaceTime → V} {g L : ℕ → ℝ} {C p : ℕ → ℕ → ℝ}
-    (hb : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) F g L C p
-      (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig))
-    {j : ℕ} (hj : 1 ≤ j)
-    (hf : ContDiffOn ℝ ∞ (F j) (CutStageEstimates.physicalSublevel h qbig))
-    {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension (F j) x) := by
-  apply extension_of_powerLog_jets hh hh1 hqbig hf _ hx hqx
-  intro m
-  exact ⟨C j m, p j m, g j - L m, fun w hw _ hq1 => hb j hj m w ⟨hw.1, hw⟩ hq1⟩
 
 
 end PhysicalExtensions

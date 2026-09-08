@@ -251,23 +251,6 @@ theorem principalField_components {N : ℕ}
     simp only [principalField_apply P hdet outer ε T hq x, slotVelocity_succ,
       assembledTangent]
 
-/-- The angular integral and torus-square integral of this actual vector
-field give the physical target, with the original inverse square roots. -/
-theorem physical_principal_covariance (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (P U).matrix (chartTarget h q N T0 U)) (i : Fin 2) :
-    doubleAverage (fun Y θ =>
-      principalField P hdet (physicalOuter h N) (physicalViscosity h N)
-        (chartTarget h q N T0) q x Y θ 0 *
-      principalField P hdet (physicalOuter h N) (physicalViscosity h N)
-        (chartTarget h q N T0) q x Y θ i.succ) =
-      q ^ (-velocityExponent h - 1 / 2) * T0 i := by
-  simp_rw [(principalField_components P hdet _ _ _ hq x _ _).1,
-    (principalField_components P hdet _ _ _ hq x _ _).2 i]
-  exact physical_primary_covariance sys hdet N hN P hq hqN x T0 hcone i
 
 /-! ## A single cutoff, before periodization -/
 
@@ -314,27 +297,9 @@ noncomputable def cutoffVelocity (a : WaveCoefficients X) (ψ : ℕ → X → �
   fun i => (vectorMode (a.frequency n) (a.phase n)
     ((a.withCutoff ψ).amplitude n) x i).re
 
-noncomputable def curlVelocity (a : WaveCoefficients X) (s : StripData X)
-    (d : GraphDirections X) (ψ : ℕ → X → ℝ) (n : ℕ) (x : X) : Vector :=
-  fun i => (vectorMode (a.frequency n) (a.phase n)
-    ((a.withCutoff ψ).curlCorrection s d n) x i).re
-
-noncomputable def correctedVelocity (a : WaveCoefficients X) (s : StripData X)
-    (d : GraphDirections X) (ψ : ℕ → X → ℝ) (n : ℕ) (x : X) : Vector :=
-  fun i => (vectorMode (a.frequency n) (a.phase n)
-    ((a.corrected s d ψ).amplitude n) x i).re
 
 
-omit [NormedAddCommGroup X] [NormedSpace ℝ X] in
-theorem cutoffVelocity_identification (a : WaveCoefficients X) (ψ : ℕ → X → ℝ)
-    (n : ℕ) (z : X) {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : ℝ) (T : Vec2)
-    (q : ℝ) (x : SlotColoring.Position) (j : Fin 2) (Y : Plane) (θ : ℝ)
-    (ha : (a.withCutoff ψ).amplitude n z = slotAmplitude P hdet outer ε T q x j Y)
-    (hphase : a.frequency n * a.phase n z = slotPhase P j (Y, θ)) :
-    cutoffVelocity a ψ n z = slotVelocity P hdet outer ε T q x j Y θ :=
-  mode_identification (a.frequency n) (a.phase n) ((a.withCutoff ψ).amplitude n) z
-    P hdet outer ε T q x j Y θ ha hphase
+
 
 end CurlCorrection
 
@@ -342,11 +307,6 @@ noncomputable def covarianceError (V R : Plane → ℝ → Vector) (i : Fin 2)
     (Y : Plane) (θ : ℝ) : ℝ :=
   V Y θ 0 * R Y θ i.succ + R Y θ 0 * V Y θ i.succ + R Y θ 0 * R Y θ i.succ
 
-theorem covariance_expansion (V R : Plane → ℝ → Vector) (i : Fin 2) (Y : Plane) (θ : ℝ) :
-    (V Y θ + R Y θ) 0 * (V Y θ + R Y θ) i.succ =
-      V Y θ 0 * V Y θ i.succ + covarianceError V R i Y θ := by
-  simp only [Pi.add_apply, covarianceError]
-  ring
 
 private theorem continuous_angularMean {f : Plane → ℝ → ℝ}
     (hf : Continuous f.uncurry) : Continuous (fun Y => SmoothLoop.angularMean (f Y)) :=
@@ -364,18 +324,6 @@ private theorem squareAverage_add {f g : Plane → ℝ} (hf : Continuous f) (hg 
   · exact (hg.continuousOn.integrableOn_compact (isCompact_Icc.prod isCompact_Icc)).mono_set
       (Set.prod_mono Ico_subset_Icc_self Ico_subset_Icc_self)
 
-theorem doubleAverage_add {f g : Plane → ℝ → ℝ}
-    (hf : Continuous f.uncurry) (hg : Continuous g.uncurry) :
-    doubleAverage (fun Y θ => f Y θ + g Y θ) = doubleAverage f + doubleAverage g := by
-  unfold doubleAverage
-  have he : (fun Y => SmoothLoop.angularMean (fun θ => f Y θ + g Y θ)) =
-      fun Y => SmoothLoop.angularMean (f Y) + SmoothLoop.angularMean (g Y) := by
-    funext Y
-    apply SmoothLoop.angularMean_add
-    · exact hf.comp (continuous_const.prodMk continuous_id)
-    · exact hg.comp (continuous_const.prodMk continuous_id)
-  rw [he]
-  exact squareAverage_add (continuous_angularMean hf) (continuous_angularMean hg)
 
 
 /-! ## Canonical source data: actual ODE pulses and the same matrix -/
@@ -540,17 +488,6 @@ noncomputable def sourceField {N : ℕ}
   ∑ᶠ a : SignedIndex,
     (A a.1).actualVelocity hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ
 
-theorem sourceField_eq {N : ℕ}
-    (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (Y : Plane) (θ : ℝ) :
-    sourceField A hdet outer ε T q x Y θ =
-      principalField (fun U => (A U).pairData) hdet outer ε T q x Y θ := by
-  unfold sourceField principalField
-  apply finsum_congr
-  intro a
-  exact (A a.1).actualVelocity_eq hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ
 
 
 end Source
@@ -564,10 +501,6 @@ open LinearWaveBounds
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable {Q : Type} [NormedAddCommGroup Q]
 
-noncomputable def cutoffModeField (a : SignedIndex → WaveCoefficients X)
-    (ψ : SignedIndex → ℕ → X → ℝ) (band : SignedIndex → ℕ)
-    (point : SignedIndex → Plane → ℝ → X) (Y : Plane) (θ : ℝ) : Vector :=
-  ∑ᶠ b : SignedIndex, cutoffVelocity (a b) (ψ b) (band b) (point b Y θ)
 
 
 
@@ -660,30 +593,6 @@ theorem angular_principal_finite {N : ℕ} (hN : 1 ≤ N)
     simp only [slotVelocity_zero, slotVelocity_succ, PairData.radialWave, PairData.tangentWave]
     exact (wave_continuous_theta _ _ _ _ _ _).mul (wave_continuous_theta _ _ _ _ _ _)
 
-theorem angular_principal_regular {N : ℕ} (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position) (i : Fin 2) :
-    let f := fun Y => SmoothLoop.angularMean (fun θ =>
-      principalField P hdet outer ε T q x Y θ 0 * principalField P hdet outer ε T q x Y θ i.succ)
-    Continuous f ∧ ∀ Y k, f (Y + TorusAverages.latticePoint k) = f Y := by
-  dsimp only
-  obtain ⟨F, hF⟩ := angular_principal_finite hN P hdet outer ε T hq x i
-  constructor
-  · simp_rw [hF]
-    apply continuous_finsetSum
-    intro a _
-    exact ((continuous_const.mul
-      (covered_continuous ((P a.1).rawRadial_continuous hdet a.2)
-        ((P a.1).rawRadial_compact hdet a.2) _)).mul
-          (covered_continuous ((P a.1).rawTangent_continuous hdet a.2 i)
-            ((P a.1).rawTangent_compact hdet a.2 i) _)).mul continuous_const
-  · intro Y k
-    rw [hF, hF]
-    apply Finset.sum_congr rfl
-    intro a _
-    unfold diagonalCovariance
-    rw [covered_periodic, covered_periodic]
 
 
 
@@ -696,18 +605,6 @@ theorem nativeVector_continuous {U : UnsignedLabel} (P : PairData sys U)
   · exact P.rawRadial_continuous hdet j
   · exact P.rawTangent_continuous hdet j k
 
-theorem slotVelocity_continuous {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : ℝ) (T : Vec2)
-    (q : ℝ) (x : SlotColoring.Position) (j : Fin 2) (hphase : Continuous (P.phases j)) :
-    Continuous (fun z : Plane × ℝ => slotVelocity P hdet outer ε T q x j z.1 z.2) := by
-  have hcov : Continuous (coveredVector P hdet j) :=
-    (TorusAverages.periodize_continuous (nativeVector_continuous P hdet j)
-      (nativeVector_compact P hdet j)).comp (SlotGeometry.cover ^ SlotColoring.nativeIndex h U.1).continuous
-  apply continuous_pi
-  intro i
-  simp only [slotVelocity_formula]
-  exact (continuous_const.mul (((continuous_apply i).comp hcov).comp continuous_fst)).mul
-    (Real.continuous_cos.comp ((continuous_const.mul continuous_snd).add (hphase.comp continuous_fst)))
 
 
 
@@ -724,13 +621,6 @@ theorem slotVelocity_outer_scale {U : UnsignedLabel} (P : PairData sys U)
   simp only [Pi.smul_apply, smul_eq_mul, slotVelocity_formula]
   ring
 
-theorem SourcePair.actualVelocity_outer_scale {Q : Type} [NormedAddCommGroup Q]
-    {U : UnsignedLabel} (A : SourcePair Q sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : ℝ) (T : Vec2)
-    (q : ℝ) (x : SlotColoring.Position) (j : Fin 2) (Y : Plane) (θ : ℝ) :
-    A.actualVelocity hdet outer ε T q x j Y θ = outer • A.actualVelocity hdet 1 ε T q x j Y θ := by
-  rw [A.actualVelocity_eq, A.actualVelocity_eq]
-  exact slotVelocity_outer_scale A.pairData hdet outer ε T q x j Y θ
 
 section PhysicalCoefficientAssembly
 
@@ -739,13 +629,6 @@ open LinearWaveBounds
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable {Q : Type} [NormedAddCommGroup Q]
 
-/-- Chart velocity is converted to physical velocity outside the chart
-coefficient. The weighted class of the original coefficient is unchanged. -/
-noncomputable def scaledCutoffModeField (outer : UnsignedLabel → ℝ)
-    (a : SignedIndex → WaveCoefficients X) (ψ : SignedIndex → ℕ → X → ℝ)
-    (band : SignedIndex → ℕ) (point : SignedIndex → Plane → ℝ → X)
-    (Y : Plane) (θ : ℝ) : Vector :=
-  ∑ᶠ b : SignedIndex, outer b.1 • cutoffVelocity (a b) (ψ b) (band b) (point b Y θ)
 
 
 

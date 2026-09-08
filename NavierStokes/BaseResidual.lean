@@ -1401,49 +1401,6 @@ theorem radialTailExpression_rate {l : Filter SpaceTime} {h lo hi : ℝ}
     have hp := pressurePower_lower hh.le N hi
     linarith
 
-/-- The actual finite residual left by the recurrence has arbitrary
-increasing order as the truncation index increases. Its rate is derived
-from the explicit omitted monomials, not supplied as a hypothesis. -/
-theorem truncationResidual_rate {l : Filter SpaceTime} {h lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h lo hi) (hlo : 0 < lo)
-    {O : Set Inner} (hO : IsOpen O) (hKO : innerBox lo hi ⊆ O)
-    (N : ℕ) (C : ℝ) (f : SlowProfiles)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) (M : ℕ) :
-    FiniteJetRate l (fun z => (cartesianChart h z).1)
-      (fun z => truncationResidual N h C f z.1 z.2) M (2 * (N : ℝ) * h - 2 - M) := by
-  let R := radialTailExpression N h C f
-  let F := transportTailField N h (angularExponent h) 1 f.flux f.axial f.phi
-  let Z := transportTailField N h (axialExponent h) 0 f.flux f.axial f.axial
-  have hW := chartedDomain_isOpen hh hh1 hO
-  have hlW := A.in_chartedDomain hh hh1 hKO
-  have hq := A.positive_small hh hh1
-  have hRs : ContDiffOn ℝ ∞ R (chartedDomain h O) :=
-    radialTailExpression_smooth hh hh1 hO N C f hv hu hf hX hL
-  have hFs : ContDiffOn ℝ ∞ F (chartedDomain h O) :=
-    transportTailField_smooth hh hh1 hO N _ _ _ _ _ hv hu hf hX hL
-  have hZs : ContDiffOn ℝ ∞ Z (chartedDomain h O) :=
-    transportTailField_smooth hh hh1 hO N _ _ _ _ _ hv hu hu hX hL
-  have hR := radialTailExpression_rate hh hh1 A hO hKO N C f hv hu hf hX hL M
-  have hF := transportTailField_rate hh hh1 A hO hKO N (angularExponent h) 1
-    f.flux f.axial f.phi hv hu hf hX hL M
-  have hZ := transportTailField_rate hh hh1 A hO hKO N (axialExponent h) 0
-    f.flux f.axial f.axial hv hu hu hX hL M
-  obtain ⟨he, heF, heZ⟩ := common_tail_power_lower hh.le N
-  have hF' := finiteRate_weaken hF hq (sub_le_sub_right heF (M : ℝ))
-  have hZ' := finiteRate_weaken hZ hq (sub_le_sub_right heZ (M : ℝ))
-  have hFC := scalarConst_rate hF' hW hlW hFs C⁻¹
-  have hr := assembleComponents_rate hW hlW A.compact A.in_carrier
-    (hq.mono (fun _ hz => hz.1)) hRs (contDiffOn_const.mul hFs) hZs hR hFC hZ'
-  rw [he] at hr
-  apply finiteRate_congr_on hr annularPast_isOpen (A.in_annularPast hh hh1 hlo)
-  intro z hz
-  rw [assembleComponents_eq_pack]
-  dsimp only [R]
-  rw [radialTailExpression_eq hh hh1 N C f hz]
-  rfl
 
 end TruncationRate
 

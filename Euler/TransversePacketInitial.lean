@@ -49,17 +49,6 @@ theorem velocityPath_initial :
     (D.frame.field ⟨0,le_rfl,D.T_pos.le⟩) (G.coordinatePath I ⟨0,le_rfl,D.T_pos.le⟩) = _
   rw [G.coordinatePath_initial I]
 
-theorem vector_initial_of_zero (hi : I.value = 0) (x : Space) (θ : ℝ) :
-    G.vector I (0,(x,θ)) = 0 := by
-  have hv : G.velocityPath I ⟨0,le_rfl,D.T_pos.le⟩ = 0 := by
-    rw [G.velocityPath_initial I,hi,map_zero]
-  have hfull : includePath P D.support D.support_measurable (G.velocityPath I)
-      ⟨0,le_rfl,D.T_pos.le⟩ = 0 := congrArg Subtype.val hv
-  have h := pointField_zero_of_value_zero P
-    (includePath P D.support D.support_measurable (G.velocityPath I))
-    (G.velocityPath_orbit I) ⟨0,le_rfl,D.T_pos.le⟩ hfull (x,(θ : AddCircle P))
-  simpa only [vector,EulerSourceCylinderClassical.field,Data.clamp,
-    projIcc_of_mem D.T_pos.le (show (0 : ℝ) ∈ Icc 0 D.T from ⟨le_rfl,D.T_pos.le⟩)] using h
 
 
 end Forcing

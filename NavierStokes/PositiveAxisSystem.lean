@@ -569,34 +569,7 @@ theorem actualLowerSource_update (h : ℝ) (n : ℕ) (phi u beta : ℕ → Inner
   apply actualLowerSource_congr
   all_goals intro j hj; exact Function.update_of_ne (Nat.ne_of_lt hj) _ _
 
-theorem baseAtOrderZero_update {n : ℕ} (hn : 0 < n) (phi u beta : ℕ → InnerProfile)
-    (phiNew uNew betaNew : InnerProfile) (w : InnerPoint) :
-    baseAtOrderZero (fun j => actualJet (Function.update phi n phiNew j) w)
-      (fun j => actualJet (Function.update u n uNew j) w)
-      (fun j => Function.update beta n betaNew j w) =
-    baseAtOrderZero (fun j => actualJet (phi j) w)
-      (fun j => actualJet (u j) w) (fun j => beta j w) := by
-  simp only [baseAtOrderZero, Function.update_of_ne (Nat.ne_of_lt hn)]
 
-/-- End-to-end equivalence from the actual profile derivatives to the
-positive-order convolution equations, with all finite source terms displayed. -/
-theorem profileSystem_iff_positiveOrder {h C r eta : ℝ} (hr : r ≠ 0)
-    {n : ℕ} (hn : 0 < n) (phi u beta : ℕ → InnerProfile) (k p omegaQuotient : InnerProfile)
-    (hphi : ContDiffAt ℝ 2 (phi n) (r ^ 2, eta)) (hu : ContDiffAt ℝ 2 (u n) (r ^ 2, eta))
-    (hk : DifferentiableAt ℝ k (r ^ 2, eta)) (hp : DifferentiableAt ℝ p (r ^ 2, eta))
-    (hbeta : beta n (r ^ 2, eta) = betaValue h (slowPower h n) eta
-      (actualJet (u n) (r ^ 2, eta)) (actualJet k (r ^ 2, eta))) :
-    ProfileSystem h (slowPower h n) C r eta
-      (baseAtOrderZero (fun j => actualJet (phi j) (r ^ 2, eta))
-        (fun j => actualJet (u j) (r ^ 2, eta)) (fun j => beta j (r ^ 2, eta)))
-      (actualLowerSource h n phi u beta omegaQuotient (r ^ 2, eta)) (phi n) (u n) k p ↔
-    PositiveOrderEquations h C eta (r ^ 2) n
-      (fun j => actualJet (phi j) (r ^ 2, eta)) (fun j => actualJet (u j) (r ^ 2, eta))
-      (fun j => beta j (r ^ 2, eta)) (actualJet k (r ^ 2, eta)) (actualJet p (r ^ 2, eta))
-      (precedingDiffusion h (angularPower h) phi n (r ^ 2, eta))
-      (precedingDiffusion h (axialPower h) u n (r ^ 2, eta)) (omegaQuotient (r ^ 2, eta)) :=
-  (profileSystem_iff_expanded hr _ _ hphi hu hk hp).trans
-    (expanded_iff_positiveOrder h C eta (r ^ 2) hn _ _ _ _ _ _ _ _ hbeta)
 
 /-- The actual radial-average difference, with its regular value at the axis. -/
 noncomputable def averageDefect (u : InnerProfile) : InnerProfile :=
@@ -685,10 +658,6 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   simp only [sourceField, neg_sq, Complex.ofReal_neg]
   fin_cases i <;> simp [forcing, paritySign]
 
-private theorem data_square_contDiffAt {n : WithTop ℕ∞} {F : CoefficientData}
-    {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2)) (i : Fin 11) :
-    ContDiffAt ℝ n (fun v : ℝ × ℂ => F i (v.1 ^ 2, v.2)) w :=
-  (hF i).comp w ((contDiffAt_fst.pow 2).prodMk contDiffAt_snd)
 
  theorem coefficient0_contDiffAt_of_pullback {n : WithTop ℕ∞} {h lam C : ℂ} {F : CoefficientData}
     {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (fun v : ℝ × ℂ => F i (v.1 ^ 2, v.2)) w)

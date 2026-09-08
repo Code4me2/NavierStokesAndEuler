@@ -782,12 +782,6 @@ theorem preserve_masses {a b : ℝ} (hm : ShellTriple a b u.mean)
   fiveRows_preserve_masses hm hh (rankIncrement_angular_slow p r axial c u)
     (hg.axial_slow axial) (hg.fiveRows axial)
 
-theorem zeroMasses {a b : ℝ} (hm : ShellTriple a b u.mean)
-    (hh : ShellTriple a b (CorrectionState.rankIncrement p r axial c u))
-    (hzero : CorrectionState.ZeroMasses u) :
-    CorrectionState.ZeroMasses (CorrectionState.rankStage p r axial c u) := by
-  obtain ⟨hv, hz⟩ := hg.preserve_masses axial hm hh
-  exact ⟨hv.trans hzero.1, hz.trans hzero.2⟩
 
 theorem debt_eq_remainders {a b : ℝ} (ha : 0 < a) (hop : PositiveOperators c.operators)
     (hb : SmoothTriple positiveDomain c.base) (hm : ShellTriple a b u.mean)

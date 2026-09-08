@@ -591,16 +591,6 @@ theorem slotTime_affine (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ) (p : Spa
   unfold ChartScales.timeCoefficient
   field_simp ; ring
 
-theorem hasFDerivAt_slotTime (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ) (p : SpaceTime) :
-    HasFDerivAt (slotTime h n center r0)
-      (ChartScales.Q n ^ (-1 - h) • ContinuousLinearMap.fst ℝ ℝ Space) p := by
-  have he : slotTime h n center r0 = fun z =>
-      ChartScales.Q n ^ (-1 - h) * z.1 +
-        (r0 - etaCoordinate center) / ChartScales.timeCoefficient h n := by
-    funext z
-    exact slotTime_affine h n center r0 z
-  rw [he]
-  exact ((ContinuousLinearMap.fst ℝ ℝ Space).hasFDerivAt.const_mul _).add_const _
 
 
 

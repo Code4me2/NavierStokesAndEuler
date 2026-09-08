@@ -71,9 +71,6 @@ theorem multiplier_bounds {h ν K X : ℝ} (hh : 0 < h) (hν : 0 ≤ ν) (hX : 0
   dsimp [multiplier]
   constructor <;> nlinarith
 
-theorem edit_pos {E : ℝ → ℝ} {h ν K X : ℝ} (hh : 0 < h) (hν : 0 ≤ ν)
-    (hX : 0 < X) (hE : 0 < E X) : 0 < edit E h ν K X :=
-  mul_pos hE (multiplier_bounds hh hν hX).1
 
 theorem switch_contDiffOn {K : ℝ} (hK : 0 < K) :
     ContDiffOn ℝ ∞ (switch K) (Ioi 0) := by

@@ -964,9 +964,6 @@ noncomputable def actualSourceCore (L : PrimaryGeometryAssembly.Index W a.N) : S
   actualSlowCore H v a L ×ˢ sourceCell r0
     (ChartScales.slotLength r0 profile.data.h (BaseChartJets.cellBand L)) 1
 
-theorem actualSourceCore_closed (L : PrimaryGeometryAssembly.Index W a.N) :
-    IsClosed (actualSourceCore H v a L) :=
-  (actualSlowCore_closed H v a L).prod (sourceCell_compact _ _ _).isClosed
 
 include hr0 in
 /-- The full actual source mask retains all its factors. Its support is
@@ -1000,18 +997,6 @@ theorem actualMask_support (L : PrimaryGeometryAssembly.Index W a.N) :
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-include hr0 in
-/-- Clock transport of the full actual mask supplies the exact closed
-source region used above. The spatial mask remains part of the source. -/
-theorem actualMask_transported_support (L : PrimaryGeometryAssembly.Index W a.N)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Geometry) (k : Frequency) {c : ℝ} (hc : 0 < c) :
-    support (fun x : P × Plane => ActualSignedGeometry.nativeCutoff H v a L
-      (χ x.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k x.2))) ⊆
-      sourceRegion (χ ⁻¹' actualSlowCore H v a L) g r0
-        (ChartScales.slotLength r0 profile.data.h (BaseChartJets.cellBand L)) c := by
-  intro x hx
-  have hs := actualMask_support H v a hr0 L hx
-  exact ⟨hs.1, mem_iUnion.mpr ⟨k, (mem_sourceCell_clock hc _).mpr hs.2⟩⟩
 
 
 

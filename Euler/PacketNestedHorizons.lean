@@ -64,29 +64,10 @@ theorem activationTime_pos {n : ℕ} (hn : 0 < n) : 0 < activationTime J X a β 
     activationTime_strictMono J hJ X hX a β ha ha₂ hβ hβ₂ hn
 
 
-include hJ hX in
-theorem activationTime_lt_horizon (n : ℕ) :
-    activationTime J X a β n < horizonTime J X a β n := by
-  exact lt_add_of_pos_right _ (mul_pos (by norm_num) (timeWidth_pos J hJ hX n))
-
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem horizonTime_succ_le (n : ℕ) (hw : timeWidth J X (n+1) ≤ timeWidth J X n/2) :
-    horizonTime J X a β (n+1) ≤ horizonTime J X a β n := by
-  unfold horizonTime
-  rw [activationTime_succ]
-  exact nested_horizon_of_width_ratio (timeWidth_pos J hJ hX n).le
-    (stepLength_bounds J hJ X hX a β ha ha₂ hβ hβ₂ n).2 hw
 
 
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem activationTime_lower {n : ℕ} (hn : 1 ≤ n) :
-    baseHorizon J X/12 ≤ activationTime J X a β n := by
-  have hfirst := (stepLength_bounds J hJ X hX a β ha ha₂ hβ hβ₂ 0).1
-  have hm := (activationTime_strictMono J hJ X hX a β ha ha₂ hβ hβ₂).monotone hn
-  rw [show (1 : ℕ)=0+1 by rfl,activationTime_succ,activationTime_zero,zero_add] at hm
-  rw [baseHorizon_eq_timeWidth J hX]
-  linarith only [hfirst,hm]
+
 
 
 

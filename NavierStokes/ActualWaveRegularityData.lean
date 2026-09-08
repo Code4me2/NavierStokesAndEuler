@@ -335,11 +335,6 @@ theorem signed_block_periodic (l : Index B N0) (s : StripData Point)
 
 /-! ## The actual full-domain phase patches -/
 
-noncomputable def signedPhasePatch (l : Index B N0) (n : ℕ) (k : Frequency) : Set FullPoint :=
-  {x | (ActualSignedStageControls.nativePoint l n k x).1 ∈
-      (PrimaryGeometryAssembly.domain ActualPrimary.nominal
-        (ActualPrimary.choice B N0).prepared.N).carrier l.1 ∧
-    ActualSignedStageControls.nativeTime l n k x ∈ Ioo (0 : ℝ) 1}
 
 
 theorem native_time_pos (l : Index B N0) (n : ℕ) (k : Frequency) {x : FullPoint}

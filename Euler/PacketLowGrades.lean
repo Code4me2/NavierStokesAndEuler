@@ -1,4 +1,5 @@
-import Euler.PacketMomentumExpansion
+import Euler.PacketPointJets
+import Euler.FiniteGradeDiagonal
 
 /-! The low coefficients of the actual packet residual, before solving their equations. -/
 

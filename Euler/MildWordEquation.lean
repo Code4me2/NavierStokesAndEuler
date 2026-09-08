@@ -88,13 +88,6 @@ def availableWordBlock {q n : ℕ} (h : n + 2 ≤ q) (w : Fin n → Fin 4) :
     SobolevSpace period q →L[ℝ] SobolevSpace period 2 :=
   (wordBlock period 2 n w).comp (restrictOperator period (by omega : 2+n ≤ q))
 
-/-- This available block is exactly the chosen derivative word as an L² field. -/
-theorem availableWordBlock_value {q n : ℕ} (h : n + 2 ≤ q) (w : Fin n → Fin 4)
-    (u : SobolevSpace period q) :
-    value period (availableWordBlock period h w u) = word period u (by omega : n ≤ q) w := by
-  change value period (wordBlock period 2 n w (restrictOperator period (by omega : 2+n ≤ q) u)) = _
-  rw [wordBlock_value]
-  rfl
 
 
 

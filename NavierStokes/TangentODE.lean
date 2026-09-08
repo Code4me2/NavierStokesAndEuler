@@ -168,28 +168,6 @@ theorem linear_uniform_lipschitz {a b : ℝ} (hab : a ≤ b)
   exact ((A t).lipschitzWith.dist_le_mul x y).trans
     (mul_le_mul_of_nonneg_right (hC t ht) dist_nonneg)
 
-/-- Actual existence for a continuous-coefficient inhomogeneous linear ODE
-on any finite closed interval. -/
-theorem exists_linear_solution {a b : ℝ} (hab : a ≤ b)
-    (A : ℝ → E →L[ℝ] E) (g : ℝ → E)
-    (hA : ContinuousOn A (Icc a b)) (hg : ContinuousOn g (Icc a b)) (x₀ : E) :
-    ∃ u : ℝ → E, u a = x₀ ∧
-      ∀ t ∈ Icc a b, HasDerivAt u (A t (u t) + g t) t := by
-  obtain ⟨L, hL⟩ := linear_uniform_lipschitz hab A g hA
-  let v : IntervalSystem E := {
-    left := a
-    right := b
-    ordered := hab
-    initial := x₀
-    field := fun t x => A t x + g t
-    lip := L
-    lipschitz := hL
-    continuous := by
-      have hcA : Continuous (fun t : Icc a b => A t) := hA.domRestrict
-      have hcg : Continuous (fun t : Icc a b => g t) := hg.domRestrict
-      exact ((hcA.comp continuous_fst).clm_apply continuous_snd).add
-        (hcg.comp continuous_fst) }
-  exact v.exists_solution
 
 omit [CompleteSpace E] in
 /-- Uniqueness on the complete finite interval follows from Grönwall's inequality. -/
@@ -226,57 +204,12 @@ theorem projectedOperator_apply (n n' x f : H) (K : H →L[ℝ] H) (δ : ℝ) :
     ContinuousLinearMap.id_apply, TangentProjection.projectedRhs, smul_smul]
   congr 3
 
-/-- Continuity of the true linear operator follows from the coefficient hypotheses;
-division is justified by the nonvanishing normal. -/
-theorem continuousOn_projectedOperator {s : Set ℝ}
-    (n n' : ℝ → H) (K : ℝ → H →L[ℝ] H) (δ : ℝ → ℝ)
-    (hn : ContinuousOn n s) (hn' : ContinuousOn n' s)
-    (hK : ContinuousOn K s) (hδ : ContinuousOn δ s)
-    (hn0 : ∀ t ∈ s, n t ≠ 0) :
-    ContinuousOn (fun t => projectedOperator (n t) (n' t) (K t) (δ t)) s := by
-  have hlin : ContinuousOn
-      (fun t => (innerSL ℝ (n t)).comp (K t) - innerSL ℝ (n' t)) s :=
-    (((innerSL ℝ).continuous.comp_continuousOn hn).clm_comp hK).sub
-      ((innerSL ℝ).continuous.comp_continuousOn hn')
-  have hnorm : ContinuousOn (fun t => (⟪n t, n t⟫_ℝ)⁻¹ • n t) s :=
-    ((hn.inner hn).inv₀ (fun t ht => inner_self_ne_zero.mpr (hn0 t ht))).smul hn
-  have houter : ContinuousOn (fun t =>
-      ((innerSL ℝ (n t)).comp (K t) - innerSL ℝ (n' t)).smulRight
-        ((⟪n t, n t⟫_ℝ)⁻¹ • n t)) s :=
-    isBoundedBilinearMap_smulRight.continuous.comp_continuousOn (hlin.prodMk hnorm)
-  exact (hK.neg.add houter).sub (hδ.smul continuousOn_const)
 
-theorem continuousOn_projectedForcing {s : Set ℝ}
-    (n f : ℝ → H) (hn : ContinuousOn n s) (hf : ContinuousOn f s)
-    (hn0 : ∀ t ∈ s, n t ≠ 0) :
-    ContinuousOn (fun t => -TangentProjection.tangentProj (n t) (f t)) s := by
-  exact (hf.sub (((hn.inner hf).div (hn.inner hn)
-    (fun t ht => inner_self_ne_zero.mpr (hn0 t ht))).smul hn)).neg
 
 variable [CompleteSpace H]
 
 
 
-omit [CompleteSpace H] in
-/-- On the finite interval, tangency propagates from the left endpoint.
-No primitive or globally defined solution is assumed. -/
-theorem projected_tangency_preserved {a b : ℝ} (hab : a ≤ b)
-    (n n' f u : ℝ → H) (K : ℝ → H →L[ℝ] H) (δ : ℝ → ℝ)
-    (hδ : ContinuousOn δ (Icc a b)) (hn0 : ∀ t ∈ Icc a b, n t ≠ 0)
-    (hn : ∀ t ∈ Icc a b, HasDerivAt n (n' t) t)
-    (hu : ∀ t ∈ Icc a b, HasDerivAt u
-      (TangentProjection.projectedRhs (n t) (n' t) (u t) (K t (u t)) (f t) (δ t)) t)
-    (hinit : ⟪n a, u a⟫_ℝ = 0) : ∀ t ∈ Icc a b, ⟪n t, u t⟫_ℝ = 0 := by
-  let A : ℝ → ℝ →L[ℝ] ℝ := fun t => -δ t • ContinuousLinearMap.id ℝ ℝ
-  have hA : ContinuousOn A (Icc a b) := hδ.neg.smul continuousOn_const
-  have hd : ∀ t ∈ Icc a b,
-      HasDerivAt (fun s => ⟪n s, u s⟫_ℝ) (A t ⟪n t, u t⟫_ℝ + 0) t := by
-    intro t ht
-    simpa [A] using TangentProjection.tangency_defect_derivative (hn0 t ht) (hn t ht) (hu t ht)
-  have hzero : ∀ t ∈ Icc a b, HasDerivAt (fun _ : ℝ => (0 : ℝ)) (A t 0 + 0) t := by
-    intro t ht
-    simpa using hasDerivAt_const t (0 : ℝ)
-  exact linear_solution_unique hab A (fun _ => 0) hA hd hzero hinit
 
 
 end

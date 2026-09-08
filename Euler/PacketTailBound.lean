@@ -1,4 +1,5 @@
-import Euler.PacketMomentumExpansion
+import Euler.PacketPointJets
+import Euler.FiniteGradeDiagonal
 
 /-! Bounds for the surviving grades of the actual finite packet residual. -/
 

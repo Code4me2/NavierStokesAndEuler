@@ -392,10 +392,6 @@ theorem finalPotential_awayExtensions (upper : ℝ) (B : ℕ) :
 
 end FinalBase
 
-/-- A closed choice of the already constructed leading profile, repaired
-hierarchy, modulation, and common cutoff schedule. -/
-noncomputable def constructedPotential (upper : ℝ) (B : ℕ) : VelocityField :=
-  finalPotential FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation upper B
 
 
 end NavierStokes.TailGaugePotential

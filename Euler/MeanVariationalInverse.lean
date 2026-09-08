@@ -136,31 +136,7 @@ theorem meanPrimitive_ae (T : ℝ) (hT : 0 ≤ T)
     (meanPrimitive T hT FInv u : ℝ → L2) =ᵐ[timeMeasure T] realPrimitive T (u : TimeLp T L2) :=
   primitiveTimeLp_ae T hT (u : TimeLp T L2)
 
-/-- The potential pairing is the literal time integral on the actual displacement paths. -/
-theorem meanPotential_inner_eq_integral (T : ℝ) (hT : 0 ≤ T)
-    (FInv H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (u v : meanDerivatives T hT FInv) :
-    ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ =
-      ∫ t, ⟪H (projIcc 0 T hT t) (realPrimitive T (u : TimeLp T L2) t),
-        realPrimitive T (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T := by
-  rw [MeasureTheory.L2.inner_def]
-  apply integral_congr_ae
-  filter_upwards [timeMultiplier_ae T hT H (meanPrimitive T hT FInv u),
-    meanPrimitive_ae T hT FInv u, meanPrimitive_ae T hT FInv v] with t ht hu hv
-  change ⟪(timeMultiplier T hT H (meanPrimitive T hT FInv u) : ℝ → L2) t,
-    (meanPrimitive T hT FInv v : ℝ → L2) t⟫_ℝ = _
-  exact congrArg₂ (fun x y : L2 => ⟪x, y⟫_ℝ)
-    (ht.trans (congrArg (H (projIcc 0 T hT t)) hu)) hv
 
-/-- The forcing pairing is the literal time integral against the actual test displacement. -/
-theorem meanForcing_inner_eq_integral (T : ℝ) (hT : 0 ≤ T)
-    (FInv : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (f : TimeLp T L2)
-    (v : meanDerivatives T hT FInv) :
-    ⟪f, meanPrimitive T hT FInv v⟫_ℝ =
-      ∫ t, ⟪f t, realPrimitive T (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T := by
-  rw [MeasureTheory.L2.inner_def]
-  apply integral_congr_ae
-  filter_upwards [meanPrimitive_ae T hT FInv v] with t ht
-  exact congrArg (fun z : L2 => ⟪f t, z⟫_ℝ) ht
 
 
 variable (T : ℝ) (hT : 0 ≤ T)
@@ -181,10 +157,6 @@ def meanSolver : TimeLp T L2 →L[ℝ] meanDerivatives T hT FInv :=
     (timeMultiplier_quadratic_upper T hT H K hH)
     (meanTrace_boundary T hT FInv M0 A L B hF0 hboundary) hsmall
 
-/-- The physical displacement is the actual terminal primitive of the solved derivative. -/
-def meanEta : TimeLp T L2 →L[ℝ] C(Icc (0 : ℝ) T, L2) :=
-  (terminalPrimitive T hT).comp ((meanDerivatives T hT FInv).subtypeL.comp
-    (meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall))
 
 
 

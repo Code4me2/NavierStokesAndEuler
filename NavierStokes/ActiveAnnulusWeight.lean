@@ -632,8 +632,6 @@ theorem tilt_smul {r : ℝ} (hr : r ≠ 0) (v : ℝ × ℝ) : tilt (r • v) = t
   simp only [tilt,Prod.smul_fst,Prod.smul_snd,smul_eq_mul]
   exact mul_div_mul_left _ _ hr
 
-theorem direction_smul {r : ℝ} (hr : r ≠ 0) (v : ℝ × ℝ) : direction (r • v) = direction v := by
-  simp only [direction,tilt_smul hr]
 
 theorem direction_smooth {O : Set (E × ℝ)} {B : E × ℝ → ℝ × ℝ}
     (hB : ContDiffOn ℝ ∞ B O) (hne : ∀ q ∈ O, (B q).1 ≠ 0) :
@@ -1008,45 +1006,6 @@ theorem exists_natural_activation_factor_aligned {h j σ Λ C : ℝ} {P0 : ℝ �
       (div_pos (sub_pos.mpr hκ) (stepDenominator_pos T 0)).ne',hedge]
     exact mul_div_mul_left _ _ (Real.exp_pos _).ne'
 
-/-- The initial ACT stress has a genuine smooth unit-direction extension and
-a strict cone margin relative to its actual shear. -/
-theorem natural_activation_strict_direction {h j σ Λ C : ℝ} {P0 : ℝ → ℝ}
-    {d : NaturalAxisCoefficients.AnalyticInputs h j σ P0}
-    (hΛ : 0 < Λ) (F : NaturalEntrance.EntranceProfile d Λ C)
-    (hP0 : ContDiff ℝ ∞ P0) (hsmall : NaturalAxisData.SmallParameters h j)
-    {δ : ℝ} (hδ : 0 < δ) (hδlim : 2*δ < ReferencePath.rampLimit)
-    {T κ : ℝ} (hT : 0 < T) (hκ : κ < 1) :
-    let N := ReferencePath.Input.ofNatural hΛ F.profile.family
-    let L := FromReference.refLog N δ
-    let U := FromReference.refAxial N δ
-    let I := ActivationStocks.FromReference.initial N hδ hδlim P0 hP0
-    let S := fun q : ℝ × ℝ => activatedStress h N.endpoint I L U T κ (q.2,q.1)
-    ∃ G : EdgeFactor (Icc (-1 : ℝ) 1) (T^2) S,
-      HasStrictDirectionCollar (Icc (-1 : ℝ) 1) S G.coefficient
-        (fun q => shearSize T κ N.endpoint L U (q.2,q.1))
-        (fun q => shearSlope T κ N.endpoint L U (q.2,q.1)) G.width := by
-  let N := ReferencePath.Input.ofNatural hΛ F.profile.family
-  let L := FromReference.refLog N δ
-  let U := FromReference.refAxial N δ
-  have hL := FromReference.refLog_smooth N hδ hδlim
-  have hU := FromReference.refAxial_smooth N hδ hδlim
-  have hKJ : Icc (-1 : ℝ) 1 ⊆ ReferencePath.parameterInterval :=
-    NaturalAxisCoefficients.original_interval_interior
-  obtain ⟨G,hGfirst,hGalign⟩ := exists_natural_activation_factor_aligned hΛ F hP0 hsmall hδ hδlim hT hκ
-  obtain ⟨τ,α,M,hτ,_,hα,_,hb⟩ := natural_reference_bounds hΛ F hδ hδlim
-  have hA0 : ∀ η ∈ Icc (-1 : ℝ) 1, 0 < referenceP1 L (0,η) := by
-    intro η hη
-    exact hα.trans_le (hb 0 ⟨le_rfl,hτ.le⟩ η hη).1
-  obtain ⟨O,hO,hKO,hv,hs⟩ := actual_shear_domain hT κ N.endpoint_pos
-    ReferencePath.parameterInterval_open hKJ hL hU hA0
-  refine ⟨G,G.aligned_collar isCompact_Icc hGfirst hO hKO hv.continuousOn hs.continuousOn ?_⟩
-  intro η hη
-  obtain ⟨hAz,hBz⟩ := actual_shear_coordinates_zero hT κ N.endpoint_pos
-    ReferencePath.parameterInterval_open hL hU (hKJ hη)
-  rw [hGalign η hη]
-  change referenceP2 N.endpoint L U (0,η) / referenceP1 L (0,η) =
-    actualP2 T κ N.endpoint L U (0,η) / actualP1 T κ L (0,η)
-  rw [hAz,hBz]
 
 
 end ActualActivation

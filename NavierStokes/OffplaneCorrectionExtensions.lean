@@ -188,9 +188,6 @@ def ModelSupported {V : Type*} [Zero V] (a b : ℝ) (F : Model → V) : Prop :=
   ∀ y ∈ modelDomain, F y ≠ 0 →
     y.1.2.1 ∈ Icc (Real.sqrt y.1.1 * a) (Real.sqrt y.1.1 * b)
 
-def ModelPeriodic (F : Model → ℝ) : Prop :=
-  ∀ y : MeanRankUpdate.ModelPoint, 0 < y.1 →
-    FourierAlias.TorusPeriodic (fun Y => F (y, Y))
 
 
 theorem continuedSource_supported {coord a b : ℝ} {F : Model → ℝ}
@@ -408,14 +405,6 @@ variable {coord a b : ℝ} {W : Window coord a b}
 
 
 
-theorem support_on_past {f : Lift → ℝ} (e : SupportedContinuation W f)
-    (hc : 0 < coord) (hc1 : coord < 1) {p : Lift}
-    (hp : p.2.1 ∈ W.carrier) (ht : 0 < p.2.1.1) (hn : f p ≠ 0) :
-    p.1 ∈ Icc (VariableGaugeMean.qLength coord p.2.1 * a)
-      (VariableGaugeMean.qLength coord p.2.1 * b) := by
-  have he := e.agrees ⟨hp, ht⟩
-  have hs := e.supported p hp (fun hzero => hn (he.symm.trans hzero))
-  simpa only [stableLength_eq_qLength hc hc1 ht] using hs
 
 end SupportedContinuation
 
@@ -451,15 +440,7 @@ noncomputable def stableParameter (coord : ℝ) (p : ℝ × Slow) : MeanRankUpda
 noncomputable def physicalParameter (coord : ℝ) (p : ℝ × Slow) : MeanRankUpdate.ModelPoint :=
   (SimilarityCoordinates.coordinateQ coord p.2, (p.1, p.2.2))
 
-noncomputable def continuedReferenceSolve (coord : ℝ)
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Slow → ℝ) : Lift → E :=
-  fun p => (pullLinearData (stableParameter coord) d).commonSolve g hab κ ((p.1, p.2.1), p.2.2)
 
-noncomputable def physicalReferenceSolve (coord : ℝ)
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Slow → ℝ) : Lift → E :=
-  fun p => (pullLinearData (physicalParameter coord) d).commonSolve g hab κ ((p.1, p.2.1), p.2.2)
 
 
 
@@ -634,43 +615,9 @@ noncomputable def azimuthalExtension (e : SupportedContinuation W f) (h : ℝ) (
 
 end SupportedContinuation
 
-/-- The scalar pressure and the actual azimuthal mean potential (and hence
-its Cartesian curl) have ambient endpoint extensions from primitive model
-smoothness and support.  No extension of a solved field is an input. -/
-theorem mean_model_extensions {h a b d : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (M : ℝ) (v : Slow) (n : ℕ)
-    (F : Model → ℝ) (hF : ContDiffOn ℝ ∞ F modelDomain) (hs : ModelSupported a b F)
-    {x : Space} (hx : x 2 ≠ 0) :
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (physicalScalar h n (VariableGaugeMean.meanPressure d a b M hab
-        (VariableGaugeMean.qLength (2 * h)) v (physicalSource (2 * h) F))) x) ∧
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (azimuthalPotential h n (VariableGaugeMean.streamPotential d a b M
-        (VariableGaugeMean.qLength (2 * h)) v (physicalSource (2 * h) F))) x) ∧
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (SpatialCurl.spatialCurl (azimuthalPotential h n (VariableGaugeMean.streamPotential d a b M
-        (VariableGaugeMean.qLength (2 * h)) v (physicalSource (2 * h) F)))) x) := by
-  have hc : 0 < 2 * h := by linarith
-  have hc1 : 2 * h < 1 := by linarith
-  obtain ⟨W, hw⟩ := exists_endpoint_window hc hc1 ha hab hx
-  let e : SupportedContinuation W (physicalSource (2 * h) F) :=
-    SupportedContinuation.ofModel hc hc1 F hF hs
-  let ep := (e.pressure hc hc1 ha hab hd M v).physicalExtension h n hw
-  let eA := (e.stream hc hc1 ha hab hd M v).azimuthalExtension h n hw
-  exact ⟨⟨ep⟩, ⟨eA⟩, ⟨AnnularEndpoint.curlExtension eA⟩⟩
 
 
 
-theorem physicalScalar_shrinkingSupport (h : ℝ) (n : ℕ) {a b : ℝ} {f : Lift → ℝ}
-    (hf : VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength (2 * h)) positiveSlow f) :
-    AnnularEndpoint.ShrinkingSupport h b (physicalScalar h n f) := by
-  intro w ht hn
-  have hs := (hf (physicalLift h n w) (show 0 < 1 - w.1 from sub_pos.mpr ht) hn).2
-  change AnnularEndpoint.radius w ≤
-    Real.sqrt (SimilarityCoordinates.coordinateQ (2 * h) (1 - w.1, w.2 2)) * b at hs
-  change AnnularEndpoint.radius w ≤
-    b * Real.sqrt (SimilarityCoordinates.coordinateQ (2 * h) (1 - w.1, w.2 2))
-  simpa only [mul_comm] using hs
 
 
 end PhysicalFields

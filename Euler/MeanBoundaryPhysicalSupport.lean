@@ -47,16 +47,5 @@ theorem scaledBoundary_continuous_support (ℓ : ℝ) (hℓ : 0 < ℓ) (L : ℝ)
   have hnorm : 2 < ‖ℓ • x‖ := lt_of_not_ge h
   exact hx (hzero hnorm)
 
-theorem scaledBoundary_continuous_compact (ℓ : ℝ) (hℓ : 0 < ℓ) (L : ℝ) (z : L2)
-    (b : Space → Space) (hb : Continuous b)
-    (hrep : b =ᵐ[volume] (L • boundaryOperator (scaledCutoff ℓ hℓ) z : L2)) :
-    HasCompactSupport b := by
-  apply (isCompact_closedBall (0 : Space) (2/ℓ)).of_isClosed_subset (isClosed_tsupport b)
-  intro x hx
-  have hs := scaledBoundary_continuous_support ℓ hℓ L z b hb hrep hx
-  change ‖ℓ • x‖ ≤ 2 at hs
-  rw [norm_smul, Real.norm_eq_abs, abs_of_pos hℓ] at hs
-  simp only [Metric.mem_closedBall, dist_zero_right]
-  exact (le_div_iff₀ hℓ).2 (by simpa only [mul_comm] using hs)
 
 end EulerMeanBoundary

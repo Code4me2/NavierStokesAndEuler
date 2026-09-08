@@ -70,16 +70,6 @@ theorem timeTranslateIsometry_zero (T : ℝ) (f : TimeLp T (CylinderL2 P V)) :
   rw [ht]
   exact translate_zero P (f t)
 
-theorem time_block_constant {ι : Type*} [Fintype ι] (directions : ι → LiftTangent) (q : ℕ)
-    (T : ℝ) (f : TimeLp T (CylinderL2 P V))
-    (hf : ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap f))
-    (n : ℕ) (a : LiftTangent) :
-    block directions q (fun b => timeLift T (translate P b).toContinuousLinearMap f) n a =
-      block directions q (fun b => timeLift T (translate P b).toContinuousLinearMap f) n 0 :=
-  EulerIsometricAction.block_orbit_constant (X := LiftTangent)
-    (E := TimeLp T (CylinderL2 P V)) (ι := ι) (timeTranslateIsometry (V := V) P T)
-    (fun a b u => timeTranslateIsometry_add P T a b u)
-    (fun u => timeTranslateIsometry_zero P T u) directions q f hf n a
 
 
 /-- The actual Ctime-to-time-L² inclusion preserves all mixed word blocks

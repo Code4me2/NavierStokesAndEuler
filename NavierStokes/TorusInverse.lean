@@ -274,20 +274,6 @@ theorem norm_multiplier_le (d : Direction) (k : Frequency) :
 theorem Rapid.inverseCoeff {a : Frequency → ℂ} (ha : Rapid a) (d : Direction) :
     Rapid (inverseCoeff d a) := ha.mul_linear (6 * ‖omega⁻¹‖) (norm_multiplier_le d)
 
-/-- The coefficient estimate loses one polynomial frequency weight. -/
-theorem inverseCoeff_weighted_bound (d : Direction) (a : Frequency → ℂ)
-    (p : ℕ) (k : Frequency) :
-    weight k ^ p * ‖inverseCoeff d a k‖ ≤
-      (6 * ‖omega⁻¹‖) * (weight k ^ (p + 1) * ‖a k‖) := by
-  unfold inverseCoeff
-  rw [norm_mul]
-  calc
-    weight k ^ p * (‖multiplier d k‖ * ‖a k‖) ≤
-        weight k ^ p * (((6 * ‖omega⁻¹‖) * weight k) * ‖a k‖) :=
-      mul_le_mul_of_nonneg_left
-        (mul_le_mul_of_nonneg_right (norm_multiplier_le d k) (norm_nonneg _))
-        (pow_nonneg (weight_pos k).le p)
-    _ = _ := by rw [pow_succ]; ring
 
 theorem coefficient_cancel (d : Direction) {a : Frequency → ℂ} (hzero : a 0 = 0)
     (k : Frequency) : omega * (symbol d k : ℂ) * inverseCoeff d a k = a k := by

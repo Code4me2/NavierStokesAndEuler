@@ -834,26 +834,6 @@ theorem physicalCompact_periodic (d a b M : ℝ) (v : PressureStream.Plane)
     TransportPrimitive.compactIntegral, TransportPrimitive.pastIntegral, TransportPrimitive.totalIntegral,
     he]
 
-theorem physicalAlias_periodic (d a b M : ℝ) (v : PressureStream.Plane)
-    {f : Lift S → ℝ} (hp : PressureStream.TorusPeriodicLift f) :
-    PressureStream.TorusPeriodicLift (RadialPullback.physicalAlias d a b M (0, v) f) := by
-  intro R s Y k
-  have he : (fun q : ℝ => RadialPullback.normalizeSource d a f
-      (TransportPrimitive.shift M ((0 : S), v)
-        (RadialPullback.powerChart d a R, (s, Y + ((k.1 : ℝ), (k.2 : ℝ)))) q)) =
-      fun q : ℝ => RadialPullback.normalizeSource d a f
-      (TransportPrimitive.shift M ((0 : S), v)
-        (RadialPullback.powerChart d a R, (s, Y)) q) := by
-    funext q
-    simp only [RadialPullback.normalizeSource, RadialPullback.liftChart,
-      TransportPrimitive.shift, Prod.add_def, Prod.smul_def, smul_zero, add_zero]
-    simpa only [Prod.add_def, Prod.smul_def, add_right_comm] using
-      congrArg (fun u : ℝ => RadialPullback.sourceMultiplier d a
-        (RadialPullback.powerChart d a R + q) • u)
-        (hp (RadialPullback.inverseChart d a (RadialPullback.powerChart d a R + q)) s
-          (Y + (M * q) • v) k)
-  simp only [RadialPullback.physicalAlias, RadialPullback.liftChart,
-    TransportPrimitive.totalIntegral, he]
 
 
 

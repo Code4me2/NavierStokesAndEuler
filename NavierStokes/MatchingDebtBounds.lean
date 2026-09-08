@@ -847,39 +847,6 @@ theorem exists_ordered_assembled_profile {F : OutgoingProfile.Profile} {D : ℝ}
   obtain ⟨W, hWA, hWc⟩ := hassemble A c hR hmatch.separation.le hsmall
   exact ⟨w, W, hWA, hWc, hmatch.of_heq hWA hWc⟩
 
-/-- The analytic preparation and its cutoff margin are now chosen together.
-The assembled witness has the prescribed scale and normalization; both may
-be increased in their displayed order. -/
-theorem exists_ordered_nominal_witness {F : OutgoingProfile.Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) (hP : 2 ≤ F.data.core.P) (N : ℕ)
-    {rho : ℝ} (hrho : 0 < rho) (hradius : rho ≤ NominalProfile.resetSolver.radius) :
-    ∃ eps : ℝ, 0 < eps ∧ eps ≤ 1 ∧
-      ∀ j : ℝ, |j| ≤ eps → NaturalAxisData.SmallParameters F.data.h j →
-      ∃ Λ0 : ℝ, 1 ≤ Λ0 ∧ ∀ Λ : ℝ, 0 < Λ → Λ0 ≤ Λ →
-        ∃ T : ℝ, 0 < T ∧ ∃ C0 : ℝ, 1 ≤ C0 ∧ ∀ C : ℝ, C0 ≤ C →
-          ∃ W : NominalProfile.Witness F,
-            W.axis.j = j ∧ W.axis.scale = Λ ∧ W.axis.normalization = C ∧
-            W.controls.shapeTime = T ∧ MatchingBounds W.controls N rho := by
-  obtain ⟨eps, heps, heps1, hassembled⟩ := exists_ordered_assembled_profile hF N hrho hradius
-  refine ⟨eps, heps, heps1, ?_⟩
-  intro j hjbound hj
-  obtain ⟨prep, hcut⟩ := NominalProfile.prepare_axis_with_cutoff F hP hj
-  obtain ⟨Λ0, hΛ0, hscale⟩ := hassembled j hjbound hj prep prep.delta prep.delta_pos hcut
-  refine ⟨Λ0, hΛ0, ?_⟩
-  intro Λ hΛ hL
-  obtain ⟨T, hT, C0, hC0, hnorm⟩ := hscale Λ hΛ hL
-  refine ⟨T, hT, C0, hC0, ?_⟩
-  intro C hC
-  obtain ⟨hLprep, hCprep, E, hcontrols⟩ := hnorm C hC
-  obtain ⟨w, W, hWA, hWc, hmatch⟩ := hcontrols 0 1 zero_lt_one
-  refine ⟨W, ?_, ?_, ?_, ?_, hmatch⟩
-  · rw [hWA]
-    rfl
-  · rw [hWA]
-    rfl
-  · rw [hWA]
-    rfl
-  · exact shapeTime_eq_of_heq hWA hWc
 
 
 

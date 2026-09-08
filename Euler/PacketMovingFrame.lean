@@ -170,18 +170,6 @@ theorem frameRate_skew (B : Space →L[ℝ] Space) (p q : Space)
 
 def normalizedFrame (m v : ℝ → Space) (t : ℝ) : Fin 3 → Space := frame (unit (m t)) (unit (v t))
 
-theorem normalizedFrame_hasDerivAt (B : Space →L[ℝ] Space) {m v : ℝ → Space} {t : ℝ}
-    (hm : HasDerivAt m (-B.adjoint (m t)) t)
-    (hv : HasDerivAt v (-B (v t) + (2*⟪m t,B (v t)⟫_ℝ / ‖m t‖^2) • m t) t)
-    (hm0 : m t ≠ 0) (hv0 : v t ≠ 0) (hmv : ⟪m t,v t⟫_ℝ = 0) (i : Fin 3) :
-    HasDerivAt (fun s => normalizedFrame m v s i)
-      (frameRate B (unit (m t)) (unit (v t)) i) t := by
-  have hp := normalized_ray_hasDerivAt B hm hm0
-  have hq := normalized_velocity_hasDerivAt B hv hv0 hmv
-  fin_cases i
-  · exact hp
-  · exact hq
-  · exact cross_hasDerivAt hp hq
 
 theorem normalizedFrame_hasDerivWithinAt (B : Space →L[ℝ] Space)
     {m v : ℝ → Space} {t : ℝ} {S : Set ℝ}

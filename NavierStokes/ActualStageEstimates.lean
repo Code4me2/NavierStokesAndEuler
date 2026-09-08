@@ -209,32 +209,6 @@ noncomputable def cycleInputs : CycleInputs h DP (Fin 3 × IP) KP DS (Fin 3 × I
 
 
 
-theorem cycleInputs_metadata : (cycleInputs R M hN W).Metadata ChartScales.kappa := by
-  constructor
-  · intro j
-    exact (nativePotential_eq_ledger j).symm.le.trans (W.particularPotential_exponent j)
-  · intro j
-    exact (W.particularPotential_shift j).ge
-  · intro j
-    exact (nativePotential_eq_ledger j).symm.le.trans (W.signedPotential_exponent j)
-  · intro j
-    exact (W.signedPotential_shift j).ge
-  · intro j
-    exact (nativeMean_eq_ledger j).ge
-  · intro j
-    exact (nativeMean_eq_ledger j).ge
-  · intro j
-    exact (nativeMean_eq_ledger j).ge
-  · intro j
-    exact (nativePressure_eq_ledger j).symm.le.trans (W.particularPressure_exponent j)
-  · intro j
-    exact (W.particularPressure_shift j).ge
-  · intro j
-    exact (nativePressure_eq_ledger j).symm.le.trans (W.signedPressure_exponent j)
-  · intro j
-    exact (W.signedPressure_shift j).ge
-  · intro j
-    exact (nativeMean_eq_ledger j).ge
 
 theorem cycleInputs_validScale {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) :
     (cycleInputs R M hN W).ValidScale qbig :=

@@ -73,10 +73,6 @@ theorem cross_triple (n a : Space) :
 /-- The inverse-square-normal coefficient used by the real potential. -/
 def normalCoefficient (n a : Space) : Space := (‖n‖ ^ 2)⁻¹ • cross n a
 
-theorem cross_normalCoefficient {n a : Space} (hn : n ≠ 0) (ha : ⟪n, a⟫_ℝ = 0) :
-    cross n (normalCoefficient n a) = -a := by
-  rw [normalCoefficient, cross_smul_right, cross_triple, ha, zero_smul, zero_sub,
-    smul_neg, smul_smul, inv_mul_cancel₀ (pow_ne_zero 2 (norm_ne_zero_iff.mpr hn)), one_smul]
 
 /-- The actual Euclidean gradient map applied to a scalar derivative. -/
 def gradientLinear : (Space →L[ℝ] ℝ) →L[ℝ] Space :=
@@ -91,14 +87,6 @@ theorem curlLinear_smulRight (L : Space →L[ℝ] ℝ) (a : Space) :
   ext i
   fin_cases i <;> simp
 
-/-- The genuine spatial curl product rule. -/
-theorem curl_smul {f : Space → ℝ} {B : Space → Space} {x : Space}
-    (hf : DifferentiableAt ℝ f x) (hB : DifferentiableAt ℝ B x) :
-    SpatialCurl.curl (fun y => f y • B y) x =
-      cross (gradientLinear (fderiv ℝ f x)) (B x) + f x • SpatialCurl.curl B x := by
-  unfold SpatialCurl.curl
-  rw [fderiv_fun_smul hf hB, map_add, map_smul, curlLinear_smulRight]
-  exact add_comm _ _
 
 def carrier (k s : ℝ) : ℝ := -Real.sin (k * s) / k
 
@@ -132,39 +120,13 @@ theorem phaseNormal_contDiffOn {U : Set SpaceTime} {Φ : PressureField}
   (ResidualRegularity.contDiffOn_space_fderiv hU hΦ (m := ∞) (by simp)).continuousLinearMap_comp
     gradientLinear
 
-theorem coefficient_contDiffOn {U : Set SpaceTime} {Φ : PressureField} {a : VelocityField}
-    (hU : IsOpen U) (hΦ : ContDiffOn ℝ ∞ Φ U) (ha : ContDiffOn ℝ ∞ a U)
-    (hn : ∀ z ∈ U, phaseNormal Φ z ≠ 0) : ContDiffOn ℝ ∞ (coefficient Φ a) U := by
-  have hN := phaseNormal_contDiffOn hU hΦ
-  have hnorm : ContDiffOn ℝ ∞ (fun z => ‖phaseNormal Φ z‖ ^ 2) U :=
-    (contDiff_norm_sq ℝ).comp_contDiffOn hN
-  exact (hnorm.inv (fun z hz => pow_ne_zero 2 (norm_ne_zero_iff.mpr (hn z hz)))).smul
-    ((hN.continuousLinearMap_comp crossLinear).clm_apply ha)
 
 
 
 
 
 
-theorem potential_tsupport_subset (k : ℝ) (Φ : PressureField) (a : VelocityField) :
-    tsupport (potential k Φ a) ⊆ tsupport a := by
-  apply closure_mono
-  intro z hz haz
-  exact hz (by simp [potential, coefficient, normalCoefficient, haz])
 
-/-- Spatial differentiation cannot create support outside the closed joint
-spacetime support, since vanishing on a joint neighborhood implies vanishing
-on the spatial slice. -/
-theorem spatialCurl_tsupport_subset (A : VelocityField) :
-    tsupport (SpatialCurl.spatialCurl A) ⊆ tsupport A := by
-  apply closure_minimal _ isClosed_closure
-  intro z hz
-  by_contra hnot
-  have heq : A =ᶠ[𝓝 z] (fun _ => 0) := notMem_tsupport_iff_eventuallyEq.mp hnot
-  apply hz
-  change SpatialCurl.curlLinear (fderiv ℝ (fun y : Space => A (z.1, y)) z.2) = 0
-  rw [ResidualRegularity.space_fderiv_congr heq]
-  simp
 
 
 
@@ -190,9 +152,6 @@ theorem potential_periodic {times : Set ℝ} {Φ : PressureField} {a : VelocityF
 
 
 
-/-- The coefficient remaining after removing the sine oscillation. -/
-def strippedRemainder (k : ℝ) (B : VelocityField) : VelocityField :=
-  fun z => (1 / k) • SpatialCurl.spatialCurl B z
 
 
 

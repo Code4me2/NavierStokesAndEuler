@@ -288,33 +288,6 @@ theorem debt_norm_le (δ : ℝ) : ‖debt δ‖ ≤ |δ| := by
   intro i
   fin_cases i <;> simp [debt]
 
-/-- A smooth small branch is obtained from the proved actual moment derivative,
-not from an assumed solution or matrix rank. -/
-theorem exists_normalized_branch (lam : ℝ) (hlam : 0 < lam) :
-    ∃ (c : ℝ → Coeff) (ε K : ℝ), 0 < ε ∧ 0 < K ∧
-      ContDiffOn ℝ ∞ c (Ioo (-ε) ε) ∧ c 0 = 0 ∧
-      ∀ δ ∈ Ioo (-ε) ε,
-        (∫ y, Real.exp (angularSlope lam * y) * relative (c δ) y) = δ ∧
-        (∫ y, Real.exp (pressureSlope lam * y) * ((1 + relative (c δ) y) ^ 2 - 1)) = 0 ∧
-        ‖c δ‖ ≤ K * |δ| := by
-  obtain ⟨c, U, K, hU, h0, hK, hc, hc0, heq⟩ :=
-    SmoothMomentRepair.exists_smooth_parameter_branch (E := Coeff) (P := ℝ) 0
-      (fun _ => (linearEquiv lam hlam).toContinuousLinearMap)
-      (fun _ => quadraticCLM lam) debt contDiff_const contDiff_const debt_contDiff
-      (linearEquiv lam hlam) rfl (by ext i; fin_cases i <;> simp [debt])
-  obtain ⟨ε, hε, hεU⟩ := Metric.mem_nhds_iff.mp (hU.mem_nhds h0)
-  have hsub : Ioo (-ε) ε ⊆ U := by
-    intro δ hδ
-    apply hεU
-    simpa only [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt, Set.mem_Ioo] using hδ
-  refine ⟨c, ε, K, hε, hK, hc.mono hsub, hc0, ?_⟩
-  intro δ hδ
-  obtain ⟨he, hb⟩ := heq δ (hsub hδ)
-  change linearEquiv lam hlam (c δ) + quadraticCLM lam (c δ) (c δ) = debt δ at he
-  rw [moment_map_identity] at he
-  refine ⟨?_, ?_, hb.trans (mul_le_mul_of_nonneg_left (debt_norm_le δ) hK.le)⟩
-  · exact congrFun he 0
-  · exact congrFun he 1
 
 theorem relative_deriv (c : Coeff) (y : ℝ) :
     deriv (relative c) y = c 0 * deriv (bump 0) y + c 1 * deriv (bump 1) y := by
@@ -557,11 +530,6 @@ theorem angularScale_pos (lam e0 X0 y0 : ℝ) (he0 : 0 < e0) (hX : 0 < X0) :
 
 
 
-theorem modifiedH_unchanged (lam e0 X0 y0 : ℝ) (c : Coeff) {y : ℝ}
-    (hy : y ∉ Ioo (y0 - 1) (y0 + 3)) :
-    modifiedH lam e0 X0 y0 c y = baseH lam e0 X0 y := by
-  unfold modifiedH baseH
-  rw [modifiedE_unchanged lam e0 y0 c hy]
 
 namespace ResetBranch
 
@@ -601,14 +569,7 @@ end ResetBranch
 theorem radiusX_continuous (X0 : ℝ) : Continuous (radiusX X0) :=
   continuous_const.mul Real.continuous_exp
 
-theorem baseH_continuous (lam e0 X0 : ℝ) : Continuous (baseH lam e0 X0) :=
-  (Real.continuous_sqrt.comp (continuous_const.mul (radiusX_continuous X0))).mul
-    (baseE_contDiff lam e0).continuous
 
-theorem modifiedH_continuous (lam e0 X0 y0 : ℝ) (c : Coeff) :
-    Continuous (modifiedH lam e0 X0 y0 c) :=
-  (Real.continuous_sqrt.comp (continuous_const.mul (radiusX_continuous X0))).mul
-    (modifiedE_contDiff lam e0 y0 c).continuous
 
 theorem outside_window {a b y0 y : ℝ} (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b)
     (hy : y ∉ Icc a b) : y ∉ Ioo (y0 - 1) (y0 + 3) := by

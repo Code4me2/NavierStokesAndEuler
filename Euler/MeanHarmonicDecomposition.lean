@@ -69,16 +69,6 @@ theorem cutoff_curlTest_eq (χ : Cutoff) (U : Set Space)
     change χ.field x • vectorCurl (f : Space → Space) x = _
     rw [image_eq_zero_of_notMem_tsupport hs, smul_zero]
 
-/-- The actual curl tensor of any homogeneous potential remains solenoidal. -/
-theorem homogeneous_curl_solenoidal (u : homogeneousSpace) :
-    curlTensor (u : GradientTensor) ∈ solenoidalSpace := by
-  refine homogeneousGradient_dense.induction_on u ?_ ?_
-  · exact gradientSpace.isClosed_orthogonal.preimage
-      (curlTensor.continuous.comp continuous_subtype_val)
-  · intro f
-    change curlTensor (EulerMeanGradientTest.testGradient f) ∈ solenoidalSpace
-    rw [curlTensor_test_eq]
-    exact curl_mem_solenoidal _ ((contDiff_piLp 2).mp f.smooth) (test_memLp (curlTest f))
 
 
 /-- The source's `z - w` is genuinely weakly harmonic where the actual cutoff equals one. -/

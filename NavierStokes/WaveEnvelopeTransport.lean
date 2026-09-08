@@ -92,9 +92,6 @@ theorem copyEnvelope_path {g : Geometry} {r L : ℝ} (hsep : Separated g r L)
     g.coordinates_path]
 
 
-theorem path_transverse (g : Geometry) (k : Frequency) (Y : Plane) (s : ℝ) :
-    (g.coordinates k (g.path k Y s)).1 = (g.coordinates k Y).1 := by
-  rw [g.coordinates_path]
 
 
 section SlowCoordinates
@@ -170,17 +167,6 @@ theorem grouped_eventually_eq_copy {g : Geometry} {r L : ℝ}
   exact hynot (hsupport l hne)
 
 
-omit [NormedSpace ℝ P] [NormedSpace ℝ V] in
-theorem grouped_on_entire_path {g : Geometry} {r L : ℝ}
-    (hsep : Separated g r L) (F : Frequency → P × Plane → V)
-    (hsupport : ∀ k, support (F k) ⊆ copyCell g r L k)
-    (k : Frequency) (p : P) (Y : Plane)
-    (hξ : (g.coordinates k Y).1 ∈ Icc (-r) r) :
-    ∀ v ∈ Icc 0 L, grouped F (p, g.path k Y v) = F k (p, g.path k Y v) := by
-  intro v hv
-  have hmem : (p, g.path k Y v) ∈ copyCell g r L k :=
-    coordinates_path_in_rectangle g k Y hξ hv
-  exact (grouped_eventually_eq_copy hsep F hsupport hmem).self_of_nhds
 
 
 

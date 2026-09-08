@@ -103,12 +103,6 @@ theorem common_eq_of_localized (f g : PeriodizedWaveBounds.CopyData D K)
     _ = {g.background with amplitude := g.common.amplitude, pressure := g.common.pressure} := by rw [hb, ha, hp]
     _ = g.common := rfl
 
-theorem commonCorrected_eq_of_localized (f g : PeriodizedWaveBounds.CopyData D K)
-    (hb : f.background = g.background) (he : ∀ k, f.localized k = g.localized k)
-    (s : StripData D) (d : GraphDirections D) :
-    f.commonCorrected s d = g.commonCorrected s d := by
-  unfold PeriodizedWaveBounds.CopyData.commonCorrected
-  rw [common_eq_of_localized f g hb he]
 
 end Copies
 
@@ -288,31 +282,6 @@ noncomputable def dynamicCopyData (request : ℕ → Cylinder → Vec2) (j : Fin
       (layout sys hh label hl gap).nativeGaussian reference k (V.map n x).1.2.2
   source := fun _ _ => 0
 
-theorem dynamic_localized_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency) :
-    (dynamicCopyData sys hh label hl gap B V request j).localized k =
-      (ActualPeriodizedSignedRealization.copyData B (layout sys hh label hl gap) V request j).localized k := by
-  have hm : ActualPeriodizedSignedRealization.copyMask B (layout sys hh label hl gap) V k =
-      fun n x => ActualPeriodizedSignedRealization.sharedMask B V n x *
-        nativeMask sys label ((geometry sys label gap).coordinates k (V.map n x).1.2.2) := rfl
-  change ((dynamicCoefficients sys hh label hl gap B V request j k).withCutoff _) =
-    ((ActualPeriodizedSignedRealization.nativeCoefficients B (layout sys hh label hl gap) V request j k).withCutoff _)
-  unfold dynamicCoefficients ActualPeriodizedSignedRealization.nativeCoefficients
-  rw [hm]
-  unfold ActualPeriodizedSignedRealization.coefficientsWith
-  rw [coefficients_repartition]
-  congr 1
-  funext n x
-  change PartitionedCovariance.cutoff sys.radius
-      ((geometry sys label gap).coordinates k (V.map n x).1.2.2).1 *
-    GaussianTailFlat.profile (((geometry sys label gap).coordinates k (V.map n x).1.2.2).2 /
-      ChartScales.slotLength sys.radius h label.1) =
-    GaussianTailFlat.profile (((geometry sys label gap).coordinates k (V.map n x).1.2.2).2 /
-      ChartScales.slotLength sys.radius h label.1) *
-      (PartitionedCovariance.cutoff sys.radius
-        ((geometry sys label gap).coordinates k (V.map n x).1.2.2).1 *
-        PrimaryCopyBounds.outerCutoff (((geometry sys label gap).coordinates k (V.map n x).1.2.2).2 /
-          ChartScales.slotLength sys.radius h label.1))
-  rw [mul_left_comm, PrimaryCopyBounds.profile_mul_outerCutoff]
 
 
 
@@ -1989,24 +1958,6 @@ variable (G : ReferenceGeometry sys f) (L : NativeLabel f.active)
 
 include G ha hd
 
-include hPhi in
-theorem labelPotential_eq_reference {x : SpaceTime}
-    (hx : x ∈ referencePatch (h := h) f L a b delta j) :
-    labelPotential sys hh f L a x =
-      ActualPeriodizedSignedRealization.physicalPotential (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta x := by
-  let z := PhysicalCurlCovariance.polarCoordinates delta j x
-  have hz : z ∈ PhysicalCurlCovariance.validCylindrical delta j := polarCoordinates_valid hd j hx.1
-  have he : (z.1, CylindricalResidual.chart z.2) = x := polarCoordinates_backward hd j hx.1
-  ext i
-  simp only [labelPotential, PhysicalCurlCovariance.realVector_apply]
-  have hb' : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PhysicalGraphBounds.annulus a b := by simpa only [he] using hx.2.1
-  have hj' : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PolarCharts.chartDomain a j := by simpa only [he] using hx.2.2.1
-  have H := potential_periodized_physical sys hh f G L i hPhi ha hd j z hz hx.2.2.2 hb' hj'
-  simp only [he] at H
-  exact H
 
 
 

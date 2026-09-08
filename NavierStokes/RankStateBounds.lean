@@ -294,15 +294,6 @@ theorem rankIncrementState_bounds {H : ℝ}
     fixedClass_to_moving U ha hlo hcL hcR ε L hε hεone hL hleft hright hlocal.angular hsT hfixed.angular,
     fixedClass_to_moving U ha hlo hcL hcR ε L hε hεone hL hleft hright hlocal.axial hsZ hfixed.axial⟩
 
-theorem rankIncrementState_bounds_of_components {H : ℝ}
-    (heps : BandBound (movingStripData U g.radial.inner g.radial.outer cL cR ha hcL hcR
-      ε L hε hεone hL) 1 c.operators.epsilon)
-    (hdebt : ∀ i : Fin 3, UnweightedClass (PhysicalMeanDomain.localSlowStripData U.carrier U.isOpen
-      ε L hε hεone hL) H (fun n x => CorrectionState.debt c u n x i)) :
-    IncrementBounds (movingStripData U g.radial.inner g.radial.outer cL cR ha hcL hcR
-      ε L hε hεone hL) H (VariableGaugeMean.rankIncrementState g r axial c u) :=
-  rankIncrementState_bounds U g r ha hcL hcR ε L hε hεone hL c u hg hparam hB hleft hright axial heps
-    (debtClass_of_components _ hdebt)
 
 
 

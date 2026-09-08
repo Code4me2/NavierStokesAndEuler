@@ -618,25 +618,6 @@ theorem radialSlice_continuous {f : ℝ × E → V} (hf : Continuous f)
   exact hf.comp (continuous_id.prodMk
     (continuous_const.add ((continuous_const.mul (continuous_id.sub continuous_const)).smul continuous_const)))
 
-/-- Auxiliary translation does not change a radial bound that is uniform in
-the auxiliary variable. Constants are independent of M, v, and the base point. -/
-theorem shifted_radial_compact_primitive_uniform
-    {a b c d cL cR : ℝ} (ha : 0 < a) (hac : a < c) (hcd : c < d) (hdb : d < b)
-    (hcL : 0 < cL) (hcR : 0 < cR) (m : ℕ) (χ : ℝ → ℝ)
-    (hχ : ∀ X, |χ X| ≤ 1)
-    (hleft : ∀ X, X ≤ c → χ X = 0) (hright : ∀ X, d ≤ X → χ X = 1) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : E) (f : ℝ × E → V), Continuous f →
-      ∀ A : ℝ, 0 ≤ A →
-      (∀ X ∈ Ioo a b, ∀ Y : E, ‖f (X, Y)‖ ≤ A * logWeight cL cR a b m X) →
-      ∀ z : ℝ × E, z.1 ∈ Ioo a b →
-        ‖radialCompactPrimitive χ (radialSlice M v f z) a b z.1‖ ≤
-          K * A * logWeight cL cR a b m z.1 := by
-  obtain ⟨K, hK, hbound⟩ := radial_compact_primitive_uniform (V := V)
-    ha hac hcd hdb hcL hcR m χ hχ hleft hright
-  refine ⟨K, hK, ?_⟩
-  intro M v f hfc A hA hf z hz
-  exact hbound (radialSlice M v f z) (radialSlice_continuous hfc M v z) A hA
-    (fun X hX => hf X hX _) z.1 hz
 
 end PhysicalIntegrals
 
@@ -647,15 +628,6 @@ section Transport
 variable {E V : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-theorem compactIntegral_eq_radialCompactPrimitive
-    {a b M : ℝ} {v : E} {f : ℝ × E → V} (χ : ℝ → ℝ)
-    (hf : Continuous f) (hs : RadialAlias.RadiallySupported a b f) (z : ℝ × E) :
-    TransportPrimitive.compactIntegral χ M v f z =
-      radialCompactPrimitive χ (radialSlice M v f z) a b z.1 := by
-  rw [TransportPrimitive.compactIntegral,
-    TransportPrimitive.pastIntegral_eq_radialInterval hf hs,
-    TransportPrimitive.totalIntegral_eq_radialInterval hf hs]
-  rfl
 
 
 

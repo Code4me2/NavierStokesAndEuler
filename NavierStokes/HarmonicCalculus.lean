@@ -434,22 +434,6 @@ theorem normalDot_norm_eq_div (R : E → ℝ) (Vr Vθ Vz : E → E)
   apply (eq_div_iff (abs_ne_zero.mpr hκ)).mpr
   simpa only [mul_comm] using he
 
-/-- Quantitative pointwise gain using actual radial and axial derivatives
-of the coefficient. -/
-theorem longitudinalCoefficient_bound (R : E → ℝ) (Vr Vθ Vz : E → E)
-    (κ : ℝ) {Φ : E → ℝ} {a : E → ComplexVector} {x : E}
-    (hκ : κ ≠ 0) (hΦ : DifferentiableAt ℝ Φ x)
-    (ha : ∀ i, DifferentiableAt ℝ (fun y => a y i) x)
-    (haθ : along Vθ (fun y => a y 1) x = 0)
-    (hdiv : cylindricalDivergence R Vr Vθ Vz (vectorMode κ Φ a) x = 0) :
-    ‖longitudinalCoefficient (phaseNormal R Vr Vθ Vz Φ x) (a x)‖ ≤
-      (‖along Vr (fun y => a y 0) x‖ + ‖a x 0‖ / |R x| +
-        ‖along Vz (fun y => a y 2) x‖) /
-        (|κ| * ‖phaseNormal R Vr Vθ Vz Φ x‖) := by
-  rw [norm_longitudinalCoefficient, normalDot_norm_eq_div R Vr Vθ Vz κ hκ hΦ ha haθ hdiv,
-    div_div]
-  exact div_le_div_of_nonneg_right (norm_strippedDivergence_le R Vr Vz a x)
-    (mul_nonneg (abs_nonneg κ) (norm_nonneg _))
 
 
 

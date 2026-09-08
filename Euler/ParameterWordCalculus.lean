@@ -121,12 +121,5 @@ theorem wordSum_sub_le (directions : ι → P) (f g : P → E)
   rw [wordDerivative_sub directions f g hf hg w x]
   exact norm_sub_le _ _
 
-/-- Subtracting a frozen coefficient has no positive-order derivative. -/
-theorem wordSum_sub_const_succ (directions : ι → P) (f : P → E)
-    (hf : ContDiff ℝ ∞ f) (c : E) (n : ℕ) (x : P) :
-    wordSum directions (f-fun _ => c) (n+1) x = wordSum directions f (n+1) x := by
-  unfold wordSum wordDerivative
-  rw [iteratedFDeriv_sub_apply (hf.contDiffAt.of_le (by simp)) contDiffAt_const]
-  simp only [iteratedFDeriv_succ_const, Pi.zero_apply, sub_zero]
 
 end EulerParameterWordGevrey

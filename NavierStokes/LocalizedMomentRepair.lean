@@ -304,28 +304,6 @@ theorem repair_derivative_bound (a l u : Fin n → ℝ) (hlu : ∀ j, l j < u j)
       simpa only [Real.norm_eq_abs] using norm_le_pi_norm d j
     _ = (∑ j, C j) * ‖d‖ := by rw [← Finset.mul_sum, mul_comm]
 
-/-- All derivatives through any prescribed finite order depend Lipschitz-continuously
-on the moment debt, uniformly over the spatial coordinate. -/
-theorem repair_finite_jet_bound (a l u : Fin n → ℝ) (hlu : ∀ j, l j < u j) (N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ k ≤ N, ∀ (d e : Fin n → ℝ) (t : ℝ),
-      |iteratedDeriv k (repair a l u d) t - iteratedDeriv k (repair a l u e) t| ≤
-        C * ‖d - e‖ := by
-  choose C hC hbound using repair_derivative_bound a l u hlu
-  refine ⟨∑ k ∈ Finset.range (N + 1), C k, Finset.sum_nonneg (fun k _ => hC k), ?_⟩
-  intro k hk d e t
-  have hsub : iteratedDeriv k (repair a l u (d - e)) t =
-      iteratedDeriv k (repair a l u d) t - iteratedDeriv k (repair a l u e) t := by
-    rw [repair_sub]
-    exact iteratedDeriv_sub
-      ((repair_contDiff a l u d).of_le
-        (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffAt
-      ((repair_contDiff a l u e).of_le
-        (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffAt
-  rw [← hsub]
-  apply (hbound k (d - e) t).trans
-  apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
-  exact Finset.single_le_sum (fun j _ => hC j)
-    (Finset.mem_range.mpr (Nat.lt_succ_of_le hk))
 
 end Jets
 

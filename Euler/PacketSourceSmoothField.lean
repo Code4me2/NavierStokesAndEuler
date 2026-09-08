@@ -48,10 +48,6 @@ theorem smoothField_jetLp_continuous (n : ℕ) :
   simp only [smoothField_jetLp]
   exact (tensorPath D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF n).continuous
 
-def smoothCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Space :=
-  EulerMeanSobolevBoundedField.coefficientPath
-    (smoothField D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF)
-    (smoothField_jetLp_continuous D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF)
 
 
 end EulerPacketSourceVolumeSobolev

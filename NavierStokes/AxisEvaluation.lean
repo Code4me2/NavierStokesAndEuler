@@ -422,11 +422,6 @@ theorem mixedSeries_sub_bound (I : Window) {ε R : ℝ} (hε : 0 < ε)
 
 
 
-/-- A window larger than the target interval, with arbitrarily small margin. -/
-def enlargedUnitWindow (δ : ℝ) (hδ : 0 < δ) : Window where
-  left := -1 - δ
-  right := 1 + δ
-  nondegenerate := by linarith
 
 
 

@@ -471,9 +471,6 @@ theorem torusAverage_torusPartial_zero (v : ℝ × ℝ) {F : (P × ℝ) × ℝ �
     torusAverage_first_zero hF hp, torusAverage_second_zero hF hp]
   simp
 
-noncomputable def graphPartial (a : P → ℝ) (v : P) (w : ℝ × ℝ)
-    (F : (P × ℝ) × ℝ → ℝ) (q : (P × ℝ) × ℝ) : ℝ :=
-  slowPartial v F q + a q.1.1 * torusPartial w F q
 
 
 
@@ -563,17 +560,6 @@ theorem SmoothShell.weighted_integrable {a b : ℝ} {F : MeanField} (hF : Smooth
     (n : ℕ) (p : MeanParameter) : Integrable (fun r => r ^ n * F (r, p)) :=
   IntegratedMeanBalances.weighted_integrable (hF.slice_smooth p).continuous (hF.slice_compact p) n
 
-/-- The angular line of (32), after the actual torus average. Coordinates are
-`(R,(T,Z))`; `ε` is constant on a chart. The supplied fluxes are full averages
-of the pointwise products in (32), and the last radial divergence is the virtual stress. -/
-noncomputable def angularBalance (ε : ℝ) (v radialFlux axialFlux virtualFlux : MeanField)
-    (x : MeanPoint) : ℝ :=
-  (-ε) * parameterPartial (1, 0) v x +
-    radialDivergence 2 (fun r => radialFlux (r, x.2)) x.1 +
-    ε * parameterPartial (0, 1) axialFlux x -
-    ε * (angularRadialViscosity (fun r => v (r, x.2)) x.1 +
-      ε ^ 2 * parameterPartial (0, 1) (parameterPartial (0, 1) v) x) -
-    radialDivergence 2 (fun r => virtualFlux (r, x.2)) x.1
 
 /-- The axial line of (32), with pressure retained inside the axial flux. -/
 noncomputable def axialBalance (ε : ℝ) (γ radialFlux axialFlux pressure virtualFlux : MeanField)
@@ -646,21 +632,6 @@ theorem flux_pressure_moment {a b : ℝ} {axialFlux pressure gr ρ : MeanField}
   unfold axialDefect pressureCoefficient radialMoment
   ring
 
-/-- The pressure coefficient stays inside the actual axial derivative, exactly
-as in (34); it may vary with both slow parameters. -/
-theorem integrated_axial_reconstructed {a b : ℝ} (ε : ℝ)
-    {γ radialFlux axialFlux pressure virtualFlux gr ρ : MeanField}
-    (hγ : SmoothShell a b γ) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hp : SmoothShell a b pressure)
-    (hT : SmoothShell a b virtualFlux) (hg : SmoothShell a b gr) (hρ : SmoothShell a b ρ)
-    (hmass : radialMoment 1 γ = 0)
-    (hderiv : ∀ r p, deriv (fun s => pressure (s, p)) r =
-      gr (r, p) - ρ (r, p) * pressureTotal gr p) (p : MeanParameter) :
-    radialMoment 1 (axialBalance ε γ radialFlux axialFlux pressure virtualFlux) p =
-      ε * fderiv ℝ (fun q => axialDefect axialFlux gr q +
-        pressureCoefficient ρ q * pressureTotal gr q) p (0, 1) := by
-  rw [integrated_axial_balance ε hγ hr hz hp hT hmass,
-    flux_pressure_moment hz hp hg hρ hderiv]
 
 /-! ## Restriction to the physical positive radial half-line -/
 
@@ -682,14 +653,6 @@ theorem radialDivergence_supported {a b : ℝ} {f : ℝ → ℝ}
   simp [radialDivergence, zero_of_not_mem_interval hs hn,
     zero_of_not_mem_interval (deriv_support_interval hs) hn]
 
-theorem angularViscosity_supported {a b : ℝ} {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) : support (angularRadialViscosity f) ⊆ Icc a b := by
-  intro r hr
-  by_contra hn
-  apply hr
-  simp [angularRadialViscosity, zero_of_not_mem_interval hs hn,
-    zero_of_not_mem_interval (deriv_support_interval hs) hn,
-    zero_of_not_mem_interval (deriv_support_interval (deriv_support_interval hs)) hn]
 
 theorem axialViscosity_supported {a b : ℝ} {f : ℝ → ℝ}
     (hs : support f ⊆ Icc a b) : support (axialRadialViscosity f) ⊆ Icc a b := by
@@ -709,28 +672,7 @@ theorem SmoothShell.zero_of_not_mem {a b : ℝ} {F : MeanField} (hF : SmoothShel
   exact hx (hF.supported h)
 
 
-theorem axialBalance_supported {a b : ℝ} (ε : ℝ)
-    {γ radialFlux axialFlux pressure virtualFlux : MeanField}
-    (hγ : SmoothShell a b γ) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hp : SmoothShell a b pressure)
-    (hT : SmoothShell a b virtualFlux) :
-    RadialAlias.RadiallySupported a b (axialBalance ε γ radialFlux axialFlux pressure virtualFlux) := by
-  intro x hx
-  by_contra hn
-  apply hx
-  simp [axialBalance,
-    (hγ.partial (1, 0)).zero_of_not_mem hn, ((hz.add hp).partial (0, 1)).zero_of_not_mem hn,
-    ((hγ.partial (0, 1)).partial (0, 1)).zero_of_not_mem hn,
-    zero_of_not_mem_interval (radialDivergence_supported (hr.slice_support x.2) 1) hn,
-    zero_of_not_mem_interval (radialDivergence_supported (hT.slice_support x.2) 1) hn,
-    zero_of_not_mem_interval (axialViscosity_supported (hγ.slice_support x.2)) hn]
 
-theorem positive_radialMoment {a b : ℝ} (ha : 0 < a) {F : MeanField}
-    (hs : RadialAlias.RadiallySupported a b F) (n : ℕ) (p : MeanParameter) :
-    (∫ r in Ioi (0 : ℝ), r ^ n * F (r, p)) = radialMoment n F p := by
-  apply positive_integral_eq_integral ha
-  intro r hr
-  exact hs (right_ne_zero_of_mul hr)
 
 
 
@@ -765,15 +707,8 @@ theorem constructed_pressure_moment {d a b M : ℝ}
 
 end PressurePrimitive
 
-noncomputable def reconstructedMeanPressure (d a b M : ℝ) (hab : a < b) (v : ℝ × ℝ)
-    (f : PressureStream.Lift MeanParameter → ℝ) : MeanField :=
-  PressureStream.torusAverage (PressureStream.meanPressure d a b M hab v f)
 
-noncomputable def averagedRadialSource (f : PressureStream.Lift MeanParameter → ℝ) : MeanField :=
-  PressureStream.torusAverage f
 
-noncomputable def normalizedMeanDensity (a b : ℝ) (hab : a < b) (x : MeanPoint) : ℝ :=
-  PressureStream.rho a b hab x.1
 
 
 

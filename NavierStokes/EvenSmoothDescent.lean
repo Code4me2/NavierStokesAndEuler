@@ -270,13 +270,6 @@ theorem iteratedDerivWithin_descent {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
     exact (hasDerivWithinAt_descent (contDiff_radialIterate hf n)
       (even_radialIterate he n) hX).derivWithin (uniqueDiffOn_Ici 0 X hX)
 
-theorem contDiffOn_descent {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
-    (he : Function.Even f) : ContDiffOn ℝ ∞ (descent f) (Ici 0) := by
-  apply contDiffOn_of_differentiableOn_deriv
-  intro n _ X hX
-  exact ((hasDerivWithinAt_descent (contDiff_radialIterate hf n)
-    (even_radialIterate he n) hX).congr_of_mem
-      (iteratedDerivWithin_descent hf he n) hX).differentiableWithinAt
 
 theorem radialIterate_at_zero (n : ℕ) {f : ℝ → E} (hf : ContDiff ℝ ∞ f) :
     radialIterate f n 0 =

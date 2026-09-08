@@ -59,23 +59,6 @@ open Set EulerSmoothLimit EulerPacketPointJets EulerPacketProfileRecursion
 
 variable {P T : ℝ} [Fact (0 < P)] {O : Operators} {N : ℕ} {a : ℕ → Profile} {S : Set Space}
 
-def literalTailGradeField (hT : 0 < T)
-    (G : ∀ i, i ≤ N → ProfileRegularity P T hT.le S (a i))
-    (C : CoefficientData P T O) (ha : a 0=0) (n : ℕ) (hn : N+1 ≤ n) :
-    Field P T (fun z => slicedMomentumGrade O.interval (N+1) (O.inverseFrame z) (O.strain z) (O.normal z)
-      (assembledVelocity N a) (assembledPressure N a) z n) := by
-  refine (tailGradeField hT G C ha n hn).congr ?_
-  intro t x θ
-  apply slicedMomentumGrade_tail_eq_recursive O N n hn a (t,(x,θ))
-  · intro i hi
-    rw [C.interval_eq]
-    exact (G i hi).high.sliceDifferentiable (G i hi).highDerivative hT.le (G i hi).high_time t x θ
-  · intro i hi
-    rw [C.interval_eq]
-    exact (G i hi).mean.sliceDifferentiable (G i hi).meanDerivative hT.le (G i hi).mean_time t x θ
-  · intro i hi
-    rw [C.interval_eq]
-    exact (G i hi).corrector.sliceDifferentiable (G i hi).correctorDerivative hT.le (G i hi).corrector_time t x θ
 
 
 end EulerPacketCylinderField.ProfileRegularity

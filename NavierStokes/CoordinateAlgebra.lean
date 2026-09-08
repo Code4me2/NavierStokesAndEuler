@@ -40,13 +40,7 @@ theorem L_pos {h η : ℝ} (hh₀ : 0 ≤ h) (hh : h < 1 / 2)
 
 
 
-/-- The inverse Jacobian acting on `(τ',z')`, first component. -/
-def inverseQ (q h η τ' z' : ℝ) : ℝ :=
-  (τ' + 2 * q * η * z' / q ^ D h) / L h η
 
-/-- The inverse Jacobian acting on `(τ',z')`, second component. -/
-def inverseEta (q h η τ' z' : ℝ) : ℝ :=
-  (d η * z' / q ^ D h - D h * η * τ' / q) / L h η
 
 
 

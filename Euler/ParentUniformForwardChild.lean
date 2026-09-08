@@ -1,6 +1,8 @@
 import Euler.ParentParticleInverse
 import Euler.ParentPacketForwardInput
-import Euler.PacketForwardInitializedFlowAndShear
+import Euler.PacketForwardInitializedFlowBounds
+import Euler.PacketForwardGlobalShear
+import Euler.PacketForwardExactPressureError
 import Euler.PhysicalChildSourceBound
 import Euler.PacketForwardUniformChild
 import Euler.PacketUniversalFrequency

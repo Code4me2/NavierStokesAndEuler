@@ -465,10 +465,6 @@ noncomputable def correctionCLM (P : Patch) (x : ℝ) : Coeff →L[ℝ] ℝ :=
           RingHom.id_apply] }
 
 
-theorem correction_parameter_deriv (P : Patch) {c : ℝ → Coeff} {η : ℝ}
-    (hc : DifferentiableAt ℝ c η) (x : ℝ) :
-    deriv (fun s => correction P (c s) x) η = correction P (deriv c η) x :=
-  ((correctionCLM P x).hasFDerivAt.comp_hasDerivAt η hc.hasDerivAt).deriv
 
 theorem correction_family_contDiffOn (P : Patch) {U : Set ℝ} {c : ℝ → Coeff}
     (hc : ContDiffOn ℝ ∞ c U) :
@@ -478,19 +474,6 @@ theorem correction_family_contDiffOn (P : Patch) {U : Set ℝ} {c : ℝ → Coef
   exact ((contDiffOn_pi.mp hc j).comp contDiffOn_fst (fun z hz => hz.1)).mul
     ((bump_contDiff P j).comp_contDiffOn contDiffOn_snd)
 
-/-- Composition with the debt gives the true parameter derivative, with no
-regularity hypothesis on a previously chosen solution branch. -/
-theorem composed_solver_deriv_bound {g : Coeff → Coeff} {ε C : ℝ}
-    (hg : ContDiffOn ℝ ∞ g (Metric.ball 0 ε))
-    (hbound : ∀ v ∈ Metric.ball (0 : Coeff) ε, ‖fderiv ℝ g v‖ ≤ C)
-    {d : ℝ → Coeff} {η : ℝ} (hd : DifferentiableAt ℝ d η)
-    (hmem : d η ∈ Metric.ball (0 : Coeff) ε) :
-    ‖deriv (g ∘ d) η‖ ≤ C * ‖deriv d η‖ := by
-  have hgd := (hg.contDiffAt (Metric.isOpen_ball.mem_nhds hmem)).differentiableAt
-    (by simp : (∞ : WithTop ℕ∞) ≠ 0)
-  rw [(hgd.hasFDerivAt.comp_hasDerivAt η hd.hasDerivAt).deriv]
-  exact ((fderiv ℝ g (d η)).le_opNorm _).trans
-    (mul_le_mul_of_nonneg_right (hbound (d η) hmem) (norm_nonneg _))
 
 /-- The physical profile uses the actual additive bumps at scale `R`. -/
 noncomputable def physicalProfile (P : Patch) (lam R a : ℝ) (c : Coeff) (X : ℝ) : ℝ :=
@@ -604,54 +587,8 @@ theorem amplitudeFactors_contDiffOn {U : Set ℝ} {a : ℝ → ℝ}
   · exact (contDiffOn_const.mul (ha.pow 2)).inv (fun η hη => by have := hpos η hη; positivity)
   · exact ha.inv (fun η hη => (hpos η hη).ne')
 
-theorem amplitudeDebt_contDiffOn {U : Set ℝ} {a : ℝ → ℝ}
-    (ha : ContDiffOn ℝ ∞ a U) (hpos : ∀ η ∈ U, 0 < a η) (v : Coeff) :
-    ContDiffOn ℝ ∞ (fun η => amplitudeDebt (a η) v) U :=
-  ((amplitudeFactors_contDiffOn ha hpos).mul contDiffOn_const).neg
 
-theorem compact_amplitude_bounds {U S : Set ℝ} (hU : IsOpen U) (hS : IsCompact S)
-    (hSU : S ⊆ U) {a : ℝ → ℝ} (ha : ContDiffOn ℝ ∞ a U)
-    (hpos : ∀ η ∈ U, 0 < a η) :
-    ∃ D : ℝ, 0 < D ∧ ∀ η ∈ S,
-      ‖amplitudeFactors (a η)‖ ≤ D ∧
-      ‖deriv (fun θ => amplitudeFactors (a θ)) η‖ ≤ D ∧
-      |a η| ≤ D ∧ |deriv a η| ≤ D := by
-  have hF := amplitudeFactors_contDiffOn ha hpos
-  have hFd : ContDiffOn ℝ ∞ (deriv (fun θ => amplitudeFactors (a θ))) U :=
-    hF.deriv_of_isOpen hU (by simp)
-  have had : ContDiffOn ℝ ∞ (deriv a) U := ha.deriv_of_isOpen hU (by simp)
-  obtain ⟨B₀, hb₀⟩ := hS.exists_bound_of_continuousOn (hF.continuousOn.mono hSU)
-  obtain ⟨B₁, hb₁⟩ := hS.exists_bound_of_continuousOn (hFd.continuousOn.mono hSU)
-  obtain ⟨B₂, hb₂⟩ := hS.exists_bound_of_continuousOn (ha.continuousOn.mono hSU)
-  obtain ⟨B₃, hb₃⟩ := hS.exists_bound_of_continuousOn (had.continuousOn.mono hSU)
-  let D : ℝ := 1 + |B₀| + |B₁| + |B₂| + |B₃|
-  have hD₀ : B₀ ≤ D := by dsimp [D]; linarith [le_abs_self B₀, abs_nonneg B₁, abs_nonneg B₂, abs_nonneg B₃]
-  have hD₁ : B₁ ≤ D := by dsimp [D]; linarith [le_abs_self B₁, abs_nonneg B₀, abs_nonneg B₂, abs_nonneg B₃]
-  have hD₂ : B₂ ≤ D := by dsimp [D]; linarith [le_abs_self B₂, abs_nonneg B₀, abs_nonneg B₁, abs_nonneg B₃]
-  have hD₃ : B₃ ≤ D := by dsimp [D]; linarith [le_abs_self B₃, abs_nonneg B₀, abs_nonneg B₁, abs_nonneg B₂]
-  refine ⟨D, by dsimp [D]; positivity, fun η hη => ⟨(hb₀ η hη).trans hD₀,
-    (hb₁ η hη).trans hD₁, ?_, ?_⟩⟩
-  · exact (hb₂ η hη).trans hD₂
-  · exact (hb₃ η hη).trans hD₃
 
-theorem amplitudeDebt_bounds {U S : Set ℝ} (hU : IsOpen U) (hSU : S ⊆ U)
-    {a : ℝ → ℝ} (ha : ContDiffOn ℝ ∞ a U) (hpos : ∀ η ∈ U, 0 < a η)
-    {D : ℝ} (hD : ∀ η ∈ S, ‖amplitudeFactors (a η)‖ ≤ D ∧
-      ‖deriv (fun θ => amplitudeFactors (a θ)) η‖ ≤ D)
-    (v : Coeff) {η : ℝ} (hη : η ∈ S) :
-    ‖amplitudeDebt (a η) v‖ ≤ D * ‖v‖ ∧
-      ‖deriv (fun θ => amplitudeDebt (a θ) v) η‖ ≤ D * ‖v‖ := by
-  have hF : DifferentiableAt ℝ (fun θ => amplitudeFactors (a θ)) η :=
-    ((amplitudeFactors_contDiffOn ha hpos).contDiffAt (hU.mem_nhds (hSU hη))).differentiableAt
-      (by simp : (∞ : WithTop ℕ∞) ≠ 0)
-  constructor
-  · dsimp [amplitudeDebt]
-    rw [norm_neg]
-    exact (norm_mul_le _ _).trans (mul_le_mul_of_nonneg_right (hD η hη).1 (norm_nonneg v))
-  · simp only [amplitudeDebt]
-    rw [((hF.hasDerivAt.mul_const v).fun_neg).deriv]
-    rw [norm_neg]
-    exact (norm_mul_le _ _).trans (mul_le_mul_of_nonneg_right (hD η hη).2 (norm_nonneg v))
 
 /-- The value, normalized radial derivative, and parameter derivative of the
 actual additive profile perturbation are all small. -/
@@ -673,10 +610,6 @@ theorem physicalProfile_eq_clean_outside (P : Patch) (lam R a : ℝ) (c : Coeff)
 
 
 
-noncomputable def heatDebt (T : OutgoingTail.TailData) (ν K η : ℝ) : Coeff :=
-  ![HeatTailEdit.pressureDebt (HeatTailEdit.outgoingProfile T K η) T.h ν K,
-    HeatTailEdit.energyDebt (HeatTailEdit.outgoingProfile T K η) T.h ν K,
-    HeatTailEdit.angularDebt (HeatTailEdit.outgoingProfile T K η) T.h ν K]
 
 
 

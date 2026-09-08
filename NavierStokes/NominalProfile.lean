@@ -1529,15 +1529,6 @@ theorem physical_density_integrable (hsep : c.separation ≤ Real.exp (-8))
     (c.admissible_nonnegative hr hη hs) i) _ measurableSet_Ioc
   exact fun x hx => congrArg (fun q : Debt => q i) (c.physical_density_eq hsep hx.1 eta).symm
 
-theorem profiles_pressure (hsep : c.separation ≤ Real.exp (-8))
-    {p : Point} (hX : 0 ≤ p.1) : (c.profiles hsep).pressure p = c.Pi p := by
-  change F.axisDatum p.2 + ProfileHistories.primitive (fun q => c.f q ^ 2) p =
-    F.axisDatum p.2 + moments c.U c.E p.1 p.2 4
-  congr 1
-  rw [ProfileHistories.primitive, intervalIntegral.integral_of_le hX]
-  apply setIntegral_congr_fun measurableSet_Ioc
-  intro x hx
-  exact (congrArg (fun q : Debt => q 4) (c.physical_density_eq hsep hx.1 p.2)).symm
 
 end Controls
 
@@ -1615,14 +1606,6 @@ namespace Controls
 
 variable {F : Profile} {A : AxisStage F} (c : Controls A)
 
-theorem pressure_after_match (hsep : c.separation ≤ Real.exp (-8))
-    {X eta : ℝ} (hX : c.radius * matchFraction ≤ X)
-    (hη : eta ∈ ReferencePath.parameterInterval) (hs : SmallDebt F c.debt eta) :
-    c.Pi (X, eta) = OutgoingDilation.Pi F c.radius (X, eta) := by
-  change F.axisDatum eta + moments c.U c.E X eta 4 = _
-  rw [c.physical_moments hsep hX hη hs]
-  exact outgoing_pressure_prefix F c.radius eta c.radius_pos
-    ((mul_pos c.radius_pos matchFraction_pos).trans_le hX)
 
 theorem kernel_integral (hsep : c.separation ≤ Real.exp (-8))
     {eta : ℝ} (hη : eta ∈ ReferencePath.parameterInterval) (hs : SmallDebt F c.debt eta) :
@@ -2030,14 +2013,6 @@ theorem heated_pressure_after {B : ℝ} (w : HeatedOutgoing.CompensationWitness 
   rw [c.heated_moments w hsep hη hs hX]
   exact heated_outgoing_pressure_prefix w hη (c.heatJoin_pos.le.trans hX)
 
-theorem heated_pressure_before (coef : ℝ → HeatedOutgoing.Coeff) {p : Point}
-    (hp : p.1 ≤ c.heatJoin) : c.heatedPi coef p = c.Pi p := by
-  change F.axisDatum p.2 + moments c.U (c.heatedE coef) p.1 p.2 4 =
-    F.axisDatum p.2 + moments c.U c.E p.1 p.2 4
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Ioc
-  intro x hx
-  simp only [density, c.heatedE_before coef (p := (x, p.2)) (hx.2.trans hp)]
 
 end Controls
 
@@ -2065,16 +2040,6 @@ theorem activation_collar_le_Xi : (4 / A.scale) * Real.exp c.referenceWidth ≤ 
   change c.reference.radius0 * Real.exp c.referenceWidth ≤ Xi
   exact (h.trans_eq hr).trans (by norm_num [Xi])
 
-theorem heated_seed_fields (coef : ℝ → HeatedOutgoing.Coeff)
-    (hsep : c.separation ≤ Real.exp (-8)) {p : Point} (hp : p.1 ≤ Xi) :
-    c.heatedf coef p = c.seedProfiles.f p ∧ c.U p = c.seedProfiles.U p ∧
-      c.heatedE coef p = c.seedProfiles.E p := by
-  have hc := c.physical_before_Xi hsep hp
-  refine ⟨?_, hc.1, ?_⟩
-  · rw [heatedf, ite_eq_left hp, c.f_before_Xi hp]
-    rfl
-  · rw [c.heatedE_before coef (hp.trans (c.Xi_lt_heatJoin hsep).le), hc.2]
-    rfl
 
 
 

@@ -53,22 +53,6 @@ theorem framePathApply_translation_contDiff {n : ℕ∞ω}
       (fun a => coordinatePathTranslation T a v)
       (contDiff_solenoidalFrame T (fun a => translatePath T a F) hF) hv)
 
-theorem framePathApply_translation_gevrey
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hv : ContDiff ℝ ∞ (fun a : Space => coordinatePathTranslation T a v))
-    (R CF Cv : ℝ) (hR : 0 ≤ R) (hCF : 0 ≤ CF) (hCv : 0 ≤ Cv) (d : ℕ)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant R 0 n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => coordinatePathTranslation T b v) a‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => pathTranslation T b (multiplier (solenoidalFrame T F) v)) a‖ ≤
-      (3*CF*Cv)*majorant R d n := by
-  have h := apply_bound (fun b : Space => solenoidalFrame T (translatePath T b F))
-    (fun b : Space => coordinatePathTranslation T b v)
-    (contDiff_solenoidalFrame T (fun b => translatePath T b F) hF) hv
-    R CF Cv hR hCF hCv 0 d
-    (solenoidalFrame_bound T (fun b => translatePath T b F) hF R CF hR hCF 0 hFb) hvb n a
-  exact (congrArg (fun g : Space → C(Icc (0 : ℝ) T,L2) => ‖iteratedFDeriv ℝ n g a‖)
-    (framePathApply_orbit_eq T F v)).trans_le (by simpa only [Nat.zero_add] using h)
 
 end EulerMeanContinuousPhysical
 

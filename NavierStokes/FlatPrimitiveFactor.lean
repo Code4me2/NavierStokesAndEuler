@@ -240,24 +240,7 @@ theorem factor_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
 
 
 
-theorem integral_exp_eq_primitive (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
-    {x : ℝ} (hx : 0 ≤ x) :
-    (∫ u in (0 : ℝ)..x, (Real.exp (-c / u ^ 2) / u ^ j) * b u) =
-      primitive c j b x := by
-  rw [primitive, intervalIntegral.integral_of_le hx, intervalIntegral.integral_of_le hx]
-  apply setIntegral_congr_fun measurableSet_Ioc
-  intro u hu
-  simp only [integrand, edge_of_pos c hu.1]
 
-theorem scale_eq_rpow (c : ℝ) (j : ℕ) {x : ℝ} (hx : 0 < x) :
-    scale c j x = Real.exp (-c / x ^ 2) * x ^ (3 - (j : ℝ)) := by
-  rw [scale, edge_of_pos c hx]
-  calc
-    (Real.exp (-c / x ^ 2) / x ^ j) * x ^ 3 =
-        Real.exp (-c / x ^ 2) * (x ^ 3 / x ^ j) := by ring
-    _ = _ := by
-      rw [← Real.rpow_natCast x 3, ← Real.rpow_natCast x j, ← Real.rpow_sub hx]
-      norm_num
 
 
 theorem factor_sqrt_contDiffAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}

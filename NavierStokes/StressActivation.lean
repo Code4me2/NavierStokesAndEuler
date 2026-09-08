@@ -47,12 +47,6 @@ theorem activation_le_one (T κ y : ℝ) (hκ : κ ∈ Icc (0 : ℝ) 1) :
   dsimp [activation]
   nlinarith [mul_nonneg hκ.1 hl]
 
-theorem activation_monotone {T κ : ℝ} (hT : 0 < T) (hκ : κ ≤ 1) :
-    Monotone (activation T κ) := by
-  intro x y hxy
-  exact mul_le_mul_of_nonneg_left
-    (OutgoingSchedule.sigma_monotone ((div_le_div_iff_of_pos_right hT).mpr hxy))
-    (sub_nonneg.mpr hκ)
 
 theorem activation_zero {T : ℝ} (hT : 0 < T) (κ : ℝ) {y : ℝ} (hy : y ≤ 0) :
     activation T κ y = 0 := by
@@ -429,20 +423,6 @@ noncomputable def familyPrimitiveFactor (T : ℝ) (B : FamilyPoint → ℝ)
       ((q.1.1, q.2), q.1.2)
 
 
-theorem familyPrimitiveFactor_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : IsOpen J)
-    {B : FamilyPoint → ℝ}
-    (hB : ContDiffOn ℝ ∞ B ((univ : Set (ℝ × ℝ)) ×ˢ J)) :
-    ContDiffOn ℝ ∞ (familyPrimitiveFactor T B) ((univ : Set (ℝ × ℝ)) ×ˢ J) := by
-  have hb : ContDiffOn ℝ ∞ (familyFlatCoefficient T B) ((univ ×ˢ J) ×ˢ (univ : Set ℝ)) :=
-    (hB.comp ((contDiff_fst.fst.prodMk contDiff_snd).prodMk contDiff_fst.snd).contDiffOn
-      (fun _ hp => ⟨mem_univ _, hp.1.2⟩)).div
-        ((stepDenominator_smooth T).comp contDiff_snd).contDiffOn
-        (fun q _ => (stepDenominator_pos T q.2).ne')
-  have hf := flatFactor_local (sq_pos_of_pos hT) 0 (isOpen_univ.prod hJ) hb
-  exact ((contDiff_fst.snd.pow 2).mul
-    ((stepDenominator_smooth T).comp contDiff_fst.snd)).contDiffOn.mul
-      (hf.comp ((contDiff_fst.fst.prodMk contDiff_snd).prodMk contDiff_fst.snd).contDiffOn
-        (fun _ hp => ⟨⟨mem_univ _, hp.2⟩, mem_univ _⟩))
 
 
 /-! ## The five actual pressure and moment histories -/
@@ -625,13 +605,6 @@ noncomputable def historyIntegrandFamily (T X0 : ℝ) (L U : Field)
     (r : HistoryRow) (q : FamilyPoint) : ℝ :=
   q.1.2 * densityDifferenceFamily T X0 L U r q
 
-theorem historyIntegrandFamily_smooth {T : ℝ} (hT : 0 < T) (X0 : ℝ)
-    {J : Set ℝ} (hJ : IsOpen J) {L U : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) (r : HistoryRow) :
-    ContDiffOn ℝ ∞ (historyIntegrandFamily T X0 L U r)
-      ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  contDiffOn_fst.snd.mul (densityDifferenceFamily_smooth hT X0 hJ hL hU r)
 
 theorem history_difference_integral {T : ℝ} (hT : 0 < T) (κ X0 : ℝ)
     (initial : HistoryRow → ℝ → ℝ) {J : Set ℝ} (hJ : IsOpen J) {L U : Field}

@@ -205,21 +205,6 @@ theorem edge_div_pow_iteratedFDeriv_zero {c : ℝ} (hc : 0 < c) (j n : ℕ) :
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, edge_div_pow_eq_polynomial,
     FlatCutoff.iteratedDeriv_polynomialEdge hc (X ^ j) n, FlatCutoff.polynomialEdge_zero, norm_zero]
 
-/-- Every full derivative tensor vanishes on the joining hyperplane. -/
-theorem weighted_iteratedFDeriv_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) (n : ℕ) (p : E) :
-    iteratedFDeriv ℝ n (weighted c j B) (p, 0) = 0 := by
-  have hz (k : ℕ) : iteratedFDeriv ℝ k
-      (fun y : E × ℝ => FlatCutoff.edge c y.2 / y.2 ^ j) (p, 0) = 0 := by
-    apply norm_le_zero_iff.mp
-    have h := norm_iteratedFDeriv_snd_le (FlatCutoff.edge_div_pow_contDiff hc j) k (p, 0)
-    simpa only [edge_div_pow_iteratedFDeriv_zero hc j k, norm_zero] using h
-  have hw : ContDiff ℝ ∞ (fun y : E × ℝ => FlatCutoff.edge c y.2 / y.2 ^ j) :=
-    (FlatCutoff.edge_div_pow_contDiff hc j).comp contDiff_snd
-  have h := norm_iteratedFDeriv_mul_le hw hB (p, 0) (nat_le_infty n)
-  apply norm_le_zero_iff.mp
-  unfold weighted
-  simpa only [hz, norm_zero, mul_zero, zero_mul, Finset.sum_const_zero] using h
 
 
 end Joint
@@ -239,21 +224,6 @@ theorem norm_iteratedFDeriv_comp_linear_le {G : Type*} [NormedAddCommGroup G] [N
     Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun _ _ => hL)
   simpa only [mul_one] using mul_le_mul_of_nonneg_left hp (norm_nonneg (iteratedFDeriv ℝ n f (L x)))
 
-theorem norm_iteratedFDeriv_parameter_le {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
-    (n : ℕ) (p : E) (x : ℝ) :
-    ‖iteratedFDeriv ℝ n (fun p => f (p, x)) p‖ ≤ ‖iteratedFDeriv ℝ n f (p, x)‖ := by
-  let L : E →L[ℝ] E × ℝ := (ContinuousLinearMap.id ℝ E).prod 0
-  have hL : ‖L‖ ≤ 1 := by
-    apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-    intro q
-    simp [L]
-  let g : E × ℝ → ℝ := fun y => f (y + (0, x))
-  have hg : ContDiff ℝ ∞ g := hf.comp (contDiff_id.add contDiff_const)
-  have h := norm_iteratedFDeriv_comp_linear_le hg L hL n p
-  have heq : g ∘ L = fun p => f (p, x) := by ext q; simp [g, L]
-  rw [heq] at h
-  simpa only [g, iteratedFDeriv_comp_add_right, L, ContinuousLinearMap.prod_apply,
-    ContinuousLinearMap.id_apply, _root_.zero_apply, Prod.mk_add_mk, add_zero, zero_add] using h
 
 noncomputable def radialIterate (f : E × ℝ → ℝ) : ℕ → E × ℝ → ℝ
   | 0 => f
@@ -272,32 +242,7 @@ theorem deriv_slice {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (p : E) (x 
     (hasDerivAt_const x p).prodMk (hasDerivAt_id x)
   exact ((hf.differentiable (by simp) (p, x)).hasFDerivAt.comp_hasDerivAt x hpair).deriv
 
-theorem radialIterate_eq {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f) (n : ℕ) (p : E) (x : ℝ) :
-    radialIterate f n (p, x) = iteratedDeriv n (fun t => f (p, t)) x := by
-  induction n generalizing x with
-  | zero => rfl
-  | succ n ih =>
-      rw [iteratedDeriv_succ]
-      have heq : iteratedDeriv n (fun t => f (p, t)) = fun t => radialIterate f n (p, t) :=
-        funext (fun t => (ih t).symm)
-      rw [heq, deriv_slice (radialIterate_contDiff hf n)]
-      rfl
 
-theorem norm_radialIterate_le {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
-    (n m : ℕ) (y : E × ℝ) :
-    ‖iteratedFDeriv ℝ m (radialIterate f n) y‖ ≤ ‖iteratedFDeriv ℝ (m + n) f y‖ := by
-  induction n generalizing m with
-  | zero => simp [radialIterate]
-  | succ n ih =>
-      have h := norm_iteratedFDeriv_clm_apply_const
-        (c := ((0 : E), (1 : ℝ)))
-        (((radialIterate_contDiff hf n).fderiv_right (by simp)).contDiffAt (x := y))
-        (nat_le_infty m)
-      have hn : ‖((0 : E), (1 : ℝ))‖ = 1 := by simp
-      rw [hn, one_mul, norm_iteratedFDeriv_fderiv] at h
-      have hi := ih (m + 1)
-      rw [show m + 1 + n = m + (n + 1) by omega] at hi
-      exact h.trans hi
 
 
 
@@ -399,28 +344,10 @@ section Products
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem edge_mul_edge (c d x : ℝ) :
-    FlatCutoff.edge c x * FlatCutoff.edge d x = FlatCutoff.edge (c + d) x := by
-  by_cases hx : x ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos _ hx]
-  · have hp := lt_of_not_ge hx
-    rw [FlatCutoff.edge_of_pos c hp, FlatCutoff.edge_of_pos d hp,
-      FlatCutoff.edge_of_pos (c + d) hp, ← Real.exp_add]
-    congr 1
-    ring
 
 
 
 
-theorem edge_pow (c x : ℝ) {k : ℕ} (hk : 0 < k) :
-    FlatCutoff.edge c x ^ k = FlatCutoff.edge ((k : ℝ) * c) x := by
-  by_cases hx : x ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos _ hx, hk.ne']
-  · have hp := lt_of_not_ge hx
-    rw [FlatCutoff.edge_of_pos c hp, FlatCutoff.edge_of_pos ((k : ℝ) * c) hp,
-      ← Real.exp_nat_mul]
-    congr 1
-    ring
 
 
 

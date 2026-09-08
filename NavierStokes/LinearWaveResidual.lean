@@ -410,10 +410,6 @@ theorem realMap_linearResidual {U : Set E} (L : ℂ →L[ℝ] ℝ) (ε : ℝ) (R
 
 open ProblemStatement
 
-noncomputable def bilinearAdvection (u v : Space → Space) (q : Space) : Space :=
-  u q 0 • CylindricalResidual.dCoord 0 v q +
-    (u q 1 / q 0) • (CylindricalResidual.dCoord 1 v q + CylindricalResidual.connection (v q)) +
-    u q 2 • CylindricalResidual.dCoord 2 v q
 
 
 

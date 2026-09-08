@@ -1733,31 +1733,6 @@ theorem radialZ_eq_axialOp {S : Set ℝ} {h : ℝ} (d : Domain S h) (b : ℝ) (u
   simp only [PositiveAxisSystem.edge, div_eq_mul_inv]
   ring
 
-theorem betaFromU_x_divergence {S : Set ℝ} {h : ℝ} (d : Domain S h) (lam : ℝ)
-    (u : EvenProfile S) {w : ℝ × ℝ} (hX : 0 < w.1) (heta : w.2 ∈ S) :
-    SimilarityProfile.partialX (AxisSourceRegularity.axisFactor (xProfile (betaFromU d lam u))) w +
-      SimilarityProfile.Z h (-PositiveAxisSystem.a h + lam) (xProfile u) w = 0 := by
-  let b := betaFromU d lam u
-  let R := Real.sqrt (2 * w.1)
-  have hR : R ≠ 0 := (Real.sqrt_pos.mpr (mul_pos (by norm_num) hX)).ne'
-  have hR2 : R ^ 2 / 2 = w.1 := by
-    dsimp [R]; rw [Real.sq_sqrt (mul_pos (by norm_num) hX).le]; ring
-  have hb := ProfileHistories.radialPartial_hasDerivAt (PositiveOrderMoments.parameterDomain S d.isOpen)
-    b.smooth (p := (R, w.2)) ⟨mem_univ _, heta⟩
-  have hr : HasDerivAt (fun r : ℝ => r ^ 2 / 2) R R := by
-    convert! ((hasDerivAt_id R).pow 2).div_const 2 using 1
-    norm_num
-  have he := (hr.mul hb).unique (reconstructed_flux_derivative d lam u (R := R) heta)
-  dsimp only at he
-  have hx := radius_mul_xDerivative d.isOpen b heta R
-  change R * xDerivative d.isOpen b (R, w.2) = ProfileHistories.radialPartial b (R, w.2) at hx
-  rw [← hx, radialZ_eq_axialOp d _ u (w := (R, w.2)) heta, hR2] at he
-  rw [AxisSourceRegularity.partialX_axisFactor ((xProfile_contDiffAt d.isOpen b hX heta).differentiableAt (by simp)),
-    xProfile_partialX d.isOpen b hX heta, ← xProfile_axialOp d _ u hX heta]
-  change b (R, w.2) + w.1 * xDerivative d.isOpen b (R, w.2) +
-    axialOp d (-PositiveAxisSystem.a h + lam) u (R, w.2) = 0
-  apply mul_left_cancel₀ hR
-  linear_combination he
 
 noncomputable def asSlowProfiles {S : Set ℝ} {h C : ℝ} (s : Scheme S h C) :
     SlowExpansionResidual.SlowProfiles :=

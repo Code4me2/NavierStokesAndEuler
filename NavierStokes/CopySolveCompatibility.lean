@@ -198,11 +198,6 @@ theorem anchoredSolve_recenter (d : LinearData P V E) (g : Geometry) (hab : a �
     simp only [LinearData.forcingAlong, coordinates_recenter, path_recenter]
   simp only [LinearData.anchoredSolve, hA, hf]
 
-theorem copySolve_recenter (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (l j : Frequency) (p : P) (Y : Plane) :
-    d.copySolve (recenterGeometry g l) hab j (p, Y) =
-      d.copySolve g hab (j + l) (p, Y) := by
-  simp only [LinearData.copySolve, coordinates_recenter, anchoredSolve_recenter]
 
 
 
@@ -490,9 +485,6 @@ theorem commonSolve_transport {a b : ℝ} (d : LinearData P V E) (φ : Q → P)
   rw [commonSolve_scaleSource, commonSolve_transform,
     commonSolve_timeData d g τ rate hrate hab hA hB hf κ hκ hq]
 
-noncomputable def physicalOutput {a b : ℝ} (d : LinearData P V E) (g : Geometry)
-    (hab : a ≤ b) (κ : Plane → ℝ) (χ : X → P × Plane) : X → E :=
-  fun x => d.commonSolve g hab κ (χ x)
 
 
 
@@ -568,10 +560,6 @@ end InputCompatibility
 
 /-! ## Why the anchor must be transported as input data -/
 
-noncomputable def constantForcing : LinearData ℝ ℝ ℝ where
-  coefficient := fun _ => 0
-  forcingMap := fun _ => ContinuousLinearMap.id ℝ ℝ
-  source := fun _ => 1
 
 
 

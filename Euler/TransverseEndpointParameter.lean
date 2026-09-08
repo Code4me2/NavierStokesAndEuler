@@ -38,11 +38,6 @@ theorem contDiff_initialEnergy (hH : ContDiff ℝ n H) :
   contDiff_const.sub
     (contDiff_const.clm_comp ((contDiff_timeMultiplier T hT H hH).clm_comp contDiff_const))
 
-omit [CompleteSpace U] [CompleteSpace E] in
-theorem contDiff_initialProductDerivative (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) :
-    ContDiff ℝ n (fun x => initialProductDerivative T hT (Q x) (Q₁ x)) :=
-  ((contDiff_timeMultiplier T hT Q₁ hQ₁).clm_comp contDiff_const).add
-    (contDiff_timeMultiplier T hT Q hQ)
 
 variable (c : ℝ) (hc : 0 < c) (hLower : ∀ x t v, c * ‖v‖ ^ 2 ≤ ‖Q x t v‖ ^ 2)
   (hd : ∀ x (t : Icc (0 : ℝ) T),
@@ -66,14 +61,6 @@ theorem contDiff_fixedEndpointCorrection
   have hE := contDiff_initialEnergy T hT H hH
   exact hi.clm_comp ((contDiff_adjoint hD).clm_comp (hE.clm_comp hL))
 
-theorem contDiff_fixedEndpointDerivative
-    (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) (hH : ContDiff ℝ n H)
-    (L : P → V →L[ℝ] TimeLp T E) (hL : ContDiff ℝ n L) :
-    ContDiff ℝ n (fun x => fixedEndpointDerivative T hT (Q x) (Q₁ x) (H x)
-      c hc (hLower x) (hd x) K hK (hPotential x) hsmall (L x)) :=
-  hL.sub ((contDiff_fixedFrameDerivative T hT Q Q₁ hQ hQ₁).clm_comp
-    (contDiff_fixedEndpointCorrection T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
-      hQ hQ₁ hH L hL))
 
 
 section AffineTrial

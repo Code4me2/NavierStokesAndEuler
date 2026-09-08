@@ -1,6 +1,18 @@
 import Euler.PacketInitializedOutputCosts
 import Euler.PacketGraphFlowExplicitBounds
-import Euler.PacketInitializedFlowAndShear
+import Euler.PacketLiftedFlowData
+import Euler.PacketWeightedPhysicalErrors
+import Euler.PacketGraphFlowFieldBounds
+import Euler.PacketGraphFlowSupBounds
+import Euler.PacketExactGlobalShear
+import Euler.PacketExactPressureError
+import Euler.PacketInitializedPointwiseChoice
+import Euler.PacketPhysicalFrequencyBounds
+import Euler.PacketContinuousInverse
+import Euler.PacketPhysicalPressureGevrey
+import Euler.PacketPhysicalCorrectionPotential
+import Euler.PacketInitializedTimeBounds
+import Euler.PacketLiftedSmallness
 
 /-! A single polynomial comparison gives the actual canonical correction,
 the physical shear and pressure errors, and the three flow fields. Only

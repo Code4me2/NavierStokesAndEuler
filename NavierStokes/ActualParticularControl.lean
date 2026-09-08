@@ -387,39 +387,6 @@ theorem frame_input_jets
         W l n v := by rw [pow_add]; ring
     _ ≤ _ := by gcongr
 
-/-- Instantiation of the input bound for the selected actual phase. -/
-theorem selected_input_jets
-    (s : StripData P) (F : PhaseConstruction D) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (g : Label → ℕ → Geometry) (r : Label → ℕ → ℝ)
-    (hscale : ∀ l n, D.scale (l,n) = s.slow n)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (g l n) (r l n) (F.L (l,n)))
-    {A : ℝ} {a : ℕ} (hA : 1 ≤ A)
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (g l n) ≤ A*s.slow n^a)
-    (harmonic : Label → ℤ) {J : ℝ} (hJ : 1 ≤ J) (hj : ∀ l, |(harmonic l : ℝ)| ≤ J)
-    {α : ℝ} {f : Label → ℕ → P × Plane → ProblemStatement.Space}
-    (hf : UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope g r (fun l n => F.L (l,n))
-        (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))) α f)
-    (N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ m : ℕ, ∀ l n k (x : P × Plane), x.1 ∈ s.domain →
-      χ x.1 ∈ D.carrier (l,n) →
-      ((g l n).coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n) →
-      ∀ j ≤ N, ∀ v ∈ Icc 0 (F.L (l,n)),
-      ‖iteratedFDeriv ℝ j
-        ((PrimaryCopyBridge.copyFrame (nativeFrame (F.frame (l,n)) χ) (g l n) k).coefficient
-          (harmonic l)) (x,v)‖ ≤ C*s.growth n x.1^m ∧
-      ‖iteratedFDeriv ℝ j
-        ((PrimaryCopyBridge.copyFrame (nativeFrame (F.frame (l,n)) χ) (g l n) k).forcing
-          (PrimaryCopyBridge.copySource (f l n) (g l n) k)) (x,v)‖ ≤
-        (s.epsilon n^α * Real.sqrt (s.zeta x.1))*C*s.growth n x.1^m *
-          referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) v ∧
-      ∀ i : Fin 2, ‖iteratedFDeriv ℝ j
-        (synthesisColumn (PrimaryCopyBridge.copyFrame (nativeFrame (F.frame (l,n)) χ) (g l n) k) i)
-          (x,v)‖ ≤ C*s.growth n x.1^m := by
-  exact frame_input_jets s F.V F.openV F.frame F.L
-    (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))
-    (selected_frame_jets F) F.interval (fun _ _ _ => (referenceP_pos _ _ _ _).le)
-    χ g r hscale hsep hA hgeometry harmonic hJ hj hf N
 
 end NativeInputs
 
@@ -531,23 +498,8 @@ noncomputable def phasePatch (s : StripData P) (F : PhaseConstruction D)
   phaseNeighborhood s F χ g l n k ∩
     {x | ((g l n).coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n)}
 
-theorem phaseNeighborhood_open (s : StripData P) (F : PhaseConstruction D)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry)
-    (l : Label) (n : ℕ) (k : Frequency) :
-    IsOpen (phaseNeighborhood s F χ g l n k) :=
-  (s.isOpen_domain.preimage continuous_fst).inter
-    (((D.isOpen (l,n)).preimage (χ.continuous.comp continuous_fst)).inter
-      (isOpen_Ioo.preimage (((g l n).coordinates_contDiff k).continuous.comp continuous_snd |>.snd)))
 
 
-theorem selected_copy_smooth (s : StripData P) (F : PhaseConstruction D)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry)
-    (l : Label) (n : ℕ) (k : Frequency) :
-    (PrimaryCopyBridge.copyFrame (nativeFrame (F.frame (l,n)) χ) (g l n) k).SmoothOn
-      (phaseNeighborhood s F χ g l n k ×ˢ F.V (l,n)) := by
-  change (PrimaryCopyBridge.reindex (F.frame (l,n)) (fun x : P × Plane => χ x.1)).SmoothOn _
-  exact PrimaryCopyBridge.reindex_smoothOn _ _ ((selected_frame_jets F).smoothOn (l,n))
-    (frameArgument χ).contDiff.contDiffOn (fun z hz => ⟨hz.1.2.1,hz.2⟩)
 
 
 end ReferenceControl

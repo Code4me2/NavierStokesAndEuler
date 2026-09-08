@@ -23,20 +23,6 @@ section LocalSums
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-omit [NormedSpace ℝ E] [NormedSpace ℝ V] in
-/-- A common neighborhood kills all sufficiently late terms. This follows
-from local finiteness of the supports; pointwise finiteness alone is weaker. -/
-theorem eventually_zero_tail_of_locallyFinite {F : ℕ → E → V}
-    (hF : LocallyFinite (fun j => support (F j))) (x : E) :
-    ∃ K : ℕ, ∀ᶠ y in 𝓝 x, ∀ j : ℕ, K ≤ j → F j y = 0 := by
-  obtain ⟨s, hs, hfin⟩ := hF x
-  obtain ⟨K, hK⟩ := hfin.bddAbove
-  refine ⟨K + 1, ?_⟩
-  filter_upwards [hs] with y hy
-  intro j hj
-  by_contra hne
-  have hle : j ≤ K := hK ⟨y, hne, hy⟩
-  omega
 
 private theorem finite_sum_jet {F : ℕ → E → V} {x : E}
     (hF : ∀ j, ContDiffAt ℝ ∞ (F j) x) (K m : ℕ) :
@@ -257,37 +243,6 @@ theorem partialPotential_eventuallyEq_uncut (a : ℕ → ℝ) (q : E → ℝ)
   change SmoothCutoffs.scaledCutoff (a j) (q y) • A j y = A j y
   rw [hplateau hy j hj, one_smul]
 
-/-- The actual cut-sum remainder can be compared to the original uncut
-finite stage for small `q`, with an arbitrary prescribed finite jet and power. -/
-theorem exists_uncut_tail_order {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : E → ℝ} {A : ℕ → E → V} {g L : ℕ → ℝ} {U : Set E}
-    (hU : IsOpen U) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) (hg : Monotone g)
-    (hgtop : Tendsto g atTop atTop) (hb : CutStageBounds a q A g L U)
-    (M Jmin : ℕ) (N : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∃ δ : ℝ, 0 < δ ∧
-      ∀ m ≤ M, ∀ x ∈ U, 0 < q x → q x < δ →
-        ‖iteratedFDeriv ℝ m
-          (fun y => SolenoidalDiagonal.potentialSum a q A y -
-            uncutPrefix A (J + 1) y) x‖ ≤ (1 / 2 : ℝ) ^ J * (q x) ^ N := by
-  obtain ⟨J, hJmin, hJM, htail⟩ :=
-    exists_potential_tail_order ha hU hq hA hg hgtop hb M Jmin N
-  obtain ⟨δ, hδ, hprefix⟩ := partialPotential_eventuallyEq_uncut a q A (J + 1)
-  refine ⟨J, hJmin, hJM, min δ 1, lt_min hδ (by norm_num), ?_⟩
-  intro m hm x hx hqx hsmall
-  have hqx1 : q x ≤ 1 := (hsmall.trans_le (min_le_right _ _)).le
-  have hsmall' : |q x| < δ := by
-    rw [abs_of_pos hqx]
-    exact hsmall.trans_le (min_le_left _ _)
-  have heq := hprefix x (hq.contDiffAt (hU.mem_nhds hx)).continuousAt hsmall'
-  have hdiff :
-      (fun y => SolenoidalDiagonal.potentialSum a q A y -
-        SolenoidalDiagonal.partialPotential a q A (J + 1) y) =ᶠ[𝓝 x]
-      (fun y => SolenoidalDiagonal.potentialSum a q A y - uncutPrefix A (J + 1) y) := by
-    filter_upwards [heq] with y hy
-    rw [hy]
-  rw [← (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hdiff m).self_of_nhds]
-  exact htail m hm x hx hqx hqx1
 
 
 end UncutPrefix

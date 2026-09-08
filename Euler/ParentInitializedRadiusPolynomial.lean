@@ -96,10 +96,6 @@ def fullConstant : ℝ := coefficientCost fullPolynomial
 def fullPower : ℕ := fullPolynomial.natDegree
 
 
-theorem fullEnvelope_power (X : ℝ) (hX : 1 ≤ X) :
-    fullEnvelope X ≤ fullConstant*X^fullPower := by
-  rw [← fullPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound fullPolynomial X hX)
 
 end EulerParentInitializedRadius
 
@@ -129,8 +125,6 @@ local notation "J" => L.joinedInputs H m hm R S hS τ hτ hτT Ti Cp hτ1 hTi hC
 local notation "BC" => joinedCoefficientBudget period (G.meanData H) (G.transverseData m hm R S hS)
   rfl τ hτ hτT (G.historyOn H m hm R S hS τ hτ hτT) (JoinedInputs.normal J)
 
-def canonicalInitializedRadius (δ : ℝ) (ξ : U) : ℝ :=
-  initializedRadius (J).mean (J).linear (J).normal BC δ ξ
 
 theorem joined_radius_primitives (δ : ℝ) (ξ : U) (X : ℝ)
     (hKX : L.K ≤ X) (hTiX : Ti ≤ X) (hTiTotalX : TiTotal ≤ X)

@@ -87,17 +87,6 @@ theorem scaled_accelerationField_eq
   simp only [accelerationField,scaledCoefficient_apply,scaledCoefficient_fderiv T A ell hell,
     map_smul,smul_add]
 
-theorem scaled_materialAcceleration_eq
-    (A₁ : SmoothTimeField (Icc (0 : ℝ) T) E E) (hell : ell ≠ 0)
-    (t : Icc (0 : ℝ) T) (x : E) :
-    materialAcceleration T hT (scaledCoefficient T A ell) (scaledCoefficient T A₁ ell) t x =
-      ell • materialAcceleration T hT A A₁ t (ell⁻¹ • x) := by
-  unfold materialAcceleration
-  rw [scaled_accelerationField_eq T A ell A₁ hell]
-  change ell • accelerationField T A A₁ t
-    (ell⁻¹ • (flowData T hT (scaledCoefficient T A ell)).flow 0 t x) = _
-  rw [scaled_flow_eq T hT A ell hell,smul_smul,inv_mul_cancel₀ hell,one_smul]
-  rfl
 
 omit [FiniteDimensional ℝ E] in
 theorem scaledCoefficient_trace_zero (hell : ell ≠ 0)

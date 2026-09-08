@@ -352,35 +352,7 @@ noncomputable def jointSource {V : Type*}
 
 /-! ## Native chart and carrier bounds are uniform before label selection -/
 
-noncomputable def diagonalChart (f : BandLabel → CopyFamily H K)
-    (c : ∀ L, SupportCells (f L)) {a b h r0 σ : ℝ}
-    (source : (L : BandLabel) → ι L → ℕ → E → ℂ)
-    (ch : ∀ L, LocalPhysicalCopyBounds.CommonChart (f L) (c L) a b h r0 σ (source L))
-    (hj : ∀ m : ℕ, ∃ B : ℝ, 1 ≤ B ∧ ∃ q : ℕ,
-      ∀ k I x, x ∈ (ch I.1).domain k I → ∀ j, 1 ≤ j → j ≤ m →
-        ‖iteratedFDeriv ℝ j ((ch I.1).map k I) x‖ ≤ B * ChartScales.S I.1.val.1 ^ q) :
-    LocalPhysicalCopyBounds.CommonChart (diagonal f) (diagonalCells f c)
-      a b h r0 σ (jointSource source) where
-  sourceIndex k I := ⟨I.1, (ch I.1).sourceIndex k I⟩
-  map k I := (ch I.1).map k I
-  domain k I := (ch I.1).domain k I
-  open_domain k I := (ch I.1).open_domain k I
-  smooth k I := (ch I.1).smooth k I
-  positive_jets := hj
-  amplitude_eq k I := (ch I.1).amplitude_eq k I
-  contains k I := (ch I.1).contains k I
 
-noncomputable def diagonalCarrier (f : BandLabel → CopyFamily H K)
-    (c : ∀ L, SupportCells (f L)) {a b h r0 : ℝ}
-    (bc : ∀ L, CarrierBounds (f L) (c L) a b h r0)
-    (hj : PhaseJetBounds.PolynomialJets
-      (copyBandDomain (fun k L => (bc L).region k L) (fun k L => (bc L).open_region k L))
-      (fun I x => (((f I.2).carrier I.1 I.2).F x, ((f I.2).carrier I.1 I.2).G x))) :
-    CarrierBounds (diagonal f) (diagonalCells f c) a b h r0 where
-  region k L := (bc L).region k L
-  open_region k L := (bc L).open_region k L
-  jets := hj
-  contains k I := (bc I.1).contains k I
 
 
 

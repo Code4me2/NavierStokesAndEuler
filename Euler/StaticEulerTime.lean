@@ -30,9 +30,6 @@ def unitDerivativeCoefficient : SmoothTimeField (Icc (0 : ℝ) 1) Space Space :=
     ((Field.zero P 1).smul (amplitude P C R hC hR))).precompLinear
       (ContinuousLinearMap.inl ℝ Space ℝ)
 
-def unitForceCoefficient : SmoothTimeField (Icc (0 : ℝ) 1) Space Space :=
-  (exactPacket P u C R hC hR hu hdiv).pressure.toSmoothTimeField.precompLinear
-    (ContinuousLinearMap.inl ℝ Space ℝ)
 
 theorem unitCoefficient_time :
     SmoothTimeField.TimeDerivative 1 zero_le_one

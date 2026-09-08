@@ -176,8 +176,6 @@ structure Inputs (Ω : Set (P × Plane)) (a b : ℝ) : Prop where
 noncomputable def reconstructedPath (hab : a ≤ b) (q : P × Plane) : ℝ → Space :=
   PrimaryODE.ambientSolution hab (copyFrame d g k) j (fun _ => 0) (copySource t.source g k) q
 
-noncomputable def reconstructedCopy (hab : a ≤ b) (q : P × Plane) : Space :=
-  reconstructedPath d t j g k hab q (g.coordinates k q.2).2
 
 omit [NormedAddCommGroup P] in
 theorem reconstructedPath_initial (hab : a ≤ b) (q : P × Plane) :
@@ -393,8 +391,6 @@ section CanonicalInputs
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   (d : PrimaryODE.FrameData (P × ℝ)) (g : CommonCoverSolve.Geometry) (k : Frequency)
 
-theorem copyParameter_contDiff : ContDiff ℝ ∞ (copyParameter (P := P) g k) :=
-  contDiff_fst.prodMk (((g.coordinates_contDiff k).comp contDiff_snd).fst)
 
 
 

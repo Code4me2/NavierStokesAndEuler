@@ -41,9 +41,6 @@ theorem operatorAmplitude_nonneg (T CF CF₁ CH CM CA L : ℝ)
     (hT : 0 ≤ T) (hCH : 0 ≤ CH) (hCM : 0 ≤ CM) (hCA : 0 ≤ CA) :
     0 ≤ operatorAmplitude T CF CF₁ CH CM CA L := by unfold operatorAmplitude; positivity
 
-theorem forcingAmplitude_nonneg (T CF CF₁ Cf : ℝ)
-    (hT : 0 ≤ T) (hCF : 0 ≤ CF) (hCF₁ : 0 ≤ CF₁) (hCf : 0 ≤ Cf) :
-    0 ≤ forcingAmplitude T CF CF₁ Cf := by unfold forcingAmplitude; positivity
 
 variable (T : ℝ) (hT : 0 ≤ T)
   (F F₁ H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (M0 A : L2 →L[ℝ] L2) (L c : ℝ)

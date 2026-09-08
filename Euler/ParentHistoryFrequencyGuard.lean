@@ -104,22 +104,6 @@ theorem stepLength_nonneg (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0 ≤ X)
     (a β : ℕ → ℝ) (n : ℕ) : 0 ≤ stepLength J X a β n :=
   div_nonneg (hX.trans (sequence_initial_le J hJ X hX (n+1))) (sqrt_nonneg _)
 
-theorem activation_lower_of_initial (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0 < X)
-    (a β : ℕ → ℝ) (ha : 1/2 ≤ a 0) (ha₂ : a 0 ≤ 2)
-    (hβ : 1/2 ≤ β 0*X^2) (hβ₂ : β 0*X^2 ≤ 2) {n : ℕ} (hn : 1 ≤ n) :
-    baseHorizon J X/12 ≤ activationTime J X a β n := by
-  have hxnext : 0 ≤ scaleSequence J X 1 :=
-    hX.le.trans (sequence_initial_le J hJ X hX.le 1)
-  have hfirst : timeWidth J X 0/6 ≤ stepLength J X a β 0 :=
-    (EulerPacketScaleGeometry.activation_time_bounds ha ha₂
-      (previousShear_pos J hX 0) hX hxnext hβ hβ₂).1
-  have hsum : stepLength J X a β 0 ≤ activationTime J X a β n := by
-    apply Finset.single_le_sum
-    · intro i _
-      exact stepLength_nonneg J hJ X hX.le a β i
-    · exact Finset.mem_range.mpr (by omega)
-  rw [baseHorizon_eq_timeWidth J hX]
-  linarith only [hfirst,hsum]
 
 
 

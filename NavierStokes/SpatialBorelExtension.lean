@@ -52,13 +52,6 @@ theorem exists_spatial_plateau (x : X) : ∃ m : ℕ, ‖x‖ < (m : ℝ) + 1 :=
   obtain ⟨m, hm⟩ := exists_nat_gt ‖x‖
   exact ⟨m, by linarith⟩
 
-omit [NormedSpace ℝ X] [FiniteDimensional ℝ X] in
-theorem exists_compact_spatial_plateau {K : Set X} (hK : IsCompact K) :
-    ∃ m : ℕ, ∀ x ∈ K, ‖x‖ < (m : ℝ) + 1 := by
-  obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn (continuous_id.continuousOn :
-    ContinuousOn (fun x : X => x) K)
-  obtain ⟨m, hm⟩ := exists_nat_gt C
-  exact ⟨m, fun x hx => lt_of_le_of_lt (hC x hx) (by linarith)⟩
 
 def term (b : ℝ) (j : ℕ) (a : X → V) (z : ℝ × X) : V :=
   BorelExtension.term b j (a z.2) z.1

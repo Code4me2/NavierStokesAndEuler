@@ -365,18 +365,6 @@ theorem hasDerivWithinAt_iterated_smooth (I : Window) (F : ℕ → ℝ → ℝ)
       (uniqueDiffOn_Icc I.nondegenerate) x hx
   simpa only [iteratedDerivWithin_succ] using hd.hasDerivWithinAt
 
-/-- Reverse constructor from actual smooth coefficient functions with
-uniform bounds on all their parameter derivatives. -/
-def ofSmoothFamily (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m, 0 < w n m)
-    (F : ℕ → ℝ → ℝ) (hF : ∀ n, ContDiffOn ℝ ∞ (F n) I.interval)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hbound : ∀ n m x, x ∈ I.interval →
-      |iteratedDerivWithin m (F n) I.interval x| ≤ C * w n m) : CoefficientSpace I w :=
-  ofJetFamily I w hw (fun n m => iteratedDerivWithin m (F n) I.interval)
-    (fun n m => (hF n).continuousOn_iteratedDerivWithin (m := m)
-      (by exact_mod_cast (ENat.natCast_lt_top m).le)
-      (uniqueDiffOn_Icc I.nondegenerate))
-    (fun n m _ hx => hasDerivWithinAt_iterated_smooth I F hF n m hx) C hC hbound
 
 
 

@@ -537,25 +537,6 @@ variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 variable {ι : Type*} [Fintype ι] {W : ι → Type*}
   [∀ i, NormedAddCommGroup (W i)] [∀ i, NormedSpace ℝ (W i)]
 
-/-- The same actual implicit coordinate and one unchanged schedule for all
-finite stream, direct-field, and pressure components. -/
-theorem exists_physical_finite_diagonal_cut_bounds {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {S : Set SpaceTime} (hS : S ⊆ PhysicalWaveSum.preterminal)
-    {A : ∀ i, ℕ → SpaceTime → W i}
-    (hA : ∀ i j, 1 ≤ j → ContDiffOn ℝ ∞ (A i j) PhysicalWaveSum.preterminal)
-    (g L : ℕ → ℝ) (C p : ι → ℕ → ℕ → ℝ)
-    (hraw : ∀ i, RawStageBounds (PhysicalWaveSum.physicalQ h) (A i) g L (C i) (p i) S)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      ∀ i, DiagonalJetBounds.CutStageBounds (fun j => (a j : ℝ))
-        (PhysicalWaveSum.physicalQ h) (A i) (fun j => g j / 2) (cutLoss L) S := by
-  choose B hB hb using physicalQ_jet_bound hh hh1
-  exact exists_finite_diagonal_cut_bounds PhysicalWaveSum.preterminal_open hS
-    (fun w hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt)
-    (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 (hS hw)) B
-    (fun k w hw hq1 => hb k w (hS hw) hq1) hA g L C p hraw hg lower
 
 
 /-- The genuine open validity region for locally constructed raw stages. -/

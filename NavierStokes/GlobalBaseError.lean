@@ -194,10 +194,6 @@ end JointOrigin
 
 /-! ## One actual profile and one fixed enlarged schedule -/
 
-/-- The enlargement depends only on the originally selected profile and
-the supplied constant, never on the physical point, derivative order, or `q`. -/
-noncomputable def actualUpper (upper : ℝ) : ℝ :=
-  max upper (BaseExterior.nominalExteriorRadius FinalSlowBase.actualProfile.nominal)
 
 
 

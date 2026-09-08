@@ -240,10 +240,6 @@ theorem chart_eq_localChart {a : ℝ} (ha : 0 < a) (j : Index) {p : Plane}
     (hp : p ∈ chartDomain a j) : chart a j p = localChart j p := by
   simp only [chart, extendedBase_eq ha hp, localChart]
 
-theorem chart_eventuallyEq_localChart {a : ℝ} (ha : 0 < a) (j : Index) {p : Plane}
-    (hp : p ∈ chartDomain a j) : chart a j =ᶠ[𝓝 p] localChart j := by
-  filter_upwards [(chartDomain_open a j).mem_nhds hp] with q hq
-  exact chart_eq_localChart ha j hq
 
 theorem polar_chart {a : ℝ} (ha : 0 < a) (j : Index) {p : Plane}
     (hp : p ∈ chartDomain a j) : polar (chart a j p) = p := by

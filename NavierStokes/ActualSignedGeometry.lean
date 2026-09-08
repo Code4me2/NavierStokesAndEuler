@@ -742,55 +742,7 @@ noncomputable def phaseCell (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) : Se
     (nativeDomain H v a).carrier (reference l n)
 
 
-theorem copy_weight_eq (hr0 : 0 < r0) (l : Λ) (n : ℕ) (k : TorusInverse.Frequency)
-    {x : Native} (hx : x ∈ (viewStrip W U chart).domain) :
-    (preparedChart H v a hr0).weight (reference l n)
-        (copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k x) =
-      (viewStrip W U chart).zeta x := by
-  have hp := (viewStrip_mem W U chart x).mp hx
-  have ht := BaseContextAssembly.nativeStrip_time W U hp
-  have hr := BaseContextAssembly.nativeStrip_radius W U hp
-  change PrimaryTargetBounds.movingWeight W (slowChange F.data.h _ _ x.1) = _
-  rw [movingWeight_slowChange W (ChartScales.Q_pos _) (ChartScales.Q_pos _) ht hr,
-    viewStrip_zeta]
 
-theorem copy_growth_le
-    (hchart : ∀ n, 1 ≤ chart n)
-    (hnear : ∀ l n, chart n ≤ BaseChartJets.cellBand (reference l n) + 4 ∧
-      BaseChartJets.cellBand (reference l n) ≤ chart n + 4)
-    (l : Λ) (n : ℕ) (k : TorusInverse.Frequency)
-    {x : Native} (hx : x ∈ (viewStrip W U chart).domain) :
-    (nativeDomain H v a).growth (reference l n)
-        (copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k x) ≤
-      25 * (viewStrip W U chart).growth n x := by
-  have hp := (viewStrip_mem W U chart x).mp hx
-  have ht := BaseContextAssembly.nativeStrip_time W U hp
-  have hr := BaseContextAssembly.nativeStrip_radius W U hp
-  have he : (BaseContextAssembly.nativeStrip W (standardSlowRegion F.data.h_pos F.data.h_lt_half)).delta
-      (BaseContextAssembly.insertSlow (slowChange F.data.h (ChartScales.Q (chart n))
-        (ChartScales.Q (BaseChartJets.cellBand (reference l n))) x.1)) =
-      (viewStrip W U chart).delta x := by
-    change (viewStrip W (standardSlowRegion F.data.h_pos F.data.h_lt_half) id).delta
-      (slowChange F.data.h (ChartScales.Q (chart n))
-        (ChartScales.Q (BaseChartJets.cellBand (reference l n))) x.1, 0) = _
-    rw [viewStrip_delta, viewStrip_delta,
-      profileRadius_slowChange (ChartScales.Q_pos _) (ChartScales.Q_pos _) ht hr]
-  have hSn := PhysicalGraphBounds.S_ge_one (hchart n)
-  have hSm := S_window_le (hchart n) (hnear l n).2
-  have hmax : BaseContextAssembly.slowScale (BaseChartJets.cellBand (reference l n)) ≤
-      25 * BaseContextAssembly.slowScale (chart n) := by
-    unfold BaseContextAssembly.slowScale
-    rw [max_eq_right hSn]
-    exact max_le (by linarith) hSm
-  change BaseContextAssembly.slowScale (BaseChartJets.cellBand (reference l n)) *
-    max 1 ((BaseContextAssembly.nativeStrip W _).delta
-      (BaseContextAssembly.insertSlow (slowChange F.data.h (ChartScales.Q (chart n))
-        (ChartScales.Q (BaseChartJets.cellBand (reference l n))) x.1)))⁻¹ ≤ _
-  rw [he]
-  exact (mul_le_mul_of_nonneg_right hmax (zero_le_one.trans (le_max_left 1 _))).trans_eq (by
-    change (25 * BaseContextAssembly.slowScale (chart n)) * max 1 ((viewStrip W U chart).delta x)⁻¹ =
-      25 * (BaseContextAssembly.slowScale (chart n) * max 1 ((viewStrip W U chart).delta x)⁻¹)
-    ring)
 
 
 
@@ -1199,8 +1151,6 @@ noncomputable def activeReference (_ : Unit) (q : ℕ) : Label H v a :=
   reference (activeEnumeration H v a reference chart q).val.1
     (activeEnumeration H v a reference chart q).val.2
 
-noncomputable def activeChart (q : ℕ) : ℕ :=
-  chart (activeEnumeration H v a reference chart q).val.2
 
 
 
@@ -1224,9 +1174,6 @@ theorem norm_cylinderNativeLinear : ‖cylinderNativeLinear‖ ≤ 1 := by
   rw [LinearIsometryEquiv.norm_map, one_mul]
   exact norm_fst_le x
 
-noncomputable def cylinderStrip (s : StripData Native) : StripData Cylinder :=
-  ParticularWaveBounds.reindexStrip (StateReindex.cylinder (ParticularWaveBounds.liftAssoc Plane))
-    (HarmonicWaveInteraction.productStrip s)
 
 
 

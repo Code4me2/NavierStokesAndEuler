@@ -105,18 +105,7 @@ noncomputable def zeroBlock {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ
   phase := Φ
   angularFrequency := kp
 
-theorem zeroBlock_evaluation {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (a : MeanVector D) (n : ℕ) (p : D × ℝ) (i : Fin 3) :
-    (zeroBlock k Φ kp a).oscillation n p i = a n p.1 i := by
-  change (field (constantCoefficient (fun x => (a n x i : ℂ))) (k n) (Φ n) (kp n) p).re = _
-  unfold field constantCoefficient
-  rw [evaluate_single, character_zero, mul_one, Complex.ofReal_re]
 
-theorem zeroBlock_band {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (a : MeanVector D) : HarmonicBlock.BandLimited (zeroBlock k Φ kp a) 0 := by
-  refine ⟨fun n i => band_constantCoefficient _, ?_⟩
-  intro n l hl
-  simp [zeroBlock] at hl
 
 theorem zeroBlock_symmetric {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
     (a : MeanVector D) (n : ℕ) (i : Fin 3) :
@@ -156,13 +145,6 @@ theorem excludedSlotError_angleIndependent (d : LinearWaveBounds.GraphDirections
   simp only [LinearWaveBounds.excludedSlotError, dfast_angleIndependent d hψ hψa n x θ,
     hψa n x θ, ha n x θ, hs n x θ]
 
-theorem slot_coordinate_angleIndependent {s : WeightedClasses.StripData (D × ℝ)}
-    (g : GaussianTailFlat.SlotFamily s) (hangle : ∀ n, g.linear n ((0 : D), 1) = 0) :
-    AngleIndependent g.coordinate := by
-  intro n x θ
-  have hp : (x, θ) = (x, 0) + θ • ((0 : D), 1) := by ext <;> simp
-  simp only [GaussianTailFlat.SlotFamily.coordinate, hp, map_add, map_smul, hangle,
-    smul_zero, add_zero]
 
 
 /-- The retained Gaussian term as a literal real carrier field. -/
@@ -229,18 +211,7 @@ end AliasErrors
 def RealBlock {D : Type} (b : HarmonicBlock D) : Prop :=
   (∀ n i, ConjugateSymmetric (b.velocity n i)) ∧ ∀ n, ConjugateSymmetric (b.pressure n)
 
-theorem pairedBlock_real {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ)
-    (kp : ℕ → ℤ) (a : ℕ → D → HarmonicCalculus.ComplexVector) :
-    RealBlock (pairedBlock j k Φ kp a) := by
-  refine ⟨pairedBlock_symmetric j k Φ kp a, ?_⟩
-  intro n l x
-  simp [pairedBlock]
 
-theorem zeroBlock_real {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (a : MeanVector D) : RealBlock (zeroBlock k Φ kp a) := by
-  refine ⟨zeroBlock_symmetric k Φ kp a, ?_⟩
-  intro n l x
-  simp [zeroBlock]
 
 
 
@@ -351,16 +322,6 @@ noncomputable def accumulatedGaussianBlock (steps : ℕ) (g : ℕ → GaussianDa
   sumBlock (Finset.range steps) k Φ kp (fun s => (g s).block k Φ kp)
 
 
-theorem accumulatedGaussianBlock_band (steps : ℕ) (g : ℕ → GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (N : ℕ) (hj : ∀ s < steps, (g s).harmonic.natAbs ≤ N) :
-    HarmonicBlock.BandLimited (accumulatedGaussianBlock steps g k Φ kp) N := by
-  apply sumBlock_band
-  intro s hs
-  have he := gaussianBlock_band (g s).directions (g s).cutoff (g s).amplitude
-    (g s).source (g s).harmonic k Φ kp
-  exact ⟨fun n i => (he.1 n i).mono (hj s (Finset.mem_range.mp hs)),
-    fun n => (he.2 n).mono (hj s (Finset.mem_range.mp hs))⟩
 
 
 
@@ -377,17 +338,7 @@ noncomputable def accumulatedAlias (steps : ℕ) (r : ReconstructionData) (h : �
   CorrectionState.pressureAlias r c (u steps) +
     ∑ s ∈ Finset.range steps, CorrectionState.temporalAlias r h c (u s)
 
-noncomputable def accumulatedAliasBlock (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) : HarmonicBlock (Lift S) :=
-  zeroBlock k Φ kp (fun n x => accumulatedAlias steps r h c u n (x, 0))
 
-theorem accumulatedAlias_angleIndependent (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S)) :
-    AngleIndependent (accumulatedAlias steps r h c u) := by
-  intro n x θ
-  simp only [accumulatedAlias, Pi.add_apply, Finset.sum_apply, CorrectionState.pressureAlias,
-    CorrectionState.temporalAlias]
 
 
 
@@ -411,48 +362,15 @@ noncomputable def polarSpace (r z θ : ℝ) : Space :=
 noncomputable def polarProfile (q : ProfilePoint) : ProfilePoint :=
   (q.1, (q.2.1 ^ 2 / 2, q.2.2))
 
-theorem profilePoint_polarSpace (q : ProfilePoint) (θ : ℝ) :
-    profilePoint q.1 (polarSpace q.2.1 q.2.2 θ) = polarProfile q := by
-  simp only [profilePoint, polarProfile, radialEnergy, polarSpace,
-    AxisymmetricResidual.pack_zero, AxisymmetricResidual.pack_one, AxisymmetricResidual.pack_two]
-  congr 2
-  calc
-    _ = q.2.1 ^ 2 * (Real.sin θ ^ 2 + Real.cos θ ^ 2) / 2 := by ring
-    _ = _ := by rw [Real.sin_sq_add_cos_sq, mul_one]
 
 /-- Components in the actual orthonormal radial/angular/axial frame. -/
 noncomputable def cylindricalComponents (θ : ℝ) (v : Space) : Fin 3 → ℝ :=
   ![Real.cos θ * v 0 + Real.sin θ * v 1,
     -Real.sin θ * v 0 + Real.cos θ * v 1, v 2]
 
-theorem cylindricalComponents_pack (r θ A B C : ℝ) :
-    cylindricalComponents θ (AxisymmetricResidual.pack
-      (r * Real.cos θ * A + r * Real.sin θ * B)
-      (r * Real.sin θ * A - r * Real.cos θ * B) C) = ![r * A, -r * B, C] := by
-  funext i
-  fin_cases i
-  · simp [cylindricalComponents]
-    calc
-      _ = r * A * (Real.sin θ ^ 2 + Real.cos θ ^ 2) := by ring
-      _ = _ := by rw [Real.sin_sq_add_cos_sq, mul_one]
-  · simp [cylindricalComponents]
-    calc
-      _ = -r * B * (Real.sin θ ^ 2 + Real.cos θ ^ 2) := by ring
-      _ = _ := by simp only [Real.sin_sq_add_cos_sq, mul_one, neg_mul]
-  · simp [cylindricalComponents]
 
 
-/-- The literal Cartesian Navier--Stokes residual, expressed in its cylindrical
-frame. This is not an independently specified error oracle. -/
-noncomputable def axisymmetricBaseError (B F U P : ℕ → Profile) : Oscillation ProfilePoint :=
-  fun n p => cylindricalComponents p.2
-    (navierStokesResidual (AxisymmetricResidual.velocity (B n) (F n) (U n))
-      (AxisymmetricResidual.pressure (P n)) p.1.1 (polarSpace p.1.2.1 p.1.2.2 p.2))
 
-noncomputable def axisymmetricBaseValue (B F U P : ℕ → Profile) : MeanVector ProfilePoint :=
-  fun n q => ![q.2.1 * AxisymmetricResidual.residualRadial (B n) (F n) (U n) (P n) (polarProfile q),
-    -q.2.1 * AxisymmetricResidual.residualAngular (B n) (F n) (U n) (polarProfile q),
-    AxisymmetricResidual.residualAxial (B n) (U n) (P n) (polarProfile q)]
 
 
 

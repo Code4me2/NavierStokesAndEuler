@@ -641,21 +641,6 @@ section Longitudinal
 
 variable {D : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-/-- Solving the actual harmonic divergence identity gives the same inverse
-carrier as in the curl remainder. This equality includes normal derivatives
-when differentiated; there is no pointwise-only estimate here. -/
-theorem longitudinal_eq_inverseCarrier (R : D → ℝ) (Vr Vθ Vz : D → D)
-    {K : ℝ} (hK : K ≠ 0) {Φ : D → ℝ} {a : D → ComplexVector} {x : D}
-    (hΦ : DifferentiableAt ℝ Φ x) (ha : ∀ i, DifferentiableAt ℝ (fun y => a y i) x)
-    (hθ : HarmonicCalculus.along Vθ (fun y => a y 1) x = 0)
-    (hdiv : HarmonicCalculus.cylindricalDivergence R Vr Vθ Vz
-      (HarmonicCalculus.vectorMode K Φ a) x = 0) :
-    HarmonicCalculus.normalDot (HarmonicCalculus.phaseNormal R Vr Vθ Vz Φ x) (a x) =
-      inverseCarrier K * HarmonicCalculus.strippedDivergence R Vr Vz a x := by
-  have h := congrArg (fun z : ℂ => inverseCarrier K * z)
-    (HarmonicCalculus.longitudinal_identity R Vr Vθ Vz K hΦ ha hθ hdiv)
-  rw [← mul_assoc, inverseCarrier_phaseFactor hK] at h
-  simpa only [neg_one_mul, mul_neg, neg_inj] using h
 
 variable {s : StripData D} {w : ℕ → D → ℝ} {α κ : ℝ}
   {R : D → ℝ} {Vr Vθ Vz : ℕ → D → D} {K : ℕ → ℝ}
@@ -719,15 +704,6 @@ theorem cylindricalCurl_tsupport_subset (R : D → ℝ) (Vr Vθ Vz : D → D)
   ext i
   fin_cases i <;> simp [cylindricalCurl, HarmonicCalculus.along, hderiv, hval]
 
-theorem vectorPotential_tsupport_subset (K : ℝ) (R : D → ℝ) (Vr Vθ Vz : D → D)
-    (Φ : D → ℝ) (a : D → ComplexVector) :
-    tsupport (vectorPotential K R Vr Vθ Vz Φ a) ⊆ tsupport a := by
-  apply closure_mono
-  intro x hx ha
-  apply hx
-  ext i
-  simp [vectorPotential, HarmonicCalculus.vectorMode, HarmonicCalculus.mode,
-    coefficient, normalCoefficient, normalCross, ha]
 
 
 end Support
@@ -739,16 +715,6 @@ open ProblemStatement
 variable {s : StripData SpaceTime} {w : ℕ → SpaceTime → ℝ} {α : ℝ}
   {B : ℕ → VelocityField} {K : ℕ → ℝ}
 
-/-- Direct compatibility with the actual Euclidean spatial curl. All input
-jets here are physical spacetime jets, so no separate graph factor occurs. -/
-theorem physicalCurl_class (hB : MemClass s w α B) :
-    MemClass s w α (fun n => SpatialCurl.spatialCurl (B n)) := by
-  apply class_congr (hB.fderiv.map
-    (SpatialCurl.curlLinear.comp (ResidualStability.spaceRestriction Space)))
-  intro n x hx
-  change SpatialCurl.curlLinear (ResidualStability.spaceRestriction Space (fderiv ℝ (B n) x)) =
-    SpatialCurl.curlLinear (fderiv ℝ (fun y => B n (x.1, y)) x.2)
-  rw [ResidualStability.space_fderiv_eq_full ((hB.contDiffAt n hx 1).differentiableAt (by norm_num))]
 
 
 

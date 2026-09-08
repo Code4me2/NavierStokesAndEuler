@@ -24,21 +24,6 @@ abbrev Point := PressureStream.Lift Plane
 noncomputable def basePressureCoefficient (a b : ℝ) (hab : a < b) : ℝ :=
   IntegratedMeanBalances.moment 2 (PressureStream.rho a b hab) / 2
 
-theorem basePressureCoefficient_lower {a b : ℝ} (ha : 0 < a) (hab : a < b) :
-    a ^ 2 / 2 ≤ basePressureCoefficient a b hab := by
-  have hm : (∫ r, a ^ 2 * PressureStream.rho a b hab r) ≤
-      ∫ r, r ^ 2 * PressureStream.rho a b hab r := by
-    apply integral_mono ((PressureStream.rho_integrable a b hab).const_mul (a ^ 2))
-      (IntegratedMeanBalances.weighted_integrable (PressureStream.rho_contDiff a b hab).continuous
-        (PressureStream.rho_hasCompactSupport a b hab) 2)
-    intro r
-    by_cases hr : PressureStream.rho a b hab r = 0
-    · simp only [hr, mul_zero, le_refl]
-    · have har := (PressureStream.rho_support a b hab hr).1
-      apply mul_le_mul_of_nonneg_right _ (PressureStream.rho_nonneg a b hab r)
-      nlinarith [mul_nonneg (sub_nonneg.mpr har) (add_nonneg (ha.le.trans har) ha.le)]
-  rw [integral_const_mul, PressureStream.rho_integral, mul_one] at hm
-  exact div_le_div_of_nonneg_right hm (by norm_num)
 
 
 noncomputable def pressureCoefficient {S : Type} (g : VariableGaugeMean.GaugeData S)

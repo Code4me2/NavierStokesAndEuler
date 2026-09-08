@@ -43,17 +43,6 @@ theorem positive_profile_tendsto_atTop {ι : Type*} {l : Filter ι}
     simpa only [add_zero] using tendsto_const_nhds.add herror
   exact (negative_power_tendsto_atTop hA hq).atTop_mul_pos hE hfactor
 
-/-- A velocity norm bounded below by the positive leading profile diverges.
-This directly applies when the angular component has that leading term. -/
-theorem norm_tendsto_atTop_of_profile_lower_bound {ι V : Type*}
-    [NormedAddCommGroup V] {l : Filter ι} {q error : ι → ℝ}
-    {v : ι → V} {A E : ℝ} (hA : 0 < A) (hE : 0 < E)
-    (hq : Tendsto q l (𝓝[>] (0 : ℝ)))
-    (herror : Tendsto error l (𝓝 0))
-    (hlower : ∀ᶠ t in l, q t ^ (-A) * (E + error t) ≤ ‖v t‖) :
-    Tendsto (fun t => ‖v t‖) l atTop := by
-  exact tendsto_atTop_mono' l hlower
-    (positive_profile_tendsto_atTop hA hE hq herror)
 
 
 

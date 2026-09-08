@@ -125,14 +125,6 @@ theorem amplitudes_pos {a b scaleMinus scalePlus m t : ℝ}
   intro i
   exact Real.sqrt_pos.mpr (coefficients_pos ha hb hMinus hPlus hcone i)
 
-theorem amplitudes_sq {a b scaleMinus scalePlus m t : ℝ}
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (hcone : |a * t| < b * m) :
-    (fun i => (amplitudes a b scaleMinus scalePlus m t i) ^ 2) =
-      coefficients a b scaleMinus scalePlus m t := by
-  funext i
-  exact Real.sq_sqrt (le_of_lt (coefficients_pos ha hb hMinus hPlus hcone i))
 
 
 

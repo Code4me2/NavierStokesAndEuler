@@ -673,12 +673,6 @@ theorem profile_mul_outerCutoff (t : ℝ) :
   · rw [outerCutoff_one h, mul_one]
   · rw [GaussianTailFlat.profile_zero (le_of_not_ge h), zero_mul]
 
-theorem outerCutoff_jet_bounded (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ t : ℝ, ‖iteratedFDeriv ℝ m outerCutoff t‖ ≤ C := by
-  have hs := outerBump.hasCompactSupport.iteratedFDeriv (𝕜 := ℝ) m
-  obtain ⟨C, hC⟩ := hs.exists_bound_of_continuous
-    (outerCutoff_smooth.continuous_iteratedFDeriv (nat_le_infty m))
-  exact ⟨max C 0, le_max_right _ _, fun t => (hC t).trans (le_max_left _ _)⟩
 
 theorem affine_profile_jets (U : Domain ι D) (f : ℝ → ℝ) (hf : ContDiff ℝ ∞ f)
     (hjets : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ t : ℝ, ‖iteratedFDeriv ℝ m f t‖ ≤ C)
@@ -1130,29 +1124,7 @@ noncomputable def nativePointLinear (g : Geometry) : (P × TorusInverse.Plane) �
   (ContinuousLinearMap.fst ℝ P TorusInverse.Plane).prod
     (g.coordinateLinear.comp (ContinuousLinearMap.snd ℝ P TorusInverse.Plane))
 
-theorem nativePoint_affine (g : Geometry) (k : Frequency) (x : P × TorusInverse.Plane) :
-    ParticularWaveBounds.nativePoint g k x =
-      nativePointLinear g x + ParticularWaveBounds.nativePoint g k 0 := by
-  apply Prod.ext
-  · simp [ParticularWaveBounds.nativePoint, nativePointLinear]
-  · change g.coordinates k x.2 = g.coordinateLinear x.2 + g.coordinates k 0
-    rw [g.coordinates_eq_affine k x.2, add_comm]
 
-theorem norm_nativePointLinear_le (g : Geometry) :
-    ‖nativePointLinear (P := P) g‖ ≤ CommonCoverClass.argumentCost g := by
-  have hcost := CommonCoverClass.one_le_argumentCost g
-  have hc : ‖g.coordinateLinear‖ ≤ CommonCoverClass.argumentCost g := by
-    unfold CommonCoverClass.argumentCost
-    have h : 0 ≤ ‖g.pointLinear‖ * (1 + ‖g.coordinateLinear‖) := by positivity
-    linarith
-  apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans hcost)
-  intro x
-  change ‖(x.1, g.coordinateLinear x.2)‖ ≤ _
-  rw [Prod.norm_def]
-  apply max_le
-  · exact (norm_fst_le x).trans (le_mul_of_one_le_left (norm_nonneg x) hcost)
-  · exact (g.coordinateLinear.le_opNorm x.2).trans
-      (mul_le_mul hc (norm_snd_le x) (norm_nonneg _) (zero_le_one.trans hcost))
 
 
 

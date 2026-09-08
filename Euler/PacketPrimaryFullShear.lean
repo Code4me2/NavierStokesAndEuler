@@ -98,15 +98,6 @@ theorem fullWave_physical_canonical_gradient (α k : ℝ) (hk : k ≠ 0)
     envelopedVelocity_independent_profile τ hτ hτT B δ 1 hδ zero_lt_one]
   rfl
 
-theorem fullWave_physical_canonical_norm (α k : ℝ) (hα : 0 ≤ α) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    ‖fderiv ℝ (fun x => fullWave τ hτ hτT B δ hδ ξ hs α k t (Y x)) (X 0)‖ =
-      (α/δ) * (‖D.normal.field t 0‖ * ‖canonicalVelocity τ hτ hτT B ξ hs t 0‖) := by
-  rw [fullWave_physical_norm τ hτ hτT B δ hδ ξ hs α k hα hk t X Y hX hY hleft,
-    envelopedVelocity_independent_profile τ hτ hτT B δ 1 hδ zero_lt_one]
-  rfl
 
 
 end EulerPacketPrimaryShear

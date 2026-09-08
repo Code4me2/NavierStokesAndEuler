@@ -533,25 +533,6 @@ theorem next_meanHypotheses (HM : LiftedMeanResidual.MeanHypotheses p.strip.doma
 
 end StepData
 
-/-- A fixed local domain is used throughout the actual stored iteration.
-The step inputs are on its constructed waves and streams, not mean identities. -/
-theorem iterate_meanHypotheses {ι : Type} {coord : ℝ}
-    (U : LocalSignedRequest.SlowRegion coord) (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (V : Set Point)
-    (hV : ∀ j, (p j).strip.domain = V)
-    (H₀ : LiftedMeanResidual.MeanHypotheses V c seed.state)
-    (H : ∀ j, StepData U (p j) (CycleState.iterate p c seed j).coefficients c
-      (CycleState.iterate p c seed j).state) (j : ℕ) :
-    LiftedMeanResidual.MeanHypotheses V c (CycleState.iterate p c seed j).state := by
-  induction j with
-  | zero => exact H₀
-  | succ j ih =>
-    have hi : LiftedMeanResidual.MeanHypotheses (p j).strip.domain c
-        (CycleState.iterate p c seed j).state := by simpa only [hV j] using ih
-    have hn := (H j).next_meanHypotheses hi
-    change LiftedMeanResidual.MeanHypotheses V c
-      ((p j).next (CycleState.iterate p c seed j).coefficients c (CycleState.iterate p c seed j).state)
-    simpa only [hV j] using hn
 
 
 

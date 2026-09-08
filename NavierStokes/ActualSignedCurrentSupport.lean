@@ -91,39 +91,12 @@ theorem physicalDomain_of_source (n : ℕ) {z : ProblemStatement.SpaceTime}
     z ∈ ActualSignedPotentialCoherence.physicalDomain n :=
   ⟨hz.1, (CurrentSignedCurl.nativePoint_mem n hz).1.1⟩
 
-theorem currentPotential_zero (l : Index B N0) (u : State Point) (n : ℕ)
-    {qbig a : ℝ} {i : PolarCharts.Index} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ ActualPhysicalPrefixFields.cartesianChartDomain qbig n a i)
-    (hn : l ∉ activeLabels standardRegion B N0 n) :
-    CurrentSignedCurl.currentPotential l u n a i z = 0 := by
-  have hp := (cylindrical_zero l u n (physicalDomain_of_source n hz.2.2) hn).1
-  have hzero : PhysicalCurlCovariance.realVector (0 : ComplexVector) = 0 := by
-    ext j
-    simp
-  simp only [CurrentSignedCurl.currentPotential, PhysicalCurlCovariance.cartesianPotential,
-    hp, hzero, map_zero]
 
-theorem currentPressure_zero (l : Index B N0) (u : State Point) (n : ℕ)
-    {qbig a : ℝ} {i : PolarCharts.Index} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ ActualPhysicalPrefixFields.cartesianChartDomain qbig n a i)
-    (hn : l ∉ activeLabels standardRegion B N0 n) :
-    CurrentSignedCurl.currentPressure l u n a i z = 0 := by
-  have hp := (cylindrical_zero l u n (physicalDomain_of_source n hz.2.2) hn).2
-  simp only [CurrentSignedCurl.currentPressure, hp, Complex.zero_re]
 
 
 
 /-! ## The canonical sum is the finite current active-label sum -/
 
-theorem finsum_eq_active_sum {E : Type*} [AddCommMonoid E] (n : ℕ)
-    (f : Index B N0 → E)
-    (hz : ∀ l, l ∉ activeLabels standardRegion B N0 n → f l = 0) :
-    (∑ᶠ l, f l) = ∑ l ∈ activeLabels standardRegion B N0 n, f l := by
-  classical
-  apply finsum_eq_sum_of_support_subset
-  intro l hl
-  by_contra hn
-  exact hl (hz l hn)
 
 
 

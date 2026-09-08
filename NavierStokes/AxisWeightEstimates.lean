@@ -442,38 +442,9 @@ def mixedWeightSum (ε : ℝ) (r n m : ℕ) : ℝ :=
     (((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
       weight ε ij.1 (kl.1 + 1) * weight ε ij.2 kl.2
 
-theorem mixedWeightSum_le {ε : ℝ} (hε : 0 < ε) {r : ℕ} (hr : 1 ≤ r) (n m : ℕ) :
-    mixedWeightSum ε r n m ≤ (5120 / ε) * weight ε (n + 1) m := by
-  have hsum : mixedWeightSum ε r n m ≤
-      ∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-        (80 / ε) * ((m.choose kl.1 : ℝ) * weight ε (ij.1 + 1) kl.1 * weight ε ij.2 kl.2) := by
-    apply Finset.sum_le_sum
-    intro ij hij
-    apply Finset.sum_le_sum
-    intro kl hkl
-    exact mixed_weight_term_le hε hr (mem_antidiagonal.mp hij) m kl.1 kl.2
-  have hfactor :
-      (∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-        (80 / ε) * ((m.choose kl.1 : ℝ) * weight ε (ij.1 + 1) kl.1 * weight ε ij.2 kl.2)) =
-      (80 / ε) * shiftedProductWeightSum ε n m := by
-    simp only [shiftedProductWeightSum, Finset.mul_sum]
-  rw [hfactor] at hsum
-  calc
-    _ ≤ (80 / ε) * shiftedProductWeightSum ε n m := hsum
-    _ ≤ (80 / ε) * (64 * weight ε (n + 1) m) :=
-      mul_le_mul_of_nonneg_left (shiftedProductWeightSum_le hε n m) (by positivity)
-    _ = _ := by ring
-
-/-- The coefficient at radial degree n+1 of J_r((∂η f) D_Y g).
-The radial divisor is distributed over its finite convolution sum. -/
-def inverseMixedJet (r : ℕ) (f g : ℕ → ℕ → ℝ) (n m : ℕ) : ℝ :=
-  ∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-    (((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
-      f ij.1 (kl.1 + 1) * g ij.2 kl.2
 
 
-/-- Coefficients of the radial averaging operator `Bf(Y)=∫₀¹ f(tY)dt`. -/
-def averageJet (f : ℕ → ℕ → ℝ) (n m : ℕ) : ℝ := f n m / ((n : ℝ) + 1)
+
 
 
 /-- Coefficients of the regular zero-datum inverse of `Y f'' + r f'`. -/

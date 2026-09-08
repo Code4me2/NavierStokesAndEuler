@@ -710,62 +710,6 @@ theorem represented_initial_rate (upper : ℝ) (B : ℕ)
     MB.family.angularField w = SpatialCurl.spatialCurl (A 0) w + Bdirect 0 w
   rw [SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq he, hB hw]
 
-/-- The finite-background consumer now uses only native wave/mean data
-on the true domain, plus exact initial and positive-stage identities. -/
-theorem background_from_representations
-    {DP DS : Type} [NormedAddCommGroup DP] [NormedSpace ℝ DP]
-    [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
-    (Cyc : CycleInputs F.data.h DP IP KP DS IS KS) {κ qbig : ℝ}
-    (HM : Cyc.Metadata κ) (HQ : Cyc.ValidScale qbig) (hκ : κ ≤ 1 / 100000)
-    (hqbig : 0 < qbig) (upper : ℝ) (bandFloor : ℕ)
-    (WA : PhysicalStageBounds.WaveData F.data.h D I K (Fin 3))
-    (MT MR : MeanInput F.data.h (CoordinateAlgebra.A F.data.h - 1 / 2))
-    (MB : MeanInput F.data.h (CoordinateAlgebra.A F.data.h))
-    (hqT : qbig ≤ ChartScales.Q MT.firstBand) (hqR : qbig ≤ ChartScales.Q MR.firstBand)
-    (hqB : qbig ≤ ChartScales.Q MB.firstBand)
-    (A B : ℕ → VelocityField)
-    (hA0 : EqOn (A 0) (initialPotential H v upper bandFloor WA MT MR)
-      (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (hB0 : EqOn (B 0) MB.family.angularField (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (hA : ∀ k, EqOn (Cyc.potential k) (A (k + 1)) (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (hB : ∀ k, EqOn (Cyc.direct k) (B (k + 1)) (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (J m : ℕ) :
-    JetRate ActualBaseVelocityBounds.endpoint (PhysicalWaveSum.physicalQ F.data.h)
-      (MixedDiagonalResidual.uncutVelocity A B J) m
-      (-MixedFiniteBackground.initialBackgroundLoss
-        (initialLoss F.data.h WA.alpha WA.shift (min MT.alpha MR.alpha) MB.alpha)
-        (PhysicalStageBounds.potentialLoss F.data.h F.data.h 0)
-        (PhysicalStageBounds.directLoss F.data.h 0) m) := by
-  have hU := CutStageEstimates.physicalSublevel_open F.data.h_pos F.data.h_lt_half qbig
-  have hlU := InitializedPhysicalBackground.endpoint_sublevel F.data.h_pos F.data.h_lt_half hqbig
-  have hsa : ∀ j, ContDiffOn ℝ ∞ (A j) (CutStageEstimates.physicalSublevel F.data.h qbig) := by
-    intro j
-    cases j with
-    | zero =>
-      exact (initialPotential_smooth H v upper bandFloor WA MT MR hqT hqR).congr
-        (fun _ hw => hA0 hw)
-    | succ k =>
-      exact (Cyc.potential_smooth HQ F.data.h_pos F.data.h_lt_half k).congr
-        (fun _ hw => (hA k hw).symm)
-  have hsb : ∀ j, ContDiffOn ℝ ∞ (B j) (CutStageEstimates.physicalSublevel F.data.h qbig) := by
-    intro j
-    cases j with
-    | zero =>
-      exact (MB.angular_smooth F.data.h_pos F.data.h_lt_half hqB).congr (fun _ hw => hB0 hw)
-    | succ k =>
-      exact (Cyc.direct_smooth HQ F.data.h_pos F.data.h_lt_half k).congr
-        (fun _ hw => (hB k hw).symm)
-  obtain ⟨CA, _, hrawA⟩ := raw_of_positive_bounds (fun k m =>
-    bound_congr F.data.h_pos F.data.h_lt_half (hA k)
-      (Cyc.potential_bound HM HQ F.data.h_pos F.data.h_lt_half hκ k m))
-  obtain ⟨CB, _, hrawB⟩ := raw_of_positive_bounds (fun k m =>
-    bound_congr F.data.h_pos F.data.h_lt_half (hB k)
-      (Cyc.direct_bound HM HQ F.data.h_pos F.data.h_lt_half hκ k m))
-  exact MixedFiniteBackground.mixed_background_from_initial hU hlU
-    (ActualBaseVelocityBounds.endpoint_past.and hlU)
-    (ActualBaseVelocityBounds.endpoint_q_small F.data.h_pos F.data.h_lt_half)
-    hsa hsb hrawA hrawB (fun j _ => ActualIterationLedger.gain_nonneg F.data.h_pos.le j)
-    (represented_initial_rate H v upper bandFloor WA MT MR MB hU hlU hA0 hB0) J m
 
 end ActualInitialBase
 

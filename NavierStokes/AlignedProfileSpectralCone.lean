@@ -77,33 +77,6 @@ theorem modulated_shear_eq {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) :
     (d.domain_nonnegative hX.le (d.parameters_contains (abs_le.mp heta)))
     (v.positive_f hX (abs_le.mp heta)).ne' hg.1 hg.2
 
-/-- The primitive true-cone conclusion of the actual finite modulation is
-converted into the two spectral cones for its own leading fields. -/
-theorem modulated_spectral_cones
-    (hcone : ∀ w : Point, NominalConeAssembly.activeLeft W < w.1 →
-      w.1 < NominalConeAssembly.activeRight W → w.2 ∈ Icc (-1 : ℝ) 1 →
-      TrueConeLoop.InTrueCone (ActivationStocks.profileStockOne v.profiles F.data.h w)
-        (ActivationStocks.profileStockTwo v.profiles F.data.h w)
-        (ModulatedCone.angularShear v.profiles.E w)
-        (ModulatedCone.signedAxialShear v.profiles.E v.profiles.U w))
-    {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1)
-    (hl : NominalConeAssembly.activeLeft W < (BaseChartJets.normalizedCoordinates F.data.h p).2.1)
-    (hr : (BaseChartJets.normalizedCoordinates F.data.h p).2.1 < NominalConeAssembly.activeRight W) :
-    let F₀ := BaseChartJets.leadingFrequency F.data.h W.axis.normalization
-      (EntranceAlignedBase.modulatedCoefficients H v)
-    let G₀ := BaseChartJets.leadingAxial F.data.h (EntranceAlignedBase.modulatedCoefficients H v)
-    PrimaryRepresentatives.ReferenceCone (F₀ p) (PhaseEstimates.shearVector F₀ G₀ p) ∧
-      PrimaryRepresentatives.TargetCone (F₀ p) (PhaseEstimates.shearVector F₀ G₀ p)
-        (stressVector v.profiles F.data.h (BaseChartJets.normalizedCoordinates F.data.h p).2) := by
-  dsimp only
-  rw [modulated_shear_eq H v hT hR]
-  have hh := ConstructedSlowBase.height_pos W
-  have hh1 := ConstructedSlowBase.height_lt_half W
-  have hX := normalized_X_pos hh hh1 hT hR
-  have heta := abs_le.mp (BaseChartJets.normalizedCoordinates_eta hh hh1 hT).le
-  exact profile_spectral_cones v.profiles F.data.h
-    (d.domain_nonnegative hX.le (d.parameters_contains heta)) hX (v.positive_f hX heta)
-    (modulated_frequency_pos H v hT hR) (hcone _ hl hr heta)
 
 
 

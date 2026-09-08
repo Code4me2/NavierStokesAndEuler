@@ -391,17 +391,6 @@ noncomputable def sameCoefficient {s : StripData D} {κ : ℝ} (G : Geometry s �
   strippedTransport G a b n x i + phaseFactor (ξ n) * normalDot
     (phaseNormal (G.radius n) (G.radial n) (G.angular n) (G.axial n) (Φ n) x) (a n x) * b n x i
 
-theorem same_label_identity {s : StripData D} {κ : ℝ} (G : Geometry s κ)
-    (Φ : ℕ → D → ℝ) (ν ξ : ℕ → ℝ) (a b : Family D)
-    (hbθ : AngularIndependent G b) (n : ℕ) {x : D} (hx : x ∈ s.domain)
-    (hΦ : DifferentiableAt ℝ (Φ n) x)
-    (hb : ∀ i, DifferentiableAt ℝ (fun y => b n y i) x) (i : Fin 3) :
-    LinearWaveResidual.transport (G.radius n) (G.radial n) (G.angular n) (G.axial n)
-      (vectorMode (ν n) (Φ n) (a n)) (vectorMode (ξ n) (Φ n) (b n)) x i =
-        sameCoefficient G Φ ξ a b n x i * carrier (ν n + ξ n) (Φ n) x := by
-  rw [transport_modes _ _ _ _ _ _ _ hΦ hb,
-    transport_eq_stripped G a b hbθ n hx]
-  rfl
 
 /-- All derivatives of the longitudinal contraction are estimated through
 the actual divergence identity, including derivatives of the phase normal. -/
@@ -440,19 +429,6 @@ theorem same_label_raw_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ
     rw [switched_longitudinal _ _ _ _ (ν n) (ξ n) (hν n) hp hd (haθ n 1 x hx) (hdiv n x hx)]
   exact (strippedTransport_class G hκ ha hb i).add hp
 
-theorem same_label_wave_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ : ℝ}
-    (G : Geometry s κ) (hκ : 0 ≤ κ) {Φ : ℕ → D → ℝ} {ν ξ : ℕ → ℝ}
-    {a b : Family D} (ha : WaveVector s P α a) (hb : WaveVector s P β b)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (Φ n) s.domain) (hν : ∀ n, ν n ≠ 0)
-    (hratio : BandBound s 0 (fun n => ξ n / ν n)) (haθ : AngularIndependent G a)
-    (hdiv : ∀ n x, x ∈ s.domain → cylindricalDivergence
-      (G.radius n) (G.radial n) (G.angular n) (G.axial n) (vectorMode (ν n) (Φ n) (a n)) x = 0)
-    (hζ : ∀ x ∈ s.domain, s.zeta x ≤ 1)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    WaveVector s P (α + β - κ) (sameCoefficient G Φ ξ a b) := by
-  intro i
-  exact wave_square_weight_wave (same_label_raw_bound G hκ ha hb hΦ hν hratio haθ hdiv i) hζ hP0 hP1
 
 theorem same_label_mean_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ : ℝ}
     (G : Geometry s κ) (hκ : 0 ≤ κ) {Φ : ℕ → D → ℝ} {ν ξ : ℕ → ℝ}
@@ -512,25 +488,10 @@ theorem bandBound_frequency {s : StripData D} {β : ℝ} {k : ℕ → ℝ} {j : 
       mul_le_mul (h n) (by simpa only [Real.norm_eq_abs] using hj n) (norm_nonneg _) hnonneg
     _ = _ := by ring
 
-/-- Fixed-stage frequency growth is finite and independent of the band. -/
-theorem harmonic_stage_add {j l : ℤ} {M : ℝ} (stage : ℕ)
-    (hj : |(j : ℝ)| ≤ 2 ^ stage * M) (hl : |(l : ℝ)| ≤ 2 ^ stage * M) :
-    |((j + l : ℤ) : ℝ)| ≤ 2 ^ (stage + 1) * M := by
-  rw [Int.cast_add]
-  calc
-    _ ≤ |(j : ℝ)| + |(l : ℝ)| := abs_add_le _ _
-    _ ≤ 2 ^ stage * M + 2 ^ stage * M := add_le_add hj hl
-    _ = _ := by rw [pow_succ]; ring
 
-theorem harmonic_stage_neg {j : ℤ} {M : ℝ} (stage : ℕ)
-    (hj : |(j : ℝ)| ≤ 2 ^ stage * M) : |((-j : ℤ) : ℝ)| ≤ 2 ^ stage * M := by
-  simpa only [Int.cast_neg, abs_neg] using hj
 
 noncomputable def conjugateFamily (a : Family D) : Family D := fun n x i => star (a n x i)
 
-theorem conjugate_wave {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ} {a : Family D}
-    (ha : WaveVector s P α a) : WaveVector s P α (conjugateFamily a) :=
-  fun i => class_conj (ha i)
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem carrier_neg (ν : ℝ) (Φ : D → ℝ) (x : D) : carrier (-ν) Φ x = star (carrier ν Φ x) := by
@@ -540,25 +501,8 @@ theorem carrier_neg (ν : ℝ) (Φ : D → ℝ) (x : D) : carrier (-ν) Φ x = s
   simp only [phaseFactor, map_mul, Complex.conj_ofReal, Complex.conj_I, Complex.ofReal_neg]
   ring
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem vectorMode_conjugate (ν : ℝ) (Φ : D → ℝ) (a : D → ComplexVector) (x : D) (i : Fin 3) :
-    vectorMode (-ν) Φ (fun y j => star (a y j)) x i = star (vectorMode ν Φ a x i) := by
-  simp [vectorMode, mode, carrier_neg, star_mul, mul_comm]
 
 
-theorem opposite_mean_bound {s : StripData D} {P : ℕ → D → ℝ} {α β κ : ℝ}
-    (G : Geometry s κ) (hκ : 0 ≤ κ) {Φ : ℕ → D → ℝ} {ν : ℕ → ℝ} {a b : Family D}
-    (ha : WaveVector s P α a) (hb : WaveVector s P β b)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (Φ n) s.domain) (hν : ∀ n, ν n ≠ 0)
-    (haθ : AngularIndependent G a)
-    (hdiv : ∀ n x, x ∈ s.domain → cylindricalDivergence
-      (G.radius n) (G.radial n) (G.angular n) (G.axial n) (vectorMode (ν n) (Φ n) (a n)) x = 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (i : Fin 3) :
-    MeanClass s (α + β - κ) (fun n x => sameCoefficient G Φ (fun n => -(ν n)) a b n x i) := by
-  have hr : BandBound s 0 (fun n => -(ν n) / ν n) := by
-    simpa only [neg_div, div_self (hν _)] using bandBound_const s (-1)
-  exact same_label_mean_bound G hκ ha hb hΦ hν hr haθ hdiv hP0 hP1 i
 
 
 
@@ -578,29 +522,6 @@ theorem mul_along_zero {U : Set D} (hU : IsOpen U) {f g : D → ℂ} {x : D}
   rw [hgn.fderiv_eq]
   simp
 
-theorem transport_zero_of_products {U : Set D} (hU : IsOpen U)
-    (R : D → ℝ) (Vr Vθ Vz : D → D) {a b : D → ComplexVector}
-    (ha : ∀ i, ContinuousOn (fun y => a y i) U)
-    (hab : ∀ i j y, y ∈ U → a y i * b y j = 0) {x : D} (hx : x ∈ U) :
-    LinearWaveResidual.transport R Vr Vθ Vz a b x = 0 := by
-  funext i
-  have hr := mul_along_zero hU hx ((ha 0 x hx).continuousAt (hU.mem_nhds hx)) (hab 0 i) Vr
-  have hθ := mul_along_zero hU hx ((ha 1 x hx).continuousAt (hU.mem_nhds hx)) (hab 1 i) Vθ
-  have hz := mul_along_zero hU hx ((ha 2 x hx).continuousAt (hU.mem_nhds hx)) (hab 2 i) Vz
-  have hc : a x 1 * angularGenerator (b x) i = 0 := by
-    fin_cases i
-    · change a x 1 * (-b x 1) = 0
-      rw [mul_neg, hab 1 1 x hx, neg_zero]
-    · change a x 1 * b x 0 = 0
-      exact hab 1 0 x hx
-    · change a x 1 * 0 = 0
-      exact mul_zero _
-  change _ = (0 : ℂ)
-  calc
-    _ = a x 0 * along Vr (fun y => b y i) x +
-        (a x 1 * along Vθ (fun y => b y i) x + a x 1 * angularGenerator (b x) i) / (R x : ℂ) +
-        a x 2 * along Vz (fun y => b y i) x := by unfold LinearWaveResidual.transport; ring
-    _ = 0 := by rw [hr, hθ, hc, hz]; simp
 
 
 
@@ -619,32 +540,7 @@ theorem transport_realLift (R : D → ℝ) (Vr Vθ Vz : D → D)
       LinearWaveResidual.realLift, angularGenerator, LinearWaveResidual.realAngularGenerator,
       hd, Complex.ofReal_add, Complex.ofReal_mul, Complex.ofReal_div]
 
-/-- Real bilinear products require both ordinary and conjugate harmonic pairs. -/
-theorem transport_real_parts (R : D → ℝ) (Vr Vθ Vz : D → D)
-    (u : D → ComplexVector) {v : D → ComplexVector} {x : D}
-    (hv : ∀ i, DifferentiableAt ℝ (fun y => v y i) x) (i : Fin 3) :
-    LinearWaveResidual.realTransport R Vr Vθ Vz
-      (fun y j => (u y j).re) (fun y j => (v y j).re) x i =
-        ((LinearWaveResidual.transport R Vr Vθ Vz u v x i).re +
-          (LinearWaveResidual.transport R Vr Vθ Vz u (fun y j => star (v y j)) x i).re) / 2 := by
-  have hd (V : D → D) (j : Fin 3) :
-      along V (fun y => (v y j).re) x = (along V (fun y => v y j) x).re :=
-    LinearWaveResidual.along_map Complex.reCLM V (hv j)
-  have hc (V : D → D) (j : Fin 3) :
-      along V (fun y => (starRingEnd ℂ) (v y j)) x = (starRingEnd ℂ) (along V (fun y => v y j) x) :=
-    LinearWaveResidual.along_map (Complex.conjCLE : ℂ →L[ℝ] ℂ) V (hv j)
-  fin_cases i <;>
-    simp [LinearWaveResidual.transport, LinearWaveResidual.realTransport,
-      angularGenerator, LinearWaveResidual.realAngularGenerator, hd, hc,
-      div_eq_mul_inv, ← Complex.ofReal_inv, Complex.mul_re, Complex.mul_im] <;> ring
 
-theorem conjugate_angularIndependent {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
-    (G : Geometry s κ) {a : Family D} (ha : WaveVector s P α a)
-    (haθ : AngularIndependent G a) : AngularIndependent G (conjugateFamily a) := by
-  intro n i x hx
-  have hd := (((ha i).smooth n).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp)
-  change along (G.angular n) (fun y => (Complex.conjCLE : ℂ →L[ℝ] ℂ) (a n y i)) x = 0
-  rw [LinearWaveResidual.along_map _ _ hd, haθ n i x hx, map_zero]
 
 
 
@@ -690,25 +586,6 @@ theorem product_curl_zero {U : Set D} (hU : IsOpen U)
             ring
       _ = 0 := by rw [hD Vr 1, hab i 1 x hx, hD Vθ 0]; ring
 
-theorem curl_cross_products {U : Set D} {R : D → ℝ} {Vr Vθ Vz : D → D}
-    (G : CurlClassBounds.CylindricalGeometry U R Vr Vθ Vz) {a b : D → ComplexVector}
-    (ha : ContDiffOn ℝ ∞ a U) (hb : ContDiffOn ℝ ∞ b U)
-    (hab : ∀ i j y, y ∈ U → a y i * b y j = 0)
-    {x : D} (hx : x ∈ U) (i j : Fin 3) :
-    CurlClassBounds.cylindricalCurl R Vr Vθ Vz a x i *
-      CurlClassBounds.cylindricalCurl R Vr Vθ Vz b x j = 0 := by
-  have hcb := CurlClassBounds.cylindricalCurl_contDiffOn G.isOpen
-    (G.radius_smooth.inv G.radius_ne) G.radial_smooth G.angular_smooth G.axial_smooth hb
-  have hac (k : Fin 3) : ContinuousOn (fun y => a y k) U := (contDiffOn_pi.mp ha k).continuousOn
-  have hcbc (k : Fin 3) : ContinuousOn
-      (fun y => CurlClassBounds.cylindricalCurl R Vr Vθ Vz b y k) U :=
-    (contDiffOn_pi.mp hcb k).continuousOn
-  have hba : ∀ k l y, y ∈ U → CurlClassBounds.cylindricalCurl R Vr Vθ Vz b y k * a y l = 0 := by
-    intro k l y hy
-    rw [mul_comm]
-    exact product_curl_zero G.isOpen R Vr Vθ Vz hac hab hy l k
-  rw [mul_comm]
-  exact product_curl_zero G.isOpen R Vr Vθ Vz hcbc hba hx j i
 
 
 

@@ -50,21 +50,12 @@ theorem ideal_transport_eq (h η : ℝ) :
   unfold idealTransport axialExponent axialShape idealAxialVelocity coordinateFactor
   ring
 
-theorem ideal_source_displayed (h η : ℝ) :
-    idealSource h η =
-      (3 / 5) * (4 * coordinateFactor h η - 1) - h * (1 - 8 * η ^ 2) +
-        (axialExponent h + 4 * axialShape η) * η * (2 * η / (1 + η ^ 2)) := by
-  unfold idealSource logShapeDerivative idealAxialVelocity
-  rw [ideal_transport_eq]
-  ring
 
 
 
 
 def radiusProfile (X₀ y : ℝ) : ℝ := X₀ * Real.exp y
 
-def angularVelocityProfile (e₀ lam y : ℝ) : ℝ :=
-  e₀ * Real.exp (-(1 / 2 + lam) * y)
 
 
 
@@ -99,9 +90,6 @@ theorem pulse_energy_debt_bounds :
 
 
 
-/-- Constant-source lag solution, written in a form that also specifies its initial value. -/
-def lagSolution (a c q₀ y : ℝ) : ℝ :=
-  c / a + (q₀ - c / a) * Real.exp (-a * y)
 
 
 

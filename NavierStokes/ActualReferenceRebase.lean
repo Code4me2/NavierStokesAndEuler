@@ -199,15 +199,7 @@ noncomputable def pullDirections (e : D ≃L[ℝ] E) (d : LinearWaveBounds.Graph
   fastScale := d.fastScale
   radialProfile x := d.radialProfile (e x)
 
-theorem pullDirections_radial (e : D ≃L[ℝ] E) (d : LinearWaveBounds.GraphDirections E)
-    (n : ℕ) (x : D) : (pullDirections e d).radialField n x =
-      e.symm (d.radialField n (e x)) := by
-  simp only [LinearWaveBounds.GraphDirections.radialField, pullDirections, map_add, map_smul]
 
-theorem pullDirections_axial (e : D ≃L[ℝ] E) (d : LinearWaveBounds.GraphDirections E)
-    (s : StripData E) (n : ℕ) (x : D) :
-    (pullDirections e d).axialField (pullStrip e s) n x = e.symm (d.axialField s n (e x)) := by
-  simp only [LinearWaveBounds.GraphDirections.axialField, pullDirections, pullStrip, map_smul]
 
 end Pullback
 
@@ -257,9 +249,6 @@ theorem rebaseAssembly_source (D : ParticularWaveAssembly.AssemblyData P) (k : �
     (pull_residualSource (inverseCover (P := P) k) D.context D.state D.carrierBlock
       D.gaussianInput D.aliasInput j n x)
 
-theorem rebaseAssembly_referenceIdentity
-    (D : ParticularWaveAssembly.AssemblyData PhysicalParticularWave.Parameter) (k : ℕ) :
-    PhysicalParticularWave.ReferenceIdentity (rebaseAssembly D k) := ⟨rfl, rfl, rfl⟩
 
 /-! ## Binding to the one actual initializer choice and current cycle state -/
 
@@ -524,37 +513,6 @@ theorem state_sourceWeight (n m : ℕ) :
     GaugeStateCoherence.bandScale_eq_ratioPower, velocityWeight] using
       PhysicalResidualNaturality.weight_source (ChartScales.Q_pos n) (ChartScales.Q_pos m) h
 
-/-- This consumes exactly the full-fiber state and block conclusions of the
-physical recurrence.  It does not assume source or solved-wave coherence. -/
-theorem source_forward
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) {V : Set Plane} (hV : IsOpen V)
-    (htime : ∀ s ∈ V, 0 < s.1) (n k : ℕ)
-    (hi : CommonWindow.index h n + k = CommonWindow.index h (BaseChartJets.cellBand l.2))
-    (HS : PhysicalResidualNaturality.StateOn (PhysicalMeanDomain.slowDomain V)
-      (GaugeStateCoherence.bandChartEquiv h n (BaseChartJets.cellBand l.2) k)
-      (GaugeStateCoherence.bandVelocityScale h n (BaseChartJets.cellBand l.2))
-      (GaugeStateCoherence.bandScale n (BaseChartJets.cellBand l.2))
-      x.state x.state n (BaseChartJets.cellBand l.2))
-    (HB : PhysicalResidualNaturality.BlockFieldsOn (PhysicalMeanDomain.slowDomain V)
-      (GaugeStateCoherence.bandChartEquiv h n (BaseChartJets.cellBand l.2) k)
-      (GaugeStateCoherence.bandVelocityScale h n (BaseChartJets.cellBand l.2))
-      (GaugeStateCoherence.bandScale n (BaseChartJets.cellBand l.2))
-      (x.coefficients.blocks l) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) n (BaseChartJets.cellBand l.2))
-    (j : ℤ) (z : PhysicalResidualNaturality.Associated) (hz : z.1.2 ∈ V) :
-    ParticularWaveAssembly.residualSource (ActualParticularStageControls.assembly x l).context
-      (ActualParticularStageControls.assembly x l).state (ActualParticularStageControls.assembly x l).carrierBlock
-      (ActualParticularStageControls.assembly x l).gaussianInput (ActualParticularStageControls.assembly x l).aliasInput
-      j n z = PhysicalParticularWave.transportedResidualSource (nativeAssembly x l) h (ChartScales.Q n)
-        (ChartScales.Q (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n) j z := by
-  have he := HS.source (ActualInitialCoherence.context_band B htime n (BaseChartJets.cellBand l.2) k hi)
-    (PhysicalMeanDomain.slowDomain_open hV) (GaugeStateCoherence.bandScale_pos n (BaseChartJets.cellBand l.2)).ne'
-      HB j (x := CorrectionStep.cycleAssoc.symm z) hz
-  rw [state_sourceWeight] at he
-  rw [assembly_source, transportedSource_eq_commonReference, commonReferenceChart_forward l n k hi]
-  exact he
 
 /-! The reference operator identities hold on the entire free lift. -/
 
@@ -597,26 +555,6 @@ theorem parameterChange_inverse (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Q
     (p : Parameter) : parameterChange h Qr Q (parameterChange h Q Qr p) = p := by
   ext <;> simp only [parameterChange, ← mul_assoc, ratioPower_reverse_mul hQr hQ, one_mul]
 
-theorem commonReferenceChart_backward (l : ActualParticularStageControls.Label B N0)
-    (n k : ℕ) (hi : CommonWindow.index h (BaseChartJets.cellBand l.2) + k = CommonWindow.index h n)
-    (hn : CommonWindow.index h n ≤ ChartScales.nativeIndex h (BaseChartJets.cellBand l.2))
-    (z : PhysicalResidualNaturality.Associated) :
-    GaugeStateCoherence.bandChartEquiv h (BaseChartJets.cellBand l.2) n k
-      (CorrectionStep.cycleAssoc.symm (commonReferenceChart l n z)) = CorrectionStep.cycleAssoc.symm z := by
-  have hg : ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2) =
-      ActualParticularStageControls.gap l n + k := by
-    unfold ActualParticularStageControls.gap
-    omega
-  rw [← associatedChart_stateChart]
-  apply congrArg CorrectionStep.cycleAssoc.symm
-  rw [PhysicalResidualNaturality.associatedChart_apply, commonReferenceChart_apply,
-    parameterChange_inverse h (ChartScales.Q_pos n) (ChartScales.Q_pos (BaseChartJets.cellBand l.2))]
-  apply Prod.ext
-  · rfl
-  · change coverPower k ((coverPower (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2))).symm
-      (coverPower (ActualParticularStageControls.gap l n) z.2)) = z.2
-    apply (coverPower (ActualParticularStageControls.gap l n)).injective
-    rw [← CopySolveCompatibility.coverPower_add, ← hg, ContinuousLinearEquiv.apply_symm_apply]
 
 abbrev StateComparison (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
     (V : Set Plane) (n m k : ℕ) : Prop :=
@@ -652,18 +590,6 @@ theorem residualBandAmplitude_rebase_at (D : ParticularWaveAssembly.AssemblyData
   apply commonVelocity_source_congr
   exact hf
 
-theorem residualBandPressure_rebase_at (D : ParticularWaveAssembly.AssemblyData Parameter)
-    (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (kr gap : ℕ)
-    (K : ℝ) (j : ℤ) (n : ℕ) (p : Parameter)
-    (hf : ∀ Y, ParticularWaveAssembly.residualSource D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j n (p,Y) =
-        PhysicalParticularWave.transportedResidualSource (rebaseAssembly D kr) h Q Qr gap j (p,Y))
-    (Y : Plane) :
-    PhysicalParticularWave.residualBandPressure D h hQ hQr gap K j n (p,Y) =
-      PhysicalParticularWave.bandPressure (rebaseAssembly D kr) h hQ hQr gap K j (p,Y) := by
-  unfold PhysicalParticularWave.residualBandPressure PhysicalParticularWave.bandPressure
-  apply commonPressure_source_congr
-  exact hf
 
 /-- The literal current-source common coefficient in the actual stage. -/
 noncomputable def actualCoefficients
@@ -675,25 +601,6 @@ noncomputable def actualCoefficients
     (ActualParticularStageControls.assembly x l).gaussianInput
     (ActualParticularStageControls.assembly x l).aliasInput j).common
 
-theorem actualAmplitude_rebase_at
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) (j : ℤ) (n : ℕ) (p : Parameter)
-    (hf : ∀ Y, ParticularWaveAssembly.residualSource (ActualParticularStageControls.assembly x l).context
-      (ActualParticularStageControls.assembly x l).state (ActualParticularStageControls.assembly x l).carrierBlock
-      (ActualParticularStageControls.assembly x l).gaussianInput (ActualParticularStageControls.assembly x l).aliasInput
-      j n (p,Y) = PhysicalParticularWave.transportedResidualSource (nativeAssembly x l) h (ChartScales.Q n)
-        (ChartScales.Q (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n) j (p,Y))
-    (theta : ℝ) (Y : Plane) :
-    (actualCoefficients x l j).amplitude n ((p,theta),Y) =
-      PhysicalParticularWave.bandAmplitude (nativeAssembly x l) h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n)
-        ((j : ℝ) * (x.coefficients.blocks l).frequency n) j (p,Y) := by
-  have he := congrFun (CorrectionStep.ParticularParameters.fromReference_amplitude
-    (ActualParticularStageControls.assembly x l) h (ActualParticularStageControls.gap l) j n) ((p,theta),Y)
-  exact he.trans (residualBandAmplitude_rebase_at (ActualParticularStageControls.assembly x l) h
-    (ChartScales.Q_pos n) (ChartScales.Q_pos (BaseChartJets.cellBand l.2))
-    (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n)
-    ((j : ℝ) * (x.coefficients.blocks l).frequency n) j n p hf Y)
 
 
 
@@ -713,33 +620,6 @@ theorem carrier_phase_rebase {K Kr J a theta phi psi : ℝ}
     _ = (Kr/K)*psi + ((Kr/K)*(a/Kr))*theta := by ring
     _ = phi + (a/K)*theta := by rw [he]; congr 2 ; field_simp
 
-theorem actualPhase_rebase_at
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) (j : ℤ) (hj : j ≠ 0) (n : ℕ)
-    (hn : (x.coefficients.blocks l).frequency n ≠ 0)
-    (hm : (x.coefficients.blocks l).frequency (BaseChartJets.cellBand l.2) ≠ 0)
-    (p : Parameter) (Y : Plane)
-    (hp : (x.coefficients.blocks l).frequency n *
-        (x.coefficients.blocks l).phase n (CorrectionStep.cycleAssoc.symm (p,Y)) =
-      (x.coefficients.blocks l).frequency (BaseChartJets.cellBand l.2) *
-        (x.coefficients.blocks l).phase (BaseChartJets.cellBand l.2)
-          (CorrectionStep.cycleAssoc.symm (commonReferenceChart l n (p,Y))))
-    (ha : (x.coefficients.blocks l).angularFrequency n =
-      (x.coefficients.blocks l).angularFrequency (BaseChartJets.cellBand l.2)) (theta : ℝ) :
-    PhysicalParticularWave.bandPhase (nativeAssembly x l) h (ChartScales.Q n)
-      (ChartScales.Q (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n)
-      ((j : ℝ) * (x.coefficients.blocks l).frequency n) j (waveEquiv.symm ((p,theta),Y)) =
-        (actualCoefficients x l j).phase n ((p,theta),Y) := by
-  change ((j : ℝ) * (x.coefficients.blocks l).frequency (BaseChartJets.cellBand l.2)) /
-      ((j : ℝ) * (x.coefficients.blocks l).frequency n) *
-    ((x.coefficients.blocks l).phase (BaseChartJets.cellBand l.2)
-        (CorrectionStep.cycleAssoc.symm (commonReferenceChart l n (p,Y))) +
-      ((x.coefficients.blocks l).angularFrequency (BaseChartJets.cellBand l.2) : ℝ) /
-        (x.coefficients.blocks l).frequency (BaseChartJets.cellBand l.2) * theta) =
-    (x.coefficients.blocks l).phase n (CorrectionStep.cycleAssoc.symm (p,Y)) +
-      ((x.coefficients.blocks l).angularFrequency n : ℝ) / (x.coefficients.blocks l).frequency n * theta
-  rw [ha]
-  exact carrier_phase_rebase hn hm (by exact_mod_cast hj) hp
 
 
 

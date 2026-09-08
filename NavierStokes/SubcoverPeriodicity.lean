@@ -187,32 +187,13 @@ theorem inverseCoverSource_shift {P V : Type} (d : ℕ) (f : P × Plane → V)
   rw [← coverPower_lattice, map_add, ContinuousLinearEquiv.symm_apply_apply]
   exact hf _
 
-theorem inverseCoverSource_subcoverPeriodic {P V : Type} (d : ℕ) (f : P × Plane → V)
-    (p : P) (hf : PeriodicAt f p) : SubcoverPeriodicAt d (inverseCoverSource d f) p :=
-  fun Y k => inverseCoverSource_shift d f p k (fun Z => hf Z k) Y
 
 
 section SubcoverFields
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-theorem commonVelocity_subcover_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (d : ℕ) (k : Frequency) (p : P)
-    (hf : ∀ Y : Plane,
-      f (p, Y + TorusAverages.latticePoint (coverIndex d k)) = f (p,Y)) (Y : Plane) :
-    commonVelocity t f g hab κ (p, Y + TorusAverages.latticePoint (coverIndex d k)) =
-      commonVelocity t f g hab κ (p,Y) :=
-  commonVelocity_shift t f g hab κ (coverIndex d k) p hf Y
 
-theorem commonPressure_subcover_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (frequency : ℝ) (d : ℕ) (k : Frequency) (p : P)
-    (hf : ∀ Y : Plane,
-      f (p, Y + TorusAverages.latticePoint (coverIndex d k)) = f (p,Y)) (Y : Plane) :
-    commonPressure t f g hab κ frequency (p, Y + TorusAverages.latticePoint (coverIndex d k)) =
-      commonPressure t f g hab κ frequency (p,Y) :=
-  commonPressure_shift t f g hab κ frequency (coverIndex d k) p hf Y
 
 
 

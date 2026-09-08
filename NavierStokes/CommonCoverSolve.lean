@@ -557,16 +557,6 @@ theorem commonSolve_eventually_eq_sum {κ : Plane → ℝ} (hκ : HasCompactSupp
   unfold localizedCopy
   rw [hs q.2 hq.le k hk, zero_smul]
 
-theorem commonSolve_contDiffOn_of_copies {U : Set P} (hU : IsOpen U)
-    {κ : Plane → ℝ} (hκ : HasCompactSupport κ)
-    (hc : ∀ k : Frequency, ContDiffOn ℝ ∞ (d.localizedCopy g hab κ k) (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (d.commonSolve g hab κ) (U ×ˢ univ) := by
-  apply (hU.prod isOpen_univ).contDiffOn_iff.mpr
-  intro p hp
-  obtain ⟨s, hs⟩ := d.commonSolve_eventually_eq_sum g hab hκ p
-  have hsum : ContDiffAt ℝ ∞ (fun q => ∑ k ∈ s, d.localizedCopy g hab κ k q) p :=
-    ContDiffAt.sum (fun k _ => (hc k).contDiffAt ((hU.prod isOpen_univ).mem_nhds hp))
-  exact hsum.congr_of_eventuallyEq hs
 
 end LinearData
 
@@ -609,11 +599,6 @@ variable {P V E : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
   {a b : ℝ} (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
 
-/-- The constructed common-torus solution is obtained by a genuine quotient
-lift of the reindexed copy sum. -/
-noncomputable def commonOnTorus (κ : Plane → ℝ) (p : P) (hp : PeriodicAt d.source p) :
-    Torus → E := torusDescent (fun Y => d.commonSolve g hab κ (p, Y))
-      (d.commonSolve_periodic g hab κ p hp)
 
 
 /-! Joint regularity is derived from the actual ODE construction. -/
@@ -645,29 +630,6 @@ theorem copySolve_contDiffAt {U : Set P} (hU : IsOpen U) (k : Frequency)
   have hcomp := hs.comp p hc.contDiffAt
   exact hcomp
 
-/-- The localization cutoff is supported strictly inside the slot interval.
-The clamped extension outside the interval is never claimed to be smooth. -/
-theorem localizedCopy_contDiffOn {U : Set P} (hU : IsOpen U) (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ))
-    {κ : Plane → ℝ} (hκ : ContDiff ℝ ∞ κ)
-    (hsupp : tsupport κ ⊆ univ ×ˢ Ioo a b) :
-    ContDiffOn ℝ ∞ (d.localizedCopy g hab κ k) (U ×ˢ univ) := by
-  apply (hU.prod isOpen_univ).contDiffOn_iff.mpr
-  intro p hp
-  have hc : ContDiff ℝ ∞ (fun q : P × Plane => g.coordinates k q.2) :=
-    (g.coordinates_contDiff k).comp contDiff_snd
-  by_cases hmem : g.coordinates k p.2 ∈ tsupport κ
-  · exact ((hκ.comp hc).contDiffAt).smul
-      (d.copySolve_contDiffAt g hab hU k hA hB hf hp.1 (hsupp hmem).2)
-  · have hz : κ =ᶠ[𝓝 (g.coordinates k p.2)] (fun _ => 0) :=
-      notMem_tsupport_iff_eventuallyEq.mp hmem
-    have hzero : d.localizedCopy g hab κ k =ᶠ[𝓝 p] (fun _ => (0 : E)) := by
-      filter_upwards [hz.comp_tendsto hc.continuous.continuousAt] with q hq
-      change κ (g.coordinates k q.2) = 0 at hq
-      simp only [localizedCopy, hq, zero_smul]
-    exact contDiffAt_const.congr_of_eventuallyEq hzero
 
 
 
@@ -715,8 +677,6 @@ noncomputable def pointLinear : Plane →L[ℝ] Plane :=
 
 noncomputable def horizontal : Plane →L[ℝ] Plane := (ContinuousLinearMap.fst ℝ ℝ ℝ).prod 0
 
-noncomputable def pathLinear : Plane →L[ℝ] Plane :=
-  g.pointLinear.comp (horizontal.comp g.coordinateLinear)
 
 theorem coordinates_eq_affine (k : Frequency) (Y : Plane) :
     g.coordinates k Y = g.coordinates k 0 + g.coordinateLinear Y := by
@@ -736,16 +696,7 @@ theorem norm_pointLinear_le {D : ℕ} (hd : g.gap ≤ D) :
   (ContinuousLinearMap.opNorm_comp_le _ _).trans
     (mul_le_mul_of_nonneg_right (inverseCoveringNorm_le_bound hd) (norm_nonneg _))
 
-theorem norm_horizontal_le : ‖horizontal‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro Y
-  change max ‖Y.1‖ ‖(0 : ℝ)‖ ≤ 1 * ‖Y‖
-  rw [norm_zero, max_eq_left (norm_nonneg _), one_mul]
-  exact norm_fst_le Y
 
-noncomputable def pathBound (D : ℕ) : ℝ :=
-  (coveringBound D * ‖(g.basis : Plane →L[ℝ] Plane)‖) *
-    (‖(g.basis.symm : Plane →L[ℝ] Plane)‖ * coveringBound D)
 
 
 
@@ -809,23 +760,6 @@ noncomputable def linearData : LinearData P H H where
   forcingMap z := negativeTangentProjection (t.normal z)
   source := t.source
 
-/-- The concrete copy solve satisfies equation (27) with the source evaluated
-at the actual lifted earlier point, including the normal-motion term. -/
-theorem anchoredSolve_projected_equation {U : Set P} (k : Frequency)
-    (hA : ContinuousOn t.linearData.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn t.linearData.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn t.source (U ×ˢ univ)) {p : P} (hp : p ∈ U)
-    (Y : Plane) (s : Icc a b) :
-    let z := (p, ((g.coordinates k Y).1, (s : ℝ)))
-    HasDerivAt (t.linearData.anchoredSolve g hab k (p, Y))
-      (TangentProjection.projectedRhs (t.normal z) (t.normalDot z)
-        (t.linearData.anchoredSolve g hab k (p, Y) s)
-        (t.action z (t.linearData.anchoredSolve g hab k (p, Y) s))
-        (t.source (p, g.path k Y s)) (t.damping z)) s := by
-  have hd := t.linearData.anchoredSolve_hasDerivAt g hab k hA hB hf hp Y s
-  simpa only [LinearData.coefficientAlong, LinearData.forcingAlong, linearData,
-    negativeTangentProjection_apply, ← sub_eq_add_neg, TangentODE.projectedOperator_apply]
-    using hd
 
 
 end TangentData

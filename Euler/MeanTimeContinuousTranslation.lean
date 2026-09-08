@@ -53,25 +53,6 @@ theorem reconstruction_translation_contDiff (T : ℝ) (hT : 0 ≤ T)
     (reconstruction_contDiff T hT (fun a : Space => timeTranslation T a p)
       (fun a : Space => timeTranslation T a q) hp hq)
 
-/-- The true uniform-time norm of every spatial orbit derivative has only the
-proved H¹ trace cost. -/
-theorem reconstruction_translation_gevrey (T : ℝ) (hT : 0 < T)
-    (p q : TimeLp T L2)
-    (hp : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a p))
-    (hq : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a q))
-    (R C D : ℝ) (hR : 0 ≤ R) (hC : 0 ≤ C) (hD : 0 ≤ D) (d : ℕ)
-    (hbp : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b p) a‖ ≤ C*majorant R d n)
-    (hbq : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b q) a‖ ≤ D*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space =>
-      pathTranslation T b (reconstruction T hT.le (p,q))) a‖ ≤
-        ((T⁻¹*Real.sqrt T)*C+(2*Real.sqrt T)*D)*majorant R d n := by
-  have heq : (fun b : Space => pathTranslation T b (reconstruction T hT.le (p,q))) =
-      fun b : Space => reconstruction T hT.le (timeTranslation T b p, timeTranslation T b q) :=
-    funext (fun b => pathTranslation_reconstruction T hT.le b p q)
-  exact (congrArg (fun g : Space → C(Icc (0 : ℝ) T, L2) => ‖iteratedFDeriv ℝ n g a‖) heq).trans_le
-    (reconstruction_gevrey T hT (fun b : Space => timeTranslation T b p)
-      (fun b : Space => timeTranslation T b q) hp hq R C D hR hC hD d hbp hbq n a)
 
 /-- Time evaluation is a norm contraction on continuous ordinary-L² paths. -/
 theorem evaluation_norm_le (T : ℝ) (t : Icc (0 : ℝ) T) :

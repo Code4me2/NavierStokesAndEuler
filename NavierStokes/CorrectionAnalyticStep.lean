@@ -628,13 +628,6 @@ theorem step (D : StaticData G h index axial r c κ)
     W.particularPressure W.signedPressure
   exact ⟨hFull, hT, hRank, hPressure, hInc.1, hInc.2, hSθ, hSz⟩
 
-/-- Projection of the complete step estimate to the stored invariant. -/
-theorem step_preserves (D : StaticData G h index axial r c κ)
-    (H : CycleAnalyticInvariant G c primary P S σ x)
-    (hσ : 1/5 ≤ σ) (hκsmall : κ ≤ 1/100000)
-    (d : StepData G h index axial particular signed r c x primary P S D H hσ) :
-    CycleAnalyticInvariant G c primary P S (σ+1/10) (CycleState.step p c x) :=
-  (step G h index axial particular signed r c x primary P S D H hσ hκsmall d).invariant
 
 end Preservation
 

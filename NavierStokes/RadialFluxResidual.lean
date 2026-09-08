@@ -180,17 +180,6 @@ theorem divergence_velocity_at {B F U : Profile} {t : ℝ} {x : Space}
     coordinateVector, profilePoint, radialEnergy, lift]
   ring
 
-/-- Actual Cartesian divergence, needing regularity only at the evaluated
-profile point. No smooth extension of the quotient across the axis is assumed. -/
-theorem divergence_radialB {V F U : Profile} {t : ℝ} {x : Space}
-    (hV : DifferentiableAt ℝ V (profilePoint t x))
-    (hF : DifferentiableAt ℝ F (profilePoint t x))
-    (hU : DifferentiableAt ℝ U (profilePoint t x)) (hs : 0 < radialEnergy x) :
-    spatialDivergence (AxisymmetricResidual.velocity (radialB V) F U) t x =
-      partialS V (profilePoint t x) + partialZ U (profilePoint t x) := by
-  have hne : (profilePoint t x).2.1 ≠ 0 := ne_of_gt hs
-  rw [divergence_velocity_at (differentiableAt_radialB hV hne) hF hU]
-  exact divergence_coefficient U hV hne
 
 
 noncomputable def fluxResidual (V F U P : Profile) (p : ProfilePoint) : ℝ :=

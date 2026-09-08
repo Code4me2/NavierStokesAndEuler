@@ -24,27 +24,6 @@ section LocalGerms
 variable {D E I : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- Enlarging the set of estimated points through zero neighborhoods
-preserves the actual native derivative constants. -/
-theorem localJets_extend_by_zero {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
-    {C K : ℕ → I → Set D} {f : ℕ → I → D → E}
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x) (hf : LocalJets s w α C f)
-    (hz : ∀ n i x, x ∈ s.domain → x ∈ K n i → x ∉ C n i →
-      f n i =ᶠ[𝓝 x] fun _ => 0) : LocalJets s w α K f := by
-  constructor
-  · intro n i x hx hi
-    by_cases hc : x ∈ C n i
-    · exact hf.smooth n i x hx hc
-    · exact contDiffAt_const.congr_of_eventuallyEq (hz n i x hx hi hc)
-  · intro m
-    obtain ⟨A, hA, p, hb⟩ := hf.bounds m
-    refine ⟨A, hA, p, ?_⟩
-    intro n i x hx hi j hj
-    by_cases hc : x ∈ C n i
-    · exact hb n i x hx hc j hj
-    · rw [jets_eq_of_germ (hz n i x hx hi hc) j]
-      simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply, norm_zero] using
-        majorant_nonneg s w α hA p n x (hw n x hx)
 
 end LocalGerms
 

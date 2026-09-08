@@ -401,37 +401,6 @@ theorem block_velocity_physical
     (fun j hj => mul_ne_zero (by exact_mod_cast (C j hj).harmonic_ne) ((C j hj).frequency_ne n))
     hU R hz hdelta chart hchart k
 
-include H hn hr C in
-theorem block_pressure_physical
-    {U : Set Parameter} (R : ∀ j ∈ modes N, ReferenceODE D j U)
-    {z : SpaceTime} (hz : 0 < z.2 0)
-    (hp : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (nativeMap h (ChartScales.Q n) i z).1.1 ∈ U)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    (block D s h gap N).oscillatoryPressure n
-      (associatedCylinder ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).map z)) =
-        (ChartScales.Q n) ^ (2 * CoordinateAlgebra.A h) *
-          labelPressure D h (ChartScales.Q D.reference.band) (i + gap n) delta N
-            (z.1, CylindricalResidual.chart z.2) := by
-  by_cases hN : N = 0
-  · subst N
-    simp [block, CorrectionStep.ParticularParameters.updateBlock, assembledBlock_pressure_value,
-      modes, labelPressure]
-  have hm : ∃ j, j ∈ modes N := by
-    refine ⟨1, ?_⟩
-    simp only [modes, Finset.mem_erase, ne_eq, one_ne_zero, not_false_eq_true,
-      Finset.mem_Icc, true_and]
-    constructor <;> omega
-  obtain ⟨j, hj⟩ := hm
-  rw [block_pressure_eq_band D s h gap n i H hn hr
-    (fun j hj => (C j hj).harmonic_ne) (C j hj).frequency_ne
-    (mul_pos (Real.rpow_pos_of_pos (ChartScales.Q_pos n) _) hz)]
-  exact label_physical_pressure D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-    i (gap n) (fun j => (j : ℝ) * D.carrierBlock.frequency n)
-    (fun j hj => mul_ne_zero (by exact_mod_cast (C j hj).harmonic_ne) ((C j hj).frequency_ne n))
-    (fun j hj => mul_ne_zero (by exact_mod_cast (C j hj).harmonic_ne) ((C j hj).frequency_ne D.reference.band))
-    R hz hp hdelta chart hchart
 
 end Physical
 
@@ -448,12 +417,6 @@ theorem cycleBlock_velocity (D : AssemblyData Parameter) (s : WeightedClasses.St
   rw [cycleBlock, StateReindex.block_oscillation]
   rfl
 
-theorem cycleBlock_pressure (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
-    (h : ℝ) (gap : ℕ → ℕ) (N n : ℕ) (x : Cylinder) :
-    (cycleBlock D s h gap N).oscillatoryPressure n (PhysicalResidualTZ.swapCylinder x) =
-      (block D s h gap N).oscillatoryPressure n (associatedCylinder x) := by
-  rw [cycleBlock, StateReindex.block_pressure]
-  rfl
 
 section CyclePhysical
 
@@ -473,29 +436,6 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
   {U : Set Parameter} (hU : IsOpen U) (R : ∀ j ∈ modes N, ReferenceODE D j U)
   {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
 
-include H hn hr T C hstrip hcover Href hU R hdelta in
-/-- The exact cycle block is the cylindrical view of one fixed reference
-curl. The covering index enters only through `i + gap n = I`. -/
-theorem cycle_velocity_cylindrical {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).source
-      (bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U))
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    velocityMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-      ((cycleBlock D s h gap N).oscillation n) z =
-        CylindricalResidual.frame (-(z.2 1))
-          (labelVelocity D h (ChartScales.Q D.reference.band) I delta N
-            (z.1, CylindricalResidual.chart z.2)) := by
-  have Href' : ReferenceChart D h (ChartScales.Q D.reference.band) (i + gap n) := hcover.symm ▸ Href
-  ext k
-  change (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).velocity
-    (fun x => (cycleBlock D s h gap N).oscillation n (PhysicalResidualTZ.swapCylinder x)) z k = _
-  rw [PhysicalResidualBridge.ScaledGraph.velocity_apply, cycleBlock_velocity,
-    block_velocity_physical D s h gap n i H hn hr T C hstrip Href' hU R hz hdelta chart hchart k,
-    hcover]
-  change (ChartScales.Q n) ^ (-CoordinateAlgebra.A h) *
-    ((ChartScales.Q n) ^ CoordinateAlgebra.A h * _) = _
-  rw [← mul_assoc, ← Real.rpow_add (ChartScales.Q_pos n)]
-  simp
 
 
 
@@ -685,31 +625,6 @@ noncomputable def referenceLiftVelocity (D : AssemblyData Parameter) (h Qr : ℝ
       (PhysicalResidualBridge.commonGraph Qr h I).radial PhysicalResidualBridge.ScaledGraph.angular
       (PhysicalResidualBridge.commonGraph Qr h I).axial (liftPhase D j) (liftRaw D j))
 
-include H in
-theorem referenceLiftVelocity_eq_wave :
-    referenceLiftVelocity D h Qr I j = fun x =>
-      vectorMode ((D.wave j).frequency D.reference.band) ((D.wave j).phase D.reference.band)
-        ((D.wave j).amplitude D.reference.band) (waveEquiv x) := by
-  have he := realizedCoefficient_pull waveEquiv (referenceFrequency D j)
-    (D.background.radius D.reference.band) ((rawCommon D j).phase D.reference.band)
-    (D.directions.radialField D.reference.band) (fun _ => D.directions.angular)
-    (D.directions.axialField D.strip D.reference.band) ((rawCommon D j).amplitude D.reference.band)
-  have hR : (fun x => D.background.radius D.reference.band (waveEquiv x)) =
-      PhysicalResidualBridge.ScaledGraph.radius := H.radius
-  have hr : StateReindex.vector waveEquiv (D.directions.radialField D.reference.band) =
-      (PhysicalResidualBridge.commonGraph Qr h I).radial := H.radial
-  have ht : StateReindex.vector waveEquiv (fun _ => D.directions.angular) =
-      PhysicalResidualBridge.ScaledGraph.angular := H.angular
-  have hz : StateReindex.vector waveEquiv (D.directions.axialField D.strip D.reference.band) =
-      (PhysicalResidualBridge.commonGraph Qr h I).axial := H.axial
-  rw [hR, hr, ht, hz] at he
-  funext x
-  have ha : liftRaw D j = fun y => (rawCommon D j).amplitude D.reference.band (waveEquiv y) := by
-    unfold liftRaw
-    rw [referenceRaw_eq_common D H.identity]
-  simp only [referenceLiftVelocity, ha]
-  rw [show liftPhase D j = (fun y => (rawCommon D j).phase D.reference.band (waveEquiv y)) from rfl, he]
-  rfl
 
 end LiftedReference
 
@@ -723,32 +638,6 @@ variable (D : AssemblyData Parameter) {h Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
     D.gaussianInput D.aliasInput j D.background D.copy D.strip D.directions α κ)
   {K : ℝ} (hK : K ≠ 0) {U : Set Parameter} (hU : IsOpen U) (R : ReferenceODE D j U)
 
-include H C hK hU R in
-/-- Exact covariance of the actual curl-corrected transported solve on
-the full positive lift. This is stronger than equality on a graph. -/
-theorem bandVelocity_eq_reference {x : Cylinder} (hx : x ∈ bandDomain D h Q Qr gap U) :
-    bandVelocity D h hQ hQr i gap K j x =
-      velocityWeight h Q Qr • referenceLiftVelocity D h Qr (i + gap) j (cylinderChange h Q Qr gap x) := by
-  have hKr : referenceFrequency D j ≠ 0 := C.frequency_nonzero D.reference.band
-  have hraw : bandRaw D h hQ hQr gap K j =ᶠ[𝓝 x]
-      (fun y => velocityWeight h Q Qr • liftRaw D j (cylinderChange h Q Qr gap y)) := by
-    filter_upwards [(bandDomain_open D h Q Qr gap hU).mem_nhds hx] with y hy
-    exact bandRaw_eq_lift D h hQ hQr gap hK j hKr R y hy.2.2
-  have ha := (ParticularWaveAssembly.realizedCoefficient_germ hraw K
-    PhysicalResidualBridge.ScaledGraph.radius (PhysicalResidualBridge.commonGraph Q h i).radial
-    PhysicalResidualBridge.ScaledGraph.angular (PhysicalResidualBridge.commonGraph Q h i).axial
-    (bandPhase D h Q Qr gap K j)).eq_of_nhds
-  have he := correctedMode_scaled
-    (SpatialScaling.commonChart hQ hQr h i gap (bandDomain_open D h Q Qr gap hU) (fun _ hy => hy.1))
-    (velocityWeight h Q Qr) hK (div_ne_zero hKr hK)
-    (show K * (referenceFrequency D j / K) = referenceFrequency D j by field_simp)
-    (fun y hy => ((liftPhase_smooth D C).contDiffAt ((referenceDomain_open D).mem_nhds hy.2.1)).differentiableAt (by simp))
-    hx (fun k => ((contDiffOn_pi.mp (liftCoefficient_smooth D H C) k).contDiffAt
-      ((referenceDomain_open D).mem_nhds hx.2.1)).differentiableAt (by simp))
-  change vectorMode K (bandPhase D h Q Qr gap K j) _ x = _
-  have hv := congrArg (fun v : ComplexVector =>
-    fun k => v k * carrier K (bandPhase D h Q Qr gap K j) x) ha
-  exact hv.trans he
 
 end FullBand
 
@@ -756,35 +645,7 @@ noncomputable def referenceLiftPressure (D : AssemblyData Parameter) (j : ℤ) :
   mode (PhysicalParticularWave.referenceFrequency D j) (PhysicalParticularWave.liftPhase D j)
     (fun x => PhysicalParticularWave.referenceRawPressure D j (PhysicalParticularWave.waveEquiv x))
 
-theorem bandPressureMode_eq_reference (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) {K : ℝ} (hK : K ≠ 0) (j : ℤ)
-    (hKr : PhysicalParticularWave.referenceFrequency D j ≠ 0)
-    {U : Set Parameter} (R : PhysicalParticularWave.ReferenceODE D j U) (x : Cylinder)
-    (hx : PhysicalParticularWave.parameterChange h Q Qr (PhysicalParticularWave.waveEquiv x).1.1 ∈ U) :
-    PhysicalParticularWave.bandPressureMode D h hQ hQr gap K j x =
-      PhysicalParticularWave.pressureWeight h Q Qr *
-        referenceLiftPressure D j (PhysicalParticularWave.cylinderChange h Q Qr gap x) := by
-  have hp := PhysicalParticularWave.bandRawPressure_eq_lift D h hQ hQr gap hK j hKr R x hx
-  have hc : carrier K (PhysicalParticularWave.bandPhase D h Q Qr gap K j) x =
-      carrier (PhysicalParticularWave.referenceFrequency D j) (PhysicalParticularWave.liftPhase D j)
-        (PhysicalParticularWave.cylinderChange h Q Qr gap x) :=
-    PhysicalCurlCovariance.carrier_eq_of_products (by
-      unfold PhysicalParticularWave.bandPhase
-      field_simp)
-  unfold PhysicalParticularWave.bandPressureMode referenceLiftPressure mode
-  rw [hp, hc]
-  simp only [Complex.real_smul]
-  ring
 
-theorem referenceLiftPressure_eq_wave (D : AssemblyData Parameter)
-    (H : PhysicalParticularWave.ReferenceIdentity D) (j : ℤ) (hj : j ≠ 0)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0) :
-    referenceLiftPressure D j = fun x =>
-      mode ((D.wave j).frequency D.reference.band) ((D.wave j).phase D.reference.band)
-        ((D.wave j).pressure D.reference.band) (PhysicalParticularWave.waveEquiv x) := by
-  unfold referenceLiftPressure
-  rw [PhysicalParticularWave.referenceRawPressure_eq_common D H hj hf]
-  rfl
 
 
 section ActualReferenceFields

@@ -160,26 +160,6 @@ theorem isOpen_trueCone : IsOpen trueCone := by
     ((isOpen_lt continuous_const continuous_fst).inter
       (isOpen_lt (continuous_snd.comp continuous_snd) continuous_coneBound))
 
-/-- A continuous compact family inside the true cone stays a uniformly
-positive distance from each of its three defining scalar boundaries. -/
-theorem compact_trueCone_margins {K : Set X} (hK : IsCompact K)
-    {P J v : X → ℝ} (hP : ContinuousOn P K) (hJ : ContinuousOn J K)
-    (hv : ContinuousOn v K)
-    (hcone : ∀ x ∈ K, 2 < v x ∧ 2 < P x ∧ v x < coneBound (P x) (J x)) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ x ∈ K,
-      ε ≤ v x - 2 ∧ ε ≤ P x - 2 ∧ ε ≤ coneBound (P x) (J x) - v x := by
-  have hbound : ContinuousOn (fun x => coneBound (P x) (J x)) K :=
-    continuous_coneBound.comp_continuousOn (hP.prodMk (hJ.prodMk hv))
-  obtain ⟨εv, hεv, hboundv⟩ := positive_uniform_margin hK (hv.sub continuousOn_const)
-    (fun x hx => sub_pos.mpr (hcone x hx).1)
-  obtain ⟨εP, hεP, hboundP⟩ := positive_uniform_margin hK (hP.sub continuousOn_const)
-    (fun x hx => sub_pos.mpr (hcone x hx).2.1)
-  obtain ⟨εU, hεU, hboundU⟩ := positive_uniform_margin hK (hbound.sub hv)
-    (fun x hx => sub_pos.mpr (hcone x hx).2.2)
-  refine ⟨min εv (min εP εU), lt_min hεv (lt_min hεP hεU), fun x hx => ?_⟩
-  exact ⟨(min_le_left _ _).trans (hboundv x hx),
-    ((min_le_right _ _).trans (min_le_left _ _)).trans (hboundP x hx),
-    ((min_le_right _ _).trans (min_le_right _ _)).trans (hboundU x hx)⟩
 
 /-- Every compact subset of the true cone has one positive metric
 perturbation tolerance, including perturbations outside the original image. -/
@@ -191,23 +171,6 @@ theorem compact_trueCone_stable {S : Set ConeDatum} (hS : IsCompact S)
   exact ⟨ρ, hρ, fun z hz z' hdist =>
     hsub (Metric.mem_cthickening_of_dist_le z' z ρ S hz hdist)⟩
 
-/-- A continuous compact family in the true cone has uniform perturbation
-tolerance. The competing datum need not depend continuously on the parameter. -/
-theorem compact_family_trueCone_stable {K : Set X} (hK : IsCompact K)
-    {P J v : X → ℝ} (hP : ContinuousOn P K) (hJ : ContinuousOn J K)
-    (hv : ContinuousOn v K)
-    (hcone : ∀ x ∈ K, 2 < v x ∧ 2 < P x ∧ v x < coneBound (P x) (J x)) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ x ∈ K, ∀ P' J' v' : ℝ,
-      dist (P', J', v') (P x, J x, v x) ≤ ρ →
-        2 < v' ∧ 2 < P' ∧ v' < coneBound P' J' := by
-  let f : X → ConeDatum := fun x => (P x, J x, v x)
-  have hf : ContinuousOn f K := hP.prodMk (hJ.prodMk hv)
-  have himage : f '' K ⊆ trueCone := by
-    rintro z ⟨x, hx, rfl⟩
-    exact hcone x hx
-  obtain ⟨ρ, hρ, hstable⟩ := compact_trueCone_stable (hK.image_of_continuousOn hf) himage
-  exact ⟨ρ, hρ, fun x hx P' J' v' hdist =>
-    hstable (f x) (mem_image_of_mem f hx) (P', J', v') hdist⟩
 
 
 end NavierStokes.UniformCone

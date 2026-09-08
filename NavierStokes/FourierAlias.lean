@@ -162,29 +162,9 @@ theorem torusMean_totalIntegral {a b M : ℝ} {v : Plane} {f : State → F}
   intro s _
   exact torusMean_translate (hp s) ((M * (s - U)) • v)
 
-theorem totalIntegral_periodic {M : ℝ} {v : Plane} {f : State → F}
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y))) :
-    ∀ U, TorusPeriodic (fun Y => TransportPrimitive.totalIntegral M v f (U, Y)) := by
-  intro U Y k
-  apply integral_congr_ae
-  filter_upwards [] with u
-  change f (U + u, (Y + ((k.1 : ℝ), (k.2 : ℝ))) + (M * u) • v) =
-    f (U + u, Y + (M * u) • v)
-  rw [add_right_comm Y ((k.1 : ℝ), (k.2 : ℝ))]
-  exact hp (U + u) (Y + (M * u) • v) k
 
 
 
-theorem cutoffAlias_zero_mean_of_integratedMean_zero {a b M : ℝ} {v : Plane}
-    {f : State → F} (χ : ℝ → ℝ) (hab : a ≤ b) (hf : Continuous f)
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y)))
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hm : (∫ s in a..b, sliceMean f s) = 0) (U : ℝ) :
-    sliceMean (cutoffAlias χ M v f) U = 0 := by
-  change torusMean (fun Y => deriv χ U • TransportPrimitive.totalIntegral M v f (U, Y)) = 0
-  rw [torusMean_smul]
-  change deriv χ U • sliceMean (TransportPrimitive.totalIntegral M v f) U = 0
-  rw [torusMean_totalIntegral hab hf hp hs, hm, smul_zero]
 
 
 /-- The alias is an exact term in the constructed inverse identity. -/
@@ -410,26 +390,6 @@ theorem nonbarPart_radiallySupported {a b : ℝ} {f : State → ℂ}
     simp only [hsource, intervalIntegral.integral_zero]
   exact hz (by change f z - mean f z.1 = 0; rw [hmean, sub_zero]; exact hsource z.2)
 
-theorem totalIntegral_nonbarPart {a b M : ℝ} {v : Plane} {f : State → ℂ}
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f)
-    (hm : (∫ U in a..b, sliceMean f U) = 0) (z : State) :
-    TransportPrimitive.totalIntegral M v (nonbarPart f) z =
-      TransportPrimitive.totalIntegral M v f z := by
-  rw [TransportPrimitive.totalIntegral_eq_radialInterval (nonbarPart_smooth hf).continuous
-      (nonbarPart_radiallySupported hs),
-    TransportPrimitive.totalIntegral_eq_radialInterval hf.continuous hs]
-  change (∫ U in a..b, f (U, z.2 + (M * (U - z.1)) • v) - mean f U) = _
-  have hc : Continuous (fun U => f (U, z.2 + (M * (U - z.1)) • v)) :=
-    hf.continuous.comp (continuous_id.prodMk
-      (continuous_const.add ((continuous_const.mul (continuous_id.sub continuous_const)).smul
-        continuous_const)))
-  rw [intervalIntegral.integral_sub
-    (f := fun U => f (U, z.2 + (M * (U - z.1)) • v)) (g := fun U => mean f U)
-    (hc.intervalIntegrable _ _)
-    ((coefficient_smooth hf 0).continuous.intervalIntegrable _ _)]
-  have hm' : (∫ U in a..b, mean f U) = 0 := by
-    simpa only [mean_eq_integral, sliceMean, torusMean] using hm
-  rw [hm', sub_zero]
 
 
 /-- The successive slow derivatives of actual directional Fourier inverses. -/
@@ -485,33 +445,6 @@ theorem cutoffAlias_fourierSourceJet (d : Direction) {a b M : ℝ} {f : State �
     have hn := fourierSourceJet_properties d hf hp hm hs n
     exact inverse_solves d hn.1 hn.2.1 hn.2.2.1
 
-/-- All fixed jets of the exact alias gain arbitrarily many inverse powers of
-the frequency. The constant precedes the frequency, point, and jet index. -/
-theorem cutoffAlias_arbitrary_order (d : Direction) {a b : ℝ} {f : State → ℂ}
-    {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hm : ZeroMean f)
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m p : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j (cutoffAlias χ M (vector d) f) z‖ ≤ C * (|M|⁻¹) ^ p := by
-  have hg := fourierSourceJet_properties d hf hp hm hs p
-  obtain ⟨C, hC, hb⟩ := cutoffAlias_finiteJet_bound hab hχ hg.1 hg.2.1 hg.2.2.2
-    hleft hright m
-  refine ⟨C, hC, ?_⟩
-  intro M hM j hj z
-  have heq := funext (cutoffAlias_fourierSourceJet d χ hf hp hm hs p hM)
-  rw [heq, iteratedFDeriv_const_smul_apply'
-    (((cutoffAlias_smooth hχ hg.1 hg.2.2.2).of_le
-      (by exact_mod_cast (le_top : (j : ℕ∞) ≤ ⊤))).contDiffAt)]
-  have hnorm : ‖((-M⁻¹) ^ p : ℝ) •
-      iteratedFDeriv ℝ j (cutoffAlias χ M (vector d) (fourierSourceJet d f p)) z‖ =
-      |(-M⁻¹) ^ p| *
-        ‖iteratedFDeriv ℝ j (cutoffAlias χ M (vector d) (fourierSourceJet d f p)) z‖ :=
-    _root_.norm_smul ((-M⁻¹) ^ p : ℝ)
-      (iteratedFDeriv ℝ j (cutoffAlias χ M (vector d) (fourierSourceJet d f p)) z)
-  rw [hnorm, abs_pow, abs_neg, abs_inv, mul_comm]
-  exact mul_le_mul_of_nonneg_right (hb M (vector d) j hj z)
-    (pow_nonneg (inv_nonneg.mpr (abs_nonneg M)) p)
 
 
 
@@ -550,27 +483,6 @@ theorem inverse_frequency_eventually_small {M : ℕ → ℝ} {h κ A growth : �
       mul_le_mul_of_nonneg_right hsn.le (Real.rpow_nonneg (ChartScales.epsilon_pos h n).le _)
     _ = _ := one_mul _
 
-/-- For each requested epsilon power one fixed finite IBP order suffices. -/
-theorem inverse_frequency_power_le_epsilon {M : ℕ → ℝ} {h κ A growth : ℝ}
-    (hh : 0 < h) (hκ : 0 < κ)
-    (hbound : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (N : ℕ) :
-    ∃ p : ℕ, ∀ᶠ n in atTop, (|M n|⁻¹) ^ p ≤ ChartScales.epsilon h n ^ N := by
-  obtain ⟨p, hp⟩ := exists_nat_gt ((N : ℝ) / (κ / 2))
-  have hNp : (N : ℝ) ≤ (κ / 2) * (p : ℝ) := by
-    have hp' := (div_lt_iff₀ (half_pos hκ)).mp hp
-    nlinarith
-  refine ⟨p, ?_⟩
-  filter_upwards [inverse_frequency_eventually_small hh hκ hbound] with n hn
-  calc
-    _ ≤ (ChartScales.epsilon h n ^ (κ / 2)) ^ p :=
-      pow_le_pow_left₀ (inv_nonneg.mpr (abs_nonneg _)) hn p
-    _ = ChartScales.epsilon h n ^ ((κ / 2) * (p : ℝ)) :=
-      (Real.rpow_mul_natCast (ChartScales.epsilon_pos h n).le _ p).symm
-    _ ≤ ChartScales.epsilon h n ^ (N : ℝ) :=
-      Real.rpow_le_rpow_of_exponent_ge (ChartScales.epsilon_pos h n)
-        (ChartScales.epsilon_le_one h hh.le n) hNp
-    _ = ChartScales.epsilon h n ^ N := Real.rpow_natCast _ _
 
 
 

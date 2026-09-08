@@ -59,13 +59,6 @@ theorem stationaryPart_subspace (v : S) : stationaryPart S A c hc hA (v : E) = 0
     exact inverse_operator_apply _ _ _ _ v
   rw [stationaryPart_eq, hcorr, sub_self]
 
-/-- The actual extension depends only on the terminal class of the trial. -/
-theorem stationaryPart_eq_of_sub_mem (x y : E) (hxy : x - y ∈ S) :
-    stationaryPart S A c hc hA x = stationaryPart S A c hc hA y := by
-  have he := stationaryPart_subspace S A c hc hA ⟨x - y, hxy⟩
-  change stationaryPart S A c hc hA (x - y) = 0 at he
-  rw [map_sub] at he
-  exact sub_eq_zero.mp he
 
 /-- Energy splits orthogonally along the stationary extension and zero-trace variations. -/
 theorem energy_split (hAs : A.IsSymmetric) (x : E) (v : S) :

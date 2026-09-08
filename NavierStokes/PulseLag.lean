@@ -151,12 +151,6 @@ theorem lag_eq_linearLag (β m₀ : ℝ) (f : ℝ → ℝ) (y : ℝ) :
   simp only [OutgoingSchedule.primitive]
   ring
 
-theorem lag_hasDerivAt (β m₀ : ℝ) {f : ℝ → ℝ} (hf : Continuous f) (y : ℝ) :
-    HasDerivAt (lag β m₀ f) (f y - β * lag β m₀ f y) y := by
-  have heq : lag β m₀ f = OutgoingTail.linearLag (fun _ => β) f m₀ :=
-    funext (lag_eq_linearLag β m₀ f)
-  rw [heq]
-  exact OutgoingTail.linearLag_hasDerivAt continuous_const hf m₀ y
 
 section ActualPulse
 

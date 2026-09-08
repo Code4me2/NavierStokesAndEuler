@@ -443,39 +443,9 @@ theorem meridionalComponents_updated (m t : MeanIncrementBounds.Triple Point) (n
   funext x i
   fin_cases i <;> simp [CyclePhysicalPrefixes.meridionalComponents, MeanIncrementBounds.updated]
 
-/-- The temporal and rank inputs may be successive actual states. Their
-potentials realize exactly the radial/axial parts of those literal increments. -/
-theorem temporal_rank_curl {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : CorrectionState.RankData (ℝ × ℝ))
-    (h : ℝ) (index : ℕ → ℕ) (c : CorrectionState.Context Point)
-    (ut ur : CorrectionState.State Point) (G : ScaledGraph) (hl : 0 < G.radialScale)
-    (n : ℕ) (H : GaugeMatches g c G n) {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (ht : ContDiffAt ℝ ∞ (VariableGaugeMean.temporalPotential g h index c ut n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w)))
-    (hr : ContDiffAt ℝ ∞ (VariableGaugeMean.rankPotential g r c ur n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl
-      (cartesianPotential a j G (VariableGaugeMean.temporalPotential g h index c ut n) +
-        cartesianPotential a j G (VariableGaugeMean.rankPotential g r c ur n)) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents
-          (VariableGaugeMean.temporalIncrementState g h index axial c ut) n +
-        CyclePhysicalPrefixes.meridionalComponents
-          (VariableGaugeMean.rankIncrementState g r axial c ur) n)) w := by
-  rw [cartesianPotential_add_curl ha j G hl _ _ hw ht hr,
-    meridional_temporal g h index c ut G n H, meridional_rank g r c ur G n H]
 
 open CorrectionState CorrectionStep
 
-/-- The two scalar streams are evaluated at the actual successive states of
-the four-stage cycle. -/
-noncomputable def cycleMeanPotential {ι : Type} (p : CycleParameters ι)
-    (v : CycleCoefficients ι) (c : Context Point) (u : State Point)
-    (a : ℝ) (j : PolarCharts.Index) (G : ScaledGraph) (n : ℕ) : VelocityField :=
-  cartesianPotential a j G
-    (VariableGaugeMean.temporalPotential p.gauge p.timeExponent p.commonIndex c (p.afterSigned v c u) n) +
-  cartesianPotential a j G
-    (VariableGaugeMean.rankPotential p.gauge p.rank c (p.afterTemporal v c u) n)
 
 
 
@@ -510,12 +480,6 @@ noncomputable def meanIncrementComponents {ι : Type} (p : CycleParameters ι)
   CyclePhysicalPrefixes.meridionalComponents (p.temporalIncrement v c u) n +
     CyclePhysicalPrefixes.meridionalComponents (p.rankIncrement v c u) n
 
-theorem meridionalComponents_next {ι : Type} (p : CycleParameters ι)
-    (v : CycleCoefficients ι) (c : Context Point) (u : State Point) (n : ℕ) :
-    CyclePhysicalPrefixes.meridionalComponents (p.next v c u).mean n =
-      CyclePhysicalPrefixes.meridionalComponents u.mean n + meanIncrementComponents p v c u n := by
-  rw [p.next_mean, meridionalComponents_updated, meridionalComponents_updated]
-  exact add_assoc _ _ _
 
 
 

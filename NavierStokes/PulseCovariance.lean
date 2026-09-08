@@ -577,16 +577,6 @@ theorem signedModel_strictCone {c₀ u m t : ℝ} (hc₀ : c₀ < 0) (hu : 0 < u
   exact SmoothCovariance.signed_model_strictCone (Covariance.normalMagnitude_pos hc₀)
     hu zero_lt_one zero_lt_one hcone
 
-theorem signedModel_continuousOn {X : Type*} [TopologicalSpace X] {K : Set X}
-    {c₀ u : X → ℝ} (hc₀ : ContinuousOn c₀ K) (hu : ContinuousOn u K) (i j : Fin 2) :
-    ContinuousOn (fun p => signedModel (c₀ p) (u p) i j) K := by
-  have hn : ContinuousOn (fun p => c₀ p * Real.sqrt (1 + u p ^ 2)) K :=
-    hc₀.mul (Real.continuous_sqrt.comp_continuousOn (continuousOn_const.add (hu.pow 2)))
-  fin_cases i <;> fin_cases j
-  · simpa [signedModel, modelDirection, signedSlopes, radiusProfile] using hn
-  · simpa [signedModel, modelDirection, signedSlopes, radiusProfile] using hn
-  · simpa [signedModel, modelDirection, signedSlopes] using hu.fun_neg
-  · simpa [signedModel, modelDirection, signedSlopes] using hu
 
 abbrev SignedPulsePair (r a A b B c₀ u E : ℝ) :=
   (j : Fin 2) → TangentPulse r a A b B c₀ (signedSlopes u j) (signedSlopes u j) E
@@ -655,59 +645,6 @@ local instance : NormedAddCommGroup Mat2 :=
 local instance : NormedSpace ℝ Mat2 :=
   inferInstanceAs (NormedSpace ℝ (Fin 2 → Fin 2 → ℝ))
 
-/-- A uniform slot threshold for the actual signed pulse pair over a compact
-strict-cone family.  Its matrix approximation is a conclusion of the Gaussian
-moment and pointwise tangent estimates in `TangentPulse`, not a hypothesis. -/
-theorem compact_actual_positive_inverse
-    {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsCompact K)
-    {c₀ u : X → ℝ} {T : X → Vec2}
-    (hmodel : ∀ i j, ContinuousOn (fun p => signedModel (c₀ p) (u p) i j) K)
-    (hT : ∀ i, ContinuousOn (fun p => T p i) K)
-    (hcone : ∀ p ∈ K, SmoothCovariance.StrictCone (signedModel (c₀ p) (u p)) (T p))
-    {a A b B E C U : ℝ} (hE : 0 ≤ E) (hC : 0 ≤ C) (hU : 0 ≤ U)
-    (hc₀ : ∀ p ∈ K, |c₀ p| ≤ C) (hu : ∀ p ∈ K, |u p| ≤ U) :
-    ∃ R : ℝ, 1 ≤ R ∧ ∀ p ∈ K, ∀ r : ℝ, R ≤ r →
-      ∀ pulses : SignedPulsePair r a A b B (c₀ p) (u p) E,
-      ∀ ci : Vec2, (∀ j, 0 < ci j) →
-        (actualMatrix pulses ci).det ≠ 0 ∧
-        (∀ i, 0 < SmoothCovariance.weights (actualMatrix pulses ci) (T p) i) ∧
-        (∀ i, 0 < SmoothCovariance.amplitudes (actualMatrix pulses ci) (T p) i) := by
-  obtain ⟨ρ, hρ, hstable⟩ := SmoothCovariance.compact_family_perturbation_stability
-    hK hmodel hT hcone
-  let Q : ℝ := E + ((C + 1) * U) * |concentrationConstant a A b B|
-  have hQ : 0 ≤ Q := by
-    dsimp [Q]
-    positivity
-  refine ⟨max 1 (Q / ρ), le_max_left _ _, ?_⟩
-  intro p hp r hr pulses ci hci
-  have hr1 : 1 ≤ r := (le_max_left _ _).trans hr
-  have hrp : 0 < r := lt_of_lt_of_le zero_lt_one hr1
-  have hsmall : Q / r ≤ ρ := by
-    apply (div_le_iff₀ hrp).mpr
-    have hR : Q / ρ ≤ r := (le_max_right _ _).trans hr
-    nlinarith [(div_le_iff₀ hρ).mp hR]
-  have hentry (i j : Fin 2) :
-      |normalizedMatrix pulses i j - signedModel (c₀ p) (u p) i j| ≤ ρ := by
-    apply (normalizedMatrix_entry_error pulses hE i j).trans
-    apply le_trans _ hsmall
-    apply div_le_div_of_nonneg_right _ hrp.le
-    dsimp [Q]
-    apply add_le_add_right
-    have hf : (|c₀ p| + 1) * |u p| ≤ (C + 1) * U :=
-      mul_le_mul (add_le_add_left (hc₀ p hp) 1) (hu p hp)
-        (abs_nonneg _) (by linarith)
-    exact mul_le_mul hf (le_abs_self _)
-      (pulses j).bounds.concentrationConstant_nonneg
-      (mul_nonneg (by linarith) hU)
-  have hdist : dist (normalizedMatrix pulses, T p) (signedModel (c₀ p) (u p), T p) ≤ ρ := by
-    rw [dist_prod_same_right]
-    apply (dist_pi_le_iff hρ.le).mpr
-    intro i
-    apply (dist_pi_le_iff hρ.le).mpr
-    intro j
-    simpa only [Real.dist_eq] using hentry i j
-  obtain ⟨hd, hw, _⟩ := hstable p hp (normalizedMatrix pulses) (T p) hdist
-  exact actualMatrix_positive_of_normalized pulses hci (T p) hd hw
 
 
 end NavierStokes.PulseCovariance

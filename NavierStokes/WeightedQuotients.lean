@@ -519,20 +519,6 @@ theorem weighted_half_control {s : Set E} {S T w g r : E → ℝ}
     simpa only [mul_assoc, mul_left_comm, mul_comm] using h
 
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- Convert the usual weighted upper inequality to the envelope notation. -/
-theorem polyBound_of_weighted {s : Set E} {S T w F : E → ℝ}
-    (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hw : ∀ x ∈ s, 0 < w x) {C : ℝ} (hC : 0 ≤ C) (K N : ℕ)
-    (hbound : ∀ x ∈ s, F x ≤ C * S x ^ K * T x ^ N * w x) :
-    PolyBound s S T (fun x => F x / w x) := by
-  refine ⟨C + 1, by linarith, K, N, ?_⟩
-  intro x hx
-  apply ((div_le_iff₀ (hw x hx)).mpr (hbound x hx)).trans
-  have hP : 0 ≤ S x ^ K * T x ^ N :=
-    mul_nonneg (pow_nonneg (zero_le_one.trans (hS x hx)) _)
-      (pow_nonneg (zero_le_one.trans (hT x hx)) _)
-  nlinarith
 
 end WeightedJets
 
@@ -568,25 +554,6 @@ theorem inverse_distance_one_le {U : Set E} {p : E × ℝ} (hp : p ∈ edgeStrip
     1 ≤ p.2⁻¹ := (one_le_inv₀ hp.2.1).mpr hp.2.2.le
 
 
-theorem weighted_half_jets {c : ℝ} {U : Set E} (hU : IsOpen U)
-    {S g r : E × ℝ → ℝ} (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p)
-    (hpos : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < g p)
-    (hg : ContDiffOn ℝ ∞ g (U ×ˢ Ioi 0)) (hr : ContDiffOn ℝ ∞ r (U ×ˢ Ioi 0))
-    (hlower : PolyBound (edgeStrip U) S (fun p => p.2⁻¹)
-      (fun p => FlatCutoff.edge c p.2 / g p))
-    (hgj : WeightedJets c U S g) (hrj : WeightedJets c U S r) :
-    WeightedJets (c / 2) U S (fun p => Real.sqrt (g p)) ∧
-      WeightedJets (c / 2) U S (fun p => r p / (2 * Real.sqrt (g p))) := by
-  have hsub : edgeStrip U ⊆ U ×ˢ Ioi (0 : ℝ) := fun p hp => ⟨hp.1, hp.2.1⟩
-  have h := weighted_half_control (hU.prod isOpen_Ioo) hS
-    (fun p hp => inverse_distance_one_le hp)
-    (fun p hp => FlatCutoff.edge_pos c hp.2.1) (fun p hp => hpos p (hsub hp))
-    (hg.mono hsub) (hr.mono hsub) hlower hgj hrj
-  constructor
-  · intro n
-    simpa only [sqrt_edge] using h.1 n
-  · intro n
-    simpa only [sqrt_edge] using h.2 n
 
 theorem WeightedJets.localGaussian {c : ℝ} {U : Set E} {S f : E × ℝ → ℝ}
     (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p) (hscale : LocallyBoundedScale U S)

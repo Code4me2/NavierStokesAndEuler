@@ -50,17 +50,6 @@ theorem spatialDifference_commutator (a : Space) (h : ℝ) (A : L2 →L[ℝ] L2)
     ContinuousLinearMap.comp_id, smul_sub]
   abel
 
-/-- Exact two-position derivative splitting for an actual spatial difference quotient. -/
-theorem mixedBoundaryOperator_differenceCommutator (a : Space) (h : ℝ) (χ ψ : Cutoff) :
-    (spatialDifference a h).comp (mixedBoundaryOperator χ ψ) -
-        (mixedBoundaryOperator χ ψ).comp (spatialDifference a h) =
-      (mixedBoundaryOperator (χ.differenceQuotient a h) (ψ.translate (h • a)) +
-        mixedBoundaryOperator χ (ψ.differenceQuotient a h)).comp
-          (translation (h • a)).toContinuousLinearMap := by
-  rw [spatialDifference_commutator, mixedBoundaryOperator_translationCommutator]
-  unfold Cutoff.differenceQuotient
-  rw [mixedBoundaryOperator_scale_left, mixedBoundaryOperator_scale_right]
-  simp only [ContinuousLinearMap.add_comp, ContinuousLinearMap.smul_comp, smul_add]
 
 
 

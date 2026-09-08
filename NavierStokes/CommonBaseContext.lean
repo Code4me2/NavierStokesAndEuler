@@ -200,66 +200,12 @@ theorem pull_fderiv {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 
 
-theorem pull_slowTime (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
-    (operators h index a b hab).slowTime (pull gap f) =
-      pull gap ((operators h (fun n => index n + gap n) a b hab).slowTime f) := by
-  funext n x
-  change -(ChartScales.epsilon h n * fderiv ℝ (pull gap f n) x (0,((1,0),0))) =
-    -(ChartScales.epsilon h n * fderiv ℝ (f n) (coverLift (gap n) x) (0,((1,0),0)))
-  rw [pull_fderiv, coverLift_eT]
-
-theorem pull_fastTime (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
-    (operators h index a b hab).fastTime (pull gap f) =
-      pull gap ((operators h (fun n => index n + gap n) a b hab).fastTime f) := by
-  funext n x
-  change fastCoefficient h index n * fderiv ℝ (pull gap f n) x (0,(0,TorusInverse.vector .temporal)) =
-    fastCoefficient h (fun n => index n + gap n) n *
-      fderiv ℝ (f n) (coverLift (gap n) x) (0,(0,TorusInverse.vector .temporal))
-  rw [pull_fderiv, coverLift_vT, map_smul, fastCoefficient_add]
-  simp only [smul_eq_mul]
-  ring
 
 
 
-theorem coverLift_radialField (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (n : ℕ) (x : Point) :
-    coverLift (gap n) ((operators h index a b hab).eR +
-      ((operators h index a b hab).radialFrequency n * (operators h index a b hab).radialProfile x) •
-        (operators h index a b hab).vR) =
-    (operators h (fun m => index m + gap m) a b hab).eR +
-      ((operators h (fun m => index m + gap m) a b hab).radialFrequency n *
-        (operators h (fun m => index m + gap m) a b hab).radialProfile (coverLift (gap n) x)) •
-        (operators h (fun m => index m + gap m) a b hab).vR := by
-  change coverLift (gap n) ((1,(0,0)) + (radialFrequency h index n *
-      RadialPullback.radialJacobian (ChartScales.radialExponent h) x.1) •
-      (0,(0,TorusInverse.vector .radial))) =
-    (1,(0,0)) + (radialFrequency h (fun m => index m + gap m) n *
-      RadialPullback.radialJacobian (ChartScales.radialExponent h) x.1) •
-      (0,(0,TorusInverse.vector .radial))
-  rw [map_add, map_smul, coverLift_eR, coverLift_vR, smul_smul, radialFrequency_add]
-  congr 2
-  ring
 
-theorem coverLift_axialField (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (n : ℕ) :
-    coverLift (gap n) ((operators h index a b hab).epsilon n • (operators h index a b hab).eZ) =
-    (operators h (fun m => index m + gap m) a b hab).epsilon n •
-      (operators h (fun m => index m + gap m) a b hab).eZ := by
-  change coverLift (gap n) (ChartScales.epsilon h n • (0,((0,1),0))) =
-    ChartScales.epsilon h n • (0,((0,1),0))
-  rw [map_smul, coverLift_eZ]
 
-theorem coverLift_timeField (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (n : ℕ) :
-    coverLift (gap n) ((operators h index a b hab).fastCoefficient n • (operators h index a b hab).vT -
-      (operators h index a b hab).epsilon n • (operators h index a b hab).eT) =
-    (operators h (fun m => index m + gap m) a b hab).fastCoefficient n •
-      (operators h (fun m => index m + gap m) a b hab).vT -
-    (operators h (fun m => index m + gap m) a b hab).epsilon n •
-      (operators h (fun m => index m + gap m) a b hab).eT := by
-  change coverLift (gap n) (fastCoefficient h index n • (0,(0,TorusInverse.vector .temporal)) -
-      ChartScales.epsilon h n • (0,((1,0),0))) =
-    fastCoefficient h (fun m => index m + gap m) n • (0,(0,TorusInverse.vector .temporal)) -
-      ChartScales.epsilon h n • (0,((1,0),0))
-  rw [map_sub, map_smul, map_smul, coverLift_vT, coverLift_eT, smul_smul, fastCoefficient_add]
-  rw [mul_comm (fastCoefficient h index n)]
+
 
 
 

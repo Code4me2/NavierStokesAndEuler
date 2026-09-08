@@ -714,17 +714,7 @@ theorem exact_pressure_smooth_full {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
   ((ActualPrimaryBounds.chart_cut_pressure_uniform.each (l.2,l.1)).smooth n).mono
     (fun _ hx => hx.1)
 
-theorem initial_meanGood (B N0 n : ℕ) {x : Point} (hT : 0 < x.2.1.1) (i : Fin 3) :
-    (initialState B N0).meanGoodResidual (ActualPrimary.commonContext B) n x i =
-      (initialState B N0).reducedMeanResidual (ActualPrimary.commonContext B) n x i -
-        initialAlias B N0 n x i :=
-  ActualInitialMean.initialized_meanGood B N0 n hT i
 
-theorem initialAlias_radial (B N0 n : ℕ) (x : Point) :
-    initialAlias B N0 n x 0 = VariableGaugeMean.pressureAliasState ActualPrimary.commonGauge
-      (ActualPrimary.commonContext B) (initialState B N0) n (x, 0) 0 := by
-  simp only [initialAlias, VariableGaugeMean.temporalAliasState, Matrix.cons_val_zero, zero_add]
-  rfl
 
 
 end NavierStokes.ActualInitialization
@@ -800,43 +790,6 @@ theorem primary_pressure_zero {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
 theorem primary_tangent_carrier {B N0 : ℕ} (l : Index B N0) :
     CorrectionStep.SameCarrier (primaryBlock l) (tangentBlock l) := ⟨rfl, rfl, rfl⟩
 
-/-- All assumptions of local harmonic extraction follow from the actual
-initial state and the proved support separation of its primary pieces. -/
-theorem initial_extraction_regular (B N0 n : ℕ) :
-    LocalResidualGrouping.ExtractionRegular strip.domain (ActualPrimary.commonContext B)
-      (initialState B N0) (coefficients B N0).labels (coefficients B N0).blocks
-      (coefficients B N0).gaussian (coefficients B N0).aliasCoefficients n := by
-  constructor
-  · exact contextFrame_regular (ActualPrimary.commonContext B) n contDiffOn_fst
-      (fun x hx => (radius_pos B x hx).ne') ((operators B).radialProfile.smooth n)
-  · intro i
-    fin_cases i
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((base_bounds B).radial.smooth n)
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((base_bounds B).angular.smooth n)
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((base_bounds B).axial.smooth n)
-  · intro i
-    have hm := (initial_primitive B N0).mean
-    fin_cases i
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((hm.radial.smooth n).mono geometry.strip_subset)
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((hm.angular.smooth n).mono geometry.strip_subset)
-    · exact Complex.ofRealCLM.contDiff.comp_contDiffOn ((hm.axial.smooth n).mono geometry.strip_subset)
-  · exact (((initial_primitive B N0).pressure geometry.inner_pos geometry.exponent_pos
-      geometry.length_eq rfl).smooth n).mono geometry.strip_subset
-  · intro l hl
-    exact ⟨phase_smooth l n, fun i => (primary_coefficients_smooth l n i).realCoefficients,
-      (primary_pressure_smooth l n).realCoefficients⟩
-  · intro l hl i
-    exact gaussian_coefficients_smooth l n i
-  · intro l hl i
-    exact smoothCoefficients_zero strip.domain
-  · intro l hl m hm hlm
-    change Disjoint (liftDomain strip.domain ∩ tsupport ((primaryBlock l).oscillation n))
-      (liftDomain strip.domain ∩ tsupport ((primaryBlock m).oscillation n))
-    rw [(primaryBlock_represents l).1, (primaryBlock_represents m).1,
-      LocalResidualGrouping.liftDomain_eq_preimage]
-    exact ActualPrimaryCovariance.velocity_tsupport_disjoint n hlm
-  · intro l hl
-    exact angularMode_ne_zero l n
 
 
 end NavierStokes.ActualInitialization

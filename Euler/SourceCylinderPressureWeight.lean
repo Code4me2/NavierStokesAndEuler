@@ -65,11 +65,6 @@ variable (P : ℝ) [Fact (0 < P)]
   (m : SmoothCoefficientPath (Icc (0 : ℝ) T) Space)
   (cm : ℝ) (hcm : 0 < cm) (hm : ∀ t x, cm ≤ ‖m.field t x‖^2)
 
-/-- The bounded pressure used in the coefficient estimate is exactly the PDE pressure. -/
-theorem pressurePath_eq_sourcePressure :
-    pressurePath P S hS T hT Q Q₁ c hc hQ f a₀ M m cm hcm hm =
-      sourcePressure P M m cm hcm hm (includePath P S hS f)
-        (includePath P S hS (velocity P S hS T hT Q Q₁ c hc hQ f a₀)) := rfl
 
 variable (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t)
 

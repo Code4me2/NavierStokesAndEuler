@@ -42,11 +42,6 @@ noncomputable def initialPressure (B N0 : ℕ) : PressureField :=
 noncomputable def initialDirect (B N0 : ℕ) : VelocityField :=
   ActualCandidateConstruction.angularMeanStages B N0 0
 
-noncomputable def initialDirectData (B N0 : ℕ) :
-    DirectAngularDiagonal.AngularData
-      (LocalAngularDiagonal.localSlowDomain h (ActualCandidateConstruction.qbig B N0)) :=
-  ActualMeanStageData.initialAngularData B N0 (ActualCandidateConstruction.firstBand B N0)
-    (ActualCandidateConstruction.qbig B N0) le_rfl
 
 
 theorem initialPotential_eq_stage (B N0 : ℕ) :

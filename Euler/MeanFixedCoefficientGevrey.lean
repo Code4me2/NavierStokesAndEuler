@@ -118,25 +118,5 @@ theorem fixedMeanOperator_bound
     (mul_le_mul_of_nonneg_left (baseAmplitude_time_bound T hT CH (CM+|L| *CA) hCH hC0) (by positivity))
     (majorant_nonneg r hr 0 n))
 
-/-- The actual force pullback preserves the forcing shift and has explicit polynomial amplitude. -/
-theorem fixedMeanForcing_bound (f : P → TimeLp T L2)
-    (hF : ContDiff ℝ ∞ F) (hF₁ : ContDiff ℝ ∞ F₁) (hf : ContDiff ℝ ∞ f)
-    (r CF CF₁ Cf : ℝ) (hr : 0 ≤ r) (hCF : 0 ≤ CF) (hCF₁ : 0 ≤ CF₁) (hCf : 0 ≤ Cf) (d : ℕ)
-    (hFb : ∀ n x, ‖iteratedFDeriv ℝ n F x‖ ≤ CF*majorant r 0 n)
-    (hF₁b : ∀ n x, ‖iteratedFDeriv ℝ n F₁ x‖ ≤ CF₁*majorant r 0 n)
-    (hfb : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ Cf*majorant r d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun p => -(fixedMeanPrimitive T hT (F p) (F₁ p)).adjoint (f p)) x‖ ≤
-      (3*(T*(T*CF₁+CF))*Cf)*majorant r d n := by
-  have hD0 : 0 ≤ T*CF₁+CF := add_nonneg (mul_nonneg hT hCF₁) hCF
-  have hb := pullbackMeanForcing_bound (primitiveTimeLp (E := L2) T hT)
-    (fun p => fixedMeanDerivative T hT (F p) (F₁ p)) f
-    (contDiff_fixedMeanDerivative T hT F F₁ hF hF₁) hf r (T*CF₁+CF) Cf hr hD0 hCf d
-    (fixedMeanDerivative_bound T hT F F₁ hF hF₁ r CF CF₁ hr hCF hCF₁ 0 hFb hF₁b) hfb n x
-  exact hb.trans (mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_right
-      (mul_le_mul_of_nonneg_left
-        (mul_le_mul_of_nonneg_right (primitive_norm_le_time (E := L2) T hT) hD0) (by norm_num)) hCf)
-    (majorant_nonneg r hr d n))
 
 end EulerMeanFixedCoefficientGevrey

@@ -180,12 +180,6 @@ noncomputable def chartToPhysical (h Q : ℝ) (p : ChartPoint) :
 
 
 
-theorem q_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) {p : ChartPoint} (hp : 0 < p.2.2) :
-    SimilarityProfile.q h (chartToPhysical h Q p) = Q * chartQ h p := by
-  change coordinateQ (2 * h) (1 - (1 - Q * p.2.2), Q ^ D h * p.2.1) = _
-  rw [show 1 - (1 - Q * p.2.2) = Q * p.2.2 by ring]
-  exact coordinateQ_scale_h hh hh1 hQ hp
 
 
 
@@ -223,8 +217,6 @@ theorem chartInner_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 
 
 
-noncomputable def chartWeight {E : Type*} (h : ℝ) (ζ : ℝ → E) (p : ChartPoint) : E :=
-  ζ (chartX h p)
 
 
 /-- The lesser of one and the two logarithmic distances to fixed profile

@@ -207,12 +207,6 @@ theorem familyPhase_contDiffOn [FiniteDimensional ℝ E]
   rw [heq]
   exact contDiff_snd.contDiffOn.mul hi
 
-/-- Final density-only interface for the joint inverse on an open parameter set. -/
-theorem inverseMap_contDiffOn [FiniteDimensional ℝ E]
-    (d : E → CircleDensity) (U : Set E) (hU : IsOpen U)
-    (hrate : ContDiffOn ℝ ∞ (familyRate d) (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (inverseMap d) (U ×ˢ univ) :=
-  inverseMap_contDiffOn_of_phase d U hU (familyPhase_contDiffOn d U hU hrate)
 
 
 

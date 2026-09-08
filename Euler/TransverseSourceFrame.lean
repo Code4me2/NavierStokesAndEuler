@@ -33,11 +33,6 @@ def framePath (T : ℝ) (F : C(Icc (0 : ℝ) T, E →L[ℝ] E)) :
     C(Icc (0 : ℝ) T, U →L[ℝ] E) :=
   ⟨fun t => (F t).comp (referenceEmbedding m₀ R), F.continuous.clm_comp continuous_const⟩
 
-omit [CompleteSpace U] [CompleteSpace E] in
-/-- The frame is literally the source expression `F R⊥`. -/
-theorem framePath_apply (T : ℝ) (F : C(Icc (0 : ℝ) T, E →L[ℝ] E))
-    (t : Icc (0 : ℝ) T) (x : U) :
-    framePath m₀ R T F t x = F t (R x : E) := rfl
 
 
 

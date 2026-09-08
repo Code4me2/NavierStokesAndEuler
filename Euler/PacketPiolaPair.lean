@@ -45,9 +45,6 @@ theorem curl_lifted_split (κ : ℝ) (m : Space) (L : LiftTangent →L[ℝ] Spac
     rw [hv, map_add, map_smul, map_smul]
   rw [he, curlMatrix_add, curlMatrix_smul, curlMatrix_rankOne]
 
-def coveringSlowCurl (G : Space →L[ℝ] Space) (q : LiftTangent → Space)
-    (z : LiftTangent) : Space :=
-  curlMatrix ((fderiv ℝ q z).comp ((ContinuousLinearMap.inl ℝ Space ℝ).comp G))
 
 /-- The same angular primitive as in the source, at each ordinary label. -/
 def coveringPotential (P : ℝ) (m : Space → Space) (A : LiftTangent → Space)

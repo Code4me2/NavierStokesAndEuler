@@ -833,17 +833,6 @@ theorem excludedSlotError_eq_gaussianError {s : StripData D}
   funext n x
   exact (g.error_eq_directional a source n x (d.fastScale n • d.fast) (hfast n)).symm
 
-theorem excludedSlotError_all_gains {s : StripData D}
-    (g : GaussianTailFlat.SlotFamily s) (d : GraphDirections D)
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {a source : ℕ → D → ComplexVector}
-    (ha : WaveClass s P α a) (hf : WaveClass s P α source) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (N : ℝ) : UnweightedClass s N (excludedSlotError d g.cutoff a source) := by
-  rw [excludedSlotError_eq_gaussianError g d hfast]
-  exact g.error_all_gains edges scales ha hf hc hP N
 
 
 

@@ -348,14 +348,6 @@ theorem zero_of_initial_profiles (hsmall : NaturalAxisData.SmallParameters h j)
 
 end ConstructedFamily
 
-/-- The order-zero profile sequence formed from genuine histories.  The
-stored radial component is beta; `ofBeta` inserts its required factor `X`. -/
-noncomputable def historiesProfiles {D : ProfileHistories.RadialDomain}
-    (h C : ℝ) (Q : ProfileHistories.Profiles D) : SlowProfiles :=
-  SlowResidualMatching.ofBeta (zeroSequence (fun p => C * Q.f p))
-    (zeroSequence Q.U)
-    (zeroSequence (fun p => SlowDivergence.radialFlux h 0 Q.U p / p.1))
-    (zeroSequence Q.pressure)
 
 
 section Transition
@@ -412,19 +404,6 @@ variable (hzero : ∀ p ∈ Ioo (0 : ℝ) r ×ˢ S,
 
 include ha hzero
 
-theorem radial_densities_zero {R η : ℝ} (hR : R ∈ Icc (0 : ℝ) a) (hη : η ∈ S) :
-    SlowResidualMatching.thetaDensity h C f 0 (R, η) = 0 ∧
-      SlowResidualMatching.zDensity h f 0 (R, η) = 0 := by
-  by_cases hz : R = 0
-  · subst R
-    simp [SlowResidualMatching.thetaDensity, SlowResidualMatching.zDensity]
-  · have hp : 0 < R := lt_of_le_of_ne hR.1 (Ne.symm hz)
-    have hsum : 0 ≤ a + R := by linarith [hR.2]
-    have hsq : R ^ 2 / 2 < r := by
-      nlinarith [mul_nonneg (sub_nonneg.mpr hR.2) hsum]
-    have he := hzero (R ^ 2 / 2, η) ⟨⟨by positivity, hsq⟩, hη⟩
-    simp only [SlowResidualMatching.thetaDensity, SlowResidualMatching.zDensity,
-      SlowResidualMatching.radiusPoint, he.1, he.2, mul_zero, and_self]
 
 
 

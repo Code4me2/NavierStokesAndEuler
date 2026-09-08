@@ -682,12 +682,6 @@ theorem etaDebt_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Boo
   (nuDebt_contDiffOn d hK square hq).comp diffusion_contDiff.contDiffOn
     (fun _ hη => (diffusion_mem hη).1)
 
-theorem etaDebt_hasDerivWithinAt (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    HasDerivWithinAt (etaDebt d K square q)
-      (nuDebtJet d K square q 1 (diffusion eta) * (-2 * eta)) (Icc (-1 : ℝ) 1) eta :=
-  (nuDebtJet_derivative d hK square hq 0 (diffusion_mem hη).1).comp eta
-    (diffusion_hasDerivAt eta).hasDerivWithinAt (fun _ hη => (diffusion_mem hη).1)
 
 theorem etaDebt_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
     {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) {eta : ℝ}
@@ -835,16 +829,6 @@ theorem exists_physical_debt_C1_bounds (d : TailData) :
 
 /-! ## Endpoint jets and the velocity in physical units -/
 
-theorem correctionJet_eq_iteratedDerivWithin {h K X ν : ℝ} (hh : 0 < h)
-    (hX : 0 < X) (hν : 0 ≤ ν) (n : ℕ) :
-    iteratedDerivWithin n (fun u => multiplier h u K X - 1) (Ici 0) ν =
-      correctionJet h K n ν X := by
-  induction n generalizing ν with
-  | zero => exact (correctionJet_zero h K ν X).symm
-  | succ n ih =>
-      rw [iteratedDerivWithin_succ]
-      exact ((correctionJet_hasDerivWithinAt hh hX hν n).congr_of_mem
-        (fun u hu => ih hu) hν).derivWithin ((uniqueDiffOn_Ici 0) ν hν)
 
 
 
@@ -943,23 +927,7 @@ theorem physicalEdit_eventual_heat_carrier (d : TailData) {K q s τ eta : ℝ}
 /-! The eta derivatives are not identically zero. In particular, the actual
 one-sided angular derivative at the physical endpoint `eta = 1` is positive. -/
 
-theorem switch_pos {K X : ℝ} (hK : 0 < K) (hX : K < X) : 0 < switch K X := by
-  have hl : 0 < Real.log (X / K) := Real.log_pos ((one_lt_div hK).mpr hX)
-  exact div_pos (FlatCutoff.edge_pos 1 (div_pos hl (by norm_num)))
-    (OutgoingSchedule.sigma_denom_pos _)
 
-theorem profile_first_jet_neg {h z : ℝ} (hh : 0 < h) (hz : 0 ≤ z) :
-    RadialHeatProfile.profileJet (1 + h) 1 z < 0 := by
-  have hg : 0 < (Real.Gamma (1 + h))⁻¹ :=
-    inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
-  have hm := RadialHeatProfile.moment_pos (a := 1 + h) (by linarith) 1 hz
-  have he : RadialHeatProfile.profileJet (1 + h) 1 z =
-      ((Real.Gamma (1 + h))⁻¹ * (-h)) * RadialHeatProfile.moment (1 + h) 1 z := by
-    simp only [RadialHeatProfile.profileJet, RadialHeatProfile.derivativeCoeff,
-      Nat.cast_zero, sub_zero]
-    ring
-  rw [he]
-  exact mul_neg_of_neg_of_pos (mul_neg_of_pos_of_neg hg (neg_neg_of_pos hh)) hm
 
 
 
