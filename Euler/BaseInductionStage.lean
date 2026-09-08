@@ -93,12 +93,7 @@ def firstStage : Stage S 0 := by
     rw [htilt]
     norm_num
 
-theorem firstStage_time : S.firstStage.time=0 := rfl
 
-theorem firstStage_horizon : S.firstStage.parent.T=baseHorizon S.J S.X := rfl
 
-theorem firstStage_coupling : S.firstStage.frame.a=1 :=
-  ((S.first.packet S.j_one).initialFrame_parameters firstNormal firstNormal_unit firstFrame
-    support compact).1
 
 end EulerPacketInductionScales.Scales

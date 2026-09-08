@@ -304,61 +304,7 @@ theorem rankIncrementState_bounds_of_components {H : ℝ}
   rankIncrementState_bounds U g r ha hcL hcR ε L hε hεone hL c u hg hparam hB hleft hright axial heps
     (debtClass_of_components _ hdebt)
 
-theorem rankIncrementState_bounds_of_defectBounds {σ H : ℝ} (hH : H ≤ 1 + σ)
-    (heps : BandBound (movingStripData U g.radial.inner g.radial.outer cL cR ha hcL hcR
-      ε L hε hεone hL) 1 c.operators.epsilon)
-    (hdebt : CorrectionState.DefectBounds (PhysicalMeanDomain.localSlowStripData U.carrier U.isOpen
-      ε L hε hεone hL) σ c u) :
-    IncrementBounds (movingStripData U g.radial.inner g.radial.outer cL cR ha hcL hcR
-      ε L hε hεone hL) H (VariableGaugeMean.rankIncrementState g r axial c u) :=
-  rankIncrementState_bounds_of_components U g r ha hcL hcR ε L hε hεone hL c u hg hparam hB hleft hright axial heps
-    (fun i => (hdebt i).mono_exponent hH)
 
-omit hB in
-/-- One positive profile margin controls every nonzero component of the
-actual rank increment, uniformly over bands and slow points. -/
-theorem rankIncrementState_support_margin :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ n z, z.2.1 ∈ U.carrier →
-      ((VariableGaugeMean.rankIncrementState g r axial c u).radial n z ≠ 0 ∨
-        (VariableGaugeMean.rankIncrementState g r axial c u).angular n z ≠ 0 ∨
-        (VariableGaugeMean.rankIncrementState g r axial c u).axial n z ≠ 0) →
-      δ ≤ z.1 / VariableGaugeMean.qLength coord z.2.1 - g.radial.inner ∧
-        δ ≤ g.radial.outer - z.1 / VariableGaugeMean.qLength coord z.2.1 := by
-  obtain ⟨lo, hi, hlo, horder, _, _, hlow, hupp⟩ := containingShell U hg.inner_pos hg.inner_lt_outer
-  have hlow' (n : ℕ) (x : Plane) (hx : x ∈ U.carrier) : lo ≤ r.length n x * r.inner := by
-    rw [hparam.length n x hx]
-    exact hlow x hx
-  have hupp' (n : ℕ) (x : Plane) (hx : x ∈ U.carrier) : r.length n x * r.outer ≤ hi := by
-    rw [hparam.length n x hx]
-    exact hupp x hx
-  let I := VariableGaugeMean.rankIncrementState g r axial c u
-  let f : ℕ → Point → ℝ := fun n z => ‖I.radial n z‖ + ‖I.angular n z‖ + ‖I.axial n z‖
-  have hs : ∀ n, VariableGaugeMean.SupportedGauge r.inner r.outer (r.length n) U.carrier (f n) := by
-    intro n z hz hn
-    have hsup := hg.increment_supportedGauge hlo horder U.isOpen hlow' hupp' axial n
-    by_cases hR : I.radial n z = 0
-    · by_cases hT : I.angular n z = 0
-      · apply hsup.2.2 z hz
-        intro hZ
-        exact hn (by simp only [f, hR, hT, show I.axial n z = 0 from hZ, norm_zero, add_zero])
-      · exact hsup.2.1 z hz hT
-    · exact hsup.1 z hz hR
-  obtain ⟨δ, hδ, hb⟩ := LocalRankDefect.normalized_support_margin hleft hright r.length U.carrier f hg.length_pos hs
-  refine ⟨δ, hδ, ?_⟩
-  intro n z hz hn
-  have hpos : 0 < f n z := by
-    rcases hn with hR | hT | hZ
-    · have hr : 0 < ‖I.radial n z‖ := norm_pos_iff.mpr hR
-      dsimp only [f]
-      linarith [norm_nonneg (I.angular n z), norm_nonneg (I.axial n z)]
-    · have ht : 0 < ‖I.angular n z‖ := norm_pos_iff.mpr hT
-      dsimp only [f]
-      linarith [norm_nonneg (I.radial n z), norm_nonneg (I.axial n z)]
-    · have hz' : 0 < ‖I.axial n z‖ := norm_pos_iff.mpr hZ
-      dsimp only [f]
-      linarith [norm_nonneg (I.radial n z), norm_nonneg (I.angular n z)]
-  have hm := hb n z hz hpos.ne'
-  rwa [hparam.length n _ hz] at hm
 
 end ActualIncrement
 

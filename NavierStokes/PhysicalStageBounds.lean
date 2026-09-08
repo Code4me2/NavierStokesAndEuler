@@ -588,20 +588,7 @@ theorem jets_eq_of_eqOn_open {f g : E → V} {U : Set E} (hU : IsOpen U)
     exact he hy
   exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hg m).self_of_nhds
 
-/-- Transfer the proved raw estimates to a separately defined family by its
-literal representation on the valid physical neighborhood. -/
-theorem rawStageBounds_congr_on {F G : ℕ → E → V} {U S : Set E}
-    {q : E → ℝ} {g L : ℕ → ℝ} {C p : ℕ → ℕ → ℝ}
-    (hU : IsOpen U) (hSU : S ⊆ U) (he : ∀ j, EqOn (F j) (G j) U)
-    (hb : CutStageEstimates.RawStageBounds q G g L C p S) :
-    CutStageEstimates.RawStageBounds q F g L C p S := by
-  intro j hj m x hx hq
-  rw [jets_eq_of_eqOn_open hU (he j) (hSU hx) m]
-  exact hb j hj m x hx hq
 
-theorem stage_smooth_congr_on {F G : ℕ → E → V} {U : Set E}
-    (he : ∀ j, EqOn (F j) (G j) U) (hs : ∀ j, ContDiffOn ℝ ∞ (G j) U) :
-    ∀ j, ContDiffOn ℝ ∞ (F j) U := fun j => (hs j).congr (he j)
 
 end RepresentationTransfer
 
@@ -611,15 +598,7 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
   (H : NominalConeAssembly.Certificate W) {d : ModulatedProfileAssembly.LoopData W}
   (v : ModulatedProfileAssembly.Witness d)
 
-theorem actual_potential_base_smooth (upper : ℝ) (bandFloor : ℕ) (qbig : ℝ) :
-    ContDiffOn ℝ ∞ (TailGaugePotential.finalPotential H v upper bandFloor)
-      (CutStageEstimates.physicalSublevel F.data.h qbig) :=
-  (TailGaugePotential.finalPotential_smooth H v upper bandFloor).mono (fun _ hw => ⟨hw.1, mem_univ _⟩)
 
-theorem actual_pressure_base_smooth (upper : ℝ) (bandFloor : ℕ) (qbig : ℝ) :
-    ContDiffOn ℝ ∞ (FinalSlowBase.pressure H v upper bandFloor)
-      (CutStageEstimates.physicalSublevel F.data.h qbig) :=
-  (FinalSlowBase.pressure_smooth H v upper bandFloor).mono (fun _ hw => ⟨hw.1, mem_univ _⟩)
 
 end ActualBase
 

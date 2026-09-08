@@ -40,11 +40,6 @@ theorem radialJet_even {F : ℝ × P → E} {z : P}
     Function.Even (fun r => radialJet F k r z) :=
   EvenSmoothDescent.even_radialIterate he k
 
-omit [CompleteSpace E] in
-theorem axisJet_square {F : ℝ × P → E} {z : P}
-    (he : Function.Even (fun r => F (r, z))) (k : ℕ) (r : ℝ) :
-    axisJet F k (r ^ 2, z) = radialJet F k r z :=
-  EvenSmoothDescent.descent_square (radialJet_even he k) r
 
 omit [CompleteSpace E] in
 theorem radialJet_contDiff {F : ℝ × P → E} {z : P}
@@ -59,14 +54,6 @@ theorem axisJet_eq_iteratedDerivWithin {F : ℝ × P → E} {z : P}
       iteratedDerivWithin k (fun Y => F (Real.sqrt Y, z)) (Ici 0) X :=
   (EvenSmoothDescent.iteratedDerivWithin_descent hf he k hX).symm
 
-theorem axisJet_hasDerivWithinAt {F : ℝ × P → E} {z : P}
-    (hf : ContDiff ℝ ∞ (fun r => F (r, z)))
-    (he : Function.Even (fun r => F (r, z))) (k : ℕ) {X : ℝ} (hX : 0 ≤ X) :
-    HasDerivWithinAt (fun Y => axisJet F k (Y, z)) (axisJet F (k + 1) (X, z)) (Ici 0) X := by
-  simp only [axisJet, radialJet_succ]
-  exact
-    (EvenSmoothDescent.hasDerivWithinAt_descent (radialJet_contDiff hf k)
-      (radialJet_even he k) hX)
 
 theorem axisJet_hasDerivAt_pos {F : ℝ × P → E} {z : P}
     (hf : ContDiff ℝ ∞ (fun r => F (r, z)))
@@ -315,15 +302,6 @@ theorem axisJet_square_local {R : ℝ} (hR : 0 < R) {F : ℝ × P → E} {z : P}
   · rw [abs_of_nonneg hs]
   · rw [abs_of_neg hs, radialJet_even_local hR he k hr]
 
-/-- The input needed by positive-order lower sources: every canonical
-squared-radius jet has a genuinely smooth, even signed radial pullback. -/
-theorem axisJet_pullback_contDiffOn_local {R : ℝ} (hR : 0 < R) {U : Set P} (hU : IsOpen U)
-    {F : ℝ × P → E} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k : ℕ) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × P => axisJet F k (p.1 ^ 2, p.2))
-      (Ioo (-(R / 4)) (R / 4) ×ˢ U) :=
-  (radialJet_joint_contDiffOn_local hR hU hF k).congr
-    (fun p hp => axisJet_square_local hR (he p.2 hp.2) k hp.1)
 
 end Joint
 
@@ -570,52 +548,9 @@ theorem mixedAxisJet_square_local {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsO
     exact axisJet_square_local hR (he w hw) k hr
   exact heq.iteratedDeriv_eq m
 
-/-- Every fixed mixed jet has the genuine joint regularity required of a
-lower-order source, without any negative-`X` extension. -/
-theorem mixedAxisJet_pullback_contDiffOn_local {R : ℝ} (hR : 0 < R) {U : Set ℂ}
-    (hU : IsOpen U) {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (hhol : ∀ r ∈ Ioo (-R) R, DifferentiableOn ℂ (fun z => F (r, z)) U)
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℂ => mixedAxisJet F k m (p.1 ^ 2, p.2))
-      (Ioo (-(R / 4)) (R / 4) ×ˢ U) := by
-  have h := complexJet_contDiffOn isOpen_Ioo hU (radialJet_joint_contDiffOn_local hR hU hF k)
-    (fun r hr => radialJet_holomorphic_local hR hU hF hhol k hr) m
-  exact h.congr fun p hp => mixedAxisJet_square_local hR hU he k m hp.1 hp.2
 
-theorem mixedAxisJet_pullback_holomorphic_local {R : ℝ} (hR : 0 < R) {U : Set ℂ}
-    (hU : IsOpen U) {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (hhol : ∀ r ∈ Ioo (-R) R, DifferentiableOn ℂ (fun z => F (r, z)) U)
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ)
-    {r : ℝ} (hr : r ∈ Ioo (-(R / 4)) (R / 4)) :
-    DifferentiableOn ℂ (fun z => mixedAxisJet F k m (r ^ 2, z)) U :=
-  VolterraRegularity.holomorphic_iteratedDeriv hU
-    (axisJet_pullback_holomorphic_local hR hU hF hhol he k hr) m
 
-theorem mixedAxisJet_eq_within_local {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ)
-    {X : ℝ} (hX : X ∈ Ico (0 : ℝ) ((R / 4) ^ 2)) {z : ℂ} (hz : z ∈ U) :
-    mixedAxisJet F k m (X, z) =
-      iteratedDeriv m (fun w => iteratedDerivWithin k (fun Y => F (Real.sqrt Y, w)) (Ici 0) X) z := by
-  have heq : (fun w => axisJet F k (X, w)) =ᶠ[𝓝 z]
-      (fun w => iteratedDerivWithin k (fun Y => F (Real.sqrt Y, w)) (Ici 0) X) := by
-    filter_upwards [hU.mem_nhds hz] with w hw
-    apply axisJet_eq_iteratedDerivWithin_local hR _ (he w hw) k hX
-    exact hF.comp (contDiff_id.prodMk contDiff_const).contDiffOn (fun r hr => ⟨hr, hw⟩)
-  exact heq.iteratedDeriv_eq m
 
-theorem mixedAxisJet_eq_ordinary_local {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ)
-    {X : ℝ} (hX : X ∈ Ioo (0 : ℝ) ((R / 4) ^ 2)) {z : ℂ} (hz : z ∈ U) :
-    mixedAxisJet F k m (X, z) =
-      iteratedDeriv m (fun w => iteratedDeriv k (fun Y => F (Real.sqrt Y, w)) X) z := by
-  have heq : (fun w => axisJet F k (X, w)) =ᶠ[𝓝 z]
-      (fun w => iteratedDeriv k (fun Y => F (Real.sqrt Y, w)) X) := by
-    filter_upwards [hU.mem_nhds hz] with w hw
-    apply axisJet_eq_iteratedDeriv_local_pos hR _ (he w hw) k hX
-    exact hF.comp (contDiff_id.prodMk contDiff_const).contDiffOn (fun r hr => ⟨hr, hw⟩)
-  exact heq.iteratedDeriv_eq m
 
 /-! ## Interior localization retaining the full radial domain -/
 
@@ -760,12 +695,6 @@ theorem axisJet_square_full {R : ℝ} (hR : 0 < R) {F : ℝ × ℂ → B} {z : �
   · rw [abs_of_nonneg hs]
   · rw [abs_of_neg hs, radialJet_even_full hR he k hr]
 
-theorem axisJet_pullback_contDiffOn_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k : ℕ) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℂ => axisJet F k (p.1 ^ 2, p.2)) (Ioo (-R) R ×ˢ U) :=
-  (radialJet_joint_contDiffOn_full hR hU hF k).congr
-    (fun p hp => axisJet_square_full hR (he p.2 hp.2) k hp.1)
 
 theorem axisJet_pullback_holomorphic_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
     {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
@@ -823,16 +752,6 @@ theorem axisJet_eq_ordinary_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOp
     axisJet F k (X, z) = iteratedDeriv k (fun Y => F (Real.sqrt Y, z)) X :=
   (axisJet_derivatives_full hR hU hF he k ⟨hX.1.le, hX.2⟩ hz).2 hX.1
 
-theorem axisJet_zero_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k : ℕ)
-    {z : ℂ} (hz : z ∈ U) :
-    axisJet F k (0, z) = ((k.factorial : ℝ) / ((2 * k).factorial : ℝ)) •
-      iteratedDeriv (2 * k) (fun r => F (r, z)) 0 := by
-  rw [axisJet_eq_within_full hR hU hF he k (by constructor <;> positivity) hz]
-  apply EvenSmoothDescent.iteratedDerivWithin_descent_zero_local (f := fun r => F (r, z)) hR
-  · exact hF.comp (contDiff_id.prodMk contDiff_const).contDiffOn (fun r hr => ⟨hr, hz⟩)
-  · exact he z hz
 
 omit [CompleteSpace B] in
 theorem mixedAxisJet_square_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
@@ -863,29 +782,7 @@ theorem mixedAxisJet_pullback_holomorphic_full {R : ℝ} (hR : 0 < R) {U : Set �
   VolterraRegularity.holomorphic_iteratedDeriv hU
     (axisJet_pullback_holomorphic_full hR hU hF hhol he k hr) m
 
-theorem mixedAxisJet_eq_within_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ)
-    {X : ℝ} (hX : X ∈ Ico (0 : ℝ) (R ^ 2)) {z : ℂ} (hz : z ∈ U) :
-    mixedAxisJet F k m (X, z) =
-      iteratedDeriv m (fun w => iteratedDerivWithin k (fun Y => F (Real.sqrt Y, w)) (Ici 0) X) z := by
-  have heq : (fun w => axisJet F k (X, w)) =ᶠ[𝓝 z]
-      (fun w => iteratedDerivWithin k (fun Y => F (Real.sqrt Y, w)) (Ici 0) X) := by
-    filter_upwards [hU.mem_nhds hz] with w hw
-    exact axisJet_eq_within_full hR hU hF he k hX hw
-  exact heq.iteratedDeriv_eq m
 
-theorem mixedAxisJet_eq_ordinary_full {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    {F : ℝ × ℂ → B} (hF : ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U))
-    (he : ∀ z ∈ U, ∀ r ∈ Ioo (-R) R, F (-r, z) = F (r, z)) (k m : ℕ)
-    {X : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2)) {z : ℂ} (hz : z ∈ U) :
-    mixedAxisJet F k m (X, z) =
-      iteratedDeriv m (fun w => iteratedDeriv k (fun Y => F (Real.sqrt Y, w)) X) z := by
-  have heq : (fun w => axisJet F k (X, w)) =ᶠ[𝓝 z]
-      (fun w => iteratedDeriv k (fun Y => F (Real.sqrt Y, w)) X) := by
-    filter_upwards [hU.mem_nhds hz] with w hw
-    exact axisJet_eq_ordinary_full hR hU hF he k hX hw
-  exact heq.iteratedDeriv_eq m
 
 end Holomorphic
 

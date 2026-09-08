@@ -145,19 +145,6 @@ theorem temporalStage_reconstructed (g : VariableGaugeMean.GaugeData Plane)
     VariableGaugeMean.reconstructState g c (VariableGaugeMean.temporalStageState g h index axial c u) =
       VariableGaugeMean.temporalStageState g h index axial c u := rfl
 
-/-- The primitive invariant and actual pressure reconstruction are both
-available for the next stage. -/
-theorem temporalStage_preserves (H : PrimitiveData U g.radial.inner g.radial.outer c u)
-    (ha : 0 < g.radial.inner) (hd : 0 < g.radial.exponent)
-    (hell : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (hfixed : (VariableGaugeMean.reconstructState g c u).pressure = u.pressure)
-    (h : ℝ) (index : ℕ → ℕ) (axial : Plane × Plane) :
-    PrimitiveData U g.radial.inner g.radial.outer c
-        (VariableGaugeMean.temporalStageState g h index axial c u) ∧
-      VariableGaugeMean.reconstructState g c (VariableGaugeMean.temporalStageState g h index axial c u) =
-        VariableGaugeMean.temporalStageState g h index axial c u :=
-  ⟨temporalStage_primitive H ha hd hell hfixed h index axial,
-    temporalStage_reconstructed g c u h index axial⟩
 
 end Temporal
 
@@ -293,24 +280,6 @@ theorem rankStage_from_geometry {v : State Point}
 
 end Rank
 
-/-- The two literal mean stages preserve the same primitive invariant.
-The rank geometry is refreshed from the actual temporal output before
-the rank correction is formed. -/
-theorem temporal_rank_preserves {coord : ℝ} {U : SlowRegion coord}
-    {g : VariableGaugeMean.GaugeData Plane} {r : RankData Plane}
-    {c : Context Point} {u v : State Point}
-    (H : PrimitiveData U g.radial.inner g.radial.outer c u)
-    (hg : LocalRankDefect.RankGeometry g r U.carrier c v)
-    (hell : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (hfixed : (VariableGaugeMean.reconstructState g c u).pressure = u.pressure)
-    (h : ℝ) (index : ℕ → ℕ) (axialTime axialRank : Plane × Plane) :
-    let next := VariableGaugeMean.rankStageState g r axialRank c
-      (VariableGaugeMean.temporalStageState g h index axialTime c u)
-    PrimitiveData U g.radial.inner g.radial.outer c next ∧
-      VariableGaugeMean.reconstructState g c next = next :=
-  rankStage_from_geometry
-    (temporalStage_primitive H hg.primitive_inner_pos hg.exponent_pos hell hfixed h index axialTime)
-    hg hell axialRank
 
 end
 

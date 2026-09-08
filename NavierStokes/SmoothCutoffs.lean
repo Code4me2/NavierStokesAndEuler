@@ -75,8 +75,6 @@ theorem cutoff_eventually_zero {x : ℝ} (hx : 1 < |x|) :
   intro hmem
   exact (not_le_of_gt hx) (abs_le.mpr hmem)
 
-theorem cutoff_eventually_one_at_zero : cutoff =ᶠ[𝓝 0] (fun _ => 1) :=
-  cutoff_eventually_one (by norm_num)
 
 theorem iteratedDeriv_const_succ (n : ℕ) (c : ℝ) :
     iteratedDeriv (n + 1) (fun _ : ℝ => c) = (fun _ => 0) := by
@@ -108,11 +106,6 @@ theorem cutoff_iteratedDeriv_support (n : ℕ) :
   · by_contra h
     exact hx (cutoff_iteratedDeriv_zero_outside n (lt_of_not_ge h))
 
-theorem cutoff_iteratedDeriv_tsupport (n : ℕ) :
-    tsupport (iteratedDeriv (n + 1) cutoff) ⊆ {x : ℝ | 1 / 2 ≤ |x| ∧ |x| ≤ 1} := by
-  apply closure_minimal (cutoff_iteratedDeriv_support n)
-  exact (isClosed_le continuous_const continuous_abs).inter
-    (isClosed_le continuous_abs continuous_const)
 
 theorem cutoff_iteratedDeriv_hasCompactSupport (n : ℕ) :
     HasCompactSupport (iteratedDeriv n cutoff) := by
@@ -151,12 +144,6 @@ theorem scaledCutoff_zero_of_inv_le {a q : ℝ} (ha : 0 < a) (hq : 1 / a ≤ q) 
   have hprod := (div_le_iff₀ ha).mp hq
   nlinarith
 
-theorem scaledCutoff_hasCompactSupport {a : ℝ} (ha : a ≠ 0) :
-    HasCompactSupport (scaledCutoff a) := by
-  change HasCompactSupport (fun x => cutoff (a * x))
-  have hc : HasCompactSupport (fun x : ℝ => cutoff (a • x)) :=
-    cutoff_hasCompactSupport.comp_smul (G₀ := ℝ) (c := a) ha
-  simpa only [smul_eq_mul] using hc
 
 theorem scaledCutoff_eventually_one {a q : ℝ} (hq : |a * q| < 1 / 2) :
     scaledCutoff a =ᶠ[𝓝 q] (fun _ => 1) :=
@@ -276,13 +263,7 @@ theorem timeSwitch_eventually_one {t : ℝ} (ht : 3 / 4 < t) :
   filter_upwards [scaledCutoff_eventually_zero hs] with s hs
   simp [timeSwitch, hs]
 
-theorem timeSwitch_iteratedDeriv_at_zero (n : ℕ) :
-    iteratedDeriv (n + 1) timeSwitch 0 = 0 := by
-  rw [timeSwitch_eventually_zero.iteratedDeriv_eq (n + 1), iteratedDeriv_const_succ]
 
-theorem timeSwitch_iteratedDeriv_late (n : ℕ) {t : ℝ} (ht : 3 / 4 < t) :
-    iteratedDeriv (n + 1) timeSwitch t = 0 := by
-  rw [(timeSwitch_eventually_one ht).iteratedDeriv_eq (n + 1), iteratedDeriv_const_succ]
 
 theorem timeSwitch_iteratedDeriv_formula (n : ℕ) (t : ℝ) :
     iteratedDeriv (n + 1) timeSwitch t =
@@ -292,18 +273,5 @@ theorem timeSwitch_iteratedDeriv_formula (n : ℕ) (t : ℝ) :
   change iteratedDeriv (n + 1) (fun s => -(scaledCutoff (4 / 3) s)) t = _
   rw [iteratedDeriv_fun_neg, scaledCutoff_iteratedDeriv]
 
-/-- On the physical half-line, all nonzero positive derivatives lie in `[3/8,3/4]`. -/
-theorem timeSwitch_iteratedDeriv_support_nonneg (n : ℕ) {t : ℝ} (ht : 0 ≤ t)
-    (hs : iteratedDeriv (n + 1) timeSwitch t ≠ 0) :
-    3 / 8 ≤ t ∧ t ≤ 3 / 4 := by
-  have hcut : iteratedDeriv (n + 1) cutoff ((4 / 3) * t) ≠ 0 := by
-    intro hz
-    apply hs
-    rw [timeSwitch_iteratedDeriv_formula, hz]
-    simp
-  have hb := cutoff_iteratedDeriv_support n hcut
-  change 1 / 2 ≤ |(4 / 3 : ℝ) * t| ∧ |(4 / 3 : ℝ) * t| ≤ 1 at hb
-  rw [abs_of_nonneg (by positivity : (0 : ℝ) ≤ (4 / 3) * t)] at hb
-  constructor <;> linarith [hb.1, hb.2]
 
 end NavierStokes.SmoothCutoffs

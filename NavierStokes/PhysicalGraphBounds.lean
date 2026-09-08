@@ -608,9 +608,6 @@ theorem slotTime_derivative (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ)
   rw [(hasFDerivAt_slotTime h n center r0 p).fderiv]
   rfl
 
-theorem slotTime_spatial_derivative (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ)
-    (p : SpaceTime) (v : Space) : fderiv ℝ (slotTime h n center r0) p (0, v) = 0 := by
-  simp [slotTime_derivative]
 
 /-- Exact integer rounding gives a uniform upper carrier power. -/
 theorem carrier_upper {h : ℝ} (hh : 0 ≤ h) (n : ℕ) :
@@ -669,20 +666,6 @@ theorem norm_character_jet (c : ℝ) (m : ℕ) (t : ℝ) :
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, iteratedDeriv_character]
   simp [norm_character, phaseFactor, norm_pow, Complex.norm_I, Complex.norm_real, Real.norm_eq_abs]
 
-/-- Stage harmonics change the multiplicative constant, never the power loss. -/
-theorem rounded_carrier_jet_bound {h : ℝ} (hh : 0 ≤ h) (n m : ℕ)
-    (j : ℤ) {H : ℝ} (hH : |(j : ℝ)| ≤ H) (t : ℝ) :
-    ‖iteratedFDeriv ℝ m (character ((ChartScales.carrier h n : ℝ) * (j : ℝ))) t‖ ≤
-      (2 * H) ^ m * ChartScales.Q n ^ (-(h * (m : ℝ) / 2)) := by
-  rw [norm_character_jet, abs_mul, abs_of_nonneg (Nat.cast_nonneg _)]
-  have hh0 : 0 ≤ H := (abs_nonneg _).trans hH
-  have hk := mul_le_mul (carrier_upper hh n) hH (abs_nonneg _)
-    (mul_nonneg (by norm_num) (Real.rpow_nonneg (ChartScales.Q_pos n).le _))
-  have hp := pow_le_pow_left₀ (by positivity : 0 ≤ (ChartScales.carrier h n : ℝ) * |(j : ℝ)|) hk m
-  apply hp.trans_eq
-  rw [mul_right_comm, mul_pow, ← Real.rpow_mul_natCast (ChartScales.Q_pos n).le]
-  congr 2
-  ring
 
 theorem pointwise_product_jet_bound {E A : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedRing A] [NormedAlgebra ℝ A] {f g : E → A} (hf : ContDiff ℝ ∞ f)
@@ -887,13 +870,6 @@ theorem norm_fstCLM_le (E F : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   change ‖x.1‖ ≤ 1 * max ‖x.1‖ ‖x.2‖
   simpa only [one_mul] using le_max_left ‖x.1‖ ‖x.2‖
 
-theorem norm_sndCLM_le (E F : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F] :
-    ‖ContinuousLinearMap.snd ℝ E F‖ ≤ 1 := by
-  refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one ?_
-  intro x
-  change ‖x.2‖ ≤ 1 * max ‖x.1‖ ‖x.2‖
-  simpa only [one_mul] using le_max_right ‖x.1‖ ‖x.2‖
 
 theorem jet_comp_linear_bound {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -1393,22 +1369,6 @@ theorem carrier_class_physical_bound {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1
       mul_le_mul_of_nonneg_left (comparable_rpow hQ hq hlo hhi _) (mul_nonneg hW hD.le)
     _ = _ := by ring
 
-/-- The four actual polar chart extensions supply one common constant for
-all normalized Cartesian phase derivatives; a sector always exists. -/
-theorem physical_polar_chart_available {a b : ℝ} (ha : 0 < a) (m : ℕ) :
-    ∃ K : ℝ, 1 ≤ K ∧ ∀ n : ℕ, ∀ p : SpaceTime, scaledRadial n p ∈ annulus a b →
-      ∃ j : PolarCharts.Index,
-        scaledRadial n p ∈ PolarCharts.sector a b j ∧
-        ContDiff ℝ ∞ (PolarCharts.chart a j) ∧
-        (∀ k ≤ m, ‖iteratedFDeriv ℝ k (PolarCharts.chart a j) (scaledRadial n p)‖ ≤ K) ∧
-        PolarCharts.polar (PolarCharts.chart a j (scaledRadial n p)) = scaledRadial n p := by
-  obtain ⟨K, hK, hbound⟩ := PolarCharts.chart_finiteJets_uniform ha b m
-  refine ⟨K, hK, ?_⟩
-  intro n p hp
-  obtain ⟨j, hj⟩ := PolarCharts.annulus_covered ha hp
-  exact ⟨j, hj, PolarCharts.chart_contDiff ha j,
-    (fun k hk => hbound j k hk _ hp.1),
-    PolarCharts.polar_chart ha j (PolarCharts.sector_subset_chartDomain ha j hj)⟩
 
 @[simp] theorem liftXY_physicalLift (h : ℝ) (n : ℕ) (p : SpaceTime) :
     liftXY (physicalLift h n p) = scaledRadial n p := by
@@ -1430,26 +1390,6 @@ theorem character_phase_eq_harmonic (k : ℝ) (j : ℤ) (ε p pz x0 : ℝ)
   push_cast
   ring
 
-/-- On a covering sector, the phase is the literal Cartesian realization
-of (26), with `R=√(x²+y²)/√Q` and an actual local arctangent angle. -/
-theorem liftedPhase_physical_formula {a b : ℝ} (ha : 0 < a)
-    (chart : PolarCharts.Index) (h : ℝ) (n : ℕ) (center : Plane)
-    (r0 p pz x0 : ℝ) (F G : Slow → ℝ) (w : SpaceTime)
-    (hw : scaledRadial n w ∈ PolarCharts.sector a b chart) :
-    let R := PolarCharts.radius (scaledRadial n w)
-    let θ := Real.arctan ((PolarCharts.rotate chart (scaledRadial n w)).2 /
-      (PolarCharts.rotate chart (scaledRadial n w)).1) + PolarCharts.offset chart
-    let Z := ChartScales.Q n ^ (-CoordinateAlgebra.D h) * w.2 2
-    let T := (1 - w.1) / ChartScales.Q n
-    liftedPhase (PolarCharts.chart a chart) h n center r0 p pz x0 F G (physicalLift h n w) =
-      p * θ + (pz / ChartScales.epsilon h n) * Z + x0 * R -
-        slotTime h n center r0 w * (p * F (R, (Z, T)) + pz * G (R, (Z, T))) := by
-  dsimp only
-  unfold liftedPhase
-  rw [Function.comp_apply, slotMap_physical,
-    PolarCharts.chart_eq_localChart ha chart (PolarCharts.sector_subset_chartDomain ha chart hw),
-    PolarCharts.localChart_apply]
-  rfl
 
 /-- All polar branches share the same physical bound for the actual phase
 (26). No derivative hypothesis on the phase or on the native graph occurs:

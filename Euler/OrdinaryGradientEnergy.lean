@@ -62,8 +62,6 @@ def gradientEnergyConstant : ℝ := 54*(∑ n ∈ range 4, (6 : ℝ)^n)
 theorem gradientEnergyConstant_nonneg : 0 ≤ gradientEnergyConstant := by
   exact mul_nonneg (by norm_num) (sum_nonneg (fun _ _ => by positivity))
 
-theorem gradientEnergyConstant_eq : gradientEnergyConstant=13986 := by
-  norm_num [gradientEnergyConstant,sum_range_succ]
 
 theorem eulerRhs_word_gradient (A P : SmoothL2Field Space) (K : ℝ)
     (hK : ∀ x, ‖fderiv ℝ A.field x‖ ≤ K) (hdiv : ∀ x, divergence A.field x=0)

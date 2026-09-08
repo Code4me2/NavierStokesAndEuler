@@ -131,25 +131,5 @@ theorem momentum_weak
   exact momentum_weak_of_product_tests T hT Q Q₁ hQ H
     (u : TimeLp T E) f v htest
 
-/-- The actual solved transverse momentum has an AC representative and the
-prescribed genuine a.e. derivative. This is a regularity conclusion of the solve. -/
-theorem transverseSolver_momentum_ac (hTpos : 0 < T)
-    (hQ : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (m : Icc (0 : ℝ) T → E)
-    (hm : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (H : C(Icc (0 : ℝ) T, E →L[ℝ] E)) (K : ℝ) (hK : 0 ≤ K)
-    (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖ ^ 2)
-    (hsmall : K * (T ^ 2 / 2) ≤ 1 / 2) (f : TimeLp T E) :
-    let u : TimeLp T E := transverseSolver T hT m H K hK hH hsmall f
-    ∃ p : ℝ → U, AbsolutelyContinuousOnInterval p 0 T ∧
-      (momentum T hT Q u : ℝ → U) =ᵐ[timeMeasure T] p ∧
-      ∀ᵐ t ∂timeMeasure T,
-        HasDerivAt p (momentumForcing T hT Q Q₁ H u f t) t := by
-  apply exists_ac_representative_of_weak T hTpos
-  intro v hv
-  exact momentum_weak T hT Q Q₁ hQ m hm H
-    (transverseSolver T hT m H K hK hH hsmall f) f
-    (transverseSolver_weak T hT m H K hK hH hsmall f) v hv
 
 end EulerTransverseMomentumRegularity

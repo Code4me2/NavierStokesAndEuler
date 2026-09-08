@@ -59,21 +59,5 @@ theorem quadraticTower_odd (κ : ℝ) (t : Icc (0 : ℝ) D.T) (i : Fin 3) (x : L
     fderiv_neg_of_even (D.F.field t : Space → Space →L[ℝ] Space) (D.F.smooth t) (hF t),
     neg_apply,comp_neg,smul_neg]
 
-include hF hM in
-theorem correctionParityData (κ : ℝ) (hκ : |κ| ≤ 1) {z r : VectorField}
-    (Z : Field P D.T z) (G : Field P D.T r)
-    (hZ : JointOdd D.T z) (hG : JointOdd D.T r) :
-    EulerCorrectionAssembly.ParityData P (correctionDataOfFields D P κ hκ Z G) where
-  metric := metricTower_even D hF P
-  linear := linearTower_even D hF hM P
-  quadratic := quadraticTower_odd D hF P κ
-  approximation t := by
-    have h := Z.reflection_neg_of_raw_odd t (hZ t)
-    change -EulerCylinderFieldReflection.reflection P (Z.path t) = Z.path t
-    rw [h,neg_neg]
-  residual t := by
-    have h := G.reflection_neg_of_raw_odd t (hG t)
-    change -EulerCylinderFieldReflection.reflection P (G.path t) = G.path t
-    rw [h,neg_neg]
 
 end EulerPacketCorrectionCoefficients

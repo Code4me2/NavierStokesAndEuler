@@ -40,20 +40,6 @@ theorem coefficient_assembled (N p : ℕ) (hp : 1 ≤ p) (hpN : p ≤ N)
   simp only [map_add]
   abel
 
-/-- The two actual linear equations imply cancellation; no residual equation is assumed. -/
-theorem coefficient_assembled_eq_zero (N p : ℕ) (hp : 1 ≤ p) (hpN : p ≤ N)
-    (L : V →ₗ[ℝ] W) (G H : Q →ₗ[ℝ] W) (B C : V →ₗ[ℝ] V →ₗ[ℝ] W)
-    (a b c : ℕ → V) (q π : ℕ → Q) (hq : ∀ i ≤ N, H (q i)=0) (fmean : W)
-    (hmean : L (b p)+G (q p)=fmean)
-    (hhigh : L (a p)+H (π p)=
-      -(L (c (p-1))+G (π (p-1))+
-        convolution (N+1) B (assemble N (fun i => a i+b i) c)
-          (assemble N (fun i => a i+b i) c) p+
-        convolution (N+1) C (assemble N (fun i => a i+b i) c)
-          (assemble N (fun i => a i+b i) c) (p+1))-fmean) :
-    coefficient (N+1) L G H B C (assemble N (fun i => a i+b i) c) (assemble N q π) p=0 := by
-  rw [coefficient_assembled N p hp hpN L G H B C a b c q π hq, hmean, hhigh]
-  abel
 
 theorem coefficient_zero_grade (N : ℕ) (L : V →ₗ[ℝ] W) (G H : Q →ₗ[ℝ] W)
     (B C : V →ₗ[ℝ] V →ₗ[ℝ] W) (u : ℕ → V) (q : ℕ → Q)

@@ -220,20 +220,6 @@ theorem recurrence_truncation (N : ℕ) (w L A : ℕ → ℝ) (K : ℕ → ℕ �
   simp only [recurrence, mul_sub, mul_add, Finset.sum_sub_distrib, Finset.sum_add_distrib]
   ring
 
-/-- If the retained coefficient equations hold, the physical finite
-expansion still has these explicit omitted interactions and viscosity term. -/
-theorem recurrence_truncation_of_zero (N : ℕ) (w L A : ℕ → ℝ) (K : ℕ → ℕ → ℝ)
-    (hzero : ∀ n ≤ N, recurrence L K A n = 0) :
-    (∑ n ∈ Finset.range (N + 1), w n * L n) +
-      (∑ ij ∈ pairs N, w (ij.1 + ij.2) * K ij.1 ij.2) -
-      (∑ n ∈ Finset.range (N + 1), w (n + 1) * A n) =
-      pairTail N w K - w (N + 1) * A N := by
-  rw [recurrence_truncation]
-  have hs : (∑ n ∈ Finset.range (N + 1), w n * recurrence L K A n) = 0 := by
-    apply Finset.sum_eq_zero
-    intro n hn
-    rw [hzero n (by have := Finset.mem_range.mp hn; omega), mul_zero]
-  rw [hs, zero_add]
 
 def transportLinear (X m : ℝ) (gt gx gxx source : ℕ → ℝ) (n : ℕ) : ℝ :=
   gt n - 2 * (X * gxx n + m * gx n) + source n
@@ -876,11 +862,6 @@ theorem slowVelocity_components (N : ℕ) (h C : ℝ) (f : SlowProfiles)
       AxisymmetricResidual.pack, ProblemStatement.coordinateVector,
       profilePoint] <;> ring
 
-theorem slowVelocity_radial_flux (N : ℕ) (h C : ℝ) (f : SlowProfiles)
-    (t : ℝ) (x : ProblemStatement.Space) (hs : 0 < radialEnergy x) :
-    x 0 * slowVelocity N h C f (t, x) 0 + x 1 * slowVelocity N h C f (t, x) 1 =
-      slowFlux N h f (profilePoint t x) :=
-  RadialFluxResidual.radial_flux_velocity _ _ _ _ _ hs
 
 /-- The finite field's divergence is exactly its finite divergence-coefficient
 sum. This assertion uses the actual Euclidean divergence, away from the axis. -/
@@ -912,20 +893,6 @@ theorem finiteSeries_eq_zero (N : ℕ) (q h e : ℝ) (a : ℕ → ℝ)
   intro n hn
   rw [ha n (by have := Finset.mem_range.mp hn; omega), mul_zero]
 
-theorem divergence_slowVelocity_eq_zero {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (N : ℕ) (C : ℝ) (f : SlowProfiles) {t : ℝ} {x : ProblemStatement.Space}
-    (ht : t < 1) (hs : 0 < radialEnergy x)
-    (hv : ∀ n ≤ N, DifferentiableAt ℝ (f.flux n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hf : ∀ n ≤ N, DifferentiableAt ℝ (f.phi n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hu : ∀ n ≤ N, DifferentiableAt ℝ (f.axial n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hdiv : ∀ n ≤ N, divergenceCoefficient h f n
-      (SimilarityProfile.inner h (profilePoint t x)) = 0) :
-    ProblemStatement.spatialDivergence (slowVelocity N h C f) t x = 0 := by
-  rw [divergence_slowVelocity hh hh1 N C f ht hs hv hf hu]
-  exact finiteSeries_eq_zero _ _ _ _ _ hdiv
 
 noncomputable def angularExpansion (N : ℕ) (q h C : ℝ) (f : SlowProfiles)
     (w : InnerPoint) : ℝ :=
@@ -1011,29 +978,5 @@ noncomputable def truncationResidual (N : ℕ) (h C : ℝ) (f : SlowProfiles)
   let U := transportTail N q h (axialExponent h) 0 f.flux f.axial f.axial w
   AxisymmetricResidual.pack (x 0 * R - x 1 * A) (x 1 * R + x 0 * A) U
 
-/-- Solving all retained coefficient equations produces precisely the
-displayed truncation forcing; it does not make that forcing disappear. -/
-theorem navierStokesResidual_slowVelocity_of_coefficients
-    {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (N : ℕ) (C : ℝ) (f : SlowProfiles) {t : ℝ} {x : ProblemStatement.Space}
-    (ht : t < 1) (hs : 0 < radialEnergy x)
-    (hv : ∀ n ≤ N, ContDiffAt ℝ 2 (f.flux n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hf : ∀ n ≤ N, ContDiffAt ℝ 2 (f.phi n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hu : ∀ n ≤ N, ContDiffAt ℝ 2 (f.axial n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hπ : ∀ n ≤ N, DifferentiableAt ℝ (f.pressure n)
-      (SimilarityProfile.inner h (profilePoint t x)))
-    (hA : ∀ n ≤ N, angularCoefficient h f n (SimilarityProfile.inner h (profilePoint t x)) = 0)
-    (hZ : ∀ n ≤ N, axialCoefficient h f n (SimilarityProfile.inner h (profilePoint t x)) = 0)
-    (hR : ∀ n ≤ N, pressureCoefficient h C f n (SimilarityProfile.inner h (profilePoint t x)) = 0) :
-    ProblemStatement.navierStokesResidual (slowVelocity N h C f) (slowPressureField N h f) t x =
-      truncationResidual N h C f t x := by
-  rw [navierStokesResidual_slowVelocity hh hh1 N C f ht hs hv hf hu hπ]
-  simp only [radialFluxExpansion, angularExpansion, axialExpansion,
-    finiteSeries_eq_zero _ _ _ _ _ hA, finiteSeries_eq_zero _ _ _ _ _ hZ,
-    finiteSeries_eq_zero _ _ _ _ _ hR, mul_zero, zero_add]
-  rfl
 
 end NavierStokes.SlowExpansionResidual

@@ -68,13 +68,6 @@ instance transverseDerivatives_complete [CompleteSpace E] (T : ℝ) (hT : 0 ≤ 
     (m : Icc (0 : ℝ) T → E) : CompleteSpace (transverseDerivatives T hT m) :=
   (transverseDerivatives_closed T hT m).completeSpace_coe
 
-/-- The zero initial trace is exactly the zero-mean condition on the time derivative. -/
-theorem transverseDerivatives_integral_zero (T : ℝ) (hT : 0 ≤ T)
-    (m : Icc (0 : ℝ) T → E) (u : transverseDerivatives T hT m) :
-    (∫ t in 0..T, (u : TimeLp T E) t) = 0 := by
-  have hi := u.property.1
-  rw [initialTrace_eq_integral] at hi
-  exact neg_eq_zero.mp hi
 
 /-- Every genuine absolutely continuous zero-endpoint transverse path with an
 L² derivative belongs to this Hilbert model.  Thus the test space is not an
@@ -158,15 +151,6 @@ theorem transverseDisplacement_tangent (f : TimeLp T E) (t : Icc (0 : ℝ) T) :
     ⟪m t, transverseDisplacement T hT m H K hK hH hsmall f t⟫_ℝ = 0 :=
   (transverseSolver T hT m H K hK hH hsmall f).property.2 t
 
-/-- The derivative of the constructed displacement is the solved L² field,
-as an actual almost-everywhere derivative of its continuous real-time representative. -/
-theorem transverseDisplacement_hasDerivAt_ae (f : TimeLp T E) :
-    ∀ᵐ t ∂timeMeasure T,
-      HasDerivAt (realPrimitive T
-        (transverseSolver T hT m H K hK hH hsmall f : TimeLp T E))
-        ((transverseSolver T hT m H K hK hH hsmall f : TimeLp T E) t) t :=
-  realPrimitive_hasDerivAt_ae T
-    (transverseSolver T hT m H K hK hH hsmall f : TimeLp T E)
 
 /-- The actual weak transverse displacement equation, tested against every
 zero-endpoint displacement in the same moving plane. -/
@@ -206,71 +190,8 @@ theorem transverseSolver_norm (f : TimeLp T E) :
 @[simp] theorem transverseDisplacement_zero :
     transverseDisplacement T hT m H K hK hH hsmall 0 = 0 := map_zero _
 
-/-- The inverse preserves sign, hence oddness in a parameter with unchanged coefficients. -/
-theorem transverseDisplacement_neg (f : TimeLp T E) :
-    transverseDisplacement T hT m H K hK hH hsmall (-f) =
-      -transverseDisplacement T hT m H K hK hH hsmall f := map_neg _ _
 
-/-- A zero angle mean of the forcing gives a zero angle mean of the displacement.
-The measure can be the normalized periodic angle measure; coefficients are fixed in this parameter. -/
-theorem transverseDisplacement_integral_zero {α : Type*} [MeasurableSpace α]
-    (μ : Measure α) (f : α → TimeLp T E) (hf : Integrable f μ)
-    (hmean : ∫ a, f a ∂μ = 0) :
-    (∫ a, transverseDisplacement T hT m H K hK hH hsmall (f a) ∂μ) = 0 := by
-  rw [(transverseDisplacement T hT m H K hK hH hsmall).integral_comp_comm hf,
-    hmean, map_zero]
 
-include K hK hH hsmall in
-/-- Existence and uniqueness follow from the actual sharp time primitive estimate,
-the pointwise potential bound, and closed transverse constraints. -/
-theorem existsUnique_transverse_weak_solution (f : TimeLp T E) :
-    ∃! u : transverseDerivatives T hT m,
-      ∀ v : transverseDerivatives T hT m,
-        ⟪(u : TimeLp T E), (v : TimeLp T E)⟫_ℝ -
-            ⟪timeMultiplier T hT H (transversePrimitive T hT m u),
-              transversePrimitive T hT m v⟫_ℝ =
-          -⟪f, transversePrimitive T hT m v⟫_ℝ := by
-  exact ⟨transverseSolver T hT m H K hK hH hsmall f,
-    transverseSolver_weak T hT m H K hK hH hsmall f,
-    fun u hu => transverseSolver_unique T hT m H K hK hH hsmall f u hu⟩
 
-include K hK hH hsmall in
-/-- The actual weak inverse has the source's form `η = F R⊥ ξ`, with continuous
-coordinates and both endpoint conditions.  The frame is prescribed coefficient
-data; neither a displacement nor a differential inverse is supplied. -/
-theorem exists_transverse_frame_displacement
-    {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
-    (m₀ : E) (R : U ≃ₗᵢ[ℝ] EulerTransverseFrameCoordinates.referencePlane m₀)
-    (F : Icc (0 : ℝ) T → E ≃L[ℝ] E)
-    (A : C(Icc (0 : ℝ) T, E →L[ℝ] E))
-    (hA : ∀ t, A t = (F t).symm.toContinuousLinearMap) (f : TimeLp T E) :
-    let mF := fun t => EulerTransverseFrameCoordinates.movingNormal (F t) m₀
-    ∃ (u : transverseDerivatives T hT mF)
-      (η : C(Icc (0 : ℝ) T, E)) (ξ : C(Icc (0 : ℝ) T, U)),
-      η = terminalPrimitive T hT (u : TimeLp T E) ∧
-      η ⟨0, le_rfl, hT⟩ = 0 ∧ η ⟨T, hT, le_rfl⟩ = 0 ∧
-      ξ ⟨0, le_rfl, hT⟩ = 0 ∧ ξ ⟨T, hT, le_rfl⟩ = 0 ∧
-      (∀ t, F t (R (ξ t) : E) = η t) ∧
-      ‖u‖ ≤ 2 * T * ‖f‖ ∧
-      ∀ v : transverseDerivatives T hT mF,
-        ⟪(u : TimeLp T E), (v : TimeLp T E)⟫_ℝ -
-          ⟪timeMultiplier T hT H (transversePrimitive T hT mF u),
-            transversePrimitive T hT mF v⟫_ℝ =
-          -⟪f, transversePrimitive T hT mF v⟫_ℝ := by
-  let mF := fun t => EulerTransverseFrameCoordinates.movingNormal (F t) m₀
-  let u := transverseSolver T hT mF H K hK hH hsmall f
-  let η := transverseDisplacement T hT mF H K hK hH hsmall f
-  let ξ := EulerTransverseFrameCoordinates.coordinatePath m₀ R A η
-  have h0 : η ⟨0, le_rfl, hT⟩ = 0 :=
-    transverseDisplacement_initial T hT mF H K hK hH hsmall f
-  have hT' : η ⟨T, hT, le_rfl⟩ = 0 :=
-    transverseDisplacement_terminal T hT mF H K hK hH hsmall f
-  refine ⟨u, η, ξ, rfl, h0, hT', ?_, ?_, ?_,
-    transverseSolver_norm T hT mF H K hK hH hsmall f,
-    transverseSolver_weak T hT mF H K hK hH hsmall f⟩
-  · exact EulerTransverseFrameCoordinates.coordinatePath_zero_at m₀ R A η _ h0
-  · exact EulerTransverseFrameCoordinates.coordinatePath_zero_at m₀ R A η _ hT'
-  · exact EulerTransverseFrameCoordinates.coordinatePath_reconstruct m₀ R F A hA η
-      (transverseDisplacement_tangent T hT mF H K hK hH hsmall f)
 
 end EulerTransverseVariationalInverse

@@ -39,9 +39,6 @@ theorem packetPosition_contDiffAt_two (t : ℝ) (ht : t ∈ Ioo 0 A.T) (x : Spac
   ((A.realPosition_contDiffAt_two t ht (A.ell • x)).comp (t,x)
     (contDiffAt_fst.prodMk (contDiffAt_snd.const_smul A.ell))).const_smul A.ell⁻¹
 
-theorem packetPosition_joint_continuous : Continuous A.packetPosition :=
-  (A.realPosition_joint_continuous.comp
-    (continuous_fst.prodMk (continuous_snd.const_smul A.ell))).const_smul A.ell⁻¹
 
 theorem realPosition_hasFDerivAt (t : Icc (0 : ℝ) A.T) (ht : (t : ℝ) ∈ Ioo 0 A.T) (x : Space) :
     HasFDerivAt (Function.uncurry A.realPosition)

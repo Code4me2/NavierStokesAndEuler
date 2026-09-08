@@ -69,13 +69,6 @@ theorem physicalCoefficient_timeDerivative (ell : ℝ)
   scaledCoefficient_timeDerivative T hT (graphCoefficient k m T A) ell
     (graphCoefficient k m T A₁) (graphCoefficient_timeDerivative k m T hT A A₁ htime)
 
-include hgraph in
-theorem physical_flow_eq (ell : ℝ) (hell : ell ≠ 0) (s t : ℝ) (x : Vector3) :
-    (flowData T hT (physicalCoefficient k m T A ell)).flow s t x =
-      ell • ((flowData T hT A).flow s t (graphLinear k m (ell⁻¹ • x))).1 := by
-  rw [physicalCoefficient,scaled_flow_eq T hT (graphCoefficient k m T A) ell hell]
-  rw [← graph_flow_eq k m T hT A hgraph]
-  rfl
 
 include hgraph in
 theorem physical_displacement_eq (ell : ℝ) (hell : ell ≠ 0)

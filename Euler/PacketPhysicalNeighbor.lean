@@ -1,4 +1,6 @@
-import Euler.PacketPhysicalStage
+import Euler.PacketMatrixContinuity
+import Euler.PacketWithinRay
+import Euler.PacketTangentInvariant
 import Euler.PacketNeighborControlled
 
 /-!

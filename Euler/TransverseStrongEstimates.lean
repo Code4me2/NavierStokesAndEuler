@@ -127,17 +127,6 @@ theorem coordinateDerivative_norm (hT : 0 ≤ T) (u : TimeLp T E) :
   exact mul_le_mul (frameLeftInverseDerivativePath_norm T Q Q₁ c hc hQ) hs
     (Real.sqrt_nonneg _) (by positivity)
 
-/-- The actual coercive forcing-to-coordinate-velocity map has a polynomial bound. -/
-theorem transverseCoordinateDerivative_norm (hT : 0 ≤ T)
-    (m : Icc (0 : ℝ) T → E) (H : C(Icc (0 : ℝ) T, E →L[ℝ] E))
-    (K : ℝ) (hK : 0 ≤ K) (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖^2)
-    (hsmall : K * (T^2/2) ≤ 1/2) (f : TimeLp T E) :
-    ‖coordinateDerivative T hT Q Q₁ c hc hQ
-      (transverseSolver T hT m H K hK hH hsmall f : TimeLp T E)‖ ≤
-      ((2 * (c⁻¹)^2 * ‖Q‖^2 * ‖Q₁‖ + c⁻¹ * ‖Q₁‖) * T + c⁻¹ * ‖Q‖) *
-        (2 * T * ‖f‖) := by
-  apply (coordinateDerivative_norm T Q Q₁ c hc hQ hT _).trans
-  exact mul_le_mul_of_nonneg_left (transverseSolver_norm T hT m H K hK hH hsmall f) (by positivity)
 
 /-- Inverting the projected strong equation is an exact equality of actual L² fields. -/
 theorem acceleration_eq_inverse (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T E)
@@ -191,30 +180,5 @@ theorem acceleration_norm (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T E)
       gcongr
     _ = _ := by ring
 
-/-- Applying the strong bound to the actual variational solver gives a polynomial
-acceleration estimate in terms of its already bounded coordinate velocity. -/
-theorem transverseCoordinateSecondDerivative_norm
-    (Q₂ : C(Icc (0 : ℝ) T, U →L[ℝ] E)) (hT : 0 < T)
-    (hd : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT.le Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (hd₁ : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT.le Q₁) (Q₂ t) (Icc (0 : ℝ) T) t)
-    (m : Icc (0 : ℝ) T → E) (hm : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ x : U, Q t x = η)
-    (H : C(Icc (0 : ℝ) T, E →L[ℝ] E)) (K : ℝ) (hK : 0 ≤ K)
-    (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖^2)
-    (hsmall : K * (T^2/2) ≤ 1/2)
-    (hframe : ∀ t, Q₂ t = -((H t).comp (Q t))) (f : TimeLp T E) :
-    let u : TimeLp T E := transverseSolver T hT.le m H K hK hH hsmall f
-    ‖coordinateSecondDerivative T hT.le Q Q₁ Q₂ c hc hQ H u f‖ ≤
-      c⁻¹ * ‖Q‖ * (‖f‖ + 2 * ‖Q₁‖ * ‖coordinateDerivative T hT.le Q Q₁ c hc hQ u‖) := by
-  let u : TimeLp T E := transverseSolver T hT.le m H K hK hH hsmall f
-  obtain ⟨v, _, _, hv, _, _, heq⟩ :=
-    transverseSolver_strong T hT.le Q Q₁ Q₂ c hc hQ hd hd₁ hT m hm hRange
-      H K hK hH hsmall hframe f
-  apply acceleration_norm T Q Q₁ c hc hQ hT.le
-  filter_upwards [hv, heq] with t hvt ht
-  rw [hvt]
-  exact ht
 
 end EulerTransverseStrongEstimates

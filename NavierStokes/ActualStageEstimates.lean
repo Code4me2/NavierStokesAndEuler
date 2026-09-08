@@ -206,20 +206,8 @@ noncomputable def cycleInputs : CycleInputs h DP (Fin 3 × IP) KP DS (Fin 3 × I
   angular := angularInput R M hN
   pressure := pressureInput R M hN
 
-theorem cycleInputs_potential (j : ℕ) :
-    (cycleInputs R M hN W).potential j = fun w =>
-      (W.particularPotential j).vector w + (W.signedPotential j).vector w +
-        ((ActualMeanPhysicalData.initialCycleData M).temporalFamily j).angularField w +
-        ((ActualMeanPhysicalData.initialCycleData M).rankFamily j).angularField w := rfl
 
-theorem cycleInputs_direct (j : ℕ) :
-    (cycleInputs R M hN W).direct j =
-      ((ActualMeanPhysicalData.initialCycleData M).angularIncrementFamily j).angularField := rfl
 
-theorem cycleInputs_pressure (j : ℕ) :
-    (cycleInputs R M hN W).pressureField j = fun w =>
-      (W.particularPressure j).pressure w + (W.signedPressure j).pressure w +
-        ((ActualMeanPhysicalData.initialCycleData M).pressureIncrementFamily j).field w := rfl
 
 theorem cycleInputs_metadata : (cycleInputs R M hN W).Metadata ChartScales.kappa := by
   constructor
@@ -402,21 +390,6 @@ noncomputable def stageEstimates_of_representations
       (fun J => DiagonalJetBounds.uncutPrefix P (J + 1))
       (fun J => ActualCyclePreservation.broad_invariant (R.invariant J)) d
 
-theorem stageEstimates_ledger
-    (hqbig : 0 < qbig) {Nres : ℕ} (hNres : 4 ≤ Nres)
-    (hGeom : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (d : ∀ J, ActualCycleResidualBounds.PhysicalData B Nres
-      (ActualCyclePreservation.state B N0 J).state
-      (MixedDiagonalResidual.uncutVelocity A Bdirect J)
-      (DiagonalJetBounds.uncutPrefix P (J + 1))) :
-    let E := stageEstimates_of_representations R M hN W WA WP e hq hqbig hNres hGeom d
-    E.gain = ActualIterationLedger.gain h ∧
-      E.potentialLoss = PhysicalStageBounds.potentialLoss h h 0 ∧
-      E.directLoss = PhysicalStageBounds.directLoss h 0 ∧
-      E.pressureLoss = PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 ∧
-      E.backgroundLoss = backgroundLoss WA.alpha WA.shift ∧
-      E.residualLoss = ActualCycleResidualBounds.fixedLoss :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 end StageEstimates
 

@@ -61,9 +61,7 @@ def state (hJ : 1 ≤ J) : SmoothState (H.parent hJ) := (H.packet hJ).state
 theorem state_label (hJ : 1 ≤ J) : (H.state hJ).labels.K=(X^D)^80 :=
   (H.packet hJ).state_label_constant
 
-theorem parent_time (hJ : 1 ≤ J) : (H.parent hJ).T=baseHorizon J X := rfl
 
-theorem parent_scale (hJ : 1 ≤ J) : (H.parent hJ).ell=supportScale J X 0 := rfl
 
 def lowBounds (hJ : 1 ≤ J) : LowBounds (H.parent hJ) :=
   FirstPacketChoice.lowBounds (X^(-2 : ℝ)) H.tilt_bound (baseRadius X) H.core_pos H.core_one

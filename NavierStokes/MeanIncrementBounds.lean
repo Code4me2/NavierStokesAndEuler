@@ -795,14 +795,6 @@ theorem directional_zero_of_line_const {f : D → ℝ} {x v : D}
   rw [he] at hd
   exact hd.unique (hasDerivAt_const 0 (f x))
 
-/-- A field depending only on the slow projection has no fast derivative. -/
-theorem directional_zero_of_factor {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
-    (π : D →L[ℝ] P) {f : P → ℝ} {x v : D}
-    (hf : DifferentiableAt ℝ f (π x)) (hv : π v = 0) :
-    fderiv ℝ (fun y => f (π y)) x v = 0 := by
-  change fderiv ℝ (f ∘ π) x v = 0
-  rw [(hf.hasFDerivAt.comp x π.hasFDerivAt).fderiv]
-  simp only [ContinuousLinearMap.comp_apply, hv, map_zero]
 
 section PressureReconstruction
 
@@ -1077,31 +1069,6 @@ theorem tangential_recomputedPressure_change_mem
   simpa only [he] using
     axialResidual_change_sub_fast_mem ho hb hm hh hH W hW p0 (p1 - p0) Tz hp0 hδ
 
-include hd ho hb hm hh hH hκ hW hf hg hsf hsg in
-/-- In the slow rank update the fast derivatives vanish, so the estimates
-hold directly for the full changes of the tangential residuals. -/
-theorem tangential_recomputedPressure_slow_change_mem
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane)
-    (Tθ Tz : Field (PressureStream.Lift P))
-    (hslowθ : ∀ n x, x ∈ (logStripData a b cL cR ha hcL hcR ε S hε hεone hS).domain →
-      fderiv ℝ (inc.angular n) x o.vT = 0)
-    (hslowz : ∀ n x, x ∈ (logStripData a b cL cR ha hcL hcR ε S hε hεone hS).domain →
-      fderiv ℝ (inc.axial n) x o.vT = 0) :
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) (H + 1 - 2 * κ)
-      (thetaResidual o base (updated mean inc) W Tθ - thetaResidual o base mean W Tθ) ∧
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) (H + 1 - 2 * κ)
-      (axialResidual o base (updated mean inc) W
-          (reconstructedPressure d a b hab M v o base (updated mean inc) W) Tz -
-        axialResidual o base mean W (reconstructedPressure d a b hab M v o base mean W) Tz) := by
-  obtain ⟨hθ, hz⟩ := tangential_recomputedPressure_change_mem ha hab hd hcL hcR ε S hε hεone hS
-    ho hb hm hh hH hκ W hW hf hg hsf hsg M v Tθ Tz
-  constructor
-  · apply class_congr hθ
-    intro n x hx
-    simp only [Pi.sub_apply, Operators.fastTime, hslowθ n x hx, mul_zero, sub_zero]
-  · apply class_congr hz
-    intro n x hx
-    simp only [Pi.sub_apply, Operators.fastTime, hslowz n x hx, mul_zero, sub_zero]
 
 end ReconstructedTangential
 
@@ -1222,40 +1189,8 @@ private theorem physical_radialAngular (b m w : MeanResidual.Components) :
     MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply, Pi.smul_apply, smul_eq_mul]
   ring
 
-theorem thetaResidual_eq_MeanResidual (b m w : MeanResidual.Components)
-    (T : MeanResidual.Scalar) (n : ℕ) (q : SpaceTime) :
-    thetaResidual physicalOperators (physicalTriple b) (physicalTriple m)
-      (physicalCovariance w) (physicalField T) n q = MeanResidual.Etheta b m w T q := by
-  unfold thetaResidual
-  rw [physical_thetaRadial, physical_thetaAxial]
-  simp only [
-    Pi.sub_apply, Pi.add_apply, physical_time, physical_radialDiv, physical_dz,
-    physical_viscosity, physicalTriple, physicalField, MeanResidual.Etheta, one_mul]
-  ring
 
-theorem axialResidual_eq_MeanResidual (b m w : MeanResidual.Components)
-    (p T : MeanResidual.Scalar) (n : ℕ) (q : SpaceTime) :
-    axialResidual physicalOperators (physicalTriple b) (physicalTriple m)
-      (physicalCovariance w) (physicalField p) (physicalField T) n q =
-        MeanResidual.Ez b m w p T q := by
-  unfold axialResidual
-  rw [physical_axialRadial, physical_axialAxial]
-  simp only [
-    Pi.sub_apply, Pi.add_apply, physical_time, physical_radialDiv, physical_dz,
-    physical_viscosity, physicalTriple, physicalField, MeanResidual.Ez, zero_mul, sub_zero]
-  rfl
 
-theorem gr_eq_MeanResidual (b m w : MeanResidual.Components) (n : ℕ) (q : SpaceTime) :
-    gr physicalOperators (physicalTriple b) (physicalTriple m) (physicalCovariance w) n q =
-      MeanResidual.gr b m w q := by
-  unfold gr
-  rw [physical_radialRadial, physical_radialAxial, physical_radialAngular]
-  simp only [
-    Pi.neg_apply, Pi.sub_apply, Pi.add_apply, Pi.mul_apply,
-    physical_time, physical_radialDiv, physical_dz, physical_viscosity]
-  simp only [Operators.invRadius, physicalOperators, physicalTriple, physicalField,
-    MeanResidual.gr, div_eq_mul_inv, one_mul]
-  ring
 
 end PhysicalIdentification
 

@@ -147,34 +147,6 @@ theorem velocityCoefficient_bound (n : ℕ) :
       (mul_le_mul_of_nonneg_right (graphCost_embedding P R hR) hV)
       (by have hc := coverRadius_nonneg R hR; unfold outputRadius; linarith) n
 
-theorem derivativeCoefficient_bound (n : ℕ) :
-    ‖(derivativeCoefficient P u C R hC hR hu hdiv).jet n‖ ≤
-      outputDerivativeSize P C R hC hR*(outputRadius R)^n*(n.factorial : ℝ)^2 := by
-  have he := (amplitude_pos P C R hC hR).le
-  have hT := staticTimeCost_nonneg P R hR
-  have hunit := ((correctionBudget P u C R hC hR hu hdiv).timeDerivativeTower P).zeroGraphCoefficient_bound
-    (retainedRadius R) (amplitude P C R hC hR*staticTimeCost P R)
-    (retainedRadius_pos R hR) (mul_nonneg he hT) (time_weighted P u C R hC hR hu hdiv) n
-  rw [← SmoothTimeField.jet_eq_of_field_eq _ _ (unitDerivativeCoefficient_graph P u C R hC hR hu hdiv) n] at hunit
-  have h := (EulerTimeRescaling.derivativeCoefficient_jet_norm (amplitude P C R hC hR)
-    (amplitude_pos P C R hC hR) (unitDerivativeCoefficient P u C R hC hR hu hdiv) n).trans
-    (mul_le_mul_of_nonneg_left hunit (sq_nonneg _))
-  have hi : (amplitude P C R hC hR)⁻¹*amplitude P C R hC hR=1 :=
-    inv_mul_cancel₀ (amplitude_pos P C R hC hR).ne'
-  apply h.trans
-  calc
-    _ = ((amplitude P C R hC hR)⁻¹*sobolevEmbeddingConstant P 3*staticTimeCost P R)*
-        (coverRadius R)^n*(n.factorial : ℝ)^2 := by
-      unfold coverRadius
-      calc
-        _ = ((amplitude P C R hC hR)⁻¹*amplitude P C R hC hR)*
-          (((amplitude P C R hC hR)⁻¹*sobolevEmbeddingConstant P 3*staticTimeCost P R)*
-            (‖coordinateEquiv.symm.toContinuousLinearMap‖*(retainedRadius R)⁻¹)^n*(n.factorial : ℝ)^2) := by ring
-        _ = _ := by rw [hi,one_mul]
-    _ ≤ _ := jet_mono (outputDerivativeSize_nonneg P C R hC hR) (coverRadius_nonneg R hR)
-      (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left (graphCost_embedding P R hR) (inv_nonneg.mpr he)) hT)
-      (by have hc := coverRadius_nonneg R hR; unfold outputRadius; linarith) n
 
 theorem localField_bound (t : Icc (0 : ℝ) (amplitude P C R hC hR)) :
     (localField P u C R hC hR hu hdiv t).HasJetBound (outputVelocitySize P C R) (outputRadius R) := by

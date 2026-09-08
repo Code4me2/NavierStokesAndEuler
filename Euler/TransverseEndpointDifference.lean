@@ -180,20 +180,5 @@ variable (m n : Icc (0 : ℝ) T → E)
   (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ v : U, Q t v = η)
   (hRange' : ∀ t η, ⟪n t, η⟫_ℝ = 0 → ∃ v : U, P t v = η)
 
-include c hc hQ hd hP hp hm hn hRange hRange' in
-/-- A genuine neighboring-label bound on the physical endpoint solutions. -/
-theorem affineEndpoint_sub_norm_le (d a r : ℝ)
-    (hD : T * ‖Q₁‖ + ‖Q‖ ≤ d) (hD' : T * ‖P₁‖ + ‖P‖ ≤ d)
-    (hA : 1 + T ^ 2 * ‖H‖ ≤ a) (hA' : 1 + T ^ 2 * ‖G‖ ≤ a)
-    (hr : transportCost T Q Q₁ c ≤ r) (hr' : transportCost T P P₁ c ≤ r) :
-    ‖endpointDerivative T hT m H K hK hH hsmall (affineTrial T hT Q Q₁) -
-      endpointDerivative T hT n G K hK hG hsmall (affineTrial T hT P P₁)‖ ≤
-      affineCost T * endpointDifferenceCost d (2*r^2) a
-        (derivativeDistance T Q Q₁ P P₁) (T^2*‖H-G‖) := by
-  rw [← fixedEndpointDerivative_eq_endpoint T hT Q Q₁ H c hc hQ hd K hK hH hsmall
-    m hm hRange, ← fixedEndpointDerivative_eq_endpoint T hT P P₁ G c hc hP hp K hK hG hsmall
-    n hn hRange']
-  exact fixedAffineEndpoint_sub_norm_le T hT Q Q₁ H c hc hQ hd K hK hH hsmall
-    P P₁ G hP hp hG d a r hD hD' hA hA' hr hr'
 
 end EulerTransverseEndpointDifference

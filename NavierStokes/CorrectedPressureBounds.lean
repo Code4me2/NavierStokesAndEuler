@@ -40,10 +40,6 @@ theorem editSize_nonneg {d : TailData} {K : ℝ} (w : ResetWitness d K) :
     0 ≤ editSize d K :=
   (norm_nonneg (w.coefficients 0)).trans (w.coefficient_bound 0)
 
-theorem witness_K_nonneg {d : TailData} {K : ℝ} (w : ResetWitness d K) : 0 ≤ K := by
-  have he := editSize_nonneg w
-  dsimp [editSize] at he
-  exact nonneg_of_mul_nonneg_left he (pow_pos d.core.lam_pos 28)
 
 theorem relative_abs_le_two_norm (c : Coeff) (t : ℝ) : |relative c t| ≤ 2 * ‖c‖ := by
   have h0 : |c 0| ≤ ‖c‖ := by simpa only [Real.norm_eq_abs] using norm_le_pi_norm c 0
@@ -333,11 +329,6 @@ theorem pressureChange_joint_contDiff {d : TailData} {K : ℝ} (w : ResetWitness
   rw [heq]
   exact contDiff_const.mul (intervalPrimitive_contDiff (editDensity_contDiff w) _)
 
-theorem correctedPi_joint_contDiff {d : TailData} {K : ℝ} (w : ResetWitness d K) :
-    ContDiff ℝ ∞ (fun p : ℝ × ℝ => correctedPi w p.1 p.2) := by
-  convert! (cleanPi_joint_contDiff d).add (pressureChange_joint_contDiff w) using 1
-  funext p
-  simp [pressureChange]
 
 theorem correctedPi_hasDerivAt_y {d : TailData} {K : ℝ}
     (w : ResetWitness d K) (y eta : ℝ) :
@@ -614,21 +605,6 @@ theorem corrected_bounds_of_small {d : TailData} {K : ℝ}
     (correctedPi_deriv_abs_le w hy heta).trans
       (mul_le_mul_of_nonneg_right hderiv (sq_nonneg _))⟩
 
-/-- The smallness condition follows from an explicit threshold depending only on K. -/
-theorem exists_editSize_small_threshold (K : ℝ) (hK : 0 ≤ K) :
-    ∃ lam0 : ℝ, 0 < lam0 ∧ ∀ d : TailData, d.core.lam < lam0 → editSize d K ≤ 1 := by
-  refine ⟨1 / (K + 1), by positivity, ?_⟩
-  intro d hd
-  have hLamOne : d.core.lam ≤ 1 := by linarith [d.core.lam_lt]
-  have hp : d.core.lam ^ 28 ≤ d.core.lam := by
-    rw [show (28 : ℕ) = 27 + 1 by rfl, pow_succ]
-    simpa only [one_mul] using mul_le_mul_of_nonneg_right
-      (pow_le_one₀ (n := 27) d.core.lam_pos.le hLamOne) d.core.lam_pos.le
-  have hprod : d.core.lam * (K + 1) ≤ 1 :=
-    (le_div_iff₀ (by positivity : 0 < K + 1)).mp hd.le
-  have h := mul_le_mul_of_nonneg_left hp hK
-  unfold editSize
-  nlinarith [d.core.lam_pos]
 
 theorem releaseSquare_le_core_endpoint (d : TailData) {eta : ℝ} (heta : |eta| ≤ 1) :
     releaseSquare d ≤ (4 * Real.exp (6 / 5)) * finalAngular d (d.core.endpoint, eta) ^ 2 := by
@@ -647,26 +623,6 @@ theorem releaseSquare_le_core_endpoint (d : TailData) {eta : ℝ} (heta : |eta| 
       mul_le_mul_of_nonneg_right (clock_le_four_angular_square d _ heta) (Real.exp_pos _).le
     _ = _ := by ring
 
-theorem pressureChange_core_endpoint_bounds {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) (y : ℝ) {eta : ℝ} (heta : |eta| ≤ 1) :
-    |pressureChange w y eta| ≤
-      (40 * Real.exp 5 * Real.exp (6 / 5) * editSize d K) *
-        finalAngular d (d.core.endpoint, eta) ^ 2 ∧
-    |deriv (pressureChange w y) eta| ≤
-      (48 * Real.exp 5 * Real.exp (6 / 5) * editSize d K) *
-        finalAngular d (d.core.endpoint, eta) ^ 2 := by
-  have hsize := editSize_nonneg w
-  constructor
-  · apply (pressureChange_abs_le w y eta).trans
-    have h := mul_le_mul_of_nonneg_left (releaseSquare_le_core_endpoint d heta)
-      (show 0 ≤ 10 * editSize d K * Real.exp 5 by positivity)
-    convert! h using 1
-    ring
-  · apply (pressureChange_deriv_abs_le w y eta).trans
-    have h := mul_le_mul_of_nonneg_left (releaseSquare_le_core_endpoint d heta)
-      (show 0 ≤ 12 * editSize d K * Real.exp 5 by positivity)
-    convert! h using 1
-    ring
 
 /-- Canonical forward pressure with the unchanged whole-axis pressure datum. -/
 theorem correctedPi_eq_axisPressure_add {d : TailData} {K : ℝ}
@@ -680,11 +636,5 @@ theorem correctedPi_eq_axisPressure_add {d : TailData} {K : ℝ}
   unfold correctedPi SchedulePressure.axisPressure
   linarith
 
-theorem pressureChange_hasDerivAt_y {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) (y eta : ℝ) :
-    HasDerivAt (fun t => pressureChange w t eta) ((1 / 2) * editDensity w (y, eta)) y := by
-  convert! (correctedPi_hasDerivAt_y w y eta).sub (Pi_hasDerivAt_y d y eta) using 1
-  dsimp [editDensity]
-  ring
 
 end NavierStokes.CorrectedPressureBounds

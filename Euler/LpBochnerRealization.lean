@@ -67,22 +67,5 @@ theorem realization_ae (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
 
 variable [SFinite μ]
 
-/-- Fubini preserves the exact L² norm, with no angle or dimension factor. -/
-theorem realization_norm (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
-    (hf : AEStronglyMeasurable f (μ.prod ν))
-    (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) :
-    ‖realization w f hf hrep‖ = ‖w‖ := by
-  have he : ‖realization w f hf hrep‖^2 = ‖w‖^2 := by
-    rw [norm_sq_eq_integral]
-    calc
-      _ = ∫ z, ‖f z‖^2 ∂μ.prod ν := by
-        apply integral_congr_ae
-        filter_upwards [realization_ae w f hf hrep] with z hz
-        rw [hz]
-      _ = ∫ x, ∫ y, ‖f (x,y)‖^2 ∂ν ∂μ :=
-        integral_prod _ ((memLp_two_iff_integrable_sq_norm hf).1 (field_memLp w f hf hrep))
-      _ = ∫ x, ‖w x‖^2 ∂μ := integral_congr_ae (fiber_integral w f hrep)
-      _ = _ := (norm_sq_eq_integral w).symm
-  nlinarith [norm_nonneg (realization w f hf hrep), norm_nonneg w]
 
 end EulerLpBochnerRealization

@@ -101,10 +101,6 @@ theorem tangentBlock_represents (l : Index B N0) :
     ((primaryPiece l).coefficients.withCutoff (primaryPiece l).cutoff)
     (phase l) (angularMode l) (tangent_amplitude_angle l) (phase_split l) n x i
 
-theorem curlBlock_represents (l : Index B N0) :
-    (curlBlock l).oscillation = (primaryPiece l).velocity - (primaryPiece l).tangentVelocity :=
-  (primaryPiece l).differenceBlock_represents (phase l) (angularMode l)
-    (exact_amplitude_angle l) (tangent_amplitude_angle l) (phase_split l)
 
 theorem gaussianBlock_represents (l : Index B N0) :
     (gaussianBlock l).oscillation = (primaryPiece l).excluded :=
@@ -187,10 +183,6 @@ noncomputable def initialCycleState (B N0 : ℕ) : CorrectionStep.CycleState (In
   coefficients := coefficients B N0
   axisymmetricAlias := initialAlias B N0
 
-theorem initialState_eq_bands (B N0 : ℕ) :
-    initialState B N0 = GaugeInitialization.initializedBands ActualPrimary.commonGauge ActualPrimary.rankData
-      ActualPrimary.h (CommonWindow.index ActualPrimary.h) axial (ActualPrimary.commonContext B)
-      (coefficients B N0).labels primaryPiece (baseError B) := rfl
 
 theorem initialState_error_components (B N0 : ℕ) :
     (initialState B N0).errors.base = baseError B ∧
@@ -296,15 +288,7 @@ theorem initialResidualBlock_band (l : Index B N0) : (initialResidualBlock l).Ba
   exact HarmonicResidual.residualBlock_band (ActualPrimary.commonContext B) (initialState B N0)
     (primaryBlock l) (gaussianBlock l).velocity 0 (primaryBlock_band l) hG hA
 
-theorem initialResidualBlock_zeroMode (l : Index B N0) :
-    HarmonicWaveInteraction.ZeroMode (initialResidualBlock l) :=
-  HarmonicResidual.residualBlock_zero_mode (ActualPrimary.commonContext B) (initialState B N0)
-    (primaryBlock l) (gaussianBlock l).velocity 0
 
-theorem initialResidualBlock_symmetric (l : Index B N0) (n : ℕ) (i : Fin 3) :
-    HarmonicFields.ConjugateSymmetric ((initialResidualBlock l).velocity n i) :=
-  HarmonicResidual.residualBlock_conjugate (ActualPrimary.commonContext B) (initialState B N0)
-    (primaryBlock l) (gaussianBlock l).velocity 0 n i
 
 end NavierStokes.ActualInitialization
 
@@ -416,10 +400,6 @@ theorem radius_pos (B : ℕ) (x : Point) (hx : x ∈ strip.domain) :
 theorem strip_time (x : Point) (hx : x ∈ strip.domain) : 0 < x.2.1.1 :=
   BaseContextAssembly.nativeStrip_time ActualPrimary.nominal ActualPrimary.standardRegion hx
 
-theorem tangent_coefficients_uniform (B N0 : ℕ) (i : Fin 3) (j : ℤ) :
-    LabelSumBounds.UniformWaveClass strip envelope (1/2)
-      (fun l : Index B N0 => fun n x => (tangentBlock l).velocity n i j x) :=
-  (ActualPrimaryBounds.tangent_block_uniform.1 i j).reindex Prod.swap
 
 /-- The exact curl construction retains the same pressure coefficient. -/
 theorem pressure_coefficients_uniform (B N0 : ℕ) (j : ℤ) :
@@ -662,8 +642,6 @@ noncomputable def geometry : SignedMeanGain.Geometry where
   time := (1, 0)
   temporal := TorusInverse.vector .temporal
 
-theorem geometry_strip : geometry.strip = strip := rfl
-theorem geometry_slowStrip : geometry.slowStrip = slowStrip := rfl
 theorem geometry_operators (B : ℕ) : geometry.operators = (ActualPrimary.commonContext B).operators := rfl
 
 theorem initial_primitive (B N0 : ℕ) :
@@ -1466,52 +1444,10 @@ theorem initial_invariant (B N0 : ℕ) :
   axisFlat := initial_axis_flat B N0
   baseAngular := initial_base_angular B N0
 
-/-- The radial component is included: all three actual good mean
-residuals have exponent six fifths. -/
-theorem initial_mean_all_components (B N0 : ℕ) (i : Fin 3) :
-    MeanClass strip (6/5) (fun n x =>
-      (initialState B N0).meanGoodResidual (ActualPrimary.commonContext B) n x i) := by
-  have he : (1 + (1 : ℝ)/5) = 6/5 := by norm_num
-  fin_cases i
-  · apply initial_radial_mean_class
-    simpa only [debt, Matrix.cons_val_zero, he] using initial_debt B N0 0
-  · have hc := (initial_mean B N0).angular
-    simp only [he] at hc
-    exact hc
-  · have hc := (initial_mean B N0).axial
-    simp only [he] at hc
-    exact hc
-
-theorem initial_fullDivergence (B N0 n : ℕ) {x : Point × ℝ} (hx : x.1 ∈ strip.domain) :
-    CorrectionStep.fullDivergence (ActualPrimary.commonContext B) (initialState B N0) n x = 0 :=
-  ActualInitialMeanEquation.initialized_fullDivergence B N0 n ⟨hx,trivial⟩
-
-/-- Exact decomposition of the actual differentiated PDE, with both the
-mean and every stored excluded error retained. -/
-theorem initial_fullResidual (B N0 n : ℕ) {x : Point × ℝ} (hx : x.1 ∈ strip.domain) (i : Fin 3) :
-    CorrectionStep.fullResidual (ActualPrimary.commonContext B) (initialState B N0) n x i =
-      (∑ l ∈ (coefficients B N0).labels n, (initialResidualBlock l).oscillation n x i) +
-      (initialState B N0).meanGoodResidual (ActualPrimary.commonContext B) n x.1 i +
-      (initialState B N0).errors.total n x i := by
-  have he := congrArg (fun f : Oscillation Point => f n x i)
-    (CorrectionStep.fullResidual_decomposition (ActualPrimary.commonContext B) (initialState B N0))
-  change CorrectionStep.fullResidual _ _ n x i = CorrectionStep.fullGoodWaveResidual _ _ n x i +
-    CorrectionStep.angularMeanVector (CorrectionStep.fullGoodResidual _ _) n x.1 i + _ at he
-  rw [initial_goodWave_grouped B N0 n hx i,
-    CorrectionStep.angularMean_fullGoodResidual (initial_meanHypotheses B N0) n hx i] at he
-  exact he
 
 
-/-- All derivatives of the complete stored excluded error satisfy estimates for every
-power on the full angular and auxiliary lift. -/
-theorem initial_excluded_all_gains (B N0 : ℕ) (beta : ℝ) :
-    UnweightedClass (HarmonicWaveInteraction.productStrip strip) beta
-      (initialState B N0).errors.total :=
-  ActualInitialExcluded.initializedErrors_vector_all_gains B N0 beta
 
-theorem initial_excluded_component_all_gains (B N0 : ℕ) (beta : ℝ) (i : Fin 3) :
-    UnweightedClass (HarmonicWaveInteraction.productStrip strip) beta
-      (fun n x => (initialState B N0).errors.total n x i) :=
-  ActualInitialExcluded.initializedErrors_all_gains B N0 beta i
+
+
 
 end NavierStokes.ActualInitialization

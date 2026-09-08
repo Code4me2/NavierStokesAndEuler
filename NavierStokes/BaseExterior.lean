@@ -325,7 +325,6 @@ end ExteriorSummation
 
 section PressureScaling
 
-theorem q_radial (h t s s' z : ℝ) : q h (t, (s, z)) = q h (t, (s', z)) := rfl
 
 theorem eta_radial (h t s s' z : ℝ) : eta h (t, (s, z)) = eta h (t, (s', z)) := rfl
 
@@ -637,15 +636,6 @@ theorem nominal_base_residual_germ_zero {a : ℕ → ℕ} (ha : StrictMono a)
     (nominalExteriorRadius W)).mem_nhds hz] with y hy
   exact nominal_base_residual_zero W ha hy
 
-/-- Every physical derivative of the actual Cartesian residual is exactly
-zero on the exterior, not just asymptotically small. -/
-theorem nominal_base_residual_jets_zero {a : ℕ → ℕ} (ha : StrictMono a)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) (m : ℕ) :
-    iteratedFDeriv ℝ m (fun y => navierStokesResidual
-      (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-      (basePressure a F.data.h W.axis.normalization (nominalCoefficients W)) y.1 y.2) z = 0 := by
-  rw [(SolenoidalDiagonal.iteratedFDeriv_eventuallyEq (nominal_base_residual_germ_zero W ha hz) m).self_of_nhds,
-    iteratedFDeriv_fun_zero, Pi.zero_apply]
 
 end NominalExterior
 
@@ -703,38 +693,7 @@ theorem near_one_in_exterior {h R : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hR : 0 
 
 open AssembledSlowBase
 
-/-- For each fixed positive radius on the central plane, the actual base
-equals the explicit heat extension on a whole terminal time interval. -/
-theorem nominal_base_terminal_extension {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {a : ℕ → ℕ} (ha : StrictMono a) {x : Space} (hx : x 2 = 0)
-    (hs : 0 < AxisymmetricFields.radialEnergy x) :
-    ∃ δ : ℝ, 0 < δ ∧
-      (∀ t ∈ Ioo (1 - δ) 1,
-        baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) (t, x) =
-          heatVelocity (nominalHeatNormalization W) F.data.h (t, x) ∧
-        basePressure a F.data.h W.axis.normalization (nominalCoefficients W) (t, x) =
-          heatPressureField (nominalHeatNormalization W) F.data.h (t, x)) ∧
-      ContDiffOn ℝ ∞ (fun t => heatVelocity (nominalHeatNormalization W) F.data.h (t, x)) (Iic 1) ∧
-      ContDiffOn ℝ ∞ (fun t => heatPressureField (nominalHeatNormalization W) F.data.h (t, x)) (Iic 1) := by
-  refine ⟨AxisymmetricFields.radialEnergy x / (nominalExteriorRadius W + 1),
-    div_pos hs (by linarith [nominalExteriorRadius_pos W]), ?_, ?_, ?_⟩
-  · intro t ht
-    have hm := near_one_in_exterior F.data.h_pos F.data.h_lt_half (nominalExteriorRadius_pos W).le hx hs ht
-    exact ⟨(nominal_base_eq_heat W ha).1 hm, (nominal_base_eq_heat W ha).2 hm⟩
-  · exact (heatVelocity_contDiffOn_closed (nominalHeatNormalization W) F.data.h_pos).comp
-      (contDiffOn_id.prodMk contDiffOn_const) (fun _ ht => ⟨ht, hs⟩)
-  · exact (heatPressureField_contDiffOn_closed (nominalHeatNormalization W) F.data.h_pos).comp
-      (contDiffOn_id.prodMk contDiffOn_const) (fun _ ht => ⟨ht, hs⟩)
 
-theorem nominal_base_meridional_zero {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {a : ℕ → ℕ} (ha : StrictMono a) {z : SpaceTime}
-    (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) :
-    baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) z 2 = 0 ∧
-      z.2 0 * baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) z 0 +
-        z.2 1 * baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) z 1 = 0 := by
-  rw [(nominal_base_eq_heat W ha).1 hz, heatVelocity_eq_angularVector]
-  simp [BaseResidual.angularVector, coordinateVector, Fin.ext_iff]
-  ring
 
 end TerminalExtension
 

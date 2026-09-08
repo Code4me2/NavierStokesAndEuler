@@ -554,21 +554,6 @@ theorem outputs_zero_germs {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   filter_upwards [hpr, hr] with y hpy hry
   simp only [retainedGood, hpy, hry, add_zero]
 
-/-- Containment of the two closed input supports is enough to supply
-the local-estimate/zero-germ alternative; no output support is assumed. -/
-theorem input_germ_cover_of_tsupport {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    (a : WaveFamily D I) {C : ℕ → I → Set D}
-    (ha : ∀ n i, tsupport (a.amplitude n i) ⊆ C n i)
-    (hp : ∀ n i, tsupport (a.pressure n i) ⊆ C n i) (n : ℕ) (i : I) (x : D) :
-    x ∈ C n i ∨ (a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧
-      (a.pressure n i =ᶠ[𝓝 x] fun _ => 0) := by
-  classical
-  by_cases hx : x ∈ C n i
-  · exact Or.inl hx
-  · exact Or.inr ⟨PeriodizedWaveBounds.zero_germ_of_support isClosed_closure subset_closure
-      (fun hi => hx (ha n i hi)),
-      PeriodizedWaveBounds.zero_germ_of_support isClosed_closure subset_closure
-      (fun hi => hx (hp n i hi))⟩
 
 end WaveFamily
 
@@ -1042,22 +1027,6 @@ theorem common_bounds_from_native_local (K : PeriodizedWaveBounds.Cells D I)
     · exact Or.inr (common_curl_zero_germ a K hs s d (not_exists.mp hi))
   · exact a.globalGood_class_of_native K hs d hw hgood.to_localJets
 
-theorem common_bounds_from_raw_local (K : PeriodizedWaveBounds.Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} {d : GraphDirections D} {W : ℕ → D → ℝ} {α κ : ℝ}
-    (hW : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (h : InputBounds s K.carrier (fun n _ => W n) α κ d (rawFamily a))
-    (hψ : LocalUnweighted s K.carrier 0 a.cutoff)
-    (hκ : κ ≤ 1 / 2) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → b ≤ ‖a.background.normal s d n x‖)
-    (hupper : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → ‖a.background.normal s d n x‖ ≤ M)
-    (hfreq : LocalUnweighted s K.carrier (1 / 2) (fun n _ _ => 1 / a.background.frequency n)) :
-    WaveClass s W α a.common.amplitude ∧
-    WaveClass s W α (a.commonCorrected s d).amplitude ∧
-    WaveClass s W (α + 1 / 2) a.common.pressure ∧
-    WaveClass s W (α + 1 / 2 - κ) (a.common.curlCorrection s d) ∧
-    WaveClass s W (α + 1 / 2 - 3 * κ) (a.globalGood s d) :=
-  common_bounds_from_native_local a K hs hW (h.with_cutoff hψ) hκ hb hlower hupper hfreq
 
 /-- The copy cell may be larger than the native phase patch. Primitive
 jets are needed only on `C`; on the remaining points only the two input
@@ -1095,18 +1064,6 @@ theorem common_bounds_from_supported_native (K : PeriodizedWaveBounds.Cells D I)
     exact Or.inl ⟨i, hi, common_curl_germ a K hs s d hi⟩
   · exact Or.inr (common_curl_zero_germ a K hs s d (not_exists.mp hi))
 
-theorem common_outputs_zero_germ (K : PeriodizedWaveBounds.Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) {n : ℕ} {x : D}
-    (hx : ∀ i, x ∉ K.carrier n i) :
-    (a.common.amplitude n =ᶠ[𝓝 x] fun _ => 0) ∧
-    (a.common.pressure n =ᶠ[𝓝 x] fun _ => 0) ∧
-    ((a.commonCorrected s d).amplitude n =ᶠ[𝓝 x] fun _ => 0) ∧
-    (a.common.curlCorrection s d n =ᶠ[𝓝 x] fun _ => 0) ∧
-    (a.globalGood s d n =ᶠ[𝓝 x] fun _ => 0) :=
-  ⟨(a.common_zero_germs K hs hx).1, (a.common_zero_germs K hs hx).2,
-    a.commonCorrected_zero_germ K hs s d hx, common_curl_zero_germ a K hs s d hx,
-    a.globalGood_zero_germ K hs s d hx⟩
 
 end CommonCopies
 
@@ -1118,77 +1075,6 @@ variable {D I : Type} {L : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
 noncomputable def jointNativeFamily : WaveFamily D (L × I) :=
   WaveFamily.ofCoefficients (fun j => (a j.1).localized j.2)
 
-/-- The same proof is uniform in an external spatial label. In particular,
-no bound is chosen after fixing a label and then incorrectly made uniform. -/
-theorem uniform_common_bounds_from_native_local (K : L → PeriodizedWaveBounds.Cells D I)
-    (hs : ∀ l n i, support ((a l).cutoff n i) ⊆ (K l).carrier n i)
-    {s : StripData D} {d : GraphDirections D} {W : L → ℕ → D → ℝ} {α κ : ℝ}
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (h : InputBounds s (fun (n : ℕ) (j : L × I) => (K j.1).carrier n j.2)
-      (fun n j x => W j.1 n x) α κ d (jointNativeFamily a))
-    (hκ : κ ≤ 1 / 2) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i →
-      b ≤ ‖(a l).background.normal s d n x‖)
-    (hupper : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i →
-      ‖(a l).background.normal s d n x‖ ≤ M)
-    (hfreq : LocalUnweighted s (fun (n : ℕ) (j : L × I) => (K j.1).carrier n j.2)
-      (1 / 2) (fun n j _ => 1 / (a j.1).background.frequency n)) :
-    LabelSumBounds.UniformClass s (fun l n x => Real.sqrt (s.zeta x) * W l n x)
-      α (fun l => (a l).common.amplitude) ∧
-    LabelSumBounds.UniformClass s (fun l n x => Real.sqrt (s.zeta x) * W l n x)
-      α (fun l => ((a l).commonCorrected s d).amplitude) ∧
-    LabelSumBounds.UniformClass s (fun l n x => Real.sqrt (s.zeta x) * W l n x)
-      (α + 1 / 2) (fun l => (a l).common.pressure) ∧
-    LabelSumBounds.UniformClass s (fun l n x => Real.sqrt (s.zeta x) * W l n x)
-      (α + 1 / 2 - κ) (fun l => (a l).common.curlCorrection s d) ∧
-    LabelSumBounds.UniformClass s (fun l n x => Real.sqrt (s.zeta x) * W l n x)
-      (α + 1 / 2 - 3 * κ) (fun l => (a l).globalGood s d) := by
-  have hw : ∀ l n x, x ∈ s.domain → 0 ≤ Real.sqrt (s.zeta x) * W l n x :=
-    fun l n x hx => mul_nonneg (Real.sqrt_nonneg _) (hW l n x hx)
-  have hc := h.curlCorrection_class hb (fun n j x hx hi => hlower j.1 n j.2 x hx hi)
-    (fun n j x hx hi => hupper j.1 n j.2 x hx hi) hfreq
-  have hci j := hc.map (ContinuousLinearMap.proj j)
-  have hcorrected := h.add_curl_amplitude hκ hci
-  have hg := h.retainedGood_class hκ hb (fun n j x hx hi => hlower j.1 n j.2 x hx hi)
-    (fun n j x hx hi => hupper j.1 n j.2 x hx hi) hfreq
-  have haj : PeriodizedWaveBounds.UniformLocalJets s
-      (fun l n x => Real.sqrt (s.zeta x) * W l n x) α (fun l => (K l).carrier)
-      (fun l n i => ((a l).localized i).amplitude n) :=
-    (component_classes h.amplitude).to_uniformLocalJets
-  have hpj : PeriodizedWaveBounds.UniformLocalJets s
-      (fun l n x => Real.sqrt (s.zeta x) * W l n x) (α + 1 / 2) (fun l => (K l).carrier)
-      (fun l n i => ((a l).localized i).pressure n) := h.pressure.to_uniformLocalJets
-  have hcj : PeriodizedWaveBounds.UniformLocalJets s
-      (fun l n x => Real.sqrt (s.zeta x) * W l n x) (α + 1 / 2 - κ) (fun l => (K l).carrier)
-      (fun l n i => ((a l).localized i).curlCorrection s d n) := hc.to_uniformLocalJets
-  have hcorj : PeriodizedWaveBounds.UniformLocalJets s
-      (fun l n x => Real.sqrt (s.zeta x) * W l n x) α (fun l => (K l).carrier)
-      (fun l n i => ((a l).corrected s d i).amplitude n) :=
-    (component_classes hcorrected.amplitude).to_uniformLocalJets
-  have hgj : PeriodizedWaveBounds.UniformLocalJets s
-      (fun l n x => Real.sqrt (s.zeta x) * W l n x) (α + 1 / 2 - 3 * κ) (fun l => (K l).carrier)
-      (fun l n i => (a l).localGood s d n i) := hg.to_uniformLocalJets
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · exact PeriodizedWaveBounds.copySum_uniformClass K hw
-      (fun l => (a l).localized_amplitude_support (K l) (hs l)) haj
-  · apply PeriodizedWaveBounds.uniformClass_of_local_germs hw hcorj
-    intro l n x hx
-    classical
-    by_cases hi : ∃ i, x ∈ (K l).carrier n i
-    · obtain ⟨i, hi⟩ := hi
-      exact Or.inl ⟨i, hi, (a l).commonCorrected_amplitude_germ (K l) (hs l) s d n hi⟩
-    · exact Or.inr ((a l).commonCorrected_zero_germ (K l) (hs l) s d (not_exists.mp hi))
-  · exact PeriodizedWaveBounds.copySum_uniformClass K hw
-      (fun l => (a l).localized_pressure_support (K l) (hs l)) hpj
-  · apply PeriodizedWaveBounds.uniformClass_of_local_germs hw hcj
-    intro l n x hx
-    classical
-    by_cases hi : ∃ i, x ∈ (K l).carrier n i
-    · obtain ⟨i, hi⟩ := hi
-      exact Or.inl ⟨i, hi, common_curl_germ (a l) (K l) (hs l) s d hi⟩
-    · exact Or.inr (common_curl_zero_germ (a l) (K l) (hs l) s d (not_exists.mp hi))
-  · exact PeriodizedWaveBounds.copySum_uniformClass K hw
-      (fun l => (a l).localGood_support (K l) (hs l) s d) hgj
 
 /-- Support-local primitive estimates, uniform over both labels and
 copies, imply the global uniform classes. The phase patch `C` is allowed

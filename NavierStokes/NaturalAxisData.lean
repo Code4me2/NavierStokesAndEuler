@@ -97,9 +97,6 @@ theorem neg_W_lower_bound {h j η : ℝ} (p : SmallParameters h j)
   rw [neg_W_formula]
   nlinarith [p.h_le, p.j_le]
 
-theorem neg_W_gt {h j η : ℝ} (p : SmallParameters h j)
-    (hη : η ∈ Icc (-1 : ℝ) 1) : 14 / 5 < -W h j η := by
-  linarith [neg_W_lower_bound p hη]
 
 theorem H_contDiff (h j : ℝ) : ContDiff ℝ ∞ (H h j) := by
   unfold H U d
@@ -138,12 +135,6 @@ theorem H_pos_of_nonneg {h j η : ℝ} (p : SmallParameters h j)
     exact add_pos_of_pos_of_nonneg (mul_pos (D_pos p) hpos)
       (mul_nonneg (d_nonneg hη) hU)
 
-theorem H_neg_of_le_left {h j η : ℝ} (p : SmallParameters h j)
-    (hη : η ∈ Icc (-1 : ℝ) 1) (hleft : η ≤ -j / 4) : H h j η < 0 := by
-  have hη0 : η < 0 := by linarith [p.j_pos]
-  have hU : U j η ≤ 0 := by dsimp [U]; linarith
-  exact add_neg_of_neg_of_nonpos (mul_neg_of_pos_of_neg (D_pos p) hη0)
-    (mul_nonpos_of_nonneg_of_nonpos (d_nonneg hη) hU)
 
 theorem root_negative {h j η : ℝ} (p : SmallParameters h j)
     (hη : η ∈ Icc (-1 : ℝ) 1) (hzero : H h j η = 0) : η < 0 := by
@@ -367,14 +358,5 @@ theorem ideal_prefix_cutoff_parameters {h j : ℝ} (p : SmallParameters h j)
       ContDiff ℝ ∞ (chi h j σ) :=
   exists_cutoff_parameters p (pressureData_of_ideal_prefix hp hB hg ha)
 
-theorem ideal_prefix_root_positive {h j : ℝ} (p : SmallParameters h j)
-    {g a : ℝ → ℝ} {cap B : ℝ}
-    (hp : PressureDatum.Admissible g a cap) (hB : 2 ≤ B)
-    (hg : ∀ y ≤ 0, g y = B ^ 2 * Real.exp ((1 / 5 : ℝ) * y))
-    (ha : ∀ y ≤ 0, a y = 1) :
-    ∃ η₀ : ℝ, η₀ ∈ Ioo (-j / 4) (-j / 5) ∧ H h j η₀ = 0 ∧
-      j / 5 < Z h j (PressureDatum.pressure g a) η₀ ∧
-      ∀ η ∈ Icc (-1 : ℝ) 1, H h j η = 0 → η = η₀ :=
-  exists_root_with_positive_Z p (pressureData_of_ideal_prefix hp hB hg ha)
 
 end NavierStokes.NaturalAxisData

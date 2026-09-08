@@ -47,21 +47,5 @@ theorem velocity_sup_bound (k : ℝ) (m : Vector3) (ell : ℝ)
 
 variable (k : ℝ) (m : Vector3) (hgraph : ∀ t z, graphConstraint k m (G.A.field t z)=0)
 
-include hgraph in
-theorem physical_positive_bound (ell : ℝ) (hell : 0 < ell) (hell1 : ell ≤ 1)
-    (t : Icc (0 : ℝ) T) (n : ℕ) (hn : 0 < n) (x : Vector3) :
-    ‖iteratedFDeriv ℝ n ((flowData T G.time_nonneg (physicalCoefficient k m T G.A ell)).forward t) x‖ ≤
-      (1+G.B*T)*(1+ell⁻¹*(4*G.R*graphFactor k m))^n*(n.factorial : ℝ)^2 := by
-  have he : (flowData T G.time_nonneg (physicalCoefficient k m T G.A ell)).forward t =
-      fun y => y+(G.displacementField k m ell hell t).field y := by
-    funext y
-    rw [G.displacementField_eq k m hgraph,displacement_eq]
-    abel
-  rw [he]
-  exact positive_id_add_bound _ (G.displacementField k m ell hell t).smooth
-    (G.B*T) (ell⁻¹*(4*G.R*graphFactor k m)) (mul_nonneg G.B_nonneg G.time_nonneg)
-    (mul_nonneg (inv_nonneg.mpr hell.le)
-      (mul_nonneg (by linarith [G.R_pos]) (graphFactor_nonneg k m)))
-    (G.displacement_sup_bound k m ell hell hell1 t) n hn x
 
 end EulerPhysicalGraphFlowBounds.Data

@@ -201,13 +201,6 @@ theorem exterior_axialOp {S : Set ℝ} (hS : IsOpen S) {f : Field} (hf : Smooth 
   simp [axialOp, hs eta heta R hR, exterior_dr hS hf hs eta heta R hR,
     exterior_de hS hf hs eta heta R hR]
 
-theorem axialOp_mul {S : Set ℝ} (hS : IsOpen S) {f g : Field}
-    (hf : Smooth S f) (hg : Smooth S g) (h b c : ℝ)
-    {w : ℝ × ℝ} (hw : w.2 ∈ S) :
-    axialOp h (b + c) (fun p => f p * g p) w =
-      axialOp h b f w * g w + f w * axialOp h c g w := by
-  simp only [axialOp, de_mul hS hf hg hw, dr_mul hS hf hg hw]
-  ring
 
 /-- The weighted axial derivative is the actual derivative of the weighted
 moment, with its exact scaling coefficient and radial boundary term. -/
@@ -304,24 +297,11 @@ theorem orderExponent_pair (h : ℝ) {i j n : ℕ} (hij : i + j = n) :
   rw [← hij, SlowExpansionResidual.slowOrder_add]
   ring
 
-/-- At a fixed convolution order the physical power is independent of the split. -/
-theorem physical_product_power {q : ℝ} (hq : 0 < q) (h b c : ℝ)
-    {i j n : ℕ} (hij : i + j = n) :
-    q ^ (b + SlowExpansionResidual.slowOrder h i) * q ^ (c + SlowExpansionResidual.slowOrder h j) =
-      q ^ (b + c + SlowExpansionResidual.slowOrder h n) := by
-  rw [SlowExpansionResidual.rpow_product_order hq, hij]
 
 noncomputable def conv (n : ℕ) (u v : History) (w : ℝ × ℝ) : ℝ :=
   ∑ i ∈ Finset.range (n + 1), u i w * v (n - i) w
 
-theorem conv_eq_actual (n : ℕ) (u v : History) (w : ℝ × ℝ) :
-    conv n u v w = PositiveOrderMoments.cauchy n (PositiveOrderMoments.slice u w.2)
-      (PositiveOrderMoments.slice v w.2) w.1 := rfl
 
-theorem conv_eq_antidiagonal (n : ℕ) (u v : History) (w : ℝ × ℝ) :
-    conv n u v w = SlowExpansionResidual.convolution (fun i j => u i w * v j w) n := by
-  symm
-  exact Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j => u i w * v j w) n
 
 theorem smooth_conv {S : Set ℝ} {n : ℕ} {u v : History}
     (hu : ∀ j, j ≤ n → Smooth S (u j)) (hv : ∀ j, j ≤ n → Smooth S (v j)) :
@@ -787,16 +767,6 @@ theorem stress_weighted_hasDerivAt {S : Set ℝ} (hS : IsOpen S) {F : Field} (hF
   rw [stress_of_pos m F (w := (r, eta)) hr]
   field_simp [pow_ne_zero m (ne_of_gt (show 0 < r from hr))]
 
-theorem stress_radial_identity {S : Set ℝ} (hS : IsOpen S) {F : Field} (hF : Smooth S F)
-    (m : ℕ) {a : ℝ} (ha : 0 < a)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, F (R, eta) = 0)
-    {w : ℝ × ℝ} (hR : 0 < w.1) (heta : w.2 ∈ S) :
-    (m : ℝ) * w.1 ^ (m - 1) * stress m F w + w.1 ^ m * dr (stress m F) w = -F w := by
-  have ht := stress_smooth hS hF m ha hinner
-  have hd := (radial_hasDerivAt hS (smooth_weighted ht m) heta).unique
-    (stress_weighted_hasDerivAt hS hF m hR heta)
-  rw [dr_weighted hS ht m heta] at hd
-  exact hd
 
 theorem stress_slice_support (m : ℕ) {F : Field} {S : Set ℝ} {a B : ℝ} (hB : 0 ≤ B)
     (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, F (R, eta) = 0)
@@ -877,22 +847,6 @@ theorem stress_radialSupport (m : ℕ) {F : Field} {S : Set ℝ} {a B : ℝ} (hB
   by_contra hn
   exact hR (stress_slice_support m hB hinner hs hm heta hn)
 
-/-- A fixed interior support interval gives all weighted stress jets on
-every compact parameter subinterval, as well as a smooth normalized stress. -/
-theorem stress_weighted_jets {S K : Set ℝ} (hS : IsOpen S) (hK : IsCompact K) (hKS : K ⊆ S)
-    {F : Field} (hF : Smooth S F) (m : ℕ) {a B l r : ℝ} (ha : 0 < a) (hB : 0 ≤ B)
-    (hab : Icc a B ⊆ Ioo l r)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, F (R, eta) = 0)
-    (hs : exterior B S F) (hm : ∀ eta ∈ S, moment B 0 F eta = 0)
-    {zeta : ℝ → ℝ} (hz : ContDiffOn ℝ ∞ zeta (Ioo l r))
-    (hz0 : ∀ R ∈ Ioo l r, 0 < zeta R) :
-    Smooth S (fun w => stress m F w / zeta w.1) ∧
-      ∀ k : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ R ∈ Ioo l r, ∀ eta ∈ K,
-        ‖iteratedFDeriv ℝ k (stress m F) (R, eta)‖ ≤ C * zeta R := by
-  have ht := stress_smooth hS hF m ha hinner
-  have hts := stress_radialSupport m hB hinner hs hm
-  exact ⟨interior_quotient_smooth hS ht hts hab hz (fun R hR => (hz0 R hR).ne'),
-    interior_weighted_jets hS hK hKS ht hts hab hz.continuousOn hz0⟩
 
 theorem smooth_angularDensity {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
     {v u e : History} (hv : ∀ j, j ≤ n → Smooth S (v j))
@@ -977,82 +931,7 @@ noncomputable def angularStress (h : ℝ) (n : ℕ) (v u e : History) : Field :=
 noncomputable def axialStress (h : ℝ) (n : ℕ) (v u : History) (p : Field) : Field :=
   stress 1 (axialDensity h n v u p)
 
-/-- For n≥2 all the angular hypotheses below are supplied by ordinary
-positive-order moments and compact positive-order profiles. -/
-theorem angular_stress_support {S : Set ℝ} (hS : IsOpen S) {n : ℕ} (hn : 2 ≤ n)
-    {v u e : History} (hv : ∀ j, j ≤ n → Smooth S (v j))
-    (hu : ∀ j, j ≤ n → Smooth S (u j)) (he : ∀ j, j ≤ n → Smooth S (e j))
-    (h a B : ℝ) (ha : 0 < a) (hB : 0 ≤ B)
-    (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0)
-    (hV : ∀ j, j ≤ n → exterior B S (v j)) (hU : ∀ j, j ≤ n → exterior B S (u j))
-    (hE : ∀ j, 0 < j → j ≤ n → exterior B S (e j))
-    (hem : ∀ eta ∈ S, moment B 2 (e n) eta = 0)
-    (hum : ∀ eta ∈ S, moment B 2 (conv n u e) eta = 0)
-    (hprev : ∀ eta ∈ S, moment B 2 (e (n - 1)) eta = 0)
-    (hdiv : ∀ w : ℝ × ℝ, w.2 ∈ S → ∀ j, j ≤ n →
-      dr (v j) w = -w.1 * axialOp h (orderExponent h j) (u j) w)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, angularWeighted h n v u e (R, eta) = 0) :
-    Smooth S (angularStress h n v u e) ∧ radialSupport S a B (angularStress h n v u e) ∧
-      ∀ eta ∈ S, ∀ R, 0 < R → HasDerivAt (fun r => r ^ 2 * angularStress h n v u e (r, eta))
-        (-angularWeighted h n v u e (R, eta)) R := by
-  have hen := hE n (by omega) le_rfl
-  have hep := hE (n - 1) (by omega) (Nat.sub_le _ _)
-  have hsm := smooth_angularDensity hS hv hu he h hell
-  have htotal : ∀ eta ∈ S, moment B 0 (angularDensity h n v u e) eta = 0 :=
-    fun eta heta => angular_integral_zero hS hv hu he h B hell hen hV hem hum
-      (exterior_conv_left hU) hep hprev heta
-  have hout := exterior_angularDensity hS hv hu he h B hV hU hen
-    (exterior_axialOp2 hS (he (n - 1) (Nat.sub_le _ _)) hep h _ hell)
-  have hin : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, angularDensity h n v u e (R, eta) = 0 := by
-    intro eta heta R hR
-    rw [← angularWeighted_eq_density hS hv hu he h heta (hdiv _ heta)]
-    exact hinner eta heta R hR
-  refine ⟨stress_smooth hS hsm 2 ha hin, stress_radialSupport 2 hB hin hout htotal, ?_⟩
-  intro eta heta R hR
-  rw [angularWeighted_eq_density hS hv hu he h heta (hdiv _ heta)]
-  exact stress_weighted_hasDerivAt hS hsm 2 hR heta
 
-theorem axial_stress_support {S : Set ℝ} (hS : IsOpen S) {n : ℕ} (hn : 0 < n)
-    {v u : History} {p : Field} (hv : ∀ j, j ≤ n → Smooth S (v j))
-    (hu : ∀ j, j ≤ n → Smooth S (u j)) (hp : Smooth S p)
-    (h a B : ℝ) (ha : 0 < a) (hB : 0 ≤ B)
-    (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0)
-    (hV : ∀ j, j ≤ n → exterior B S (v j)) (hU : ∀ j, j ≤ n → exterior B S (u j))
-    (hP : exterior B S p) (haxis : ∀ eta ∈ S, ∀ j, j ≤ n → v j (0, eta) = 0)
-    (hum : ∀ eta ∈ S, moment B 1 (u n) eta = 0)
-    (hflux : ∀ eta ∈ S, moment B 1 (fun w => conv n u u w + p w) eta = 0)
-    (hprev : ∀ eta ∈ S, moment B 1 (u (n - 1)) eta = 0)
-    (hdiv : ∀ w : ℝ × ℝ, w.2 ∈ S → ∀ j, j ≤ n →
-      dr (v j) w = -w.1 * axialOp h (orderExponent h j) (u j) w)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, axialWeighted h n v u p (R, eta) = 0) :
-    Smooth S (axialStress h n v u p) ∧ radialSupport S a B (axialStress h n v u p) ∧
-      ∀ eta ∈ S, ∀ R, 0 < R → HasDerivAt (fun r => r * axialStress h n v u p (r, eta))
-        (-axialWeighted h n v u p (R, eta)) R := by
-  have hprev_le : n - 1 ≤ n := (Nat.sub_lt hn (by decide : 0 < 1)).le
-  have hsm := smooth_axialDensity hS hv hu hp h hell
-  have hax : ∀ eta ∈ S, conv n v u (0, eta) = 0 := by
-    intro eta heta
-    unfold conv
-    apply Finset.sum_eq_zero
-    intro j hj
-    rw [haxis eta heta j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)), zero_mul]
-  have hfB : ∀ eta ∈ S, conv n u u (B, eta) + p (B, eta) = 0 := by
-    intro eta heta
-    rw [exterior_conv_left hU eta heta B le_rfl, hP eta heta B le_rfl, add_zero]
-  have htotal : ∀ eta ∈ S, moment B 0 (axialDensity h n v u p) eta = 0 :=
-    fun eta heta => axial_integral_zero hS hv hu hp h B hell (hU n le_rfl) hV hax hum hflux hfB
-      (hU (n - 1) hprev_le) hprev heta
-  have hout := exterior_axialDensity hS hv hu hp h B hV hU hP
-    (exterior_axialOp2 hS (hu (n - 1) (Nat.sub_le _ _)) (hU (n - 1) (Nat.sub_le _ _)) h _ hell)
-  have hin : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, axialDensity h n v u p (R, eta) = 0 := by
-    intro eta heta R hR
-    rw [← axialWeighted_eq_density hS hv hu hp h heta (hdiv _ heta)]
-    exact hinner eta heta R hR
-  refine ⟨stress_smooth hS hsm 1 ha hin, stress_radialSupport 1 hB hin hout htotal, ?_⟩
-  intro eta heta R hR
-  rw [axialWeighted_eq_density hS hv hu hp h heta (hdiv _ heta)]
-  unfold axialStress
-  simpa only [pow_one] using stress_weighted_hasDerivAt hS hsm 1 hR heta
 
 /-- The order-one angular input is a moment of the actual axial viscosity,
 not a condition on the total residual. It is supplied by differentiating
@@ -1060,37 +939,6 @@ the restored renormalized order-zero physical angular moment. -/
 noncomputable def LowerAngularViscosityMoment (S : Set ℝ) (B h : ℝ) (e₀ : Field) : Prop :=
   ∀ eta ∈ S, moment B 2 (axialOp2 h (orderExponent h 0) e₀) eta = 0
 
-theorem order_one_angular_stress_support {S : Set ℝ} (hS : IsOpen S)
-    {v u e : History} (hv : ∀ j, j ≤ 1 → Smooth S (v j))
-    (hu : ∀ j, j ≤ 1 → Smooth S (u j)) (he : ∀ j, j ≤ 1 → Smooth S (e j))
-    (h a B : ℝ) (ha : 0 < a) (hB : 0 ≤ B)
-    (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0)
-    (hV : ∀ j, j ≤ 1 → exterior B S (v j)) (hU : ∀ j, j ≤ 1 → exterior B S (u j))
-    (hE : exterior B S (e 1))
-    (hem : ∀ eta ∈ S, moment B 2 (e 1) eta = 0)
-    (hum : ∀ eta ∈ S, moment B 2 (conv 1 u e) eta = 0)
-    (hvisc : LowerAngularViscosityMoment S B h (e 0))
-    (hviscExterior : exterior B S (axialOp2 h (orderExponent h 0) (e 0)))
-    (hdiv : ∀ w : ℝ × ℝ, w.2 ∈ S → ∀ j, j ≤ 1 →
-      dr (v j) w = -w.1 * axialOp h (orderExponent h j) (u j) w)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, angularWeighted h 1 v u e (R, eta) = 0) :
-    Smooth S (angularStress h 1 v u e) ∧ radialSupport S a B (angularStress h 1 v u e) ∧
-      ∀ eta ∈ S, ∀ R, 0 < R → HasDerivAt (fun r => r ^ 2 * angularStress h 1 v u e (r, eta))
-        (-angularWeighted h 1 v u e (R, eta)) R := by
-  have hsm := smooth_angularDensity hS hv hu he h hell
-  have htotal : ∀ eta ∈ S, moment B 0 (angularDensity h 1 v u e) eta = 0 := by
-    intro eta heta
-    rw [angular_integral_balance hS hv hu he h B hell hE hV hem hum (exterior_conv_left hU) heta]
-    simp only [Nat.sub_self, hvisc eta heta, neg_zero]
-  have hout := exterior_angularDensity hS hv hu he h B hV hU hE hviscExterior
-  have hin : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, angularDensity h 1 v u e (R, eta) = 0 := by
-    intro eta heta R hR
-    rw [← angularWeighted_eq_density hS hv hu he h heta (hdiv _ heta)]
-    exact hinner eta heta R hR
-  refine ⟨stress_smooth hS hsm 2 ha hin, stress_radialSupport 2 hB hin hout htotal, ?_⟩
-  intro eta heta R hR
-  rw [angularWeighted_eq_density hS hv hu he h heta (hdiv _ heta)]
-  exact stress_weighted_hasDerivAt hS hsm 2 hR heta
 
 /-- A concrete two-edge weight of the form prescribed in (20). -/
 noncomputable def logFlatWeight (l r cL cR R : ℝ) : ℝ :=
@@ -1124,20 +972,5 @@ theorem logFlatWeight_contDiffOn {l r cL cR : ℝ} (hl : 0 < l)
   filter_upwards [isOpen_Ioo.mem_nhds hR] with x hx
   exact ite_eq_left hx
 
-/-- In particular the prescribed logarithmic Gaussian weight controls every
-jet, with inverse-edge loss zero, for a field supported strictly inside both
-fixed edges. The constants are obtained from compactness. -/
-theorem logarithmic_weighted_jets {S K : Set ℝ} (hS : IsOpen S) (hK : IsCompact K) (hKS : K ⊆ S)
-    {f : Field} (hf : Smooth S f) {a b l r cL cR : ℝ}
-    (hs : radialSupport S a b f) (hab : Icc a b ⊆ Ioo l r)
-    (hl : 0 < l) (hcL : 0 < cL) (hcR : 0 < cR) :
-    Smooth S (fun w => f w / logFlatWeight l r cL cR w.1) ∧
-      ∀ k : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ R ∈ Ioo l r, ∀ eta ∈ K,
-        ‖iteratedFDeriv ℝ k f (R, eta)‖ ≤ C * logFlatWeight l r cL cR R := by
-  have hz := logFlatWeight_contDiffOn (r := r) hl hcL hcR
-  have hp : ∀ R ∈ Ioo l r, 0 < logFlatWeight l r cL cR R :=
-    fun R hR => logFlatWeight_pos hl cL cR hR
-  exact ⟨interior_quotient_smooth hS hf hs hab hz (fun R hR => (hp R hR).ne'),
-    interior_weighted_jets hS hK hKS hf hs hab hz.continuousOn hp⟩
 
 end NavierStokes.SlowStressSupport

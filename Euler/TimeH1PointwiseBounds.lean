@@ -91,15 +91,5 @@ theorem norm_le_initial_add_uniform (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
   (norm_le_initial_add T hT g η hη hder t ht).trans
     (add_le_add le_rfl (mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg g)))
 
-include hT hη hder in
-/-- The actual terminal trace has the corresponding backward-in-time bound. -/
-theorem norm_le_terminal_add (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
-    ‖η t‖ ≤ ‖η T‖+Real.sqrt (T-t)*‖g‖ := by
-  have he := eq_primitive_add_terminal T hT g η hη hder t ht
-  calc
-    ‖η t‖ = ‖realPrimitive T g t+η T‖ := congrArg norm he
-    _ ≤ ‖realPrimitive T g t‖+‖η T‖ := norm_add_le _ _
-    _ ≤ Real.sqrt (T-t)*‖g‖+‖η T‖ := add_le_add (realPrimitive_norm_le T g t ht) le_rfl
-    _ = ‖η T‖+Real.sqrt (T-t)*‖g‖ := add_comm _ _
 
 end EulerTimeH1PointwiseBounds

@@ -28,10 +28,6 @@ theorem velocityAmplitude_le_uniform (β : ℝ) (hβ : |β| ≤ 1) :
       gcongr
     _ ≤ uniformAmplitude := by unfold uniformAmplitude; linarith
 
-theorem velocity_uniform_sup (β : ℝ) (hβ : |β| ≤ 1) :
-    HasSupBound (velocity (linear β)) uniformAmplitude 1024 :=
-  (velocity_sup_bound (linear β)).mono (velocityAmplitude_nonneg _) (by norm_num)
-    (velocityAmplitude_le_uniform β hβ) le_rfl
 
 def uniformL2Amplitude : ℝ := uniformAmplitude*volumeFactor
 
@@ -48,41 +44,9 @@ def uniformLabelBound : ℝ :=
   1+sobolevCoefficientAmplitude (Fin 3) 6 1024 uniformL2Amplitude+
     sobolevCoefficientRadius (Fin 3) 1024
 
-theorem uniformLabelBound_one : 1 ≤ uniformLabelBound := by
-  have ha := sobolevCoefficientAmplitude_nonneg (ι := Fin 3) 6 1024 uniformL2Amplitude
-    (by norm_num) uniformL2Amplitude_nonneg
-  have hr := sobolevCoefficientRadius_nonneg (ι := Fin 3) 1024 (by norm_num)
-  unfold uniformLabelBound
-  linarith
 
-theorem field_uniform_label (β : ℝ) (hβ : |β| ≤ 1) :
-    HasLabelBound uniformLabelBound (field (linear β)) := by
-  have ha := sobolevCoefficientAmplitude_nonneg (ι := Fin 3) 6 1024 uniformL2Amplitude
-    (by norm_num) uniformL2Amplitude_nonneg
-  have hr := sobolevCoefficientRadius_nonneg (ι := Fin 3) 1024 (by norm_num)
-  apply SmoothL2Field.hasLabelBound_of_jet_bound (field (linear β)) uniformL2Amplitude
-    1024 uniformLabelBound uniformL2Amplitude_nonneg (by norm_num) (field_uniform_jet β hβ)
-  · unfold uniformLabelBound
-    linarith
-  · unfold uniformLabelBound
-    linarith
 
-theorem field_uniform_Hq (β : ℝ) (hβ : |β| ≤ 1) (q n : ℕ) :
-    classicalBlockSize direction q (field (linear β)).toLp
-      (field (linear β)).translation_contDiff n ≤
-        sobolevCoefficientAmplitude (Fin 3) q 1024 uniformL2Amplitude*
-          (sobolevCoefficientRadius (Fin 3) 1024)^n*(n.factorial : ℝ)^2 :=
-  SmoothL2Field.classicalBlockSize_of_jet_bound direction (by intro i; simp [direction]) q
-    (field (linear β)) uniformL2Amplitude 1024 uniformL2Amplitude_nonneg (by norm_num)
-    (field_uniform_jet β hβ) n
 
-theorem beta_bound (x₀ : ℝ) (hx : 1 ≤ x₀) : |(x₀^2)⁻¹| ≤ 1 := by
-  have hpow : (1 : ℝ) ≤ x₀^2 := one_le_pow₀ hx
-  rw [abs_of_nonneg (inv_nonneg.mpr (sq_nonneg x₀))]
-  exact inv_le_one_of_one_le₀ hpow
 
-theorem initial_gradient (x₀ : ℝ) :
-    fderiv ℝ (field (linear ((x₀^2)⁻¹))).field 0=linear ((x₀^2)⁻¹) :=
-  velocity_fderiv_plateau _ (linear_trace _) 0 (by simp)
 
 end EulerBaseDatum

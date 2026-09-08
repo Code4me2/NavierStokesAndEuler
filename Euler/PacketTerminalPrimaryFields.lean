@@ -28,7 +28,6 @@ def joinedTerminalPrimaryWitness :
   (EulerTransversePacketPrimary.profileRegularity τ hτ hτT B Y
     (joinedSourceOperators P M D τ hτ hτT B) rfl).changeTime hTime.symm M.T_pos.le
 
-theorem joinedTerminalPrimary_mean : (joinedTerminalPrimary P M D τ hτ hτT B Y).mean=0 := rfl
 
 include hTime in
 theorem joinedTerminalPrimary_tangent (t : Icc (0 : ℝ) M.T) (x : Space) (θ : ℝ) :

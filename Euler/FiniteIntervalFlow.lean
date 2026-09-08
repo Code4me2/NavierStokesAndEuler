@@ -34,26 +34,5 @@ omit [NormedSpace ℝ E] in
 
 variable [CompleteSpace E]
 
-/-- The actual finite-time flow has an actual two-sided continuous inverse.
-No flow map, inverse map or ODE solution is assumed. -/
-theorem exists_flow_and_inverse (T : ℝ) (hT : 0 ≤ T)
-    (u : C(Icc (0 : ℝ) T, E →ᵇ E)) (K : ℝ≥0)
-    (hLip : ∀ t, LipschitzWith K (u t)) :
-    ∃ X Y : ℝ → E → E,
-      (∀ x, X 0 x = x) ∧ (∀ x, Y 0 x = x) ∧
-      Continuous (Function.uncurry X) ∧ Continuous (Function.uncurry Y) ∧
-      (∀ t x, Y t (X t x) = x) ∧ (∀ t x, X t (Y t x) = x) ∧
-      (∀ (t : Icc (0 : ℝ) T) x,
-        HasDerivAt (fun s => X s x) (u t (X t x)) t) ∧
-      (∀ (t : Icc (0 : ℝ) T) x, dist (X t x) x ≤ ‖u‖*|t.1|) := by
-  let V := ofTimeInterval T hT u K hLip
-  refine ⟨V.forward, V.backward, V.forward_zero, V.backward_zero,
-    V.forward_joint_continuous, V.backward_joint_continuous,
-    V.backward_forward, V.forward_backward, ?_, ?_⟩
-  · intro t x
-    have h := V.forward_hasDerivAt t x
-    simpa only [V, ofTimeInterval_velocity] using h
-  · intro t x
-    exact V.forward_displacement t x
 
 end EulerBoundedLipschitzFlow

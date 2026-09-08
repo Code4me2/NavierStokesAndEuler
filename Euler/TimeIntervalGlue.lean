@@ -83,29 +83,6 @@ theorem glue_hasDerivWithinAt (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
     exact ((hg t ⟨hgt.le,ht.2⟩).mono_of_mem_nhdsWithin hlocal).congr_of_eventuallyEq
       he (glue_right τ f g hmatch t hgt.le)
 
-/-- For the same first-order equation the derivative matching follows from value matching. -/
-theorem glue_evolution (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
-    (f g : ℝ → E) (rhs : ℝ → E → E) (hmatch : f τ=g τ)
-    (hf : ∀ t ∈ Icc 0 τ, HasDerivWithinAt f (rhs t (f t)) (Icc 0 τ) t)
-    (hg : ∀ t ∈ Icc τ S, HasDerivWithinAt g (rhs t (g t)) (Icc τ S) t)
-    (t : ℝ) (ht : t ∈ Icc 0 S) :
-    HasDerivWithinAt (glue τ f g) (rhs t (glue τ f g t)) (Icc 0 S) t := by
-  have h := glue_hasDerivWithinAt S τ hτ0 hτS f g (fun s => rhs s (f s))
-    (fun s => rhs s (g s)) hmatch (congrArg (rhs τ) hmatch) hf hg t ht
-  have he : glue τ (fun s => rhs s (f s)) (fun s => rhs s (g s)) t=rhs t (glue τ f g t) := by
-    by_cases hx : t ≤ τ <;> simp only [glue, hx, ite_true, ite_false]
-  exact he ▸ h
 
-omit [NormedSpace ℝ E] in
-/-- Joining the intervals does not change a shared pointwise time-profile bound. -/
-theorem glue_weighted_bound (S τ : ℝ) (f g : ℝ → E) (γ : ℝ → ℝ) (C : ℝ)
-    (hf : ∀ t ∈ Icc 0 τ, ‖f t‖ ≤ C*γ t)
-    (hg : ∀ t ∈ Icc τ S, ‖g t‖ ≤ C*γ t)
-    (t : ℝ) (ht : t ∈ Icc 0 S) : ‖glue τ f g t‖ ≤ C*γ t := by
-  by_cases h : t ≤ τ
-  · rw [glue_left τ f g t h]
-    exact hf t ⟨ht.1,h⟩
-  · simp only [glue, h, ite_false]
-    exact hg t ⟨(not_le.mp h).le,ht.2⟩
 
 end EulerTimeIntervalGlue

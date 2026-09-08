@@ -121,19 +121,6 @@ theorem modified_pressure_after (henergy : RestoredSquaredSwirl W Q (S := S))
     M.pressure0 (henergy eta heta)
   exact fun r hr => (modified_fields_after W Q M hr.1 heta).1
 
-/-- The reconstructed pressure is the actual canonical tail integral in
-the exterior.  Its integration constant was fixed by the restored row. -/
-theorem modified_pressure_canonical_after (henergy : RestoredSquaredSwirl W Q (S := S))
-    {X eta : ℝ} (hX : nominalOuterX W ≤ X) (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    Q.pressure (X, eta) = -(∫ r in Ioi X, Q.f (r, eta) ^ 2) := by
-  rw [modified_pressure_after W Q M henergy hX (M.contains heta)]
-  change W.Pi (X, eta) = _
-  rw [nominal_pressure_regular_integral W ((nominalOuterX_pos W).le.trans hX) heta]
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro r hr
-  exact congrArg (fun u : ℝ => u ^ 2)
-    (modified_fields_after W Q M (hX.trans hr.le) (M.contains heta)).1.symm
 
 end FiniteModification
 
@@ -147,13 +134,6 @@ structure RealizesScheme {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
   axial : d.axial = fun n => extendedCoefficient s hI n 1
   pressure : d.pressure = fun n => extendedCoefficient s hI n 3
 
-theorem realizes_coefficients {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    (Z0 : ZeroOrderSolved s inner) (hI : Icc (-1 : ℝ) 1 ⊆ S) :
-    RealizesScheme s hI (AssembledSlowBase.coefficients L B0 Z0 hI) :=
-  ⟨rfl, rfl, rfl⟩
 
 variable {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
     {D : ProfileHistories.RadialDomain} (Q : ProfileHistories.Profiles D)
@@ -359,22 +339,7 @@ theorem actual_fields_eq_heat (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
       (cartesianExterior F.data.h (nominalExteriorRadius W)) :=
   actual_base_eq_heat v (ConstructedSlowBase.Modulated.scales_strictMono v c hc upper B)
 
-theorem actual_residual_zero (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) :
-    navierStokesResidual (ConstructedSlowBase.Modulated.velocity v c hc upper B)
-      (ConstructedSlowBase.Modulated.pressure v c hc upper B) z.1 z.2 = 0 :=
-  realized_base_residual_zero W v.profiles v.finiteModification (actual_realizes v) rfl rfl
-    (ConstructedSlowBase.Modulated.coefficients_smooth v) (actual_squared_swirl_restored v)
-    (ConstructedSlowBase.Modulated.scales_strictMono v c hc upper B) hz
 
-theorem actual_residual_jets_zero (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) (m : ℕ) :
-    iteratedFDeriv ℝ m (fun y => navierStokesResidual
-      (ConstructedSlowBase.Modulated.velocity v c hc upper B)
-      (ConstructedSlowBase.Modulated.pressure v c hc upper B) y.1 y.2) z = 0 :=
-  realized_residual_jets_zero W v.profiles v.finiteModification (actual_realizes v) rfl rfl
-    (ConstructedSlowBase.Modulated.coefficients_smooth v) (actual_squared_swirl_restored v)
-    (ConstructedSlowBase.Modulated.scales_strictMono v c hc upper B) hz m
 
 end ActualModulation
 
@@ -510,24 +475,6 @@ theorem realized_terminal_extension {F : OutgoingProfile.Profile} (W : NominalPr
   exact completed_fields_smooth_near_terminal F.data.h_pos F.data.h_lt_half
     (nominalExteriorRadius_pos W).le he.1 he.2 hx hs
 
-theorem actual_terminal_extension {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {ld : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness ld)
-    (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) {x : Space}
-    (hx : x 2 = 0) (hs : 0 < AxisymmetricFields.radialEnergy x) :
-    ∃ U : Set SpaceTime, IsOpen U ∧ (1, x) ∈ U ∧
-      EqOn (completedVelocity (nominalHeatNormalization W) F.data.h
-        (ConstructedSlowBase.Modulated.velocity v c hc upper B))
-        (heatVelocity (nominalHeatNormalization W) F.data.h) U ∧
-      EqOn (completedPressure (nominalHeatNormalization W) F.data.h
-        (ConstructedSlowBase.Modulated.pressure v c hc upper B))
-        (heatPressureField (nominalHeatNormalization W) F.data.h) U ∧
-      ContDiffOn ℝ ∞ (completedVelocity (nominalHeatNormalization W) F.data.h
-        (ConstructedSlowBase.Modulated.velocity v c hc upper B)) (U ∩ (Iic 1 ×ˢ (univ : Set Space))) ∧
-      ContDiffOn ℝ ∞ (completedPressure (nominalHeatNormalization W) F.data.h
-        (ConstructedSlowBase.Modulated.pressure v c hc upper B)) (U ∩ (Iic 1 ×ˢ (univ : Set Space))) := by
-  have he := actual_fields_eq_heat v c hc upper B
-  exact completed_fields_smooth_near_terminal F.data.h_pos F.data.h_lt_half
-    (nominalExteriorRadius_pos W).le he.1 he.2 hx hs
 
 end JointTerminalExtension
 

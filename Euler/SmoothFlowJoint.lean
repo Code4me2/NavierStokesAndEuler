@@ -37,16 +37,6 @@ theorem forward_joint_hasFDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
     extendPath T hT (pathFamily T hT A p.2) p.1
   simp only [extendPath, projIcc_of_mem hT ⟨hp.1.le,hp.2.le⟩, pathFamily_apply]
 
-theorem forward_joint_contDiffAt_one (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
-    ContDiffAt ℝ 1 (Function.uncurry (flowData T hT A).forward) (t,x) := by
-  rw [contDiffAt_one_iff]
-  refine ⟨Function.uncurry (jointDerivative T hT (pathFamily T hT A) (velocityFamily T hT A)),
-    {p : ℝ × E | p.1 ∈ Ioo 0 T}, ?_,
-    (jointDerivative_continuous T hT _ _ (pathFamily_contDiff T hT A)
-      (velocityFamily_contDiff T hT A).continuous).continuousOn, ?_⟩
-  · exact (continuous_fst.tendsto (t,x)).eventually (Ioo_mem_nhds ht.1 ht.2)
-  · intro p hp
-    exact forward_joint_hasFDerivAt T hT A p.1 hp p.2
 
 theorem forward_jointDerivative_contDiffAt_one
     (htime : SmoothTimeField.TimeDerivative T hT A A₁)
@@ -146,10 +136,5 @@ theorem liftBackward_contDiffAt_two
     · rfl
     · exact (flowData T hT A).forward_backward p.1 p.2
 
-theorem backward_joint_contDiffAt_two
-    (htime : SmoothTimeField.TimeDerivative T hT A A₁)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
-    ContDiffAt ℝ 2 (Function.uncurry (flowData T hT A).backward) (t,x) :=
-  (liftBackward_contDiffAt_two T hT A A₁ htime t ht x).snd
 
 end EulerSmoothBanachFlow

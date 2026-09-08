@@ -25,17 +25,10 @@ theorem supportedMultiplier_weight (A : C(K,Space →ᵇ E →L[ℝ] F))
   intro t
   exact (supportedOperatorMap period S hS (A t)).map_smul (g t) (u t)
 
-theorem supportedMultiplier_normalize (hg : ∀ t, 0 < g t)
-    (A : C(K,Space →ᵇ E →L[ℝ] F)) (u : C(K,Supported period E S hS)) :
-    supportedMultiplierMap period S hS A (normalize g hg u) =
-      normalize g hg (supportedMultiplierMap period S hS A u) :=
-  supportedMultiplier_weight period S hS (reciprocal g hg) A u
 
 theorem include_weight (u : C(K,Supported period E S hS)) :
     includePath period S hS (weight g u) = weight g (includePath period S hS u) := rfl
 
-theorem include_normalize (hg : ∀ t, 0 < g t) (u : C(K,Supported period E S hS)) :
-    includePath period S hS (normalize g hg u) = normalize g hg (includePath period S hS u) := rfl
 
 theorem translate_weight (a : LiftTangent) (u : C(K,CylinderL2 period E)) :
     pathTranslate period a (weight g u) = weight g (pathTranslate period a u) := by

@@ -79,42 +79,5 @@ theorem initialized_correction_pointwise_eventually :
   simpa only [Q.correctionTower_pointField period t,Q.pressureTower_pointField period t,
     Q.timeDerivativeTower_pointField period t] using And.intro he (And.intro hp ht)
 
-/-- Even after any fixed physical polynomial loss, the whole actual
-pointwise mixed-derivative Gevrey envelope is smaller than a prescribed
-inverse power of the frequency. -/
-theorem initialized_correction_pointwise_power_loss_eventually
-    (physicalCost loss p : ℝ) (hphysicalCost : 0 ≤ physicalCost) :
-    ∃ ρ0 G : ℝ, 0 < ρ0 ∧ 0 < G ∧ ∀ᶠ k : ℝ in atTop,
-      ∃ (hk : 4 ≤ k) (hn : 1 ≤ truncation k)
-        (Q : EulerAllOrderDriftCorrection.Budget period D.T_pos
-          (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree
-            (truncation k) hn k hk)),
-        Q.delta=delta (expansion k) ∧ Q.initialRadius=ρ0 ∧ Q.growthCoefficient=G ∧
-        ∀ (n : ℕ) (t : Icc (0 : ℝ) D.T) (x : LiftDomain period),
-          physicalCost*k^loss*(∑ w : Fin n → Fin 4,
-              ‖iteratedFieldDerivative period w (Q.pointField period t) x‖) <
-            k^(-p)*(4/ρ0)^n*(n.factorial : ℝ)^2 ∧
-          physicalCost*k^loss*(∑ w : Fin n → Fin 4,
-              ‖iteratedFieldDerivative period w (Q.pointPressure period t) x‖) <
-            k^(-p)*(4/ρ0)^n*(n.factorial : ℝ)^2 ∧
-          physicalCost*k^loss*(∑ w : Fin n → Fin 4,
-              ‖iteratedFieldDerivative period w (Q.pointTimeDerivative period t) x‖) <
-            k^(-p)*(4/ρ0)^n*(n.factorial : ℝ)^2 := by
-  obtain ⟨ρ0,G,C,hρ,hG,_hC,hQ⟩ := initialized_correction_pointwise_eventually
-    M D hTime τ hτ hτT B δ hδ hδ1 ξ hs α hα L NB LM Cagree Ξ hΞ hF hdet
-  refine ⟨ρ0,G,hρ,hG,?_⟩
-  filter_upwards [hQ,correction_with_power_loss_eventually (physicalCost*C) loss p] with k hQ hkbound
-  obtain ⟨hk,hn,Q,hδQ,hρQ,hGQ,hbounds⟩ := hQ
-  refine ⟨hk,hn,Q,hδQ,hρQ,hGQ,?_⟩
-  intro n t x
-  have hscale : 0 ≤ physicalCost*k^loss :=
-    mul_nonneg hphysicalCost (Real.rpow_nonneg (by linarith) _)
-  have hword : 0 < (4/ρ0)^n*(n.factorial : ℝ)^2 := by positivity
-  have hm := mul_lt_mul_of_pos_right hkbound hword
-  have hbound (X : ℝ) (hX : X ≤ C*delta (expansion k)*(4/ρ0)^n*(n.factorial : ℝ)^2) :
-      physicalCost*k^loss*X < k^(-p)*(4/ρ0)^n*(n.factorial : ℝ)^2 := by
-    apply (mul_le_mul_of_nonneg_left hX hscale).trans_lt
-    simpa only [mul_assoc, mul_left_comm, mul_comm] using hm
-  exact ⟨hbound _ (hbounds n t x).1,hbound _ (hbounds n t x).2.1,hbound _ (hbounds n t x).2.2⟩
 
 end EulerPacketTerminalDatum

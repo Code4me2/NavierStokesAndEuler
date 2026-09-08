@@ -116,10 +116,6 @@ theorem force_zero_from {t : ℝ} (ht : 2 ≤ t) (x : Space) :
   SpacetimeGluing.smoothExtension_zero_from
     (tracedResidual_smooth u p hu hp L hlim) (by linarith) x
 
-theorem force_zero_nonpos {t : ℝ} (ht : t ≤ 0) (x : Space) :
-    force u p hu hp L hlim (t, x) = 0 := by
-  rw [force_eq_pastResidual u p hu hp L hlim (by linarith) x]
-  exact PastExtension.pastResidual_zero_nonpos u p ht x
 
 theorem force_time_support : CompactFutureTimeSupport (force u p hu hp L hlim) :=
   ⟨2, by norm_num, fun t ht x => force_zero_from u p hu hp L hlim ht x⟩
@@ -135,17 +131,6 @@ theorem force_boundary_jets (n : ℕ) (x : Space) :
         ⟨mem_Iic.mpr (le_refl (1 : ℝ)), mem_univ x⟩
     _ = L x n := tracedResidual_boundary_jets u p hu hp L hlim n x
 
-/-- Compact time support and global joint smoothness give arbitrary
-polynomial decay of every actual full derivative tensor. -/
-theorem force_derivative_decay
-    (huper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hpper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p)
-    (m : ℕ) (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space,
-      ‖iteratedFDeriv ℝ m (force u p hu hp L hlim) (t, x)‖ ≤ C * (1 + t) ^ (-K) :=
-  CompactForceDecay.iteratedFDeriv_decay (force u p hu hp L hlim)
-    (force_smooth u p hu hp L hlim) (force_periodic u p hu hp L hlim huper hpper)
-    (force_time_support u p hu hp L hlim) m K hK
 
 /-- The same conclusion for every ordered choice of time/spatial coordinate
 directions and every output component. The constant is uniform in these choices. -/
@@ -207,15 +192,6 @@ theorem exists_candidate_force
   · intro m K hK
     exact force_mixed_derivative_decay u p hu hp L hlim huper hpper m K hK
 
-/-- Conditional reduction of the primary existential target to the stated
-physical fields and locally uniform limits of all actual residual derivatives. -/
-theorem candidateStatement_of_residual_limits
-    (huper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hpper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p)
-    (hdiv : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence u t x = 0)
-    (hunbounded : SpeedUnboundedAtOne u) : candidateStatement :=
-  ⟨activatedVelocity u, activatedPressure p, force u p hu hp L hlim,
-    candidate_properties u p hu hp L hlim huper hpper hdiv hunbounded⟩
 
 end Construction
 

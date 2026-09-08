@@ -45,13 +45,6 @@ noncomputable def auxiliary {S : Set ℝ}
     (F : ℝ × ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
   F (positiveMap a p.1, w.parameterMap p.2)
 
-theorem auxiliary_contDiff {S : Set ℝ}
-    (w : ParametricRadialExtension.ParameterWindow S) {a : ℝ} (ha : 0 < a)
-    {F : ℝ × ℝ → ℝ} (hF : ContDiffOn ℝ ∞ F (Ioi 0 ×ˢ S)) :
-    ContDiff ℝ ∞ (auxiliary w a F) :=
-  hF.comp_contDiff (((positiveMap_contDiff a).comp contDiff_fst).prodMk
-    (w.parameterMap_contDiff.comp contDiff_snd))
-    (fun p => ⟨positiveMap_pos ha p.1, w.parameterMap_mem p.2⟩)
 
 theorem auxiliary_eq {S : Set ℝ}
     (w : ParametricRadialExtension.ParameterWindow S) {a : ℝ} (ha : 0 < a)
@@ -66,14 +59,6 @@ theorem auxiliary_germ {S : Set ℝ}
   filter_upwards [(isOpen_Ioi.prod isOpen_Ioo).mem_nhds ⟨hX, abs_lt.mp heta⟩] with q hq
   exact auxiliary_eq w ha F hq.1.le (abs_lt.mpr hq.2).le
 
-theorem auxiliary_jets {S : Set ℝ}
-    (w : ParametricRadialExtension.ParameterWindow S) {a : ℝ} (ha : 0 < a)
-    (F : ℝ × ℝ → ℝ) (m : ℕ) {p : ℝ × ℝ}
-    (hX : a < p.1) (heta : |p.2| < w.inner) :
-    iteratedFDeriv ℝ m (auxiliary w a F) p = iteratedFDeriv ℝ m F p := by
-  have he := auxiliary_germ w ha F hX heta
-  have hu : auxiliary w a F =ᶠ[𝓝[univ] p] F := by simpa using he
-  simpa only [iteratedFDerivWithin_univ] using hu.iteratedFDerivWithin_eq he.eq_of_nhds m
 
 section Transplant
 
@@ -106,19 +91,6 @@ theorem transplant_density_difference (H : α → E → V)
 
 end Transplant
 
-theorem transplant_contDiffOn {D : Set (ℝ × ℝ)} {base aux replacement : ℝ × ℝ → ℝ}
-    (hb : ContDiffOn ℝ ∞ base D) (ha : ContDiff ℝ ∞ aux) (hr : ContDiff ℝ ∞ replacement) :
-    ContDiffOn ℝ ∞ (transplant base aux replacement) D :=
-  hb.add (hr.sub ha).contDiffOn
 
-theorem transplanted_density_integral
-    {E V : Type*} [AddCommGroup E] [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (H : (ℝ × ℝ) → E → V) {base aux replacement : ℝ × ℝ → E} {K : Set (ℝ × ℝ)}
-    (hbase : EqOn base aux K) (hedit : ∀ x ∉ K, replacement x = aux x) (X eta : ℝ) :
-    (∫ r in (0 : ℝ)..X, H (r, eta) (transplant base aux replacement (r, eta)) - H (r, eta) (base (r, eta))) =
-      ∫ r in (0 : ℝ)..X, H (r, eta) (replacement (r, eta)) - H (r, eta) (aux (r, eta)) := by
-  apply intervalIntegral.integral_congr
-  intro r _
-  exact transplant_density_difference H hbase hedit (r, eta)
 
 end NavierStokes.AnnularAuxiliary

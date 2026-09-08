@@ -696,12 +696,5 @@ theorem abs_deriv_normalizedPostPulseEnergy_le (d : TailData) (eta : ℝ)
       add_le_add hfirst hsecond
     _ ≤ _ := by nlinarith
 
-theorem abs_deriv_normalized_postPulseEnergy_le (d : TailData) (eta : ℝ)
-    (heta : eta ^ 2 ≤ 1) :
-    |deriv (fun q => d.core.lam * postPulseEnergy d q /
-      (Real.exp d.core.pulseStart * pulseAmplitude d.core ^ 2 * shape q ^ 2)) eta| ≤
-      (2 * flattenLength + 4 * tailConstant) * d.core.lam *
-        (1 + Real.log (1 / d.core.lam)) :=
-  abs_deriv_normalizedPostPulseEnergy_le d eta heta
 
 end NavierStokes.TailEnergyBounds

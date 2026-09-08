@@ -94,10 +94,5 @@ theorem localVelocity_odd (t : ℝ) (x : Space) :
   rw [EulerTimeRescaling.coordinates_apply,EulerTimeRescaling.coordinates_apply,
     unit_velocity_odd P u C R hC hR hu hdiv hodd,smul_neg]
 
-theorem localPressure_even (t : ℝ) (x : Space) :
-    localPressure P u C R hC hR hu hdiv (t,-x)=localPressure P u C R hC hR hu hdiv (t,x) := by
-  unfold localPressure EulerTimeRescaling.pressure
-  rw [EulerTimeRescaling.coordinates_apply,EulerTimeRescaling.coordinates_apply,
-    unit_pressure_even P u C R hC hR hu hdiv hodd]
 
 end EulerStaticEuler

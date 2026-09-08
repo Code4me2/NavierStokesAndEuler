@@ -40,10 +40,7 @@ def stages : (n : ℕ) → Stage S n
   | 0 => S.firstStage
   | n+1 => (stages n).successor hq hB
 
-theorem stages_zero : stages S hq hB 0=S.firstStage := rfl
 
-theorem stages_succ (n : ℕ) :
-    stages S hq hB (n+1)=(stages S hq hB n).successor hq hB := rfl
 
 theorem stages_time (n : ℕ) :
     (stages S hq hB (n+1)).time=(stages S hq hB n).nextTime :=
@@ -58,9 +55,6 @@ theorem stages_initial_step (n : ℕ) (hn : n ≠ 0) :
   | zero => exact (hn rfl).elim
   | succ n => exact (stages S hq hB (n+1)).joinedNext_initial_velocity (Nat.succ_ne_zero n) hq hB
 
-theorem stages_gradient_atTop :
-    Tendsto (fun n => (stages S hq hB n).activationGradient) atTop atTop :=
-  Stage.gradient_atTop (stages S hq hB)
 
 abbrev ConstructionScales :=
   Scales (requiredExponent : ℝ) (commonThreshold gradientConstant hessianConstant)

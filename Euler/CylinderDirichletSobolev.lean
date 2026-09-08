@@ -106,22 +106,5 @@ theorem velocityLp_block_bound (f : TimeLp T (CylinderL2 P E))
   rw [time_block_constant P directions q T f hf k b]
   exact hfb k
 
-/-- For source intervals of length at most one, continuous forcing embeds
-with no extra amplitude, and the same history estimate applies. -/
-theorem continuous_velocityLp_block_bound (hT1 : T ≤ 1)
-    (f : C(Icc (0 : ℝ) T,CylinderL2 P E))
-    (hf : ContDiff ℝ ∞ (fun a => pathTranslate P a f))
-    (d : ℕ) (hfb : ∀ n, block directions q (fun a => pathTranslate P a f) n 0 ≤ Cf*majorant R d n)
-    (n : ℕ) (a : LiftTangent) :
-    block directions q (fun b => timeLift T (translate P b).toContinuousLinearMap
-      (D.velocityLp P (pathLp T D.time_pos.le f))) n a ≤ majorant R (d+1) n := by
-  have hsqrt : Real.sqrt T ≤ 1 := by simpa using Real.sqrt_le_sqrt hT1
-  apply D.velocityLp_block_bound P directions hdir q hQ hQ₁ hH Rc C₀ C₁ CH Cf R hRc
-    hC₀ hC₁ hCH hCf hbQ hbQ₁ hbH hR (pathLp T D.time_pos.le f)
-    (pathLp_orbit_contDiff P T D.time_pos.le f hf) d _ n a
-  intro k
-  exact (pathLp_block_le P directions q T D.time_pos.le f hf k 0).trans
-    ((mul_le_mul_of_nonneg_right hsqrt (block_nonneg directions q _ k 0)).trans
-      (by simpa only [one_mul] using hfb k))
 
 end EulerCylinderDirichlet.Coefficients

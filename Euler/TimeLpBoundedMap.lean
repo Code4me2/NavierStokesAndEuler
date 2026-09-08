@@ -27,32 +27,13 @@ def timeLift (T : ℝ) (A : E →L[ℝ] F) : TimeLp T E →L[ℝ] TimeLp T F :=
 theorem timeLift_ae (T : ℝ) (A : E →L[ℝ] F) (u : TimeLp T E) :
     timeLift T A u =ᵐ[timeMeasure T] fun t => A (u t) := A.coeFn_compLpL u
 
-theorem timeLift_norm_le (T : ℝ) (A : E →L[ℝ] F) : ‖timeLift T A‖ ≤ ‖A‖ :=
-  A.norm_compLpL_le
 
 theorem timeLift_apply_norm_le (T : ℝ) (A : E →L[ℝ] F) (u : TimeLp T E) :
     ‖timeLift T A u‖ ≤ ‖A‖*‖u‖ := A.norm_compLp_le u
 
-theorem timeLift_add (T : ℝ) (A B : E →L[ℝ] F) :
-    timeLift T (A+B) = timeLift T A + timeLift T B := A.add_compLpL B
 
-theorem timeLift_smul (T : ℝ) (c : ℝ) (A : E →L[ℝ] F) :
-    timeLift T (c • A) = c • timeLift T A := A.smul_compLpL c
 
-theorem timeLift_comp (T : ℝ) (A : F →L[ℝ] G) (B : E →L[ℝ] F) :
-    timeLift T (A.comp B) = (timeLift T A).comp (timeLift T B) := by
-  apply ContinuousLinearMap.ext
-  intro u
-  apply Lp.ext
-  filter_upwards [timeLift_ae T (A.comp B) u,
-    timeLift_ae T A (timeLift T B u), timeLift_ae T B u] with t hab ha hb
-  exact hab.trans ((congrArg A hb).symm.trans ha.symm)
 
-theorem timeLift_id (T : ℝ) : timeLift T (ContinuousLinearMap.id ℝ E) =
-    ContinuousLinearMap.id ℝ (TimeLp T E) := by
-  apply ContinuousLinearMap.ext
-  intro u
-  exact Lp.ext (timeLift_ae T (ContinuousLinearMap.id ℝ E) u)
 
 theorem zeroExtension_timeLift (T : ℝ) (A : E →L[ℝ] F) (u : TimeLp T E) :
     zeroExtension T (timeLift T A u) =ᵐ[volume] fun t => A (zeroExtension T u t) := by

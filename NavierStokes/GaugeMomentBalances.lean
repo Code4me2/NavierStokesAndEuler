@@ -69,23 +69,6 @@ section GeneralGauge
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-/-- This is the coefficient of the pressure debt, measured in the moving
-physical radius, rather than in the normalized profile radius. -/
-theorem pressureCoefficient_measured (g : VariableGaugeMean.GaugeData S) (n : ℕ) (s : S)
-    (hl : 0 < g.length n s) (Y : Plane) :
-    (IntegratedMeanBalances.moment 2 (fun R => VariableGaugeMean.density
-      g.radial.inner g.radial.outer g.radial.inner_lt_outer (g.length n) (R, (s, Y)))) / 2 =
-      pressureCoefficient g n s := by
-  have he : (fun R => VariableGaugeMean.density g.radial.inner g.radial.outer
-      g.radial.inner_lt_outer (g.length n) (R, (s, Y))) =
-      PressureStream.rho (g.length n s * g.radial.inner) (g.length n s * g.radial.outer)
-        (mul_lt_mul_of_pos_left g.radial.inner_lt_outer hl) := by
-    funext R
-    exact VariableGaugeMean.density_eq_scaled g.radial.inner_lt_outer (g.length n) (R, (s, Y)) hl
-  rw [he, rho_second_moment_scale hl g.radial.inner_lt_outer]
-  unfold pressureCoefficient basePressureCoefficient
-  ring
 
 /-- The actual moving-gauge pressure moment. Freezing is used only to apply
 a radial integral theorem on one fiber; no slow derivative is frozen. -/
@@ -155,21 +138,6 @@ theorem similarity_pressureCoefficient {h d a b M : ℝ} (hab : a < b) (index : 
   unfold pressureCoefficient VariableGaugeMean.similarityGauge VariableGaugeMean.qLength
   rw [Real.sq_sqrt (SimilarityCoordinates.coordinateQ_spec hc hc1 hs).1.le]
 
-theorem similarity_pressureCoefficient_fderiv {h d a b M : ℝ} (hab : a < b) (index : ℕ → ℕ)
-    (hc : 0 < 2 * h) (hc1 : 2 * h < 1) (n : ℕ) {s : Plane} (hs : 0 < s.1) (v : Plane) :
-    fderiv ℝ (pressureCoefficient (VariableGaugeMean.similarityGauge h d a b M hab index) n) s v =
-      basePressureCoefficient a b hab *
-        ((v.1 + 2 * s.2 * SimilarityCoordinates.coordinateQ (2 * h) s ^ (2 * h) * v.2) /
-          SimilarityCoordinates.scalarSlope (2 * h) s.2 (SimilarityCoordinates.coordinateQ (2 * h) s)) := by
-  have he : pressureCoefficient (VariableGaugeMean.similarityGauge h d a b M hab index) n =ᶠ[𝓝 s]
-      (fun t => basePressureCoefficient a b hab * SimilarityCoordinates.coordinateQ (2 * h) t) := by
-    filter_upwards [continuousAt_fst.eventually (Ioi_mem_nhds hs)] with t ht
-    exact similarity_pressureCoefficient hab index hc hc1 n ht
-  rw [he.fderiv_eq]
-  have hd := ((SimilarityCoordinates.coordinateQ_smooth hc hc1 hs).differentiableAt (by simp)).hasFDerivAt
-  rw [(hd.const_mul (basePressureCoefficient a b hab)).fderiv]
-  change basePressureCoefficient a b hab * fderiv ℝ (SimilarityCoordinates.coordinateQ (2 * h)) s v = _
-  rw [SimilarityCoordinates.coordinateQ_fderiv_apply hc hc1 hs]
 
 end SimilarityCoefficient
 
@@ -687,21 +655,6 @@ theorem q_pressureCoefficient_fderiv {coord : ℝ} (U : SlowRegion coord)
   change basePressureCoefficient _ _ _ * fderiv ℝ (SimilarityCoordinates.coordinateQ coord) s v = _
   rw [SimilarityCoordinates.coordinateQ_fderiv_apply U.coord_pos U.coord_lt_one (U.time_pos s hs)]
 
-/-- On the positive axial half-plane the coefficient has a strictly positive
-axial derivative, so replacing it by a constant would change the identity. -/
-theorem q_pressureCoefficient_axial_derivative_pos {coord : ℝ} (U : SlowRegion coord)
-    (g : VariableGaugeMean.GaugeData Plane) (ha : 0 < g.radial.inner)
-    (hg : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (n : ℕ) {s : Plane} (hs : s ∈ U.carrier) (hz : 0 < s.2) :
-    0 < fderiv ℝ (pressureCoefficient g n) s (0, 1) := by
-  have hq := SimilarityCoordinates.coordinateQ_spec U.coord_pos U.coord_lt_one (U.time_pos s hs)
-  have hforward : 0 < SimilarityCoordinates.forwardScalar coord s.2
-      (SimilarityCoordinates.coordinateQ coord s) := by rw [hq.2]; exact U.time_pos s hs
-  have hsl := SimilarityCoordinates.scalarSlope_pos U.coord_pos U.coord_lt_one hq.1 hforward
-  rw [q_pressureCoefficient_fderiv U g hg n hs]
-  simp only [zero_add, mul_one]
-  exact mul_pos (basePressureCoefficient_pos ha g.radial.inner_lt_outer)
-    (div_pos (mul_pos (mul_pos (by norm_num) hz) (Real.rpow_pos_of_pos hq.1 coord)) hsl)
 
 theorem axialDebtPotential_smooth {coord : ℝ} (U : SlowRegion coord)
     (g : VariableGaugeMean.GaugeData Plane) (ha : 0 < g.radial.inner)
@@ -743,28 +696,6 @@ theorem axialDebtPotential_fderiv {coord : ℝ} (U : SlowRegion coord)
   simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
   ring
 
-/-- Explicit native `Z` balance, with the moving-density derivative retained. -/
-theorem state_axial_moment_expanded {coord : ℝ} (U : SlowRegion coord)
-    (g : VariableGaugeMean.GaugeData Plane) (ha : 0 < g.radial.inner) (hd : 0 < g.radial.exponent)
-    (hg : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (ε fast : ℕ → ℝ) (v : Plane) (c : Context Point) (u : State Point)
-    (ho : c.operators = nativeOperators g.radial ε fast (0, 1) (1, 0) v)
-    (H : MovingAxialInputs U g.radial.inner g.radial.outer c u)
-    (hf : MovingField U g.radial.inner g.radial.outer (u.gr c))
-    (hfixed : VariableGaugeMean.reconstructState g c u = u)
-    (hmass : ∀ n s, s ∈ U.carrier → CorrectionState.radialMoment 1 u.mean.axial n s = 0)
-    (n : ℕ) {s : Plane} (hs : s ∈ U.carrier) :
-    CorrectionState.radialMoment 1 (u.axialResidual c) n s = ε n *
-      (fderiv ℝ (CorrectionState.axialDefect c u n) s (0, 1) +
-        pressureCoefficient g n s * fderiv ℝ (CorrectionState.pressureDefect c u n) s (0, 1) +
-        (basePressureCoefficient g.radial.inner g.radial.outer g.radial.inner_lt_outer *
-          ((2 * s.2 * SimilarityCoordinates.coordinateQ coord s ^ coord) /
-            SimilarityCoordinates.scalarSlope coord s.2 (SimilarityCoordinates.coordinateQ coord s))) *
-          CorrectionState.pressureDefect c u n s) := by
-  rw [state_axial_moment U g ha hd hg ε fast (0, 1) (1, 0) v c u ho H hf hfixed hmass n hs,
-    axialDebtPotential_fderiv U g ha hg c u H.axial hf n hs,
-    q_pressureCoefficient_fderiv U g hg n hs]
-  simp only [zero_add, mul_one]
 
 theorem pressureCoefficient_unweighted {coord : ℝ} (U : SlowRegion coord)
     (P : SignedStressPrimitive.Patch) {cL cR : ℝ} (hcL : 0 < cL) (hcR : 0 < cR)

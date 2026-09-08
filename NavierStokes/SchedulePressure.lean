@@ -55,13 +55,6 @@ theorem shapeExponent_before (d : TailData) {y : ℝ} (hy : y ≤ d.core.endpoin
     div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr hy) flattenLength_pos.le
   simp [shapeExponent, sigma_zero hs]
 
-theorem shapeExponent_after (d : TailData) {y : ℝ} (hy : d.flattenEnd ≤ y) :
-    shapeExponent d y = 0 := by
-  have hs : 1 ≤ (y - d.core.endpoint) / flattenLength := by
-    apply (le_div_iff₀ flattenLength_pos).mpr
-    dsimp [TailData.flattenEnd] at hy
-    linarith
-  simp [shapeExponent, sigma_one hs]
 
 theorem clockWeight_ideal (d : TailData) {y : ℝ} (hy : y ≤ 0) :
     clockWeight d y = d.core.P ^ 2 * Real.exp ((1 / 5 : ℝ) * y) := by
@@ -177,57 +170,20 @@ theorem axisPressure_contDiff (d : TailData) : ContDiff ℝ ∞ (axisPressure d)
   rw [axisPressure_eq]
   exact PressureDatum.pressure_neg _ _ _
 
-theorem axisPressure_lower_bound (d : TailData) (η : ℝ) :
-    axisPressure d η ≤ -(5 / 2 : ℝ) * d.core.P ^ 2 * shape η ^ 2 := by
-  rw [axisPressure_eq]
-  exact PressureDatum.pressure_le_of_ideal_prefix (admissible d)
-    (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy) η
 
 theorem positive_exponent_mass (d : TailData) :
     0 < ∫ y, clockWeight d y * shapeExponent d y :=
   PressureDatum.exponent_mass_pos_of_ideal_prefix (admissible d) d.core.P_pos
     (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy)
 
-theorem axisPressure_hasDerivAt (d : TailData) (η : ℝ) :
-    HasDerivAt (axisPressure d)
-      ((2 * η / (1 + η ^ 2)) *
-        ∫ y, shapeExponent d y * finalAngular d (y, η) ^ 2) η := by
-  rw [axisPressure_eq]
-  have heq : (∫ y, shapeExponent d y * finalAngular d (y, η) ^ 2) =
-      ∫ y, clockWeight d y * shapeExponent d y * PressureDatum.kernel (shapeExponent d y) η := by
-    apply integral_congr_ae
-    exact Filter.Eventually.of_forall fun y => by
-      dsimp only
-      rw [angular_square_factorization]
-      ring
-  rw [heq]
-  exact PressureDatum.hasDerivAt_pressure (admissible d) η
 
-theorem axisPressure_deriv_pos (d : TailData) {η : ℝ} (hη : 0 < η) :
-    0 < deriv (axisPressure d) η := by
-  rw [axisPressure_eq]
-  exact PressureDatum.deriv_pressure_pos (admissible d) (positive_exponent_mass d) hη
 
-theorem axisPressure_deriv_neg (d : TailData) {η : ℝ} (hη : η < 0) :
-    deriv (axisPressure d) η < 0 := by
-  rw [axisPressure_eq]
-  exact PressureDatum.deriv_pressure_neg (admissible d) (positive_exponent_mass d) hη
 
 @[simp] theorem axisPressure_deriv_zero (d : TailData) : deriv (axisPressure d) 0 = 0 := by
   rw [axisPressure_eq]
   exact PressureDatum.deriv_pressure_zero (admissible d)
 
-theorem axisPressure_neg (d : TailData) (η : ℝ) : axisPressure d η < 0 := by
-  rw [axisPressure_eq]
-  exact PressureDatum.pressure_neg_of_ideal_prefix (admissible d) d.core.P_pos
-    (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy) η
 
-/-- Moving `X_R` translates the logarithmic clock and leaves the actual datum fixed. -/
-theorem axisPressure_radius_independent (d : TailData) (X_R η : ℝ) :
-    (-(1 / 2 : ℝ) * ∫ y, finalAngular d (y - Real.log X_R, η) ^ 2) = axisPressure d η := by
-  unfold axisPressure
-  simp only [sub_eq_add_neg]
-  rw [integral_add_right_eq_self (fun y => finalAngular d (y, η) ^ 2) (-Real.log X_R)]
 
 noncomputable def complexAxisPressure (d : TailData) : ℂ → ℂ :=
   PressureDatum.complexPressure (clockWeight d) (shapeExponent d)
@@ -247,21 +203,6 @@ theorem natural_axis_pressureData (d : TailData) (hP : 2 ≤ d.core.P) :
   exact NaturalAxisData.pressureData_of_ideal_prefix (admissible d) hP
     (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy)
 
-/-- The analytic input is fixed first, followed by every sufficiently large
-`Λ` and every normalization `C` above its constructed threshold. -/
-theorem natural_profileFamily (d : TailData) {j : ℝ}
-    (hsmall : NaturalAxisData.SmallParameters d.h j) (hP : 2 ≤ d.core.P) :
-    ∃ δ σ : ℝ, 0 < δ ∧ 0 < σ ∧
-      (∀ η ∈ Icc (-1 : ℝ) 1,
-        |NaturalAxisData.Z d.h j (axisPressure d) η| ≤ δ →
-          99 / 100 < NaturalAxisData.chi d.h j σ η) ∧
-      ∃ data : NaturalAxisCoefficients.AnalyticInputs d.h j σ (axisPressure d),
-        ∃ Λ₀ : ℝ, 0 < Λ₀ ∧ ∀ Λ : ℝ, Λ₀ ≤ Λ →
-          ∀ C : ℝ, data.normalizationThreshold Λ ≤ C →
-            Nonempty (NaturalProfile.ProfileFamily data Λ C) := by
-  rw [axisPressure_eq]
-  exact NaturalProfile.ideal_prefix_profileFamily hsmall (admissible d) hP
-    (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy)
 
 /-- The pressure of the actual outgoing schedule supplies the natural-axis theorem. -/
 theorem exists_natural_profiles (d : TailData) {j : ℝ}

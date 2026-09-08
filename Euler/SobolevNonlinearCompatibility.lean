@@ -77,10 +77,5 @@ def algebraicAtBilinear {s : ℕ} (hs : 6 ≤ s)
     SobolevSpace period s →L[ℝ] SobolevSpace period s →L[ℝ] SobolevSpace period s :=
   ∑ i : Fin 3, postcompose (C i) (productHqBilinear period hs (coordinate 3 i) (coordinate_norm_le 3 i))
 
-/-- This bilinear map is precisely the already bounded order-zero Euler term. -/
-theorem algebraicAtBilinear_apply {s : ℕ} (hs : 6 ≤ s)
-    (C : Fin 3 → SobolevSpace period s →L[ℝ] SobolevSpace period s) (u v : SobolevSpace period s) :
-    algebraicAtBilinear period hs C u v = algebraicAt period hs C u v := by
-  simp only [algebraicAtBilinear, sum_apply, postcompose_apply, productHqBilinear_apply, algebraicAt]
 
 end EulerSobolevNonlinearCompatibility

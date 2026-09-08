@@ -31,27 +31,6 @@ structure Evolution (T : ℝ) (hT : 0 ≤ T) where
         ((velocity ⟨t,ht.1.le,ht.2.le⟩).field x)-
           (pressureForce ⟨t,ht.1.le,ht.2.le⟩).field x) t
 
-def evolutionOfClassical (T : ℝ) (hT : 0 ≤ T)
-    (U G : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hU : ∀ n, Continuous (fun t => (U t).jetLp n))
-    (hG : ∀ n, Continuous (fun t => (G t).jetLp n))
-    (u : ℝ × Space → Space) (p : ℝ × Space → ℝ)
-    (hu : ∀ (t : Icc (0 : ℝ) T) x, u (t,x)=(U t).field x)
-    (hp : ∀ (t : Icc (0 : ℝ) T), Differentiable ℝ (fun x => p (t,x)))
-    (hg : ∀ (t : Icc (0 : ℝ) T) x, gradient (fun y => p (t,y)) x=(G t).field x)
-    (hdiv : ∀ t x, divergence (U t).field x=0)
-    (hdiff : ∀ t ∈ Ioo 0 T, ∀ x, DifferentiableAt ℝ u (t,x))
-    (heuler : ∀ t ∈ Ioo 0 T, ∀ x, EulerLagrangian.momentumResidual u p (t,x)=0) :
-    Evolution T hT where
-  velocity := U
-  pressureForce := G
-  velocity_continuous := hU
-  pressure_continuous := hG
-  solenoidal t := smooth_mem_solenoidal (U t).field (U t).smooth (U t).memLp (hdiv t)
-  gradient t := gradient_mem (G t) (fun x => p (t,x))
-    (potential_smooth (G t) _ (hp t) (fun x => (hg t x).symm)) (fun x => (hg t x).symm)
-  time_law := EulerSmoothEulerEvolution.pointwise_time_derivative_of_classical T hT U G
-    u p hu hg hdiff heuler
 
 theorem continuous_jet_fieldSub {K : Type*} [TopologicalSpace K]
     (A B : K → SmoothL2Field Space)

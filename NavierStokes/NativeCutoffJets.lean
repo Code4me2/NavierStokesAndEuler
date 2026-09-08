@@ -35,13 +35,6 @@ noncomputable def literalCutoff (l : Label) (n : ℕ) (k : Frequency)
       (CopySolveCompatibility.nativeTimeMap 0 (clock.value l n)
         ((g l n).coordinates k x.2)).2
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem literalCutoff_eq_referenceTransport (l : Label) (n : ℕ) (k : Frequency) :
-    literalCutoff (P := P) F clock g r hr l n k =
-      fun x => ActualGaussianCoverage.referenceCutoff (r l n) (F.L (l,n))
-        (hr l n) (F.L_pos (l,n))
-          (CopySolveCompatibility.nativeTimeMap 0 (clock.value l n)
-            ((g l n).coordinates k x.2)) := rfl
 
 variable (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
   (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)

@@ -77,19 +77,6 @@ theorem stage_displacement_le_of_partial_sums {C : ℝ}
   exact (stage_displacement_le_partial_sum H X Y M δ hbase hnest hstep hsmall n t ht x).trans
     (add_le_add le_rfl (hC n))
 
-include hbase hnest hstep hsmall in
-theorem stage_mapsTo_closedBall_of_partial_sums {C : ℝ}
-    (hC : ∀ n, ∑ i ∈ range n, δ i ≤ C)
-    (R : ℝ) (n : ℕ) (t : Time) (ht : H n t) :
-    MapsTo (X n t) (Metric.closedBall 0 R) (Metric.closedBall 0 (R + M + C)) := by
-  intro x hx
-  rw [Metric.mem_closedBall, dist_zero_right] at hx ⊢
-  calc
-    ‖X n t x‖ = ‖x + (X n t x - x)‖ := by rw [add_comm x, sub_add_cancel]
-    _ ≤ ‖x‖ + ‖X n t x - x‖ := norm_add_le _ _
-    _ ≤ R + (M + C) := add_le_add hx
-      (stage_displacement_le_of_partial_sums H X Y M δ hbase hnest hstep hsmall hC n t ht x)
-    _ = R + M + C := (add_assoc _ _ _).symm
 
 include hbase hnest hstep hsmall in
 theorem stage_displacement_le_tsum (hδ : Summable δ) (hδ0 : ∀ n, 0 ≤ δ n)
@@ -98,17 +85,5 @@ theorem stage_displacement_le_tsum (hδ : Summable δ) (hδ0 : ∀ n, 0 ≤ δ n
   exact (stage_displacement_le_partial_sum H X Y M δ hbase hnest hstep hsmall n t ht x).trans
     (add_le_add le_rfl (hδ.sum_le_tsum (range n) (fun i _ => hδ0 i)))
 
-include hbase hnest hstep hsmall in
-theorem stage_mapsTo_closedBall (hδ : Summable δ) (hδ0 : ∀ n, 0 ≤ δ n)
-    (R : ℝ) (n : ℕ) (t : Time) (ht : H n t) :
-    MapsTo (X n t) (Metric.closedBall 0 R) (Metric.closedBall 0 (R + M + ∑' i, δ i)) := by
-  intro x hx
-  rw [Metric.mem_closedBall, dist_zero_right] at hx ⊢
-  calc
-    ‖X n t x‖ = ‖x + (X n t x - x)‖ := by rw [add_comm x, sub_add_cancel]
-    _ ≤ ‖x‖ + ‖X n t x - x‖ := norm_add_le _ _
-    _ ≤ R + (M + ∑' i, δ i) := add_le_add hx
-      (stage_displacement_le_tsum H X Y M δ hbase hnest hstep hsmall hδ hδ0 n t ht x)
-    _ = R + M + ∑' i, δ i := (add_assoc _ _ _).symm
 
 end Euler.ComparatorBridge

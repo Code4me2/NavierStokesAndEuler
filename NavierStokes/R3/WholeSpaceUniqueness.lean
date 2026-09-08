@@ -99,21 +99,5 @@ theorem candidate_unique_on_Icc {u : VelocityField} {p : PressureField}
     have ht0 : t = 0 := le_antisymm (ht.2.trans (le_of_not_gt hT0)) ht.1
     rw [ht0, h.zero_initial_velocity, hvzero]
 
-/-- A global smooth solution with uniformly finite kinetic energy must agree
-with the candidate at every time strictly before one. -/
-theorem candidate_global_agrees_before_one {u : VelocityField} {p : PressureField}
-    {f : VelocityField} {K : Set Space} (h : CandidateProperties 1 u p f K)
-    (v : GlobalFiniteEnergySolution 1 f) :
-    ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, u (t, x) = v.velocity (t, x) := by
-  intro t ht
-  have hsub : Comparison.slab 0 t ⊆ futureDomain := by
-    intro z hz
-    exact ⟨hz.1.1, hz.2⟩
-  have he := v.energy_bounded.mono (show Icc (0 : ℝ) t ⊆ Ici 0 from fun _ hs => hs.1)
-  exact candidate_unique_on_Icc h ht.2 (v.velocity_smooth.mono hsub)
-    (v.pressure_smooth.mono hsub) he
-    (fun s hs => v.divergence_free s hs.1.le)
-    (fun s hs => v.navier_stokes s hs.1)
-    v.zero_initial_velocity t ⟨ht.1, le_rfl⟩
 
 end NavierStokesR3.WholeSpaceUniqueness

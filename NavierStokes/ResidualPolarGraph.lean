@@ -156,22 +156,6 @@ theorem eventually_chartDomain {a : ℝ} (j : PolarCharts.Index) (n : ℕ) {w : 
     ∀ᶠ z in 𝓝 w, PhysicalGraphBounds.scaledRadial n z ∈ PolarCharts.chartDomain a j :=
   ((PolarCharts.chartDomain_open a j).preimage (PhysicalGraphBounds.scaledRadial n).continuous).mem_nhds hw
 
-theorem spacetimeChart_cylindricalPoint_eventually {a : ℝ} (ha : 0 < a)
-    (j : PolarCharts.Index) (n : ℕ) {w : SpaceTime}
-    (hw : PhysicalGraphBounds.scaledRadial n w ∈ PolarCharts.chartDomain a j) :
-    (fun z => ((cylindricalPoint a j n z).1,
-      CylindricalResidual.chart (cylindricalPoint a j n z).2)) =ᶠ[𝓝 w] id := by
-  filter_upwards [eventually_chartDomain j n hw] with z hz
-  exact spacetimeChart_cylindricalPoint ha j n hz
 
-theorem graphMapTZ_cylindricalPoint_eventually {a : ℝ} (ha : 0 < a) (h : ℝ)
-    (j : PolarCharts.Index) (n d : ℕ) (hd : d ≤ ChartScales.nativeIndex h n) {w : SpaceTime}
-    (hw : PhysicalGraphBounds.scaledRadial n w ∈ PolarCharts.chartDomain a j) :
-    (fun z => PhysicalResidualTZ.graphMapTZ
-      (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (ChartScales.nativeIndex h n - d))
-        (cylindricalPoint a j n z)) =ᶠ[𝓝 w]
-      (fun z => (PhysicalMeanJetBounds.graph h n d z, angle a j n z)) := by
-  filter_upwards [eventually_chartDomain j n hw] with z hz
-  exact graphMapTZ_cylindricalPoint ha h j n d hd hz
 
 end NavierStokes.ResidualPolarGraph

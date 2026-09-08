@@ -100,12 +100,6 @@ def sqrtTimeMap (T : ℝ) : C(Icc (0 : ℝ) T, Icc (0 : ℝ) (Real.sqrt T)) wher
 @[simp] theorem sqrtTimeMap_apply (T : ℝ) (t : Icc (0 : ℝ) T) :
     (sqrtTimeMap T t : ℝ) = Real.sqrt t := rfl
 
-/-- Continuous square-root reparametrization recovers the exact original family. -/
-theorem potentialTruncation_square_sqrt (v : Space × ℝ → Space)
-    (χ : Space → ℝ) (x : Space) {t : ℝ} (ht : 0 ≤ t) :
-    potentialTruncation (fun y => v (y, (Real.sqrt t) ^ 2)) χ x =
-      potentialTruncation (fun y => v (y, t)) χ x := by
-  rw [Real.sq_sqrt ht]
 
 
 end Euler.ComparatorBridge

@@ -81,11 +81,7 @@ theorem extraPolynomial_eval (X : ℝ) : extraPolynomial.eval X=extraEnvelope X 
 def extraConstant : ℝ := coefficientCost extraPolynomial
 def extraPower : ℕ := extraPolynomial.natDegree
 
-theorem extraConstant_pos : 0 < extraConstant := coefficientCost_pos _
 
-theorem extraEnvelope_power (X : ℝ) (hX : 1 ≤ X) : extraEnvelope X ≤ extraConstant*X^extraPower := by
-  rw [← extraPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound extraPolynomial X hX)
 
 theorem physicalEnvelope_nonneg (X S : ℝ) (hX : 0 ≤ X) (hS : 0 ≤ S) :
     0 ≤ physicalEnvelope X S := by

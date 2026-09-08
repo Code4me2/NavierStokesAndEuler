@@ -80,20 +80,5 @@ theorem lineHeat_one_derivative (a : LiftTangent) {v : ℝ≥0} (hv : 0 < v) (f 
   ⟨lineHeatDerivative period a v f, lineHeat_hasDerivAt period a hv f,
     lineHeatDerivative_smoothing_bound period a hv f⟩
 
-/-- The derivative of the heat average commutes with every cylinder translation. -/
-theorem lineHeatDerivative_translation (a : LiftTangent) (v : ℝ≥0) (b : LiftDomain period) (f : LiftL2 period) :
-    translation period b (lineHeatDerivative period a v f) =
-      lineHeatDerivative period a v (translation period b f) := by
-  simp only [lineHeatDerivative, map_smul]
-  congr 1
-  change (translation period b).toContinuousLinearMap
-      (∫ x : ℝ, x • lineOrbit period a f x ∂gaussianReal 0 v) = _
-  rw [← (translation period b).toContinuousLinearMap.integral_comp_comm (gaussianMomentOrbit_integrable period a v f)]
-  apply integral_congr_ae
-  apply Filter.Eventually.of_forall
-  intro x
-  change translation period b (x • translation period (translationPath period a x) f) =
-    x • translation period (translationPath period a x) (translation period b f)
-  rw [map_smul, translation_add, translation_add, add_comm b]
 
 end EulerGaussianCylinderHeat

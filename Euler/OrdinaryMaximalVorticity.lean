@@ -73,36 +73,9 @@ theorem maximalVorticityIntegral_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < 
     (L.intermediateHorizon_lt (L.shorterTime S hSL t)) hSL t t.property.1
     (L.time_lt_intermediateHorizon (L.shorterTime S hSL t)).le t.property.2
 
-theorem maximalVorticityIntegral_nonneg (t : L.Time) : 0 ≤ L.maximalVorticityIntegral t :=
-  (L.evolution (L.intermediateHorizon t) (L.intermediateHorizon_pos t)
-    (L.intermediateHorizon_lt t)).vorticityIntegral_nonneg (L.intermediateTime t)
 
-theorem maximalVorticityIntegral_initial : L.maximalVorticityIntegral L.initialTime=0 :=
-  (L.evolution (L.intermediateHorizon L.initialTime) (L.intermediateHorizon_pos L.initialTime)
-    (L.intermediateHorizon_lt L.initialTime)).vorticityIntegral_initial
 
-theorem maximalVorticityIntegral_continuous : Continuous L.maximalVorticityIntegral := by
-  apply L.continuous_of_shorter_restrictions
-  intro S hS hSL
-  have he : (fun t : Icc (0 : ℝ) S => L.maximalVorticityIntegral (L.shorterTime S hSL t))=
-      (L.evolution S hS hSL).vorticityIntegral :=
-    funext (L.maximalVorticityIntegral_eq_evolution S hS hSL)
-  rw [he]
-  exact (L.evolution S hS hSL).vorticityIntegral_continuous
 
-theorem maximalVorticityIntegral_mono : Monotone L.maximalVorticityIntegral := by
-  intro s t hst
-  let R := L.intermediateHorizon t
-  have hR : 0 < R := L.intermediateHorizon_pos t
-  have hRL : R < L.duration := L.intermediateHorizon_lt t
-  have htR : (t : ℝ) ≤ R := (L.time_lt_intermediateHorizon t).le
-  have hsR : (s : ℝ) ≤ R := (show (s : ℝ) ≤ t from hst).trans htR
-  have hs := L.maximalVorticityIntegral_eq_evolution R hR hRL ⟨s,s.property.1,hsR⟩
-  have ht := L.maximalVorticityIntegral_eq_evolution R hR hRL ⟨t,t.property.1,htR⟩
-  change L.maximalVorticityIntegral s=_ at hs
-  change L.maximalVorticityIntegral t=_ at ht
-  rw [hs,ht]
-  exact (L.evolution R hR hRL).vorticityIntegral_mono _ _ hst
 
 theorem vorticityIntegral_eventually_large_of_unbounded
     (hunbounded : ∀ G : ℝ, ∃ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)

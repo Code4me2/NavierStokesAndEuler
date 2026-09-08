@@ -37,10 +37,6 @@ private local instance : NormedRing (Space →ᵇ U →L[ℝ] U) := inferInstanc
 def evolution (S : Set Space) (hS : MeasurableSet S) :=
   constructedEvolution period S hS T hT (sourceGenerator Q Q₁ c hc hQ)
 
-/-- The source coefficient automatically has the translated regularity needed by the solver. -/
-theorem source_coefficient_contDiff :
-    ContDiff ℝ ∞ (translateCoefficientPath (sourceGenerator Q Q₁ c hc hQ)) :=
-  sourceGenerator_translation_contDiff Q Q₁ c hc hQ
 
 include hd in
 /-- Mixed spatial-angular external words, including a fixed Sobolev base,

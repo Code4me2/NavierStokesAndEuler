@@ -44,20 +44,8 @@ noncomputable def cycle (B N0 : ℕ) : ℕ → CycleState (Index B N0) :=
 @[simp] theorem cycle_zero (B N0 : ℕ) :
     cycle B N0 0 = ActualInitialization.initialCycleState B N0 := rfl
 
-theorem cycle_succ (B N0 j : ℕ) :
-    cycle B N0 (j + 1) = (cycle B N0 j).step (parameters B N0) (commonContext B) := rfl
 
-theorem cycle_labels (B N0 j : ℕ) :
-    (cycle B N0 j).coefficients.labels = activeLabels standardRegion B N0 := by
-  induction j with
-  | zero => rfl
-  | succ j ih => exact ih
 
-theorem cycle_aliasCoefficients (B N0 j : ℕ) :
-    (cycle B N0 j).coefficients.aliasCoefficients = fun _ => 0 := by
-  induction j with
-  | zero => rfl
-  | succ j ih => exact ih
 
 theorem cycle_carrier (B N0 j : ℕ) (l : Index B N0) :
     SameCarrier ((cycle B N0 j).coefficients.blocks l) (ActualInitialization.tangentBlock l) := by
@@ -65,11 +53,6 @@ theorem cycle_carrier (B N0 j : ℕ) (l : Index B N0) :
   | zero => exact ActualInitialization.primary_tangent_carrier l
   | succ j ih => exact ⟨ih.frequency, ih.phase, ih.angular⟩
 
-/-- Recomputing the actual constructor at this state selects precisely
-the fixed parameters used by the recurrence. -/
-theorem current_parameters (B N0 j : ℕ) :
-    ActualCycleParameters.parameters (cycle B N0 j) = parameters B N0 :=
-  ActualCycleParameters.parameters_eq_fixed _ (cycle_carrier B N0 j)
 
 theorem cycle_signed_carrier (B N0 j : ℕ) (l : Index B N0) :
     SameCarrier ((cycle B N0 j).coefficients.blocks l)
@@ -84,40 +67,9 @@ theorem cycle_representation (B N0 j : ℕ) :
     (ActualInitialization.initialCycleState B N0) (ActualInitialization.initialCycleState_represents B N0)
     (cycle_signed_carrier B N0) j
 
-theorem cycle_coefficientBands (B N0 j : ℕ) :
-    CoefficientBands (cycle B N0 j).coefficients :=
-  CycleState.iterate_bands (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) (ActualInitialization.coefficients_band B N0) j
 
-theorem cycle_residualBand (B N0 j : ℕ) :
-    (cycle B N0 j).coefficients.residualBand = 2 ^ (j + 1) := by
-  induction j with
-  | zero => rfl
-  | succ j ih =>
-      change 2 * max (cycle B N0 j).coefficients.residualBand 1 = 2 ^ (j + 1 + 1)
-      have hp : 1 ≤ (2 : ℕ) ^ (j + 1) := Nat.succ_le_iff.mpr (by positivity)
-      rw [ih, max_eq_left hp]
-      simp only [pow_succ]
-      ring
 
-theorem cycle_base_error (B N0 j : ℕ) :
-    (cycle B N0 j).state.errors.base = ActualInitialization.baseError B := by
-  induction j with
-  | zero => exact (ActualInitialization.initialState_error_components B N0).1
-  | succ j ih =>
-      change ((parameters B N0).next (cycle B N0 j).coefficients (commonContext B)
-        (cycle B N0 j).state).errors.base = _
-      rw [CycleParameters.next_base_error]
-      exact ih
 
-theorem cycle_reconstructed (B N0 j : ℕ) :
-    (VariableGaugeMean.reconstructState commonGauge (commonContext B) (cycle B N0 j).state).pressure =
-      (cycle B N0 j).state.pressure := by
-  cases j with
-  | zero => exact congrArg State.pressure (ActualInitialization.initialState_reconstructed B N0)
-  | succ j =>
-      exact (parameters B N0).next_reconstructed (cycle B N0 j).coefficients
-        (commonContext B) (cycle B N0 j).state
 
 noncomputable def initialTemporalAlias (B N0 : ℕ) : Oscillation Point :=
   VariableGaugeMean.temporalAliasState commonGauge h (CorrectionInitialization.CommonWindow.index h)
@@ -127,45 +79,26 @@ noncomputable def temporalAlias (B N0 j : ℕ) : Oscillation Point :=
   CycleStateCoherence.temporalAliasAt (parameterSequence B N0) (commonContext B)
     (ActualInitialization.initialCycleState B N0) j
 
-/-- Every earlier temporal alias and exactly the current pressure alias
-remain present, with the signs inherited from the actual state updates. -/
-theorem cycle_alias_error (B N0 J : ℕ) :
-    (cycle B N0 J).state.errors.aliasError = initialTemporalAlias B N0 +
-      (∑ j ∈ Finset.range J, temporalAlias B N0 j) +
-        VariableGaugeMean.pressureAliasState commonGauge (commonContext B) (cycle B N0 J).state := by
-  apply CycleStateCoherence.iterate_alias_separated (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) commonGauge (fun _ => rfl)
-    (initialTemporalAlias B N0)
-  exact (ActualInitialization.initialState_error_components B N0).2.2
 
 /-- One positive band floor is retained for every physical stage. -/
 noncomputable def firstBand (B N0 : ℕ) : ℕ := max 4 (ActualCycleParameters.bandFloor B N0)
 
 theorem firstBand_four (B N0 : ℕ) : 4 ≤ firstBand B N0 := le_max_left _ _
 
-theorem firstBand_pos (B N0 : ℕ) : 1 ≤ firstBand B N0 :=
-  (by norm_num : 1 ≤ (4 : ℕ)).trans (firstBand_four B N0)
 
 theorem firstBand_ge_choice (B N0 : ℕ) :
     ActualCycleParameters.bandFloor B N0 ≤ firstBand B N0 := le_max_right _ _
 
-theorem firstBand_ge (B N0 : ℕ) : N0 ≤ firstBand B N0 :=
-  (ActualCycleParameters.bandFloor_ge B N0).trans (firstBand_ge_choice B N0)
 
 noncomputable def qbig (B N0 : ℕ) : ℝ := ChartScales.Q (firstBand B N0)
 
 theorem qbig_pos (B N0 : ℕ) : 0 < qbig B N0 := ChartScales.Q_pos _
 
-theorem qbig_le_choice (B N0 : ℕ) :
-    qbig B N0 ≤ ChartScales.Q (ActualCycleParameters.bandFloor B N0) :=
-  ActualPrimaryCovariance.Q_antitone (firstBand_ge_choice B N0)
 
 /-- One extra comparison band keeps every native point with `q/Q < 2`
 inside the original raw field's validity domain. -/
 noncomputable def residualBand (B N0 : ℕ) : ℕ := firstBand B N0 + 1
 
-theorem residualBand_four (B N0 : ℕ) : 4 ≤ residualBand B N0 :=
-  (firstBand_four B N0).trans (Nat.le_succ _)
 
 theorem firstBand_le_residualBand (B N0 : ℕ) : firstBand B N0 ≤ residualBand B N0 := Nat.le_succ _
 
@@ -177,14 +110,6 @@ theorem twice_residual_scale (B N0 : ℕ) :
     Real.rpow_add (by norm_num : (0 : ℝ) < 2), Real.rpow_neg_one]
   ring
 
-theorem nativeScale_lt_qbig (B N0 n : ℕ) (hn : residualBand B N0 ≤ n)
-    {r : ℝ} (hr : r < 2) : ChartScales.Q n * r < qbig B N0 := by
-  calc
-    ChartScales.Q n * r < ChartScales.Q n * 2 :=
-      mul_lt_mul_of_pos_left hr (ChartScales.Q_pos n)
-    _ ≤ ChartScales.Q (residualBand B N0) * 2 :=
-      mul_le_mul_of_nonneg_right (ActualPrimaryCovariance.Q_antitone hn) (by norm_num)
-    _ = qbig B N0 := by rw [mul_comm, twice_residual_scale]
 
 noncomputable def physicalDomain (B N0 : ℕ) : Set SpaceTime :=
   CutStageEstimates.physicalSublevel h (qbig B N0)
@@ -214,7 +139,6 @@ noncomputable def selectedCycle : ℕ → CycleState (Index selectedBudget selec
 
 noncomputable def selectedQbig : ℝ := qbig selectedBudget selectedThreshold
 
-theorem selectedQbig_pos : 0 < selectedQbig := qbig_pos _ _
 
 theorem selected_initial_invariant :
     CycleAnalyticInvariant ActualInitialization.geometry (commonContext selectedBudget)
@@ -222,10 +146,6 @@ theorem selected_initial_invariant :
       ActualInitialization.envelope ActualInitialization.labelCarrier
       (ActualIterationLedger.sigma 0) (selectedCycle 0) := initial_invariant _ _
 
-theorem selected_initial_meanHypotheses :
-    LiftedMeanResidual.MeanHypotheses ActualInitialMeanEquation.strip.domain
-      (commonContext selectedBudget) (selectedCycle 0).state :=
-  ActualInitialMeanEquation.initialized_meanHypotheses _ _
 
 /-! ## Exact finite physical prefixes in any valid polar chart -/
 
@@ -257,11 +177,6 @@ noncomputable def chartDirectStages (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Inde
   CyclePhysicalPrefixes.directStages (parameterSequence B N0) (commonContext B)
     (ActualInitialization.initialCycleState B N0) a i (graph n) n
 
-theorem chart_velocity_prefix (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n J : ℕ) :
-    DiagonalJetBounds.uncutPrefix (chartVelocityStages B N0 a i n) (J + 1) =
-      chartVelocity B N0 a i n J :=
-  CyclePhysicalPrefixes.velocity_prefix (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) a i (graph n) n J
 
 theorem chart_pressure_prefix (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n J : ℕ) :
     DiagonalJetBounds.uncutPrefix (chartPressureStages B N0 a i n) (J + 1) =
@@ -269,11 +184,6 @@ theorem chart_pressure_prefix (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n 
   CyclePhysicalPrefixes.pressure_prefix (parameterSequence B N0) (commonContext B)
     (ActualInitialization.initialCycleState B N0) a i (graph n) n (basePressure B n) J
 
-theorem chart_velocity_split (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n j : ℕ) :
-    chartVelocityStages B N0 a i n j =
-      chartPotentialParts B N0 a i n j + chartDirectStages B N0 a i n j :=
-  CyclePhysicalPrefixes.velocityStages_split (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) a i (graph n) n j
 
 /-! The global physical representatives need only agree with an individual
 chart on its open validity set. Finite summation and the genuine residual
@@ -326,24 +236,6 @@ theorem chart_residual_of_stage_realizations (B N0 : ℕ) (a : ℝ)
   · exact eventually_of_mem (hU.mem_nhds hz) (fun _ hy =>
       chart_pressure_of_stage_realizations B N0 a i n PP hP J hy)
 
-theorem chart_residual_jets_of_stage_realizations (B N0 : ℕ) (a : ℝ)
-    (i : PolarCharts.Index) (n : ℕ) {U : Set SpaceTime} (hU : IsOpen U)
-    (AP BP : ℕ → VelocityField) (PP : ℕ → PressureField)
-    (hA : ∀ k, DifferentiableOn ℝ (AP k) U)
-    (hcurl : ∀ k, EqOn (SpatialCurl.spatialCurl (AP k))
-      (chartPotentialParts B N0 a i n k) U)
-    (hB : ∀ k, EqOn (BP k) (chartDirectStages B N0 a i n k) U)
-    (hP : ∀ k, EqOn (PP k) (chartPressureStages B N0 a i n k) U) (J m : ℕ) :
-    EqOn (iteratedFDeriv ℝ m (fun z =>
-      navierStokesResidual (MixedDiagonalResidual.uncutVelocity AP BP J)
-        (DiagonalJetBounds.uncutPrefix PP (J + 1)) z.1 z.2))
-      (iteratedFDeriv ℝ m (fun z => navierStokesResidual (chartVelocity B N0 a i n J)
-        (chartPressure B N0 a i n J) z.1 z.2)) U := by
-  intro z hz
-  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (eventually_of_mem (hU.mem_nhds hz) (fun _ hy =>
-      chart_residual_of_stage_realizations B N0 a i n hU AP BP PP hA hcurl hB hP J hy))
-    m).self_of_nhds
 
 /-! ## The actual mean fields, with one common physical representative
 
@@ -377,11 +269,6 @@ theorem meanField_sub (B N0 : ℕ) (degree : ℝ) (f g : ActualMeanPhysicalData.
   exact congrFun ((meanAtlas B N0).physical_sub standardRegion.carrier degree f g)
     (PhysicalMeanJetBounds.physicalPoint h w)
 
-theorem meanAngularField_add (B N0 : ℕ) (degree : ℝ) (f g : ActualMeanPhysicalData.Scalar) :
-    meanAngularField B N0 degree (f + g) =
-      meanAngularField B N0 degree f + meanAngularField B N0 degree g := by
-  funext w
-  simp only [meanAngularField, meanField_add, Pi.add_apply, add_smul]
 
 theorem meanAngularField_sub (B N0 : ℕ) (degree : ℝ) (f g : ActualMeanPhysicalData.Scalar) :
     meanAngularField B N0 degree (f - g) =
@@ -422,33 +309,7 @@ theorem uncutPrefix_succ {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
   funext w
   exact Finset.sum_range_succ (fun j => f j w) N
 
-theorem angularMeanStages_prefix (B N0 J : ℕ) :
-    DiagonalJetBounds.uncutPrefix (angularMeanStages B N0) (J + 1) =
-      meanAngularField B N0 (CoordinateAlgebra.A h) (cycle B N0 J).state.mean.angular := by
-  induction J with
-  | zero =>
-      funext w
-      simp [DiagonalJetBounds.uncutPrefix, angularMeanStages, angularNativeStages]
-  | succ J ih =>
-      rw [uncutPrefix_succ, ih]
-      change _ + meanAngularField B N0 (CoordinateAlgebra.A h)
-        ((cycle B N0 (J + 1)).state.mean.angular - (cycle B N0 J).state.mean.angular) = _
-      rw [meanAngularField_sub]
-      abel
 
-theorem pressureMeanStages_prefix (B N0 J : ℕ) :
-    DiagonalJetBounds.uncutPrefix (pressureMeanStages B N0) (J + 1) =
-      meanField B N0 (2 * CoordinateAlgebra.A h) (cycle B N0 J).state.pressure := by
-  induction J with
-  | zero =>
-      funext w
-      simp [DiagonalJetBounds.uncutPrefix, pressureMeanStages, pressureNativeStages]
-  | succ J ih =>
-      rw [uncutPrefix_succ, ih]
-      change _ + meanField B N0 (2 * CoordinateAlgebra.A h)
-        ((cycle B N0 (J + 1)).state.pressure - (cycle B N0 J).state.pressure) = _
-      rw [meanField_sub]
-      abel
 
 noncomputable def temporalNative (B N0 j : ℕ) : ActualMeanPhysicalData.Scalar :=
   VariableGaugeMean.temporalPotential (parameters B N0).gauge (parameters B N0).timeExponent
@@ -484,10 +345,6 @@ theorem pressureMeanStages_zero (B N0 : ℕ) :
 abbrev MeanCycleInput (B N0 : ℕ) :=
   ActualMeanPhysicalData.InitialCycleInput B N0 (firstBand B N0) (parameterSequence B N0)
 
-theorem parameters_realizes (B N0 j : ℕ) :
-    CycleStateCoherence.Realizes ActualMeanPhysicalData.initialGeometry
-      (parameterSequence B N0 j) (commonContext B) :=
-  ActualMeanPhysicalData.initial_realizes B _ _
 
 theorem streamMeanStages_succ {B N0 : ℕ} (H : MeanCycleInput B N0) (j : ℕ) :
     streamMeanStages B N0 (j + 1) =
@@ -868,10 +725,6 @@ theorem streamData_field {B N0 : ℕ} (H : MeanCycleInput B N0) (j : ℕ) :
 theorem meanStreamSupport_field {B N0 : ℕ} (H : MeanCycleInput B N0) (j : ℕ) :
     (meanStreamSupport H j).field = streamMeanStages B N0 j := streamData_field H j
 
-theorem angularMeanStages_smooth {B N0 : ℕ} (H : MeanCycleInput B N0) (j : ℕ) :
-    ContDiffOn ℝ ∞ (angularMeanStages B N0 j) (physicalDomain B N0) := by
-  rw [← directData_field H j]
-  exact LocalAngularDiagonal.rawSeries_smooth outgoing.data.h_pos outgoing.data.h_lt_half (directData H) j
 
 theorem streamMeanStages_smooth {B N0 : ℕ} (H : MeanCycleInput B N0) (j : ℕ) :
     ContDiffOn ℝ ∞ (streamMeanStages B N0 j) (physicalDomain B N0) := by
@@ -960,13 +813,5 @@ theorem initialPotentialStage_field (B N0 : ℕ)
   simp [streamMeanStages_zero]
   erw [ActualMeanStageData.initialStreamSupport_field]
 
-theorem positivePotentialStage_field {B N0 : ℕ} (H : MeanCycleInput B N0)
-    (j : ℕ) (particular signed : MixedAxisPreservation.CopyPotential.{u} h) :
-    (positivePotentialStage H j particular signed).field =
-      particular.field + signed.field + streamMeanStages B N0 (j + 1) := by
-  funext w
-  change (∑ i : Fin 2, (![particular, signed] i).field w) +
-    (∑ _ : Fin 1, (meanStreamSupport H (j + 1)).field w) = _
-  simp [Fin.sum_univ_two, meanStreamSupport_field]
 
 end NavierStokes.ActualCandidateConstruction

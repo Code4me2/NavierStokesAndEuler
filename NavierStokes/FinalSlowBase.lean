@@ -57,10 +57,6 @@ theorem annulus_eq : annulus W = BaseResidual.activeWindow (logLeft W) (logRight
   simp only [annulus, BaseResidual.activeWindow, logLeft, logRight,
     Real.exp_log (NominalConeAssembly.activeLeft_pos W), Real.exp_log (terminal_pos W)]
 
-theorem annulus_subset_box (upper : ℝ) : annulus W ⊆ innerBox 0 (boxRadius W upper) := by
-  intro p hp
-  exact ⟨⟨(NominalConeAssembly.activeLeft_pos W).le.trans hp.1.1.le,
-    hp.1.2.le.trans (le_max_right _ _)⟩, hp.2⟩
 
 end Geometry
 
@@ -159,9 +155,6 @@ theorem leading_lowerBound (hcone : LeadingStressWeights.FullTrueCone v) :
     Real.exp_log hx, Prod.mk.eta] at he ⊢
   exact he
 
-theorem leading_ne_zero (hcone : LeadingStressWeights.FullTrueCone v) {p : Inner} (hp : p ∈ annulus W) :
-    leadingStress v p ≠ 0 :=
-  LeadingStressWeights.stress_ne_zero v hcone hp.1.1 hp.1.2 hp.2
 
 theorem leading_radial_jets (hcone : LeadingStressWeights.FullTrueCone v) (m : ℕ) :
     ∃ D : ℝ, 0 < D ∧ ∃ N : ℕ, ∀ w ∈ annulus W,
@@ -205,19 +198,7 @@ noncomputable def leadingFrequency : PhaseCalculus.Slow → ℝ :=
 noncomputable def leadingAxial : PhaseCalculus.Slow → ℝ :=
   BaseChartJets.leadingAxial F.data.h (coefficients H v)
 
-theorem leadingFrequency_pos {p : PhaseCalculus.Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) :
-    0 < leadingFrequency H v p :=
-  AlignedProfileSpectralCone.modulated_frequency_pos H v hT hR
 
-theorem spectral_cones (hcone : LeadingStressWeights.FullTrueCone v)
-    {p : PhaseCalculus.Slow} (hT : 0 < p.2.2) (hR : 0 < p.1)
-    (hw : (BaseChartJets.normalizedCoordinates F.data.h p).2 ∈ annulus W) :
-    PrimaryRepresentatives.ReferenceCone (leadingFrequency H v p)
-      (PhaseEstimates.shearVector (leadingFrequency H v) (leadingAxial H v) p) ∧
-    PrimaryRepresentatives.TargetCone (leadingFrequency H v p)
-      (PhaseEstimates.shearVector (leadingFrequency H v) (leadingAxial H v) p)
-      (ProfileSpectralCone.stressVector v.profiles F.data.h (BaseChartJets.normalizedCoordinates F.data.h p).2) :=
-  AlignedProfileSpectralCone.modulated_spectral_cones H v hcone hT hR hw.1.1 hw.1.2
 
 /-- The actual covariance target, including its positive chart factor. -/
 noncomputable def covarianceTarget (q : ℝ) (N : ℕ) (U : PartitionedCovariance.UnsignedLabel)
@@ -227,16 +208,6 @@ noncomputable def covarianceTarget (q : ℝ) (N : ℕ) (U : PartitionedCovarianc
     ![(coefficients H v).stressTheta 0 w, (coefficients H v).stressAxial 0 w] U
   !₂[T 0, T 1]
 
-theorem covarianceTarget_cones (hcone : LeadingStressWeights.FullTrueCone v)
-    {p : PhaseCalculus.Slow} (hT : 0 < p.2.2) (hR : 0 < p.1)
-    (hw : (BaseChartJets.normalizedCoordinates F.data.h p).2 ∈ annulus W)
-    {q : ℝ} (hq : 0 < q) (N : ℕ) (U : PartitionedCovariance.UnsignedLabel) :
-    PrimaryRepresentatives.ReferenceCone (leadingFrequency H v p)
-      (PhaseEstimates.shearVector (leadingFrequency H v) (leadingAxial H v) p) ∧
-    PrimaryRepresentatives.TargetCone (leadingFrequency H v p)
-      (PhaseEstimates.shearVector (leadingFrequency H v) (leadingAxial H v) p)
-      (covarianceTarget H v q N U p) :=
-  AlignedProfileSpectralCone.modulated_chartTarget_cones H v hcone hT hR hw.1.1 hw.1.2 hq N U
 
 /-- The sequence is selected once from the aligned enlarged bundle. -/
 noncomputable def scales (upper : ℝ) (B : ℕ) : ℕ → ℕ :=
@@ -420,15 +391,6 @@ theorem stress_difference_jets_eq (upper : ℝ) (B m : ℕ) {q : ℝ} (hq : 0 < 
       normalizedStress H v upper B (scaleMap q y) - leadingStress v y.2
     rw [leading_stress_eq H v hy.2.1.le (abs_le.mpr ⟨hy.2.2.1.le, hy.2.2.2.le⟩)]
 
-theorem weighted_jets_leading (upper : ℝ) (B m : ℕ) :
-    ∃ D : ℝ, 0 < D ∧ ∃ N : ℕ, ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ annulus W,
-      ‖blownJet m (fun y => normalizedStress H v upper B y - leadingStress v y.2) (q, w)‖ ≤
-        D * q ^ F.data.h * weight W w * (edgeDistance W w)⁻¹ ^ N := by
-  obtain ⟨D, hD, N, hb⟩ := weighted_jets H v upper B m
-  refine ⟨D, hD, N, fun q hq hq1 w hw => ?_⟩
-  rw [← stress_difference_jets_eq H v upper B m hq
-    ((NominalConeAssembly.activeLeft_pos W).trans hw.1.1) hw.2]
-  exact hb q hq hq1 w hw
 
 theorem physical_stress_eq_normalized (upper : ℝ) (B : ℕ) {p : Chart} (hp : p.1 < 1) :
     (baseStressTheta (scales H v upper B) F.data.h W.axis.normalization (coefficients H v) p,
@@ -456,18 +418,7 @@ theorem coefficient_stress_support (n : ℕ) :
       ((coefficients H v).stressAxial n) :=
   EntranceAlignedBase.modulated_all_stress_support H v n
 
-theorem positive_stress_support {n : ℕ} (hn : 0 < n) :
-    SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-      (EntranceAlignedBase.zeroEnd W H ld.modulation.left) (NominalConeAssembly.activeRight W)
-      ((coefficients H v).stressTheta n) ∧
-    SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-      (EntranceAlignedBase.zeroEnd W H ld.modulation.left) (NominalConeAssembly.activeRight W)
-      ((coefficients H v).stressAxial n) :=
-  EntranceAlignedBase.modulated_positive_radialSupport H v hn
 
-theorem positive_support_gap :
-    NominalConeAssembly.activeLeft W < EntranceAlignedBase.zeroEnd W H ld.modulation.left :=
-  (EntranceAlignedBase.window_order W H ld.after_initial).1
 
 theorem normalizedStress_zero_left (upper : ℝ) (B : ℕ) (q : ℝ) {w : Inner}
     (hw : w.1 ≤ NominalConeAssembly.activeLeft W) : normalizedStress H v upper B (q, w) = 0 :=
@@ -533,11 +484,6 @@ theorem stressForce_exterior_germ (upper : ℝ) (B : ℕ) {z : ProblemStatement.
       from ⟨ht, hX⟩)] with y hy
   exact stressForce_zero_right H v upper B hy.1 hy.2
 
-theorem stressForce_jets_zero_in_exterior (upper : ℝ) (B m : ℕ) {z : ProblemStatement.SpaceTime}
-    (ht : z.1 < 1) (hX : NominalConeAssembly.activeRight W < (cartesianChart F.data.h z).2.1) :
-    iteratedFDeriv ℝ m (stressForce H v upper B) z = 0 := by
-  rw [(SolenoidalDiagonal.iteratedFDeriv_eventuallyEq (stressForce_exterior_germ H v upper B ht hX) m).self_of_nhds,
-    iteratedFDeriv_fun_zero, Pi.zero_apply]
 
 theorem stressForce_core_germ (upper : ℝ) (B : ℕ) {z : ProblemStatement.SpaceTime}
     (ht : z.1 < 1) (hX : (cartesianChart F.data.h z).2.1 < NominalConeAssembly.activeLeft W) :
@@ -545,11 +491,6 @@ theorem stressForce_core_germ (upper : ℝ) (B : ℕ) {z : ProblemStatement.Spac
   BaseResidual.baseStressForce_core_germ F.data.h_pos F.data.h_lt_half (scales H v upper B)
     (stressZeroCore H v) ht hX
 
-theorem stressForce_jets_zero_in_core (upper : ℝ) (B m : ℕ) {z : ProblemStatement.SpaceTime}
-    (ht : z.1 < 1) (hX : (cartesianChart F.data.h z).2.1 < NominalConeAssembly.activeLeft W) :
-    iteratedFDeriv ℝ m (stressForce H v upper B) z = 0 := by
-  rw [(SolenoidalDiagonal.iteratedFDeriv_eventuallyEq (stressForce_core_germ H v upper B ht hX) m).self_of_nhds,
-    iteratedFDeriv_fun_zero, Pi.zero_apply]
 
 /-- The exterior comparison uses the actual coefficient formulas, not a
 separately assumed support or heat-flow conclusion. -/
@@ -574,14 +515,6 @@ theorem exterior_residual_zero (upper : ℝ) (B : ℕ) {z : ProblemStatement.Spa
     (coefficients_smooth H v) (ModulatedExterior.actual_squared_swirl_restored v)
     (scales_strictMono H v upper B) hz
 
-theorem exterior_residual_jets_zero (upper : ℝ) (B m : ℕ) {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ BaseExterior.cartesianExterior F.data.h (BaseExterior.nominalExteriorRadius W)) :
-    iteratedFDeriv ℝ m (fun p => ProblemStatement.navierStokesResidual
-      (velocity H v upper B) (pressure H v upper B) p.1 p.2) z = 0 :=
-  ModulatedExterior.realized_residual_jets_zero W v.profiles v.finiteModification (realizesScheme H v)
-    (EntranceAlignedBase.modulated_base_eq H v) (EntranceAlignedBase.modulated_outer H v)
-    (coefficients_smooth H v) (ModulatedExterior.actual_squared_swirl_restored v)
-    (scales_strictMono H v upper B) hz m
 
 noncomputable def completedVelocity (upper : ℝ) (B : ℕ) : ProblemStatement.VelocityField :=
   ModulatedExterior.completedVelocity (BaseExterior.nominalHeatNormalization W) F.data.h (velocity H v upper B)
@@ -595,21 +528,6 @@ theorem completedVelocity_before (upper : ℝ) (B : ℕ) {z : ProblemStatement.S
 theorem completedPressure_before (upper : ℝ) (B : ℕ) {z : ProblemStatement.SpaceTime} (ht : z.1 < 1) :
     completedPressure H v upper B z = pressure H v upper B z := ite_eq_left ht
 
-/-- The same exterior yields an actual joint one-sided terminal extension
-near every non-axis point in the central symmetry plane. -/
-theorem terminal_extension (upper : ℝ) (B : ℕ) {x : ProblemStatement.Space}
-    (hx : x 2 = 0) (hs : 0 < AxisymmetricFields.radialEnergy x) :
-    ∃ U : Set ProblemStatement.SpaceTime, IsOpen U ∧ (1, x) ∈ U ∧
-      EqOn (completedVelocity H v upper B)
-        (BaseExterior.heatVelocity (BaseExterior.nominalHeatNormalization W) F.data.h) U ∧
-      EqOn (completedPressure H v upper B)
-        (BaseExterior.heatPressureField (BaseExterior.nominalHeatNormalization W) F.data.h) U ∧
-      ContDiffOn ℝ ∞ (completedVelocity H v upper B) (U ∩ (Iic 1 ×ˢ (univ : Set ProblemStatement.Space))) ∧
-      ContDiffOn ℝ ∞ (completedPressure H v upper B) (U ∩ (Iic 1 ×ˢ (univ : Set ProblemStatement.Space))) :=
-  ModulatedExterior.realized_terminal_extension W v.profiles v.finiteModification (realizesScheme H v)
-    (EntranceAlignedBase.modulated_base_eq H v) (EntranceAlignedBase.modulated_outer H v)
-    (coefficients_smooth H v) (ModulatedExterior.actual_squared_swirl_restored v)
-    (scales_strictMono H v upper B) hx hs
 
 end Fields
 
@@ -633,80 +551,5 @@ theorem profileData_nonempty : Nonempty ProfileData := by
 the compact profile box. -/
 noncomputable def actualProfile : ProfileData := Classical.choice profileData_nonempty
 
-/-- A complete slow base is constructed without a profile, moment repair,
-finite PDE identity, support estimate, or residual estimate among the inputs.
-The same profile, coefficient sequence, and scale sequence occur throughout. -/
-theorem exists_final_base (upper : ℝ) (B : ℕ) :
-    ∃ (F : OutgoingProfile.Profile) (W : NominalProfile.Witness F)
-      (H : NominalConeAssembly.Certificate W)
-      (ld : ModulatedProfileAssembly.LoopData W) (v : ModulatedProfileAssembly.Witness ld),
-      LeadingStressWeights.FullTrueCone v ∧
-      SmoothCoefficients (coefficients H v) ∧
-      BaseResidual.FiniteIdentities F.data.h W.axis.normalization (coefficients H v) (profileSequence H v) ∧
-      B ≤ scales H v upper B 0 ∧
-      AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (coefficients H v))
-        (innerBox 0 (boxRadius W upper)) (scales H v upper B) ∧
-      AdmissibleScales F.data.h
-        (BaseResidual.weightedBundle W.axis.normalization (coefficients H v) (weight W))
-        (innerBox 0 (boxRadius W upper)) (scales H v upper B) ∧
-      ActiveAnnulusWeight.WeightedBounds (Icc (-1 : ℝ) 1)
-        (edgeExponent W) (logLeft W) (logRight W)
-        (LeadingStressWeights.logStress v.profiles F.data.h) ∧
-      ConstructedSlowBase.WeightedStressBound (scales H v upper B) F.data.h (coefficients H v)
-        (edgeExponent W) (logLeft W) (logRight W) ∧
-      (∀ n : ℕ, SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-          (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W)
-          ((coefficients H v).stressTheta n) ∧
-        SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-          (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W)
-          ((coefficients H v).stressAxial n)) ∧
-      (∀ p : Inner, 0 ≤ p.1 → |p.2| ≤ 1 →
-        BaseResidual.stressPair (coefficients H v) 0 p = leadingStress v p) ∧
-      velocity H v upper B = SpatialCurl.spatialCurl (vectorPotential H v upper B) ∧
-      ContDiffOn ℝ ∞ (vectorPotential H v upper B) BaseResidual.past ∧
-      ContDiffOn ℝ ∞ (velocity H v upper B) BaseResidual.past ∧
-      ContDiffOn ℝ ∞ (pressure H v upper B) BaseResidual.past ∧
-      ContDiffOn ℝ ∞ (stressForce H v upper B) BaseResidual.past ∧
-      ContDiffOn ℝ ∞ (error H v upper B) BaseResidual.past ∧
-      (∀ t < (1 : ℝ), ∀ x : ProblemStatement.Space,
-        ProblemStatement.spatialDivergence (velocity H v upper B) t x = 0) ∧
-      (∀ z : ProblemStatement.SpaceTime,
-        ProblemStatement.navierStokesResidual (velocity H v upper B) (pressure H v upper B) z.1 z.2 =
-          stressForce H v upper B z + error H v upper B z) ∧
-      (∀ t < (1 : ℝ), velocity H v upper B (t, 0) =
-        ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) • ProblemStatement.coordinateVector 2) ∧
-      ProblemStatement.SpeedUnboundedAtOne (velocity H v upper B) ∧
-      (∀ l : Filter ProblemStatement.SpaceTime,
-        BaseResidual.PhysicalApproach l F.data.h 0 (boxRadius W upper) →
-          ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1) (error H v upper B)) ∧
-      EqOn (velocity H v upper B)
-        (BaseExterior.heatVelocity (BaseExterior.nominalHeatNormalization W) F.data.h)
-        (BaseExterior.cartesianExterior F.data.h (BaseExterior.nominalExteriorRadius W)) ∧
-      EqOn (pressure H v upper B)
-        (BaseExterior.heatPressureField (BaseExterior.nominalHeatNormalization W) F.data.h)
-        (BaseExterior.cartesianExterior F.data.h (BaseExterior.nominalExteriorRadius W)) := by
-  let D := actualProfile
-  refine ⟨D.outgoing, D.nominal, D.certificate, D.loop, D.modulation, D.fullTrueCone,
-    coefficients_smooth D.certificate D.modulation, finiteIdentities D.certificate D.modulation,
-    (scales_spec D.certificate D.modulation upper B).1,
-    scales_admissible D.certificate D.modulation upper B,
-    (scales_spec D.certificate D.modulation upper B).2,
-    leading_weighted D.modulation D.fullTrueCone,
-    weighted_bound D.certificate D.modulation upper B,
-    coefficient_stress_support D.certificate D.modulation,
-    fun _ hx he => leading_stress_eq D.certificate D.modulation hx he,
-    velocity_eq_curl D.certificate D.modulation upper B,
-    vectorPotential_smooth D.certificate D.modulation upper B,
-    velocity_smooth D.certificate D.modulation upper B,
-    pressure_smooth D.certificate D.modulation upper B,
-    stressForce_smooth D.certificate D.modulation upper B,
-    error_smooth D.certificate D.modulation upper B,
-    fun _ ht x => divergence_zero D.certificate D.modulation upper B ht x,
-    residual_identity D.certificate D.modulation upper B,
-    fun _ ht => origin D.certificate D.modulation upper B ht,
-    speedUnbounded D.certificate D.modulation upper B,
-    fun _ hp => error_allJetsFlat D.certificate D.modulation upper B hp le_rfl,
-    (exterior_fields_eq_heat D.certificate D.modulation upper B).1,
-    (exterior_fields_eq_heat D.certificate D.modulation upper B).2⟩
 
 end NavierStokes.FinalSlowBase

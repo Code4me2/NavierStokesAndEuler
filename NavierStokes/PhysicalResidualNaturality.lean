@@ -575,12 +575,6 @@ theorem weight_time {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
     velocityWeight h Q Qr * ratioPower Q Qr (1/2) = clockWeight h Q Qr :=
   ratioPower_mul hQ hQr _ _
 
-theorem weight_pressure {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
-    velocityWeight h Q Qr * velocityWeight h Q Qr = pressureWeight h Q Qr := by
-  unfold velocityWeight pressureWeight
-  rw [ratioPower_mul hQ hQr]
-  congr 1
-  ring
 
 theorem weight_source {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
     velocityWeight h Q Qr * velocityWeight h Q Qr * ratioPower Q Qr (1/2) =
@@ -1175,30 +1169,6 @@ noncomputable def stateView (e : ℕ → D ≃L[ℝ] E) (c l : ℕ → ℝ)
       gaussian := fun n x i => (c n*c n*l n) * r.errors.gaussian nr (e n x.1,x.2) i
       aliasError := fun n x i => (c n*c n*l n) * r.errors.aliasError nr (e n x.1,x.2) i }
 
-theorem stateView_coherent (e : ℕ → D ≃L[ℝ] E) (c l : ℕ → ℝ)
-    (r : CorrectionState.State E) (nr n : ℕ) (U : Set D) :
-    StateOn U (e n) (c n) (l n) (stateView e c l r nr) r n nr := by
-  constructor
-  · exact ⟨fun _ _ => rfl, fun _ _ => rfl, fun _ _ => rfl⟩
-  · intro x hx; rfl
-  · intro x hx theta i; rfl
-  · intro x hx theta; rfl
-  · intro x hx theta i; rfl
-  · intro x hx theta i; rfl
-  · intro x hx theta i; rfl
 
-/-- Pullback commutes with the actual additive state update. -/
-theorem stateView_addIncrement (e : ℕ → D ≃L[ℝ] E) (c l : ℕ → ℝ)
-    (r w : CorrectionState.State E) (nr : ℕ) :
-    stateView e c l
-      (r.addIncrement w.mean w.pressure w.oscillation w.oscillatoryPressure w.errors) nr =
-      (stateView e c l r nr).addIncrement (stateView e c l w nr).mean
-        (stateView e c l w nr).pressure (stateView e c l w nr).oscillation
-        (stateView e c l w nr).oscillatoryPressure (stateView e c l w nr).errors := by
-  cases r
-  cases w
-  simp only [stateView, CorrectionState.State.addIncrement, MeanIncrementBounds.updated,
-    CorrectionState.ExcludedErrors.add, Pi.add_apply, mul_add]
-  rfl
 
 end NavierStokes.PhysicalResidualNaturality

@@ -52,9 +52,6 @@ theorem nextTilt_pos (herror : G.tiltError ≤ 1/2) : 0 < G.nextTilt := by
   have hzero := mul_nonpos_of_nonneg_of_nonpos hn.le (le_of_not_gt hneg)
   linarith only [h,herror,hzero]
 
-theorem compressionScale_pos : 0 < G.compressionScale := by
-  unfold compressionScale
-  positivity [G.a_pos,G.epsilon_pos,G.target_pos]
 
 /-- The existing geometric smallness guard leaves enough compression
 margin for any subsequent center remainder of size at most one. -/
@@ -144,11 +141,7 @@ theorem shear_eq (hδ : 0 < G.δ) : P.shear=G.hchild := by
 theorem epsilon_eq (hδ : 0 < G.δ) : P.epsilon=Real.sqrt (P.a/G.hchild) := by
   rw [ParentFrame.epsilon,J.shear_eq hδ]
 
-theorem normalized_ray_eq : unit (P.m G.targetTime)=unit (G.r G.center G.targetTime) :=
-  congrArg unit J.ray_eq
 
-theorem normalized_velocity_eq : unit (P.v G.targetTime)=unit (G.w G.center G.targetTime) :=
-  congrArg unit J.velocity_eq
 
 /-- The actual next source matrix has the prescribed target shear and
 the original packet's center error. -/
@@ -177,9 +170,6 @@ theorem coupling_interval :
   · have hh : P.a/G.a ≤ 1+G.couplingError := by linarith only [h.2]
     exact (div_le_iff₀ G.a_pos).mp hh
 
-theorem coupling_absolute_error : |P.a-G.a| ≤ G.a*G.couplingError := by
-  rw [abs_le]
-  constructor <;> nlinarith only [J.coupling_interval.1,J.coupling_interval.2]
 
 theorem sigma_sq (herror : G.tiltError ≤ 1/2) : P.sigma^2=G.nextTilt := by
   rw [J.sigma_eq,Real.sq_sqrt (G.nextTilt_pos herror).le]

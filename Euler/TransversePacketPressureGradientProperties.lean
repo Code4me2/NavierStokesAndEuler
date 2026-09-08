@@ -46,9 +46,5 @@ variable (P : ℝ) [Fact (0 < P)]
   (D : Data U) (I : InitialData P D) (raw : VectorField)
   (h : Nonempty (Forcing P D raw))
 
-theorem highSolvePressureGradientField_supported (t : Icc (0 : ℝ) D.T) :
-    (highSolvePressureGradientField P D I raw h).path t ∈
-      Supported P Space D.support D.support_measurable :=
-  (Classical.choice h).scalarGradientField_supported I t
 
 end EulerTransversePacketProvider

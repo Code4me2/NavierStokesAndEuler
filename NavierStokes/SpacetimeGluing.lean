@@ -393,42 +393,6 @@ theorem smoothExtension_unit_periods {T : ℝ} {f : SpaceTime → V}
   exact smoothExtension_add_period hf (ProblemStatement.coordinateVector i)
     (fun s hs y => hperiod s hs y i) t x
 
-/-- A complete constructive endpoint theorem for periodic spacetime fields.
-The inputs are derivative recurrence and locally uniform left limits, not
-closed-side or global smoothness. The resulting extension is jointly smooth,
-retains every mixed boundary jet, and vanishes after `T + 1`. -/
-theorem exists_smooth_periodic_extension_of_limits {T : ℝ} {f : SpaceTime → V}
-    {J : SpaceTime → FormalMultilinearSeries ℝ SpaceTime V}
-    {L : Space → FormalMultilinearSeries ℝ SpaceTime V}
-    (hzero : ∀ z : SpaceTime, z.1 < T → (J z 0).curry0 = f z)
-    (hderiv : ∀ n : ℕ, ∀ z : SpaceTime, z.1 < T →
-      HasFDerivAt (fun y => J y n) (J z (n + 1)).curryLeft z)
-    (hlim : ∀ n : ℕ, TendstoLocallyUniformly (fun t x => J (t, x) n)
-      (fun x => L x n) (𝓝[<] T))
-    (hperiod : ProblemStatement.UnitSpatialPeriodsOn (Iio T) f) :
-    ∃ F : SpaceTime → V, ContDiff ℝ ∞ F ∧
-      EqOn F f (SpacetimeEndpoint.openPast T) ∧
-      ProblemStatement.UnitSpatialPeriodsOn univ F ∧
-      (∀ t : ℝ, T + 1 ≤ t → ∀ x : Space, F (t, x) = 0) ∧
-      ∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n F (T, x) = L x n := by
-  let e := SpacetimeEndpoint.extendTrace T f (fun x => (L x 0).curry0)
-  have he : ContDiffOn ℝ ∞ e (past T) :=
-    SpacetimeEndpoint.contDiffOn_joint_extension hzero hderiv hlim
-  have heperiod : ProblemStatement.UnitSpatialPeriodsOn (Iic T) e := by
-    intro t _ x i
-    exact SpacetimeEndpoint.unit_periods_joint_extension hzero (hlim 0) hperiod
-      t (mem_univ t) x i
-  refine ⟨smoothExtension T e he, smoothExtension_contDiff he, ?_,
-    smoothExtension_unit_periods he heperiod, ?_, ?_⟩
-  · intro z hz
-    have hzt : z.1 < T := hz.1
-    rw [smoothExtension_eqOn_past he ⟨mem_Iic.mpr hzt.le, hz.2⟩]
-    exact SpacetimeEndpoint.extendTrace_of_lt hz.1
-  · intro t ht x
-    exact smoothExtension_zero_from he ht x
-  · intro n x
-    rw [smoothExtension_iteratedFDeriv he n ⟨mem_Iic.mpr (le_refl T), mem_univ x⟩]
-    exact SpacetimeEndpoint.boundary_jets_eq_limits hzero hderiv hlim n x
 
 end Complete
 

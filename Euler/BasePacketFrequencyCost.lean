@@ -38,10 +38,6 @@ theorem firstParameterSize_literal (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 1 �
 def firstFrequencyConstant : ℝ := frequencyConstant*(7+solutionLabelConstant)^frequencyPower
 def firstFrequencyPower : ℕ := 1010*frequencyPower
 
-theorem firstFrequencyConstant_pos : 0 < firstFrequencyConstant := by
-  have hK := solutionLabelConstant_one
-  unfold firstFrequencyConstant
-  exact mul_pos frequencyConstant_pos (pow_pos (by linarith) _)
 
 theorem first_frequency_cost_bound (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 1 ≤ X) :
     EulerPacketInitializedOutputCost.uniformConstant*

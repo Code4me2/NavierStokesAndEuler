@@ -80,12 +80,6 @@ theorem Budget.sourceSize_le_delta (B : Budget period hT A) (q : ℕ) (hq : 6 �
     congr 1 <;> ring
   · rfl
 
-theorem Budget.sourceCost_nonneg (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) :
-    0 ≤ B.sourceCost period q hq := by
-  exact sourceBound_nonneg period (B.spatial q hq).full.B0_nonneg (B.spatial q hq).full.B1_nonneg
-    (B.spatial q hq).full.A0_nonneg (B.spatial q hq).full.A2_nonneg (by norm_num)
-    (B.baseCorrectionSize_nonneg period)
-    (mul_nonneg (div_nonneg (by norm_num) B.radius_pos.le) (B.baseCorrectionSize_nonneg period))
 
 private theorem tower_weightedNorm_eq (F : FieldTower period T) (s u N : ℕ)
     (hs : N+6 ≤ s) (hu : N+6 ≤ u) (r : ℝ) (t : Icc (0 : ℝ) T) :
@@ -94,29 +88,6 @@ private theorem tower_weightedNorm_eq (F : FieldTower period T) (s u N : ℕ)
   apply weightedNorm_unique period 6 N r _ _ _ hs hu
   rw [F.value_eq, F.value_eq]
 
-/-- The common raw source is bounded at the fixed smaller radius, using
-only the actual correction and derivative bounds already proved. -/
-theorem Budget.rawSourceTower_reducedNorm (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (N : ℕ) (hNq : N+4 ≤ q)
-    (s : ℕ) (hs : N+6 ≤ s) (t : Icc (0 : ℝ) T) :
-    weightedNorm period 6 N (B.reducedRadius period) ((B.rawSourceTower period).realization s t) ≤
-      B.sourceSize period q hq := by
-  have hrR : B.reducedRadius period ≤ B.radius t := by
-    have h := B.reducedRadius_le_half period t
-    have hp := (B.spatial q hq).full.radius_pos t
-    linarith
-  have h := rawSource_smallerRadius_bound period (B.spatial q hq).full N (by omega) (by omega)
-    t (B.reducedRadius period) (B.reducedRadius_pos period) hrR
-    (B.correctionSize period) ((8/B.initialRadius)*B.correctionSize period)
-    ((B.fieldTower period).realization (q+3) t)
-    (B.fieldTower_reducedNorm period (q+3) N (by omega) t)
-    (B.fieldTower_reducedDerivativeNorm period (q+2) N (by omega) t)
-  change weightedNorm period 6 N (B.reducedRadius period)
-    ((A.atOrder period (q+2)).rawSource period (by omega) t
-      ((B.fieldTower period).realization (q+3) t)) ≤ B.sourceSize period q hq at h
-  rw [B.rawSource_eq_realization period (q+2) (by omega)] at h
-  rw [tower_weightedNorm_eq period (B.rawSourceTower period) s (q+2) N hs (by omega)]
-  exact h
 
 /-- The pressure is the actual common signed pressure obtained from the
 coercive elliptic inverse, with an explicit smaller-radius bound. -/

@@ -358,12 +358,6 @@ theorem transport_totalIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
     radial_zero_of_lt (z := shift M v z (a - z.1 - 1)) hs
       (by simp only [shift_fst]; linarith), sub_self]
 
-/-- This derivative is exactly `∂U + M v·∂Y`. -/
-theorem transport_eq_partials (M : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
-    fixedDeriv (1, M • v) f z = fixedDeriv (1, 0) f z + M • fixedDeriv (0, v) f z := by
-  have hv : ((1 : ℝ), M • v) = (1, (0 : E)) + M • ((0 : ℝ), v) := by
-    ext <;> simp
-  simp only [fixedDeriv, hv, map_add, map_smul]
 
 /-- The cutoff product rule retains the actual ordinary radial derivative. -/
 theorem fixedDeriv_compactIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
@@ -404,13 +398,6 @@ theorem transport_compactIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
     transport_pastIntegral hf hs, transport_totalIntegral hf hs]
   simp
 
-theorem auxiliaryDeriv_compactIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
-    {f : ℝ × E → F} {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f)
-    (w : E) (z : ℝ × E) :
-    fixedDeriv (0, w) (compactIntegral χ M v f) z =
-      compactIntegral χ M v (fixedDeriv (0, w) f) z := by
-  simpa only [mul_zero, zero_smul, sub_zero] using fixedDeriv_compactIntegral hχ hf hs (0, w) z
 
 omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
 theorem radial_zero_of_le {a b : ℝ} {f : ℝ × E → F}
@@ -599,21 +586,6 @@ theorem pastIntegral_norm_le {a b M C : ℝ} {v : E} {f : ℝ × E → F}
     _ ≤ C * (b - a) := totalIntegral_norm_le (f := fun x => ‖f x‖) hab hf.norm hnorm
       (fun s hs Y => by simpa only [norm_norm] using hbound s hs Y) z
 
-theorem compactIntegral_norm_le {a b M C K : ℝ} {v : E} {f : ℝ × E → F} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hf : Continuous f) (hs : RadialAlias.RadiallySupported a b f)
-    (hbound : ∀ s ∈ Icc a b, ∀ Y : E, ‖f (s, Y)‖ ≤ C)
-    (hK : 0 ≤ K) (hχ : ∀ u, |χ u| ≤ K) (z : ℝ × E) :
-    ‖compactIntegral χ M v f z‖ ≤ (1 + K) * C * (b - a) := by
-  have hC : 0 ≤ C := (norm_nonneg (f (a, 0))).trans (hbound a ⟨le_rfl, hab⟩ 0)
-  calc
-    ‖compactIntegral χ M v f z‖ ≤ ‖pastIntegral M v f z‖ +
-        |χ z.1| * ‖totalIntegral M v f z‖ := by
-      simpa only [compactIntegral, norm_smul, Real.norm_eq_abs] using
-        norm_sub_le (pastIntegral M v f z) (χ z.1 • totalIntegral M v f z)
-    _ ≤ C * (b - a) + K * (C * (b - a)) := by
-      exact add_le_add (pastIntegral_norm_le hab hf hs hbound z)
-        (mul_le_mul (hχ _) (totalIntegral_norm_le hab hf hs hbound z) (norm_nonneg _) hK)
-    _ = (1 + K) * C * (b - a) := by ring
 
 theorem pastIntegral_add {a b M : ℝ} {v : E} {f g : ℝ × E → F}
     (hf : Continuous f) (hg : Continuous g)
@@ -629,15 +601,6 @@ theorem totalIntegral_add {a b M : ℝ} {v : E} {f g : ℝ × E → F}
     totalIntegral M v (fun x => f x + g x) z = totalIntegral M v f z + totalIntegral M v g z :=
   integral_add (shifted_integrable hf hsf z) (shifted_integrable hg hsg z)
 
-theorem compactIntegral_add {a b M : ℝ} {v : E} {f g : ℝ × E → F}
-    (hf : Continuous f) (hg : Continuous g)
-    (hsf : RadialAlias.RadiallySupported a b f) (hsg : RadialAlias.RadiallySupported a b g)
-    (χ : ℝ → ℝ) (z : ℝ × E) :
-    compactIntegral χ M v (fun x => f x + g x) z =
-      compactIntegral χ M v f z + compactIntegral χ M v g z := by
-  simp only [compactIntegral, pastIntegral_add hf hg hsf hsg,
-    totalIntegral_add hf hg hsf hsg, smul_add]
-  abel
 
 theorem pastIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
     pastIntegral M v (fun x => c • f x) z = c • pastIntegral M v f z := integral_smul c _
@@ -708,14 +671,6 @@ theorem iteratedFDeriv_totalIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
       (F := ContinuousMultilinearMap ℝ (fun _ : Fin (n + 1) => ℝ × E) F) (𝕜 := ℝ) (μ := volume)
       (fun u : ℝ => fderiv ℝ (iteratedFDeriv ℝ n f) (shift M v z u))).symm
 
-theorem iteratedFDeriv_pastIntegral_norm_le [CompleteSpace F] {a b M C : ℝ} {v : E}
-    {f : ℝ × E → F} (hab : a ≤ b) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (n : ℕ)
-    (hbound : ∀ s ∈ Icc a b, ∀ Y : E, ‖iteratedFDeriv ℝ n f (s, Y)‖ ≤ C) (z : ℝ × E) :
-    ‖iteratedFDeriv ℝ n (pastIntegral M v f) z‖ ≤ C * (b - a) := by
-  rw [iteratedFDeriv_pastIntegral hf hs]
-  exact pastIntegral_norm_le hab (iteratedFDeriv_contDiff hf n).continuous
-    (iteratedFDeriv_supported hs n) hbound z
 
 theorem iteratedFDeriv_totalIntegral_norm_le [CompleteSpace F] {a b M C : ℝ} {v : E}
     {f : ℝ × E → F} (hab : a ≤ b) (hf : ContDiff ℝ ∞ f)
@@ -765,44 +720,6 @@ theorem iteratedFDeriv_compactIntegral_norm_le [CompleteSpace F] {a b M : ℝ} {
   rw [iteratedFDeriv_compactIntegral_eq hχ hf hs, iteratedFDeriv_pastIntegral hf hs]
   exact (norm_sub_le _ _).trans (add_le_add_right hb _)
 
-/-- Uniform all-order operator-norm estimate from a finite list of genuine source
-and cutoff derivative bounds. The constant contains no translation parameter. -/
-theorem iteratedFDeriv_compactIntegral_uniform [CompleteSpace F] {a b M : ℝ} {v : E}
-    {f : ℝ × E → F} {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f) (n : ℕ)
-    (A B : ℕ → ℝ) (hB : ∀ i ≤ n, 0 ≤ B i)
-    (hsource : ∀ j ≤ n, ∀ s ∈ Icc a b, ∀ Y : E, ‖iteratedFDeriv ℝ j f (s, Y)‖ ≤ A j)
-    (hcutoff : ∀ i ≤ n, ∀ z : ℝ × E, ‖iteratedFDeriv ℝ i (fun y : ℝ × E => χ y.1) z‖ ≤ B i)
-    (z : ℝ × E) :
-    ‖iteratedFDeriv ℝ n (compactIntegral χ M v f) z‖ ≤
-      (A n + ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) * B i * A (n - i)) * (b - a) := by
-  have hp : ‖pastIntegral M v (iteratedFDeriv ℝ n f) z‖ ≤ A n * (b - a) :=
-    pastIntegral_norm_le hab (iteratedFDeriv_contDiff hf n).continuous
-      (iteratedFDeriv_supported hs n) (hsource n le_rfl) z
-  have ht : ∀ i ∈ Finset.range (n + 1),
-      (n.choose i : ℝ) * ‖iteratedFDeriv ℝ i (fun y : ℝ × E => χ y.1) z‖ *
-        ‖totalIntegral M v (iteratedFDeriv ℝ (n - i) f) z‖ ≤
-      ((n.choose i : ℝ) * B i * A (n - i)) * (b - a) := by
-    intro i hi
-    have hin : i ≤ n := Nat.le_of_lt_succ (Finset.mem_range.mp hi)
-    have hj := totalIntegral_norm_le (M := M) (v := v) hab
-      (iteratedFDeriv_contDiff hf (n - i)).continuous
-      (iteratedFDeriv_supported hs (n - i)) (hsource (n - i) (Nat.sub_le _ _)) z
-    calc
-      _ ≤ ((n.choose i : ℝ) * B i) * (A (n - i) * (b - a)) :=
-        mul_le_mul (mul_le_mul_of_nonneg_left (hcutoff i hin z) (Nat.cast_nonneg _)) hj
-          (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg _) (hB i hin))
-      _ = _ := by ring
-  calc
-    _ ≤ ‖pastIntegral M v (iteratedFDeriv ℝ n f) z‖ +
-        ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) *
-          ‖iteratedFDeriv ℝ i (fun y : ℝ × E => χ y.1) z‖ *
-            ‖totalIntegral M v (iteratedFDeriv ℝ (n - i) f) z‖ :=
-      iteratedFDeriv_compactIntegral_norm_le hχ hf hs n z
-    _ ≤ A n * (b - a) + ∑ i ∈ Finset.range (n + 1),
-        ((n.choose i : ℝ) * B i * A (n - i)) * (b - a) :=
-      add_le_add hp (Finset.sum_le_sum ht)
-    _ = _ := by rw [add_mul, Finset.sum_mul]
 
 theorem futureIntegral_eq_total_sub_past {a b M : ℝ} {v : E} {f : ℝ × E → F}
     (hf : Continuous f) (hs : RadialAlias.RadiallySupported a b f) (z : ℝ × E) :
@@ -810,13 +727,6 @@ theorem futureIntegral_eq_total_sub_past {a b M : ℝ} {v : E} {f : ℝ × E →
   have h := past_add_future (M := M) (v := v) hf hs z
   exact eq_sub_iff_add_eq.mpr (by simpa only [add_comm] using h)
 
-theorem futureIntegral_contDiff [CompleteSpace F] {a b M : ℝ} {v : E} {f : ℝ × E → F}
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f) :
-    ContDiff ℝ ∞ (futureIntegral M v f) := by
-  have heq : futureIntegral M v f = fun z => totalIntegral M v f z - pastIntegral M v f z :=
-    funext (futureIntegral_eq_total_sub_past hf.continuous hs)
-  rw [heq]
-  exact (totalIntegral_contDiff hf hs).sub (pastIntegral_contDiff hf hs)
 
 theorem iteratedFDeriv_sub_of_smooth {f g : ℝ × E → F}
     (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g) (n : ℕ) (z : ℝ × E) :
@@ -864,14 +774,6 @@ theorem futureIntegral_norm_le {a b M C : ℝ} {v : E} {f : ℝ × E → F}
     _ ≤ C * (b - a) := totalIntegral_norm_le (f := fun x => ‖f x‖) hab hf.norm hnorm
       (fun s hs Y => by simpa only [norm_norm] using hbound s hs Y) z
 
-theorem iteratedFDeriv_futureIntegral_norm_le [CompleteSpace F] {a b M C : ℝ} {v : E}
-    {f : ℝ × E → F} (hab : a ≤ b) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (n : ℕ)
-    (hbound : ∀ s ∈ Icc a b, ∀ Y : E, ‖iteratedFDeriv ℝ n f (s, Y)‖ ≤ C) (z : ℝ × E) :
-    ‖iteratedFDeriv ℝ n (futureIntegral M v f) z‖ ≤ C * (b - a) := by
-  rw [iteratedFDeriv_futureIntegral hf hs]
-  exact futureIntegral_norm_le hab (iteratedFDeriv_contDiff hf n).continuous
-    (iteratedFDeriv_supported hs n) hbound z
 
 /-- The total integral agrees with the separately formalized radial alias. -/
 theorem totalIntegral_eq_wholeAlias {a b M : ℝ} {v : E} {f : ℝ × E → F}

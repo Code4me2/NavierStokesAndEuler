@@ -120,13 +120,6 @@ theorem average_integrable_of_bound {t : ℝ} (ht : 0 < t)
   rw [norm_smul, Real.norm_of_nonneg (kernel_nonneg ht y)]
   exact mul_le_mul_of_nonneg_left (hb _) (kernel_nonneg ht y)
 
-theorem average_norm_le {t : ℝ} (ht : 0 < t) (f : Space → V)
-    (C : ℝ) (hb : ∀ x, ‖f x‖ ≤ C) (x : Space) : ‖average t f x‖ ≤ C := by
-  have h := norm_integral_le_of_norm_le ((kernel_integrable ht).mul_const C)
-    (f := fun y : Space => kernel t y • f (x+y)) (Eventually.of_forall (fun y => by
-      rw [norm_smul, Real.norm_of_nonneg (kernel_nonneg ht y)]
-      exact mul_le_mul_of_nonneg_left (hb _) (kernel_nonneg ht y)))
-  simpa only [integral_mul_const, integral_kernel ht, one_mul, average] using h
 
 /-- Cauchy--Schwarz for scalar multiplication, in a form that retains the
 ordinary L² norm of a Banach-valued field. -/

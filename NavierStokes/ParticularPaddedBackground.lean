@@ -29,9 +29,6 @@ noncomputable def paddedCell (n : ℕ) (i : CopyIndex B N0) : Set ActualPrimary.
 noncomputable def cells (n : ℕ) (i : CopyIndex B N0) : Set ActualParticularBackground.Native :=
   ActualParticularBackground.nativeToFull ⁻¹' paddedCell n i
 
-theorem primary_control_subset_padded (n : ℕ) (i : CopyIndex B N0) :
-    controlCell n i ⊆ paddedCell n i :=
-  fun _ hx => ⟨hx.1, hx.2.1, hx.2.2.1⟩
 
 theorem padded_q (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     {n : ℕ} {i : CopyIndex B N0} {x : ActualPrimary.FullPoint}

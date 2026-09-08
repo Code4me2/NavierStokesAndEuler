@@ -116,15 +116,6 @@ theorem cylinderAt_physical_chart (h : ℝ) (n : ℕ) {a : ℝ} (ha : 0 < a)
   simpa only [he] using ActualSignedPhysicalData.cylinderAt_physical_forward h n ha j
     (PhysicalCurlCovariance.polarCoordinates (chartRadius a n) j w) hv.1 hv.2.1 hc
 
-theorem exists_physical_chart (h : ℝ) (n : ℕ) {a : ℝ} (ha : 0 < a)
-    (j : PolarCharts.Index) {w : SpaceTime}
-    (hchart : scaledRadial n w ∈ PolarCharts.chartDomain a j) :
-    ∃ b : ℝ, 0 < b ∧ radialProjection w ∈ PolarCharts.chartDomain b j ∧
-      ActualSignedPhysicalData.cylinderAt a j (physicalLift h n w) =
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h
-          (ChartScales.nativeIndex h n)).map (PhysicalCurlCovariance.polarCoordinates b j w) :=
-  ⟨chartRadius a n, chartRadius_pos ha n, physical_chart_mem n j hchart,
-    cylinderAt_physical_chart h n ha j hchart⟩
 
 /-- The mean graph's slow coordinate does not depend on its auxiliary cover. -/
 theorem graph_slow_mem_standard_of_ratio {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)

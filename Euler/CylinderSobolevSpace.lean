@@ -56,8 +56,6 @@ instance sobolevNormedAddCommGroup (q : ℕ) : NormedAddCommGroup (SobolevSpace 
 instance sobolevNormedSpace (q : ℕ) : NormedSpace ℝ (SobolevSpace period q) :=
   inferInstanceAs (NormedSpace ℝ (sobolevSubspace period q).toSubmodule)
 
-/-- Completeness follows from closedness of the derivative graphs in a finite product of L² spaces. -/
-theorem sobolev_complete (q : ℕ) : CompleteSpace (SobolevSpace period q) := inferInstance
 
 /-- The underlying L² field of a Sobolev derivative array. -/
 def value {q : ℕ} (u : SobolevSpace period q) : LiftL2 period := u.val (emptyWord q)

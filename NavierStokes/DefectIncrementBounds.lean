@@ -260,17 +260,6 @@ theorem barMoment_sub {a b : ℝ} {f g : ScalarField (Point P)}
   simp only [barMoment_apply, he, mul_sub]
   exact integral_sub (hf.barIntegrable k n p) (hg.barIntegrable k n p)
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem barMoment_smul (c : ℝ) (f : ScalarField (Point P)) (k : ℕ) :
-    barMoment k (c • f) = c • barMoment k f := by
-  funext n p
-  change PressureStream.pressureMass (fun x => x.1 ^ k * (c * f n x)) p =
-    c * PressureStream.pressureMass (fun x => x.1 ^ k * f n x) p
-  have he : (fun x : Point P => x.1 ^ k * (c * f n x)) =
-      (fun x => c * (x.1 ^ k * f n x)) := by funext x; ring
-  rw [he]
-  simp only [PressureStream.pressureMass, PressureStream.torusAverage, PressureStream.torusInner,
-    intervalIntegral.integral_const_mul, integral_const_mul]
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
 @[simp] theorem barMoment_zero (k : ℕ) : barMoment k (0 : ScalarField (Point P)) = 0 := by
@@ -396,18 +385,6 @@ theorem radial_update_split (o : Operators (Point P)) (base m h : Triple (Point 
   unfold actualRadialError
   abel
 
-/-- The complete equation-(32) remainder: slow/fast time, radial transport,
-axial transport, old/new angular products, and viscosity are retained. -/
-theorem actualRadialError_eq_formula {U : Set (Point P)} (hU : IsOpen U)
-    (o : Operators (Point P)) (ha : ContDiffOn ℝ ∞ o.radialProfile U)
-    {base m h : Triple (Point P)} (hb : SmoothTriple U base)
-    (hm : SmoothTriple U m) (hh : SmoothTriple U h)
-    (W : Fin 3 → Fin 3 → ScalarField (Point P)) (hW : ∀ i j, SmoothOn U (W i j)) :
-    Agree U (actualRadialError o base m h W) (radialRemainder o base m h) := by
-  intro n x hx
-  have he := gr_change hU o ha hb hm hh W hW n hx
-  simp only [actualRadialError, Pi.add_apply, Pi.sub_apply] at he ⊢
-  linarith
 
 section RemainderClasses
 

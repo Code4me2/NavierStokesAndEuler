@@ -123,21 +123,5 @@ theorem meanSolve_of_admissible (D : Data) (raw : VectorField) (h : Nonempty (Fo
     meanSolve D raw = ((Classical.choice h).vector,(Classical.choice h).scalar) := by
   simp only [meanSolve, dite_eq_left h]
 
-/-- The total provider is backed by an actual source solve on every admissible input. -/
-theorem meanSolve_contract (D : Data) (raw : VectorField) (h : Nonempty (Forcing D raw)) :
-    ∃ bt : VectorField,
-      (∀ (t : Icc (0 : ℝ) D.T) x θ,
-        HasDerivWithinAt (fun r => (meanSolve D raw).1 (r,(x,θ))) (bt (t,(x,θ))) (Icc (0 : ℝ) D.T) t) ∧
-      (∀ (t : Icc (0 : ℝ) D.T) x θ,
-        bt (t,(x,θ))+D.strain (t,(x,θ)) ((meanSolve D raw).1 (t,(x,θ)))+
-          (D.inverseFrame (t,(x,θ))).adjoint
-            (gradient (fun y => (meanSolve D raw).2 (t,(y,θ))) x) = raw (t,(x,θ))) ∧
-      (∀ t, ContDiff ℝ ∞ (fun y : Space × ℝ => (meanSolve D raw).1 (t,y))) ∧
-      (∀ t, ContDiff ℝ ∞ (fun y : Space × ℝ => (meanSolve D raw).2 (t,y))) ∧
-      (∀ t θ, (meanSolve D raw).2 (t,(0,θ)) = 0) := by
-  rw [meanSolve_of_admissible D raw h]
-  exact ⟨(Classical.choice h).vectorDerivative, (Classical.choice h).vector_hasDerivWithinAt,
-    (Classical.choice h).equation, (Classical.choice h).vector_spatial_smooth,
-    (Classical.choice h).scalar_spatial_smooth, (Classical.choice h).scalar_normalized⟩
 
 end EulerMeanPacketProvider

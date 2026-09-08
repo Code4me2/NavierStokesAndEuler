@@ -50,14 +50,6 @@ theorem initializedInitialMean_memLp (N n : ℕ) (k : ℝ) :
   exact scale_jet_memLp M.ℓ M.ℓ_pos _ (G.raw_graph_contDiff ⟨0,le_rfl,M.T_pos.le⟩ k D.m₀) n
     (G.raw_graph_tensor_memLp ⟨0,le_rfl,M.T_pos.le⟩ k D.m₀ n)
 
-include hTime in
-theorem initializedInitial_compact
-    (hS : D.support ⊆ Metric.closedBall 0 (1/2 : ℝ)) (N : ℕ) (k : ℝ) :
-    HasCompactSupport (initializedInitialHigh M D τ hτ hτT B δ hδ ξ hs α N k) ∧
-      HasCompactSupport (initializedInitialMean M D τ hτ hτT B δ hδ ξ hs α N k) := by
-  have h := initializedInitial_common_support M D hTime τ hτ hτT B δ hδ ξ hs α hS N k
-  exact ⟨(isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _) h.1,
-    (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _) h.2⟩
 
 variable (Cagree : SourceCoefficientAgreement M D) (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : 4 ≤ k)
   (Q : Budget period D.T_pos

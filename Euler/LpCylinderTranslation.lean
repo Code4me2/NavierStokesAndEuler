@@ -75,15 +75,6 @@ omit [CompactSpace K] in
 @[simp] theorem pathTranslate_apply (a : LiftTangent) (u : C(K,CylinderL2 period V)) (t : K) :
     pathTranslate period a u t = translate period a (u t) := rfl
 
-theorem pathTranslate_norm (a : LiftTangent) : ‖pathTranslate (K := K) (V := V) period a‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro u
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg u)).2
-  intro t
-  change ‖translate period a (u t)‖ ≤ ‖u‖
-  rw [LinearIsometry.norm_map]
-  exact u.norm_coe_le_norm t
 
 end Translation
 
@@ -118,16 +109,6 @@ omit [CompactSpace K] [Fact (0 < period)] in
 @[simp] theorem fieldPathLift_apply (A : C(K,Space →ᵇ W)) (t : K) (x : LiftDomain period) :
     fieldPathLift period A t x = A t x.1 := rfl
 
-omit [Fact (0 < period)] in
-theorem fieldPathLift_norm : ‖fieldPathLift (K := K) (W := W) period‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  apply (BoundedContinuousFunction.norm_le (norm_nonneg A)).2
-  intro x
-  exact ((A t).norm_coe_le_norm x.1).trans (A.norm_coe_le_norm t)
 
 end Fields
 

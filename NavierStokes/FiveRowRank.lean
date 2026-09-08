@@ -297,30 +297,8 @@ theorem integrable_power_mul_of_patch (p a b : ℝ) (f : ℝ → ℝ) (ha : 0 < 
   intro R hR
   exact Or.inl (ne_of_gt (lt_of_lt_of_le ha hR.1))
 
-theorem deltaV_power_integrable (lam C a b p : ℝ) (d : Debt)
-    (ha : 0 < a) (hab : a < b) : Integrable (fun R => R ^ p * deltaV lam C a b d R) :=
-  integrable_power_mul_of_patch p a b _ ha (deltaV_contDiff lam C a b d).continuous
-    (subset_closure.trans (deltaV_tsupport_subset lam C a b d hab))
 
-theorem gamma_power_integrable (lam C a b p : ℝ) (d : Debt)
-    (ha : 0 < a) (hab : a < b) : Integrable (fun R => R ^ p * gamma lam C a b d R) :=
-  integrable_power_mul_of_patch p a b _ ha (gamma_contDiff lam C a b d).continuous
-    (subset_closure.trans (gamma_tsupport_subset lam C a b d hab))
 
-/-- The complete existence statement has no moment-rank assumption. -/
-theorem exists_five_row_repair (lam C a b : ℝ) (d : Debt) (hlam : 0 < lam) (hC : C ≠ 0)
-    (ha : 0 < a) (hab : a < b) (V G : ℝ → ℝ)
-    (hV : ∀ R ∈ Ioo a b, V R = background lam C R)
-    (hG : ∀ R ∈ Ioo a b, G R = 0) :
-    ∃ dv ga : ℝ → ℝ,
-      ContDiff ℝ ∞ dv ∧ ContDiff ℝ ∞ ga ∧
-      HasCompactSupport dv ∧ HasCompactSupport ga ∧
-      tsupport dv ⊆ Ioo a b ∧ tsupport ga ⊆ Ioo a b ∧ FiveRows V G d dv ga :=
-  ⟨deltaV lam C a b d, gamma lam C a b d,
-    deltaV_contDiff lam C a b d, gamma_contDiff lam C a b d,
-    deltaV_hasCompactSupport lam C a b d hab, gamma_hasCompactSupport lam C a b d hab,
-    deltaV_tsupport_subset lam C a b d hab, gamma_tsupport_subset lam C a b d hab,
-    five_rows_on_patch lam C a b d hlam hC ha hab V G hV hG⟩
 
 section Linearity
 
@@ -360,21 +338,9 @@ def gammaLinearMap (lam C a b : ℝ) : Debt →ₗ[ℝ] (ℝ → ℝ) :=
 @[simp] theorem gammaLinearMap_apply (lam C a b : ℝ) (d : Debt) :
     gammaLinearMap lam C a b d = gamma lam C a b d := rfl
 
-theorem deltaV_add (lam C a b : ℝ) (d e : Debt) :
-    deltaV lam C a b (d + e) = deltaV lam C a b d + deltaV lam C a b e :=
-  (deltaVLinearMap lam C a b).map_add d e
 
-theorem gamma_add (lam C a b : ℝ) (d e : Debt) :
-    gamma lam C a b (d + e) = gamma lam C a b d + gamma lam C a b e :=
-  (gammaLinearMap lam C a b).map_add d e
 
-theorem deltaV_smul (lam C a b r : ℝ) (d : Debt) :
-    deltaV lam C a b (r • d) = r • deltaV lam C a b d :=
-  (deltaVLinearMap lam C a b).map_smul r d
 
-theorem gamma_smul (lam C a b r : ℝ) (d : Debt) :
-    gamma lam C a b (r • d) = r • gamma lam C a b d :=
-  (gammaLinearMap lam C a b).map_smul r d
 
 @[simp] theorem deltaV_zero (lam C a b : ℝ) : deltaV lam C a b 0 = 0 :=
   (deltaVLinearMap lam C a b).map_zero
@@ -394,17 +360,7 @@ theorem axialDebt_rescale (C : ℝ) (d : Debt) : axialDebt C d = C⁻¹ • axia
     simp [axialDebt, Pi.smul_apply, smul_eq_mul, div_eq_mul_inv]
   ring
 
-theorem deltaV_rescale (lam C a b : ℝ) (d : Debt) :
-    deltaV lam C a b d = C⁻¹ • deltaV lam 1 a b d := by
-  unfold deltaV
-  rw [angularDebt_rescale]
-  exact LocalizedMomentRepair.repair_smul _ _ _ _ _
 
-theorem gamma_rescale (lam C a b : ℝ) (d : Debt) :
-    gamma lam C a b d = C⁻¹ • gamma lam 1 a b d := by
-  unfold gamma
-  rw [axialDebt_rescale]
-  exact LocalizedMomentRepair.repair_smul _ _ _ _ _
 
 end Linearity
 
@@ -469,23 +425,6 @@ theorem finite_jet_bound (lam a b : ℝ) (hab : a < b) (N : ℕ) :
       add_le_add (mul_le_mul_of_nonneg_left hvd hKv) (mul_le_mul_of_nonneg_left hgd hKg)
     _ = (Kv + Kg) * ‖C⁻¹‖ * ‖d - e‖ := by ring
 
-/-- If the amplitude stays a positive distance from zero, the finite-jet estimate
-has a single constant valid for all amplitudes in that range. -/
-theorem uniform_finite_jet_bound (lam a b η : ℝ) (hab : a < b) (hη : 0 < η) (N : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (C : ℝ), η ≤ |C| → ∀ (k : ℕ), k ≤ N →
-      ∀ (d e : Debt) (R : ℝ),
-      |iteratedDeriv k (deltaV lam C a b d) R - iteratedDeriv k (deltaV lam C a b e) R| +
-      |iteratedDeriv k (gamma lam C a b d) R - iteratedDeriv k (gamma lam C a b e) R| ≤
-        K * ‖d - e‖ := by
-  obtain ⟨K, hK, hbound⟩ := finite_jet_bound lam a b hab N
-  refine ⟨K / η, div_nonneg hK hη.le, ?_⟩
-  intro C hC k hk d e R
-  apply (hbound C k hk d e R).trans
-  apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
-  have hinv : ‖C⁻¹‖ ≤ η⁻¹ := by
-    rw [norm_inv, Real.norm_eq_abs]
-    exact inv_anti₀ hη hC
-  simpa only [div_eq_mul_inv] using mul_le_mul_of_nonneg_left hinv hK
 
 end JetBounds
 
@@ -557,14 +496,6 @@ theorem gamma_joint_contDiffOn (lam a b : ℝ) {S : Set E} {C : E → ℝ} {d : 
     (S := S) (d := fun p => axialDebt (C p) (d p))
     (axialDebt_contDiffOn (E := E) (S := S) (C := C) (d := d) hC hd hCn)
 
-theorem repair_pair_joint_contDiffOn (lam a b : ℝ) {S : Set E} {C : E → ℝ} {d : E → Debt}
-    (hC : ContDiffOn ℝ ∞ C S) (hd : ContDiffOn ℝ ∞ d S)
-    (hCn : ∀ p ∈ S, C p ≠ 0) :
-    ContDiffOn ℝ ∞ (fun z : E × ℝ =>
-      (deltaV lam (C z.1) a b (d z.1) z.2, gamma lam (C z.1) a b (d z.1) z.2))
-      (S ×ˢ univ) :=
-  (deltaV_joint_contDiffOn lam a b hC hd hCn).prodMk
-    (gamma_joint_contDiffOn lam a b hC hd hCn)
 
 end SmoothParameters
 

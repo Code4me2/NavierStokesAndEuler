@@ -100,12 +100,6 @@ theorem tailJet_contDiff {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
     (Eventually.of_forall fun u n ν => tailKernel_hasDerivAt hh square k n u ν)
     (tailKernel_measurable hh hX square k) (tailKernel_dominated hh hk hX square)
 
-theorem tailJet_eq_iteratedDeriv {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
-    (square : Bool) (n : ℕ) (ν : ℝ) :
-    iteratedDeriv n (tailJet square h k 0 X) ν = tailJet square h k n X ν :=
-  ExtendedHeatDebts.iteratedDeriv_integral_chain
-    (Eventually.of_forall fun u n ν => tailKernel_hasDerivAt hh square k n u ν)
-    (tailKernel_measurable hh hX square k) (tailKernel_dominated hh hk hX square) n ν
 
 theorem tailJet_tendsto_zero {h k : ℝ} (hh : 0 < h) (hk : 0 < k)
     (square : Bool) (n : ℕ) (ν : ℝ) :
@@ -142,35 +136,13 @@ theorem mul_tailJet_tendsto_zero {h k : ℝ} (hh : 0 < h) (hk : 1 < k)
 noncomputable def etaTail (square : Bool) (h k X η : ℝ) : ℝ :=
   tailJet square h k 0 X (ParametricHeatTail.diffusion η)
 
-theorem etaTail_contDiff {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
-    (square : Bool) : ContDiff ℝ ∞ (etaTail square h k X) :=
-  (tailJet_contDiff hh hk hX square).comp ParametricHeatTail.diffusion_contDiff
 
 theorem etaTail_hasDerivAt {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
     (square : Bool) (η : ℝ) : HasDerivAt (etaTail square h k X)
       (tailJet square h k 1 X (ParametricHeatTail.diffusion η) * (-2 * η)) η :=
   (tailJet_hasDerivAt hh hk hX square 0 _).comp η (ParametricHeatTail.diffusion_hasDerivAt η)
 
-theorem etaTail_bound {h k X η : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
-    (hη : η ∈ Icc (-1 : ℝ) 1) (square : Bool) :
-    |etaTail square h k X η| ≤ (ExtendedHeatDebts.editBound square h 1 0 / k) * X ^ (-k) := by
-  exact tailJet_bound hh hk hX
-    (by rw [abs_of_nonneg (ParametricHeatTail.diffusion_mem hη).1]; exact (ParametricHeatTail.diffusion_mem hη).2)
-    square 0
 
-theorem etaTail_derivative_bound {h k X η : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
-    (hη : η ∈ Icc (-1 : ℝ) 1) (square : Bool) :
-    |deriv (etaTail square h k X) η| ≤
-      2 * (ExtendedHeatDebts.editBound square h 1 1 / k) * X ^ (-k) := by
-  rw [(etaTail_hasDerivAt hh hk hX square η).deriv, abs_mul]
-  have hη' : |-2 * η| ≤ 2 := by
-    rw [abs_mul]
-    norm_num
-    exact (abs_le.mpr hη).trans_eq (by ring)
-  have hb := tailJet_bound (L := 1) hh hk hX
-    (by rw [abs_of_nonneg (ParametricHeatTail.diffusion_mem hη).1]; exact (ParametricHeatTail.diffusion_mem hη).2)
-    square 1
-  nlinarith [abs_nonneg (tailJet square h k 1 X (ParametricHeatTail.diffusion η))]
 
 theorem etaTail_tendsto_zero {h k : ℝ} (hh : 0 < h) (hk : 0 < k) (square : Bool) (η : ℝ) :
     Tendsto (fun X => etaTail square h k X η) atTop (𝓝 0) :=
@@ -705,27 +677,5 @@ theorem mul_H_sub_powerH_tendsto_zero (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c
   rw [heated_difference_eq_kernel F hXR c hη hX]
   ring
 
-/-- All required history limits for one and the same actual heat completion. -/
-theorem actual_history_limits {F : Profile} {XR C B : ℝ}
-    (hF : OutgoingProfile.Specification F B) (w : CompensationWitness F XR C)
-    {η : ℝ} (hη : η ∈ Ioo (-1 : ℝ) 1) :
-    Tendsto (fun X => angularHistory F XR w.coefficients η X - powerHistory F XR X) atTop (𝓝 0) ∧
-    Tendsto (fun X => deriv (fun t => angularHistory F XR w.coefficients t X) η) atTop (𝓝 0) ∧
-    Tendsto (fun X => HeatedOutgoing.H F XR w.coefficients (X,η)) atTop (𝓝 0) ∧
-    Tendsto (fun X => X * deriv (fun u => HeatedOutgoing.H F XR w.coefficients (u,η)) X) atTop (𝓝 0) ∧
-    Tendsto (fun X => energyHistory F XR w.coefficients η X) atTop (𝓝 0) ∧
-    Tendsto (fun X => deriv (fun t => energyHistory F XR w.coefficients t X) η) atTop (𝓝 0) ∧
-    Tendsto (fun X => X * HeatedOutgoing.Pi F XR w.coefficients (X,η)) atTop (𝓝 0) ∧
-    Tendsto (fun X => X * deriv (fun t => HeatedOutgoing.Pi F XR w.coefficients (X,t)) η) atTop (𝓝 0) ∧
-    Tendsto (fun X => X * (HeatedOutgoing.H F XR w.coefficients (X,η) -
-      OutgoingDilation.powerH F XR X)) atTop (𝓝 0) := by
-  have hb : η ∈ HeatedOutgoing.parameterDomain := ⟨hη.1.le, hη.2.le⟩
-  exact ⟨angularHistory_sub_power_tendsto_zero w hb, angularHistory_eta_tendsto_zero w hη,
-    H_tendsto_zero F w.radius_pos w.coefficients hb,
-    mul_H_deriv_tendsto_zero F w.radius_pos w.coefficients hb,
-    energyHistory_tendsto_zero hF w hb, energyHistory_eta_tendsto_zero hF w hη,
-    mul_pressure_tendsto_zero F w.radius_pos w.coefficients hb,
-    mul_pressure_eta_tendsto_zero F w.radius_pos w.coefficients hη,
-    mul_H_sub_powerH_tendsto_zero F w.radius_pos w.coefficients hb⟩
 
 end NavierStokes.HeatTailHistoryLimits

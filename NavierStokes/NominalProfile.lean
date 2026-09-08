@@ -87,15 +87,11 @@ noncomputable def referenceInput : ReferencePath.Input :=
   ReferencePath.Input.ofNatural A.scale_pos A.natural.profile.family
 
 theorem reference_scale : A.referenceInput.scale = A.scale := rfl
-theorem reference_f : A.referenceInput.f = A.natural.profile.family.f := rfl
-theorem reference_U : A.referenceInput.U = A.natural.profile.family.U := rfl
 
 noncomputable def reference (δ : ℝ) (hδ : 0 < δ) (hδsmall : 2 * δ < ReferencePath.rampLimit) :
     ProfileHistories.Profiles A.referenceInput.radialDomain :=
   A.referenceInput.histories hδ hδsmall F.axisDatum F.axisDatum_contDiff
 
-theorem reference_pressure0 (δ : ℝ) (hδ : 0 < δ) (hδsmall : 2 * δ < ReferencePath.rampLimit) :
-    (A.reference δ hδ hδsmall).pressure0 = F.axisDatum := rfl
 
 /-- The stocks used in ACT come from this exact REF profile. -/
 noncomputable def activation (δ : ℝ) (hδ : 0 < δ)
@@ -104,13 +100,7 @@ noncomputable def activation (δ : ℝ) (hδ : 0 < δ)
   TransitionRamp.ofNatural A.natural.profile.family A.scale_pos A.small hδ hδsmall
     F.axisDatum_contDiff
 
-theorem activation_profiles (δ : ℝ) (hδ : 0 < δ)
-    (hδsmall : 2 * δ < ReferencePath.rampLimit) :
-    (A.activation δ hδ hδsmall).profiles = A.reference δ hδ hδsmall := rfl
 
-theorem activation_radius (δ : ℝ) (hδ : 0 < δ)
-    (hδsmall : 2 * δ < ReferencePath.rampLimit) :
-    (A.activation δ hδ hδsmall).radius0 = 4 / A.scale := rfl
 
 theorem activation_initial (δ : ℝ) (hδ : 0 < δ)
     (hδsmall : 2 * δ < ReferencePath.rampLimit) (T κ w₁ w₂ : ℝ) {p : Point}
@@ -125,15 +115,6 @@ theorem activation_initial (δ : ℝ) (hδ : 0 < δ)
 
 end AxisStage
 
-theorem exists_axis_stage (F : Profile) (hP : 2 ≤ F.data.core.P) {j : ℝ}
-    (hj : NaturalAxisData.SmallParameters F.data.h j) (scaleFloor normFloor : ℝ) :
-    ∃ A : AxisStage F, A.j = j ∧ scaleFloor ≤ A.scale ∧ normFloor ≤ A.normalization := by
-  obtain ⟨prep⟩ := prepare_axis F hP hj
-  let Λ := max prep.scaleBound scaleFloor
-  let C := max (NaturalEntrance.entranceNormalization prep.inputs Λ prep.delta) normFloor
-  exact ⟨⟨j, hj, prep, Λ, C, le_max_left _ _, le_max_left _ _,
-      Classical.choice (prep.entrances Λ (le_max_left _ _) C (le_max_left _ _))⟩,
-    rfl, le_max_right _ _, le_max_right _ _⟩
 
 /-! ## Matching geometry: the radius is derived from the same normalization -/
 
@@ -141,7 +122,6 @@ noncomputable def Xi : ℝ := 110
 noncomputable def matchingRadius (F : Profile) (C : ℝ) : ℝ :=
   ShapeTransition.resetRadius Xi C F.data.core.P
 noncomputable def matchFraction : ℝ := Real.exp (-5)
-noncomputable def matchRadius (F : Profile) (C : ℝ) : ℝ := matchingRadius F C * matchFraction
 
 theorem Xi_pos : 0 < Xi := by norm_num [Xi]
 theorem matchingRadius_pos (F : Profile) {C : ℝ} (hC : 0 < C) : 0 < matchingRadius F C :=
@@ -587,9 +567,6 @@ noncomputable def initialAxial : ℝ → ℝ :=
   c.reference.endpointU c.activationTime c.kappa c.axialWidth
 
 theorem reference_radius : c.reference.radius0 = 4 / A.scale := rfl
-theorem reference_profiles : c.reference.profiles =
-    A.reference c.referenceWidth c.referenceWidth_pos c.referenceWidth_small := rfl
-theorem reference_pressure : c.reference.profiles.pressure0 = F.axisDatum := rfl
 theorem reference_before_big : 0 < c.reference.bigTime :=
   c.referenceWidth_pos.trans_le c.before_big
 theorem radius_before_Xi : c.reference.radius0 < 110 :=
@@ -646,10 +623,6 @@ theorem seedU_held {X eta : ℝ} (hX : Xi ≤ X) (hη : eta ∈ ReferencePath.pa
       have hf : c.reference.bigTime + c.axialWidth + c.angularWidth ≤ c.reference.finalTime := c.finish
       linarith [c.angularWidth_pos]) c.radius_before_Xi hX hη
 
-theorem initialShape_value {eta : ℝ} (hη : eta ∈ ReferencePath.parameterInterval) :
-    c.initialShape eta = Real.log (A.normalization * (Real.sqrt (2 * Xi) * c.seedF (Xi, eta))) :=
-  c.reference.endpointLog_eq_actual ReferencePath.parameterInterval_open c.angularWidth_pos
-    c.finish c.radius_before_Xi A.normalization_pos hη
 
 /-- The nominal fields are functions of the actual stock-controlled seed. -/
 noncomputable def debt : ℝ → Debt :=
@@ -755,46 +728,6 @@ theorem natural_prefix
 
 end Controls
 
-/-- All elementary clock constraints can be achieved with arbitrarily small
-widths after the axis profile and its normalization have been fixed. -/
-theorem controls_exist {F : Profile} (A : AxisStage F) (hscale : 1 ≤ A.scale)
-    (T : ℝ) (hT : 0 < T) {eps : ℝ} (heps : 0 < eps) :
-    ∃ c : Controls A, c.shapeTime = T ∧ c.referenceWidth < eps ∧
-      c.activationTime < eps ∧ c.kappa < eps ∧ c.axialWidth < eps ∧ c.angularWidth < eps := by
-  let δ := min A.preparation.delta (min (ReferencePath.rampLimit / 4) (eps / 2))
-  have hδ : 0 < δ := lt_min A.preparation.delta_pos
-    (lt_min (div_pos ReferencePath.rampLimit_pos (by norm_num)) (half_pos heps))
-  have hδlim : δ ≤ ReferencePath.rampLimit / 4 := (min_le_right _ _).trans (min_le_left _ _)
-  have hδeps : δ < eps := ((min_le_right _ _).trans (min_le_right _ _)).trans_lt (half_lt_self heps)
-  have hδT : 2 * δ < ReferencePath.rampLimit := by linarith [ReferencePath.rampLimit_pos]
-  let R := A.activation δ hδ hδT
-  have hb : δ ≤ R.bigTime := by
-    have hf := A.referenceInput.freeze_before_Xbig hscale hδT
-    have he : Real.exp (2 * δ) < 100 / R.radius0 := by
-      apply (lt_div_iff₀ R.radius0_pos).mpr
-      simp only [R, AxisStage.activation, TransitionRamp.ofNatural, ReferencePath.Input.Xbig,
-        mul_comm] at hf ⊢
-      exact hf
-    have ht : 2 * δ < R.bigTime :=
-      (Real.lt_log_iff_exp_lt (div_pos (by norm_num) R.radius0_pos)).mpr he
-    linarith
-  let gap := R.finalTime - R.bigTime
-  have hgap : 0 < gap := sub_pos.mpr R.finalTime_gt_bigTime
-  let w := min (gap / 4) (eps / 2)
-  have hw : 0 < w := lt_min (div_pos hgap (by norm_num)) (half_pos heps)
-  have hweps : w < eps := (min_le_right _ _).trans_lt (half_lt_self heps)
-  have hfinish : R.bigTime + w + w ≤ R.finalTime := by
-    have h := min_le_left (gap / 4) (eps / 2)
-    dsimp only [gap] at h
-    change w ≤ (R.finalTime - R.bigTime) / 4 at h
-    linarith [R.finalTime_gt_bigTime]
-  let κ := min (1 / 2 : ℝ) (eps / 2)
-  have hκ : 0 < κ := lt_min (by norm_num) (half_pos heps)
-  have hκ1 : κ ≤ 1 := (min_le_left _ _).trans (by norm_num)
-  have hκeps : κ < eps := (min_le_right _ _).trans_lt (half_lt_self heps)
-  let c : Controls A := ⟨δ, hδ, hδT, δ / 2, half_pos hδ, (half_le_self hδ.le),
-    κ, hκ, hκ1, w, hw, w, hw, hb, hfinish, T, hT⟩
-  exact ⟨c, rfl, hδeps, (half_lt_self hδ).trans hδeps, hκeps, hweps, hweps⟩
 
 /-! ## Regular parameter-dependent prefix integrals -/
 
@@ -1015,10 +948,6 @@ variable {F : Profile} {A : AxisStage F} (c : Controls A)
 theorem debt_smooth : ContDiffOn ℝ ∞ c.debt ReferencePath.parameterInterval :=
   (outgoing_prefix_smooth F matchFraction_lt_one.le).contDiffOn.sub c.base_moments_smooth
 
-theorem repair_coefficients_smooth
-    (hs : ∀ eta ∈ ReferencePath.parameterInterval, SmallDebt F c.debt eta) :
-    ContDiffOn ℝ ∞ (resetCoefficients F c.debt) ReferencePath.parameterInterval :=
-  resetCoefficients_smooth F c.debt_smooth hs
 
 theorem moments_at_match
     (hsep : ShapeTransition.separation c.shapeTime A.normalization F.data.core.P ≤ Real.exp (-8))
@@ -1784,18 +1713,7 @@ noncomputable def Controls.ofContinuation {F : Profile} (A : AxisStage F) {N : �
   shapeTime := T
   shapeTime_pos := hT
 
-theorem Controls.ofContinuation_seed {F : Profile} (A : AxisStage F) {N : ℕ} {eps : ℝ}
-    (w : ActivationContinuation.ContinuationWitness A.natural A.scale_pos A.small
-      F.axisDatum_contDiff N eps) (T : ℝ) (hT : 0 < T) :
-    (Controls.ofContinuation A w T hT).seedF = w.parameters.profiles.f ∧
-      (Controls.ofContinuation A w T hT).seedU = w.parameters.profiles.U := ⟨rfl, rfl⟩
 
-theorem Controls.ofContinuation_log_control {F : Profile} (A : AxisStage F) {N : ℕ} {eps : ℝ}
-    (w : ActivationContinuation.ContinuationWitness A.natural A.scale_pos A.small
-      F.axisDatum_contDiff N eps) (T : ℝ) (hT : 0 < T) :
-    let c := Controls.ofContinuation A w T hT
-    c.reference.SmallLogControl (Icc (-1 : ℝ) 1) N eps
-      c.activationTime c.kappa c.axialWidth c.angularWidth := w.logarithmic_control
 
 /-! ## Joining the heat completion of the same outgoing profile -/
 
@@ -1812,8 +1730,6 @@ noncomputable def heatJoin : ℝ := c.radius * matchFraction
 noncomputable def heatBlend (X : ℝ) : ℝ := ShapeTransition.radialSwitch c.heatJoin 1 X
 noncomputable def heatedE (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
   c.E p + c.heatBlend p.1 * (HeatedOutgoing.E F c.radius coef p - c.E p)
-noncomputable def heatedH (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
-  Real.sqrt (2 * p.1) * c.heatedE coef p
 noncomputable def heatedPi (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
   F.axisDatum p.2 + moments c.U (c.heatedE coef) p.1 p.2 4
 noncomputable def heatedf (coef : ℝ → HeatedOutgoing.Coeff) (p : Point) : ℝ :=
@@ -1864,27 +1780,7 @@ theorem heated_fields_after (coef : ℝ → HeatedOutgoing.Coeff) {p : Point}
     c.U p = HeatedOutgoing.U F c.radius p ∧ c.heatedE coef p = HeatedOutgoing.E F c.radius coef p :=
   ⟨(c.physical_after_match hp).1, c.heatedE_after coef hp⟩
 
-theorem heated_natural_prefix (coef : ℝ → HeatedOutgoing.Coeff)
-    (hsep : c.separation ≤ Real.exp (-8)) (hscale : 1 ≤ A.scale)
-    {p : Point} (hp : p.1 ≤ 4 / A.scale) :
-    c.heatedf coef p = A.natural.profile.family.f p ∧ c.U p = A.natural.profile.family.U p := by
-  have hb : (4 : ℝ) / A.scale ≤ Xi := by
-    apply (div_le_iff₀ A.scale_pos).mpr
-    have := mul_le_mul_of_nonneg_left hscale Xi_pos.le
-    norm_num [Xi] at *
-    linarith
-  rw [heatedf, ite_eq_left (hp.trans hb)]
-  exact c.natural_prefix hsep hscale hp
 
-theorem heatedE_smooth {B : ℝ} (w : HeatedOutgoing.CompensationWitness F c.radius B)
-    (hsep : c.separation ≤ Real.exp (-8)) :
-    ContDiffOn ℝ ∞ (c.heatedE w.coefficients)
-      {p | p ∈ HeatedOutgoing.domain ∧ SmallDebt F c.debt p.2} := by
-  have hc : ContDiffOn ℝ ∞ c.E {p | p ∈ HeatedOutgoing.domain ∧ SmallDebt F c.debt p.2} := by
-    intro p hp
-    exact (c.E_smoothAt hsep hp.1.1 (physical_band_in_parameterInterval hp.1.2) hp.2).contDiffWithinAt
-  exact hc.add (((c.heatBlend_smooth.comp contDiff_fst).contDiffOn).mul
-    ((HeatedOutgoing.E_contDiffOn F c.radius c.radius_pos w.smooth).mono (fun _ hp => hp.1) |>.sub hc))
 
 end Controls
 
@@ -2175,16 +2071,7 @@ theorem heated_pressure_before (coef : ℝ → HeatedOutgoing.Coeff) {p : Point}
 
 end Controls
 
-theorem Controls.ofContinuation_reference {F : Profile} (A : AxisStage F) {N : ℕ} {eps : ℝ}
-    (w : ActivationContinuation.ContinuationWitness A.natural A.scale_pos A.small
-      F.axisDatum_contDiff N eps) (T : ℝ) (hT : 0 < T) :
-    (Controls.ofContinuation A w T hT).reference = w.parameters.reference := rfl
 
-theorem Controls.ofContinuation_endpoints {F : Profile} (A : AxisStage F) {N : ℕ} {eps : ℝ}
-    (w : ActivationContinuation.ContinuationWitness A.natural A.scale_pos A.small
-      F.axisDatum_contDiff N eps) (T : ℝ) (hT : 0 < T) :
-    (Controls.ofContinuation A w T hT).initialAxial = w.parameters.endpointAxial ∧
-      (Controls.ofContinuation A w T hT).initialShape = w.parameters.endpointLogarithm := ⟨rfl, rfl⟩
 
 namespace Controls
 
@@ -2228,18 +2115,6 @@ theorem heated_seed_moments (coef : ℝ → HeatedOutgoing.Coeff)
   rcases c.heated_seed_fields coef hsep (p := (x, eta)) (hx.2.trans hX) with ⟨_, hU, hE⟩
   simp only [density, hU, hE]
 
-theorem heated_seed_pressure (coef : ℝ → HeatedOutgoing.Coeff)
-    (hsep : c.separation ≤ Real.exp (-8)) {p : Point} (hX : 0 ≤ p.1) (hp : p.1 ≤ Xi) :
-    c.heatedPi coef p = c.seedProfiles.pressure p := by
-  change F.axisDatum p.2 + moments c.U (c.heatedE coef) p.1 p.2 4 = _
-  rw [c.heated_seed_moments coef hsep hp]
-  change F.axisDatum p.2 + moments c.seedProfiles.U c.seedProfiles.E p.1 p.2 4 =
-    F.axisDatum p.2 + ProfileHistories.primitive (fun q => c.seedProfiles.f q ^ 2) p
-  congr 1
-  rw [ProfileHistories.primitive, intervalIntegral.integral_of_le hX]
-  apply setIntegral_congr_fun measurableSet_Ioc
-  intro x hx
-  exact congrArg (fun q : Debt => q 4) (regularDensity_eq c.seedProfiles hx.1 p.2)
 
 theorem Pi_smoothAt (hsep : c.separation ≤ Real.exp (-8)) {p : Point}
     (hX : 0 < p.1) (hη : p.2 ∈ ReferencePath.parameterInterval) (hs : SmallDebt F c.debt p.2) :
@@ -2272,17 +2147,6 @@ theorem heated_pressure_blend {B : ℝ} (w : HeatedOutgoing.CompensationWitness 
     · rw [c.heatBlend_after (le_of_not_ge hR)]
       ring
 
-theorem heatedPi_smooth {B : ℝ} (w : HeatedOutgoing.CompensationWitness F c.radius B)
-    (hsep : c.separation ≤ Real.exp (-8)) :
-    ContDiffOn ℝ ∞ (c.heatedPi w.coefficients)
-      {p | p ∈ HeatedOutgoing.domain ∧ SmallDebt F c.debt p.2} := by
-  have hc : ContDiffOn ℝ ∞ c.Pi {p | p ∈ HeatedOutgoing.domain ∧ SmallDebt F c.debt p.2} := by
-    intro p hp
-    exact (c.Pi_smoothAt hsep hp.1.1 (physical_band_in_parameterInterval hp.1.2) hp.2).contDiffWithinAt
-  apply (hc.add (((c.heatBlend_smooth.comp contDiff_fst).contDiffOn).mul
-    ((w.Pi_contDiffOn.mono (fun _ hp => hp.1)).sub hc))).congr
-  intro p hp
-  exact c.heated_pressure_blend w hsep hp.1.1 hp.1.2 hp.2
 
 theorem heatedE_positive {B : ℝ} (w : HeatedOutgoing.CompensationWitness F c.radius B)
     (hsep : c.separation ≤ Real.exp (-8)) {p : Point}
@@ -2380,13 +2244,6 @@ theorem extendedE_physical (coef : ℝ → ExtendedHeatedOutgoing.Coeff) {p : Po
   rw [show ExtendedHeatedOutgoing.E F c.radius coef p = HeatedOutgoing.E F c.radius coef p from
     ExtendedHeatedOutgoing.E_eq_physical F c.radius coef p.2 p.1 hη hX]
 
-theorem extendedf_physical (coef : ℝ → ExtendedHeatedOutgoing.Coeff) {p : Point}
-    (hX : 0 < p.1) (hη : p.2 ∈ HeatedOutgoing.parameterDomain) :
-    c.extendedf coef p = c.heatedf coef p := by
-  unfold extendedf heatedf
-  split_ifs
-  · rfl
-  · rw [c.extendedE_physical coef hX hη]
 
 theorem extendedPi_physical (coef : ℝ → ExtendedHeatedOutgoing.Coeff)
     (hsep : c.separation ≤ Real.exp (-8)) {p : Point}
@@ -2631,18 +2488,6 @@ theorem E_outgoing_between_patch_and_switch {X eta : ℝ} (hR : W.controls.radiu
 
 end Witness
 
-/-- Heat completion imposes a late radius bound on the already selected
-outgoing profile. Any matched continuation beyond that bound gives one
-actual nominal witness, retaining its entrance and ramp parameters. -/
-theorem exists_assembly_threshold {F : Profile} {D : ℝ} (hF : OutgoingProfile.Specification F D) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ (A : AxisStage F) (c : Controls A), R0 ≤ c.radius →
-      c.separation ≤ Real.exp (-8) →
-      (∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) → Nonempty (Witness F) := by
-  obtain ⟨R0, B, hR0, _hB, hw⟩ := ExtendedHeatedOutgoing.exists_witness F
-  refine ⟨R0, hR0, ?_⟩
-  intro A c hr hsep hs
-  obtain ⟨w⟩ := hw c.radius hr
-  exact ⟨⟨A, c, D, hF, B, w, hsep, hs⟩⟩
 
 theorem exists_assembly_threshold_preserving {F : Profile} {D : ℝ}
     (hF : OutgoingProfile.Specification F D) :

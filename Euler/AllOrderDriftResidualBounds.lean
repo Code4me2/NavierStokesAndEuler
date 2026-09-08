@@ -104,48 +104,5 @@ private theorem sourceBound_residual (B : Budget period hT A)
   · congr 1 <;> ring
   · rfl
 
-/-- The constructed pressure and actual time derivative satisfy the
-sharper residual-envelope estimates, without assuming either bound. -/
-theorem Budget.pressure_time_reducedNorms_residual (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (N : ℕ) (hNq : N+6 ≤ q)
-    (s : ℕ) (hs : N+6 ≤ s) (t : Icc (0 : ℝ) T) :
-    weightedNorm period 6 N (B.reducedRadius period) ((B.pressureTower period).realization s t) ≤
-        (2*(B.spatial q hq).full.M*B.residualSourceCost period q hq)*B.residualEnvelope period q hq t ∧
-    weightedNorm period 6 N (B.reducedRadius period) ((B.timeDerivativeTower period).realization s t) ≤
-        ((1+2*(B.spatial q hq).full.M*(448*(B.spatial q hq).full.B+1))*
-          B.residualSourceCost period q hq)*B.residualEnvelope period q hq t := by
-  have hrR : B.reducedRadius period ≤ B.radius t := by
-    have h := B.reducedRadius_le_half period t
-    have hp := (B.spatial q hq).full.radius_pos t
-    linarith
-  have he := (B.fieldTower_reducedNorms_residual period q hq N hNq (q+3) (by omega) t).1
-  have hde := (B.fieldTower_reducedNorms_residual period q hq N hNq (q+2) (by omega) t).2
-  have hcost := sourceBound_residual period B q hq t
-  have hM := zero_le_one.trans (B.spatial q hq).full.M_one_le
-  have hB := (B.spatial q hq).full.B_nonneg
-  have hp := pressure_smallerRadius_bound period (B.spatial q hq).full N (by omega) (by omega)
-    t (B.reducedRadius period) (B.reducedRadius_pos period) hrR _ _ _ he hde
-  have ht := timeSource_smallerRadius_bound period (B.spatial q hq).full N (by omega) (by omega)
-    t (B.reducedRadius period) (B.reducedRadius_pos period) hrR _ _ _ he hde
-  have hp' := hp.trans (mul_le_mul_of_nonneg_left hcost (by positivity : 0 ≤ 2*(B.spatial q hq).full.M))
-  have ht' := ht.trans (mul_le_mul_of_nonneg_left hcost
-    (by positivity : 0 ≤ 1+2*(B.spatial q hq).full.M*(448*(B.spatial q hq).full.B+1)))
-  change weightedNorm period 6 N (B.reducedRadius period)
-    ((A.atOrder period (q+2)).pressure period (by omega) t
-      ((B.fieldTower period).realization (q+3) t)) ≤ _ at hp'
-  rw [← B.solution_eq_realization period (q+2) (by omega), B.pressure_eq_realization] at hp'
-  change weightedNorm period 6 N (B.reducedRadius period)
-    (((A.atOrder period (q+2)).coefficients period (by omega)).apply t
-      ((B.fieldTower period).realization (q+3) t)) ≤ _ at ht'
-  rw [B.source_eq_timeDerivativeTower period (q+2) (by omega)] at ht'
-  constructor
-  · rw [weightedNorm_unique period 6 N (B.reducedRadius period) _
-      ((B.pressureTower period).realization (q+2) t)
-      (by rw [(B.pressureTower period).value_eq, (B.pressureTower period).value_eq]) hs (by omega)]
-    exact hp'.trans_eq (by ring)
-  · rw [weightedNorm_unique period 6 N (B.reducedRadius period) _
-      ((B.timeDerivativeTower period).realization (q+2) t)
-      (by rw [(B.timeDerivativeTower period).value_eq, (B.timeDerivativeTower period).value_eq]) hs (by omega)]
-    exact ht'.trans_eq (by ring)
 
 end EulerAllOrderDriftCorrection

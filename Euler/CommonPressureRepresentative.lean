@@ -37,12 +37,6 @@ theorem pointPressure_joint_continuous {T : ℝ} (hT : 0 < T) (A : Data period T
     ((restrictOperator period (by omega : 3 ≤ 6)).compLeftContinuous ℝ (Icc (0 : ℝ) T)
       (signedPressurePath period hT A B 6 le_rfl))
 
-/-- The canonical pressure is continuous on each spatial slice. -/
-theorem pointPressure_continuous {T : ℝ} (hT : 0 < T) (A : Data period T)
-    (B : Budget period hT A) (t : Icc (0 : ℝ) T) :
-    Continuous (pointPressure period hT A B t) :=
-  representative_continuous period (restrictOperator period (by omega : 3 ≤ 6)
-    (signedPressurePath period hT A B 6 le_rfl t))
 
 /-- These same canonical representatives are smooth in every spatial coordinate. -/
 theorem pointPressure_smooth {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)

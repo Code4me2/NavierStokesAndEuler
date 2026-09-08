@@ -1,4 +1,6 @@
-import Euler.PacketInitializedPhysicalChoice
+import Euler.PacketInitializedPointwiseChoice
+import Euler.PacketPhysicalFrequencyBounds
+import Euler.PacketContinuousInverse
 import Euler.PacketPhysicalPressureGevrey
 
 /-! A single actual correction has small physical velocity and pressure

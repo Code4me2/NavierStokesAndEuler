@@ -120,22 +120,6 @@ theorem slotCutoff_zero {L v : ℝ} (hL : 0 < L) (hv : L / 3 ≤ |v - L / 2|) :
   apply (le_div_iff₀ hL).2
   linarith
 
-/-- The derivative error is supported strictly inside the slot and outside
-the central plateau; in particular it lies near the entry or exit. -/
-theorem slotCutoff_deriv_support {L v : ℝ} (hL : 0 < L)
-    (hv : deriv (slotCutoff L) v ≠ 0) :
-    L / 5 ≤ |v - L / 2| ∧ |v - L / 2| ≤ L / 3 := by
-  have hd : deriv profile (v / L) ≠ 0 := by
-    intro hz
-    exact hv (by rw [slotCutoff_deriv, hz, mul_zero])
-  have hh := profile_iteratedDeriv_support 0 (by simpa using hd)
-  change 1 / 5 ≤ |v / L - 1 / 2| ∧ |v / L - 1 / 2| ≤ 1 / 3 at hh
-  rw [slot_normalized_distance hL] at hh
-  constructor
-  · have ht := (le_div_iff₀ hL).1 hh.1
-    linarith
-  · have ht := (div_le_iff₀ hL).1 hh.2
-    linarith
 
 /-- The precise Gaussian tail bound uses the full plateau radius. -/
 theorem gaussian_off_plateau {c L v : ℝ} (hc : 0 ≤ c) (hL : 0 < L)
@@ -147,22 +131,6 @@ theorem gaussian_off_plateau {c L v : ℝ} (hc : 0 ≤ c) (hL : 0 < L)
   apply (div_le_iff₀ hL).2
   nlinarith [mul_le_mul_of_nonneg_left hsq hc]
 
-theorem reference_envelope_off_plateau {lam u L v : ℝ}
-    (hlam : 0 < lam) (hu : 0 < u) (hL : 0 < L) (hv : v ∈ Icc 0 L)
-    (htail : L / 5 ≤ |v - L / 2|) :
-    GaussianEnvelope.envelope (GaussianEnvelope.referenceRate lam u L) (L / 2) v ≤
-      Real.exp (-(u * GaussianEnvelope.referenceMinSlope lam u / 50) * L) := by
-  have h := (GaussianEnvelope.reference_gaussian_bounds hlam hu hL hv).2
-  have hc := GaussianEnvelope.referenceMinSlope_pos hlam hu
-  have hg := gaussian_off_plateau
-    (c := u * GaussianEnvelope.referenceMinSlope lam u / 2) (by positivity) hL htail
-  have he : -(u * GaussianEnvelope.referenceMinSlope lam u / 2) *
-      (v - L / 2) ^ 2 / L =
-      -(u * GaussianEnvelope.referenceMinSlope lam u) * (v - L / 2) ^ 2 / (2 * L) := by ring
-  rw [he] at hg
-  convert! h.trans hg using 1
-  congr 1
-  ring
 
 /-- The square root of the actual flat edge is another member of that family. -/
 theorem sqrt_edge (c x : ℝ) : Real.sqrt (FlatCutoff.edge c x) = FlatCutoff.edge (c / 2) x := by
@@ -388,12 +356,6 @@ normalized slot coordinate `v/L`. -/
 noncomputable def cutoffError (L : ℝ) (θ : D → ℝ) (u f : D → E) (x : D) : E :=
   (L⁻¹ * deriv profile (θ x)) • u x + (1 - profile (θ x)) • f x
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem cutoffError_eq_slot (L : ℝ) (v : D → ℝ) (u f : D → E) (x : D) :
-    cutoffError L (fun y => v y / L) u f x =
-      deriv (slotCutoff L) (v x) • u x + (1 - slotCutoff L (v x)) • f x := by
-  rw [slotCutoff_deriv]
-  rfl
 
 theorem cutoffError_contDiffOn {U : Set D} (L : ℝ) {θ : D → ℝ} {u f : D → E}
     (hθ : ContDiffOn ℝ ∞ θ U) (hu : ContDiffOn ℝ ∞ u U) (hf : ContDiffOn ℝ ∞ f U) :
@@ -723,15 +685,6 @@ theorem actualSlotFamily_coordinate (s : StripData D) (r0 h : ℝ)
   simp only [_root_.smul_apply, smul_eq_mul]
   ring
 
-theorem actualSlotFamily_cutoff (s : StripData D) (r0 h : ℝ)
-    (hr0 : 0 < r0) (hh : 0 ≤ h) (η : D →L[ℝ] ℝ) (center : ℕ → ℝ) (n : ℕ) (x : D) :
-    (actualSlotFamily s r0 h hr0 hh η center).cutoff n x =
-      slotCutoff (ChartScales.slotLength r0 h n)
-        ((η x - center n + r0) / ChartScales.timeCoefficient h n) := by
-  rw [SlotFamily.cutoff, actualSlotFamily_coordinate]
-  unfold slotCutoff ChartScales.slotLength
-  congr 1
-  field_simp [(ChartScales.timeCoefficient_pos h n).ne', hr0.ne']
 
 /-- The reference Gaussian envelope, extended by zero away from its slot.
 This is a weight, not a redefinition of either retained error. -/
@@ -757,12 +710,6 @@ theorem referenceSlotEnvelope_bound {lam u L : ℝ}
 
 namespace SlotFamily
 
-theorem error_contDiff {s : StripData D} (g : SlotFamily s) {u f : ℕ → D → E}
-    (hu : ∀ n, ContDiff ℝ ∞ (u n)) (hf : ∀ n, ContDiff ℝ ∞ (f n)) (n : ℕ) :
-    ContDiff ℝ ∞ (g.error u f n) := by
-  apply contDiffOn_univ.mp
-  exact cutoffError_contDiffOn (g.length n) (g.coordinate_contDiff n).contDiffOn
-    (hu n).contDiffOn (hf n).contDiffOn
 
 /-- The fundamental need only be smooth in the open slot. Away from that
 slot the exact error agrees locally with the smooth source. This avoids any
@@ -827,31 +774,6 @@ theorem error_physical_bound {s : StripData LiftPoint} (g : SlotFamily s)
       simpa only [Real.rpow_zero, mul_one] using hab n (physicalLift h n p) hd i hi)
   simpa only [add_sub_cancel_right] using hb
 
-/-- Big-O formulation along any sequence of physical points in the controlled
-annulus and slow domain.  The derivative order and power are arbitrary. -/
-theorem error_physical_isBigO {s : StripData LiftPoint} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → LiftPoint → ℝ} {α c : ℝ} {u f : ℕ → LiftPoint → E}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (hu_smooth : ∀ n, ContDiffOn ℝ ∞ (u n) {x | g.coordinate n x ∈ Ioo (0 : ℝ) 1})
-    (hf_smooth : ∀ n, ContDiff ℝ ∞ (f n))
-    {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (ha : 0 < a)
-    (p : ℕ → SpaceTime)
-    (hp : ∀ n, 4 ≤ n → scaledRadial n (p n) ∈ annulus a b ∧ |(p n).1| ≤ 1 ∧
-      physicalLift h n (p n) ∈ s.domain) (m : ℕ) (N : ℝ) :
-    (fun n => iteratedFDeriv ℝ m (g.error u f n ∘ physicalLift h n) (p n)) =O[atTop]
-      (fun n => ChartScales.Q n ^ N) := by
-  obtain ⟨C, hC, hb⟩ := g.error_physical_bound edges scales hu hf hc hP hu_smooth hf_smooth
-    hh hh1 ha (b := b) m N
-  apply Asymptotics.IsBigO.of_bound C
-  filter_upwards [eventually_ge_atTop 4] with n hn
-  have hQ := ChartScales.Q_pos n
-  have hpn := hp n hn
-  have hh := hb n hn (p n) hpn.1 hpn.2.1 hpn.2.2 (ChartScales.Q n) hQ
-    (by linarith) (by linarith)
-  simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hQ N)] using hh
 
 /-- The same result for the actual oscillatory carrier. The phase estimates
 are the primitive estimates consumed by `carrier_class_physical_bound`. -/
@@ -883,46 +805,6 @@ theorem error_carrier_physical_bound {s : StripData LiftPoint} (g : SlotFamily s
       simpa only [Real.rpow_zero, mul_one] using hab n (physicalLift h n p) hd i hi) hΦb
   simpa only [add_sub_cancel_right] using hh
 
-/-- Version with the manuscript's actual native phase, polar charts and
-rounded carrier. No phase-derivative hypothesis replaces the base-field jets. -/
-theorem error_native_carrier_physical_bound {s : StripData LiftPoint} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {Penv : ℕ → LiftPoint → ℝ} {α c : ℝ} {u f : ℕ → LiftPoint → ℂ}
-    (hu : WaveClass s Penv α u) (hf : WaveClass s Penv α f) (hc : 0 < c)
-    (hPenv : ∀ n x, x ∈ s.domain →
-      Penv n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (hu_smooth : ∀ n, ContDiffOn ℝ ∞ (u n) {x | g.coordinate n x ∈ Ioo (0 : ℝ) 1})
-    (hf_smooth : ∀ n, ContDiff ℝ ∞ (f n))
-    {h a b Z r0 P B dBase H : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (ha : 0 < a)
-    (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0) (hP : 1 ≤ P) (hB : 1 ≤ B) (hdBase : 0 ≤ dBase)
-    (hH : 0 ≤ H) (m : ℕ) (N : ℝ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ, 4 ≤ n → ∀ w : SpaceTime,
-      scaledRadial n w ∈ annulus a b → |w.1| ≤ 1 → physicalLift h n w ∈ s.domain →
-      ‖liftZT (physicalLift h n w)‖ ≤ Z →
-      ∀ q : ℝ, 0 < q → q / 2 ≤ ChartScales.Q n → ChartScales.Q n ≤ 2 * q →
-      ∀ (chart : PolarCharts.Index) (center : Plane) (p pz x0 : ℝ),
-      |p| ≤ P → |pz| ≤ P → |x0| ≤ P →
-      |etaCoordinate (nativeGraph h n w - center)| ≤ r0 →
-      ∀ (F G : Slow → ℝ) (j : ℤ), ContDiff ℝ ∞ F → ContDiff ℝ ∞ G → |(j : ℝ)| ≤ H →
-      (∀ i ≤ m, ‖iteratedFDeriv ℝ i F
-        (slotMap (PolarCharts.chart a chart) (ChartScales.timeCoefficient h n) center r0
-          (physicalLift h n w)).1‖ ≤ B * ChartScales.S n ^ dBase) →
-      (∀ i ≤ m, ‖iteratedFDeriv ℝ i G
-        (slotMap (PolarCharts.chart a chart) (ChartScales.timeCoefficient h n) center r0
-          (physicalLift h n w)).1‖ ≤ B * ChartScales.S n ^ dBase) →
-      ‖iteratedFDeriv ℝ m
-        ((fun y => g.error u f n y * character ((ChartScales.carrier h n : ℝ) * (j : ℝ))
-          (liftedPhase (PolarCharts.chart a chart) h n center r0 p pz x0 F G y)) ∘
-          physicalLift h n) w‖ ≤ C * q ^ N := by
-  obtain ⟨A, hA, hab⟩ := g.error_stripped_bound edges scales hu hf hc hPenv m (N + waveLoss h m)
-  obtain ⟨C, hC, hb⟩ := native_carrier_physical_bound (b := b) hh hh1 ha hZ hr0 hP hB hdBase m
-    (N + waveLoss h m) 0 A H hA hH
-  refine ⟨C, hC, fun n hn w hw ht hd hz q hq hlo hhi chart center p pz x0 hp hpz hx0 hslot
-    F G j hF hG hj hFb hGb => ?_⟩
-  have hh := hb n hn w hw ht hz q hq hlo hhi chart center p pz x0 hp hpz hx0 hslot
-    (g.error u f n) F G j (g.error_contDiff_of_slot hu_smooth hf_smooth n) hF hG hj (fun i hi => by
-      simpa only [Real.rpow_zero, mul_one] using hab n (physicalLift h n w) hd i hi) hFb hGb
-  simpa only [add_sub_cancel_right] using hh
 
 end SlotFamily
 
@@ -938,9 +820,6 @@ noncomputable def omittedSource {s : StripData D} (g : SlotFamily s)
     (f : ℕ → D → E) (n : ℕ) (x : D) : E :=
   (1 - profile (g.coordinate n x)) • f n x
 
-theorem error_eq_sum {s : StripData D} (g : SlotFamily s) (u f : ℕ → D → E)
-    (n : ℕ) (x : D) :
-    g.error u f n x = g.derivativeError u n x + g.omittedSource f n x := rfl
 
 private theorem jet_eq_zero_of_eventually {u : D → E} {x : D}
     (he : u =ᶠ[𝓝 x] fun _ => 0) (j : ℕ) : iteratedFDeriv ℝ j u x = 0 := by
@@ -972,85 +851,10 @@ theorem derivativeError_jet_support {s : StripData D} (g : SlotFamily s)
     filter_upwards [(profile_eventually_zero (lt_of_not_ge ht)).deriv] with y hy
     simpa using hy
 
-/-- Both transition collars, with the exact normalized slot endpoints. This
-holds for every actual parameter jet, without any regularity needed of `u`
-where the multiplier vanishes on a neighborhood. -/
-theorem derivativeError_jet_near_ends {s : StripData D} (g : SlotFamily s)
-    (u : ℕ → D → E) (n j : ℕ) {x : D}
-    (hx : iteratedFDeriv ℝ j (g.derivativeError u n) x ≠ 0) :
-    g.coordinate n x ∈ Icc (1 / 6 : ℝ) (3 / 10) ∪ Icc (7 / 10 : ℝ) (5 / 6) := by
-  have hb := g.derivativeError_jet_support u n j hx
-  change 1 / 5 ≤ |g.coordinate n x - 1 / 2| ∧ |g.coordinate n x - 1 / 2| ≤ 1 / 3 at hb
-  rcases le_total (g.coordinate n x) (1 / 2) with h | h
-  · rw [abs_of_nonpos (by linarith)] at hb
-    left
-    constructor <;> linarith [hb.1, hb.2]
-  · rw [abs_of_nonneg (by linarith)] at hb
-    right
-    constructor <;> linarith [hb.1, hb.2]
 
-theorem omittedSource_jet_support {s : StripData D} (g : SlotFamily s)
-    (f : ℕ → D → E) (n j : ℕ) :
-    support (iteratedFDeriv ℝ j (g.omittedSource f n)) ⊆
-      {x | 1 / 5 ≤ |g.coordinate n x - 1 / 2|} := by
-  intro x hx
-  change 1 / 5 ≤ |g.coordinate n x - 1 / 2|
-  by_contra ht
-  apply hx
-  apply jet_eq_zero_of_eventually (j := j)
-  have hcomp := (profile_eventually_one (lt_of_not_ge ht)).comp_tendsto
-    (g.coordinate_contDiff n).continuous.continuousAt
-  filter_upwards [hcomp] with y hy
-  have hy' : profile (g.coordinate n y) = 1 := hy
-  simp [omittedSource, hy']
 
-theorem derivativeError_gaussian_bound {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {u : ℕ → D → E}
-    (hu : WaveClass s P α u) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∃ d : ℕ, ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (g.derivativeError u n) x‖ ≤
-        C * (1 + ChartScales.S n) ^ d *
-          Real.exp (-(c * g.length_scale / 50) * ChartScales.S n) := by
-  have hz : WaveClass s P α (fun _ _ => (0 : E)) := MemClass.zero hu.weight_nonneg
-  have he : g.error u (fun _ _ => (0 : E)) = g.derivativeError u := by
-    funext n x
-    simp only [error, cutoffError, derivativeError, smul_zero, add_zero]
-  have hb := g.error_gaussian_bound edges scales hu hz hc hP m
-  rwa [he] at hb
 
-theorem omittedSource_gaussian_bound {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {f : ℕ → D → E}
-    (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∃ d : ℕ, ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (g.omittedSource f n) x‖ ≤
-        C * (1 + ChartScales.S n) ^ d *
-          Real.exp (-(c * g.length_scale / 50) * ChartScales.S n) := by
-  have hz : WaveClass s P α (fun _ _ => (0 : E)) := MemClass.zero hf.weight_nonneg
-  have he : g.error (fun _ _ => (0 : E)) f = g.omittedSource f := by
-    funext n x
-    simp only [error, cutoffError, omittedSource, smul_zero, zero_add]
-  have hb := g.error_gaussian_bound edges scales hz hf hc hP m
-  rwa [he] at hb
 
-/-- Full all-gain specialization to the actually constructed reference
-Gaussian envelope. Only the proved original wave classes are inputs. -/
-theorem reference_error_all_gains {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {lam v α : ℝ} (hlam : 0 < lam) (hv : 0 < v) {u f : ℕ → D → E}
-    (hu : WaveClass s (fun n x => referenceSlotEnvelope lam v (g.length n) (g.coordinate n x)) α u)
-    (hf : WaveClass s (fun n x => referenceSlotEnvelope lam v (g.length n) (g.coordinate n x)) α f)
-    (N : ℝ) : UnweightedClass s N (g.error u f) := by
-  have hm := GaussianEnvelope.referenceMinSlope_pos hlam hv
-  apply g.error_all_gains edges scales hu hf
-    (c := v * GaussianEnvelope.referenceMinSlope lam v / 2) (by positivity)
-  intro n x _
-  exact referenceSlotEnvelope_bound hlam hv (g.length_pos n) (g.coordinate n x)
 
 end SlotFamily
 

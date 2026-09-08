@@ -469,15 +469,6 @@ noncomputable def familyCovariance (vr vt : TorusInverse.Plane)
     (fun j => (a j).frame) (fun j => (a j).lam) (fun _ _ => u)
     (fun j => (a j).length) i p
 
-theorem familyCovariance_eq_native (vr vt : TorusInverse.Plane)
-    (a : Fin 2 → FamilyData D h r0 u M) (hc : CompatiblePair a) (i : ι) (p : Slow) :
-    familyCovariance vr vt a i p = nativePrimaryCovariance vr vt r0 h
-      (fun j _ => (a j).frame i) (fun j _ => (a j).lam i) (fun _ _ => u)
-      ((a 0).band i) p := by
-  unfold familyCovariance nativePrimaryCovariance PrimaryPulseBounds.primaryCovariance
-  ext r c
-  change _ * _ = _ * _
-  simp only [FamilyData.length, hc.band]
 
 /-- Uniform finite-matrix bounds follow from the actual constructed
 phases and their ODEs.  The model point only records the common
@@ -912,35 +903,6 @@ theorem targetAmplitude_lower_all (hcone : LeadingStressWeights.FullTrueCone v) 
     rw [movingWeight_eq W hp.2 hp'.radius, weight_zero_of_not_active W hx, mul_zero]
     exact targetAmplitude_nonneg v hp.2
 
-/-- The chart target at its own band is exactly the actual leading
-stress times the residual scalar coordinate. -/
-theorem covarianceTarget_eq_actual {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1)
-    (N : ℕ) (U : PartitionedCovariance.UnsignedLabel) :
-    FinalSlowBase.covarianceTarget H v
-      (ChartScales.Q (U.1+N) * (BaseChartJets.normalizedCoordinates F.data.h p).1) N U p =
-      actualTarget v p := by
-  have hq := BaseChartJets.normalizedCoordinates_q_pos F.data.h_pos F.data.h_lt_half hT
-  have hX := ProfileSpectralCone.normalized_X_pos F.data.h_pos F.data.h_lt_half hT hR
-  have heta := (BaseChartJets.normalizedCoordinates_eta F.data.h_pos F.data.h_lt_half hT).le
-  have he := EntranceAlignedBase.modulated_leading_stress_eq H v hX.le heta
-  have hdiv : ChartScales.Q (U.1+N) /
-      (ChartScales.Q (U.1+N) * (BaseChartJets.normalizedCoordinates F.data.h p).1) =
-      ((BaseChartJets.normalizedCoordinates F.data.h p).1)⁻¹ := by
-    field_simp [(ChartScales.Q_pos (U.1+N)).ne']
-  have hfactor : (ChartScales.Q (U.1+N) /
-      (ChartScales.Q (U.1+N) * (BaseChartJets.normalizedCoordinates F.data.h p).1)) ^
-        (PartitionedCovariance.velocityExponent F.data.h + 1/2) =
-      (BaseChartJets.normalizedCoordinates F.data.h p).1 ^ (-CoordinateAlgebra.A F.data.h - 1/2) := by
-    rw [hdiv, Real.inv_rpow hq.le, ← Real.rpow_neg hq.le]
-    congr 1
-    unfold PartitionedCovariance.velocityExponent CoordinateAlgebra.A
-    ring
-  ext k
-  fin_cases k <;>
-    simp [FinalSlowBase.covarianceTarget, PartitionedCovariance.chartTarget,
-      actualTarget, ProfileSpectralCone.stressVector, FinalSlowBase.coefficients,
-      he.1, he.2, PiLp.smul_apply, smul_eq_mul] <;>
-    exact Or.inl (by simpa only [one_div] using hfactor)
 
 end ActualTarget
 

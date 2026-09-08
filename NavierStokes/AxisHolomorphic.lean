@@ -530,43 +530,5 @@ theorem exists_parameterTube_subset (I J : Window) (hleft : I.left < J.left)
   have hz' := abs_le.mp hre
   exact ⟨⟨by linarith, by linarith⟩, by linarith⟩
 
-/-- A common, explicitly constructed holomorphic extension exists on a positive
-tube over every strictly smaller real window and compact radial interval.
-
-The tube and all bound constants are chosen before the coefficient vector.
-Every radial derivative uses this same tube, and all complex parameter jets
-match the genuine real jets. -/
-theorem exists_common_holomorphic_extension (I J : Window) (hleft : I.left < J.left)
-    (hright : J.right < I.right) {ε R : ℝ} (hε : 0 < ε) (hR20 : R < 20) :
-    ∃ δ : ℝ, 0 < δ ∧ ∃ B : ℕ → ℝ, (∀ k, 0 ≤ B k) ∧
-      ∀ (A : AxisSpace I ε) (Y : ℝ), |Y| ≤ R → ∀ k : ℕ,
-        AnalyticOnNhd ℂ (complexProfile I ε A k Y) (parameterTube J δ) ∧
-        (∀ z ∈ parameterTube J δ, ‖complexProfile I ε A k Y z‖ ≤ B k * ‖A‖) ∧
-        (∀ z ∈ parameterTube J δ,
-          iteratedDeriv k (fun y => complexProfile I ε A 0 y z) Y =
-            complexProfile I ε A k Y z) ∧
-        (∀ (m : ℕ) (x : ℝ), x ∈ J.interval →
-          iteratedDeriv m (complexProfile I ε A k Y) (x : ℂ) =
-            (mixedSeries I ε A k m (Y, x) : ℂ)) := by
-  obtain ⟨S, hS, hS20⟩ := exists_between (max_lt (by norm_num : (1 : ℝ) < 20) hR20)
-  have hS1 : 1 ≤ S := (le_max_left 1 R).trans hS.le
-  have hRS : R < S := (le_max_right 1 R).trans_lt hS
-  obtain ⟨s, hs, hs1⟩ := exists_between (show S / 20 < 1 by linarith)
-  have ha : 0 < ε * (1 - s) := mul_pos hε (by linarith)
-  obtain ⟨δ, hδ, htube⟩ := exists_parameterTube_subset I J hleft hright ha
-  refine ⟨δ, hδ, (fun k => 2 * jetConstant S s k), ?_, ?_⟩
-  · intro k
-    exact mul_nonneg (by norm_num) (jetConstant_nonneg hS1 hs hs1 k)
-  · intro A Y hY k
-    have hYS : |Y| < S := hY.trans_lt hRS
-    refine ⟨(complexProfile_analytic I hε hS1 hs hs1 A k hYS.le).mono htube, ?_, ?_, ?_⟩
-    · intro z hz
-      exact complexProfile_bound I hε hS1 hs hs1 A k hYS.le (htube hz).2.le
-    · intro z hz
-      simpa only [Nat.zero_add] using
-        complexProfile_iteratedDeriv_Y I hε hS1 hs hs1 A 0 k hYS (htube hz)
-    · intro m x hx
-      exact complexProfile_iteratedDeriv_ofReal I hε hS1 hs hs1 A k m hYS.le
-        ⟨hleft.trans_le hx.1, hx.2.trans_lt hright⟩
 
 end NavierStokes.AxisHolomorphic

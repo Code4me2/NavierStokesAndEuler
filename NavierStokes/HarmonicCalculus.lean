@@ -278,31 +278,6 @@ theorem cylindricalLaplacian_phase {U : Set E} (R : E → ℝ)
     phaseNormal, smul_eq_mul, div_eq_mul_inv]
   ring
 
-/-- The scalar part of the manuscript's no-slow-angular-dependence formula.
-Both the absent angular coefficient derivative and the affine angular phase
-are hypotheses on actual derivatives on an open set. -/
-theorem cylindricalLaplacian_mode_angular_independent {U : Set E} (R : E → ℝ)
-    {Vr Vθ Vz : E → E} (κ : ℝ) {Φ : E → ℝ} {a : E → ℂ} {p : ℝ} {x : E}
-    (hU : IsOpen U) (hr : ContDiffOn ℝ ∞ Vr U) (hθ : ContDiffOn ℝ ∞ Vθ U)
-    (hz : ContDiffOn ℝ ∞ Vz U) (hΦ : ContDiffOn ℝ ∞ Φ U)
-    (ha : ContDiffOn ℝ ∞ a U) (haθ : EqOn (along Vθ a) (fun _ => 0) U)
-    (hΦθ : EqOn (along Vθ Φ) (fun _ => p) U) (hx : x ∈ U) :
-    cylindricalLaplacian R Vr Vθ Vz (mode κ Φ a) x =
-      (along Vr (along Vr a) x + (R x)⁻¹ • along Vr a x + along Vz (along Vz a) x +
-        2 * phaseFactor κ *
-          (Complex.ofReal (phaseNormal R Vr Vθ Vz Φ x 0) * along Vr a x +
-            Complex.ofReal (phaseNormal R Vr Vθ Vz Φ x 2) * along Vz a x) +
-        (phaseFactor κ * Complex.ofReal
-          (along Vr (fun y => phaseNormal R Vr Vθ Vz Φ y 0) x +
-            phaseNormal R Vr Vθ Vz Φ x 0 / R x +
-            along Vz (fun y => phaseNormal R Vr Vθ Vz Φ y 2) x) -
-          (κ : ℂ) ^ 2 * Complex.ofReal (‖phaseNormal R Vr Vθ Vz Φ x‖ ^ 2)) * a x) *
-        carrier κ Φ x := by
-  rw [cylindricalLaplacian_mode_normal R κ hU hr hθ hz hΦ ha hx,
-    cylindricalLaplacian_angular_independent R Vr Vθ Vz hU haθ hx,
-    cylindricalLaplacian_phase R Vr Vθ Vz hU hΦθ hx]
-  simp only [phaseCross, haθ hx, mul_zero, add_zero]
-  rfl
 
 /-! ## Divergence and the longitudinal gain -/
 
@@ -319,10 +294,6 @@ noncomputable def vectorMode (κ : ℝ) (Φ : E → ℝ) (a : E → ComplexVecto
 noncomputable def angularGenerator (a : ComplexVector) : ComplexVector :=
   ![-a 1, a 0, 0]
 
-theorem angularGenerator_sq (a : ComplexVector) :
-    angularGenerator (angularGenerator a) = ![-a 0, -a 1, 0] := by
-  ext i
-  fin_cases i <;> simp [angularGenerator]
 
 /-- The scalar component Laplacians plus the two cylindrical frame
 connections. Its identification with Cartesian vector Laplacian belongs to
@@ -517,41 +488,10 @@ theorem longitudinal_gain_frequency (R : E → ℝ) (Vr Vθ Vz : E → E)
       div_le_div_of_nonneg_left hnum₀ (mul_pos (abs_pos.mpr hκ) hn₀)
         (mul_le_mul_of_nonneg_left hn (abs_nonneg _))
 
-/-- The manuscript frequency is `κ = k*j`, with a nonzero integer harmonic. -/
-theorem longitudinal_gain (R : E → ℝ) (Vr Vθ Vz : E → E)
-    (k : ℝ) (j : ℤ) {Φ : E → ℝ} {a : E → ComplexVector} {x : E}
-    {r₀ n₀ A Ar Az : ℝ} (hk : k ≠ 0) (hj : j ≠ 0)
-    (hΦ : DifferentiableAt ℝ Φ x)
-    (ha : ∀ i, DifferentiableAt ℝ (fun y => a y i) x)
-    (haθ : along Vθ (fun y => a y 1) x = 0)
-    (hdiv : cylindricalDivergence R Vr Vθ Vz (vectorMode (k * (j : ℝ)) Φ a) x = 0)
-    (hr₀ : 0 < r₀) (hr : r₀ ≤ R x)
-    (hn₀ : 0 < n₀) (hn : n₀ ≤ ‖phaseNormal R Vr Vθ Vz Φ x‖)
-    (hA : ‖a x 0‖ ≤ A) (hAr : ‖along Vr (fun y => a y 0) x‖ ≤ Ar)
-    (hAz : ‖along Vz (fun y => a y 2) x‖ ≤ Az) :
-    ‖longitudinalCoefficient (phaseNormal R Vr Vθ Vz Φ x) (a x)‖ ≤
-      (Ar + A / r₀ + Az) / (|k| * |(j : ℝ)| * n₀) := by
-  have hjr : (j : ℝ) ≠ 0 := Int.cast_ne_zero.mpr hj
-  simpa only [abs_mul] using longitudinal_gain_frequency R Vr Vθ Vz (k * (j : ℝ))
-    (mul_ne_zero hk hjr) hΦ ha haθ hdiv hr₀ hr hn₀ hn hA hAr hAz
 
-/-- Operator norms of the actual full coefficient derivatives can be
-used to supply the directional derivative bounds above. -/
-theorem norm_along_le (V : E → E) (f : E → F) (x : E) :
-    ‖along V f x‖ ≤ ‖fderiv ℝ f x‖ * ‖V x‖ :=
-  (fderiv ℝ f x).le_opNorm (V x)
 
 /-! ## Finite jets of the longitudinal contraction -/
 
-theorem contDiffOn_strippedDivergence {U : Set E} {R : E → ℝ} {Vr Vz : E → E}
-    {a : E → ComplexVector} (hU : IsOpen U)
-    (hR : ContDiffOn ℝ ∞ R U) (hRne : ∀ x ∈ U, R x ≠ 0)
-    (hr : ContDiffOn ℝ ∞ Vr U) (hz : ContDiffOn ℝ ∞ Vz U)
-    (ha₀ : ContDiffOn ℝ ∞ (fun y => a y 0) U)
-    (ha₂ : ContDiffOn ℝ ∞ (fun y => a y 2) U) :
-    ContDiffOn ℝ ∞ (strippedDivergence R Vr Vz a) U :=
-  ((contDiffOn_along hU hr ha₀).add ((hR.inv hRne).smul ha₀)).add
-    (contDiffOn_along hU hz ha₂)
 
 /-- At every derivative order, the contraction `n·a` has the same
 inverse-frequency factor. Derivatives of the normal are included on the
@@ -592,117 +532,12 @@ theorem normalDot_jet_norm_eq {U : Set E} (R : E → ℝ) (Vr Vθ Vz : E → E)
   simp only [norm_smul, norm_neg, norm_inv, norm_phaseFactor, div_eq_mul_inv]
   ring
 
-/-- Uniform finite-jet version of the exact contraction estimate. -/
-theorem normalDot_finiteJetBound {U : Set E} (R : E → ℝ) (Vr Vθ Vz : E → E)
-    (κ : ℝ) {Φ : E → ℝ} {a : E → ComplexVector} {m : ℕ} {C : ℝ}
-    (hκ : κ ≠ 0) (hU : IsOpen U) (hΦ : DifferentiableOn ℝ Φ U)
-    (ha : ∀ i, DifferentiableOn ℝ (fun y => a y i) U)
-    (haθ : ∀ y ∈ U, along Vθ (fun z => a z 1) y = 0)
-    (hdiv : ∀ y ∈ U, cylindricalDivergence R Vr Vθ Vz (vectorMode κ Φ a) y = 0)
-    (hS : ContDiffOn ℝ ∞ (strippedDivergence R Vr Vz a) U)
-    (hJ : JetBounds.FiniteJetBound m (strippedDivergence R Vr Vz a) U C) :
-    JetBounds.FiniteJetBound m
-      (fun y => normalDot (phaseNormal R Vr Vθ Vz Φ y) (a y)) U (C / |κ|) := by
-  intro n hn x hx
-  rw [normalDot_jet_norm_eq R Vr Vθ Vz κ n hκ hU hΦ ha haθ hdiv hS hx]
-  exact div_le_div_of_nonneg_right (hJ n hn x hx) (abs_nonneg κ)
 
-/-- The coefficient divergence bound is derived from actual coefficient
-jets through order `m+1`, and graph-direction and inverse-radius jets
-through order `m`. -/
-theorem strippedDivergence_finiteJetBound {U : Set E} {R : E → ℝ} {Vr Vz : E → E}
-    {a : E → ComplexVector} {m : ℕ} {Ar Az Cr Cz CI : ℝ}
-    (hU : IsOpen U) (hR : ContDiffOn ℝ ∞ R U) (hRne : ∀ x ∈ U, R x ≠ 0)
-    (hr : ContDiffOn ℝ ∞ Vr U) (hz : ContDiffOn ℝ ∞ Vz U)
-    (ha₀ : ContDiffOn ℝ ∞ (fun y => a y 0) U)
-    (ha₂ : ContDiffOn ℝ ∞ (fun y => a y 2) U)
-    (hAr : JetBounds.FiniteJetBound (m + 1) (fun y => a y 0) U Ar)
-    (hAz : JetBounds.FiniteJetBound (m + 1) (fun y => a y 2) U Az)
-    (hCr : JetBounds.FiniteJetBound m Vr U Cr)
-    (hCz : JetBounds.FiniteJetBound m Vz U Cz)
-    (hCI : JetBounds.FiniteJetBound m (fun y => (R y)⁻¹) U CI) :
-    JetBounds.FiniteJetBound m (strippedDivergence R Vr Vz a) U
-      ((2 : ℝ) ^ m * Ar * Cr +
-        ‖(ContinuousLinearMap.lsmul ℝ ℝ : ℝ →L[ℝ] ℂ →L[ℝ] ℂ)‖ * (2 : ℝ) ^ m * CI * Ar +
-        (2 : ℝ) ^ m * Az * Cz) := by
-  have hm := ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-  have hm1 := ENat.natCast_le_of_coe_top_le_withTop le_rfl (m + 1)
-  have hbr := JetBounds.FiniteJetBound.transport hU (hr.of_le hm) (ha₀.of_le hm1) hCr hAr
-  have hbz := JetBounds.FiniteJetBound.transport hU (hz.of_le hm) (ha₂.of_le hm1) hCz hAz
-  have hbi := JetBounds.FiniteJetBound.bilinear
-    (ContinuousLinearMap.lsmul ℝ ℝ : ℝ →L[ℝ] ℂ →L[ℝ] ℂ) hU
-    ((hR.inv hRne).of_le hm) (ha₀.of_le hm) hCI (hAr.of_le (Nat.le_succ m))
-  have hdr := (contDiffOn_along hU hr ha₀).of_le hm
-  have hdz := (contDiffOn_along hU hz ha₂).of_le hm
-  have hdi := ((hR.inv hRne).smul ha₀).of_le hm
-  exact JetBounds.FiniteJetBound.add hU (hdr.add hdi) hdz
-    (JetBounds.FiniteJetBound.add hU hdr hdi hbr hbi) hbz
 
 /-! ## Compatibility with the phase and graph already formalized -/
 
-/-- This carrier is the previously formalized slot harmonic, including its
-integer-harmonic and angular-period conventions. -/
-theorem carrier_eq_slot_harmonic (k : ℝ) (j : ℤ) (ε p pz x₀ : ℝ)
-    (F G : PhaseCalculus.Slow → ℝ) :
-    carrier (k * (j : ℝ)) (PhaseCalculus.phase ε p pz x₀ F G) =
-      PhaseCalculus.harmonic k j ε p pz x₀ F G := by
-  funext q
-  unfold carrier phaseFactor PhaseCalculus.harmonic
-  apply congrArg Complex.exp
-  simp only [Complex.ofReal_mul]
-  ring
 
-/-- The graph direction in the axial slot is `ε ∂Z`; after that rescaling
-the normal here is exactly the normal used in the phase module. -/
-theorem phaseNormal_eq_slot_normal (ε p pz x₀ : ℝ)
-    (F G : PhaseCalculus.Slow → ℝ) (q : PhaseCalculus.Slot) :
-    phaseNormal (fun y : PhaseCalculus.Slot => y.1.1)
-      (fun _ => PhaseCalculus.eR) (fun _ => PhaseCalculus.eTheta)
-      (fun _ => ε • PhaseCalculus.eZ) (PhaseCalculus.phase ε p pz x₀ F G) q =
-      PhaseCalculus.phaseNormal ε p pz x₀ F G q := by
-  ext i
-  fin_cases i <;>
-    simp [phaseNormal, PhaseCalculus.phaseNormal, along, map_smul, smul_eq_mul]
 
-/-- Restricting a complex harmonic to the actual auxiliary graph gives the
-radial product formula with the genuine radial graph vector field. -/
-theorem graph_deriv_radial_mode (d : ℝ) (vr vt : GraphCalculus.Plane) (κ : ℝ)
-    {Φ : GraphCalculus.Lift → ℝ} {a : GraphCalculus.Lift → ℂ} {r t : ℝ}
-    (hr : r ≠ 0) (hΦ : DifferentiableAt ℝ Φ (GraphCalculus.graph d vr vt (r, t)))
-    (ha : DifferentiableAt ℝ a (GraphCalculus.graph d vr vt (r, t))) :
-    deriv (fun s => mode κ Φ a (GraphCalculus.graph d vr vt (s, t))) r =
-      (along (GraphCalculus.radialVector d vr) a (GraphCalculus.graph d vr vt (r, t)) +
-        phaseFactor κ * Complex.ofReal
-          (along (GraphCalculus.radialVector d vr) Φ (GraphCalculus.graph d vr vt (r, t))) *
-            a (GraphCalculus.graph d vr vt (r, t))) *
-        carrier κ Φ (GraphCalculus.graph d vr vt (r, t)) := by
-  have hm : DifferentiableAt ℝ (mode κ Φ a) (GraphCalculus.graph d vr vt (r, t)) :=
-    ha.mul (differentiableAt_carrier κ hΦ)
-  calc
-    _ = along (GraphCalculus.radialVector d vr) (mode κ Φ a)
-        (GraphCalculus.graph d vr vt (r, t)) :=
-      (hm.hasFDerivAt.comp_hasDerivAt r
-        (GraphCalculus.hasDerivAt_graph_radial d vr vt r t hr)).deriv
-    _ = _ := along_mode _ κ hΦ ha
 
-/-- The analogous actual graph pullback identity in its time direction. -/
-theorem graph_deriv_time_mode (d : ℝ) (vr vt : GraphCalculus.Plane) (κ : ℝ)
-    {Φ : GraphCalculus.Lift → ℝ} {a : GraphCalculus.Lift → ℂ} {r t : ℝ}
-    (hΦ : DifferentiableAt ℝ Φ (GraphCalculus.graph d vr vt (r, t)))
-    (ha : DifferentiableAt ℝ a (GraphCalculus.graph d vr vt (r, t))) :
-    deriv (fun s => mode κ Φ a (GraphCalculus.graph d vr vt (r, s))) t =
-      (along (fun _ => GraphCalculus.timeVector vt) a (GraphCalculus.graph d vr vt (r, t)) +
-        phaseFactor κ * Complex.ofReal
-          (along (fun _ => GraphCalculus.timeVector vt) Φ (GraphCalculus.graph d vr vt (r, t))) *
-            a (GraphCalculus.graph d vr vt (r, t))) *
-        carrier κ Φ (GraphCalculus.graph d vr vt (r, t)) := by
-  have hm : DifferentiableAt ℝ (mode κ Φ a) (GraphCalculus.graph d vr vt (r, t)) :=
-    ha.mul (differentiableAt_carrier κ hΦ)
-  calc
-    _ = along (fun _ => GraphCalculus.timeVector vt) (mode κ Φ a)
-        (GraphCalculus.graph d vr vt (r, t)) :=
-      (hm.hasFDerivAt.comp_hasDerivAt t
-        (GraphCalculus.hasDerivAt_graph_time d vr vt r t)).deriv
-    _ = _ := along_mode _ κ hΦ ha
 
 end NavierStokes.HarmonicCalculus

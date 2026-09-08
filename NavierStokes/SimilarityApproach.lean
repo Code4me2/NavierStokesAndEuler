@@ -70,11 +70,6 @@ theorem coordinateQ_tendsto_zero {α : Type*} {l : Filter α} {tau z : α → �
   · filter_upwards [hpos] with i hi
     exact coordinateQ_le_upperScale ha ha1 hi
 
-theorem physical_q_bound {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (ht : p.1 < 1) :
-    SimilarityProfile.q h p ≤
-      2 * (1 - p.1) + (2 * p.2.2 ^ 2) ^ (1 - 2 * h)⁻¹ :=
-  coordinateQ_le_upperScale (by linarith) (by linarith) (sub_pos.mpr ht)
 
 theorem physical_q_tendsto_zero {α : Type*} {l : Filter α}
     {p : α → SimilarityProfile.PhysicalPoint} {h : ℝ}

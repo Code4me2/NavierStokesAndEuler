@@ -66,14 +66,5 @@ theorem TimeDerivative.derivative (htime : TimeDerivative T hT A A₁) :
     (TimeDerivative.jet_pointwise T hT A A₁ htime 1 x t)
   exact h
 
-theorem TimeDerivative.jet_uniform (htime : TimeDerivative T hT A A₁)
-    (n : ℕ) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (A.jet n))
-      (A₁.jet n t) (Icc (0 : ℝ) T) t := by
-  have h := EulerBoundedFieldTimeDerivative.hasDerivWithinAt T hT (A.jet n) (A₁.jet n)
-    (fun s hs x => by
-      simpa only [extendPath, projIcc_of_mem hT hs] using
-        TimeDerivative.jet_pointwise T hT A A₁ htime n x ⟨s,hs⟩) t t.property
-  simpa only [extendPath, projIcc_of_mem hT t.property] using h
 
 end SmoothTimeField

@@ -175,15 +175,6 @@ noncomputable def coherentAngularData (D : PhysicalMeanJetBounds.CoherentFamily 
   inner_pos _ hp := innerRadius_pos hh hh1 ha hp
   vanishes := coefficient_vanishes D hh hh1 ha hab hU hcover hs hq
 
-theorem coherentAngularData_field (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {a b : ℝ} (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : PhysicalMeanJetBounds.NativeSupport h a b N U D.native)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    DirectAngularDiagonal.angularField (coherentAngularData D hh hh1 ha hab hU hcover hsm hs qbig hq).scalar = D.angularField :=
-  coefficient_angularField D
 
 end Generic
 
@@ -278,18 +269,6 @@ theorem actualAngular_zero_germ
     (LocalAngularDiagonal.localSlowDomain_open outgoing.data.h_pos outgoing.data.h_lt_half qbig) hw hr
   rwa [actualAngularData_field] at he
 
-theorem actualAngular_axis_zero_germ
-    (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
-    (Hm : GaugeMomentBalances.MovingField standardRegion commonGauge.radial.inner
-      commonGauge.radial.outer D.native)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N)
-    {w : SpaceTime} (hw : w ∈ MixedAxisPreservation.localDomain h qbig)
-    (hr : DirectAngularDiagonal.radius w = 0) :
-    D.angularField =ᶠ[𝓝 w] fun _ => 0 := by
-  apply actualAngular_zero_germ D Hm qbig hq hw
-  rw [hr]
-  exact innerRadius_pos outgoing.data.h_pos outgoing.data.h_lt_half
-    ActualInitialization.geometry.patch.a_pos hw
 
 end Actual
 

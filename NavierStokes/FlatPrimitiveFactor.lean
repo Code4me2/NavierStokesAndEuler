@@ -45,19 +45,6 @@ theorem denominator_sq (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :
     denominator x t ^ 2 = 1 + x ^ 2 * t :=
   Real.sq_sqrt (denominator_inner_pos x ht).le
 
-/-- The square-root notation is exactly the real power appearing in the
-substitution formula, including when `j < 3`. -/
-theorem denominator_ratio_eq_rpow (j : ℕ) (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :
-    denominator x t ^ j / denominator x t ^ 3 =
-      (1 + x ^ 2 * t) ^ (((j : ℝ) - 3) / 2) := by
-  have ha := denominator_inner_pos x ht
-  rw [denominator, Real.sqrt_eq_rpow]
-  rw [← Real.rpow_natCast ((1 + x ^ 2 * t) ^ (1 / 2 : ℝ)) j,
-    ← Real.rpow_natCast ((1 + x ^ 2 * t) ^ (1 / 2 : ℝ)) 3]
-  rw [← Real.rpow_mul ha.le, ← Real.rpow_mul ha.le, ← Real.rpow_sub ha]
-  congr 1
-  norm_num
-  ring
 
 theorem coordinate_pos {x t : ℝ} (hx : 0 < x) (ht : 0 ≤ t) : 0 < coordinate x t :=
   div_pos hx (denominator_pos x ht)
@@ -157,13 +144,6 @@ theorem primitive_eq_scale_mul_factor (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
       exact transformed_integrand c j b hx ht.le
     _ = scale c j x * factor c j b x := integral_const_mul _ _
 
-/-- The transformed integral is the normalized primitive for positive `x`. -/
-theorem factor_eq_normalized_primitive (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
-    {x : ℝ} (hx : 0 < x) :
-    factor c j b x = primitive c j b x / scale c j x := by
-  have hs : scale c j x ≠ 0 := (scale_pos c j hx).ne'
-  rw [primitive_eq_scale_mul_factor c j b hx]
-  field_simp [hs]
 
 theorem kernel_at_zero (c : ℝ) (j : ℕ) (b : ℝ → ℝ) (t : ℝ) :
     kernel c j b 0 t = (b 0 / 2) * Real.exp (-c * t) := by
@@ -258,27 +238,7 @@ theorem factor_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
     (kernel_ae_contDiff c j hb) (kernel_iteratedDeriv_measurable c j hb)
     (kernel_locallyDominated hc j hb)
 
-theorem factor_iteratedDeriv {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) (n : ℕ) (x : ℝ) :
-    iteratedDeriv n (factor c j b) x =
-      ∫ t in Ioi (0 : ℝ), iteratedDeriv n (fun y => kernel c j b y t) x :=
-  NavierStokes.SmoothParameterIntegral.iteratedDeriv_integral
-    (kernel_ae_contDiff c j hb) (kernel_iteratedDeriv_measurable c j hb)
-    (kernel_locallyDominated hc j hb) n x
 
-/-- Full smooth factorization of the actual terminal primitive, with its
-endpoint value fixed by the coefficient. The smooth factor is constructed
-as an improper integral rather than assumed. -/
-theorem exists_smooth_factor {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) :
-    ∃ F : ℝ → ℝ, ContDiff ℝ ∞ F ∧ F 0 = b 0 / (2 * c) ∧
-      ∀ x : ℝ, 0 ≤ x → primitive c j b x = scale c j x * F x := by
-  refine ⟨factor c j b, factor_contDiff hc j hb, factor_at_zero hc j b, ?_⟩
-  intro x hx
-  rcases eq_or_lt_of_le hx with hzero | hpos
-  · subst x
-    simp
-  · exact primitive_eq_scale_mul_factor c j b hpos
 
 theorem integral_exp_eq_primitive (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
     {x : ℝ} (hx : 0 ≤ x) :
@@ -299,18 +259,6 @@ theorem scale_eq_rpow (c : ℝ) (j : ℕ) {x : ℝ} (hx : 0 < x) :
       rw [← Real.rpow_natCast x 3, ← Real.rpow_natCast x j, ← Real.rpow_sub hx]
       norm_num
 
-/-- The manuscript's scalar primitive factorization in its original
-exponential and real-power notation, with a genuine smooth extension. -/
-theorem exists_smooth_factor_original {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) :
-    ∃ F : ℝ → ℝ, ContDiff ℝ ∞ F ∧ F 0 = b 0 / (2 * c) ∧
-      ∀ x : ℝ, 0 < x →
-        (∫ u in (0 : ℝ)..x, (Real.exp (-c / u ^ 2) / u ^ j) * b u) =
-          Real.exp (-c / x ^ 2) * x ^ (3 - (j : ℝ)) * F x := by
-  refine ⟨factor c j b, factor_contDiff hc j hb, factor_at_zero hc j b, ?_⟩
-  intro x hx
-  rw [integral_exp_eq_primitive c j b hx.le,
-    primitive_eq_scale_mul_factor c j b hx, scale_eq_rpow c j hx]
 
 theorem factor_sqrt_contDiffAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
     (hb : ContDiff ℝ ∞ b) (hb0 : 0 < b 0) :

@@ -61,17 +61,6 @@ theorem ordinarySobolev_hasDerivWithinAt (q : ℕ) (u : ℝ → EulerMeanSolenoi
       (coordinateTuple w.2))
   exact L.hasFDerivAt.comp_hasDerivWithinAt t (hjet w.1.val (Nat.le_of_lt_succ w.1.isLt))
 
-/-- The actual pointwise time derivative equals the smooth representative of the L² derivative. -/
-theorem representative_hasDerivAt (u : ℝ → EulerMeanSolenoidal.L2) (hu : ∀ t, SmoothOrbit (u t))
-    (v : EulerMeanSolenoidal.L2) (hv : SmoothOrbit v) (t : ℝ)
-    (hjet : ∀ n ≤ 3, HasDerivAt
-      (fun s => iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a (u s)) 0)
-      (iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a v) 0) t)
-    (x : Space) :
-    HasDerivAt (fun s => representative (u s) (hu s) x) (representative v hv x) t := by
-  have H := (pointEvaluation 1 (x, 0)).hasFDerivAt.comp_hasDerivAt t
-    (ordinarySobolev_hasDerivAt 3 u hu v hv t hjet)
-  simpa only [Function.comp_def, pointEvaluation_ordinary] using H
 
 theorem representative_hasDerivWithinAt (u : ℝ → EulerMeanSolenoidal.L2)
     (hu : ∀ t, SmoothOrbit (u t)) (v : EulerMeanSolenoidal.L2) (hv : SmoothOrbit v)

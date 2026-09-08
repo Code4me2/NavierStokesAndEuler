@@ -32,11 +32,6 @@ theorem cross_perpendicular_left {R : Type*} [CommRing R] (u v : Vec3 R) :
     Matrix.cons_val]
   ring
 
-theorem cross_perpendicular_right {R : Type*} [CommRing R] (u v : Vec3 R) :
-    dot v (cross u v) = 0 := by
-  simp only [dot, cross, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.cons_val]
-  ring
 
 /-- The vector triple-product identity, before imposing tangency. -/
 theorem triple_product {R : Type*} [CommRing R] (n a : Vec3 R) :
@@ -109,29 +104,7 @@ theorem complexify_dot_self (n : Vec3 ℝ) :
     dot (complexify n) (complexify n) = ((dot n n : ℝ) : ℂ) := by
   simp [complexify, dot]
 
-/-- Specialization to the manuscript's real, nonzero phase normal and real,
-nonzero frequency. The only amplitude condition is complex tangency. -/
-theorem real_normal_principal_symbol (k : ℝ) (n : Vec3 ℝ) (a : Vec3 ℂ)
-    (hk : k ≠ 0) (hn : n ≠ 0) (ha : dot (complexify n) a = 0) :
-    curlSymbol ((k : ℂ) • complexify n)
-      (potentialCoefficient k (complexify n) a) = a := by
-  apply principal_symbol_realizes (k : ℂ) (complexify n) a
-    (Complex.ofReal_ne_zero.mpr hk) ?_ ha
-  rw [complexify_dot_self]
-  exact Complex.ofReal_ne_zero.mpr (real_dot_self_ne_zero hn)
 
-theorem curl_symbol_transverse (ξ A : Vec3 ℂ) : dot ξ (curlSymbol ξ A) = 0 := by
-  unfold curlSymbol
-  have h := cross_smul Complex.I (1 : ℂ) ξ A
-  simp only [one_smul, mul_one] at h
-  rw [h]
-  simp only [dot, Pi.smul_apply, smul_eq_mul]
-  have hp := cross_perpendicular_left ξ A
-  dsimp [dot] at hp
-  calc
-    _ = Complex.I * (ξ 0 * cross ξ A 0 + ξ 1 * cross ξ A 1 + ξ 2 * cross ξ A 2) := by
-      ring
-    _ = 0 := by rw [hp, mul_zero]
 
 /-! ## Cylindrical differential cancellation
 
@@ -152,19 +125,5 @@ def cylindricalDiv {F : Type*} [CommRing F]
     (Dr Dθ Dz : F →+ F) (q : F) (v : Vec3 F) : F :=
   Dr (v 0) + q * v 0 + q * Dθ (v 1) + Dz (v 2)
 
-/-- Divergence of the full cylindrical curl, including both `1/R` terms.
-No conclusion about analytic regularity is hidden in the algebraic statement. -/
-theorem cylindrical_div_curl {F : Type*} [CommRing F]
-    (Dr Dθ Dz : F →+ F) (q : F)
-    (hrr : ∀ f, Dr (q * f) = q * Dr f - q ^ 2 * f)
-    (hzq : ∀ f, Dz (q * f) = q * Dz f)
-    (hrθ : ∀ f, Dr (Dθ f) = Dθ (Dr f))
-    (hrz : ∀ f, Dr (Dz f) = Dz (Dr f))
-    (hθz : ∀ f, Dθ (Dz f) = Dz (Dθ f))
-    (A : Vec3 F) : cylindricalDiv Dr Dθ Dz q (cylindricalCurl Dr Dθ Dz q A) = 0 := by
-  simp only [cylindricalDiv, cylindricalCurl, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.cons_val, map_sub, map_add]
-  rw [hrr, hzq, hzq, hrθ, hrz, hθz]
-  ring
 
 end NavierStokes.CurlGeometry

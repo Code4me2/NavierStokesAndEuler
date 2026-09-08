@@ -48,11 +48,5 @@ theorem solution_map (f : C(Icc (0 : ℝ) T,E)) (a₀ : E) :
   · change L (U.solution f a₀ ⟨0,le_rfl,hT⟩) = L a₀
     rw [U.solution_initial]
 
-/-- Pointwise form of the same identity, including both endpoints. -/
-theorem solution_map_apply (f : C(Icc (0 : ℝ) T,E)) (a₀ : E)
-    (t : Icc (0 : ℝ) T) :
-    V.solution (L.compLeftContinuous ℝ (Icc (0 : ℝ) T) f) (L a₀) t =
-      L (U.solution f a₀ t) := by
-  exact congrArg (fun p : C(Icc (0 : ℝ) T,F) => p t) (U.solution_map V L hL f a₀)
 
 end EulerLinearDuhamel.Evolution

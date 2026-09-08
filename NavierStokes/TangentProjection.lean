@@ -44,9 +44,6 @@ theorem tangentProj_of_tangent (n f : E) (hf : ⟪n, f⟫_ℝ = 0) :
     tangentProj n f = f := by
   simp [tangentProj, hf]
 
-theorem tangentProj_idempotent {n : E} (hn : n ≠ 0) (f : E) :
-    tangentProj n (tangentProj n f) = tangentProj n f :=
-  tangentProj_of_tangent n _ (tangentProj_normal hn f)
 
 /-- The full normal identity includes the damping of an existing tangency defect. -/
 theorem normal_projectedRhs {n : E} (hn : n ≠ 0) (n' t Kt f : E) (δ : ℝ) :
@@ -78,16 +75,6 @@ theorem pressure_cancellation (n n' t Kt f : E) (δ : ℝ) :
   rw [← h]
   abel
 
-/-- Actual differentiation of tangency gives the normal derivative in Appendix A.3. -/
-theorem differentiated_tangency {n t : ℝ → E} {n' t' : E} {x : ℝ}
-    (hn : HasDerivAt n n' x) (ht : HasDerivAt t t' x)
-    (htangent : ∀ y, ⟪n y, t y⟫_ℝ = 0) :
-    ⟪n x, t'⟫_ℝ = -⟪n', t x⟫_ℝ := by
-  have hp := hn.inner ℝ ht
-  have heq : (fun y => ⟪n y, t y⟫_ℝ) = fun _ => (0 : ℝ) := funext htangent
-  rw [heq] at hp
-  have hz := hp.unique (hasDerivAt_const x (0 : ℝ))
-  linarith
 
 /-- Along any differentiable solution of (27), the tangency defect solves `h' = -δ h`. -/
 theorem tangency_defect_derivative {n t : ℝ → E} {n' : E} {x : ℝ}
@@ -116,28 +103,8 @@ theorem scalar_defect_zero (h δ D : ℝ → ℝ)
     simpa only [hzero, mul_zero] using heq
   exact (mul_eq_zero.mp hz).resolve_left (Real.exp_ne_zero _)
 
-/-- Initial tangency persists for a differentiable solution of the projected equation.
-This version is global in slot time and assumes an explicit primitive of the damping. -/
-theorem tangency_preserved (n n' t Kt f : ℝ → E) (δ D : ℝ → ℝ)
-    (hn0 : ∀ x, n x ≠ 0)
-    (hn : ∀ x, HasDerivAt n (n' x) x)
-    (ht : ∀ x, HasDerivAt t (projectedRhs (n x) (n' x) (t x) (Kt x) (f x) (δ x)) x)
-    (hD : ∀ x, HasDerivAt D (δ x) x)
-    (x₀ : ℝ) (hzero : ⟪n x₀, t x₀⟫_ℝ = 0) : ∀ x, ⟪n x, t x⟫_ℝ = 0 := by
-  exact scalar_defect_zero (fun x => ⟪n x, t x⟫_ℝ) δ D hD
-    (fun x => tangency_defect_derivative (hn0 x) (hn x) (ht x)) x₀ hzero
 
-/-- Nonnegative viscosity gives a nonnegative scalar damping coefficient. -/
-theorem viscous_coefficient_nonneg (ε k j : ℝ) (n : E) (hε : 0 ≤ ε) :
-    0 ≤ ε * k ^ 2 * j ^ 2 * ⟪n, n⟫_ℝ := by
-  exact mul_nonneg (mul_nonneg (mul_nonneg hε (sq_nonneg k)) (sq_nonneg j))
-    (real_inner_self_nonneg)
 
-/-- The damping term has nonpositive contribution to the energy derivative. -/
-theorem damping_dissipative (δ : ℝ) (t : E) (hδ : 0 ≤ δ) :
-    ⟪t, -δ • t⟫_ℝ ≤ 0 := by
-  rw [inner_smul_right]
-  exact mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hδ) real_inner_self_nonneg
 
 /-- With `c = k j' ≠ 0`, the manuscript's pressure is `i A / c`.
 Multiplication by the Fourier gradient `i c` yields `-A`, fixing the sign. -/

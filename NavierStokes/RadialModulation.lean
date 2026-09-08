@@ -113,23 +113,7 @@ theorem modulatedU_hasDerivAt_X
   apply hd.congr_deriv
   field_simp; ring
 
-theorem modulatedE_hasDerivAt_eta
-    (E : BaseProfile) (A : PrimitiveProfile) (n X η : ℝ)
-    (hE : DifferentiableAt ℝ (E X) η)
-    (hA : DifferentiableAt ℝ A (phasePoint n X η)) :
-    HasDerivAt (modulatedE n E A X)
-      (deriv (E X) η * Real.exp (A (phasePoint n X η) / n) +
-        E X η * (Real.exp (A (phasePoint n X η) / n) *
-          (partialEta A (phasePoint n X η) / n))) η := by
-  exact hE.hasDerivAt.mul (((phase_hasDerivAt_eta A n X η hA).div_const n).exp)
 
-theorem modulatedU_hasDerivAt_eta
-    (U : BaseProfile) (B : PrimitiveProfile) (n X η : ℝ)
-    (hU : DifferentiableAt ℝ (U X) η)
-    (hB : DifferentiableAt ℝ B (phasePoint n X η)) :
-    HasDerivAt (modulatedU n U B X)
-      (deriv (U X) η + partialEta B (phasePoint n X η) / n) η := by
-  exact hU.hasDerivAt.add ((phase_hasDerivAt_eta B n X η hB).div_const n)
 
 /-- Exact angular shear: the only error after the primitive prescription is
 the slow radial derivative of `A`, divided by frequency. -/
@@ -164,33 +148,7 @@ theorem axial_shear_exact
   rw [hprescribed]
   field_simp [Real.exp_ne_zero]; ring
 
-/-- Explicit uniform value estimate once the frequency exceeds the bound on A. -/
-theorem angular_value_bound
-    (E A n CE CA : ℝ) (hn : 0 < n) (hE : |E| ≤ CE) (hA : |A| ≤ CA) (hCA : CA ≤ n) :
-    |E * Real.exp (A / n) - E| ≤ 2 * CE * CA / n := by
-  have hCE : 0 ≤ CE := (abs_nonneg E).trans hE
-  have hCA0 : 0 ≤ CA := (abs_nonneg A).trans hA
-  have hsmall : |A / n| ≤ 1 := by
-    rw [abs_div, abs_of_pos hn]
-    exact (div_le_one hn).mpr (hA.trans hCA)
-  calc
-    |E * Real.exp (A / n) - E| = |E| * |Real.exp (A / n) - 1| := by
-      rw [← abs_mul]
-      congr 1
-      ring
-    _ ≤ CE * (2 * |A / n|) :=
-      mul_le_mul hE (Real.abs_exp_sub_one_le hsmall) (abs_nonneg _) hCE
-    _ ≤ CE * (2 * (CA / n)) := by
-      rw [abs_div, abs_of_pos hn]
-      gcongr
-    _ = 2 * CE * CA / n := by ring
 
-theorem axial_value_bound
-    (U B n CB : ℝ) (hn : 0 < n) (hB : |B| ≤ CB) :
-    |U + B / n - U| ≤ CB / n := by
-  have heq : U + B / n - U = B / n := by ring
-  rw [heq, abs_div, abs_of_pos hn]
-  exact div_le_div_of_nonneg_right hB hn.le
 
 /-- The primitive is an actual interval integral. -/
 def periodicPrimitive (q : ℝ → ℝ) (θ : ℝ) : ℝ := intervalIntegral q 0 θ volume
@@ -251,26 +209,6 @@ theorem exists_smooth_periodic_zeroMean_primitive
   unfold zeroMeanPrimitive
   rw [periodicPrimitive_periodic q hq.continuous hperiodic hzero θ]
 
-/-- Interface for a loop with prescribed mean: subtract the nominal shear and
-scale it, then construct its normalized primitive. Choosing `c = -1/2` gives
-the angular primitive; `c = E/2` gives the axial primitive. -/
-theorem exists_primitive_of_prescribed_mean
-    (f : ℝ → ℝ) (hf : ContDiff ℝ ∞ f) (hperiodic : Function.Periodic f 1)
-    (m c : ℝ) (hmean : intervalIntegral f 0 1 volume = m) :
-    ∃ A : ℝ → ℝ, ContDiff ℝ ∞ A ∧ Function.Periodic A 1 ∧
-      intervalIntegral A 0 1 volume = 0 ∧ ∀ θ, HasDerivAt A (c * (f θ - m)) θ := by
-  have hq : ContDiff ℝ ∞ (fun θ => c * (f θ - m)) :=
-    contDiff_const.mul (hf.sub contDiff_const)
-  have hp : Function.Periodic (fun θ => c * (f θ - m)) 1 := by
-    intro θ
-    change c * (f (θ + 1) - m) = c * (f θ - m)
-    rw [hperiodic θ]
-  have hz : intervalIntegral (fun θ => c * (f θ - m)) 0 1 volume = 0 := by
-    rw [intervalIntegral.integral_const_mul,
-      intervalIntegral.integral_sub (hf.continuous.intervalIntegrable 0 1)
-        (continuous_const.intervalIntegrable 0 1)]
-    simp [hmean]
-  exact exists_smooth_periodic_zeroMean_primitive (fun θ => c * (f θ - m)) hq hp hz
 
 /-! ### Uniform bounds for every fixed parameter jet -/
 

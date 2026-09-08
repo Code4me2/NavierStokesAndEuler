@@ -117,21 +117,6 @@ theorem collar_lower_of_errors {c B r e s v : ℝ}
   have hm := mul_le_mul_of_nonneg_left (show r + s ≤ B + 1 by linarith) he
   nlinarith
 
-/-- Combining the ramp and collar estimates gives the actual lower-root
-criterion, including the strict lower bound on `v`. -/
-theorem true_collar_of_errors {c B r e s P J v : ℝ}
-    (hc : 0 < c) (hr : 2 + c ≤ r) (hrB : r ≤ B)
-    (he : 0 < e) (he1 : e ≤ 1) (hs : 0 ≤ s)
-    (hsquarter : s ≤ 1 / 4) (hsc : s ≤ c / 2)
-    (hsB : (B + 1) * s ≤ 1 / 4) (heB : e * (B + 1) ≤ c / 4)
-    (hP : |P - r| ≤ s * e) (hv : |v - (1 - e) * r| ≤ s * e)
-    (hJ : |J| ≤ s * e) :
-    e ≤ P - v ∧ 2 + c / 2 < v ∧ 2 < P ∧ v < coneBound P J := by
-  obtain ⟨hgap, _, hquad⟩ := ramp_cone_of_errors hc hr hrB he he1 hs hsquarter hsc hsB hP hv hJ
-  have hvc := collar_lower_of_errors hc hr hrB he.le (by linarith) heB hv
-  have hv2 : 2 < v := by linarith
-  have hcone := (true_cone_iff hv2).mpr ⟨by linarith, hquad⟩
-  exact ⟨hgap, hvc, hcone⟩
 
 /-- A single error tolerance is chosen from the fixed reference bounds. -/
 noncomputable def errorTolerance (c B : ℝ) : ℝ :=
@@ -283,15 +268,6 @@ theorem reducedStress_first_positive {F A B κ y dA dB dR α M : ℝ}
   have hm := mul_le_mul_of_nonneg_left hlo hy
   nlinarith
 
-theorem reducedStress_nonzero {F A B κ y dA dB dR α M : ℝ}
-    (hF : 0 < F) (hα : 0 < α) (hA : α ≤ A) (hy : 0 ≤ y)
-    (hdA : |dA| ≤ M) (hsmall : y * M ≤ α / 2) :
-    reducedStress F A B κ y dA dB dR ≠ 0 := by
-  intro hz
-  have hpos := reducedStress_first_positive (B := B) (κ := κ) (dB := dB) (dR := dR)
-    hF hα hA hy hdA hsmall
-  rw [hz] at hpos
-  exact (lt_irrefl (0 : ℝ)) hpos
 
 theorem reducedStress_edge_projection (F A B κ dA dB dR : ℝ) :
     (reducedStress F A B κ 0 dA dB dR).1 +
@@ -300,33 +276,16 @@ theorem reducedStress_edge_projection (F A B κ dA dB dR : ℝ) :
   simp only [reducedStress_at_edge]
   ring
 
-/-- The true angular directional margin has a strictly positive edge limit. -/
-theorem reducedStress_edge_margin {F A B c κ dA dB dR : ℝ}
-    (hF : 0 < F) (hc : 0 < c) (hr : 2 + c ≤ A + B ^ 2 / A) :
-    2 * F < (reducedStress F A B κ 0 dA dB dR).1 +
-      (B / A) * (reducedStress F A B κ 0 dA dB dR).2 := by
-  rw [reducedStress_edge_projection]
-  nlinarith
 
 /-- The quadratic cone gap after removing the square of the flat activation. -/
 noncomputable def normalizedConeGap (r v y dP dv dJ : ℝ) : ℝ :=
   2 * (r + y * (dP - dv)) ^ 2 - (v - 2) * (y * dJ) ^ 2
 
-theorem cone_gap_factorization (r e y dP dv dJ : ℝ) :
-    2 * ((r + y * e * dP) - ((1 - e) * r + y * e * dv)) ^ 2 -
-        (((1 - e) * r + y * e * dv) - 2) * (y * e * dJ) ^ 2 =
-      e ^ 2 * normalizedConeGap r ((1 - e) * r + y * e * dv) y dP dv dJ := by
-  unfold normalizedConeGap
-  ring
 
 @[simp] theorem normalizedConeGap_at_edge (r v dP dv dJ : ℝ) :
     normalizedConeGap r v 0 dP dv dJ = 2 * r ^ 2 := by
   simp [normalizedConeGap]
 
-theorem normalizedConeGap_edge_positive {r : ℝ} (hr : r ≠ 0) (v dP dv dJ : ℝ) :
-    0 < normalizedConeGap r v 0 dP dv dJ := by
-  rw [normalizedConeGap_at_edge]
-  positivity
 
 /-- The actual cone coordinates formed from two stock coordinates and a shear ratio. -/
 noncomputable def stockProjection (p q t : ℝ) : ℝ := p + q * t

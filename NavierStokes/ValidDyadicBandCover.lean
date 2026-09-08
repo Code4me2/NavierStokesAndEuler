@@ -163,20 +163,5 @@ theorem endpoint_band {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (N : ℕ)
   filter_upwards [self_mem_nhdsWithin, ht.eventually (isOpen_Ioo.mem_nhds ⟨hl, hr⟩)] with w hw hq
   exact ⟨hw.1, hq⟩
 
-/-- A proved continuation of the selected current-chart formula transfers
-to the representative.  Local continuation remains a necessary premise. -/
-theorem field_endpoint_extension {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {N : ℕ} {f : ℕ → SpaceTime → E} (hf : Compatible h N f)
-    {x : Space} (hx : x 2 ≠ 0)
-    (hq : EndpointCoordinates.endpointRoot (2 * h) (x 2) ≤ ChartScales.Q N)
-    (he : ∀ n, N ≤ n →
-      ChartScales.Q n / 2 < EndpointCoordinates.endpointRoot (2 * h) (x 2) →
-      EndpointCoordinates.endpointRoot (2 * h) (x 2) < 2 * ChartScales.Q n →
-      Nonempty (JointResidualLimits.OneSidedExtension (f n) x)) :
-    Nonempty (JointResidualLimits.OneSidedExtension (field h N f) x) := by
-  obtain ⟨n, hn, hl, hr, hg⟩ := endpoint_band hh hh1 N hx hq
-  apply MixedDiagonalExtensions.extension_of_eventuallyEq _ (Classical.choice (he n hn hl hr))
-  filter_upwards [hg] with w hw
-  exact field_eq hf hn hw
 
 end NavierStokes.ValidDyadicBandCover

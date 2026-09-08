@@ -212,47 +212,7 @@ theorem physical_initial_split_germ {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with z hz
   exact physical_initial_split hh hh1 ha A hz
 
-theorem physical_initial_split_jets {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {a : ℕ → ℕ} (ha : StrictMono a) {V : Type*}
-    [NormedAddCommGroup V] [NormedSpace ℝ V] (A : ℕ → SpaceTime → V)
-    {w : SpaceTime} (hw : w ∈ PhysicalWaveSum.preterminal) (m : ℕ) :
-    iteratedFDeriv ℝ m
-        (SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A) w =
-      iteratedFDeriv ℝ m
-        (fun z => SolenoidalDiagonal.cutStage (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A 0 z +
-          SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h)
-            (CutStageEstimates.positiveStages A) z) w :=
-  (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (physical_initial_split_germ hh hh1 ha A hw) m).self_of_nhds
 
-/-- The same schedule also yields smooth full sums when stage zero is
-smooth. The quantitative input still concerns only positive stages. -/
-theorem exists_three_component_schedule_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {S : Set SpaceTime} (hS : S ⊆ PhysicalWaveSum.preterminal)
-    {A B : ℕ → VelocityField} {P : ℕ → PressureField}
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) PhysicalWaveSum.preterminal)
-    (hB : ∀ j, ContDiffOn ℝ ∞ (B j) PhysicalWaveSum.preterminal)
-    (hP : ∀ j, ContDiffOn ℝ ∞ (P j) PhysicalWaveSum.preterminal)
-    (g LA LB LP : ℕ → ℝ) (CA CB CP pA pB pP : ℕ → ℕ → ℝ)
-    (rawA : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) A g LA CA pA S)
-    (rawB : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) B g LB CB pB S)
-    (rawP : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) P g LP CP pP S)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      ThreeCutBounds a h A B P (fun j => g j / 2) (commonLoss LA LB LP) S ∧
-      ThreeSmoothSums a h A B P := by
-  obtain ⟨a, hal, hap, had, ham, hat, hb⟩ := exists_three_component_schedule hh hh1 hS
-    (fun j _ => hA j) (fun j _ => hB j) (fun j _ => hP j)
-    g LA LB LP CA CB CP pA pB pP rawA rawB rawP hg lower
-  have hq : ContDiffOn ℝ ∞ (PhysicalWaveSum.physicalQ h) PhysicalWaveSum.preterminal :=
-    fun w hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt
-  have hqpos := fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 (w := w) hw
-  exact ⟨a, hal, hap, had, ham, hat, hb,
-    ⟨SolenoidalDiagonal.potentialSum_contDiffOn hat PhysicalWaveSum.preterminal_open hqpos hq hA,
-      SolenoidalDiagonal.potentialSum_contDiffOn hat PhysicalWaveSum.preterminal_open hqpos hq hB,
-      SolenoidalDiagonal.potentialSum_contDiffOn hat PhysicalWaveSum.preterminal_open hqpos hq hP⟩⟩
 
 section LocalStages
 
@@ -279,19 +239,6 @@ theorem full_sum_smooth_of_initial {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     PhysicalWaveSum.preterminal_open hq hA0 ha0' hgap
   exact (hzero.add hp).congr (fun w hw => physical_initial_split hh hh1 ha A hw)
 
-/-- Every full sum, including stage zero, is genuinely zero beyond the
-original validity range. No value of the uncut totalization is used there. -/
-theorem full_sum_zero_of_sublevel_le {h qbig : ℝ} {a : ℕ → ℕ}
-    (ha : ∀ j, 0 < a j) (hrecip : ∀ j, 1 / (a j : ℝ) < qbig)
-    (A : ℕ → SpaceTime → V) {w : SpaceTime} (hw : qbig ≤ PhysicalWaveSum.physicalQ h w) :
-    SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A w = 0 := by
-  have hz : ∀ j, SolenoidalDiagonal.cutStage (fun j => (a j : ℝ))
-      (PhysicalWaveSum.physicalQ h) A j w = 0 := by
-    intro j
-    have hz := SmoothCutoffs.scaledCutoff_zero_of_inv_le
-      (by exact_mod_cast ha j : (0 : ℝ) < a j) ((hrecip j).le.trans hw)
-    simp only [SolenoidalDiagonal.cutStage, hz, zero_smul]
-  simp only [SolenoidalDiagonal.potentialSum, hz, tsum_zero]
 
 end LocalStages
 

@@ -449,20 +449,7 @@ theorem Ns_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
   unfold Ns
   field_simp [(X_pos p).ne']
 
-/-- The angular ODE (6), using the derivative in the true log coordinate. -/
-theorem Qs_equation (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (p : Point) :
-    deriv (fun y => Qs w Amp (y, p.2)) p.1 +
-      (1 + dY (H w) p / H w p) * Qs w Amp p = Sq w Amp p := by
-  rw [(Qs_hasDerivAt w ha p).deriv]
-  ring
 
-/-- The axial ODE (6); no derivative identity is an input hypothesis. -/
-theorem Ns_equation (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (p : Point) :
-    deriv (fun y => Ns w Amp (y, p.2)) p.1 + Ns w Amp p = Sn w Amp p := by
-  rw [(Ns_hasDerivAt w ha p).deriv]
-  ring
 
 theorem dEta_H (w : ResetWitness d K) (p : Point) :
     dEta (H w) p = Real.exp (p.1 / 2) * dEta (E w) p := by
@@ -501,13 +488,6 @@ theorem U_before_pulse (d : TailData) (Amp : ℝ → ℝ) (eta : ℝ) {y : ℝ} 
 theorem M_eq_massMoment (d : TailData) (Amp : ℝ → ℝ) (y eta : ℝ) :
     M d Amp (y, eta) = massMoment d.core Amp eta y := rfl
 
-theorem M_div_E_before (w : ResetWitness d K) (Amp : ℝ → ℝ) (eta : ℝ)
-    {y : ℝ} (hy : y ≤ d.core.endpoint) :
-    M d Amp (y, eta) / (X (y, eta) * E w (y, eta)) =
-      massMoment d.core Amp eta y /
-        (Real.exp y * angular d.core.P d.core.dropLength d.core.lam (y, eta)) := by
-  rw [M_eq_massMoment, E_before w eta hy]
-  rfl
 
 @[simp] theorem history_zero (initial : ℝ → ℝ) (f : Field) (eta : ℝ) :
     history initial f (0, eta) = initial eta := by simp [history, ProfileHistories.primitive]
@@ -866,19 +846,7 @@ theorem Pi_eq_future_integral (w : ResetWitness d K) (y eta : ℝ) :
   unfold SchedulePressure.axisPressure
   linarith
 
-theorem energyWeight_integrable (w : ResetWitness d K) (Amp : ℝ → ℝ) (eta : ℝ) :
-    Integrable (fun y => energyWeight w Amp (y, eta)) := by
-  exact CorrectedPulseAmplitude.energyIntegrand_integrable d w.coefficients (Amp eta) eta
 
-theorem total_energy_eq (w : ResetWitness d K) (Amp : ℝ → ℝ) (eta : ℝ) :
-    (∫ y, energyWeight w Amp (y, eta)) =
-      CorrectedPulseAmplitude.totalEnergy d w.coefficients (Amp eta) eta := by
-  unfold CorrectedPulseAmplitude.totalEnergy
-  apply integral_congr_ae
-  exact Eventually.of_forall (fun y => by
-    unfold energyWeight energyDensity X E U CorrectedPulseAmplitude.energyIntegrand
-    dsimp only
-    rw [PulseAmplitude.axial_eq_of_amplitude_eq d.core Amp (fun _ => Amp eta) eta y rfl])
 
 theorem angular_source_continuous (w : ResetWitness d K) {Amp : ℝ → ℝ}
     (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
@@ -1064,22 +1032,6 @@ theorem angularStock_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → �
   rw [(angular_source_past w ha eta).2] at hi
   exact (angularStock_eq_source_primitive w ha y eta).trans hi.symm
 
-/-- The regular source-integral definition of `Q_s`, including its actual past. -/
-theorem Qs_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    Qs w Amp (y, eta) =
-      (∫ t in Iic y, Real.exp (3 * t / 2) * E w (t, eta) * Sq w Amp (t, eta)) /
-        (Real.exp (3 * y / 2) * E w (y, eta)) := by
-  unfold Qs
-  rw [angularStock_eq_source_integral w ha]
-  have he := angularWeight_eq w (y, eta)
-  change X (y, eta) * H w (y, eta) = _ at he
-  rw [he]
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  dsimp only
-  rw [angularSource_weight, angularWeight_eq]
 
 noncomputable def incomingSnConstant (d : TailData) (eta : ℝ) : ℝ :=
   -4 * velocityExponent d.h * eta * (1 - 8 * eta ^ 2) -
@@ -1170,13 +1122,6 @@ theorem axialStock_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → ℝ}
   rw [(axial_source_past w ha eta).2] at hi
   exact (axialStock_eq_source_primitive w ha y eta).trans hi.symm
 
-/-- The regular source-integral definition of `N_s`, including its actual past. -/
-theorem Ns_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    Ns w Amp (y, eta) = (∫ t in Iic y, Real.exp t * Sn w Amp (t, eta)) / Real.exp y := by
-  unfold Ns
-  rw [axialStock_eq_source_integral w ha]
-  rfl
 
 /-! ## Entrance-radius factors -/
 
@@ -1188,77 +1133,12 @@ noncomputable def physicalJ (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ
   XR * Real.sqrt (2 * XR) * J w Amp p
 noncomputable def physicalS (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ := XR * S w Amp p
 
-theorem physicalH_eq (XR : ℝ) (hXR : 0 < XR) (w : ResetWitness d K) (p : Point) :
-    physicalH XR w p = Real.sqrt (2 * physicalX XR p) * E w p := by
-  unfold physicalH physicalX X H
-  rw [show 2 * (XR * Real.exp p.1) = (2 * XR) * Real.exp p.1 by ring,
-    Real.sqrt_mul (by positivity : 0 ≤ 2 * XR), AngularMomentReset.sqrt_exp_half]
-  ring
 
-theorem physicalM_eq_integral (XR : ℝ) (d : TailData) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    physicalM XR d Amp (y, eta) = ∫ t in Iic y, physicalX XR (t, eta) * U d Amp (t, eta) := by
-  unfold physicalM
-  rw [M_eq_integral d ha, ← integral_const_mul]
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  dsimp [physicalX, X]
-  ring
 
-theorem physicalI_eq_integral (XR : ℝ) (w : ResetWitness d K) (y eta : ℝ) :
-    physicalI XR w (y, eta) = ∫ t in Iic y, physicalX XR (t, eta) * physicalH XR w (t, eta) := by
-  unfold physicalI
-  rw [I_eq_integral, ← integral_const_mul]
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  dsimp only
-  have he := angularWeight_eq w (t, eta)
-  change X (t, eta) * H w (t, eta) = _ at he
-  rw [← he]
-  unfold physicalX physicalH
-  ring
 
-theorem physicalJ_eq_integral (XR : ℝ) (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    physicalJ XR w Amp (y, eta) =
-      ∫ t in Iic y, physicalX XR (t, eta) * (U d Amp (t, eta) * physicalH XR w (t, eta)) := by
-  unfold physicalJ
-  rw [J_eq_integral w ha, ← integral_const_mul]
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  dsimp only
-  have he := angularWeight_eq w (t, eta)
-  change X (t, eta) * H w (t, eta) = _ at he
-  rw [← he]
-  unfold physicalX physicalH
-  ring
 
-theorem physicalS_eq_integral (XR : ℝ) (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    physicalS XR w Amp (y, eta) =
-      ∫ t in Iic y, physicalX XR (t, eta) * (U d Amp (t, eta) ^ 2 - E w (t, eta) ^ 2 / 2) := by
-  unfold physicalS
-  rw [S_eq_integral w ha, ← integral_const_mul]
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  dsimp [physicalX, X]
-  ring
 
-/-- The common angular scaling cancels exactly from the source-integral lag. -/
-theorem Qs_dilation (XR : ℝ) (hXR : 0 < XR) (w : ResetWitness d K)
-    (Amp : ℝ → ℝ) (p : Point) :
-    (XR * Real.sqrt (2 * XR) * angularStock w Amp p) /
-      (physicalX XR p * physicalH XR w p) = Qs w Amp p := by
-  unfold physicalX physicalH Qs
-  have hs : Real.sqrt (2 * XR) ≠ 0 := (Real.sqrt_pos.mpr (by positivity)).ne'
-  field_simp [hXR.ne', hs, (X_pos p).ne', (H_pos w p).ne']
 
-/-- The common axial scaling cancels exactly from the source-integral lag. -/
-theorem Ns_dilation (XR : ℝ) (hXR : 0 < XR) (w : ResetWitness d K)
-    (Amp : ℝ → ℝ) (p : Point) :
-    (XR * axialStock w Amp p) / physicalX XR p = Ns w Amp p := by
-  unfold physicalX Ns
-  field_simp [hXR.ne', (X_pos p).ne']
 
 noncomputable def p1 (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ :=
   physicalX XR p * Qs w Amp p / (1 - 2 * d.h * p.2 ^ 2)
@@ -1270,9 +1150,5 @@ theorem p1_dilation (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : P
   unfold p1 physicalX
   ring
 
-theorem p2_dilation (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) :
-    p2 XR w Amp p = XR * p2 1 w Amp p := by
-  unfold p2 physicalX
-  ring
 
 end NavierStokes.OutgoingHistories

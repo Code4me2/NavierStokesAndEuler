@@ -36,10 +36,6 @@ def zeroTraceMap (A : U →L[ℝ] V) :
 @[simp] theorem zeroTraceMap_coe (A : U →L[ℝ] V) (u : zeroTraceDerivatives (U := U) T hT) :
     (zeroTraceMap T hT A u : TimeLp T V) = timeLift T A (u : TimeLp T U) := rfl
 
-theorem zeroTraceMap_norm (A : U →L[ℝ] V) : ‖zeroTraceMap T hT A‖ ≤ ‖A‖ := by
-  apply opNorm_le_bound _ (norm_nonneg A)
-  intro u
-  exact timeLift_apply_norm_le T A (u : TimeLp T U)
 
 omit [CompleteSpace U] [CompleteSpace V] [CompleteSpace E] [CompleteSpace F] in
 theorem timeMultiplier_intertwines (A : U →L[ℝ] V) (B : E →L[ℝ] F)

@@ -207,65 +207,6 @@ theorem stage_guards (J D : ℕ) (hJ : 3 ≤ J) (C c X K δ : ℝ)
   · exact compression_of_error_small (ha n) heps.le hθp.le htθ hg hd
       (by simpa only [geometryError, add_assoc] using he0)
 
-/-- All numerical geometry guards are achieved by one fixed stage, then one
-base scale, uniformly over every frame satisfying the induction invariants. -/
-theorem exists_guarded_sequence (D : ℕ) (hD : 1000 ≤ D) (C c K : ℝ)
-    (hC : 4 ≤ C) (hc : 0 ≤ c) (hK : 1 ≤ K) :
-    ∃ J : ℕ, 3 ≤ J ∧ ∀ η : ℝ, 0 < η → ∃ X₀ δ : ℝ, 8 ≤ X₀ ∧ 0 < δ ∧ δ ≤ η ∧
-      ∀ X : ℝ, X₀ ≤ X → ActualBounds J D C c X δ ∧
-        ∀ a β : ℕ → ℝ, (∀ n, 1/2 ≤ a n) → (∀ n, a n ≤ 2) →
-          (∀ n, 1/2 ≤ β n*scaleSequence J X n^2) →
-          (∀ n, β n*scaleSequence J X n^2 ≤ 2) →
-          ∀ n, StageGuards J D C c X K a β n := by
-  obtain ⟨J, hJ, hchoice⟩ := actual_uniform_choice D hD C c (by linarith only [hC]) hc
-  refine ⟨J, hJ, ?_⟩
-  intro η hη
-  let δ : ℝ := min η (min (1/2) (1/(1000000*K)))
-  have hδpos : 0 < δ := by dsimp [δ]; positivity
-  have hδη : δ ≤ η := min_le_left _ _
-  have hδhalf : δ ≤ 1/2 := (min_le_right _ _).trans (min_le_left _ _)
-  have hδinv : δ ≤ 1/(1000000*K) := (min_le_right _ _).trans (min_le_right _ _)
-  have hδK : 1000000*K*δ ≤ 1 := by
-    have hh := (le_div_iff₀ (show 0 < 1000000*K by positivity)).mp hδinv
-    nlinarith only [hh]
-  obtain ⟨X₀, hX₀, hX⟩ := hchoice δ hδpos
-  refine ⟨X₀, δ, hX₀, hδpos, hδη, ?_⟩
-  intro X hXX
-  have hb := hX X hXX
-  exact ⟨hb, fun a β ha ha₂ hβ hβ₂ n => stage_guards J D hJ C c X K δ hC (hX₀.trans hXX)
-    hK hδhalf hδK hb a β ha ha₂ hβ hβ₂ n⟩
 
-/-- Equation (39) gives the actual packet power inequality for the
-constructed sequence, for every fixed polynomial degree and positive
-frequency exponent. The aggregate includes any fixed base constants. -/
-theorem parameter_packet_bound_eventually (J : ℕ) (hJ : 3 ≤ J) (X Cbase Cstar : ℝ)
-    (hX : 1 ≤ X) (hCbase : 1 ≤ Cbase) (hCstar : 0 ≤ Cstar)
-    (Q : ℕ) (θ : ℝ) (hθ : 0 < θ) :
-    ∀ᶠ n in atTop,
-      sourceParameterAggregate J Cbase Cstar (scaleSequence J X) n^Q ≤ frequency J X n^θ := by
-  have hlim := (source_parameters_separated J (by omega) Cbase Cstar hCbase hCstar
-    (scaleSequence J X) hX (scaleSequence_succ J X)).const_mul (Q:ℝ)
-  simp only [mul_zero] at hlim
-  have hxp := quadratic_growth_pos J (by omega) (scaleSequence J X)
-    (show 0 < scaleSequence J X 0 from lt_of_lt_of_le zero_lt_one hX) (scaleSequence_succ J X)
-  filter_upwards [hlim.eventually_le_const hθ] with n hn
-  have hj : (0:ℝ) < (J+n:ℕ) := by exact_mod_cast (show 0 < J+n by omega)
-  have hscale : 0 < scaleSequence J X n/((J+n:ℕ):ℝ)^2 := div_pos (hxp n) (pow_pos hj 2)
-  have hq : ((Q:ℝ)*log (sourceParameterAggregate J Cbase Cstar (scaleSequence J X) n))/
-      (scaleSequence J X n/((J+n:ℕ):ℝ)^2) ≤ θ := by
-    convert! hn using 1
-    ring
-  have hb := (div_le_iff₀ hscale).mp hq
-  have hP : 0 < sourceParameterAggregate J Cbase Cstar (scaleSequence J X) n :=
-    Finset.sum_pos (fun i _ => exp_pos _) Finset.univ_nonempty
-  calc
-    _ = exp ((Q:ℝ)*log (sourceParameterAggregate J Cbase Cstar (scaleSequence J X) n)) := by
-      rw [exp_nat_mul, exp_log hP]
-    _ ≤ exp (θ*(scaleSequence J X n/((J+n:ℕ):ℝ)^2)) := exp_le_exp.mpr hb
-    _ = _ := by
-      unfold frequency
-      rw [← exp_mul]
-      congr 1
-      ring
 
 end EulerPacketSourceScaleGuards

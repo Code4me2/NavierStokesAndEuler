@@ -117,20 +117,7 @@ theorem canonicalNormal_equation (t : Icc (0 : ℝ) D.T) (x : Space) :
   simpa only [extendPath,Data.clamp,projIcc_of_mem D.T_pos.le t.property,
     Data.normalDerivative_apply] using D.normal_hasDerivWithinAt t t.property x
 
-theorem canonicalVelocity_tangent (t : Icc (0 : ℝ) D.T) (x : Space) :
-    ⟪D.normal.field t x,canonicalVelocity τ hτ hτT B ξ hs t x⟫_ℝ = 0 := by
-  have h : ⟪D.normal.field t x,
-      vector τ hτ hτT B (initialData D 1 zero_lt_one ξ hs) (t,(x,Real.pi/2))⟫_ℝ = 0 := by
-    simpa only [Data.normalField,Data.clamp_coe] using
-      vector_tangent τ hτ hτT B (initialData D 1 zero_lt_one ξ hs) t x (Real.pi/2)
-  simp only [canonicalVelocity,envelopedVelocity,inner_smul_right,h,mul_zero]
 
-theorem canonicalVelocity_equation (t : Icc (0 : ℝ) D.T) (x : Space) :
-    HasDerivWithinAt (fun s => canonicalVelocity τ hτ hτT B ξ hs s x)
-      (-D.M.field t x (canonicalVelocity τ hτ hτT B ξ hs t x)+
-        (2*⟪D.normal.field t x,D.M.field t x (canonicalVelocity τ hτ hτT B ξ hs t x)⟫_ℝ/
-          ‖D.normal.field t x‖^2) • D.normal.field t x) (Icc (0 : ℝ) D.T) t := by
-  simpa only [physicalGenerator_apply] using canonicalVelocity_homogeneous_time τ hτ hτT B ξ hs t x
 
 theorem canonicalVelocity_ne_zero (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T)
     (x : Space) (hx : innerCutoff x ≠ 0) : canonicalVelocity τ hτ hτT B ξ hs t x ≠ 0 := by
@@ -153,35 +140,7 @@ theorem canonical_size_pos (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T) :
   mul_pos (norm_pos_iff.mpr (HistoryData.normal_ne_zero t 0))
     (norm_pos_iff.mpr (canonicalVelocity_center_ne_zero τ hτ hτT B ξ hs hξ t))
 
-def canonicalVelocityPath (x : Space) : C(Icc (0 : ℝ) D.T,Space) where
-  toFun t := canonicalVelocity τ hτ hτT B ξ hs t x
-  continuous_toFun := (show ContinuousOn (fun t => canonicalVelocity τ hτ hτT B ξ hs t x)
-      (Icc (0 : ℝ) D.T) from fun t ht =>
-    (canonicalVelocity_homogeneous_time τ hτ hτT B ξ hs ⟨t,ht⟩ x).continuousWithinAt).domRestrict
 
-theorem canonical_amplitude_pos (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T)
-    (δ h : ℝ) (hδ : 0 < δ) (hh : 0 < h) :
-    0 < δ*h/(‖D.normal.field t 0‖*‖canonicalVelocity τ hτ hτT B ξ hs t 0‖) :=
-  div_pos (mul_pos hδ hh) (canonical_size_pos τ hτ hτT B ξ hs hξ t)
 
-/-- The actual scaled terminal datum achieves the requested primary
-gradient norm; nonvanishing is proved from its nonzero terminal direction. -/
-theorem scaled_terminal_target_shear (hξ : ξ ≠ 0) (δ : ℝ) (hδ : 0 < δ)
-    (h k : ℝ) (hh : 0 ≤ h) (hk : k ≠ 0) (t : Icc (0 : ℝ) D.T)
-    (X Y : Space → Space) (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    let α := δ*h/(‖D.normal.field t 0‖*‖canonicalVelocity τ hτ hτT B ξ hs t 0‖)
-    ‖fderiv ℝ (fun x => k⁻¹ • vector τ hτ hτT B (initialData D δ hδ (α • ξ) hs)
-      (t,(Y x,k*inner ℝ D.m₀ (Y x)))) (X 0)‖ = h := by
-  dsimp only
-  have he := EulerPacketPrimaryShear.scaled_terminal_wave_eq τ hτ hτT B δ hδ ξ hs
-    (δ*h/(‖D.normal.field t 0‖*‖canonicalVelocity τ hτ hτT B ξ hs t 0‖)) k t
-  change ‖fderiv ℝ ((fun x : Space => k⁻¹ • vector τ hτ hτT B
-    (initialData D δ hδ ((δ*h/(‖D.normal.field t 0‖*
-      ‖canonicalVelocity τ hτ hτT B ξ hs t 0‖)) • ξ) hs)
-      (t,(x,k*inner ℝ D.m₀ x))) ∘ Y) (X 0)‖ = h
-  rw [he]
-  exact EulerPacketPrimaryShear.fullWave_target_shear τ hτ hτT B δ hδ ξ hs h k hh hk t X Y
-    hX hY hleft (canonicalVelocity_center_ne_zero τ hτ hτT B ξ hs hξ t)
 
 end EulerPacketPrimaryFactorization

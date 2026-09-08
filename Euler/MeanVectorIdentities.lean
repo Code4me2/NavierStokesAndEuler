@@ -21,11 +21,6 @@ theorem vectorPartial_smooth (f : Space → Space) (hf : ContDiff ℝ ∞ f) (i 
 theorem vectorPartial_compact (f : Space → Space) (hc : HasCompactSupport f) (i : Fin 3) :
     HasCompactSupport (vectorPartial f i) := hc.fderiv_apply ℝ (EuclideanSpace.single i 1)
 
-theorem vectorPartial_apply (f : Space → Space) (hf : ContDiff ℝ ∞ f)
-    (i j : Fin 3) (x : Space) :
-    vectorPartial f i x j = partialDerivative (fun y => f y j) i x :=
-  (fderiv_coordinate f x ((hf.differentiable (by simp)).differentiableAt)
-    j (EuclideanSpace.single i 1)).symm
 
 theorem vector_laplacian_coordinate (f : Space → Space) (hf : ContDiff ℝ ∞ f)
     (x : Space) (i : Fin 3) :

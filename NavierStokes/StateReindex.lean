@@ -52,14 +52,6 @@ theorem along_pull_component {ι : Type*} (e : D ≃ₗᵢ[ℝ] E) (V : E → E)
     along (vector e V) (fun x => f (e x) i) =
       fun x => along V (fun y => f y i) (e x) := along_pull e V (fun y => f y i)
 
-theorem iteratedFDeriv_pull (e : D ≃ₗᵢ[ℝ] E) (f : E → F) (m : ℕ) (x : D) :
-    iteratedFDeriv ℝ m (fun y => f (e y)) x =
-      (iteratedFDeriv ℝ m f (e x)).compContinuousLinearMap
-        (fun _ => e.toContinuousLinearEquiv.toContinuousLinearMap) := by
-  have h := e.toContinuousLinearEquiv.iteratedFDerivWithin_comp_right f
-    uniqueDiffOn_univ (mem_univ (e x)) m
-  simp only [iteratedFDerivWithin_univ, preimage_univ, Function.comp_def] at h
-  exact h
 
 theorem norm_iteratedFDeriv_pull (e : D ≃ₗᵢ[ℝ] E) (f : E → F) (m : ℕ) (x : D) :
     ‖iteratedFDeriv ℝ m (fun y => f (e y)) x‖ = ‖iteratedFDeriv ℝ m f (e x)‖ :=
@@ -142,23 +134,10 @@ theorem viscosity_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operato
   rw [dr_pull, dr_pull, dz_pull, dz_pull]
   rfl
 
-theorem angularAverage_pull (e : D ≃ₗᵢ[ℝ] E) (f : CorrectionState.OscillatoryScalar E) :
-    CorrectionState.angularAverage (fun n x => f n (cylinder e x)) =
-      field e (CorrectionState.angularAverage f) := rfl
 
-theorem covariance_pull (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State E) (i j : Fin 3) :
-    (state e u).covariance i j = field e (u.covariance i j) := rfl
 
-theorem totalErrors_pull (e : D ≃ₗᵢ[ℝ] E) (a : CorrectionState.ExcludedErrors E) :
-    (errors e a).total = oscillation e a.total := rfl
 
-theorem totalVelocity_pull (e : D ≃ₗᵢ[ℝ] E)
-    (c : CorrectionState.Context E) (u : CorrectionState.State E) :
-    (state e u).totalVelocity (context e c) = oscillation e (u.totalVelocity c) := rfl
 
-theorem totalPressure_pull (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State E) :
-    (state e u).totalPressureIncrement =
-      fun n x => u.totalPressureIncrement n (cylinder e x) := rfl
 
 /-! ## Finite harmonic coefficients -/
 
@@ -230,9 +209,6 @@ theorem harmonicField_pull (e : D ≃ₗᵢ[ℝ] E) (a : HarmonicFields.Coeffici
       HarmonicFields.field a k Phi kp (cylinder e x) := by
   exact evaluate_pull e a x.1 _
 
-theorem coefficientMass_pull (e : D ≃ₗᵢ[ℝ] E) (a : HarmonicFields.Coefficients E) (x : D) :
-    HarmonicFields.coefficientMass (coefficients e a) x = HarmonicFields.coefficientMass a (e x) := by
-  simp only [HarmonicFields.coefficientMass, coefficients_support, coefficients_apply]
 
 theorem bandLimited_pull (e : D ≃ₗᵢ[ℝ] E) {a : HarmonicFields.Coefficients E} {N : ℕ}
     (ha : HarmonicFields.BandLimited a N) : HarmonicFields.BandLimited (coefficients e a) N := by
@@ -554,13 +530,6 @@ theorem fullResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context 
   rw [hl, hq, virtualDivergence_pull]
   rfl
 
-theorem fullGoodResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) (n : ℕ) (x : D × ℝ) (i : Fin 3) :
-    LiftedMeanResidual.fullGoodResidual (context e c) (state e u) n x i =
-      LiftedMeanResidual.fullGoodResidual c u n (cylinder e x) i := by
-  change LiftedMeanResidual.fullResidual (context e c) (state e u) n x i - _ = _
-  rw [fullResidual_pull]
-  rfl
 
 /-! ## Exact return from the alternate layout -/
 
@@ -608,25 +577,8 @@ theorem context_roundtrip (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context 
 noncomputable def strip (e : D ≃ₗᵢ[ℝ] E) (s : WeightedClasses.StripData E) :
     WeightedClasses.StripData D := ParticularWaveBounds.reindexStrip e s
 
-theorem memClass_pull (e : D ≃ₗᵢ[ℝ] E) {s : WeightedClasses.StripData E}
-    {w : ℕ → E → ℝ} {alpha : ℝ} {f : ℕ → E → F}
-    (hf : WeightedClasses.MemClass s w alpha f) :
-    WeightedClasses.MemClass (strip e s) (fun n x => w n (e x)) alpha (fun n x => f n (e x)) :=
-  ParticularWaveBounds.memClass_reindex e hf
 
-theorem block_waveBounds (e : D ≃ₗᵢ[ℝ] E) {s : WeightedClasses.StripData E}
-    {w : ℕ → E → ℝ} {alpha : ℝ} {b : CorrectionState.HarmonicBlock E}
-    (hb : b.WaveBounds s w alpha) :
-    (block e b).WaveBounds (strip e s) (fun n x => w n (e x)) alpha := by
-  intro i j hj
-  exact ParticularWaveBounds.waveClass_reindex e (hb i j hj)
 
-theorem block_pressureBounds (e : D ≃ₗᵢ[ℝ] E) {s : WeightedClasses.StripData E}
-    {w : ℕ → E → ℝ} {alpha : ℝ} {b : CorrectionState.HarmonicBlock E}
-    (hb : b.PressureBounds s w alpha) :
-    (block e b).PressureBounds (strip e s) (fun n x => w n (e x)) alpha := by
-  intro j hj
-  exact ParticularWaveBounds.waveClass_reindex e (hb j hj)
 
 /-! ## Real linearization and the mean equations -/
 
@@ -647,15 +599,6 @@ theorem realFrameLaplacian_pull (e : D ≃ₗᵢ[ℝ] E) (R : E → ℝ)
   simp only [LinearWaveResidual.realFrameLaplacian, scalarLaplacian_component_pull,
     along_pull_component]
 
-theorem realComponentLinearResidual_pull (e : D ≃ₗᵢ[ℝ] E) (epsilon : ℝ) (R : E → ℝ)
-    (Vr Vt Vz Vtime : E → E) (B a : E → Fin 3 → ℝ) (p : E → ℝ) (x : D) :
-    LinearWaveResidual.realComponentLinearResidual epsilon (fun y => R (e y))
-      (vector e Vr) (vector e Vt) (vector e Vz) (vector e Vtime)
-      (fun y => B (e y)) (fun y => a (e y)) (fun y => p (e y)) x =
-      LinearWaveResidual.realComponentLinearResidual epsilon R Vr Vt Vz Vtime B a p (e x) := by
-  funext i
-  simp only [LinearWaveResidual.realComponentLinearResidual, realTransport_pull,
-    realFrameLaplacian_pull, along_pull, along_pull_component]
 
 theorem thetaResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
     (u : CorrectionState.State E) :
@@ -747,52 +690,11 @@ noncomputable def associatedTorusAverage (f : Associated S → ℝ) (p : ℝ × 
 noncomputable def associatedMass (f : Associated S → ℝ) (s : S) : ℝ :=
   ∫ r, associatedTorusAverage f (r, s)
 
-theorem torusAverage_liftAssoc (f : Associated S → ℝ) (p : ℝ × S) :
-    PressureStream.torusAverage (fun x => f (ParticularWaveBounds.liftAssoc S x)) p =
-      associatedTorusAverage f p := rfl
 
-theorem pressureMass_liftAssoc (f : Associated S → ℝ) (s : S) :
-    PressureStream.pressureMass (fun x => f (ParticularWaveBounds.liftAssoc S x)) s =
-      associatedMass f s := rfl
 
-theorem radialMoment_liftAssoc (k : ℕ) (f : MeanIncrementBounds.Field (Associated S))
-    (n : ℕ) (s : S) :
-    CorrectionState.radialMoment k (field (ParticularWaveBounds.liftAssoc S) f) n s =
-      associatedMass (fun x => x.1.1 ^ k * f n x) s := rfl
 
-theorem covarianceMass_liftAssoc (k : ℕ) (u : CorrectionState.State (Associated S))
-    (i j : Fin 3) (n : ℕ) (s : S) :
-    CorrectionState.radialMoment k ((state (ParticularWaveBounds.liftAssoc S) u).covariance i j) n s =
-      associatedMass (fun x => x.1.1 ^ k * u.covariance i j n x) s := rfl
 
-/-- A current state sent into the assembly and returned has exactly its
-original stripped residual block, including the actual error coefficients. -/
-theorem residualBlock_liftAssoc_return
-    (c : CorrectionState.Context (PressureStream.Lift S))
-    (u : CorrectionState.State (PressureStream.Lift S))
-    (b : CorrectionState.HarmonicBlock (PressureStream.Lift S))
-    (G A : HarmonicResidual.BlockCoefficients (PressureStream.Lift S)) :
-    block (ParticularWaveBounds.liftAssoc S)
-      (HarmonicResidual.residualBlock
-        (context (ParticularWaveBounds.liftAssoc S).symm c)
-        (state (ParticularWaveBounds.liftAssoc S).symm u)
-        (block (ParticularWaveBounds.liftAssoc S).symm b)
-        (blockCoefficients (ParticularWaveBounds.liftAssoc S).symm G)
-        (blockCoefficients (ParticularWaveBounds.liftAssoc S).symm A)) =
-      HarmonicResidual.residualBlock c u b G A := by
-  rw [residualBlock_pull, block_roundtrip]
 
-theorem fullResidual_liftAssoc_return
-    (c : CorrectionState.Context (PressureStream.Lift S))
-    (u : CorrectionState.State (PressureStream.Lift S)) (n : ℕ)
-    (x : PressureStream.Lift S × ℝ) (i : Fin 3) :
-    LiftedMeanResidual.fullResidual
-      (context (ParticularWaveBounds.liftAssoc S).symm c)
-      (state (ParticularWaveBounds.liftAssoc S).symm u) n
-      (cylinder (ParticularWaveBounds.liftAssoc S) x) i =
-      LiftedMeanResidual.fullResidual c u n x i := by
-  rw [fullResidual_pull]
-  rfl
 
 end Association
 

@@ -27,14 +27,6 @@ def differenceEnvelope (Ti ci q q1 d a r x y z : ℝ) : ℝ :=
     q*(4*generatorDifferenceEnvelope ci q q1 x y*slopeEnvelope Ti d a r+
       (2*(Ti+4*ci*q*q1))*slopeDifferenceEnvelope Ti d a r (y+x) z)
 
-theorem differenceEnvelope_nonneg (Ti ci q q1 d a r x y z : ℝ)
-    (hTi : 0 ≤ Ti) (hci : 0 ≤ ci) (hq : 0 ≤ q) (hq1 : 0 ≤ q1)
-    (hd : 0 ≤ d) (ha : 0 ≤ a) (hr : 0 ≤ r)
-    (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) :
-    0 ≤ differenceEnvelope Ti ci q q1 d a r x y z := by
-  unfold differenceEnvelope slopeDifferenceEnvelope
-    generatorDifferenceEnvelope slopeEnvelope endpointDifferenceCost
-  positivity
 
 theorem historyDifferenceCost_le_envelope (T c Ti ci q q1 d a r x y z : ℝ)
     (hT : 0 < T) (hT1 : T ≤ 1) (hTi : T⁻¹ ≤ Ti) (hc : 0 < c) (hci : c⁻¹ ≤ ci)

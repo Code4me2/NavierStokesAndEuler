@@ -174,14 +174,6 @@ theorem chart_smul {a c : ℝ} (ha : 0 < a) (hc : 0 < c) (j : PolarCharts.Index)
   rw [PolarCharts.chart_eq_localChart (mul_pos hc ha) j (chartDomain_smul hc j hp),
     PolarCharts.chart_eq_localChart ha j hp, PolarCharts.localChart_smul j hc]
 
-/-- The scaling identity holds on an open neighborhood, so it can be used
-for physical germ and jet comparisons without an angle-branch inference. -/
-theorem chart_smul_germ {a c : ℝ} (ha : 0 < a) (hc : 0 < c) (j : PolarCharts.Index) {p : Plane}
-    (hp : p ∈ PolarCharts.chartDomain a j) :
-    (fun y : Plane => PolarCharts.chart (c * a) j (c • y)) =ᶠ[𝓝 p]
-      (fun y => (c * (PolarCharts.chart a j y).1, (PolarCharts.chart a j y).2)) := by
-  filter_upwards [(PolarCharts.chartDomain_open a j).mem_nhds hp] with y hy
-  exact chart_smul ha hc j hy
 
 /-! ## The actual Cartesian rotation -/
 
@@ -193,10 +185,6 @@ theorem rotation_smooth {a b : ℝ} (ha : 0 < a) :
   CartesianCopySource.rotationMap_smooth.comp PhysicalGraphBounds.liftXY.contDiff.contDiffOn
     (fun _ hx => PhysicalClassBounds.cylindricalDomain_axisFree ha hx)
 
-theorem rotation_smoothNear {a b : ℝ} (ha : 0 < a) {x : LiftPoint}
-    (hx : x ∈ PhysicalClassBounds.cylindricalDomain a b) :
-    LocalPhysicalCopyBounds.SmoothNear rotation x :=
-  ⟨_, PhysicalClassBounds.cylindricalDomain_open a b, hx, rotation_smooth ha⟩
 
 /-- These are full jets, including order zero, of the literal rotation
 operator.  The same constant works for every chart and free coordinate. -/

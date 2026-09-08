@@ -44,19 +44,5 @@ theorem exists_smooth_signed_pressure {T : ℝ} (hT : 0 < T) (A : Data period T)
   choose p hp ha using h
   exact ⟨p,hp,ha⟩
 
-/-- The actual signed correction pressure yields a smooth scalar potential on every reciprocal-frequency graph.
-The common pressure, all its strong jets, its smooth representative and its closed-gradient property are constructed internally. -/
-theorem exists_smooth_pressure_graph {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)
-    (k : ℝ) (hk : k*A.κ=1) :
-    ∃ (p : Icc (0 : ℝ) T → LiftDomain period → Vector3) (Q : Icc (0 : ℝ) T → Vector3 → ℝ),
-      (∀ t x, ContDiff ℝ ∞ (localFieldLift period (p t) x)) ∧
-      (∀ t, (commonPressure period hT A B t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] p t) ∧
-      (∀ t, ContDiff ℝ ∞ (Q t)) ∧
-      ∀ t x, gradient (Q t) x=A.κ • p t (cylinderGraph period k A.direction x) := by
-  obtain ⟨p,hp,ha⟩ := exists_smooth_signed_pressure period hT A B
-  have hQ (t : Icc (0 : ℝ) T) := gradientSpace_has_graph_potential period A.κ k hk A.direction
-    (commonPressure period hT A B t) (commonPressure_gradient period hT A B t) (p t) (ha t) (hp t)
-  choose Q hQs hQ using hQ
-  exact ⟨p,Q,hp,ha,hQs,hQ⟩
 
 end EulerAllOrderSmoothPressure

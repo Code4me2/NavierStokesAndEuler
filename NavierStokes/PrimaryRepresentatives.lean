@@ -127,25 +127,6 @@ theorem width_eq_scaled_spacing (D : ℝ) (n : ℕ) (j : Fin 3) :
   rw [SlotColoring.spacing_eq_scaled_mesh]
   simp only [ChartScales.Q, SquaredPartition.nativeSpacing, ChartScales.S, one_div]
 
-theorem physicalBox_normalizes (D : ℝ) (L : SlotColoring.Label) {x : Position}
-    (hx : x ∈ SlotColoring.physicalBox D L) :
-    normalizedSlow D L.1 x ∈ gridBox L.1 L.2.1 2 := by
-  intro j
-  have hp : 0 < ChartScales.Q L.1 ^ SlotColoring.axisExponent D j :=
-    Real.rpow_pos_of_pos (ChartScales.Q_pos _) _
-  have he : position (normalizedSlow D L.1 x) j -
-      SquaredPartition.nativeSpacing L.1 * (L.2.1 j : ℝ) =
-      (x j - SlotColoring.width D j L.1 * (L.2.1 j : ℝ)) /
-        (ChartScales.Q L.1 ^ SlotColoring.axisExponent D j) := by
-    simp only [normalizedSlow, position_slow, SquaredPartition.slowCoordinates,
-      width_eq_scaled_spacing]
-    field_simp
-  rw [he, abs_div, abs_of_pos hp]
-  apply (div_le_iff₀ hp).mpr
-  have hj := hx j
-  rw [width_eq_scaled_spacing] at hj
-  rw [width_eq_scaled_spacing]
-  nlinarith
 
 theorem physicalMask_nativeMask (D : ℝ) (L : Label) (q : ℝ) (x : Position) :
     PartitionedCovariance.mask D L q x = SquaredPartition.dyadicMask (L.1 : ℤ) q *
@@ -253,10 +234,6 @@ theorem ReferenceCone.coupling_neg {F : ℝ} {g : Plane} (h : ReferenceCone F g)
   exact div_neg_of_neg_of_pos (mul_neg_of_pos_of_neg (by linarith [h.frequency_pos]) h.theta_neg)
     (norm_pos_iff.mpr h.shear_ne_zero)
 
-theorem ReferenceCone.normalDirection_theta_neg {F : ℝ} {g : Plane} (h : ReferenceCone F g) :
-    normalDirection g 0 < 0 := by
-  rw [normalDirection_theta]
-  exact div_neg_of_neg_of_pos h.theta_neg (norm_pos_iff.mpr h.shear_ne_zero)
 
 theorem ReferenceCone.coupling_add_norm_pos {F : ℝ} {g : Plane} (h : ReferenceCone F g) :
     0 < coupling F g + ‖g‖ := by
@@ -473,8 +450,6 @@ noncomputable def baseChart (a b : ℝ) : Set Slow :=
 theorem baseChart_open (a b : ℝ) : IsOpen (baseChart a b) :=
   isOpen_Ioo.prod (isOpen_Ioo.prod isOpen_Ioo)
 
-theorem baseChart_convex (a b : ℝ) : Convex ℝ (baseChart a b) :=
-  (convex_Ioo _ _).prod ((convex_Ioo _ _).prod (convex_Ioo _ _))
 
 theorem referenceCompact_subset_baseChart {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h < 1 / 2)
     (ha : 0 < a) (hab : a ≤ b) : referenceCompact h a b ⊆ baseChart a b := by
@@ -485,12 +460,6 @@ theorem referenceCompact_subset_baseChart {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h 
     ⟨⟨by linarith [hZ.1], by linarith [hZ.2]⟩,
       ⟨by linarith [hT.1], by linarith [hT.2]⟩⟩⟩
 
-theorem reference_enlarged_eventually_in_chart {h a b : ℝ} (hh : 0 ≤ h)
-    (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a ≤ b) :
-    ∃ N : ℕ, ∀ L : ActiveLabel (referenceCompact h a b), N ≤ L.val.1 →
-      gridBox L.val.1 L.val.2 2 ⊆ baseChart a b :=
-  enlarged_eventually_in_chart (referenceCompact_isCompact hh hh1 ha hab)
-    (baseChart_open a b) (referenceCompact_subset_baseChart hh hh1 ha hab)
 
 theorem normalizedSlow_coordinates (D : ℝ) (n : ℕ) (x : Position) :
     normalizedSlow D n x =
@@ -539,14 +508,6 @@ theorem physicalMask_normalized_mem {h a b : ℝ} (L : Label) {q : ℝ} {x : Pos
     q / ChartScales.Q L.1, hqn, hnormeq, ?_⟩
   simpa only [hratio] using hX
 
-theorem physicalMask_has_representative {h a b : ℝ} (L : Label) (hL : 1 ≤ L.1)
-    {q : ℝ} {x : Position} (hq : 0 < q) (hR : 0 ≤ x 0) (hT : 0 ≤ x 2)
-    (he : SimilarityCoordinates.forwardScalar (2 * h) (x 1) q = x 2)
-    (hX : x 0 ^ 2 / (2 * q) ∈ Icc a b)
-    (hm : PartitionedCovariance.mask (CoordinateAlgebra.D h) L q x ≠ 0) :
-    ∃ A : ActiveLabel (referenceCompact h a b), A.val = L :=
-  physicalMask_active (referenceCompact h a b) (CoordinateAlgebra.D h) L hL
-    (physicalMask_normalized_mem L hq hR hT he hX hm) hm
 
 /-! ## One target-direction parameter, with uniform mixed-point slack -/
 
@@ -690,24 +651,6 @@ theorem compact_mixed_target {K : Set Slow} (hK : IsCompact K)
   apply (div_lt_iff₀ (neg_pos.mpr hneg)).mpr
   exact sub_pos.mp (hpb q₀ h₀ q hq (hdist.trans_le (min_le_right _ _)))
 
-/-- A single `u` works for the actual selected representatives and every
-active target point in the enlarged boxes of all sufficiently fine labels. -/
-theorem representative_target_choice {K : Set Slow} (hK : IsCompact K)
-    {F : Slow → ℝ} {g T : Slow → Plane}
-    (hF : ContinuousOn F K) (hg : ContinuousOn g K) (hT : ContinuousOn T K)
-    (hc : ∀ q ∈ K, ReferenceCone (F q) (g q))
-    (ht : ∀ q ∈ K, TargetCone (F q) (g q) (T q)) :
-    ∃ u : ℝ, 0 < u ∧ ∃ N : ℕ, ∀ L : ActiveLabel K, N ≤ L.val.1 →
-      ∀ q ∈ K, q ∈ gridBox L.val.1 L.val.2 2 →
-      ⟪T q, normalDirection (g (representative K L))⟫_ℝ < 0 ∧
-      |c0 (F (representative K L)) (g (representative K L)) *
-        ⟪T q, transverseDirection (g (representative K L))⟫_ℝ /
-        ⟪T q, normalDirection (g (representative K L))⟫_ℝ| < slopeRatio u := by
-  obtain ⟨u, δ, hu, hδ, hb⟩ := compact_mixed_target hK hF hg hT hc ht
-  obtain ⟨N, hN⟩ := eventually_atTop.mp ((tendsto_order.1 grid_mesh_tendsto_zero).2 δ hδ)
-  refine ⟨u, hu, N, fun L hL q hq hbox => hb _ (representative_mem K L) q hq ?_⟩
-  simpa only [dist_eq_norm] using
-    (representative_enlarged_distance K L hbox).trans_lt (hN _ hL)
 
 /-- The mixed-point cone has a positive numerical margin independent of
 both points. The single selected `u` is strictly above the supremum. -/

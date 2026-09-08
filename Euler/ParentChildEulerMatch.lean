@@ -51,21 +51,5 @@ theorem child_velocity_exact (t : Icc (0 : ℝ) A.T) (x : Space) :
     (A.exactPacketVelocity_eq_corrected m hm J support hSupport B residual k Y u t
       ((A.child G k m hgraph nextEll hnext hnext1).position t x)).symm
 
-include hV hG hk hYX hXY hY hforce hgradient hvelocity hu hp heuler in
-theorem child_acceleration_exact (t : Icc (0 : ℝ) A.T) (x : Space) :
-    (A.child G k m hgraph nextEll hnext hnext1).acceleration.field t x =
-      -A.exactPacketForce m hm J support hSupport B residual k Y force t
-        ((A.child G k m hgraph nextEll hnext hnext1).position t x) := by
-  apply (A.child G k m hgraph nextEll hnext hnext1).acceleration_physical_of_euler
-    (A.exactPacketVelocity m hm J support hSupport B residual k Y u)
-    (A.exactPacketPressure m hm J support hSupport B residual k Y p)
-    (A.exactPacketForce m hm J support hSupport B residual k Y force)
-    (A.exactPacketForce_continuous m hm J support hSupport B residual k Y force hY hforce)
-    (A.exactPacketPressure_gradient m hm J support hSupport B residual k hk Y hXY hY p force hp hgradient)
-    (A.child_velocity_exact m hm J support hSupport B residual V hV G hG k hgraph
-      nextEll hnext hnext1 Y hYX u hvelocity)
-    (A.exactPacketVelocity_differentiableAt m hm J support hSupport B residual k Y hYX hXY hY u hu)
-    (A.exactPacket_momentum m hm J support hSupport B residual k hk Y hYX hXY hY u p hvelocity hu hp heuler)
-    t x
 
 end EulerParentPacketFrames.Parent

@@ -35,12 +35,6 @@ def initializedInitialMeanField (N : ℕ) (k : ℝ) : SmoothL2Field Space where
     exact scale_contDiff M.ℓ _ (G.raw_graph_contDiff ⟨0,le_rfl,M.T_pos.le⟩ k D.m₀)
   integrable n := initializedInitialMean_memLp M D hTime τ hτ hτT B δ hδ ξ hs α N n k
 
-theorem initializedInitialHighField_field (N : ℕ) (k : ℝ) :
-    (initializedInitialHighField M D hTime τ hτ hτT B δ hδ ξ hs α N k).field=
-      initializedInitialHigh M D τ hτ hτT B δ hδ ξ hs α N k := rfl
 
-theorem initializedInitialMeanField_field (N : ℕ) (k : ℝ) :
-    (initializedInitialMeanField M D hTime τ hτ hτT B δ hδ ξ hs α N k).field=
-      initializedInitialMean M D τ hτ hτT B δ hδ ξ hs α N k := rfl
 
 end EulerPacketTerminalDatum

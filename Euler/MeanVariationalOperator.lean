@@ -93,13 +93,5 @@ theorem meanSolver_norm (f : W) :
     _ ≤ 2*(‖J‖*‖f‖) := mul_le_mul_of_nonneg_left ha (by norm_num)
     _ = 2*‖J‖*‖f‖ := by ring
 
-include hK hB hJ hR hH hC hsmall in
-/-- Existence and uniqueness are conclusions, with no solution or inverse hypothesis. -/
-theorem existsUnique_mean_solution (f : W) :
-    ∃! u : V, ∀ v,
-      ⟪u, v⟫_ℝ-⟪H (J u), J v⟫_ℝ+⟪C (R u), R v⟫_ℝ = -⟪f, J v⟫_ℝ :=
-  ⟨meanSolver J R H C P Q K B hK hB hJ hR hH hC hsmall f,
-    meanSolver_weak J R H C P Q K B hK hB hJ hR hH hC hsmall f,
-    fun u hu => meanSolver_unique J R H C P Q K B hK hB hJ hR hH hC hsmall f u hu⟩
 
 end EulerMeanVariationalOperator

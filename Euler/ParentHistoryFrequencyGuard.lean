@@ -130,14 +130,5 @@ theorem reciprocal_activation_le_base (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0
   have hi := one_div_le_one_div_of_le (div_pos hb (by norm_num)) hs
   simpa only [one_div,inv_div] using hi
 
-theorem actual_reciprocal_activation (J D : ℕ) (hJ : 3 ≤ J) (hD : 2000 ≤ D)
-    (C c X δ : ℝ) (hX : 2 ≤ X) (hb : ActualBounds J D C c X δ)
-    (a β : ℕ → ℝ) (ha : 1/2 ≤ a 0) (ha₂ : a 0 ≤ 2)
-    (hβ : 1/2 ≤ β 0*X^2) (hβ₂ : β 0*X^2 ≤ 2) {n : ℕ} (hn : 1 ≤ n) :
-    (activationTime J X a β n)⁻¹ ≤ 12/baseHorizon J X ∧
-      12/baseHorizon J X ≤ previousFrequency J D X n^80 :=
-  ⟨reciprocal_activation_le_base J (by omega) X (by linarith only [hX])
-      a β ha ha₂ hβ hβ₂ hn,
-    base_inverse_le_previous_frequency_pow80 J D hJ hD X hX hb.initial_frequency n⟩
 
 end EulerParentHistoryFrequency

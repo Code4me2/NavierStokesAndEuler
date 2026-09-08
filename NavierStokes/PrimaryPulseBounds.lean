@@ -744,11 +744,6 @@ theorem EnvelopeJets.restrict {D D' : PhaseJetBounds.Domain ι E} {w : ι → E 
   intro i x hx j hj
   simpa only [hscale i] using hm i x (hsub i hx) j hj
 
-theorem polynomial_memClass_of_domain {D : PhaseJetBounds.Domain ℕ E} {f : ℕ → E → F}
-    (hf : PhaseJetBounds.PolynomialJets D f) (s : WeightedClasses.StripData E)
-    (hscale : ∀ i, D.scale i = s.slow i) (hdom : ∀ i, D.carrier i = s.domain) :
-    WeightedClasses.UnweightedClass s 0 f :=
-  (EnvelopeJets.of_polynomial hf).memClass s hscale hdom
 
 end DomainRestriction
 
@@ -759,17 +754,6 @@ open WeightedClasses
 variable {Q : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 variable {s : StripData (Q × ℝ)} {P : ℕ → Q × ℝ → ℝ}
 
-theorem synthesis_memClass {c : Fin 2 → ℕ → Q × ℝ → Space}
-    {z : ℕ → Q × ℝ → State} (hc : ∀ j, UnweightedClass s 0 (c j))
-    (hz : MemClass s P 0 z) :
-    MemClass s P 0 (fun n x => z n x 0 • c 0 n x + z n x 1 • c 1 n x) := by
-  have hz0 := hz.map (PiLp.proj 2 (fun _ : Fin 2 => ℝ) 0)
-  have hz1 := hz.map (PiLp.proj 2 (fun _ : Fin 2 => ℝ) 1)
-  have h0 : MemClass s P 0 (fun n x => z n x 0 • c 0 n x) := by
-    simpa only [PiLp.proj_apply, mul_one, zero_add] using hz0.smul (hc 0)
-  have h1 : MemClass s P 0 (fun n x => z n x 1 • c 1 n x) := by
-    simpa only [PiLp.proj_apply, mul_one, zero_add] using hz1.smul (hc 1)
-  exact h0.add h1
 
 end AmbientClass
 
@@ -1015,15 +999,6 @@ theorem primaryCurlRemainder_waveClass
   simp only [show (1 / 2 + 1 / 2 : ℝ) = 1 by norm_num] at h
   exact h
 
-/-- In particular the exact-curl change meets the cumulative 0.68 budget. -/
-theorem primaryCurlRemainder_budget
-    {s : StripData E} {P : ℕ → E → ℝ} {κ : ℝ}
-    {N : ℕ → E → Space} {R : E → ℝ} {Vr Vθ Vz : ℕ → E → E}
-    {harmonic : ℕ → ℤ} {a : ℕ → E → HarmonicCalculus.ComplexVector}
-    (h : WaveClass s P (1 - κ) (primaryCurlRemainder s N R Vr Vθ Vz harmonic a))
-    (hκ : κ ≤ 8 / 25) :
-    WaveClass s P (17 / 25) (primaryCurlRemainder s N R Vr Vθ Vz harmonic a) :=
-  h.mono_exponent (by linarith)
 
 end PrimaryClass
 
@@ -1656,37 +1631,6 @@ noncomputable def phaseWave (s : StripData E) {D : Domain ℕ Slow}
   primaryWave s pref (fun c => (F c).frame) (fun c => (F c).lam)
     (fun c => (F c).u) (fun c => (F c).L) χ T mask c
 
-/-- End-to-end primary class membership from the actual phase/base inputs.
-The covariance matrix in the hypotheses is the integral of these same
-constructed pulses. Its derivative bounds and all amplitude jets are
-derived in the proof. -/
-theorem phaseWave_waveClass
-    (s : StripData E) (D : Domain ℕ Slow) (F : Fin 2 → PhaseConstruction D)
-    (pref : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Slow × ℝ)
-    (T : ℕ → E → SmoothCovariance.Vec2) (mask : ℕ → E → ℝ)
-    (hscale : ∀ n, D.scale n = s.slow n)
-    (hχ : PolynomialJets (phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ D.carrier n)
-    (hpref : ∀ c, PolynomialJets D (fun n _ => pref c n))
-    (hT : ∀ i, MeanClass s 0 (fun n x => T n x i))
-    (hmask : PolynomialJets (phaseDomain s) mask)
-    {b M a : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (ha : 0 < a)
-    (hdet : ∀ n x, x ∈ s.domain →
-      b ≤ |(normalizedMatrix (Real.sqrt (s.slow n))
-        (phaseCovariance F pref n (χ n x).1)).det|)
-    (hentry : ∀ n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * phaseCovariance F pref n (χ n x).1 i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ n x, x ∈ s.domain → ∀ j,
-      a * s.zeta x ≤ SmoothCovariance.weights (phaseCovariance F pref n (χ n x).1) (T n x) j)
-    (c : Fin 2) :
-    WaveClass s (fun n x => GaussianTailFlat.referenceSlotEnvelope
-      ((F c).lam n) ((F c).u n) ((F c).L n) (χ n x).2) (1 / 2)
-      (phaseWave s F pref χ T mask c) :=
-  primaryWave_waveClass s D pref (fun c => (F c).frame) (fun c => (F c).lam)
-    (fun c => (F c).u) (fun c => (F c).L) χ T mask hscale hχ hmap hpref
-    (fun c => (F c).pulse_jets) (fun c => (F c).lam_pos) (fun c => (F c).u_pos)
-    (fun c => (F c).L_pos) hT hmask hb hM ha hdet hentry hζ hlower c
 
 end PhaseConstruction
 
@@ -2020,45 +1964,6 @@ theorem primaryWave_eq_cutoff (s : StripData E)
   simp only [primaryWave, uncutPrimaryWave, primaryCoefficient, cutoffPulse, map_smul,
     smul_smul, mul_comm]
 
-/-- The same quantitative estimate before applying the external Gaussian
-slot cutoff. This is the class used for the homogeneous principal equation. -/
-theorem uncutPrimaryWave_waveClass
-    (s : StripData E) (D : PhaseJetBounds.Domain ℕ Q)
-    (pref : Fin 2 → ℕ → ℝ) (d : Fin 2 → ℕ → PrimaryODE.FrameData Q)
-    (lam u L : Fin 2 → ℕ → ℝ) (χ : ℕ → E → Q × ℝ)
-    (T : ℕ → E → SmoothCovariance.Vec2) (mask : ℕ → E → ℝ)
-    (hscale : ∀ n, D.scale n = s.slow n)
-    (hχ : PhaseJetBounds.PolynomialJets (phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x) ∈ D.carrier n ×ˢ Ioo (0 : ℝ) 1)
-    (hpref : ∀ c, PhaseJetBounds.PolynomialJets D (fun n _ => pref c n))
-    (hpulse : ∀ c, EnvelopeJets
-      (productDomain D (fun _ => Ioo (0 : ℝ) 1) (fun _ => isOpen_Ioo))
-      (fun n z => referenceP (lam c n) (u c n) (L c n) (L c n * z.2))
-      (fun n => normalizedPulse (d c n) (lam c n) (u c n) (L c n)))
-    (hlam : ∀ c n, 0 < lam c n) (hu : ∀ c n, 0 < u c n) (hL : ∀ c n, 0 < L c n)
-    (hT : ∀ i, MeanClass s 0 (fun n x => T n x i))
-    (hmask : PhaseJetBounds.PolynomialJets (phaseDomain s) mask)
-    {b M a : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (ha : 0 < a)
-    (hdet : ∀ n x, x ∈ s.domain →
-      b ≤ |(normalizedMatrix (Real.sqrt (s.slow n)) (chartCovariance pref d lam u L χ n x)).det|)
-    (hentry : ∀ n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * chartCovariance pref d lam u L χ n x i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ n x, x ∈ s.domain → ∀ j,
-      a * s.zeta x ≤ SmoothCovariance.weights (chartCovariance pref d lam u L χ n x) (T n x) j)
-    (c : Fin 2) :
-    WaveClass s (fun n x => referenceP (lam c n) (u c n) (L c n) (L c n * (χ n x).2))
-      (1 / 2) (uncutPrimaryWave s pref d lam u L χ T mask c) := by
-  have hH (i j : Fin 2) : PhaseJetBounds.PolynomialJets (phaseDomain s)
-      (fun n x => chartCovariance pref d lam u L χ n x i j) := by
-    apply ((EnvelopeJets.of_polynomial
-      (primaryCovariance_entry_polynomial D pref d lam u L hpref hpulse hlam hu hL i j)).comp
-      (hχ.clm (ContinuousLinearMap.fst ℝ Q ℝ)) hscale (fun n x hx => (hmap n x hx).1)).to_polynomial
-    intro n x hx
-    rfl
-  have hp := (hpulse c).comp hχ hscale hmap
-  have hv := hp.memClass s (fun _ => rfl) (fun _ => rfl)
-  exact primaryCoefficient_waveClass hH hT hmask hv hb hM ha hdet hentry hζ hlower c
 
 end CutoffFactorization
 

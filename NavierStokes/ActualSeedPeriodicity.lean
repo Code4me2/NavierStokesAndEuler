@@ -24,8 +24,6 @@ unchanged. This is definitionally the shift used by the seed continuation. -/
 noncomputable def pointDeck (k : TorusInverse.Frequency) : Point :=
   (ActualPrimaryCoherence.chartDeck k).1
 
-theorem pointDeck_eq (k : TorusInverse.Frequency) :
-    pointDeck k = (0, (0, TorusAverages.latticePoint k)) := rfl
 
 theorem zeroSlice_add_deck (k : TorusInverse.Frequency) (x : Point) :
     (x + pointDeck k, (0 : ℝ)) = (x, 0) + ActualPrimaryCoherence.chartDeck k := by

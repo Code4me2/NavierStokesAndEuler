@@ -91,10 +91,6 @@ theorem spatialDivergence_spatialCurl (A : VelocityField) (t : ℝ) (x : Space)
     (fderiv ℝ (curl (fun y : Space => A (t, y))) x (coordinateVector i)) i) = 0
   exact divergence_curl hA
 
-/-- One derivative of regularity is sufficient for taking the curl. -/
-theorem contDiffAt_curl {A : Space → Space} {x : Space} {m n : WithTop ℕ∞}
-    (hA : ContDiffAt ℝ n A x) (hmn : m + 1 ≤ n) : ContDiffAt ℝ m (curl A) x :=
-  curlLinear.contDiff.comp_contDiffAt x (hA.fderiv_right hmn)
 
 theorem contDiff_curl {A : Space → Space} {m n : WithTop ℕ∞}
     (hA : ContDiff ℝ n A) (hmn : m + 1 ≤ n) : ContDiff ℝ m (curl A) :=
@@ -161,9 +157,6 @@ theorem curl_eq_of_eventuallyEq {A B : Space → Space} {x : Space}
   unfold curl
   rw [h.fderiv_eq]
 
-theorem curl_eventuallyEq {A B : Space → Space} {x : Space}
-    (h : A =ᶠ[𝓝 x] B) : curl A =ᶠ[𝓝 x] curl B :=
-  h.fderiv.mono fun _ h' => congrArg curlLinear h'
 
 /-- A periodic potential gives a periodic curl; the identity also holds for
 the totalized derivative at points without differentiability. -/
@@ -189,10 +182,6 @@ theorem spatialCurl_eq_zero_of_timeSlice {A : VelocityField} {t : ℝ}
   rw [funext hA]
   exact curl_zero x
 
-theorem compactFutureTimeSupport_spatialCurl {A : VelocityField}
-    (hA : CompactFutureTimeSupport A) : CompactFutureTimeSupport (spatialCurl A) := by
-  obtain ⟨T, hT, hzero⟩ := hA
-  exact ⟨T, hT, fun t ht x => spatialCurl_eq_zero_of_timeSlice (hzero t ht) x⟩
 
 theorem curl_eq_zero_of_not_mem_tsupport {A : Space → Space} {x : Space}
     (hx : x ∉ tsupport A) : curl A x = 0 := by
@@ -217,18 +206,6 @@ theorem hasCompactSupport_curl_cutoff {χ : Space → ℝ} (hχ : HasCompactSupp
     (A : Space → Space) : HasCompactSupport (curl (fun y => χ y • A y)) :=
   hasCompactSupport_curl hχ.smul_right
 
-/-- Multiplying the potential by a spatial cutoff and then taking its curl
-gives a genuinely divergence-free field. -/
-theorem divergence_curl_cutoff {χ : Space → ℝ} {A : Space → Space} {x : Space}
-    (hχ : ContDiffAt ℝ 2 χ x) (hA : ContDiffAt ℝ 2 A x) :
-    (∑ i : Fin 3, (fderiv ℝ (curl (fun y => χ y • A y)) x (coordinateVector i)) i) = 0 :=
-  divergence_curl (hχ.smul hA)
 
-/-- A cutoff equal to one near a point preserves the original curl there. -/
-theorem curl_cutoff_eq {χ : Space → ℝ} {A : Space → Space} {x : Space}
-    (hχ : ∀ᶠ y in 𝓝 x, χ y = 1) : curl (fun y => χ y • A y) x = curl A x := by
-  apply curl_eq_of_eventuallyEq
-  filter_upwards [hχ] with y hy
-  simp [hy]
 
 end NavierStokes.SpatialCurl

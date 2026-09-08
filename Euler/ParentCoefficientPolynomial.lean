@@ -55,12 +55,7 @@ theorem leafPolynomial_eval (K : ℝ) : leafPolynomial.eval K=leafEnvelope K := 
 def leafConstant : ℝ := coefficientCost leafPolynomial
 def leafPower : ℕ := leafPolynomial.natDegree
 
-theorem leafConstant_pos : 0 < leafConstant := coefficientCost_pos _
 
-theorem leafEnvelope_power (K : ℝ) (hK : 1 ≤ K) :
-    leafEnvelope K ≤ leafConstant*K^leafPower := by
-  rw [← leafPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound leafPolynomial K hK)
 
 theorem radiusCeiling_le (K : ℝ) (hK : 0 ≤ K) : coefficientRadius K ≤ radiusCeiling K := by
   unfold coefficientRadius radiusCeiling

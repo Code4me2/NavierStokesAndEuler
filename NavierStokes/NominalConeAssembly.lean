@@ -231,12 +231,6 @@ theorem prefix_f {p : Point} (hp : p.1 ≤ W.controls.heatJoin) :
   · rw [Controls.extendedf, ite_eq_right hXi,
       W.controls.extendedE_before W.heat.coefficients hp, Controls.f, ite_eq_right hXi]
 
-theorem prefix_histories (r : HistoryRow) {X eta : ℝ} (hX : 0 ≤ X)
-    (hR : X ≤ W.controls.heatJoin) :
-    profileHistory W.profiles r (X, eta) =
-      profileHistory (W.controls.profiles W.separated) r (X, eta) :=
-  history_of_prefix W.profiles (W.controls.profiles W.separated) (J := univ) rfl
-    (fun _ _ hq => prefix_f W hq) (fun _ _ _ => rfl) r hX hR (mem_univ _)
 
 theorem prefix_coordinates {p : Point} (hp : p ∈ W.domain.carrier)
     (hX : 0 < p.1) (hR : p.1 ≤ W.controls.heatJoin)
@@ -989,23 +983,8 @@ noncomputable def assemble {D : ℝ} (hF : OutgoingProfile.Specification F D)
     (hs : ∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) : NominalProfile.Witness F :=
   ⟨A, c, D, hF, G.bound, Classical.choice (G.branches c.radius hr), hsep, hs⟩
 
-theorem assemble_axis {D : ℝ} (hF : OutgoingProfile.Specification F D)
-    (A : AxisStage F) (c : Controls A) (hr : G.radiusFloor ≤ c.radius)
-    (hsep : c.separation ≤ Real.exp (-8))
-    (hs : ∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) :
-    (G.assemble hF A c hr hsep hs).axis = A := rfl
 
-theorem assemble_controls {D : ℝ} (hF : OutgoingProfile.Specification F D)
-    (A : AxisStage F) (c : Controls A) (hr : G.radiusFloor ≤ c.radius)
-    (hsep : c.separation ≤ Real.exp (-8))
-    (hs : ∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) :
-    (G.assemble hF A c hr hsep hs).controls = c := rfl
 
-theorem assemble_bound {D : ℝ} (hF : OutgoingProfile.Specification F D)
-    (A : AxisStage F) (c : Controls A) (hr : G.radiusFloor ≤ c.radius)
-    (hsep : c.separation ≤ Real.exp (-8))
-    (hs : ∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) :
-    (G.assemble hF A c hr hsep hs).heatBound = G.bound := rfl
 
 theorem assemble_true_from_hold {D : ℝ} (hF : OutgoingProfile.Specification F D)
     (A : AxisStage F) (c : Controls A) (hr : G.radiusFloor ≤ c.radius)
@@ -1192,19 +1171,7 @@ theorem shearSize_eq_initial (a b : ℝ) (ha : a ≠ 0) :
   unfold ActivationContinuation.shearSize
   field_simp
 
-theorem projection_eq_initial (h X0 T κ : ℝ) (I : HistoryRow → ℝ → ℝ)
-    (L U : ProfileHistories.Field) (p : Point) :
-    ActivationContinuation.projection (ActivationCone.activatedStockOne h X0 I L U T κ p)
-      (ActivationCone.activatedStockTwo h X0 I L U T κ p)
-      (actualP1 T κ L p) (actualP2 T κ X0 L U p) =
-        ActivationCone.activatedProjection h X0 I L U T κ p := rfl
 
-theorem transverse_eq_initial (h X0 T κ : ℝ) (I : HistoryRow → ℝ → ℝ)
-    (L U : ProfileHistories.Field) (p : Point) :
-    ActivationContinuation.transverse (ActivationCone.activatedStockOne h X0 I L U T κ p)
-      (ActivationCone.activatedStockTwo h X0 I L U T κ p)
-      (actualP1 T κ L p) (actualP2 T κ X0 L U p) =
-        ActivationCone.activatedCross h X0 I L U T κ p := rfl
 
 
 /-- The actual ACT histories of the same continuation witness give the
@@ -1368,17 +1335,6 @@ structure Certificate {F : Profile} (W : NominalProfile.Witness F) : Prop where
   outgoing : ∀ y eta : ℝ, F.data.core.holdStart ≤ y → y < OutgoingTail.tailEnd F.data →
     eta ∈ HeatedOutgoing.parameterDomain → IsTrue W.profiles F.data.h (chart W.controls.radius (y, eta))
 
-theorem Certificate.coordinates_smoothAt {F : Profile} {W : NominalProfile.Witness F}
-    (hW : Certificate W) {p : Point} (hl : activeLeft W < p.1) (hr : p.1 < activeRight W)
-    (heta : p.2 ∈ HeatedOutgoing.parameterDomain) :
-    ContDiffAt ℝ ∞ (ActivationContinuation.shearA W.profiles) p ∧
-      ContDiffAt ℝ ∞ (tilt W.profiles) p ∧
-      ContDiffAt ℝ ∞ (ReferenceBounds.p1 W.profiles F.data.h) p ∧
-      ContDiffAt ℝ ∞ (ReferenceBounds.p2 W.profiles F.data.h) p := by
-  have hx := (activeLeft_pos W).trans hl
-  exact cone_coordinates_smoothAt W.profiles F.data.h (W.domain_contains hx.le heta) hx
-    (Witness.f_positive W hx heta).ne' (hW.relaxed p hl hr heta).first_positive.ne'
-    (NaturalAxisData.L_pos W.axis.small heta).ne'
 
 /-- Intermediate data retain the actual continuation and its repair
 coefficients. The existence theorem below constructs every cone field in

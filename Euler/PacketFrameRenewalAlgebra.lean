@@ -32,12 +32,5 @@ theorem scaling_cross_flux {a : ℝ} (ha : a ≠ 0) (s₀ ε : ℝ)
   field_simp
   ring
 
-theorem scaling_pressure_ratio {a : ℝ} (ha : a ≠ 0) (s₀ ε : ℝ)
-    (M : Fin 3 → Fin 3 → ℝ) (R V : Fin 3 → ℝ) (hV : V 1 ≠ 0) :
-    (∑ i : Fin 3, (s₀*rayScale ε i*R i)*(∑ j : Fin 3, M i j*(velocityScale ε j*V j))) =
-      s₀*a*(V 1)*velocityNumerator (scaledVelocityEntry a ε M)
-        (R 0) (R 1) (R 2) (V 0/V 1) 1 (V 2/V 1) := by
-  rw [scaling_flux ha, velocityNumerator_homogeneous _ _ _ _ _ _ _ hV]
-  ring
 
 end EulerPacketMovingFrame

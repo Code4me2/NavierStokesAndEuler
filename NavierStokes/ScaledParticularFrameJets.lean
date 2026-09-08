@@ -117,12 +117,6 @@ theorem argumentLinear_norm (χ : P →L[ℝ] Slow) (g : Geometry) :
       ((mul_le_mul hc (norm_snd_le x) (norm_nonneg x.2) hg).trans
         (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left (norm_nonneg χ)) (norm_nonneg x))))
 
-theorem argument_smooth (χ : P →L[ℝ] Slow) (g : Geometry) (k : Frequency) :
-    ContDiff ℝ ∞ (argument χ g k) := by
-  have he : argument χ g k = fun x => argumentLinear χ g x+(0,(g.coordinates k 0).2) :=
-    funext (argument_affine χ g k)
-  rw [he]
-  exact (argumentLinear χ g).contDiff.add contDiff_const
 
 end NativeCoordinates
 
@@ -179,17 +173,7 @@ theorem native_normal_eq (source : Label → ℕ → P × Plane → Space) (j : 
     (tangent F χ φ clock normal source j l n).normal (ParticularWaveBounds.nativePoint (g l n) k x) =
       (ScaledActualParticularControl.frame F φ clock normal (l,n)).normal (argument χ (g l n) k x) := rfl
 
-theorem native_motion_eq (source : Label → ℕ → P × Plane → Space) (j : ℤ)
-    (l : Label) (n : ℕ) (k : Frequency) (x : P × Plane) :
-    (tangent F χ φ clock normal source j l n).normalDot (ParticularWaveBounds.nativePoint (g l n) k x) =
-      (ScaledActualParticularControl.frame F φ clock normal (l,n)).normalMotion (argument χ (g l n) k x) := rfl
 
-theorem native_action_eq (source : Label → ℕ → P × Plane → Space) (j : ℤ)
-    (l : Label) (n : ℕ) (k : Frequency) (x : P × Plane) :
-    (tangent F χ φ clock normal source j l n).action (ParticularWaveBounds.nativePoint (g l n) k x) =
-      PrimaryCopyBridge.baseOperator
-        ((ScaledActualParticularControl.frame F φ clock normal (l,n)).F (argument χ (g l n) k x))
-        ((ScaledActualParticularControl.frame F φ clock normal (l,n)).shear (argument χ (g l n) k x)) := rfl
 
 /-- These are the three actual geometric inputs needed by the pressure
 estimate in `ParticularCopyBounds.uniform_coefficients_jets`. -/

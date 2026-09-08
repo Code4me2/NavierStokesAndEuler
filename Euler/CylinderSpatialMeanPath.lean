@@ -67,14 +67,5 @@ theorem pathMean_block_bound (directions : ι → X) (q : ℕ)
     directions q (pathMean (K := K) (V := V) P) f hf n x
   exact h.trans (mul_le_mul_of_nonneg_right (pathMean_norm P) (block_nonneg directions q f n x))
 
-theorem pathMean_block_majorant (directions : ι → X) (q : ℕ)
-    (f : X → C(K,CylinderL2 P V)) (hf : ContDiff ℝ ∞ f) (R C : ℝ) (d : ℕ)
-    (hb : ∀ n x, block directions q f n x ≤ C*majorant R d n) (n : ℕ) (x : X) :
-    block directions q (fun y => pathMean P (f y)) n x ≤
-      ((P⁻¹*Real.sqrt P)*C)*majorant R d n :=
-  (pathMean_block_bound P directions q f hf n x).trans
-    ((mul_le_mul_of_nonneg_left (hb n x)
-      (mul_nonneg (inv_nonneg.mpr (le_of_lt (Fact.out : 0 < P))) (Real.sqrt_nonneg P))).trans_eq
-      (mul_assoc (P⁻¹*Real.sqrt P) C _).symm)
 
 end EulerCylinderSpatialMean

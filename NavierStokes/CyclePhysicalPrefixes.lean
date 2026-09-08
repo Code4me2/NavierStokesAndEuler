@@ -132,17 +132,7 @@ theorem cylindricalPressure_next (G : ScaledGraph) (n : ℕ) (p₀ : Cylinder �
   unfold cylindricalPressure cylindricalStepPressure
   rw [next_pressureComponents, ← add_assoc, map_add]
 
-theorem cylindricalVelocity_difference (G : ScaledGraph) (n : ℕ) :
-    cylindricalVelocity G n c (p.next v c u) - cylindricalVelocity G n c u =
-      cylindricalStepVelocity p v c u G n := by
-  rw [cylindricalVelocity_next]
-  abel
 
-theorem cylindricalPressure_difference (G : ScaledGraph) (n : ℕ) (p₀ : Cylinder → ℝ) :
-    cylindricalPressure G n p₀ (p.next v c u) - cylindricalPressure G n p₀ u =
-      cylindricalStepPressure p v c u G n := by
-  rw [cylindricalPressure_next]
-  abel
 
 end OneStep
 
@@ -195,23 +185,7 @@ theorem pressure_polar_forward {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
     (PhysicalCurlCovariance.polarCoordinates a j (z.1, CylindricalResidual.chart z.2)) = _
   rw [PhysicalCurlCovariance.polarCoordinates_forward ha j hz]
 
-/-- The actual Cartesian realization supplies the germ used by the physical
-residual chart theorem, on the valid polar domain. -/
-theorem velocity_polar_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (n : ℕ) (c : Context CyclePoint) (u : State CyclePoint)
-    {z : SpaceTime} (hz : z ∈ PhysicalCurlCovariance.validCylindrical a j) :
-    (fun w => velocity a j G n c u (w.1, CylindricalResidual.chart w.2)) =ᶠ[𝓝 z]
-      (fun w => CylindricalResidual.frame (w.2 1) (cylindricalVelocity G n c u w)) :=
-  eventually_of_mem ((PhysicalCurlCovariance.validCylindrical_open a j).mem_nhds hz)
-    (fun _ hw => velocity_polar_forward ha j G n c u hw)
 
-theorem pressure_polar_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (n : ℕ) (p₀ : Cylinder → ℝ) (u : State CyclePoint)
-    {z : SpaceTime} (hz : z ∈ PhysicalCurlCovariance.validCylindrical a j) :
-    (fun w => pressure a j G n p₀ u (w.1, CylindricalResidual.chart w.2)) =ᶠ[𝓝 z]
-      cylindricalPressure G n p₀ u :=
-  eventually_of_mem ((PhysicalCurlCovariance.validCylindrical_open a j).mem_nhds hz)
-    (fun _ hw => pressure_polar_forward ha j G n p₀ u hw)
 
 section CartesianStep
 
@@ -233,15 +207,7 @@ theorem pressure_next (p₀ : Cylinder → ℝ) :
     pressure a j G n p₀ (p.next v c u) = pressure a j G n p₀ u + stepPressure p v c u a j G n := by
   simp only [pressure, stepPressure, cylindricalPressure_next, map_add]
 
-theorem velocity_difference :
-    velocity a j G n c (p.next v c u) - velocity a j G n c u = stepVelocity p v c u a j G n := by
-  rw [velocity_next]
-  abel
 
-theorem pressure_difference (p₀ : Cylinder → ℝ) :
-    pressure a j G n p₀ (p.next v c u) - pressure a j G n p₀ u = stepPressure p v c u a j G n := by
-  rw [pressure_next]
-  abel
 
 end CartesianStep
 
@@ -441,21 +407,6 @@ theorem mixedResidual_prefix {U : Set SpaceTime} (hU : IsOpen U)
       (fun _ hy => mixedVelocity_prefix p c seed a j G n hU A hA hcurl J hy)
   · exact Filter.Eventually.of_forall (fun y => congrFun (pressure_prefix p c seed a j G n p₀ J) y)
 
-/-- The same equality holds for every genuine joint spacetime derivative. -/
-theorem mixedResidual_prefix_jets {U : Set SpaceTime} (hU : IsOpen U)
-    (A : ℕ → VelocityField) (hA : ∀ k, DifferentiableOn ℝ (A k) U)
-    (hcurl : ∀ k, EqOn (SpatialCurl.spatialCurl (A k))
-      (potentialParts p c seed a j G n k) U) (p₀ : Cylinder → ℝ) (J m : ℕ) :
-    EqOn (iteratedFDeriv ℝ m (fun z => navierStokesResidual
-      (MixedDiagonalResidual.uncutVelocity A (directStages p c seed a j G n) J)
-      (DiagonalJetBounds.uncutPrefix (pressureStages p c seed a j G n p₀) (J + 1)) z.1 z.2))
-      (iteratedFDeriv ℝ m (fun z => navierStokesResidual
-        (velocity a j G n c (CycleState.iterate p c seed J).state)
-        (pressure a j G n p₀ (CycleState.iterate p c seed J).state) z.1 z.2)) U := by
-  intro z hz
-  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (eventually_of_mem (hU.mem_nhds hz)
-      (fun _ hy => mixedResidual_prefix p c seed a j G n hU A hA hcurl p₀ J hy)) m).self_of_nhds
 
 end MixedPrefixes
 

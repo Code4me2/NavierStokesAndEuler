@@ -62,21 +62,6 @@ theorem pathHeat_continuous {q : ℕ} (T : ℝ) (u : C(Icc (0 : ℝ) T, SobolevS
 def regularizedPath {q : ℕ} (T : ℝ) (n : ℕ) (u : C(Icc (0 : ℝ) T, SobolevSpace period q)) :
     C(Icc (0 : ℝ) T, SobolevSpace period (q+3)) := mapPath period T (heatRegularizer period q n) u
 
-/-- Regularized paths converge uniformly in their original complete Sobolev norm. -/
-theorem regularizedPath_tendsto {q : ℕ} (T : ℝ) (u : C(Icc (0 : ℝ) T, SobolevSpace period q)) :
-    Filter.Tendsto (fun n => mapPath period T (restrictOperator period (by omega : q ≤ q+3))
-      (regularizedPath period T n u)) Filter.atTop (𝓝 u) := by
-  have h := (pathHeat_continuous period T u).continuousAt.tendsto.comp regularizerVariance_tendsto
-  have hzero : pathHeat period q T 0 u = u := by
-    apply ContinuousMap.ext
-    intro t
-    exact heatOperator_zero period (u t)
-  rw [hzero] at h
-  convert h using 1
-  funext n
-  apply ContinuousMap.ext
-  intro t
-  exact restrict_heatRegularizer period n (u t)
 
 /-- Regularization at adjacent Sobolev levels has exactly the same underlying field. -/
 theorem heatRegularizer_truncate {q : ℕ} (n : ℕ) (u : SobolevSpace period (q+1)) :

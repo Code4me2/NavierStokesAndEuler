@@ -202,23 +202,7 @@ theorem candidate_extends_shorter_solution {u v : VelocityField} {p q : Pressure
   refine ⟨1, u, p, hT, candidate_is_classical_solution h, ?_⟩
   simpa only [min_eq_left hT.le] using candidate_agree_on_overlap h hv
 
-/-- Every maximal classical solution for these data has exactly lifespan one. -/
-theorem maximal_lifespan_eq_one {u v : VelocityField} {p q : PressureField}
-    {f : VelocityField} {T : ℝ} (h : CandidateProperties u p f)
-    (hv : IsMaximalClassicalSolution f (fun _ => 0) T v q) : T = 1 := by
-  have hle := candidate_all_lifespans_le_one h hv.1
-  apply le_antisymm hle
-  by_contra hnot
-  exact hv.2 (candidate_extends_shorter_solution h hv.1 (lt_of_not_ge hnot))
 
-/-- There is a greatest admissible finite classical lifespan, and it is one.
-Existence at that time comes solely from the supplied candidate witness. -/
-theorem candidate_greatest_lifespan {u : VelocityField} {p : PressureField}
-    {f : VelocityField} (h : CandidateProperties u p f) :
-    IsGreatest (admissibleLifespans f (fun _ => 0)) 1 := by
-  refine ⟨⟨u, p, candidate_is_classical_solution h⟩, ?_⟩
-  rintro T ⟨v, q, hv⟩
-  exact candidate_all_lifespans_le_one h hv
 
 /-- The entire set of finite admissible classical lifespans is `(0,1]`. -/
 theorem candidate_admissible_lifespans {u : VelocityField} {p : PressureField}

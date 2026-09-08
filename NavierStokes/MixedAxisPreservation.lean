@@ -223,11 +223,6 @@ noncomputable def mixedDiagonal {h : ℝ} {Ω : Set SpaceTime}
   DirectAngularDiagonal.mixedVelocity scales (PhysicalWaveSum.physicalQ h)
     (potentialSeries base p) (fun j => (D j).scalar)
 
-theorem mixedDiagonal_eq {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (p : ℕ → PotentialStage.{u} h Ω)
-    (D : ℕ → AngularSupport Ω) (scales : ℕ → ℝ) :
-    mixedDiagonal base p D scales = fun w =>
-      SpatialCurl.spatialCurl (potentialDiagonal base p scales) w + directDiagonal h D scales w := rfl
 
 theorem directDiagonal_zero_germ {h : ℝ} {Ω : Set SpaceTime}
     (D : ℕ → AngularSupport Ω) (hh : 0 < h) (hh1 : h < 1 / 2)
@@ -293,18 +288,6 @@ theorem mixedDiagonal_eq_base_germ {h : ℝ} {Ω : Set SpaceTime}
   exact (mixedDiagonal_eq_cutBase_germ base p D hh hh1 hs hΩ hw ht haxis).trans
     (SolenoidalDiagonal.spatialCurl_eventuallyEq hbase)
 
-theorem mixedDiagonal_axis_jets {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (p : ℕ → PotentialStage.{u} h Ω)
-    (D : ℕ → AngularSupport Ω) (hh : 0 < h) (hh1 : h < 1 / 2)
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop)
-    (hΩ : IsOpen Ω) {w : SpaceTime} (hw : w ∈ Ω)
-    (ht : w ∈ PhysicalWaveSum.preterminal)
-    (haxis : PhysicalGraphBounds.radialProjection w = 0)
-    (hsmall : |scales 0 * PhysicalWaveSum.physicalQ h w| < 1 / 2) (k : ℕ) :
-    iteratedFDeriv ℝ k (mixedDiagonal base p D scales) w =
-      iteratedFDeriv ℝ k (SpatialCurl.spatialCurl base) w :=
-  (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (mixedDiagonal_eq_base_germ base p D hh hh1 hs hΩ hw ht haxis hsmall) k).self_of_nhds
 
 theorem radialProjection_origin (t : ℝ) :
     PhysicalGraphBounds.radialProjection (t, (0 : Space)) = 0 := by
@@ -377,12 +360,6 @@ theorem initializedSeries_succ {h : ℝ} {Ω : Set SpaceTime}
     (p : ℕ → PotentialStage.{u} h Ω) (j : ℕ) :
     initializedSeries base initial p (j + 1) = (p j).field := rfl
 
-theorem initializedDiagonal_eq {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω) (scales : ℕ → ℝ) :
-    initializedDiagonal base initial p D scales =
-      DirectAngularDiagonal.mixedVelocity scales (PhysicalWaveSum.physicalQ h)
-        (initializedSeries base initial p) (fun j => (D j).scalar) := rfl
 
 theorem initializedBase_germ {h : ℝ} {Ω : Set SpaceTime}
     (base : VelocityField) (initial : PotentialStage.{u} h Ω)
@@ -405,18 +382,6 @@ theorem initialized_eq_base_germ {h : ℝ} {Ω : Set SpaceTime}
   (mixedDiagonal_eq_base_germ (initializedBase base initial) p D hh hh1 hs hΩ hw ht haxis hsmall).trans
     (SolenoidalDiagonal.spatialCurl_eventuallyEq (initializedBase_germ base initial hh hh1 hΩ hw ht haxis))
 
-theorem initialized_axis_jets {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {scales : ℕ → ℝ}
-    (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω) {w : SpaceTime}
-    (hw : w ∈ Ω) (ht : w ∈ PhysicalWaveSum.preterminal)
-    (haxis : PhysicalGraphBounds.radialProjection w = 0)
-    (hsmall : |scales 0 * PhysicalWaveSum.physicalQ h w| < 1 / 2) (k : ℕ) :
-    iteratedFDeriv ℝ k (initializedDiagonal base initial p D scales) w =
-      iteratedFDeriv ℝ k (SpatialCurl.spatialCurl base) w :=
-  (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (initialized_eq_base_germ base initial p D hh hh1 hs hΩ hw ht haxis hsmall) k).self_of_nhds
 
 theorem initialized_origin_eventually {h : ℝ} {Ω : Set SpaceTime}
     (base : VelocityField) (initial : PotentialStage.{u} h Ω)
@@ -464,27 +429,6 @@ theorem origin_eventually_localDomain {h qbig : ℝ}
 
 /-! ## Compatibility with the global axis-preservation endpoint -/
 
-/-- When support is known on the full preterminal region, the existing
-`AxisPreservation.origin_blowup` theorem applies to the actual copy series.
-The local-domain theorem above does not require this stronger hypothesis. -/
-theorem origin_blowup_global {h : ℝ}
-    (base : VelocityField) (p : ℕ → PotentialStage.{u} h PhysicalWaveSum.preterminal)
-    (D : ℕ → AngularSupport PhysicalWaveSum.preterminal)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {scales : ℕ → ℝ}
-    (hs : Tendsto scales atTop atTop)
-    (hbase : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl base (t, 0)‖) (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ => ‖mixedDiagonal base p D scales (t, 0)‖) (𝓝[<] 1) atTop := by
-  have hz : ∀ t < 1, ∀ j : ℕ, j ≠ 0 → potentialSeries base p j =ᶠ[𝓝 (t, 0)] fun _ => 0 :=
-    fun t ht => potentialSeries_zero_germ base p hh hh1 PhysicalWaveSum.preterminal_open ht ht
-      (radialProjection_origin t)
-  have hb := AxisPreservation.origin_blowup hs
-    (fun _ ht => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 ht).continuousAt)
-    (fun _ ht => PhysicalWaveSum.physicalQ_pos hh hh1 ht) hz
-    (AxisPreservation.physicalQ_origin_tendsto hh hh1) hbase
-  apply hb.congr'
-  exact Filter.Eventually.of_forall fun t => congrArg norm
-    (DirectAngularDiagonal.mixedVelocity_axis scales (PhysicalWaveSum.physicalQ h)
-      (potentialSeries base p) (fun j => (D j).scalar) t 0 rfl rfl).symm
 
 /-! ## The anchored base supplies the actual blow-up -/
 
@@ -501,18 +445,6 @@ theorem anchored_base_axis_tendsto (upper : ℝ) (B : ℕ) :
   filter_upwards [self_mem_nhdsWithin (a := (1 : ℝ)) (s := Iio 1)] with t ht
   rw [TailGaugePotential.finalPotential_sameCurl H v upper B (w := (t, 0)) ht]
 
-theorem final_origin_eventually (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
-    (p : ℕ → PotentialStage.{u} F.data.h Ω) (D : ℕ → AngularSupport Ω)
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω) :
-    (fun t : ℝ => mixedDiagonal (TailGaugePotential.finalPotential H v upper B) p D scales (t, 0))
-      =ᶠ[𝓝[<] 1] (fun t =>
-        ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) • coordinateVector 2) := by
-  filter_upwards [origin_eventually_eq_base (TailGaugePotential.finalPotential H v upper B) p D
-    F.data.h_pos F.data.h_lt_half hs hΩ hΩaxis,
-    self_mem_nhdsWithin (a := (1 : ℝ)) (s := Iio 1)] with t he ht
-  rw [he, TailGaugePotential.finalPotential_sameCurl H v upper B (w := (t, 0)) ht,
-    FinalSlowBase.origin H v upper B ht]
 
 theorem final_origin_blowup (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
     (p : ℕ → PotentialStage.{u} F.data.h Ω) (D : ℕ → AngularSupport Ω)
@@ -524,12 +456,6 @@ theorem final_origin_blowup (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
   origin_blowup _ p D F.data.h_pos F.data.h_lt_half hs hΩ hΩaxis
     (anchored_base_axis_tendsto H v upper B)
 
-theorem final_speedUnbounded (upper : ℝ) (B : ℕ) {Ω : Set SpaceTime}
-    (p : ℕ → PotentialStage.{u} F.data.h Ω) (D : ℕ → AngularSupport Ω)
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω) :
-    SpeedUnboundedAtOne (mixedDiagonal (TailGaugePotential.finalPotential H v upper B) p D scales) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (final_origin_blowup H v upper B p D hs hΩ hΩaxis)
 
 /-- Raw stage support is needed only where `q < qbig`.  The concrete base,
 the actual cutoff scale, and the literal mixed sums are kept throughout. -/
@@ -543,12 +469,6 @@ theorem local_final_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 
   final_origin_blowup H v upper B p D hs (localDomain_open F.data.h_pos F.data.h_lt_half qbig)
     (origin_eventually_localDomain F.data.h_pos F.data.h_lt_half hqbig)
 
-theorem local_final_speedUnbounded (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (p : ℕ → PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (D : ℕ → AngularSupport (localDomain F.data.h qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    SpeedUnboundedAtOne (mixedDiagonal (TailGaugePotential.finalPotential H v upper B) p D scales) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (local_final_origin_blowup H v upper B hqbig p D hs)
 
 theorem local_initialized_final_origin_blowup (upper : ℝ) (B : ℕ)
     {qbig : ℝ} (hqbig : 0 < qbig)
@@ -564,16 +484,6 @@ theorem local_initialized_final_origin_blowup (upper : ℝ) (B : ℕ)
     (origin_eventually_localDomain F.data.h_pos F.data.h_lt_half hqbig)
     (anchored_base_axis_tendsto H v upper B)
 
-theorem local_initialized_final_speedUnbounded (upper : ℝ) (B : ℕ)
-    {qbig : ℝ} (hqbig : 0 < qbig)
-    (initial : PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (p : ℕ → PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (D : ℕ → AngularSupport (localDomain F.data.h qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    SpeedUnboundedAtOne
-      (initializedDiagonal (TailGaugePotential.finalPotential H v upper B) initial p D scales) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto
-    (local_initialized_final_origin_blowup H v upper B hqbig initial p D hs)
 
 end FinalBase
 
@@ -590,12 +500,6 @@ theorem constructed_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 
   local_final_origin_blowup FinalSlowBase.actualProfile.certificate
     FinalSlowBase.actualProfile.modulation upper B hqbig p D hs
 
-theorem constructed_speedUnbounded (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (p : ℕ → PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (D : ℕ → AngularSupport (localDomain constructedExponent qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    SpeedUnboundedAtOne (mixedDiagonal (TailGaugePotential.constructedPotential upper B) p D scales) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (constructed_origin_blowup upper B hqbig p D hs)
 
 theorem initialized_constructed_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
     (initial : PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
@@ -608,14 +512,5 @@ theorem initialized_constructed_origin_blowup (upper : ℝ) (B : ℕ) {qbig : �
   local_initialized_final_origin_blowup FinalSlowBase.actualProfile.certificate
     FinalSlowBase.actualProfile.modulation upper B hqbig initial p D hs
 
-theorem initialized_constructed_speedUnbounded (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (initial : PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (p : ℕ → PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (D : ℕ → AngularSupport (localDomain constructedExponent qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    SpeedUnboundedAtOne
-      (initializedDiagonal (TailGaugePotential.constructedPotential upper B) initial p D scales) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto
-    (initialized_constructed_origin_blowup upper B hqbig initial p D hs)
 
 end NavierStokes.MixedAxisPreservation

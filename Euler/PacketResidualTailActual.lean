@@ -50,19 +50,6 @@ theorem slicedMomentumGrade_tail_eq_recursive (O : Operators) (N n : ℕ) (hn : 
   unfold recursiveGrade coefficient
   rw [hg,shiftDown_above (N+1) n _ hn,shiftDown_above (N+1) n _ hn]
 
-theorem slicedMomentumGrade_tail (O : Operators) (N n : ℕ) (hn : N+1 ≤ n)
-    (a : ℕ → Profile) (ha : a 0=0) (z : Domain)
-    (hA : ∀ i ≤ N, SliceDifferentiable O.interval (a i).high z)
-    (hB : ∀ i ≤ N, SliceDifferentiable O.interval (a i).mean z)
-    (hC : ∀ i ≤ N, SliceDifferentiable O.interval (a i).corrector z) :
-    slicedMomentumGrade O.interval (N+1) (O.inverseFrame z) (O.strain z) (O.normal z)
-      (assembledVelocity N a) (assembledPressure N a) z n =
-      (if n=N+1 then
-        linearPart (O.strain z) (slicedJet O.interval (a N).corrector z)+
-        slowPressure (O.inverseFrame z) (pressureJet (a N).highPressure z) else 0) +
-      nonlinearGrade (N+1) n (O.inverseFrame z) (O.normal z) (knownJets O (N+1) a z) :=
-  (slicedMomentumGrade_tail_eq_recursive O N n hn a z hA hB hC).trans
-    (recursiveGrade_tail O N n hn a ha z)
 
 end EulerPacketProfileRecursion
 

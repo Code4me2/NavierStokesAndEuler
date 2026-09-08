@@ -96,51 +96,6 @@ def cutoffDifferenceConstant (R M₁ M₂ : ℝ) : ℝ :=
   3 * cutoffCurlConstant *
     (M₁ + M₂ * (volume (Metric.closedBall (0 : Space) (R+1))).toReal ^ (1/3 : ℝ))
 
-/-- A bound independent of the difference step; the only data are genuine derivative bounds. -/
-theorem cutoffBound_differenceQuotient (χ : Cutoff) (R M₁ M₂ : ℝ)
-    (hM₁ : 0 ≤ M₁) (hM₂ : 0 ≤ M₂)
-    (hsupport : tsupport χ.field ⊆ Metric.closedBall (0 : Space) R)
-    (hD₁ : ∀ x, ‖fderiv ℝ χ.field x‖ ≤ M₁)
-    (hD₂ : ∀ x, ‖fderiv ℝ (fderiv ℝ χ.field) x‖ ≤ M₂)
-    (a : Space) (h : ℝ) (hstep : ‖h • a‖ ≤ 1) :
-    cutoffBound (χ.differenceQuotient a h) ≤ cutoffDifferenceConstant R M₁ M₂ * ‖a‖ := by
-  let K := Metric.closedBall (0 : Space) (R+1)
-  have hK : volume K ≠ (∞ : ℝ≥0∞) := (isCompact_closedBall (0 : Space) (R+1)).measure_ne_top
-  have hs : tsupport (χ.differenceQuotient a h).field ⊆ K :=
-    differenceQuotient_support χ R hsupport a h hstep
-  have hz : ∀ x ∉ K, (χ.differenceQuotient a h).field x = 0 :=
-    fun x hx => image_eq_zero_of_notMem_tsupport (fun ht => hx (hs ht))
-  have hdz : ∀ x ∉ K, fderiv ℝ (χ.differenceQuotient a h).field x = 0 :=
-    fun x hx => fderiv_of_notMem_tsupport ℝ (fun ht => hx (hs ht))
-  have hb (x : Space) : ‖(χ.differenceQuotient a h).field x‖ ≤ M₁ * ‖a‖ :=
-    norm_differenceQuotient_le χ.field (χ.smooth.differentiable (by simp)) M₁ hM₁ hD₁ a h x
-  have hdb (x : Space) : ‖fderiv ℝ (χ.differenceQuotient a h).field x‖ ≤ M₂ * ‖a‖ := by
-    rw [differenceQuotient_fderiv]
-    exact norm_differenceQuotient_le (fderiv ℝ χ.field)
-      ((χ.smooth.fderiv_right (m := ∞) (by simp)).differentiable (by simp)) M₂ hM₂ hD₂ a h x
-  have h₀ := lpNorm_le_bound_volume (χ.differenceQuotient a h).field
-    (χ.differenceQuotient a h).smooth.continuous.aestronglyMeasurable K hK
-    (M₁ * ‖a‖) (mul_nonneg hM₁ (norm_nonneg a)) hb hz (∞ : ℝ≥0∞)
-  simp only [ENNReal.toReal_top, div_zero, Real.rpow_zero, mul_one] at h₀
-  have h₁ := lpNorm_le_bound_volume (fderiv ℝ (χ.differenceQuotient a h).field)
-    (((χ.differenceQuotient a h).smooth.fderiv_right (m := ∞) (by simp)).continuous.aestronglyMeasurable)
-    K hK (M₂ * ‖a‖) (mul_nonneg hM₂ (norm_nonneg a)) hdb hdz 3
-  norm_num only [ENNReal.toReal_ofNat] at h₁
-  unfold cutoffBound
-  rw [lpNorm_gradient_eq_fderiv _ (χ.differenceQuotient a h).smooth]
-  calc
-    _ ≤ 3 * cutoffCurlConstant *
-        (M₁ * ‖a‖ + (M₂ * ‖a‖) * (volume K).toReal ^ (1/3 : ℝ)) :=
-      mul_le_mul_of_nonneg_left (add_le_add h₀ h₁)
-        (mul_nonneg (by norm_num) cutoffCurlConstant_pos.le)
-    _ = cutoffDifferenceConstant R M₁ M₂ * ‖a‖ := by
-      unfold cutoffDifferenceConstant K
-      ring
 
-theorem cutoffDifferenceConstant_nonneg (R M₁ M₂ : ℝ) (hM₁ : 0 ≤ M₁) (hM₂ : 0 ≤ M₂) :
-    0 ≤ cutoffDifferenceConstant R M₁ M₂ := by
-  unfold cutoffDifferenceConstant
-  exact mul_nonneg (mul_nonneg (by norm_num) cutoffCurlConstant_pos.le)
-    (add_nonneg hM₁ (mul_nonneg hM₂ (Real.rpow_nonneg ENNReal.toReal_nonneg _)))
 
 end EulerMeanBoundary

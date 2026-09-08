@@ -124,22 +124,6 @@ theorem activatedVelocity_divergence_free (u : VelocityField)
   intro t ht x
   rw [activatedVelocity_divergence u hu t ht x, hdiv t ht x, mul_zero]
 
-/-- Exact residual of the constructed activation: `χ R + χ' u + (χ²-χ)(u·∇)u`. -/
-theorem activated_residual_formula (u : VelocityField) (p : PressureField)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain)
-    (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) (x : Space) :
-    navierStokesResidual (activatedVelocity u) (activatedPressure p) t x =
-      timeSwitch t • navierStokesResidual u p t x + deriv timeSwitch t • u (t, x) +
-        (timeSwitch t * timeSwitch t - timeSwitch t) • advection u t x := by
-  unfold activatedVelocity activatedPressure
-  simpa only [deriv, smul_eq_mul] using
-    navierStokesResidual_time_smul u p timeSwitch t x
-      (timeSwitch_contDiff.differentiable (by simp) t)
-      (temporal_differentiable_of_presingular_smooth u hu t ht x)
-      ((spatial_contDiff_of_presingular_smooth u hu t ht).of_le
-        (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)))
-      ((spatial_contDiff_of_presingular_smooth p hp t ht).differentiable (by simp) x)
 
 theorem activated_temporalDerivative_eq_late (u : VelocityField) {t : ℝ}
     (ht : 3 / 4 < t) (x : Space) :
@@ -192,34 +176,5 @@ theorem activatedVelocity_speed_unbounded_iff (u : VelocityField) :
     exact ⟨t, x, ht, hnear, hlarge.trans_le (activatedVelocity_norm_le u (t, x))⟩
   · exact activatedVelocity_speed_unbounded u
 
-/-- A constructed pair with zero initial velocity, retaining the incoming
-presingular smoothness, periods, divergence constraint and terminal blowup.
-The input field is not assumed to vanish initially. -/
-theorem exists_time_localized_pair (u : VelocityField) (p : PressureField)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain)
-    (huper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hpper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p)
-    (hdiv : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence u t x = 0)
-    (hunbounded : SpeedUnboundedAtOne u) :
-    ∃ v : VelocityField, ∃ q : PressureField,
-      ContDiffOn ℝ ∞ v preSingularDomain ∧
-      ContDiffOn ℝ ∞ q preSingularDomain ∧
-      UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) v ∧
-      UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) q ∧
-      (∀ x : Space, v (0, x) = 0) ∧
-      (∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence v t x = 0) ∧
-      SpeedUnboundedAtOne v ∧
-      (∀ t : ℝ, 3 / 4 < t → ∀ x : Space,
-        v (t, x) = u (t, x) ∧ q (t, x) = p (t, x) ∧
-          navierStokesResidual v q t x = navierStokesResidual u p t x) := by
-  refine ⟨activatedVelocity u, activatedPressure p,
-    activatedVelocity_smooth u hu, activatedPressure_smooth p hp,
-    activatedVelocity_periodic u _ huper, activatedPressure_periodic p _ hpper,
-    activatedVelocity_zero_initial u, activatedVelocity_divergence_free u hu hdiv,
-    activatedVelocity_speed_unbounded u hunbounded, ?_⟩
-  intro t ht x
-  exact ⟨activatedVelocity_eq_late u ht.le x, activatedPressure_eq_late p ht.le x,
-    activated_residual_eq_late u p ht x⟩
 
 end NavierStokes.TimeLocalization

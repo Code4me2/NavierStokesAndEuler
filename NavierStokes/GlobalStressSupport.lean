@@ -371,21 +371,7 @@ theorem zDensity_exterior {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
   rw [zDensity_eq s hbase (by omega : 0 < n) ⟨mem_univ R, heta⟩]
   exact axialDensity_exterior s hn eta heta R hR
 
-theorem thetaDensity_integrableOn {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 2 ≤ n)
-    {eta : ℝ} (heta : eta ∈ S) :
-    IntegrableOn (fun R => SlowResidualMatching.thetaDensity h C (asSlowProfiles s) n (R, eta)) (Ioi 0) :=
-  PositiveOrderMoments.positive_integrableOn_of_compact
-    (SlowStressSupport.slice_smooth (thetaDensity_smooth s hbase (by omega : 0 < n)) heta).continuous.continuousOn
-    (thetaDensity_exterior s hbase hn eta heta)
 
-theorem zDensity_integrableOn {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 2 ≤ n)
-    {eta : ℝ} (heta : eta ∈ S) :
-    IntegrableOn (fun R => SlowResidualMatching.zDensity h (asSlowProfiles s) n (R, eta)) (Ioi 0) :=
-  PositiveOrderMoments.positive_integrableOn_of_compact
-    (SlowStressSupport.slice_smooth (zDensity_smooth s hbase (by omega : 0 < n)) heta).continuous.continuousOn
-    (zDensity_exterior s hbase hn eta heta)
 
 theorem thetaDensity_positive_integral_zero {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
     (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 2 ≤ n)
@@ -437,24 +423,7 @@ theorem nominal_stresses_exterior {n : ℕ} (hn : 2 ≤ n) :
         (asSlowProfiles (nominalScheme W)) n)) :=
   raw_stresses_exterior (nominalScheme W) (nominal_base_beta W) hn
 
-theorem nominal_density_integrals_zero {n : ℕ} (hn : 2 ≤ n)
-    {eta : ℝ} (heta : eta ∈ nominalParameters W) :
-    (∫ R in Ioi (0 : ℝ), SlowResidualMatching.thetaDensity F.data.h W.axis.normalization
-      (asSlowProfiles (nominalScheme W)) n (R, eta)) = 0 ∧
-    (∫ R in Ioi (0 : ℝ), SlowResidualMatching.zDensity F.data.h
-      (asSlowProfiles (nominalScheme W)) n (R, eta)) = 0 :=
-  ⟨thetaDensity_positive_integral_zero (nominalScheme W) (nominal_base_beta W) hn heta,
-   zDensity_positive_integral_zero (nominalScheme W) (nominal_base_beta W) hn heta⟩
 
-/-- The actual globally smooth coefficients vanish outside the fixed outer
-radius for every parameter, including outside the physical parameter strip. -/
-theorem nominalCoefficients_stress_zero_right {n : ℕ} (hn : 2 ≤ n)
-    {p : ℝ × ℝ} (hX : nominalOuterX W ≤ p.1) :
-    (nominalCoefficients W).stressTheta n p = 0 ∧ (nominalCoefficients W).stressAxial n p = 0 := by
-  have hs := nominal_stresses_exterior W hn
-  apply coefficients_stress_zero_right (nominalLocalization W) (nominalBaseAgreement W)
-    (nominalZeroOrder W) (nominalParameters_contains W) n (nominalOuterRadius_pos W).le hs.1 hs.2
-  simpa only [nominalOuterRadius_square] using hX
 
 /-- One compact rectangle contains both stress supports for the entire
 higher-order family.  Its radial lower edge is strictly positive. -/
@@ -470,11 +439,6 @@ theorem nominalCoefficients_stress_support {n : ℕ} (hn : 2 ≤ n) :
   simp only [nominalOuterRadius_square] at h
   exact h
 
-theorem nominalCoefficients_stress_compactSupport {n : ℕ} (hn : 2 ≤ n) :
-    HasCompactSupport (fun p => ((nominalCoefficients W).stressTheta n p,
-      (nominalCoefficients W).stressAxial n p)) :=
-  (isCompact_Icc.prod isCompact_Icc).of_isClosed_subset isClosed_closure
-    (nominalCoefficients_stress_support W hn)
 
 end Nominal
 

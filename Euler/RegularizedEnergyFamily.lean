@@ -16,12 +16,6 @@ open scoped Topology
 variable (period : ℝ) [Fact (0 < period)]
 variable {α β : Type*} [Fintype α] [Fintype β] {q : ℕ}
 
-/-- A finite actual family of energy-order heat-regularized Sobolev word paths. -/
-def regularizedFamily (d : α → β → ℕ) (w : ∀ i j, Fin (d i j) → Fin 4)
-    (hd : ∀ i j, d i j ≤ q+1) (n : ℕ) (T : ℝ)
-    (u : C(Icc (0 : ℝ) T, SobolevSpace period (q+1))) (i : α) :
-    C(Icc (0 : ℝ) T, β → SobolevSpace period 2) :=
-  familyPath T (fun j => regularizedWordPath period (hd i j) n (w i j) T u)
 
 /-- The genuine L² values of the regularized energy-word family. -/
 def regularizedValueFamily (d : α → β → ℕ) (w : ∀ i j, Fin (d i j) → Fin 4)

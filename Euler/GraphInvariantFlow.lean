@@ -60,12 +60,6 @@ theorem graphFlow_invariant (s t : ℝ) (x : Vector3) :
 @[simp] theorem graphFlow_initial (s : ℝ) (x : Vector3) : graphFlow k m V s s x=x := by
   simp [graphFlow]
 
-include hV in
-theorem graphFlow_inverse (s t : ℝ) (x : Vector3) :
-    graphFlow k m V t s (graphFlow k m V s t x)=x := by
-  change (V.flow t s (graphLinear k m (graphFlow k m V s t x))).1=x
-  rw [← graphFlow_invariant k m V hV,V.flow_inverse]
-  rfl
 
 include hV in
 theorem graphFlow_hasDerivAt (s t : ℝ) (x : Vector3) :
@@ -74,17 +68,7 @@ theorem graphFlow_hasDerivAt (s t : ℝ) (x : Vector3) :
   have hd := (V.flow_hasDerivAt s t (graphLinear k m x)).fst
   rwa [graphFlow_invariant k m V hV] at hd
 
-theorem graphFlow_continuous (s t : ℝ) : Continuous (graphFlow k m V s t) :=
-  continuous_fst.comp ((V.flowHomeomorph s t).continuous.comp (graphLinear k m).continuous)
 
-theorem graphFlow_forward_joint_continuous :
-    Continuous (fun r : ℝ × Vector3 => graphFlow k m V 0 r.1 r.2) :=
-  continuous_fst.comp (V.forward_joint_continuous.comp
-    (continuous_fst.prodMk ((graphLinear k m).continuous.comp continuous_snd)))
 
-theorem graphFlow_backward_joint_continuous :
-    Continuous (fun r : ℝ × Vector3 => graphFlow k m V r.1 0 r.2) :=
-  continuous_fst.comp (V.backward_joint_continuous.comp
-    (continuous_fst.prodMk ((graphLinear k m).continuous.comp continuous_snd)))
 
 end EulerGraphInvariantFlow

@@ -183,11 +183,6 @@ theorem FiniteJetBound.transport {m : ℕ} {f : D → D} {g : D → E}
     hg.fderiv_of_isOpen hs (by simp)
   exact FiniteJetBound.clm_apply hs hg' hf hB.fderiv hA
 
-/-- The actual second Fréchet derivative consumes two orders of a finite bound. -/
-theorem FiniteJetBound.secondFDeriv {m : ℕ} {f : D → E} {s : Set D} {C : ℝ}
-    (hf : FiniteJetBound (m + 2) f s C) :
-    FiniteJetBound m (_root_.fderiv ℝ (_root_.fderiv ℝ f)) s C :=
-  hf.fderiv.fderiv
 
 /-- The order profile produced by the binomial Leibniz sum. -/
 def leibnizProfile (A B : ℕ → ℝ) (n : ℕ) : ℝ :=
@@ -275,36 +270,6 @@ theorem AllJetBound.mul_rpow {f g : D → ℝ} {s : Set D}
   intro n x hx
   simpa only [leibnizProfile_scale, Real.rpow_add hε] using h n x hx
 
-/-- Quantitative change of a general bounded bilinear nonlinearity.  The three
-terms are the two cross interactions and the quadratic perturbation. -/
-theorem FiniteJetBound.bilinear_perturbation {m : ℕ} (L : E →L[ℝ] F →L[ℝ] G)
-    {f u : D → E} {g v : D → F} {s : Set D} {A U B V : ℝ}
-    (hs : IsOpen s) (hf : ContDiffOn ℝ m f s) (hu : ContDiffOn ℝ m u s)
-    (hg : ContDiffOn ℝ m g s) (hv : ContDiffOn ℝ m v s)
-    (hA : FiniteJetBound m f s A) (hU : FiniteJetBound m u s U)
-    (hB : FiniteJetBound m g s B) (hV : FiniteJetBound m v s V) :
-    FiniteJetBound m
-      (fun x => L (f x + u x) (g x + v x) - L (f x) (g x)) s
-      (‖L‖ * (2 : ℝ) ^ m * (A * V + U * B + U * V)) := by
-  have hfv : ContDiffOn ℝ m (fun x => L (f x) (v x)) s :=
-    (L.contDiff.comp_contDiffOn hf).clm_apply hv
-  have hug : ContDiffOn ℝ m (fun x => L (u x) (g x)) s :=
-    (L.contDiff.comp_contDiffOn hu).clm_apply hg
-  have huv : ContDiffOn ℝ m (fun x => L (u x) (v x)) s :=
-    (L.contDiff.comp_contDiffOn hu).clm_apply hv
-  have h₁ := FiniteJetBound.bilinear L hs hf hv hA hV
-  have h₂ := FiniteJetBound.bilinear L hs hu hg hU hB
-  have h₃ := FiniteJetBound.bilinear L hs hu hv hU hV
-  have hsum := FiniteJetBound.add hs (hfv.add hug) huv
-    (FiniteJetBound.add hs hfv hug h₁ h₂) h₃
-  have heq : (fun x => L (f x + u x) (g x + v x) - L (f x) (g x)) =
-      (fun x => (L (f x) (v x) + L (u x) (g x)) + L (u x) (v x)) := by
-    funext x
-    simp only [map_add, add_apply]
-    abel
-  rw [heq]
-  apply hsum.mono
-  exact le_of_eq (by ring)
 
 end
 

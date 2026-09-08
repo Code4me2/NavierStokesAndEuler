@@ -42,57 +42,7 @@ theorem accumulate_step {a e : ℕ → ℝ} (n : ℕ)
   rw [sum_range_succ]
   linarith only [hi,hprev,ht]
 
-/-- No bound on a future coupling is an input. The step estimate can
-be established only after the previous finite prefix has been bounded. -/
-theorem coupling_prefix {a e : ℕ → ℝ} {η : ℝ} (N : ℕ)
-    (he : SmallSeries e η) (hη : η ≤ 1/4) (hzero : a 0=1)
-    (hstep : ∀ n < N, (∀ i ≤ n, 1/2 ≤ a i ∧ a i ≤ 2) →
-      |a (n+1)/a n-1| ≤ e n) :
-    ∀ n ≤ N, (1/2 ≤ a n ∧ a n ≤ 2) ∧ |a n-1| ≤ 2*∑ i ∈ range n, e i := by
-  intro n
-  induction n using Nat.strong_induction_on with
-  | h n ih =>
-    intro hn
-    cases n with
-    | zero => simp only [hzero,sub_self,abs_zero,sum_range_zero,mul_zero]; norm_num
-    | succ n =>
-      have hp := ih n (by omega) (by omega)
-      have hprefix : ∀ i ≤ n, 1/2 ≤ a i ∧ a i ≤ 2 := by
-        intro i hi
-        exact (ih i (by omega) (by omega)).1
-      have hs := accumulate_step n hp.1.1 hp.1.2 (he.nonneg n) hp.2
-        (hstep n (by omega) hprefix)
-      exact ⟨bounds_of_accumulated_error he hη (n+1) hs,hs⟩
 
-/-- The same finite induction propagates the normalized tilt invariant
-along with the coupling. Its hypotheses mention only already-built stages. -/
-theorem coupling_and_tilt_prefix {a β x e : ℕ → ℝ} {η : ℝ} (N : ℕ)
-    (he : SmallSeries e η) (hη : η ≤ 1/4) (hzero : a 0=1)
-    (hβzero : 1/2 ≤ β 0*(x 0)^2 ∧ β 0*(x 0)^2 ≤ 2)
-    (hstep : ∀ n < N,
-      (∀ i ≤ n, (1/2 ≤ a i ∧ a i ≤ 2) ∧ (1/2 ≤ β i*(x i)^2 ∧ β i*(x i)^2 ≤ 2)) →
-      |a (n+1)/a n-1| ≤ e n ∧
-        (1/2 ≤ β (n+1)*(x (n+1))^2 ∧ β (n+1)*(x (n+1))^2 ≤ 2)) :
-    ∀ n ≤ N, (1/2 ≤ a n ∧ a n ≤ 2) ∧
-      (1/2 ≤ β n*(x n)^2 ∧ β n*(x n)^2 ≤ 2) ∧
-      |a n-1| ≤ 2*∑ i ∈ range n, e i := by
-  intro n
-  induction n using Nat.strong_induction_on with
-  | h n ih =>
-    intro hn
-    cases n with
-    | zero =>
-      refine ⟨?_,hβzero,?_⟩ <;> simp only [hzero,sub_self,abs_zero,sum_range_zero,mul_zero] <;> norm_num
-    | succ n =>
-      have hp := ih n (by omega) (by omega)
-      have hprefix : ∀ i ≤ n,
-          (1/2 ≤ a i ∧ a i ≤ 2) ∧ (1/2 ≤ β i*(x i)^2 ∧ β i*(x i)^2 ≤ 2) := by
-        intro i hi
-        have h := ih i (by omega) (by omega)
-        exact ⟨h.1,h.2.1⟩
-      have ht := hstep n (by omega) hprefix
-      have hs := accumulate_step n hp.1.1 hp.1.2 (he.nonneg n) hp.2.2 ht.1
-      exact ⟨bounds_of_accumulated_error he hη (n+1) hs,ht.2,hs⟩
 
 theorem stage_congr_at {J D : ℕ} {C c X K : ℝ} {a β b γ : ℕ → ℝ} {n : ℕ}
     (G : StageGuards J D C c X K a β n) (ha : a n=b n) (hβ : β n=γ n) :

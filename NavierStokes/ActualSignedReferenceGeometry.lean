@@ -161,10 +161,6 @@ noncomputable def cycleSingletonGeometry
     ((ActualCycleParameters.fixedParameters B N0).afterParticular
       x.coefficients (commonContext B) x.state) H hp L
 
-noncomputable def cycleNativeGeometry (l : Label B N0) :
-    ActualSignedPhysicalData.ReferenceGeometry (h := h) slots
-      ((ActualSignedExterior.cycleFamily x H hp).singleton (ActualSignedExterior.nativeLabel l)) :=
-  cycleSingletonGeometry x H hp (ActualSignedExterior.nativeLabel l)
 
 end Cycle
 

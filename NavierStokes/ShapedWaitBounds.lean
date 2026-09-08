@@ -1214,48 +1214,7 @@ theorem holdConstant_bounds {P : ℝ} (hP : 0 < P) (m : ℝ) :
   · linarith
   constructor <;> linarith
 
-/-- The complete estimates (16), including the actual first parameter
-derivatives, with one displayed constant depending only on the earlier `P,m`. -/
-theorem canonical_hold_estimates {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    {η t : ℝ} (hh1 : v.h ≤ 1 / 100) (hhlam : v.h ≤ v.core.lam / 4)
-    (hhT : v.h ≤ Real.exp (-(v.core.holdStart + 3 / 5)) / 8)
-    (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
-    holdFloor v.core.m * (η ^ 2 + v.core.lam + Real.exp (-(1 - v.core.lam) * t)) ≤
-        OutgoingHistories.Qs w Amp (v.core.holdStart + t, η) ∧
-      |OutgoingHistories.Qs w Amp (v.core.holdStart + t, η) - equilibrium v.core v.h η| ≤
-        holdConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 - v.core.lam) * t) ∧
-      |deriv (fun θ => OutgoingHistories.Qs w Amp (v.core.holdStart + t, θ) - equilibrium v.core v.h θ) η| ≤
-        holdConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 - v.core.lam) * t) ∧
-      |OutgoingHistories.Ns w Amp (v.core.holdStart + t, η) / OutgoingHistories.E w (v.core.holdStart + t, η)| ≤
-        holdConstant v.core.P v.core.m * |η| * (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) ∧
-      |deriv (fun θ => OutgoingHistories.Ns w Amp (v.core.holdStart + t, θ) /
-        OutgoingHistories.E w (v.core.holdStart + t, θ)) η| ≤
-          holdConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) := by
-  have hc := holdConstant_bounds v.core.P_pos v.core.m
-  have hprod : 206 ≤ holdConstant v.core.P v.core.m * (1 + t) := by
-    nlinarith [mul_nonneg hc.1.le ht]
-  refine ⟨canonical_Qs_hold_lower w ha hh1 hhlam hhT hη ht htw, ?_, ?_, ?_, ?_⟩
-  · exact (canonical_Qs_hold_error w ha hh1 hη ht htw).trans
-      (mul_le_mul_of_nonneg_right (by linarith) (Real.exp_pos _).le)
-  · exact (canonical_Qs_hold_deriv_error w ha hh1 hη ht htw).trans
-      (mul_le_mul_of_nonneg_right hprod (Real.exp_pos _).le)
-  · apply (canonical_Ns_hold_ratio_bound w ha hh1 hη ht htw).trans
-    gcongr
-    exact hc.2.2.1
-  · apply (canonical_Ns_hold_ratio_deriv_bound w ha hh1 hη ht htw).trans
-    gcongr
-    exact hc.2.2.2
 
-theorem canonical_Qs_pulseStart_deriv_power_error {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (hh1 : v.h ≤ 1 / 100) {η : ℝ} (hη : |η| ≤ 1) (n : ℕ)
-    (hwait : waitForPower v.core n ≤ v.core.wait) :
-    |deriv (fun θ => OutgoingHistories.Qs w Amp (v.core.pulseStart, θ) - equilibrium v.core v.h θ) η| ≤
-      206 * v.core.lam ^ n := by
-  have ht : 0 ≤ v.core.wait := by linarith [v.core.wait_gt]
-  exact (canonical_Qs_hold_deriv_error w ha hh1 hη ht le_rfl).trans
-    (mul_le_mul_of_nonneg_left (decay_le_power v.core n hwait) (by norm_num))
 
 /-- A logarithmic wait gives the claimed polynomial smallness of the axial
 history, including its harmless linear factor, with no hidden `λ` constant. -/
@@ -1278,29 +1237,5 @@ theorem polynomial_decay_le_power (c : Parameters) (hlam : c.lam ≤ 1 / 120)
       change 120 * Real.exp (((29 : ℕ) : ℝ) * Real.log c.lam) = 120 * c.lam ^ 29
       rw [Real.exp_nat_mul, Real.exp_log c.lam_pos]
 
-theorem canonical_Ns_pulseStart_power_bounds {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (hh1 : v.h ≤ 1 / 100) (hlam : v.core.lam ≤ 1 / 120)
-    (hwait : -60 * Real.log v.core.lam ≤ v.core.wait) {η : ℝ} (hη : |η| ≤ 1) :
-    |OutgoingHistories.Ns w Amp (v.core.pulseStart, η) / OutgoingHistories.E w (v.core.pulseStart, η)| ≤
-        120 * axialWaitConstant v.core.P v.core.m * |η| * v.core.lam ^ 29 ∧
-      |deriv (fun θ => OutgoingHistories.Ns w Amp (v.core.pulseStart, θ) /
-        OutgoingHistories.E w (v.core.pulseStart, θ)) η| ≤
-          120 * axialRatioDerivativeWaitConstant v.core.P v.core.m * v.core.lam ^ 29 := by
-  have ht : 0 ≤ v.core.wait := by linarith [v.core.wait_gt]
-  have hd := polynomial_decay_le_power v.core hlam hwait
-  have hval := canonical_Ns_hold_ratio_bound w ha hh1 hη ht le_rfl
-  have hder := canonical_Ns_hold_ratio_deriv_bound w ha hh1 hη ht le_rfl
-  have hc := axialWaitConstant_pos v.core.P_pos v.core.m
-  have hc' := axialRatioDerivativeWaitConstant_pos v.core.P_pos v.core.m
-  constructor
-  · have hm := mul_le_mul_of_nonneg_left hd (mul_nonneg hc.le (abs_nonneg η))
-    change |OutgoingHistories.Ns w Amp (v.core.holdStart + v.core.wait, η) /
-      OutgoingHistories.E w (v.core.holdStart + v.core.wait, η)| ≤ _
-    nlinarith
-  · have hm := mul_le_mul_of_nonneg_left hd hc'.le
-    change |deriv (fun θ => OutgoingHistories.Ns w Amp (v.core.holdStart + v.core.wait, θ) /
-      OutgoingHistories.E w (v.core.holdStart + v.core.wait, θ)) η| ≤ _
-    nlinarith
 
 end NavierStokes.ShapedWaitBounds

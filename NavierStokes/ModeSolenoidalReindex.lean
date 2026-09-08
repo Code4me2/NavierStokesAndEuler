@@ -19,13 +19,6 @@ open HarmonicCalculus WeightedClasses
 variable {D E : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem amplitude_pull (e : D ≃ₗᵢ[ℝ] E) (b : CorrectionState.HarmonicBlock E)
-    (j : ℤ) (n : ℕ) :
-    HarmonicWaveInteraction.amplitude (StateReindex.block e b) j n =
-      fun x => HarmonicWaveInteraction.amplitude b j n (e x) := by
-  funext x i
-  simp only [HarmonicWaveInteraction.amplitude, HarmonicMeanInteraction.blockAmplitude,
-    StateReindex.block, StateReindex.realCoefficients_pull, StateReindex.coefficients_apply]
 
 theorem singleMode_pull (e : D ≃ₗᵢ[ℝ] E) (b : CorrectionState.HarmonicBlock E)
     (j : ℤ) (n : ℕ) :

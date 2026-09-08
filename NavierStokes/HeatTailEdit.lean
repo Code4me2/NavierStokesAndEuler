@@ -436,12 +436,6 @@ theorem outgoingProfile_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
   exact ((finalAngular_contDiff d).contDiffAt.comp p
     ((contDiffAt_const.add hl).prodMk contDiffAt_snd)).contDiffWithinAt
 
-theorem outgoingEdit_joint_contDiffOn (d : TailData) {ν K : ℝ}
-    (hν : 0 < ν) (hK : 0 < K) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => outgoingEdit d ν K p.2 p.1)
-      (Ioi 0 ×ˢ univ) := by
-  apply (outgoingProfile_joint_contDiffOn d hK).mul
-  exact (multiplier_contDiffOn d.h_pos hν hK).comp contDiffOn_fst (fun _ hp => hp.1)
 
 theorem outgoingEdit_pos (d : TailData) {ν K X : ℝ} (hν : 0 ≤ ν) (hX : 0 < X)
     (eta : ℝ) : 0 < outgoingEdit d ν K eta X :=
@@ -557,15 +551,6 @@ theorem outgoingEdit_heat_factorization (d : TailData) (ν eta : ℝ) {K X : ℝ
   simp only [div_inv_eq_mul]
   ring
 
-/-- Beyond the terminal taper, the profile is the unmodified exact radial
-heat solution with a positive constant normalization. -/
-theorem outgoingEdit_eventual_heat (d : TailData) (ν eta : ℝ) {K X : ℝ}
-    (hK : 0 < K) (hX : 0 < X) (htail : 3 ≤ Real.log (X / K) + 1 / 5) :
-    outgoingEdit d ν K eta X =
-      (outgoingAmplitude d * K ^ exponent d.h) *
-        RadialHeatProfile.spatialProfile (1 + d.h) ν X := by
-  rw [outgoingEdit_heat_factorization d ν eta hK hX (by linarith),
-    tailShape_late d htail, mul_one]
 
 /-- The actual switch amplitude is fixed by the schedule and comparable to
 the carrier amplitude used in the estimates. -/
@@ -575,29 +560,8 @@ theorem outgoingProfile_at_switch (d : TailData) {K : ℝ} (hK : 0 < K) (eta : �
   simp only [powerTail, div_self hK.ne', Real.one_rpow, mul_one, Real.log_one,
     outgoingShape, zero_add, tailShape_early d (by norm_num : (1 / 5 : ℝ) ≤ 1)]
 
-theorem outgoing_pressure_eta_contDiff (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K) :
-    ContDiff ℝ ∞ (fun eta => pressureDebt (outgoingProfile d K eta) d.h ν K) := by
-  have heq : (fun eta => pressureDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => pressureDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_pressureDebt_eq d ν eta hK
-  rw [heq]
-  exact contDiff_const
 
-theorem outgoing_energy_eta_contDiff (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K) :
-    ContDiff ℝ ∞ (fun eta => energyDebt (outgoingProfile d K eta) d.h ν K) := by
-  have heq : (fun eta => energyDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => energyDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_energyDebt_eq d ν eta hK
-  rw [heq]
-  exact contDiff_const
 
-theorem outgoing_angular_eta_contDiff (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K) :
-    ContDiff ℝ ∞ (fun eta => angularDebt (outgoingProfile d K eta) d.h ν K) := by
-  have heq : (fun eta => angularDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => angularDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_angularDebt_eq d ν eta hK
-  rw [heq]
-  exact contDiff_const
 
 theorem outgoing_pressure_eta_jet_zero (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K)
     (n : ℕ) (eta : ℝ) :
@@ -623,44 +587,7 @@ theorem outgoing_angular_eta_jet_zero (d : TailData) (ν : ℝ) {K : ℝ} (hK : 
     funext fun eta => outgoing_angularDebt_eq d ν eta hK
   rw [heq, SmoothCutoffs.iteratedDeriv_const_succ]
 
-/-- The pressure estimate holds with every fixed slow-variable jet. -/
-theorem outgoing_pressure_jet_bound (d : TailData) {ν K : ℝ} (hν : 0 < ν) (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    |iteratedDeriv n (fun eta => pressureDebt (outgoingProfile d K eta) d.h ν K) eta| ≤
-      2 * heatConstant d.h ν * outgoingAmplitude d ^ 2 / (K * (2 * exponent d.h + 1)) := by
-  cases n with
-  | zero => simpa only [iteratedDeriv_zero] using (outgoing_pressure d hν hK eta).2
-  | succ n =>
-    rw [outgoing_pressure_eta_jet_zero d ν hK n eta, abs_zero]
-    have hc := heatConstant_pos d.h_pos hν
-    have he : 0 < exponent d.h := by unfold exponent; linarith [d.h_pos]
-    positivity
 
-/-- The energy estimate holds with every fixed slow-variable jet. -/
-theorem outgoing_energy_jet_bound (d : TailData) {ν K : ℝ} (hν : 0 < ν) (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    |iteratedDeriv n (fun eta => energyDebt (outgoingProfile d K eta) d.h ν K) eta| ≤
-      2 * heatConstant d.h ν * outgoingAmplitude d ^ 2 / (2 * exponent d.h) := by
-  cases n with
-  | zero => simpa only [iteratedDeriv_zero] using (outgoing_energy d hν hK eta).2
-  | succ n =>
-    rw [outgoing_energy_eta_jet_zero d ν hK n eta, abs_zero]
-    have hc := heatConstant_pos d.h_pos hν
-    have he : 0 < exponent d.h := by unfold exponent; linarith [d.h_pos]
-    positivity
 
-/-- The renormalized angular estimate holds with every fixed slow-variable jet. -/
-theorem outgoing_angular_jet_bound (d : TailData) {ν K : ℝ} (hν : 0 < ν) (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    |iteratedDeriv n (fun eta => angularDebt (outgoingProfile d K eta) d.h ν K) eta| ≤
-      Real.sqrt 2 * heatConstant d.h ν * outgoingAmplitude d * Real.sqrt K / d.h := by
-  cases n with
-  | zero => simpa only [iteratedDeriv_zero] using (outgoing_angular d hν hK eta).2
-  | succ n =>
-    rw [outgoing_angular_eta_jet_zero d ν hK n eta, abs_zero]
-    have hc := heatConstant_pos d.h_pos hν
-    have he := outgoingAmplitude_pos d
-    have hh := d.h_pos
-    positivity
 
 end NavierStokes.HeatTailEdit

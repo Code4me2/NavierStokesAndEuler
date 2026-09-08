@@ -50,15 +50,6 @@ theorem vector_sum_zero_near_axis {H : ℕ} {f : Fin 3 → WaveFamily H}
   filter_upwards [hz] with y hy
   simp only [vectorSum, hy, map_zero, Finset.sum_const_zero]
 
-theorem wave_curl_zero_on_axis {H : ℕ} {f : Fin 3 → WaveFamily H}
-    {a b h r0 Z : ℝ} {gap : ℕ}
-    (hf : ∀ i, RegularFamily (f i) a b h r0 Z gap) (ha : 0 < a)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {w : SpaceTime}
-    (hw : w ∈ preterminal) (haxis : PhysicalGraphBounds.radialProjection w = 0) :
-    SpatialCurl.spatialCurl (vectorSum f a h r0) w = 0 := by
-  have he := spatialCurl_eq_of_eventuallyEq
-    (vector_sum_zero_near_axis hf ha hh hh1 hw haxis)
-  simpa [SpatialCurl.spatialCurl, SpatialCurl.curl] using he
 
 /-- Only finitely many zero germs are intersected at each positive-scale
 point. There is no common support radius assumed for every stage. -/
@@ -154,28 +145,6 @@ noncomputable def waveSeries (base : VelocityField) (H : ℕ → ℕ)
   | 0 => base
   | j + 1 => vectorSum (f j) a h r0
 
-theorem physical_wave_diagonal_origin_blowup
-    {base : VelocityField} {H : ℕ → ℕ} {f : (j : ℕ) → Fin 3 → WaveFamily (H j)}
-    {a b h r0 : ℝ} {Z : ℕ → ℝ} {gap : ℕ → ℕ}
-    (hf : ∀ j i, RegularFamily (f j i) a b h r0 (Z j) (gap j))
-    (ha : 0 < a) (hh : 0 < h) (hh1 : h < 1 / 2)
-    {scales : ℕ → ℝ} (hscales : Tendsto scales atTop atTop)
-    (hbase : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl base (t, 0)‖)
-      (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ =>
-      ‖velocitySum scales (physicalQ h) (waveSeries base H f a h r0) (t, 0)‖)
-      (𝓝[<] 1) atTop := by
-  have hz : ∀ t < 1, ∀ j : ℕ, j ≠ 0 →
-      waveSeries base H f a h r0 j =ᶠ[𝓝 (t, 0)] fun _ => 0 := by
-    intro t ht j hj
-    cases j with
-    | zero => exact (hj rfl).elim
-    | succ j =>
-        exact vector_sum_zero_near_axis (hf j) ha hh hh1 ht
-          (by simp only [PhysicalGraphBounds.radialProjection_apply]; rfl)
-  exact origin_blowup hscales
-    (fun t ht => (physicalQ_smoothAt hh hh1 ht).continuousAt)
-    (fun t ht => physicalQ_pos hh hh1 ht) hz (physicalQ_origin_tendsto hh hh1) hbase
 
 end
 

@@ -29,8 +29,6 @@ theorem historyAverage_formula (b : ℝ → ℝ) (b₀ y : ℝ) :
       (b₀ + ∫ t in (0 : ℝ)..y, Real.exp t * b t) := by
   simp [historyAverage, linearLag, OutgoingSchedule.primitive]
 
-theorem historyAverage_initial (b : ℝ → ℝ) (b₀ : ℝ) : historyAverage b b₀ 0 = b₀ := by
-  simp [historyAverage, linearLag_initial]
 
 theorem historyAverage_hasDerivAt {b : ℝ → ℝ} (hb : Continuous b) (b₀ y : ℝ) :
     HasDerivAt (historyAverage b b₀) (b y - historyAverage b b₀ y) y := by
@@ -273,12 +271,6 @@ theorem angularSource_ideal (c : Parameters) (h η : ℝ) {y : ℝ} (hy : y ≤ 
     dropCoefficient_early c.m (show y ≤ 1 by linarith), idealAngularSource]
   ring
 
-theorem idealAngularLag_is_incoming_integral (h η : ℝ) :
-    (∫ t in Iic (0 : ℝ), Real.exp ((8 / 5 : ℝ) * t) * idealAngularSource h η) =
-      idealAngularLag h η := by
-  rw [integral_mul_const, integral_exp_mul_Iic (by norm_num : (0 : ℝ) < 8 / 5)]
-  simp [idealAngularLag]
-  ring
 
 theorem natural_L_bounds {h η : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 100) (hη : |η| ≤ 1) :
     49 / 50 ≤ L h η ∧ L h η ≤ 1 := by
@@ -1333,11 +1325,6 @@ noncomputable def entranceRatioBound (P m : ℝ) : ℝ :=
   (64 + (3 + 4 * pressureBound) * energyEnvelope P (entranceTime m)) /
     ((P * Real.exp (-entranceTime m) / 2) * (coneFloor * Real.exp (-entranceTime m)))
 
-theorem entranceRatioBound_pos {P : ℝ} (hP : 0 < P) (m : ℝ) : 0 < entranceRatioBound P m := by
-  unfold entranceRatioBound energyEnvelope
-  have := pressureBound_pos
-  have := coneFloor_pos
-  positivity
 
 /-- A fixed pre-`λ` bound on the ratio throughout the first ramp, drop, and
 shaped-wait entrance. It depends only on the already fixed `P,m`. -/
@@ -1864,24 +1851,6 @@ theorem chosen_parameters_bounds (v : TailData)
   rw [holdStart_eq_entranceTime]
   exact hh.trans ((min_le_right _ _).trans (min_le_right _ _))
 
-/-- The drop is chosen first. All subsequent cutoffs display precisely which
-earlier parameters they depend on; the cone constants are absolute. -/
-theorem exists_ordered_preliminary_bounds :
-    ∃ M : ℝ, 0 < M ∧ ∀ v : TailData, M ≤ v.core.m →
-      amplitudeThreshold v.core.m ≤ v.core.P →
-      v.core.lam ≤ lambdaThreshold v.core.P v.core.m →
-      v.h ≤ heightThreshold v.core.m v.core.lam →
-      ∀ y η : ℝ, 0 ≤ y → y ≤ v.core.holdStart → |η| ≤ 1 →
-        coneFloor * (η ^ 2 + Real.exp (-y)) ≤ angularLag v.core v.h η y ∧
-        (4 / 5 : ℝ) ≤ radialA v.core y - shear v.core y η * directionRatio v y η ∧
-        2 * shear v.core y η * directionRatio v y η + shear v.core y η ^ 2 / radialA v.core y +
-          (radialA v.core y - 2) * directionRatio v y η ^ 2 ≤ 5 / 8 := by
-  obtain ⟨M, hM, hsmall⟩ := exists_small_dropSpeed dropThreshold_pos
-  refine ⟨M, hM, ?_⟩
-  intro v hm hP hlam hh y η hy hyT hη
-  have hb := chosen_parameters_bounds v hP hlam hh
-  exact ⟨angularLag_lower v.core v.h_pos.le hb.2.2.1 hy hyT hη hb.2.2.2,
-    preliminary_cone_margins v hb.2.2.1 hy hyT hη hb.1 hb.2.2.2 (hsmall _ hm) hb.2.1⟩
 
 /-! ## The actual stress-cone fields and finite amplitude -/
 
@@ -2105,16 +2074,6 @@ theorem canonical_Qs_ideal_lower {v : TailData} {K : ℝ}
   rw [canonical_Qs_ideal w ha hy]
   exact idealAngularLag_lower v.h_pos.le hh1 hη
 
-theorem canonical_Ns_ideal {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) {y : ℝ} (hy : y ≤ 0) (η : ℝ) :
-    OutgoingHistories.Ns w Amp (y, η) = -20 * η + (32 + 32 * v.h) * η ^ 3 +
-      (4 * A v.h * η * SchedulePressure.axisPressure v η -
-        d η * deriv (SchedulePressure.axisPressure v) η +
-          (5 / 6) * (5 * d η * shapeGradient η + (10 * A v.h + 1) * η) *
-            angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2) := by
-  rw [canonical_Ns_before w ha (hy.trans v.core.pulseStart_pos.le)]
-  exact congrArg₂ (· + ·) (geometricAxialLag_ideal v.core v.h η hy) (pressureAxialLag_ideal v η hy)
 
 theorem actual_ideal_cone_margins {v : TailData} {K : ℝ}
     (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ}
@@ -2151,30 +2110,5 @@ theorem coneA_eq_E_derivative {v : TailData} {K : ℝ}
   simp only [OutgoingHistories.H, id_eq]
   field_simp [(Real.exp_pos (y / 2)).ne', (OutgoingHistories.E_pos w (y, η)).ne'] ; ring
 
-/-- Ordered parameter selection for actual histories, followed by the final
-physical radial-scale choice. All thresholds before `XR` are explicit. -/
-theorem exists_ordered_actual_preliminary_cone :
-    ∃ M : ℝ, 0 < M ∧ ∀ v : TailData, M ≤ v.core.m →
-      amplitudeThreshold v.core.m ≤ v.core.P →
-      v.core.lam ≤ lambdaThreshold v.core.P v.core.m →
-      v.h ≤ heightThreshold v.core.m v.core.lam →
-      ∀ {K : ℝ} (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ},
-        ContDiff ℝ ∞ Amp →
-        (∀ y η : ℝ, 0 ≤ y → y ≤ v.core.holdStart → |η| ≤ 1 →
-          coneFloor * (η ^ 2 + Real.exp (-y)) ≤ OutgoingHistories.Qs w Amp (y, η)) ∧
-        ∃ gap XR₀ : ℝ, 0 < gap ∧ 0 < XR₀ ∧ ∀ XR : ℝ, XR₀ < XR →
-          ∀ p ∈ preliminaryWindow v,
-            2 + gap < OutgoingHistories.p1 XR w Amp p *
-              (1 - coneB w Amp p * coneRatio w Amp p / coneA w p) ∧
-            coneA w p * (1 + (coneB w Amp p / coneA w p) ^ 2) + gap <
-              ConeAlgebra.coneBound
-                (OutgoingHistories.p1 XR w Amp p * (1 - coneB w Amp p * coneRatio w Amp p / coneA w p))
-                (OutgoingHistories.p1 XR w Amp p * (coneRatio w Amp p + coneB w Amp p / coneA w p)) := by
-  obtain ⟨M, hM, hsmall⟩ := exists_small_dropSpeed dropThreshold_pos
-  refine ⟨M, hM, ?_⟩
-  intro v hm hP hlam hh K w Amp ha
-  have hb := chosen_parameters_bounds v hP hlam hh
-  refine ⟨fun y η hy hyT hη => canonical_Qs_lower w ha hb.2.2.1 hy hyT hη hb.2.2.2, ?_⟩
-  exact exists_actual_preliminary_cone_scale w ha hb.2.2.1 hb.1 hb.2.2.2 (hsmall _ hm) hb.2.1
 
 end NavierStokes.OutgoingEntranceCone

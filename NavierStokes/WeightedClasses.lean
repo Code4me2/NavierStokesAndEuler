@@ -42,7 +42,6 @@ structure StripData (D : Type*) [NormedAddCommGroup D] [NormedSpace ℝ D] where
   zeta_smooth : ContDiffOn ℝ ∞ zeta domain
   zeta_nonneg : ∀ x ∈ domain, 0 ≤ zeta x
 
-abbrev EuclideanStripData (d : ℕ) := StripData (EuclideanSpace ℝ (Fin d))
 
 /-- A common polynomial degree in `S` and the inverse edge distance is enough:
 separate finite degrees can always be increased to their sum.  The maximum
@@ -122,9 +121,6 @@ abbrev WaveClass (s : StripData D) (P : ℕ → D → ℝ) (α : ℝ)
 abbrev UnweightedClass (s : StripData D) (α : ℝ) (f : ℕ → D → E) : Prop :=
   MemClass s (fun _ _ => 1) α f
 
-/-- Stage constants are deliberately not uniform in the stage index. -/
-def StageClasses (s : StripData D) (w : ℕ → D → ℝ) (α : ℕ → ℝ)
-    (f : ℕ → ℕ → D → E) : Prop := ∀ stage, MemClass s w (α stage) (f stage)
 
 /-- A bound on a band-dependent scalar. There is no spatial derivative of
 the discrete band index. -/
@@ -142,30 +138,6 @@ theorem contDiffAt (hf : MemClass s w α f) (n : ℕ) {x : D}
   ((hf.smooth n).contDiffAt (s.isOpen_domain.mem_nhds hx)).of_le
     (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)
 
-/-- The common-degree definition accepts the manuscript's separate
-logarithmic and inverse-edge polynomial degrees. -/
-theorem of_separate_bounds
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    (hsmooth : ∀ n, ContDiffOn ℝ ∞ (f n) s.domain)
-    (hb : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ p q : ℕ,
-      ∀ n x, x ∈ s.domain → ∀ j : ℕ, j ≤ m →
-        ‖iteratedFDeriv ℝ j (f n) x‖ ≤
-          C * s.epsilon n ^ α * s.slow n ^ p * (max 1 (s.delta x)⁻¹) ^ q * w n x) :
-    MemClass s w α f := by
-  refine ⟨hw, hsmooth, ?_⟩
-  intro m
-  obtain ⟨C, hC, p, q, h⟩ := hb m
-  refine ⟨C, hC, p + q, ?_⟩
-  intro n x hx j hj
-  apply (h n x hx j hj).trans
-  calc
-    _ = (C * s.epsilon n ^ α) *
-        (s.slow n ^ p * (max 1 (s.delta x)⁻¹) ^ q) * w n x := by ring
-    _ ≤ (C * s.epsilon n ^ α) * s.growth n x ^ (p + q) * w n x :=
-      mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left (s.separate_powers_le_growth p q n x)
-          (mul_nonneg hC (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le)) (hw n x hx)
-    _ = _ := rfl
 
 theorem zero (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x) :
     MemClass s w α (fun _ _ => (0 : E)) := by
@@ -221,9 +193,6 @@ theorem add (hf : MemClass s w α f) (hg : MemClass s w α g) :
           (hf.weight_nonneg n x hx))
     _ = _ := by unfold majorant; ring
 
-theorem add_min (hf : MemClass s w α f) (hg : MemClass s w β g) :
-    MemClass s w (min α β) (fun n x => f n x + g n x) :=
-  (hf.mono_exponent (min_le_left _ _)).add (hg.mono_exponent (min_le_right _ _))
 
 theorem fderiv (hf : MemClass s w α f) :
     MemClass s w α (fun n => _root_.fderiv ℝ (f n)) := by

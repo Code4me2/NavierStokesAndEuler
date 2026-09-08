@@ -35,9 +35,6 @@ def joinedLiteralTailGradeField (N n : ℕ) (hn : N+1 ≤ n) :
     (fun i _ => joinedSourceProfileWitness P M D hT τ hτ hτT B primary hprimary i)
     (joinedSourceCoefficientData P M D τ hτ hτT B hT) (profiles_zero _ _) n hn
 
-theorem joinedLiteralTailGradeField_path (N n : ℕ) (hn : N+1 ≤ n) :
-    (joinedLiteralTailGradeField P M D hT τ hτ hτT B primary hprimary N n hn).path =
-      (joinedTailGradeField P M D hT τ hτ hτT B primary hprimary N n hn).path := rfl
 
 def joinedTailSumField (N : ℕ) (κ : ℝ) :
     Field P M.T (fun z => ∑ n ∈ Ico (N+1) (2*N+3), κ^n •

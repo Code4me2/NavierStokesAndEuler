@@ -143,20 +143,6 @@ theorem liftedPullbackCovector_compact (Ξ : Space → Space)
   simp only [Function.mem_support, not_not] at hx ⊢
   simp only [liftedPullbackCovector, hx, map_zero]
 
-/-- Actual pointwise lifted divergence vanishes for the transformed packet curl. -/
-theorem lifted_divergence_piola_curl (κ : ℝ) (m : Space) (Ξ : Space → Space)
-    (Q : LiftDomain period → Space) (hΞ : ContDiff ℝ ∞ Ξ)
-    (F : Space → Space ≃L[ℝ] Space)
-    (hF : ∀ y, fderiv ℝ Ξ y = (F y).toContinuousLinearMap)
-    (hdet : ∀ y, (operatorMatrix (F y).toContinuousLinearMap).det = 1)
-    (hQ : ∀ x, ContDiff ℝ ∞ (localFieldLift period Q x)) (x : LiftDomain period) :
-    (∑ i : Fin 3, (fieldDerivative period (coordinateDirection κ m i)
-      (fun y => (F y.1).symm (transformedLiftedCurl period κ m F Q y)) x) i) = 0 := by
-  have he : (fun y => (F y.1).symm (transformedLiftedCurl period κ m F Q y)) =
-      liftedCurl period κ m (liftedPullbackCovector period Ξ Q) :=
-    funext fun y => lifted_piola_curl period κ m Ξ Q (hΞ.of_le (by simp)) F hF hdet hQ y
-  rw [he]
-  exact lifted_divergence_curl period κ m _ (liftedPullbackCovector_smooth period Ξ Q hΞ hQ) x
 
 variable [Fact (0 < period)]
 
@@ -169,18 +155,6 @@ def piolaLiftedCurlLp (κ : ℝ) (m : Space) (Ξ : Space → Space)
     (liftedPullbackCovector_compact period Ξ Q hc)
     (liftedPullbackCovector_smooth period Ξ Q hΞ hQ)
 
-theorem piolaLiftedCurlLp_ae (κ : ℝ) (m : Space) (Ξ : Space → Space)
-    (Q : LiftDomain period → Space) (hΞ : ContDiff ℝ ∞ Ξ)
-    (hc : HasCompactSupport Q) (hQ : ∀ x, ContDiff ℝ ∞ (localFieldLift period Q x))
-    (F : Space → Space ≃L[ℝ] Space)
-    (hF : ∀ y, fderiv ℝ Ξ y = (F y).toContinuousLinearMap)
-    (hdet : ∀ y, (operatorMatrix (F y).toContinuousLinearMap).det = 1) :
-    (piolaLiftedCurlLp period κ m Ξ Q hΞ hc hQ : LiftDomain period → Space) =ᵐ[liftMeasure period]
-      (fun x => (F x.1).symm (transformedLiftedCurl period κ m F Q x)) := by
-  filter_upwards [liftedCurlLp_ae period κ m (liftedPullbackCovector period Ξ Q)
-    (liftedPullbackCovector_compact period Ξ Q hc)
-    (liftedPullbackCovector_smooth period Ξ Q hΞ hQ)] with x hx
-  exact hx.trans (lifted_piola_curl period κ m Ξ Q (hΞ.of_le (by simp)) F hF hdet hQ x).symm
 
 /-- The pulled-back packet satisfies the exact closed constraint used by correction assembly. -/
 theorem piolaLiftedCurlLp_mem (κ : ℝ) (m : Space) (Ξ : Space → Space)

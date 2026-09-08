@@ -56,14 +56,6 @@ theorem constant_mul_constant (f g : D → ℂ) :
   · simp [hj, constantCoefficient]
   · simp [constantCoefficient, hj]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem constant_add (f g : D → ℂ) :
-    constantCoefficient f + constantCoefficient g = constantCoefficient (fun x => f x + g x) := by
-  ext j x
-  by_cases hj : j = 0
-  · subst j
-    simp [constantCoefficient]
-  · simp [constantCoefficient, hj]
 
 theorem differentiate_constant (V : D → D) (k : ℝ) (Φ : D → ℝ) (f : D → ℂ) :
     differentiate V k Φ (constantCoefficient f) = constantCoefficient (along V f) := by
@@ -147,11 +139,6 @@ theorem realCoefficients_add (a b : Coefficients D) :
   simp only [HarmonicResidual.realCoefficients_apply, coeff_add, map_add]
   ring
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem realCoefficients_local_congr {U : Set D} {a b : Coefficients D}
-    (hab : ∀ j x, x ∈ U → a j x = b j x) (j : ℤ) {x : D} (hx : x ∈ U) :
-    HarmonicResidual.realCoefficients a j x = HarmonicResidual.realCoefficients b j x := by
-  simp only [HarmonicResidual.realCoefficients_apply, hab j x hx, hab (-j) x hx]
 
 noncomputable def tripleField (h : MeanIncrementBounds.Triple D) (n : ℕ) (x : D) : ComplexVector :=
   ![(h.radial n x : ℂ), (h.angular n x : ℂ), (h.axial n x : ℂ)]
@@ -550,63 +537,9 @@ theorem residualDifferenceBlock_algebra (c : CorrectionState.Context D)
     (N₁ - G n i - A₁ n i) - (N₀ - G n i - A₀ n i) = (N₁ - N₀) - (A₁ n i - A₀ n i) := by abel
     _ = _ := by rw [nonlinear_difference_algebra]
 
-/-- A mean-only update preserves the existing harmonic-value bound. -/
-theorem residualDifferenceBlock_band (c : CorrectionState.Context D)
-    (s₀ s₁ : CorrectionState.State D) (b : CorrectionState.HarmonicBlock D)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D) {N : ℕ} (hb : b.BandLimited N)
-    (hA : ∀ n i, BandLimited (A₁ n i - A₀ n i) 0) :
-    (residualDifferenceBlock c s₀ s₁ b G A₀ A₁).BandLimited N := by
-  refine ⟨?_, fun _ => HarmonicResidual.band_zero N⟩
-  intro n i
-  rw [residualDifferenceBlock_algebra]
-  exact HarmonicResidual.band_nonconstant (HarmonicResidual.band_realCoefficients
-    (HarmonicResidual.band_sub (transportDifference_band _ _ _ _ _ _
-      (fun j => HarmonicResidual.band_realCoefficients (hb.1 n j)) i)
-      ((hA n i).mono (Nat.zero_le N))))
 
-theorem residualDifferenceBlock_conjugate (c : CorrectionState.Context D)
-    (s₀ s₁ : CorrectionState.State D) (b : CorrectionState.HarmonicBlock D)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((residualDifferenceBlock c s₀ s₁ b G A₀ A₁).velocity n i) := by
-  intro j x
-  simp only [residualDifferenceBlock, coeff_sub,
-    HarmonicResidual.residualBlock_conjugate c s₁ b G A₁ n i j x,
-    HarmonicResidual.residualBlock_conjugate c s₀ b G A₀ n i j x, map_sub]
 
-theorem residualDifferenceBlock_zero_mode (c : CorrectionState.Context D)
-    (s₀ s₁ : CorrectionState.State D) (b : CorrectionState.HarmonicBlock D)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D) (n : ℕ) (i : Fin 3) :
-    (residualDifferenceBlock c s₀ s₁ b G A₀ A₁).velocity n i 0 = 0 := by
-  change (HarmonicResidual.residualBlock c s₁ b G A₁).velocity n i 0 -
-    (HarmonicResidual.residualBlock c s₀ b G A₀).velocity n i 0 = 0
-  rw [HarmonicResidual.residualBlock_zero_mode, HarmonicResidual.residualBlock_zero_mode, sub_self]
 
-/-- The same finite coefficients evaluate to the two actual cross-advection fields. -/
-theorem crossCoefficients_field {U : Set D} (hU : IsOpen U) (g : HarmonicResidual.Frame D)
-    (k : ℝ) {Φ : D → ℝ} (hΦ : ContDiffOn ℝ ∞ Φ U) (kp : ℤ)
-    (m : D → ComplexVector) (hm : ∀ i, ContDiffOn ℝ ∞ (fun x => m x i) U)
-    (a : HarmonicResidual.VectorCoefficients D) (ha : ∀ i, HarmonicResidual.SmoothCoefficients U (a i))
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) :
-    HarmonicResidual.vectorField (crossCoefficients g k Φ kp m a) k Φ kp x =
-      LinearWaveResidual.transport (fun y => g.radius y.1) (HarmonicResidual.liftDirection g.radial)
-        HarmonicResidual.angularDirection (HarmonicResidual.liftDirection g.axial)
-        (fun y => m y.1) (HarmonicResidual.vectorField a k Φ kp) x +
-      LinearWaveResidual.transport (fun y => g.radius y.1) (HarmonicResidual.liftDirection g.radial)
-        HarmonicResidual.angularDirection (HarmonicResidual.liftDirection g.axial)
-        (HarmonicResidual.vectorField a k Φ kp) (fun y => m y.1) x := by
-  have hm' : ∀ i, HarmonicResidual.SmoothCoefficients U (HarmonicResidual.constantVector m i) :=
-    fun i => HarmonicResidual.smoothCoefficients_constant (hm i)
-  have hleft := HarmonicResidual.field_transport hU g (HarmonicResidual.constantVector m) ha hΦ k kp hx
-  have hright := HarmonicResidual.field_transport hU g a hm' hΦ k kp hx
-  have he : HarmonicResidual.vectorField (HarmonicResidual.constantVector m) k Φ kp =
-      fun y : D × ℝ => m y.1 := by
-    funext y
-    exact HarmonicResidual.vectorField_constantVector m k Φ kp y
-  rw [he] at hleft hright
-  ext i
-  change field (_ + _) k Φ kp x = _
-  rw [HarmonicResidual.field_add]
-  exact congrFun (congrArg₂ (· + ·) hleft hright) i
 
 /-- The computed block differences reconstruct the actual change in the good
 nonconstant residual. This is an identity, with no uniform sum estimate assumed. -/
@@ -626,11 +559,5 @@ theorem grouped_wave_change {ι : Type*} {U : Set D} (hU : IsOpen U)
     HarmonicResidual.stateGoodWaveResidual_grouped hU hrep₀ h₀ hx i]
   simp only [residualDifferenceBlock_field, Finset.sum_sub_distrib]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- A recomputed mean pressure is unrestricted in this application; its
-contribution is in the mean residual, not in the fixed label's wave block. -/
-theorem stateMean_addIncrement (s₀ : CorrectionState.State D) (h : MeanIncrementBounds.Triple D)
-    (δp : CorrectionState.ScalarField D) (δe : CorrectionState.ExcludedErrors D) :
-    (s₀.addIncrement h δp 0 0 δe).mean = MeanIncrementBounds.updated s₀.mean h := rfl
 
 end NavierStokes.HarmonicMeanInteraction

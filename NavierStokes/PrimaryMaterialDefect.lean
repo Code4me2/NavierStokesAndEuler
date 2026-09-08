@@ -50,35 +50,9 @@ theorem axialField (n : ℕ) {x : E} (hx : x ∈ s.domain) :
     fderiv ℝ (χ n) x (d.axialField s n x) = s.epsilon n • PhaseCalculus.eZ := by
   simp only [GraphDirections.axialField, map_smul, hχ.axial n x hx]
 
-theorem timeField (n : ℕ) {x : E} (hx : x ∈ s.domain) :
-    fderiv ℝ (χ n) x
-      (LinearWaveResidual.timeDirection (s.epsilon n) (d.fastField n) (fun _ => d.slow) x) =
-      PhaseCalculus.eV - s.epsilon n • PhaseCalculus.eT := by
-  simp only [LinearWaveResidual.timeDirection, map_sub, map_smul,
-    hχ.fast n x hx, hχ.slow n x hx]
 
 end NativeCoordinates
 
-/-- For affine native/common coordinate maps, checking the six images is
-linear algebra.  No differentiability premise is needed. -/
-theorem affine_coordinates (s : StripData E) (d : GraphDirections E)
-    (L : ℕ → E →L[ℝ] Slot) (c : ℕ → Slot)
-    (hr : ∀ n, L n d.radial = PhaseCalculus.eR)
-    (ha : ∀ n, L n d.auxiliary = 0)
-    (hθ : ∀ n, L n d.angular = PhaseCalculus.eTheta)
-    (hz : ∀ n, L n d.axial = PhaseCalculus.eZ)
-    (hf : ∀ n, d.fastScale n • L n d.fast = PhaseCalculus.eV)
-    (ht : ∀ n, L n d.slow = PhaseCalculus.eT) :
-    NativeCoordinates s d (fun n x => L n x + c n) := by
-  have hd n x : fderiv ℝ (fun y => L n y + c n) x = L n :=
-    ((L n).hasFDerivAt.add_const (c n)).fderiv
-  refine ⟨fun n _ _ => (L n).differentiableAt.add_const _, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro n x _; rw [hd]; exact hr n
-  · intro n x _; rw [hd]; exact ha n
-  · intro n x _; rw [hd]; exact hθ n
-  · intro n x _; rw [hd]; exact hz n
-  · intro n x _; rw [hd]; simpa only [GraphDirections.fastField, map_smul] using hf n
-  · intro n x _; rw [hd]; exact ht n
 
 section CommonPullback
 
@@ -224,84 +198,7 @@ theorem polynomial_comp_unweighted
   ((PrimaryPulseBounds.EnvelopeJets.of_polynomial hf).comp hc hscale hmap).memClass s
     (fun _ => rfl) (fun _ => rfl)
 
-/-- The same composition result allows polynomial inverse-edge losses in
-the slow chart itself.  This is a quantitative chain-rule estimate, not
-an assumption about the pulled-back base derivatives. -/
-theorem polynomial_comp_with_edges
-    {s : StripData E} {U : PhaseJetBounds.Domain ℕ Slow}
-    {f : ℕ → Slow → ℝ} (hf : PhaseJetBounds.PolynomialJets U f)
-    {c : ℕ → E → Slow} (hc : UnweightedClass s 0 c)
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hmap : ∀ n, MapsTo (c n) s.domain (U.carrier n)) :
-    UnweightedClass s 0 (fun n x => f n (c n x)) := by
-  refine ⟨fun _ _ _ => zero_le_one, fun n => (hf.smooth n).comp (hc.smooth n) (hmap n), ?_⟩
-  intro N
-  obtain ⟨A, hA, m, ha⟩ := hf.bound N
-  obtain ⟨B, hB, k, hb⟩ := hc.bounds N
-  refine ⟨(N.factorial : ℝ) * A * (B + 1) ^ N, by positivity, m + k * N, ?_⟩
-  intro n x hx j hj
-  have hg0 := s.growth_nonneg n x
-  have hg1 := s.one_le_growth n x
-  have hD : 1 ≤ (B + 1) * s.growth n x ^ k :=
-    one_le_mul_of_one_le_of_one_le (by linarith) (one_le_pow₀ hg1)
-  have hinner (a : ℕ) (haN : a ≤ N) :
-      ‖iteratedFDeriv ℝ a (c n) x‖ ≤ (B + 1) * s.growth n x ^ k := by
-    have hh := hb n x hx a haN
-    simp only [majorant, Real.rpow_zero, mul_one] at hh
-    exact hh.trans (mul_le_mul_of_nonneg_right (by linarith) (pow_nonneg hg0 _))
-  have houter (a : ℕ) (haN : a ≤ N) :
-      ‖iteratedFDeriv ℝ a (f n) (c n x)‖ ≤ A * s.growth n x ^ m := by
-    have hh := ha n a haN _ (hmap n hx)
-    rw [hscale n] at hh
-    exact hh.trans (mul_le_mul_of_nonneg_left
-      (pow_le_pow_left₀ (zero_le_one.trans (s.one_le_slow n)) (s.slow_le_growth n x) _)
-      (zero_le_one.trans hA))
-  have hn : (j : WithTop ℕ∞) ≤ ∞ := ENat.natCast_le_of_coe_top_le_withTop le_rfl j
-  have hchain := norm_iteratedFDerivWithin_comp_le (hf.smooth n) (hc.smooth n) hn
-    (U.isOpen n).uniqueDiffOn s.isOpen_domain.uniqueDiffOn (hmap n) hx
-    (C := A * s.growth n x ^ m) (D := (B + 1) * s.growth n x ^ k)
-    (fun a haj => ?_) (fun a ha1 haj => ?_)
-  · rw [iteratedFDerivWithin_of_isOpen j s.isOpen_domain hx] at hchain
-    simp only [majorant, Real.rpow_zero, mul_one]
-    calc
-      _ ≤ (j.factorial : ℝ) * (A * s.growth n x ^ m) * ((B + 1) * s.growth n x ^ k) ^ j := hchain
-      _ ≤ (N.factorial : ℝ) * (A * s.growth n x ^ m) * ((B + 1) * s.growth n x ^ k) ^ N := by
-        apply mul_le_mul
-        · exact mul_le_mul_of_nonneg_right (by exact_mod_cast Nat.factorial_le hj) (by positivity)
-        · exact pow_le_pow_right₀ hD hj
-        · positivity
-        · positivity
-      _ = _ := by rw [mul_pow, pow_add, pow_mul]; ring
-  · rw [iteratedFDerivWithin_of_isOpen a (U.isOpen n) (hmap n hx)]
-    exact houter a (haj.trans hj)
-  · rw [iteratedFDerivWithin_of_isOpen a s.isOpen_domain hx]
-    exact (hinner a (haj.trans hj)).trans (by simpa using pow_le_pow_right₀ hD ha1)
 
-/-- The actual affine clock has polynomial jets from its value and linear
-coefficient bounds.  This supplies the slot-coordinate class in either
-native or common coordinates. -/
-theorem affine_slot_class (s : StripData E) (L : ℕ → E →L[ℝ] ℝ) (c : ℕ → ℝ)
-    {C : ℝ} {m : ℕ} (hC : 1 ≤ C)
-    (hL : ∀ n, ‖L n‖ ≤ C * s.slow n ^ m)
-    (hv : ∀ n x, x ∈ s.domain → |L n x + c n| ≤ C * s.slow n ^ m) :
-    UnweightedClass s 0 (fun n x => L n x + c n) := by
-  apply PrimaryPulseBounds.polynomial_memClass s
-  refine ⟨fun n => (L n).contDiff.contDiffOn.add contDiffOn_const, fun _ => ⟨C, hC, m, ?_⟩⟩
-  intro n j _ x hx
-  have hd : fderiv ℝ (fun y => L n y + c n) = fun _ => L n := by
-    funext y
-    exact ((L n).hasFDerivAt.add_const (c n)).fderiv
-  cases j with
-  | zero => simpa only [norm_iteratedFDeriv_zero, Real.norm_eq_abs, PrimaryPulseBounds.phaseDomain] using hv n x hx
-  | succ j =>
-      rw [← norm_iteratedFDeriv_fderiv, hd]
-      cases j with
-      | zero => simpa only [norm_iteratedFDeriv_zero, PrimaryPulseBounds.phaseDomain] using hL n
-      | succ j =>
-          rw [iteratedFDeriv_succ_const]
-          simp only [Pi.zero_apply, norm_zero]
-          exact mul_nonneg (zero_le_one.trans hC)
-            (pow_nonneg (zero_le_one.trans (s.one_le_slow n)) _)
 
 section Primary
 
@@ -402,46 +299,7 @@ theorem defect_class (P : PrimaryPulseBounds.PhaseConstruction U)
   intro n x hx
   exact (defect_formula P s d χ b amplitude pressure frequency hχ hmap heps n hx (hR n x hx)).symm
 
-theorem defect_class_of_mean (P : PrimaryPulseBounds.PhaseConstruction U)
-    (s : StripData E) (d : GraphDirections E) (χ : ℕ → E → Slot) (b : ℕ → Slow → ℝ)
-    (amplitude : ℕ → E → HarmonicCalculus.ComplexVector)
-    (pressure : ℕ → E → ℂ) (frequency : ℕ → ℝ)
-    (hχ : NativeCoordinates s d χ)
-    (hslow : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s) (fun n x => (χ n x).1))
-    (hslot : UnweightedClass s 0 (fun n x => (χ n x).2.2))
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hmap : ∀ n, MapsTo (fun x => (χ n x).1) s.domain (U.carrier n))
-    (heps : ∀ n, P.phase.epsilon n = s.epsilon n)
-    (hR : ∀ n x, x ∈ s.domain → 0 < (χ n x).1.1)
-    (hζ : ∀ x ∈ s.domain, s.zeta x ≤ 1)
-    (hb : MeanClass s 1 (fun n x => b n (χ n x).1)) :
-    UnweightedClass s 1 ((coefficients P b χ amplitude pressure frequency).defect s d) :=
-  defect_class P s d χ b amplitude pressure frequency hχ hslow hslot hscale hmap heps hR
-    (mean_unweighted hb hζ)
 
-/-- Field matching binds an existing wave record to the exact phase.  It
-does not assume equality or bounds of its material defect. -/
-theorem defect_class_of_fields (P : PrimaryPulseBounds.PhaseConstruction U)
-    (s : StripData E) (d : GraphDirections E) (χ : ℕ → E → Slot) (b : ℕ → Slow → ℝ)
-    (a : WaveCoefficients E)
-    (hχ : NativeCoordinates s d χ)
-    (hslow : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s) (fun n x => (χ n x).1))
-    (hslot : UnweightedClass s 0 (fun n x => (χ n x).2.2))
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hmap : ∀ n, MapsTo (fun x => (χ n x).1) s.domain (U.carrier n))
-    (heps : ∀ n, P.phase.epsilon n = s.epsilon n)
-    (hR : ∀ n x, x ∈ s.domain → 0 < (χ n x).1.1)
-    (hb : UnweightedClass s 1 (fun n x => b n (χ n x).1))
-    (hbfield : a.radialBase = fun n x => b n (χ n x).1)
-    (hFfield : a.frequencyBase = fun n x => P.phase.F n (χ n x).1)
-    (hGfield : a.axialBase = fun n x => P.phase.G n (χ n x).1)
-    (hphase : a.phase = pulledPhase P χ) : UnweightedClass s 1 (a.defect s d) := by
-  have hd := defect_class P s d χ b a.amplitude a.pressure a.frequency
-    hχ hslow hslot hscale hmap heps hR hb
-  apply class_congr hd
-  intro n x _
-  simp only [WaveCoefficients.defect, LinearWaveResidual.materialPhaseDefect,
-    coefficients, hbfield, hFfield, hGfield, hphase]
 
 end Primary
 

@@ -94,41 +94,6 @@ theorem coerciveSolution_derivative_recurrence
   exact hrec.trans (mul_le_mul_of_nonneg_right
     (coerciveInverse_norm_le (A x) (c x) (hc x) (hcoercive x)) (by positivity))
 
-/-- A single factorial shift controls every actual derivative of the inverse solve. -/
-theorem coerciveSolution_gevrey
-    (A : P → E →L[ℝ] E) (c : P → ℝ) (hc : ∀ x, 0 < c x)
-    (hcoercive : ∀ x v, c x * ‖v‖^2 ≤ ⟪A x v, v⟫_ℝ)
-    (f : P → E) (hA : ContDiff ℝ ∞ A) (hf : ContDiff ℝ ∞ f)
-    (M Rc R : ℝ) (hM : 1 ≤ M) (hRc : 0 ≤ Rc) (hR : 2*M*(Rc+1) ≤ R)
-    (hinv : ∀ x, (c x)⁻¹ ≤ M)
-    (hcoeff : ∀ j x, ‖iteratedFDeriv ℝ (j+1) A x‖ ≤
-      Rc^(j+1) * ((j+1).factorial : ℝ)^2)
-    (d : ℕ) (hforce : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n
-      (fun y => coerciveInverse (A y) (c y) (hc y) (hcoercive y) (f y)) x‖ ≤
-        majorant R (d+1) n := by
-  let u := fun y => coerciveInverse (A y) (c y) (hc y) (hcoercive y) (f y)
-  apply triangular_inverse_majorant M Rc R hM hRc hR d
-    (fun k => ‖iteratedFDeriv ℝ k f x‖)
-    (fun k => ‖iteratedFDeriv ℝ k u x‖) (fun k => hforce k x) _ n
-  intro k
-  have hrec := coerciveSolution_derivative_recurrence A c hc hcoercive f hA hf x k
-  have hsum : (∑ j ∈ range k,
-      (k.choose (j+1) : ℝ) * ‖iteratedFDeriv ℝ (j+1) A x‖ *
-        ‖iteratedFDeriv ℝ (k-(j+1)) u x‖) ≤
-      ∑ j ∈ range k, (k.choose (j+1) : ℝ) * Rc^(j+1) *
-        ((j+1).factorial : ℝ)^2 * ‖iteratedFDeriv ℝ (k-(j+1)) u x‖ := by
-    apply sum_le_sum
-    intro j _
-    have h := mul_le_mul_of_nonneg_right
-      (mul_le_mul_of_nonneg_left (hcoeff j x) (by positivity : (0 : ℝ) ≤ k.choose (j+1)))
-      (norm_nonneg (iteratedFDeriv ℝ (k-(j+1)) u x))
-    simpa only [mul_assoc] using h
-  exact hrec.trans ((mul_le_mul_of_nonneg_left
-    (add_le_add (le_refl ‖iteratedFDeriv ℝ k f x‖) hsum)
-    (inv_nonneg.mpr (hc x).le)).trans
-      (mul_le_mul_of_nonneg_right (hinv x) (by positivity)))
 
 /-- Polynomial coefficient and forcing amplitudes enter only the fixed top
 constant, not the derivative-order radius. -/

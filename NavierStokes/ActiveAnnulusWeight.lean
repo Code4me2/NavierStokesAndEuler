@@ -103,13 +103,7 @@ theorem flat_right_of_zero {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) {b : ℝ}
   have hc := heq.closure (hf.continuous_iteratedDeriv n (by exact_mod_cast le_top)) continuous_const
   exact hc (by simp)
 
-theorem weight_flat_left {c : ℝ} (hc : 0 < c) (a b : ℝ) (n : ℕ) :
-    iteratedDeriv n (weight c a b) a = 0 :=
-  flat_left_of_zero (weight_smooth hc a b) (fun _ hx => weight_zero_left c b hx.le) n
 
-theorem weight_flat_right {c : ℝ} (hc : 0 < c) (a b : ℝ) (n : ℕ) :
-    iteratedDeriv n (weight c a b) b = 0 :=
-  flat_right_of_zero (weight_smooth hc a b) (fun _ hx => weight_zero_right c a hx.le) n
 
 theorem radialWeight_zero_left (c b : ℝ) {a X : ℝ} (hX : X ≤ Real.exp a) : radialWeight c a b X = 0 := by
   by_cases hx : 0 < X
@@ -143,13 +137,7 @@ theorem radialWeight_smooth {c : ℝ} (hc : 0 < c) (a b : ℝ) : ContDiff ℝ �
       exact radialWeight_zero_left c b hxp.le
     exact contDiffAt_const.congr_of_eventuallyEq he
 
-theorem radialWeight_flat_left {c : ℝ} (hc : 0 < c) (a b : ℝ) (n : ℕ) :
-    iteratedDeriv n (radialWeight c a b) (Real.exp a) = 0 :=
-  flat_left_of_zero (radialWeight_smooth hc a b) (fun _ hx => radialWeight_zero_left c b hx.le) n
 
-theorem radialWeight_flat_right {c : ℝ} (hc : 0 < c) (a b : ℝ) (n : ℕ) :
-    iteratedDeriv n (radialWeight c a b) (Real.exp b) = 0 :=
-  flat_right_of_zero (radialWeight_smooth hc a b) (fun _ hx => radialWeight_zero_right c a hx.le) n
 
 theorem weight_lower_middle {c a b d y : ℝ} (hc : 0 ≤ c) (hd : 0 < d)
     (hy : y ∈ Icc (a+d) (b-d)) :
@@ -537,20 +525,6 @@ theorem exists_global_derivative_bound {K : Set E} (hK : IsCompact K)
       exact (hM i hi (p,y) ⟨hp,hym⟩).trans
         ((interior_bound_to_weight hc.le hCM.le hd hy hym (NL+NR)).trans (hmono AM hAMC))
 
-/-- Equation (20), for actual derivative tensors in the fixed logarithmic
-profile chart. The lower constant and the weight are independent of order. -/
-theorem global_weighted_bounds {K : Set E} (hK : IsCompact K)
-    (hKd : UniqueDiffOn ℝ K) {a b c : ℝ} (hab : a < b) (hc : 0 < c)
-    {T : E × ℝ → V} {O : Set (E × ℝ)} (hO : IsOpen O)
-    (hT : ContDiffOn ℝ ∞ T O) (hKO : K ×ˢ Icc a b ⊆ O)
-    (hinterior : ∀ p ∈ K, ∀ y ∈ Ioo a b, T (p,y) ≠ 0)
-    (FL : EdgeFactor K c (leftChart a T)) (FR : EdgeFactor K 4 (rightChart b T)) :
-    (∃ m : ℝ, 0 < m ∧ ∀ p ∈ K, ∀ y ∈ Ioo a b, m * weight c a b y ≤ ‖T (p,y)‖) ∧
-    ∀ n : ℕ, ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ K,
-      ∀ y ∈ Ioo a b, ‖iteratedFDeriv ℝ i T (p,y)‖ ≤
-        C * weight c a b y / edgeDistance a b y ^ N :=
-  ⟨exists_global_lower_bound hK hab hc (hT.continuousOn.mono hKO) hinterior FL FR,
-    exists_global_derivative_bound hK hKd hab hc hO hT hKO FL FR⟩
 
 end CompactFamilies
 
@@ -682,12 +656,6 @@ theorem unitOfTilt_smooth : ContDiff ℝ ∞ unitOfTilt := by
   have hne (t : ℝ) : Real.sqrt (1+t^2) ≠ 0 := (Real.sqrt_pos.2 (by positivity)).ne'
   exact (hs.inv hne).prodMk (contDiff_id.div hs hne)
 
-theorem unitOfTilt_normSq (t : ℝ) : (unitOfTilt t).1^2 + (unitOfTilt t).2^2 = 1 := by
-  have hs : 0 < Real.sqrt (1+t^2) := Real.sqrt_pos.2 (by positivity)
-  have hsq := Real.sq_sqrt (by positivity : 0 ≤ 1+t^2)
-  dsimp [unitOfTilt]
-  field_simp
-  exact hsq.symm
 
 theorem tilt_smul {r : ℝ} (hr : r ≠ 0) (v : ℝ × ℝ) : tilt (r • v) = tilt v := by
   simp only [tilt,Prod.smul_fst,Prod.smul_snd,smul_eq_mul]

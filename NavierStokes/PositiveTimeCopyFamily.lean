@@ -58,11 +58,6 @@ theorem gate_amplitude_germ (f : CopyFamily H K) (k : K) (I : WaveIndex H)
   filter_upwards [liftPast_open.mem_nhds hx] with y hy
   exact gate_amplitude_eq f k I hy
 
-theorem gate_amplitude_jets (f : CopyFamily H K) (k : K) (I : WaveIndex H)
-    {x : LiftPoint} (hx : x ∈ liftPast) (m : ℕ) :
-    iteratedFDeriv ℝ m ((gate f).amplitude k I) x =
-      iteratedFDeriv ℝ m (f.amplitude k I) x :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (gate_amplitude_germ f k I hx) m
 
 theorem gate_amplitude_support_subset (f : CopyFamily H K) (k : K) (I : WaveIndex H) :
     support ((gate f).amplitude k I) ⊆ support (f.amplitude k I) :=
@@ -121,10 +116,6 @@ theorem term_germ (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∈ pretermi
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
   exact term_eq f a h r0 I k hy
 
-theorem term_jets (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∈ preterminal) (m : ℕ) :
-    iteratedFDeriv ℝ m ((gate f).term a h r0 I k) w =
-      iteratedFDeriv ℝ m (f.term a h r0 I k) w :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (term_germ f a h r0 I k hw) m
 
 theorem term_support_subset (I : WaveIndex H) (k : K) :
     support ((gate f).term a h r0 I k) ⊆ support (f.term a h r0 I k) := by
@@ -133,9 +124,6 @@ theorem term_support_subset (I : WaveIndex H) (k : K) :
   · simpa only [mem_support, term_eq f a h r0 I k ht] using hw
   · exact (hw (term_zero f a h r0 I k ht)).elim
 
-theorem term_tsupport_subset (I : WaveIndex H) (k : K) :
-    tsupport ((gate f).term a h r0 I k) ⊆ tsupport (f.term a h r0 I k) :=
-  closure_mono (term_support_subset f a h r0 I k)
 
 theorem periodized_eq (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ preterminal) :
     (gate f).periodized a h r0 I w = f.periodized a h r0 I w := by
@@ -152,10 +140,6 @@ theorem periodized_germ (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ pretermina
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
   exact periodized_eq f a h r0 I hy
 
-theorem periodized_jets (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ preterminal) (m : ℕ) :
-    iteratedFDeriv ℝ m ((gate f).periodized a h r0 I) w =
-      iteratedFDeriv ℝ m (f.periodized a h r0 I) w :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (periodized_germ f a h r0 I hw) m
 
 theorem sum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
     (gate f).sum a h r0 w = f.sum a h r0 w := by
@@ -170,9 +154,6 @@ theorem sum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
   exact sum_eq f a h r0 hy
 
-theorem sum_jets {w : SpaceTime} (hw : w ∈ preterminal) (m : ℕ) :
-    iteratedFDeriv ℝ m ((gate f).sum a h r0) w = iteratedFDeriv ℝ m (f.sum a h r0) w :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (sum_germ f a h r0 hw) m
 
 end PhysicalFields
 
@@ -185,9 +166,6 @@ theorem vectorSum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
       PhysicalCopyBounds.vectorSum f a h r0 w := by
   simp only [PhysicalCopyBounds.vectorSum, sum_eq (f _) a h r0 hw]
 
-theorem vectorSum_zero {w : SpaceTime} (hw : w ∉ preterminal) :
-    PhysicalCopyBounds.vectorSum (fun i => gate (f i)) a h r0 w = 0 := by
-  simp only [PhysicalCopyBounds.vectorSum, sum_zero (f _) a h r0 hw, map_zero, Finset.sum_const_zero]
 
 theorem vectorSum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
     PhysicalCopyBounds.vectorSum (fun i => gate (f i)) a h r0 =ᶠ[𝓝 w]
@@ -195,10 +173,6 @@ theorem vectorSum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
   exact vectorSum_eq f a h r0 hy
 
-theorem vectorSum_jets {w : SpaceTime} (hw : w ∈ preterminal) (m : ℕ) :
-    iteratedFDeriv ℝ m (PhysicalCopyBounds.vectorSum (fun i => gate (f i)) a h r0) w =
-      iteratedFDeriv ℝ m (PhysicalCopyBounds.vectorSum f a h r0) w :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (vectorSum_germ f a h r0 hw) m
 
 end VectorFields
 

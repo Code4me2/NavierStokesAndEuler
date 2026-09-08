@@ -190,14 +190,6 @@ theorem contDiffOn_coefficient (I : Window) (w : ℕ → ℕ → ℝ)
     ContDiffOn ℝ ∞ (coefficient I w A n) I.interval :=
   contDiffOn_jet I w A n 0
 
-/-- On the interior these are ordinary smooth real functions on an open
-neighborhood, so an original interval may be placed inside this enlarged one. -/
-theorem contDiffAt_coefficient_interior (I : Window) (w : ℕ → ℕ → ℝ)
-    (A : CoefficientSpace I w) (n : ℕ) {x : ℝ}
-    (hx : x ∈ Ioo I.left I.right) :
-    ContDiffAt ℝ ∞ (coefficient I w A n) x :=
-  ((contDiffOn_coefficient I w A n) x ⟨hx.1.le, hx.2.le⟩).contDiffAt
-    (Icc_mem_nhds hx.1 hx.2)
 
 /-- The inherited norm controls every actual parameter derivative with its weight. -/
 theorem abs_jet_le (I : Window) (w : ℕ → ℕ → ℝ) (A : CoefficientSpace I w)
@@ -406,45 +398,15 @@ theorem jet_ofSmoothFamily (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m,
   unfold ofSmoothFamily
   exact jet_ofJetFamily I w hw _ _ _ C hC hbound n m hx
 
-theorem coefficient_ofSmoothFamily (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m, 0 < w n m)
-    (F : ℕ → ℝ → ℝ) (hF : ∀ n, ContDiffOn ℝ ∞ (F n) I.interval)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hbound : ∀ n m x, x ∈ I.interval →
-      |iteratedDerivWithin m (F n) I.interval x| ≤ C * w n m)
-    (n : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
-    coefficient I w (ofSmoothFamily I w hw F hF C hC hbound) n x = F n x := by
-  simpa only [coefficient, iteratedDerivWithin_zero] using
-    jet_ofSmoothFamily I w hw F hF C hC hbound n 0 hx
 
-theorem norm_ofSmoothFamily_le (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m, 0 < w n m)
-    (F : ℕ → ℝ → ℝ) (hF : ∀ n, ContDiffOn ℝ ∞ (F n) I.interval)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hbound : ∀ n m x, x ∈ I.interval →
-      |iteratedDerivWithin m (F n) I.interval x| ≤ C * w n m) :
-    ‖ofSmoothFamily I w hw F hF C hC hbound‖ ≤ C := by
-  unfold ofSmoothFamily
-  exact norm_ofJetFamily_le I w hw _ _ _ C hC hbound
 
 /-- The specific space in GAX.2, with the manuscript's exact positive weights
 when `ε>0`. Completeness and normed vector-space structures are inherited. -/
 abbrev AxisSpace (I : Window) (ε : ℝ) :=
   CoefficientSpace I (AxisWeightEstimates.weight ε)
 
-/-- The concrete space is a complete normed space of actual smooth functions. -/
-theorem axisSpace_complete (I : Window) (ε : ℝ) : CompleteSpace (AxisSpace I ε) :=
-  inferInstance
 
-theorem axisSpace_smooth (I : Window) (ε : ℝ) (A : AxisSpace I ε) (n : ℕ) :
-    ContDiffOn ℝ ∞ (coefficient I (AxisWeightEstimates.weight ε) A n) I.interval :=
-  contDiffOn_coefficient I (AxisWeightEstimates.weight ε) A n
 
-/-- Each actual derivative is controlled by exactly the printed weight. -/
-theorem axisSpace_derivative_bound (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
-    |iteratedDerivWithin m (coefficient I (AxisWeightEstimates.weight ε) A n) I.interval x| ≤
-      AxisWeightEstimates.weight ε n m * ‖A‖ := by
-  simpa only [abs_of_pos (AxisWeightEstimates.weight_pos hε n m)] using
-    abs_iteratedDerivWithin_coefficient_le I (AxisWeightEstimates.weight ε) A n m hx
 
 /-- The exact manuscript norm, with actual derivatives in its quotient. -/
 theorem axisSpace_norm_le_iff (I : Window) {ε : ℝ} (hε : 0 < ε)

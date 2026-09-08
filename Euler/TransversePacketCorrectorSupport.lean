@@ -53,19 +53,6 @@ theorem correctorDerivative_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.sup
     (G.correctorTimePath_orbit I) D.support_compact.isClosed
     (G.correctorTimePath_supported I) (D.clamp t) (x,(θ : AddCircle P)) hx
 
-theorem corrector_compact (t θ : ℝ) : HasCompactSupport (fun x => G.corrector I (t,(x,θ))) := by
-  apply D.support_compact.of_isClosed_subset (isClosed_tsupport _)
-  apply closure_minimal _ D.support_compact.isClosed
-  intro x hx
-  by_contra hn
-  exact hx (G.corrector_zero_outside I t x hn θ)
 
-theorem correctorDerivative_compact (t θ : ℝ) :
-    HasCompactSupport (fun x => G.correctorDerivative I (t,(x,θ))) := by
-  apply D.support_compact.of_isClosed_subset (isClosed_tsupport _)
-  apply closure_minimal _ D.support_compact.isClosed
-  intro x hx
-  by_contra hn
-  exact hx (G.correctorDerivative_zero_outside I t x hn θ)
 
 end EulerTransversePacketProvider.Forcing

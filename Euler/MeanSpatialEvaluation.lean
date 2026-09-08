@@ -39,17 +39,5 @@ theorem representative_bound (u : EulerMeanSolenoidal.L2) (hu : SmoothOrbit u) (
   exact H.trans (mul_le_mul_of_nonneg_left (ordinarySobolev_norm_le 3 u hu)
     (sobolevEmbeddingConstant_nonneg 1 3))
 
-/-- A family with continuous genuine L² derivatives through order three has jointly continuous values. -/
-theorem representative_joint_continuous {T : Type*} [TopologicalSpace T]
-    (u : T → EulerMeanSolenoidal.L2) (hu : ∀ t, SmoothOrbit (u t))
-    (hjet : ∀ n ≤ 3, Continuous
-      (fun t => iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a (u t)) 0)) :
-    Continuous (fun p : T × Space => representative (u p.1) (hu p.1) p.2) := by
-  have hc := ordinarySobolev_continuous 3 u hu hjet
-  have hp : Continuous (fun p : T × Space =>
-      (ordinarySobolev 3 (u p.1) (hu p.1), (p.2, (0 : AddCircle (1 : ℝ))))) :=
-    (hc.comp continuous_fst).prodMk (continuous_snd.prodMk continuous_const)
-  have H := (EulerSobolevJointEvaluation.pointEvaluation_joint_continuous 1).comp hp
-  simpa only [Function.comp_def, pointEvaluation_ordinary] using H
 
 end EulerMeanSmoothRepresentative

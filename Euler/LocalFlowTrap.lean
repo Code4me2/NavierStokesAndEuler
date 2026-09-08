@@ -76,34 +76,5 @@ theorem norm_lt_of_local_speed_bound (X : ℝ → E) (V : ℝ → E → E)
   have hbudget : M * s ≤ M * δ := mul_le_mul_of_nonneg_left hsI.2 hM
   nlinarith
 
-omit [NormedSpace ℝ E] in
-/-- Compactness supplies a common speed bound and positive time budget on a fixed ball. -/
-theorem exists_local_speed_budget [ProperSpace E] (u : ℝ → E → E) {A B : ℝ}
-    (hAB : A < B)
-    (hu : ContinuousOn (Function.uncurry u)
-      (Icc (0 : ℝ) 1 ×ˢ Metric.closedBall (0 : E) B)) :
-    ∃ δ M : ℝ, 0 < δ ∧ δ ≤ 1 ∧ 0 < M ∧ δ * M < B - A ∧
-      ∀ s ∈ Icc 0 δ, ∀ x : E, ‖x‖ ≤ B → ‖u s x‖ ≤ M := by
-  obtain ⟨C, hC⟩ :=
-    (isCompact_Icc.prod (isCompact_closedBall (0 : E) B)).exists_bound_of_continuousOn hu
-  let M : ℝ := max C 0 + 1
-  have hM : 0 < M := by dsimp [M]; positivity
-  let δ : ℝ := min 1 ((B - A) / (2 * M))
-  have hδ : 0 < δ := lt_min zero_lt_one (div_pos (sub_pos.mpr hAB) (by positivity))
-  have hδone : δ ≤ 1 := min_le_left _ _
-  have hsmall : δ * M < B - A := by
-    have hb : δ * M ≤ (B - A) / 2 := by
-      calc
-        δ * M ≤ ((B - A) / (2 * M)) * M :=
-          mul_le_mul_of_nonneg_right (min_le_right _ _) hM.le
-        _ = (B - A) / 2 := by field_simp
-    linarith
-  refine ⟨δ, M, hδ, hδone, hM, hsmall, ?_⟩
-  intro s hs x hx
-  have hxball : x ∈ Metric.closedBall (0 : E) B := by
-    simpa only [Metric.mem_closedBall, dist_zero_right] using hx
-  have hc := hC (s, x) ⟨⟨hs.1, hs.2.trans hδone⟩, hxball⟩
-  have hCM : C ≤ M := (le_max_left C 0).trans (by dsimp [M]; linarith)
-  exact hc.trans hCM
 
 end EulerComparatorLocalFlow

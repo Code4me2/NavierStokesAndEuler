@@ -69,8 +69,6 @@ theorem scalarCommutator_all_memLp {n : ℕ} (w : Fin n → Fin 4)
 def commutatorH6Norm (n : ℕ) (f : LiftDomain period → ℝ) (g : LiftDomain period → Vector3) : ℝ :=
   ∑ w : Fin n → Fin 4, liftSobolevNorm period 6 (scalarCommutator period w f g)
 
-theorem commutatorH6Norm_nonneg (n : ℕ) (f : LiftDomain period → ℝ) (g : LiftDomain period → Vector3) :
-    0 ≤ commutatorH6Norm period n f g := Finset.sum_nonneg fun _ _ => liftSobolevNorm_nonneg period 6 _
 
 @[simp] theorem commutatorH6Norm_zero (f : LiftDomain period → ℝ) (g : LiftDomain period → Vector3) :
     commutatorH6Norm period 0 f g = 0 := by

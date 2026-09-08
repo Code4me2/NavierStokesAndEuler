@@ -45,9 +45,6 @@ def Data.activation (D : Data U) (t₀ : Icc (0 : ℝ) D.T) (n : Space) (hn : n 
   D.reframe (activationDirection (D.deformationEquiv t₀ 0) n)
     (activationDirection_unit _ hn)
 
-theorem Data.activation_normal (D : Data U) (t₀ : Icc (0 : ℝ) D.T) (n : Space) (hn : n ≠ 0) :
-    (D.activation t₀ n hn).normal.field t₀ 0 = activationRayScale (D.deformationEquiv t₀ 0) n • n := by
-  exact activationDirection_transport (D.deformationEquiv t₀ 0) n
 
 def HistoryData.activation {D : Data U} (B : HistoryData D)
     (t₀ : Icc (0 : ℝ) D.T) (n : Space) (hn : n ≠ 0) : HistoryData (D.activation t₀ n hn) :=

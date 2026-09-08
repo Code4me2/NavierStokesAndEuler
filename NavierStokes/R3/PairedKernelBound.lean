@@ -57,14 +57,6 @@ theorem lpNorm_const_smul_of_nonneg {f : Space → E} {p : ℝ≥0∞}
   rw [eLpNorm_const_smul, ENNReal.toReal_mul]
   simp [Real.norm_eq_abs, abs_of_nonneg hD]
 
-omit [NormedSpace ℝ E] in
-/-- A reflected translate has the same `Lᵖ` norm. -/
-theorem lpNorm_sub_left {k : Space → E} {p : ℝ≥0∞}
-    (hk : AEStronglyMeasurable k volume) (x : Space) :
-    comparisonLpNorm p (fun y => k (x - y)) = comparisonLpNorm p k := by
-  unfold comparisonLpNorm
-  congr 1
-  exact eLpNorm_comp_measurePreserving hk (measurePreserving_reflect_translate x)
 
 /-- Hölder provides both integrability and the estimate for vector-valued data. -/
 theorem integrable_smul_and_integral_norm_le
@@ -84,13 +76,6 @@ theorem integrable_smul_and_integral_norm_le
   simpa only [comparisonLpNorm, ENNReal.toReal_mul] using
     ENNReal.toReal_mono (ENNReal.mul_ne_top hk.eLpNorm_ne_top hr.eLpNorm_ne_top) hbound
 
-/-- The scalar multiplication estimate in ordinary real multiplication notation. -/
-theorem integrable_mul_and_integral_norm_le
-    {k r : Space → ℝ} (hk : MemLp k (4 / 3) volume)
-    (hr : MemLp r 4 volume) :
-    Integrable (fun y => k y * r y) volume ∧
-      (∫ y, ‖k y * r y‖) ≤ comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by
-  simpa only [smul_eq_mul] using integrable_smul_and_integral_norm_le hk hr
 
 /-- A single measurable section can be dominated almost everywhere; no
 jointly measurable extension of that section is required. -/
@@ -137,17 +122,6 @@ theorem dominated_section_integrable_and_integral_norm_le_scaled
     lpNorm_const_smul_of_nonneg hD
   rwa [hscale] at hnorm
 
-/-- A measurable kernel section dominated by a reflected translate of an
-`L^(4/3)` function has a uniform `L^(4/3)` bound. -/
-theorem section_memLp_and_lpNorm_le
-    {K : Space → Space → ℝ} {k : Space → ℝ}
-    (hK : Measurable (Function.uncurry K))
-    (hk : MemLp k (4 / 3) volume)
-    (hbound : ∀ x y, ‖K x y‖ ≤ k (x - y)) (x : Space) :
-    MemLp (K x) (4 / 3) volume ∧ comparisonLpNorm (4 / 3) (K x) ≤ comparisonLpNorm (4 / 3) k := by
-  exact dominated_section_memLp_and_lpNorm_le x
-    (hK.comp measurable_prodMk_left).aestronglyMeasurable hk
-    (Filter.Eventually.of_forall (hbound x))
 
 /-- Each paired section is genuinely Bochner integrable, with a bound
 independent of the outer variable. -/
@@ -162,17 +136,6 @@ theorem section_integrable_and_integral_norm_le
     (hK.comp measurable_prodMk_left).aestronglyMeasurable hk hr
     (Filter.Eventually.of_forall (hbound x))
 
-/-- A scaled majorant gives the corresponding scaled uniform section bound. -/
-theorem section_integrable_and_integral_norm_le_scaled
-    {K : Space → Space → ℝ} {k : Space → ℝ} {r : Space → E} {D : ℝ}
-    (hK : Measurable (Function.uncurry K))
-    (hk : MemLp k (4 / 3) volume) (hr : MemLp r 4 volume)
-    (hD : 0 ≤ D) (hbound : ∀ x y, ‖K x y‖ ≤ D * k (x - y)) (x : Space) :
-    Integrable (fun y => K x y • r y) volume ∧
-      (∫ y, ‖K x y • r y‖) ≤ D * comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by
-  exact dominated_section_integrable_and_integral_norm_le_scaled x
-    (hK.comp measurable_prodMk_left).aestronglyMeasurable hk hr hD
-    (Filter.Eventually.of_forall (hbound x))
 
 /-- Pairing with an `L¹` function proves integrability on the whole product
 space, not just existence of the iterated Bochner integral. -/
@@ -255,18 +218,6 @@ theorem norm_paired_kernel_le_scaled
       norm_paired_kernel_le hK (hk.const_mul D) hr hg hbound
     _ = D * comparisonLpNorm 1 g * comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by rw [hscale]; ring
 
-/-- Fubini for the paired expression follows from actual product integrability. -/
-theorem integral_pairing_swap
-    {K : Space → Space → ℝ} {k g : Space → ℝ} {r : Space → E}
-    (hK : Measurable (Function.uncurry K))
-    (hk : MemLp k (4 / 3) volume) (hr : MemLp r 4 volume)
-    (hg : Integrable g volume) (hbound : ∀ x y, ‖K x y‖ ≤ k (x - y)) :
-    (∫ x, g x • ∫ y, K x y • r y) =
-      ∫ y, ∫ x, g x • (K x y • r y) := by
-  calc
-    (∫ x, g x • ∫ y, K x y • r y) = ∫ x, ∫ y, g x • (K x y • r y) := by
-      simp only [integral_smul]
-    _ = _ := integral_integral_swap (integrable_paired_kernel hK hk hr hg hbound)
 
 /-- The direct convolution specialization needs only measurability of the
 kernel and finite `L^(4/3)`, `L⁴`, and `L¹` norms. -/
@@ -281,14 +232,5 @@ theorem norm_convolution_pairing_le
       (hkm.comp (measurable_fst.sub measurable_snd)) hk.norm hr hg
       (fun _ _ => le_rfl)
 
-/-- The requested real-valued paired convolution inequality. -/
-theorem abs_convolution_pairing_le
-    {k g r : Space → ℝ} (hkm : Measurable k)
-    (hk : MemLp k (4 / 3) volume) (hr : MemLp r 4 volume)
-    (hg : Integrable g volume) :
-    |∫ x, g x * ∫ y, k (x - y) * r y| ≤
-      comparisonLpNorm 1 g * comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by
-  simpa only [smul_eq_mul, Real.norm_eq_abs] using
-    norm_convolution_pairing_le hkm hk hr hg
 
 end NavierStokesR3.PairedKernelBound

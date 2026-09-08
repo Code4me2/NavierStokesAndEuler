@@ -393,20 +393,6 @@ theorem own_zero_outside (request : ℕ → Full → SignedWaveUpdate.Vec2)
   simp only [amplitude, pressure, potential, hza, hzp, CurlClassBounds.normalCoefficient,
     CurlClassBounds.normalCross, map_zero, smul_zero, and_self]
 
-/-- The full-strip families supplied to radial continuation have literal
-zero values outside the original open radial interval, in every band. -/
-theorem ownFields_zero_outside (request : ℕ → Full → SignedWaveUpdate.Vec2)
-    (i : Label B N0 × Copy) (n : ℕ) {x : Full}
-    (hx : x ∈ ActualWaveRegularity.fullDomain standardRegion)
-    (hout : ActualWaveRegularityData.radius x ∉ Ioo
-      (PrimaryTargetBounds.leftRadius nominal) (PrimaryTargetBounds.rightRadius nominal)) :
-    ownField (amplitude request) i n x = 0 ∧
-      ownField (pressure request) i n x = 0 ∧ ownField (potential request) i n x = 0 := by
-  by_cases hn : n = reference i.1
-  · subst n
-    simp only [ownField_reference]
-    exact own_zero_outside request i.1 i.2 hx hout
-  · simp only [ownField_other _ i hn, and_self]
 
 /-! ## The request is the measured current residual -/
 
@@ -436,22 +422,5 @@ theorem actual_own_potential_pressure_class (G : SignedMeanGain.Geometry)
     exact hr
   simpa only [sub_add_cancel] using own_potential_pressure_class hr'
 
-/-- In particular the literal reconstructed cycle invariant is sufficient;
-the only analytic output used is its already measured residual class. -/
-theorem invariant_own_potential_pressure_class {ι : Type} (G : SignedMeanGain.Geometry)
-    (hs : G.strip = ActualPrimaryBounds.strip)
-    (c : CorrectionState.Context Point) (primary : ι → CorrectionState.HarmonicBlock Point)
-    (P : ι → ℕ → Point → ℝ) (labelCarrier : ι → ℕ → Set Point)
-    (σ : ℝ) (u : CorrectionStep.CycleState ι)
-    (H : CorrectionStep.CycleAnalyticInvariant G c primary P labelCarrier σ u) :
-    let request := LocalSignedRequest.fullRequest G.strip G.patch G.coord c u.state
-    LabelSumBounds.UniformClass fullStrip
-      (fun (i : Label B N0 × Copy) n x => Real.sqrt (fullStrip.zeta x) * envelope i.1 n x) (1 + σ)
-      (ownField (potential request)) ∧
-    LabelSumBounds.UniformClass fullStrip
-      (fun (i : Label B N0 × Copy) n x => Real.sqrt (fullStrip.zeta x) * envelope i.1 n x) (1 + σ)
-      (ownField (pressure request)) :=
-  actual_own_potential_pressure_class G hs c u.state (1 + σ) H.primitives H.reconstructed
-    H.raw_mean_bounds.1 H.raw_mean_bounds.2
 
 end NavierStokes.ActualSignedUnmaskedBounds

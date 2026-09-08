@@ -57,8 +57,6 @@ theorem nativeDomain_open : IsOpen nativeDomain :=
 theorem nativeDomain_radius_pos {x : Cylinder} (hx : x ∈ nativeDomain) :
     0 < x.1.1 := hx.1.2
 
-theorem nativeDomain_radius_ne {x : Cylinder} (hx : x ∈ nativeDomain) :
-    x.1.1 ≠ 0 := (nativeDomain_radius_pos hx).ne'
 
 /-! ## Scale identities independent of the particular actual profile -/
 
@@ -225,14 +223,6 @@ theorem selected_annulus (n : ℕ) {w : SpaceTime} (hw : w ∈ preterminal)
   · change PrimaryTargetBounds.leftRadius ActualPrimary.nominal / 4 ≤ ‖scaledRadial n w‖
     linarith only [hRlo, PolarCharts.radius_le_two_norm (scaledRadial n w)]
 
-theorem selected_chart_exists (n : ℕ) {w : SpaceTime} (hw : w ∈ preterminal)
-    (hactive : w ∈ active)
-    (hqQ : physicalQ ActualPrimary.h w ≤ ChartScales.Q n)
-    (hQq : ChartScales.Q n < 2 * physicalQ ActualPrimary.h w) :
-    ∃ j : PolarCharts.Index, scaledRadial n w ∈ PolarCharts.chartDomain inner j := by
-  obtain ⟨j, hj⟩ := PolarCharts.annulus_covered inner_pos
-    (selected_annulus n hw hactive hqQ hQq)
-  exact ⟨j, PolarCharts.sector_subset_chartDomain inner_pos j hj⟩
 
 theorem selected_polar_nativeDomain (j : PolarCharts.Index) (n d : ℕ)
     {w : SpaceTime} (hw : w ∈ preterminal) (hactive : w ∈ active)
@@ -281,18 +271,5 @@ theorem exists_selected_band (N : ℕ) {w : SpaceTime}
   exact ⟨selected_polar_nativeDomain j n d hw hactive hqQ hQq hj,
     selected_polar_closure j n d hw hactive hqQ hQq hj⟩
 
-theorem exists_selected_band_of_qbig (firstBand : ℕ) {qbig : ℝ} {w : SpaceTime}
-    (hw : w ∈ preterminal) (hactive : w ∈ active)
-    (hsmall : physicalQ ActualPrimary.h w ≤ qbig)
-    (hfloor : qbig ≤ ChartScales.Q firstBand) :
-    ∃ n : ℕ, firstBand ≤ n ∧ physicalQ ActualPrimary.h w ≤ ChartScales.Q n ∧
-      ChartScales.Q n < 2 * physicalQ ActualPrimary.h w ∧
-      scaledRadial n w ∈ annulus inner outer ∧
-      ∀ (j : PolarCharts.Index) (d : ℕ),
-        scaledRadial n w ∈ PolarCharts.chartDomain inner j →
-          PhysicalResidualJetBounds.polarGraph inner ActualPrimary.h j n d w ∈ nativeDomain ∧
-          PhysicalResidualJetBounds.polarGraph inner ActualPrimary.h j n d w ∈
-            closure (HarmonicResidual.liftDomain ActualInitialization.geometry.strip.domain) :=
-  exists_selected_band firstBand hw hactive (hsmall.trans hfloor)
 
 end NavierStokes.ActualPolarCoverage

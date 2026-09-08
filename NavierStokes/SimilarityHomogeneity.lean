@@ -91,16 +91,7 @@ noncomputable def physicalScale (h Q : ℝ) (p : SimilarityProfile.PhysicalPoint
     SimilarityProfile.PhysicalPoint :=
   (1 - Q * (1 - p.1), (Q * p.2.1, Q ^ D h * p.2.2))
 
-theorem physicalScale_smooth (h Q : ℝ) : ContDiff ℝ ∞ (physicalScale h Q) :=
-  (contDiff_const.sub (contDiff_const.mul (contDiff_const.sub contDiff_fst))).prodMk
-    ((contDiff_const.mul contDiff_snd.fst).prodMk
-      (contDiff_const.mul contDiff_snd.snd))
 
-theorem physicalScale_time_lt_one {h Q : ℝ} (hQ : 0 < Q)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) :
-    (physicalScale h Q p).1 < 1 := by
-  change 1 - Q * (1 - p.1) < 1
-  linarith [mul_pos hQ (sub_pos.mpr hp)]
 
 theorem q_physicalScale {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (hQ : 0 < Q) {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) :
@@ -129,16 +120,6 @@ theorem inner_physicalScale {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     SimilarityProfile.inner h (physicalScale h Q p) = SimilarityProfile.inner h p :=
   Prod.ext (X_physicalScale hh hh1 hQ hp) (eta_physicalScale hh hh1 hQ hp)
 
-/-- Homogeneity holds for every profile, without assuming its smoothness. -/
-theorem pullback_physicalScale {h Q b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1)
-    (f : SimilarityProfile.InnerProfile) :
-    SimilarityProfile.pullback h b f (physicalScale h Q p) =
-      Q ^ b * SimilarityProfile.pullback h b f p := by
-  unfold SimilarityProfile.pullback
-  rw [q_physicalScale hh hh1 hQ hp, inner_physicalScale hh hh1 hQ hp,
-    Real.mul_rpow hQ.le (SimilarityProfile.q_pos hh hh1 hp).le]
-  ring
 
 abbrev ChartPoint := ℝ × (ℝ × ℝ)
 
@@ -160,15 +141,7 @@ noncomputable def chartTransition (h Q Q' : ℝ) (p : ChartPoint) : ChartPoint :
   ((Q / Q') ^ (1 / 2 : ℝ) * p.1,
     ((Q / Q') ^ D h * p.2.1, (Q / Q') * p.2.2))
 
-theorem chartTransition_smooth (h Q Q' : ℝ) :
-    ContDiff ℝ ∞ (chartTransition h Q Q') :=
-  (contDiff_const.mul contDiff_fst).prodMk
-    ((contDiff_const.mul contDiff_snd.fst).prodMk
-      (contDiff_const.mul contDiff_snd.snd))
 
-theorem chartTransition_time_pos {h Q Q' : ℝ} (hQ : 0 < Q) (hQ' : 0 < Q')
-    {p : ChartPoint} (hp : 0 < p.2.2) : 0 < (chartTransition h Q Q' p).2.2 :=
-  mul_pos (div_pos hQ hQ') hp
 
 theorem chartQ_transition {h Q Q' : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (hQ : 0 < Q) (hQ' : 0 < Q') {p : ChartPoint} (hp : 0 < p.2.2) :
@@ -204,24 +177,8 @@ noncomputable def chartToPhysical (h Q : ℝ) (p : ChartPoint) :
     SimilarityProfile.PhysicalPoint :=
   (1 - Q * p.2.2, (Q * (p.1 ^ 2 / 2), Q ^ D h * p.2.1))
 
-theorem chartToPhysical_smooth (h Q : ℝ) : ContDiff ℝ ∞ (chartToPhysical h Q) :=
-  (contDiff_const.sub (contDiff_const.mul contDiff_snd.snd)).prodMk
-    ((contDiff_const.mul ((contDiff_fst.pow 2).div_const 2)).prodMk
-      (contDiff_const.mul contDiff_snd.fst))
 
-theorem chartToPhysical_time_lt_one {h Q : ℝ} (hQ : 0 < Q)
-    {p : ChartPoint} (hp : 0 < p.2.2) : (chartToPhysical h Q p).1 < 1 := by
-  change 1 - Q * p.2.2 < 1
-  linarith [mul_pos hQ hp]
 
-/-- The radial component really is obtained from `r = sqrt(Q) R`. -/
-theorem chartToPhysical_radial {Q : ℝ} (hQ : 0 < Q) (h : ℝ) (p : ChartPoint) :
-    (chartToPhysical h Q p).2.1 = (Scaling.radialLength Q * p.1) ^ 2 / 2 := by
-  unfold chartToPhysical Scaling.radialLength
-  dsimp only
-  rw [mul_pow, ← Real.rpow_mul_natCast hQ.le]
-  norm_num
-  ring
 
 theorem q_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (hQ : 0 < Q) {p : ChartPoint} (hp : 0 < p.2.2) :
@@ -245,32 +202,7 @@ theorem X_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   change (Q * (p.1 ^ 2 / 2)) / (Q * chartQ h p) = (p.1 ^ 2 / 2) / chartQ h p
   exact mul_div_mul_left _ _ hQ.ne'
 
-theorem inner_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) {p : ChartPoint} (hp : 0 < p.2.2) :
-    SimilarityProfile.inner h (chartToPhysical h Q p) = chartInner h p :=
-  Prod.ext (X_chartToPhysical hh hh1 hQ hp) (eta_chartToPhysical hh hh1 hQ hp)
 
-/-- Two band descriptions of the same physical point agree exactly. -/
-theorem chartToPhysical_transition {h Q Q' : ℝ} (hQ : 0 < Q) (hQ' : 0 < Q')
-    (p : ChartPoint) :
-    chartToPhysical h Q' (chartTransition h Q Q' p) = chartToPhysical h Q p := by
-  have hr : 0 < Q / Q' := div_pos hQ hQ'
-  have hs : ((Q / Q') ^ (1 / 2 : ℝ)) ^ 2 = Q / Q' := by
-    rw [← Real.rpow_mul_natCast hr.le]
-    norm_num
-  have hz : Q' ^ D h * (Q / Q') ^ D h = Q ^ D h := by
-    rw [← Real.mul_rpow hQ'.le hr.le]
-    congr 1
-    field_simp
-  apply Prod.ext
-  · dsimp [chartToPhysical, chartTransition]
-    field_simp
-  · apply Prod.ext
-    · dsimp [chartToPhysical, chartTransition]
-      rw [mul_pow, hs]
-      field_simp
-    · dsimp [chartToPhysical, chartTransition]
-      rw [← mul_assoc, hz]
 
 theorem chartTransition_refl {Q : ℝ} (hQ : 0 < Q) (h : ℝ) (p : ChartPoint) :
     chartTransition h Q Q p = p := by
@@ -292,10 +224,6 @@ theorem chartTransition_comp {h Q Q' Q'' : ℝ}
     · dsimp [chartTransition]
       rw [← mul_assoc, hr]
 
-theorem chartTransition_inverse {h Q Q' : ℝ} (hQ : 0 < Q) (hQ' : 0 < Q')
-    (p : ChartPoint) :
-    chartTransition h Q' Q (chartTransition h Q Q' p) = p := by
-  rw [chartTransition_comp hQ hQ' hQ, chartTransition_refl hQ]
 
 /-- The usual open annular-chart domain; profile annulus restrictions can
 be added using `chartX_mem_transition`. -/
@@ -324,17 +252,7 @@ theorem chartInner_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (coordinateQ_spec (by linarith) (by linarith) (p := (p.2.2, p.2.1)) hp).1
   exact (((contDiffAt_fst.pow 2).div_const 2).div hq hqp.ne').prodMk he
 
-theorem chartX_mem_transition {h Q Q' : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) (hQ' : 0 < Q') {p : ChartPoint} (hp : 0 < p.2.2) (I : Set ℝ) :
-    chartX h (chartTransition h Q Q' p) ∈ I ↔ chartX h p ∈ I := by
-  rw [chartX_transition hh hh1 hQ hQ' hp]
 
-/-- Every profile depending on both actual inner coordinates is unchanged. -/
-theorem chartProfile_transition {E : Type*} {h Q Q' : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q) (hQ' : 0 < Q')
-    {p : ChartPoint} (hp : 0 < p.2.2) (F : (ℝ × ℝ) → E) :
-    F (chartInner h (chartTransition h Q Q' p)) = F (chartInner h p) := by
-  rw [chartInner_transition hh hh1 hQ hQ' hp]
 
 noncomputable def chartWeight {E : Type*} (h : ℝ) (ζ : ℝ → E) (p : ChartPoint) : E :=
   ζ (chartX h p)
@@ -366,15 +284,5 @@ theorem chartLogDistance_transition {h Q Q' : ℝ}
       chartLogDistance h left right p :=
   congrArg (profileLogDistance left right) (chartX_transition hh hh1 hQ hQ' hp)
 
-/-- Exact transport includes square-root flat weights and every real edge
-power, including the negative powers used for derivative losses. -/
-theorem chartWeightedFactor_transition {h Q Q' : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q) (hQ' : 0 < Q')
-    {p : ChartPoint} (hp : 0 < p.2.2) (ζ : ℝ → ℝ) (left right exponent : ℝ) :
-    Real.sqrt (chartWeight h ζ (chartTransition h Q Q' p)) *
-        chartLogDistance h left right (chartTransition h Q Q' p) ^ exponent =
-      Real.sqrt (chartWeight h ζ p) * chartLogDistance h left right p ^ exponent := by
-  rw [chartWeight_transition hh hh1 hQ hQ' hp,
-    chartLogDistance_transition hh hh1 hQ hQ' hp]
 
 end NavierStokes.SimilarityHomogeneity

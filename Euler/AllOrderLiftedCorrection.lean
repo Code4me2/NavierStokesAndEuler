@@ -54,12 +54,6 @@ def commonJet {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A
   exact EulerH6Pressure.SpatialJet.restrict
     (toJet period (solution period hT A B (n+6) (by omega) t)) n (by omega)
 
-/-- Every external cutoff of the common solution retains the actual uniform Gevrey metric bound. -/
-theorem commonPath_energy {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)
-    (P : ℕ) (t : Icc (0 : ℝ) T) :
-    energyNorm period P (by omega : P+6 ≤ (P+6)+1) (B.radius t) (B.metric.operatorPath period t)
-      (solution period hT A B (P+6) (by omega) t) ≤ B.delta/2 :=
-  solution_energy period hT A B (P+6) (by omega) P (by omega) (by omega) t
 
 /-- The common L² path satisfies the actual nonlinear inviscid correction equation. -/
 theorem commonPath_hasDerivAt {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)

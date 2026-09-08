@@ -59,9 +59,5 @@ theorem embedding_mem (κ : ℝ) (m : Space) (u : L2) (hu : u ∈ solenoidalSpac
   · exact lift_classical_divergence P κ m f hf
       (EulerMeanClassical.solenoidal_representative_divergence u hu f hf hrep)
 
-theorem embedding_mem_of_smooth_orbit (κ : ℝ) (m : Space) (u : L2)
-    (hu : u ∈ solenoidalSpace) (hs : SmoothOrbit u) :
-    embedding P u ∈ divergenceFreeSpace P κ m :=
-  embedding_mem P κ m u hu (representative u hs) (representative_smooth u hs) (representative_ae u hs)
 
 end EulerMeanCylinderSolenoidal

@@ -81,49 +81,6 @@ def initializedExactPacket (Cagree : SourceCoefficientAgreement M D)
   exactPacketOfResidual period Q
     (initializedApproximationResidual M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk)
 
-theorem initializedExactPacket_velocity_odd
-    (eM : EulerMeanPacketProvider.EvenData M)
-    (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hDM : ∀ t x, D.M.field t (-x) = D.M.field t x)
-    (hBH : ∀ t x, B.H.field t (-x) = B.H.field t x)
-    (Cagree : SourceCoefficientAgreement M D) (N : ℕ) (hN : 1 ≤ N)
-    (k : ℝ) (hk : 4 ≤ k)
-    (Q : Budget period D.T_pos
-      (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk))
-    (t : Icc (0 : ℝ) D.T) :
-    -reflection period
-      ((initializedExactPacket M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk Q).velocity.field t) =
-      (initializedExactPacket M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk Q).velocity.field t :=
-  exactPacketOfResidual_velocity_odd period Q _
-    (initializedCorrectionParityData M D hTime τ hτ hτT B δ hδ ξ hs α
-      eM hSym hF hDM hBH Cagree N hN k hk) t
 
-/-- No inverse budget, residual equation or pressure is postulated here.
-The original source data construct the budget and the exact corrected pair
-for every sufficiently large frequency, with fixed positive radius and cost. -/
-theorem initialized_exact_lifted_packets_eventually
-    (hδ1 : δ ≤ 1) (hα : 0 < α)
-    (L : EulerTransversePacketJoin.Budget D τ hτ hτT B (Fin 4) 6)
-    (NB : EulerTransversePacketJoin.NormalBudget D 6 L.R)
-    {Rm : ℝ} (LM : EulerMeanPacketProvider.Budget M 6 Rm)
-    (Cagree : SourceCoefficientAgreement M D)
-    (Ξ : Icc (0 : ℝ) D.T → Space → Space) (hΞ : ∀ t, ContDiff ℝ ∞ (Ξ t))
-    (hF : ∀ t x, fderiv ℝ (Ξ t) x = D.F.field t x)
-    (hdet : ∀ t x, (EulerPacketPiola.operatorMatrix (D.F.field t x)).det=1) :
-    ∃ ρ0 C : ℝ, 0 < ρ0 ∧ 0 < C ∧ ∀ᶠ k : ℝ in atTop,
-      ∃ (hk : 4 ≤ k) (hn : 1 ≤ truncation k)
-        (Q : Budget period D.T_pos
-          (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree (truncation k) hn k hk)),
-        Q.delta=delta (expansion k) ∧ Q.initialRadius=ρ0 ∧ Q.growthCoefficient=C ∧
-          Nonempty (ExactLiftedPacket period D.T_pos
-            (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree (truncation k) hn k hk) Q) := by
-  obtain ⟨ρ0,C,hρ,hC,he⟩ := initialized_correction_budgets_eventually M D hTime τ hτ hτT B
-    δ hδ hδ1 ξ hs α hα L NB LM Cagree Ξ hΞ hF hdet
-  refine ⟨ρ0,C,hρ,hC,?_⟩
-  filter_upwards [he] with k hk
-  obtain ⟨hk,hn,Q,hδQ,hρQ,hCQ⟩ := hk
-  exact ⟨hk,hn,Q,hδQ,hρQ,hCQ,
-    ⟨initializedExactPacket M D hTime τ hτ hτT B δ hδ ξ hs α Cagree (truncation k) hn k hk Q⟩⟩
 
 end EulerPacketTerminalDatum

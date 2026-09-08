@@ -145,17 +145,6 @@ theorem velocityPath_norm_sub_le (U V : Evolution T hT) (K : ℝ) (hK0 : 0 ≤ K
     (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr
       (mul_le_mul_of_nonneg_left t.property.2 hK0)) (norm_nonneg _))
 
-theorem l2_stability_of_h3 (U V : Evolution T hT) (M : ℝ)
-    (hM : ∀ t, tensorNorm 3 (U.velocity t) ≤ M) (t : Icc (0 : ℝ) T) :
-    ‖(U.difference V t).toLp‖ ≤ ‖(U.difference V ⟨0,le_rfl,hT⟩).toLp‖*
-      Real.exp ((9*EulerSmoothSobolev.smoothEmbeddingConstant*M)*t) := by
-  apply U.l2_stability V
-  intro s x
-  have hb := EulerSmoothSobolev.real_smooth_fderiv_le_H3 3 (U.velocity s).field
-    (U.velocity s).smooth (fun j _ => (U.velocity s).integrable j) x
-  rw [← tensorNorm_eq] at hb
-  exact hb.trans (mul_le_mul_of_nonneg_left (hM s)
-    (mul_nonneg (by norm_num) EulerSmoothSobolev.smoothEmbeddingConstant_nonneg))
 
 end Evolution
 end EulerOrdinarySobolev

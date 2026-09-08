@@ -252,8 +252,6 @@ noncomputable def gap (L : PhysicalWaveSum.BandLabel) : ℕ :=
 noncomputable def geometry (L : PhysicalWaveSum.BandLabel) : CommonCoverSolve.Geometry :=
   ActualSignedPhysicalData.geometry ActualPrimary.slots L.val (gap L)
 
-theorem geometry_bandLabel (l : SignedLabel B N0) :
-    geometry (bandLabel l) = ActualPrimary.chartGeometry (BaseChartJets.cellBand l.2) l.1 l.2 := rfl
 
 noncomputable def selectedCarrier (l : SignedLabel B N0) (k : Frequency) : PhysicalWaveSum.CarrierData :=
   ActualSignedPhysicalData.carrier (h := ActualPrimary.h) (spatialLabel l) k
@@ -2567,46 +2565,7 @@ theorem pressure_eq_active (n d : ℕ) (z : ProblemStatement.SpaceTime)
   intro l hl
   exact pressure_periodized_eq (l.2, l.1) z ht hr
 
-/-- Exact normalized velocity of the initialized primary aggregate. The
-right side is the curl of the actual Cartesian potential constructed above. -/
-theorem velocity_chart (n d : ℕ) (z : ProblemStatement.SpaceTime)
-    (ht : z.1 < 1) (hr : 0 < z.2 0)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d
-      (z.1, CylindricalResidual.chart z.2) ∈ strip.domain) (i : Fin 3) :
-    (∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-      (ActualPrimary.piece ActualPrimary.standardRegion l.2 l.1).velocity n
-        (PhysicalResidualTZ.swapCylinder
-          ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) ActualPrimary.h
-            (CommonWindow.index ActualPrimary.h n)).map z)) i) =
-      ChartScales.Q n ^ CoordinateAlgebra.A ActualPrimary.h *
-        CylindricalResidual.frame (-(z.2 1))
-          (SpatialCurl.spatialCurl (potential B N0) (z.1, CylindricalResidual.chart z.2)) i := by
-  rw [curl_eq_active n d (w := (z.1, CylindricalResidual.chart z.2)) ht hx]
-  change _ = ChartScales.Q n ^ CoordinateAlgebra.A ActualPrimary.h *
-    AxisymmetricFields.projection i
-      (CylindricalResidual.frame (-(z.2 1))
-        (∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-          ActualPrimaryCoherence.cartesianVelocity l.2 l.1 (z.1, CylindricalResidual.chart z.2)))
-  rw [map_sum, map_sum, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro l hl
-  exact ActualPrimaryCoherence.piece_cartesian_velocity ActualPrimary.standardRegion l.2 l.1 n ht hr i
 
-theorem pressure_chart (n d : ℕ) (z : ProblemStatement.SpaceTime)
-    (ht : z.1 < 1) (hr : 0 < z.2 0)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d
-      (z.1, CylindricalResidual.chart z.2) ∈ strip.domain) :
-    (∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-      (ActualPrimary.piece ActualPrimary.standardRegion l.2 l.1).pressure n
-        (PhysicalResidualTZ.swapCylinder
-          ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) ActualPrimary.h
-            (CommonWindow.index ActualPrimary.h n)).map z))) =
-      ChartScales.Q n ^ (2 * CoordinateAlgebra.A ActualPrimary.h) *
-        pressure B N0 (z.1, CylindricalResidual.chart z.2) := by
-  rw [pressure_eq_active n d z ht hr hx, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro l hl
-  exact ActualPrimaryCoherence.piece_physical_pressure ActualPrimary.standardRegion l.2 l.1 n hr
 
 
 end FiniteAggregation

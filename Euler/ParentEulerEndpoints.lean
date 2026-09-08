@@ -28,21 +28,5 @@ theorem spatial_derivative_continuous (x : Space) :
     coefficientPath_apply _ _ t x]
   rw [funext (S.velocity_match t)]
 
-theorem divergence_closed (t : Icc (0 : ℝ) A.T) (x : Space) :
-    divergence (fun y => E.velocity (t,y)) x=0 := by
-  let f : ℝ → ℝ := fun s => coordinateTrace
-    (fderiv ℝ (fun y => E.velocity (projIcc 0 A.T A.T_pos.le s,y)) x)
-  have hf : Continuous f := coordinateTrace.continuous.comp
-    ((S.spatial_derivative_continuous x).comp continuous_projIcc)
-  have he : EqOn f (fun _ => 0) (Ioo 0 A.T) := by
-    intro s hs
-    simpa only [f,projIcc_of_mem A.T_pos.le ⟨hs.1.le,hs.2.le⟩,
-      coordinateTrace_eq_linearTrace,divergence] using E.divergence_zero s hs x
-  have ht : (t : ℝ) ∈ closure (Ioo (0 : ℝ) A.T) := by
-    rw [closure_Ioo A.T_pos.ne]
-    exact t.property
-  have hh := he.closure hf continuous_const ht
-  simpa only [f,projIcc_of_mem A.T_pos.le t.property,
-    coordinateTrace_eq_linearTrace,divergence] using hh
 
 end EulerParentPacketFrames.SobolevData

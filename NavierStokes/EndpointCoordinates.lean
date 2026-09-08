@@ -107,15 +107,6 @@ theorem past_mem_domain {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 theorem qExtension_pos {h : ℝ} {p : PhysicalPoint} (hp : p ∈ domain h) : 0 < qExtension h p :=
   (PositiveRepresentatives.stableInverse_spec hp).1.1
 
-theorem qExtension_equation {h : ℝ} {p : PhysicalPoint} (hp : p ∈ domain h) :
-    forwardScalar (2 * h) p.2.2 (qExtension h p) = 1 - p.1 := by
-  have hs := (PositiveRepresentatives.stableInverse_spec hp).2
-  have hz : (PositiveRepresentatives.stableInverse (2 * h) (timeAxial p)).2 = p.2.2 := by
-    simpa only [forwardMap, timeAxial] using congrArg (fun x : ℝ × ℝ => x.2) hs
-  have hq := congrArg (fun x : ℝ × ℝ => x.1) hs
-  change forwardScalar (2 * h)
-    (PositiveRepresentatives.stableInverse (2 * h) (timeAxial p)).2 (qExtension h p) = 1 - p.1 at hq
-  rwa [hz] at hq
 
 theorem qExtension_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : PhysicalPoint} (hp : p ∈ domain h) : ContDiffAt ℝ ∞ (qExtension h) p :=
@@ -157,11 +148,6 @@ theorem qExtension_eq_physical {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
       (PositiveRepresentatives.stableInverse_eq_inverseMap
         (by linarith : 0 < 2 * h) (by linarith : 2 * h < 1) (sub_pos.mpr hp))
 
-theorem innerExtension_eq_physical {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : PhysicalPoint} (hp : p.1 < 1) : innerExtension h p = SimilarityProfile.inner h p := by
-  change (p.2.1 / qExtension h p, p.2.2 / qExtension h p ^ ((1 - 2 * h) / 2)) =
-    (p.2.1 / SimilarityProfile.q h p, p.2.2 / SimilarityProfile.q h p ^ ((1 - 2 * h) / 2))
-  rw [qExtension_eq_physical hh hh1 hp]
 
 theorem chartExtension_eq_physical {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : PhysicalPoint} (hp : p.1 < 1) : chartExtension h p = SlowBorelBase.physicalChart h p := by
@@ -182,10 +168,6 @@ theorem jets_eq_of_eventuallyEq {E V : Type*} [NormedAddCommGroup E] [NormedSpac
   have he' : f =ᶠ[𝓝[univ] p] g := by simpa only [nhdsWithin_univ] using he
   simpa only [iteratedFDerivWithin_univ] using he'.iteratedFDerivWithin_eq he.self_of_nhds n
 
-theorem chartExtension_jets_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : PhysicalPoint} (hp : p.1 < 1) (n : ℕ) :
-    iteratedFDeriv ℝ n (chartExtension h) p = iteratedFDeriv ℝ n (SlowBorelBase.physicalChart h) p :=
-  jets_eq_of_eventuallyEq (chartExtension_eventuallyEq hh hh1 hp) n
 
 noncomputable def lowerDomain (h c : ℝ) : Set PhysicalPoint :=
   domain h ∩ {p | c < qExtension h p}
@@ -247,12 +229,7 @@ theorem cartesianExtension_smoothOn {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :
     ContDiffOn ℝ ∞ (cartesianExtension h) (cartesianDomain h) :=
   fun _ hz => (cartesianExtension_smoothAt hh hh1 hz).contDiffWithinAt
 
-theorem cartesianExtension_pos {h : ℝ} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ cartesianDomain h) : 0 < (cartesianExtension h z).1 := qExtension_pos hz
 
-theorem cartesianExtension_X_nonneg {h : ℝ} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ cartesianDomain h) : 0 ≤ (cartesianExtension h z).2.1 :=
-  div_nonneg (AxisymmetricFields.radialEnergy_nonneg z.2) (qExtension_pos hz).le
 
 theorem cartesianExtension_endpoint {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {x : ProblemStatement.Space} (hx : x 2 ≠ 0) :
@@ -273,12 +250,6 @@ theorem cartesianExtension_eventuallyEq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   filter_upwards [(isOpen_lt continuous_fst continuous_const).mem_nhds hz] with p hp
   exact cartesianExtension_eq_physical hh hh1 hp
 
-/-- Equality is for arbitrary orders of the genuine space-time derivative. -/
-theorem cartesianExtension_jets_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {z : ProblemStatement.SpaceTime} (hz : z.1 < 1) (n : ℕ) :
-    iteratedFDeriv ℝ n (cartesianExtension h) z =
-      iteratedFDeriv ℝ n (SlowBorelBase.cartesianChart h) z :=
-  jets_eq_of_eventuallyEq (cartesianExtension_eventuallyEq hh hh1 hz) n
 
 theorem cartesian_endpoint_neighborhood {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {x : ProblemStatement.Space} (hx : x 2 ≠ 0) :
@@ -307,20 +278,6 @@ theorem composition_smoothAt {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ
     ContDiffAt ℝ ∞ (fun p => f (cartesianExtension h p)) z :=
   hf.comp z (cartesianExtension_smoothAt hh hh1 hz)
 
-theorem composition_endpoint_smoothAt {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) {x : ProblemStatement.Space}
-    (hx : x 2 ≠ 0) {f : Chart → V}
-    (hf : ContDiffAt ℝ ∞ f (cartesianExtension h (1, x))) :
-    ContDiffAt ℝ ∞ (fun p => f (cartesianExtension h p)) (1, x) :=
-  composition_smoothAt hh hh1 (cartesian_endpoint_mem hh hh1 hx) hf
 
-theorem composition_jets_eq {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (f : Chart → V)
-    {z : ProblemStatement.SpaceTime} (hz : z.1 < 1) (n : ℕ) :
-    iteratedFDeriv ℝ n (fun p => f (cartesianExtension h p)) z =
-      iteratedFDeriv ℝ n (fun p => f (SlowBorelBase.cartesianChart h p)) z := by
-  apply jets_eq_of_eventuallyEq _ n
-  filter_upwards [cartesianExtension_eventuallyEq hh hh1 hz] with p hp
-  exact congrArg f hp
 
 end NavierStokes.EndpointCoordinates

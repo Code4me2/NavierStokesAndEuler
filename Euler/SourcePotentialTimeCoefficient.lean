@@ -43,17 +43,7 @@ def timeNormalPath (N : C(K,NormalField)) (Q₁ : C(K,Space →ᵇ ℝ →L[ℝ]
   pathCompositionMap (pathCompositionMap N (pathAdjointMap N)) (pathAdjointMap Q₁) -
     (2 : ℝ) • pathCompositionMap (pathCompositionMap N Q₁) N
 
-theorem timeNormalPath_apply (N : C(K,NormalField)) (Q₁ : C(K,Space →ᵇ ℝ →L[ℝ] Space))
-    (t : K) (y : Space) : timeNormalPath N Q₁ t y = normalTimeMap (N t y) (Q₁ t y) := rfl
 
-theorem timeNormalPath_translation (N : C(K,NormalField)) (Q₁ : C(K,Space →ᵇ ℝ →L[ℝ] Space))
-    (a : Space) : translateCoefficientPath (timeNormalPath N Q₁) a =
-      timeNormalPath (translateCoefficientPath N a) (translateCoefficientPath Q₁ a) := by
-  apply ContinuousMap.ext
-  intro t
-  apply BoundedContinuousFunction.ext
-  intro y
-  rfl
 
 section Families
 
@@ -141,36 +131,6 @@ theorem potentialTimeCoefficient_translation :
   intro y
   rfl
 
-theorem potentialTimeCoefficient_translation_contDiff :
-    ContDiff ℝ ∞ (translateCoefficientPath (potentialTimeCoefficient m m₁ c hc hm)) := by
-  rw [potentialTimeCoefficient_translation]
-  have h := timeNormalPath_contDiff _ _
-    (normalFunctional_translation_contDiff m c hc hm) (normalColumn m₁).translation_contDiff
-  exact (potentialPathMap (K := K)).contDiff.comp h
 
-/-- The derivative coefficient is polynomial in the already constructed normal functional. -/
-theorem potentialTimeCoefficient_translation_bound (R C D : ℝ)
-    (hR : 0 ≤ R) (hC : 0 ≤ C) (hD : 0 ≤ D)
-    (hbN : ∀ n a, ‖iteratedFDeriv ℝ n (translateCoefficientPath (normalFunctional m c hc hm)) a‖ ≤
-      C*majorant R 0 n)
-    (hbm₁ : ∀ n t y, ‖iteratedFDeriv ℝ n (m₁.field t : Space → Space) y‖ ≤ D*majorant R 0 n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (translateCoefficientPath (potentialTimeCoefficient m m₁ c hc hm)) a‖ ≤
-      (27*C^2*D)*majorant R 0 n := by
-  have hQ (j : ℕ) (x : Space) :
-      ‖iteratedFDeriv ℝ j (translateCoefficientPath (normalColumn m₁).field) x‖ ≤ D*majorant R 0 j := by
-    apply (normalColumn m₁).norm_iteratedFDeriv_translation_le j (D*majorant R 0 j)
-      (mul_nonneg hD (majorant_nonneg R hR 0 j))
-    intro t y
-    exact SmoothCoefficientPath.map_derivative_bound
-      (ContinuousLinearMap.toSpanSingletonLIE ℝ Space).toLinearIsometry.toContinuousLinearMap
-      (ContinuousLinearMap.toSpanSingletonLIE ℝ Space).toLinearIsometry.norm_toContinuousLinearMap_le
-      m₁ j (D*majorant R 0 j) (hbm₁ j) t y
-  rw [potentialTimeCoefficient_translation]
-  exact contraction_bound (potentialPathMap (K := K)) potentialPathMap_norm _
-    (timeNormalPath_contDiff _ _ (normalFunctional_translation_contDiff m c hc hm)
-      (normalColumn m₁).translation_contDiff) R (27*C^2*D) hR (by positivity) 0
-    (timeNormalPath_bound _ _ (normalFunctional_translation_contDiff m c hc hm)
-      (normalColumn m₁).translation_contDiff R C D hR hC hD hbN hQ) n a
 
 end EulerSourcePotentialCoefficient

@@ -387,18 +387,6 @@ theorem jet_solution_eq_solution (hab : a ≤ b) {U : Set P} (hU : IsOpen U)
   rw [(integrator hab).map_add] at hj
   exact (eq_sub_iff_add_eq.mpr (by simpa only [add_assoc, add_comm, add_left_comm] using hj.symm))
 
-/-- The time derivative of each actual parameter jet is its triangular
-variational equation on the original closed interval. -/
-theorem jet_solution_hasDerivWithinAt (hab : a ≤ b) {U : Set P} (hU : IsOpen U)
-    (A : P → Coefficient a b E) (x₀ : P → E) (f : P → Curve a b E)
-    (hA : ContDiffOn ℝ ∞ A U) (hx₀ : ContDiffOn ℝ ∞ x₀ U)
-    (hf : ContDiffOn ℝ ∞ f U) (l : List P) {p : P} (hp : p ∈ U) (t : Icc a b) :
-    let u := fun q => solution hab (A q) (x₀ q) (f q)
-    HasDerivWithinAt (extend hab (jet u l p))
-      (A p t (jet u l p t) + jetSource A f u l p t) (Icc a b) t := by
-  dsimp only
-  rw [jet_solution_eq_solution hab hU A x₀ f hA hx₀ hf l hp]
-  exact solution_hasDerivWithinAt hab _ _ _ t
 
 end Products
 
@@ -605,16 +593,6 @@ theorem amplitude_le_polynomial {S K w L : ℝ} (hS : 1 ≤ S) (hK : 1 ≤ K)
       ring
     _ = w * D ^ (n + 1) * S ^ ((m + 1) * (n + 1)) := by dsimp [T]; rw [pow_mul]
 
-/-- An error of order `1/S` on a slot of length at most `d*S` has a uniform
-exponential factor, independent of `S`. -/
-theorem exp_error_le_of_inv_scale {μ S L c d : ℝ} (hS : 0 < S)
-    (hc : 0 ≤ c) (hμ : μ ≤ c / S) (hL : 0 ≤ L) (hslot : L ≤ d * S) :
-    Real.exp (μ * L) ≤ Real.exp (c * d) := by
-  apply Real.exp_le_exp.mpr
-  calc
-    μ * L ≤ (c / S) * L := mul_le_mul_of_nonneg_right hμ hL
-    _ ≤ (c / S) * (d * S) := mul_le_mul_of_nonneg_left hslot (div_nonneg hc hS.le)
-    _ = c * d := by field_simp
 
 /-- A concrete slot-polynomial estimate. `w` may be a small-scale power times
 a slow-variable weight; no loss of its power occurs in the induction. -/

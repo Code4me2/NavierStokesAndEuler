@@ -308,19 +308,6 @@ theorem coefficients_stress_eq_window {S : Set ℝ} {h C rho inner : ℝ} {U : S
     rw [extendCoreZero_eq _ L.inner_pos _ (fun _ he _ hr => zEven_zero L B0 Z0 n hr he) hX heta]
     exact zEven_eq L B0 Z0 n (Real.sqrt_nonneg _)
 
-theorem coefficients_stress_germ {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    (Z0 : ZeroOrderSolved s inner) (hI : Icc (-1 : ℝ) 1 ⊆ S) (n : ℕ)
-    {p : ℝ × ℝ} (hX : 0 < p.1) (heta : |p.2| ≤ 1) :
-    (fun q => ((coefficients L B0 Z0 hI).stressTheta n q, (coefficients L B0 Z0 hI).stressAxial n q)) =ᶠ[𝓝 p]
-      (fun q => (SlowResidualMatching.thetaStress h C (asSlowProfiles s) n q,
-        SlowResidualMatching.zStress h (asSlowProfiles s) n q)) := by
-  have he : |p.2| < (commonWindow s hI).inner := heta.trans_lt (commonWindow s hI).one_lt_inner
-  filter_upwards [(isOpen_Ioi.prod isOpen_Ioo).mem_nhds ⟨hX, abs_lt.mp he⟩] with q hq
-  have hh := coefficients_stress_eq_window L B0 Z0 hI n hq.1.le (abs_lt.mpr hq.2).le
-  exact Prod.ext hh.1 hh.2
 
 section Nominal
 
@@ -900,37 +887,7 @@ theorem first_pair_zero_right {F : OutgoingProfile.Profile} (W : NominalProfile.
   rw [SlowFirstOrderEdge.stressX_zero_outside _ _ _ hp]
   rfl
 
-/-- The tensor scale is the exact first slow-order scale
-`q^(-A-1/2+2h)`, and the angular term is the actual physical backward
-primitive of minus the second axial derivative. -/
-theorem physical_first_pair {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {f : (ℝ × ℝ) → ℝ × ℝ}
-    (he : EqOn f
-      (fun p => (SlowFirstOrderEdge.stressX (terminalAmplitude W) F.data (terminalShift W) p, 0))
-      (Ioi (terminalInner W) ×ˢ Ioo (-1 : ℝ) 1))
-    {t r z : ℝ} (ht : t < 1) (hr : 0 < r)
-    (hX : terminalInner W < SimilarityProfile.X F.data.h (TerminalStress.radiusPoint t r z)) :
-    SimilarityProfile.q F.data.h (TerminalStress.radiusPoint t r z) ^
-        (-CoordinateAlgebra.A F.data.h - 1 / 2 + 2 * F.data.h) •
-        f (SimilarityProfile.inner F.data.h (TerminalStress.radiusPoint t r z)) =
-      (SlowFirstOrderEdge.physicalStress (terminalAmplitude W) F.data (terminalShift W) t z r, 0) := by
-  have heta := TerminalHistoryBridge.eta_mem_interior F.data.h_pos F.data.h_lt_half
-    (p := TerminalStress.radiusPoint t r z) ht
-  rw [he (show SimilarityProfile.inner F.data.h (TerminalStress.radiusPoint t r z) ∈
-      Ioi (terminalInner W) ×ˢ Ioo (-1 : ℝ) 1 from ⟨hX, heta⟩)]
-  rw [SlowFirstOrderEdge.physicalStress_scaled (terminalAmplitude W) F.data (terminalShift W) ht hr]
-  apply Prod.ext
-  · rfl
-  · simp
 
-theorem nominal_first_jets {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (m : ℕ) {p : ℝ × ℝ} (hp : terminalInner W < p.1) (heta : p.2 ∈ Icc (-1 : ℝ) 1) :
-    iteratedFDeriv ℝ m (BaseResidual.stressPair (nominalCoefficients W) 1) p =
-      iteratedFDeriv ℝ m
-        (fun q => (SlowFirstOrderEdge.stressX (terminalAmplitude W) F.data (terminalShift W) q, 0)) p := by
-  have hs := nominalCoefficients_smooth W
-  exact first_pair_jets_of_interior_equality W ((hs.stressTheta 1).prodMk (hs.stressAxial 1))
-    (nominal_first_pair_eq W) m hp heta
 
 /-- The actual constructed modulation witness supplies the additional
 angular anchor, using the same profile and the same finite modification. -/

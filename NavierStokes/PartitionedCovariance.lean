@@ -414,17 +414,6 @@ theorem pairMatrix_of_actual_pulses {r a A b B c₀ u E : ℝ}
   unfold PulseCovariance.actualMatrix PulseCovariance.actualColumn
   ring
 
-theorem pairMatrix_strictCone_of_actual {r a A b B c₀ u E r0 : ℝ}
-    (P : PulseCovariance.SignedPulsePair r a A b B c₀ u E)
-    {vr vt : Plane} (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (hr0 : 0 < r0)
-    {ci : Vec2} (hci : ∀ j, 0 < ci j) {T : Vec2}
-    (hcone : SmoothCovariance.StrictCone (PulseCovariance.normalizedMatrix P) T) :
-    SmoothCovariance.StrictCone (pairMatrix vr vt r0 ci (fun j => ofTangentPulse (P j))) T := by
-  rw [pairMatrix_of_actual_pulses]
-  apply (SmoothCovariance.weights_pos_iff _ _).mp
-  exact (PulseCovariance.actualMatrix_positive_of_normalized P
-    (fun j => mul_pos (nativePrefactor_pos hdet hr0) (hci j)) T
-    hcone.det_ne_zero hcone.weights_pos).2.1
 
 noncomputable def amplitude (ε mask : ℝ) (H : Mat2) (T : Vec2) (j : Fin 2) : ℝ :=
   Real.sqrt ε * SmoothCovariance.amplitudes H T j * mask
@@ -802,11 +791,6 @@ theorem physical_scale_identity {Q q : ℝ} (hQ : 0 < Q) (hq : 0 < q) (h : ℝ) 
   congr 1
   ring
 
-theorem physical_viscosity_scale {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    (Q ^ (-velocityExponent h)) ^ 2 * Q ^ h = Q ^ (-2 * velocityExponent h) * Q ^ h := by
-  rw [← Real.rpow_mul_natCast hQ.le]
-  congr 2
-  ring
 
 noncomputable def constructedSlotSystem (D h : ℝ) (hh : 0 ≤ h) (vr vt : Plane) : SlotSystem D h vr vt :=
   Classical.choice (exists_slotSystem D h hh vr vt)
@@ -976,43 +960,7 @@ theorem physical_primary_covariance {D h : ℝ} {vr vt : Plane} (sys : SlotSyste
 
 /-! ## Instantiation by the actual pulse and rounding interfaces -/
 
-noncomputable def PairData.ofSignedPulses {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (U : UnsignedLabel) {r a A b B c₀ u E : ℝ}
-    (pulses : PulseCovariance.SignedPulsePair r a A b B c₀ u E)
-    (ci : Vec2) (hci : ∀ j, 0 < ci j) (hfit : ∀ j, ci j * r ^ 2 = 2 * sys.radius)
-    (modes : Fin 2 → ℤ) (hmodes : ∀ j, modes j ≠ 0) (phases : Fin 2 → Plane → ℝ) : PairData sys U where
-  pulses := fun j => ofTangentPulse (pulses j)
-  ci := ci
-  ci_pos := hci
-  fits := fun j => ofTangentPulse_fits (pulses j) (hci j) (hfit j)
-  modes := modes
-  modes_ne := hmodes
-  phases := phases
 
-/-- A compact strict-cone family yields one slot-length threshold for positive
-inverse weights of the actual integrated columns, including the native Haar
-and cosine prefactor. No model-column equality is assumed. -/
-theorem compact_actual_pair_strictCone
-    {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsCompact K)
-    {c₀ u m t : X → ℝ} (hc₀ : ContinuousOn c₀ K) (hu : ContinuousOn u K)
-    (hm : ContinuousOn m K) (ht : ContinuousOn t K)
-    (hc₀neg : ∀ p ∈ K, c₀ p < 0) (hupos : ∀ p ∈ K, 0 < u p)
-    (hcone : ∀ p ∈ K, |Covariance.normalMagnitude (c₀ p) (u p) * t p| < u p * m p)
-    {a A b B E : ℝ} (hE : 0 ≤ E) {vr vt : Plane}
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) {r0 : ℝ} (hr0 : 0 < r0) :
-    ∃ R : ℝ, 1 ≤ R ∧ ∀ p ∈ K, ∀ r : ℝ, R ≤ r →
-      ∀ pulses : PulseCovariance.SignedPulsePair r a A b B (c₀ p) (u p) E,
-      ∀ ci : Vec2, (∀ j, 0 < ci j) →
-        SmoothCovariance.StrictCone
-          (pairMatrix vr vt r0 ci (fun j => ofTangentPulse (pulses j))) (Covariance.target (m p) (t p)) := by
-  obtain ⟨R, hR, hpositive⟩ := PulseCovariance.compact_actual_positive_inverse_of_scalar_cone
-    hK hc₀ hu hm ht hc₀neg hupos hcone hE
-  refine ⟨R, hR, ?_⟩
-  intro p hp r hr pulses ci hci
-  rw [pairMatrix_of_actual_pulses]
-  apply (SmoothCovariance.weights_pos_iff _ _).mp
-  exact (hpositive p hp r hr pulses (fun j => nativePrefactor vr vt r0 * ci j)
-    (fun j => mul_pos (nativePrefactor_pos hdet hr0) (hci j))).2.1
 
 noncomputable def roundedPhaseRemainder (k ε target pz x0 : ℝ) (F G : PhaseCalculus.Slow → ℝ)
     (s : PhaseCalculus.Slow) (v : Plane → ℝ) (Y : Plane) : ℝ :=
@@ -1038,12 +986,5 @@ theorem rounded_phase_cos_sq_mean (k ε target pz x0 : ℝ) (hk : k ≠ 0)
 theorem actual_carrier_ne_zero (h : ℝ) (n : ℕ) : (ChartScales.carrier h n : ℝ) ≠ 0 :=
   (Scaling.carrier_frequency_pos (ChartScales.epsilon_pos h n)).ne'
 
-theorem actual_carrier_cos_sq_mean (h : ℝ) (n : ℕ) (target pz x0 : ℝ)
-    (F G : PhaseCalculus.Slow → ℝ) (s : PhaseCalculus.Slow) (v : Plane → ℝ) (Y : Plane) :
-    SmoothLoop.angularMean (fun θ =>
-      Real.cos ((ChartScales.carrier h n : ℝ) * PhaseCalculus.phase (ChartScales.epsilon h n)
-        (PhaseEstimates.roundedFrequency (ChartScales.carrier h n : ℝ) target) pz x0 F G
-        (s, θ, v Y)) ^ 2) = 1 / 2 :=
-  rounded_phase_cos_sq_mean _ _ target pz x0 (actual_carrier_ne_zero h n) F G s v Y
 
 end NavierStokes.PartitionedCovariance

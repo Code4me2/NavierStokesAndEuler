@@ -57,22 +57,6 @@ noncomputable def singletonGeometry
     ActualSignedPhysicalData.ReferenceGeometry slots ((family P u H hp).singleton L) :=
   ActualSignedReferenceGeometry.singletonGeometry P u H hp L
 
-/-- One actual bound works for every native label and both signs. -/
-theorem singleton_frequencies
-    (L : ActualSignedPhysicalData.NativeLabel (family (N0 := N0) P u H hp).active)
-    (K : ActualSignedPhysicalData.NativeLabel ((family P u H hp).singleton L).active) :
-    |((((family P u H hp).singleton L).primary K).pulse
-        (((family P u H hp).singleton L).column K)).phase.p K.val.1| ≤
-        ActualPhaseJetBounds.phaseSize B N0 ∧
-    |((((family P u H hp).singleton L).primary K).pulse
-        (((family P u H hp).singleton L).column K)).phase.pz K.val.1| ≤
-        ActualPhaseJetBounds.phaseSize B N0 ∧
-    |((((family P u H hp).singleton L).primary K).pulse
-        (((family P u H hp).singleton L).column K)).phase.x0 K.val.1| ≤
-        ActualPhaseJetBounds.phaseSize B N0 := by
-  rw [ActualSignedReferenceGeometry.singleton_index_eq (family P u H hp) L K]
-  exact ActualPhaseJetBounds.phase_constants_bound
-    ((ActualSignedExterior.actualLabel L).2, (ActualSignedExterior.actualLabel L).1)
 
 end Geometry
 
@@ -478,21 +462,9 @@ variable
 @[simp] theorem pressureOfNative_shift :
     (pressureOfNative s hgeo hn hpressure).shift = -(2 * CoordinateAlgebra.A h) := rfl
 
-theorem potentialOfNative_vector_eq {w : SpaceTime} (hw : w ∈ preterminal) :
-    (potentialOfNative s hgeo hn hpotential).vector w = ActualSignedExterior.potential s w :=
-  potential_field_eq s hw
 
-theorem pressureOfNative_pressure_eq {w : SpaceTime} (hw : w ∈ preterminal) :
-    (pressureOfNative s hgeo hn hpressure).pressure w = ActualSignedExterior.pressure s w :=
-  pressure_field_eq s hw
 
-theorem potentialOfNative_vector_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (potentialOfNative s hgeo hn hpotential).vector =ᶠ[𝓝 w] ActualSignedExterior.potential s :=
-  potential_field_germ s hw
 
-theorem pressureOfNative_pressure_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (pressureOfNative s hgeo hn hpressure).pressure =ᶠ[𝓝 w] ActualSignedExterior.pressure s :=
-  pressure_field_germ s hw
 
 end NativeAssembly
 
@@ -611,33 +583,7 @@ theorem cyclePressureData_germ {w : SpaceTime} (hw : w ∈ preterminal) :
         (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive) :=
   pressure_field_germ _ hw
 
-/-- A consequence for the original signed potential, including every
-ambient time and spatial derivative. -/
-theorem cyclePotential_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ preterminal, physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (ActualSignedExterior.cyclePotential x R.primitive
-          (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive)) w‖ ≤
-        C * physicalQ h w ^ (h * (1 + σ - ChartScales.kappa) -
-          PhysicalClassBounds.physicalLoss h (-h) m) := by
-  obtain ⟨C, hC, hb⟩ := (cyclePotentialData x R).vector_bound
-    outgoing.data.h_pos outgoing.data.h_lt_half m
-  refine ⟨C, hC, fun w hw hq => ?_⟩
-  rw [← PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (cyclePotentialData_germ x R hw) m]
-  exact hb w hw hq
 
-theorem cyclePressure_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ preterminal, physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (ActualSignedExterior.cyclePressure x R.primitive
-          (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive)) w‖ ≤
-        C * physicalQ h w ^ (h * (1 + σ - ChartScales.kappa) -
-          PhysicalClassBounds.physicalLoss h (-(2 * CoordinateAlgebra.A h)) m) := by
-  obtain ⟨C, hC, hb⟩ := (cyclePressureData x R).pressure_bound
-    outgoing.data.h_pos outgoing.data.h_lt_half m
-  refine ⟨C, hC, fun w hw hq => ?_⟩
-  rw [← PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (cyclePressureData_germ x R hw) m]
-  exact hb w hw hq
 
 end Cycle
 

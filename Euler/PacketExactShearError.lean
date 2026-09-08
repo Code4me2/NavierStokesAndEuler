@@ -96,23 +96,5 @@ variable
 
 include H NB W LM WM BC hRc hcost hδ1 hα hR WP hgrowth
 
-theorem initializedExactPhysicalVelocity_gradient_error
-    (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ))
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    ‖fderiv ℝ (initializedExactPhysicalVelocity M D hTime τ hτ hτT B δ hδ ξ hs α
-      Cagree N hN k hk Q t Y) (X 0) -
-      (α/δ) • rankOne ℝ (canonicalVelocity τ hτ hτT B ξ hs t 0) (D.normal.field t 0)‖ ≤
-      (initializedRemainderDerivativeCost L.R S.H0/k)*‖D.FInv.field t 0‖ +
-      ‖fderiv ℝ (fun y => k⁻¹ • D.F.field t (Y y)
-        (Q.pointField period t (cylinderGraph period k D.m₀ (Y y)))) (X 0)‖ := by
-  rw [initializedExactPhysicalVelocity_fderiv M D hTime τ hτ hτT B δ hδ ξ hs α
-    Cagree N hN k hk Q t Y (X 0) hY]
-  have he : ∀ A E R : Space →L[ℝ] Space, A+E-R=(A-R)+E := by intros; abel
-  rw [he]
-  exact (norm_add_le _ _).trans (add_le_add
-    (initializedVelocity_gradient_error M D hTime τ hτ hτT B δ hδ ξ hs α
-      L H NB W LM WM BC hRc hcost hδ1 hα hR WP S hgrowth N hN k hk hbase t X Y hX hY hleft) le_rfl)
 
 end EulerPacketTerminalDatum

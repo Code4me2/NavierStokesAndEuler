@@ -64,14 +64,6 @@ theorem graph_displacement_eq (t : Icc (0 : ℝ) T) (x : Vector3) :
   rw [graph_flow_cover k m T hT A hgraph]
   rfl
 
-include hgraph in
-theorem graph_forward_contDiff (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ ∞ (graphFlow k m (flowData T hT A) 0 t) := by
-  have he : graphFlow k m (flowData T hT A) 0 t =
-      (flowData T hT (graphCoefficient k m T A)).forward t :=
-    funext (graph_flow_eq k m T hT A hgraph 0 t)
-  rw [he]
-  exact forward_contDiff T hT (graphCoefficient k m T A) t
 
 variable (hdiv : ∀ t z,
   LinearMap.trace ℝ LiftTangent (fderiv ℝ (A.field t : LiftTangent → LiftTangent) z).toLinearMap=0)
@@ -83,24 +75,6 @@ theorem graphCoefficient_trace_zero (t : Icc (0 : ℝ) T) (x : Vector3) :
   graphVelocity_trace_zero k m (A.field t) ((A.smooth t).differentiable (by simp))
     (hgraph t) (hdiv t) x
 
-include hgraph hdiv in
-theorem graph_forward_measurePreserving (t : Icc (0 : ℝ) T) :
-    MeasurePreserving (graphFlow k m (flowData T hT A) 0 t) volume volume := by
-  have he : graphFlow k m (flowData T hT A) 0 t =
-      (flowData T hT (graphCoefficient k m T A)).forward t :=
-    funext (graph_flow_eq k m T hT A hgraph 0 t)
-  rw [he]
-  exact forward_measurePreserving T hT (graphCoefficient k m T A)
-    (graphCoefficient_trace_zero k m T A hgraph hdiv) volume t
 
-include hgraph hdiv in
-theorem graph_backward_measurePreserving (t : Icc (0 : ℝ) T) :
-    MeasurePreserving (graphFlow k m (flowData T hT A) t 0) volume volume := by
-  have he : graphFlow k m (flowData T hT A) t 0 =
-      (flowData T hT (graphCoefficient k m T A)).backward t :=
-    funext (graph_flow_eq k m T hT A hgraph t 0)
-  rw [he]
-  exact backward_measurePreserving T hT (graphCoefficient k m T A)
-    (graphCoefficient_trace_zero k m T A hgraph hdiv) volume t
 
 end EulerGraphInvariantFlow

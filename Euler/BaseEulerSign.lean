@@ -58,24 +58,5 @@ theorem source_numerator_pos (ξ : U) (hξ : ‖ξ‖=1) (x : Space)
     rw [G.strain_apply,comp_apply,G.inverse_initial]
     exact h0
 
-theorem source_numerator_pos_on (T : ℝ) (hT : 0 < T) (hTG : T ≤ G.T)
-    (hguard : T ≤ guardTime G.T L.K) (ξ : U) (hξ : ‖ξ‖=1) (x : Space)
-    (h0 : ⟪m,G.initialStrain.field x (R ξ : Space)⟫_ℝ=1)
-    (t : Icc (0 : ℝ) T) :
-    1/2 ≤ ⟪((G.restrictTime T hT hTG).transverseData m hm R S hS).normal.field t x,
-      (G.restrictTime T hT hTG).strain.field t x
-        (EulerPacketForwardFactorization.uncutVelocity
-          ((G.restrictTime T hT hTG).transverseData m hm R S hS) ξ t x)⟫_ℝ := by
-  apply source_numerator_pos (L.restrictTime T hT hTG) m hm R S hS ξ hξ x _ _ _ t
-  · rw [G.restrictTime_initialStrain]
-    exact h0
-  · have hh := (mul_le_mul_of_nonneg_left hguard (coefficientCost_nonneg L.K)).trans
-      (guardTime_small G.T L.K).1
-    exact hh.trans (by norm_num)
-  · have hr : 0 ≤ firstSignRate (coefficientCost L.K) (coefficientCost L.K) := by
-      unfold firstSignRate
-      positivity [coefficientCost_nonneg L.K]
-    have hh := (mul_le_mul_of_nonneg_left hguard hr).trans (guardTime_small G.T L.K).2
-    exact hh.trans (by norm_num)
 
 end EulerBaseEulerGuards

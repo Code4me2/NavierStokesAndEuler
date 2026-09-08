@@ -68,19 +68,6 @@ theorem modulated_mean_fields {p : Inner}
   rw [hv.1]
   exact (W.E_eq_sqrt_f hpos).symm.trans hn.2
 
-theorem modulated_radial_mean_fields {R eta : ℝ}
-    (hR : R ∈ ReservedPatches.radialWindow F W.controls.radius .mean)
-    (heta : |eta| ≤ 1) :
-    v.profiles.U (R ^ 2 / 2, eta) = 0 ∧
-      v.profiles.E (R ^ 2 / 2, eta) =
-        FiveRowRank.background F.data.core.lam
-          (ReservedPatches.radialAmplitude F W.controls.radius eta) R := by
-  have hx := ReservedPatches.radial_mem_window F W.controls.radius W.controls.radius_pos .mean hR
-  have hp := (ReservedPatches.radialLeft_pos F W.controls.radius W.controls.radius_pos .mean).trans hR.1
-  have hf := modulated_mean_fields v (p := (R ^ 2 / 2, eta)) hx heta
-  refine ⟨hf.1, ?_⟩
-  rw [hf.2, ReservedPatches.square_half_power _ _ hp]
-  simp only [FiveRowRank.background, ReservedPatches.radialAmplitude, mul_assoc]
 
 end Leading
 
@@ -120,13 +107,8 @@ noncomputable def rankLength (h : ℝ) (s : ℝ × ℝ) : ℝ :=
 noncomputable def rankVelocity (h : ℝ) (s : ℝ × ℝ) : ℝ :=
   rankScale h s ^ (-CoordinateAlgebra.A h)
 
-theorem rankLength_eq_qLength (h : ℝ) : rankLength h = VariableGaugeMean.qLength (2 * h) := rfl
 
-theorem rankScale_eq_chartQ (h R : ℝ) (s Y : ℝ × ℝ) :
-    rankScale h s = MeanRankUpdate.chartQ (2 * h) (R, (s, Y)) := rfl
 
-theorem rankEta_eq_chartEta (h R : ℝ) (s Y : ℝ × ℝ) :
-    rankEta h s = MeanRankUpdate.chartEta (2 * h) (R, (s, Y)) := rfl
 
 theorem coordinates_rankScale (h R : ℝ) (s : ℝ × ℝ) :
     (normalizedCoordinates h (R, (s.2, s.1))).1 = rankScale h s := by
@@ -266,23 +248,7 @@ noncomputable def axialSlice (upper : ℝ) (B : ℕ) (Q : ℝ) (s : ℝ × ℝ) 
   axial (FinalSlowBase.scales H v upper B) F.data.h
     (FinalSlowBase.coefficients H v) Q (R, (s.2, s.1))
 
-theorem angularSlice_physical (upper : ℝ) (B : ℕ) {Q : ℝ} (hQ : 0 < Q)
-    {s : ℝ × ℝ} (hs : 0 < s.1) {R : ℝ} (hR : 0 < R) :
-    angularSlice H v upper B Q s R = Q ^ CoordinateAlgebra.A F.data.h *
-      FinalSlowBase.velocity H v upper B (bandPoint F.data.h Q (R, (s.2, s.1))) 1 := by
-  unfold angularSlice
-  rw [frequency_eq_normalized_velocity (FinalSlowBase.scales_strictMono H v upper B)
-    F.data.h_pos F.data.h_lt_half hQ (FinalSlowBase.coefficients_smooth H v) hs hR]
-  unfold FinalSlowBase.velocity
-  change R * (_ / R) = _
-  field_simp [hR.ne']
 
-theorem axialSlice_physical (upper : ℝ) (B : ℕ) {Q : ℝ} (hQ : 0 < Q)
-    {s : ℝ × ℝ} (hs : 0 < s.1) (R : ℝ) :
-    axialSlice H v upper B Q s R = Q ^ CoordinateAlgebra.A F.data.h *
-      FinalSlowBase.velocity H v upper B (bandPoint F.data.h Q (R, (s.2, s.1))) 2 :=
-  axial_eq_normalized_velocity (FinalSlowBase.scales_strictMono H v upper B)
-    F.data.h_pos F.data.h_lt_half hQ (FinalSlowBase.coefficients_smooth H v) hs
 
 /-- The actual background identities required by the local rank inverse.
 All scales and amplitudes are fixed by the original profile. -/

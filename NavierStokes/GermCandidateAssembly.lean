@@ -60,14 +60,6 @@ theorem initializedSeries_zero (base initial : VelocityField) (stages : ℕ → 
 theorem initializedSeries_succ (base initial : VelocityField) (stages : ℕ → VelocityField)
     (j : ℕ) : initializedSeries base initial stages (j + 1) = stages j := rfl
 
-/-- Substituting the original stage fields gives exactly the original series. -/
-theorem initializedSeries_of_potentialStage {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : MixedAxisPreservation.PotentialStage h Ω)
-    (stages : ℕ → MixedAxisPreservation.PotentialStage h Ω) :
-    initializedSeries base initial.field (fun j => (stages j).field) =
-      MixedAxisPreservation.initializedSeries base initial stages := by
-  funext j w
-  cases j <;> rfl
 
 /-- Local finiteness intersects only finitely many stage-dependent zero
 neighborhoods.  On the zeroth cutoff plateau the actual potential sum has

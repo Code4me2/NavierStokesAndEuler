@@ -66,24 +66,6 @@ def normalProjectionDerivative (m m₁ : E) : E →L[ℝ] E :=
   -((- (2 * ⟪m, m₁⟫_ℝ) / (‖m‖ ^ 2) ^ 2) • rankOne ℝ m m +
     (‖m‖ ^ 2)⁻¹ • (rankOne ℝ m₁ m + rankOne ℝ m m₁))
 
-/-- The projection derivative is derived from the actual ray derivative. -/
-theorem normalProjection_hasDerivAt {m : ℝ → E} {m₁ : E} {t : ℝ}
-    (hd : HasDerivAt m m₁ t) (hm : m t ≠ 0) :
-    HasDerivAt (fun s => normalProjection (m s))
-      (normalProjectionDerivative (m t) m₁) t := by
-  have hr : HasDerivAt (fun s => rankOne ℝ (m s) (m s))
-      (rankOne ℝ m₁ (m t) + rankOne ℝ (m t) m₁) t := by
-    convert! ContinuousLinearMap.hasDerivAt_of_bilinear
-      (B := (rankOne ℝ : E →L[ℝ] E →L[ℝ] E →L[ℝ] E)) (fun _ => hd) (fun _ => hd) using 1
-    ext v
-    change ⟪m t, v⟫_ℝ • m₁ + ⟪m₁, v⟫_ℝ • m t =
-      ⟪m₁, v⟫_ℝ • m t + ⟪m t, v⟫_ℝ • m₁
-    exact add_comm _ _
-  have hi := hd.norm_sq.inv (pow_ne_zero 2 (norm_ne_zero_iff.mpr hm))
-  change HasDerivAt (fun s => ContinuousLinearMap.id ℝ E - (‖m s‖ ^ 2)⁻¹ • rankOne ℝ (m s) (m s))
-    (normalProjectionDerivative (m t) m₁) t
-  convert! (hi.smul hr).const_sub (ContinuousLinearMap.id ℝ E) using 1
-  simp only [normalProjectionDerivative, Pi.inv_apply, add_comm]
 
 theorem normalProjection_hasDerivWithinAt {m : ℝ → E} {m₁ : E} {t : ℝ} {S : Set ℝ}
     (hd : HasDerivWithinAt m m₁ S t) (hm : m t ≠ 0) :

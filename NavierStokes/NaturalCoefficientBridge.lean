@@ -196,19 +196,6 @@ theorem naturalFlux_eq_radialFlux {h j Λ : ℝ} {P0 a0 : ℝ → ℝ} {f U V P 
   simp only [naturalFlux, SlowDivergence.radialFlux, he.eq_of_nhds, hd, add_zero]
   ring
 
-/-- The same unscaled pressure solves the normalized slow pressure equation;
-the `C⁻²` in that equation cancels the square of `C*f`. -/
-theorem natural_pressure_zero {h j Λ C : ℝ} {P0 a0 : ℝ → ℝ} {f U V P : InnerProfile}
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V P)
-    (hC : C ≠ 0) {w : InnerPoint} (hw : w ∈ NaturalProfile.domain Λ) :
-    pressureCoefficient h C (naturalProfiles h C f U V P) 0 w = 0 := by
-  have hp := hs.pressure_smooth.contDiffAt ((NaturalProfile.domain_isOpen Λ).mem_nhds hw)
-  have hd : partialX P w = f w ^ 2 :=
-    (partialX_eq_slice (hp.differentiableAt (by simp))).trans (hs.pressure_equation w hw)
-  simp only [pressureCoefficient, naturalProfiles, zeroSequence, ↓reduceIte,
-    convolution, Finset.Nat.antidiagonal_zero, Finset.sum_singleton, previous_zero,
-    zero_div, add_zero, hd]
-  field_simp ; ring
 
 /-- Germ transfer to any actual slow sequence. Higher coefficients are
 irrelevant at order zero. No order-zero residual equation is a hypothesis. -/
@@ -404,20 +391,6 @@ theorem transition_initial_fields :
     exact (TransitionRamp.physical_fields_natural F hΛ hsmall hδ hδT hP0
       T κ w₁ w₂ hp.1.2).2
 
-theorem transition_coefficients_zero {p : InnerPoint} (hp : p ∈ initialCore Λ) :
-    let Q := TransitionRamp.physicalProfiles F hΛ hsmall hδ hδT hP0
-      (κ := κ) hT hb hw₁ hw₂
-    angularCoefficient h (historiesProfiles h C Q) 0 p = 0 ∧
-      axialCoefficient h (historiesProfiles h C Q) 0 p = 0 := by
-  let Q := TransitionRamp.physicalProfiles F hΛ hsmall hδ hδT hP0
-    (κ := κ) hT hb hw₁ hw₂
-  obtain ⟨hf, hu⟩ := transition_initial_fields F hΛ hsmall hδ hδT hP0
-    (κ := κ) hT hb hw₁ hw₂
-  apply zero_of_initial_profiles F hΛ hP0 hsmall Q rfl hf hu hp
-  · exact Filter.EventuallyEq.rfl
-  · exact Filter.EventuallyEq.rfl
-  · rw [historiesProfiles_flux]
-  · exact Filter.EventuallyEq.rfl
 
 end Transition
 
@@ -577,37 +550,6 @@ theorem fromNatural_coefficients_zero {p : InnerPoint} (hp0 : p ∈ initialCore 
     exact (ActualSlowAxis.fromNatural_base_values hp hP0 F hΛ hsmall hσ
       hT hδ hδT κ hq.1.1.le hq.2).2.2.2
 
-/-- For the same constructed natural/ACT hierarchy, the defining integrals
-and both canonical stresses vanish on a fixed positive neighborhood of the
-axis. The radius here is strictly inside the natural coefficient core. -/
-theorem fromNatural_primitives_and_stresses_zero {R η : ℝ}
-    (hR : R ∈ Icc (0 : ℝ) (Real.sqrt (4 / Λ)))
-    (hη : (η : ℂ) ∈ ActualSlowAxis.parameterDomain
-      (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow
-        (ActualSlowAxis.tubeWidth hp hP0 F hΛ hsmall hσ))) :
-    let A := ActualSlowAxis.fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-    let f := SlowResidualMatching.hierarchyProfiles A
-    ProfileHistories.primitive (SlowResidualMatching.thetaDensity h C f 0) (R, η) = 0 ∧
-      ProfileHistories.primitive (SlowResidualMatching.zDensity h f 0) (R, η) = 0 ∧
-      SlowStressSupport.stress 2 (SlowResidualMatching.thetaDensity h C f 0) (R, η) = 0 ∧
-      SlowStressSupport.stress 1 (SlowResidualMatching.zDensity h f 0) (R, η) = 0 := by
-  let A := ActualSlowAxis.fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-  let f := SlowResidualMatching.hierarchyProfiles A
-  let S : Set ℝ := {η | (η : ℂ) ∈ ActualSlowAxis.parameterDomain
-    (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow
-      (ActualSlowAxis.tubeWidth hp hP0 F hΛ hsmall hσ))}
-  have hz : ∀ p ∈ Ioo (0 : ℝ) (4 / Λ) ×ˢ S,
-      angularCoefficient h f 0 p = 0 ∧ axialCoefficient h f 0 p = 0 := by
-    intro p hp'
-    exact fromNatural_coefficients_zero hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-      ⟨hp'.1, ActualSlowAxis.parameterDomain_real_interval hp'.2⟩ hp'.2
-  have hpos : 0 < (4 : ℝ) / Λ := div_pos (by norm_num) hΛ
-  have ha : Real.sqrt (4 / Λ) ^ 2 / 2 < 4 / Λ := by
-    rw [Real.sq_sqrt hpos.le]
-    linarith
-  obtain ⟨hθ, hz'⟩ := radial_primitives_zero (C := C) ha hz hR hη
-  obtain ⟨hsθ, hsz⟩ := radial_stresses_zero (C := C) ha hz hR.2 hη
-  exact ⟨hθ, hz', hsθ, hsz⟩
 
 end ActualNatural
 

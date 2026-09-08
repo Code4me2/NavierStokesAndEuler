@@ -244,11 +244,6 @@ theorem linearResidual_mode_split {U : Set E} (ε κ : ℝ) (R b F G : E → ℝ
 
 /-! ## Actual slot phase and projected pressure -/
 
-/-- Scaling a prescribed fast direction produces exactly the manuscript's
-prefactor, for example `c = Q^(1+h)` multiplying `Nabs`. -/
-theorem along_scaled_direction (c : ℝ) (V : E → E) (f : E → ℂ) (x : E) :
-    along (fun y => c • V y) f x = (c : ℂ) * along V f x := by
-  simp [along, map_smul, Complex.real_smul]
 
 /-- The material defect used in the residual is the actual backward-time
 material derivative already computed in `PhaseCalculus`. -/
@@ -295,17 +290,7 @@ theorem slot_base_derivative (f : PhaseCalculus.Slow → ℝ) (q w : PhaseCalcul
   rw [hd]
   rfl
 
-theorem slot_base_radial (f : PhaseCalculus.Slow → ℝ) (q : PhaseCalculus.Slot)
-    (hf : DifferentiableAt ℝ f q.1) :
-    along (fun _ => PhaseCalculus.eR) (fun y : PhaseCalculus.Slot => f y.1) q =
-      PhaseCalculus.slowR f q.1 := slot_base_derivative f q PhaseCalculus.eR hf
 
-theorem slot_base_angular (f : PhaseCalculus.Slow → ℝ) (q : PhaseCalculus.Slot)
-    (hf : DifferentiableAt ℝ f q.1) :
-    along (fun _ => PhaseCalculus.eTheta) (fun y : PhaseCalculus.Slot => f y.1) q = 0 := by
-  rw [slot_base_derivative f q PhaseCalculus.eTheta hf]
-  change fderiv ℝ f q.1 0 = 0
-  exact map_zero _
 
 /-- Numerator in the pressure from the projected equation. The derivative
 of `n` is the actual derivative in the fast direction. -/
@@ -335,22 +320,6 @@ theorem projectedPressure_force (κ : ℝ) (Vf : E → E)
         projectionNumerator Vf n a Ka f x / Complex.ofReal (‖n x‖ ^ 2) := by ring
     _ = _ := by rw [hc]; ring
 
-/-- Substituting the projected pressure into the principal part is an exact
-identity for arbitrary amplitudes; no tangent ODE is imposed on the actual
-coefficient supplied to the residual. -/
-theorem principal_projectedPressure (ε κ : ℝ) (R F G : E → ℝ) (Vr Vθ Vz Vf : E → E)
-    (Φ : E → ℝ) (a f : E → ComplexVector) (x : E) (hκ : κ ≠ 0) :
-    principal ε κ R F G Vr Vθ Vz Vf Φ a
-      (projectedPressure κ Vf (phaseNormal R Vr Vθ Vz Φ) a (shear R F G Vr a) f) x =
-      fun i => along Vf (fun y => a y i) x + shear R F G Vr a x i +
-        Complex.ofReal (ε * κ ^ 2 * ‖phaseNormal R Vr Vθ Vz Φ x‖ ^ 2) * a x i -
-        Complex.ofReal (phaseNormal R Vr Vθ Vz Φ x i) *
-          projectionNumerator Vf (phaseNormal R Vr Vθ Vz Φ) a (shear R F G Vr a) f x /
-            Complex.ofReal (‖phaseNormal R Vr Vθ Vz Φ x‖ ^ 2) := by
-  ext i
-  unfold principal
-  rw [projectedPressure_force κ Vf (phaseNormal R Vr Vθ Vz Φ) a (shear R F G Vr a) f x hκ i]
-  ring
 
 theorem contDiffOn_normalDot {U : Set E} {n : E → EuclideanSpace ℝ (Fin 3)}
     {a : E → ComplexVector} (hn : ContDiffOn ℝ ∞ n U)
@@ -361,26 +330,6 @@ theorem contDiffOn_normalDot {U : Set E} {n : E → EuclideanSpace ℝ (Fin 3)}
       ((EuclideanSpace.proj i : EuclideanSpace ℝ (Fin 3) →L[ℝ] ℝ).contDiff.comp_contDiffOn hn)
   exact (((hc 0).mul (ha 0)).add ((hc 1).mul (ha 1))).add ((hc 2).mul (ha 2))
 
-theorem contDiffOn_projectedPressure {U : Set E} (κ : ℝ) {Vf : E → E}
-    {n : E → EuclideanSpace ℝ (Fin 3)} {a Ka f : E → ComplexVector}
-    (hU : IsOpen U) (hVf : ContDiffOn ℝ ∞ Vf U) (hn : ContDiffOn ℝ ∞ n U)
-    (hn₀ : ∀ x ∈ U, n x ≠ 0)
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun y => a y i) U)
-    (hKa : ∀ i, ContDiffOn ℝ ∞ (fun y => Ka y i) U)
-    (hf : ∀ i, ContDiffOn ℝ ∞ (fun y => f y i) U) :
-    ContDiffOn ℝ ∞ (projectedPressure κ Vf n a Ka f) U := by
-  have hnum : ContDiffOn ℝ ∞ (projectionNumerator Vf n a Ka f) U :=
-    ((contDiffOn_normalDot hn hKa).sub
-      (contDiffOn_normalDot (contDiffOn_along hU hVf hn) ha)).add (contDiffOn_normalDot hn hf)
-  have hden : ContDiffOn ℝ ∞ (fun y => Complex.ofReal (‖n y‖ ^ 2)) U :=
-    Complex.ofRealCLM.contDiff.comp_contDiffOn ((contDiff_norm_sq ℝ).comp_contDiffOn hn)
-  have htop : ContDiffOn ℝ ∞ (fun y => (Complex.I / (κ : ℂ)) *
-      projectionNumerator Vf n a Ka f y) U := contDiffOn_const.mul hnum
-  have hnz : ∀ x ∈ U, Complex.ofReal (‖n x‖ ^ 2) ≠ 0 := by
-    intro x hx
-    exact_mod_cast pow_ne_zero 2 (norm_ne_zero_iff.mpr (hn₀ x hx))
-  unfold projectedPressure
-  simpa only [div_eq_mul_inv, Pi.inv_apply] using htop.mul (hden.inv hnz)
 
 /-! ## Real-linear transfer of the complex calculation -/
 
@@ -528,45 +477,6 @@ theorem cartesianBilinearAdvection_components {u v : Space → Space} {q : Space
   simp only [CylindricalResidual.frame_inverse'] at he'
   exact he'
 
-/-- The real differential linearization is exactly conjugated by the
-cylindrical frame. Both cross-advections are derived from the actual
-Cartesian derivative, rather than from a postulated residual identity. -/
-theorem cartesianLinearResidual_cylindrical (ε : ℝ) {B a : VelocityField} {p : PressureField}
-    {t : ℝ} {q : Space}
-    (ha : ContDiffAt ℝ 2 a (t, CylindricalResidual.chart q))
-    (hB : DifferentiableAt ℝ B (t, CylindricalResidual.chart q))
-    (hp : DifferentiableAt ℝ p (t, CylindricalResidual.chart q)) (hr : 0 < q 0) :
-    cartesianLinearResidual ε B a p t (CylindricalResidual.chart q) =
-      CylindricalResidual.frame (q 1)
-        (cylindricalLinearResidual ε (CylindricalResidual.velocityComponents B)
-          (CylindricalResidual.velocityComponents a) (CylindricalResidual.pressurePullback p) t q) := by
-  have has : ContDiffAt ℝ 2 (fun y => a (t, y)) (CylindricalResidual.chart q) :=
-    ha.comp _ (contDiffAt_const.prodMk contDiffAt_id)
-  have had := has.differentiableAt (by norm_num)
-  have hBs : DifferentiableAt ℝ (fun y : Space => B (t, y)) (CylindricalResidual.chart q) :=
-    hB.comp (CylindricalResidual.chart q) ((differentiableAt_const t).prodMk differentiableAt_id)
-  have hps : DifferentiableAt ℝ (fun y : Space => p (t, y)) (CylindricalResidual.chart q) :=
-    hp.comp (CylindricalResidual.chart q) ((differentiableAt_const t).prodMk differentiableAt_id)
-  have hat : DifferentiableAt ℝ (fun s : ℝ => a (s, CylindricalResidual.chart q)) t :=
-    (ha.differentiableAt (by norm_num)).comp t
-      (differentiableAt_id.prodMk (differentiableAt_const (CylindricalResidual.chart q)))
-  have ht : temporalDerivative a t (CylindricalResidual.chart q) =
-      CylindricalResidual.frame (q 1)
-        (temporalDerivative (CylindricalResidual.velocityComponents a) t q) := by
-    rw [CylindricalResidual.temporalDerivative_components hat, CylindricalResidual.frame_inverse']
-  unfold cartesianLinearResidual
-  change temporalDerivative a t (CylindricalResidual.chart q) +
-    fderiv ℝ (fun y => a (t, y)) (CylindricalResidual.chart q) (B (t, CylindricalResidual.chart q)) +
-    fderiv ℝ (fun y => B (t, y)) (CylindricalResidual.chart q) (a (t, CylindricalResidual.chart q)) +
-    CylindricalResidual.euclideanGradient (fun y => p (t, y)) (CylindricalResidual.chart q) -
-    ε • CylindricalResidual.euclideanLaplacian (fun y => a (t, y)) (CylindricalResidual.chart q) = _
-  rw [ht, cartesianBilinearAdvection_components (u := fun y => B (t, y)) had (ne_of_gt hr),
-    cartesianBilinearAdvection_components (u := fun y => a (t, y)) hBs (ne_of_gt hr),
-    CylindricalResidual.cartesianGradient_pullback hps (ne_of_gt hr),
-    CylindricalResidual.cartesianLaplacian_components has (ne_of_gt hr)]
-  simp only [cylindricalLinearResidual, map_add, map_sub, map_smul,
-    CylindricalResidual.velocityComponents, CylindricalResidual.pressurePullback]
-  rfl
 
 noncomputable def spaceDirection (i : Fin 3) (_ : SpaceTime) : SpaceTime :=
   (0, coordinateVector i)
@@ -620,53 +530,5 @@ theorem laplacian_space_slice {U : Set SpaceTime} {f : SpaceTime → W} {t : ℝ
 
 end Slices
 
-/-- The generic real component operator used for the harmonic calculation
-is the actual cylindrical linearization when its directions are the physical
-spacetime coordinate directions. -/
-theorem realComponentLinearResidual_eq_cylindrical {U : Set SpaceTime} (ε : ℝ)
-    {B a : VelocityField} {p : PressureField} {t : ℝ} {q : Space}
-    (hU : IsOpen U) (hB : ContDiffOn ℝ ∞ B U) (ha : ContDiffOn ℝ ∞ a U)
-    (hp : ContDiffOn ℝ ∞ p U) (hx : (t, q) ∈ U) :
-    realComponentLinearResidual ε coordinateRadius (spaceDirection 0) (spaceDirection 1)
-      (spaceDirection 2) physicalTimeDirection (fun z i => B z i) (fun z i => a z i) p (t, q) =
-      fun i => cylindricalLinearResidual ε B a p t q i := by
-  have hAc (i : Fin 3) : ContDiffOn ℝ ∞ (fun z => a z i) U :=
-    (AxisymmetricFields.projection i).contDiff.comp_contDiffOn ha
-  have hBc (i : Fin 3) : ContDiffOn ℝ ∞ (fun z => B z i) U :=
-    (AxisymmetricFields.projection i).contDiff.comp_contDiffOn hB
-  have had := (ha.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have hbd := (hB.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have hpd := (hp.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have has : ContDiffAt ℝ 2 (fun y : Space => a (t, y)) q :=
-    ((ha.contDiffAt (hU.mem_nhds hx)).comp q (contDiffAt_const.prodMk contDiffAt_id)).of_le
-      (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2)
-  have hasd := has.differentiableAt (by norm_num)
-  have hbsd : DifferentiableAt ℝ (fun y : Space => B (t, y)) q :=
-    hbd.comp q ((differentiableAt_const t).prodMk differentiableAt_id)
-  have hAfirst (i j : Fin 3) : along (spaceDirection i) (fun z => a z j) (t, q) =
-      CylindricalResidual.dCoord i (fun y => a (t, y)) q j := by
-    rw [along_space_slice (((hAc j).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))]
-    exact CylindricalResidual.dCoord_map (AxisymmetricFields.projection j) hasd i
-  have hBfirst (i j : Fin 3) : along (spaceDirection i) (fun z => B z j) (t, q) =
-      CylindricalResidual.dCoord i (fun y => B (t, y)) q j := by
-    rw [along_space_slice (((hBc j).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))]
-    exact CylindricalResidual.dCoord_map (AxisymmetricFields.projection j) hbsd i
-  have hLap (j : Fin 3) : cylindricalLaplacian coordinateRadius
-      (spaceDirection 0) (spaceDirection 1) (spaceDirection 2) (fun z => a z j) (t, q) =
-      CylindricalResidual.scalarLaplacian (fun y => a (t, y)) q j := by
-    rw [laplacian_space_slice hU (hAc j) hx]
-    exact CylindricalResidual.scalarLaplacian_component has j
-  have htime (j : Fin 3) : along physicalTimeDirection (fun z => a z j) (t, q) =
-      temporalDerivative a t q j := by
-    calc
-      _ = (along physicalTimeDirection a (t, q)) j :=
-        along_map (AxisymmetricFields.projection j) physicalTimeDirection had
-      _ = _ := congrArg (fun v : Space => v j) (along_time_slice had)
-  ext i
-  fin_cases i <;>
-    simp [realComponentLinearResidual, realTransport, realFrameLaplacian, realAngularGenerator,
-      hAfirst, hBfirst, hLap, htime, along_space_slice hpd, coordinateRadius,
-      cylindricalLinearResidual, bilinearAdvection, CylindricalResidual.vectorLaplacian,
-      CylindricalResidual.scalarGradient, CylindricalResidual.connection_apply] <;> ring
 
 end NavierStokes.LinearWaveResidual

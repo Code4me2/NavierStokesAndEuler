@@ -858,49 +858,7 @@ structure IsPositiveOrderSolution (R : ℝ) (U : Set ℂ) (h C : ℝ) (n : ℕ)
     ExtendsPositiveOrder h C n phi u beta (xProfile W 0) (xProfile W 1)
       (xProfile W 2) (xProfile W 3) omegaQuotient (X, eta)
 
-/-- Concrete positive-order existence from smooth radial, holomorphic
-parameter input jets of the lower history. No solution, convergence,
-positive-order equation, or output smoothness is an input assumption. -/
-theorem exists_positive_order_solution {R T : ℝ} (hR : 0 < R) (hRT : R < T)
-    {U : Set ℂ} (hU : IsOpen U) (h C : ℝ) {n : ℕ} (hn : 0 < n)
-    (phi u beta : ℕ → InnerProfile) (omegaQuotient : InnerProfile)
-    {F : CoefficientData} (hF : LowerInputRegularity T U (h : ℂ) F)
-    (hreal : RealCompatible R U F (lowerHistoryData h n phi u beta omegaQuotient)) :
-    ∃ W : Field, IsPositiveOrderSolution R U h C n phi u beta omegaQuotient F W := by
-  let W := positiveSolution hR.le (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F
-  have hi := positiveSolution_spec hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF
-  have hs := positiveSolution_jointly_smooth hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF
-  have hp : ∀ r ∈ Icc (-R) R, ∀ z ∈ U, W (-r) z = parityVec (W r z) :=
-    fun r hr z hz => positiveSolution_parity hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF hr hz
-  refine ⟨W, {
-    integral := hi
-    smooth := hs
-    parity := hp
-    equation := fun r hr hr0 z hz i =>
-      positiveSolution_equation hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF hr hr0 hz i
-    profiles_smooth := fun i hi => xProfile_smooth hR hU hs hp i hi
-    profiles_zero := fun i eta heta => xProfile_axis_zero hi.axis_zero i heta
-    profiles_axis_jets := fun i hi eta heta k => xProfile_axis_jet hR hs hp i hi heta k
-    positive_order := ?_ }⟩
-  intro X hX eta heta
-  exact positiveSolution_extends_order hR hRT hU h C hn phi u beta omegaQuotient hF hreal hX heta
 
-/-- Uniqueness for the same explicit lower-data problem, for any competing
-pair of actual holomorphic continuous-path integral solutions. -/
-theorem positive_order_solution_unique {R T : ℝ} (hR : 0 ≤ R) (hRT : R < T)
-    {U : Set ℂ} (hU : IsOpen U) (h C : ℝ) (n : ℕ)
-    {F : CoefficientData} (hF : LowerInputRegularity T U (h : ℂ) F)
-    {V : Bool → ℂ → NilpotentVolterra.Path R}
-    (hV : SidePathSolution hR U
-      (coefficient0 (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F)
-      (coefficient1 (h : ℂ) F) (sourceField (h : ℂ) (C : ℂ) F) V)
-    (r : ℝ) {z : ℂ} (hz : z ∈ U) :
-    candidateLift hR
-      (coefficient0 (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F)
-      (coefficient1 (h : ℂ) F) (sourceField (h : ℂ) (C : ℂ) F) V r z =
-      positiveSolution hR (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F r z :=
-  assembledSolution_unique hR hRT hU (hF.system hU ((slowPower h n : ℝ) : ℂ) (C : ℂ))
-    (coefficient1_shape (h : ℂ) F) hV r hz
 
 end FinalExistence
 

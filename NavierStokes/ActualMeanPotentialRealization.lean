@@ -290,30 +290,7 @@ theorem meridional_rank (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : Corr
   fin_cases i <;> simp [meridional, CyclePhysicalPrefixes.meridionalComponents,
     VariableGaugeMean.rankIncrementState, H.epsilon, H.exponent, H.frequency, H.radialVector]
 
-theorem temporalPotential_curl {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (h : ℝ) (index : ℕ → ℕ)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point)
-    (G : ScaledGraph) (hl : 0 < G.radialScale) (n : ℕ) (H : GaugeMatches g c G n)
-    {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (hΨ : ContDiffAt ℝ ∞ (VariableGaugeMean.temporalPotential g h index c u n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl (cartesianPotential a j G (VariableGaugeMean.temporalPotential g h index c u n)) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents
-          (VariableGaugeMean.temporalIncrementState g h index axial c u) n)) w := by
-  rw [cartesianPotential_curl ha j G hl hw hΨ, meridional_temporal g h index c u G n H]
 
-theorem rankPotential_curl {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : CorrectionState.RankData (ℝ × ℝ))
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point)
-    (G : ScaledGraph) (hl : 0 < G.radialScale) (n : ℕ) (H : GaugeMatches g c G n)
-    {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (hΨ : ContDiffAt ℝ ∞ (VariableGaugeMean.rankPotential g r c u n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl (cartesianPotential a j G (VariableGaugeMean.rankPotential g r c u n)) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents (VariableGaugeMean.rankIncrementState g r axial c u) n)) w := by
-  rw [cartesianPotential_curl ha j G hl hw hΨ, meridional_rank g r c u G n H]
 
 /-! ## Identification with the coherent physical mean potential -/
 
@@ -440,33 +417,6 @@ theorem coherent_angularField_curl {a h : ℝ} (ha : 0 < a) (j : PolarCharts.Ind
   apply cartesianPotential_curl ha j _ (Real.rpow_pos_of_pos (ChartScales.Q_pos n) _) hw
   rwa [chartPoint_eq_graph ha j h n (D.gap n) (D.gap_native n hn) hw]
 
-/-- For the reconstructed mean stream, smoothness of the scalar potential is
-proved from the supported axial source. No curl identity or smoothness of the
-output is an input. The radial exponent and frequency are the physical ones. -/
-theorem reconstructStream_curl {a b h ρ : ℝ} (hρ : 0 < ρ) (j : PolarCharts.Index)
-    (U : LocalSignedRequest.SlowRegion (2 * h)) {N Δ : ℕ}
-    (D : PhysicalMeanJetBounds.CoherentFamily h (CoordinateAlgebra.A h) N Δ U.carrier ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hf : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hs : PhysicalMeanJetBounds.NativeSupport h a b N U.carrier D.native)
-    (n : ℕ) (hn : N ≤ n) {w : SpaceTime}
-    (ht : w ∈ PhysicalWaveSum.preterminal)
-    (hu : (PhysicalMeanJetBounds.graph h n (D.gap n) w).2.1 ∈ U.carrier)
-    (hw : w ∈ cartesianDomain ρ j) :
-    let R := D.reconstructStream hh hh1 ha hab (ChartScales.radialExponent_pos h hh.le)
-      1 U.isOpen hf hs
-    SpatialCurl.spatialCurl R.angularField w =
-      let G := PhysicalResidualBridge.commonGraph (ChartScales.Q n) h
-        (ChartScales.nativeIndex h n - D.gap n)
-      CyclePhysicalPrefixes.polarVelocityMap ρ j
-        (CyclePhysicalPrefixes.velocityMap G (meridional G (R.native n))) w := by
-  dsimp only
-  apply coherent_angularField_curl hρ j
-    (D.reconstructStream hh hh1 ha hab (ChartScales.radialExponent_pos h hh.le) 1 U.isOpen hf hs)
-    U.isOpen n hn ht hu hw
-  exact (VariableGaugeMean.streamPotential_q_contDiffOn U ha hab
-    (ChartScales.radialExponent_pos h hh.le) _ _ (hf n hn) (hs n hn)).contDiffAt
-      ((PhysicalMeanDomain.slowDomain_open U.isOpen).mem_nhds hu)
 
 /-! ## Finite sums of the actual potentials -/
 
@@ -603,27 +553,6 @@ theorem initializedBands_mean {ι : Type}
       (temporalBands g h index axial c labels pieces baseError)) = _
   simp only [MeanIncrementBounds.updated, zero_add]
 
-/-- The initial mean potential is the sum of the two actual initialized
-streams. Its curl equals the initialized mean's meridional components. -/
-theorem initializedMeanPotential_curl {ι : Type}
-    (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : RankData (ℝ × ℝ))
-    (h : ℝ) (index : ℕ → ℕ) (c : Context Point)
-    (labels : ℕ → Finset ι) (pieces : ι → PrimaryPiece (Point × ℝ))
-    (baseError : Oscillation Point) {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (hl : 0 < G.radialScale) (n : ℕ) (H : GaugeMatches g c G n)
-    {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (ht : ContDiffAt ℝ ∞ (VariableGaugeMean.temporalPotential g h index c
-      (primaryBands g c labels pieces baseError) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w)))
-    (hr : ContDiffAt ℝ ∞ (VariableGaugeMean.rankPotential g r c
-      (temporalBands g h index axial c labels pieces baseError) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl (initializedMeanPotential g r h index c labels pieces baseError a j G n) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents
-          (initializedBands g r h index axial c labels pieces baseError).mean n)) w := by
-  rw [initializedBands_mean, meridionalComponents_updated]
-  exact temporal_rank_curl ha j g r h index c _ _ G hl n H hw ht hr
 
 /-! ## Finite prefixes of the literal iteration -/
 
@@ -660,31 +589,5 @@ noncomputable def cycleMeanPrefix {ι : Type} (p : ℕ → CycleParameters ι)
   fun w => ∑ k ∈ Finset.range J, cycleMeanPotential (p k)
     (CycleState.iterate p c seed k).coefficients c (CycleState.iterate p c seed k).state a j G n w
 
-theorem cycleMeanPrefix_curl {ι : Type} (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) {a : ℝ} (ha : 0 < a)
-    (j : PolarCharts.Index) (G : ScaledGraph) (hl : 0 < G.radialScale) (n J : ℕ)
-    (H : ∀ k < J, GaugeMatches (p k).gauge c G n)
-    (hax : ∀ k < J, (p k).axial = axial) {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (ht : ∀ k < J, ContDiffAt ℝ ∞
-      (VariableGaugeMean.temporalPotential (p k).gauge (p k).timeExponent (p k).commonIndex c
-        ((p k).afterSigned (CycleState.iterate p c seed k).coefficients c (CycleState.iterate p c seed k).state) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w)))
-    (hr : ∀ k < J, ContDiffAt ℝ ∞
-      (VariableGaugeMean.rankPotential (p k).gauge (p k).rank c
-        ((p k).afterTemporal (CycleState.iterate p c seed k).coefficients c (CycleState.iterate p c seed k).state) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl (cycleMeanPrefix p c seed a j G n J) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents (CycleState.iterate p c seed J).state.mean n -
-          CyclePhysicalPrefixes.meridionalComponents seed.state.mean n)) w := by
-  rw [meridionalComponents_iterate, add_sub_cancel_left]
-  unfold cycleMeanPrefix
-  rw [PhysicalParticularWave.spatialCurl_finset_sum _ _ (fun k hk =>
-    (cycleMeanPotential_smoothAt (p k) _ c _ ha j G hl n hw
-      (ht k (Finset.mem_range.mp hk)) (hr k (Finset.mem_range.mp hk))).differentiableAt (by simp))]
-  simp only [map_sum, Finset.sum_apply]
-  exact Finset.sum_congr rfl (fun k hk => cycleMeanPotential_curl (p k) _ c _ ha j G hl n
-    (H k (Finset.mem_range.mp hk)) (hax k (Finset.mem_range.mp hk)) hw
-    (ht k (Finset.mem_range.mp hk)) (hr k (Finset.mem_range.mp hk)))
 
 end NavierStokes.ActualMeanPotentialRealization

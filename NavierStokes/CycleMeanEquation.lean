@@ -530,12 +530,6 @@ theorem next_meanHypotheses (HM : LiftedMeanResidual.MeanHypotheses p.strip.doma
   intro n x hx
   exact (H.next_fullDivergence HM.oscillation_smooth n hx).trans (HM.total_divergence n x hx)
 
-theorem next_angularMean_fullGoodResidual
-    (HM : LiftedMeanResidual.MeanHypotheses p.strip.domain c u)
-    (n : ℕ) {x : Point} (hx : x ∈ p.strip.domain) (i : Fin 3) :
-    angularMeanVector (fullGoodResidual c (p.next v c u)) n x i =
-      (p.next v c u).meanGoodResidual c n x i :=
-  LiftedMeanResidual.angularMean_fullGoodResidual (H.next_meanHypotheses HM) n hx i
 
 end StepData
 
@@ -559,28 +553,7 @@ theorem iterate_meanHypotheses {ι : Type} {coord : ℝ}
       ((p j).next (CycleState.iterate p c seed j).coefficients c (CycleState.iterate p c seed j).state)
     simpa only [hV j] using hn
 
-theorem iterate_divergence_zero {ι : Type} {coord : ℝ}
-    (U : LocalSignedRequest.SlowRegion coord) (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (V : Set Point)
-    (hV : ∀ j, (p j).strip.domain = V)
-    (H₀ : LiftedMeanResidual.MeanHypotheses V c seed.state)
-    (H : ∀ j, StepData U (p j) (CycleState.iterate p c seed j).coefficients c
-      (CycleState.iterate p c seed j).state)
-    (j n : ℕ) {x : Point × ℝ} (hx : x ∈ LiftedMeanResidual.cylinder V) :
-    fullDivergence c (CycleState.iterate p c seed j).state n x = 0 :=
-  (iterate_meanHypotheses U p c seed V hV H₀ H j).total_divergence n x hx
 
-theorem iterate_angularMean_fullGoodResidual {ι : Type} {coord : ℝ}
-    (U : LocalSignedRequest.SlowRegion coord) (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (V : Set Point)
-    (hV : ∀ j, (p j).strip.domain = V)
-    (H₀ : LiftedMeanResidual.MeanHypotheses V c seed.state)
-    (H : ∀ j, StepData U (p j) (CycleState.iterate p c seed j).coefficients c
-      (CycleState.iterate p c seed j).state)
-    (j n : ℕ) {x : Point} (hx : x ∈ V) (i : Fin 3) :
-    angularMeanVector (fullGoodResidual c (CycleState.iterate p c seed j).state) n x i =
-      (CycleState.iterate p c seed j).state.meanGoodResidual c n x i :=
-  LiftedMeanResidual.angularMean_fullGoodResidual (iterate_meanHypotheses U p c seed V hV H₀ H j) n hx i
 
 /-- Specialization to the literal initializer: its mean-PDE hypotheses
 come from the proved initialization theorem, not an additional premise. -/
@@ -602,21 +575,5 @@ theorem iterate_meanHypotheses_of_initialized {ι : Type} {coord : ℝ}
   rw [hseed]
   exact ActualInitialMeanEquation.initialized_meanHypotheses B N0
 
-theorem iterate_angularMean_fullGoodResidual_of_initialized {ι : Type} {coord : ℝ}
-    (U : LocalSignedRequest.SlowRegion coord) (B N0 : ℕ)
-    (p : ℕ → CycleParameters ι) (seed : CycleState ι)
-    (hseed : seed.state = ActualInitialCoherence.initialized B N0)
-    (hV : ∀ j, (p j).strip.domain = ActualInitialMeanEquation.strip.domain)
-    (H : ∀ j, StepData U (p j)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).coefficients
-      (CorrectionInitialization.ActualPrimary.commonContext B)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).state)
-    (j n : ℕ) {x : Point} (hx : x ∈ ActualInitialMeanEquation.strip.domain) (i : Fin 3) :
-    angularMeanVector (fullGoodResidual (CorrectionInitialization.ActualPrimary.commonContext B)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).state) n x i =
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).state.meanGoodResidual
-        (CorrectionInitialization.ActualPrimary.commonContext B) n x i :=
-  LiftedMeanResidual.angularMean_fullGoodResidual
-    (iterate_meanHypotheses_of_initialized U B N0 p seed hseed hV H j) n hx i
 
 end NavierStokes.CycleMeanEquation

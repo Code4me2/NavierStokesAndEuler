@@ -576,11 +576,6 @@ def LocallyBoundedScale (U : Set E) (S : E × ℝ → ℝ) : Prop :=
   ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ M : ℝ, 1 ≤ M ∧
     ∀ y ∈ V ∩ U, ∀ δ ∈ Ioo (0 : ℝ) 1, S (y, δ) ≤ M
 
-omit [NormedSpace ℝ E] in
-theorem locallyBoundedScale_const (U : Set E) {S : ℝ} (hS : 1 ≤ S) :
-    LocallyBoundedScale U (fun _ => S) := by
-  intro x hx
-  exact ⟨univ, univ_mem, S, hS, by simp⟩
 
 theorem sqrt_edge (c δ : ℝ) : Real.sqrt (FlatCutoff.edge c δ) = FlatCutoff.edge (c / 2) δ := by
   by_cases hδ : δ ≤ 0
@@ -685,52 +680,8 @@ theorem weighted_zero_extension {c : ℝ} (hc : 0 < c) {U : Set E} (hU : IsOpen 
   exact ⟨FlatZeroExtension.iteratedFDeriv_zeroExtension_edge hc2 hU has haB n hx,
     FlatZeroExtension.iteratedFDeriv_zeroExtension_edge hc2 hU hbs hbB n hx⟩
 
-/-- Direct interface using only the original weighted input inequalities. -/
-theorem weighted_zero_extension_of_bounds {c : ℝ} (hc : 0 < c) {U : Set E} (hU : IsOpen U)
-    {S g r : E × ℝ → ℝ} (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p)
-    (hscale : LocallyBoundedScale U S)
-    (hpos : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < g p)
-    (hg : ContDiffOn ℝ ∞ g (U ×ˢ Ioi 0)) (hr : ContDiffOn ℝ ∞ r (U ×ˢ Ioi 0))
-    {c₀ : ℝ} (hc₀ : 0 < c₀) (K₀ N₀ : ℕ)
-    (hlower : ∀ p ∈ edgeStrip U,
-      c₀ * FlatCutoff.edge c p.2 / (S p ^ K₀ * (p.2⁻¹) ^ N₀) ≤ g p)
-    (hgBounds : ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ K N : ℕ, ∀ p ∈ edgeStrip U,
-      ‖iteratedFDeriv ℝ n g p‖ ≤ C * S p ^ K * FlatCutoff.edge c p.2 / p.2 ^ N)
-    (hrBounds : ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ K N : ℕ, ∀ p ∈ edgeStrip U,
-      ‖iteratedFDeriv ℝ n r p‖ ≤ C * S p ^ K * FlatCutoff.edge c p.2 / p.2 ^ N) :
-    ContDiffOn ℝ ∞ (FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p))) (U ×ˢ univ) ∧
-    ContDiffOn ℝ ∞ (FlatZeroExtension.zeroExtension (fun p => r p / (2 * Real.sqrt (g p))))
-      (U ×ˢ univ) ∧
-    ∀ n : ℕ, ∀ x ∈ U,
-      iteratedFDeriv ℝ n (FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p))) (x, 0) = 0 ∧
-      iteratedFDeriv ℝ n (FlatZeroExtension.zeroExtension
-        (fun p => r p / (2 * Real.sqrt (g p)))) (x, 0) = 0 := by
-  apply weighted_zero_extension hc hU hS hscale hpos hg hr
-  · exact polyBound_of_lower hS (fun p hp => inverse_distance_one_le hp)
-      (fun p hp => hpos p ⟨hp.1, hp.2.1⟩) hc₀ K₀ N₀ hlower
-  · exact WeightedJets.of_bounds hS hgBounds
-  · exact WeightedJets.of_bounds hS hrBounds
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem zeroExtension_sqrt_sq {U : Set E} {g : E × ℝ → ℝ}
-    (hpos : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < g p) {p : E × ℝ} (hp : p.1 ∈ U) :
-    (FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p)) p) ^ 2 =
-      FlatZeroExtension.zeroExtension g p := by
-  by_cases hδ : 0 < p.2
-  · simp only [FlatZeroExtension.zeroExtension_of_pos _ hδ]
-    exact Real.sq_sqrt (hpos p ⟨hp, hδ⟩).le
-  · simp only [FlatZeroExtension.zeroExtension_of_nonpos _ (le_of_not_gt hδ), zero_pow (by decide : 2 ≠ 0)]
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem zeroExtension_signed_identity {U : Set E} {g r : E × ℝ → ℝ}
-    (hpos : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < g p) {p : E × ℝ} (hp : p.1 ∈ U) :
-    2 * FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p)) p *
-      FlatZeroExtension.zeroExtension (fun p => r p / (2 * Real.sqrt (g p))) p =
-      FlatZeroExtension.zeroExtension r p := by
-  by_cases hδ : 0 < p.2
-  · simp only [FlatZeroExtension.zeroExtension_of_pos _ hδ]
-    field_simp [(Real.sqrt_pos.mpr (hpos p ⟨hp, hδ⟩)).ne']
-  · simp only [FlatZeroExtension.zeroExtension_of_nonpos _ (le_of_not_gt hδ), mul_zero]
 
 end GaussianEdge
 

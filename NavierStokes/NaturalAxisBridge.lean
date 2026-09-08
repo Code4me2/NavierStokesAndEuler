@@ -57,13 +57,6 @@ theorem partialEta_profile (I : Window) {ε : ℝ} (hε : 0 < ε)
   simpa only [partialEta, AxisEvaluation.mixedSeries_zero] using
     (AxisEvaluation.mixedSeries_hasDerivAt_eta I hε A 0 0 hp.1 hp.2).deriv
 
-theorem mixedDerivative_profile (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) (k m : ℕ) {p : ℝ × ℝ} (hp : p ∈ AxisEvaluation.strip I 20) :
-    mixedDerivative k m (AxisEvaluation.profile I ε A) p =
-      AxisEvaluation.mixedSeries I ε A k m p := by
-  simpa only [mixedDerivative, AxisEvaluation.mixedSeries, AxisEvaluation.term,
-    AxisEvaluation.polynomialJet] using
-    AxisEvaluation.mixed_derivative_profile I hε A k m hp.1 hp.2
 
 theorem radialEvaluation_eq (I : Window) {ε : ℝ} (hε : 0 < ε)
     (r : ℕ) (A : AxisSpace I ε) {p : ℝ × ℝ} (hp : p ∈ AxisEvaluation.strip I 20) :
@@ -636,39 +629,6 @@ structure IsLeadingSolution (I : Window) (d : ParameterData)
   axial_equation : ∀ p ∈ AxisEvaluation.strip I 20,
     2 * radialDifferential 1 u p = -d.inverseL p.2 * d.zStar p.2
 
-/-- The profiles used in the error estimate really solve the regular
-leading equations with the prescribed axis data. -/
-theorem reference_isLeadingSolution (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) (d : AxisContraction.AxisData (AxisSpace I ε))
-    (hd : CompatibleData I ε χ d) :
-    IsLeadingSolution I (parameters I ε χ d)
-      (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).1)
-      (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).2) := by
-  have hzero : RadiallyConstant I ε (0 : AxisSpace I ε) := by
-    intro n hn η hη
-    simp [coefficient]
-  have hφ : (referenceCoefficients I hε χ d).1 +
-      AxisResolvent.naturalOperator I hε χ (referenceCoefficients I hε χ d).1 =
-      d.one + (0 : ℝ) • (AxisContraction.naturalRemainder
-        (AxisContraction.coefficientOperators I hε) d (ContinuousLinearMap.id ℝ _) 0 0
-          (referenceCoefficients I hε χ d)).1 := by
-    simpa only [referenceCoefficients, AxisContraction.referencePair, zero_smul, add_zero] using
-      AxisResolvent.naturalResolvent_equation I hε χ d.one
-  have hu : (referenceCoefficients I hε χ d).2 =
-      -(1 / 2 : ℝ) • AxisOperators.regularInverse I hε 1 (by norm_num)
-        (AxisOperators.product I hε d.inverseL d.zStar) +
-      (0 : ℝ) • (AxisContraction.naturalRemainder
-        (AxisContraction.coefficientOperators I hε) d (ContinuousLinearMap.id ℝ _) 0 0
-          (referenceCoefficients I hε χ d)).2 := by
-    simp only [zero_smul, add_zero]
-    rfl
-  have hs := integrated_solution I hε χ d hd 0 0 (by norm_num) 0 hzero
-    (referenceCoefficients I hε χ d) hφ hu
-  refine ⟨hs.phi_smooth, hs.u_smooth, hs.phi_axis, hs.u_axis, ?_, ?_⟩
-  · intro p hp
-    simpa only [zero_mul, add_zero] using hs.angular_equation p hp
-  · intro p hp
-    simpa only [zero_mul, add_zero] using hs.axial_equation p hp
 
 /-- A fixed finite constant computed from the input norms and the genuine
 bounded operators. It is independent of `Λ` and of the amplitude in its norm ball. -/

@@ -55,25 +55,6 @@ theorem exists_scheduled_core_below (P m : ℝ) (hP : 0 < P) (hm : 0 < m)
     scale_small := hrate lam hlam hdelta' }
   exact ⟨F, rfl, rfl, rfl, b, b.specification⟩
 
-/-- A scalar-parameter form of the same construction, with the reset bound
-retained as an explicit preceding existential. -/
-theorem exists_scheduled_profile_below (P m : ℝ) (hP : 0 < P) (hm : 0 < m)
-    (cap : ℝ → ℝ) (hcap : ∀ K : ℝ, 0 < K → 0 < cap K) :
-    ∃ K lam B : ℝ,
-      0 < K ∧ 0 < lam ∧ lam < cap K ∧ lam < 1 / 120 ∧ 0 < B ∧
-      ∀ h : ℝ, 0 < h → 2 * h < lam →
-        ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-          F.data.core.lam = lam ∧ F.data.h = h ∧ F.coefficientBound = K ∧
-          ScheduleBounds F ∧ OutgoingProfile.Specification F B := by
-  obtain ⟨K, B, core, hK, hB, hcP, hcm, _hwait, hcaller, hsmall, hf⟩ :=
-    exists_scheduled_core_below P m hP hm cap hcap
-  refine ⟨K, core.lam, B, hK, core.lam_pos, hcaller, hsmall, hB, ?_⟩
-  intro h hh ht
-  obtain ⟨F, hcore, hh', hK', hb, hF⟩ := hf h hh ht
-  refine ⟨F, ?_, ?_, ?_, hh', hK', hb, hF⟩
-  · rw [hcore, hcP]
-  · rw [hcore, hcm]
-  · rw [hcore]
 
 /-- This number depends on the already fixed core and an additional caller
 height bound. It is chosen before the terminal exponent h. -/

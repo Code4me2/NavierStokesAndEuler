@@ -414,20 +414,6 @@ theorem interactionBlock_uniform
   rw [nonconstant_apply_of_ne _ hj, realCoefficients_add]
   rfl
 
-/-- The same expression is still a genuine finite harmonic block, with
-zero constant mode and the original carrier. This is independent of the
-estimates and uses the exact coefficient constructors. -/
-theorem interactionBlock_structure
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (a b : ι → CorrectionState.HarmonicBlock D) {M N : ℕ}
-    (hM : ∀ l, (a l).BandLimited M) (hN : ∀ l, (b l).BandLimited N) (l : ι) :
-    (interactionBlock c u (a l) (b l)).BandLimited (max (M+N) (N+N)) ∧
-    ZeroMode (interactionBlock c u (a l) (b l)) ∧
-    (interactionBlock c u (a l) (b l)).frequency = (a l).frequency ∧
-    (interactionBlock c u (a l) (b l)).phase = (a l).phase ∧
-    (interactionBlock c u (a l) (b l)).angularFrequency = (a l).angularFrequency :=
-  ⟨HarmonicWaveInteraction.interactionBlock_band c u (hM l) (hN l),
-    HarmonicWaveInteraction.interactionBlock_zero c u (a l) (b l), rfl, rfl, rfl⟩
 
 end ActualBlock
 

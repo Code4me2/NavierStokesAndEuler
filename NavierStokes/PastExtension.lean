@@ -39,10 +39,6 @@ theorem zeroBefore_of_neg (g : SpaceTime → V) {t : ℝ} (ht : t < 0) (x : Spac
     zeroBefore g (t, x) = 0 := by
   simp only [zeroBefore, not_le.mpr ht, ite_false]
 
-theorem zeroBefore_eqOn_nonneg (g : SpaceTime → V) :
-    EqOn (zeroBefore g) g (Ici (0 : ℝ) ×ˢ (univ : Set Space)) := by
-  intro z hz
-  exact zeroBefore_of_nonneg g hz.1 z.2
 
 theorem zeroBefore_eventuallyEq_pos {g : SpaceTime → V} {z : SpaceTime}
     (hz : 0 < z.1) : zeroBefore g =ᶠ[𝓝 z] g := by
@@ -136,11 +132,7 @@ theorem pastPressure_eq_activated (p : PressureField) {t : ℝ} (ht : 0 ≤ t) (
     pastPressure p (t, x) = activatedPressure p (t, x) :=
   zeroBefore_of_nonneg _ ht x
 
-theorem pastVelocity_zero_negative (u : VelocityField) {t : ℝ} (ht : t < 0) (x : Space) :
-    pastVelocity u (t, x) = 0 := zeroBefore_of_neg _ ht x
 
-theorem pastPressure_zero_negative (p : PressureField) {t : ℝ} (ht : t < 0) (x : Space) :
-    pastPressure p (t, x) = 0 := zeroBefore_of_neg _ ht x
 
 theorem pastVelocity_smooth (u : VelocityField)
     (hu : ContDiffOn ℝ ∞ u preSingularDomain) :
@@ -172,13 +164,7 @@ theorem pastPressure_eventuallyEq_activated (p : PressureField) {t : ℝ}
     pastPressure p =ᶠ[𝓝 (t, x)] activatedPressure p :=
   zeroBefore_eventuallyEq_nonneg (activatedPressure_zero_germ p) ht x
 
-theorem pastVelocity_eq_late (u : VelocityField) {t : ℝ} (ht : 3 / 4 ≤ t) (x : Space) :
-    pastVelocity u (t, x) = u (t, x) := by
-  rw [pastVelocity_eq_activated u (by linarith), activatedVelocity_eq_late u ht]
 
-theorem pastPressure_eq_late (p : PressureField) {t : ℝ} (ht : 3 / 4 ≤ t) (x : Space) :
-    pastPressure p (t, x) = p (t, x) := by
-  rw [pastPressure_eq_activated p (by linarith), activatedPressure_eq_late p ht]
 
 theorem pastVelocity_eventuallyEq_late (u : VelocityField) {t : ℝ}
     (ht : 3 / 4 < t) (x : Space) : pastVelocity u =ᶠ[𝓝 (t, x)] u :=
@@ -190,27 +176,7 @@ theorem pastPressure_eventuallyEq_late (p : PressureField) {t : ℝ}
   (pastPressure_eventuallyEq_activated p (by linarith) x).trans
     (activatedPressure_eventuallyEq_late p ht x)
 
-theorem pastVelocity_divergence_free (u : VelocityField)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hdiv : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence u t x = 0) :
-    ∀ t ∈ Iio (1 : ℝ), ∀ x : Space, spatialDivergence (pastVelocity u) t x = 0 := by
-  intro t ht x
-  by_cases hnonneg : 0 ≤ t
-  · have hder := spatialDerivative_congr (pastVelocity_eventuallyEq_activated u hnonneg x)
-    simpa only [spatialDivergence, hder] using
-      activatedVelocity_divergence_free u hu hdiv t ⟨hnonneg, ht⟩ x
-  · have heq : pastVelocity u =ᶠ[𝓝 (t, x)] (fun _ => 0) :=
-      zeroBefore_eventually_zero_neg (lt_of_not_ge hnonneg)
-    have hder := spatialDerivative_congr heq
-    simp only [spatialDivergence, hder]
-    simp [spatialDerivative]
 
-theorem pastVelocity_speed_unbounded (u : VelocityField) (hu : SpeedUnboundedAtOne u) :
-    SpeedUnboundedAtOne (pastVelocity u) := by
-  intro M hM δ hδ
-  obtain ⟨t, x, ht, hnear, hlarge⟩ := activatedVelocity_speed_unbounded u hu M hM δ hδ
-  refine ⟨t, x, ht, hnear, ?_⟩
-  simpa only [pastVelocity_eq_activated u ht.1.le] using hlarge
 
 /-- The force used by the endpoint theorem is the actual residual of the
 new fields on the entire open past, including negative times. -/
@@ -258,10 +224,6 @@ theorem pastResidual_eventuallyEq_late (u : VelocityField) (p : PressureField)
   residual_eventuallyEq (pastVelocity_eventuallyEq_late u ht x)
     (pastPressure_eventuallyEq_late p ht x)
 
-theorem pastResidual_eq_late (u : VelocityField) (p : PressureField)
-    {t : ℝ} (ht : 3 / 4 < t) (x : Space) :
-    pastResidual u p (t, x) = navierStokesResidual u p t x :=
-  (pastResidual_eventuallyEq_late u p ht x).self_of_nhds
 
 /-- Full joint derivative tensors, not only values, retain the terminal germ. -/
 theorem pastResidual_iteratedFDeriv_eq_late (u : VelocityField) (p : PressureField)
@@ -311,27 +273,5 @@ theorem pastResidual_derivative_recurrence (u : VelocityField) (p : PressureFiel
   simp only [fderiv_iteratedFDeriv, Function.comp_apply] at hd
   exact hd
 
-/-- A direct adapter to joint endpoint regularity. Only the locally uniform
-limits near time one remain an analytic input; no negative-time assumptions
-are imposed on the original velocity or pressure. -/
-theorem exists_joint_endpoint_extension_of_residual_limits
-    (u : VelocityField) (p : PressureField)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain)
-    (L : Space → FormalMultilinearSeries ℝ SpaceTime Space)
-    (hlim : ∀ n : ℕ, TendstoLocallyUniformly
-      (fun t x => iteratedFDeriv ℝ n (fun z => navierStokesResidual u p z.1 z.2) (t, x))
-      (fun x => L x n) (𝓝[<] (1 : ℝ))) :
-    ∃ g : VelocityField, EqOn g (pastResidual u p) pastDomain ∧
-      ContDiffOn ℝ ∞ g (SpacetimeEndpoint.closedPast 1) ∧
-      ∀ n : ℕ, ∀ x : Space,
-        iteratedFDerivWithin ℝ n g (SpacetimeEndpoint.closedPast 1) (1, x) = L x n := by
-  apply SpacetimeEndpoint.exists_joint_endpoint_extension
-    (J := ftaylorSeries ℝ (pastResidual u p))
-  · intro z _
-    rfl
-  · exact pastResidual_derivative_recurrence u p hu hp
-  · intro n
-    exact pastResidual_locallyUniform_limit u p n (fun x => L x n) (hlim n)
 
 end NavierStokes.PastExtension

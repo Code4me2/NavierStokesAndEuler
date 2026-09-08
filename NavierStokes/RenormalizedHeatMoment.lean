@@ -201,9 +201,6 @@ theorem Q_pos {h τ : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hτ : 0 < τ) (z : �
     0 < Q h τ z :=
   (SimilarityCoordinates.coordinateQ_spec (by linarith) (by linarith) (p := (τ, z)) hτ).1
 
-theorem Q_implicit {h τ : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hτ : 0 < τ) (z : ℝ) :
-    Q h τ z - z ^ 2 * Q h τ z ^ (2 * h) = τ :=
-  (SimilarityCoordinates.coordinateQ_spec (by linarith) (by linarith) (p := (τ, z)) hτ).2
 
 theorem eta_mem {h τ : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hτ : 0 < τ) (z : ℝ) :
     eta h τ z ∈ Ioo (-1 : ℝ) 1 :=
@@ -660,29 +657,7 @@ theorem integral_weighted_radial_scale (b : ℝ) {q : ℝ} (hq : 0 < q) (g : ℝ
       _ = _ := by congr 1; ring
   rw [hp]
 
-theorem integral_axial_scale (h : ℝ) {q : ℝ} (hq : 0 < q) (g : ℝ → ℝ) :
-    (∫ r in Ioi (0 : ℝ), r ^ 2 *
-      (q ^ (-A h - 2 * CoordinateAlgebra.D h) * g (r / Real.sqrt q))) =
-        q ^ h * ∫ R in Ioi (0 : ℝ), R ^ 2 * g R := by
-  rw [integral_weighted_radial_scale _ hq]
-  congr 2
-  unfold A CoordinateAlgebra.D
-  ring
 
-theorem exterior_second_derivative_zero {u : ℝ × ℝ → ℝ} {tail : ℝ → ℝ}
-    (he : CommonExterior u tail) (z : ℝ) :
-    ∃ B : ℝ, 0 < B ∧ ∀ r : ℝ, B ≤ r → iteratedDeriv 2 (fun y => u (y, r)) z = 0 := by
-  obtain ⟨ε, B, hε, hB, htail⟩ := he z
-  refine ⟨B, hB, ?_⟩
-  intro r hr
-  have hfun : (fun y => u (y, r)) =ᶠ[𝓝 z] (fun _ => tail r) := by
-    filter_upwards [Metric.ball_mem_nhds z hε] with y hy
-    exact htail y hy r hr
-  rw [hfun.iteratedDeriv_eq 2]
-  simp only [show 2 = 1 + 1 from rfl, iteratedDeriv_succ, iteratedDeriv_zero]
-  have hc : deriv (fun _ : ℝ => tail r) = fun _ => 0 := funext fun y => deriv_const y (tail r)
-  rw [hc]
-  exact deriv_const z 0
 
 /-! ## The reference normalization of the constructed outgoing schedule -/
 

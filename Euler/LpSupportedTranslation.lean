@@ -26,9 +26,6 @@ variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
 /-- The exact support set of a translated field. -/
 def shiftedSet (a : Space) (S : Set Space) : Set Space := {x | x+a ∈ S}
 
-/-- Translated supports remain measurable. -/
-theorem shiftedSet_measurable (a : Space) (S : Set Space) (hS : MeasurableSet S) :
-    MeasurableSet (shiftedSet a S) := hS.preimage (measurable_id.add measurable_const)
 
 /-- Translation carries an actual supported L² field into its translated support set. -/
 theorem translation_mem (a : Space) (S Ω : Set Space) (hS : MeasurableSet S) (hΩ : MeasurableSet Ω)

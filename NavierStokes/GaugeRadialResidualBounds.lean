@@ -68,10 +68,6 @@ noncomputable def radialMinusAlias (g : VariableGaugeMean.GaugeData Plane)
     (c : Context Point) (u : State Point) : Scalar := fun n x =>
   u.radialResidual c n x - VariableGaugeMean.pressureAliasState g c u n (x, 0) 0
 
-theorem radialMinusAlias_angle (g : VariableGaugeMean.GaugeData Plane)
-    (c : Context Point) (u : State Point) (n : ℕ) (x : Point) (theta : ℝ) :
-    u.radialResidual c n x - VariableGaugeMean.pressureAliasState g c u n (x, theta) 0 =
-      radialMinusAlias g c u n x := rfl
 
 /-- The pressure defect is the actual zeroth radial moment of the radial
 source, with the same auxiliary-torus average used by the gauge. -/
@@ -115,17 +111,6 @@ theorem radialMinusAlias_identity
   simp only [VariableGaugeMean.pressureAliasState, Matrix.cons_val_zero]
   ring
 
-/-- Applying the actual constructor discharges pressure reconstruction; the
-same incoming primitive data and pressure debt are used. -/
-theorem reconstructed_identity
-    (H : MeanStateRegularity.PrimitiveData U g.radial.inner g.radial.outer c u)
-    (hr : RadialMatch U.carrier g c.operators)
-    (n : ℕ) {x : Point} (hx : x.2.1 ∈ U.carrier) :
-    radialMinusAlias g c (VariableGaugeMean.reconstructState g c u) n x =
-      -VariableGaugeMean.density g.radial.inner g.radial.outer g.radial.inner_lt_outer
-        (g.length n) x * pressureDefect c u n x.2.1 :=
-  radialMinusAlias_identity U g ha hd hell c (VariableGaugeMean.reconstructState g c u)
-    (primitiveData_reconstructState g H) hr rfl n hx
 
 end Identity
 
@@ -180,16 +165,6 @@ theorem radialMinusAlias_class (c : Context Point) (u : State Point)
     epsilon slow hepsilon hepsilon_one hslow x).mp hx).1
   exact radialMinusAlias_identity U g ha hd hell c u H hr hfixed n hxu
 
-include hd in
-/-- The actual reconstructed state's radial class is derived without an
-input assertion that its pressure already equals the gauge formula. -/
-theorem reconstructed_class (c : Context Point) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData U g.radial.inner g.radial.outer c u)
-    (hr : RadialMatch U.carrier g c.operators)
-    {alpha : ℝ} (hdebt : UnweightedClass slowStrip alpha (pressureDefect c u)) :
-    MeanClass strip alpha (radialMinusAlias g c (VariableGaugeMean.reconstructState g c u)) :=
-  radialMinusAlias_class U g ha hd hcL hcR epsilon slow hepsilon hepsilon_one hslow hell
-    c (VariableGaugeMean.reconstructState g c u) (primitiveData_reconstructState g H) hr rfl hdebt
 
 end Classes
 
@@ -210,19 +185,6 @@ local notation "strip" => movingStripData U a b cL cR ha hcL hcR
 local notation "slowStrip" => PhysicalMeanDomain.localSlowStripData U.carrier U.isOpen
   epsilon slow hepsilon hepsilon_one hslow
 
-include ha in
-/-- The normalized bump and sign for the actual similarity gauge. -/
-theorem similarity_identity (c : Context Point) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData U a b c u)
-    (hr : RadialMatch U.carrier gauge c.operators)
-    (hfixed : (VariableGaugeMean.reconstructState gauge c u).pressure = u.pressure)
-    (n : ℕ) {x : Point} (hx : x.2.1 ∈ U.carrier) :
-    u.radialResidual c n x - VariableGaugeMean.pressureAliasState gauge c u n (x, 0) 0 =
-      -VariableGaugeMean.density a b hab (VariableGaugeMean.qLength (2 * h)) x *
-        pressureDefect c u n x.2.1 := by
-  have hh : 0 ≤ h := by linarith [U.coord_pos]
-  exact radialMinusAlias_identity U gauge ha (ChartScales.radialExponent_pos h hh)
-    (fun _ => rfl) c u H hr hfixed n hx
 
 /-- The iteration's radial component: an S_(1+sigma) pressure debt gives
 M_(1+sigma) for the current alias-subtracted radial residual. -/
@@ -237,22 +199,6 @@ theorem similarity_class (c : Context Point) (u : State Point)
   exact radialMinusAlias_class U gauge ha (ChartScales.radialExponent_pos h hh)
     hcL hcR epsilon slow hepsilon hepsilon_one hslow (fun _ => rfl) c u H hr hfixed hdebt
 
-/-- With the actual native operators, every radial matching field is proved
-from the constructor. The only operator premise is the literal input binding. -/
-theorem similarity_native_class (c : Context Point) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData U a b c u)
-    (fast : ℕ → ℝ) (axial slowTime temporal : Plane)
-    (ho : c.operators = StateMomentBalances.nativeOperators (gauge).radial
-      epsilon fast axial slowTime temporal)
-    (hfixed : (VariableGaugeMean.reconstructState gauge c u).pressure = u.pressure)
-    (hdebt : UnweightedClass slowStrip (1 + sigma) (pressureDefect c u)) :
-    MeanClass strip (1 + sigma) (fun n x =>
-      u.radialResidual c n x - VariableGaugeMean.pressureAliasState gauge c u n (x, 0) 0) := by
-  apply similarity_class U ha hab hcL hcR Mbase index epsilon slow hepsilon hepsilon_one hslow c u H
-  · rw [ho]
-    exact RadialMatch.nativeOperators U.carrier gauge epsilon fast axial slowTime temporal
-  · exact hfixed
-  · exact hdebt
 
 end Similarity
 

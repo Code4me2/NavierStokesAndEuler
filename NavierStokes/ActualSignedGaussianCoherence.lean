@@ -178,32 +178,6 @@ theorem gaussian_transport (l : SignedLabel B N0) (u : State Point)
   gaussian_transport_of_request l u n m k hi x
     (fullRequest_transport u H hfixed n m k hi HS x hx)
 
-/-- Reverse transport of the actual complex Gaussian coefficient on the
-image of the same overlap, with the reciprocal physical weight. -/
-theorem gaussian_transport_symm (l : SignedLabel B N0) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData ActualInitialization.geometry.region
-      ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b (commonContext B) u)
-    (hfixed : (VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge
-      (commonContext B) u).pressure = u.pressure)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (HS : PhysicalResidualNaturality.StateOn
-      (PhysicalMeanDomain.slowDomain (ActualInitialCoherence.overlap n m))
-      (bandChartEquiv h n m k) (bandVelocityScale h n m) (bandScale n m) u u n m)
-    (x : ActualSignedCoherence.FullPoint)
-    (hx : ((chart n m k).symm x).1.2.1 ∈ ActualInitialCoherence.overlap n m) :
-    (copies l u).globalGaussian (ActualSignedStageControls.directions B) m x =
-      (bandVelocityScale h m n * bandVelocityScale h m n * bandScale m n) •
-        (copies l u).globalGaussian (ActualSignedStageControls.directions B) n ((chart n m k).symm x) := by
-  have he := gaussian_transport l u H hfixed n m k hi HS ((chart n m k).symm x) hx
-  have hw : bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m ≠ 0 :=
-    mul_ne_zero (mul_ne_zero (velocity_pos n m).ne' (velocity_pos n m).ne')
-      (bandScale_pos n m).ne'
-  have he' := congrArg (fun z : ComplexVector =>
-    (bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m)⁻¹ • z) he
-  have he'' := he'.symm
-  simp only [ContinuousLinearEquiv.apply_symm_apply, smul_smul,
-    inv_mul_cancel₀ hw, one_smul] at he''
-  simpa only [gaussianWeight_swap] using he''
 
 /-- The Gaussian component of `WaveOn`, for the actual signed Fourier
 block, on all radial and free auxiliary fibers and at every angle. -/
@@ -227,37 +201,6 @@ theorem gaussianBlock_transport (l : SignedLabel B N0) (u : State Point)
     n m k hi x theta _ i
   exact gaussian_transport l u H hfixed n m k hi HS (x,0) hx
 
-/-- The same field comparison in the reverse common-chart direction.
-Its domain is the exact image of the forward overlap. -/
-theorem gaussianBlock_transport_symm (l : SignedLabel B N0) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData ActualInitialization.geometry.region
-      ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b (commonContext B) u)
-    (hfixed : (VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge
-      (commonContext B) u).pressure = u.pressure)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (HS : PhysicalResidualNaturality.StateOn
-      (PhysicalMeanDomain.slowDomain (ActualInitialCoherence.overlap n m))
-      (bandChartEquiv h n m k) (bandVelocityScale h n m) (bandScale n m) u u n m)
-    (x : Point)
-    (hx : (bandChartEquiv h n m k).symm x ∈
-      PhysicalMeanDomain.slowDomain (ActualInitialCoherence.overlap n m))
-    (theta : ℝ) (i : Fin 3) :
-    ((ActualSignedStageControls.parameters l).gaussianBlock ActualInitialization.geometry.strip
-      (request B u)).oscillation m (x,theta) i =
-      (bandVelocityScale h m n * bandVelocityScale h m n * bandScale m n) *
-        ((ActualSignedStageControls.parameters l).gaussianBlock ActualInitialization.geometry.strip
-          (request B u)).oscillation n ((bandChartEquiv h n m k).symm x,theta) i := by
-  have he := gaussianBlock_transport l u H hfixed n m k hi HS
-    ((bandChartEquiv h n m k).symm x) hx theta i
-  have hw : bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m ≠ 0 :=
-    mul_ne_zero (mul_ne_zero (velocity_pos n m).ne' (velocity_pos n m).ne')
-      (bandScale_pos n m).ne'
-  have he' := congrArg (fun z : ℝ =>
-    (bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m)⁻¹ * z) he
-  have he'' := he'.symm
-  simp only [ContinuousLinearEquiv.apply_symm_apply, ← mul_assoc,
-    inv_mul_cancel₀ hw, one_mul] at he''
-  simpa only [gaussianWeight_swap] using he''
 
 end ActualTransport
 

@@ -84,38 +84,6 @@ theorem Budget.liftedPacketDerivativeCoefficient_memLp (H : Field P T raw_t)
       ((B.timeDerivativeTower P).pointField_smooth t) n
       (H.toFieldTower.coverTensor_memLp n t) ((B.timeDerivativeTower P).coverTensor_memLp n t))
 
-theorem Budget.liftedPacketDerivativeCoefficient_jet_bound (H : Field P T raw_t)
-    (R ρ Ch Ce : ℝ) (hκ : |A.κ| ≤ 1) (hm : ‖A.direction‖ ≤ 1)
-    (hR : 0 ≤ R) (hρ : 0 < ρ) (hCh : 0 ≤ Ch) (hCe : 0 ≤ Ce)
-    (hH : H.WordBound 6 R Ch 0)
-    (hE : ∀ n (t : Icc (0 : ℝ) T),
-      weightedNorm P 6 n ρ ((B.timeDerivativeTower P).realization (n+6) t) ≤ Ce) (n : ℕ) :
-    ‖(B.liftedPacketDerivativeCoefficient P H).jet n‖ ≤
-      (2*liftedInputConstant P*(Ch+Ce)) * (liftedInputRadius R ρ)^n * (n.factorial : ℝ)^2 := by
-  have hK : 0 ≤ liftedInputConstant P := zero_le_one.trans (liftedInputConstant_one_le P)
-  have hh := (hH.toSmoothTimeField_jet_bound (by norm_num) hR hCh n).trans
-    (time_envelope_mono (mul_nonneg hK hCh) (mul_nonneg (norm_nonneg _) hR)
-      (mul_le_mul_of_nonneg_right (liftedInputConstant_embedding_le P) hCh)
-      (liftedInputRadius_packet R ρ hR hρ) n)
-  have he : ‖(B.correctionDerivativeCoefficient P).jet n‖ ≤
-      (liftedInputConstant P*Ce)*(liftedInputRadius R ρ)^n*(n.factorial : ℝ)^2 :=
-    ((B.timeDerivativeTower P).toSmoothTimeField_jet_weighted n ρ Ce hρ hCe (hE n)).trans
-      (time_envelope_mono (mul_nonneg hK hCe) (mul_nonneg (norm_nonneg _) (inv_nonneg.mpr hρ.le))
-        (mul_le_mul_of_nonneg_right (liftedInputConstant_embedding_le P) hCe)
-        (liftedInputRadius_error R ρ hR) n)
-  have hsum := (H.toSmoothTimeField.add_jet_norm_le (B.correctionDerivativeCoefficient P) n).trans
-    (add_le_add hh he)
-  have hfull := lift_jet_norm_le_full
-    (H.toSmoothTimeField.add (B.correctionDerivativeCoefficient P)) A.κ A.direction n
-  change ‖(lift (H.toSmoothTimeField.add (B.correctionDerivativeCoefficient P)) A.κ A.direction).jet n‖ ≤ _
-  apply hfull.trans
-  calc
-    _ ≤ 2*‖(H.toSmoothTimeField.add (B.correctionDerivativeCoefficient P)).jet n‖ :=
-      mul_le_mul_of_nonneg_right (by linarith) (norm_nonneg _)
-    _ ≤ 2*((liftedInputConstant P*Ch)*(liftedInputRadius R ρ)^n*(n.factorial : ℝ)^2 +
-        (liftedInputConstant P*Ce)*(liftedInputRadius R ρ)^n*(n.factorial : ℝ)^2) :=
-      mul_le_mul_of_nonneg_left hsum (by norm_num)
-    _ = _ := by ring
 
 theorem Budget.liftedPacketDerivativeCoefficient_L2_bound (H : Field P T raw_t)
     (R ρ Ch Ce : ℝ) (hκ : |A.κ| ≤ 1) (hm : ‖A.direction‖ ≤ 1)

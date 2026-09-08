@@ -278,24 +278,6 @@ theorem profile_stocks_from_history_bounds {D : RadialDomain} (Q : Profiles D) (
   exact ⟨hPpos, hb₁.trans (mul_le_mul_of_nonneg_left hd hC),
     hb₂.trans (mul_le_mul_of_nonneg_left hd hC)⟩
 
-/-- A first parameter-jet bound on an actual history difference supplies
-exactly the value/derivative estimates used by the stock adapter. -/
-theorem profileHistory_first_jet_bound {D D' : RadialDomain}
-    (P : Profiles D) (Q : Profiles D') (r : StressActivation.HistoryRow)
-    {p : Point} (hp : p ∈ D.carrier) (hp' : p ∈ D'.carrier)
-    {J : Set ℝ} {ε : ℝ}
-    (hjet : JetBounds.FiniteJetBound 1 (fun η =>
-      StressActivation.profileHistory P r (p.1, η) -
-        StressActivation.profileHistory Q r (p.1, η)) J ε) (hη : p.2 ∈ J) :
-    |StressActivation.profileHistory P r p - StressActivation.profileHistory Q r p| ≤ ε ∧
-      |parameterPartial (StressActivation.profileHistory P r) p -
-        parameterPartial (StressActivation.profileHistory Q r) p| ≤ ε := by
-  have hd := (parameterPartial_hasDerivAt D (StressActivation.profileHistory_smooth P r) hp).fun_sub
-    (parameterPartial_hasDerivAt D' (StressActivation.profileHistory_smooth Q r) hp')
-  constructor
-  · simpa only [Real.norm_eq_abs, Prod.eta] using hjet.norm_le hη
-  · simpa only [norm_iteratedFDeriv_eq_norm_iteratedDeriv, iteratedDeriv_one,
-      hd.deriv, Real.norm_eq_abs] using hjet 1 le_rfl p.2 hη
 
 /-- Actual field and five-row history estimates of order `1/n` imply an
 eventual uniform `1/n` estimate for both actual lag stocks. The integer

@@ -129,8 +129,6 @@ theorem average_invariant [CompleteSpace E] {f : SpaceTime → E}
   simp only [average, hf, intervalIntegral.integral_const, sub_zero, smul_smul,
     inv_mul_cancel₀ period_ne_zero, one_smul]
 
-theorem average_const [CompleteSpace E] (c : E) (q : SpaceTime) : average (fun _ => c) q = c :=
-  average_invariant (fun _ _ => rfl) q
 
 theorem average_mul_invariant {a f : Scalar} (ha : AngularInvariant a) (q : SpaceTime) :
     average (fun y => a y * f y) q = a q * average f q := by
@@ -226,13 +224,6 @@ theorem average_dtheta_zero [CompleteSpace E] {f : SpaceTime → E}
   rw [hp, angularShift_zero, sub_self] at hi
   simp only [average, hi, smul_zero]
 
-theorem dtheta_invariant_zero [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (hp : AngularInvariant f) (q : SpaceTime) : dtheta f q = 0 := by
-  have he : average f = f := funext (average_invariant hp)
-  calc
-    dtheta f q = dtheta (average f) q := by rw [he]
-    _ = average (dtheta f) q := direction_average hf angularVector q
-    _ = 0 := average_dtheta_zero hf (fun y => hp y period) q
 
 theorem direction_add {f g : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
     (hg : ContDiff ℝ ∞ g) (v q : SpaceTime) :
@@ -256,13 +247,6 @@ theorem direction_mul {f g : Scalar} (hf : ContDiff ℝ ∞ f)
   simp
   ring
 
-theorem direction_map (L : E →L[ℝ] F) {f : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
-    (v q : SpaceTime) :
-    direction v (fun y => L (f y)) q = L (direction v f q) := by
-  unfold direction
-  change (fderiv ℝ (L ∘ f) q) v = _
-  rw [(L.hasFDerivAt.comp q (hf.differentiable (by simp) q).hasFDerivAt).fderiv]
-  rfl
 
 theorem spatial_direction {f : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
     (t : ℝ) (x : Space) (i : Fin 3) :
@@ -973,49 +957,8 @@ theorem exact_mean_balances {b m o : Components} {p pb pm : Scalar}
     reynoldsAxial_total_sub hb hm ho hpb hpm hbi hmi hz hpavg Tz q,
     reynoldsRadial_total_sub hb hm ho hpb hpm hbi hmi hz hpavg q⟩
 
-theorem Etheta_expanded (b m o : Components) (T : Scalar) (q : SpaceTime) :
-    Etheta b m o T q = dt (m 1) q +
-      radialDivergence 2 (fun y => b 0 y * m 1 y + m 0 y * b 1 y +
-        m 0 y * m 1 y + covariance o 0 1 y) q +
-      dz (fun y => b 2 y * m 1 y + b 1 y * m 2 y + m 2 y * m 1 y + covariance o 2 1 y) q -
-      (meanLaplacian (m 1) q - m 1 q / radius q ^ 2) - radialDivergence 2 T q := by
-  have he : fluxDifference b m o 2 1 =
-      (fun y => b 2 y * m 1 y + b 1 y * m 2 y + m 2 y * m 1 y + covariance o 2 1 y) := by
-    funext y
-    unfold fluxDifference
-    ring
-  have he01 : fluxDifference b m o 0 1 =
-      (fun y => b 0 y * m 1 y + m 0 y * b 1 y + m 0 y * m 1 y + covariance o 0 1 y) := rfl
-  unfold Etheta
-  rw [he, he01]
-  ring
 
-theorem Ez_expanded (b m o : Components) (pm T : Scalar) (q : SpaceTime) :
-    Ez b m o pm T q = dt (m 2) q +
-      radialDivergence 1 (fun y => b 0 y * m 2 y + m 0 y * b 2 y +
-        m 0 y * m 2 y + covariance o 0 2 y) q +
-      dz (fun y => 2 * b 2 y * m 2 y + (m 2 y) ^ 2 + covariance o 2 2 y + pm y) q -
-      meanLaplacian (m 2) q - radialDivergence 1 T q := by
-  simp only [Ez, fluxDifference_diagonal]
-  rfl
 
-theorem gr_expanded (b m o : Components) (q : SpaceTime) :
-    gr b m o q = -(dt (m 0) q +
-      radialDivergence 1 (fun y => 2 * b 0 y * m 0 y + (m 0 y) ^ 2 + covariance o 0 0 y) q +
-      dz (fun y => b 0 y * m 2 y + b 2 y * m 0 y + m 0 y * m 2 y + covariance o 2 0 y) q -
-      (2 * b 1 q * m 1 q + (m 1 q) ^ 2 + covariance o 1 1 q) / radius q -
-      (meanLaplacian (m 0) q - m 0 q / radius q ^ 2)) := by
-  have he0 : fluxDifference b m o 0 0 =
-      (fun y => 2 * b 0 y * m 0 y + (m 0 y) ^ 2 + covariance o 0 0 y) :=
-    funext (fluxDifference_diagonal b m o 0)
-  have he2 : fluxDifference b m o 2 0 =
-      (fun y => b 0 y * m 2 y + b 2 y * m 0 y + m 0 y * m 2 y + covariance o 2 0 y) := by
-    funext y
-    unfold fluxDifference
-    ring
-  unfold gr
-  rw [he0, he2, fluxDifference_diagonal]
-  ring
 
 /-- The perturbation pressure is defined from its actual angular mean. -/
 noncomputable def meanPressure (p pb : Scalar) : Scalar := fun q => average p q - pb q
@@ -1023,11 +966,6 @@ noncomputable def meanPressure (p pb : Scalar) : Scalar := fun q => average p q 
 theorem meanPressure_smooth {p pb : Scalar} (hp : ContDiff ℝ ∞ p) (hpb : ContDiff ℝ ∞ pb) :
     ContDiff ℝ ∞ (meanPressure p pb) := (average_smooth hp).sub hpb
 
-theorem meanPressure_reconstruction (p pb : Scalar) :
-    average p = fun q => pb q + meanPressure p pb q := by
-  funext q
-  unfold meanPressure
-  ring
 
 theorem cylindricalDivergence_eq {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
     (q : SpaceTime) :
@@ -1086,48 +1024,6 @@ theorem average_cartesianResidual_eq {u : VelocityField} {p : PressureField}
   have hra : 0 < radius (angularShift q a) := by simpa only [radius_angularShift] using hr
   exact cartesianResidual_eq hrep hpull _ hra (hu _ hra) (hp _ hra) i
 
-/-- End-to-end mean balances for the actual Cartesian operators. Cartesian
-regularity is required only at positive-radius chart points. -/
-theorem exact_cartesian_mean_balances
-    {u ub : VelocityField} {P Pb : PressureField} {b m o : Components} {p pb pm : Scalar}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hm : ∀ i, ContDiff ℝ ∞ (m i))
-    (ho : ∀ i, ContDiff ℝ ∞ (o i)) (hp : ContDiff ℝ ∞ p)
-    (hpb : ContDiff ℝ ∞ pb) (hpm : ContDiff ℝ ∞ pm)
-    (hbi : ∀ i, AngularInvariant (b i)) (hmi : ∀ i, AngularInvariant (m i))
-    (hop : ∀ i, AngularPeriodic (o i)) (hpp : AngularPeriodic p) (hpbi : AngularInvariant pb)
-    (hz : ∀ i q, average (o i) q = 0) (hpavg : average p = fun q => pb q + pm q)
-    (hrep : Represents u (total b m o)) (hbrep : Represents ub b)
-    (hpull : CylindricalResidual.pressurePullback P = p)
-    (hbpull : CylindricalResidual.pressurePullback Pb = pb)
-    (hu : ∀ y, 0 < radius y → ContDiffAt ℝ 2 u (y.1, CylindricalResidual.chart y.2))
-    (hub : ∀ y, 0 < radius y → ContDiffAt ℝ 2 ub (y.1, CylindricalResidual.chart y.2))
-    (hP : ∀ y, 0 < radius y → DifferentiableAt ℝ P (y.1, CylindricalResidual.chart y.2))
-    (hPb : ∀ y, 0 < radius y → DifferentiableAt ℝ Pb (y.1, CylindricalResidual.chart y.2))
-    (hdiv : ∀ y, 0 < radius y → spatialDivergence u y.1 (CylindricalResidual.chart y.2) = 0)
-    (hbdiv : ∀ y, 0 < radius y → spatialDivergence ub y.1 (CylindricalResidual.chart y.2) = 0)
-    (Ttheta Tz : Scalar) (q : SpaceTime) (hr : 0 < radius q) :
-    (average (cartesianResidual u P 1) q - cartesianResidual ub Pb 1 q -
-      radialDivergence 2 Ttheta q = Etheta b m o Ttheta q) ∧
-    (average (cartesianResidual u P 2) q - cartesianResidual ub Pb 2 q -
-      radialDivergence 1 Tz q = Ez b m o pm Tz q) ∧
-    (average (cartesianResidual u P 0) q - cartesianResidual ub Pb 0 q = dr pm q - gr b m o q) := by
-  have hdc : ∀ y, 0 < radius y → divergence (total b m o) y = 0 := by
-    intro y hy
-    rw [← cartesianDivergence_eq (total_smooth hb hm ho) hrep y hy (hu y hy)]
-    exact hdiv y hy
-  have hdbc : ∀ y, 0 < radius y → divergence b y = 0 := by
-    intro y hy
-    rw [← cartesianDivergence_eq hb hbrep y hy (hub y hy)]
-    exact hbdiv y hy
-  have h := exact_mean_balances hb hm ho hp hpb hpm hbi hmi hop hpp hpbi hz hpavg
-    hdc hdbc Ttheta Tz q hr
-  rw [average_cartesianResidual_eq hrep hpull hu hP q hr 1,
-    average_cartesianResidual_eq hrep hpull hu hP q hr 2,
-    average_cartesianResidual_eq hrep hpull hu hP q hr 0,
-    cartesianResidual_eq hbrep hbpull q hr (hub q hr) (hPb q hr) 1,
-    cartesianResidual_eq hbrep hbpull q hr (hub q hr) (hPb q hr) 2,
-    cartesianResidual_eq hbrep hbpull q hr (hub q hr) (hPb q hr) 0]
-  exact h
 
 theorem average_invariant_of_periodic [CompleteSpace E] {f : SpaceTime → E}
     (hf : ContDiff ℝ ∞ f) (hp : AngularPeriodic f) : AngularInvariant (average f) := by
@@ -1146,20 +1042,7 @@ theorem average_invariant_of_periodic [CompleteSpace E] {f : SpaceTime → E}
   simpa only [angularShift_zero] using
     is_const_of_deriv_eq_zero (fun b => (hd b).differentiableAt) (fun b => (hd b).deriv) a 0
 
-theorem covariance_invariant {o : Components} (ho : ∀ i, ContDiff ℝ ∞ (o i))
-    (hop : ∀ i, AngularPeriodic (o i)) (i j : Fin 3) : AngularInvariant (covariance o i j) :=
-  average_invariant_of_periodic ((ho i).mul (ho j)) ((hop i).mul (hop j))
 
-/-- Substitution of (24) retains, rather than discards, its full base error. -/
-theorem retain_base_error {Rtheta Rz Rr Btheta Bz Br Ttheta Tz Etheta Ez Drp gr
-    ftheta fz fr : ℝ}
-    (hθ : Rtheta - Btheta - Ttheta = Etheta)
-    (hz : Rz - Bz - Tz = Ez) (hr : Rr - Br = Drp - gr)
-    (hbθ : Btheta = -Ttheta + ftheta) (hbz : Bz = -Tz + fz) (hbr : Br = fr) :
-    Rtheta = Etheta + ftheta ∧ Rz = Ez + fz ∧ Rr = Drp - gr + fr := by
-  constructor
-  · linarith
-  constructor <;> linarith
 
 end
 

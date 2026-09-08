@@ -98,48 +98,7 @@ theorem PrefixFields.highForce_decomposition (t : Icc (0 : ℝ) T) (x : Space) (
     F.meanForce_decomposition C hp hT Ct hCt pressure hc hB₁ hA hB, he]
   abel
 
-include hc hB₁ hA hB in
-theorem PrefixFields.knownForce_term_path :
-    (F.knownForce C (by omega) hT Ct hCt pressure).path =
-      -(∑ q ∈ knownTermIndices p, (F.termField C (by omega) hT Ct hCt pressure
-        q.1 q.2.1 q.2.2).path) := by
-  let G := Field.finsetSum (knownTermIndices p) _
-    (fun q => F.termField C (by omega) hT Ct hCt pressure q.1 q.2.1 q.2.2)
-  change (F.knownForce C (by omega) hT Ct hCt pressure).path = G.neg.path
-  apply Field.path_eq_of_raw_eq
-  intro t x θ
-  simpa only [Pi.neg_apply, Finset.sum_apply] using
-    (F.knownForce_decomposition hp hc hB₁ hA hB t x θ).symm
 
-include hc hB₁ hA hB in
-theorem PrefixFields.meanForce_term_path :
-    (F.meanForce C (by omega) hT Ct hCt pressure).path =
-      -(∑ q ∈ knownTermIndices p, (F.meanTermField C (by omega) hT Ct hCt pressure
-        q.1 q.2.1 q.2.2).path) := by
-  let G := Field.finsetSum (knownTermIndices p) _
-    (fun q => F.meanTermField C (by omega) hT Ct hCt pressure q.1 q.2.1 q.2.2)
-  change (F.meanForce C (by omega) hT Ct hCt pressure).path = G.neg.path
-  apply Field.path_eq_of_raw_eq
-  intro t x θ
-  simpa only [Pi.neg_apply, Finset.sum_apply] using
-    (F.meanForce_decomposition C hp hT Ct hCt pressure hc hB₁ hA hB t x θ).symm
 
-include hc hB₁ hA hB in
-theorem PrefixFields.highForce_term_path (newMean : Field P T (meanResult O p a).1) :
-    (F.highForce C hp hT Ct hCt pressure newMean).path =
-      -(∑ q ∈ knownTermIndices p, (F.highTermField C (by omega) hT Ct hCt pressure
-        q.1 q.2.1 q.2.2).path) -
-      (SpatialJetField.fastAdvection C.normal (SpatialJetField.ofField O.interval newMean)
-        (SpatialJetField.ofField O.interval (F.high 1 (by omega)))).path := by
-  let G := Field.finsetSum (knownTermIndices p) _
-    (fun q => F.highTermField C (by omega) hT Ct hCt pressure q.1 q.2.1 q.2.2)
-  let A := SpatialJetField.fastAdvection C.normal (SpatialJetField.ofField O.interval newMean)
-    (SpatialJetField.ofField O.interval (F.high 1 (by omega)))
-  rw [sub_eq_add_neg]
-  change (F.highForce C hp hT Ct hCt pressure newMean).path = (G.neg.sub A).path
-  apply Field.path_eq_of_raw_eq
-  intro t x θ
-  simpa only [Pi.sub_apply, Pi.neg_apply, Finset.sum_apply] using
-    (F.highForce_decomposition C hp hT Ct hCt pressure hc hB₁ hA hB t x θ).symm
 
 end EulerPacketCylinderField

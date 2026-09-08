@@ -59,11 +59,6 @@ private theorem jetField_field_aux (n : ℕ) :
     (jetField n A).field x = iteratedFDeriv ℝ n A.field x :=
   jetField_field_aux n V A x
 
-theorem jetField_toLp {V : Type u} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (A : SmoothL2Field V) (n : ℕ) : (jetField n A).toLp = A.jetLp n := by
-  apply Lp.ext
-  filter_upwards [(jetField n A).toLp_ae, A.jetLp_ae n] with x h₁ h₂
-  exact h₁.trans ((jetField_field A n x).trans h₂.symm)
 
 variable {K : Type v} [TopologicalSpace K]
 

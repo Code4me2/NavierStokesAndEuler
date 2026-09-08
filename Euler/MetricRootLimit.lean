@@ -69,57 +69,5 @@ theorem root_integral_limit (Q A F : ℝ → ℝ) (s t : ℝ) (hst : s ≤ t)
   exact le_of_tendsto_of_tendsto' ((regularized_root_tendsto (Q t)).sub
     (regularized_root_tendsto (Q s))) hii (fun n => hineq (cutoffScale n) (cutoffScale_pos n))
 
-/-- The unregularized finite-family energy obeys an integral inequality even when the norm vanishes. -/
-theorem family_energy_integral_bound {ι H : Type*} [Fintype ι]
-    [NormedAddCommGroup H] [InnerProductSpace ℝ H]
-    (K : ℝ → H →L[ℝ] H) (e : ι → ℝ → H)
-    (s t c ν : ℝ) (K' : ℝ → H →L[ℝ] H)
-    (e' transport pressure forcing lap : ι → ℝ → H) (B C : ℝ → ℝ)
-    (hst : s ≤ t) (hc : 0 < c) (hν : 0 ≤ ν)
-    (hKc : ContinuousOn K (Icc s t)) (hec : ∀ i, ContinuousOn (e i) (Icc s t))
-    (hB : ∀ u ∈ Ioo s t, 0 ≤ B u) (hC : ∀ u ∈ Ioo s t, 0 ≤ C u)
-    (hcoercive : ∀ u ∈ Icc s t, ∀ v, c ^ 2 * ‖v‖ ^ 2 ≤ ⟪K u v, v⟫_ℝ)
-    (hKd : ∀ u ∈ Ioo s t, HasDerivAt K (K' u) u)
-    (hed : ∀ i u, u ∈ Ioo s t → HasDerivAt (e i) (e' i u) u)
-    (hsym : ∀ u ∈ Ioo s t, ∀ v w, ⟪K u v, w⟫_ℝ = ⟪v, K u w⟫_ℝ)
-    (heq : ∀ i u, u ∈ Ioo s t → e' i u + transport i u + pressure i u =
-      forcing i u + ν • lap i u)
-    (hp : ∀ i u, u ∈ Ioo s t → ⟪K u (e i u), pressure i u⟫_ℝ = 0)
-    (ht : ∀ i u, u ∈ Ioo s t → |⟪K u (e i u), transport i u⟫_ℝ| ≤ B u * ‖e i u‖ ^ 2)
-    (hheat : ∀ i u, u ∈ Ioo s t → ⟪K u (e i u), lap i u⟫_ℝ ≤ C u * ‖e i u‖ ^ 2)
-    (hAint : IntegrableOn (fun u => (‖K' u‖ + 2 * B u + 2 * ν * C u) / (2 * c ^ 2)) (Icc s t))
-    (hFint : IntegrableOn (fun u => (‖K u‖ / c) * familyNorm (fun i => forcing i u)) (Icc s t)) :
-    familyMetricNorm (K t) (fun i => e i t) - familyMetricNorm (K s) (fun i => e i s) ≤
-      ∫ u in s..t, (((‖K' u‖ + 2 * B u + 2 * ν * C u) / (2 * c ^ 2)) *
-        familyMetricNorm (K u) (fun i => e i u) + (‖K u‖ / c) * familyNorm (fun i => forcing i u)) := by
-  let Q := fun u => familyEnergy (K u) (fun i => e i u)
-  let A := fun u => (‖K' u‖ + 2 * B u + 2 * ν * C u) / (2 * c ^ 2)
-  let F := fun u => (‖K u‖ / c) * familyNorm (fun i => forcing i u)
-  have hQ : ContinuousOn Q (Icc s t) :=
-    continuousOn_finsetSum Finset.univ (fun i _ => (hKc.clm_apply (hec i)).inner (hec i))
-  have hQ0 (u : ℝ) (hu : u ∈ Icc s t) : 0 ≤ Q u := by
-    have h := familyEnergy_coercive (K u) (fun i => e i u) c (hcoercive u hu)
-    exact (mul_nonneg (sq_nonneg c) (familySquaredNorm_nonneg _)).trans h
-  apply root_integral_limit Q A F s t hst hQ hQ0 hAint hFint
-  intro δ hδ
-  have hrootc : ContinuousOn (fun u => √(Q u + δ ^ 2)) (Icc s t) :=
-    (hQ.add continuousOn_const).sqrt
-  have hφint : IntegrableOn (fun u => A u * √(Q u + δ ^ 2) + F u) (Icc s t) :=
-    (hAint.mul_continuousOn hrootc isCompact_Icc).add hFint
-  refine intervalIntegral.sub_le_integral_of_hasDeriv_right_of_le
-    (g' := fun u => deriv (fun v => √(Q v + δ ^ 2)) u) hst hrootc ?_ hφint ?_
-  · intro u hu
-    have hd := family_energy_hasDerivAt K e u ν (K' u) (fun i => e' i u)
-      (fun i => transport i u) (fun i => pressure i u) (fun i => forcing i u) (fun i => lap i u)
-      (hKd u hu) (fun i => hed i u hu) (hsym u hu) (fun i => heq i u hu) (fun i => hp i u hu)
-    have hq := hQ0 u ⟨hu.1.le, hu.2.le⟩
-    have hr := HasDerivAt.sqrt (hd.add_const (δ ^ 2)) (by nlinarith : Q u + δ ^ 2 ≠ 0)
-    exact hr.differentiableAt.hasDerivAt.hasDerivWithinAt
-  · intro u hu
-    exact family_regularized_energy_evolution K e u δ c (B u) (C u) ν (K' u)
-      (fun i => e' i u) (fun i => transport i u) (fun i => pressure i u)
-      (fun i => forcing i u) (fun i => lap i u) hδ hc (hB u hu) (hC u hu) hν
-      (hcoercive u ⟨hu.1.le, hu.2.le⟩) (hKd u hu) (fun i => hed i u hu) (hsym u hu)
-      (fun i => heq i u hu) (fun i => hp i u hu) (fun i => ht i u hu) (fun i => hheat i u hu)
 
 end EulerMetricRootLimit

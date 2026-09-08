@@ -58,10 +58,5 @@ theorem graph_norm_sq_le (w : Lp Vector3 2 (volume : Measure Vector3))
     ((memLp_congr_ae hu).1 (Lp.memLp u))
     ((memLp_congr_ae hv).1 (Lp.memLp v)) θ hθ).2
 
-theorem graphRealization_norm_sq_le :
-    ‖graphRealization P f hf u v hu hv θ hθ‖^2 ≤
-      (2/P)*‖u‖^2+(2*P)*‖v‖^2 :=
-  graph_norm_sq_le P f hf u v hu hv θ hθ _
-    (graphRealization_ae P f hf u v hu hv θ hθ)
 
 end EulerCylinderGraphTrace

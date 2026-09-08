@@ -175,36 +175,5 @@ theorem transverseCoordinates_gevrey
   convert hout using 1
   rfl
 
-include hd hQ hQ₁ hH hRc hC₀ hC₁ hCH hbQ hbQ₁ hbH in
-/-- The actual physical transverse velocity has the same factorial shift,
-with only the fixed coefficient multiplication constant. -/
-theorem transverseVelocity_gevrey
-    (m : P → Icc (0 : ℝ) T → E)
-    (hTangent : ∀ y t v, ⟪m y t, Q y t v⟫_ℝ = 0)
-    (hRange : ∀ y t η, ⟪m y t, η⟫_ℝ = 0 → ∃ v : U, Q y t v = η)
-    (R : ℝ) (hR : 2 * solveCost T C₀ C₁ CH c * (Rc+1) ≤ R)
-    (f : P → TimeLp T E) (hf : ContDiff ℝ ∞ f) (d : ℕ)
-    (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => timeMultiplier T hT (Q y)
-      (coordinateDerivative T hT (Q y) (Q₁ y) c hc (hLower y)
-        (transverseSolver T hT (m y) (H y) K hK (hPotential y) hsmall (f y) : TimeLp T E))) x‖ ≤
-      (3*C₀) * majorant R (d+1) n := by
-  let v := fun y => coordinateDerivative T hT (Q y) (Q₁ y) c hc (hLower y)
-    (transverseSolver T hT (m y) (H y) K hK (hPotential y) hsmall (f y) : TimeLp T E)
-  have hv : ContDiff ℝ ∞ v := contDiff_transverse_coordinates T hT Q Q₁ H c hc hLower hd
-    K hK hPotential hsmall m hTangent hRange hQ hQ₁ hH f hf
-  have hb := transverseCoordinates_gevrey T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
-    hQ hQ₁ hH Rc C₀ C₁ CH hRc hC₀ hC₁ hCH hbQ hbQ₁ hbH m hTangent hRange R hR f hf d hbf
-  have hM := solveCost_one_le T C₀ C₁ CH c hT hC₀ hC₁ hCH
-  have hR0 : 0 ≤ R := by nlinarith
-  have hRcR : Rc ≤ R := by nlinarith
-  have hbQR (j : ℕ) (y : P) : ‖iteratedFDeriv ℝ j Q y‖ ≤ C₀*majorant R 0 j :=
-    (hbQ j y).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 j) hC₀)
-  have h := clm_apply_bound (fun y => timeMultiplier T hT (Q y)) v
-    (contDiff_timeMultiplier T hT Q hQ) hv R C₀ 1 hR0 hC₀ zero_le_one 0 (d+1)
-    (timeMultiplier_bound T hT Q hQ R C₀ hR0 hC₀ 0 hbQR)
-    (by simpa only [one_mul] using hb) n x
-  simpa only [mul_one, Nat.zero_add] using h
 
 end EulerTransverseGevreyInverse

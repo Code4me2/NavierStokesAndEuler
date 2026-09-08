@@ -82,45 +82,8 @@ theorem heatCommutatorKernel_bound (i j : Fin 3) {φ : Space → ℝ} {L R : ℝ
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- Every heat commutator section acts by an integrable scalar product on
-`L⁴` data. -/
-theorem heatKernel_commutator_section_integrable (i j : Fin 3)
-    {φ : Space → ℝ} {r : Space → E} {L R : ℝ}
-    (hR : 0 < R) (hφm : Measurable φ) (hφ : ∀ x, φ x ∈ Icc (0 : ℝ) 1)
-    (hLip : ∀ x y, |φ x - φ y| ≤ (L / R) * ‖x - y‖)
-    (hr : MemLp r 4 volume) (x : Space) :
-    Integrable (fun y => heatCommutatorKernel i j φ x y • r y) volume := by
-  exact (PairedKernelBound.section_integrable_and_integral_norm_le
-    (heatCommutatorKernel_measurable i j hφm)
-    ((radialCommutatorKernel_memLp hR).const_mul (heatKernelTimeConstant * max (2 * L) 1))
-    hr (heatCommutatorKernel_bound i j hR hφ hLip) x).1
 
-/-- The paired heat kernel is integrable on the product of spatial domains. -/
-theorem heatKernel_commutator_product_integrable (i j : Fin 3)
-    {φ g : Space → ℝ} {r : Space → E} {L R : ℝ}
-    (hR : 0 < R) (hφm : Measurable φ) (hφ : ∀ x, φ x ∈ Icc (0 : ℝ) 1)
-    (hLip : ∀ x y, |φ x - φ y| ≤ (L / R) * ‖x - y‖)
-    (hg : Integrable g volume) (hr : MemLp r 4 volume) :
-    Integrable (fun p : Space × Space =>
-      g p.1 • (heatCommutatorKernel i j φ p.1 p.2 • r p.2))
-      ((volume : Measure Space).prod volume) := by
-  exact PairedKernelBound.integrable_paired_kernel
-    (heatCommutatorKernel_measurable i j hφm)
-    ((radialCommutatorKernel_memLp hR).const_mul (heatKernelTimeConstant * max (2 * L) 1))
-    hr hg (heatCommutatorKernel_bound i j hR hφ hLip)
 
-/-- The outer pairing is genuinely integrable for real `L¹` and vector-valued
-`L⁴` data. -/
-theorem heatKernel_commutator_pair_integrable (i j : Fin 3)
-    {φ g : Space → ℝ} {r : Space → E} {L R : ℝ}
-    (hR : 0 < R) (hφm : Measurable φ) (hφ : ∀ x, φ x ∈ Icc (0 : ℝ) 1)
-    (hLip : ∀ x y, |φ x - φ y| ≤ (L / R) * ‖x - y‖)
-    (hg : Integrable g volume) (hr : MemLp r 4 volume) :
-    Integrable (fun x => g x • ∫ y, heatCommutatorKernel i j φ x y • r y) volume := by
-  exact PairedKernelBound.integrable_pairing
-    (heatCommutatorKernel_measurable i j hφm)
-    ((radialCommutatorKernel_memLp hR).const_mul (heatKernelTimeConstant * max (2 * L) 1))
-    hr hg (heatCommutatorKernel_bound i j hR hφ hLip)
 
 /-- The actual heat commutator satisfies the required paired estimate, with
 the precise `R^(-3/4)` decay and a universal positive constant. -/

@@ -31,15 +31,7 @@ def forward (t : ℝ) : LiftDomain P → LiftDomain P :=
 def backward (t : ℝ) : LiftDomain P → LiftDomain P :=
   EulerCylinderPeriodicFlow.flow P (flowData T hT A) t 0
 
-include hA in
-theorem forward_cover (t : ℝ) (z : LiftTangent) :
-    forward P T hT A t (coveringMap P z)=coveringMap P ((flowData T hT A).forward t z) :=
-  EulerCylinderPeriodicFlow.flow_cover P (flowData T hT A) (velocity_deck P T hT A hA) 0 t z
 
-include hA in
-theorem backward_cover (t : ℝ) (z : LiftTangent) :
-    backward P T hT A t (coveringMap P z)=coveringMap P ((flowData T hT A).backward t z) :=
-  EulerCylinderPeriodicFlow.flow_cover P (flowData T hT A) (velocity_deck P T hT A hA) t 0 z
 
 include hA in
 theorem forward_joint_continuous : Continuous (Function.uncurry (forward P T hT A)) :=

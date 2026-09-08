@@ -27,15 +27,6 @@ def materialAccelerationJet (t : Icc (0 : ℝ) T) (q : LiftDomain P) (n : ℕ) :
     LiftTangent [×n]→L[ℝ] LiftTangent :=
   jetSeries P (materialAcceleration T hT A A₁ t) q n
 
-include hA hA₁ in
-theorem materialAccelerationJet_local (t : Icc (0 : ℝ) T) (q : LiftDomain P) (n : ℕ) :
-    materialAccelerationJet P T hT A A₁ t q n =
-      iteratedFDeriv ℝ n (EulerMetricTransport.localFieldLift P
-        (descend P (materialAcceleration T hT A A₁ t)) q) 0 := by
-  apply jetSeries_eq_local
-  exact comp_deck P (accelerationField T A A₁ t)
-    (accelerationField_deck P T A A₁ hA hA₁ t) ((flowData T hT A).forward t)
-    (EulerCylinderPeriodicFlow.flow_deck P (flowData T hT A) (velocity_deck P T hT A hA) 0 t)
 
 include hA hA₁ hdiv in
 theorem materialAccelerationJet_memLp_and_bound (B R C S C₁ S₁ : ℝ)

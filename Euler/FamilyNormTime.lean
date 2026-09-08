@@ -42,21 +42,5 @@ theorem familyNormTime_tendsto (T : ℝ) (u : ℕ → TimeLp T (I → H)) (v : T
     Filter.Tendsto (fun n => familyNormTime T (u n)) Filter.atTop (𝓝 (familyNormTime T v)) :=
   (familyNorm_lipschitz.continuous_compLp (by simp [familyNorm, familySquaredNorm])).continuousAt.tendsto.comp hu
 
-/-- Weighted time integrals of actual family forcing norms pass through strong L² approximations. -/
-theorem integral_familyNorm_tendsto (T : ℝ) (a : TimeLp T ℝ)
-    (u : ℕ → TimeLp T (I → H)) (v : TimeLp T (I → H))
-    (hu : Filter.Tendsto u Filter.atTop (𝓝 v)) :
-    Filter.Tendsto (fun n => ∫ t, a t * familyNorm (u n t) ∂timeMeasure T) Filter.atTop
-      (𝓝 (∫ t, a t * familyNorm (v t) ∂timeMeasure T)) := by
-  have he (f : TimeLp T (I → H)) : ⟪a, familyNormTime T f⟫_ℝ =
-      ∫ t, a t * familyNorm (f t) ∂timeMeasure T := by
-    rw [L2.inner_def]
-    apply integral_congr_ae
-    filter_upwards [familyNormTime_ae T f] with t ht
-    rw [ht]
-    simp [RCLike.inner_apply, mul_comm]
-  have h : Filter.Tendsto (fun n => ⟪a, familyNormTime T (u n)⟫_ℝ) Filter.atTop (𝓝 ⟪a, familyNormTime T v⟫_ℝ) :=
-    Filter.Tendsto.inner tendsto_const_nhds (familyNormTime_tendsto T u v hu)
-  simpa only [he] using h
 
 end EulerFamilyNormTime

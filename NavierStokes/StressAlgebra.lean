@@ -267,78 +267,11 @@ theorem axial_integrated_lag
   unfold axialPrimitive
   field_simp; ring
 
-/-- The source written with logarithmic derivatives agrees with `H S_q`.
-Its use for actual logarithms requires the usual nonvanishing profile conditions. -/
-theorem angular_source_logarithmic_form
-    (h η x W U H Hx Hη : ℝ) (hH : H ≠ 0) :
-    H * (-W * (x * Hx / H) - h * (1 - 2 * η * U) -
-      (axialExponent h * η + coordinateFactor η * U) * (Hη / H)) =
-      angularSource h η x W U H Hx Hη := by
-  unfold angularSource
-  field_simp
 
-/-- Multiplying (6)'s angular lag equation by its integrating factor gives the
-primitive equation. This equivalence uses genuine derivatives of `H` and `Q`. -/
-theorem angular_lag_primitive_iff
-    (H Q : ℝ → ℝ) (x Hx Qx Sq : ℝ)
-    (hH : HasDerivAt H Hx x) (hQ : HasDerivAt Q Qx x) (hHne : H x ≠ 0) :
-    HasDerivAt (fun y => y * H y * Q y) (H x * Sq) x ↔
-      x * Qx + (1 + x * Hx / H x) * Q x = Sq := by
-  have hd := ((hasDerivAt_id x).mul hH).mul hQ
-  have hcalc : (1 * H x + x * Hx) * Q x + x * H x * Qx =
-      H x * (x * Qx + (1 + x * Hx / H x) * Q x) := by
-    field_simp; ring
-  constructor
-  · intro hp
-    have heq := hd.unique hp
-    simp only [Pi.mul_apply, id_eq] at heq
-    rw [hcalc] at heq
-    exact (mul_left_cancel₀ hHne) heq
-  · intro hlag
-    apply hd.congr_deriv
-    simp only [Pi.mul_apply, id_eq]
-    rw [hcalc, hlag]
 
-/-- The axial lag equation's integrating factor is `x`. -/
-theorem axial_lag_primitive_iff
-    (N : ℝ → ℝ) (x Nx Sn : ℝ) (hN : HasDerivAt N Nx x) :
-    HasDerivAt (fun y => y * N y) Sn x ↔ x * Nx + N x = Sn := by
-  have hd := (hasDerivAt_id x).mul hN
-  constructor
-  · intro hp
-    simpa only [Pi.mul_apply, Pi.sub_apply, id_eq, one_mul, add_comm] using hd.unique hp
-  · intro hlag
-    apply hd.congr_deriv
-    simpa only [Pi.mul_apply, Pi.sub_apply, id_eq, one_mul, add_comm] using hlag
 
-/-- The angular stress-free substitution from (7) yields exactly the radial
-second-order expression in (8). Here `φx` and `φxx` denote radial derivatives. -/
-theorem stressFree_angular_lag_algebra
-    (x L φ φx φxx : ℝ) (hφ : φ ≠ 0) :
-    x * (-2 * L * (φxx * φ - φx ^ 2) / φ ^ 2) +
-      (2 + x * φx / φ) * (-2 * L * φx / φ) =
-      -2 * L * (x * φxx + 2 * φx) / φ := by
-  field_simp; ring
 
-/-- The axial stress-free substitution from (7) yields its expression in (8). -/
-theorem stressFree_axial_lag_algebra (x L Ux Uxx : ℝ) :
-    x * (-2 * L * Uxx) + (-2 * L * Ux) = -2 * L * (x * Uxx + Ux) := by
-  ring
 
-/-- The axial coefficient of `F (p_s - s)` in (7), with the positive viscous
-primitive `2 x U_x / R` made explicit. Here `R` is the radial factor `sqrt(2x)`. -/
-theorem axial_stress_coefficient
-    (x R E L Ns Ux : ℝ) (hR : R ≠ 0) (hE : E ≠ 0) (hL : L ≠ 0) :
-    (E / R) * (x * Ns / (L * E) + 2 * x * Ux / E) =
-      (x / R) * (Ns / L + 2 * Ux) := by
-  field_simp
 
-/-- The angular coefficient of (7), with its radial viscous primitive exposed.
-This verifies the sign of the subtraction of `a = 1 - 2 dot(E)/E`. -/
-theorem angular_stress_coefficient
-    (x R E L Qs Ex : ℝ) (hR : R ≠ 0) (hE : E ≠ 0) (hL : L ≠ 0) :
-    (E / R) * (x * Qs / L - (1 - 2 * x * Ex / E)) =
-      (E / R) * (x * Qs / L) + (2 * x * Ex - E) / R := by
-  field_simp; ring
 
 end NavierStokes.StressAlgebra

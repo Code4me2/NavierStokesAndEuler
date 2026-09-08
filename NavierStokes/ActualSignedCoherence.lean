@@ -74,9 +74,6 @@ theorem radiusWeight_eq (n m : ℕ) :
 theorem velocity_pos (n m : ℕ) : 0 < bandVelocityScale h n m :=
   Real.rpow_pos_of_pos (div_pos (ChartScales.Q_pos n) (ChartScales.Q_pos m)) _
 
-theorem coefficientWeight_pos (n m : ℕ) : 0 < coefficientWeight n m :=
-  PhysicalSignedWave.coefficientScale_pos (ChartScales.epsilon_pos h n)
-    (ChartScales.epsilon_pos h m) (velocity_pos n m)
 
 theorem carrier_pos (n : ℕ) : 0 < (ChartScales.carrier h n : ℝ) := by
   exact Scaling.carrier_frequency_pos (ChartScales.epsilon_pos h n)
@@ -368,18 +365,6 @@ theorem raw_amplitude_of_request (l : SignedLabel B N0) (u : CorrectionState.Sta
         (ActualSignedStageControls.fundamental l copy) l.2 m (chart n m k x))
   rw [signedVector_of_request l u n m k hi copy x hR, map_smul]
 
-theorem raw_amplitude_transport (l : SignedLabel B N0) (u : CorrectionState.State Point)
-    (H : MeanStateRegularity.PrimitiveData ActualInitialization.geometry.region
-      ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b (commonContext B) u)
-    (hfixed : (VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge
-      (commonContext B) u).pressure = u.pressure)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (HS : PhysicalResidualNaturality.StateOn (PhysicalMeanDomain.slowDomain (ActualInitialCoherence.overlap n m))
-      (bandChartEquiv h n m k) (bandVelocityScale h n m) (bandScale n m) u u n m)
-    (copy : TorusInverse.Frequency) (x : FullPoint) (hx : x.1.2.1 ∈ ActualInitialCoherence.overlap n m) :
-    (copies l u).amplitude n copy x =
-      bandVelocityScale h n m • (copies l u).amplitude m copy (chart n m k x) :=
-  raw_amplitude_of_request l u n m k hi copy x (fullRequest_transport u H hfixed n m k hi HS x hx)
 
 theorem pressure_factor (n m : ℕ) :
     (clockWeight n m * bandVelocityScale h n m / (phaseWeight n m * bandScale n m)) *

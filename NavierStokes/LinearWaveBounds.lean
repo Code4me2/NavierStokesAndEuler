@@ -607,21 +607,6 @@ theorem principal_add_curl (h : InputBounds s P α κ d a) {β : ℝ}
     simp [WaveCoefficients.principal, WaveCoefficients.principalVelocity, LinearWaveResidual.principal,
       WaveCoefficients.addAmplitude, LinearWaveResidual.shear, Pi.add_apply] <;> ring
 
-/-- After the actual principal equation is solved for the tangent coefficient,
-the corrected coefficient's remaining source has the claimed class. -/
-theorem corrected_good_coefficient (h : InputBounds s P α κ d a) (hκ : κ ≤ 1 / 2)
-    {f source : ℕ → D → ComplexVector}
-    (hf : ∀ i, WaveClass s P (α + 1 / 2 - κ) (fun n x => f n x i))
-    (hsolve : ∀ n x, x ∈ s.domain → a.principal s d n x = -source n x) :
-    WaveClass s P (α + 1 / 2 - 3 * κ) (fun n x =>
-      (a.addAmplitude f).principal s d n x + (a.addAmplitude f).remainder s d n x + source n x) := by
-  have hrem := (h.add_curl_amplitude hκ hf).remainder_class
-  have hp := h.curl_principal_gain hf
-  apply class_congr (hp.add hrem)
-  intro n x hx
-  dsimp only
-  rw [h.principal_add_curl hf n hx, hsolve n x hx]
-  abel
 
 end InputBounds
 
@@ -814,19 +799,6 @@ theorem harmonicResidual_eq_good_add_excluded {s : StripData D}
       source n x i * carrier (a.frequency n) (a.phase n) x = _
   rw [← add_mul, hei]
 
-theorem linear_wave_bound_with_excluded_error {s : StripData D}
-    {P : ℕ → D → ℝ} {α κ : ℝ} {d : GraphDirections D} {a : WaveCoefficients D}
-    (h : InputBounds s P α κ d a) (hκ : κ ≤ 1 / 2)
-    {ψ : ℕ → D → ℝ} (hψ : UnweightedClass s 0 ψ) {f source : ℕ → D → ComplexVector}
-    (hf : ∀ i, WaveClass s P (α + 1 / 2 - κ) (fun n x => f n x i))
-    (hsolve : ∀ n x, x ∈ s.domain → a.principal s d n x = -source n x) :
-    WaveClass s P (α + 1 / 2 - 3 * κ) (a.goodCoefficient s d ψ f) ∧
-      ∀ n x, x ∈ s.domain →
-        ((a.withCutoff ψ).addAmplitude f).principal s d n x +
-            ((a.withCutoff ψ).addAmplitude f).remainder s d n x + source n x =
-          a.goodCoefficient s d ψ f n x + excludedSlotError d ψ a.amplitude source n x :=
-  ⟨h.goodCoefficient_class hκ hψ hf,
-    fun n x hx => corrected_coefficient_eq_good_add_excluded h hψ hf n hx (hsolve n x hx)⟩
 
 /-- The complete exact identity and good class for the constructed curl
 coefficient. Every estimate on the correction is obtained from primitive jets. -/
@@ -877,92 +849,7 @@ theorem excludedSlotError_all_gains {s : StripData D}
   rw [excludedSlotError_eq_gaussianError g d hfast]
   exact g.error_all_gains edges scales ha hf hc hP N
 
-/-- All actual stripped jets of the retained error decay to arbitrary order,
-uniformly including approach to the flat spatial support edges. -/
-theorem excludedSlotError_stripped_bound {s : StripData D}
-    (g : GaussianTailFlat.SlotFamily s) (d : GraphDirections D)
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {a source : ℕ → D → ComplexVector}
-    (ha : WaveClass s P α a) (hf : WaveClass s P α source) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (m : ℕ) (N : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (excludedSlotError d g.cutoff a source n) x‖ ≤
-        C * ChartScales.Q n ^ N := by
-  rw [excludedSlotError_eq_gaussianError g d hfast]
-  exact g.error_stripped_bound edges scales ha hf hc hP m N
 
-/-- Proposition 9.3 at the coefficient level: the actual harmonic residual
-has the proved good class plus an explicitly proved all-order flat error. -/
-theorem constructed_linear_wave_with_flat_error {s : StripData D}
-    {P : ℕ → D → ℝ} {α κ : ℝ} {d : GraphDirections D} {a : WaveCoefficients D}
-    (h : InputBounds s P α κ d a) (hκ : κ ≤ 1 / 2)
-    (g : GaussianTailFlat.SlotFamily s)
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    {source : ℕ → D → ComplexVector} (hsource : WaveClass s P α source)
-    {c : ℝ} (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    {R : D → ℝ} (hR : a.radius = fun _ => R)
-    (hN : PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain s) (a.normal s d))
-    {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖a.normal s d n x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖a.normal s d n x‖ ≤ M)
-    (hK : BandBound s (1 / 2) (fun n => 1 / a.frequency n))
-    (hsolve : ∀ n x, x ∈ s.domain → a.principal s d n x = -source n x)
-    (hg : ExactConditions s d (a.corrected s d g.cutoff)) :
-    WaveClass s P (α + 1 / 2 - 3 * κ) (a.constructedGood s d g.cutoff) ∧
-      (∀ N : ℝ, UnweightedClass s N (excludedSlotError d g.cutoff a.amplitude source)) ∧
-      ∀ n x, x ∈ s.domain →
-        (a.corrected s d g.cutoff).harmonicResidual s d n x +
-            (fun i => source n x i * carrier (a.frequency n) (a.phase n) x) =
-          (fun i => (a.constructedGood s d g.cutoff n x i +
-              excludedSlotError d g.cutoff a.amplitude source n x i) *
-            carrier (a.frequency n) (a.phase n) x) := by
-  obtain ⟨hgood, hexact⟩ := constructed_linear_wave_with_excluded h hκ g.cutoff_memClass
-    hR hN hb hlower hupper hK hsolve hg
-  exact ⟨hgood, fun N => excludedSlotError_all_gains g d hfast edges scales
-    (component_classes h.amplitude) hsource hc hP N, hexact⟩
 
-open PhysicalGraphBounds in
-/-- The retained error remains flat after multiplication by the actual
-rounded harmonic carrier and restriction to the physical graph. -/
-theorem excludedSlotError_carrier_physical_bound {s : StripData LiftPoint}
-    (g : GaussianTailFlat.SlotFamily s) (d : GraphDirections LiftPoint)
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    {P : ℕ → LiftPoint → ℝ} {α c : ℝ} {a source : ℕ → LiftPoint → ComplexVector}
-    (ha : WaveClass s P α a) (hf : WaveClass s P α source) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (ha_smooth : ∀ n, ContDiffOn ℝ ∞ (a n) {x | g.coordinate n x ∈ Ioo 0 1})
-    (hf_smooth : ∀ n, ContDiff ℝ ∞ (source n))
-    {h rLower rUpper B e H : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (hrLower : 0 < rLower)
-    (hB : 1 ≤ B) (he : 0 ≤ e) (hH : 0 ≤ H) (i : Fin 3) (m : ℕ) (N : ℝ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ, 4 ≤ n → ∀ p : ProblemStatement.SpaceTime,
-      scaledRadial n p ∈ annulus rLower rUpper → |p.1| ≤ 1 → physicalLift h n p ∈ s.domain →
-      ∀ q : ℝ, 0 < q → q / 2 ≤ ChartScales.Q n → ChartScales.Q n ≤ 2 * q →
-      ∀ (Φ : LiftPoint → ℝ) (j : ℤ), ContDiff ℝ ∞ Φ → |(j : ℝ)| ≤ H →
-      (∀ k ≤ m, ‖iteratedFDeriv ℝ k Φ (physicalLift h n p)‖ ≤
-        B * ChartScales.S n ^ e * ChartScales.Q n ^ (-1 : ℝ)) →
-      ‖iteratedFDeriv ℝ m
-        ((fun y => excludedSlotError d g.cutoff a source n y i *
-            character ((ChartScales.carrier h n : ℝ) * (j : ℝ)) (Φ y)) ∘
-          physicalLift h n) p‖ ≤ C * q ^ N := by
-  have hai (n : ℕ) : ContDiffOn ℝ ∞ (fun x => a n x i) {x | g.coordinate n x ∈ Ioo 0 1} :=
-    (ContinuousLinearMap.proj i : ComplexVector →L[ℝ] ℂ).contDiff.comp_contDiffOn (ha_smooth n)
-  have hfi (n : ℕ) : ContDiff ℝ ∞ (fun x => source n x i) :=
-    (ContinuousLinearMap.proj i : ComplexVector →L[ℝ] ℂ).contDiff.comp (hf_smooth n)
-  have herr : (fun n x => excludedSlotError d g.cutoff a source n x i) =
-      g.error (fun n x => a n x i) (fun n x => source n x i) := by
-    funext n x
-    rw [excludedSlotError_eq_gaussianError g d hfast]
-    rfl
-  have hb := g.error_carrier_physical_bound edges scales
-    (CurlClassBounds.class_component ha i) (CurlClassBounds.class_component hf i) hc hP hai hfi
-    (b := rUpper) hh hh1 hrLower hB he hH m N
-  simpa only [← herr] using hb
 
 end NavierStokes.LinearWaveBounds

@@ -46,22 +46,5 @@ theorem weakHarmonicSmallBallConstant_nonneg : 0 ≤ weakHarmonicSmallBallConsta
   unfold weakHarmonicSmallBallConstant
   exact mul_nonneg (by positivity) harmonicQuarterBallConstant_nonneg
 
-/-- Source localization for weakly harmonic fields: the radius enters with the genuine power 3. -/
-theorem weakHarmonic_smallBall_energy (u : L2)
-    (hu : WeakHarmonicOn (Metric.ball (0 : Space) 1) u)
-    (r : ℝ) (hr : 0 ≤ r) (hrquarter : r ≤ 1/4) :
-    localL2Energy (Metric.ball (0 : Space) r) u ≤
-      weakHarmonicSmallBallConstant * r^3 * ‖u‖^2 := by
-  have hb : ∀ᵐ x ∂volume, x ∈ Metric.ball (0 : Space) r →
-      ‖u x‖^2 ≤ harmonicQuarterBallConstant * ‖u‖^2 := by
-    filter_upwards [weakHarmonic_pointwise u hu] with x hx
-    intro hxball
-    exact hx ((Metric.ball_subset_closedBall.trans
-      (Metric.closedBall_subset_closedBall hrquarter)) hxball)
-  have H := localL2Energy_ball_le_of_ae_bound u
-    (harmonicQuarterBallConstant * ‖u‖^2) r hr hb
-  unfold weakHarmonicSmallBallConstant
-  convert H using 1
-  ring
 
 end EulerMeanHarmonic

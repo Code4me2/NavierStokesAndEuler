@@ -96,10 +96,6 @@ theorem heatKernelTimeConstant_pos : 0 < heatKernelTimeConstant := by
   unfold heatKernelTimeConstant
   positivity
 
-theorem heatKernelSecondTimeEnvelope_nonneg {s : ℝ} (r : ℝ) (hs : 0 ≤ s) :
-    0 ≤ heatKernelSecondTimeEnvelope r s := by
-  unfold heatKernelSecondTimeEnvelope
-  positivity
 
 theorem heatKernelSecondTimeEnvelope_integrable {r : ℝ} (hr : 0 < r) :
     IntegrableOn (heatKernelSecondTimeEnvelope r) (Ioi 0) := by

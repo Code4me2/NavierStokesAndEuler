@@ -14,13 +14,6 @@ theorem tailBase_nonneg (R H C : ℝ) (hC : 0 ≤ C) (N : ℕ) :
   unfold tailBase
   exact mul_nonneg (mul_nonneg (by positivity) (sq_nonneg H)) (gradeBase_nonneg R N)
 
-theorem tailBase_ge_one (R H C : ℝ) (hR : 1 ≤ R) (hH : 1 ≤ H)
-    (hC : 0 ≤ C) (N : ℕ) (hN : 1 ≤ N) : 1 ≤ tailBase R H C N := by
-  have hf : (1 : ℝ) ≤ 1+C*(1+18*((N+2 : ℕ) : ℝ)^2) := by
-    have h : 0 ≤ C*(1+18*((N+2 : ℕ) : ℝ)^2) := by positivity
-    linarith only [h]
-  exact one_le_mul_of_one_le_of_one_le
-    (one_le_mul_of_one_le_of_one_le hf (one_le_pow₀ hH)) (gradeBase_ge_one R hR N hN)
 
 /-- The envelope is absorbed once into the base, with no dependence on
 the surviving grade in that base. -/

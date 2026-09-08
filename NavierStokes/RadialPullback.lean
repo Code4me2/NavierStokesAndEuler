@@ -79,8 +79,6 @@ theorem inverseChart_contDiff {a : ℝ} (ha : 0 < a) (d : ℝ) :
   (positiveRadius_contDiff (a ^ d / 4)).rpow_const_of_ne
     (fun U => (positiveRadius_pos (div_pos (Real.rpow_pos_of_pos ha d) (by norm_num)) U).ne')
 
-theorem powerChart_pos {a : ℝ} (ha : 0 < a) (d R : ℝ) : 0 < powerChart d a R :=
-  Real.rpow_pos_of_pos (positiveRadius_pos (by positivity) R) d
 
 theorem inverseChart_pos {a : ℝ} (ha : 0 < a) (d U : ℝ) : 0 < inverseChart d a U :=
   Real.rpow_pos_of_pos
@@ -104,15 +102,6 @@ theorem inverseChart_power {a R d : ℝ} (ha : 0 < a) (hd : 0 < d) (hR : a ≤ R
   have hRU : a ^ d ≤ R ^ d := Real.rpow_le_rpow ha.le hR hd.le
   rw [inverseChart_eq ha d (by linarith), Real.rpow_rpow_inv (ha.le.trans hR) hd.ne']
 
-theorem powerChart_inverse {a U d : ℝ} (ha : 0 < a) (hd : 0 < d) (hU : a ^ d ≤ U) :
-    powerChart d a (inverseChart d a U) = U := by
-  have haU : 0 < a ^ d := Real.rpow_pos_of_pos ha d
-  have hUp : 0 < U := haU.trans_le hU
-  have hR : a ≤ U ^ d⁻¹ := by
-    have h := Real.rpow_le_rpow haU.le hU (inv_pos.mpr hd).le
-    simpa only [Real.rpow_rpow_inv ha.le hd.ne'] using h
-  rw [inverseChart_eq ha d (by linarith), powerChart_eq ha (by linarith) d,
-    Real.rpow_inv_rpow hUp.le hd.ne']
 
 theorem inverseChart_rpow {a U d : ℝ} (ha : 0 < a) (hd : 0 < d) (hU : a ^ d ≤ U) :
     (inverseChart d a U) ^ d = U := by
@@ -276,17 +265,6 @@ theorem physicalGraphDeriv_pullback {a d M : ℝ} (ha : 0 < a) (v : E)
   rw [hv, map_smul]
   rfl
 
-/-- Pure auxiliary derivatives are unchanged by the radial coordinate map. -/
-theorem auxiliaryDeriv_pullback {a d : ℝ} (ha : 0 < a) (w : E)
-    {F : ℝ × E → V} (z : ℝ × E) (hz : a / 2 < z.1)
-    (hF : DifferentiableAt ℝ F (liftChart (powerChart d a) z)) :
-    TransportPrimitive.fixedDeriv (0, w) (pullback d a F) z =
-      TransportPrimitive.fixedDeriv (0, w) F (liftChart (powerChart d a) z) := by
-  have h := hF.hasFDerivAt.comp z (liftChart_hasFDerivAt z (powerChart_hasDerivAt ha hz d))
-  unfold TransportPrimitive.fixedDeriv pullback
-  rw [h.fderiv, ContinuousLinearMap.comp_apply]
-  congr 1
-  ext <;> simp
 
 /-- The positive power substitution includes the actual radial Jacobian. -/
 theorem power_substitution {a R d : ℝ} (ha : 0 < a) (hR : a ≤ R)
@@ -321,17 +299,6 @@ theorem normalized_radial_integral {a R d : ℝ} (ha : 0 < a) (hd : 0 < d) (hR :
   rw [normalizeSource_at_power ha hd has, smul_smul,
     mul_inv_cancel₀ (radialJacobian_pos hd (ha.trans_le has)).ne', one_smul]
 
-/-- The total transformed integral has exactly the original physical radial
-measure. In particular no Jacobian remains when taking a torus mean later. -/
-theorem total_normalized_eq_radialIntegral {a b d : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) {g : ℝ × E → V}
-    (hg : ContDiff ℝ ∞ g) (hs : RadialAlias.RadiallySupported a b g)
-    (M U : ℝ) (v Y : E) :
-    TransportPrimitive.totalIntegral M v (normalizeSource d a g) (U, Y) =
-      ∫ s in a..b, g (s, Y + (M * (s ^ d - U)) • v) := by
-  rw [TransportPrimitive.totalIntegral_eq_radialInterval (normalizeSource_contDiff ha hd hg).continuous
-    (normalizeSource_supported ha hab hd hs)]
-  exact normalized_radial_integral ha hd hab.le hg M U v Y
 
 noncomputable def physicalCompact (d a b M : ℝ) (v : E) (g : ℝ × E → V) : ℝ × E → V :=
   pullback d a (TransportPrimitive.compactIntegral
@@ -840,20 +807,6 @@ theorem meanClass_physicalCompact {a b d cL cR : ℝ}
     rw [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α (K * C) p n z hz]
     simpa only [mul_assoc] using hout
 
-theorem supported_meanClass_physicalCompact {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    (α : ℝ) (M : ℕ → ℝ) (v : ℕ → E) (g : ℕ → ℝ × E → V)
-    (hg : ∀ n, ContDiff ℝ ∞ (g n)) (hs : ∀ n, RadialAlias.RadiallySupported a b (g n))
-    (hclass : WeightedClasses.MeanClass
-      (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α g) :
-    let F := fun n => physicalCompact d a b (M n) (v n) (g n)
-    (∀ n, ContDiff ℝ ∞ (F n)) ∧
-      (∀ n, RadialAlias.RadiallySupported a b (F n)) ∧
-      WeightedClasses.MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α F := by
-  refine ⟨?_, ?_, meanClass_physicalCompact ha hab hd hcL hcR ε S hε hεone hS α M v g hg hs hclass⟩
-  · exact fun n => physicalCompact_contDiff ha hab hd (hg n) (hs n) (M n) (v n)
-  · exact fun n => physicalCompact_supported ha hab hd (hg n) (hs n) (M n) (v n)
 
 end Weighted
 

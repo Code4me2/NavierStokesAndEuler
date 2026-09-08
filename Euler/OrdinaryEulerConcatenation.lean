@@ -103,13 +103,5 @@ theorem concatenate_left (hTpos : 0 < T) (hSpos : 0 < S)
   change join T S hT hS U.velocity V.velocity t=U.velocity t
   rw [join_left U.velocity V.velocity t.property.2,projIcc_of_mem hT t.property]
 
-theorem concatenate_right (hTpos : 0 < T) (hSpos : 0 < S)
-    (hmatch : U.velocity ⟨T,hT,le_rfl⟩=V.velocity ⟨0,le_rfl,hS⟩)
-    (t : Icc (0 : ℝ) S) :
-    (U.concatenate V hTpos hSpos hmatch).velocity
-        ⟨T+t,add_nonneg hT t.property.1,add_le_add_right t.property.2 T⟩=V.velocity t := by
-  change join T S hT hS U.velocity V.velocity (T+t)=V.velocity t
-  rw [join_right U.velocity V.velocity hmatch (le_add_of_nonneg_right t.property.1),
-    add_sub_cancel_left,projIcc_of_mem hS t.property]
 
 end EulerOrdinarySobolev.Evolution

@@ -109,35 +109,5 @@ theorem initialized_correction_estimates_eventually :
     hp.trans (mul_le_mul_of_nonneg_right hCp (delta_pos _).le),
     ht.trans (mul_le_mul_of_nonneg_right hCt (delta_pos _).le)⟩
 
-/-- Every fixed polynomial loss can be paid while making all three
-actual weighted H⁶ norms smaller than any prescribed inverse power.
-The chosen frequency works simultaneously at every finite cutoff. -/
-theorem initialized_correction_with_power_loss_eventually
-    (physicalCost loss p : ℝ) (hphysicalCost : 0 ≤ physicalCost) :
-    ∃ ρ0 G : ℝ, 0 < ρ0 ∧ 0 < G ∧ ∀ᶠ k : ℝ in atTop,
-      ∃ (hk : 4 ≤ k) (hn : 1 ≤ truncation k)
-        (Q : EulerAllOrderDriftCorrection.Budget period D.T_pos
-          (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree
-            (truncation k) hn k hk)),
-        Q.delta=delta (expansion k) ∧ Q.initialRadius=ρ0 ∧ Q.growthCoefficient=G ∧
-        ∀ (s N : ℕ), N+6 ≤ s → ∀ t : Icc (0 : ℝ) D.T,
-          physicalCost*k^loss*weightedNorm period 6 N (ρ0/4)
-              ((Q.fieldTower period).realization s t) < k^(-p) ∧
-          physicalCost*k^loss*weightedNorm period 6 N (ρ0/4)
-              ((Q.pressureTower period).realization s t) < k^(-p) ∧
-          physicalCost*k^loss*weightedNorm period 6 N (ρ0/4)
-              ((Q.timeDerivativeTower period).realization s t) < k^(-p) := by
-  obtain ⟨ρ0,G,C,hρ,hG,_hC,hQ⟩ := initialized_correction_estimates_eventually
-    M D hTime τ hτ hτT B δ hδ hδ1 ξ hs α hα L NB LM Cagree Ξ hΞ hF hdet
-  refine ⟨ρ0,G,hρ,hG,?_⟩
-  filter_upwards [hQ,correction_with_power_loss_eventually (physicalCost*C) loss p] with k hQ hkbound
-  obtain ⟨hk,hn,Q,hδQ,hρQ,hGQ,hbounds⟩ := hQ
-  refine ⟨hk,hn,Q,hδQ,hρQ,hGQ,?_⟩
-  intro s N hN t
-  have hscale : 0 ≤ physicalCost*k^loss := mul_nonneg hphysicalCost (Real.rpow_nonneg (by linarith) _)
-  have hb (x : ℝ) (hx : x ≤ C*delta (expansion k)) : physicalCost*k^loss*x < k^(-p) := by
-    apply (mul_le_mul_of_nonneg_left hx hscale).trans_lt
-    simpa only [mul_assoc, mul_left_comm, mul_comm] using hkbound
-  exact ⟨hb _ (hbounds s N hN t).1,hb _ (hbounds s N hN t).2.1,hb _ (hbounds s N hN t).2.2⟩
 
 end EulerPacketTerminalDatum

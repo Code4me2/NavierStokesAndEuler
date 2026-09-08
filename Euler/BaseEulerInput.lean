@@ -44,10 +44,7 @@ def solutionEvolution : Evolution (solutionParent β hβ ell hell hell1) :=
     uniformL2Amplitude_nonneg (by norm_num) (field_uniform_jet β hβ)
     (velocity_divergence (linear β)) ell hell hell1
 
-theorem solutionParent_time : (solutionParent β hβ ell hell hell1).T=solutionTime := rfl
 
-theorem solutionLabelData_constant :
-    (solutionLabelData β hβ ell hell hell1).K=solutionLabelConstant := rfl
 
 theorem solutionOddData : OddData (solutionParent β hβ ell hell hell1) :=
   EulerStaticEuler.baseOddData 1 (field (linear β)) uniformL2Amplitude 1024
@@ -61,27 +58,8 @@ theorem solution_initial_velocity (x : Space) :
     uniformL2Amplitude_nonneg (by norm_num) (field_uniform_jet β hβ)
     (velocity_divergence (linear β)) ell hell hell1 x
 
-theorem solution_initial_gradient :
-    fderiv ℝ ((solutionParent β hβ ell hell hell1).velocity.field
-      ⟨0,le_rfl,solutionTime_pos.le⟩ : Space → Space) 0=linear β := by
-  have he : ((solutionParent β hβ ell hell hell1).velocity.field
-      ⟨0,le_rfl,solutionTime_pos.le⟩ : Space → Space)=velocity (linear β) :=
-    funext (solution_initial_velocity β hβ ell hell hell1)
-  rw [he]
-  exact velocity_fderiv_plateau _ (linear_trace β) 0 (by simp)
 
-theorem solution_initial_support :
-    tsupport ((solutionParent β hβ ell hell hell1).velocity.field
-      ⟨0,le_rfl,solutionTime_pos.le⟩ : Space → Space) ⊆ Metric.closedBall 0 2 := by
-  have he : ((solutionParent β hβ ell hell hell1).velocity.field
-      ⟨0,le_rfl,solutionTime_pos.le⟩ : Space → Space)=velocity (linear β) :=
-    funext (solution_initial_velocity β hβ ell hell hell1)
-  rw [he]
-  exact velocity_support _
 
-theorem solution_origin_fixed (t : Icc (0 : ℝ) solutionTime) :
-    (solutionParent β hβ ell hell hell1).position t 0=0 :=
-  (solutionOddData β hβ ell hell hell1).position_zero t
 
 omit β hβ ell hell hell1 in
 theorem solutionLabelConstant_one : 1 ≤ solutionLabelConstant :=

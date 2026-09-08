@@ -37,14 +37,5 @@ theorem heat_time_commutator_tendsto (p q : ℕ) (T : ℝ) (hT : 0 ≤ T)
   have hB := heat_timeLp_tendsto period p T (timeMultiplier T hT A u)
   simpa only [sub_self, Function.comp_def] using hA.sub hB
 
-/-- The actual heat commutator vanishes in the full L² time norm. -/
-theorem heat_time_commutator_norm_tendsto (p q : ℕ) (T : ℝ) (hT : 0 ≤ T)
-    (A : C(Icc (0 : ℝ) T, SobolevSpace period q →L[ℝ] SobolevSpace period p))
-    (u : TimeLp T (SobolevSpace period q)) :
-    Filter.Tendsto (fun n => ‖
-      timeMultiplier T hT A ((heatOperator period q (regularizerVariance n)).compLpL 2 (timeMeasure T) u) -
-        (heatOperator period p (regularizerVariance n)).compLpL 2 (timeMeasure T) (timeMultiplier T hT A u)‖)
-      Filter.atTop (𝓝 (0 : ℝ)) := by
-  simpa only [norm_zero] using (heat_time_commutator_tendsto period p q T hT A u).norm
 
 end EulerSobolevTimeRegularization

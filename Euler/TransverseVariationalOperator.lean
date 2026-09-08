@@ -101,16 +101,6 @@ theorem dirichletSolver_norm (J : V →L[ℝ] W) (H : W →L[ℝ] W)
     _ ≤ 2 * (‖J‖ * ‖f‖) := mul_le_mul_of_nonneg_left ha (by norm_num)
     _ = 2 * ‖J‖ * ‖f‖ := by ring
 
-/-- Existence and uniqueness, as conclusions from coefficient and primitive bounds. -/
-theorem existsUnique_dirichlet_solution (J : V →L[ℝ] W) (H : W →L[ℝ] W)
-    (L K : ℝ) (hK : 0 ≤ K)
-    (hJ : ∀ u, ‖J u‖ ^ 2 ≤ L * ‖u‖ ^ 2)
-    (hH : ∀ w, ⟪H w, w⟫_ℝ ≤ K * ‖w‖ ^ 2)
-    (hsmall : K * L ≤ 1 / 2) (f : W) :
-    ∃! u : V, ∀ v, ⟪u, v⟫_ℝ - ⟪H (J u), J v⟫_ℝ = -⟪f, J v⟫_ℝ := by
-  exact ⟨dirichletSolver J H L K hK hJ hH hsmall f,
-    dirichletSolver_weak J H L K hK hJ hH hsmall f,
-    fun u hu => dirichletSolver_unique J H L K hK hJ hH hsmall f u hu⟩
 
 open MeasureTheory Set EulerTimeLp EulerVolterraConvolution
 

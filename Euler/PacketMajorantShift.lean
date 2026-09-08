@@ -20,24 +20,6 @@ theorem majorant_mono_shift (R : ℝ) (hR : 1 ≤ R) (d D n : ℕ) (h : d ≤ D)
   exact mul_le_mul (pow_le_pow_right₀ hR (Nat.add_le_add_left h n)) hs
     (sq_nonneg _) (pow_nonneg (by linarith) _)
 
-/-- A single spare shift pays a linear number of grade terms at one fixed radius. -/
-theorem linear_grade_cost_absorbed (C R : ℝ) (hC : 0 ≤ C) (hR : C ≤ R)
-    (p d n : ℕ) (hd : 0 < d) (hpd : p ≤ d) :
-    (C*(p : ℝ))*majorant R (d-1) n ≤ majorant R d n := by
-  have hR0 : 0 ≤ R := hC.trans hR
-  have hnd : (1 : ℝ) ≤ ((n+d : ℕ) : ℝ) := by exact_mod_cast (show 1 ≤ n+d by omega)
-  have hpnd : (p : ℝ) ≤ ((n+d : ℕ) : ℝ) := by exact_mod_cast (show p ≤ n+d by omega)
-  have hpsq : (p : ℝ) ≤ ((n+d : ℕ) : ℝ)^2 := by
-    nlinarith [mul_nonneg (show (0 : ℝ) ≤ ((n+d : ℕ) : ℝ) by positivity) (sub_nonneg.mpr hnd)]
-  have hcost : C*(p : ℝ) ≤ R*((n+d : ℕ) : ℝ)^2 :=
-    (mul_le_mul_of_nonneg_left hpsq hC).trans (mul_le_mul_of_nonneg_right hR (sq_nonneg _))
-  calc
-    _ ≤ (R*((n+d : ℕ) : ℝ)^2)*majorant R (d-1) n :=
-      mul_le_mul_of_nonneg_right hcost (majorant_nonneg R hR0 _ _)
-    _ = majorant R d n := by
-      have h := majorant_succ_identity R (d-1) n
-      rw [show d-1+1=d by omega, show n+(d-1)+1=n+d by omega] at h
-      exact h.symm
 
 theorem factorial_sum_split (n d : ℕ) :
     (n+d).factorial ≤ 2^(n+d)*n.factorial*d.factorial := by

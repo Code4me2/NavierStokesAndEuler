@@ -89,21 +89,7 @@ theorem localVelocity_divergence (t : ℝ) (x : Space) :
     ← divergence_eq_coordinate_sum]
   erw [EulerConstantEuler.velocity_divergence,mul_zero]
 
-theorem localVelocity_joint_continuous : Continuous (localVelocity P u C R hC hR hu hdiv) := by
-  change Continuous (fun q => (amplitude P C R hC hR)⁻¹ •
-    EulerConstantEuler.velocity (exactPacket P u C R hC hR hu hdiv)
-      (EulerTimeRescaling.coordinates (amplitude P C R hC hR) q))
-  exact ((EulerConstantEuler.velocity_joint_continuous (exactPacket P u C R hC hR hu hdiv)).comp
-    (EulerTimeRescaling.coordinates (E := Space) (amplitude P C R hC hR)).continuous).const_smul
-      ((amplitude P C R hC hR)⁻¹)
 
-theorem localPressure_joint_continuous : Continuous (localPressure P u C R hC hR hu hdiv) := by
-  change Continuous (fun q => ((amplitude P C R hC hR)⁻¹)^2 •
-    EulerConstantEuler.pressure (exactPacket P u C R hC hR hu hdiv)
-      (EulerTimeRescaling.coordinates (amplitude P C R hC hR) q))
-  exact ((EulerConstantEuler.pressure_joint_continuous (exactPacket P u C R hC hR hu hdiv)).comp
-    (EulerTimeRescaling.coordinates (E := Space) (amplitude P C R hC hR)).continuous).const_smul
-      (((amplitude P C R hC hR)⁻¹)^2)
 
 theorem localForce_joint_continuous : Continuous (localForce P u C R hC hR hu hdiv) := by
   change Continuous (fun q => ((amplitude P C R hC hR)⁻¹)^2 •
@@ -128,10 +114,6 @@ theorem localPressure_smooth (t : ℝ) :
     EulerConstantEuler.pressure (exactPacket P u C R hC hR hu hdiv) ((amplitude P C R hC hR)⁻¹*t,x))
   exact (EulerConstantEuler.pressure_smooth (exactPacket P u C R hC hR hu hdiv) _).const_smul _
 
-theorem localPressure_zero (t : ℝ) : localPressure P u C R hC hR hu hdiv (t,0)=0 := by
-  change ((amplitude P C R hC hR)⁻¹)^2 *
-    EulerConstantEuler.pressure (exactPacket P u C R hC hR hu hdiv) (_,0)=0
-  erw [EulerConstantEuler.pressure_zero,mul_zero]
 
 def localField (t : Icc (0 : ℝ) (amplitude P C R hC hR)) : SmoothL2Field Space :=
   SmoothL2Field.mapField ((amplitude P C R hC hR)⁻¹ • ContinuousLinearMap.id ℝ Space)
@@ -155,12 +137,5 @@ theorem localField_jetLp_continuous (n : ℕ) :
     (fun n => (EulerConstantEuler.field_jetLp_continuous (exactPacket P u C R hC hR hu hdiv) n).comp
       (EulerTimeRescaling.timeMap (amplitude P C R hC hR) (amplitude_pos P C R hC hR)).continuous) n
 
-theorem localVelocity_smooth (t : Icc (0 : ℝ) (amplitude P C R hC hR)) :
-    ContDiff ℝ ∞ (fun x => localVelocity P u C R hC hR hu hdiv (t,x)) := by
-  have he : (localField P u C R hC hR hu hdiv t).field =
-      fun x => localVelocity P u C R hC hR hu hdiv (t,x) :=
-    funext (localField_apply P u C R hC hR hu hdiv t)
-  rw [← he]
-  exact (localField P u C R hC hR hu hdiv t).smooth
 
 end EulerStaticEuler

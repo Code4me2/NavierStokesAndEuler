@@ -86,10 +86,6 @@ theorem initial_inverseBound_le (τ : ℝ) (hτ : 0 < τ) (hτT : τ ≤ D.T) :
   change 1+‖(D.FInv.comp (initialInclusion D.T τ hτT)).field‖ ≤ 1+‖D.FInv.field‖
   linarith [D.FInv.comp_norm_le (initialInclusion D.T τ hτT)]
 
-theorem tail_inverseBound_le (τ : ℝ) (hτ : 0 ≤ τ) (hτT : τ < D.T) :
-    (D.tail τ hτ hτT).inverseBound ≤ D.inverseBound := by
-  change 1+‖(D.FInv.comp (tailInclusion D.T τ hτ)).field‖ ≤ 1+‖D.FInv.field‖
-  linarith [D.FInv.comp_norm_le (tailInclusion D.T τ hτ)]
 
 end Data
 

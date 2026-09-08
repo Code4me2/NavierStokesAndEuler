@@ -28,29 +28,6 @@ theorem velocityCoefficient_apply (t : Icc (0 : ℝ) (amplitude P C R hC hR)) (x
       (exactPacket P u C R hC hR hu hdiv) ((amplitude P C R hC hR)⁻¹*(t : ℝ),x)
   rw [div_eq_mul_inv,mul_comm (t : ℝ)]
 
-theorem forceCoefficient_apply (t : Icc (0 : ℝ) (amplitude P C R hC hR)) (x : Space) :
-    (forceCoefficient P u C R hC hR hu hdiv).field t x =
-      localForce P u C R hC hR hu hdiv (t,x) := by
-  change ((amplitude P C R hC hR)⁻¹)^2 •
-    (unitForceCoefficient P u C R hC hR hu hdiv).field
-      (EulerTimeRescaling.timeMap (amplitude P C R hC hR) (amplitude_pos P C R hC hR) t) x = _
-  rw [unitForceCoefficient_apply]
-  change ((amplitude P C R hC hR)⁻¹)^2 • EulerConstantEuler.force
-      (exactPacket P u C R hC hR hu hdiv) ((t : ℝ)/amplitude P C R hC hR,x) =
-    ((amplitude P C R hC hR)⁻¹)^2 • EulerConstantEuler.force
-      (exactPacket P u C R hC hR hu hdiv) ((amplitude P C R hC hR)⁻¹*(t : ℝ),x)
-  rw [div_eq_mul_inv,mul_comm (t : ℝ)]
 
-theorem localVelocity_hasDerivWithinAt
-    (t : Icc (0 : ℝ) (amplitude P C R hC hR)) (x : Space) :
-    HasDerivWithinAt (fun s => localVelocity P u C R hC hR hu hdiv (s,x))
-      ((derivativeCoefficient P u C R hC hR hu hdiv).field t x)
-      (Icc (0 : ℝ) (amplitude P C R hC hR)) t := by
-  have hd := coefficient_time P u C R hC hR hu hdiv t x
-  apply hd.congr_of_mem _ t.property
-  intro s hs
-  have he := velocityCoefficient_apply P u C R hC hR hu hdiv ⟨s,hs⟩ x
-  simpa only [SmoothTimeField.realField,extendPath,projIcc_of_mem (amplitude_pos P C R hC hR).le hs]
-    using he.symm
 
 end EulerStaticEuler

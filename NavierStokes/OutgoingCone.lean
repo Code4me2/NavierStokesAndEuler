@@ -546,74 +546,8 @@ theorem normal_data_continuousOn {d : TailData} {K : ℝ} (w : ResetWitness d K)
     hp1.mul (hcr.add (hcb.div hca hane)),
     hca.mul (continuousOn_const.add ((hcb.div hca hane).pow 2))⟩
 
-/-- Uniform relaxed margins on the full chosen finite outgoing interval. -/
-theorem clean_relaxed_margins {d : TailData} {K : ℝ} (w : ResetWitness d K)
-    {XR left : ℝ} (h : CleanOutgoingCone w XR left) :
-    ∃ eps : ℝ, 0 < eps ∧ ∀ p ∈ cleanWindow d left,
-      eps ≤ OutgoingHistories.Qs w (CorrectedPulseAmplitude.amplitude d w.coefficients) p ∧
-      eps ≤ coneA w p ∧ eps ≤ normalP w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p - 2 ∧
-      eps ≤ ConeAlgebra.coneBound
-        (normalP w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p)
-        (normalJ w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p) -
-          normalV w (CorrectedPulseAmplitude.amplitude d w.coefficients) p := by
-  let Amp := CorrectedPulseAmplitude.amplitude d w.coefficients
-  have ha : ContDiff ℝ ∞ Amp := CorrectedPulseAmplitude.amplitude_contDiff d w.smooth
-  have hk : IsCompact (cleanWindow d left) := isCompact_Icc.prod isCompact_Icc
-  have hd := normal_data_continuousOn w ha XR (s := cleanWindow d left)
-    (fun p hp => abs_le.mpr hp.2) (fun p hp => (h.relaxed p hp).angular_positive)
-    (fun p hp => (h.relaxed p hp).radial_positive)
-  obtain ⟨eQ, heQ, HQ⟩ := UniformCone.positive_uniform_margin hk
-    (OutgoingHistories.Qs_smooth w ha).continuous.continuousOn (fun p hp => (h.relaxed p hp).angular_positive)
-  obtain ⟨eA, heA, HA⟩ := UniformCone.positive_uniform_margin hk
-    (OutgoingEntranceCone.coneA_continuous w).continuousOn (fun p hp => (h.relaxed p hp).radial_positive)
-  obtain ⟨eP, heP, HP⟩ := UniformCone.positive_uniform_margin hk (hd.1.sub continuousOn_const)
-    (fun p hp => sub_pos.mpr (h.relaxed p hp).stress_gt_two)
-  have hroot : ContinuousOn (fun p => ConeAlgebra.coneBound (normalP w Amp XR p) (normalJ w Amp XR p) -
-      normalV w Amp p) (cleanWindow d left) :=
-    (UniformCone.continuous_coneBound.comp_continuousOn (hd.1.prodMk (hd.2.1.prodMk hd.2.2))).sub hd.2.2
-  obtain ⟨eR, heR, HR⟩ := UniformCone.positive_uniform_margin hk hroot
-    (fun p hp => sub_pos.mpr (h.relaxed p hp).root_strict)
-  refine ⟨min eQ (min eA (min eP eR)), lt_min heQ (lt_min heA (lt_min heP heR)), ?_⟩
-  intro p hp
-  exact ⟨(min_le_left _ _).trans (HQ p hp),
-    ((min_le_right _ _).trans (min_le_left _ _)).trans (HA p hp),
-    ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))).trans (HP p hp),
-    ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))).trans (HR p hp)⟩
 
-theorem clean_true_margins {d : TailData} {K : ℝ} (w : ResetWitness d K)
-    {XR left : ℝ} (h : CleanOutgoingCone w XR left) :
-    ∃ eps : ℝ, 0 < eps ∧ ∀ p ∈ trueWindow d,
-      eps ≤ normalV w (CorrectedPulseAmplitude.amplitude d w.coefficients) p - 2 ∧
-      eps ≤ normalP w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p - 2 ∧
-      eps ≤ ConeAlgebra.coneBound
-        (normalP w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p)
-        (normalJ w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p) -
-          normalV w (CorrectedPulseAmplitude.amplitude d w.coefficients) p := by
-  have ha := CorrectedPulseAmplitude.amplitude_contDiff d w.smooth
-  have hd := normal_data_continuousOn w ha XR (s := trueWindow d)
-    (fun p hp => abs_le.mpr hp.2) (fun p hp => (h.true_from_hold p hp).1.angular_positive)
-    (fun p hp => (h.true_from_hold p hp).1.radial_positive)
-  exact UniformCone.compact_trueCone_margins (isCompact_Icc.prod isCompact_Icc) hd.1 hd.2.1 hd.2.2
-    (fun p hp => ⟨(h.true_from_hold p hp).2, (h.true_from_hold p hp).1.stress_gt_two,
-      (h.true_from_hold p hp).1.root_strict⟩)
 
-/-- A coordinate perturbation tolerance for later edits on the true region.
-The competing coordinates need not be continuous; their closeness must be
-proved separately for the actual edit. -/
-theorem clean_true_stable {d : TailData} {K : ℝ} (w : ResetWitness d K)
-    {XR left : ℝ} (h : CleanOutgoingCone w XR left) :
-    ∃ rho : ℝ, 0 < rho ∧ ∀ p ∈ trueWindow d, ∀ P' J' v' : ℝ,
-      |P' - normalP w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p| ≤ rho →
-      |J' - normalJ w (CorrectedPulseAmplitude.amplitude d w.coefficients) XR p| ≤ rho →
-      |v' - normalV w (CorrectedPulseAmplitude.amplitude d w.coefficients) p| ≤ rho →
-      2 < v' ∧ v' < P' ∧ (v' - 2) * J' ^ 2 < 2 * (P' - v') ^ 2 := by
-  have ha := CorrectedPulseAmplitude.amplitude_contDiff d w.smooth
-  have hd := normal_data_continuousOn w ha XR (s := trueWindow d)
-    (fun p hp => abs_le.mpr hp.2) (fun p hp => (h.true_from_hold p hp).1.angular_positive)
-    (fun p hp => (h.true_from_hold p hp).1.radial_positive)
-  exact UniformCone.compact_family_quadratic_stable (isCompact_Icc.prod isCompact_Icc) hd.1 hd.2.1 hd.2.2
-    (fun p hp => ⟨(h.true_from_hold p hp).2, (h.true_from_hold p hp).1.stress_gt_two,
-      (h.true_from_hold p hp).1.root_strict⟩)
 
 /-! ## Margins independent of the later entrance radius -/
 

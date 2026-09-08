@@ -555,9 +555,6 @@ noncomputable def viewStrip {F : OutgoingProfile.Profile} (W : NominalProfile.Wi
     (UniformPrimaryWeights.reindexedStrip (BaseContextAssembly.nativeStrip W U)
       (fun n => (chart n, ())))
 
-theorem viewStrip_slow {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (U : LocalSignedRequest.SlowRegion (2 * F.data.h)) (chart : ℕ → ℕ) (n : ℕ) :
-    (viewStrip W U chart).slow n = max 1 (ChartScales.S (chart n)) := rfl
 
 theorem viewStrip_mem {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
     (U : LocalSignedRequest.SlowRegion (2 * F.data.h)) (chart : ℕ → ℕ) (x : Native) :
@@ -744,11 +741,6 @@ noncomputable def phaseCell (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) : Se
   copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k ⁻¹'
     (nativeDomain H v a).carrier (reference l n)
 
-theorem phaseCell_open (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) :
-    IsOpen (phaseCell H v a sys hdet reference chart index sign l n k) := by
-  apply ((nativeDomain H v a).isOpen (reference l n)).preimage
-  exact ((slowChange F.data.h _ _).continuous.comp continuous_fst).prodMk
-    (((slotGeometry sys hdet _ _).coordinates_contDiff k).continuous.comp continuous_snd)
 
 theorem copy_weight_eq (hr0 : 0 < r0) (l : Λ) (n : ℕ) (k : TorusInverse.Frequency)
     {x : Native} (hx : x ∈ (viewStrip W U chart).domain) :
@@ -851,19 +843,6 @@ noncomputable def copyChart (hr0 : 0 < r0)
     rw [max_eq_right (PhysicalGraphBounds.S_ge_one (hchart n))]
     exact sqrt_S_window (hchart n) (reference l n).val.property.1 (hnear l n).1 (hnear l n).2
 
-theorem copyChart_pull (hr0 : 0 < r0) (hchart : ∀ n, 1 ≤ chart n)
-    (hnear : ∀ l n, chart n ≤ BaseChartJets.cellBand (reference l n) + 4 ∧
-      BaseChartJets.cellBand (reference l n) ≤ chart n + 4)
-    {budget : ℕ} (hi : CommonBaseContext.IndexBounds F.data.h index budget)
-    {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (f : Label H v a → Native → E) (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) (x : Native) :
-    (copyChart H v a sys hdet U reference chart index sign hr0 hchart hnear hi).pull f l n k x =
-      f (reference l n) (copyPoint sys hdet (copyLabel H v a reference sign l n)
-        (chart n) (index (chart n)) k x) := by
-  change f (reference l n)
-    (copyLinear sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) x +
-      copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k 0) = _
-  rw [← copyPoint_affine]
 
 end PreparedCopies
 
@@ -1119,15 +1098,6 @@ theorem copyPoint_eq_reference_view (l : SlotColoring.Label) (n common : ℕ)
   apply Prod.ext rfl
   exact (slot_coordinates_from_zero sys hdet l _ k _).symm
 
-theorem reference_view_graph (l : SlotColoring.Label) (n common : ℕ)
-    (hi : common ≤ ChartScales.nativeIndex h l.1)
-    {z : ProblemStatement.SpaceTime} (hz : 0 < z.2 0) :
-    PhysicalParticularWave.cylinderChange h (ChartScales.Q n) (ChartScales.Q l.1)
-      (ChartScales.nativeIndex h l.1 - common)
-        ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) h common).map z) =
-      (PhysicalResidualBridge.commonGraph (ChartScales.Q l.1) h (ChartScales.nativeIndex h l.1)).map z := by
-  rw [PhysicalParticularWave.cylinderChange_graph (ChartScales.Q_pos _) (ChartScales.Q_pos _) h common _ hz,
-    Nat.add_sub_of_le hi]
 
 end ReferenceViews
 
@@ -1268,17 +1238,12 @@ noncomputable def ActivePairCondition (l : Λ) (n : ℕ) : Prop :=
 
 abbrev ActivePair := {q : Λ × ℕ // ActivePairCondition H v a reference chart q.1 q.2}
 
-noncomputable def activePhaseCell (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) : Set Native :=
-  {x | ActivePairCondition H v a reference chart l n ∧
-    x ∈ phaseCell H v a sys hdet reference chart index sign l n k}
 
 variable [Countable Λ] [Nonempty (ActivePair H v a reference chart)]
 
 noncomputable def activeEnumeration : ℕ → ActivePair H v a reference chart :=
   Classical.choose (exists_surjective_nat (ActivePair H v a reference chart))
 
-theorem activeEnumeration_surjective : Surjective (activeEnumeration H v a reference chart) :=
-  Classical.choose_spec (exists_surjective_nat (ActivePair H v a reference chart))
 
 noncomputable def activeReference (_ : Unit) (q : ℕ) : Label H v a :=
   reference (activeEnumeration H v a reference chart q).val.1
@@ -1296,19 +1261,7 @@ theorem active_near (q : ℕ) :
       BaseChartJets.cellBand (activeReference H v a reference chart () q) ≤ activeChart H v a reference chart q + 4 :=
   (activeEnumeration H v a reference chart q).property.2
 
-/-- Every input of this chart is the original active pair. Its uniform
-bounds are valid without any comparison for inactive label-band pairs. -/
-noncomputable def activeCopyChart (hr0 : 0 < r0) {budget : ℕ}
-    (hi : CommonBaseContext.IndexBounds F.data.h index budget) :=
-  copyChart H v a sys hdet U (activeReference H v a reference chart)
-    (activeChart H v a reference chart) index (activeSign H v a reference chart sign) hr0
-    (fun q => (activeEnumeration H v a reference chart q).property.1)
-    (fun _ q => active_near H v a reference chart q) hi
 
-theorem active_reindexed_strip :
-    viewStrip W U (activeChart H v a reference chart) =
-      UniformPrimaryWeights.reindexedStrip (viewStrip W U chart)
-        (fun q => ((activeEnumeration H v a reference chart q).val.2, ())) := rfl
 
 end ActiveCopies
 
@@ -1358,11 +1311,6 @@ noncomputable def cylinderCopyChart {Λ I i : Type} {s : StripData Native}
   ratio_one := c.ratio_one
   scale_ratio := c.scale_ratio
 
-theorem cylinderCopyChart_pull {Λ I i E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {s : StripData Native} {V : JetDomain i Native} {weight : i → Native → ℝ}
-    {K : Λ → ℕ → I → Set Native} (c : ActualSignedControl.CopyChart s V weight K)
-    (f : i → Native → E) (l : Λ) (n : ℕ) (k : I) (x : Cylinder) :
-    (cylinderCopyChart c).pull f l n k x = c.pull f l n k (cylinderNative x) := rfl
 
 /-! ## The actual cutoffs locate every nonzero native contribution -/
 
@@ -1410,50 +1358,8 @@ theorem nativeCutoff_nonzero_mem (hr0 : 0 < r0) (L : Label H v a) {x : Native}
   apply (BaseContextAssembly.nativeStrip_mem W _ _).mpr
   exact ⟨⟨ht, hq⟩, hactive⟩
 
-theorem nativeCutoff_zero_germ_outside_q (L : Label H v a) {x : Native}
-    (ht : 0 < x.1.2.2)
-    (hq : SimilarityHomogeneity.chartQ F.data.h x.1 ∉ Icc (1 / 2 : ℝ) 2) :
-    nativeCutoff H v a L =ᶠ[𝓝 x] fun _ => 0 := by
-  have he : SquaredPartition.dyadicProfile =ᶠ[𝓝 (SimilarityHomogeneity.chartQ F.data.h x.1)] fun _ => 0 :=
-    notMem_tsupport_iff_eventuallyEq.mp (by simpa only [SquaredPartition.dyadicProfile_tsupport] using hq)
-  have hc : ContinuousAt (fun y : Native => SimilarityHomogeneity.chartQ F.data.h y.1) x := by
-    exact ((SimilarityCoordinates.coordinateQ_smooth
-      (by linarith [F.data.h_pos]) (by linarith [F.data.h_lt_half]) ht).continuousAt).comp
-        (continuousAt_fst.snd.snd.prodMk continuousAt_fst.snd.fst)
-  filter_upwards [hc.eventually he] with y hy
-  simp only [nativeCutoff, hy, zero_mul]
 
-theorem nativeCutoff_zero_germ_outside_cell (L : Label H v a) {x : Native}
-    (ht : 0 < x.1.2.2) (hx : x.1 ∉ (PrimaryGeometryAssembly.domain W a.N).carrier L) :
-    nativeCutoff H v a L =ᶠ[𝓝 x] fun _ => 0 := by
-  have hs : x.1 ∉ tsupport (PrimaryRepresentatives.nativeMask
-      (BaseChartJets.cellBand L) (PrimaryGeometryAssembly.label W L).2) := by
-    intro hs
-    exact hx (PrimaryGeometryAssembly.native_support_in_carrier W L ⟨hs, ht⟩)
-  have he := notMem_tsupport_iff_eventuallyEq.mp hs
-  filter_upwards [continuousAt_fst.eventually he] with y hy
-  simp only [nativeCutoff, hy, Pi.zero_apply, mul_zero, zero_mul]
 
-theorem copy_cutoff_mem_phaseCell (hr0 : 0 < r0)
-    {vr vt : Plane}
-    (sys : PartitionedCovariance.SlotSystem (CoordinateAlgebra.D F.data.h) F.data.h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (U : LocalSignedRequest.SlowRegion (2 * F.data.h))
-    {Λ : Type} (reference : Λ → ℕ → Label H v a) (chart index : ℕ → ℕ)
-    (sign : Λ → ℕ → Fin 2) (l : Λ) (n : ℕ) (k : TorusInverse.Frequency)
-    {x : Native} (hx : x ∈ (viewStrip W U chart).domain)
-    (hn : nativeCutoff H v a (reference l n)
-      (copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k x) ≠ 0) :
-    x ∈ phaseCell H v a sys hdet reference chart index sign l n k := by
-  have hp := (viewStrip_mem W U chart x).mp hx
-  have ht := BaseContextAssembly.nativeStrip_time W U hp
-  have hr := BaseContextAssembly.nativeStrip_radius W U hp
-  have ha := ((BaseContextAssembly.nativeStrip_mem W U _).mp hp).2
-  apply nativeCutoff_nonzero_mem H v a hr0 (reference l n) _ _ hn
-  · exact slowChange_time (ChartScales.Q_pos _) (ChartScales.Q_pos _) ht
-  · change PrimaryTargetBounds.profileRadius F.data.h (slowChange F.data.h _ _ x.1) ∈ _
-    rw [profileRadius_slowChange (ChartScales.Q_pos _) (ChartScales.Q_pos _) ht hr]
-    exact ha
 
 end CutoffSupport
 
@@ -1477,18 +1383,5 @@ noncomputable def parameterLinear (h Q Qr : ℝ) : Slow →L[ℝ] Slow :=
 @[simp] theorem parameterLinear_apply (h Q Qr : ℝ) (x : Slow) :
     parameterLinear h Q Qr x = PhysicalParticularWave.parameterChange h Q Qr x := rfl
 
-theorem norm_parameterLinear_le (h : ℝ) {n m : ℕ}
-    (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    ‖parameterLinear h (ChartScales.Q n) (ChartScales.Q m)‖ ≤ slowChangeCost h := by
-  apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (slowChangeCost_one h))
-  intro x
-  change ‖swapParameter (slowChange h (ChartScales.Q n) (ChartScales.Q m) (swapParameter x))‖ ≤ _
-  rw [LinearIsometryEquiv.norm_map]
-  calc
-    _ ≤ ‖slowChange h (ChartScales.Q n) (ChartScales.Q m)‖ * ‖swapParameter x‖ :=
-      (slowChange h _ _).le_opNorm _
-    _ ≤ slowChangeCost h * ‖x‖ := by
-      rw [LinearIsometryEquiv.norm_map]
-      exact mul_le_mul_of_nonneg_right (norm_slowChange_le h hnm hmn) (norm_nonneg _)
 
 end NavierStokes.ActualSignedGeometry

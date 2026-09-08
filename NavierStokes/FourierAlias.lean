@@ -179,25 +179,6 @@ theorem cutoffAlias_periodic {χ : ℝ → ℝ} {M : ℝ} {v : Plane} {f : State
   intro U Y k
   exact congrArg (fun q => deriv χ U • q) (totalIntegral_periodic hp U Y k)
 
-/-- The exact defect is supported in the transition interval of the cutoff,
-which may be strictly inside the radial support interval of the source. -/
-theorem cutoffAlias_supported_on_transition {c d M : ℝ} {v : Plane} {f : State → F}
-    {χ : ℝ → ℝ} (hleft : ∀ u ≤ c, χ u = 0) (hright : ∀ u, d ≤ u → χ u = 1) :
-    RadialAlias.RadiallySupported c d (cutoffAlias χ M v f) := by
-  intro z hz
-  have hl : c ≤ z.1 := by
-    by_contra hn
-    have heq : χ =ᶠ[𝓝 z.1] (fun _ => 0) :=
-      (eventually_lt_nhds (lt_of_not_ge hn)).mono (fun u hu => hleft u hu.le)
-    have hd : deriv χ z.1 = 0 := by simpa using heq.deriv_eq
-    exact hz (by simp only [cutoffAlias, hd, zero_smul])
-  have hr : z.1 ≤ d := by
-    by_contra hn
-    have heq : χ =ᶠ[𝓝 z.1] (fun _ => 1) :=
-      (eventually_gt_nhds (lt_of_not_ge hn)).mono (fun u hu => hright u hu.le)
-    have hd : deriv χ z.1 = 0 := by simpa using heq.deriv_eq
-    exact hz (by simp only [cutoffAlias, hd, zero_smul])
-  exact ⟨hl, hr⟩
 
 theorem cutoffAlias_zero_mean_of_integratedMean_zero {a b M : ℝ} {v : Plane}
     {f : State → F} (χ : ℝ → ℝ) (hab : a ≤ b) (hf : Continuous f)
@@ -397,24 +378,6 @@ theorem cutoffAlias_sourceJet {a b M : ℝ} {v : Plane}
   rw [cutoffAlias, totalIntegral_sourceJet J f p hM hf hsf hJ hsJ hr]
   exact smul_comm _ _ _
 
-/-- Differentiate the exact scalar IBP identity. This controls full derivative
-tensors, including every ordinary mixed coordinate derivative. -/
-theorem iteratedFDeriv_cutoffAlias_sourceJet {a b M : ℝ} {v : Plane}
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (J : (State → ℂ) → State → ℂ) (f : State → ℂ) (p : ℕ) (hM : M ≠ 0)
-    (hf : ContDiff ℝ ∞ f) (hsf : RadialAlias.RadiallySupported a b f)
-    (hJ : ∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n)))
-    (hsJ : ∀ n < p, RadialAlias.RadiallySupported a b (J (RadialAlias.sourceJet J f n)))
-    (hr : ∀ n < p, RadialAlias.directionalDeriv v (J (RadialAlias.sourceJet J f n)) =
-      RadialAlias.sourceJet J f n) (m : ℕ) (z : State) :
-    iteratedFDeriv ℝ m (cutoffAlias χ M v f) z = (-M⁻¹) ^ p •
-      iteratedFDeriv ℝ m (cutoffAlias χ M v (RadialAlias.sourceJet J f p)) z := by
-  have heq := funext (cutoffAlias_sourceJet χ J f p hM hf hsf hJ hsJ hr)
-  rw [heq]
-  exact iteratedFDeriv_const_smul_apply'
-    (((cutoffAlias_smooth hχ (sourceJet_smooth J f p hf hJ)
-      (RadialAlias.sourceJet_radiallySupported J f p hsf hsJ)).of_le
-      (by exact_mod_cast (le_top : (m : ℕ∞) ≤ ⊤))).contDiffAt)
 
 end IntegrationByParts
 
@@ -494,18 +457,6 @@ theorem cutoffAlias_eq_nonbarPart {a b M : ℝ} {v : Plane} {f : State → ℂ}
 noncomputable def fourierSourceJet (d : Direction) (f : State → ℂ) (p : ℕ) : State → ℂ :=
   RadialAlias.sourceJet (inverse d) f p
 
-/-- The interleaved construction is exactly the manuscript's slow derivative
-of the iterated Fourier inverse, because the actual operators commute. -/
-theorem fourierSourceJet_eq_parameterJet (d : Direction) {f : State → ℂ}
-    (hf : ContDiff ℝ ∞ f) (hp : ParametricTorusInverse.Periodic f) (p : ℕ) :
-    fourierSourceJet d f p = parameterJet p (iterateInverse d p f) := by
-  induction p with
-  | zero => rfl
-  | succ p ih =>
-    have heq : fourierSourceJet d f (p + 1) = parameterPartial (inverse d (fourierSourceJet d f p)) :=
-      RadialAlias.sourceJet_succ (inverse d) f p
-    rw [heq, ih, parameterJet_succ, iterateInverse_succ,
-      parameterJet_inverse d (iterateInverse_smooth d hf hp p) (iterateInverse_periodic d hp p)]
 
 theorem inverse_radiallySupported (d : Direction) {a b : ℝ} {f : State → ℂ}
     (hs : RadialAlias.RadiallySupported a b f) :
@@ -583,21 +534,6 @@ theorem cutoffAlias_arbitrary_order (d : Direction) {a b : ℝ} {f : State → �
   exact mul_le_mul_of_nonneg_right (hb M (vector d) j hj z)
     (pow_nonneg (inv_nonneg.mpr (abs_nonneg M)) p)
 
-theorem cutoffAlias_arbitrary_order_of_integratedMean_zero (d : Direction)
-    {a b : ℝ} {f : State → ℂ} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hs : RadialAlias.RadiallySupported a b f)
-    (hm : (∫ U in a..b, sliceMean f U) = 0)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m p : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j (cutoffAlias χ M (vector d) f) z‖ ≤ C * (|M|⁻¹) ^ p := by
-  obtain ⟨C, hC, hb⟩ := cutoffAlias_arbitrary_order d hab hχ (nonbarPart_smooth hf)
-    (nonbarPart_periodic hp) (nonbarPart_zeroMean hf) (nonbarPart_radiallySupported hs)
-    hleft hright m p
-  refine ⟨C, hC, ?_⟩
-  intro M hM j hj z
-  rw [cutoffAlias_eq_nonbarPart χ hf hs hm]
-  exact hb M hM j hj z
 
 /-- The square average is the normalized Haar average of the actual descent. -/
 theorem torusMean_eq_haar {f : Plane → ℂ} (hf : Continuous f) (hp : TorusPeriodic f) :
@@ -605,17 +541,6 @@ theorem torusMean_eq_haar {f : Plane → ℂ} (hf : Continuous f) (hp : TorusPer
   rw [← SmoothFourierData.coefficient_zero_eq_mean]
   exact (SmoothFourierData.coefficient_zero_eq_integral f).symm
 
-theorem cutoffAlias_haar_zero (d : Direction) {a b M : ℝ} {f : State → ℂ}
-    {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hm : ZeroMean f)
-    (hs : RadialAlias.RadiallySupported a b f) (U : ℝ) :
-    ∫ z, SmoothFourierData.descendContinuous (fun Y => cutoffAlias χ M (vector d) f (U, Y))
-      ((cutoffAlias_smooth hχ hf hs).continuous.comp (continuous_const.prodMk continuous_id))
-      (cutoffAlias_periodic hp U) z ∂torusMeasure = 0 := by
-  rw [← torusMean_eq_haar]
-  apply cutoffAlias_zero_mean χ hab hf.continuous hp hs _ U
-  intro u
-  exact (mean_eq_integral f u).symm.trans (hm u)
 
 end ActualFourierInverse
 
@@ -695,48 +620,7 @@ theorem cutoffAlias_superflat (d : Direction) {a b : ℝ} {f : State → ℂ}
   intro j hj z
   exact (hCbound (M n) hn j hj z).trans (mul_le_mul_of_nonneg_left hnM hC)
 
-theorem cutoffAlias_superflat_of_integratedMean_zero (d : Direction)
-    {a b : ℝ} {f : State → ℂ} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hs : RadialAlias.RadiallySupported a b f)
-    (hm : (∫ U in a..b, sliceMean f U) = 0)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {M : ℕ → ℝ} {h κ A growth : ℝ} (hh : 0 < h) (hκ : 0 < κ)
-    (hM : ∀ᶠ n in atTop, M n ≠ 0)
-    (hbound : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j (cutoffAlias χ (M n) (vector d) f) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  obtain ⟨C, hC, hb⟩ := cutoffAlias_superflat d hab hχ (nonbarPart_smooth hf)
-    (nonbarPart_periodic hp) (nonbarPart_zeroMean hf) (nonbarPart_radiallySupported hs)
-    hleft hright hh hκ hM hbound m N
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [hb] with n hn
-  intro j hj z
-  rw [cutoffAlias_eq_nonbarPart χ hf hs hm]
-  exact hn j hj z
 
-/-- Specialization to the manuscript's explicitly constructed radial
-frequency, whose reciprocal bound is already proved in `ChartScales`. -/
-theorem radial_cutoffAlias_superflat {a b : ℝ} {f : State → ℂ}
-    {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hm : ParametricTorusInverse.ZeroMean f)
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {h : ℝ} (hh : 0 < h) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j
-        (cutoffAlias χ (ChartScales.radialCoefficient h n) (vector .radial) f) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  apply cutoffAlias_superflat .radial (A := ChartScales.Lambda) (growth := ChartScales.rho)
-    hab hχ hf hp hm hs hleft hright hh
-    (show 0 < ChartScales.kappa by norm_num [ChartScales.kappa])
-    (Filter.Eventually.of_forall (fun n => ne_of_gt (ChartScales.radialCoefficient_pos h n)))
-    _ m N
-  filter_upwards [eventually_ge_atTop 4] with n hn
-  simpa only [abs_of_pos (ChartScales.radialCoefficient_pos h n)] using
-    ChartScales.radialCoefficient_inv_upper h hh.le hn
 
 end SmallScale
 

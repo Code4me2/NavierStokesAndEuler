@@ -41,16 +41,7 @@ noncomputable def phaseAction {U : Domain ι PhaseCalculus.Slow}
   fun i x => PrimaryCopyBridge.baseOperator (F.phase.F i (χ i x).1)
     (F.phase.shear i (PrimaryCopyBounds.phasePoint F χ i x))
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem pulseMatrix_eq_phaseMatrix {U : Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (χ : ℕ → D → PhaseCalculus.Slow × ℝ) :
-    pulseMatrix F pref χ = SignedWaveUpdate.phaseMatrix F pref χ := rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem pulseVector_eq_phaseFundamental {U : Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PhaseConstruction U) (χ : ℕ → D → PhaseCalculus.Slow × ℝ) (j : Fin 2) :
-    pulseVector F χ j = SignedWaveUpdate.phaseFundamental F χ j := rfl
 
 /-- The three geometric jet estimates are obtained from the actual phase
 construction, rather than being supplied for the pressure output. -/
@@ -490,26 +481,6 @@ noncomputable def nativeCovariance (hzeta : ∀ x ∈ s.domain, 0 < s.zeta x) :
       (s.zeta_nonneg x hx) scale.lower_pos (scale.bounds l n).1 c.ratio_pos
       (c.scale_ratio l n).1 (c.scale_ratio l n).2).2.2
 
-/-- The requested copy-level `NativeCovariance` is a projection of the
-jointly proved record, retaining the same numerical margins. -/
-noncomputable def nativeCovarianceAt (hzeta : ∀ x ∈ s.domain, 0 < s.zeta x) (l : Λ) :
-    SignedCopyBounds.NativeCovariance s (K l)
-      (fun i n => c.pull (pulseMatrix F pref χ) l n i)
-      (fun i n x => scale.value l n ^ 2 • c.pull T l n i x) := by
-  let hc := h.nativeCovariance c scale hzeta
-  exact {
-    matrix_jets := fun j k => (hc.matrix_jets j k).each l
-    target_jets := fun j => (hc.target_jets j).each l
-    zeta_pos := hc.zeta_pos
-    determinantGap := hc.determinantGap
-    entryBound := hc.entryBound
-    primaryLower := hc.primaryLower
-    gap_pos := hc.gap_pos
-    entry_one := hc.entry_one
-    lower_pos := hc.lower_pos
-    determinant := hc.determinant l
-    entries := hc.entries l
-    lower := hc.lower l }
 
 include h
 
@@ -555,16 +526,6 @@ theorem copied_normal_bounds (normal : PositiveScale Λ) (j : Fin 2)
 
 end ReferenceBounds
 
-/-- The carrier bound is derived for any nonzero integral harmonic, with
-one constant before both the label and the copy. -/
-theorem harmonic_frequency_bound (s : StripData X)
-    (base : Λ → I → LinearWaveBounds.WaveCoefficients X)
-    (harmonic : Λ → ℕ → ℤ) (hn : ∀ l n, harmonic l n ≠ 0)
-    (hf : ∀ l i n, (base l i).frequency n = CurlClassBounds.carrierFrequency s n * (harmonic l n : ℝ)) :
-    UniformPrimaryWeights.UniformBandBound s (1 / 2)
-      (fun li : Λ × I => fun n => 1 / (base li.1 li.2).frequency n) := by
-  obtain ⟨C, hC, p, hb⟩ := UniformPrimaryWeights.harmonic_inverse_bandBound s harmonic hn
-  exact ⟨C, hC, p, fun li n => by dsimp only; rw [hf]; exact hb li.1 n⟩
 
 namespace ReferenceBounds
 
@@ -711,61 +672,6 @@ noncomputable def copiedCoefficients (scale normal clock : PositiveScale Λ)
 
 end PreparedChart
 
-/-- Starting with an already selected prepared primary, a common tail
-restriction gives actual uniform native covariance, request-driven signed
-amplitude/pressure bounds, and the actual cutoff jets. No finished control
-record, target jet, fundamental jet, or copied request jet is an input. -/
-theorem exists_actual_signed_control
-    (a : PrimaryGeometryAssembly.Prepared H₀ v₀ upper B r0 N0)
-    (hcone : LeadingStressWeights.FullTrueCone v₀) (hr0 : 0 < r0)
-    (vr vt : TorusInverse.Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) :
-    ∃ N : ℕ, ∃ hN : a.N ≤ N,
-      ∀ (C : PreparedChart H₀ v₀ (a.restrict N hN) D)
-        (s : StripData LocalSignedRequest.Point)
-        (K : Λ → ℕ → I → Set (LocalSignedRequest.Point × ℝ))
-        (copy : CopyChart (HarmonicWaveInteraction.productStrip s) C.native C.weight K)
-        (scale normal clock : PositiveScale Λ)
-        (base : Λ → I → LinearWaveBounds.WaveCoefficients (LocalSignedRequest.Point × ℝ))
-        (dirs : Λ → I → LinearWaveBounds.GraphDirections (LocalSignedRequest.Point × ℝ))
-        (P : SignedStressPrimitive.Patch) (coord : ℝ)
-        (ctx : CorrectionState.Context LocalSignedRequest.Point)
-        (u : CorrectionState.State LocalSignedRequest.Point) (β : ℝ)
-        (W : Λ → ℕ → LocalSignedRequest.Point × ℝ → ℝ)
-        (j : Fin 2),
-      (∀ x ∈ s.domain, 0 < s.zeta x) →
-      (∀ q, MeanClass s β (fun n x => LocalSignedRequest.normalizedRequest s P coord ctx u n x q)) →
-      (∀ l n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain → 0 ≤ W l n x) →
-      (∀ l n i x, x ∈ (HarmonicWaveInteraction.productStrip s).domain → x ∈ K l n i →
-        copy.pull (pulseEnvelope (PrimaryGeometryAssembly.construction H₀ v₀ (a.restrict N hN) hr0)
-          C.coordinate j) l n i x ≤ W l n x) →
-      (∀ l n i x, x ∈ (HarmonicWaveInteraction.productStrip s).domain → x ∈ K l n i →
-        (fun y => normal.value l n • copy.pull
-          (phaseNormal (PrimaryGeometryAssembly.construction H₀ v₀ (a.restrict N hN) hr0 j) C.coordinate)
-          l n i y) =ᶠ[𝓝 x] (base l i).normal (HarmonicWaveInteraction.productStrip s) (dirs l i) n) →
-      UniformPrimaryWeights.UniformBandBound (HarmonicWaveInteraction.productStrip s) (1 / 2)
-        (fun li : Λ × I => fun n => 1 / (base li.1 li.2).frequency n) →
-      Nonempty (SignedCopyBounds.UniformNativeCovariance (HarmonicWaveInteraction.productStrip s) K
-        (C.copiedMatrix hr0 vr vt copy) (C.copiedTarget copy scale)) ∧
-      UniformLocalJets (HarmonicWaveInteraction.productStrip s)
-        (fun l n x => Real.sqrt (s.zeta x.1) * W l n x) (β + 1 / 2) K
-        (fun l n i => (C.copiedCoefficients hr0 vr vt copy scale normal clock base dirs
-          (LocalSignedRequest.fullRequest s P coord ctx u) j l i).amplitude n) ∧
-      UniformLocalJets (HarmonicWaveInteraction.productStrip s)
-        (fun l n x => Real.sqrt (s.zeta x.1) * W l n x) (β + 1) K
-        (fun l n i => (C.copiedCoefficients hr0 vr vt copy scale normal clock base dirs
-          (LocalSignedRequest.fullRequest s P coord ctx u) j l i).pressure n) ∧
-      UniformLocalJets (HarmonicWaveInteraction.productStrip s) (fun _ _ _ => 1) 0 K
-        (copy.pull (fun L x => GaussianTailFlat.profile (C.coordinate L x).2)) := by
-  obtain ⟨N, hN, hc⟩ := exists_referenceBounds (D := D) H₀ v₀ a hcone hr0 vr vt hdet
-  refine ⟨N, hN, ?_⟩
-  intro C s K copy scale normal clock base dirs P coord ctx u β W j hzeta hrequest hW henv hnormal hfrequency
-  obtain ⟨hr⟩ := hc C
-  have hζ : ∀ x ∈ (HarmonicWaveInteraction.productStrip s).domain,
-      0 < (HarmonicWaveInteraction.productStrip s).zeta x := fun x hx => hzeta x.1 hx
-  have hb := hr.copied_coefficients_jets copy scale normal clock base dirs
-    (LocalSignedRequest.fullRequest s P coord ctx u) hζ
-    (fullRequest_localJets s P coord ctx u hrequest K) hW j henv hnormal hfrequency
-  exact ⟨⟨hr.nativeCovariance copy scale hζ⟩, hb.1, hb.2, copy.unweighted hr.cutoff_jets⟩
 
 end Combined
 

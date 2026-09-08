@@ -526,18 +526,6 @@ theorem phaseCell_of_cut_tsupport (l : SignedLabel B N0) (n : ℕ)
     exact ⟨k, controlCell_subset_phaseCell n (l,k) hk⟩
   · exact False.elim ((notMem_tsupport_iff_eventuallyEq.mpr hz.1) hs)
 
-theorem weightedPhase_positive_jets_cut (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ (l : SignedLabel B N0) n x,
-      x ∈ ActualPrimaryBounds.fullStrip.domain →
-      x ∈ tsupport ((ActualPrimaryBounds.cutCoefficients l).amplitude n) →
-      ∀ j, 1 ≤ j → j ≤ m →
-      ‖iteratedFDeriv ℝ j (weightedPhase l n) x‖ ≤
-        C * ChartScales.S n ^ p * ChartScales.Q n ^ (-(2 * ActualPrimary.h)) := by
-  obtain ⟨C,hC,p,hb⟩ := weightedPhase_positive_jets (B := B) (N0 := N0) m
-  refine ⟨C,hC,p,?_⟩
-  intro l n x hx hs j hj hjm
-  obtain ⟨k,hk⟩ := phaseCell_of_cut_tsupport l n hx hs
-  exact hb n (l,k) x hk j hj hjm
 
 theorem carrier_eq_character (l : SignedLabel B N0) (n : ℕ) :
     HarmonicCalculus.carrier ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)

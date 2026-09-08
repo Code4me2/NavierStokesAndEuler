@@ -95,22 +95,7 @@ theorem productHighLow_bound_smooth {q : ℕ} (hq : 6 ≤ q)
         (mul_nonneg hpos (mul_nonneg (Nat.cast_nonneg _) (norm_nonneg U)))
     _ = sobolevProductConstant period q * ‖U‖ * ‖v‖ := by unfold sobolevProductConstant; ring
 
-/-- The high-low product is additive in its first argument. -/
-theorem productHighLow_add_left {q : ℕ} (L : Vector3 →L[ℝ] ℝ)
-    (u w : SobolevSpace period (q+3)) (v : SobolevSpace period q) :
-    productHighLow period L (u+w) v = productHighLow period L u v + productHighLow period L w v := by
-  apply value_injective period
-  change value period (productHighLow period L (u+w) v) = value period (productHighLow period L u v) + value period (productHighLow period L w v)
-  simp only [productHighLow_value, map_add, scalarProduct_add_left]
 
-/-- The high-low product is additive in its second argument. -/
-theorem productHighLow_add_right {q : ℕ} (L : Vector3 →L[ℝ] ℝ)
-    (u : SobolevSpace period (q+3)) (v w : SobolevSpace period q) :
-    productHighLow period L u (v+w) = productHighLow period L u v + productHighLow period L u w := by
-  apply value_injective period
-  change value period (productHighLow period L u (v+w)) = value period (productHighLow period L u v) + value period (productHighLow period L u w)
-  simp only [productHighLow_value]
-  exact scalarProduct_add_right period (le_refl 3) L _ _ _
 
 /-- Exact product difference decomposition. -/
 theorem productHighLow_sub {q : ℕ} (L : Vector3 →L[ℝ] ℝ)

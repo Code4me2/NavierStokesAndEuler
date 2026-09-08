@@ -46,28 +46,6 @@ theorem regularized_limit_restriction (T : ℝ) (hT : 0 ≤ T)
   exact limit_restriction_ae T hT (truncateOperator period 1)
     (fun n => (truncateOperator period 2).compLeftContinuous ℝ (Icc (0 : ℝ) T) (regularizedState period T n u)) u U hU hrestrict
 
-/-- The genuine heat estimate passes to the strong higher-order time limit without weak compactness. -/
-theorem regularized_limit_bound (T : ℝ) (hT : 0 ≤ T) (ν : ℝ) (hν : 0 < ν)
-    (f : C(Icc (0 : ℝ) T, SobolevSpace period 0)) (u : C(Icc (0 : ℝ) T, SobolevSpace period 1))
-    (hd : ∀ n t, t ∈ Ioo 0 T → ∀ i : Fin 4,
-      HasDerivAt (fun s => value period (derivativeOperator period 2 i (extendPath T hT (regularizedState period T n u) s)))
-        (value period (derivativeOperator period 0 i
-          (ν • laplacianOperator period 1 (extendPath T hT (regularizedState period T n u) t) +
-            extendPath T hT (regularizedForcing period T n f) t))) t)
-    (U : TimeLp T (SobolevSpace period 2))
-    (hU : Filter.Tendsto (fun n => higherTime period T hT (regularizedState period T n u)) Filter.atTop (𝓝 U)) :
-    ‖U‖^2 ≤ (T+4*ν⁻¹)*‖u‖^2 + (ν⁻¹)^2 *
-      ‖pathLp T hT ((valueOperator period 0).compLeftContinuous ℝ (Icc (0 : ℝ) T) f)‖^2 := by
-  have hlow := regularizedState_low_tendsto period T u
-  have hsource := pathLp_tendsto T hT _
-    ((valueOperator period 0).compLeftContinuous ℝ (Icc (0 : ℝ) T) f)
-    (regularizedForcing_value_tendsto period T f)
-  exact EulerQuadraticCauchy.limit_quadratic_bound
-    (fun n => lowerPath period T (regularizedState period T n u))
-    (fun n => sourceTime period T hT (regularizedForcing period T n f))
-    (fun n => higherTime period T hT (regularizedState period T n u)) u _ U (T+4*ν⁻¹) ((ν⁻¹)^2)
-    hlow hsource hU (fun n => heat_time_H2_bound period T hT ν hν
-      (regularizedState period T n u) (regularizedForcing period T n f) (hd n))
 
 /-- Completeness of actual H² Bochner space constructs its strong Cauchy limit. -/
 theorem exists_H2_time_limit (T : ℝ) (u : ℕ → TimeLp T (SobolevSpace period 2)) (hu : CauchySeq u) :
@@ -102,16 +80,5 @@ theorem viscous_mild_maximal_regularity (T : ℝ) (hT : 0 ≤ T) (ν : ℝ) (hν
   intro U hU
   exact ⟨regularized_limit_restriction period T hT u U hU, hU⟩
 
-/-- Actual H² spatial representatives exist for almost every time of the genuine H¹ viscous mild solution. -/
-theorem viscous_mild_ae_H2 (T : ℝ) (hT : 0 ≤ T) (ν : ℝ) (hν : 0 < ν)
-    (u₀ : SobolevSpace period 1) (f : C(Icc (0 : ℝ) T, SobolevSpace period 0))
-    (u : C(Icc (0 : ℝ) T, SobolevSpace period 1))
-    (hsol : ∀ t : Icc (0 : ℝ) T,
-      u t = heatOperator period 1 (2*ν*t.val).toNNReal u₀ +
-        ∫ r in (0 : ℝ)..t.val, heatKernel period 0 ν hν r (extendPath T hT f (t.val-r))) :
-    ∀ᵐ t ∂timeMeasure T, ∃ v : SobolevSpace period 2, value period v = value period (extendPath T hT u t) := by
-  obtain ⟨U, hU, _⟩ := viscous_mild_maximal_regularity period T hT ν hν u₀ f u hsol
-  filter_upwards [hU] with t ht
-  exact ⟨U t, congrArg (value period) ht⟩
 
 end EulerHeatMaximalRegularity

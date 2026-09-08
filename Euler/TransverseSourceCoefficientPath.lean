@@ -137,9 +137,6 @@ def framePathMap (T : ℝ) : C(Icc (0 : ℝ) T,Space →L[ℝ] Space) →L[ℝ]
     C(Icc (0 : ℝ) T,U →L[ℝ] Space) :=
   (referenceRestriction m₀ Rperp).compLeftContinuous ℝ (Icc (0 : ℝ) T)
 
-/-- This restriction is exactly the source frame path `F Rperp`. -/
-theorem framePathMap_apply (T : ℝ) (A : C(Icc (0 : ℝ) T,Space →L[ℝ] Space)) :
-    framePathMap m₀ Rperp T A = framePath m₀ Rperp T A := rfl
 
 /-- Orthogonal reference restriction does not enlarge the coefficient path norm. -/
 theorem framePathMap_norm (T : ℝ) : ‖framePathMap m₀ Rperp T‖ ≤ 1 := by
@@ -161,35 +158,10 @@ theorem sourceFrame_contDiff (T : ℝ)
     (E := C(Icc (0 : ℝ) T,Space →L[ℝ] Space))
     (F := C(Icc (0 : ℝ) T,U →L[ℝ] Space)) (framePathMap m₀ Rperp T)).comp (pointPath_contDiff A)
 
-/-- Source spatial factorial bounds give the exact frame-path bounds used by the inverse. -/
-theorem sourceFrame_gevrey (T : ℝ)
-    (A : SmoothCoefficientPath (Icc (0 : ℝ) T) (Space →L[ℝ] Space))
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C) (d : ℕ)
-    (hb : ∀ n t x, ‖iteratedFDeriv ℝ n (A.field t : Space → Space →L[ℝ] Space) x‖ ≤
-      C*majorant Rc d n) (n : ℕ) (x : Space) :
-    ‖iteratedFDeriv ℝ n (fun y => framePath m₀ Rperp T (pointPath A y)) x‖ ≤ C*majorant Rc d n := by
-  exact contraction_bound (framePathMap m₀ Rperp T) (framePathMap_norm m₀ Rperp T)
-    (pointPath A) (pointPath_contDiff A) Rc C hRc hC d (pointPath_gevrey A Rc C hRc hC d hb) n x
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-/-- The literal frame remains smooth after adjoining independent angle coordinates. -/
-theorem sourceFrame_pullback_contDiff (T : ℝ) (L : P →L[ℝ] Space)
-    (A : SmoothCoefficientPath (Icc (0 : ℝ) T) (Space →L[ℝ] Space)) :
-    ContDiff ℝ ∞ (fun x => framePath m₀ Rperp T (pointPath A (L x))) :=
-  (sourceFrame_contDiff m₀ Rperp T A).comp L.contDiff
 
-/-- The actual source `F Rperp` coefficients satisfy the full joint parameter factorial bounds. -/
-theorem sourceFrame_pullback_gevrey (T : ℝ) (L : P →L[ℝ] Space) (hL : ‖L‖ ≤ 1)
-    (A : SmoothCoefficientPath (Icc (0 : ℝ) T) (Space →L[ℝ] Space))
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C) (d : ℕ)
-    (hb : ∀ n t x, ‖iteratedFDeriv ℝ n (A.field t : Space → Space →L[ℝ] Space) x‖ ≤
-      C*majorant Rc d n) (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => framePath m₀ Rperp T (pointPath A (L y))) x‖ ≤
-      C*majorant Rc d n := by
-  exact contraction_bound (framePathMap m₀ Rperp T) (framePathMap_norm m₀ Rperp T)
-    (fun y => pointPath A (L y)) (pointPath_pullback_contDiff L A) Rc C hRc hC d
-    (pointPath_pullback_gevrey L hL A Rc C hRc hC d hb) n x
 
 end Frame
 

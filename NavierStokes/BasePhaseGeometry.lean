@@ -23,13 +23,6 @@ abbrev Slow := PhaseCalculus.Slow
 abbrev Plane := MovingFrameODE.Plane
 abbrev Space := MovingFrameODE.Space
 
-/-- The normalized base error `Q^(2h)` is exactly the squared native small
-parameter used by the phase estimates. -/
-theorem epsilon_squared (h : ℝ) (n : ℕ) :
-    ChartScales.epsilon h n ^ 2 = ChartScales.Q n ^ (2 * h) := by
-  symm
-  simpa only [ChartScales.epsilon, Nat.cast_ofNat, mul_comm] using
-    Real.rpow_mul_natCast (ChartScales.Q_pos n).le h 2
 
 noncomputable def dampingDenominator (u : ℝ) : ℝ :=
   (1 + u ^ 2) * Real.sqrt (1 + u ^ 2)
@@ -77,14 +70,6 @@ theorem referenceScale_bounds {lam l M viscosity u : ℝ}
       one_le_mul_of_one_le_of_one_le hvlo (dampingDenominator_one_le u)
     exact hM.trans (le_mul_of_one_le_right (hlampos.le.trans hM) hVD)
 
-theorem dyadic_referenceScale_normalization (h u : ℝ) {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
-    (ChartScales.epsilon h n * (ChartScales.carrier h n : ℝ) ^ 2) *
-      referenceScale lam (ChartScales.epsilon h n * (ChartScales.carrier h n : ℝ) ^ 2) u ^ 2 =
-        lam / dampingDenominator u := by
-  apply referenceScale_normalization hlam
-  have hk : 0 < (ChartScales.carrier h n : ℝ) :=
-    Scaling.carrier_frequency_pos (ChartScales.epsilon_pos h n)
-  exact mul_pos (ChartScales.epsilon_pos h n) (pow_pos hk 2)
 
 theorem localBase_mono {F G F0 G0 : Slow → ℝ} {U : Set Slow} {M T ε : ℝ}
     (h : PhaseEstimates.LocalBaseBounds F G F0 G0 U M ε) (hMT : M ≤ T) :
@@ -1059,10 +1044,6 @@ noncomputable def construction (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
       dampingConstant M / D.scale i ≤ (a.frame i).viscosity (q, v)
     linarith [(abs_le.mp hd).1]
 
-theorem construction_frame (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
-    (hu : 0 < u) (huM : u ≤ M) (hL : 1 / (2 * r0) ≤ M)
-    (hslot : 4 * r0 * ChartScales.Tg ≤ M) (hlarge : ∀ i, LargeBand h M u (a.band i)) :
-    (a.construction hh hr hM hu huM hL hslot hlarge).frame = a.frame := rfl
 
 /-- Every fixed derivative of the actual coefficient is controlled after
 the derived zeroth-order geometry is inserted. -/
@@ -1131,34 +1112,6 @@ theorem ordered_constants {K : Set Slow} (hK : IsCompact K)
     fun q hq => (hp q hq).mono h0, ?_⟩
   exact exists_large_band h M u T hh hM N0
 
-/-- One target-cone choice, one compact parameter constant, and then one
-band threshold.  Both the mixed-point target margin and all analytic
-phase estimates hold after that same threshold. -/
-theorem ordered_target_constants {K : Set Slow} (hK : IsCompact K)
-    {F0 G0 : Slow → ℝ} {T0 : Slow → Plane}
-    (hF : ContinuousOn F0 K) (hg : ContinuousOn (PhaseEstimates.shearVector F0 G0) K)
-    (hT : ContinuousOn T0 K) (hR : ∀ q ∈ K, 0 < q.1)
-    (hc : ∀ q ∈ K, ReferenceCone (F0 q) (PhaseEstimates.shearVector F0 G0 q))
-    (ht : ∀ q ∈ K, TargetCone (F0 q) (PhaseEstimates.shearVector F0 G0 q) (T0 q))
-    (h r0 A Tmin : ℝ) (hh : 0 < h) (N0 : ℕ) :
-    ∃ u η M : ℝ, 0 < u ∧ 0 < η ∧ 1 ≤ M ∧ A ≤ M ∧ u ≤ M ∧
-      1 / (2 * r0) ≤ M ∧ 4 * r0 * ChartScales.Tg ≤ M ∧
-      (∀ q ∈ K, ParameterBounds M q.1 (F0 q) (PhaseEstimates.shearVector F0 G0 q)) ∧
-      ∃ N ≥ N0, (∀ n ≥ N, LargeBand h M u n ∧ Tmin ≤ ChartScales.S n) ∧
-        ∀ L : ActiveLabel K, N ≤ L.val.1 → ∀ q ∈ K, q ∈ gridBox L.val.1 L.val.2 2 →
-          ⟪T0 q, normalDirection (PhaseEstimates.shearVector F0 G0 (representative K L))⟫_ℝ ≤ -η ∧
-          |c0 (F0 (representative K L)) (PhaseEstimates.shearVector F0 G0 (representative K L)) *
-            ⟪T0 q, transverseDirection (PhaseEstimates.shearVector F0 G0 (representative K L))⟫_ℝ /
-            ⟪T0 q, normalDirection (PhaseEstimates.shearVector F0 G0 (representative K L))⟫_ℝ| + η ≤
-              slopeRatio u := by
-  obtain ⟨u, η, hu, hη, N1, htarget⟩ := representative_target_margin hK hF hg hT hc ht
-  obtain ⟨M, hM, hA, huM, hL, hslot, hp, N, hN, hlarge⟩ :=
-    ordered_constants hK hF hg hR hc h r0 u A Tmin hh (max N0 N1)
-  refine ⟨u, η, M, hu, hη, hM, hA, ?_, hL, hslot, hp, N,
-    (le_max_left _ _).trans hN, hlarge, ?_⟩
-  · simpa only [abs_of_pos hu] using huM
-  · intro L hLN q hq hbox
-    exact htarget L ((le_max_right _ _).trans (hN.trans hLN)) q hq hbox
 
 /-- The actual selected mesh representatives and their derived compact
 eigenpairs instantiate the analytic phase data.  In particular, neither

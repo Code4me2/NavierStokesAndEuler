@@ -115,26 +115,5 @@ variable (T : ℝ) (hT : 0 ≤ T)
   (hp : ∀ t : Icc (0:ℝ) T, HasDerivWithinAt (extendPath T hT P) (P₁ t) (Icc (0:ℝ) T) t)
   (hG : ∀ t z, ⟪G t z,z⟫_ℝ ≤ K*‖z‖^2)
 
-/-- The two actual stationary histories use the same terminal coordinate
-`ξ`; physical coefficient differences give the scaled initial error. -/
-theorem history_scaled_pair_difference_le (hTpos : 0 < T) (q q₁ d a r : ℝ)
-    (hQn : ‖Q‖ ≤ q) (hPn : ‖P‖ ≤ q) (hQ₁n : ‖Q₁‖ ≤ q₁) (hP₁n : ‖P₁‖ ≤ q₁)
-    (hD : T*‖Q₁‖+‖Q‖ ≤ d) (hD' : T*‖P₁‖+‖P‖ ≤ d)
-    (hA : 1+T^2*‖H‖ ≤ a) (hA' : 1+T^2*‖G‖ ≤ a)
-    (hr : transportCost T Q Q₁ c ≤ r) (hr' : transportCost T P P₁ c ≤ r)
-    (L₀ L₁ LH s : ℝ) (h₀ : ‖Q-P‖ ≤ L₀*s) (h₁ : ‖Q₁-P₁‖ ≤ L₁*s) (hHdiff : ‖H-G‖ ≤ LH*s)
-    (ξ : U) (t : Icc (0:ℝ) T) {p₀ q₀ : Space} (hp₀ : ‖p₀‖ = 1) (hq₀ : ‖q₀‖ = 1)
-    {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) :
-    let u := historyVelocity T hT Q Q₁ H c hc hQ hd K hK hH hsmall ξ t
-    let v := historyVelocity T hT P P₁ G c hc hP hp K hK hG hsmall ξ t
-    |⟪p₀,u⟫_ℝ/ε-⟪p₀,v⟫_ℝ/ε|+|⟪q₀,u⟫_ℝ-⟪q₀,v⟫_ℝ| ≤
-      2*historyDifferenceCost T c q q₁ d a r L₀ L₁ LH*s*‖ξ‖/ε := by
-  have hh := historyVelocity_sub_norm_le_of_coefficient_bounds T hT Q Q₁ H c hc hQ hd K hK hH hsmall
-    P P₁ G hP hp hG hTpos q q₁ d a r hQn hPn hQ₁n hP₁n hD hD' hA hA' hr hr'
-    L₀ L₁ LH s h₀ h₁ hHdiff
-  have h := frame_pair_operator_difference_le
-    (historyVelocity T hT Q Q₁ H c hc hQ hd K hK hH hsmall)
-    (historyVelocity T hT P P₁ G c hc hP hp K hK hG hsmall) ξ t hp₀ hq₀ hε hε1 hh
-  simpa only [mul_assoc] using h
 
 end EulerPacketMovingFrame

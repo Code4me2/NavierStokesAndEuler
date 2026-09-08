@@ -13,14 +13,6 @@ open scoped ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
 
-omit [CompleteSpace E] in
-theorem flow_time_derivative_eq (X u : ℝ × E → E) (q : ℝ × E)
-    (hX : DifferentiableAt ℝ X q)
-    (hflow : HasDerivAt (fun s => X (s,q.2)) (u (q.1,X q)) q.1) :
-    fderiv ℝ X q (1,0) = u (q.1,X q) := by
-  have h := hX.hasFDerivAt.comp_hasDerivAt q.1
-    ((hasDerivAt_id q.1).prodMk (hasDerivAt_const q.1 q.2))
-  exact h.unique hflow
 
 omit [CompleteSpace E] in
 theorem parent_frame_time (X u : ℝ × E → E) (F : ℝ × E → E →L[ℝ] E)

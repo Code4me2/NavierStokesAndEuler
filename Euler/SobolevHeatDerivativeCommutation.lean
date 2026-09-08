@@ -19,13 +19,5 @@ theorem derivative_heat {q : ℕ} (i : Fin 4) (v : ℝ≥0) (u : SobolevSpace pe
   funext w
   rfl
 
-/-- Actual heat commutes with the genuine Laplacian between Sobolev levels. -/
-theorem laplacian_heat {q : ℕ} (v : ℝ≥0) (u : SobolevSpace period (q+2)) :
-    laplacianOperator period q (heatOperator period (q+2) v u) =
-      heatOperator period q v (laplacianOperator period q u) := by
-  rw [laplacianOperator_apply, laplacianOperator_apply, map_sum]
-  apply Finset.sum_congr rfl
-  intro i _
-  rw [derivative_heat, derivative_heat]
 
 end EulerSobolevLaplacian

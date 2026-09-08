@@ -58,12 +58,5 @@ theorem wordDerivative_smooth (word : List (Fin 3)) (f : Space → ℝ)
   | nil => exact hf
   | cons i word ih => exact contDiff_partialDerivative _ ih i
 
-theorem wordDerivative_harmonic_on (word : List (Fin 3)) (f : Space → ℝ)
-    (hf : ContDiff ℝ ∞ f) (U : Set Space) (hU : IsOpen U)
-    (hh : ∀ x ∈ U, Δ f x = 0) : ∀ x ∈ U, Δ (wordDerivative word f) x = 0 := by
-  induction word with
-  | nil => exact hh
-  | cons i word ih =>
-    exact partialDerivative_harmonic_on _ (wordDerivative_smooth word f hf) U hU ih i
 
 end EulerMeanHarmonic

@@ -49,9 +49,5 @@ theorem firstForwardStage_initial_support :
       Metric.closedBall 0 2 :=
   S.firstStage.forwardNext_initial_support hq hB S.firstStage_initial_support
 
-theorem firstForwardStage_initial_field_support :
-    tsupport ((S.firstStage.forwardNext hq hB).state.regularity.velocity
-      (S.firstStage.forwardNext hq hB).parent.zeroTime).field ⊆ Metric.closedBall 0 2 :=
-  S.firstStage.forwardNext_initial_field_support hq hB S.firstStage_initial_support
 
 end EulerPacketInductionScales.Scales

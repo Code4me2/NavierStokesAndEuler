@@ -187,22 +187,6 @@ variable (A : Parent) (H : LowBounds A)
       (A.sourceAgreement m hm J support hSupport H) N hN k hk))
   (I : ParticleInverse A)
 
-theorem normalizedPacketVelocity_initialized (t : Icc (0 : ℝ) A.T) :
-    A.normalizedPacketVelocity m hm J support hSupport Q
-      (initializedApproximationResidual (A.meanData H) (A.transverseData m hm J support hSupport) rfl
-        τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α
-        (A.sourceAgreement m hm J support hSupport H) N hN k hk) k I t =
-    initializedExactPhysicalVelocity (A.meanData H) (A.transverseData m hm J support hSupport) rfl
-      τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α
-      (A.sourceAgreement m hm J support hSupport H) N hN k hk Q t (I.normalized t) := rfl
 
-theorem normalizedPacketPressure_initialized (t : Icc (0 : ℝ) A.T) :
-    A.normalizedPacketPressure m hm J support hSupport Q
-      (initializedApproximationResidual (A.meanData H) (A.transverseData m hm J support hSupport) rfl
-        τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α
-        (A.sourceAgreement m hm J support hSupport H) N hN k hk) k I t =
-    initializedExactPhysicalPressure (A.meanData H) (A.transverseData m hm J support hSupport) rfl
-      τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α
-      (A.sourceAgreement m hm J support hSupport H) N hN k hk Q t (I.normalized t) := rfl
 
 end EulerParentPacketFrames.Parent

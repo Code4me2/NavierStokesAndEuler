@@ -152,13 +152,5 @@ theorem uncutVelocity_ne_zero (hξ : ξ ≠ 0) (t : Icc (0 : ℝ) D.T) (x : Spac
   erw [uncutVelocity_history] at hz
   exact hs hz
 
-theorem vector_uncut_factorization (δ : ℝ) (hδ : 0 < δ) (a : ℝ)
-    (hs : tsupport innerCutoff ⊆ D.support) (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    vector τ hτ hτT B (initialData D δ hδ (a • ξ) hs) (t,(x,θ)) =
-      (a*innerCutoff x*profile δ θ) • uncutVelocity τ hτ hτT B ξ t x := by
-  rw [vector_terminal_smul,vector_factorization_canonical,canonicalVelocity_eq_cutoff_uncut]
-  simp only [smul_smul]
-  congr 1
-  ring
 
 end EulerPacketPrimaryFactorization

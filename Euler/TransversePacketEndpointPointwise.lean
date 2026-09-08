@@ -60,13 +60,5 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteS
   {D : Data U} (B : HistoryData D) (δ : ℝ) (hδ : 0 < δ) (ξ : U)
   (hs : tsupport innerCutoff ⊆ D.support)
 
-theorem compact_wave_history (t : Icc (0 : ℝ) D.T) (x : LiftDomain period) :
-    pointField period (velocityPath B (initialData D δ hδ ξ hs))
-      (velocityPath_orbit B (initialData D δ hδ ξ hs)) t x =
-      scalarField δ x • B.coefficients.labelVelocity x.1 ξ t := by
-  rw [velocityPath_eq_history B (initialData D δ hδ ξ hs) (field δ ξ)
-    (smoothField_continuous period _ (field_smooth δ hδ ξ)) (terminal_ae δ hδ ξ)]
-  change B.coefficients.labelVelocity x.1 (scalarField δ x • ξ) t = _
-  rw [map_smul,ContinuousMap.smul_apply]
 
 end EulerPacketTerminalDatum

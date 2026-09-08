@@ -180,36 +180,5 @@ theorem cutoff_curl_bound (ψ : Space → ℝ) (φ : Space → Space)
   unfold cutoffCurlConstant
   nlinarith [mul_nonneg hc ha]
 
-/-- The distributional cutoff-curl functional on an arbitrary genuine L² field.
-No derivative or divergence condition on `z` is required. -/
-theorem integral_cutoff_curl_bound (ψ : Space → ℝ) (φ : Space → Space)
-    (hψ : ContDiff ℝ ∞ ψ) (hψc : HasCompactSupport ψ)
-    (hφ : ContDiff ℝ ∞ φ) (hφc : HasCompactSupport φ)
-    (z : Lp Space 2 (volume : Measure Space)) :
-    |∫ x, inner ℝ (z x) (vectorCurl (fun y => ψ y • φ y) x)| ≤
-      cutoffCurlConstant * (lpNorm ψ ∞ volume + lpNorm (gradient ψ) 3 volume) *
-        ‖z‖ * lpNorm (fderiv ℝ φ) 2 volume := by
-  have hprod : ContDiff ℝ ∞ (fun y => ψ y • φ y) := hψ.smul hφ
-  have hpc : HasCompactSupport (fun y => ψ y • φ y) := hφc.smul_left (f := ψ)
-  have hm : MemLp (vectorCurl (fun y => ψ y • φ y)) 2 volume :=
-    vectorCurl_memLp _ hprod hpc
-  let v : Lp Space 2 (volume : Measure Space) := hm.toLp _
-  have hv : ‖v‖ = lpNorm (vectorCurl (fun y => ψ y • φ y)) 2 volume := by
-    rw [Lp.norm_toLp, toReal_eLpNorm hm.aestronglyMeasurable]
-  have he : (∫ x, inner ℝ (z x) (vectorCurl (fun y => ψ y • φ y) x)) = inner ℝ z v := by
-    rw [L2.inner_def]
-    apply integral_congr_ae
-    filter_upwards [hm.coeFn_toLp] with x hx
-    rw [hx]
-  calc
-    |∫ x, inner ℝ (z x) (vectorCurl (fun y => ψ y • φ y) x)| = |inner ℝ z v| := congrArg abs he
-    _ ≤ ‖z‖ * ‖v‖ := by
-      simpa only [Real.norm_eq_abs] using norm_inner_le_norm (𝕜 := ℝ) z v
-    _ ≤ ‖z‖ * (cutoffCurlConstant * (lpNorm ψ ∞ volume + lpNorm (gradient ψ) 3 volume) *
-        lpNorm (fderiv ℝ φ) 2 volume) := by
-      rw [hv]
-      exact mul_le_mul_of_nonneg_left (cutoff_curl_bound ψ φ hψ hψc hφ hφc) (norm_nonneg z)
-    _ = cutoffCurlConstant * (lpNorm ψ ∞ volume + lpNorm (gradient ψ) 3 volume) *
-        ‖z‖ * lpNorm (fderiv ℝ φ) 2 volume := by ring
 
 end EulerMeanCutoffCurl

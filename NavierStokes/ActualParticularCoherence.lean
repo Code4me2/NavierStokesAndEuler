@@ -141,30 +141,6 @@ theorem corrected_eq_band_of_germs (x : CorrectionStep.CycleState (Label B N0))
   exact congrArg₂ (· * ·) rfl (PhysicalCurlCovariance.carrier_eq_of_products
     (congrArg (((j : ℝ) * (x.coefficients.blocks l).frequency n) * ·) hphi.eq_of_nhds))
 
-/-- Forward cover order: the germ inputs are consequences of the current
-state and coefficient identities, not assumptions about the solved wave. -/
-theorem corrected_forward (x : CorrectionStep.CycleState (Label B N0))
-    (l : Label B N0) {V : Set Plane} (hV : IsOpen V) (htime : ∀ s ∈ V, 0 < s.1)
-    (n k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h (BaseChartJets.cellBand l.2))
-    (HS : ActualReferenceRebase.StateComparison x V n (BaseChartJets.cellBand l.2) k)
-    (HB : ActualReferenceRebase.BlockComparison x l V n (BaseChartJets.cellBand l.2) k)
-    (j : ℤ) (hj : j ≠ 0)
-    (hn : (x.coefficients.blocks l).frequency n ≠ 0)
-    (hm : (x.coefficients.blocks l).frequency (BaseChartJets.cellBand l.2) ≠ 0)
-    (z : Cylinder) (hz : z ∈ cylinderDomain V) :
-    vectorMode ((corrected x l j).frequency n) ((corrected x l j).phase n)
-      ((corrected x l j).amplitude n) (waveEquiv z) =
-      bandVelocity (ActualReferenceRebase.nativeAssembly x l) h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos (BaseChartJets.cellBand l.2)) (CommonWindow.index h n)
-        (ActualParticularStageControls.gap l n)
-        ((j : ℝ) * (x.coefficients.blocks l).frequency n) j z := by
-  apply corrected_eq_band_of_germs
-  · filter_upwards [(cylinderDomain_open hV).mem_nhds hz] with y hy
-    exact ActualReferenceRebase.actualAmplitude_forward x l hV htime n k hi HS HB j
-      (cylinderParameter y) hy (waveEquiv y).1.2 (waveEquiv y).2
-  · filter_upwards [(cylinderDomain_open hV).mem_nhds hz] with y hy
-    exact (ActualReferenceRebase.actualPhase_forward x l V n k hi HB j hj hn hm
-      (cylinderParameter y) hy (waveEquiv y).1.2 (waveEquiv y).2).symm
 
 /-! ## Composition of the actual primitive copy data
 

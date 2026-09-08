@@ -40,14 +40,6 @@ def residual (a : ℕ → ℝ) (q : SpaceTime → ℝ)
     (A B : ℕ → VelocityField) (P : ℕ → PressureField) : VelocityField :=
   fun z => navierStokesResidual (velocity a q A B) (pressure a q P) z.1 z.2
 
-/-- The residual is exactly the nonlinear residual used by the mixed
-localization and force construction, including both cross interactions. -/
-theorem residual_eq_originalResidual (a : ℕ → ℝ) (q : SpaceTime → ℝ)
-    (A B : ℕ → VelocityField) (P : ℕ → PressureField) :
-    residual a q A B P = MixedPeriodicAssembly.originalResidual
-      (SolenoidalDiagonal.potentialSum a q A)
-      (SolenoidalDiagonal.potentialSum a q B)
-      (SolenoidalDiagonal.potentialSum a q P) := rfl
 
 theorem velocity_smooth {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     {q : SpaceTime → ℝ} {A B : ℕ → VelocityField} {U : Set SpaceTime}
@@ -57,17 +49,6 @@ theorem velocity_smooth {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
   (SolenoidalDiagonal.velocitySum_contDiffOn ha hU hqpos hq hA).add
     (SolenoidalDiagonal.potentialSum_contDiffOn ha hU hqpos hq hB)
 
-/-- Smoothness of the full cut sums suffices. The raw stages need not
-be smooth outside the positive-scale domain where they are constructed. -/
-theorem velocity_smooth_of_sums {a : ℕ → ℕ} {h : ℝ}
-    {A B : ℕ → VelocityField} {P : ℕ → PressureField}
-    (hs : MixedDiagonalSchedule.ThreeSmoothSums a h A B P) :
-    ContDiffOn ℝ ∞ (velocity (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A B)
-      PhysicalWaveSum.preterminal := by
-  intro z hz
-  have hmem := PhysicalWaveSum.preterminal_open.mem_nhds hz
-  exact ((SpatialCurl.contDiffAt_spatialCurl (hs.potential.contDiffAt hmem)
-    (by simp)).add (hs.direct.contDiffAt hmem)).contDiffWithinAt
 
 theorem uncutVelocity_smooth {A B : ℕ → VelocityField} {U : Set SpaceTime}
     (hU : IsOpen U) (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U)

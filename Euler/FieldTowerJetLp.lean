@@ -75,8 +75,5 @@ theorem coverTensor_weighted (n : ℕ) (ρ C : ℝ) (hρ : 0 < ρ)
       mul_le_mul_of_nonneg_left hlevel (pow_nonneg (norm_nonneg _) n)
     _ = _ := by rw [weight, div_div_eq_mul_div, mul_pow, inv_pow]; ring
 
-theorem toSmoothTimeField_jetSeries (n : ℕ) (t : Icc (0 : ℝ) T) :
-    (fun q => jetSeries P (A.toSmoothTimeField.field t : LiftTangent → Vector3) q n) =
-      tensor P (A.pointField t) n := rfl
 
 end EulerAllOrderCorrectionData.FieldTower

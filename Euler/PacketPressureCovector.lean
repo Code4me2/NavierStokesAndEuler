@@ -29,8 +29,6 @@ def gradientLinear : ScalarJet →ₗ[ℝ] Space where
   map_add' J K := by simp [add_comp]
   map_smul' c J := by simp [smul_comp]
 
-theorem gradientLinear_jet (p : ScalarField) (z : Domain) :
-    gradientLinear (pressureJet p z)=pressureGradient p z := rfl
 
 theorem fieldSum_assemble {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (N : ℕ) (κ : ℝ) (u c : ℕ → Domain → E) (z : Domain) :

@@ -93,28 +93,5 @@ theorem propagator_norm_le_two_of_deformation (C C₁ : ℝ) (hC : 0 ≤ C) (hC�
     (fun r y _ => sourceGenerator_norm_le D C C₁ hC hC₁ hdet hF hF₁ r y)
     hshort t s hst x (mem_univ _)
 
-/-- The full source forward budget for g=1. All homogeneous propagation
-estimates are proved from the displayed shortness condition. -/
-def shortTimeForwardBudget (q : ℕ) (R C C₁ : ℝ)
-    (hR : 0 ≤ R) (hC : 0 ≤ C) (hC₁ : 0 ≤ C₁)
-    (hdet : ∀ t x, (operatorMatrix (D.F.field t x)).det=1)
-    (hF : ∀ n t x, ‖iteratedFDeriv ℝ n (D.F.field t : Space → Space →L[ℝ] Space) x‖ ≤ C*majorant R 0 n)
-    (hF₁ : ∀ n t x, ‖iteratedFDeriv ℝ n (D.F₁.field t : Space → Space →L[ℝ] Space) x‖ ≤ C₁*majorant R 0 n)
-    (Ω : Set Space) (hΩ : MeasurableSet Ω) (hΩo : IsOpen Ω)
-    (hsub : D.support ⊆ Ω) (hΩball : ∀ x ∈ Ω, ‖x‖ ≤ (1/2 : ℝ))
-    (hshort : shortTimeRate C C₁*D.T ≤ 1/2) :
-    EulerTransversePacketForward.Budget D (Fin 4) q := by
-  apply EulerPacketParentForwardBudget.sourceForwardBudget D q R C C₁ 2
-    hR hC hC₁ (by norm_num) hdet hF hF₁ (1 : C(Icc (0 : ℝ) D.T,ℝ))
-    (by intro t; norm_num) (by norm_num) Ω hΩ hΩo hsub hΩball
-  intro t s hst x _
-  have hf (r : Icc (0 : ℝ) D.T) (y : Space) : ‖D.F.field r y‖ ≤ C := by
-    simpa only [norm_iteratedFDeriv_zero,majorant,Nat.zero_add,Nat.factorial_zero,
-      Nat.cast_one,pow_zero,mul_one,one_pow] using hF 0 r y
-  have hf₁ (r : Icc (0 : ℝ) D.T) (y : Space) : ‖D.F₁.field r y‖ ≤ C₁ := by
-    simpa only [norm_iteratedFDeriv_zero,majorant,Nat.zero_add,Nat.factorial_zero,
-      Nat.cast_one,pow_zero,mul_one,one_pow] using hF₁ 0 r y
-  simpa only [ContinuousMap.one_apply,mul_one,div_one,propagator,fundamental] using
-    propagator_norm_le_two_of_deformation D C C₁ hC hC₁ hdet hf hf₁ hshort t s hst x
 
 end EulerPacketSourcePropagator

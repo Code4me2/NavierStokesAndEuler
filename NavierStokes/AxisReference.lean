@@ -197,12 +197,6 @@ on `|Y|≤5`, uniformly over the parameter interval. -/
 def stabilityScale (ε K : ℝ) : ℝ :=
   1 + 500 * (AxisEvaluation.jetBound ε 5 0 0 + AxisEvaluation.jetBound ε 5 1 0) * K
 
-theorem stabilityScale_pos {ε K : ℝ} (hε : 0 < ε) (hK : 0 ≤ K) :
-    0 < stabilityScale ε K := by
-  have hC₀ := AxisEvaluation.jetBound_nonneg hε (by norm_num : (1 : ℝ) ≤ 5) 0 0
-  have hC₁ := AxisEvaluation.jetBound_nonneg hε (by norm_num : (1 : ℝ) ≤ 5) 1 0
-  unfold stabilityScale
-  positivity
 
 theorem value_error_le (I : Window) {ε K Λ : ℝ} (hε : 0 < ε) (hK : 0 ≤ K)
     (hΛ : stabilityScale ε K ≤ Λ) {Φ u Φ₀ u₀ : ℝ × ℝ → ℝ}

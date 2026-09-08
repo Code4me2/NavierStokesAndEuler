@@ -48,12 +48,6 @@ theorem localPressure_eq_sum (x : CycleState (ActualInitialization.Index B N0)) 
     Equiv.symm_symm, Finset.sum_map, Equiv.toEmbedding_apply,
     ActualCycleParameters.swap_apply]
 
-theorem nativeMode_eq (x : CycleState (ActualInitialization.Index B N0))
-    (l : ActualInitialization.Index B N0) (j : ℤ) (n : ℕ)
-    (z : PhysicalResidualBridge.Cylinder) (k : Fin 3) :
-    ActualParticularCycleData.nativeMode x l j n z k =
-      (nativeVelocity (ActualCycleParameters.particularState x) (l.2,l.1) j n
-        (ActualWaveRegularity.particularChart z) k).re := rfl
 
 theorem particularVelocity_eq_sum {x : CycleState (ActualInitialization.Index B N0)} {σ : ℝ}
     (H : ActualParticularCycleData.Invariant σ x) (n : ℕ)

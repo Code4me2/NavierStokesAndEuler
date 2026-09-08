@@ -65,16 +65,5 @@ def spatialDerivative (G : Forcing D raw) (v : Space) :
 
 end Forcing
 
-/-- Every actual finite sum of admissible forcing fields is admissible. -/
-theorem admissible_finset_sum {ι : Type*} (D : Data) (s : Finset ι) (raw : ι → VectorField)
-    (h : ∀ i ∈ s, Nonempty (Forcing D (raw i))) : Nonempty (Forcing D (∑ i ∈ s, raw i)) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using (show Nonempty (Forcing D 0) from ⟨Forcing.zero D⟩)
-  | @insert i s his ih =>
-    have hi : Nonempty (Forcing D (raw i)) := h i (Finset.mem_insert_self i s)
-    have hs : Nonempty (Forcing D (∑ j ∈ s, raw j)) := ih (fun j hj => h j (Finset.mem_insert_of_mem hj))
-    simpa only [Finset.sum_insert his] using
-      (show Nonempty (Forcing D (raw i+∑ j ∈ s, raw j)) from ⟨(Classical.choice hi).add (Classical.choice hs)⟩)
 
 end EulerMeanPacketProvider

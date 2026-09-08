@@ -30,19 +30,12 @@ theorem maximalVorticityDensity_nonneg (r : ℝ) : 0 ≤ L.maximalVorticityDensi
   · exact L.maximalVorticityNorm_nonneg _
   · exact le_rfl
 
-theorem maximalVorticityDensity_measurable : Measurable L.maximalVorticityDensity := by
-  classical
-  exact L.maximalVorticityNorm_continuous.measurable.dite measurable_const measurableSet_Ico
 
 theorem maximalVorticityDensity_eq (t : L.Time) :
     L.maximalVorticityDensity t=L.maximalVorticityNorm t := by
   classical
   simp only [maximalVorticityDensity,dite_eq_left t.property]
 
-theorem maximalVorticityDensity_le_iff (t : L.Time) (K : ℝ) :
-    L.maximalVorticityDensity t ≤ K ↔ ∀ x, ‖vectorCurl (L.maximalVelocity t) x‖ ≤ K := by
-  rw [L.maximalVorticityDensity_eq]
-  exact L.maximalVorticityNorm_le_iff t K
 
 theorem maximalVorticityDensity_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
     (t : Icc (0 : ℝ) S) :

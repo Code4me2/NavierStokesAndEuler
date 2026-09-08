@@ -40,28 +40,6 @@ theorem contDiff_coerciveInverse_variable
     exact contDiffAt_map_inverse (coerciveEquiv (A x) (c x) (hc x) (hA x))
   exact hinv.comp x hreg.contDiffAt
 
-/-- The actual derivative of an inverse, even with a varying coercivity certificate. -/
-theorem hasDerivAt_coerciveInverse_variable
-    (A : ℝ → E →L[ℝ] E) (c : ℝ → ℝ) (hc : ∀ x, 0 < c x)
-    (hA : ∀ x v, c x * ‖v‖^2 ≤ ⟪A x v, v⟫_ℝ)
-    (x : ℝ) (A₁ : E →L[ℝ] E) (hder : HasDerivAt A A₁ x) :
-    HasDerivAt (fun r => coerciveInverse (A r) (c r) (hc r) (hA r))
-      (-(coerciveInverse (A x) (c x) (hc x) (hA x)).comp
-        (A₁.comp (coerciveInverse (A x) (c x) (hc x) (hA x)))) x := by
-  let u : (E →L[ℝ] E)ˣ := (coerciveEquiv (A x) (c x) (hc x) (hA x)).toUnit
-  have hu : (u : E →L[ℝ] E) = A x := by
-    ext v
-    exact coerciveEquiv_apply (A x) (c x) (hc x) (hA x) v
-  have hui : (↑u⁻¹ : E →L[ℝ] E) = coerciveInverse (A x) (c x) (hc x) (hA x) := rfl
-  have hi := hasFDerivAt_ringInverse (𝕜 := ℝ) u
-  rw [hu] at hi
-  have hcomp := hi.comp_hasDerivAt x hder
-  have hfun : (fun r => coerciveInverse (A r) (c r) (hc r) (hA r)) = Ring.inverse ∘ A := by
-    funext r
-    exact coerciveInverse_eq_ringInverse (A r) (c r) (hc r) (hA r)
-  rw [hfun]
-  simpa only [neg_apply, ContinuousLinearMap.mulLeftRight_apply, hui,
-    ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_assoc] using hcomp
 
 /-- Actual forcing-to-solution regularity for a parameterized coercive solve. -/
 theorem contDiff_coerciveSolution_variable

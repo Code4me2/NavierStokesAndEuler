@@ -192,11 +192,6 @@ theorem waveStage_covariance (g : VariableGaugeMean.GaugeData S)
   unfold covarianceIncrement State.covariance
   abel
 
-theorem waveStage_gaussian (g : VariableGaugeMean.GaugeData S)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (w : Oscillation (PressureStream.Lift S)) (q : OscillatoryScalar (PressureStream.Lift S))
-    (gaussian : Oscillation (PressureStream.Lift S)) :
-    (waveStage g c u w q gaussian).errors.gaussian = u.errors.gaussian + gaussian := rfl
 
 theorem waveStage_theta_change {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
     (g : VariableGaugeMean.GaugeData S) (c : Context (PressureStream.Lift S))
@@ -1351,14 +1346,5 @@ theorem native_signed_mean_gain
   obtain ⟨hcθ, hcz⟩ := native_family_cross G B c u f a hl hp hcp ht hct
   exact signed_mean_gain_of_cross G c u hσ hκ hκsmall f a q gaussian hold H ho hX hS hθ hz hd hcθ hcz
 
-/-- The excluded Gaussian field is carried by the very same output state.
-The raw mean estimate does not set this field or its average to zero. -/
-theorem native_stage_gaussian_retained
-    (G : Geometry) (c : Context Point) (u : State Point)
-    {ι : Type} {P : ι → ℕ → Point → ℝ} {α δ β η : ℝ}
-    (f : LabelSumBounds.SignedFamily G.strip P α δ β η) (a : Assembly f)
-    (q : OscillatoryScalar Point) (gaussian : Oscillation Point) :
-    (waveStage G.gauge c u (tangentField f a + curlField f a) q gaussian).errors.gaussian =
-      u.errors.gaussian + gaussian := rfl
 
 end NavierStokes.SignedMeanGain

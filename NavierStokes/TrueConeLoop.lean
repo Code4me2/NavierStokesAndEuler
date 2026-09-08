@@ -133,9 +133,6 @@ theorem varianceRoot_sq (a δ v : ℝ) (ha : 0 < a) :
     varianceRoot a δ v ^ 2 = correction δ v / a := by
   simp only [varianceRoot, div_pow, Real.sq_sqrt ha.le, correction]
 
-theorem varianceRoot_zero (a δ v : ℝ) (hδ : 0 < δ) (hv : highSpeed δ ≤ v) :
-    varianceRoot a δ v = 0 := by
-  simp only [varianceRoot, correctionRoot_zero δ v hδ hv, zero_div]
 
 theorem varianceRoot_bound (amin a δ v : ℝ) (hmin : 0 < amin) (ha : amin ≤ a)
     (hδ : 0 < δ) (hδ₁ : δ ≤ 1) (hv : 0 < v) :
@@ -229,9 +226,6 @@ theorem seedSpeed_nominal_of_inactive (a m δ : ℝ)
   simp only [seedSpeed, correctedSpeed, correction, correctionRoot, hzero,
     zero_mul, zero_pow (by decide : (2 : ℕ) ≠ 0), add_zero]
 
-theorem seedTilt_nominal (a m d p δ : ℝ) (hδ : 0 < δ)
-    (hh : highSpeed δ ≤ nominalSpeed a m) : seedTilt a m d p δ = (fun _ => m) :=
-  seedTilt_nominal_of_inactive a m d p δ (speedCutoff_zero δ _ hδ hh)
 
 theorem seed_cone (a m p₁ p₂ d δ R : ℝ) (ha : 0 < a) (hd : 0 < d)
     (hδ : 0 < δ) (hδ₁ : δ ≤ 1) (hR : Real.sqrt (3 / a) ≤ R)
@@ -405,36 +399,6 @@ theorem constructed_nominal (a m d p δ : ℝ) (ha : 0 < a) (hd : d ≠ 0) (hδ 
     have hnz := ne_of_gt (one_add_sq_pos m)
     field_simp
 
-/-- Fixed-parameter true-cone realization, with no assumed loop or margin.
-The nominal data need only satisfy the relaxed cone. -/
-theorem exists_trueCone_loop (a m p₁ p₂ : ℝ) (ha : 0 < a)
-    (hP : 2 < p₁ + p₂ * m)
-    (hrelaxed : nominalSpeed a m < coneBound (p₁ + p₂ * m) (p₂ - p₁ * m)) :
-    ∃ A C : ℝ → ℝ, ContDiff ℝ ∞ A ∧ ContDiff ℝ ∞ C ∧
-      Function.Periodic A 1 ∧ Function.Periodic C 1 ∧
-      (∫ φ in (0 : ℝ)..1, A φ) = a ∧ (∫ φ in (0 : ℝ)..1, C φ) = a * m ∧
-      ∀ φ, InTrueCone p₁ p₂ (A φ) (C φ) := by
-  let d := (p₁ + p₂ * m - 2) / 2
-  have hd : 0 < d := by dsimp [d]; linarith
-  have hmargin : 2 ≤ p₁ + p₂ * m - d := by dsimp [d]; linarith
-  let R := Real.sqrt (3 / a)
-  obtain ⟨ε, hε, hU⟩ := uniform_tilt_cone_margin (X := ℝ) (K := {0}) isCompact_singleton
-    (fun _ => m) (fun _ => p₁) (fun _ => p₂) continuous_const continuous_const continuous_const
-    d R hd (fun _ _ => hmargin)
-  let δ := min ε 1
-  have hδ : 0 < δ := lt_min hε (by norm_num)
-  have hδ₁ : δ ≤ 1 := min_le_right _ _
-  have hUδ : ∀ r ∈ Icc (0 : ℝ) R, ∀ θ,
-      2 + δ ≤ coneBound (p₁ + p₂ * solvedTilt m d p₂ r θ) (p₂ - p₁ * solvedTilt m d p₂ r θ) := by
-    intro r hr θ
-    exact (add_le_add_right (min_le_left ε 1) 2).trans (hU 0 (by simp) r hr θ)
-  let A := constructedA a m d p₂ δ ha (ne_of_gt hd) hδ
-  let C := constructedC a m d p₂ δ ha (ne_of_gt hd) hδ
-  have hs := constructed_smooth a m d p₂ δ ha (ne_of_gt hd) hδ
-  have hp := constructed_periodic a m d p₂ δ ha (ne_of_gt hd) hδ
-  have hm := constructed_means a m d p₂ δ ha (ne_of_gt hd) hδ
-  exact ⟨A, C, hs.1, hs.2, hp.1, hp.2, hm.1, hm.2,
-    constructed_trueCone a m p₁ p₂ d δ R ha hd hδ hδ₁ le_rfl hmargin hrelaxed hUδ⟩
 
 structure FamilyChoices {X : Type*} (a m p₁ p₂ : X → ℝ) (K B : Set X) where
   aMin : ℝ
@@ -760,42 +724,6 @@ theorem exists_compact_trueCone_family [FiniteDimensional ℝ E]
   exact ⟨U, N, A, C, isOpen_lt continuous_const ha.continuous, haK,
     hN, hBN, hNU, hs.1, hs.2, family_pointwise_properties a m p₁ p₂ c hrelaxed, hmatch⟩
 
-/-- The complete family theorem with one strictly positive margin valid
-for every slow parameter in `K` and every fast angle. -/
-theorem exists_compact_trueCone_family_with_margin [FiniteDimensional ℝ E]
-    (a m p₁ p₂ : E → ℝ) {K B : Set E}
-    (hK : IsCompact K) (hB : IsCompact B) (hBK : B ⊆ K)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
-    (hp₁ : ContDiff ℝ ∞ p₁) (hp₂ : ContDiff ℝ ∞ p₂)
-    (haK : ∀ x ∈ K, 0 < a x)
-    (hPK : ∀ x ∈ K, 2 < p₁ x + p₂ x * m x)
-    (hrelaxed : ∀ x ∈ K, nominalSpeed (a x) (m x) <
-      coneBound (p₁ x + p₂ x * m x) (p₂ x - p₁ x * m x))
-    (htrueB : ∀ x ∈ B, 2 < nominalSpeed (a x) (m x)) :
-    ∃ ε : ℝ, ∃ U N : Set E, ∃ A C : E × ℝ → ℝ,
-      0 < ε ∧ IsOpen U ∧ K ⊆ U ∧ IsOpen N ∧ B ⊆ N ∧ N ⊆ U ∧
-      ContDiffOn ℝ ∞ A (U ×ˢ (univ : Set ℝ)) ∧
-      ContDiffOn ℝ ∞ C (U ×ˢ (univ : Set ℝ)) ∧
-      (∀ x ∈ K, Function.Periodic (fun φ => A (x, φ)) 1 ∧
-        Function.Periodic (fun φ => C (x, φ)) 1 ∧
-        (∫ φ in (0 : ℝ)..1, A (x, φ)) = a x ∧
-        (∫ φ in (0 : ℝ)..1, C (x, φ)) = a x * m x ∧
-        ∀ φ, InTrueCone (p₁ x) (p₂ x) (A (x, φ)) (C (x, φ)) ∧
-          HasConeMargin ε (p₁ x) (p₂ x) (A (x, φ)) (C (x, φ))) ∧
-      (∀ x ∈ N, ∀ φ, A (x, φ) = a x ∧ C (x, φ) = a x * m x) := by
-  obtain ⟨U, N, A, C, hU, hKU, hN, hBN, hNU, hA, hC, hloops, hmatch⟩ :=
-    exists_compact_trueCone_family a m p₁ p₂ hK hB hBK ha hm hp₁ hp₂ haK hPK hrelaxed htrueB
-  have hsub : K ×ˢ (univ : Set ℝ) ⊆ U ×ˢ (univ : Set ℝ) :=
-    fun _ hz => ⟨hKU hz.1, hz.2⟩
-  obtain ⟨ε, hε, hmargin⟩ := compact_periodic_trueCone_margins p₁ p₂ A C hK
-    hp₁.continuous.continuousOn hp₂.continuous.continuousOn
-    (hA.continuousOn.mono hsub) (hC.continuousOn.mono hsub)
-    (fun x hx => (hloops x hx).1) (fun x hx => (hloops x hx).2.1)
-    (fun x hx => (hloops x hx).2.2.2.2)
-  refine ⟨ε, U, N, A, C, hε, hU, hKU, hN, hBN, hNU, hA, hC, ?_, hmatch⟩
-  intro x hx
-  obtain ⟨hpA, hpC, hmA, hmC, hc⟩ := hloops x hx
-  exact ⟨hpA, hpC, hmA, hmC, fun φ => ⟨hc φ, hmargin x hx φ⟩⟩
 
 end SmoothFamily
 

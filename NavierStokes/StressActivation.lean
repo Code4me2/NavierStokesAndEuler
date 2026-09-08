@@ -75,12 +75,6 @@ theorem weightedPrimitive_smooth (T κ : ℝ) {J : Set ℝ} (hJ : IsOpen J) {B :
     ContDiffOn ℝ ∞ (weightedPrimitive T κ B) (logDomain J hJ).carrier :=
   primitive_smooth (logDomain J hJ) (weightedField_smooth T κ hJ hB)
 
-theorem weightedPrimitive_hasDerivAt (T κ : ℝ) {J : Set ℝ} (hJ : IsOpen J) {B : Field}
-    (hB : ContDiffOn ℝ ∞ B (logDomain J hJ).carrier) (y : ℝ) {η : ℝ} (hη : η ∈ J) :
-    HasDerivAt (fun x => weightedPrimitive T κ B (x, η))
-      (activation T κ y * B (y, η)) y :=
-  primitive_hasDerivAt (logDomain J hJ) (weightedField_smooth T κ hJ hB)
-    (p := (y, η)) ⟨mem_univ _, hη⟩
 
 theorem weightedPrimitive_zero {T : ℝ} (hT : 0 < T) (κ : ℝ) (B : Field)
     {y : ℝ} (hy : y ≤ 0) (η : ℝ) : weightedPrimitive T κ B (y, η) = 0 := by
@@ -354,13 +348,6 @@ noncomputable def relativeFactor (T κ : ℝ) (L : Field) (p : Point) : ℝ :=
   -primitiveFactor T (radialPartial L) p *
     meanExp (-weightedPrimitive T κ (radialPartial L) p)
 
-theorem relativeFactor_smooth {T : ℝ} (hT : 0 < T) (κ : ℝ)
-    {J : Set ℝ} (hJ : IsOpen J) {L : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (relativeFactor T κ L) (logDomain J hJ).carrier := by
-  have hD := radialPartial_smooth (logDomain J hJ) hL
-  exact (primitiveFactor_smooth hT hJ hD).neg.mul
-    (meanExp_smooth.comp_contDiffOn (weightedPrimitive_smooth T κ hJ hD).neg)
 
 @[simp] theorem relativeFactor_zero (T κ : ℝ) (L : Field) (η : ℝ) :
     relativeFactor T κ L (0, η) = 0 := by simp [relativeFactor]
@@ -470,26 +457,7 @@ theorem scaled_family_jet_bound {T : ℝ} (_hT : 0 < T) {J K : Set ℝ}
     (mul_nonneg hy.1 (activation_nonneg T κ y hκ.2))
   nlinarith
 
-theorem controlled_parameter_jet_bounds {T : ℝ} (hT : 0 < T) {J K : Set ℝ}
-    (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J) {F : Field}
-    (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ => controlled T κ F (y, ξ) - F (y, ξ)) η| ≤
-        M * y * activation T κ y := by
-  apply scaled_family_jet_bound hT hJ hK hKJ (differenceFamily_smooth hT hJ hF)
-  intro κ y η hη
-  exact controlled_difference_factorization hT κ hJ hF y hη
 
-theorem angular_relative_parameter_jet_bounds {T : ℝ} (hT : 0 < T) {J K : Set ℝ}
-    (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J) {L : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ =>
-        activatedAngular T κ L (y, ξ) / referenceAngular L (y, ξ) - 1) η| ≤
-          M * y * activation T κ y := by
-  apply scaled_family_jet_bound hT hJ hK hKJ (relativeFamily_smooth hT hJ hL)
-  intro κ y η hη
-  exact angular_relative_difference hT κ hJ hL y hη
 
 /-! ## Flat integrals of smoothly parameterized families -/
 
@@ -522,17 +490,6 @@ theorem familyPrimitiveFactor_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : 
       (hf.comp ((contDiff_fst.fst.prodMk contDiff_snd).prodMk contDiff_fst.snd).contDiffOn
         (fun _ hp => ⟨⟨mem_univ _, hp.2⟩, mem_univ _⟩))
 
-theorem weighted_family_parameter_jet_bounds {T : ℝ} (hT : 0 < T) {J K : Set ℝ}
-    (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J)
-    {B : FamilyPoint → ℝ} (hB : ContDiffOn ℝ ∞ B ((univ : Set (ℝ × ℝ)) ×ˢ J)) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ =>
-        weightedPrimitive T κ (fun p => B ((κ, p.1), p.2)) (y, ξ)) η| ≤
-          M * y * activation T κ y := by
-  apply scaled_family_jet_bound hT hJ hK hKJ (familyPrimitiveFactor_smooth hT hJ hB)
-  intro κ y η _
-  rw [familyPrimitiveFactor_eq]
-  exact weightedPrimitive_factorization hT κ _ _
 
 /-! ## The five actual pressure and moment histories -/
 
@@ -778,19 +735,6 @@ theorem history_difference_factorization {T : ℝ} (hT : 0 < T) (κ X0 : ℝ)
     weightedPrimitive_factorization hT]
   rfl
 
-theorem history_parameter_jet_bounds {T : ℝ} (hT : 0 < T) (X0 : ℝ)
-    (initial : HistoryRow → ℝ → ℝ) {J K : Set ℝ}
-    (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J) {L U : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) (r : HistoryRow) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ =>
-        logHistory X0 initial (activatedAngular T κ L) (controlled T κ U) r (y, ξ) -
-          logHistory X0 initial (referenceAngular L) U r (y, ξ)) η| ≤
-            M * y * activation T κ y := by
-  apply scaled_family_jet_bound hT hJ hK hKJ (historyDifferenceFamily_smooth hT X0 hJ hL hU r)
-  intro κ y η hη
-  exact history_difference_factorization hT κ X0 initial hJ hL hU r y hη
 
 /-! ## Identification with the physical `ProfileHistories` integrals -/
 
@@ -1122,19 +1066,6 @@ theorem histories_difference_factorization {T δ : ℝ} (hT : 0 < T) (hδ : 0 < 
   exact history_difference_factorization hT κ N.endpoint _ parameterInterval_open
     (refLog_smooth N hδ hδT) (refAxial_smooth N hδ hδT) r y hη
 
-theorem histories_parameter_jet_bounds {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < rampLimit) (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    {K : Set ℝ} (hK : IsCompact K) (hKJ : K ⊆ parameterInterval) (r : HistoryRow) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ =>
-        profileHistory (histories N hT hδ hδT κ P0 hP0) r (radius N.endpoint y, ξ) -
-          profileHistory (N.histories hδ hδT P0 hP0) r (radius N.endpoint y, ξ)) η| ≤
-            M * y * activation T κ y := by
-  apply scaled_family_jet_bound hT parameterInterval_open hK hKJ
-    (historyDifferenceFamily_smooth hT N.endpoint parameterInterval_open
-      (refLog_smooth N hδ hδT) (refAxial_smooth N hδ hδT) r)
-  intro κ y η hη
-  exact histories_difference_factorization N hT hδ hδT κ P0 hP0 r y hη
 
 theorem angular_equation {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < rampLimit) (κ y : ℝ) {η : ℝ} (hη : η ∈ parameterInterval) :
@@ -1245,12 +1176,5 @@ theorem shearSize_error (T : ℝ) {κ X0 : ℝ} (hκ : κ ∈ Ioc (0 : ℝ) 1) (
   rw [actualP1_eq T κ hJ hL y hη, actualP2_eq T κ hX0 hJ hU y hη]
   field_simp ; ring
 
-theorem controlled_bound {T κ M y : ℝ} (hT : 0 < T) (hκ : κ ≤ 1)
-    (hM : 0 ≤ M) (hy : 0 ≤ y) {J : Set ℝ} (hJ : IsOpen J) {F : Field}
-    (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) {η : ℝ} (hη : η ∈ J)
-    (hB : ∀ t ∈ Icc (0 : ℝ) y, |radialPartial F (t, η)| ≤ M) :
-    |controlled T κ F (y, η) - F (y, η)| ≤ M * y * activation T κ y := by
-  rw [controlled_sub T κ hJ hF y hη, abs_neg]
-  exact weightedPrimitive_bound hT hκ hM hy (radialPartial F) η hB
 
 end NavierStokes.StressActivation

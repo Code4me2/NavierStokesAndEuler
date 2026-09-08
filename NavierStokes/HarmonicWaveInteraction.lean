@@ -401,22 +401,6 @@ theorem transport_wave_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D �
     (transport_raw_class c ho hR ha hb ha0 hb0 hN hΦ hk hdiv m i)
     ho.weight_le_one hP0 hP1
 
-theorem transport_mean_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hN : a.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hdiv : ModeSolenoidal s c a)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (m : ℤ) (i : Fin 3) :
-    MeanClass s (α + β - κ)
-      (fun n x => HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-        (a.frequency n) (a.phase n) (a.angularFrequency n)
-        (blockAmplitude a n) (blockAmplitude b n) i m x) :=
-  wave_square_weight_mean
-    (transport_raw_class c ho hR ha hb ha0 hb0 hN hΦ hk hdiv m i) hP0 hP1
 
 /-- Coefficients evaluated using the original label's carrier. -/
 noncomputable def withCarrier (carrierData b : CorrectionState.HarmonicBlock D) :
@@ -527,51 +511,9 @@ noncomputable def nonlinearErrorBlock (c : CorrectionState.Context D)
   phase := a.phase
   angularFrequency := a.angularFrequency
 
-theorem nonlinearErrorBlock_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hda : ModeSolenoidal s c a) (hdb : ModeSolenoidal s c (withCarrier a b))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    (nonlinearErrorBlock c a b).WaveBounds s P (min (α + β - κ) (β + β - κ)) := by
-  intro i j hj
-  have hh m := nonlinearCoefficients_wave_class c ho hR ha hb ha0 hb0 hM hN hΦ hk hda hdb hP0 hP1 m i
-  have hr := realCoefficient_class (fun n => nonlinearCoefficients c a b n i) j (hh j) (hh (-j))
-  apply class_congr hr
-  intro n x _
-  exact (nonconstant_apply_of_ne _ hj x).symm
 
-theorem nonlinearErrorBlock_band (c : CorrectionState.Context D)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.BandLimited M) (hb : b.BandLimited N) :
-    (nonlinearErrorBlock c a b).BandLimited (max (M + N) (N + N)) := by
-  refine ⟨fun n i => ?_, fun _ => HarmonicResidual.band_zero _⟩
-  apply HarmonicResidual.band_nonconstant
-  apply HarmonicResidual.band_realCoefficients
-  have ha' r := HarmonicResidual.band_realCoefficients (ha.1 n r)
-  have hb' r := HarmonicResidual.band_realCoefficients (hb.1 n r)
-  have hab := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) ha' hb' i
-  have hba := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) hb' ha' i
-  have hbb := HarmonicResidual.band_transport (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) hb' hb' i
-  exact ((hab.mono (le_max_left _ _)).add (hba.mono (by omega))).add
-    (hbb.mono (le_max_right _ _))
 
-theorem nonlinearErrorBlock_conjugate (c : CorrectionState.Context D)
-    (a b : CorrectionState.HarmonicBlock D) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((nonlinearErrorBlock c a b).velocity n i) :=
-  HarmonicResidual.nonconstant_conjugate (HarmonicResidual.realCoefficients_conjugate _)
 
-theorem nonlinearErrorBlock_zero (c : CorrectionState.Context D)
-    (a b : CorrectionState.HarmonicBlock D) : ZeroMode (nonlinearErrorBlock c a b) := by
-  intro n i
-  simp [nonlinearErrorBlock, HarmonicResidual.nonconstant]
 
 /-! ## Identification with the actual differentiated residual -/
 
@@ -1054,41 +996,14 @@ theorem interactionBlock_band (c : CorrectionState.Context D) (u : CorrectionSta
     (fun r => HarmonicResidual.band_realCoefficients (hb.1 n r)) i
   exact (hcross.mono (by omega)).add (nonlinearCoefficients_band c ha hb n i)
 
-theorem interactionBlock_conjugate (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (a b : CorrectionState.HarmonicBlock D) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((interactionBlock c u a b).velocity n i) :=
-  HarmonicResidual.nonconstant_conjugate (HarmonicResidual.realCoefficients_conjugate _)
 
 theorem interactionBlock_zero (c : CorrectionState.Context D) (u : CorrectionState.State D)
     (a b : CorrectionState.HarmonicBlock D) : ZeroMode (interactionBlock c u a b) := by
   intro n i
   simp [interactionBlock, HarmonicResidual.nonconstant]
 
-theorem linearGoodBlock_band (c : CorrectionState.Context D) (a : CorrectionState.HarmonicBlock D)
-    {b : CorrectionState.HarmonicBlock D} {g : HarmonicResidual.BlockCoefficients D} {N E : ℕ}
-    (hb : b.BandLimited N) (hg : ∀ n i, BandLimited (g n i) E) :
-    (linearGoodBlock c a b g).BandLimited (max N E) := by
-  refine ⟨fun n i => ?_, fun _ => HarmonicResidual.band_zero _⟩
-  apply HarmonicResidual.band_nonconstant
-  apply HarmonicResidual.band_realCoefficients
-  have hlin := HarmonicResidual.band_linearResidual (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n)
-    (B := HarmonicResidual.constantVector (HarmonicResidual.contextBase c n))
-    (fun _ => band_constantCoefficient _)
-    (fun r => HarmonicResidual.band_realCoefficients (hb.1 n r))
-    (HarmonicResidual.band_realCoefficients (hb.2 n)) i
-  exact HarmonicResidual.band_sub (hlin.mono (le_max_left _ _)) ((hg n i).mono (le_max_right _ _))
 
-theorem linearGoodBlock_conjugate (c : CorrectionState.Context D)
-    (a b : CorrectionState.HarmonicBlock D) (g : HarmonicResidual.BlockCoefficients D) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((linearGoodBlock c a b g).velocity n i) :=
-  HarmonicResidual.nonconstant_conjugate (HarmonicResidual.realCoefficients_conjugate _)
 
-theorem linearGoodBlock_zero (c : CorrectionState.Context D)
-    (a b : CorrectionState.HarmonicBlock D) (g : HarmonicResidual.BlockCoefficients D) :
-    ZeroMode (linearGoodBlock c a b g) := by
-  intro n i
-  simp [linearGoodBlock, HarmonicResidual.nonconstant]
 
 noncomputable def waveResidualDifferenceBlock (c : CorrectionState.Context D)
     (u₀ u₁ : CorrectionState.State D) (a b : CorrectionState.HarmonicBlock D)

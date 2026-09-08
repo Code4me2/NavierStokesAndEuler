@@ -185,23 +185,5 @@ theorem jetLaplacian_ae {f : LiftL2 period} (J : SpatialJet period standardDirec
   rw [jetLaplacian, hx]
   exact Finset.sum_congr rfl (fun i _ => hh i)
 
-/-- The metric heat bound is an actual integral estimate for a smooth cylinder representative. -/
-theorem classical_metric_heat_bound (K : SmoothCoefficient period) (f : LiftL2 period)
-    (J : SpatialJet period standardDirection 2 f) (g : LiftDomain period → Vector3)
-    (hrep : (f : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g)
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x))
-    (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c ^ 2 * ‖v‖ ^ 2 ≤ ⟪K.coefficient x v, v⟫_ℝ) :
-    (∫ x, ⟪K.coefficient x (g x), classicalLaplacian period g x⟫_ℝ ∂liftMeasure period) ≤
-      -(c ^ 2 / 2) * ∑ i : Fin 4, ‖J.word (fun _ : Fin 1 => i)‖ ^ 2 +
-      (2 * (K.firstBound : ℝ) ^ 2 / c ^ 2) * ‖f‖ ^ 2 := by
-  have hi : ⟪K.operator f, jetLaplacian period J⟫_ℝ =
-      ∫ x, ⟪K.coefficient x (g x), classicalLaplacian period g x⟫_ℝ ∂liftMeasure period := by
-    rw [L2.inner_def]
-    apply integral_congr_ae
-    filter_upwards [K.operator_ae f, jetLaplacian_ae period J g hrep hg, hrep] with x hK hΔ he
-    rw [hK, hΔ, he]
-  rw [← hi]
-  exact metric_heat_bound period K f J c hc hpos
 
 end EulerMetricHeatEnergy

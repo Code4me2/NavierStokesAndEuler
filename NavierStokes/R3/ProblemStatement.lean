@@ -152,15 +152,6 @@ def breakdownStatement : Prop :=
     ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField, ∃ K : Set Space,
       CandidateProperties ν u p f K ∧ ¬ Nonempty (GlobalFiniteEnergySolution ν f)
 
-/-- Bundling the witnesses in `Candidate` does not change any hypothesis of
-the explicit primary existence assertion. -/
-theorem candidateStatement_iff_nonempty (ν : ℝ) :
-    candidateStatement ν ↔ Nonempty (Candidate ν) := by
-  constructor
-  · rintro ⟨u, p, f, K, h⟩
-    exact ⟨⟨u, p, f, K, h⟩⟩
-  · rintro ⟨c⟩
-    exact ⟨c.velocity, c.pressure, c.force, c.support, c.properties⟩
 
 /-- The unit-viscosity residual is exactly the existing differential expression. -/
 @[simp] theorem residual_at_viscosity_one (u : VelocityField) (p : PressureField)
@@ -169,13 +160,6 @@ theorem candidateStatement_iff_nonempty (ν : ℝ) :
       NavierStokes.ProblemStatement.navierStokesResidual u p t x := by
   simp [navierStokesResidual, NavierStokes.ProblemStatement.navierStokesResidual]
 
-/-- The support convention really excludes forcing at every nonpositive time. -/
-theorem CompactPositiveTimeSupport.eq_zero_of_nonpos {f : VelocityField}
-    (hf : CompactPositiveTimeSupport f) {t : ℝ} (ht : t ≤ 0) (x : Space) :
-    f (t, x) = 0 := by
-  apply image_eq_zero_of_notMem_tsupport
-  intro h
-  exact (not_lt_of_ge ht) (hf.2 h).1
 
 /-- Restricting the set of times preserves the same energy bound. -/
 theorem UniformFiniteEnergy.mono {times shorter : Set ℝ} {u : VelocityField}
@@ -184,39 +168,6 @@ theorem UniformFiniteEnergy.mono {times shorter : Set ℝ} {u : VelocityField}
   obtain ⟨E, hE, hu⟩ := hu
   exact ⟨E, hE, fun t ht => hu t (hsub ht)⟩
 
-/-- Zero velocity and pressure solve the equation for zero force at any
-viscosity. This checks that the competing-solution class is inhabited. -/
-theorem zero_force_has_global_solution (ν : ℝ) :
-    Nonempty (GlobalFiniteEnergySolution ν (fun _ => 0)) := by
-  refine ⟨{
-    velocity := fun _ => 0
-    pressure := fun _ => 0
-    velocity_smooth := contDiff_const.contDiffOn
-    pressure_smooth := contDiff_const.contDiffOn
-    zero_initial_velocity := fun _ => rfl
-    divergence_free := ?_
-    navier_stokes := ?_
-    energy_bounded := ?_
-  }⟩
-  · intro t ht x
-    simp [NavierStokes.ProblemStatement.spatialDivergence,
-      NavierStokes.ProblemStatement.spatialDerivative]
-  · intro t ht x
-    simp [navierStokesResidual, NavierStokes.ProblemStatement.temporalDerivative,
-      NavierStokes.ProblemStatement.advection,
-      NavierStokes.ProblemStatement.spatialLaplacian,
-      NavierStokes.ProblemStatement.spatialDerivative,
-      NavierStokes.ProblemStatement.pressureGradient]
-  · refine ⟨0, le_refl 0, ?_⟩
-    intro t ht
-    constructor
-    · simp [SquareIntegrableAtTime]
-    · simp [kineticEnergy]
 
-/-- The full target contains the primary candidate-existence target. -/
-theorem breakdown_implies_core (h : breakdownStatement) : coreBreakdownStatement := by
-  intro ν hν
-  obtain ⟨u, p, f, K, hc, _⟩ := h ν hν
-  exact ⟨u, p, f, K, hc⟩
 
 end NavierStokesR3.ProblemStatement

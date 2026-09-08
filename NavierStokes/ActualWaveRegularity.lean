@@ -38,9 +38,6 @@ noncomputable def onDomain (s : StripData D) (Ω : Set D) (hΩ : IsOpen Ω) : St
   zeta_smooth := contDiffOn_const
   zeta_nonneg := fun _ _ => le_rfl
 
-theorem commonCorrected_onDomain (a : CopyData D I) (s : StripData D)
-    (d : GraphDirections D) (Ω : Set D) (hΩ : IsOpen Ω) :
-    a.commonCorrected (onDomain s Ω hΩ) d = a.commonCorrected s d := rfl
 
 /-- These are native, uncorrected data.  In particular the smoothness of
 the common corrected velocity is a conclusion, not a field of this record. -/
@@ -87,12 +84,6 @@ theorem glue_smooth {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
     · exact contDiffAt_const.congr_of_eventuallyEq ((hg n i x hi).trans (hflat n i x h0))
   · exact contDiffAt_const.congr_of_eventuallyEq (hz n x (not_exists.mp hi))
 
-theorem common_raw_smooth (n : ℕ) : ContDiffOn ℝ ∞ (a.common.amplitude n) Ω := by
-  apply h.glue_smooth a.common.amplitude (fun n i => (a.localized i).amplitude n)
-  · exact fun n _ _ hi => a.common_amplitude_germ h.cells h.cutoff_support n hi
-  · exact fun _ _ hi => (a.common_zero_germs h.cells h.cutoff_support hi).1
-  · exact h.raw.localized_smooth
-  · exact fun _ _ _ hz => hz
 
 theorem native_normal_smooth (n : ℕ) (i : I) :
     ContDiffOn ℝ ∞ (coefficient (a.background.radius n) (d.radialField n)
@@ -101,26 +92,6 @@ theorem native_normal_smooth (n : ℕ) (i : I) :
   normalCoefficient_contDiffOn (phaseNormal_contDiffOn (h.raw.geometry n i) (h.raw.phase n i))
     (h.raw.localized_smooth n i) (h.raw.normal n i)
 
-/-- The actual normalized vector-potential coefficient has a smooth zero
-extension too; smoothness of the bare phase normal off support is not used. -/
-theorem common_normal_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (coefficient (a.background.radius n) (d.radialField n)
-      (fun _ => d.angular) (d.axialField s n) (a.background.phase n) (a.common.amplitude n)) Ω := by
-  let B := fun n (f : D → ComplexVector) => coefficient (a.background.radius n) (d.radialField n)
-    (fun _ => d.angular) (d.axialField s n) (a.background.phase n) f
-  have hmap {n : ℕ} {f g : D → ComplexVector} {x : D} (he : f =ᶠ[𝓝 x] g) :
-      B n f =ᶠ[𝓝 x] B n g := by
-    filter_upwards [he] with y hy
-    simp only [B, coefficient, hy]
-  change ContDiffOn ℝ ∞ (B n (a.common.amplitude n)) Ω
-  apply h.glue_smooth (fun n => B n (a.common.amplitude n))
-    (fun n i => B n ((a.localized i).amplitude n))
-  · exact fun n _ _ hi => hmap (a.common_amplitude_germ h.cells h.cutoff_support n hi)
-  · intro m x hi
-    simpa only [B, coefficient_zero] using hmap (n := m) (a.common_zero_germs h.cells h.cutoff_support hi).1
-  · exact h.native_normal_smooth
-  · intro m i x hz
-    simpa only [B, coefficient_zero] using hmap (n := m) hz
 
 theorem native_corrected_smooth (n : ℕ) (i : I) :
     ContDiffOn ℝ ∞ ((a.corrected s d i).amplitude n) (Ω ∩ h.patch n i) := by
@@ -130,13 +101,6 @@ theorem native_corrected_smooth (n : ℕ) (i : I) :
   exact (h.raw.localized_smooth n i).add
     ((hc.const_smul Complex.I).const_smul (1 / a.background.frequency n))
 
-theorem common_corrected_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ ((a.commonCorrected s d).amplitude n) Ω := by
-  apply h.glue_smooth (a.commonCorrected s d).amplitude (fun n i => (a.corrected s d i).amplitude n)
-  · exact fun n _ _ hi => a.commonCorrected_amplitude_germ h.cells h.cutoff_support s d n hi
-  · exact fun _ _ hi => a.commonCorrected_zero_germ h.cells h.cutoff_support s d hi
-  · exact h.native_corrected_smooth
-  · exact fun _ _ _ hz => (LocalizedCurlRealization.native_zero_germs a s d hz).2.1
 
 /-- Locally finite native zero germs give a zero germ for the common
 corrected amplitude, even if the phase or normal is singular at this point. -/
@@ -319,19 +283,6 @@ theorem ModalSmooth.copySolve_smooth
     (h.coefficient n k) (h.forcing n k) (h.columns n k) (h.current_slot n k)).mono
       (h.contains n k)
 
-theorem complexCopy_smooth
-    {t : ℕ → TangentData P ProblemStatement.Space} {source : ℕ → P × Plane → ComplexVector}
-    {harmonic : ℤ} {g : ℕ → Geometry} {L : ℕ → ℝ} {Ω : Set (P × Plane)}
-    {C : ℕ → Frequency → Set (P × Plane)}
-    (hr : ModalSmooth (fun n => realData (t n) (source n)) harmonic g L Ω C)
-    (hi : ModalSmooth (fun n => imagData (t n) (source n)) harmonic g L Ω C)
-    (hL : ∀ n, 0 < L n) (n : ℕ) (k : Frequency) :
-    ContDiffOn ℝ ∞ (complexCopyVelocity (t n) (source n) (g n) (hL n).le k) (Ω ∩ C n k) := by
-  have hreal := complexify.contDiff.comp_contDiffOn (hr.copySolve_smooth hL n k)
-  have himag := complexify.contDiff.comp_contDiffOn (hi.copySolve_smooth hL n k)
-  have hc := hreal.add (himag.const_smul Complex.I)
-  simp only [Function.comp_def] at hc ⊢
-  exact hc
 
 end Modal
 
@@ -523,31 +474,7 @@ noncomputable def particularCopyData {ι : Type} (p : CycleParameters ι)
     (StateReindex.blockCoefficients cycleAssoc.symm (v.gaussian l))
     (StateReindex.blockCoefficients cycleAssoc.symm (v.aliasCoefficients l)) j
 
-/-- Deck covariance of the actual Volterra coefficient follows from
-periodicity of its incoming residual coefficient, with the same anchor. -/
-theorem particular_amplitude_deck {ι : Type} (p : CycleParameters ι)
-    (v : CycleCoefficients ι) (c : Context Point) (u : State Point) (l : ι) (j : ℤ)
-    (n : ℕ) (k m : TorusInverse.Frequency) (x : ParticularSpace)
-    (hp : CommonCoverSolve.PeriodicAt ((particularCopyData p v c u l j).source n) x.1) :
-    (particularCopyData p v c u l j).amplitude n
-      (k + CommonCoverSolve.coverIndex ((p.particular l).geometry n).gap m)
-      (x.1, x.2 + TorusAverages.latticePoint m) =
-        (particularCopyData p v c u l j).amplitude n k x := by
-  exact complexCopyVelocity_deck _ _ _ ((p.particular l).length_pos n).le k m x.1 hp x.2
 
-theorem particular_cutoff_deck {ι : Type} (p : CycleParameters ι)
-    (v : CycleCoefficients ι) (c : Context Point) (u : State Point) (l : ι) (j : ℤ)
-    (n : ℕ) (k m : TorusInverse.Frequency) (x : ParticularSpace) :
-    (particularCopyData p v c u l j).cutoff n
-      (k + CommonCoverSolve.coverIndex ((p.particular l).geometry n).gap m)
-      (x.1, x.2 + TorusAverages.latticePoint m) =
-        (particularCopyData p v c u l j).cutoff n k x := by
-  change (p.particular l).cutoff n
-    (((p.particular l).geometry n).coordinates
-      (k + CommonCoverSolve.coverIndex ((p.particular l).geometry n).gap m)
-        (x.2 + TorusAverages.latticePoint m)) = _
-  rw [CommonCoverSolve.Geometry.coordinates_deck]
-  rfl
 
 /-- This representation is derived from the actual angle-lifted Volterra
 solve and the original carrier. No equality of completed output fields is
@@ -727,46 +654,6 @@ theorem block_eq_mode :
 
 end SignedAngles
 
-/-- The existing native angular inputs imply the smaller qualitative
-record. Their quantitative-domain smoothness field is not extended or used. -/
-noncomputable def signedAngles_of_inputs (p : PeriodizedSignedParameters Point I) (s : StripData Point)
-    (request : ℕ → Cylinder → SignedWaveUpdate.Vec2) (m : ℕ → ℝ) (i₀ : I)
-    (hθ : p.directions.angular = ((0 : Point), 1))
-    (hf : ∀ n, p.base.frequency n * m n = (p.angularFrequency n : ℝ))
-    (h : ∀ i, SignedWaveUpdate.AngularInputs (HarmonicWaveInteraction.productStrip s)
-      p.directions p.base (p.matrix i) (p.target i) request (p.mask i) (p.fundamental i)
-        (p.normalMotion i) (p.action i) (p.cutoff i) m) : SignedAngles p s request := by
-  refine ⟨m, ?_, ?_, ?_, hf, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro n
-    have he := (h i₀).radius n
-    simp only [hθ] at he
-    exact he
-  · intro n; simpa only [hθ] using (h i₀).radialField n
-  · intro n; simpa only [hθ] using (h i₀).phase n
-  · intro i n
-    have he := (h i).matrix n
-    simp only [hθ] at he
-    exact he
-  · intro i n
-    have he := (h i).primary_target n
-    simp only [hθ] at he
-    exact he
-  · intro n
-    have he := (h i₀).signed_target n
-    simp only [hθ] at he
-    exact he
-  · intro i n
-    have he := (h i).mask n
-    simp only [hθ] at he
-    exact he
-  · intro i n
-    have he := (h i).fundamental n
-    simp only [hθ] at he
-    exact he
-  · intro i n
-    have he := (h i).cutoff n
-    simp only [hθ] at he
-    exact he
 
 /-- All fields use the literal post-particular request.  The old state,
 profile, and native data are not reselected. -/
@@ -802,24 +689,6 @@ theorem SignedData.regular {ι : Type} {p : CycleParameters ι} {v : CycleCoeffi
 
 end SignedCycle
 
-/-- The qualitative oscillation fields of the actual next cycle state.
-The intervening temporal, rank, and pressure-refresh operations preserve the
-same oscillation by the literal recurrence. -/
-theorem next_regular {ι : Type} {p : CorrectionStep.CycleParameters ι}
-    {v : CorrectionStep.CycleCoefficients ι} {c : Context Point} {u : State Point}
-    {coord r₀ r₁ : ℝ} {U : LocalSignedRequest.SlowRegion coord}
-    (hp : ParticularData p v c u U r₀ r₁) (hs : SignedData p v c u U r₀ r₁)
-    (hu : WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier) u.oscillation)
-    (hper : CorrectionStep.OscillationPeriodic U.carrier u.oscillation)
-    (hsup : WaveStateRegularity.WaveSupport U r₀ r₁ u.oscillation) :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (p.next v c u).oscillation ∧
-    CorrectionStep.OscillationPeriodic U.carrier (p.next v c u).oscillation ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (p.next v c u).oscillation := by
-  rw [p.next_oscillation]
-  exact ⟨(hu.add hp.regular.1).add hs.regular.1,
-    (hper.add hp.regular.2.1).add hs.regular.2.1,
-    (hsup.add hp.regular.2.2).add hs.regular.2.2⟩
 
 /-! ## Moving radial edges of the literal coefficients
 
@@ -863,28 +732,6 @@ theorem literal_moving_regular {Ω : Set D} (hΩ : IsOpen Ω) {ρ : D → ℝ}
   rw [← jets_eq_of_germ hg n]
   exact iteratedFDeriv_extension_edge hΩ hρ ha hab hcL hcR hf hB n hx hedge
 
-/-- Apply the already proved native Gaussian derivative estimates to the
-same literal coefficient. The constants are those in the native estimates;
-no full-domain estimate or output smoothness is assumed. -/
-theorem literal_native_regular {J : Type} {V : PrimaryCopyBounds.JetDomain J D}
-    {Ω : Set D} (hΩ : IsOpen Ω) {ρ : D → ℝ} (hρ : ContDiffOn ℝ ∞ ρ Ω)
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    {A S : J → ℝ} {P : J → D → ℝ} {f : J → D → E}
-    (hf : PrimaryCopyBounds.NativeJets V
-      (fun i x => A i * Real.sqrt (flatWeight ρ a b cL cR x) * P i x) f)
-    (hA : ∀ i, 0 ≤ A i) (hS : ∀ i, 1 ≤ S i)
-    (hP : ∀ i, ContinuousOn (P i) Ω) (hP0 : ∀ i x, x ∈ Ω → 0 ≤ P i x)
-    (hdom : ∀ i, windowDomain Ω ρ a b ⊆ V.carrier i)
-    (q : ℕ) (hG : ∀ i x, x ∈ windowDomain Ω ρ a b →
-      V.growth i x ≤ S i * edgeGrowth ρ a b x ^ q)
-    (hz : ∀ i x, x ∈ Ω → x ∉ window ρ a b → f i x = 0) :
-    ∀ i, ContDiffOn ℝ ∞ (f i) Ω ∧
-      ∀ n x, x ∈ Ω → (ρ x = a ∨ ρ x = b) → iteratedFDeriv ℝ n (f i) x = 0 := by
-  intro i
-  have hB := boundaryControls_of_majorants hΩ hρ (hP i) ha hab hcL hcR
-    (native_jet_majorant hf hA hS hP0 hdom q hG i)
-  exact literal_moving_regular hΩ hρ ha hab (half_pos hcL) (half_pos hcR)
-    ((hf.smooth i).mono (hdom i)) hB (hz i)
 
 end RadialEdges
 

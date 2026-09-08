@@ -32,10 +32,6 @@ theorem forwardThreshold_le_common (CM CH : ℝ) :
 theorem joinedThreshold_le_common (CM CH : ℝ) :
     joinedThreshold CM CH ≤ commonThreshold CM CH := le_max_right _ _
 
-theorem threshold_le_previous (J D : ℕ) (hJ : 3 ≤ J) (X : ℝ) (hX : 0 ≤ X)
-    (hbase : X^D ≤ exp (X/((J-1 : ℕ) : ℝ)^4)) (B : ℝ) (hB : B ≤ X^D)
-    (n : ℕ) : B ≤ previousFrequency J D X n :=
-  hB.trans (initial_frequency_le_previous J D hJ X hX hbase n)
 
 end EulerParentNeighborThreshold
 
@@ -109,30 +105,5 @@ variable {U : Type} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
   (τ : ℝ) (hτ : 0 < τ) (hτT : τ < G.T)
   (P : ParentFrame (G.transverseData m hm R S hS) τ)
 
-theorem joined_neighbor_error_of_literal_scales
-    (J D : ℕ) (hJ : 3 ≤ J) (hD : 2000 ≤ D) (X ρ CM CH : ℝ)
-    (hX : 2 ≤ X) (hbase : X^D ≤ exp (X/((J-1 : ℕ) : ℝ)^4))
-    (a β : ℕ → ℝ) (ha₀ : 1/2 ≤ a 0) (ha₀₂ : a 0 ≤ 2)
-    (hβ₀ : 1/2 ≤ β 0*X^2) (hβ₀₂ : β 0*X^2 ≤ 2)
-    (n c : ℕ) (hn : 1 ≤ n) (hτliteral : τ=activationTime J X a β n)
-    (hτ1 : τ ≤ 1) (hCM : 0 ≤ CM) (hCH : 0 ≤ CH)
-    (ha : 1/2 ≤ P.a) (hH : 1 ≤ P.shear)
-    (hρ : 0 ≤ ρ) (hρ1 : ρ ≤ 1)
-    (hshear : P.shear=previousShear J X n)
-    (hKk : L.K ≤ previousFrequency J D X n^80)
-    (hcost : joinedThreshold CM CH ≤ previousFrequency J D X n)
-    (hc : requiredExponent ≤ c) (hscale : G.ell ≤ supportScale J X n) :
-    L.neighborScaleCost m hm R S hS H τ hτ hτT P CM CH*G.ell*ρ ≤
-      neighborError J D X (c : ℝ) n := by
-  have hx0 : 0 < X := by linarith only [hX]
-  have hx1 : 1 ≤ X := by linarith only [hX]
-  have hTi : τ⁻¹ ≤ 12/baseHorizon J X := by
-    rw [hτliteral]
-    exact reciprocal_activation_le_base J (by omega) X hx0 a β ha₀ ha₀₂ hβ₀ hβ₀₂ hn
-  have hTik := base_inverse_le_previous_frequency_pow80 J D hJ hD X hX hbase n
-  have hk := previousFrequency_one_le J D hJ X hx1 hbase n
-  exact L.neighbor_error_of_source_scales m hm R S hS H τ hτ hτT P
-    (12/baseHorizon J X) CM CH hτ1 hTi hCM hCH ha hH J D X ρ n 80 c
-    hρ hρ1 hshear hk hKk hTik hcost hc (degree_le_requiredExponent.trans hc) hscale
 
 end EulerParentPacketFrames.LabelData

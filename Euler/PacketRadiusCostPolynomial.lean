@@ -142,7 +142,6 @@ theorem radiusPolynomial_eval (W : ℝ) : radiusPolynomial.eval W=radiusEnvelope
 def radiusConstant : ℝ := coefficientCost radiusPolynomial
 def radiusPower : ℕ := radiusPolynomial.natDegree
 
-theorem radiusConstant_pos : 0 < radiusConstant := coefficientCost_pos _
 
 theorem radiusEnvelope_power (W : ℝ) (hW : 1 ≤ W) :
     radiusEnvelope W ≤ radiusConstant*W^radiusPower := by

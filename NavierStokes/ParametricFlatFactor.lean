@@ -62,17 +62,11 @@ def factor (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ) (y : E × ℝ) : ℝ :=
 def primitive (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ) (y : E × ℝ) : ℝ :=
   FlatPrimitive.primitive c j (fun u => b (y.1, u)) y.2
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem factor_eq_scalar (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ) (p : E) (x : ℝ) :
-    factor c j b (p, x) = FlatPrimitiveFactor.factor c j (fun u => b (p, u)) x := rfl
 
 theorem coefficient_slice_contDiff {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (p : E) :
     ContDiff ℝ ∞ (fun u : ℝ => b (p, u)) :=
   hb.comp (contDiff_const.prodMk contDiff_id)
 
-theorem factor_slice_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ) {b : E × ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) (p : E) : ContDiff ℝ ∞ (fun x => factor c j b (p, x)) :=
-  FlatPrimitiveFactor.factor_contDiff hc j (coefficient_slice_contDiff hb p)
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem factor_at_zero {c : ℝ} (hc : 0 < c) (j : ℕ) (b : E × ℝ → ℝ) (p : E) :
@@ -225,14 +219,6 @@ theorem factor_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
   SmoothParameterIntegral.contDiff_integral (kernel_ae_contDiff c j hb)
     (kernel_jet_measurable c j hb) (kernel_locallyDominated hc j hb)
 
-/-- This formula includes all mixed parameter/edge derivatives as genuine
-Fréchet derivatives, with the corresponding multilinear maps integrated. -/
-theorem factor_iteratedFDeriv {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (n : ℕ) (y : E × ℝ) :
-    iteratedFDeriv ℝ n (factor c j b) y =
-      ∫ t in Ioi (0 : ℝ), iteratedFDeriv ℝ n (fun z => kernel c j b z t) y :=
-  SmoothParameterIntegral.iteratedFDeriv_integral (kernel_ae_contDiff c j hb)
-    (kernel_jet_measurable c j hb) (kernel_locallyDominated hc j hb) n y
 
 theorem primitive_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
     {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) :
@@ -244,17 +230,6 @@ theorem primitive_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
   exact ((FlatPrimitive.scale_contDiff hc j).comp contDiff_snd).mul
     (factor_contDiff hc j hb)
 
-/-- Jointly smooth factorization with no assumed factor smoothness or
-integrable derivative bounds in its hypotheses. -/
-theorem exists_joint_smooth_factor {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) :
-    ∃ F : E × ℝ → ℝ, ContDiff ℝ ∞ F ∧
-      (∀ p : E, F (p, 0) = b (p, 0) / (2 * c)) ∧
-      ∀ (p : E) (x : ℝ), 0 < x →
-        (∫ u in (0 : ℝ)..x, (Real.exp (-c / u ^ 2) / u ^ j) * b (p, u)) =
-          Real.exp (-c / x ^ 2) * x ^ (3 - (j : ℝ)) * F (p, x) :=
-  ⟨factor c j b, factor_contDiff hc j hb, factor_at_zero hc j b,
-    fun p _x hx => integral_original_factorization c j b p hx⟩
 
 theorem factor_sqrt_contDiffAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
     {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (p : E) (hbp : 0 < b (p, 0)) :

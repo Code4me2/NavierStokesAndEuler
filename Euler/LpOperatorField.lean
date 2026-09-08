@@ -113,11 +113,6 @@ def fullMap : (α →ᵇ (E →L[ℝ] F)) →L[ℝ] (Lp E 2 μ →L[ℝ] Lp F 2 
       change ‖full μ A‖ ≤ (1 : ℝ)*‖A‖
       simpa only [one_mul] using full_norm μ A)
 
-theorem fullMap_norm : ‖fullMap (E := E) (F := F) μ‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  change ‖full μ A‖ ≤ (1 : ℝ)*‖A‖
-  simpa only [one_mul] using full_norm μ A
 
 end EulerLpOperatorField
 
@@ -144,9 +139,6 @@ def supported (A : α →ᵇ (E →L[ℝ] F)) :
   ((full μ A).comp (supportedSpace μ S hS).subtypeL).codRestrict
     (supportedSpace μ S hS) (full_mem μ S hS A)
 
-theorem supported_ae (A : α →ᵇ (E →L[ℝ] F)) (u : supportedSpace (V := E) μ S hS) :
-    ((supported μ S hS A u : supportedSpace (V := F) μ S hS) : Lp F 2 μ) =ᵐ[μ]
-      fun x => A x ((u : Lp E 2 μ) x) := full_ae μ A u
 
 /-- Only values on the supporting region enter the actual operator norm. -/
 theorem supported_norm (A : α →ᵇ (E →L[ℝ] F)) (C : ℝ) (hC : 0 ≤ C)

@@ -46,12 +46,5 @@ theorem energy_le_tensorNorm_sq (A : SmoothL2Field Space) :
       exact pow_le_pow_left₀ (norm_nonneg _) (hA n (by have := mem_range.mp hn; omega) w) 2
     _ = _ := by norm_num [sum_range_succ]; ring
 
-theorem sqrt_energy_le_tensorNorm (A : SmoothL2Field Space) :
-    Real.sqrt (wordEnergy 3 A) ≤ 7*tensorNorm 3 A := by
-  have he := energy_le_tensorNorm_sq A
-  have hs := Real.sq_sqrt (wordEnergy_nonneg 3 A)
-  have ht := tensorNorm_nonneg 3 A
-  have hr := Real.sqrt_nonneg (wordEnergy 3 A)
-  nlinarith [sq_nonneg (tensorNorm 3 A)]
 
 end EulerOrdinarySobolev

@@ -489,11 +489,6 @@ theorem Qs_endpoint_lower_of_nonnegative_entry (w : ResetWitness d K)
 noncomputable def sourceThreshold (P m : ℝ) : ℝ :=
   min (1 / 120) (1 / (8 * sourceConstant P m))
 
-theorem sourceThreshold_pos {P : ℝ} (hP : 0 < P) (m : ℝ) :
-    0 < sourceThreshold P m := by
-  have hc := sourceConstant_pos hP m
-  unfold sourceThreshold
-  positivity
 
 theorem source_error_small (c : Parameters)
     (hsmall : c.lam ≤ sourceThreshold c.P c.m) :
@@ -578,16 +573,6 @@ theorem Qs_endpoint_lower (w : ResetWitness d K)
   Qs_endpoint_lower_of_nonnegative_entry w hwait hsmall hpulse ha heta hamp hamp'
     (OutgoingEntranceCone.canonical_Qs_pos_at_pulseStart w ha hh₁ hhT heta).le
 
-theorem Qs_endpoint_lower_of_threshold (w : ResetWitness d K)
-    (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hsmall : d.core.lam ≤ sourceThreshold d.core.P d.core.m)
-    (hh₁ : d.h ≤ 1 / 100)
-    (hhT : d.h ≤ Real.exp (-(d.core.holdStart + 3 / 5)) / 8)
-    {amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ amp) {eta : ℝ}
-    (heta : |eta| ≤ 1) (hamp : |amp eta| ≤ 6 / 5) (hamp' : |deriv amp eta| ≤ 1) :
-    d.core.lam / 4 ≤ Qs w amp (d.core.endpoint, eta) :=
-  Qs_endpoint_lower w hwait (hsmall.trans (min_le_left _ _))
-    (source_error_small d.core hsmall) hh₁ hhT ha heta hamp hamp'
 
 /-- The final energy-closing amplitude, including the angular reset, is
 the amplitude used in this endpoint theorem. -/
@@ -1173,23 +1158,6 @@ theorem perturbed_cone_margins {lam R C Z b v eps F M : ℝ}
       _ ≤ 167 / 100 + 1 / 100 := add_le_add (second_quadratic_margin R) hbudget
       _ = _ := by norm_num
 
-theorem perturbed_true_cone {lam R C Z b v eps F M : ℝ}
-    (hlam : 0 < lam) (hF : 0 ≤ F) (hM : 0 ≤ M) (heps : 0 ≤ eps) (heps' : eps ≤ 1)
-    (hR : 0 ≤ R) (hR' : R ≤ F) (hC : 0 ≤ C) (hC' : C ≤ 2001 / 1000)
-    (hZ : Z ≤ 6 / 5) (hmain : |2 * R - C * Z| ≤ M)
-    (hb : |b + R| ≤ eps) (hv : |v - (2 * R - C * Z)| ≤ eps)
-    (hbudget : coneErrorBudget F M eps lam ≤ 1 / 100) :
-    0 < (2 + 2 * lam) - b * v ∧
-      2 * b * v + b ^ 2 / (2 + 2 * lam) + ((2 + 2 * lam) - 2) * v ^ 2 < 2 ∧
-      2 < (2 + 2 * lam) * (1 + (b / (2 + 2 * lam)) ^ 2) := by
-  have h := perturbed_cone_margins hlam.le hF hM heps heps' hR hR' hC hC' hZ hmain hb hv hbudget
-  have hsq := sq_nonneg (b / (2 + 2 * lam))
-  have hprod := mul_nonneg (show 0 ≤ 2 + 2 * lam by linarith) hsq
-  constructor
-  · linarith [h.1]
-  constructor
-  · nlinarith [h.2]
-  · nlinarith
 
 /-! ## The axial history error is derived from actual moments -/
 

@@ -24,10 +24,6 @@ def toCoefficientTower (A : MatrixCoefficient T raw) :
     (t : Icc (0 : ℝ) T) (x : LiftDomain P) :
     ((A.toCoefficientTower P).coefficient t).coefficient x = A.path t x.1 := rfl
 
-theorem toCoefficientTower_raw (A : MatrixCoefficient T raw)
-    (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) :
-    ((A.toCoefficientTower P).coefficient t).coefficient (x,(θ : AddCircle P)) =
-      raw (t,(x,θ)) := (A.raw_eq t x θ).symm
 
 theorem toCoefficientTower_operator (A : MatrixCoefficient T raw)
     (t : Icc (0 : ℝ) T) :

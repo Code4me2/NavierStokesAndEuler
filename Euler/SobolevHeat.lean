@@ -90,31 +90,6 @@ theorem truncate_heatGain {q : ℕ} (v : ℝ≥0) (hv : 0 < v) (u : SobolevSpace
   apply value_injective period
   simp only [value_truncateOperator, heatGain_value, heatOperator_value]
 
-/-- A fixed positive amount of smoothing may be separated from any remaining heat evolution. -/
-theorem heatGain_semigroup {q : ℕ} (v w : ℝ≥0) (hv : 0 < v) (u : SobolevSpace period q) :
-    heatGain period q v hv (heatOperator period q w u) =
-      heatGain period q (v + w) (add_pos_of_pos_of_nonneg hv (show 0 ≤ w from bot_le)) u := by
-  apply value_injective period
-  simp only [heatGain_value, heatOperator_value, cylinderHeat_semigroup]
 
-/-- The gained-derivative heat orbit is strongly continuous at every positive variance. -/
-theorem heatGain_continuous {q : ℕ} (u : SobolevSpace period q) :
-    Continuous (fun v : {v : ℝ≥0 // 0 < v} => heatGain period q v.val v.property u) := by
-  apply continuous_iff_continuousAt.mpr
-  intro v
-  let ε : ℝ≥0 := v.val / 2
-  have hε : 0 < ε := div_pos v.property (by norm_num)
-  have hεv : ε < v.val := by dsimp [ε]; exact half_lt_self v.property
-  have hc : Continuous (fun w : {v : ℝ≥0 // 0 < v} =>
-      heatGain period q ε hε (heatOperator period q (w.val - ε) u)) :=
-    (heatGain period q ε hε).continuous.comp
-      ((heatOperator_continuous period u).comp (continuous_subtype_val.sub continuous_const))
-  apply hc.continuousAt.congr_of_eventuallyEq
-  have he : ∀ᶠ w : {v : ℝ≥0 // 0 < v} in 𝓝 v, ε < w.val :=
-    (continuous_subtype_val.tendsto v).eventually (Ioi_mem_nhds hεv)
-  filter_upwards [he] with w hw
-  apply value_injective period
-  simp only [heatGain_value, heatOperator_value, cylinderHeat_semigroup]
-  rw [add_tsub_cancel_of_le hw.le]
 
 end EulerSobolevHeat

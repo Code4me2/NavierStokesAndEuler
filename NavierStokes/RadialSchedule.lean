@@ -38,12 +38,6 @@ def idealTransport (h η : ℝ) : ℝ :=
 /-- The logarithmic shape derivative of `(1 + η²)⁻¹`. -/
 def logShapeDerivative (η : ℝ) : ℝ := -(2 * η / (1 + η ^ 2))
 
-theorem log_shape_hasDerivAt (η : ℝ) :
-    HasDerivAt (fun x : ℝ => -Real.log (1 + x ^ 2)) (logShapeDerivative η) η := by
-  have hp : 1 + η ^ 2 ≠ 0 := by positivity
-  have hd := (((hasDerivAt_id η).pow 2).const_add 1).log hp
-  convert! hd.neg using 1
-  simp [logShapeDerivative]
 
 def idealSource (h η : ℝ) : ℝ :=
   -(3 / 5) * idealTransport h η - h * (1 - 2 * η * idealAxialVelocity η) -
@@ -73,24 +67,7 @@ theorem ideal_source_positive_decomposition (h η : ℝ) :
   unfold coordinateFactor
   ring
 
-/-- A quantitative version of the ideal-prefix positivity in Section 4.4. -/
-theorem ideal_lag_ge_one {h η : ℝ}
-    (hh : 0 ≤ h) (hsmall : h ≤ 1 / 5) (hη : η ^ 2 ≤ 1) :
-    1 ≤ idealLag h η := by
-  have hD : 0 ≤ axialExponent h := by unfold axialExponent; linarith
-  have hd : 0 ≤ axialShape η := by unfold axialShape; linarith
-  have hquad : 0 ≤ (16 / 5 : ℝ) * h * η ^ 2 := by positivity
-  have hshape : 0 ≤ 2 * (axialExponent h + 4 * axialShape η) * η ^ 2 /
-      (1 + η ^ 2) := by positivity
-  unfold idealLag
-  rw [ideal_source_positive_decomposition]
-  linarith
 
-/-- The profile equation is satisfied by the constant particular solution. -/
-theorem ideal_lag_equation (h η : ℝ) :
-    (1 + (3 / 5 : ℝ)) * idealLag h η = idealSource h η := by
-  unfold idealLag
-  ring
 
 def radiusProfile (X₀ y : ℝ) : ℝ := X₀ * Real.exp y
 
@@ -111,30 +88,7 @@ theorem first_axial_moment_weight (X₀ e₀ lam y : ℝ) :
       ring
     _ = _ := by congr 2; ring
 
-/-- Weight of `R` in `dJ/dy = X E H R`. -/
-theorem second_axial_moment_weight (X₀ e₀ H₀ lam y : ℝ) :
-    radiusProfile X₀ y * angularVelocityProfile e₀ lam y *
-        angularMomentumProfile H₀ lam y =
-      (X₀ * e₀ * H₀) * Real.exp ((1 / 2 - 2 * lam) * y) := by
-  rw [first_axial_moment_weight]
-  unfold angularMomentumProfile
-  calc
-    _ = (X₀ * e₀ * H₀) * Real.exp ((1 / 2 - lam) * y + -lam * y) := by
-      rw [Real.exp_add]
-      ring
-    _ = _ := by congr 2; ring
 
-/-- The common energy weight used to rescale the pulse in equation (13). -/
-theorem energy_moment_weight (X₀ e₀ lam y : ℝ) :
-    radiusProfile X₀ y * angularVelocityProfile e₀ lam y ^ 2 =
-      (X₀ * e₀ ^ 2) * Real.exp (-2 * lam * y) := by
-  unfold radiusProfile angularVelocityProfile
-  calc
-    _ = (X₀ * e₀ ^ 2) *
-        Real.exp (y + (-(1 / 2 + lam) * y + -(1 / 2 + lam) * y)) := by
-      rw [Real.exp_add, Real.exp_add]
-      ring
-    _ = _ := by congr 2; ring
 
 /-- The two axial slopes differ whenever `lam > 0`, as do their translated weights. -/
 theorem axial_weight_gap_neg {lam δ : ℝ} (hlam : 0 < lam) (hδ : 0 < δ) :
@@ -144,25 +98,7 @@ theorem axial_weight_gap_neg {lam δ : ℝ} (hlam : 0 < lam) (hδ : 0 < δ) :
     nlinarith [mul_pos hlam hδ]
   exact sub_neg.mpr (Real.exp_lt_exp.mpr hgap)
 
-/-- Determinant of the moment matrix for two equal bumps separated by `δ`. -/
-theorem axial_moment_determinant_neg {lam δ c₁ c₂ : ℝ}
-    (hlam : 0 < lam) (hδ : 0 < δ) (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) :
-    c₁ * (c₂ * Real.exp ((1 / 2 - 2 * lam) * δ)) -
-      (c₁ * Real.exp ((1 / 2 - lam) * δ)) * c₂ < 0 := by
-  have h := mul_neg_of_pos_of_neg (mul_pos hc₁ hc₂) (axial_weight_gap_neg hlam hδ)
-  nlinarith
 
-/-- Explicit algebraic reset for arbitrary debts in the two normalized moment rows.
-The theorem does not assert bounds on these coefficients or construct smooth bumps. -/
-theorem two_moment_reset {r₁ r₂ : ℝ} (hgap : r₂ ≠ r₁) (debt₁ debt₂ : ℝ) :
-    let b := (debt₁ - debt₂) / (r₂ - r₁)
-    let a := -debt₁ - r₁ * b
-    debt₁ + a + r₁ * b = 0 ∧ debt₂ + a + r₂ * b = 0 := by
-  dsimp
-  constructor
-  · ring
-  · field_simp [sub_ne_zero.mpr hgap]
-    ring
 
 /-- The exact negative part of the scaled pulse energy in equation (13). -/
 theorem pulse_negative_energy_integral :
@@ -200,32 +136,11 @@ theorem pulse_amplitude_endpoint_signs {K error₀ error₁ : ℝ}
   rcases abs_le.mp herror₁ with ⟨he₁lo, he₁hi⟩
   constructor <;> nlinarith
 
-/-- A continuous error bounded by `1/100` gives an amplitude in the manuscript's
-bracket. No monotonicity, uniqueness, smooth dependence, or asymptotic error
-estimate is inferred from this theorem. -/
-theorem pulse_amplitude_root {K : ℝ} (error : ℝ → ℝ)
-    (hKlo : 1 / 5 ≤ K) (hKhi : K ≤ 1 / 4)
-    (hcontinuous : ContinuousOn error (Set.Icc (9 / 10 : ℝ) (6 / 5)))
-    (herror : ∀ A ∈ Set.Icc (9 / 10 : ℝ) (6 / 5), |error A| ≤ 1 / 100) :
-    ∃ A ∈ Set.Icc (9 / 10 : ℝ) (6 / 5),
-      K * A ^ 2 - pulseEnergyDebt + error A = 0 := by
-  let F : ℝ → ℝ := fun A => K * A ^ 2 - pulseEnergyDebt + error A
-  have hF : ContinuousOn F (Set.Icc (9 / 10 : ℝ) (6 / 5)) := by
-    apply ContinuousOn.add _ hcontinuous
-    exact ((continuous_const.mul (continuous_id.pow 2)).sub continuous_const).continuousOn
-  have hlo := herror (9 / 10) (by constructor <;> norm_num)
-  have hhi := herror (6 / 5) (by constructor <;> norm_num)
-  have hsign := pulse_amplitude_endpoint_signs hKlo hKhi hlo hhi
-  have hzero : 0 ∈ F '' Set.Icc (9 / 10 : ℝ) (6 / 5) :=
-    intermediate_value_Icc (by norm_num) hF ⟨hsign.1.le, hsign.2.le⟩
-  exact hzero
 
 /-- Constant-source lag solution, written in a form that also specifies its initial value. -/
 def lagSolution (a c q₀ y : ℝ) : ℝ :=
   c / a + (q₀ - c / a) * Real.exp (-a * y)
 
-theorem lag_solution_initial (a c q₀ : ℝ) : lagSolution a c q₀ 0 = q₀ := by
-  simp [lagSolution]
 
 theorem lag_solution_hasDerivAt (a c q₀ y : ℝ) :
     HasDerivAt (lagSolution a c q₀)
@@ -235,19 +150,7 @@ theorem lag_solution_hasDerivAt (a c q₀ y : ℝ) :
   simp only [mul_one, id_eq]
   ring
 
-theorem lag_solution_equation {a : ℝ} (ha : a ≠ 0) (c q₀ y : ℝ) :
-    deriv (lagSolution a c q₀) y + a * lagSolution a c q₀ y = c := by
-  rw [(lag_solution_hasDerivAt a c q₀ y).deriv]
-  unfold lagSolution
-  field_simp [ha]; ring
 
-/-- The release initial lag follows algebraically from the angular moment reset. -/
-theorem release_initial_lag {lam : ℝ} (hlam : lam ≠ 1) (h : ℝ) :
-    -1 + (1 - h) / (1 - lam) = (lam - h) / (1 - lam) := by
-  field_simp [sub_ne_zero.mpr (Ne.symm hlam)]; ring
 
-theorem release_initial_lag_positive {lam h : ℝ} (hhlam : h < lam) (hlam : lam < 1) :
-    0 < (lam - h) / (1 - lam) :=
-  div_pos (sub_pos.mpr hhlam) (sub_pos.mpr hlam)
 
 end NavierStokes.RadialSchedule

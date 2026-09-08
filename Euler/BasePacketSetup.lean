@@ -66,11 +66,7 @@ def packetBaseState : SmoothState (packetBaseParent β hβ ell hell hell1 T hT h
 def packetBaseLowBounds : LowBounds (packetBaseParent β hβ ell hell hell1 T hT hTB) :=
   (initialLowBounds β hβ ell hell hell1).restrictTime T hT hTB
 
-theorem packetBase_label_constant :
-    (packetBaseState β hβ ell hell hell1 T hT hTB).labels.K=solutionLabelConstant := rfl
 
-theorem packetBase_boundary_zero :
-    (packetBaseLowBounds β hβ ell hell hell1 T hT hTB).L=0 := rfl
 
 include hTB in
 theorem packetBase_short : initialCoefficientCost*T ≤ 1/2 :=
@@ -121,8 +117,6 @@ def firstPacketInputs :
     (fun x hx => le_of_lt (by simpa only [Metric.mem_ball,dist_zero_right] using hx))
     (packetBase_short T hTB) T⁻¹ (hTB.trans initialTime_le_one) le_rfl
 
-theorem firstPacketInputs_growth :
-    (firstPacketInputs β hβ ell hell hell1 T hT hTB).linear.g=1 := rfl
 
 theorem firstPacket_pressure_numerator (t : Icc (0 : ℝ) T)
     (x : Space) (hx : x ∈ support) :

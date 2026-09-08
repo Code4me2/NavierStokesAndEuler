@@ -44,11 +44,6 @@ theorem translation_continuous (u : L2Space V) : Continuous (fun a : Space => tr
   exact continuous_const.compMeasurePreservingLp hg
     (fun a => measurePreserving_add_right (volume : Measure Space) a) (by norm_num)
 
-theorem translation_norm_le (a : Space) :
-    ‖(translation (V := V) a).toContinuousLinearMap‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro u
-  simp only [LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.norm_map, one_mul, le_refl]
 
 theorem translation_hasFDerivAt_all (u : L2Space V) (D : Space →L[ℝ] L2Space V)
     (h : HasFDerivAt (fun a : Space => translation a u) D 0) (a : Space) :
@@ -61,12 +56,6 @@ theorem translation_orbits_tendstoUniformly {ι : Type*} {l : Filter ι}
     TendstoUniformly (fun n a => translation a (u n)) (fun a => translation a v) l :=
   EulerIsometricAction.orbits_tendstoUniformly translation u v hu
 
-theorem translation_derivatives_tendstoUniformly {ι : Type*} {l : Filter ι}
-    (D : ι → Space →L[ℝ] L2Space V) (D₀ : Space →L[ℝ] L2Space V)
-    (hD : Tendsto D l (𝓝 D₀)) :
-    TendstoUniformly (fun n a => (translation a).toContinuousLinearMap.comp (D n))
-      (fun a => (translation a).toContinuousLinearMap.comp D₀) l :=
-  EulerIsometricAction.derivatives_tendstoUniformly translation D D₀ hD
 
 /-- Convergent ordinary L² fields and their actual translation derivatives have the expected derivative in the limit. -/
 theorem translation_hasFDerivAt_limit (u : ℕ → L2Space V)

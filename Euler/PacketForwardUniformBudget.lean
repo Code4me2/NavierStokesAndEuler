@@ -59,16 +59,7 @@ def forwardUniformBudget : EulerAllOrderDriftCorrection.Budget period D.T_pos
     (costs.1.trans hfrequency) (costs.2.1.trans hfrequency) (costs.2.2.1.trans hfrequency)
     (costs.2.2.2.1.trans hfrequency) (costs.2.2.2.2.trans hfrequency) Ξ hΞ hF hdet
 
-theorem forwardUniformBudget_delta :
-    (forwardUniformBudget M D hTime δ hδ hδ1 ξ hs α hα L NB LM Cagree
-      W hW hprofile k hk hX hlog hfrequency Ξ hΞ hF hdet).delta=delta (expansion k) := rfl
 
-theorem forwardUniformBudget_initialRadius :
-    (forwardUniformBudget M D hTime δ hδ hδ1 ξ hs α hα L NB LM Cagree
-      W hW hprofile k hk hX hlog hfrequency Ξ hΞ hF hdet).initialRadius=
-      initialRadius
-        (forwardInitializedRadius LM L NB (forwardCoefficientBudget period M D hTime NB) δ ξ)
-        (L.correctionCoefficients NB period).M (L.correctionCoefficients NB period).Rc := rfl
 
 
 open EulerPacketCorrectionOutput EulerSobolevGevreyOperators EulerAllOrderDriftCorrection

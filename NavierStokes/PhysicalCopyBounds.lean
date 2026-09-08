@@ -546,52 +546,7 @@ noncomputable def nativeSupportCells (g : BandLabel → Geometry) (U : BandLabel
     x ∈ ((nativeSupportCells g U hU hinj hs).cells I.1).carrier I.1.val.1 k ↔
       (g I.1).coordinates k x.2 ∈ U I.1 := Iff.rfl
 
-/-- For the actual localized coefficients, the support premise is itself
-derived from the literal cutoff factor. -/
-noncomputable def nativeCutoffSupportCells (g : BandLabel → Geometry) (U : BandLabel → Set Plane)
-    (hU : ∀ L, IsCompact (U L))
-    (hinj : ∀ L, InjOn TorusAverages.quotientPoint
-      ((fun z => (g L).center + (g L).basis z) '' U L))
-    (κ : BandLabel → Plane → ℝ) (hκ : ∀ L, support (κ L) ⊆ U L)
-    (v : TorusInverse.Frequency → WaveIndex H → LiftPoint → ℂ)
-    (he : ∀ k I x, F.amplitude k I x = κ I.1 ((g I.1).coordinates k x.2) • v k I x) :
-    SupportCells F :=
-  nativeSupportCells g U hU hinj (by
-    intro k I x hx
-    apply hκ I.1
-    intro hz
-    exact hx (by rw [he, hz, zero_smul]))
 
-/-- A native cell description proves all copy-width support conditions in
-the regularity record.  The radial annulus, slow mask, and smooth coefficient
-inputs are separate, as in the original construction. -/
-theorem regular_of_native (g : BandLabel → Geometry) (U : BandLabel → Set Plane)
-    (hgap : ∀ L, (g L).gap = F.gap L)
-    (hcenter : ∀ k L, (F.carrier k L).center = nativeCenter (g L) k)
-    (hwidth : ∀ L z, z ∈ U L → |PhysicalGraphBounds.etaCoordinate ((g L).basis z)| ≤ r0)
-    (hs : ∀ k I x, F.amplitude k I x ≠ 0 → (g I.1).coordinates k x.2 ∈ U I.1)
-    (hgap_le : ∀ L, F.gap L ≤ Δ)
-    (hgap_native : ∀ L, F.gap L ≤ ChartScales.nativeIndex h L.val.1)
-    (hamp : ∀ k I, ContDiff ℝ ∞ (F.amplitude k I))
-    (hF : ∀ k L, ContDiff ℝ ∞ (F.carrier k L).F)
-    (hG : ∀ k L, ContDiff ℝ ∞ (F.carrier k L).G)
-    (hint : ∀ k L, ∃ m : ℤ,
-      (ChartScales.carrier h L.val.1 : ℝ) * (F.carrier k L).angular = (m : ℝ))
-    (hgeo : ∀ k I y, F.amplitude k I (commonLift h I.1.val.1 (F.gap I.1) y) ≠ 0 →
-      PhysicalGraphBounds.scaledRadial I.1.val.1 y ∈ PhysicalGraphBounds.annulus a b ∧
-      ‖PhysicalGraphBounds.liftZT (PhysicalGraphBounds.physicalLift h I.1.val.1 y)‖ ≤ Z)
-    (hmask : ∀ k I y, y ∈ preterminal →
-      F.amplitude k I (commonLift h I.1.val.1 (F.gap I.1) y) ≠ 0 →
-      physicalMask (CoordinateAlgebra.D h) I.1.val (physicalParams h y) ≠ 0) :
-    RegularFamily F a b h r0 Z Δ := by
-  refine ⟨fun k => ⟨hgap_le, hgap_native, hamp k, hF k, hG k, hint k, ?_, hmask k⟩⟩
-  intro I y hy
-  refine ⟨(hgeo k I y hy).1, (hgeo k I y hy).2, ?_⟩
-  change |PhysicalGraphBounds.etaCoordinate
-    (PhysicalGraphBounds.nativeGraph h I.1.val.1 y - (F.carrier k I.1).center)| ≤ r0
-  rw [hcenter]
-  exact physical_native_width (g I.1) k h I.1.val.1 (F.gap I.1) (hgap I.1)
-    (hwidth I.1) y (hs k I _ hy)
 
 end NativeCells
 

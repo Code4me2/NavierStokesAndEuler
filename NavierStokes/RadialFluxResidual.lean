@@ -225,26 +225,6 @@ theorem residualRadial_radialB {V : Profile} (F U P : Profile) {p : ProfilePoint
   unfold fluxResidual radialB
   field_simp [hne] ; ring
 
-/-- The actual physical radial residual multiplied by `r`, expressed
-without introducing a square root or a radial unit vector. All regularity
-hypotheses are local at the evaluated point with `s > 0`. -/
-theorem physical_radial_flux_residual {V F U P : Profile} {t : ℝ} {x : Space}
-    (hV : ContDiffAt ℝ 2 V (profilePoint t x))
-    (hF : ContDiffAt ℝ 2 F (profilePoint t x))
-    (hU : ContDiffAt ℝ 2 U (profilePoint t x))
-    (hP : DifferentiableAt ℝ P (profilePoint t x)) (hs : 0 < radialEnergy x) :
-    x 0 * navierStokesResidual (AxisymmetricResidual.velocity (radialB V) F U)
-        (pressure P) t x 0 +
-      x 1 * navierStokesResidual (AxisymmetricResidual.velocity (radialB V) F U)
-        (pressure P) t x 1 = fluxResidual V F U P (profilePoint t x) := by
-  have hB := contDiffAt_radialB hV (ne_of_gt hs)
-  have hR := LocalAxisymmetricResidual.navierStokesResidual_velocity hB hF hU hP
-  simp only [hR, pack_zero, pack_one]
-  calc
-    _ = 2 * radialEnergy x * residualRadial (radialB V) F U P (profilePoint t x) := by
-      unfold radialEnergy
-      ring
-    _ = _ := residualRadial_radialB F U P hV hs
 
 end
 

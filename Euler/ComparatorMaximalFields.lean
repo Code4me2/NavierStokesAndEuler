@@ -33,10 +33,6 @@ theorem maximalPressureExtension_eq (t : L.Time) :
 theorem maximalVelocityExtension_initial : (maximalVelocityExtension L · 0) = A.field :=
   (maximalVelocityExtension_eq L L.initialTime).trans L.maximalVelocity_initial
 
-theorem maximalVelocityExtension_memLp (t : ℝ) (ht : t ∈ Ico 0 L.duration) :
-    MemLp (maximalVelocityExtension L · t) 2 volume := by
-  rw [maximalVelocityExtension_eq L ⟨t, ht⟩]
-  exact (L.maximalField ⟨t, ht⟩).memLp
 
 theorem maximalVelocityExtension_divergence (t : ℝ) (ht : t ∈ Ico 0 L.duration)
     (x : Space) : Euler.divergence (maximalVelocityExtension L · t) x = 0 := by

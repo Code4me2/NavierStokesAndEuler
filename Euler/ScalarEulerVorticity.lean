@@ -122,45 +122,7 @@ theorem vorticity_tsupport_subset_flow_image
       (hX a) (hXd a) (by simpa only [hX0 a] using ha) t ht)
   simpa only [he] using hs
 
-/-- Compact initial vorticity therefore stays compactly supported under a
-complete particle flow; no global bounds on spatial derivatives are assumed. -/
-theorem vorticity_hasCompactSupport_of_flow
-    (X : ℝ → Space → Space) (Y : Space → Space) (T t : ℝ)
-    (ht : t ∈ Icc 0 T)
-    (hX : ∀ a, ContinuousOn (fun r => X r a) (Icc 0 T))
-    (hXd : ∀ a r, r ∈ Ioo 0 T → HasDerivAt (fun s => X s a) (v (X r a) r) r)
-    (hX0 : ∀ a, X 0 a = a) (hXt : Continuous (X t))
-    (hXY : ∀ x, X t (Y x) = x)
-    (hc : HasCompactSupport (vectorCurl u₀)) :
-    HasCompactSupport (vectorCurl (v · t)) :=
-  (hc.image hXt).of_isClosed_subset (isClosed_tsupport _)
-    (h.vorticity_tsupport_subset_flow_image X Y T t ht hX hXd hX0 hXt hXY hc)
 
 
-/-- On a compact time interval all vorticity supports lie in one compact set:
-the image of the compact initial support swept out by the particle flow. -/
-theorem vorticity_uniformCompactSupport_of_flow
-    (X Y : ℝ → Space → Space) (T : ℝ)
-    (hX : ContinuousOn (Function.uncurry X) (Icc 0 T ×ˢ (univ : Set Space)))
-    (hXd : ∀ a r, r ∈ Ioo 0 T → HasDerivAt (fun s => X s a) (v (X r a) r) r)
-    (hX0 : ∀ a, X 0 a = a)
-    (hXY : ∀ t ∈ Icc 0 T, ∀ x, X t (Y t x) = x)
-    (hc : HasCompactSupport (vectorCurl u₀)) :
-    ∃ K : Set Space, IsCompact K ∧
-      ∀ t ∈ Icc 0 T, tsupport (vectorCurl (v · t)) ⊆ K := by
-  refine ⟨Function.uncurry X '' (Icc 0 T ×ˢ tsupport (vectorCurl u₀)),
-    (isCompact_Icc.prod hc).image_of_continuousOn
-      (hX.mono (by intro z hz; exact ⟨hz.1, mem_univ _⟩)), ?_⟩
-  intro t ht x hx
-  have htcont : ∀ a, ContinuousOn (fun r => X r a) (Icc 0 T) := by
-    intro a
-    exact hX.comp (continuousOn_id.prodMk continuousOn_const)
-      (fun r hr => ⟨hr, mem_univ _⟩)
-  have hxcont : Continuous (X t) :=
-    hX.comp_continuous (continuous_const.prodMk continuous_id)
-      (fun a => ⟨ht, mem_univ a⟩)
-  obtain ⟨a, ha, hax⟩ := h.vorticity_tsupport_subset_flow_image
-    X (Y t) T t ht htcont hXd hX0 hxcont (hXY t ht) hc hx
-  exact ⟨(t, a), ⟨ht, ha⟩, hax⟩
 
 end Euler.EulerExistenceAndSmoothnessR3

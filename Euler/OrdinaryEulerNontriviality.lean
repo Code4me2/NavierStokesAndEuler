@@ -35,9 +35,6 @@ def zeroEvolution (T : ℝ) (hT : 0 ≤ T) : Evolution T hT where
     simpa only [fderiv_const_apply,zero_apply,neg_zero,sub_zero] using
       hasDerivAt_const t (0 : Space)
 
-theorem zero_has_euler (T : ℝ) (hT : 0 < T) :
-    HasEulerEvolution (zeroField : SmoothL2Field Space) T :=
-  ⟨hT,zeroEvolution T hT.le,rfl⟩
 
 namespace FiniteLifespan
 

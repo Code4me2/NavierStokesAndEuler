@@ -50,8 +50,6 @@ theorem previousFrequency_one (n : ℕ) : 1 ≤ previousFrequency S.J S.D S.X n 
   | zero => exact S.first.frequency.one_le
   | succ n => exact (S.normal_frequency n).one_le
 
-theorem priorError_nonneg (n : ℕ) : 0 ≤ priorError S.J S.D S.X n :=
-  rpow_nonneg (zero_le_one.trans (S.previousFrequency_one n)) _
 
 theorem priorError_one (n : ℕ) : priorError S.J S.D S.X n ≤ 1 := by
   cases n with

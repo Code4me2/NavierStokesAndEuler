@@ -66,15 +66,6 @@ theorem joined_upper_pressure_cost_bound (hdelta : A.δ ≤ spike J X n) :
     _ = 2*M*A.hchild*(A.δ*goodRatio)+2*M*A.hchild*A.badRatio := by ring
     _ ≤ _ := add_le_add hg hb
 
-theorem joined_initial_gradient_cost_bound (hMone : 1 ≤ M) (ev : ℝ) :
-    A.hchild*A.badRatio+ev ≤ badCost J Cθ CM CMn CHn c (scaleSequence J X) n+ev := by
-  have hb := L.joined_bad_pressure_cost_bound m hm R S hS H τ hτ hτT P A Ti hτ1 hTi
-    J D hJ X Cθ CM CMn CHn c hX hCθ hCM hCMn hCHn hc hbaseH hbaseK n M
-    hK hTib hCMb hCHb hTheta hSigma hchild hMb
-  have hbase : A.hchild*A.badRatio ≤ 2*M*A.hchild*A.badRatio := by
-    nlinarith only [mul_nonneg (by linarith only [hMone] : 0 ≤ 2*M-1)
-      (mul_nonneg A.child_nonneg A.badRatio_nonneg)]
-  exact add_le_add (hbase.trans hb) le_rfl
 
 end EulerParentPacketFrames.LabelData
 
@@ -137,14 +128,5 @@ theorem upper_pressure_cost_bound (hdelta : A.δ ≤ spike J X n) :
     _ = 2*M*A.hchild*(A.δ*goodRatio)+2*M*A.hchild*A.earlyRatio := by ring
     _ ≤ _ := add_le_add hg hb
 
-omit [CompleteSpace U] in
-theorem initial_gradient_cost_bound (hMone : 1 ≤ M) (ev : ℝ) :
-    A.hchild*A.earlyRatio+ev ≤ badCost J Cθ CM CMn CHn c (scaleSequence J X) n+ev := by
-  have hb := A.bad_pressure_cost_bound J hJ X Cθ CM CMn CHn c hX hCθ hCM hCMn hCHn hc
-    hbaseH n M hTheta hSigma hchild hMb
-  have hbase : A.hchild*A.earlyRatio ≤ 2*M*A.hchild*A.earlyRatio := by
-    nlinarith only [mul_nonneg (by linarith only [hMone] : 0 ≤ 2*M-1)
-      (mul_nonneg A.child_nonneg A.earlyRatio_nonneg)]
-  exact add_le_add (hbase.trans hb) le_rfl
 
 end EulerPacketSourceGeometry.ForwardGuards

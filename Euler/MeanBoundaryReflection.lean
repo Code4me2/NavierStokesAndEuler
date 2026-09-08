@@ -21,10 +21,6 @@ def Cutoff.reflect (χ : Cutoff) : Cutoff :=
   ⟨fun x => χ.field (-x), χ.smooth.comp contDiff_id.neg,
     χ.compact.comp_homeomorph (Homeomorph.neg Space)⟩
 
-theorem Cutoff.reflect_reflect (χ : Cutoff) : χ.reflect.reflect = χ := by
-  apply Cutoff.ext
-  funext x
-  exact congrArg χ.field (neg_neg x)
 
 theorem Cutoff.reflect_eq_of_even (χ : Cutoff) (hχ : ∀ x, χ.field (-x) = χ.field x) :
     χ.reflect = χ := Cutoff.ext (funext hχ)
@@ -35,8 +31,6 @@ def l2ReflectionEquiv : L2 ≃ₗᵢ[ℝ] L2 :=
 def gradientReflection : GradientTensor ≃ₗᵢ[ℝ] GradientTensor :=
   LinearIsometryEquiv.piLpCongrRight 2 (fun _ : Fin 3 => l2ReflectionEquiv)
 
-theorem gradientReflection_apply (G : GradientTensor) (i : Fin 3) :
-    gradientReflection G i = reflection (G i) := rfl
 
 theorem gradientReflection_involutive (G : GradientTensor) :
     gradientReflection (gradientReflection G) = G := by
@@ -78,8 +72,6 @@ def homogeneousReflection : homogeneousSpace →ₗᵢ[ℝ] homogeneousSpace whe
   map_smul' c u := by apply Subtype.ext; exact map_smul gradientReflection c _
   norm_map' u := gradientReflection.norm_map (u : GradientTensor)
 
-theorem homogeneousReflection_coe (u : homogeneousSpace) :
-    (homogeneousReflection u : GradientTensor) = gradientReflection (u : GradientTensor) := rfl
 
 theorem homogeneousReflection_involutive (u : homogeneousSpace) :
     homogeneousReflection (homogeneousReflection u) = u := by

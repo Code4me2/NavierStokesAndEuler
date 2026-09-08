@@ -50,19 +50,7 @@ theorem field_initial (x : Space) : I.field A.zeroTime x=x := by
   have h := I.left_inverse A.zeroTime x
   simpa only [Parent.position, Parent.zeroTime, A.initial, add_zero] using h
 
-include I in
-theorem position_measurePreserving (t : Icc (0 : ℝ) A.T) :
-    MeasurePreserving (A.position t) volume volume :=
-  EulerDeformationVolume.measurePreserving_of_det_one volume (A.position t)
-    (fun x => ContinuousLinearMap.id ℝ Space+fderiv ℝ (A.displacement.field t : Space → Space) x)
-    (A.position_hasFDerivAt t) (I.position_bijective t) (A.displacement_det_one t)
 
-theorem field_measurePreserving (t : Icc (0 : ℝ) A.T) :
-    MeasurePreserving (I.field t) volume volume :=
-  EulerFlowL2Transport.inverse_measurePreserving (A.position t) (I.field t)
-    (fun x => ContinuousLinearMap.id ℝ Space+fderiv ℝ (A.displacement.field t : Space → Space) x)
-    (A.position_hasFDerivAt t) (I.left_inverse t) (I.right_inverse t)
-    (Continuous.uncurry_left t I.continuous) (A.displacement_det_one t)
 
 def normalized (t : Icc (0 : ℝ) A.T) (x : Space) : Space :=
   A.packetInverse I.field (t,x)

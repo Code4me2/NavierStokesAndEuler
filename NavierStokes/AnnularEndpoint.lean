@@ -118,14 +118,6 @@ theorem ShrinkingSupport.map_zero {W : Type*} [Zero W] {h C : ℝ}
   intro hz
   exact hn (by simpa only [hz] using hT w)
 
-theorem exists_common_zero_neighborhood {ι : Type*} {h C : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) {f : ι → SpaceTime → V}
-    (hf : ∀ i, ShrinkingSupport h C (f i)) {x : Space}
-    (hx : x ≠ 0) (hz : x 2 = 0) :
-    ∃ U : Set SpaceTime, IsOpen U ∧ (1, x) ∈ U ∧
-      ∀ w ∈ U, w.1 < 1 → ∀ i, f i w = 0 := by
-  obtain ⟨U, hU, hxU, hs⟩ := exists_separating_neighborhood hh hh1 C hx hz
-  exact ⟨U, hU, hxU, fun w hw ht i => (hf i).zero_of_separated ht (hs w hw ht)⟩
 
 theorem exists_zero_neighborhood {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {f : SpaceTime → V} (hf : ShrinkingSupport h C f) {x : Space}
@@ -252,11 +244,6 @@ theorem regularFamily_term_support {H : ℕ} {f : PhysicalWaveSum.WaveFamily H}
     (PhysicalWaveSum.globalWave_ne_zero_amp hn)).1,
     (PhysicalWaveSum.labelRegion_active_relation (hf.term_support I w ht hn)).2⟩
 
-theorem regularFamily_sum_support {H : ℕ} {f : PhysicalWaveSum.WaveFamily H}
-    {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : PhysicalWaveSum.RegularFamily f a b h r0 Z Δ) :
-    ShrinkingSupport h (2 * b * Real.sqrt 2) (f.sum a h r0) :=
-  ShrinkingSupport.finsum (regularFamily_term_support hf)
 
 /-- The complete physical copy-and-label sum has the same outer support.
 The support witness keeps the individual copy and its own carrier center. -/
@@ -269,20 +256,7 @@ theorem copyFamily_sum_support {H Δ : ℕ} {K : Type*}
   obtain ⟨I, _, _, ha, hm⟩ := hf.sum_support ht hn
   exact ⟨I.1.val.1, ha, (PhysicalWaveSum.labelRegion_active_relation hm).2⟩
 
-theorem copyFamily_real_sum_support {H Δ : ℕ} {K : Type*}
-    {f : PhysicalCopyBounds.CopyFamily H K} {a b h r0 Z : ℝ}
-    (hf : PhysicalCopyBounds.RegularFamily f a b h r0 Z Δ) :
-    ShrinkingSupport h (2 * b * Real.sqrt 2) (fun w => (f.sum a h r0 w).re) :=
-  (copyFamily_sum_support hf).map_zero (fun _ z => z.re) (by intro; rfl)
 
-theorem copyFamily_vector_support {H Δ : ℕ} {K : Type*}
-    {f : Fin 3 → PhysicalCopyBounds.CopyFamily H K} {a b h r0 Z : ℝ}
-    (hf : ∀ i, PhysicalCopyBounds.RegularFamily (f i) a b h r0 Z Δ) :
-    ShrinkingSupport h (2 * b * Real.sqrt 2) (PhysicalCopyBounds.vectorSum f a h r0) := by
-  apply ShrinkingSupport.finset_sum
-  intro i _
-  exact (copyFamily_sum_support (hf i)).map_zero
-    (fun _ z => PhysicalWaveSum.realCoordinate i z) (by intro; simp)
 
 end WaveSupport
 
@@ -357,22 +331,7 @@ theorem ShrinkingSupport.jets_eventually_zero {h C : ℝ} (hh : 0 < h) (hh1 : h 
   filter_upwards [nhdsWithin_le_nhds (hU.mem_nhds hxU), self_mem_nhdsWithin] with w hw ht
   exact jets_zero_of_eqOn hU hfU m ⟨hw, ht⟩
 
-theorem ShrinkingSupport.jets_tendsto_zero {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : SpaceTime → V} (hf : ShrinkingSupport h C f) {x : Space}
-    (hx : x ≠ 0) (hz : x 2 = 0) (m : ℕ) :
-    Tendsto (iteratedFDeriv ℝ m f) (𝓝[SpacetimeEndpoint.openPast 1] (1, x)) (𝓝 0) :=
-  tendsto_const_nhds.congr' (hf.jets_eventually_zero hh hh1 hx hz m).symm
 
-/-- The support argument supplies the central-plane branch.  Extensions
-at nonzero axial coordinate remain a separate, explicit input. -/
-theorem awayExtensions_of_offplane {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : SpaceTime → V} (hf : ShrinkingSupport h C f)
-    (hoff : ∀ x : Space, x 2 ≠ 0 → Nonempty (JointResidualLimits.OneSidedExtension f x)) :
-    JointResidualLimits.AwayExtensions f := by
-  intro x hx
-  by_cases hz : x 2 = 0
-  · exact hf.oneSidedExtension hh hh1 hx hz
-  · exact hoff x hz
 
 /-- Adding a correction which vanishes on a past neighborhood preserves
 the literal extension of the base field on the intersection. -/
@@ -550,57 +509,7 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
     (v : ModulatedProfileAssembly.Witness ld)
 
-/-- Apply the shrinking-support construction to the actual selected
-slow-base potential in the terminally smooth radial gauge.  All correction
-orders are retained.  This assertion is at the central plane only. -/
-theorem final_diagonal_extensions (upper : ℝ) (B : ℕ) {C : ℝ}
-    {A : ℕ → SpaceTime → Space} {p : ℕ → SpaceTime → ℝ}
-    (hA : ∀ j, ShrinkingSupport F.data.h C (A j))
-    (hp : ∀ j, ShrinkingSupport F.data.h C (p j))
-    (a : ℕ → ℝ) (q : SpaceTime → ℝ) {x : Space} (hx : x ≠ 0) (hz : x 2 = 0) :
-    let A' := diagonalAddition (TailGaugePotential.finalPotential H v upper B) a q A
-    let p' := diagonalAddition (FinalSlowBase.pressure H v upper B) a q p
-    Nonempty (JointResidualLimits.OneSidedExtension A' x) ∧
-      Nonempty (JointResidualLimits.OneSidedExtension (SpatialCurl.spatialCurl A') x) ∧
-      Nonempty (JointResidualLimits.OneSidedExtension p' x) ∧
-      Nonempty (JointResidualLimits.OneSidedExtension
-        (fun w => ProblemStatement.navierStokesResidual (SpatialCurl.spatialCurl A') p' w.1 w.2) x) := by
-  obtain ⟨eA0⟩ := TailGaugePotential.finalPotential_awayExtensions H v upper B x hx
-  obtain ⟨ep0⟩ := (SlowBaseEndpoint.final_fields_awayExtensions H v upper B).2 x hx
-  obtain ⟨eA⟩ := diagonal_addition_extension F.data.h_pos F.data.h_lt_half hA a q hx hz eA0
-  obtain ⟨ep⟩ := diagonal_addition_extension F.data.h_pos F.data.h_lt_half hp a q hx hz ep0
-  exact ⟨⟨eA⟩, ⟨curlExtension eA⟩, ⟨ep⟩, ⟨residualExtension (curlExtension eA) ep⟩⟩
 
-/-- Near each nonzero terminal central-plane point, the corrected actual
-velocity, pressure, and residual agree as ambient germs with the same
-constructed slow base.  All joint derivatives therefore agree there too. -/
-theorem final_diagonal_germs (upper : ℝ) (B : ℕ) {C : ℝ}
-    {A : ℕ → SpaceTime → Space} {p : ℕ → SpaceTime → ℝ}
-    (hA : ∀ j, ShrinkingSupport F.data.h C (A j))
-    (hp : ∀ j, ShrinkingSupport F.data.h C (p j))
-    (a : ℕ → ℝ) (q : SpaceTime → ℝ) {x : Space} (hx : x ≠ 0) (hz : x 2 = 0) :
-    let A' := diagonalAddition (TailGaugePotential.finalPotential H v upper B) a q A
-    let p' := diagonalAddition (FinalSlowBase.pressure H v upper B) a q p
-    ∃ U : Set SpaceTime, IsOpen U ∧ (1, x) ∈ U ∧
-      ∀ w ∈ U, w.1 < 1 →
-        SpatialCurl.spatialCurl A' =ᶠ[𝓝 w] FinalSlowBase.velocity H v upper B ∧
-        p' =ᶠ[𝓝 w] FinalSlowBase.pressure H v upper B ∧
-        (fun z => ProblemStatement.navierStokesResidual
-          (SpatialCurl.spatialCurl A') p' z.1 z.2) =ᶠ[𝓝 w]
-        (fun z => ProblemStatement.navierStokesResidual (FinalSlowBase.velocity H v upper B)
-          (FinalSlowBase.pressure H v upper B) z.1 z.2) := by
-  obtain ⟨U, hU, hxU, hg⟩ := diagonal_addition_germs F.data.h_pos F.data.h_lt_half
-    (TailGaugePotential.finalPotential H v upper B) (FinalSlowBase.pressure H v upper B)
-    hA hp a q hx hz
-  refine ⟨U, hU, hxU, ?_⟩
-  intro w hw ht
-  have hbase : SpatialCurl.spatialCurl (TailGaugePotential.finalPotential H v upper B) =ᶠ[𝓝 w]
-      FinalSlowBase.velocity H v upper B := by
-    filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds ht] with y hy
-    exact TailGaugePotential.finalPotential_sameCurl H v upper B hy
-  have hv := (hg w hw ht).2.1.trans hbase
-  have hpr := (hg w hw ht).2.2.1
-  exact ⟨hv, hpr, ResidualRegularity.residual_eventuallyEq hv hpr⟩
 
 end FinalBase
 

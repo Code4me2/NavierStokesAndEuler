@@ -84,15 +84,7 @@ theorem cubeIntegral_sum {ι : Type*} (s : Finset ι) (f : ι → Space → ℝ)
 theorem cubeIntegral_nonneg {f : Space → ℝ} (hf : ∀ x, 0 ≤ f x) :
     0 ≤ cubeIntegral f := integral_nonneg fun y => hf (toSpace y)
 
-theorem cubeIntegral_mono {f g : Space → ℝ} (hf : Continuous f) (hg : Continuous g)
-    (hfg : ∀ x, f x ≤ g x) : cubeIntegral f ≤ cubeIntegral g :=
-  integral_mono (integrable_cube hf) (integrable_cube hg) fun y => hfg (toSpace y)
 
-theorem cubeIntegral_nonneg_on_cube {f : Space → ℝ}
-    (hf : ∀ y ∈ cube, 0 ≤ f (toSpace y)) : 0 ≤ cubeIntegral f := by
-  apply integral_nonneg_of_ae
-  filter_upwards [ae_restrict_mem (show MeasurableSet cube from measurableSet_Icc)] with y hy
-  exact hf y hy
 
 theorem cubeIntegral_mono_on_cube {f g : Space → ℝ} (hf : Continuous f) (hg : Continuous g)
     (hfg : ∀ y ∈ cube, f (toSpace y) ≤ g (toSpace y)) : cubeIntegral f ≤ cubeIntegral g := by

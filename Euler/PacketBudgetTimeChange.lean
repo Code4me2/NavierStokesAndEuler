@@ -31,13 +31,6 @@ theorem WordBound.changeTime (hG : G.WordBound q R A d) (h : T = T') :
   subst T'
   exact hG
 
-theorem WordBound.normalized_profile_eq {hT : 0 ≤ T}
-    {g : C(Icc (0 : ℝ) T,ℝ)} {hg : ∀ t, 0 < g t}
-    (hG : (G.normalized hT g hg).WordBound q R A d)
-    (g' : C(Icc (0 : ℝ) T,ℝ)) (hg' : ∀ t, 0 < g' t) (he : g = g') :
-    (G.normalized hT g' hg').WordBound q R A d := by
-  subst g'
-  exact hG
 
 theorem WordBound.normalized_changeTime (hT : 0 ≤ T)
     (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t)

@@ -69,10 +69,6 @@ theorem classicalPrimitive_smooth
   rw [he]
   exact hq.comp (contDiff_const.add contDiff_id)
 
-theorem classicalPrimitive_continuous
-    (hfs : ∀ x, ContDiff ℝ ∞ (localFieldLift P f x)) :
-    Continuous (classicalPrimitive P f hf hmean) :=
-  smoothField_continuous P _ (classicalPrimitive_smooth P f hf hmean hfs)
 
 omit [Fact (0 < P)] in
 /-- Angular integration does not spread spatial support. -/

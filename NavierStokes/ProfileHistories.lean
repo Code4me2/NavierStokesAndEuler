@@ -356,10 +356,7 @@ theorem W_smooth (h : ℝ) : ContDiffOn ℝ ∞ (P.W h) D.carrier := by
   · exact (contDiffOn_const.sub (contDiffOn_snd.pow 2)).mul
       (average_smooth D (parameterPartial_smooth D P.U_smooth))
 
-theorem Ubar_at_axis (η : ℝ) : P.Ubar (0, η) = P.U (0, η) := average_at_axis P.U η
 
-theorem Ubar_eq_mass_quotient {p : Point} (hX : p.1 ≠ 0) :
-    P.Ubar p = P.M p / p.1 := average_eq_quotient P.U hX
 
 theorem W_formula (h : ℝ) {p : Point} (hp : p ∈ D.carrier) :
     P.W h p = 1 - 2 * axialExponent h * p.2 * P.Ubar p -
@@ -672,34 +669,7 @@ theorem logE_parameter_deriv {p : Point} (hp : p ∈ D.carrier)
   dsimp [Eη, E, H]
   field_simp
 
-/-- The angular row of (6) with actual logarithms, not surrogate slope data. -/
-theorem angularLag_equation_logarithmic (h : ℝ) {p : Point} (hp : p ∈ D.carrier)
-    (hX : 0 < p.1) (hf : P.f p ≠ 0) :
-    p.1 * deriv (fun x => P.angularLag h (x, p.2)) p.1 +
-      (1 + p.1 * deriv (fun x => Real.log (P.H (x, p.2))) p.1) * P.angularLag h p =
-        -P.W h p * (p.1 * deriv (fun x => Real.log (P.H (x, p.2))) p.1) -
-          h * (1 - 2 * p.2 * P.U p) -
-            (axialExponent h * p.2 + coordinateFactor p.2 * P.U p) *
-              deriv (fun η => Real.log (P.E (p.1, η))) p.2 := by
-  have hH := P.H_ne_zero hX.ne' hf
-  rw [P.logH_radial_deriv hp hH, P.logE_parameter_deriv hp hX hf]
-  rw [← mul_div_assoc]
-  rw [P.angularLag_equation h hp hX.ne' hH]
-  dsimp [angularSource, StressAlgebra.angularSource]
-  field_simp
 
-/-- The axial row of (6), with the pressure derivative proved from its integral. -/
-theorem axialLag_equation_explicit (h : ℝ) {p : Point} (hp : p ∈ D.carrier) (hX : 0 < p.1) :
-    p.1 * deriv (fun x => P.axialLag h (x, p.2)) p.1 + P.axialLag h p =
-      -P.W h p * (p.1 * radialPartial P.U p) -
-        velocityExponent h * (1 - 2 * p.2 * P.U p) * P.U p -
-          (axialExponent h * p.2 + coordinateFactor p.2 * P.U p) * parameterPartial P.U p -
-            coordinateFactor p.2 * parameterPartial P.pressure p +
-              4 * velocityExponent h * p.2 * P.pressure p +
-                2 * p.2 * (p.1 * radialPartial P.pressure p) := by
-  rw [P.axialLag_equation h hp hX.ne', P.radialPartial_pressure hp]
-  dsimp [axialSource, StressAlgebra.axialSource]
-  ring
 
 end Profiles
 

@@ -28,12 +28,6 @@ theorem wordSum_subalphabet_le (directions : κ → P) (e : ι → κ) (he : Fun
     _ ≤ ∑ w : Fin n → κ, ‖wordDerivative directions f w x‖ :=
       sum_le_sum_of_subset_of_nonneg (subset_univ _) (fun _ _ _ => norm_nonneg _)
 
-/-- The same literal subalphabet restriction is contractive on every fixed Sobolev block. -/
-theorem block_subalphabet_le (directions : κ → P) (e : ι → κ) (he : Function.Injective e)
-    (q : ℕ) (f : P → E) (hf : ContDiff ℝ ∞ f) (n : ℕ) (x : P) :
-    block (directions ∘ e) q f n x ≤ block directions q f n x := by
-  rw [block_eq_sum_levels _ q f hf,block_eq_sum_levels _ q f hf]
-  exact sum_le_sum (fun k _ => wordSum_subalphabet_le directions e he f (n+k) x)
 
 omit [Fintype ι] in
 /-- A linear parameter map transports the actual directions exactly. -/

@@ -81,8 +81,5 @@ def geometryForwardInputs (Ti : ℝ) (hT1 : A.T ≤ 1) (hTi : A.T⁻¹ ≤ Ti) :
     normal := N.enlargeRadius Rc ((le_max_left Rn Rm).trans (le_max_right _ _))
     mean := M.enlargeRadius Rc ((le_max_right Rn Rm).trans (le_max_right _ _)) }
 
-theorem geometryForwardInputs_growth (Ti : ℝ) (hT1 : A.T ≤ 1) (hTi : A.T⁻¹ ≤ Ti) :
-    (L.geometryForwardInputs H m hm J support hSupport P G hball Ω hΩ hΩo hsub hΩball
-      Ti hT1 hTi).linear.g=G.sourceGrowthProfile hball := rfl
 
 end EulerParentPacketFrames.LabelData

@@ -28,13 +28,6 @@ theorem scalarEulerForce_field (A B : SmoothL2Field Space) (x : Space) :
     (scalarEulerForce A B).field x = -((B.field x)+fderiv ℝ A.field x (A.field x)) := by
   simp only [scalarEulerForce,fieldNeg_field,addField_field,advectionField_field]
 
-theorem scalarEulerForce_continuous
-    (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n))
-    (hB : ∀ n, Continuous (fun t => (B t).jetLp n)) (n : ℕ) :
-    Continuous (fun t => (scalarEulerForce (A t) (B t)).jetLp n) :=
-  continuous_jetLp_mapField _ _
-    (continuous_jetLp_addField B _ hB (advectionField_continuous A hA)) n
 
 /-- An ordinary scalar Euler equation implies the actual projected L² equation.
 Spatial differentiability of pressure is used only at interior times. -/
@@ -110,8 +103,6 @@ variable (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
       fderiv ℝ (A ⟨t,ht.1.le,ht.2.le⟩).field x
         ((A ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0)
 
-theorem evolutionOfScalarEuler_velocity :
-    (evolutionOfScalarEuler A B hA hd p hdiv hp he).velocity=A := rfl
 
 include hB in
 theorem evolutionOfScalarEuler_derivative (hpos : 0 < T) (t : Icc (0 : ℝ) T) :
@@ -146,20 +137,6 @@ theorem evolutionOfScalarEuler_pressureForce (hpos : 0 < T) (t : Icc (0 : ℝ) T
       ((sub_eq_iff_eq_add).mp hv).symm
     _ = (B t).field x+-((B t).field x+fderiv ℝ (A t).field x ((A t).field x)) := by abel
 
-include hB in
-theorem evolutionOfScalarEuler_scalarPressure (hpos : 0 < T)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) (x : Space) :
-    (evolutionOfScalarEuler A B hA hd p hdiv hp he).scalarPressure ⟨t,ht.1.le,ht.2.le⟩ x=
-      p t x-p t 0 := by
-  let U := evolutionOfScalarEuler A B hA hd p hdiv hp he
-  let s : Icc (0 : ℝ) T := ⟨t,ht.1.le,ht.2.le⟩
-  have hg (y : Space) : (U.pressureForce s).field y=gradient (p t) y := by
-    rw [evolutionOfScalarEuler_pressureForce A B hA hB hd p hdiv hp he hpos s,
-      scalarEulerForce_field]
-    exact (eq_neg_of_add_eq_zero_right (he t ht y)).symm
-  exact EulerCanonicalGraphPotential.radialPotential_eq_sub (U.pressureForce s).field
-    (U.pressureForce s).smooth.continuous (p t)
-    (potential_smooth (U.pressureForce s) (p t) (hp t ht) hg) (fun y => (hg y).symm) x
 
 end Identification
 
@@ -222,25 +199,6 @@ theorem isSmoothScalarEuler_of_sobolev
     IsSmoothScalarEuler (hT := hT) A :=
   ⟨hA,B,p,hB,l2_timeDerivative_of_sobolev A B hA hB q hd,hdiv,hp,he⟩
 
-/-- Starting from genuine continuous Sobolev realizations requires no
-preselected smooth representative or pressure-force path. The order-two
-time law is part of the source's `C¹ H^(m-1)` condition at `m=3`;
-the continuous realizations of the derivative come from its higher orders. -/
-theorem SobolevTower.isSmoothScalarEuler (A B : SobolevTower T)
-    (hd : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (extendPath T hT (A.realization 2))
-        (B.realization 2 ⟨t,ht.1.le,ht.2.le⟩) t)
-    (p : ℝ → Space → ℝ)
-    (hdiv : ∀ t x, divergence (A.smoothField t).field x=0)
-    (hp : ∀ t ∈ Ioo 0 T, Differentiable ℝ (p t))
-    (he : ∀ t (ht : t ∈ Ioo 0 T) x,
-      (B.smoothField ⟨t,ht.1.le,ht.2.le⟩).field x+
-        fderiv ℝ (A.smoothField ⟨t,ht.1.le,ht.2.le⟩).field x
-          ((A.smoothField ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0) :
-    IsSmoothScalarEuler (hT := hT) A.smoothField := by
-  apply isSmoothScalarEuler_of_sobolev A.smoothField B.smoothField
-    A.smoothField_jet_continuous B.smoothField_jet_continuous 2 _ p hdiv hp he
-  simpa only [A.smoothField_path 2,B.smoothField_path 2] using hd
 
 theorem scalarEuler_iff_projected (A : Icc (0 : ℝ) T → SmoothL2Field Space) :
     IsSmoothScalarEuler (hT := hT) A ↔ IsSmoothProjectedEuler (hT := hT) A := by

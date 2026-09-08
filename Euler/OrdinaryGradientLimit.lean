@@ -61,30 +61,6 @@ def limitEvolutionOfGradientIntegral (V : ℕ → Evolution T hT) (hpos : 0 < T)
       (fun k => (V k).h3_tensorNorm_gradient_uniform R G (hR k) (hG k)) hinit)
     (Evolution.cauchyPath_of_initial_gradient V G hG hcauchy)
 
-theorem limitEvolutionOfGradientIntegral_convergence (V : ℕ → Evolution T hT) (hpos : 0 < T)
-    (R G : ℝ) (hR : ∀ k, tensorNorm 3 ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ R)
-    (hG : ∀ k t, (V k).gradientIntegral t ≤ G)
-    (hinit : ∀ q, ∃ C : ℝ, ∀ k, tensorNorm q ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ C)
-    (hcauchy : CauchySeq (fun k => ((V k).velocity ⟨0,le_rfl,hT⟩).toLp)) (q : ℕ) :
-    Tendsto (fun k => jetPath (V k).velocity (V k).velocity_continuous q) atTop
-      (𝓝 (jetPath (limitEvolutionOfGradientIntegral V hpos R G hR hG hinit hcauchy).velocity
-        (limitEvolutionOfGradientIntegral V hpos R G hR hG hinit hcauchy).velocity_continuous q)) :=
-  limitEvolution_jet_convergence V hpos
-    (Evolution.all_order_bounds_of_h3 V (gradientTensorBound R G)
-      (fun k => (V k).h3_tensorNorm_gradient_uniform R G (hR k) (hG k)) hinit)
-    (Evolution.cauchyPath_of_initial_gradient V G hG hcauchy) q
 
-theorem limitEvolutionOfGradientIntegral_initial (V : ℕ → Evolution T hT) (hpos : 0 < T)
-    (R G : ℝ) (hR : ∀ k, tensorNorm 3 ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ R)
-    (hG : ∀ k t, (V k).gradientIntegral t ≤ G)
-    (hinit : ∀ q, ∃ C : ℝ, ∀ k, tensorNorm q ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ C)
-    (hcauchy : CauchySeq (fun k => ((V k).velocity ⟨0,le_rfl,hT⟩).toLp)) (u0 : L2)
-    (hu0 : Tendsto (fun k => ((V k).velocity ⟨0,le_rfl,hT⟩).toLp) atTop (𝓝 u0)) :
-    ((limitEvolutionOfGradientIntegral V hpos R G hR hG hinit hcauchy).velocity
-      ⟨0,le_rfl,hT⟩).toLp=u0 :=
-  limitEvolution_initial V hpos
-    (Evolution.all_order_bounds_of_h3 V (gradientTensorBound R G)
-      (fun k => (V k).h3_tensorNorm_gradient_uniform R G (hR k) (hG k)) hinit)
-    (Evolution.cauchyPath_of_initial_gradient V G hG hcauchy) u0 hu0
 
 end EulerOrdinarySobolev

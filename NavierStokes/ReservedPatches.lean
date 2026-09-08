@@ -84,8 +84,6 @@ theorem mem_window_pos (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     (s : Slot) {X : ℝ} (hX : X ∈ window F XR s) : 0 < X :=
   (left_pos F XR hXR s).trans hX.1
 
-theorem window_nonempty (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot) :
-    (window F XR s).Nonempty := nonempty_Ioo.mpr (left_lt_right F XR hXR s)
 
 theorem windows_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     {s t : Slot} (hst : s ≠ t) : Disjoint (window F XR s) (window F XR t) := by
@@ -132,17 +130,6 @@ theorem canonical_wait_gt_54 {lam : ℝ} (hlam : 0 < lam) (hlam' : lam < 1 / 10)
   simp only [one_div, inv_inv] at h ⊢
   nlinarith
 
-/-- The earliest reserved boundary has over twenty-nine log units of
-entrance margin. The latest boundary has three log units before the pulse. -/
-theorem canonical_margins (F : Profile)
-    (hw : F.data.core.wait = 60 * Real.log (1 / F.data.core.lam)) (s : Slot) :
-    F.data.core.holdStart + 29 < leftClock F s ∧
-      rightClock F s ≤ F.data.core.pulseStart - 3 := by
-  have hwait := canonical_wait_gt_54 F.data.core.lam_pos F.data.core.lam_lt
-  rw [← hw] at hwait
-  obtain ⟨hlo, _, hhi⟩ := offset_bounds s
-  dsimp only [leftClock, rightClock, OutgoingSchedule.Parameters.pulseStart]
-  constructor <;> linarith
 
 theorem pulse_before_switch (F : Profile) :
     F.data.core.pulseStart < HeatTailEdit.switchStart F.data := by
@@ -209,21 +196,7 @@ noncomputable def supportRight (F : Profile) (XR : ℝ) (s : Slot) : ℝ :=
 noncomputable def closedPatch (F : Profile) (XR : ℝ) (s : Slot) : Set ℝ :=
   Icc (supportLeft F XR s) (supportRight F XR s)
 
-theorem supportLeft_formula (F : Profile) (XR : ℝ) {s : Slot} (hs : s ≠ .heat) :
-    supportLeft F XR s = OutgoingDilation.radius XR (leftClock F s + 1) := by
-  cases s <;> simp_all [supportLeft, left, innerLower, OutgoingDilation.radius,
-    Real.exp_add, mul_assoc]
 
-theorem supportRight_formula (F : Profile) (XR : ℝ) {s : Slot} (hs : s ≠ .heat) :
-    supportRight F XR s = OutgoingDilation.radius XR (rightClock F s - 1) := by
-  have hu : innerUpper s = Real.exp 4 := by cases s <;> simp_all [innerUpper]
-  have hc : rightClock F s - 1 = leftClock F s + 4 := by
-    unfold rightClock leftClock
-    rw [offset_width]
-    ring
-  rw [hc, supportRight, hu, left, OutgoingDilation.radius,
-    OutgoingDilation.radius, Real.exp_add]
-  ring
 
 theorem support_margins (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot) :
     left F XR s < supportLeft F XR s ∧
@@ -247,15 +220,7 @@ theorem closedPatch_subset (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot) :
   obtain ⟨hl, _, hr⟩ := support_margins F XR hXR s
   exact ⟨hl.trans_le hX.1, hX.2.trans_lt hr⟩
 
-theorem closedPatch_nonempty (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot) :
-    (closedPatch F XR s).Nonempty :=
-  nonempty_Icc.mpr (support_margins F XR hXR s).2.1.le
 
-theorem closedPatches_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) :
-    Disjoint (closedPatch F XR s) (closedPatch F XR t) :=
-  (windows_disjoint F XR hXR hst).mono
-    (closedPatch_subset F XR hXR s) (closedPatch_subset F XR hXR t)
 
 noncomputable def momentPatch (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     (s : Slot) : FiveProfileMoments.Patch where
@@ -339,30 +304,8 @@ theorem heated_fields (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   rw [heated_E_eq_clean F XR hXR c hs eta hX]
   exact clean_fields F XR hXR s eta hX
 
-theorem heated_fields_on_closedPatch (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) {s : Slot} (hs : s ≠ .heat)
-    (eta : ℝ) {X : ℝ} (hX : X ∈ closedPatch F XR s) :
-    HeatedOutgoing.U F XR (X, eta) = 0 ∧
-      HeatedOutgoing.E F XR c (X, eta) =
-        xAmplitude F XR eta * X ^ (-(1 / 2 + F.data.core.lam)) :=
-  heated_fields F XR hXR c hs eta (closedPatch_subset F XR hXR s hX)
 
-theorem heat_slot_actual_formula (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) (eta : ℝ) {X : ℝ} (hX : X ∈ window F XR .heat) :
-    HeatedOutgoing.E F XR c (X, eta) =
-      xAmplitude F XR eta * X ^ (-(1 / 2 + F.data.core.lam)) +
-        HeatedOutgoing.patchIncrement F XR c (X, eta) := by
-  rw [HeatedOutgoing.E, HeatedOutgoing.heatE_before F XR eta X hXR
-    (mem_window_pos F XR hXR .heat hX) (hX.2.le.trans (right_before_switch F XR hXR .heat).le)]
-  rw [(clean_fields F XR hXR .heat eta hX).2]
 
-theorem witness_fields {F : Profile} {XR C : ℝ}
-    (w : HeatedOutgoing.CompensationWitness F XR C) {s : Slot} (hs : s ≠ .heat)
-    (eta : ℝ) {X : ℝ} (hX : X ∈ window F XR s) :
-    HeatedOutgoing.U F XR (X, eta) = 0 ∧
-      HeatedOutgoing.E F XR w.coefficients (X, eta) =
-        xAmplitude F XR eta * X ^ (-(1 / 2 + F.data.core.lam)) :=
-  heated_fields F XR w.radius_pos w.coefficients hs eta hX
 
 /-! ## The heat correction lies in its own closed interior support region -/
 
@@ -409,11 +352,6 @@ theorem heat_increment_support (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     rw [heat_left]
     simpa only [innerUpper, mul_comm] using (div_le_iff₀ hp).mp ht.2
 
-theorem heat_increment_tsupport (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) (eta : ℝ) :
-    tsupport (fun X => HeatedOutgoing.patchIncrement F XR c (X, eta)) ⊆
-      closedPatch F XR .heat :=
-  closure_minimal (heat_increment_support F XR hXR c eta) isClosed_Icc
 
 /-! ## Conversion to the similarity radius R, where X = R squared / 2 -/
 
@@ -492,9 +430,6 @@ theorem radial_mem_window (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot)
     {R : ℝ} (hR : R ∈ radialWindow F XR s) : R ^ 2 / 2 ∈ window F XR s :=
   square_half_mem_Ioo (left_pos F XR hXR s) hR
 
-theorem radial_mem_closedPatch (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot)
-    {R : ℝ} (hR : R ∈ radialClosedPatch F XR s) : R ^ 2 / 2 ∈ closedPatch F XR s :=
-  square_half_mem_Icc (supportLeft_pos F XR hXR s) hR
 
 theorem radial_closedPatch_subset (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot) :
     radialClosedPatch F XR s ⊆ radialWindow F XR s := by
@@ -509,11 +444,6 @@ theorem radial_windows_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   exact Set.disjoint_left.mp (windows_disjoint F XR hXR hst)
     (radial_mem_window F XR hXR s hRs) (radial_mem_window F XR hXR t hRt)
 
-theorem radial_closedPatches_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) :
-    Disjoint (radialClosedPatch F XR s) (radialClosedPatch F XR t) :=
-  (radial_windows_disjoint F XR hXR hst).mono
-    (radial_closedPatch_subset F XR hXR s) (radial_closedPatch_subset F XR hXR t)
 
 noncomputable def radialAmplitude (F : Profile) (XR eta : ℝ) : ℝ :=
   xAmplitude F XR eta * (2 : ℝ) ^ (1 / 2 + F.data.core.lam)
@@ -555,47 +485,14 @@ theorem radial_heated_fields (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   rw [he, square_half_power _ _ hp]
   simp only [FiveRowRank.background, radialAmplitude, mul_assoc]
 
-theorem radial_witness_fields {F : Profile} {XR C : ℝ}
-    (w : HeatedOutgoing.CompensationWitness F XR C) {s : Slot} (hs : s ≠ .heat)
-    (eta : ℝ) {R : ℝ} (hR : R ∈ radialWindow F XR s) :
-    HeatedOutgoing.U F XR (R ^ 2 / 2, eta) = 0 ∧
-      HeatedOutgoing.E F XR w.coefficients (R ^ 2 / 2, eta) =
-        FiveRowRank.background F.data.core.lam (radialAmplitude F XR eta) R :=
-  radial_heated_fields F XR w.radius_pos w.coefficients hs eta hR
 
-theorem radial_heated_fields_on_closedPatch (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) {s : Slot} (hs : s ≠ .heat)
-    (eta : ℝ) {R : ℝ} (hR : R ∈ radialClosedPatch F XR s) :
-    HeatedOutgoing.U F XR (R ^ 2 / 2, eta) = 0 ∧
-      HeatedOutgoing.E F XR c (R ^ 2 / 2, eta) =
-        FiveRowRank.background F.data.core.lam (radialAmplitude F XR eta) R :=
-  radial_heated_fields F XR hXR c hs eta (radial_closedPatch_subset F XR hXR s hR)
 
 /-! ## Supported perturbations preserve the other complete open windows -/
 
 def Supported (F : Profile) (XR : ℝ) (s : Slot) (v : ℝ × ℝ → ℝ) : Prop :=
   ∀ eta, support (fun X => v (X, eta)) ⊆ closedPatch F XR s
 
-theorem heat_increment_supported (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) :
-    Supported F XR .heat (HeatedOutgoing.patchIncrement F XR c) :=
-  heat_increment_support F XR hXR c
 
-/-- The actual five-row bump formulas satisfy the support premise, for arbitrary
-amplitude and coefficient functions. Smoothness is irrelevant to this identity. -/
-theorem five_row_updates_supported (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot)
-    (A : ℝ → ℝ) (c : ℝ → FiveProfileMoments.Coeff) :
-    Supported F XR s (fun p => A p.2 * FiveProfileMoments.u (momentPatch F XR hXR s) (c p.2) p.1) ∧
-      Supported F XR s (fun p => A p.2 * FiveProfileMoments.e (momentPatch F XR hXR s) (c p.2) p.1) := by
-  constructor
-  · intro eta X hX
-    have ht := (FiveProfileMoments.physical_edits_tsupport
-      (momentPatch F XR hXR s) (A eta) (c eta)).1 (subset_tsupport _ hX)
-    exact ⟨ht.1.le, ht.2.le⟩
-  · intro eta X hX
-    have ht := (FiveProfileMoments.physical_edits_tsupport
-      (momentPatch F XR hXR s) (A eta) (c eta)).2 (subset_tsupport _ hX)
-    exact ⟨ht.1.le, ht.2.le⟩
 
 theorem supported_vanishes (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     {s t : Slot} (hst : s ≠ t) {v : ℝ × ℝ → ℝ} (hv : Supported F XR s v)
@@ -622,37 +519,8 @@ theorem supported_update_germ (F : Profile) (XR : ℝ) (hXR : 0 < XR)
     ⟨hp, mem_univ _⟩)] with q hq
   exact supported_update_eqOn F XR hXR hst hv g hq
 
-theorem supported_update_jets (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) {v : ℝ × ℝ → ℝ} (hv : Supported F XR s v)
-    (g : ℝ × ℝ → ℝ) {p : ℝ × ℝ} (hp : p.1 ∈ window F XR t) (n : ℕ) :
-    iteratedFDeriv ℝ n (fun q => g q + v q) p = iteratedFDeriv ℝ n g p := by
-  have hg := supported_update_germ F XR hXR hst hv g hp
-  have hg' : (fun q => g q + v q) =ᶠ[𝓝[univ] p] g := by simpa using hg
-  simpa only [iteratedFDerivWithin_univ] using
-    hg'.iteratedFDerivWithin_eq (𝕜 := ℝ) hg.self_of_nhds n
 
-theorem supported_updates_preserve_fields (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) {s t : Slot} (hst : s ≠ t) (ht : t ≠ .heat)
-    {vU vE : ℝ × ℝ → ℝ} (hu : Supported F XR s vU) (he : Supported F XR s vE)
-    (eta : ℝ) {X : ℝ} (hX : X ∈ window F XR t) :
-    HeatedOutgoing.U F XR (X, eta) + vU (X, eta) = 0 ∧
-      HeatedOutgoing.E F XR c (X, eta) + vE (X, eta) =
-        xAmplitude F XR eta * X ^ (-(1 / 2 + F.data.core.lam)) := by
-  rw [supported_vanishes F XR hXR hst hu eta hX,
-    supported_vanishes F XR hXR hst he eta hX, add_zero, add_zero]
-  exact heated_fields F XR hXR c ht eta hX
 
-theorem finite_updates_eqOn {ι : Type*} [Fintype ι]
-    (F : Profile) (XR : ℝ) (hXR : 0 < XR) (t : Slot)
-    (s : ι → Slot) (v : ι → ℝ × ℝ → ℝ)
-    (hs : ∀ i, s i ≠ t) (hv : ∀ i, Supported F XR (s i) (v i))
-    (g : ℝ × ℝ → ℝ) :
-    EqOn (fun p => g p + ∑ i, v i p) g (window F XR t ×ˢ (univ : Set ℝ)) := by
-  intro p hp
-  have hz : ∑ i, v i p = 0 := Finset.sum_eq_zero
-    (fun i _ => supported_vanishes F XR hXR (hs i) (hv i) p.2 hp.1)
-  change g p + ∑ i, v i p = g p
-  rw [hz, add_zero]
 
 def RadialSupported (F : Profile) (XR : ℝ) (s : Slot) (v : ℝ × ℝ → ℝ) : Prop :=
   ∀ eta, support (fun R => v (R, eta)) ⊆ radialWindow F XR s
@@ -665,37 +533,7 @@ theorem radial_supported_vanishes (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   by_contra hn
   exact Set.disjoint_left.mp (radial_windows_disjoint F XR hXR hst) (hv eta hn) hR
 
-theorem radial_supported_update_germ (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) {v : ℝ × ℝ → ℝ} (hv : RadialSupported F XR s v)
-    (g : ℝ × ℝ → ℝ) {p : ℝ × ℝ} (hp : p.1 ∈ radialWindow F XR t) :
-    (fun q => g q + v q) =ᶠ[𝓝 p] g := by
-  have ho : IsOpen (radialWindow F XR t ×ˢ (univ : Set ℝ)) := isOpen_Ioo.prod isOpen_univ
-  filter_upwards [ho.mem_nhds (show p ∈ radialWindow F XR t ×ˢ (univ : Set ℝ) from
-    ⟨hp, mem_univ _⟩)] with q hq
-  have hz : v q = 0 := radial_supported_vanishes F XR hXR hst hv q.2 hq.1
-  simp only [hz, add_zero]
 
-theorem radial_supported_updates_preserve_fields (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    (c : ℝ → HeatedOutgoing.Coeff) {s t : Slot} (hst : s ≠ t) (ht : t ≠ .heat)
-    {vU vE : ℝ × ℝ → ℝ} (hu : RadialSupported F XR s vU) (he : RadialSupported F XR s vE)
-    (eta : ℝ) {R : ℝ} (hR : R ∈ radialWindow F XR t) :
-    HeatedOutgoing.U F XR (R ^ 2 / 2, eta) + vU (R, eta) = 0 ∧
-      HeatedOutgoing.E F XR c (R ^ 2 / 2, eta) + vE (R, eta) =
-        FiveRowRank.background F.data.core.lam (radialAmplitude F XR eta) R := by
-  rw [radial_supported_vanishes F XR hXR hst hu eta hR,
-    radial_supported_vanishes F XR hXR hst he eta hR, add_zero, add_zero]
-  exact radial_heated_fields F XR hXR c ht eta hR
 
-theorem radial_finite_updates_eqOn {ι : Type*} [Fintype ι]
-    (F : Profile) (XR : ℝ) (hXR : 0 < XR) (t : Slot)
-    (s : ι → Slot) (v : ι → ℝ × ℝ → ℝ)
-    (hs : ∀ i, s i ≠ t) (hv : ∀ i, RadialSupported F XR (s i) (v i))
-    (g : ℝ × ℝ → ℝ) :
-    EqOn (fun p => g p + ∑ i, v i p) g (radialWindow F XR t ×ˢ (univ : Set ℝ)) := by
-  intro p hp
-  have hz : ∑ i, v i p = 0 := Finset.sum_eq_zero
-    (fun i _ => radial_supported_vanishes F XR hXR (hs i) (hv i) p.2 hp.1)
-  change g p + ∑ i, v i p = g p
-  rw [hz, add_zero]
 
 end NavierStokes.ReservedPatches

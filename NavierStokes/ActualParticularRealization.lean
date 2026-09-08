@@ -874,11 +874,6 @@ theorem referenceLiftPressure_eq_wave (D : AssemblyData Parameter)
   rw [PhysicalParticularWave.referenceRawPressure_eq_common D H hj hf]
   rfl
 
-theorem associatedCylinder_change (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
-    (gap : ℕ) (x : Cylinder) :
-    associatedCylinder (PhysicalParticularWave.cylinderChange h Q Qr gap x) =
-      (PhysicalResidualNaturality.associatedChart h hQ hQr gap (associatedCylinder x).1,
-        (associatedCylinder x).2) := rfl
 
 section ActualReferenceFields
 
@@ -928,50 +923,7 @@ theorem corrected_pressure_eq_reference {j : ℤ} {α κ : ℝ}
       (gap n) (C.frequency_nonzero n) j (C.frequency_nonzero D.reference.band) R x hx.2.2,
     referenceLiftPressure_eq_wave D Href.identity j C.harmonic_ne C.frequency_ne]
 
-include H hn hr T Href hU in
-/-- The entire literal target block equals the same finite reference
-block, on the full radial/free-torus/angular domain. -/
-theorem block_velocity_eq_reference {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hstrip : D.strip = CorrectionStep.ParticularParameters.nativeStrip s)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    (R : ∀ j ∈ modes N, ReferenceODE D j U) {x : Cylinder}
-    (hx : x ∈ bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U)
-    (k : Fin 3) :
-    (block D s h gap N).oscillation n (associatedCylinder x) k =
-      velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-        (D.updateBlock N).oscillation D.reference.band
-          (associatedCylinder (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x)) k := by
-  rw [block_velocity_represents D s h gap (fun j hj => hstrip ▸ (C j hj).background) hf]
-  rw [(AssemblyData.update_represents C).1]
-  change (∑ j ∈ modes N, _) = _ * (∑ j ∈ modes N, _)
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro j hj
-  rw [angleShuffle_associatedCylinder,
-    corrected_velocity_eq_reference D s h gap n i H hn hr T Href hU (C j hj) (R j hj) hx,
-    angleShuffle_associatedCylinder]
-  simp only [Pi.smul_apply, Complex.real_smul, Complex.mul_re, Complex.ofReal_re,
-    Complex.ofReal_im, zero_mul, sub_zero]
 
-include H hn hr Href in
-theorem block_pressure_eq_reference {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    (R : ∀ j ∈ modes N, ReferenceODE D j U) {x : Cylinder}
-    (hx : x ∈ bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U) :
-    (block D s h gap N).oscillatoryPressure n (associatedCylinder x) =
-      pressureWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-        (D.updateBlock N).oscillatoryPressure D.reference.band
-          (associatedCylinder (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x)) := by
-  rw [block_pressure_represents D s h gap (fun j hj => (C j hj).harmonic_ne) hf]
-  rw [(AssemblyData.update_represents C).2]
-  change (∑ j ∈ modes N, _) = _ * (∑ j ∈ modes N, _)
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro j hj
-  rw [angleShuffle_associatedCylinder,
-    corrected_pressure_eq_reference D s h gap n i H hn hr Href (C j hj) (R j hj) hx,
-    angleShuffle_associatedCylinder]
-  simp only [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, zero_mul, sub_zero]
 
 end ActualReferenceFields
 
@@ -992,47 +944,7 @@ variable {ι : Type} {D : AssemblyData Parameter}
   (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
   {α κ : ℝ} (C : D.controls v.residualBand α κ)
 
-include J H hn hr C in
-theorem CurrentInputs.velocity_realization
-    (hstrip : D.strip = CorrectionStep.ParticularParameters.nativeStrip
-      (reindexStrip CorrectionStep.cycleAssoc.symm p.strip))
-    (hm : CorrectionStep.WaveFrameMatch D.context
-      (HarmonicWaveInteraction.productStrip (reindexStrip CorrectionStep.cycleAssoc.symm p.strip))
-      (reindexDirections angleShuffle D.directions) (reindexCoefficients angleShuffle D.background))
-    {I : ℕ} (hcover : i + gap n = I)
-    (Href : ReferenceChart D h (ChartScales.Q D.reference.band) I)
-    {U : Set Parameter} (hU : IsOpen U) (R : ∀ j ∈ modes v.residualBand, ReferenceODE D j U)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index) {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).source
-      (bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U))
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    polarVelocityMap delta chart
-      (velocityMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-        ((p.particularBlock v c u label).oscillation n)) (z.1, CylindricalResidual.chart z.2) =
-      SpatialCurl.spatialCurl (labelPotential D h (ChartScales.Q D.reference.band) I delta v.residualBand)
-        (z.1, CylindricalResidual.chart z.2) := by
-  rw [J.particularBlock]
-  exact cycle_velocity_realization D (reindexStrip CorrectionStep.cycleAssoc.symm p.strip) h gap n i
-    H hn hr (targetChart_of_frameMatch D _ h n i hm H.targetFrame) C hstrip hcover Href hU R
-    hdelta chart hz hchart
 
-include J H hn hr C in
-theorem CurrentInputs.pressure_realization
-    {I : ℕ} (hcover : i + gap n = I)
-    {U : Set Parameter} (R : ∀ j ∈ modes v.residualBand, ReferenceODE D j U)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index) {z : SpaceTime}
-    (hz : 0 < z.2 0)
-    (hp : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (nativeMap h (ChartScales.Q n) i z).1.1 ∈ U)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    polarPressureMap delta chart
-      (pressureMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-        ((p.particularBlock v c u label).oscillatoryPressure n)) (z.1, CylindricalResidual.chart z.2) =
-      labelPressure D h (ChartScales.Q D.reference.band) I delta v.residualBand
-        (z.1, CylindricalResidual.chart z.2) := by
-  rw [J.particularBlock]
-  exact cycle_pressure_realization D (reindexStrip CorrectionStep.cycleAssoc.symm p.strip) h gap n i
-    H hn hr C hcover R hdelta chart hz hp hchart
 
 end CurrentCycle
 
@@ -1063,27 +975,7 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
   {U : Set Parameter} (hU : IsOpen U) (R : ∀ j ∈ modes N, ReferenceODE D j U)
   {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
 
-include H hn hr T C hstrip hcover Href hU R hdelta in
-theorem cycle_velocity_eqOn :
-    EqOn (SpatialCurl.spatialCurl (labelPotential D h (ChartScales.Q D.reference.band) I delta N))
-      (polarVelocityMap delta chart
-        (velocityMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-          ((cycleBlock D s h gap N).oscillation n)))
-      (physicalDomain D h n i (gap n) U delta chart) := by
-  rintro _ ⟨z, ⟨hz, hc⟩, rfl⟩
-  exact (cycle_velocity_realization D s h gap n i H hn hr T C hstrip hcover Href hU R
-    hdelta chart hz hc).symm
 
-include H hn hr C hcover R hdelta in
-theorem cycle_pressure_eqOn :
-    EqOn (labelPressure D h (ChartScales.Q D.reference.band) I delta N)
-      (polarPressureMap delta chart
-        (pressureMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-          ((cycleBlock D s h gap N).oscillatoryPressure n)))
-      (physicalDomain D h n i (gap n) U delta chart) := by
-  rintro _ ⟨z, ⟨hz, hc⟩, rfl⟩
-  exact (cycle_pressure_realization D s h gap n i H hn hr C hcover R hdelta chart
-    hz.1 hz.2.2.2 hc).symm
 
 end LocalIdentity
 

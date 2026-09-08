@@ -56,12 +56,6 @@ def eulerianCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Space :=
   EulerPacketSourceVolumeSobolev.smoothCoefficientPath D (reconstructedTower D P κ Z)
     k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF
 
-theorem eulerianCoefficientPath_apply (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (eulerianCoefficientPath D P κ Z k X Y hX hYX hXY hY R C hR hC hdet hF).field t x =
-      κ • D.F.field t (Y t x) (Z.pointField t (cylinderGraph P k D.m₀ (Y t x))) := by
-  rw [eulerianCoefficientPath, EulerPacketSourceVolumeSobolev.smoothCoefficientPath_apply,
-    reconstructedTower_pointField]
-  rfl
 
 def pressureForceSmoothField (t : Icc (0 : ℝ) D.T) : SmoothL2Field Space :=
   EulerPacketSourceVolumeSobolev.smoothField D (pressureForceTower D P κ Z) k D.m₀
@@ -83,12 +77,5 @@ def pressureForceCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Spa
   EulerPacketSourceVolumeSobolev.smoothCoefficientPath D (pressureForceTower D P κ Z)
     k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF
 
-theorem pressureForceCoefficientPath_apply (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (pressureForceCoefficientPath D P κ Z k X Y hX hYX hXY hY R C hR hC hdet hF).field t x =
-      κ • (D.FInv.field t (Y t x)).adjoint
-        (Z.pointField t (cylinderGraph P k D.m₀ (Y t x))) := by
-  rw [pressureForceCoefficientPath, EulerPacketSourceVolumeSobolev.smoothCoefficientPath_apply,
-    pressureForceTower_pointField]
-  rfl
 
 end EulerPacketPhysicalField

@@ -113,12 +113,6 @@ theorem tsupport (hc : NonzeroSupported K c) (hK : IsClosed K) {j : ℤ} (hj : j
   by_contra hn
   exact hx (hc j hj x hn)
 
-omit [NormedSpace ℝ D] in
-theorem of_tsupport (hc : ∀ j : ℤ, j ≠ 0 → _root_.tsupport (c j) ⊆ K) :
-    NonzeroSupported K c := by
-  intro j hj x hx
-  by_contra hn
-  exact hx (hc j hj (subset_tsupport (c j) hn))
 
 end NonzeroSupported
 
@@ -242,14 +236,6 @@ theorem residualSource_outside (c : CorrectionState.Context D) (u : CorrectionSt
     have hn := ((nonlinear_ofBlock_supported hK c u b G A n hv hp i).realProjection) j hj x hx
     simp only [hn, excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj, zero_sub]
 
-theorem residualSource_complement_germ (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (b.velocity n i)) (hp : NonzeroSupported K (b.pressure n))
-    (j : ℤ) {x : D} (hx : x ∉ K) :
-    ParticularWaveAssembly.residualSource c u b G A j n =ᶠ[𝓝 x] excludedSource G A j n := by
-  filter_upwards [hK.isOpen_compl.mem_nhds hx] with y hy
-  exact residualSource_outside c u b G A hK n hv hp j hy
 
 theorem residualSource_support (c : CorrectionState.Context D) (u : CorrectionState.State D)
     (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
@@ -268,13 +254,6 @@ theorem residualSource_support (c : CorrectionState.Context D) (u : CorrectionSt
       (hG i).realProjection j hj x hnot, (hA i).realProjection j hj x hnot, neg_zero, sub_zero,
       Pi.zero_apply]
 
-theorem residualSource_tsupport (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (b.velocity n i)) (hp : NonzeroSupported K (b.pressure n))
-    (hG : ∀ i, NonzeroSupported K (G n i)) (hA : ∀ i, NonzeroSupported K (A n i)) (j : ℤ) :
-    tsupport (ParticularWaveAssembly.residualSource c u b G A j n) ⊆ K :=
-  closure_minimal (residualSource_support c u b G A hK n hv hp hG hA j) hK
 
 /-! ## Support of the actual real fields suffices -/
 
@@ -358,65 +337,10 @@ theorem realCoefficients_supported_of_field
     NonzeroSupported K (realCoefficients c) :=
   fun j _ x hx => realCoefficient_eq_zero_of_field c k Φ hkp j x (hf x hx)
 
-omit [NormedSpace ℝ D] in
-theorem realCoefficients_tsupport_of_field
-    (c : HarmonicFields.Coefficients D) (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) {K : Set D} (hK : IsClosed K)
-    (hf : ∀ x, x ∉ K → ∀ θ, (HarmonicFields.field c k Φ kp (x, θ)).re = 0)
-    (j : ℤ) : tsupport (realCoefficients c j) ⊆ K := by
-  apply closure_minimal _ hK
-  intro x hx
-  by_contra hn
-  exact hx (realCoefficient_eq_zero_of_field c k Φ hkp j x (hf x hn))
 
-theorem residualSource_support_of_fields
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ) (hkp : b.angularFrequency n ≠ 0)
-    (hv : ∀ x, x ∉ K → ∀ θ i, b.oscillation n (x, θ) i = 0)
-    (hp : ∀ x, x ∉ K → ∀ θ, b.oscillatoryPressure n (x, θ) = 0)
-    (hG : ∀ x, x ∉ K → ∀ θ i,
-      (HarmonicResidual.vectorField (G n) (b.frequency n) (b.phase n)
-        (b.angularFrequency n) (x, θ) i).re = 0)
-    (hA : ∀ x, x ∉ K → ∀ θ i,
-      (HarmonicResidual.vectorField (A n) (b.frequency n) (b.phase n)
-        (b.angularFrequency n) (x, θ) i).re = 0) (j : ℤ) :
-    support (ParticularWaveAssembly.residualSource c u b G A j n) ⊆ K := by
-  apply residualSource_support_of_real c u b G A hK n
-  · intro i
-    exact realCoefficients_supported_of_field _ _ _ hkp (fun x hx θ => hv x hx θ i)
-  · exact realCoefficients_supported_of_field _ _ _ hkp hp
-  · intro i
-    exact realCoefficients_supported_of_field _ _ _ hkp (fun x hx θ => hG x hx θ i)
-  · intro i
-    exact realCoefficients_supported_of_field _ _ _ hkp (fun x hx θ => hA x hx θ i)
 
 /-! ## The uncovered source is estimated from its explicit excluded errors -/
 
-theorem residualSource_complementJets
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {I : Type*} (K : PeriodizedWaveBounds.Cells D I)
-    (hv : ∀ n i, NonzeroSupported (⋃ a, K.carrier n a) (realCoefficients (b.velocity n i)))
-    (hp : ∀ n, NonzeroSupported (⋃ a, K.carrier n a) (realCoefficients (b.pressure n)))
-    (j : ℤ) {s : WeightedClasses.StripData D} {w : ℕ → D → ℝ} {α : ℝ}
-    (he : WeightedClasses.MemClass s w α (excludedSource G A j)) :
-    PeriodizedWaveBounds.ComplementJets s w α K.carrier
-      (ParticularWaveAssembly.residualSource c u b G A j) := by
-  have hg (n : ℕ) (x : D) (hx : ∀ a, x ∉ K.carrier n a) :
-      ParticularWaveAssembly.residualSource c u b G A j n =ᶠ[𝓝 x] excludedSource G A j n :=
-    residualSource_complement_germ_of_real c u b G A
-      ((K.locallyFinite n).isClosed_iUnion (K.closed n)) n (hv n) (hp n) j (by simpa using hx)
-  constructor
-  · intro n x hx hK
-    exact ((he.smooth n).contDiffAt (s.isOpen_domain.mem_nhds hx)).congr_of_eventuallyEq
-      (hg n x hK)
-  · intro m
-    obtain ⟨C, hC, p, hb⟩ := he.bounds m
-    refine ⟨C, hC, p, ?_⟩
-    intro n x hx hK a ha
-    rw [PeriodizedWaveBounds.jets_eq_of_germ (hg n x hK) a]
-    exact hb n x hx a ha
 
 /-! ## Coverage by all actual native copies -/
 
@@ -470,23 +394,6 @@ theorem mem_nativeUnion_iff (g : Geometry) (K : Set Plane) (z : P × Plane) :
       exact g.basis.symm_apply_apply v
     rwa [hc]
 
-theorem sourceFamily_covered
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : CorrectionState.HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : ℕ → Geometry) (K : ℕ → Set Plane) (hK : ∀ n, IsCompact (K n))
-    (hv : ∀ n i, NonzeroSupported (nativeUnion (g n) (K n)) (realCoefficients (b.velocity n i)))
-    (hp : ∀ n, NonzeroSupported (nativeUnion (g n) (K n)) (realCoefficients (b.pressure n)))
-    (hG : ∀ n i, NonzeroSupported (nativeUnion (g n) (K n)) (realCoefficients (G n i)))
-    (hA : ∀ n i, NonzeroSupported (nativeUnion (g n) (K n)) (realCoefficients (A n i)))
-    (j : ℤ) (n : ℕ) :
-    support (ParticularWaveAssembly.sourceFamily c u b G A j n) ⊆
-      ⋃ k : Frequency, PeriodizedWaveBounds.nativeCell (P := P × ℝ) (g n) (K n) k := by
-  intro x hx
-  have hs := residualSource_support_of_real c u b G A (nativeUnion_closed (g n) (hK n)) n
-    (hv n) (hp n) (hG n) (hA n) j hx
-  obtain ⟨k, hk⟩ := mem_iUnion.mp hs
-  exact mem_iUnion.mpr ⟨k, hk⟩
 
 end NativeCoverage
 
@@ -562,54 +469,7 @@ theorem supported_product_germ (hU : IsOpen U)
   rw [← Complex.ofReal_mul,
     supported_cross_product_zero hu hv hl hk hne hy.1 y.2 i j, Complex.ofReal_zero]
 
-/-- The actual colored-slot geometry eliminates cross-label advection,
-including every derivative of the right factor in the cylindrical operator. -/
-theorem supported_transport_zero (hU : IsOpen U)
-    (hu : SupportedOscillations sys label χ Y U u)
-    (hv : SupportedOscillations sys label χ Y U v)
-    {l k : ι} {n : ℕ} (hl : 1 ≤ (label n l).1) (hk : 1 ≤ (label n k).1)
-    (hne : label n l ≠ label n k) {x : D × ℝ} (hx : x.1 ∈ U)
-    (hc : ∀ i, ContinuousAt (fun y => u l n y i) x)
-    (R : D × ℝ → ℝ) (Vr Vθ Vz : D × ℝ → D × ℝ) :
-    LinearWaveResidual.transport R Vr Vθ Vz (LinearWaveResidual.realLift (u l n))
-      (LinearWaveResidual.realLift (v k n)) x = 0 := by
-  apply transport_zero_of_product_germ R Vr Vθ Vz
-  · intro i
-    exact Complex.continuous_ofReal.continuousAt.comp (hc i)
-  · exact supported_product_germ hU hu hv hl hk hne hx
 
-/-- The nonlinear residual of the actual finite sum is the sum of its
-same-label residuals.  Cross-label cancellation comes from the geometric
-support predicate, not from an assumed PDE cancellation. -/
-theorem supported_nonlinearResidual_sum (hU : IsOpen U)
-    (hs : SupportedOscillations sys label χ Y U u) (labels : Finset ι) (n : ℕ)
-    (hlevel : ∀ l ∈ labels, 1 ≤ (label n l).1)
-    (hinj : Set.InjOn (label n) (↑labels : Set ι))
-    (ε : ℝ) (R : D × ℝ → ℝ) {Vr Vθ Vz : D × ℝ → D × ℝ}
-    (Vt : D × ℝ → D × ℝ)
-    (hr : ContDiffOn ℝ ∞ Vr (liftDomain U))
-    (hθ : ContDiffOn ℝ ∞ Vθ (liftDomain U))
-    (hz : ContDiffOn ℝ ∞ Vz (liftDomain U))
-    (B : D × ℝ → ComplexVector) (p : ι → D × ℝ → ℂ)
-    (hu : ∀ l ∈ labels, ∀ i, ContDiffOn ℝ ∞ (fun y => u l n y i) (liftDomain U))
-    (hp : ∀ l ∈ labels, ContDiffOn ℝ ∞ (p l) (liftDomain U))
-    {x : D × ℝ} (hx : x.1 ∈ U) :
-    Actual.nonlinearResidual ε R Vr Vθ Vz Vt B
-      (∑ l ∈ labels, LinearWaveResidual.realLift (u l n)) (∑ l ∈ labels, p l) x =
-        ∑ l ∈ labels, Actual.nonlinearResidual ε R Vr Vθ Vz Vt B
-          (LinearWaveResidual.realLift (u l n)) (p l) x := by
-  have hcx : x ∈ liftDomain U := ⟨hx, mem_univ x.2⟩
-  have hcu (l : ι) (hl : l ∈ labels) (i : Fin 3) :
-      ContDiffOn ℝ ∞ (fun y => LinearWaveResidual.realLift (u l n) y i) (liftDomain U) :=
-    Complex.ofRealCLM.contDiff.comp_contDiffOn (hu l hl i)
-  unfold Actual.nonlinearResidual
-  rw [Actual.linearResidual_sum labels (liftDomain_open hU) ε R Vt hr hθ hz B _ p hcu hp hcx,
-    transport_sum_self_of_product_germs labels R Vr Vθ Vz _ (fun l hl i =>
-      ((hcu l hl i).contDiffAt ((liftDomain_open hU).mem_nhds hcx)).differentiableAt (by simp)),
-    Finset.sum_add_distrib]
-  intro l hl k hk hne
-  exact supported_product_germ hU hs hs (hlevel l hl) (hlevel k hk)
-    (fun he => hne (hinj hl hk he)) hx
 
 end ColoredSlots
 
@@ -757,48 +617,7 @@ theorem zero_complementJets_of_germs
     rw [PeriodizedWaveBounds.jets_eq_of_germ (hg n x hx hn) j]
     simp [WeightedClasses.majorant]
 
-theorem residualSource_zero_complementJets
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {I : Type*} (K : PeriodizedWaveBounds.Cells D I) (s : WeightedClasses.StripData D)
-    (hs : InputSupportOn s.domain (fun n => ⋃ i, K.carrier n i) b G A)
-    (j : ℤ) (w : ℕ → D → ℝ) (α : ℝ) :
-    PeriodizedWaveBounds.ComplementJets s w α K.carrier
-      (ParticularWaveAssembly.residualSource c u b G A j) := by
-  apply zero_complementJets_of_germs
-  intro n x hx hn
-  exact residualSource_zero_germ_on c u b G A s.isOpen_domain
-    (fun n => (K.locallyFinite n).isClosed_iUnion (K.closed n)) hs j n hx (by simpa using hn)
 
-/-- If an excluded nonzero tail is present outside the native cells, its
-actual class supplies the complement estimate.  The source is not replaced
-by zero there. -/
-theorem residualSource_complementJets_on
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {I : Type*} (K : PeriodizedWaveBounds.Cells D I) (s : WeightedClasses.StripData D)
-    (hv : ∀ n i, NonzeroSupportedOn s.domain (⋃ a, K.carrier n a)
-      (realCoefficients (b.velocity n i)))
-    (hp : ∀ n, NonzeroSupportedOn s.domain (⋃ a, K.carrier n a)
-      (realCoefficients (b.pressure n)))
-    (j : ℤ) {w : ℕ → D → ℝ} {α : ℝ}
-    (he : WeightedClasses.MemClass s w α (excludedSource G A j)) :
-    PeriodizedWaveBounds.ComplementJets s w α K.carrier
-      (ParticularWaveAssembly.residualSource c u b G A j) := by
-  have hg (n : ℕ) (x : D) (hx : x ∈ s.domain) (hn : ∀ a, x ∉ K.carrier n a) :
-      ParticularWaveAssembly.residualSource c u b G A j n =ᶠ[𝓝 x] excludedSource G A j n :=
-    residualSource_complement_germ_on c u b G A s.isOpen_domain
-      ((K.locallyFinite n).isClosed_iUnion (K.closed n)) n (hv n) (hp n) j hx (by simpa using hn)
-  constructor
-  · intro n x hx hn
-    exact ((he.smooth n).contDiffAt (s.isOpen_domain.mem_nhds hx)).congr_of_eventuallyEq
-      (hg n x hx hn)
-  · intro m
-    obtain ⟨C, hC, p, hb⟩ := he.bounds m
-    refine ⟨C, hC, p, ?_⟩
-    intro n x hx hn a ha
-    rw [PeriodizedWaveBounds.jets_eq_of_germ (hg n x hx hn) a]
-    exact hb n x hx a ha
 
 section RelativeNativeCoverage
 
@@ -829,58 +648,7 @@ theorem coefficient_nativeSupport_of_field
   rw [← coverPower_apply, hcoord x hx]
   exact ht
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem block_velocity_nativeSupport
-    {ι : Type*} {d h : ℝ} {vr vt : Plane}
-    (sys : PartitionedCovariance.SlotSystem d h vr vt)
-    (label : ℕ → ι → SlotColoring.Label)
-    (χ : ℕ → P × Plane → LabelSumBounds.WindowPoint) (Y : ℕ → P × Plane → Plane)
-    {U : Set (P × Plane)} (b : ι → CorrectionState.HarmonicBlock (P × Plane))
-    (hb : LabelSumBounds.SupportedOscillations sys label χ Y U (fun l => (b l).oscillation))
-    (l : ι) (n : ℕ) (hkp : (b l).angularFrequency n ≠ 0) (g : Geometry) (K : Set Plane)
-    (hcoord : ∀ x, x ∈ U → coverPower g.gap x.2 =
-      (SlotGeometry.cover ^ SlotColoring.nativeIndex h (label n l).1) (Y n x))
-    (hslot : PartitionedCovariance.slotSet h sys.radius vr vt (label n l) ⊆
-      (fun v => g.center + g.basis v) '' K) (i : Fin 3) :
-    NonzeroSupportedOn U (nativeUnion g K) (realCoefficients ((b l).velocity n i)) := by
-  apply coefficient_nativeSupport_of_field _ _ _ hkp g K _ _ (Y n) hcoord hslot
-  intro x hx θ hn
-  exact (hb l n x hx θ i hn).2
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem InputSupportOn.of_native_fields
-    (b : CorrectionState.HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : ℕ → Geometry) (K : ℕ → Set Plane) {U : Set (P × Plane)}
-    (level : ℕ → ℕ) (slot : ℕ → Set Plane) (Y : ℕ → P × Plane → Plane)
-    (hkp : ∀ n, b.angularFrequency n ≠ 0)
-    (hcoord : ∀ n x, x ∈ U → coverPower (g n).gap x.2 =
-      (SlotGeometry.cover ^ level n) (Y n x))
-    (hslot : ∀ n, slot n ⊆ (fun v => (g n).center + (g n).basis v) '' K n)
-    (hv : ∀ n x, x ∈ U → ∀ θ i, b.oscillation n (x, θ) i ≠ 0 →
-      Y n x ∈ SlotGeometry.liftedSupport (level n) (slot n))
-    (hp : ∀ n x, x ∈ U → ∀ θ, b.oscillatoryPressure n (x, θ) ≠ 0 →
-      Y n x ∈ SlotGeometry.liftedSupport (level n) (slot n))
-    (hG : ∀ n x, x ∈ U → ∀ θ i,
-      (vectorField (G n) (b.frequency n) (b.phase n) (b.angularFrequency n) (x, θ) i).re ≠ 0 →
-      Y n x ∈ SlotGeometry.liftedSupport (level n) (slot n))
-    (hA : ∀ n x, x ∈ U → ∀ θ i,
-      (vectorField (A n) (b.frequency n) (b.phase n) (b.angularFrequency n) (x, θ) i).re ≠ 0 →
-      Y n x ∈ SlotGeometry.liftedSupport (level n) (slot n)) :
-    InputSupportOn U (fun n => nativeUnion (g n) (K n)) b G A := by
-  constructor
-  · intro n i
-    exact coefficient_nativeSupport_of_field _ _ _ (hkp n) (g n) (K n) (level n) (slot n)
-      (Y n) (hcoord n) (hslot n) (fun x hx θ hn => hv n x hx θ i hn)
-  · intro n
-    exact coefficient_nativeSupport_of_field _ _ _ (hkp n) (g n) (K n) (level n) (slot n)
-      (Y n) (hcoord n) (hslot n) (hp n)
-  · intro n i
-    exact coefficient_nativeSupport_of_field _ _ _ (hkp n) (g n) (K n) (level n) (slot n)
-      (Y n) (hcoord n) (hslot n) (fun x hx θ hn => hG n x hx θ i hn)
-  · intro n i
-    exact coefficient_nativeSupport_of_field _ _ _ (hkp n) (g n) (K n) (level n) (slot n)
-      (Y n) (hcoord n) (hslot n) (fun x hx θ hn => hA n x hx θ i hn)
 
 theorem sourceFamily_zero_germ_on
     (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
@@ -941,33 +709,6 @@ theorem realCoefficient_eq_zero_of_field_constant
   · rw [extract_field _ _ _ hkp]
     simp [constantCoefficient, hj]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- Outside the slot, the real field may have any angularly constant
-part.  Only its nonzero Fourier modes are constrained. -/
-theorem realCoefficients_supportedOn_of_field_constant
-    (c : HarmonicFields.Coefficients D) (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) {U K : Set D}
-    (hf : ∀ x, x ∈ U → x ∉ K → ∃ m : ℝ, ∀ θ, (field c k Φ kp (x, θ)).re = m) :
-    NonzeroSupportedOn U K (realCoefficients c) := by
-  intro j hj x hx hn
-  obtain ⟨m, hm⟩ := hf x hx hn
-  exact realCoefficient_eq_zero_of_field_constant c k Φ hkp hj x m hm
 
-/-- An explicit obstruction to dropping the excluded-source condition:
-even a zero wave and zero pressure leave a nonzero residual if the stored
-Gaussian family contains an unlocalized first harmonic. -/
-theorem zero_wave_unlocalized_error
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (n : ℕ)
-    (hv : ∀ i, b.velocity n i = 0) (hp : b.pressure n = 0) (x : D) :
-    ParticularWaveAssembly.residualSource c u b
-      (fun _ _ => AddMonoidAlgebra.single (1 : ℤ) (fun _ => (1 : ℂ))) 0 1 n x =
-      fun _ => -(2 : ℂ)⁻¹ := by
-  rw [residualSource_outside c u b _ _ isClosed_empty n
-    (fun i => by rw [hv i]; exact NonzeroSupported.zero)
-    (by rw [hp]; exact NonzeroSupported.zero) 1 (Set.notMem_empty x)]
-  ext i
-  norm_num [excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, realCoefficients_apply,
-    AddMonoidAlgebra.coeff_single, Finsupp.single_apply, -LaurentPolynomial.single_eq_C_mul_T]
 
 end NavierStokes.HarmonicSourceSupport

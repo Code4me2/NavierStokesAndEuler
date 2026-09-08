@@ -55,10 +55,6 @@ theorem wave_at_least_seven_tenths {σ : ℝ} (hσ : 1 / 5 ≤ σ) :
   unfold waveExponent
   linarith
 
-theorem mean_at_least_six_fifths {σ : ℝ} (hσ : 1 / 5 ≤ σ) :
-    6 / 5 ≤ meanExponent σ := by
-  unfold meanExponent
-  linarith
 
 theorem wave_increment (σ : ℝ) :
     waveExponent (σ + 1 / 10) = waveExponent σ + 1 / 10 := by
@@ -70,9 +66,6 @@ theorem mean_increment (σ : ℝ) :
   unfold meanExponent
   ring
 
-theorem parameter_lower_bound_preserved {σ : ℝ} (hσ : 1 / 5 ≤ σ) :
-    1 / 5 ≤ σ + 1 / 10 := by
-  linarith
 
 /-! ## Step 1: particular correction -/
 
@@ -85,19 +78,8 @@ theorem particular_gain_eq {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
   simp only [le_min_iff]
   exact ⟨⟨⟨by linarith, by linarith⟩, by linarith⟩, le_refl _⟩
 
-theorem particular_linear_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    waveExponent σ + 2 / 5 ≤ waveExponent σ + 1 / 2 - 3 * κ := by
-  linarith
 
-theorem particular_old_wave_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    waveExponent σ + 2 / 5 ≤ waveExponent σ + 1 / 2 - κ := by
-  linarith
 
-theorem particular_square_margin {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    waveExponent σ + 2 / 5 ≤ 2 * waveExponent σ - κ := by
-  unfold waveExponent
-  linarith
 
 theorem particular_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
     (hκ : κ ≤ 1 / 100000) :
@@ -105,9 +87,6 @@ theorem particular_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
   rw [particular_gain_eq hσ hκ, wave_increment]
   linarith
 
-theorem particular_tensor_exponent (σ : ℝ) :
-    waveExponent σ + 1 / 2 = meanExponent σ := by
-  exact (mean_eq_wave_add_half σ).symm
 
 /-! ## Step 2: signed correction -/
 
@@ -126,32 +105,10 @@ theorem signed_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
   rw [signed_gain_eq hσ hκ, wave_increment]
   linarith
 
-theorem signed_old_difference_identity (σ κ : ℝ) :
-    waveExponent σ + 17 / 25 - κ = meanExponent σ + 9 / 50 - κ := by
-  unfold waveExponent meanExponent
-  ring
 
-theorem signed_square_identity (σ κ : ℝ) :
-    2 * waveExponent σ - 2 * κ = meanExponent σ + σ - 2 * κ := by
-  unfold waveExponent meanExponent
-  ring
 
-theorem signed_old_difference_after_divergence (σ κ : ℝ) :
-    (waveExponent σ + 17 / 25 - κ) - κ =
-      meanExponent σ + (9 / 50 - 2 * κ) := by
-  unfold waveExponent meanExponent
-  ring
 
-theorem signed_curl_after_divergence (σ κ : ℝ) :
-    (meanExponent σ + 1 / 2 - 2 * κ) - κ =
-      meanExponent σ + (1 / 2 - 3 * κ) := by
-  ring
 
-theorem signed_square_after_divergence (σ κ : ℝ) :
-    (2 * waveExponent σ - 2 * κ) - κ =
-      meanExponent σ + (σ - 3 * κ) := by
-  unfold waveExponent meanExponent
-  ring
 
 theorem old_difference_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
     17 / 100 < 9 / 50 - 2 * κ := by
@@ -174,14 +131,6 @@ theorem pressure_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
     17 / 100 < 1 - 2 * κ := by
   linarith
 
-/-- Every listed contribution exceeds the claimed `.17` bar-residual gain. -/
-theorem signed_bar_gain_exceeds_seventeen_hundredths {σ κ : ℝ}
-    (hσ : 1 / 5 ≤ σ) (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < signedBarGain σ κ := by
-  unfold signedBarGain
-  simp only [lt_min_iff]
-  exact ⟨⟨⟨⟨old_difference_bar_margin hκ, curl_bar_margin hκ⟩,
-    square_bar_margin hσ hκ⟩, axial_bar_margin hκ⟩, pressure_bar_margin hκ⟩
 
 /-! ## Steps 3 and 4: mean and defect updates -/
 
@@ -195,10 +144,6 @@ theorem mean_update_wave_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
   rw [mean_update_wave_identity, wave_increment]
   linarith
 
-theorem temporal_mean_gain_identity (σ κ : ℝ) :
-    meanUpdateExponent σ κ + 1 - 2 * κ = meanExponent σ + (1 - 4 * κ) := by
-  unfold meanUpdateExponent
-  ring
 
 theorem completed_mean_gain_eq {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
     min (17 / 100) (1 - 4 * κ) = 17 / 100 := by
@@ -211,11 +156,6 @@ theorem completed_mean_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
   rw [completed_mean_gain_eq hκ, mean_increment]
   linarith
 
-theorem rank_defect_gain_identity (σ κ : ℝ) :
-    meanUpdateExponent σ κ + 9 / 10 - 2 * κ =
-      meanExponent σ + 9 / 10 - 4 * κ := by
-  unfold meanUpdateExponent
-  ring
 
 theorem completed_defect_margin {σ κ : ℝ} (hκ : κ ≤ 1 / 100000) :
     meanExponent (σ + 1 / 10) < meanExponent σ + 9 / 10 - 4 * κ := by
@@ -248,39 +188,13 @@ theorem mean_increment_above_cumulative_mean {σ κ : ℝ}
   unfold meanUpdateExponent meanExponent
   linarith
 
-theorem radial_increment_above_cumulative_radial {σ κ : ℝ}
-    (hσ : 1 / 5 ≤ σ) (hκ : κ ≤ 1 / 100000) :
-    19 / 10 < meanUpdateExponent σ κ + 1 := by
-  have h := mean_increment_above_cumulative_mean hσ hκ
-  linarith
 
-theorem particular_pressure_above_cumulative_mean {σ : ℝ}
-    (hσ : 1 / 5 ≤ σ) :
-    9 / 10 < waveExponent σ + 1 / 2 := by
-  have h := wave_at_least_seven_tenths hσ
-  linarith
 
-theorem signed_pressure_above_cumulative_mean {σ κ : ℝ}
-    (hσ : 1 / 5 ≤ σ) (hκ : κ ≤ 1 / 100000) :
-    9 / 10 < waveExponent σ - κ + 1 / 2 := by
-  have h := signed_increment_lower_bound hσ hκ
-  linarith
 
 /-! ## Exact fixed choice and quantifier bookkeeping -/
 
-theorem manuscript_kappa_admissible :
-    (0 : ℝ) ≤ 1 / 100000 ∧ (1 / 100000 : ℝ) ≤ 1 / 100000 := by
-  norm_num
 
-/-- A stricter `κ < 10⁻⁶` also suffices, but is not the manuscript's choice. -/
-theorem smaller_kappa_admissible {κ : ℝ} (hκ : κ < 1 / 1000000) :
-    κ ≤ 1 / 100000 := by
-  linarith
 
-/-- The most restrictive `.17` bar margin has this exact threshold. -/
-theorem old_difference_bar_margin_iff (κ : ℝ) :
-    17 / 100 < 9 / 50 - 2 * κ ↔ κ < 1 / 200 := by
-  constructor <;> intro h <;> linarith
 
 /-- Iterated accuracy parameters; this does not assert existence of the iterates. -/
 def stageParameter (n : ℕ) : ℝ := 1 / 5 + (n : ℝ) / 10

@@ -200,13 +200,6 @@ theorem coefficient_swap {f : Plane → ℂ} (hf : Continuous f) (k : Frequency)
   unfold kernel swapFunction
   ring
 
-theorem coefficient_decay_second {f : Plane → ℂ} (hf : ContDiff ℝ ∞ f)
-    (hp : UnitPeriodic f) {k : Frequency} (hk : k.2 ≠ 0) (p : ℕ) {C : ℝ}
-    (hb : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖xJet p (swapFunction f) (x, y)‖ ≤ C) :
-    ‖coefficient f k‖ ≤ ‖(omega * (k.2 : ℂ))⁻¹‖ ^ p * C := by
-  rw [coefficient_swap hf.continuous k]
-  exact coefficient_decay_first (swapFunction_smooth hf) (swapFunction_periodic hp) hk p hb
 
 theorem norm_omega_ge_one : 1 ≤ ‖omega‖ := by
   have hnorm : ‖omega‖ = 2 * Real.pi := by
@@ -490,15 +483,6 @@ theorem coefficient_zero_eq_mean (f : C(Torus, ℂ)) :
   rw [coefficient_lift_eq_torus]
   simp [torusCoefficient, torusMode]
 
-/-- The constructed inverse now solves the equation for an arbitrary smooth
-zero-mean torus function, not only for a preassigned coefficient sequence. -/
-theorem inverse_solves_smooth_torus (d : Direction) (f : C(Torus, ℂ))
-    (hf : ContDiff ℝ ∞ (torusLift f)) (hmean : (∫ z, f z ∂torusMeasure) = 0) (x : Plane) :
-    fderiv ℝ (directionalInverse d (coefficient (torusLift f))) x (vector d) =
-      torusLift f x := by
-  have ha := rapid_coefficient hf (torusLift_periodic f)
-  have hz : coefficient (torusLift f) 0 = 0 := by rw [coefficient_zero_eq_mean, hmean]
-  rw [directionalInverse_solves d ha hz, series_coefficient_lift f hf]
 
 /-! ## Descent of an arbitrary periodic function on the plane -/
 
@@ -557,10 +541,6 @@ theorem coefficient_zero_eq_integral (f : Plane → ℂ) :
   rw [coefficient_eq_doubleIntegral]
   simp [kernel]
 
-/-- The final coefficient bridge to the existing inverse construction. -/
-theorem smooth_periodic_fourier_data {f : Plane → ℂ} (hf : ContDiff ℝ ∞ f)
-    (hp : UnitPeriodic f) : Rapid (coefficient f) ∧ series (coefficient f) = f :=
-  ⟨rapid_coefficient hf hp, funext (series_coefficient hf hp)⟩
 
 theorem inverse_solves_smooth_periodic (d : Direction) {f : Plane → ℂ}
     (hf : ContDiff ℝ ∞ f) (hp : UnitPeriodic f)

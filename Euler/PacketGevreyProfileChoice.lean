@@ -43,12 +43,6 @@ theorem ofTimeProfile_growth {T T' : ℝ} (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀
   change timeProfileChange (α • timeProfileChange g h) h.symm = α • g
   rw [timeProfileChange_smul,timeProfileChange_roundtrip]
 
-theorem ofTimeProfile_high {T T' : ℝ} (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t)
-    (h : T = T') (α : ℝ) (hα : 0 < α) (p : ℕ) :
-    timeProfileChange ((ofTimeProfile g hg h α hα).high p) h.symm =
-      (α*meanScale (ofTimeProfile g hg h α hα).H0 p) • g :=
-  high_timeProfile_eq (ofTimeProfile g hg h α hα) h.symm g α
-    (ofTimeProfile_growth g hg h α hα) p
 
 theorem gradeFactor_pos {K : Type*} [TopologicalSpace K] (S : Scales K)
     (α : ℝ) (hα : 0 < α) (p : ℕ) : 0 < α*meanScale S.H0 p :=

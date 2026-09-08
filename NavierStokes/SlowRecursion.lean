@@ -378,23 +378,7 @@ theorem profile_radialDerivative_germ {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU :
     (show (X, eta) ∈ Ioo (0 : ℝ) (R ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U from ⟨hX, heta⟩)] with p hp
   exact profile_radialDerivative hR hU F hp.1 hp.2
 
-theorem profile_parameterDerivative_germ {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    (F : AxisFunction R U) {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2))
-    (heta : (eta : ℂ) ∈ U) :
-    profile (parameterDerivative hU F) =ᶠ[𝓝 (X, eta)] SimilarityProfile.partialEta (profile F) := by
-  filter_upwards [(isOpen_Ioo.prod (PositiveAxisExistence.realParameterDomain_isOpen hU)).mem_nhds
-    (show (X, eta) ∈ Ioo (0 : ℝ) (R ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U from ⟨hX, heta⟩)] with p hp
-  exact profile_parameterDerivative hR hU F hp.1 hp.2
 
-theorem radialDerivative_twice_value {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    (F : AxisFunction R U) {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2))
-    (heta : (eta : ℂ) ∈ U) :
-    complexProfile (radialDerivative hR hU (radialDerivative hR hU F)) (X, (eta : ℂ)) =
-      (SimilarityProfile.partialX (SimilarityProfile.partialX (profile F)) (X, eta) : ℂ) := by
-  rw [radialDerivative_value hR hU _ hX heta]
-  unfold SimilarityProfile.partialX
-  rw [(profile_radialDerivative_germ hR hU F hX heta).fderiv_eq]
-  rfl
 
 /-- Fixed geometric data for one analytic parameter neighborhood. -/
 structure Domain (R : ℝ) (U : Set ℂ) (h : ℝ) : Prop where
@@ -1122,23 +1106,6 @@ theorem domain_real_denominator {R : ℝ} {U : Set ℂ} {h : ℝ} (c : Domain R 
   apply c.denominator (eta : ℂ) heta
   rw [← he, hh, Complex.ofReal_zero]
 
-/-- The supplied regular representative really is the original radial
-residual divided by X, for every previously constructed order. -/
-theorem sequence_omega_quotient {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
-    (c : Domain (radius core buffer 0) U h) (hcore : 0 < core) (hbuffer : 0 < buffer)
-    (C : ℝ) (base : Coefficient (radius core buffer 0) U) (k : ℕ)
-    {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (core ^ 2)) (heta : (eta : ℂ) ∈ U) :
-    let A := sequence c hcore hbuffer C base
-    AxisSourceRegularity.omega h (fun j => profile (A j 1))
-        (fun j => AxisSourceRegularity.axisFactor (profile (A j 4))) k (X, eta) / X =
-      AxisSourceRegularity.previousOmegaDivX h (fun j => profile (A j 1))
-        (fun j => profile (A j 4)) (k + 1) (X, eta) := by
-  apply AxisSourceRegularity.omega_quotient_eq
-  · intro j _
-    exact (profile_contDiffAt hcore c.open_set _ hX heta).of_le
-      (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2)
-  · exact domain_real_denominator c heta
-  · exact hX.1.ne'
 
 theorem average_from_equation {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
     (u k : AxisFunction R U) {eta X : ℝ} (heta : (eta : ℂ) ∈ U)
@@ -1209,34 +1176,8 @@ noncomputable def makeBase {R : ℝ} {U : Set ℂ} {h : ℝ} (c : Domain R U h)
     (phi u average pressure : AxisFunction R U) : Coefficient R U :=
   ![phi, u, average - u, pressure, betaOperator c 0 u (average - u)]
 
-theorem sequence_smooth {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
-    (c : Domain (radius core buffer 0) U h) (hcore : 0 < core) (hbuffer : 0 < buffer)
-    (C : ℝ) (base : Coefficient (radius core buffer 0) U) (n : ℕ) (i : Fin 5) :
-    ContDiffOn ℝ ∞ (profile (sequence c hcore hbuffer C base n i))
-      (Ico (0 : ℝ) (core ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U) :=
-  profile_smooth hcore c.open_set _
 
-theorem sequence_mixed_pullback_smooth {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
-    (c : Domain (radius core buffer 0) U h) (hcore : 0 < core) (hbuffer : 0 < buffer)
-    (C : ℝ) (base : Coefficient (radius core buffer 0) U) (n : ℕ) (i : Fin 5) (k m : ℕ) :
-    ContDiffOn ℝ ∞
-      (fun p : ℝ × ℂ => BoundaryAxisJets.mixedAxisJet (sequence c hcore hbuffer C base n i) k m (p.1 ^ 2, p.2))
-      (Ioo (-core) core ×ˢ U) :=
-  BoundaryAxisJets.mixedAxisJet_pullback_contDiffOn_full hcore c.open_set
-    (sequence c hcore hbuffer C base n i).2.smooth
-    (sequence c hcore hbuffer C base n i).2.holomorphic
-    (sequence c hcore hbuffer C base n i).2.even k m
 
-theorem sequence_mixed_pullback_holomorphic {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
-    (c : Domain (radius core buffer 0) U h) (hcore : 0 < core) (hbuffer : 0 < buffer)
-    (C : ℝ) (base : Coefficient (radius core buffer 0) U) (n : ℕ) (i : Fin 5) (k m : ℕ)
-    {r : ℝ} (hr : r ∈ Ioo (-core) core) :
-    DifferentiableOn ℂ
-      (fun z => BoundaryAxisJets.mixedAxisJet (sequence c hcore hbuffer C base n i) k m (r ^ 2, z)) U :=
-  BoundaryAxisJets.mixedAxisJet_pullback_holomorphic_full hcore c.open_set
-    (sequence c hcore hbuffer C base n i).2.smooth
-    (sequence c hcore hbuffer C base n i).2.holomorphic
-    (sequence c hcore hbuffer C base n i).2.even k m hr
 
 /-- The concrete finite equations of an actual sequence of profile functions. -/
 def OrderEquations {R : ℝ} {U : Set ℂ} (h C : ℝ) (A : ℕ → Coefficient R U)
@@ -1280,11 +1221,6 @@ noncomputable def buildLocalHierarchy {core buffer : ℝ} {U : Set ℂ} {h : ℝ
   equations := fun _ hn _ hX _ heta => sequence_positive_order c hcore hbuffer C base hn hX heta
   average := fun _ hn _ hX _ heta => sequence_average c hcore hbuffer C base hn hX heta
 
-theorem exists_local_slow_hierarchy {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
-    (c : Domain (radius core buffer 0) U h) (hcore : 0 < core) (hbuffer : 0 < buffer)
-    (C : ℝ) (base : Coefficient (radius core buffer 0) U) :
-    Nonempty (LocalHierarchy core U h C (fun i => profile (base i))) :=
-  ⟨buildLocalHierarchy c hcore hbuffer C base⟩
 
 theorem LocalHierarchy.profiles_smooth {R : ℝ} {U : Set ℂ} {h C : ℝ}
     {base : Fin 5 → SimilarityProfile.InnerProfile} (A : LocalHierarchy R U h C base)
@@ -1293,13 +1229,5 @@ theorem LocalHierarchy.profiles_smooth {R : ℝ} {U : Set ℂ} {h C : ℝ}
       (Ico (0 : ℝ) (R ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U) :=
   profile_smooth hR hU _
 
-/-- Any fixed real parameter window contained in the input neighborhood is
-retained at every slow order; the recursion consumes no further strip width. -/
-theorem LocalHierarchy.equations_on_window {R : ℝ} {U : Set ℂ} {h C a b : ℝ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} (A : LocalHierarchy R U h C base)
-    (hwindow : ∀ eta ∈ Icc a b, (eta : ℂ) ∈ U)
-    {n : ℕ} (hn : 0 < n) {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2))
-    (heta : eta ∈ Icc a b) : OrderEquations h C A.coefficients n (X, eta) :=
-  A.equations n hn X hX eta (hwindow eta heta)
 
 end NavierStokes.SlowRecursion

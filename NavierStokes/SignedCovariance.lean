@@ -143,17 +143,7 @@ noncomputable def tangentWith {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h 
   wave (outer * (Real.sqrt ε * a j * mask D U q x))
     (SlotColoring.nativeIndex h U.1) (P.rawTangent hdet j i) (P.modes j) (P.phases j)
 
-theorem radialWith_primary {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt}
-    {U : UnsignedLabel} (P : PairData sys U) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (outer ε : ℝ) (T : Vec2) (q : ℝ) (x : SlotColoring.Position) (j : Fin 2) :
-    radialWith P hdet outer ε (SmoothCovariance.amplitudes P.matrix T) q x j =
-      P.radialWave hdet outer ε T q x j := rfl
 
-theorem tangentWith_primary {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt}
-    {U : UnsignedLabel} (P : PairData sys U) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (outer ε : ℝ) (T : Vec2) (q : ℝ) (x : SlotColoring.Position) (j i : Fin 2) :
-    tangentWith P hdet outer ε (SmoothCovariance.amplitudes P.matrix T) q x j i =
-      P.tangentWave hdet outer ε T q x j i := rfl
 
 /-- Pointwise diagonal reduction uses padded-slot disjointness, including
 when different labels carry the same angular harmonic. -/
@@ -526,9 +516,6 @@ theorem signedJetCost_le {j m : ℕ} (hj : j ≤ m) : signedJetCost j ≤ prefix
     (fun k _ => abs_nonneg (signedJetCost k)) (Finset.mem_range.mpr (Nat.lt_succ_of_le hj))
   exact (le_abs_self _).trans (hs.trans (by dsimp [prefixJetCost]; linarith))
 
-theorem signedJetCost_nonneg (j : ℕ) : 0 ≤ signedJetCost j :=
-  div_nonneg (mul_nonneg (WeightedQuotients.chooseSum_nonneg j)
-    (WeightedQuotients.orderBound_nonneg _ _)) (by norm_num)
 
 /-- Derive the all-order signed quotient class from weighted input jets.
 The weight is never differentiated or divided out as a variable function. -/
@@ -635,21 +622,6 @@ theorem increment_wave_class {s : StripData E} {H : ℕ → E → Mat2}
     (fun n x hx => (increment_eq_inverse (H n x) (T n x) (R n x) (hcone n x hx) j).symm)
   simpa only [WaveClass, mul_one] using he
 
-/-- Multiplying a signed coefficient by the original pulse envelope gives
-the wave weight `sqrt ζ * P` with the expected epsilon exponent. -/
-theorem increment_times_pulse_class {s : StripData E} {H : ℕ → E → Mat2}
-    {T R : ℕ → E → Vec2} {β γ : ℝ} {P f : ℕ → E → ℝ} (j : Fin 2)
-    (hζ : ∀ x ∈ s.domain, 0 < s.zeta x)
-    (hcone : ∀ n x, x ∈ s.domain → SmoothCovariance.StrictCone (H n x) (T n x))
-    (hY : MeanClass s 0 (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hR : MeanClass s β (fun n x => ((H n x)⁻¹.mulVec (R n x)) j))
-    (hlower : InverseControl s (fun _ x => s.zeta x)
-      (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hf : MemClass s P γ f) :
-    WaveClass s P (β + γ)
-      (fun n x => increment (H n x) (T n x) (R n x) j * f n x) := by
-  have hc := increment_wave_class j hζ hcone hY hR hlower
-  simpa only [WaveClass, mul_one] using (MemClass.mul hc hf)
 
 /-- The exact signed-square column satisfies a mean-class estimate.  The
 assumptions are estimates for the input inverse solves and actual columns. -/
@@ -720,30 +692,7 @@ theorem balanced_signed_square_class {s : StripData E} {H : ℕ → E → Mat2}
   have hsum := MemClass.sum Finset.univ _ (fun n x hx => s.zeta_nonneg x hx) (fun j _ => ht j)
   simpa only [MeanClass, squareColumn, Matrix.mulVec, dotProduct, pow_two, two_mul] using hsum
 
-/-- Exact cancellation of the column's flat factor with the remaining
-inverse-solve factor, including the zero edge. -/
-theorem balanced_edge_weights (σ κ δ : ℝ) :
-    FlatCutoff.edge κ δ * FlatCutoff.edge (σ - κ) δ = FlatCutoff.edge σ δ := by
-  rw [FlatCovariance.edge_mul]
-  congr 1
-  ring
 
-theorem balanced_native_signed_square_class {s : StripData E} {H : ℕ → E → Mat2}
-    {T R : ℕ → E → Vec2} {w v : Fin 2 → ℕ → E → ℝ} (B loss : ℝ) (i : Fin 2)
-    (hw : ∀ j n x, x ∈ s.domain → 0 < w j n x)
-    (hcone : ∀ n x, x ∈ s.domain → SmoothCovariance.StrictCone (H n x) (T n x))
-    (hY : ∀ j, MemClass s (w j) 0 (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hR : ∀ j, MemClass s (w j) (B - 1 / 2 - loss) (fun n x => ((H n x)⁻¹.mulVec (R n x)) j))
-    (hlower : ∀ j, InverseControl s (w j) (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hH : ∀ j, MemClass s (v j) 0 (fun n x => H n x i j))
-    (hbalance : ∀ j n x, x ∈ s.domain → v j n x * w j n x ≤ s.zeta x) :
-    MeanClass s (2 * B - 2 * loss)
-      (fun n x => s.epsilon n * squareColumn (H n x) (T n x) (R n x) i) := by
-  have hc := balanced_signed_square_class i hw hcone hY hR hlower hH hbalance
-  have hb := hc.band_smul (bandBound_rpow s 1)
-  have he : 2 * (B - 1 / 2 - loss) + 1 = 2 * B - 2 * loss := by ring
-  unfold MeanClass
-  simpa only [he, Real.rpow_one, smul_eq_mul] using hb
 
 end Weighted
 
@@ -812,37 +761,6 @@ theorem mask_average_bound (D : ℝ) (N : ℕ) {q : ℝ} (hq : 0 < q)
         (hb U ((finite_active_masks D N hq x).mem_toFinset.mp hU)) (sq_nonneg _)
     _ = B := by rw [← Finset.sum_mul, hs, one_mul]
 
-/-- A bound for the full actual averaged remainder, proved from the primary
-inverse lower bound, signed inverse numerator bound, and actual column bound.
-The number of active labels costs nothing because their squared masks sum to one. -/
-theorem assembled_signed_square_bound {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (outer ε : UnsignedLabel → ℝ) (T R : UnsignedLabel → Vec2)
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position)
-    (hε : ∀ U, mask D (tailLabel N U) q x ≠ 0 → 0 ≤ ε U)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 → SmoothCovariance.StrictCone (P U).matrix (T U))
-    {l d K Λ : ℝ} (hl : 0 < l) (hd : 0 ≤ d) (hK : 0 ≤ K) (hΛ : 0 ≤ Λ)
-    (hY : ∀ U, mask D (tailLabel N U) q x ≠ 0 → ∀ j, l ≤ ((P U).matrix⁻¹.mulVec (T U)) j)
-    (hR : ∀ U, mask D (tailLabel N U) q x ≠ 0 → ∀ j, |((P U).matrix⁻¹.mulVec (R U)) j| ≤ d)
-    (hH : ∀ U, mask D (tailLabel N U) q x ≠ 0 → ∀ i j, |(P U).matrix i j| ≤ K)
-    (hscale : ∀ U, mask D (tailLabel N U) q x ≠ 0 → outer U ^ 2 * ε U ≤ Λ) (i : Fin 2) :
-    |doubleAverage (fun Y θ => signedRadial P hdet outer ε T R q x Y θ *
-      signedTangent P hdet outer ε T R q x i Y θ)| ≤ Λ * (2 * K * d ^ 2 / (4 * l)) := by
-  rw [assembled_signed_square sys hdet N hN P outer ε T R hq x hε i]
-  have heq : (fun U : UnsignedLabel => outer U ^ 2 * ε U * mask D (tailLabel N U) q x ^ 2 *
-      squareColumn (P U).matrix (T U) (R U) i) =
-      fun U => mask D (tailLabel N U) q x ^ 2 *
-        (outer U ^ 2 * ε U * squareColumn (P U).matrix (T U) (R U) i) := by
-    funext U
-    ring
-  rw [heq]
-  apply mask_average_bound D N hq hqN x
-  intro U hU
-  rw [abs_mul, abs_of_nonneg (mul_nonneg (sq_nonneg _) (hε U hU))]
-  exact mul_le_mul (hscale U hU)
-    (squareColumn_abs_bound (P U).matrix (T U) (R U) (hcone U hU) i hl hd hK (hY U hU) (hR U hU) (hH U hU i))
-    (abs_nonneg _) hΛ
 
 /-! ## Smooth edge extension of the actual inverse amplitudes -/
 
@@ -855,49 +773,12 @@ noncomputable def extendedIncrement (H : E × ℝ → Mat2) (T R : E × ℝ → 
   FlatZeroExtension.zeroExtension (fun p => ((H p)⁻¹.mulVec (R p)) j /
     (2 * Real.sqrt (((H p)⁻¹.mulVec (T p)) j)))
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem extendedIncrement_of_pos (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2)
-    (j : Fin 2) {p : E × ℝ} (hp : 0 < p.2) (hcone : SmoothCovariance.StrictCone (H p) (T p)) :
-    extendedIncrement H T R j p = increment (H p) (T p) (R p) j := by
-  rw [extendedIncrement, FlatZeroExtension.zeroExtension_of_pos _ hp,
-    increment_eq_inverse _ _ _ hcone j]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem extendedIncrement_of_nonpos (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2)
     (j : Fin 2) {p : E × ℝ} (hp : p.2 ≤ 0) : extendedIncrement H T R j p = 0 :=
   FlatZeroExtension.zeroExtension_of_nonpos _ hp
 
-/-- Joint smoothness, every parameter jet, and zero tensors at the edge,
-from actual inverse-solve derivatives and the primary's weighted lower bound. -/
-theorem extendedIncrement_regular {U : Set E} (hU : IsOpen U) {c : ℝ} (hc : 0 < c)
-    {H : E × ℝ → Mat2} {T R : E × ℝ → Vec2} {S : E × ℝ → ℝ} (j : Fin 2)
-    (hS : ∀ p ∈ WeightedQuotients.edgeStrip U, 1 ≤ S p)
-    (hscale : WeightedQuotients.LocallyBoundedScale U S)
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun p => H p i j) (U ×ˢ Ioi 0))
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun p => T p i) (U ×ˢ Ioi 0))
-    (hR : ∀ i, ContDiffOn ℝ ∞ (fun p => R p i) (U ×ˢ Ioi 0))
-    (hcone : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), SmoothCovariance.StrictCone (H p) (T p))
-    (hlower : WeightedQuotients.PolyBound (WeightedQuotients.edgeStrip U) S (fun p => p.2⁻¹)
-      (fun p => FlatCutoff.edge c p.2 / ((H p)⁻¹.mulVec (T p)) j))
-    (hYjets : WeightedQuotients.WeightedJets c U S (fun p => ((H p)⁻¹.mulVec (T p)) j))
-    (hRjets : WeightedQuotients.WeightedJets c U S (fun p => ((H p)⁻¹.mulVec (R p)) j)) :
-    ContDiffOn ℝ ∞ (extendedIncrement H T R j) (U ×ˢ univ) ∧
-      WeightedQuotients.WeightedJets (c / 2) U S (extendedIncrement H T R j) ∧
-      ∀ m : ℕ, ∀ x ∈ U, iteratedFDeriv ℝ m (extendedIncrement H T R j) (x, 0) = 0 := by
-  have hp : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < ((H p)⁻¹.mulVec (T p)) j :=
-    fun p hp => (amplitudes_are_inverse_weights (hcone p hp) j).1
-  have hYs := SmoothCovariance.contDiffOn_inverse_solution hH hT
-    (fun p hp => (hcone p hp).det_ne_zero) j
-  have hRs := SmoothCovariance.contDiffOn_inverse_solution hH hR
-    (fun p hp => (hcone p hp).det_ne_zero) j
-  have he := WeightedQuotients.weighted_zero_extension hc hU hS hscale hp hYs hRs hlower hYjets hRjets
-  refine ⟨he.2.1, ?_, fun m x hx => (he.2.2 m x hx).2⟩
-  have hj := (WeightedQuotients.weighted_half_jets hU hS hp hYs hRs hlower hYjets hRjets).2
-  intro m
-  apply (hj m).mono
-  intro p hp
-  change ‖iteratedFDeriv ℝ m (FlatZeroExtension.zeroExtension _) p‖ / _ ≤ _
-  rw [WeightedQuotients.jet_congr (FlatZeroExtension.zeroExtension_germ_pos _ hp.2.1) m]
 
 noncomputable def maskedExtendedIncrement (D : ℝ) (L : UnsignedLabel)
     (q : E × ℝ → ℝ) (x : E × ℝ → SlotColoring.Position)
@@ -922,54 +803,10 @@ theorem physical_mask_compactSupport (D : ℝ) (L : UnsignedLabel) (hL : 1 ≤ L
     SquaredPartition.physicalSlowMask D L.1 L.2 p.2 ≠ 0 at hp
   exact ⟨subset_closure (mul_ne_zero_iff.mp hp).1, subset_closure (mul_ne_zero_iff.mp hp).2⟩
 
-theorem masked_physical_coefficient_compactSupport (D : ℝ) (L : UnsignedLabel) (hL : 1 ≤ L.1)
-    (f : ℝ × SlotColoring.Position → ℝ) :
-    HasCompactSupport (fun p => mask D L p.1 p.2 * f p) :=
-  (physical_mask_compactSupport D L hL).mul_right
 
-theorem masked_physical_coefficients_locallyFinite (D : ℝ) (N : ℕ)
-    (f : UnsignedLabel → Ioi (0 : ℝ) × SlotColoring.Position → ℝ) :
-    LocallyFinite (fun L => support (fun p : Ioi (0 : ℝ) × SlotColoring.Position =>
-      mask D (tailLabel N L) p.1 p.2 * f L p)) := by
-  apply ((mask_locallyFinite D).comp_injective (tailLabel_injective N)).subset
-  intro L p hp
-  exact (mul_ne_zero_iff.mp hp).1
 
-theorem masked_physical_jet_support (D : ℝ) (L : UnsignedLabel)
-    (f : ℝ × SlotColoring.Position → ℝ) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (fun p => mask D L p.1 p.2 * f p)) ⊆
-      tsupport (fun p : ℝ × SlotColoring.Position => mask D L p.1 p.2) := by
-  apply (tsupport_iteratedFDeriv_subset m).trans
-  apply closure_mono
-  intro p hp
-  exact (mul_ne_zero_iff.mp hp).1
 
-theorem maskedExtendedIncrement_smooth (D : ℝ) (L : UnsignedLabel)
-    {U : Set E} {q : E × ℝ → ℝ} {x : E × ℝ → SlotColoring.Position}
-    {H : E × ℝ → Mat2} {T R : E × ℝ → Vec2} (j : Fin 2)
-    (hq : ContDiffOn ℝ ∞ q (U ×ˢ univ)) (hx : ContDiffOn ℝ ∞ x (U ×ˢ univ))
-    (he : ContDiffOn ℝ ∞ (extendedIncrement H T R j) (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (maskedExtendedIncrement D L q x H T R j) (U ×ˢ univ) :=
-  (((physical_mask_smooth D L).comp_contDiffOn (hq.prodMk hx)).mul he)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- The signed update cannot create support outside the original mask or
-on the zero side of the edge.  Its inverse numerator also controls support. -/
-theorem maskedExtendedIncrement_support (D : ℝ) (L : UnsignedLabel)
-    (q : E × ℝ → ℝ) (x : E × ℝ → SlotColoring.Position)
-    (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2) (j : Fin 2) :
-    support (maskedExtendedIncrement D L q x H T R j) ⊆
-      {p | mask D L (q p) (x p) ≠ 0 ∧ 0 < p.2 ∧ ((H p)⁻¹.mulVec (R p)) j ≠ 0} := by
-  intro p hp
-  have hm := mul_ne_zero_iff.mp hp
-  refine ⟨hm.1, ?_, ?_⟩
-  · by_contra hn
-    exact hm.2 (extendedIncrement_of_nonpos H T R j (le_of_not_gt hn))
-  · intro hr
-    apply hm.2
-    by_cases hδ : 0 < p.2
-    · simp [extendedIncrement, FlatZeroExtension.zeroExtension_of_pos _ hδ, hr]
-    · exact extendedIncrement_of_nonpos H T R j (le_of_not_gt hδ)
 
 end Edge
 

@@ -295,17 +295,8 @@ def neighbors (D : ℝ) (L : Label) : Finset Label := by
   classical
   exact (candidates D L).filter (Adj D L)
 
-theorem mem_neighbors_iff (D : ℝ) (L M : Label) : M ∈ neighbors D L ↔ Adj D L M := by
-  classical
-  simp only [neighbors, Finset.mem_filter]
-  exact ⟨And.right, fun h => ⟨adj_mem_candidates D h, h⟩⟩
 
-/-- Uniform degree control for every dyadic level, grid point, and sign. -/
-theorem neighbors_card_le (D : ℝ) (L : Label) : (neighbors D L).card ≤ degreeBound D := by
-  classical
-  exact (Finset.card_filter_le _ _).trans (candidates_card_le D L)
 
-theorem label_type_countable : Countable Label := by infer_instance
 
 /-- The expanding eigenvalue of the actual covering matrix. -/
 def coverGrowth : ℝ := 4 + Real.sqrt 2
@@ -435,30 +426,6 @@ theorem nativeArgument_nonneg (h : ℝ) (hh : 0 ≤ h) {n : ℕ} (hn : 4 ≤ n) 
     simpa using hq
   exact div_nonneg (Real.log_nonneg hratio) log_coverGrowth_pos.le
 
-theorem nativeIndex_eq_integer_floor (h : ℝ) (hh : 0 ≤ h) {n : ℕ} (hn : 4 ≤ n) :
-    (nativeIndex h n : ℤ) = ⌊nativeArgument h n⌋ := by
-  unfold nativeIndex
-  rw [← Int.floor_toNat, Int.toNat_of_nonneg (Int.floor_nonneg.mpr (nativeArgument_nonneg h hh hn))]
 
-/-- The constructed finite coloring feeds the proved rational-slot geometry
-using the manuscript's actual native covering index, with no coloring or
-native-index-gap assumption. -/
-theorem physical_labels_have_auxiliary_slots (D h : ℝ) (hh : 0 ≤ h)
-    (a b : SlotGeometry.Plane) :
-    ∃ r : ℝ, 0 < r ∧ ∀ L M : Label, Adj D L M →
-      Disjoint
-        (SlotGeometry.liftedSupport (nativeIndex h L.1)
-          (SlotGeometry.orientedRectangle
-            (SlotGeometry.center (Fintype.card Palette) (nativeGap h) (color L)) a b (2 * r)))
-        (SlotGeometry.liftedSupport (nativeIndex h M.1)
-          (SlotGeometry.orientedRectangle
-            (SlotGeometry.center (Fintype.card Palette) (nativeGap h) (color M)) a b (2 * r))) := by
-  apply SlotGeometry.colored_labels_have_slots
-    (Fintype.card Palette) (nativeGap h) a b (Adj D) color (fun L => nativeIndex h L.1)
-  · intro L M hLM
-    exact color_proper D hLM
-  · intro L M hLM
-    exact nativeIndex_gap h hh hLM.left_positive hLM.right_positive
-      hLM.left_level_le hLM.right_level_le
 
 end NavierStokes.SlotColoring

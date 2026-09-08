@@ -58,17 +58,6 @@ theorem clm_apply_absolutelyContinuous {a b : ℝ} {A : ℝ → E →L[ℝ] F} {
 variable (T : ℝ) (hT : 0 ≤ T)
   (A A' : C(Icc (0 : ℝ) T, E →L[ℝ] F))
 
-/-- A genuine differentiable extension supplies the within-interval derivative
-hypothesis for its clamped continuous path, including both endpoints. -/
-theorem operatorPath_hasDerivWithinAt_of_extension (a : ℝ → E →L[ℝ] F)
-    (ha : ∀ t : Icc (0 : ℝ) T, A t = a t)
-    (hader : ∀ t : Icc (0 : ℝ) T, HasDerivAt a (A' t) t) :
-    ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT A) (A' t) (Icc (0 : ℝ) T) t := by
-  intro t
-  apply (hader t).hasDerivWithinAt.congr_of_mem _ t.property
-  intro x hx
-  simpa only [extendPath, projIcc_of_mem hT hx] using ha ⟨x, hx⟩
 
 /-- Within-interval differentiability with a continuous derivative implies actual
 absolute continuity of the clamped coefficient path. -/

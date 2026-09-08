@@ -99,39 +99,7 @@ theorem localGaussian_all_gains_from_supported_native
   intro n i x hx hi hn
   exact localGaussian_zero_of_inactive a d (houtside n i x hx hi hn)
 
-/-- The source on the complement of all cells is kept and estimated
-through `hcomplement`; it is not replaced by a copywise sum of sources. -/
-theorem globalGaussian_all_gains_from_supported_native
-    (K : Cells D I) (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} (d : GraphDirections D) (C : ℕ → I → Set D)
-    {W : ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hψ : LocalJets s (fun _ _ => 1) 0 C a.cutoff)
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α C a.amplitude)
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α C (fun n _ => a.source n))
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : ℕ → I → D → ℝ) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n, ell * ChartScales.S n ≤ L n) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ C n i →
-      W n x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n))
-    (hcentral : ∀ n i x, x ∈ s.domain → x ∈ C n i → |θ n i x - 1 / 2| < 1 / 5 →
-      (a.cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (houtside : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → x ∉ C n i →
-      ((a.cutoff n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ) (hcomplement : ComplementJets s (fun _ _ => 1) β K.carrier a.source) :
-    UnweightedClass s β (a.globalGaussian d) :=
-  a.globalGaussian_class_with_complement K hs d (fun _ _ _ => zero_le_one)
-    (localGaussian_all_gains_from_supported_native a d C K.carrier hWnonneg hψ hfast hu hf
-      edges scales θ L hL ell hell hLell hc hW hcentral houtside β) hcomplement
 
-theorem source_complement_of_zero (s : StripData D) (K : Cells D I)
-    (hzero : a.source = fun _ _ => 0) (β : ℝ) :
-    ComplementJets s (fun _ _ => 1) β K.carrier a.source :=
-  HarmonicSourceSupport.zero_complementJets_of_germs s _ β K.carrier a.source
-    (fun _ _ _ _ => Filter.Eventually.of_forall (fun _ => by simp only [hzero]))
 
 end CopyBounds
 
@@ -461,25 +429,7 @@ theorem uniform_globalGaussian_all_gains_from_supported_native
       hWnonneg hψ hfast hu hf edges scales θ length hL ell hell hLell hc hW hcentral houtside β)
     hcomplement
 
-theorem uniform_source_complement_of_zero
-    (a : L → CopyData D I) (s : StripData D) (K : L → Cells D I)
-    (hzero : ∀ l, (a l).source = fun _ _ => 0) (β : ℝ) :
-    UniformComplementJets s (fun _ _ _ => 1) β (fun l => (K l).carrier) (fun l => (a l).source) :=
-  UniformComplementJets.of_zero_germs s _ β _ _
-    (fun l _ _ _ _ => Filter.Eventually.of_forall (fun _ => by simp only [hzero l]))
 
-theorem uniform_source_patch_jets_of_zero
-    (a : L → CopyData D I) (s : StripData D) (C : L → ℕ → I → Set D)
-    (hzero : ∀ l, (a l).source = fun _ _ => 0) (w : L → ℕ → D → ℝ) (α : ℝ) :
-    UniformLocalJets s w α C (fun l n _ => (a l).source n) := by
-  constructor
-  · intro l n i x hx hi
-    rw [hzero l]
-    exact contDiffAt_const
-  · intro m
-    refine ⟨0, le_rfl, 0, ?_⟩
-    intro l n i x hx hi j hj
-    simp [hzero l, majorant]
 
 end UniformCopyBounds
 
@@ -491,21 +441,6 @@ open CommonCoverSolve TorusInverse ParticularWaveAssembly HarmonicSourceSupport
 
 variable {P L : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-theorem source_complement_of_harmonicSupport
-    (a : CopyData ((P × ℝ) × Plane) Frequency)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : CorrectionState.HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : ℕ → Geometry) (K : ℕ → Set Plane) (hK : ∀ n, IsCompact (K n))
-    {U : Set (P × Plane)} (hU : IsOpen U)
-    (hs : InputSupportOn U (fun n => nativeUnion (g n) (K n)) b G A)
-    (s : StripData ((P × ℝ) × Plane))
-    (hdom : ∀ x, x ∈ s.domain → (x.1.1, x.2) ∈ U)
-    (j : ℤ) (hsource : a.source = sourceFamily c u b G A j) (β : ℝ) :
-    ComplementJets s (fun _ _ => 1) β
-      (fun n => nativeCell (g n) (K n)) a.source := by
-  rw [hsource]
-  exact sourceFamily_zero_complementJets c u b G A g K hK hU hs s hdom j _ β
 
 theorem uniform_source_complement_of_harmonicSupport
     (a : L → CopyData ((P × ℝ) × Plane) Frequency)
@@ -526,39 +461,6 @@ theorem uniform_source_complement_of_harmonicSupport
   exact sourceFamily_zero_germ_on c u (b l) (G l) (A l) (g l) (K l) (hK l) hU
     (hs l) (j l) n (hdom x hx) hn
 
-/-- If an excluded harmonic tail remains outside the cells, its actual
-uniform class transfers to the literal incoming source.  It is kept in
-the final global Gaussian, not set to zero. -/
-theorem uniform_source_complement_of_excluded_class
-    (a : L → CopyData ((P × ℝ) × Plane) Frequency)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : L → CorrectionState.HarmonicBlock (P × Plane))
-    (G A : L → HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : L → ℕ → Geometry) (K : L → ℕ → Set Plane) (hK : ∀ l n, IsCompact (K l n))
-    {U : Set (P × Plane)} (hU : IsOpen U)
-    (hv : ∀ l n i, NonzeroSupportedOn U (nativeUnion (g l n) (K l n))
-      (HarmonicResidual.realCoefficients ((b l).velocity n i)))
-    (hp : ∀ l n, NonzeroSupportedOn U (nativeUnion (g l n) (K l n))
-      (HarmonicResidual.realCoefficients ((b l).pressure n)))
-    (s : StripData ((P × ℝ) × Plane))
-    (hdom : ∀ x, x ∈ s.domain → (x.1.1, x.2) ∈ U)
-    (j : L → ℤ) (hsource : ∀ l, (a l).source = sourceFamily c u (b l) (G l) (A l) (j l))
-    {w : L → ℕ → (P × ℝ) × Plane → ℝ} {β : ℝ}
-    (he : LabelSumBounds.UniformClass s w β
-      (fun l n => angleLift (excludedSource (G l) (A l) (j l) n))) :
-    UniformComplementJets s w β (fun l n => nativeCell (g l n) (K l n))
-      (fun l => (a l).source) := by
-  apply UniformComplementJets.of_germs he
-  intro l n x hx hn
-  rw [hsource l]
-  have hnot : (x.1.1, x.2) ∉ nativeUnion (g l n) (K l n) := by
-    simp only [nativeUnion, mem_iUnion, not_exists]
-    exact hn
-  have hg := residualSource_complement_germ_on c u (b l) (G l) (A l) hU
-    (nativeUnion_closed (g l n) (hK l n)) n (hv l n) (hp l n) (j l) (hdom x hx) hnot
-  have hc : Continuous (fun y : (P × ℝ) × Plane => (y.1.1, y.2)) :=
-    continuous_fst.fst.prodMk continuous_snd
-  exact hg.comp_tendsto hc.continuousAt
 
 end HarmonicSource
 

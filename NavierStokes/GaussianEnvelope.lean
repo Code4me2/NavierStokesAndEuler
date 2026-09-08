@@ -117,22 +117,6 @@ theorem gaussian_envelope_bounds {D : Set ℝ} {rate : ℝ → ℝ}
 theorem envelope_pos (rate : ℝ → ℝ) (midpoint time : ℝ) :
     0 < envelope rate midpoint time := Real.exp_pos _
 
-/-- For positive `c` and slot length the midpoint is the unique maximum on the domain. -/
-theorem envelope_lt_one_away_from_midpoint {D : Set ℝ} {rate : ℝ → ℝ}
-    {midpoint time c C ell : ℝ} (hD : Convex ℝ D)
-    (hcont : ContinuousOn rate D)
-    (hdiff : DifferentiableOn ℝ rate (interior D))
-    (hderiv : ∀ x ∈ interior D,
-      -C / ell ≤ deriv rate x ∧ deriv rate x ≤ -c / ell)
-    (hm : midpoint ∈ D) (ht : time ∈ D) (hzero : rate midpoint = 0)
-    (hc : 0 < c) (hell : 0 < ell) (hne : time ≠ midpoint) :
-    envelope rate midpoint time < 1 := by
-  have hu := (gaussian_envelope_bounds hD hcont hdiff hderiv hm ht hzero).2
-  have hsq : 0 < (time - midpoint) ^ 2 := sq_pos_of_ne_zero (sub_ne_zero.2 hne)
-  have he : -c * (time - midpoint) ^ 2 / (2 * ell) < 0 :=
-    div_neg_of_neg_of_pos (mul_neg_of_neg_of_pos (neg_neg_of_pos hc) hsq)
-      (mul_pos (by norm_num) hell)
-  exact lt_of_le_of_lt hu (by simpa only [Real.exp_zero] using Real.exp_lt_exp.2 he)
 
 /-- Derivative of the manuscript's scalar reference rate in its magnitude variable. -/
 noncomputable def referenceSlope (lam u s : ℝ) : ℝ :=

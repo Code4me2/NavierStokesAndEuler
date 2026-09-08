@@ -138,19 +138,5 @@ theorem momentumPath_ae_of_weak (hTpos : 0 < T) (u : TimeLp T E)
     constantField_ae T hT (terminalMomentum T hT Q Q₁ H u)] with t ha hp hc
   simpa only [Pi.add_apply, hp, hc, momentumPath] using ha
 
-/-- The momentum of the constructed endpoint solution has this actual continuous representative. -/
-theorem endpointDerivative_momentumPath_ae (hTpos : 0 < T)
-    (hd : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (m : Icc (0 : ℝ) T → E) (hm : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (K : ℝ) (hK : 0 ≤ K) (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖ ^ 2)
-    (hsmall : K * (T ^ 2 / 2) ≤ 1 / 2)
-    {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
-    (L : V →L[ℝ] TimeLp T E) (Y : V) :
-    let u := endpointDerivative T hT m H K hK hH hsmall L Y
-    (momentum T hT Q u : ℝ → U) =ᵐ[timeMeasure T] momentumPath T hT Q Q₁ H u := by
-  apply momentumPath_ae_of_weak T hT Q Q₁ H hTpos
-  exact initialMomentum_weak T hT Q Q₁ H hd m hm _
-    (endpointDerivative_weak T hT m H K hK hH hsmall L Y)
 
 end EulerTransverseEndpointMomentum

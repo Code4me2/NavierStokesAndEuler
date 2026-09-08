@@ -563,42 +563,9 @@ theorem physicalQ_jet_bound {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (m : ℕ) :
       mul_le_mul hqb hpow (pow_nonneg (norm_nonneg _) _) (by positivity)
     _ = _ := by ring
 
-theorem physical_cutoff_jet_bound {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ a : ℝ, 0 ≤ a → ∀ w ∈ PhysicalWaveSum.preterminal,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (fun z => SmoothCutoffs.scaledCutoff a (PhysicalWaveSum.physicalQ h z)) w‖ ≤
-          C * PhysicalWaveSum.physicalQ h w ^ (-(m : ℝ)) := by
-  choose B hB hb using physicalQ_jet_bound hh hh1
-  obtain ⟨C, hC, hc⟩ := cutoff_jet_bound PhysicalWaveSum.preterminal_open
-    (S := PhysicalWaveSum.preterminal ∩ {w | PhysicalWaveSum.physicalQ h w ≤ 1})
-    (fun _ hw => hw.1)
-    (fun w hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt)
-    (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 hw.1) B
-    (fun k w hw => hb k w hw.1 hw.2) m
-  exact ⟨C, hC, fun a ha w hw hq1 => hc a ha w ⟨hw, hq1⟩⟩
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- Actual physical cutoff stages and their single selected schedule.
-The only stage estimate premise concerns uncut physical derivatives. -/
-theorem exists_physical_diagonal_cut_bounds {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {S : Set SpaceTime} (hS : S ⊆ PhysicalWaveSum.preterminal)
-    {A : ℕ → SpaceTime → V}
-    (hA : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (A j) PhysicalWaveSum.preterminal)
-    (g L : ℕ → ℝ) (C p : ℕ → ℕ → ℝ)
-    (hraw : RawStageBounds (PhysicalWaveSum.physicalQ h) A g L C p S)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      DiagonalJetBounds.CutStageBounds (fun j => (a j : ℝ))
-        (PhysicalWaveSum.physicalQ h) A (fun j => g j / 2) (cutLoss L) S := by
-  choose B hB hb using physicalQ_jet_bound hh hh1
-  exact exists_diagonal_cut_bounds PhysicalWaveSum.preterminal_open hS
-    (fun w hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt)
-    (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 (hS hw)) B
-    (fun k w hw hq1 => hb k w (hS hw) hq1) hA g L C p hraw hg lower
 
 variable {ι : Type*} [Fintype ι] {W : ι → Type*}
   [∀ i, NormedAddCommGroup (W i)] [∀ i, NormedSpace ℝ (W i)]
@@ -623,50 +590,6 @@ theorem exists_physical_finite_diagonal_cut_bounds {h : ℝ} (hh : 0 < h) (hh1 :
     (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 (hS hw)) B
     (fun k w hw hq1 => hb k w (hS hw) hq1) hA g L C p hraw hg lower
 
-/-- The common case supplied by physical-copy estimates: the uncut bounds
-have no logarithmic factor and their constants are existential.  The same
-constructed sequence controls all positive components and gives smooth
-actual sums on the entire preterminal spacetime domain. -/
-theorem exists_physical_positive_sums_of_power {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {S : Set SpaceTime} (hS : S ⊆ PhysicalWaveSum.preterminal)
-    {A : ∀ i, ℕ → SpaceTime → W i}
-    (hA : ∀ i j, 1 ≤ j → ContDiffOn ℝ ∞ (A i j) PhysicalWaveSum.preterminal)
-    (g L : ℕ → ℝ)
-    (hraw : ∀ i j, 1 ≤ j → ∀ m, ∃ C : ℝ, ∀ w ∈ S,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (A i j) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g j - L m))
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      ∀ i, DiagonalJetBounds.CutStageBounds (fun j => (a j : ℝ))
-          (PhysicalWaveSum.physicalQ h) (positiveStages (A i))
-          (fun j => g j / 2) (cutLoss L) S ∧
-        ContDiffOn ℝ ∞
-          (SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ))
-            (PhysicalWaveSum.physicalQ h) (positiveStages (A i))) PhysicalWaveSum.preterminal := by
-  have hex : ∀ i j m, ∃ C : ℝ, 1 ≤ j → ∀ w ∈ S,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (A i j) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g j - L m) := by
-    intro i j m
-    by_cases hj : 1 ≤ j
-    · obtain ⟨C, hb⟩ := hraw i j hj m
-      exact ⟨C, fun _ => hb⟩
-    · exact ⟨0, fun hj' => False.elim (hj hj')⟩
-  choose C hC using hex
-  have hb : ∀ i, RawStageBounds (PhysicalWaveSum.physicalQ h) (A i) g L (C i)
-      (fun _ _ => 0) S := by
-    intro i j hj m w hw hq1
-    simpa only [Real.rpow_zero, mul_one] using hC i j m hj w hw hq1
-  obtain ⟨a, halower, hapos, hadouble, hamono, hatop, hab⟩ :=
-    exists_physical_finite_diagonal_cut_bounds hh hh1 hS hA g L C (fun _ _ _ => 0) hb hg lower
-  refine ⟨a, halower, hapos, hadouble, hamono, hatop, fun i => ?_⟩
-  exact ⟨positiveStages_cut_bounds (hab i),
-    positive_sum_smooth PhysicalWaveSum.preterminal_open
-      (fun w hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt)
-      (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 hw) (hA i) hamono⟩
 
 /-- The genuine open validity region for locally constructed raw stages. -/
 noncomputable def physicalSublevel (h qbig : ℝ) : Set SpaceTime :=

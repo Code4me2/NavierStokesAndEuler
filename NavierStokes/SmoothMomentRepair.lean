@@ -250,21 +250,6 @@ theorem quadratic_sub_le (A : E →L[ℝ] E →L[ℝ] E) (c e : E) :
       add_le_add (A.le_opNorm₂ (c - e) c) (A.le_opNorm₂ e (c - e))
     _ = _ := by ring
 
-/-- The existing contraction theorem gives uniqueness in the quantitative
-correction ball, with all quadratic estimates proved from the supplied coefficients. -/
-theorem exists_unique_quadratic_correction [CompleteSpace E]
-    (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ] E) (d : E) (r : ℝ) (hr : 0 ≤ r)
-    (hsmall : 4 * ‖B.symm.toContinuousLinearMap‖ * ‖A‖ * r ≤ 1)
-    (hd : 2 * ‖B.symm.toContinuousLinearMap‖ * ‖d‖ ≤ r) :
-    ∃! c : E, ‖c‖ ≤ r ∧ B c + A c c = d := by
-  apply MomentRepair.exists_unique_small_correction B (fun c => A c c) d
-    ‖B.symm.toContinuousLinearMap‖ ‖A‖ r
-    (norm_nonneg B.symm.toContinuousLinearMap) (norm_nonneg A) hr
-  · exact fun x => B.symm.toContinuousLinearMap.le_opNorm x
-  · exact fun c _ => quadratic_norm_le A c
-  · exact fun c _ e _ => quadratic_sub_le A c e
-  · exact hsmall
-  · exact hd
 
 /-- Compactness supplies genuine uniform bounds on the inverse linear part and
 the quadratic coefficient; these bounds are not additional hypotheses. -/

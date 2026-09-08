@@ -34,11 +34,6 @@ theorem block_comp_clm_le (directions : ι → P) (q : ℕ) (L : E →L[ℝ] F)
   rw [he]
   exact baseSize_comp_clm_le directions q L _ (wordDerivative_contDiff directions f hf w) x
 
-theorem coefficientBlock_comp_clm_le (directions : ι → P) (q : ℕ) (L : E →L[ℝ] F)
-    (f : P → E) (hf : ContDiff ℝ ∞ f) (n : ℕ) (x : P) :
-    coefficientBlock directions q (L ∘ f) n x ≤ ‖L‖*coefficientBlock directions q f n x :=
-  (mul_le_mul_of_nonneg_left (block_comp_clm_le directions q L f hf n x) (by positivity)).trans_eq
-    (by unfold coefficientBlock; ring)
 
 theorem block_sub_le (directions : ι → P) (q : ℕ) (f g : P → E)
     (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g) (n : ℕ) (x : P) :

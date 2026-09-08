@@ -59,16 +59,6 @@ variable (hJ : 2 ≤ J) (C c : ℝ) (hC : 0 < C) (hc : 0 ≤ c)
 
 local notation "V" => initialLimit A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency
 
-theorem selectedQ_initial_Hm (s : ℕ) :
-    Tendsto (fun N => derivativeSum s (exactPartial A J X hk hn Q N-(V).field)) atTop (𝓝 0) := by
-  simpa only [exactPartial_eq] using
-    initialLimit_Hm A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency s
 
-theorem selectedQ_fullInitial_Hm (base : SmoothL2Field Space) (s : ℕ) :
-    Tendsto (fun N => derivativeSum s ((base.field+exactPartial A J X hk hn Q N)-
-      (fullInitialLimit A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency base).field))
-      atTop (𝓝 0) := by
-  simpa only [exactPartial_eq] using
-    fullInitialLimit_Hm A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency base s
 
 end EulerPacketInitial

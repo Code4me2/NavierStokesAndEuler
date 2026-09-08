@@ -576,27 +576,6 @@ theorem meanClass_fastAtIndex (s : StripData (Point Plane)) {h α : ℝ} (hh : 0
   simp only [add_zero, smul_eq_mul] at hb ⊢
   exact hb
 
-theorem meanClass_fastDividedAlias_superflat {coord a b h Mbase α : ℝ} (U : SlowRegion coord)
-    (ha : 0 < a) (hab : a < b) {cL cR : ℝ} (hcL : 0 < cL) (hcR : 0 < cR)
-    (hh : 0 < h) (hM : Mbase ≠ 0) (index : ℕ → ℕ) (D : ℕ)
-    (hgapLower : ∀ n, ChartScales.nativeIndex h n ≤ index n + D)
-    (hgapUpper : ∀ n, index n ≤ ChartScales.nativeIndex h n + D)
-    (L : ℕ → ℝ) (hL : ∀ n, 1 ≤ L n) (hS : ∀ n, ChartScales.S n ≤ L n)
-    {f : ℕ → Point Plane → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hs : ∀ n, SupportedGauge a b (qLength coord) U.carrier (f n))
-    (hp : ∀ n, PhysicalMeanDomain.PeriodicOn U.carrier (f n))
-    (hm : ∀ n s, s ∈ U.carrier → PressureStream.pressureMass (f n) s = 0)
-    (hclass : MeanClass (movingStripData U a b cL cR ha hcL hcR (ChartScales.epsilon h) L
-      (ChartScales.epsilon_pos h) (ChartScales.epsilon_le_one h hh.le) hL) α f) (β : ℝ) :
-    MeanClass (movingStripData U a b cL cR ha hcL hcR (ChartScales.epsilon h) L
-      (ChartScales.epsilon_pos h) (ChartScales.epsilon_le_one h hh.le) hL) β
-      (fun n => MeanChartCompatibility.fastAtIndex h n (index n)
-        (PressureStream.divideRadius (compactAlias (ChartScales.radialExponent h) a b
-          (MeanChartCompatibility.radialFrequency h n (index n) (ChartScales.radialExponent h) Mbase)
-          (qLength coord) (vector .radial) (f n)))) :=
-  meanClass_fastAtIndex _ hh index D hgapUpper
-    (meanClass_dividedAlias_superflat U ha hab hcL hcR hh hM index D hgapLower L hL hS hf hs hp hm hclass β)
 
 end ClassConclusions
 

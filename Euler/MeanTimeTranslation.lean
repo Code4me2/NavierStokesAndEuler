@@ -63,12 +63,6 @@ theorem timeSolenoidalTranslation_ae (T : ℝ) (a : Space) (u : TimeLp T solenoi
     timeSolenoidalTranslation T a u =ᵐ[timeMeasure T] fun t => solenoidalTranslation a (u t) :=
   timeLift_ae T (solenoidalTranslation a).toContinuousLinearMap u
 
-theorem timeTranslation_add (T : ℝ) (a b : Space) (u : TimeLp T L2) :
-    timeTranslation T a (timeTranslation T b u) = timeTranslation T (a+b) u := by
-  apply Lp.ext
-  filter_upwards [timeTranslation_ae T a (timeTranslation T b u), timeTranslation_ae T b u,
-    timeTranslation_ae T (a+b) u] with t ha hb hab
-  exact (ha.trans (congrArg (translation a) hb)).trans ((translation_add a b (u t)).trans hab.symm)
 
 @[simp] theorem timeTranslation_zero (T : ℝ) (u : TimeLp T L2) : timeTranslation T 0 u = u := by
   apply Lp.ext
@@ -90,37 +84,14 @@ theorem timeSolenoidalTranslation_add (T : ℝ) (a b : Space) (u : TimeLp T sole
   filter_upwards [timeSolenoidalTranslation_ae T 0 u] with t ht
   exact ht.trans (solenoidalTranslation_zero (u t))
 
-/-- The actual spatial action is continuous in translation for every time-L² field. -/
-theorem timeTranslation_continuous (T : ℝ) (u : TimeLp T L2) :
-    Continuous (fun a : Space => timeTranslation T a u) :=
-  timeLift_strongly_continuous T (fun a => (translation a).toContinuousLinearMap)
-    (fun a => (translation a).norm_map) translation_continuous u
 
-/-- Strong continuity on the fixed mean derivative space. -/
-theorem timeSolenoidalTranslation_continuous (T : ℝ) (u : TimeLp T solenoidalSpace) :
-    Continuous (fun a : Space => timeSolenoidalTranslation T a u) :=
-  timeLift_strongly_continuous T (fun a => (solenoidalTranslation a).toContinuousLinearMap)
-    (fun a => (solenoidalTranslation a).norm_map) solenoidalTranslation_continuous u
 
-theorem timeTranslation_realPrimitive (T : ℝ) (a : Space) (u : TimeLp T L2) (t : ℝ) :
-    realPrimitive T (timeTranslation T a u) t = translation a (realPrimitive T u t) :=
-  realPrimitive_timeLift T (translation a).toContinuousLinearMap u t
 
-theorem timeSolenoidalTranslation_realPrimitive (T : ℝ) (a : Space)
-    (u : TimeLp T solenoidalSpace) (t : ℝ) :
-    realPrimitive T (timeSolenoidalTranslation T a u) t =
-      solenoidalTranslation a (realPrimitive T u t) :=
-  realPrimitive_timeLift T (solenoidalTranslation a).toContinuousLinearMap u t
 
 theorem timeTranslation_initialTrace (T : ℝ) (hT : 0 ≤ T) (a : Space) (u : TimeLp T L2) :
     initialTrace T hT (timeTranslation T a u) = translation a (initialTrace T hT u) :=
   initialTrace_timeLift T hT (translation a).toContinuousLinearMap u
 
-theorem timeSolenoidalTranslation_initialTrace (T : ℝ) (hT : 0 ≤ T) (a : Space)
-    (u : TimeLp T solenoidalSpace) :
-    initialTrace T hT (timeSolenoidalTranslation T a u) =
-      solenoidalTranslation a (initialTrace T hT u) :=
-  initialTrace_timeLift T hT (solenoidalTranslation a).toContinuousLinearMap u
 
 theorem timeTranslation_primitiveTimeLp (T : ℝ) (hT : 0 ≤ T) (a : Space) (u : TimeLp T L2) :
     primitiveTimeLp T hT (timeTranslation T a u) = timeTranslation T a (primitiveTimeLp T hT u) :=

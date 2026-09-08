@@ -30,12 +30,5 @@ def scalarGradientForcing : Forcing D G.scalarGradient := by
   simpa only [A, SmoothCoefficientPath.map_apply, Data.clamp_coe,
     hAdj] using G.scalarGradient_eq t x θ
 
-theorem physicalGradient_eq (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    (D.inverseFrame (t,(x,θ))).adjoint (G.scalarGradient (t,(x,θ))) =
-      G.pressureForce (t,(x,θ)) := by
-  have h := pressureScalar_physicalGradient D.T D.T_pos.le D.F D.F₁ D.opInv G.solution
-    D.frameLower D.frameLower_pos D.frame_lower G.path G.pressureForcePath_orbit
-    D.FInv D.inverse_right t x
-  simpa only [Data.inverseFrame, scalarGradient, scalar, pressureForce, Data.clamp_coe] using h
 
 end EulerMeanPacketProvider.Forcing

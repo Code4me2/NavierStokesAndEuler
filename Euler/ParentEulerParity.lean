@@ -29,18 +29,10 @@ theorem velocity_zero (t : Icc (0 : ℝ) A.T) : E.velocity (t,0)=0 := by
     fun x => congrArg (fun v : Space => v i) (E.velocity_odd O t x)
   exact hi.map_zero
 
-theorem force_zero (t : Icc (0 : ℝ) A.T) : E.force t 0=0 := by
-  ext i
-  have hi : Function.Odd (fun x : Space => (E.force t x) i) :=
-    fun x => congrArg (fun v : Space => v i) (E.force_odd O t x)
-  exact hi.map_zero
 
 theorem strain_origin (t : Icc (0 : ℝ) A.T) :
     A.strain.field t 0=fderiv ℝ (fun y => E.velocity (t,y)) 0 := by
   rw [E.strain_eq,smul_zero,O.position_zero]
 
-theorem curvature_origin (t : Icc (0 : ℝ) A.T) :
-    A.curvature.field t 0=fderiv ℝ (E.force t) 0 := by
-  rw [E.curvature_eq,smul_zero,O.position_zero]
 
 end EulerParentPacketFrames.Evolution

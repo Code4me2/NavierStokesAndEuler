@@ -168,25 +168,7 @@ theorem lower_of_conjugate_bound {a b D : ℝ} (hprod : 1 ≤ |a| * |b|)
   apply (div_le_iff₀ hD).mpr
   exact hprod.trans (mul_le_mul_of_nonneg_left hb (abs_nonneg a))
 
-/-- Explicit Diophantine bound for `v_r = (1,1-sqrt 2)` in the L1 length. -/
-theorem radial_diophantine_l1 (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
-    (1 / 3 : ℝ) / (1 + frequencyL1 m n) ≤ |radialSymbol m n| := by
-  rw [div_div]
-  apply lower_of_conjugate_bound (radial_product_lower m n hmn)
-  · have := frequencyL1_nonneg m n
-    positivity
-  · have := radialConjugate_upper m n
-    linarith
 
-/-- Explicit Diophantine bound for `v_t = (sqrt 2-1,1)` in the L1 length. -/
-theorem time_diophantine_l1 (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
-    (1 / 3 : ℝ) / (1 + frequencyL1 m n) ≤ |timeSymbol m n| := by
-  rw [div_div]
-  apply lower_of_conjugate_bound (time_product_lower m n hmn)
-  · have := frequencyL1_nonneg m n
-    positivity
-  · have := timeConjugate_upper m n
-    linarith
 
 /-- The manuscript's estimate with an explicit constant and Euclidean length. -/
 theorem radial_diophantine (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
@@ -252,31 +234,8 @@ theorem time_reciprocal_bound (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
       mul_le_mul_of_nonneg_left hb (abs_nonneg _)
     _ = _ := by ring
 
-/-- Repeated radial inversion has the corresponding finite polynomial loss. -/
-theorem radial_inverse_power_bound (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) (p : ℕ) :
-    |1 / radialSymbol m n| ^ p ≤ (6 * (1 + frequencyLength m n)) ^ p := by
-  exact pow_le_pow_left₀ (abs_nonneg _) (radial_reciprocal_bound m n hmn) p
 
-/-- Repeated temporal inversion has the corresponding finite polynomial loss. -/
-theorem time_inverse_power_bound (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) (p : ℕ) :
-    |1 / timeSymbol m n| ^ p ≤ (6 * (1 + frequencyLength m n)) ^ p := by
-  exact pow_le_pow_left₀ (abs_nonneg _) (time_reciprocal_bound m n hmn) p
 
-/-- Both estimates packaged for a nonzero integer vector. -/
-theorem graph_directions_diophantine (k : ℤ × ℤ) (hk : k ≠ 0) :
-    (1 / 6 : ℝ) / (1 + frequencyLength k.1 k.2) ≤
-        |(k.1 : ℝ) + (1 - Real.sqrt 2) * (k.2 : ℝ)| ∧
-      (1 / 6 : ℝ) / (1 + frequencyLength k.1 k.2) ≤
-        |(Real.sqrt 2 - 1) * (k.1 : ℝ) + (k.2 : ℝ)| := by
-  have hmn : k.1 ≠ 0 ∨ k.2 ≠ 0 := by
-    by_cases hm : k.1 = 0
-    · right
-      intro hn
-      exact hk (Prod.ext hm hn)
-    · exact Or.inl hm
-  constructor
-  · simpa only [radialSymbol_formula] using radial_diophantine k.1 k.2 hmn
-  · simpa only [timeSymbol_formula] using time_diophantine k.1 k.2 hmn
 
 /-- The integer matrix `[[3,1],[1,5]]` acting on a frequency. -/
 def coveringFrequency (k : ℤ × ℤ) : ℤ × ℤ :=
@@ -289,31 +248,8 @@ theorem coveringFrequency_injective : Function.Injective coveringFrequency := by
   simp only [coveringFrequency] at h₁ h₂
   apply Prod.ext <;> linarith
 
-theorem coveringFrequency_ne_zero (k : ℤ × ℤ) (hk : k ≠ 0) :
-    coveringFrequency k ≠ 0 := by
-  intro hz
-  apply hk
-  apply coveringFrequency_injective
-  simpa [coveringFrequency] using hz
 
-/-- The radial symbol scales by the smaller eigenvalue of the covering matrix. -/
-theorem radial_symbol_covering (k : ℤ × ℤ) :
-    radialSymbol (coveringFrequency k).1 (coveringFrequency k).2 =
-      (4 - Real.sqrt 2) * radialSymbol k.1 k.2 := by
-  simp only [coveringFrequency, radialSymbol_formula, Int.cast_add,
-    Int.cast_mul, Int.cast_ofNat]
-  nlinarith [congrArg (fun x : ℝ => x * (k.2 : ℝ)) sqrt_two_square]
 
-/-- The temporal symbol scales by the larger eigenvalue of the covering matrix. -/
-theorem time_symbol_covering (k : ℤ × ℤ) :
-    timeSymbol (coveringFrequency k).1 (coveringFrequency k).2 =
-      (4 + Real.sqrt 2) * timeSymbol k.1 k.2 := by
-  simp only [coveringFrequency, timeSymbol_formula, Int.cast_add,
-    Int.cast_mul, Int.cast_ofNat]
-  nlinarith [congrArg (fun x : ℝ => x * (k.1 : ℝ)) sqrt_two_square]
 
-theorem covering_eigenvalues_gt_one :
-    1 < 4 - Real.sqrt 2 ∧ 1 < 4 + Real.sqrt 2 := by
-  constructor <;> nlinarith [sqrt_two_le_two, Real.sqrt_nonneg (2 : ℝ)]
 
 end NavierStokes.DiophantineGraph

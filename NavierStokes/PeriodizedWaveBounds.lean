@@ -131,19 +131,6 @@ theorem copySum_memClass {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
     MemClass s w α (fun n => copySum (f n)) :=
   memClass_of_local_germs hw hj (fun n x _ => copySum_germ_cover K n (f n) (hs n) x)
 
-/-- The proof also gives the very same prefix constants globally. -/
-theorem copySum_jet_bound (K : Cells D I) {s : StripData D} {w : ℕ → D → ℝ}
-    {α C : ℝ} {p m : ℕ} (hC : 0 ≤ C) (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    {f : ℕ → I → D → E} (hs : ∀ n i, support (f n i) ⊆ K.carrier n i)
-    (hb : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f n i) x‖ ≤ majorant s w α C p n x)
-    (n : ℕ) {x : D} (hx : x ∈ s.domain) (j : ℕ) (hj : j ≤ m) :
-    ‖iteratedFDeriv ℝ j (copySum (f n)) x‖ ≤ majorant s w α C p n x := by
-  rcases copySum_germ_cover K n (f n) (hs n) x with ⟨i, hxi, hg⟩ | hg
-  · rw [jets_eq_of_germ hg j]
-    exact hb n i x hx hxi j hj
-  · simp only [jets_eq_of_germ hg j, iteratedFDeriv_fun_zero, Pi.zero_apply, norm_zero]
-    exact majorant_nonneg s w α hC p n x (hw n x hx)
 
 omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
 theorem copySum_support (K : Cells D I) (n : ℕ) (f : I → D → E)
@@ -168,11 +155,6 @@ theorem copySum_eventually_finite (K : Cells D I) (n : ℕ) (f : I → D → E)
   apply hi
   exact hfin.mem_toFinset.mpr ⟨y, hs i hne, hy⟩
 
-omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
-theorem copySum_tsupport (K : Cells D I) (n : ℕ) (f : I → D → E)
-    (hs : ∀ i, support (f i) ⊆ K.carrier n i) :
-    tsupport (copySum f) ⊆ ⋃ i, K.carrier n i :=
-  closure_minimal (copySum_support K n f hs) ((K.locallyFinite n).isClosed_iUnion (K.closed n))
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] [NormedSpace ℝ E] in
 theorem copySum_translate (f : I → D → E) (T : D → D) (e : I ≃ I)
@@ -353,19 +335,6 @@ theorem native_localized_support (g : Geometry) {K : Set Plane} {κ : Plane → 
   intro he
   exact hz (by simp only [he, zero_smul])
 
-/-- Whole-lift weighted bounds for the literal common-copy sum.  The native
-smoothness and all-jet estimates are needed only on their own support cell. -/
-theorem periodizedCopies_memClass {s : StripData (P × Plane)} {w : ℕ → P × Plane → ℝ}
-    {α : ℝ} (g : ℕ → Geometry) (K : ℕ → Set Plane) (hK : ∀ n, IsCompact (K n))
-    (hinj : ∀ n, InjOn quotientPoint ((fun z => (g n).center + (g n).basis z) '' K n))
-    (κ : ℕ → Plane → ℝ) (hκ : ∀ n, support (κ n) ⊆ K n)
-    (f : ℕ → Frequency → P × Plane → E)
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    (hj : LocalJets s w α (fun n => nativeCell (g n) (K n))
-      (fun n k x => κ n ((g n).coordinates k x.2) • f n k x)) :
-    MemClass s w α (fun n => ParticularWaveBounds.periodizedCopies (g n) (κ n) (f n)) :=
-  copySum_memClass (s := s) (w := w) (α := α) (nativeCells (P := P) g K hK hinj) hw
-    (fun n => native_localized_support (g n) (hκ n) (f n)) hj
 
 end NativeCells
 
@@ -951,13 +920,6 @@ theorem localTail_support (K : Cells D I)
   by_contra hn
   exact hx (a.localTail_zero_germ d (zero_germ_of_support (K.closed n i) (hs n i) hn)).self_of_nhds
 
-theorem corrected_support (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) (n : ℕ) (i : I) :
-    support ((a.corrected s d i).amplitude n) ⊆ K.carrier n i := by
-  intro x hx
-  by_contra hn
-  exact hx (a.corrected_zero_germ s d (zero_germ_of_support (K.closed n i) (hs n i) hn)).self_of_nhds
 
 omit [NormedSpace ℝ D] in
 theorem common_zero_germs (K : Cells D I)
@@ -1138,22 +1100,7 @@ theorem globalGaussian_of_source_zero (d : GraphDirections D)
   funext n x
   simp [globalGaussian, hf]
 
-theorem globalGood_support (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) (n : ℕ) :
-    support (a.globalGood s d n) ⊆ ⋃ i, K.carrier n i :=
-  copySum_support K n _ (a.localGood_support K hs s d n)
 
-theorem globalGaussian_support (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (hsource : ∀ n, support (a.source n) ⊆ ⋃ i, K.carrier n i)
-    (d : GraphDirections D) (n : ℕ) :
-    support (a.globalGaussian d n) ⊆ ⋃ i, K.carrier n i := by
-  intro x hx
-  by_contra h
-  have hn : ∀ i, x ∉ K.carrier n i := by simpa only [mem_iUnion, not_exists] using h
-  have hz := (a.globalGaussian_uncovered_germ K hs d hn).trans (source_zero_germ K hsource hn)
-  exact hx hz.self_of_nhds
 
 /-- The global differential formula corresponding to the sum of native
 good terms.  Its equality with that sum is proved from actual germs. -/
@@ -1236,36 +1183,6 @@ theorem common_inputBounds (K : Cells D I)
   obtain ⟨hva, hvp⟩ := a.common_classes K hs (hb.amplitude 0).weight_nonneg ha hp
   exact { hb with amplitude := fun i => hva.map (ContinuousLinearMap.proj i), pressure := hvp }
 
-/-- Primitive background estimates and native localized velocity/pressure
-jets imply the actual global curl correction and good-remainder classes.
-Neither a local nor a global remainder-class hypothesis is used. -/
-theorem common_bounds_from_native (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} {d : GraphDirections D} {W : ℕ → D → ℝ} {α κ : ℝ}
-    (hb : InputBounds s W α κ d a.backgroundOnly)
-    (ha : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K.carrier
-      (fun n i => (a.localized i).amplitude n))
-    (hp : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) (α + 1 / 2) K.carrier
-      (fun n i => (a.localized i).pressure n))
-    (hκ : κ ≤ 1 / 2) {R : D → ℝ} (hR : a.background.radius = fun _ => R)
-    (hN : PhaseJetBounds.PolynomialJets (phaseDomain s) (a.background.normal s d))
-    {b M : ℝ} (hpos : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖a.background.normal s d n x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖a.background.normal s d n x‖ ≤ M)
-    (hK : BandBound s (1 / 2) (fun n => 1 / a.background.frequency n)) :
-    WaveClass s W α a.common.amplitude ∧
-    WaveClass s W α (a.commonCorrected s d).amplitude ∧
-    WaveClass s W (α + 1 / 2) a.common.pressure ∧
-    WaveClass s W (α + 1 / 2 - κ) (a.common.curlCorrection s d) ∧
-    WaveClass s W (α + 1 / 2 - 3 * κ) (a.globalGood s d) := by
-  have h := a.common_inputBounds K hs hb ha hp
-  have hc := h.curlCorrection_class hR hN hpos hlower hupper hK
-  have hci i := hc.map (ContinuousLinearMap.proj i)
-  have hcorrected := h.add_curl_amplitude hκ hci
-  refine ⟨component_classes h.amplitude, component_classes hcorrected.amplitude,
-    h.pressure, hc, ?_⟩
-  rw [a.globalGood_eq_differentialGood K hs s d]
-  exact (h.curl_principal_gain hci).add hcorrected.remainder_class
 
 theorem localGaussian_wave_jets {s : StripData D} (d : GraphDirections D)
     {K : ℕ → I → Set D} {w : ℕ → D → ℝ} {α : ℝ}
@@ -1333,30 +1250,6 @@ theorem localGaussian_all_gains_from_native {s : StripData D} (d : GraphDirectio
   · exact a.localGaussian_zero_of_cutoff_one d hone
   · exact a.localGaussian_zero_of_fields d hu0 hf0
 
-/-- The whole-lift Gaussian estimate derives every native output jet from
-primitive data, then glues using the actual periodized fields and source
-coverage.  No Gaussian error class is an input. -/
-theorem globalGaussian_all_gains_from_native (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (hsource : ∀ n, support (a.source n) ⊆ ⋃ i, K.carrier n i)
-    {s : StripData D} (d : GraphDirections D) {W : ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hψ : LocalJets s (fun _ _ => 1) 0 K.carrier a.cutoff)
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K.carrier a.amplitude)
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K.carrier (fun n _ => a.source n))
-    (edges : GaussianTailFlat.FlatEdges s) (scales : GaussianTailFlat.BandScaleControl s)
-    (θ : ℕ → I → D → ℝ) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n, ell * ChartScales.S n ≤ L n) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i →
-      W n x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n))
-    (hcentral : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → |θ n i x - 1 / 2| < 1 / 5 →
-      (a.cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ) : UnweightedClass s β (a.globalGaussian d) :=
-  a.globalGaussian_class_of_covered_source K hs hsource d (fun _ _ _ => zero_le_one)
-    (a.localGaussian_all_gains_from_native d hWnonneg hψ hfast hu hf edges scales θ L hL
-      ell hell hLell hc hW hcentral β)
 
 theorem common_potential_germ (K : Cells D I)
     (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
@@ -1493,41 +1386,7 @@ theorem globalGood_invariant (s : StripData D) (d : GraphDirections D)
     (fun n => a.cutoff n i) hR hb hF hG hr hz hΦ (fun n => hu n i) (fun n => hp n i)
     (fun n => hψ n i) n)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- Deck reindexing is sufficient for common-field periodicity; individual
-uncut copies need not be periodic. -/
-theorem common_translate (n : ℕ) (T : D → D) (e : I ≃ I)
-    (hψ : ∀ i x, a.cutoff n (e i) (T x) = a.cutoff n i x)
-    (hu : ∀ i x, a.amplitude n (e i) (T x) = a.amplitude n i x)
-    (hp : ∀ i x, a.pressure n (e i) (T x) = a.pressure n i x) (x : D) :
-    a.common.amplitude n (T x) = a.common.amplitude n x ∧
-      a.common.pressure n (T x) = a.common.pressure n x := by
-  constructor
-  · apply copySum_translate _ T e _ x
-    intro i y
-    change a.cutoff n (e i) (T y) • a.amplitude n (e i) (T y) = _
-    rw [hψ, hu]
-    rfl
-  · apply copySum_translate _ T e _ x
-    intro i y
-    change (a.cutoff n (e i) (T y) : ℂ) * a.pressure n (e i) (T y) = _
-    rw [hψ, hp]
-    rfl
 
-theorem globalGaussian_translate (d : GraphDirections D) (n : ℕ) (z : D) (e : I ≃ I)
-    (hψ : ∀ i x, a.cutoff n (e i) (x + z) = a.cutoff n i x)
-    (hu : ∀ i x, a.amplitude n (e i) (x + z) = a.amplitude n i x)
-    (hf : ∀ x, a.source n (x + z) = a.source n x) (x : D) :
-    a.globalGaussian d n (x + z) = a.globalGaussian d n x := by
-  have hT : a.globalTail d n (x + z) = a.globalTail d n x := by
-    apply copySum_translate _ (fun x => x + z) e _ x
-    intro i y
-    have hD : fderiv ℝ (a.cutoff n (e i)) (y + z) = fderiv ℝ (a.cutoff n i) y := by
-      rw [← fderiv_comp_add_right z, show (fun x => a.cutoff n (e i) (x + z)) = a.cutoff n i from funext (hψ i)]
-    simp only [localTail, GraphDirections.Dfast, HarmonicCalculus.along,
-      GraphDirections.fastField, hD, hu]
-  have hS : a.cutoffSum n (x + z) = a.cutoffSum n x := copySum_translate _ (fun x => x + z) e hψ x
-  simp only [globalGaussian, hT, hS, hf]
 
 end CopyData
 
@@ -1555,33 +1414,8 @@ noncomputable def complexCopyData (base : WaveCoefficients (P × Plane))
   cutoff n k z := κ n ((g n).coordinates k z.2)
   source := source
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem complexCopyData_common (base : WaveCoefficients (P × Plane))
-    (t : ℕ → TangentData P ProblemStatement.Space) (source : ℕ → P × Plane → ComplexVector)
-    (g : ℕ → Geometry) (entry exit : ℕ → ℝ) (hab : ∀ n, entry n ≤ exit n)
-    (κ : ℕ → Plane → ℝ) :
-    (complexCopyData base t source g entry exit hab κ).common =
-      { base with
-        amplitude := fun n => commonVelocity (t n) (source n) (g n) (hab n) (κ n)
-        pressure := fun n => commonPressure (t n) (source n) (g n) (hab n) (κ n) (base.frequency n) } := rfl
 
-theorem complexCopyData_common_periodic (base : WaveCoefficients (P × Plane))
-    (t : ℕ → TangentData P ProblemStatement.Space) (source : ℕ → P × Plane → ComplexVector)
-    (g : ℕ → Geometry) (entry exit : ℕ → ℝ) (hab : ∀ n, entry n ≤ exit n)
-    (κ : ℕ → Plane → ℝ) (n : ℕ) (p : P) (hp : PeriodicAt (source n) p) :
-    PeriodicAt ((complexCopyData base t source g entry exit hab κ).common.amplitude n) p ∧
-    PeriodicAt ((complexCopyData base t source g entry exit hab κ).common.pressure n) p :=
-  ⟨commonVelocity_periodic (t n) (source n) (g n) (hab n) (κ n) p hp,
-    commonPressure_periodic (t n) (source n) (g n) (hab n) (κ n) (base.frequency n) p hp⟩
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem complexCopyData_cutoff_support (base : WaveCoefficients (P × Plane))
-    (t : ℕ → TangentData P ProblemStatement.Space) (source : ℕ → P × Plane → ComplexVector)
-    (g : ℕ → Geometry) (entry exit : ℕ → ℝ) (hab : ∀ n, entry n ≤ exit n)
-    (κ : ℕ → Plane → ℝ) (K : ℕ → Set Plane) (hκ : ∀ n, support (κ n) ⊆ K n)
-    (n : ℕ) (k : Frequency) :
-    support ((complexCopyData base t source g entry exit hab κ).cutoff n k) ⊆
-      nativeCell (g n) (K n) k := native_cutoff_support (g n) (hκ n) k
 
 /-- The data-only binding to the actual fixed-reference particular solve.
 The source is the literal coefficient of the incoming harmonic residual;
@@ -1596,50 +1430,11 @@ noncomputable def particularData (r : Reference P) (charts : BandCharts P)
   cutoff n k z := r.cutoff ((bandGeometry r charts n).coordinates k z.2)
   source n := angleLift (residualSource c u b G A j n)
 
-theorem particularData_eq_complexCopyData (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) :
-    particularData r charts c u b G A j base =
-      complexCopyData (actualCarrier base b j) (fun n => angleTangent (bandTangent r charts j n))
-        (fun n => angleLift (residualSource c u b G A j n)) (bandGeometry r charts)
-        (fun _ => 0) (fun _ => r.length) (fun _ => r.length_pos.le) (fun _ => r.cutoff) := rfl
 
-theorem particularData_raw (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (k : Frequency) :
-    (particularData r charts c u b G A j base).raw k =
-      actualCopyCoefficients r charts c u b G A j base (fun _ => k) := rfl
 
-theorem particularData_source (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (n : ℕ) (z : (P × ℝ) × Plane) (i : Fin 3) :
-    (particularData r charts c u b G A j base).source n z i =
-      (HarmonicResidual.residualBlock c u b G A).velocity n i j (z.1.1, z.2) := rfl
 
-theorem particularData_frequency (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (n : ℕ) :
-    (particularData r charts c u b G A j base).background.frequency n = (j : ℝ) * b.frequency n := rfl
 
-theorem particularData_phase (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (n : ℕ) (z : (P × ℝ) × Plane) :
-    (particularData r charts c u b G A j base).background.phase n z =
-      b.phase n (z.1.1, z.2) + (b.angularFrequency n : ℝ) / b.frequency n * z.1.2 := rfl
 
-theorem particularData_cutoff_support (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (K : ℕ → Set Plane)
-    (hK : ∀ n, support r.cutoff ⊆ K n) (n : ℕ) (k : Frequency) :
-    support ((particularData r charts c u b G A j base).cutoff n k) ⊆
-      nativeCell (bandGeometry r charts n) (K n) k :=
-  native_cutoff_support (bandGeometry r charts n) (hK n) k
 
 /-- This is the same actual periodization as `ParticularWaveAssembly`,
 with its single physical reference and original source. -/
@@ -1666,16 +1461,6 @@ theorem particularData_common (r : Reference P) (charts : BandCharts P)
       pressure := (actualCommonCoefficients r charts c u b G A j base).pressure } := by rw [ha, hp]
     _ = _ := rfl
 
-theorem particularData_commonCorrected (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) {j : ℤ} (hj : j ≠ 0)
-    (hfrequency : ∀ n, b.frequency n ≠ 0)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) (s : StripData ((P × ℝ) × Plane))
-    (d : GraphDirections ((P × ℝ) × Plane)) :
-    (particularData r charts c u b G A j base).commonCorrected s d =
-      actualCorrectedCommon r charts c u b G A j base s d := by
-  unfold CopyData.commonCorrected actualCorrectedCommon
-  rw [particularData_common r charts c u b G A hj hfrequency]
 
 end ActualParticularData
 

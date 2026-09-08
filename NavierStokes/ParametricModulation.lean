@@ -72,13 +72,6 @@ theorem source_slice_contDiff
   intro θ
   exact ⟨hp, mem_univ θ⟩
 
-omit [FiniteDimensional ℝ P] in
-theorem normalizedPrimitiveFamily_hasDerivAt
-    (q : P × ℝ → ℝ) (U : Set P)
-    (hq : ContDiffOn ℝ ∞ q (U ×ˢ (univ : Set ℝ))) (p : P) (hp : p ∈ U) (θ : ℝ) :
-    HasDerivAt (fun s => normalizedPrimitiveFamily q (p, s)) (q (p, θ)) θ :=
-  RadialModulation.zeroMeanPrimitive_hasDerivAt _
-    (source_slice_contDiff q U hq p hp).continuous θ
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P] in
 theorem normalizedPrimitiveFamily_periodic
@@ -384,16 +377,6 @@ theorem primitives_periodic (r : TrueConeRealization a m p₁ p₂ K B)
       (fun p hp => (r.loop_periods_means p hp).2.1)
       (fun p hp => (r.loop_periods_means p hp).2.2.2) p⟩
 
-theorem primitives_mean_zero (r : TrueConeRealization a m p₁ p₂ K B)
-    (E : P → ℝ) (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
-    (hp₂ : ContDiff ℝ ∞ p₂) (p : P) :
-    intervalIntegral (fun θ => r.angularPrimitive (p, θ)) 0 1 volume = 0 ∧
-      intervalIntegral (fun θ => r.axialPrimitive E (p, θ)) 0 1 volume = 0 := by
-  have hs := r.loop_smooth ha hm hp₂
-  exact ⟨extendedPrimitive_mean_zero r.cutoff _ _ _
-      (fun p hp => (source_slice_contDiff _ _ hs.1 p hp).continuous) p,
-    extendedPrimitive_mean_zero r.cutoff _ _ _
-      (fun p hp => (source_slice_contDiff _ _ hs.2 p hp).continuous) p⟩
 
 theorem primitive_derivatives (r : TrueConeRealization a m p₁ p₂ K B)
     (E : P → ℝ) (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
@@ -574,38 +557,6 @@ theorem realized_shears_exact
     rw [hθ.2, ← hbNom]
     ring
 
-/-- End-to-end existence from nominal scalar data: construct the actual
-TrueConeLoop family, its normalized integral primitives, and modulated profiles.
-All smoothness and finite-jet conclusions are proved for these constructions. -/
-theorem exists_modulated_trueCone_profiles
-    (a m p₁ p₂ E U : RadialParameter → ℝ) (KX Kη : Set ℝ) (B : Set RadialParameter)
-    (hKX : IsCompact KX) (hKη : IsCompact Kη) (hB : IsCompact B) (hBK : B ⊆ KX ×ˢ Kη)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
-    (hp₁ : ContDiff ℝ ∞ p₁) (hp₂ : ContDiff ℝ ∞ p₂)
-    (hE : ContDiff ℝ ∞ E) (hU : ContDiff ℝ ∞ U)
-    (haK : ∀ p ∈ KX ×ˢ Kη, 0 < a p)
-    (hPK : ∀ p ∈ KX ×ˢ Kη, 2 < p₁ p + p₂ p * m p)
-    (hrelaxed : ∀ p ∈ KX ×ˢ Kη, TrueConeLoop.nominalSpeed (a p) (m p) <
-      ConeAlgebra.coneBound (p₁ p + p₂ p * m p) (p₂ p - p₁ p * m p))
-    (htrueB : ∀ p ∈ B, 2 < TrueConeLoop.nominalSpeed (a p) (m p)) :
-    ∃ r : TrueConeRealization a m p₁ p₂ (KX ×ˢ Kη) B,
-      (∀ p ∈ KX ×ˢ Kη, ∀ θ, TrueConeLoop.InTrueCone (p₁ p) (p₂ p)
-        (r.angularLoop (p, θ)) (r.signedAxialLoop (p, θ))) ∧
-      (∀ n X η : ℝ, X ≠ 0 →
-        ContDiffAt ℝ ∞ (Function.uncurry (realizedE r E n)) (X, η) ∧
-        ContDiffAt ℝ ∞ (Function.uncurry (realizedU r E U n)) (X, η)) ∧
-      (∀ k : ℕ, ∃ CE CU : ℝ, 0 ≤ CE ∧ 0 ≤ CU ∧
-        ∀ n : ℝ, 1 ≤ n → ∀ X ∈ KX, ∀ η ∈ Kη,
-          |iteratedDeriv k (realizedE r E n X) η - iteratedDeriv k (fun e => E (X, e)) η| ≤ CE / n ∧
-          |iteratedDeriv k (realizedU r E U n X) η - iteratedDeriv k (fun e => U (X, e)) η| ≤ CU / n) ∧
-      (∃ N : Set RadialParameter, IsOpen N ∧ B ⊆ N ∧ ∀ n X η : ℝ, (X, η) ∈ N →
-        realizedE r E n X η = E (X, η) ∧ realizedU r E U n X η = U (X, η)) := by
-  obtain ⟨r⟩ := exists_trueConeRealization a m p₁ p₂ (KX ×ˢ Kη) B
-    (hKX.prod hKη) hB ha hm hp₁ hp₂ haK hPK htrueB
-  exact ⟨r, r.loop_trueCone hrelaxed,
-    realized_profiles_contDiffAt r E U ha hm hp₂ hE hU,
-    realized_profiles_uniform_eta_jets r E U ha hm hp₂ hE hU KX Kη hKX hKη,
-    realized_profiles_boundary_match r E U ha hm hBK⟩
 
 end RadialProfiles
 

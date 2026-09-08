@@ -114,9 +114,6 @@ theorem pressureScalar_spec (t : Icc (0 : ℝ) T) :
 def pressureProfile (t : Icc (0 : ℝ) T) (x : Space) (_θ : ℝ) : ℝ :=
   pressureScalar T hT F F₁ FInv s c hc hLower fC hR t x
 
-theorem pressureProfile_angle_derivative (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) :
-    HasDerivAt (pressureProfile T hT F F₁ FInv s c hc hLower fC hR t x) 0 θ :=
-  hasDerivAt_const θ _
 
 /-- The physical pressure force is exactly the actual residual, because the
 inverse-transpose cancels the transpose of the given frame. -/

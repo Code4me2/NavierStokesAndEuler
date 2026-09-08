@@ -36,30 +36,10 @@ theorem gluePath_right (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
       projIcc_of_mem hτS ⟨le_rfl,hτS⟩] using matching_values S τ hτ0 hτS u)
     t t.property.1, projIcc_of_mem hτS t.property]
 
-theorem glue_family_contDiff (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
-    (f : X → Matching (E := E) S τ hτ0 hτS) (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (fun x => gluePath S τ hτ0 hτS (f x)) := by
-  simpa only [Function.comp_def, glueOperator_apply] using
-    (glueOperator (E := E) S τ hτ0 hτS).contDiff.comp hf
 
-theorem glue_word_derivative (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
-    (directions : ι → X) (f : X → Matching (E := E) S τ hτ0 hτS)
-    (hf : ContDiff ℝ ∞ f) {n : ℕ} (w : Fin n → ι) (x : X) :
-    wordDerivative directions (fun y => gluePath S τ hτ0 hτS (f y)) w x =
-      gluePath S τ hτ0 hτS (wordDerivative directions f w x) := by
-  simpa only [Function.comp_def, glueOperator_apply] using
-    wordDerivative_comp_clm directions (glueOperator (E := E) S τ hτ0 hτS) f hf w x
 
 variable [Fintype ι]
 
-theorem glue_word_bound (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
-    (directions : ι → X) (f : X → Matching (E := E) S τ hτ0 hτS)
-    (hf : ContDiff ℝ ∞ f) (n : ℕ) (x : X) :
-    wordSum directions (fun y => gluePath S τ hτ0 hτS (f y)) n x ≤
-      wordSum directions f n x := by
-  have h := wordSum_comp_clm_le directions (glueOperator S τ hτ0 hτS) f hf n x
-  exact h.trans ((mul_le_mul_of_nonneg_right
-    (glueOperator_norm_le_one S τ hτ0 hτS) (wordSum_nonneg directions f n x)).trans_eq (one_mul _))
 
 /-- Fixed H6 is the specialization q=6; no tensor-to-word conversion occurs. -/
 theorem glue_block_bound (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)

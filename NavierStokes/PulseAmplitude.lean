@@ -137,8 +137,6 @@ theorem pulseConstant_lower : 1 / 5 < pulseConstant := by
   simp only [id_eq, neg_mul] at *
   linarith
 
-theorem pulseConstant_bounds : 1 / 5 < pulseConstant ∧ pulseConstant ≤ 1 / 4 :=
-  ⟨pulseConstant_lower, pulseConstant_upper⟩
 
 /-! ## The actual affine correction and the actual pulse quadratic -/
 
@@ -1377,38 +1375,6 @@ theorem amplitude_spec (d : OutgoingTail.TailData)
       (normalizedTail_derivative_bound d eta heta),
     fun A hA hz => amplitude_unique d eta (errorScale d.core) heta h hscale A hA hz⟩
 
-/-- One threshold works for all terminal parameters `0 < h < lam/2`.
-The constructed core with `OutgoingTail.finalAngular` has zero total energy,
-with an actual smooth amplitude in the manuscript's bracket and the claimed
-derivative rate. The separate angular-moment reset is not included here. -/
-theorem exists_uniform_amplitude_threshold (P m : ℝ) (hP : 0 < P) :
-    ∃ lam₀ C : ℝ, 0 < lam₀ ∧ 0 < C ∧ ∀ d : OutgoingTail.TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam₀ →
-      ContDiff ℝ ∞ (amplitude d) ∧ ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-        9 / 10 < amplitude d eta ∧ amplitude d eta < 6 / 5 ∧
-        (∫ y, Real.exp y * (axial d.core (amplitude d) (y, eta) ^ 2 -
-          OutgoingTail.finalAngular d (y, eta) ^ 2 / 2)) = 0 ∧
-        |deriv (amplitude d) eta| ≤ C * d.core.lam * (1 + Real.log (1 / d.core.lam)) ∧
-        (∀ A ∈ Icc (9 / 10 : ℝ) (6 / 5), totalEnergy d A eta = 0 → A = amplitude d eta) := by
-  obtain ⟨delta, hd, hsmall⟩ := exists_rate_threshold (errorConstant P m)
-  refine ⟨min delta (1 / 120), 128 * errorConstant P m, lt_min hd (by norm_num),
-    mul_pos (by norm_num) (errorConstant_pos hP m), ?_⟩
-  intro d hdP hdm hwait hlam
-  have hl : d.core.lam ≤ 1 / 120 :=
-    (lt_of_lt_of_le hlam (min_le_right _ _)).le
-  have hscale : errorScale d.core ≤ 1 / 1000 := by
-    unfold errorScale
-    rw [hdP, hdm]
-    exact hsmall _ d.core.lam_pos (lt_of_lt_of_le hlam (min_le_left _ _))
-  obtain ⟨hs, hspec⟩ := amplitude_spec d hl hwait hscale
-  refine ⟨hs, fun eta heta => ?_⟩
-  obtain ⟨hr, hr', hz, hderiv, huniq⟩ := hspec eta heta
-  refine ⟨hr, hr', hz, ?_, huniq⟩
-  convert! hderiv using 1
-  unfold errorScale logarithmicRate
-  rw [hdP, hdm]
-  ring
 
 /-! ## The same equality in the actual radial variable -/
 
@@ -1478,14 +1444,5 @@ theorem radialEnergy_integral (d : OutgoingTail.TailData) (amp : ℝ → ℝ)
     setIntegral_univ, integral_const_mul] at h
   exact h
 
-theorem radialEnergy_zero (d : OutgoingTail.TailData)
-    (hsmall : d.core.lam ≤ 1 / 120) (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hscale : errorScale d.core ≤ 1 / 1000) (eta : ℝ) (heta : eta ^ 2 ≤ 1)
-    (XR : ℝ) (hXR : 0 < XR) :
-    (∫ X in Ioi 0, radialEnergyIntegrand d (amplitude d) eta XR X) = 0 := by
-  rw [radialEnergy_integral d (amplitude d) eta XR hXR]
-  have h := amplitude_spec_of_error_bound d eta (errorScale d.core) heta
-    (actual_energy_error_bounds d hsmall hwait eta heta) hscale
-  rw [h.2.2, mul_zero]
 
 end NavierStokes.PulseAmplitude

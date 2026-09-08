@@ -26,11 +26,6 @@ theorem source_continuous {T : Type*} [TopologicalSpace T]
     ((hA.comp continuous_fst).clm_apply continuous_snd)).add
       (((hB.comp continuous_fst).clm_apply continuous_snd).clm_apply continuous_snd))).neg
 
-/-- The exact product difference identity needs no symmetry of the bilinear source. -/
-theorem quadratic_sub (B : X →L[ℝ] X →L[ℝ] Y) (u v : X) :
-    B u u - B v v = B (u-v) u + B v (u-v) := by
-  simp only [map_sub, sub_apply]
-  abel
 
 /-- The quadratic source has the genuine pointwise bound used for Picard existence. -/
 theorem source_bound (P : Y →L[ℝ] Y) (r : Y) (A : X →L[ℝ] Y) (B : X →L[ℝ] X →L[ℝ] Y)

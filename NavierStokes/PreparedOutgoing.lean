@@ -118,11 +118,5 @@ theorem PreparedProfile.large_nominal (d : PreparedProfile) (floor left : ℝ)
 /-- An actual fixed prepared profile, obtained from the proved existence. -/
 noncomputable def prepared : PreparedProfile := Classical.choice exists_prepared
 
-theorem exists_matched_nominal (floor left : ℝ) (hleft : left ≤ 0) :
-    ∃ (d : PreparedProfile) (W : NominalProfile.Witness d.profile),
-      floor < W.controls.radius ∧
-      OutgoingCone.ProfileCleanCone d.profile W.controls.radius left := by
-  obtain ⟨W, hW⟩ := prepared.large_nominal floor left hleft
-  exact ⟨prepared, W, hW⟩
 
 end NavierStokes.PreparedOutgoing

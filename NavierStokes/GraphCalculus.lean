@@ -158,13 +158,6 @@ theorem differentiableAt_radialOp (d : ℝ) (vr : Plane) (F : Lift → ℝ) (p :
   exact ((hF.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).clm_apply
     (differentiableAt_radialVector d vr p hr)
 
-/-- Restriction to the graph preserves each differentiability order away
-from the axis, in particular `C∞` when the order is `∞`. -/
-theorem contDiffAt_pullback {n : WithTop ℕ∞} (d : ℝ) (vr vt : Plane)
-    (F : Lift → ℝ) (q : Plane) (hr : q.1 ≠ 0)
-    (hF : ContDiffAt ℝ n F (graph d vr vt q)) :
-    ContDiffAt ℝ n (pullback d vr vt F) q :=
-  hF.comp q (contDiffAt_graph d vr vt q hr)
 
 /-- Differentiate the restricted time derivative in the radial direction. -/
 theorem partialR_partialT_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ)
@@ -194,15 +187,6 @@ theorem partialT_partialR_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ)
   exact partialT_pullback d vr vt (radialOp d vr F) q
     (differentiableAt_radialOp d vr F _ hr hF.contDiffAt)
 
-/-- The mixed physical derivatives commute, and both orders coincide with
-the corresponding iterated exact graph operators. -/
-theorem mixed_partial_pullback_comm (d : ℝ) (vr vt : Plane) (F : Lift → ℝ)
-    (q : Plane) (hr : q.1 ≠ 0) (hF : ContDiff ℝ 2 F) :
-    partialR (partialT (pullback d vr vt F)) q =
-      partialT (partialR (pullback d vr vt F)) q := by
-  rw [partialR_partialT_pullback d vr vt F q hr hF,
-    partialT_partialR_pullback d vr vt F q hr hF]
-  exact radialOp_timeOp_comm d vr vt F _ hr hF.contDiffAt
 
 /-- A derivative in an auxiliary direction is the ordinary dot product
 with the two auxiliary partial derivatives. -/
@@ -216,28 +200,6 @@ theorem auxiliary_directional_eq (F : Lift → ℝ) (p : Lift) (v : Plane) :
   rw [hv, map_add, map_smul, map_smul]
   rfl
 
-/-- This is exactly `∂r + d r^(d-1) (vr · ∂Y)`. -/
-theorem radialOp_expanded (d : ℝ) (vr : Plane) (F : Lift → ℝ) (p : Lift) :
-    radialOp d vr F p = fderiv ℝ F p ((1, 0), (0, 0)) +
-      radialSpeed d p.1.1 *
-        (vr.1 * fderiv ℝ F p ((0, 0), (1, 0)) +
-          vr.2 * fderiv ℝ F p ((0, 0), (0, 1))) := by
-  change fderiv ℝ F p (radialVector d vr p) = _
-  have hv : radialVector d vr p =
-      (((1, 0), (0, 0)) : Lift) + radialSpeed d p.1.1 • (((0, 0), vr) : Lift) := by
-    ext <;> simp [radialVector]
-  rw [hv, map_add, map_smul, auxiliary_directional_eq]
-  rfl
 
-/-- This is exactly `∂t + vt · ∂Y`. -/
-theorem timeOp_expanded (vt : Plane) (F : Lift → ℝ) (p : Lift) :
-    timeOp vt F p = fderiv ℝ F p ((0, 1), (0, 0)) +
-      (vt.1 * fderiv ℝ F p ((0, 0), (1, 0)) +
-        vt.2 * fderiv ℝ F p ((0, 0), (0, 1))) := by
-  change fderiv ℝ F p (timeVector vt) = _
-  have hv : timeVector vt =
-      (((0, 1), (0, 0)) : Lift) + (((0, 0), vt) : Lift) := by
-    ext <;> simp [timeVector]
-  rw [hv, map_add, auxiliary_directional_eq]
 
 end NavierStokes.GraphCalculus

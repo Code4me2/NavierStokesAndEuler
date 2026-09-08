@@ -121,20 +121,5 @@ def historyDifferenceScaleCost (H : LowBounds G) : ℝ :=
     (G.T*‖D.frameDerivative.field‖+‖D.frame.field‖) (1+G.T^2*‖B.H.field‖)
     (historyTransportCost (D := D)) L.frameDifferenceCost L.firstDifferenceCost L.strainDifferenceCost
 
-omit [CompleteSpace U] in
-theorem source_history_derivative_scale (H : LowBounds G) :
-    historyLabelDifferenceCost (G.historyData m hm R S hS H) ≤
-      L.historyDifferenceScaleCost m hm R S hS H*G.ell := by
-  apply historyDifferenceCost_le_scale
-  · exact G.T_pos.le
-  · exact (G.transverseData m hm R S hS).frameLower_pos.le
-  · positivity
-  · positivity
-  · exact add_nonneg (mul_nonneg G.T_pos.le (norm_nonneg _)) (norm_nonneg _)
-  · positivity
-  · exact historyTransportCost_nonneg
-  · exact L.source_frame_derivative_norm m hm R S hS
-  · exact L.source_first_derivative_norm m hm R S hS
-  · exact L.source_curvature_derivative_norm m hm R S hS H
 
 end EulerParentPacketFrames.LabelData

@@ -39,25 +39,6 @@ theorem Budget.correctionCoefficient_timeDerivative (B : Budget P hT A) :
   (B.fieldTower P).toSmoothTimeField_timeDerivative_of_interior (B.timeDerivativeTower P)
     hT.le 6 (by norm_num) (B.fieldTower_hasDerivAt_timeDerivativeTower P 6 le_rfl)
 
-theorem Budget.correctionCoefficient_jet_bound (B : Budget P hT A) (n : ℕ) :
-    ‖(B.correctionCoefficient P).jet n‖ ≤
-      (sobolevEmbeddingConstant P 3 * B.correctionSize P) *
-        (‖coordinateEquiv.symm.toContinuousLinearMap‖ * (B.reducedRadius P)⁻¹)^n *
-          (n.factorial : ℝ)^2 :=
-  (B.fieldTower P).toSmoothTimeField_jet_weighted n (B.reducedRadius P)
-    (B.correctionSize P) (B.reducedRadius_pos P) (B.correctionSize_nonneg P)
-    (B.fieldTower_reducedNorm P (n+6) n le_rfl)
 
-theorem Budget.correctionDerivativeCoefficient_jet_bound (B : Budget P hT A)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hb : ∀ (n : ℕ) (t : Icc (0 : ℝ) T),
-      EulerSobolevGevreyOperators.weightedNorm P 6 n (B.reducedRadius P)
-        ((B.timeDerivativeTower P).realization (n+6) t) ≤ C) (n : ℕ) :
-    ‖(B.correctionDerivativeCoefficient P).jet n‖ ≤
-      (sobolevEmbeddingConstant P 3 * C) *
-        (‖coordinateEquiv.symm.toContinuousLinearMap‖ * (B.reducedRadius P)⁻¹)^n *
-          (n.factorial : ℝ)^2 :=
-  (B.timeDerivativeTower P).toSmoothTimeField_jet_weighted n (B.reducedRadius P)
-    C (B.reducedRadius_pos P) hC (hb n)
 
 end EulerAllOrderDriftCorrection

@@ -111,15 +111,5 @@ theorem tsupport_subset_flow_image
     exact hnot ⟨Y x, subset_tsupport _ hnz, hXY x⟩
   exact hx (by simpa only [hXY x] using hzero (Y x) hz)
 
-omit [InnerProductSpace ℝ E] in
-/-- In particular each time slice has compact support. -/
-theorem hasCompactSupport_of_flow_image
-    (ω : ℝ → E → E) (X : ℝ → E → E) (Y : E → E) (t : ℝ)
-    (hc : HasCompactSupport (ω 0)) (hX : Continuous (X t))
-    (hXY : ∀ x, X t (Y x) = x)
-    (hzero : ∀ a, ω 0 a = 0 → ω t (X t a) = 0) :
-    HasCompactSupport (ω t) :=
-  (hc.image hX).of_isClosed_subset (isClosed_tsupport _)
-    (tsupport_subset_flow_image ω X Y t hc hX hXY hzero)
 
 end Euler.ComparatorBridge

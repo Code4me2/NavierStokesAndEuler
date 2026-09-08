@@ -494,23 +494,6 @@ theorem particular_mode_inputSupport (j : ℤ) (l : Label) :
     exact (particular_zero_germs F clock reference gap r hr base tangent ctx u b G A j
       s S hS hsupport hinj outStrip d l n (x := ((x.1, 0), x.2)) hx.1 hn).2.2.self_of_nhds
 
-/-- Finite reassembly of all signed particular modes retains the fixed
-label carrier, with no growth or derivative estimate as an input. -/
-theorem particular_assembled_inputSupport (N : ℕ) (l : Label) :
-    HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ) (sourceRegions F clock reference gap r S l)
-      (ErrorHarmonics.sumBlock (ParticularWaveAssembly.modes N)
-        (b l).frequency (b l).phase (b l).angularFrequency (fun j =>
-          ParticularWaveAssembly.nativeModeBlock j (b l)
-            ((data F clock reference gap r hr base tangent ctx u b G A j l).commonCorrected outStrip d)))
-      (fun n i => ∑ j ∈ ParticularWaveAssembly.modes N,
-        (ParticularWaveAssembly.nativeModeBlock j (b l)
-          { base l with
-            amplitude := (data F clock reference gap r hr base tangent ctx u b G A j l).globalGaussian d
-            pressure := fun _ _ => 0 }).velocity n i) 0 := by
-  apply inputSupport_sumBlock
-  intro j _
-  exact particular_mode_inputSupport F clock reference gap r hr base tangent ctx u b G A
-    s S hS hsupport hinj outStrip d j l
 
 end ParticularAssembly
 
@@ -579,22 +562,7 @@ theorem transported_carrier_closed (χ : P →L[ℝ] Q) (g : Geometry)
     IsClosed (ActualGaussianCoverage.sourceRegion (χ ⁻¹' S) g r L c) :=
   ActualGaussianCoverage.sourceRegion_closed (hS.preimage χ.continuous) g r L c
 
-theorem transported_mask_tsupport (χ : P →L[ℝ] Q) (g : Geometry) (k : Frequency)
-    {S : Set Q} (hS : IsClosed S) {r L c : ℝ} (hc : 0 < c) {mask : Q × Plane → ℝ}
-    (hm : support mask ⊆ S ×ˢ ActualGaussianCoverage.sourceCell r L 1) :
-    tsupport (fun x : P × Plane => mask
-      (χ x.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k x.2))) ⊆
-      ActualGaussianCoverage.sourceRegion (χ ⁻¹' S) g r L c :=
-  closure_minimal (transported_mask_support χ g k hc hm) (transported_carrier_closed χ g hS r L c)
 
-theorem transported_mask_zero_germ (χ : P →L[ℝ] Q) (g : Geometry) (k : Frequency)
-    {S : Set Q} (hS : IsClosed S) {r L c : ℝ} (hc : 0 < c) {mask : Q × Plane → ℝ}
-    (hm : support mask ⊆ S ×ˢ ActualGaussianCoverage.sourceCell r L 1)
-    {x : P × Plane} (hx : x ∉ ActualGaussianCoverage.sourceRegion (χ ⁻¹' S) g r L c) :
-    (fun y : P × Plane => mask
-      (χ y.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k y.2))) =ᶠ[𝓝 x] fun _ => 0 :=
-  zero_germ_of_support (transported_carrier_closed χ g hS r L c)
-    (transported_mask_support χ g k hc hm) hx
 
 end TransportedMask
 

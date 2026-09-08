@@ -42,12 +42,6 @@ theorem initialCoordinates_initial (u : TimeLp T E) :
     initialCoordinates T hT Q c hc hQ u 0 = 0 := by
   simp only [initialCoordinates, initialRealPrimitive_initial, map_zero]
 
-theorem initialCoordinateField_ae (u : TimeLp T E) :
-    (initialCoordinateField T hT Q c hc hQ u : ℝ → U) =ᵐ[timeMeasure T]
-      initialCoordinates T hT Q c hc hQ u :=
-  fieldProduct_ae T hT (frameLeftInversePath T Q c hc hQ)
-    (initialPrimitiveTimeLp T hT u) (initialRealPrimitive T u)
-    (initialPrimitiveTimeLp_ae T hT u)
 
 variable (hd : ∀ t : Icc (0 : ℝ) T,
   HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)

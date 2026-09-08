@@ -85,9 +85,5 @@ theorem pressurePath_weight_eq :
   rw [pressurePath_eq_sourcePressure, velocity_weight_eq, include_weight, include_weight]
   exact sourcePressure_weight P M m cm hcm hm g _ _
 
-theorem normalized_full_pressure_eq :
-    normalize g hg (pressurePath P S hS T hT Q Q₁ c hc hQ (weight g f) a₀ M m cm hcm hm) =
-      normalizedPressure P S hS T hT Q Q₁ c hc hQ f a₀ M m cm hcm hm g hg := by
-  rw [pressurePath_weight_eq, normalize_weight]
 
 end EulerSourceCylinderEquation

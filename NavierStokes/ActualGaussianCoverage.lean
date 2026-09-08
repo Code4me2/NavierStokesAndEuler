@@ -26,10 +26,6 @@ theorem normalized_clock {L c : ℝ} (hL : L ≠ 0) (_hc : c ≠ 0) (v : ℝ) :
     c * v / L = v / (L / c) := by
   field_simp
 
-theorem slotCutoff_clock {L c : ℝ} (hL : L ≠ 0) (hc : c ≠ 0) (v : ℝ) :
-    GaussianTailFlat.slotCutoff L (c * v) = GaussianTailFlat.slotCutoff (L / c) v := by
-  unfold GaussianTailFlat.slotCutoff
-  rw [normalized_clock hL hc]
 
 noncomputable def gaussianRate (lam u : ℝ) : ℝ :=
   u * GaussianEnvelope.referenceMinSlope lam u / 2
@@ -158,8 +154,6 @@ noncomputable def referenceWindow (r L : ℝ) (hr : 0 < r) (hL : 0 < L) :
   padding := padding r L
   padding_pos := padding_pos hr hL
 
-theorem referenceWindow_core (r L : ℝ) (hr : 0 < r) (hL : 0 < L) :
-    (referenceWindow r L hr hL).core = WaveEnvelopeTransport.rectangle r L := rfl
 
 /-- This cutoff is separate from every dyadic, radial and slow source
 mask.  The outer padding is transported together with the Gaussian. -/
@@ -892,35 +886,6 @@ section CurrentSourceJets
 variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   {D : PhaseJetBounds.Domain (Label × ℕ) PhaseCalculus.Slow}
 
-/-- The local source estimate consumed above follows from the actual
-current harmonic residual classes, with the angular variable inserted
-by the literal source-family definition. -/
-theorem source_jets_of_residual_classes
-    (F : PhaseConstruction D) (clock : ActualSignedControl.PositiveScale Label)
-    (reference : Label → ℕ → Geometry) (gap : Label → ℕ → ℕ) (r : Label → ℕ → ℝ)
-    (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
-    (ctx : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : Label → CorrectionState.HarmonicBlock (P × Plane))
-    (G A : Label → HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ) (α : ℝ)
-    (h : ∀ i : Fin 3, LabelSumBounds.UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (ActualParticularControl.groupedEnvelope
-        (ScaledActualParticularControl.geometry reference gap clock) r
-        (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)) α
-      (fun l n x => (HarmonicResidual.residualBlock ctx u (b l) (G l) (A l)).velocity n i j x)) :
-    UniformLocalJets (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun l n x => Real.sqrt (s.zeta x.1.1) * fieldEnvelope F clock reference gap r l n x) α
-      (analyticPatches F clock reference gap r s χ φ)
-      (fun l n _ => ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n) := by
-  have hs := ActualParticularControl.sourceFamily_uniform s
-    (ScaledActualParticularControl.geometry reference gap clock) r
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
-    α ctx u b G A (fun _ => j) h
-  refine ⟨fun l n _ x hx _ => (hs.smooth l n).contDiffAt
-    ((CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).isOpen_domain.mem_nhds hx), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hs.bounds m
-  exact ⟨C, hC, p, fun l n _ x hx _ k hk => hb l n x hx k hk⟩
 
 end CurrentSourceJets
 
@@ -929,23 +894,7 @@ end CurrentSourceJets
 noncomputable def referenceCutoff (r L : ℝ) (hr : 0 < r) (hL : 0 < L) (z : Plane) : ℝ :=
   (referenceWindow r L hr hL).cutoff z * GaussianTailFlat.slotCutoff L z.2
 
-theorem nativeCutoff_eq_reference_transport {r L c : ℝ} (hr : 0 < r) (hL : 0 < L) :
-    nativeCutoff r L hr hL c = referenceCutoff r L hr hL ∘
-      CopySolveCompatibility.nativeTimeMap 0 c := by
-  funext z
-  simp only [nativeCutoff, referenceCutoff, Function.comp_def,
-    CopySolveCompatibility.nativeTimeMap, zero_add]
 
-theorem referenceCutoff_support {r L : ℝ} (hr : 0 < r) (hL : 0 < L) :
-    support (referenceCutoff r L hr hL) ⊆ univ ×ˢ Icc 0 L := by
-  intro z hz
-  have hg : GaussianTailFlat.profile (z.2 / L) ≠ 0 := (mul_ne_zero_iff.mp hz).2
-  have hd : |z.2 / L - 1 / 2| < 1 / 3 := by
-    exact lt_of_not_ge (fun h => hg (GaussianTailFlat.profile_zero h))
-  have hlo : 0 ≤ z.2 / L := by linarith [(abs_lt.mp hd).1]
-  have hhi : z.2 / L ≤ 1 := by linarith [(abs_lt.mp hd).2]
-  exact ⟨mem_univ _, by simpa only [zero_mul] using (le_div_iff₀ hL).mp hlo,
-    (div_le_one hL).mp hhi⟩
 
 theorem mem_sourceCell_clock {r L c : ℝ} (hc : 0 < c) (z : Plane) :
     z ∈ sourceCell r L c ↔
@@ -965,9 +914,6 @@ variable {D h : ℝ} {vr vt : Plane}
 theorem actual_slot_length_pos (m : ℕ) : 0 < ChartScales.slotLength sys.radius h m :=
   div_pos (mul_pos (by norm_num) sys.radius_pos) (ChartScales.timeCoefficient_pos h m)
 
-theorem referenceWindow_eq_actual (m : ℕ) :
-    referenceWindow sys.radius (ChartScales.slotLength sys.radius h m) sys.radius_pos
-      (actual_slot_length_pos sys m) = ActualSignedGeometry.clockWindow sys m := rfl
 
 /-- The actual slot system supplies the geometric injectivity needed
 for finite periodization cells, including their outer padding. -/
@@ -980,15 +926,6 @@ theorem actual_outer_injective (hh : 0 ≤ h) {l : SlotColoring.Label} (hl : 4 �
           (actual_slot_length_pos sys l.1)).outer) :=
   ActualSignedGeometry.clockWindow_injective sys hdet hh hl gap
 
-theorem actual_scaled_slot_lower (hh : 0 ≤ h) {m : ℕ} (hm : 4 ≤ m)
-    {c upper : ℝ} (hc : 0 < c) (hcU : c ≤ upper) :
-    (2 * sys.radius / upper) * ChartScales.S m ≤ ChartScales.slotLength sys.radius h m / c := by
-  have hU := hc.trans_le hcU
-  calc
-    _ = (2 * sys.radius * ChartScales.S m) / upper := by ring
-    _ ≤ ChartScales.slotLength sys.radius h m / upper :=
-      div_le_div_of_nonneg_right (ChartScales.slotLength_bounds sys.radius h sys.radius_pos.le hh hm).1 hU.le
-    _ ≤ _ := div_le_div_of_nonneg_left (actual_slot_length_pos sys m).le hc hcU
 
 end ActualWindow
 
@@ -1064,10 +1001,6 @@ theorem actualMask_tsupport (L : PrimaryGeometryAssembly.Index W a.N) :
     tsupport (ActualSignedGeometry.nativeCutoff H v a L) ⊆ actualSourceCore H v a L :=
   closure_minimal (actualMask_support H v a hr0 L) (actualSourceCore_closed H v a L)
 
-include hr0 in
-theorem actualMask_jet_support (L : PrimaryGeometryAssembly.Index W a.N) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (ActualSignedGeometry.nativeCutoff H v a L)) ⊆ actualSourceCore H v a L :=
-  (tsupport_iteratedFDeriv_subset (𝕜 := ℝ) m).trans (actualMask_tsupport H v a hr0 L)
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
@@ -1094,15 +1027,6 @@ theorem actualMask_transported_tsupport (L : PrimaryGeometryAssembly.Index W a.N
   closure_minimal (actualMask_transported_support H v a hr0 L χ g k hc)
     (sourceRegion_closed ((actualSlowCore_closed H v a L).preimage χ.continuous) _ _ _ _)
 
-include hr0 in
-theorem actualMask_transported_jet_support (L : PrimaryGeometryAssembly.Index W a.N)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Geometry) (k : Frequency) {c : ℝ} (hc : 0 < c) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (fun x : P × Plane => ActualSignedGeometry.nativeCutoff H v a L
-      (χ x.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k x.2)))) ⊆
-      sourceRegion (χ ⁻¹' actualSlowCore H v a L) g r0
-        (ChartScales.slotLength r0 profile.data.h (BaseChartJets.cellBand L)) c :=
-  (tsupport_iteratedFDeriv_subset (𝕜 := ℝ) m).trans
-    (actualMask_transported_tsupport H v a hr0 L χ g k hc)
 
 end ActualParametersAndMasks
 
@@ -1257,92 +1181,6 @@ variable [Countable Label] [Nonempty Label]
   (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
   (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
 
-/-- The actual Gaussian error retains precisely the flat `sqrt(zeta)`
-weight at every decay exponent. This companion is suitable for the
-physical local-source bounds; no completed edge extension is assumed. -/
-theorem globalGaussian_weighted_all_gains
-    (frame : Label → ℕ → PrimaryODE.FrameData ((P × ℝ) × ℝ))
-    {α lam0 u0 ell : ℝ} (hlam0 : 0 < lam0) (hu0 : 0 < u0) (hell : 0 < ell)
-    (hlam : ∀ l n, lam0 ≤ F.lam (l,n)) (hu : ∀ l n, F.u (l,n) = u0)
-    (hL : ∀ l n, ell * ChartScales.S n ≤ F.L (l,n))
-    (hinj : ∀ l n, InjOn TorusAverages.quotientPoint
-      ((fun z => (reference l n).center + (reference l n).basis z) ''
-        (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).outer))
-    (S : Label → ℕ → Set P) (hS : ∀ l n, IsClosed (S l n))
-    (hsupport : ∀ l, HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ)
-      (sourceRegions F clock reference gap r S l) (b l) (G l) (A l))
-    (hinside : ∀ l n p, p ∈ s.domain → p ∈ S l n → φ (l,n) (χ p) ∈ D.carrier (l,n))
-    (hreal : ParticularCopyBounds.UniformModalControl
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) α frame
-      (fun l n => realData (tangent l n) (ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-      j (ScaledActualParticularControl.geometry reference gap clock)
-      (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
-      (analyticPatches F clock reference gap r s χ φ))
-    (himag : ParticularCopyBounds.UniformModalControl
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) α frame
-      (fun l n => imagData (tangent l n) (ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-      j (ScaledActualParticularControl.geometry reference gap clock)
-      (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
-      (analyticPatches F clock reference gap r s χ φ))
-    (hsource : UniformLocalJets
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun l n x => Real.sqrt (s.zeta x.1.1) * fieldEnvelope F clock reference gap r l n x) α
-      (analyticPatches F clock reference gap r s χ φ)
-      (fun l n _ => ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-    (dirs : LinearWaveBounds.GraphDirections ((P × ℝ) × Plane))
-    (hfast : BandBound (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) 0 dirs.fastScale)
-    (scales : GaussianTailFlat.BandScaleControl (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)))
-    (β : ℝ) :
-    LabelSumBounds.UniformClass (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun _ _ x => Real.sqrt (s.zeta x.1.1)) β
-      (fun l => (data F clock reference gap r hr base tangent ctx u b G A j l).globalGaussian dirs) := by
-  have hw l n x (_ : x ∈ (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).domain) :=
-    fieldEnvelope_nonneg F clock reference gap r l n x
-  have he l n k x (_ : x ∈ (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).domain)
-      (hx : x ∈ analyticPatches F clock reference gap r s χ φ l n k) :=
-    (fieldEnvelope_eq F clock reference gap r hr s χ φ hinj hx).ge
-  have hamp := complex_amplitude_uniform_jets tangent
-    (fun l => ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j)
-    (ScaledActualParticularControl.geometry reference gap clock)
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.length_pos F clock)
-    (ScaledActualParticularControl.envelope F clock) (fieldEnvelope F clock reference gap r)
-    frame j (analyticPatches F clock reference gap r s χ φ) hreal himag hw he
-  have hcomp : LocalizedGaussianBounds.UniformComplementJets
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun _ _ x => Real.sqrt (s.zeta x.1.1)) β
-      (fun l => (cells F clock reference gap r hr hinj l).carrier)
-      (fun l => (data F clock reference gap r hr base tangent ctx u b G A j l).source) := by
-    apply LocalizedGaussianBounds.UniformComplementJets.of_zero_germs
-    intro l n x hx hn
-    apply data_source_zero_germ F clock reference gap r hr base tangent ctx u b G A j
-      s S hS hsupport l n hx
-    intro hreg
-    obtain ⟨k,hk⟩ := mem_iUnion.mp hreg.2
-    exact hn k (sourceCell_subset_outer (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hk)
-  apply uniform_globalGaussian_weighted_from_supported_native
-    (data F clock reference gap r hr base tangent ctx u b G A j)
-    (cells F clock reference gap r hr hinj)
-    (data_cutoff_support F clock reference gap r hr base tangent ctx u b G A j)
-    dirs (analyticPatches F clock reference gap r s χ φ) hw
-    (data_cutoff_jets F clock reference gap r hr base tangent ctx u b G A j s χ φ hu0 hu
-      ⟨hreal.constant, hreal.constant_ge_one, hreal.coordinate_power, hreal.coordinate_bound⟩)
-    hfast hamp hsource scales
-    (fun l n k x => theta F clock l n
-      ((ScaledActualParticularControl.geometry reference gap clock l n).coordinates k x.2).2)
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.length_pos F clock)
-    (ell / clock.upper) (div_pos hell (zero_lt_one.trans_le clock.upper_one))
-    (length_uniform_lower F clock hL)
-    (mul_pos (gaussianRate_pos hlam0 hu0) clock.lower_pos)
-    ?_ ?_ ?_ β
-    hcomp
-  · intro l n k x hx hc
-    rw [fieldEnvelope_eq F clock reference gap r hr s χ φ hinj hc]
-    exact envelope_uniform_bound F clock hlam0 hu0 hlam hu l n ⟨hc.1.2.2.1.le, hc.1.2.2.2.le⟩
-  · intro l n k x hx hc hm
-    exact Or.inl (data_central F clock reference gap r hr base tangent ctx u b G A j s χ φ l n k hc hm)
-  · intro l n k x hx hk hn
-    exact data_outside F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport
-      χ φ hinside hinj l n k hx hk hn
 
 end ActualWeighted
 

@@ -541,12 +541,6 @@ theorem field_nonconstant (c : Coefficients D) (k : ℝ) (Φ : D → ℝ)
     field (nonconstant c) k Φ kp p = field c k Φ kp p - c 0 p.1 := by
   rw [nonconstant_eq_sub, field_sub, field_constant]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem angularMean_nonconstant (c : Coefficients D) (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) (x : D) :
-    angularMean (fun θ => field (nonconstant c) k Φ kp (x, θ)) = 0 := by
-  rw [angularMean_field _ k Φ hkp x]
-  simp [nonconstant]
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem nonconstant_conjugate {c : Coefficients D} (hc : ConjugateSymmetric c) :
@@ -1160,13 +1154,6 @@ theorem LabelData.waveResidualCoefficients_band (d : LabelData D) (g : Frame D)
     ∀ i, BandLimited (d.waveResidualCoefficients g B M i) (max (N + N) E) :=
   fun i => band_nonconstant (d.residualCoefficients_band g B M hu hp hg ha i)
 
-theorem LabelData.waveResidualCoefficients_values (d : LabelData D) (g : Frame D)
-    (B M : D → ComplexVector) {N E : ℕ}
-    (hu : ∀ i, BandLimited (d.velocity i) N) (hp : BandLimited d.pressure N)
-    (hg : ∀ i, BandLimited (d.gaussian i) E) (ha : ∀ i, BandLimited (d.aliasError i) E)
-    (i : Fin 3) (j : ℤ) (hj : j ∈ (d.waveResidualCoefficients g B M i).support) :
-    j ≠ 0 ∧ j.natAbs ≤ max (N + N) E :=
-  ⟨nonconstant_support hj, d.waveResidualCoefficients_band g B M hu hp hg ha i j hj⟩
 
 theorem LabelData.residualCoefficients_conjugate (d : LabelData D) (g : Frame D)
     (B M : D → ComplexVector) (i : Fin 3) : ConjugateSymmetric (d.residualCoefficients g B M i) :=
@@ -1189,11 +1176,6 @@ theorem LabelData.waveResidualCoefficients_smooth {U : Set D} (hU : IsOpen U)
     (fun i => smoothCoefficients_constant ((hB i).add (hM i))) hd.velocity hd.pressure i).sub
       (hgaussian i)).sub (halias i)).realCoefficients.nonconstant
 
-theorem LabelData.extract_residual (d : LabelData D) (g : Frame D)
-    (B M : D → ComplexVector) (hkp : d.angularFrequency ≠ 0) (i : Fin 3) (j : ℤ) (x : D) :
-    extract (field (d.residualCoefficients g B M i) d.frequency d.phase d.angularFrequency)
-      d.frequency d.phase d.angularFrequency j x = d.residualCoefficients g B M i j x :=
-  extract_field _ _ _ hkp _ _
 
 noncomputable def realAngularMean (f : ℝ → ℝ) : ℝ :=
   (∫ θ in (0 : ℝ)..period, f θ) / period
@@ -1380,12 +1362,6 @@ theorem ofBlock_tsupport_wave (b : CorrectionState.HarmonicBlock D)
     rw [ofBlock_wave, h]
     rfl
 
-theorem ofBlock_regular {U : Set D} (b : CorrectionState.HarmonicBlock D)
-    (gaussian aliasError : BlockCoefficients D) (n : ℕ)
-    (hΦ : ContDiffOn ℝ ∞ (b.phase n) U)
-    (hv : ∀ i, SmoothCoefficients U (b.velocity n i)) (hp : SmoothCoefficients U (b.pressure n)) :
-    (ofBlock b gaussian aliasError n).Regular U :=
-  ⟨hΦ, fun i => (hv i).realCoefficients, hp.realCoefficients⟩
 
 /-- Only representations of the stored fields are inputs; no residual identity is assumed.
 The finite label set may vary with the band. -/
@@ -1539,58 +1515,10 @@ theorem residualBlock_zero_mode (c : CorrectionState.Context D) (s : CorrectionS
     (residualBlock c s b gaussian aliasError).velocity n i 0 = 0 :=
   Finsupp.erase_same
 
-theorem residualBlock_smooth {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : CorrectionState.Context D} {s : CorrectionState.State D} {labels : ℕ → Finset ι}
-    {blocks : ι → CorrectionState.HarmonicBlock D} {gaussian aliasError : ι → BlockCoefficients D} {n : ℕ}
-    (h : ExtractionRegular U c s labels blocks gaussian aliasError n) {l : ι} (hl : l ∈ labels n) :
-    ∀ i, SmoothCoefficients U ((residualBlock c s (blocks l) (gaussian l) (aliasError l)).velocity n i) :=
-  LabelData.waveResidualCoefficients_smooth hU h.frame _ _ h.base h.mean _
-    (h.blocks l hl) (h.gaussian l hl) (h.aliasError l hl)
 
-theorem residualBlock_values (c : CorrectionState.Context D) (s : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (gaussian aliasError : BlockCoefficients D)
-    {N E : ℕ} (hb : b.BandLimited N)
-    (hg : ∀ n i, BandLimited (gaussian n i) E) (ha : ∀ n i, BandLimited (aliasError n i) E)
-    (n : ℕ) (i : Fin 3) (j : ℤ)
-    (hj : j ∈ ((residualBlock c s b gaussian aliasError).velocity n i).support) :
-    j ≠ 0 ∧ j.natAbs ≤ max (N + N) E :=
-  ⟨nonconstant_support hj, (residualBlock_band c s b gaussian aliasError hb hg ha).1 n i j hj⟩
 
-/-- A fixed stage can have large harmonic values, but the next quadratic stage
-has an explicit bound independent of band and label count. -/
-theorem residualBlock_stage_band (c : CorrectionState.Context D) (s : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (gaussian aliasError : BlockCoefficients D)
-    (stage : ℕ) (hb : b.BandLimited (2 ^ stage))
-    (hg : ∀ n i, BandLimited (gaussian n i) (2 ^ (stage + 1)))
-    (ha : ∀ n i, BandLimited (aliasError n i) (2 ^ (stage + 1))) :
-    (residualBlock c s b gaussian aliasError).BandLimited (2 ^ (stage + 1)) := by
-  have he : 2 ^ stage + 2 ^ stage = 2 ^ (stage + 1) := by omega
-  simpa only [he, max_self] using residualBlock_band c s b gaussian aliasError hb hg ha
 
-theorem residualBlock_extract (c : CorrectionState.Context D) (s : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (gaussian aliasError : BlockCoefficients D)
-    (n : ℕ) (hkp : b.angularFrequency n ≠ 0) (i : Fin 3) (j : ℤ) (x : D) :
-    extract (fun y => ((residualBlock c s b gaussian aliasError).oscillation n y i : ℂ))
-      (b.frequency n) (b.phase n) (b.angularFrequency n) j x =
-        (residualBlock c s b gaussian aliasError).velocity n i j x := by
-  have he : (fun y => ((residualBlock c s b gaussian aliasError).oscillation n y i : ℂ)) =
-      field ((residualBlock c s b gaussian aliasError).velocity n i)
-        (b.frequency n) (b.phase n) (b.angularFrequency n) := by
-    funext y
-    exact field_real (residualBlock_conjugate c s b gaussian aliasError n i) _ _ _ _
-  rw [he]
-  exact extract_field _ _ _ hkp _ _
 
-theorem residualBlock_mean_zero (c : CorrectionState.Context D) (s : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (gaussian aliasError : BlockCoefficients D)
-    (n : ℕ) (hkp : b.angularFrequency n ≠ 0) (i : Fin 3) (x : D) :
-    CorrectionState.angularAverage
-      (fun m y => (residualBlock c s b gaussian aliasError).oscillation m y i) n x = 0 := by
-  change realAngularMean (fun θ => (field
-    ((residualBlock c s b gaussian aliasError).velocity n i)
-    (b.frequency n) (b.phase n) (b.angularFrequency n) (x, θ)).re) = 0
-  rw [realAngularMean_field _ _ _ hkp x, residualBlock_zero_mode]
-  rfl
 
 /-- Reconstruction of the full differentiated residual, with every excluded error restored once. -/
 theorem stateFullResidual_reconstructed {ι : Type*} {U : Set D} (hU : IsOpen U)

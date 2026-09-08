@@ -187,11 +187,6 @@ theorem within_parameter_eq {H : Point → ℝ}
   (ProfileHistories.parameterPartial_hasDerivAt interiorDomain hH hp).hasDerivWithinAt.derivWithin
     (uniqueDiffOn_Icc (by norm_num) p.2 (interior_to_band hp.2))
 
-theorem ordinary_parameter_eq {H : Point → ℝ}
-    (hH : ContDiffOn ℝ ∞ H interiorDomain.carrier)
-    {p : Point} (hp : p ∈ interiorDomain.carrier) :
-    deriv (fun eta => H (p.1, eta)) p.2 = ProfileHistories.parameterPartial H p :=
-  (ProfileHistories.parameterPartial_hasDerivAt interiorDomain hH hp).deriv
 
 theorem history_parameter_mixed_within {H G : Point → ℝ}
     (hH : ContDiffOn ℝ ∞ H interiorDomain.carrier)

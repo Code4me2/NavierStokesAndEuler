@@ -64,12 +64,6 @@ theorem weightedForcing_norm (hg₀ : g ⟨0,le_rfl,hT⟩ = 1) (C : ℝ) (hC : 0
 def weightedSolution (f : C(Icc (0 : ℝ) T,E)) (a₀ : E) : C(Icc (0 : ℝ) T,E) :=
   normalize g hg (U.solution (weight g f) a₀)
 
-/-- The normalized solution is still exactly the two actual data maps. -/
-theorem weightedSolution_eq (f : C(Icc (0 : ℝ) T,E)) (a₀ : E) :
-    U.weightedSolution g hg f a₀ = U.weightedInitial g hg a₀ + U.weightedForcing g hg f := by
-  unfold weightedSolution
-  rw [U.solution_eq_operators, map_add]
-  rfl
 
 variable {D : C(Icc (0 : ℝ) T,E →L[ℝ] E)} (V : Evolution T hT D)
 

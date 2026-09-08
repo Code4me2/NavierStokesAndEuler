@@ -764,62 +764,8 @@ theorem dyadic_actual_bounds {ι : Type*} {D : Domain ι Slow}
     (fun i => ChartScales.Q (band i)) (fun i => ChartScales.Q_pos (band i))
     (fun i => ChartScales.Q_le_one (band i)) (fun i => hN (band i) (hband i))
 
-/-- The already selected enlarged-bundle schedule of the nominal base
-instantiates the chart theorem without any additional schedule choice. -/
-theorem nominal_estimates {ι : Type*} {D : Domain ι Slow}
-    {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
-    {r M qlo qhi lo hi : ℝ}
-    (hr : 0 < r) (hM : 1 ≤ M) (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (hhi : hi ≤ ConstructedSlowBase.scaleUpper W upper)
-    (H : GeometryBounds D F.data.h r M qlo qhi lo hi)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    Estimates D Q (ConstructedSlowBase.nominalScales W c hc upper B)
-      F.data.h W.axis.normalization (AssembledSlowBase.nominalCoefficients W) :=
-  actual_estimates (ConstructedSlowBase.height_pos W) (ConstructedSlowBase.height_lt_half W)
-    hr hM hqlo hqhi hlo H (AssembledSlowBase.nominalCoefficients_smooth W)
-    (ConstructedSlowBase.nominalScales_admissible_on W c hc upper B hlo.le hhi)
-    Q hQ hQ1 hsmall
 
-/-- The same conclusion for the actual solved finite modulation and its
-single common weighted/ordinary Borel schedule. -/
-theorem modulated_estimates {ι : Type*} {D : Domain ι Slow}
-    {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {ld : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness ld)
-    (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
-    {r M qlo qhi lo hi : ℝ}
-    (hr : 0 < r) (hM : 1 ≤ M) (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (hhi : hi ≤ ConstructedSlowBase.scaleUpper W upper)
-    (H : GeometryBounds D F.data.h r M qlo qhi lo hi)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    Estimates D Q (ConstructedSlowBase.Modulated.scales v c hc upper B)
-      F.data.h W.axis.normalization (ConstructedSlowBase.Modulated.coefficients v) := by
-  have ha := ConstructedSlowBase.admissibleScales_mono
-    (ConstructedSlowBase.Modulated.scales_admissible v c hc upper B)
-    (show SlowBorelBase.innerBox lo hi ⊆
-      SlowBorelBase.innerBox 0 (ConstructedSlowBase.scaleUpper W upper) from
-        fun w hw => ⟨⟨hlo.le.trans hw.1.1, hw.1.2.trans hhi⟩, hw.2⟩)
-  exact actual_estimates (ConstructedSlowBase.height_pos W) (ConstructedSlowBase.height_lt_half W)
-    hr hM hqlo hqhi hlo H (ConstructedSlowBase.Modulated.coefficients_smooth v) ha Q hQ hQ1 hsmall
 
-/-- A direct paired all-jet form, with constants uniform over every index
-of the chart family. -/
-theorem Estimates.uniform_errors {ι : Type*} {D : Domain ι Slow} {Q : ι → ℝ}
-    {a : ℕ → ℕ} {h C : ℝ} {d : SlowBorelBase.Coefficients}
-    (H : Estimates D Q a h C d) (N : ℕ) :
-    ∃ K : ℝ, 1 ≤ K ∧ ∀ i x, x ∈ D.carrier i → ∀ j, j ≤ N →
-      ‖iteratedFDeriv ℝ j (fun p => frequency a h C d (Q i) p - leadingFrequency h C d p) x‖ ≤
-        K * Q i ^ (2 * h) ∧
-      ‖iteratedFDeriv ℝ j (fun p => axial a h d (Q i) p - leadingAxial h d p) x‖ ≤
-        K * Q i ^ (2 * h) := by
-  obtain ⟨CF, hCF, hF⟩ := envelope_unit_bound H.frequency_error N
-  obtain ⟨CG, hCG, hG⟩ := envelope_unit_bound H.axial_error N
-  refine ⟨max CF CG, hCF.trans (le_max_left _ _), fun i x hx j hj => ?_⟩
-  have hw := H.frequency_error.nonneg i x hx
-  exact ⟨(hF i x hx j hj).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hw),
-    (hG i x hx j hj).trans (mul_le_mul_of_nonneg_right (le_max_right _ _) hw)⟩
 
 /-- Every actual positive active label above a single fixed band. -/
 noncomputable def CellIndex (h lo hi : ℝ) (N : ℕ) :=
@@ -843,15 +789,7 @@ theorem positiveCellDomain_convex (h lo hi : ℝ) (N : ℕ) (L : CellIndex h lo 
     Convex ℝ ((positiveCellDomain h lo hi N).carrier L) :=
   PositiveRepresentatives.positiveCell_convex _ _
 
-theorem positiveCellDomain_representative (h lo hi : ℝ) (N : ℕ) (L : CellIndex h lo hi N) :
-    PositiveRepresentatives.representative (PrimaryRepresentatives.referenceCompact h lo hi) L.val ∈
-      (positiveCellDomain h lo hi N).carrier L :=
-  PositiveRepresentatives.representative_mem_cell _ L.val
 
-theorem positiveCellDomain_covers (h lo hi : ℝ) (N : ℕ) (L : CellIndex h lo hi N) :
-    PrimaryRepresentatives.gridBox L.val.val.1 L.val.val.2 2 ∩ PositiveRepresentatives.positiveTime ⊆
-      (positiveCellDomain h lo hi N).carrier L :=
-  PositiveRepresentatives.enlarged_positive_subset_cell L.val.property.1 _
 
 /-- Full actual-input conclusion. The fixed annular profile and one
 admissible Borel schedule give all-order estimates and a single local-base
@@ -900,35 +838,5 @@ theorem exists_actual_positive_charts {a : ℕ → ℕ} {h C lo hi : ℝ}
   exact he.localBaseBounds hh.le (fun L => ChartScales.Q_pos (cellBand L))
     (fun L => ChartScales.Q_le_one (cellBand L)) (positiveCellDomain_convex h lo hi N)
 
-/-- Actual modulated base, actual common schedule, and actual positive
-active cells, combined in one theorem. The only annular restriction is
-that the selected schedule controls the enlarged fixed inner box. -/
-theorem exists_modulated_positive_charts
-    {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {ld : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness ld)
-    (c : ℝ) (hc : 0 < c) (upper : ℝ) (B0 : ℕ)
-    {lo hi : ℝ} (hlo : 0 < lo) (hhi : lo ≤ hi)
-    (hbox : 2 * hi ≤ ConstructedSlowBase.scaleUpper W upper) (N0 : ℕ) :
-    let a := ConstructedSlowBase.Modulated.scales v c hc upper B0
-    let d := ConstructedSlowBase.Modulated.coefficients v
-    ∃ N : ℕ, N0 ≤ N ∧
-      Estimates (positiveCellDomain F.data.h lo hi N)
-        (fun L => ChartScales.Q (cellBand L)) a F.data.h W.axis.normalization d ∧
-      ∃ B : ℝ, 1 ≤ B ∧ ∀ L : CellIndex F.data.h lo hi N,
-        PhaseEstimates.LocalBaseBounds
-          (frequency a F.data.h W.axis.normalization d (ChartScales.Q (cellBand L)))
-          (axial a F.data.h d (ChartScales.Q (cellBand L)))
-          (leadingFrequency F.data.h W.axis.normalization d) (leadingAxial F.data.h d)
-          ((positiveCellDomain F.data.h lo hi N).carrier L) B
-          (ChartScales.epsilon F.data.h (cellBand L)) := by
-  dsimp only
-  have ha := ConstructedSlowBase.admissibleScales_mono
-    (ConstructedSlowBase.Modulated.scales_admissible v c hc upper B0)
-    (show SlowBorelBase.innerBox (lo / 2) (2 * hi) ⊆
-      SlowBorelBase.innerBox 0 (ConstructedSlowBase.scaleUpper W upper) from
-      fun w hw => ⟨⟨(half_pos hlo).le.trans hw.1.1, hw.1.2.trans hbox⟩, hw.2⟩)
-  exact exists_actual_positive_charts (ConstructedSlowBase.height_pos W)
-    (ConstructedSlowBase.height_lt_half W) hlo hhi
-    (ConstructedSlowBase.Modulated.coefficients_smooth v) ha N0
 
 end NavierStokes.BaseChartJets

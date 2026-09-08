@@ -32,11 +32,6 @@ theorem initialDataLimit_support
   change tsupport ((initialBase P).field+tail.field) ⊆ Metric.closedBall 0 2
   exact (tsupport_add _ _).trans (union_subset hbase htail)
 
-theorem initialDataLimit_compact
-    (hbase : tsupport (initialBase P).field ⊆ Metric.closedBall 0 2) :
-    HasCompactSupport (initialDataLimit P hq hB).field :=
-  (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _)
-    (initialDataLimit_support P hq hB hbase)
 
 theorem initialDataLimit_support_of_physical
     (hbase : tsupport (fun x => (P 1).state.evolution.velocity (0,x)) ⊆ Metric.closedBall 0 2) :

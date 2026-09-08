@@ -92,19 +92,6 @@ theorem exterior_zero
   have hg := exterior_zero_germs D Hm ht hq he
   exact ⟨hg.1.eq_of_nhds, hg.2.eq_of_nhds⟩
 
-/-- The direct angular-field constructor used for both angular velocity and
-stream potentials retains the same exact exterior zero. -/
-theorem actualAngularData_exterior
-    (D : CoherentFamily h degree N Δ standardRegion.carrier ℝ)
-    (Hm : GaugeMomentBalances.MovingField standardRegion commonGauge.radial.inner
-      commonGauge.radial.outer D.native)
-    (qbig : ℝ) (hbound : qbig ≤ ChartScales.Q N)
-    {w : SpaceTime} (ht : w ∈ preterminal)
-    (hq : physicalQ h w < qbig) (he : w ∉ ActualPolarCoverage.active) :
-    DirectAngularDiagonal.angularField
-      (ActualMeanStageData.actualAngularData D Hm qbig hbound).scalar w = 0 := by
-  rw [ActualMeanStageData.actualAngularData_field]
-  exact (exterior_zero D Hm ht (hq.le.trans hbound) he).2
 
 end Support
 
@@ -128,15 +115,7 @@ theorem initialPressure_exterior :
       (initialPressureFamily B N0 N).angularField w = 0 :=
   exterior_zero (initialPressureFamily B N0 N) (initial_pressure_moving B N0) ht hq he
 
-theorem initialTemporal_exterior :
-    (initialTemporalFamily B N0 N).field w = 0 ∧
-      (initialTemporalFamily B N0 N).angularField w = 0 :=
-  exterior_zero (initialTemporalFamily B N0 N) (initialTemporal_moving B N0) ht hq he
 
-theorem initialRank_exterior :
-    (initialRankFamily B N0 N).field w = 0 ∧
-      (initialRankFamily B N0 N).angularField w = 0 :=
-  exterior_zero (initialRankFamily B N0 N) (initialRank_moving B N0) ht hq he
 
 /-- The full initialized stream is the literal temporal-plus-rank stream. -/
 theorem initialStream_exterior :
@@ -166,17 +145,7 @@ private theorem seed_reconstructed :
 
 include ht hq he
 
-theorem cycleAngular_exterior :
-    ((initialCycleData H).angularFamily j).field w = 0 ∧
-      ((initialCycleData H).angularFamily j).angularField w = 0 :=
-  exterior_zero ((initialCycleData H).angularFamily j)
-    ((initialCycleData H).primitives j).mean.angular ht hq he
 
-theorem cyclePressure_exterior :
-    ((initialCycleData H).pressureFamily j).field w = 0 ∧
-      ((initialCycleData H).pressureFamily j).angularField w = 0 :=
-  exterior_zero ((initialCycleData H).pressureFamily j)
-    ((initialCycleData H).pressure_moving seed_reconstructed j) ht hq he
 
 theorem cycleAngularIncrement_exterior :
     ((initialCycleData H).angularIncrementFamily j).field w = 0 ∧
@@ -190,17 +159,7 @@ theorem cyclePressureIncrement_exterior :
   exterior_zero ((initialCycleData H).pressureIncrementFamily j)
     ((initialCycleData H).pressureIncrement_moving seed_reconstructed j) ht hq he
 
-theorem cycleTemporal_exterior :
-    ((initialCycleData H).temporalFamily j).field w = 0 ∧
-      ((initialCycleData H).temporalFamily j).angularField w = 0 :=
-  exterior_zero ((initialCycleData H).temporalFamily j)
-    ((initialCycleData H).temporal_moving j) ht hq he
 
-theorem cycleRank_exterior :
-    ((initialCycleData H).rankFamily j).field w = 0 ∧
-      ((initialCycleData H).rankFamily j).angularField w = 0 :=
-  exterior_zero ((initialCycleData H).rankFamily j)
-    ((initialCycleData H).rank_moving j) ht hq he
 
 theorem cycleStream_exterior :
     ((initialCycleData H).streamFamily j).field w = 0 ∧

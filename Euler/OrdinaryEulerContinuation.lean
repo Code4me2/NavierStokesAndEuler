@@ -121,16 +121,6 @@ theorem gradientIntegral_agrees (S T : ℝ) (hS : 0 < S) (hT : 0 < T)
     ‖EulerMeanSobolevBoundedField.finiteField ((L.evolution T hT hTL).velocity ⟨r,hrT⟩).derivative‖
   rw [L.evolution_agrees_at S T hS hT hSL hTL r hrs.1 hrS.2 hrT.2]
 
-theorem gradientIntegral_eventually_large (G : ℝ) :
-    ∃ (R : ℝ) (_hR : 0 < R) (_hRL : R < L.duration),
-      ∀ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration), R ≤ S →
-        G < (L.evolution S hS hSL).gradientIntegral ⟨S,hS.le,le_rfl⟩ := by
-  obtain ⟨R,hR,hRL,t,ht⟩ := L.gradientIntegral_unbounded G
-  refine ⟨R,hR,hRL,?_⟩
-  intro S hS hSL hRS
-  rw [L.gradientIntegral_agrees R S hR hS hRL hSL hRS t] at ht
-  exact ht.trans_le ((L.evolution S hS hSL).gradientIntegral_mono
-    ⟨t,t.property.1,t.property.2.trans hRS⟩ ⟨S,hS.le,le_rfl⟩ (t.property.2.trans hRS))
 
 end FiniteLifespan
 end EulerOrdinarySobolev

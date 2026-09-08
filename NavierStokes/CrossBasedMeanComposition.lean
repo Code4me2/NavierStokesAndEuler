@@ -332,46 +332,6 @@ theorem bandSignedStage_mean_debt_of_cross_defects {ι : Type}
     gaugeWaveStage_cumulative G.gauge c u w q ⟨0,gaussian,0⟩ hu hpressure (by linarith)
   exact ⟨hpressure, hcum, hgain.1, hgain.2.1, hgain.2.2.1, hgain.2.2.2, hdebt⟩
 
-/-- Exact cross identities recover the original signed-stage conclusion
-without the normalized-domain native-selection assumption. -/
-theorem bandSignedStage_mean_debt_of_cross {ι : Type}
-    (G : SignedMeanGain.Geometry)
-    (c : Context Point) (u : State Point)
-    {P : ι → ℕ → Point → ℝ} {σ κ : ℝ}
-    (hσ : 1/5 ≤ σ) (hκ : 0 ≤ κ) (hκsmall : κ ≤ 1/100000)
-    (f : LabelSumBounds.SignedFamily G.strip P (1/2) (17/25)
-      (1/2+σ-κ) (1+σ-2*κ)) (a : SignedMeanGain.Assembly f)
-    (q : OscillatoryScalar Point) (gaussian : Oscillation Point)
-    (hold : u.oscillation = SignedMeanGain.oldField f a)
-    (H : SignedMeanGain.LocalData G c u
-      (SignedMeanGain.tangentField f a + SignedMeanGain.curlField f a) q gaussian)
-    (ho : OperatorBounds G.strip G.operators κ)
-    (hu : CorrectionState.CumulativeBounds G.strip u)
-    (hbase : SmoothTriple (LocalRankDefect.positiveDomain G.region.carrier) c.base)
-    (hm : GaugeDebtIncrement.RegularTriple G.region G.patch.a G.patch.b u.mean)
-    (hW : ∀ i j, GaugeDebtIncrement.Regular G.region G.patch.a G.patch.b (u.covariance i j))
-    (hX : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.incrementTensor f a i j))
-    (hS : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.crossTensor f a i j))
-    (hθ : MeanClass G.strip (1+σ-κ) (u.thetaResidual c))
-    (hz : MeanClass G.strip (1+σ-κ) (u.axialResidual c))
-    (hd : DefectBounds G.slowStrip (σ-κ) c u)
-    (hcrossθ : Agree G.strip.domain (StateMomentBalances.meanBar (crossTensor f a 0 1))
-      (physicalSigma G 2 (u.thetaResidual c)))
-    (hcrossz : Agree G.strip.domain (StateMomentBalances.meanBar (crossTensor f a 0 2))
-      (physicalSigma G 1 (u.axialResidual c))) :
-    let v := SignedMeanGain.waveStage G.gauge c u
-      (SignedMeanGain.tangentField f a + SignedMeanGain.curlField f a) q gaussian
-    MeanClass G.strip (1+σ-2*κ) (v.pressure - u.pressure) ∧
-    CorrectionState.CumulativeBounds G.strip v ∧
-    MeanClass G.strip (1+σ-2*κ) (v.thetaResidual c) ∧
-    MeanClass G.strip (1+σ-2*κ) (v.axialResidual c) ∧
-    MeanClass G.strip (1+σ+17/100) (meanBar (v.thetaResidual c)) ∧
-    MeanClass G.strip (1+σ+17/100) (meanBar (v.axialResidual c)) ∧
-    DefectBounds G.slowStrip (σ-2*κ) c v := by
-  exact bandSignedStage_mean_debt_of_cross_defects G c u hσ hκ hκsmall f a
-    q gaussian hold H ho hu hbase hm hW hX hS hθ hz hd
-    (crossDefect_mem_of_cross G 2 (u.thetaResidual c) (crossTensor f a 0 1) _ hcrossθ)
-    (crossDefect_mem_of_cross G 1 (u.axialResidual c) (crossTensor f a 0 2) _ hcrossz)
 
 section MeanCycle
 variable {ι : Type} (G : SignedMeanGain.Geometry)
@@ -624,77 +584,6 @@ theorem mean_gain_from_waves_of_cross_defects
   exact ⟨hsθ, hsz, ⟨hscum.velocity, hscum.pressure⟩,
     hi, hr, hpmean, ⟨hcum.velocity, hcum.pressure⟩, hdebt, htheta, haxial⟩
 
-/-- The complete cycle needs only one baseline class for each cross defect
-and actual agreement after a fixed band.  Finite-head promotion retains
-its contribution and preserves the original mean/debt gain. -/
-theorem mean_gain_from_waves_of_finite_head
-    (a : SignedMeanGain.Assembly F) (halabels : a.labels = v.labels)
-    {axis : AxisymmetricAlias} (hrep : CycleRepresentation v u axis)
-    (hzero : ∀ l, HarmonicWaveInteraction.ZeroMode (v.blocks l))
-    (hpartzero : ∀ l, HarmonicWaveInteraction.ZeroMode ((ofGeometry G h index axial particular signed r).particularBlock v c u l))
-    (hsold : LabelSumBounds.SupportedOscillations a.slots a.label a.window a.auxiliary G.strip.domain
-      (fun l => (v.blocks l).oscillation))
-    (hspart : LabelSumBounds.SupportedOscillations a.slots a.label a.window a.auxiliary G.strip.domain
-      (fun l => ((ofGeometry G h index axial particular signed r).particularBlock v c u l).oscillation))
-    (hκ : 0 ≤ κ) (hκsmall : κ ≤ 1/100000)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hop : c.operators = G.operators)
-    (ho : OperatorBounds G.strip G.operators κ) (hb : BaseBounds G.strip c.base)
-    (hu : CorrectionState.CumulativeBounds G.strip u)
-    (hfixed : (reconstructState G.gauge c u).pressure = u.pressure)
-    (hmθ : ∀ n z, z ∈ G.region.carrier → radialMoment 2 u.mean.angular n z = 0)
-    (hmz : ∀ n z, z ∈ G.region.carrier → radialMoment 1 u.mean.axial n z = 0)
-    (hθ : MeanClass G.strip (1+σ) (u.thetaResidual c))
-    (hz : MeanClass G.strip (1+σ) (u.axialResidual c))
-    (hd : DefectBounds G.slowStrip σ c u)
-    (hX₁ : ∀ i j, GaugeMomentBalances.MovingField G.region G.patch.a G.patch.b
-      (SignedMeanGain.covarianceIncrement u.oscillation ((ofGeometry G h index axial particular signed r).particularVelocity v c u) i j))
-    (hX₂ : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.incrementTensor F a i j))
-    (hS : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.crossTensor F a i j))
-    {αθ αz : ℝ}
-    (hDθ : MeanClass G.strip αθ
-      (crossDefect G 2 (((ofGeometry G h index axial particular signed r).afterParticular v c u).thetaResidual c)
-        (crossTensor F a 0 1)))
-    (hDz : MeanClass G.strip αz
-      (crossDefect G 1 (((ofGeometry G h index axial particular signed r).afterParticular v c u).axialResidual c)
-        (crossTensor F a 0 2)))
-    (Ncross : ℕ)
-    (htailθ : ∀ n, Ncross ≤ n → ∀ x ∈ G.strip.domain,
-      StateMomentBalances.meanBar (crossTensor F a 0 1) n x =
-        physicalSigma G 2 (((ofGeometry G h index axial particular signed r).afterParticular v c u).thetaResidual c) n x)
-    (htailz : ∀ n, Ncross ≤ n → ∀ x ∈ G.strip.domain,
-      StateMomentBalances.meanBar (crossTensor F a 0 2) n x =
-        physicalSigma G 1 (((ofGeometry G h index axial particular signed r).afterParticular v c u).axialResidual c) n x)
-    (hh : 0 ≤ h) (hscale : ∀ n, ChartScales.S n ≤ G.slow n)
-    (gap : ℕ) (hgap : ∀ n, ChartScales.nativeIndex h n ≤ index n + gap)
-    (hv : c.operators.vT = (0, (0, TorusInverse.vector .temporal)))
-    (hfast : ∀ n, c.operators.fastCoefficient n = ChartScales.Tg ^ index n * ChartScales.Q n ^ (1+h))
-    (hV : LocalRankDefect.IsSlowOn G.region.carrier c.base.angular)
-    (hG : LocalRankDefect.IsSlowOn G.region.carrier c.base.axial)
-    (hg : LocalRankDefect.RankGeometry G.gauge r G.region.carrier c ((ofGeometry G h index axial particular signed r).afterTemporal v c u))
-    {A₀ B₀ : ℝ} (hparam : RankStateBounds.NormalizedParameters G.coord A₀ B₀ r G.region.carrier)
-    (hB : B₀ ≠ 0) (hleft : G.patch.a < r.inner) (hright : r.outer < G.patch.b) :
-    MeanClass G.strip (1+σ-2*κ)
-      (((ofGeometry G h index axial particular signed r).afterSigned v c u).thetaResidual c) ∧
-    MeanClass G.strip (1+σ-2*κ)
-      (((ofGeometry G h index axial particular signed r).afterSigned v c u).axialResidual c) ∧
-    CorrectionState.CumulativeBounds G.strip ((ofGeometry G h index axial particular signed r).afterSigned v c u) ∧
-    IncrementBounds G.strip (1+σ-2*κ) ((ofGeometry G h index axial particular signed r).temporalIncrement v c u) ∧
-    IncrementBounds G.strip (1+σ-2*κ) ((ofGeometry G h index axial particular signed r).rankIncrement v c u) ∧
-    MeanClass G.strip (1+σ-2*κ) (((ofGeometry G h index axial particular signed r).next v c u).pressure-u.pressure) ∧
-    CorrectionState.CumulativeBounds G.strip ((ofGeometry G h index axial particular signed r).next v c u) ∧
-    DefectBounds G.slowStrip (σ+1/10) c ((ofGeometry G h index axial particular signed r).next v c u) ∧
-    MeanClass G.strip (1+(σ+1/10)) (((ofGeometry G h index axial particular signed r).next v c u).thetaResidual c) ∧
-    MeanClass G.strip (1+(σ+1/10))
-      (((ofGeometry G h index axial particular signed r).next v c u).axialResidual c - fun n x => temporalAliasState G.gauge h index c
-        ((ofGeometry G h index axial particular signed r).afterSigned v c u) n (x,0) 2) := by
-  exact mean_gain_from_waves_of_cross_defects G h index axial particular signed r
-    v c u primary P hσ N hprimary hband hcp hcs hold hdiff hpart htangent hcurl
-    hP0 hP1 hkp a halabels hrep hzero hpartzero hsold hspart hκ hκsmall
-    H hop ho hb hu hfixed hmθ hmz hθ hz hd hX₁ hX₂ hS
-    (crossDefect_all_exponents_of_tail G 2 _ _ hDθ Ncross htailθ _)
-    (crossDefect_all_exponents_of_tail G 1 _ _ hDz Ncross htailz _)
-    hh hscale gap hgap hv hfast hV hG hg hparam hB hleft hright
 
 end ActualMean
 

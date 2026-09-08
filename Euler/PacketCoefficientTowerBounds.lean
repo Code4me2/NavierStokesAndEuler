@@ -18,10 +18,6 @@ variable (P : ℝ) [Fact (0 < P)] {T : ℝ} {raw : EulerPacketPointJets.Domain �
 
 include hRc hC hb
 
-theorem toCoefficientTower_block_bound (s q n : ℕ) (t : Icc (0 : ℝ) T) :
-    EulerH6Pressure.coefficientBlock P ((A.toCoefficientTower P).jet s t) q n ≤
-      sobolevCoefficientAmplitude (Fin 4) q Rc C * majorant (sobolevCoefficientRadius (Fin 4) Rc) 0 n :=
-  coefficientJet_block_bound P A.path A.orbit s q Rc C hRc hC hb n t
 
 theorem toCoefficientTower_base_bound (s q r : ℕ) (hr : r ≤ q) (t : Icc (0 : ℝ) T) :
     boundLevel P ((A.toCoefficientTower P).jet s t) r ≤ sobolevCoefficientAmplitude (Fin 4) q Rc C :=

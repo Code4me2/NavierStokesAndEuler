@@ -70,11 +70,5 @@ theorem operatorPath_norm_le (T : ℝ) (A : C(Icc (0 : ℝ) T, Field)) :
   intro t
   exact (multiplier_norm_le (A t)).trans (A.norm_coe_le_norm t)
 
-theorem operatorPath_norm_le_of_pointwise (T : ℝ) (A : C(Icc (0 : ℝ) T, Field))
-    (C : ℝ) (hC : 0 ≤ C) (hA : ∀ t x, ‖A t x‖ ≤ C) : ‖operatorPath T A‖ ≤ C := by
-  apply (operatorPath_norm_le T A).trans
-  apply (ContinuousMap.norm_le A hC).2
-  intro t
-  exact (BoundedContinuousFunction.norm_le hC).2 (hA t)
 
 end EulerMeanCoefficients

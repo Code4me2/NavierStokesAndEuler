@@ -120,11 +120,6 @@ theorem periodicResidual_jet_periodic (A : VelocityField) (p : PressureField) (n
     UnitSpatialPeriodsOn univ (iteratedFDeriv ℝ n (periodicResidual A p)) :=
   CompactForceDecay.iteratedFDeriv_periods (periodicResidual_periodic A p) n
 
-theorem periodicResidual_jet_integerShift (A : VelocityField) (p : PressureField)
-    (n : ℕ) (k : Fin 3 → ℤ) (t : ℝ) (x : Space) :
-    iteratedFDeriv ℝ n (periodicResidual A p) (t, x + CompactForceDecay.integerShift k) =
-      iteratedFDeriv ℝ n (periodicResidual A p) (t, x) :=
-  CompactForceDecay.periodic_integerShift (periodicResidual_jet_periodic A p n) t k x
 
 theorem periodicResidual_jet_sub_integerShift (A : VelocityField) (p : PressureField)
     (n : ℕ) (k : Fin 3 → ℤ) (t : ℝ) (x : Space) :
@@ -280,25 +275,6 @@ theorem boundaryLimits_independent {A : VelocityField} {p : PressureField}
   exact tendsto_nhds_unique (boundaryLimits_joint hz eA ep n x)
     (boundaryLimits_joint hz eA' ep' n x)
 
-theorem boundaryLimits_add_integerShift {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (k : Fin 3 → ℤ) (n : ℕ) (x : Space) :
-    boundaryLimits A p eA ep (x + CompactForceDecay.integerShift k) n =
-      boundaryLimits A p eA ep x n := by
-  let y := x + CompactForceDecay.integerShift k
-  let := JointResidualLimits.past_filter_neBot y
-  have hshift : Tendsto (fun z : SpaceTime => (z.1, z.2 - CompactForceDecay.integerShift k))
-      (𝓝[SpacetimeEndpoint.openPast 1] (1, y)) (𝓝[SpacetimeEndpoint.openPast 1] (1, x)) := by
-    simpa only [y, add_sub_cancel_right] using
-      spatial_sub_tendsto_past (CompactForceDecay.integerShift k) y
-  have ht := (boundaryLimits_joint hz eA ep n x).comp hshift
-  have hty : Tendsto (iteratedFDeriv ℝ n (periodicResidual A p))
-      (𝓝[SpacetimeEndpoint.openPast 1] (1, y)) (𝓝 (boundaryLimits A p eA ep x n)) := by
-    apply ht.congr'
-    filter_upwards [] with z
-    exact periodicResidual_jet_sub_integerShift A p n k z.1 z.2
-  exact tendsto_nhds_unique (boundaryLimits_joint hz eA ep n y) hty
 
 theorem periodicResidual_smooth {A : VelocityField} {p : PressureField}
     (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
@@ -412,18 +388,6 @@ theorem localizedResidual_joint {A : VelocityField} {p : PressureField}
   exact ((SolenoidalDiagonal.iteratedFDeriv_eventuallyEq he n).filter_mono
     nhdsWithin_le_nhds).symm
 
-theorem localizedResidual_locallyUniform {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    TendstoLocallyUniformly
-      (fun t x => iteratedFDeriv ℝ n
-        (fun z => navierStokesResidual (SpatialLocalization.localizedVelocity A)
-          (SpatialLocalization.localizedPressure p) z.1 z.2) (t, x))
-      (fun x => boundaryLimits A p eA ep x n) (𝓝[<] (1 : ℝ)) := by
-  apply JointResidualLimits.locallyUniform_of_joint_limits
-  intro x
-  simpa only [JointResidualLimits.past_filter] using localizedResidual_joint hz eA ep n x
 
 /-- The entire family required by `CandidateFromLimits` is now derived
 from the original input fields and their local analytic data. -/
@@ -482,15 +446,5 @@ theorem exists_candidate_force {A : VelocityField} {p : PressureField}
   intro t ht x
   exact SpatialLocalization.periodicVelocity_divergence_free hA ht.2 x
 
-theorem candidateStatement_of_potential_data {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p)
-    (haxis : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖)
-      (𝓝[<] 1) atTop) : candidateStatement := by
-  obtain ⟨F, hF, _⟩ := exists_candidate_force hA hp hz eA ep haxis
-  exact ⟨SpatialLocalization.localizedVelocity A, SpatialLocalization.localizedPressure p, F, hF⟩
 
 end NavierStokes.PeriodicResidualLimits

@@ -26,11 +26,6 @@ theorem coordinates_transport (g : Geometry) (gap : ℕ) (shift rate : ℝ)
         g.coordinates copy (coverPower gap Y) := by
   rw [CopySolveCompatibility.transportGeometry, CopySolveCompatibility.coordinates_refine, CopySolveCompatibility.coordinates_timeGeometry]
 
-theorem path_transport (g : Geometry) (gap : ℕ) (shift rate : ℝ)
-    (hrate : rate ≠ 0) (copy : Frequency) (Y : Plane) (t : ℝ) :
-    coverPower gap ((CopySolveCompatibility.transportGeometry g gap shift rate hrate).path copy Y t) =
-      g.path copy (coverPower gap Y) (shift + rate * t) := by
-  rw [CopySolveCompatibility.transportGeometry, CopySolveCompatibility.path_refine, CopySolveCompatibility.path_timeGeometry]
 
 theorem slotDirection_transport (g : Geometry) (gap : ℕ) (shift rate : ℝ)
     (hrate : rate ≠ 0) :
@@ -97,21 +92,6 @@ noncomputable def transportSource (f : P × Plane → ComplexVector) (parameter 
     (gap : ℕ) (rate amplitude : ℝ) : Q × Plane → ComplexVector :=
   fun z => (rate * amplitude) • f (parameter z.1, coverPower gap z.2)
 
-theorem normal_slot_derivative (t : TangentData P H) (parameter : Q → P)
-    (gap : ℕ) (shift rate amplitude normalScale : ℝ) (q : Q) (xi eta : ℝ)
-    (hn : HasDerivAt (fun s : ℝ => t.normal (parameter q, (xi, s)))
-      (t.normalDot (parameter q, (xi, shift + rate * eta)))
-      (shift + rate * eta)) :
-    HasDerivAt
-      (fun s : ℝ => (transportTangent t parameter gap shift rate amplitude normalScale).normal
-        (q, (xi, s)))
-      ((transportTangent t parameter gap shift rate amplitude normalScale).normalDot
-        (q, (xi, eta))) eta := by
-  have hc : HasDerivAt (fun s : ℝ => shift + rate * s) rate eta := by
-    simpa only [mul_one, id_eq] using ((hasDerivAt_id eta).const_mul rate).const_add shift
-  have h := (hn.scomp eta hc).const_smul normalScale
-  simp only [smul_smul] at h
-  exact h
 
 end Inputs
 
@@ -270,22 +250,6 @@ section LocalizedTransport
 
 variable {P Q E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-omit [CompleteSpace E] in
-/-- The actual transported series is finite when the reference cutoff is
-compact; the transport identities do not rely on a divergent-series value. -/
-theorem transported_periodization_finite (g : Geometry) (gap : ℕ) (shift rate : ℝ)
-    (hrate : rate ≠ 0) {cutoff : Plane → ℝ} (hcutoff : HasCompactSupport cutoff)
-    (F : Frequency → Q × Plane → E) (q : Q) (Y : Plane) :
-    ∃ I : Finset Frequency,
-      periodizedCopies (CopySolveCompatibility.transportGeometry g gap shift rate hrate)
-        (cutoff ∘ CopySolveCompatibility.nativeTimeMap shift rate) F (q, Y) =
-      ∑ copy ∈ I,
-        (cutoff ∘ CopySolveCompatibility.nativeTimeMap shift rate)
-          ((CopySolveCompatibility.transportGeometry g gap shift rate hrate).coordinates copy Y) •
-        F copy (q, Y) := by
-  obtain ⟨I, hI⟩ := finite_transported_copy_cutoffs g gap shift rate hrate hcutoff ‖Y‖
-  refine ⟨I, tsum_eq_sum (fun copy hcopy => ?_)⟩
-  rw [hI Y le_rfl copy hcopy, zero_smul]
 
 omit [CompleteSpace E] in
 /-- A transported periodization only uses copy identities on the active

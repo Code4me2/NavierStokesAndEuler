@@ -584,13 +584,6 @@ theorem physicalCompact_contDiffOn {d a b M : ℝ}
   (physicalCompact_fiberLocal d a b M v).contDiffOn_of_supported
     (fun _ h hc => physicalCompact_contDiff ha hab hd h hc M (0, v)) hU hf hs
 
-theorem physicalAlias_contDiffOn {d a b M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → V}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    ContDiffOn ℝ ∞ (physicalAlias d a b M ((0 : S), v) f) (slowDomain U) :=
-  (physicalAlias_fiberLocal d a b M v).contDiffOn_of_supported
-    (fun _ h hc => physicalAlias_contDiff ha hab hd h hc M (0, v)) hU hf hs
 
 theorem streamPotential_contDiffOn {d a b M : ℝ}
     (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
@@ -600,13 +593,6 @@ theorem streamPotential_contDiffOn {d a b M : ℝ}
   (streamPotential_fiberLocal d a b M v).contDiffOn_of_supported
     (fun _ h hc => PressureStream.streamPotential_contDiff ha hab hd (0, v) h hc) hU hf hs
 
-theorem meanPressure_contDiffOn {d a b M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    ContDiffOn ℝ ∞ (PressureStream.meanPressure d a b M hab v f) (slowDomain U) :=
-  (meanPressure_fiberLocal d a b M hab v).contDiffOn_of_supported
-    (fun _ h hc => PressureStream.meanPressure_contDiff ha hab hd v h hc) hU hf hs
 
 theorem liftedPressureMass_contDiffOn {a b : ℝ}
     {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
@@ -1195,15 +1181,6 @@ theorem normalizedDomain_eq (coord qlo qhi rlo rhi : ℝ) :
     chartQ_eq_slow, PhysicalCoordinateBounds.positiveTime, MeanRankUpdate.chartInput_apply]
   tauto
 
-theorem normalizedStripData_eq (coord qlo qhi rlo rhi cL cR : ℝ)
-    (hc : 0 < coord) (hc1 : coord < 1) (hrlo : 0 < rlo) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n) :
-    MeanRankUpdate.normalizedStripData coord qlo qhi rlo rhi cL cR hc hc1 hrlo hcL hcR
-      ε L hε hεone hL =
-    localStripData rlo rhi cL cR hrlo hcL hcR ε L hε hεone hL
-      (normalizedSlowDomain coord qlo qhi) (normalizedSlowDomain_open hc hc1 qlo qhi) := by
-  unfold MeanRankUpdate.normalizedStripData localStripData
-  simp only [normalizedDomain_eq]
 
 section TemporalClasses
 
@@ -1633,20 +1610,6 @@ theorem meanClass_streamGamma {a b d cL cR : ℝ}
   intro n p hp
   exact streamGamma_eq_desired_sub_alias_on ha hab hd (v n) hU (hf n) (hs n) hp.2
 
-theorem stream_divergence_zero_on {a b d M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
-    (w : S × PressureStream.Plane) {U : Set S} (hU : IsOpen U)
-    {f : PressureStream.Lift S → ℝ} (hf : ContDiffOn ℝ ∞ f (slowDomain U))
-    (hs : SupportedOn a b U f) {p : PressureStream.Lift S} (hp : p.2.1 ∈ U) (hr : p.1 ≠ 0) :
-    PressureStream.graphDivergence (PressureStream.physicalSpeed d M) ((0 : S), v) w
-      (PressureStream.streamBeta w (PressureStream.streamPotential d a b M ((0 : S), v) f))
-      (PressureStream.streamGamma (PressureStream.physicalSpeed d M) ((0 : S), v)
-        (PressureStream.streamPotential d a b M ((0 : S), v) f)) p = 0 := by
-  have hpot := (streamPotential_contDiffOn (M := M) ha hab hd v hU hf hs).contDiffAt
-    ((slowDomain_open hU).mem_nhds hp)
-  exact PressureStream.stream_divergence_zero ((0 : S), v) w
-    (hpot.of_le (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le)
-    ((PressureStream.physicalSpeed_smooth d M hr).differentiableAt (by simp)) hr
 
 end FinalStreamClasses
 
@@ -1663,25 +1626,7 @@ theorem desiredIncrement_zeroMean_on (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpe
   rw [← PressureStream.torusAverage_congr_slice p (hfg p.1)]
   exact TemporalMeanUpdate.desiredIncrement_zeroMean h n hcf (localize_periodic hcs hper) p
 
-theorem desiredIncrement_barMass_on (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpen U)
-    {f : PressureStream.Lift S → ℝ} (hf : ContDiffOn ℝ ∞ f (slowDomain U))
-    (hper : PeriodicOn U f) (w : ℝ → ℝ) (s : S) (hs : s ∈ U) :
-    (∫ r, w r * PressureStream.torusAverage (TemporalMeanUpdate.desiredIncrement h n f) (r, s)) = 0 := by
-  have hz (r : ℝ) := desiredIncrement_zeroMean_on h n hU hf hper (r, s) hs
-  simp_rw [hz, mul_zero, integral_zero]
 
-theorem desiredIncrement_fastDerivative_on (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpen U)
-    {f : PressureStream.Lift S → ℝ} (hf : ContDiffOn ℝ ∞ f (slowDomain U))
-    (hper : PeriodicOn U f) {p : PressureStream.Lift S} (hp : p.2.1 ∈ U) :
-    TemporalMeanUpdate.fastDerivative h n (TemporalMeanUpdate.desiredIncrement h n f) p =
-      -TemporalMeanUpdate.centered f p := by
-  obtain ⟨c, _, hcs, hcf, he⟩ := exists_fiber_localization hU hp hf
-  have hD : fderiv ℝ (TemporalMeanUpdate.desiredIncrement h n (localize c f)) p =
-      fderiv ℝ (TemporalMeanUpdate.desiredIncrement h n f) p :=
-    (((desiredIncrement_fiberLocal h n).germ he).eventuallyEq p.1 p.2.2).fderiv_eq
-  have hC := ((centered_fiberLocal.germ he).eventuallyEq p.1 p.2.2).self_of_nhds
-  have ho := TemporalMeanUpdate.desiredIncrement_fastDerivative h n hcf (localize_periodic hcs hper) p
-  simpa only [TemporalMeanUpdate.fastDerivative, PressureStream.graphDz, hD, hC] using ho
 
 theorem meanClass_axialPotential {a b d cL cR h : ℝ}
     (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)

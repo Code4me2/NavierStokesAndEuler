@@ -50,29 +50,6 @@ theorem potentialPath_hasDerivWithinAt (t : Icc (0 : ℝ) T) :
   fullProduct_hasDerivWithinAt P T hT B B₁ hBt (pathPrimitive P p) (pathPrimitive P f)
     (pathPrimitive_time_derivative P T hT p f hd) t
 
-theorem potentialField_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P) :
-    HasDerivWithinAt (fun r => potentialField P B hB p hp (projIcc 0 T hT r) x)
-      (pointField P (potentialDerivative P T B B₁ p f)
-        (potentialDerivative_orbit P T B B₁ hB hB₁ p f hp hf) t x) (Icc (0 : ℝ) T) t :=
-  pointField_hasDerivWithinAt P T hT (potentialPath P B p) (potentialDerivative P T B B₁ p f)
-    (potentialPath_orbit P B hB p hp) (potentialDerivative_orbit P T B B₁ hB hB₁ p f hp hf)
-    (potentialPath_hasDerivWithinAt P T hT B B₁ p f hBt hd) t x
 
-/-- The actual curl derivative is obtained from the constructed potential, not assumed as a profile jet. -/
-theorem potentialCurl_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P)
-    (F : ℝ → Space → Space ≃L[ℝ] Space) (G₁ : Space →L[ℝ] Space)
-    (hG : HasDerivWithinAt (fun r => (F r x.1).symm.toContinuousLinearMap) G₁
-      (Icc (0 : ℝ) T) t) :
-    HasDerivWithinAt
-      (fun r => liftedSlowCurl P (F r) (potentialField P B hB p hp (projIcc 0 T hT r)) x)
-      (liftedSlowCurl P (F t)
-          (pointField P (potentialDerivative P T B B₁ p f)
-            (potentialDerivative_orbit P T B B₁ hB hB₁ p f hp hf) t) x +
-        curlMatrix ((fieldFDeriv P (potentialField P B hB p hp t) x).comp
-          ((ContinuousLinearMap.inl ℝ Space ℝ).comp G₁)))
-      (Icc (0 : ℝ) T) t :=
-  liftedSlowCurl_hasDerivWithinAt P T hT (potentialPath P B p) (potentialDerivative P T B B₁ p f)
-    (potentialPath_orbit P B hB p hp) (potentialDerivative_orbit P T B B₁ hB hB₁ p f hp hf)
-    (potentialPath_hasDerivWithinAt P T hT B B₁ p f hBt hd) t x F G₁ hG
 
 end EulerCylinderPotential

@@ -170,31 +170,5 @@ theorem flow_generating_sum_bound_of_jet_derivative
     exact jet_integral_of_hasDerivWithinAt ψ (fun s => b s ∘ (id+ψ s))
       n T hψ0 (hd n hn) (hcv n hn) t ht x
 
-/-- All positive spatial orders have the same radius 4R and the same
-linear amplitude B*t.  Smoothness and the jet equation are qualitative
-inputs; the derivative estimates are conclusions. -/
-theorem flow_positive_derivative_bound
-    (ψ b : ℝ → E → E) (T B R : ℝ)
-    (hT : 0 ≤ T) (hB : 0 ≤ B) (hR : 0 < R) (hsmall : B*R*T ≤ 1/8)
-    (hψ : ∀ t ∈ Icc 0 T, ContDiff ℝ ∞ (ψ t))
-    (hb : ∀ t ∈ Icc 0 T, ContDiff ℝ ∞ (b t)) (hψ0 : ψ 0 = 0)
-    (hbjet : ∀ t ∈ Icc 0 T, ∀ y, ∀ n, 0 < n →
-      ‖iteratedFDeriv ℝ n (b t) y‖ ≤ B*R^n*(n.factorial : ℝ)^2)
-    (hd : ∀ n, 0 < n → ∀ t ∈ Icc 0 T, ∀ x,
-      HasDerivWithinAt (fun s => iteratedFDeriv ℝ n (ψ s) x)
-        (iteratedFDeriv ℝ n (b t ∘ (id+ψ t)) x) (Icc 0 T) t)
-    (hcv : ∀ n, 0 < n → ∀ x,
-      ContinuousOn (fun t => iteratedFDeriv ℝ n (b t ∘ (id+ψ t)) x) (Icc 0 T)) :
-    ∀ t ∈ Icc 0 T, ∀ x, ∀ n, 0 < n →
-      ‖iteratedFDeriv ℝ n (ψ t) x‖ ≤ B*t*(4*R)^n*(n.factorial : ℝ)^2 := by
-  intro t ht x n hn
-  apply derivative_bound_of_generating_sum (ψ t) n n R (B*t) x hR
-    (Finset.mem_Icc.mpr ⟨hn,le_rfl⟩)
-  exact flow_generating_sum_bound_of_jet_derivative ψ b n T B R hT hB hR hsmall
-    (fun s hs => (hψ s hs).of_le (by simp))
-    (fun s hs => (hb s hs).of_le (by simp)) hψ0
-    (fun s hs y j hj => hbjet s hs y j (Finset.mem_Icc.mp hj).1)
-    (fun j hj => hd j (Finset.mem_Icc.mp hj).1)
-    (fun j hj => hcv j (Finset.mem_Icc.mp hj).1) t ht x
 
 end EulerGevreyFlowFinite

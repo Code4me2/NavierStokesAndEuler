@@ -150,23 +150,5 @@ theorem hessian_physical {q : LiftTangent → ℝ} (hq : ContDiff ℝ ∞ q)
   match_scalars <;> field_simp
   all_goals ring
 
-theorem lowerHessian_norm_le (q : LiftTangent → ℝ) (k : ℝ) (m : Space)
-    (Y : Space → Space) (J : Space → Space →L[ℝ] Space) (x : Space) :
-    ‖lowerHessian q k m Y J x‖ ≤
-      |k⁻¹|^2 * ‖fderiv ℝ (slowForce q k m Y J) x‖ +
-      |k⁻¹| * (|angularDerivative q (graphMap k m (Y x))| *
-        ‖fderiv ℝ (transportedNormal m J) x‖ +
-        ‖(fderiv ℝ (angularDerivative q) (graphMap k m (Y x))).comp (inl ℝ Space ℝ)‖ *
-          ‖J x‖ * ‖transportedNormal m J x‖) := by
-  unfold lowerHessian
-  apply (norm_add_le _ _).trans
-  simp only [norm_smul,Real.norm_eq_abs,abs_pow]
-  apply add_le_add le_rfl
-  apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
-  apply (norm_add_le _ _).trans
-  simp only [norm_smul,Real.norm_eq_abs]
-  apply add_le_add le_rfl
-  rw [norm_smulRight_apply]
-  exact mul_le_mul_of_nonneg_right (opNorm_comp_le _ _) (norm_nonneg _)
 
 end EulerPacketGraphHessian

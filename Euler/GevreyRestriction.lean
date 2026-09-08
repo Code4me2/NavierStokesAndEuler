@@ -57,10 +57,5 @@ theorem weightedNorm_truncate {s : ℕ} (r N : ℕ) (hN : N+r ≤ s) (ρ : ℝ)
     weightedNorm period r N ρ (truncateOperator period s u) = weightedNorm period r N ρ u :=
   weightedNorm_restrict period (by omega : s ≤ s+1) r N hN ρ u
 
-/-- The complete-solution truncation leaves the retained radius-loss sum unchanged. -/
-theorem weightedLoss_truncate {s : ℕ} (r N : ℕ) (hN : N+r ≤ s) (ρ : ℝ)
-    (u : SobolevSpace period (s+1)) :
-    weightedLoss period r N ρ (truncateOperator period s u) = weightedLoss period r N ρ u :=
-  weightedLoss_restrict period (by omega : s ≤ s+1) r N hN ρ u
 
 end EulerGevreyRestriction

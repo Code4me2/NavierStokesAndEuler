@@ -51,8 +51,6 @@ def forwardInputs (Ti : ℝ) (hT1 : G.T ≤ 1) (hTi : G.T⁻¹ ≤ Ti) :
     normal := N.enlargeRadius Rc ((le_max_left Rn Rm).trans (le_max_right _ _))
     mean := M.enlargeRadius Rc ((le_max_right Rn Rm).trans (le_max_right _ _)) }
 
-theorem forwardInputs_growth (Ti : ℝ) (hT1 : G.T ≤ 1) (hTi : G.T⁻¹ ≤ Ti) :
-    (L.forwardInputs H m hm R S hS CM hCM hM Ω hΩ hΩo hsub hΩball hshort Ti hT1 hTi).linear.g=1 := rfl
 
 end LabelData
 end EulerParentPacketFrames

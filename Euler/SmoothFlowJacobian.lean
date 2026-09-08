@@ -87,32 +87,6 @@ def jacobianEquiv (t : Icc (0 : ℝ) T) (x : E) : E ≃L[ℝ] E :=
     (fun v => congrArg (fun L : E →L[ℝ] E => L v)
       ((jacobianEvolution T hT A x).forward_backward t))
 
-theorem backward_hasFDerivAt_label (t : Icc (0 : ℝ) T) (x : E) :
-    HasFDerivAt (fun y => (flowData T hT A).backward t y)
-      ((jacobianEvolution T hT A ((flowData T hT A).backward t x)).backward t) x := by
-  apply EulerContinuousInverseDerivative.hasFDerivAt_inverse
-    (fun y => (flowData T hT A).forward t y) (fun y => (flowData T hT A).backward t y) x
-    ((jacobianEvolution T hT A ((flowData T hT A).backward t x)).forward t)
-  · exact ((flowData T hT A).backward_joint_continuous.comp
-      (continuous_const.prodMk continuous_id)).continuousAt
-  · exact forward_hasFDerivAt_label T hT A t _
-  · exact Filter.Eventually.of_forall ((flowData T hT A).forward_backward t)
-  · intro v
-    exact congrArg (fun L : E →L[ℝ] E => L v)
-      ((jacobianEvolution T hT A ((flowData T hT A).backward t x)).backward_forward t)
 
-theorem backward_contDiff (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ ∞ (fun y => (flowData T hT A).backward t y) := by
-  rw [contDiff_iff_contDiffAt]
-  intro x
-  apply EulerSmoothImplicitLift.contDiffAt_of_identity
-    (fun y => (flowData T hT A).backward t y)
-    (fun y => (flowData T hT A).forward t y) id x ∞ (by simp)
-    (((flowData T hT A).backward_joint_continuous.comp
-      (continuous_const.prodMk continuous_id)).continuousAt)
-    (forward_contDiff T hT A t).contDiffAt contDiff_id.contDiffAt
-    (jacobianEquiv T hT A t ((flowData T hT A).backward t x))
-  · exact forward_hasFDerivAt_label T hT A t _
-  · exact (flowData T hT A).forward_backward t
 
 end EulerSmoothBanachFlow

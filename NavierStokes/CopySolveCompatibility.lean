@@ -41,9 +41,6 @@ theorem path_refine (g : Geometry) (k : ℕ) (j : Frequency) (Y : Plane) (s : �
     coverPower k ((refineGeometry g k).path j Y s) = g.path j (coverPower k Y) s := by
   simp only [Geometry.path, coordinates_refine, point_refine]
 
-theorem cutoff_refine (g : Geometry) (k : ℕ) (κ : Plane → ℝ) (j : Frequency) (Y : Plane) :
-    κ ((refineGeometry g k).coordinates j Y) = κ (g.coordinates j (coverPower k Y)) := by
-  rw [coordinates_refine]
 
 /-- This includes cutoff indicators and copy envelopes, with no regularity
 assumption on the native function. -/
@@ -165,14 +162,6 @@ theorem source_periodic_transform (d : LinearData P V E) (φ : Q → P) (k : ℕ
   rw [map_add, coverPower_lattice]
   exact hp (coverPower k Y) (coverIndex k j)
 
-theorem commonOnTorus_refine [NormedAddCommGroup P] [NormedSpace ℝ P]
-    (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (k : ℕ) (κ : Plane → ℝ) (p : P) (hp : PeriodicAt d.source p) (Y : Plane) :
-    (pullbackData d k).commonOnTorus (refineGeometry g k) hab κ p
-        (source_periodic_transform d id k p hp) (TorusAverages.quotientPoint Y) =
-      d.commonOnTorus g hab κ p hp (TorusAverages.quotientPoint (coverPower k Y)) := by
-  simp only [LinearData.commonOnTorus_coe]
-  exact commonSolve_refine d g hab k κ p Y
 
 end Paths
 
@@ -234,11 +223,6 @@ theorem localizedCopy_recenter (d : LinearData P V E) (g : Geometry) (hab : a �
       d.localizedCopy g hab κ (j + l) (p, Y) := by
   simp only [LinearData.localizedCopy, coordinates_recenter, copySolve_recenter]
 
-theorem commonSolve_recenter (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (l : Frequency) (κ : Plane → ℝ) (p : P) (Y : Plane) :
-    d.commonSolve (recenterGeometry g l) hab κ (p, Y) = d.commonSolve g hab κ (p, Y) := by
-  simp only [LinearData.commonSolve, localizedCopy_recenter]
-  exact (Equiv.addRight l).tsum_eq (fun j => d.localizedCopy g hab κ j (p, Y))
 
 end Recenter
 
@@ -528,21 +512,6 @@ noncomputable def physicalOutput {a b : ℝ} (d : LinearData P V E) (g : Geometr
     (hab : a ≤ b) (κ : Plane → ℝ) (χ : X → P × Plane) : X → E :=
   fun x => d.commonSolve g hab κ (χ x)
 
-/-- The single reference output is an actual smooth field under the usual
-compact native cutoff and smooth input hypotheses. Local finiteness of the
-periodization is supplied by the constructed copy solver. -/
-theorem physicalOutput_contDiffOn [NormedAddCommGroup X] [NormedSpace ℝ X]
-    {a b : ℝ} (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    {U : Set P} (hU : IsOpen U)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ))
-    {κ : Plane → ℝ} (hκ : ContDiff ℝ ∞ κ) (hcκ : HasCompactSupport κ)
-    (hsupp : tsupport κ ⊆ univ ×ˢ Ioo a b)
-    {Ω : Set X} {χ : X → P × Plane} (hχ : ContDiffOn ℝ ∞ χ Ω)
-    (hmaps : MapsTo χ Ω (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (physicalOutput d g hab κ χ) Ω :=
-  (d.commonSolve_contDiffOn g hab hU hA hB hf hκ hcκ hsupp).comp hχ hmaps
 
 /-- The family of chart solves represents one explicitly constructed
 physical field. Assumptions concern only input transport and the coordinate
@@ -586,16 +555,6 @@ section ConcreteBandChart
 variable {V E : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] {a b : ℝ}
 
-/-- The slow/torus argument is exactly the existing common-band chart map. -/
-theorem commonSolve_bandCommonChart (d : LinearData CommonCoverClass.SlowPoint V E)
-    (g : Geometry) (hab : a ≤ b) (D : ℝ) (n m k : ℕ) (κ : Plane → ℝ)
-    (x : CommonCoverClass.SlowPoint × Plane) :
-    (transformData d (CommonCoverClass.bandChart D n m) k).commonSolve
-        (refineGeometry g k) hab κ x =
-      d.commonSolve g hab κ (CommonCoverClass.bandCommonChart D n m true k x) := by
-  simpa only [CommonCoverClass.bandCommonChart_apply, CommonCoverClass.coverChange,
-    Bool.true_eq, ite_true, ContinuousLinearEquiv.coe_coe] using
-    commonSolve_transform d (CommonCoverClass.bandChart D n m) g hab k κ x.1 x.2
 
 end ConcreteBandChart
 
@@ -656,38 +615,6 @@ theorem commonSolve_of_compatibleInputs (d : LinearData P V E) (e : LinearData Q
     _ hab q hi]
   exact commonSolve_transport d φ g hab k τ rate amplitude hrate hA hB hf κ hκ q hq Y
 
-/-- Existing, separately defined chart inputs produce the same single
-physical output as the canonical transported data when their primitive
-coefficient and forcing identities are verified. -/
-theorem compatible_family_represents
-    {A B : ℝ} (hAB : A ≤ B) (d : LinearData P V E) (g : Geometry)
-    {U : Set P} (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ)) (hf : ContinuousOn d.source (U ×ˢ univ))
-    (κ : Plane → ℝ) (hκ : support κ ⊆ univ ×ˢ Icc A B)
-    (χ : X → P × Plane) (domains : I → Set X)
-    (charts : I → X → Q × Plane) (φ : I → Q → P) (gaps : I → ℕ)
-    (entry exit shift rate amplitude : I → ℝ)
-    (hrate : ∀ i, 0 < rate i) (hinterval : ∀ i, entry i ≤ exit i)
-    (hentry : ∀ i, shift i + rate i * entry i = A)
-    (hexit : ∀ i, shift i + rate i * exit i = B)
-    (hchart : ∀ i x, x ∈ domains i →
-      (φ i (charts i x).1, coverPower (gaps i) (charts i x).2) = χ x)
-    (hslow : ∀ i x, x ∈ domains i → (χ x).1 ∈ U)
-    (data : I → LinearData Q V E)
-    (hdata : ∀ i x, x ∈ domains i → SameInputsAt (data i)
-      (transportData d (φ i) (gaps i) (shift i) (rate i) (amplitude i)) (charts i x).1) :
-    ∀ i x, x ∈ domains i →
-      (data i).commonSolve
-          (transportGeometry g (gaps i) (shift i) (rate i) (hrate i).ne') (hinterval i)
-          (κ ∘ nativeTimeMap (shift i) (rate i)) (charts i x) =
-        amplitude i • physicalOutput d g hAB κ χ x := by
-  intro i x hx
-  have hi := commonSolve_eq_of_sameInputs (data i)
-    (transportData d (φ i) (gaps i) (shift i) (rate i) (amplitude i))
-    (transportGeometry g (gaps i) (shift i) (rate i) (hrate i).ne') (hinterval i)
-    (charts i x).1 (hdata i x hx) (κ ∘ nativeTimeMap (shift i) (rate i)) (charts i x).2
-  exact hi.trans (commonSolve_family_represents hAB d g hA hB hf κ hκ χ domains charts φ gaps
-    entry exit shift rate amplitude hrate hinterval hentry hexit hchart hslow i x hx)
 
 end InputCompatibility
 
@@ -709,13 +636,5 @@ theorem constantForcing_anchoredSolve {a b : ℝ} (g : Geometry) (hab : a ≤ b)
         (hasDerivAt_id t).sub_const a)
   exact (h hs).symm
 
-/-- Even smooth constant source/coefficient data do not make differently
-anchored solves equal. This is an actual constructed-solution counterexample. -/
-theorem changing_anchor_changes_solution (g : Geometry) :
-    constantForcing.anchoredSolve g (a := 0) (b := 1) (by norm_num) 0 (0, 0) 0 ≠
-      constantForcing.anchoredSolve g (a := -1) (b := 1) (by norm_num) 0 (0, 0) 0 := by
-  rw [constantForcing_anchoredSolve g _ _ _ _ (by norm_num : (0 : ℝ) ∈ Icc 0 1),
-    constantForcing_anchoredSolve g _ _ _ _ (by norm_num : (0 : ℝ) ∈ Icc (-1) 1)]
-  norm_num
 
 end NavierStokes.CopySolveCompatibility

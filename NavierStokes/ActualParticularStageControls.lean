@@ -182,11 +182,6 @@ noncomputable def parameters (x : CycleState (Label B N0)) (l : Label B N0) :
     ParticularParameters Parameter :=
   ParticularParameters.fromReference (assembly x l) h (gap l)
 
-theorem parameters_source (x : CycleState (Label B N0)) (l : Label B N0) (j : ℤ) :
-    ((parameters x l).copyData (assembly x l).context (assembly x l).state
-      (assembly x l).carrierBlock (assembly x l).gaussianInput (assembly x l).aliasInput j).source =
-      ParticularWaveAssembly.sourceFamily (assembly x l).context (assembly x l).state
-        (assembly x l).carrierBlock (assembly x l).gaussianInput (assembly x l).aliasInput j := rfl
 
 theorem parameters_length (x : CycleState (Label B N0)) (l : Label B N0) (n : ℕ) :
     (parameters x l).length n = (phases B N0 l.1).L l.2 /
@@ -413,13 +408,7 @@ noncomputable def slowInsert : Parameter →L[ℝ] CyclePoint where
 noncomputable def slowStrip : StripData Parameter :=
   HarmonicWaveInteraction.pullbackStrip (BaseContextAssembly.nativeStrip nominal standardRegion) slowInsert
 
-theorem sourceStrip_eq : CommonCoverClass.sourceStrip slowStrip = associatedStrip := by
-  rfl
 
-theorem nativeStrip_eq :
-    CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip) =
-      ParticularParameters.nativeStrip associatedStrip := by
-  rfl
 
 noncomputable def pulseEnvelope (l : Label B N0) : ℝ → ℝ :=
   PrimaryPulseBounds.referenceP ((phases B N0 l.1).lam l.2) ((phases B N0 l.1).u l.2)
@@ -488,11 +477,7 @@ noncomputable def selectedLength :=
 noncomputable def selectedPulseEnvelope :=
   ScaledActualParticularControl.envelope (selectedConstruction e) (selectedClock e)
 
-theorem selected_geometry_eq (x : CycleState (Label B N0)) (n : ℕ) :
-    selectedGeometry e () n = (parameters x (selectedLabel e n)).geometry (selectedBand e n) := rfl
 
-theorem selected_length_eq (x : CycleState (Label B N0)) (n : ℕ) :
-    selectedLength e () n = (parameters x (selectedLabel e n)).length (selectedBand e n) := rfl
 
 theorem selected_gap_bound (u : Unit) (n : ℕ) :
     selectedGap e u n ≤ CommonWindow.gap h + SlotColoring.nativeGap h :=
@@ -578,16 +563,6 @@ theorem current_source_class (x : CycleState (Label B N0)) {α : ℝ}
   rw [he] at ht
   exact ht
 
-theorem invariant_current_source_class (x : CycleState (Label B N0))
-    {G : SignedMeanGain.Geometry} {primary : Label B N0 → HarmonicBlock CyclePoint} {σ : ℝ}
-    {labelCarrier : Label B N0 → ℕ → Set CyclePoint}
-    (H : CycleAnalyticInvariant G (commonContext B) primary meanEnvelope labelCarrier σ x)
-    (hstrip : G.strip = BaseContextAssembly.nativeStrip nominal standardRegion)
-    (j : ℤ) (hj : j ≠ 0) :
-    LabelSumBounds.UniformWaveClass (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
-      nativeEnvelope (1/2+σ) (currentSource x j) := by
-  apply current_source_class x _ j hj
-  simpa only [hstrip] using H.residual
 
 theorem source_angle_reindex (s : StripData Parameter) (index : ℕ → ℕ) :
     CommonCoverClass.sourceStrip
@@ -991,15 +966,8 @@ theorem raw_jets (x : CycleState (Label B N0))
 noncomputable def supportLabel (l : Label B N0) : ActualCarrierTransportBase.Index B N0 :=
   (l.2,l.1)
 
-theorem support_geometry_eq (x : CycleState (Label B N0)) (l : Label B N0) (n : ℕ) :
-    ActualCarrierTransportBase.geometry (supportLabel l) n = (parameters x l).geometry n := rfl
 
-theorem support_length_eq (x : CycleState (Label B N0)) (l : Label B N0) (n : ℕ) :
-    ActualCarrierTransportBase.referenceLength (supportLabel l) /
-      ActualCarrierTransportBase.clock (supportLabel l) n = (parameters x l).length n := rfl
 
-theorem support_cutoff_eq (x : CycleState (Label B N0)) (l : Label B N0) (n : ℕ) :
-    ActualCarrierTransportBase.cutoff (supportLabel l) n = (parameters x l).cutoff n := rfl
 
 theorem copyData_ext {D I : Type} {a b : PeriodizedWaveBounds.CopyData D I}
     (hb : a.background = b.background) (ha : a.amplitude = b.amplitude)
@@ -1309,9 +1277,6 @@ theorem preserves_frequency {x : CycleState (Label B N0)} (hx : PreservesCarrier
     (x.coefficients.blocks l).frequency n = ChartScales.carrier h n :=
   (congrFun (hx l).frequency n).symm
 
-theorem data_background_eq (x : CycleState (Label B N0)) (l : Label B N0) (j : ℤ) :
-    (data x l j).background =
-      ActualParticularBackground.carrier (fun l => x.coefficients.blocks l) j l := rfl
 
 theorem native_background_eq (x : CycleState (Label B N0)) (j : ℤ) :
     jointRawBackground (fun l => data x l j) =
@@ -1467,28 +1432,5 @@ theorem assembled_bounds (x : CycleState (Label B N0))
   exact ⟨fun i j => associated_wave_return (ha i j),
     fun j => associated_wave_return (hp j), fun i j => associated_wave_return (hg i j)⟩
 
-/-- The quantitative inputs are precisely fields of the current analytic
-invariant. The geometric equalities identify its actual strip and carrier. -/
-theorem invariant_assembled_bounds (x : CycleState (Label B N0))
-    {G : SignedMeanGain.Geometry} {σ : ℝ}
-    (H : CycleAnalyticInvariant G (commonContext B) ActualParticularBackground.primaryBlock
-      meanEnvelope (fun l => ActualCarrierTransportBase.labelCarrier (supportLabel l)) σ x)
-    (hstrip : G.strip = BaseContextAssembly.nativeStrip nominal standardRegion)
-    (hdomain : G.domain = ActualCarrierTransportBase.domain)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) :
-    (∀ i j, LabelSumBounds.UniformWaveClass G.strip meanEnvelope (1/2+σ)
-      (fun l n z => (outputBlock x x.coefficients.residualBand l).velocity n i j z)) ∧
-    (∀ j, LabelSumBounds.UniformWaveClass G.strip meanEnvelope (1+σ)
-      (fun l n z => (outputBlock x x.coefficients.residualBand l).pressure n j z)) ∧
-    (∀ i j, LabelSumBounds.UniformWaveClass G.strip meanEnvelope (1+σ-3*ChartScales.kappa)
-      (fun l n z => (outputGood x x.coefficients.residualBand l).velocity n i j z)) := by
-  have hs : InputSupport x := by
-    intro l
-    simpa only [hdomain] using H.inputSupport l
-  have hr : ResidualBounds x (1/2+σ) := by
-    simpa only [hstrip] using H.residual
-  have hout := assembled_bounds x H.carrier hs hN hr x.coefficients.residualBand
-  have hα : (1/2:ℝ)+σ+1/2 = 1+σ := by ring
-  simpa only [hstrip, hα] using hout
 
 end NavierStokes.ActualParticularStageControls

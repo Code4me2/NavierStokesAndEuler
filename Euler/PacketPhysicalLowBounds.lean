@@ -87,12 +87,6 @@ theorem normal_projection_quadratic_le (r z : Space) :
   rw [Real.norm_eq_abs,sq_abs] at hsq
   exact (div_le_iff₀ hn).2 (by nlinarith only [hsq])
 
-theorem pressureTerm_nonpos (amp slope : ℝ) (M : Matrix) (r w z : Space)
-    (hamp : 0 ≤ amp) (hslope : 0 ≤ slope) (hflux : 0 ≤ ⟪r,M w⟫_ℝ) :
-    ⟪pressureTerm amp slope M r w z,z⟫_ℝ ≤ 0 := by
-  rw [pressureTerm_quadratic]
-  exact mul_nonpos_of_nonpos_of_nonneg (by nlinarith [mul_nonneg (mul_nonneg hamp hflux) hslope])
-    (div_nonneg (sq_nonneg _) (sq_nonneg _))
 
 theorem pressureTerm_upper_flux (amp slope : ℝ) (M : Matrix) (r w z : Space)
     (hamp : 0 ≤ amp) (hslope : -1 ≤ slope) (hflux : 0 ≤ ⟪r,M w⟫_ℝ) :

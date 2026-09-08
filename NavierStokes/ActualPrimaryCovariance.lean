@@ -128,8 +128,6 @@ theorem physicalTangentMode_eq_slot (j : Fin 2) (L : Label B N0) (p : Slow)
 noncomputable def nativePoint (n : ℕ) (x : Point) (L : Label B N0) : Slow :=
   nativeSlow L (toAbsolute n x)
 
-theorem nativePoint_auxiliary (n : ℕ) (x : Point) (L : Label B N0) (Y : Plane) :
-    nativePoint n (x.1, (x.2.1, Y)) L = nativePoint n x L := rfl
 
 theorem nativePoint_time (n : ℕ) {x : Point} (hT : 0 < x.2.1.1) (L : Label B N0) :
     0 < (nativePoint n x L).2.2 := by
@@ -618,14 +616,6 @@ theorem mean_tangentCovariance_eq_leading (B N0 : ℕ) {n : ℕ}
   rw [mean_tangentCovariance_factor B N0 n hx i,
     partitionFactor_eq_one B N0 n hx (physicalScale_tail B N0 hn hx), one_mul]
 
-theorem mean_tangentCovariance_jets (B N0 : ℕ) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ (BaseContextAssembly.nativeStrip nominal standardRegion).domain) (i : Fin 2) (m : ℕ) :
-    iteratedFDeriv ℝ m (StateMomentBalances.meanBar (tangentCovariance B N0 0 i.succ) n) x =
-      iteratedFDeriv ℝ m (leadingStress i n) x := by
-  apply (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (eventually_of_mem ((BaseContextAssembly.nativeStrip nominal standardRegion).isOpen_domain.mem_nhds hx)
-      (fun y hy => mean_tangentCovariance_eq_leading B N0 hn hy i)) m).self_of_nhds
 
 /-! ## The exact finite low-band defect -/
 
@@ -850,22 +840,7 @@ theorem averagedDefect_meanClass (B N0 : ℕ) (i : Fin 2) (beta : ℝ) :
     ((choice B N0).prepared.N + 1)
     (fun _ hn _ hx => averagedDefect_zero_tail B N0 hn hx i)
 
-/-- Every actual spatial derivative of the averaged covariance error has
-the same arbitrary exponent; the finite-prefix constants may depend on
-the chosen exponent and derivative order. -/
-theorem averagedDefect_derivative_meanClass (B N0 : ℕ) (i : Fin 2) (beta : ℝ) :
-    MeanClass (BaseContextAssembly.nativeStrip nominal standardRegion) beta
-      (fun n => fderiv ℝ (averagedDefect B N0 i n)) :=
-  (averagedDefect_meanClass B N0 i beta).fderiv
 
-theorem averagedDefect_radialDiv_meanClass (B N0 : ℕ) (i : Fin 2) (beta weight : ℝ) :
-    MeanClass (BaseContextAssembly.nativeStrip nominal standardRegion) beta
-      ((commonContext B).operators.radialDiv weight (averagedDefect B N0 i)) := by
-  have ho := CommonBaseContext.context_operator_bounds certificate modulation upper B standardRegion
-    (CorrectionInitialization.CommonWindow.index_le_native h)
-  have hc := ho.radialDiv (averagedDefect_meanClass B N0 i (beta + ChartScales.kappa)) weight
-  simp only [add_sub_cancel_right] at hc
-  exact hc
 
 /-! ## Direct interfaces for the initial mean balance -/
 
@@ -875,9 +850,6 @@ theorem meanBar_of_fiber_constant (f : CorrectionState.ScalarField Point)
   change (∫ y in (0 : ℝ)..1, ∫ z in (0 : ℝ)..1, f n (x.1, (x.2.1, (z, y)))) = f n x
   simp only [hf, intervalIntegral.integral_const, sub_zero, one_smul]
 
-theorem meanBar_leadingStress (i : Fin 2) :
-    StateMomentBalances.meanBar (leadingStress i) = leadingStress i :=
-  meanBar_of_fiber_constant _ (fun _ _ _ => rfl)
 
 theorem meanBar_virtualTheta (B : ℕ) :
     StateMomentBalances.meanBar (commonContext B).virtualTheta = (commonContext B).virtualTheta :=
@@ -1134,20 +1106,7 @@ theorem cutAmplitude_tsupport_active (l : Label B N0 × Fin 2) (n : ℕ) {x : Po
     l ∈ activeLabels standardRegion B N0 n :=
   activeLabels_cover n hx l.1 l.2 (cutAmplitude_tsupport_physical l.2 l.1 n hx theta ht).1
 
-theorem cutAmplitude_inactive_germ (l : Label B N0 × Fin 2) (n : ℕ) {x : Point}
-    (hx : x ∈ (BaseContextAssembly.nativeStrip nominal standardRegion).domain) (theta : ℝ)
-    (hl : l ∉ activeLabels standardRegion B N0 n) :
-    cutAmplitude l.2 l.1 n =ᶠ[𝓝 (x, theta)] fun _ => 0 :=
-  notMem_tsupport_iff_eventuallyEq.mp (fun ht => hl (cutAmplitude_tsupport_active l n hx theta ht))
 
-theorem velocity_inactive_germ (l : Label B N0 × Fin 2) (n : ℕ) {x : Point}
-    (hx : x ∈ (BaseContextAssembly.nativeStrip nominal standardRegion).domain) (theta : ℝ)
-    (hl : l ∉ activeLabels standardRegion B N0 n) :
-    (piece standardRegion l.2 l.1).velocity n =ᶠ[𝓝 (x, theta)] fun _ => 0 := by
-  apply notMem_tsupport_iff_eventuallyEq.mp
-  intro ht
-  exact hl (cutAmplitude_tsupport_active l n hx theta
-    ((piece standardRegion l.2 l.1).velocity_tsupport_subset_tangent n ht))
 
 theorem cutAmplitude_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hlm : l ≠ m) :
     Disjoint
@@ -1163,15 +1122,6 @@ theorem cutAmplitude_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hl
   exact Set.disjoint_left.mp (slots.disjoint _ _ (LabelSumBounds.closedWindow_adjacency
     l.1.val.property.1 m.1.val.property.1 hne hwl hwm)) hsl hsm
 
-theorem exactAmplitude_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hlm : l ≠ m) :
-    Disjoint
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport ((piece standardRegion l.2 l.1).exactCoefficients.amplitude n))
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport ((piece standardRegion m.2 m.1).exactCoefficients.amplitude n)) :=
-  (cutAmplitude_tsupport_disjoint n hlm).mono
-    (inter_subset_inter_right _ ((piece standardRegion l.2 l.1).exactAmplitude_tsupport_subset_tangent n))
-    (inter_subset_inter_right _ ((piece standardRegion m.2 m.1).exactAmplitude_tsupport_subset_tangent n))
 
 theorem velocity_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hlm : l ≠ m) :
     Disjoint

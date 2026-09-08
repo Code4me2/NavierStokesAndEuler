@@ -213,37 +213,7 @@ theorem field_jet_bound_of_localBandJets (D : CoherentFamily h degree N Δ U E)
   field_jet_bound D hh hh1 ha hab hN hU hcover hsm hs
     (NativeJets.of_localBandJets hj hε hL0 hC hL) m
 
-theorem angularField_jet_bound_of_localBandJets (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {α : ℝ} {ε L : ℕ → ℝ}
-    (hj : PhysicalMeanDomain.LocalBandJets U ε L α D.native)
-    (hε : ∀ n ≥ N, ε n = ChartScales.epsilon h n)
-    (hL0 : ∀ n ≥ N, 0 ≤ L n) {C : ℝ} {p : ℕ} (hC : 1 ≤ C)
-    (hL : ∀ n ≥ N, L n ≤ C * ChartScales.S n ^ p) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      physicalQ h w ≤ ChartScales.Q N →
-      ‖iteratedFDeriv ℝ m D.angularField w‖ ≤ K * physicalQ h w ^ (h * α - loss degree m) :=
-  angularField_jet_bound D hh hh1 ha hab hN hU hcover hsm hs
-    (NativeJets.of_localBandJets hj hε hL0 hC hL) m
 
-theorem curl_angularField_jet_bound_of_localBandJets (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {α : ℝ} {ε L : ℕ → ℝ}
-    (hj : PhysicalMeanDomain.LocalBandJets U ε L α D.native)
-    (hε : ∀ n ≥ N, ε n = ChartScales.epsilon h n)
-    (hL0 : ∀ n ≥ N, 0 ≤ L n) {C : ℝ} {p : ℕ} (hC : 1 ≤ C)
-    (hL : ∀ n ≥ N, L n ≤ C * ChartScales.S n ^ p) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ w : SpaceTime, w ∈ physicalDomain h N → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (SpatialCurl.spatialCurl D.angularField) w‖ ≤
-        K * physicalQ h w ^ (h * α - loss degree (m + 1)) :=
-  curl_angularField_jet_bound D hh hh1 ha hab hN hU hcover hsm hs
-    (NativeJets.of_localBandJets hj hε hL0 hC hL) m
 
 /-! ## Open physical sublevel interfaces -/
 
@@ -267,16 +237,6 @@ theorem angularField_sublevel_smooth (D : CoherentFamily h degree N Δ U ℝ)
   (angularField_smooth D hh hh1 ha hab hU hcover hsm hs).mono
     (fun _ hw => ⟨hw.1, hw.2.trans_le hq⟩)
 
-theorem curl_angularField_sublevel_smooth (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) :
-    ContDiffOn ℝ ∞ (SpatialCurl.spatialCurl D.angularField)
-      (CutStageEstimates.physicalSublevel h qbig) :=
-  (curl_angularField_smooth D hh hh1 ha hab hU hcover hsm hs).mono
-    (fun _ hw => ⟨hw.1, hw.2.trans_le hq⟩)
 
 theorem field_sublevel_bound (D : CoherentFamily h degree N Δ U E)
     (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
@@ -306,19 +266,5 @@ theorem angularField_sublevel_bound (D : CoherentFamily h degree N Δ U ℝ)
   exact ⟨C, hC, fun w hw hqw => hb w hw.1
     (PhysicalStageBounds.abs_time_le_one hh hh1 hw.1 hqw) (hw.2.le.trans hq)⟩
 
-theorem curl_angularField_sublevel_bound (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {gain : ℝ} (hj : NativeJets N U gain D.native)
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (SpatialCurl.spatialCurl D.angularField) w‖ ≤
-        C * physicalQ h w ^ (gain - loss degree (m + 1)) := by
-  obtain ⟨C, hC, hb⟩ := curl_angularField_jet_bound D hh hh1 ha hab hN hU hcover hsm hs hj m
-  exact ⟨C, hC, fun w hw hqw => hb w ⟨hw.1, hw.2.trans_le hq⟩
-    (PhysicalStageBounds.abs_time_le_one hh hh1 hw.1 hqw)⟩
 
 end NavierStokes.LocalMeanPhysicalBounds

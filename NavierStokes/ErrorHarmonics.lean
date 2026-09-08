@@ -68,11 +68,6 @@ theorem band_conjugatePair {D : Type} (j : ℤ) (a : D → ℂ) :
   (band_single j (fun x => a x / 2)).add
     (band_conjugateReverse (band_single j (fun x => a x / 2)))
 
-theorem norm_pair_field_le {D : Type} (j : ℤ) (a : D → ℂ) (k : ℝ) (Φ : D → ℝ)
-    (kp : ℤ) (p : D × ℝ) : ‖field (conjugatePair j a) k Φ kp p‖ ≤ ‖a p.1‖ := by
-  rw [field_conjugatePair, Complex.norm_real]
-  apply (Complex.abs_re_le_norm _).trans
-  rw [norm_mul, norm_character, mul_one]
 
 noncomputable def pairedBlock {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ)
     (kp : ℕ → ℤ) (a : ℕ → D → HarmonicCalculus.ComplexVector) : HarmonicBlock D where
@@ -187,12 +182,6 @@ noncomputable def gaussianBlock (d : LinearWaveBounds.GraphDirections (D × ℝ)
     (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) : HarmonicBlock D :=
   pairedBlock j k Φ kp (fun n x => LinearWaveBounds.excludedSlotError d ψ a source n (x, 0))
 
-theorem gaussianBlock_metadata (d : LinearWaveBounds.GraphDirections (D × ℝ))
-    (ψ : ℕ → D × ℝ → ℝ) (a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector)
-    (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) :
-    (gaussianBlock d ψ a source j k Φ kp).frequency = k ∧
-    (gaussianBlock d ψ a source j k Φ kp).phase = Φ ∧
-    (gaussianBlock d ψ a source j k Φ kp).angularFrequency = kp := ⟨rfl, rfl, rfl⟩
 
 theorem gaussianBlock_band (d : LinearWaveBounds.GraphDirections (D × ℝ))
     (ψ : ℕ → D × ℝ → ℝ) (a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector)
@@ -200,12 +189,6 @@ theorem gaussianBlock_band (d : LinearWaveBounds.GraphDirections (D × ℝ))
     HarmonicBlock.BandLimited (gaussianBlock d ψ a source j k Φ kp) j.natAbs :=
   pairedBlock_band j k Φ kp _
 
-theorem gaussianBlock_symmetric (d : LinearWaveBounds.GraphDirections (D × ℝ))
-    (ψ : ℕ → D × ℝ → ℝ) (a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector)
-    (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) (n : ℕ) (i : Fin 3) :
-    ConjugateSymmetric ((gaussianBlock d ψ a source j k Φ kp).velocity n i) :=
-  conjugatePair_symmetric j
-    (fun x => LinearWaveBounds.excludedSlotError d ψ a source n (x, 0) i)
 
 /-- The witness evaluates to the actual error, from primitive angular
 independence and the actual phase identity. No error representation is assumed. -/
@@ -226,29 +209,7 @@ theorem gaussianBlock_represents (d : LinearWaveBounds.GraphDirections (D × ℝ
   rw [← character_eq_carrier j (k n) (Ψ n) p, hphase n p.1 p.2]
   rw [excludedSlotError_angleIndependent d hψ hψa ha hs n p.1 p.2]
 
-/-- The affine Gaussian slot profile supplies the cutoff invariance itself. -/
-theorem gaussianSlotBlock_represents {s : WeightedClasses.StripData (D × ℝ)}
-    (g : GaussianTailFlat.SlotFamily s) (d : LinearWaveBounds.GraphDirections (D × ℝ))
-    {a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector}
-    (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (Ψ : ℕ → D × ℝ → ℝ) (kp : ℕ → ℤ)
-    (hangle : ∀ n, g.linear n ((0 : D), 1) = 0)
-    (ha : AngleIndependent a) (hs : AngleIndependent source)
-    (hphase : ∀ n x θ, k n * Ψ n (x, θ) = k n * Φ n x + (kp n : ℝ) * θ) :
-    (gaussianBlock d g.cutoff a source j k Φ kp).oscillation =
-      gaussianField d g.cutoff a source j k Ψ :=
-  gaussianBlock_represents d j k Φ Ψ kp
-    (fun n => GaussianTailFlat.profile_contDiff.comp (g.coordinate_contDiff n))
-    (slot_cutoff_angleIndependent g hangle) ha hs hphase
 
-theorem gaussianField_eq_gaussianTailError {s : WeightedClasses.StripData (D × ℝ)}
-    (g : GaussianTailFlat.SlotFamily s) (d : LinearWaveBounds.GraphDirections (D × ℝ))
-    (hfast : ∀ n, g.linear n (d.fastScale n • d.fast) = (g.length n)⁻¹)
-    (a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector)
-    (j : ℤ) (k : ℕ → ℝ) (Ψ : ℕ → D × ℝ → ℝ) :
-    gaussianField d g.cutoff a source j k Ψ =
-      fun n p i => (HarmonicCalculus.vectorMode (k n * (j : ℝ)) (Ψ n) (g.error a source n) p i).re := by
-  unfold gaussianField
-  rw [LinearWaveBounds.excludedSlotError_eq_gaussianError g d hfast]
 
 end GaussianErrors
 
@@ -263,20 +224,8 @@ noncomputable def pressureAliasBlock (r : ReconstructionData) (c : Context (Lift
     HarmonicBlock (Lift S) :=
   zeroBlock k Φ kp (fun n x => CorrectionState.pressureAlias r c u n (x, 0))
 
-theorem pressureAliasBlock_represents (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    (pressureAliasBlock r c u k Φ kp).oscillation = CorrectionState.pressureAlias r c u := by
-  funext n p i
-  exact zeroBlock_evaluation k Φ kp _ n p i
 
-theorem pressureAliasBlock_band (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock.BandLimited (pressureAliasBlock r c u k Φ kp) 0 :=
-  zeroBlock_band k Φ kp _
 
-theorem pressureAlias_angleIndependent (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) : AngleIndependent (CorrectionState.pressureAlias r c u) :=
-  fun _ _ _ => rfl
 
 /-- The temporal alias retains its actual differentiated shifted integral. -/
 noncomputable def temporalAliasBlock (r : ReconstructionData) (h : ℝ)
@@ -284,23 +233,8 @@ noncomputable def temporalAliasBlock (r : ReconstructionData) (h : ℝ)
     (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) : HarmonicBlock (Lift S) :=
   zeroBlock k Φ kp (fun n x => CorrectionState.temporalAlias r h c u n (x, 0))
 
-theorem temporalAliasBlock_represents (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    (temporalAliasBlock r h c u k Φ kp).oscillation =
-      CorrectionState.temporalAlias r h c u := by
-  funext n p i
-  exact zeroBlock_evaluation k Φ kp _ n p i
 
-theorem temporalAliasBlock_band (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock.BandLimited (temporalAliasBlock r h c u k Φ kp) 0 :=
-  zeroBlock_band k Φ kp _
 
-theorem temporalAlias_angleIndependent (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : State (Lift S)) :
-    AngleIndependent (CorrectionState.temporalAlias r h c u) := fun _ _ _ => rfl
 
 /-- Replacing a pressure reconstruction changes the saved alias by its exact
 new-minus-old value, which is again mode zero. -/
@@ -310,19 +244,7 @@ noncomputable def pressureAliasRefreshBlock (r : ReconstructionData)
   zeroBlock k Φ kp (fun n x => CorrectionState.pressureAlias r c newState n (x, 0) -
     CorrectionState.pressureAlias r c oldState n (x, 0))
 
-theorem pressureAliasRefreshBlock_represents (r : ReconstructionData)
-    (c : Context (Lift S)) (oldState newState : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    (pressureAliasRefreshBlock r c oldState newState k Φ kp).oscillation =
-      CorrectionState.pressureAlias r c newState - CorrectionState.pressureAlias r c oldState := by
-  funext n p i
-  exact zeroBlock_evaluation k Φ kp _ n p i
 
-theorem pressureAliasRefreshBlock_band (r : ReconstructionData)
-    (c : Context (Lift S)) (oldState newState : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock.BandLimited (pressureAliasRefreshBlock r c oldState newState k Φ kp) 0 :=
-  zeroBlock_band k Φ kp _
 
 end AliasErrors
 
@@ -343,27 +265,9 @@ theorem zeroBlock_real {D : Type} (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp
   intro n l x
   simp [zeroBlock]
 
-theorem gaussianBlock_real {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    (d : LinearWaveBounds.GraphDirections (D × ℝ))
-    (ψ : ℕ → D × ℝ → ℝ) (a source : ℕ → D × ℝ → HarmonicCalculus.ComplexVector)
-    (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (gaussianBlock d ψ a source j k Φ kp) :=
-  pairedBlock_real j k Φ kp _
 
-theorem pressureAliasBlock_real {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-    (r : ReconstructionData) (c : Context (Lift S)) (u : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (pressureAliasBlock r c u k Φ kp) := zeroBlock_real k Φ kp _
 
-theorem temporalAliasBlock_real {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-    (r : ReconstructionData) (h : ℝ) (c : Context (Lift S)) (u : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (temporalAliasBlock r h c u k Φ kp) := zeroBlock_real k Φ kp _
 
-theorem pressureAliasRefreshBlock_real {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-    (r : ReconstructionData) (c : Context (Lift S)) (oldState newState : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (pressureAliasRefreshBlock r c oldState newState k Φ kp) := zeroBlock_real k Φ kp _
 
 theorem symmetric_add {D : Type} {a b : Coefficients D}
     (ha : ConjugateSymmetric a) (hb : ConjugateSymmetric b) :
@@ -431,11 +335,6 @@ theorem sumBlock_represents {D ι : Type} (s : Finset ι)
   intro l hl
   rw [hk l hl, hΦ l hl, hkp l hl]
 
-theorem realBlock_field {D : Type} {b : HarmonicBlock D} (hb : RealBlock b)
-    (n : ℕ) (p : D × ℝ) (i : Fin 3) :
-    ((b.oscillation n p i : ℝ) : ℂ) =
-      field (b.velocity n i) (b.frequency n) (b.phase n) (b.angularFrequency n) p :=
-  field_real (hb.1 n i) _ _ _ _
 
 section FiniteStages
 
@@ -557,23 +456,7 @@ theorem accumulatedAliasBlock_real (steps : ℕ) (r : ReconstructionData) (h : �
     (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
     RealBlock (accumulatedAliasBlock steps r h c u k Φ kp) := zeroBlock_real k Φ kp _
 
-theorem accumulatedAlias_succ (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S)) :
-    accumulatedAlias (steps + 1) r h c u = accumulatedAlias steps r h c u +
-      CorrectionState.temporalAlias r h c (u steps) +
-      (CorrectionState.pressureAlias r c (u (steps + 1)) -
-        CorrectionState.pressureAlias r c (u steps)) := by
-  simp only [accumulatedAlias, Finset.sum_range_succ]
-  abel
 
-theorem pressure_refreshes_telescope (steps : ℕ) (r : ReconstructionData)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S)) :
-    (∑ s ∈ Finset.range steps, (CorrectionState.pressureAlias r c (u (s + 1)) -
-      CorrectionState.pressureAlias r c (u s))) =
-        CorrectionState.pressureAlias r c (u steps) - CorrectionState.pressureAlias r c (u 0) := by
-  induction steps with
-  | zero => simp
-  | succ steps ih => rw [Finset.sum_range_succ, ih]; abel
 
 /-- The two retained error types for one label are added as actual finite
 coefficient families. The base error is handled separately in the physical
@@ -588,39 +471,8 @@ noncomputable def accumulatedErrorBlock (steps : ℕ) (g : ℕ → GaussianData 
   phase := Φ
   angularFrequency := kp
 
-theorem accumulatedErrorBlock_represents (steps : ℕ) (g : ℕ → GaussianData (Lift S))
-    (r : ReconstructionData) (h : ℝ) (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ)
-    (hg : ∀ s < steps, (g s).Compatible k Φ kp) :
-    (accumulatedErrorBlock steps g r h c u k Φ kp).oscillation =
-      (∑ s ∈ Finset.range steps, (g s).error k) + accumulatedAlias steps r h c u := by
-  rw [← accumulatedGaussianBlock_represents steps g k Φ kp hg,
-    ← accumulatedAliasBlock_represents steps r h c u k Φ kp]
-  funext n p i
-  change (evaluate (_ + _) p.1 _).re = (evaluate _ p.1 _).re + (evaluate _ p.1 _).re
-  rw [evaluate_add, Complex.add_re]
-  rfl
 
-theorem accumulatedErrorBlock_band (steps : ℕ) (g : ℕ → GaussianData (Lift S))
-    (r : ReconstructionData) (h : ℝ) (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ)
-    (hj : ∀ s < steps, (g s).harmonic.natAbs ≤ 2 ^ s) :
-    HarmonicBlock.BandLimited (accumulatedErrorBlock steps g r h c u k Φ kp) (2 ^ steps) := by
-  refine ⟨fun n i => ?_, ?_⟩
-  · exact ((accumulatedGaussianBlock_band_pow steps g k Φ kp hj).1 n i).add
-      (((accumulatedAliasBlock_band steps r h c u k Φ kp).1 n i).mono (Nat.zero_le _))
-  · intro n j hj
-    simp [accumulatedErrorBlock] at hj
 
-theorem accumulatedErrorBlock_real (steps : ℕ) (g : ℕ → GaussianData (Lift S))
-    (r : ReconstructionData) (h : ℝ) (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (accumulatedErrorBlock steps g r h c u k Φ kp) := by
-  refine ⟨fun n i => symmetric_add
-    ((accumulatedGaussianBlock_real steps g k Φ kp).1 n i)
-    ((accumulatedAliasBlock_real steps r h c u k Φ kp).1 n i), ?_⟩
-  intro n j x
-  simp [accumulatedErrorBlock]
 
 end AliasStages
 
@@ -665,17 +517,6 @@ theorem cylindricalComponents_pack (r θ A B C : ℝ) :
       _ = _ := by simp only [Real.sin_sq_add_cos_sq, mul_one, neg_mul]
   · simp [cylindricalComponents]
 
-theorem axisymmetricVelocity_components (B F U : Profile) (q : ProfilePoint) (θ : ℝ) :
-    cylindricalComponents θ (AxisymmetricResidual.velocity B F U
-      (q.1, polarSpace q.2.1 q.2.2 θ)) =
-        ![-q.2.1 * B (polarProfile q), q.2.1 * F (polarProfile q), U (polarProfile q)] := by
-  have he := cylindricalComponents_pack q.2.1 θ (-B (polarProfile q))
-    (-F (polarProfile q)) (U (polarProfile q))
-  dsimp only [AxisymmetricResidual.velocity, AxisymmetricResidual.componentX,
-    AxisymmetricResidual.componentY, AxisymmetricResidual.lift]
-  rw [profilePoint_polarSpace]
-  simp only [polarSpace, AxisymmetricResidual.pack_zero, AxisymmetricResidual.pack_one]
-  convert! he using 2 <;> ring_nf
 
 /-- The literal Cartesian Navier--Stokes residual, expressed in its cylindrical
 frame. This is not an independently specified error oracle. -/
@@ -705,42 +546,13 @@ theorem axisymmetricBaseError_eq_value (B F U P : ℕ → Profile) (n : ℕ)
     (AxisymmetricResidual.residualAngular (B n) (F n) (U n) (polarProfile q))
     (AxisymmetricResidual.residualAxial (B n) (U n) (P n) (polarProfile q))
 
-/-- A local-in-time identity; no smooth continuation through singular time is
-required to place the actual base residual in the zero harmonic. -/
-theorem axisymmetricBaseError_angleIndependent_at (B F U P : ℕ → Profile) (n : ℕ)
-    (q : ProfilePoint) (θ : ℝ)
-    (hB : AxisymmetricResidual.SliceC2 (B n) q.1)
-    (hF : AxisymmetricResidual.SliceC2 (F n) q.1)
-    (hU : AxisymmetricResidual.SliceC2 (U n) q.1)
-    (hP : AxisymmetricResidual.SliceDifferentiable (P n) q.1) :
-    axisymmetricBaseError B F U P n (q, θ) = axisymmetricBaseError B F U P n (q, 0) := by
-  rw [axisymmetricBaseError_eq_value B F U P n q θ hB hF hU hP,
-    axisymmetricBaseError_eq_value B F U P n q 0 hB hF hU hP]
 
 noncomputable def axisymmetricBaseBlock (B F U P : ℕ → Profile)
     (k : ℕ → ℝ) (Φ : ℕ → ProfilePoint → ℝ) (kp : ℕ → ℤ) : HarmonicBlock ProfilePoint :=
   zeroBlock k Φ kp (axisymmetricBaseValue B F U P)
 
-theorem axisymmetricBaseBlock_represents_at (B F U P : ℕ → Profile)
-    (k : ℕ → ℝ) (Φ : ℕ → ProfilePoint → ℝ) (kp : ℕ → ℤ)
-    (n : ℕ) (q : ProfilePoint) (θ : ℝ) (i : Fin 3)
-    (hB : AxisymmetricResidual.SliceC2 (B n) q.1)
-    (hF : AxisymmetricResidual.SliceC2 (F n) q.1)
-    (hU : AxisymmetricResidual.SliceC2 (U n) q.1)
-    (hP : AxisymmetricResidual.SliceDifferentiable (P n) q.1) :
-    (axisymmetricBaseBlock B F U P k Φ kp).oscillation n (q, θ) i =
-      axisymmetricBaseError B F U P n (q, θ) i := by
-  rw [axisymmetricBaseBlock, zeroBlock_evaluation,
-    axisymmetricBaseError_eq_value B F U P n q θ hB hF hU hP]
 
-theorem axisymmetricBaseBlock_band (B F U P : ℕ → Profile)
-    (k : ℕ → ℝ) (Φ : ℕ → ProfilePoint → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock.BandLimited (axisymmetricBaseBlock B F U P k Φ kp) 0 :=
-  zeroBlock_band k Φ kp _
 
-theorem axisymmetricBaseBlock_real (B F U P : ℕ → Profile)
-    (k : ℕ → ℝ) (Φ : ℕ → ProfilePoint → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (axisymmetricBaseBlock B F U P k Φ kp) := zeroBlock_real k Φ kp _
 
 end AxisymmetricBase
 

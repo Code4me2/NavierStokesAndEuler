@@ -42,10 +42,5 @@ def bilinear (G : Forcing D raw) (H : Forcing D raw')
 
 end Forcing
 
-theorem admissible_bilinear (D : Data) (raw raw' : VectorField)
-    (h : Nonempty (Forcing D raw)) (h' : Nonempty (Forcing D raw'))
-    (B : Space →L[ℝ] Space →L[ℝ] Space) :
-    Nonempty (Forcing D (fun z => B (raw z) (raw' z))) :=
-  ⟨(Classical.choice h).bilinear (Classical.choice h') B⟩
 
 end EulerMeanPacketProvider

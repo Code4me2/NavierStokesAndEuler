@@ -109,29 +109,5 @@ theorem meanMomentum_with_initial
     (meanBoundaryFlux T hT FInv F M0 A L u)
     (meanMomentum_full_weak T hT FInv F F' hF hInv H M0 A L u f hu)
 
-/-- The constructed mean inverse therefore has the genuine derived initial
-momentum trace, before cancellation with the initial deformation derivative. -/
-theorem meanSolver_momentum_with_initial
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F' t) (Icc (0 : ℝ) T) t)
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x)
-    (H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (M0 A : L2 →L[ℝ] L2)
-    (L K B : ℝ) (hK : 0 ≤ K) (hB : 0 ≤ B)
-    (hF0 : FInv ⟨0, le_rfl, hT⟩ = ContinuousLinearMap.id ℝ L2)
-    (hH : ∀ t z, ⟪H t z, z⟫_ℝ ≤ K*‖z‖^2)
-    (hboundary : ∀ z : L2, z ∈ solenoidalSpace →
-      -B*‖z‖^2 ≤ ⟪M0 z, z⟫_ℝ+L*⟪A z, z⟫_ℝ)
-    (hsmall : K*(T^2/2)+B*T ≤ 1/2) (f : TimeLp T L2) :
-    let u := meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f
-    ∃ p : ℝ → solenoidalSpace, AbsolutelyContinuousOnInterval p 0 T ∧
-      p 0 = meanBoundaryFlux T hT FInv F M0 A L u ∧
-      (momentum T hT (solenoidalFrame T F) (u : TimeLp T L2) : ℝ → solenoidalSpace)
-        =ᵐ[timeMeasure T] p ∧
-      ∀ᵐ t ∂timeMeasure T,
-        HasDerivAt p (momentumForcing T hT (solenoidalFrame T F) (solenoidalFrame T F')
-          H (u : TimeLp T L2) f t) t :=
-  meanMomentum_with_initial T hT FInv F F' hF hInv H M0 A L
-    (meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f) f
-    (meanSolver_weak T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f)
 
 end EulerMeanVariationalInverse

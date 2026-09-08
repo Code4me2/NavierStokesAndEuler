@@ -47,13 +47,6 @@ theorem reconstruct (F : E ≃L[ℝ] E) (m₀ η : E)
   rw [hp]
   exact F.apply_symm_apply η
 
-omit [CompleteSpace E] in
-/-- The coordinate map is a left inverse to `F` restricted to the reference plane. -/
-theorem coordinates_leftInverse (F : E ≃L[ℝ] E) (m₀ : E) (ξ : referencePlane m₀) :
-    coordinates F m₀ (F (ξ : E)) = ξ := by
-  change (referencePlane m₀).orthogonalProjectionOnto (F.symm (F (ξ : E))) = ξ
-  rw [F.symm_apply_apply]
-  exact (referencePlane m₀).orthogonalProjectionOnto_mem_subspace_eq_self ξ
 
 omit [CompleteSpace E] in
 /-- The coordinate map has the expected polynomial bound from the inverse frame. -/
@@ -75,14 +68,6 @@ theorem frame_reconstruct (F : E ≃L[ℝ] E) (m₀ η : E)
   rw [R.apply_symm_apply]
   exact reconstruct F m₀ η hη
 
-omit [CompleteSpace E] in
-/-- Passing to an orthonormal coordinate basis has no extra norm cost. -/
-theorem frameCoordinates_norm (F : E ≃L[ℝ] E) (m₀ η : E)
-    (R : U ≃ₗᵢ[ℝ] referencePlane m₀) :
-    ‖frameCoordinates F m₀ R η‖ ≤ ‖F.symm.toContinuousLinearMap‖ * ‖η‖ := by
-  change ‖R.symm (coordinates F m₀ η)‖ ≤ _
-  rw [R.symm.norm_map]
-  exact coordinates_norm F m₀ η
 
 section Paths
 
@@ -115,15 +100,6 @@ theorem coordinatePath_zero_at (m₀ : E) (R : U ≃ₗᵢ[ℝ] referencePlane m
   change R.symm ((referencePlane m₀).orthogonalProjectionOnto (A t (η t))) = 0
   simp only [hη, map_zero]
 
-omit [CompleteSpace E] in
-/-- Pointwise coordinate control only pays the actual inverse-frame norm. -/
-theorem coordinatePath_norm (m₀ : E) (R : U ≃ₗᵢ[ℝ] referencePlane m₀)
-    (A : C(X, E →L[ℝ] E)) (η : C(X, E)) (t : X) :
-    ‖coordinatePath m₀ R A η t‖ ≤ ‖A t‖ * ‖η t‖ := by
-  change ‖R.symm ((referencePlane m₀).orthogonalProjectionOnto (A t (η t)))‖ ≤ _
-  rw [R.symm.norm_map]
-  exact ((referencePlane m₀).norm_orthogonalProjectionOnto_apply_le (A t (η t))).trans
-    ((A t).le_opNorm (η t))
 
 end Paths
 

@@ -298,16 +298,6 @@ theorem labelRegion_color_injective {D : ℝ} {z : ℝ × Position} (hq : 0 < z.
   exact SlotColoring.colorData_proper D
     (labelRegion_adjacency hq hL.1 hM.1 hne hL.2 hM.2) hc
 
-/-- The constructed coloring bounds overlap even on closed derivative
-supports. In particular no generic bounded-overlap hypothesis is used. -/
-theorem labelRegion_card_le {D : ℝ} {z : ℝ × Position} (hq : 0 < z.1)
-    (s : Finset Label) (hs : ∀ L ∈ s, 1 ≤ L.1 ∧ z ∈ labelRegion D L) : s.card ≤ 2250 := by
-  classical
-  have hi : Set.InjOn SlotColoring.colorData (s : Set Label) :=
-    (labelRegion_color_injective hq).mono hs
-  have hc := Finset.card_le_card_of_injOn (t := Finset.univ) SlotColoring.colorData
-    (fun L _ => Finset.mem_univ _) hi
-  simpa only [Finset.card_univ, SlotColoring.palette_card] using hc
 
 abbrev PositiveParam := Ioi (0 : ℝ) × Position
 
@@ -891,11 +881,6 @@ theorem commonWave_reexpress (a h : ℝ) (n d e : ℕ) (r0 : ℝ)
       commonWave a h n e r0 c amp j w := by
   simp only [commonWave, Function.comp_apply, coverChange_common]
 
-theorem globalWave_reexpress (a h : ℝ) (n d e : ℕ) (r0 : ℝ)
-    (c : CarrierData) (amp : LiftPoint → ℂ) (j : ℤ) (w : SpaceTime) :
-    globalWave a h n d r0 c (amp ∘ coverChange d e) j w =
-      globalWave a h n e r0 c amp j w :=
-  commonWave_reexpress a h n d e r0 _ amp j w
 
 theorem RegularFamily.sum_locally_finite {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
     (hf : RegularFamily f a b h r0 Z Δ) (hh : 0 < h) (hh1 : h < 1 / 2)
@@ -905,16 +890,6 @@ theorem RegularFamily.sum_locally_finite {H : ℕ} {f : WaveFamily H} {a b h r0 
   obtain ⟨s, hs, he⟩ := masked_finsum_eventually hh hh1 (f.term a h r0) hf.term_support hw
   exact ⟨s, waveRegion_card_le (physicalQ_pos hh hh1 hw) s (fun I hI => (hs I).mp hI), he⟩
 
-/-- Factoring in the actual constructed mask proves the support input used
-by `RegularFamily`; no separate support assertion about the sum is needed. -/
-theorem mask_support_of_factorization {D h : ℝ} {L : Label} {n d : ℕ}
-    {amp : LiftPoint → ℂ} {rest : SpaceTime → ℂ}
-    (he : ∀ w, amp (commonLift h n d w) = (physicalMask D L (physicalParams h w) : ℂ) * rest w)
-    (w : SpaceTime) (hw : amp (commonLift h n d w) ≠ 0) :
-    physicalMask D L (physicalParams h w) ≠ 0 := by
-  intro hz
-  apply hw
-  rw [he, hz, Complex.ofReal_zero, zero_mul]
 
 noncomputable def realCoordinate (i : Fin 3) : ℂ →L[ℝ] Space :=
   Complex.reCLM.smulRight (coordinateVector i)

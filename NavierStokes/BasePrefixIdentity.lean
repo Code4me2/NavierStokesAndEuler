@@ -265,15 +265,6 @@ theorem prefixVelocity_germ {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   filter_upwards [BaseResidual.annularPast_isOpen.mem_nhds hz] with w hw
   exact prefixVelocity_eq_slowVelocity hh hh1 hd hm J C hw.1 w.2 hw.2
 
-/-- In the regular radial-quotient convention, the sole radial input is the
-proved identity `X * beta = radialFlux`; it determines the finite curl. -/
-theorem velocityMatches_of_beta (h : ℝ) (d : Coefficients) (beta : ℕ → Inner → ℝ)
-    (hb : ∀ n, ∀ w ∈ profileWindow, w.1 * beta n w =
-      SlowDivergence.radialFlux h (SlowExpansionResidual.slowOrder h n) (d.axial n) w) :
-    VelocityMatches h d (SlowResidualMatching.ofBeta d.phi d.axial beta d.pressure) where
-  phi := fun _ _ _ => rfl
-  axial := fun _ _ _ => rfl
-  flux := fun n w hw => (hb n w hw).symm
 
 /-- The remaining agreements concern scalar pressure and the actual canonical
 stress primitives.  No finite-field or residual identity is an input. -/

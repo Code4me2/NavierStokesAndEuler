@@ -75,10 +75,6 @@ theorem contDiff_fixedMeanPrimitive (hF : ContDiff ℝ n F) (hF₁ : ContDiff �
     ContDiff ℝ n (fun p => fixedMeanPrimitive T hT (F p) (F₁ p)) :=
   contDiff_const.clm_comp (contDiff_fixedMeanDerivative T hT F F₁ hF hF₁)
 
-/-- The actual initial-trace map inherits parameter regularity. -/
-theorem contDiff_fixedMeanTrace (hF : ContDiff ℝ n F) (hF₁ : ContDiff ℝ n F₁) :
-    ContDiff ℝ n (fun p => fixedMeanTrace T hT (F p) (F₁ p)) :=
-  contDiff_const.clm_comp (contDiff_fixedMeanDerivative T hT F F₁ hF hF₁)
 
 /-- The full mean form, including the nonlocal boundary term, is a genuinely
 regular family whenever its actual coefficient paths are. -/

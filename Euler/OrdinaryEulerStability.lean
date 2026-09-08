@@ -71,35 +71,5 @@ theorem sampled_h3_tendsto_zero (U : Evolution T hT) (V : ℕ → Evolution T hT
   simpa only [mul_zero,zero_mul] using (hlim.const_mul 640).mul_const
     (Real.exp (3*stabilityConstant U.referenceSize*T))
 
-theorem no_gradient_escape (U : Evolution T hT) (V : ℕ → Evolution T hT)
-    (ε : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hlim : Tendsto ε atTop (𝓝 0))
-    (hinit : ∀ n, tensorNorm 3 (U.difference (V n) ⟨0,le_rfl,hT⟩) ≤ ε n)
-    (times : ℕ → Icc (0 : ℝ) T) :
-    ¬ Tendsto (fun n => ‖fderiv ℝ ((V n).velocity (times n)).field 0‖) atTop atTop := by
-  let err : ℕ → ℝ := fun n => (9*smoothEmbeddingConstant)*
-    tensorNorm 3 (U.difference (V n) (times n))
-  have he : Tendsto err atTop (𝓝 0) := by
-    simpa only [mul_zero] using
-      (U.sampled_h3_tendsto_zero V ε hε hlim hinit times).const_mul (9*smoothEmbeddingConstant)
-  have hc : Continuous (fun r => fderiv ℝ (U.velocity (projIcc 0 T hT r)).field 0) :=
-    (U.gradient_continuous 0).comp continuous_projIcc
-  apply EulerBreakdownCriterion.no_escape_near_compact_trajectory
-    (fun r => fderiv ℝ (U.velocity (projIcc 0 T hT r)).field 0)
-    (fun n => fderiv ℝ ((V n).velocity (times n)).field 0)
-    (fun n => (times n : ℝ)) err T hc.continuousOn (fun n => (times n).property) he
-  apply Eventually.of_forall
-  intro n
-  have hb := real_smooth_fderiv_le_H3 3 (U.difference (V n) (times n)).field
-    (U.difference (V n) (times n)).smooth
-    (fun j _ => (U.difference (V n) (times n)).integrable j) 0
-  have hf : (U.difference (V n) (times n)).field=
-      ((V n).velocity (times n)).field-(U.velocity (times n)).field :=
-    funext (fieldSub_field _ _)
-  rw [hf,fderiv_sub (((V n).velocity (times n)).smooth.differentiable (by simp) 0)
-    ((U.velocity (times n)).smooth.differentiable (by simp) 0)] at hb
-  rw [projIcc_of_mem hT (times n).property]
-  change _ ≤ (9*smoothEmbeddingConstant)*tensorNorm 3 (U.difference (V n) (times n))
-  rw [tensorNorm_eq,hf]
-  exact hb
 
 end EulerOrdinarySobolev.Evolution

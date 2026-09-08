@@ -60,23 +60,7 @@ def multiplierMap : Field →L[ℝ] (L2 →L[ℝ] L2) where
 
 @[simp] theorem multiplierMap_apply (A : Field) : multiplierMap A = multiplier A := rfl
 
-theorem multiplier_one : multiplier (1 : Field) = ContinuousLinearMap.id ℝ L2 := by
-  apply ContinuousLinearMap.ext
-  intro u
-  apply Lp.ext
-  filter_upwards [multiplier_ae (1 : Field) u] with x hx
-  exact hx
 
-theorem multiplier_mul (A B : Field) :
-    multiplier (A*B) = (multiplier A).comp (multiplier B) := by
-  apply ContinuousLinearMap.ext
-  intro u
-  apply Lp.ext
-  filter_upwards [multiplier_ae (A*B) u, multiplier_ae A (multiplier B u),
-    multiplier_ae B u] with x hab ha hb
-  change (multiplier (A*B) u) x = (multiplier A (multiplier B u)) x
-  rw [hab, ha, hb]
-  rfl
 
 theorem multiplier_inverse (A B : Field) (hAB : ∀ x v, A x (B x v) = v) (u : L2) :
     multiplier A (multiplier B u) = u := by

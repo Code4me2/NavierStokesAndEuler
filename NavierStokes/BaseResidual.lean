@@ -113,13 +113,6 @@ theorem baseVelocity_axis_tendsto_atTop {a : ℕ → ℕ} (ha : StrictMono a) {h
   filter_upwards [self_mem_nhdsWithin] with t ht
   exact (baseVelocity_norm_at_origin ha hh hh1 hd C hz h0 ht).symm
 
-theorem baseVelocity_speedUnbounded {a : ℕ → ℕ} (ha : StrictMono a) {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) {d : Coefficients}
-    (hd : SmoothCoefficients d) (C : ℝ)
-    (hz : ∀ j, 0 < j → d.axial j (0, 0) = 0) (h0 : 0 < d.axial 0 (0, 0)) :
-    ProblemStatement.SpeedUnboundedAtOne (baseVelocity a h C d) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto
-    (baseVelocity_axis_tendsto_atTop ha hh hh1 hd C hz h0)
 
 end Axis
 
@@ -184,27 +177,6 @@ theorem exists_local_coefficient_extension {U K : Set Inner} (hU : IsOpen U)
   filter_upwards [χ.open_neighborhood.mem_nhds (χ.contains hw)] with v hv
   simp [F, χ.one_on v hv]
 
-/-- Local coefficient regularity suffices for the physical estimate. All
-coefficients with `1/X` or `1/L` may therefore stay on their true domain. -/
-theorem physical_monomial_bound_on {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {U K : Set Inner} (hU : IsOpen U) (hK : IsCompact K) (hKU : K ⊆ U)
-    {f : Inner → ℝ} (hf : ContDiffOn ℝ ∞ f U) (b lo hi qbig : ℝ) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ p : Chart, p.1 < 1 → (physicalChart h p).1 ≤ qbig →
-      (physicalChart h p).2.1 ∈ Icc lo hi → (physicalChart h p).2 ∈ K →
-      ‖iteratedFDeriv ℝ m (SimilarityProfile.pullback h b f) p‖ ≤
-        C * (physicalChart h p).1 ^ (b - m) := by
-  obtain ⟨F, hF, hFe⟩ := exists_local_coefficient_extension hU hK hKU hf
-  obtain ⟨C, hC, hb⟩ := physical_monomial_bound hh hh1 hF b lo hi qbig m
-  refine ⟨C, hC, fun p hp hq hX hw => ?_⟩
-  have he : SimilarityProfile.pullback h b f =ᶠ[𝓝 p]
-      SimilarityProfile.pullback h b F := by
-    filter_upwards [(hFe _ hw).comp_tendsto
-      (physicalChart_smoothAt hh hh1 hp).snd.continuousAt] with y hy
-    change (physicalChart h y).1 ^ b * f (physicalChart h y).2 =
-      (physicalChart h y).1 ^ b * F (physicalChart h y).2
-    exact congrArg (fun v => (physicalChart h y).1 ^ b * v) hy
-  rw [iteratedFDeriv_eq_of_eventuallyEq he m]
-  exact hb p hp hq hX
 
 end Monomials
 
@@ -439,10 +411,6 @@ variable {D E F G : Type}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-theorem finiteRate_mono {l : Filter D} {q : D → ℝ} {f : D → E} {M N : ℕ} {r : ℝ}
-    (hf : FiniteJetRate l q f M r) (hNM : N ≤ M) : FiniteJetRate l q f N r := by
-  obtain ⟨C, hC, hb⟩ := hf
-  exact ⟨C, hC, hb.mono (fun x hx m hm => hx m (hm.trans hNM))⟩
 
 theorem finiteRate_at {l : Filter D} {q : D → ℝ} {f : D → E} {M m : ℕ} {r : ℝ}
     (hf : FiniteJetRate l q f M r) (hm : m ≤ M) : JetRate l q f m r := by
@@ -1609,25 +1577,6 @@ theorem baseResidual_jetRate {l : Filter SpaceTime} {a : ℕ → ℕ} {h C lo hi
     abel
   rwa [heq] at hsum
 
-/-- All physical Cartesian space-time jets of the actual nonlinear error
-are flat along every fixed compact annular approach to q=0. -/
-theorem baseResidual_allJetsFlat {l : Filter SpaceTime} {a : ℕ → ℕ} {h C lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h lo hi) (hlo : 0 < lo)
-    {d : Coefficients} (hd : SmoothCoefficients d)
-    (ha : AdmissibleScales h (coefficientBundle C d) (innerBox lo hi) a)
-    (f : SlowProfiles) {O : Set Inner} (hO : IsOpen O) (hKO : innerBox lo hi ⊆ O)
-    (hv : ∀ j, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    (hfinite : FiniteIdentities h C d f) :
-    AllJetsFlat l (fun z => (cartesianChart h z).1) (baseResidual a h C d) := by
-  intro m N
-  obtain ⟨K, hK, hb⟩ := baseResidual_jetRate hh hh1 A hlo hd ha f hO hKO hv hu hf hX hL
-    hfinite m N (Nat.cast_nonneg N)
-  refine ⟨K, hK, ?_⟩
-  filter_upwards [A.positive_small hh hh1, hb] with z hz hbound
-  simpa only [abs_norm, abs_of_pos hz.1, Real.rpow_natCast] using hbound
 
 end NonlinearAssembly
 
@@ -2772,35 +2721,6 @@ theorem firstOrder_pair_outer_edgeJets (C : ℝ) (d : OutgoingTail.TailData)
       mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg (mul_nonneg hB.le hz) hd)
     _ = _ := by ring
 
- /-- A common scale sequence with the full weighted tensor estimate,
-constructed from support, smoothness, and the actual first-order primitive.
-No tensor estimate or summation-tail estimate is assumed. -/
-theorem exists_weighted_base_scales_from_primitives {h : ℝ} (hh : 0 < h) (C : ℝ)
-    {d : Coefficients} (hd : SmoothCoefficients d) (tail : OutgoingTail.TailData)
-    (y0 : ℝ) {c left width inner : ℝ} (hc : 0 < c) (hw : 0 < width)
-    (hl : Real.exp left < inner) (hi : inner ≤ Real.exp (y0 + 3 - width))
-    (hs : HigherInteriorSupport d left (y0 + 3))
-    (hz : ∀ w : Inner, w.1 < inner → stressPair d 1 w = 0)
-    (he : ∀ w ∈ outerWindow (Real.exp (y0 + 3 - width)) (y0 + 3),
-      stressPair d 1 =ᶠ[𝓝 w] (fun v => (SlowFirstOrderEdge.stressX C tail y0 v, 0)))
-    {K : Set Inner} (hK : IsCompact K) (hWK : activeWindow left (y0 + 3) ⊆ K) (B : ℕ) :
-    ∃ a : ℕ → ℕ, B ≤ a 0 ∧ AdmissibleScales h (coefficientBundle C d) K a ∧
-      ∀ m : ℕ, ∃ D : ℝ, 0 < D ∧ ∃ N : ℕ, ∀ q : ℝ, 0 < q → q ≤ 1 →
-        ∀ w ∈ activeWindow left (y0 + 3),
-          ‖blownJet m (fun v => normalizedTensor a h d v - stressPair d 0 v.2) (q, w)‖ ≤
-            D * q ^ h * activeZeta c left (y0 + 3) w * (activeDelta left (y0 + 3) w)⁻¹ ^ N := by
-  have hlog : left < y0 + 3 - width := Real.exp_lt_exp.mp (hl.trans_le hi)
-  have hright : Real.exp (y0 + 3 - width) < Real.exp (y0 + 3) :=
-    Real.exp_lt_exp.mpr (by linarith)
-  have hfirst := edgeJets_of_outer_collar (stressPair_smooth hd 1) hc hl hi hright hz
-    (firstOrder_pair_outer_edgeJets C tail y0 hc hw hlog he)
-  let O : Set Inner := Ioo (Real.exp left) (Real.exp (y0 + 3)) ×ˢ univ
-  have hO : IsOpen O := isOpen_Ioo.prod isOpen_univ
-  have hWO : activeWindow left (y0 + 3) ⊆ O := fun _ hw => ⟨hw.1, mem_univ _⟩
-  exact exists_weighted_base_scales hh C hd hK hWK hO hWO
-    (activeZeta_smooth hc left (y0 + 3)) (fun _ hw => radialWeight_pos hw.1)
-    (fun _ hw => activeDelta_bounds hw) hfirst
-    (activeZeta_edgeJets (by linarith) hc) (higherStressQuotient_smooth_of_support hd hc hs) B
 
 end WeightedInputConstruction
 

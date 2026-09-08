@@ -92,12 +92,7 @@ theorem BlocksCoherent.reindex {ι κ : Type} (e : κ ≃ ι) {v : CycleCoeffici
   intro l n m k hi
   exact H (e l) n m k hi
 
-theorem Coherent.particular_state {B N0 : ℕ} {x : CycleState (Index B N0)} (H : Coherent x) :
-    StateCoherent (ActualCycleParameters.particularState x).state := H.state
 
-theorem Coherent.particular_blocks {B N0 : ℕ} {x : CycleState (Index B N0)} (H : Coherent x) :
-    BlocksCoherent (ActualCycleParameters.particularState x).coefficients :=
-  H.blocks.reindex (ActualCycleParameters.swap B N0).symm
 
 theorem StateCoherent.atlas {u : State Point} (H : StateCoherent u) (N : ℕ) :
     (ActualMeanPhysicalData.initialAtlas N).StateOverlap standardRegion.carrier u :=
@@ -740,44 +735,7 @@ theorem next_primitive :
     (realizes B N0).length H.primitives (covariance_moving H W).1 (covariance_moving H W).2
     (rank_geometry H)).1
 
-include H W C in
-theorem temporal_potential_overlap (N : ℕ)
-    (HW : ∀ n m k, CommonWindow.index h n + k = CommonWindow.index h m →
-      CycleStateCoherence.CycleWavesOn geometry (ActualCycleParameters.fixedParameters B N0)
-        x.coefficients (commonContext B) x.state (overlap n m) n m k) :
-    (ActualMeanPhysicalData.initialAtlas N).OverlapLaw standardRegion.carrier
-      (CoordinateAlgebra.A h - 1 / 2)
-      (VariableGaugeMean.temporalPotential (ActualCycleParameters.fixedParameters B N0).gauge
-        (ActualCycleParameters.fixedParameters B N0).timeExponent
-        (ActualCycleParameters.fixedParameters B N0).commonIndex (commonContext B)
-        ((ActualCycleParameters.fixedParameters B N0).afterSigned x.coefficients (commonContext B) x.state)) := by
-  have HS : (ActualMeanPhysicalData.initialAtlas N).StateOverlap standardRegion.carrier
-      ((ActualCycleParameters.fixedParameters B N0).afterSigned x.coefficients (commonContext B) x.state) :=
-    fun n _ m _ k hi => (transport_of_waves H W C n m k hi (HW n m k hi)).signed
-  exact (ActualMeanPhysicalData.initialAtlas N).temporal_overlap standardRegion
-    (ActualCycleParameters.fixedParameters B N0).gauge (commonContext B) _
-    (ActualMeanPhysicalData.initial_context_overlap B N) HS
-    (ActualMeanPhysicalData.initial_gauge_overlap N) (stage_primitives H W).signed
-    (realizes B N0).inner_pos (realizes B N0).exponent_pos (realizes B N0).length rfl
 
-include H W C in
-theorem rank_potential_overlap (N : ℕ)
-    (HW : ∀ n m k, CommonWindow.index h n + k = CommonWindow.index h m →
-      CycleStateCoherence.CycleWavesOn geometry (ActualCycleParameters.fixedParameters B N0)
-        x.coefficients (commonContext B) x.state (overlap n m) n m k) :
-    (ActualMeanPhysicalData.initialAtlas N).OverlapLaw standardRegion.carrier
-      (CoordinateAlgebra.A h - 1 / 2)
-      (VariableGaugeMean.rankPotential (ActualCycleParameters.fixedParameters B N0).gauge
-        (ActualCycleParameters.fixedParameters B N0).rank (commonContext B)
-        ((ActualCycleParameters.fixedParameters B N0).afterTemporal x.coefficients (commonContext B) x.state)) := by
-  have HS : (ActualMeanPhysicalData.initialAtlas N).StateOverlap standardRegion.carrier
-      ((ActualCycleParameters.fixedParameters B N0).afterTemporal x.coefficients (commonContext B) x.state) :=
-    fun n _ m _ k hi => (transport_of_waves H W C n m k hi (HW n m k hi)).temporal
-  exact (ActualMeanPhysicalData.initialAtlas N).rank_overlap standardRegion
-    (ActualCycleParameters.fixedParameters B N0).gauge (ActualCycleParameters.fixedParameters B N0).rank
-    (commonContext B) _ (ActualMeanPhysicalData.initial_context_overlap B N) HS
-    (ActualMeanPhysicalData.initial_gauge_overlap N) (ActualMeanPhysicalData.initial_rank_overlap N)
-    (stage_primitives H W).temporal (stage_primitives H W).rankGeometry
 
 end Step
 
@@ -796,9 +754,6 @@ theorem state_labels (B N0 j : ℕ) :
     (state B N0 j).coefficients.labels = activeLabels standardRegion B N0 :=
   CycleStateCoherence.iterate_labels _ _ _ j
 
-theorem state_aliasCoefficients (B N0 j : ℕ) :
-    (state B N0 j).coefficients.aliasCoefficients = 0 :=
-  CycleStateCoherence.iterate_aliasCoefficients _ _ _ j
 
 /-- Collection of the already proved actual transport laws into precisely
 the input used by the physical mean atlas.  Its covariance fields are
@@ -855,13 +810,6 @@ theorem iterate_waves (j n m k : ℕ)
       rw [state_labels]
       exact hcover l n z hz hs) hS hcore n m k hi
 
-include H W hS hcore hcover in
-/-- The actual mean-atlas input is derived from the same analytic
-recurrence; its wave and covariance transports are conclusions. -/
-theorem mean_input (N : ℕ) :
-    ActualMeanPhysicalData.InitialCycleInput B N0 N (fun _ => ActualCycleParameters.fixedParameters B N0) :=
-  mean_input_of_transport B N0 N sigma S H W
-    (iterate_waves B N0 sigma S H W hS hcore hcover)
 
 end Iteration
 

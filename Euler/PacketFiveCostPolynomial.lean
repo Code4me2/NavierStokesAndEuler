@@ -116,7 +116,6 @@ theorem fivePolynomial_eval (X : ℝ) : (fivePolynomial P).eval X=fiveEnvelope P
 def costConstant : ℝ := coefficientCost (fivePolynomial P)
 def costPower : ℕ := (fivePolynomial P).natDegree
 
-theorem costConstant_pos : 0 < costConstant P := coefficientCost_pos _
 
 theorem fiveEnvelope_power (X : ℝ) (hX : 1 ≤ X) :
     fiveEnvelope P X ≤ costConstant P*X^(costPower P) := by

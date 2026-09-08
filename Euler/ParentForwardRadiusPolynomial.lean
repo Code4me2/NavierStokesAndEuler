@@ -107,25 +107,6 @@ theorem geometryCanonicalRadius_power (δ : ℝ) (hδ : 0 < δ) (ξ : U) (X : �
   exact (EulerPacketForwardRadius.canonicalRadius_le_envelope (J).linear (J).mean (J).normal BC δ ξ
     (sourceEnvelope X) hδ hp).trans (fullEnvelope_power X (L.K_one.trans hKX))
 
-theorem geometryForward_radius_primitive_polynomial (δ : ℝ) (hδ : 0 < δ) (ξ : U) :
-    let X := parameterSize L.K 0 Ti Cp H.L δ ‖ξ‖
-    EulerPacketForwardRadius.RadiusPrimitives (J).linear (J).mean (J).normal BC δ ξ (sourceEnvelope X) ∧
-      sourceEnvelope X ≤ sourceConstant*X^sourcePower := by
-  have hL0 : 0 ≤ H.L := (mul_nonneg boundaryLocalizationC1_nonneg H.Bc_nonneg).trans H.L_lower
-  obtain ⟨h1,hK,_,hIT,hC,hB,hD,hN⟩ := parameterSize_bounds L.K 0 Ti Cp H.L δ ‖ξ‖
-    (zero_le_one.trans L.K_one) le_rfl ((inv_pos.mpr A.T_pos).le.trans hTi)
-    G.growth_constant_pos.le hL0 hδ (norm_nonneg ξ)
-  exact ⟨L.geometryForward_radius_primitives H m hm R S hS P G hball Ω hΩ hΩo hsub hΩball
-    Ti hT1 hTi δ ξ _ hK hIT hC hB hD hN,sourceEnvelope_power _ h1⟩
 
-theorem geometryCanonicalRadius_polynomial (δ : ℝ) (hδ : 0 < δ) (ξ : U) :
-    L.geometryCanonicalRadius H m hm R S hS P G hball Ω hΩ hΩo hsub hΩball Ti hT1 hTi δ ξ ≤
-      fullConstant*(parameterSize L.K 0 Ti Cp H.L δ ‖ξ‖)^fullPower := by
-  have hL0 : 0 ≤ H.L := (mul_nonneg boundaryLocalizationC1_nonneg H.Bc_nonneg).trans H.L_lower
-  obtain ⟨_,hK,_,hIT,hC,hB,hD,hN⟩ := parameterSize_bounds L.K 0 Ti Cp H.L δ ‖ξ‖
-    (zero_le_one.trans L.K_one) le_rfl ((inv_pos.mpr A.T_pos).le.trans hTi)
-    G.growth_constant_pos.le hL0 hδ (norm_nonneg ξ)
-  exact L.geometryCanonicalRadius_power H m hm R S hS P G hball Ω hΩ hΩo hsub hΩball
-    Ti hT1 hTi δ hδ ξ _ hK hIT hC hB hD hN
 
 end EulerParentPacketFrames.LabelData

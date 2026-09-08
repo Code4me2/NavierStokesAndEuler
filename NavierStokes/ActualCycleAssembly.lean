@@ -544,17 +544,6 @@ theorem refined_tangent_inputSupport (l : Index B N0) (s : StripData Point)
   · intro n x hx hn
     exact (refined_signed_common_zero l s request n (x := (x,0)) hx hn).2
 
-theorem refined_curl_inputSupport (l : Index B N0) (s : StripData Point)
-    (request : ℕ → Point × ℝ → SignedWaveUpdate.Vec2) :
-    HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualCoreSupport.refinedCarrier l)
-      ((ActualSignedStageControls.parameters l).curlBlock s request) 0 0 := by
-  apply inputSupport_subBlock _ (refined_tangent_inputSupport l s request)
-  apply block_inputSupport_of_zero
-  · intro n x hx hn
-    exact (refined_signed_common_zero_germs l s request n (x := (x,0)) hx hn).2.1.self_of_nhds
-  · intro n x hx hn
-    exact (refined_signed_common_zero l s request n (x := (x,0)) hx hn).2
 
 end RefinedSignedSupport
 
@@ -681,25 +670,6 @@ theorem canonical_source_zero_germ (j : ℤ) (n : ℕ)
     (ActualCarrierTransport.canonicalSourceRegion_closed l) (associated_inputSupport hN l hs)
     j n ⟨hz, mem_univ _⟩ hn
 
-theorem canonical_copy_zero_germs (j : ℤ)
-    (s : StripData ((CycleSlow × ℝ) × TorusInverse.Plane))
-    (d : LinearWaveBounds.GraphDirections ((CycleSlow × ℝ) × TorusInverse.Plane))
-    (n : ℕ) {z : (CycleSlow × ℝ) × TorusInverse.Plane}
-    (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain)
-    (hn : (z.1.1, z.2) ∉ ActualCarrierTransport.canonicalSourceRegion l n) :
-    let a := (ActualParticularStageControls.canonicalParameters (l.2,l.1)).copyData
-      (StateReindex.context cycleAssoc.symm c) (StateReindex.state cycleAssoc.symm u)
-      (StateReindex.block cycleAssoc.symm b) (StateReindex.blockCoefficients cycleAssoc.symm G)
-      (StateReindex.blockCoefficients cycleAssoc.symm A) j
-    ((a.commonCorrected s d).amplitude n =ᶠ[𝓝 z] fun _ => 0) ∧
-    (a.common.pressure n =ᶠ[𝓝 z] fun _ => 0) ∧
-    (a.globalGaussian d n =ᶠ[𝓝 z] fun _ => 0) := by
-  dsimp only
-  rw [canonical_copyData_eq_scalar]
-  exact ScalarParticularSupport.scalarData_zero_germs _ _ _ _ _ _ _ _ _ _
-    (ActualCarrierTransport.geometry_outer_injective l) ActualCarrierTransport.parameterDomain
-    (ActualCarrierTransport.activeSlowCore l)
-    (fun n z hz hn => canonical_source_zero_germ hN l c u b G A hs j n hz hn) s d n hz hn
 
 end CanonicalParticular
 
@@ -982,16 +952,6 @@ theorem refined_particular_zero_germs (hN : ActualCarrierGeometry.geometricThres
       (refined_carrier_factorization hN l) c u b G A hs j s
       (ActualParticularStageControls.canonicalParameters (l.2,l.1)).directions n hz hns⟩
 
-/-- The literal recomputed signed request is allowed, so this is the
-fixed cycle's exact block and Gaussian coefficient support. -/
-theorem cycle_refined_signed_inputSupport (x : CycleState (Index B N0)) (c : Context Point)
-    (l : Index B N0) :
-    HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualCoreSupport.refinedCarrier l)
-      ((ActualCycleParameters.fixedParameters B N0).signedBlock x.coefficients c x.state l)
-      ((ActualCycleParameters.fixedParameters B N0).signedGaussianBlock x.coefficients c x.state l).velocity 0 :=
-  refined_signed_inputSupport l ActualInitialization.geometry.strip
-    ((ActualCycleParameters.fixedParameters B N0).signedRequest x.coefficients c x.state)
 
 end ConcreteCarriers
 
@@ -1106,9 +1066,6 @@ noncomputable def assemblyOfParticularSupport :
     ((ActualCycleParameters.fixedParameters B N0).signedRequest x.coefficients
       (ActualPrimary.commonContext B) x.state)
 
-theorem assemblyOfParticularSupport_labels :
-    (assemblyOfParticularSupport x H hσ hpart htangent hcurl hP0 hP1 hN hcarrier hpartSupport).labels =
-      x.coefficients.labels := rfl
 
 /-- The actual geometric constructor. Incoming primitive support is
 transported through the particular solve; signed support is proved above. -/
@@ -1118,16 +1075,8 @@ noncomputable def assembly :
     (cycle_particular_inputSupport hN x (ActualPrimary.commonContext B)
       (fun l => inputSupport_mono (H.inputSupport l) (hcarrier l)))
 
-theorem assembly_labels :
-    (assembly x H hσ hpart htangent hcurl hP0 hP1 hN hcarrier).labels = x.coefficients.labels := rfl
 
-theorem family_primary :
-    (family x H hσ hpart htangent hcurl hP0 hP1).primary = ActualInitialization.tangentBlock := rfl
 
-theorem family_tangent :
-    (family x H hσ hpart htangent hcurl hP0 hP1).tangent =
-      (ActualCycleParameters.fixedParameters B N0).signedTangent x.coefficients
-        (ActualPrimary.commonContext B) x.state := rfl
 
 /-- The two additional support predicates consumed by mean composition
 come from the same assembly and the same finite labels. -/

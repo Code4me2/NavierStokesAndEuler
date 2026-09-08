@@ -46,13 +46,6 @@ theorem adjugate_bound (F : P → EndSpace) (hF : ContDiff ℝ ∞ F)
         (mul_nonneg (by positivity) (majorant_nonneg R hR 0 n))
     _ = (9*C^2)*majorant R 0 n := by ring
 
-theorem inverse_contDiff (F I : P → EndSpace) (hF : ContDiff ℝ ∞ F)
-    (hdet : ∀ x, (operatorMatrix (F x)).det = 1)
-    (hI : ∀ x v, I x (F x v) = v) : ContDiff ℝ ∞ I := by
-  have he : I = fun x => adjugate (F x) :=
-    funext (fun x => inverse_eq_adjugate (F x) (I x) (hdet x) (hI x))
-  rw [he]
-  exact adjugate_contDiff F hF
 
 theorem inverse_bound (F I : P → EndSpace) (hF : ContDiff ℝ ∞ F)
     (hdet : ∀ x, (operatorMatrix (F x)).det = 1)

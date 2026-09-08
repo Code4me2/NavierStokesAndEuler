@@ -241,15 +241,5 @@ theorem radialCommutatorKernel_lpNorm_scale {R : ℝ} (hR : 0 < R) :
     Real.mul_rpow (Real.rpow_nonneg hR.le _) hi, ← Real.rpow_mul hR.le]
   norm_num ; ring
 
-/-- A single finite constant bounds the kernel norm at every positive radius. -/
-theorem radialCommutatorKernel_lpNorm_le :
-    ∃ C : ℝ, 0 < C ∧ ∀ R > 0,
-      comparisonLpNorm (4 / 3) (radialCommutatorKernel R) ≤ C * R ^ (-(3 / 4) : ℝ) := by
-  refine ⟨comparisonLpNorm (4 / 3) (radialCommutatorKernel 1) + 1, ?_, ?_⟩
-  · exact add_pos_of_nonneg_of_pos ENNReal.toReal_nonneg zero_lt_one
-  · intro R hR
-    rw [radialCommutatorKernel_lpNorm_scale hR]
-    exact mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one)
-      (Real.rpow_nonneg hR.le _)
 
 end NavierStokesR3.Comparison

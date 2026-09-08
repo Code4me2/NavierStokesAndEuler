@@ -88,7 +88,6 @@ theorem primitivePolynomial_eval (P : ℝ) [Fact (0 < P)] (X : ℝ) :
 def primitiveConstant (P : ℝ) [Fact (0 < P)] : ℝ := coefficientCost (primitivePolynomial P)
 def primitivePower (P : ℝ) [Fact (0 < P)] : ℕ := (primitivePolynomial P).natDegree
 
-theorem primitiveConstant_pos (P : ℝ) [Fact (0 < P)] : 0 < primitiveConstant P := coefficientCost_pos _
 
 theorem primitiveEnvelope_power (P : ℝ) [Fact (0 < P)] (X : ℝ) (hX : 1 ≤ X) :
     primitiveEnvelope P X ≤ primitiveConstant P*X^(primitivePower P) := by

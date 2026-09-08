@@ -24,16 +24,6 @@ namespace SobolevData
 
 variable {A : Parent} {E : Evolution A} (S : SobolevData E)
 
-theorem strong_euler (q : ℕ) (t : Icc (0 : ℝ) A.T) :
-    HasDerivWithinAt (extendPath A.T A.T_pos.le
-      (sobolevPath S.velocity S.velocity_continuous q))
-      (sobolevPath (rhs S.velocity S.velocity_continuous S.force)
-        (rhs_jet_continuous S.velocity S.velocity_continuous S.force S.force_continuous) q t)
-      (Icc (0 : ℝ) A.T) t :=
-  sobolev_evolution_of_classical A.T A.T_pos.le S.velocity S.force
-    S.velocity_continuous S.force_continuous E.velocity E.pressure S.velocity_match
-    (fun s x => (E.pressure_gradient s x).trans (S.force_match s x))
-    E.velocity_differentiable E.momentum_zero q t
 
 def restrictTime (T : ℝ) (hT : 0 < T) (hTA : T ≤ A.T) :
     SobolevData (E.restrictTime T hT hTA) where

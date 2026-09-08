@@ -60,11 +60,6 @@ def data (t : Icc (0 : ℝ) T) : EulerChildParticleFieldBounds.Data where
     rw [inner_eq_forward G k m hgraph ell hell t]
     exact physical_forward_measurePreserving k m T G.time_nonneg G.A hgraph G.divergence ell hell.ne' t
 
-include hgraph hK hD hV hW hM hR hd hv hw hds hvs in
-theorem data_inner (t : Icc (0 : ℝ) T) :
-    (data G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs t).inner =
-      (flowData T G.time_nonneg (physicalCoefficient k m T G.A ell)).forward t :=
-  inner_eq_forward G k m hgraph ell hell t
 
 omit G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs in
 def childAmplitude (K M : ℝ) : ℝ :=
@@ -73,23 +68,6 @@ def childAmplitude (K M : ℝ) : ℝ :=
 omit G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs in
 def childRadius (K M R : ℝ) : ℝ := (1+R)*((1+M)*(16*K)+2)+R
 
-include hgraph hK hD hV hW hM hR hd hv hw hds hvs in
-theorem fields_jet_bound (t : Icc (0 : ℝ) T) :
-    let E := data G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs t
-    E.childDisplacement.HasJetBound (childAmplitude K M) (childRadius K M R) ∧
-    E.childVelocity.HasJetBound (childAmplitude K M) (childRadius K M R) ∧
-    E.childAcceleration.HasJetBound (childAmplitude K M) (childRadius K M R) := by
-  let E := data G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs t
-  exact ⟨E.childDisplacement_bound,E.childVelocity_bound,E.childAcceleration_bound⟩
 
-include hgraph hK hD hV hW hM hR hd hv hw hds hvs in
-theorem fields_label_bound (J : ℝ)
-    (ha : EulerParameterWordGevrey.sobolevCoefficientAmplitude (Fin 3) 6
-      (childRadius K M R) (childAmplitude K M) ≤ J)
-    (hr : EulerParameterWordGevrey.sobolevCoefficientRadius (Fin 3) (childRadius K M R) ≤ J)
-    (t : Icc (0 : ℝ) T) :
-    let E := data G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs t
-    HasLabelBound J E.childDisplacement ∧ HasLabelBound J E.childVelocity ∧ HasLabelBound J E.childAcceleration :=
-  (data G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs t).child_label_bounds J ha hr
 
 end EulerPhysicalChildFields

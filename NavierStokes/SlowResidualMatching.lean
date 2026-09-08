@@ -322,34 +322,7 @@ noncomputable def pressureTailSize (N : ℕ) (h C : ℝ) (f : SlowProfiles)
     |omegaCoefficient h f N w| +
     |2 * w.1 * C⁻¹ ^ 2| * pairTailSize N (fun i j => f.phi i w * f.phi j w)
 
-theorem pressureTailSize_nonneg (N : ℕ) (h C : ℝ) (f : SlowProfiles)
-    (w : InnerPoint) : 0 ≤ pressureTailSize N h C f w :=
-  add_nonneg (add_nonneg (transportTailSize_nonneg _ _ _ _ _ _ _ _) (abs_nonneg _))
-    (mul_nonneg (abs_nonneg _) (pairTailSize_nonneg _ _))
 
-/-- The radial remainder retains the last radial acceleration as well as
-the omitted swirl products. Its exponent is not silently equated with the
-stronger tangential exponent. -/
-theorem pressureTail_bound {q h : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) (hh : 0 ≤ h)
-    (N : ℕ) (C : ℝ) (f : SlowProfiles) (w : InnerPoint) :
-    |pressureTail N q h C f w| ≤
-      pressureTailSize N h C f w * q ^ (pressureExponent h + slowOrder h (N + 1)) := by
-  have ht := transportTail_bound hq hq1 hh N 0 (-1 / 2) f.flux f.axial f.flux w
-  have he : pressureExponent h + slowOrder h (N + 1) ≤
-      0 - 1 + slowOrder h (N + 1) := by
-    unfold pressureExponent CoordinateAlgebra.A
-    linarith
-  have ht' := ht.trans (mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_exponent_ge hq hq1 he)
-    (transportTailSize_nonneg N h 0 (-1/2) f.flux f.axial f.flux w))
-  have hp := pairTail_bound hq hq1 hh N (pressureExponent h)
-    (fun i j => f.phi i w * f.phi j w)
-  unfold pressureTail
-  refine (abs_sub _ _).trans ((add_le_add_left (abs_add_le _ _) _).trans ?_)
-  rw [abs_mul, abs_mul, abs_of_pos (Real.rpow_pos_of_pos hq _)]
-  have hh' := mul_le_mul_of_nonneg_left hp (abs_nonneg (2 * w.1 * C⁻¹ ^ 2))
-  dsimp only [pressureTailSize]
-  nlinarith
 
 /-- The change from cylindrical radius R to the regular variable X. -/
 noncomputable def radiusPoint (w : InnerPoint) : InnerPoint := (w.1 ^ 2 / 2, w.2)
@@ -642,10 +615,6 @@ theorem toRadius_differentiableAt {f : InnerProfile} {w : InnerPoint}
     (hf : DifferentiableAt ℝ f (radiusPoint w)) : DifferentiableAt ℝ (toRadius f) w :=
   hf.comp w (radiusPoint_smooth.differentiable (by simp)).differentiableAt
 
-theorem toRadius_contDiffAt_two {f : InnerProfile} {w : InnerPoint}
-    (hf : ContDiffAt ℝ 2 f (radiusPoint w)) : ContDiffAt ℝ 2 (toRadius f) w :=
-  hf.comp w ((radiusPoint_smooth.of_le
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2)).contDiffAt)
 
 theorem partialX_toRadius {f : InnerProfile} {w : InnerPoint}
     (hf : DifferentiableAt ℝ f (radiusPoint w)) :
@@ -1120,47 +1089,7 @@ theorem finite_monomial_inner_jet_bound {ι : Type*} (s : Finset ι)
     _ ≤ C * q ^ bmin := mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
       (Real.rpow_nonneg hq.le _)
 
-theorem transportTail_inner_jet_bound {O K : Set InnerPoint} (hO : IsOpen O)
-    (hK : IsCompact K) (hKO : K ⊆ O) {h : ℝ} (hh : 0 ≤ h)
-    (N : ℕ) (e α : ℝ) (v u f : ℕ → InnerProfile)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (v j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ K,
-      ‖iteratedFDeriv ℝ m (transportTail N q h e α v u f) w‖ ≤
-        C * q ^ (e - 1 + slowOrder h (N + 1)) := by
-  obtain ⟨C, hC, hb⟩ := finite_monomial_inner_jet_bound (transportIndices N)
-    (transportPower N h e) (transportTerm N h e α v u f) (e - 1 + slowOrder h (N + 1))
-    hO hK hKO (fun i hi => transportTerm_smoothOn hO N h e α v u f hv hu hf hX hL hi)
-    (fun i hi => transportPower_lower hh N e hi) m
-  refine ⟨C, hC, fun q hq hq1 w hw => ?_⟩
-  have he : transportTail N q h e α v u f =
-      fun y => ∑ i ∈ transportIndices N, q ^ transportPower N h e i * transportTerm N h e α v u f i y :=
-    funext (transportTail_eq_finite_monomials N q h e α v u f)
-  rw [he]
-  exact hb q hq hq1 w hw
 
-theorem pressureTail_inner_jet_bound {O K : Set InnerPoint} (hO : IsOpen O)
-    (hK : IsCompact K) (hKO : K ⊆ O) {h : ℝ} (hh : 0 ≤ h)
-    (N : ℕ) (C₀ : ℝ) (f : SlowProfiles)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ K,
-      ‖iteratedFDeriv ℝ m (pressureTail N q h C₀ f) w‖ ≤
-        C * q ^ (pressureExponent h + slowOrder h (N + 1)) := by
-  obtain ⟨C, hC, hb⟩ := finite_monomial_inner_jet_bound (pressureIndices N)
-    (pressurePower N h) (pressureTerm N h C₀ f) (pressureExponent h + slowOrder h (N + 1))
-    hO hK hKO (fun i hi => pressureTerm_smoothOn hO N h C₀ f hv hu hf hX hL hi)
-    (fun i hi => pressurePower_lower hh N hi) m
-  refine ⟨C, hC, fun q hq hq1 w hw => ?_⟩
-  have he : pressureTail N q h C₀ f =
-      fun y => ∑ i ∈ pressureIndices N, q ^ pressurePower N h i * pressureTerm N h C₀ f i y :=
-    funext (pressureTail_eq_finite_monomials N q h C₀ f)
-  rw [he]
-  exact hb q hq hq1 w hw
 
 theorem orderExponent_eq_axial (h : ℝ) (n : ℕ) :
     SlowStressSupport.orderExponent h n = axialExponent h + slowOrder h n := rfl
@@ -1282,17 +1211,6 @@ theorem axialWeighted_eq_zDensity (h : ℝ) (f : SlowProfiles) {n : ℕ} (hn : 0
     PositiveAxisSystem.a, CoordinateAlgebra.A]
   ring
 
-theorem radius_divergence (h : ℝ) (f : SlowProfiles) (n : ℕ) {w : InnerPoint}
-    (hv : DifferentiableAt ℝ (f.flux n) (radiusPoint w))
-    (hu : DifferentiableAt ℝ (f.axial n) (radiusPoint w))
-    (hd : divergenceCoefficient h f n (radiusPoint w) = 0) :
-    SlowStressSupport.dr (toRadius (f.flux n)) w =
-      -w.1 * SlowStressSupport.axialOp h (SlowStressSupport.orderExponent h n)
-        (toRadius (f.axial n)) w := by
-  change partialX (toRadius (f.flux n)) w = _
-  rw [partialX_toRadius hv, axialOp_toRadius h _ hu, orderExponent_eq_axial,
-    (divergenceCoefficient_eq_zero_iff h f n (radiusPoint w)).mp hd]
-  ring
 
 theorem partialX_toRadius_zero {f : InnerProfile} {eta : ℝ}
     (hf : DifferentiableAt ℝ (toRadius f) (0, eta)) : partialX (toRadius f) (0, eta) = 0 := by
@@ -1367,26 +1285,7 @@ theorem primitive_stress_congr_slice (m : ℕ) {F G : InnerProfile} {R eta : ℝ
     intervalIntegral.integral_congr (fun r _ => hFG r)
   simp only [SlowStressSupport.stress, hp]
 
-/-- Equality of the actual negative integrals, not just their derivatives. -/
-theorem thetaStress_eq_canonical {S : Set ℝ} (h C : ℝ) (f : SlowProfiles) (n : ℕ)
-    (hEq : EqOn (thetaDensity h C f n)
-      (SlowStressSupport.angularDensity h n (fun j => toRadius (f.flux j))
-        (fun j => toRadius (f.axial j)) (fun j => swirlRadius C (f.phi j)))
-      (SlowStressSupport.region S)) {w : InnerPoint} (hw : w.2 ∈ S) :
-    thetaStress h C f n w = fromRadius
-      (SlowStressSupport.angularStress h n (fun j => toRadius (f.flux j))
-        (fun j => toRadius (f.axial j)) (fun j => swirlRadius C (f.phi j))) w :=
-  primitive_stress_congr_slice 2 (fun r => hEq ⟨mem_univ r, hw⟩)
 
-theorem zStress_eq_canonical {S : Set ℝ} (h : ℝ) (f : SlowProfiles) (n : ℕ)
-    (hEq : EqOn (zDensity h f n)
-      (SlowStressSupport.axialDensity h n (fun j => toRadius (f.flux j))
-        (fun j => toRadius (f.axial j)) (toRadius (f.pressure n)))
-      (SlowStressSupport.region S)) {w : InnerPoint} (hw : w.2 ∈ S) :
-    zStress h f n w = fromRadius
-      (SlowStressSupport.axialStress h n (fun j => toRadius (f.flux j))
-        (fun j => toRadius (f.axial j)) (toRadius (f.pressure n))) w :=
-  primitive_stress_congr_slice 1 (fun r => hEq ⟨mem_univ r, hw⟩)
 
 theorem inner_smoothAt_of_radial {S : Set ℝ} (hS : IsOpen S) {F E : InnerProfile}
     (hF : SlowStressSupport.Smooth S F)
@@ -1479,36 +1378,6 @@ theorem normalized_axial_viscosity {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   rw [hfun, deriv_deriv_pullback_z hh hh1 (p := p) ht hE2]
   simp only [pullback, hqp, hip, Real.one_rpow, one_mul]
 
-/-- The order-one angular viscosity moment follows from the restored
-renormalized heat moment. Only the stated exterior support is used to
-replace the positive half-line integral by its finite radial integral. -/
-theorem lowerAngularViscosityMoment_of_renormalized {h C T B : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hT : 0 < T) (hB : 0 ≤ B)
-    {F E : InnerProfile} (hF : SlowStressSupport.Smooth (Ioo (-1) 1) F)
-    (hFE : ∀ R : ℝ, 0 < R → ∀ eta ∈ Ioo (-1 : ℝ) 1, F (R, eta) = E (R ^ 2 / 2, eta))
-    (he : ∀ eta ∈ Ioo (-1 : ℝ) 1, ∀ X : ℝ, T ≤ X →
-      E (X, eta) = C * X ^ (-RenormalizedHeatMoment.A h) *
-        RadialHeatProfile.profile (1 + h) (2 * (1 - eta ^ 2) / X))
-    (hm : ∀ eta ∈ Ioo (-1 : ℝ) 1, RenormalizedHeatMoment.xMoment h C E eta = 0)
-    (hExt : SlowStressSupport.exterior B (Ioo (-1) 1)
-      (SlowStressSupport.axialOp2 h (SlowStressSupport.orderExponent h 0) F)) :
-    SlowStressSupport.LowerAngularViscosityMoment (Ioo (-1) 1) B h F := by
-  intro eta heta
-  obtain ⟨ht, _, _⟩ := RenormalizedHeatMoment.normalized_coordinates hh hh1 heta
-  have hz := RenormalizedHeatMoment.uTheta_axial_viscosity_integral hh hh1 ht hT hF hFE he hm eta
-  rw [SlowStressSupport.moment_eq_positive hB hExt heta 2]
-  change (∫ R in Ioi (0 : ℝ), R ^ 2 *
-    SlowStressSupport.axialOp2 h (SlowStressSupport.orderExponent h 0) F (R, eta)) = 0
-  calc
-    _ = ∫ R in Ioi (0 : ℝ), R ^ 2 *
-        deriv (deriv (RenormalizedHeatMoment.uTheta h E (eta ^ 2) R)) eta := by
-      apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
-      intro R hR
-      dsimp only
-      rw [normalized_axial_viscosity hh hh1 hF hFE heta hR]
-      simp only [SlowStressSupport.orderExponent, slowOrder_zero, add_zero]
-      rfl
-    _ = 0 := hz
 
 theorem hierarchy_profile_smoothAt {R : ℝ} {U : Set ℂ} {h C : ℝ}
     {base : Fin 5 → InnerProfile} (A : SlowRecursion.LocalHierarchy R U h C base)
@@ -1521,29 +1390,6 @@ theorem hierarchy_profile_smoothAt {R : ℝ} {U : Set ℂ} {h C : ℝ}
   exact ((A.profiles_smooth hR hU n i).mono hsub).contDiffAt
     ((isOpen_Ioo.prod (PositiveAxisExistence.realParameterDomain_isOpen hU)).mem_nhds ⟨hX, heta⟩)
 
-theorem hierarchy_pressure_coefficient {R : ℝ} {U : Set ℂ} {h C : ℝ}
-    {base : Fin 5 → InnerProfile} (A : SlowRecursion.LocalHierarchy R U h C base)
-    (hR : 0 < R) (hU : IsOpen U) {n : ℕ} (hn : 0 < n)
-    {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2)) (heta : (eta : ℂ) ∈ U)
-    (hL : CoordinateAlgebra.L h eta ≠ 0) :
-    pressureCoefficient h C (hierarchyProfiles A) n (X, eta) = 0 := by
-  exact positiveOrder_pressure_coefficient h C _ _ _ _ _ n hX.1.ne' hL
-    (fun j _ => (hierarchy_profile_smoothAt A hR hU j 4 hX heta).of_le
-      (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2))
-    (A.equations n hn X hX eta heta)
 
-/-- A repaired family that retains the finite input germs retains the
-actual solved angular and axial equations in the inner region. -/
-theorem repaired_tangential_coefficients {R : ℝ} {U : Set ℂ} {h C : ℝ}
-    {base : Fin 5 → InnerProfile} (A : SlowRecursion.LocalHierarchy R U h C base)
-    (f : SlowProfiles) {n : ℕ} (hn : 0 < n) {X eta : ℝ}
-    (hX : X ∈ Ioo (0 : ℝ) (R ^ 2)) (heta : (eta : ℂ) ∈ U)
-    (hv : ∀ j ≤ n, f.flux j =ᶠ[𝓝 (X, eta)] (hierarchyProfiles A).flux j)
-    (hu : ∀ j ≤ n, f.axial j =ᶠ[𝓝 (X, eta)] (hierarchyProfiles A).axial j)
-    (hphi : ∀ j ≤ n, f.phi j =ᶠ[𝓝 (X, eta)] (hierarchyProfiles A).phi j)
-    (hp : f.pressure n =ᶠ[𝓝 (X, eta)] (hierarchyProfiles A).pressure n) :
-    angularCoefficient h f n (X, eta) = 0 ∧ axialCoefficient h f n (X, eta) = 0 := by
-  rw [angularCoefficient_congr_germ h n hv hu hphi, axialCoefficient_congr_germ h n hv hu hp]
-  exact hierarchy_tangential_coefficients A hn hX heta
 
 end NavierStokes.SlowResidualMatching

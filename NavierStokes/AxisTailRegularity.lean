@@ -324,55 +324,8 @@ theorem pressureTerm_eq_regular_on_nonnegative {O : Set InnerPoint} (hO : IsOpen
 
 /-! ## The same finite monomials, with regular inner coefficients -/
 
-theorem transportTail_eq_regular_of_germs (N : ℕ) (q h e α : ℝ)
-    {v u f beta u' f' : ℕ → InnerProfile} {w : InnerPoint}
-    (hv : ∀ j ≤ N, v j =ᶠ[𝓝 w] AxisSourceRegularity.axisFactor (beta j))
-    (hu : ∀ j ≤ N, u j =ᶠ[𝓝 w] u' j)
-    (hf : ∀ j ≤ N, f j =ᶠ[𝓝 w] f' j) (hX : w.1 ≠ 0) :
-    transportTail N q h e α v u f w =
-      ∑ i ∈ transportIndices N,
-        q ^ transportPower N h e i * regularTransportTerm N h e α beta u' f' i w := by
-  rw [transportTail_eq_finite_monomials]
-  apply Finset.sum_congr rfl
-  intro i hi
-  rw [transportTerm_eq_regular_of_germs N h e α hv hu hf hX hi]
 
-theorem pressureTail_div_eq_regular_of_germs (N : ℕ) (q h C : ℝ)
-    {f : SlowProfiles} {phi u beta : ℕ → InnerProfile} {w : InnerPoint}
-    (hv : ∀ j ≤ N, f.flux j =ᶠ[𝓝 w] AxisSourceRegularity.axisFactor (beta j))
-    (hu : ∀ j ≤ N, f.axial j =ᶠ[𝓝 w] u j)
-    (hp : ∀ j ≤ N, f.phi j =ᶠ[𝓝 w] phi j)
-    (hb : ∀ j ≤ N, ContDiffAt ℝ 2 (beta j) w)
-    (hL : CoordinateAlgebra.L h w.2 ≠ 0) (hX : w.1 ≠ 0) :
-    pressureTail N q h C f w / (2 * w.1) =
-      ∑ i ∈ pressureIndices N,
-        q ^ pressurePower N h i * regularPressureTerm N h C phi u beta i w := by
-  rw [pressureTail_eq_finite_monomials, Finset.sum_div]
-  apply Finset.sum_congr rfl
-  intro i hi
-  rw [mul_div_assoc, pressureTerm_eq_regular_of_germs N h C hv hu hp hb hL hX hi]
 
-/-- The physical radial denominator contributes precisely the original
-single power of `q`.  Regularizing `X` costs no further power. -/
-theorem radialTail_eq_regular_of_germs {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (N : ℕ) (C : ℝ) {f : SlowProfiles} {phi u beta : ℕ → InnerProfile}
-    {p : PhysicalPoint} (hp : p.1 < 1) (hs : 0 < p.2.1)
-    (hv : ∀ j ≤ N, f.flux j =ᶠ[𝓝 (SimilarityProfile.inner h p)]
-      AxisSourceRegularity.axisFactor (beta j))
-    (hu : ∀ j ≤ N, f.axial j =ᶠ[𝓝 (SimilarityProfile.inner h p)] u j)
-    (hphi : ∀ j ≤ N, f.phi j =ᶠ[𝓝 (SimilarityProfile.inner h p)] phi j)
-    (hb : ∀ j ≤ N, ContDiffAt ℝ 2 (beta j) (SimilarityProfile.inner h p))
-    (hL : CoordinateAlgebra.L h (SimilarityProfile.inner h p).2 ≠ 0) :
-    pressureTail N (SimilarityProfile.q h p) h C f (SimilarityProfile.inner h p) /
-        (2 * p.2.1) =
-      ∑ i ∈ pressureIndices N,
-        SimilarityProfile.q h p ^ (pressurePower N h i - 1) *
-          regularPressureTerm N h C phi u beta i (SimilarityProfile.inner h p) := by
-  rw [radialTail_eq_finite_monomials hh hh1 N C f hp hs]
-  apply Finset.sum_congr rfl
-  intro i hi
-  rw [pressureTerm_eq_regular_of_germs N h C hv hu hphi hb hL
-    (LeadingStress.inner_X_pos hh hh1 hp hs).ne' hi]
 
 theorem angular_power_lower {h : ℝ} (hh : 0 ≤ h) (N : ℕ)
     {i : TailIndex} (hi : i ∈ transportIndices N) :
@@ -404,54 +357,9 @@ theorem toRadius_smoothOn {O : Set InnerPoint} {f : InnerProfile}
     ContDiffOn ℝ ∞ (toRadius f) (radiusPoint ⁻¹' O) :=
   hf.comp radiusPoint_contDiff.contDiffOn (fun _ hw => hw)
 
-theorem toRadius_even (f : InnerProfile) (R η : ℝ) :
-    toRadius f (-R, η) = toRadius f (R, η) := by
-  simp [toRadius, radiusPoint]
 
-theorem regularTransportTerm_right_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h e α : ℝ) (beta u f : ℕ → InnerProfile)
-    (hb : ∀ j ≤ N, ContDiffOn ℝ ∞ (beta j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : TailIndex} (hi : i ∈ transportIndices N) :
-    ContDiffOn ℝ ∞ (regularTransportTerm N h e α beta u f i)
-      (O ∩ {w | 0 ≤ w.1}) :=
-  (regularTransportTerm_smoothOn hO N h e α beta u f hb hu hf hL hi).mono
-    Set.inter_subset_left
 
-theorem regularPressureTerm_right_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h C : ℝ) (phi u beta : ℕ → InnerProfile)
-    (hp : ∀ j ≤ N, ContDiffOn ℝ ∞ (phi j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hb : ∀ j ≤ N, ContDiffOn ℝ ∞ (beta j) O)
-    (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : PressureIndex} (hi : i ∈ pressureIndices N) :
-    ContDiffOn ℝ ∞ (regularPressureTerm N h C phi u beta i)
-      (O ∩ {w | 0 ≤ w.1}) :=
-  (regularPressureTerm_smoothOn hO N h C phi u beta hp hu hb hL hi).mono
-    Set.inter_subset_left
 
-theorem regularTransportTerm_radial_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h e α : ℝ) (beta u f : ℕ → InnerProfile)
-    (hb : ∀ j ≤ N, ContDiffOn ℝ ∞ (beta j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : TailIndex} (hi : i ∈ transportIndices N) :
-    ContDiffOn ℝ ∞ (toRadius (regularTransportTerm N h e α beta u f i))
-      (radiusPoint ⁻¹' O) :=
-  toRadius_smoothOn (regularTransportTerm_smoothOn hO N h e α beta u f hb hu hf hL hi)
 
-theorem regularPressureTerm_radial_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h C : ℝ) (phi u beta : ℕ → InnerProfile)
-    (hp : ∀ j ≤ N, ContDiffOn ℝ ∞ (phi j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hb : ∀ j ≤ N, ContDiffOn ℝ ∞ (beta j) O)
-    (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : PressureIndex} (hi : i ∈ pressureIndices N) :
-    ContDiffOn ℝ ∞ (toRadius (regularPressureTerm N h C phi u beta i))
-      (radiusPoint ⁻¹' O) :=
-  toRadius_smoothOn (regularPressureTerm_smoothOn hO N h C phi u beta hp hu hb hL hi)
 
 end NavierStokes.AxisTailRegularity

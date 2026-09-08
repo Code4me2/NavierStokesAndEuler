@@ -73,13 +73,5 @@ theorem ofPathFamily_jet_norm (n : ℕ) :
   rw [ofPathFamily_jet_apply]
   exact hC n t x
 
-theorem ofPathFamily_field_norm :
-    ‖(ofPathFamily T hT f q hf hq hd C D hC hD).field‖ ≤ C 0 := by
-  have hnonneg : 0 ≤ C 0 := (norm_nonneg _).trans (hC 0 ⟨0,le_rfl,hT⟩ 0)
-  apply (ContinuousMap.norm_le _ hnonneg).2
-  intro t
-  apply (BoundedContinuousFunction.norm_le hnonneg).2
-  intro x
-  exact value_bound T f C hC t x
 
 end SmoothTimeField

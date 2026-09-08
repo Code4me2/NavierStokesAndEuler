@@ -126,13 +126,6 @@ theorem extendTrace_periodic {T : ℝ} {f : SpaceTime → V} {L : Space → V} (
 
 variable [NormedSpace ℝ V]
 
-/-- A fixed continuous linear map preserves the locally uniform limit. -/
-theorem locallyUniform_linearMap {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
-    {T : ℝ} {f : SpaceTime → V} {L : Space → V} (A : V →L[ℝ] W)
-    (hlim : TendstoLocallyUniformly (fun t x => f (t, x)) L (𝓝[<] T)) :
-    TendstoLocallyUniformly (fun t x => A (f (t, x))) (fun x => A (L x)) (𝓝[<] T) := by
-  intro u hu x
-  exact hlim _ (A.uniformContinuous hu) x
 
 /-- The full Frechet derivative extends to the boundary. The proof uses
 the mean-value theorem on the convex open past halfspace. -/

@@ -37,8 +37,6 @@ def amplitude (C R : ℝ) (hC : 0 ≤ C) (hR : 0 ≤ R) : ℝ := (scales P C R h
 theorem amplitude_pos (C R : ℝ) (hC : 0 ≤ C) (hR : 0 ≤ R) : 0 < amplitude P C R hC hR :=
   (scales P C R hC hR).positive
 
-theorem amplitude_le_one (C R : ℝ) (hC : 0 ≤ C) (hR : 0 ≤ R) : amplitude P C R hC hR ≤ 1 :=
-  (scales P C R hC hR).one
 
 variable (u : SmoothL2Field Space) (C R : ℝ) (hC : 0 ≤ C) (hR : 0 ≤ R)
   (hu : u.HasJetBound C R) (hdiv : ∀ x, divergence u.field x=0)

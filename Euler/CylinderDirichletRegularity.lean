@@ -69,45 +69,7 @@ variable (hQ : ContDiff ℝ ∞ (translateCoefficientPath D.Q))
 
 include hQ hQ₁ hH
 
-theorem velocityLp_orbit_contDiff (f : TimeLp T (CylinderL2 P E))
-    (hf : ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap f)) :
-    ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap (D.velocityLp P f)) := by
-  let g : LiftTangent → TimeLp T (CylinderL2 P E) :=
-    fun a => timeLift T (translate P a).toContinuousLinearMap f
-  change ContDiff ℝ ∞ g at hf
-  have hs := EulerTransverseFixedEvolution.velocityLp_contDiff
-    (X := LiftTangent) (U := CylinderL2 P U) (E := CylinderL2 P E) (n := ∞) T D.time_pos.le
-    (fun a : LiftTangent => (D.shifted a.1).frame P)
-    (fun a : LiftTangent => (D.shifted a.1).frameDerivative P)
-    (fun a : LiftTangent => (D.shifted a.1).hessian P)
-    D.lower D.lower_pos (fun a => (D.shifted a.1).frame_lower P)
-    (fun a => (D.shifted a.1).frame_derivative P)
-    D.potential D.potential_nonneg (fun a => (D.shifted a.1).hessian_upper P) D.small
-    (D.frameOrbit_contDiff P hQ) (D.frameDerivativeOrbit_contDiff P hQ₁) (D.hessianOrbit_contDiff P hH)
-    g hf
-  convert hs using 1
-  funext a
-  exact (D.velocityLp_translation P a f).symm
 
-theorem accelerationLp_orbit_contDiff (f : TimeLp T (CylinderL2 P E))
-    (hf : ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap f)) :
-    ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap (D.accelerationLp P f)) := by
-  let g : LiftTangent → TimeLp T (CylinderL2 P E) :=
-    fun a => timeLift T (translate P a).toContinuousLinearMap f
-  change ContDiff ℝ ∞ g at hf
-  have hs := EulerTransverseFixedEvolution.accelerationLp_contDiff
-    (X := LiftTangent) (U := CylinderL2 P U) (E := CylinderL2 P E) (n := ∞) T D.time_pos.le
-    (fun a : LiftTangent => (D.shifted a.1).frame P)
-    (fun a : LiftTangent => (D.shifted a.1).frameDerivative P)
-    (fun a : LiftTangent => (D.shifted a.1).hessian P)
-    D.lower D.lower_pos (fun a => (D.shifted a.1).frame_lower P)
-    (fun a => (D.shifted a.1).frame_derivative P)
-    D.potential D.potential_nonneg (fun a => (D.shifted a.1).hessian_upper P) D.small
-    (D.frameOrbit_contDiff P hQ) (D.frameDerivativeOrbit_contDiff P hQ₁) (D.hessianOrbit_contDiff P hH)
-    g hf
-  convert hs using 1
-  funext a
-  exact (D.accelerationLp_translation P a f).symm
 
 theorem velocityPath_orbit_contDiff (f : C(Icc (0 : ℝ) T,CylinderL2 P E))
     (hf : ContDiff ℝ ∞ (fun a => pathTranslate P a f)) :

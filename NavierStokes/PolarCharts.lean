@@ -53,8 +53,6 @@ theorem unrotate_rotate (j : Index) (p : Plane) : unrotate j (rotate j p) = p :=
 theorem rotate_unrotate (j : Index) (p : Plane) : rotate j (unrotate j p) = p := by
   fin_cases j <;> simp [rotate, unrotate]
 
-theorem norm_rotate (j : Index) (p : Plane) : ‖rotate j p‖ = ‖p‖ := by
-  fin_cases j <;> simp [rotate, Prod.norm_def, max_comm]
 
 theorem rotate_sum_sq (j : Index) (p : Plane) :
     (rotate j p).1 ^ 2 + (rotate j p).2 ^ 2 = p.1 ^ 2 + p.2 ^ 2 := by
@@ -163,13 +161,6 @@ theorem localChart_polar (j : Index) {r θ : ℝ} (hr : 0 < r)
   rw [localChart, hrot, baseChart_polar hr hθ]
   simp
 
-theorem localChart_contDiffAt (j : Index) {p : Plane} (hp : 0 < (rotate j p).1) :
-    ContDiffAt ℝ ∞ (localChart j) p := by
-  have hc : ContDiffAt ℝ ∞ (rotate j) p := (rotate_contDiff j).contDiffAt
-  have hrad : (rotate j p).1 ^ 2 + (rotate j p).2 ^ 2 ≠ 0 := by
-    nlinarith [sq_nonneg (rotate j p).2]
-  exact ((hc.fst.pow 2).add (hc.snd.pow 2)).sqrt hrad |>.prodMk
-    ((hc.snd.div hc.fst hp.ne').arctan.add contDiffAt_const)
 
 /-- The original normalized compact annulus uses the product norm. -/
 noncomputable def annulus (a b : ℝ) : Set Plane :=
@@ -185,9 +176,6 @@ noncomputable def chartDomain (a : ℝ) (j : Index) : Set Plane :=
 theorem chartDomain_open (a : ℝ) (j : Index) : IsOpen (chartDomain a j) :=
   isOpen_lt continuous_const (rotate_contDiff j).continuous.fst
 
-theorem sector_isCompact (a b : ℝ) (j : Index) : IsCompact (sector a b j) :=
-  (isCompact_closedBall 0 b).inter_right
-    (isClosed_le continuous_const (rotate_contDiff j).continuous.fst)
 
 theorem sector_subset_chartDomain {a b : ℝ} (ha : 0 < a) (j : Index) :
     sector a b j ⊆ chartDomain a j := by
@@ -215,16 +203,6 @@ theorem annulus_covered {a b : ℝ} (ha : 0 < a) {p : Plane} (hp : p ∈ annulus
   change a / 2 ≤ (rotate j p).1
   linarith
 
-/-- The same four sectors cover a compact annulus defined by the Euclidean
-radius, with the stated margin `rotated x ≥ a/2`. -/
-theorem euclidean_annulus_covered {a b : ℝ} {p : Plane}
-    (hlo : a ≤ radius p) (hhi : radius p ≤ b) :
-    ∃ j : Index, p ∈ sector a b j := by
-  have hn : a / 2 ≤ ‖p‖ := by linarith [radius_le_two_norm p]
-  obtain ⟨j, hj⟩ := exists_rotate_fst_ge hn
-  refine ⟨j, ?_, hj⟩
-  rw [Metric.mem_closedBall, dist_zero_right]
-  exact (norm_le_radius p).trans hhi
 
 /-- A concrete global extension of the base polar chart. -/
 noncomputable def extendedBase (a : ℝ) (p : Plane) : Plane :=
@@ -309,16 +287,6 @@ theorem chart_finiteJets_uniform {a : ℝ} (ha : 0 < a) (b : ℝ) (m : ℕ) :
       Finset.single_le_sum (fun v _ => abs_nonneg (B v)) (Finset.mem_univ i)
     exact (hB i p hp).trans ((le_abs_self (B i)).trans (by linarith))
 
-/-- The compact sectors cover the annulus and carry one uniform bound for the
-actual local inverse jets, not merely for a prescribed jet family. -/
-theorem localChart_finiteJets_uniform {a : ℝ} (ha : 0 < a) (b : ℝ) (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∀ j : Index, ∀ k ≤ m, ∀ p ∈ sector a b j,
-      ‖iteratedFDeriv ℝ k (localChart j) p‖ ≤ C := by
-  obtain ⟨C, hC, hB⟩ := chart_finiteJets_uniform ha b m
-  refine ⟨C, hC, ?_⟩
-  intro j k hk p hp
-  rw [← chart_jet_eq_localChart ha j (sector_subset_chartDomain ha j hp) k]
-  exact hB j k hk p hp.1
 
 section Scaling
 
@@ -359,27 +327,7 @@ theorem norm_scalePlane_le {Q : ℝ} (hQ : 0 < Q) :
 noncomputable def physicalChart (a : ℝ) (j : Index) (Q : ℝ) : Plane → Plane :=
   chart a j ∘ scalePlane Q
 
-theorem physicalChart_contDiff {a : ℝ} (ha : 0 < a) (j : Index) (Q : ℝ) :
-    ContDiff ℝ ∞ (physicalChart a j Q) :=
-  (chart_contDiff ha j).comp (scalePlane Q).contDiff
 
-/-- Each physical derivative costs exactly the fixed half-power of `Q`.
-The constant is chosen before `Q`, the chart, and the evaluation point. -/
-theorem physicalChart_finiteJets_uniform {a : ℝ} (ha : 0 < a) (b : ℝ) (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∀ (Q : ℝ), 0 < Q → ∀ j : Index, ∀ k ≤ m, ∀ p : Plane,
-      scalePlane Q p ∈ Metric.closedBall (0 : Plane) b →
-      ‖iteratedFDeriv ℝ k (physicalChart a j Q) p‖ ≤ C * Q ^ (-(k : ℝ) / 2) := by
-  obtain ⟨C, hC, hB⟩ := chart_comp_linear_finiteJets (E := Plane) ha b m
-  refine ⟨C, hC, ?_⟩
-  intro Q hQ j k hk p hp
-  have h := hB j k hk (scalePlane Q) p hp
-  have hs : ‖scalePlane Q‖ ^ k ≤ (Q ^ (-(1 / 2 : ℝ))) ^ k :=
-    pow_le_pow_left₀ (norm_nonneg _) (norm_scalePlane_le hQ) k
-  have he : (Q ^ (-(1 / 2 : ℝ))) ^ k = Q ^ (-(k : ℝ) / 2) := by
-    rw [← Real.rpow_mul_natCast hQ.le]
-    congr 1
-    ring
-  exact h.trans ((mul_le_mul_of_nonneg_left hs (by linarith)).trans_eq (by rw [he]))
 
 theorem rotate_smul (j : Index) (c : ℝ) (p : Plane) : rotate j (c • p) = c • rotate j p := by
   fin_cases j <;> ext <;> simp [rotate, mul_neg]
@@ -406,11 +354,6 @@ theorem physicalChart_eq {a Q : ℝ} (ha : 0 < a) (hQ : 0 < Q) (j : Index) {p : 
   rw [localChart_apply]
   simp only [inv_mul_eq_div]
 
-theorem physicalChart_inverse {a Q : ℝ} (ha : 0 < a) (hQ : 0 < Q) (j : Index) {p : Plane}
-    (hp : scalePlane Q p ∈ chartDomain a j) :
-    Real.sqrt Q • polar (physicalChart a j Q p) = p := by
-  rw [physicalChart, comp_apply, polar_chart ha j hp, scalePlane_eq_inv_sqrt hQ,
-    smul_smul, mul_inv_cancel₀ (Real.sqrt_pos.2 hQ).ne', one_smul]
 
 /-- Angles from two valid local inverse charts differ by an integer full turn. -/
 theorem localChart_angle_difference (i j : Index) {p : Plane}
@@ -466,14 +409,5 @@ theorem chart_periodic_eventuallyEq {V : Type*} {a : ℝ} (ha : 0 < a) (f : Plan
     with q hqi hqj
   exact chart_periodic_agree ha f hf i j hqi hqj
 
-theorem chart_periodic_jets_agree {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {a : ℝ} (ha : 0 < a) (f : Plane → V)
-    (hf : ∀ r : ℝ, Periodic (fun θ => f (r, θ)) (2 * Real.pi))
-    (i j : Index) {p : Plane} (hi : p ∈ chartDomain a i) (hj : p ∈ chartDomain a j) (k : ℕ) :
-    iteratedFDeriv ℝ k (f ∘ chart a i) p = iteratedFDeriv ℝ k (f ∘ chart a j) p := by
-  have he := chart_periodic_eventuallyEq ha f hf i j hi hj
-  have he' : f ∘ chart a i =ᶠ[𝓝[univ] p] f ∘ chart a j := by simpa using he
-  simpa only [iteratedFDerivWithin_univ] using
-    he'.iteratedFDerivWithin_eq he.eq_of_nhds k
 
 end NavierStokes.PolarCharts

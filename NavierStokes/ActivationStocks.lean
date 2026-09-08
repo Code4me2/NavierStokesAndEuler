@@ -174,10 +174,6 @@ end SmoothPairs
 noncomputable def etaD (F : Field) (p : Point) : ℝ :=
   deriv (fun η => F (p.1, η)) p.2
 
-theorem etaD_eq_parameterPartial {D : RadialDomain} {F : Field}
-    (hF : ContDiffOn ℝ ∞ F D.carrier) {p : Point} (hp : p ∈ D.carrier) :
-    etaD F p = parameterPartial F p :=
-  (parameterPartial_hasDerivAt D hF hp).deriv
 
 noncomputable def logViewOne (h X0 : ℝ) (f : Field) (H : HistoryRow → Field) (p : Point) : ℝ :=
   stockOne h (radius X0 p.1) p.2 (f p) (H .mass p) (etaD (H .mass) p)
@@ -359,13 +355,6 @@ theorem etaPair_actual_eq {J : Set ℝ} (hJ : IsOpen J) (A : StockPair J)
   filter_upwards [hJ.mem_nhds hη] with ξ hξ
   exact heq ξ hξ
 
-theorem etaPair_reference_eq {J : Set ℝ} (hJ : IsOpen J) (A : StockPair J)
-    (F : Field) (κ T u : ℝ) {η : ℝ} (hη : η ∈ J)
-    (heq : ∀ ξ ∈ J, A.reference ((κ, T), (u, ξ)) = F (T * u, ξ)) :
-    (etaPair hJ A).reference ((κ, T), (u, η)) = etaD F (T * u, η) := by
-  apply Filter.EventuallyEq.deriv_eq
-  filter_upwards [hJ.mem_nhds hη] with ξ hξ
-  exact heq ξ hξ
 
 noncomputable def controlledPair {J : Set ℝ} (hJ : IsOpen J) {U : Field}
     (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) : StockPair J where
@@ -612,9 +601,6 @@ theorem historyEtaPair_actual {T : ℝ} (hT : T ≠ 0) (κ u : ℝ)
   intro ξ hξ
   exact historyPair_actual_eq X0 initial hJ hL hU hi hT κ r u hξ
 
-theorem historyEtaPair_reference (q : ScaledPoint) (r : HistoryRow) :
-    (etaPair hJ (historyPair X0 initial hJ hL hU hi r)).reference q =
-      etaD (logHistory X0 initial (referenceAngular L) U r) (q.1.2 * q.2.1, q.2.2) := rfl
 
 theorem activationOnePair_actual {T : ℝ} (hT : T ≠ 0) (κ u : ℝ)
     {η : ℝ} (hη : η ∈ J) :
@@ -693,19 +679,7 @@ theorem exists_log_stock_factors :
     rwa [activationTwoPair_actual h hX0 initial hJ hL hU hi hcoef hT κ u hη,
       activationTwoPair_reference h hX0 initial hJ hL hU hi hcoef] at he
 
-theorem activationOnePair_zero (κ u : ℝ) {η : ℝ} (hη : η ∈ J) :
-    (activationOnePair h hX0 initial hJ hL hU hi hcoef).actual ((κ, 0), (u, η)) =
-      (activationOnePair h hX0 initial hJ hL hU hi hcoef).reference ((κ, 0), (u, η)) := by
-  have he := (activationOnePair h hX0 initial hJ hL hU hi hcoef).difference
-    ((κ, 0), (u, η)) ⟨mem_univ _, mem_univ _, hη⟩
-  simpa only [scaledDistance, zero_mul, sub_eq_zero] using he
 
-theorem activationTwoPair_zero (κ u : ℝ) {η : ℝ} (hη : η ∈ J) :
-    (activationTwoPair h hX0 initial hJ hL hU hi hcoef).actual ((κ, 0), (u, η)) =
-      (activationTwoPair h hX0 initial hJ hL hU hi hcoef).reference ((κ, 0), (u, η)) := by
-  have he := (activationTwoPair h hX0 initial hJ hL hU hi hcoef).difference
-    ((κ, 0), (u, η)) ⟨mem_univ _, mem_univ _, hη⟩
-  simpa only [scaledDistance, zero_mul, sub_eq_zero] using he
 
 include hX0 hJ hL hU hi hcoef in
 theorem log_stocks_uniform_jets {K : Set ℝ} (hK : IsCompact K) (hKJ : K ⊆ J)
@@ -750,65 +724,7 @@ open ReferencePath
 
 variable (N : ReferencePath.Input)
 
-/-- The factors concern the actual recomputed ACT and REF lag histories.
-Their common scaled domain contains `T=0`. -/
-theorem exists_physical_stock_factors {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit)
-    (h : ℝ) (hcoef : ∀ η ∈ parameterInterval, NaturalAxisData.L h η ≠ 0)
-    (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0) :
-    ∃ P Q : ScaledPoint → ℝ,
-      ContDiffOn ℝ ∞ P (scaledDomain parameterInterval) ∧
-      ContDiffOn ℝ ∞ Q (scaledDomain parameterInterval) ∧
-      ∀ T : ℝ, ∀ hT : 0 < T, ∀ κ u η : ℝ, η ∈ parameterInterval →
-        profileStockOne (StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0) h
-            (radius N.endpoint (T * u), η) -
-          profileStockOne (N.histories hδ hδT P0 hP0) h (radius N.endpoint (T * u), η) =
-            scaledDistance ((κ, T), (u, η)) * P ((κ, T), (u, η)) ∧
-        profileStockTwo (StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0) h
-            (radius N.endpoint (T * u), η) -
-          profileStockTwo (N.histories hδ hδT P0 hP0) h (radius N.endpoint (T * u), η) =
-            scaledDistance ((κ, T), (u, η)) * Q ((κ, T), (u, η)) := by
-  obtain ⟨P, Q, hP, hQ, hf⟩ := exists_log_stock_factors h N.endpoint_pos
-    (initial N hδ hδT P0 hP0) parameterInterval_open
-    (StressActivation.FromReference.refLog_smooth N hδ hδT)
-    (StressActivation.FromReference.refAxial_smooth N hδ hδT)
-    (initial_smooth N hδ hδT P0 hP0) hcoef
-  refine ⟨P, Q, hP, hQ, ?_⟩
-  intro T hT κ u η hη
-  rw [actual_stockOne_logView N hT hδ hδT κ h P0 hP0 (T * u) hη,
-    reference_stockOne_logView N hδ hδT h P0 hP0 (T * u) hη,
-    actual_stockTwo_logView N hT hδ hδT κ h P0 hP0 (T * u) hη,
-    reference_stockTwo_logView N hδ hδT h P0 hP0 (T * u) hη]
-  exact hf T hT.ne' κ u η hη
 
-/-- One constant controls both actual stock errors for every sufficiently
-small positive width and all activation parameters, including `κ=0`. -/
-theorem physical_stocks_uniform_bound {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit)
-    (h : ℝ) (hcoef : ∀ η ∈ parameterInterval, NaturalAxisData.L h η ≠ 0)
-    (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0) (T0 : ℝ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T : ℝ, ∀ hT : 0 < T, T ≤ T0 → ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ Icc (-1 : ℝ) 1,
-        |profileStockOne (StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0) h
-            (radius N.endpoint y, η) -
-          profileStockOne (N.histories hδ hδT P0 hP0) h (radius N.endpoint y, η)| ≤
-            M * y * activation T κ y ∧
-        |profileStockTwo (StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0) h
-            (radius N.endpoint y, η) -
-          profileStockTwo (N.histories hδ hδT P0 hP0) h (radius N.endpoint y, η)| ≤
-            M * y * activation T κ y := by
-  have hKJ : Icc (-1 : ℝ) 1 ⊆ parameterInterval :=
-    NaturalAxisCoefficients.original_interval_interior
-  obtain ⟨M, hM, hbound⟩ := log_stocks_uniform_jets h N.endpoint_pos
-    (initial N hδ hδT P0 hP0) parameterInterval_open
-    (StressActivation.FromReference.refLog_smooth N hδ hδT)
-    (StressActivation.FromReference.refAxial_smooth N hδ hδT)
-    (initial_smooth N hδ hδT P0 hP0) hcoef isCompact_Icc hKJ T0 0
-  refine ⟨M, hM, ?_⟩
-  intro T hT hTT κ hκ y hy η hη
-  rw [actual_stockOne_logView N hT hδ hδT κ h P0 hP0 y (hKJ hη),
-    reference_stockOne_logView N hδ hδT h P0 hP0 y (hKJ hη),
-    actual_stockTwo_logView N hT hδ hδT κ h P0 hP0 y (hKJ hη),
-    reference_stockTwo_logView N hδ hδT h P0 hP0 y (hKJ hη)]
-  simpa only [iteratedDeriv_zero] using hbound T ⟨hT, hTT⟩ κ hκ y hy η hη
 
 end FromReference
 

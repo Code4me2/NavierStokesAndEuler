@@ -186,26 +186,6 @@ theorem represented_goodResidual_angular_continuous {ι : Type*} {U : Set D}
   exact continuous_const.add (continuous_finsetSum (labels n) (fun l _ =>
     Complex.continuous_re.comp (HarmonicFields.field_angular_continuous _ _ _ _ _)))
 
-/-- An arbitrary independent alias does not disturb angular continuity. -/
-theorem Representation.goodResidual_angular_continuous {ι : Type*} {U : Set D}
-    (hU : IsOpen U) {c : Context D} {s : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasCoeffs : ι → HarmonicResidual.BlockCoefficients D}
-    {axis : MeanVector D}
-    (hrep : Representation labels blocks gaussian aliasCoeffs s axis) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c s labels blocks gaussian aliasCoeffs n)
-    {x : D} (hx : x ∈ U) (i : Fin 3) :
-    Continuous (fun θ => HarmonicResidual.stateGoodResidual c s n (x, θ) i) := by
-  have hc := represented_goodResidual_angular_continuous hU hrep.erase
-    (extractionRegular_erase h axis) hx i
-  have he : (fun θ => HarmonicResidual.stateGoodResidual c s n (x, θ) i) =
-      fun θ => HarmonicResidual.stateGoodResidual c (eraseAxisymmetricAlias s axis)
-        n (x, θ) i - axis n x i := by
-    funext θ
-    rw [stateGoodResidual_eraseAxisymmetricAlias]
-    exact (add_sub_cancel_right _ _).symm
-  rw [he]
-  exact hc.sub continuous_const
 
 /-- Actual nonconstant residual grouping, with no smoothness or support
 assumption on the independent axisymmetric alias. -/

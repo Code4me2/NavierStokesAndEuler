@@ -103,11 +103,5 @@ theorem sobolevPath_hasDerivWithinAt (q : ℕ) (t : Icc (0 : ℝ) T) :
     simp only [extendPath,sobolevPath,ContinuousMap.coe_mk,Function.comp_def,restrict_sobolev]
   rfl
 
-include hd in
-theorem sobolevPath_hasDerivAt (q : ℕ) (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT (sobolevPath A hA q))
-      (sobolevPath B hB q ⟨t,ht.1.le,ht.2.le⟩) t :=
-  (sobolevPath_hasDerivWithinAt T hT A B hA hB hd q ⟨t,ht.1.le,ht.2.le⟩).hasDerivAt
-    (Icc_mem_nhds ht.1 ht.2)
 
 end EulerSmoothFieldSobolevTime

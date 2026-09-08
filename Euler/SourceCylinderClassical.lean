@@ -70,12 +70,6 @@ theorem field_tsupport_subset (t : Icc (0 : ℝ) T) :
   exact representative_tsupport_subset period S hS hSc.isClosed _ _
     (velocity period S hS T hT Q Q₁ c hc hQ f a₀ t).property
 
-theorem field_hasCompactSupport (t : Icc (0 : ℝ) T) :
-    HasCompactSupport (field period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ t) := by
-  change HasCompactSupport (pointField period _ _ t)
-  rw [pointField_eq_representative]
-  exact representative_hasCompactSupport period S hS hSc _ _
-    (velocity period S hS T hT Q Q₁ c hc hQ f a₀ t).property
 
 /-- Inclusion in full cylinder L² preserves the already proved time derivative. -/
 theorem fullVelocity_hasDerivWithinAt

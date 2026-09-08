@@ -22,8 +22,6 @@ def initialData : InitialData period D where
   orbit := terminal_orbit_contDiff δ hδ ξ
   mean_zero := terminal_average_zero δ hδ ξ
 
-theorem initialData_value : ((initialData D δ hδ ξ hs).value : CylinderL2 period U) =
-    terminal δ hδ ξ := rfl
 
 theorem initialData_bound {ι : Type*} [Fintype ι]
     (directions : ι → LiftTangent) (hd : ∀ i, ‖directions i‖ ≤ 1) (q : ℕ)

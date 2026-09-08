@@ -57,18 +57,6 @@ theorem commutatorBlock_nonneg {s q n : ℕ} {A : SmoothCoefficient period} {f :
     (J : EulerSpatialSobolevInverse.SpatialJet period directions s f) : 0 ≤ commutatorBlock K J q n :=
   Finset.sum_nonneg (fun _ _ => sobolevSize_nonneg _ _)
 
-/-- Truncation preserves every valid external commutator as an actual L² field. -/
-theorem commutatorBlock_truncate {s q n : ℕ} {A : SmoothCoefficient period} {f : LiftL2 period}
-    (K : EulerSpatialSobolevInverse.CoefficientJet period directions (s + 1) A)
-    (J : EulerSpatialSobolevInverse.SpatialJet period directions (s + 1) f) (h : n ≤ s) :
-    commutatorBlock K.truncate J.truncate q n = commutatorBlock K J q n := by
-  unfold commutatorBlock
-  apply Finset.sum_congr rfl
-  intro w _
-  rw [EulerPressureJetIdentities.SpatialJet.word_unique
-    (EulerSpatialSobolevInverse.SpatialJet.multiply K.truncate J.truncate)
-    (EulerSpatialSobolevInverse.SpatialJet.multiply K J) rfl h (by omega) w,
-    EulerPressureJetIdentities.SpatialJet.word_unique J.truncate J rfl h (by omega) w]
 
 /-- The external commutator recurrence uses a fixed Sobolev norm at every leaf. -/
 theorem commutatorBlock_succ_le {s q n : ℕ} {A : SmoothCoefficient period} {f : LiftL2 period}

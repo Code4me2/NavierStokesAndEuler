@@ -51,15 +51,5 @@ theorem sobolevMollifier_word_ae {q k : ℕ} (hk : k ≤ q) (n : ℕ) (u : Sobol
   rw [toJet_word period u hk] at h
   exact h
 
-/-- Fields with actual smooth cylinder representatives are dense in the complete Sobolev space. -/
-theorem smooth_representatives_dense (q : ℕ) :
-    Dense {u : SobolevSpace period q | ∃ g : LiftDomain period → Vector3,
-      (value period u : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g ∧
-        ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)} := by
-  intro u
-  apply mem_closure_of_tendsto (sobolevMollifier_tendsto period u)
-  exact Filter.Eventually.of_forall fun n =>
-    ⟨smoothMollifier period n (value period u), sobolevMollifier_representative period n u,
-      smoothMollifier_smooth period n (value period u)⟩
 
 end EulerCylinderSobolevSpace

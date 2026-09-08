@@ -119,9 +119,6 @@ theorem J_scaling (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR) :
   rw [integral_const_mul, integral_dilate_Ioc (fun u => F.H (u, eta) * F.U (u, eta)) XR X hXR]
   ring
 
-theorem S_scaling (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR) :
-    S F XR eta X = XR * ∫ u in Ioc 0 (X / XR), F.energyDensity eta u :=
-  integral_dilate_Ioc (F.energyDensity eta) XR X hXR
 
 theorem totalS_scaling (F : Profile) (XR eta : ℝ) (hXR : 0 < XR) :
     totalS F XR eta = XR * F.totalS eta := by
@@ -176,18 +173,8 @@ theorem E_family_contDiffOn (F : Profile) :
     ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => E F z.1 z.2) familyDomain :=
   F.E_contDiffOn.comp dilation_family_contDiffOn dilation_family_mapsTo
 
-theorem U_family_contDiffOn (F : Profile) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => U F z.1 z.2) familyDomain :=
-  F.U_contDiffOn.comp dilation_family_contDiffOn dilation_family_mapsTo
 
-theorem H_family_contDiffOn (F : Profile) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => H F z.1 z.2) familyDomain :=
-  ((contDiffOn_const.mul contDiff_snd.fst.contDiffOn).sqrt
-    (fun _ hz => ne_of_gt (mul_pos (by norm_num) hz.2.1))).mul (E_family_contDiffOn F)
 
-theorem Pi_family_contDiffOn (F : Profile) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => Pi F z.1 z.2) familyDomain :=
-  F.Pi_contDiffOn.comp dilation_family_contDiffOn dilation_family_mapsTo
 
 theorem mass_integrable (F : Profile) (XR eta : ℝ) (hXR : 0 < XR) :
     IntegrableOn (fun X => U F XR (X, eta)) (Ioi 0) := by
@@ -332,8 +319,6 @@ theorem switchRadius_eq (F : Profile) (XR : ℝ) :
 theorem switchRadius_pos (F : Profile) (XR : ℝ) (hXR : 0 < XR) : 0 < switchRadius F XR :=
   radius_pos XR _ hXR
 
-theorem carrierAmplitude_pos (F : Profile) : 0 < carrierAmplitude F :=
-  HeatTailEdit.outgoingAmplitude_pos F.data
 
 theorem ideal_prefix (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR) (hX : 0 < X) (hX' : X ≤ XR) :
     E F XR (X, eta) = F.data.core.P * OutgoingSchedule.shape eta * (X / XR) ^ (1 / 10 : ℝ) ∧
@@ -385,13 +370,6 @@ theorem E_eq_clean_switch_profile (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR)
   rw [UniformAngularReset.correctedAngular_unchanged F.data F.reset.coefficients eta hout]
   rw [switchRadius, clock_center XR X (HeatTailEdit.switchStart F.data) hXR hp]
 
-theorem E_tail_factorization (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR)
-    (hX : switchRadius F XR ≤ X) :
-    E F XR (X, eta) = HeatTailEdit.powerTail F.data.h (carrierAmplitude F)
-      (switchRadius F XR) (HeatTailEdit.outgoingShape F.data) X := by
-  rw [E_eq_clean_switch_profile F XR eta X hXR hX,
-    HeatTailEdit.outgoingProfile_eq_powerTail F.data (switchRadius_pos F XR hXR) hX]
-  rfl
 
 theorem E_at_switch (F : Profile) (XR eta : ℝ) (hXR : 0 < XR) :
     E F XR (switchRadius F XR, eta) = carrierAmplitude F * (1 - F.data.rho) := by
@@ -399,8 +377,6 @@ theorem E_at_switch (F : Profile) (XR eta : ℝ) (hXR : 0 < XR) :
     HeatTailEdit.outgoingProfile_at_switch F.data (switchRadius_pos F XR hXR)]
   rfl
 
-theorem switchRadius_tendsto (F : Profile) : Tendsto (switchRadius F) atTop atTop := by
-  exact tendsto_id.atTop_mul_const (Real.exp_pos (HeatTailEdit.switchStart F.data))
 
 /-! ## The actual second reserved shaped-wait patch -/
 
@@ -632,19 +608,6 @@ theorem preserves_specification {F : Profile} {C : ℝ} (hF : Specification F C)
   shaped_patch := fun eta x hx => patch_fields F XR eta x hXR hx
   patch_disjoint := patch_switch_disjoint F XR hXR
 
-/-- The same reset and amplitude work simultaneously for every entrance radius.
-The schedule is chosen once, before the radius is selected. -/
-theorem exists_dilated_outgoing_profiles (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam₀ C : ℝ, 0 < lam₀ ∧ 0 < C ∧ ∀ lam : ℝ,
-      0 < lam → lam < lam₀ → ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-        F.data.core.lam = lam ∧ F.data.h = h ∧ Specification F C ∧
-        ∀ XR : ℝ, 0 < XR → DilatedSpecification F XR := by
-  obtain ⟨lam₀, C, hlam₀, hC, hc⟩ := OutgoingProfile.exists_outgoing_profile P m hP hm
-  refine ⟨lam₀, C, hlam₀, hC, ?_⟩
-  intro lam hlam hlam' h hh hsmall
-  obtain ⟨F, hP', hm', hl', hh', _, hs⟩ := hc lam hlam hlam' h hh hsmall
-  exact ⟨F, hP', hm', hl', hh', hs, fun XR hXR => preserves_specification hs XR hXR⟩
 
 theorem exists_fixed_schedule (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
     ∃ lam C : ℝ, 0 < lam ∧ 0 < C ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →

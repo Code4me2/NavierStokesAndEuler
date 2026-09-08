@@ -161,10 +161,7 @@ theorem localization : Localization (scheme W H Q M hlo) (nominalHierarchy W) (c
 
 theorem scheme_base : (scheme W H Q M hlo).base = (modifiedScheme W Q M).base := rfl
 
-theorem scheme_outer : (scheme W H Q M hlo).B = nominalOuterRadius W := rfl
 
-theorem scheme_base_beta : (scheme W H Q M hlo).base.beta =
-    betaFromU (scheme W H Q M hlo).domain 0 (scheme W H Q M hlo).base.axial := rfl
 
 /-- The actual nominal fields agree with the ACT fields throughout the
 analytic collar, rather than only on the smaller natural core. -/
@@ -360,11 +357,6 @@ theorem aligned_smooth : SlowBorelBase.SmoothCoefficients (alignedCoefficients W
   coefficients_smooth (smallLocalization W H Q M hlo) (smallBaseAgreement W H Q M hlo)
     (smallZeroOrder W H Q M hlo) M.contains
 
-theorem aligned_coefficientMatches :
-    BasePrefixIdentity.CoefficientMatches F.data.h W.axis.normalization
-      (alignedCoefficients W H Q M hlo) (asSlowProfiles (scheme W H Q M hlo)) :=
-  ConstructedSlowBase.repaired_coefficientMatches (smallLocalization W H Q M hlo)
-    (smallBaseAgreement W H Q M hlo) (smallZeroOrder W H Q M hlo) M.contains rfl
 
 theorem positive_coefficients_zero {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
     (hX : 0 < p.1) (hc : p.1 < cutoffInner W H lo) (heta : p.2 ∈ S) :
@@ -609,17 +601,6 @@ theorem zero_raw_stresses_eq (R eta : ℝ) :
     intro r
     simp only [SlowResidualMatching.zDensity, (zero_residuals_eq W H Q M hlo _).2]
 
-/-- Moving the positive-order cutoff preserves the leading stress itself,
-including its actual integration constant. -/
-theorem aligned_zero_stresses_eq {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta : |p.2| ≤ 1) :
-    (alignedCoefficients W H Q M hlo).stressTheta 0 p = (modifiedCoefficients W Q M).stressTheta 0 p ∧
-    (alignedCoefficients W H Q M hlo).stressAxial 0 p = (modifiedCoefficients W Q M).stressAxial 0 p := by
-  have h1 := coefficients_stress_eq (smallLocalization W H Q M hlo) (smallBaseAgreement W H Q M hlo)
-    (smallZeroOrder W H Q M hlo) M.contains 0 hX heta
-  have h2 := coefficients_stress_eq (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M)
-    (modifiedZeroOrder W Q M) M.contains 0 hX heta
-  have he := zero_raw_stresses_eq W H Q M hlo (Real.sqrt (2 * p.1)) p.2
-  exact ⟨h1.1.trans (he.1.trans h2.1.symm), h1.2.trans (he.2.trans h2.2.symm)⟩
 
 theorem leading_histories_eq :
     EqOn (GlobalStressSupport.angularHistory (scheme W H Q M hlo) 0)
@@ -663,19 +644,7 @@ theorem aligned_positive_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |eta| �
    extendedCoefficient_axis (smallLocalization W H Q M hlo) (smallBaseAgreement W H Q M hlo) M.contains hn 1 heta,
    extendedCoefficient_axis (smallLocalization W H Q M hlo) (smallBaseAgreement W H Q M hlo) M.contains hn 3 heta⟩
 
-theorem aligned_moments_zero {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : eta ∈ S) :
-    PositiveOrderMoments.moments n
-      (PositiveOrderMoments.slice (GlobalStressSupport.axialHistory (scheme W H Q M hlo)) eta)
-      (PositiveOrderMoments.slice (GlobalStressSupport.angularHistory (scheme W H Q M hlo)) eta)
-      (fun R => GlobalStressSupport.previousOmega (scheme W H Q M hlo) n (R, eta)) = 0 :=
-  GlobalStressSupport.moments_zero (scheme W H Q M hlo) hn heta
 
-theorem aligned_mass_primitive_zero {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
-    (hp : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.primitive ((alignedCoefficients W H Q M hlo).axial n) p = 0 := by
-  apply extended_axial_primitive_zero (scheme W H Q M hlo) M.contains hn _ heta
-  change nominalOuterRadius W ^ 2 / 2 ≤ p.1
-  rwa [nominalOuterRadius_square]
 
 theorem pressureCoefficient_zero (n : ℕ) {p : ℝ × ℝ} (hX : 0 < p.1) (heta : p.2 ∈ S) :
     SlowExpansionResidual.pressureCoefficient F.data.h W.axis.normalization
@@ -783,9 +752,6 @@ theorem exp_right_eq_cone :
   rw [he, Real.exp_add, Real.exp_log W.controls.radius_pos]
   rfl
 
-theorem exp_left_eq_cone :
-    Real.exp (Real.log (NominalConeAssembly.activeLeft W)) = NominalConeAssembly.activeLeft W :=
-  Real.exp_log (NominalConeAssembly.activeLeft_pos W)
 
 end Clocks
 
@@ -808,9 +774,6 @@ noncomputable def modulatedCoefficients : SlowBorelBase.Coefficients :=
 theorem modulated_base_eq :
     (modulatedScheme H v).base = (modifiedScheme W v.profiles v.finiteModification).base := rfl
 
-theorem modulated_baseFields_eq :
-    (modulatedScheme H v).base = baseFields (modulatedScheme H v).domain
-      W.axis.normalization v.profiles v.finiteModification.halfPlane := rfl
 
 theorem modulated_outer : (modulatedScheme H v).B = nominalOuterRadius W := rfl
 
@@ -820,8 +783,6 @@ theorem modulated_phi_eq_extended (n : ℕ) :
 theorem modulated_axial_eq_extended (n : ℕ) :
     (modulatedCoefficients H v).axial n = extendedCoefficient (modulatedScheme H v) v.finiteModification.contains n 1 := rfl
 
-theorem modulated_pressure_eq_extended (n : ℕ) :
-    (modulatedCoefficients H v).pressure n = extendedCoefficient (modulatedScheme H v) v.finiteModification.contains n 3 := rfl
 
 theorem modulated_smooth : SlowBorelBase.SmoothCoefficients (modulatedCoefficients H v) :=
   aligned_smooth W H v.profiles v.finiteModification (modulation_after_entrance (d := d))
@@ -953,24 +914,6 @@ theorem modulated_normalizedTensor_zero (a : ℕ → ℕ) (q : ℝ) {p : ℝ × 
   have hs := modulated_all_stress_support H v n
   exact Prod.ext (hs.1 p.2 heta p.1 hp) (hs.2 p.2 heta p.1 hp)
 
-/-- The transition lies in the true cone of the same final modulated
-profile, with its actual restored histories. -/
-theorem modulated_transition_true {p : ℝ × ℝ}
-    (hp : p.1 ∈ Icc (cutoffInner W H d.modulation.left) (cutoffStop W H d.modulation.left))
-    (heta : p.2 ∈ Icc (-1 : ℝ) 1) :
-    TrueConeLoop.InTrueCone
-      (ActivationStocks.profileStockOne v.profiles F.data.h p)
-      (ActivationStocks.profileStockTwo v.profiles F.data.h p)
-      (ModulatedCone.angularShear v.profiles.E p)
-      (ModulatedCone.signedAxialShear v.profiles.E v.profiles.U p) := by
-  have hx : 0 < p.1 := (cutoffInner_pos W H (modulation_after_entrance (d := d))).trans_le hp.1
-  have hf := NominalConeAssembly.Witness.f_positive W hx heta
-  apply v.true_cone_from_nominal hx (d.parameters_contains heta) hf.ne'
-  intro _
-  have hc := (NominalConeAssembly.isTrue_iff_loop W.profiles F.data.h p).mp
-    (cutoff_transition_true W H (modulation_after_entrance (d := d)) hp heta)
-  have hs := NominalConeAssembly.modulated_shears_eq W.profiles (W.domain_contains hx.le heta) hx hf.ne'
-  simpa only [NominalConeAssembly.p1_eq_stock, NominalConeAssembly.p2_eq_stock, hs.1, hs.2] using hc
 
 theorem modulated_quotients_smooth {c : ℝ} (hc : 0 < c) (n : ℕ) :
     ContDiff ℝ ∞ (BaseResidual.higherStressQuotient (modulatedCoefficients H v)

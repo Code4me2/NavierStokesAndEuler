@@ -53,14 +53,5 @@ theorem pointField_timeComp (p : C(K,CylinderL2 P Space))
   · exact smoothField_continuous P _ (pointField_smooth P (p.comp φ) (timeComp_orbit_contDiff P p hp φ) t)
   · exact smoothField_continuous P _ (pointField_smooth P p hp (φ t))
 
-theorem scalarPointField_timeComp (p : C(K,CylinderL2 P ℝ))
-    (hp : ContDiff ℝ ∞ (fun a => pathTranslate P a p)) (φ : C(L,K)) (t : L) :
-    scalarPointField P (p.comp φ) (timeComp_orbit_contDiff P p hp φ) t =
-      scalarPointField P p hp (φ t) :=
-  Measure.eq_of_ae_eq
-    ((scalarPointField_ae P (p.comp φ) (timeComp_orbit_contDiff P p hp φ) t).symm.trans
-      (scalarPointField_ae P p hp (φ t)))
-    (scalarPointField_continuous P (p.comp φ) (timeComp_orbit_contDiff P p hp φ) t)
-    (scalarPointField_continuous P p hp (φ t))
 
 end EulerLpCylinderTranslation

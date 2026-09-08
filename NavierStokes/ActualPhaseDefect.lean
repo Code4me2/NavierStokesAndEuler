@@ -634,12 +634,6 @@ theorem materialWeight_bound (L : Label B N0) (n : ℕ)
     (PhysicalParticularWave.ratioPower_pos (ChartScales.Q_pos n) (ChartScales.Q_pos _) _).le
     (by have := ActualSignedGeometry.powerBound_one (h/2+1/2); linarith)
 
-theorem native_core_of_interval (j : Fin 2) (L : Label B N0) (n : ℕ)
-    (k : TorusInverse.Frequency) {x : FullPoint}
-    (hu : |(nativeCopy j L n k x).2.1| ≤ slots.radius)
-    (hv : (nativeCopy j L n k x).2.2 ∈ Ioo 0 ((phases B N0 j).L L)) :
-    (nativeCopy j L n k x).2 ∈ (ActualSignedGeometry.clockWindow slots (BaseChartJets.cellBand L)).core :=
-  ⟨abs_le.mp hu, hv.1.le, hv.2.le⟩
 
 theorem active_copy_defect_germ (j : Fin 2) (L : Label B N0) (n : ℕ)
     (hactive : BaseChartJets.cellBand L ∈ CommonWindow.levels n)
@@ -655,18 +649,6 @@ theorem active_copy_defect_germ (j : Fin 2) (L : Label B N0) (n : ℕ)
     (BaseContextAssembly.nativeStrip_time nominal standardRegion hx)
     (BaseContextAssembly.nativeStrip_radius nominal standardRegion hx) hp hc
 
-theorem active_copy_defect_jets (j : Fin 2) (L : Label B N0) (n : ℕ)
-    (hactive : BaseChartJets.cellBand L ∈ CommonWindow.levels n)
-    (k : TorusInverse.Frequency) {x : FullPoint}
-    (hx : x ∈ (HarmonicWaveInteraction.productStrip
-      (BaseContextAssembly.nativeStrip nominal standardRegion)).domain)
-    (hp : (nativeCopy j L n k x).1 ∈
-      (PrimaryGeometryAssembly.domain nominal (choice B N0).prepared.N).carrier L)
-    (hc : (nativeCopy j L n k x).2 ∈ (ActualSignedGeometry.clockWindow slots (BaseChartJets.cellBand L)).core)
-    (m : ℕ) :
-    iteratedFDeriv ℝ m (defect j L n) x = iteratedFDeriv ℝ m
-      (fun y => ChartScales.epsilon h n * materialWeight L n * reducedExpression j L n k y) x :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (active_copy_defect_germ j L n hactive k hx hp hc) m
 
 theorem active_materialWeight_bound (L : Label B N0) (n : ℕ)
     (hactive : BaseChartJets.cellBand L ∈ CommonWindow.levels n) :
@@ -809,12 +791,6 @@ theorem native_reduced_polynomial (U : LocalSignedRequest.SlowRegion (2*h)) :
     (hbb.mul hx0).sub (ht.mul (((hbb.mul ((hp.mul hFR).add (hpz.mul hGR))).sub
       ((hp.mul hFT).add (hpz.mul hGT))).add (hGG.mul ((hp.mul hFZ).add (hpz.mul hGZ)))))
 
-theorem native_reduced_finite_jets (U : LocalSignedRequest.SlowRegion (2*h)) (N : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ m : ℕ, ∀ (j : Fin 2) (L : Label B N0),
-      JetBounds.FiniteJetBound N (nativeReduced (j,L))
-        ((reducedJetDomain U).carrier (j,L)) (C*ChartScales.S (BaseChartJets.cellBand L)^m) := by
-  obtain ⟨C,hC,m,hm⟩ := (native_reduced_polynomial (B := B) (N0 := N0) U).bound N
-  exact ⟨C,hC,m,fun j L => hm (j,L)⟩
 
 theorem native_reduced_domain_mem (U : LocalSignedRequest.SlowRegion (2*h))
     (j : Fin 2) (L : Label B N0) {p : Slow} {t : ℝ}

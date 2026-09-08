@@ -41,11 +41,6 @@ theorem raw_angle_derivative_continuous (t : Icc (0 : ℝ) T) (x : Space) :
   (((G.raw_smooth t).fderiv_right (m := ∞) (by simp)).continuous.comp
     (continuous_const.prodMk continuous_id)).clm_apply continuous_const
 
-include G in
-theorem raw_angle_derivative_integral (t : Icc (0 : ℝ) T) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, fderiv ℝ (fun y => raw (t,y)) (x,θ) (0,1)) = 0 :=
-  integral_derivative_eq_zero P _ _ (G.raw_angle_hasDerivAt t x)
-    (G.raw_angle_derivative_continuous t x) (G.raw_periodic t x)
 
 include G in
 theorem subtract_mean_integral (t : Icc (0 : ℝ) T) (x : Space) :

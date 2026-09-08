@@ -35,21 +35,5 @@ theorem normalizedVelocity_bound (k : ℝ) (hk : 4 ≤ k)
     (fixedVelocityGradeCost_nonneg R S.H0 (zero_le_one.trans hR) 1)
     (fixedVelocityGradeCost_nonneg R S.H0 (zero_le_one.trans hR) 2)
 
-/-- This is the inverse-frame image of W_t. The derivative of the inverse
-frame is a separate coefficient term in the time derivative of z_a. -/
-theorem normalizedVelocityTimeTerm_bound (k : ℝ) (hk : 4 ≤ k)
-    (hbase : tailBase R S.H0 BC.termCost N ≤ k^(1/100 : ℝ)) :
-    ((C.inverse.multiply (velocityDerivativeField hT G k⁻¹)).smul k).WordBound 6 (4*R)
-      (BC.multiplierCost*(fixedVelocityGradeCost R S.H0 1+fixedVelocityGradeCost R S.H0 2+1)) 0 := by
-  have hk0 : 0 ≤ k := by linarith
-  have hsmall : k⁻¹*tailBase R S.H0 BC.termCost N ≤ 1/2 := by
-    simpa only [div_eq_mul_inv,mul_comm] using
-      EulerPacketTailBound.grade_ratio_le_half k (tailBase R S.H0 BC.termCost N) hk hbase
-  have h := velocityDerivative_bound hT G hG hR ha hN BC.termCost BC.one_le_termCost
-    k⁻¹ (inv_nonneg.mpr hk0) hsmall
-  exact BC.normalized_approximation_bound (velocityDerivativeField hT G k⁻¹) h (by linarith)
-    (hRc.trans (by linarith)) hk (tailBase_nonneg R S.H0 BC.termCost BC.termCost_nonneg N) hbase
-    (fixedVelocityGradeCost_nonneg R S.H0 (zero_le_one.trans hR) 1)
-    (fixedVelocityGradeCost_nonneg R S.H0 (zero_le_one.trans hR) 2)
 
 end EulerPacketCylinderField.ProfileRegularity

@@ -118,9 +118,5 @@ def budget (hdiv : ∀ t, G.path t ∈ divergenceFreeSpace P 1 (0 : Space)) :
   radius_eq _ _ _ := rfl
   divergence t := (divergenceFreeSpace P 1 (0 : Space)).smul_mem S.value (hdiv t)
 
-/-- No scalar guard is required of the input: the amplitude is explicitly
-chosen from its finite actual Gevrey constants. -/
-def smallBudget (hdiv : ∀ t, G.path t ∈ divergenceFreeSpace P 1 (0 : Space)) :=
-  budget G hG hC hR (scale P C R (residualCost P C R) hC hR (residualCost_pos P C R hR)) hdiv
 
 end EulerSmallCorrection

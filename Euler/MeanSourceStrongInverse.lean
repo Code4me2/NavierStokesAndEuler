@@ -45,22 +45,6 @@ theorem sourceMeanSolver_strong (T : ℝ) (hT : 0 ≤ T) (ℓ : ℝ) (hℓ : 0 <
     hF hF₁ hInv hRight hF₁₀ hODE
     (fun z _ => boundaryOperator_solenoidal (scaledCutoff ℓ hℓ) z) f
 
-theorem sourceStrong_initial_ae_support (T : ℝ) (hT : 0 ≤ T) (ℓ : ℝ) (hℓ : 0 < ℓ)
-    (FInv F F₁ : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (L : ℝ) (u f : TimeLp T L2)
-    (S : StrongMeanEvolution T hT FInv F F₁ (boundaryOperator (scaledCutoff ℓ hℓ)) L u f) :
-    ∀ᵐ x ∂volume, 2 < ‖ℓ • x‖ → (S.velocity 0 : L2) x = 0 := by
-  have H := scaledBoundary_multiple_zero_outside ℓ hℓ L (S.label 0 : L2)
-  rw [← S.initial_velocity] at H
-  exact H
 
-/-- A continuous representative of the actual initial mean velocity is compactly supported. -/
-theorem sourceStrong_initial_compact (T : ℝ) (hT : 0 ≤ T) (ℓ : ℝ) (hℓ : 0 < ℓ)
-    (FInv F F₁ : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (L : ℝ) (u f : TimeLp T L2)
-    (S : StrongMeanEvolution T hT FInv F F₁ (boundaryOperator (scaledCutoff ℓ hℓ)) L u f)
-    (b : Space → Space) (hb : Continuous b) (hrep : b =ᵐ[volume] (S.velocity 0 : L2)) :
-    HasCompactSupport b := by
-  apply scaledBoundary_continuous_compact ℓ hℓ L (S.label 0 : L2) b hb
-  rw [← S.initial_velocity]
-  exact hrep
 
 end EulerMeanSourceInverse

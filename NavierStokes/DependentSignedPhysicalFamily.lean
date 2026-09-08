@@ -164,8 +164,6 @@ noncomputable def diagonal (f : BandLabel → CopyFamily H K) : CopyFamily H K w
     (I : WaveIndex H) :
     (diagonal f).periodized a h r0 I = (f I.1).periodized a h r0 I := rfl
 
-theorem diagonal_sum (f : BandLabel → CopyFamily H K) (a h r0 : ℝ) (w : SpaceTime) :
-    (diagonal f).sum a h r0 w = ∑ᶠ I : WaveIndex H, (f I.1).periodized a h r0 I w := rfl
 
 noncomputable def diagonalCells (f : BandLabel → CopyFamily H K)
     (c : ∀ L, SupportCells (f L)) : SupportCells (diagonal f) where
@@ -191,26 +189,7 @@ theorem diagonalSmooth (f : BandLabel → CopyFamily H K) {a h r0 : ℝ}
   amplitude k I := (s I.1).amplitude k I
   profiles k I := (s I.1).profiles k I
 
-/-- The assembled infinite family retains the original uniform overlap
-bound and has a genuine local finite-sum identity. -/
-theorem diagonal_sum_locally_finite (f : BandLabel → CopyFamily H K)
-    {a b h r0 Z : ℝ} {Δ : ℕ}
-    (s : ∀ L, LocalPhysicalCopyBounds.SupportData (f L) a b h r0 Z Δ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {w : SpaceTime} (hw : w ∈ preterminal) :
-    ∃ t : Finset (WaveIndex H), t.card ≤ 2250 * (2 * H + 1) ∧
-      (diagonal f).sum a h r0 =ᶠ[𝓝 w]
-        fun y => ∑ I ∈ t, (f I.1).periodized a h r0 I y := by
-  simpa only [diagonal_periodized] using
-    (diagonalSupport f s).sum_locally_finite hh hh1 hw
 
-theorem diagonal_sum_smooth (f : BandLabel → CopyFamily H K)
-    {a b h r0 Z : ℝ} {Δ : ℕ}
-    (c : ∀ L, SupportCells (f L))
-    (s : ∀ L, LocalPhysicalCopyBounds.SupportData (f L) a b h r0 Z Δ)
-    (sm : ∀ L, LocalPhysicalCopyBounds.SmoothData (f L) a h r0)
-    (ha : 0 < a) (hh : 0 < h) (hh1 : h < 1 / 2) :
-    ContDiffOn ℝ ∞ ((diagonal f).sum a h r0) preterminal :=
-  (diagonalSupport f s).sum_smooth (diagonalSmooth f sm) (diagonalCells f c) ha hh hh1
 
 namespace Family
 
@@ -236,16 +215,7 @@ theorem copyAt_inactive (copies : NativeLabel f.active → CopyFamily H K)
 noncomputable def assembled (copies : NativeLabel f.active → CopyFamily H K) :
     CopyFamily H K := diagonal (f.copyAt copies)
 
-theorem assembled_term_active (copies : NativeLabel f.active → CopyFamily H K)
-    (L : NativeLabel f.active) (j : Harmonic H) (a h r0 : ℝ) (k : K) :
-    (f.assembled copies).term a h r0 ((L : BandLabel), j) k =
-      (copies L).term a h r0 ((L : BandLabel), j) k := by
-  rw [assembled, diagonal_term, copyAt_active]
 
-theorem assembled_term_inactive (copies : NativeLabel f.active → CopyFamily H K)
-    (I : WaveIndex H) (hI : I.1 ∉ f.active) (a h r0 : ℝ) (k : K) :
-    (f.assembled copies).term a h r0 I k = 0 := by
-  rw [assembled, diagonal_term, copyAt_inactive f copies hI, zeroCopies_term]
 
 noncomputable def branchCells (copies : NativeLabel f.active → CopyFamily H K)
     (c : ∀ L, SupportCells (copies L)) (L : BandLabel) :
@@ -379,20 +349,6 @@ noncomputable def jointSource {V : Type*}
     (source : (L : BandLabel) → ι L → ℕ → E → V) :
     (Σ L, ι L) → ℕ → E → V := fun I => source I.1 I.2
 
-theorem localSourceBounds_slice {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {s : StripData E} {h α : ℝ}
-    {w : (L : BandLabel) → ι L → ℕ → E → ℝ}
-    {source : (L : BandLabel) → ι L → ℕ → E → V}
-    (hs : LocalPhysicalCopyBounds.LocalSourceBounds s h α (jointSource w) (jointSource source))
-    (L : BandLabel) :
-    LocalPhysicalCopyBounds.LocalSourceBounds s h α (w L) (source L) where
-  uniform := hs.uniform.reindex (Sigma.mk L)
-  flat_geometry := hs.flat_geometry
-  weight_le := by
-    obtain ⟨c, hc, hb⟩ := hs.weight_le
-    exact ⟨c, hc, fun i => hb ⟨L, i⟩⟩
-  epsilon_eq := hs.epsilon_eq
-  slow_le := hs.slow_le
 
 /-! ## Native chart and carrier bounds are uniform before label selection -/
 
@@ -426,68 +382,9 @@ noncomputable def diagonalCarrier (f : BandLabel → CopyFamily H K)
   jets := hj
   contains k I := (bc I.1).contains k I
 
-/-- No native region is required for an omitted label whose amplitude
-vanishes identically. -/
-noncomputable def zeroCarrier {a b h r0 : ℝ} :
-    CarrierBounds (zeroCopies : CopyFamily H K) zeroCells a b h r0 where
-  region _ _ := ∅
-  open_region _ _ := isOpen_empty
-  jets := PhaseJetBounds.PolynomialJets.const_fixed (0 : ℝ × ℝ)
-  contains _ _ _ _ _ _ hx := hx.elim
 
-noncomputable def zeroChart {ν : Type*} {a b h r0 σ : ℝ}
-    (source : ν → ℕ → E → ℂ) (index : K → WaveIndex H → ν) :
-    LocalPhysicalCopyBounds.CommonChart (zeroCopies : CopyFamily H K) zeroCells
-      a b h r0 σ source where
-  sourceIndex := index
-  map _ _ _ := 0
-  domain _ _ := ∅
-  open_domain _ _ := isOpen_empty
-  smooth _ _ := contDiffOn_const
-  positive_jets _ := ⟨1, le_rfl, 0, fun _ _ _ hx => hx.elim⟩
-  amplitude_eq _ _ _ hx := hx.elim
-  contains _ _ _ _ _ _ hx _ := hx.elim
 
-/-- In the actual Cartesian source adapter every local map is the identity.
-Its common positive-jet bound is exactly one, with polynomial degree zero. -/
-theorem identity_chart_jets
-    (f : BandLabel → CopyFamily H K) (c : ∀ L, SupportCells (f L))
-    {a b h r0 σ : ℝ}
-    (source : (L : BandLabel) → ι L → ℕ → PhysicalGraphBounds.LiftPoint → ℂ)
-    (ch : ∀ L, LocalPhysicalCopyBounds.CommonChart (f L) (c L) a b h r0 σ (source L))
-    (hid : ∀ k I, (ch I.1).map k I = fun x => x) :
-    ∀ m : ℕ, ∃ B : ℝ, 1 ≤ B ∧ ∃ q : ℕ,
-      ∀ k I x, x ∈ (ch I.1).domain k I → ∀ j, 1 ≤ j → j ≤ m →
-        ‖iteratedFDeriv ℝ j ((ch I.1).map k I) x‖ ≤ B * ChartScales.S I.1.val.1 ^ q := by
-  intro m
-  refine ⟨1, le_rfl, 0, ?_⟩
-  intro k I x _ j hj _
-  rw [hid k I]
-  simp only [pow_zero, mul_one]
-  exact (PhysicalGraphBounds.norm_positive_jet_linear_le
-      (ContinuousLinearMap.id ℝ PhysicalGraphBounds.LiftPoint) x hj).trans (by simp)
 
-/-- Empty inactive charts do not alter the common bound for identity
-charts of active labels. -/
-theorem identity_or_empty_chart_jets
-    (f : BandLabel → CopyFamily H K) (c : ∀ L, SupportCells (f L))
-    {a b h r0 σ : ℝ}
-    (source : (L : BandLabel) → ι L → ℕ → PhysicalGraphBounds.LiftPoint → ℂ)
-    (ch : ∀ L, LocalPhysicalCopyBounds.CommonChart (f L) (c L) a b h r0 σ (source L))
-    (hid : ∀ k I, (ch I.1).domain k I = ∅ ∨ (ch I.1).map k I = fun x => x) :
-    ∀ m : ℕ, ∃ B : ℝ, 1 ≤ B ∧ ∃ q : ℕ,
-      ∀ k I x, x ∈ (ch I.1).domain k I → ∀ j, 1 ≤ j → j ≤ m →
-        ‖iteratedFDeriv ℝ j ((ch I.1).map k I) x‖ ≤ B * ChartScales.S I.1.val.1 ^ q := by
-  intro m
-  refine ⟨1, le_rfl, 0, ?_⟩
-  intro k I x hx j hj _
-  rcases hid k I with he | hi
-  · rw [he] at hx
-    exact hx.elim
-  · rw [hi]
-    simp only [pow_zero, mul_one]
-    exact (PhysicalGraphBounds.norm_positive_jet_linear_le
-        (ContinuousLinearMap.id ℝ PhysicalGraphBounds.LiftPoint) x hj).trans (by simp)
 
 /-! ## One application of the physical-family estimate -/
 
@@ -548,23 +445,8 @@ noncomputable def waveData : PhysicalStageBounds.WaveData h E (Σ L, ι L) K J w
   smooth i := diagonalSmooth (f i) (hsmooth i)
   frequencies := hfrequency
 
-theorem waveData_copies (i : J) :
-    (waveData s f c source weight hsource ch hchart hmap bc hphase
-      hsupport hsmooth ha hr0 hZ hP hfrequency).copies i = diagonal (f i) := rfl
 
-theorem waveData_scalar (i : J) :
-    (waveData s f c source weight hsource ch hchart hmap bc hphase
-      hsupport hsmooth ha hr0 hZ hP hfrequency).scalar i =
-      (diagonal (f i)).sum a h r0 := rfl
 
-include s c source weight hsource ch hchart hmap bc hphase hsupport hsmooth
-  ha hr0 hZ hP hfrequency in
-theorem physical_scalar_bound (hh : 0 < h) (hh1 : h < 1 / 2) (i : J) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ preterminal, physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m ((diagonal (f i)).sum a h r0) w‖ ≤
-        C * physicalQ h w ^ (h * α - PhysicalClassBounds.physicalLoss h σ m) :=
-  (waveData s f c source weight hsource ch hchart hmap bc hphase
-    hsupport hsmooth ha hr0 hZ hP hfrequency).scalar_bound hh hh1 i m
 
 end Assembly
 

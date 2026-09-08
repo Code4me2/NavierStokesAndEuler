@@ -41,7 +41,6 @@ noncomputable def similarityData : ActualCycleExcluded.SimilarityData where
   slow_one := BaseContextAssembly.one_le_slowScale
   slow_scale := fun _ => le_max_right _ _
 
-theorem strip_eq : similarityData.strip = ActualInitialization.strip := rfl
 
 theorem strip_eq_geometry : similarityData.strip = ActualInitialization.geometry.strip := rfl
 
@@ -53,7 +52,6 @@ theorem gauge_eq : similarityData.gauge = ActualPrimary.commonGauge :=
 theorem gauge_eq_geometry : similarityData.gauge = ActualInitialization.geometry.gauge :=
   gauge_eq
 
-theorem region_eq : similarityData.region = ActualInitialization.geometry.region := rfl
 
 theorem inner_eq : similarityData.inner = ActualInitialization.geometry.patch.a := rfl
 
@@ -61,11 +59,7 @@ theorem outer_eq : similarityData.outer = ActualInitialization.geometry.patch.b 
 
 theorem index_eq : similarityData.index = CommonWindow.index ActualPrimary.h := rfl
 
-theorem index_bounds : CommonBaseContext.IndexBounds similarityData.h
-    similarityData.index similarityData.gap :=
-  CommonWindow.indexBounds ActualPrimary.h ActualPrimary.outgoing.data.h_pos.le
 
-theorem slow_eq : similarityData.slow = BaseContextAssembly.slowScale := rfl
 
 theorem epsilon_eq : similarityData.strip.epsilon = ChartScales.epsilon ActualPrimary.h := rfl
 

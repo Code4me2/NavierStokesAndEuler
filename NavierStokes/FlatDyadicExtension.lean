@@ -252,13 +252,5 @@ theorem dyadic_product_contDiffOn {Ω : Set D} (hΩ : IsOpen Ω)
     ContDiffOn ℝ ∞ (fun x => SquaredPartition.dyadicProfile (q x) • g x) Ω :=
   (dyadic_product_smooth_and_flat hΩ hq hg hB).1
 
-theorem dyadic_product_face {Ω : Set D} (hΩ : IsOpen Ω)
-    {q : D → ℝ} (hq : ContDiffOn ℝ ∞ q Ω) {g : D → E}
-    (hg : ContDiffOn ℝ ∞ g (windowDomain Ω q (1 / 2) 2))
-    (hB : LocalJetBounds Ω q g) {x : D} (hx : x ∈ Ω) (he : q x = 1 / 2 ∨ q x = 2) :
-    ContDiffAt ℝ ∞ (fun y => SquaredPartition.dyadicProfile (q y) • g y) x ∧
-      ∀ n : ℕ, iteratedFDeriv ℝ n (fun y => SquaredPartition.dyadicProfile (q y) • g y) x = 0 :=
-  ⟨(dyadic_product_contDiffOn hΩ hq hg hB).contDiffAt (hΩ.mem_nhds hx),
-    (dyadic_product_smooth_and_flat hΩ hq hg hB).2 x hx he⟩
 
 end NavierStokes.FlatDyadicExtension

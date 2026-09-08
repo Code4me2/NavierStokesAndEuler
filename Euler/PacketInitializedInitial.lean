@@ -70,22 +70,6 @@ theorem initializedInitial_common_support
     initializedInitialMean_support M D hTime τ hτ hτT B δ hδ ξ hs α N k⟩
   exact Metric.closedBall_subset_closedBall (by have := M.ℓ_le_one; linarith)
 
-include hTime in
-theorem initializedInitialMean_zero (hL : M.L=0) (N : ℕ) (k : ℝ) :
-    initializedInitialMean M D τ hτ hτT B δ hδ ξ hs α N k = 0 := by
-  funext x
-  change M.ℓ • EulerPacketInitial.mean N k⁻¹ 0
-    (initializedProfiles M D τ hτ hτT B δ hδ ξ hs α)
-    (0,(M.ℓ⁻¹ • x,k*inner ℝ D.m₀ (M.ℓ⁻¹ • x))) = 0
-  rw [EulerPacketInitial.mean_eq]
-  simp only [EulerPacketPointJets.fieldSum,EulerFiniteGrades.evaluate,EulerPacketInitial.timeSlice]
-  have hz (i : ℕ) := joinedSource_mean_initial_zero period M D hTime τ hτ hτT B
-    (joinedTerminalPrimary period M D τ hτ hτT B (initialData D δ hδ (α • ξ) hs))
-    (joinedTerminalPrimaryWitness period M D hTime τ hτ hτT B (initialData D δ hδ (α • ξ) hs))
-    rfl hL i (M.ℓ⁻¹ • x) (k*inner ℝ D.m₀ (M.ℓ⁻¹ • x))
-  simp only [show ∀ i, (initializedProfiles M D τ hτ hτT B δ hδ ξ hs α i).mean
-      (0,(M.ℓ⁻¹ • x,k*inner ℝ D.m₀ (M.ℓ⁻¹ • x))) = 0 from hz,
-    smul_zero,Finset.sum_const_zero]
 
 variable
   (L : EulerTransversePacketJoin.Budget D τ hτ hτT B (Fin 4) 6)

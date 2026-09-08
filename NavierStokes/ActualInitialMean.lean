@@ -661,17 +661,6 @@ theorem initial_mean_smooth (B N0 : ℕ) :
       (initialized B N0).mean :=
   (rank_bounds B N0).mean_smooth
 
-theorem initial_mean_support (B N0 : ℕ) :
-    CorrectionStep.GaugeSupportedTriple ActualPrimary.commonGauge.radial.inner ActualPrimary.commonGauge.radial.outer
-      (VariableGaugeMean.qLength (2 * ActualPrimary.h)) ActualPrimary.standardRegion.carrier
-      (initialized B N0).mean :=
-  (rank_bounds B N0).mean_support
 
-theorem initialized_formula (B N0 : ℕ) :
-    initialized B N0 = GaugeInitialization.initializedBands ActualPrimary.commonGauge ActualPrimary.rankData
-      ActualPrimary.h (CommonWindow.index ActualPrimary.h) ((0, 1), 0) (ActualPrimary.commonContext B)
-      (ActualPrimary.activeLabels ActualPrimary.standardRegion B N0)
-      (fun l => ActualPrimary.piece ActualPrimary.standardRegion l.2 l.1)
-      (ActualBaseResidual.baseError ActualPrimary.certificate ActualPrimary.modulation ActualPrimary.upper B) := rfl
 
 end NavierStokes.ActualInitialMean

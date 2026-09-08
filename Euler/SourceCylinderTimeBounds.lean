@@ -49,15 +49,6 @@ theorem coordinateRhs_contDiff
   have h₂ := projectedForcing_contDiff P S hS Q c hc hQ f hf
   simpa only [coordinateRhs,map_add] using h₁.add h₂
 
-theorem physicalRhs_contDiff
-    (hf : ContDiff ℝ ∞ (fun b : LiftTangent => pathTranslate P b (includePath P S hS f)))
-    (ha : ContDiff ℝ ∞ (fun b : LiftTangent => pathTranslate P b (includePath P S hS a))) :
-    ContDiff ℝ ∞ (fun b : LiftTangent => pathTranslate P b
-      (includePath P S hS (physicalRhs P S hS Q Q₁ c hc hQ f a))) := by
-  have h₁ := supported_product_orbit_contDiff P Q₁.field Q₁.translation_contDiff S hS a ha
-  have h₂ := supported_product_orbit_contDiff P Q.field Q.translation_contDiff S hS
-    (coordinateRhs P S hS Q Q₁ c hc hQ f a) (coordinateRhs_contDiff P S hS Q Q₁ c hc hQ f a hf ha)
-  simpa only [physicalRhs,map_add] using h₁.add h₂
 
 def coordinateCost (ι : Type*) [Fintype ι] (q : ℕ) (Ri C₀ C₁ Df Da : ℝ) : ℝ :=
   3*sobolevCoefficientAmplitude ι q (4*Ri) (18*Ri*C₀*C₁)*Da+

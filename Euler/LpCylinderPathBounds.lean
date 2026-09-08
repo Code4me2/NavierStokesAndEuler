@@ -33,12 +33,6 @@ private local instance : NormedSpace ℝ C(K,CylinderL2 P E →L[ℝ] CylinderL2
 def mixedOperatorPath (A : C(K,Space →ᵇ E →L[ℝ] F)) (a : LiftTangent) :
     C(K,CylinderL2 P E →L[ℝ] CylinderL2 P F) := fullPathMap P (translateCoefficientPath A a.1)
 
-theorem mixedOperatorPath_contDiff (A : C(K,Space →ᵇ E →L[ℝ] F))
-    (hA : ContDiff ℝ ∞ (translateCoefficientPath A)) :
-    ContDiff ℝ ∞ (mixedOperatorPath P A) :=
-  (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞)
-    (E := C(K,Space →ᵇ E →L[ℝ] F)) (F := C(K,CylinderL2 P E →L[ℝ] CylinderL2 P F))
-    (fullPathMap P)).comp (hA.comp (ContinuousLinearMap.fst ℝ Space ℝ).contDiff)
 
 theorem mixedOperatorPath_bound (A : C(K,Space →ᵇ E →L[ℝ] F))
     (hA : ContDiff ℝ ∞ (translateCoefficientPath A)) (n : ℕ) (C : ℝ)

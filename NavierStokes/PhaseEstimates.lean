@@ -47,9 +47,6 @@ theorem roundedFrequency_integer {k : ℝ} (hk : k ≠ 0) (target : ℝ) :
   unfold roundedFrequency
   field_simp
 
-theorem roundedFrequency_nonzero {k : ℝ} (hk : k ≠ 0) (target : ℝ) :
-    ∃ m : ℤ, m ≠ 0 ∧ k * roundedFrequency k target = (m : ℝ) :=
-  ⟨nonzeroRound (k * target), nonzeroRound_ne_zero _, roundedFrequency_integer hk target⟩
 
 theorem roundedFrequency_ne_zero {k : ℝ} (hk : k ≠ 0) (target : ℝ) :
     roundedFrequency k target ≠ 0 := by
@@ -109,12 +106,6 @@ theorem representative_frequency_bound (B sigma u L : ℝ) (K g : Plane)
 
 noncomputable def signedSlot (sigma u L v : ℝ) : ℝ := sigma * (u / 2 + u * v / L)
 
-/-- The cancellation producing the intended radial slope is exact for the
-unrounded representative data. -/
-theorem radial_reference_identity (B sigma u L v : ℝ) :
-    sigma * B * u / 2 - v * (-sigma * B * u / L) = B * signedSlot sigma u L v := by
-  unfold signedSlot
-  ring
 
 /-! ## Local C2 control implies the derivative comparison at the representative -/
 
@@ -908,79 +899,8 @@ theorem actual_phase_estimates
     F G (q, (θ, v)) hε.ne' (hbase.actualF q hq) (hbase.actualG q hq)]
   exact h
 
-/-- Punctured-lattice rounding itself already excludes exact zeros of the
-tangential normal; the comparison estimate supplies the uniform lower bound. -/
-theorem phase_normal_nonvanishing {ε k target pz x0 : ℝ} {F G : Slow → ℝ}
-    {q : PhaseCalculus.Slot} (hε : ε ≠ 0) (hk : k ≠ 0) (hR : q.1.1 ≠ 0)
-    (hF : DifferentiableAt ℝ F q.1) (hG : DifferentiableAt ℝ G q.1) :
-    MovingFrameODE.tail (PhaseCalculus.phaseNormal ε (roundedFrequency k target) pz x0 F G q) ≠ 0 ∧
-    PhaseCalculus.phaseNormal ε (roundedFrequency k target) pz x0 F G q ≠ 0 := by
-  rw [phaseNormal_eq_explicit ε (roundedFrequency k target) pz x0 F G q hε hF hG]
-  have hp := div_ne_zero (roundedFrequency_ne_zero hk target) hR
-  constructor
-  · intro hz
-    have h := congrArg (fun w : Plane => w 0) hz
-    exact hp h
-  · intro hz
-    have h := congrArg (fun w : Space => w 1) hz
-    exact hp h
 
-/-- The phase's actual derivative, uniform lower bounds and every changing
-frame quantity needed in `MovingFrameODE`, from local base and band data. -/
-theorem actual_phase_geometry
-    {F G F0 G0 : Slow → ℝ} {U : Set Slow} {q q0 : Slow}
-    {ε target pz v θ B sigma u L M S k : ℝ} {K : Plane}
-    (hbase : LocalBaseBounds F G F0 G0 U M ε)
-    (hq : q ∈ U) (hq0 : q0 ∈ U) (hdiameter : ‖q - q0‖ ≤ 1 / S ^ 3)
-    (hR : q.1 ≠ 0) (hR0 : q0.1 ≠ 0)
-    (hg : shearVector F0 G0 q0 ≠ 0) (horth : ⟪K, shearVector F0 G0 q0⟫_ℝ = 0)
-    (hfreq : (!₂[target / q0.1, pz] : Plane) =
-      representativeFrequency B sigma u L K (shearVector F0 G0 q0))
-    (hM : 1 ≤ M) (hS : 1 ≤ S) (hk : 1 ≤ k) (hε : 0 < ε)
-    (htarget : |target| ≤ M) (hpz : |pz| ≤ M) (hB : |B| ≤ M)
-    (hsigma : |sigma| = 1) (hu : |u| ≤ M) (hgi : 1 / ‖shearVector F0 G0 q0‖ ≤ M)
-    (hL : 1 / |L| ≤ M / S) (hv : |v| ≤ M * S)
-    (hRi : |1 / q.1| ≤ M) (hR0i : |1 / q0.1| ≤ M)
-    (hBpos : 0 < B) (hK : ‖K‖ = 1)
-    (hsmall : phaseConstant M * phaseError S ε k ≤ B / 2) :
-    let N : ℝ → Space := fun w => PhaseCalculus.phaseNormal ε (roundedFrequency k target) pz
-      (sigma * B * u / 2) F G (q, (θ, w))
-    let n' := PhaseCalculus.normalSlotDerivative ε (roundedFrequency k target) pz F G q
-    let δ := phaseConstant M * phaseError S ε k
-    HasDerivAt N n' v ∧
-    B / 2 ≤ MovingFrameODE.normalScale (N v) ∧ B / 2 ≤ ‖N v‖ ∧
-    MovingFrameODE.tail (N v) ≠ 0 ∧ N v ≠ 0 ∧
-    |MovingFrameODE.radialSlope (N v) - signedSlot sigma u L v| ≤
-      2 * (1 + |signedSlot sigma u L v|) * δ / B ∧
-    ‖MovingFrameODE.normalDirection (N v) - K‖ ≤ 4 * δ / B ∧
-    ‖MovingFrameODE.quarterTurn (MovingFrameODE.normalDirection (N v)) - MovingFrameODE.quarterTurn K‖ ≤
-      4 * δ / B ∧
-    |slopeDerivative (N v) n'| ≤ 2 * (1 + |MovingFrameODE.radialSlope (N v)|) * δ / B ∧
-    |angularVelocity (N v) n'| ≤ 4 * δ / B := by
-  dsimp only
-  obtain ⟨hc, hd⟩ := actual_phase_estimates (v := v) (θ := θ) hbase hq hq0 hdiameter
-    hR hR0 hg horth hfreq hM hS hk hε htarget hpz hB hsigma hu hgi hL hv hRi hR0i
-  have hl := normal_lower_bounds (s := signedSlot sigma u L v) hBpos hK hsmall hc
-  refine ⟨?_, hl.1, hl.2.1, hl.2.2.1, hl.2.2.2, ?_, ?_, ?_, ?_, ?_⟩
-  · exact PhaseCalculus.hasDerivAt_phaseNormal_slot ε (roundedFrequency k target) pz
-      (sigma * B * u / 2) θ v F G q hε.ne' (hbase.actualF q hq) (hbase.actualG q hq)
-  · exact radialSlope_close hBpos hK hsmall hc
-  · exact normalDirection_close hBpos hK hsmall hc
-  · exact transverseDirection_close hBpos hK hsmall hc
-  · exact slopeDerivative_bound hBpos hl.1 hd
-  · exact angularVelocity_bound hBpos hl.1 hd
 
-theorem signedSlot_bound {sigma u L v : ℝ}
-    (hsigma : |sigma| = 1) (hu : 0 ≤ u) (hL : 0 < L) (hv : 0 ≤ v) (hvL : v ≤ L) :
-    |signedSlot sigma u L v| ≤ 3 * u / 2 := by
-  have hvdiv : v / L ≤ 1 := (div_le_one hL).2 hvL
-  have hnonneg : 0 ≤ u / 2 + u * v / L := by positivity
-  unfold signedSlot
-  rw [abs_mul, hsigma, one_mul, abs_of_nonneg hnonneg]
-  have h := mul_le_mul_of_nonneg_left hvdiv hu
-  simp only [mul_one] at h
-  rw [mul_div_assoc]
-  nlinarith only [h]
 
 theorem radialSlope_uniform_bound {n : Space} {K : Plane} {B s δ A : ℝ}
     (hB : 0 < B) (hK : ‖K‖ = 1) (hδ : δ ≤ B / 2)
@@ -1058,20 +978,5 @@ theorem eventually_phaseError_le (h : ℝ) (hh : 0 < h) :
   filter_upwards [eventually_band_conditions h hh] with n hn
   exact phaseError_le_four_div (lt_of_lt_of_le zero_lt_one hn.1) hn.2.1 hn.2.2.1 hn.2.2.2
 
-/-- Any fixed positive representative lower bound eventually dominates the
-derived normal error.  This is a cutoff conclusion, not an assumed comparison. -/
-theorem eventually_error_small (h : ℝ) (hh : 0 < h) {C B : ℝ} (hC : 0 ≤ C) (hB : 0 < B) :
-    ∀ᶠ n : ℕ in atTop,
-      C * phaseError (ChartScales.S n) (ChartScales.epsilon h n) (ChartScales.carrier h n) ≤ B / 2 := by
-  have hS := chart_S_tendsto_atTop.eventually (eventually_ge_atTop (max 1 (8 * C / B)))
-  filter_upwards [hS, eventually_phaseError_le h hh] with n hn he
-  have hS1 : 1 ≤ ChartScales.S n := (le_max_left _ _).trans hn
-  have hS0 : 0 < ChartScales.S n := lt_of_lt_of_le zero_lt_one hS1
-  have hthreshold : 8 * C / B ≤ ChartScales.S n := (le_max_right _ _).trans hn
-  have hb := (div_le_iff₀ hB).mp hthreshold
-  calc
-    _ ≤ C * (4 / ChartScales.S n) := mul_le_mul_of_nonneg_left he hC
-    _ = (4 * C) / ChartScales.S n := by ring
-    _ ≤ B / 2 := (div_le_iff₀ hS0).mpr (by nlinarith only [hb])
 
 end NavierStokes.PhaseEstimates

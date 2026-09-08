@@ -44,16 +44,7 @@ theorem representative_eq_of_mem [Zero E] {U : ι → Set D} {f : ι → D → E
   simp only [representative, dite_eq_left h]
   exact hf (Classical.choose h) i ⟨Classical.choose_spec h, hx⟩
 
-theorem representative_eqOn [Zero E] {U : ι → Set D} {f : ι → D → E}
-    (hf : Compatible U f) (i : ι) : EqOn (representative U f) (f i) (U i) :=
-  fun _ hx => representative_eq_of_mem hf hx
 
-theorem representative_unique_on_domain [Zero E] {U : ι → Set D} {f : ι → D → E}
-    (hf : Compatible U f) {g : D → E} (hg : ∀ i, EqOn g (f i) (U i)) :
-    EqOn (representative U f) g (domain U) := by
-  intro x hx
-  obtain ⟨i, hi⟩ := mem_domain_iff.mp hx
-  exact (representative_eq_of_mem hf hi).trans (hg i hi).symm
 
 section Topology
 
@@ -67,20 +58,7 @@ theorem representative_germ [Zero E] {U : ι → Set D} {f : ι → D → E}
     representative U f =ᶠ[𝓝 x] f i :=
   eventually_of_mem ((hU i).mem_nhds hx) (fun _ hy => representative_eq_of_mem hf hy)
 
-/-- The zero totalization has a zero germ off the closure. No such claim
-is made at an excluded face in the closure of the valid union. -/
-theorem representative_zero_germ [Zero E] {U : ι → Set D} {f : ι → D → E}
-    {x : D} (hx : x ∉ closure (domain U)) : representative U f =ᶠ[𝓝 x] fun _ => 0 := by
-  filter_upwards [isClosed_closure.isOpen_compl.mem_nhds hx] with y hy
-  exact representative_zero (fun h => hy (subset_closure h))
 
-theorem representative_continuousOn [TopologicalSpace E] [Zero E]
-    {U : ι → Set D} {f : ι → D → E} (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    (hs : ∀ i, ContinuousOn (f i) (U i)) : ContinuousOn (representative U f) (domain U) := by
-  intro x hx
-  obtain ⟨i, hi⟩ := mem_domain_iff.mp hx
-  exact ((hs i).continuousAt ((hU i).mem_nhds hi)).congr
-    (representative_germ hU hf hi).symm |>.continuousWithinAt
 
 end Topology
 
@@ -102,10 +80,6 @@ theorem representative_contDiffOn {n : WithTop ℕ∞}
   obtain ⟨i, hi⟩ := mem_domain_iff.mp hx
   exact (representative_contDiffAt hU hf hi (hs i)).contDiffWithinAt
 
-theorem representative_fderiv_eq (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    {i : ι} {x : D} (hx : x ∈ U i) :
-    fderiv ℝ (representative U f) x = fderiv ℝ (f i) x :=
-  (representative_germ hU hf hx).fderiv_eq
 
 /-- The actual multilinear derivative tensors agree as functions near
 each valid point. No differentiability premise is needed for germ locality. -/
@@ -138,17 +112,7 @@ theorem representative_jet_bound_on_union (hU : ∀ i, IsOpen (U i)) (hf : Compa
   obtain ⟨i, hi⟩ := mem_domain_iff.mp hx
   exact representative_jet_bound hU hf hi m (hb i x hi)
 
-theorem representative_finite_jets_bound (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    (N : ℕ) {B : ℕ → D → ℝ}
-    (hb : ∀ i, ∀ m ≤ N, ∀ x ∈ U i, ‖iteratedFDeriv ℝ m (f i) x‖ ≤ B m x) :
-    ∀ m ≤ N, ∀ x ∈ domain U, ‖iteratedFDeriv ℝ m (representative U f) x‖ ≤ B m x := by
-  intro m hm
-  exact representative_jet_bound_on_union hU hf m (fun i x hx => hb i m hm x hx)
 
-theorem representative_jet_apply_eq (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    {i : ι} {x : D} (hx : x ∈ U i) (m : ℕ) (v : Fin m → D) :
-    iteratedFDeriv ℝ m (representative U f) x v = iteratedFDeriv ℝ m (f i) x v := by
-  rw [representative_iteratedFDeriv_eq hU hf hx m]
 
 end Derivatives
 
@@ -169,10 +133,6 @@ theorem representative_spatialCurl_eq {U : ι → Set SpaceTime} {A : ι → Vel
     SpatialCurl.spatialCurl (representative U A) x = SpatialCurl.spatialCurl (A i) x :=
   spatialCurl_eq_of_germ (representative_germ hU hA hx)
 
-theorem representative_spatialCurl_germ {U : ι → Set SpaceTime} {A : ι → VelocityField}
-    (hU : ∀ i, IsOpen (U i)) (hA : Compatible U A) {i : ι} {x : SpaceTime} (hx : x ∈ U i) :
-    SpatialCurl.spatialCurl (representative U A) =ᶠ[𝓝 x] SpatialCurl.spatialCurl (A i) :=
-  eventually_of_mem ((hU i).mem_nhds hx) (fun _ hy => representative_spatialCurl_eq hU hA hy)
 
 end PhysicalCurl
 

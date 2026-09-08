@@ -319,22 +319,6 @@ theorem coreVelocity_divergence {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
   exact ((corePotential_contDiffAt hh hh1 hf hV hx).comp x
     (contDiffAt_const.prodMk contDiffAt_id)).of_le (nat_le_infty 2)
 
-/-- The averaged meridional potential recovers the actual axial profile. -/
-theorem coreVelocity_axial {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr)
-    {t : ℝ} {x : Space} (hx : (t, x) ∈ coreDomain h Λ) :
-    coreVelocity h f V (t, x) 2 =
-      physicalQ h (profilePoint t x) ^ (-NaturalAxisData.A h) *
-        U (similarityPoint h (profilePoint t x)) := by
-  have hH := (meridionalPotential_contDiffAt hh hh1 hs.average_smooth hx).differentiableAt (by simp)
-  have hK := (swirlPotential_contDiffAt hh hh1 hs.f_smooth hx).differentiableAt (by simp)
-  change velocity (meridionalPotential h V) (swirlPotential h f) (t, x) 2 = _
-  rw [velocity_two _ _ t x hH hK,
-    meridionalPotential_partialS hh hh1 hs.average_smooth hx,
-    ← hs.average_equation _ hx.2]
-  dsimp only [meridionalPotential, similarityPoint, profilePoint]
-  ring
 
 theorem coreVelocity_angular {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2)
@@ -365,38 +349,6 @@ theorem scaled_sqrt_identity {q s : ℝ} (hq : 0 < q) (hs : 0 ≤ s) (h : ℝ) :
     Real.sqrt_div (mul_nonneg (by norm_num) hs), hc]
   ring
 
-/-- Away from the axis the cylindrical azimuthal velocity is precisely
-`q^(-A) sqrt(2X) f(X,eta)`. The Cartesian field remains smooth on the axis. -/
-theorem coreVelocity_swirl {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
-    {t : ℝ} {x : Space} (hx : (t, x) ∈ coreDomain h Λ) (hs : 0 < radialEnergy x) :
-    (x 0 * coreVelocity h f V (t, x) 1 - x 1 * coreVelocity h f V (t, x) 0) /
-        Real.sqrt (2 * radialEnergy x) =
-      physicalQ h (profilePoint t x) ^ (-NaturalAxisData.A h) *
-        Real.sqrt (2 * (similarityPoint h (profilePoint t x)).1) *
-          f (similarityPoint h (profilePoint t x)) := by
-  rw [coreVelocity_angular hh hh1 hf hV hx]
-  have hr : Real.sqrt (2 * radialEnergy x) ≠ 0 :=
-    (Real.sqrt_pos.mpr (mul_pos (by norm_num) hs)).ne'
-  have hr2 : Real.sqrt (2 * radialEnergy x) ^ 2 = 2 * radialEnergy x :=
-    Real.sq_sqrt (mul_nonneg (by norm_num) hs.le)
-  have hquot : (2 * radialEnergy x) / Real.sqrt (2 * radialEnergy x) =
-      Real.sqrt (2 * radialEnergy x) :=
-    (div_eq_iff hr).2 (by simpa only [pow_two] using hr2.symm)
-  calc
-    _ = Real.sqrt (2 * radialEnergy x) *
-        (physicalQ h (profilePoint t x) ^ (-h) / physicalQ h (profilePoint t x)) *
-          f (similarityPoint h (profilePoint t x)) := by
-      calc
-        _ = ((2 * radialEnergy x) / Real.sqrt (2 * radialEnergy x)) *
-            (physicalQ h (profilePoint t x) ^ (-h) / physicalQ h (profilePoint t x)) *
-              f (similarityPoint h (profilePoint t x)) := by ring
-        _ = _ := by rw [hquot]
-    _ = _ := by
-      rw [scaled_sqrt_identity (physicalQ_pos hh hh1 hx.1) hs.le]
-      rfl
 
 /-- The axial velocity is exactly the prescribed nonzero axis datum,
 multiplied by the singular similarity scale. -/
@@ -471,40 +423,6 @@ theorem extension_speedUnbounded {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
   apply (coreVelocity_axis_tendsto_atTop hh hh1 hj hs).congr'
   exact hagrees.mono (fun t ht => congrArg norm ht.symm)
 
-theorem extension_on_core_speedUnbounded {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} {u : VelocityField}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hj : 0 < j)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr)
-    (hagrees : EqOn u (coreVelocity h f V) (coreDomain h Λ)) :
-    SpeedUnboundedAtOne u := by
-  apply extension_speedUnbounded hh hh1 hj hs
-  filter_upwards [self_mem_nhdsWithin] with t ht
-  exact hagrees (core_axis_mem h Λ ht)
 
-/-- The constructed natural profiles produce an actual smooth,
-divergence-free physical core with unbounded speed. This is a local core
-existence statement, not the existence of the final forced periodic flow. -/
-theorem exists_natural_core {h j : ℝ} (hsmall : NaturalAxisData.SmallParameters h j)
-    {g a : ℝ → ℝ} {cap B : ℝ}
-    (hp : PressureDatum.Admissible g a cap) (hB : 2 ≤ B)
-    (hg : ∀ y ≤ 0, g y = B ^ 2 * Real.exp ((1 / 5 : ℝ) * y))
-    (ha : ∀ y ≤ 0, a y = 1) :
-    ∃ Λ : ℝ, 0 < Λ ∧ ∃ f V : ℝ × ℝ → ℝ,
-      IsOpen (coreDomain h Λ) ∧
-      (∀ t < 1, (t, (0 : Space)) ∈ coreDomain h Λ) ∧
-      ContDiffOn ℝ ∞ (coreVelocity h f V) (coreDomain h Λ) ∧
-      (∀ t x, (t, x) ∈ coreDomain h Λ → spatialDivergence (coreVelocity h f V) t x = 0) ∧
-      (∀ t < 1, coreVelocity h f V (t, 0) =
-        ((1 - t) ^ (-NaturalAxisData.A h) * j) • coordinateVector 2) ∧
-      SpeedUnboundedAtOne (coreVelocity h f V) := by
-  obtain ⟨_, _, Λ, _, _, _, hΛ, _, f, U, V, Pr, hs, _, _⟩ :=
-    NaturalProfile.exists_natural_profiles hsmall hp hB hg ha
-  have hh1 : h < 1 / 2 := by linarith [hsmall.h_le]
-  refine ⟨Λ, hΛ, f, V, coreDomain_isOpen hsmall.h_pos hh1 Λ,
-    (fun t ht => core_axis_mem h Λ ht),
-    coreVelocity_contDiffOn hsmall.h_pos hh1 hs.f_smooth hs.average_smooth,
-    (fun t x hx => coreVelocity_divergence hsmall.h_pos hh1 hs.f_smooth hs.average_smooth hx),
-    (fun t ht => coreVelocity_at_origin hsmall.h_pos hh1 hs ht),
-    coreVelocity_speedUnbounded hsmall.h_pos hh1 hsmall.j_pos hs⟩
 
 end NavierStokes.NaturalCore

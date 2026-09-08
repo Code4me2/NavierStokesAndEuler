@@ -746,23 +746,7 @@ theorem physicalAngular_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
   rw [he]
   exact contDiffOn_const.mul (etaDebt_contDiffOn d hK false (angular_decay d))
 
-theorem physicalPressure_hasDerivWithinAt (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    HasDerivWithinAt (physicalPressure d K)
-      (nuDebtJet d K true (-1) 1 (diffusion eta) * (-2 * eta)) (Icc (-1 : ℝ) 1) eta := by
-  have he : physicalPressure d K = etaDebt d K true (-1) :=
-    funext (physicalPressure_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact etaDebt_hasDerivWithinAt d hK true (pressure_decay d) hη
 
-theorem physicalEnergy_hasDerivWithinAt (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    HasDerivWithinAt (physicalEnergy d K)
-      (nuDebtJet d K true 0 1 (diffusion eta) * (-2 * eta)) (Icc (-1 : ℝ) 1) eta := by
-  have he : physicalEnergy d K = etaDebt d K true 0 :=
-    funext (physicalEnergy_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact etaDebt_hasDerivWithinAt d hK true (energy_decay d) hη
 
 theorem physicalAngular_hasDerivWithinAt (d : TailData) {K : ℝ} (hK : 1 ≤ K)
     {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
@@ -871,14 +855,6 @@ theorem correctionJet_eq_iteratedDerivWithin {h K X ν : ℝ} (hh : 0 < h)
       exact ((correctionJet_hasDerivWithinAt hh hX hν n).congr_of_mem
         (fun u hu => ih hu) hν).derivWithin ((uniqueDiffOn_Ici 0) ν hν)
 
-theorem multiplier_nu_contDiffOn {h K X : ℝ} (hh : 0 < h) (hX : 0 < X) :
-    ContDiffOn ℝ ∞ (fun ν => multiplier h ν K X) (Ici 0) := by
-  have hmap : MapsTo (fun ν : ℝ => 2 * ν / X) (Ici 0) (Ici 0) := by
-    intro ν hν
-    exact div_nonneg (mul_nonneg (by norm_num) hν) hX.le
-  exact contDiffOn_const.add (contDiffOn_const.mul
-    (((RadialHeatProfile.profile_contDiffOn (a := 1 + h) (by linarith)).comp
-      ((contDiffOn_const.mul contDiffOn_id).div_const X) hmap).sub contDiffOn_const))
 
 theorem multiplier_nu_jet {h K X ν : ℝ} (hh : 0 < h) (hX : 0 < X)
     (hν : 0 ≤ ν) (n : ℕ) :
@@ -890,12 +866,6 @@ theorem multiplier_nu_jet {h K X ν : ℝ} (hh : 0 < h) (hX : 0 < X)
   rw [he, iteratedDerivWithin_const_add (Nat.succ_pos n) (1 : ℝ)]
   exact correctionJet_eq_iteratedDerivWithin hh hX hν (n + 1)
 
-theorem multiplier_nu_jet_bound {h K X ν : ℝ} (hh : 0 < h) (hX : 1 ≤ X)
-    (hν : ν ∈ Icc (0 : ℝ) 1) (n : ℕ) :
-    |iteratedDerivWithin (n + 1) (fun u => multiplier h u K X) (Ici 0) ν| ≤
-      correctionBound h 1 (n + 1) / X := by
-  rw [multiplier_nu_jet hh (lt_of_lt_of_le zero_lt_one hX) hν.1 n]
-  exact correctionJet_bound hh hX hν (n + 1)
 
 theorem multiplier_zero {h : ℝ} (hh : 0 < h) (K X : ℝ) : multiplier h 0 K X = 1 := by
   simp [multiplier, RadialHeatProfile.profile_zero (a := 1 + h) (by linarith)]
@@ -925,21 +895,11 @@ theorem physical_debts_integrable (d : TailData) {K eta : ℝ} (hK : 0 < K)
       change (outgoingProfile d K eta) d.h (diffusion eta) K X) (Ioi K) :=
   outgoing_debts_integrable d hK (diffusion_mem hη).1 eta
 
-theorem physical_debts_zero (d : TailData) (K : ℝ) {eta : ℝ} (hη : diffusion eta = 0) :
-    physicalPressure d K eta = 0 ∧ physicalEnergy d K eta = 0 ∧ physicalAngular d K eta = 0 := by
-  simp [physicalPressure, physicalEnergy, physicalAngular, pressureDebt, energyDebt, angularDebt,
-    hη, squareChange, change, edit, multiplier_zero d.h_pos]
 
 noncomputable def physicalEdit (d : TailData) (K eta X : ℝ) : ℝ :=
   outgoingEdit d (diffusion eta) K eta X
 
-theorem physicalEdit_pos (d : TailData) (K : ℝ) {eta X : ℝ}
-    (hη : eta ∈ Icc (-1 : ℝ) 1) (hX : 0 < X) : 0 < physicalEdit d K eta X :=
-  outgoingEdit_pos d (diffusion_mem hη).1 hX eta
 
-theorem physicalEdit_before (d : TailData) {K X : ℝ} (hK : 0 < K) (hX : 0 < X)
-    (hXK : X ≤ K) (eta : ℝ) : physicalEdit d K eta X = outgoingProfile d K eta X :=
-  outgoingEdit_before d (diffusion eta) eta hK hX hXK
 
 theorem physicalEdit_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
     ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalEdit d K p.2 p.1)
@@ -959,12 +919,6 @@ theorem physicalEdit_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
     (show MapsTo (Prod.fst : ℝ × ℝ → ℝ) (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) (Ioi 0) from fun _ hp => hp.1)
   exact hE.mul (contDiffOn_const.add (hs.mul (hH.sub contDiffOn_const)))
 
-theorem diffusion_of_physical_coordinates {q τ z : ℝ} (hq : 0 < q) (hrel : q = τ + z ^ 2) :
-    diffusion (z / Real.sqrt q) = τ / q := by
-  unfold diffusion
-  rw [div_pow, Real.sq_sqrt hq.le]
-  field_simp [hq.ne']
-  linarith
 
 theorem heat_ratio_physical {q s τ : ℝ} (hq : 0 < q) (hs : 0 < s) :
     2 * (τ / q) / (s / q) = 2 * τ / s := by
@@ -1059,12 +1013,5 @@ theorem nuDebt_linear_first_neg (d : TailData) {K : ℝ} (hK : 1 ≤ K)
   rw [integral_neg] at hp
   exact neg_pos.mp hp
 
-theorem physicalAngular_endpoint_derivative_pos (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
-    0 < derivWithin (physicalAngular d K) (Icc (-1 : ℝ) 1) 1 := by
-  have hd := physicalAngular_hasDerivWithinAt d hK (eta := 1) (by norm_num)
-  rw [hd.derivWithin ((uniqueDiffOn_Icc (by norm_num)) 1 (by norm_num))]
-  have hn := nuDebt_linear_first_neg d hK (angular_decay d) (ν := 0) (by norm_num)
-  simp only [diffusion, one_pow, sub_self, mul_one]
-  exact mul_pos (Real.sqrt_pos.mpr (by norm_num)) (mul_pos_of_neg_of_neg hn (by norm_num))
 
 end NavierStokes.ParametricHeatTail

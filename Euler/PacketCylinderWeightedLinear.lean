@@ -83,12 +83,6 @@ theorem WordBound.normalized_multiply {q d : ℕ} {R A : ℝ}
       (3*sobolevCoefficientAmplitude (Fin 4) q Rc C*A) d :=
   (hG.multiply K Rc C hRc hC hA hR hK).of_path_eq _ (G.normalized_multiply_path hT g hg K)
 
-theorem wordBound_normalized_finsetSum {ι : Type*} (s : Finset ι) (f : ι → VectorField)
-    (W : ∀ i, Field P T (f i)) (q : ℕ) (R : ℝ) (d : ℕ) (A : ι → ℝ)
-    (hW : ∀ i ∈ s, ((W i).normalized hT g hg).WordBound q R (A i) d) :
-    ((Field.finsetSum s f W).normalized hT g hg).WordBound q R (∑ i ∈ s,A i) d :=
-  (wordBound_finsetSum s _ (fun i => (W i).normalized hT g hg) A hW).of_path_eq _
-    (normalized_finsetSum_path hT g hg s f W)
 
 theorem WordBound.angleMean {q d : ℕ} {R A : ℝ} (hG : G.WordBound q R A d) :
     G.angleMean.WordBound q R A d := by

@@ -68,11 +68,6 @@ theorem source_zero (l : Index B N0) (n : ℕ) (i : Fin 3) : (source x l).veloci
 theorem source_carrier (l : Index B N0) : CorrectionStep.SameCarrier (source x l) (ActualInitialization.primaryBlock l) :=
   ⟨(H.carrier l).frequency, (H.carrier l).phase, (H.carrier l).angular⟩
 
-theorem source_fullPhase (l : Index B N0) (j : ℤ) (n : ℕ) :
-    fullPhase (source x l) j n = fullPhase (ActualInitialization.primaryBlock l) j n := by
-  funext z
-  simp only [fullPhase, (H.source_carrier l).frequency, (H.source_carrier l).phase,
-    (H.source_carrier l).angular]
 
 theorem source_zero_germ (l : Index B N0) (j : ℤ) (n : ℕ) {z : Point}
     (hz : z ∈ ActualInitialization.geometry.domain) (hout : z ∉ labelCarrier l n) :
@@ -1144,8 +1139,6 @@ abbrev PhysicalData (B N : ℕ) (s : State Point) (u : VelocityField) (P : Press
 
 noncomputable def fixedLoss (m : ℕ) : ℝ := physicalLoss ActualPrimary.h (2 * ActualPrimary.h) m
 
-theorem fixedLoss_eq_ledger (m : ℕ) :
-    fixedLoss m = ActualIterationLedger.residualLoss ActualPrimary.h (2 * ActualPrimary.h) m := rfl
 
 namespace Invariant
 

@@ -49,10 +49,5 @@ def boundedPath : C(Icc (0 : ℝ) T,X →ᵇ V) where
 @[simp] theorem boundedPath_apply (t : Icc (0 : ℝ) T) (x : X) :
     boundedPath T hT f q hf C D hC hD hq hd t x = f x t := rfl
 
-theorem boundedPath_norm (hCnonneg : 0 ≤ C) :
-    ‖boundedPath T hT f q hf C D hC hD hq hd‖ ≤ C := by
-  apply (ContinuousMap.norm_le _ hCnonneg).2
-  intro t
-  exact (BoundedContinuousFunction.norm_le hCnonneg).2 (hC t)
 
 end EulerBoundedPathFamily

@@ -58,9 +58,5 @@ def pressureForceForcing (G : Forcing D raw) : Forcing D G.pressureForce :=
 
 end Forcing
 
-theorem meanSolve_admissible (D : Data) (raw : VectorField) (h : Nonempty (Forcing D raw)) :
-    Nonempty (Forcing D (meanSolve D raw).1) := by
-  rw [meanSolve_of_admissible D raw h]
-  exact ⟨(Classical.choice h).vectorForcing⟩
 
 end EulerMeanPacketProvider

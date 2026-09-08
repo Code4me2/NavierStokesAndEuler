@@ -271,14 +271,6 @@ theorem sectionStrip_nativeStrip (s : StripData (Q × TorusInverse.Plane)) :
   cases s
   rfl
 
-theorem nativeSlice_original_uniform {s : StripData (Q × TorusInverse.Plane)}
-    {w : ι → ℕ → (Q × ℝ) × TorusInverse.Plane → ℝ} {α : ℝ}
-    {f : ι → ℕ → (Q × ℝ) × TorusInverse.Plane → F} (hf : UniformClass (nativeStrip s) w α f) :
-    UniformClass s (fun l n x => w l n (ParticularWaveAssembly.angleShuffle (x,0))) α
-      (fun l n x => f l n (ParticularWaveAssembly.angleShuffle (x,0))) := by
-  have h := nativeSlice_uniform hf
-  rw [sectionStrip_nativeStrip] at h
-  exact h
 
 /-- Full-angle, already periodized mode coefficients produce the actual
 finite particular block. Every output mode has uniform label bounds. -/
@@ -341,12 +333,6 @@ theorem block_velocity_reindex (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
       (fun l n x => (StateReindex.block e (a l)).velocity n i j x) :=
   uniform_reindex e ha
 
-theorem block_pressure_reindex (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
-    {w : ι → ℕ → E → ℝ} {α : ℝ} {a : ι → CorrectionState.HarmonicBlock E}
-    (j : ℤ) (ha : UniformClass s w α (fun l n x => (a l).pressure n j x)) :
-    UniformClass (StateReindex.strip e s) (fun l n x => w l n (e x)) α
-      (fun l n x => (StateReindex.block e (a l)).pressure n j x) :=
-  uniform_reindex e ha
 
 end StateReindex
 

@@ -204,36 +204,6 @@ theorem modulated_continuousOn {K : Set Slow}
     · exact fun p hp => ((hS p hp).2.continuousAt.comp_of_eq
         (BaseChartJets.normalizedCoordinates_smoothAt hh hh1 (hpos p hp).1).snd.continuousAt rfl).continuousWithinAt
 
-/-- Uniform reference bounds and one mixed target margin for any compact
-positive-time subset of the actual active annulus. -/
-theorem modulated_compact_bounds (hcone : LeadingStressWeights.FullTrueCone v)
-    {K : Set Slow} (hK : IsCompact K) (hpos : ∀ p ∈ K, 0 < p.2.2 ∧ 0 < p.1)
-    (hactive : ∀ p ∈ K, NominalConeAssembly.activeLeft W <
-      (BaseChartJets.normalizedCoordinates F.data.h p).2.1 ∧
-      (BaseChartJets.normalizedCoordinates F.data.h p).2.1 < NominalConeAssembly.activeRight W) :
-    let F₀ := BaseChartJets.leadingFrequency F.data.h W.axis.normalization
-      (EntranceAlignedBase.modulatedCoefficients H v)
-    let G₀ := BaseChartJets.leadingAxial F.data.h (EntranceAlignedBase.modulatedCoefficients H v)
-    let g₀ := PhaseEstimates.shearVector F₀ G₀
-    let T₀ := fun p => stressVector v.profiles F.data.h (BaseChartJets.normalizedCoordinates F.data.h p).2
-    ∃ M u eta delta : ℝ, 1 ≤ M ∧ 0 < u ∧ 0 < eta ∧ 0 < delta ∧
-      (∀ p ∈ K, PrimaryRepresentatives.ParameterBounds M p.1 (F₀ p) (g₀ p)) ∧
-      ∀ p₀ ∈ K, ∀ p ∈ K, dist p p₀ < delta →
-        ⟪T₀ p, PrimaryRepresentatives.normalDirection (g₀ p₀)⟫_ℝ ≤ -eta ∧
-        |PrimaryRepresentatives.c0 (F₀ p₀) (g₀ p₀) *
-          ⟪T₀ p, PrimaryRepresentatives.transverseDirection (g₀ p₀)⟫_ℝ /
-          ⟪T₀ p, PrimaryRepresentatives.normalDirection (g₀ p₀)⟫_ℝ| + eta ≤
-          PrimaryRepresentatives.slopeRatio u := by
-  dsimp only
-  have hc := modulated_continuousOn H v hpos
-  have hs (p : Slow) (hp : p ∈ K) := modulated_spectral_cones H v hcone
-    (hpos p hp).1 (hpos p hp).2 (hactive p hp).1 (hactive p hp).2
-  obtain ⟨M, hM, hb⟩ := PrimaryRepresentatives.compact_parameter_bounds hK hc.1 hc.2.1
-    (fun p hp => (hpos p hp).2) (fun p hp => (hs p hp).1)
-  obtain ⟨u, eta, delta, hu, he, hd, hm⟩ :=
-    PrimaryRepresentatives.compact_mixed_target_margin hK hc.1 hc.2.1 hc.2.2
-      (fun p hp => (hs p hp).1) (fun p hp => (hs p hp).2)
-  exact ⟨M, u, eta, delta, hM, hu, he, hd, hb, hm⟩
 
 end Modulated
 

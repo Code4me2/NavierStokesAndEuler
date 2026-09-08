@@ -63,15 +63,6 @@ theorem cauchy_phiHistory (n : ℕ) (C : ℝ) (e : History) (R : ℝ) :
   intro j hj
   ring
 
-/-- Multiplying the actual X-pressure equation by dX/dR=R gives the pressure
-row used here. In particular the preceding Ω term is retained exactly. -/
-theorem pressureGradient_eq_X_equation (n : ℕ) (C : ℝ) (e : History) (omega : Profile)
-    {R : ℝ} (hC : C ≠ 0) (hR : R ≠ 0) :
-    pressureGradient n e omega R = R * ((C ^ 2)⁻¹ *
-      cauchy n (phiHistory C e) (phiHistory C e) R - omega R / (2 * (R ^ 2 / 2))) := by
-  rw [cauchy_phiHistory]
-  unfold pressureGradient
-  field_simp
 
 /-- The five densities in (23), in the order printed there. -/
 noncomputable def rowDensity (n : ℕ) (u e : History) (omega : Profile) (R : ℝ) : Debt :=
@@ -284,25 +275,6 @@ theorem moments_repair_target (lam A a b : ℝ) (target : Debt) {n : ℕ} (hn : 
   rw [moments_repair lam A a b _ hn u e omega hlam hA ha hab hu he hint]
   abel
 
-theorem exists_smooth_exact_repair (lam A a b : ℝ) (target : Debt) {n : ℕ} (hn : 0 < n)
-    (u e : History) (omega : Profile) (hlam : 0 < lam) (hA : A ≠ 0)
-    (ha : 0 < a) (hab : a < b)
-    (hu : ∀ R ∈ Ioo a b, u 0 R = 0)
-    (he : ∀ R ∈ Ioo a b, e 0 R = FiveRowRank.background lam A R)
-    (hint : ∀ i, IntegrableOn (fun R => rowDensity n u e omega R i) (Ioi 0)) :
-    ∃ du de : Profile, ContDiff ℝ ∞ du ∧ ContDiff ℝ ∞ de ∧
-      HasCompactSupport du ∧ HasCompactSupport de ∧
-      tsupport du ⊆ Ioo a b ∧ tsupport de ⊆ Ioo a b ∧
-      moments n (increment u n du) (increment e n de) omega = target := by
-  let d := target - moments n u e omega
-  refine ⟨repairU lam A a b d, repairE lam A a b d,
-    repairU_contDiff lam A a b d, repairE_contDiff lam A a b d, ?_, ?_,
-    repairU_tsupport lam A a b d hab, repairE_tsupport lam A a b d hab,
-    moments_repair_target lam A a b target hn u e omega hlam hA ha hab hu he hint⟩
-  · exact HasCompactSupport.of_support_subset_isCompact isCompact_Icc
-      ((subset_closure.trans (repairU_tsupport lam A a b d hab)).trans Ioo_subset_Icc_self)
-  · exact HasCompactSupport.of_support_subset_isCompact isCompact_Icc
-      ((subset_closure.trans (repairE_tsupport lam A a b d hab)).trans Ioo_subset_Icc_self)
 
 
 theorem repairU_zero_before (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ} (hR : R ≤ a) :
@@ -336,14 +308,6 @@ theorem rowDensity_repair_eq_outside (lam A a b : ℝ) (d : Debt) {n : ℕ} (hn 
   fin_cases i <;> simp [linearDensity, repairU_zero_outside lam A a b d hab hR,
     repairE_zero_outside lam A a b d hab hR]
 
-theorem rowDensity_repair_exterior (lam A a b : ℝ) (d : Debt) {n : ℕ} (hn : 0 < n)
-    (u e : History) (omega : Profile) (hab : a < b) {B R : ℝ}
-    (hs : ∀ t, B ≤ t → rowDensity n u e omega t = 0) (hR : max B b ≤ R) :
-    rowDensity n (increment u n (repairU lam A a b d))
-      (increment e n (repairE lam A a b d)) omega R = 0 := by
-  rw [rowDensity_repair_eq_outside lam A a b d hn u e omega hab
-    (fun ht => (not_lt_of_ge ((le_max_right B b).trans hR)) ht.2)]
-  exact hs R ((le_max_left B b).trans hR)
 
 theorem increment_eq_of_zero (u : History) (n j : ℕ) (du : Profile) (R : ℝ)
     (hd : du R = 0) : increment u n du j R = u j R := by
@@ -357,30 +321,7 @@ theorem pressureGradient_increment_of_zero {n : ℕ} (hn : 0 < n) (e : History)
     pressureGradient n (increment e n de) omega R = pressureGradient n e omega R := by
   simp only [pressureGradient, cauchy_increment hn, hd, mul_zero, zero_mul, add_zero]
 
-/-- Recomputing pressure does not disturb the already solved inner region:
-the complete new pressure source agrees with the old one up to the patch. -/
-theorem pressure_primitive_repair_before_patch (lam A a b : ℝ) (d : Debt)
-    {n : ℕ} (hn : 0 < n) (e : History) (omega : Profile) (hab : a < b)
-    {R : ℝ} (hR0 : 0 ≤ R) (hRa : R ≤ a) :
-    (∫ t in (0 : ℝ)..R, pressureGradient n (increment e n (repairE lam A a b d)) omega t) =
-      ∫ t in (0 : ℝ)..R, pressureGradient n e omega t := by
-  apply intervalIntegral.integral_congr
-  intro t ht
-  rw [uIcc_of_le hR0] at ht
-  exact pressureGradient_increment_of_zero hn e omega _ t
-    (repairE_zero_before lam A a b d hab (ht.2.trans hRa))
 
-/-- The physical mass primitive is likewise preserved before the patch. -/
-theorem mass_primitive_repair_before_patch (lam A a b : ℝ) (d : Debt)
-    (n : ℕ) (u : History) (hab : a < b) {R : ℝ} (hR0 : 0 ≤ R) (hRa : R ≤ a) :
-    (∫ t in (0 : ℝ)..R, t * increment u n (repairU lam A a b d) n t) =
-      ∫ t in (0 : ℝ)..R, t * u n t := by
-  apply intervalIntegral.integral_congr
-  intro t ht
-  rw [uIcc_of_le hR0] at ht
-  change t * increment u n (repairU lam A a b d) n t = t * u n t
-  rw [increment_eq_of_zero u n n _ t
-    (repairU_zero_before lam A a b d hab (ht.2.trans hRa))]
 
 section SmoothParameters
 
@@ -433,25 +374,8 @@ noncomputable def slice (f : JointHistory) (eta : ℝ) : History := fun j R => f
 noncomputable def jointIncrement (u : JointHistory) (n : ℕ) (du : JointProfile) : JointHistory :=
   Function.update u n (fun w => u n w + du w)
 
-theorem slice_jointIncrement (u : JointHistory) (n : ℕ) (du : JointProfile) (eta : ℝ) :
-    slice (jointIncrement u n du) eta = increment (slice u eta) n (fun R => du (R, eta)) := by
-  funext j R
-  by_cases hj : j = n
-  · subst j
-    simp [slice, jointIncrement, increment]
-  · simp [slice, jointIncrement, increment, hj]
 
-theorem jointIncrement_lower (u : JointHistory) {n j : ℕ} (du : JointProfile) (hj : j < n) :
-    jointIncrement u n du j = u j := Function.update_of_ne (Nat.ne_of_lt hj) _ _
 
-theorem jointIncrement_contDiffOn {S : Set (ℝ × ℝ)} {n : ℕ} {u : JointHistory}
-    {du : JointProfile} (hu : ∀ j, j ≤ n → ContDiffOn ℝ ∞ (u j) S)
-    (hdu : ContDiffOn ℝ ∞ du S) (j : ℕ) (hj : j ≤ n) :
-    ContDiffOn ℝ ∞ (jointIncrement u n du j) S := by
-  by_cases h : j = n
-  · subst j
-    simpa only [jointIncrement, Function.update_self] using (hu n le_rfl).add hdu
-  · simpa only [jointIncrement, Function.update_of_ne h] using hu j hj
 
 noncomputable def globalDomain : ProfileHistories.RadialDomain where
   carrier := univ
@@ -487,18 +411,8 @@ noncomputable def jointPressureGradient (n : ℕ) (e : JointHistory) (omega : Jo
 noncomputable def pressureHistory (n : ℕ) (e : JointHistory) (omega : JointProfile) : JointProfile :=
   ProfileHistories.primitive (jointPressureGradient n e omega)
 
-theorem pressureHistory_axis (n : ℕ) (e : JointHistory) (omega : JointProfile) (eta : ℝ) :
-    pressureHistory n e omega (0, eta) = 0 := ProfileHistories.primitive_at_axis _ _
 
-theorem pressureHistory_contDiff {n : ℕ} {e : JointHistory} {omega : JointProfile}
-    (hq : ContDiff ℝ ∞ (jointPressureGradient n e omega)) :
-    ContDiff ℝ ∞ (pressureHistory n e omega) := primitive_contDiff hq
 
-theorem pressureHistory_hasDerivAt {n : ℕ} {e : JointHistory} {omega : JointProfile}
-    (hq : ContDiff ℝ ∞ (jointPressureGradient n e omega)) (w : ℝ × ℝ) :
-    HasDerivAt (fun R => pressureHistory n e omega (R, w.2))
-      (pressureGradient n (slice e w.2) (fun R => omega (R, w.2)) w.1) w.1 :=
-  primitive_hasDerivAt hq w
 
 theorem pressureHistory_exterior {n : ℕ} {e : JointHistory} {omega : JointProfile} {B : ℝ}
     (hB : 0 ≤ B) (hs : ∀ eta R, B ≤ R → jointPressureGradient n e omega (R, eta) = 0)
@@ -507,15 +421,6 @@ theorem pressureHistory_exterior {n : ℕ} {e : JointHistory} {omega : JointProf
   rw [pressureHistory, ProfileHistories.primitive,
     ← positiveIntegral_eq_primitive hB hR (hs eta), hm eta]
 
-/-- The third repaired row is the actual pressure-exterior condition. -/
-theorem pressureHistory_exterior_of_moments {n : ℕ} {u e : JointHistory} {omega : JointProfile}
-    {B : ℝ} (hB : 0 ≤ B)
-    (hs : ∀ eta R, B ≤ R → jointPressureGradient n e omega (R, eta) = 0)
-    (hm : ∀ eta, moments n (slice u eta) (slice e eta) (fun R => omega (R, eta)) = 0)
-    {R eta : ℝ} (hR : B ≤ R) : pressureHistory n e omega (R, eta) = 0 := by
-  apply pressureHistory_exterior hB hs _ hR
-  intro eta
-  exact congrFun (hm eta) 2
 
 noncomputable def weightedAxial (u : JointProfile) (w : ℝ × ℝ) : ℝ := w.1 * u w
 
@@ -553,26 +458,6 @@ theorem massHistory_parameterPartial {u : JointProfile} (hu : ContDiff ℝ ∞ u
     ProfileHistories.parameterPartial (massHistory u) w = parameterMassHistory u w :=
   ProfileHistories.parameterPartial_primitive globalDomain (weightedAxial_contDiff hu).contDiffOn (mem_univ w)
 
-/-- Genuine radial differentiation of the integral formula gives incompressibility. -/
-theorem fluxHistory_hasDerivAt (h lam : ℝ) {u : JointProfile} (hu : ContDiff ℝ ∞ u)
-    (w : ℝ × ℝ) :
-    HasDerivAt (fun R => fluxHistory h lam u (R, w.2))
-      (-w.1 * radialZ h (-PositiveAxisSystem.a h + lam) u w) w.1 := by
-  have hdu := ProfileHistories.radialPartial_hasDerivAt globalDomain hu.contDiffOn (mem_univ w)
-  have hdm := primitive_hasDerivAt (weightedAxial_contDiff hu) w
-  have hdn := primitive_hasDerivAt (parameterPartial_contDiff (weightedAxial_contDiff hu)) w
-  have hd := (((((hasDerivAt_id w.1).fun_pow 2).fun_mul hdu).const_mul w.2).sub
-    (hdm.const_mul (2 * w.2 * (PositiveAxisSystem.dScale h + lam)))).sub
-      (hdn.const_mul (PositiveAxisSystem.edge w.2))
-  have he := hd.div_const (PositiveAxisSystem.ell h w.2)
-  rw [weightedAxial_parameterPartial hu w] at he
-  convert! he using 1
-  · funext R
-    simp [fluxHistory, massHistory, parameterMassHistory, id_eq]
-    ring
-  · simp only [weightedAxial, radialZ, PositiveAxisSystem.a, PositiveAxisSystem.dScale,
-      id_eq, div_eq_mul_inv]
-    ring
 
 /-- The first repaired row is exactly the mass condition making the recomputed
 radial flux vanish outside the source. Parameter differentiation is justified
@@ -599,50 +484,7 @@ theorem fluxHistory_exterior (h lam : ℝ) {u : JointProfile} (hu : ContDiff ℝ
   simp [fluxHistory, hs eta R hR, hmass eta, hp]
 
 
-/-- The first row of the actual five-moment system gives the required mass
-condition for the recomputed divergence flux. -/
-theorem fluxHistory_exterior_of_moments (h lam : ℝ) {n : ℕ} {u e : JointHistory}
-    {omega : JointProfile} (hu : ContDiff ℝ ∞ (u n)) {B : ℝ}
-    (hB : 0 ≤ B) (hs : ∀ eta R, B ≤ R → u n (R, eta) = 0)
-    (hm : ∀ eta, moments n (slice u eta) (slice e eta) (fun R => omega (R, eta)) = 0)
-    {R eta : ℝ} (hR : B ≤ R) : fluxHistory h lam (u n) (R, eta) = 0 := by
-  apply fluxHistory_exterior h lam hu hB hs _ hR
-  intro eta
-  exact congrFun (hm eta) 0
 
-/-- The pressure integration-by-parts identity underlying the fifth row is
-proved for the actual pressure primitive, including its exterior boundary. -/
-theorem pressure_weighted_identity {q : JointProfile} (hq : ContDiff ℝ ∞ q) {B : ℝ}
-    (hB : 0 ≤ B) (hs : ∀ eta R, B ≤ R → q (R, eta) = 0)
-    (hm : ∀ eta, positiveIntegral (fun R => q (R, eta)) = 0) (eta : ℝ) :
-    positiveIntegral (fun R => R * ProfileHistories.primitive q (R, eta)) =
-      -(1 / 2 : ℝ) * positiveIntegral (fun R => R ^ 2 * q (R, eta)) := by
-  have hPzero : ∀ R, B ≤ R → ProfileHistories.primitive q (R, eta) = 0 := by
-    intro R hR
-    rw [ProfileHistories.primitive, ← positiveIntegral_eq_primitive hB hR (hs eta), hm eta]
-  have hPc : Continuous (fun R => ProfileHistories.primitive q (R, eta)) :=
-    (primitive_contDiff hq).continuous.comp (continuous_id.prodMk continuous_const)
-  have hqc : Continuous (fun R => q (R, eta)) :=
-    hq.continuous.comp (continuous_id.prodMk continuous_const)
-  have hpow : ∀ R : ℝ, HasDerivAt (fun t => t ^ 2 / 2) R R := by
-    intro R
-    convert! ((hasDerivAt_id R).pow 2).div_const 2 using 1
-    simp
-  have hi := intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt
-    (a := (0 : ℝ)) (b := B)
-    (u := fun R : ℝ => R ^ 2 / 2) (u' := fun R => R)
-    (v := fun R => ProfileHistories.primitive q (R, eta)) (v' := fun R => q (R, eta))
-    ((continuous_id.pow 2).div_const 2).continuousOn hPc.continuousOn
-    (fun R _ => hpow R) (fun R _ => primitive_hasDerivAt hq (R, eta))
-    (continuous_id.intervalIntegrable 0 B) (hqc.intervalIntegrable 0 B)
-  have he : (fun R => R ^ 2 / 2 * q (R, eta)) =
-      (fun R => (1 / 2 : ℝ) * (R ^ 2 * q (R, eta))) := by funext R; ring
-  rw [he, intervalIntegral.integral_const_mul] at hi
-  rw [hPzero B le_rfl] at hi
-  rw [positiveIntegral_eq_primitive hB le_rfl (fun R hR => by rw [hPzero R hR, mul_zero]),
-    positiveIntegral_eq_primitive hB le_rfl (fun R hR => by rw [hs eta R hR, mul_zero])]
-  simp only [mul_zero, zero_pow (by norm_num : 2 ≠ 0), zero_div, zero_sub] at hi
-  linarith
 
 /-- Open parameter domains retain all radial histories while keeping the
 original parameter domain; no extension across its endpoints is needed. -/
@@ -659,14 +501,6 @@ theorem pressureHistory_contDiffOn {S : Set ℝ} (hS : IsOpen S)
     ContDiffOn ℝ ∞ (pressureHistory n e omega) (univ ×ˢ S) :=
   ProfileHistories.primitive_smooth (parameterDomain S hS) hq
 
-theorem pressureHistory_hasDerivAt_on {S : Set ℝ} (hS : IsOpen S)
-    {n : ℕ} {e : JointHistory} {omega : JointProfile}
-    (hq : ContDiffOn ℝ ∞ (jointPressureGradient n e omega) (univ ×ˢ S))
-    {R eta : ℝ} (heta : eta ∈ S) :
-    HasDerivAt (fun r => pressureHistory n e omega (r, eta))
-      (jointPressureGradient n e omega (R, eta)) R :=
-  ProfileHistories.primitive_hasDerivAt (parameterDomain S hS)
-    (F := jointPressureGradient n e omega) hq (p := (R, eta)) ⟨mem_univ _, heta⟩
 
 theorem pressureHistory_exterior_on {S : Set ℝ} {n : ℕ}
     {u e : JointHistory} {omega : JointProfile} {B : ℝ} (hB : 0 ≤ B)
@@ -695,22 +529,6 @@ theorem massHistory_parameterPartial_on {S : Set ℝ} (hS : IsOpen S)
   ProfileHistories.parameterPartial_primitive (parameterDomain S hS)
     (contDiffOn_fst.mul hu) ⟨mem_univ _, hw⟩
 
-theorem fluxHistory_contDiffOn (h lam : ℝ) {S : Set ℝ} (hS : IsOpen S)
-    {u : JointProfile} (hu : ContDiffOn ℝ ∞ u (univ ×ˢ S))
-    (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0) :
-    ContDiffOn ℝ ∞ (fluxHistory h lam u) (univ ×ˢ S) := by
-  have hm : ContDiffOn ℝ ∞ (massHistory u) (univ ×ˢ S) :=
-    ProfileHistories.primitive_smooth (parameterDomain S hS) (contDiffOn_fst.mul hu)
-  have hn : ContDiffOn ℝ ∞ (parameterMassHistory u) (univ ×ˢ S) :=
-    ProfileHistories.primitive_smooth (parameterDomain S hS)
-      (ProfileHistories.parameterPartial_smooth (parameterDomain S hS) (contDiffOn_fst.mul hu))
-  have he : ContDiffOn ℝ ∞ (fun w : ℝ × ℝ => PositiveAxisSystem.edge w.2) (univ ×ˢ S) := by
-    exact contDiffOn_const.sub (contDiffOn_snd.pow 2)
-  have hl : ContDiffOn ℝ ∞ (fun w : ℝ × ℝ => PositiveAxisSystem.ell h w.2) (univ ×ˢ S) := by
-    exact contDiffOn_const.sub (contDiffOn_const.mul (contDiffOn_snd.pow 2))
-  exact ((((contDiffOn_snd.mul (contDiffOn_fst.pow 2)).mul hu).sub
-    (((contDiffOn_const.mul contDiffOn_snd).mul contDiffOn_const).mul hm)).sub
-      (he.mul hn)).div hl (fun w hw => hell w.2 hw.2)
 
 /-- The actual radial divergence equation holds on an open parameter domain,
 without any smooth extension past that domain. -/
@@ -845,42 +663,7 @@ theorem moments_contDiffOn {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
   exact positiveIntegral_contDiffOn hS (hd i) hB
     (fun eta heta R hR => congrFun (hs eta heta R hR) i)
 
-theorem moments_contDiffOn_of_histories {S : Set ℝ} (hS : IsOpen S) {n : ℕ} (hn : 0 < n)
-    {u e : JointHistory} {omega : JointProfile}
-    (hu : ∀ j, j ≤ n → ContDiffOn ℝ ∞ (u j) (univ ×ˢ S))
-    (he : ∀ j, j ≤ n → ContDiffOn ℝ ∞ (e j) (univ ×ˢ S))
-    (hq : ContDiffOn ℝ ∞ (jointPressureGradient n e omega) (univ ×ˢ S))
-    {B : ℝ} (hB : 0 ≤ B)
-    (hU : ∀ eta ∈ S, ∀ R, B ≤ R → ∀ j, j ≤ n → u j (R, eta) = 0)
-    (hE : ∀ eta ∈ S, ∀ R, B ≤ R → ∀ j, 0 < j → j ≤ n → e j (R, eta) = 0)
-    (hOmega : ∀ eta ∈ S, ∀ R, B ≤ R → omega (R, eta) = 0) :
-    ContDiffOn ℝ ∞ (fun eta => moments n (slice u eta) (slice e eta) (fun R => omega (R, eta))) S := by
-  apply moments_contDiffOn hS (jointRowDensity_contDiffOn hu he hq) hB
-  intro eta heta R hR
-  exact jointRowDensity_exterior hn u e omega (R, eta)
-    (hU eta heta R hR) (hE eta heta R hR) (hOmega eta heta R hR)
 
-/-- In particular, the exact zero-moment corrections vary smoothly with η
-when their debts are the actual profile integrals, not prescribed surrogates. -/
-theorem exact_corrections_joint_contDiffOn (lam a b : ℝ) {S : Set ℝ} (hS : IsOpen S)
-    {n : ℕ} {u e : JointHistory} {omega : JointProfile} {A : ℝ → ℝ}
-    (hA : ContDiffOn ℝ ∞ A S) (hAn : ∀ eta ∈ S, A eta ≠ 0)
-    (hd : ∀ i, ContDiffOn ℝ ∞ (fun w => jointRowDensity n u e omega w i) (univ ×ˢ S))
-    {B : ℝ} (hB : 0 ≤ B)
-    (hs : ∀ eta ∈ S, ∀ R, B ≤ R → jointRowDensity n u e omega (R, eta) = 0) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × ℝ =>
-      (repairU lam (A z.1) a b (-moments n (slice u z.1) (slice e z.1) (fun R => omega (R, z.1))) z.2,
-       repairE lam (A z.1) a b (-moments n (slice u z.1) (slice e z.1) (fun R => omega (R, z.1))) z.2))
-      (S ×ˢ univ) :=
-  by
-    have hm := moments_contDiffOn (S := S) (n := n) (u := u) (e := e)
-      (omega := omega) hS hd hB hs
-    exact (repairU_joint_contDiffOn (P := ℝ) lam a b (S := S) (A := A)
-      (d := fun eta => -moments n (slice u eta) (slice e eta) (fun R => omega (R, eta)))
-      hA hm.neg hAn).prodMk
-      (repairE_joint_contDiffOn (P := ℝ) lam a b (S := S) (A := A)
-        (d := fun eta => -moments n (slice u eta) (slice e eta) (fun R => omega (R, eta)))
-        hA hm.neg hAn)
 
 
 theorem positive_integrableOn_of_compact {f : Profile} {B : ℝ}

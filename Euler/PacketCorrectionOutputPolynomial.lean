@@ -41,12 +41,7 @@ theorem outputPolynomial_eval (X : ℝ) : (outputPolynomial P).eval X=outputEnve
 def outputConstant : ℝ := coefficientCost (outputPolynomial P)
 def outputPower : ℕ := (outputPolynomial P).natDegree
 
-theorem outputConstant_pos : 0 < outputConstant P := coefficientCost_pos _
 
-theorem outputEnvelope_power (X : ℝ) (hX : 1 ≤ X) :
-    outputEnvelope P X ≤ outputConstant P*X^outputPower P := by
-  rw [← outputPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound (outputPolynomial P) X hX)
 
 theorem output_components (X : ℝ) (hX : 0 ≤ X) :
     1 ≤ outputEnvelope P X ∧ baseEnvelope X ≤ outputEnvelope P X ∧

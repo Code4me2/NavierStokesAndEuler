@@ -299,13 +299,6 @@ theorem rightEdge_eq : rightEdge W = Real.log W.controls.radius + OutgoingTail.t
   unfold rightEdge NominalConeAssembly.activeRight
   rw [Real.log_mul W.controls.radius_pos.ne' (Real.exp_pos _).ne', Real.log_exp]
 
-theorem rightEdge_shift : rightEdge W = TerminalHistoryBridge.shift F W.controls.radius + 3 := by
-  rw [rightEdge_eq]
-  unfold TerminalHistoryBridge.shift
-  rw [OutgoingDilation.switchRadius_eq,
-    Real.log_mul W.controls.radius_pos.ne' (Real.exp_pos _).ne', Real.log_exp]
-  unfold OutgoingTail.tailEnd
-  ring
 
 theorem edges_ordered : leftEdge W < rightEdge W := by
   have hR : W.controls.radius < NominalConeAssembly.activeRight W := by
@@ -733,50 +726,7 @@ theorem trueDirection_transfer {K : Set ℝ} {T S B : ℝ × ℝ → ℝ × ℝ}
 variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     {d : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness d)
 
-/-- The actual stress has the inner flat factor and a smooth unit
-direction with strict margins for the actual modulated shear. -/
-theorem inner_direction (hcone : FullTrueCone v) :
-    ∃ G : EdgeFactor (Icc (-1 : ℝ) 1) (W.controls.activationTime ^ 2)
-        (leftChart (leftEdge W) (logStress v.profiles F.data.h)),
-      HasTrueDirectionCollar (Icc (-1 : ℝ) 1)
-        (leftChart (leftEdge W) (logStress v.profiles F.data.h)) G.coefficient
-        (leftChart (leftEdge W) (logSpeed v.profiles))
-        (leftChart (leftEdge W) (logSlope v.profiles)) G.width := by
-  obtain ⟨G, hG⟩ := natural_activation_true_direction W.axis.scale_pos W.axis.natural
-    F.axisDatum_contDiff W.axis.small W.controls.referenceWidth_pos W.controls.referenceWidth_small
-      W.controls.activationTime_pos (kappa_lt_one v hcone)
-  let G' := G.transfer (lt_min (innerWidth_pos v) G.width_pos)
-    (min_le_right (innerWidth v) G.width)
-      (fun eta heta x _ hx => modulated_activation_stress v (hx.trans_le (min_le_left _ _)) heta)
-  refine ⟨G', ?_⟩
-  apply trueDirection_transfer hG (lt_min (innerWidth_pos v) G.width_pos)
-  · exact fun eta heta x _ hx => modulated_activation_stress v (hx.trans_le (min_le_left _ _)) heta
-  · exact fun eta heta x _ hx =>
-      (modulated_activation_speed_slope v (hx.trans_le (min_le_left _ _)) heta).1
-  · exact fun eta heta x _ hx =>
-      (modulated_activation_speed_slope v (hx.trans_le (min_le_left _ _)) heta).2
 
-/-- The inverse-cubic terminal factor has a smooth nonzero direction,
-with strict cone margin through the true terminal edge. -/
-theorem outer_direction :
-    ∃ G : EdgeFactor (Icc (-1 : ℝ) 1) 4
-        (rightChart (rightEdge W) (logStress v.profiles F.data.h)),
-      HasTrueDirectionCollar (Icc (-1 : ℝ) 1)
-        (rightChart (rightEdge W) (logStress v.profiles F.data.h)) G.coefficient
-        (rightChart (rightEdge W) (logSpeed v.profiles))
-        (rightChart (rightEdge W) (logSlope v.profiles)) G.width := by
-  have hC := TerminalCone.normalization_pos F W.controls.radius_pos
-  let G := terminalEdgeFactor hC F.data (TerminalHistoryBridge.shift F W.controls.radius)
-    (outerWidth v) (outerWidth_pos v)
-  let G' := G.transfer (outerWidth_pos v) le_rfl
-    (fun eta heta x _ hx => modulated_terminal_stress v hx heta)
-  refine ⟨G', ?_⟩
-  apply trueDirection_transfer
-    (terminal_true_direction hC F.data (TerminalHistoryBridge.shift F W.controls.radius))
-    (outerWidth_pos v)
-  · exact fun eta heta x _ hx => modulated_terminal_stress v hx heta
-  · exact fun eta heta x _ hx => (modulated_terminal_speed_slope v hx heta).1
-  · exact fun eta heta x _ hx => (modulated_terminal_speed_slope v hx heta).2
 
 end DirectionTransfer
 
@@ -844,33 +794,7 @@ theorem closed_shear_positive (hcone : FullTrueCone v) {eta y : ℝ}
   rw [← hs.1, ← hs.2]
   exact ⟨hc.1, hc.2.1⟩
 
-theorem inner_angular_positive (hcone : FullTrueCone v) :
-    ∃ r : ℝ, 0 < r ∧ r < innerWidth v ∧
-      ∀ eta ∈ Icc (-1 : ℝ) 1, ∀ x : ℝ, 0 < x → x ≤ r →
-        0 < (leftChart (leftEdge W) (logStress v.profiles F.data.h) (eta, x)).1 := by
-  obtain ⟨G, hGpos, _⟩ := exists_natural_activation_factor_aligned W.axis.scale_pos W.axis.natural
-    F.axisDatum_contDiff W.axis.small W.controls.referenceWidth_pos W.controls.referenceWidth_small
-      W.controls.activationTime_pos (kappa_lt_one v hcone)
-  let G' := G.transfer (lt_min (innerWidth_pos v) G.width_pos)
-    (min_le_right (innerWidth v) G.width)
-      (fun eta heta x _ hx => modulated_activation_stress v (hx.trans_le (min_le_left _ _)) heta)
-  obtain ⟨r, O, hr, hrw, _, _, _, _, hpos⟩ := G'.direction_collar isCompact_Icc hGpos
-  exact ⟨r, hr, hrw.trans_le (min_le_left _ _), hpos⟩
 
-theorem outer_angular_positive :
-    ∃ r : ℝ, 0 < r ∧ r < outerWidth v ∧
-      ∀ eta ∈ Icc (-1 : ℝ) 1, ∀ x : ℝ, 0 < x → x ≤ r →
-        0 < (rightChart (rightEdge W) (logStress v.profiles F.data.h) (eta, x)).1 := by
-  have hC := TerminalCone.normalization_pos F W.controls.radius_pos
-  let G := terminalEdgeFactor hC F.data (TerminalHistoryBridge.shift F W.controls.radius)
-    (outerWidth v) (outerWidth_pos v)
-  let G' := G.transfer (outerWidth_pos v) le_rfl
-    (fun eta heta x _ hx => modulated_terminal_stress v hx heta)
-  have hGpos : ∀ eta ∈ Icc (-1 : ℝ) 1, 0 < (G'.coefficient (eta, 0)).1 :=
-    fun eta heta => TerminalEdgeFactor.profileAngularFactor_zero_pos hC F.data
-      (TerminalHistoryBridge.shift F W.controls.radius) heta
-  obtain ⟨r, O, hr, hrw, _, _, _, _, hpos⟩ := G'.direction_collar isCompact_Icc hGpos
-  exact ⟨r, hr, hrw, hpos⟩
 
 end EdgePositivity
 
@@ -1092,12 +1016,6 @@ noncomputable def zeta (_v : ModulatedProfileAssembly.Witness d) (X : ℝ) : ℝ
 noncomputable def distance (_v : ModulatedProfileAssembly.Witness d) (X : ℝ) : ℝ :=
   edgeDistance (leftEdge W) (rightEdge W) (Real.log X)
 
-theorem zeta_positive {X : ℝ}
-    (hX : X ∈ Ioo (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W)) :
-    0 < zeta v X := by
-  apply radialWeight_pos
-  simpa only [leftEdge, rightEdge, Real.exp_log (NominalConeAssembly.activeLeft_pos W),
-    Real.exp_log (activeRight_pos W)] using hX
 
 theorem radialPullback_eq {D : RadialDomain} (P : Profiles D) (h : ℝ) {q : ℝ × ℝ}
     (hX : 0 < q.2) : radialPullback (logStress P h) q = stress P h (q.2, q.1) := by
@@ -1116,63 +1034,8 @@ theorem radialPullback_jet_eq {D : RadialDomain} (P : Profiles D) (h : ℝ) {q :
   simpa only [iteratedFDerivWithin_univ] using
     (he'.iteratedFDerivWithin_eq (radialPullback_eq P h hX) n (𝕜 := ℝ))
 
-/-- A positive multiple of the actual radial product weight is below the
-norm of the literal two leading stress components. -/
-theorem stress_lower_bound (hcone : FullTrueCone v) :
-    ∃ c : ℝ, 0 < c ∧ ∀ p : Point,
-      p.1 ∈ Ioo (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W) →
-      p.2 ∈ Icc (-1 : ℝ) 1 → c * zeta v p.1 ≤ ‖stress v.profiles F.data.h p‖ := by
-  obtain ⟨c, hc, hb⟩ := (weighted_bounds v hcone).1
-  refine ⟨c, hc, ?_⟩
-  intro p hp heta
-  have hX : p.1 ∈ Ioo (Real.exp (leftEdge W)) (Real.exp (rightEdge W)) := by
-    simpa only [leftEdge, rightEdge, Real.exp_log (NominalConeAssembly.activeLeft_pos W),
-      Real.exp_log (activeRight_pos W)] using hp
-  have hh := radial_lower_bound hb heta hX
-  rw [radialPullback_eq _ _ ((NominalConeAssembly.activeLeft_pos W).trans hp.1)] at hh
-  exact hh
 
-/-- Every actual mixed physical profile tensor has the same flat product
-weight, with a finite derivative-dependent inverse-distance loss. -/
-theorem physical_jet_bound (hcone : FullTrueCone v) (n : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ eta ∈ Icc (-1 : ℝ) 1,
-      ∀ X ∈ Ioo (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W),
-        ‖iteratedFDeriv ℝ n (fun p : ℝ × ℝ => stress v.profiles F.data.h (p.2, p.1)) (eta, X)‖ ≤
-          C * zeta v X / distance v X ^ N := by
-  obtain ⟨C, hC, N, hb⟩ := (weighted_bounds v hcone).2.2 n
-  refine ⟨C, hC, N, ?_⟩
-  intro eta heta X hX
-  have hx : X ∈ Ioo (Real.exp (leftEdge W)) (Real.exp (rightEdge W)) := by
-    simpa only [leftEdge, rightEdge, Real.exp_log (NominalConeAssembly.activeLeft_pos W),
-      Real.exp_log (activeRight_pos W)] using hX
-  have hh := hb eta heta X hx
-  rw [radialPullback_jet_eq _ _ ((NominalConeAssembly.activeLeft_pos W).trans hX.1)] at hh
-  exact hh
 
-/-- One no-input instance of the complete actual weighted profile and its
-two oriented strict edge-direction certificates. -/
-theorem exists_weighted_profile :
-    ∃ (F : OutgoingProfile.Profile) (W : NominalProfile.Witness F)
-      (d : ModulatedProfileAssembly.LoopData W) (v : ModulatedProfileAssembly.Witness d),
-      FullTrueCone v ∧
-      WeightedBounds (Icc (-1 : ℝ) 1) (W.controls.activationTime ^ 2)
-        (leftEdge W) (rightEdge W) (logStress v.profiles F.data.h) ∧
-      (∃ G : EdgeFactor (Icc (-1 : ℝ) 1) (W.controls.activationTime ^ 2)
-          (leftChart (leftEdge W) (logStress v.profiles F.data.h)),
-        (∀ eta ∈ Icc (-1 : ℝ) 1, 0 < (G.coefficient (eta, 0)).1) ∧
-        HasTrueDirectionCollar (Icc (-1 : ℝ) 1)
-          (leftChart (leftEdge W) (logStress v.profiles F.data.h)) G.coefficient
-          (leftChart (leftEdge W) (logSpeed v.profiles))
-          (leftChart (leftEdge W) (logSlope v.profiles)) G.width) ∧
-      (∃ G : EdgeFactor (Icc (-1 : ℝ) 1) 4
-          (rightChart (rightEdge W) (logStress v.profiles F.data.h)),
-        (∀ eta ∈ Icc (-1 : ℝ) 1, 0 < (G.coefficient (eta, 0)).1) ∧
-        HasTrueDirectionCollar (Icc (-1 : ℝ) 1)
-          (rightChart (rightEdge W) (logStress v.profiles F.data.h)) G.coefficient
-          (rightChart (rightEdge W) (logSpeed v.profiles))
-          (rightChart (rightEdge W) (logSlope v.profiles)) G.width) := by
-  obtain ⟨F, W, d, v, hv⟩ := ModulatedProfileAssembly.exists_modulated_profile
-  exact ⟨F, W, d, v, hv, weighted_bounds v hv, inner_direction_positive v hv, outer_direction_positive v⟩
 
 end FinalPackage
 

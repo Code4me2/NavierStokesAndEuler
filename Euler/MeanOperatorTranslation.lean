@@ -36,17 +36,7 @@ theorem translateOperator_translation (a : Space) (A : L2 →L[ℝ] L2) (u : L2)
   intro u
   simp only [translateOperator_apply, neg_zero, translation_zero]
 
-theorem translateOperator_add (a : Space) (A B : L2 →L[ℝ] L2) :
-    translateOperator a (A+B) = translateOperator a A + translateOperator a B := by
-  apply ContinuousLinearMap.ext
-  intro u
-  simp only [translateOperator_apply, add_apply, map_add]
 
-theorem translateOperator_smul (a : Space) (c : ℝ) (A : L2 →L[ℝ] L2) :
-    translateOperator a (c • A) = c • translateOperator a A := by
-  apply ContinuousLinearMap.ext
-  intro u
-  simp only [translateOperator_apply, smul_apply, map_smul]
 
 theorem translateOperator_neg_cancel (a : Space) (A : L2 →L[ℝ] L2) :
     translateOperator (-a) (translateOperator a A) = A := by
@@ -63,11 +53,6 @@ theorem translateOperator_norm_le (a : Space) (A : L2 →L[ℝ] L2) :
     _ ≤ ‖A‖*‖translation (-a) u‖ := A.le_opNorm _
     _ = ‖A‖*‖u‖ := by rw [(translation (-a)).norm_map]
 
-theorem translateOperator_norm (a : Space) (A : L2 →L[ℝ] L2) :
-    ‖translateOperator a A‖ = ‖A‖ := by
-  apply le_antisymm (translateOperator_norm_le a A)
-  have h := translateOperator_norm_le (-a) (translateOperator a A)
-  simpa only [translateOperator_neg_cancel] using h
 
 /-- Translate the spatial operator at every time in the coefficient path. -/
 def translatePath (T : ℝ) (a : Space) (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) :
@@ -79,11 +64,6 @@ def translatePath (T : ℝ) (a : Space) (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)
     (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (t : Icc (0 : ℝ) T) :
     translatePath T a F t = translateOperator a (F t) := rfl
 
-theorem translatePath_norm_le (T : ℝ) (a : Space)
-    (F : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) : ‖translatePath T a F‖ ≤ ‖F‖ := by
-  apply (ContinuousMap.norm_le (translatePath T a F) (norm_nonneg F)).2
-  intro t
-  exact (translateOperator_norm_le a (F t)).trans (F.norm_coe_le_norm t)
 
 /-- Translation commutes with the genuine time multiplier. -/
 theorem timeMultiplier_translate (T : ℝ) (hT : 0 ≤ T) (a : Space)

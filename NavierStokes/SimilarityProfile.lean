@@ -260,15 +260,6 @@ theorem Z_smoothAt {h b : ℝ} {f : InnerProfile} {w : InnerPoint}
     (((contDiffAt_const.mul contDiffAt_snd).mul contDiffAt_fst).mul hx)).div
     (contDiffAt_const.sub (contDiffAt_const.mul (contDiffAt_snd.pow 2))) hL
 
-theorem T_smoothAt {h b : ℝ} {f : InnerProfile} {w : InnerPoint}
-    (hf : ContDiffAt ℝ 2 f w) (hL : L h w.2 ≠ 0) :
-    ContDiffAt ℝ 1 (T h b f) w := by
-  have hf₁ : ContDiffAt ℝ 1 f w := hf.of_le (by norm_num)
-  have hx : ContDiffAt ℝ 1 (partialX f) w := partialX_smoothAt hf (by norm_num)
-  have hη : ContDiffAt ℝ 1 (partialEta f) w := partialEta_smoothAt hf (by norm_num)
-  exact (((contDiffAt_const.mul hf₁).add ((contDiffAt_const.mul contDiffAt_snd).mul hη)).add
-    (contDiffAt_fst.mul hx)).div
-    (contDiffAt_const.sub (contDiffAt_const.mul (contDiffAt_snd.pow 2))) hL
 
 theorem eventually_C2_inner {h : ℝ} {f : InnerProfile}
     (hh : 0 < h) (hh1 : h < 1 / 2) {p : PhysicalPoint} (hp : p.1 < 1)
@@ -322,12 +313,5 @@ theorem isOpen_physicalDomain {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   filter_upwards [continuousAt_fst.eventually (Iio_mem_nhds hp.1), hi] with y hy hyU
   exact ⟨hy, hyU⟩
 
-/-- Joint smoothness in `(t,s,z)` on the open coordinate domain; no global
-smooth extension through the singular time or the edge of the profile is assumed. -/
-theorem pullback_smoothOn {h b : ℝ} {f : InnerProfile} {n : ℕ∞}
-    (hh : 0 < h) (hh1 : h < 1 / 2) {U : Set InnerPoint} (hU : IsOpen U)
-    (hf : ContDiffOn ℝ n f U) : ContDiffOn ℝ n (pullback h b f) (physicalDomain h U) := by
-  intro p hp
-  exact (pullback_smoothAt hh hh1 hp.1 (hf.contDiffAt (hU.mem_nhds hp.2))).contDiffWithinAt
 
 end NavierStokes.SimilarityProfile

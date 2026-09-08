@@ -517,38 +517,6 @@ theorem radialField_aux_derivative {K : ℝ → ℝ} (v w : A) {x : ℝ × A}
   rw [hd.fderiv]
   simp
 
-/-- Concrete graph directions commute because their radial coefficient only
-depends on the radius. No operator commutation is assumed in this constructor. -/
-theorem explicitGraph_geometry {U : Set (ℝ × A)} (hU : IsOpen U)
-    {K : ℝ → ℝ} (v θ z : A)
-    (hK : ∀ x ∈ U, ContDiffAt ℝ ∞ K x.1) (hR : ∀ x ∈ U, x.1 ≠ 0) :
-    CylindricalGeometry U Prod.fst (radialField K v)
-      (fun _ => (0, θ)) (fun _ => (0, z)) := by
-  refine ⟨hU, contDiffOn_fst, hR, ?_, contDiffOn_const, contDiffOn_const,
-    ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro x hx
-    exact (contDiffAt_const.prodMk (((hK x hx).comp x contDiffAt_fst).smul
-      contDiffAt_const)).contDiffWithinAt
-  · intro x hx
-    change fderiv ℝ (ContinuousLinearMap.fst ℝ ℝ A) x (1, K x.1 • v) = 1
-    rw [ContinuousLinearMap.fderiv]
-    rfl
-  · intro x hx
-    change fderiv ℝ (ContinuousLinearMap.fst ℝ ℝ A) x (0, θ) = 0
-    rw [ContinuousLinearMap.fderiv]
-    rfl
-  · intro x hx
-    change fderiv ℝ (ContinuousLinearMap.fst ℝ ℝ A) x (0, z) = 0
-    rw [ContinuousLinearMap.fderiv]
-    rfl
-  · intro x hx
-    rw [radialField_aux_derivative v θ ((hK x hx).differentiableAt (by simp))]
-    simp
-  · intro x hx
-    rw [radialField_aux_derivative v z ((hK x hx).differentiableAt (by simp))]
-    simp
-  · intro x hx
-    simp
 
 end ExplicitGraph
 
@@ -726,24 +694,6 @@ theorem longitudinal_class (ha : MemClass s w α a) (hκ : 0 ≤ κ)
     (hθ n x hx) (hdiv n x hx)]
   simp [inverseCarrier, Complex.real_smul, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
 
-/-- The divergence premise is discharged by a genuine smooth vector
-potential. Equality is required on the open strip so all derivatives transfer. -/
-theorem longitudinal_from_curl_class (ha : MemClass s w α a) (hκ : 0 ≤ κ)
-    (hr : UnweightedClass s (-κ) Vr) (hz : UnweightedClass s 1 Vz)
-    (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹))
-    (hK : ∀ n, K n ≠ 0) (hfreq : BandBound s (1 / 2) (fun n => 1 / K n))
-    (hΦ : ∀ n, DifferentiableOn ℝ (Φ n) s.domain)
-    (hθ : ∀ n x, x ∈ s.domain → HarmonicCalculus.along (Vθ n) (fun y => a n y 1) x = 0)
-    (G : ∀ n, CylindricalGeometry s.domain R (Vr n) (Vθ n) (Vz n))
-    (A : ℕ → D → ComplexVector) (hA : ∀ n, ContDiffOn ℝ ∞ (A n) s.domain)
-    (hreal : ∀ n, EqOn (HarmonicCalculus.vectorMode (K n) (Φ n) (a n))
-      (cylindricalCurl R (Vr n) (Vθ n) (Vz n) (A n)) s.domain) :
-    MemClass s w (α + 1 / 2 - κ) (fun n x => HarmonicCalculus.normalDot
-      (HarmonicCalculus.phaseNormal R (Vr n) (Vθ n) (Vz n) (Φ n) x) (a n x)) := by
-  apply longitudinal_class ha hκ hr hz hR hK hfreq hΦ hθ
-  intro n x hx
-  rw [cylindricalDivergence_congr s.isOpen_domain R (Vr n) (Vθ n) (Vz n) (hreal n) hx]
-  exact divergence_curl_zero (G n) (hA n) hx
 
 end Longitudinal
 
@@ -867,17 +817,6 @@ theorem physical_normalCoefficient_class {N a : ℕ → VelocityField}
   simpa only [zero_add, OscillatoryCurl.normalCoefficient] using
     class_mul_real (normalInverse_unweighted hN hb hlower hupper) hcross
 
-/-- The remainder in the existing physical exact-curl theorem belongs to the
-claimed class once its actual normal and amplitude jets are supplied. -/
-theorem physical_actualRemainder_class {Φ : ℕ → PressureField} {a : ℕ → VelocityField}
-    (hN : PhaseJetBounds.PolynomialJets (phaseDomain s) (fun n => OscillatoryCurl.phaseNormal (Φ n)))
-    (ha : MemClass s w α a) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖OscillatoryCurl.phaseNormal (Φ n) x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖OscillatoryCurl.phaseNormal (Φ n) x‖ ≤ M)
-    (hK : BandBound s (1 / 2) (fun n => 1 / K n)) :
-    MemClass s w (α + 1 / 2) (fun n =>
-      OscillatoryCurl.strippedRemainder (K n) (OscillatoryCurl.coefficient (Φ n) (a n))) :=
-  physical_strippedRemainder_class (physical_normalCoefficient_class hN ha hb hlower hupper) hK
 
 end PhysicalCurl
 

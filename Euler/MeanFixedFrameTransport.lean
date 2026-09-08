@@ -55,19 +55,6 @@ theorem meanForward_backward
     (solenoidalFrame_lower T FInv F hInv) (solenoidalFrame_hasDerivWithinAt T hT F F₁ hF)
     (u : TimeLp T L2) (meanPrimitive_in_frame_range T hT FInv F hRight u)
 
-/-- A genuine continuous linear equivalence to a coefficient-independent mean space. -/
-def meanTransportEquiv
-    (hRight : ∀ (t : Icc (0 : ℝ) T) (x : L2), F t (FInv t x) = x) :
-    TimeLp T solenoidalSpace ≃L[ℝ] meanDerivatives T hT FInv where
-  toLinearEquiv :=
-    { toFun := meanTestMap T hT FInv F F₁ hF hInv
-      invFun := meanBackward T hT FInv F F₁ hInv
-      left_inv := meanBackward_forward T hT FInv F F₁ hInv hF
-      right_inv := meanForward_backward T hT FInv F F₁ hInv hF hRight
-      map_add' := map_add _
-      map_smul' := map_smul _ }
-  continuous_toFun := (meanTestMap T hT FInv F F₁ hF hInv).continuous
-  continuous_invFun := (meanBackward T hT FInv F F₁ hInv).continuous
 
 /-- Explicit polynomial transport cost for the mean fixed-space formulation. -/
 def meanTransportCost : ℝ :=

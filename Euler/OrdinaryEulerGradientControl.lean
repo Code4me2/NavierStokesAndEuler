@@ -87,15 +87,6 @@ theorem h3_energy_gradientIntegral (U : Evolution T hT) (t : Icc (0 : ℝ) T) :
     projIcc_of_mem hT (show (0 : ℝ) ∈ Icc 0 T from ⟨le_rfl,hT⟩),
     integerEnergyPath,ContinuousMap.coe_mk,gradientIntegral] using h
 
-theorem h3_energy_gradient_bound (U : Evolution T hT) (K : ℝ)
-    (hK : ∀ t x, ‖fderiv ℝ (U.velocity t).field x‖ ≤ K) (t : Icc (0 : ℝ) T) :
-    wordEnergy 3 (U.velocity t) ≤ wordEnergy 3 (U.velocity ⟨0,le_rfl,hT⟩)*
-      Real.exp (gradientEnergyConstant*K*(t : ℝ)) := by
-  apply (U.h3_energy_gradientIntegral t).trans
-  apply mul_le_mul_of_nonneg_left _ (wordEnergy_nonneg _ _)
-  apply Real.exp_le_exp.mpr
-  exact (mul_le_mul_of_nonneg_left (U.gradientIntegral_le_const K hK t)
-    gradientEnergyConstant_nonneg).trans_eq (by ring)
 
 def gradientH3Bound (U : Evolution T hT) (G : ℝ) : ℝ :=
   Real.sqrt (wordEnergy 3 (U.velocity ⟨0,le_rfl,hT⟩)*Real.exp (gradientEnergyConstant*G))
@@ -116,11 +107,6 @@ theorem h3_tensorNorm_of_gradientIntegral (U : Evolution T hT) (G : ℝ)
     tensorNorm 3 (U.velocity t) ≤ wordCount 3*U.gradientH3Bound G :=
   tensorNorm_le_wordCount _ 3 _ (U.wordBound_of_gradientIntegral G hG t)
 
-theorem higher_energy_of_gradientIntegral (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
-    (G : ℝ) (hG : ∀ t, U.gradientIntegral t ≤ G) (t : Icc (0 : ℝ) T) :
-    wordEnergy m (U.velocity t) ≤ wordEnergy m (U.velocity ⟨0,le_rfl,hT⟩)*
-      Real.exp (tameEnergyConstant m*U.gradientH3Bound G*T) :=
-  U.integer_energy_uniform m hm _ (U.wordBound_of_gradientIntegral G hG) t
 
 theorem higher_tensorNorm_of_gradientIntegral (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
     (G : ℝ) (hG : ∀ t, U.gradientIntegral t ≤ G) (t : Icc (0 : ℝ) T) :
@@ -129,15 +115,5 @@ theorem higher_tensorNorm_of_gradientIntegral (U : Evolution T hT) (m : ℕ) (hm
         Real.exp (tameEnergyConstant m*U.gradientH3Bound G*T)) :=
   U.tensorNorm_uniform m hm _ (U.wordBound_of_gradientIntegral G hG) t
 
-theorem higher_tensorNorm_of_gradientBound (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
-    (K : ℝ) (hK : ∀ t x, ‖fderiv ℝ (U.velocity t).field x‖ ≤ K)
-    (t : Icc (0 : ℝ) T) :
-    tensorNorm m (U.velocity t) ≤ wordCount m*
-      Real.sqrt (wordEnergy m (U.velocity ⟨0,le_rfl,hT⟩)*
-        Real.exp (tameEnergyConstant m*U.gradientH3Bound (K*T)*T)) := by
-  have hK0 : 0 ≤ K := (norm_nonneg (fderiv ℝ (U.velocity t).field 0)).trans (hK t 0)
-  exact U.higher_tensorNorm_of_gradientIntegral m hm (K*T)
-    (fun s => (U.gradientIntegral_le_const K hK s).trans
-      (mul_le_mul_of_nonneg_left s.property.2 hK0)) t
 
 end EulerOrdinarySobolev.Evolution

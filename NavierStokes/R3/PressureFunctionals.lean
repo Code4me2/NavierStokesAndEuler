@@ -126,18 +126,6 @@ def averagedPressureDifferenceValue (W0 W1 : Space → ℝ)
     (∑ i : Fin 3, ∫ x : Space, (G k i x : ℂ) * partialCLM i ψ x) +
     ∑ i : Fin 3, ∑ j : Fin 3, pressurePair i j (G i j) (partialCLM k ψ)
 
-/-- Every term of the pressure-difference functional is an integrable pairing. -/
-theorem integrable_terms {W0 W1 : Space → ℝ} {G : Fin 3 → Fin 3 → Space → ℝ}
-    (hW0 : MemLp W0 2) (hW1 : MemLp W1 2)
-    (hG : ∀ i j : Fin 3, Integrable (G i j)) (k : Fin 3) (ψ : ComplexTest) :
-    Integrable (fun x : Space => (W0 x : ℂ) * laplacianCLM ψ x) ∧
-      Integrable (fun x : Space => (W1 x : ℂ) * ψ x) ∧
-      (∀ i : Fin 3, Integrable (fun x : Space => (G k i x : ℂ) * partialCLM i ψ x)) ∧
-      (∀ i j : Fin 3, Integrable (fun x : Space =>
-        (G i j x : ℂ) * rieszTest i j (partialCLM k ψ) x)) := by
-  exact ⟨integrable_l2_pair hW0 (laplacianCLM ψ), integrable_l2_pair hW1 ψ,
-    fun i => integrable_l1_pair (hG k i) (partialCLM i ψ),
-    fun i j => integrable_l1_riesz_pair (hG i j) i j (partialCLM k ψ)⟩
 
 theorem l2_pair_laplacian_eq_sum {W : Space → ℝ} (hW : MemLp W 2)
     (ψ : ComplexTest) :

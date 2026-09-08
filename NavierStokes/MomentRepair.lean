@@ -77,26 +77,7 @@ theorem repair_unchanged_when_exact (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V
     repair L b u (moments L u) = u := by
   simp [repair, coefficients, synthesize]
 
-/-- An arbitrary correction attaining the target has the computed coefficients. -/
-theorem repair_coefficients_unique (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V)
-    (hB : (momentMatrix L b).det ≠ 0) (u : V) (target c : ι → ℝ)
-    (hc : moments L (u + synthesize b c) = target) :
-    c = coefficients (momentMatrix L b) (target - moments L u) := by
-  apply coefficients_unique (momentMatrix L b) hB
-  rw [← moments_synthesize L b]
-  ext i
-  have hi := congrFun hc i
-  change L i (u + synthesize b c) = target i at hi
-  simp only [map_add] at hi
-  change L i (synthesize b c) = target i - L i u
-  linarith
 
-/-- The repair is idempotent for fixed target moments. -/
-theorem repair_idempotent (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V)
-    (hB : (momentMatrix L b).det ≠ 0) (u : V) (target : ι → ℝ) :
-    repair L b (repair L b u target) target = repair L b u target := by
-  conv_lhs => rhs; rw [← repair_exact L b hB u target]
-  exact repair_unchanged_when_exact L b (repair L b u target)
 
 end LinearRepair
 
@@ -135,12 +116,6 @@ theorem twoPointMatrix_det (x₁ x₂ w₁ w₂ : ℝ) :
   simp [twoPointMatrix, Matrix.det_fin_two]
   ring
 
-/-- Ordered nodes and positive weights genuinely imply nonsingularity in two rows. -/
-theorem twoPointMatrix_det_pos (x₁ x₂ w₁ w₂ : ℝ)
-    (hx : x₁ < x₂) (hw₁ : 0 < w₁) (hw₂ : 0 < w₂) :
-    0 < (twoPointMatrix x₁ x₂ w₁ w₂).det := by
-  rw [twoPointMatrix_det]
-  exact mul_pos (mul_pos hw₁ hw₂) (sub_pos.mpr hx)
 
 section NonlinearRepair
 

@@ -286,20 +286,6 @@ theorem angular_barrier {D : RadialDomain} (P : Profiles D) {h eta a X : ℝ}
   unfold angularGap at hout
   nlinarith
 
-theorem shape_relaxed_from_source {D : RadialDomain} (P : Profiles D) {h eta a X : ℝ}
-    (ha : 2 ≤ a) (haX : a ≤ X) (hL : 0 < L h eta) (hL1 : L h eta ≤ 1)
-    (hmem : ∀ s ∈ Icc a X, (s, eta) ∈ D.carrier)
-    (hf : ∀ s ∈ Icc a X, 0 < P.f (s, eta))
-    (hl : ∀ s ∈ Icc a X, ReferenceBounds.logSlope P (s, eta) ∈ Icc (11 / 20 : ℝ) (13 / 20))
-    (hq : ∀ s ∈ Icc a X, 1 < ReferenceBounds.sourceQ P h (s, eta))
-    (hinit : 2 < ReferenceBounds.p1 P h (a, eta))
-    (hu : radialPartial P.U (X, eta) = 0) : ActivationContinuation.IsRelaxed P h (X, eta) := by
-  have hp := angular_barrier P ha haX hL hL1 hmem hf
-    (fun s hs => (hl s hs).2.trans (by norm_num)) hq hinit
-  have he := ActivationContinuation.logSlope_eq_shear P (X, eta)
-  have hb := hl X ⟨haX, le_rfl⟩
-  exact ActivationContinuation.zero_axial_relaxed_profile P
-    (by linarith [hb.1, hb.2]) (by linarith [hb.1, hb.2]) hu hp
 
 theorem axial_error_jet {J K : Set ℝ} (R : TransitionRamp.StockReference J)
     (hJ : IsOpen J) (hKJ : K ⊆ J) {N : ℕ} {eps T kappa wU wE y eta : ℝ}
@@ -720,9 +706,6 @@ noncomputable def shapeScale {F : OutgoingProfile.Profile} {j : ℝ}
       (NaturalProfile.profileErrorConstant prep.inputs))
     (Classical.choose (actual_shape_source_threshold hj prep.sigma_pos (shapeConstant_one prep))))
 
-theorem shapeScale_one {F : OutgoingProfile.Profile} {j : ℝ}
-    (hj : SmallParameters F.data.h j) (prep : NominalProfile.AxisPreparation F j) :
-    1 ≤ shapeScale hj prep := le_max_left _ _
 
 section ActualShapeCone
 

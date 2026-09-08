@@ -74,11 +74,6 @@ def supportedMap : (α →ᵇ E →L[ℝ] F) →L[ℝ]
 
 @[simp] theorem supportedMap_apply (A : α →ᵇ E →L[ℝ] F) : supportedMap μ S hS A = supported μ S hS A := rfl
 
-theorem supportedMap_norm : ‖supportedMap (E := E) (F := F) μ S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  simpa only [one_mul,supportedMap_apply] using
-    supported_norm μ S hS A ‖A‖ (norm_nonneg _) (fun x _ => A.norm_coe_le_norm x)
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 
@@ -91,22 +86,7 @@ omit [CompactSpace K] in
 @[simp] theorem supportedPathMap_apply (A : C(K,α →ᵇ E →L[ℝ] F)) (t : K) :
     supportedPathMap μ S hS A t = supported μ S hS (A t) := rfl
 
-theorem supportedPathMap_norm : ‖supportedPathMap (K := K) (E := E) (F := F) μ S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  exact (supported_norm μ S hS (A t) ‖A t‖ (norm_nonneg _) (fun x _ => (A t).norm_coe_le_norm x)).trans
-    (A.norm_coe_le_norm t)
 
-omit [CompactSpace K] in
-/-- Every-time pointwise lower frame bounds hold on the real L² frame path. -/
-theorem supportedPath_lower (A : C(K,α →ᵇ E →L[ℝ] F)) (c : ℝ) (hc : 0 ≤ c)
-    (hA : ∀ t x, x ∈ S → ∀ v, c*‖v‖^2 ≤ ‖A t x v‖^2)
-    (t : K) (u : supportedSpace (V := E) μ S hS) :
-    c*‖u‖^2 ≤ ‖supportedPathMap μ S hS A t u‖^2 :=
-  supported_norm_sq_lower μ S hS (A t) c hc (hA t) u
 
 section Derivative
 
@@ -138,19 +118,5 @@ theorem supportedPath_hasDerivWithinAt
 
 end Derivative
 
-/-- A localized Hessian upper bound passes to its genuine supported L² operator. -/
-theorem supported_quadratic_upper (A : α →ᵇ E →L[ℝ] E) (C : ℝ)
-    (hA : ∀ x ∈ S, ∀ v, ⟪A x v,v⟫_ℝ ≤ C*‖v‖^2) (u : supportedSpace (V := E) μ S hS) :
-    ⟪supported μ S hS A u,u⟫_ℝ ≤ C*‖u‖^2 := by
-  change ⟪full μ A (u : Lp E 2 μ),(u : Lp E 2 μ)⟫_ℝ ≤ C*‖(u : Lp E 2 μ)‖^2
-  rw [← real_inner_self_eq_norm_sq,L2.inner_def,L2.inner_def,← integral_const_mul]
-  apply integral_mono_ae (L2.integrable_inner (full μ A (u : Lp E 2 μ)) (u : Lp E 2 μ))
-    ((L2.integrable_inner (u : Lp E 2 μ) (u : Lp E 2 μ)).const_mul C)
-  filter_upwards [full_ae μ A (u : Lp E 2 μ),
-    (mem_supportedSpace_ae μ S hS (u : Lp E 2 μ)).1 u.property] with x hx hu
-  rw [hx,real_inner_self_eq_norm_sq]
-  by_cases hs : x ∈ S
-  · exact hA x hs _
-  · simp only [hu hs,map_zero,inner_zero_left,norm_zero,zero_pow (by decide : 2 ≠ 0),mul_zero,le_refl]
 
 end EulerLpOperatorField

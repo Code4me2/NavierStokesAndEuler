@@ -93,64 +93,7 @@ theorem commonPotential_curl (n : ℕ) {x : (P × ℝ) × Plane} (hx : x ∈ D.s
     (C.frequency_nonzero n) (C.background.phase_smooth n) (commonRaw_smooth D C n)
     (C.normal_nonzero n) (fun y hy => commonRaw_tangent D C n hy) hx
 
-theorem commonPotential_fullTurn (n : ℕ) (x : (P × ℝ) × Plane) :
-    commonPotential D j n (x + (2 * Real.pi) • D.directions.angular) =
-      commonPotential D j n x := by
-  have ha : Invariant D.directions.angular ((rawCommon D j).amplitude n) := by
-    rw [C.background.angular]
-    exact angleLift_invariant (actualBandVelocity D.reference D.charts D.context D.state
-      D.carrierBlock D.gaussianInput D.aliasInput j n)
-  have hΦ : AffinePhase D.directions.angular
-      ((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n)
-      ((actualCarrier D.background D.carrierBlock j).phase n) := by
-    rw [C.background.angular]
-    exact actualCarrier_affine _ _ _ _
-  have hf : ((j : ℝ) * D.carrierBlock.frequency n) *
-      ((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n) =
-      ((j * D.carrierBlock.angularFrequency n : ℤ) : ℝ) := by
-    push_cast
-    field_simp [C.frequency_ne n]
-  exact PhysicalCurlCovariance.vectorPotential_fullTurn (j * D.carrierBlock.angularFrequency n)
-    (C.background.radius_invariant n) (C.background.radial_invariant n) (Invariant.const _)
-    (C.background.axial_invariant n) hΦ ha hf x
 
-theorem commonPressure_fullTurn (n : ℕ) (x : (P × ℝ) × Plane) :
-    commonPressure D j n (x + (2 * Real.pi) • D.directions.angular) =
-      commonPressure D j n x := by
-  have hp : Invariant D.directions.angular ((rawCommon D j).pressure n) := by
-    rw [C.background.angular]
-    exact angleLift_invariant (actualBandPressure D.reference D.charts D.context D.state
-      D.carrierBlock D.gaussianInput D.aliasInput j n)
-  have hΦ : AffinePhase D.directions.angular
-      ((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n)
-      ((actualCarrier D.background D.carrierBlock j).phase n) := by
-    rw [C.background.angular]
-    exact actualCarrier_affine _ _ _ _
-  have hf : ((j : ℝ) * D.carrierBlock.frequency n) *
-      ((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n) =
-      ((j * D.carrierBlock.angularFrequency n : ℤ) : ℝ) := by
-    push_cast
-    field_simp [C.frequency_ne n]
-  have he : phaseFactor ((j : ℝ) * D.carrierBlock.frequency n) *
-      (((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n *
-        (2 * Real.pi) : ℝ) : ℂ) =
-      ((j * D.carrierBlock.angularFrequency n : ℤ) : ℂ) * (2 * Real.pi * Complex.I) := by
-    have hf' : (((j : ℝ) * D.carrierBlock.frequency n : ℝ) : ℂ) *
-        (((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n : ℝ) : ℂ) =
-        ((j * D.carrierBlock.angularFrequency n : ℤ) : ℂ) := by exact_mod_cast hf
-    unfold phaseFactor
-    push_cast
-    calc
-      _ = ((((j : ℝ) * D.carrierBlock.frequency n : ℝ) : ℂ) *
-        (((D.carrierBlock.angularFrequency n : ℝ) / D.carrierBlock.frequency n : ℝ) : ℂ)) *
-        (2 * Real.pi * Complex.I) := by push_cast; ring
-      _ = _ := by rw [hf']; simp only [Int.cast_mul]
-  unfold commonPressure
-  change mode ((j : ℝ) * D.carrierBlock.frequency n)
-      ((actualCarrier D.background D.carrierBlock j).phase n) ((rawCommon D j).pressure n)
-      (x + (2 * Real.pi) • D.directions.angular) = _
-  rw [mode_translate hp hΦ, he, Complex.exp_int_mul_two_pi_mul_I, one_mul]
-  rfl
 
 end ActualInputs
 
@@ -440,33 +383,6 @@ theorem phaseNormal_chartChange {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
     (by simpa only [ContinuousLinearMap.fderiv] using cylinderChange_axial hQ hQr h i gap x)
     rfl hΦ (Kr / K)
 
-theorem phaseNormal_chartChange_of_phase {Q Qr K Kr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
-    (hK : K ≠ 0) (h : ℝ) (i gap : ℕ) {x : Cylinder} (hx : 0 < x.1.1)
-    {Φ Ψ : Cylinder → ℝ} (hΨ : DifferentiableAt ℝ Ψ (cylinderChange h Q Qr gap x))
-    (hphase : (fun y => K * Φ y) =ᶠ[𝓝 x] fun y => Kr * Ψ (cylinderChange h Q Qr gap y)) :
-    let G := PhysicalResidualBridge.commonGraph Q h i
-    let H := PhysicalResidualBridge.commonGraph Qr h (i + gap)
-    phaseNormal PhysicalResidualBridge.ScaledGraph.radius G.radial
-      PhysicalResidualBridge.ScaledGraph.angular G.axial Φ x =
-    normalWeight Q Qr K Kr • phaseNormal PhysicalResidualBridge.ScaledGraph.radius H.radial
-      PhysicalResidualBridge.ScaledGraph.angular H.axial Ψ (cylinderChange h Q Qr gap x) := by
-  have he : Φ =ᶠ[𝓝 x] fun y => (Kr / K) * Ψ (cylinderChange h Q Qr gap y) := by
-    filter_upwards [hphase] with y hy
-    apply mul_left_cancel₀ hK
-    rw [hy]
-    field_simp
-  have hn : phaseNormal PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Q h i).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Q h i).axial Φ x =
-      phaseNormal PhysicalResidualBridge.ScaledGraph.radius
-      (PhysicalResidualBridge.commonGraph Q h i).radial PhysicalResidualBridge.ScaledGraph.angular
-      (PhysicalResidualBridge.commonGraph Q h i).axial
-      (fun y => (Kr / K) * Ψ (cylinderChange h Q Qr gap y)) x := by
-    have hD (V : Cylinder → Cylinder) : along V Φ x =
-        along V (fun y => (Kr / K) * Ψ (cylinderChange h Q Qr gap y)) x :=
-      (along_germ he V).eq_of_nhds
-    simp only [phaseNormal, hD]
-  exact hn.trans (phaseNormal_chartChange hQ hQr h i gap K Kr hx hΨ)
 
 /-! ## One potential built from the actual reference solve -/
 
@@ -667,10 +583,6 @@ theorem liftRaw_tangent {x : Cylinder} (hx : x ∈ referenceDomain D) :
   rw [referenceRaw_eq_common D H.identity]
   exact commonRaw_tangent D C D.reference.band hx
 
-theorem reference_radius_ne {x : Cylinder} (hx : x ∈ referenceDomain D) : x.1.1 ≠ 0 := by
-  have he : D.background.radius D.reference.band (waveEquiv x) = x.1.1 := congrFun H.radius x
-  rw [← he]
-  exact C.background.radius_ne D.reference.band (waveEquiv x) hx
 
 theorem liftPotential_eq {x : Cylinder} (hx : x ∈ referenceDomain D) :
     CurlClassBounds.vectorPotential (referenceFrequency D j) PhysicalResidualBridge.ScaledGraph.radius
@@ -715,52 +627,6 @@ theorem referencePotential_smoothAt (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2
   apply hs.congr_of_eventuallyEq
   exact eventually_of_mem hn (fun y hy => referencePotential_eq_common D H C hQr hy.1 hy.2)
 
-theorem reference_physical_velocity (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0)
-    (hx : nativeMap h Qr I z ∈ D.strip.domain) {delta : ℝ} (hdelta : 0 < delta)
-    (chart : PolarCharts.Index) (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart)
-    (component : Fin 3) :
-    (vectorMode ((D.wave j).frequency D.reference.band) ((D.wave j).phase D.reference.band)
-      ((D.wave j).amplitude D.reference.band) (nativeMap h Qr I z) component).re =
-      Qr ^ CoordinateAlgebra.A h * CylindricalResidual.frame (-(z.2 1))
-        (physicalVelocity D h Qr I delta j (z.1, CylindricalResidual.chart z.2)) component := by
-  let G := PhysicalResidualBridge.commonGraph Qr h I
-  let B : Cylinder → ComplexVector := fun x => commonPotential D j D.reference.band (waveEquiv x)
-  have hP := referencePotential_smoothAt D H C hQr hz hx
-  have hper := referencePotential_periodic D h Qr I j (C.frequency_ne D.reference.band)
-  have hA := (PhysicalCurlCovariance.globalCartesianPotential_smoothAt_forward hdelta chart hper hchart hP).differentiableAt (by simp)
-  have hB (i : Fin 3) : DifferentiableAt ℝ (fun x => B x i) (G.map z) := by
-    exact (((contDiffOn_pi.mp (commonPotential_smooth D C D.reference.band)) i).contDiffAt
-      (D.strip.isOpen_domain.mem_nhds hx)).differentiableAt (by simp) |>.comp (G.map z) waveEquiv.differentiableAt
-  have hvalue := PhysicalCurlCovariance.globalCartesianPotential_forward_germ hdelta chart
-    (referencePotential D h Qr I j) hper hchart
-  have hm : ContinuousAt (nativeMap h Qr I) z := waveEquiv.continuous.continuousAt.comp
-    ((G.map_smoothAt (mul_pos (Real.rpow_pos_of_pos hQr _) hz).ne').continuousAt)
-  have hrep : (fun y : SpaceTime => physicalPotential D h Qr I delta j
-      (y.1, CylindricalResidual.chart y.2)) =ᶠ[𝓝 z]
-      (fun y => CylindricalResidual.frame (y.2 1)
-        (PhysicalCurlCovariance.ScaledGraph.realPotential G (Qr ^ (-h)) B y)) := by
-    filter_upwards [hvalue,
-      (isOpen_lt continuous_const (PhysicalGraphBounds.coordinateProjection 0).continuous).mem_nhds hz,
-      hm (D.strip.isOpen_domain.mem_nhds hx)] with y hv hyr hy
-    unfold physicalPotential
-    rw [hv, referencePotential_eq_common D H C hQr hyr hy]
-    rfl
-  have hc := PhysicalCurlCovariance.commonGraph_physical_curl hQr h I hz hB hA hrep component
-  have he := PhysicalCurlCovariance.cylindricalCurl_reindex waveEquiv.toContinuousLinearEquiv
-    (D.background.radius D.reference.band) (D.directions.radialField D.reference.band)
-    (fun _ => D.directions.angular) (D.directions.axialField D.strip D.reference.band)
-    (fun i => (((contDiffOn_pi.mp (commonPotential_smooth D C D.reference.band)) i).contDiffAt
-      (D.strip.isOpen_domain.mem_nhds hx)).differentiableAt (by simp))
-  rw [H.radius, H.radial, H.angular, H.axial] at he
-  change CurlClassBounds.cylindricalCurl PhysicalResidualBridge.ScaledGraph.radius G.radial
-    PhysicalResidualBridge.ScaledGraph.angular G.axial B (G.map z) =
-    CurlClassBounds.cylindricalCurl (D.background.radius D.reference.band)
-      (D.directions.radialField D.reference.band) (fun _ => D.directions.angular)
-      (D.directions.axialField D.strip D.reference.band)
-      (commonPotential D j D.reference.band) (nativeMap h Qr I z) at he
-  rw [commonPotential_curl D C D.reference.band hx] at he
-  rw [he] at hc
-  exact hc
 
 end ReferenceRealization
 
@@ -1219,48 +1085,8 @@ theorem referencePotential_zero_of_source (D : AssemblyData Parameter) (h Qr : �
     HarmonicCalculus.vectorMode, HarmonicCalculus.mode, CurlClassBounds.coefficient,
     CurlClassBounds.normalCoefficient, CurlClassBounds.normalCross, ha]
 
-theorem physicalVelocity_axis_zero_of_source (D : AssemblyData Parameter) (h Qr : ℝ)
-    (I : ℕ) (j : ℤ) (hQr : 0 < Qr) {delta : ℝ} (hdelta : 0 < delta)
-    (hf : ∀ p : Parameter, p.1 ≤ Qr ^ (-(1 / 2 : ℝ)) * delta →
-      ∀ Y : Plane, referenceSource D j (p, Y) = 0)
-    (t : ℝ) (x : Space) (hx₀ : x 0 = 0) (hx₁ : x 1 = 0) :
-    physicalVelocity D h Qr I delta j (t, x) = 0 :=
-  PhysicalCurlCovariance.cartesianVelocity_axis_zero hdelta
-    (referencePotential_zero_of_source D h Qr I j hQr hf) t x hx₀ hx₁
 
-/-- All allowed covering indices refer to one fixed reference cover.
-In particular `i` may be a native index or a common refinement. -/
-theorem label_velocity_on_cover (D : AssemblyData Parameter) {h Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (i I : ℕ) (hi : i ≤ I) (H : ReferenceChart D h Qr I)
-    {N : ℕ} {α κ : ℝ} (C : D.controls N α κ) (frequency : ℤ → ℝ)
-    (hfrequency : ∀ j ∈ modes N, frequency j ≠ 0) {U : Set Parameter} (hU : IsOpen U)
-    (R : ∀ j ∈ modes N, ReferenceODE D j U) {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph Q h i).source (bandDomain D h Q Qr (I - i) U))
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) (component : Fin 3) :
-    labelBandVelocity D h hQ hQr i (I - i) frequency N
-      ((PhysicalResidualBridge.commonGraph Q h i).map z) component =
-      Q ^ CoordinateAlgebra.A h * CylindricalResidual.frame (-(z.2 1))
-        (labelVelocity D h Qr I delta N (z.1, CylindricalResidual.chart z.2)) component := by
-  have hcover : i + (I - i) = I := by omega
-  have H' : ReferenceChart D h Qr (i + (I - i)) := by simpa only [hcover] using H
-  simpa only [hcover] using label_physical_velocity D hQ hQr i (I - i) H' C frequency hfrequency hU R
-    hz hdelta chart hchart component
 
-theorem label_pressure_on_cover (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (i I : ℕ) (hi : i ≤ I) {N : ℕ} (frequency : ℤ → ℝ)
-    (hfrequency : ∀ j ∈ modes N, frequency j ≠ 0)
-    (hreference : ∀ j ∈ modes N, referenceFrequency D j ≠ 0) {U : Set Parameter}
-    (R : ∀ j ∈ modes N, ReferenceODE D j U) {z : SpaceTime} (hz : 0 < z.2 0)
-    (hp : parameterChange h Q Qr (nativeMap h Q i z).1.1 ∈ U)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    labelBandPressure D h hQ hQr (I - i) frequency N ((PhysicalResidualBridge.commonGraph Q h i).map z) =
-      Q ^ (2 * CoordinateAlgebra.A h) *
-        labelPressure D h Qr I delta N (z.1, CylindricalResidual.chart z.2) := by
-  have hcover : i + (I - i) = I := by omega
-  simpa only [hcover] using label_physical_pressure D h hQ hQr i (I - i) frequency hfrequency hreference R
-    hz hp hdelta chart hchart
 
 /-! ## Regularity of the constructed physical fields -/
 
@@ -1300,9 +1126,6 @@ theorem physicalPotential_smoothAt : ContDiffAt ℝ ∞ (physicalPotential D h Q
     (referencePotential_periodic D h Qr I j (C.frequency_ne D.reference.band)) hchart
     (referencePotential_smoothAt D H C hQr hz hx)
 
-theorem physicalVelocity_smoothAt : ContDiffAt ℝ ∞ (physicalVelocity D h Qr I delta j)
-    (z.1, CylindricalResidual.chart z.2) :=
-  SpatialCurl.contDiffAt_spatialCurl (physicalPotential_smoothAt D H C hQr hz hx hdelta chart hchart) (by simp)
 
 omit hdelta hchart in
 theorem complexPhysicalPressure_smoothAt : ContDiffAt ℝ ∞ (complexPhysicalPressure D h Qr I j) z := by
@@ -1347,34 +1170,8 @@ theorem labelPotential_smoothAt (D : AssemblyData Parameter) {h Qr : ℝ} {I : �
   intro j hj
   exact physicalPotential_smoothAt D H (C j hj) hQr hz hx hdelta chart hchart
 
-theorem labelVelocity_smoothAt (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ}
-    (H : ReferenceChart D h Qr I) {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0) (hx : nativeMap h Qr I z ∈ D.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    ContDiffAt ℝ ∞ (labelVelocity D h Qr I delta N) (z.1, CylindricalResidual.chart z.2) :=
-  SpatialCurl.contDiffAt_spatialCurl (labelPotential_smoothAt D H C hQr hz hx hdelta chart hchart) (by simp)
 
-theorem labelPressure_smoothAt (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ}
-    (H : ReferenceChart D h Qr I) {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0) (hx : nativeMap h Qr I z ∈ D.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    ContDiffAt ℝ ∞ (labelPressure D h Qr I delta N) (z.1, CylindricalResidual.chart z.2) := by
-  apply ContDiffAt.sum
-  intro j hj
-  exact physicalPressure_smoothAt D H (C j hj) hQr hz hx hdelta chart hchart
 
-theorem labelVelocity_divergence (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ}
-    (H : ReferenceChart D h Qr I) {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0) (hx : nativeMap h Qr I z ∈ D.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    spatialDivergence (labelVelocity D h Qr I delta N) z.1 (CylindricalResidual.chart z.2) = 0 := by
-  have hs := (labelPotential_smoothAt D H C hQr hz hx hdelta chart hchart).comp
-    (CylindricalResidual.chart z.2) (contDiffAt_const.prodMk contDiffAt_id)
-  exact SpatialCurl.spatialDivergence_spatialCurl _ _ _
-    (hs.of_le (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le)
 
 /-! ## Substitution of the actual target-band residual source -/
 

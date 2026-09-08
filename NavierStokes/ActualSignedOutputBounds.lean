@@ -45,13 +45,7 @@ theorem primary_local {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 theorem envelope_nonneg (l : SignedLabel B N0) (n : ℕ) (x : FullPoint) :
     0 ≤ envelope l n x := ActualPrimaryBounds.fullEnvelope_nonneg (l.2, l.1) n x
 
-theorem background_normal_eq (request : ℕ → FullPoint → SignedWaveUpdate.Vec2) :
-    (jointRawBackground (copies (B := B) (N0 := N0) request)).normal fullStrip (directions B) =
-      fun n i => ActualPrimaryBounds.actualFamily.normal fullStrip (directions B) n (primaryIndex i) := rfl
 
-theorem background_defect_eq (request : ℕ → FullPoint → SignedWaveUpdate.Vec2) :
-    (jointRawBackground (copies (B := B) (N0 := N0) request)).defect fullStrip (directions B) =
-      fun n i => ActualPrimaryBounds.actualFamily.defect fullStrip (directions B) n (primaryIndex i) := rfl
 
 /-- This background certificate has zero amplitude and pressure.  Every
 nonzero field in it is an actual primary background or phase expression. -/
@@ -326,32 +320,5 @@ theorem localized_pressure_jets {β : ℝ} {request : ℕ → FullPoint → Sign
   rw [show β + 1 / 2 + 1 / 2 = β + 1 by ring] at hp
   exact hp.to_uniformLocalJets
 
-/-- Native potential and pressure bounds directly from the actual
-incoming residual classes, before their distinct physical prefactors. -/
-theorem actual_native_potential_pressure_jets (G : SignedMeanGain.Geometry)
-    (hs : G.strip = ActualPrimaryBounds.strip)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point) (α : ℝ)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hfixed : VariableGaugeMean.reconstructState G.gauge c u = u)
-    (hθ : MeanClass G.strip α (u.thetaResidual c))
-    (hz : MeanClass G.strip α (u.axialResidual c)) :
-    let request := LocalSignedRequest.fullRequest G.strip G.patch G.coord c u
-    PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun l n x => Real.sqrt (fullStrip.zeta x) * envelope l n x) α
-      (phaseCell (B := B) (N0 := N0)) (localPotential request) ∧
-    PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun l n x => Real.sqrt (fullStrip.zeta x) * envelope l n x) α
-      (phaseCell (B := B) (N0 := N0))
-      (fun l n k => ((copies request l).localized k).pressure n) := by
-  dsimp only
-  have hr := fullRequest_jets_from_residuals G c u α H hfixed hθ hz
-    (phaseCell (B := B) (N0 := N0))
-  have hr' : ∀ q, PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun _ _ x => fullStrip.zeta x) (α - 1) (phaseCell (B := B) (N0 := N0))
-      (fun _ n _ x => LocalSignedRequest.fullRequest G.strip G.patch G.coord c u n x q) := by
-    simp only [hs] at hr ⊢
-    exact hr
-  exact ⟨by simpa only [sub_add_cancel] using localPotential_jets hr',
-    by simpa only [sub_add_cancel] using localized_pressure_jets hr'⟩
 
 end NavierStokes.ActualSignedOutputBounds

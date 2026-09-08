@@ -53,20 +53,8 @@ theorem correctorField_time :
     TimeDerivative D.T_pos.le (G.correctorField I) (G.correctorDerivativeField I) :=
   G.correctorPath_time I
 
-theorem vectorField_supported (t : Icc (0 : ℝ) D.T) :
-    (G.vectorField I).path t ∈ Supported P Space D.support D.support_measurable :=
-  (G.velocityPath I t).property
 
-theorem vectorDerivativeField_supported (t : Icc (0 : ℝ) D.T) :
-    (G.vectorDerivativeField I).path t ∈ Supported P Space D.support D.support_measurable :=
-  (G.derivativePath I t).property
 
-theorem correctorField_supported (t : Icc (0 : ℝ) D.T) :
-    (G.correctorField I).path t ∈ Supported P Space D.support D.support_measurable :=
-  G.correctorPath_supported I t
 
-theorem correctorDerivativeField_supported (t : Icc (0 : ℝ) D.T) :
-    (G.correctorDerivativeField I).path t ∈ Supported P Space D.support D.support_measurable :=
-  G.correctorTimePath_supported I t
 
 end EulerTransversePacketProvider.Forcing

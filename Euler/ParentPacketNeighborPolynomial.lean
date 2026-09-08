@@ -186,15 +186,6 @@ theorem neighborScaleCost_polynomial :
     (envelope_power L.K Ti P.epsilon⁻¹ P.shear⁻¹ CM CH (zero_le_one.trans L.K_one)
       ((inv_pos.mpr hτ).le.trans hTi) (inv_nonneg.mpr heps.le) (inv_nonneg.mpr hshear.le) hCM hCH)
 
-include hτ1 hTi hCM hCH hshear heps in
-theorem source_neighbor_polynomial :
-    P.neighborCost hτ hτT (G.historyOn H m hm R S hS τ hτ hτT) CM CH ≤
-      (EulerParentNeighborCost.constant*
-        (1+L.K+Ti+P.epsilon⁻¹+P.shear⁻¹+CM+CH)^EulerParentNeighborCost.degree)*G.ell :=
-  (L.source_neighbor_scale m hm R S hS H τ hτ hτT P CM CH hCM hCH hshear heps).trans
-    (mul_le_mul_of_nonneg_right
-      (L.neighborScaleCost_polynomial m hm R S hS H τ hτ hτT P Ti CM CH hτ1 hTi hCM hCH hshear heps)
-      G.ell_pos.le)
 
 include hτ1 hTi hCM hCH in
 /-- With the actual activation scales, only the positive shear itself is
@@ -225,17 +216,5 @@ theorem neighborScaleCost_low_polynomial (ha : 1/2 ≤ P.a) (hH : 1 ≤ P.shear)
         (2*(1+CM+CH)*(1+L.K+Ti+P.shear))^EulerParentNeighborCost.degree := by gcongr
     _ = _ := by rw [mul_pow]; ring
 
-include hτ1 hTi hCM hCH in
-theorem source_neighbor_low_polynomial (ha : 1/2 ≤ P.a) (hH : 1 ≤ P.shear) :
-    P.neighborCost hτ hτT (G.historyOn H m hm R S hS τ hτ hτT) CM CH ≤
-      ((EulerParentNeighborCost.constant*(2*(1+CM+CH))^EulerParentNeighborCost.degree)*
-        (1+L.K+Ti+P.shear)^EulerParentNeighborCost.degree)*G.ell := by
-  have hHp : 0 < P.shear := zero_lt_one.trans_le hH
-  have ha0 : 0 < P.a := by linarith only [ha]
-  have hEp : 0 < P.epsilon := Real.sqrt_pos.mpr (div_pos ha0 hHp)
-  exact (L.source_neighbor_scale m hm R S hS H τ hτ hτT P CM CH hCM hCH hHp hEp).trans
-    (mul_le_mul_of_nonneg_right
-      (L.neighborScaleCost_low_polynomial m hm R S hS H τ hτ hτT P Ti CM CH hτ1 hTi hCM hCH ha hH)
-      G.ell_pos.le)
 
 end EulerParentPacketFrames.LabelData

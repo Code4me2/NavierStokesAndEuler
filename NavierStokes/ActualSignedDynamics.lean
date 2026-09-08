@@ -259,16 +259,5 @@ theorem unitPulse_tangent_germ (j : Fin 2) (L : Label B N0) (n : ℕ)
   filter_upwards [normal_eq_copy_germ j L n U k hR hT hc, hp', ht'] with y hy hyp hyt
   rw [hy, inner_smul_left, unitPulse, nativeUnit_tangent j L hyp ⟨hyt.1.le, hyt.2.le⟩, mul_zero]
 
-theorem unitPulse_tangent (j : Fin 2) (L : Label B N0) (n : ℕ)
-    (U : LocalSignedRequest.SlowRegion (2*h)) (k : TorusInverse.Frequency) {x : FullPoint}
-    (hR : 0 < x.1.1) (hT : 0 < x.1.2.1.1)
-    (hp : (copyPoint j L n k x).1 ∈
-      (PrimaryGeometryAssembly.domain nominal (choice B N0).prepared.N).carrier L)
-    (ht : (copyPoint j L n k x).2.2 / (phases B N0 j).L L ∈ Ioo (0 : ℝ) 1)
-    (hc : (copyPoint j L n k x).2 ∈ (clockWindow L).core) :
-    ⟪(chartCoefficients j L).normal
-      (HarmonicWaveInteraction.productStrip (BaseContextAssembly.nativeStrip nominal U))
-      (PrimaryResidualClass.directions (commonContext B)) n x, unitPulse j L n k x⟫_ℝ = 0 :=
-  (unitPulse_tangent_germ j L n U k hR hT hp ht hc).eq_of_nhds
 
 end NavierStokes.ActualSignedDynamics

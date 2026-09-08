@@ -370,14 +370,6 @@ theorem currentPotential_overlap (l : SignedLabel B N0) (u : CorrectionState.Sta
     currentPotential l u n a i z = currentPotential l u n b j z :=
   cartesianPotential_overlap_radius ha hb i j _ (cylindricalPotential_periodic l u n) hi hj
 
-theorem currentPotential_overlap_germ (l : SignedLabel B N0) (u : CorrectionState.State Point)
-    (n : ℕ) {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (i j : PolarCharts.Index)
-    {z : SpaceTime} (hi : z ∈ ActualMeanPotentialRealization.cartesianDomain a i)
-    (hj : z ∈ ActualMeanPotentialRealization.cartesianDomain b j) :
-    currentPotential l u n a i =ᶠ[𝓝 z] currentPotential l u n b j := by
-  filter_upwards [(ActualMeanPotentialRealization.cartesianDomain_open a i).mem_nhds hi,
-    (ActualMeanPotentialRealization.cartesianDomain_open b j).mem_nhds hj] with y hyi hyj
-  exact currentPotential_overlap l u n ha hb i j hyi hyj
 
 /-! ## The actual pressure mode -/
 
@@ -458,13 +450,5 @@ theorem currentPressure_overlap (l : SignedLabel B N0) (u : CorrectionState.Stat
   polarScalar_overlap_radius ha hb i j (fun x => (cylindricalPressureMode l u n x).re)
     (realCylindricalPressure_periodic l u n) hi hj
 
-theorem currentPressure_overlap_germ (l : SignedLabel B N0) (u : CorrectionState.State Point)
-    (n : ℕ) {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (i j : PolarCharts.Index)
-    {z : SpaceTime} (hi : z ∈ ActualMeanPotentialRealization.cartesianDomain a i)
-    (hj : z ∈ ActualMeanPotentialRealization.cartesianDomain b j) :
-    currentPressure l u n a i =ᶠ[𝓝 z] currentPressure l u n b j := by
-  filter_upwards [(ActualMeanPotentialRealization.cartesianDomain_open a i).mem_nhds hi,
-    (ActualMeanPotentialRealization.cartesianDomain_open b j).mem_nhds hj] with y hyi hyj
-  exact currentPressure_overlap l u n ha hb i j hyi hyj
 
 end NavierStokes.CurrentSignedCurl

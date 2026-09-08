@@ -36,19 +36,6 @@ theorem value_oddReflection {q : ℕ} (u : SobolevSpace period q) :
   change -value period (sobolevReflection period q u) = _
   rw [value_sobolevReflection]
 
-/-- Actual almost-everywhere odd parity is precisely a fixed point of signed reflection. -/
-theorem oddReflection_fixed_of_ae {q : ℕ} (u : SobolevSpace period q)
-    (hu : ∀ᵐ x ∂liftMeasure period, value period u (-x) = -value period u x) :
-    oddReflection period q u = u := by
-  apply value_injective period
-  rw [value_oddReflection]
-  have hh : reflection period (value period u) = -value period u := by
-    apply Lp.ext
-    filter_upwards [reflection_ae period (value period u), Lp.coeFn_neg (value period u), hu]
-      with x h1 h2 h3
-    rw [h1, h2]
-    exact h3
-  rw [hh, neg_neg]
 
 /-- Signed reflection commutes with restriction to the next Sobolev order. -/
 theorem truncate_oddReflection {q : ℕ} (u : SobolevSpace period (q+1)) :

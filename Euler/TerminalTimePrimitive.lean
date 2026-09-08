@@ -274,16 +274,6 @@ theorem primitiveTimeLp_ae (T : ℝ) (hT : 0 ≤ T) (u : TimeLp T E) :
   change realPrimitive T u (projIcc 0 T hT t) = realPrimitive T u t
   rw [projIcc_of_mem hT hmem]
 
-/-- The primitive's increments within the interval are literal integrals of its L² derivative. -/
-theorem terminalPrimitive_increment (T : ℝ) (hT : 0 ≤ T) (u : TimeLp T E)
-    (s t : Icc (0 : ℝ) T) :
-    terminalPrimitive T hT u t-terminalPrimitive T hT u s = ∫ r in s.val..t.val, u r := by
-  rw [terminalPrimitive_apply, terminalPrimitive_apply, realPrimitive_increment]
-  apply intervalIntegral.integral_congr
-  intro r hr
-  have hm : r ∈ Icc (0 : ℝ) T :=
-    (uIcc_subset_Icc s.property t.property) hr
-  exact Set.indicator_of_mem hm _
 
 /-- The explicit initial trace is the negative total integral of the derivative. -/
 theorem initialTrace_eq_integral (T : ℝ) (hT : 0 ≤ T) (u : TimeLp T E) :

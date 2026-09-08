@@ -460,38 +460,6 @@ theorem temporalInverse_centered_coverPull (l : ℝ) (P : S →L[ℝ] T) (k : �
   exact temporalInverse_coverPull l P k u (TemporalMeanUpdate.centered_smooth hf)
     (TemporalMeanUpdate.centered_periodic hp) (TemporalMeanUpdate.centered_zeroMean hf) z
 
-/-- The physical temporal update is one fixed Fourier operator. The native
-cover factor and the momentum/velocity unit factors cancel exactly. -/
-theorem temporal_physical_pull (h : ℝ) (n : ℕ) (l : ℝ) (P : S →L[ℝ] T)
-    {f : PressureStream.Lift T → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hp : PressureStream.TorusPeriodicLift f) (z : PressureStream.Lift S) :
-    coverPull l P (ChartScales.nativeIndex h n)
-      (ChartScales.Q n ^ (-CoordinateAlgebra.A h)) (TemporalMeanUpdate.desiredIncrement h n f) z =
-      -TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered
-        (coverPull l P (ChartScales.nativeIndex h n)
-          (ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2))) f)) z := by
-  rw [temporalInverse_centered_coverPull l P _ _ hf hp]
-  change ChartScales.Q n ^ (-CoordinateAlgebra.A h) *
-      (-TemporalMeanUpdate.chartPrefactor h n *
-        TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f)
-          (l * z.1, (P z.2.1, TemporalMeanUpdate.coverMap (ChartScales.nativeIndex h n) z.2.2))) =
-    -((ChartScales.Tg ^ ChartScales.nativeIndex h n)⁻¹ *
-      (ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) *
-        TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f)
-          (l * z.1, (P z.2.1, TemporalMeanUpdate.coverMap (ChartScales.nativeIndex h n) z.2.2))))
-  rw [TemporalMeanUpdate.chartPrefactor_eq]
-  have hpow : ChartScales.Q n ^ (-CoordinateAlgebra.A h) * ChartScales.Q n ^ (-1 - h) =
-      ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) := by
-    rw [← Real.rpow_add (ChartScales.Q_pos n)]
-    congr 1
-    unfold CoordinateAlgebra.A
-    ring
-  calc
-    _ = -(ChartScales.Q n ^ (-CoordinateAlgebra.A h) * ChartScales.Q n ^ (-1 - h)) *
-      (ChartScales.Tg ^ ChartScales.nativeIndex h n)⁻¹ *
-        TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f)
-          (l * z.1, (P z.2.1, TemporalMeanUpdate.coverMap (ChartScales.nativeIndex h n) z.2.2)) := by ring
-    _ = _ := by rw [hpow]; ring
 
 /-- The common-index form of the actual temporal update. A common index
 is independent of the dyadic band; the native recipe is its specialization. -/
@@ -500,9 +468,6 @@ noncomputable def temporalAtIndex (h : ℝ) (n i : ℕ)
   -((ChartScales.Tg ^ i * ChartScales.Q n ^ (1 + h))⁻¹) *
     TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered f) z
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem temporalAtIndex_native (h : ℝ) (n : ℕ) (f : PressureStream.Lift S → ℝ) :
-    temporalAtIndex h n (ChartScales.nativeIndex h n) f = TemporalMeanUpdate.desiredIncrement h n f := rfl
 
 noncomputable def physicalTemporal (f : PressureStream.Lift S → ℝ)
     (z : PressureStream.Lift S) : ℝ :=
@@ -571,11 +536,6 @@ theorem rankDesiredAxial_scale {l u ell U : ℝ} (hl : l ≠ 0) (hu : u ≠ 0)
   simp only [MeanRankUpdate.scaleField, mul_div_mul_left _ _ hl]
   ring
 
-theorem rankBackground_scale {l : ℝ} (hl : l ≠ 0) (u ell U lam C r : ℝ) :
-    MeanRankUpdate.background lam C (l * ell) (u * U) (l * r) =
-      u * MeanRankUpdate.background lam C ell U r := by
-  simp only [MeanRankUpdate.background, MeanRankUpdate.scaleField, mul_div_mul_left _ _ hl]
-  ring
 
 end RankScaling
 
@@ -705,10 +665,6 @@ theorem radialFrequency_scale (h : ℝ) (n i : ℕ) (d M : ℝ) :
   rw [hs, radialFrequency, mul_assoc, ← Real.rpow_add (ChartScales.Q_pos n)]
   simp
 
-theorem radialFrequency_native (h : ℝ) (n : ℕ) :
-    radialFrequency h n (ChartScales.nativeIndex h n) (ChartScales.radialExponent h) 1 =
-      ChartScales.radialCoefficient h n := by
-  simp [radialFrequency, ChartScales.radialCoefficient]
 
 theorem radialFrequency_shift (h : ℝ) (n i : ℕ) (d M : ℝ) :
     M • TemporalMeanUpdate.coverMap i (vector .radial) =
@@ -783,25 +739,6 @@ noncomputable def reconstructPressureFamily (r : ℕ → CorrectionState.Reconst
     CorrectionState.State (PressureStream.Lift Plane) :=
   { u with pressure := fun n => (CorrectionState.reconstructPressure (r n) c u).pressure n }
 
-/-- If the normalized sources are one physical source, the recomputed
-pressures are representations of its single, defined physical pressure.
-Compatibility of the output is the conclusion, not an input. -/
-theorem reconstructPressureFamily_represents {d a b : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (h M : ℝ) (index : ℕ → ℕ)
-    (c : CorrectionState.Context (PressureStream.Lift Plane))
-    (u : CorrectionState.State (PressureStream.Lift Plane))
-    (F : PressureStream.Lift Plane → ℝ)
-    (hf : ∀ n, ContDiff ℝ ∞ (u.gr c n))
-    (hp : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n))
-    (hs : ∀ n, RadialAlias.RadiallySupported (chartScale n * a) (chartScale n * b) (u.gr c n))
-    (hsource : ∀ n, fieldOnPhysical h n (index n) (2 * CoordinateAlgebra.A h + 1 / 2) (u.gr c n) = F) :
-    ∀ n, fieldOnPhysical h n (index n) (2 * CoordinateAlgebra.A h)
-      ((reconstructPressureFamily (fun k => bandReconstruction h k (index k) d a b M hab) c u).pressure n) =
-        PressureStream.meanPressure d a b M hab (vector .radial) F := by
-  intro n
-  have ht := physicalPressure_naturality ha hab hd h n (index n) M (hf n) (hp n) (hs n)
-  rw [hsource n] at ht
-  exact ht.symm
 
 theorem temporalFamily_represents (h : ℝ) (index : ℕ → ℕ)
     (f : ℕ → PressureStream.Lift Plane → ℝ) (F : PressureStream.Lift Plane → ℝ)
@@ -855,26 +792,6 @@ theorem reconstructedBeta_pull {l a b d : ℝ} (hl : 0 < l) (ha : 0 < a)
         (mul_lt_mul_of_pos_left hab hl) hd w hf hs).differentiable (by simp)) _) haxial,
     div_mul_cancel₀ _ hl.ne']
 
-/-- The axial alias itself transforms as a velocity. It is retained as
-the exact compactification term. -/
-theorem streamAlias_pull {l a b d : ℝ} (hl : 0 < l) (ha : 0 < a)
-    (hab : a < b) (hd : 0 < d) (C : E →L[ℝ] F) (M N u : ℝ) (v : E) (w : F)
-    (hshift : M • C v = (N * l ^ d) • w) {f : ℝ × F → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported (l * a) (l * b) f)
-    (z : ℝ × E) (hz : 0 ≤ z.1) :
-    RadialPullback.physicalAlias d a b M v (PressureStream.weightedSource (pull l C u f)) z / z.1 =
-      u * (RadialPullback.physicalAlias d (l * a) (l * b) N w
-        (PressureStream.weightedSource f) (chartLinear l C z) / (l * z.1)) := by
-  have he := reconstructedGamma_pull hl ha hab hd C M N u v w hshift hf hs z hz
-  rw [PressureStream.streamGamma_eq_desired_sub_alias_global ha hab hd v
-    (pull_smooth l C u hf) (pull_supported hl C u hs),
-    PressureStream.streamGamma_eq_desired_sub_alias_global (mul_pos hl ha)
-      (mul_lt_mul_of_pos_left hab hl) hd w hf hs] at he
-  change u * f (chartLinear l C z) - _ =
-    u * (f (chartLinear l C z) -
-      RadialPullback.physicalAlias d (l * a) (l * b) N w
-        (PressureStream.weightedSource f) (chartLinear l C z) / (l * z.1)) at he
-  linarith
 
 end ReconstructedStream
 
@@ -972,30 +889,8 @@ noncomputable def commonTemporalIncrement (r : ℕ → CorrectionState.Reconstru
 
 variable [FiniteDimensional ℝ S]
 
-omit [FiniteDimensional ℝ S] in
-theorem commonTemporalIncrement_native (r : CorrectionState.ReconstructionData)
-    (h : ℝ) (axial : S × Plane) (c : CorrectionState.Context (PressureStream.Lift S))
-    (u : CorrectionState.State (PressureStream.Lift S)) :
-    commonTemporalIncrement (fun _ => r) h (ChartScales.nativeIndex h) axial c u =
-      CorrectionState.temporalIncrement r h axial c u := rfl
 
-theorem commonTemporalPotential_smooth (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (f : ℕ → PressureStream.Lift S → ℝ) (n : ℕ)
-    (ha : 0 < (r n).inner) (hd : 0 < (r n).exponent)
-    (hf : ContDiff ℝ ∞ (f n)) (hp : PressureStream.TorusPeriodicLift (f n))
-    (hs : RadialAlias.RadiallySupported (r n).inner (r n).outer (f n)) :
-    ContDiff ℝ ∞ (commonTemporalPotential r h index f n) :=
-  PressureStream.streamPotential_contDiff ha (r n).inner_lt_outer hd _
-    (temporalAtIndex_smooth h n (index n) hf hp) (temporalAtIndex_supported h n (index n) hs)
 
-theorem commonTemporalPotential_supported (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (f : ℕ → PressureStream.Lift S → ℝ) (n : ℕ)
-    (ha : 0 < (r n).inner) (hd : 0 < (r n).exponent)
-    (hf : ContDiff ℝ ∞ (f n)) (hp : PressureStream.TorusPeriodicLift (f n))
-    (hs : RadialAlias.RadiallySupported (r n).inner (r n).outer (f n)) :
-    RadialAlias.RadiallySupported (r n).inner (r n).outer (commonTemporalPotential r h index f n) :=
-  PressureStream.streamPotential_supported ha (r n).inner_lt_outer hd _
-    (temporalAtIndex_smooth h n (index n) hf hp) (temporalAtIndex_supported h n (index n) hs)
 
 theorem commonTemporalAlias_smooth (r : ℕ → CorrectionState.ReconstructionData)
     (h : ℝ) (index : ℕ → ℕ) (f : ℕ → PressureStream.Lift S → ℝ) (n : ℕ)
@@ -1086,32 +981,6 @@ theorem physicalAuxiliary_axial (h : ℝ) (n i : ℕ) :
   simp [physicalAuxiliary, axialUnit, slowToChart, he]
   exact (TemporalMeanUpdate.coverMap i).map_zero
 
-theorem physicalFast_naturality (h : ℝ) (n i : ℕ) {f : PressureStream.Lift Plane → ℝ}
-    (hf : ContDiff ℝ ∞ f) (z : PressureStream.Lift Plane) :
-    fieldOnPhysical h n i (2 * CoordinateAlgebra.A h + 1 / 2) (fastAtIndex h n i f) z =
-      PressureStream.graphDz ((0 : Plane), vector .temporal)
-        (fieldOnPhysical h n i (CoordinateAlgebra.A h) f) z := by
-  have he := graphDz_pull (chartScale n) (physicalAuxiliary h n i)
-    (ChartScales.Q n ^ (-CoordinateAlgebra.A h)) (ChartScales.Tg ^ i)
-    ((0 : Plane), vector .temporal) ((0 : Plane), vector .temporal)
-    ((hf.differentiable (by simp)) (physicalToChart h n i z)) (physicalAuxiliary_temporal h n i)
-  change PressureStream.graphDz _ (fieldOnPhysical h n i (CoordinateAlgebra.A h) f) z = _ at he
-  rw [he, fieldOnPhysical_apply, fastAtIndex]
-  have hunit : ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) *
-      ChartScales.Q n ^ (1 + h) = ChartScales.Q n ^ (-CoordinateAlgebra.A h) := by
-    rw [← Real.rpow_add (ChartScales.Q_pos n)]
-    congr 1
-    unfold CoordinateAlgebra.A
-    ring
-  change ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) *
-    ((ChartScales.Tg ^ i * ChartScales.Q n ^ (1 + h)) *
-      PressureStream.graphDz _ f (physicalToChart h n i z)) = _
-  rw [show ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) *
-      ((ChartScales.Tg ^ i * ChartScales.Q n ^ (1 + h)) *
-        PressureStream.graphDz ((0 : Plane), vector .temporal) f (physicalToChart h n i z)) =
-      (ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h + 1 / 2)) * ChartScales.Q n ^ (1 + h)) *
-        ChartScales.Tg ^ i * PressureStream.graphDz _ f (physicalToChart h n i z) by ring, hunit]
-  rfl
 
 theorem physicalGamma_naturality {d a b : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
     (h : ℝ) (n i : ℕ) (M : ℝ) {f : PressureStream.Lift Plane → ℝ}
@@ -1158,38 +1027,6 @@ noncomputable def physicalTemporalFields (d a b M : ℝ)
     PressureStream.streamGamma (PressureStream.physicalSpeed d M) ((0 : Plane), vector .radial)
       (PressureStream.streamPotential d a b M ((0 : Plane), vector .radial) (physicalTemporal Fz)) z]
 
-/-- The three defined chart components are restrictions of one physical
-vector field. The source identities are the only compatibility premises. -/
-theorem commonTemporalFields_represents {d a b : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (h M : ℝ) (index : ℕ → ℕ)
-    (fθ fz : ℕ → PressureStream.Lift Plane → ℝ) (Fθ Fz : PressureStream.Lift Plane → ℝ)
-    (hθ : ∀ n, ContDiff ℝ ∞ (fθ n)) (hz : ∀ n, ContDiff ℝ ∞ (fz n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (fθ n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (fz n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported (chartScale n * a) (chartScale n * b) (fz n))
-    (hsourceθ : ∀ n, fieldOnPhysical h n (index n) (2 * CoordinateAlgebra.A h + 1 / 2) (fθ n) = Fθ)
-    (hsourcez : ∀ n, fieldOnPhysical h n (index n) (2 * CoordinateAlgebra.A h + 1 / 2) (fz n) = Fz)
-    (n : ℕ) (z : PressureStream.Lift Plane) (hr : 0 ≤ z.1) :
-    let δ := commonTemporalFields (fun k => bandReconstruction h k (index k) d a b M hab)
-      h index (ChartScales.epsilon h) axialUnit fθ fz
-    ![fieldOnPhysical h n (index n) (CoordinateAlgebra.A h) (δ.radial n) z,
-      fieldOnPhysical h n (index n) (CoordinateAlgebra.A h) (δ.angular n) z,
-      fieldOnPhysical h n (index n) (CoordinateAlgebra.A h) (δ.axial n) z] =
-        physicalTemporalFields d a b M Fθ Fz z := by
-  have hθphys := temporalFamily_represents h index fθ Fθ hθ hpθ hsourceθ n
-  have hzphys := temporalFamily_represents h index fz Fz hz hpz hsourcez n
-  have hβ := physicalBeta_naturality ha hab hd h n (index n) M
-    (temporalAtIndex_smooth h n (index n) (hz n) (hpz n))
-    (temporalAtIndex_supported h n (index n) (hsz n)) z
-  have hγ := physicalGamma_naturality ha hab hd h n (index n) M
-    (temporalAtIndex_smooth h n (index n) (hz n) (hpz n))
-    (temporalAtIndex_supported h n (index n) (hsz n)) z hr
-  rw [hzphys] at hβ hγ
-  ext j
-  fin_cases j
-  · exact hβ.symm
-  · exact congrFun hθphys z
-  · exact hγ.symm
 
 end PhysicalTemporalFields
 
@@ -1226,33 +1063,6 @@ theorem sourceMoment_coverPull {l : ℝ} (hl : 0 < l) (P : S →L[ℝ] T)
   rw [pow_succ]
   field_simp
 
-/-- The radial source carries one additional inverse-length factor.
-The actual three integrated debts then have the required different length powers. -/
-theorem sourceDebt_coverPull {l : ℝ} (hl : 0 < l) (P : S →L[ℝ] T) (k : ℕ) (u : ℝ)
-    {g qθ qz : PressureStream.Lift T → ℝ}
-    (hg : ContDiff ℝ ∞ g) (hθ : ContDiff ℝ ∞ qθ) (hz : ContDiff ℝ ∞ qz)
-    (hpg : PressureStream.TorusPeriodicLift g) (hpθ : PressureStream.TorusPeriodicLift qθ)
-    (hpz : PressureStream.TorusPeriodicLift qz) (s : S) :
-    sourceDebt (coverPull l P k (l * u ^ 2) g) (coverPull l P k (u ^ 2) qθ)
-      (coverPull l P k (u ^ 2) qz) s =
-        MeanRankUpdate.scaleDebt l⁻¹ u (sourceDebt g qθ qz (P s)) := by
-  ext j
-  fin_cases j
-  · change sourceMoment 0 (coverPull l P k (l * u ^ 2) g) s =
-      u ^ 2 * sourceMoment 0 g (P s)
-    rw [sourceMoment_coverPull hl P k 0 (l * u ^ 2) hg hpg]
-    simp [hl.ne']
-  · change sourceMoment 2 (coverPull l P k (u ^ 2) qθ) s =
-      l⁻¹ ^ 3 * u ^ 2 * sourceMoment 2 qθ (P s)
-    rw [sourceMoment_coverPull hl P k 2 (u ^ 2) hθ hpθ]
-    simp only [show 2 + 1 = 3 from rfl, inv_pow, div_eq_mul_inv]
-    ring
-  · change sourceMoment 1 (coverPull l P k (u ^ 2) qz) s -
-        (1 / 2 : ℝ) * sourceMoment 2 (coverPull l P k (l * u ^ 2) g) s =
-      l⁻¹ ^ 2 * u ^ 2 * (sourceMoment 1 qz (P s) - (1 / 2 : ℝ) * sourceMoment 2 g (P s))
-    rw [sourceMoment_coverPull hl P k 1 (u ^ 2) hz hpz,
-      sourceMoment_coverPull hl P k 2 (l * u ^ 2) hg hpg]
-    field_simp ; ring
 
 omit [NormedAddCommGroup T] [NormedSpace ℝ T] in
 theorem stateDebt_eq_sourceDebt (c : CorrectionState.Context (PressureStream.Lift S))
@@ -1268,39 +1078,7 @@ section RankFamilies
 
 variable {S T : Type}
 
-/-- Naturality with slow-dependent length, velocity, amplitude and debt.
-Only the primitive input data are transported. -/
-theorem rankAngularFamily_transport {l u : ℝ} (hl : l ≠ 0) (hu : u ≠ 0)
-    (P : S → T) (lam a b : ℝ) (ell U C : S → ℝ) (debt : S → MeanRankUpdate.Debt)
-    (ell' U' C' : T → ℝ) (debt' : T → MeanRankUpdate.Debt)
-    (hell : ∀ s, ell s ≠ 0) (hU : ∀ s, U s ≠ 0)
-    (hlength : ∀ s, ell' (P s) = l * ell s) (hvelocity : ∀ s, U' (P s) = u * U s)
-    (hcoefficient : ∀ s, C' (P s) = C s)
-    (hdebt : ∀ s, debt' (P s) = MeanRankUpdate.scaleDebt l u (debt s))
-    (r : ℝ) (s : S) :
-    MeanRankUpdate.angularFamily lam a b ell' U' C' debt' (l * r, P s) =
-      u * MeanRankUpdate.angularFamily lam a b ell U C debt (r, s) := by
-  change MeanRankUpdate.angularIncrement lam (C' (P s)) a b (ell' (P s)) (U' (P s))
-    (debt' (P s)) (l * r) =
-      u * MeanRankUpdate.angularIncrement lam (C s) a b (ell s) (U s) (debt s) r
-  rw [hlength, hvelocity, hcoefficient, hdebt]
-  exact rankAngular_scale hl hu (hell s) (hU s) lam (C s) a b (debt s) r
 
-theorem rankDesiredAxialFamily_transport {l u : ℝ} (hl : l ≠ 0) (hu : u ≠ 0)
-    (P : S → T) (lam a b : ℝ) (ell U C : S → ℝ) (debt : S → MeanRankUpdate.Debt)
-    (ell' U' C' : T → ℝ) (debt' : T → MeanRankUpdate.Debt)
-    (hell : ∀ s, ell s ≠ 0) (hU : ∀ s, U s ≠ 0)
-    (hlength : ∀ s, ell' (P s) = l * ell s) (hvelocity : ∀ s, U' (P s) = u * U s)
-    (hcoefficient : ∀ s, C' (P s) = C s)
-    (hdebt : ∀ s, debt' (P s) = MeanRankUpdate.scaleDebt l u (debt s))
-    (r : ℝ) (s : S) :
-    MeanRankUpdate.desiredAxialFamily lam a b ell' U' C' debt' (l * r, P s) =
-      u * MeanRankUpdate.desiredAxialFamily lam a b ell U C debt (r, s) := by
-  change MeanRankUpdate.desiredAxialIncrement lam (C' (P s)) a b (ell' (P s)) (U' (P s))
-    (debt' (P s)) (l * r) =
-      u * MeanRankUpdate.desiredAxialIncrement lam (C s) a b (ell s) (U s) (debt s) r
-  rw [hlength, hvelocity, hcoefficient, hdebt]
-  exact rankDesiredAxial_scale hl hu (hell s) (hU s) lam (C s) a b (debt s) r
 
 end RankFamilies
 
@@ -1325,23 +1103,7 @@ theorem physicalProfile_inner {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   rw [slowProjection_physicalToChart]
   exact SimilarityHomogeneity.chartInner_transition hh hh1 zero_lt_one (ChartScales.Q_pos n) hz
 
-/-- Every function of the true profile coordinates `(X,η)` is invariant,
-including the radial profile weight and its logarithmic edge distance. -/
-theorem physicalProfile_weight {V : Type} {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (n i : ℕ) {z : PressureStream.Lift Plane} (hz : 0 < z.2.1.2) (w : ℝ × ℝ → V) :
-    w (SimilarityHomogeneity.chartInner h (slowProjection (physicalToChart h n i z))) =
-      w (SimilarityHomogeneity.chartInner h (slowProjection z)) :=
-  congrArg w (physicalProfile_inner hh hh1 n i hz)
 
-/-- The slow similarity length itself scales; it is not a fixed radial
-endpoint shared by all normalized band charts. -/
-theorem physicalProfile_q {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (n i : ℕ) {z : PressureStream.Lift Plane} (hz : 0 < z.2.1.2) :
-    SimilarityHomogeneity.chartQ h (slowProjection (physicalToChart h n i z)) =
-      (ChartScales.Q n)⁻¹ * SimilarityHomogeneity.chartQ h (slowProjection z) := by
-  rw [slowProjection_physicalToChart]
-  simpa only [one_div] using
-    SimilarityHomogeneity.chartQ_transition hh hh1 zero_lt_one (ChartScales.Q_pos n) hz
 
 end PhysicalProfile
 

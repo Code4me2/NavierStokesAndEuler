@@ -413,17 +413,6 @@ theorem temporalStage_on
 
 end StateFields
 
-theorem temporalStage_gr_eq (g : VariableGaugeMean.GaugeData S) (h : ℝ) (index : ℕ → ℕ)
-    (axial : S × Plane) (C : CorrectionState.Context (PressureStream.Lift S))
-    (s : CorrectionState.State (PressureStream.Lift S)) :
-    (VariableGaugeMean.temporalStageState g h index axial C s).gr C =
-      MeanIncrementBounds.gr C.operators C.base
-        (MeanIncrementBounds.updated s.mean (VariableGaugeMean.temporalIncrementState g h index axial C s))
-        s.covariance := by
-  change MeanIncrementBounds.gr _ _ _
-    (CorrectionState.bilinearCovariance (s.oscillation + 0) (s.oscillation + 0)) = _
-  simp only [add_zero]
-  rfl
 
 /-! ## Actual similarity bands and common graph operators -/
 
@@ -508,57 +497,7 @@ variable {h d a b M ca cb : ℝ}
 
 include hh hh1 ha hd hi hV hU htime hmap hC hCr H G hfz hpz hsz hfθ hpθ
 
-theorem similarity_temporalFields_on :
-    TripleOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv h n m k) (bandVelocityScale h n m)
-      (VariableGaugeMean.temporalIncrementState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection C s)
-      (VariableGaugeMean.temporalIncrementState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection Cr r) n m ∧
-    ∀ z ∈ PhysicalMeanDomain.slowDomain V, ∀ theta i,
-      VariableGaugeMean.temporalAliasState (VariableGaugeMean.similarityGauge h d a b M hab index) h index C s n (z,theta) i =
-      (bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m) *
-        VariableGaugeMean.temporalAliasState (VariableGaugeMean.similarityGauge h d a b M hab index) h index Cr r m (bandChartEquiv h n m k z,theta) i := by
-  have hg := similarityGaugeOn hh hh1 d a b M hab index n m k hi htime
-  have hclock := clock_band_transport h n m (index n) (index m) k hi
-  have haxial : ((bandSlowEquiv h n m).toContinuousLinearMap.prodMap (TemporalMeanUpdate.coverMap k))
-      (C.operators.epsilon n • axialDirection) =
-        bandScale n m • (Cr.operators.epsilon m • axialDirection) := by
-    rw [hC, hCr]
-    exact band_axial_transport h n m k
-  have hfast : bandChartEquiv h n m k (C.operators.fastCoefficient n • C.operators.vT) =
-      (bandVelocityScale h n m * bandScale n m) • (Cr.operators.fastCoefficient m • Cr.operators.vT) := by
-    rw [hC, hCr]
-    exact common_fast_transport h index ca cb hcab n m k hi
-  exact ⟨temporalIncrement_on (bandScale_pos n m) (bandSlowEquiv h n m) k hV hU hmap
-    (VariableGaugeMean.similarityGauge h d a b M hab index) (VariableGaugeMean.similarityGauge h d a b M hab index) C Cr s r h index index n m ha hd hg H G hclock hfz hpz hsz
-    axialDirection axialDirection haxial hfθ hpθ,
-    temporalAliasState_on (bandScale_pos n m) (bandSlowEquiv h n m) k hV hU hmap
-    (VariableGaugeMean.similarityGauge h d a b M hab index) (VariableGaugeMean.similarityGauge h d a b M hab index) C Cr s r h index index n m ha hd hg H G hclock hfz hpz hsz
-    axialDirection axialDirection haxial hfθ hpθ hfast⟩
 
-theorem similarity_temporalStage_on
-    (hfpost : ContDiffOn ℝ ∞ ((VariableGaugeMean.temporalStageState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection Cr r).gr Cr m)
-      (PhysicalMeanDomain.slowDomain U))
-    (hppost : PhysicalMeanDomain.PeriodicOn U
-      ((VariableGaugeMean.temporalStageState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection Cr r).gr Cr m))
-    (hspost : VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength (2*h)) U
-      ((VariableGaugeMean.temporalStageState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection Cr r).gr Cr m)) :
-    StateOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv h n m k)
-      (bandVelocityScale h n m) (bandScale n m)
-      (VariableGaugeMean.temporalStageState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection C s)
-      (VariableGaugeMean.temporalStageState (VariableGaugeMean.similarityGauge h d a b M hab index) h index axialDirection Cr r) n m := by
-  have hg := similarityGaugeOn hh hh1 d a b M hab index n m k hi htime
-  have hclock := clock_band_transport h n m (index n) (index m) k hi
-  have haxial : ((bandSlowEquiv h n m).toContinuousLinearMap.prodMap (TemporalMeanUpdate.coverMap k))
-      (C.operators.epsilon n • axialDirection) =
-        bandScale n m • (Cr.operators.epsilon m • axialDirection) := by
-    rw [hC, hCr]
-    exact band_axial_transport h n m k
-  have hfast : bandChartEquiv h n m k (C.operators.fastCoefficient n • C.operators.vT) =
-      (bandVelocityScale h n m * bandScale n m) • (Cr.operators.fastCoefficient m • Cr.operators.vT) := by
-    rw [hC, hCr]
-    exact common_fast_transport h index ca cb hcab n m k hi
-  exact temporalStage_on (bandScale_pos n m) (bandSlowEquiv h n m) k hV hU hmap
-    (VariableGaugeMean.similarityGauge h d a b M hab index) (VariableGaugeMean.similarityGauge h d a b M hab index) C Cr s r h index index n m ha hd hg H G hclock hfz hpz hsz
-    axialDirection axialDirection haxial hfθ hpθ hfast hfpost hppost hspost
 
 end Similarity
 

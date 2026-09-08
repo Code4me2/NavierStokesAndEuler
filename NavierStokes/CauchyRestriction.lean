@@ -54,11 +54,6 @@ def restrictionCLM (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ) :
     (f : C(Disk c σ, E)) (z : Disk c ρ) :
     restrictionCLM c h f z = f ⟨z.1, closedBall_subset_closedBall h z.2⟩ := rfl
 
-theorem restrictionCLM_comp (c : ℂ) {r ρ σ : ℝ} (h₁ : r ≤ ρ) (h₂ : ρ ≤ σ) :
-    (restrictionCLM (E := E) c h₁).comp (restrictionCLM c h₂) =
-      restrictionCLM c (h₁.trans h₂) := by
-  ext f z
-  rfl
 
 theorem offset_ne_zero {δ : ℝ} (hδ : 0 < δ) (θ : ℝ) : circleMap 0 δ θ ≠ 0 := by
   intro h
@@ -167,12 +162,6 @@ theorem norm_derivativeCLM_le (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ) :
   apply ContinuousLinearMap.opNorm_le_bound _ (by positivity)
   exact norm_cauchyMap_le c hgap
 
-theorem norm_restrictionCLM_le (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ) :
-    ‖restrictionCLM (E := E) c h‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro f
-  change ‖restrictionLinear c h f‖ ≤ 1 * ‖f‖
-  simpa only [one_mul] using norm_restrictionLinear_le c h f
 
 variable [CompleteSpace E]
 
@@ -244,59 +233,10 @@ omit [NormedSpace ℂ E] [CompleteSpace E] in
     (hF : ContinuousOn F (closedBall c r)) (z : Disk c r) :
     ofContinuousOn c r F hF z = F z := rfl
 
-/-- Agreement with the actual derivative under holomorphy in the open disk and
-continuity on its closure. No smoothness of the derivative is assumed. -/
-theorem derivativeCLM_apply_of_diffContOnCl (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ)
-    (F : ℂ → E) (hF : DiffContOnCl ℂ F (ball c σ)) (z : Disk c ρ) :
-    derivativeCLM c hgap (ofContinuousOn c σ F hF.continuousOn_ball) z = deriv F z :=
-  derivativeCLM_apply_of_eq c hgap _ F hF (fun _ => rfl) z
 
-theorem derivativeCLM_apply_of_differentiableOn (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ)
-    (F : ℂ → E) (hF : DifferentiableOn ℂ F (closedBall c σ)) (z : Disk c ρ) :
-    derivativeCLM c hgap (ofContinuousOn c σ F hF.continuousOn) z = deriv F z :=
-  derivativeCLM_apply_of_eq c hgap _ F
-    (DiffContOnCl.mk_ball (hF.mono ball_subset_closedBall) hF.continuousOn) (fun _ => rfl) z
 
-/-- On holomorphic data, further restriction of the derivative does not depend
-on which smaller target disk was used to construct the Cauchy integral. -/
-theorem restrict_derivativeCLM_of_eq (c : ℂ) {r ρ σ : ℝ}
-    (hr : r ≤ ρ) (hgap : ρ < σ) (f : C(Disk c σ, E)) (F : ℂ → E)
-    (hF : DiffContOnCl ℂ F (ball c σ))
-    (hvalues : ∀ w : Disk c σ, f w = F w) :
-    restrictionCLM c hr (derivativeCLM c hgap f) =
-      derivativeCLM c (hr.trans_lt hgap) f := by
-  ext z
-  change derivativeCLM c hgap f (inclusion c hr z) = _
-  calc
-    _ = deriv F z := derivativeCLM_apply_of_eq c hgap f F hF hvalues (inclusion c hr z)
-    _ = _ := (derivativeCLM_apply_of_eq c (hr.trans_lt hgap) f F hF hvalues z).symm
 
-/-- Restricting the source disk also gives the same derivative on common
-smaller disks, provided the source represents a holomorphic function. -/
-theorem derivativeCLM_restrict_of_eq (c : ℂ) {r ρ σ : ℝ}
-    (hgap : r < ρ) (houter : ρ ≤ σ) (f : C(Disk c σ, E)) (F : ℂ → E)
-    (hF : DiffContOnCl ℂ F (ball c σ))
-    (hvalues : ∀ w : Disk c σ, f w = F w) :
-    derivativeCLM c hgap (restrictionCLM c houter f) =
-      derivativeCLM c (hgap.trans_le houter) f := by
-  ext z
-  calc
-    _ = deriv F z := derivativeCLM_apply_of_eq c hgap (restrictionCLM c houter f) F
-      (hF.mono (ball_subset_ball houter))
-      (fun w => hvalues (inclusion c houter w)) z
-    _ = _ := (derivativeCLM_apply_of_eq c (hgap.trans_le houter) f F hF hvalues z).symm
 
-omit [CompleteSpace E] in
-theorem continuous_derivative_path {X : Type*} [TopologicalSpace X]
-    (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ) {f : X → C(Disk c σ, E)} (hf : Continuous f) :
-    Continuous (fun x => derivativeCLM c hgap (f x)) :=
-  (derivativeCLM c hgap).continuous.comp hf
 
-omit [CompleteSpace E] in
-theorem contDiff_derivative_path {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ) {n : WithTop ℕ∞}
-    {f : X → C(Disk c σ, E)} (hf : ContDiff ℝ n f) :
-    ContDiff ℝ n (fun x => derivativeCLM c hgap (f x)) :=
-  ((derivativeCLM c hgap).restrictScalars ℝ).contDiff.comp hf
 
 end NavierStokes.CauchyRestriction

@@ -279,51 +279,9 @@ theorem width_uniform_jet_bound {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact 
     (mul_nonneg hy.1 (activation_nonneg T κ y hκ.2))
   nlinarith
 
-theorem weightedPrimitive_uniform_jets {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K)
-    (hKJ : K ⊆ J) {B : Field} (hB : ContDiffOn ℝ ∞ B (logDomain J hJ).carrier)
-    (T0 : ℝ) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T ∈ Ioc (0 : ℝ) T0, ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ => weightedPrimitive T κ B (y, ξ)) η| ≤
-          M * y * activation T κ y := by
-  apply width_uniform_jet_bound hJ hK hKJ (primitiveErrorFactor_smooth hJ hB)
-  intro κ T hT u η _
-  exact weightedPrimitive_scaled_factor hT.ne' κ B u η
 
-theorem controlled_uniform_jets {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K)
-    (hKJ : K ⊆ J) {F : Field} (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier)
-    (T0 : ℝ) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T ∈ Ioc (0 : ℝ) T0, ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ => controlled T κ F (y, ξ) - F (y, ξ)) η| ≤
-          M * y * activation T κ y := by
-  apply width_uniform_jet_bound hJ hK hKJ (controlledErrorFactor_smooth hJ hF)
-  intro κ T hT u η hη
-  exact controlled_scaled_factor hT.ne' κ hJ hF u hη
 
-theorem angular_relative_uniform_jets {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K)
-    (hKJ : K ⊆ J) {L : Field} (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (T0 : ℝ) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T ∈ Ioc (0 : ℝ) T0, ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ =>
-          activatedAngular T κ L (y, ξ) / referenceAngular L (y, ξ) - 1) η| ≤
-            M * y * activation T κ y := by
-  apply width_uniform_jet_bound hJ hK hKJ (relativeErrorFactor_smooth hJ hL)
-  intro κ T hT u η hη
-  exact angular_relative_scaled_factor hT.ne' κ hJ hL u hη
 
-theorem angular_uniform_jets {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K)
-    (hKJ : K ⊆ J) {L : Field} (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (T0 : ℝ) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T ∈ Ioc (0 : ℝ) T0, ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ =>
-          activatedAngular T κ L (y, ξ) - referenceAngular L (y, ξ)) η| ≤
-            M * y * activation T κ y := by
-  apply width_uniform_jet_bound hJ hK hKJ (angularErrorFactor_smooth hJ hL)
-  intro κ T hT u η hη
-  exact angular_scaled_factor hT.ne' κ hJ hL u hη
 
 /-! ## Width-uniform factors for the actual five histories -/
 
@@ -504,11 +462,6 @@ theorem etaD_scaledDistance_mul (H : ScaledPoint → ℝ) (q : ScaledPoint) :
     etaD (fun z => scaledDistance z * H z) q = scaledDistance q * etaD H q := by
   exact deriv_const_mul_field (scaledDistance q)
 
-theorem etaD_rescale {J : Set ℝ} (hJ : IsOpen J) {F : Field}
-    (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) {q : ScaledPoint}
-    (hq : q ∈ scaledDomain J) : etaD (rescale F) q = rescale (parameterPartial F) q :=
-  (parameterPartial_hasDerivAt (logDomain J hJ) hF
-    (p := (q.1.2 * q.2.1, q.2.2)) ⟨mem_univ _, hq.2.2⟩).deriv
 
 theorem etaD_congr {J : Set ℝ} (hJ : IsOpen J) {H G : ScaledPoint → ℝ}
     (h : ∀ q ∈ scaledDomain J, H q = G q) {q : ScaledPoint} (hq : q ∈ scaledDomain J) :
@@ -684,39 +637,6 @@ theorem diagonal_history_scaled_factor {T δ0 : ℝ} (hT : 0 < T)
     reference_histories_independent N hT hTR hδ0 hδ0R P0 hP0 r hη hx hxT hxδ0]
   exact fixed_history_scaled_factor N hT hδ0 hδ0R κ P0 hP0 r u hη
 
-theorem diagonal_histories_uniform_jets {δ0 : ℝ} (hδ0 : 0 < δ0)
-    (hδ0R : 2 * δ0 < rampLimit) (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    {K : Set ℝ} (hK : IsCompact K) (hKJ : K ⊆ parameterInterval) (r : HistoryRow) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T (hT : T ∈ Ioc (0 : ℝ) δ0) (hTR : 2 * T < rampLimit),
-      ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ =>
-          profileHistory (FromReference.histories N hT.1 hT.1 hTR κ P0 hP0) r (radius N.endpoint y, ξ) -
-            profileHistory (N.histories hT.1 hTR P0 hP0) r (radius N.endpoint y, ξ)) η| ≤
-              M * y * activation T κ y := by
-  obtain ⟨M, hM, hb⟩ := history_uniform_jets N.endpoint (fun _ _ => 0)
-    parameterInterval_open hK hKJ (FromReference.refLog_smooth N hδ0 hδ0R)
-      (FromReference.refAxial_smooth N hδ0 hδ0R) δ0 r n
-  refine ⟨M, hM, ?_⟩
-  intro T hT hTR κ hκ y hy η hη
-  let u := y / T
-  have hu : u ∈ Icc (0 : ℝ) 1 :=
-    ⟨div_nonneg hy.1 hT.1.le, (div_le_one hT.1).2 hy.2⟩
-  have hTu : T * u = y := by dsimp only [u]; field_simp [hT.1.ne']
-  have heq : (fun ξ =>
-      profileHistory (FromReference.histories N hT.1 hT.1 hTR κ P0 hP0) r (radius N.endpoint y, ξ) -
-        profileHistory (N.histories hT.1 hTR P0 hP0) r (radius N.endpoint y, ξ)) =ᶠ[𝓝 η]
-      (fun ξ => logHistory N.endpoint (fun _ _ => 0)
-          (activatedAngular T κ (FromReference.refLog N δ0))
-          (controlled T κ (FromReference.refAxial N δ0)) r (y, ξ) -
-        logHistory N.endpoint (fun _ _ => 0) (referenceAngular (FromReference.refLog N δ0))
-          (FromReference.refAxial N δ0) r (y, ξ)) := by
-    filter_upwards [parameterInterval_open.mem_nhds (hKJ hη)] with ξ hξ
-    rw [← hTu]
-    exact (diagonal_history_scaled_factor N hT.1 hTR hδ0 hδ0R hT.2 κ P0 hP0 r hu hξ).trans
-      (history_scaled_factor hT.1.ne' κ N.endpoint (fun _ _ => 0) parameterInterval_open
-        (FromReference.refLog_smooth N hδ0 hδ0R) (FromReference.refAxial_smooth N hδ0 hδ0R) r u hξ).symm
-  rw [heq.iteratedDeriv_eq n]
-  exact hb T hT κ hκ y hy η hη
 
 end NaturalOverlap
 

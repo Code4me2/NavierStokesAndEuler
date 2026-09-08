@@ -161,16 +161,5 @@ theorem coordinateDerivative_reconstruct (m : Icc (0 : ℝ) T → E)
   coordinateDerivative_reconstruct_of_range T hT Q Q₁ c hc hQ hd (u : TimeLp T E)
     (transverse_range T hT Q m hRange u)
 
-include hd in
-/-- The transverse physical derivative has its actual coordinate expression a.e. -/
-theorem coordinateDerivative_reconstruct_ae (m : Icc (0 : ℝ) T → E)
-    (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ x : U, Q t x = η)
-    (u : transverseDerivatives T hT m) :
-    ∀ᵐ t ∂timeMeasure T,
-      (u : TimeLp T E) t =
-        extendPath T hT Q₁ t (coordinatePrimitive T hT Q c hc hQ (u : TimeLp T E) t) +
-        extendPath T hT Q t (coordinateDerivative T hT Q Q₁ c hc hQ (u : TimeLp T E) t) :=
-  coordinateDerivative_reconstruct_ae_of_range T hT Q Q₁ c hc hQ hd (u : TimeLp T E)
-    (transverse_range T hT Q m hRange u)
 
 end EulerTransverseCoordinateRegularity

@@ -109,21 +109,6 @@ def transportField (q : ℕ) (b : LiftDomain period → Domain 4) (e : LiftDomai
     LiftDomain period → Domain q :=
   ∑ i : Fin 4, (fun x => b x i • fieldDerivative period (standardDirection i) e x)
 
-theorem transport_all_memLp (q : ℕ) (b : LiftDomain period → Domain 4) (e : LiftDomain period → Domain q)
-    (hb : ∀ x, ContDiff ℝ ∞ (localFieldLift period b x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x))
-    (hbL2 : ∀ j, ∀ w : Fin j → Fin 4, MemLp (iteratedFieldDerivative period w b) 2 (liftMeasure period))
-    (heL2 : ∀ j, ∀ w : Fin j → Fin 4, MemLp (iteratedFieldDerivative period w e) 2 (liftMeasure period)) :
-    ∀ j, ∀ w : Fin j → Fin 4,
-      MemLp (iteratedFieldDerivative period w (transportField period q b e)) 2 (liftMeasure period) := by
-  apply sum_all_memLp period Finset.univ
-  · intro i _ x
-    exact (postcomp_smooth period (coordinate 4 i) b hb x).smul (fieldDerivative_smooth period _ e he x)
-  · intro i _
-    exact product_all_memLp period q (coordinate 4 i ∘ b) _
-      (postcomp_smooth period _ b hb) (fieldDerivative_smooth period _ e he)
-      (fun j w => postcomp_word_memLp period (show j ≤ j by omega) _ b hb (fun r _ v => hbL2 r v) w)
-      (derivative_all_memLp period e heL2 i)
 
 /-- The actual transport source has a single derivative on the transported H⁶ block. -/
 theorem transport_wordSobolevNorm_bound (q n : ℕ)

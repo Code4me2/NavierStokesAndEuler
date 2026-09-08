@@ -3,7 +3,7 @@ import Euler.SmoothTimeFieldComposition
 import Euler.SmoothTimeFieldBilinear
 import Euler.SmoothTimeFieldAlgebra
 import Euler.SmoothTimeFieldTimeJets
-import Euler.SmoothTimeFieldDerivativeBounds
+import Euler.SmoothTimeField
 
 /-! Actual deformation, first time derivative, and second time derivative
 as smooth bounded coefficient paths. Every spatial jet is continuous in
@@ -100,18 +100,6 @@ theorem velocityCoefficient_time : SmoothTimeField.TimeDerivative T hT
   rw [accelerationCoefficient_apply]
   exact velocityFamily_time_derivative T hT A A₁ htime x t
 
-theorem deformationCoefficient_time : SmoothTimeField.TimeDerivative T hT
-    (deformationCoefficient T hT A B R hB hR hsmall hb)
-    (deformationTimeCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁) := by
-  have hd := SmoothTimeField.TimeDerivative.derivative T hT _ _
-    (displacementCoefficient_time T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁)
-  intro t x
-  exact (hd t x).const_add (ContinuousLinearMap.id ℝ E)
 
-theorem deformationTimeCoefficient_time : SmoothTimeField.TimeDerivative T hT
-    (deformationTimeCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁)
-    (deformationSecondCoefficient T hT A B R hB hR hsmall hb A₁) :=
-  SmoothTimeField.TimeDerivative.derivative T hT _ _
-    (velocityCoefficient_time T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁)
 
 end EulerSmoothBanachFlow

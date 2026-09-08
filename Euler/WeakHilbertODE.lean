@@ -74,17 +74,6 @@ theorem lipschitzOnWith_of_dense_scalar_derivative
   have hb := (lipschitzOnWith_iff_norm_sub_le.mp (hscalar φ hφ)) ht hs
   simpa only [inner_sub_right, NNReal.coe_mul, coe_nnnorm, mul_right_comm] using hb
 
-/-- Strong continuity follows from weak scalar equations with uniformly
-bounded derivatives, including at the endpoints. -/
-theorem continuousOn_of_dense_scalar_derivative
-    {D : Set H} (hD : Dense D) {u : ℝ → H} {a c : ℝ} (hac : a < c)
-    (C : ℝ≥0)
-    (hcont : ∀ φ ∈ D, ContinuousOn (fun t => inner ℝ φ (u t)) (Icc a c))
-    (hderiv : ∀ φ ∈ D, ∀ t ∈ Ioo a c,
-      ∃ d : ℝ, HasDerivAt (fun s => inner ℝ φ (u s)) d t ∧
-        ‖d‖ ≤ (C : ℝ) * ‖φ‖) :
-    ContinuousOn u (Icc a c) :=
-  (lipschitzOnWith_of_dense_scalar_derivative hD hac C hcont hderiv).continuousOn
 
 /-- A bounded vector right-hand side provides the scalar derivative bounds. -/
 theorem lipschitzOnWith_of_dense_weak_equation
@@ -117,21 +106,6 @@ theorem sub_eq_integral_of_dense_pairing
   rw [inner_sub_right, hweak φ hφ]
   exact (innerSL ℝ φ).intervalIntegral_comp_comm hb
 
-/-- Scalar integral identities supply strong continuity without a prior
-strong measurability or continuity assumption on the path itself. -/
-theorem continuousOn_of_dense_integral_equation
-    {D : Set H} (hD : Dense D) {u b : ℝ → H} {a c : ℝ}
-    (hb : IntervalIntegrable b volume a c)
-    (hweak : ∀ t ∈ Icc a c, ∀ φ ∈ D,
-      inner ℝ φ (u t) - inner ℝ φ (u a) = ∫ s in a..t, inner ℝ φ (b s)) :
-    ContinuousOn u (Icc a c) := by
-  have hprimitive : ContinuousOn (fun t => ∫ s in a..t, b s) (Icc a c) :=
-    (intervalIntegral.continuousOn_primitive_interval' hb left_mem_uIcc).mono Icc_subset_uIcc
-  apply (continuousOn_const.add hprimitive).congr
-  intro t ht
-  have htint := hb.mono_set (uIcc_subset_uIcc_left (Icc_subset_uIcc ht))
-  have heq := sub_eq_integral_of_dense_pairing hD htint (hweak t ht)
-  exact (sub_eq_iff_eq_add.mp heq).trans (add_comm _ _)
 
 /-- Continuous right-hand sides give a strong derivative of a path satisfying
 the integral equation on dense tests, including one-sided endpoint derivatives. -/

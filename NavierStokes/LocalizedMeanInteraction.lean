@@ -293,33 +293,7 @@ theorem uniform_constant {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
   obtain ⟨A, hA, p, hb⟩ := hf.bounds m
   exact ⟨A, hA, p, fun _ => hb⟩
 
-/-- A common coefficient estimated uniformly on every native copy
-patch is estimated on their union with the very same constants. -/
-theorem local_iUnion {J : Type*} [Nonempty J] {s : StripData D}
-    {C : ℕ → I → J → Set D} {w : ℕ → I → D → ℝ} {α : ℝ}
-    {f : ℕ → I → D → E}
-    (hf : LocalClass s (fun (n : ℕ) (p : I × J) => C n p.1 p.2)
-      (fun n p => w n p.1) α (fun n p => f n p.1)) :
-    LocalClass s (fun n l => ⋃ j, C n l j) w α f := by
-  classical
-  refine ⟨fun n l x hx => hf.weight_nonneg n (l, Classical.arbitrary J) x hx, ?_, ?_⟩
-  · intro n l x hx hi
-    obtain ⟨j, hj⟩ := Set.mem_iUnion.mp hi
-    exact hf.smooth n (l, j) x hx hj
-  · intro m
-    obtain ⟨A, hA, p, hb⟩ := hf.bounds m
-    refine ⟨A, hA, p, fun n l x hx hi k hk => ?_⟩
-    obtain ⟨j, hj⟩ := Set.mem_iUnion.mp hi
-    exact hb n (l, j) x hx hj k hk
 
-omit [NormedSpace ℝ D] in
-theorem velocity_zero_germs_of_tsupport (b : CorrectionState.HarmonicBlock D)
-    {C : ℕ → Set D}
-    (hs : ∀ n i j, j ≠ 0 → tsupport (b.velocity n i j) ⊆ C n)
-    (n : ℕ) {x : D} (hx : x ∉ C n) (i : Fin 3) (j : ℤ) (hj : j ≠ 0) :
-    b.velocity n i j =ᶠ[𝓝 x] fun _ => 0 :=
-  PeriodizedWaveBounds.zero_germ_of_support isClosed_closure subset_closure
-    (fun hmem => hx (hs n i j hj hmem))
 
 /-- All constants precede the external label as well as the band.
 Only the actual phase patch carries a normal estimate. -/

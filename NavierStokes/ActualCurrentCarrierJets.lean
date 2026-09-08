@@ -65,8 +65,6 @@ theorem actualCarrier_character
   rw [actualCarrier_phase b hb j l n, ActualParticularBackground.carrier_frequency b hb j l]
   exact harmonic_carrier_eq l n j
 
-theorem paddedCell_eq_phaseCell (n : ℕ) (i : ActualPhaseJetBounds.CopyIndex B N0) :
-    ParticularPaddedBackground.paddedCell n i = ActualPhaseJetBounds.phaseCell n i := rfl
 
 theorem mem_cells_iff (n : ℕ) (i : ActualPhaseJetBounds.CopyIndex B N0) (z : Native) :
     z ∈ ParticularPaddedBackground.cells n i ↔
@@ -160,17 +158,6 @@ theorem phase_positive_jets (m : ℕ) :
   rw [StateReindex.norm_iteratedFDeriv_pull]
   exact hb n i _ ((mem_cells_iff n i z).mp hz) r hr hrm
 
-/-- The displayed physical loss is exactly two inverse powers of epsilon. -/
-theorem weightedPhase_positive_jets_epsilon (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ n (i : ActualPhaseJetBounds.CopyIndex B N0) z,
-      z ∈ ParticularPaddedBackground.cells n i → ∀ r, 1 ≤ r → r ≤ m →
-      ‖iteratedFDeriv ℝ r (weightedPhase i.1 n) z‖ ≤
-        C * ChartScales.S n ^ p * (ChartScales.epsilon ActualPrimary.h n)⁻¹ ^ 2 := by
-  obtain ⟨C,hC,p,hb⟩ := weightedPhase_positive_jets (B := B) (N0 := N0) m
-  refine ⟨C,hC,p,?_⟩
-  intro n i z hz r hr hrm
-  rw [ActualPhaseJetBounds.inverse_epsilon_sq]
-  exact hb n i z hz r hr hrm
 
 theorem weightedPhase_smoothNear_controlPatch (l : Label B N0) (n : ℕ)
     (k : TorusInverse.Frequency) {z : Native}
@@ -179,12 +166,6 @@ theorem weightedPhase_smoothNear_controlPatch (l : Label B N0) (n : ℕ)
   weightedPhase_smoothNear (n := n) (i := (l,k)) (z := z)
     (ActualParticularStageControls.controlPatch_subset_padded l n k hz)
 
-theorem phase_smoothNear_controlPatch (l : Label B N0) (n : ℕ)
-    (k : TorusInverse.Frequency) {z : Native}
-    (hz : z ∈ ActualParticularStageControls.controlPatch l n k) :
-    LocalPhysicalCopyBounds.SmoothNear (phase l n) z :=
-  phase_smoothNear (n := n) (i := (l,k)) (z := z)
-    (ActualParticularStageControls.controlPatch_subset_padded l n k hz)
 
 /-- The quantitative statement on the actual retained current-copy cells.
 The cell hypothesis already supplies activeness; no native-band interior
@@ -198,13 +179,5 @@ theorem weightedPhase_positive_jets_controlPatch (m : ℕ) :
   exact ⟨C,hC,p,fun l n k z hz r hr hrm =>
     hb n (l,k) z (ActualParticularStageControls.controlPatch_subset_padded l n k hz) r hr hrm⟩
 
-theorem phase_positive_jets_controlPatch (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ (l : Label B N0) n k z,
-      z ∈ ActualParticularStageControls.controlPatch l n k → ∀ r, 1 ≤ r → r ≤ m →
-      ‖iteratedFDeriv ℝ r (phase l n) z‖ ≤
-        C * ChartScales.S n ^ p * ChartScales.Q n ^ (-(2 * ActualPrimary.h)) := by
-  obtain ⟨C,hC,p,hb⟩ := phase_positive_jets (B := B) (N0 := N0) m
-  exact ⟨C,hC,p,fun l n k z hz r hr hrm =>
-    hb n (l,k) z (ActualParticularStageControls.controlPatch_subset_padded l n k hz) r hr hrm⟩
 
 end NavierStokes.ActualCurrentCarrierJets

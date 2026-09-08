@@ -902,38 +902,7 @@ theorem exists_nominal_witness {F : OutgoingProfile.Profile} {D : ℝ}
   obtain ⟨W, _hj, _hL, _hC, _hT, hmatch⟩ := hnorm C0 le_rfl
   exact ⟨W, hmatch⟩
 
-theorem exists_nominal_with_small_coefficients {F : OutgoingProfile.Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) (hP : 2 ≤ F.data.core.P)
-    (hh : F.data.h ≤ 1 / 1000) (N : ℕ) :
-    ∃ K : ℝ, 0 < K ∧ ∀ tau : ℝ, 0 < tau →
-      tau ≤ min 1 (NominalProfile.resetSolver.radius / 2) →
-      ∃ W : NominalProfile.Witness F,
-        MatchingBounds W.controls N (tau ^ (N + 1)) ∧
-        JetBounds.FiniteJetBound N (NominalProfile.resetCoefficients F W.controls.debt)
-          (Icc (-1 : ℝ) 1) (K * tau) := by
-  obtain ⟨K, hK, hk⟩ := resetCoefficients_jet_control N
-  refine ⟨K, hK, ?_⟩
-  intro tau htau hmax
-  have ht1 : tau ≤ 1 := hmax.trans (min_le_left _ _)
-  have hpow : tau ^ (N + 1) ≤ tau := by
-    simpa only [pow_one] using
-      pow_le_pow_of_le_one htau.le ht1 (show 1 ≤ N + 1 by omega)
-  have hradius : tau ^ (N + 1) ≤ NominalProfile.resetSolver.radius :=
-    hpow.trans ((hmax.trans (min_le_right _ _)).trans
-      (by linarith [NominalProfile.resetSolver.radius_pos]))
-  obtain ⟨W, hw⟩ := exists_nominal_witness hF hP hh N (pow_pos htau _) hradius
-  refine ⟨W, hw, hk W.controls hw.separation.le tau htau hmax ?_⟩
-  exact fun n hn eta hη => (hw.normalized_jets n hn eta hη).le
 
-theorem nominal_witness_exists {F : OutgoingProfile.Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) (hP : 2 ≤ F.data.core.P)
-    (hh : F.data.h ≤ 1 / 1000) : Nonempty (NominalProfile.Witness F) := by
-  obtain ⟨W, _⟩ := exists_nominal_witness hF hP hh 0
-    (show 0 < NominalProfile.resetSolver.radius / 2 by
-      exact div_pos NominalProfile.resetSolver.radius_pos (by norm_num))
-    (show NominalProfile.resetSolver.radius / 2 ≤ NominalProfile.resetSolver.radius by
-      linarith [NominalProfile.resetSolver.radius_pos])
-  exact ⟨W⟩
 
 end NavierStokes.MatchingDebtBounds
 

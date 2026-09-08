@@ -137,12 +137,6 @@ theorem field_zero_outside (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) (hx : x.1 
   exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
     _ _ (B.velocityPath_supported G t) x hx
 
-theorem derivativeField_zero_outside (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) (hx : x.1 ∉ D.support) :
-    B.derivativeField G t x = 0 := by
-  change pointField P (B.derivativePath G) (B.derivativePath_orbit G) t x = 0
-  rw [pointField_eq_representative]
-  exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
-    _ _ (B.derivativePath_supported G t) x hx
 
 omit [CompleteSpace U] in
 theorem normal_ne_zero (t : Icc (0 : ℝ) D.T) (x : Space) : D.normal.field t x ≠ 0 := by

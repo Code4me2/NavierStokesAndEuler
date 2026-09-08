@@ -25,14 +25,7 @@ noncomputable def chartOuter : ℝ := 2 * PrimaryTargetBounds.rightRadius Actual
 theorem chartInner_pos : 0 < chartInner :=
   div_pos (PrimaryTargetBounds.leftRadius_pos ActualPrimary.nominal) (by norm_num)
 
-theorem chartOuter_pos : 0 < chartOuter :=
-  mul_pos (by norm_num) (PrimaryTargetBounds.rightRadius_pos ActualPrimary.nominal)
 
-theorem chartInner_lt_chartOuter : chartInner < chartOuter := by
-  have ha := PrimaryTargetBounds.leftRadius_pos ActualPrimary.nominal
-  have hab := PrimaryTargetBounds.radii_ordered ActualPrimary.nominal
-  dsimp [chartInner, chartOuter]
-  linarith
 
 theorem band_q_comparison (n : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n) :
@@ -126,17 +119,5 @@ theorem point_profileRadius (n : ℕ) {a : ℝ} (ha : 0 < a) (i : PolarCharts.In
       AxisymmetricResidual.pack_zero, AxisymmetricResidual.pack_two]
   rw [he, ActualCurrentWaveSupport.nativePoint_profileRadius n ht]
 
-theorem point_mem_closed_window (n : ℕ) {a : ℝ} (ha : 0 < a) (i : PolarCharts.Index)
-    {w : SpaceTime} (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n)
-    (hc : PhysicalGraphBounds.scaledRadial n w ∈ PolarCharts.chartDomain a i)
-    (hr : ActualCurrentWaveSupport.profileRadius ActualPrimary.h w ∈
-      Icc (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
-        (PrimaryTargetBounds.rightRadius ActualPrimary.nominal)) :
-    point a i n w ∈ ActualCurrentParticularPhysical.nativeDomain ∧
-      ActualWaveRegularityData.radius (ActualWaveRegularity.particularChart.symm (point a i n w)) ∈
-        Icc (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
-          (PrimaryTargetBounds.rightRadius ActualPrimary.nominal) := by
-  refine ⟨point_mem_nativeDomain n ha i hw hc, ?_⟩
-  rwa [point_profileRadius n ha i hw.1 hc]
 
 end NavierStokes.CurrentModeGeometry

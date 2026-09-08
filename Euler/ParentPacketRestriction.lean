@@ -29,21 +29,12 @@ def restrictTime : Parent where
   initial := G.initial
   determinant t x := G.determinant (initialInclusion G.T S hST t) x
 
-theorem restrictTime_frame (t : Icc (0 : ℝ) S) (x : Space) :
-    (G.restrictTime S hS hST).frame.field t x=G.frame.field (initialInclusion G.T S hST t) x := by
-  erw [frame_apply]
 
 theorem restrictTime_first (t : Icc (0 : ℝ) S) (x : Space) :
     (G.restrictTime S hS hST).first.field t x=G.first.field (initialInclusion G.T S hST t) x := by
   erw [first_apply]
 
-theorem restrictTime_second (t : Icc (0 : ℝ) S) (x : Space) :
-    (G.restrictTime S hS hST).second.field t x=G.second.field (initialInclusion G.T S hST t) x := by
-  erw [second_apply]
 
-theorem restrictTime_inverse (t : Icc (0 : ℝ) S) (x : Space) :
-    (G.restrictTime S hS hST).inverse.field t x=G.inverse.field (initialInclusion G.T S hST t) x := by
-  erw [inverse_apply]
 
 theorem restrictTime_strain (t : Icc (0 : ℝ) S) (x : Space) :
     (G.restrictTime S hS hST).strain.field t x=G.strain.field (initialInclusion G.T S hST t) x := by

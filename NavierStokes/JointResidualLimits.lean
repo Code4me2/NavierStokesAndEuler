@@ -164,13 +164,6 @@ theorem past_filter_neBot (x : Space) :
   rw [past_filter]
   infer_instance
 
-/-- The chosen tensors agree with every actual local extension, so they do
-not depend on the choice used to construct the family. -/
-theorem boundaryLimits_eq_extension {f : SpaceTime → V} (hzero : VanishingJointJets f)
-    (hext : AwayExtensions f) {x : Space} (e : OneSidedExtension f x) (n : ℕ) :
-    boundaryLimits f hext x n = iteratedFDeriv ℝ n e.value (1, x) := by
-  let := past_filter_neBot x
-  exact tendsto_nhds_unique (boundaryLimits_joint hzero hext n x) (e.jet_tendsto n)
 
 theorem boundaryLimits_independent {f : SpaceTime → V} (hzero : VanishingJointJets f)
     (h₁ h₂ : AwayExtensions f) : boundaryLimits f h₁ = boundaryLimits f h₂ := by
@@ -186,21 +179,6 @@ theorem iteratedFDeriv_eqOn_past {f g : SpaceTime → V}
     ← iteratedFDerivWithin_of_isOpen n (SpacetimeEndpoint.openPast_isOpen 1) hz]
   exact iteratedFDerivWithin_congr h hz n
 
-/-- Values at and after time one, including an arbitrary zero extension,
-do not change the boundary family when the past functions agree. -/
-theorem boundaryLimits_eq_of_eqOn_past {f g : SpaceTime → V}
-    (hf : VanishingJointJets f) (hg : VanishingJointJets g)
-    (ef : AwayExtensions f) (eg : AwayExtensions g)
-    (h : EqOn f g (SpacetimeEndpoint.openPast 1)) :
-    boundaryLimits f ef = boundaryLimits g eg := by
-  funext x n
-  let := past_filter_neBot x
-  have hjet : iteratedFDeriv ℝ n f =ᶠ[𝓝[SpacetimeEndpoint.openPast 1] (1, x)]
-      iteratedFDeriv ℝ n g := by
-    filter_upwards [self_mem_nhdsWithin] with y hy
-    exact iteratedFDeriv_eqOn_past h n hy
-  exact tendsto_nhds_unique ((boundaryLimits_joint hf ef n x).congr' hjet)
-    (boundaryLimits_joint hg eg n x)
 
 /-- Actual derivative recurrence on the open past; the jet family is not
 independent input data. -/
@@ -276,19 +254,7 @@ theorem extendedResidual_boundary_jets {f : SpaceTime → V}
   SpacetimeEndpoint.boundary_jets_eq_limits (J := ftaylorSeries ℝ f)
     (fun _ _ => rfl) (actual_derivative_recurrence hf) (boundaryLimits_locallyUniform hzero hext) n x
 
-theorem extendedResidual_flat_at_origin {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) (n : ℕ) :
-    iteratedFDerivWithin ℝ n (extendedResidual f hext)
-      (SpacetimeEndpoint.closedPast 1) ((1 : ℝ), (0 : Space)) = 0 := by
-  rw [extendedResidual_boundary_jets hf hzero hext, boundaryLimits_zero]
 
-theorem extendedResidual_unit_periods {f : SpaceTime → V}
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f)
-    (hperiod : ProblemStatement.UnitSpatialPeriodsOn (Iio (1 : ℝ)) f) :
-    ProblemStatement.UnitSpatialPeriodsOn univ (extendedResidual f hext) :=
-  SpacetimeEndpoint.unit_periods_joint_extension (J := ftaylorSeries ℝ f)
-    (fun _ _ => rfl) (boundaryLimits_locallyUniform hzero hext 0) hperiod
 
 /-- The limit portion of the `CandidateFromLimits` input is constructed
 solely from actual joint jet limits and one-sided local extensions. -/
@@ -303,21 +269,6 @@ theorem exists_residual_limits {f : SpaceTime → V}
   ⟨boundaryLimits f hext, boundaryLimits_zero f hext,
     boundaryLimits_joint hzero hext, boundaryLimits_locallyUniform hzero hext⟩
 
-/-- Complete endpoint implication, including derived smoothness and exact
-compatibility of all boundary tensors. -/
-theorem exists_smooth_compatible_limits {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) :
-    ∃ L : Space → FormalMultilinearSeries ℝ SpaceTime V,
-      (∀ n : ℕ, L 0 n = 0) ∧
-      (∀ n : ℕ, TendstoLocallyUniformly (fun t x => iteratedFDeriv ℝ n f (t, x))
-        (fun x => L x n) (𝓝[<] (1 : ℝ))) ∧
-      (∀ n : ℕ, ContDiff ℝ ∞ (fun x => L x n)) ∧
-      (∀ n : ℕ, ∀ x : Space, HasFDerivAt (fun y => L y n)
-        ((L x (n + 1)).curryLeft.comp (ContinuousLinearMap.inr ℝ ℝ Space)) x) :=
-  ⟨boundaryLimits f hext, boundaryLimits_zero f hext,
-    boundaryLimits_locallyUniform hzero hext, boundaryLimits_smooth hf hzero hext,
-    boundaryLimits_hasFDerivAt hf hzero hext⟩
 
 end ActualJets
 

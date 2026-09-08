@@ -183,14 +183,6 @@ theorem repair_exact (a l u d : Fin n → ℝ) (ha : Injective a)
   · intro j _
     exact (integrable_power_mul_bump (a i) (l j) (u j) (hl j) (hlu j)).const_mul _
 
-/-- Existence from exponents and intervals alone, with an actual function witness. -/
-theorem exists_smooth_compact_repair (a l u d : Fin n → ℝ) (ha : Injective a)
-    (hl : ∀ j, 0 < l j) (hlu : ∀ j, l j < u j)
-    (hsep : ∀ i j, i < j → u i ≤ l j) :
-    ∃ f : ℝ → ℝ, ContDiff ℝ ∞ f ∧ HasCompactSupport f ∧
-      tsupport f ⊆ ⋃ j, Ioo (l j) (u j) ∧ ∀ i, (∫ t, t ^ a i * f t) = d i :=
-  ⟨repair a l u d, repair_contDiff a l u d, repair_hasCompactSupport a l u d hlu,
-    repair_tsupport_subset_open a l u d hlu, repair_exact a l u d ha hl hlu hsep⟩
 
 theorem repair_add (a l u d e : Fin n → ℝ) :
     repair a l u (d + e) = repair a l u d + repair a l u e := by
@@ -224,9 +216,6 @@ theorem continuous_repair_eval (a l u : Fin n → ℝ) (t : ℝ) :
   intro k _
   exact continuous_const.mul (continuous_apply k)
 
-/-- Continuity in the pointwise function topology; the later jet bounds are stronger. -/
-theorem continuous_repair (a l u : Fin n → ℝ) : Continuous (repair a l u) :=
-  continuous_pi (continuous_repair_eval a l u)
 
 /-- Decomposition into the finite family of repairs of coordinate debts. -/
 theorem repair_eq_sum_coordinate (a l u d : Fin n → ℝ) :

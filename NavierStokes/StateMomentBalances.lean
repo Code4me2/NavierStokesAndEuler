@@ -276,11 +276,6 @@ theorem meanBar_dr (o : MeanIncrementBounds.Operators (Lift S))
   simpa only [MeanIncrementBounds.Operators.radialDiv, zero_smul, add_zero] using
     meanBar_radialDiv o hradius hprofile f hf hp 0
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem meanBar_band_mul (c : ℕ → ℝ) (f : ScalarField (Lift S)) :
-    meanBar (fun n x => c n * f n x) = fun n x => c n * meanBar f n x := by
-  funext n x
-  exact average_const_mul (c n) (f n) (x.1, x.2.1)
 
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem average_radial_mul (c : ℝ → ℝ) (f : Lift S → ℝ) (x : ℝ × S) :
@@ -576,13 +571,7 @@ theorem balance_axial (ε : ℝ) (z t : S) (u R Z T : ℝ × S → ℝ) :
   funext x
   simp [balance, axialBalanceAlong, IntegratedMeanBalances.axialRadialViscosity]
 
-theorem angularBalanceAlong_eq_integrated (ε : ℝ) (u R Z T : IntegratedMeanBalances.MeanField) :
-    angularBalanceAlong ε (0, 1) (1, 0) u R Z T =
-      IntegratedMeanBalances.angularBalance ε u R Z T := rfl
 
-theorem axialBalanceAlong_eq_integrated (ε : ℝ) (u R Z p T : IntegratedMeanBalances.MeanField) :
-    axialBalanceAlong ε (0, 1) (1, 0) u R (fun x => Z x + p x) T =
-      IntegratedMeanBalances.axialBalance ε u R Z p T := rfl
 
 section MomentIntegration
 
@@ -789,9 +778,6 @@ noncomputable def pressureRecipe (r : ReconstructionData) (c : Context (Lift S))
   fun n => PressureStream.meanPressure r.exponent r.inner r.outer (r.frequency n)
     r.inner_lt_outer r.radialDirection (u.gr c n)
 
-theorem pressure_recipe_of_fixed (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) (h : reconstructPressure r c u = u) : u.pressure = pressureRecipe r c u := by
-  exact (congrArg State.pressure h).symm
 
 theorem pressureRecipe_shell (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent)
     (c : Context (Lift S)) (u : State (Lift S))
@@ -884,17 +870,6 @@ theorem average_neg (f : Lift S → ℝ) (x : ℝ × S) :
     PressureStream.torusAverage (fun y => -f y) x = -PressureStream.torusAverage f x := by
   simp only [PressureStream.torusAverage, PressureStream.torusInner, intervalIntegral.integral_neg]
 
-theorem pressureAlias_state_average_zero (r : ReconstructionData)
-    (ha : 0 < r.inner) (hd : 0 < r.exponent) (c : Context (Lift S)) (u : State (Lift S))
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c))
-    (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n)) (n : ℕ) (x : ℝ × S) (i : Fin 3) :
-    PressureStream.torusAverage (fun y => CorrectionState.pressureAlias r c u n (y, 0) i) x = 0 := by
-  fin_cases i
-  · change PressureStream.torusAverage (fun y => -PressureStream.pressureAlias r.exponent r.inner r.outer
-      (r.frequency n) r.inner_lt_outer r.radialDirection (u.gr c n) y) x = 0
-    rw [average_neg, pressureAlias_average_zero r ha hd c u hg pg, neg_zero]
-  · simp [CorrectionState.pressureAlias, PressureStream.torusAverage, PressureStream.torusInner]
-  · simp [CorrectionState.pressureAlias, PressureStream.torusAverage, PressureStream.torusInner]
 
 theorem axialAlias_periodic (d a b M : ℝ) (v : PressureStream.Plane) (h : ℝ) (n : ℕ)
     (f : Lift S → ℝ) :
@@ -904,28 +879,6 @@ theorem axialAlias_periodic (d a b M : ℝ) (v : PressureStream.Plane) (h : ℝ)
   intro R s Y k
   exact congrArg (fun a : ℝ => a / R) (hp R s Y k)
 
-theorem temporalAlias_average_zero [FiniteDimensional ℝ S]
-    (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent) (h : ℝ)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (hres : DefectIncrementBounds.Shell r.inner r.outer (u.axialResidual c))
-    (pres : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (n : ℕ) (x : ℝ × S) (i : Fin 3) :
-    PressureStream.torusAverage (fun y => temporalAlias r h c u n (y, 0) i) x = 0 := by
-  fin_cases i
-  · simp [temporalAlias, PressureStream.torusAverage, PressureStream.torusInner]
-  · simp [temporalAlias, PressureStream.torusAverage, PressureStream.torusInner]
-  · change PressureStream.torusAverage (fun y => -TemporalMeanUpdate.fastDerivative h n
-      (TemporalMeanUpdate.axialAlias r.exponent r.inner r.outer (r.frequency n)
-        r.radialDirection h n (u.axialResidual c n)) y) x = 0
-    rw [average_neg]
-    change -PressureStream.torusAverage (fun y => ChartScales.timeCoefficient h n *
-      fderiv ℝ (TemporalMeanUpdate.axialAlias r.exponent r.inner r.outer (r.frequency n)
-        r.radialDirection h n (u.axialResidual c n)) y (0, (0, TorusInverse.vector .temporal))) x = 0
-    rw [AuxiliaryAverage.average_const_mul,
-      AuxiliaryAverage.average_torusDerivative
-        (TemporalMeanUpdate.axialAlias_smooth ha r.inner_lt_outer hd r.radialDirection h n
-          (hres.smooth n) (pres n) (hres.supported n))
-        (axialAlias_periodic _ _ _ _ _ _ _ _), mul_zero, neg_zero]
 
 theorem pressureRecipe_periodic (r : ReconstructionData) (c : Context (Lift S))
     (u : State (Lift S)) (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n)) :
@@ -1117,23 +1070,9 @@ theorem state_axial_bump_improvedClass (P : Patch) {cL cR : ℝ}
     (u.axialResidual c) (axialDebtPotential r c u) z hD
   exact state_axial_moment r ha hd ε fast z t v c u ho H hg pg hrecipe hmass.2
 
-theorem debt_component_pressure (c : Context (Lift S)) (u : State (Lift S)) :
-    (fun n s => debt c u n s 0) = pressureDefect c u := rfl
 
-theorem debt_component_angular (c : Context (Lift S)) (u : State (Lift S)) :
-    (fun n s => debt c u n s 1) = thetaDefect c u := rfl
 
-theorem debt_component_axial (c : Context (Lift S)) (u : State (Lift S)) :
-    (fun n s => debt c u n s 2) = axialDefect c u := rfl
 
-theorem defectBounds_components {ε slow : ℕ → ℝ}
-    {hε : ∀ n, 0 < ε n} {hε1 : ∀ n, ε n ≤ 1} {hslow : ∀ n, 1 ≤ slow n}
-    {σ : ℝ} {c : Context (Lift S)} {u : State (Lift S)}
-    (hD : DefectBounds (slowStripData ε slow hε hε1 hslow) σ c u) :
-    UnweightedClass (slowStripData ε slow hε hε1 hslow) (1 + σ) (pressureDefect c u) ∧
-    UnweightedClass (slowStripData ε slow hε hε1 hslow) (1 + σ) (thetaDefect c u) ∧
-    UnweightedClass (slowStripData ε slow hε hε1 hslow) (1 + σ) (axialDefect c u) :=
-  ⟨hD 0, hD 1, hD 2⟩
 
 end ClassBounds
 

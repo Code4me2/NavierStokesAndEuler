@@ -399,18 +399,6 @@ theorem log_remaining {a b X : ℝ} (ha : 0 < a) (hX : X ∈ Ioo a b) :
     Real.log_div hb.ne' hx.ne']
   ring
 
-/-- The weight is exactly the manuscript's two logarithmic-edge exponential,
-with its clipped inverse-edge power. -/
-theorem logWeight_formula {a b X : ℝ} (ha : 0 < a) (hX : X ∈ Ioo a b)
-    (cL cR : ℝ) (m : ℕ) :
-    logWeight cL cR a b m X =
-      Real.exp (-cL / (Real.log (X / a)) ^ 2 - cR / (Real.log (b / X)) ^ 2) /
-        (min 1 (min (Real.log (X / a)) (Real.log (b / X)))) ^ m := by
-  have hp := logPosition_mem ha hX
-  rw [logWeight, weight, zeta, delta, edge_of_pos cL hp.1,
-    edge_of_pos cR (sub_pos.mpr hp.2), log_remaining ha hX]
-  rw [← Real.exp_add]
-  simp only [logPosition, neg_div, sub_eq_add_neg]
 
 def expCoordinate (a s : ℝ) : ℝ := a * Real.exp s
 
@@ -696,25 +684,6 @@ theorem transport_compact_primitive_uniform
   rw [compactIntegral_eq_radialCompactPrimitive χ hf hs]
   exact hbound M v f hf A hA hb z hz
 
-/-- The cutoff itself is the explicit smooth transition constructed in
-`TransportPrimitive`; there is no cutoff-existence hypothesis. -/
-theorem canonical_transport_compact_uniform
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b)
-    (hcL : 0 < cL) (hcR : 0 < cR) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : E) (f : ℝ × E → V), Continuous f →
-      RadialAlias.RadiallySupported a b f → ∀ A : ℝ, 0 ≤ A →
-      (∀ X ∈ Ioo a b, ∀ Y : E, ‖f (X, Y)‖ ≤ A * logWeight cL cR a b m X) →
-      ∀ z : ℝ × E, z.1 ∈ Ioo a b →
-        ‖TransportPrimitive.compactIntegral (TransportPrimitive.interiorCutoff a b) M v f z‖ ≤
-          K * A * logWeight cL cR a b m z.1 := by
-  apply transport_compact_primitive_uniform ha
-    (c := (2 * a + b) / 3) (d := (a + 2 * b) / 3)
-    (by linarith) (by linarith) (by linarith) hcL hcR m
-  · intro X
-    have h := TransportPrimitive.cutoff_mem_Icc ((2 * a + b) / 3) ((a + 2 * b) / 3) X
-    exact (abs_of_nonneg h.1).le.trans h.2
-  · exact fun X hX => TransportPrimitive.interiorCutoff_zero hab hX
-  · exact fun X hX => TransportPrimitive.interiorCutoff_one hab hX
 
 /-- The uncorrected past primitive obeys the left weighted estimate uniformly
 in every auxiliary shift. -/
@@ -1081,24 +1050,6 @@ theorem meanClass_canonical_transport
     rw [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α (K * C) p n z hz]
     simpa only [mul_assoc] using hout
 
-/-- The full supported-mean conclusion includes global smoothness and the
-original radial support, as required by the smooth zero-extension convention. -/
-theorem supported_meanClass_canonical_transport
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    (α : ℝ) (M : ℕ → ℝ) (v : ℕ → E) (f : ℕ → ℝ × E → V)
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    (hclass : WeightedClasses.MeanClass
-      (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α f) :
-    let g := fun n => TransportPrimitive.compactIntegral (TransportPrimitive.interiorCutoff a b)
-      (M n) (v n) (f n)
-    (∀ n, ContDiff ℝ ∞ (g n)) ∧
-      (∀ n, RadialAlias.RadiallySupported a b (g n)) ∧
-      WeightedClasses.MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α g := by
-  refine ⟨?_, ?_, meanClass_canonical_transport ha hab hcL hcR ε S hε hεone hS α M v f hf hs hclass⟩
-  · exact fun n => TransportPrimitive.compactIntegral_contDiff
-      (TransportPrimitive.interiorCutoff_contDiff a b) (hf n) (hs n)
-  · exact fun n => TransportPrimitive.canonicalCompact_supported hab (hf n).continuous (hs n)
 
 end LogStrip
 

@@ -112,21 +112,6 @@ theorem coefficients_pos {a b scaleMinus scalePlus m t : ℝ}
   · change 0 < (b * m + a * t) / (2 * a * b * scalePlus)
     exact div_pos (by linarith) (by positivity)
 
-/-- The same strict cone condition is necessary as well as sufficient. -/
-theorem coefficients_pos_iff {a b scaleMinus scalePlus m t : ℝ}
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus) :
-    (∀ i, 0 < coefficients a b scaleMinus scalePlus m t i) ↔ |a * t| < b * m := by
-  constructor
-  · intro hy
-    have hm : 0 < 2 * a * b * scaleMinus := by positivity
-    have hp : 0 < 2 * a * b * scalePlus := by positivity
-    have hnMinus : 0 < b * m - a * t :=
-      (div_pos_iff_of_pos_right hm).mp (by simpa [coefficients] using hy 0)
-    have hnPlus : 0 < b * m + a * t :=
-      (div_pos_iff_of_pos_right hp).mp (by simpa [coefficients] using hy 1)
-    exact abs_lt.mpr ⟨by linarith, by linarith⟩
-  · exact coefficients_pos ha hb hMinus hPlus
 
 /-- The primary velocity amplitudes are positive square roots of the solve. -/
 def amplitudes (a b scaleMinus scalePlus m t : ℝ) : Fin 2 → ℝ :=
@@ -159,23 +144,6 @@ theorem reconstruct_from_amplitudes {a b scaleMinus scalePlus m t : ℝ}
   rw [amplitudes_sq ha hb hMinus hPlus hcone]
   exact reconstruct m t (ne_of_gt ha) (ne_of_gt hb) (ne_of_gt hMinus) (ne_of_gt hPlus)
 
-/-- The square-root viscosity factor and any common partition mask in (29)
-produce precisely the expected factor `ε * mask^2` in covariance. -/
-theorem scaled_primary_covariance {a b scaleMinus scalePlus m t ε : ℝ}
-    (mask : ℝ) (hε : 0 ≤ ε)
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (hcone : |a * t| < b * m) :
-    (signedMatrix a b scaleMinus scalePlus).mulVec
-        (fun i => (Real.sqrt ε * amplitudes a b scaleMinus scalePlus m t i * mask) ^ 2) =
-      (ε * mask ^ 2) • target m t := by
-  have hsq :
-      (fun i => (Real.sqrt ε * amplitudes a b scaleMinus scalePlus m t i * mask) ^ 2) =
-        (ε * mask ^ 2) • (fun i => (amplitudes a b scaleMinus scalePlus m t i) ^ 2) := by
-    funext i
-    simp only [Pi.smul_apply, smul_eq_mul, mul_pow, Real.sq_sqrt hε]
-    ring
-  rw [hsq, Matrix.mulVec_smul, reconstruct_from_amplitudes ha hb hMinus hPlus hcone]
 
 /-- Positive normal magnitude in the manuscript's signed directions. -/
 def normalMagnitude (c u : ℝ) : ℝ := -c * Real.sqrt (1 + u ^ 2)
@@ -202,20 +170,5 @@ theorem cone_of_ratio {c u m t : ℝ} (hm : 0 < m)
       rw [abs_mul, abs_neg, abs_of_pos hs]
     _ < u * m := hcross
 
-/-- The exact signed-slot model has positive primary amplitudes under the
-ratio condition stated in Section 8.3. This asserts no analytic error bound. -/
-theorem positive_primary {c u scaleMinus scalePlus m t : ℝ}
-    (hc : c < 0) (hu : 0 < u) (hm : 0 < m)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (hratio : |c * t / m| < u / Real.sqrt (1 + u ^ 2)) :
-    ∃ velocity : Fin 2 → ℝ,
-      (∀ i, 0 < velocity i) ∧
-      (signedMatrix (normalMagnitude c u) u scaleMinus scalePlus).mulVec
-        (fun i => (velocity i) ^ 2) = target m t := by
-  refine ⟨amplitudes (normalMagnitude c u) u scaleMinus scalePlus m t, ?_, ?_⟩
-  · exact amplitudes_pos (normalMagnitude_pos hc) hu hMinus hPlus
-      (cone_of_ratio hm hratio)
-  · exact reconstruct_from_amplitudes (normalMagnitude_pos hc) hu hMinus hPlus
-      (cone_of_ratio hm hratio)
 
 end NavierStokes.Covariance

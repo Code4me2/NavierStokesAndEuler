@@ -102,12 +102,5 @@ theorem weakHarmonicOn_sub_harmonicPart (χ : Cutoff) (U : Set Space) (z : L2)
     linarith
   exact (l2_test_pairing (z - harmonicPart χ z) (laplacianTest f)).symm.trans hi
 
-/-- A quantitative decomposition constructed from the cutoff and the given solenoidal field. -/
-theorem exists_weak_harmonic_decomposition (χ : Cutoff) (U : Set Space) (z : L2)
-    (hz : z ∈ solenoidalSpace) (hχ : ∀ x ∈ U, χ.field x = 1) :
-    ∃ w : L2, w = harmonicPart χ z ∧ w ∈ solenoidalSpace ∧
-      ‖w‖ ≤ 6 * ‖weakPotential χ z‖ ∧ WeakHarmonicOn U (z - w) :=
-  ⟨harmonicPart χ z, rfl, harmonicPart_solenoidal χ z, harmonicPart_norm_le χ z,
-    weakHarmonicOn_sub_harmonicPart χ U z hz hχ⟩
 
 end EulerMeanHarmonic

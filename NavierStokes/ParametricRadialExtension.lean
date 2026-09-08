@@ -302,21 +302,6 @@ theorem extension_radialJet {S : Set ℝ} (w : ParameterWindow S) {F : Plane →
       (BoundaryAxisJets.axisJet_eq_iteratedDerivWithin hs heven n
         (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hX)).symm
 
-/-- The axis constants and every higher radial jet are preserved exactly. -/
-theorem extension_axis_jets {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    (n : ℕ) {eta : ℝ} (heta : |eta| ≤ w.inner) :
-    iteratedDeriv n (fun Y => extension w F hF he (Y, eta)) 0 =
-      ((2 : ℝ) ^ n * ((n.factorial : ℝ) / ((2 * n).factorial : ℝ))) •
-        iteratedDeriv (2 * n) (fun r => F (r, eta)) 0 := by
-  have hetaS : eta ∈ S :=
-    w.outer_subset (abs_lt.mp (heta.trans_lt w.inner_lt_outer))
-  have hs : ContDiff ℝ ∞ (fun r => F (r, eta)) :=
-    hF.comp_contDiff (contDiff_id.prodMk contDiff_const)
-      (fun _ => ⟨mem_univ _, hetaS⟩)
-  rw [extension_radialJet w hF he n le_rfl heta, mul_zero,
-    BoundaryAxisJets.axisJet_zero hs, smul_smul]
 
 /-- Exterior support is inherited globally in the parameter, not only on
 the interval where exact agreement with the input is required. -/

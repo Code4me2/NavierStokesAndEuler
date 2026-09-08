@@ -47,21 +47,7 @@ theorem differentiableAt_shiftUp (N n : ℕ) (u : ℕ → Domain → E) (z : Dom
   | zero => exact differentiableAt_const (c := (0 : E))
   | succ n => exact differentiableAt_truncate N n u z hu
 
-theorem jet_assemble (N n : ℕ) (u c : ℕ → Domain → E) (z : Domain)
-    (hu : ∀ i ≤ N, DifferentiableAt ℝ (u i) z)
-    (hc : ∀ i ≤ N, DifferentiableAt ℝ (c i) z) :
-    jet (assemble N u c n) z =
-      assemble N (fun i => jet (u i) z) (fun i => jet (c i) z) n := by
-  change jet (truncate N u n+shiftUp N c n) z = _
-  rw [jet_add _ _ z (differentiableAt_truncate N n u z hu)
-      (differentiableAt_shiftUp N n c z hc), jet_truncate, jet_shiftUp]
-  rfl
 
-theorem differentiableAt_assemble (N n : ℕ) (u c : ℕ → Domain → E) (z : Domain)
-    (hu : ∀ i ≤ N, DifferentiableAt ℝ (u i) z)
-    (hc : ∀ i ≤ N, DifferentiableAt ℝ (c i) z) :
-    DifferentiableAt ℝ (assemble N u c n) z :=
-  (differentiableAt_truncate N n u z hu).add (differentiableAt_shiftUp N n c z hc)
 
 /-- The extra degree N+1 is precisely the final divergence corrector in (13). -/
 theorem fieldSum_assemble_from_one (N : ℕ) (κ : ℝ) (u c : ℕ → Domain → E)

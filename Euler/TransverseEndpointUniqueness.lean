@@ -97,19 +97,5 @@ theorem endpointDerivative_eq_of_trial_terminal
 
 variable [CompleteSpace V]
 
-theorem dirichletToNeumann_eq_of_trial_terminal
-    (L₁ L₂ : V →L[ℝ] TimeLp T E)
-    (hL₁ : ∀ Y t, ⟪m t, initialRealPrimitive T (L₁ Y) t⟫_ℝ = 0)
-    (hL₂ : ∀ Y t, ⟪m t, initialRealPrimitive T (L₂ Y) t⟫_ℝ = 0)
-    (hterminal : ∀ Y, initialRealPrimitive T (L₁ Y) T = initialRealPrimitive T (L₂ Y) T) :
-    dirichletToNeumann T hT m H K hK hH hsmall L₁ =
-      dirichletToNeumann T hT m H K hK hH hsmall L₂ := by
-  have he := endpointDerivative_eq_of_trial_terminal T hT m H K hK hH hsmall
-    L₁ L₂ hL₁ hL₂ hterminal
-  apply ContinuousLinearMap.ext
-  intro Y
-  apply ext_inner_right ℝ
-  intro Z
-  rw [dirichletToNeumann_inner, dirichletToNeumann_inner, he]
 
 end EulerTransverseEndpointUniqueness

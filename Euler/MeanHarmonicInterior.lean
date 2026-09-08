@@ -41,9 +41,6 @@ def harmonicInteriorConstant : ℝ :=
   embeddingConstant 3 2 (by norm_num) *
     (1 + (2 * Real.pi) ^ (-2 : ℤ) * (3 * Real.sqrt interiorSecondEnergyConstant))
 
-theorem harmonicInteriorConstant_nonneg : 0 ≤ harmonicInteriorConstant := by
-  unfold harmonicInteriorConstant embeddingConstant
-  positivity
 
 /-- A genuine L²-to-pointwise interior estimate on the unit ball in R³. -/
 theorem harmonic_pointwise_halfBall (h : Space → ℝ) (hh : ContDiff ℝ ∞ h)

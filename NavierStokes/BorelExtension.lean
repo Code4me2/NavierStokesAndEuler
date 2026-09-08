@@ -257,10 +257,6 @@ theorem extension_eq_series (a : ℕ → E) (s : ℝ) :
       (SmoothCutoffs.cutoff ((scale a j : ℝ) * s) * (s ^ j / (j.factorial : ℝ))) • a j := by
   simp only [extension, term, monomial, smul_smul]
 
-theorem summable_iteratedDeriv_terms (a : ℕ → E) (k : ℕ) (s : ℝ) :
-    Summable (fun j : ℕ => iteratedDeriv k (term (scale a j) j (a j)) s) :=
-  .of_norm_bounded (majorant_summable a k)
-    (fun j => norm_iteratedDeriv_term_le_majorant a k j s)
 
 theorem extension_contDiff (a : ℕ → E) : ContDiff ℝ ∞ (extension a) := by
   apply contDiff_tsum (N := ⊤) (v := majorant a)
@@ -324,14 +320,6 @@ omit [CompleteSpace E] in
 theorem extension_hasCompactSupport (a : ℕ → E) : HasCompactSupport (extension a) :=
   isCompact_Icc.of_isClosed_subset isClosed_closure (extension_tsupport a)
 
-/-- The right endpoint jets used by the one-sided gluing theorem are the same
-prescribed jets as the ordinary derivatives. -/
-theorem extension_right_jets (a : ℕ → E) (k : ℕ) :
-    iteratedDerivWithin k (extension a) (Ici 0) 0 = a k := by
-  rw [iteratedDerivWithin_eq_iteratedFDerivWithin,
-    iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici 0)
-      ((extension_contDiff a).of_le (nat_le_infty k)).contDiffAt (mem_Ici.mpr le_rfl)]
-  exact extension_jets a k
 
 /-- Translate the constructed extension to any joining time. -/
 def rightExtension (T : ℝ) (a : ℕ → E) (t : ℝ) : E := extension a (t - T)
@@ -360,20 +348,7 @@ theorem rightExtension_zero_from (T : ℝ) (a : ℕ → E) {t : ℝ} (ht : T + 1
   apply extension_zero_of_one_le_abs
   exact le_trans (by linarith : 1 ≤ t - T) (le_abs_self _)
 
-/-- Borel's jet realization theorem with a fixed compact support, constructed
-from the cutoff series rather than assumed as an extension principle. -/
-theorem exists_smooth_compact_extension (a : ℕ → E) :
-    ∃ f : ℝ → E, ContDiff ℝ ∞ f ∧ tsupport f ⊆ Icc (-1 : ℝ) 1 ∧
-      (∀ k : ℕ, iteratedDeriv k f 0 = a k) :=
-  ⟨extension a, extension_contDiff a, extension_tsupport a, extension_jets a⟩
 
-/-- The interface for gluing to left endpoint limits at an arbitrary time. -/
-theorem exists_smooth_right_extension (T : ℝ) (a : ℕ → E) :
-    ∃ f : ℝ → E, ContDiffOn ℝ ∞ f (Ici T) ∧
-      (∀ k : ℕ, iteratedDerivWithin k f (Ici T) T = a k) ∧
-      (∀ t : ℝ, T + 1 ≤ t → f t = 0) :=
-  ⟨rightExtension T a, (rightExtension_contDiff T a).contDiffOn,
-    rightExtension_right_jets T a, fun _ ht => rightExtension_zero_from T a ht⟩
 
 end Complete
 

@@ -326,44 +326,6 @@ theorem exists_integer_frequency (C ε : ℝ) (hε : 0 < ε) :
   refine ⟨hn1, (div_le_iff₀ (lt_of_lt_of_le zero_lt_one hn1)).mpr ?_⟩
   nlinarith
 
-/-- Interface for combining the derived shear bound with derived stock
-estimates. The actual history construction supplies `hstock` below. -/
-theorem realized_trueCone_of_stock_bound
-    (r : TrueConeRealization a m p₁ p₂ K B) (E U : RadialParameter → ℝ)
-    (hK : IsCompact K)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
-    (hp₁ : ContDiff ℝ ∞ p₁) (hp₂ : ContDiff ℝ ∞ p₂)
-    (hE : ContDiff ℝ ∞ E) (hU : ContDiff ℝ ∞ U)
-    (haK : ∀ p ∈ K, 0 < a p) (hX : ∀ p ∈ K, p.1 ≠ 0)
-    (hE0 : ∀ p ∈ K, E p ≠ 0)
-    (haNom : ∀ p ∈ K, a p = angularShear E p)
-    (hbNom : ∀ p ∈ K, a p * m p = signedAxialShear E U p)
-    (hrelaxed : ∀ p ∈ K, TrueConeLoop.nominalSpeed (a p) (m p) <
-      ConeAlgebra.coneBound (p₁ p + p₂ p * m p) (p₂ p - p₁ p * m p))
-    (q₁ q₂ : ℝ → RadialParameter → ℝ) (Cstock : ℝ)
-    (hstock : ∀ n : ℝ, 1 ≤ n → ∀ p ∈ K,
-      |q₁ n p - p₁ p| ≤ Cstock / n ∧ |q₂ n p - p₂ p| ≤ Cstock / n) :
-    ∃ N : ℕ, 0 < N ∧ ∀ n : ℕ, N ≤ n → ∀ p ∈ K,
-      TrueConeLoop.InTrueCone (q₁ n p) (q₂ n p)
-        (angularShear (fun q => realizedE r E n q.1 q.2) p)
-        (signedAxialShear (fun q => realizedE r E n q.1 q.2)
-          (fun q => realizedU r E U n q.1 q.2) p) := by
-  obtain ⟨Cshear, _, hshear⟩ := realized_shears_uniform_bound r E U hK
-    ha hm hp₂ hE hU haK hX hE0 haNom hbNom
-  obtain ⟨ρ, hρ, hstable⟩ := realized_loop_stable r hK ha hm hp₁ hp₂ haK hrelaxed
-  obtain ⟨N, hN, hlarge⟩ := exists_integer_frequency (max Cstock Cshear) ρ hρ
-  refine ⟨N, hN, ?_⟩
-  intro n hn p hp
-  obtain ⟨hn1, hsmall⟩ := hlarge n hn
-  have hn0 : (0 : ℝ) ≤ n := by positivity
-  have hs := hstock n hn1 p hp
-  have hv := hshear n hn1 p hp
-  have hCs : Cstock / n ≤ ρ :=
-    (div_le_div_of_nonneg_right (le_max_left _ _) hn0).trans hsmall
-  have hCv : Cshear / n ≤ ρ :=
-    (div_le_div_of_nonneg_right (le_max_right _ _) hn0).trans hsmall
-  exact hstable p hp (n * Real.log p.1) _ _ _ _
-    (hs.1.trans hCs) (hs.2.trans hCs) (hv.1.trans hCv) (hv.2.trans hCv)
 
 /-- Quotient perturbations controlled by a common positive denominator. -/
 theorem quotient_perturbation_bound {μ M ε x y e f : ℝ}
@@ -493,22 +455,6 @@ theorem compact_shear_perturbation
   exact ⟨hnew, shear_perturbation_bound hδ hR hM hε hnom hnew hrad hEd hUd
     hedit hEedit hUedit⟩
 
-/-- The primitive construction preserves a single open collar for the
-values and the genuine radial shears, at every frequency. -/
-theorem realized_profiles_boundary_shears
-    (r : TrueConeRealization a m p₁ p₂ K B) (E U : RadialParameter → ℝ)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m) (hBK : B ⊆ K) :
-    ∃ O : Set RadialParameter, IsOpen O ∧ B ⊆ O ∧ ∀ n : ℝ, ∀ p ∈ O,
-      realizedE r E n p.1 p.2 = E p ∧ realizedU r E U n p.1 p.2 = U p ∧
-      angularShear (fun q => realizedE r E n q.1 q.2) p = angularShear E p ∧
-      signedAxialShear (fun q => realizedE r E n q.1 q.2)
-        (fun q => realizedU r E U n q.1 q.2) p = signedAxialShear E U p := by
-  obtain ⟨O, hO, hBO, heq⟩ := realized_profiles_boundary_match r E U ha hm hBK
-  refine ⟨O, hO, hBO, ?_⟩
-  intro n p hp
-  exact ⟨(heq n p.1 p.2 hp).1, (heq n p.1 p.2 hp).2,
-    shears_eq_on_open hO (fun q hq => (heq n q.1 q.2 hq).1)
-      (fun q hq => (heq n q.1 q.2 hq).2) hp⟩
 
 /-- Local agreement along the radial variable suffices for exact shear agreement. -/
 theorem shears_eq_of_radial_eventuallyEq
@@ -1151,30 +1097,6 @@ theorem field_C1_bound (patch : FiveProfileMoments.Patch) (J : Set ℝ) (hJ : Is
   simpa only [norm_iteratedFDeriv_zero, iteratedDeriv_zero, iteratedDeriv_one,
     Real.norm_eq_abs, radialDerivative] using And.intro hv (And.intro hd.2 hd.1)
 
-/-- A later repair preserves the already realized shears on the entire
-closed modulation window, including both endpoint collars. -/
-theorem window_shears_match {D D' : RadialDomain} (W : ModulatedHistories.Window)
-    (r : TrueConeRealization a m p₁ p₂ K B) (f E U : Field)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m) (hBK : B ⊆ K)
-    (J : Set ℝ) (hends : ∀ η ∈ J, (W.left, η) ∈ B ∧ (W.right, η) ∈ B)
-    (n : ℝ) (Q : Profiles D) (P : Profiles D')
-    (hQf : Q.f = ModulatedHistories.localizedF W r f n)
-    (hQU : Q.U = ModulatedHistories.localizedU W r E U n)
-    (patch : FiveProfileMoments.Patch) (A : ℝ → ℝ) (c : ℝ → ModulatedHistories.Coeff)
-    (hgap : W.right < patch.left)
-    (hPf : P.f = ModulatedHistories.applyRepairF patch A c Q.f)
-    (hPU : P.U = ModulatedHistories.applyRepairU patch A c Q.U)
-    {p : Point} (hp : p.1 ∈ Icc W.left W.right) (hη : p.2 ∈ J)
-    (hphys : E =ᶠ[𝓝 p] fun q => Real.sqrt (2 * q.1) * f q) :
-    angularShear P.E p = angularShear (fun q => realizedE r E n q.1 q.2) p ∧
-      signedAxialShear P.E P.U p = signedAxialShear (fun q => realizedE r E n q.1 q.2)
-        (fun q => realizedU r E U n q.1 q.2) p := by
-  have hout : p.1 ∉ Ioo patch.left patch.right := by
-    intro hx
-    linarith [hp.2, hx.1]
-  have hr := shears_unchanged_outside P Q patch A c hPf hPU hout
-  have hm := Localized.physical_shears_match W r f E U ha hm hBK J hends n Q hQf hQU hp hη hphys
-  exact ⟨hr.2.2.1.trans hm.1, hr.2.2.2.trans hm.2⟩
 
 /-- The actual repaired profile data satisfy a uniform estimate before,
 inside, and after the repair. The two contributions are the modulation

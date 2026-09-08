@@ -31,8 +31,6 @@ local notation "BC" => forwardCoefficientBudget period (A.meanData H) (A.transve
   rfl (ForwardInputs.normal J)
 local notation "Cp" => (2 : ℝ)
 
-def shortForwardCanonicalRadius (δ : ℝ) (ξ : U) : ℝ :=
-  EulerPacketForwardRadius.canonicalRadius (J).linear (J).mean (J).normal BC δ ξ
 
 theorem shortForward_radius_primitives (δ : ℝ) (ξ : U) (X : ℝ)
     (hKX : L.K ≤ X) (hTiX : Ti ≤ X) (hCpX : Cp ≤ X)
@@ -108,15 +106,5 @@ theorem shortForward_radius_primitives (δ : ℝ) (ξ : U) (X : ℝ)
     terminal := hξX.trans hXV }
 
 
-theorem shortForward_radius_primitive_polynomial (δ : ℝ) (hδ : 0 < δ) (ξ : U) :
-    let X := parameterSize L.K 0 Ti 2 H.L δ ‖ξ‖
-    EulerPacketForwardRadius.RadiusPrimitives (J).linear (J).mean (J).normal BC δ ξ (sourceEnvelope X) ∧
-      sourceEnvelope X ≤ sourceConstant*X^sourcePower := by
-  have hL0 : 0 ≤ H.L := (mul_nonneg boundaryLocalizationC1_nonneg H.Bc_nonneg).trans H.L_lower
-  obtain ⟨h1,hK,_,hIT,hC,hB,hD,hN⟩ := parameterSize_bounds L.K 0 Ti 2 H.L δ ‖ξ‖
-    (zero_le_one.trans L.K_one) le_rfl ((inv_pos.mpr A.T_pos).le.trans hTi)
-    (by norm_num) hL0 hδ (norm_nonneg ξ)
-  exact ⟨L.shortForward_radius_primitives H m hm R S hS CM hCM hM hshort
-    Ω hΩ hΩo hsub hΩball Ti hT1 hTi δ ξ _ hK hIT hC hB hD hN,sourceEnvelope_power _ h1⟩
 
 end EulerParentPacketFrames.LabelData

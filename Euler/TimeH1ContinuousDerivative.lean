@@ -84,15 +84,5 @@ theorem hasDerivWithinAt_of_continuous_representative (T : ℝ) (hT : 0 ≤ T)
     (fun r hr => eq_continuousIntegral_add_terminal T hT q qC hq η hη hder r hr) t.property
   simpa only [extendPath, projIcc_of_mem hT t.property] using h'
 
-/-- At every interior time the actual AC path has an ordinary two-sided derivative. -/
-theorem hasDerivAt_of_continuous_representative (T : ℝ) (hT : 0 ≤ T)
-    (q : TimeLp T E) (qC : C(Icc (0 : ℝ) T, E))
-    (hq : (q : ℝ → E) =ᵐ[timeMeasure T] extendPath T hT qC)
-    (η : ℝ → E) (hη : AbsolutelyContinuousOnInterval η 0 T)
-    (hder : ∀ᵐ r ∂timeMeasure T, HasDerivAt η (q r) r)
-    (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) T) :
-    HasDerivAt η (qC ⟨t, ht.1.le, ht.2.le⟩) t :=
-  (hasDerivWithinAt_of_continuous_representative T hT q qC hq η hη hder
-    ⟨t, ht.1.le, ht.2.le⟩).hasDerivAt (Icc_mem_nhds ht.1 ht.2)
 
 end EulerTimeH1ContinuousDerivative

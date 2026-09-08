@@ -54,10 +54,6 @@ omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 @[simp] theorem total_zero : (zero : ExcludedErrors D).total = 0 := by
   simp [total, zero]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem total_add (e f : ExcludedErrors D) : (e.add f).total = e.total + f.total := by
-  simp only [total, add]
-  abel
 
 end ExcludedErrors
 
@@ -137,9 +133,6 @@ noncomputable def meanExcluded (s : State D) : MeanVector D :=
 noncomputable def meanGoodResidual (s : State D) (c : Context D) : MeanVector D :=
   s.meanResidual c - s.meanExcluded
 
-theorem meanResidual_eq_good_add_excluded (s : State D) (c : Context D) :
-    s.meanResidual c = s.meanGoodResidual c + s.meanExcluded := by
-  simp [meanGoodResidual]
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem covariance_symm (s : State D) (i j : Fin 3) :
@@ -328,12 +321,6 @@ theorem graphOperators_dz (r : ReconstructionData) (epsilon fast : ℕ → ℝ)
   rw [he, map_smul]
   rfl
 
-theorem graphOperators_fastTime (r : ReconstructionData) (epsilon : ℕ → ℝ) (h : ℝ)
-    (axial slowTime : S × PressureStream.Plane) (f : ScalarField (Lift S))
-    (n : ℕ) (x : Lift S) :
-    (graphOperators r epsilon (ChartScales.timeCoefficient h) axial slowTime
-      (TorusInverse.vector .temporal)).fastTime f n x =
-      TemporalMeanUpdate.fastDerivative h n (f n) x := rfl
 
 theorem reconstructed_radial_residual (r : ReconstructionData)
     (ha : 0 < r.inner) (hd : 0 < r.exponent) (c : Context (Lift S))

@@ -86,17 +86,5 @@ theorem endpoint_matches_partial {T : ℝ} {hT : 0 ≤ T}
     rw [hW]
   exact ⟨(R.velocity_eq_of_initial U hi t).symm,(R.pressure_eq_of_initial U hS hi t).symm⟩
 
-theorem exists_smooth_endpoint_extension (T : ℝ) (hT : 0 < T)
-    (A : SmoothL2Field Space) (G : ℝ)
-    (hpartial : ∀ S (hS : 0 < S), S < T →
-      ∃ U : Evolution S hS.le, U.velocity ⟨0,le_rfl,hS.le⟩=A ∧
-        ∀ t, U.gradientIntegral t ≤ G) :
-    ∃ W : Evolution T hT.le, W.velocity ⟨0,le_rfl,hT.le⟩=A ∧
-      ∀ S (hS : 0 < S) (hST : S ≤ T) (U : Evolution S hS.le),
-        U.velocity ⟨0,le_rfl,hS.le⟩=A → ∀ t : Icc (0 : ℝ) S,
-          W.velocity ⟨t,t.property.1,t.property.2.trans hST⟩=U.velocity t ∧
-          W.pressureForce ⟨t,t.property.1,t.property.2.trans hST⟩=U.pressureForce t := by
-  obtain ⟨W,hW⟩ := exists_smooth_endpoint T hT A G hpartial
-  exact ⟨W,hW,fun S hS hST U hU t => endpoint_matches_partial W A hW S hS hST U hU t⟩
 
 end EulerOrdinarySobolev

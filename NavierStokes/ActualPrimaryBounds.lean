@@ -652,35 +652,7 @@ theorem uniform_lift {D E ι : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 noncomputable def fullEnvelope (l : SignedLabel B N0) (n : ℕ) (x : ActualPrimary.FullPoint) : ℝ :=
   envelope l n (ActualSignedGeometry.meanEquiv.symm x.1)
 
-theorem chart_amplitude_uniform :
-    LabelSumBounds.UniformWaveClass (HarmonicWaveInteraction.productStrip strip) fullEnvelope (1 / 2)
-      (fun l : SignedLabel B N0 => (ActualPrimary.chartCoefficients l.1 l.2).amplitude) := by
-  have hh := UniformBlockBounds.uniform_reindex ActualSignedGeometry.meanEquiv.symm
-    (periodized_velocity_uniform (B := B) (N0 := N0))
-  change LabelSumBounds.UniformWaveClass strip
-    (fun l n x => envelope l n (ActualSignedGeometry.meanEquiv.symm x)) (1 / 2)
-    (fun l n x => periodized (CoordinateAlgebra.A ActualPrimary.h)
-      (fun l : SignedLabel B N0 => fun y => CurlClassBounds.complexify (ActualPrimary.attachedRawVelocity l.1 l.2 y))
-      l n (ActualSignedGeometry.meanEquiv.symm x)) at hh
-  apply (uniform_lift hh).congr
-  intro l n x hx
-  simpa only [ActualSignedGeometry.meanEquiv.apply_symm_apply] using
-    periodized_velocity_eq l n (x := ActualSignedGeometry.meanEquiv.symm x.1) hx x.2
 
-theorem chart_pressure_uniform :
-    LabelSumBounds.UniformWaveClass (HarmonicWaveInteraction.productStrip strip) fullEnvelope 1
-      (fun l : SignedLabel B N0 => (ActualPrimary.chartCoefficients l.1 l.2).pressure) := by
-  have hh := UniformBlockBounds.uniform_reindex ActualSignedGeometry.meanEquiv.symm
-    (periodized_pressure_uniform (B := B) (N0 := N0))
-  change LabelSumBounds.UniformWaveClass strip
-    (fun l n x => envelope l n (ActualSignedGeometry.meanEquiv.symm x)) 1
-    (fun l n x => periodized (2 * CoordinateAlgebra.A ActualPrimary.h)
-      (fun l : SignedLabel B N0 => ActualPrimary.attachedRawPressure l.1 l.2)
-      l n (ActualSignedGeometry.meanEquiv.symm x)) at hh
-  apply (uniform_lift hh).congr
-  intro l n x hx
-  simpa only [ActualSignedGeometry.meanEquiv.apply_symm_apply] using
-    periodized_pressure_eq l n (x := ActualSignedGeometry.meanEquiv.symm x.1) hx x.2
 
 end LiteralCoefficients
 
@@ -1734,19 +1706,6 @@ theorem exact_block_uniform :
     (fun l : SignedLabel B N0 => (ActualPrimary.piece region l.1 l.2).exactCoefficients)
     angularFrequency chart_exact_amplitude_uniform chart_exact_pressure_uniform
 
-theorem difference_block_uniform :
-    ∀ i m, LabelSumBounds.UniformWaveClass strip (meanEnvelope (B := B) (N0 := N0))
-      (1 - ChartScales.kappa)
-      (fun l n x => ((ActualPrimary.piece region l.1 l.2).differenceBlock (phase l) (angularFrequency l)).velocity n i m x) := by
-  have hp : LabelSumBounds.UniformWaveClass fullStrip (fullEnvelope (B := B) (N0 := N0))
-      (1 - ChartScales.kappa) (fun _ _ _ => (0 : ℂ)) :=
-    LabelSumBounds.UniformClass.zero (fun l n x _ =>
-      mul_nonneg (Real.sqrt_nonneg _) (fullEnvelope_nonneg l n x))
-  exact (UniformBlockBounds.blockOfCoefficients_product_uniform
-    (s := strip) (P := meanEnvelope (B := B) (N0 := N0))
-    (α := 1 - ChartScales.kappa) (γ := 1 - ChartScales.kappa)
-    (fun l : SignedLabel B N0 => (ActualPrimary.piece region l.1 l.2).differenceCoefficients)
-    angularFrequency chart_difference_uniform hp).1
 
 end UniformActualOutputs
 

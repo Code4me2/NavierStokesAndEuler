@@ -864,20 +864,6 @@ theorem errorState_band (U : Set Point) (n m k : ℕ) :
   · intro x hx theta i; simp [errorState]
   · intro x hx theta i; simp [errorState]
 
-theorem fixedPressure_band (U : Set Point) (n m k : ℕ) :
-    PhysicalResidualNaturality.ScalarOn U (GaugeStateCoherence.bandChartEquiv F.data.h n m k)
-      (GaugeStateCoherence.bandVelocityScale F.data.h n m *
-        GaugeStateCoherence.bandVelocityScale F.data.h n m)
-      (fixedPressure H v upper B n) (fixedPressure H v upper B m) := by
-  intro x hx
-  have hp : GaugeStateCoherence.bandVelocityScale F.data.h n m *
-      GaugeStateCoherence.bandVelocityScale F.data.h n m =
-      (ChartScales.Q n / ChartScales.Q m) ^ (2 * CoordinateAlgebra.A F.data.h) := by
-    unfold GaugeStateCoherence.bandVelocityScale
-    rw [← Real.rpow_add (div_pos (ChartScales.Q_pos n) (ChartScales.Q_pos m))]
-    congr 1
-    ring
-  simpa only [fixedPressure, hp] using basePressure_band H v upper B n m k x 0
 
 
 /-- The actual excluded error has no angular dependence on positive time
@@ -919,35 +905,9 @@ theorem baseError_angle_eq (n : ℕ) {x : Point} (hR : 0 < x.1) (hT : 0 < x.2.1.
   exact add_left_cancel he
 
 
-theorem baseError_auxiliary_eq (n : ℕ) (R : ℝ) (s Y Y' : ℝ × ℝ) (theta : ℝ) :
-    baseError H v upper B n ((R, (s, Y)), theta) =
-      baseError H v upper B n ((R, (s, Y')), theta) := rfl
 
-theorem basePressure_auxiliary_eq (n : ℕ) (R : ℝ) (s Y Y' : ℝ × ℝ) (theta : ℝ) :
-    basePressure H v upper B n ((R, (s, Y)), theta) =
-      basePressure H v upper B n ((R, (s, Y')), theta) := rfl
 
-/-- Fixed-band common-cover specialization of the same physical error field. -/
-theorem errorState_common (U : Set Point) (n k : ℕ) :
-    PhysicalResidualNaturality.StateOn U (CommonBaseContext.coverLift k) 1 1
-      (errorState H v upper B) (errorState H v upper B) n n := by
-  refine ⟨⟨?_, ?_, ?_⟩, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro x hx; simp [errorState]
-  · intro x hx; simp [errorState]
-  · intro x hx; simp [errorState]
-  · intro x hx; simp [errorState]
-  · intro x hx theta i; simp [errorState]
-  · intro x hx theta; simp [errorState]
-  · intro x hx theta i
-    simp [errorState, baseError, errorAtScale, physicalPoint, cylinderPoint]
-  · intro x hx theta i; simp [errorState]
-  · intro x hx theta i; simp [errorState]
 
-theorem fixedPressure_common (U : Set Point) (n k : ℕ) :
-    PhysicalResidualNaturality.ScalarOn U (CommonBaseContext.coverLift k) 1
-      (fixedPressure H v upper B n) (fixedPressure H v upper B n) := by
-  intro x hx
-  simp [fixedPressure, basePressure, pressureAtScale, physicalPoint, cylinderPoint]
 
 end Actual
 

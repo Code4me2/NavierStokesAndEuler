@@ -28,12 +28,6 @@ theorem tangentProj_smul_normal (n f : H) {s : ℝ} (hs : s ≠ 0) :
   congr 2
   field_simp
 
-theorem tangentProj_smul_right (n f : H) (amp : ℝ) :
-    tangentProj n (amp • f) = amp • tangentProj n f := by
-  simp only [tangentProj, real_inner_smul_right, smul_sub, smul_smul]
-  congr 1
-  congr 1
-  ring
 
 theorem negativeTangentProjection_smul (n : H) {s : ℝ} (hs : s ≠ 0) :
     CommonCoverSolve.negativeTangentProjection (s • n) =

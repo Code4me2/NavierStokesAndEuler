@@ -135,10 +135,6 @@ theorem profiles_mean (O : Operators) (primary : Profile) (p : ℕ) (hp : 2 ≤ 
   rw [profiles_step O primary p hp]
   rfl
 
-theorem profiles_high (O : Operators) (primary : Profile) (p : ℕ) (hp : 2 ≤ p) :
-    (profiles O primary p).high=(O.highSolve (highForce O p (profiles O primary))).1 := by
-  rw [profiles_step O primary p hp]
-  rfl
 
 theorem profiles_corrector (O : Operators) (primary : Profile) (p : ℕ) (hp : 2 ≤ p) :
     (profiles O primary p).corrector=O.curlCorrector (profiles O primary p).high := by

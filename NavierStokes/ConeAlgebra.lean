@@ -30,10 +30,6 @@ theorem rootTerm_sq {P J : ℝ} (hP : 2 < P) :
   unfold rootTerm
   rw [mul_pow, sq_abs, Real.sq_sqrt hrad]
 
-theorem boundary_polynomial (P J v : ℝ) :
-    2 * (P - v) ^ 2 - (v - 2) * J ^ 2 =
-      2 * v ^ 2 - (4 * P + J ^ 2) * v + 2 * P ^ 2 + 2 * J ^ 2 := by
-  ring
 
 theorem square_difference (P J v : ℝ) :
     (P + J ^ 2 / 4 - v) ^ 2 - J ^ 2 * ((P - 2) / 2 + J ^ 2 / 16) =
@@ -148,18 +144,5 @@ theorem sufficiently_large_amplitude_cone {c j v : ℝ} (hc : 0 < c)
   · exact (div_lt_iff₀ hc).mp (lt_of_le_of_lt hᵥ hlarge)
   · exact (div_lt_iff₀ hδ).mp (lt_of_le_of_lt hδbound hlarge)
 
-/-- Equation (11) is sufficient at all sufficiently large positive stress
-amplitudes for each fixed triple of parameters. -/
-theorem equation_eleven_sufficient {a b w : ℝ} (ha : 0 < a)
-    (hfirst : 0 < a - b * w)
-    (hsecond : 2 * b * w + b ^ 2 / a + (a - 2) * w ^ 2 < 2) :
-    ∃ p₀ : ℝ, ∀ p : ℝ, p₀ < p →
-      2 < p * (1 - b * w / a) ∧ a * (1 + (b / a) ^ 2) <
-        coneBound (p * (1 - b * w / a)) (p * (w + b / a)) := by
-  apply sufficiently_large_amplitude_cone
-  · apply sub_pos.mpr
-    exact (div_lt_one ha).mpr (by linarith)
-  · have h := normalized_test_negative ha hsecond
-    linarith
 
 end NavierStokes.ConeAlgebra

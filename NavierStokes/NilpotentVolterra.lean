@@ -184,8 +184,6 @@ theorem extendPath_continuous {R : ℝ} (hR : 0 ≤ R) (f : Path R) :
     Continuous (extendPath hR f) :=
   f.continuous.comp continuous_projIcc
 
-theorem extendPath_apply {R : ℝ} (hR : 0 ≤ R) (f : Path R) (ξ : Icc (0 : ℝ) R) :
-    extendPath hR f ξ = f ξ := by simp only [extendPath, projIcc_val]
 
 def pathInverseValue {R : ℝ} (hR : 0 ≤ R) (c : Fin 6 → ℕ) (f : Path R) : Path R :=
   ⟨fun ξ i => regularPrimitive (c i) (fun s => extendPath hR f s i) ξ,
@@ -307,8 +305,6 @@ theorem pathWord_holomorphic {R : ℝ} (hR : 0 ≤ R) (c : Fin 6 → ℕ)
 def pathEvaluation {R : ℝ} (ξ : Icc (0 : ℝ) R) (i : Fin 6) : Path R →L[ℂ] ℂ :=
   (ContinuousLinearMap.proj i).comp (ContinuousMap.evalCLM ℂ ξ)
 
-theorem pathEvaluation_apply {R : ℝ} (ξ : Icc (0 : ℝ) R) (i : Fin 6) (f : Path R) :
-    pathEvaluation ξ i f = f ξ i := rfl
 
 /-- Coordinate evaluation commutes with the genuine complex derivative. -/
 theorem pathEvaluation_deriv {R : ℝ} {F : ℂ → Path R} {z : ℂ}
@@ -895,22 +891,6 @@ theorem liftedField_isRegularSolution :
 
 end LiftSolution
 
-/-- A regular solution on any prescribed finite radial interval. Only
-the parameter neighborhood is reduced; coefficient size places no upper
-bound on the length of the radial interval. -/
-theorem exists_regular_solution {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → CoefficientPath R} {f : ℂ → Path R} {U : Set ℂ}
-    (hU : IsOpen U) (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U) {center : ℂ} {ρ σ : ℝ}
-    (hDisk : Metric.closedBall center σ ⊆ U) (hgap : ρ < σ)
-    (hshape : VolterraAnalyticBounds.DerivativeShape (rawCoefficient hR A₁)) :
-    ∃ W : VolterraAnalyticBounds.Field,
-      IsRegularSolution R (Metric.ball center ρ)
-        (rawCoefficient hR A₀) (rawCoefficient hR A₁) (rawField hR f) W := by
-  obtain ⟨holo, heq⟩ := integralSolution_spec hR hU hA₀ hA₁ hf hDisk hgap hshape
-  exact ⟨liftedField hR A₀ A₁ f (integralSolution hR A₀ A₁ f),
-    liftedField_isRegularSolution hR A₀ A₁ f (integralSolution hR A₀ A₁ f)
-      Metric.isOpen_ball holo heq⟩
 
 theorem homogeneous_layer_eq {R : ℝ} (hR : 0 ≤ R)
     {A₀ A₁ : ℂ → CoefficientPath R} {V : ℂ → Path R} {U : Set ℂ}
@@ -1041,18 +1021,6 @@ theorem integralSolution_spec_open {R : ℝ} (hR : 0 ≤ R)
     exact ⟨hholo.differentiableAt (Metric.isOpen_ball.mem_nhds hz'), heq z hz'⟩
   exact ⟨fun z hz => (hlocal z hz).1.differentiableWithinAt, fun z hz => (hlocal z hz).2⟩
 
-/-- Existence on any finite radial interval and any open parameter
-neighborhood carrying the fixed holomorphic input data. -/
-theorem exists_regular_solution_open {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → CoefficientPath R} {f : ℂ → Path R} {U : Set ℂ}
-    (hU : IsOpen U) (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : VolterraAnalyticBounds.DerivativeShape (rawCoefficient hR A₁)) :
-    ∃ W : VolterraAnalyticBounds.Field,
-      IsRegularSolution R U (rawCoefficient hR A₀) (rawCoefficient hR A₁) (rawField hR f) W := by
-  obtain ⟨holo, heq⟩ := integralSolution_spec_open hR hU hA₀ hA₁ hf hshape
-  exact ⟨liftedField hR A₀ A₁ f (integralSolution hR A₀ A₁ f),
-    liftedField_isRegularSolution hR A₀ A₁ f (integralSolution hR A₀ A₁ f) hU holo heq⟩
 
 /-- Zero axis data make the axis derivative depend only on the given forcing. -/
 theorem IsRegularSolution.axis_derivative_eq_forcing

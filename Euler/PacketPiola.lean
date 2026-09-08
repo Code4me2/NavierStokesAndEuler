@@ -73,20 +73,5 @@ theorem pullbackCovector_smooth (Ξ Q : Space → Space)
   ((realAdjoint (U := Space) (E := Space)).contDiff.comp
     (hΞ.fderiv_right (m := ∞) (by simp))).clm_apply hQ
 
-/-- The transformed curl produces an actually divergence-free label velocity. -/
-theorem divergence_piola_curl (Ξ Q : Space → Space)
-    (hΞ : ContDiff ℝ ∞ Ξ) (hQ : ContDiff ℝ ∞ Q)
-    (F : Space → Space ≃L[ℝ] Space)
-    (hF : ∀ x, fderiv ℝ Ξ x = (F x).toContinuousLinearMap)
-    (hdet : ∀ x, (operatorMatrix (F x).toContinuousLinearMap).det = 1) (x : Space) :
-    divergence (fun y => (F y).symm (transformedCurl F Q y)) x = 0 := by
-  have he : (fun y => (F y).symm (transformedCurl F Q y)) =
-      vectorCurl (pullbackCovector Ξ Q) := by
-    funext y
-    exact piola_curl Ξ Q (hΞ.of_le (by simp)) (F y) y (hF y) (hdet y)
-      ((hQ.differentiable (by simp)).differentiableAt)
-  rw [he]
-  exact divergence_curl (fun i y => pullbackCovector Ξ Q y i)
-    ((contDiff_piLp 2).mp (pullbackCovector_smooth Ξ Q hΞ hQ)) x
 
 end EulerPacketPiola

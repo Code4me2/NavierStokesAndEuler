@@ -292,32 +292,6 @@ theorem periodize_smul_of_injective_support {S : Set Plane}
       simpa only [not_exists, not_not] using hactive
     simp [TorusAverages.periodize, hz]
 
-/-- Primitive local factorization suffices to identify the coefficient
-after applying its single cutoff. This is not an assumed covariance or
-assembled-field identity. -/
-theorem cutoff_periodized_coefficient {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2)
-    (ψ : Plane → ℝ) (a : Plane → Vector)
-    (hψ : support ψ ⊆ slotSet h sys.radius vr vt (signedLabel U j))
-    (ha : support a ⊆ slotSet h sys.radius vr vt (signedLabel U j))
-    (hlocal : ∀ z, ψ z • a z = nativeVector P hdet j z)
-    (outer ε : ℝ) (T : Vec2) (q : ℝ) (x : SlotColoring.Position) (Y : Plane) :
-    TorusAverages.periodize ψ ((SlotGeometry.cover ^ SlotColoring.nativeIndex h U.1) Y) •
-      (fun i => ((outer * amplitude ε (mask D U q x) P.matrix T j *
-        TorusAverages.periodize a
-          ((SlotGeometry.cover ^ SlotColoring.nativeIndex h U.1) Y) i : ℝ) : ℂ)) =
-      slotAmplitude P hdet outer ε T q x j Y := by
-  have hh := periodize_smul_of_injective_support (sys.injective (signedLabel U j)) hψ ha
-    ((SlotGeometry.cover ^ SlotColoring.nativeIndex h U.1) Y)
-  have he : (fun z => ψ z • a z) = nativeVector P hdet j := funext hlocal
-  rw [he] at hh
-  funext i
-  have hi := congrFun hh i
-  simp only [Pi.smul_apply, smul_eq_mul] at hi
-  simp only [Pi.smul_apply, Complex.real_smul, slotAmplitude, coveredVector]
-  rw [← hi]
-  push_cast
-  ring
 
 /-- Identification with any actual frequency/phase presentation of the
 same harmonic, including the frequency convention of `WaveCoefficients`. -/
@@ -357,17 +331,6 @@ theorem actual_phase_identification (k ε p pz x0 : ℝ)
   rw [← hm]
   ring
 
-/-- The rounded angular frequency is the exact same nonzero integer as in
-the pair data; this identity does not use an approximate rounding bound. -/
-theorem rounded_phase_identification (k ε target pz x0 : ℝ) (hk : k ≠ 0)
-    (F G : PhaseCalculus.Slow → ℝ) (s : PhaseCalculus.Slow)
-    (v : Plane → ℝ) (Y : Plane) (θ : ℝ) :
-    k * PhaseCalculus.phase ε (PhaseEstimates.roundedFrequency k target) pz x0 F G
-        (s, θ, v Y) =
-      (PhaseEstimates.nonzeroRound (k * target) : ℝ) * θ +
-        roundedPhaseRemainder k ε target pz x0 F G s v Y :=
-  actual_phase_identification k ε _ pz x0 F G s v _
-    (PhaseEstimates.roundedFrequency_integer hk target) Y θ
 
 /-! ## The exact curl retains its covariance error -/
 
@@ -698,37 +661,7 @@ theorem cutoffModeField_eq_source {N : ℕ}
     ((hcoeff b Y θ).trans ((A b.1).actualAmplitude_eq hdet _ _ _ q x b.2 Y))
     (hphase b Y θ)
 
-omit [NormedAddCommGroup X] [NormedSpace ℝ X] in
-theorem cutoffModeField_physical_covariance (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (A U).sourceMatrix (chartTarget h q N T0 U))
-    (a : SignedIndex → WaveCoefficients X) (ψ : SignedIndex → ℕ → X → ℝ)
-    (band : SignedIndex → ℕ) (point : SignedIndex → Plane → ℝ → X)
-    (hcoeff : ∀ b Y θ, ((a b).withCutoff (ψ b)).amplitude (band b) (point b Y θ) =
-      (A b.1).actualAmplitude hdet (physicalOuter h N b.1) (physicalViscosity h N b.1)
-        (chartTarget h q N T0 b.1) q x b.2 Y)
-    (hphase : ∀ b Y θ, (a b).frequency (band b) * (a b).phase (band b) (point b Y θ) =
-      slotPhase (A b.1).pairData b.2 (Y, θ)) (i : Fin 2) :
-    doubleAverage (fun Y θ => cutoffModeField a ψ band point Y θ 0 *
-      cutoffModeField a ψ band point Y θ i.succ) =
-      q ^ (-velocityExponent h - 1 / 2) * T0 i := by
-  simp_rw [cutoffModeField_eq_source A hdet _ _ _ q x a ψ band point hcoeff hphase]
-  exact physical_source_covariance sys hdet N hN A hq hqN x T0 hcone i
 
-/-- A finite exact-curl assembly retains the sum of its actual curl
-corrections. This applies before any covariance estimate is made. -/
-theorem finite_corrected_field_split {ι : Type*} (F : Finset ι)
-    (a : ι → WaveCoefficients X) (s : ι → WeightedClasses.StripData X)
-    (d : ι → GraphDirections X) (ψ : ι → ℕ → X → ℝ)
-    (band : ι → ℕ) (point : ι → X) :
-    (∑ b ∈ F, correctedVelocity (a b) (s b) (d b) (ψ b) (band b) (point b)) =
-      (∑ b ∈ F, cutoffVelocity (a b) (ψ b) (band b) (point b)) +
-        ∑ b ∈ F, curlVelocity (a b) (s b) (d b) (ψ b) (band b) (point b) := by
-  simp_rw [correctedVelocity_split]
-  exact Finset.sum_add_distrib
 
 end CoefficientAssembly
 
@@ -870,29 +803,6 @@ theorem principal_torus_average {N : ℕ} (hN : 1 ≤ N)
     ((TorusAverages.squareAverage f : ℝ) : ℂ)
   simp only [TorusAverages.squareAverage, ← intervalIntegral.integral_ofReal]
 
-theorem physical_source_torus_covariance {Q : Type} [NormedAddCommGroup Q]
-    (sys : SlotSystem D h vr vt) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (N : ℕ) (hN : 1 ≤ N) (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (A U).sourceMatrix (chartTarget h q N T0 U)) (i : Fin 2) :
-    ∃ g : C(TorusInverse.Torus, ℂ),
-      (∀ Y, g (TorusAverages.quotientPoint Y) =
-        ((SmoothLoop.angularMean (fun θ =>
-          sourceField A hdet (physicalOuter h N) (physicalViscosity h N)
-            (chartTarget h q N T0) q x Y θ 0 *
-          sourceField A hdet (physicalOuter h N) (physicalViscosity h N)
-            (chartTarget h q N T0) q x Y θ i.succ) : ℝ) : ℂ)) ∧
-      (∫ z, g z ∂TorusInverse.torusMeasure) =
-        ((q ^ (-velocityExponent h - 1 / 2) * T0 i : ℝ) : ℂ) := by
-  obtain ⟨g, hg, hint⟩ := principal_torus_average hN (fun U => (A U).pairData) hdet
-    (physicalOuter h N) (physicalViscosity h N) (chartTarget h q N T0) hq x i
-  refine ⟨g, ?_, ?_⟩
-  · simpa only [sourceField_eq] using hg
-  · have hphys := physical_source_covariance sys hdet N hN A hq hqN x T0 hcone i
-    simp only [sourceField_eq] at hphys
-    rw [hphys] at hint
-    exact hint
 
 theorem nativeVector_continuous {U : UnsignedLabel} (P : PairData sys U)
     (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2) :
@@ -931,28 +841,6 @@ theorem principalField_continuous {N : ℕ}
   exact continuous_finsetSum F (fun a _ =>
     slotVelocity_continuous (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 (hphase a.1 a.2))
 
-/-- The physical covariance target belongs to the principal field. Adding
-the actual curl remainder preserves all three covariance error terms. -/
-theorem physical_source_plus_remainder {Q : Type} [NormedAddCommGroup Q]
-    (sys : SlotSystem D h vr vt) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (N : ℕ) (hN : 1 ≤ N) (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (A U).sourceMatrix (chartTarget h q N T0 U))
-    (hphase : ∀ U j, Continuous ((A U).phase j))
-    (R : Plane → ℝ → Vector) (hR : Continuous R.uncurry) (i : Fin 2) :
-    let V := sourceField A hdet (physicalOuter h N) (physicalViscosity h N) (chartTarget h q N T0) q x
-    doubleAverage (fun Y θ => (V Y θ + R Y θ) 0 * (V Y θ + R Y θ) i.succ) =
-      q ^ (-velocityExponent h - 1 / 2) * T0 i + doubleAverage (covarianceError V R i) := by
-  dsimp only
-  have hV : Continuous (sourceField A hdet (physicalOuter h N) (physicalViscosity h N)
-      (chartTarget h q N T0) q x).uncurry := by
-    change Continuous (fun z : Plane × ℝ => sourceField A hdet (physicalOuter h N)
-      (physicalViscosity h N) (chartTarget h q N T0) q x z.1 z.2)
-    simp_rw [sourceField_eq]
-    exact principalField_continuous (fun U => (A U).pairData) hdet _ _ _ hq x hphase
-  rw [averaged_covariance_expansion _ R hV hR i,
-    physical_source_covariance sys hdet N hN A hq hqN x T0 hcone i]
 
 /-- Integer angular modes give actual full-turn periodicity. -/
 theorem slotVelocity_angular_periodic {U : UnsignedLabel} (P : PairData sys U)
@@ -967,38 +855,7 @@ theorem slotVelocity_angular_periodic {U : UnsignedLabel} (P : PairData sys U)
     ((P.modes j : ℝ) * θ + P.phases j Y) + (P.modes j : ℝ) * (2 * Real.pi) by ring]
   exact Real.cos_add_int_mul_two_pi _ _
 
-theorem principalField_angular_periodic {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (Y : Plane) (θ : ℝ) :
-    principalField P hdet outer ε T q x Y (θ + 2 * Real.pi) =
-      principalField P hdet outer ε T q x Y θ := by
-  unfold principalField
-  apply finsum_congr
-  intro a
-  exact slotVelocity_angular_periodic (P a.1) hdet _ _ _ q x a.2 Y θ
 
-/-- Full-field auxiliary periodicity uses the source phase convention.
-The angular covariance's periodicity above needed no such hypothesis. -/
-theorem principalField_auxiliary_periodic {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (hphase : ∀ U j Y k, (P U).phases j (Y + TorusAverages.latticePoint k) = (P U).phases j Y)
-    (Y : Plane) (θ : ℝ) (k : TorusInverse.Frequency) :
-    principalField P hdet outer ε T q x (Y + TorusAverages.latticePoint k) θ =
-      principalField P hdet outer ε T q x Y θ := by
-  unfold principalField
-  apply finsum_congr
-  intro a
-  have hcov : coveredVector (P a.1) hdet a.2 (Y + TorusAverages.latticePoint k) =
-      coveredVector (P a.1) hdet a.2 Y := by
-    funext i
-    refine Fin.cases ?_ (fun l => ?_) i
-    · simp only [coveredVector_zero, covered_periodic]
-    · simp only [coveredVector_succ, covered_periodic]
-  funext i
-  simp only [slotVelocity_formula, hcov, hphase]
 
 /-! ## Explicit conversion from chart velocity to physical velocity -/
 
@@ -1056,37 +913,7 @@ theorem scaledCutoffModeField_eq_source {N : ℕ}
     ((hcoeff b Y θ).trans ((A b.1).actualAmplitude_eq hdet 1 _ _ q x b.2 Y))
     (hphase b Y θ)
 
-omit [NormedAddCommGroup X] [NormedSpace ℝ X] in
-/-- The physical factor is exactly `Q^(-A)` applied to each chart field.
-It is not inserted into the coefficient before the chart wave estimates. -/
-theorem scaledCutoffModeField_physical_covariance (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    {q : ℝ} (hq : 0 < q) (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (T0 : Vec2)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (A U).sourceMatrix (chartTarget h q N T0 U))
-    (a : SignedIndex → WaveCoefficients X) (ψ : SignedIndex → ℕ → X → ℝ)
-    (band : SignedIndex → ℕ) (point : SignedIndex → Plane → ℝ → X)
-    (hcoeff : ∀ b Y θ, ((a b).withCutoff (ψ b)).amplitude (band b) (point b Y θ) =
-      (A b.1).actualAmplitude hdet 1 (physicalViscosity h N b.1)
-        (chartTarget h q N T0 b.1) q x b.2 Y)
-    (hphase : ∀ b Y θ, (a b).frequency (band b) * (a b).phase (band b) (point b Y θ) =
-      slotPhase (A b.1).pairData b.2 (Y, θ)) (i : Fin 2) :
-    doubleAverage (fun Y θ => scaledCutoffModeField (physicalOuter h N) a ψ band point Y θ 0 *
-      scaledCutoffModeField (physicalOuter h N) a ψ band point Y θ i.succ) =
-      q ^ (-velocityExponent h - 1 / 2) * T0 i := by
-  simp_rw [scaledCutoffModeField_eq_source A hdet _ _ _ q x a ψ band point hcoeff hphase]
-  exact physical_source_covariance sys hdet N hN A hq hqN x T0 hcone i
 
-theorem finite_scaled_corrected_field_split {ι : Type*} (F : Finset ι) (outer : ι → ℝ)
-    (a : ι → WaveCoefficients X) (s : ι → WeightedClasses.StripData X)
-    (d : ι → GraphDirections X) (ψ : ι → ℕ → X → ℝ)
-    (band : ι → ℕ) (point : ι → X) :
-    (∑ b ∈ F, outer b • correctedVelocity (a b) (s b) (d b) (ψ b) (band b) (point b)) =
-      (∑ b ∈ F, outer b • cutoffVelocity (a b) (ψ b) (band b) (point b)) +
-        ∑ b ∈ F, outer b • curlVelocity (a b) (s b) (d b) (ψ b) (band b) (point b) := by
-  simp_rw [correctedVelocity_split, smul_add]
-  exact Finset.sum_add_distrib
 
 end PhysicalCoefficientAssembly
 

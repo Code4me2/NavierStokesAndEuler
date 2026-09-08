@@ -92,13 +92,6 @@ theorem vorticityIntegral_le_const (K : ℝ)
           (U.vorticityNormPath_le_iff (projIcc 0 T hT r) K).mpr (hK _))
     _ = _ := by simp only [intervalIntegral.integral_const,sub_zero,smul_eq_mul]; ring
 
-theorem vorticityNormPath_le_gradient (t : Icc (0 : ℝ) T) :
-    U.vorticityNormPath t ≤ ‖curlOperator‖*U.gradientNormPath t := by
-  apply (U.vorticityNormPath_le_iff t _).mpr
-  intro x
-  rw [← vorticityField_apply]
-  exact (curlOperator.le_opNorm (fderiv ℝ (U.velocity t).field x)).trans
-    (mul_le_mul_of_nonneg_left (U.pointwise_gradient_le t x) (norm_nonneg _))
 
 end Evolution
 end EulerOrdinarySobolev

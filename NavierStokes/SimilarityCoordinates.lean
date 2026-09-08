@@ -285,10 +285,6 @@ theorem coordinateQ_smooth {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
   rw [himage] at hsm
   exact hsm.fst
 
-theorem coordinateQ_smoothOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
-    ContDiffOn ℝ ∞ (coordinateQ a) {p : ℝ × ℝ | 0 < p.1} := by
-  intro p hp
-  exact (coordinateQ_smooth ha ha1 hp).contDiffWithinAt
 
 /-- Full Fréchet derivative of the actual implicitly defined coordinate. -/
 theorem coordinateQ_fderiv_apply {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
@@ -371,19 +367,6 @@ theorem coordinateEta_abs_lt_one {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
   apply abs_lt.mpr
   constructor <;> nlinarith
 
-/-- The branch lies strictly beyond the manuscript's threshold
-`|z|^(1/D)`, where `D=(1-a)/2`. -/
-theorem coordinateQ_above_threshold {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
-    {p : ℝ × ℝ} (hp : 0 < p.1) :
-    |p.2| ^ (((1 - a) / 2)⁻¹) < coordinateQ a p := by
-  have hq := (coordinateQ_spec ha ha1 hp).1
-  have hd : 0 < (1 - a) / 2 := by linarith
-  have hpow : 0 < coordinateQ a p ^ ((1 - a) / 2) := Real.rpow_pos_of_pos hq _
-  have hη := coordinateEta_abs_lt_one ha ha1 hp
-  unfold coordinateEta at hη
-  rw [abs_div, abs_of_pos hpow] at hη
-  exact (Real.rpow_inv_lt_iff_of_pos (abs_nonneg p.2) hq.le hd).mpr
-    ((div_lt_one hpow).mp hη)
 
 /-- Both implicit descriptions in equation (3) agree for the constructed
 coordinates: `τ=q(1-η²)`. -/
@@ -406,12 +389,6 @@ theorem scalarSlope_eq_L {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
   rw [Real.rpow_sub_one hq.ne', coordinateEta_sq ha ha1 hp]
   ring
 
-theorem coordinateQ_hasDerivAt_tau_L {a τ z : ℝ}
-    (ha : 0 < a) (ha1 : a < 1) (hτ : 0 < τ) :
-    HasDerivAt (fun t => coordinateQ a (t, z))
-      (1 / (1 - a * coordinateEta a (τ, z) ^ 2)) τ := by
-  have hc := coordinateQ_hasDerivAt_tau (z := z) ha ha1 hτ
-  rwa [scalarSlope_eq_L ha ha1 (p := (τ, z)) hτ] at hc
 
 theorem coordinateQ_hasDerivAt_time_L {a t z : ℝ}
     (ha : 0 < a) (ha1 : a < 1) (ht : t < 1) :
@@ -499,10 +476,6 @@ theorem coordinateQ_hasDerivAt_z_L {a τ z : ℝ}
 
 def coordinateX (a s : ℝ) (p : ℝ × ℝ) : ℝ := s / coordinateQ a p
 
-theorem coordinateX_smooth {a s : ℝ} (ha : 0 < a) (ha1 : a < 1)
-    {p : ℝ × ℝ} (hp : 0 < p.1) : ContDiffAt ℝ ∞ (coordinateX a s) p := by
-  exact contDiffAt_const.div (coordinateQ_smooth ha ha1 hp)
-    (coordinateQ_spec ha ha1 hp).1.ne'
 
 theorem coordinateX_hasDerivAt_time {a s t z : ℝ}
     (ha : 0 < a) (ha1 : a < 1) (ht : t < 1) :
@@ -539,21 +512,6 @@ theorem coordinateX_hasDerivAt_z {a s τ z : ℝ}
   unfold coordinateX
   field_simp [hq.1.ne', hpow, hm]; ring
 
-/-- Joint physical `(t,z)` smoothness of the actual coordinate functions. -/
-theorem physical_coordinates_smooth {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
-    {p : ℝ × ℝ} (hp : p.1 < 1) :
-    ContDiffAt ℝ ∞
-      (fun x : ℝ × ℝ =>
-        (coordinateQ a (1 - x.1, x.2), coordinateEta a (1 - x.1, x.2))) p := by
-  have hm : ContDiffAt ℝ ∞ (fun x : ℝ × ℝ => (1 - x.1, x.2)) p :=
-    (contDiffAt_const.sub contDiffAt_fst).prodMk contDiffAt_snd
-  exact ((coordinateQ_smooth ha ha1 (p := (1 - p.1, p.2)) (sub_pos.mpr hp)).prodMk
-    (coordinateEta_smooth ha ha1 (p := (1 - p.1, p.2)) (sub_pos.mpr hp))).comp p hm
 
-/-- Equation (3), with exactly the manuscript's exponent `2h`. -/
-theorem manuscript_coordinate_existsUnique {h τ : ℝ} (hh : 0 < h)
-    (hh1 : h < 1 / 2) (hτ : 0 < τ) (z : ℝ) :
-    ∃! q : ℝ, 0 < q ∧ q - z ^ 2 * q ^ (2 * h) = τ := by
-  exact existsUnique_positive_solution (by linarith) (by linarith) hτ z
 
 end NavierStokes.SimilarityCoordinates

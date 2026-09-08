@@ -41,11 +41,6 @@ theorem sigma_succ (J : ℕ) : sigma (J + 1) = sigma J + 1 / 10 :=
 theorem sigma_admissible (J : ℕ) : 1 / 5 ≤ sigma J :=
   ExponentLedger.stage_parameter_admissible J
 
-theorem sigma_strictMono : StrictMono sigma := by
-  intro j k hjk
-  have hk : (j : ℝ) < k := by exact_mod_cast hjk
-  simp only [sigma_formula]
-  linarith
 
 @[simp] theorem inputSigma_succ (j : ℕ) : inputSigma (j + 1) = sigma j := by
   simp [inputSigma]
@@ -55,22 +50,11 @@ theorem inputSigma_formula {j : ℕ} (hj : 1 ≤ j) :
   simp only [inputSigma, sigma_formula, Nat.cast_sub hj, Nat.cast_one]
   ring
 
-theorem inputSigma_index {j : ℕ} (hj : 1 ≤ j) : inputSigma j + 1 / 10 = sigma j := by
-  rw [inputSigma_formula hj, sigma_formula]
-  ring
 
-theorem inputSigma_admissible (j : ℕ) : 1 / 5 ≤ inputSigma j := sigma_admissible _
 
 @[simp] theorem gain_zero (h : ℝ) : gain h 0 = 0 := by simp [gain]
 
-theorem gain_succ (h : ℝ) (j : ℕ) : gain h (j + 1) = gain h j + h / 10 := by
-  simp only [gain, Nat.cast_add, Nat.cast_one]
-  ring
 
-theorem gain_eq_accuracy (h : ℝ) (J : ℕ) : gain h J = h * (sigma J - 1 / 5) := by
-  rw [sigma_formula]
-  unfold gain
-  ring
 
 theorem gain_nonneg {h : ℝ} (hh : 0 ≤ h) (j : ℕ) : 0 ≤ gain h j := by
   unfold gain
@@ -86,11 +70,6 @@ theorem gain_monotone {h : ℝ} (hh : 0 ≤ h) : Monotone (gain h) := by
   have hk : (j : ℝ) ≤ k := by exact_mod_cast hjk
   exact div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hk hh) (by norm_num)
 
-theorem gain_strictMono {h : ℝ} (hh : 0 < h) : StrictMono (gain h) := by
-  intro j k hjk
-  have hk : (j : ℝ) < k := by exact_mod_cast hjk
-  exact (div_lt_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 10)).mpr
-    (mul_lt_mul_of_pos_left hk hh)
 
 theorem gain_add_tendsto_atTop {h : ℝ} (hh : 0 < h) (a : ℝ) :
     Tendsto (fun j => gain h j + a) atTop atTop := by
@@ -107,26 +86,11 @@ theorem gain_add_tendsto_atTop {h : ℝ} (hh : 0 < h) (a : ℝ) :
 theorem gain_tendsto_atTop {h : ℝ} (hh : 0 < h) : Tendsto (gain h) atTop atTop := by
   simpa only [add_zero] using gain_add_tendsto_atTop hh 0
 
-theorem sigma_tendsto_atTop : Tendsto sigma atTop atTop := by
-  have hs := gain_add_tendsto_atTop (by norm_num : (0 : ℝ) < 1) (1 / 5)
-  simp only [gain, one_mul, add_comm] at hs ⊢
-  exact hs
 
 theorem kappa_admissible : 0 ≤ kappa ∧ kappa ≤ 1 / 100000 := by norm_num [kappa]
 
 theorem kappa_pos : 0 < kappa := by norm_num [kappa]
 
-theorem all_cycle_margins (n : ℕ) {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    ExponentLedger.waveExponent (sigma (n + 1)) <
-        ExponentLedger.waveExponent (sigma n) + ExponentLedger.particularGain (sigma n) κ ∧
-    ExponentLedger.waveExponent (sigma (n + 1)) <
-        ExponentLedger.waveExponent (sigma n) + ExponentLedger.signedGain (sigma n) κ ∧
-    ExponentLedger.waveExponent (sigma (n + 1)) < ExponentLedger.meanUpdateExponent (sigma n) κ ∧
-    ExponentLedger.meanExponent (sigma (n + 1)) <
-        ExponentLedger.meanExponent (sigma n) + min (17 / 100) (1 - 4 * κ) ∧
-    ExponentLedger.meanExponent (sigma (n + 1)) <
-        ExponentLedger.meanExponent (sigma n) + 9 / 10 - 4 * κ :=
-  ExponentLedger.all_stage_arithmetic n hκ
 
 /-! ## The native increment exponents and their physical comparison -/
 
@@ -157,10 +121,6 @@ theorem meanNative_formula (κ : ℝ) {j : ℕ} (hj : 1 ≤ j) :
   rw [meanNative, ExponentLedger.meanUpdateExponent, ExponentLedger.meanExponent, inputSigma_formula hj]
   ring
 
-theorem radialNative_formula (κ : ℝ) {j : ℕ} (hj : 1 ≤ j) :
-    radialNative κ j = (j : ℝ) / 10 + (21 / 10 - 2 * κ) := by
-  rw [radialNative, meanNative_formula κ hj]
-  ring
 
 theorem wave_physical_gap (h κ : ℝ) {j : ℕ} (hj : 1 ≤ j) :
     h * waveNative κ j = gain h j + h * (3 / 5 - κ) := by
@@ -195,11 +155,6 @@ theorem gain_le_mean {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) {j : 
   rw [mean_physical_gap h κ hj]
   exact le_add_of_nonneg_right (mul_nonneg hh (by linarith))
 
-theorem gain_le_radial {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) {j : ℕ} (hj : 1 ≤ j) :
-    gain h j ≤ h * radialNative κ j := by
-  have he := gain_le_mean hh hκ hj
-  unfold radialNative
-  nlinarith
 
 structure Offsets where
   wavePotential : ℝ
@@ -240,9 +195,6 @@ theorem cycle_wave_output (n : ℕ) :
     ExponentLedger.waveExponent (sigma n) + 1 / 10 = residualWave (n + 1) := by
   rw [residualWave, sigma_succ, ExponentLedger.wave_increment]
 
-theorem cycle_mean_output (n : ℕ) :
-    ExponentLedger.meanExponent (sigma n) + 1 / 10 = residualMean (n + 1) := by
-  rw [residualMean, sigma_succ, ExponentLedger.mean_increment]
 
 theorem residual_minimum (J : ℕ) : min (residualWave J) (residualMean J) = residualWave J := by
   apply min_eq_left
@@ -266,20 +218,8 @@ theorem gain_le_residualWave {h : ℝ} (hh : 0 ≤ h) (J : ℕ) :
   rw [residual_physical_gap]
   linarith
 
-theorem gain_le_residualMean {h : ℝ} (hh : 0 ≤ h) (J : ℕ) :
-    gain h J ≤ h * residualMean J := by
-  rw [residual_mean_physical_gap]
-  linarith
 
-theorem gain_le_residualMinimum {h : ℝ} (hh : 0 ≤ h) (J : ℕ) :
-    gain h J ≤ h * min (residualWave J) (residualMean J) := by
-  rw [residual_minimum]
-  exact gain_le_residualWave hh J
 
-theorem gain_after_cycle {h : ℝ} (hh : 0 ≤ h) (n : ℕ) :
-    gain h (n + 1) ≤ h * (ExponentLedger.waveExponent (sigma n) + 1 / 10) := by
-  rw [cycle_wave_output]
-  exact gain_le_residualWave hh (n + 1)
 
 /-- The full-phase derivative cost is a fixed parameter `beta`, not a
 stage-dependent loss. -/
@@ -303,16 +243,7 @@ theorem residualRate_tendsto_atTop {h : ℝ} (hh : 0 < h) (beta : ℝ) (m : ℕ)
     Tendsto (fun J => residualRate h beta J m) atTop atTop := by
   simpa only [residualRate_eq] using gain_add_tendsto_atTop hh (7 * h / 10 - residualLoss h beta m)
 
-theorem eventually_residualRate_ge {h : ℝ} (hh : 0 < h) (beta : ℝ) (m : ℕ) (a : ℝ) :
-    ∀ᶠ J in atTop, a ≤ residualRate h beta J m :=
-  (residualRate_tendsto_atTop hh beta m).eventually (eventually_ge_atTop a)
 
-theorem residual_bound_with_gain {V : Type*} [NormedAddCommGroup V]
-    {h beta C q : ℝ} (hh : 0 ≤ h) (hC : 0 ≤ C) (hq : 0 < q) (hq1 : q ≤ 1)
-    (J m : ℕ) {v : V} (hv : ‖v‖ ≤ C * q ^ residualRate h beta J m) :
-    ‖v‖ ≤ C * q ^ (gain h J - residualLoss h beta m) :=
-  hv.trans (mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_exponent_ge hq hq1 (gain_le_residual_rate hh beta J m)) hC)
 
 /-! ## Binding the ledger to the actual physical-stage interface -/
 
@@ -413,20 +344,5 @@ theorem StageMetadata.derived_stage_inputs (H : StageMetadata WA MA MB WP MP κ)
 
 end StageInputs
 
-/-- A single fixed κ, the explicit accuracy sequence, and the explicit
-gain work simultaneously at every stage. No iteration is asserted here. -/
-theorem fixed_ledger {h : ℝ} (hh : 0 < h) :
-    (0 ≤ kappa ∧ kappa ≤ 1 / 100000) ∧ sigma 0 = 1 / 5 ∧
-    (∀ n, sigma (n + 1) = sigma n + 1 / 10) ∧ gain h 0 = 0 ∧
-    (∀ j, 1 ≤ j → 0 < gain h j) ∧ Monotone (gain h) ∧ Tendsto (gain h) atTop atTop ∧
-    (∀ j, 1 ≤ j →
-      gain h j ≤ h * waveNative kappa j + (-h) + (offsets h).wavePotential ∧
-      gain h j ≤ h * meanNative kappa j + (offsets h).meanStream ∧
-      gain h j ≤ h * meanNative kappa j + (offsets h).directAngular ∧
-      gain h j ≤ h * wavePressureNative kappa j + (-(2 * CoordinateAlgebra.A h)) + (offsets h).wavePressure ∧
-      gain h j ≤ h * meanNative kappa j + (offsets h).meanPressure) :=
-  ⟨kappa_admissible, sigma_zero, sigma_succ, gain_zero h, fun _ hj => gain_pos hh hj,
-    gain_monotone hh.le, gain_tendsto_atTop hh,
-    fun _ hj => fixed_offset_inequalities hh.le kappa_admissible.2 hj⟩
 
 end NavierStokes.ActualIterationLedger

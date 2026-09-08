@@ -52,9 +52,5 @@ theorem corrector_mean_zero (t : ℝ) (x : Space) :
   (pathAverage_eq_zero_iff P (G.correctorPath I) (G.correctorPath_orbit I)).mp
     (G.correctorPath_average_zero I) (D.clamp t) x
 
-theorem correctorDerivative_mean_zero (t : ℝ) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, G.correctorDerivative I (t,(x,θ))) = 0 :=
-  (pathAverage_eq_zero_iff P (G.correctorTimePath I) (G.correctorTimePath_orbit I)).mp
-    (G.correctorTimePath_average_zero I) (D.clamp t) x
 
 end EulerTransversePacketProvider.Forcing

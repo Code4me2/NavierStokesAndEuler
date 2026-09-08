@@ -35,13 +35,7 @@ variable {B N0 : ℕ}
 @[simp] theorem labelCarrier_eq (l : Index B N0) (n : ℕ) :
     ActualCarrierTransportBase.labelCarrier l n = ActualInitialization.labelCarrier l n := rfl
 
-theorem canonical_geometry (l : Index B N0) (n : ℕ) :
-    (ActualParticularStageControls.canonicalParameters (l.2,l.1)).geometry n =
-      geometry l n := rfl
 
-theorem canonical_length (l : Index B N0) (n : ℕ) :
-    (ActualParticularStageControls.canonicalParameters (l.2,l.1)).length n =
-      referenceLength l / clock l n := rfl
 
 theorem canonical_cutoff (l : Index B N0) (n : ℕ) :
     (ActualParticularStageControls.canonicalParameters (l.2,l.1)).cutoff n =
@@ -49,18 +43,7 @@ theorem canonical_cutoff (l : Index B N0) (n : ℕ) :
         slots.radius_pos (referenceLength_pos l) (clock l n) :=
   ActualCarrierTransportBase.cutoff_eq_native l n
 
-theorem fixed_geometry (l : Index B N0) (n : ℕ) :
-    ((ActualCycleParameters.fixedParameters B N0).particular l).geometry n =
-      geometry l n := rfl
 
-theorem fixed_length (l : Index B N0) (n : ℕ) :
-    ((ActualCycleParameters.fixedParameters B N0).particular l).length n =
-      referenceLength l / clock l n := rfl
 
-theorem fixed_cutoff (l : Index B N0) (n : ℕ) :
-    ((ActualCycleParameters.fixedParameters B N0).particular l).cutoff n =
-      ActualGaussianCoverage.nativeCutoff slots.radius (referenceLength l)
-        slots.radius_pos (referenceLength_pos l) (clock l n) :=
-  canonical_cutoff l n
 
 end NavierStokes.ActualCarrierTransport

@@ -88,24 +88,6 @@ theorem correction_nonneg {K f : ℝ → ℝ} {r : ℝ} (hr : 0 ≤ r)
   exact sub_nonneg.mpr ((mul_nonpos_of_nonneg_of_nonpos (sq_nonneg r) hKr).trans
     (mul_nonneg hr hK))
 
-/-- The backward stress controls the positive radial boundary term. -/
-theorem backwardStress_ge_boundary {K f T : ℝ → ℝ} {r : ℝ} (hr : 0 < r)
-    (hK : ∀ u ∈ Ici r, DifferentiableAt ℝ K u)
-    (hf : ∀ u ∈ Ici r, ContDiffAt ℝ 2 f u)
-    (hv : IntegrableOn (fun u => u ^ 2 * viscousResidual K f u) (Ioi r))
-    (hc : IntegrableOn (correction K f) (Ioi r))
-    (ht : IntegrableOn (fun u => u ^ 2 * T u) (Ioi r))
-    (hboundary : Tendsto (boundary K f) atTop (𝓝 0))
-    (hKpos : ∀ u ∈ Ioi r, 0 ≤ K u) (hKdec : ∀ u ∈ Ioi r, deriv K u ≤ 0)
-    (hfinc : ∀ u ∈ Ioi r, 0 ≤ deriv f u) (hTpos : ∀ u ∈ Ioi r, 0 ≤ T u) :
-    K r * deriv f r ≤ backwardStress (fun u => T u + viscousResidual K f u) r := by
-  rw [backwardStress_formula hr hK hf hv hc ht hboundary]
-  have ht0 : 0 ≤ ∫ u in Ioi r, u ^ 2 * T u :=
-    setIntegral_nonneg measurableSet_Ioi (fun u hu => mul_nonneg (sq_nonneg u) (hTpos u hu))
-  have hc0 : 0 ≤ ∫ u in Ioi r, correction K f u :=
-    setIntegral_nonneg measurableSet_Ioi (fun u hu =>
-      correction_nonneg (hr.le.trans hu.le) (hKpos u hu) (hKdec u hu) (hfinc u hu))
-  exact le_add_of_nonneg_right (div_nonneg (add_nonneg ht0 hc0) (sq_nonneg r))
 
 /-- A precise version of the time-integral lower comparison. The extra
 coefficient comparison is distinct from mere monotonicity of `K`. -/
@@ -600,20 +582,6 @@ theorem terminal_navierStokesResidual (C : ℝ) {h t : ℝ} {x : ProblemStatemen
   · ring
   · ring
 
-/-- A backward stress solves the actual radial divergence equation without
-any hypothesis about its integral over the whole radius. -/
-theorem backwardStress_divergence {R : ℝ → ℝ} {a r : ℝ} (hr : r ≠ 0) (ha : a < r)
-    (hi : IntegrableOn (fun u => u ^ 2 * R u) (Ioi a))
-    (hc : ContinuousOn (fun u => u ^ 2 * R u) (Ioi a)) :
-    deriv (backwardStress R) r + 2 * backwardStress R r / r = -R r := by
-  have hd := (neg_tailIntegral_hasDerivAt ha hi hc).fun_neg
-  have hd' : HasDerivAt (fun x => ∫ u in Ioi x, u ^ 2 * R u) (-(r ^ 2 * R r)) r := by
-    simpa only [neg_neg] using hd
-  have hT := hd'.fun_div ((hasDerivAt_id r).fun_pow 2) (pow_ne_zero 2 hr)
-  rw [show deriv (backwardStress R) r = _ from hT.deriv]
-  unfold backwardStress
-  simp only [Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one, id_eq]
-  field_simp ; ring
 
 noncomputable def forwardStress (R : ℝ → ℝ) (r : ℝ) : ℝ :=
   -(∫ u in (0 : ℝ)..r, u ^ 2 * R u) / r ^ 2
@@ -775,21 +743,6 @@ theorem terminalStress_ge_boundary {C h t r z : ℝ}
     exact terminal_correction_nonneg hC hh hh1 ht (hr.trans hu)
       (hf.differentiable (by norm_num) _) (hmono _)
 
-theorem terminalStress_nonneg {C h t r z : ℝ}
-    (hC : 0 < C) (hh : 0 < h) (hh1 : h < 1 / 2) (ht : t < 1) (hr : 0 < r)
-    {f : ℝ → ℝ} (hf : ContDiff ℝ 2 f) (hmono : ∀ y, 0 ≤ deriv f y)
-    (hv : IntegrableOn (fun u => u ^ 2 * viscousResidual (heatAmplitude C (1 + h) t)
-      (radialSlice (flattening h f) t z) u) (Ioi r))
-    (hc : IntegrableOn (correction (heatAmplitude C (1 + h) t)
-      (radialSlice (flattening h f) t z)) (Ioi r))
-    (hT : IntegrableOn (fun u => u ^ 2 * timeResidual C h f t z u) (Ioi r))
-    (hb : Tendsto (boundary (heatAmplitude C (1 + h) t)
-      (radialSlice (flattening h f) t z)) atTop (𝓝 0)) :
-    0 ≤ terminalStress C h f t z r := by
-  apply le_trans _ (terminalStress_ge_boundary hC hh hh1 ht hr hf hmono hv hc hT hb)
-  apply mul_nonneg (heatAmplitude_pos hC (by linarith) ht hr).le
-  rw [(flattening_radial_hasDerivAt hh hh1 ht hr (hf.differentiable (by norm_num) _)).deriv]
-  exact div_nonneg (mul_nonneg (by norm_num) (hmono _)) hr.le
 
 /-- A plateau at infinity automatically removes the radial boundary term,
 irrespective of the behavior of the heat carrier there. -/
@@ -925,13 +878,6 @@ noncomputable def edgeStress (c : ℝ) (b a : E × ℝ → ℝ) (y : E × ℝ) :
 noncomputable def normalizedEdgeStress (c : ℝ) (b a : E × ℝ → ℝ) (y : E × ℝ) : ℝ :=
   b y + y.2 ^ 3 * ParametricFlatFactor.factor c 3 a y
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] in
-/-- Actual integral factorization, including auxiliary parameters. -/
-theorem edgeStress_factorization (c : ℝ) (b a : E × ℝ → ℝ) (y : E × ℝ) :
-    edgeStress c b a y = (FlatCutoff.edge c y.2 / y.2 ^ 3) * normalizedEdgeStress c b a y := by
-  rw [edgeStress, ParametricFlatFactor.primitive_eq_scale_mul_factor]
-  unfold FlatPrimitive.scale normalizedEdgeStress
-  ring
 
 theorem normalizedEdgeStress_contDiff {c : ℝ} (hc : 0 < c) {b a : E × ℝ → ℝ}
     (hb : ContDiff ℝ ∞ b) (ha : ContDiff ℝ ∞ a) :
@@ -942,13 +888,6 @@ omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem normalizedEdgeStress_zero (c : ℝ) (b a : E × ℝ → ℝ) (p : E) :
     normalizedEdgeStress c b a (p, 0) = b (p, 0) := by simp [normalizedEdgeStress]
 
-theorem normalizedEdgeStress_eventually_pos {c : ℝ} (hc : 0 < c) {b a : E × ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) (ha : ContDiff ℝ ∞ a) (p : E) (hbp : 0 < b (p, 0)) :
-    ∀ᶠ y in 𝓝 (p, 0), 0 < normalizedEdgeStress c b a y := by
-  have hp : 0 < normalizedEdgeStress c b a (p, 0) := by
-    rw [normalizedEdgeStress_zero]
-    exact hbp
-  exact (normalizedEdgeStress_contDiff hc hb ha).continuous.continuousAt.eventually (Ioi_mem_nhds hp)
 
 end ParametricEdge
 

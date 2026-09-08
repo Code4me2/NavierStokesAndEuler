@@ -134,12 +134,5 @@ theorem physicalPath_translation_contDiff (hTpos : 0 < T)
     hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
   exact s.physicalPath_translation_contDiff hTpos hF hp.1 hp.2.1 t
 
-/-- Each physical time slice has a genuine smooth representative on ordinary R³. -/
-theorem physicalPath_smooth_representative (hTpos : 0 < T)
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f)) (t : Icc (0 : ℝ) T) :
-    ∃ b : Space → Space, ContDiff ℝ ∞ b ∧ (s.physicalPath t : Space → Space) =ᵐ[volume] b :=
-  EulerMeanSmoothRepresentative.exists_smooth_representative (s.physicalPath t)
-    (physicalPath_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-      hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hTpos hf t)
 
 end EulerMeanSourceSpatialRegularity

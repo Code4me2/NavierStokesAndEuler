@@ -14,10 +14,6 @@ open Set EulerSmoothLimit EulerPacketTerminalDatum EulerPacketSourceFrequency
 
 namespace SmoothState
 
-theorem velocityIncrement_restrictTime {A B : Parent} (S : SmoothState A) (T : SmoothState B)
-    (s : ℝ) (hs : 0 < s) (hA : s ≤ A.T) (hB : s ≤ B.T) :
-    (S.restrictTime s hs hA).velocityIncrement (T.restrictTime s hs hB) =
-      S.velocityIncrement T := rfl
 
 end SmoothState
 

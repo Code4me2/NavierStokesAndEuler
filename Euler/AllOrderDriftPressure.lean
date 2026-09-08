@@ -37,11 +37,6 @@ theorem Budget.commonPressure_gradient (B : Budget period hT A) (t : Icc (0 : �
 def Budget.pressureTower (B : Budget period hT A) : FieldTower period T :=
   (B.family period).pressureTower period (B.comparisonData period)
 
-/-- The all-order tower represents exactly the pressure selected from the finite construction. -/
-theorem Budget.pressureTower_value (B : Budget period hT A)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    value period ((B.pressureTower period).realization q t) = B.commonPressure period t :=
-  (B.pressureTower period).value_eq q t
 
 /-- Evaluating the genuine finite-order pressure solver on the constructed correction
 gives exactly the corresponding realization of the common pressure tower. -/
@@ -151,42 +146,6 @@ theorem Budget.normalizedGraphPotential_even (B : Budget period hT A) (P : Parit
     B.normalizedGraphPotential period k t (-x) = B.normalizedGraphPotential period k t x :=
   (B.family period).normalizedGraphPotential_even period (B.comparisonData period) P k t x
 
-/-- The all-order drift-aware input budget constructs a common actual pressure,
-a jointly continuous smooth spatial representative, and a canonically normalized
-smooth scalar graph potential. No correction solution or pressure is assumed. -/
-theorem exists_normalized_pressure (B : Budget period hT A) (k : ℝ) (hk : k * A.κ = 1) :
-    ∃ (p : Icc (0 : ℝ) T → LiftDomain period → Vector3)
-      (Q : Icc (0 : ℝ) T → Vector3 → ℝ),
-      (∀ t, (B.commonPressure period t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] p t) ∧
-      Continuous p.uncurry ∧
-      (∀ t x, ContDiff ℝ ∞ (localFieldLift period (p t) x)) ∧
-      Continuous Q.uncurry ∧ (∀ t, Q t 0 = 0) ∧
-      (∀ t, ContDiff ℝ ∞ (Q t)) ∧
-      ∀ t x, gradient (Q t) x = A.κ • p t (cylinderGraph period k A.direction x) :=
-  ⟨B.pointPressure period, B.normalizedGraphPotential period k,
-    B.pointPressure_ae period, B.pointPressure_joint_continuous period,
-    B.pointPressure_smooth period, B.normalizedGraphPotential_joint_continuous period k,
-    B.normalizedGraphPotential_zero period k, B.normalizedGraphPotential_smooth period k hk,
-    B.normalizedGraphPotential_gradient period k hk⟩
 
-/-- With parity of the prescribed data, the same constructed pressure representative
-is odd and its canonically normalized scalar graph potential is even. -/
-theorem exists_odd_normalized_pressure (B : Budget period hT A) (P : ParityData period A)
-    (k : ℝ) (hk : k * A.κ = 1) :
-    ∃ (p : Icc (0 : ℝ) T → LiftDomain period → Vector3)
-      (Q : Icc (0 : ℝ) T → Vector3 → ℝ),
-      (∀ t, (B.commonPressure period t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] p t) ∧
-      Continuous p.uncurry ∧
-      (∀ t x, ContDiff ℝ ∞ (localFieldLift period (p t) x)) ∧
-      (∀ t x, p t (-x) = -p t x) ∧
-      Continuous Q.uncurry ∧ (∀ t, Q t 0 = 0) ∧
-      (∀ t, ContDiff ℝ ∞ (Q t)) ∧ (∀ t x, Q t (-x) = Q t x) ∧
-      ∀ t x, gradient (Q t) x = A.κ • p t (cylinderGraph period k A.direction x) :=
-  ⟨B.pointPressure period, B.normalizedGraphPotential period k,
-    B.pointPressure_ae period, B.pointPressure_joint_continuous period,
-    B.pointPressure_smooth period, B.pointPressure_odd period P,
-    B.normalizedGraphPotential_joint_continuous period k, B.normalizedGraphPotential_zero period k,
-    B.normalizedGraphPotential_smooth period k hk, B.normalizedGraphPotential_even period P k,
-    B.normalizedGraphPotential_gradient period k hk⟩
 
 end EulerAllOrderDriftCorrection

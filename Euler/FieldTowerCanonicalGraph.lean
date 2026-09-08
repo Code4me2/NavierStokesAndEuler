@@ -31,15 +31,6 @@ theorem canonicalGraphWordPath_norm_sq_le (n : ℕ) (w : Fin n → Fin 4)
       (2/P+2*P)*‖A.realization (n+1) t‖^2 :=
   A.graphWordPath_norm_sq_le A.pointField A.pointField_smooth A.pointField_ae θ hθ n w t
 
-theorem canonicalGraphWordPath_norm_sq_le_high (n : ℕ) (w : Fin n → Fin 4)
-    (q : ℕ) (hq : n+1 ≤ q) (t : Icc (0 : ℝ) T) :
-    ‖A.canonicalGraphWordPath θ hθ n w t‖^2 ≤
-      (2/P+2*P)*‖A.realization q t‖^2 := by
-  have hn := restrictOperator_bound P hq (A.realization q t)
-  rw [A.restrict_realization] at hn
-  have hP : 0 < P := Fact.out
-  exact (A.canonicalGraphWordPath_norm_sq_le θ hθ n w t).trans
-    (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (norm_nonneg _) hn 2) (by positivity))
 
 theorem canonicalGraphWordPath_hasDerivAt (B : EulerAllOrderCorrectionData.FieldTower P T)
     (hT : 0 ≤ T) (n : ℕ) (w : Fin n → Fin 4) (q : ℕ) (hq : n+1 ≤ q)

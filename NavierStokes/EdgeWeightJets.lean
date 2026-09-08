@@ -206,16 +206,6 @@ theorem edge_mul_iteratedFDeriv_bound_unit {c : ℝ} (hc : 0 < c) (j : ℕ)
   obtain ⟨C, hC, N, hbound⟩ := edge_mul_iteratedFDeriv_bound hc j hB hS n (by norm_num : (0 : ℝ) < 1)
   exact ⟨C, hC, N, fun p hp x hx => hbound n le_rfl p hp x hx.1 hx.2.le⟩
 
-theorem weightedJets_of_isCompact_closure {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) {U : Set E} (hU : IsCompact (closure U)) :
-    WeightedQuotients.WeightedJets c U (fun _ => 1) (weighted c j B) := by
-  apply WeightedQuotients.WeightedJets.of_bounds (fun _ _ => le_rfl)
-  intro n
-  obtain ⟨C, hC, N, hbound⟩ := edge_mul_iteratedFDeriv_bound_unit hc j hB hU n
-  refine ⟨C, hC.le, 0, N, ?_⟩
-  intro y hy
-  unfold weighted
-  simpa only [pow_zero, mul_one, Prod.eta] using hbound y.1 (subset_closure hy.1) y.2 hy.2
 
 theorem edge_div_pow_iteratedFDeriv_zero {c : ℝ} (hc : 0 < c) (j n : ℕ) :
     iteratedFDeriv ℝ n (fun x => FlatCutoff.edge c x / x ^ j) 0 = 0 := by
@@ -239,10 +229,6 @@ theorem weighted_iteratedFDeriv_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
   unfold weighted
   simpa only [hz, norm_zero, mul_zero, zero_mul, Finset.sum_const_zero] using h
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem weighted_of_nonpos (c : ℝ) (j : ℕ) (B : E × ℝ → ℝ) {y : E × ℝ}
-    (hy : y.2 ≤ 0) : weighted c j B y = 0 := by
-  simp [weighted, FlatCutoff.edge_of_nonpos c hy]
 
 end Joint
 
@@ -333,17 +319,6 @@ theorem norm_mixed_derivatives_le {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ 
   exact (norm_iteratedFDeriv_parameter_le (radialIterate_contDiff hf n) m p x).trans
     (norm_radialIterate_le hf n m (p, x))
 
-theorem edge_mul_mixed_derivatives_bound {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) {S : Set E} (hS : IsCompact S)
-    (k : ℕ) {d : ℝ} (hd : 0 < d) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ m n : ℕ, m + n ≤ k → ∀ p ∈ S,
-      ∀ x : ℝ, 0 < x → x ≤ d →
-        ‖iteratedFDeriv ℝ m (fun q => iteratedDeriv n
-          (fun t => weighted c j B (q, t)) x) p‖ ≤ C * FlatCutoff.edge c x / x ^ N := by
-  obtain ⟨C, hC, N, hbound⟩ := edge_mul_iteratedFDeriv_bound hc j hB hS k hd
-  exact ⟨C, hC, N, fun m n hmn p hp x hx hxd =>
-    (norm_mixed_derivatives_le (weighted_contDiff hc j hB) m n p x).trans
-      (hbound (m + n) hmn p hp x hx hxd)⟩
 
 end MixedDerivatives
 
@@ -436,16 +411,6 @@ theorem edge_smul_iteratedFDeriv_bound {c : ℝ} (hc : 0 < c) (j : ℕ)
           C * FlatCutoff.edge c x / x ^ N :=
   edge_smul_iteratedFDeriv_bound_on hc j isOpen_univ hB.contDiffOn hS n hd (subset_univ _)
 
-theorem edge_mul_iteratedFDeriv_bound_on {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} {V : Set (E × ℝ)} (hV : IsOpen V) (hB : ContDiffOn ℝ ∞ B V)
-    {S : Set E} (hS : IsCompact S) (n : ℕ) {d : ℝ} (hd : 0 < d)
-    (hSV : S ×ˢ Icc (0 : ℝ) d ⊆ V) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ d →
-      ‖iteratedFDeriv ℝ i (weighted c j B) (p, x)‖ ≤
-        C * FlatCutoff.edge c x / x ^ N := by
-  unfold weighted
-  simpa only [smul_eq_mul] using
-    edge_smul_iteratedFDeriv_bound_on hc j hV hB hS n hd hSV
 
 end VectorCoefficients
 
@@ -475,25 +440,7 @@ theorem weighted_mul (c d : ℝ) (j k : ℕ) (B D : E × ℝ → ℝ) :
         (y.2 ^ j * y.2 ^ k) * (B y * D y) by ring]
   rw [edge_mul_edge]
 
-theorem weighted_mul_iteratedFDeriv_bound {c d : ℝ} (hc : 0 < c) (hd : 0 < d)
-    (j k : ℕ) {B D : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) (hD : ContDiff ℝ ∞ D)
-    {S : Set E} (hS : IsCompact S) (n : ℕ) {a : ℝ} (ha : 0 < a) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ a →
-      ‖iteratedFDeriv ℝ i (fun y => weighted c j B y * weighted d k D y) (p, x)‖ ≤
-        C * FlatCutoff.edge (c + d) x / x ^ N := by
-  rw [weighted_mul]
-  exact edge_mul_iteratedFDeriv_bound (add_pos hc hd) (j + k) (hB.mul hD) hS n ha
 
-/-- Any fixed nonnegative power of the radial coordinate can be retained
-inside the actual smooth coefficient. Inverse powers are already arbitrary. -/
-theorem radial_power_iteratedFDeriv_bound {c : ℝ} (hc : 0 < c) (j k : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) {S : Set E} (hS : IsCompact S)
-    (n : ℕ) {d : ℝ} (hd : 0 < d) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ d →
-      ‖iteratedFDeriv ℝ i (fun y : E × ℝ =>
-        (FlatCutoff.edge c y.2 / y.2 ^ j) * (y.2 ^ k * B y)) (p, x)‖ ≤
-          C * FlatCutoff.edge c x / x ^ N :=
-  edge_mul_iteratedFDeriv_bound hc j ((contDiff_snd.pow k).mul hB) hS n hd
 
 theorem edge_pow (c x : ℝ) {k : ℕ} (hk : 0 < k) :
     FlatCutoff.edge c x ^ k = FlatCutoff.edge ((k : ℝ) * c) x := by
@@ -512,15 +459,6 @@ theorem weighted_pow (c : ℝ) (j : ℕ) (B : E × ℝ → ℝ) {k : ℕ} (hk : 
   funext y
   simp only [weighted, mul_pow, div_pow, edge_pow c y.2 hk, pow_mul]
 
-theorem weighted_pow_iteratedFDeriv_bound {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) {S : Set E} (hS : IsCompact S)
-    {k : ℕ} (hk : 0 < k) (n : ℕ) {d : ℝ} (hd : 0 < d) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ d →
-      ‖iteratedFDeriv ℝ i (fun y => weighted c j B y ^ k) (p, x)‖ ≤
-        C * FlatCutoff.edge ((k : ℝ) * c) x / x ^ N := by
-  rw [weighted_pow c j B hk]
-  exact edge_mul_iteratedFDeriv_bound (mul_pos (Nat.cast_pos.mpr hk) hc)
-    (j * k) (hB.pow k) hS n hd
 
 end Products
 

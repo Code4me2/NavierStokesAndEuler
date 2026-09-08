@@ -180,25 +180,6 @@ theorem real_domain_mem (N : ReferencePath.Input) {X eta : ℝ} (hX : 0 ≤ X)
   have := mul_nonneg N.scale_pos.le hX
   linarith
 
-/-- The canonical right jets agree with the actual smooth ACT jets at the
-axis as well as at every positive radius. -/
-theorem element_right_jets {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    (S : ℝ) (i : Fin 4) (k : ℕ) {X eta : ℝ} (hX : 0 ≤ X)
-    (heta : eta ∈ ReferencePath.parameterInterval) :
-    iteratedDerivWithin k (fun Y => SlowRecursion.profile (element E hT hδ hδT κ hP0 S i) (Y, eta)) (Ici 0) X =
-      iteratedDeriv k (fun Y => realFields (N := N) hT hδ hδT κ hP0 i (Y, eta)) X := by
-  have he : EqOn (fun Y => SlowRecursion.profile (element E hT hδ hδT κ hP0 S i) (Y, eta))
-      (fun Y => realFields (N := N) hT hδ hδT κ hP0 i (Y, eta)) (Ici 0) :=
-    fun Y hY => element_profile E hT hδ hδT κ hP0 S i hY heta
-  rw [iteratedDerivWithin_congr he hX]
-  have hs : ContDiffAt ℝ ∞ (fun Y => realFields (N := N) hT hδ hδT κ hP0 i (Y, eta)) X :=
-    ((realFields_smooth hT hδ hδT κ hP0 i).contDiffAt
-      (N.radialDomain.isOpen.mem_nhds (real_domain_mem N hX heta))).comp X
-      (contDiffAt_id.prodMk contDiffAt_const)
-  simp only [iteratedDerivWithin_eq_iteratedFDerivWithin, iteratedDeriv_eq_iteratedFDeriv]
-  rw [iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici 0)
-    (hs.of_le (ENat.natCast_le_of_coe_top_le_withTop le_rfl k)) hX]
 
 theorem element_profile_germ {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0)
@@ -304,18 +285,6 @@ theorem hierarchy_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
   simp only [(hierarchy E hT hδ hδT κ hP0 C).starts]
   exact base_values E hT hδ hδT κ hP0 C _ hX heta
 
-theorem hierarchy_physical_swirl {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    {C : ℝ} (hC : C ≠ 0) {X eta : ℝ} (hX : 0 ≤ X)
-    (heta : eta ∈ ReferencePath.parameterInterval) :
-    let A := hierarchy E hT hδ hδT κ hP0 C
-    let P := StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0
-    Real.sqrt (2 * X) * SlowRecursion.profile (A.coefficients 0 0) (X, eta) / C = P.E (X, eta) := by
-  have hv := (hierarchy_base_values E hT hδ hδT κ hP0 C hX heta).1
-  dsimp only
-  rw [hv]
-  unfold ProfileHistories.Profiles.E
-  field_simp
 
 theorem hierarchy_on_collar {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0) (C : ℝ)
@@ -367,14 +336,6 @@ theorem fromNatural_window {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
       (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow (tubeWidth hp hP0 F hΛ hsmall hσ)) :=
   parameterDomain_real (constructedTube hp hP0 F hΛ hsmall hσ).real_mem heta
 
-theorem fromNatural_uniform_tube :
-    ∃ τ : ℝ, 0 < τ ∧
-      AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow τ ⊆
-        parameterDomain (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow
-          (tubeWidth hp hP0 F hΛ hsmall hσ)) := by
-  exact ⟨min (tubeWidth hp hP0 F hΛ hsmall hσ) (1 / 40),
-    lt_min (tubeWidth_pos hp hP0 F hΛ hsmall hσ) (by norm_num),
-    smallTube_subset_domain (min_le_left _ _) (min_le_right _ _)⟩
 
 theorem fromNatural_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) {X eta : ℝ} (hX : 0 ≤ X)
@@ -389,34 +350,7 @@ theorem fromNatural_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
   hierarchy_base_values (constructedTube hp hP0 F hΛ hsmall hσ) hT hδ hδT κ
     (actualPressure_smooth hp hP0) C hX heta
 
-theorem fromNatural_positive_order {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) {n : ℕ} (hn : 0 < n)
-    {X eta : ℝ} (hX : 0 < X)
-    (hcollar : X ≤ (ReferenceJetBounds.referenceInput F hΛ).endpoint * Real.exp δ)
-    (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    SlowRecursion.OrderEquations h C
-      (fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ).coefficients n (X, eta) :=
-  hierarchy_on_collar (constructedTube hp hP0 F hΛ hsmall hσ) hT hδ hδT κ
-    (actualPressure_smooth hp hP0) C hn hX hcollar heta
 
-theorem fromNatural_initial {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) {X eta : ℝ}
-    (hX : 0 ≤ X) (hinitial : X ≤ 4 / Λ) (heta : eta ∈ ReferencePath.parameterInterval) :
-    let A := fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-    SlowRecursion.profile (A.coefficients 0 0) (X, eta) = C * F.family.f (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 1) (X, eta) = F.family.U (X, eta) := by
-  have hv := fromNatural_base_values hp hP0 F hΛ hsmall hσ hT hδ hδT κ hX heta
-  have he : X ≤ (ReferenceJetBounds.referenceInput F hΛ).endpoint := hinitial
-  dsimp only at hv ⊢
-  refine ⟨hv.1.trans ?_, hv.2.1.trans ?_⟩
-  · change C * StressActivation.FromReference.f _ T κ δ (X, eta) = _
-    rw [StressActivation.FromReference.f_eq_reference _ T κ δ he,
-      ReferencePath.Input.refF_eq_natural_initial _ δ he]
-    rfl
-  · change StressActivation.FromReference.U _ T κ δ (X, eta) = _
-    rw [StressActivation.FromReference.U_eq_reference _ T κ δ he,
-      ReferencePath.Input.refU_eq_natural_initial _ δ he]
-    rfl
 
 theorem fromNatural_stock_prefix {T δ κ w₁ w₂ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < ReferencePath.rampLimit)
@@ -447,50 +381,9 @@ theorem fromNatural_stock_prefix {T δ κ w₁ w₂ : ℝ} (hT : 0 < T) (hδ : 0
     hv.2.2.1.trans (congrArg₂ (· - ·) hhist.1.symm (he X le_rfl).2.symm),
     hv.2.2.2.trans hhist.2.symm⟩
 
-theorem fromNatural_stock_fields {T δ κ w₁ w₂ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (hC : C ≠ 0)
-    (hb : δ ≤ (TransitionRamp.ofNatural F.family hΛ hsmall hδ hδT (actualPressure_smooth hp hP0)).bigTime)
-    (hw₁ : 0 < w₁) (hw₂ : 0 < w₂) {X eta : ℝ} (hX : 0 ≤ X)
-    (hcollar : X ≤ (ReferenceJetBounds.referenceInput F hΛ).endpoint * Real.exp δ)
-    (heta : eta ∈ ReferencePath.parameterInterval) :
-    let A := fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-    let Q := TransitionRamp.physicalProfiles F.family hΛ hsmall hδ hδT
-      (actualPressure_smooth hp hP0) (κ := κ) hT hb hw₁ hw₂
-    Real.sqrt (2 * X) * SlowRecursion.profile (A.coefficients 0 0) (X, eta) / C = Q.E (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 1) (X, eta) = Q.U (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 3) (X, eta) = Q.pressure (X, eta) := by
-  have hv := fromNatural_stock_prefix hp hP0 F hΛ hsmall hσ (κ := κ) hT hδ hδT hb hw₁ hw₂ hX hcollar heta
-  refine ⟨?_, hv.2.1, hv.2.2.2⟩
-  rw [hv.1]
-  unfold ProfileHistories.Profiles.E
-  field_simp
 
-theorem fromNatural_profiles_smooth {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (n : ℕ) (i : Fin 5) :
-    ContDiffOn ℝ ∞
-      (SlowRecursion.profile ((fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ).coefficients n i))
-      (Ico (0 : ℝ) (axisRadius (ReferenceJetBounds.referenceInput F hΛ) δ ^ 2) ×ˢ
-        PositiveAxisExistence.realParameterDomain (parameterDomain
-          (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow (tubeWidth hp hP0 F hΛ hsmall hσ)))) :=
-  (fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ).profiles_smooth (axisRadius_pos _ _)
-    (parameterDomain_open (constructedTube hp hP0 F hΛ hsmall hσ).isOpen) n i
 
-theorem fromNatural_zero_axis {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) {n : ℕ} (hn : 0 < n)
-    (i : Fin 5) {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    (fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ).coefficients n i (0, (eta : ℂ)) = 0 :=
-  (fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ).zero_axis n hn i (eta : ℂ)
-    (fromNatural_window hp hP0 F hΛ hsmall hσ heta)
 
-theorem fromNatural_axis_jets {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (n : ℕ) (i : Fin 5) (k : ℕ)
-    {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    let A := fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-    iteratedDerivWithin k (fun X => SlowRecursion.profile (A.coefficients n i) (X, eta)) (Ici 0) 0 =
-      ((k.factorial : ℝ) / ((2 * k).factorial : ℝ)) •
-        iteratedDeriv (2 * k) (fun r => (A.coefficients n i (r, (eta : ℂ))).re) 0 :=
-  SlowRecursion.profile_axis_jet (axisRadius_pos _ _) _
-    (fromNatural_window hp hP0 F hΛ hsmall hσ heta) k
 
 end NaturalConstruction
 

@@ -150,29 +150,6 @@ theorem temporal_differentiable_of_presingular_smooth
   exact ((smooth_at_interior hg ht x).differentiableAt (by simp)).comp t
     (differentiableAt_id.prodMk (differentiableAt_const x))
 
-/-- The perturbation identity applies directly to the smoothness conditions
-appearing in the candidate PDE statement, at every interior time. -/
-theorem navierStokesResidual_add_sub_of_smooth
-    (u e : VelocityField) (p q : PressureField)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (he : ContDiffOn ℝ ∞ e preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain)
-    (hq : ContDiffOn ℝ ∞ q preSingularDomain)
-    (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) (x : Space) :
-    navierStokesResidual (fun z => u z + e z) (fun z => p z + q z) t x -
-      navierStokesResidual u p t x =
-        temporalDerivative e t x - spatialLaplacian e t x + pressureGradient q t x +
-          spatialDerivative u t x (e (t, x)) + spatialDerivative e t x (u (t, x)) +
-          spatialDerivative e t x (e (t, x)) := by
-  exact navierStokesResidual_add_sub u e p q t x
-    (temporal_differentiable_of_presingular_smooth u hu t ht x)
-    (temporal_differentiable_of_presingular_smooth e he t ht x)
-    ((spatial_contDiff_of_presingular_smooth u hu t ht).of_le
-      (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)))
-    ((spatial_contDiff_of_presingular_smooth e he t ht).of_le
-      (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)))
-    ((spatial_contDiff_of_presingular_smooth p hp t ht).differentiable (by simp) x)
-    ((spatial_contDiff_of_presingular_smooth q hq t ht).differentiable (by simp) x)
 
 /-- A constant spatial scalar factors out of the actual spatial derivative. -/
 theorem spatialDerivative_const_smul
@@ -264,13 +241,5 @@ theorem navierStokesResidual_time_smul
   simp only [smul_add, smul_sub, sub_smul]
   abel
 
-/-- A scalar time switch preserves the divergence-free condition. -/
-theorem time_smul_divergence_free
-    (u : VelocityField) (a : ℝ → ℝ) (t : ℝ) (x : Space)
-    (hu : DifferentiableAt ℝ (fun y : Space => u (t, y)) x)
-    (hdiv : spatialDivergence u t x = 0) :
-    spatialDivergence (fun z => a z.1 • u z) t x = 0 := by
-  change spatialDivergence (fun z => a t • u z) t x = 0
-  rw [spatialDivergence_const_smul u t x (a t) hu, hdiv, mul_zero]
 
 end NavierStokes.ResidualCalculus

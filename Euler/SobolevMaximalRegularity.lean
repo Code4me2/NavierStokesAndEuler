@@ -55,17 +55,5 @@ theorem viscous_mild_maximal_regularity {q : ℕ} (ν : ℝ) (hν : 0 < ν) (T :
   intro U hU
   exact ⟨maximal_limit_restriction period T hT u U hU, hU⟩
 
-/-- The genuine full higher-order spatial derivatives exist at almost every time of the actual viscous solution. -/
-theorem viscous_mild_ae_higher {q : ℕ} (ν : ℝ) (hν : 0 < ν) (T : ℝ) (hT : 0 ≤ T)
-    (u₀ : SobolevSpace period (q+1)) (f : C(Icc (0 : ℝ) T, SobolevSpace period q))
-    (u : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)))
-    (hsol : ∀ t : Icc (0 : ℝ) T,
-      u t = heatOperator period (q+1) (2*ν*t.val).toNNReal u₀ +
-        ∫ r in (0 : ℝ)..t.val, heatKernel period q ν hν r (extendPath T hT f (t.val-r))) :
-    ∀ᵐ t ∂timeMeasure T, ∃ v : SobolevSpace period (2+q),
-      restrictOperator period (by omega : q+1 ≤ 2+q) v = extendPath T hT u t := by
-  obtain ⟨U, hU, _⟩ := viscous_mild_maximal_regularity period ν hν T hT u₀ f u hsol
-  filter_upwards [hU] with t ht
-  exact ⟨U t, ht⟩
 
 end EulerSobolevMaximalRegularity

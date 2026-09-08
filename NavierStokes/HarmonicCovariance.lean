@@ -171,49 +171,6 @@ theorem angularProduct_add_error (A B C E : OscillatoryScalar D)
       (fun n x => (hC n x).mul (hB n x))]
   abel
 
-/-- The error in the actual angular covariance has order `1.5-κ`:
-the two primary-curl products and the curl-curl product are all retained. -/
-theorem realAngularProduct_curl_error_mem {s : StripData D} {P : ℕ → D → ℝ}
-    {κ : ℝ} (hκ : κ ≤ 1 / 2)
-    (a b da db : ℕ → Coefficients D) (N : ℕ)
-    (hband : ∀ n, BandLimited (a n) N) (hdband : ∀ n, BandLimited (da n) N)
-    (ha : ∀ j, WaveClass s P (1 / 2) (fun n x => a n j x))
-    (hb : ∀ j, WaveClass s P (1 / 2) (fun n x => b n j x))
-    (hda : ∀ j, WaveClass s P (1 - κ) (fun n x => da n j x))
-    (hdb : ∀ j, WaveClass s P (1 - κ) (fun n x => db n j x))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) (hkp : ∀ n, kp n ≠ 0) :
-    MeanClass s (3 / 2 - κ)
-      (angularAverage (fun n p =>
-        (field (a n + da n) (k n) (Φ n) (kp n) p).re *
-        (field (b n + db n) (k n) (Φ n) (kp n) p).re) -
-      angularAverage (fun n p =>
-        (field (a n) (k n) (Φ n) (kp n) p).re *
-        (field (b n) (k n) (Φ n) (kp n) p).re)) := by
-  let A : OscillatoryScalar D := fun n p => (field (a n) (k n) (Φ n) (kp n) p).re
-  let B : OscillatoryScalar D := fun n p => (field (b n) (k n) (Φ n) (kp n) p).re
-  let C : OscillatoryScalar D := fun n p => (field (da n) (k n) (Φ n) (kp n) p).re
-  let E : OscillatoryScalar D := fun n p => (field (db n) (k n) (Φ n) (kp n) p).re
-  have hAE : MeanClass s (3 / 2 - κ) (angularAverage (A * E)) := by
-    convert! realAngularProduct_mem a db N hband ha hdb hP0 hP1 k Φ kp hkp using 1
-    ring
-  have hCB : MeanClass s (3 / 2 - κ) (angularAverage (C * B)) := by
-    convert! realAngularProduct_mem da b N hdband hda hb hP0 hP1 k Φ kp hkp using 1
-    ring
-  have hCE : MeanClass s (3 / 2 - κ) (angularAverage (C * E)) :=
-    (realAngularProduct_mem da db N hdband hda hdb hP0 hP1 k Φ kp hkp).mono_exponent (by linarith)
-  have he := angularProduct_add_error A B C E
-    (fun n x => Complex.continuous_re.comp (field_angular_continuous (a n) (k n) (Φ n) (kp n) x))
-    (fun n x => Complex.continuous_re.comp (field_angular_continuous (b n) (k n) (Φ n) (kp n) x))
-    (fun n x => Complex.continuous_re.comp (field_angular_continuous (da n) (k n) (Φ n) (kp n) x))
-    (fun n x => Complex.continuous_re.comp (field_angular_continuous (db n) (k n) (Φ n) (kp n) x))
-  have herr : MeanClass s (3 / 2 - κ)
-      (angularAverage ((A + C) * (B + E)) - angularAverage (A * B)) := by
-    rw [he]
-    exact (hAE.add hCB).add hCE
-  simp only [A, B, C, E, HarmonicResidual.field_add, Complex.add_re] at herr ⊢
-  exact herr
 
 end RealCoefficientCovariance
 

@@ -41,13 +41,6 @@ theorem block_clm_apply_gevrey (directions : ι → P) (q : ℕ)
   exact (block_clm_apply_le directions q A f hA hf n x).trans
     ((le_abs_self _).trans (by simpa only [Nat.zero_add, EulerJetProductBounds.leibnizConvolution] using hp))
 
-theorem block_linear_gevrey (directions : ι → P) (q : ℕ)
-    (L : E →L[ℝ] F) (f : P → E) (hf : ContDiff ℝ ∞ f)
-    (R C : ℝ) (d : ℕ) (hb : ∀ n x, block directions q f n x ≤ C*majorant R d n)
-    (n : ℕ) (x : P) :
-    block directions q (fun y => L (f y)) n x ≤ (‖L‖*C)*majorant R d n :=
-  (block_comp_clm_le directions q L f hf n x).trans
-    (by simpa only [mul_assoc] using mul_le_mul_of_nonneg_left (hb n x) (norm_nonneg L))
 
 theorem block_add_gevrey (directions : ι → P) (q : ℕ)
     (f g : P → E) (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)

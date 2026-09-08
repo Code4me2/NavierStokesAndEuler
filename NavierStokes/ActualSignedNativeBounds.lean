@@ -680,25 +680,5 @@ theorem source_bounds {β : ℝ}
 
 end Bounds
 
-/-- The request premise can itself be discharged by the measured theta and
-axial residual classes of this same reconstructed state. -/
-theorem source_bounds_from_residuals
-    (u : State LocalSignedRequest.Point) (α : ℝ)
-    (H : MeanStateRegularity.PrimitiveData standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b (commonContext B) u)
-    (hp : GaugeMomentBalances.MovingField standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b u.pressure)
-    (hfixed : VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge
-      (commonContext B) u = u)
-    (hθ : MeanClass ActualInitialization.geometry.strip α (u.thetaResidual (commonContext B)))
-    (hz : MeanClass ActualInitialization.geometry.strip α (u.axialResidual (commonContext B))) :
-    LocalPhysicalCopyBounds.LocalSourceBounds ActualPrimaryBounds.strip h α weight
-      (potentialSource (N0 := N0) ActualInitialization.patch u H hp) ∧
-    LocalPhysicalCopyBounds.LocalSourceBounds ActualPrimaryBounds.strip h α weight
-      (pressureSource (N0 := N0) ActualInitialization.patch u H hp) := by
-  have hR := ActualSignedStageControls.fullRequest_jets_from_residuals
-    ActualInitialization.geometry (commonContext B) u α H hfixed hθ hz
-    (ActualSignedStageControls.phaseCell (B := B) (N0 := N0))
-  simpa only [sub_add_cancel] using source_bounds ActualInitialization.patch u H hp hR
 
 end NavierStokes.ActualSignedNativeBounds

@@ -91,17 +91,6 @@ theorem contDiff_timeMultiplier {P : Type*} [NormedAddCommGroup P] [NormedSpace 
       (E := C(Icc (0 : ℝ) T, E →L[ℝ] F)) (F := TimeLp T E →L[ℝ] TimeLp T F)
       (coefficientMap (E := E) (F := F) T hT)) hA
 
-/-- Differentiating the actual frame H¹ transport with respect to an external parameter. -/
-theorem hasDerivAt_productDerivative
-    (A B : ℝ → C(Icc (0 : ℝ) T, E →L[ℝ] F))
-    (A₁ B₁ : C(Icc (0 : ℝ) T, E →L[ℝ] F)) (x : ℝ)
-    (hA : HasDerivAt A A₁ x) (hB : HasDerivAt B B₁ x) :
-    HasDerivAt (fun r => productDerivative T hT (A r) (B r))
-      ((timeMultiplier T hT B₁).comp (primitiveTimeLp T hT) + timeMultiplier T hT A₁) x := by
-  have h := ((hasDerivAt_timeMultiplier T hT B B₁ x hB).clm_comp
-    (hasDerivAt_const x (primitiveTimeLp (E := E) T hT))).add
-      (hasDerivAt_timeMultiplier T hT A A₁ x hA)
-  convert h using 1 <;> first | rfl | simp only [comp_zero, add_zero]
 
 /-- Arbitrary-order parameter regularity of the genuine H¹ frame transport. -/
 theorem contDiff_productDerivative {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]

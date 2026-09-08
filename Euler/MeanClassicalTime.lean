@@ -49,16 +49,6 @@ theorem coordinateVelocityPath_ae :
   rw [projIcc_of_mem hT ht]
   exact hv
 
-/-- The coordinate path has the actual H¹ trace bound. -/
-theorem coordinateVelocityPath_norm (hTpos : 0 < T) :
-    ‖s.coordinateVelocityPath‖ ≤
-      (T⁻¹*Real.sqrt T)*‖s.velocityLp‖+(2*Real.sqrt T)*‖s.acceleration‖ := by
-  have heq : s.coordinateVelocityPath = reconstruction T hT (s.velocityLp, s.acceleration) := by
-    apply ContinuousMap.ext
-    intro t
-    exact (reconstruction_eq_path T hTpos s.velocityLp s.acceleration s.velocity
-      s.velocity_ac s.velocity_ae s.velocity_derivative t).symm
-  exact (congrArg norm heq).trans_le (reconstruction_norm_le T hTpos s.velocityLp s.acceleration)
 
 /-- The already proved projected equation is the ordinary solenoidal Gram equation. -/
 theorem gram_equation_ae :
@@ -82,21 +72,6 @@ def classicalAcceleration : C(Icc (0 : ℝ) T, solenoidalSpace) :=
   accelerationPath T (solenoidalFrame T F) (solenoidalFrame T F₁) c hc hLower
     s.coordinateVelocityPath fC
 
-/-- Its norm is the source's ordinary inverse-Gram estimate for time suprema. -/
-theorem classicalAcceleration_norm :
-    ‖s.classicalAcceleration c hc hLower fC‖ ≤
-      c⁻¹*‖F‖*(‖fC‖+2*‖F₁‖*‖s.coordinateVelocityPath‖) := by
-  apply (accelerationPath_norm T (solenoidalFrame T F) (solenoidalFrame T F₁)
-    c hc hLower s.coordinateVelocityPath fC).trans
-  have hF := mul_le_mul_of_nonneg_left (solenoidalFrame_norm_le T F) (inv_nonneg.mpr hc.le)
-  have hF₁ := mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_left (solenoidalFrame_norm_le T F₁) (by norm_num : (0 : ℝ) ≤ 2))
-    (norm_nonneg s.coordinateVelocityPath)
-  exact mul_le_mul hF (add_le_add le_rfl hF₁)
-    (add_nonneg (norm_nonneg fC)
-      (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg (solenoidalFrame T F₁)))
-        (norm_nonneg s.coordinateVelocityPath)))
-    (mul_nonneg (inv_nonneg.mpr hc.le) (norm_nonneg F))
 
 /-- The L² acceleration is genuinely represented by this continuous path. -/
 theorem classicalAcceleration_ae
@@ -148,17 +123,5 @@ theorem physical_hasDerivWithinAt
     (s.classicalPhysicalDerivative c hc hLower fC) (s.classicalPhysicalDerivative_ae c hc hLower fC hf)
     s.physicalPath hp.1 hp.2.2 t
 
-/-- The physical time-derivative supremum pays only the two coefficient factors. -/
-theorem classicalPhysicalDerivative_norm :
-    ‖s.classicalPhysicalDerivative c hc hLower fC‖ ≤
-      ‖F₁‖*‖s.coordinateVelocityPath‖+‖F‖*‖s.classicalAcceleration c hc hLower fC‖ := by
-  apply (ContinuousMap.norm_le _ (by positivity)).2
-  intro t
-  apply (norm_add_le _ _).trans
-  exact add_le_add
-    (((F₁ t).le_opNorm _).trans (mul_le_mul (F₁.norm_coe_le_norm t)
-      (s.coordinateVelocityPath.norm_coe_le_norm t) (norm_nonneg _) (norm_nonneg F₁)))
-    (((F t).le_opNorm _).trans (mul_le_mul (F.norm_coe_le_norm t)
-      ((s.classicalAcceleration c hc hLower fC).norm_coe_le_norm t) (norm_nonneg _) (norm_nonneg F)))
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

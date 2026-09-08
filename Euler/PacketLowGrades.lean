@@ -29,15 +29,5 @@ namespace EulerPacketPointJets
 
 open Finset EulerSmoothLimit EulerPacketResidual
 
-/-- This is the coefficient equation used in the source recursion, with actual derivatives. -/
-theorem momentumGrade_eq_diagonal (N n : ℕ) (hn : n+1 ≤ N)
-    (FInv M : Space →L[ℝ] Space) (m : Space)
-    (u : ℕ → Domain → Space) (p : ℕ → Domain → ℝ) (z : Domain) :
-    momentumGrade N FInv M m u p z n =
-      linearPart M (jet (u n) z) + slowPressure FInv (jet (p n) z) +
-      fastPressure m (jet (p (n+1)) z) +
-      (∑ i ∈ range (n+1), slowAdvection FInv (jet (u i) z) (jet (u (n-i)) z)) +
-      (∑ i ∈ range (n+2), fastAdvection m (jet (u i) z) (jet (u (n+1-i)) z)) :=
-  coefficient_eq_diagonal N n hn _ _ _ _ _ _ _
 
 end EulerPacketPointJets

@@ -114,15 +114,6 @@ theorem translatedData_contDiff (u : CylinderL2 period V)
   exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞) (E := CylinderL2 period V)
     (F := Supported period V S hS) (projection (liftMeasure period) (spatialSet period S) (spatialSet_measurable period S hS))).comp hu
 
-/-- The supported parameter family has no larger actual derivative norm. -/
-theorem norm_iteratedFDeriv_translatedData_le (u : CylinderL2 period V)
-    (hu : ContDiff ℝ ∞ (fun a : LiftTangent => translate period a u)) (n : ℕ) (a : LiftTangent) :
-    ‖iteratedFDeriv ℝ n (translatedData period S hS u) a‖ ≤
-      ‖iteratedFDeriv ℝ n (fun b : LiftTangent => translate period b u) a‖ := by
-  have h := (projection (V := V) (liftMeasure period) (spatialSet period S) (spatialSet_measurable period S hS)).norm_iteratedFDeriv_comp_left
-    (hu.contDiffAt (x := a)) (n := n) (by simp)
-  exact h.trans (by simpa only [one_mul] using
-    mul_le_mul_of_nonneg_right (projection_norm (V := V) (liftMeasure period) (spatialSet period S) (spatialSet_measurable period S hS)) (norm_nonneg _))
 
 /-- Uniform-time orbit smoothness is preserved by the fixed support projection. -/
 theorem translatedForcing_contDiff (f : C(K,CylinderL2 period V))
@@ -131,17 +122,6 @@ theorem translatedForcing_contDiff (f : C(K,CylinderL2 period V))
   exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞) (E := C(K,CylinderL2 period V))
     (F := C(K,Supported period V S hS)) (projectPath period S hS)).comp hf
 
-/-- The projected forcing jets are bounded by the genuine uniform-time spatial orbit jets. -/
-theorem norm_iteratedFDeriv_translatedForcing_le (f : C(K,CylinderL2 period V))
-    (hf : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate period a f))
-    (n : ℕ) (a : LiftTangent) :
-    ‖iteratedFDeriv ℝ n (translatedForcing period S hS f) a‖ ≤
-      ‖iteratedFDeriv ℝ n (fun b : LiftTangent => pathTranslate period b f) a‖ := by
-  have h := ContinuousLinearMap.norm_iteratedFDeriv_comp_left (𝕜 := ℝ) (E := LiftTangent)
-    (F := C(K,CylinderL2 period V)) (G := C(K,Supported period V S hS))
-    (projectPath (K := K) (V := V) period S hS) (hf.contDiffAt (x := a)) (n := n) (by simp)
-  exact h.trans (by simpa only [one_mul] using
-    mul_le_mul_of_nonneg_right (projectPath_norm (K := K) (V := V) period S hS) (norm_nonneg _))
 
 
 variable {ι : Type*} [Fintype ι] (directions : ι → LiftTangent) (q : ℕ)

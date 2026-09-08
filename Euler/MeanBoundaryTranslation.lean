@@ -15,13 +15,10 @@ def l2TranslationEquiv (a : Space) : L2 ≃ₗᵢ[ℝ] L2 :=
   LinearIsometryEquiv.ofSurjective (translation a) (fun u =>
     ⟨translation (-a) u, by rw [translation_add, add_neg_cancel, translation_zero]⟩)
 
-theorem l2TranslationEquiv_apply (a : Space) (u : L2) : l2TranslationEquiv a u = translation a u := rfl
 
 def gradientTranslation (a : Space) : GradientTensor ≃ₗᵢ[ℝ] GradientTensor :=
   LinearIsometryEquiv.piLpCongrRight 2 (fun _ : Fin 3 => l2TranslationEquiv a)
 
-theorem gradientTranslation_apply (a : Space) (G : GradientTensor) (i : Fin 3) :
-    gradientTranslation a G i = translation a (G i) := rfl
 
 theorem gradientTranslation_add (a b : Space) (G : GradientTensor) :
     gradientTranslation a (gradientTranslation b G) = gradientTranslation (a+b) G := by
@@ -67,8 +64,6 @@ def homogeneousTranslation (a : Space) : homogeneousSpace →ₗᵢ[ℝ] homogen
   map_smul' c u := by apply Subtype.ext; exact map_smul (gradientTranslation a) c _
   norm_map' u := (gradientTranslation a).norm_map (u : GradientTensor)
 
-theorem homogeneousTranslation_coe (a : Space) (u : homogeneousSpace) :
-    (homogeneousTranslation a u : GradientTensor) = gradientTranslation a (u : GradientTensor) := rfl
 
 theorem homogeneousTranslation_add (a b : Space) (u : homogeneousSpace) :
     homogeneousTranslation a (homogeneousTranslation b u) = homogeneousTranslation (a+b) u := by
@@ -160,25 +155,5 @@ theorem mixedBoundaryOperator_translationCommutator (a : Space) (χ ψ : Cutoff)
   exact congrArg (fun A : L2 →L[ℝ] L2 => A (translation a z))
     (mixedBoundaryOperator_difference (χ.translate a) χ (ψ.translate a) ψ)
 
-theorem mixedBoundaryOperator_translationCommutator_norm_le (a : Space) (χ ψ : Cutoff) :
-    ‖translationCommutator a (mixedBoundaryOperator χ ψ)‖ ≤
-      cutoffBound ((χ.translate a).sub χ) * cutoffBound (ψ.translate a) +
-        cutoffBound χ * cutoffBound ((ψ.translate a).sub ψ) := by
-  apply ContinuousLinearMap.opNorm_le_bound _
-    (add_nonneg (mul_nonneg (cutoffBound_nonneg _) (cutoffBound_nonneg _))
-      (mul_nonneg (cutoffBound_nonneg _) (cutoffBound_nonneg _)))
-  intro z
-  change ‖translation a (mixedBoundaryOperator χ ψ z) - mixedBoundaryOperator χ ψ (translation a z)‖ ≤ _
-  rw [mixedBoundaryOperator_translation]
-  change ‖(mixedBoundaryOperator (χ.translate a) (ψ.translate a) -
-    mixedBoundaryOperator χ ψ) (translation a z)‖ ≤ _
-  calc
-    _ ≤ ‖mixedBoundaryOperator (χ.translate a) (ψ.translate a) -
-        mixedBoundaryOperator χ ψ‖ * ‖translation a z‖ :=
-      (mixedBoundaryOperator (χ.translate a) (ψ.translate a) - mixedBoundaryOperator χ ψ).le_opNorm _
-    _ ≤ _ := by
-      rw [(translation a).norm_map]
-      exact mul_le_mul_of_nonneg_right
-        (mixedBoundaryOperator_difference_norm_le (χ.translate a) χ (ψ.translate a) ψ) (norm_nonneg z)
 
 end EulerMeanBoundary

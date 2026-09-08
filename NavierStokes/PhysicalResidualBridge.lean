@@ -672,25 +672,6 @@ structure MatchesAt (o : MeanIncrementBounds.Operators Lift) (G : ScaledGraph) (
   vR : o.vR = (0, (0, G.radialVector))
   vT : o.vT = (0, (0, G.temporalVector))
 
-theorem matchesAt_graphOperators (r : CorrectionState.ReconstructionData)
-    (epsilon fast : ℕ → ℝ) (G : ScaledGraph) (n : ℕ)
-    (hε : epsilon n = G.epsilon) (hM : r.frequency n = G.frequency)
-    (hc : fast n = G.fastCoefficient) (hd : r.exponent = G.exponent)
-    (hv : r.radialDirection = G.radialVector) :
-    MatchesAt (CorrectionState.graphOperators r epsilon fast
-      (((1, 0) : Plane), (0 : Plane)) (((0, 1) : Plane), (0 : Plane)) G.temporalVector) G n := by
-  constructor
-  · exact hε
-  · exact hM
-  · exact hc
-  · rfl
-  · simp only [CorrectionState.graphOperators, hd, RadialPullback.radialJacobian,
-      GraphCalculus.radialSpeed]
-  · rfl
-  · rfl
-  · rfl
-  · simp only [CorrectionState.graphOperators, hv]
-  · rfl
 
 theorem MatchesAt.radialDirection {c : CorrectionState.Context Lift} {G : ScaledGraph} {n : ℕ}
     (H : MatchesAt c.operators G n) : LiftedMeanResidual.radialDirection c n = G.radial := by

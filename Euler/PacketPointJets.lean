@@ -100,13 +100,5 @@ def momentumResidual (κ : ℝ) (FInv M : Space →L[ℝ] Space) (m : Space)
   linearPart M (jet u z) + slowPressure FInv (jet p z) + κ⁻¹ • fastPressure m (jet p z) +
     slowAdvection FInv (jet u z) (jet u z) + κ⁻¹ • fastAdvection m (jet u z) (jet u z)
 
-theorem momentumResidual_formula (κ : ℝ) (FInv M : Space →L[ℝ] Space) (m : Space)
-    (u : Domain → Space) (p : Domain → ℝ) (z : Domain) :
-    momentumResidual κ FInv M m u p z =
-      fderiv ℝ u z timeDirection + M (u z) +
-      FInv.adjoint ((toDual ℝ Space).symm ((fderiv ℝ p z).comp spatialInjection)) +
-      κ⁻¹ • (fderiv ℝ p z angleDirection • m) +
-      fderiv ℝ u z (spatialInjection (FInv (u z))) +
-      κ⁻¹ • (⟪m, u z⟫_ℝ • fderiv ℝ u z angleDirection) := rfl
 
 end EulerPacketPointJets

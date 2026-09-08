@@ -436,10 +436,6 @@ theorem norm_series_le {a : Frequency → ℂ} (ha : Rapid a) (x : Plane) :
   simpa only [series, coeffSeminorm, pow_zero, one_mul, norm_mul, norm_mode, mul_one] using
     norm_tsum_le_tsum_norm (summable_terms ha x).norm
 
-theorem norm_directionalInverse_le (d : Direction) {a : Frequency → ℂ}
-    (ha : Rapid a) (x : Plane) :
-    ‖directionalInverse d a x‖ ≤ (6 * ‖omega⁻¹‖) * coeffSeminorm 1 a := by
-  exact (norm_series_le (ha.inverseCoeff d) x).trans (inverseCoeff_seminorm_le d ha 0)
 
 def coordinateCoeff (j : Bool) (a : Frequency → ℂ) : Frequency → ℂ :=
   if j then derivY a else derivX a
@@ -536,30 +532,6 @@ theorem hasDerivAt_parameter_series (a a' : ℝ → Frequency → ℂ) (B : Freq
   intro k s
   simpa only [norm_mul, norm_mode, mul_one] using hbound k s
 
-/-- Parameter differentiation commutes with the actual inverse series under a
-uniform summable bound on one frequency-weighted parameter derivative. -/
-theorem hasDerivAt_parameter_inverse (d : Direction) (a a' : ℝ → Frequency → ℂ)
-    (B : Frequency → ℝ)
-    (hderiv : ∀ k t, HasDerivAt (fun s => a s k) (a' t k) t)
-    (hB : Summable (fun k => weight k * B k))
-    (hbound : ∀ k t, ‖a' t k‖ ≤ B k)
-    (t₀ : ℝ) (hinit : Rapid (a t₀)) (x : Plane) (t : ℝ) :
-    HasDerivAt (fun s => directionalInverse d (a s) x)
-      (directionalInverse d (a' t) x) t := by
-  refine hasDerivAt_parameter_series
-    (fun s => inverseCoeff d (a s)) (fun s => inverseCoeff d (a' s))
-    (fun k => (6 * ‖omega⁻¹‖) * (weight k * B k)) ?_ ?_ ?_
-      t₀ (hinit.inverseCoeff d) x t
-  · intro k s
-    exact HasDerivAt.const_mul (multiplier d k) (hderiv k s)
-  · exact hB.mul_left _
-  · intro k s
-    calc
-      ‖inverseCoeff d (a' s) k‖ = ‖multiplier d k‖ * ‖a' s k‖ := norm_mul _ _
-      _ ≤ ((6 * ‖omega⁻¹‖) * weight k) * B k :=
-        mul_le_mul (norm_multiplier_le d k) (hbound k s) (norm_nonneg _)
-          (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg _)) (weight_pos k).le)
-      _ = _ := by ring
 
 /-- Inversion uses only the torus variable and preserves support in every
 external parameter. No nonvanishing or convergence hypothesis is needed here. -/
@@ -580,27 +552,5 @@ theorem directionalInverse_periodic (d : Direction) (a : Frequency → ℂ)
     directionalInverse d a (x.1 + m, x.2 + n) = directionalInverse d a x :=
   series_periodic (inverseCoeff d a) x m n
 
-/-- A zero-average rapidly convergent Fourier series on the actual torus has
-a zero-average inverse whose universal-cover lift is smooth and solves the
-directional equation. Both manuscript directions are covered. -/
-theorem zero_mean_series_has_smooth_inverse (d : Direction) {a : Frequency → ℂ}
-    (ha : Rapid a) (hmean : (∫ z, torusSeries a z ∂torusMeasure) = 0) :
-    ∃ u : Torus → ℂ, Continuous u ∧ (∫ z, u z ∂torusMeasure) = 0 ∧
-      ContDiff ℝ ∞ (fun x : Plane => u ((x.1 : UnitAddCircle), (x.2 : UnitAddCircle))) ∧
-      ∀ x : Plane,
-        fderiv ℝ (fun y : Plane => u ((y.1 : UnitAddCircle), (y.2 : UnitAddCircle)))
-          x (vector d) = series a x := by
-  have hzero : a 0 = 0 := by rwa [integral_torusSeries ha] at hmean
-  have hpull : (fun x : Plane =>
-      torusSeries (inverseCoeff d a) ((x.1 : UnitAddCircle), (x.2 : UnitAddCircle))) =
-      directionalInverse d a := by
-    funext x
-    exact (series_eq_torusSeries (inverseCoeff d a) x).symm
-  refine ⟨torusSeries (inverseCoeff d a), continuous_torusSeries (ha.inverseCoeff d),
-    inverse_zero_mean d ha, ?_, ?_⟩
-  · rw [hpull]
-    exact contDiff_directionalInverse d ha
-  · rw [hpull]
-    exact directionalInverse_solves d ha hzero
 
 end NavierStokes.TorusInverse

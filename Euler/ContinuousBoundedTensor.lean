@@ -140,12 +140,6 @@ def tensorPathMap (n : ℕ) :
     (t : K) (x : X) (v : Fin n → E) : tensorPathMap n A t x v = A v t x :=
   tensorPath_apply n A t x v
 
-theorem tensorPathMap_norm_le (n : ℕ) :
-    ‖tensorPathMap (K := K) (X := X) (E := E) (V := V) n‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro A
-  change ‖tensorPath n A‖ ≤ 1 * ‖A‖
-  simpa only [one_mul] using tensorPath_norm_le n A
 
 theorem tensorPath_iteratedFDeriv (f : E → C(K, X →ᵇ V)) (hf : ContDiff ℝ ∞ f)
     (n : ℕ) (a : E) (t : K) (x : X) :

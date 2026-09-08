@@ -56,10 +56,5 @@ theorem meanPressure_step_exists :
   refine ⟨Q,?_⟩
   exact (LM.grade_bounds WM S GM MF p hp hMF).2.2.of_path_eq _ rfl
 
-include WM BC hmean hRc hcost hp hG hc₀ hB₁ hA in
-theorem meanPressure_step_bound (Q : Field P M.T (pressureGradient (step O p a).meanPressure)) :
-    (Q.normalized M.T_pos.le (S.mean p) (S.mean_pos p)).WordBound 6 R 1 (meanShift p) := by
-  obtain ⟨Q₀,hQ₀⟩ := meanPressure_step_exists M LM WM C BC hmean hRc hcost S hp G hG hc₀ hB₁ hA
-  exact hQ₀.normalized_of_raw_eq Q M.T_pos.le (S.mean p) (S.mean_pos p) (fun _ _ _ => rfl)
 
 end EulerPacketCylinderField.ProfileBudget

@@ -69,25 +69,5 @@ theorem gramSolution_gevrey (T : ℝ) (hT : 0 ≤ T)
     (gramOperator_contDiff T hT Q hQ) hf c⁻¹ (3*C^2) D (gramCost c C D) Rc R
     (by positivity) hD hM hMC hMD hRc hR (fun _ => le_rfl) hb d hbf n x
 
-/-- The same estimate applies to the explicit inverse-Gram multiplier in the strong equation. -/
-theorem inverseGramMultiplier_gevrey (T : ℝ) (hT : 0 ≤ T)
-    (Q : P → C(Icc (0 : ℝ) T, U →L[ℝ] E))
-    (c : ℝ) (hc : 0 < c) (hLower : ∀ x t v, c*‖v‖^2 ≤ ‖Q x t v‖^2)
-    (hQ : ContDiff ℝ ∞ Q)
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C)
-    (hbQ : ∀ n x, ‖iteratedFDeriv ℝ n Q x‖ ≤ C*majorant Rc 0 n)
-    (f : P → TimeLp T U) (hf : ContDiff ℝ ∞ f)
-    (D R : ℝ) (hD : 0 ≤ D) (hR : 2*gramCost c C D*(Rc+1) ≤ R)
-    (d : ℕ) (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ D*majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n
-      (fun y => timeMultiplier T hT (gramInversePath T (Q y) c hc (hLower y)) (f y)) x‖ ≤
-      majorant R (d+1) n := by
-  have heq : (fun y => timeMultiplier T hT (gramInversePath T (Q y) c hc (hLower y)) (f y)) =
-      fun y => gramSolver T hT (Q y) c hc (hLower y) (f y) := by
-    funext y
-    rw [gramSolver_eq_multiplier]
-  rw [heq]
-  exact gramSolution_gevrey T hT Q c hc hLower hQ Rc C hRc hC hbQ f hf D R hD hR d hbf n x
 
 end EulerTimeLpGramGevrey

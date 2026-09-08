@@ -148,13 +148,6 @@ theorem prefix_exterior (J : ℕ) {w : SpaceTime} (ht : w ∈ preterminal)
   have hw := mem_exteriorDomain.mpr ⟨ht, hq, hout⟩
   exact ⟨H.velocity_prefix_eqOn J hw, H.pressure_prefix_eqOn J hw⟩
 
-theorem prefix_germs (J : ℕ) {w : SpaceTime} (hw : w ∈ exteriorDomain Nr) :
-    MixedDiagonalResidual.uncutVelocity A D J =ᶠ[𝓝 w]
-        FinalSlowBase.velocity ActualPrimary.certificate ActualPrimary.modulation ActualPrimary.upper B ∧
-      DiagonalJetBounds.uncutPrefix P (J + 1) =ᶠ[𝓝 w]
-        FinalSlowBase.pressure ActualPrimary.certificate ActualPrimary.modulation ActualPrimary.upper B :=
-  ⟨eqOn_exterior_germ (H.velocity_prefix_eqOn J) hw,
-    eqOn_exterior_germ (H.pressure_prefix_eqOn J) hw⟩
 
 end ExteriorStages
 

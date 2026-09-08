@@ -62,13 +62,7 @@ def rieszTestLinear (i j : Fin 3) : ComplexTest →ₗ[ℂ] (Space → ℂ) wher
 @[simp] theorem rieszTest_zero (i j : Fin 3) : rieszTest i j 0 = 0 :=
   map_zero (rieszTestLinear i j)
 
-theorem rieszTest_neg (i j : Fin 3) (ψ : ComplexTest) :
-    rieszTest i j (-ψ) = -rieszTest i j ψ :=
-  map_neg (rieszTestLinear i j) ψ
 
-theorem rieszTest_sub (i j : Fin 3) (ψ φ : ComplexTest) :
-    rieszTest i j (ψ - φ) = rieszTest i j ψ - rieszTest i j φ :=
-  map_sub (rieszTestLinear i j) ψ φ
 
 theorem rieszTest_sum (i j : Fin 3) {ι : Type*} (s : Finset ι) (ψ : ι → ComplexTest) :
     rieszTest i j (∑ a ∈ s, ψ a) = ∑ a ∈ s, rieszTest i j (ψ a) :=

@@ -79,49 +79,6 @@ theorem frameLeftInversePath_bound (n : ℕ) (x : P) :
   convert h using 1
   all_goals rfl
 
-include hQr hQ₁r hRc hC₀ hC₁ hRi hbQ hbQ₁ in
-/-- The ordinary generator in (12) has actual shift-zero coefficient bounds. -/
-theorem generator_bound (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => generator T (Q y) (Q₁ y) c hc (hQ y)) x‖ ≤
-      (18*Ri*C₀*C₁)*majorant (4*Ri) 0 n := by
-  obtain ⟨hi,hbase⟩ := inverseRadius_bounds c C₀ Rc Ri hc hRc hRi
-  have hrad : 0 ≤ 4*Ri := by positivity
-  have hbQ₁' (j : ℕ) (y : P) : ‖iteratedFDeriv ℝ j Q₁ y‖ ≤ C₁*majorant (4*Ri) 0 j :=
-    (hbQ₁ j y).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc (4*Ri) hRc hbase 0 j) hC₁)
-  let S := fun y => compose (frameLeftInversePath T (Q y) c hc (hQ y)) (Q₁ y)
-  have hSr : ContDiff ℝ ∞ S := contDiff_compose _ Q₁
-    (frameLeftInversePath_contDiff T Q c hc hQ hQr) hQ₁r
-  have hSb : ‖iteratedFDeriv ℝ n S x‖ ≤ (3*(3*Ri*C₀)*C₁)*majorant (4*Ri) 0 n := by
-    exact compose_bound (fun y => frameLeftInversePath T (Q y) c hc (hQ y)) Q₁
-      (frameLeftInversePath_contDiff T Q c hc hQ hQr) hQ₁r (4*Ri) (3*Ri*C₀) C₁
-      hrad (by positivity) hC₁ 0 0
-      (frameLeftInversePath_bound T Q c hc hQ hQr Rc C₀ Ri hRc hC₀ hRi hbQ) hbQ₁' n x
-  change ‖iteratedFDeriv ℝ n (fun y => (-2 : ℝ) • S y) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hSr.contDiffAt.of_le (by simp)), norm_smul]
-  norm_num only [norm_neg, Real.norm_ofNat]
-  exact (mul_le_mul_of_nonneg_left hSb (by norm_num : (0 : ℝ) ≤ 2)).trans_eq (by ring)
 
-include hQr hRc hC₀ hRi hbQ in
-/-- Multiplication by the actual projected-forcing coefficient preserves the
-input factorial shift, with a polynomial amplitude. -/
-theorem projected_forcing_bound (f : P → C(Icc (0 : ℝ) T,E)) (hf : ContDiff ℝ ∞ f)
-    (R D : ℝ) (hR : 4*Ri ≤ R) (hD : 0 ≤ D) (d : ℕ)
-    (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ D*majorant R d n) (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => forcingOperator T (Q y) c hc (hQ y) (f y)) x‖ ≤
-      (9*Ri*C₀*D)*majorant R d n := by
-  have hi := (inverseRadius_bounds c C₀ Rc Ri hc hRc hRi).1
-  have hrad : 0 ≤ 4*Ri := by positivity
-  have hR0 : 0 ≤ R := hrad.trans hR
-  have hbL (j : ℕ) (y : P) :
-      ‖iteratedFDeriv ℝ j (fun z => frameLeftInversePath T (Q z) c hc (hQ z)) y‖ ≤
-        (3*Ri*C₀)*majorant R 0 j :=
-    (frameLeftInversePath_bound T Q c hc hQ hQr Rc C₀ Ri hRc hC₀ hRi hbQ j y).trans
-      (mul_le_mul_of_nonneg_left (majorant_radius_mono (4*Ri) R hrad hR 0 j) (by positivity))
-  have h := apply_bound (fun y => frameLeftInversePath T (Q y) c hc (hQ y)) f
-    (frameLeftInversePath_contDiff T Q c hc hQ hQr) hf R (3*Ri*C₀) D hR0 (by positivity) hD 0 d hbL hbf n x
-  have he : 3*(3*Ri*C₀)*D = 9*Ri*C₀*D := by ring
-  simp only [Nat.zero_add, he] at h
-  convert h using 1
-  all_goals rfl
 
 end EulerTransverseForwardCoefficientGevrey

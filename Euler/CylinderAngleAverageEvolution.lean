@@ -50,17 +50,7 @@ omit [CompactSpace K] in
 @[simp] theorem supportedPathAverage_apply (p : C(K,Supported P V S hS)) (t : K) :
     supportedPathAverage P S hS p t = supportedAverage P S hS (p t) := rfl
 
-omit [CompactSpace K] in
-theorem include_supportedPathAverage (p : C(K,Supported P V S hS)) :
-    includePath P S hS (supportedPathAverage P S hS p) = pathAverage P (includePath P S hS p) := rfl
 
-theorem supportedPathAverage_norm : ‖supportedPathAverage (K := K) (V := V) P S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro p
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg p)).mpr
-  intro t
-  exact (averageIntegral_norm P (p t : CylinderL2 P V)).trans (p.norm_coe_le_norm t)
 
 end Paths
 

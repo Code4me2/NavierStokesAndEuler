@@ -780,13 +780,6 @@ theorem angularMoment_at_pulseStart (c : Parameters) (amp : ℝ → ℝ) (eta : 
   rw [hI]
   ring
 
-theorem axial_reserved_band (c : Parameters) (amp : ℝ → ℝ) (eta y : ℝ)
-    (hy : c.pulseStart - 25 ≤ y) (hy' : y ≤ c.pulseStart - 3) :
-    axial c amp (y, eta) = 0 := by
-  apply axial_shaped_wait c amp eta
-  · dsimp [Parameters.pulseStart] at hy
-    linarith [c.wait_gt]
-  · linarith
 
 theorem correction_zero_on_main_pulse (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ)
     {y : ℝ} (hy : y ≤ 11 / c.lam) : correction c amp eta (Real.exp y) = 0 := by
@@ -795,52 +788,15 @@ theorem correction_zero_on_main_pulse (c : Parameters) (amp : ℝ → ℝ) (eta 
   have hey := Real.exp_le_exp.mpr hy
   linarith [c.main_end_lt_lower i, hi.1]
 
-theorem pulseRatio_on_main_pulse (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ)
-    {y : ℝ} (hy : y ≤ 11 / c.lam) :
-    pulseRatio c amp (y, eta) = amp eta * mainPulse (c.lam * y) := by
-  simp [pulseRatio, correction_zero_on_main_pulse c amp eta hy]
 
 theorem axial_ideal (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
     axial c amp (y, eta) = 4 * eta := by
   rw [axial_before_pulse c amp eta (hy.trans c.pulseStart_pos.le),
     dropCoefficient_early c.m (by linarith)]
 
-theorem axial_drop (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) {t : ℝ}
-    (ht : 0 ≤ t) (ht' : t ≤ c.dropLength) :
-    axial c amp (1 + t, eta) =
-      4 * (1 - sigma (Real.log (1 + t) / c.m)) * eta := by
-  have hB := c.pulseStart_ge_hold
-  have hy : 1 + t ≤ c.pulseStart := by
-    dsimp [Parameters.holdStart] at hB
-    linarith
-  rw [axial_before_pulse c amp eta hy, dropCoefficient_eq c.m_pos (by linarith)]
 
-theorem radialAmplitude_drop {dropLength lam y P : ℝ}
-    (hy : 1 ≤ y) (hy' : y ≤ dropLength + 1) :
-    radialAmplitude P dropLength lam y =
-      radialAmplitude P dropLength lam 1 * Real.exp (-(y - 1) / 2) := by
-  have h := primitive_increment (g := fun t => slope dropLength lam t - 1 / 2)
-    ((slope_contDiff dropLength lam).continuous.sub continuous_const) 1 y (-1 / 2) ?_
-  · have he : logAmplitude dropLength lam y =
-        logAmplitude dropLength lam 1 + -(y - 1) / 2 := by
-      unfold logAmplitude
-      rw [h]
-      ring
-    simp only [radialAmplitude, he, Real.exp_add, mul_assoc]
-  · intro t ht
-    have ht' := uIcc_of_le hy ▸ ht
-    rw [slope_drop ht'.1 (ht'.2.trans hy')]
-    ring
 
-theorem ideal_mass_prefix_integral (eta : ℝ) :
-    (∫ _x in (0 : ℝ)..1, 4 * eta) = 4 * eta := by simp
 
-theorem ideal_angular_prefix_integral (P eta : ℝ) :
-    (∫ x in (0 : ℝ)..1, (4 * eta * Real.sqrt 2 * P * shape eta) * x ^ (3 / 5 : ℝ)) =
-      (5 / 2) * Real.sqrt 2 * P * eta * shape eta := by
-  rw [intervalIntegral.integral_const_mul, integral_rpow (Or.inl (by norm_num))]
-  norm_num
-  ring
 
 /-- Both moments are the actual log-coordinate integrals of the combined fields. -/
 theorem massMoment_endpoint (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) :
@@ -921,10 +877,6 @@ theorem angularMoment_endpoint (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) 
       rw [angularMoment_at_pulseStart, hI]
       exact (pulse_closes_prefix c amp eta).2
 
-/-- The constructed profiles satisfy both endpoint equations for every parameter value. -/
-theorem exact_axial_moments (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) :
-    massMoment c amp eta c.endpoint = 0 ∧ angularMoment c amp eta c.endpoint = 0 :=
-  ⟨massMoment_endpoint c amp eta, angularMoment_endpoint c amp eta⟩
 
 theorem massMoment_after_pulse (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ) {y : ℝ}
     (hy : c.endpoint ≤ y) : massMoment c amp eta y = 0 := by
@@ -990,24 +942,5 @@ def paperParameters (P m lam : ℝ) (hP : 0 < P) (hm : 0 < m)
     simp only [one_div, inv_inv] at h ⊢
     nlinarith
 
-/-- A compact interface for using the constructed profiles in later stages. -/
-theorem constructed_core (c : Parameters) {amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ amp) :
-    ContDiff ℝ ∞ (angular c.P c.dropLength c.lam) ∧
-    ContDiff ℝ ∞ (axial c amp) ∧
-    (∀ p, 0 < angular c.P c.dropLength c.lam p) ∧
-    (∀ eta y, c.endpoint ≤ y →
-      axial c amp (y, eta) = 0 ∧ massMoment c amp eta y = 0 ∧
-        angularMoment c amp eta y = 0) ∧
-    (∀ eta y, c.holdStart ≤ y → y ≤ c.pulseStart →
-      axial c amp (y, eta) = 0 ∧
-      angular c.P c.dropLength c.lam (y, eta) =
-        radialAmplitude c.P c.dropLength c.lam c.holdStart * shape eta *
-          Real.exp (-(1 / 2 + c.lam) * (y - c.holdStart))) := by
-  refine ⟨angular_contDiff _ _ _, axial_contDiff c ha, angular_pos c.P_pos _ _, ?_, ?_⟩
-  · intro eta y hy
-    exact ⟨axial_after_pulse c amp eta hy, massMoment_after_pulse c amp eta hy,
-      angularMoment_after_pulse c amp eta hy⟩
-  · intro eta y hy hy'
-    exact ⟨axial_shaped_wait c amp eta hy hy', angular_shaped_wait c eta hy⟩
 
 end NavierStokes.OutgoingSchedule

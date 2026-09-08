@@ -463,27 +463,6 @@ theorem pulse_history_bounds (w : ResetWitness d K) {amp : ℝ → ℝ}
     (mul_nonneg (by norm_num) (forceConstant_pos d.core.P_pos d.core.m).le) hy hy'
     (fun t _ => (hdata t).1) (fun t _ => (hdata t).2)
 
-/-- Specialization to the corrected amplitude supplied by the proved energy solve. -/
-theorem corrected_pulse_history_bounds (w : ResetWitness d K) (hK : 0 < K)
-    (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hsmall : d.core.lam ≤ 1 / 120)
-    (hscale : CorrectedPulseAmplitude.combinedScale d K ≤ 1 / 1000)
-    {eta y : ℝ} (heta : |eta| ≤ 1) (hy : 0 ≤ y) (hy' : y ≤ d.core.pulseLength) :
-    |S w (CorrectedPulseAmplitude.amplitude d w.coefficients) (d.core.pulseStart + y, eta)| /
-        (X (d.core.pulseStart + y, eta) * E w (d.core.pulseStart + y, eta) ^ 2) ≤
-      historyConstant d.core.P d.core.m * Real.exp 26 / d.core.lam ∧
-    |dEta (S w (CorrectedPulseAmplitude.amplitude d w.coefficients))
-        (d.core.pulseStart + y, eta)| /
-        (X (d.core.pulseStart + y, eta) * E w (d.core.pulseStart + y, eta) ^ 2) ≤
-      historyConstant d.core.P d.core.m * Real.exp 26 / d.core.lam := by
-  obtain ⟨ha, hspec⟩ := CorrectedPulseAmplitude.amplitude_spec w hK hsmall hwait hscale
-  have heta2 : eta ^ 2 ≤ 1 := by
-    nlinarith [sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1) |>.mpr heta, sq_abs eta]
-  obtain ⟨hlo, hhi, _, hd, _⟩ := hspec eta heta2
-  apply pulse_history_bounds w ha hwait hsmall heta _ _ hy hy'
-  · rw [abs_of_pos (by linarith : 0 < CorrectedPulseAmplitude.amplitude d w.coefficients eta)]
-    exact hhi.le
-  · exact hd.trans (by linarith)
 
 end
 

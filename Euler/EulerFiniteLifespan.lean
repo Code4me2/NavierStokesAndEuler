@@ -36,17 +36,5 @@ theorem hasSmoothEulerSolution_iff (A : SmoothL2Field Space) (T : ℝ) :
   · rintro ⟨hT,U,hU⟩
     exact ⟨hT,U,congrArg SmoothL2Field.field hU⟩
 
-theorem exists_compact_smooth_finite_lifespan :
-    ∃ u₀ : Space → Space, ContDiff ℝ ∞ u₀ ∧ HasCompactSupport u₀ ∧
-      (∀ x, divergence u₀ x=0) ∧
-      ∃ T : ℝ, 0 < T ∧ T ≤ 1 ∧
-        (∀ t : ℝ, 0 < t → t < T → HasSmoothEulerSolution u₀ t) ∧
-        (∀ t : ℝ, T < t → ¬ HasSmoothEulerSolution u₀ t) := by
-  refine ⟨initialDatum.field,initialDatum.smooth,initialDatum_compact,initialDatum_divergence,
-    lifespan.duration,lifespan.duration_pos,lifespan_le_one,?_,?_⟩
-  · intro t ht htT
-    exact (hasSmoothEulerSolution_iff initialDatum t).mpr (lifespan.shorter t ht htT)
-  · intro t hTt h
-    exact lifespan.maximal t hTt ((hasSmoothEulerSolution_iff initialDatum t).mp h)
 
 end EulerPacketInduction

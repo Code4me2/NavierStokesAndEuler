@@ -17,37 +17,7 @@ variable (hK : ContinuousOn (fun p : ℝ × Y => K p.1 p.2) (Ioi 0 ×ˢ (univ : 
 variable (hk : IntegrableOn k (Ioc 0 T)) (hk0 : ∀ r ∈ Ioc 0 T, 0 ≤ k r)
 variable (hbound : ∀ r ∈ Ioc 0 T, ∀ y, ‖K r y‖ ≤ k r * ‖y‖)
 
-include hK hk hk0 hbound in
-/-- Two actual mild solutions in the contraction ball agree as continuous paths. -/
-theorem mild_solution_unique (a : C(Icc (0 : ℝ) T, X)) (F : Icc (0 : ℝ) T → X → Y)
-    (hF : Continuous (fun p : Icc (0 : ℝ) T × X => F p.1 p.2))
-    (R L : ℝ) (hL : 0 ≤ L)
-    (hFL : ∀ t x y, ‖x‖ ≤ R → ‖y‖ ≤ R → ‖F t x - F t y‖ ≤ L * ‖x - y‖)
-    (hsmall : kernelMass T k * L < 1)
-    (u v : C(Icc (0 : ℝ) T, X)) (hu : ‖u‖ ≤ R) (hv : ‖v‖ ≤ R)
-    (hsolu : ∀ t : Icc (0 : ℝ) T, u t = a t + ∫ r in (0 : ℝ)..t.val,
-      K r (F (projIcc 0 T hT (t.val - r)) (u (projIcc 0 T hT (t.val - r)))))
-    (hsolv : ∀ t : Icc (0 : ℝ) T, v t = a t + ∫ r in (0 : ℝ)..t.val,
-      K r (F (projIcc 0 T hT (t.val - r)) (v (projIcc 0 T hT (t.val - r))))) : u = v := by
-  have hfix (z : C(Icc (0 : ℝ) T, X))
-      (hz : ∀ t : Icc (0 : ℝ) T, z t = a t + ∫ r in (0 : ℝ)..t.val,
-        K r (F (projIcc 0 T hT (t.val - r)) (z (projIcc 0 T hT (t.val - r))))) :
-      picard T hT K k hK hk hk0 hbound a F hF z = z := by
-    ext t
-    change a t + convolution T hT K k hK hk hk0 hbound (pathNonlinearity T F hF z) t = z t
-    rw [convolution_eq_interval T hT K k hK hk hk0 hbound]
-    exact (hz t).symm
-  have h := picard_sub_bound T hT K k hK hk hk0 hbound a F hF R L hL hFL u v hu hv
-  rw [hfix u hsolu, hfix v hsolv] at h
-  have hn : ‖u - v‖ = 0 := by nlinarith [norm_nonneg (u - v)]
-  exact sub_eq_zero.mp (norm_eq_zero.mp hn)
 
-/-- The actual Volterra integral vanishes at time zero, giving the prescribed initial trace. -/
-theorem mild_solution_initial (a u : C(Icc (0 : ℝ) T, X)) (F : Icc (0 : ℝ) T → X → Y)
-    (hsol : ∀ t : Icc (0 : ℝ) T, u t = a t + ∫ r in (0 : ℝ)..t.val,
-      K r (F (projIcc 0 T hT (t.val - r)) (u (projIcc 0 T hT (t.val - r))))) :
-    u ⟨0, le_rfl, hT⟩ = a ⟨0, le_rfl, hT⟩ := by
-  simpa only [intervalIntegral.integral_same, add_zero] using hsol ⟨0, le_rfl, hT⟩
 
 end EulerVolterraConvolution
 

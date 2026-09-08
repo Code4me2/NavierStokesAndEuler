@@ -335,15 +335,6 @@ def rampLimit : ℝ := Real.log (41 / 40 : ℝ)
 
 theorem rampLimit_pos : 0 < rampLimit := Real.log_pos (by norm_num)
 
-theorem exists_small_length {ε : ℝ} (hε : 0 < ε) :
-    ∃ δ : ℝ, 0 < δ ∧ 2 * δ < rampLimit ∧ δ < ε := by
-  have hT := rampLimit_pos
-  refine ⟨min (rampLimit / 4) (ε / 2), lt_min (by positivity) (by positivity), ?_, ?_⟩
-  · have := min_le_left (rampLimit / 4) (ε / 2)
-    have := rampLimit_pos
-    linarith
-  · have := min_le_right (rampLimit / 4) (ε / 2)
-    linarith
 
 /-- Only the proved natural-profile regularity and positivity are used in
 constructing REF. The natural ODE is not replaced by a surrogate assumption. -/
@@ -816,14 +807,6 @@ theorem freeze_before_Xbig (hscale : 1 ≤ N.scale) {δ : ℝ} (hδT : 2 * δ < 
   dsimp [Xbig]
   linarith
 
-/-- In particular the reference is already frozen throughout [100,110]. -/
-theorem frozen_through_Xi (hscale : 1 ≤ N.scale) {δ : ℝ} (hδ : 0 < δ)
-    (hδT : 2 * δ < rampLimit) {p : Point} (hη : p.2 ∈ parameterInterval)
-    (hX : p.1 ∈ Icc Xbig Xi) :
-    N.refF δ p = Real.exp (continuation δ N.logF (2 * δ, p.2)) ∧
-      N.refU δ p = continuation δ N.logU (2 * δ, p.2) := by
-  have hfreeze := (N.freeze_before_Xbig hscale hδT).le.trans hX.1
-  exact ⟨N.refF_frozen hδ hδT hη hfreeze, N.refU_frozen hδ hδT hη hfreeze⟩
 
 end Input
 

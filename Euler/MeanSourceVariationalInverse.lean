@@ -54,43 +54,7 @@ def sourceMeanSolver : TimeLp T L2 →L[ℝ] meanDerivatives T hT FInv :=
     (scaled_mean_boundary_lower_bound ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter hext hcore)
     (source_smallness T K Be Bc r hsmall)
 
-theorem sourceMeanSolver_norm (f : TimeLp T L2) :
-    ‖sourceMeanSolver T hT ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter
-      hext hcore FInv H K hK hF0 hH hsmall f‖ ≤ 2*T*‖f‖ :=
-  meanSolver_norm T hT FInv H (coefficientOperator M hM C hC)
-    (boundaryOperator (scaledCutoff ℓ hℓ)) L K (effectiveNegativeBound Be Bc r)
-    hK (effectiveNegativeBound_nonneg Be Bc r hBe hBc hr) hF0 hH
-    (scaled_mean_boundary_lower_bound ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter hext hcore)
-    (source_smallness T K Be Bc r hsmall) f
 
-/-- The literal mean weak equation, retaining both original initial boundary terms. -/
-theorem sourceMeanSolver_weak (f : TimeLp T L2) (v : meanDerivatives T hT FInv) :
-    let u := sourceMeanSolver T hT ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter
-      hext hcore FInv H K hK hF0 hH hsmall f
-    ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ -
-      ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ +
-      ⟪coefficientOperator M hM C hC (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ +
-      L * ⟪boundaryOperator (scaledCutoff ℓ hℓ) (meanTrace T hT FInv u),
-        meanTrace T hT FInv v⟫_ℝ = -⟪f, meanPrimitive T hT FInv v⟫_ℝ :=
-  meanSolver_weak T hT FInv H (coefficientOperator M hM C hC)
-    (boundaryOperator (scaledCutoff ℓ hℓ)) L K (effectiveNegativeBound Be Bc r)
-    hK (effectiveNegativeBound_nonneg Be Bc r hBe hBc hr) hF0 hH
-    (scaled_mean_boundary_lower_bound ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter hext hcore)
-    (source_smallness T K Be Bc r hsmall) f v
 
-include hK hF0 hH hsmall hBe hBc hL hr hrquarter hext hcore in
-/-- Existence and uniqueness from the actual source spatial and time assumptions. -/
-theorem existsUnique_source_mean_weak_solution (f : TimeLp T L2) :
-    ∃! u : meanDerivatives T hT FInv, ∀ v : meanDerivatives T hT FInv,
-      ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ -
-        ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ +
-        ⟪coefficientOperator M hM C hC (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ +
-        L * ⟪boundaryOperator (scaledCutoff ℓ hℓ) (meanTrace T hT FInv u),
-          meanTrace T hT FInv v⟫_ℝ = -⟪f, meanPrimitive T hT FInv v⟫_ℝ :=
-  existsUnique_mean_weak_solution T hT FInv H (coefficientOperator M hM C hC)
-    (boundaryOperator (scaledCutoff ℓ hℓ)) L K (effectiveNegativeBound Be Bc r)
-    hK (effectiveNegativeBound_nonneg Be Bc r hBe hBc hr) hF0 hH
-    (scaled_mean_boundary_lower_bound ℓ hℓ M hM C hC Be Bc L r hBe hBc hL hr hrquarter hext hcore)
-    (source_smallness T K Be Bc r hsmall) f
 
 end EulerMeanSourceInverse

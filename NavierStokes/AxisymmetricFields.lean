@@ -189,9 +189,6 @@ theorem contDiff_velocity {H K : Profile} {m n : WithTop ℕ∞}
     ContDiff ℝ m (velocity H K) :=
   SpatialCurl.contDiff_spatialCurl (contDiff_potential hH hK) hmn
 
-theorem smooth_velocity {H K : Profile}
-    (hH : ContDiff ℝ ∞ H) (hK : ContDiff ℝ ∞ K) : ContDiff ℝ ∞ (velocity H K) :=
-  contDiff_velocity hH hK (by simp)
 
 theorem contDiffOn_velocity {H K : Profile} {times : Set ℝ} {m n : WithTop ℕ∞}
     (hH : ContDiffOn ℝ n H (times ×ˢ (univ : Set (ℝ × ℝ))))
@@ -252,14 +249,6 @@ theorem tsupport_velocity_slice_subset (H K : Profile) (t : ℝ) :
   (SpatialCurl.tsupport_curl_subset (fun x : Space => potential H K (t, x))).trans
     (tsupport_potential_slice_subset H K t)
 
-theorem velocity_eq_zero_outside_profile_support (H K : Profile) (t : ℝ) (x : Space)
-    (hH : profilePoint t x ∉ tsupport H) (hK : profilePoint t x ∉ tsupport K) :
-    velocity H K (t, x) = 0 := by
-  apply image_eq_zero_of_notMem_tsupport (f := fun y : Space => velocity H K (t, y))
-  intro hx
-  rcases tsupport_velocity_slice_subset H K t hx with h | h
-  · exact hH h
-  · exact hK h
 
 /-- The Cartesian cylinder cut out by bounds on `s` and `z` is compact. -/
 theorem isCompact_cylinder (R Z : ℝ) :
@@ -293,11 +282,5 @@ theorem tsupport_velocity_cylinder_subset (H K : Profile) (t R Z : ℝ)
   · exact hH h
   · exact hK h
 
-theorem hasCompactSupport_velocity_of_profile_bounds (H K : Profile) (t R Z : ℝ)
-    (hH : tsupport H ⊆ {p : ProfilePoint | p.2.1 ≤ R ∧ |p.2.2| ≤ Z})
-    (hK : tsupport K ⊆ {p : ProfilePoint | p.2.1 ≤ R ∧ |p.2.2| ≤ Z}) :
-    HasCompactSupport (fun x : Space => velocity H K (t, x)) :=
-  (isCompact_cylinder R Z).of_isClosed_subset (isClosed_tsupport _)
-    (tsupport_velocity_cylinder_subset H K t R Z hH hK)
 
 end NavierStokes.AxisymmetricFields

@@ -53,12 +53,6 @@ def regularizer (n : ℕ) : SmoothingOperator where
   contraction := regularizerMap_contract n
   solenoidal _u := solenoidalProjection_mem _
 
-theorem regularizer_tendsto (u : L2) :
-    Tendsto (fun n => (regularizer n).op u) atTop (𝓝 (solenoidalProjection u)) := by
-  change Tendsto (fun n => solenoidalProjection (mollify n (solenoidalProjection u)))
-    atTop (𝓝 (solenoidalProjection u))
-  have h := solenoidalProjection.continuous.tendsto (solenoidalProjection u)
-  simpa only [Function.comp_def,projection_idempotent] using h.comp (mollify_tendsto (solenoidalProjection u))
 
 theorem regularizer_error (n : ℕ) (A : SmoothL2Field Space) :
     ‖(regularizer n).op A.toLp-solenoidalProjection A.toLp‖ ≤

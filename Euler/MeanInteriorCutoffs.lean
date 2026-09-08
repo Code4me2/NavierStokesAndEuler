@@ -67,14 +67,6 @@ theorem abs_inner_le_one (x : Space) : |innerCutoff x| ≤ 1 := by
   change |innerBump x| ≤ 1
   rw [abs_of_nonneg innerBump.nonneg]
   exact innerBump.le_one
-theorem abs_middle_le_one (x : Space) : |middleCutoff x| ≤ 1 := by
-  change |middleBump x| ≤ 1
-  rw [abs_of_nonneg middleBump.nonneg]
-  exact middleBump.le_one
-theorem abs_outer_le_one (x : Space) : |outerCutoff x| ≤ 1 := by
-  change |outerBump x| ≤ 1
-  rw [abs_of_nonneg outerBump.nonneg]
-  exact outerBump.le_one
 
 theorem inner_one_on_halfBall {x : Space} (hx : x ∈ Metric.closedBall 0 (1/2 : ℝ)) :
     innerCutoff x = 1 := innerBump.one_of_mem_closedBall hx

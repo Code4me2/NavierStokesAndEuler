@@ -129,7 +129,6 @@ noncomputable def profiles : Profiles (ModulatedHistories.stripDomain univ isOpe
   ModulatedHistories.profiles univ isOpen_univ d.f d.U F.axisDatum d.f_smooth.contDiffOn d.U_smooth.contDiffOn
     F.axisDatum_contDiff.contDiffOn
 
-theorem pressure0_eq : d.profiles.pressure0 = W.profiles.pressure0 := rfl
 
 /-- These are absolute histories, not the histories of a radially clamped field. -/
 theorem rows_eq {X eta : ℝ} (hX : 0 ≤ X) (heta : eta ∈ d.target) :
@@ -595,10 +594,6 @@ theorem rows_before {X eta : ℝ} (hX : 0 ≤ X) (hbefore : X ≤ d.modulation.l
   · intro x hx
     exact (v.fields_outside (by intro hc; linarith [hx.2, hc.1])).2
 
-theorem exterior_pressure {X eta : ℝ} (heta : eta ∈ d.parameters)
-    (hX : (repairPatch W).right ≤ X) :
-    v.profiles.pressure (X, eta) = W.profiles.pressure (X, eta) := by
-  exact congrArg (fun rows => rows 4) (v.restored eta heta X hX)
 
 theorem exterior_mass {X eta : ℝ} (heta : eta ∈ d.parameters)
     (hX : (repairPatch W).right ≤ X) : v.profiles.M (X, eta) = W.profiles.M (X, eta) := by
@@ -608,13 +603,7 @@ theorem exterior_angular {X eta : ℝ} (heta : eta ∈ d.parameters)
     (hX : (repairPatch W).right ≤ X) : v.profiles.I (X, eta) = W.profiles.I (X, eta) := by
   exact congrArg (fun rows => rows 1) (v.restored eta heta X hX)
 
-theorem exterior_transport {X eta : ℝ} (heta : eta ∈ d.parameters)
-    (hX : (repairPatch W).right ≤ X) : v.profiles.J (X, eta) = W.profiles.J (X, eta) := by
-  exact congrArg (fun rows => rows 2) (v.restored eta heta X hX)
 
-theorem exterior_energy {X eta : ℝ} (heta : eta ∈ d.parameters)
-    (hX : (repairPatch W).right ≤ X) : v.profiles.S (X, eta) = W.profiles.S (X, eta) := by
-  exact congrArg (fun rows => rows 3) (v.restored eta heta X hX)
 
 theorem rows_outside {X eta : ℝ} (hX : 0 ≤ X) (heta : eta ∈ d.parameters)
     (hout : X ∉ Ioo d.modulation.left (repairPatch W).right) :
@@ -993,9 +982,6 @@ theorem positive_f {p : Point} (hX : 0 < p.1) (heta : p.2 ∈ Icc (-1 : ℝ) 1) 
     rw [(v.fields_outside hn).1]
     exact NominalConeAssembly.Witness.f_positive W hX heta
 
-theorem positive_E {p : Point} (hX : 0 < p.1) (heta : p.2 ∈ Icc (-1 : ℝ) 1) :
-    0 < v.profiles.E p :=
-  mul_pos (Real.sqrt_pos.mpr (mul_pos (by norm_num) hX)) (v.positive_f hX heta)
 
 end Witness
 

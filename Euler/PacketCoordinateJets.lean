@@ -70,14 +70,6 @@ theorem coordinate_hasDerivWithinAt (k : ℝ) (W Wt : VectorField)
   have h := (hi.clm_apply hW).const_smul k
   convert! h using 1
 
-theorem coordinate_derivWithin (k : ℝ) (W Wt : VectorField)
-    (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ)
-    (hW : HasDerivWithinAt (fun r => W (r,(x,θ))) (Wt (t,(x,θ)))
-      (Icc (0 : ℝ) D.T) t) :
-    derivWithin (fun r => coordinate D k W (r,(x,θ))) (Icc (0 : ℝ) D.T) t =
-      coordinateTime D k W Wt (t,(x,θ)) :=
-  (coordinate_hasDerivWithinAt D k W Wt t x θ hW).derivWithin
-    ((uniqueDiffOn_Icc D.T_pos) _ t.property)
 
 section Fields
 

@@ -34,9 +34,6 @@ def sourceLiteralTailGradeField (N n : ℕ) (hn : N+1 ≤ n) :
     (fun i _ => sourceProfileWitness P M D hT I Iprimary i)
     (sourceCoefficientData P M D I hT) (profiles_zero _ _) n hn
 
-theorem sourceLiteralTailGradeField_path (N n : ℕ) (hn : N+1 ≤ n) :
-    (sourceLiteralTailGradeField P M D hT I Iprimary N n hn).path =
-      (sourceTailGradeField P M D hT I Iprimary N n hn).path := rfl
 
 def sourceTailSumField (N : ℕ) (κ : ℝ) :
     Field P M.T (fun z => ∑ n ∈ Ico (N+1) (2*N+3), κ^n •

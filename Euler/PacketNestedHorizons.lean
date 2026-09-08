@@ -67,11 +67,6 @@ theorem activationTime_pos {n : ℕ} (hn : 0 < n) : 0 < activationTime J X a β 
   simpa only [activationTime_zero] using
     activationTime_strictMono J hJ X hX a β ha ha₂ hβ hβ₂ hn
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem horizonTime_pos (n : ℕ) : 0 < horizonTime J X a β n := by
-  exact add_pos_of_nonneg_of_pos
-    (activationTime_nonneg J hJ X hX a β ha ha₂ hβ hβ₂ n)
-    (mul_pos (by norm_num) (timeWidth_pos J hJ hX n))
 
 include hJ hX in
 theorem activationTime_lt_horizon (n : ℕ) :
@@ -92,11 +87,6 @@ theorem horizonTime_antitone (hw : ∀ n, timeWidth J X (n+1) ≤ timeWidth J X 
   exact antitone_nat_of_succ_le (fun n =>
     horizonTime_succ_le J hJ X hX a β ha ha₂ hβ hβ₂ n (hw n))
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem horizonTime_le_base (hw : ∀ n, timeWidth J X (n+1) ≤ timeWidth J X n/2) (n : ℕ) :
-    horizonTime J X a β n ≤ baseHorizon J X := by
-  simpa only [horizonTime_zero J hX a β] using
-    horizonTime_antitone J hJ X hX a β ha ha₂ hβ hβ₂ hw (Nat.zero_le n)
 
 include hJ hX ha ha₂ hβ hβ₂ in
 theorem activationTime_lower {n : ℕ} (hn : 1 ≤ n) :
@@ -117,20 +107,6 @@ theorem common_positive_interval (n : ℕ) : baseHorizon J X/12 < horizonTime J 
   · exact (activationTime_lower J hJ X hX a β ha ha₂ hβ hβ₂ (by omega)).trans_lt
       (activationTime_lt_horizon J hJ X hX a β n)
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem reciprocal_horizon_le (n : ℕ) :
-    (horizonTime J X a β n)⁻¹ ≤ 12/baseHorizon J X := by
-  have hb := baseHorizon_pos J hJ hX
-  have hs := common_positive_interval J hJ X hX a β ha ha₂ hβ hβ₂ n
-  have h := one_div_le_one_div_of_le (div_pos hb (by norm_num)) hs.le
-  simpa only [one_div,inv_div] using h
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem reciprocal_activation_le {n : ℕ} (hn : 1 ≤ n) :
-    (activationTime J X a β n)⁻¹ ≤ 12/baseHorizon J X := by
-  have hb := baseHorizon_pos J hJ hX
-  have hs := activationTime_lower J hJ X hX a β ha ha₂ hβ hβ₂ hn
-  have h := one_div_le_one_div_of_le (div_pos hb (by norm_num)) hs
-  simpa only [one_div,inv_div] using h
 
 end EulerPacketNestedHorizons

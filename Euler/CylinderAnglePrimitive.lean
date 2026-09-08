@@ -98,7 +98,5 @@ theorem primitive_translation (a : LiftDomain P) (u : LiftL2 P) :
 def sobolevPrimitive (q : ℕ) : SobolevSpace P q →L[ℝ] SobolevSpace P q :=
   liftOperator P q (primitive P) (primitive_translation P)
 
-theorem sobolevPrimitive_norm (q : ℕ) : ‖sobolevPrimitive P q‖ ≤ P :=
-  (norm_liftOperator_le P q (primitive P) (primitive_translation P)).trans (primitive_norm P)
 
 end EulerCylinderAnglePrimitive

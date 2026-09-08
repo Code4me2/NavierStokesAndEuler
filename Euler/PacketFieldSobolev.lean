@@ -24,12 +24,6 @@ theorem toFieldTower_derivative (G : Field P T raw) (s : ℕ) (i : Fin 4)
   rw [(G.derivative i).toFieldTower_value]
   exact wordPath_eq_sobolev P G.path G.orbit s (fun _ : Fin 1 => i) t
 
-theorem toFieldTower_derivative_path (G : Field P T raw) (s : ℕ) (i : Fin 4) :
-    (derivativeOperator P s i).compLeftContinuous ℝ (Icc (0 : ℝ) T)
-        (G.toFieldTower.realization (s+1)) = (G.derivative i).toFieldTower.realization s := by
-  apply ContinuousMap.ext
-  intro t
-  exact G.toFieldTower_derivative s i t
 
 theorem toFieldTower_levelNorm_eq (G : Field P T raw) (s n : ℕ) (hn : n ≤ s)
     (t : Icc (0 : ℝ) T) :

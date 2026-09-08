@@ -71,15 +71,6 @@ theorem timeAverage_timeSlice_integrable {E : Type*} [NormedAddCommGroup E]
   (ha.smul (hf.comp (continuous_id.prodMk continuous_const).continuousOn
     (fun _ ht => ⟨ht, mem_univ x⟩))).integrableOn_Icc
 
-/-- Bounded linear maps commute with these time averages pointwise. -/
-theorem timeAverage_continuousLinearMap {E F : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] [NormedAddCommGroup F]
-    [NormedSpace ℝ F] [CompleteSpace F] {T : ℝ} {a : ℝ → ℝ} {f : SpaceTime → E}
-    (ha : ContinuousOn a (Icc 0 T)) (hf : ContinuousOn f (slab 0 T))
-    (L : E →L[ℝ] F) (x : Space) :
-    timeAverage T a (fun z => L (f z)) x = L (timeAverage T a f x) := by
-  simpa only [timeAverage, map_smul] using
-    L.integral_comp_comm (timeAverage_timeSlice_integrable ha hf x)
 
 /-- A field with a uniform spatial `L¹` bound has an integrable weighted
 integrand on the time-space slab. -/
@@ -107,28 +98,6 @@ theorem timeAverage_integrable {E : Type*} [NormedAddCommGroup E]
     Integrable (timeAverage T a f) :=
   (timeAverage_integrand_integrable ha hf hslice hbound).integral_prod_right
 
-/-- The spatial `L¹` norm of an average is bounded by the uniform spatial
-norm bound times the time integral of the weight's absolute value. -/
-theorem timeAverage_norm_integral_le {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] {T M : ℝ} {a : ℝ → ℝ} {f : SpaceTime → E}
-    (ha : ContinuousOn a (Icc 0 T)) (hf : ContinuousOn f (slab 0 T))
-    (hslice : ∀ t ∈ Icc 0 T, Integrable (fun x : Space => f (t, x)))
-    (hbound : ∀ t ∈ Icc 0 T, (∫ x : Space, ‖f (t, x)‖) ≤ M) :
-    (∫ x : Space, ‖timeAverage T a f x‖) ≤ M * ∫ t in Icc 0 T, ‖a t‖ := by
-  have hF := timeAverage_integrand_integrable ha hf hslice hbound
-  calc
-    (∫ x : Space, ‖timeAverage T a f x‖) ≤
-        ∫ x : Space, ∫ t in Icc 0 T, ‖a t • f (t, x)‖ :=
-      integral_mono hF.integral_prod_right.norm hF.integral_norm_prod_right
-        (fun x => norm_integral_le_integral_norm (fun t => a t • f (t, x)))
-    _ = ∫ t in Icc 0 T, ∫ x : Space, ‖a t • f (t, x)‖ :=
-      (integral_integral_swap hF.norm).symm
-    _ ≤ ∫ t in Icc 0 T, ‖a t‖ * M := by
-      apply integral_mono_ae hF.integral_norm_prod_left (ha.norm.integrableOn_Icc.mul_const M)
-      filter_upwards [ae_restrict_mem measurableSet_Icc] with t ht
-      simp only [norm_smul, integral_const_mul]
-      exact mul_le_mul_of_nonneg_left (hbound t ht) (norm_nonneg _)
-    _ = M * ∫ t in Icc 0 T, ‖a t‖ := by rw [integral_mul_const]; ring
 
 /-- Fubini for a uniformly `L¹` field and a continuous time weight. -/
 theorem integral_timeAverage_eq {E : Type*} [NormedAddCommGroup E]
@@ -245,31 +214,6 @@ theorem timeAverage_memLp_two {E : Type*} [NormedAddCommGroup E]
   memLp_two_timeIntegral (aestronglyMeasurable_slab (continuousOn_time_weight ha hf))
     (timeAverage_integrand_integrable_sq_norm ha hf hslice hbound)
 
-/-- A quantitative square-integral estimate using only the time weight and
-the uniform spatial square-integral bound. -/
-theorem timeAverage_l2Sq_le {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] {T M : ℝ} {a : ℝ → ℝ} {f : SpaceTime → E}
-    (hT : 0 ≤ T) (ha : ContinuousOn a (Icc 0 T)) (hf : ContinuousOn f (slab 0 T))
-    (hslice : ∀ t ∈ Icc 0 T, Integrable (fun x : Space => ‖f (t, x)‖ ^ 2))
-    (hbound : ∀ t ∈ Icc 0 T, (∫ x : Space, ‖f (t, x)‖ ^ 2) ≤ M) :
-    l2Sq (timeAverage T a f) ≤ T * M * ∫ t in Icc 0 T, ‖a t‖ ^ 2 := by
-  have hF := aestronglyMeasurable_slab (continuousOn_time_weight ha hf)
-  have hFsq := timeAverage_integrand_integrable_sq_norm ha hf hslice hbound
-  have hvol : ((volume : Measure ℝ).restrict (Icc 0 T)).real univ = T := by
-    simp only [measureReal_def, Measure.restrict_apply_univ, Real.volume_Icc, sub_zero,
-      ENNReal.toReal_ofReal hT]
-  calc
-    l2Sq (timeAverage T a f) ≤ T *
-        ∫ t in Icc 0 T, ∫ x : Space, ‖a t • f (t, x)‖ ^ 2 := by
-      simpa only [hvol, timeAverage] using! l2Sq_timeIntegral_le hF hFsq
-    _ ≤ T * ∫ t in Icc 0 T, ‖a t‖ ^ 2 * M := by
-      apply mul_le_mul_of_nonneg_left _ hT
-      apply integral_mono_ae hFsq.integral_prod_left
-        ((ha.norm.pow 2).integrableOn_Icc.mul_const M)
-      filter_upwards [ae_restrict_mem measurableSet_Icc] with t ht
-      simp only [norm_smul, mul_pow, integral_const_mul]
-      exact mul_le_mul_of_nonneg_left (hbound t ht) (sq_nonneg _)
-    _ = T * M * ∫ t in Icc 0 T, ‖a t‖ ^ 2 := by rw [integral_mul_const]; ring
 
 /-- Uniform finite kinetic energy gives square-integrability of every
 continuously weighted time average of a velocity. -/
@@ -281,16 +225,6 @@ theorem timeAverage_memLp_two_of_uniformFiniteEnergy {T : ℝ} {a : ℝ → ℝ}
   exact timeAverage_memLp_two ha hu_cont (fun t ht => (hM t ht).1)
     (fun t ht => (hM t ht).2)
 
-/-- In particular, the averaged difference of two finite-energy velocities
-belongs to spatial `L²`. The weight can equally be a continuous derivative of
-a smooth time test function. -/
-theorem timeAverage_difference_memLp_two {T : ℝ} {a : ℝ → ℝ}
-    {u v : VelocityField} (ha : ContinuousOn a (Icc 0 T))
-    (hu_cont : ContinuousOn u (slab 0 T)) (hv_cont : ContinuousOn v (slab 0 T))
-    (hu : UniformFiniteEnergy (Icc 0 T) u) (hv : UniformFiniteEnergy (Icc 0 T) v) :
-    MemLp (timeAverage T a (fun z => u z - v z)) 2 volume :=
-  timeAverage_memLp_two_of_uniformFiniteEnergy ha (hu_cont.sub hv_cont)
-    (uniformFiniteEnergy_sub_of_continuousOn hu_cont hv_cont hu hv)
 
 /-- A uniform finite-energy bound also bounds every scalar coordinate's
 ordinary spatial square integral. -/
@@ -387,43 +321,6 @@ theorem l2_inner_integrable_and_norm_integral_le {E : Type*} [NormedAddCommGroup
       integral_mono hint.norm (hf_sq.add hg_sq) hpoint
     _ = l2Sq f + l2Sq g := integral_add hf_sq hg_sq
 
-/-- The spatial `L²` pairing commutes with time averaging. Compact smooth
-spatial tests are covered as a special case of a continuous `L²` test. -/
-theorem timeAverage_inner_integral {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [CompleteSpace E] {T M : ℝ} {a : ℝ → ℝ}
-    {f : SpaceTime → E} {ψ : Space → E}
-    (ha : ContinuousOn a (Icc 0 T)) (hf : ContinuousOn f (slab 0 T))
-    (hslice : ∀ t ∈ Icc 0 T, Integrable (fun x : Space => ‖f (t, x)‖ ^ 2))
-    (hbound : ∀ t ∈ Icc 0 T, (∫ x : Space, ‖f (t, x)‖ ^ 2) ≤ M)
-    (hψcont : Continuous ψ) (hψ : MemLp ψ 2 volume) :
-    (∫ x : Space, ⟪ψ x, timeAverage T a f x⟫_ℝ) =
-      ∫ t in Icc 0 T, a t * (∫ x : Space, ⟪ψ x, f (t, x)⟫_ℝ) := by
-  have hflp (t : ℝ) (ht : t ∈ Icc 0 T) : MemLp (fun x : Space => f (t, x)) 2 volume := by
-    have hfc : ContinuousOn (fun x : Space => f (t, x)) univ :=
-      hf.comp (continuous_const.prodMk continuous_id).continuousOn
-        (fun x _ => ⟨ht, mem_univ x⟩)
-    have hfm : AEStronglyMeasurable (fun x : Space => f (t, x)) volume := by
-      simpa only [Measure.restrict_univ] using hfc.aestronglyMeasurable MeasurableSet.univ
-    exact (memLp_two_iff_integrable_sq_norm hfm).2 (hslice t ht)
-  have hpaircont : ContinuousOn (fun z : SpaceTime => ⟪ψ z.2, f z⟫_ℝ) (slab 0 T) :=
-    (hψcont.comp continuous_snd).continuousOn.inner hf
-  have hpair (t : ℝ) (ht : t ∈ Icc 0 T) :=
-    l2_inner_integrable_and_norm_integral_le hψ (hflp t ht)
-  have hpairbound (t : ℝ) (ht : t ∈ Icc 0 T) :
-      (∫ x : Space, ‖⟪ψ x, f (t, x)⟫_ℝ‖) ≤ l2Sq ψ + M :=
-    (hpair t ht).2.trans (add_le_add_right (hbound t ht) (l2Sq ψ))
-  have havg (x : Space) :
-      timeAverage T a (fun z : SpaceTime => ⟪ψ z.2, f z⟫_ℝ) x =
-        ⟪ψ x, timeAverage T a f x⟫_ℝ := by
-    simpa only [timeAverage, inner_smul_right, smul_eq_mul] using
-      integral_inner (𝕜 := ℝ) (timeAverage_timeSlice_integrable ha hf x) (ψ x)
-  calc
-    (∫ x : Space, ⟪ψ x, timeAverage T a f x⟫_ℝ) =
-        ∫ x : Space, timeAverage T a (fun z : SpaceTime => ⟪ψ z.2, f z⟫_ℝ) x :=
-      integral_congr_ae (Filter.Eventually.of_forall (fun x => (havg x).symm))
-    _ = ∫ t in Icc 0 T, a t * (∫ x : Space, ⟪ψ x, f (t, x)⟫_ℝ) := by
-      simpa only [smul_eq_mul] using
-        integral_timeAverage_eq ha hpaircont (fun t ht => (hpair t ht).1) hpairbound
 
 /-- A complex scalar spatial test factors out of the time integral. -/
 theorem timeAverage_complex_mul (T : ℝ) (a : ℝ → ℝ) (f : SpaceTime → ℝ)

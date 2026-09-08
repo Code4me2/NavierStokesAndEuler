@@ -441,15 +441,6 @@ theorem symmetricSolution_spec {R : ℝ} (hR : 0 ≤ R)
     integral_equation := glue_integralEquation hzero hpEq' hmEq'
     axis_zero := fun z _ => (glue_nonneg _ _ le_rfl z).trans (hpZero z) }
 
-theorem exists_symmetric_integral_solution {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → SymmetricCoefficientPath R} {f : ℂ → SymmetricPath R Vec}
-    {U : Set ℂ} (hU : IsOpen U)
-    (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : DerivativeShape (symmetricRawCoefficient hR A₁)) :
-    ∃ W, IsSymmetricIntegralSolution R U (symmetricRawCoefficient hR A₀)
-      (symmetricRawCoefficient hR A₁) (symmetricRawField hR f) W :=
-  ⟨symmetricSolution hR A₀ A₁ f, symmetricSolution_spec hR hU hA₀ hA₁ hf hshape⟩
 
 theorem reflected_matrix_parity {S : Set ℝ} {U : Set ℂ} {A : Coeff}
     (hA : CoefficientParityOn S U A) {r : ℝ} (hr : r ∈ S)
@@ -647,21 +638,6 @@ theorem symmetricSolution_parity {R : ℝ} (hR : 0 ≤ R)
       sideSolution_parity hR hU hA₀ hA₁ hf hshape hpA₀ hpA₁ hpf hn hz,
       parityVec_involutive]
 
-theorem symmetricSolution_parity_of_global {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → SymmetricCoefficientPath R} {f : ℂ → SymmetricPath R Vec}
-    {U : Set ℂ} (hU : IsOpen U)
-    (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : DerivativeShape (symmetricRawCoefficient hR A₁))
-    (hpA₀ : CoefficientParity (symmetricRawCoefficient hR A₀))
-    (hpA₁ : CoefficientParity (symmetricRawCoefficient hR A₁))
-    (hpf : ForcingParity (symmetricRawField hR f))
-    {r : ℝ} (hr : r ∈ Icc (-R) R) {z : ℂ} (hz : z ∈ U) :
-    symmetricSolution hR A₀ A₁ f (-r) z =
-      parityVec (symmetricSolution hR A₀ A₁ f r z) :=
-  symmetricSolution_parity hR hU hA₀ hA₁ hf hshape
-    (fun r _ z _ => hpA₀ r z) (fun r _ z _ => hpA₁ r z)
-    (fun r _ z _ => hpf r z) hr hz
 
 /-- This is the component form used by the smooth even-descent theorem. -/
 theorem first_components_even {W : Field} {R : ℝ} {U : Set ℂ}
@@ -671,13 +647,6 @@ theorem first_components_even {W : Field} {R : ℝ} {U : Set ℂ}
   intro r hr
   simpa [parityVec_apply, paritySign, hi] using congrFun (hW r ⟨hr.1.le, hr.2.le⟩ z hz) i
 
-theorem last_components_odd {W : Field} {R : ℝ} {U : Set ℂ}
-    (hW : ∀ r ∈ Icc (-R) R, ∀ z ∈ U, W (-r) z = parityVec (W r z))
-    (i : Fin 6) (hi : 4 ≤ i.val) {z : ℂ} (hz : z ∈ U) :
-    ∀ r ∈ Ioo (-R) R, W (-r) z i = -W r z i := by
-  intro r hr
-  simpa [parityVec_apply, paritySign, not_lt.mpr hi] using
-    congrFun (hW r ⟨hr.1.le, hr.2.le⟩ z hz) i
 
 /-- Two derivatives with the same value and axis trace glue to an ordinary
 two-sided derivative. -/
@@ -691,36 +660,6 @@ theorem hasDerivAt_glue_zero {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
   funext r
   by_cases hr : 0 ≤ r <;> simp [hr, h0]
 
-/-- The derivatives from both sides match at the axis. The value is
-determined by the forcing, with the exact singular-diagonal factor. -/
-theorem symmetricSolution_hasDerivAt_zero {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → SymmetricCoefficientPath R} {f : ℂ → SymmetricPath R Vec}
-    {U : Set ℂ} (hU : IsOpen U)
-    (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : DerivativeShape (symmetricRawCoefficient hR A₁))
-    {z : ℂ} (hz : z ∈ U) (i : Fin 6) :
-    HasDerivAt (fun r => symmetricSolution hR A₀ A₁ f r z i)
-      ((1 / ((exponent i : ℝ) + 1)) • symmetricRawField hR f 0 z i) 0 := by
-  obtain ⟨hp, _, _⟩ := sideSolution_spec hR false hU hA₀ hA₁ hf hshape
-  obtain ⟨hm, _, _⟩ := sideSolution_spec hR true hU hA₀ hA₁ hf hshape
-  have hdp := (hp.radial_differentiable z hz i 0).hasDerivAt
-  have heqp := hp.axis_derivative_eq_forcing hU hz i
-  change deriv (fun r => sideSolution hR false A₀ A₁ f r z i) 0 = _ at heqp
-  rw [heqp, sideRawField_pos hR f ⟨le_rfl, hR⟩ z] at hdp
-  have hdm := (hm.radial_differentiable z hz i 0).hasDerivAt
-  have heqm := hm.axis_derivative_eq_forcing hU hz i
-  change deriv (fun r => sideSolution hR true A₀ A₁ f r z i) 0 = _ at heqm
-  rw [heqm, sideRawField_neg hR f ⟨le_rfl, hR⟩ z] at hdm
-  simp only [reflectedForcing, neg_zero, Pi.neg_apply, smul_neg] at hdm
-  have hdneg : HasDerivAt (fun r => sideSolution hR true A₀ A₁ f (-r) z i)
-      ((1 / ((exponent i : ℝ) + 1)) • symmetricRawField hR f 0 z i) 0 := by
-    simpa only [Function.comp_def, neg_one_smul, neg_neg] using
-      hdm.scomp_of_eq 0 (hasDerivAt_neg (0 : ℝ)) (by simp)
-  have hzero : sideSolution hR false A₀ A₁ f 0 z i =
-      sideSolution hR true A₀ A₁ f (-0) z i := by
-    simpa only [neg_zero] using congrFun ((hp.axis_zero z hz).trans (hm.axis_zero z hz).symm) i
-  simpa only [symmetricSolution, glue, ite_apply] using hasDerivAt_glue_zero hdp hdneg hzero
 
 /-- Uniqueness of the glued actual lifts in the holomorphic path class.
 Both sides are compared by the proved positive Volterra uniqueness

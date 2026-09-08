@@ -126,13 +126,6 @@ def canonicalFlux (g : Fin 3 → Fin 3 → Space → ℝ) (f : Space → ℝ)
     (hf : ContDiff ℝ ∞ f) (hc : HasCompactSupport f) : ℂ :=
   ∑ i : Fin 3, ∑ j : Fin 3, pressurePair i j (g i j) (PressureRecovery.realTest f hf hc)
 
-theorem canonical_pair_integrable (g : Fin 3 → Fin 3 → Space → ℝ) (f : Space → ℝ)
-    (hf : ContDiff ℝ ∞ f) (hc : HasCompactSupport f)
-    (hg : ∀ i j, Integrable (g i j) volume) (i j : Fin 3) :
-    Integrable (fun x => (g i j x : ℂ) *
-      rieszTest i j (PressureRecovery.realTest f hf hc) x) volume := by
-  apply RieszTestOperators.integrable_mul_rieszTest
-  simpa only [Complex.ofRealCLM_apply] using Complex.ofRealCLM.integrable_comp (hg i j)
 
 theorem norm_canonicalFlux_le {g : Fin 3 → Fin 3 → Space → ℝ} {f : Space → ℝ}
     (hf : ContDiff ℝ ∞ f) (hc : HasCompactSupport f) {C : ℝ}
@@ -195,11 +188,6 @@ def canonicalCutoffFlux (R : ℝ) (hR : 0 < R) (u v : VelocityField) (t : ℝ)
     (fluxFunction_smooth (ComparisonCutoffs.weight_smooth R) (hu.sub hv))
     (fluxFunction_compact (ComparisonCutoffs.weight_hasCompactSupport hR) _)
 
-theorem canonicalCutoffFlux_eq_sum (R : ℝ) (hR : 0 < R) (u v : VelocityField) (t : ℝ)
-    (hu : ContDiff ℝ ∞ (fun x => u (t, x))) (hv : ContDiff ℝ ∞ (fun x => v (t, x))) :
-    canonicalCutoffFlux R hR u v t hu hv =
-      ∑ i : Fin 3, ∑ j : Fin 3, pressurePair i j (tensorDiff u v t i j)
-        (fluxTest R hR (fun x => (u - v) (t, x)) (hu.sub hv)) := rfl
 
 theorem norm_canonicalCutoffFlux_le (R : ℝ) (hR : 0 < R) (u v : VelocityField) (t : ℝ)
     (hu : ContDiff ℝ ∞ (fun x => u (t, x))) (hv : ContDiff ℝ ∞ (fun x => v (t, x)))
@@ -235,18 +223,6 @@ theorem actual_flux_integrable_and_le_canonicalNorm {T t R : ℝ} {u v : Velocit
 def commutatorPair (i j : Fin 3) (h g : Space → ℝ) (ψ ψh : ComplexTest) : ℂ :=
   ∫ x, g x • (rieszTest i j ψh x - h x • rieszTest i j ψ x)
 
-theorem integrable_commutator_pair (i j : Fin 3) {h g : Space → ℝ}
-    (hg : Integrable g volume) (hhg : MemLp (fun x => h x * g x) (6 / 5) volume)
-    (ψ ψh : ComplexTest) :
-    Integrable (fun x => g x • (rieszTest i j ψh x - h x • rieszTest i j ψ x)) volume := by
-  have hgc : Integrable (fun x => (g x : ℂ)) volume := by
-    simpa only [Complex.ofRealCLM_apply] using Complex.ofRealCLM.integrable_comp hg
-  have hq := RieszTestOperators.integrable_mul_rieszTest i j ψh hgc
-  have hl := integrable_holder_pair hhg (RieszTestOperators.memLp_rieszTest_six i j ψ)
-  convert! hq.sub hl using 1
-  funext x
-  simp only [Pi.sub_apply, Complex.real_smul, Complex.ofReal_mul]
-  ring
 
 theorem pressurePair_decomposition (i j : Fin 3) {h g : Space → ℝ}
     (hg : Integrable g volume) (hhg : MemLp (fun x => h x * g x) (6 / 5) volume)
@@ -266,14 +242,6 @@ theorem pressurePair_decomposition (i j : Fin 3) {h g : Space → ℝ}
       ring
   simpa only [add_comm] using (eq_sub_iff_add_eq.mp he).symm
 
-theorem norm_pressurePair_le_local_commutator (i j : Fin 3) {h g : Space → ℝ}
-    (hg : Integrable g volume) (hhg : MemLp (fun x => h x * g x) (6 / 5) volume)
-    (ψ ψh : ComplexTest) :
-    ‖pressurePair i j g ψh‖ ≤ comparisonLpNorm (6 / 5) (fun x => h x * g x) *
-      comparisonLpNorm 6 (rieszTest i j ψ) + ‖commutatorPair i j h g ψ ψh‖ := by
-  rw [pressurePair_decomposition i j hg hhg]
-  exact (norm_add_le _ _).trans (add_le_add_left
-    (norm_holder_pair_le hhg (RieszTestOperators.memLp_rieszTest_six i j ψ)) _)
 
 /-- The fixed constant in the actual Riesz-test Sobolev inequality. -/
 def rieszSobolevConstant : ℝ := 3 * WeightedSobolev.sobolevConstant

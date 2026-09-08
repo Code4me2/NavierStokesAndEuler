@@ -600,52 +600,6 @@ theorem slot_geometry_cost (s : StripData P) (hh : 0 ≤ h)
   simpa only [slotCost, Nat.mul_one] using geometry_cost_uniform s clock
     (slotReference sys hdet slot) gap budget hgap hr
 
-/-- A full target control built from the original slot system, the selected
-reference phase, active-band bounds, and current HR coefficient classes.
-All clock, normal, affine and geometry bounds are supplied by the concrete
-active-window constructions; no energy or output-control premise remains. -/
-noncomputable def actualSlotControl
-    (s : StripData Slow) (F : PhaseConstruction D) (hh : 0 ≤ h)
-    (chart : ℕ → ℕ) (hchart : ∀ n, 1 ≤ chart n)
-    (hnear : ∀ l n, chart n ≤ (slot l n).1+4 ∧ (slot l n).1 ≤ chart n+4)
-    (hslot : ∀ l n, 4 ≤ (slot l n).1)
-    (hs : ∀ n, ChartScales.S (chart n) ≤ s.slow n)
-    (hscale : ∀ i, D.scale i = ChartScales.S (slot i.1 i.2).1)
-    (hL : ∀ i, F.L i = ChartScales.slotLength sys.radius h (slot i.1 i.2).1)
-    (gap : Label → ℕ → ℕ) (budget : ℕ) (hgap : ∀ l n, gap l n ≤ budget)
-    (referenceSource : Label → ℕ → Slow × Plane → ProblemStatement.Space)
-    (c : CorrectionState.Context (Slow × Plane)) (u : CorrectionState.State (Slow × Plane))
-    (b : Label → CorrectionState.HarmonicBlock (Slow × Plane))
-    (G A0 : Label → HarmonicResidual.BlockCoefficients (Slow × Plane)) (j : ℤ) (hj : j ≠ 0)
-    {α : ℝ}
-    (hsource : ∀ i : Fin 3, UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope
-        (geometry (slotReference sys hdet slot) gap
-          (ActualSignedGeometry.clockScale chart (fun l n => (slot l n).1) hnear h))
-        (fun _ _ => sys.radius)
-        (length F (ActualSignedGeometry.clockScale chart (fun l n => (slot l n).1) hnear h))
-        (envelope F (ActualSignedGeometry.clockScale chart (fun l n => (slot l n).1) hnear h))) α
-      (fun l n x => (HarmonicResidual.residualBlock c u (b l) (G l) (A0 l)).velocity n i j x))
-    (part : HarmonicCalculus.ComplexVector →L[ℝ] ProblemStatement.Space) :=
-  actualControl s F ActualSignedGeometry.swapParameter.toContinuousLinearEquiv.toContinuousLinearMap
-    (physicalPhi h chart (fun l n => (slot l n).1))
-    (physicalPsi h chart (fun l n => (slot l n).1))
-    (physical_commute h chart (fun l n => (slot l n).1))
-    (ActualSignedGeometry.clockScale chart (fun l n => (slot l n).1) hnear h)
-    (ActualSignedGeometry.normalScale chart (fun l n => (slot l n).1) hnear hh)
-    (slotReference sys hdet slot) referenceSource gap
-    (fun l n => PhysicalParticularWave.velocityWeight h (ChartScales.Q (chart n)) (ChartScales.Q (slot l n).1))
-    (fun _ _ => sys.radius)
-    (ActualSignedGeometry.slowChangeCost_one h) (by norm_num : (1:ℝ) ≤ 25)
-    (slotCost_one hdet _ budget)
-    (physicalPhi_bound h chart (fun l n => (slot l n).1) hnear)
-    (fun i => by rw [hscale i]; exact active_scale_bound s chart _ hchart hnear hs i.1 i.2)
-    (fun l n => by
-      rw [hL (l,n)]
-      exact ActualSignedGeometry.slotGeometry_separated sys hdet hh (hslot l n) 0)
-    (slot_geometry_cost sys hdet slot s hh _ gap budget hgap hslot
-      (active_scale_bound s chart _ hchart hnear hs))
-    c u b G A0 j hj hsource part
 
 theorem actualSlot_tangent_eq
     (F : PhaseConstruction D) (hh : 0 ≤ h) (chart : ℕ → ℕ)

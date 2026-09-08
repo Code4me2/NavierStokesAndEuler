@@ -77,14 +77,6 @@ theorem editedAngular_eq_pure_heat (d : OutgoingTail.TailData) {K : ℝ}
   exact ParametricHeatTail.physicalEdit_eventual_heat_carrier d hK
     (q_pos d.h_pos hh1 ht) hs (diffusion_eq_ratio d.h_pos hh1 ht) hlate
 
-theorem editedAngular_div_radius (d : OutgoingTail.TailData) {K : ℝ}
-    (hK : 0 < K) (hh1 : d.h < 1 / 2) {p : PhysicalPoint}
-    (ht : p.1 < 1) (hs : 0 < p.2.1)
-    (hfull : 1 / 2 ≤ Real.log (X d.h p / K) + 1 / 5) :
-    editedAngular d K p / Real.sqrt (2 * p.2.1) =
-      TerminalStress.swirlCoefficient (normalization d K) d.h (shape d K) p := by
-  rw [editedAngular_eq_heat d hK hh1 ht hs hfull]
-  rfl
 
 /-- The normalized section is used only inside the physical time domain.
 It supplies a direct profile-parameter comparison without `log(1-eta^2)`.
@@ -108,12 +100,5 @@ theorem X_normalizedSection {h e : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   change x / q h (normalizedSection x e) = x
   rw [q_normalizedSection hh hh1 he x, div_one]
 
-theorem editedAngular_normalizedSection (d : OutgoingTail.TailData)
-    (hh1 : d.h < 1 / 2) {e : ℝ} (he : e ^ 2 < 1) (K x : ℝ) :
-    editedAngular d K (normalizedSection x e) =
-      ParametricHeatTail.physicalEdit d K e x := by
-  simp only [editedAngular, q_normalizedSection d.h_pos hh1 he x,
-    eta_normalizedSection d.h_pos hh1 he x, X_normalizedSection d.h_pos hh1 he x,
-    Real.one_rpow, one_mul]
 
 end NavierStokes.PhysicalHeatCoordinates

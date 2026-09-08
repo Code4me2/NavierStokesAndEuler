@@ -68,9 +68,6 @@ def volumeTensorPath : C(Icc (0 : ℝ) T,
     Lp (Vector3 [×n]→L[ℝ] Vector3) 2 (volume : Measure Vector3)) :=
   EulerVolumeSobolevPath.tensorPath Y hmp (fun i => A.physicalTensorPath k m i) D hD hJ hB
 
-theorem volumePointField_smooth (hY : ∀ t, ContDiff ℝ ∞ (Y t)) (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ ∞ (A.volumePointField k m Y t) :=
-  (A.physicalPointField_smooth k m t).comp (hY t)
 
 theorem volumeTensorPath_ae (hY : ∀ t, ContDiff ℝ ∞ (Y t)) (t : Icc (0 : ℝ) T) :
     (A.volumeTensorPath k m Y hmp n D hD hJ hB t : Vector3 → (Vector3 [×n]→L[ℝ] Vector3)) =ᵐ[volume]

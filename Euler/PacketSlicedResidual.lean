@@ -21,21 +21,6 @@ def slicedMomentumGrade (s : Set ℝ) (N : ℕ) (FInv M : Space →L[ℝ] Space)
     (slowAdvection FInv) (fastAdvection m) (fun i => slicedJet s (u i) z)
       (fun i => pressureJet (p i) z) n
 
-theorem slicedMomentum_fieldSum_eq (s : Set ℝ) (N : ℕ) (κ : ℝ) (hκ : κ ≠ 0)
-    (FInv M : Space →L[ℝ] Space) (m : Space)
-    (u : ℕ → Domain → Space) (p : ℕ → Domain → ℝ) (z : Domain)
-    (hs : UniqueDiffWithinAt ℝ s z.1)
-    (hut : ∀ i ≤ N, DifferentiableWithinAt ℝ (fun t => u i (t,z.2)) s z.1)
-    (hux : ∀ i ≤ N, DifferentiableAt ℝ (fun y => u i (z.1,y)) z.2)
-    (hpx : ∀ i ≤ N, DifferentiableAt ℝ (fun y => p i (z.1,y)) z.2)
-    (hu0 : slicedJet s (u 0) z=0) (hp0 : fastPressure m (pressureJet (p 0) z)=0) :
-    slicedMomentumResidual s κ FInv M m (fieldSum N κ u) (fieldSum N κ p) z=
-      evaluate (2*N) κ (slicedMomentumGrade s N FInv M m u p z) := by
-  unfold slicedMomentumResidual
-  rw [slicedJet_fieldSum s N κ u z hs hut hux, pressureJet_fieldSum N κ p z hpx]
-  exact residual_eq_evaluate N κ hκ (linearPart M) (slowPressure FInv) (fastPressure m)
-    (slowAdvection FInv) (fastAdvection m) (fun i => slicedJet s (u i) z)
-      (fun i => pressureJet (p i) z) hu0 hp0
 
 /-- This identity is valid at both endpoints when s=[0,T] and T>0. -/
 theorem slicedMomentum_fieldSum_tail (s : Set ℝ) (N : ℕ) (κ : ℝ) (hκ : κ ≠ 0)

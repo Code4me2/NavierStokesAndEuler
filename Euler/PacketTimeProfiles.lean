@@ -44,8 +44,6 @@ theorem mean_pos (p : ℕ) (t : K) : 0 < S.mean p t := meanScale_pos S.H0 S.H0_p
 theorem high_pos (p : ℕ) (t : K) : 0 < S.high p t :=
   highScale_pos (S.growth t) S.H0 (S.growth_pos t) S.H0_pos p
 
-theorem mean_mono {i j : ℕ} (hij : i ≤ j) (t : K) : S.mean i t ≤ S.mean j t :=
-  meanScale_mono S.H0 S.H0_one_le hij
 
 theorem high_mono {i j : ℕ} (hij : i ≤ j) (t : K) : S.high i t ≤ S.high j t :=
   highScale_mono (S.growth t) S.H0 (S.growth_pos t).le S.H0_one_le hij
@@ -86,15 +84,7 @@ theorem fast_corrector_high_high_bound (i j p : ℕ) (hi : 2 ≤ i) (hj : 1 ≤ 
   fast_corrector_high_high (S.growth t) S.H0 (S.growth_pos t).le (S.growth_le t)
     S.H0_one_le i j p hi hj hp
 
-theorem fast_corrector_corrector_mean_bound (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j)
-    (hp : i+j=p+1) (t : K) : S.high (i-1) t*S.high (j-1) t ≤ S.mean p t :=
-  fast_corrector_corrector_mean (S.growth t) S.H0 (S.growth_pos t).le (S.growth_le t)
-    S.H0_one_le i j p hi hj hp
 
-theorem fast_corrector_corrector_high_bound (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j)
-    (hp : i+j=p+1) (t : K) : S.high (i-1) t*S.high (j-1) t ≤ S.high p t :=
-  fast_corrector_corrector_high (S.growth t) S.H0 (S.growth_pos t).le (S.growth_le t)
-    S.H0_one_le i j p hi hj hp
 
 theorem previous_linear_mean_bound (p : ℕ) (hp : 2 ≤ p) (t : K) : S.high (p-1) t ≤ S.mean p t :=
   previous_linear_mean (S.growth t) S.H0 (S.growth_pos t).le (S.growth_le t) S.H0_one_le p hp

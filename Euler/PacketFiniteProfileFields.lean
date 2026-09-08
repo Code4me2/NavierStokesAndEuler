@@ -21,9 +21,6 @@ def Field.timeDerivativeField {raw raw_t : VectorField} (G : Field P T raw) (hT 
   H.congr (fun t x θ => (G.raw_hasDerivWithinAt hT.le H ht t x θ).derivWithin
     ((uniqueDiffOn_Icc hT) _ t.property))
 
-theorem Field.timeDerivativeField_time {raw raw_t : VectorField} (G : Field P T raw) (hT : 0 < T)
-    (H : Field P T raw_t) (ht : TimeDerivative hT.le G H) :
-    TimeDerivative hT.le G (G.timeDerivativeField hT H ht) := ht
 
 namespace ProfileRegularity
 

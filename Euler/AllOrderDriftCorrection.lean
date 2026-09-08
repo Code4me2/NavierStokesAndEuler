@@ -77,9 +77,6 @@ def Budget.commonJet (B : Budget period hT A) (n : ℕ) (t : Icc (0 : ℝ) T) :
 def Budget.fieldTower (B : Budget period hT A) : FieldTower period T :=
   (B.family period).fieldTower period (B.comparisonData period)
 
-/-- The tower's underlying field is exactly the constructed common correction. -/
-theorem Budget.fieldTower_field (B : Budget period hT A) :
-    (B.fieldTower period).field = B.commonPath period := rfl
 
 /-- Every Sobolev realization of the common correction has zero initial data. -/
 theorem Budget.fieldTower_initial (B : Budget period hT A) (q : ℕ) :

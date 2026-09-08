@@ -78,15 +78,6 @@ theorem forwardInitializedPrimaryRemainder_bound (N : ℕ) (hN : 1 ≤ N) (k : �
     (forwardInitializedProfiles_one_mean M D δ hδ ξ hs α) hN BC k hk hbase
   exact (h.changeTime hTime).of_raw_eq _ (fun _ _ _ => by rw [forwardInitializedProfiles_one_high]; rfl)
 
-theorem forwardInitializedPrimaryRemainder_physical_norm (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : 4 ≤ k)
-    (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ))
-    (t : Icc (0 : ℝ) D.T) (Y : Space → Space) (x : Space) :
-    ‖forwardInitializedPrimaryRemainder M D δ hδ ξ hs α N k⁻¹
-      (t,(Y x,k*inner ℝ D.m₀ (Y x)))‖ ≤
-      sobolevEmbeddingConstant period 3*((fixedVelocityGradeCost L.R S.H0 2+2)/k^2) :=
-  (forwardInitializedPrimaryRemainder_bound M D hTime δ hδ ξ hs α
-    L NB W LM WM BC hRc hcost hδ1 hα hR WP S hgrowth N hN k hk hbase).raw_graph_norm_le
-      (by norm_num) t k D.m₀ (Y x)
 
 theorem forwardInitializedPrimaryRemainder_physical_fderiv (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : 4 ≤ k)
     (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ))

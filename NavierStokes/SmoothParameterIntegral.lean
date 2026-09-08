@@ -204,16 +204,6 @@ theorem contDiffOn_integral (hs : IsOpen s)
     ContDiffOn ℝ ∞ (fun x => ∫ t, F x t ∂μ) s :=
   (hasFTaylorSeriesUpToOn_integral hs h_smooth h_meas h_dom).contDiffOn
 
-theorem iteratedFDeriv_integralOn (hs : IsOpen s)
-    (h_smooth : ∀ᵐ t ∂μ, ContDiffOn ℝ ∞ (fun x => F x t) s)
-    (h_meas : ∀ k x, x ∈ s → AEStronglyMeasurable (jet F k x) μ)
-    (h_dom : LocallyDominatedOn F μ s) (k : ℕ) {x : H} (hx : x ∈ s) :
-    iteratedFDeriv ℝ k (fun y => ∫ t, F y t ∂μ) x =
-      ∫ t, iteratedFDeriv ℝ k (fun y => F y t) x ∂μ := by
-  rw [← iteratedFDerivWithin_of_isOpen k hs hx]
-  have hp := hasFTaylorSeriesUpToOn_integral hs h_smooth h_meas h_dom
-  exact (hp.eq_iteratedFDerivWithin_of_uniqueDiffOn
-    (m := k) (WithTop.coe_le_coe.mpr le_top) hs.uniqueDiffOn hx).symm
 
 end OpenDomain
 

@@ -36,14 +36,5 @@ theorem nonlinearGrade_update (M p : ℕ) (hp : 2 ≤ p) (hMp : p+1 ≤ M)
     fastAdvection_tangent_left m (u 1) (A+B) hprimary]
   simp only [zero_add, add_zero, add_assoc]
 
-/-- The surviving unknown term is literally (m dot B) times the primary angular derivative. -/
-theorem nonlinearGrade_update_formula (M p : ℕ) (hp : 2 ≤ p) (hMp : p+1 ≤ M)
-    (FInv : Space →L[ℝ] Space) (m : Space) (u u' : ℕ → VectorJet)
-    (A B : VectorJet) (hu0 : u 0=0) (hu : ∀ i < p, u' i=u i)
-    (hnew : u' p=u p+(A+B)) (hprimary : ⟪m, (u 1).1⟫_ℝ=0)
-    (hA : ⟪m, A.1⟫_ℝ=0) :
-    nonlinearGrade M p FInv m u' = nonlinearGrade M p FInv m u +
-      ⟪m, B.1⟫_ℝ • (u 1).2 angleDirection :=
-  nonlinearGrade_update M p hp hMp FInv m u u' A B hu0 hu hnew hprimary hA
 
 end EulerPacketPointJets

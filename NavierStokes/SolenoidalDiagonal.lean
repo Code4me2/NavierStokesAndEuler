@@ -267,19 +267,6 @@ theorem velocitySum_eventuallyEq_sum {a : ℕ → ℝ} (ha : Tendsto a atTop atT
   exact hw.trans (spatialCurl_partialPotential (hq.contDiffAt (hU.mem_nhds hwU))
     (fun j => (hA j).contDiffAt (hU.mem_nhds hwU)) N)
 
-/-- A direct open-domain theorem for the constructed potential and velocity. -/
-theorem smooth_solenoidal_diagonal {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : SpaceTime → ℝ} {A : ℕ → VelocityField} {U : Set SpaceTime}
-    (hU : IsOpen U) (hqpos : ∀ z ∈ U, 0 < q z) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) :
-    LocallyFinite (fun j => support (fun z : U => cutStage a q A j z)) ∧
-    ContDiffOn ℝ ∞ (potentialSum a q A) U ∧
-    ContDiffOn ℝ ∞ (velocitySum a q A) U ∧
-    (∀ z ∈ U, spatialDivergence (velocitySum a q A) z.1 z.2 = 0) :=
-  ⟨locallyFinite_cutStage_support_on ha hq.continuousOn hqpos A,
-    potentialSum_contDiffOn ha hU hqpos hq hA,
-    velocitySum_contDiffOn ha hU hqpos hq hA,
-    divergence_velocitySum_on ha hU hqpos hq hA⟩
 
 /-- Integer schedules from `DiagonalScale` supply the required real divergence
 of the cutoff scales. -/
@@ -287,32 +274,7 @@ theorem realScales_tendsto {a : ℕ → ℕ} (ha : StrictMono a) :
     Tendsto (fun j => (a j : ℝ)) atTop atTop :=
   tendsto_natCast_atTop_atTop.comp ha.tendsto_atTop
 
-theorem doublingEnvelope_tendsto (b : ℕ → ℕ) :
-    Tendsto (fun j => (DiagonalScale.doublingEnvelope b j : ℝ)) atTop atTop :=
-  realScales_tendsto (DiagonalScale.doublingEnvelope_strictMono b)
 
-/-- The numerical diagonal schedule and the smooth solenoidal construction
-can be chosen together. The numerical bounds are not asserted to be estimates
-for the potentials; that requires the manuscript's separate analytic input. -/
-theorem exists_diagonal_scales_smooth_solenoidal
-    (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ) (hg : ∀ j, 1 ≤ j → 0 < g j) (B : ℕ)
-    {q : SpaceTime → ℝ} {A : ℕ → VelocityField} {U : Set SpaceTime}
-    (hU : IsOpen U) (hqpos : ∀ z ∈ U, 0 < q z) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) :
-    ∃ a : ℕ → ℕ,
-      B ≤ a 0 ∧ (∀ j, 0 < a j) ∧ (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      (∀ j, 1 ≤ j → ∀ m, m ≤ j + 2 → ∀ r : ℝ, 0 < r → r ≤ 1 / (a j : ℝ) →
-        |DiagonalScale.logPowerWeight (C j m) (p j m) (g j / 2) r| ≤ (1 / 2 : ℝ) ^ j) ∧
-      ContDiffOn ℝ ∞ (potentialSum (fun j => (a j : ℝ)) q A) U ∧
-      ContDiffOn ℝ ∞ (velocitySum (fun j => (a j : ℝ)) q A) U ∧
-      (∀ z ∈ U, spatialDivergence (velocitySum (fun j => (a j : ℝ)) q A) z.1 z.2 = 0) := by
-  obtain ⟨a, hB, hpos, hdouble, hmono, _, hweight⟩ :=
-    DiagonalScale.exists_diagonal_scales C p g hg B
-  have hatop := realScales_tendsto hmono
-  exact ⟨a, hB, hpos, hdouble, hmono, hweight,
-    potentialSum_contDiffOn hatop hU hqpos hq hA,
-    velocitySum_contDiffOn hatop hU hqpos hq hA,
-    divergence_velocitySum_on hatop hU hqpos hq hA⟩
 
 end Spatial
 

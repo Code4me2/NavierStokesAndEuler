@@ -126,11 +126,6 @@ theorem locallyFinite_support_translate {r : ℝ} {f : SpaceTime → V}
   by_contra hnot
   exact hw (hzero n (by simpa using hnot))
 
-/-- The series is genuinely summable at every spacetime point. -/
-theorem summable_translate {r : ℝ} {f : SpaceTime → V}
-    (hf : SupportedInCube r f) (z : SpaceTime) :
-    Summable (fun n : Lattice => translate f n z) :=
-  summable_of_hasFiniteSupport ((locallyFinite_support_translate hf).point_finite z)
 
 /-- Locally, the infinite sum equals a single finite sum of smooth translates. -/
 theorem periodize_locally_eq_sum {r : ℝ} {f : SpaceTime → V}
@@ -150,18 +145,6 @@ theorem contDiff_translate {f : SpaceTime → V} {m : WithTop ℕ∞}
     (hf : ContDiff ℝ m f) (n : Lattice) : ContDiff ℝ m (translate f n) :=
   hf.comp (contDiff_fst.prodMk (contDiff_snd.sub contDiff_const))
 
-/-- Spatial periodization preserves every given differentiability order,
-in particular `m = ∞`, through locally finite sums. -/
-theorem contDiff_periodize {r : ℝ} {f : SpaceTime → V} {m : WithTop ℕ∞}
-    (hs : SupportedInCube r f) (hf : ContDiff ℝ m f) :
-    ContDiff ℝ m (periodize f) := by
-  rw [contDiff_iff_contDiffAt]
-  intro z
-  obtain ⟨N, hN⟩ := periodize_locally_eq_sum hs z
-  have hsum : ContDiff ℝ m
-      (fun w => ∑ n ∈ latticeBoxFinset N, translate f n w) :=
-    ContDiff.sum fun n _ => contDiff_translate hf n
-  exact hsum.contDiffAt.congr_of_eventuallyEq hN
 
 /-- A translation preserves smoothness relative to any set of times. -/
 theorem contDiffOn_translate {f : SpaceTime → V} {m : WithTop ℕ∞} {times : Set ℝ}
@@ -257,36 +240,12 @@ theorem periodize_eventuallyEq {r : ℝ} {f : SpaceTime → V}
   filter_upwards [hU] with w hw
   exact periodize_eq_on_innerCube hf hw w.1
 
-/-- A cube strictly inside the fundamental unit cube gives equality near the
-spatial origin at every time. -/
-theorem periodize_eventuallyEq_at_origin {r : ℝ} {f : SpaceTime → V}
-    (hf : SupportedInCube r f) (hr : r < 1 / 2) (t : ℝ) :
-    periodize f =ᶠ[𝓝 (t, (0 : Space))] f := by
-  apply periodize_eventuallyEq hf
-  intro i
-  simp only [PiLp.zero_apply, abs_zero]
-  linarith
 
-/-- For support strictly inside the fundamental cube, equality holds on the
-whole closed fundamental cube, including its boundary. -/
-theorem periodize_eq_on_unitCube {r : ℝ} {f : SpaceTime → V}
-    (hf : SupportedInCube r f) (hr : r < 1 / 2) {x : Space}
-    (hx : ∀ i : Fin 3, |x i| ≤ 1 / 2) (t : ℝ) :
-    periodize f (t, x) = f (t, x) := by
-  apply periodize_eq_on_innerCube hf (t := t)
-  intro i
-  have := hx i
-  linarith
 
 /-- Spatial periodization preserves every zero time slice. -/
 theorem periodize_eq_zero_of_timeSlice {f : SpaceTime → V} {t : ℝ}
     (hf : ∀ x : Space, f (t, x) = 0) (x : Space) : periodize f (t, x) = 0 := by
   simp only [periodize, translate, hf, tsum_zero]
 
-/-- In particular, the common future time-support endpoint is preserved. -/
-theorem compactFutureTimeSupport_periodize {f : VelocityField}
-    (hf : CompactFutureTimeSupport f) : CompactFutureTimeSupport (periodize f) := by
-  obtain ⟨T, hT, hzero⟩ := hf
-  exact ⟨T, hT, fun t ht x => periodize_eq_zero_of_timeSlice (hzero t ht) x⟩
 
 end NavierStokes.PeriodicLocalization

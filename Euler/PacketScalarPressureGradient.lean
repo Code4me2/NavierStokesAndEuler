@@ -113,11 +113,5 @@ def compactPressureField : Field P D.T (coordinatePressure D k p) :=
     simp only [smul_add,smul_smul]
     rw [show k^2*k⁻¹ = k by field_simp [hk]])
 
-theorem compactPressureField_mem (S : Set Space) (hS : IsCompact S)
-    (hz : ∀ (t : Icc (0 : ℝ) D.T) x, x ∉ S → ∀ θ, p (t,(x,θ)) = 0)
-    (t : Icc (0 : ℝ) D.T) :
-    (compactPressureField D k hk p q hq he).path t ∈ gradientSpace P k⁻¹ D.m₀ :=
-  (gradientSpace P k⁻¹ D.m₀).smul_mem (k^2)
-    (liftedGradientField_mem P p q hq he k⁻¹ D.m₀ S hS hz t)
 
 end EulerPacketCoordinates

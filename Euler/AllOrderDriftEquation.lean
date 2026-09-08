@@ -136,33 +136,5 @@ theorem Budget.correctedFieldTower_hasDerivAt (B : Budget period hT A)
   rw [hp] at hsum
   exact hsum
 
-/-- A single coherent exact lifted solution and total pressure are constructed
-from the drift budget and the literal approximate residual identity. -/
-theorem exists_exact_lifted_solution (B : Budget period hT A)
-    (R : ApproximationResidual period hT A) :
-    ∃ (Z Q : FieldTower period T),
-      (∀ q, Z.realization q ⟨0, le_rfl, hT.le⟩ =
-        A.approximation.realization q ⟨0, le_rfl, hT.le⟩) ∧
-      (∀ t, Z.field t ∈ divergenceFreeSpace period A.κ A.direction) ∧
-      (∀ t, Q.field t ∈ gradientSpace period A.κ A.direction) ∧
-      (∀ (P : ℕ) t,
-        energyNorm period P (by omega : P+6 ≤ (P+6)+1)
-            (B.radius t) (B.metric.operatorPath period t)
-            (Z.realization ((P+6)+1) t - A.approximation.realization ((P+6)+1) t) ≤
-          2*(B.spatial (P+6) (by omega)).full.residual*
-            Real.exp (3*B.growthCoefficient*t.val) ∧
-        energyNorm period P (by omega : P+6 ≤ (P+6)+1)
-            (B.radius t) (B.metric.operatorPath period t)
-            (Z.realization ((P+6)+1) t - A.approximation.realization ((P+6)+1) t) ≤ B.delta/2) ∧
-      ∀ (q : ℕ) (hq : 6 ≤ q) t (ht : t ∈ Ioo 0 T),
-        HasDerivAt (extendPath T hT.le (Z.realization q))
-          (-nonlinearity period (A.atOrder period q) hq ⟨t, ht.1.le, ht.2.le⟩
-            (Z.realization (q+1) ⟨t, ht.1.le, ht.2.le⟩) -
-            coefficientSobolevOperator period (A.metric.jet q ⟨t, ht.1.le, ht.2.le⟩)
-              (Q.realization q ⟨t, ht.1.le, ht.2.le⟩)) t := by
-  exact ⟨B.correctedFieldTower period, B.correctedPressureTower period R,
-    B.correctedFieldTower_initial period, B.correctedFieldTower_divergence period,
-    B.correctedPressureTower_gradient period R, B.correctedFieldTower_error_energy period,
-    B.correctedFieldTower_hasDerivAt period R⟩
 
 end EulerAllOrderDriftCorrection

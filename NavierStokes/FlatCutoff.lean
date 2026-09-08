@@ -151,11 +151,6 @@ theorem iteratedDeriv_polynomialEdge {c : ℝ} (hc : 0 < c) (p : ℝ[X]) (m : �
   funext x
   simp [polynomialEdge]
 
-/-- Every actual derivative vanishes at the joining point. -/
-theorem iteratedDeriv_edge_zero {c : ℝ} (hc : 0 < c) (m : ℕ) :
-    iteratedDeriv m (edge c) 0 = 0 := by
-  rw [← polynomialEdge_one c, iteratedDeriv_polynomialEdge hc 1 m]
-  exact polynomialEdge_zero c _
 
 /-- Division by an arbitrary natural power stays inside the smooth family. -/
 theorem polynomialEdge_div_pow (c : ℝ) (p : ℝ[X]) (loss : ℕ) :
@@ -169,13 +164,6 @@ theorem edge_div_pow_contDiff {c : ℝ} (hc : 0 < c) (loss : ℕ) {n : ℕ∞} :
   rw [← polynomialEdge_one c, polynomialEdge_div_pow]
   exact polynomialEdge_contDiff hc _
 
-/-- Every inverse-power weighted derivative of the edge is smooth. -/
-theorem weighted_iteratedDeriv_contDiff {c : ℝ} (hc : 0 < c)
-    (m loss : ℕ) {n : ℕ∞} :
-    ContDiff ℝ n (fun x => iteratedDeriv m (edge c) x / x ^ loss) := by
-  rw [← polynomialEdge_one c, iteratedDeriv_polynomialEdge hc 1 m,
-    polynomialEdge_div_pow]
-  exact polynomialEdge_contDiff hc _
 
 /-- Every derivative decays faster than every inverse power can grow. This
 is a limit for the constructed function, with no assumed flatness predicate. -/
@@ -196,9 +184,5 @@ theorem edge_div_edge (c d : ℝ) :
     congr 1
     ring
 
-theorem edge_quotient_contDiff {c d : ℝ} (hdc : d < c) {n : ℕ∞} :
-    ContDiff ℝ n (fun x => edge c x / edge d x) := by
-  rw [edge_div_edge]
-  exact edge_contDiff (sub_pos.mpr hdc)
 
 end NavierStokes.FlatCutoff

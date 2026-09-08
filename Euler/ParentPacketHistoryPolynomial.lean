@@ -105,15 +105,5 @@ theorem initialHistoryDifferenceScaleCost_bound :
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) hC hC1 hCH (coefficientRadius_nonneg L.K)
     (D.frame_norm_le C hC hF) (D.frameDerivative_norm_le C1 hC1 hF1) hBH
 
-omit [CompleteSpace U] in
-include hτ1 hTi in
-theorem initial_history_polynomial :
-    historyLabelDifferenceCost (G.historyOn H m hm R S hS τ hτ hτT) ≤
-      (labelHistoryConstant*(1+L.K+Ti)^labelHistoryPower)*G.ell := by
-  have hTi0 : 0 ≤ Ti := (inv_pos.mpr hτ).le.trans hTi
-  exact (L.initial_history_derivative_scale m hm R S hS H τ hτ hτT).trans
-    (mul_le_mul_of_nonneg_right
-      ((L.initialHistoryDifferenceScaleCost_bound m hm R S hS H τ hτ hτT Ti hτ1 hTi).trans
-        (labelHistoryEnvelope_power L.K Ti (zero_le_one.trans L.K_one) hTi0)) G.ell_pos.le)
 
 end EulerParentPacketFrames.LabelData

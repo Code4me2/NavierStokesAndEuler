@@ -130,10 +130,6 @@ theorem maximalField_solenoidal (t : L.Time) : (L.maximalField t).toLp ∈ solen
   (L.evolution (L.intermediateHorizon t) (L.intermediateHorizon_pos t)
     (L.intermediateHorizon_lt t)).solenoidal (L.intermediateTime t)
 
-theorem maximalPressureField_gradient (t : L.Time) :
-    (L.maximalPressureField t).toLp ∈ gradientSpace :=
-  (L.evolution (L.intermediateHorizon t) (L.intermediateHorizon_pos t)
-    (L.intermediateHorizon_lt t)).gradient (L.intermediateTime t)
 
 def maximalVelocity (t : L.Time) : Space → Space := (L.maximalField t).field
 
@@ -145,11 +141,6 @@ theorem maximalVelocity_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duratio
     L.maximalVelocity (L.shorterTime S hSL t)=((L.evolution S hS hSL).velocity t).field := by
   exact congrArg SmoothL2Field.field (L.maximalField_eq_evolution S hS hSL t)
 
-theorem maximalPressure_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-    (t : Icc (0 : ℝ) S) :
-    L.maximalPressure (L.shorterTime S hSL t)=(L.evolution S hS hSL).scalarPressure t := by
-  simp only [maximalPressure,Evolution.scalarPressure,
-    L.maximalPressureField_eq_evolution S hS hSL t]
 
 theorem maximalVelocity_initial : L.maximalVelocity L.initialTime=A.field :=
   congrArg SmoothL2Field.field L.maximalField_initial
@@ -166,13 +157,6 @@ theorem maximalVelocity_joint_continuous :
   simpa only [EulerMeanSobolevBoundedField.finiteField_apply,maximalVelocity] using
     h.eval continuous_snd
 
-theorem maximalPressureField_joint_continuous :
-    Continuous (fun z : L.Time × Space => (L.maximalPressureField z.1).field z.2) := by
-  have h : Continuous (fun z : L.Time × Space =>
-      EulerMeanSobolevBoundedField.finiteField (L.maximalPressureField z.1)) :=
-    (EulerMeanSobolevBoundedField.continuous_finiteField L.maximalPressureField
-      L.maximalPressureField_jet_continuous).comp continuous_fst
-  simpa only [EulerMeanSobolevBoundedField.finiteField_apply] using h.eval continuous_snd
 
 theorem maximalVelocity_divergence (t : L.Time) (x : Space) :
     divergence (L.maximalVelocity t) x=0 :=
@@ -197,16 +181,5 @@ theorem maximal_restriction_is_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.dur
     funext (fun t => (L.maximalPressureField_eq_evolution S hS hSL t).symm),
     L.evolution_initial S hS hSL⟩
 
-theorem maximalVelocity_time_law (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-    (t : ℝ) (ht : t ∈ Ioo 0 S) (x : Space) :
-    HasDerivAt (fun r => L.maximalVelocity
-      (L.shorterTime S hSL (projIcc 0 S hS.le r)) x)
-      (-fderiv ℝ (L.maximalVelocity (L.shorterTime S hSL ⟨t,ht.1.le,ht.2.le⟩)) x
-        (L.maximalVelocity (L.shorterTime S hSL ⟨t,ht.1.le,ht.2.le⟩) x)-
-        _root_.gradient (L.maximalPressure (L.shorterTime S hSL ⟨t,ht.1.le,ht.2.le⟩)) x) t := by
-  rw [(L.maximalPressure_spec (L.shorterTime S hSL ⟨t,ht.1.le,ht.2.le⟩)).2.2 x,
-    L.maximalPressureField_eq_evolution S hS hSL]
-  simpa only [L.maximalVelocity_eq_evolution S hS hSL] using
-    (L.evolution S hS hSL).time_law t ht x
 
 end EulerOrdinarySobolev.FiniteLifespan

@@ -145,12 +145,6 @@ theorem exactAlias_supported {a b M : ℝ} {v : E} {χ : ℝ → ℝ} {f : ℝ �
     exact hz (by simp only [exactAlias, hd, zero_smul])
   exact ⟨hl, hr⟩
 
-theorem transport_compact_exactAlias {a b M : ℝ} {v : E} {χ : ℝ → ℝ} {f : ℝ × E → F}
-    (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (z : ℝ × E) :
-    TransportPrimitive.fixedDeriv (1, M • v) (TransportPrimitive.compactIntegral χ M v f) z =
-      f z - exactAlias χ M v f z :=
-  TransportPrimitive.transport_compactIntegral hχ hf hs z
 
 /-- Repeated integration by parts for full derivative tensors. The last
 premise bounds genuine source jets, not the alias. -/
@@ -419,17 +413,6 @@ theorem sourceMean_totalIntegral {a b M : ℝ} {v : Plane} {f : ℝ × (S × Pla
   exact FourierAlias.torusMean_totalIntegral hab (radialSlice_smooth hf s).continuous
     (fun u => hp u s) (radialSlice_supported hs s) U
 
-theorem exactAlias_sourceMean_zero [CompleteSpace F] {a b M : ℝ} {v : Plane}
-    {f : ℝ × (S × Plane) → F} (χ : ℝ → ℝ) (hab : a ≤ b)
-    (hf : ContDiff ℝ ∞ f) (hp : SourcePeriodic f)
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hm : ∀ s, (∫ u in a..b, sourceMean f (u, s)) = 0) (p : ℝ × S) :
-    sourceMean (exactAlias χ M ((0 : S), v) f) p = 0 := by
-  change FourierAlias.torusMean (fun Y => deriv χ p.1 •
-    TransportPrimitive.totalIntegral M ((0 : S), v) f (p.1, (p.2, Y))) = 0
-  rw [FourierAlias.torusMean_smul]
-  change deriv χ p.1 • sourceMean (TransportPrimitive.totalIntegral M ((0 : S), v) f) p = 0
-  rw [sourceMean_totalIntegral hab hf hp hs, hm p.2, smul_zero]
 
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem sourceMean_complexify (f : ℝ × (S × Plane) → ℝ) (p : ℝ × S) :
@@ -519,21 +502,7 @@ theorem realCentered_preserves_parameter_support (f : P × Plane → ℝ)
   change Complex.re (SmoothFamilyTorusInverse.nonbarPart (complexify f) (p, Y)) = 0
   rw [hc p hp Y, Complex.zero_re]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem realInverse_periodic (d : Direction) (f : P × Plane → ℝ) :
-    ParameterPeriodic (realInverse d f) := by
-  intro p Y k
-  exact congrArg Complex.re (SmoothFamilyTorusInverse.inverse_periodic d (complexify f) p Y k)
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem realInverse_preserves_parameter_support (d : Direction) (f : P × Plane → ℝ)
-    (S : Set P) (hs : ∀ p, p ∉ S → ∀ Y, f (p, Y) = 0) :
-    ∀ p, p ∉ S → ∀ Y, realInverse d f (p, Y) = 0 := by
-  have hh := SmoothFamilyTorusInverse.inverse_preserves_parameter_support d (complexify f) S
-    (fun p hp Y => by simp only [complexify, hs p hp Y, Complex.ofReal_zero])
-  intro p hp Y
-  change Complex.re (SmoothFamilyTorusInverse.inverse d (complexify f) (p, Y)) = 0
-  rw [hh p hp Y, Complex.zero_re]
 
 variable [FiniteDimensional ℝ P]
 
@@ -557,43 +526,7 @@ theorem realInverse_smooth (d : Direction) {f : P × Plane → ℝ}
   Complex.reCLM.contDiff.comp
     (SmoothFamilyTorusInverse.inverse_smooth d (complexify_smooth hf) (complexify_parameterPeriodic hp))
 
-theorem realInverse_zeroMean (d : Direction) {f : P × Plane → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : ParameterPeriodic f) :
-    ∀ p, parameterMean (realInverse d f) p = 0 := by
-  intro p
-  have hi := SmoothFamilyTorusInverse.inverse_smooth d (complexify_smooth hf)
-    (complexify_parameterPeriodic hp)
-  have hm := SmoothFamilyTorusInverse.inverse_zeroMean d (complexify_smooth hf)
-    (complexify_parameterPeriodic hp) p
-  change FourierAlias.torusMean (fun Y => Complex.reCLM
-    (SmoothFamilyTorusInverse.inverse d (complexify f) (p, Y))) = 0
-  rw [torusMean_map Complex.reCLM
-    (f := fun Y => SmoothFamilyTorusInverse.inverse d (complexify f) (p, Y))
-    (hi.continuous.comp (continuous_const.prodMk continuous_id))]
-  change Complex.re (parameterMean (SmoothFamilyTorusInverse.inverse d (complexify f)) p) = 0
-  rw [← familyMean_eq_parameterMean, hm, Complex.zero_re]
 
-theorem realInverse_solves (d : Direction) {f : P × Plane → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : ParameterPeriodic f) (hm : ∀ p, parameterMean f p = 0)
-    (z : P × Plane) :
-    fderiv ℝ (realInverse d f) z (0, vector d) = f z := by
-  have hi := SmoothFamilyTorusInverse.inverse_smooth d (complexify_smooth hf)
-    (complexify_parameterPeriodic hp)
-  have hmc : SmoothFamilyTorusInverse.ZeroMean (complexify f) := by
-    intro p
-    rw [familyMean_eq_parameterMean, parameterMean_complexify, hm p, Complex.ofReal_zero]
-  have hsolve := congrFun (SmoothFamilyTorusInverse.inverse_solves d (complexify_smooth hf)
-    (complexify_parameterPeriodic hp) hmc) z
-  have heq := (Complex.reCLM.hasFDerivAt.comp z
-    ((hi.differentiable (by simp)) z).hasFDerivAt).fderiv
-  change fderiv ℝ (Complex.reCLM ∘ SmoothFamilyTorusInverse.inverse d (complexify f)) z
-    (0, vector d) = f z
-  rw [heq]
-  change Complex.re (fderiv ℝ (SmoothFamilyTorusInverse.inverse d (complexify f)) z
-    (0, vector d)) = f z
-  rw [show fderiv ℝ (SmoothFamilyTorusInverse.inverse d (complexify f)) z (0, vector d) =
-    complexify f z from hsolve]
-  rfl
 
 theorem norm_iteratedFDeriv_realInverse_le (d : Direction) {f : P × Plane → ℝ}
     (hf : ContDiff ℝ ∞ f) (hp : ParameterPeriodic f) (m : ℕ) (z : P × Plane) :
@@ -726,9 +659,6 @@ theorem exactAlias_eq_realCenterSource {a b M : ℝ} {v : Plane}
   unfold exactAlias
   rw [totalIntegral_realCenterSource hf hp hs hm]
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S] in
-theorem periodic_toProduct {f : ℝ × (S × Plane) → ℂ} (hp : SourcePeriodic f) :
-    SmoothFamilyTorusInverse.Periodic (toProduct f) := fun p => hp p.1 p.2
 
 theorem familyInverse_smooth (d : Direction) {f : ℝ × (S × Plane) → ℂ}
     (hf : ContDiff ℝ ∞ f) (hp : SmoothFamilyTorusInverse.Periodic (toProduct f)) :
@@ -1174,21 +1104,6 @@ theorem admissible_complexify {a b : ℝ} {f : ℝ × (S × Plane) → ℝ}
   · intro p
     rw [mean_toProduct, sourceMean_complexify, hm p, Complex.ofReal_zero]
 
-theorem real_totalIntegral_finiteJets (d : Direction) {a b : ℝ} (hab : a ≤ b) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℝ), ContDiff ℝ ∞ f → SourcePeriodic f →
-      (∀ q, sourceMean f q = 0) → RadialAlias.RadiallySupported a b f →
-      ∀ C : ℝ, 0 ≤ C → FiniteJetBound (m + 6 * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-        ‖iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M ((0 : S), vector d) f) z‖ ≤
-          K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨K, hK, hb⟩ := totalIntegral_finiteJets (S := S) d hab m p
-  refine ⟨K, hK, ?_⟩
-  intro f hf hp hm hs C hC hsource M hM j hj z
-  rw [← norm_iteratedFDeriv_totalIntegral_complexify hf hs]
-  apply hb (complexify f) (admissible_complexify hf hp hm hs) C hC _ M hM j hj z
-  intro i hi x hx
-  rw [norm_iteratedFDeriv_complexify hf]
-  exact hsource i hi x hx
 
 theorem real_exactAlias_finiteJets (d : Direction) {a b : ℝ} {χ : ℝ → ℝ}
     (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
@@ -1207,25 +1122,6 @@ theorem real_exactAlias_finiteJets (d : Direction) {a b : ℝ} {χ : ℝ → ℝ
   rw [norm_iteratedFDeriv_complexify hf]
   exact hsource i hi x hx
 
-/-- Only the integrated torus mean must vanish. Mean subtraction costs four
-extra finite derivative orders and changes the exact alias by zero. -/
-theorem real_exactAlias_finiteJets_of_integratedMean_zero (d : Direction)
-    {a b : ℝ} {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℝ), ContDiff ℝ ∞ f → SourcePeriodic f →
-      (∀ s, (∫ U in a..b, sourceMean f (U, s)) = 0) → RadialAlias.RadiallySupported a b f →
-      ∀ C : ℝ, 0 ≤ C → FiniteJetBound (m + 6 * p + 4) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-        ‖iteratedFDeriv ℝ j (exactAlias χ M ((0 : S), vector d) f) z‖ ≤ K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨A, hA, ha⟩ := real_exactAlias_finiteJets (S := S) d hab hχ hleft hright m p
-  obtain ⟨B, hB, hb⟩ := realCenterSource_finiteJets (S := S) a b (m + 6 * p)
-  refine ⟨A * B, mul_nonneg hA hB, ?_⟩
-  intro f hf hp hm hs C hC hsource M hM j hj z
-  rw [exactAlias_eq_realCenterSource χ hf hp hs hm]
-  have h := ha (realCenterSource f) (realCenterSource_smooth hf hp) (realCenterSource_periodic hp)
-    (realCenterSource_zeroMean hf hp) (realCenterSource_supported hs) (B * C) (mul_nonneg hB hC)
-    (hb f C hf hp hC hsource) M hM j hj z
-  simpa only [mul_assoc] using h
 
 theorem realMeanClass_alias_superflat (d : Direction) {a b cL cR h α : ℝ}
     (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
@@ -1306,28 +1202,6 @@ theorem realMeanClass_alias_superflat_of_integratedMean_zero (d : Direction)
   rw [exactAlias_eq_realCenterSource χ (hfc n) (hp n) (hs n) (hm n)]
   exact hn j hj z
 
-theorem radial_realMeanClass_alias_superflat_of_integratedMean_zero {a b cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {f : ℕ → ℝ × (S × Plane) → ℝ}
-    (hf : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, SourcePeriodic (f n))
-    (hm : ∀ n s, (∫ U in a..b, sourceMean (f n) (U, s)) = 0)
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-      ‖iteratedFDeriv ℝ j
-        (exactAlias χ (ChartScales.radialCoefficient h n) ((0 : S), vector .radial) (f n)) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  apply realMeanClass_alias_superflat_of_integratedMean_zero .radial
-    (A := ChartScales.Lambda) (growth := ChartScales.rho)
-    ha hab hcL hcR hh hχ hleft hright hf hfc hp hm hs
-    (show 0 < ChartScales.kappa by norm_num [ChartScales.kappa])
-    (Filter.Eventually.of_forall (fun n => ne_of_gt (ChartScales.radialCoefficient_pos h n)))
-    _ m N
-  filter_upwards [eventually_ge_atTop 4] with n hn
-  simpa only [abs_of_pos (ChartScales.radialCoefficient_pos h n)] using
-    ChartScales.radialCoefficient_inv_upper h hh.le hn
 
 end UniformFamilies
 

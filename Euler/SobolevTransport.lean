@@ -48,16 +48,6 @@ theorem transportBilinear_bound {q : ℕ} (hq : 6 ≤ q)
   simpa only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, Nat.cast_ofNat,
     mul_assoc] using h
 
-/-- The transport norm in the derivative-losing operator topology. -/
-theorem transportBilinear_norm {q : ℕ} (hq : 6 ≤ q)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1) :
-    ‖transportBilinear period hq L hL‖ ≤ 4 * sobolevProductConstant period q := by
-  apply ContinuousLinearMap.opNorm_le_bound _ (mul_nonneg (by norm_num) (sobolevProductConstant_nonneg period q))
-  intro u
-  apply ContinuousLinearMap.opNorm_le_bound _ (mul_nonneg (mul_nonneg (by norm_num)
-    (sobolevProductConstant_nonneg period q)) (norm_nonneg u))
-  intro v
-  exact transportBilinear_bound period hq L hL u v
 
 /-- The genuine transport is represented by the literal sum of pointwise directional products. -/
 theorem transportBilinear_value {q : ℕ} (hq : 6 ≤ q)

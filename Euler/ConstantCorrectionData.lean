@@ -79,22 +79,7 @@ theorem jet_zero_weightedCoefficient (q b N : ℕ) (ρ : ℝ) :
     weightedCoefficient P (jet P (0 : Space →L[ℝ] Space) q) b N ρ=0 := by
   simp only [weightedCoefficient,jet_zero_coefficientBlock,mul_zero,Finset.sum_const_zero]
 
-theorem coefficient_operator_id :
-    (coefficient P (ContinuousLinearMap.id ℝ Space)).operator=ContinuousLinearMap.id ℝ (LiftL2 P) := by
-  apply ContinuousLinearMap.ext
-  intro u
-  apply Lp.ext
-  filter_upwards [(coefficient P (ContinuousLinearMap.id ℝ Space)).operator_ae u] with x hx
-  exact hx
 
-theorem coefficient_operator_zero :
-    (coefficient P (0 : Space →L[ℝ] Space)).operator=0 := by
-  apply ContinuousLinearMap.ext
-  intro u
-  apply Lp.ext
-  filter_upwards [(coefficient P (0 : Space →L[ℝ] Space)).operator_ae u,
-    Lp.coeFn_zero Space 2 (liftMeasure P)] with x hx hz
-  exact hx.trans hz.symm
 
 def tower (T : ℝ) (A : Space →L[ℝ] Space) : CoefficientTower P T where
   coefficient _ := coefficient P A

@@ -87,15 +87,6 @@ theorem velocityField_norm
       congrArg norm (s.velocityField_eq_meanVelocityMap hF hRight)
     _ ≤ _ := meanVelocityMap_apply_norm T hT FInv F₁ u
 
-/-- Combining the two actual bounds controls z_t by the original variational variable. -/
-theorem velocityLp_norm_from_input
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F₁ t) (Icc (0 : ℝ) T) t)
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x)
-    (hRight : ∀ (t : Icc (0 : ℝ) T) (x : L2), F t (FInv t x) = x) :
-    ‖s.velocityLp‖ ≤ ‖FInv‖*((1+‖F₁‖*‖FInv‖*Real.sqrt (T^2/2))*‖u‖) :=
-  (s.velocityLp_norm_le hInv).trans
-    (mul_le_mul_of_nonneg_left (s.velocityField_norm hF hRight) (norm_nonneg FInv))
 
 /-- The actual strong acceleration pays only the inverse Gram and coefficient norms. -/
 theorem acceleration_norm
@@ -122,34 +113,7 @@ theorem acceleration_norm
   · exact solenoidalFrame_norm_le T F
   · exact solenoidalFrame_norm_le T F₁
 
-/-- The product-rule derivative B_t has the corresponding actual L² bound. -/
-theorem velocityDerivative_norm :
-    ‖s.velocityDerivative‖ ≤ ‖F₁‖*‖s.velocityLp‖+‖F‖*‖s.acceleration‖ := by
-  apply (fieldProductDerivative_norm_le T hT (solenoidalFrame T F) (solenoidalFrame T F₁)
-    s.velocityLp s.acceleration).trans
-  exact add_le_add
-    (mul_le_mul_of_nonneg_right (solenoidalFrame_norm_le T F₁) (norm_nonneg _))
-    (mul_le_mul_of_nonneg_right (solenoidalFrame_norm_le T F) (norm_nonneg _))
 
-/-- The actual pressure-gradient residual is controlled without differentiating H. -/
-theorem pressureResidual_norm :
-    ‖s.pressureResidual‖ ≤ ‖f‖+‖F‖*‖s.acceleration‖+2*‖F₁‖*‖s.velocityLp‖ := by
-  have hfa : ‖timeMultiplier T hT (solenoidalFrame T F) s.acceleration‖ ≤ ‖F‖*‖s.acceleration‖ :=
-    (timeApply_bound T hT (solenoidalFrame T F) _).trans
-      (mul_le_mul_of_nonneg_right (solenoidalFrame_norm_le T F) (norm_nonneg _))
-  have hfv : ‖timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp‖ ≤ ‖F₁‖*‖s.velocityLp‖ :=
-    (timeApply_bound T hT (solenoidalFrame T F₁) _).trans
-      (mul_le_mul_of_nonneg_right (solenoidalFrame_norm_le T F₁) (norm_nonneg _))
-  calc
-    ‖s.pressureResidual‖ ≤ ‖f‖+
-        ‖timeMultiplier T hT (solenoidalFrame T F) s.acceleration‖+
-        2*‖timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp‖ :=
-      norm_sub_sub_two_smul f
-        (timeMultiplier T hT (solenoidalFrame T F) s.acceleration)
-        (timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp)
-    _ ≤ ‖f‖+‖F‖*‖s.acceleration‖+2*(‖F₁‖*‖s.velocityLp‖) :=
-      add_le_add (add_le_add le_rfl hfa) (mul_le_mul_of_nonneg_left hfv (by norm_num))
-    _ = _ := by ring
 
 /-- The derived compact-initial-data law has an actual quantitative trace bound. -/
 theorem initialPhysicalVelocity_norm
@@ -171,18 +135,6 @@ theorem initialPhysicalVelocity_norm
       mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hzbound (norm_nonneg A)) (abs_nonneg L)
     _ = _ := by ring
 
-/-- The actual continuous velocity is uniformly controlled in time by its
-initial trace and the proved L² derivative bound. -/
-theorem physicalPath_norm_uniform
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F₁ t) (Icc (0 : ℝ) T) t)
-    (hFInv₀ : FInv ⟨0, le_rfl, hT⟩ = ContinuousLinearMap.id ℝ L2)
-    (hF₀ : F ⟨0, le_rfl, hT⟩ = ContinuousLinearMap.id ℝ L2)
-    (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
-    ‖s.physicalPath t‖ ≤ |L| * ‖A‖*Real.sqrt T*‖u‖+Real.sqrt T*‖s.velocityDerivative‖ := by
-  have hV := s.physical_h1 hF
-  apply (norm_le_initial_add_uniform T hT s.velocityDerivative s.physicalPath hV.1 hV.2.2 t ht).trans
-  exact add_le_add (s.initialPhysicalVelocity_norm hFInv₀ hF₀) le_rfl
 
 end StrongMeanEvolution
 end EulerMeanVariationalInverse

@@ -377,30 +377,6 @@ theorem current_raw_pressure_zero_germs
     n hz hr
   exact ⟨hz'.1, hz'.2.2.1⟩
 
-theorem current_raw_pressure_annulus
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (x : CorrectionStep.CycleState (ActualCurrentParticularPhysical.Label B N0))
-    (l : ActualCurrentParticularPhysical.Label B N0)
-    (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
-    (j : ℤ) (n : ℕ) {z : ActualCurrentParticularPhysical.Native}
-    (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain) :
-    ((ActualCurrentParticularPhysical.copyData x l j).common.amplitude n z ≠ 0 →
-      ActualCoreSupport.radialRatio (ActualCarrierTransport.associatedPoint z.1.1 z.2) ∈
-        Icc (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
-          (PrimaryTargetBounds.rightRadius ActualPrimary.nominal)) ∧
-    ((ActualCurrentParticularPhysical.copyData x l j).common.pressure n z ≠ 0 →
-      ActualCoreSupport.radialRatio (ActualCarrierTransport.associatedPoint z.1.1 z.2) ∈
-        Icc (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
-          (PrimaryTargetBounds.rightRadius ActualPrimary.nominal)) := by
-  constructor
-  · intro hne
-    by_contra hr
-    exact hne (current_raw_pressure_zero_germs hN x l hs j n hz hr).1.eq_of_nhds
-  · intro hne
-    by_contra hr
-    exact hne (current_raw_pressure_zero_germs hN x l hs j n hz hr).2.eq_of_nhds
 
 theorem current_native_zero_germs
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
@@ -598,25 +574,6 @@ theorem current_annulus
       BandAnnulus.finset_sum (fun _ => ParticularWaveAssembly.modes x.coefficients.residualBand)
         (fun j => (current_mode_annulus hN x l (hs l) j N).2))
 
-theorem current_local_active_zero
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (x : CorrectionStep.CycleState (ActualCurrentParticularPhysical.Label B N0))
-    (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
-    (n : ℕ) {w : SpaceTime} (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n)
-    (hX : (SlowBorelBase.cartesianChart ActualPrimary.h w).2.1 ∉
-      Icc (NominalConeAssembly.activeLeft ActualPrimary.nominal)
-        (NominalConeAssembly.activeRight ActualPrimary.nominal)) :
-    ActualCurrentParticularPhysical.localPotential x n w = 0 ∧
-      ActualCurrentParticularPhysical.localPressure x n w = 0 := by
-  have hr : profileRadius ActualPrimary.h w ∉
-      Icc (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
-        (PrimaryTargetBounds.rightRadius ActualPrimary.nominal) :=
-    fun hp => hX ((profileRadius_mem_iff_active hw.1).mp hp)
-  have hh := current_annulus hN x hs 0
-  exact ⟨hh.1.zero_of_exterior (Nat.zero_le n) hw hr,
-    hh.2.zero_of_exterior (Nat.zero_le n) hw hr⟩
 
 theorem current_local_axis_germs
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
@@ -673,17 +630,6 @@ theorem current_field_active_germs {w : SpaceTime}
     hh.2.field_zero_germ ActualPrimary.outgoing.data.h_pos
       ActualPrimary.outgoing.data.h_lt_half hP hqbig hw hr⟩
 
-theorem current_field_active_zero {w : SpaceTime}
-    (hw : w ∈ CutStageEstimates.physicalSublevel ActualPrimary.h qbig)
-    (hX : (SlowBorelBase.cartesianChart ActualPrimary.h w).2.1 ∉
-      Icc (NominalConeAssembly.activeLeft ActualPrimary.nominal)
-        (NominalConeAssembly.activeRight ActualPrimary.nominal)) :
-    ValidDyadicBandCover.field ActualPrimary.h N
-      (ActualCurrentParticularPhysical.localPotential x) w = 0 ∧
-    ValidDyadicBandCover.field ActualPrimary.h N
-      (ActualCurrentParticularPhysical.localPressure x) w = 0 := by
-  have hh := current_field_active_germs hN x hs hA hP hqbig hw hX
-  exact ⟨hh.1.eq_of_nhds, hh.2.eq_of_nhds⟩
 
 theorem current_field_support :
     MixedDiagonalExtensions.SublevelShrinkingSupport ActualPrimary.h

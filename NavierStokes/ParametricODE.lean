@@ -114,16 +114,7 @@ def volterra : Coefficient a b E →L[ℝ] Curve a b E →L[ℝ] Curve a b E :=
   ((ContinuousLinearMap.compL ℝ (Curve a b E) (Curve a b E) (Curve a b E))
     (integrator hab)).comp (coefficientAction (E := E))
 
-theorem volterra_apply (A : Coefficient a b E) (u : Curve a b E) (t : Icc a b) :
-    volterra (E := E) hab A u t =
-      ∫ s in a..(t : ℝ), extend hab A s (extend hab u s) := rfl
 
-theorem norm_volterra_apply_le (A : Coefficient a b E) (u : Curve a b E) :
-    ‖volterra (E := E) hab A u‖ ≤ (b - a) * ‖A‖ * ‖u‖ := by
-  change ‖integralPath hab (applyCoefficient A u)‖ ≤ _
-  exact (norm_integralPath_le hab _).trans
-    ((mul_le_mul_of_nonneg_left (norm_applyCoefficient_le A u)
-      (sub_nonneg.mpr hab)).trans_eq (mul_assoc _ _ _).symm)
 
 def homogeneousSystem (A : Coefficient a b E) : TangentODE.IntervalSystem E := {
   left := a
@@ -378,20 +369,6 @@ theorem parameter_derivative_eq_solution
           (constantCurve (x₀ p) + integrator hab (f p))) + integrator hab (f' v))
       abel
 
-theorem parameter_derivative_hasDerivWithinAt
-    (A : P → Coefficient a b E) (x₀ : P → E) (f : P → Curve a b E)
-    {p : P} {A' : P →L[ℝ] Coefficient a b E} {x₀' : P →L[ℝ] E}
-    {f' : P →L[ℝ] Curve a b E}
-    (hA : HasFDerivAt A A' p) (hx₀ : HasFDerivAt x₀ x₀' p)
-    (hf : HasFDerivAt f f' p) (v : P) (t : Icc a b) :
-    HasDerivWithinAt
-      (extend hab (fderiv ℝ (fun q => solution hab (A q) (x₀ q) (f q)) p v))
-      (A p t ((fderiv ℝ (fun q => solution hab (A q) (x₀ q) (f q)) p v) t) +
-        A' v t (solution hab (A p) (x₀ p) (f p) t) + f' v t) (Icc a b) t := by
-  rw [parameter_derivative_eq_solution hab A x₀ f hA hx₀ hf v]
-  simpa only [ContinuousMap.add_apply, applyCoefficient, ContinuousMap.coe_mk, add_assoc]
-    using solution_hasDerivWithinAt hab (A p) (x₀' v)
-      (applyCoefficient (A' v) (solution hab (A p) (x₀ p) (f p)) + f' v) t
 
 omit [CompleteSpace E] in
 theorem norm_constantCurve_le (x : E) :
@@ -408,21 +385,6 @@ theorem norm_solution_le (A : Coefficient a b E) (x₀ : E) (f : Curve a b E) :
   ((resolvent hab A).le_opNorm _).trans
     (mul_le_mul_of_nonneg_left (norm_source_le hab x₀ f) (norm_nonneg _))
 
-theorem norm_parameter_derivative_le
-    (A : P → Coefficient a b E) (x₀ : P → E) (f : P → Curve a b E)
-    {p : P} {A' : P →L[ℝ] Coefficient a b E} {x₀' : P →L[ℝ] E}
-    {f' : P →L[ℝ] Curve a b E}
-    (hA : HasFDerivAt A A' p) (hx₀ : HasFDerivAt x₀ x₀' p)
-    (hf : HasFDerivAt f f' p) (v : P) :
-    ‖fderiv ℝ (fun q => solution hab (A q) (x₀ q) (f q)) p v‖ ≤
-      ‖resolvent hab (A p)‖ * (‖x₀' v‖ + (b - a) *
-        (‖A' v‖ * ‖solution hab (A p) (x₀ p) (f p)‖ + ‖f' v‖)) := by
-  rw [parameter_derivative_eq_solution hab A x₀ f hA hx₀ hf v]
-  apply (norm_solution_le hab (A p) (x₀' v) _).trans
-  apply mul_le_mul_of_nonneg_left _ (norm_nonneg (resolvent hab (A p)))
-  apply add_le_add_right
-  apply mul_le_mul_of_nonneg_left _ (sub_nonneg.mpr hab)
-  exact (norm_add_le _ _).trans (add_le_add_left (norm_applyCoefficient_le _ _) _)
 
 /-- Full smooth dependence in the supremum-norm spaces of coefficient and forcing
 paths. Smoothness of the solution map is a conclusion. -/
@@ -447,17 +409,6 @@ theorem contDiffOn_solution_family {s : Set P}
     (((constantCurve (E := E) (a := a) (b := b)).contDiff.comp_contDiffOn hx₀).add
       ((integrator (E := E) hab).contDiff.comp_contDiffOn hf))
 
-/-- Every parameter derivative has a finite uniform bound on a compact parameter
-set. This does not assert polynomial dependence of those bounds on a band index. -/
-theorem parameter_derivatives_bounded_on_compact
-    (A : P → Coefficient a b E) (x₀ : P → E) (f : P → Curve a b E)
-    (hA : ContDiff ℝ ∞ A) (hx₀ : ContDiff ℝ ∞ x₀) (hf : ContDiff ℝ ∞ f)
-    {s : Set P} (hs : IsCompact s) (m : ℕ) :
-    ∃ C : ℝ, ∀ p ∈ s,
-      ‖iteratedFDeriv ℝ m (fun q => solution hab (A q) (x₀ q) (f q)) p‖ ≤ C := by
-  exact hs.exists_bound_of_continuousOn
-    ((contDiff_solution_family hab A x₀ f hA hx₀ hf).continuous_iteratedFDeriv
-      (m := m) (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)).continuousOn
 
 end
 

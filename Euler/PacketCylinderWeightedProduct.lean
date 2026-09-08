@@ -83,17 +83,6 @@ theorem normalized_spatialTransport_path :
 
 variable {G H g h b hg hh hb}
 
-theorem WordBound.normalized_bilinear {R A B : ℝ} {d e : ℕ}
-    (hG : (G.normalized hT g hg).WordBound 6 R A d)
-    (hH : (H.normalized hT h hh).WordBound 6 R B e)
-    (L : Space →L[ℝ] Space →L[ℝ] Space) (hR : 0 ≤ R) (hA : 0 ≤ A) (hB : 0 ≤ B)
-    (C : ℝ) (hC : 0 ≤ C) (hprofile : ∀ t, |productProfileRatio g h b hb t| ≤ C) :
-    ((G.bilinear H L).normalized hT b hb).WordBound 6 R
-      (C*(9*productBlockConstant P*‖L‖*A*B)) (d+e) := by
-  have hbound := (hG.bilinear hH L hR hA hB).weighted hT (productProfileRatio g h b hb) C hC hprofile
-  unfold WordBound at *
-  rw [G.normalized_bilinear_path H hT g h b hg hh hb L]
-  exact hbound
 
 theorem WordBound.normalized_scalarProduct {R A B : ℝ} {d e : ℕ}
     (hG : (G.normalized hT g hg).WordBound 6 R A d)

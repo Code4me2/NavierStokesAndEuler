@@ -82,27 +82,7 @@ theorem scaled_majorant_le (ℓ : ℝ) (hℓ : 0 ≤ ℓ) (hℓ1 : ℓ ≤ 1) (n
   apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
   exact pow_le_pow_left₀ (by positivity) (by linarith) n
 
-theorem scaledCutoffCurl_gevrey (ℓ : ℝ) (hℓ : 0 < ℓ) (hℓ1 : ℓ ≤ 1) (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n
-      (fun b : Space => cutoffCurl ((scaledCutoff ℓ hℓ).translate b)) a‖ ≤
-      scaledCutoffOperatorAmplitude * majorant 1024 0 n := by
-  have H := cutoffCurl_gevrey (scaledCutoff ℓ hℓ) (2*ℓ⁻¹) (256*ℓ) scaledCutoffGevreySize
-    (by positivity) scaledCutoffGevreySize_nonneg (scaledCutoff_support_ball ℓ hℓ)
-    (scaledCutoff_scaledRadiusGevrey ℓ hℓ) n a
-  rw [scaledCutoff_amplitude ℓ hℓ] at H
-  exact H.trans (mul_le_mul_of_nonneg_left (scaled_majorant_le ℓ hℓ.le hℓ1 n)
-    scaledCutoffOperatorAmplitude_nonneg)
 
-theorem scaledWeakPotential_gevrey (ℓ : ℝ) (hℓ : 0 < ℓ) (hℓ1 : ℓ ≤ 1) (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n
-      (fun b : Space => weakPotential ((scaledCutoff ℓ hℓ).translate b)) a‖ ≤
-      scaledCutoffOperatorAmplitude * majorant 1024 0 n := by
-  have H := weakPotential_gevrey (scaledCutoff ℓ hℓ) (2*ℓ⁻¹) (256*ℓ) scaledCutoffGevreySize
-    (by positivity) scaledCutoffGevreySize_nonneg (scaledCutoff_support_ball ℓ hℓ)
-    (scaledCutoff_scaledRadiusGevrey ℓ hℓ) n a
-  rw [scaledCutoff_amplitude ℓ hℓ] at H
-  exact H.trans (mul_le_mul_of_nonneg_left (scaled_majorant_le ℓ hℓ.le hℓ1 n)
-    scaledCutoffOperatorAmplitude_nonneg)
 
 def scaledBoundaryOperatorAmplitude : ℝ := 3 * scaledCutoffOperatorAmplitude^2
 

@@ -27,9 +27,6 @@ structure SameCarrierAt {D : Type} (a b : HarmonicBlock D) (n : ℕ) : Prop wher
   phase : b.phase n = a.phase n
   angular : b.angularFrequency n = a.angularFrequency n
 
-theorem sameCarrierAt_of_sameCarrier {D : Type} {a b : HarmonicBlock D}
-    (h : LabelSumBounds.SameCarrier a b) (n : ℕ) : SameCarrierAt a b n :=
-  ⟨congrFun h.frequency n, congrFun h.phase n, congrFun h.angular n⟩
 
 /-- Equality of the stored coefficients and carrier metadata identifies the
 actual harmonic field at this band.  Pressure data are not used in covariance. -/

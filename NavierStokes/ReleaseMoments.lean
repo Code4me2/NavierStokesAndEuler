@@ -68,8 +68,6 @@ namespace ResetWitness
 
 variable {d : TailData} {K : ℝ} (w : UniformAngularReset.ResetWitness d K)
 
-theorem history_contDiff_y (eta : ℝ) : ContDiff ℝ ∞ (history d w.coefficients eta) :=
-  contDiff_const.add (primitive_contDiff (correctedWeight_contDiff d w.coefficients w.smooth eta))
 
 theorem history_hasDerivAt (eta y : ℝ) :
     HasDerivAt (history d w.coefficients eta) (correctedWeight d w.coefficients eta y) y :=
@@ -112,13 +110,6 @@ theorem history_eta_independent (eta eta' : ℝ) {y : ℝ} (hy : d.releaseStart 
   rw [history_at_release w eta'] at hi'
   linarith
 
-theorem history_contDiff_eta {y : ℝ} (hy : d.releaseStart ≤ y) :
-    ContDiff ℝ ∞ (fun eta => history d w.coefficients eta y) := by
-  have he : (fun eta => history d w.coefficients eta y) =
-      fun _ : ℝ => history d w.coefficients 0 y :=
-    funext (fun eta => history_eta_independent w eta 0 hy)
-  rw [he]
-  exact contDiff_const
 
 theorem history_deriv_eta_zero {y : ℝ} (hy : d.releaseStart ≤ y) (eta : ℝ) :
     deriv (fun p => history d w.coefficients p y) eta = 0 := by
@@ -293,14 +284,6 @@ namespace ResetWitness
 
 variable {d : TailData} {K : ℝ} (w : UniformAngularReset.ResetWitness d K)
 
-theorem normalizedLag_hasDerivAt (eta : ℝ) {y : ℝ} (hy : d.releaseStart ≤ y) :
-    HasDerivAt (normalizedLag d w.coefficients eta)
-      (-profileSlope d y - d.h - (1 + profileSlope d y) * normalizedLag d w.coefficients eta y) y := by
-  have hp := (((history_hasDerivAt_release w eta hy).const_mul (1 - d.h)).div
-    (releaseWeight_hasDerivAt d hy) (releaseWeight_pos d y).ne').sub_const 1
-  convert! hp using 1
-  unfold normalizedLag
-  field_simp [(releaseWeight_pos d y).ne'] ; ring
 
 theorem normalizedLag_eq_of_history (eta : ℝ) (q : ℝ → ℝ) (y : ℝ)
     (heq : history d w.coefficients eta y = momentCandidate d q y) :
@@ -324,16 +307,7 @@ theorem normalizedLag_tail (eta : ℝ) {y : ℝ} (hy : tailStart d ≤ y) :
     normalizedLag d w.coefficients eta y = tailLag d (y - tailStart d) :=
   normalizedLag_eq_of_history w eta _ y (history_tail w eta hy)
 
-theorem normalizedLag_initial (eta : ℝ) :
-    normalizedLag d w.coefficients eta d.releaseStart = initialLag d := by
-  rw [normalizedLag_release w eta le_rfl (by linarith [d.rampEnd_pos]),
-    sub_self, releaseLag_initial]
 
-theorem normalizedLag_eventual_zero (eta : ℝ) {y : ℝ} (hy : tailEnd d ≤ y) :
-    normalizedLag d w.coefficients eta y = 0 := by
-  have ht : tailStart d ≤ y := by dsimp [tailEnd] at hy; linarith
-  rw [normalizedLag_tail w eta ht]
-  exact tailLag_zero_late d (by dsimp [tailEnd] at hy; linarith)
 
 end ResetWitness
 
@@ -479,14 +453,6 @@ theorem radial_history_eta_independent (eta eta' : ℝ) {X : ℝ} (hX : 0 < X)
   rw [Real.exp_log hX] at hi hi'
   rw [hi, hi', history_eta_independent w eta eta' hrel]
 
-theorem radial_history_contDiff_eta {X : ℝ} (hX : 0 < X)
-    (hrel : d.releaseStart ≤ Real.log X) :
-    ContDiff ℝ ∞ (fun eta => ∫ u in Ioc 0 X, radialH d w.coefficients eta u) := by
-  have he : (fun eta => ∫ u in Ioc 0 X, radialH d w.coefficients eta u) =
-      fun _ : ℝ => ∫ u in Ioc 0 X, radialH d w.coefficients 0 u :=
-    funext (fun eta => radial_history_eta_independent w eta 0 hX hrel)
-  rw [he]
-  exact contDiff_const
 
 /-- The eventual physical history, in the manuscript's `X` coordinate. -/
 theorem radial_history_eventual (eta : ℝ) {X : ℝ} (hX : 0 < X)
@@ -526,23 +492,5 @@ theorem renormalized_angular_moment (eta : ℝ) :
 
 end ResetWitness
 
-/-- The actual scheduled correction has the exact renormalized angular
-moment and eventual physical history for a common small-`lam` threshold. -/
-theorem complete_release_moments :
-    ∃ lam0 : ℝ, 0 < lam0 ∧ ∀ d : TailData, d.core.lam < lam0 →
-      ∃ c : ℝ → Coeff, ContDiff ℝ ∞ (correctedAngular d c) ∧
-        ∀ eta : ℝ,
-          IntegrableOn (fun X => radialH d c eta X - radialPowerH d X) (Ioi 0) ∧
-          (∫ X in Ioi 0, radialH d c eta X - radialPowerH d X) = 0 ∧
-          ∀ X : ℝ, 0 < X → tailEnd d ≤ Real.log X →
-            (∫ u in Ioc 0 X, radialH d c eta u) = X * radialH d c eta X / (1 - d.h) := by
-  obtain ⟨lam0, K, hlam0, _, hreset⟩ := exists_scheduled_reset
-  refine ⟨lam0, hlam0, ?_⟩
-  intro d hd
-  obtain ⟨w⟩ := hreset d hd
-  exact ⟨w.coefficients, correctedAngular_contDiff d w.coefficients w.smooth,
-    fun eta => ⟨ResetWitness.renormalized_radial_integrable w eta,
-      ResetWitness.renormalized_angular_moment w eta,
-      fun _ hX hfar => ResetWitness.radial_history_eventual w eta hX hfar⟩⟩
 
 end NavierStokes.ReleaseMoments

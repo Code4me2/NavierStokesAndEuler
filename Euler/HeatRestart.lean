@@ -47,15 +47,6 @@ theorem duhamel_restart {q : ℕ} (ν : ℝ) (hν : 0 ≤ ν) (T : ℝ) (hT : 0 
     ((shiftedHeat_continuous period ν T hT f t).intervalIntegrable (μ := volume) 0 a)
     ((shiftedHeat_continuous period ν T hT f t).intervalIntegrable (μ := volume) a t)).symm
 
-/-- The full genuine inhomogeneous heat solution restarts from its attained state. -/
-theorem inhomogeneous_heat_restart {q : ℕ} (ν : ℝ) (hν : 0 ≤ ν) (T : ℝ) (hT : 0 ≤ T)
-    (f : C(Icc (0 : ℝ) T, SobolevSpace period q)) (u₀ : SobolevSpace period q)
-    (a t : ℝ) (ha : 0 ≤ a) (hat : a ≤ t) :
-    heatFlow period q ν t u₀ + duhamel period ν T hT f t =
-      heatFlow period q ν (t-a) (heatFlow period q ν a u₀ + duhamel period ν T hT f a) +
-        ∫ s in a..t, heatFlow period q ν (t-s) (extendPath T hT f s) := by
-  rw [map_add, heatFlow_semigroup period ν hν (t-a) a (sub_nonneg.mpr hat) ha,
-    sub_add_cancel, duhamel_restart period ν hν T hT f a t ha hat, add_assoc]
 
 /-- The old-history and new-source identity written in elapsed time after the restart. -/
 theorem duhamel_restart_shifted {q : ℕ} (ν : ℝ) (hν : 0 ≤ ν) (T : ℝ) (hT : 0 ≤ T)

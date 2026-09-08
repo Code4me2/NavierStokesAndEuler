@@ -273,13 +273,6 @@ theorem corrected_energy_eq (d : TailData) (c : ℝ → Coeff) (eta y : ℝ) :
   dsimp [energyDensity, resetDensity]
   ring
 
-theorem corrected_energy_integrable_postPulse (d : TailData) (c : ℝ → Coeff) (eta : ℝ) :
-    IntegrableOn (fun y => Real.exp y * correctedAngular d c (y, eta) ^ 2) (Ioi d.core.endpoint) := by
-  have he : (fun y => Real.exp y * correctedAngular d c (y, eta) ^ 2) =
-      (fun y => energyDensity d eta y + resetDensity d c eta y) :=
-    funext (corrected_energy_eq d c eta)
-  rw [he]
-  exact (energyDensity_integrable_postPulse d eta).add (resetDensity_integrable d c eta).integrableOn
 
 theorem integral_corrected_energy (d : TailData) (c : ℝ → Coeff) (eta : ℝ) :
     (∫ y in Ioi d.core.endpoint, Real.exp y * correctedAngular d c (y, eta) ^ 2) =
@@ -298,15 +291,6 @@ theorem integral_corrected_energy (d : TailData) (c : ℝ → Coeff) (eta : ℝ)
   apply hy
   exact ((flattenEnd_gt_core d).trans (last_four_after_flatten d)).trans hw.1
 
-theorem corrected_energy_contDiff (d : TailData) {c : ℝ → Coeff} (hc : ContDiff ℝ ∞ c) :
-    ContDiff ℝ ∞ (fun eta =>
-      ∫ y in Ioi d.core.endpoint, Real.exp y * correctedAngular d c (y, eta) ^ 2) := by
-  have he : (fun eta =>
-      ∫ y in Ioi d.core.endpoint, Real.exp y * correctedAngular d c (y, eta) ^ 2) =
-      (fun eta => postPulseEnergy d eta + resetEnergy d c eta) :=
-    funext (integral_corrected_energy d c)
-  rw [he]
-  exact (postPulseEnergy_contDiff d).add (resetEnergy_contDiff d hc)
 
 /-! ## Full normalization, including its parameter derivative -/
 
@@ -436,31 +420,5 @@ theorem exists_scheduled_reset_energy_bounds :
     nlinarith [mul_nonneg hK.le hp]
   · exact normalizedResetEnergy_deriv_abs_le w eta heta
 
-/-- The constructed reset has arbitrarily small normalized energy and first
-parameter derivative when the common parameter `lam` is sufficiently small. -/
-theorem exists_scheduled_reset_small_energy (epsilon : ℝ) (hepsilon : 0 < epsilon) :
-    ∃ lam0 K : ℝ, 0 < lam0 ∧ 0 < K ∧
-      ∀ d : TailData, d.core.lam < lam0 → ∃ w : ResetWitness d K,
-        ContDiff ℝ ∞ (normalizedResetEnergy d w.coefficients) ∧
-        ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-          |normalizedResetEnergy d w.coefficients eta| < epsilon ∧
-          |deriv (normalizedResetEnergy d w.coefficients) eta| < epsilon := by
-  obtain ⟨lam0, K, C, hlam0, hK, hC, hreset⟩ := exists_scheduled_reset_energy_bounds
-  refine ⟨min lam0 (epsilon / C), K, lt_min hlam0 (div_pos hepsilon hC), hK, ?_⟩
-  intro d hd
-  obtain ⟨w, hw, hbounds⟩ := hreset d (lt_of_lt_of_le hd (min_le_left _ _))
-  have hpow : d.core.lam ^ (29 : ℕ) ≤ d.core.lam := by
-    have hp : d.core.lam ^ (28 : ℕ) ≤ 1 :=
-      pow_le_one₀ d.core.lam_pos.le (by linarith [d.core.lam_lt])
-    have h := mul_le_mul_of_nonneg_left hp d.core.lam_pos.le
-    calc
-      _ = d.core.lam * d.core.lam ^ (28 : ℕ) := by ring
-      _ ≤ _ := by simpa using h
-  have hlim : C * d.core.lam ^ (29 : ℕ) < epsilon := by
-    apply lt_of_le_of_lt (mul_le_mul_of_nonneg_left hpow hC.le)
-    have hsmall := (lt_div_iff₀ hC).mp (lt_of_lt_of_le hd (min_le_right _ _))
-    nlinarith
-  exact ⟨w, hw, fun eta heta =>
-    ⟨(hbounds eta heta).1.trans_lt hlim, (hbounds eta heta).2.trans_lt hlim⟩⟩
 
 end NavierStokes.ResetEnergyBounds

@@ -202,12 +202,6 @@ theorem tendsto_approximate (ψ : SchwartzMap Space ℂ) :
   have hlarge : errorTailBound ψ k m / ε < (n : ℝ) + 1 := by linarith
   simpa [mul_comm] using (div_lt_iff₀ hε).1 hlarge
 
-/-- Compactly supported smooth tests are dense in Schwartz space. -/
-theorem dense_hasCompactSupport :
-    Dense {ψ : SchwartzMap Space ℂ | HasCompactSupport (ψ : Space → ℂ)} := by
-  intro ψ
-  exact mem_closure_of_tendsto (tendsto_approximate ψ)
-    (Filter.Eventually.of_forall fun n => approximate_hasCompactSupport ψ n)
 
 /-- A continuous functional vanishing on compact tests vanishes on every Schwartz test. -/
 theorem continuous_zero_of_compactSupport (F : SchwartzMap Space ℂ → ℂ)
@@ -227,13 +221,5 @@ theorem eq_zero_of_compactSupport (F : SchwartzMap Space ℂ →L[ℂ] ℂ)
     (ψ : SchwartzMap Space ℂ) : F ψ = 0 :=
   continuous_zero_of_compactSupport F F.continuous hzero ψ
 
-/-- In particular, an identity tested after a continuous differential operator extends. -/
-theorem comp_eq_zero_of_compactSupport
-    (F : SchwartzMap Space ℂ →L[ℂ] ℂ)
-    (L : SchwartzMap Space ℂ →L[ℂ] SchwartzMap Space ℂ)
-    (hzero : ∀ ψ : SchwartzMap Space ℂ,
-      HasCompactSupport (ψ : Space → ℂ) → F (L ψ) = 0)
-    (ψ : SchwartzMap Space ℂ) : F (L ψ) = 0 :=
-  eq_zero_of_compactSupport (F.comp L) hzero ψ
 
 end NavierStokesR3.SchwartzCompactApproximation

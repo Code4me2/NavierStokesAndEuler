@@ -44,15 +44,7 @@ theorem comp_norm_le (A : SmoothCoefficientPath K V) (φ : C(L,K)) :
   intro t
   exact A.field.norm_coe_le_norm (φ t)
 
-theorem comp_jet_norm_le (A : SmoothCoefficientPath K V) (φ : C(L,K)) (n : ℕ) :
-    ‖(A.comp φ).jet n‖ ≤ ‖A.jet n‖ := by
-  apply (ContinuousMap.norm_le _ (norm_nonneg _)).2
-  intro t
-  exact (A.jet n).norm_coe_le_norm (φ t)
 
-theorem comp_translation (A : SmoothCoefficientPath K V) (φ : C(L,K)) (a : Space) :
-    translateCoefficientPath (A.comp φ).field a =
-      (translateCoefficientPath A.field a).comp φ := rfl
 
 /-- A continuous change of time parameter preserves each literal spatial
 derivative bound with exactly the same constant. -/
@@ -63,13 +55,6 @@ theorem comp_derivative_bound (A : SmoothCoefficientPath K V) (φ : C(L,K))
     ‖iteratedFDeriv ℝ n ((A.comp φ).field t : Space → V) x‖ ≤ C :=
   hb (φ t) x
 
-theorem comp_translation_bound (A : SmoothCoefficientPath K V) (φ : C(L,K))
-    (n : ℕ) (C : ℝ) (hC : 0 ≤ C)
-    (hb : ∀ t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C)
-    (a : Space) :
-    ‖iteratedFDeriv ℝ n (translateCoefficientPath (A.comp φ).field) a‖ ≤ C :=
-  (A.comp φ).norm_iteratedFDeriv_translation_le n C hC
-    (A.comp_derivative_bound φ n C hb) a
 
 end SmoothCoefficientPath
 
@@ -95,21 +80,7 @@ def initialPath (S τ : ℝ) (hτS : τ ≤ S) : C(Icc (0 : ℝ) S,V) →L[ℝ] 
 def tailPath (S τ : ℝ) (hτ : 0 ≤ τ) : C(Icc (0 : ℝ) S,V) →L[ℝ] C(Icc (0 : ℝ) (S-τ),V) :=
   ContinuousMap.compCLM ℝ V (tailInclusion S τ hτ)
 
-theorem initialPath_norm (S τ : ℝ) (hτS : τ ≤ S) : ‖initialPath (V := V) S τ hτS‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  exact A.norm_coe_le_norm _
 
-theorem tailPath_norm (S τ : ℝ) (hτ : 0 ≤ τ) : ‖tailPath (V := V) S τ hτ‖ ≤ 1 := by
-  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  exact A.norm_coe_le_norm _
 
 theorem initial_extend (S τ : ℝ) (hS : 0 ≤ S) (hτ : 0 ≤ τ) (hτS : τ ≤ S)
     (A : C(Icc (0 : ℝ) S,V)) (t : ℝ) (ht : t ∈ Icc (0 : ℝ) τ) :

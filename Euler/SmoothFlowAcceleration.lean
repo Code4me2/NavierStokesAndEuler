@@ -70,18 +70,5 @@ theorem velocityFamily_time_derivative
   · intro _ s hs
     exact velocityFamily_time_derivative_interior T hT A A₁ htime x s hs
 
-theorem forward_second_time_derivative
-    (htime : SmoothTimeField.TimeDerivative T hT A A₁)
-    (x : E) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (fun s => deriv (fun r => (flowData T hT A).forward r x) s)
-      (accelerationFamily T hT A A₁ x t) (Icc (0 : ℝ) T) t := by
-  apply (velocityFamily_time_derivative T hT A A₁ htime x t).congr_of_mem _ t.property
-  intro s hs
-  rw [((flowData T hT A).forward_hasDerivAt s x).deriv]
-  change (flowData T hT A).velocity s ((flowData T hT A).forward s x) =
-    velocityFamily T hT A x (projIcc 0 T hT s)
-  rw [projIcc_of_mem hT hs]
-  exact EulerBoundedLipschitzFlow.ofTimeInterval_velocity T hT A.field
-    ‖A.derivative.field‖₊ (velocity_lipschitz T A) ⟨s,hs⟩ _
 
 end EulerSmoothBanachFlow

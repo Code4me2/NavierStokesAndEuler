@@ -103,29 +103,6 @@ theorem endpointAcceleration_eq_forced (Y : CylinderL2 P U) :
     ((uniqueDiffOn_Icc D.time_pos) _ t.property)).symm.trans
       (he.derivWithin ((uniqueDiffOn_Icc D.time_pos) _ t.property))
 
-theorem endpointVelocity_eq_forced (Y : CylinderL2 P U) :
-    D.endpointVelocity P Y =
-      multiplier (D.frame P) (ContinuousMap.const (Icc (0 : ℝ) T) (T⁻¹ • Y))-
-        D.physicalVelocity P (D.endpointForcing P Y) := by
-  apply ContinuousMap.ext
-  intro t
-  change D.frame P t (D.endpointCoordinate P Y t) =
-    D.frame P t (T⁻¹ • Y)-D.frame P t
-      (D.velocityPath P (pathLp T D.time_pos.le (D.endpointForcing P Y)) t)
-  rw [D.endpointCoordinate_eq_const_sub P Y t,map_sub]
 
-theorem endpointDerivative_eq_forced (Y : CylinderL2 P U) :
-    D.endpointDerivative P Y =
-      multiplier (D.frameDerivative P) (ContinuousMap.const (Icc (0 : ℝ) T) (T⁻¹ • Y))-
-        D.physicalDerivative P (D.endpointForcing P Y) := by
-  apply ContinuousMap.ext
-  intro t
-  change D.frameDerivative P t (D.endpointCoordinate P Y t)+D.frame P t (D.endpointAcceleration P Y t) =
-    D.frameDerivative P t (T⁻¹ • Y)-(D.frameDerivative P t
-      (D.velocityPath P (pathLp T D.time_pos.le (D.endpointForcing P Y)) t)+
-        D.frame P t (D.accelerationPath P (D.endpointForcing P Y) t))
-  rw [D.endpointCoordinate_eq_const_sub P Y t,D.endpointAcceleration_eq_forced P Y,
-    ContinuousMap.neg_apply,map_sub,map_neg]
-  abel
 
 end EulerCylinderDirichlet.Coefficients

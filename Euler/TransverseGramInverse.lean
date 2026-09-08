@@ -90,16 +90,6 @@ theorem hasDerivAt_gram (Q : ℝ → U →L[ℝ] E) (Q₁ : U →L[ℝ] E) (t : 
       (Q₁.adjoint.comp (Q t) + (Q t).adjoint.comp Q₁) t :=
   (hasDerivAt_adjoint Q Q₁ t hQ).clm_comp hQ
 
-/-- The constructed Gram inverse has the actual inverse derivative. -/
-theorem hasDerivAt_gramInverse (Q : ℝ → U →L[ℝ] E) (c : ℝ) (hc : 0 < c)
-    (hQ : ∀ s x, c * ‖x‖ ^ 2 ≤ ‖Q s x‖ ^ 2)
-    (Q₁ : U →L[ℝ] E) (t : ℝ) (hd : HasDerivAt Q Q₁ t) :
-    HasDerivAt (fun s => gramInverse (Q s) c hc (hQ s))
-      (-(gramInverse (Q t) c hc (hQ t)).comp
-        ((Q₁.adjoint.comp (Q t) + (Q t).adjoint.comp Q₁).comp
-          (gramInverse (Q t) c hc (hQ t)))) t :=
-  hasDerivAt_coerciveInverse (fun s => gram (Q s)) c hc
-    (fun s => gram_coercive (Q s) c (hQ s)) t _ (hasDerivAt_gram Q Q₁ t hd)
 
 open MeasureTheory Set EulerTimeLp EulerVolterraConvolution
 

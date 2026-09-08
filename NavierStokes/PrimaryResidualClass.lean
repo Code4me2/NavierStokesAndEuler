@@ -264,12 +264,6 @@ theorem primary_bounds : (primaryBlock s c a ψ kp).WaveBounds s P (1 / 2) := by
   exact SignedWaveUpdate.conjugatePair_class
     (wave_slice (h.corrected_bounds.amplitude i)) j
 
-theorem primary_pressure : (primaryBlock s c a ψ kp).PressureBounds s P 1 := by
-  intro j _
-  have hp := SignedWaveUpdate.conjugatePair_class
-    (wave_slice h.corrected_bounds.pressure) j
-  simp only [show (1 / 2 : ℝ) + 1 / 2 = 1 by norm_num] at hp
-  exact hp
 
 theorem exact_conditions : LinearWaveBounds.ExactConditions (HarmonicWaveInteraction.productStrip s)
     (directions c) (corrected s c a ψ) :=

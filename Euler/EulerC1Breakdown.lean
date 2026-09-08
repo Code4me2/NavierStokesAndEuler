@@ -25,7 +25,6 @@ def maximalC1Norm (t : L.Time) : ℝ := L.maximalVelocityNorm t+L.maximalGradien
 
 theorem maximalVelocityNorm_nonneg (t : L.Time) : 0 ≤ L.maximalVelocityNorm t := norm_nonneg _
 
-theorem maximalGradientNorm_nonneg (t : L.Time) : 0 ≤ L.maximalGradientNorm t := norm_nonneg _
 
 theorem maximalVelocityNorm_le_iff (t : L.Time) (K : ℝ) :
     L.maximalVelocityNorm t ≤ K ↔ ∀ x, ‖L.maximalVelocity t x‖ ≤ K := by
@@ -48,12 +47,6 @@ theorem maximalGradientNorm_continuous : Continuous L.maximalGradientNorm :=
 theorem maximalC1Norm_continuous : Continuous L.maximalC1Norm :=
   L.maximalVelocityNorm_continuous.add L.maximalGradientNorm_continuous
 
-theorem maximalGradientNorm_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-    (t : Icc (0 : ℝ) S) :
-    L.maximalGradientNorm (L.shorterTime S hSL t)=(L.evolution S hS hSL).gradientNormPath t := by
-  change ‖finiteField (L.maximalField (L.shorterTime S hSL t)).derivative‖=_
-  rw [L.maximalField_eq_evolution S hS hSL t]
-  rfl
 
 theorem maximalVelocity_gradient_unbounded_near_endpoint (τ K : ℝ) (hτ : τ < L.duration) :
     ∃ (t : L.Time) (x : Space), τ < t ∧ K < ‖fderiv ℝ (L.maximalVelocity t) x‖ := by
@@ -113,13 +106,7 @@ theorem maximalPressure_spec (t : MaximalTime) :
       ∀ x, _root_.gradient (maximalPressure t) x=(lifespan.maximalPressureField t).field x :=
   lifespan.maximalPressure_spec t
 
-theorem maximalGradientNorm_spec (t : MaximalTime) (K : ℝ) :
-    maximalGradientNorm t ≤ K ↔ ∀ x, ‖fderiv ℝ (maximalVelocity t) x‖ ≤ K :=
-  lifespan.maximalGradientNorm_le_iff t K
 
-theorem maximalVelocityNorm_spec (t : MaximalTime) (K : ℝ) :
-    maximalVelocityNorm t ≤ K ↔ ∀ x, ‖maximalVelocity t x‖ ≤ K :=
-  lifespan.maximalVelocityNorm_le_iff t K
 
 theorem maximalGradientNorm_continuous : Continuous maximalGradientNorm :=
   lifespan.maximalGradientNorm_continuous
@@ -127,26 +114,12 @@ theorem maximalGradientNorm_continuous : Continuous maximalGradientNorm :=
 theorem maximalC1Norm_continuous : Continuous maximalC1Norm :=
   lifespan.maximalC1Norm_continuous
 
-theorem pointwiseGradient_unbounded_near_maximal_time (τ K : ℝ) (hτ : τ < lifespan.duration) :
-    ∃ (t : MaximalTime) (x : Space), τ < t ∧ K < ‖fderiv ℝ (maximalVelocity t) x‖ :=
-  lifespan.maximalVelocity_gradient_unbounded_near_endpoint τ K hτ
 
-/-- The gradient supremum has infinite upper limit at the actual maximal time. -/
-theorem gradient_unbounded_near_maximal_time (τ K : ℝ) (hτ : τ < lifespan.duration) :
-    ∃ t : MaximalTime, τ < t ∧ K < maximalGradientNorm t :=
-  lifespan.maximalGradientNorm_unbounded_near_endpoint τ K hτ
 
 /-- The same characterization for the sum of the actual velocity and gradient suprema. -/
 theorem c1_unbounded_near_maximal_time (τ K : ℝ) (hτ : τ < lifespan.duration) :
     ∃ t : MaximalTime, τ < t ∧ K < maximalC1Norm t :=
   lifespan.maximalC1Norm_unbounded_near_endpoint τ K hτ
 
-theorem initialDatum_c1_breakdown :
-    0 < lifespan.duration ∧ lifespan.duration ≤ 1 ∧
-      ¬ HasSmoothEulerSolution initialDatum.field lifespan.duration ∧
-      ∀ τ : ℝ, τ < lifespan.duration → ∀ K : ℝ,
-        ∃ t : MaximalTime, τ < t ∧ K < maximalC1Norm t :=
-  ⟨lifespan.duration_pos,lifespan_le_one,initialDatum_no_endpoint,
-    fun τ hτ K => c1_unbounded_near_maximal_time τ K hτ⟩
 
 end EulerPacketInduction

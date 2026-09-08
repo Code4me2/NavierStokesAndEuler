@@ -171,12 +171,5 @@ theorem local_compact_vorticity_of_truncationFamily
     Metric.isClosed_closedBall
 
 
-/-- Compact initial vorticity stays in one compact ball for a positive time
-for every Comparator solution. The auxiliary global trajectories are those
-of the explicitly constructed finite-energy solenoidal truncations. -/
-theorem local_compact_vorticity (hc : HasCompactSupport (vectorCurl u₀)) :
-    ∃ δ B : ℝ, 0 < δ ∧ ∀ t ∈ Icc 0 δ,
-      tsupport (vectorCurl (v · t)) ⊆ Metric.closedBall (0 : Space) B :=
-  h.local_compact_vorticity_of_truncationFamily h.finiteEnergyTruncationFamily hc
 
 end Euler.EulerExistenceAndSmoothnessR3

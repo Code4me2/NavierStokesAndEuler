@@ -107,17 +107,6 @@ theorem weakPotential_hasDerivAt_zero (χ : Cutoff) (a : Space) :
   · have hc : Continuous (fun h : ℝ => cutoffDifferenceConstant R M₂ M₃ * |h| * ‖a‖ ^ 2) := by fun_prop
     simpa only [abs_zero, mul_zero, zero_mul] using (hc.tendsto 0).mono_left nhdsWithin_le_nhds
 
-/-- Both cutoff positions contribute to the actual operator-norm derivative. -/
-theorem mixedBoundaryOperator_hasDerivAt_zero (χ ψ : Cutoff) (a : Space) :
-    HasDerivAt (fun t : ℝ => mixedBoundaryOperator (χ.translate (t • a)) (ψ.translate (t • a)))
-      (mixedBoundaryOperator (χ.directional a) ψ + mixedBoundaryOperator χ (ψ.directional a)) 0 := by
-  have h := (cutoffCurl_hasDerivAt_zero χ a).clm_comp (weakPotential_hasDerivAt_zero ψ a)
-  simpa only [zero_smul, Cutoff.translate_zero, mixedBoundaryOperator] using h
 
-/-- The corresponding differential commutator has the source's duality bound. -/
-theorem mixedBoundaryOperator_derivative_norm_le (χ ψ : Cutoff) (a : Space) :
-    ‖mixedBoundaryOperator (χ.directional a) ψ + mixedBoundaryOperator χ (ψ.directional a)‖ ≤
-      cutoffBound (χ.directional a) * cutoffBound ψ + cutoffBound χ * cutoffBound (ψ.directional a) :=
-  (norm_add_le _ _).trans (add_le_add (mixedBoundaryOperator_norm_le _ _) (mixedBoundaryOperator_norm_le _ _))
 
 end EulerMeanBoundary

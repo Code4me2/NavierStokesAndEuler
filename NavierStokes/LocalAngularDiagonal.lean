@@ -27,8 +27,6 @@ noncomputable def slowQ (h : ℝ) (s : DirectAngularDiagonal.Slow) : ℝ :=
 noncomputable def localSlowDomain (h qbig : ℝ) : Set DirectAngularDiagonal.Slow :=
   {s | s.1 < 1 ∧ slowQ h s < qbig}
 
-theorem slowQ_physical (h : ℝ) (w : SpaceTime) :
-    slowQ h (DirectAngularDiagonal.slowPoint w) = PhysicalWaveSum.physicalQ h w := rfl
 
 theorem slowQ_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {s : DirectAngularDiagonal.Slow} (hs : s.1 < 1) : ContDiffAt ℝ ∞ (slowQ h) s := by
@@ -43,16 +41,8 @@ theorem localSlowDomain_open {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (qbig : �
   exact Filter.inter_mem (DirectAngularDiagonal.preterminalSlow_open.mem_nhds hs.1)
     ((slowQ_smoothAt hh hh1 hs.1).continuousAt (gt_mem_nhds hs.2))
 
-theorem physicalDomain_eq_localDomain (h qbig : ℝ) :
-    DirectAngularDiagonal.physicalDomain (localSlowDomain h qbig) =
-      MixedAxisPreservation.localDomain h qbig := rfl
 
-theorem physicalDomain_eq_physicalSublevel (h qbig : ℝ) :
-    DirectAngularDiagonal.physicalDomain (localSlowDomain h qbig) =
-      CutStageEstimates.physicalSublevel h qbig := rfl
 
-theorem localSlowDomain_subset (h qbig : ℝ) :
-    localSlowDomain h qbig ⊆ DirectAngularDiagonal.preterminalSlow := fun _ hs => hs.1
 
 variable {h qbig : ℝ}
 
@@ -77,19 +67,8 @@ noncomputable def angularSupport
     ℕ → MixedAxisPreservation.AngularSupport (MixedAxisPreservation.localDomain h qbig) :=
   fun j => MixedAxisPreservation.AngularSupport.ofAngularData (D j) (fun _ hw => hw)
 
-theorem angularSupport_field
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) (j : ℕ) :
-    (angularSupport D j).field = rawSeries D j := rfl
 
-theorem angularSum_eq_potentialSum
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) (a : ℕ → ℝ) :
-    DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar) =
-      SolenoidalDiagonal.potentialSum a (PhysicalWaveSum.physicalQ h) (rawSeries D) := rfl
 
-theorem angularSum_eq_directDiagonal
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) (a : ℕ → ℝ) :
-    DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar) =
-      MixedAxisPreservation.directDiagonal h (angularSupport D) a := rfl
 
 /-! ## One common zero neighborhood above the cutoff support -/
 

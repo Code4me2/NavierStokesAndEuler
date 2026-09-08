@@ -310,11 +310,6 @@ theorem physicalMask_tsupport_closedWindow {d : ℝ} {l : SlotColoring.Label} {x
     (SquaredPartition.logCoordinate x.1, x.2) ∈ closedWindow d l :=
   labelRegion_subset_closedWindow hl (PhysicalWaveSum.physicalMask_tsupport_subset d l hx) hq
 
-theorem physicalMask_jet_tsupport_closedWindow {d : ℝ} {l : SlotColoring.Label} {x : WindowPoint}
-    (hl : 1 ≤ l.1) (hq : 0 < x.1) (m : ℕ)
-    (hx : x ∈ tsupport (iteratedFDeriv ℝ m (PhysicalWaveSum.physicalMask d l))) :
-    (SquaredPartition.logCoordinate x.1, x.2) ∈ closedWindow d l :=
-  physicalMask_tsupport_closedWindow hl hq ((tsupport_iteratedFDeriv_subset m) hx)
 
 theorem window_card_le {d : ℝ} {x : WindowPoint} (F : Finset ι)
     (label : ι → SlotColoring.Label) (hinj : Set.InjOn label (F : Set ι))
@@ -679,64 +674,8 @@ theorem SupportedOscillations.sub {d h : ℝ} {vr vt : TorusInverse.Plane}
     simpa only [Pi.sub_apply, hzero, zero_sub, neg_ne_zero] using hn
   · exact hu l n x hx θ i hzero
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- A native covered profile and a supported slow factor give the exact
-support predicate used above. This also covers derivatives of the slow
-mask, since their closed supports lie in the same window. -/
-theorem covered_product_supported {d h : ℝ} {vr vt : TorusInverse.Plane}
-    (sys : PartitionedCovariance.SlotSystem d h vr vt)
-    (label : ℕ → ι → SlotColoring.Label) (χ : ℕ → D → WindowPoint)
-    (Y : ℕ → D → TorusInverse.Plane) (U : Set D)
-    (a : ι → ℕ → D → ℝ → Fin 3 → ℝ)
-    (f : ι → ℕ → D → ℝ → Fin 3 → TorusInverse.Plane → ℝ)
-    (ha : ∀ l n x, x ∈ U → ∀ θ i, a l n x θ i ≠ 0 → χ n x ∈ closedWindow d (label n l))
-    (hf : ∀ l n x, x ∈ U → ∀ θ i, support (f l n x θ i) ⊆
-      PartitionedCovariance.slotSet h sys.radius vr vt (label n l)) :
-    SupportedOscillations sys label χ Y U (fun l n p i =>
-      a l n p.1 p.2 i * PartitionedCovariance.covered
-        (SlotColoring.nativeIndex h (label n l).1) (f l n p.1 p.2 i) (Y n p.1)) := by
-  intro l n x hx θ i hn
-  obtain ⟨ha0, hf0⟩ := mul_ne_zero_iff.mp hn
-  exact ⟨ha l n x hx θ i ha0, PartitionedCovariance.covered_support (hf l n x hx θ i) _ hf0⟩
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- The actual physical mask automatically supplies the slow-window
-condition for a covered native wave, with arbitrary phase and amplitude. -/
-theorem native_wave_supported {d h : ℝ} {vr vt : TorusInverse.Plane}
-    (sys : PartitionedCovariance.SlotSystem d h vr vt)
-    (label : ℕ → ι → SlotColoring.Label) (hlevel : ∀ n l, 1 ≤ (label n l).1)
-    (q : ℕ → D → ℝ) (position : ℕ → D → SlotColoring.Position)
-    (Y : ℕ → D → TorusInverse.Plane) (U : Set D) (hq : ∀ n x, x ∈ U → 0 < q n x)
-    (scale : ι → ℕ → D → Fin 3 → ℝ)
-    (f : ι → ℕ → D → Fin 3 → TorusInverse.Plane → ℝ)
-    (mode : ι → ℕ → ℤ) (phase : ι → ℕ → D → TorusInverse.Plane → ℝ)
-    (hf : ∀ l n x, x ∈ U → ∀ i, support (f l n x i) ⊆
-      PartitionedCovariance.slotSet h sys.radius vr vt (label n l)) :
-    SupportedOscillations sys label
-      (fun n x => (SquaredPartition.logCoordinate (q n x), position n x)) Y U
-      (fun l n p i => PartitionedCovariance.wave
-        (scale l n p.1 i * PartitionedCovariance.physicalMask d (label n l)
-          (q n p.1) (position n p.1))
-        (SlotColoring.nativeIndex h (label n l).1) (f l n p.1 i)
-        (mode l n) (phase l n p.1) (Y n p.1) p.2) := by
-  intro l n x hx θ i hn
-  obtain ⟨hprod, _⟩ := mul_ne_zero_iff.mp hn
-  obtain ⟨hamp, hprof⟩ := mul_ne_zero_iff.mp hprod
-  have hmask := (mul_ne_zero_iff.mp hamp).2
-  have hregion : (q n x, position n x) ∈ PhysicalWaveSum.labelRegion d (label n l) :=
-    PhysicalWaveSum.physicalMask_support_subset d (label n l) hmask
-  exact ⟨labelRegion_subset_closedWindow (hlevel n l) hregion (hq n x hx),
-    PartitionedCovariance.covered_support (hf l n x hx i) _ hprof⟩
 
-/-- The signed tail-label convention used by PrimaryFieldAssembly is
-injective and has positive levels for every chosen start `N ≥ 1`. -/
-theorem signedTailLabel_admissible {N : ℕ} (hN : 1 ≤ N) :
-    Function.Injective (PartitionedCovariance.signedTailLabel N) ∧
-      ∀ a, 1 ≤ (PartitionedCovariance.signedTailLabel N a).1 := by
-  refine ⟨PartitionedCovariance.signedTailLabel_injective N, ?_⟩
-  intro a
-  change 1 ≤ a.1.1 + N
-  omega
 
 /-! ## The full signed covariance remainder, below CorrectionStep -/
 
@@ -1143,18 +1082,6 @@ theorem uniformClass_of_envelopeJets {s : StripData D}
         (mul_nonneg (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le (hw l n x hx))
     _ = _ := by unfold majorant; ring
 
-theorem uniformWaveClass_of_envelopeJets {s : StripData D}
-    {V : PhaseJetBounds.Domain (ℕ × ι) D} {W : (ℕ × ι) → D → ℝ}
-    {a : (ℕ × ι) → D → E} (ha : PrimaryPulseBounds.EnvelopeJets V W a)
-    {P : ι → ℕ → D → ℝ} {α K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hscale : ∀ n l, V.scale (n, l) ≤ K * s.slow n ^ q)
-    (hdom : ∀ n l, s.domain ⊆ V.carrier (n, l))
-    (hP : ∀ l n x, x ∈ s.domain → 0 ≤ P l n x)
-    (hW : ∀ l n x, x ∈ s.domain →
-      W (n, l) x ≤ s.epsilon n ^ α * (Real.sqrt (s.zeta x) * P l n x)) :
-    UniformWaveClass s P α (fun l n => a (n, l)) :=
-  uniformClass_of_envelopeJets ha hK hscale hdom
-    (fun l n x hx => mul_nonneg (Real.sqrt_nonneg _) (hP l n x hx)) hW
 
 theorem uniformClass_of_polynomialJets {s : StripData D}
     {V : PhaseJetBounds.Domain (ℕ × ι) D} {a : (ℕ × ι) → D → E}
@@ -1181,13 +1108,5 @@ theorem slotSet_isCompact (h r : ℝ) (vr vt : TorusInverse.Plane) (l : SlotColo
     ((continuous_const.add (continuous_fst.smul continuous_const)).add
       (continuous_snd.smul continuous_const))
 
-/-- Native derivatives stay inside the same closed padded slot, including
-entry and exit. Periodizing such a derivative can therefore reuse
-`PartitionedCovariance.covered_support` and the original slot separation. -/
-theorem native_jet_tsupport_subset {h r : ℝ} {vr vt : TorusInverse.Plane}
-    {l : SlotColoring.Label} {f : TorusInverse.Plane → E}
-    (hf : support f ⊆ PartitionedCovariance.slotSet h r vr vt l) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m f) ⊆ PartitionedCovariance.slotSet h r vr vt l :=
-  (tsupport_iteratedFDeriv_subset m).trans (closure_minimal hf (slotSet_isCompact h r vr vt l).isClosed)
 
 end NavierStokes.LabelSumBounds

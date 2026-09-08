@@ -24,13 +24,6 @@ variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 def scalarGradientPath : C(K,LiftL2 P) := ∑ i : Fin 3,
   pathMap P (gradientComponent i) (derivativePath P (pathMap P scalarEmbed p) i.succ)
 
-include hp in
-theorem scalarGradientPath_orbit :
-    ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a (scalarGradientPath p)) := by
-  simp only [scalarGradientPath,map_sum]
-  exact ContDiff.sum (fun i _ => pathMap_orbit_contDiff P (gradientComponent i) _
-    (derivativePath_orbit P (pathMap P scalarEmbed p)
-      (pathMap_orbit_contDiff P scalarEmbed p hp) i.succ))
 
 include hp in
 theorem scalarGradientPath_block_bound (q n : ℕ) (a : LiftTangent) :
@@ -89,22 +82,8 @@ variable {T : ℝ} (raw : ScalarField) (p : C(Icc (0 : ℝ) T,CylinderL2 P ℝ))
   (he : ∀ (t : Icc (0 : ℝ) T) x θ,
     raw (t,(x,θ)) = scalarPointField P p hp t (x,(θ : AddCircle P)))
 
-theorem scalarGradientField_path :
-    (scalarGradientField raw p hp he).path = scalarGradientPath p := rfl
 
-theorem scalarGradientField_block_bound (q n : ℕ) (a : LiftTangent) :
-    block standardDirection q
-        (fun b : LiftTangent => pathTranslate P b (scalarGradientField raw p hp he).path) n a ≤
-      3 * block standardDirection q (fun b : LiftTangent => pathTranslate P b p) (n+1) a :=
-  scalarGradientPath_block_bound p hp q n a
 
-theorem scalarGradientField_majorant (q : ℕ) (R A : ℝ) (d : ℕ)
-    (hb : ∀ n, block standardDirection q (fun b : LiftTangent => pathTranslate P b p) n 0 ≤
-      A * majorant R d n) (n : ℕ) :
-    block standardDirection q
-        (fun b : LiftTangent => pathTranslate P b (scalarGradientField raw p hp he).path) n 0 ≤
-      (3*A) * majorant R (d+1) n :=
-  scalarGradientPath_majorant p hp q R A d hb n
 
 end Field
 

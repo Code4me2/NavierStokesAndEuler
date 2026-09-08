@@ -93,31 +93,12 @@ theorem angular_after {C T y : ℝ} (hC : 0 < C) (hT : 0 < T) (hy : T ≤ y)
     sub_self, zero_mul, one_mul, zero_add, Real.exp_add, exp_logShape]
   ring
 
-theorem angular_initial {C T : ℝ} (hC : 0 < C) (hT : 0 < T)
-    (li : ℝ → ℝ) (eta : ℝ) :
-    angular C T li (0, eta) = C⁻¹ * Real.exp (li eta) := by
-  simpa using angular_before hC hT (le_refl 0) li eta
 
 /-! Smoothness above and exact equalities on both closed half-lines give the
 actual smooth gluing. The following statement records all radial jets on the
 open constant-profile regions as well. -/
 
-theorem angular_jets_before {C T y : ℝ} (hC : 0 < C) (hT : 0 < T) (hy : y < 0)
-    (li : ℝ → ℝ) (eta : ℝ) (n : ℕ) :
-    iteratedDeriv n (fun s => angular C T li (s, eta)) y =
-      iteratedDeriv n (fun s => C⁻¹ * Real.exp (s / 10 + li eta)) y := by
-  apply Filter.EventuallyEq.iteratedDeriv_eq
-  filter_upwards [eventually_lt_nhds hy] with s hs
-  exact angular_before hC hT hs.le li eta
 
-theorem angular_jets_after {C T y : ℝ} (hC : 0 < C) (hT : 0 < T) (hy : T < y)
-    (li : ℝ → ℝ) (eta : ℝ) (n : ℕ) :
-    iteratedDeriv n (fun s => angular C T li (s, eta)) y =
-      iteratedDeriv n (fun s => C⁻¹ * Real.exp (s / 10) *
-        OutgoingSchedule.shape eta) y := by
-  apply Filter.EventuallyEq.iteratedDeriv_eq
-  filter_upwards [eventually_gt_nhds hy] with s hs
-  exact angular_after hC hT hs.le li eta
 
 /-! ## A duration chosen before `C` -/
 
@@ -170,11 +151,6 @@ theorem logarithmicSlope_eq (C T : ℝ) (li : ℝ → ℝ) (y eta : ℝ) :
   rw [(logProfile_hasDerivAt C T li y eta).deriv]
   ring
 
-theorem logarithmicSlope_eq_actual (C T : ℝ) (li : ℝ → ℝ) (y eta : ℝ) :
-    logarithmicSlope T li (y, eta) =
-      1 / 2 + deriv (fun s => Real.log (angular C T li (s, eta))) y := by
-  simp only [log_angular]
-  exact logarithmicSlope_eq C T li y eta
 
 theorem logarithmicSlope_bounds {T K B : ℝ} {li : ℝ → ℝ}
     (hT : 0 < T) (hK : 0 ≤ K) (_ : 0 ≤ B)
@@ -330,9 +306,6 @@ noncomputable def resetClock (C P y : ℝ) : ℝ := y - 10 * Real.log (C * P)
 noncomputable def idealAngular (P : ℝ) (p : ℝ × ℝ) : ℝ :=
   P * OutgoingSchedule.shape p.2 * Real.exp (p.1 / 10)
 
-theorem idealAngular_contDiff (P : ℝ) : ContDiff ℝ ∞ (idealAngular P) :=
-  (contDiff_const.mul (OutgoingSchedule.shape_contDiff.comp contDiff_snd)).mul
-    (contDiff_fst.div_const 10).exp
 
 theorem angular_after_reset_clock {C P T y : ℝ} (hC : 0 < C) (hP : 0 < P)
     (hT : 0 < T) (hy : T ≤ y) (li : ℝ → ℝ) (eta : ℝ) :
@@ -377,13 +350,7 @@ theorem restore_contDiff {Gi : ℝ → ℝ} (hGi : ContDiff ℝ ∞ Gi) :
       ((OutgoingSchedule.sigma_contDiff.comp (contDiff_fst.add contDiff_const)).mul
         (contDiff_const.mul contDiff_snd))
 
-theorem restore_before {z : ℝ} (hz : z ≤ -8) (Gi : ℝ → ℝ) (eta : ℝ) :
-    restore Gi (z, eta) = Gi eta := by
-  simp [restore, OutgoingSchedule.sigma_zero (by linarith : z + 8 ≤ 0)]
 
-theorem restore_after {z : ℝ} (hz : -7 ≤ z) (Gi : ℝ → ℝ) (eta : ℝ) :
-    restore Gi (z, eta) = 4 * eta := by
-  simp [restore, OutgoingSchedule.sigma_one (by linarith : 1 ≤ z + 8)]
 
 theorem restore_sub (Gi : ℝ → ℝ) (z eta : ℝ) :
     restore Gi (z, eta) - 4 * eta =
@@ -391,11 +358,6 @@ theorem restore_sub (Gi : ℝ → ℝ) (z eta : ℝ) :
   dsimp [restore]
   ring
 
-theorem restore_error_le (Gi : ℝ → ℝ) (z eta : ℝ) :
-    |restore Gi (z, eta) - 4 * eta| ≤ |Gi eta - 4 * eta| := by
-  rw [restore_sub, abs_mul, abs_of_nonneg (sub_nonneg.mpr (OutgoingSchedule.sigma_le_one _))]
-  exact mul_le_of_le_one_left (abs_nonneg _)
-    (by linarith [OutgoingSchedule.sigma_nonneg (z + 8)])
 
 theorem restore_error_jet (Gi : ℝ → ℝ) (hGi : ContDiff ℝ ∞ Gi) (z eta : ℝ) (n : ℕ) :
     iteratedDeriv n (fun e => restore Gi (z, e) - 4 * e) eta =
@@ -835,29 +797,6 @@ theorem prefix_bound_tendsto (n : ℕ) (B K L T P : ℝ) :
   convert! (hs.const_mul (prefixCoefficient n B K L)).add hp using 1 <;>
     simp [div_eq_mul_inv, inv_pow]
 
-/-- Uniformity in the external parameter is obtained from uniform input-jet
-bounds. The fixed duration, data bounds, and physical prefix length precede `C`. -/
-theorem eventually_small_prefix (n : ℕ) {B K Xi T P : ℝ} (hB : 0 ≤ B) (hK : 0 ≤ K)
-    (hXi : 0 < Xi) (hP : 0 < P) (S : Set ℝ)
-    (u f : ℝ → ℝ × ℝ → ℝ)
-    (hu : ∀ C, 1 ≤ C → ContDiff ℝ ∞ (u C))
-    (hf : ∀ C, 1 ≤ C → ContDiff ℝ ∞ (f C))
-    (hub : ∀ C, 1 ≤ C → ∀ eta ∈ S, ∀ x ∈ Ioc (0 : ℝ) (separation T C P),
-      ∀ k ≤ n, |iteratedDeriv k (fun e => u C (x, e)) eta| ≤ B)
-    (hfb : ∀ C, 1 ≤ C → ∀ eta ∈ S, ∀ x ∈ Ioc (0 : ℝ) (separation T C P),
-      ∀ k ≤ n, |iteratedDeriv k (fun e => f C (x, e)) eta| ≤ K / C)
-    {eps : ℝ} (heps : 0 < eps) :
-    ∀ᶠ C : ℝ in atTop, ∀ eta ∈ S,
-      prefixJetSize n (resetRadius Xi C P) (separation T C P) (u C) (f C) eta < eps := by
-  have hsmall := (prefix_bound_tendsto n B K (Xi * Real.exp T) T P).eventually (gt_mem_nhds heps)
-  have hsep := (separation_tendsto T hP.ne').eventually (gt_mem_nhds zero_lt_one)
-  filter_upwards [eventually_ge_atTop (1 : ℝ), hsmall, hsep] with C hC hb hs
-  intro eta heta
-  have hCpos : 0 < C := lt_of_lt_of_le zero_lt_one hC
-  exact (prefixJetSize_bound (by unfold resetRadius; positivity)
-    (separation_pos T hCpos hP).le hs.le
-    (resetRadius_mul_separation Xi T C P (mul_pos hCpos hP).ne') hB hK hC
-    (hu C hC) (hf C hC) n eta (hub C hC eta heta) (hfb C hC eta heta)).trans_lt hb
 
 /-! ## The ideal prefix has small rows too -/
 
@@ -1090,17 +1029,7 @@ noncomputable def restoreDensityJ (Gi A : ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
 noncomputable def restoreDensityS (Gi : ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
   restoreDefect Gi p * (restore Gi (Real.log p.1, p.2) + 4 * p.2)
 
-theorem restoreDensityJ_eq (Gi A : ℝ → ℝ) (p : ℝ × ℝ) :
-    restoreDensityJ Gi A p =
-      restore Gi (Real.log p.1, p.2) * Real.sqrt (2 * p.1) * (A p.2 * p.1 ^ (1 / 10 : ℝ)) -
-        (4 * p.2) * Real.sqrt (2 * p.1) * (A p.2 * p.1 ^ (1 / 10 : ℝ)) := by
-  dsimp [restoreDensityJ, restoreDefect]
-  ring
 
-theorem restoreDensityS_eq (Gi : ℝ → ℝ) (p : ℝ × ℝ) :
-    restoreDensityS Gi p = restore Gi (Real.log p.1, p.2) ^ 2 - (4 * p.2) ^ 2 := by
-  dsimp [restoreDensityS, restoreDefect]
-  ring
 
 theorem restore_local_smooth {Gi A : ℝ → ℝ} (hGi : ContDiff ℝ ∞ Gi) (hA : ContDiff ℝ ∞ A)
     {x : ℝ} (hx : 0 < x) (eta : ℝ) :
@@ -1344,12 +1273,6 @@ theorem vanishingDebtBound_tendsto (n : ℕ) (B K L BG KA T : ℝ) {P : ℝ} (hP
     ring
   · ring_nf
 
-/-- Increasing `C` removes only the prefix term. The explicit restoration term
-is retained, so the upstream smallness choice is not silently changed. -/
-theorem eventually_vanishingDebtBound_lt (n : ℕ) (B K L BG KA T : ℝ)
-    {P eps : ℝ} (hP : P ≠ 0) (heps : 0 < eps) :
-    ∀ᶠ C : ℝ in atTop, vanishingDebtBound n B K L BG KA (separation T C P) C < eps :=
-  (vanishingDebtBound_tendsto n B K L BG KA T hP).eventually (gt_mem_nhds heps)
 
 /-! ## Direct adapter from axis and entry jets to the constructed prefix -/
 
@@ -1391,61 +1314,6 @@ theorem scaledFamily_contDiff (R : ℝ) {F : ℝ × ℝ → ℝ} (hF : ContDiff 
     ContDiff ℝ ∞ (scaledFamily R F) :=
   hF.comp ((contDiff_const.mul contDiff_fst).prodMk contDiff_snd)
 
-/-- This theorem assumes axis-field jets and the held entry power law, then
-derives the actual constructed prefix-row estimates. No row-smallness
-hypothesis occurs. The constant `shapeJetConstant` is independent of `C`. -/
-theorem constructed_prefix_bound {Xi C T P B BJ K : ℝ} (hXi : 0 < Xi) (hC : 1 ≤ C)
-    (hT : 0 < T) (hP : 0 < P) (hB : 0 ≤ B) (hBJ : 1 ≤ BJ) (hK : 0 ≤ K)
-    {li Gi : ℝ → ℝ} {oldU oldF : ℝ × ℝ → ℝ}
-    (hli : ContDiff ℝ ∞ li) (hU : ContDiff ℝ ∞ oldU) (hF : ContDiff ℝ ∞ oldF)
-    (n : ℕ) (eta : ℝ) (hsep : separation T C P ≤ 1)
-    (hAxisU : ∀ X ∈ Icc (0 : ℝ) Xi, ∀ k ≤ n, |iteratedDeriv k (fun e => oldU (X, e)) eta| ≤ B)
-    (hGi : ∀ k ≤ n, |iteratedDeriv k Gi eta| ≤ B)
-    (hHoldU : ∀ X, Xi ≤ X → ∀ e, oldU (X, e) = Gi e)
-    (hAxisF : ∀ X ∈ Icc (0 : ℝ) Xi, ∀ k ≤ n, |iteratedDeriv k (fun e => oldF (X, e)) eta| ≤ K / C)
-    (hHoldF : ∀ X, Xi ≤ X → ∀ e, oldF (X, e) =
-      C⁻¹ * Real.exp (Real.log (X / Xi) / 10 + li e) / Real.sqrt (2 * X))
-    (hl : ∀ i ≤ n, |iteratedDeriv i li eta| ≤ BJ)
-    (hshape : ∀ i ≤ n, |iteratedDeriv i logShape eta| ≤ BJ) :
-    prefixJetSize n (resetRadius Xi C P) (separation T C P)
-      (scaledFamily (resetRadius Xi C P) oldU)
-      (scaledFamily (resetRadius Xi C P) (shapeField Xi T li oldF)) eta ≤
-      prefixCoefficient n B (shapeJetConstant n Xi T BJ K) (Xi * Real.exp T) * separation T C P +
-        (2 ^ n * (Xi * Real.exp T) * (shapeJetConstant n Xi T BJ K) ^ 2) / C ^ 2 := by
-  have hCpos : 0 < C := lt_of_lt_of_le zero_lt_one hC
-  have hR : 0 < resetRadius Xi C P := by unfold resetRadius; positivity
-  have hr : 0 < separation T C P := separation_pos T hCpos hP
-  have hRL := resetRadius_mul_separation Xi T C P (mul_pos hCpos hP).ne'
-  apply prefixJetSize_bound hR.le hr.le hsep hRL hB
-    (shapeJetConstant_nonneg n (zero_le_one.trans hBJ) hK) hC
-    (scaledFamily_contDiff _ hU)
-    (scaledFamily_contDiff _ (shapeField_contDiff hXi hT hli hF)) n eta
-  · intro x hx k hk
-    change |iteratedDeriv k (fun e => oldU (resetRadius Xi C P * x, e)) eta| ≤ B
-    have hx0 : 0 ≤ resetRadius Xi C P * x := mul_nonneg hR.le hx.1.le
-    by_cases hxXi : resetRadius Xi C P * x ≤ Xi
-    · exact hAxisU _ ⟨hx0, hxXi⟩ k hk
-    · have he : (fun e => oldU (resetRadius Xi C P * x, e)) = Gi :=
-        funext (hHoldU _ (le_of_not_ge hxXi))
-      rw [he]
-      exact hGi k hk
-  · intro x hx k hk
-    change |iteratedDeriv k (fun e => shapeField Xi T li oldF (resetRadius Xi C P * x, e)) eta| ≤ _
-    have hx0 : 0 ≤ resetRadius Xi C P * x := mul_nonneg hR.le hx.1.le
-    have hxL : resetRadius Xi C P * x ≤ Xi * Real.exp T :=
-      (mul_le_mul_of_nonneg_left hx.2 hR.le).trans_eq hRL
-    exact shapeField_jets_uniform hXi hCpos hT hx0 hxL hli hBJ hK n eta
-      (fun hxXi => hAxisF _ ⟨hx0, hxXi⟩) (hHoldF _) hl hshape k hk
 
-/-- The row-debt decomposition used above is the ordinary split of actual
-integrals at the separation radius. -/
-theorem integral_debt_split {r b : ℝ} {F G : ℝ → ℝ}
-    (hF0 : IntervalIntegrable F volume 0 r) (hFr : IntervalIntegrable F volume r b)
-    (hG0 : IntervalIntegrable G volume 0 r) (hGr : IntervalIntegrable G volume r b) :
-    (∫ x in (0 : ℝ)..b, F x - G x) =
-      (∫ x in (0 : ℝ)..r, F x) - (∫ x in (0 : ℝ)..r, G x) +
-        (∫ x in r..b, F x - G x) := by
-  rw [← intervalIntegral.integral_add_adjacent_intervals (hF0.sub hG0) (hFr.sub hGr),
-    intervalIntegral.integral_sub hF0 hG0]
 
 end NavierStokes.ShapeTransition

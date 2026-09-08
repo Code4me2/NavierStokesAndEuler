@@ -128,21 +128,5 @@ theorem heat_H2_cauchy (T : ℝ) (hT : 0 ≤ T) (ν : ℝ) (hν : 0 < ν)
   exact first_derivative_difference period T hT ν (u n) (u m) (f n) (f m) t i
     (hd n t ht i) (hd m t ht i)
 
-/-- Completeness constructs a genuine Bochner L²-time H² limit of the regularized heat solutions. -/
-theorem exists_heat_H2_limit (T : ℝ) (hT : 0 ≤ T) (ν : ℝ) (hν : 0 < ν)
-    (u : ℕ → C(Icc (0 : ℝ) T, SobolevSpace period 3))
-    (f : ℕ → C(Icc (0 : ℝ) T, SobolevSpace period 1))
-    (hd : ∀ n t, t ∈ Ioo 0 T → ∀ i : Fin 4,
-      HasDerivAt (fun s => value period (derivativeOperator period 2 i (extendPath T hT (u n) s)))
-        (value period (derivativeOperator period 0 i
-          (ν • laplacianOperator period 1 (extendPath T hT (u n) t) + extendPath T hT (f n) t))) t)
-    (hu : CauchySeq (fun n => (restrictOperator period (by norm_num : 1 ≤ 3)).compLeftContinuous ℝ
-      (Icc (0 : ℝ) T) (u n)))
-    (hf : CauchySeq (fun n => pathLp T hT ((valueOperator period 1).compLeftContinuous ℝ
-      (Icc (0 : ℝ) T) (f n)))) :
-    ∃ U : TimeLp T (SobolevSpace period 2),
-      Filter.Tendsto (fun n => pathLp T hT ((truncateOperator period 2).compLeftContinuous ℝ
-        (Icc (0 : ℝ) T) (u n))) Filter.atTop (𝓝 U) :=
-  cauchySeq_tendsto_of_complete (heat_H2_cauchy period T hT ν hν u f hd hu hf)
 
 end EulerHeatMaximalCauchy

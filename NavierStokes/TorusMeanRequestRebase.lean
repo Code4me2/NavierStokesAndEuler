@@ -112,26 +112,8 @@ theorem fullRequest_free_variables (s : StripData Point) (P : SignedStressPrimit
     LocalSignedRequest.fullRequest s P coord c u n ((r, (z, Y)), theta) =
       LocalSignedRequest.fullRequest s P coord c u n ((r, (z, Y')), theta') := rfl
 
-theorem stateRequest_free_variables (s : StripData Cylinder) (P : SignedStressPrimitive.Patch)
-    (h : ℝ) (c : Context Point) (u : State Point) (n : ℕ)
-    (r : ℝ) (z Y Y' : Plane) (theta theta' : ℝ) :
-    PhysicalSignedWave.stateRequest s P h c u n ((r, (z, Y)), theta) =
-      PhysicalSignedWave.stateRequest s P h c u n ((r, (z, Y')), theta') := rfl
 
-/-- This changes only the evaluation point, not the state or the measure
-used for its torus average. The fast-coordinate map can be arbitrary. -/
-theorem stateRequest_fast_map (s : StripData Cylinder) (P : SignedStressPrimitive.Patch)
-    (h : ℝ) (c : Context Point) (u : State Point) (n : ℕ)
-    (mapFast : Plane → Plane) (x : Cylinder) :
-    PhysicalSignedWave.stateRequest s P h c u n
-      ((x.1.1, (x.1.2.1, mapFast x.1.2.2)), x.2) =
-      PhysicalSignedWave.stateRequest s P h c u n x := rfl
 
-theorem stateRequest_inverseCover (s : StripData Cylinder) (P : SignedStressPrimitive.Patch)
-    (h : ℝ) (c : Context Point) (u : State Point) (n gap : ℕ) (x : Cylinder) :
-    PhysicalSignedWave.stateRequest s P h c u n
-      ((x.1.1, (x.1.2.1, (CommonCoverSolve.coverPower gap).symm x.1.2.2)), x.2) =
-      PhysicalSignedWave.stateRequest s P h c u n x := rfl
 
 /-- Equality uses exactly the source and target epsilons. No equality of
 their unrelated domains, phase frames, or native backgrounds is needed. -/

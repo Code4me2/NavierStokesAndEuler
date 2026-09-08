@@ -702,62 +702,8 @@ theorem physical_sum_jet_bound_of_weighted {s : StripData D} {α σ P : ℝ}
 
 end LocalWeightedInputs
 
-/-- Direct interface for the actual valid native open patches, including
-patches whose raw totalizations need not be smooth on their boundary. -/
-theorem SmoothData.of_open_patches
-    (UA : K → WaveIndex H → Set LiftPoint) (UP : K → BandLabel → Set PhysicalGraphBounds.Slow)
-    (hUA : ∀ k I, IsOpen (UA k I)) (hUP : ∀ k L, IsOpen (UP k L))
-    (hA : ∀ k I, ContDiffOn ℝ ∞ (f.amplitude k I) (UA k I))
-    (hF : ∀ k L, ContDiffOn ℝ ∞ (f.carrier k L).F (UP k L))
-    (hG : ∀ k L, ContDiffOn ℝ ∞ (f.carrier k L).G (UP k L))
-    (haCover : ∀ k I w, w ∈ preterminal → w ∈ tsupport (f.term a h r0 I k) →
-      commonLift h I.1.val.1 (f.gap I.1) w ∈ UA k I)
-    (hpCover : ∀ k I w, w ∈ preterminal → w ∈ tsupport (f.term a h r0 I k) →
-      ∀ chart : PolarCharts.Index,
-      PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PolarCharts.chartDomain a chart →
-      slotSlow ((f.carrier k I.1).withChart chart) a h I.1.val.1 r0 w ∈ UP k I.1) :
-    SmoothData f a h r0 := by
-  constructor
-  · intro k I w hw hts
-    exact SmoothNear.of_open (hUA k I) (hA k I) (haCover k I w hw hts)
-  · intro k I w hw hts chart hchart
-    exact ⟨SmoothNear.of_open (hUP k I.1) (hF k I.1) (hpCover k I w hw hts chart hchart),
-      SmoothNear.of_open (hUP k I.1) (hG k I.1) (hpCover k I w hw hts chart hchart)⟩
 
-theorem JetData.of_stripped {hc : SupportCells f} {P A B g eAmp eBase : ℝ} {m : ℕ}
-    (hb : PhysicalCopyBounds.LocalStrippedClass f hc a b h r0 P A B g eAmp eBase m) :
-    JetData f hc a b h r0 P A B g eAmp eBase m := by
-  refine ⟨hb.parameters, ?_⟩
-  intro k I w hw hreg hann hcell _
-  exact ⟨hb.amplitude k I w hw hreg hann hcell,
-    fun chart hchart => ⟨hb.base_F k I w hw hreg hann hcell chart hchart,
-      hb.base_G k I w hw hreg hann hcell chart hchart⟩⟩
 
-/-- The native lattice-center construction proves the support data without
-any global smoothness hypotheses on amplitudes or phase profiles. -/
-theorem supportData_of_native {F : CopyFamily H TorusInverse.Frequency}
-    (g : BandLabel → CommonCoverSolve.Geometry) (U : BandLabel → Set Plane)
-    (hgap : ∀ L, (g L).gap = F.gap L)
-    (hcenter : ∀ k L, (F.carrier k L).center = nativeCenter (g L) k)
-    (hwidth : ∀ L z, z ∈ U L → |PhysicalGraphBounds.etaCoordinate ((g L).basis z)| ≤ r0)
-    (hs : ∀ k I x, F.amplitude k I x ≠ 0 → (g I.1).coordinates k x.2 ∈ U I.1)
-    (hgap_le : ∀ L, F.gap L ≤ Δ)
-    (hgap_native : ∀ L, F.gap L ≤ ChartScales.nativeIndex h L.val.1)
-    (hint : ∀ k L, ∃ m : ℤ,
-      (ChartScales.carrier h L.val.1 : ℝ) * (F.carrier k L).angular = (m : ℝ))
-    (hgeo : ∀ k I y, F.amplitude k I (commonLift h I.1.val.1 (F.gap I.1) y) ≠ 0 →
-      PhysicalGraphBounds.scaledRadial I.1.val.1 y ∈ PhysicalGraphBounds.annulus a b ∧
-      ‖PhysicalGraphBounds.liftZT (PhysicalGraphBounds.physicalLift h I.1.val.1 y)‖ ≤ Z)
-    (hmask : ∀ k I y, y ∈ preterminal →
-      F.amplitude k I (commonLift h I.1.val.1 (F.gap I.1) y) ≠ 0 →
-      physicalMask (CoordinateAlgebra.D h) I.1.val (physicalParams h y) ≠ 0) :
-    SupportData F a b h r0 Z Δ := by
-  refine ⟨hgap_le, hgap_native, hint, ?_, hmask⟩
-  intro k I y hy
-  refine ⟨(hgeo k I y hy).1, (hgeo k I y hy).2, ?_⟩
-  rw [hcenter]
-  exact physical_native_width (g I.1) k h I.1.val.1 (F.gap I.1) (hgap I.1)
-    (hwidth I.1) y (hs k I _ hy)
 
 /-! ## Real Cartesian vectors -/
 

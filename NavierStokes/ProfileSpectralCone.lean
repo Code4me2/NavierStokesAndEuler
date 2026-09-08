@@ -126,11 +126,6 @@ theorem spectral_cones_of_trueCone {F τ p₁ p₂ a c : ℝ} (hF : 0 < F) (hτ 
     rw [cancel_signed_scale _ _ _ _ hk.ne', abs_neg, abs_div, abs_of_pos hd]
     exact (div_lt_one hd).mpr habs
 
-theorem stress_coordinates_ne_zero {p₁ p₂ a c : ℝ}
-    (h : TrueConeLoop.InTrueCone p₁ p₂ a c) : (!₂[p₁ - a, p₂ - c] : Plane) ≠ 0 := by
-  have ht := (spectral_cones_of_trueCone (F := 1) (τ := 1) (by norm_num) (by norm_num) h).2
-  intro hz
-  simpa only [one_smul, hz, inner_zero_left, lt_self_iff_false] using ht.inward
 
 /-- A scalar criterion for any direction, including a nonzero smooth
 edge factor when the actual stress itself vanishes. -/
@@ -237,14 +232,6 @@ theorem profile_spectral_cones {D : RadialDomain} (P : Profiles D) (h : ℝ) {p 
   rw [stressVector_eq_stocks P h hp hX hf.ne']
   exact spectral_cones_of_trueCone hF hf hc
 
-theorem profile_stress_ne_zero {D : RadialDomain} (P : Profiles D) (h : ℝ) {p : Point}
-    (hp : p ∈ D.carrier) (hX : 0 < p.1) (hf : 0 < P.f p)
-    (hc : TrueConeLoop.InTrueCone (ActivationStocks.profileStockOne P h p)
-      (ActivationStocks.profileStockTwo P h p) (ModulatedCone.angularShear P.E p)
-      (ModulatedCone.signedAxialShear P.E P.U p)) : stressVector P h p ≠ 0 := by
-  have ht := (profile_spectral_cones P h hp hX hf (F := 1) (by norm_num) hc).2
-  intro hz
-  simpa only [hz, inner_zero_left, lt_self_iff_false] using ht.inward
 
 /-! ## Genuine radial derivatives of the normalized leading fields -/
 
@@ -458,59 +445,6 @@ theorem signedShear_continuousOn {K : Set Slow} {F a c : Slow → ℝ}
   · exact ha.neg
   · exact hc.neg
 
-/-- Scalar shear and direction margins on a compact set produce all
-reference bounds and one mixed-point target margin. All constants are
-chosen before a band or label is selected. `T` can be an extended edge
-direction: no positive lower bound for a separate amplitude is used. -/
-theorem compact_signedShear_bounds {K : Set Slow} (hK : IsCompact K)
-    {F a c : Slow → ℝ} {T : Slow → Plane}
-    (hF : ContinuousOn F K) (ha : ContinuousOn a K) (hc : ContinuousOn c K)
-    (hT : ContinuousOn T K) (hR : ∀ p ∈ K, 0 < p.1)
-    (hFp : ∀ p ∈ K, 0 < F p) (hap : ∀ p ∈ K, 0 < a p)
-    (hv : ∀ p ∈ K, 2 < a p * (1 + (c p / a p) ^ 2))
-    (hin : ∀ p ∈ K, 0 < a p * T p 0 + c p * T p 1)
-    (hquad : ∀ p ∈ K, (a p * (1 + (c p / a p) ^ 2) - 2) *
-      (a p * T p 1 - c p * T p 0) ^ 2 < 2 * (a p * T p 0 + c p * T p 1) ^ 2) :
-    ∃ M u eta delta : ℝ, 1 ≤ M ∧ 0 < u ∧ 0 < eta ∧ 0 < delta ∧
-      (∀ p ∈ K, PrimaryRepresentatives.ReferenceCone (F p) (F p • !₂[-a p, -c p]) ∧
-        PrimaryRepresentatives.TargetCone (F p) (F p • !₂[-a p, -c p]) (T p) ∧
-        PrimaryRepresentatives.ParameterBounds M p.1 (F p) (F p • !₂[-a p, -c p])) ∧
-      ∀ p₀ ∈ K, ∀ p ∈ K, dist p p₀ < delta →
-        ⟪T p, PrimaryRepresentatives.normalDirection (F p₀ • !₂[-a p₀, -c p₀])⟫_ℝ ≤ -eta ∧
-        |PrimaryRepresentatives.c0 (F p₀) (F p₀ • !₂[-a p₀, -c p₀]) *
-          ⟪T p, PrimaryRepresentatives.transverseDirection (F p₀ • !₂[-a p₀, -c p₀])⟫_ℝ /
-          ⟪T p, PrimaryRepresentatives.normalDirection (F p₀ • !₂[-a p₀, -c p₀])⟫_ℝ| + eta ≤
-          PrimaryRepresentatives.slopeRatio u := by
-  have hRef : ∀ p ∈ K, PrimaryRepresentatives.ReferenceCone (F p) (F p • !₂[-a p, -c p]) := by
-    intro p hp
-    apply PrimaryRepresentatives.referenceCone_of_shear_coordinates (hFp p hp) (hap p hp)
-    have he := shear_size_mul (c := c p) (hap p hp).ne'
-    have hm := mul_lt_mul_of_pos_left (hv p hp) (hap p hp)
-    nlinarith
-  have hTar : ∀ p ∈ K, PrimaryRepresentatives.TargetCone (F p) (F p • !₂[-a p, -c p]) (T p) :=
-    fun p hp => targetCone_of_signedShear (hFp p hp) (hap p hp) (hv p hp) (T p)
-      (hin p hp) (hquad p hp)
-  have hg := signedShear_continuousOn hF ha hc
-  obtain ⟨M, hM, hMb⟩ := PrimaryRepresentatives.compact_parameter_bounds hK hF hg hR hRef
-  obtain ⟨u, eta, delta, hu, he, hd, hb⟩ :=
-    PrimaryRepresentatives.compact_mixed_target_margin hK hF hg hT hRef hTar
-  exact ⟨M, u, eta, delta, hM, hu, he, hd,
-    fun p hp => ⟨hRef p hp, hTar p hp, hMb p hp⟩, hb⟩
 
-/-- A vanishing nonnegative amplitude preserves the linear inward
-margin; where it is positive it cancels exactly from the target ratio. -/
-theorem weighted_target_margin {F eta u zeta : ℝ} {g T : Plane}
-    (hz : 0 ≤ zeta)
-    (hin : ⟪T, PrimaryRepresentatives.normalDirection g⟫_ℝ ≤ -eta)
-    (hratio : PrimaryRepresentatives.targetRatio F g T + eta ≤ PrimaryRepresentatives.slopeRatio u) :
-    ⟪zeta • T, PrimaryRepresentatives.normalDirection g⟫_ℝ ≤ -eta * zeta ∧
-      (0 < zeta → PrimaryRepresentatives.targetRatio F g (zeta • T) + eta ≤
-        PrimaryRepresentatives.slopeRatio u) := by
-  constructor
-  · rw [real_inner_smul_left]
-    simpa only [mul_comm zeta (-eta)] using mul_le_mul_of_nonneg_left hin hz
-  · intro hz'
-    rw [PrimaryRepresentatives.targetRatio_smul F g T hz'.ne']
-    exact hratio
 
 end NavierStokes.ProfileSpectralCone

@@ -180,11 +180,6 @@ def joinedNext : Stage S (n+1) := by
 
 theorem joinedNext_time : (P.joinedNext hn hq hB).time=P.nextTime := rfl
 
-theorem joinedNext_initial_increment :
-    (fun x => (P.joinedNext hn hq hB).state.evolution.velocity (0,x)-
-      P.state.evolution.velocity (0,x)) = (I).high k+(I).mean k :=
-  GeometryJoinedChoice.initial_increment_eq I P.restrictedState k hk ell
-    (S.support_pos (n+1)) (S.support_one (n+1)) F symmetric
 
 theorem joinedNext_initial_velocity :
     (fun x => (P.joinedNext hn hq hB).state.evolution.velocity (0,x)) =

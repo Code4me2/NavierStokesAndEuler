@@ -20,8 +20,6 @@ open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
 open NavierStokes.PeriodicUniqueness
 
-private theorem laplacian_nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
-  (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
 
 private theorem laplacian_partial_smul {χ : Space → ℝ} {w : Space → Space}
     (hχ : ContDiff ℝ ∞ χ) (hw : ContDiff ℝ ∞ w) (i : Fin 3) (x : Space) :
@@ -39,16 +37,6 @@ theorem laplacian_integrable_weighted_partial_sq {χ : Space → ℝ} {w : Space
   (hχ.mul ((spatial_partial_contDiff hw i).continuous.norm.pow 2)).integrable_of_hasCompactSupport
     hcχ.mul_right
 
-theorem laplacian_integrable_weighted_gradient_sq {χ : Space → ℝ} {w : Space → Space}
-    (hχ : Continuous χ) (hw : ContDiff ℝ ∞ w) (hcχ : HasCompactSupport χ) :
-    Integrable (fun x => χ x * ∑ i : Fin 3, ‖spatialPartial i w x‖ ^ 2) := by
-  have hsum : (fun x => χ x * ∑ i : Fin 3, ‖spatialPartial i w x‖ ^ 2) =
-      (fun x => ∑ i : Fin 3, χ x * ‖spatialPartial i w x‖ ^ 2) := by
-    funext x
-    exact Finset.mul_sum _ _ _
-  rw [hsum]
-  exact integrable_finsetSum _ (fun i _ =>
-    laplacian_integrable_weighted_partial_sq hχ hw hcχ i)
 
 theorem laplacian_integrable_cutoff_second_partial {χ : Space → ℝ} {w : Space → Space}
     (hχ : ContDiff ℝ ∞ χ) (hw : Continuous w) (hcχ : HasCompactSupport χ)
@@ -58,28 +46,7 @@ theorem laplacian_integrable_cutoff_second_partial {χ : Space → ℝ} {w : Spa
     (spatial_partial_contDiff (spatial_partial_contDiff hχ i) i).continuous).integrable_of_hasCompactSupport
     (CompactEnergy.compact_partial (CompactEnergy.compact_partial hcχ i) i).mul_left
 
-theorem laplacian_integrable_cutoff_laplacian {χ : Space → ℝ} {w : Space → Space}
-    (hχ : ContDiff ℝ ∞ χ) (hw : Continuous w) (hcχ : HasCompactSupport χ) :
-    Integrable (fun x => ‖w x‖ ^ 2 *
-      ∑ i : Fin 3, spatialPartial i (spatialPartial i χ) x) := by
-  have hsum : (fun x => ‖w x‖ ^ 2 *
-        ∑ i : Fin 3, spatialPartial i (spatialPartial i χ) x) =
-      (fun x => ∑ i : Fin 3, ‖w x‖ ^ 2 * spatialPartial i (spatialPartial i χ) x) := by
-    funext x
-    exact Finset.mul_sum _ _ _
-  rw [hsum]
-  exact integrable_finsetSum _ (fun i _ =>
-    laplacian_integrable_cutoff_second_partial hχ hw hcχ i)
 
-theorem laplacian_integrable_weighted_laplacian {χ : Space → ℝ} {w : Space → Space}
-    (hχ : Continuous χ) (hw : ContDiff ℝ ∞ w) (hcχ : HasCompactSupport χ) :
-    Integrable (fun x => χ x *
-      ⟪w x, ∑ i : Fin 3, spatialPartial i (spatialPartial i w) x⟫_ℝ) := by
-  have hsum : Continuous (fun x =>
-      ∑ i : Fin 3, spatialPartial i (spatialPartial i w) x) :=
-    continuous_finsetSum _ (fun i _ =>
-      (spatial_partial_contDiff (spatial_partial_contDiff hw i) i).continuous)
-  exact (hχ.mul (hw.continuous.inner hsum)).integrable_of_hasCompactSupport hcχ.mul_right
 
 /-- The one-coordinate weighted integration-by-parts identity. -/
 theorem integral_weighted_second_partial {χ : Space → ℝ} {w : Space → Space}

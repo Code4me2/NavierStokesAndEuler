@@ -19,8 +19,6 @@ theorem integrable_norm_sq_L2 (u : L2) : Integrable (fun x => ‖u x‖ ^ 2) vol
 theorem integral_norm_sq_L2 (u : L2) : (∫ x, ‖u x‖ ^ 2) = ‖u‖ ^ 2 := by
   rw [← lpNorm_sq_eq_integral_norm_sq _ (Lp.memLp u), lpNorm_coe_L2]
 
-theorem localL2Energy_nonneg (s : Set Space) (u : L2) : 0 ≤ localL2Energy s u :=
-  integral_nonneg (fun _ => sq_nonneg _)
 
 theorem localL2Energy_le (s : Set Space) (u : L2) : localL2Energy s u ≤ ‖u‖ ^ 2 := by
   rw [← integral_norm_sq_L2]

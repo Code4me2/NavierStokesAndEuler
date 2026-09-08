@@ -48,7 +48,6 @@ theorem Lambda_two_lt : 2 < Lambda := by
   linarith [sqrt_two_lt_two]
 
 theorem Lambda_pos : 0 < Lambda := lt_trans (by norm_num) Lambda_two_lt
-theorem log_Lambda_pos : 0 < Real.log Lambda := Real.log_pos (by linarith [Lambda_two_lt])
 
 /-- A coarse explicit bound suffices to show that the radial power is positive. -/
 theorem rho_lower : (1 / 3 : ℝ) ≤ rho := by

@@ -245,12 +245,6 @@ theorem chart_tau_identity (d : TailData) (p : EdgeParam) :
     (by linarith [d.h_lt_half] : 2 * d.h < 1)
     (p := (1 - timeOf p, p.2)) (sub_pos.mpr (timeOf_lt_one p))
 
-/-- The physical heat argument retains the varying factor `1-eta²`. -/
-theorem physical_heat_argument (d : TailData) (y0 : ℝ) (y : EdgeParam × ℝ) :
-    2 * (1 - timeOf y.1) / (radius d y0 y ^ 2 / 2) =
-      2 * (1 - chartEta d y.1 ^ 2) / Real.exp (y0 + 3 - y.2) := by
-  rw [chart_tau_identity, radius_square]
-  field_simp [(chartQ_pos d y.1).ne']
 
 noncomputable def logTaper (d : TailData) (y0 : ℝ) (y : ℝ) : ℝ := tailShape d (y - y0)
 noncomputable def radialTaper (d : TailData) (y0 : ℝ) (p : EdgeParam) : ℝ → ℝ :=
@@ -508,27 +502,8 @@ theorem angularFactor_zero_pos {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) 
   exact mul_pos (div_pos (mul_pos (by norm_num) (carrier_pos hC d y0 (p, 0)))
     (radius_pos d y0 (p, 0))) (taperSlopeFactor_zero_pos d)
 
-theorem angularFactor_eventually_pos {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) (p : EdgeParam) :
-    ∀ᶠ y in 𝓝 (p, (0 : ℝ)), 0 < angularFactor C d y0 y :=
-  (angularFactor_contDiff C d y0).continuous.continuousAt.eventually
-    (Ioi_mem_nhds (angularFactor_zero_pos hC d y0 p))
 
-theorem angularStress_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (angularStress C d y0) := by
-  have heq : angularStress C d y0 = fun y : EdgeParam × ℝ =>
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) * angularFactor C d y0 y :=
-    funext (angularStress_factorization C d y0)
-  rw [heq]
-  exact ((FlatCutoff.edge_div_pow_contDiff (by norm_num : (0 : ℝ) < 4) 3).comp
-    contDiff_snd).mul (angularFactor_contDiff C d y0)
 
-theorem angularStress_normalized (C : ℝ) (d : TailData) (y0 : ℝ) (p : EdgeParam)
-    {δ : ℝ} (hδ : 0 < δ) :
-    angularStress C d y0 (p, δ) / (Real.exp (-4 / δ ^ 2) / δ ^ 3) =
-      angularFactor C d y0 (p, δ) := by
-  rw [angularStress_factorization, FlatCutoff.edge_of_pos 4 hδ]
-  have hden : Real.exp (-4 / δ ^ 2) / δ ^ 3 ≠ 0 := by positivity
-  exact mul_div_cancel_left₀ _ hden
 
 /-- The same edge coordinate in the regular radial variable `s=r²/2`. -/
 noncomputable def logCoordinate (S s : ℝ) : ℝ := edgeCoordinate S s / 2
@@ -1228,11 +1203,6 @@ theorem angularStress_normalizedParam (C : ℝ) (d : TailData) (y0 x : ℝ)
   rw [angularStress_factorization, profileAngularStress_factorization,
     angularFactor_normalizedParam C d y0 x hη]
 
-theorem pressureGradient_normalizedParam (C : ℝ) (d : TailData) (y0 x : ℝ)
-    {η : ℝ} (hη : η ^ 2 < 1) :
-    pressureGradient C d y0 (normalizedParam η, x) = profilePressureGradient C d y0 (η, x) := by
-  rw [pressureGradient_factorization, profilePressureGradient_factorization,
-    pressureFactor_normalizedParam C d y0 x hη]
 
 theorem axialStress_normalizedParam (C : ℝ) (d : TailData) (y0 x : ℝ)
     {η : ℝ} (hη : η ^ 2 < 1) :
@@ -1296,25 +1266,7 @@ theorem profileStress_jets (C : ℝ) (d : TailData) (y0 : ℝ) (n : ℕ) {b : �
   exact EdgeWeightJets.edge_smul_iteratedFDeriv_bound (by norm_num) 3
     (profileStressFactor_contDiff C d y0) isCompact_Icc n hb
 
-theorem profileAngularStress_edge_jets (C : ℝ) (d : TailData) (y0 : ℝ) (n : ℕ) (η : ℝ) :
-    iteratedFDeriv ℝ n (profileAngularStress C d y0) (η, 0) = 0 := by
-  have he : profileAngularStress C d y0 =
-      EdgeWeightJets.weighted 4 3 (profileAngularFactor C d y0) :=
-    funext (profileAngularStress_factorization C d y0)
-  rw [he]
-  exact EdgeWeightJets.weighted_iteratedFDeriv_zero (by norm_num) 3
-    (profileAngularFactor_contDiff C d y0) n η
 
-theorem profileAxialStress_edge_jets (C : ℝ) (d : TailData) (y0 : ℝ) (n : ℕ) (η : ℝ) :
-    iteratedFDeriv ℝ n (profileAxialStress C d y0) (η, 0) = 0 := by
-  have he : profileAxialStress C d y0 =
-      EdgeWeightJets.weighted 4 0 (fun y : ℝ × ℝ => y.2 ^ 3 * profileAxialFactor C d y0 y) := by
-    funext y
-    simpa only [EdgeWeightJets.weighted, pow_zero, div_one, mul_assoc] using
-      profileAxialStress_factorization C d y0 y
-  rw [he]
-  exact EdgeWeightJets.weighted_iteratedFDeriv_zero (by norm_num) 0
-    ((contDiff_snd.pow 3).mul (profileAxialFactor_contDiff C d y0)) n η
 
 noncomputable def profileTilt (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) : ℝ :=
   y.2 ^ 6 * profileAxialFactor C d y0 y / profileAngularFactor C d y0 y
@@ -1339,13 +1291,6 @@ theorem profileTilt_contDiffAt {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ)
     (profileAngularFactor_contDiff C d y0).contDiffAt
     (profileAngularFactor_zero_pos hC d y0 hη).ne'
 
-theorem profileTilt_tendsto_zero {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ)
-    {η : ℝ} (hη : η ∈ Icc (-1 : ℝ) 1) :
-    Tendsto (profileTilt C d y0) (𝓝 (η, 0)) (𝓝 0) := by
-  have he := (profileTilt_contDiffAt hC d y0 hη).continuousAt
-  change Tendsto (profileTilt C d y0) (𝓝 (η, 0))
-    (𝓝 (profileTilt C d y0 (η, 0))) at he
-  simpa only [profileTilt_zero] using he
 
 /-- The actual velocity shear ratio for the terminal product `K f_o`. -/
 noncomputable def profileSpeed (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) : ℝ :=
@@ -1493,10 +1438,6 @@ theorem profile_uniform_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
 noncomputable def profileAngularVelocity (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) : ℝ :=
   profileCarrier C d y0 y * tailShape d (3 - y.2)
 
-theorem profileAngularVelocity_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (profileAngularVelocity C d y0) :=
-  (profileCarrier_contDiff C d y0).mul
-    ((tailShape_contDiff d).comp (contDiff_const.sub contDiff_snd))
 
 theorem profileS_hasDerivAt (y0 x : ℝ) : HasDerivAt (profileS y0) (-profileS y0 x) x := by
   convert! (((hasDerivAt_const x (y0 + 3)).sub (hasDerivAt_id x)).exp) using 1
@@ -1604,38 +1545,13 @@ theorem physicalStress_factorization (C : ℝ) (d : TailData) (y0 : ℝ) (y : Ed
     · simp [hx]
     · field_simp [hx]
 
-theorem physicalStress_jets (C : ℝ) (d : TailData) (y0 : ℝ) {S : Set EdgeParam}
-    (hS : IsCompact S) (n : ℕ) {b : ℝ} (hb : 0 < b) :
-    ∃ A : ℝ, 0 < A ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ b →
-      ‖iteratedFDeriv ℝ i (physicalStress C d y0) (p, x)‖ ≤ A * FlatCutoff.edge 4 x / x ^ N := by
-  have he : physicalStress C d y0 = fun y =>
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) • physicalStressFactor C d y0 y :=
-    funext (physicalStress_factorization C d y0)
-  rw [he]
-  exact EdgeWeightJets.edge_smul_iteratedFDeriv_bound (by norm_num) 3
-    (physicalStressFactor_contDiff C d y0) hS n hb
 
-theorem physicalStress_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (physicalStress C d y0) := by
-  have he : physicalStress C d y0 = fun y =>
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) • physicalStressFactor C d y0 y :=
-    funext (physicalStress_factorization C d y0)
-  rw [he]
-  exact ((FlatCutoff.edge_div_pow_contDiff (by norm_num : (0 : ℝ) < 4) 3).comp
-    contDiff_snd).smul (physicalStressFactor_contDiff C d y0)
 
 theorem profileStress_of_nonpos (C : ℝ) (d : TailData) (y0 : ℝ)
     {y : ℝ × ℝ} (hy : y.2 ≤ 0) : profileStress C d y0 y = 0 := by
   rw [profileStress_factorization, FlatCutoff.edge_of_nonpos 4 hy, zero_div, zero_smul]
 
-theorem physicalStress_of_nonpos (C : ℝ) (d : TailData) (y0 : ℝ)
-    {y : EdgeParam × ℝ} (hy : y.2 ≤ 0) : physicalStress C d y0 y = 0 := by
-  rw [physicalStress_factorization, FlatCutoff.edge_of_nonpos 4 hy, zero_div, zero_smul]
 
-theorem physicalStress_normalizedParam (C : ℝ) (d : TailData) (y0 x : ℝ)
-    {η : ℝ} (hη : η ^ 2 < 1) :
-    physicalStress C d y0 (normalizedParam η, x) = profileStress C d y0 (η, x) := by
-  exact Prod.ext (angularStress_normalizedParam C d y0 x hη) (axialStress_normalizedParam C d y0 x hη)
 
 /-! ## The genuine root-form cone on the terminal collar -/
 
@@ -1654,22 +1570,5 @@ noncomputable def profileP (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) 
 noncomputable def profileJ (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) : ℝ :=
   profileAxialStress C d y0 y / profileSwirlCoefficient C d y0 y
 
-/-- Applying the exact true-cone equivalence to the actual terminal stress,
-with `P-v=Tθ/F` and `J=Tz/F`, rather than taking a large-amplitude limit. -/
-theorem profile_true_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ η ∈ Icc (-1 : ℝ) 1, ∀ x : ℝ, 0 < x → x < ε →
-      2 < profileP C d y0 (η, x) ∧ profileSpeed C d y0 (η, x) <
-        ConeAlgebra.coneBound (profileP C d y0 (η, x)) (profileJ C d y0 (η, x)) := by
-  obtain ⟨ε, hε, hb⟩ := profile_relative_cone hC d y0
-  refine ⟨ε, hε, ?_⟩
-  intro η hη x hx hxε
-  obtain ⟨hT, hv, hm⟩ := hb η hη x hx hxε
-  have hF := profileSwirlCoefficient_pos hC d y0 (y := (η, x)) hη
-  apply (ConeAlgebra.true_cone_iff hv).mpr
-  constructor
-  · exact lt_add_of_pos_right _ (div_pos hT hF)
-  · have hd := div_lt_div_of_pos_right hm (sq_pos_of_pos hF)
-    simp only [profileP, profileJ, add_sub_cancel_left, div_pow]
-    simpa only [mul_div_assoc] using hd
 
 end NavierStokes.TerminalEdgeFactor

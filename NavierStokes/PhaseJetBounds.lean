@@ -462,18 +462,6 @@ section Phase
 
 variable {ι : Type*}
 
-/-- Uniform normalized base-field jets are a sufficient input.  The bound is
-on the base field itself, before any normal or frame is constructed. -/
-theorem polynomialJets_of_uniform {E F : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
-    {D : Domain ι E} {f : ι → E → F}
-    (hf : ∀ i, ContDiffOn ℝ ∞ (f i) (D.carrier i))
-    (hbound : ∀ N : ℕ, ∃ C : ℝ, 1 ≤ C ∧
-      ∀ i, JetBounds.FiniteJetBound N (f i) (D.carrier i) C) : PolynomialJets D f := by
-  refine ⟨hf, ?_⟩
-  intro N
-  obtain ⟨C, hC, hc⟩ := hbound N
-  exact ⟨C, hC, 0, by simpa only [pow_zero, mul_one] using hc⟩
 
 noncomputable def Domain.slot (D : Domain ι Slow) (V : ι → Set ℝ) (hV : ∀ i, IsOpen (V i)) :
     Domain ι (Slow × ℝ) where
@@ -952,16 +940,6 @@ theorem PhaseFamily.frameData_jets_of_phase_comparison
   exact frameJets_ofNormalLocal hn hd (hF.lift_slot V hV) hg hl hh hq hνj
     hb hb hnlow hnup hhlow hhup
 
-/-- Direct output in the fixed-slot format used by the ODE jet theorem.
-The coefficient is the actual `FrameData.coefficient`, not a comparison ODE. -/
-theorem FrameJets.coefficient_parameter_bounds
-    {Q : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
-    {D : Domain ι (Q × ℝ)} {d : ι → PrimaryODE.FrameData Q}
-    (hd : FrameJets D d) (j : ℤ) (N : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ m : ℕ, ∀ i p v, (p, v) ∈ D.carrier i →
-      ∀ k ≤ N, ‖iteratedFDeriv ℝ k (fun q => (d i).coefficient j (q, v)) p‖ ≤
-        C * D.scale i ^ m :=
-  (hd.coefficient j).parameter_bound N
 
 end Assembly
 
@@ -985,60 +963,10 @@ theorem rounded_frequency_jets (k target : ι → ℝ) {M : ℝ} (hM : 1 ≤ M)
   rw [Real.norm_eq_abs]
   linarith [ht i]
 
-/-- With the actual carrier choice, the fundamental viscosity factor is a
-uniformly bounded label constant.  Thus no factor k is lost in slow jets. -/
-theorem band_viscosity_jets (band : ι → ℕ) (h : ℝ) (hh : 0 ≤ h) :
-    PolynomialJets D (fun i _ => ChartScales.epsilon h (band i) *
-      (ChartScales.carrier h (band i) : ℝ) ^ 2) := by
-  apply PolynomialJets.const_uniform _ (by norm_num : (1 : ℝ) ≤ 4)
-  intro i
-  obtain ⟨hl, hu⟩ := ChartScales.carrier_viscosity_bounds h hh (band i)
-  rw [Real.norm_eq_abs, abs_of_nonneg (le_trans zero_le_one hl)]
-  exact hu
 
-theorem band_epsilon_jets (band : ι → ℕ) (h : ℝ) (hh : 0 ≤ h) :
-    PolynomialJets D (fun i _ => ChartScales.epsilon h (band i)) := by
-  apply PolynomialJets.const_uniform _ (le_refl (1 : ℝ))
-  intro i
-  rw [Real.norm_eq_abs, abs_of_pos (ChartScales.epsilon_pos h (band i))]
-  exact ChartScales.epsilon_le_one h hh (band i)
 
-theorem band_rounded_frequency_jets (band : ι → ℕ) (h : ℝ) (target : ι → ℝ)
-    {M : ℝ} (hM : 1 ≤ M) (ht : ∀ i, |target i| ≤ M) :
-    PolynomialJets D (fun i _ => PhaseEstimates.roundedFrequency
-      (ChartScales.carrier h (band i) : ℝ) (target i)) := by
-  apply rounded_frequency_jets _ target hM _ ht
-  intro i
-  have hp : 0 < (ChartScales.carrier h (band i) : ℝ) :=
-    Scaling.carrier_frequency_pos (ChartScales.epsilon_pos h (band i))
-  have hp' : 0 < ChartScales.carrier h (band i) := by exact_mod_cast hp
-  exact_mod_cast hp'
 
-/-- A direct domain constructor with the manuscript's S(n)=n². -/
-noncomputable def Domain.ofBands (band : ι → ℕ) (hband : ∀ i, 1 ≤ band i)
-    (U : ι → Set E) (hU : ∀ i, IsOpen (U i)) : Domain ι E where
-  scale i := ChartScales.S (band i)
-  carrier := U
-  isOpen := hU
-  one_le_scale i := by
-    have h : (1 : ℝ) ≤ band i := by exact_mod_cast hband i
-    dsimp [ChartScales.S]
-    nlinarith
 
-omit [NormedSpace ℝ E] in
-/-- The reference logarithmic-rate input follows from a lower slot-length
-bound.  In particular `ChartScales.slotLength_bounds` gives c=2r₀. -/
-theorem normalized_slot_rate_le {S ell u c M : ℝ} (hS : 0 < S) (hc : 0 < c)
-    (hell : c * S ≤ ell) (hu : |u| ≤ M) : |u / ell| * S ≤ M / c := by
-  have hellpos : 0 < ell := lt_of_lt_of_le (mul_pos hc hS) hell
-  have hM : 0 ≤ M := (abs_nonneg u).trans hu
-  rw [abs_div, abs_of_pos hellpos]
-  apply (le_div_iff₀ hc).mpr
-  rw [div_mul_eq_mul_div, div_mul_eq_mul_div]
-  apply (div_le_iff₀ hellpos).mpr
-  have h1 := mul_le_mul_of_nonneg_right hu (mul_nonneg hS.le hc.le)
-  have h2 := mul_le_mul_of_nonneg_left hell hM
-  nlinarith
 
 end BandChoices
 

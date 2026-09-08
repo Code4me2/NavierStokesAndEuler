@@ -139,12 +139,6 @@ theorem projectedRhsPath_convergence (hT : 0 ≤ T) (M : ℝ)
   exact ((-solenoidalProjection).compLeftContinuous ℝ (Icc (0 : ℝ) T)).continuous.tendsto _
     |>.comp (L.advectionPath_convergence hT M hb)
 
-theorem pressurePath_convergence (hT : 0 ≤ T) (M : ℝ)
-    (hb : ∀ k t, tensorNorm 3 (A k t) ≤ M) :
-    Tendsto (fun k => pressurePath (A k) (hA k)) atTop (𝓝 (pressurePath L.field L.field_continuous)) := by
-  simp only [pressurePath_eq]
-  exact ((solenoidalProjection-ContinuousLinearMap.id ℝ L2).compLeftContinuous ℝ
-    (Icc (0 : ℝ) T)).continuous.tendsto _ |>.comp (L.advectionPath_convergence hT M hb)
 
 end SmoothLimitData
 end EulerOrdinarySobolev

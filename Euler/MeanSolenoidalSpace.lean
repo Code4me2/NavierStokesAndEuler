@@ -106,8 +106,6 @@ def solenoidalProjection : L2 →L[ℝ] L2 := solenoidalSpace.starProjection
 theorem solenoidalProjection_mem (u : L2) :
     solenoidalProjection u ∈ solenoidalSpace := solenoidalSpace.starProjection_apply_mem u
 
-theorem solenoidalProjection_norm_le : ‖solenoidalProjection‖ ≤ 1 :=
-  solenoidalSpace.starProjection_norm_le
 
 theorem solenoidalProjection_apply_norm_le (u : L2) : ‖solenoidalProjection u‖ ≤ ‖u‖ :=
   solenoidalSpace.norm_starProjection_apply_le u
@@ -219,41 +217,9 @@ def metricInverse : solenoidalSpace →L[ℝ] solenoidalSpace :=
   projectedInverse solenoidalSpace (coefficientOperator A hA C hbound) c hc
     (coefficientOperator_coercive A hA C hbound c hpositive)
 
-theorem metricInverse_equation (f : solenoidalSpace) :
-    solenoidalSpace.orthogonalProjectionOnto
-      (coefficientOperator A hA C hbound
-        (metricInverse A hA C hbound c hc hpositive f : L2)) = f :=
-  projectedOperator_inverse_apply solenoidalSpace (coefficientOperator A hA C hbound)
-    c hc (coefficientOperator_coercive A hA C hbound c hpositive) f
 
-theorem metricInverse_norm_le : ‖metricInverse A hA C hbound c hc hpositive‖ ≤ c⁻¹ :=
-  projectedInverse_norm_le solenoidalSpace (coefficientOperator A hA C hbound)
-    c hc (coefficientOperator_coercive A hA C hbound c hpositive)
 
-include hc hpositive in
-/-- A forcing in the ambient L² space has one solenoidal solution of the
-projected metric equation. No inverse or solution is supplied as an input. -/
-theorem existsUnique_metric_solution (f : L2) :
-    ∃! u : solenoidalSpace,
-      solenoidalSpace.orthogonalProjectionOnto (coefficientOperator A hA C hbound (u : L2)) =
-        solenoidalSpace.orthogonalProjectionOnto f :=
-  existsUnique_projected_solution solenoidalSpace (coefficientOperator A hA C hbound)
-    c hc (coefficientOperator_coercive A hA C hbound c hpositive) f
 
-/-- The residual of the solved projected equation is a genuine weak gradient. -/
-theorem metric_solution_residual_gradient (f : L2) (u : solenoidalSpace)
-    (hu : solenoidalSpace.orthogonalProjectionOnto
-      (coefficientOperator A hA C hbound (u : L2)) =
-        solenoidalSpace.orthogonalProjectionOnto f) :
-    f - coefficientOperator A hA C hbound (u : L2) ∈ gradientSpace := by
-  apply (solenoidalProjection_eq_zero_iff _).1
-  change solenoidalSpace.starProjection
-    (f - coefficientOperator A hA C hbound (u : L2)) = 0
-  rw [map_sub]
-  have h := congrArg (fun v : solenoidalSpace => (v : L2)) hu
-  change solenoidalSpace.starProjection (coefficientOperator A hA C hbound (u : L2)) =
-    solenoidalSpace.starProjection f at h
-  rw [h, sub_self]
 
 end CoefficientInverse
 

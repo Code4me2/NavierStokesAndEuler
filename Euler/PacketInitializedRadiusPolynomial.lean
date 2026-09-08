@@ -619,9 +619,5 @@ theorem initializedRadius_le_envelope (W : ℝ) (hδ : 0 < δ)
     unfold radiusEnvelope
     nlinarith only [hW0,hreq0,hmean0,hgrade0]
 
-theorem initializedRadius_power (W : ℝ) (hδ : 0 < δ)
-    (H : RadiusPrimitives LM L NB BC δ ξ W) :
-    initializedRadius LM L NB BC δ ξ ≤ radiusConstant*W^radiusPower :=
-  (initializedRadius_le_envelope LM L NB BC δ ξ W hδ H).trans (radiusEnvelope_power W H.one)
 
 end EulerPacketRadiusPolynomial

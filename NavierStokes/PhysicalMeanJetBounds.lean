@@ -694,15 +694,6 @@ field.  The formula applies both to angular velocity and stream potential. -/
 noncomputable def CoherentFamily.angularField (D : CoherentFamily h degree N Δ U ℝ) : VelocityField :=
   fun w => D.field w • angularVector (PhysicalGraphBounds.radialProjection w)
 
-theorem CoherentFamily.angularField_formula (D : CoherentFamily h degree N Δ U ℝ) (w : SpaceTime) :
-    D.angularField w =
-      (-w.2 1 / PhysicalClassBounds.cartesianRadius (PhysicalGraphBounds.radialProjection w) *
-        D.field w) • coordinateVector 0 +
-      (w.2 0 / PhysicalClassBounds.cartesianRadius (PhysicalGraphBounds.radialProjection w) *
-        D.field w) • coordinateVector 1 := by
-  simp only [CoherentFamily.angularField, angularVector, smul_add, smul_smul]
-  change (D.field w * (-w.2 1 / _)) • _ + (D.field w * (w.2 0 / _)) • _ = _
-  rw [mul_comm (D.field w), mul_comm (D.field w)]
 
 theorem CoherentFamily.angularField_germ (D : CoherentFamily h degree N Δ U ℝ)
     (hU : IsOpen U) (n : ℕ) (hn : N ≤ n) {w : SpaceTime} (hw : w ∈ preterminal)

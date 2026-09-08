@@ -189,8 +189,6 @@ theorem beta_small_bounds (c : Parameters) (hc : c.lam ≤ 1 / 120) (i : Fin 2) 
 noncomputable def holdAmplitude (c : Parameters) : ℝ :=
   radialAmplitude c.P c.dropLength c.lam c.holdStart
 
-theorem holdAmplitude_pos (c : Parameters) : 0 < holdAmplitude c :=
-  mul_pos c.P_pos (Real.exp_pos _)
 
 theorem pulseAmplitude_split (c : Parameters) :
     pulseAmplitude c = holdAmplitude c * Real.exp (-(1 / 2 + c.lam) * c.wait) := by
@@ -710,19 +708,6 @@ theorem normalized_inverse_entry_bound (c : Parameters) (i j : Fin 2) :
       e, Pi.single_apply]
   simpa only [hc] using hb
 
-theorem normalized_inverse_norm_bound (c : Parameters) :
-    c.lam * ‖fun i : Fin 2 => fun j : Fin 2 => (normalizedMatrix c)⁻¹ i j‖ ≤ inverseBound := by
-  have hb : ‖fun i : Fin 2 => fun j : Fin 2 => c.lam * (normalizedMatrix c)⁻¹ i j‖ ≤
-      inverseBound := by
-    apply (pi_norm_le_iff_of_nonneg inverseBound_pos.le).mpr
-    intro i
-    apply (pi_norm_le_iff_of_nonneg inverseBound_pos.le).mpr
-    intro j
-    simpa only [Real.norm_eq_abs, abs_mul, abs_of_pos c.lam_pos] using
-      normalized_inverse_entry_bound c i j
-  have he : (fun i : Fin 2 => fun j : Fin 2 => c.lam * (normalizedMatrix c)⁻¹ i j) =
-      c.lam • (fun i : Fin 2 => fun j : Fin 2 => (normalizedMatrix c)⁻¹ i j) := rfl
-  rwa [he, norm_smul, Real.norm_eq_abs, abs_of_pos c.lam_pos] at hb
 
 noncomputable def normalizedDebt (c : Parameters) (d : Fin 2 → ℝ) (i : Fin 2) : ℝ :=
   Real.exp (-(beta c i * center c 0)) * d i
@@ -1222,121 +1207,8 @@ theorem individual_correction_jet_formula (c : Parameters) (amp : ℝ → ℝ)
   simpa only [sub_eq_add_neg] using
     congrFun (iteratedDeriv_comp_add_const k logTemplate (-center c j)) y
 
-theorem individual_correction_jet_bound (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
-    (amp : ℝ → ℝ) {eta : ℝ} (heta : |eta| ≤ 1) (j : Fin 2) (k : ℕ) (y : ℝ) :
-    |iteratedDeriv k (fun t =>
-      LocalizedMomentRepair.coefficients c.exponents c.lower c.upper (debt c amp eta) j *
-        LocalizedMomentRepair.bump (c.lower j) (c.upper j) (Real.exp t)) y| ≤
-      correctionJetBound c.P c.m k * Real.exp (-(1 / (4 * c.lam))) * (1 + |amp eta|) := by
-  rw [individual_correction_jet_formula, abs_mul]
-  have hc := pulse_coefficients_exp_bound c hsmall amp heta j
-  rw [debt_eq_affine] at hc
-  change |affineCoefficients c (parameterPolynomial eta) (amp eta) j| ≤ _ at hc
-  have hpos : 0 ≤ (2 * coefficientBound c.P c.m) *
-      Real.exp (-(1 / (4 * c.lam))) * (1 + |amp eta|) := by
-    have hp := coefficientBound_pos c.P_pos c.m
-    positivity
-  have h := mul_le_mul hc (logTemplate_jet_le k (y - center c j)) (abs_nonneg _) hpos
-  refine h.trans_eq ?_
-  unfold correctionJetBound
-  ring
 
-theorem individual_correction_jet_eta_bound (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
-    {amp : ℝ → ℝ} {eta amp' : ℝ} (ha : HasDerivAt amp amp' eta) (heta : |eta| ≤ 1)
-    (j : Fin 2) (k : ℕ) (y : ℝ) :
-    |deriv (fun s => iteratedDeriv k (fun t =>
-      LocalizedMomentRepair.coefficients c.exponents c.lower c.upper (debt c amp s) j *
-        LocalizedMomentRepair.bump (c.lower j) (c.upper j) (Real.exp t)) y) eta| ≤
-      (2 * correctionJetBound c.P c.m k) * Real.exp (-(1 / (4 * c.lam))) * (1 + |amp'|) := by
-  have heq : (fun s => iteratedDeriv k (fun t =>
-      LocalizedMomentRepair.coefficients c.exponents c.lower c.upper (debt c amp s) j *
-        LocalizedMomentRepair.bump (c.lower j) (c.upper j) (Real.exp t)) y) =
-      (fun s => LocalizedMomentRepair.coefficients c.exponents c.lower c.upper (debt c amp s) j *
-        iteratedDeriv k logTemplate (y - center c j)) := by
-    funext s
-    rw [individual_correction_jet_formula, debt_eq_affine]
-    rfl
-  rw [heq, ((pulse_coefficients_hasDerivAt c ha j).mul_const
-    (iteratedDeriv k logTemplate (y - center c j))).deriv, abs_mul]
-  have hq : |1 + 3 * eta ^ 2| ≤ 4 := by
-    simpa only [(parameterPolynomial_hasDerivAt eta).deriv] using parameterPolynomial_derivative_bound heta
-  have hc := affineCoefficients_exp_bound c hsmall (1 + 3 * eta ^ 2) amp' j
-  have hp : 0 ≤ coefficientBound c.P c.m * Real.exp (-(1 / (4 * c.lam))) *
-      (|1 + 3 * eta ^ 2| + |amp'|) := by
-    have hP := coefficientBound_pos c.P_pos c.m
-    positivity
-  have h := mul_le_mul hc (logTemplate_jet_le k (y - center c j)) (abs_nonneg _) hp
-  refine h.trans ?_
-  have hfac := mul_le_mul_of_nonneg_left
-    (show |1 + 3 * eta ^ 2| + |amp'| ≤ 4 * (1 + |amp'|) by linarith [abs_nonneg amp'])
-    (mul_nonneg (mul_nonneg (coefficientBound_pos c.P_pos c.m).le
-      (Real.exp_pos (-(1 / (4 * c.lam)))).le)
-      (templateJetBound_pos k).le)
-  unfold correctionJetBound
-  convert! hfac using 1 <;> ring
 
-/-- One constant controls the two prefix estimates and the first parameter
-derivative for the exact family specified in the manuscript. -/
-theorem paper_prefix_bounds (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (lam : ℝ) (hlam : 0 < lam) (hsmall : lam ≤ 1 / 120),
-      let c := paperParameters P m lam hP hm hlam (by linarith)
-      pulseAmplitude c ≤ C * lam ^ 30 ∧
-        ∀ (amp : ℝ → ℝ) (eta : ℝ), |eta| ≤ 1 →
-          |massMoment c amp eta c.pulseStart /
-            (Real.exp c.pulseStart * angular c.P c.dropLength c.lam (c.pulseStart, eta))| ≤ C * lam ^ 29 ∧
-          |deriv (fun t => massMoment c amp t c.pulseStart /
-            (Real.exp c.pulseStart * angular c.P c.dropLength c.lam (c.pulseStart, t))) eta| ≤ C * lam ^ 29 := by
-  let C := P * Real.exp (Real.exp m + 12) + 4 * prefixBound P m 0
-  have hb := prefixBound_pos hP m 0
-  have he : 0 < P * Real.exp (Real.exp m + 12) := mul_pos hP (Real.exp_pos _)
-  refine ⟨C, by dsimp [C]; positivity, ?_⟩
-  intro lam hlam hsmall
-  let c := paperParameters P m lam hP hm hlam (by linarith)
-  change pulseAmplitude c ≤ C * lam ^ 30 ∧ _
-  have hwait : c.wait = 60 * Real.log (1 / c.lam) := rfl
-  have hl : c.lam ≤ 1 / 120 := hsmall
-  constructor
-  · have h := pulseAmplitude_small c hwait
-    refine h.trans ?_
-    apply mul_le_mul_of_nonneg_right _ (pow_nonneg hlam.le _)
-    dsimp [C, c, paperParameters]
-    linarith
-  · intro amp eta heta
-    constructor
-    · refine (normalized_mass_prefix_small c hwait hl amp heta).trans ?_
-      apply mul_le_mul_of_nonneg_right _ (pow_nonneg hlam.le _)
-      change 2 * prefixBound P m 0 ≤ C
-      dsimp [C]
-      linarith
-    · refine (normalized_mass_prefix_derivative_small c hwait hl amp heta).trans ?_
-      apply mul_le_mul_of_nonneg_right _ (pow_nonneg hlam.le _)
-      change 4 * prefixBound P m 0 ≤ C
-      dsimp [C]
-      linarith
 
-/-- For every fixed radial derivative order there is a single constant independent
-of `lam`, the amplitude function, the parameter, and the radial coordinate. -/
-theorem paper_correction_bounds (P m : ℝ) (hP : 0 < P) (hm : 0 < m) (k : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (lam : ℝ) (hlam : 0 < lam) (hsmall : lam ≤ 1 / 120),
-      let c := paperParameters P m lam hP hm hlam (by linarith)
-      ∀ (amp : ℝ → ℝ) (eta y : ℝ), |eta| ≤ 1 →
-        |correctionJet c amp k eta y| ≤ C * Real.exp (-(1 / (4 * lam))) * (1 + |amp eta|) ∧
-        ∀ amp' : ℝ, HasDerivAt amp amp' eta →
-          |deriv (fun t => correctionJet c amp k t y) eta| ≤
-            C * Real.exp (-(1 / (4 * lam))) * (1 + |amp'|) := by
-  refine ⟨4 * correctionJetBound P m k, mul_pos (by norm_num) (correctionJetBound_pos hP m k), ?_⟩
-  intro lam hlam hsmall
-  let c := paperParameters P m lam hP hm hlam (by linarith)
-  dsimp only
-  intro amp eta y heta
-  constructor
-  · have h := correctionJet_bound c hsmall amp k heta y
-    refine h.trans ?_
-    apply mul_le_mul_of_nonneg_right _ (by positivity)
-    apply mul_le_mul_of_nonneg_right _ (Real.exp_pos _).le
-    change 2 * correctionJetBound P m k ≤ 4 * correctionJetBound P m k
-    linarith [correctionJetBound_pos hP m k]
-  · intro amp' ha
-    exact correctionJet_eta_bound c hsmall ha heta k y
 
 end NavierStokes.OutgoingPulseBounds

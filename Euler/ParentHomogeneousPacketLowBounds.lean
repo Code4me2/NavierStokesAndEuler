@@ -44,24 +44,6 @@ def HomogeneousSourceErrors (ev ep : ℝ) : Prop :=
         ((A.transverseData m hm J support hSupport).normal.field t (E.inverse.normalized t x))
         (canonicalVelocity (A.transverseData m hm J support hSupport) ξ t (E.inverse.normalized t x))‖ ≤ ep
 
-/-- The literal strict errors returned by the global same-Q packet
-theorem imply the error record without any additional analytic bound. -/
-theorem homogeneousSourceErrors_of_global (ev ep : ℝ)
-    (herr : ∀ (t : Icc (0 : ℝ) A.T) (x : Space),
-      ‖fderiv ℝ (A.normalizedPacketVelocity m hm J support hSupport B residual k E.inverse t) x-
-        ((δ*hchild)*deriv (profile δ) (k*⟪m,E.inverse.normalized t x⟫_ℝ)) •
-          rankOne ℝ (canonicalVelocity (A.transverseData m hm J support hSupport) ξ t (E.inverse.normalized t x))
-            ((A.transverseData m hm J support hSupport).normal.field t (E.inverse.normalized t x))‖ < ev ∧
-      ‖fderiv ℝ (gradient (A.normalizedPacketPressure m hm J support hSupport B residual k E.inverse t)) x-
-        (EulerPacketForwardShear.pressureCoefficient (A.transverseData m hm J support hSupport) ξ (δ*hchild) t
-            (E.inverse.normalized t x)*deriv (profile δ) (k*⟪m,E.inverse.normalized t x⟫_ℝ)) •
-          rankOne ℝ ((A.transverseData m hm J support hSupport).normal.field t (E.inverse.normalized t x))
-            ((A.transverseData m hm J support hSupport).normal.field t (E.inverse.normalized t x))‖ < ep) :
-    E.HomogeneousSourceErrors m hm J support hSupport B residual k δ hchild ξ ev ep := by
-  intro t x
-  refine ⟨(herr t x).1.le,?_⟩
-  erw [forwardPressureTerm_eq_coefficient]
-  exact (herr t x).2.le
 
 include hk hδ hδ1 hhchild in
 theorem exactHomogeneousPacket_low_bounds

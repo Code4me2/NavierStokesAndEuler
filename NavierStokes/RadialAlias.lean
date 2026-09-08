@@ -211,17 +211,6 @@ theorem wholeAlias_sourceJet [CompleteSpace F] {a b M : ℝ} {v Y : E}
       rw [hr p (Nat.lt_succ_self p), ← sourceJet_succ] at hstep
       rw [hp, hstep, smul_smul, ← pow_succ]
 
-/-- The manuscript's literal `∂u^p J^p` form, with the sign displayed. -/
-theorem wholeAlias_inverse_iterate [CompleteSpace F] {a b M : ℝ} {v Y : E}
-    (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ) (hM : M ≠ 0)
-    (hcomm : Function.Commute slowDeriv J)
-    (hJ : ∀ n < p, ContDiff ℝ 1 (J (sourceJet J f n)))
-    (hs : ∀ n < p, RadiallySupported a b (J (sourceJet J f n)))
-    (hr : ∀ n < p, directionalDeriv v (J (sourceJet J f n)) = sourceJet J f n) :
-    wholeAlias M v Y f = (-M⁻¹) ^ p •
-      wholeAlias M v Y (slowDeriv^[p] (J^[p] f)) := by
-  rw [← sourceJet_eq_deriv_inverse_iterate J f p hcomm]
-  exact wholeAlias_sourceJet J f p hM hJ hs hr
 
 theorem sourceJet_continuous
     (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
@@ -255,21 +244,5 @@ theorem wholeAlias_norm_le {a b M C : ℝ} {v Y : E} {f : ℝ × E → F}
     simpa only [uIcc_of_le hab] using uIoc_subset_uIcc hu
   exact hbound u hu' _
 
-/-- The all-order gain has a constant uniform in the translation parameter Y
-and in M whenever the last source-jet bound is uniform. -/
-theorem wholeAlias_sourceJet_norm_le [CompleteSpace F] {a b M C : ℝ} {v Y : E}
-    (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
-    (hab : a ≤ b) (hM : M ≠ 0) (hf : Continuous f) (hfs : RadiallySupported a b f)
-    (hJ : ∀ n < p, ContDiff ℝ 1 (J (sourceJet J f n)))
-    (hs : ∀ n < p, RadiallySupported a b (J (sourceJet J f n)))
-    (hr : ∀ n < p, directionalDeriv v (J (sourceJet J f n)) = sourceJet J f n)
-    (hbound : ∀ u ∈ Icc a b, ∀ Z : E, ‖sourceJet J f p (u, Z)‖ ≤ C) :
-    ‖wholeAlias M v Y f‖ ≤ (|M|⁻¹) ^ p * (C * |b - a|) := by
-  rw [wholeAlias_sourceJet J f p hM hJ hs hr, norm_smul, Real.norm_eq_abs,
-    abs_pow, abs_neg, abs_inv]
-  exact mul_le_mul_of_nonneg_left
-    (wholeAlias_norm_le hab (sourceJet_continuous J f p hf hJ)
-      (sourceJet_radiallySupported J f p hfs hs) hbound)
-    (pow_nonneg (inv_nonneg.mpr (abs_nonneg M)) p)
 
 end NavierStokes.RadialAlias

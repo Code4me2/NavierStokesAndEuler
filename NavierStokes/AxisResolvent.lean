@@ -388,12 +388,6 @@ theorem axisLinearOperator_pow_bound (I : Window) {ε : ℝ} (hε : 0 < ε)
     simpa only [radialDivisor, Nat.cast_ofNat] using
       axisLinearOperator_bound_on_order I hε χ Q hQ k A hA
 
-theorem axisLinearOperator_resolvent_equation (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) (Q : AxisSpace I ε →L[ℝ] AxisSpace I ε)
-    (hQ : IsAxisLinearOperator I ε χ Q) (A : AxisSpace I ε) :
-    alternatingResolvent Q A + Q (alternatingResolvent Q A) = A :=
-  alternatingResolvent_equation Q (by positivity)
-    (axisLinearOperator_pow_bound I hε χ Q hQ) A
 
 /-- The exact bounded operator in the natural angular equation. -/
 def naturalOperator (I : Window) {ε : ℝ} (hε : 0 < ε) (χ : AxisSpace I ε) :
@@ -431,51 +425,18 @@ theorem naturalOperator_pow_bound (I : Window) {ε : ℝ} (hε : 0 < ε)
 def naturalResolvent (I : Window) {ε : ℝ} (hε : 0 < ε) (χ : AxisSpace I ε) :
     AxisSpace I ε →L[ℝ] AxisSpace I ε := alternatingResolvent (naturalOperator I hε χ)
 
-theorem naturalResolvent_hasSum (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) :
-    HasSum (fun k : ℕ => (-naturalOperator I hε χ) ^ k) (naturalResolvent I hε χ) :=
-  hasSum_alternatingResolvent _ (by positivity) (naturalOperator_pow_bound I hε χ)
 
-theorem naturalResolvent_norm_le (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) :
-    ‖naturalResolvent I hε χ‖ ≤ ∑' k : ℕ, factorialMajorant (2560 * ‖χ‖) k :=
-  norm_alternatingResolvent_le _ (by positivity) (naturalOperator_pow_bound I hε χ)
 
-theorem one_add_mul_naturalResolvent (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) :
-    (1 + naturalOperator I hε χ) * naturalResolvent I hε χ = 1 :=
-  one_add_mul_alternatingResolvent _ (by positivity) (naturalOperator_pow_bound I hε χ)
 
-theorem naturalResolvent_mul_one_add (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) :
-    naturalResolvent I hε χ * (1 + naturalOperator I hε χ) = 1 :=
-  alternatingResolvent_mul_one_add _ (by positivity) (naturalOperator_pow_bound I hε χ)
 
-theorem one_add_apply_naturalResolvent (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ A : AxisSpace I ε) :
-    (1 + naturalOperator I hε χ) (naturalResolvent I hε χ A) = A :=
-  one_add_apply_alternatingResolvent _ (by positivity) (naturalOperator_pow_bound I hε χ) A
 
-theorem naturalResolvent_apply_one_add (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ A : AxisSpace I ε) :
-    naturalResolvent I hε χ ((1 + naturalOperator I hε χ) A) = A :=
-  alternatingResolvent_apply_one_add _ (by positivity) (naturalOperator_pow_bound I hε χ) A
 
 theorem naturalResolvent_equation (I : Window) {ε : ℝ} (hε : 0 < ε)
     (χ A : AxisSpace I ε) :
     naturalResolvent I hε χ A + naturalOperator I hε χ (naturalResolvent I hε χ A) = A :=
   alternatingResolvent_equation _ (by positivity) (naturalOperator_pow_bound I hε χ) A
 
-theorem naturalResolvent_unique (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) {A b : AxisSpace I ε}
-    (hA : A + naturalOperator I hε χ A = b) : A = naturalResolvent I hε χ b :=
-  alternatingResolvent_unique _ (by positivity) (naturalOperator_pow_bound I hε χ) hA
 
-/-- In particular, the reference angular profile is obtained by applying this
-map to the constant coefficient representing `1`. -/
-def naturalEquationEquiv (I : Window) {ε : ℝ} (hε : 0 < ε) (χ : AxisSpace I ε) :
-    AxisSpace I ε ≃L[ℝ] AxisSpace I ε :=
-  oneAddEquiv _ (by positivity) (naturalOperator_pow_bound I hε χ)
 
 end AxisOperators
 

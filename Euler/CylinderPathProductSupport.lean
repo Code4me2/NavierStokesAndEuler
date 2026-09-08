@@ -43,43 +43,8 @@ theorem scalarProductPath_supported_left (L : Space →L[ℝ] ℝ) (hL : ‖L‖
     with x hz hr hrep hx
   rw [hr, ← hrep, hz hx, map_zero, zero_smul]
 
-theorem scalarProductPath_supported_right (L : Space →L[ℝ] ℝ) (hL : ‖L‖ ≤ 1)
-    (hs : ∀ t, q t ∈ Supported P Space S hS) (t : K) :
-    scalarProductPath P L hL p q hp hq t ∈ Supported P Space S hS := by
-  apply (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) _).mpr
-  have hzero := (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) (q t)).mp (hs t)
-  filter_upwards [hzero,scalarProductPath_ae P L hL p q hp hq t,pointField_ae P q hq t]
-    with x hz hr hrep hx
-  rw [hr, ← hrep, hz hx, smul_zero]
 
-theorem bilinearProductPath_supported_left (B : Space →L[ℝ] Space →L[ℝ] Space)
-    (hs : ∀ t, p t ∈ Supported P Space S hS) (t : K) :
-    bilinearProductPath P B p q hp hq t ∈ Supported P Space S hS := by
-  apply (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) _).mpr
-  have hzero := (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) (p t)).mp (hs t)
-  filter_upwards [hzero,bilinearProductPath_ae P B p q hp hq t,pointField_ae P p hp t]
-    with x hz hr hrep hx
-  rw [hr, ← hrep, hz hx, map_zero, zero_apply]
 
-theorem scalarDerivativeProductPath_supported (L : Space →L[ℝ] ℝ) (hL : ‖L‖ ≤ 1)
-    (hs : ∀ t, p t ∈ Supported P Space S hS) (i : Fin 4) (t : K) :
-    scalarDerivativeProductPath P L hL p q hp hq i t ∈ Supported P Space S hS :=
-  scalarProductPath_supported_left P S hS p (derivativePath P q i) hp
-    (derivativePath_orbit P q hq i) L hL hs t
 
-theorem advectionPath_supported (hs : ∀ t, p t ∈ Supported P Space S hS) (t : K) :
-    advectionPath P p q hp hq t ∈ Supported P Space S hS := by
-  apply (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) _).mpr
-  have hzero := (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) (p t)).mp (hs t)
-  filter_upwards [hzero,advectionPath_ae P p q hp hq t,pointField_ae P p hp t]
-    with x hz hr hrep hx
-  rw [hr, ← hrep, hz hx]
-  exact map_zero _
 
 end EulerCylinderPathProduct

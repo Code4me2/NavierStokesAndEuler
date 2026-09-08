@@ -30,17 +30,6 @@ theorem continuous_slice {F : ℝ × Space → E} {s : Set ℝ}
   exact hF.comp_continuous (continuous_const.prodMk continuous_id)
     (fun _ => ⟨ht, mem_univ _⟩)
 
-/-- A continuous spatial slice supported in a fixed compact set is integrable. -/
-theorem integrable_slice {F : ℝ × Space → E} {s : Set ℝ} {K : Set Space}
-    (hK : IsCompact K) (hF : ContinuousOn F (s ×ˢ univ))
-    (hsupp : ∀ t ∈ s, ∀ x ∉ K, F (t, x) = 0) {t : ℝ} (ht : t ∈ s) :
-    Integrable (fun x : Space => F (t, x)) := by
-  have hsupport : Function.support (fun x : Space => F (t, x)) ⊆ K := by
-    intro x hx
-    by_contra hxK
-    exact hx (hsupp t ht x hxK)
-  exact (integrableOn_iff_integrable_of_support_subset hsupport).mp
-    ((continuous_slice hF ht).continuousOn.integrableOn_compact hK)
 
 variable [NormedSpace ℝ E]
 
@@ -144,14 +133,6 @@ theorem continuousOn_timeDeriv_of_contDiffOn {F : ℝ × Space → E} {a b : ℝ
   intro p hp
   exact (hasDerivAt_time_of_contDiffOn hF hp.1 p.2).deriv
 
-/-- A jointly C¹ field with uniform compact spatial support has a continuous
-ordinary spatial integral throughout the closed time slab. -/
-theorem continuousOn_integral_of_contDiffOn {F : ℝ × Space → E}
-    {a b : ℝ} {K : Set Space} (hK : IsCompact K)
-    (hF : ContDiffOn ℝ 1 F (Icc a b ×ˢ univ))
-    (hsupp : ∀ t ∈ Icc a b, ∀ x ∉ K, F (t, x) = 0) :
-    ContinuousOn (fun t => ∫ x : Space, F (t, x)) (Icc a b) :=
-  continuousOn_integral hK hF.continuousOn hsupp
 
 /-- At interior times, the derivative of the ordinary spatial integral is
 the integral of the ordinary time derivative. -/

@@ -86,28 +86,9 @@ def forwardPrimaryRegularity (O : Operators) (hcorrector : O.curlCorrector = D.c
     ProfileRegularity period D.T D.T_pos.le D.support (forwardPrimary D δ hδ ξ hs O) :=
   EulerPacketForwardPrimary.regularity D (initialData D δ hδ ξ hs) O hcorrector
 
-theorem forwardPrimary_equation (O : Operators) (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    linearPart (D.strain (t,(x,θ)))
-        (slicedJet (Icc (0 : ℝ) D.T) (forwardPrimary D δ hδ ξ hs O).high (t,(x,θ)))+
-      fastPressure (D.normalField (t,(x,θ)))
-        (pressureJet (forwardPrimary D δ hδ ξ hs O).highPressure (t,(x,θ))) = 0 :=
-  EulerPacketForwardPrimary.equation D (initialData D δ hδ ξ hs) t x θ
 
-theorem forwardPrimary_tangent (O : Operators) (t : ℝ) (x : Space) (θ : ℝ) :
-    inner ℝ (D.normalField (t,(x,θ))) ((forwardPrimary D δ hδ ξ hs O).high (t,(x,θ))) = 0 :=
-  EulerPacketForwardPrimary.tangent D (initialData D δ hδ ξ hs) t x θ
 
-theorem forwardPrimary_mean_zero (O : Operators) (t : ℝ) (x : Space) :
-    (∫ θ in (0 : ℝ)..period, (forwardPrimary D δ hδ ξ hs O).high (t,(x,θ))) = 0 :=
-  EulerPacketForwardPrimary.mean_zero D (initialData D δ hδ ξ hs) t x
 
-theorem forwardPrimary_parity (O : Operators) (hcorrector : O.curlCorrector = D.curlCorrector period)
-    (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hM : ∀ t x, D.M.field t (-x) = D.M.field t x) :
-    ProfileParity D.T (forwardPrimary D δ hδ ξ hs O) :=
-  EulerPacketForwardPrimary.parity D (initialData D δ hδ ξ hs) O hcorrector hSym hF hM
-    (terminal_reflection δ hδ ξ)
 
 theorem forwardPrimary_initial (O : Operators) (x : Space) (θ : ℝ) :
     (forwardPrimary D δ hδ ξ hs O).high (0,(x,θ)) =
@@ -129,10 +110,5 @@ theorem forwardPrimary_initial_angular (O : Operators) (x : Space) :
   rw [profile_deriv_zero δ hδ] at hp
   exact (hp.const_mul (innerCutoff x)).smul_const (D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ x ξ)
 
-theorem forwardPrimary_initial_angular_norm (O : Operators) :
-    ‖deriv (fun θ : ℝ => (forwardPrimary D δ hδ ξ hs O).high (0,(0,θ))) 0‖ =
-      δ⁻¹*‖D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ 0 ξ‖ := by
-  rw [(forwardPrimary_initial_angular D δ hδ ξ hs O 0).deriv,innerCutoff_zero,one_mul,
-    norm_smul,Real.norm_eq_abs,abs_of_pos (inv_pos.mpr hδ)]
 
 end EulerPacketTerminalDatum

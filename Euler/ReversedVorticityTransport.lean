@@ -40,17 +40,5 @@ theorem vorticity_ne_zero_along_reverse_trajectory
   apply hne
   simpa only [sub_self] using he
 
-/-- A path for a modified reverse-time velocity has the same nonzero
-vorticity transport whenever that velocity agrees with Euler along the path. -/
-theorem vorticity_ne_zero_along_reverse_trajectory_of_agrees
-    (X : ℝ → Space) (w : ℝ → Space → Space) (T : ℝ) (hT : 0 ≤ T)
-    (hX : ContinuousOn X (Icc 0 T))
-    (hXd : ∀ s ∈ Ioo 0 T, HasDerivAt X (-w s (X s)) s)
-    (hw : ∀ s ∈ Ioo 0 T, w s (X s) = v (X s) (T - s))
-    (hne : vectorCurl (v · T) (X 0) ≠ 0) :
-    vectorCurl (v · 0) (X T) ≠ 0 := by
-  apply h.vorticity_ne_zero_along_reverse_trajectory X T hT hX _ hne
-  intro s hs
-  simpa only [hw s hs] using hXd s hs
 
 end Euler.EulerExistenceAndSmoothnessR3

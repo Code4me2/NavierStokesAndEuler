@@ -579,17 +579,6 @@ theorem initialPressureIncrement_bound (W : PhysicalStageBounds.WaveData h D I K
     (W.pressure_smooth hh hh1).mono inter_subset_left
   exact add_bounds hh hh1 sw (M.field_smooth hh hh1 hq) hw hm
 
-theorem initialPressureIncrement_rate (W : PhysicalStageBounds.WaveData h D I K Unit)
-    (M : MeanInput h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig : ℝ} (hqbig : 0 < qbig)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) (m : ℕ) :
-    JetRate ActualBaseVelocityBounds.endpoint (PhysicalWaveSum.physicalQ h)
-      (initialPressureIncrement W M) m (-initialPressureLoss h W.alpha W.shift M.alpha m) := by
-  obtain ⟨C, hC, hb⟩ := initialPressureIncrement_bound W M hh hh1 hq m
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [InitializedPhysicalBackground.endpoint_sublevel hh hh1 hqbig,
-    ActualBaseVelocityBounds.endpoint_q_small hh hh1] with w hw hqw
-  exact hb w hw hqw.2
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem initialDirect_rate (MB : MeanInput h (CoordinateAlgebra.A h))
@@ -792,43 +781,6 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
   {DP DS : Type} [NormedAddCommGroup DP] [NormedSpace ℝ DP]
   [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
 
-/-- Quantitative bounds for the actual MCA/MAS indexing convention.
-The remaining representations concern the literal component fields. -/
-theorem candidate_raw_bounds
-    (Cyc : CycleInputs F.data.h DP IP KP DS IS KS) {κ qbig : ℝ}
-    (HM : Cyc.Metadata κ) (HQ : Cyc.ValidScale qbig) (hκ : κ ≤ 1 / 100000)
-    (upper : ℝ) (bandFloor : ℕ)
-    (initial : MixedAxisPreservation.PotentialStage.{u} F.data.h
-      (MixedAxisPreservation.localDomain F.data.h qbig))
-    (stages : ℕ → MixedAxisPreservation.PotentialStage.{u} F.data.h
-      (MixedAxisPreservation.localDomain F.data.h qbig))
-    (angular : ℕ → DirectAngularDiagonal.AngularData (LocalAngularDiagonal.localSlowDomain F.data.h qbig))
-    (pInitial : PressureField) (pStages : ℕ → PressureField)
-    (hA : ∀ k, EqOn (Cyc.potential k) (stages k).field (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (hB : ∀ k, EqOn (Cyc.direct k) (LocalAngularDiagonal.rawSeries angular (k + 1))
-      (CutStageEstimates.physicalSublevel F.data.h qbig))
-    (hP : ∀ k, EqOn (Cyc.pressureField k) (pStages k) (CutStageEstimates.physicalSublevel F.data.h qbig)) :
-    ∃ CA CB CP : ℕ → ℕ → ℝ,
-      (∀ j m, 0 ≤ CA j m ∧ 0 ≤ CB j m ∧ 0 ≤ CP j m) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ F.data.h)
-        (MixedCandidateAssembly.potentialStages H v upper bandFloor initial stages)
-        (ActualIterationLedger.gain F.data.h) (PhysicalStageBounds.potentialLoss F.data.h F.data.h 0)
-        CA (fun _ _ => 0) (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel F.data.h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ F.data.h)
-        (LocalAngularDiagonal.rawSeries angular) (ActualIterationLedger.gain F.data.h)
-        (PhysicalStageBounds.directLoss F.data.h 0) CB (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel F.data.h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ F.data.h)
-        (MixedCandidateAssembly.pressureStages H v upper bandFloor pInitial pStages)
-        (ActualIterationLedger.gain F.data.h)
-        (PhysicalStageBounds.pressureLoss F.data.h (2 * CoordinateAlgebra.A F.data.h) 0)
-        CP (fun _ _ => 0) (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel F.data.h qbig) := by
-  apply Cyc.represented_raw_bounds HM HQ F.data.h_pos F.data.h_lt_half hκ
-  · intro k
-    simpa only [MixedCandidateAssembly.potentialStages, MixedAxisPreservation.initializedSeries_succ] using hA k
-  · exact hB
-  · intro k
-    simpa only [MixedCandidateAssembly.pressureStages_succ] using hP k
 
 end CandidateSequences
 
@@ -877,22 +829,6 @@ noncomputable def actualInitialPressureInput (B N0 N : ℕ) (hN : 4 ≤ N) :
 @[simp] theorem actualInitialPressureInput_family (B N0 N : ℕ) (hN : 4 ≤ N) :
     (actualInitialPressureInput B N0 N hN).family = initialPressureFamily B N0 N := rfl
 
-/-- The actual initialized velocity, with its actual initial temporal,
-rank, and direct angular families. Only the primary wave representation
-is supplied by the separate physical-copy construction. -/
-theorem actualInitialVelocity_rate
-    {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
-    (B N0 N : ℕ) (hN : 4 ≤ N) (WA : PhysicalStageBounds.WaveData h D I K (Fin 3)) (m : ℕ) :
-    JetRate ActualBaseVelocityBounds.endpoint (PhysicalWaveSum.physicalQ h)
-      (initialVelocity certificate modulation upper B WA
-        (actualInitialTemporalInput B N0 N hN) (actualInitialRankInput B N0 N hN)
-        (actualInitialAngularInput B N0 N hN)) m
-      (-initialLoss h WA.alpha WA.shift (1 - ChartScales.kappa) (9 / 10) m) := by
-  simpa only [actualInitialTemporalInput, actualInitialRankInput, actualInitialAngularInput,
-    MeanInput.ofMoving, min_self] using
-    initialVelocity_rate certificate modulation upper B WA
-      (actualInitialTemporalInput B N0 N hN) (actualInitialRankInput B N0 N hN)
-      (actualInitialAngularInput B N0 N hN) m
 
 variable {B N0 N : ℕ} {p : ℕ → CycleParameters (ActualInitialization.Index B N0)}
 

@@ -525,28 +525,6 @@ theorem nativeMap_polar_mem_iff (n : ℕ) (a : ℝ) (i : PolarCharts.Index) (w :
     PhysicalResidualBridge.ScaledGraph.map, PhysicalCurlCovariance.polarCoordinates,
     AxisymmetricResidual.pack_two, nativePoint, cylinderPoint]
 
-theorem localModes_contDiffAt_of_current_source (x : CycleState (Label B N0))
-    (hx : ActualParticularStageControls.PreservesCarriers x)
-    (hs : ActualParticularStageControls.InputSupport x)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    {α : ℝ} (j : ℤ) (hj : j ≠ 0)
-    (H : LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip ActualParticularStageControls.slowStrip))
-      ActualParticularStageControls.nativeEnvelope α (ActualParticularStageControls.currentSource x j))
-    (l : Label B N0) (hz : RawBoundaryZero x l j) (n : ℕ)
-    {a : ℝ} (ha : 0 < a) (i : PolarCharts.Index) {w : SpaceTime}
-    (hw : w ∈ ActualMeanPotentialRealization.cartesianDomain a i)
-    (hm : nativePoint n w ∈ nativeDomain) :
-    ContDiffAt ℝ ∞ (localPotentialMode x l j n) w ∧
-      ContDiffAt ℝ ∞ (localPressureMode x l j n) w := by
-  have hh := native_smooth_of_current_source x hx hs hN j hj H l hz n
-  have hm' := (nativeMap_polar_mem_iff n a i w).mpr hm
-  exact ⟨localPotentialMode_contDiffAt_of_native x l j
-      (ActualParticularStageControls.preserves_frequency hx l) n ha i hw
-      (hh.1.contDiffAt (nativeDomain_open.mem_nhds hm')),
-    localPressureMode_contDiffAt_of_native x l j
-      (ActualParticularStageControls.preserves_frequency hx l) n ha i hw
-      (hh.2.contDiffAt (nativeDomain_open.mem_nhds hm'))⟩
 
 /-! The literal cycle input discharges the raw endpoint condition. -/
 

@@ -38,21 +38,5 @@ def Budget.restrict {q : ℕ} {T S : ℝ} {hq : 6 ≤ q+1}
   drift_nonneg := B.drift_nonneg
   drift_bound t := B.drift_bound (timeInclusion hTS t)
 
-/-- Only the correction field uses the coarse drift-to-velocity comparison. -/
-theorem Budget.total_drift_bound {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
-    {D : CorrectionData period (q+1) (Icc (0 : ℝ) T)}
-    {N : ℕ} {R : C(Icc (0 : ℝ) T, ℝ)}
-    (B : Budget period hq D N R) (hN : N+6 ≤ (q+1)+1)
-    (t : Icc (0 : ℝ) T) (e : SobolevSpace period ((q+1)+1)) :
-    weightedDriftNorm period 6 N (R t)
-        (velocityMap (velocityComponents D.κ D.direction)) (D.approximation t+e) ≤
-      4 * (B.drift + weightedNorm period 6 N (R t) e) := by
-  have he := weightedDriftNorm_velocityMap_le period 6 N (R t) (B.full.radius_pos t)
-    (velocityComponents D.κ D.direction)
-    (velocityComponents_norm D.κ D.direction D.scale_bound D.direction_bound) e
-  have h := (weightedDriftNorm_add_le period 6 N hN (R t) (B.full.radius_pos t)
-    (velocityMap (velocityComponents D.κ D.direction)) (D.approximation t) e).trans
-    (add_le_add (B.drift_bound t) he)
-  nlinarith only [h, B.drift_nonneg]
 
 end EulerDriftCorrectionBudget

@@ -111,21 +111,5 @@ theorem spatial_gevrey_bounds :
     R CF CF₁ 1 1 hR0 hCF hCF₁ zero_le_one zero_le_one (d+2) hFR hF₁R hvb'
     (by simpa only [one_mul] using hab) n a
 
-include hc hLower hF hF₁ hv hf hRc hR hRcR hCF hCF₁ hCf hstrong hFb hF₁b hfb hvb in
-/-- The actual continuous-time velocity has the same fixed factorial radius. -/
-theorem continuousVelocity_spatial_gevrey (hTpos : 0 < T) (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => pathTranslation T b s.continuousVelocity) a‖ ≤
-      ((T⁻¹*Real.sqrt T)*(3*CF)+(2*Real.sqrt T)*(3*(CF₁+CF)))*majorant R (d+2) n := by
-  have hb := s.spatial_gevrey_bounds c hc hLower hF hF₁ hv hf Rc R CF CF₁ Cf hRc hR hRcR
-    hCF hCF₁ hCf hstrong hFb hF₁b d hfb hvb
-  have hBb (k b) : ‖iteratedFDeriv ℝ k (fun x : Space => timeTranslation T x s.velocityField) b‖ ≤
-      (3*CF)*majorant R (d+2) k := by
-    have h := (hb.2.1 k b).trans (mul_le_mul_of_nonneg_left (majorant_shift_mono R hR (d+1) k) (by positivity))
-    simpa only [Nat.add_assoc] using h
-  have ha := s.acceleration_orbit_contDiff c hc hLower hF hF₁ hv hf
-  exact s.continuousVelocity_translation_gevrey hTpos (s.velocityField_translation_contDiff hF hv)
-    (s.velocityDerivative_translation_contDiff hF hF₁ hv ha)
-    R (3*CF) (3*(CF₁+CF)) (zero_le_one.trans hR) (by positivity) (by positivity) (d+2)
-    hBb hb.2.2 n a
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

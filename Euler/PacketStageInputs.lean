@@ -90,9 +90,6 @@ theorem joinedInput_frequency : (P.joinedInput hn hq hB).frequencyGuard (frequen
   S.source_frequency n _ (P.joinedInput hn hq hB).parameterSize_one
     (P.joinedInput_parameterSize hn hq hB)
 
-theorem joinedInput_targetTime :
-    ((P.joinedInput hn hq hB).geometry.lowGeometry (P.joinedInput hn hq hB).halfBall).targetTime=P.nextTime :=
-  P.joinedGeometry_targetTime hn hq hB
 
 theorem joinedInput_sigma_bound :
     (P.joinedInput hn hq hB).frame.sigma*scaleSequence S.J S.X n ≤ 2 := by
@@ -153,14 +150,7 @@ theorem forwardInput_parameterSize : (P.forwardInput hq hB).parameterSize ≤ en
 theorem forwardInput_frequency : (P.forwardInput hq hB).frequencyGuard (frequency S.J S.X 0) :=
   S.source_frequency 0 _ (P.forwardInput hq hB).parameterSize_one (P.forwardInput_parameterSize hq hB)
 
-theorem forwardInput_targetTime :
-    ((P.forwardInput hq hB).geometry.lowGeometry (P.forwardInput hq hB).halfBall).targetTime=P.nextTime :=
-  P.forwardGeometry_targetTime hq hB
 
-theorem forwardInput_sigma_bound : (P.forwardInput hq hB).frame.sigma*scaleSequence S.J S.X 0 ≤ 2 := by
-  change P.forwardFrame.sigma*scaleSequence S.J S.X 0 ≤ 2
-  rw [P.forwardFrame_sigma]
-  exact P.normalized_sigma
 
 theorem forwardInput_scale : (P.forwardInput hq hB).parent.ell=supportScale S.J S.X 0 := P.scale_eq
 

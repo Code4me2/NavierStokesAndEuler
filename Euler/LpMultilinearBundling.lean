@@ -42,10 +42,5 @@ theorem multilinearBundling_apply_norm_le (D : Lp (P [×n]→L[ℝ] V) 2 μ) :
   rw [hx, mul_comm]
   exact (D x).le_opNorm v
 
-theorem multilinearBundling_norm_le_one :
-    ‖multilinearBundling (P := P) (V := V) μ n‖ ≤ 1 := by
-  apply (multilinearBundling (P := P) (V := V) μ n).opNorm_le_bound zero_le_one
-  intro D
-  simpa only [one_mul] using multilinearBundling_apply_norm_le μ n D
 
 end EulerLpDerivative

@@ -66,17 +66,6 @@ theorem firstStage_initial_support :
     tsupport (fun x => S.firstStage.state.evolution.velocity (0,x)) ⊆ Metric.closedBall 0 2 :=
   (S.first.packet S.j_one).initial_support
 
-theorem firstStage_initial_compact :
-    HasCompactSupport (fun x => S.firstStage.state.evolution.velocity (0,x)) :=
-  (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _) S.firstStage_initial_support
 
-theorem firstStage_initial_field_support :
-    tsupport (S.firstStage.state.regularity.velocity S.firstStage.parent.zeroTime).field ⊆
-      Metric.closedBall 0 2 := by
-  have he : (S.firstStage.state.regularity.velocity S.firstStage.parent.zeroTime).field=
-      fun x => S.firstStage.state.evolution.velocity (0,x) :=
-    funext (fun x => (S.firstStage.state.regularity.velocity_match S.firstStage.parent.zeroTime x).symm)
-  rw [he]
-  exact S.firstStage_initial_support
 
 end EulerPacketInductionScales.Scales

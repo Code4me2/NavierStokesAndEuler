@@ -444,24 +444,6 @@ theorem axisHistory_localized_sub (W : Window)
   simp_rw [localized_density_difference]
   exact integral_indicator_window W _ hX
 
-theorem actual_axisHistory_jets (W : Window)
-    (r : ParametricModulation.TrueConeRealization a m p₁ p₂ K B) (f E U : Field)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m) (hp₂ : ContDiff ℝ ∞ p₂)
-    (hf : ContDiff ℝ ∞ f) (hE : ContDiff ℝ ∞ E) (hU : ContDiff ℝ ∞ U)
-    (S : Set ℝ) (hS : IsCompact S) (q : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ N : ℝ, 1 ≤ N → ∀ X : ℝ, 0 ≤ X →
-      JetBounds.FiniteJetBound q (fun eta =>
-        axisHistory (localizedF W r f N) (localizedU W r E U N) (X, eta) -
-          axisHistory f U (X, eta)) S (C / N) := by
-  obtain ⟨C, hC, hb⟩ := historyDifference_jets W r f E U ha hm hp₂ hf hE hU S hS q
-  refine ⟨C, hC, ?_⟩
-  intro N hN X hX
-  have he : (fun eta => axisHistory (localizedF W r f N) (localizedU W r E U N) (X, eta) -
-      axisHistory f U (X, eta)) = historyDifference W r f E U N X := by
-    funext eta
-    exact axisHistory_localized_sub W r f E U ha hm hp₂ hf hE hU N X eta hX
-  rw [he]
-  exact hb N hN X
 
 /-! ## A linear finite-jet bound for the actual nonlinear inverse -/
 
@@ -1391,42 +1373,6 @@ theorem repaired_axisHistory_jets (W : Window)
   exact (norm_add_le _ _).trans (add_le_add (hb1 N hN X j hj eta heta)
     (hb2 c hc eps heps hed hcb X j hj eta heta))
 
-/-- An actual smooth correction for every sufficiently large frequency,
-with exact restoration on an open parameter neighborhood. Its debt is the
-integral of the constructed modulation, rather than an assumed small row. -/
-theorem exists_actual_restoring_repair (W : Window)
-    (r : ParametricModulation.TrueConeRealization a m p₁ p₂ K B) (f E U : Field)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m) (hp₂ : ContDiff ℝ ∞ p₂)
-    (hf : ContDiff ℝ ∞ f) (hE : ContDiff ℝ ∞ E) (hU : ContDiff ℝ ∞ U)
-    (P : FiveProfileMoments.Patch) (hWP : W.right < P.left) (b : ℝ)
-    (hb : FiveProfileMoments.GoodExponent b) (A G : ℝ → ℝ)
-    (hA : ContDiff ℝ ∞ A) (hG : ContDiff ℝ ∞ G) (hApos : ∀ eta, 0 < A eta)
-    (S J : Set ℝ) (hS : IsCompact S) (hJ : IsOpen J) (hSJ : S ⊆ J)
-    (hpatchU : ∀ eta ∈ J, ∀ X ∈ Ioo P.left P.right, U (X, eta) = G eta)
-    (hpatchE : ∀ eta ∈ J, ∀ X ∈ Ioo P.left P.right,
-      Real.sqrt (2 * X) * f (X, eta) = A eta * X ^ b) (q : ℕ) :
-    ∃ N0 C : ℝ, 1 ≤ N0 ∧ 0 < C ∧ ∀ N : ℝ, N0 ≤ N →
-      ∃ (c : ℝ → Coeff) (V : Set ℝ), ContDiff ℝ ∞ c ∧ IsOpen V ∧ S ⊆ V ∧ V ⊆ J ∧
-        JetBounds.FiniteJetBound q c S (C / N) ∧
-        ∀ eta ∈ V, ∀ X : ℝ, P.right ≤ X →
-          axisHistory (applyRepairF P A c (localizedF W r f N))
-            (applyRepairU P A c (localizedU W r E U N)) (X, eta) = axisHistory f U (X, eta) := by
-  obtain ⟨N0, C, hN0, hC, hsolve⟩ := actual_repair_family W r f E U ha hm hp₂ hf hE hU
-    P b hb S hS A G hA hG hApos q
-  refine ⟨N0, C, hN0, hC, ?_⟩
-  intro N hN
-  obtain ⟨c, V, hc, hV, hSV, hmom, hcb⟩ := hsolve N hN
-  refine ⟨c, V ∩ J, hc, hV.inter hJ, fun eta heta => ⟨hSV heta, hSJ heta⟩,
-    inter_subset_right, hcb, ?_⟩
-  intro eta heta X hX
-  exact actual_histories_restored W r f E U ha hm hp₂ hf hE hU P hWP b A G c N eta X hX
-    (hApos eta).ne' (hpatchU eta heta.2) (hpatchE eta heta.2) (hmom eta heta.1).1
 
-theorem profileRows_eq_of_axisHistory_eq {D D' : ProfileHistories.RadialDomain}
-    (P : ProfileHistories.Profiles D) (Q : ProfileHistories.Profiles D')
-    (hP0 : P.pressure0 = Q.pressure0) {p : Point}
-    (h : axisHistory P.f P.U p = axisHistory Q.f Q.U p) : profileRows P p = profileRows Q p := by
-  apply sub_eq_zero.mp
-  rw [profileRows_sub P Q hP0 p, h, sub_self]
 
 end NavierStokes.ModulatedHistories

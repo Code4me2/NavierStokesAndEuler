@@ -465,37 +465,6 @@ theorem exists_ordinary_uncut_tail {a : ℕ → ℕ} {h : ℝ} (hh : 0 < h)
     (mul_le_mul_of_nonneg_left
       (Real.rpow_le_rpow_of_exponent_ge hq hq1 (by simpa using hgain m hm)) (by positivity))
 
-theorem exists_blown_uncut_tail {a : ℕ → ℕ} {h : ℝ} (hh : 0 < h)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j))
-    {K : Set Inner} (ha : AdmissibleScales h f K a) (M Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∃ δ : ℝ, 0 < δ ∧
-      ∀ m ≤ M, ∀ q : ℝ, 0 < q → q < δ → ∀ w ∈ K,
-        ‖blownJet m (fun y => slowSum a h f y - uncutPrefix h f J y) (q, w)‖ ≤
-          (1 / 2 : ℝ) ^ J * q ^ P := by
-  have htop : Tendsto (fun j : ℕ => h * j) atTop atTop :=
-    tendsto_natCast_atTop_atTop.const_mul_atTop hh
-  obtain ⟨J, hJmin, hJM, hgain⟩ :=
-    DiagonalJetBounds.exists_prefix_gain (fun j => h * j) (fun _ => 0) htop M Jmin P
-  obtain ⟨δ, hδ, hprefix⟩ := cutPrefix_eventually_uncut a h f J
-  refine ⟨J, hJmin, hJM, min δ 1, lt_min hδ (by norm_num), ?_⟩
-  intro m hm q hq hsmall w hw
-  have hq1 : q ≤ 1 := (hsmall.trans_le (min_le_right _ _)).le
-  have hp := hprefix (q, w) (by simpa only [abs_of_pos hq] using
-    (hsmall.trans_le (min_le_left _ _)))
-  have hmap : scaleMap q (1, w) = (q, w) := by simp
-  have ht : Tendsto (scaleMap q) (𝓝 (1, w)) (𝓝 (q, w)) := by
-    rw [← hmap]
-    exact (scaleMap q).continuous.continuousAt
-  have hdiff : (fun y => slowSum a h f y - cutPrefix a h f J y) =ᶠ[𝓝 (q, w)]
-      (fun y => slowSum a h f y - uncutPrefix h f J y) :=
-    hp.mono (fun y hy => congrArg (fun z => slowSum a h f y - z) hy)
-  have he := (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (hdiff.comp_tendsto ht) m).self_of_nhds
-  change ‖iteratedFDeriv ℝ m _ (1, w)‖ ≤ _
-  rw [← he]
-  exact (blown_tail_bound hh hf ha hq hq1 hw J m (by omega)).trans
-    (mul_le_mul_of_nonneg_left
-      (Real.rpow_le_rpow_of_exponent_ge hq hq1 (by simpa using hgain m hm)) (by positivity))
 
 /-- A fixed stage keeps its full q^(2hj) order. Only the tail estimates spend
 half this gain to absorb coefficient growth. -/
@@ -734,48 +703,6 @@ theorem physical_composition_bound {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     (fun i hi hin => by simpa only [iteratedFDerivWithin_of_isOpen i hs hp] using hD i hi hin)
   simpa only [iteratedFDerivWithin_of_isOpen n hs hp] using hb
 
-/-- Actual physical derivatives of a tail have arbitrary prescribed decay
-after choosing the prefix for that derivative order and requested power. -/
-theorem exists_physical_uncut_tail {a : ℕ → ℕ} {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j)) (lo hi : ℝ)
-    (ha : AdmissibleScales h f (innerBox lo hi) a) (m Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ m ≤ J ∧ ∃ δ C : ℝ, 0 < δ ∧ 0 < C ∧
-      ∀ p : Chart, p.1 < 1 → (physicalChart h p).1 < δ →
-        (physicalChart h p).2.1 ∈ Icc lo hi →
-        ‖iteratedFDeriv ℝ m
-          ((fun y => slowSum a h f y - uncutPrefix h f J y) ∘ physicalChart h) p‖ ≤
-            C * (physicalChart h p).1 ^ P := by
-  obtain ⟨J, hJmin, hJm, δ, hδ, hb⟩ := exists_ordinary_uncut_tail hh hf ha m Jmin (P + m)
-  obtain ⟨D, hD, hDb⟩ := physicalChart_finite_bound hh hh1 lo hi m
-  let C := (m.factorial : ℝ) * (1 / 2 : ℝ) ^ J * D ^ m
-  refine ⟨J, hJmin, hJm, min δ 1, C, lt_min hδ (by norm_num), ?_, ?_⟩
-  · dsimp [C]
-    have hDpos : 0 < D := lt_of_lt_of_le zero_lt_one hD
-    positivity
-  intro p hp hsmall hX
-  have hq := physicalChart_positive hh hh1 hp
-  have hq1 : (physicalChart h p).1 ≤ 1 := (hsmall.trans_le (min_le_right _ _)).le
-  have hw := physicalChart_inner_mem hh hh1 hp hX
-  have hFs : ContDiffOn ℝ ∞ (fun y => slowSum a h f y - uncutPrefix h f J y)
-      {y | 0 < y.1} := by
-    apply (slowSum_smoothOn ha.strictMono hf h).sub
-    intro y hy
-    apply ContDiffAt.contDiffWithinAt
-    apply ((hf 0).comp contDiff_snd).contDiffAt.add
-    exact ContDiffAt.sum (fun j _ => positiveCoefficient_smoothAt hf h j hy)
-  have hbound := physical_composition_bound hh hh1 hFs hp m
-    (C := (1 / 2 : ℝ) ^ J * (physicalChart h p).1 ^ (P + m))
-    (D := D / (physicalChart h p).1)
-    (fun i hi => hb i hi _ hq (hsmall.trans_le (min_le_left _ _)) _ hw)
-    (hDb p hp hq1 hX)
-  refine hbound.trans_eq ?_
-  dsimp [C]
-  rw [Real.rpow_add hq, Real.rpow_natCast, div_pow]
-  have hqn : (physicalChart h p).1 ^ m ≠ 0 := pow_ne_zero m hq.ne'
-  field_simp [hq.ne', hqn] ; simp [← mul_pow]
-  congr 1
-  field_simp
 
 end PhysicalCoordinates
 
@@ -1020,19 +947,6 @@ theorem exists_powered_physical_tail_finite {a : ℕ → ℕ} {h : ℝ}
     hh hh1 hf lo hi b ha.strictMono J M P ((1 / 2 : ℝ) ^ J) δ (by positivity) hδ hb
   exact ⟨J, hJmin, hJM, δ', C, hδ', hC, hbound⟩
 
-theorem exists_powered_physical_tail {a : ℕ → ℕ} {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j)) (lo hi b : ℝ)
-    (ha : AdmissibleScales h f (innerBox lo hi) a) (m Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ m ≤ J ∧ ∃ δ C : ℝ, 0 < δ ∧ 0 < C ∧
-      ∀ p : Chart, p.1 < 1 → (physicalChart h p).1 < δ →
-        (physicalChart h p).2.1 ∈ Icc lo hi →
-        ‖iteratedFDeriv ℝ m
-          (fun y => physicalProfile a h b f y - physicalUncutPrefix h b f J y) p‖ ≤
-            C * (physicalChart h p).1 ^ P := by
-  obtain ⟨J, hJ, hJm, δ, C, hδ, hC, hb⟩ :=
-    exists_powered_physical_tail_finite hh hh1 hf lo hi b ha m Jmin P
-  exact ⟨J, hJ, hJm, δ, C, hδ, hC, hb m le_rfl⟩
 
 end PoweredTails
 
@@ -1417,49 +1331,6 @@ noncomputable def cartesianUncutPrefix (h b : ℝ) (f : ℕ → Inner → V) (J 
     (z : ProblemStatement.SpaceTime) : V :=
   physicalUncutPrefix h b f J (AxisymmetricFields.profilePoint z.1 z.2)
 
-/-- The map `(t,x)↦(t,(|x_perp|²/2,x₃))` is smooth at the axis. On any fixed
-compact Cartesian set its derivatives have finite bounds, so the proved
-physical-profile tail estimates imply actual Cartesian space-time estimates. -/
-theorem exists_cartesian_profile_tail {a : ℕ → ℕ} {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j)) (lo hi b : ℝ)
-    (ha : AdmissibleScales h f (innerBox lo hi) a)
-    {K : Set ProblemStatement.SpaceTime} (hK : IsCompact K) (m Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ m ≤ J ∧ ∃ δ C : ℝ, 0 < δ ∧ 0 < C ∧
-      ∀ z ∈ K, z.1 < 1 → (cartesianChart h z).1 < δ →
-        (cartesianChart h z).2.1 ∈ Icc lo hi →
-        ‖iteratedFDeriv ℝ m
-          (fun y => cartesianProfile a h b f y - cartesianUncutPrefix h b f J y) z‖ ≤
-            C * (cartesianChart h z).1 ^ P := by
-  obtain ⟨J, hJmin, hJm, δ, C, hδ, hC, hb⟩ :=
-    exists_powered_physical_tail_finite hh hh1 hf lo hi b ha m Jmin P
-  let G : ProblemStatement.SpaceTime → Chart := fun z => AxisymmetricFields.profilePoint z.1 z.2
-  have hG : ContDiff ℝ ∞ G := AxisymmetricFields.contDiff_profilePoint
-  obtain ⟨D, hD, hDb⟩ := compact_map_finite_bound hG hK m
-  let B := (m.factorial : ℝ) * C * D ^ m
-  have hDpos : 0 < D := lt_of_lt_of_le zero_lt_one hD
-  refine ⟨J, hJmin, hJm, δ, B, hδ, by dsimp [B]; positivity, ?_⟩
-  intro z hz hzt hq hX
-  let F : Chart → V := fun p => physicalProfile a h b f p - physicalUncutPrefix h b f J p
-  have hU : IsOpen {p : Chart | p.1 < 1} := isOpen_lt continuous_fst continuous_const
-  have hS : IsOpen {p : ProblemStatement.SpaceTime | p.1 < 1} :=
-    isOpen_lt continuous_fst continuous_const
-  have hF : ContDiffOn ℝ ∞ F {p | p.1 < 1} := by
-    intro p hp
-    exact ((physicalProfile_smoothAt ha.strictMono hh hh1 hf b hp).sub
-      (physicalUncutPrefix_smoothAt hh hh1 hf b J hp)).contDiffWithinAt
-  have hmaps : MapsTo G {p | p.1 < 1} {p | p.1 < 1} := fun _ hp => hp
-  have hc := norm_iteratedFDerivWithin_comp_le hF hG.contDiffOn
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl m) hU.uniqueDiffOn hS.uniqueDiffOn hmaps hzt
-    (C := C * (cartesianChart h z).1 ^ P) (D := D)
-    (fun i hi => by
-      rw [iteratedFDerivWithin_of_isOpen i hU hzt]
-      exact hb i hi (G z) hzt hq hX)
-    (fun i hi him => by
-      rw [iteratedFDerivWithin_of_isOpen i hS hzt]
-      exact hDb z hz i hi him)
-  rw [iteratedFDerivWithin_of_isOpen m hS hzt] at hc
-  exact hc.trans_eq (by dsimp [B]; ring)
 
 end CartesianTails
 
@@ -1612,30 +1483,6 @@ theorem angularMoment_eq_normalizedSwirl {a : ℕ → ℕ} (ha : StrictMono a) {
       rw [hsqrt, Real.rpow_sub hq]
       ring
 
-/-- Smooth fixed inner weights, including reciprocal annular weights on
-compact subsets where they are smooth, preserve the proved tensor estimate.
-This is an interior weighted statement; it does not presume the edge bounds. -/
-theorem normalized_stress_weighted_compact {a : ℕ → ℕ} {h C : ℝ}
-    (hh : 0 < h) {d : Coefficients} (hd : SmoothCoefficients d)
-    {K U : Set Inner} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
-    (ha : AdmissibleScales h (coefficientBundle C d) K a)
-    {r : Inner → ℝ} (hr : ContDiffOn ℝ ∞ r U) (m : ℕ) :
-    ∃ B : ℝ, 0 < B ∧ ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ K,
-      ‖blownJet m (fun y => r y.2 * (slowSum a h d.stressTheta y - d.stressTheta 0 y.2))
-        (q, w)‖ ≤ B * q ^ h ∧
-      ‖blownJet m (fun y => r y.2 * (slowSum a h d.stressAxial y - d.stressAxial 0 y.2))
-        (q, w)‖ ≤ B * q ^ h := by
-  have htheta : AdmissibleScales h d.stressTheta K a := admissible_component hd ha 3
-  have haxial : AdmissibleScales h d.stressAxial K a := admissible_component hd ha 4
-  obtain ⟨A, hA, hAb⟩ := normalized_correction_smul_inner hh hd.stressTheta hK hU hKU htheta hr m
-  obtain ⟨B, hB, hBb⟩ := normalized_correction_smul_inner hh hd.stressAxial hK hU hKU haxial hr m
-  refine ⟨A + B, add_pos hA hB, fun q hq hq1 w hw => ?_⟩
-  have hp : q ^ (2 * h) ≤ q ^ h := Real.rpow_le_rpow_of_exponent_ge hq hq1 (by linarith)
-  refine ⟨(hAb q hq hq1 w hw).trans ?_, (hBb q hq hq1 w hw).trans ?_⟩
-  · exact (mul_le_mul_of_nonneg_left hp hA.le).trans
-      (mul_le_mul_of_nonneg_right (le_add_of_nonneg_right hB.le) (Real.rpow_nonneg hq.le _))
-  · exact (mul_le_mul_of_nonneg_left hp hB.le).trans
-      (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left hA.le) (Real.rpow_nonneg hq.le _))
 
 end PhysicalIdentification
 

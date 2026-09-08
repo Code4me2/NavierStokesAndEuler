@@ -183,58 +183,7 @@ theorem complexProfile_joint_smooth_tube (I J : Window) {ε R s δ : ℝ}
   (complexProfile_joint_smooth I hε hR hs hs1 A k).mono
     (Set.prod_mono Subset.rfl htube)
 
-/-- The jointly smooth extension is exactly the original real radial jet on
-the real slice, rather than a separately selected continuation. -/
-theorem complexProfile_joint_real_agreement (I : Window) (ε : ℝ)
-    (A : AxisSpace I ε) (k : ℕ) (Y x : ℝ) :
-    complexProfile I ε A k Y (x : ℂ) = (mixedSeries I ε A k 0 (Y, x) : ℂ) :=
-  complexProfile_ofReal I ε A k Y x
 
-theorem complexProfile_joint_zero_real_agreement (I : Window) (ε : ℝ)
-    (A : AxisSpace I ε) (Y x : ℝ) :
-    complexProfile I ε A 0 Y (x : ℂ) = (profile I ε A (Y, x) : ℂ) :=
-  complexProfile_zero_ofReal I ε A Y x
 
-/-- A common positive tube and a genuine open radial neighborhood work for
-every coefficient vector and every radial derivative order. The extension is
-jointly real smooth, holomorphic in the complex parameter, uniformly bounded,
-and agrees with all actual real parameter jets. -/
-theorem exists_common_joint_extension (I J : Window) (hleft : I.left < J.left)
-    (hright : J.right < I.right) {ε R : ℝ} (hε : 0 < ε) (hR20 : R < 20) :
-    ∃ δ : ℝ, 0 < δ ∧ ∃ S : ℝ, R < S ∧ S < 20 ∧ ∃ B : ℕ → ℝ,
-      (∀ k, 0 ≤ B k) ∧ ∀ (A : AxisSpace I ε) (k : ℕ),
-        ContDiffOn ℝ ∞ (fun p : ℝ × ℂ => complexProfile I ε A k p.1 p.2)
-          (Ioo (-S) S ×ˢ parameterTube J δ) ∧
-        ∀ Y : ℝ, |Y| ≤ R →
-          AnalyticOnNhd ℂ (complexProfile I ε A k Y) (parameterTube J δ) ∧
-          (∀ z ∈ parameterTube J δ, ‖complexProfile I ε A k Y z‖ ≤ B k * ‖A‖) ∧
-          (∀ z ∈ parameterTube J δ,
-            iteratedDeriv k (fun y => complexProfile I ε A 0 y z) Y =
-              complexProfile I ε A k Y z) ∧
-          (∀ (m : ℕ) (x : ℝ), x ∈ J.interval →
-            iteratedDeriv m (complexProfile I ε A k Y) (x : ℂ) =
-              (mixedSeries I ε A k m (Y, x) : ℂ)) := by
-  obtain ⟨S, hS, hS20⟩ := exists_between (max_lt (by norm_num : (1 : ℝ) < 20) hR20)
-  have hS1 : 1 ≤ S := (le_max_left 1 R).trans hS.le
-  have hRS : R < S := (le_max_right 1 R).trans_lt hS
-  obtain ⟨s, hs, hs1⟩ := exists_between (show S / 20 < 1 by linarith)
-  have ha : 0 < ε * (1 - s) := mul_pos hε (by linarith)
-  obtain ⟨δ, hδ, htube⟩ := exists_parameterTube_subset I J hleft hright ha
-  refine ⟨δ, hδ, S, hRS, hS20, (fun k => 2 * jetConstant S s k), ?_, ?_⟩
-  · intro k
-    exact mul_nonneg (by norm_num) (jetConstant_nonneg hS1 hs hs1 k)
-  · intro A k
-    refine ⟨complexProfile_joint_smooth_tube I J hε hS1 hs hs1 htube A k, ?_⟩
-    intro Y hY
-    have hYS : |Y| < S := hY.trans_lt hRS
-    refine ⟨(complexProfile_analytic I hε hS1 hs hs1 A k hYS.le).mono htube, ?_, ?_, ?_⟩
-    · intro z hz
-      exact complexProfile_bound I hε hS1 hs hs1 A k hYS.le (htube hz).2.le
-    · intro z hz
-      simpa only [Nat.zero_add] using
-        complexProfile_iteratedDeriv_Y I hε hS1 hs hs1 A 0 k hYS (htube hz)
-    · intro m x hx
-      exact complexProfile_iteratedDeriv_ofReal I hε hS1 hs hs1 A k m hYS.le
-        ⟨hleft.trans_le hx.1, hx.2.trans_lt hright⟩
 
 end NavierStokes.AxisHolomorphicJoint

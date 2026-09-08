@@ -72,22 +72,7 @@ theorem inverseMetric_inverse (t : Icc (0 : ℝ) D.T) (x v : Space) :
     (D.F.field t x (D.FInv.field t x ((D.FInv.field t x).adjoint v))) = v
   rw [D.inverse_right,frame_adjoint_inverse]
 
-theorem metric_inverseMetric (t : Icc (0 : ℝ) D.T) (x v : Space) :
-    (metricCoefficient D).path t x ((inverseMetricCoefficient D).path t x v) = v := by
-  change D.FInv.field t x
-    ((D.FInv.field t x).adjoint ((D.F.field t x).adjoint (D.F.field t x v))) = v
-  rw [inverse_adjoint_frame,D.inverse_left]
 
-theorem metric_symmetric (t : Icc (0 : ℝ) D.T) (x v w : Space) :
-    ⟪(metricCoefficient D).path t x v,w⟫_ℝ =
-      ⟪v,(metricCoefficient D).path t x w⟫_ℝ := by
-  calc
-    _ = ⟪(D.FInv.field t x).adjoint v,(D.FInv.field t x).adjoint w⟫_ℝ :=
-      metric_inner D t x v w
-    _ = ⟪(D.FInv.field t x).adjoint w,(D.FInv.field t x).adjoint v⟫_ℝ :=
-      real_inner_comm _ _
-    _ = ⟪(metricCoefficient D).path t x w,v⟫_ℝ := (metric_inner D t x w v).symm
-    _ = _ := real_inner_comm _ _
 
 theorem inverseMetric_symmetric (t : Icc (0 : ℝ) D.T) (x v w : Space) :
     ⟪(inverseMetricCoefficient D).path t x v,w⟫_ℝ =

@@ -235,13 +235,6 @@ theorem regularPrimitive_contDiffOn_succ (n : ℕ) (c : ℕ) {R : ℝ} {f : ℝ 
         (fun r hr => (hfirst r hr).deriv)
   simpa only [Nat.cast_add, Nat.cast_one] using hout
 
-theorem regularPrimitive_contDiffOn_infty (c : ℕ) {R : ℝ} {f : ℝ → E}
-    (hf : ContDiffOn ℝ ∞ f (radialDomain R)) :
-    ContDiffOn ℝ ∞ (regularPrimitive c f) (radialDomain R) := by
-  apply contDiffOn_infty.2
-  intro n
-  exact (regularPrimitive_contDiffOn_succ n c (contDiffOn_infty.1 hf n)).of_le (by
-    exact_mod_cast Nat.le_succ n)
 
 end IntegralRegularity
 
@@ -273,37 +266,6 @@ variable {ι : Type*} [Fintype ι]
 variable {B : ℕ → Type u} [∀ j, NormedAddCommGroup (B j)]
   [∀ j, NormedSpace ℝ (B j)] [∀ j, CompleteSpace (B j)]
 
-/-- A genuine radial bootstrap on a sequence of Banach spaces. The next
-level is the larger parameter disk; its bounded Cauchy derivative is folded
-into `A₁`. The only initial regularity imposed on the solution is continuity. -/
-theorem scale_contDiffOn (c : ι → ℕ) {R : ℝ}
-    (W f : ∀ j, ℝ → ι → B j)
-    (A₀ : ∀ j, ℝ → (ι → B j) →L[ℝ] (ι → B j))
-    (A₁ : ∀ j, ℝ → (ι → B (j + 1)) →L[ℝ] (ι → B j))
-    (hW : ∀ j, ContinuousOn (W j) (radialDomain R))
-    (hf : ∀ j, ContDiffOn ℝ ∞ (f j) (radialDomain R))
-    (hA₀ : ∀ j, ContDiffOn ℝ ∞ (A₀ j) (radialDomain R))
-    (hA₁ : ∀ j, ContDiffOn ℝ ∞ (A₁ j) (radialDomain R))
-    (heq : ∀ j, EqOn (W j)
-      (diagonalRegularPrimitive c (fun r =>
-        f j r + (A₀ j r) (W j r) + (A₁ j r) (W (j + 1) r))) (radialDomain R)) :
-    ∀ j, ContDiffOn ℝ ∞ (W j) (radialDomain R) := by
-  have hfinite : ∀ n : ℕ, ∀ j, ContDiffOn ℝ n (W j) (radialDomain R) := by
-    intro n
-    induction n with
-    | zero =>
-        intro j
-        exact contDiffOn_zero.mpr (hW j)
-    | succ n ih =>
-        intro j
-        have hrhs : ContDiffOn ℝ n (fun r =>
-            f j r + (A₀ j r) (W j r) + (A₁ j r) (W (j + 1) r)) (radialDomain R) :=
-          ((contDiffOn_infty.1 (hf j) n).add
-            ((contDiffOn_infty.1 (hA₀ j) n).clm_apply (ih j))).add
-            ((contDiffOn_infty.1 (hA₁ j) n).clm_apply (ih (j + 1)))
-        exact (diagonalRegularPrimitive_contDiffOn_succ n c hrhs).congr (heq j)
-  intro j
-  exact contDiffOn_infty.2 (fun n => hfinite n j)
 
 end ScaleBootstrap
 
@@ -435,20 +397,6 @@ theorem fieldDiskCurve_apply (R : ℝ) (hR : 0 ≤ R) {U : Set ℂ}
   change W (radiusProjection R hR r) z i = W r z i
   rw [radiusProjection_eq R hR hr]
 
-/-- Smoothness of the disk-valued curve implies actual scalar radial
-smoothness, by bounded evaluation. -/
-theorem fieldDiskCurve_radial_contDiffOn (R : ℝ) (hR : 0 ≤ R) {U : Set ℂ}
-    (W : Field)
-    (hW : ContinuousOn (fun p : ℝ × ℂ => W p.1 p.2) (Icc (-R) R ×ˢ U))
-    (center : ℂ) (ρ : ℝ) (hDisk : Metric.closedBall center ρ ⊆ U)
-    (i : Fin 6) (n : WithTop ℕ∞)
-    (hs : ContDiffOn ℝ n (fun r => fieldDiskCurve R hR W hW center ρ hDisk r i)
-      (radialDomain R)) (z : Disk center ρ) :
-    ContDiffOn ℝ n (fun r => W r z i) (radialDomain R) := by
-  apply ((ContinuousMap.evalCLM ℝ z).contDiff.comp_contDiffOn hs).congr
-  intro r hr
-  exact (fieldDiskCurve_apply R hR W hW center ρ hDisk
-    (radialDomain_subset_Icc R hr) i z).symm
 
 /-- Actual radial regularity of a symmetric integral solution. The smooth
 inputs are disk-valued representations of the coefficients and forcing;
@@ -787,80 +735,9 @@ theorem symmetric_solution_mixed_contDiffAt_zero
   (symmetric_solution_mixed_contDiffOn hR.le hU hW hdata hz n k i).contDiffAt
     (Metric.ball_mem_nhds 0 hR)
 
-theorem symmetric_solution_radial_contDiffOn
-    {R : ℝ} (hR : 0 ≤ R) {U : Set ℂ} (hU : IsOpen U)
-    {A₀ A₁ : Coeff} {f W : Field}
-    (hW : VolterraParity.IsSymmetricIntegralSolution R U A₀ A₁ f W)
-    (hdata : SmoothCoefficientData R U A₀ A₁ f)
-    {z : ℂ} (hz : z ∈ U) :
-    ContDiffOn ℝ ∞ (fun r => W r z) (radialDomain R) := by
-  apply contDiffOn_pi.mpr
-  intro i
-  simpa only [iteratedDeriv_zero] using
-    symmetric_solution_parameterJets_radial_contDiffOn_local hR hU hW hdata hz 0 i
 
-theorem symmetric_solution_uniform_mixed_bound
-    {R : ℝ} (hR : 0 ≤ R) {U : Set ℂ} (hU : IsOpen U)
-    {A₀ A₁ : Coeff} {f W : Field}
-    (hW : VolterraParity.IsSymmetricIntegralSolution R U A₀ A₁ f W)
-    (hdata : SmoothCoefficientData R U A₀ A₁ f)
-    (center : ℂ) (ρ : ℕ → ℝ) (hρ : ∀ j, ρ j < ρ (j + 1))
-    (hDisk : ∀ j, Metric.closedBall center (ρ j) ⊆ U)
-    {K : Set ℝ} (hK : IsCompact K) (hKR : K ⊆ radialDomain R)
-    (n k j : ℕ) (i : Fin 6) :
-    ∃ B : ℝ, 0 ≤ B ∧ ∀ r ∈ K, ∀ z : Disk center (ρ j),
-      ‖iteratedDeriv n (fun s => iteratedDeriv k (fun w : ℂ => W s w i) z) r‖ ≤ B := by
-  let V := fun j r => fieldDiskCurve R hR W hW.jointly_continuous center (ρ j) (hDisk j) r i
-  apply parameterJets_uniform_mixed_bound center ρ hρ V Metric.isOpen_ball hU hDisk
-    (fun r w => W r w i)
-  · intro r hr
-    exact hW.parameter_holomorphic r (radialDomain_subset_Icc R hr) i
-  · intro j r hr z
-    exact fieldDiskCurve_apply R hR W hW.jointly_continuous center (ρ j) (hDisk j)
-      (radialDomain_subset_Icc R hr) i z
-  · intro j
-    exact symmetric_solution_disk_curves_of_smooth_coefficients hR hU hW hdata
-      center ρ hρ hDisk j i
-  · exact hK
-  · exact hKR
 
-/-- Direct specialization to the two-sided solution constructed from the
-convergent nilpotent Volterra series. No regularity of that output is an
-input to this theorem. -/
-theorem symmetricSolution_mixed_contDiffOn
-    {R : ℝ} (hR : 0 ≤ R)
-    {A₀ A₁ : ℂ → VolterraParity.SymmetricCoefficientPath R}
-    {f : ℂ → VolterraParity.SymmetricPath R VolterraAnalyticBounds.Vec}
-    {U : Set ℂ} (hU : IsOpen U)
-    (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : DerivativeShape (VolterraParity.symmetricRawCoefficient hR A₁))
-    (hdata : SmoothCoefficientData R U (VolterraParity.symmetricRawCoefficient hR A₀)
-      (VolterraParity.symmetricRawCoefficient hR A₁) (VolterraParity.symmetricRawField hR f))
-    {z : ℂ} (hz : z ∈ U) (n k : ℕ) (i : Fin 6) :
-    ContDiffOn ℝ ∞
-      (iteratedDeriv n (fun r => iteratedDeriv k
-        (fun w : ℂ => VolterraParity.symmetricSolution hR A₀ A₁ f r w i) z))
-      (radialDomain R) :=
-  symmetric_solution_mixed_contDiffOn hR hU
-    (VolterraParity.symmetricSolution_spec hR hU hA₀ hA₁ hf hshape) hdata hz n k i
 
-theorem symmetricSolution_mixed_contDiffAt_zero
-    {R : ℝ} (hR : 0 < R)
-    {A₀ A₁ : ℂ → VolterraParity.SymmetricCoefficientPath R}
-    {f : ℂ → VolterraParity.SymmetricPath R VolterraAnalyticBounds.Vec}
-    {U : Set ℂ} (hU : IsOpen U)
-    (hA₀ : DifferentiableOn ℂ A₀ U) (hA₁ : DifferentiableOn ℂ A₁ U)
-    (hf : DifferentiableOn ℂ f U)
-    (hshape : DerivativeShape (VolterraParity.symmetricRawCoefficient hR.le A₁))
-    (hdata : SmoothCoefficientData R U (VolterraParity.symmetricRawCoefficient hR.le A₀)
-      (VolterraParity.symmetricRawCoefficient hR.le A₁) (VolterraParity.symmetricRawField hR.le f))
-    {z : ℂ} (hz : z ∈ U) (n k : ℕ) (i : Fin 6) :
-    ContDiffAt ℝ ∞
-      (iteratedDeriv n (fun r => iteratedDeriv k
-        (fun w : ℂ => VolterraParity.symmetricSolution hR.le A₀ A₁ f r w i) z)) 0 :=
-  symmetric_solution_mixed_contDiffAt_zero hR hU
-    (VolterraParity.symmetricSolution_spec hR.le hU hA₀ hA₁ hf hshape) hdata hz n k i
 
 end SmoothInputs
 

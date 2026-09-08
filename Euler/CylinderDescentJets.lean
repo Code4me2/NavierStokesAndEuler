@@ -61,14 +61,6 @@ theorem jetSeries_eq_local (q : LiftDomain P) (n : ℕ) :
   rw [jetSeries_cover P f hperiod,localFieldLift_descend_cover P f hperiod,
     iteratedFDeriv_comp_add_left,add_zero]
 
-theorem jetSeries_joint_continuous {K : Type*} [TopologicalSpace K]
-    (F : K → LiftTangent → W)
-    (hF : ∀ t (c : AddSubgroup.zmultiples P) z, F t (z.1,(c : ℝ)+z.2)=F t z)
-    (n : ℕ)
-    (hJ : Continuous (fun z : K × LiftTangent => iteratedFDeriv ℝ n (F z.1) z.2)) :
-    Continuous (fun z : K × LiftDomain P => jetSeries P (F z.1) z.2 n) :=
-  descend_joint_continuous P (fun t => iteratedFDeriv ℝ n (F t)) hJ
-    (fun t => fiber_constant_of_deck P _ (iteratedFDeriv_deck P (F t) (hF t) n))
 
 include hperiod in
 omit [NormedAddCommGroup W] [NormedSpace ℝ W] in
@@ -98,15 +90,5 @@ theorem comp_deck (Φ : LiftTangent → LiftTangent)
     (f ∘ Φ) (z.1,(c : ℝ)+z.2)=(f ∘ Φ) z := by
   simp only [Function.comp_def,hΦ,hperiod]
 
-include hperiod in
-theorem local_jet_comp (Φ : LiftTangent → LiftTangent)
-    (hdeck : ∀ (c : AddSubgroup.zmultiples P) z,
-      Φ (z.1,(c : ℝ)+z.2)=((Φ z).1,(c : ℝ)+(Φ z).2))
-    (hf : ContDiff ℝ ∞ f) (hΦ : ContDiff ℝ ∞ Φ) (q : LiftDomain P) (n : ℕ) :
-    iteratedFDeriv ℝ n (localFieldLift P (descend P f ∘ descendMap P Φ) q) 0 =
-      (jetSeries P f (descendMap P Φ q)).taylorComp (jetSeries P Φ q) n := by
-  rw [← descend_comp_map P f hperiod Φ,
-    ← jetSeries_eq_local P (f ∘ Φ) (comp_deck P f hperiod Φ hdeck) q n]
-  exact jetSeries_comp P f hperiod Φ hf hΦ q n
 
 end EulerCylinderCoverDescent

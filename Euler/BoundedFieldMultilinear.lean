@@ -80,8 +80,5 @@ def multilinearMap (L : ContinuousMultilinearMap ℝ V W) :
     (f : ∀ i, α →ᵇ V i) (x : α) :
     multilinearMap L f x = L (fun i => f i x) := rfl
 
-theorem multilinearMap_norm (L : ContinuousMultilinearMap ℝ V W) :
-    ‖multilinearMap (α := α) L‖ ≤ ‖L‖ :=
-  (multilinearAlgebra L).mkContinuous_norm_le (norm_nonneg L) (multilinearValue_norm L)
 
 end EulerBoundedFieldCalculus

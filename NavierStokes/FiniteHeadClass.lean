@@ -114,16 +114,6 @@ theorem meanClass_all_exponents {s : StripData D} {α : ℝ} {f : ℕ → D → 
     (hz : ∀ n, N ≤ n → ∀ x ∈ s.domain, f n x = 0) :
     ∀ β : ℝ, MeanClass s β f := all_exponents hf N hz
 
-/-- Both the square-root radial weight and the given slot envelope remain
-exactly the same; no lower bound for either is required. -/
-theorem waveClass_all_exponents {s : StripData D} {P : ℕ → D → ℝ}
-    {α : ℝ} {f : ℕ → D → E} (hf : WaveClass s P α f) (N : ℕ)
-    (hz : ∀ n, N ≤ n → ∀ x ∈ s.domain, f n x = 0) :
-    ∀ β : ℝ, WaveClass s P β f := all_exponents hf N hz
 
-theorem unweightedClass_all_exponents {s : StripData D}
-    {α : ℝ} {f : ℕ → D → E} (hf : UnweightedClass s α f) (N : ℕ)
-    (hz : ∀ n, N ≤ n → ∀ x ∈ s.domain, f n x = 0) :
-    ∀ β : ℝ, UnweightedClass s β f := all_exponents hf N hz
 
 end NavierStokes.FiniteHeadClass

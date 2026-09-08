@@ -77,9 +77,6 @@ theorem initialLimit_support : tsupport (V).field ⊆ Metric.closedBall 0 2 :=
     (actual_increment_summable A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency)
     (Metric.closedBall 0 2) Metric.isClosed_closedBall (fun n => (A n).increment_support (frequency J X n))
 
-theorem initialLimit_compact : HasCompactSupport (V).field :=
-  (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _)
-    (initialLimit_support A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency)
 
 def fullInitialLimit (base : SmoothL2Field Space) : SmoothL2Field Space := addField base V
 

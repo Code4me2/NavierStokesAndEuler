@@ -77,36 +77,5 @@ theorem continuousVelocity_hasDerivWithinAt (hTpos : 0 < T)
   rw [projIcc_of_mem hT hr]
   exact s.continuousVelocity_eq_physicalPath hTpos hFTime ⟨r, hr⟩
 
-/-- Genuine space-time classical mean fields are obtained from the actual
-solved coordinate velocity and acceleration orbits. -/
-theorem exists_classical_spatial_pair (hTpos : 0 < T)
-    (hf : (f : ℝ → L2) =ᵐ[timeMeasure T] extendPath T hT fC)
-    (hFTime : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F₁ t) (Icc (0 : ℝ) T) t)
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hF₁ : ContDiff ℝ ∞ (fun a : Space => translatePath T a F₁))
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.velocityLp))
-    (ha : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.acceleration))
-    (hfC : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a fC)) :
-    ∃ B Bt : Icc (0 : ℝ) T → Space → Space,
-      Continuous (fun z : Icc (0 : ℝ) T × Space => B z.1 z.2) ∧
-      Continuous (fun z : Icc (0 : ℝ) T × Space => Bt z.1 z.2) ∧
-      (∀ t, ContDiff ℝ ∞ (B t)) ∧ (∀ t, ContDiff ℝ ∞ (Bt t)) ∧
-      (∀ t : Icc (0 : ℝ) T, (s.physicalPath t : Space → Space) =ᵐ[volume] B t) ∧
-      (∀ t, (s.classicalPhysicalDerivative c hc hLower fC t : Space → Space) =ᵐ[volume] Bt t) ∧
-      ∀ t : Icc (0 : ℝ) T, ∀ x : Space,
-        HasDerivWithinAt (fun r => B (projIcc 0 T hT r) x) (Bt t x) (Icc (0 : ℝ) T) t := by
-  have hp := s.continuousVelocity_translation_contDiff
-    (s.velocityField_translation_contDiff hF hv)
-    (s.velocityDerivative_translation_contDiff hF hF₁ hv ha)
-  have hvc := s.coordinateVelocityPath_translation_contDiff hTpos hv ha
-  have hq := s.classicalPhysicalDerivative_translation_contDiff c hc hLower fC hF hF₁ hvc hfC
-  obtain ⟨B, Bt, hBc, hBtc, hBs, hBts, hBa, hBta, hd⟩ :=
-    exists_classical_pair T hT s.continuousVelocity (s.classicalPhysicalDerivative c hc hLower fC)
-      hp hq (s.continuousVelocity_hasDerivWithinAt c hc hLower fC hTpos hf hFTime)
-  refine ⟨B, Bt, hBc, hBtc, hBs, hBts, ?_, hBta, hd⟩
-  intro t
-  rw [← s.continuousVelocity_eq_physicalPath hTpos hFTime t]
-  exact hBa t
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

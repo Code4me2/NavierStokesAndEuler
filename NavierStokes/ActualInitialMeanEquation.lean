@@ -380,9 +380,6 @@ theorem seed_oscillation_divergence (B N0 n : ℕ) {x : Full}
       (ActualPrimaryCoherence.positiveChart_open.mem_nhds (strip_time hx.1))).differentiableAt (by simp))]
   exact Finset.sum_eq_zero (fun l _ => piece_divergence l n ⟨strip_radius hx.1, strip_time hx.1⟩)
 
-theorem primary_oscillation (B N0 : ℕ) :
-    (ActualInitialCoherence.primary B N0).oscillation =
-      (ActualInitialCoherence.seed B N0).oscillation := rfl
 
 theorem temporal_oscillation (B N0 : ℕ) :
     (ActualInitialCoherence.temporal B N0).oscillation =
@@ -627,12 +624,5 @@ theorem initialized_meanHypotheses (B N0 : ℕ) :
     (initialized_angularData B N0) (fun n _ hx => base_divergence B n hx)
     (fun n _ hx => initialized_fullDivergence B N0 n hx)
 
-/-- Exact mean equation, with the same Gaussian and alias errors retained
-by `initializedBands`. -/
-theorem initialized_angularMean_fullGoodResidual (B N0 n : ℕ) {x : Point}
-    (hx : x ∈ strip.domain) (i : Fin 3) :
-    angularMeanVector (fullGoodResidual (commonContext B) (ActualInitialCoherence.initialized B N0)) n x i =
-      (ActualInitialCoherence.initialized B N0).meanGoodResidual (commonContext B) n x i :=
-  LiftedMeanResidual.angularMean_fullGoodResidual (initialized_meanHypotheses B N0) n hx i
 
 end NavierStokes.ActualInitialMeanEquation

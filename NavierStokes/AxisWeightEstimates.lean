@@ -247,9 +247,6 @@ theorem weight_radial_shift {ε : ℝ} (hε : 0 < ε) (n m : ℕ) :
         (squareDecay_pos n).le (mul_nonneg (by norm_num) (coreWeight_pos hε (n + 1) m).le)
     _ = _ := by ring
 
-theorem weight_radial_shift_ratio {ε : ℝ} (hε : 0 < ε) (n m : ℕ) :
-    weight ε n m / weight ε (n + 1) m ≤ 80 := by
-  exact (div_le_iff₀ (weight_pos hε (n + 1) m)).2 (weight_radial_shift hε n m)
 
 /-- Assigning the output radial shift to a parameter-differentiated factor. -/
 theorem weight_parameter_radial_shift {ε : ℝ} (hε : 0 < ε) (i k : ℕ) :
@@ -267,9 +264,6 @@ theorem weight_parameter_radial_shift {ε : ℝ} (hε : 0 < ε) (i k : ℕ) :
         (4 * squareDecay (i + 1) * squareDecay k) := mul_le_mul_of_nonneg_left hd hc
     _ = _ := by ring
 
-theorem weight_parameter_radial_shift_ratio {ε : ℝ} (hε : 0 < ε) (i k : ℕ) :
-    weight ε i (k + 1) / weight ε (i + 1) k ≤ (80 / ε) * ((i : ℝ) + 1) := by
-  exact (div_le_iff₀ (weight_pos hε (i + 1) k)).2 (weight_parameter_radial_shift hε i k)
 
 /-- The finite weight convolution associated with radial multiplication and
 the parameter Leibniz rule. -/
@@ -533,20 +527,6 @@ theorem averageJet_bound {ε F : ℝ} (_hε : 0 < ε) (_hF : 0 ≤ F)
     have hn : (0 : ℝ) ≤ n := by positivity
     linarith)).trans (hf n m)
 
-theorem primitiveJet_bound {ε F : ℝ} (hε : 0 < ε) (hF : 0 ≤ F)
-    (f : ℕ → ℕ → ℝ) (hf : ∀ n m, |f n m| ≤ F * weight ε n m) (n m : ℕ) :
-    |primitiveJet f n m| ≤ 80 * F * weight ε n m := by
-  cases n with
-  | zero =>
-      simpa only [primitiveJet, abs_zero] using
-        (mul_nonneg (mul_nonneg (by norm_num) hF) (weight_pos hε 0 m).le)
-  | succ n =>
-      calc
-        |primitiveJet f (n + 1) m| = |averageJet f n m| := rfl
-        _ ≤ F * weight ε n m := averageJet_bound hε hF f hf n m
-        _ ≤ F * (80 * weight ε (n + 1) m) :=
-          mul_le_mul_of_nonneg_left (weight_radial_shift hε n m) hF
-        _ = _ := by ring
 
 theorem radialDivisor_ge_one {r : ℕ} (hr : 1 ≤ r) (n : ℕ) : 1 ≤ radialDivisor r n := by
   have hn : (0 : ℝ) ≤ n := by positivity
@@ -556,57 +536,13 @@ theorem radialDivisor_ge_one {r : ℕ} (hr : 1 ≤ r) (n : ℕ) : 1 ≤ radialDi
   simpa only [one_mul, radialDivisor] using
     (mul_le_mul ha hb (by norm_num : (0 : ℝ) ≤ 1) (by positivity : 0 ≤ (n : ℝ) + 1))
 
-theorem regularInverseJet_bound {ε F : ℝ} (hε : 0 < ε) (hF : 0 ≤ F)
-    {r : ℕ} (hr : 1 ≤ r) (f : ℕ → ℕ → ℝ)
-    (hf : ∀ n m, |f n m| ≤ F * weight ε n m) (n m : ℕ) :
-    |regularInverseJet r f n m| ≤ 80 * F * weight ε n m := by
-  cases n with
-  | zero =>
-      simpa only [regularInverseJet, abs_zero] using
-        (mul_nonneg (mul_nonneg (by norm_num) hF) (weight_pos hε 0 m).le)
-  | succ n =>
-      rw [regularInverseJet, abs_div, abs_of_pos (radialDivisor_pos hr n)]
-      calc
-        |f n m| / radialDivisor r n ≤ |f n m| :=
-          div_le_self (abs_nonneg _) (radialDivisor_ge_one hr n)
-        _ ≤ F * weight ε n m := hf n m
-        _ ≤ F * (80 * weight ε (n + 1) m) :=
-          mul_le_mul_of_nonneg_left (weight_radial_shift hε n m) hF
-        _ = _ := by ring
 
-theorem parameterPrimitiveJet_bound {ε F : ℝ} (hε : 0 < ε) (hF : 0 ≤ F)
-    (f : ℕ → ℕ → ℝ) (hf : ∀ n m, |f n m| ≤ F * weight ε n m) (n m : ℕ) :
-    |parameterPrimitiveJet f n m| ≤ (80 / ε) * F * weight ε n m := by
-  cases n with
-  | zero =>
-      simpa only [parameterPrimitiveJet, abs_zero] using
-        (mul_nonneg (mul_nonneg (show 0 ≤ 80 / ε by positivity) hF) (weight_pos hε 0 m).le)
-  | succ n =>
-      rw [parameterPrimitiveJet, abs_div, abs_of_pos (by positivity : 0 < (n : ℝ) + 1)]
-      apply (div_le_iff₀ (by positivity : 0 < (n : ℝ) + 1)).2
-      calc
-        |f n (m + 1)| ≤ F * weight ε n (m + 1) := hf n (m + 1)
-        _ ≤ F * ((80 / ε) * ((n : ℝ) + 1) * weight ε (n + 1) m) :=
-          mul_le_mul_of_nonneg_left (weight_parameter_radial_shift hε n m) hF
-        _ = _ := by ring
 
 /-- Put the already estimated mixed coefficient in its output radial degree. -/
 def regularInverseMixedJet (r : ℕ) (f g : ℕ → ℕ → ℝ) : ℕ → ℕ → ℝ
   | 0, _ => 0
   | n + 1, m => inverseMixedJet r f g n m
 
-theorem regularInverseMixedJet_bound {ε F G : ℝ}
-    (hε : 0 < ε) (hF : 0 ≤ F) (hG : 0 ≤ G) {r : ℕ} (hr : 1 ≤ r)
-    (f g : ℕ → ℕ → ℝ)
-    (hf : ∀ n m, |f n m| ≤ F * weight ε n m)
-    (hg : ∀ n m, |g n m| ≤ G * weight ε n m) (n m : ℕ) :
-    |regularInverseMixedJet r f g n m| ≤ (5120 / ε) * F * G * weight ε n m := by
-  cases n with
-  | zero =>
-      simpa only [regularInverseMixedJet, abs_zero] using
-        (mul_nonneg (mul_nonneg (mul_nonneg (show 0 ≤ 5120 / ε by positivity) hF) hG)
-          (weight_pos hε 0 m).le)
-  | succ n => exact inverseMixedJet_bound hε hF hG hr f g hf hg n m
 
 end
 

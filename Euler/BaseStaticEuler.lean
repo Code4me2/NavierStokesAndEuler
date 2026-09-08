@@ -99,12 +99,7 @@ def baseParent : Parent := (baseInput P u C R hC hR hu hdiv).parent ell hell hel
 def baseLabelData : LabelData (baseParent P u C R hC hR hu hdiv ell hell hell1) :=
   (baseL2Data P u C R hC hR hu hdiv).labelData ell hell hell1
 
-theorem baseLabelData_constant :
-    (baseLabelData P u C R hC hR hu hdiv ell hell hell1).K=baseLabelConstant P C R hC hR := rfl
 
-include u hu hdiv ell hell hell1 in
-theorem baseLabelConstant_one : 1 ≤ baseLabelConstant P C R hC hR :=
-  (baseLabelData P u C R hC hR hu hdiv ell hell hell1).K_one
 
 def baseInverse : ParticleInverse (baseParent P u C R hC hR hu hdiv ell hell hell1) :=
   (baseInput P u C R hC hR hu hdiv).particleInverse ell hell hell1

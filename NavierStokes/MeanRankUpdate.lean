@@ -38,10 +38,6 @@ theorem scale_normalizeDebt {ell U : ℝ} (hell : ell ≠ 0) (hU : U ≠ 0) (d :
   ext i
   fin_cases i <;> simp [scaleDebt, normalizeDebt] <;> field_simp
 
-theorem normalize_scaleDebt {ell U : ℝ} (hell : ell ≠ 0) (hU : U ≠ 0) (d : Debt) :
-    normalizeDebt ell U (scaleDebt ell U d) = d := by
-  ext i
-  fin_cases i <;> simp [scaleDebt, normalizeDebt, hell, hU]
 
 theorem integral_scaled {ell : ℝ} (hell : 0 < ell) (c : ℝ) (f : ℝ → ℝ) :
     (∫ r, c * f (r / ell)) = ell * c * ∫ x, f x := by
@@ -66,10 +62,6 @@ theorem scaleField_tsupport {ell : ℝ} (hell : 0 < ell) (U a b : ℝ) {f : ℝ 
   exact ⟨by simpa only [mul_comm ell a] using (lt_div_iff₀ hell).1 hx.1,
     by simpa only [mul_comm ell b] using (div_lt_iff₀ hell).1 hx.2⟩
 
-theorem scaleField_compact {ell : ℝ} (hell : 0 < ell) (U a b : ℝ) {f : ℝ → ℝ}
-    (hs : tsupport f ⊆ Ioo a b) : HasCompactSupport (scaleField ell U f) :=
-  HasCompactSupport.of_support_subset_isCompact isCompact_Icc
-    (subset_closure.trans ((scaleField_tsupport hell U a b hs).trans Ioo_subset_Icc_self))
 
 theorem scaled_angular_mass {ell : ℝ} (hell : 0 < ell) (U : ℝ) (f : ℝ → ℝ) :
     (∫ r, r ^ (2 : ℕ) * scaleField ell U f r) =
@@ -173,9 +165,6 @@ theorem physical_five_rows {lam C a b ell U : ℝ} (hlam : 0 < lam) (hC : C ≠ 
   rw [hz] at h
   exact h
 
-theorem angularIncrement_smooth (lam C a b ell U : ℝ) (d : Debt) :
-    ContDiff ℝ ∞ (angularIncrement lam C a b ell U d) :=
-  scaleField_smooth ell U (FiveRowRank.deltaV_contDiff _ _ _ _ _)
 
 theorem desiredAxialIncrement_smooth (lam C a b ell U : ℝ) (d : Debt) :
     ContDiff ℝ ∞ (desiredAxialIncrement lam C a b ell U d) :=
@@ -331,15 +320,6 @@ theorem desiredAxialFamily_supported (lam a b : ℝ) {ell U C : E → ℝ} (d : 
     (subset_closure hp)
   exact ⟨(hlo p.2).trans hs.1.le, hs.2.le.trans (hhi p.2)⟩
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem angularFamily_supported (lam a b : ℝ) {ell U C : E → ℝ} (d : E → Debt)
-    (hab : a < b) (hl : ∀ s, 0 < ell s) {lo hi : ℝ}
-    (hlo : ∀ s, lo ≤ ell s * a) (hhi : ∀ s, ell s * b ≤ hi) :
-    RadialAlias.RadiallySupported lo hi (angularFamily lam a b ell U C d) := by
-  intro p hp
-  have hs := angularIncrement_tsupport lam (C p.2) a b (U p.2) (hl p.2) hab (d p.2)
-    (subset_closure hp)
-  exact ⟨(hlo p.2).trans hs.1.le, hs.2.le.trans (hhi p.2)⟩
 
 end Families
 
@@ -362,9 +342,6 @@ theorem slowLift_supported {f : ℝ × E → ℝ} {a b : ℝ}
   intro p hp
   exact hs hp
 
-theorem slowLift_shift (f : ℝ × E → ℝ) (r : ℝ) (s : E) (Y v : PressureStream.Plane)
-    (c : ℝ) : slowLift f (r, (s, Y) + c • ((0 : E), v)) = f (r, s) := by
-  simp [slowLift]
 
 omit [NormedSpace ℝ E] in
 theorem radial_integral_eq_interval {a b : ℝ} {f : ℝ × E → ℝ}
@@ -1100,28 +1077,6 @@ theorem meanClass_congr_on {s : WeightedClasses.StripData D} {α : ℝ}
   rw [iteratedFDeriv_congr_germ hgerm j]
   exact hb n x hx j hj
 
-/-- Uniform class bounds for the physical definition, read in any normalized
-band; the physical correction itself has no chosen band. -/
-theorem concrete_physical_rank_update_meanClass (coord qlo qhi rlo rhi cL cR A B lam a b α : ℝ)
-    (hc : 0 < coord) (hc1 : coord < 1) (hqlo : 0 < qlo)
-    (hrlo : 0 < rlo) (hcL : 0 < cL) (hcR : 0 < cR) (ha : 0 < a) (hab : a < b) (hB : B ≠ 0)
-    (hleft : rlo < Real.sqrt qlo * a) (hright : Real.sqrt qhi * b < rhi)
-    (ε S Q : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    (hQ : ∀ n, 0 < Q n) {d : ℕ → ChartPoint → Debt}
-    (hd : WeightedClasses.UnweightedClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α d) :
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α
-        (fun n => normalizedPhysicalAngular coord A B lam a b (Q n) (d n)) ∧
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α
-        (fun n => normalizedPhysicalAxial coord A B lam a b (Q n) (d n)) := by
-  have h := concrete_rank_update_meanClass coord qlo qhi rlo rhi cL cR A B lam a b α
-    hc hc1 hqlo hrlo hcL hcR ha hab hB hleft hright ε S hε hεone hS hd
-  exact ⟨meanClass_congr_on h.1 (fun n p hp =>
-    normalizedPhysicalAngular_eq_chart hc hc1 (hQ n) A B lam a b (d n) hp.1),
-    meanClass_congr_on h.2 (fun n p hp =>
-    normalizedPhysicalAxial_eq_chart hc hc1 (hQ n) A B lam a b (d n) hp.1)⟩
 
 end FinalClass
 
@@ -1150,22 +1105,6 @@ theorem background_eq_shaped_profile {q r : ℝ} (hq : 0 < q) (hr : 0 < r)
   unfold background scaleField FiveRowRank.background
   ring
 
-theorem physical_rows_on_shaped_patch {lam B a b q : ℝ} (hlam : 0 < lam) (hB : B ≠ 0)
-    (ha : 0 < a) (hab : a < b) (hq : 0 < q) (A η : ℝ) (d : Debt) (V G : ℝ → ℝ)
-    (hV : ∀ r ∈ Ioo (Real.sqrt q * a) (Real.sqrt q * b),
-      V r = q ^ (-A) * shapedAmplitude B η * (r ^ 2 / (2 * q)) ^ (-(1 / 2 + lam)))
-    (hG : ∀ r ∈ Ioo (Real.sqrt q * a) (Real.sqrt q * b), G r = 0) :
-    FiveRowRank.FiveRows V G d
-      (angularIncrement lam (shapedAmplitude B η * (2 : ℝ) ^ (1 / 2 + lam)) a b
-        (Real.sqrt q) (q ^ (-A)) d)
-      (desiredAxialIncrement lam (shapedAmplitude B η * (2 : ℝ) ^ (1 / 2 + lam)) a b
-        (Real.sqrt q) (q ^ (-A)) d) := by
-  apply physical_rows_on_patch hlam
-    (mul_ne_zero (shapedAmplitude_ne_zero hB η) (Real.rpow_pos_of_pos (by norm_num) _).ne')
-    ha hab (Real.sqrt_pos.mpr hq) (Real.rpow_pos_of_pos hq _).ne' d V G
-  · intro r hr
-    rw [hV r hr, background_eq_shaped_profile hq ((mul_pos (Real.sqrt_pos.mpr hq) ha).trans hr.1)]
-  · exact hG
 
 end ShapedPatch
 
@@ -1263,17 +1202,6 @@ theorem axial_exact (F : SmoothFamily E) {power lo hi M : ℝ}
   slow_streamGamma_eq_desired hlo0 horder hp v F.desired_smooth (F.desired_supported hlo hhi)
     F.desired_mass_zero p
 
-/-- These are the five rows of the actual divergence-free update. -/
-theorem streamed_five_rows (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi)
-    (s : E) (Y : PressureStream.Plane) :
-    FiveRowRank.FiveRows (background F.lam (F.amplitude s) (F.length s) (F.velocity s)) (fun _ => 0)
-      (F.debt s) (fun r => F.angular (r, s)) (fun r => F.axial power lo hi M v (r, s, Y)) := by
-  have he : (fun r => F.axial power lo hi M v (r, s, Y)) = (fun r => F.desired (r, s)) :=
-    funext (fun r => F.axial_exact hlo0 horder hp v hlo hhi (r, s, Y))
-  rw [he]
-  exact F.prescribed_five_rows s
 
 theorem divergence_zero (F : SmoothFamily E) {power lo hi M : ℝ}
     (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
@@ -1372,17 +1300,6 @@ theorem radial_zero_outside (F : SmoothFamily E) {power lo hi M : ℝ}
   rw [he.fderiv_eq, fderiv_fun_const]
   simp
 
-theorem radial_tsupport (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (w : E × PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi)
-    (s : E) (Y : PressureStream.Plane) :
-    tsupport (fun r => F.radial power lo hi M v w (r, s, Y)) ⊆
-      Icc (F.length s * F.a) (F.length s * F.b) := by
-  apply closure_minimal _ isClosed_Icc
-  intro r hr
-  by_contra hn
-  exact hr (F.radial_zero_outside hlo0 horder hp v w hlo hhi (r, s, Y) hn)
 
 end SmoothFamily
 
@@ -1395,65 +1312,9 @@ noncomputable def reservedAngularBase (F : OutgoingProfile.Profile) (XR : ℝ)
 noncomputable def reservedAxialBase (F : OutgoingProfile.Profile) (XR q U η r : ℝ) : ℝ :=
   U * HeatedOutgoing.U F XR ((r / Real.sqrt q) ^ 2 / 2, η)
 
-/-- The five-row repair on the actual untouched heated outgoing mean patch. -/
-theorem reserved_five_rows (F : OutgoingProfile.Profile) {XR q : ℝ}
-    (hXR : 0 < XR) (hq : 0 < q) (c : ℝ → HeatedOutgoing.Coeff) (A η : ℝ) (d : Debt) :
-    FiveRowRank.FiveRows (reservedAngularBase F XR c q (q ^ (-A)) η)
-      (reservedAxialBase F XR q (q ^ (-A)) η) d
-      (angularIncrement F.data.core.lam (shapedAmplitude (ReservedPatches.radialAmplitude F XR 0) η)
-        (ReservedPatches.radialSupportLeft F XR .mean) (ReservedPatches.radialSupportRight F XR .mean)
-        (Real.sqrt q) (q ^ (-A)) d)
-      (desiredAxialIncrement F.data.core.lam (shapedAmplitude (ReservedPatches.radialAmplitude F XR 0) η)
-        (ReservedPatches.radialSupportLeft F XR .mean) (ReservedPatches.radialSupportRight F XR .mean)
-        (Real.sqrt q) (q ^ (-A)) d) := by
-  have ha := ReservedPatches.radialSupportLeft_pos F XR hXR .mean
-  have hab := (ReservedPatches.radial_support_margins F XR hXR .mean).2.1
-  have hfield (r : ℝ) (hr : r ∈ Ioo (Real.sqrt q * ReservedPatches.radialSupportLeft F XR .mean)
-      (Real.sqrt q * ReservedPatches.radialSupportRight F XR .mean)) :
-      HeatedOutgoing.U F XR ((r / Real.sqrt q) ^ 2 / 2, η) = 0 ∧
-      HeatedOutgoing.E F XR c ((r / Real.sqrt q) ^ 2 / 2, η) =
-        FiveRowRank.background F.data.core.lam (ReservedPatches.radialAmplitude F XR η) (r / Real.sqrt q) := by
-    have hdiv : r / Real.sqrt q ∈ ReservedPatches.radialClosedPatch F XR .mean := by
-      constructor
-      · exact ((le_div_iff₀ (Real.sqrt_pos.mpr hq)).mpr (by nlinarith [hr.1])).trans le_rfl
-      · exact (div_le_iff₀ (Real.sqrt_pos.mpr hq)).mpr (by nlinarith [hr.2])
-    exact ReservedPatches.radial_heated_fields F XR hXR c (by decide) η
-      (ReservedPatches.radial_closedPatch_subset F XR hXR .mean hdiv)
-  apply physical_rows_on_patch F.data.core.lam_pos
-    (shapedAmplitude_ne_zero (ReservedPatches.radialAmplitude_pos F XR 0).ne' η) ha hab
-    (Real.sqrt_pos.mpr hq) (Real.rpow_pos_of_pos hq _).ne' d
-  · intro r hr
-    unfold reservedAngularBase background scaleField
-    rw [(hfield r hr).2, ReservedPatches.radialAmplitude_shape]
-    rfl
-  · intro r hr
-    unfold reservedAxialBase
-    rw [(hfield r hr).1, mul_zero]
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- Instantiating the actual reserved patch with any smooth physical `q>0`
-and smooth slow defect family supplies all stream input data. -/
-noncomputable def SmoothFamily.ofReserved (F : OutgoingProfile.Profile) (XR : ℝ) (hXR : 0 < XR)
-    (A : ℝ) (q η : E → ℝ) (d : E → Debt) (hq : ContDiff ℝ ∞ q) (hη : ContDiff ℝ ∞ η)
-    (hd : ContDiff ℝ ∞ d) (hqpos : ∀ s, 0 < q s) : SmoothFamily E where
-  lam := F.data.core.lam
-  a := ReservedPatches.radialSupportLeft F XR .mean
-  b := ReservedPatches.radialSupportRight F XR .mean
-  length := fun s => Real.sqrt (q s)
-  velocity := fun s => q s ^ (-A)
-  amplitude := fun s => ReservedPatches.radialAmplitude F XR (η s)
-  debt := d
-  lam_pos := F.data.core.lam_pos
-  a_pos := ReservedPatches.radialSupportLeft_pos F XR hXR .mean
-  ordered := (ReservedPatches.radial_support_margins F XR hXR .mean).2.1
-  length_pos := fun s => Real.sqrt_pos.mpr (hqpos s)
-  velocity_ne := fun s => (Real.rpow_pos_of_pos (hqpos s) _).ne'
-  amplitude_ne := fun s => (ReservedPatches.radialAmplitude_pos F XR (η s)).ne'
-  length_smooth := hq.sqrt (fun s => (hqpos s).ne')
-  velocity_smooth := hq.rpow_const_of_ne (fun s => (hqpos s).ne')
-  amplitude_smooth := (ReservedPatches.radialAmplitude_contDiff F XR).comp hη
-  debt_smooth := hd
 
 end ReservedMeanPatch
 
@@ -1637,25 +1498,6 @@ theorem rank_stream_meanClass (s : WeightedClasses.StripData ChartPoint)
     _root_.neg_apply, ContinuousLinearMap.id_apply] at hder ⊢
   exact hder
 
-theorem concrete_rank_stream_meanClass (coord qlo qhi rlo rhi cL cR A B lam a b α : ℝ)
-    (hc : 0 < coord) (hc1 : coord < 1) (hqlo : 0 < qlo)
-    (hrlo : 0 < rlo) (hcL : 0 < cL) (hcR : 0 < cR)
-    (hlam : 0 < lam) (ha : 0 < a) (hab : a < b) (hB : B ≠ 0)
-    (hleft : rlo < Real.sqrt qlo * a) (hright : Real.sqrt qhi * b < rhi)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    (w : PressureStream.Plane × PressureStream.Plane) {d : ℕ → ChartPoint → Debt}
-    (hd : WeightedClasses.UnweightedClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α d) :
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α (fun n => chartPotential coord A B lam a b (d n)) ∧
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α (fun n => chartStreamRadial coord A B lam a b w (d n)) := by
-  exact rank_stream_meanClass
-    (normalizedStripData coord qlo qhi rlo rhi cL cR hc hc1 hrlo hcL hcR ε S hε hεone hS)
-    hc hc1 hlam ha hab hB hqlo (fun p hp => hp.1)
-    (fun p hp => ⟨hp.2.1.1.le, hp.2.1.2.le⟩) (fun p hp => ⟨hp.2.2.1.le, hp.2.2.2.le⟩)
-    (normalizedStrip_weight_margin coord qlo qhi rlo rhi cL cR a b hc hc1 hrlo hcL hcR
-      ε S hε hεone hS hleft hright) w hd
 
 theorem radial_physical_scale_gain (s : WeightedClasses.StripData ChartPoint) {α : ℝ}
     {β : ℕ → ChartPoint → ℝ} (hβ : WeightedClasses.MeanClass s α β) :
@@ -2009,28 +1851,6 @@ theorem slow_streamPotential_phase_independent (lo hi power M : ℝ) (v : Pressu
     TransportPrimitive.totalIntegral, TransportPrimitive.shift, RadialPullback.normalizeSource,
     RadialPullback.liftChart, PressureStream.weightedSource, slowLift]
 
-/-- Arbitrarily large fast parts of the axial graph direction vanish exactly
-for the slow rank stream. They cannot create a band-dependent loss. -/
-theorem slow_streamBeta_eq_slow_direction (lo hi power M : ℝ) (v : PressureStream.Plane)
-    (f : ℝ × E → ℝ) (w : E) (wfast : PressureStream.Plane) (p : PressureStream.Lift E)
-    (hΨ : DifferentiableAt ℝ (PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f)) p) :
-    PressureStream.streamBeta (w, wfast)
-      (PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f)) p =
-      PressureStream.streamBeta (w, 0)
-        (PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f)) p := by
-  let Ψ := PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f)
-  have he : ∀ t : ℝ, Ψ (p + t • ((0 : ℝ), ((0 : E), wfast))) = Ψ p := by
-    intro t
-    rcases p with ⟨r, s, Y⟩
-    simpa [Ψ] using slow_streamPotential_phase_independent lo hi power M v f r s
-      (Y + t • wfast) Y
-  have hz := fderiv_apply_eq_of_line_eq ((0 : ℝ), ((0 : E), wfast)) hΨ
-    (differentiableAt_const (Ψ p)) he
-  simp only [fderiv_fun_const, Pi.zero_apply, _root_.zero_apply] at hz
-  have hw : ((0 : ℝ), (w, wfast)) = ((0 : ℝ), (w, (0 : PressureStream.Plane))) +
-      ((0 : ℝ), ((0 : E), wfast)) := by ext <;> simp
-  change -(fderiv ℝ Ψ p ((0 : ℝ), (w, wfast))) = -(fderiv ℝ Ψ p ((0 : ℝ), (w, (0 : PressureStream.Plane))))
-  rw [hw, map_add, hz, add_zero]
 
 end AllVelocityClasses
 

@@ -1835,37 +1835,7 @@ theorem profiles_axis_zero {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
   rw [he, A.zero_axis n hn (localIndex i) _ (L.parameter_embedding eta heta)]
   rfl
 
-/-- Joint smoothness up to the axis is inherited from actual local equality. -/
-theorem profiles_inner_smooth {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    {n : ℕ} (hn : 0 < n) (i : Fin 4) :
-    ContDiffOn ℝ ∞ (xProfile (component (profiles s n) i)) (Ico 0 inner ×ˢ S) := by
-  have hl : ContDiffOn ℝ ∞ (SlowRecursion.profile (A.coefficients n (localIndex i)))
-      (Ico 0 inner ×ˢ S) :=
-    (A.profiles_smooth L.radius_pos L.parameter_open n (localIndex i)).mono
-      (fun w hw => ⟨⟨hw.1.1, hw.1.2.trans L.inner_radius⟩, L.parameter_embedding w.2 hw.2⟩)
-  exact hl.congr (fun w hw => profiles_inner_eq L B0 hn i hw.1.1 hw.1.2 hw.2)
 
-/-- All actual mixed right jets, not just the zero-order values, agree at
-the axis.  The derivative is taken relative to the closed half-plane. -/
-theorem profiles_axis_mixed_jets {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    {n : ℕ} (hn : 0 < n) (i : Fin 4) (m : ℕ) {eta : ℝ} (heta : eta ∈ S) :
-    iteratedFDerivWithin ℝ m (xProfile (component (profiles s n) i))
-      (Ici 0 ×ˢ (univ : Set ℝ)) (0, eta) =
-    iteratedFDerivWithin ℝ m (SlowRecursion.profile (A.coefficients n (localIndex i)))
-      (Ici 0 ×ˢ (univ : Set ℝ)) (0, eta) := by
-  have he : xProfile (component (profiles s n) i) =ᶠ[𝓝[Ici 0 ×ˢ (univ : Set ℝ)] (0, eta)]
-      SlowRecursion.profile (A.coefficients n (localIndex i)) := by
-    have hN : ∀ᶠ w : ℝ × ℝ in 𝓝 (0, eta), w.1 < inner ∧ w.2 ∈ S :=
-      (isOpen_Iio.prod s.domain.isOpen).mem_nhds ⟨L.inner_pos, heta⟩
-    filter_upwards [self_mem_nhdsWithin, hN.filter_mono nhdsWithin_le_nhds] with w hw hNw
-    exact profiles_inner_eq L B0 hn i hw.1 hNw.1 hNw.2
-  exact he.iteratedFDerivWithin_eq (profiles_inner_eq L B0 hn i le_rfl L.inner_pos heta) m
 
 theorem profiles_axis_right_jets {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
     {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
@@ -1922,25 +1892,8 @@ theorem compactSupport_of_even_exterior {S : Set ℝ} (f : EvenProfile S) {B : �
     rw [← f.even heta R]
     exact hf eta heta (-R) hneg
 
-theorem profiles_compactSupport {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    {n : ℕ} (hn : 0 < n) (i : Fin 4) {eta : ℝ} (heta : eta ∈ S) :
-    HasCompactSupport (fun R => component (profiles s n) i (R, eta)) := by
-  apply compactSupport_of_even_exterior _ (B := s.B) _ heta
-  fin_cases i
-  · exact profiles_phi_exterior s hn
-  · exact profiles_axial_exterior s n
-  · exact profiles_beta_exterior s n
-  · exact profiles_pressure_exterior s hn
 
-theorem profiles_angular_compactSupport {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : eta ∈ S) :
-    HasCompactSupport (fun R => angularField C (profiles s n).phi (R, eta)) :=
-  (compactSupport_of_even_exterior _ (profiles_phi_exterior s hn) heta).mul_left
 
-theorem profiles_flux_compactSupport {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (n : ℕ) {eta : ℝ} (heta : eta ∈ S) :
-    HasCompactSupport (fun R => R ^ 2 / 2 * (profiles s n).beta (R, eta)) :=
-  (compactSupport_of_even_exterior _ (profiles_beta_exterior s n) heta).mul_left
 
 /-- The radial pressure is literally the forward primitive used by the
 moment module, with the actual preceding radial source retained. -/
@@ -1953,21 +1906,6 @@ theorem profiles_pressureHistory {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
   rw [profiles_pressure_eq s hn]
   exact pressureFromSource_eq_pressureHistory s.domain.isOpen C _ _ n
 
-theorem profiles_fluxHistory {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    {n : ℕ} (hn : 0 < n) {w : ℝ × ℝ} (heta : w.2 ∈ S) :
-    w.1 ^ 2 / 2 * (profiles s n).beta w =
-      PositiveOrderMoments.fluxHistory h (AxisSourceRegularity.slowOrder h n) (profiles s n).axial w := by
-  rw [profiles_beta_eq s hn]
-  exact betaFromU_eq_fluxHistory s.domain _ _ heta
 
-/-- The genuine radial divergence identity holds at every signed radius,
-including the axis, on the original open parameter domain. -/
-theorem profiles_radial_divergence {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    {n : ℕ} (hn : 0 < n) {R eta : ℝ} (heta : eta ∈ S) :
-    HasDerivAt (fun r => r ^ 2 / 2 * (profiles s n).beta (r, eta))
-      (-R * PositiveOrderMoments.radialZ h (-PositiveAxisSystem.a h + AxisSourceRegularity.slowOrder h n)
-        (profiles s n).axial (R, eta)) R := by
-  rw [profiles_beta_eq s hn]
-  exact reconstructed_flux_derivative s.domain _ _ heta
 
 end NavierStokes.GlobalSlowProfiles

@@ -73,13 +73,6 @@ theorem FlatGeometry.uniform {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
   rw [hg.delta_eq x hx, hg.zeta_eq x hx]
   exact hb (ρ x) (hg.position x hx)
 
-theorem logStrip_flatGeometry {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {a b cL cR : ℝ} (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1)
-    (hS : ∀ n, 1 ≤ S n) :
-    FlatGeometry (WeightedRadialPrimitive.logStripData (E := V) a b cL cR ha hcL hcR ε S hε hεone hS)
-      cL cR (WeightedRadialPrimitive.logLength a b) (fun x => WeightedRadialPrimitive.logPosition a x.1) :=
-  ⟨hcL, hcR, fun _ hx => WeightedRadialPrimitive.logPosition_mem ha hx, fun _ _ => rfl, fun _ _ => rfl⟩
 
 theorem movingStrip_flatGeometry {coord : ℝ} (U : LocalSignedRequest.SlowRegion coord)
     {a b cL cR : ℝ} (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
@@ -134,13 +127,6 @@ theorem jets_bound_global_of_support {f : D → E} {U : Set D} {B : ℝ}
   · rw [PhysicalWaveSum.jet_zero_off_tsupport f m (fun ht => hx (hs ht)), norm_zero]
     exact hB
 
-omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
-theorem tsupport_subset_closure_of_zero {f : D → E} {U : Set D}
-    (hf : ∀ x, x ∉ closure U → f x = 0) : tsupport f ⊆ closure U := by
-  apply closure_minimal _ isClosed_closure
-  intro x hx
-  by_contra hn
-  exact hx (hf x hn)
 
 theorem UniformClass.edge_absorbed_global {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
     (hg : FlatGeometry s cL cR L ρ) {c α : ℝ} (hc : 0 < c)
@@ -248,29 +234,7 @@ theorem SourceBounds.chart_bound {s : StripData D} {h α : ℝ}
   obtain ⟨K, hK, q, hq⟩ := hf.slow_le
   exact UniformClass.chart_bound hg hc hK hf.epsilon_eq hq hf.uniform hw hf.smooth hf.support m
 
-theorem SourceBounds.of_wave {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {h α K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hε : ∀ n, s.epsilon n = ChartScales.epsilon h n)
-    (hslow : ∀ n, 4 ≤ n → s.slow n ≤ K * ChartScales.S n ^ q)
-    {P : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : UniformWaveClass s P α f)
-    (hP : ∀ l n x, x ∈ s.domain → P l n x ≤ 1)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) :
-    SourceBounds s h α (fun l n x => Real.sqrt (s.zeta x) * P l n x) f :=
-  ⟨hf, ⟨cL, cR, L, ρ, hg⟩, ⟨1 / 2, by norm_num, waveWeight_le hP⟩,
-    hε, ⟨K, hK, q, hslow⟩, hfc, hs⟩
 
-theorem SourceBounds.of_mean {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {h α K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hε : ∀ n, s.epsilon n = ChartScales.epsilon h n)
-    (hslow : ∀ n, 4 ≤ n → s.slow n ≤ K * ChartScales.S n ^ q)
-    {f : ι → ℕ → D → E} (hf : UniformMeanClass s α f)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) :
-    SourceBounds s h α (fun _ _ x => s.zeta x) f :=
-  ⟨hf, ⟨cL, cR, L, ρ, hg⟩, ⟨1, by norm_num, by intro l n x hx; rw [Real.rpow_one]⟩,
-    hε, ⟨K, hK, q, hslow⟩, hfc, hs⟩
 
 theorem SourceBounds.map {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     {s : StripData D} {h α : ℝ} {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
@@ -501,30 +465,6 @@ theorem physical_vector_sum_jet_bound {s : StripData D} {h α σ a b r0 Z P : �
       (mul_le_mul_of_nonneg_right (hi i) (Real.rpow_pos_of_pos hq _).le))
   exact he.trans_eq (by ring)
 
-/-- Taking the real part, as for the physical pressure, loses no constant. -/
-theorem physical_real_sum_jet_bound {s : StripData D} {h α σ a b r0 Z P : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H Δ : ℕ} {F : PhysicalWaveSum.WaveFamily H}
-    (hc : CommonChart F a b h r0 σ f) (hb : CarrierBounds F a b h r0)
-    (hr : PhysicalWaveSum.RegularFamily F a b h r0 Z Δ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0)
-    (hP : 1 ≤ P) (hp : ∀ L, |(F.carrier L).angular| ≤ P ∧
-      |(F.carrier L).axial| ≤ P ∧ |(F.carrier L).radial| ≤ P) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ z : ProblemStatement.SpaceTime,
-      z ∈ PhysicalWaveSum.preterminal → |z.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (fun z => (F.sum a h r0 z).re) z‖ ≤
-        C * PhysicalWaveSum.physicalQ h z ^ (h * α - physicalLoss h σ m) := by
-  obtain ⟨C, hC, hbound⟩ := physical_sum_jet_bound hf hc hb hr hh hh1 ha hZ hr0 hP hp m
-  refine ⟨C, hC, ?_⟩
-  intro z hz ht
-  have hsm := ((hr.sum_smooth ha hh hh1).contDiffAt
-    (PhysicalWaveSum.preterminal_open.mem_nhds hz)).of_le (nat_le_infty m)
-  have he := PhysicalWaveSum.norm_jet_linear_comp_at hsm Complex.reCLM
-  have hn : ‖Complex.reCLM‖ ≤ 1 := by
-    apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-    intro c
-    simpa only [Complex.reCLM_apply, one_mul, Real.norm_eq_abs] using Complex.abs_re_le_norm c
-  exact he.trans ((mul_le_of_le_one_left (norm_nonneg _) hn).trans (hbound z hz ht))
 
 /-- Inclusion of a spatial direction into a joint spacetime direction. -/
 noncomputable def spatialInclusion : ProblemStatement.Space →L[ℝ] ProblemStatement.SpaceTime :=
@@ -564,26 +504,6 @@ theorem spatialCurl_jet_bound {A : ProblemStatement.VelocityField}
   have hb := PhysicalWaveSum.norm_jet_linear_comp_at (hd.of_le (nat_le_infty m)) jointCurl
   simpa only [norm_iteratedFDeriv_fderiv] using hb
 
-theorem physical_vector_curl_jet_bound {s : StripData D} {h α σ a b r0 Z P : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H Δ : ℕ} {F : Fin 3 → PhysicalWaveSum.WaveFamily H}
-    (hc : ∀ i, CommonChart (F i) a b h r0 σ f)
-    (hb : ∀ i, CarrierBounds (F i) a b h r0)
-    (hr : ∀ i, PhysicalWaveSum.RegularFamily (F i) a b h r0 Z Δ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0)
-    (hP : 1 ≤ P) (hp : ∀ i L, |((F i).carrier L).angular| ≤ P ∧
-      |((F i).carrier L).axial| ≤ P ∧ |((F i).carrier L).radial| ≤ P) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ z : ProblemStatement.SpaceTime,
-      z ∈ PhysicalWaveSum.preterminal → |z.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (SpatialCurl.spatialCurl (PhysicalWaveSum.vectorSum F a h r0)) z‖ ≤
-        C * PhysicalWaveSum.physicalQ h z ^ (h * α - physicalLoss h σ (m + 1)) := by
-  obtain ⟨C, hC, hbound⟩ := physical_vector_sum_jet_bound hf hc hb hr
-    hh hh1 ha hZ hr0 hP hp (m + 1)
-  refine ⟨‖jointCurl‖ * C, mul_nonneg (norm_nonneg jointCurl) hC, ?_⟩
-  intro z hz ht
-  exact (spatialCurl_jet_bound PhysicalWaveSum.preterminal_open
-    (PhysicalWaveSum.vectorSum_smooth hr ha hh hh1) hz m).trans
-      ((mul_le_mul_of_nonneg_left (hbound z hz ht) (norm_nonneg jointCurl)).trans_eq (by ring))
 
 @[simp] theorem physicalLoss_potential (h : ℝ) (m : ℕ) :
     physicalLoss h (-h) m = PhysicalGraphBounds.waveLoss h m + h := by
@@ -717,23 +637,5 @@ theorem commonLift_mem_cylindricalDomain {a b : ℝ} (ha : 0 < a)
     simpa only [Metric.mem_closedBall, dist_zero_right] using hz.1
   constructor <;> linarith
 
-/-- Direct adapter for a genuine cylindrical coefficient.  No coordinate
-derivative estimate is assumed: the preceding theorems prove it. -/
-noncomputable def cylindricalCommonChart {H : ℕ} (F : PhysicalWaveSum.WaveFamily H)
-    (a b h r0 σ : ℝ) (ha : 0 < a) (f : ι → ℕ → CylindricalPoint → ℂ)
-    (index : PhysicalWaveSum.WaveIndex H → ι)
-    (he : ∀ I, F.amplitude I = fun x =>
-      (ChartScales.Q I.1.val.1 ^ σ) • f (index I) I.1.val.1 (cylindricalMap x)) :
-    CommonChart F a b h r0 σ f where
-  sourceIndex := index
-  map _ := cylindricalMap
-  domain _ := cylindricalDomain a b
-  open_domain _ := cylindricalDomain_open a b
-  smooth _ := cylindricalMap_smooth ha
-  positive_jets m := by
-    obtain ⟨B, hB, hb⟩ := cylindricalMap_positiveJets (b := b) ha m
-    exact ⟨B, hB, 0, fun _ x hx j hj hjm => by simpa using hb x hx j hj hjm⟩
-  amplitude_eq := he
-  contains I z _ _ hz := commonLift_mem_cylindricalDomain ha h I.1.val.1 (F.gap I.1) z hz
 
 end NavierStokes.PhysicalClassBounds

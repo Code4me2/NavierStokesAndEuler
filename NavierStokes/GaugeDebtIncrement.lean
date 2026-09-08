@@ -178,11 +178,6 @@ theorem radialMoment_sub_on {f g : Scalar} (hf : Regular U a b f) (hg : Regular 
   obtain ⟨lo, hi, _, _, _, _, _, hl, hr, _⟩ := VariableGaugeMean.qLength_reference_bounds U ha hab
   exact LocalRankDefect.barMoment_sub_on U.isOpen (hf.containing hl hr) (hg.containing hl hr) k n hx
 
-theorem radialMoment_add_on {f g : Scalar} (hf : Regular U a b f) (hg : Regular U a b g)
-    (k n : ℕ) {x : Plane} (hx : x ∈ U.carrier) :
-    radialMoment k (f + g) n x = radialMoment k f n x + radialMoment k g n x := by
-  obtain ⟨lo, hi, _, _, _, _, _, hl, hr, _⟩ := VariableGaugeMean.qLength_reference_bounds U ha hab
-  exact LocalRankDefect.barMoment_add_on U.isOpen (hf.containing hl hr) (hg.containing hl hr) k n hx
 
 end Moments
 
@@ -292,19 +287,6 @@ theorem agree_slow_of_positive {coord a b : ℝ} {U : SlowRegion coord} {f g : S
   · rw [hf.zero_of_nonpositive ha n hz (le_of_not_gt hR),
       hg.zero_of_nonpositive ha n hz (le_of_not_gt hR)]
 
-theorem moving_subset_positive {coord a b cL cR : ℝ} (U : SlowRegion coord)
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n) :
-    (movingStripData U a b cL cR ha hcL hcR ε L hε hεone hL).domain ⊆
-      LocalRankDefect.positiveDomain U.carrier := by
-  intro z hz
-  have hh := (movingStrip_domain U a b cL cR ha hcL hcR ε L hε hεone hL z).mp hz
-  refine ⟨?_, hh.1⟩
-  have hpos := VariableGaugeMean.qLength_pos U.coord_pos U.coord_lt_one (U.time_pos _ hh.1)
-  have hr : 0 < z.1 / VariableGaugeMean.qLength coord z.2.1 := ha.trans hh.2.1
-  have he := (lt_div_iff₀ hpos).mp hr
-  simp only [zero_mul] at he
-  exact he
 
 theorem radialMoment_congr_on {U : Set Plane} {f g : Scalar}
     (he : Agree (PhysicalMeanDomain.slowDomain U) f g) (k n : ℕ) {x : Plane} (hx : x ∈ U) :
@@ -496,23 +478,6 @@ theorem temporalStage_covariance_regular (i j : Fin 3) :
   rw [temporalStage_covariance]
   exact hW i j
 
-include ha hab hop hb hm hi hW in
-/-- Only the actual mean increment contributes to the temporal flux change;
-the covariance remains the same actual angular integral. -/
-theorem temporalStage_debt_change_formula (n : ℕ) {x : Plane} (hx : x ∈ U.carrier) :
-    debt c (VariableGaugeMean.temporalStageState g h index axial c u) n x - debt c u n x =
-      momentChange
-        ((VariableGaugeMean.temporalStageState g h index axial c u).gr c - u.gr c)
-        (deltaThetaAxial c.base u.mean (VariableGaugeMean.temporalIncrementState g h index axial c u))
-        (deltaAxialAxial c.base u.mean (VariableGaugeMean.temporalIncrementState g h index axial c u)) n x := by
-  have hmu := temporalStage_mean_regular U g h index axial c u hm hi
-  have hWv := temporalStage_covariance_regular U g h index axial c u hW
-  have he := debt_sub_eq U ha hab c u (VariableGaugeMean.temporalStageState g h index axial c u)
-    (hm.gr ha hab hb hop u.covariance hW)
-    (hmu.gr ha hab hb hop (VariableGaugeMean.temporalStageState g h index axial c u).covariance hWv)
-    ((hm.thetaAxial ha hab hb).add (hW 2 1)) ((hmu.thetaAxial ha hab hb).add (hWv 2 1))
-    ((hm.axialAxial ha hab hb).add (hW 2 2)) ((hmu.axialAxial ha hab hb).add (hWv 2 2)) n hx
-  rwa [temporal_thetaFlux_change, temporal_axialFlux_change] at he
 
 end TemporalRegularity
 
@@ -664,14 +629,6 @@ theorem temporalStage_debt_mem {β : ℝ} (hβ : H ≤ β)
     (temporalStage_debt_change_mem U ha hab hcL hcR ε L hε hεone hL g h index axial c u
       hop hb hm hi hW ho hbC hmC hiC hH hκ)
 
-theorem temporalStage_defectBounds {σ τ : ℝ} (hσ : τ ≤ σ) (hτ : 1 + τ ≤ H)
-    (hold : DefectBounds (PhysicalMeanDomain.localSlowStripData U.carrier U.isOpen
-      ε L hε hεone hL) σ c u) :
-    DefectBounds (PhysicalMeanDomain.localSlowStripData U.carrier U.isOpen
-      ε L hε hεone hL) τ c (VariableGaugeMean.temporalStageState g h index axial c u) :=
-  defectBounds_after_change _ c u _ hσ hτ hold
-    (temporalStage_debt_change_mem U ha hab hcL hcR ε L hε hεone hL g h index axial c u
-      hop hb hm hi hW ho hbC hmC hiC hH hκ)
 
 end TemporalNextDebt
 

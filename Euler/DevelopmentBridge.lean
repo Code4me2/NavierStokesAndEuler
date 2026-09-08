@@ -21,26 +21,8 @@ namespace Euler.ComparatorBridge
 
 local notation "ℝ³" => EuclideanSpace ℝ (Fin 3)
 
-theorem divergence_eq_development (v : ℝ³ → ℝ³) (x : ℝ³) :
-    Euler.divergence v x = EulerSmoothLimit.divergence v x := rfl
 
-theorem admissible_initial_data
-    (A : EulerLpTranslation.SmoothL2Field ℝ³) (hc : HasCompactSupport A.field)
-    (hd : ∀ x, EulerSmoothLimit.divergence A.field x = 0) :
-    InitialVelocityConditionDecay A.field :=
-  initialVelocityConditionDecay_of_compact A.field A.smooth hc hd
 
-theorem exists_smoothL2Field_iff
-    {u₀ : ℝ³ → ℝ³} {v : ℝ³ → ℝ → ℝ³} {p : ℝ³ → ℝ → ℝ}
-    (h : EulerExistenceAndSmoothnessR3 u₀ v p) (t : ℝ) (ht : 0 ≤ t) :
-    (∃ A : EulerLpTranslation.SmoothL2Field ℝ³, A.field = (v · t)) ↔
-      ∀ m : ℕ, MemLp (iteratedFDeriv ℝ m (v · t)) 2 volume := by
-  constructor
-  · rintro ⟨A, hA⟩ m
-    rw [← hA]
-    exact A.integrable m
-  · intro hjets
-    exact ⟨⟨(v · t), h.velocity_contDiff t ht, hjets⟩, rfl⟩
 
 /-- A conversion once the required all-order spatial integrability is proved.
 This hypothesis is deliberately explicit; the Comparator does not provide it. -/

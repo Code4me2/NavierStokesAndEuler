@@ -58,10 +58,5 @@ theorem tsupport_iteratedFDeriv_subset (f : Space → ℂ) (n : ℕ) :
     tsupport (iteratedFDeriv ℝ n f) ⊆ tsupport f :=
   _root_.tsupport_iteratedFDeriv_subset n
 
-/-- Each iterated derivative of a compactly supported test has compact support. -/
-theorem hasCompactSupport_iteratedFDeriv (f : Space → ℂ)
-    (hc : HasCompactSupport f) (n : ℕ) :
-    HasCompactSupport (iteratedFDeriv ℝ n f) :=
-  hc.iteratedFDeriv n
 
 end NavierStokesR3.CompactSchwartz

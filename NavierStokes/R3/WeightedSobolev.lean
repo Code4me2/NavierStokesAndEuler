@@ -27,12 +27,6 @@ def sobolevConstant : ℝ :=
 
 theorem sobolevConstant_nonneg : 0 ≤ sobolevConstant := NNReal.coe_nonneg _
 
-/-- Compactly supported continuous functions have finite norms at every
-exponent, including infinity. -/
-theorem memLp_of_compact {E : Type*} [NormedAddCommGroup E]
-    {f : Space → E} (hf : Continuous f) (hs : HasCompactSupport f)
-    (p : ℝ≥0∞) : MemLp f p (volume : Measure Space) :=
-  hf.memLp_of_hasCompactSupport hs
 
 /-- Mathlib's homogeneous Sobolev inequality specialized to Euclidean `R³`.
 The finite derivative norm is supplied by compact support and `C¹` regularity. -/
@@ -132,14 +126,6 @@ theorem norm_cutoffGradientAmplitude_sq (φ : Space → ℝ) (w : Space → Spac
     Real.sq_sqrt (GradientOperator.gradientSq_nonneg w x)]
   ring
 
-/-- The weighted dissipation integral is finite solely from local regularity. -/
-theorem integrable_weighted_gradientSq {φ : Space → ℝ} {w : Space → Space}
-    (hφ : Continuous φ) (hs : HasCompactSupport φ) (hw : ContDiff ℝ 1 w) :
-    Integrable (fun x => φ x ^ 8 * gradientSq w x) volume := by
-  have hp : HasCompactSupport (fun x => φ x ^ 8) :=
-    hs.comp_left (g := fun r : ℝ => r ^ 8) (by norm_num)
-  exact ((hφ.pow 8).mul (GradientOperator.continuous_gradientSq hw)).integrable_of_hasCompactSupport
-    hp.mul_right
 
 theorem lpNorm_cutoffGradientAmplitude {φ : Space → ℝ} {w : Space → Space}
     (hφ : Continuous φ) (hs : HasCompactSupport φ) (hw : ContDiff ℝ 1 w) :

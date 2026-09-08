@@ -24,18 +24,11 @@ open RadialHeatProfile
 /-- The actual right endpoint jets, as derived from the integral kernels. -/
 noncomputable def endpointJet (a : ℝ) (n : ℕ) : ℝ := profileJet a n 0
 
-theorem endpointJet_eq_gamma {a : ℝ} (ha : 1 < a) (n : ℕ) :
-    endpointJet a n =
-      (Real.Gamma a)⁻¹ * derivativeCoeff a n * Real.Gamma (a + (n : ℝ)) := by
-  rw [endpointJet, profileJet, moment_zero ha]
 
 theorem endpointJet_eq_right_derivative {a : ℝ} (ha : 1 < a) (n : ℕ) :
     endpointJet a n = iteratedDerivWithin n (profile a) (Ici 0) 0 :=
   (iteratedDerivWithin_profile ha n le_rfl).symm
 
-theorem profileJet_continuousOn {a : ℝ} (ha : 1 < a) (n : ℕ) :
-    ContinuousOn (profileJet a n) (Ici 0) :=
-  continuousOn_const.mul (moment_continuousOn ha n)
 
 /-- The negative branch is the actual compactly supported Borel series. -/
 noncomputable def leftBranch (a : ℝ) : ℝ → ℝ := BorelExtension.extension (endpointJet a)
@@ -98,21 +91,12 @@ theorem iteratedDeriv_extension_zero {a : ℝ} (ha : 1 < a) (n : ℕ) :
     iteratedDeriv n (extension a) 0 = endpointJet a n :=
   iteratedDeriv_extension_eq_profileJet ha n le_rfl
 
-theorem extension_preserves_right_jets {a : ℝ} (ha : 1 < a) (n : ℕ) :
-    iteratedDeriv n (extension a) 0 =
-      iteratedDerivWithin n (profile a) (Ici 0) 0 :=
-  (iteratedDeriv_extension_zero ha n).trans (endpointJet_eq_right_derivative ha n)
 
 theorem extension_pos {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
     0 < extension a z := by
   rw [extension_eq_profile a hz]
   exact profile_pos ha hz
 
-theorem extension_zero_of_le_neg_one (a : ℝ) {z : ℝ} (hz : z ≤ -1) :
-    extension a z = 0 := by
-  rw [extension_eq_leftBranch a (by linarith)]
-  exact BorelExtension.extension_zero_of_one_le_abs (endpointJet a)
-    ((by linarith : (1 : ℝ) ≤ -z).trans (neg_le_abs z))
 
 /-! ## Global fixed-order derivative bounds -/
 
@@ -174,15 +158,6 @@ theorem extension_positive_near_zero {a : ℝ} (ha : 1 < a) :
   refine ⟨δ, hδ, fun z hz => hnear ?_⟩
   simpa only [Real.dist_eq, sub_zero] using hz
 
-theorem extension_positive_on_collar {a : ℝ} (ha : 1 < a) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ z : ℝ, -δ < z → 0 < extension a z := by
-  obtain ⟨δ, hδ, hnear⟩ := extension_positive_near_zero ha
-  refine ⟨δ, hδ, fun z hz => ?_⟩
-  by_cases hnonneg : 0 ≤ z
-  · exact extension_pos ha hnonneg
-  · have hz0 : z < 0 := lt_of_not_ge hnonneg
-    have hsmall : |z| < δ := by rw [abs_of_neg hz0]; linarith
-    exact lt_trans (by norm_num) (hnear z hsmall).1
 
 /-! ## Physical parameter composition -/
 
@@ -216,13 +191,6 @@ theorem iteratedDeriv_scaledProfile {a : ℝ} (ha : 1 < a) (n : ℕ) (X ν : ℝ
     ((extension_contDiff ha).of_le (ENat.natCast_le_of_coe_top_le_withTop le_rfl n)) (2 / X)) ν
   simpa only [show 2 / X * ν = 2 * ν / X by ring] using h
 
-theorem scaledProfile_derivative_bound {a X : ℝ} (ha : 1 < a) (hX : 0 < X)
-    (n : ℕ) (ν : ℝ) :
-    |iteratedDeriv n (scaledProfile a X) ν| ≤ (2 / X) ^ n * derivativeBound a n := by
-  rw [iteratedDeriv_scaledProfile ha, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (2 / X) ^ n)]
-  exact mul_le_mul_of_nonneg_left
-    (by simpa only [Real.norm_eq_abs] using extension_derivative_bound ha n (2 * ν / X))
-    (by positivity)
 
 /-- On a bounded diffusion set this supplies a uniform inverse-radius
 majorant on either side of zero diffusion. -/

@@ -91,33 +91,8 @@ theorem reindexState_symm {ι κ : Type} (e : κ ≃ ι)
   rcases x with ⟨state, coefficients, axis⟩
   simp only [reindexState, reindexCoefficients_symm]
 
-theorem reindexCoefficients_sum {ι κ : Type} (e : κ ≃ ι)
-    (v : CycleCoefficients ι) {E : Type*} [AddCommMonoid E]
-    (n : ℕ) (f : ι → E) :
-    (∑ l ∈ (reindexCoefficients e v).labels n, f (e l)) = ∑ l ∈ v.labels n, f l := by
-  classical
-  simp [reindexCoefficients]
 
-theorem reindexState_representation {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι)
-    (H : CycleRepresentation x.coefficients x.state x.axisymmetricAlias) :
-    CycleRepresentation (reindexState e x).coefficients (reindexState e x).state
-      (reindexState e x).axisymmetricAlias := by
-  constructor
-  · intro n z i
-    simpa [reindexState, reindexCoefficients] using H.velocity n z i
-  · intro n z
-    simpa [reindexState, reindexCoefficients] using H.pressure n z
-  · intro n z i
-    simpa [reindexState, reindexCoefficients] using H.gaussian n z i
-  · intro n z i
-    simpa [reindexState, reindexCoefficients] using H.aliasError n z i
 
-theorem reindexState_bands {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι) (H : CoefficientBands x.coefficients) :
-    CoefficientBands (reindexState e x).coefficients :=
-  ⟨fun l => H.velocityPressure (e l), fun l => H.gaussian (e l),
-    fun l => H.aliasError (e l)⟩
 
 /-! ## The two label orders describe the same primary choice -/
 
@@ -157,9 +132,6 @@ noncomputable def particularState {B N0 : ℕ} (x : CycleState (Index B N0)) :
   simpa only [particularState, reindexState, Equiv.symm_apply_apply] using
     reindexCoefficients_mem (swap B N0).symm x.coefficients n (swap B N0 l)
 
-theorem particularState_roundtrip {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    reindexState (swap B N0) (particularState x) = x :=
-  reindexState_symm (swap B N0).symm x
 
 /-! ## The actual four-stage parameter constructor -/
 
@@ -179,9 +151,6 @@ noncomputable def parametersInParticularOrder {B N0 : ℕ}
     (ActualParticularStageControls.parameters x)
     (fun l => ActualSignedStageControls.parameters ((swap B N0).symm l)) ActualPrimary.rankData
 
-theorem parameters_swap {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    reindexParameters (swap B N0).symm (parameters x) =
-      parametersInParticularOrder (particularState x) := rfl
 
 @[simp] theorem parameters_gauge {B N0 : ℕ} (x : CycleState (Index B N0)) :
     (parameters x).gauge = ActualPrimary.commonGauge := rfl
@@ -216,20 +185,8 @@ theorem parameters_swap {B N0 : ℕ} (x : CycleState (Index B N0)) :
     (l : Index B N0) :
     (parameters x).signed l = ActualSignedStageControls.parameters l := rfl
 
-theorem parameters_indexBounds {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    CommonBaseContext.IndexBounds ActualPrimary.h (parameters x).commonIndex
-      (CommonWindow.gap ActualPrimary.h) :=
-  CommonWindow.indexBounds ActualPrimary.h ActualPrimary.outgoing.data.h_pos.le
 
-theorem parameters_geometry_operators {B N0 : ℕ} (_x : CycleState (Index B N0)) :
-    ActualInitialization.geometry.operators = (ActualPrimary.commonContext B).operators := rfl
 
-theorem parameters_compatible {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    ActualCycleExcluded.Compatible ActualCycleGeometry.similarityData (parameters x)
-      (ActualPrimary.commonContext B) :=
-  ActualCycleGeometry.compatible B
-    (fun l => ActualParticularStageControls.parameters (particularState x) (swap B N0 l))
-    ActualSignedStageControls.parameters
 
 /-- The physical band floor belongs to the already selected primary
 choice and does not change with the current correction state. -/
@@ -239,16 +196,8 @@ noncomputable def sourceBand {B N0 : ℕ} (l : Index B N0) : ℕ := BaseChartJet
 
 theorem bandFloor_ge (B N0 : ℕ) : N0 ≤ bandFloor B N0 := ActualPrimary.threshold B N0
 
-theorem sourceBand_ge_floor {B N0 : ℕ} (l : Index B N0) :
-    bandFloor B N0 ≤ sourceBand l := l.1.property
 
-theorem particular_reference_band {B N0 : ℕ} (l : Index B N0) :
-    (ActualParticularStageControls.reference (swap B N0 l)).band = sourceBand l := rfl
 
-theorem particular_gap {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
-    ActualParticularStageControls.gap (swap B N0 l) n =
-      ChartScales.nativeIndex ActualPrimary.h (sourceBand l) -
-        CommonWindow.index ActualPrimary.h n := rfl
 
 theorem activeLabel_band {B N0 : ℕ} (n : ℕ) (l : Index B N0)
     (hl : l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n) :
@@ -266,58 +215,15 @@ theorem activeLabel_index {B N0 : ℕ} (n : ℕ) (l : Index B N0)
       ChartScales.nativeIndex ActualPrimary.h (sourceBand l) :=
   CommonWindow.index_le (activeLabel_band n l hl)
 
-theorem activeLabel_particular {B N0 : ℕ} (n : ℕ) (hn : 1 ≤ n) (l : Index B N0)
-    (hl : l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n) :
-    1 ≤ n ∧ BaseChartJets.cellBand (swap B N0 l).2 ∈ CommonWindow.levels n :=
-  ⟨hn, activeLabel_band n l hl⟩
 
 /-! The particular source really is the current stored residual. -/
 
-theorem particular_assembly_context {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (ActualParticularStageControls.assembly (particularState x) (swap B N0 l)).context =
-      StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B) := rfl
 
-theorem particular_assembly_state {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (ActualParticularStageControls.assembly (particularState x) (swap B N0 l)).state =
-      StateReindex.state cycleAssoc.symm x.state := rfl
 
-theorem particular_assembly_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (ActualParticularStageControls.assembly (particularState x) (swap B N0 l)).carrierBlock =
-      StateReindex.block cycleAssoc.symm (x.coefficients.blocks l) := rfl
 
-theorem particular_assembly_gaussian {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (ActualParticularStageControls.assembly (particularState x) (swap B N0 l)).gaussianInput =
-      StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l) := rfl
 
-theorem particular_assembly_alias {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (ActualParticularStageControls.assembly (particularState x) (swap B N0 l)).aliasInput =
-      StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l) := rfl
 
-theorem particular_source {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) (j : ℤ) :
-    (((parameters x).particular l).copyData
-      (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
-      (StateReindex.state cycleAssoc.symm x.state)
-      (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j).source =
-    ParticularWaveAssembly.sourceFamily
-      (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
-      (StateReindex.state cycleAssoc.symm x.state)
-      (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j := rfl
 
-theorem signed_request {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).signedRequest x.coefficients (ActualPrimary.commonContext B) x.state =
-      LocalSignedRequest.fullRequest ActualInitialization.strip ActualInitialization.patch
-        (2 * ActualPrimary.h) (ActualPrimary.commonContext B)
-        ((parameters x).afterParticular x.coefficients (ActualPrimary.commonContext B) x.state) := rfl
 
 /-! ## The signed update uses the initialized primary carrier -/
 
@@ -383,32 +289,9 @@ theorem parameters_signed_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
     ((parameters x).signedRequest x.coefficients c x.state)
   exact ⟨hs.frequency.trans H.frequency, hs.phase.trans H.phase, hs.angular.trans H.angular⟩
 
-theorem parameters_particular_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
-    (c : Context CyclePoint) (l : Index B N0) :
-    SameCarrier (x.coefficients.blocks l)
-      ((parameters x).particularBlock x.coefficients c x.state l) :=
-  (parameters x).particular_carrier x.coefficients c x.state l
 
-theorem parameters_gaussian_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
-    (c : Context CyclePoint) (l : Index B N0) :
-    SameCarrier (x.coefficients.blocks l)
-      ((parameters x).particularGaussianBlock x.coefficients c x.state l) :=
-  (parameters x).particularGaussian_carrier x.coefficients c x.state l
 
-theorem invariant_signed_carrier {B N0 : ℕ} {x : CycleState (Index B N0)}
-    {P : Index B N0 → ℕ → CyclePoint → ℝ}
-    {labelCarrier : Index B N0 → ℕ → Set CyclePoint} {sigma : ℝ}
-    (H : CycleAnalyticInvariant ActualInitialization.geometry (ActualPrimary.commonContext B)
-      ActualInitialization.tangentBlock P labelCarrier sigma x) (l : Index B N0) :
-    SameCarrier (x.coefficients.blocks l)
-      ((parameters x).signedBlock x.coefficients (ActualPrimary.commonContext B) x.state l) :=
-  parameters_signed_carrier x _ l (H.carrier l)
 
-theorem initial_signed_carrier (B N0 : ℕ) (l : Index B N0) :
-    let x := ActualInitialization.initialCycleState B N0
-    SameCarrier (x.coefficients.blocks l)
-      ((parameters x).signedBlock x.coefficients (ActualPrimary.commonContext B) x.state l) :=
-  parameters_signed_carrier _ _ l (ActualInitialization.primary_tangent_carrier l)
 
 /-! ## The same fixed primitives at every valid state -/
 
@@ -449,12 +332,6 @@ noncomputable def fixedParameters (B N0 : ℕ) : CycleParameters (Index B N0) :=
 @[simp] theorem fixedParameters_rank (B N0 : ℕ) :
     (fixedParameters B N0).rank = ActualPrimary.rankData := rfl
 
-theorem fixedParameters_compatible (B N0 : ℕ) :
-    ActualCycleExcluded.Compatible ActualCycleGeometry.similarityData (fixedParameters B N0)
-      (ActualPrimary.commonContext B) :=
-  ActualCycleGeometry.compatible B
-    (fun l => ActualParticularStageControls.canonicalParameters (swap B N0 l))
-    ActualSignedStageControls.parameters
 
 theorem current_frequency {B N0 : ℕ} (x : CycleState (Index B N0)) (l : Index B N0)
     (H : SameCarrier (x.coefficients.blocks l) (ActualInitialization.tangentBlock l)) (n : ℕ) :
@@ -492,9 +369,6 @@ theorem invariant_parameters_eq_fixed {B N0 : ℕ} {x : CycleState (Index B N0)}
       ActualInitialization.tangentBlock P labelCarrier sigma x) :
     parameters x = fixedParameters B N0 := parameters_eq_fixed x H.carrier
 
-theorem initial_parameters_eq_fixed (B N0 : ℕ) :
-    parameters (ActualInitialization.initialCycleState B N0) = fixedParameters B N0 :=
-  parameters_eq_fixed _ ActualInitialization.primary_tangent_carrier
 
 theorem fixedParameters_signed_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
     (c : Context CyclePoint) (l : Index B N0)

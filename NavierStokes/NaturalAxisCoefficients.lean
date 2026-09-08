@@ -426,20 +426,6 @@ theorem CoefficientFamily.compatible {h j σ : ℝ} {P : ℝ → ℝ}
   change deriv (fun y : ℝ => 4 * y + j) x = 4
   simp
 
-theorem ideal_prefix_fixed_coefficients {h j : ℝ}
-    (hsmall : NaturalAxisData.SmallParameters h j)
-    {g a : ℝ → ℝ} {cap B : ℝ}
-    (hp : PressureDatum.Admissible g a cap) (hB : 2 ≤ B)
-    (hg : ∀ y ≤ 0, g y = B ^ 2 * Real.exp ((1 / 5 : ℝ) * y))
-    (ha : ∀ y ≤ 0, a y = 1) :
-    ∃ δ σ : ℝ, 0 < δ ∧ 0 < σ ∧
-      (∀ x ∈ Icc (-1 : ℝ) 1,
-        |NaturalAxisData.Z h j (PressureDatum.pressure g a) x| ≤ δ →
-          99 / 100 < NaturalAxisData.chi h j σ x) ∧
-      Nonempty (CoefficientFamily h j σ (PressureDatum.pressure g a)) := by
-  obtain ⟨δ, σ, hδ, hσ, hcut, _⟩ :=
-    NaturalAxisData.ideal_prefix_cutoff_parameters hsmall hp hB hg ha
-  exact ⟨δ, σ, hδ, hσ, hcut, exists_coefficientFamily hsmall hσ hp⟩
 
 /-- The actual normalized logarithmic phase, as a complex segment integral. -/
 def axisPhase (h j σ : ℝ) : ℂ → ℂ :=
@@ -520,14 +506,6 @@ theorem realAmplitude_pos (h j σ Λ : ℝ) {C : ℝ} (hC : 0 < C) (x : ℝ) :
     0 < realAmplitude h j σ Λ C x :=
   div_pos (Real.exp_pos _) hC
 
-/-- The true logarithmic derivative is the prescribed `ξ₀=Λκ`. -/
-theorem AnalyticInputs.realAmplitude_logDerivative {h j σ : ℝ} {P : ℝ → ℝ}
-    (d : AnalyticInputs h j σ P) (Λ : ℝ) {C : ℝ} (hC : 0 < C)
-    {x : ℝ} (hx : x ∈ window.interval) :
-    deriv (realAmplitude h j σ Λ C) x / realAmplitude h j σ Λ C x =
-      Λ * realGradient h j σ x := by
-  rw [(d.realAmplitude_hasDerivAt Λ C hx).deriv]
-  exact mul_div_cancel_right₀ _ (realAmplitude_pos h j σ Λ hC x).ne'
 
 def AnalyticInputs.normalizationThreshold {h j σ : ℝ} {P : ℝ → ℝ}
     (d : AnalyticInputs h j σ P) (Λ : ℝ) : ℝ :=

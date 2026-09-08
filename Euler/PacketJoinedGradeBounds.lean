@@ -157,15 +157,7 @@ theorem derivative_grade_bound :
       (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
   (L.grade_bounds N W G F c hc p hp hforce).2.1
 
-theorem corrector_grade_bound :
-    ((correctorField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)
-      (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
-  (L.grade_bounds N W G F c hc p hp hforce).2.2.1
 
-theorem corrector_derivative_grade_bound :
-    ((correctorDerivativeField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)
-      (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
-  (L.grade_bounds N W G F c hc p hp hforce).2.2.2.1
 
 theorem pressure_gradient_grade_bound :
     ((scalarGradientField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)

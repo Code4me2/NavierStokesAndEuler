@@ -232,49 +232,7 @@ theorem pressureMode_band (x : CorrectionStep.CycleState (Label B N0)) (l : Labe
       j hj z hz (by rw [ActualParticularCoherence.parameterChange_slow]; exact hmap hz)).2.1
   · exact ActualParticularCoherence.phase_band x l n m k hi HB j hj (hf n) (hf m) z hz
 
-theorem pressureMode_band_sq (x : CorrectionStep.CycleState (Label B N0)) (l : Label B N0)
-    (I : ActualParticularCoherence.SourceInputs x l)
-    (hfrequency : ∀ n, (x.coefficients.blocks l).frequency n = ChartScales.carrier h n)
-    {V : Set TorusInverse.Plane} (hV : IsOpen V) (htime : ∀ s ∈ V, 0 < s.1)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (hmap : MapsTo (GaugeStateCoherence.bandSlowEquiv h n m) V standardRegion.carrier)
-    (HS : ActualReferenceRebase.StateComparison x V n m k)
-    (HB : ActualReferenceRebase.BlockComparison x l V n m k)
-    (j : ℤ) (hj : j ≠ 0) (z : WaveSpace) (hz : z ∈ ActualParticularCoherence.waveDomain V) :
-    pressureMode x l j n z = (velocityWeight h (ChartScales.Q n) (ChartScales.Q m)) ^ 2 •
-      pressureMode x l j m (ActualParticularCoherence.bandMap n m z) := by
-  simpa only [pressure_weight (ChartScales.Q_pos n) (ChartScales.Q_pos m)] using
-    pressureMode_band x l I hfrequency hV htime n m k hi hmap HS HB j hj z hz
 
-/-- Equality holds as an ambient germ at every point of the open slow
-overlap, including all free radial, angular, and fast coordinates. -/
-theorem potential_band_germ (x : CorrectionStep.CycleState (Label B N0)) (l : Label B N0)
-    (I : ActualParticularCoherence.SourceInputs x l)
-    (hfrequency : ∀ n, (x.coefficients.blocks l).frequency n = ChartScales.carrier h n)
-    {V : Set TorusInverse.Plane} (hV : IsOpen V) (htime : ∀ s ∈ V, 0 < s.1)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (hmap : MapsTo (GaugeStateCoherence.bandSlowEquiv h n m) V standardRegion.carrier)
-    (HS : ActualReferenceRebase.StateComparison x V n m k)
-    (HB : ActualReferenceRebase.BlockComparison x l V n m k)
-    (j : ℤ) (hj : j ≠ 0) (z : WaveSpace) (hz : z ∈ ActualParticularCoherence.waveDomain V) :
-    potential x l j n =ᶠ[𝓝 z] fun y => ratioPower (ChartScales.Q n) (ChartScales.Q m) h •
-      potential x l j m (ActualParticularCoherence.bandMap n m y) := by
-  filter_upwards [(ActualParticularCoherence.waveDomain_open hV).mem_nhds hz] with y hy
-  exact potential_band x l I hfrequency hV htime n m k hi hmap HS HB j hj y hy
 
-theorem pressureMode_band_germ (x : CorrectionStep.CycleState (Label B N0)) (l : Label B N0)
-    (I : ActualParticularCoherence.SourceInputs x l)
-    (hfrequency : ∀ n, (x.coefficients.blocks l).frequency n = ChartScales.carrier h n)
-    {V : Set TorusInverse.Plane} (hV : IsOpen V) (htime : ∀ s ∈ V, 0 < s.1)
-    (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (hmap : MapsTo (GaugeStateCoherence.bandSlowEquiv h n m) V standardRegion.carrier)
-    (HS : ActualReferenceRebase.StateComparison x V n m k)
-    (HB : ActualReferenceRebase.BlockComparison x l V n m k)
-    (j : ℤ) (hj : j ≠ 0) (z : WaveSpace) (hz : z ∈ ActualParticularCoherence.waveDomain V) :
-    pressureMode x l j n =ᶠ[𝓝 z]
-      fun y => pressureWeight h (ChartScales.Q n) (ChartScales.Q m) •
-        pressureMode x l j m (ActualParticularCoherence.bandMap n m y) := by
-  filter_upwards [(ActualParticularCoherence.waveDomain_open hV).mem_nhds hz] with y hy
-  exact pressureMode_band x l I hfrequency hV htime n m k hi hmap HS HB j hj y hy
 
 end NavierStokes.ActualParticularPotentialCoherence

@@ -388,58 +388,6 @@ theorem jetRate_diagonal_velocity_tail {a : ℕ → ℝ} (ha : Tendsto a atTop a
   exact (htail.spatialCurl hU hlU (hsum.sub hprefix)).congr_on hU hlU
     (spatialCurl_sub_on hU hsum hprefix)
 
-/-- Explicit diagonal-sum corollary. Velocity is the curl of the constructed
-potential sum and pressure is the constructed scalar sum. Their tail
-assumptions are discharged by `DiagonalJetBounds`; the background growth and
-finite-stage residual estimates remain the genuine construction inputs. -/
-theorem allJetsFlat_diagonal_residual {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : SpaceTime → ℝ} {A : ℕ → VelocityField} {P : ℕ → PressureField}
-    {g LA LP Lbg Lres : ℕ → ℝ} {U : Set SpaceTime} {l : Filter SpaceTime}
-    (hU : IsOpen U) (hqpos : ∀ z ∈ U, 0 < q z) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) (hP : ∀ j, ContDiffOn ℝ ∞ (P j) U)
-    (hgmono : Monotone g) (hgtop : Tendsto g atTop atTop)
-    (hbA : DiagonalJetBounds.CutStageBounds a q A g LA U)
-    (hbP : DiagonalJetBounds.CutStageBounds a q P g LP U)
-    (hlU : ∀ᶠ z in l, z ∈ U) (hqzero : Tendsto q l (𝓝 0))
-    (hbg : ∀ J m, JetRate l q
-      (SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix A (J + 1))) m (-Lbg m))
-    (hres : ∀ J m, JetRate l q
-      (fun z => navierStokesResidual
-        (SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix A (J + 1)))
-        (DiagonalJetBounds.uncutPrefix P (J + 1)) z.1 z.2) m (g J - Lres m)) :
-    AllJetsFlat l q (fun z => navierStokesResidual
-      (SolenoidalDiagonal.velocitySum a q A)
-      (SolenoidalDiagonal.potentialSum a q P) z.1 z.2) := by
-  have hlq : ∀ᶠ z in l, 0 < q z ∧ q z ≤ 1 := by
-    filter_upwards [hlU, hqzero.eventually (gt_mem_nhds (show (0 : ℝ) < 1 by norm_num))]
-      with z hz hq1
-    exact ⟨hqpos z hz, hq1.le⟩
-  have hprefixA (J : ℕ) :
-      ContDiffOn ℝ ∞ (DiagonalJetBounds.uncutPrefix A (J + 1)) U :=
-    ContDiffOn.sum (fun j _ => hA j)
-  have hprefixP (J : ℕ) :
-      ContDiffOn ℝ ∞ (DiagonalJetBounds.uncutPrefix P (J + 1)) U :=
-    ContDiffOn.sum (fun j _ => hP j)
-  have hvelocity (J : ℕ) : ContDiffOn ℝ ∞
-      (SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix A (J + 1))) U := by
-    intro z hz
-    exact (SpatialCurl.contDiffAt_spatialCurl
-      ((hprefixA J).contDiffAt (hU.mem_nhds hz)) (by simp)).contDiffWithinAt
-  apply allJetsFlat_residual_of_stages
-    (uStage := fun J => SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix A (J + 1)))
-    (pStage := fun J => DiagonalJetBounds.uncutPrefix P (J + 1))
-    (g := g) (Ltail := fun m => max (LA (m + 1)) (LP m))
-    hU hlU hlq (SolenoidalDiagonal.velocitySum_contDiffOn ha hU hqpos hq hA)
-    (SolenoidalDiagonal.potentialSum_contDiffOn ha hU hqpos hq hP)
-    hvelocity hprefixP hgtop hbg ?_ ?_ hres
-  · intro J m hm
-    apply (jetRate_diagonal_velocity_tail ha hU hqpos hq hA hgmono hbA hlU hlq
-      hqzero J m (by omega)).weaken hlq
-    exact sub_le_sub (hgmono (Nat.le_succ J)) (le_max_left (LA (m + 1)) (LP m))
-  · intro J m hm
-    apply (jetRate_diagonal_tail ha hU hq hP hgmono hbP hlU hlq hqzero J m
-      (by omega)).weaken hlq
-    exact sub_le_sub (hgmono (Nat.le_succ J)) (le_max_right (LA (m + 1)) (LP m))
 
 end DiagonalVelocity
 

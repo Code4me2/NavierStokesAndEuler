@@ -181,20 +181,6 @@ theorem fullRequest_jets_from_residuals (G : SignedMeanGain.Geometry)
     htheta.smooth haxial'.smooth (MeanStateRegularity.MovingField.movingSupport htheta)
     (MeanStateRegularity.MovingField.movingSupport haxial') hθ hz K
 
-/-- The initial cycle invariant gives the request class without assuming
-any request derivative or signed output bound. -/
-theorem fullRequest_jets_from_invariant {ι : Type} (G : SignedMeanGain.Geometry)
-    (c : CorrectionState.Context Point) (primary : ι → CorrectionState.HarmonicBlock Point)
-    (P : ι → ℕ → Point → ℝ) (labelCarrier : ι → ℕ → Set Point)
-    (sigma : ℝ) (u : CorrectionStep.CycleState ι)
-    (H : CorrectionStep.CycleAnalyticInvariant G c primary P labelCarrier sigma u)
-    {Λ I : Type} (K : Λ → ℕ → I → Set FullPoint) :
-    ∀ q, PeriodizedWaveBounds.UniformLocalJets (HarmonicWaveInteraction.productStrip G.strip)
-      (fun _ _ x => G.strip.zeta x.1) sigma K
-      (fun _ n _ x => LocalSignedRequest.fullRequest G.strip G.patch G.coord c u.state n x q) := by
-  have hh := fullRequest_jets_from_residuals G c u.state (1 + sigma) H.primitives H.reconstructed
-    H.raw_mean_bounds.1 H.raw_mean_bounds.2 K
-  simpa only [show (1 : ℝ) + sigma - 1 = sigma by ring] using hh
 
 /-! ## Native input jets on a neighborhood of the closed band -/
 
@@ -408,9 +394,6 @@ theorem coefficientLower_pos : 0 < coefficientLower := by
   unfold coefficientLower
   positivity
 
-theorem coefficientUpper_one : 1 ≤ coefficientUpper :=
-  one_le_mul_of_one_le_of_one_le (ActualSignedGeometry.powerBound_one _)
-    (ActualSignedGeometry.powerBound_one _)
 
 theorem coefficientScale_bounds (l : SignedLabel B N0) {n : ℕ}
     (hnm : n ≤ BaseChartJets.cellBand l.1 + 4) (hmn : BaseChartJets.cellBand l.1 ≤ n + 4) :
@@ -422,8 +405,6 @@ theorem coefficientScale_bounds (l : SignedLabel B N0) {n : ℕ}
   rw [ActualSignedGeometry.coefficientScale_value] at h
   exact h
 
-theorem nativePoint_eq_dynamics (l : SignedLabel B N0) (n : ℕ) (k : Frequency) :
-    nativePoint l n k = ActualPrimaryDynamics.copyPoint l.2 l.1 n k := rfl
 
 theorem clockScale_eq_dynamics (l : SignedLabel B N0) (n : ℕ) :
     clockScale l n = ActualPrimaryDynamics.clockScale l.1 n := by
@@ -1154,33 +1135,6 @@ theorem raw_coefficients_jets {β : ℝ} {request : ℕ → FullPoint → Signed
       · exact uniform_select_two (fun j => (hh j).1) hweight
       · exact uniform_select_two (fun j => (hh j).2) hweight
 
-/-- The actual full request is derived from the current residuals.  No
-request-output class or signed-output estimate is an input. -/
-theorem actual_raw_coefficients_jets (G : SignedMeanGain.Geometry)
-    (hs : G.strip = ActualPrimaryBounds.strip)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point) (α : ℝ)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hfixed : VariableGaugeMean.reconstructState G.gauge c u = u)
-    (hθ : MeanClass G.strip α (u.thetaResidual c))
-    (hz : MeanClass G.strip α (u.axialResidual c)) :
-    PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun (l : SignedLabel B N0) n x => Real.sqrt (fullStrip.zeta x) * envelope l n x) (α - 1 / 2)
-      (phaseCell (B := B) (N0 := N0))
-      (fun l n k => (((parameters l).copyData ActualPrimaryBounds.strip
-        (LocalSignedRequest.fullRequest G.strip G.patch G.coord c u)).raw k).amplitude n) ∧
-    PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun (l : SignedLabel B N0) n x => Real.sqrt (fullStrip.zeta x) * envelope l n x) α phaseCell
-      (fun l n k => (((parameters l).copyData ActualPrimaryBounds.strip
-        (LocalSignedRequest.fullRequest G.strip G.patch G.coord c u)).raw k).pressure n) := by
-  have hr := fullRequest_jets_from_residuals G c u α H hfixed hθ hz
-    (phaseCell (B := B) (N0 := N0))
-  have hr' : ∀ q, PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun _ _ x => fullStrip.zeta x) (α - 1) (phaseCell (B := B) (N0 := N0))
-      (fun _ n _ x => LocalSignedRequest.fullRequest G.strip G.patch G.coord c u n x q) := by
-    simp only [hs] at hr ⊢
-    exact hr
-  simpa only [show α - 1 + 1 / 2 = α - 1 / 2 by ring, sub_add_cancel] using
-    raw_coefficients_jets hr'
 
 noncomputable def covariance_at_label (l : SignedLabel B N0) :
     SignedCopyBounds.NativeCovariance fullStrip (phaseCell l) (matrix l) (target l) where
@@ -1197,11 +1151,6 @@ noncomputable def covariance_at_label (l : SignedLabel B N0) :
   entries := (nativeCovariance B N0).entries l
   lower := (nativeCovariance B N0).lower l
 
-theorem primary_weight_pos {l : SignedLabel B N0} {n : ℕ} {k : Frequency} {x : FullPoint}
-    (hx : x ∈ fullStrip.domain) (hc : x ∈ phaseCell l n k) (j : Fin 2) :
-    0 < SmoothCovariance.weights (matrix l k n x) (target l k n x) j :=
-  (mul_pos (nativeCovariance B N0).lower_pos (fullStrip_zeta_pos hx)).trans_le
-    ((nativeCovariance B N0).lower l n k x hx hc j)
 
 open scoped InnerProductSpace
 open HarmonicCalculus
@@ -1326,27 +1275,5 @@ theorem fullRequest_principal_zero {β : ℝ} (s : StripData Point)
       (LocalSignedRequest.fullRequest s P coord c u)).raw k).principal fullStrip (directions B) n x = 0 :=
   raw_principal_zero hR (request_frozen s P coord c u) hx hc
 
-/-- The current residuals provide every request estimate needed by the
-actual homogeneous signed equation. -/
-theorem actual_principal_zero (G : SignedMeanGain.Geometry)
-    (hs : G.strip = ActualPrimaryBounds.strip)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point) (α : ℝ)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hfixed : VariableGaugeMean.reconstructState G.gauge c u = u)
-    (hθ : MeanClass G.strip α (u.thetaResidual c))
-    (hz : MeanClass G.strip α (u.axialResidual c))
-    {l : SignedLabel B N0} {n : ℕ} {k : Frequency} {x : FullPoint}
-    (hx : x ∈ fullStrip.domain) (hc : x ∈ phaseCell l n k) :
-    (((parameters l).copyData ActualPrimaryBounds.strip
-      (LocalSignedRequest.fullRequest G.strip G.patch G.coord c u)).raw k).principal
-        fullStrip (directions B) n x = 0 := by
-  have hr := fullRequest_jets_from_residuals G c u α H hfixed hθ hz
-    (phaseCell (B := B) (N0 := N0))
-  have hr' : ∀ q, PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun _ _ x => fullStrip.zeta x) (α - 1) (phaseCell (B := B) (N0 := N0))
-      (fun _ n _ x => LocalSignedRequest.fullRequest G.strip G.patch G.coord c u n x q) := by
-    simp only [hs] at hr ⊢
-    exact hr
-  exact fullRequest_principal_zero G.strip G.patch G.coord c u hr' hx hc
 
 end NavierStokes.ActualSignedStageControls

@@ -44,10 +44,5 @@ theorem activation_scaled_velocity {m v w : ℝ → Space} {t₀ a ε C γ : ℝ
   rw [hu]
   ring
 
-theorem activation_tangent_pairing {m v r w : ℝ → Space} {s₀ t₀ : ℝ}
-    (hr : r t₀ = s₀ • cross (unit (m t₀)) (unit (v t₀)))
-    (hw : ⟪cross (unit (m t₀)) (unit (v t₀)),w t₀⟫_ℝ = 0) :
-    ⟪r t₀,w t₀⟫_ℝ = 0 := by
-  rw [hr, real_inner_smul_left, hw, mul_zero]
 
 end EulerPacketMovingFrame

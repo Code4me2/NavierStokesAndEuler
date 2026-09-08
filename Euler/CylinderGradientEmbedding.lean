@@ -76,10 +76,5 @@ theorem smul_embedding_gradient_mem (κ : ℝ) (m : Space)
   exact ((Submodule.span ℝ EulerMeanSolenoidal.gradientGenerators).topologicalClosure_minimal
     hgen hclosed) hg
 
-theorem embedding_gradient_mem (κ : ℝ) (hκ : κ ≠ 0) (m : Space)
-    (g : EulerMeanSolenoidal.L2) (hg : g ∈ EulerMeanSolenoidal.gradientSpace) :
-    embedding P g ∈ gradientSpace P κ m := by
-  have h := (gradientSpace P κ m).smul_mem κ⁻¹ (smul_embedding_gradient_mem P κ m g hg)
-  simpa only [smul_smul,inv_mul_cancel₀ hκ,one_smul] using h
 
 end EulerCylinderSpatialEmbedding

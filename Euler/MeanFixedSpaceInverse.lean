@@ -141,27 +141,7 @@ def fixedMeanSolver : TimeLp T L2 →L[ℝ] TimeLp T solenoidalSpace :=
   (fixedMeanInverse T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall).comp
     (-(fixedMeanPrimitive T hT F F₁).adjoint)
 
-/-- The fixed inverse has its actual quantitative coercive norm bound. -/
-theorem fixedMeanInverse_norm :
-    ‖fixedMeanInverse T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall‖ ≤
-      (fixedMeanCoercivity T F F₁ FInv)⁻¹ :=
-  coerciveInverse_norm_le (fixedMeanOperator T hT F F₁ H M0 A L) (fixedMeanCoercivity T F F₁ FInv)
-    (fixedMeanCoercivity_pos T hT F F₁ FInv)
-    (fixedMeanOperator_coercive T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall)
 
-/-- The constructed fixed-space solution satisfies the full original form. -/
-theorem fixedMeanSolver_weak (f : TimeLp T L2) (v : TimeLp T solenoidalSpace) :
-    let u := fixedMeanSolver T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall f
-    ⟪fixedMeanDerivative T hT F F₁ u, fixedMeanDerivative T hT F F₁ v⟫_ℝ-
-      ⟪timeMultiplier T hT H (fixedMeanPrimitive T hT F F₁ u), fixedMeanPrimitive T hT F F₁ v⟫_ℝ+
-      ⟪(M0+L • A) (fixedMeanTrace T hT F F₁ u), fixedMeanTrace T hT F F₁ v⟫_ℝ =
-      -⟪f, fixedMeanPrimitive T hT F F₁ v⟫_ℝ := by
-  exact (fixedMeanOperator_inner T hT F F₁ H M0 A L
-    (fixedMeanSolver T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall f) v).symm.trans
-    (coercive_forcing_inner (fixedMeanOperator T hT F F₁ H M0 A L)
-      (fixedMeanPrimitive T hT F F₁) (fixedMeanCoercivity T F F₁ FInv)
-      (fixedMeanCoercivity_pos T hT F F₁ FInv)
-      (fixedMeanOperator_coercive T hT F F₁ H M0 A L FInv hInv hF K B hK hB hFInv₀ hH hboundary hsmall) f v)
 
 /-- Uniqueness is on the same fixed Hilbert space. -/
 theorem fixedMeanSolver_unique (f : TimeLp T L2) (u : TimeLp T solenoidalSpace)

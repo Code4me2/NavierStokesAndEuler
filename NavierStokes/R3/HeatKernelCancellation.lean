@@ -63,12 +63,6 @@ theorem cutoffSquareDifference_abs_le_lipschitz {φ : Space → ℝ}
   exact (abs_sq_sub_sq_le_two_mul_abs_sub (hφ y) (hφ x)).trans
     (by nlinarith)
 
-theorem cutoffSquareDifference_abs_le_min {φ : Space → ℝ}
-    {L : ℝ≥0} (hφ : ∀ x, φ x ∈ Icc (0 : ℝ) 1)
-    (hLip : LipschitzWith L φ) (x y : Space) :
-    |cutoffSquareDifference φ x y| ≤ min (2 * L * ‖x - y‖) 1 :=
-  le_min (cutoffSquareDifference_abs_le_lipschitz hφ hLip x y)
-    (cutoffSquareDifference_abs_le_one hφ x y)
 
 /-- A form with a real scale parameter, convenient for scaled bump functions. -/
 theorem cutoffSquareDifference_abs_le_scaled_min {φ : Space → ℝ}
@@ -97,10 +91,6 @@ theorem cutoffSquareDifference_abs_le_scaled_min {φ : Space → ℝ}
 @[simp] theorem cutoffSquareDifference_self (φ : Space → ℝ) (x : Space) :
     cutoffSquareDifference φ x x = 0 := sub_self _
 
-theorem cutoffSquareDifference_swap (φ : Space → ℝ) (x y : Space) :
-    cutoffSquareDifference φ y x = -cutoffSquareDifference φ x y := by
-  unfold cutoffSquareDifference
-  ring
 
 /-- The time-integrated kernel with cancellation already inserted. -/
 def cancelledTimeKernel (K : ℝ → Space → ℝ) (φ : Space → ℝ)

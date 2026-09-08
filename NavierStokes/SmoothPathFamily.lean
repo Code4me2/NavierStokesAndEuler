@@ -257,20 +257,6 @@ theorem odeFamily_initial (A : P × ℝ → E →L[ℝ] E) (x₀ : P → E)
     odeFamily hab A x₀ f p ⟨a, le_rfl, hab⟩ = x₀ p :=
   ParametricODE.solution_initial hab (pathFamily A p) (x₀ p) (pathFamily f p)
 
-omit [NormedSpace ℝ P] in
-/-- The smooth path family satisfies the ODE with the originally supplied
-coefficient values at every time in the closed interval. -/
-theorem odeFamily_hasDerivWithinAt (U : Set P) (V : Set ℝ)
-    (hI : Icc a b ⊆ V) (A : P × ℝ → E →L[ℝ] E) (x₀ : P → E) (f : P × ℝ → E)
-    (hA : ContinuousOn A (U ×ˢ V)) (hf : ContinuousOn f (U ×ˢ V))
-    {p : P} (hp : p ∈ U) (t : Icc a b) :
-    HasDerivWithinAt (ParametricODE.extend hab (odeFamily hab A x₀ f p))
-      (A (p, t) (odeFamily hab A x₀ f p t) + f (p, t)) (Icc a b) t := by
-  have hAc := slice_continuous (hA.mono (Set.prod_mono Subset.rfl hI)) hp
-  have hfc := slice_continuous (hf.mono (Set.prod_mono Subset.rfl hI)) hp
-  unfold odeFamily
-  simpa only [pathFamily_apply A p hAc, pathFamily_apply f p hfc] using
-    ParametricODE.solution_hasDerivWithinAt hab (pathFamily A p) (x₀ p) (pathFamily f p) t
 
 end ODE
 

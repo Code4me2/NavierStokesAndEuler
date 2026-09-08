@@ -560,10 +560,6 @@ theorem rawStress_smooth (U : Set Plane) (hT : ∀ p ∈ U, 0 < p.1) (n : ℕ) :
   exact ((contDiffAt_const (c := (ChartScales.Q n ^ (2 * CoordinateAlgebra.A F.data.h) : ℝ))).smul ((htheta.comp x hP.contDiffAt).prodMk
     (haxial.comp x hP.contDiffAt))).contDiffWithinAt
 
-theorem rawStress_periodic (U : Set Plane) (n : ℕ) :
-    PhysicalMeanDomain.PeriodicOn U (fun x => (rawStress H v upper B n x).1) ∧
-    PhysicalMeanDomain.PeriodicOn U (fun x => (rawStress H v upper B n x).2) := by
-  constructor <;> intro r s hs Y k <;> rfl
 
 theorem rawStress_normalized (n : ℕ) {x : Point} (hT : 0 < x.2.1.1) :
     rawStress H v upper B n x =
@@ -730,17 +726,6 @@ noncomputable def waveCoefficients (phase : ℕ → Point × ℝ → ℝ)
   pressure := pressure
   frequency := frequency
 
-theorem waveCoefficients_match (U : LocalSignedRequest.SlowRegion (2 * F.data.h))
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (phase : ℕ → Point × ℝ → ℝ)
-    (amplitude : ℕ → Point × ℝ → HarmonicCalculus.ComplexVector)
-    (pressure : ℕ → Point × ℝ → ℂ) (frequency : ℕ → ℝ) :
-    PrimaryResidualClass.Matches (movingStrip F.data.h_pos.le U a b cL cR ha hcL hcR)
-      (context H v upper B a b hab) (waveCoefficients H v upper B phase amplitude pressure frequency) := by
-  refine ⟨rfl, rfl, ?_⟩
-  intro n
-  funext x i
-  fin_cases i <;> rfl
 
 noncomputable def radialSlow (n : ℕ) (p : Slow) : ℝ :=
   BaseRadialJets.radial (FinalSlowBase.scales H v upper B) F.data.h W.axis.normalization
@@ -757,12 +742,6 @@ noncomputable def axialSlow (n : ℕ) : Slow → ℝ :=
 @[simp] theorem radialSlow_pullback (n : ℕ) (x : Point) :
     radialSlow H v upper B n (slowCoordinates x) = radialBase H v upper B n x := rfl
 
-theorem radialBase_stream (n : ℕ) {x : Point} (hT : 0 < x.2.1.1) :
-    radialBase H v upper B n x = -(ChartScales.epsilon F.data.h n * x.1 / 2) *
-      PhaseCalculus.slowZ (BaseRadialJets.normalizedStream (FinalSlowBase.scales H v upper B)
-        F.data.h (FinalSlowBase.coefficients H v) (ChartScales.Q n)) (slowCoordinates x) :=
-  BaseRadialJets.radial_eq_stream (FinalSlowBase.scales_strictMono H v upper B)
-    F.data.h_pos F.data.h_lt_half (ChartScales.Q_pos n) (FinalSlowBase.coefficients_smooth H v) hT
 
 theorem radialSlow_smoothAt (n : ℕ) {p : Slow} (hp : 0 < p.2.2) :
     ContDiffAt ℝ ∞ (radialSlow H v upper B n) p := by
@@ -799,32 +778,7 @@ theorem primaryCoefficients_match
       radialSlow_pullback]
     fin_cases i <;> rfl
 
-theorem nativeCoefficients_match
-    (U : LocalSignedRequest.SlowRegion (2 * F.data.h))
-    {D : PhaseJetBounds.Domain ℕ Slow} (P : PrimaryPulseBounds.PhaseConstruction D)
-    (hF : P.phase.F = frequencySlow H v upper B)
-    (hG : P.phase.G = axialSlow H v upper B)
-    (clock : ℕ → Point → ℝ)
-    (amplitude : ℕ → Point × ℝ → HarmonicCalculus.ComplexVector)
-    (pressure : ℕ → Point × ℝ → ℂ) (frequency : ℕ → ℝ) :
-    PrimaryResidualClass.Matches (nativeStrip W U)
-      (context H v upper B (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
-        (PrimaryTargetBounds.radii_ordered W))
-      (PrimaryMaterialDefect.coefficients P (radialSlow H v upper B) (nativeCoordinates clock)
-        amplitude pressure frequency) :=
-  primaryCoefficients_match H v upper B U P hF hG (nativeCoordinates clock) (fun _ _ => rfl)
-    amplitude pressure frequency
 
-theorem radialSlow_productClass (U : LocalSignedRequest.SlowRegion (2 * F.data.h))
-    (chi : ℕ → Point × ℝ → PhaseCalculus.Slot)
-    (hchi : ∀ n x, (chi n x).1 = slowCoordinates x.1) :
-    UnweightedClass (HarmonicWaveInteraction.productStrip (nativeStrip W U)) 1
-      (fun n x => radialSlow H v upper B n (chi n x).1) := by
-  apply MeanIncrementBounds.class_congr (HarmonicWaveInteraction.class_lift
-    (radialBase_unweighted H v upper B U))
-  intro n x hx
-  change radialSlow H v upper B n (chi n x).1 = radialBase H v upper B n x.1
-  rw [hchi, radialSlow_pullback]
 
 noncomputable def nativeContext : CorrectionState.Context Point :=
   context H v upper B (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
@@ -864,10 +818,6 @@ theorem native_axial_isSlow (U : Set Plane) :
   intro n R p hp Y
   rfl
 
-theorem native_matches_physical (n : ℕ) :
-    PhysicalResidualTZ.MatchesAtTZ (nativeContext H v upper B).operators
-      (PhysicalResidualBridge.commonGraph (ChartScales.Q n) F.data.h (commonIndex F.data.h n)) n :=
-  operators_match_physical _ _ _ _ n
 
 theorem native_stress_properties (U : LocalSignedRequest.SlowRegion (2 * F.data.h)) (n : ℕ) :
     ContDiffOn ℝ ∞ (fun x => ((nativeContext H v upper B).virtualTheta n x,
@@ -889,16 +839,5 @@ end ActualFields
 noncomputable def constructedContext (upper : ℝ) (B : ℕ) : CorrectionState.Context Point :=
   nativeContext FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation upper B
 
-theorem constructed_context_bounds (upper : ℝ) (B : ℕ)
-    (U : LocalSignedRequest.SlowRegion (2 * FinalSlowBase.actualProfile.outgoing.data.h)) :
-    MeanIncrementBounds.OperatorBounds (nativeStrip FinalSlowBase.actualProfile.nominal U)
-      (constructedContext upper B).operators ChartScales.kappa ∧
-    MeanIncrementBounds.BaseBounds (nativeStrip FinalSlowBase.actualProfile.nominal U)
-      (constructedContext upper B).base ∧
-    LocalRankDefect.LocalOperators U.carrier (constructedContext upper B).operators ∧
-    MeanIncrementBounds.SmoothTriple (LocalRankDefect.positiveDomain U.carrier)
-      (constructedContext upper B).base :=
-  ⟨native_operator_bounds _ _ upper B U, native_base_bounds _ _ upper B U,
-    native_operators_local _ _ upper B U.carrier, native_base_smooth _ _ upper B U⟩
 
 end NavierStokes.BaseContextAssembly

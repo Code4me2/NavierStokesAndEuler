@@ -166,30 +166,5 @@ theorem pressureConstant_polynomial {q : ℕ} {A : SmoothCoefficient period}
         _ ≤ M ^ 3 := inverse_majorant_step hL hB hM
         _ = (9 * L) ^ (3 ^ (q + 1)) := by dsimp [M]; rw [← pow_mul, pow_succ]
 
-/-- The shifted Hq pressure estimate with an explicit polynomial coefficient constant.
-All assumptions concern the actual coefficient, its derivative bounds, and coercivity. -/
-theorem pressure_shifted_Hq_polynomial_bound {s q : ℕ} {A : SmoothCoefficient period} {f : LiftL2 period}
-    (K : EulerSpatialSobolevInverse.CoefficientJet period directions s A)
-    (J : EulerSpatialSobolevInverse.SpatialJet period directions s f)
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v, v⟫_ℝ)
-    (N : ℕ) (hN : N + q ≤ s) (L ρ Rc : ℝ)
-    (hL : 1 ≤ L) (hcL : c⁻¹ ≤ L) (hρ : 0 < ρ) (hRc : 0 ≤ Rc)
-    (hbasecoeff : ∀ r ≤ q, boundLevel period K r ≤ L)
-    (hsmall : 4 * (9 * L) ^ (3 ^ q) * (ρ * Rc) ≤ 1)
-    (hcoeff : ∀ l, 1 ≤ l → l ≤ N →
-      coefficientBlock period K q l ≤ Rc ^ l * (l.factorial : ℝ) ^ 2) :
-    (∑ n ∈ Finset.range (N + 1), ((n + 1 : ℕ) : ℝ) * EulerPacketWeights.weight ρ (n + 1) *
-      blockNorm period (J.solvePressure K κ m c hc hpos) q n) ≤
-      2 * (9 * L) ^ (3 ^ q) * ∑ n ∈ Finset.range (N + 1),
-        ((n + 1 : ℕ) : ℝ) * EulerPacketWeights.weight ρ (n + 1) * blockNorm period J q n := by
-  have hq : q ≤ s := by omega
-  have hbase : (CoefficientJet.restrict K q hq).pressureConstant c ≤ (9 * L) ^ (3 ^ q) := by
-    apply pressureConstant_polynomial _ c L hc hL hcL
-    intro r hr
-    rw [coefficient_restrict_level period K hq hr]
-    exact hbasecoeff r hr
-  exact pressure_shifted_Hq_bound K J κ m c hc hpos N hN hq ρ Rc ((9 * L) ^ (3 ^ q))
-    hρ hRc (one_le_pow₀ (by linarith)) hbase hsmall hcoeff
 
 end EulerH6Pressure

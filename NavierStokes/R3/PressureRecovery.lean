@@ -413,28 +413,5 @@ theorem gradient_recovery {T t : ℝ} {u v : VelocityField} {p q : PressureField
   simpa only [Complex.ofReal_re, Complex.neg_re] using
     congrArg Complex.re (gradient_recovery_complex H ht hψ hcψ k)
 
-/-- The explicit comparison-hypothesis form of pressure recovery. Only the
-spatial test is compactly supported; both velocities and both pressures are
-allowed on all of Euclidean space. -/
-theorem pressure_gradient_recovery {T t : ℝ} {u v : VelocityField} {p q : PressureField}
-    (hT : 0 < T)
-    (hu : ContDiffOn ℝ ∞ u (Comparison.slab 0 T))
-    (hv : ContDiffOn ℝ ∞ v (Comparison.slab 0 T))
-    (hp : ContDiffOn ℝ ∞ p (Comparison.slab 0 T))
-    (hq : ContDiffOn ℝ ∞ q (Comparison.slab 0 T))
-    (hdivu : ∀ s ∈ Ioo 0 T, ∀ x, spatialDivergence u s x = 0)
-    (hdivv : ∀ s ∈ Ioo 0 T, ∀ x, spatialDivergence v s x = 0)
-    (hNS : ∀ s ∈ Ioo 0 T, ∀ x,
-      navierStokesResidual u p s x = navierStokesResidual v q s x)
-    (heu : NavierStokesR3.ProblemStatement.UniformFiniteEnergy (Icc 0 T) u)
-    (hev : NavierStokesR3.ProblemStatement.UniformFiniteEnergy (Icc 0 T) v)
-    (ht : t ∈ Ioo 0 T) {ψ : Space → ℝ}
-    (hψ : ContDiff ℝ ∞ ψ) (hcψ : HasCompactSupport ψ) (k : Fin 3) :
-    (∫ x, spatialPartial k (fun y => (p - q) (t, y)) x * ψ x) =
-      -(∑ i : Fin 3, ∑ j : Fin 3, (pressurePair i j (tensorDiff u v t i j)
-        (partialCLM k (realTest ψ hψ hcψ))).re) := by
-  let H : Hypotheses T u v p q := ⟨hT, hu, hv, hp, hq, hdivu, hdivv, hNS, heu, hev⟩
-  have h := congrArg (fun z : ℂ => Complex.reCLM z) (gradient_recovery_complex H ht hψ hcψ k)
-  simpa only [map_neg, map_sum, Complex.reCLM_apply, Complex.ofReal_re] using h
 
 end NavierStokesR3.PressureRecovery

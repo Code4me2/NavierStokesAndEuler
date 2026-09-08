@@ -53,8 +53,6 @@ theorem firstKernel_fderiv (t : ℝ) (a b x : Space) :
     smul_eq_mul, kernel_fderiv, firstKernel, secondKernel]
   ring
 
-theorem wideKernel_nonneg {t : ℝ} (ht : 0 < t) (x : Space) : 0 ≤ wideKernel t x :=
-  mul_nonneg (normalization_pos ht).le (Real.exp_pos _).le
 
 theorem wideKernel_integrable {t : ℝ} (ht : 0 < t) : Integrable (wideKernel t) :=
   (exp_integrable (inv_pos.mpr (by positivity : 0 < 2*t))).const_mul _

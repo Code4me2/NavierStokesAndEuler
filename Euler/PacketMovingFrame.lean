@@ -197,16 +197,5 @@ theorem normalizedFrame_hasDerivWithinAt (B : Space →L[ℝ] Space)
   · exact hq
   · exact cross_hasDerivWithinAt hp hq
 
-/-- The source skew matrix is now identified with the derivative of the
-actual normalized ray/velocity frame. -/
-theorem normalizedFrame_skew (B : Space →L[ℝ] Space) {m v : ℝ → Space} {t : ℝ}
-    (hm : HasDerivAt m (-B.adjoint (m t)) t)
-    (hv : HasDerivAt v (-B (v t) + (2*⟪m t,B (v t)⟫_ℝ / ‖m t‖^2) • m t) t)
-    (hm0 : m t ≠ 0) (hv0 : v t ≠ 0) (hmv : ⟪m t,v t⟫_ℝ = 0) (i j : Fin 3) :
-    ⟪normalizedFrame m v t i, deriv (fun s => normalizedFrame m v s j) t⟫_ℝ =
-      EulerPacketRay.frameSkew (frameMatrix B (unit (m t)) (unit (v t))) i j := by
-  rw [(normalizedFrame_hasDerivAt B hm hv hm0 hv0 hmv j).deriv]
-  exact frameRate_skew B (unit (m t)) (unit (v t))
-    (unit_inner_self hm0) (unit_inner_self hv0) (unit_inner_zero hmv) i j
 
 end EulerPacketMovingFrame

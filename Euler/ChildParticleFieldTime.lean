@@ -83,25 +83,6 @@ theorem velocity_hasDerivWithinAt
   rw [he,H.childAcceleration]
   exact velocity_time hP hP₁ hD hD₁ t x
 
-theorem composition_hasDerivWithinAt
-    (hP : SmoothTimeField.TimeDerivative T hT P P₁)
-    (hD : SmoothTimeField.TimeDerivative T hT D D₁)
-    (t : Icc (0 : ℝ) T) (x : Space) :
-    HasDerivWithinAt (fun s =>
-      let F := G (projIcc 0 T hT s)
-      (x+F.displacement.field x)+F.parentDisplacement.field (x+F.displacement.field x))
-      ((G t).childVelocity.field x) (Icc (0 : ℝ) T) t := by
-  have h := (H.displacement_hasDerivWithinAt hP hD t x).const_add x
-  have he : (fun s => x+(G (projIcc 0 T hT s)).childDisplacement.field x) =
-      (fun s =>
-        let F := G (projIcc 0 T hT s)
-        (x+F.displacement.field x)+F.parentDisplacement.field (x+F.displacement.field x)) := by
-    funext s
-    rw [EulerChildParticleFieldBounds.Data.childDisplacement_apply]
-    simp only [EulerChildParticleFieldBounds.Data.inner]
-    abel
-  rw [← he]
-  exact h
 
 end Representation
 end EulerChildParticleTime

@@ -174,16 +174,7 @@ theorem primary_phase (l : Label B N0) (n : ℕ) :
   rw [div_self hK, one_mul]
   rfl
 
-/-- The native record retains the exact annular domain; it is not an empty
-or shrinking domain chosen to make the reference data vacuous. -/
-theorem primary_domain (l : Label B N0) (x : Cylinder) :
-    x ∈ (primary l).strip.domain ↔
-      PhysicalResidualTZ.swapSlow x.1 ∈
-        (BaseContextAssembly.nativeStrip nominal standardRegion).domain := Iff.rfl
 
-theorem primary_time_pos (l : Label B N0) {x : Cylinder}
-    (hx : x ∈ (primary l).strip.domain) : 0 < x.1.2.1.2 :=
-  BaseContextAssembly.nativeStrip_time nominal standardRegion hx
 
 theorem primary_slow_mem (l : Label B N0) {x : Cylinder}
     (hx : x ∈ (primary l).strip.domain) : (x.1.2.1.2, x.1.2.1.1) ∈ standardRegion.carrier :=
@@ -439,12 +430,6 @@ theorem signed_action_reference (l : Label B N0) (k : TorusInverse.Frequency) {x
   rw [nativeClock_on_core l k hx]
   rfl
 
-/-- The lower endpoint is the integration anchor; the physical carrier
-retains the individual copy midpoint. -/
-theorem carrier_midpoint (l : Label B N0) (k : TorusInverse.Frequency) :
-    ActualSignedPhysicalData.center (h := h) (spatialLabel l) k =
-      (geometry l).center + TorusAverages.latticePoint k + slots.radius • ActualSignedGeometry.temporalVector :=
-  ActualSignedPhysicalData.center_eq_anchor slots (spatialLabel l) 0 k
 
 theorem primary_radial_pull (l : Label B N0) (n : ℕ) (x : Cylinder) :
     (primary l).directions.radialField n x =
@@ -690,17 +675,7 @@ theorem localized_pressure_reference (k : TorusInverse.Frequency) (x : Cylinder)
   · simp only [hc, Complex.ofReal_zero, zero_mul]
   · rw [raw_pressure_reference l P u H hp k (reference_cutoff_core l P u H hp k hc)]
 
-theorem referenceCopies_eq_nativeCopies :
-    referenceCopies l P u H hp = nativeCopies l P u := rfl
 
-/-- Exact cutoff repartition into the existing compact periodized family. -/
-theorem referenceCopies_localized (k : TorusInverse.Frequency) :
-    (referenceCopies l P u H hp).localized k =
-      (ActualPeriodizedSignedRealization.copyData (primary l) (layout l) (nativeViews l)
-        (nativeStateData l P u H hp).referenceRequest l.2).localized k :=
-  ActualSignedPhysicalData.dynamic_localized_eq slots outgoing.data.h_pos.le
-    (spatialLabel l) (label_large l) 0 (primary l) (nativeViews l)
-    (nativeStateData l P u H hp).referenceRequest l.2 k
 
 theorem common_amplitude_reference (x : Cylinder) :
     (commonCopies l P u).common.amplitude (reference l) (toCommonCylinder l x) =
@@ -770,13 +745,6 @@ theorem curlPotential_reference (x : Cylinder) :
   rw [reference_phase]
   rfl
 
-theorem reference_exactCoefficients :
-    (referenceCopies l P u H hp).commonCorrected (primary l).strip (primary l).directions =
-      (ActualPeriodizedSignedRealization.views (primary l) (layout l) (nativeViews l)).exactCoefficients
-        (nativeStateData l P u H hp).referenceRequest l.2 :=
-  ActualSignedPhysicalData.dynamic_commonCorrected_eq slots outgoing.data.h_pos.le
-    (spatialLabel l) (label_large l) 0 (primary l) (nativeViews l)
-    (nativeStateData l P u H hp).referenceRequest l.2
 
 end LocalizedComparison
 
@@ -800,19 +768,6 @@ theorem afterParticular_pressure (x : CorrectionStep.CycleState (Label B N0))
   H.pressure (g := ActualInitialization.geometry.gauge) ActualInitialization.geometry.inner_pos
     ActualInitialization.geometry.exponent_pos ActualInitialization.geometry.length_eq rfl
 
-noncomputable def cycleStateDataOfPrimitive (l : Label B N0) (x : CorrectionStep.CycleState (Label B N0))
-    (H : MeanStateRegularity.PrimitiveData standardRegion ActualInitialization.patch.a
-      ActualInitialization.patch.b (commonContext B) (afterParticular x)) : (nativeViews l).StateData :=
-  cycleStateData l x H (afterParticular_pressure x H)
 
-theorem cycleStateData_request (l : Label B N0) (x : CorrectionStep.CycleState (Label B N0))
-    (H : MeanStateRegularity.PrimitiveData standardRegion ActualInitialization.patch.a
-      ActualInitialization.patch.b (commonContext B) (afterParticular x))
-    (hp : GaugeMomentBalances.MovingField standardRegion ActualInitialization.patch.a
-      ActualInitialization.patch.b (afterParticular x).pressure) (z : Cylinder) :
-    (cycleStateData l x H hp).referenceRequest (reference l) z =
-      (ActualCycleParameters.fixedParameters B N0).signedRequest x.coefficients
-        (commonContext B) x.state (reference l) (toCommonCylinder l z) :=
-  nativeStateData_referenceRequest l ActualInitialization.patch (afterParticular x) H hp z
 
 end NavierStokes.ActualSignedPhysicalBinding

@@ -68,23 +68,6 @@ theorem pathPrimitive_time_derivative (t : Icc (0 : ℝ) T) :
       (Icc (0 : ℝ) T) t :=
   primitive_hasDerivWithinAt P _ t (extendPath T hT p) (f t) (hd t)
 
-include hd in
-/-- The literal primitive differentiates within the closed time interval at every angle. -/
-theorem classicalPrimitive_time_derivative
-    (hpm : ∀ t y, (∫ s in (0 : ℝ)..P, pointField P p hp t (y,(s : AddCircle P)))=0)
-    (hfm : ∀ t y, (∫ s in (0 : ℝ)..P, pointField P f hf t (y,(s : AddCircle P)))=0)
-    (t : Icc (0 : ℝ) T) (y : Vector3) (θ : ℝ) :
-    HasDerivWithinAt (fun r => EulerAngleMeanZeroPrimitive.primitive P
-        (fun s => pointField P p hp (projIcc 0 T hT r) (y,(s : AddCircle P))) θ)
-      (EulerAngleMeanZeroPrimitive.primitive P
-        (fun s => pointField P f hf t (y,(s : AddCircle P))) θ) (Icc (0 : ℝ) T) t := by
-  have h := pointField_hasDerivWithinAt P T hT (pathPrimitive P p) (pathPrimitive P f)
-    (pathPrimitive_orbit_contDiff P p hp) (pathPrimitive_orbit_contDiff P f hf)
-    (pathPrimitive_time_derivative P T hT p f hd) t (y,(θ : AddCircle P))
-  rw [pointField_primitive_formula P f hf hfm t y θ] at h
-  apply h.congr_of_mem _ t.property
-  intro r _
-  exact (pointField_primitive_formula P p hp hpm (projIcc 0 T hT r) y θ).symm
 
 end Time
 end EulerCylinderAnglePrimitive

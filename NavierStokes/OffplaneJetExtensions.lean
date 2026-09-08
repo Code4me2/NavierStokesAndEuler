@@ -249,15 +249,6 @@ theorem rawStage_extension {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   intro m
   exact ⟨C j m, p j m, g j - L m, fun w hw _ hq1 => hb j hj m w ⟨hw.1, hw⟩ hq1⟩
 
-theorem rawStages_extensions {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hqbig : qbig ≤ 1) {F : ℕ → SpaceTime → V} {g L : ℕ → ℝ} {C p : ℕ → ℕ → ℝ}
-    (hb : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) F g L C p
-      (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig))
-    (hf : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (F j) (CutStageEstimates.physicalSublevel h qbig))
-    {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    ∀ j, 1 ≤ j → Nonempty (JointResidualLimits.OneSidedExtension (F j) x) :=
-  fun j hj => rawStage_extension hh hh1 hqbig hb hj (hf j hj) hx hqx
 
 end PhysicalExtensions
 
@@ -307,15 +298,6 @@ section FiniteInitialPieces
 
 open ActualPhysicalStageBounds
 
-theorem mean_field_extension {h degree qbig : ℝ} (M : MeanInput h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension M.family.field x) := by
-  apply extension_of_power_jets hh hh1 hqbig (M.field_smooth hh hh1 hq) _ hx hqx
-  intro m
-  obtain ⟨C, _, hb⟩ := M.field_bound hh hh1 hq m
-  exact ⟨C, h * M.alpha - PhysicalMeanJetBounds.loss degree m, hb⟩
 
 theorem mean_angular_extension {h degree qbig : ℝ} (M : MeanInput h degree)
     (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)

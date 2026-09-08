@@ -95,12 +95,6 @@ def terminalMass : ℝ := supportMass period supportSet supportSet_compact
 
 theorem terminalMass_nonneg : 0 ≤ terminalMass := norm_nonneg _
 
-theorem terminal_jet_bound {U : Type*} [NormedAddCommGroup U] [NormedSpace ℝ U]
-    (δ : ℝ) (hδ : 0 < δ) (hδ1 : δ ≤ 1) (ξ : U) (n : ℕ) (a : LiftTangent) :
-    ‖iteratedFDeriv ℝ n (fun b : LiftTangent => translate period b (terminal δ hδ ξ)) a‖ ≤
-      (scalarJetCost δ * ‖ξ‖ * terminalMass) * majorant (jetRadius δ) 0 n :=
-  (compactField δ hδ ξ).translation_gevrey supportSet supportSet_compact (field_support δ ξ)
-    (jetRadius δ) (scalarJetCost δ * ‖ξ‖) (fun k x => field_jet_bound δ hδ hδ1 ξ k x 0) n a
 
 def wordRadius (ι : Type*) [Fintype ι] (δ : ℝ) : ℝ :=
   sobolevCoefficientRadius ι (jetRadius δ)

@@ -425,19 +425,6 @@ theorem contDiffAt_transverseDirection (hn : ContDiffAt ℝ m n q)
 
 end SmoothFrame
 
-/-- The reconstructed directions are jointly smooth functions of the actual
-phase normal, away from the axis and zeros of its tangential part. -/
-theorem phase_frame_smooth (ε p pz x0 : ℝ) (F G : PhaseCalculus.Slow → ℝ)
-    (q : PhaseCalculus.Slot) (hR : q.1.1 ≠ 0)
-    (hF : ContDiff ℝ ∞ F) (hG : ContDiff ℝ ∞ G)
-    (hne : tail (PhaseCalculus.phaseNormal ε p pz x0 F G q) ≠ 0) :
-    ContDiffAt ℝ ∞ (fun r => radialSlope (PhaseCalculus.phaseNormal ε p pz x0 F G r)) q ∧
-    ContDiffAt ℝ ∞ (fun r => normalDirection (PhaseCalculus.phaseNormal ε p pz x0 F G r)) q ∧
-    ContDiffAt ℝ ∞
-      (fun r => quarterTurn (normalDirection (PhaseCalculus.phaseNormal ε p pz x0 F G r))) q := by
-  have hn := PhaseCalculus.contDiffAt_phaseNormal ε p pz x0 F G q hR hF hG
-  exact ⟨contDiffAt_radialSlope hn hne, contDiffAt_normalDirection hn hne,
-    contDiffAt_transverseDirection hn hne⟩
 
 /-- A differentiable unit vector has purely rotational derivative in its
 orthonormal frame.  The angular speed is computed from the derivative. -/
@@ -464,35 +451,6 @@ theorem hasDerivAt_quarterTurn_of_rotation {K : ℝ → Plane} {v rot : ℝ}
   have h := quarterTurn.hasFDerivAt.comp_hasDerivAt v hK
   simpa only [Function.comp_def, map_smul, quarterTurn_square, smul_neg, neg_smul] using h
 
-/-- Every differentiable normal with nonzero tangential part supplies the
-rotating frame needed by the exact coordinate equation. -/
-theorem reconstructed_frame_hasDerivAt {n : ℝ → Space} {n' : Space} {v : ℝ}
-    (hn : HasDerivAt n n' v) (hne : tail (n v) ≠ 0) :
-    ∃ rot : ℝ,
-      HasDerivAt (fun s => normalDirection (n s))
-        (rot • quarterTurn (normalDirection (n v))) v ∧
-      HasDerivAt (fun s => quarterTurn (normalDirection (n s)))
-        (-rot • normalDirection (n v)) v := by
-  have htail := tailCLM.hasFDerivAt.comp_hasDerivAt v hn
-  have hscale : HasDerivAt (fun s => normalScale (n s))
-      (⟪tail (n v), tail n'⟫_ℝ / normalScale (n v)) v := by
-    have hsq := htail.norm_sq.sqrt (pow_ne_zero 2 (norm_ne_zero_iff.mpr hne))
-    simp only [Function.comp_def, Real.sqrt_sq_eq_abs, abs_norm,
-      mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)] at hsq
-    exact hsq
-  let Kdot : Plane := (normalScale (n v))⁻¹ • tail n' +
-    (-(⟪tail (n v), tail n'⟫_ℝ / normalScale (n v)) / normalScale (n v) ^ 2) • tail (n v)
-  have hdir : HasDerivAt (fun s => normalDirection (n s)) Kdot v :=
-    (hscale.inv (normalScale_pos hne).ne').smul htail
-  have hunit : ∀ᶠ s in nhds v, ‖normalDirection (n s)‖ = 1 := by
-    have hne' : ∀ᶠ s in nhds v, tail (n s) ≠ 0 :=
-      htail.continuousAt.eventually_ne hne
-    filter_upwards [hne'] with s hs
-    exact normalDirection_unit hs
-  have hrot := unit_curve_rotation hdir hunit
-  refine ⟨⟪quarterTurn (normalDirection (n v)), Kdot⟫_ℝ, ?_, ?_⟩
-  · exact hrot ▸ hdir
-  · exact hasDerivAt_quarterTurn_of_rotation (hrot ▸ hdir)
 
 /-! ## Quantitative coefficient comparison -/
 
@@ -722,30 +680,6 @@ noncomputable def pairCLM : (ℝ × ℝ) →L[ℝ] Plane :=
     map_add' := by intro u v; ext i; fin_cases i <;> simp
     map_smul' := by intro c u; ext i; fin_cases i <;> simp }
 
-/-- Actual differentiation of the moving eigenbasis gives the operator used
-by `GrowingMode`; no propagator estimate or cone condition is assumed. -/
-theorem hasDerivAt_modal {p q h : ℝ → ℝ}
-    {v p' q' lam damping a b c rate fx fy : ℝ}
-    (hh0 : h v ≠ 0) (hp : HasDerivAt p p' v) (hq : HasDerivAt q q' v)
-    (hh : HasDerivAt h (rate * h v) v)
-    (hx : HasDerivAt (fun s => p s + q s)
-      ((a - damping) * (p v + q v) + (lam / h v + b) * (h v * (p v - q v)) + fx) v)
-    (hy : HasDerivAt (fun s => h s * (p s - q s))
-      ((lam * h v + c) * (p v + q v) - damping * (h v * (p v - q v)) + fy) v) :
-    HasDerivAt (fun s => !₂[p s, q s])
-      (GrowingMode.modalOperator lam damping (modal11 a b c (h v) rate)
-        (modal12 a b c (h v) rate) (modal21 a b c (h v) rate)
-        (modal22 a b c (h v) rate) !₂[p v, q v] +
-          !₂[(fx + fy / h v) / 2, (fx - fy / h v) / 2]) v := by
-  have hx' := (hp.add hq).unique hx
-  have hy' := (hh.fun_mul (hp.fun_sub hq)).unique hy
-  have hsys := (modal_equations_iff hh0 (p v) (q v) p' q' lam damping a b c rate fx fy).mp
-    ⟨hx', by nlinarith only [hy']⟩
-  have hd : HasDerivAt (fun s => !₂[p s, q s]) !₂[p', q'] v :=
-    pairCLM.hasFDerivAt.comp_hasDerivAt v (hp.prodMk hq)
-  convert! hd using 1
-  ext i
-  fin_cases i <;> simp [hsys.1, hsys.2]
 
 theorem abs_four_sum_div_two_le {a b c d A B C D : ℝ}
     (ha : |a| ≤ A) (hb : |b| ≤ B) (hc : |c| ≤ C) (hd : |d| ≤ D) :
@@ -781,20 +715,6 @@ theorem modal_errors_le {a b c h rate H δ κ : ℝ}
   · simpa only [modal22, sub_eq_add_neg, hsum] using
       abs_four_sum_div_two_le ha (hneg _ _ hhb) (hneg _ _ hch) (hneg _ _ hrate)
 
-/-- A tangent ambient vector is recovered from its two coordinate values. -/
-theorem tangent_reconstructed {β ρ : ℝ} (hβ : β ≠ 0) (B : Frame) (t : Space)
-    (ht : ⟪normal β ρ B, t⟫_ℝ = 0) :
-    tangent ρ B (t 0) ⟪B 1, tail t⟫_ℝ = t := by
-  apply frame_ext B
-  · rfl
-  · rw [normal_inner] at ht
-    have hz : β * (ρ * t 0 + ⟪B 0, tail t⟫_ℝ) = 0 := by nlinarith only [ht]
-    have h := (mul_eq_zero.mp hz).resolve_left hβ
-    simp only [tangent, tail_pack, inner_add_right, inner_smul_right,
-      frame_inner00, frame_inner01, mul_one, mul_zero, add_zero]
-    linarith only [h]
-  · simp only [tangent, tail_pack, inner_add_right, inner_smul_right,
-      frame_inner10, frame_inner11, mul_zero, mul_one, zero_add]
 
 theorem modalOperator_eq_coefficient (lam damping e11 e12 e21 e22 : ℝ) :
     GrowingMode.modalOperator lam damping e11 e12 e21 e22 =

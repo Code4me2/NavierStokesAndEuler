@@ -60,16 +60,6 @@ theorem support_add {h C qbig : ℝ} {f g : SpaceTime → V}
     exact hn (by simp only [hz, hgz, add_zero])
   · exact hf w ht hq hz
 
-theorem support_finset_sum {ι : Type*} {h C qbig : ℝ} {f : ι → SpaceTime → V}
-    (s : Finset ι) (hf : ∀ i ∈ s, SublevelShrinkingSupport h C qbig (f i)) :
-    SublevelShrinkingSupport h C qbig (fun w => ∑ i ∈ s, f i w) := by
-  intro w ht hq hn
-  by_contra hs
-  apply hn
-  apply Finset.sum_eq_zero
-  intro i hi
-  by_contra hne
-  exact hs (hf i hi w ht hq hne)
 
 end SupportAlgebra
 
@@ -274,51 +264,7 @@ theorem all_increment_support (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
     exact pressureIncrement_support (WP j) (MP j) hh hh1 (hqP j)
       (H.pressureWave j) (H.pressureMean j)
 
-theorem exists_common_support (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand)
-    (H : NativeOuterBounds R WA MA MB WP MP) :
-    ∃ C : ℝ, 0 < C ∧
-      (∀ j, SublevelShrinkingSupport h C qbig (potentialIncrement (WA j) (MA j))) ∧
-      (∀ j, SublevelShrinkingSupport h C qbig (directStages MB j)) ∧
-      (∀ j, SublevelShrinkingSupport h C qbig (pressureIncrement (WP j) (MP j))) :=
-  ⟨outerConstant R, outerConstant_pos (H.radius_pos WA MA MB WP MP),
-    all_increment_support WA MA MB WP MP hh hh1 hqA hqB hqP H⟩
 
-/-- The common-radius conclusion is preserved by literal representations
-of the five families supplied to `MixedCandidateAssembly`.
-The initial field is the finite change, without the base potential. -/
-theorem candidate_support_inputs (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand)
-    (H : NativeOuterBounds R WA MA MB WP MP)
-    (initial : MixedAxisPreservation.PotentialStage.{u} h (MixedAxisPreservation.localDomain h qbig))
-    (stages : ℕ → MixedAxisPreservation.PotentialStage.{u} h (MixedAxisPreservation.localDomain h qbig))
-    (D : ℕ → DirectAngularDiagonal.AngularData (LocalAngularDiagonal.localSlowDomain h qbig))
-    (pInitial : PressureField) (pStages : ℕ → PressureField)
-    (hInitial : EqOn initial.field (potentialIncrement (WA 0) (MA 0))
-      (CutStageEstimates.physicalSublevel h qbig))
-    (hStages : ∀ j, EqOn (stages j).field (potentialIncrement (WA (j + 1)) (MA (j + 1)))
-      (CutStageEstimates.physicalSublevel h qbig))
-    (hDirect : ∀ j, EqOn (LocalAngularDiagonal.rawSeries D j) (directStages MB j)
-      (CutStageEstimates.physicalSublevel h qbig))
-    (hpInitial : EqOn pInitial (pressureIncrement (WP 0) (MP 0))
-      (CutStageEstimates.physicalSublevel h qbig))
-    (hpStages : ∀ j, EqOn (pStages j) (pressureIncrement (WP (j + 1)) (MP (j + 1)))
-      (CutStageEstimates.physicalSublevel h qbig)) :
-    SublevelShrinkingSupport h (outerConstant R) qbig initial.field ∧
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (stages j).field) ∧
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (LocalAngularDiagonal.rawSeries D j)) ∧
-    SublevelShrinkingSupport h (outerConstant R) qbig pInitial ∧
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (pStages j)) := by
-  obtain ⟨hA, hB, hP⟩ := all_increment_support WA MA MB WP MP hh hh1 hqA hqB hqP H
-  exact ⟨support_congr (hA 0) hInitial.symm,
-    fun j => support_congr (hA (j + 1)) (hStages j).symm,
-    fun j => support_congr (hB j) (hDirect j).symm,
-    support_congr (hP 0) hpInitial.symm,
-    fun j => support_congr (hP (j + 1)) (hpStages j).symm⟩
 
 end Families
 
@@ -326,49 +272,9 @@ section InitializedSequences
 
 variable {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
 
-theorem potentialStages_positive_support (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3)) (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand)
-    (hW : ∀ j, (W j).upperRadius ≤ 2 * R) (hM : ∀ j, (M j).upperRadius ≤ R)
-    (j : ℕ) (hj : j ≠ 0) :
-    SublevelShrinkingSupport h (outerConstant R) qbig (potentialStages base W M j) := by
-  rw [potentialStages, addBaseAtZero_pos _ _ (by omega : 1 ≤ j)]
-  exact potentialIncrement_support (W j) (M j) hh hh1 (hq j) (hW j) (hM j)
 
-theorem pressureStages_positive_support (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit) (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand)
-    (hW : ∀ j, (W j).upperRadius ≤ 2 * R) (hM : ∀ j, (M j).upperRadius ≤ R)
-    (j : ℕ) (hj : j ≠ 0) :
-    SublevelShrinkingSupport h (outerConstant R) qbig (pressureStages base W M j) := by
-  rw [pressureStages, addBaseAtZero_pos _ _ (by omega : 1 ≤ j)]
-  exact pressureIncrement_support (W j) (M j) hh hh1 (hq j) (hW j) (hM j)
 
-/-- Subtracting the base from initialized stage zero leaves exactly its
-finite supported potential increment. -/
-theorem potentialStages_initial_support (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3)) (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q (M 0).firstBand)
-    (hW : (W 0).upperRadius ≤ 2 * R) (hM : (M 0).upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig
-      (fun w => potentialStages base W M 0 w - base w) := by
-  convert! potentialIncrement_support (W 0) (M 0) hh hh1 hq hW hM using 1
-  funext w
-  simp only [potentialStages_zero, potentialIncrement, add_sub_cancel_left]
 
-theorem pressureStages_initial_support (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit) (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q (M 0).firstBand)
-    (hW : (W 0).upperRadius ≤ 2 * R) (hM : (M 0).upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig
-      (fun w => pressureStages base W M 0 w - base w) := by
-  convert! pressureIncrement_support (W 0) (M 0) hh hh1 hq hW hM using 1
-  funext w
-  simp only [pressureStages_zero, pressureIncrement, add_sub_cancel_left]
 
 end InitializedSequences
 
@@ -383,8 +289,6 @@ theorem geometryOuterConstant_pos (G : SignedMeanGain.Geometry) : 0 < geometryOu
 /-- The concrete common constant for the manuscript's fixed actual patch. -/
 noncomputable def actualOuterConstant : ℝ := geometryOuterConstant ActualInitialization.geometry
 
-theorem actualOuterConstant_pos : 0 < actualOuterConstant :=
-  geometryOuterConstant_pos _
 
 theorem actualOuterConstant_eq :
     actualOuterConstant = 4 * PrimaryTargetBounds.rightRadius
@@ -418,29 +322,6 @@ theorem actual_coherent_support {degree : ℝ} {N gap : ℕ}
 variable {DA DP : Type} [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP] {IA KA IP KP : Type*}
 
-theorem actual_patch_support
-    (WA : ℕ → WaveData CorrectionInitialization.ActualPrimary.h DA IA KA (Fin 3))
-    (MA : ℕ → MeanData CorrectionInitialization.ActualPrimary.h
-      (CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h - 1 / 2))
-    (MB : ℕ → MeanData CorrectionInitialization.ActualPrimary.h
-      (CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h))
-    (WP : ℕ → WaveData CorrectionInitialization.ActualPrimary.h DP IP KP Unit)
-    (MP : ℕ → MeanData CorrectionInitialization.ActualPrimary.h
-      (2 * CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h))
-    {qbig : ℝ}
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand)
-    (H : NativeOuterBounds ActualInitialization.geometry.patch.b WA MA MB WP MP) :
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (potentialIncrement (WA j) (MA j))) ∧
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (directStages MB j)) ∧
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (pressureIncrement (WP j) (MP j))) :=
-  all_increment_support WA MA MB WP MP
-    CorrectionInitialization.ActualPrimary.outgoing.data.h_pos
-    CorrectionInitialization.ActualPrimary.outgoing.data.h_lt_half hqA hqB hqP H
 
 /-- The actual mean-domain type retains the strict normalized range
 `(1/2,2)` used by the construction. -/
@@ -454,43 +335,6 @@ abbrev ActualNativeSupport {degree : ℝ} {N gap : ℕ} (D : ActualMeanFamily de
     ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b N
     CorrectionInitialization.ActualPrimary.standardRegion.carrier D.native
 
-/-- One constant for the literal coherent mean families and actual wave
-representations. This is the valid-domain alternative to `MeanData`'s wider
-cover interface. Stage zero is included in each increment family. -/
-theorem actual_coherent_families_support
-    (WA : ℕ → WaveData CorrectionInitialization.ActualPrimary.h DA IA KA (Fin 3))
-    (WP : ℕ → WaveData CorrectionInitialization.ActualPrimary.h DP IP KP Unit)
-    {NA GA NB GB NP GP : ℕ → ℕ}
-    (MA : ∀ j, ActualMeanFamily (CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h - 1 / 2)
-      (NA j) (GA j))
-    (MB : ∀ j, ActualMeanFamily (CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h)
-      (NB j) (GB j))
-    (MP : ∀ j, ActualMeanFamily (2 * CoordinateAlgebra.A CorrectionInitialization.ActualPrimary.h)
-      (NP j) (GP j))
-    (hsA : ∀ j, ActualNativeSupport (MA j))
-    (hsB : ∀ j, ActualNativeSupport (MB j))
-    (hsP : ∀ j, ActualNativeSupport (MP j))
-    {qbig : ℝ}
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (NA j))
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (NB j))
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (NP j))
-    (hWA : ∀ j, (WA j).upperRadius ≤ 2 * ActualInitialization.geometry.patch.b)
-    (hWP : ∀ j, (WP j).upperRadius ≤ 2 * ActualInitialization.geometry.patch.b) :
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (fun w => (WA j).vector w + (MA j).angularField w)) ∧
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (MB j).angularField) ∧
-    (∀ j, SublevelShrinkingSupport CorrectionInitialization.ActualPrimary.h actualOuterConstant qbig
-      (fun w => (WP j).pressure w + (MP j).field w)) := by
-  refine ⟨?_, ?_, ?_⟩
-  · intro j
-    exact support_add (wave_vector_support (WA j) (hWA j))
-      (actual_coherent_support (MA j) (hsA j) (hqA j)).2
-  · intro j
-    exact (actual_coherent_support (MB j) (hsB j) (hqB j)).2
-  · intro j
-    exact support_add (wave_pressure_support (WP j) (hWP j))
-      (actual_coherent_support (MP j) (hsP j) (hqP j)).1
 
 end FixedPatch
 

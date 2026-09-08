@@ -59,9 +59,6 @@ theorem PrefixFields.tailGradeField_path (F : PrefixFields P T (N+1) a)
 
 def tailGrades (N : ℕ) : Finset ℕ := Ico (N+1) (2*N+3)
 
-theorem tailGrades_card (N : ℕ) : (tailGrades N).card = N+2 := by
-  simp only [tailGrades, Nat.card_Ico]
-  omega
 
 def PrefixFields.tailSumField (F : PrefixFields P T (N+1) a)
     (C : CoefficientData P T O) (hT : 0 < T) {corrector_t : VectorField}

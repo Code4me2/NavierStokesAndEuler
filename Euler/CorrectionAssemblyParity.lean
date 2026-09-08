@@ -119,12 +119,5 @@ theorem FiniteFamily.fieldTower_odd (F : FiniteFamily period hT A)
       (F.fieldTower period C).realization q t :=
   fieldTower_realization_odd period (F.fieldTower period C) (F.commonPath_odd period C P) q t
 
-/-- Every realization of the actual assembled signed pressure tower is odd. -/
-theorem FiniteFamily.pressureTower_odd (F : FiniteFamily period hT A)
-    (C : ComparisonData period hT A) (P : ParityData period A)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    oddReflection period q ((F.pressureTower period C).realization q t) =
-      (F.pressureTower period C).realization q t :=
-  fieldTower_realization_odd period (F.pressureTower period C) (F.commonPressure_odd period C P) q t
 
 end EulerCorrectionAssembly

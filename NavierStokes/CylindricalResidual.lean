@@ -52,11 +52,6 @@ theorem frame_apply (θ : ℝ) (v : Space) :
 theorem connection_apply (v : Space) : connection v = pack (-v 1) (v 0) 0 := by
   simp [connection, packDerivative_apply]
 
-theorem frame_connection (θ : ℝ) :
-    (frame θ).comp connection = -Real.sin θ • horizontal + Real.cos θ • connection := by
-  ext v i
-  fin_cases i <;> simp [frame_apply, connection_apply, horizontal, packDerivative_apply]
-  ring
 
 theorem frame_inverse (θ : ℝ) (v : Space) : frame (-θ) (frame θ v) = v := by
   ext i
@@ -280,9 +275,6 @@ theorem hasFDerivAt_frameField (q : Space) :
 /-- Cartesian representation of cylindrical vector components. -/
 noncomputable def encode (w : Space → Space) (q : Space) : Space := frame (q 1) (w q)
 
-theorem contDiffAt_encode {w : Space → Space} {q : Space} {n : WithTop ℕ∞}
-    (hw : ContDiffAt ℝ n w q) : ContDiffAt ℝ n (encode w) q :=
-  (contDiff_frame.contDiffAt.comp q (projection 1).contDiff.contDiffAt).clm_apply hw
 
 theorem fderiv_encode {w : Space → Space} {q : Space}
     (hw : DifferentiableAt ℝ w q) (v : Space) :
@@ -592,19 +584,6 @@ theorem navierStokesResidual_of_representation
     rw [hq, frame_inverse]
   rw [navierStokesResidual_cylindrical hu hp hr, cylindricalResidual_congr hc hP]
 
-theorem navierStokesResidual_zero_iff
-    {u : VelocityField} {p : PressureField} {t : ℝ} {q : Space}
-    (hu : ContDiffAt ℝ 2 u (t, chart q))
-    (hp : DifferentiableAt ℝ p (t, chart q)) (hr : 0 < q 0) :
-    navierStokesResidual u p t (chart q) = 0 ↔
-      cylindricalResidual (velocityComponents u) (pressurePullback p) t q = 0 := by
-  rw [navierStokesResidual_cylindrical hu hp hr]
-  constructor
-  · intro h
-    have h' := congrArg (frame (-(q 1))) h
-    simpa only [frame_inverse, map_zero] using h'
-  · intro h
-    rw [h, map_zero]
 
 theorem dCoord_dCoord_map (L : E →L[ℝ] F) {f : Space → E} {q : Space}
     (hf : ContDiffAt ℝ 2 f q) (i : Fin 3) :

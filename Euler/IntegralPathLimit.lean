@@ -29,9 +29,6 @@ def pathIntegralOperator (T : ℝ) (hT : 0 ≤ T) (a b : ℝ) : C(Icc (0 : ℝ) 
         intervalIntegral.norm_integral_le_of_norm_le_const (fun t _ => extendPath_norm_le T hT f t)
       exact h.trans_eq (mul_comm _ _))
 
-/-- The time-integral operator is the literal Bochner interval integral. -/
-theorem pathIntegralOperator_apply (T : ℝ) (hT : 0 ≤ T) (a b : ℝ) (f : C(Icc (0 : ℝ) T,E)) :
-    pathIntegralOperator T hT a b f = ∫ t in a..b, extendPath T hT f t := rfl
 
 variable [CompleteSpace E]
 

@@ -481,9 +481,6 @@ theorem CycleTransport.step {ι : Type} {G : Geometry} {p : CycleParameters ι}
 theorem step_labels {ι : Type} (p : CycleParameters ι) (c : Context Point) (x : CycleState ι) :
     (x.step p c).coefficients.labels = x.coefficients.labels := rfl
 
-theorem step_aliasCoefficients {ι : Type} (p : CycleParameters ι) (c : Context Point)
-    (x : CycleState ι) :
-    (x.step p c).coefficients.aliasCoefficients = x.coefficients.aliasCoefficients := rfl
 
 theorem iterate_labels {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)
     (seed : CycleState ι) (j : ℕ) :
@@ -598,25 +595,6 @@ theorem iterate_state_axis {ι : Type} (G : Geometry) (p : ℕ → CycleParamete
     rw [hinner, houter] at Hprimitive
     exact ⟨Hnext.next, Hnext.axis ih.2.1, Hprimitive⟩
 
-theorem iterate_block_fields {ι : Type} (G : Geometry) (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (V : Set Plane) (n m k : ℕ)
-    (Hseed : ∀ l, BlockFieldsOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv G.h n m k)
-      (bandVelocityScale G.h n m) (bandScale n m) (seed.coefficients.blocks l) (seed.coefficients.blocks l)
-      (seed.coefficients.gaussian l) (seed.coefficients.aliasCoefficients l)
-      (seed.coefficients.gaussian l) (seed.coefficients.aliasCoefficients l) n m)
-    (HW : ∀ j, let x := CycleState.iterate p c seed j
-      CycleWavesOn G (p j) x.coefficients c x.state V n m k)
-    (hc : ∀ j l, let x := CycleState.iterate p c seed j
-      SameCarrier (x.coefficients.blocks l) ((p j).signedBlock x.coefficients c x.state l)) :
-    ∀ j l, let x := CycleState.iterate p c seed j
-      BlockFieldsOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv G.h n m k)
-        (bandVelocityScale G.h n m) (bandScale n m) (x.coefficients.blocks l) (x.coefficients.blocks l)
-        (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
-        (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) n m := by
-  intro j
-  induction j with
-  | zero => exact Hseed
-  | succ j ih => exact fun l => block_fields_next (HW j) (hc j) l (ih l)
 
 /-! ## Explicit retention of the current pressure and all temporal aliases -/
 
@@ -664,36 +642,5 @@ theorem iterate_alias_separated {ι : Type} (p : ℕ → CycleParameters ι) (c 
   rw [iterate_alias_error p c seed g hg J, hseed]
   abel
 
-/-- Reference transport on positive radii extends to the entire required
-fiber when the actual supported wave fields vanish at nonpositive radii.
-No assertion is inferred from physical-graph equality. -/
-theorem waveOn_of_positive_fibers (h : ℝ) (n m k : ℕ) {V U : Set Plane}
-    (hmap : MapsTo (bandSlowEquiv h n m) V U)
-    (w g : Oscillation Point) (q : OscillatoryScalar Point)
-    (H : WaveOn (PhysicalMeanDomain.slowDomain V ∩ {x | 0 < x.1}) (bandChartEquiv h n m k)
-      (bandVelocityScale h n m) (bandScale n m) w q g w q g n m)
-    (hzleft : ∀ x ∈ PhysicalMeanDomain.slowDomain V, x.1 ≤ 0 → ∀ theta,
-      w n (x,theta) = 0 ∧ q n (x,theta) = 0 ∧ g n (x,theta) = 0)
-    (hzright : ∀ x ∈ PhysicalMeanDomain.slowDomain U, x.1 ≤ 0 → ∀ theta,
-      w m (x,theta) = 0 ∧ q m (x,theta) = 0 ∧ g m (x,theta) = 0) :
-    WaveOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv h n m k)
-      (bandVelocityScale h n m) (bandScale n m) w q g w q g n m := by
-  have he (x : Point) (hx : x ∈ PhysicalMeanDomain.slowDomain V) (theta : ℝ) :
-      (∀ i, w n (x,theta) i = bandVelocityScale h n m * w m (bandChartEquiv h n m k x,theta) i) ∧
-      (q n (x,theta) = (bandVelocityScale h n m * bandVelocityScale h n m) *
-        q m (bandChartEquiv h n m k x,theta)) ∧
-      (∀ i, g n (x,theta) i = (bandVelocityScale h n m * bandVelocityScale h n m * bandScale n m) *
-        g m (bandChartEquiv h n m k x,theta) i) := by
-    by_cases hr : 0 < x.1
-    · exact ⟨H.velocity x ⟨hx,hr⟩ theta, H.pressure x ⟨hx,hr⟩ theta, H.gaussian x ⟨hx,hr⟩ theta⟩
-    · have hx' : bandChartEquiv h n m k x ∈ PhysicalMeanDomain.slowDomain U := hmap hx
-      have hr' : (bandChartEquiv h n m k x).1 ≤ 0 :=
-        mul_nonpos_of_nonneg_of_nonpos (bandScale_pos n m).le (le_of_not_gt hr)
-      have hleft := hzleft x hx (le_of_not_gt hr) theta
-      have hright := hzright _ hx' hr' theta
-      simp only [hleft.1, hright.1, hleft.2.1, hright.2.1, hleft.2.2, hright.2.2,
-        Pi.zero_apply, mul_zero, implies_true, and_self]
-  exact ⟨fun x hx theta => (he x hx theta).1, fun x hx theta => (he x hx theta).2.1,
-    fun x hx theta => (he x hx theta).2.2⟩
 
 end NavierStokes.CycleStateCoherence

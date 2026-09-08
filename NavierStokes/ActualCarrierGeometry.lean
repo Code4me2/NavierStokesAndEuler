@@ -33,8 +33,6 @@ noncomputable def geometricThreshold : ℕ :=
 before selecting `ActualPrimary.choice`. -/
 noncomputable def startingThreshold (requested : ℕ) : ℕ := max requested geometricThreshold
 
-theorem requested_le_startingThreshold (requested : ℕ) : requested ≤ startingThreshold requested :=
-  le_max_left _ _
 
 theorem geometricThreshold_le_startingThreshold (requested : ℕ) :
     geometricThreshold ≤ startingThreshold requested := le_max_right _ _
@@ -286,15 +284,6 @@ theorem signedLabel_injective : Function.Injective
   have he' := ActualPrimaryCovariance.signedLabelOf_injective he
   exact Prod.ext (congrArg Prod.snd he') (congrArg Prod.fst he')
 
-theorem labelCarrier_window_card (hN : geometricThreshold ≤ N0)
-    (n : ℕ) {x : Point}
-    (hx : x ∈ (BaseContextAssembly.nativeStrip nominal standardRegion).domain)
-    (s : Finset (ActualPrimaryBounds.SignedLabel B N0))
-    (hs : ∀ l ∈ s, x ∈ ActualInitialExcluded.labelCarrier l n) : s.card ≤ 2250 := by
-  apply LabelSumBounds.window_card_le s
-    (fun l => ActualPrimaryCovariance.signedLabelOf (l.2, l.1)) signedLabel_injective.injOn
-  intro l hl
-  exact ⟨l.2.val.property.1, labelCarrier_window hN l n hx (hs l hl)⟩
 
 end Windows
 

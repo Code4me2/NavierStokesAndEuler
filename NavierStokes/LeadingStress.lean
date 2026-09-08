@@ -288,13 +288,6 @@ theorem hasDerivAt_radialSlice {S : SimilarityProfile.PhysicalProfile}
   rw [map_smul]
   rfl
 
-theorem radialDivergence_eq_deriv (k : ℝ) {S : SimilarityProfile.PhysicalProfile}
-    {p : SimilarityProfile.PhysicalPoint} (hs : 0 ≤ p.2.1) (hS : DifferentiableAt ℝ S p) :
-    radialDivergence k S p =
-      deriv (fun r => S (p.1, (r ^ 2 / 2, p.2.2))) (Real.sqrt (2 * p.2.1)) +
-        k * S p / Real.sqrt (2 * p.2.1) := by
-  rw [(hasDerivAt_radialSlice hs hS).deriv]
-  rfl
 
 theorem physical_radius {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) :
@@ -423,37 +416,7 @@ theorem radialDivergence_physicalStressAxial {h : ℝ} (hh : 0 < h) (hh1 : h < 1
   congr 2
   ring
 
-theorem thetaAxialViscosity_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hw : inner h p ∈ Ω.carrier) :
-    thetaAxialViscosity P h p = SimilarityProfile.q h p ^ (-A h - 1 + 2 * h) *
-      (Real.sqrt (2 * (inner h p).1) *
-        SlowExpansionResidual.Z2 h (-A h - 1 / 2) P.f (inner h p)) := by
-  have hfc : ContDiffAt ℝ 2 P.f (inner h p) :=
-    (P.f_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).of_le (WithTop.coe_le_coe.mpr le_top)
-  unfold thetaAxialViscosity swirlProfile
-  rw [SimilarityProfile.partialZ_partialZ_pullback hh hh1 hp hfc]
-  unfold pullback
-  rw [← mul_assoc, radius_mul_rpow hh hh1 _ hp]
-  have he : -A h - 1 / 2 - 2 * CoordinateAlgebra.D h + 1 / 2 = -A h - 1 + 2 * h := by
-    unfold CoordinateAlgebra.D
-    ring
-  rw [he, mul_assoc]
-  rfl
 
-theorem axialAxialViscosity_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hw : inner h p ∈ Ω.carrier) :
-    axialAxialViscosity P h p = SimilarityProfile.q h p ^ (-A h - 1 + 2 * h) *
-      SlowExpansionResidual.Z2 h (-A h) P.U (inner h p) := by
-  have huc : ContDiffAt ℝ 2 P.U (inner h p) :=
-    (P.U_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).of_le (WithTop.coe_le_coe.mpr le_top)
-  unfold axialAxialViscosity axialProfile
-  rw [SimilarityProfile.partialZ_partialZ_pullback hh hh1 hp huc]
-  unfold pullback
-  have he : -A h - 2 * CoordinateAlgebra.D h = -A h - 1 + 2 * h := by
-    unfold CoordinateAlgebra.D
-    ring
-  rw [he]
-  rfl
 
 theorem theta_transport_stress {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) (hs : 0 < p.2.1)
@@ -530,14 +493,6 @@ theorem axial_transport_stress {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
           2 * ((inner h p).1 * partialX (partialX P.U) (inner h p) + partialX P.U (inner h p))) := by ring
     _ = _ := by rw [hc]; ring
 
-/-- The regular swirl coefficient reconstructs precisely `u_theta=q^(-A) E`. -/
-theorem physical_swirl_value {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1) :
-    Real.sqrt (2 * p.2.1) * swirlProfile P h p = pullback h (-A h) P.E p := by
-  unfold swirlProfile pullback Profiles.E
-  rw [← mul_assoc, radius_mul_rpow hh hh1 _ hp]
-  have he : -A h - 1 / 2 + 1 / 2 = -A h := by ring
-  rw [he, mul_assoc]
 
 /-- Cylindrical angular component of a genuine Cartesian vector. -/
 noncomputable def angularComponent (x v : ProblemStatement.Space) : ℝ :=
@@ -561,56 +516,5 @@ theorem angularComponent_pack {x : ProblemStatement.Space}
       congrArg (fun y => -y * T) hr2.symm
     _ = _ := by ring
 
-/-- Proposition 3.2 for the actual Cartesian Navier--Stokes residual.
-
-The local hypotheses avoid extending the quotient defining radial velocity
-across the axis. The two added terms are the exact axial-viscosity terms;
-their explicit similarity formulas are `thetaAxialViscosity_eq` and
-`axialAxialViscosity_eq`.
--/
-theorem navierStokesResidual_tangential {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {t : ℝ} {x : ProblemStatement.Space} (ht : t < 1)
-    (hs : 0 < AxisymmetricFields.radialEnergy x)
-    (hw : inner h (AxisymmetricFields.profilePoint t x) ∈ Ω.carrier)
-    (hf : P.f (inner h (AxisymmetricFields.profilePoint t x)) ≠ 0) :
-    (angularComponent x (ProblemStatement.navierStokesResidual
-        (physicalVelocity P h) (physicalPressure P h) t x) +
-        thetaAxialViscosity P h (AxisymmetricFields.profilePoint t x) =
-      -radialDivergence 2 (physicalStressTheta P h) (AxisymmetricFields.profilePoint t x)) ∧
-    ((ProblemStatement.navierStokesResidual (physicalVelocity P h) (physicalPressure P h) t x) 2 +
-        axialAxialViscosity P h (AxisymmetricFields.profilePoint t x) =
-      -radialDivergence 1 (physicalStressAxial P h) (AxisymmetricFields.profilePoint t x)) := by
-  have hL : L h (inner h (AxisymmetricFields.profilePoint t x)).2 ≠ 0 :=
-    (SimilarityProfile.L_pos hh hh1 ht).ne'
-  have hvi : ContDiffAt ℝ 2 (SlowDivergence.radialFlux h 0 P.U)
-      (inner h (AxisymmetricFields.profilePoint t x)) :=
-    (SlowDivergence.radialFlux_smoothAt Ω P.U_smooth h 0 hw hL).of_le
-      (WithTop.coe_le_coe.mpr le_top)
-  have hfi : ContDiffAt ℝ 2 P.f (inner h (AxisymmetricFields.profilePoint t x)) :=
-    (P.f_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).of_le (WithTop.coe_le_coe.mpr le_top)
-  have hui : ContDiffAt ℝ 2 P.U (inner h (AxisymmetricFields.profilePoint t x)) :=
-    (P.U_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).of_le (WithTop.coe_le_coe.mpr le_top)
-  have hpi := (P.pressure_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp)
-  have hv : ContDiffAt ℝ 2 (fluxProfile P h) (AxisymmetricFields.profilePoint t x) :=
-    SimilarityProfile.pullback_smoothAt hh hh1 ht hvi
-  have hff : ContDiffAt ℝ 2 (swirlProfile P h) (AxisymmetricFields.profilePoint t x) :=
-    SimilarityProfile.pullback_smoothAt hh hh1 ht hfi
-  have hu : ContDiffAt ℝ 2 (axialProfile P h) (AxisymmetricFields.profilePoint t x) :=
-    SimilarityProfile.pullback_smoothAt hh hh1 ht hui
-  have hp : DifferentiableAt ℝ (pressureProfile P h) (AxisymmetricFields.profilePoint t x) :=
-    SimilarityProfile.pullback_differentiableAt hh hh1 ht hpi
-  have hb := RadialFluxResidual.contDiffAt_radialB hv hs.ne'
-  have he := LocalAxisymmetricResidual.navierStokesResidual_velocity hb hff hu hp
-  change ProblemStatement.navierStokesResidual (physicalVelocity P h) (physicalPressure P h) t x = _ at he
-  rw [he]
-  constructor
-  · rw [angularComponent_pack hs, SlowExpansionResidual.residualAngular_radialB _ _ _ hs.ne']
-    have hhθ := theta_transport_stress P hh hh1 ht hs hw hf
-    change Real.sqrt (2 * AxisymmetricFields.radialEnergy x) *
-        SlowExpansionResidual.transportResidual 1 2 (fluxProfile P h) (axialProfile P h)
-          (swirlProfile P h) (fun _ => 0) (AxisymmetricFields.profilePoint t x) + _ = _ at hhθ
-    simpa only [neg_mul_neg] using hhθ
-  · rw [AxisymmetricResidual.pack_two, SlowExpansionResidual.residualAxial_radialB _ _ _ hs.ne']
-    exact axial_transport_stress P hh hh1 ht hs hw
 
 end NavierStokes.LeadingStress

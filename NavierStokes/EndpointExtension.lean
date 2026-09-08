@@ -29,9 +29,6 @@ theorem glue_eq_left {V : Type*} {a x : ℝ} {left right : ℝ → V} (hx : x �
     glue a left right x = left x := by
   simp only [glue, ite_eq_left hx]
 
-theorem glue_eq_right {V : Type*} {a x : ℝ} {left right : ℝ → V} (hx : a < x) :
-    glue a left right x = right x := by
-  simp only [glue, ite_eq_right (not_le_of_gt hx)]
 
 /-- Matching endpoint values let the glued function agree with the right
 branch on its entire closed half-line, including the joining point. -/
@@ -44,14 +41,6 @@ theorem glue_eqOn_right {V : Type*} {a : ℝ} {left right : ℝ → V}
     simpa only [glue, ite_eq_left le_rfl] using hvalue
   · simp only [glue, ite_eq_right hxa]
 
-/-- Gluing preserves a right-hand time-support bound. -/
-theorem glue_vanishes_from {V : Type*} [Zero V] {a b : ℝ} {left right : ℝ → V}
-    (hab : a ≤ b) (hvalue : left a = right a)
-    (hzero : ∀ x, b ≤ x → right x = 0) :
-    ∀ x, b ≤ x → glue a left right x = 0 := by
-  intro x hx
-  rw [glue_eqOn_right hvalue (hab.trans hx)]
-  exact hzero x hx
 
 section Normed
 
@@ -138,16 +127,6 @@ theorem contDiff_glue {a : ℝ} {left right : ℝ → V}
   intro x
   exact (hasDerivAt_gluedJet hleft hright hmatch n x).differentiableAt
 
-/-- The smooth glue preserves every prescribed endpoint jet. -/
-theorem iteratedDeriv_glue_at_join {a : ℝ} {left right : ℝ → V}
-    (hleft : ContDiffOn ℝ ∞ left (Iic a))
-    (hright : ContDiffOn ℝ ∞ right (Ici a))
-    (hmatch : ∀ n : ℕ,
-      iteratedDerivWithin n left (Iic a) a = iteratedDerivWithin n right (Ici a) a)
-    (n : ℕ) :
-    iteratedDeriv n (glue a left right) a = iteratedDerivWithin n left (Iic a) a := by
-  rw [iteratedDeriv_glue hleft hright hmatch n]
-  exact glue_eq_left le_rfl
 
 /-- Every within-derivative of the zero curve is zero. -/
 theorem iteratedDerivWithin_zero_curve (s : Set ℝ) (n : ℕ) :
@@ -158,15 +137,6 @@ theorem iteratedDerivWithin_zero_curve (s : Set ℝ) (n : ℕ) :
     funext x
     simp only [iteratedDerivWithin_succ, ih, derivWithin_fun_const, Pi.zero_apply]
 
-/-- An actually constructed extension in the flat case: if all left jets
-vanish, extension by zero to the right is smooth. -/
-theorem contDiff_zero_extension {a : ℝ} {left : ℝ → V}
-    (hleft : ContDiffOn ℝ ∞ left (Iic a))
-    (hflat : ∀ n : ℕ, iteratedDerivWithin n left (Iic a) a = 0) :
-    ContDiff ℝ ∞ (glue a left (fun _ => 0)) := by
-  apply contDiff_glue hleft contDiffOn_const
-  intro n
-  rw [hflat n, iteratedDerivWithin_zero_curve]
 
 end Normed
 

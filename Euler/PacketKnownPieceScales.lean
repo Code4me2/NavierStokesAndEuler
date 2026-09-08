@@ -65,10 +65,6 @@ theorem slow_shift_room (k l : KnownPiece) (i j p : ℕ)
   have hs := slow_high_high_room i j p hi hj hij
   omega
 
-theorem slow_shift_room_high (k l : KnownPiece) (i j p : ℕ)
-    (hi : 1 ≤ i) (hj : 1 ≤ j) (hij : i+j=p) :
-    k.shift i+l.shift j+1 < highForceShift p :=
-  lt_of_lt_of_le (slow_shift_room k l i j p hi hj hij) (mean_force_le_high_force p)
 
 theorem fast_mean_shift_room (l : KnownPiece) (i j p : ℕ)
     (hi : 2 ≤ i) (hj : 1 ≤ j) (hij : i+j=p+1) :

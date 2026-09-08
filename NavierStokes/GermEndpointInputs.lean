@@ -236,22 +236,6 @@ theorem initial_pressure_jets (B N0 N : ℕ) (hN : 4 ≤ N)
 
 end InitialCorrections
 
-/-- A finite physical sum can be extended directly from estimates of its
-actual summands.  Equality is required only on the physical validity region. -/
-theorem extension_of_sum3 {h qbig : ℝ} {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace ℝ V] [CompleteSpace V] {f f₁ f₂ f₃ : SpaceTime → V}
-    (J₁ : PhysicalJets h qbig f₁) (J₂ : PhysicalJets h qbig f₂)
-    (J₃ : PhysicalJets h qbig f₃)
-    (he : EqOn f (fun w => f₁ w + f₂ w + f₃ w)
-      (CutStageEstimates.physicalSublevel h qbig))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqbig : qbig ≤ 1)
-    {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension f x) := by
-  apply OffplaneJetExtensions.extension_of_eqOn_sublevel hh hh1 he hx hqx
-  exact OffplaneJetExtensions.extension_add
-    (OffplaneJetExtensions.extension_add (J₁.extension hh hh1 hqbig hx hqx)
-      (J₂.extension hh hh1 hqbig hx hqx)) (J₃.extension hh hh1 hqbig hx hqx)
 
 section ActualBase
 
@@ -333,36 +317,6 @@ theorem germ_stage_endpoints (upper : ℝ) (bandFloor : ℕ) {qbig : ℝ}
     | zero => omega
     | succ j => simpa only [MixedCandidateAssembly.pressureStages_succ] using JpStages j
 
-/-- Once the finite-stage estimates have been derived, only the bounded
-finite initial pieces remain to be supplied.  This wrapper does not inspect
-or impose a representation of any positive physical stage. -/
-theorem germ_stage_endpoints_of_estimates (upper : ℝ) (bandFloor : ℕ) {qbig : ℝ}
-    (hqbig : qbig ≤ 1) (initial : VelocityField) (stages : ℕ → VelocityField)
-    (D : ℕ → DirectAngularDiagonal.AngularData
-      (LocalAngularDiagonal.localSlowDomain F.data.h qbig))
-    (pInitial : PressureField) (pStages : ℕ → PressureField)
-    (E : MixedCandidateAssembly.StageEstimates F.data.h qbig
-      (GermCandidateAssembly.potentialStages H v upper bandFloor initial stages)
-      (LocalAngularDiagonal.rawSeries D)
-      (MixedCandidateAssembly.pressureStages H v upper bandFloor pInitial pStages))
-    (Jinitial : PhysicalJets F.data.h qbig initial)
-    (Jdirect : PhysicalJets F.data.h qbig (LocalAngularDiagonal.rawSeries D 0))
-    (JpInitial : PhysicalJets F.data.h qbig pInitial) :
-    ActualEndpointInputs.EndpointInputs F.data.h qbig
-      (GermCandidateAssembly.potentialStages H v upper bandFloor initial stages)
-      (LocalAngularDiagonal.rawSeries D)
-      (MixedCandidateAssembly.pressureStages H v upper bandFloor pInitial pStages) := by
-  apply endpoints_of_bounds H v upper bandFloor hqbig
-    (fun _ _ => rfl) (fun _ _ => MixedCandidateAssembly.pressureStages_zero ..)
-    Jinitial JpInitial
-    (fun j hj => PhysicalJets.of_rawStage E.potential_bound hj (E.potential_smooth j)) ?_
-    (fun j hj => PhysicalJets.of_rawStage E.pressure_bound hj (E.pressure_smooth j))
-  intro j
-  cases j with
-  | zero => exact Jdirect
-  | succ j =>
-      exact PhysicalJets.of_rawStage E.direct_bound (Nat.succ_le_succ (Nat.zero_le j))
-        (E.direct_smooth (j + 1))
 
 end ActualBase
 

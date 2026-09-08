@@ -302,9 +302,6 @@ theorem stableInner_smoothAt {h : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2)
     (contDiffAt_snd.fst.div (hq.rpow_const_of_ne hpos.ne')
       (Real.rpow_pos_of_pos hpos _).ne')
 
-theorem positiveTime_mem_stableDomain {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : Slow} (hR : 0 < p.1) (hT : 0 < p.2.2) : p ∈ stableDomain h :=
-  ⟨hR, positiveTime_mem_stableTarget (by linarith) (by linarith) hT⟩
 
 theorem stableQ_eq_chartQ {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : Slow} (hp : 0 < p.2.2) : stableQ h p = SimilarityHomogeneity.chartQ h p := by
@@ -375,12 +372,6 @@ theorem stableEta_mem_reference {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h < 1 / 2)
     linarith [hq.2]
   exact abs_le.mp ((sq_le_one_iff_abs_le_one _).mp hs)
 
-theorem reference_zeroTime_axial_ne {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (hab : a ≤ b) {p : Slow}
-    (hp : p ∈ PrimaryRepresentatives.referenceCompact h a b) (ht : p.2.2 = 0) : p.2.1 ≠ 0 := by
-  have hq := stableQ_spec (referenceCompact_subset_stableDomain hh hh1 ha hab hp)
-  intro hz
-  simpa [forwardScalar, hz, ht, hq.1.ne'] using hq.2
 
 /-- An open stable-branch neighborhood with fixed radial and similarity
 coordinate bounds. Its positive-time part is the physical domain. -/
@@ -488,8 +479,6 @@ theorem positiveCell_eventually_subset {K U : Set Slow} (hK : IsCompact K)
 
 noncomputable def cellBound (b : ℝ) : ℝ := max (2 * Real.sqrt b + 1) 3
 
-theorem cellBound_pos (b : ℝ) : 0 < cellBound b :=
-  lt_of_lt_of_le (by norm_num : (0 : ℝ) < 3) (le_max_right _ _)
 
 theorem baseChart_norm_bound {a b : ℝ} (ha : 0 < a) {p : Slow}
     (hp : p ∈ PrimaryRepresentatives.baseChart a b) :
@@ -556,15 +545,7 @@ theorem iteratedFDeriv_eq_of_eventuallyEq {E : Type*} [NormedAddCommGroup E] [No
   have he' : f =ᶠ[𝓝[univ] p] g := by simpa only [nhdsWithin_univ] using he
   simpa only [iteratedFDerivWithin_univ] using he'.iteratedFDerivWithin_eq he.self_of_nhds n
 
-theorem stableQ_iteratedFDeriv_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : Slow} (hp : 0 < p.2.2) (n : ℕ) :
-    iteratedFDeriv ℝ n (stableQ h) p = iteratedFDeriv ℝ n (SimilarityHomogeneity.chartQ h) p :=
-  iteratedFDeriv_eq_of_eventuallyEq (stableQ_eventuallyEq_chartQ hh hh1 hp) n
 
-theorem stableInner_iteratedFDeriv_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : Slow} (hp : 0 < p.2.2) (n : ℕ) :
-    iteratedFDeriv ℝ n (stableInner h) p = iteratedFDeriv ℝ n (SimilarityHomogeneity.chartInner h) p :=
-  iteratedFDeriv_eq_of_eventuallyEq (stableInner_eventuallyEq_chartInner hh hh1 hp) n
 
 theorem compact_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {K : Set Slow} (hK : IsCompact K) {f : Slow → E}
@@ -597,42 +578,9 @@ theorem stablePullback_eventuallyEq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     stableInner_eventuallyEq_chartInner hh hh1 hp] with q hq hi
   exact congrArg₂ (fun r x => r ^ exponent * f x) hq hi
 
-/-- Actual physical derivatives have one compact bound down to arbitrarily
-small positive time. The boundary values used in the proof are the genuine
-stable extension, not derivatives of a totalized inverse at zero time. -/
-theorem physicalPullback_uniform_jet_bound {h a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (hab : a ≤ b) (exponent : ℝ) {f : (ℝ × ℝ) → ℝ}
-    (hf : ∀ x ∈ Icc a b ×ˢ Icc (-1 : ℝ) 1, ContDiffAt ℝ ∞ f x) (n : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ p ∈ PrimaryRepresentatives.referenceCompact h a b,
-      0 < p.2.2 → ‖iteratedFDeriv ℝ n (physicalPullback h exponent f) p‖ ≤ C := by
-  have hs : ∀ p ∈ PrimaryRepresentatives.referenceCompact h a b,
-      ContDiffAt ℝ ∞ (stablePullback h exponent f) p := by
-    intro p hp
-    apply stablePullback_smoothAt hh.le hh1.le exponent
-      (referenceCompact_subset_stableDomain hh.le hh1 ha hab hp)
-    exact hf _ ⟨(stableQ_bounds_reference hh.le hh1 ha hab hp).2,
-      stableEta_mem_reference hh.le hh1 ha hab hp⟩
-  obtain ⟨C, hC, hb⟩ := compact_jet_bound
-    (PrimaryRepresentatives.referenceCompact_isCompact hh.le hh1 ha hab) hs n
-  refine ⟨C, hC, fun p hp hT => ?_⟩
-  rw [← iteratedFDeriv_eq_of_eventuallyEq (stablePullback_eventuallyEq hh hh1 exponent f hT) n]
-  exact hb p hp
 
 /-! ## Compact reference data are transferred only at positive time -/
 
-theorem shearVector_eq_on_positive {F G Fext Gext : Slow → ℝ}
-    (hF : EqOn F Fext positiveTime) (hG : EqOn G Gext positiveTime) :
-    EqOn (PhaseEstimates.shearVector F G) (PhaseEstimates.shearVector Fext Gext) positiveTime := by
-  intro p hp
-  have hf : F =ᶠ[𝓝 p] Fext := by
-    filter_upwards [positiveTime_open.mem_nhds hp] with q hq
-    exact hF hq
-  have hg : G =ᶠ[𝓝 p] Gext := by
-    filter_upwards [positiveTime_open.mem_nhds hp] with q hq
-    exact hG hq
-  have hdf : fderiv ℝ F p = fderiv ℝ Fext p := hf.fderiv_eq
-  have hdg : fderiv ℝ G p = fderiv ℝ Gext p := hg.fderiv_eq
-  simp only [PhaseEstimates.shearVector, PhaseCalculus.slowR, hdf, hdg]
 
 noncomputable def ActiveLabel.toClosed {K : Set Slow} (L : ActiveLabel K) :
     PrimaryRepresentatives.ActiveLabel K :=

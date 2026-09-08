@@ -74,19 +74,6 @@ theorem normalized_pressure (k : ℝ) (p : ScalarField) (z : Domain) :
   simp only [map_add,map_smul,smul_add,smul_smul,pow_two]
   module
 
-theorem coordinatePressure_eq_lifted (k : ℝ) (hk : k ≠ 0) (p : ScalarField)
-    (z : Domain) (hp : DifferentiableAt ℝ (fun y => p (z.1,y)) z.2) :
-    coordinatePressure D k p z = liftedPressure D k⁻¹ (k^2 • p) z := by
-  have hd : fderiv ℝ (fun y => (k^2 • p) (z.1,y)) z.2 =
-      k^2 • fderiv ℝ (fun y => p (z.1,y)) z.2 := by
-    convert! (hp.hasFDerivAt.const_smul (k^2)).fderiv using 1
-  unfold liftedPressure coordinatePressure
-  rw [pressureGradient_eq_spatialDual,pressureGradient_eq_spatialDual,
-    pressureJet_angle,pressureJet_angle,hd]
-  simp only [smul_comp,map_smul,smul_apply,smul_smul]
-  have he : k⁻¹*k^2 = k := by field_simp
-  rw [he]
-  simp only [smul_eq_mul]
 
 section Fields
 

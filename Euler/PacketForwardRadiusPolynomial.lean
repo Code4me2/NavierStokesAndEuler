@@ -185,9 +185,5 @@ theorem canonicalRadius_le_envelope (W : ℝ) (hδ : 0 < δ)
   unfold radiusEnvelope
   nlinarith only [H.original_mean,H.original_forward,H.coefficient_cost,hb,hm,hg1,hgT,hextra,hreq,hjW]
 
-theorem canonicalRadius_power (W : ℝ) (hδ : 0 < δ)
-    (H : RadiusPrimitives L LM N BC δ ξ W) :
-    canonicalRadius L LM N BC δ ξ ≤ radiusConstant*W^radiusPower :=
-  (canonicalRadius_le_envelope L LM N BC δ ξ W hδ H).trans (radiusEnvelope_power W H.one)
 
 end EulerPacketForwardRadius

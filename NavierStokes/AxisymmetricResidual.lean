@@ -165,11 +165,6 @@ def SliceC2 (G : Profile) (t : ℝ) : Prop :=
 theorem SliceC2.differentiable {G : Profile} {t : ℝ} (hG : SliceC2 G t) :
     SliceDifferentiable G t := fun x => (hG x).differentiableAt (by norm_num)
 
-theorem sliceC2_of_contDiffOn {G : Profile} {times : Set ℝ} {t : ℝ}
-    (hG : ContDiffOn ℝ 2 G (times ×ˢ (Set.univ : Set (ℝ × ℝ))))
-    (ht : times ∈ nhds t) : SliceC2 G t := by
-  intro x
-  exact hG.contDiffAt (prod_mem_nhds ht Filter.univ_mem)
 
 theorem contDiff_lift_slice {G : Profile} {t : ℝ} (hG : SliceC2 G t) :
     ContDiff ℝ 2 (lift G t) := by
@@ -183,16 +178,8 @@ def laplaceScalar (G : Profile) (p : ProfilePoint) : ℝ :=
 def laplaceWeighted (G : Profile) (p : ProfilePoint) : ℝ :=
   2 * p.2.1 * partialS (partialS G) p + 4 * partialS G p + partialZ (partialZ G) p
 
-theorem contDiff_lift {G : Profile} {n : WithTop ℕ∞} (hG : ContDiff ℝ n G) (t : ℝ) :
-    ContDiff ℝ n (lift G t) := hG.comp (contDiff_profilePoint_slice t)
 
-theorem contDiff_partialS {G : Profile} {m n : WithTop ℕ∞}
-    (hG : ContDiff ℝ n G) (hmn : m + 1 ≤ n) : ContDiff ℝ m (partialS G) :=
-  (hG.fderiv_right hmn).clm_apply contDiff_const
 
-theorem contDiff_partialZ {G : Profile} {m n : WithTop ℕ∞}
-    (hG : ContDiff ℝ n G) (hmn : m + 1 ≤ n) : ContDiff ℝ m (partialZ G) :=
-  (hG.fderiv_right hmn).clm_apply contDiff_const
 
 theorem fderiv_lift_apply {G : Profile} {t : ℝ} (hG : SliceDifferentiable G t)
     (x v : Space) : fderiv ℝ (lift G t) x v =
@@ -414,13 +401,6 @@ theorem navierStokesResidual_velocity {B F U P : Profile} {t : ℝ}
   fin_cases i <;> simp [pack, coordinateVector,
     residualRadial, residualAngular, residualAxial] <;> ring
 
-theorem navierStokesResidual_on_axis {B F U P : Profile} {t : ℝ}
-    (hB : SliceC2 B t) (hF : SliceC2 F t) (hU : SliceC2 U t)
-    (hP : SliceDifferentiable P t) (x : Space) (hx0 : x 0 = 0) (hx1 : x 1 = 0) :
-    navierStokesResidual (velocity B F U) (pressure P) t x =
-      residualAxial B U P (t, (0, x 2)) • coordinateVector 2 := by
-  rw [navierStokesResidual_velocity hB hF hU hP]
-  simp [pack, hx0, hx1, profilePoint, radialEnergy]
 
 /-- The three explicit coefficient equations imply the actual Cartesian PDE. -/
 theorem navierStokesResidual_eq_zero {B F U P : Profile} {t : ℝ}
@@ -457,20 +437,6 @@ theorem velocity_from_potential_at (H K : Profile) (t : ℝ) (x : Space)
     rw [AxisymmetricFields.velocity_two H K t x hH hK]
     simp [velocity, lift, fromPotentialU, profilePoint]
 
-theorem velocity_from_potential {H K : Profile}
-    (hH : Differentiable ℝ H) (hK : Differentiable ℝ K) :
-    AxisymmetricFields.velocity H K =
-      velocity (fromPotentialB H) (fromPotentialF K) (fromPotentialU H) := by
-  funext w
-  exact velocity_from_potential_at H K w.1 w.2 (hH _) (hK _)
 
-theorem divergence_velocity_eq_zero {B F U : Profile} {t : ℝ}
-    (hB : SliceDifferentiable B t) (hF : SliceDifferentiable F t)
-    (hU : SliceDifferentiable U t) (x : Space)
-    (h : partialZ U (profilePoint t x) =
-      2 * B (profilePoint t x) + 2 * radialEnergy x * partialS B (profilePoint t x)) :
-    spatialDivergence (velocity B F U) t x = 0 := by
-  rw [divergence_velocity hB hF hU, h]
-  ring
 
 end NavierStokes.AxisymmetricResidual

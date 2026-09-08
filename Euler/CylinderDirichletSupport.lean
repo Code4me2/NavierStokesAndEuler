@@ -16,11 +16,6 @@ variable (P : ℝ) [Fact (0 < P)] {V : Type*}
 def spatialCutoff : CylinderL2 P V →L[ℝ] CylinderL2 P V :=
   cutoffOperator (liftMeasure P) (spatialSet P S) (spatialSet_measurable P S hS)
 
-theorem spatialCutoff_norm : ‖spatialCutoff (V := V) P S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro u
-  change ‖cutoff (liftMeasure P) (spatialSet P S) (spatialSet_measurable P S hS) u‖ ≤ 1*‖u‖
-  simpa only [one_mul] using cutoff_norm (liftMeasure P) (spatialSet P S) (spatialSet_measurable P S hS) u
 
 theorem spatialCutoff_fix (u : CylinderL2 P V) :
     u ∈ Supported P V S hS ↔ spatialCutoff P S hS u = u :=
@@ -83,21 +78,7 @@ theorem frameDerivative_cutoff_back (t : Icc (0 : ℝ) T) (u : CylinderL2 P U) :
   rw [spatialCutoff_adjoint,spatialCutoff_adjoint]
   exact D.frameDerivative_cutoff P S hS t u
 
-theorem velocityLp_cutoff (f : TimeLp T (CylinderL2 P E)) :
-    D.velocityLp P (timeLift T (spatialCutoff P S hS) f) =
-      timeLift T (spatialCutoff P S hS) (D.velocityLp P f) :=
-  D.velocityLp_intertwines P D (spatialCutoff P S hS) (spatialCutoff P S hS)
-    (D.frame_cutoff P S hS) (D.frameDerivative_cutoff P S hS)
-    (D.frame_cutoff_back P S hS) (D.frameDerivative_cutoff_back P S hS)
-    (D.hessian_cutoff P S hS) f
 
-theorem velocityPath_cutoff (f : TimeLp T (CylinderL2 P E)) (t : Icc (0 : ℝ) T) :
-    D.velocityPath P (timeLift T (spatialCutoff P S hS) f) t =
-      spatialCutoff P S hS (D.velocityPath P f t) :=
-  D.velocityPath_intertwines P D (spatialCutoff P S hS) (spatialCutoff P S hS)
-    (D.frame_cutoff P S hS) (D.frameDerivative_cutoff P S hS)
-    (D.frame_cutoff_back P S hS) (D.frameDerivative_cutoff_back P S hS)
-    (D.hessian_cutoff P S hS) f t
 
 variable (f : C(Icc (0 : ℝ) T,CylinderL2 P E))
   (hf : ∀ t, f t ∈ Supported P E S hS)

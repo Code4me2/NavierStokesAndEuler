@@ -1,6 +1,9 @@
 import Euler.ParentState
-import Euler.ParentPacketChildChoice
-import Euler.ParentPacketForwardChildChoice
+import Euler.ParentParticleInverse
+import Euler.ParentPacketJoinedInput
+import Euler.PacketInitializedChildBounds
+import Euler.ParentPacketForwardInput
+import Euler.PacketForwardInitializedChildShear
 
 /-! Both actual initialized packet branches produce the same recursive
 physical state. Their residual and parity proofs are supplied by their

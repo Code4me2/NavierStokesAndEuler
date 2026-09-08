@@ -159,12 +159,6 @@ theorem second_deriv_bessel (k : ℕ) (t : ℝ) :
   rw [deriv_bessel]
   simpa only [neg_neg, Nat.add_assoc] using (hasDerivAt_bessel (k + 1) t).fun_neg.deriv
 
-/-- An actual differential equation for the infinite function. -/
-theorem bessel_ode (k : ℕ) (t : ℝ) :
-    t * deriv (deriv (bessel k)) t + ((k : ℝ) + 1) * deriv (bessel k) t +
-      bessel k t = 0 := by
-  rw [second_deriv_bessel, deriv_bessel, bessel_contiguous k t]
-  ring
 
 theorem bessel_zero (k : ℕ) : bessel k 0 = 1 / (k.factorial : ℝ) := by
   rw [bessel_eq_constant_add_tail]
@@ -206,15 +200,6 @@ theorem second_deriv_profile (χ Y : ℝ) :
   simp only [mul_one]
   ring
 
-/-- The leading regular equation `2(YΦ''+2Φ') = -χΦ`, for the actual sum. -/
-theorem profile_scaled_ode (χ Y : ℝ) :
-    2 * (Y * deriv (deriv (profile χ)) Y + 2 * deriv (profile χ) Y) =
-      -χ * profile χ Y := by
-  rw [second_deriv_profile, deriv_profile]
-  unfold profile
-  rw [bessel_contiguous 1 ((χ / 2) * Y)]
-  norm_num
-  ring
 
 /-- The exact successive-term ratio, including its sign. -/
 theorem term_succ_ratio (k n : ℕ) (t : ℝ) :

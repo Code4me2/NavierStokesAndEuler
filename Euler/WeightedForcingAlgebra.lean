@@ -47,15 +47,5 @@ theorem weightedForcingSum_neg (ρ : ℝ) (order : α → ℕ) (f : α → β �
     weightedForcingSum ρ order (-f) = weightedForcingSum ρ order f := by
   simp only [weightedForcingSum, Pi.neg_apply, familyNorm_neg]
 
-/-- The forcing norm of a sum is controlled by the sum of the norms of its actual terms. -/
-theorem weightedForcingSum_sum_le {ι : Type*} (ρ : ℝ) (hρ : 0 < ρ) (order : α → ℕ)
-    (S : Finset ι) (f : ι → α → β → H) :
-    weightedForcingSum ρ order (∑ i ∈ S, f i) ≤ ∑ i ∈ S, weightedForcingSum ρ order (f i) := by
-  classical
-  induction S using Finset.induction_on with
-  | empty => simp [weightedForcingSum, familyNorm, familySquaredNorm]
-  | @insert i S hi ih =>
-    rw [Finset.sum_insert hi, Finset.sum_insert hi]
-    exact (weightedForcingSum_add_le ρ hρ order (f i) (∑ j ∈ S, f j)).trans (add_le_add le_rfl ih)
 
 end EulerWeightedForcingAlgebra

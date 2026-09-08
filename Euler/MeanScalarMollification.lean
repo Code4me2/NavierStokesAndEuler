@@ -87,9 +87,5 @@ theorem scalarMollification_energy_le (φ : ContDiffBump (0 : Space))
         φ.integrable_normed hf2, φ.integral_normed]
       simp only [ContinuousLinearMap.lsmul_apply, one_smul]
 
-theorem scalarMollification_norm_le (φ : ContDiffBump (0 : Space))
-    (f : Space → ℝ) (hf : MemLp f 2 volume) :
-    lpNorm (scalarMollification φ f) 2 volume ≤ lpNorm f 2 volume :=
-  (sq_le_sq₀ lpNorm_nonneg lpNorm_nonneg).1 (scalarMollification_energy_le φ f hf)
 
 end EulerMeanHarmonic

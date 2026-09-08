@@ -326,19 +326,6 @@ theorem rescale_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       mul_le_mul (hC _) (pow_le_pow_left₀ (norm_nonneg g) hg m)
         (pow_nonneg (norm_nonneg g) _) ((norm_nonneg _).trans (hC x))
 
-theorem gridMask_all_jet_bounds (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (δ : ℝ), 0 < δ → ∀ (k : ℤ) (x : ℝ),
-      ‖iteratedFDeriv ℝ m (gridMask δ k) x‖ ≤ C / δ ^ m := by
-  obtain ⟨C, hC, hbound⟩ := exists_uniform_jet_bound (lineMask_smooth 0) (lineMask_compactSupport 0) m
-  refine ⟨C, hC, fun δ hδ k x => ?_⟩
-  have heq : gridMask δ k = fun y => lineMask 0 (δ⁻¹ • y - (k : ℝ)) := by
-    funext y
-    rw [gridMask, lineMask_eq_translate]
-    congr 1
-    simp [div_eq_mul_inv, mul_comm]
-  rw [heq]
-  simpa [abs_inv, abs_of_pos hδ, div_eq_mul_inv] using
-    rescale_jet_bound (lineMask_smooth 0) hbound δ⁻¹ (k : ℝ) x
 
 theorem productMask_eq_rescale {d : ℕ} (δ : ℝ) (k : Fin d → ℤ) (x : Fin d → ℝ) :
     productMask δ k x = productMask 1 0 (δ⁻¹ • x - fun j => (k j : ℝ)) := by
@@ -492,17 +479,6 @@ theorem dyadicMask_locallyFinite :
   change dyadicMask n q ≠ 0 ↔ lineMask n (logCoordinate q) ≠ 0
   rw [dyadicMask_eq_line n q.property]
 
-theorem dyadicMask_all_jet_bounds (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (n : ℤ) (q : ℝ),
-      ‖iteratedFDeriv ℝ m (dyadicMask n) q‖ ≤ C / integerQ n ^ m := by
-  obtain ⟨C, hC, hbound⟩ := exists_uniform_jet_bound dyadicProfile_smooth dyadicProfile_compactSupport m
-  refine ⟨C, hC, fun n q => ?_⟩
-  have heq : dyadicMask n = fun y => dyadicProfile ((integerQ n)⁻¹ • y - 0) := by
-    funext y
-    simp [dyadicMask, div_eq_mul_inv, mul_comm]
-  rw [heq]
-  simpa [abs_inv, abs_of_pos (integerQ_pos n), div_eq_mul_inv] using
-    rescale_jet_bound dyadicProfile_smooth hbound (integerQ n)⁻¹ (0 : ℝ) q
 
 theorem dyadicMask_zero_of_neg {q : ℝ} (hq : 0 < q) (hq1 : q ≤ 1)
     {n : ℤ} (hn : n < 0) : dyadicMask n q = 0 := by
@@ -590,10 +566,6 @@ theorem slowMask_tsupport_subset {n : ℕ} (hn : 1 ≤ n) (k : SlotColoring.Grid
       Icc (nativeSpacing n * k j - nativeSpacing n) (nativeSpacing n * k j + nativeSpacing n)) :=
   productMask_tsupport_subset _ (nativeSpacing_pos hn) _
 
-theorem slowMask_jet_tsupport_subset {n : ℕ} (hn : 1 ≤ n) (k : SlotColoring.Grid) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (slowMask n k)) ⊆ Set.pi univ (fun j =>
-      Icc (nativeSpacing n * k j - nativeSpacing n) (nativeSpacing n * k j + nativeSpacing n)) :=
-  (tsupport_iteratedFDeriv_subset m).trans (slowMask_tsupport_subset hn k)
 
 /-- Every fixed jet costs the fixed power `S^(3m)`, uniformly in all grid nodes. -/
 theorem slowMask_all_jet_bounds (m : ℕ) :
@@ -676,30 +648,12 @@ theorem physicalSlowMask_tsupport_subset_physicalBox (D : ℝ) {n : ℕ} (hn : 1
   rw [abs_le]
   constructor <;> linarith [hj.1, hj.2]
 
-theorem physicalSlowMask_jet_tsupport_subset_physicalBox (D : ℝ) {n : ℕ} (hn : 1 ≤ n)
-    (k : SlotColoring.Grid) (sign : Bool) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (physicalSlowMask D n k)) ⊆
-      SlotColoring.physicalBox D (n, k, sign) :=
-  (tsupport_iteratedFDeriv_subset m).trans (physicalSlowMask_tsupport_subset_physicalBox D hn k sign)
 
 def labelMask (n : ℕ) (k : SlotColoring.Grid) (p : ℝ × SlotColoring.Position) : ℝ :=
   dyadicMask (n : ℤ) p.1 * slowMask n k p.2
 
-theorem labelMask_nonneg (n : ℕ) (k : SlotColoring.Grid) (p : ℝ × SlotColoring.Position) :
-    0 ≤ labelMask n k p := mul_nonneg (dyadicMask_nonneg _ _) (slowMask_nonneg _ _ _)
 
-theorem labelMask_smooth (n : ℕ) (k : SlotColoring.Grid) : ContDiff ℝ ∞ (labelMask n k) :=
-  ((dyadicMask_smooth _).comp contDiff_fst).mul ((slowMask_smooth _ _).comp contDiff_snd)
 
-theorem labelMask_compactSupport {n : ℕ} (hn : 1 ≤ n) (k : SlotColoring.Grid) :
-    HasCompactSupport (labelMask n k) := by
-  have hc : IsCompact (tsupport (dyadicMask (n : ℤ)) ×ˢ tsupport (slowMask n k)) :=
-    (dyadicMask_compactSupport _).prod (slowMask_compactSupport hn k)
-  apply hc.of_isClosed_subset isClosed_closure
-  apply closure_minimal _ hc.isClosed
-  intro p hp
-  have h := mul_ne_zero_iff.mp hp
-  exact ⟨subset_closure h.1, subset_closure h.2⟩
 
 theorem locallyFinite_pair_inter {ι κ X : Type*} [TopologicalSpace X]
     {U : ι → Set X} {V : ι → κ → Set X}
@@ -780,24 +734,5 @@ theorem labelMask_tail_sum_sq (N : ℕ) {p : ℝ × SlotColoring.Position}
   simp_rw [hs]
   exact dyadicMask_tail_sum_sq N hq hqN
 
-theorem labelMask_tail_total_sum_sq (N : ℕ) {p : ℝ × SlotColoring.Position}
-    (hq : 0 < p.1) (hqN : p.1 ≤ ChartScales.Q N) :
-    (∑ᶠ a : ℕ × SlotColoring.Grid, labelMask (a.1 + N) a.2 p ^ 2) = 1 := by
-  have hf : (support (fun a : ℕ × SlotColoring.Grid => labelMask a.1 a.2 p)).Finite :=
-    labelMask_locallyFinite.point_finite (⟨p.1, hq⟩, p.2)
-  have hinj : Function.Injective (fun a : ℕ × SlotColoring.Grid => (a.1 + N, a.2)) := by
-    intro a b h
-    apply Prod.ext
-    · have he := congrArg Prod.fst h
-      exact Nat.add_right_cancel he
-    · simpa only [] using congrArg (fun z : ℕ × SlotColoring.Grid => z.2) h
-  have hp := hf.preimage hinj.injOn
-  have hs : (support (fun a : ℕ × SlotColoring.Grid => labelMask (a.1 + N) a.2 p ^ 2)).Finite := by
-    apply hp.subset
-    intro a ha hzero
-    change labelMask (a.1 + N) a.2 p = 0 at hzero
-    exact ha (by change labelMask (a.1 + N) a.2 p ^ 2 = 0; rw [hzero]; norm_num)
-  rw [finsum_pair_eq hs]
-  exact labelMask_tail_sum_sq N hq hqN
 
 end NavierStokes.SquaredPartition

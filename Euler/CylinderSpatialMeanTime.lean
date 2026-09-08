@@ -43,9 +43,5 @@ theorem mean_pointField_eq (t : K) :
       (by simpa only [sobolevPath_value] using pointField_ae P p hp t)
   · exact pathMean_pointField_ae P p hp t
 
-theorem rawMean_pointField_contDiff (t : K) :
-    ContDiff ℝ ∞ (rawMean P (pointField P p hp t)) := by
-  rw [← mean_pointField_eq P p hp t]
-  exact EulerMeanSmoothRepresentative.representative_smooth _ _
 
 end EulerCylinderSpatialMean

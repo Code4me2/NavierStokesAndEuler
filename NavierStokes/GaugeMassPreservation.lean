@@ -209,22 +209,6 @@ theorem temporalIncrement_slice_continuous_on
       (temporalAtIndex_contDiffOn h n (index n) U.isOpen (hz n) (hpz n))
       (temporalAtIndex_supportedGauge h n (index n) (hsz n)) hs R
 
-/-- Every radial moment of either conserved increment vanishes on the valid
-slow set, since its full torus average is identically zero there. -/
-theorem temporalIncrement_radialMoments_zero_on
-    (hθ : ∀ n, ContDiffOn ℝ ∞ (u.thetaResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hz : ∀ n, ContDiffOn ℝ ∞ (u.axialResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hpθ : ∀ n, PhysicalMeanDomain.PeriodicOn U.carrier (u.thetaResidual c n))
-    (hpz : ∀ n, PhysicalMeanDomain.PeriodicOn U.carrier (u.axialResidual c n))
-    (hsz : ∀ n, SupportedGauge g.radial.inner g.radial.outer (qLength coord) U.carrier (u.axialResidual c n))
-    (k n : ℕ) {s : Plane} (hs : s ∈ U.carrier) :
-    CorrectionState.radialMoment k (temporalIncrementState g h index axial c u).angular n s = 0 ∧
-      CorrectionState.radialMoment k (temporalIncrementState g h index axial c u).axial n s = 0 := by
-  constructor
-  · exact radialMoment_zero_of_torusAverage k _ n s (fun R =>
-      (temporalIncrement_torusMean_on U g ha hd hell h index axial c u hθ hz hpθ hpz hsz n R hs).1)
-  · exact radialMoment_zero_of_torusAverage k _ n s (fun R =>
-      (temporalIncrement_torusMean_on U g ha hd hell h index axial c u hθ hz hpθ hpz hsz n R hs).2)
 
 /-- Pressure reconstruction and the stored temporal alias leave the actual
 angular/axial torus means unchanged after the common-index increment. -/
@@ -289,18 +273,6 @@ theorem temporalStage_zeroMassesOn
     hmθ hmz hθ hz hpθ hpz hsz n hs
   exact ⟨he.1.trans (hu n s hs).1, he.2.trans (hu n s hs).2⟩
 
-theorem temporalStage_zeroMassesOn_of_global
-    (hmθ : ∀ n, ContinuousOn (u.mean.angular n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hmz : ∀ n, ContinuousOn (u.mean.axial n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hθ : ∀ n, ContDiffOn ℝ ∞ (u.thetaResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hz : ∀ n, ContDiffOn ℝ ∞ (u.axialResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hpθ : ∀ n, PhysicalMeanDomain.PeriodicOn U.carrier (u.thetaResidual c n))
-    (hpz : ∀ n, PhysicalMeanDomain.PeriodicOn U.carrier (u.axialResidual c n))
-    (hsz : ∀ n, SupportedGauge g.radial.inner g.radial.outer (qLength coord) U.carrier (u.axialResidual c n))
-    (hu : CorrectionState.ZeroMasses u) :
-    ZeroMassesOn U.carrier (temporalStageState g h index axial c u) :=
-  temporalStage_zeroMassesOn U g ha hd hell h index axial c u hmθ hmz hθ hz hpθ hpz hsz
-    (ZeroMassesOn.of_global hu)
 
 end Temporal
 

@@ -194,12 +194,6 @@ theorem finalAngular_suppressed (d : TailData) (eta : ℝ) {y : ℝ}
   have h' := mul_le_mul_of_nonneg_left h (finalAngular_pos d (d.releaseStart, eta)).le
   nlinarith
 
-theorem finalAngular_div_h_suppressed (d : TailData) (eta : ℝ) {y : ℝ}
-    (hy : d.releaseStart + d.secondRampStart ≤ y) :
-    finalAngular d (y, eta) / d.h ≤ 2 * finalAngular d (d.releaseStart, eta) * d.h ^ 3 := by
-  apply (div_le_iff₀ d.h_pos).mpr
-  convert! finalAngular_suppressed d eta hy using 1
-  ring
 
 theorem profileSlope_bounds (d : TailData) (y : ℝ) :
     -1 ≤ profileSlope d y ∧ profileSlope d y ≤ -(3 * d.h / 4) := by
@@ -505,14 +499,6 @@ theorem corrected_releaseA (d : TailData) (c : ℝ → Coeff) (eta : ℝ) {y : �
   rw [he.deriv_eq]
   exact (releaseA_eq_derivative d eta hy).symm
 
-theorem corrected_bs_zero (d : TailData) (c : ℝ → Coeff) (Amp : ℝ → ℝ) (eta : ℝ) {y : ℝ}
-    (hy : d.core.endpoint < y) :
-    2 * deriv (fun t => axial d.core Amp (t, eta)) y / correctedAngular d c (y, eta) = 0 := by
-  have he : (fun t => axial d.core Amp (t, eta)) =ᶠ[𝓝 y] (fun _ : ℝ => 0) := by
-    filter_upwards [lt_mem_nhds hy] with t ht
-    exact axial_after_pulse d.core Amp eta ht.le
-  rw [he.deriv_eq]
-  simp
 
 theorem cone_of_zero_bs {a r p : ℝ} (ha : 2 < a) (ha' : a ≤ 4)
     (hr : |r| ≤ 1 / 2) (hp : 16 < p) :
@@ -752,24 +738,6 @@ theorem actualRatio_eq_releaseVelocityRatio {d : TailData} {K : ℝ} (w : ResetW
   rw [ReleaseMoments.corrected_eq_release d w.coefficients eta hy]
   rfl
 
-theorem actual_release_cone {d : TailData} {K : ℝ} (w : ResetWitness d K)
-    (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hsmall : releaseConeConstant d.core.P d.core.m * d.core.lam ^ (29 : ℕ) ≤ 1 / 2)
-    {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    {XR eta y : ℝ} (hXR : releaseRadiusThreshold d < XR) (heta : |eta| ≤ 1)
-    (hy : d.releaseStart ≤ y) (hy' : y ≤ tailStart d + 1 / 2)
-    (hz : ∀ᶠ q in 𝓝 eta, CorrectedPulseAmplitude.totalEnergy d w.coefficients (Amp q) q = 0) :
-    0 < OutgoingHistories.Qs w Amp (y, eta) ∧
-    2 < releaseA d y ∧
-    2 < XR * Real.exp y * OutgoingHistories.Qs w Amp (y, eta) / CoordinateAlgebra.L d.h eta ∧
-    releaseA d y < ConeAlgebra.coneBound
-      (XR * Real.exp y * OutgoingHistories.Qs w Amp (y, eta) / CoordinateAlgebra.L d.h eta)
-      ((XR * Real.exp y * OutgoingHistories.Qs w Amp (y, eta) / CoordinateAlgebra.L d.h eta) *
-        (OutgoingHistories.Ns w Amp (y, eta) /
-          (OutgoingHistories.E w (y, eta) * OutgoingHistories.Qs w Amp (y, eta)))) := by
-  rw [actualRatio_eq_releaseVelocityRatio w ha eta hy hz, actualQs_eq_normalizedLag w ha eta hy]
-  have hc := release_true_cone w hwait hsmall hXR heta hy hy'
-  exact ⟨normalizedLag_pos w eta hy hy', hc.2.1, hc.1, hc.2.2⟩
 
 /-! ## Actual logarithmic derivatives through flattening and reset -/
 
@@ -1174,11 +1142,6 @@ theorem actualS_finite_bounds {d : TailData} {K : ℝ} (w : ResetWitness d K)
 noncomputable def finiteNumeratorBudget (d : TailData) : ℝ :=
   5 * finiteEnergyBudget d + 12 * CorrectedPressureBounds.correctedConstant
 
-theorem finiteNumeratorBudget_pos (d : TailData) : 0 < finiteNumeratorBudget d := by
-  dsimp [finiteNumeratorBudget]
-  have := finiteEnergyBudget_pos d
-  have := CorrectedPressureBounds.correctedConstant_pos
-  positivity
 
 theorem actualNs_finite_bound {d : TailData} {K : ℝ} (w : ResetWitness d K)
     {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
@@ -1685,30 +1648,5 @@ noncomputable def PostPulseCone {d : TailData} {K : ℝ} (w : ResetWitness d K) 
       (OutgoingHistories.p1 XR w (CorrectedPulseAmplitude.amplitude d w.coefficients) (y, eta))
       (OutgoingHistories.p2 XR w (CorrectedPulseAmplitude.amplitude d w.coefficients) (y, eta))
 
-/-- A common positive `lam` threshold works for every `0 < 2*h < lam`.
-The entrance radius is chosen only after the full schedule, including `h`.
-No energy, pressure, angular-lag, or cone inequality is assumed as input. -/
-theorem exists_scheduled_tail_cone (P m : ℝ) (hP : 0 < P) :
-    ∃ lam0 K : ℝ, 0 < lam0 ∧ 0 < K ∧ ∀ d : TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam0 → ∃ w : ResetWitness d K,
-        ContDiff ℝ ∞ (CorrectedPulseAmplitude.amplitude d w.coefficients) ∧
-        (∀ eta : ℝ, eta ^ 2 ≤ 1 → CorrectedPulseAmplitude.totalEnergy d w.coefficients
-          (CorrectedPulseAmplitude.amplitude d w.coefficients eta) eta = 0) ∧
-        ∃ R0 : ℝ, 0 < R0 ∧ ∀ XR : ℝ, R0 < XR → PostPulseCone w XR := by
-  obtain ⟨resetLam, K, hresetLam, hK, Hreset⟩ := exists_scheduled_reset
-  obtain ⟨smallLam, hsmallLam, Hsmall⟩ := exists_tail_smallness_threshold P m K hP hK
-  refine ⟨min resetLam smallLam, K, lt_min hresetLam hsmallLam, hK, ?_⟩
-  intro d hdP hdm hwait hlam
-  have hr := lt_of_lt_of_le hlam (min_le_left _ _)
-  have hs := lt_of_lt_of_le hlam (min_le_right _ _)
-  obtain ⟨w⟩ := Hreset d hr
-  obtain ⟨hsmall, hscale, hpulse, hh1, hhT, hreset, hfinite, hrelease⟩ := Hsmall d hdP hdm hs
-  have ha := CorrectedPulseAmplitude.amplitude_spec w hK hsmall hwait hscale
-  refine ⟨w, ha.1, ?_, tailRadiusThreshold d, tailRadiusThreshold_pos d, ?_⟩
-  · intro eta heta
-    exact (ha.2 eta heta).2.2.1
-  · intro XR hXR eta heta y hy hy'
-    exact corrected_tail_cone w hK hwait hsmall hscale hpulse hh1 hhT hreset hfinite hrelease hXR heta hy hy'
 
 end NavierStokes.TailCone

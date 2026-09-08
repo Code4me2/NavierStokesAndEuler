@@ -24,9 +24,6 @@ theorem supportScale_shift (J : ℕ) (X : ℝ) (r n : ℕ) :
     supportScale (J+r) (scaleSequence J X r) n=supportScale J X (r+n) := by
   simp only [supportScale,scaleSequence_shift,Nat.add_assoc]
 
-theorem spike_shift (J : ℕ) (X : ℝ) (r n : ℕ) :
-    spike (J+r) (scaleSequence J X r) n=spike J X (r+n) := by
-  simp only [spike,scaleSequence_shift,Nat.add_assoc]
 
 theorem parameterEnvelope_shift (J : ℕ) (hJ : 1 ≤ J) (C c : ℝ) (p q : ℕ)
     (X : ℝ) (r n : ℕ) :

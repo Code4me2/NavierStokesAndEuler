@@ -229,17 +229,8 @@ def geometryData (Ω : Set Space) (h0 : 0 ∈ Ω) (hΩ : ∀ x ∈ Ω, ‖x‖ �
   initial_velocity_error := fun x =>
     (A.source_velocity_initial_error x (hΩ x x.property)).trans A.error_le_scaled_error
 
-theorem geometryData_matrix (Ω : Set Space) (h0 : 0 ∈ Ω) (hΩ : ∀ x ∈ Ω, ‖x‖ ≤ A.radius)
-    (x : {x : Space // x ∈ Ω}) (t : ℝ) :
-    (A.geometryData Ω h0 hΩ).M x t=D.M.field (D.clamp t) x := rfl
 
-theorem geometryData_ray (Ω : Set Space) (h0 : 0 ∈ Ω) (hΩ : ∀ x ∈ Ω, ‖x‖ ≤ A.radius)
-    (x : {x : Space // x ∈ Ω}) (t : ℝ) :
-    (A.geometryData Ω h0 hΩ).r x t=D.normal.field (D.clamp t) x := rfl
 
-theorem geometryData_velocity (Ω : Set Space) (h0 : 0 ∈ Ω) (hΩ : ∀ x ∈ Ω, ‖x‖ ≤ A.radius)
-    (x : {x : Space // x ∈ Ω}) (t : ℝ) :
-    (A.geometryData Ω h0 hΩ).w x t=uncutVelocity τ hτ hτT H A.terminal t x := rfl
 
 end Guards
 end EulerPacketSourceGeometry

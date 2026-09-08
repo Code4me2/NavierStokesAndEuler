@@ -303,14 +303,6 @@ def extension (z : ℝ × X) : V := ∑' j : ℕ, term (scale a ha j) j (a j) z
 def localizedExtension (m : ℕ) (z : ℝ × X) : V :=
   ∑' j : ℕ, localizedTerm m (scale a ha j) j (a j) z
 
-/-- The defining series converges at every point; its `tsum` is never being
-used merely as the default value of a divergent series. -/
-theorem terms_summable (z : ℝ × X) :
-    Summable (fun j : ℕ => term (scale a ha j) j (a j) z) := by
-  apply Summable.of_norm_bounded_eventually_nat summable_geometric_two
-  have hK : IsCompact ({z.2} : Set X) := isCompact_singleton
-  filter_upwards [derivative_tail_bound_on_compact a ha hK 0] with j hj
-  simpa only [norm_iteratedFDeriv_zero] using hj z (mem_singleton z.2)
 
 theorem localized_derivatives_summable (m k : ℕ) (z : ℝ × X) :
     Summable (fun j : ℕ => iteratedFDeriv ℝ k (localizedTerm m (scale a ha j) j (a j)) z) :=
@@ -373,19 +365,6 @@ theorem extension_iteratedFDeriv (k : ℕ) (z : ℝ × X) :
   exact (iteratedFDeriv_eq_of_eventuallyEq
     (term_eventuallyEq_localized m hm (scale a ha j) j (a j)) k).symm
 
-/-- Uniform convergence of every full derivative series on compact spatial
-sets, uniformly over all real times. -/
-theorem derivatives_tendstoUniformlyOn_compact {K : Set X} (hK : IsCompact K) (k : ℕ) :
-    TendstoUniformlyOn
-      (fun N : ℕ => fun z : ℝ × X =>
-        ∑ j ∈ Finset.range N, iteratedFDeriv ℝ k (term (scale a ha j) j (a j)) z)
-      (iteratedFDeriv ℝ k (extension a ha)) atTop (univ ×ˢ K) := by
-  rw [show iteratedFDeriv ℝ k (extension a ha) =
-    (fun z => ∑' j : ℕ, iteratedFDeriv ℝ k (term (scale a ha j) j (a j)) z)
-    from funext (extension_iteratedFDeriv a ha k)]
-  apply tendstoUniformlyOn_tsum_nat_eventually summable_geometric_two
-  filter_upwards [derivative_tail_bound_on_compact a ha hK k] with j hj z hz
-  exact hj z hz.2
 
 omit [FiniteDimensional ℝ X] [CompleteSpace V] in
 theorem time_iteratedDeriv {f : (ℝ × X) → V} (hf : ContDiff ℝ ∞ f)
@@ -421,14 +400,6 @@ theorem extension_time_jets (k : ℕ) (x : X) :
   · intro j hj
     simp [Ne.symm hj]
 
-/-- Taking any number of spatial derivatives of the boundary time-jet
-function gives the corresponding derivative of the prescribed coefficient. -/
-theorem extension_mixed_boundary_jets (k l : ℕ) (x : X) :
-    iteratedFDeriv ℝ l (fun y : X =>
-      iteratedDeriv k (fun t : ℝ => extension a ha (t, y)) 0) x =
-      iteratedFDeriv ℝ l (a k) x := by
-  rw [show (fun y : X => iteratedDeriv k (fun t : ℝ => extension a ha (t, y)) 0) = a k
-    from funext (extension_time_jets a ha k)]
 
 omit [CompleteSpace V] in
 theorem extension_eq_series (z : ℝ × X) :

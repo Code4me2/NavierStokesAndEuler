@@ -36,9 +36,6 @@ noncomputable def openCell (n : ℕ) (k : SlotColoring.Grid) : Set Slow :=
 theorem openCell_open (n : ℕ) (k : SlotColoring.Grid) : IsOpen (openCell n k) :=
   (isOpen_Ioo.prod (isOpen_Ioo.prod isOpen_Ioo)).inter PositiveRepresentatives.positiveTime_open
 
-theorem openCell_convex (n : ℕ) (k : SlotColoring.Grid) : Convex ℝ (openCell n k) :=
-  ((convex_Ioo _ _).prod ((convex_Ioo _ _).prod (convex_Ioo _ _))).inter
-    PositiveRepresentatives.positiveTime_convex
 
 theorem openCell_subset_box (n : ℕ) (k : SlotColoring.Grid) :
     openCell n k ⊆ PrimaryRepresentatives.gridBox n k 2 := by
@@ -186,12 +183,6 @@ theorem native_support_in_carrier {N : ℕ} (L : Index W N) :
       PositiveRepresentatives.positiveTime ⊆ (domain W N).carrier L :=
   cellDomain_support L
 
-theorem native_jet_support_in_carrier {N : ℕ} (L : Index W N) (m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (PrimaryRepresentatives.nativeMask L.val.val.1 L.val.val.2)) ∩
-      PositiveRepresentatives.positiveTime ⊆ (domain W N).carrier L := by
-  intro p hp
-  exact native_support_in_carrier W L
-    ⟨tsupport_iteratedFDeriv_subset (𝕜 := ℝ) m hp.1, hp.2⟩
 
 /-- Every genuinely nonzero physical mask has one of the joint positive
 labels used here. The implicit inverse is never evaluated at zero time. -/
@@ -476,24 +467,13 @@ noncomputable def canonicalPrepared (hcone : LeadingStressWeights.FullTrueCone v
     Prepared H v (2 * NominalConeAssembly.activeRight W) B r0 N0 :=
   prepared H v hcone (2 * NominalConeAssembly.activeRight W) B r0 (le_max_left _ _) N0
 
-noncomputable def canonicalPhases (hcone : LeadingStressWeights.FullTrueCone v)
-    (B : ℕ) (r0 : ℝ) (hr0 : 0 < r0) (N0 : ℕ) :
-    Fin 2 → PrimaryPulseBounds.PhaseConstruction
-      (domain W (canonicalPrepared H v hcone B r0 N0).N) :=
-  construction H v (canonicalPrepared H v hcone B r0 N0) hr0
 
-theorem prepared_threshold (hcone : LeadingStressWeights.FullTrueCone v)
-    (upper : ℝ) (B : ℕ) (r0 : ℝ)
-    (hbox : 2 * NominalConeAssembly.activeRight W ≤ FinalSlowBase.boxRadius W upper)
-    (N0 : ℕ) : N0 ≤ (prepared H v hcone upper B r0 hbox N0).N :=
-  (prepared H v hcone upper B r0 hbox N0).threshold
 
 section Bindings
 
 variable {upper : ℝ} {B : ℕ} {r0 : ℝ} {N0 : ℕ}
   (a : Prepared H v upper B r0 N0) (hr0 : 0 < r0)
 
-theorem four_le_threshold : 4 ≤ a.N := (a.large a.N le_rfl).four_le
 
 theorem construction_frequency (c : Fin 2) (L : Index W a.N) :
     (construction H v a hr0 c).phase.F L = frequency H v upper B (BaseChartJets.cellBand L) := rfl
@@ -501,37 +481,16 @@ theorem construction_frequency (c : Fin 2) (L : Index W a.N) :
 theorem construction_axial (c : Fin 2) (L : Index W a.N) :
     (construction H v a hr0 c).phase.G L = axial H v upper B (BaseChartJets.cellBand L) := rfl
 
-theorem construction_epsilon (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).phase.epsilon L =
-      ChartScales.epsilon F.data.h (BaseChartJets.cellBand L) := rfl
 
-theorem construction_viscosity (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).viscosity L =
-      ChartScales.epsilon F.data.h (BaseChartJets.cellBand L) *
-        (ChartScales.carrier F.data.h (BaseChartJets.cellBand L) : ℝ) ^ 2 := rfl
 
-theorem construction_length (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).L L =
-      ChartScales.slotLength r0 F.data.h (BaseChartJets.cellBand L) := rfl
 
-theorem construction_slot (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).V L =
-      Ioo (-ChartScales.slotLength r0 F.data.h (BaseChartJets.cellBand L))
-        (2 * ChartScales.slotLength r0 F.data.h (BaseChartJets.cellBand L)) := rfl
 
 theorem construction_lambda (c : Fin 2) (L : Index W a.N) :
     (construction H v a hr0 c).lam L =
       PrimaryRepresentatives.lambda0 (leadingFrequency H v (representative W L))
         (shear H v (representative W L)) := rfl
 
-theorem construction_ratio (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).c0 L =
-      PrimaryRepresentatives.c0 (leadingFrequency H v (representative W L))
-        (shear H v (representative W L)) := rfl
 
-theorem construction_transverse (c : Fin 2) (L : Index W a.N) :
-    (construction H v a hr0 c).K L =
-      PrimaryRepresentatives.transverseDirection (shear H v (representative W L)) := rfl
 
 theorem construction_u (c : Fin 2) (L : Index W a.N) :
     (construction H v a hr0 c).u L = a.u := rfl
@@ -554,9 +513,6 @@ theorem angular_rounding_error (c : Fin 2) (L : Index W a.N) :
       1 / (ChartScales.carrier F.data.h (BaseChartJets.cellBand L) : ℝ) :=
   (family H v a c).angular_rounding_error L
 
-theorem phase_signs (L : Index W a.N) :
-    (family H v a 0).sigma L = 1 ∧ (family H v a 1).sigma L = -1 := by
-  norm_num [family, phaseSign]
 
 theorem common_bounds (c d : Fin 2) :
     (construction H v a hr0 c).r = (construction H v a hr0 d).r ∧
@@ -566,8 +522,6 @@ theorem common_bounds (c d : Fin 2) :
     (construction H v a hr0 c).E = (construction H v a hr0 d).E :=
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
-theorem carrier_time_positive {L : Index W a.N} {p : Slow}
-    (hp : p ∈ (domain W a.N).carrier L) : 0 < p.2.2 := hp.2
 
 theorem target_eq_normalized_stress {p : Slow} (hp : p ∈ referenceSet W)
     (hT : 0 < p.2.2)
@@ -580,19 +534,7 @@ theorem target_eq_normalized_stress {p : Slow} (hp : p ∈ referenceSet W)
   have hs := a.target_actual p hp (by simpa only [he] using hX)
   simpa only [he] using hs
 
-theorem frequency_eq_physical {p : Slow} (hT : 0 < p.2.2) (hR : 0 < p.1) (n : ℕ) :
-    frequency H v upper B n p = ChartScales.Q n ^ CoordinateAlgebra.A F.data.h *
-      FinalSlowBase.velocity H v upper B (BaseChartJets.bandPoint F.data.h (ChartScales.Q n) p) 1 / p.1 := by
-  exact BaseChartJets.frequency_eq_normalized_velocity
-    (FinalSlowBase.scales_strictMono H v upper B) F.data.h_pos F.data.h_lt_half
-    (ChartScales.Q_pos n) (FinalSlowBase.coefficients_smooth H v) hT hR
 
-theorem axial_eq_physical {p : Slow} (hT : 0 < p.2.2) (n : ℕ) :
-    axial H v upper B n p = ChartScales.Q n ^ CoordinateAlgebra.A F.data.h *
-      FinalSlowBase.velocity H v upper B (BaseChartJets.bandPoint F.data.h (ChartScales.Q n) p) 2 := by
-  exact BaseChartJets.axial_eq_normalized_velocity
-    (FinalSlowBase.scales_strictMono H v upper B) F.data.h_pos F.data.h_lt_half
-    (ChartScales.Q_pos n) (FinalSlowBase.coefficients_smooth H v) hT
 
 end Bindings
 
@@ -646,22 +588,8 @@ noncomputable def restrict {upper : ℝ} {B : ℕ} {r0 : ℝ} {N0 : ℕ}
       (a.restrict N hN).eta = a.eta ∧ (a.restrict N hN).target = a.target :=
   ⟨rfl, rfl, rfl, rfl⟩
 
-theorem restrict_frame {upper : ℝ} {B : ℕ} {r0 : ℝ} {N0 : ℕ}
-    (a : Prepared H v upper B r0 N0) (hr0 : 0 < r0) (N : ℕ) (hN : a.N ≤ N)
-    (c : Fin 2) (L : Index W N) :
-    (construction H v (a.restrict N hN) hr0 c).frame L =
-      (construction H v a hr0 c).frame (earlierIndex hN L) := rfl
 
-theorem restrict_angularMode {upper : ℝ} {B : ℕ} {r0 : ℝ} {N0 : ℕ}
-    (a : Prepared H v upper B r0 N0) (N : ℕ) (hN : a.N ≤ N)
-    (c : Fin 2) (L : Index W N) :
-    angularMode H v (a.restrict N hN) c L = angularMode H v a c (earlierIndex hN L) := rfl
 
-theorem restrict_phase_p {upper : ℝ} {B : ℕ} {r0 : ℝ} {N0 : ℕ}
-    (a : Prepared H v upper B r0 N0) (hr0 : 0 < r0) (N : ℕ) (hN : a.N ≤ N)
-    (c : Fin 2) (L : Index W N) :
-    (construction H v (a.restrict N hN) hr0 c).phase.p L =
-      (construction H v a hr0 c).phase.p (earlierIndex hN L) := rfl
 
 end Prepared
 

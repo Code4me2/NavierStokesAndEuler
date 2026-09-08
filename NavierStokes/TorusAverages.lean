@@ -120,10 +120,6 @@ theorem squareAverage_covering_iterate {f : Plane → ℂ}
   rw [← heq, squareAverage_torusLift]
   exact (integral_torusCovering_iterate g g.continuous n).trans hg.symm
 
-theorem squareAverage_covering_iterate_smooth {f : Plane → ℂ}
-    (hf : ContDiff ℝ ∞ f) (hp : UnitPeriodic f) (n : ℕ) :
-    squareAverage (fun z => f (covering^[n] z)) = squareAverage f :=
-  squareAverage_covering_iterate hf.continuous hp n
 
 /-- Real-valued form, with the same actual unit-square integral. -/
 theorem squareAverage_covering_iterate_real {f : Plane → ℝ}
@@ -187,19 +183,6 @@ theorem quotientPoint_injOn_small_chart (L : Plane ≃L[ℝ] Plane) (center : Pl
   · linarith [(abs_lt.mp h2).1]
   · linarith [(abs_lt.mp h2).2]
 
-/-- A positive injective native radius always exists; this proof supplies the
-explicit radius `1 / (4 * (‖L‖ + 1))`. -/
-theorem exists_injective_native_radius (L : Plane ≃L[ℝ] Plane) (center : Plane) :
-    ∃ r : ℝ, 0 < r ∧
-      InjOn quotientPoint ((fun z => center + L z) '' Metric.ball (0 : Plane) r) := by
-  let N : ℝ := ‖(L : Plane →L[ℝ] Plane)‖
-  have hN : 0 ≤ N := norm_nonneg _
-  have hpos : 0 < 4 * (N + 1) := by positivity
-  refine ⟨1 / (4 * (N + 1)), by positivity,
-    quotientPoint_injOn_small_chart L center _ ?_⟩
-  change N * (1 / (4 * (N + 1))) < 1 / 2
-  rw [mul_one_div, div_lt_iff₀ hpos]
-  nlinarith
 
 theorem latticeTranslate_unique {s : Set Plane} (hs : InjOn quotientPoint s)
     {z : Plane} {k l : Frequency} (hk : latticePoint k + z ∈ s)
@@ -304,15 +287,6 @@ theorem periodize_continuous {V : Type*} [NormedAddCommGroup V] {f : Plane → V
     continuous_finsetSum _ (fun k _ => hf.comp (continuous_const.add continuous_id))
   exact hsum.continuousAt.congr_of_eventuallyEq hs
 
-theorem periodize_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {f : Plane → V} (hf : ContDiff ℝ ∞ f) (hcf : HasCompactSupport f) :
-    ContDiff ℝ ∞ (periodize f) := by
-  rw [contDiff_iff_contDiffAt]
-  intro z
-  obtain ⟨s, hs⟩ := periodize_eventually_eq_sum hcf z
-  have hsum : ContDiff ℝ ∞ (fun w => ∑ k ∈ s, f (latticePoint k + w)) :=
-    ContDiff.sum (fun k _ => hf.comp (contDiff_const.add contDiff_id))
-  exact hsum.contDiffAt.congr_of_eventuallyEq hs
 
 theorem periodize_periodic {V : Type*} [NormedAddCommGroup V]
     (f : Plane → V) (z : Plane) (k : Frequency) :
@@ -402,11 +376,6 @@ theorem squareAverage_periodize {V : Type*} [NormedAddCommGroup V] [NormedSpace 
   rw [squareAverage_eq_setIntegral (periodize_continuous hf hcf),
     integral_periodize (hf.integrable_of_hasCompactSupport hcf)]
 
-theorem squareAverage_periodize_covering {f : Plane → ℂ}
-    (hf : Continuous f) (hcf : HasCompactSupport f) (n : ℕ) :
-    squareAverage (fun z => periodize f (covering^[n] z)) = ∫ z, f z := by
-  rw [squareAverage_covering_iterate (periodize_continuous hf hcf)
-    (periodize_periodic f) n, squareAverage_periodize hf hcf]
 
 theorem squareAverage_periodize_covering_real {f : Plane → ℝ}
     (hf : Continuous f) (hcf : HasCompactSupport f) (n : ℕ) :
@@ -492,12 +461,6 @@ theorem det_slotChart (vr vt : Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) :
     LinearMap.det (slotChart vr vt hdet : Plane →ₗ[ℝ] Plane) =
       vr.1 * vt.2 - vr.2 * vt.1 := det_slotLinearMap vr vt
 
-theorem integral_periodize_slot {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (vr vt center : Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) {f : Plane → V}
-    (hf : Continuous f) (hcf : HasCompactSupport f) :
-    (∫ z in fundamentalSquare, periodize (nativeField (slotChart vr vt hdet) center f) z) =
-      |vr.1 * vt.2 - vr.2 * vt.1| • ∫ z, f z := by
-  rw [integral_periodize_nativeField _ center hf hcf, det_slotChart]
 
 /-- Rescaling the transverse coordinate by `ci`. -/
 noncomputable def transverseChart (ci : ℝ) (hci : ci ≠ 0) : Plane ≃L[ℝ] Plane :=
@@ -535,11 +498,6 @@ theorem transverseStretch_continuous {V : Type*} [TopologicalSpace V] (ci r0 : �
   rw [transverseStretch_eq_nativeField ci r0 hci]
   exact nativeField_continuous _ _ hf
 
-theorem transverseStretch_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (ci r0 : ℝ) (hci : ci ≠ 0) {f : Plane → V} (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (transverseStretch ci r0 f) := by
-  rw [transverseStretch_eq_nativeField ci r0 hci]
-  exact nativeField_contDiff _ _ hf
 
 theorem transverseStretch_hasCompactSupport {V : Type*} [Zero V] (ci r0 : ℝ)
     (hci : ci ≠ 0) {f : Plane → V} (hf : HasCompactSupport f) :
@@ -673,24 +631,5 @@ theorem primary_covariance_average (vr vt center : Plane)
       hχ hψ hx ht hcχ hcψ i n]
   ring
 
-/-- The same exact prefactor with the transverse integral restricted to the
-actual pulse interval, using the already verified compact pulse support. -/
-theorem primary_covariance_average_interval (vr vt center : Plane)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (ci r0 : ℝ) (hci : 0 < ci)
-    {r a A b B : ℝ} {χ ψ x : ℝ → ℝ} {t : ℝ → PulseCovariance.Vec2}
-    (hp : PulseCovariance.PulseBounds r a A b B ψ x)
-    (hχ : Continuous χ) (ht : Continuous t) (hcχ : HasCompactSupport χ)
-    (i : Fin 2) (n : ℕ) (phase : Plane → ℝ) (j : ℤ) (hj : j ≠ 0) :
-    let amp := fun z => periodize
-      (nativeField (slotChart vr vt hdet) center
-        (transverseStretch ci r0 (pulseProfile χ ψ x t i)))
-      (covering^[n] z)
-    squareAverage (fun z => SmoothLoop.angularMean
-      (fun θ => amp z * Real.cos ((j : ℝ) * θ + phase z) ^ 2)) =
-      (|vr.1 * vt.2 - vr.2 * vt.1| / 2) * (∫ ξ : ℝ, χ ξ ^ 2) *
-        (ci * ∫ v in (0 : ℝ)..r ^ 2, ψ v ^ 2 * x v * t v i) := by
-  rw [← hp.actualColumn_eq_intervalIntegral ci t i]
-  exact primary_covariance_average vr vt center hdet ci r0 hci
-    hχ hp.cutoff_continuous hp.component_continuous ht hcχ hp.cutoff_compact i n phase j hj
 
 end NavierStokes.TorusAverages

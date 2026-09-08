@@ -46,21 +46,12 @@ theorem forwardMap_inverseMap (d : E → CircleDensity) (z : E × ℝ) :
   change (z.1, phaseHomeomorph (d z.1) ((phaseHomeomorph (d z.1)).symm z.2)) = z
   rw [(phaseHomeomorph (d z.1)).apply_symm_apply]
 
-theorem forwardMap_bijective (d : E → CircleDensity) : Bijective (forwardMap d) :=
-  ⟨Function.LeftInverse.injective (inverseMap_forwardMap d),
-    Function.RightInverse.surjective (forwardMap_inverseMap d)⟩
 
-theorem familyPhase_add_fullTurn (d : E → CircleDensity) (p : E) (θ : ℝ) :
-    familyPhase d (p, θ + 2 * Real.pi) = familyPhase d (p, θ) + 1 :=
-  phaseMap_add_fullTurn (d p) θ
 
 theorem inversePhase_add_one (d : E → CircleDensity) (p : E) (φ : ℝ) :
     inversePhase d (p, φ + 1) = inversePhase d (p, φ) + 2 * Real.pi :=
   phaseInverse_add_one (d p) φ
 
-theorem familyPhase_partial_hasDerivAt (d : E → CircleDensity) (p : E) (θ : ℝ) :
-    HasDerivAt (fun t => familyPhase d (p, t)) (familyRate d (p, θ)) θ :=
-  phaseMap_hasDerivAt (d p) θ
 
 variable [NormedAddCommGroup E] [NormedSpace ℝ E]
 
@@ -133,17 +124,7 @@ theorem inverseMap_contDiffOn_of_phase (d : E → CircleDensity) (U : Set E)
   apply hphase.contDiffAt
   exact (hU.prod isOpen_univ).mem_nhds ⟨hz.1, mem_univ _⟩
 
-theorem inversePhase_contDiffOn_of_phase (d : E → CircleDensity) (U : Set E)
-    (hU : IsOpen U) (hphase : ContDiffOn ℝ ∞ (familyPhase d) (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (inversePhase d) (U ×ˢ univ) :=
-  (inverseMap_contDiffOn_of_phase d U hU hphase).snd
 
-theorem inversePhase_contDiff_of_phase (d : E → CircleDensity)
-    (hphase : ContDiff ℝ ∞ (familyPhase d)) :
-    ContDiff ℝ ∞ (inversePhase d) := by
-  apply contDiff_iff_contDiffAt.mpr
-  intro z
-  exact inversePhase_contDiffAt_of_phase d z hphase.contDiffAt
 
 end InverseSmoothness
 
@@ -152,27 +133,8 @@ variable {V : Type*}
 def rephaseFamily (d : E → CircleDensity) (f : E × ℝ → V) (z : E × ℝ) : V :=
   f (inverseMap d z)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem rephaseFamily_periodic (d : E → CircleDensity) (f : E × ℝ → V)
-    (p : E) (hf : Function.Periodic (fun θ => f (p, θ)) (2 * Real.pi)) :
-    Function.Periodic (fun φ => rephaseFamily d f (p, φ)) 1 := by
-  intro φ
-  change f (p, inversePhase d (p, φ + 1)) = f (p, inversePhase d (p, φ))
-  rw [inversePhase_add_one]
-  exact hf _
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem rephaseFamily_forwardMap (d : E → CircleDensity) (f : E × ℝ → V) (z : E × ℝ) :
-    rephaseFamily d f (forwardMap d z) = f z := by
-  unfold rephaseFamily
-  rw [inverseMap_forwardMap]
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem rephaseFamily_integral (d : E → CircleDensity) (f : E × ℝ → ℝ) (p : E)
-    (hf : Continuous (fun θ => f (p, θ))) :
-    (∫ φ in (0 : ℝ)..1, rephaseFamily d f (p, φ)) =
-      ∫ θ in (0 : ℝ)..(2 * Real.pi), f (p, θ) * familyRate d (p, θ) :=
-  integral_rephase (d p) (fun θ => f (p, θ)) hf
 
 variable [NormedAddCommGroup V] [NormedSpace ℝ V]
 
@@ -265,11 +227,6 @@ theorem inversePhase_contDiffOn [FiniteDimensional ℝ E]
     ContDiffOn ℝ ∞ (inversePhase d) (U ×ˢ univ) :=
   (inverseMap_contDiffOn d U hU hrate).snd
 
-theorem inversePhase_contDiff [FiniteDimensional ℝ E]
-    (d : E → CircleDensity) (hrate : ContDiff ℝ ∞ (familyRate d)) :
-    ContDiff ℝ ∞ (inversePhase d) := by
-  have h := inversePhase_contDiffOn d univ isOpen_univ hrate.contDiffOn
-  simpa only [univ_prod_univ, contDiffOn_univ] using h
 
 /-- Smooth loops remain jointly smooth under the constructed parameter-dependent
 phase inverse. Their period becomes one by `rephaseFamily_periodic`. -/
@@ -280,11 +237,5 @@ theorem rephaseFamily_contDiffOn [FiniteDimensional ℝ E]
     ContDiffOn ℝ ∞ (rephaseFamily d f) (U ×ˢ univ) :=
   rephaseFamily_contDiffOn_of_phase d f U hU (familyPhase_contDiffOn d U hU hrate) hf
 
-theorem rephaseFamily_contDiff [FiniteDimensional ℝ E]
-    (d : E → CircleDensity) (f : E × ℝ → V)
-    (hrate : ContDiff ℝ ∞ (familyRate d)) (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (rephaseFamily d f) := by
-  have h := rephaseFamily_contDiffOn d f univ isOpen_univ hrate.contDiffOn hf.contDiffOn
-  simpa only [univ_prod_univ, contDiffOn_univ] using h
 
 end NavierStokes.ParametricRephase

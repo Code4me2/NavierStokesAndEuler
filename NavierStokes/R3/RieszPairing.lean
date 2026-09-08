@@ -33,11 +33,6 @@ theorem integrable_mul_rieszTest (i j : Fin 3) (ψ : ComplexTest)
     Integrable (fun x : Space => f x * rieszTest i j ψ x) := by
   simpa only [mul_comm] using integrable_rieszTest_mul i j ψ hf
 
-/-- The Hermitian pairing with a Schwartz test is integrable. -/
-theorem integrable_rieszTest_mul_conj (i j : Fin 3) (ψ φ : ComplexTest) :
-    Integrable (fun x : Space => rieszTest i j ψ x * conj (φ x)) :=
-  integrable_rieszTest_mul i j ψ
-    ((Complex.conjCLE : ℂ →L[ℝ] ℂ).integrable_comp φ.integrable)
 
 /-- Fourier duality with the inverse Fourier kernel. -/
 theorem integral_fourierInv_mul {f g : Space → ℂ}
@@ -56,12 +51,6 @@ theorem integral_fourierInv_mul {f g : Space → ℂ}
   change (∫ x : Space, 𝓕⁻ f x * g x) = ∫ ξ : Space, f ξ * 𝓕⁻ g ξ at h
   simpa only [Real.fourierInv_eq_fourier_neg] using h
 
-/-- Conjugation changes the inverse Fourier kernel into the Fourier kernel. -/
-theorem fourierInv_conj_apply (f : Space → ℂ) (ξ : Space) :
-    𝓕⁻ (fun x => conj (f x)) ξ = conj (𝓕 f ξ) := by
-  rw [Real.fourierInv_eq_fourier_neg,
-    SchwartzParseval.fourier_conj_apply,
-    Real.fourierInv_eq_fourier_neg, neg_neg]
 
 /-- Pair the actual double Riesz transform with a Schwartz function in Fourier space. -/
 theorem rieszTest_pairing_fourier (i j : Fin 3) (ψ φ : ComplexTest) :
@@ -82,28 +71,5 @@ theorem rieszTest_pairing_fourier_conj (i j : Fin 3) (ψ φ : ComplexTest) :
     Real.fourierInv_eq_fourier_neg, neg_neg]
   simp only [FourierTransform.fourierCLE_apply, SchwartzMap.fourier_coe]
 
-/-- The even Riesz multiplier makes the bilinear pairing symmetric. -/
-theorem rieszTest_selfAdjoint (i j : Fin 3) (ψ φ : ComplexTest) :
-    (∫ x : Space, rieszTest i j ψ x * φ x) =
-      ∫ x : Space, ψ x * rieszTest i j φ x := by
-  rw [rieszTest_pairing_fourier]
-  calc
-    (∫ ξ : Space, (rieszSymbol i j ξ : ℂ) * 𝓕 ψ ξ * 𝓕 φ (-ξ)) =
-        ∫ ξ : Space, (rieszSymbol i j ξ : ℂ) * 𝓕 φ ξ * 𝓕 ψ (-ξ) := by
-      rw [← (LinearIsometryEquiv.neg ℝ (E := Space)).measurePreserving.integral_comp
-        (LinearIsometryEquiv.neg ℝ (E := Space)).toHomeomorph.measurableEmbedding
-        (fun ξ : Space => (rieszSymbol i j ξ : ℂ) * 𝓕 ψ ξ * 𝓕 φ (-ξ))]
-      apply integral_congr_ae
-      filter_upwards [] with ξ
-      change (rieszSymbol i j (-ξ) : ℂ) * 𝓕 ψ (-ξ) * 𝓕 φ (-(-ξ)) =
-        (rieszSymbol i j ξ : ℂ) * 𝓕 φ ξ * 𝓕 ψ (-ξ)
-      rw [rieszSymbol_neg, neg_neg]
-      ring
-    _ = ∫ x : Space, rieszTest i j φ x * ψ x :=
-      (rieszTest_pairing_fourier i j φ ψ).symm
-    _ = ∫ x : Space, ψ x * rieszTest i j φ x := by
-      apply integral_congr_ae
-      filter_upwards [] with x
-      exact mul_comm _ _
 
 end NavierStokesR3.RieszTestOperators

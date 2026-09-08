@@ -33,17 +33,6 @@ theorem solenoidalFrame_adjoint (t : Icc (0 : ℝ) T) :
     _ = _ := congrArg (fun A : L2 →L[ℝ] solenoidalSpace => A.comp (F t).adjoint)
       (Submodule.adjoint_subtypeL solenoidalSpace)
 
-/-- Thus the momentum's actual representative is `Pσ F* u`, with ordinary
-spatial L² projection and no abstract replacement of the solenoidal space. -/
-theorem meanMomentum_ae (u : TimeLp T L2) :
-    (fun t => ((momentum T hT (solenoidalFrame T F) u t : solenoidalSpace) : L2))
-      =ᵐ[timeMeasure T]
-      fun t => solenoidalProjection ((extendPath T hT F t).adjoint (u t)) := by
-  filter_upwards [momentum_ae T hT (solenoidalFrame T F) u] with t ht
-  rw [ht]
-  change (((solenoidalFrame T F (projIcc 0 T hT t)).adjoint (u t) : solenoidalSpace) : L2) = _
-  exact congrArg (fun A : L2 →L[ℝ] solenoidalSpace => (A (u t) : L2))
-    (solenoidalFrame_adjoint T F (projIcc 0 T hT t))
 
 /-- The exact mean variational identity determines the weak derivative of its
 actual projected momentum after the trace-zero test restriction. -/
@@ -95,29 +84,5 @@ theorem meanMomentum_ac (hTpos : 0 < T)
   intro v hv
   exact meanMomentum_weak T hT FInv F F' hF hInv H M0 A L u f hu v hv
 
-/-- In particular the already constructed mean variational inverse has genuine
-projected momentum regularity. The coefficient/boundary lower bounds are used
-only by that solve; no regularity of the answer is assumed. -/
-theorem meanSolver_momentum_ac (hTpos : 0 < T)
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F' t) (Icc (0 : ℝ) T) t)
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x)
-    (H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (M0 A : L2 →L[ℝ] L2)
-    (L K B : ℝ) (hK : 0 ≤ K) (hB : 0 ≤ B)
-    (hF0 : FInv ⟨0, le_rfl, hT⟩ = ContinuousLinearMap.id ℝ L2)
-    (hH : ∀ t z, ⟪H t z, z⟫_ℝ ≤ K*‖z‖^2)
-    (hboundary : ∀ z : L2, z ∈ solenoidalSpace →
-      -B*‖z‖^2 ≤ ⟪M0 z, z⟫_ℝ+L*⟪A z, z⟫_ℝ)
-    (hsmall : K*(T^2/2)+B*T ≤ 1/2) (f : TimeLp T L2) :
-    let u : TimeLp T L2 :=
-      meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f
-    ∃ p : ℝ → solenoidalSpace,
-      AbsolutelyContinuousOnInterval p 0 T ∧
-      (momentum T hT (solenoidalFrame T F) u : ℝ → solenoidalSpace) =ᵐ[timeMeasure T] p ∧
-      ∀ᵐ t ∂timeMeasure T,
-        HasDerivAt p (momentumForcing T hT (solenoidalFrame T F) (solenoidalFrame T F') H u f t) t :=
-  meanMomentum_ac T hT FInv F F' hTpos hF hInv H M0 A L
-    (meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f) f
-    (meanSolver_weak T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f)
 
 end EulerMeanVariationalInverse

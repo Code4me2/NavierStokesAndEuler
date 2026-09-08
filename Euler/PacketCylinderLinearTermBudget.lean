@@ -21,15 +21,7 @@ theorem slowCost_le : B.slowCost ≤ B.termCost := by
 
 theorem fastCost_le : B.fastCost ≤ B.termCost := B.fastCost_le_slowCost.trans B.slowCost_le
 
-theorem linearCost_le : B.linearCost ≤ B.termCost := by
-  have h := B.twice_linearCost_le
-  have h0 := B.linearCost_nonneg
-  linarith
 
-theorem multiplierCost_le : B.multiplierCost ≤ B.termCost := by
-  have h := B.twice_multiplierCost_le
-  have h0 := B.multiplierCost_nonneg
-  linarith
 
 variable (hT : 0 < T) (S : Scales (Icc (0 : ℝ) T)) (p : ℕ)
   (b : C(Icc (0 : ℝ) T,ℝ)) (hb : ∀ t, 0 < b t)

@@ -40,9 +40,6 @@ theorem scaleField_fderiv (c : ℝ) (A : SmoothL2Field V) (x : Space) :
     fderiv ℝ (scaleField c A).field x=c • fderiv ℝ A.field x :=
   ((A.smooth.differentiable (by simp) x).hasFDerivAt.const_smul c).fderiv
 
-theorem scaleField_one (A : SmoothL2Field V) : scaleField 1 A=A := by
-  apply field_ext
-  exact funext (fun x => by simp only [scaleField_field,one_smul])
 
 theorem scaleField_continuous {K : Type*} [TopologicalSpace K]
     (c : ℝ) (A : K → SmoothL2Field V)

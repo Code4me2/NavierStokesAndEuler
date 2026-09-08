@@ -91,11 +91,6 @@ def integral : C(Icc (0 : ℝ) T,E) →L[ℝ] C(Icc (0 : ℝ) T,E) :=
 @[simp] theorem integral_apply (f : C(Icc (0 : ℝ) T,E)) (t : Icc (0 : ℝ) T) :
     integral T hT f t = realIntegral T hT f t := rfl
 
-/-- The exact operator bound for the initial primitive. -/
-theorem integral_norm : ‖integral (E := E) T hT‖ ≤ T := by
-  apply opNorm_le_bound _ hT
-  intro f
-  exact integralLinear_bound T hT f
 
 @[simp] theorem integral_initial (f : C(Icc (0 : ℝ) T,E)) :
     integral T hT f ⟨0,le_rfl,hT⟩ = 0 := by

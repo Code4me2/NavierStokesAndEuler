@@ -71,12 +71,6 @@ variable (A : Parent) {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ 
   {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
   (m' : Space) (hm' : ‖m'‖=1) (R' : V ≃ₗᵢ[ℝ] referencePlane m')
 
-theorem transverse_deformation_reframe (t : Icc (0 : ℝ) A.T) (x : Space) :
-    (A.transverseData m' hm' R' S hS).deformationEquiv t x=
-      (A.transverseData m hm R S hS).deformationEquiv t x := rfl
 
-theorem transverse_reframe :
-    (A.transverseData m hm R S hS).reframe m' hm'=
-      A.transverseData m' hm' (LinearIsometryEquiv.refl ℝ (referencePlane m')) S hS := rfl
 
 end EulerParentPacketFrames.Parent

@@ -50,8 +50,6 @@ theorem cross_negative_normalized (m a : Space) (hm : m ≠ 0)
 def potentialMultiplier (m : Space) : Space →L[ℝ] Space :=
   (-((‖m‖^2)⁻¹)) • crossLeft m
 
-theorem potentialMultiplier_apply (m a : Space) :
-    potentialMultiplier m a=(-((‖m‖^2)⁻¹)) • cross m a := rfl
 
 theorem cross_potentialMultiplier (m a : Space) (hm : m ≠ 0)
     (ha : ⟪m,a⟫_ℝ=0) : cross m (potentialMultiplier m a)=a :=

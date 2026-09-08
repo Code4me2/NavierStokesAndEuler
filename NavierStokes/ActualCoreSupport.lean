@@ -48,10 +48,6 @@ theorem refinedCarrier_subset_broad {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
     refinedCarrier l n ⊆ ActualInitialization.labelCarrier l n :=
   closure_minimal (fun _ hx => hx.2.1) (ActualInitialization.labelCarrier_closed l n)
 
-theorem refinedCarrier_nonnegative_time {B N0 : ℕ} (l : Index B N0) (n : ℕ) :
-    refinedCarrier l n ⊆ {x : Point | 0 ≤ x.2.1.1} :=
-  closure_minimal (fun _ hx => hx.1.le)
-    (isClosed_le continuous_const continuous_snd.fst.fst)
 
 theorem radialRatio_continuousAt {x : Point} (hT : 0 < x.2.1.1) :
     ContinuousAt radialRatio x := by
@@ -108,12 +104,7 @@ theorem mem_refinedCarrier_of_mem {B N0 : ℕ} (l : Index B N0) (n : ℕ)
     (hq : nativeQ l n x ∈ Icc (1 / 2 : ℝ) 2) : x ∈ refinedCarrier l n :=
   (mem_refinedCarrier_iff l n hT).2 ⟨hb, hr, hq⟩
 
-theorem radialRatio_fast (x : Point) (Y : TorusInverse.Plane) :
-    radialRatio (x.1, (x.2.1, Y)) = radialRatio x := rfl
 
-theorem nativeQ_fast {B N0 : ℕ} (l : Index B N0) (n : ℕ)
-    (x : Point) (Y : TorusInverse.Plane) :
-    nativeQ l n (x.1, (x.2.1, Y)) = nativeQ l n x := rfl
 
 section ActualCutoffs
 

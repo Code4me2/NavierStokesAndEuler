@@ -73,53 +73,11 @@ theorem forwardTargetRenewal_matches : RenewalAtTarget Geo Q := by
   · rfl
   · rfl
 
-theorem forwardTargetRenewal_shear : (Q).shear=G.hchild :=
-  (forwardTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext G hball CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource).shear_eq hδ
 
-theorem forwardTargetRenewal_constants : (Q).G=K ∧ (Q).error=error := ⟨rfl,rfl⟩
 
-include hTime hCM hK he hMK hHK hM hH hδ hsource in
-theorem forwardTargetRenewal_remainder (hT : tNext ≤ N.T) :
-    ‖(DNext).M.field ((DNext).clamp tNext) 0-(Geo).M (Geo).center tNext-
-      G.hchild • rankOne ℝ (unit ((Geo).w (Geo).center tNext))
-        (unit ((Geo).r (Geo).center tNext))‖ ≤ error := by
-  have H := forwardTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext G hball CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact H.target_remainder hδ hT
 
-theorem forwardTargetRenewal_parameters (hTilt : (Geo).tiltError ≤ 1/2) :
-    (Q).shear=G.hchild ∧ 0 < (Q).a ∧
-    |(Q).a/P.a-1| ≤ (Geo).couplingError ∧
-    0 < (Q).sigma ∧
-    |(G.y⁻¹)^2*(Q).sigma^2-1| ≤ (Geo).tiltError ∧
-    1/2 ≤ (G.y⁻¹)^2*(Q).sigma^2 ∧ (G.y⁻¹)^2*(Q).sigma^2 ≤ 3/2 := by
-  have H := forwardTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext G hball CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact ⟨H.shear_eq hδ,H.coupling_pos,H.coupling_error,H.sigma_pos hTilt,
-    H.tilt_error hTilt,H.tilt_interval hTilt⟩
 
-theorem forwardTargetRenewal_compression
-    (ht : 0 < tNext) (hT : tNext < N.T)
-    (hmargin : 3*((Geo).G+(Geo).d)+error < (Geo).compressionScale) :
-    ⟪(DNext).M.field ⟨tNext,ht.le,hT.le⟩ 0 (unit ((Q).m tNext)),
-      unit ((Q).m tNext)⟫_ℝ < 0 := by
-  have H := forwardTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext G hball CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact H.activation_compression ht hT hmargin
 
-theorem forwardTargetRenewal_compression_of_error_le_one
-    (hT : tNext < N.T) (herror : error ≤ 1) :
-    ⟪(DNext).M.field ⟨tNext,(Geo).targetTime_pos le_rfl |>.le,hT.le⟩ 0
-      (unit ((Q).m tNext)),unit ((Q).m tNext)⟫_ℝ < 0 := by
-  have H := forwardTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext G hball CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact H.activation_compression_of_error_le_one ((Geo).targetTime_pos le_rfl) hT herror
 
 end Forward
 
@@ -174,53 +132,11 @@ theorem joinedTargetRenewal_matches : RenewalAtTarget Geo Q := by
   · rfl
   · rfl
 
-theorem joinedTargetRenewal_shear : (Q).shear=G.hchild :=
-  (joinedTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext s hs hsT H G hball hcut CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource).shear_eq hδ
 
-theorem joinedTargetRenewal_constants : (Q).G=K ∧ (Q).error=error := ⟨rfl,rfl⟩
 
-include hTime hCM hK he hMK hHK hM hH hδ hsource in
-theorem joinedTargetRenewal_remainder (hT : tNext ≤ N.T) :
-    ‖(DNext).M.field ((DNext).clamp tNext) 0-(Geo).M (Geo).center tNext-
-      G.hchild • rankOne ℝ (unit ((Geo).w (Geo).center tNext))
-        (unit ((Geo).r (Geo).center tNext))‖ ≤ error := by
-  have E := joinedTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext s hs hsT H G hball hcut CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact E.target_remainder hδ hT
 
-theorem joinedTargetRenewal_parameters (hTilt : (Geo).tiltError ≤ 1/2) :
-    (Q).shear=G.hchild ∧ 0 < (Q).a ∧
-    |(Q).a/P.a-1| ≤ (Geo).couplingError ∧
-    0 < (Q).sigma ∧
-    |(G.y⁻¹)^2*(Q).sigma^2-1| ≤ (Geo).tiltError ∧
-    1/2 ≤ (G.y⁻¹)^2*(Q).sigma^2 ∧ (G.y⁻¹)^2*(Q).sigma^2 ≤ 3/2 := by
-  have E := joinedTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext s hs hsT H G hball hcut CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact ⟨E.shear_eq hδ,E.coupling_pos,E.coupling_error,E.sigma_pos hTilt,
-    E.tilt_error hTilt,E.tilt_interval hTilt⟩
 
-theorem joinedTargetRenewal_compression
-    (ht : 0 < tNext) (hT : tNext < N.T)
-    (hmargin : 3*((Geo).G+(Geo).d)+error < (Geo).compressionScale) :
-    ⟪(DNext).M.field ⟨tNext,ht.le,hT.le⟩ 0 (unit ((Q).m tNext)),
-      unit ((Q).m tNext)⟫_ℝ < 0 := by
-  have E := joinedTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext s hs hsT H G hball hcut CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact E.activation_compression ht hT hmargin
 
-theorem joinedTargetRenewal_compression_of_error_le_one
-    (hT : tNext < N.T) (herror : error ≤ 1) :
-    ⟪(DNext).M.field ⟨tNext,(Geo).targetTime_pos hs.le |>.le,hT.le⟩ 0
-      (unit ((Q).m tNext)),unit ((Q).m tNext)⟫_ℝ < 0 := by
-  have E := joinedTargetRenewal_matches S T hTime m hm J support hSupport
-    mNext hmNext JNext supportNext hSupportNext s hs hsT H G hball hcut CM CH K error
-    hCM hK he hMK hHK hM hH hδ k hsource
-  exact E.activation_compression_of_error_le_one ((Geo).targetTime_pos hs.le) hT herror
 
 end Joined
 end EulerParentPacketFrames.SmoothState

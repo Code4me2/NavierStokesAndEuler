@@ -154,24 +154,5 @@ theorem highSolve_of_admissible (D : Data U) (I : InitialData P D) (raw : Vector
     highSolve P D I raw = ((Classical.choice h).vector I,(Classical.choice h).scalar I) := by
   simp only [highSolve,dite_eq_left h]
 
-theorem highSolve_contract (D : Data U) (I : InitialData P D) (raw : VectorField)
-    (h : Nonempty (Forcing P D raw)) :
-    ∃ a_t : VectorField,
-      (∀ (t : Icc (0 : ℝ) D.T) x θ,
-        HasDerivWithinAt (fun r => (highSolve P D I raw).1 (r,(x,θ)))
-          (a_t (t,(x,θ))) (Icc (0 : ℝ) D.T) t) ∧
-      (∀ (t : Icc (0 : ℝ) D.T) x θ,
-        a_t (t,(x,θ))+D.strain (t,(x,θ)) ((highSolve P D I raw).1 (t,(x,θ)))+
-          deriv (fun s => (highSolve P D I raw).2 (t,(x,s))) θ • D.normalField (t,(x,θ)) = raw (t,(x,θ))) ∧
-      (∀ t, ContDiff ℝ ∞ (fun y : Space × ℝ => (highSolve P D I raw).1 (t,y))) ∧
-      (∀ t, ContDiff ℝ ∞ (fun y : Space × ℝ => (highSolve P D I raw).2 (t,y))) ∧
-      (∀ t x, (∫ θ in (0 : ℝ)..P, (highSolve P D I raw).2 (t,(x,θ))) = 0) := by
-  rw [highSolve_of_admissible D I raw h]
-  exact ⟨(Classical.choice h).vectorDerivative I,
-    (Classical.choice h).vector_hasDerivWithinAt I,
-    (Classical.choice h).equation I,
-    (Classical.choice h).vector_spatial_smooth I,
-    (Classical.choice h).scalar_spatial_smooth I,
-    (Classical.choice h).scalar_normalized I⟩
 
 end EulerTransversePacketProvider

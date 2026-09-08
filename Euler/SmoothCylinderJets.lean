@@ -55,22 +55,8 @@ def compositionJet (t : ℝ) (q : LiftDomain P) (n : ℕ) : LiftTangent [×n]→
   (jetSeries P (velocityCover T hT A t) (forward P T hT A (projIcc 0 T hT t) q)).taylorComp
     (jetSeries P (forwardCover T hT A t) q) n
 
-include hA in
-theorem displacement_cover (t : ℝ) (z : LiftTangent) :
-    displacement P T hT A t (coveringMap P z)=EulerSmoothBanachFlow.displacement T hT A t z :=
-  descend_cover P _ (fiber_constant_of_deck P _ (coverDisplacement_deck P T hT A hA t)) z
 
-include hA in
-theorem displacement_smooth (t : ℝ) (q : LiftDomain P) :
-    ContDiff ℝ ∞ (EulerMetricTransport.localFieldLift P (displacement P T hT A t) q) :=
-  descend_smooth P _ (coverDisplacement_deck P T hT A hA t)
-    (EulerSmoothBanachFlow.displacement_contDiff T hT A t) q
 
-include hA in
-theorem displacementJet_local (t : ℝ) (q : LiftDomain P) (n : ℕ) :
-    displacementJet P T hT A t q n =
-      iteratedFDeriv ℝ n (EulerMetricTransport.localFieldLift P (displacement P T hT A t) q) 0 :=
-  jetSeries_eq_local P _ (coverDisplacement_deck P T hT A hA t) q n
 
 include hA in
 theorem compositionJet_eq (t : ℝ) (q : LiftDomain P) (n : ℕ) :
@@ -125,14 +111,5 @@ theorem compositionJet_joint_measurable (n : ℕ) :
     ((sectionPoint_measurable P).comp measurable_snd))
   simpa only [compositionJet_path P T hT A hA,Function.comp_def] using hm
 
-theorem displacementJet_joint_measurable (n : ℕ) :
-    Measurable (fun z : ℝ × LiftDomain P => displacementJet P T hT A z.1 z.2 n) := by
-  have hc : Continuous (fun z : ℝ × LiftTangent =>
-      extendPath T hT (displacementJetPath T hT A n z.2) z.1) :=
-    ((displacementJetPath_label_continuous T hT A n).comp continuous_snd).eval
-      (continuous_projIcc.comp continuous_fst)
-  have hm := hc.measurable.comp (measurable_fst.prodMk
-    ((sectionPoint_measurable P).comp measurable_snd))
-  simpa only [displacementJet_path,Function.comp_def] using hm
 
 end EulerSmoothCylinderFlow

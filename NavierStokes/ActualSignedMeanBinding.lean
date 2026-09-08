@@ -66,9 +66,6 @@ theorem actual_strip_nonempty : ActualInitialization.geometry.strip.domain.Nonem
     rw [normalized_axis_scale, Real.sqrt_one, div_one]
     constructor <;> linarith [G.patch.a_lt_b]
 
-theorem no_legacy_nativeData : IsEmpty (SignedMeanGain.NativeData ActualInitialization.geometry) := by
-  obtain ⟨x, hx⟩ := actual_strip_nonempty
-  exact ⟨fun B => legacy_nativeData_excludes_strip B hx⟩
 
 /-! ## Shared matrix, scaled target and ratio of the signed coefficients -/
 
@@ -100,11 +97,7 @@ theorem velocityScale_eq (L : Label B N0) (n : ℕ) :
   simp only [velocityScale, PhysicalParticularWave.velocityWeight, PhysicalParticularWave.ratioPower,
     Real.rpow_neg (ChartScales.Q_pos _).le, div_eq_mul_inv]
 
-theorem commonMatrix_eq (L : Label B N0) (n : ℕ) (x : Point) (j : Fin 2) (k : Frequency) :
-    ActualSignedStageControls.matrix (L, j) k n (x, 0) = commonMatrix L n x := rfl
 
-theorem commonTarget_eq (L : Label B N0) (n : ℕ) (x : Point) (j : Fin 2) (k : Frequency) :
-    ActualSignedStageControls.target (L, j) k n (x, 0) = commonTarget L n x := rfl
 
 theorem commonTarget_cone (L : Label B N0) (n : ℕ) {x : Point}
     (hx : x ∈ ActualInitialization.geometry.strip.domain)
@@ -193,10 +186,6 @@ theorem primary_tangent_band (l : Label B N0 × Fin 2) :
     (ActualInitialization.tangentBlock l).BandLimited 1 :=
   CorrectionInitialization.PrimaryHarmonics.block_band _ _ _
 
-theorem actual_sameCarrier (request : ℕ → FullPoint → Vec2) (L : Label B N0) (j : Fin 2) :
-    LabelSumBounds.SameCarrier (ActualInitialization.tangentBlock (L, j))
-      ((ActualSignedStageControls.parameters (L, j)).tangentBlock ActualInitialization.geometry.strip request) :=
-  ⟨rfl, rfl, rfl⟩
 
 theorem signed_tangent_ratio (request : ℕ → FullPoint → Vec2) (L : Label B N0)
     (n : ℕ) {x : Point} (hx : x ∈ ActualInitialization.geometry.strip.domain)
@@ -215,13 +204,6 @@ theorem signed_tangent_ratio (request : ℕ → FullPoint → Vec2) (L : Label B
     zero_mul, mul_zero, add_zero, sub_zero]
   ring
 
-theorem signedRatio_fiber (c : CorrectionState.Context Point) (u : CorrectionState.State Point)
-    (L : Label B N0) (n : ℕ) (x : Point) (Y : TorusInverse.Plane) (j : Fin 2) :
-    signedRatio (LocalSignedRequest.fullRequest ActualInitialization.geometry.strip
-      ActualInitialization.geometry.patch ActualInitialization.geometry.coord c u)
-      L n (x.1, (x.2.1, Y)) j =
-    signedRatio (LocalSignedRequest.fullRequest ActualInitialization.geometry.strip
-      ActualInitialization.geometry.patch ActualInitialization.geometry.coord c u) L n x j := rfl
 
 /-! ## Individual primary modes at the actual common cover -/
 
@@ -470,46 +452,9 @@ theorem requested_cross_tail (B N0 : ℕ) (c : CorrectionState.Context Point)
   rw [requested_cross_factor B N0 c u n hx i,
     partitionFactor_eq_one B N0 n hx (physicalScale_tail B N0 hn hx), one_mul]
 
-/-- Earlier bands retain their actual cutoff deficit.  In particular this
-theorem makes no assertion of cancellation on every normalized band. -/
-theorem requested_cross_defect (B N0 : ℕ) (c : CorrectionState.Context Point)
-    (u : CorrectionState.State Point) (n : ℕ) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) (i : Fin 2) :
-    StateMomentBalances.meanBar (actualCross B N0 c u 0 i.succ) n x -
-      LocalSignedRequest.requestedStress ActualInitialization.geometry.patch
-        ActualInitialization.geometry.coord c u n x i =
-      -missingWeight (choice B N0).prepared.N (physicalScale n x) *
-        LocalSignedRequest.requestedStress ActualInitialization.geometry.patch
-          ActualInitialization.geometry.coord c u n x i := by
-  rw [requested_cross_factor B N0 c u n hx i, partitionFactor_eq_one_sub_missing B N0 n hx]
-  ring
 
-theorem theta_cross_tail (B N0 : ℕ) (c : CorrectionState.Context Point)
-    (u : CorrectionState.State Point) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) :
-    StateMomentBalances.meanBar (actualCross B N0 c u 0 1) n x =
-      SignedMeanGain.physicalSigma ActualInitialization.geometry 2 (u.thetaResidual c) n x :=
-  requested_cross_tail B N0 c u hn hx 0
 
-theorem axial_cross_tail (B N0 : ℕ) (c : CorrectionState.Context Point)
-    (u : CorrectionState.State Point) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) :
-    StateMomentBalances.meanBar (actualCross B N0 c u 0 2) n x =
-      SignedMeanGain.physicalSigma ActualInitialization.geometry 1 (u.axialResidual c) n x :=
-  requested_cross_tail B N0 c u hn hx 1
 
-theorem requested_cross_tail_jets (B N0 : ℕ) (c : CorrectionState.Context Point)
-    (u : CorrectionState.State Point) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) (i : Fin 2) (m : ℕ) :
-    iteratedFDeriv ℝ m (StateMomentBalances.meanBar (actualCross B N0 c u 0 i.succ) n) x =
-      iteratedFDeriv ℝ m (fun x => LocalSignedRequest.requestedStress
-        ActualInitialization.geometry.patch ActualInitialization.geometry.coord c u n x i) x := by
-  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (eventually_of_mem (ActualInitialization.geometry.strip.isOpen_domain.mem_nhds hx)
-      (fun y hy => requested_cross_tail B N0 c u hn hy i)) m).self_of_nhds
 
 /-! ## Binding to the signed family of the literal correction cycle -/
 
@@ -525,33 +470,9 @@ noncomputable def cycleParameters
     (CorrectionInitialization.CommonWindow.index h) ActualInitialization.axial
     particular ActualSignedStageControls.parameters rankData
 
-theorem cycle_signedRequest_eq
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point) :
-    (cycleParameters particular).signedRequest v c u =
-      actualRequest c ((cycleParameters particular).afterParticular v c u) := rfl
 
-theorem cycle_signedTangent_eq
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (l : Label B N0 × Fin 2) :
-    (cycleParameters particular).signedTangent v c u l =
-      actualSignedBlock c ((cycleParameters particular).afterParticular v c u) l := rfl
 
-theorem cycle_signed_sameCarrier
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (l : Label B N0 × Fin 2) :
-    LabelSumBounds.SameCarrier (ActualInitialization.tangentBlock l)
-      ((cycleParameters particular).signedBlock v c u l) := ⟨rfl, rfl, rfl⟩
 
-theorem cycle_current_signedCarrier
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (hcp : ∀ l, LabelSumBounds.SameCarrier (v.blocks l) (ActualInitialization.tangentBlock l))
-    (l : Label B N0 × Fin 2) :
-    LabelSumBounds.SameCarrier (v.blocks l) ((cycleParameters particular).signedBlock v c u l) :=
-  ⟨(hcp l).frequency, (hcp l).phase, (hcp l).angular⟩
 
 theorem fixedParameters_eq_cycle (B N0 : ℕ) :
     ActualCycleParameters.fixedParameters B N0 =
@@ -563,13 +484,7 @@ theorem parameters_eq_cycle (x : CycleState (Label B N0 × Fin 2)) :
       cycleParameters (fun l => ActualParticularStageControls.parameters
         (ActualCycleParameters.particularState x) (ActualCycleParameters.swap B N0 l)) := rfl
 
-theorem initial_labels (B N0 : ℕ) :
-    (ActualInitialization.coefficients B N0).labels = activeLabels standardRegion B N0 := rfl
 
-theorem next_labels
-    (p : CycleParameters (Label B N0 × Fin 2))
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point) :
-    (p.nextCoefficients v c u).labels = v.labels := rfl
 
 /-! The cycle field identity is stated without expanding its quantitative
 `SignedFamily` proof object.  Its coefficient projections are all that the
@@ -602,38 +517,7 @@ theorem cycle_requested_cross_tail
   rw [cycle_cross_eq particular v c u hlabels]
   exact requested_cross_tail B N0 c _ hn hx i
 
-theorem fixed_requested_cross_tail
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (hlabels : v.labels = activeLabels standardRegion B N0) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) (i : Fin 2) :
-    StateMomentBalances.meanBar (LabelSumBounds.symmetricCovariance
-      (LabelSumBounds.fieldSum v.labels (fun l => (ActualInitialization.tangentBlock l).oscillation))
-      (LabelSumBounds.fieldSum v.labels
-        (fun l => ((ActualCycleParameters.fixedParameters B N0).signedTangent v c u l).oscillation))
-          0 i.succ) n x =
-      LocalSignedRequest.requestedStress ActualInitialization.geometry.patch
-        ActualInitialization.geometry.coord c
-          ((ActualCycleParameters.fixedParameters B N0).afterParticular v c u) n x i := by
-  rw [fixedParameters_eq_cycle]
-  exact cycle_requested_cross_tail _ v c u hlabels hn hx i
 
-theorem literal_requested_cross_tail (state : CycleState (Label B N0 × Fin 2))
-    (hlabels : state.coefficients.labels = activeLabels standardRegion B N0) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) (i : Fin 2) :
-    StateMomentBalances.meanBar (LabelSumBounds.symmetricCovariance
-      (LabelSumBounds.fieldSum state.coefficients.labels
-        (fun l => (ActualInitialization.tangentBlock l).oscillation))
-      (LabelSumBounds.fieldSum state.coefficients.labels
-        (fun l => ((ActualCycleParameters.parameters state).signedTangent
-          state.coefficients (commonContext B) state.state l).oscillation)) 0 i.succ) n x =
-      LocalSignedRequest.requestedStress ActualInitialization.geometry.patch
-        ActualInitialization.geometry.coord (commonContext B)
-          ((ActualCycleParameters.parameters state).afterParticular
-            state.coefficients (commonContext B) state.state) n x i := by
-  rw [parameters_eq_cycle]
-  exact cycle_requested_cross_tail _ state.coefficients (commonContext B) state.state hlabels hn hx i
 
 section Family
 
@@ -666,33 +550,6 @@ theorem family_requested_cross_tail (c : Context Point) (u : State Point)
   rw [family_cross_eq c u f a hprimary htangent hlabels]
   exact requested_cross_tail B N0 c u hn hx i
 
-/-- Every requested exponent follows for the literal finite-head defects.
-The analytic inputs are the usual supported residual/coefficient estimates,
-not an assumption on the cross defect or its vanishing. -/
-theorem family_defects_all_exponents (c : Context Point) (u : State Point) {σ κ : ℝ}
-    (f : LabelSumBounds.SignedFamily ActualInitialization.geometry.strip P (1 / 2) (17 / 25)
-      (1 / 2 + σ - κ) (1 + σ - 2 * κ)) (a : SignedMeanGain.Assembly f)
-    (hprimary : f.primary = ActualInitialization.tangentBlock)
-    (htangent : f.tangent = actualSignedBlock c u)
-    (hlabels : a.labels = activeLabels standardRegion B N0)
-    (hS : ∀ i j, SignedMeanGain.MovingField ActualInitialization.geometry
-      (SignedMeanGain.crossTensor f a i j))
-    (H : MeanStateRegularity.PrimitiveData ActualInitialization.geometry.region
-      ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b c u)
-    (hfixed : (VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge c u).pressure = u.pressure)
-    (hθ : WeightedClasses.MeanClass ActualInitialization.geometry.strip (1 + σ - κ) (u.thetaResidual c))
-    (hz : WeightedClasses.MeanClass ActualInitialization.geometry.strip (1 + σ - κ) (u.axialResidual c)) :
-    ∀ γ : ℝ,
-      WeightedClasses.MeanClass ActualInitialization.geometry.strip γ
-        (StateMomentBalances.meanBar (SignedMeanGain.crossTensor f a 0 1) -
-          SignedMeanGain.physicalSigma ActualInitialization.geometry 2 (u.thetaResidual c)) ∧
-      WeightedClasses.MeanClass ActualInitialization.geometry.strip γ
-        (StateMomentBalances.meanBar (SignedMeanGain.crossTensor f a 0 2) -
-          SignedMeanGain.physicalSigma ActualInitialization.geometry 1 (u.axialResidual c)) := by
-  apply SignedCrossDefectClass.residual_defects_all_exponents_of_primitive
-    ActualInitialization.geometry c u f a hS H hfixed hθ hz ((choice B N0).prepared.N + 1)
-  intro n hn x hx i
-  exact family_requested_cross_tail c u f a hprimary htangent hlabels hn hx i
 
 end Family
 

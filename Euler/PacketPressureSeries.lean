@@ -52,21 +52,7 @@ theorem finite_sum_le {f : ℕ → ℝ} {a : ℝ} (hf : SmallSeries f a) (N : �
     ∑ n ∈ Finset.range N, f n ≤ a :=
   (hf.summable.sum_le_tsum (Finset.range N) (fun n _ => hf.nonneg n)).trans hf.total_le
 
-theorem upper_increment_series {J : ℕ} {Cθ CM CMn CHn c : ℝ} {x : ℕ → ℝ}
-    {increment error : ℕ → ℝ} {a b e : ℝ}
-    (hg : SmallSeries (fun n => 2*CM*goodRatio*goodCost J x n) a)
-    (hb : SmallSeries (badCost J Cθ CM CMn CHn c x) b) (he : SmallSeries error e)
-    (h0 : ∀ n, 0 ≤ increment n)
-    (h : ∀ n, increment n ≤ 2*CM*goodRatio*goodCost J x n+badCost J Cθ CM CMn CHn c x n+error n) :
-    SmallSeries increment (a+b+e) :=
-  (add_series (add_series hg hb) he).mono h0 h
 
-theorem initial_increment_series {J : ℕ} {Cθ CM CMn CHn c : ℝ} {x : ℕ → ℝ}
-    {increment error : ℕ → ℝ} {b e : ℝ}
-    (hb : SmallSeries (badCost J Cθ CM CMn CHn c x) b) (he : SmallSeries error e)
-    (h0 : ∀ n, 0 ≤ increment n)
-    (h : ∀ n, increment n ≤ badCost J Cθ CM CMn CHn c x n+error n) :
-    SmallSeries increment (b+e) := (add_series hb he).mono h0 h
 
 /-- The added pressure costs share the stage index and base scale with
 any finite list of the existing source costs. -/

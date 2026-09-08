@@ -340,11 +340,6 @@ theorem sourceRadiusPolynomial_eval (W : ℝ) : sourceRadiusPolynomial.eval W=so
 def sourceRadiusConstant : ℝ := coefficientCost sourceRadiusPolynomial
 def sourceRadiusPower : ℕ := sourceRadiusPolynomial.natDegree
 
-theorem sourceRadiusConstant_pos : 0 < sourceRadiusConstant := coefficientCost_pos _
 
-theorem sourceRadiusEnvelope_power (W : ℝ) (hW : 1 ≤ W) :
-    sourceRadiusEnvelope W ≤ sourceRadiusConstant*W^sourceRadiusPower := by
-  rw [← sourceRadiusPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound sourceRadiusPolynomial W hW)
 
 end EulerPacketSourceRadius

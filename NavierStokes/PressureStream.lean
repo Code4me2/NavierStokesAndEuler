@@ -208,11 +208,6 @@ noncomputable def graphDz (w : E) (f : ℝ × E → ℝ) (p : ℝ × E) : ℝ :=
 theorem graphDz_contDiff {f : ℝ × E → ℝ} (hf : ContDiff ℝ ∞ f) (w : E) :
     ContDiff ℝ ∞ (graphDz w f) := fixedDeriv_contDiff hf (0, w)
 
-theorem graphDr_contDiff {f : ℝ × E → ℝ} {k : ℝ → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hk : ContDiff ℝ ∞ k) (v : E) :
-    ContDiff ℝ ∞ (graphDr k v f) :=
-  (hf.fderiv_right (by simp)).clm_apply
-    (contDiff_const.prodMk ((hk.comp contDiff_fst).smul contDiff_const))
 
 theorem radialVector_hasFDerivAt {k : ℝ → ℝ} (v : E) {p : ℝ × E}
     (hk : DifferentiableAt ℝ k p.1) :
@@ -402,17 +397,6 @@ theorem meanPressure_supported {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 
   RadialPullback.physicalCompact_supported ha hab hd
     (pressureSource_contDiff hab hf hs) (pressureSource_supported hab hs) M (0, v)
 
-/-- The pressure residual retains the entire cutoff alias with its minus sign. -/
-theorem meanPressure_radial_residual {d a b M : ℝ} (ha : 0 < a) (hab : a < b)
-    (hd : 0 < d) (v : Plane) {f : Lift S → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (p : Lift S) (hp : a ≤ p.1) :
-    graphDr (physicalSpeed d M) (0, v) (meanPressure d a b M hab v f) p - f p =
-      -rho a b hab p.1 * pressureMass f p.2.1 - pressureAlias d a b M hab v f p := by
-  rw [graphDr_eq_physical, meanPressure,
-    RadialPullback.physicalGraphDeriv_physicalCompact ha hab hd
-      (pressureSource_contDiff hab hf hs) (pressureSource_supported hab hs) M (0, v) p hp]
-  unfold pressureAlias pressureSource
-  ring
 
 end Pressure
 
@@ -569,20 +553,6 @@ theorem torusMean_shifted_integral {a b : ℝ} (hab : a ≤ b)
   intro r _
   exact FourierAlias.torusMean_translate (hp r s) (φ r • v)
 
-theorem physicalAlias_slice_continuous {d a b M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : Plane)
-    {f : Lift S → ℝ} (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f)
-    (p : ℝ × S) :
-    Continuous (fun Y => RadialPullback.physicalAlias d a b M (0, v) f (p.1, (p.2, Y))) := by
-  change Continuous (fun Y => (RadialPullback.radialJacobian d p.1 *
-    deriv (interiorCutoff (a ^ d) (b ^ d)) (RadialPullback.powerChart d a p.1)) *
-    totalIntegral M ((0 : S), v) (RadialPullback.normalizeSource d a f)
-      (RadialPullback.powerChart d a p.1, (p.2, Y)))
-  exact continuous_const.mul
-    ((totalIntegral_contDiff (M := M) (v := ((0 : S), v))
-      (RadialPullback.normalizeSource_contDiff ha hd hf)
-      (RadialPullback.normalizeSource_supported ha hab hd hs)).continuous.comp
-        (continuous_const.prodMk (continuous_const.prodMk continuous_id)))
 
 /-- The exact alias mean is the radial mean mass times its cutoff derivative.
 The source need not have zero torus mean at each radius. -/
@@ -804,18 +774,6 @@ theorem meanPressure_radial_residual_global {d a b M : ℝ} (ha : 0 < a) (hab : 
   unfold pressureAlias pressureSource
   ring
 
-/-- Formula (33), with the physical cutoff derivative and total primitive
-fully displayed. No radial-cutoff commutator is discarded. -/
-theorem meanPressure_radial_residual_cutoff {d a b M : ℝ} (ha : 0 < a) (hab : a < b)
-    (hd : 0 < d) (v : Plane) {f : Lift S → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (p : Lift S) :
-    graphDr (physicalSpeed d M) (0, v) (meanPressure d a b M hab v f) p - f p =
-      -rho a b hab p.1 * pressureMass f p.2.1 -
-        deriv (RadialPullback.physicalCutoff d a b) p.1 *
-          physicalTotal d a M (0, v) (pressureSource a b hab f) p := by
-  rw [meanPressure_radial_residual_global ha hab hd v hf hs]
-  rw [pressureAlias, RadialPullback.physicalAlias_eq_cutoff_derivative_global ha hab hd]
-  rfl
 
 omit [NormedSpace ℝ S] in
 theorem torusAverage_sub {f g : Lift S → ℝ} (hf : Continuous f) (hg : Continuous g)

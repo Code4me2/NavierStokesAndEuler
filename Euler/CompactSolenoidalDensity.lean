@@ -152,13 +152,6 @@ theorem compactSolenoidalTests_representation (u : solenoidalSpace)
   rw [← hf]
   exact testValue_ae (curlTest f)
 
-/-- A bundled compact smooth solenoidal test has the prescribed L² class. -/
-theorem compactSolenoidalTests_testValue (u : solenoidalSpace)
-    (hu : u ∈ compactSolenoidalTests) :
-    ∃ f : Test, (∀ x, divergence (f : Space → Space) x = 0) ∧
-      testValue f = (u : L2) := by
-  obtain ⟨f, hf⟩ := hu
-  exact ⟨curlTest f, divergence_curl _ ((contDiff_piLp 2).mp f.smooth), hf⟩
 
 /-- The compact test fields form a dense subset of the actual solenoidal L² space. -/
 theorem compactSolenoidalTests_dense : Dense compactSolenoidalTests := by
@@ -179,14 +172,5 @@ theorem compactSolenoidalTests_dense : Dense compactSolenoidalTests := by
       exact ⟨⟨x, hxS⟩, hx, rfl⟩
   rw [himage, closure_compactCurlGenerators]
 
-/-- Pairings against compact smooth solenoidal tests determine a solenoidal field. -/
-theorem solenoidal_eq_zero_of_compact_test_pairing_zero
-    (u : L2) (hu : u ∈ solenoidalSpace)
-    (htest : ∀ f : Test, (∀ x, divergence (f : Space → Space) x = 0) →
-      ⟪u, testValue f⟫_ℝ = 0) : u = 0 := by
-  apply weakHarmonicOn_univ_eq_zero u
-  apply weakHarmonicOn_univ_of_compactCurl_pairing_zero u hu
-  intro f
-  exact htest (curlTest f) (divergence_curl _ ((contDiff_piLp 2).mp f.smooth))
 
 end Euler.ComparatorBridge

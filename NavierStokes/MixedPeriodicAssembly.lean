@@ -381,34 +381,5 @@ theorem angularDiagonal_origin (h : ℝ) (a : ℕ → ℝ)
     (t : ℝ) : angularDiagonal h a D (t, 0) = 0 :=
   DirectAngularDiagonal.angularSum_axis a _ _ t 0 rfl rfl
 
-/-- The angular hypotheses are only its actual smooth supported scalar
-stages.  Its smoothness, localized divergence and zero axis value are proved
-before applying the force construction.  Residual flatness and extensions of
-the complete incoming fields remain separate analytic obligations. -/
-theorem exists_force_for_angular_stages {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (D : ℕ → DirectAngularDiagonal.AngularData DirectAngularDiagonal.preterminalSlow)
-    {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A (angularDiagonal h a D) p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ev : JointResidualLimits.AwayExtensions (angularDiagonal h a D))
-    (ep : JointResidualLimits.AwayExtensions p)
-    (haxis : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖) (𝓝[<] 1) atTop) :
-    ∃ F : VelocityField,
-      CandidateProperties
-        (TimeLocalization.activatedVelocity (periodicVelocity A (angularDiagonal h a D)))
-        (TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure p)) F ∧
-      ContDiff ℝ ∞ F ∧
-      (∀ n : ℕ, ∀ x : Space,
-        iteratedFDeriv ℝ n F (1, x) = boundaryLimits A (angularDiagonal h a D) p eA ev ep x n) := by
-  have hv : ContDiffOn ℝ ∞ (angularDiagonal h a D) (SpacetimeEndpoint.openPast 1) :=
-    (DirectAngularDiagonal.actual_diagonal_smooth hh hh1 D ha).mono (fun _ hx => hx.1)
-  have hd : ∀ t < 1, ∀ x,
-      spatialDivergence (SpatialLocalization.cutPotential (angularDiagonal h a D)) t x = 0 :=
-    DirectAngularDiagonal.actual_spatialCut_diagonal_divergence hh hh1 D ha
-  apply exists_candidate_force hA hv hp hd hz eA ev ep
-  simpa only [velocity, angularDiagonal_origin, add_zero] using haxis
 
 end NavierStokes.MixedPeriodicAssembly

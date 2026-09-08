@@ -31,8 +31,6 @@ def restrictTime : Evolution S hS where
       projIcc_of_mem hT ⟨hr.1.le,hr.2.le.trans hST⟩]
     rfl
 
-theorem restrictTime_velocity (t : Icc (0 : ℝ) S) :
-    (U.restrictTime S hS hST).velocity t=U.velocity (initialInclusion T S hST t) := rfl
 
 theorem restrictTime_initial :
     (U.restrictTime S hS hST).velocity ⟨0,le_rfl,hS⟩=U.velocity ⟨0,le_rfl,hT⟩ := rfl

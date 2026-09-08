@@ -51,21 +51,6 @@ theorem gaussian_eq_length (b m r v : ℝ) :
   congr 1
   ring
 
-/-- The reference ODE envelope already constructed in `GaussianEnvelope`
-supplies the pointwise Gaussian hypotheses with constants independent of slot
-length. -/
-theorem reference_envelope_gaussian_bounds {lam u : ℝ} (hlam : 0 < lam) (hu : 0 < u) :
-    ∃ b B : ℝ, 0 < b ∧ 0 < B ∧ ∀ r : ℝ, 0 < r → ∀ v ∈ Icc 0 (r ^ 2),
-      gaussian B (r ^ 2 / 2) r v ≤
-        GaussianEnvelope.envelope (GaussianEnvelope.referenceRate lam u (r ^ 2))
-          (r ^ 2 / 2) v ∧
-      GaussianEnvelope.envelope (GaussianEnvelope.referenceRate lam u (r ^ 2))
-          (r ^ 2 / 2) v ≤ gaussian b (r ^ 2 / 2) r v := by
-  obtain ⟨b, B, hb, hB, hbounds⟩ :=
-    GaussianEnvelope.reference_uniform_gaussian_bounds hlam hu
-  refine ⟨b, B, hb, hB, ?_⟩
-  intro r hr v hv
-  simpa only [gaussian_eq_length] using hbounds (r ^ 2) (sq_pos_of_pos hr) v hv
 
 theorem integrable_gaussian {b r : ℝ} (hb : 0 < b) (hr : 0 < r) (m : ℝ) :
     Integrable (gaussian b m r) := by
@@ -313,10 +298,6 @@ theorem mass_pos : 0 < mass ψ x :=
 theorem cutoff_compact : HasCompactSupport ψ :=
   HasCompactSupport.intro isCompact_Icc h.cutoff_zero
 
-theorem weight_compact : HasCompactSupport (weight ψ x) := by
-  apply HasCompactSupport.intro (K := Icc (r ^ 2 / 6) (5 * r ^ 2 / 6)) isCompact_Icc
-  intro v hv
-  simp [weight, h.cutoff_zero v hv]
 
 theorem weight_direction_integrable {q : ℝ → ℝ}
     (hq : ContinuousOn q (Icc 0 (r ^ 2))) :
@@ -332,29 +313,6 @@ theorem weight_direction_integrable {q : ℝ → ℝ}
   apply (integrableOn_iff_integrable_of_support_subset hs).mp
   exact (h.weight_continuous.continuousOn.mul hq).integrableOn_Icc
 
-/-- The positive scalar prefactor has precisely the required reciprocal-square-
-root size when the column coefficient has reciprocal-slot-length size. -/
-theorem scalar_size_bounds {ci clo chi : ℝ} (hclo : 0 < clo) (hchi : 0 < chi)
-    (hci_lower : clo / r ^ 2 ≤ ci) (hci_upper : ci ≤ chi / r ^ 2) :
-    0 < ci * mass ψ x ∧
-      clo * lowerMassConstant a B / r ≤ ci * mass ψ x ∧
-      ci * mass ψ x ≤ chi * (A ^ 2 * Real.sqrt (Real.pi / (2 * b))) / r := by
-  have hr2 : 0 < r ^ 2 := sq_pos_of_pos h.radius_pos
-  have hci : 0 < ci := lt_of_lt_of_le (div_pos hclo hr2) hci_lower
-  refine ⟨mul_pos hci h.mass_pos, ?_, ?_⟩
-  · calc
-      clo * lowerMassConstant a B / r =
-          (clo / r ^ 2) * (lowerMassConstant a B * r) :=
-        (inverse_length_mass _ _ _ h.radius_pos.ne').symm
-      _ ≤ ci * mass ψ x :=
-        mul_le_mul hci_lower h.mass_lower
-          (mul_pos h.lowerMassConstant_pos h.radius_pos).le hci.le
-  · calc
-      ci * mass ψ x ≤ (chi / r ^ 2) *
-          (A ^ 2 * Real.sqrt (Real.pi / (2 * b)) * r) :=
-        mul_le_mul hci_upper h.mass_upper h.mass_pos.le (div_pos hchi hr2).le
-      _ = chi * (A ^ 2 * Real.sqrt (Real.pi / (2 * b))) / r :=
-        inverse_length_mass _ _ _ h.radius_pos.ne'
 
 end PulseBounds
 
@@ -515,8 +473,6 @@ theorem modelDirection_lipschitz (c₀ s t : ℝ) (i : Fin 2) :
 noncomputable def affineSlope (s₀ slope r v : ℝ) : ℝ :=
   s₀ + slope * (v - r ^ 2 / 2) / r ^ 2
 
-theorem affineSlope_midpoint (s₀ slope r : ℝ) : affineSlope s₀ slope r (r ^ 2 / 2) = s₀ := by
-  simp [affineSlope]
 
 theorem hasDerivAt_affineSlope (s₀ slope r v : ℝ) :
     HasDerivAt (affineSlope s₀ slope r) (slope / r ^ 2) v := by
@@ -524,10 +480,6 @@ theorem hasDerivAt_affineSlope (s₀ slope r v : ℝ) :
   simpa only [id_eq, mul_one] using
     (((hasDerivAt_id v).sub_const (r ^ 2 / 2)).const_mul slope).div_const (r ^ 2) |>.const_add s₀
 
-theorem affineSlope_deriv_bound (s₀ slope r v : ℝ) {C : ℝ} (hC : |slope| ≤ C) :
-    |deriv (affineSlope s₀ slope r) v| ≤ C / r ^ 2 := by
-  rw [(hasDerivAt_affineSlope s₀ slope r v).deriv, abs_div, abs_of_nonneg (sq_nonneg r)]
-  exact div_le_div_of_nonneg_right hC (sq_nonneg r)
 
 theorem affineSlope_distance (s₀ slope r v : ℝ) :
     |affineSlope s₀ slope r v - s₀| = |slope| * |v - r ^ 2 / 2| / r ^ 2 := by
@@ -613,22 +565,6 @@ theorem normalizedColumn_error {t : ℝ → Vec2}
     (modelDirection c₀ (affineSlope s₀ slope r v) i) (modelDirection c₀ s₀ i)).trans
       (add_le_add (htmodel v hv i) (modelDirection_affine_drift c₀ s₀ slope r v i))
 
-/-- The ODE error may instead be supplied as `E/S` on a slot with `L ≤ κ S`.
-This converts it to the preceding concentration estimate. -/
-theorem normalizedColumn_error_of_outer_scale {t : ℝ → Vec2}
-    (ht : ∀ i, ContinuousOn (fun v => t v i) (Icc 0 (r ^ 2)))
-    {E S κ c₀ s₀ slope : ℝ} (hE : 0 ≤ E) (hS : 0 < S) (hκ : 0 ≤ κ)
-    (hL : r ^ 2 ≤ κ * S)
-    (htmodel : ∀ v ∈ Icc 0 (r ^ 2), ∀ i,
-      |t v i / x v - modelDirection c₀ (affineSlope s₀ slope r v) i| ≤ E / S)
-    (i : Fin 2) :
-    |normalizedColumn ψ x t i - modelDirection c₀ s₀ i| ≤
-      (E * κ + ((|c₀| + 1) * |slope|) * concentrationConstant a A b B) / r := by
-  apply h.normalizedColumn_error ht (mul_nonneg hE hκ) _ i
-  intro v hv j
-  apply (htmodel v hv j).trans
-  apply (div_le_div_iff₀ hS (sq_pos_of_pos h.radius_pos)).mpr
-  nlinarith [mul_le_mul_of_nonneg_left hL hE]
 
 end PulseBounds
 

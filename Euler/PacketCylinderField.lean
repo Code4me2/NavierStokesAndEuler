@@ -52,15 +52,7 @@ theorem raw_fderiv (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) :
     funext (fun y => G.raw_eq t y.1 y.2)
   rw [he,coverField_fderiv]
 
-theorem slicedJet_spatial (s : Set ℝ) (t : Icc (0 : ℝ) T) (x v : Space) (θ : ℝ) :
-    (slicedJet s raw (t,(x,θ))).2 (spatialInjection v) =
-      fieldFDeriv P (pointField P G.path G.orbit t) (x,(θ : AddCircle P)) (v,0) := by
-  rw [slicedJet_space,G.raw_fderiv]
 
-theorem slicedJet_angular (s : Set ℝ) (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) :
-    (slicedJet s raw (t,(x,θ))).2 angleDirection =
-      fieldFDeriv P (pointField P G.path G.orbit t) (x,(θ : AddCircle P)) (0,1) := by
-  rw [slicedJet_angle,G.raw_fderiv]
 
 theorem raw_hasDerivWithinAt (hT : 0 ≤ T) (H : Field P T raw_t)
     (h : TimeDerivative hT G H) (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) :

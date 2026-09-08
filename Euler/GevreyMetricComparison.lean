@@ -74,17 +74,6 @@ theorem weightedNorm_metric_lower {s : ℕ} (q N : ℕ) (hN : N+q ≤ s) (ρ : �
     (weight_pos hρ n.val).le
   exact h.trans_eq (by ring)
 
-/-- The actual metric weighted energy is bounded by its Sobolev counterpart without a cutoff factor. -/
-theorem weightedNorm_metric_upper {s : ℕ} (q N : ℕ) (hN : N+q ≤ s) (ρ : ℝ) (hρ : 0 < ρ)
-    (K : LiftL2 period →L[ℝ] LiftL2 period) (u : SobolevSpace period s) :
-    weightedMetricSum ρ (fun I : ExternalWord N => I.1.val) K (energyValues period q N hN u) ≤
-      Real.sqrt ‖K‖ * weightedNorm period q N ρ u := by
-  rw [metricSum_eq, weightedNorm, ← Fin.sum_univ_eq_sum_range, Finset.mul_sum]
-  apply Finset.sum_le_sum
-  intro n _
-  have h := mul_le_mul_of_nonneg_left (blockNorm_metric_upper period (q := q) (n := n.val) u (by have := n.isLt; omega) K)
-    (weight_pos hρ n.val).le
-  exact h.trans_eq (by ring)
 
 /-- At the fixed base index six the comparison uses exactly 5461 base words. -/
 theorem card_baseWord_six : Fintype.card (BaseWord 6) = 5461 := by

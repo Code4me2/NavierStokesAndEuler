@@ -572,14 +572,5 @@ theorem norm_fderiv_eq_iterated_one (F : Point → ℝ) (p : Point) :
   simpa only [norm_iteratedFDeriv_zero, Nat.zero_add] using
     (norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := p) (n := 0))
 
-theorem physical_coordinate_fderiv_bounds {a : ℝ} (ha : 0 < a) (ha1 : a < 1)
-    (lo hi qbig : ℝ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ p : Point, p.1 < 1 →
-      physicalQ a p ≤ qbig → physicalX a p ∈ Icc lo hi →
-      ‖fderiv ℝ (physicalQ a) p‖ ≤ C / physicalQ a p ∧
-      ‖fderiv ℝ (physicalEta a) p‖ ≤ C / physicalQ a p ∧
-      ‖fderiv ℝ (physicalX a) p‖ ≤ C / physicalQ a p := by
-  simpa only [← norm_fderiv_eq_iterated_one, Nat.cast_one, Real.rpow_neg_one,
-    div_eq_mul_inv] using physical_coordinate_derivative_bounds ha ha1 lo hi qbig 1
 
 end NavierStokes.PhysicalCoordinateBounds

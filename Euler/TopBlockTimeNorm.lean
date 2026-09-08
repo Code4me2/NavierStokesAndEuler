@@ -37,12 +37,5 @@ theorem pathLp_quadratic_bound {X Y Z I : Type*} [Fintype I]
   simp only [pathLp_norm_sq]
   exact h
 
-/-- All actual order-q H² blocks and the lower H^(q+1) norm control the full H^(q+2) time norm. -/
-theorem top_blocks_time_norm (period : ℝ) [Fact (0 < period)] (q : ℕ)
-    (T : ℝ) (hT : 0 ≤ T) (u : C(Icc (0 : ℝ) T, SobolevSpace period (2+q))) :
-    ‖pathLp T hT u‖^2 ≤
-      ‖pathLp T hT ((restrictOperator period (by omega : 1+q ≤ 2+q)).compLeftContinuous ℝ (Icc (0 : ℝ) T) u)‖^2 +
-      ∑ w : Fin q → Fin 4, ‖pathLp T hT ((wordBlock period 2 q w).compLeftContinuous ℝ (Icc (0 : ℝ) T) u)‖^2 :=
-  pathLp_quadratic_bound _ _ (top_blocks_norm_sq period q) T hT u
 
 end EulerTopBlockTimeNorm

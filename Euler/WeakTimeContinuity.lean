@@ -132,12 +132,5 @@ theorem velocity_pairing_continuousOn
   simpa only [velocityLp, inner_toLp_eq_integral] using
     h.velocityLp_weakly_continuous (hφ.toLp φ)
 
-/-- Every finite-energy test pairing attains the prescribed initial data weakly. -/
-theorem velocity_pairing_tendsto_initial
-    (φ : ℝ³ → ℝ³) (hφ : MemLp φ 2 volume) :
-    Filter.Tendsto (fun t : ℝ => ∫ x : ℝ³, inner ℝ (φ x) (v x t))
-      (𝓝[Ici 0] 0) (𝓝 (∫ x : ℝ³, inner ℝ (φ x) (u₀ x))) := by
-  simpa only [ContinuousWithinAt, h.initial_condition] using
-    h.velocity_pairing_continuousOn φ hφ 0 (by simp)
 
 end Euler.EulerExistenceAndSmoothnessR3

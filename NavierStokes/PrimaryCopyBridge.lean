@@ -306,17 +306,6 @@ theorem reparamCopy_iteratedFDeriv_eq (hab : a ≤ b) {Ω : Set (P × Plane)}
   have he := (reparamCopy_eqOn d t j g k hab h).iteratedFDerivWithin (𝕜 := ℝ) n hq
   simpa only [iteratedFDerivWithin_of_isOpen _ (copyInterior_isOpen g k hΩ a b) hq] using he
 
-theorem reparamPath_iteratedFDeriv_eq (hab : a ≤ b) {Ω : Set (P × Plane)}
-    (hΩ : IsOpen Ω) (h : Inputs d t j g k Ω a b) {z : (P × Plane) × ℝ}
-    (hz : z ∈ Ω ×ˢ Ioo a b) (n : ℕ) :
-    iteratedFDeriv ℝ n (reparamPath d t j g k a) z =
-      iteratedFDeriv ℝ n (fun w : (P × Plane) × ℝ => t.linearData.anchoredSolve g hab k w.1 w.2) z := by
-  have he : EqOn (reparamPath d t j g k a)
-      (fun w : (P × Plane) × ℝ => t.linearData.anchoredSolve g hab k w.1 w.2) (Ω ×ˢ Ioo a b) := by
-    intro w hw
-    exact reparamPath_eq_anchoredSolve d t j g k hab h ⟨hw.1, hw.2.1.le, hw.2.2.le⟩
-  have hj := he.iteratedFDerivWithin (𝕜 := ℝ) n hz
-  simpa only [iteratedFDerivWithin_of_isOpen _ (hΩ.prod isOpen_Ioo) hz] using hj
 
 end Bridge
 
@@ -416,11 +405,6 @@ theorem copyArgument_contDiff :
     ContDiff ℝ ∞ (fun z : (P × Plane) × ℝ => (copyParameter g k z.1, z.2)) :=
   ((copyParameter_contDiff g k).comp contDiff_fst).prodMk contDiff_snd
 
-theorem copyFrame_smoothOn {S : Set ((P × ℝ) × ℝ)} {Ω : Set ((P × Plane) × ℝ)}
-    (hd : d.SmoothOn S)
-    (hmap : MapsTo (fun z : (P × Plane) × ℝ => (copyParameter g k z.1, z.2)) Ω S) :
-    (copyFrame d g k).SmoothOn Ω :=
-  reindex_smoothOn d _ hd (copyArgument_contDiff g k).contDiffOn hmap
 
 theorem copySource_contDiffOn {f : P × Plane → Space} {S : Set (P × Plane)}
     {Ω : Set ((P × Plane) × ℝ)} (hf : ContDiffOn ℝ ∞ f S)
@@ -456,31 +440,7 @@ theorem inputs_of_smooth_frame (j : ℤ) (f : P × Plane → Space)
     simpa only [CommonCoverSolve.negativeTangentProjection_apply] using
       projectedForcing_continuousOn hn hf.continuousOn hn0
 
-/-- Direct canonical bridge, with assumptions only on smooth primitive frame
-and source data and their actual slot derivatives. -/
-theorem frame_reconstructedCopy_eq_copySolve (j : ℤ) (f : P × Plane → Space)
-    {Ω : Set (P × Plane)} {a b : ℝ} (hab : a ≤ b)
-    (hd : (copyFrame d g k).SmoothOn (Ω ×ˢ Icc a b))
-    (hf : ContDiffOn ℝ ∞ (copySource f g k) (Ω ×ˢ Icc a b))
-    (hk : ∀ q ∈ Ω, d.Kinematics (copyParameter g k q) (Icc a b))
-    {q : P × Plane} (hq : q ∈ Ω) (hv : (g.coordinates k q.2).2 ∈ Icc a b) :
-    reconstructedCopy d (frameTangentData d j f) j g k hab q =
-      (frameTangentData d j f).linearData.copySolve g hab k q :=
-  reconstructedCopy_eq_copySolve d _ j g k hab
-    (inputs_of_smooth_frame d g k j f hd hf hk) hq hv
 
-/-- Exact transfer of all ordinary full tensors to the canonical copy solve.
-The interval endpoints retain the pointwise equality proved above. -/
-theorem frame_reparamCopy_iteratedFDeriv_eq (j : ℤ) (f : P × Plane → Space)
-    {Ω : Set (P × Plane)} {a b : ℝ} (hab : a ≤ b) (hΩ : IsOpen Ω)
-    (hd : (copyFrame d g k).SmoothOn (Ω ×ˢ Icc a b))
-    (hf : ContDiffOn ℝ ∞ (copySource f g k) (Ω ×ˢ Icc a b))
-    (hk : ∀ q ∈ Ω, d.Kinematics (copyParameter g k q) (Icc a b))
-    {q : P × Plane} (hq : q ∈ copyInterior g k Ω a b) (n : ℕ) :
-    iteratedFDeriv ℝ n (reparamCopy d (frameTangentData d j f) j g k a) q =
-      iteratedFDeriv ℝ n ((frameTangentData d j f).linearData.copySolve g hab k) q :=
-  reparamCopy_iteratedFDeriv_eq d _ j g k hab hΩ
-    (inputs_of_smooth_frame d g k j f hd hf hk) hq n
 
 end CanonicalInputs
 
@@ -496,45 +456,8 @@ noncomputable def seededReconstructedPath (hab : a ≤ b) (x₀ : P × Plane →
     (q : P × Plane) : ℝ → Space :=
   PrimaryODE.ambientSolution hab (copyFrame d g k) j x₀ (copySource t.source g k) q
 
-omit [NormedAddCommGroup P] in
-theorem seededReconstructedPath_initial (hab : a ≤ b) (x₀ : P × Plane → State) (q : P × Plane) :
-    seededReconstructedPath d t j g k hab x₀ q a =
-      d.ambient (copyParameter g k q, a) (x₀ q) := by
-  unfold seededReconstructedPath PrimaryODE.ambientSolution
-  rw [PrimaryODE.solution_initial]
-  rfl
 
-/-- The reconstructed seeded path satisfies the actual tangent equation.
-This is not an identification with the zero-entry copy solve. -/
-theorem seededReconstructedPath_hasDerivAt (hab : a ≤ b) (x₀ : P × Plane → State)
-    {Ω : Set (P × Plane)} (h : Inputs d t j g k Ω a b)
-    {q : P × Plane} (hq : q ∈ Ω) {v : ℝ} (hv : v ∈ Icc a b) :
-    let z := (q.1, ((g.coordinates k q.2).1, v))
-    HasDerivAt (seededReconstructedPath d t j g k hab x₀ q)
-      (TangentProjection.projectedRhs (t.normal z) (t.normalDot z)
-        (seededReconstructedPath d t j g k hab x₀ q v)
-        (t.action z (seededReconstructedPath d t j g k hab x₀ q v))
-        (t.source (q.1, g.path k q.2 v)) (t.damping z)) v := by
-  have hd : HasDerivAt (seededReconstructedPath d t j g k hab x₀ q)
-      (t.linearData.coefficientAlong g k (q, v) (seededReconstructedPath d t j g k hab x₀ q v) +
-        t.linearData.forcingAlong g k (q, v)) v := by
-    rw [linear_rhs_eq_projected d t j g k (h.compatibility q hq) hv]
-    exact PrimaryODE.ambientSolution_hasDerivAt hab (copyFrame d g k) j x₀
-      (copySource t.source g k) h.modal_coefficient h.modal_forcing hq
-      (reindex_kinematics d (copyParameter g k) (h.kinematics q hq)) hv
-  simpa only [CommonCoverSolve.LinearData.coefficientAlong, CommonCoverSolve.LinearData.forcingAlong,
-    CommonCoverSolve.TangentData.linearData, CommonCoverSolve.negativeTangentProjection_apply,
-    ← sub_eq_add_neg, TangentODE.projectedOperator_apply] using hd
 
-theorem seededReconstructedPath_tangent (hab : a ≤ b) (x₀ : P × Plane → State)
-    {Ω : Set (P × Plane)} (h : Inputs d t j g k Ω a b)
-    {q : P × Plane} (hq : q ∈ Ω) {v : ℝ} (hv : v ∈ Icc a b) :
-    ⟪t.normal (q.1, ((g.coordinates k q.2).1, v)),
-      seededReconstructedPath d t j g k hab x₀ q v⟫_ℝ = 0 := by
-  change ⟪t.normal ((copyParameter g k q).1, ((copyParameter g k q).2, v)), _⟫_ℝ = 0
-  rw [(h.compatibility q hq).normal v hv]
-  exact PrimaryODE.ambientSolution_tangent hab (copyFrame d g k) j x₀
-    (copySource t.source g k) q v
 
 end Seeded
 

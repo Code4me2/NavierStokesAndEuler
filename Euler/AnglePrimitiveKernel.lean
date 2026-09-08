@@ -1,4 +1,4 @@
-import Euler.AnglePrimitiveTranslation
+import Euler.AngleMeanZeroPrimitive
 
 /-! A translation-kernel formula for the literal normalized periodic primitive. -/
 

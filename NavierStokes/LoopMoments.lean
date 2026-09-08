@@ -87,14 +87,6 @@ theorem variance_nonneg (s : Finset ι) (w t : ι → ℝ) (m : ℝ)
     0 ≤ avg s w (fun i => (t i - m) ^ 2) := by
   exact avg_nonneg s w _ hw (fun i _ => sq_nonneg (t i - m))
 
-theorem required_variance_nonneg (s : Finset ι) (w t : ι → ℝ) (a m ρ : ℝ)
-    (ha : 0 < a) (hw : ∀ i ∈ s, 0 ≤ w i)
-    (hvar : avg s w (fun i => (t i - m) ^ 2) = ρ / a) :
-    0 ≤ ρ := by
-  have h := variance_nonneg s w t m hw
-  rw [hvar] at h
-  have hmul := mul_nonneg h (le_of_lt ha)
-  simpa only [div_mul_cancel₀ _ (ne_of_gt ha)] using hmul
 
 /-- The rephasing density relative to the old averaging parameter. -/
 def phaseDensity (a v t : ℝ) : ℝ := a * (1 + t ^ 2) / v
@@ -274,41 +266,7 @@ theorem oneSidedPair_upper_projection (m p d V : ℝ) :
   dsimp [oneSidedPair]
   ring
 
-/-- Every mean whose stress projection is strictly above `2` has a finite
-two-point distribution with any prescribed nonnegative variance, with both
-support points still strictly above that same projection threshold. This is
-a feasibility statement for the tilt moments, not the full true-cone test. -/
-theorem exists_projected_twoPoint (p₁ p₂ m V : ℝ)
-    (hP : 2 < p₁ + p₂ * m) (hV : 0 ≤ V) :
-    ∃ q : TwoPoint, q.IsProbability ∧ q.mean = m ∧ q.centeredSecond m = V ∧
-      2 < p₁ + p₂ * q.leftValue ∧ 2 < p₁ + p₂ * q.rightValue := by
-  by_cases hp : p₂ = 0
-  · refine ⟨symmetricPair m V, symmetricPair_probability m V,
-      symmetricPair_mean m V, symmetricPair_variance m V hV, ?_, ?_⟩ <;>
-      simpa only [hp, zero_mul, add_zero] using hP
-  · let d := (p₁ + p₂ * m - 2) / 2
-    have hd : 0 < d := by dsimp [d]; linarith
-    refine ⟨oneSidedPair m p₂ d V, oneSidedPair_probability m p₂ d V hd hV,
-      oneSidedPair_mean m p₂ d V hp hd hV,
-      oneSidedPair_variance m p₂ d V hp hd hV, ?_, ?_⟩
-    · have hleft := oneSidedPair_lower_projection m p₂ d V hp
-      dsimp [d] at hleft
-      linarith
-    · have hright := oneSidedPair_upper_projection m p₂ d V
-      have hinc : 0 ≤ V * p₂ ^ 2 / d :=
-        div_nonneg (mul_nonneg hV (sq_nonneg p₂)) (le_of_lt hd)
-      linarith
 
-/-- The cutoff correction used by the manuscript remains between the old
-speed and the target speed whenever the old speed is below that target. -/
-theorem corrected_speed_bounds (v₀ vstar ζ : ℝ)
-    (hz₀ : 0 ≤ ζ) (hz₁ : ζ ≤ 1) (hv : v₀ ≤ vstar) :
-    v₀ ≤ v₀ + ζ ^ 2 * (vstar - v₀) ∧
-      v₀ + ζ ^ 2 * (vstar - v₀) ≤ vstar := by
-  have hs : ζ ^ 2 ≤ 1 := by nlinarith
-  have hlow := mul_nonneg (sq_nonneg ζ) (sub_nonneg.mpr hv)
-  have hupp := mul_nonneg (sub_nonneg.mpr hs) (sub_nonneg.mpr hv)
-  constructor <;> nlinarith
 
 end
 

@@ -682,39 +682,6 @@ theorem block_nativeBounds {ι : Type} {N : ℕ} {U : Set Cylinder} {gain β : �
   intro l n hn x _
   exact (block_expansion (b l) J n i (hs l n hn i) x).symm
 
-/-- The exact reconstructed state residual is controlled by the true label
-overlap, the mean-good residual and the three excluded errors. -/
-theorem state_nativeBounds {ι : Type} {N : ℕ} {V : Set Point}
-    (hN : 1 ≤ N) (hV : IsOpen V) {gain β : ℝ}
-    {c : CorrectionState.Context Point} {s : CorrectionState.State Point}
-    (labels : ℕ → Finset ι) (b : ι → CorrectionState.HarmonicBlock Point)
-    (G A : ι → HarmonicResidual.BlockCoefficients Point)
-    (hrep : HarmonicResidual.BlockRepresentation labels b G A s)
-    (hmean : LiftedMeanResidual.MeanHypotheses V c s)
-    (hreg : ∀ n, N ≤ n → HarmonicResidual.ExtractionRegular V c s labels b G A n)
-    (hb : NativeBounds N (HarmonicResidual.liftDomain V) gain (fun m => β * m)
-      (fun l => (HarmonicResidual.residualBlock c s (b l) (G l) (A l)).oscillation))
-    (label : ℕ → ι → SlotColoring.Label)
-    (hinj : ∀ n, N ≤ n → Set.InjOn (label n) (labels n : Set ι))
-    (hlevel : ∀ n, N ≤ n → ∀ l ∈ labels n, 1 ≤ (label n l).1)
-    (d : ℝ) (χ : ℕ → Cylinder → WindowPoint)
-    (hχ : ∀ n, N ≤ n → ContinuousOn (χ n) (HarmonicResidual.liftDomain V))
-    (hs : ∀ n, N ≤ n → ∀ l ∈ labels n, ∀ x ∈ HarmonicResidual.liftDomain V,
-      (HarmonicResidual.residualBlock c s (b l) (G l) (A l)).oscillation n x ≠ 0 →
-        χ n x ∈ closedWindow d (label n l))
-    (hm : NativeBounds N (HarmonicResidual.liftDomain V) gain (fun m => β * m)
-      (fun (_ : Unit) n (x : Cylinder) => s.meanGoodResidual c n x.1))
-    (he : NativeBounds N (HarmonicResidual.liftDomain V) gain (fun m => β * m)
-      (fun (_ : Unit) => s.errors.total)) :
-    NativeBounds N (HarmonicResidual.liftDomain V) gain (fun m => β * m)
-      (fun (_ : Unit) => LiftedMeanResidual.fullResidual c s) := by
-  have hU : IsOpen (HarmonicResidual.liftDomain V) := HarmonicResidual.liftDomain_open hV
-  have hsum := hb.window_sum hU labels label hinj hlevel d χ hχ hs
-  apply ((hsum.add hN hU hm).add hN hU he).congr hU
-  intro _ n hn x hx
-  ext i
-  simpa only [Pi.add_apply, Finset.sum_apply] using
-    (state_fullResidual_reconstructed hV hrep hmean (hreg n hn) hx i).symm
 
 /-! ## One physical residual, selected comparable bands, and the base patch -/
 
@@ -982,47 +949,7 @@ theorem coefficient_source_of_uniformVelocity {ι : Type} {s : StripData Point}
       (fun l n x => (b l).velocity n i j x) :=
   ⟨hb i j hj, hflat, hw, he, hslow⟩
 
-/-- This adapter uses the actual smooth edge extension of each coefficient,
-then lifts it to the angular product. The raw totalization need not be smooth. -/
-theorem block_nativeBounds_of_weighted {ι : Type} {N : ℕ} {V : Set Point}
-    {h α β : ℝ} {s : StripData Point} {w : ι → ℕ → Point → ℝ}
-    (hN : 4 ≤ N) (hV : IsOpen V) (hβ : 0 ≤ β)
-    (b : ι → CorrectionState.HarmonicBlock Point) (J : Finset ℤ)
-    (hs : ∀ l n, N ≤ n → ∀ i, ((b l).velocity n i).support ⊆ J)
-    (ha : ∀ i j, j ∈ J → LocalSourceBounds s h α w (fun l n x => (b l).velocity n i j x))
-    (hsm : ∀ i j, j ∈ J → ∀ l n, N ≤ n → ContDiffOn ℝ ∞ ((b l).velocity n i j) V)
-    (hcover : ∀ i j, j ∈ J → ∀ l n, N ≤ n → ∀ x ∈ V,
-      x ∈ closure s.domain ∨ x ∉ tsupport ((b l).velocity n i j))
-    (hΦ : ∀ i j, j ∈ J → SupportedPhaseBounds N (HarmonicResidual.liftDomain V) β
-      (fun l n (x : Cylinder) => (b l).velocity n i j x.1) (fun l => fullPhase (b l) j)) :
-    NativeBounds N (HarmonicResidual.liftDomain V) (h * α) (fun m => β * m)
-      (fun l => (b l).oscillation) := by
-  apply block_nativeBounds (by omega) (HarmonicResidual.liftDomain_open hV) hβ b J hs _ hΦ
-  intro i j hj
-  have hc := NativeBounds.of_localSource hN hV (ha i j hj) (hsm i j hj) (hcover i j hj)
-  let π : Cylinder →L[ℝ] Point := ContinuousLinearMap.fst ℝ Point ℝ
-  have hπ : ‖π‖ ≤ 1 := by
-    apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
-    intro x
-    simp only [one_mul]
-    exact norm_fst_le x
-  have hp := hc.pull_linear hV π hπ
-  have hdom : π ⁻¹' V = HarmonicResidual.liftDomain V := by
-    ext x
-    simp [π, HarmonicResidual.liftDomain]
-  rw [hdom] at hp
-  exact hp
 
-/-- Raising the fixed derivative loss never changes a coefficient field. -/
-theorem NativeBounds.to_phaseLoss {D E ι : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    [NormedAddCommGroup E] [NormedSpace ℝ E] {N : ℕ} {U : Set D} {gain gain' β : ℝ}
-    {f : ι → ℕ → D → E} (hf : NativeBounds N U gain (fun _ => 0) f)
-    (hN : 1 ≤ N) (hβ : 0 ≤ β) (hg : gain' ≤ gain) :
-    NativeBounds N U gain' (fun m => β * m) f := by
-  apply hf.weaken hN
-  intro m
-  have hm := mul_nonneg hβ (Nat.cast_nonneg m : (0 : ℝ) ≤ m)
-  linarith
 
 theorem excluded_nativeBounds {N : ℕ} {U : Set Cylinder} {gain : ℝ} {loss : ℕ → ℝ}
     (hN : 1 ≤ N) (hU : IsOpen U) (e : CorrectionState.ExcludedErrors Point)
@@ -1034,14 +961,6 @@ theorem excluded_nativeBounds {N : ℕ} {U : Set Cylinder} {gain : ℝ} {loss : 
   simp only [CorrectionState.ExcludedErrors.total] at he ⊢
   exact he
 
-/-- An actual exterior zero germ proves every exterior residual rate. -/
-theorem jetRate_of_zero_germs {l : Filter SpaceTime} {q : SpaceTime → ℝ}
-    {R : SpaceTime → Space} (hz : ∀ᶠ w in l, R =ᶠ[𝓝 w] fun _ => 0) (m : ℕ) (r : ℝ) :
-    DiagonalResidual.JetRate l q R m r := by
-  refine ⟨0, le_rfl, ?_⟩
-  filter_upwards [hz] with w hw
-  rw [iteratedFDeriv_eq_of_eventuallyEq hw m, iteratedFDeriv_fun_zero]
-  simp
 
 /-- One fixed loss function applies to the actual residual after every
 finite correction stage. Constants and the finite harmonic cutoff may vary

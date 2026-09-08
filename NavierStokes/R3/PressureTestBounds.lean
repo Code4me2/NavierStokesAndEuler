@@ -78,9 +78,6 @@ theorem integral_first_moment_le {f : Space → ℂ}
   exact hcs.trans (mul_le_mul_of_nonneg_left
     (Real.sqrt_le_sqrt (integral_mono hb_int hw hb_le)) fourierMomentConstant_nonneg)
 
-theorem fourierHNormSq_nonneg (s : ℕ) (ψ : ComplexTest) :
-    0 ≤ fourierHNormSq s ψ :=
-  integral_nonneg fun _ => by positivity
 
 /-- A Fourier multiplier of order at most two has the required `H³` control. -/
 theorem sqrt_l2Sq_le_of_fourier_bound (ψ φ : ComplexTest) {C : ℝ} (hC : 0 ≤ C)
@@ -209,18 +206,7 @@ theorem norm_rieszTest_partialCLM_le_of_integrable (i j k : Fin 3) (ψ : Complex
   (RieszTestOperators.norm_rieszTest_le_integral i j (partialCLM k ψ) x).trans
     (integral_norm_fourier_partialCLM_le_of_integrable k ψ hw)
 
-/-- The first moment of a Schwartz Fourier transform is controlled uniformly by `H³`. -/
-theorem fourier_first_moment_le (ψ : ComplexTest) :
-    (∫ ξ : Space, ‖ξ‖ * ‖FourierTransform.fourierCLE ℂ ComplexTest ψ ξ‖) ≤
-      fourierMomentConstant * Real.sqrt (fourierHNormSq 3 ψ) :=
-  integral_first_moment_le (FourierTransform.fourierCLE ℂ ComplexTest ψ).continuous.aestronglyMeasurable
-    (FourierSobolevWeights.integrable_fourierHNormSq_three ψ)
 
-theorem integral_norm_fourier_partialCLM_le (i : Fin 3) (ψ : ComplexTest) :
-    (∫ ξ : Space, ‖FourierTransform.fourierCLE ℂ ComplexTest (partialCLM i ψ) ξ‖) ≤
-      (2 * Real.pi * fourierMomentConstant) * Real.sqrt (fourierHNormSq 3 ψ) :=
-  integral_norm_fourier_partialCLM_le_of_integrable i ψ
-    (FourierSobolevWeights.integrable_fourierHNormSq_three ψ)
 
 /-- The spatial `L²` norm of a test is at most its Fourier `H³` norm. -/
 theorem sqrt_l2Sq_test_le (ψ : ComplexTest) :

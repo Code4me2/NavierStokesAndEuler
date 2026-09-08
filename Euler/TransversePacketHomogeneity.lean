@@ -85,19 +85,6 @@ namespace EulerElapsedTimePathGluing
 
 open Set EulerPacketTimePathGluing
 
-theorem join_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (S τ : ℝ) (hτ : 0 ≤ τ) (hτS : τ ≤ S)
-    (u : C(Icc (0 : ℝ) τ,E)) (v : C(Icc (0 : ℝ) (S-τ),E))
-    (hm : u ⟨τ,hτ,le_rfl⟩ = v ⟨0,le_rfl,sub_nonneg.mpr hτS⟩) (a : ℝ) :
-    join S τ hτ hτS (a • u) (a • v) (congrArg (a • ·) hm) =
-      a • join S τ hτ hτS u v hm := by
-  apply ContinuousMap.ext
-  intro t
-  change (if (t : ℝ) ≤ τ then a • u (projIcc 0 τ hτ t)
-    else a • v (elapsedTime S τ (projIcc τ S hτS t))) =
-      a • (if (t : ℝ) ≤ τ then u (projIcc 0 τ hτ t)
-        else v (elapsedTime S τ (projIcc τ S hτS t)))
-  split <;> rfl
 
 end EulerElapsedTimePathGluing
 

@@ -20,16 +20,7 @@ def growthBase (K : SmoothCoefficient period) (K' : LiftL2 period →L[ℝ] Lift
 def growthSlope (K : SmoothCoefficient period) (κ : ℝ) (m : Vector3) (c : ℝ) : ℝ :=
   (K.firstBound : ℝ)*(|κ|+‖m‖)/(2*c^2)
 
-theorem growthBase_nonneg (K : SmoothCoefficient period) (K' : LiftL2 period →L[ℝ] LiftL2 period) (c : ℝ) :
-    0 ≤ growthBase period K K' c := by
-  unfold growthBase heatEnergyConstant
-  positivity
 
-omit [Fact (0 < period)] in
-theorem growthSlope_nonneg (K : SmoothCoefficient period) (κ : ℝ) (m : Vector3) (c : ℝ) :
-    0 ≤ growthSlope period K κ m c := by
-  unfold growthSlope
-  positivity
 
 /-- Artificial viscosity contributes no unbounded constant to the actual energy estimate as it tends to zero. -/
 theorem viscousGrowth_uniform (K : SmoothCoefficient period) (K' : LiftL2 period →L[ℝ] LiftL2 period)
@@ -42,10 +33,6 @@ theorem viscousGrowth_uniform (K : SmoothCoefficient period) (K' : LiftL2 period
   have h := div_le_div_of_nonneg_right hn (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) (sq_nonneg c))
   exact h.trans_eq (by unfold growthBase growthSlope transportEnergyConstant; ring)
 
-/-- The chosen genuine pointwise velocity bound depends continuously on the actual metric energy. -/
-theorem metricVelocityBound_continuous (c B : ℝ) : Continuous (metricVelocityBound period c B) := by
-  exact continuous_real_toNNReal.comp
-    (continuous_const.mul (continuous_const.add (continuous_const.mul continuous_id)))
 
 /-- Its NNReal coercion is exactly the intended positive metric-energy majorant. -/
 theorem metricVelocityBound_coe (c B X : ℝ) (hc : 0 < c) (hB : 0 ≤ B) (hX : 0 ≤ X) :
@@ -53,15 +40,6 @@ theorem metricVelocityBound_coe (c B X : ℝ) (hc : 0 < c) (hB : 0 ≤ B) (hX : 
   exact Real.coe_toNNReal _ (mul_nonneg (sobolevEmbeddingConstant_nonneg period 6)
     (add_nonneg hB (mul_nonneg (le_trans zero_le_one (metricAmplification_one_le hc)) hX)))
 
-/-- The actual energy growth coefficient is affine in the metric error energy, uniformly for 0<ν≤1. -/
-theorem viscousGrowth_metric (K : SmoothCoefficient period) (K' : LiftL2 period →L[ℝ] LiftL2 period)
-    (κ : ℝ) (m : Vector3) (c ν B X : ℝ) (hc : 0 < c) (hν : ν ≤ 1) (hB : 0 ≤ B) (hX : 0 ≤ X) :
-    viscousGrowthCoefficient period K K' κ m c ν (metricVelocityBound period c B X) ≤
-      growthBase period K K' c+growthSlope period K κ m c*sobolevEmbeddingConstant period 6*B+
-        (growthSlope period K κ m c*sobolevEmbeddingConstant period 6*metricAmplification c)*X := by
-  have h := viscousGrowth_uniform period K K' κ m c ν (metricVelocityBound period c B X) hν
-  rw [metricVelocityBound_coe period c B X hc hB hX] at h
-  exact h.trans_eq (by ring)
 
 /-- One positive constant absorbs every derived scalar growth coefficient while preserving the signed radius term. -/
 theorem absorb_scalar_coefficients (g0 g1 f0 f1 f2 d r X Y B R C : ℝ)

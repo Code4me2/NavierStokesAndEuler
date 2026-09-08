@@ -21,9 +21,6 @@ def pullback (A : E →ᵇ V) (d : E →ᵇ E) : E →ᵇ V :=
 @[simp] theorem pullback_apply (A : E →ᵇ V) (d : E →ᵇ E) (x : E) :
     pullback A d x = A (x+d x) := rfl
 
-theorem pullback_norm (A : E →ᵇ V) (d : E →ᵇ E) :
-    ‖pullback A d‖ ≤ ‖A‖ :=
-  BoundedContinuousFunction.norm_ofNormedAddCommGroup_le _ (norm_nonneg A) _
 
 theorem pullback_sub_norm (A B : E →ᵇ V) (d e : E →ᵇ E)
     (L : ℝ≥0) (hL : LipschitzWith L A) :

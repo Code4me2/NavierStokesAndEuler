@@ -27,14 +27,7 @@ theorem map_time_atTop :
   map_coe_atTop_of_Ioo_subset (fun _ ht => ht.2)
     (fun _ _ => ⟨0,L.duration_pos,fun _ ht => ⟨ht.1.le,ht.2⟩⟩)
 
-theorem endpointFilter_neBot : L.endpointFilter.NeBot := by
-  let : Nonempty L.Time := ⟨L.initialTime⟩
-  rw [L.endpointFilter_eq_atTop]
-  infer_instance
 
-theorem time_tendsto_endpoint :
-    Tendsto (fun t : L.Time => (t : ℝ)) atTop (𝓝[<] L.duration) :=
-  L.map_time_atTop.le
 
 /-- Arbitrarily large values in every terminal interval force the actual
 extended nonnegative upper limit to be infinity. -/
@@ -75,9 +68,6 @@ namespace EulerPacketInduction
 open Filter
 open scoped Topology ENNReal
 
-theorem maximalTime_map_atTop :
-    Filter.map (fun t : MaximalTime => (t : ℝ)) atTop=𝓝[<] lifespan.duration :=
-  lifespan.map_time_atTop
 
 theorem maximalGradientNorm_limsup :
     Filter.limsup (fun t : MaximalTime => ENNReal.ofReal (maximalGradientNorm t))

@@ -464,8 +464,6 @@ noncomputable def correctionCLM (P : Patch) (x : ℝ) : Coeff →L[ℝ] ℝ :=
         simp only [correction, Pi.smul_apply, smul_eq_mul, mul_assoc, Finset.mul_sum,
           RingHom.id_apply] }
 
-theorem correctionCLM_apply (P : Patch) (x : ℝ) (c : Coeff) :
-    correctionCLM P x c = correction P c x := rfl
 
 theorem correction_parameter_deriv (P : Patch) {c : ℝ → Coeff} {η : ℝ}
     (hc : DifferentiableAt ℝ c η) (x : ℝ) :
@@ -773,38 +771,8 @@ theorem physicalProfile_eq_clean_outside (P : Patch) (lam R a : ℝ) (c : Coeff)
     exact hX (correction_tsupport P c (subset_tsupport _ hn))
   simp only [physicalProfile, cleanProfile, hz, add_zero]
 
-theorem physicalDifference_hasCompactSupport (P : Patch) (lam R a : ℝ) (hR : 0 < R)
-    (c : Coeff) :
-    HasCompactSupport (fun X => physicalProfile P lam R a c X - cleanProfile lam R a X) := by
-  apply HasCompactSupport.of_support_subset_isCompact
-    (isCompact_Icc : IsCompact (Icc (R * P.left) (R * P.right)))
-  intro X hX
-  have hn : correction P c (X / R) ≠ 0 := by
-    intro hz
-    apply hX
-    simp only [physicalProfile, cleanProfile, hz, add_zero, sub_self]
-  have hx := correction_support P c hn
-  constructor
-  · have h := (le_div_iff₀ hR).mp hx.1
-    simpa only [mul_comm] using h
-  · have h := (div_le_iff₀ hR).mp hx.2
-    simpa only [mul_comm] using h
 
-/-- On the reserved patch `U=0`, so the mixed axial-angular moment is unchanged. -/
-theorem mixed_moment_unchanged (P : Patch) (lam R a : ℝ) (c : Coeff) (U : ℝ → ℝ)
-    (hU : ∀ X, X / R ∈ Ioo P.left P.right → U X = 0) :
-    (∫ X, U X * physicalProfile P lam R a c X) = ∫ X, U X * cleanProfile lam R a X := by
-  congr 1
-  funext X
-  by_cases hX : X / R ∈ Ioo P.left P.right
-  · simp [hU X hX]
-  · rw [physicalProfile_eq_clean_outside P lam R a c X hX]
 
-theorem angular_scale_eq (R : ℝ) (hR : 0 < R) :
-    R * Real.sqrt (2 * R) = Real.sqrt 2 * R ^ (3 / 2 : ℝ) := by
-  rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2), Real.sqrt_eq_rpow R,
-    show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add hR, Real.rpow_one]
-  ring
 
 noncomputable def heatDebt (T : OutgoingTail.TailData) (ν K η : ℝ) : Coeff :=
   ![HeatTailEdit.pressureDebt (HeatTailEdit.outgoingProfile T K η) T.h ν K,
@@ -891,53 +859,6 @@ theorem FirstJetBound.mono {P : Patch} {a : ℝ → ℝ} {c : ℝ → Coeff} {η
   intro x
   exact ⟨(h x).1.trans hLM, (h x).2.1.trans hLM, (h x).2.2.trans hLM⟩
 
-/-- The actual outgoing heat edit is compensated for every sufficiently large
-radius, uniformly on the compact parameter range, with `O(1/K)` first-jet cost. -/
-theorem exists_heat_compensation (P : Patch) (lam : ℝ) (hlam : 0 ≤ lam)
-    (T : OutgoingTail.TailData) (ν q : ℝ) (hν : 0 < ν) (hq : 0 < q)
-    {U S : Set ℝ} (hU : IsOpen U) (hS : IsCompact S) (hSU : S ⊆ U)
-    (a : ℝ → ℝ) (ha : ContDiffOn ℝ ∞ a U) (hpos : ∀ η ∈ U, 0 < a η) :
-    ∃ K₀ C : ℝ, 0 < K₀ ∧ 0 < C ∧ ∀ K : ℝ, K₀ ≤ K →
-      ∃ (c : ℝ → Coeff) (V : Set ℝ),
-        IsOpen V ∧ S ⊆ V ∧ V ⊆ U ∧ ContDiffOn ℝ ∞ c V ∧
-        ∀ η ∈ S,
-          physicalMoments P lam (q * K) (a η) (c η) + heatDebt T ν K η = 0 ∧
-          ‖c η‖ ≤ C / K ∧ ‖deriv c η‖ ≤ C / K ∧
-          FirstJetBound P a c η (C / K) ∧
-          ∀ X : ℝ, 0 < X → 0 < physicalProfile P lam (q * K) (a η) (c η) X := by
-  obtain ⟨ε, C₁, hε, hC₁, hsolve⟩ :=
-    exists_uniform_parameter_compensation P lam hlam hU hS hSU a ha hpos
-  obtain ⟨C₂, hC₂, hdebt⟩ := scaled_heatDebt_bound T ν q hν hq
-  let K₀ : ℝ := 1 + C₂ / ε
-  have hK₀ : 0 < K₀ := by dsimp [K₀]; positivity
-  refine ⟨K₀, C₁ * C₂, hK₀, mul_pos hC₁ hC₂, ?_⟩
-  intro K hlarge
-  have hK : 0 < K := hK₀.trans_le hlarge
-  have hqK : 0 < q * K := mul_pos hq hK
-  let v := scaledDebt (q * K) (heatDebt T ν K 0)
-  have hv : ‖v‖ ≤ C₂ / K := hdebt K hK
-  have hvsmall : ‖v‖ < ε := by
-    apply hv.trans_lt
-    apply (div_lt_iff₀ hK).mpr
-    have hk' : C₂ / ε < K := by dsimp [K₀] at hlarge; linarith
-    have ht := (div_lt_iff₀ hε).mp hk'
-    simpa only [mul_comm] using ht
-  obtain ⟨c, V, hV, hSV, hVU, hc, hspec⟩ := hsolve v hvsmall
-  refine ⟨c, V, hV, hSV, hVU, hc, ?_⟩
-  intro η hη
-  have hs := hspec η hη
-  have hcost : C₁ * ‖v‖ ≤ C₁ * C₂ / K := by
-    simpa only [mul_div_assoc] using mul_le_mul_of_nonneg_left hv hC₁.le
-  have hmoment : momentMap P lam (c η) = normalizedDebt (q * K) (a η) (heatDebt T ν K 0) := by
-    rw [normalizedDebt_eq]
-    exact hs.1
-  have hexact := physicalMoments_cancel P lam (q * K) (a η) hqK
-    (hpos η (hSU hη)) (c η) (heatDebt T ν K 0) hmoment
-  refine ⟨?_, hs.2.1.trans hcost, hs.2.2.1.trans hcost,
-    hs.2.2.2.1.mono hcost, ?_⟩
-  · rwa [heatDebt_independent T ν hK η]
-  · intro X hX
-    exact hs.2.2.2.2 (X / (q * K)) (div_pos hX hqK)
 
 /-- All three physical moment changes are genuine integrable functions. -/
 theorem physicalMoments_integrable (P : Patch) (lam R a : ℝ) (hR : 0 < R) (c : Coeff) :
@@ -979,44 +900,7 @@ theorem physicalMoments_positive_radius (P : Patch) (lam R a : ℝ) (hR : 0 < R)
     intro X hX <;>
     rw [physicalProfile_eq_clean_of_nonpos P lam R a hR c (le_of_not_gt hX)] <;> simp
 
-/-- A reserved patch ending before the heat switch has no overlap with the
-actual heat perturbation on positive radii. -/
-theorem patch_heat_disjoint (P : Patch) (lam q K a h ν : ℝ)
-    (hq : 0 < q) (hK : 0 < K) (hpatch : q * P.right ≤ 1)
-    (c : Coeff) (E : ℝ → ℝ) {X : ℝ} (hX : 0 < X) :
-    (physicalProfile P lam (q * K) a c X - cleanProfile lam (q * K) a X) *
-      HeatTailEdit.change E h ν K X = 0 := by
-  by_cases hXK : X ≤ K
-  · simp only [HeatTailEdit.change, HeatTailEdit.edit_before E h ν hK hX hXK,
-      sub_self, mul_zero]
-  · have hout : X / (q * K) ∉ Ioo P.left P.right := by
-      intro hx
-      have hl := (div_lt_iff₀ (mul_pos hq hK)).mp hx.2
-      have hp := mul_le_mul_of_nonneg_right hpatch hK.le
-      nlinarith
-    rw [physicalProfile_eq_clean_outside P lam (q * K) a c X hout, sub_self, zero_mul]
 
-theorem square_change_add_of_disjoint (b p t : ℝ) (hpt : p * t = 0) :
-    (b + p + t) ^ 2 - b ^ 2 = ((b + p) ^ 2 - b ^ 2) + ((b + t) ^ 2 - b ^ 2) := by
-  nlinarith
 
-/-- The constructed physical profile is jointly smooth in the parameter and
-positive radius, whenever the amplitude and solved coefficients are smooth. -/
-theorem physicalProfile_family_contDiffOn (P : Patch) (lam R : ℝ) (hR : 0 < R)
-    {U : Set ℝ} {a : ℝ → ℝ} {c : ℝ → Coeff}
-    (ha : ContDiffOn ℝ ∞ a U) (hc : ContDiffOn ℝ ∞ c U) :
-    ContDiffOn ℝ ∞
-      (fun z : ℝ × ℝ => physicalProfile P lam R (a z.1) (c z.1) z.2) (U ×ˢ Ioi 0) := by
-  have ha' : ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => a z.1) (U ×ˢ Ioi 0) :=
-    ha.comp contDiffOn_fst (fun z hz => hz.1)
-  have hb : ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => baseProfile lam (z.2 / R)) (U ×ˢ Ioi 0) := by
-    intro z hz
-    exact ((Real.contDiffAt_rpow_const_of_ne (div_pos hz.2 hR).ne').comp z
-      (contDiffAt_snd.div_const R)).contDiffWithinAt
-  have hr : ContDiffOn ℝ ∞
-      (fun z : ℝ × ℝ => correction P (c z.1) (z.2 / R)) (U ×ˢ Ioi 0) :=
-    (correction_family_contDiffOn P hc).comp
-      (contDiffOn_fst.prodMk (contDiffOn_snd.div_const R)) (fun z hz => ⟨hz.1, mem_univ _⟩)
-  exact ha'.mul (hb.add hr)
 
 end NavierStokes.TerminalCompensation

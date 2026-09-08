@@ -1520,9 +1520,6 @@ theorem profiles_mem {p : Point} (hp : p.2 ∈ Icc (-1 : ℝ) 1) (hX : 0 ≤ p.1
 
 theorem bigTime_pos : 0 < r.reference.bigTime := r.refTime_pos.trans_le r.before_big
 
-theorem holdTime_pos : 0 < r.holdTime := by
-  dsimp [holdTime]
-  linarith [r.bigTime_pos, r.widthU_pos, r.widthA_pos]
 
 theorem startRadius_pos : 0 < r.startRadius :=
   mul_pos r.reference.radius0_pos (Real.exp_pos _)
@@ -1991,13 +1988,7 @@ noncomputable def endpointAxial : ℝ → ℝ :=
 noncomputable def endpointLogarithm : ℝ → ℝ :=
   r.reference.endpointLog r.actTime r.kappa r.widthU r.widthA C
 
-theorem endpointAxial_smooth :
-    ContDiffOn ℝ ∞ r.endpointAxial ReferencePath.parameterInterval :=
-  r.reference.endpointU_smooth ReferencePath.parameterInterval_open _ _ _
 
-theorem endpointLogarithm_smooth :
-    ContDiffOn ℝ ∞ r.endpointLogarithm ReferencePath.parameterInterval :=
-  r.reference.endpointLog_smooth ReferencePath.parameterInterval_open _ _ _ _ _
 
 theorem initial_fields {p : Point} (hη : p.2 ∈ ReferencePath.parameterInterval)
     (hX : p.1 ≤ (ReferencePath.Input.ofNatural hΛ F).endpoint * Real.exp r.refTime) :
@@ -2008,23 +1999,7 @@ theorem initial_fields {p : Point} (hη : p.2 ∈ ReferencePath.parameterInterva
   TransitionRamp.physical_fields_eq_activation F hΛ hsmall r.refTime_pos r.refTime_bound hP0
     r.actTime_pos r.before_big r.widthU_pos r.widthA_pos hη hX
 
-theorem terminal_fields (hC : 0 < C) {p : Point} (hη : p.2 ∈ ReferencePath.parameterInterval)
-    (hX : 110 ≤ p.1) :
-    r.profiles.f p = C⁻¹ * Real.exp (Real.log (p.1 / 110) / 10 + r.endpointLogarithm p.2) /
-        Real.sqrt (2 * p.1) ∧ r.profiles.U p = r.endpointAxial p.2 := by
-  have hR : r.reference.radius0 < 110 := (r.reference.radius0_lt_100 r.bigTime_pos).trans (by norm_num)
-  have hfit : r.reference.bigTime + r.widthU + r.widthA ≤ r.reference.finalTime := r.finish_before.le
-  refine ⟨r.reference.physicalF_held ReferencePath.parameterInterval_open r.widthA_pos
-    hfit hR hC hX hη, ?_⟩
-  exact r.reference.physicalU_held ReferencePath.parameterInterval_open r.widthU_pos
-    (by linarith [r.widthA_pos]) hR hX hη
 
-theorem endpointLogarithm_eq_actual (hC : 0 < C) {η : ℝ}
-    (hη : η ∈ ReferencePath.parameterInterval) :
-    r.endpointLogarithm η = Real.log (C * r.profiles.E (110, η)) := by
-  have hR : r.reference.radius0 < 110 := (r.reference.radius0_lt_100 r.bigTime_pos).trans (by norm_num)
-  exact r.reference.endpointLog_eq_actual ReferencePath.parameterInterval_open r.widthA_pos
-    r.finish_before.le hR hC hη
 
 end RampParameters
 

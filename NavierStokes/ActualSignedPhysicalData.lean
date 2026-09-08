@@ -90,13 +90,6 @@ theorem coefficients_outer (clock : ℕ → D → ℝ) :
     funext fun n => funext fun x => PrimaryCopyBounds.profile_mul_outerCutoff (clock n x)
   rw [he]
 
-theorem corrected_outer (clock : ℕ → D → ℝ) :
-    (SignedWaveUpdate.coefficients a s d H T R
-      (fun n x => mask n x * PrimaryCopyBounds.outerCutoff (clock n x))
-      unit Ndot A j).corrected s d (fun n x => GaussianTailFlat.profile (clock n x)) =
-    (SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).corrected s d
-      (fun n x => GaussianTailFlat.profile (clock n x)) := by
-  simp only [WaveCoefficients.corrected, coefficients_outer]
 
 end Repartition
 
@@ -334,10 +327,6 @@ theorem dynamic_localized_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) (
           ChartScales.slotLength sys.radius h label.1))
   rw [mul_left_comm, PrimaryCopyBounds.profile_mul_outerCutoff]
 
-theorem dynamic_common_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    (dynamicCopyData sys hh label hl gap B V request j).common =
-      (ActualPeriodizedSignedRealization.copyData B (layout sys hh label hl gap) V request j).common :=
-  common_eq_of_localized _ _ rfl (dynamic_localized_eq sys hh label hl gap B V request j)
 
 theorem dynamic_commonCorrected_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
     (dynamicCopyData sys hh label hl gap B V request j).commonCorrected V.strip V.directions =
@@ -1496,42 +1485,7 @@ noncomputable def carrierRegion (h a b : ℝ) : Set PhysicalGraphBounds.Slow :=
   {p | p.1 ∈ Ioo (a / 8) (4 * b + 1) ∧
     (p.2.2, p.2.1) ∈ PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4}
 
-theorem carrierRegion_open {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (a b : ℝ) :
-    IsOpen (carrierRegion h a b) :=
-  (isOpen_Ioo.preimage continuous_fst).inter
-    ((PhysicalMeanDomain.normalizedSlowDomain_open (by linarith : 0 < 2 * h)
-      (by linarith : 2 * h < 1) (1 / 4) 4).preimage
-      (continuous_snd.snd.prodMk continuous_snd.fst))
 
-/-- Carrier profile arguments lie in a fixed open native region. The
-native phase center affects the clock, but not this slow argument. -/
-theorem carrierRegion_contains {h a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a)
-    (c : PhysicalWaveSum.CarrierData) (r0 : ℝ) (L : PhysicalWaveSum.BandLabel)
-    (w : SpaceTime) (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hregion : PhysicalWaveSum.physicalParams h w ∈
-      PhysicalWaveSum.labelRegion (CoordinateAlgebra.D h) L.val)
-    (hann : PhysicalGraphBounds.scaledRadial L.val.1 w ∈ PhysicalGraphBounds.annulus (a / 4) (2 * b))
-    (j : PolarCharts.Index)
-    (hj : PhysicalGraphBounds.scaledRadial L.val.1 w ∈ PolarCharts.chartDomain (a / 4) j) :
-    LocalPhysicalCopyBounds.slotSlow (c.withChart j) (a / 4) h L.val.1 r0 w ∈ carrierRegion h a b := by
-  have ha4 : 0 < a / 4 := by positivity
-  have hrel := PhysicalWaveSum.labelRegion_active_relation hregion
-  have hs := PhysicalMeanJetBounds.graph_slow_normalized hh hh1 L.val.1 0 hw hrel.1 hrel.2
-  have hn : ‖PhysicalGraphBounds.scaledRadial L.val.1 w‖ ≤ 2 * b := by
-    simpa only [Metric.mem_closedBall, dist_zero_right] using hann.1
-  have hl : a / 4 ≤ ‖PhysicalGraphBounds.scaledRadial L.val.1 w‖ := hann.2
-  have hrlo := PolarCharts.norm_le_radius (PhysicalGraphBounds.scaledRadial L.val.1 w)
-  have hrhi := PolarCharts.radius_le_two_norm (PhysicalGraphBounds.scaledRadial L.val.1 w)
-  change ((PhysicalGraphBounds.slotMap (PolarCharts.chart (a / 4) j)
-    (ChartScales.timeCoefficient h L.val.1) c.center r0
-      (PhysicalGraphBounds.physicalLift h L.val.1 w)).1).1 ∈ Ioo (a / 8) (4 * b + 1) ∧ _
-  rw [PhysicalGraphBounds.slotMap_formula, PhysicalGraphBounds.liftXY_physicalLift,
-    chart_radius ha4 j hj]
-  constructor
-  · exact ⟨by linarith, by linarith⟩
-  · simpa only [LocalPhysicalCopyBounds.slotSlow, PhysicalGraphBounds.slotMap_formula,
-      PhysicalMeanJetBounds.graph, Function.comp_apply, commonLift_zero,
-      PhysicalClassBounds.cylindricalMap, PhysicalClassBounds.slowFast_apply] using hs
 
 /-- Support of one full native carrier implies closed label membership,
 including the edge of the actual zero-extended coefficient. -/
@@ -1967,17 +1921,8 @@ theorem pressureWaveData_pressure :
     (pressureWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure).pressure =
       fun x => ((pressureFamily sys hh f).sum (a / 4) h sys.radius x).re := rfl
 
-theorem potentialWaveData_copyPotential :
-    (potentialWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential).vector =
-      (copyPotential sys hh f hloc G hh0 hh1 ha hb).field := rfl
 
-theorem potentialWaveData_outer :
-    (potentialWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential).upperRadius =
-      2 * b := rfl
 
-theorem pressureWaveData_outer :
-    (pressureWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure).upperRadius =
-      2 * b := rfl
 
 /- Every fixed physical jet is controlled by the supplied native exponent,
 with the physical potential scaling retained exactly. -/
@@ -2116,30 +2061,8 @@ theorem labelPotential_germ {x : SpaceTime}
   eventually_of_mem (isOpen_interior.mem_nhds hx) (fun _ hy =>
     labelPotential_eq_reference sys hh f G L hPhi ha hd j (interior_subset hy))
 
-theorem labelPressure_germ {x : SpaceTime}
-    (hx : x ∈ interior (referencePatch (h := h) f L a b delta j)) :
-    labelPressure sys hh f L a =ᶠ[𝓝 x]
-      ActualPeriodizedSignedRealization.physicalPressure (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta :=
-  eventually_of_mem (isOpen_interior.mem_nhds hx) (fun _ hy =>
-    labelPressure_eq_reference sys hh f G L ha hd j (interior_subset hy))
 
-include hPhi in
-theorem labelVelocity_eq_reference {x : SpaceTime}
-    (hx : x ∈ interior (referencePatch (h := h) f L a b delta j)) :
-    SpatialCurl.spatialCurl (labelPotential sys hh f L a) x =
-      ActualPeriodizedSignedRealization.physicalVelocity (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta x :=
-  PhysicalCurlCovariance.spatialCurl_congr (labelPotential_germ sys hh f G L hPhi ha hd j hx)
 
-include hPhi in
-theorem labelPotential_jets_eq_reference {x : SpaceTime}
-    (hx : x ∈ interior (referencePatch (h := h) f L a b delta j)) (m : ℕ) :
-    iteratedFDeriv ℝ m (labelPotential sys hh f L a) x =
-      iteratedFDeriv ℝ m (ActualPeriodizedSignedRealization.physicalPotential (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta) x :=
-  PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq
-    (labelPotential_germ sys hh f G L hPhi ha hd j hx) m
 
 end ReferenceGerms
 

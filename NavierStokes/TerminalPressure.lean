@@ -877,15 +877,6 @@ theorem outgoingPressure_partialZ_bound (C : ℝ) (d : OutgoingTail.TailData) (y
     (mul_le_mul_of_nonneg_right (logScaleDerivative_bound d.h_pos d.h_lt_half ht) (sq_nonneg _))
     (sub_nonneg.mpr (outgoingTaper_bounds d y0 _).2)
 
-theorem outgoingPressure_edge_bound (C : ℝ) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {p : SimilarityProfile.PhysicalPoint} {δ : ℝ} (ht : p.1 < 1) (hs : 0 < p.2.1)
-    (hδ : Real.log (SimilarityProfile.X d.h p) = y0 + 3 - δ) :
-    |SimilarityProfile.partialZ (outgoingPressure C d y0) p| ≤
-      (2 / (1 - 2 * d.h)) * SimilarityProfile.q d.h p ^ (-CoordinateAlgebra.D d.h) *
-        TerminalStress.physicalHeat C (1 + d.h) p ^ 2 *
-          (d.rho * FlatCutoff.edge 4 δ * TerminalStress.taperFactor δ) := by
-  have hb := outgoingPressure_partialZ_bound C d y0 ht hs
-  rwa [hδ, show y0 + 3 - δ - y0 = 3 - δ by ring, TerminalStress.tailShape_deficit] at hb
 
 /-! ## Compact support of the terminal forcing and its positive mass -/
 
@@ -1413,96 +1404,7 @@ theorem released_terminal_tilt (d : OutgoingTail.TailData) {K y0 t z r R Λ : �
       mul_le_mul_of_nonneg_left (outgoingAmplitude_suppressed d) (by positivity)
     _ = _ := by ring
 
-theorem released_terminal_tilt_small (d : OutgoingTail.TailData) {K y0 t z r R Λ ε : ℝ}
-    (hK : 0 < K) (hh4 : d.h ≤ 1 / 4) (ht : t < 1) (hr : 0 < r) (hrR : r ≤ R)
-    (hΛ : 1 ≤ Λ) (hRΛ : R ^ 2 ≤ Λ * r ^ 2)
-    (hX : K ≤ SimilarityProfile.X d.h (TerminalStress.radiusPoint t r z))
-    (hR : y0 + 3 ≤ Real.log (SimilarityProfile.X d.h (TerminalStress.radiusPoint t R z)))
-    (hinside : Real.log (SimilarityProfile.X d.h (TerminalStress.radiusPoint t r z)) < y0 + 3)
-    (hsmall : d.h ≤ ε / (1 + 16 * Λ * (Λ - 1) * OutgoingTail.finalAngular d (d.releaseStart, 0))) :
-    |axialBackwardStress (releasedNormalization d K) d.h (outgoingTaper d y0) t z r| /
-      TerminalStress.terminalStress (releasedNormalization d K) d.h (outgoingTaper d y0) t z r ≤ ε := by
-  have hb := (released_terminal_tilt d hK hh4 ht hr hrR hΛ hRΛ hX hR hinside).2
-  let B := 16 * Λ * (Λ - 1) * OutgoingTail.finalAngular d (d.releaseStart, 0)
-  have hB : 0 ≤ B := mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (zero_le_one.trans hΛ))
-    (sub_nonneg.mpr hΛ)) (OutgoingTail.finalAngular_pos d _).le
-  have hh1 : d.h ≤ 1 := by linarith
-  have hhpow : d.h ^ 4 ≤ d.h := by
-    calc
-      _ = d.h * d.h ^ 3 := by ring
-      _ ≤ d.h * 1 ^ 3 := mul_le_mul_of_nonneg_left (pow_le_pow_left₀ d.h_pos.le hh1 3) d.h_pos.le
-      _ = _ := by ring
-  have hs : d.h * (1 + B) ≤ ε := (le_div_iff₀ (by linarith : 0 < 1 + B)).mp hsmall
-  apply hb.trans
-  change B * d.h ^ 4 ≤ ε
-  nlinarith [mul_le_mul_of_nonneg_left hhpow hB, d.h_pos]
 
-/-- Full physical residual formula after discharging the pressure regularity
-and improper-integral assumptions. The axial viscosity of the swirl is retained. -/
-theorem outgoing_navierStokesResidual (C : ℝ) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {t : ℝ} {x : ProblemStatement.Space} (ht : t < 1)
-    (hs : 0 < AxisymmetricFields.radialEnergy x) :
-    ProblemStatement.navierStokesResidual
-      (TerminalStress.terminalVelocity C d.h (outgoingTaper d y0))
-      (TerminalStress.terminalPressure C d.h (outgoingTaper d y0)) t x =
-      AxisymmetricResidual.pack
-        (-x 1 / Real.sqrt (2 * AxisymmetricFields.radialEnergy x) *
-          (TerminalStress.leadingResidual C d.h (outgoingTaper d y0) t
-            (Real.sqrt (2 * AxisymmetricFields.radialEnergy x)) (x 2) -
-          TerminalStress.axialViscosity C d.h (outgoingTaper d y0) (AxisymmetricFields.profilePoint t x)))
-        (x 0 / Real.sqrt (2 * AxisymmetricFields.radialEnergy x) *
-          (TerminalStress.leadingResidual C d.h (outgoingTaper d y0) t
-            (Real.sqrt (2 * AxisymmetricFields.radialEnergy x)) (x 2) -
-          TerminalStress.axialViscosity C d.h (outgoingTaper d y0) (AxisymmetricFields.profilePoint t x)))
-        (SimilarityProfile.partialZ (outgoingPressure C d y0) (AxisymmetricFields.profilePoint t x)) := by
-  let a := AxisymmetricFields.radialEnergy x / 2
-  have ha : 0 < a := by dsimp [a]; positivity
-  have hi := swirlCoefficient_sq_integrable C (p := (t, (a, x 2))) d.h_pos d.h_lt_half ht ha
-    (outgoingTaper_contDiff d y0).continuous (outgoingTaper_bounds d y0)
-  have hc : ContinuousOn (fun s => TerminalStress.swirlCoefficient C d.h (outgoingTaper d y0)
-      (t, (s, x 2)) ^ 2) (Ioi a) := by
-    intro s hs'
-    have hlocal := TerminalStress.swirlCoefficient_contDiffAt C
-      (p := (t, (s, x 2))) (f := outgoingTaper d y0) d.h_pos d.h_lt_half ht (ha.trans hs')
-      ((outgoingTaper_contDiff d y0).contDiffAt.of_le (WithTop.coe_le_coe.mpr le_top))
-    exact (((hlocal.comp s (contDiffAt_const.prodMk
-      (contDiffAt_id.prodMk contDiffAt_const))).continuousAt).pow 2).continuousWithinAt
-  exact TerminalStress.terminal_navierStokesResidual C d.h_pos d.h_lt_half ht hs
-    ((outgoingTaper_contDiff d y0).contDiffAt.of_le (WithTop.coe_le_coe.mpr le_top))
-    (show a < AxisymmetricFields.radialEnergy x by dsimp [a]; linarith) hi hc
-    ((outgoingPressure_contDiffAt C d y0 ht hs).differentiableAt (by simp))
 
-/-- The backward axial primitive has the required cylindrical divergence,
-computed from actual derivatives of the canonical pressure. -/
-theorem axialBackwardStress_divergence {C h t z r R Y : ℝ} {f : ℝ → ℝ}
-    (hC : 0 < C) (hh : 0 < h) (hh1 : h < 1 / 2) (ht : t < 1)
-    (hr : 0 < r) (hrR : r ≤ R) (hf : ContDiff ℝ ∞ f)
-    (hb : ∀ y, 0 ≤ f y ∧ f y ≤ 1) (hmono : ∀ y, 0 ≤ deriv f y)
-    (hplateau : ∀ y, Y ≤ y → f y = 1)
-    (hR : Y ≤ Real.log (SimilarityProfile.X h (TerminalStress.radiusPoint t R z))) :
-    deriv (axialBackwardStress C h f t z) r + axialBackwardStress C h f t z r / r =
-      -SimilarityProfile.partialZ (TerminalStress.canonicalPressure
-        (TerminalStress.swirlCoefficient C h f)) (TerminalStress.radiusPoint t r z) := by
-  let g : ℝ → ℝ := fun s => SimilarityProfile.partialZ (TerminalStress.canonicalPressure
-    (TerminalStress.swirlCoefficient C h f)) (t, (s, z))
-  have ha : 0 < (r / 2) ^ 2 / 2 := by positivity
-  have hab : (r / 2) ^ 2 / 2 < r ^ 2 / 2 := by nlinarith [sq_pos_of_pos hr]
-  have hi : IntegrableOn g (Ioi ((r / 2) ^ 2 / 2)) :=
-    (axialBackwardStress_bound hC hh hh1 ht (by positivity : 0 < r / 2)
-      (by linarith : r / 2 ≤ R) hf hb hmono hplateau hR).1
-  have hc : ContinuousOn g (Ioi ((r / 2) ^ 2 / 2)) := by
-    intro s hs
-    exact (((canonicalPressure_partialZ_contDiffAt C (p := (t, (s, z))) hh hh1 ht
-      (ha.trans hs) hf hb hplateau).comp s
-        (contDiffAt_const.prodMk (contDiffAt_id.prodMk contDiffAt_const))).continuousAt).continuousWithinAt
-  have hd := (TerminalStress.neg_tailIntegral_hasDerivAt hab hi hc).fun_neg
-  simp only [neg_neg] at hd
-  have hdr := hd.comp r (RadialHeatProfile.radiusSquared_hasDerivAt r)
-  have hquot := hdr.fun_div (hasDerivAt_id r) hr.ne'
-  change HasDerivAt (axialBackwardStress C h f t z) _ r at hquot
-  rw [hquot.deriv]
-  change _ = -g (r ^ 2 / 2)
-  dsimp only [axialBackwardStress, Function.comp_apply, id_eq]
-  field_simp [hr.ne'] ; ring
 
 end NavierStokes.TerminalPressure

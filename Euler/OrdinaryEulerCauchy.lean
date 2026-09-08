@@ -101,15 +101,6 @@ def limitEvolutionOfH3 (V : ℕ → Evolution T hT) (hpos : 0 < T) (M : ℝ)
   limitEvolution V hpos (Evolution.all_order_bounds_of_h3 V M hM hinit)
     (Evolution.cauchyPath_of_initial V M hM hcauchy)
 
-theorem limitEvolutionOfH3_convergence (V : ℕ → Evolution T hT) (hpos : 0 < T) (M : ℝ)
-    (hM : ∀ k t, tensorNorm 3 ((V k).velocity t) ≤ M)
-    (hinit : ∀ q, ∃ R : ℝ, ∀ k, tensorNorm q ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ R)
-    (hcauchy : CauchySeq (fun k => ((V k).velocity ⟨0,le_rfl,hT⟩).toLp)) (q : ℕ) :
-    Tendsto (fun k => jetPath (V k).velocity (V k).velocity_continuous q) atTop
-      (𝓝 (jetPath (limitEvolutionOfH3 V hpos M hM hinit hcauchy).velocity
-        (limitEvolutionOfH3 V hpos M hM hinit hcauchy).velocity_continuous q)) :=
-  limitEvolution_jet_convergence V hpos (Evolution.all_order_bounds_of_h3 V M hM hinit)
-    (Evolution.cauchyPath_of_initial V M hM hcauchy) q
 
 theorem limitEvolutionOfH3_initial (V : ℕ → Evolution T hT) (hpos : 0 < T) (M : ℝ)
     (hM : ∀ k t, tensorNorm 3 ((V k).velocity t) ≤ M)

@@ -50,24 +50,5 @@ theorem finite_tail_norm_le (κ B : ℝ) (hκ : 0 ≤ κ) (hB : 0 ≤ B)
       (sum_geometric_Ico_le (κ*B) (mul_nonneg hκ hB) hsmall (N+1) (2*N+3)) hB
     _ = _ := by ring
 
-/-- Includes the source's final k times inverse-frame normalization. -/
-theorem normalized_tail_norm_le (k B C : ℝ) (hk : 0 ≤ k) (hB : 0 ≤ B)
-    (hsmall : B/k ≤ 1/2) (L : E →L[ℝ] F) (hL : ‖L‖ ≤ C) (N : ℕ) (c : ℕ → E)
-    (hc : ∀ n ∈ Ico (N+1) (2*N+3), ‖c n‖ ≤ B^(n+1)) :
-    ‖k • L (∑ n ∈ Ico (N+1) (2*N+3), (k⁻¹)^n • c n)‖ ≤
-      2*C*k*B*(B/k)^(N+1) := by
-  have hC : 0 ≤ C := (norm_nonneg L).trans hL
-  have hq : k⁻¹*B=B/k := by ring
-  have htail := finite_tail_norm_le k⁻¹ B (inv_nonneg.mpr hk) hB
-    (by simpa only [hq] using hsmall) N c hc
-  rw [hq] at htail
-  rw [norm_smul, Real.norm_of_nonneg hk]
-  calc
-    _ ≤ k*(C*‖∑ n ∈ Ico (N+1) (2*N+3), (k⁻¹)^n • c n‖) :=
-      mul_le_mul_of_nonneg_left ((L.le_opNorm _).trans
-        (mul_le_mul_of_nonneg_right hL (norm_nonneg _))) hk
-    _ ≤ k*(C*(2*B*(B/k)^(N+1))) :=
-      mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left htail hC) hk
-    _ = _ := by ring
 
 end EulerPacketTailBound

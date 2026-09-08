@@ -32,27 +32,8 @@ def axialLength (q h : ℝ) : ℝ := q ^ (1 / 2 - h)
 /-- Reynolds number at physical viscosity one. -/
 def reynolds (velocity length : ℝ) : ℝ := velocity * length
 
-theorem core_radial_reynolds {q : ℝ} (hq : 0 < q) (h : ℝ) :
-    reynolds (coreVelocity q h) (radialLength q) = q ^ (-h) := by
-  unfold reynolds coreVelocity radialLength
-  rw [← Real.rpow_add hq]
-  congr 1
-  ring
 
-theorem core_axial_reynolds {q : ℝ} (hq : 0 < q) (h : ℝ) :
-    reynolds (coreVelocity q h) (axialLength q h) = q ^ (-2 * h) := by
-  unfold reynolds coreVelocity axialLength
-  rw [← Real.rpow_add hq]
-  congr 1
-  ring
 
-/-- Dividing the diffusion scale by the inertial scale yields `Q ^ h`. -/
-theorem normalized_viscosity {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
-    Q ^ (-(1 / 2 + h) - 1) / Q ^ (-2 * (1 / 2 + h) - 1 / 2) =
-      Q ^ h := by
-  rw [← Real.rpow_sub hQ]
-  congr 1
-  ring
 
 theorem sqrt_viscosity {Q : ℝ} (hQ : 0 < Q) (h : ℝ) :
     Real.sqrt (Q ^ h) = Q ^ (h / 2) := by
@@ -159,27 +140,6 @@ theorem reciprocal_frequency_bounds {ε : ℝ} (hε : 0 < ε) (hε₁ : ε ≤ 1
 def waveLength (Q h : ℝ) : ℝ :=
   radialLength Q / (carrierFrequency (Q ^ h) : ℝ)
 
-/-- Integer rounding changes the nominal wavelength by a factor in `[1/2,1]`. -/
-theorem wave_length_bounds {Q h : ℝ} (hQ : 0 < Q) (hε : Q ^ h ≤ 1) :
-    Q ^ (1 / 2 + h / 2) / 2 ≤ waveLength Q h ∧
-      waveLength Q h ≤ Q ^ (1 / 2 + h / 2) := by
-  have hp : 0 < Q ^ h := Real.rpow_pos_of_pos hQ h
-  obtain ⟨hl, hu⟩ := reciprocal_frequency_bounds hp hε
-  have hr : 0 ≤ radialLength Q := (Real.rpow_pos_of_pos hQ _).le
-  constructor
-  · calc
-      Q ^ (1 / 2 + h / 2) / 2 =
-          radialLength Q * (Real.sqrt (Q ^ h) / 2) := by
-        rw [← wave_length_power hQ h]
-        ring
-      _ ≤ radialLength Q * (1 / (carrierFrequency (Q ^ h) : ℝ)) :=
-        mul_le_mul_of_nonneg_left hl hr
-      _ = waveLength Q h := by simp [waveLength, div_eq_mul_inv]
-  · calc
-      waveLength Q h = radialLength Q * (1 / (carrierFrequency (Q ^ h) : ℝ)) := by
-        simp [waveLength, div_eq_mul_inv]
-      _ ≤ radialLength Q * Real.sqrt (Q ^ h) := mul_le_mul_of_nonneg_left hu hr
-      _ = Q ^ (1 / 2 + h / 2) := wave_length_power hQ h
 
 /-- The primary velocity includes an arbitrary real envelope coefficient. -/
 def waveVelocity (Q h envelope : ℝ) : ℝ :=
@@ -207,28 +167,6 @@ theorem wave_reynolds_exact {Q : ℝ} (hQ : 0 < Q) (h envelope : ℝ) :
       field_simp
     _ = envelope := by rw [hc, mul_one]
 
-/-- A positive envelope gives quantitative bounds with no extra power of `Q`. -/
-theorem wave_reynolds_bounds {Q h envelope : ℝ} (hQ : 0 < Q)
-    (hε : Q ^ h ≤ 1) (he : 0 ≤ envelope) :
-    envelope / 2 ≤ reynolds (waveVelocity Q h envelope) (waveLength Q h) ∧
-      reynolds (waveVelocity Q h envelope) (waveLength Q h) ≤ envelope := by
-  rw [wave_reynolds_exact hQ]
-  have hp : 0 < Q ^ h := Real.rpow_pos_of_pos hQ h
-  obtain ⟨hl, hu⟩ := carrier_frequency_sqrt_bounds hp
-  have hs : Real.sqrt (Q ^ h) ≤ 1 := Real.sqrt_le_one.mpr hε
-  have hd : 0 < (carrierFrequency (Q ^ h) : ℝ) * Real.sqrt (Q ^ h) := by
-    linarith
-  have hd₂ : (carrierFrequency (Q ^ h) : ℝ) * Real.sqrt (Q ^ h) ≤ 2 := by
-    linarith
-  constructor
-  · apply (le_div_iff₀ hd).mpr
-    nlinarith [mul_nonneg he (sub_nonneg.mpr hd₂)]
-  · apply (div_le_iff₀ hd).mpr
-    nlinarith [mul_nonneg he (sub_nonneg.mpr hl)]
 
-/-- The scaling computation does not imply a lower bound at envelope zeros. -/
-theorem wave_reynolds_zero_envelope (Q h : ℝ) :
-    reynolds (waveVelocity Q h 0) (waveLength Q h) = 0 := by
-  simp [reynolds, waveVelocity]
 
 end NavierStokes.Scaling

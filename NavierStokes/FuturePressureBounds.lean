@@ -454,9 +454,6 @@ theorem Pi_hasDerivAt_y (d : TailData) (y eta : ℝ) :
   rw [heq]
   exact ((primitive_hasDerivAt hf y).const_mul (1 / 2)).const_add _
 
-theorem Pi_deriv_y (d : TailData) (y eta : ℝ) :
-    deriv (fun t => Pi d t eta) y = (1 / 2) * finalAngular d (y, eta) ^ 2 :=
-  (Pi_hasDerivAt_y d y eta).deriv
 
 theorem Pi_eq_axisPressure_add (d : TailData) (y eta : ℝ) :
     Pi d y eta = axisPressure d eta +

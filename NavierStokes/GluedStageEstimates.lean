@@ -540,15 +540,7 @@ variable {B N0 N : ℕ} (R : ActualStageEstimates.RunData B N0)
 
 include R
 
-theorem current_preservesCarriers (j : ℕ) :
-    ActualParticularStageControls.PreservesCarriers
-      (ActualCycleParameters.particularState (ActualCyclePreservation.state B N0 j)) :=
-  ActualParticularCycleData.preservesCarriers (R.invariant j)
 
-theorem current_inputSupport (j : ℕ) :
-    ActualParticularStageControls.InputSupport
-      (ActualCycleParameters.particularState (ActualCyclePreservation.state B N0 j)) :=
-  ActualParticularCycleData.native_inputSupport (R.invariant j)
 
 /-- The source class is derived from the stored residual invariant and
 the actual label/coordinate reindexing. -/
@@ -579,15 +571,6 @@ theorem current_fields_smooth
   ActualValidBandWaves.fields_smooth (R.invariant j) (C j) hGeom
     ActualCoreSupport.refinedCarrier_closed (fun _ _ => subset_rfl) hq
 
-omit R in
-theorem current_label_mem (j n : ℕ) (l : ActualParticularStageControls.Label B N0) :
-    l ∈ (ActualCycleParameters.particularState
-      (ActualCyclePreservation.state B N0 j)).coefficients.labels n ↔
-      (l.2, l.1) ∈ activeLabels standardRegion B N0 n := by
-  have hlabels : (ActualCyclePreservation.state B N0 j).coefficients.labels =
-      activeLabels standardRegion B N0 := ActualCycleCoherence.state_labels B N0 j
-  simpa only [ActualCycleParameters.swap_apply, hlabels] using
-    ActualCycleParameters.particularState_mem (ActualCyclePreservation.state B N0 j) n (l.2, l.1)
 
 omit R in
 theorem gain_le_current_exponent (j : ℕ) :
@@ -724,24 +707,6 @@ noncomputable def actualStageEstimates
   · rw [← hBg]
     exact E.finite_background
 
-theorem actualStageEstimates_ledger
-    (C : ∀ j, ActualCycleCoherence.Coherent (ActualCyclePreservation.state B N0 j))
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) (hqbig : 0 < qbig)
-    (hGeom : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (A Bdirect : ℕ → VelocityField) (P : ℕ → PressureField)
-    (e : ActualRepresentations R M hN W qbig A Bdirect P)
-    (d : ∀ J, ActualCycleResidualBounds.PhysicalData B (N + 1)
-      (ActualCyclePreservation.state B N0 J).state
-      (MixedDiagonalResidual.uncutVelocity A Bdirect J)
-      (DiagonalJetBounds.uncutPrefix P (J + 1))) :
-    let E := actualStageEstimates R M hN W C hq hqbig hGeom A Bdirect P e d
-    E.gain = ActualIterationLedger.gain h ∧
-      E.potentialLoss = PhysicalStageBounds.potentialLoss h h 0 ∧
-      E.directLoss = PhysicalStageBounds.directLoss h 0 ∧
-      E.pressureLoss = PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 ∧
-      E.backgroundLoss = ActualStageEstimates.backgroundLoss 1 (-h) ∧
-      E.residualLoss = ActualCycleResidualBounds.fixedLoss :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 end ActualRun
 

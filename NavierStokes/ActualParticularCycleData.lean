@@ -326,12 +326,6 @@ theorem native_gaussian_class (H : Invariant σ x) (hN : ActualCarrierGeometry.g
     (native_inputSupport H) hN j hj (native_source_class H j hj) β).each (l.2,l.1)
   rwa [← nativeData_eq_data H l j] at hg
 
-theorem native_raw_smooth (H : Invariant σ x) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (l : Index B N0) (j : ℤ) (hj : j ≠ 0) (n : ℕ) :
-    ContDiffOn ℝ ∞ ((nativeData x l j).common.amplitude n)
-      (ActualWaveRegularity.nativeDomain ActualWaveRegularity.particularChart ActualPrimary.standardRegion) :=
-  (ActualWaveRegularityData.particular_full_regular_of_class (native_raw_class H hN l j hj)
-    (fun n _ hz hr => (native_common_boundary H l j n hz hr).1) n).1
 
 theorem native_pressure_smooth (H : Invariant σ x) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     (l : Index B N0) (j : ℤ) (hj : j ≠ 0) (n : ℕ) :
@@ -811,10 +805,6 @@ theorem actual_data (H : Invariant σ x) (T : ActualCyclePeriodicity.Periodic x)
   support := (field_regular H T hN).2.2
   linear := linear_bounds H hN
 
-theorem actual_inputs (H : Invariant σ x) (T : ActualCyclePeriodicity.Periodic x)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (hσ : 1/5 ≤ σ) :
-    ActualParticularMeanGain.Inputs x σ :=
-  (actual_data H T hN hσ).inputs H hN
 
 end Outputs
 

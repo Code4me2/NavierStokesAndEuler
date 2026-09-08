@@ -25,12 +25,5 @@ theorem supported_of_raw_zero
   rw [hθ] at he
   exact hz.trans (he.symm.trans (h t z.1 hzs θ))
 
-theorem raw_zero_of_supported (hSc : IsClosed S)
-    (h : ∀ t : Icc (0 : ℝ) T, G.path t ∈ Supported P Space S hS)
-    (t : Icc (0 : ℝ) T) (x : Space) (hx : x ∉ S) (θ : ℝ) :
-    raw (t,(x,θ)) = 0 := by
-  rw [G.raw_eq]
-  exact EulerCylinderLocalSupport.pointField_zero_outside P S hS G.path G.orbit hSc h t
-    (x,(θ : AddCircle P)) hx
 
 end EulerPacketCylinderField.Field

@@ -165,15 +165,7 @@ theorem copyPotentialCoefficient_invariant (l : SignedLabel B N0) (k : Frequency
     CurlClassBounds.normalCoefficient).map
       (fun z => CurlClassBounds.inverseCarrier ((cutCoefficients l).frequency n) • z)
 
-theorem copyAmplitude_angle (l : SignedLabel B N0) (k : Frequency) (n : ℕ)
-    (x : LocalSignedRequest.Point) (θ : ℝ) :
-    copyAmplitude l k n (x, θ) = copyAmplitude l k n (x, 0) :=
-  CopyAngularInvariance.invariant_eq_zeroSlice (copyAmplitude_invariant l k n) x θ
 
-theorem copyPressureCoefficient_angle (l : SignedLabel B N0) (k : Frequency) (n : ℕ)
-    (x : LocalSignedRequest.Point) (θ : ℝ) :
-    copyPressureCoefficient l k n (x, θ) = copyPressureCoefficient l k n (x, 0) :=
-  CopyAngularInvariance.invariant_eq_zeroSlice (copyPressureCoefficient_invariant l k n) x θ
 
 theorem copyPotentialCoefficient_angle (l : SignedLabel B N0) (k : Frequency) (n : ℕ)
     (x : LocalSignedRequest.Point) (θ : ℝ) :

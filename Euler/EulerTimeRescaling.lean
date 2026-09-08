@@ -75,10 +75,6 @@ def timeMap (ε : ℝ) (hε : 0 < ε) : C(Icc (0 : ℝ) ε,Icc (0 : ℝ) 1) wher
   toFun t := ⟨t/ε,div_nonneg t.property.1 hε.le,(div_le_one hε).mpr t.property.2⟩
   continuous_toFun := (continuous_subtype_val.div_const ε).subtype_mk _
 
-theorem timeMap_initial (ε : ℝ) (hε : 0 < ε) :
-    timeMap ε hε ⟨0,le_rfl,hε.le⟩=⟨0,le_rfl,by norm_num⟩ := by
-  apply Subtype.ext
-  exact zero_div ε
 
 theorem scaled_time_interior (ε : ℝ) (hε : 0 < ε) (t : ℝ) (ht : t ∈ Ioo 0 ε) :
     ε⁻¹*t ∈ Ioo (0 : ℝ) 1 := by

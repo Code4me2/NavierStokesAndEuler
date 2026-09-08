@@ -88,10 +88,6 @@ theorem horizon_lower : baseHorizon S.J S.X/12 < P.parent.T := by
     linarith only [hp]
   · exact (P.time_lower hn).trans_lt P.time_lt
 
-theorem horizon_reciprocal : P.parent.T⁻¹ ≤ 12/baseHorizon S.J S.X := by
-  have hp := div_pos (baseHorizon_pos S.J S.j_one S.x_pos) (by norm_num : (0 : ℝ) < 12)
-  have h := one_div_le_one_div_of_le hp P.horizon_lower.le
-  simpa only [one_div,inv_div] using h
 
 theorem time_pos (hn : n ≠ 0) : 0 < P.time :=
   (div_pos (baseHorizon_pos S.J S.j_one S.x_pos) (by norm_num)).trans_le (P.time_lower hn)
@@ -101,11 +97,6 @@ theorem time_reciprocal (hn : n ≠ 0) : P.time⁻¹ ≤ 12/baseHorizon S.J S.X 
   have h := one_div_le_one_div_of_le hp (P.time_lower hn)
   simpa only [one_div,inv_div] using h
 
-theorem exterior_cap : P.low.Be ≤ initialCoefficientCost+1 := by
-  have h := P.exterior_bound
-  have hs := S.initial_partial_sum n
-  have hd := S.delta_small
-  linarith only [h,hs,hd]
 
 theorem core_cap : P.low.Bc ≤ gradientConstant*S.X^1000+2 := by
   have h := P.core_bound
@@ -113,12 +104,6 @@ theorem core_cap : P.low.Bc ≤ gradientConstant*S.X^1000+2 := by
   have hd := S.delta_small
   linarith only [h,hs,hd]
 
-theorem pressure_cap : P.low.K ≤ initialCoefficientCost+1 := by
-  have h := P.pressure_bound
-  have hs := S.pressure_partial_sum n
-  have hd := S.delta_small
-  have hb := S.first.pressure_small
-  linarith only [h,hs,hd,hb]
 
 theorem source_stage : EulerPacketSourceScaleGuards.StageGuards S.J S.D 4 c S.X
     geometryConstant (fun _ => P.frame.a) (fun _ => P.frame.sigma^2) n :=

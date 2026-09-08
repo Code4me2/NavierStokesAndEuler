@@ -2,7 +2,9 @@ import Euler.PacketLiftedFlowData
 import Euler.PacketWeightedPhysicalErrors
 import Euler.PacketGraphFlowFieldBounds
 import Euler.PacketGraphFlowSupBounds
-import Euler.PacketExactGlobalChoice
+import Euler.PacketExactGlobalShear
+import Euler.PacketExactPressureError
+import Euler.PacketInitializedHessianChoice
 import Euler.PacketInitializedTimeBounds
 import Euler.PacketLiftedSmallness
 

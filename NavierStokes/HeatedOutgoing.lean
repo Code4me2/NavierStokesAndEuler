@@ -740,25 +740,7 @@ theorem E_eventual_heat (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : �
         RadialHeatProfile.spatialProfile (1 + F.data.h) (ParametricHeatTail.diffusion eta) X := by
   rw [E_full_switch F XR c eta X hXR hX (by linarith), OutgoingTail.tailShape_late F.data hlate, mul_one]
 
-theorem E_eventual_heat_carrier (F : Profile) (XR : ℝ) (c : ℝ → Coeff)
-    {q s τ eta : ℝ} (hXR : 0 < XR) (hq : 0 < q) (hs : 0 < s)
-    (hν : ParametricHeatTail.diffusion eta = τ / q)
-    (hlate : 3 ≤ Real.log ((s / q) / switchRadius F XR) + 1 / 5) :
-    q ^ (-HeatTailEdit.exponent F.data.h) * E F XR c (s / q, eta) =
-      (OutgoingDilation.carrierAmplitude F * (switchRadius F XR) ^ HeatTailEdit.exponent F.data.h) *
-        RadialHeatProfile.spatialProfile (1 + F.data.h) τ s := by
-  rw [E_after_switch F XR c eta (s / q) hXR
-    (full_switch_above_radius (OutgoingDilation.switchRadius_pos F XR hXR) (div_pos hs hq) (by linarith))]
-  exact ParametricHeatTail.physicalEdit_eventual_heat_carrier F.data
-    (OutgoingDilation.switchRadius_pos F XR hXR) hq hs hν hlate
 
-theorem Pi_after_switch (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : switchRadius F XR ≤ X) :
-    Pi F XR c (X, eta) = -(1 / 2 : ℝ) * ∫ u in Ioi X,
-      ParametricHeatTail.physicalEdit F.data (switchRadius F XR) eta u ^ 2 / u := by
-  unfold Pi canonicalKernel
-  congr 1
-  exact setIntegral_congr_fun measurableSet_Ioi (fun u hu => by rw [E_after_switch F XR c eta u hXR (hX.trans hu.le)])
 
 namespace CompensationWitness
 

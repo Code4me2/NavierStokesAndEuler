@@ -55,8 +55,6 @@ theorem radial_sub_norm (x y : E) : ‖radial x-radial y‖ ≤ 2*‖x-y‖ := b
       _ ≤ _ := by simpa only [mul_one] using h1
   linarith
 
-theorem radial_lipschitz : LipschitzWith 2 (radial : E → E) :=
-  lipschitzWith_iff_norm_sub_le.mpr radial_sub_norm
 
 def normalized (B : E →L[ℝ] E →L[ℝ] E) (x : E) : E := B (radial x) (radial x)
 

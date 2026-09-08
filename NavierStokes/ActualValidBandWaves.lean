@@ -293,14 +293,6 @@ theorem potential_curl_germ (N n : ℕ) (hn : N ≤ n) {w : SpaceTime}
     SpatialCurl.spatialCurl (potential x N) =ᶠ[𝓝 w] SpatialCurl.spatialCurl (localPotential x n) :=
   SolenoidalDiagonal.spatialCurl_eventuallyEq (potential_germ H C hN hS hcore N n hn hw)
 
-include C hN hS hcore in
-theorem jets_eq (N n : ℕ) (hn : N ≤ n) {w : SpaceTime}
-    (hw : w ∈ ValidDyadicBandCover.band h n) (m : ℕ) :
-    iteratedFDeriv ℝ m (potential x N) w = iteratedFDeriv ℝ m (localPotential x n) w ∧
-      iteratedFDeriv ℝ m (pressure x N) w = iteratedFDeriv ℝ m (localPressure x n) w := by
-  have hc := compatible H C hN hS hcore N
-  exact ⟨ValidDyadicBandCover.field_jet_eq outgoing.data.h_pos outgoing.data.h_lt_half hc.1 hn hw m,
-    ValidDyadicBandCover.field_jet_eq outgoing.data.h_pos outgoing.data.h_lt_half hc.2 hn hw m⟩
 
 include C hN hS hcore in
 theorem active_zero_germs {N : ℕ} {qbig : ℝ} (hqbig : qbig ≤ ChartScales.Q N)

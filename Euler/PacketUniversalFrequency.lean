@@ -29,10 +29,6 @@ theorem universal_frequency_eventually : ∀ᶠ k : ℝ in atTop, UniversalFrequ
     eventually_ge_atTop (fixedCost 6)] with k h hk he hd
   exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1,h.2.2.2.2.1,h.2.2.2.2.2,hk,he,hd⟩
 
-theorem exists_universal_frequency_threshold :
-    ∃ K : ℝ, 1 ≤ K ∧ ∀ k : ℝ, K ≤ k → UniversalFrequency k := by
-  obtain ⟨K,hK⟩ := eventually_atTop.mp universal_frequency_eventually
-  exact ⟨max 1 K,le_max_left _ _,fun k hk => hK k ((le_max_right _ _).trans hk)⟩
 
 namespace UniversalFrequency
 
@@ -42,7 +38,6 @@ include h
 
 theorem one_le : 1 ≤ k := by linarith [h.four]
 theorem pos : 0 < k := zero_lt_one.trans_le h.one_le
-theorem truncation_one : 1 ≤ truncation k := (truncation_bounds k h.one_le).1
 
 end UniversalFrequency
 end EulerPacketSourceFrequency

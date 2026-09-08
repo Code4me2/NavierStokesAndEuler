@@ -570,18 +570,6 @@ theorem actual_native_pressure_bound (x : CycleState (Label B N0))
     (fun l n z hz => (common_control_or_zero x hs hN l j n hz).imp_right And.right) j m
   simpa only [← actual_nativePressure_eq_character x hx] using hb
 
-theorem actual_native_potential_smoothNear (x : CycleState (Label B N0))
-    (hx : ActualParticularStageControls.PreservesCarriers x)
-    (hs : ActualParticularStageControls.InputSupport x)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    {α : ℝ} (j : ℤ) (hj : j ≠ 0)
-    (H : LabelSumBounds.UniformWaveClass nativeStrip ActualParticularStageControls.nativeEnvelope
-      α (ActualParticularStageControls.currentSource x j))
-    (l : Label B N0) (n : ℕ) {z : Native} (hz : z ∈ nativeStrip.domain) :
-    LocalPhysicalCopyBounds.SmoothNear (ActualCurrentParticularPhysical.nativePotential x l j n) z := by
-  rw [actual_nativePotential_eq_character x hx]
-  exact native_modulated_smoothNear (actual_potential_coefficient_class x hx hs hN j hj H)
-    (fun l n z hz => (common_control_or_zero x hs hN l j n hz).imp_right And.left) j l n hz
 
 theorem actual_native_pressure_smoothNear (x : CycleState (Label B N0))
     (hx : ActualParticularStageControls.PreservesCarriers x)
@@ -790,69 +778,6 @@ theorem vector_chart_physical_bound {h a b : ℝ}
     (hm chart _ hdoma f hf _ ha' hfb i hi) (norm_nonneg _) (by norm_num : (0 : ℝ) ≤ 3)
   simpa only [mul_assoc] using hb
 
-/-- A physical estimate for the literal current-band oscillatory formula.
-The scalar phase may already include the rounded carrier. Its positive
-derivatives alone are needed, so no bound on the free angular coordinate
-is introduced. -/
-theorem current_mode_physical_bound {h a b : ℝ}
-    (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (ha : 0 < a)
-    (Δ m : ℕ) (gain degree ρ A B H : ℝ) (p r : ℕ)
-    (hρ : 0 ≤ ρ) (hA : 0 ≤ A) (hB : 1 ≤ B) (hH : 0 ≤ H) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ, 4 ≤ n → ∀ d : ℕ, d ≤ Δ →
-      ∀ w : SpaceTime, PhysicalGraphBounds.scaledRadial n w ∈ PhysicalGraphBounds.annulus a b →
-      |w.1| ≤ 1 → ∀ q : ℝ, 0 < q → q / 2 ≤ ChartScales.Q n → ChartScales.Q n ≤ 2 * q →
-      ∀ (amp : PhysicalWaveSum.LiftPoint → ℂ) (Φ : PhysicalWaveSum.LiftPoint → ℝ) (c : ℝ),
-      |c| ≤ H →
-      LocalPhysicalCopyBounds.SmoothNear amp (PhysicalWaveSum.commonLift h n d w) →
-      LocalPhysicalCopyBounds.SmoothNear Φ (PhysicalWaveSum.commonLift h n d w) →
-      (∀ i ≤ m, ‖iteratedFDeriv ℝ i amp (PhysicalWaveSum.commonLift h n d w)‖ ≤
-        A * ChartScales.Q n ^ gain * ChartScales.S n ^ p) →
-      (∀ i, 1 ≤ i → i ≤ m → ‖iteratedFDeriv ℝ i Φ (PhysicalWaveSum.commonLift h n d w)‖ ≤
-        B * ChartScales.Q n ^ (-ρ) * ChartScales.S n ^ r) →
-      ‖iteratedFDeriv ℝ m (fun y => (ChartScales.Q n ^ (-degree)) •
-        (amp (PhysicalWaveSum.commonLift h n d y) *
-          PhysicalGraphBounds.character c (Φ (PhysicalWaveSum.commonLift h n d y)))) w‖ ≤
-        C * q ^ (gain - currentLoss degree ρ m) := by
-  let A' : ℝ := (2 : ℝ) ^ m * A * (m.factorial : ℝ) * (1 + H) ^ m * B ^ m
-  have hA' : 0 ≤ A' := by dsimp [A']; positivity
-  obtain ⟨C, hC, hbound⟩ := PhysicalMeanJetBounds.common_stripped_physical_bound_local (E := ℂ) (b := b)
-    hh hh1 ha Δ m (gain - degree - ρ * m) (p + r * m : ℕ) A' hA'
-  refine ⟨C, hC, ?_⟩
-  intro n hn d hd w hann ht q hq hlo hhi amp Φ c hc hamp hPhi hab hPhib
-  have hQ := ChartScales.Q_pos n
-  have hS : 1 ≤ ChartScales.S n := PhysicalGraphBounds.S_ge_one (by omega)
-  have hQρ : 1 ≤ ChartScales.Q n ^ (-ρ) :=
-    Real.one_le_rpow_of_pos_of_le_one_of_nonpos hQ (ChartScales.Q_le_one n) (neg_nonpos.mpr hρ)
-  have hBPhi : 1 ≤ B * ChartScales.Q n ^ (-ρ) * ChartScales.S n ^ r :=
-    one_le_mul_of_one_le_of_one_le (one_le_mul_of_one_le_of_one_le hB hQρ) (one_le_pow₀ hS)
-  have hAc : 0 ≤ A * ChartScales.Q n ^ gain * ChartScales.S n ^ p := by positivity
-  have hc' : |c| ≤ 1 + H := hc.trans (by linarith)
-  have hjets := mode_jet_bound_local hamp hPhi m hAc hBPhi (by linarith : 1 ≤ 1 + H) hc' hab hPhib
-  let F : PhysicalWaveSum.LiftPoint → ℂ := fun y => (ChartScales.Q n ^ (-degree)) •
-    (amp y * PhysicalGraphBounds.character c (Φ y))
-  have hnear : LocalPhysicalCopyBounds.SmoothNear F (PhysicalWaveSum.commonLift h n d w) := by
-    obtain ⟨V, hV, hxV, hs⟩ := smoothNear_mode hamp hPhi c
-    exact ⟨V, hV, hxV, hs.const_smul _⟩
-  have hFjets : ∀ i ≤ m, ‖iteratedFDeriv ℝ i F (PhysicalWaveSum.commonLift h n d w)‖ ≤
-      A' * ChartScales.Q n ^ (gain - degree - ρ * m) *
-        ChartScales.S n ^ ((p + r * m : ℕ) : ℝ) := by
-    intro i hi
-    have hcDiff := (smoothNear_mode hamp hPhi c).contDiffAt.of_le (nat_le_infty i)
-    rw [show F = fun y => (ChartScales.Q n ^ (-degree)) •
-      (amp y * PhysicalGraphBounds.character c (Φ y)) from rfl,
-      iteratedFDeriv_const_smul_apply' hcDiff,
-      norm_smul (ChartScales.Q n ^ (-degree) : ℝ)
-        (iteratedFDeriv ℝ i (fun y => amp y * PhysicalGraphBounds.character c (Φ y))
-          (PhysicalWaveSum.commonLift h n d w)),
-      Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ (-degree)).le]
-    exact (mul_le_mul_of_nonneg_left (hjets i hi) (Real.rpow_pos_of_pos hQ (-degree)).le).trans_eq
-      (by simpa only [Real.rpow_natCast, A'] using
-        mode_majorant_factorization hQ (ChartScales.S n) A B H gain degree ρ p r m)
-  have he := hbound n hn d hd w hann ht q hq hlo hhi F hnear hFjets
-  convert! he using 1
-  congr 2
-  unfold currentLoss
-  ring
 
 section ActualPhysicalRates
 

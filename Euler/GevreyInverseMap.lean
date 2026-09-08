@@ -200,21 +200,6 @@ theorem fderiv_eq_inverse_field
   have hv := congrArg (fun B : E →L[ℝ] E => A (Y x) (B v)) he
   simpa only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply, hleft] using hv
 
-/-- Gevrey-two regularity of an actual smooth inverse map with a Gevrey-two
-inverse derivative field. -/
-theorem norm_iteratedFDeriv_inverseMap
-    (X Y : E → E) (A : E → E →L[ℝ] E)
-    (hX : Differentiable ℝ X) (hY : ContDiff ℝ ∞ Y) (hA : ContDiff ℝ ∞ A)
-    (hXY : ∀ x, X (Y x) = x)
-    (hleft : ∀ x v, A x (fderiv ℝ X x v) = v)
-    (C R : ℝ) (hC : 0 ≤ C) (hR : 0 ≤ R)
-    (hAjet : ∀ j y, ‖iteratedFDeriv ℝ j A y‖ ≤ C * R^j * (j.factorial : ℝ)^2)
-    (n : ℕ) (x : E) :
-    ‖iteratedFDeriv ℝ (n+1) Y x‖ ≤
-      C * (inverseMapRadius C R)^n * (n.factorial : ℝ)^2 := by
-  exact norm_iteratedFDeriv_of_fderiv_eq_comp Y A hY hA
-    (fderiv_eq_inverse_field X Y A hX (hY.differentiable (by simp)) hXY hleft)
-    C R hC hR hAjet n x
 
 /-- Pullback by a map satisfying the actual inverse differential equation
 preserves Gevrey two, with an explicit polynomial radius and unchanged

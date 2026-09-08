@@ -691,25 +691,7 @@ theorem eventually_mem_scaleFilter (U : Set SpaceTime) (q : SpaceTime → ℝ) :
     ∀ᶠ z in scaleFilter U q, z ∈ U :=
   (show ∀ᶠ z in Filter.principal U, z ∈ U from by simp).filter_mono inf_le_left
 
-theorem tendsto_scaleFilter (U : Set SpaceTime) (q : SpaceTime → ℝ) :
-    Tendsto q (scaleFilter U q) (𝓝[>] (0 : ℝ)) :=
-  tendsto_comap.mono_left inf_le_right
 
-/-- Domain/scale form of the actual nonlinear stability theorem. All
-asymptotics concern the displayed norms of actual physical derivatives. -/
-theorem residualDifference_flat_at_scale {U : Set SpaceTime} {q : SpaceTime → ℝ}
-    {u w : VelocityField} {p r : PressureField} (hU : IsOpen U)
-    (hq : ∀ z ∈ U, 0 < q z)
-    (hu : ContDiffOn ℝ ∞ u U) (hw : ContDiffOn ℝ ∞ w U)
-    (hp : ContDiffOn ℝ ∞ p U) (hr : ContDiffOn ℝ ∞ r U)
-    (hgrowth : AllJetsGrowth (scaleFilter U q) q u)
-    (hwflat : AllJetsFlat (scaleFilter U q) q w)
-    (hrflat : AllJetsFlat (scaleFilter U q) q r) :
-    AllJetsFlat (scaleFilter U q) q (residualDifference u w p r) := by
-  apply allJetsFlat_residualDifference hU (eventually_mem_scaleFilter U q) _
-    hu hw hp hr hgrowth hwflat hrflat
-  filter_upwards [eventually_mem_scaleFilter U q] with z hz
-  exact ne_of_gt (hq z hz)
 
 end ScaleDomain
 

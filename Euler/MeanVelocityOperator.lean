@@ -124,13 +124,5 @@ def meanVelocitySolver : TimeLp T L2 →L[ℝ] TimeLp T L2 :=
   (meanVelocityMap T hT FInv F₁).comp ((meanDerivatives T hT FInv).subtypeL.comp
     (meanSolver T hT FInv H M0 A L K B hK hB hFInv₀ hH hboundary hsmall))
 
-/-- The actual mean velocity inverse has an explicit finite-time bound. -/
-theorem meanVelocitySolver_norm (f : TimeLp T L2) :
-    ‖meanVelocitySolver T hT FInv F₁ H M0 A L K B hK hB hFInv₀ hH hboundary hsmall f‖ ≤
-      (1+‖F₁‖*‖FInv‖*Real.sqrt (T^2/2))*(2*T*‖f‖) := by
-  apply (meanVelocityMap_apply_norm T hT FInv F₁
-    (meanSolver T hT FInv H M0 A L K B hK hB hFInv₀ hH hboundary hsmall f : TimeLp T L2)).trans
-  exact mul_le_mul_of_nonneg_left
-    (meanSolver_norm T hT FInv H M0 A L K B hK hB hFInv₀ hH hboundary hsmall f) (by positivity)
 
 end EulerMeanVariationalInverse

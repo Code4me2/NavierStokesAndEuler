@@ -282,20 +282,6 @@ theorem p1_equation {p : Point} (hp : p ∈ D.carrier) (hX : 0 < p.1)
         (1 + logSlope P p) * P.angularLag h p) / NaturalAxisData.L h p.2 := by ring
     _ = _ := by rw [hQ]
 
-theorem ns_equation {p : Point} (hp : p ∈ D.carrier) (hX : p.1 ≠ 0) (h : ℝ) :
-    p.1 * deriv (fun x => ns P h (x, p.2)) p.1 + ns P h p =
-      P.axialSource h p / NaturalAxisData.L h p.2 := by
-  have hN := P.axialLag_equation h hp hX
-  have hNd := P.axialLag_hasDerivAt h hp hX
-  have hd := hNd.div_const (NaturalAxisData.L h p.2)
-  rw [show deriv (fun x => ns P h (x, p.2)) p.1 =
-    deriv (fun x => P.axialLag h (x, p.2)) p.1 / NaturalAxisData.L h p.2 by
-      simpa only [ns, ← hNd.deriv] using hd.deriv]
-  unfold ns
-  calc
-    _ = (p.1 * deriv (fun x => P.axialLag h (x, p.2)) p.1 + P.axialLag h p) /
-        NaturalAxisData.L h p.2 := by ring
-    _ = _ := by rw [hN]
 
 theorem lower_comparison_preserves {X a L b q : ℝ}
     (ha : 0 < a) (haX : a ≤ X) (hL : 0 < L) (hq : 0 ≤ q) (hqa : b * L ≤ q * a) :

@@ -61,8 +61,6 @@ theorem continuous_average {h : Space → ℝ} (hh : Continuous h) (i : Fin 3) :
   continuous_parametric_integral_of_continuous
     (f := fun x s => h (replaceCoord i x s)) (hh.comp (continuous_replaceCoord i)) isCompact_Icc
 
-theorem average_nonneg {h : Space → ℝ} (hh : ∀ x, 0 ≤ h x) (i : Fin 3) (x : Space) :
-    0 ≤ average i h x := integral_nonneg fun s => hh (replaceCoord i x s)
 
 theorem average_mono_on_curve {h k : Space → ℝ} (hh : Continuous h) (hk : Continuous k)
     (i : Fin 3) (x : Space)

@@ -39,34 +39,8 @@ theorem Budget.pressureTower_pointField (t : Icc (0 : ℝ) T) :
   (B.pressureTower P).pointField_unique t (B.pointPressure P t)
     (Continuous.uncurry_left t (B.pointPressure_joint_continuous P)) (B.pointPressure_ae P t)
 
-theorem Budget.graphCorrectionWordPath_ae (n : ℕ) (w : Fin n → Fin 4)
-    (t : Icc (0 : ℝ) T) :
-    (B.graphCorrectionWordPath P θ hθ n w t : Vector3 → Vector3) =ᵐ[volume]
-      fun x => iteratedFieldDerivative P w (B.pointField P t) (x,θ x) := by
-  simpa only [Budget.graphCorrectionWordPath,B.correctionTower_pointField P t] using
-    (B.fieldTower P).canonicalGraphWordPath_ae θ hθ n w t
 
-theorem Budget.graphPressureWordPath_ae (n : ℕ) (w : Fin n → Fin 4)
-    (t : Icc (0 : ℝ) T) :
-    (B.graphPressureWordPath P θ hθ n w t : Vector3 → Vector3) =ᵐ[volume]
-      fun x => iteratedFieldDerivative P w (B.pointPressure P t) (x,θ x) := by
-  simpa only [Budget.graphPressureWordPath,B.pressureTower_pointField P t] using
-    (B.pressureTower P).canonicalGraphWordPath_ae θ hθ n w t
 
-theorem Budget.graphCorrectionWordPath_hasDerivAt (n : ℕ) (w : Fin n → Fin 4)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT.le (B.graphCorrectionWordPath P θ hθ n w))
-      (B.graphTimeDerivativeWordPath P θ hθ n w ⟨t,ht.1.le,ht.2.le⟩) t :=
-  (B.fieldTower P).canonicalGraphWordPath_hasDerivAt θ hθ (B.timeDerivativeTower P)
-    hT.le n w (n+6) (by omega) t ht
-    (B.fieldTower_hasDerivAt_timeDerivativeTower P (n+6) (by omega) t ht)
 
-theorem Budget.graphCorrectionWordPath_initial (n : ℕ) (w : Fin n → Fin 4) :
-    B.graphCorrectionWordPath P θ hθ n w ⟨0,le_rfl,hT.le⟩ = 0 := by
-  have h := (B.fieldTower P).canonicalGraphWordPath_norm_sq_le θ hθ n w ⟨0,le_rfl,hT.le⟩
-  rw [B.fieldTower_initial P (n+1),norm_zero,zero_pow (by norm_num : (2 : ℕ) ≠ 0),mul_zero] at h
-  apply norm_eq_zero.mp
-  change ‖(B.fieldTower P).canonicalGraphWordPath θ hθ n w ⟨0,le_rfl,hT.le⟩‖ = 0
-  nlinarith [norm_nonneg ((B.fieldTower P).canonicalGraphWordPath θ hθ n w ⟨0,le_rfl,hT.le⟩)]
 
 end EulerAllOrderDriftCorrection

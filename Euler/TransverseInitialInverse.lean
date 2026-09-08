@@ -35,9 +35,6 @@ def initialCoordinateOperator : TimeLp T E →L[ℝ] TimeLp T U :=
   initialProductDerivative T hT (frameLeftInversePath T Q c hc hQ)
     (frameLeftInverseDerivativePath T Q Q₁ c hc hQ)
 
-theorem initialCoordinateOperator_apply (u : TimeLp T E) :
-    initialCoordinateOperator T hT Q Q₁ c hc hQ u =
-      initialCoordinateDerivative T hT Q Q₁ c hc hQ u := rfl
 
 include hd in
 theorem initialCoordinates_product (u : TimeLp T U) (t : Icc (0 : ℝ) T) :

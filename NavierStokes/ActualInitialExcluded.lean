@@ -795,13 +795,6 @@ theorem nativeGaussian_source_support (l : SignedLabel B N0) :
     simpa only [div_eq_mul_inv, inv_one, mul_one, one_mul, mul_comm, mul_assoc, mul_left_comm] using
       (div_le_iff₀ hL).mp hhi
 
-theorem nativeGaussian_source_tsupport (l : SignedLabel B N0) :
-    tsupport (nativeGaussian l) ⊆
-      ActualGaussianCoverage.actualSourceCore ActualPrimary.certificate ActualPrimary.modulation
-        (ActualPrimary.choice B N0).prepared l.2 :=
-  closure_minimal (nativeGaussian_source_support l)
-    (ActualGaussianCoverage.actualSourceCore_closed ActualPrimary.certificate ActualPrimary.modulation
-      (ActualPrimary.choice B N0).prepared l.2)
 
 end InitialLabelSupport
 
@@ -993,11 +986,6 @@ theorem gaussianCoefficient_zero (l : SignedLabel B N0) (n : ℕ) (i : Fin 3) (j
   simp only [ParticularWaveAssembly.pair_apply, hz, Pi.zero_apply, zero_div]
   split_ifs <;> simp
 
-theorem gaussianCoefficient_support (l : SignedLabel B N0) (n : ℕ) (i : Fin 3) :
-    HarmonicSourceSupport.NonzeroSupported (labelCarrier l n)
-      (ErrorHarmonics.conjugatePair 1 (fun y => chartGaussian l n (y, 0) i)) := by
-  intro j _ x hx
-  exact gaussianCoefficient_zero l n i j hx
 
 end ActualGaussianIdentification
 
@@ -1114,11 +1102,6 @@ theorem gaussianField_window (l : SignedLabel B N0) (n : ℕ) {x : ActualPrimary
   exact (ActualPrimaryCovariance.piece_support (l.2,l.1) n x.1 hx x.2
     (subset_tsupport _ (chartGaussian_cut_support l n hc))).1
 
-theorem gaussianField_zero_germ (l : SignedLabel B N0) (n : ℕ) (i : Fin 3)
-    {x : ActualPrimary.FullPoint} (hx : x.1 ∉ labelCarrier l n) :
-    (fun y => gaussianField l n y i) =ᶠ[𝓝 x] fun _ => 0 := by
-  filter_upwards [chartGaussian_zero_germ l n hx] with y hy
-  simp only [gaussianField_eq, hy, Pi.zero_apply, zero_mul, Complex.zero_re]
 
 theorem gaussianField_all_gains_of_carrier
     (hc : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∃ r : ℝ,
@@ -1351,10 +1334,6 @@ theorem gaussianField_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
   gaussianField_all_gains_of_carrier
     (ActualPhaseJetBounds.carrier_jets_cut (B := B) (N0 := N0)) β i
 
-theorem initialGaussian_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
-    MemClass gaussianStrip (fun _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun n x => initialGaussian B N0 n x i) :=
-  initialGaussian_class_of_fields β i (gaussianField_all_gains B N0 β i)
 
 theorem initialGaussian_unweighted (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
     UnweightedClass gaussianStrip β (fun n x => initialGaussian B N0 n x i) :=

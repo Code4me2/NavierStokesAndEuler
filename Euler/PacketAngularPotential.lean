@@ -18,12 +18,6 @@ theorem potential_hasDerivAt (P : ℝ) (m : Space) (A : ℝ → Space)
     HasDerivAt (potential P m A) (potentialMultiplier m (A θ)) θ :=
   primitive_hasDerivAt P _ ((potentialMultiplier m).continuous.comp hA) θ
 
-/-- The actual angular derivative recovers A after crossing with m. -/
-theorem cross_deriv_potential (P : ℝ) (m : Space) (hm : m ≠ 0) (A : ℝ → Space)
-    (hA : Continuous A) (htan : ∀ θ, ⟪m,A θ⟫_ℝ=0) (θ : ℝ) :
-    cross m (deriv (potential P m A) θ)=A θ := by
-  rw [(potential_hasDerivAt P m A hA θ).deriv]
-  exact cross_potentialMultiplier m (A θ) hm (htan θ)
 
 theorem potential_periodic (P : ℝ) (m : Space) (A : ℝ → Space)
     (hA : Continuous A) (hper : Function.Periodic A P)
@@ -35,21 +29,12 @@ theorem potential_periodic (P : ℝ) (m : Space) (A : ℝ → Space)
     rw [(potentialMultiplier m).intervalIntegral_comp_comm (hA.intervalIntegrable 0 P),
       hmean, map_zero]
 
-theorem potential_mean_zero (P : ℝ) (hP : P ≠ 0) (m : Space) (A : ℝ → Space)
-    (hA : Continuous A) : (∫ θ in 0..P, potential P m A θ)=0 :=
-  primitive_mean_zero P hP _ ((potentialMultiplier m).continuous.comp hA)
 
 theorem potential_zero (P : ℝ) (m : Space) :
     potential P m (fun _ => 0)=fun _ => 0 := by
   funext θ
   simp [potential, primitive, rawPrimitive]
 
-/-- The angular construction creates no values at labels where the whole input vanishes. -/
-theorem potential_vanishes (P : ℝ) (m : Space) (A : ℝ → Space) (hA : ∀ θ, A θ=0) :
-    ∀ θ, potential P m A θ=0 := by
-  have h : A=fun _ => 0 := funext hA
-  rw [h, potential_zero]
-  exact fun _ => rfl
 
 theorem potential_bound (P M : ℝ) (hP : 0 < P) (hM : 0 ≤ M) (m : Space)
     (A : ℝ → Space) (hA : ∀ θ ∈ Icc 0 P, ‖A θ‖ ≤ M) (θ : ℝ) (hθ : θ ∈ Icc 0 P) :

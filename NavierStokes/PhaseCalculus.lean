@@ -215,13 +215,6 @@ theorem harmonic_theta_periodic (k : ℝ) (j m : ℤ) (ε p pz x0 : ℝ)
   intro θ
   exact harmonic_angularShift_two_pi k j m ε p pz x0 F G (s, (θ, v)) hkp
 
-/-- The complex harmonic is jointly smooth whenever the base frequencies are. -/
-theorem contDiff_harmonic {n : WithTop ℕ∞} (k : ℝ) (j : ℤ) (ε p pz x0 : ℝ)
-    (F G : Slow → ℝ) (hF : ContDiff ℝ n F) (hG : ContDiff ℝ n G) :
-    ContDiff ℝ n (harmonic k j ε p pz x0 F G) := by
-  unfold harmonic
-  exact ((Complex.ofRealCLM.contDiff.comp
-    (contDiff_const.mul (contDiff_phase ε p pz x0 F G hF hG))).mul contDiff_const).cexp
 
 /-- The actual cylindrical normal is jointly `C∞` away from the axis. -/
 theorem contDiffAt_phaseNormal (ε p pz x0 : ℝ) (F G : Slow → ℝ) (q : Slot)
@@ -296,15 +289,5 @@ theorem phaseNormal_norm_lower (ε p pz x0 B s Kθ Kz δ : ℝ)
   rw [norm_sub_rev] at htriangle
   linarith
 
-/-- Half-scale closeness ensures the denominator in the projected pulse
-equation is nonzero for this actual phase normal. -/
-theorem phaseNormal_ne_zero_of_close (ε p pz x0 B s Kθ Kz : ℝ)
-    (F G : Slow → ℝ) (q : Slot) (hB : 0 < B) (hK : Kθ ^ 2 + Kz ^ 2 = 1)
-    (hclose : ‖phaseNormal ε p pz x0 F G q - referenceNormal B s Kθ Kz‖ ≤ B / 2) :
-    phaseNormal ε p pz x0 F G q ≠ 0 := by
-  have hlow := phaseNormal_norm_lower ε p pz x0 B s Kθ Kz (B / 2) F G q hK hclose
-  intro hz
-  rw [hz, norm_zero] at hlow
-  linarith
 
 end NavierStokes.PhaseCalculus

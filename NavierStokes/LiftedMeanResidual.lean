@@ -508,8 +508,6 @@ omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem avg_neg (f : D × ℝ → ℝ) (x : D) : avg (fun p => -f p) x = -avg f x := by
   simp only [avg, intervalIntegral.integral_neg, neg_div]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem avg_zero (x : D) : avg (fun _ : D × ℝ => 0) x = 0 := by simp [avg]
 
 theorem Regular.scalarLaplacian_smooth {U : Set D} {R : D → ℝ} {Vr Vz Vt : D → D}
     (G : Regular U R Vr Vz Vt) {f : D × ℝ → ℝ}
@@ -1169,19 +1167,6 @@ theorem avg_virtualDivergence (c : CorrectionState.Context D) (n : ℕ) (x : D) 
     avg (fun p => virtualDivergence c n p i) x = virtualDivergence c n (x, 0) i :=
   congrFun (avg_lift (fun y => virtualDivergence c n (y, 0) i)) x
 
-/-- The actual full residual averages to equation (32) plus exactly the
-stored base error. -/
-theorem angularMean_fullResidual {U : Set D} {c : CorrectionState.Context D} {u : CorrectionState.State D}
-    (H : MeanHypotheses U c u) (n : ℕ) {x : D} (hx : x ∈ U) (i : Fin 3) :
-    angularMeanVector (fullResidual c u) n x i = u.meanResidual c n x i := by
-  have hv : Continuous (fun θ : ℝ => virtualDivergence c n (x, θ) i) := by
-    change Continuous (fun _ : ℝ => virtualDivergence c n (x, 0) i)
-    exact continuous_const
-  change avg (fun p => nonlinearField c u n p i + virtualDivergence c n p i + u.errors.base n p i) x = _
-  rw [avg_add ((H.nonlinearField_continuous n hx i).add hv) (H.base_error_continuous n x hx i),
-    avg_add (H.nonlinearField_continuous n hx i) hv,
-    H.avg_nonlinearField n hx i, avg_virtualDivergence, meanExpression_state H n hx i]
-  rfl
 
 /-- No Gaussian or alias term is silently discarded: the exact angular mean
 of the explicitly subtracted total is removed on both sides. -/
@@ -1215,15 +1200,6 @@ theorem meanGoodResidual_errors (c : CorrectionState.Context D) (u : CorrectionS
   rw [avg_add (hb.add hg) ha, avg_add hb hg]
   ring
 
-theorem angularMean_fullGoodResidual_errors {U : Set D} {c : CorrectionState.Context D} {u : CorrectionState.State D}
-    (H : MeanHypotheses U c u) (n : ℕ) {x : D} (hx : x ∈ U) (i : Fin 3)
-    (hg : Continuous (fun θ : ℝ => u.errors.gaussian n (x, θ) i))
-    (ha : Continuous (fun θ : ℝ => u.errors.aliasError n (x, θ) i)) :
-    angularMeanVector (fullGoodResidual c u) n x i = u.reducedMeanResidual c n x i -
-      CorrectionState.angularAverage (fun k p => u.errors.gaussian k p i) n x -
-      CorrectionState.angularAverage (fun k p => u.errors.aliasError k p i) n x := by
-  rw [angularMean_fullGoodResidual H n hx i]
-  exact meanGoodResidual_errors c u n x i (H.base_error_continuous n x hx i) hg ha
 
 section CanonicalGraph
 
@@ -1238,17 +1214,6 @@ theorem graphOperators_profile_smooth (r : CorrectionState.ReconstructionData)
   change ContDiffOn ℝ ∞ (fun x : PressureStream.Lift S => r.exponent * x.1 ^ (r.exponent - 1)) U
   exact contDiffOn_const.mul (contDiffOn_fst.rpow_const_of_ne (fun x hx => (hpos x hx).ne'))
 
-/-- Direct instantiation by the genuine graph operators used by the state. -/
-theorem graphOperators_regular (r : CorrectionState.ReconstructionData)
-    (epsilon fast : ℕ → ℝ) (axial slowTime : S × PressureStream.Plane) (temporal : PressureStream.Plane)
-    {U : Set (PressureStream.Lift S)} (hU : IsOpen U) (hpos : ∀ x ∈ U, 0 < x.1) (n : ℕ) :
-    let o := CorrectionState.graphOperators r epsilon fast axial slowTime temporal
-    Regular U o.radius (radialVector o n) (axialVector o n) (temporalVector o n) := by
-  let o := CorrectionState.graphOperators r epsilon fast axial slowTime temporal
-  have hp : ContDiffOn ℝ ∞ o.radialProfile U :=
-    graphOperators_profile_smooth r epsilon fast axial slowTime temporal hpos
-  refine ⟨hU, contDiffOn_fst, fun x hx => (hpos x hx).ne', ?_, contDiffOn_const, contDiffOn_const⟩
-  exact contDiffOn_const.add ((hp.const_smul (o.radialFrequency n)).smul contDiffOn_const)
 
 end CanonicalGraph
 

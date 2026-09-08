@@ -87,15 +87,6 @@ theorem laplacianOperator_value {q : ℕ} (u : SobolevSpace period (q+2)) :
     fin_cases j <;> rfl
   rw [hw]
 
-/-- The actual complete-Sobolev Laplacian has norm at most four. -/
-theorem laplacianOperator_bound {q : ℕ} (u : SobolevSpace period (q+2)) :
-    ‖laplacianOperator period q u‖ ≤ 4 * ‖u‖ := by
-  rw [laplacianOperator_apply]
-  apply (norm_sum_le _ _).trans
-  calc
-    _ ≤ ∑ _i : Fin 4, ‖u‖ := Finset.sum_le_sum fun i _ =>
-      (derivativeOperator_bound period i _).trans (derivativeOperator_bound period i u)
-    _ = _ := by simp
 
 /-- The actual Laplacian commutes with every coordinate derivative. -/
 theorem laplacian_derivative {q : ℕ} (i : Fin 4) (u : SobolevSpace period (q+3)) :

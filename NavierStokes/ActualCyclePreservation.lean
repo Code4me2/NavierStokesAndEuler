@@ -601,19 +601,6 @@ noncomputable def stepData_of_waves (H : Invariant σ x)
 
 end Assembly
 
-/-- In a band with no compatible common cover, the actual incoming
-source has a zero germ throughout the complete slow cylinder. -/
-theorem residualSource_zero_germ_of_not_ordered {B N0 : ℕ} {σ : ℝ}
-    {x : CycleState (Index B N0)} (H : Invariant σ x)
-    (l : Index B N0) (n : ℕ) (hn : ¬ActualWaveRegularityData.Ordered l n)
-    (j : ℤ) {z : Point} (hz : z ∈ (G).domain) :
-    ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l)
-      (x.coefficients.aliasCoefficients l) j n =ᶠ[𝓝 z] fun _ => 0 := by
-  apply HarmonicSourceSupport.residualSource_zero_germ_on _ _ _ _ _
-    (G).domain_open (ActualCoreSupport.refinedCarrier_closed l) (H.inputSupport l) j n hz
-  intro hc
-  exact hn (ActualCycleParameters.activeLabel_index n l (core_active l n hz hc))
 
 section SignedEquations
 variable {B N0 : ℕ} {σ : ℝ} {x : CycleState (Index B N0)}
@@ -661,22 +648,6 @@ noncomputable def nativeParticularData {B N0 : ℕ} (x : CycleState (Index B N0)
     (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
     (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j
 
-theorem nativeParticular_inactive {B N0 : ℕ} {σ : ℝ} {x : CycleState (Index B N0)}
-    (H : Invariant σ x) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (l : Index B N0) (n : ℕ) (hn : ¬ActualWaveRegularityData.Ordered l n) (j : ℤ)
-    {z : ActualParticularStageControls.Native}
-    (hz : z ∈ ActualWaveRegularity.nativeDomain ActualWaveRegularity.particularChart
-      ActualPrimary.standardRegion) :
-    (nativeParticularData x l j).common.amplitude n =ᶠ[𝓝 z] fun _ => 0 := by
-  have hp : z.1.1 ∈ ActualCarrierTransport.parameterDomain := hz.1
-  apply ActualCycleAssembly.common_raw_zero_germ_of_factorization l
-    (ActualCoreSupport.refinedCarrier l) (ActualCycleAssembly.refinedSlowCore l)
-    (ActualCoreSupport.refinedCarrier_closed l) (ActualCycleAssembly.refined_carrier_factorization hN l)
-    (ActualPrimary.commonContext B) x.state (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) (H.inputSupport l) j n hp
-  intro hs
-  have hc := (ActualCycleAssembly.refined_carrier_factorization hN l n z.1.1 hp z.2).mpr hs
-  exact hn (ActualCycleParameters.activeLabel_index n l (core_active l n hp hc))
 
 
 section Factory
@@ -842,10 +813,6 @@ theorem state_coherent (B N0 : ℕ)
     ActualCycleCoherence.Coherent (state B N0 j) :=
   (state_runInvariant B N0 hN j).coherent
 
-theorem state_periodic (B N0 : ℕ)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j : ℕ) :
-    ActualCyclePeriodicity.Periodic (state B N0 j) :=
-  (state_runInvariant B N0 hN j).periodic
 
 theorem state_particularData (B N0 : ℕ)
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j : ℕ) :
@@ -879,27 +846,7 @@ noncomputable def state_stepData (B N0 : ℕ)
     (ActualIterationLedger.sigma_admissible j) (state_labels B N0 j)
     (state_particularData B N0 hN j)
 
-theorem state_result (B N0 : ℕ)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j : ℕ) :
-    CorrectionAnalyticStep.StepResult ActualInitialization.geometry ActualPrimary.h
-      (CommonWindow.index ActualPrimary.h) ActualInitialization.axial
-      (fun l => ActualParticularStageControls.canonicalParameters (l.2,l.1))
-      ActualSignedStageControls.parameters ActualPrimary.rankData (ActualPrimary.commonContext B)
-      (state B N0 j) ActualInitialization.tangentBlock ActualInitialization.envelope
-      ActualCoreSupport.refinedCarrier (σ := ActualIterationLedger.sigma j) («κ» := ChartScales.kappa) :=
-  stepResult_of_particular (state_invariant B N0 hN j) hN
-    (ActualIterationLedger.sigma_admissible j) (state_labels B N0 j)
-    (state_particularData B N0 hN j)
 
-theorem state_afterTemporal_debt (B N0 : ℕ)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j : ℕ) :
-    UnweightedClass ActualInitialization.slowStrip
-      (1+ActualIterationLedger.sigma j-2*ChartScales.kappa)
-      (debt (ActualPrimary.commonContext B)
-        (ActualIntermediateDebtBounds.postTemporal (state B N0 j))) :=
-  afterTemporal_debt_of_particular (state_invariant B N0 hN j) hN
-    (ActualIterationLedger.sigma_admissible j) (state_labels B N0 j)
-    (state_particularData B N0 hN j)
 
 theorem state_wave_transport (B N0 : ℕ)
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j n m k : ℕ)
@@ -911,22 +858,6 @@ theorem state_wave_transport (B N0 : ℕ)
   wave_transport_of_particular (state_runInvariant B N0 hN j) hN
     (ActualIterationLedger.sigma_admissible j) (state_particularData B N0 hN j) n m k hi
 
-theorem state_covariance_moving (B N0 : ℕ)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (j : ℕ) :
-    (∀ i k, GaugeMomentBalances.MovingField ActualPrimary.standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b
-      (SignedMeanGain.covarianceIncrement (state B N0 j).state.oscillation
-        ((ActualCycleParameters.fixedParameters B N0).particularVelocity (state B N0 j).coefficients
-          (ActualPrimary.commonContext B) (state B N0 j).state) i k)) ∧
-    (∀ i k, GaugeMomentBalances.MovingField ActualPrimary.standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b
-      (SignedMeanGain.covarianceIncrement
-        ((ActualCycleParameters.fixedParameters B N0).afterParticular (state B N0 j).coefficients
-          (ActualPrimary.commonContext B) (state B N0 j).state).oscillation
-        ((ActualCycleParameters.fixedParameters B N0).signedVelocity (state B N0 j).coefficients
-          (ActualPrimary.commonContext B) (state B N0 j).state) i k)) :=
-  (state_waveData B N0 hN j).covariance_moving (state_invariant B N0 hN j).oscillationSmooth
-    (state_invariant B N0 hN j).oscillationPeriodic
 
 
 end NavierStokes.ActualCyclePreservation

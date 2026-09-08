@@ -55,10 +55,6 @@ def wordPathOperator {s n : ℕ} (h : n ≤ s) (w : Fin n → Fin 4) (T : ℝ) :
     C(Icc (0 : ℝ) T,SobolevSpace period s) →L[ℝ] C(Icc (0 : ℝ) T,LiftL2 period) :=
   (wordOperator period ⟨⟨n,Nat.lt_succ_of_le h⟩,w⟩).compLeftContinuous ℝ (Icc (0 : ℝ) T)
 
-/-- The derivative path is its literal derivative coordinate at each time. -/
-theorem wordPathOperator_apply {s n : ℕ} (h : n ≤ s) (w : Fin n → Fin 4) (T : ℝ)
-    (u : C(Icc (0 : ℝ) T,SobolevSpace period s)) (t : Icc (0 : ℝ) T) :
-    wordPathOperator period h w T u t = word period (u t) h w := rfl
 
 /-- The exact strong-derivative interpolation inequality also controls the uniform time-path norm. -/
 theorem wordPath_square_bound {s n : ℕ} (h : n+2 ≤ s) (w : Fin n → Fin 4) (i : Fin 4)
@@ -79,12 +75,6 @@ theorem wordPath_square_bound {s n : ℕ} (h : n+2 ≤ s) (w : Fin n → Fin 4) 
   rw [Real.sq_sqrt hA] at hs
   exact hs
 
-/-- Actual derivative-coordinate paths preserve subtraction. -/
-theorem wordPath_sub {s n : ℕ} (h : n ≤ s) (w : Fin n → Fin 4) (T : ℝ)
-    (u v : C(Icc (0 : ℝ) T,SobolevSpace period s)) :
-    wordPathOperator period h w T (u-v) = wordPathOperator period h w T u-wordPathOperator period h w T v := by
-  ext t
-  rfl
 
 /-- The actual difference interpolation estimate depends only on the two given uniform state bounds. -/
 theorem wordPath_difference_square_bound {s n : ℕ} (h : n+2 ≤ s) (w : Fin n → Fin 4) (i : Fin 4)

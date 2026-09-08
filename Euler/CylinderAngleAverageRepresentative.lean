@@ -22,8 +22,6 @@ theorem average_full_translation (a : LiftDomain P) (u : LiftL2 P) :
 def sobolevAverage (q : ℕ) : SobolevSpace P q →L[ℝ] SobolevSpace P q :=
   liftOperator P q (average P) (average_full_translation P)
 
-theorem sobolevAverage_norm (q : ℕ) : ‖sobolevAverage P q‖ ≤ 1 :=
-  (norm_liftOperator_le P q (average P) (average_full_translation P)).trans (average_norm P)
 
 theorem sobolevAngleCurve_continuous {q : ℕ} (u : SobolevSpace P q) :
     Continuous (fun s : ℝ => sobolevTranslation P q (EulerCylinderAnglePrimitive.angleShift P s) u) :=

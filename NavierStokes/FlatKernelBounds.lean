@@ -374,11 +374,6 @@ theorem kernel_contDiff_x {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b)
   simp_rw [kernel_eq_expr]
   exact contDiff_const.mul ((kernelExpr j).contDiff_eval hb ht)
 
-theorem kernel_iteratedDeriv_contDiff_x {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b)
-    (c : ℝ) (j n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
-    ContDiff ℝ ∞ (iteratedDeriv n (fun x => kernel c j b x t)) := by
-  rw [iteratedDeriv_kernel hb c j n ht]
-  exact contDiff_const.mul (((Expr.diff^[n]) (kernelExpr j)).contDiff_eval hb ht)
 
 theorem unweighted_iteratedDeriv_bound {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b)
     (j n : ℕ) {R : ℝ} (hR : 0 ≤ R) :

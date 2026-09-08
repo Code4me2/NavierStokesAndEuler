@@ -91,24 +91,5 @@ theorem scaledVelocity_firstTwo_hasDerivWithinAt (B M : Space →L[ℝ] Space)
     rw [scaledVelocityRhs_second _ _ _ _ _ hthird] at h
     exact h
 
-/-- The flux identity is valid with the actual one-sided endpoint derivatives
-of packet paths, as well as in the interior. -/
-theorem velocity_scalar_flux_within
-    {β t u₁ v₁ : ℝ} {U V : ℝ → ℝ} {S : Set ℝ}
-    (hU : HasDerivWithinAt U u₁ S t) (hV : HasDerivWithinAt V v₁ S t) :
-    HasDerivWithinAt V (-U t + (v₁ + U t)) S t ∧
-    HasDerivWithinAt (fun s => (1 + (β * s ^ 2) ^ 2) * (-U s))
-      (2 * (1 - β * (β * t ^ 2)) * V t + (1 + (β * t ^ 2) ^ 2) *
-        (-u₁ + idealVelocityFirst β t (U t) (V t))) S t := by
-  refine ⟨hV.congr_deriv (by ring), ?_⟩
-  have hD : HasDerivAt (fun s : ℝ => 1 + (β * s ^ 2) ^ 2) (4 * β ^ 2 * t ^ 3) t := by
-    convert! ((((hasDerivAt_id t).pow 2).const_mul β).pow 2).const_add 1 using 1
-    simp only [Pi.pow_apply, id_eq]
-    ring
-  apply (hD.hasDerivWithinAt.mul hU.neg).congr_deriv
-  have hden : 1 + (β * t ^ 2) ^ 2 ≠ 0 := by positivity
-  dsimp [idealVelocityFirst]
-  field_simp
-  ring
 
 end EulerPacketMovingFrame

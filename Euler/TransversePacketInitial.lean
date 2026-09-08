@@ -67,10 +67,5 @@ theorem vector_zero_initial (x : Space) (θ : ℝ) :
 
 end Forcing
 
-theorem highSolve_zero_initial (D : Data U) (raw : VectorField)
-    (h : Nonempty (Forcing P D raw)) (x : Space) (θ : ℝ) :
-    (highSolve P D (InitialData.zero P D) raw).1 (0,(x,θ)) = 0 := by
-  rw [highSolve_of_admissible D (InitialData.zero P D) raw h]
-  exact (Classical.choice h).vector_zero_initial x θ
 
 end EulerTransversePacketProvider

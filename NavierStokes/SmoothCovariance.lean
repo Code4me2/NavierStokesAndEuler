@@ -201,18 +201,6 @@ theorem contDiffOn_signed_coefficients {a b sm sp m t : E → ℝ}
     rcases hpos x hx with ⟨hap, hbp, hsmp, hspp⟩
     exact ne_of_gt (by positivity)
 
-theorem contDiffOn_signed_amplitudes {a b sm sp m t : E → ℝ}
-    (ha : ContDiffOn ℝ ∞ a s) (hb : ContDiffOn ℝ ∞ b s)
-    (hsm : ContDiffOn ℝ ∞ sm s) (hsp : ContDiffOn ℝ ∞ sp s)
-    (hm : ContDiffOn ℝ ∞ m s) (ht : ContDiffOn ℝ ∞ t s)
-    (hpos : ∀ x ∈ s, 0 < a x ∧ 0 < b x ∧ 0 < sm x ∧ 0 < sp x)
-    (hcone : ∀ x ∈ s, |a x * t x| < b x * m x) (i : Fin 2) :
-    ContDiffOn ℝ ∞
-      (fun x => Covariance.amplitudes (a x) (b x) (sm x) (sp x) (m x) (t x) i) s := by
-  apply (contDiffOn_signed_coefficients ha hb hsm hsp hm ht hpos i).sqrt
-  intro x hx
-  rcases hpos x hx with ⟨hap, hbp, hsmp, hspp⟩
-  exact ne_of_gt (Covariance.coefficients_pos hap hbp hsmp hspp (hcone x hx) i)
 
 end Smooth
 
@@ -306,29 +294,7 @@ theorem isOpen_strictConeRegion : IsOpen strictConeRegion := by
   exact (isOpen_lt continuous_const ((hn 0).fun_mul hd)).inter
     (isOpen_lt continuous_const ((hn 1).fun_mul hd))
 
-/-- The solution map itself is C-infinity on the open set of admissible
-matrix-target data, without a prechosen parameterization. -/
-theorem contDiffOn_universal_weights :
-    ContDiffOn ℝ ∞ (fun z : Datum => weights z.1 z.2) strictConeRegion := by
-  apply contDiffOn_pi.mpr
-  apply contDiffOn_weights
-  · intro i j
-    exact ((contDiff_apply_apply ℝ ℝ i j).comp contDiff_fst).contDiffOn
-  · intro i
-    exact ((contDiff_apply ℝ ℝ i).comp contDiff_snd).contDiffOn
-  · intro z hz
-    exact StrictCone.det_ne_zero hz
 
-/-- The positive square-root solution is C-infinity on that same open set. -/
-theorem contDiffOn_universal_amplitudes :
-    ContDiffOn ℝ ∞ (fun z : Datum => amplitudes z.1 z.2) strictConeRegion := by
-  apply contDiffOn_amplitude_vector
-  · intro i j
-    exact ((contDiff_apply_apply ℝ ℝ i j).comp contDiff_fst).contDiffOn
-  · intro i
-    exact ((contDiff_apply ℝ ℝ i).comp contDiff_snd).contDiffOn
-  · intro z hz
-    exact hz
 
 /-- A single positive perturbation radius works for every datum in a compact
 subset of the strict cone. The perturbed data may be arbitrary actual matrices. -/

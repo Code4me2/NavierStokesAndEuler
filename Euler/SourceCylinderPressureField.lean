@@ -133,16 +133,6 @@ theorem pressureField_tsupport_subset (t : Icc (0 : ℝ) T) :
   exact hx (pressureField_zero_outside P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm
     hf₀ ha₀zero t x.1 hn x.2)
 
-theorem pressureField_hasCompactSupport (t : Icc (0 : ℝ) T) :
-    HasCompactSupport (pressureField P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero t) := by
-  have hcompact : IsCompact (spatialSet P S) := by
-    have he : spatialSet P S = S ×ˢ (univ : Set (AddCircle P)) := by
-      ext x
-      simp only [spatialSet,mem_preimage,mem_prod,mem_univ,and_true]
-    rw [he]
-    exact hSc.prod isCompact_univ
-  exact hcompact.of_isClosed_subset (isClosed_tsupport _)
-    (pressureField_tsupport_subset P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero t)
 
 /-- Equation (11) with the actual angular derivative of the normalized pressure. -/
 theorem field_pressure_equation

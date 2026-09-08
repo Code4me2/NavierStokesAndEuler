@@ -348,12 +348,6 @@ theorem reference_phi_value {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFa
   rw [v.value .chi hη]
   rfl
 
-theorem reference_phi_lower {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFamily h j σ P0)
-    (hσ : 0 < σ) (p : entranceSet) :
-    1 / 4 < sourceJets v.epsilon_pos (referencePair v) p 0 := by
-  rw [reference_phi_value v p]
-  exact AxisSeries.profile_gt_quarter _ _ (NaturalAxisData.chi_bounds h j hσ _).1
-    (NaturalAxisData.chi_bounds h j hσ _).2.le p.property.1.1 p.property.1.2
 
 theorem reference_phiY_zero {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFamily h j σ P0)
     (p : entranceSet) (hchi : NaturalAxisData.chi h j σ p.val.2 = 0) :
@@ -1376,29 +1370,6 @@ theorem EntranceProfile.regular_lag_coordinates {h j σ Λ C : ℝ} {P0 : ℝ �
   unfold p2
   rw [hn, ← mul_div_assoc, div_div]
 
-/-- The strict entrance inequality also holds when written entirely in
-terms of the source-integral stocks, with no independent stock hypotheses. -/
-theorem EntranceProfile.regular_cone_at_four {h j σ Λ C : ℝ} {P0 : ℝ → ℝ}
-    {d : AnalyticInputs h j σ P0} (F : EntranceProfile d Λ C)
-    (hsmall : NaturalAxisData.SmallParameters h j) (hΛ : 0 < Λ)
-    {η : ℝ} (hη : η ∈ Icc (-1 : ℝ) 1) :
-    let p : ℝ × ℝ := (4 / Λ, η)
-    let q := p.1 * regularAngularLag h F.profile.family.f F.profile.family.U
-      F.profile.family.Ubar p / NaturalAxisData.L h η
-    let n := p.1 * regularAxialLag h F.profile.family.U F.profile.family.Ubar
-      F.profile.family.Pi p / (NaturalAxisData.L h η * angularVelocity F.profile.family.f p)
-    9 / 4 < q + n ^ 2 / q := by
-  dsimp only
-  have hpoint : rescalePoint Λ (4 / Λ, η) ∈ entranceSet := by
-    have heq : Λ * (4 / Λ) = 4 := by field_simp
-    change (Λ * (4 / Λ), η) ∈ entranceSet
-    rw [heq]
-    exact ⟨by norm_num, hη⟩
-  obtain ⟨hq, hn⟩ := F.regular_lag_coordinates hsmall hΛ hpoint (by positivity)
-  change p1 F.profile.family.f (4 / Λ, η) = _ at hq
-  change p2 F.profile.family.f F.profile.family.U (4 / Λ, η) = _ at hn
-  rw [← hq, ← hn]
-  exact F.cone_margin η hη
 
 end NavierStokes.NaturalEntrance
 

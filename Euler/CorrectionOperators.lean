@@ -30,11 +30,6 @@ def linearize (B : X →L[ℝ] X →L[ℝ] Y) (C : X →L[ℝ] Y) (z : X) : X �
 @[simp] theorem linearize_apply (B : X →L[ℝ] X →L[ℝ] Y) (C : X →L[ℝ] Y) (z e : X) :
     linearize B C z e = B z e + B e z + C e := rfl
 
-/-- The correction source is exactly the difference of the full quadratic equations. -/
-theorem quadratic_correction_identity (B : X →L[ℝ] X →L[ℝ] Y) (C : X →L[ℝ] Y) (z e : X) :
-    C (z+e) + B (z+e) (z+e) - (C z + B z z) = linearize B C z e + B e e := by
-  simp only [linearize_apply, map_add, add_apply]
-  abel
 
 /-- Continuous data give continuous linearized operators. -/
 theorem linearize_continuous {T : Type*} [TopologicalSpace T]

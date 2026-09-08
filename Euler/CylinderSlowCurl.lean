@@ -98,12 +98,6 @@ theorem field_formula (t : K) (x : LiftDomain P) :
         (hD.clm_comp (continuous_const.clm_comp ((G t).continuous.comp continuous_fst)))
   exact congrFun he x
 
-theorem field_eq_liftedSlowCurl (F : K → Space → Space ≃L[ℝ] Space)
-    (hF : ∀ t y, G t y = (F t y).symm.toContinuousLinearMap) (t : K) :
-    field P G hG p hp t = liftedSlowCurl P (F t) (pointField P p hp t) := by
-  funext x
-  rw [field_formula, hF]
-  rfl
 
 
 end EulerCylinderSlowCurl

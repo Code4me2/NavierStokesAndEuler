@@ -59,21 +59,5 @@ theorem gradientSpace_has_graph_potential (κ k : ℝ) (hκ : k * κ = 1) (m : V
   simpa only [P, localFieldLift, Prod.fst_zero, Prod.snd_zero, zero_add,
     graphMap_apply, cylinderGraph] using hq x
 
-/-- All-order coefficient and forcing jets yield an actual smooth scalar potential for the coercive graph pressure. -/
-theorem coercive_pressure_has_graph_potential (A : SmoothCoefficient period) (f : LiftL2 period)
-    (K : ∀ s : ℕ, CoefficientJet period EulerCylinderSobolev.standardDirection s A)
-    (J : ∀ s : ℕ, SpatialJet period EulerCylinderSobolev.standardDirection s f)
-    (κ k : ℝ) (hκ : k * κ = 1) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v, v⟫_ℝ) :
-    ∃ (g : LiftDomain period → Vector3) (q : Vector3 → ℝ),
-      (∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) ∧
-      (A.pressure κ m c hc hpos f : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g ∧
-      ContDiff ℝ ∞ q ∧ ∀ x, gradient q x = κ • g (cylinderGraph period k m x) := by
-  obtain ⟨g, hgs, hrep⟩ := exists_smooth_pressure period A f K J κ m c hc hpos
-  have hp : A.pressure κ m c hc hpos f ∈ gradientSpace period κ m :=
-    liftedPressure_mem period κ m A.coefficient A.measurable A.bound A.norm_bound c hc hpos f
-  obtain ⟨q, hqs, hq⟩ := gradientSpace_has_graph_potential period κ k hκ m
-    (A.pressure κ m c hc hpos f) hp g hrep hgs
-  exact ⟨g, q, hgs, hrep, hqs, hq⟩
 
 end EulerGraphPressurePotential

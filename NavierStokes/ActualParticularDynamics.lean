@@ -1536,12 +1536,6 @@ theorem cycle_modeSolenoidal {x : CycleState (Label B N0)} (Hc : PreservesCarrie
     StateReindex.context_roundtrip] at hh ⊢
   exact hh
 
-theorem actualUpdate_eq_canonical {x : CycleState (Label B N0)} (Hc : PreservesCarriers x)
-    (l : Label B N0) (N : ℕ) : actualUpdate x l N =
-      (canonicalParameters l).updateBlock associatedStrip (assembly x l).context (assembly x l).state
-        (assembly x l).carrierBlock (assembly x l).gaussianInput (assembly x l).aliasInput N := by
-  unfold actualUpdate
-  rw [parameters_eq_canonical x l (carrier_frequency Hc l)]
 
 
 theorem linearBlockField_pull {D E : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]

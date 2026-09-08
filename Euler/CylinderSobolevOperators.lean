@@ -117,22 +117,6 @@ theorem translations_commute (a b : LiftDomain period) (f : LiftL2 period) :
 def sobolevTranslation (q : ℕ) (a : LiftDomain period) : SobolevSpace period q →L[ℝ] SobolevSpace period q :=
   liftOperator period q (translation period a).toContinuousLinearMap (translations_commute period a)
 
-/-- Cylinder translation preserves the complete Sobolev norm exactly. -/
-theorem sobolevTranslation_norm {q : ℕ} (a : LiftDomain period) (u : SobolevSpace period q) :
-    ‖sobolevTranslation period q a u‖ = ‖u‖ := by
-  apply le_antisymm
-  · change ‖(sobolevTranslation period q a u).val‖ ≤ ‖u.val‖
-    apply (pi_norm_le_iff_of_nonneg (norm_nonneg u.val)).mpr
-    intro w
-    change ‖translation period a (u.val w)‖ ≤ ‖u.val‖
-    rw [(translation period a).norm_map]
-    exact norm_le_pi_norm u.val w
-  · change ‖u.val‖ ≤ ‖(sobolevTranslation period q a u).val‖
-    apply (pi_norm_le_iff_of_nonneg (norm_nonneg _)).mpr
-    intro w
-    have h := norm_le_pi_norm (sobolevTranslation period q a u).val w
-    change ‖translation period a (u.val w)‖ ≤ _ at h
-    simpa only [(translation period a).norm_map] using h
 
 /-- The translation action is strongly continuous in the complete Sobolev topology. -/
 theorem sobolevTranslation_continuous {q : ℕ} (u : SobolevSpace period q) :

@@ -135,23 +135,7 @@ theorem summable_term (I : Window) {ε R : ℝ} (hε : 0 < ε)
     {p : ℝ × ℝ} (hp : |p.1| ≤ R) : Summable (fun n => term I ε A k m n p) :=
   .of_norm_bounded (summable_majorant hR hR20 k m) (fun n => term_bound I hε hR A k m n hp)
 
-theorem term_continuous (I : Window) (ε : ℝ) (A : AxisSpace I ε) (k m n : ℕ) :
-    Continuous (term I ε A k m n) := by
-  exact (continuous_const.mul (continuous_fst.pow (n - k))).mul
-    ((continuous_jet I (weight ε) A.1 n m).comp continuous_snd)
 
-/-- Uniform convergence of every mixed derivative series on every strictly
-smaller closed radial interval, uniformly over the parameter interval. In
-fact the clamped coefficient extension gives uniformity over all real `η`. -/
-theorem mixedSeries_uniform (I : Window) {ε R : ℝ} (hε : 0 < ε) (hR20 : R < 20)
-    (A : AxisSpace I ε) (k m : ℕ) :
-    TendstoUniformlyOn
-      (fun N (p : ℝ × ℝ) => ∑ n ∈ Finset.range N, term I ε A k m n p)
-      (mixedSeries I ε A k m) atTop {p : ℝ × ℝ | |p.1| ≤ R} := by
-  have hmax : max 1 R < 20 := max_lt (by norm_num) hR20
-  exact tendstoUniformlyOn_tsum_nat (summable_majorant (le_max_left 1 R) hmax k m)
-    (fun n p hp => term_bound I hε (le_max_left 1 R) A k m n
-      (hp.trans (le_max_right 1 R)))
 
 def strip (I : Window) (R : ℝ) : Set (ℝ × ℝ) :=
   Ioo (-R) R ×ˢ Ioo I.left I.right
@@ -435,11 +419,6 @@ theorem mixedSeries_sub_bound (I : Window) {ε R : ℝ} (hε : 0 < ε)
       rw [mixedSeries_sub I hε A B k m (hp.trans_lt hR20)]
     _ ≤ _ := mixedSeries_bound I hε hR hR20 (A - B) k m hp
 
-theorem profile_smooth_radius (I : Window) {ε R : ℝ} (hε : 0 < ε) (hR20 : R < 20)
-    (A : AxisSpace I ε) : ContDiffOn ℝ ∞ (profile I ε A) (strip I R) := by
-  apply (profile_smooth I hε A).mono
-  intro p hp
-  exact ⟨⟨(neg_lt_neg hR20).trans hp.1.1, hp.1.2.trans hR20⟩, hp.2⟩
 
 theorem coefficient_iteratedDeriv (I : Window) (ε : ℝ) (A : AxisSpace I ε)
     (n m : ℕ) {η : ℝ} (hη : η ∈ Ioo I.left I.right) :
@@ -454,18 +433,6 @@ theorem coefficient_iteratedDeriv (I : Window) (ε : ℝ) (A : AxisSpace I ε)
         exact ih hx
       rw [heq.deriv_eq, (hasDerivAt_jet_interior I (weight ε) A n m hη).deriv]
 
-/-- Termwise mixed differentiation stated entirely using ordinary
-derivatives of the actual coefficient functions. -/
-theorem mixed_derivative_profile_coefficients (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) (k m : ℕ) {Y η : ℝ}
-    (hY : Y ∈ Ioo (-20 : ℝ) 20) (hη : η ∈ Ioo I.left I.right) :
-    iteratedDeriv m (fun x => iteratedDeriv k (fun y => profile I ε A (y, x)) Y) η =
-      ∑' n : ℕ, (n.descFactorial k : ℝ) * Y ^ (n - k) *
-        iteratedDeriv m (coefficient I (weight ε) A n) η := by
-  rw [mixed_derivative_profile I hε A k m hY hη]
-  apply tsum_congr
-  intro n
-  rw [coefficient_iteratedDeriv I ε A n m hη]
 
 /-- A window larger than the target interval, with arbitrarily small margin. -/
 def enlargedUnitWindow (δ : ℝ) (hδ : 0 < δ) : Window where
@@ -478,13 +445,5 @@ theorem unitInterval_in_enlargedWindow {δ : ℝ} (hδ : 0 < δ) :
   intro x hx
   constructor <;> dsimp [enlargedUnitWindow] <;> linarith [hx.1, hx.2]
 
-/-- In particular both endpoints of the target interval `[-1,1]` have
-ordinary open-neighborhood smoothness; no endpoint extension is assumed. -/
-theorem profile_smooth_target {δ ε : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
-    (A : AxisSpace (enlargedUnitWindow δ hδ) ε) {Y η : ℝ}
-    (hY : Y ∈ Ioo (-20 : ℝ) 20) (hη : η ∈ Icc (-1 : ℝ) 1) :
-    ContDiffAt ℝ ∞ (profile (enlargedUnitWindow δ hδ) ε A) (Y, η) := by
-  rw [← mixedSeries_zero]
-  exact mixedSeries_smooth _ hε A 0 0 ⟨hY, unitInterval_in_enlargedWindow hδ hη⟩
 
 end NavierStokes.AxisEvaluation

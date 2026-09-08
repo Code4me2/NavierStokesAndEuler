@@ -88,18 +88,6 @@ theorem energyHistory_eq_neg_future {F : Profile} {XR C B : ℝ}
   unfold energyHistory
   linarith
 
-theorem square_integrable_after_switch {F : Profile} {XR C : ℝ}
-    (w : CompensationWitness F XR C) {η X : ℝ}
-    (hη : η ∈ HeatedOutgoing.parameterDomain) (hX : OutgoingDilation.switchRadius F XR ≤ X) :
-    IntegrableOn (fun u => HeatedOutgoing.E F XR w.coefficients (u,η)^2) (Ioi X) := by
-  have hXp : 0 < X := (OutgoingDilation.switchRadius_pos F XR w.radius_pos).trans_le hX
-  have hi := ((w.energy_integrable η hη).mono_set (Ioi_subset_Ioi hXp.le)).const_mul (-2)
-  apply IntegrableOn.congr_fun hi _ measurableSet_Ioi
-  intro u hu
-  dsimp only
-  rw [HeatedOutgoing.energyDensity,
-    HeatedOutgoing.U_after_switch F XR η u w.radius_pos (hX.trans hu.le)]
-  ring
 
 theorem energyHistory_eq_square_future {F : Profile} {XR C B : ℝ}
     (hF : OutgoingProfile.Specification F B) (w : CompensationWitness F XR C)
@@ -119,13 +107,6 @@ theorem energyHistory_eq_square_future {F : Profile} {XR C B : ℝ}
   rw [he,integral_neg,integral_div]
   ring
 
-theorem transport_histories_zero_after_switch {F : Profile} {XR C : ℝ}
-    (w : CompensationWitness F XR C) (η : ℝ) {X : ℝ}
-    (hX : OutgoingDilation.switchRadius F XR ≤ X) :
-    HeatedOutgoing.U F XR (X,η) = 0 ∧ HeatedOutgoing.M F XR η X = 0 ∧
-      HeatedOutgoing.J F XR w.coefficients η X = 0 :=
-  w.after_pulse η X ((OutgoingDilation.switchRadius_pos F XR w.radius_pos).trans_le hX)
-    ((HeatedOutgoing.pulseEnd_le_switch F XR w.radius_pos).trans hX)
 
 noncomputable def normalization (F : Profile) (XR : ℝ) : ℝ :=
   TerminalPressure.releasedNormalization F.data (OutgoingDilation.switchRadius F XR)

@@ -66,12 +66,6 @@ theorem normalize_norm_le (g : C(K,ℝ)) (hg : ∀ t, 0 < g t)
     _ ≤ (g t)⁻¹ * (D*g t) := mul_le_mul_of_nonneg_left (hf t) (inv_nonneg.mpr (hg t).le)
     _ = D := by field_simp [(hg t).ne']
 
-/-- Scalar normalization commutes with every coefficient multiplier. -/
-theorem normalize_multiplier (g : C(K,ℝ)) (hg : ∀ t, 0 < g t)
-    (A : C(K,E →L[ℝ] E)) (f : C(K,E)) :
-    normalize g hg (multiplier A f) = multiplier A (normalize g hg f) := by
-  ext t
-  simp only [normalize_apply, multiplier_apply, map_smul]
 
 /-- Scalar weighting commutes with every coefficient multiplier. -/
 theorem weight_multiplier (g : C(K,ℝ)) (A : C(K,E →L[ℝ] E)) (f : C(K,E)) :

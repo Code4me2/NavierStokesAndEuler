@@ -85,36 +85,6 @@ the correction index. The direct field pays no curl derivative. -/
 noncomputable def backgroundLoss (LA LB LAzero LBzero : ℕ → ℝ) (m : ℕ) : ℝ :=
   max (max (LA (m + 1)) (LAzero (m + 1))) (max (LB m) (LBzero m))
 
-theorem mixed_background {l : Filter SpaceTime} {q : SpaceTime → ℝ}
-    {A B : ℕ → VelocityField} {g LA LB LAzero LBzero : ℕ → ℝ}
-    {CA CB : ℕ → ℕ → ℝ} {U S : Set SpaceTime}
-    (hU : IsOpen U) (hlU : ∀ᶠ x in l, x ∈ U)
-    (hS : ∀ᶠ x in l, x ∈ S) (hq : ∀ᶠ x in l, 0 < q x ∧ q x ≤ 1)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U)
-    (hB : ∀ j, ContDiffOn ℝ ∞ (B j) U)
-    (hrawA : CutStageEstimates.RawStageBounds q A g LA CA (fun _ _ => 0) S)
-    (hrawB : CutStageEstimates.RawStageBounds q B g LB CB (fun _ _ => 0) S)
-    (hg : ∀ j, 1 ≤ j → 0 ≤ g j)
-    (hzeroA : ∀ m, JetRate l q (A 0) m (-LAzero m))
-    (hzeroB : ∀ m, JetRate l q (B 0) m (-LBzero m)) (J m : ℕ) :
-    JetRate l q (MixedDiagonalResidual.uncutVelocity A B J) m
-      (-backgroundLoss LA LB LAzero LBzero m) := by
-  have hpA := prefix_background hU hlU hS hq hA hrawA hg hzeroA J (m + 1)
-  have hpB := prefix_background hU hlU hS hq hB hrawB hg hzeroB J m
-  have hsA : ContDiffOn ℝ ∞ (DiagonalJetBounds.uncutPrefix A (J + 1)) U :=
-    ContDiffOn.sum (fun j _ => hA j)
-  have hsB : ContDiffOn ℝ ∞ (DiagonalJetBounds.uncutPrefix B (J + 1)) U :=
-    ContDiffOn.sum (fun j _ => hB j)
-  have hc := (hpA.spatialCurl hU hlU hsA).weaken hq
-    (neg_le_neg (le_max_left (max (LA (m + 1)) (LAzero (m + 1))) (max (LB m) (LBzero m))))
-  have hb := hpB.weaken hq
-    (neg_le_neg (le_max_right (max (LA (m + 1)) (LAzero (m + 1))) (max (LB m) (LBzero m))))
-  have hsCurl : ContDiffOn ℝ ∞
-      (SpatialCurl.spatialCurl (DiagonalJetBounds.uncutPrefix A (J + 1))) U := by
-    intro x hx
-    exact (SpatialCurl.contDiffAt_spatialCurl (hsA.contDiffAt (hU.mem_nhds hx))
-      (by simp)).contDiffWithinAt
-  exact hc.add hb hU hlU hsCurl hsB
 
 noncomputable def stageVelocity (A B : ℕ → VelocityField) (j : ℕ) : VelocityField :=
   fun x => SpatialCurl.spatialCurl (A j) x + B j x

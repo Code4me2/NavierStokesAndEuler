@@ -31,17 +31,6 @@ theorem hasDerivAt_apply (A : ℝ → E →L[ℝ] F) (u : ℝ → E) (t : ℝ) (
   exact (hfirst.add ha.tendsto_slope).congr'
     (Filter.Eventually.of_forall (fun s => (slope_apply A u t s).symm))
 
-/-- The same product rule for a one-sided derivative. -/
-theorem hasDerivWithinAt_apply (A : ℝ → E →L[ℝ] F) (u : ℝ → E) (t : ℝ) (s : Set ℝ) (u' : E) (a' : F)
-    (hu : HasDerivWithinAt u u' s t) (ha : HasDerivWithinAt (fun r => A r (u t)) a' s t)
-    (hc : ContinuousAt (fun p : ℝ × E => A p.1 p.2) (t, u')) :
-    HasDerivWithinAt (fun r => A r (u r)) (A t u' + a') s t := by
-  apply hasDerivWithinAt_iff_tendsto_slope.mpr
-  have hfirst : Tendsto (fun r => A r (slope u t r)) (𝓝[s \ {t}] t) (𝓝 (A t u')) :=
-    hc.tendsto.comp ((show Tendsto (fun r : ℝ => r) (𝓝[s \ {t}] t) (𝓝 t) from nhdsWithin_le_nhds).prodMk_nhds
-      (hasDerivWithinAt_iff_tendsto_slope.mp hu))
-  exact (hfirst.add (hasDerivWithinAt_iff_tendsto_slope.mp ha)).congr'
-    (Filter.Eventually.of_forall (fun r => (slope_apply A u t r).symm))
 
 end EulerStrongOperatorDerivative
 

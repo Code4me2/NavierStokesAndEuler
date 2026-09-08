@@ -45,13 +45,6 @@ theorem fourier_pderivTest (ψ : ComplexTest) (d ξ : Space) :
   erw [innerSL_apply_apply]
   ring
 
-theorem fourier_partialTest (ψ : ComplexTest) (k : Fin 3) (ξ : Space) :
-    (FourierTransform.fourierCLE ℂ ComplexTest (partialTest k ψ)) ξ =
-      (2 * Real.pi * Complex.I) * (ξ k : ℂ) *
-        (FourierTransform.fourierCLE ℂ ComplexTest ψ) ξ := by
-  simpa only [partialTest, NavierStokes.ProblemStatement.coordinateVector,
-    EuclideanSpace.inner_single_right, RCLike.conj_to_real, one_mul] using
-    fourier_pderivTest ψ (NavierStokes.ProblemStatement.coordinateVector k) ξ
 
 /-- An integrable first Fourier moment permits differentiation of the inverse
 Fourier integral in every direction. -/
@@ -280,24 +273,5 @@ theorem pressurePair_laplacianCLM (i j : Fin 3) (g : Space → ℝ) (ψ : Comple
       -(∫ x : Space, (g x : ℂ) * (partialCLM i (partialCLM j ψ)) x) := by
   simp only [pressurePair, rieszTest_laplacianCLM, mul_neg, integral_neg]
 
-/-- The actual smooth Riesz test function satisfies the classical Poisson identity. -/
-theorem laplacian_rieszTest (i j : Fin 3) (ψ : ComplexTest) (x : Space) :
-    (∑ k : Fin 3, Comparison.partialD k
-      (Comparison.partialD k (rieszTest i j ψ)) x) =
-      -Comparison.partialD i (Comparison.partialD j (fun y => ψ y)) x := by
-  have hLap : laplacianCLM ψ =
-      ∑ k : Fin 3, partialTest k (partialTest k ψ) := by
-    simp [laplacianCLM, partialCLM, partialTest, Fin.sum_univ_three]
-  calc
-    _ = ∑ k : Fin 3, rieszTest i j (partialTest k (partialTest k ψ)) x := by
-      apply Finset.sum_congr rfl
-      intro k _
-      rw [partial_rieszTest_eq, partial_rieszTest]
-    _ = rieszTest i j (laplacianCLM ψ) x := by
-      rw [hLap, rieszTest_sum]
-      simp only [Finset.sum_apply]
-    _ = _ := by
-      rw [rieszTest_laplacianCLM]
-      rfl
 
 end NavierStokesR3.RieszTestOperators

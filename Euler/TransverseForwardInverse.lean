@@ -90,12 +90,6 @@ theorem coordinate_equation (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : 
   rw [map_add, map_smul, gram_inverse_apply, gram_inverse_apply, map_sub, map_smul]
   module
 
-/-- Physical velocity is tangent at every time because it lies in the frame range. -/
-theorem velocity_tangent (m : Icc (0 : ℝ) T → E)
-    (hTangent : ∀ t v, ⟪m t,Q t v⟫_ℝ = 0)
-    (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) :
-    ⟪m t,velocity T hT Q Q₁ c hc hQ U f a₀ t⟫_ℝ = 0 :=
-  hTangent t _
 
 /-- The physical product-rule expression is its actual every-time derivative. -/
 theorem velocity_hasDerivWithinAt
@@ -115,18 +109,6 @@ def pressureCoefficient (M : Icc (0 : ℝ) T → E →L[ℝ] E) (m : Icc (0 : �
     (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) : ℝ :=
   (⟪m t,f t⟫_ℝ - 2*⟪m t,M t (velocity T hT Q Q₁ c hc hQ U f a₀ t)⟫_ℝ) / ‖m t‖^2
 
-/-- The actual forward velocity and explicit normal pressure residual satisfy
-source equation (11) at every time. -/
-theorem velocity_balance (M : Icc (0 : ℝ) T → E →L[ℝ] E) (m : Icc (0 : ℝ) T → E)
-    (hm : ∀ t, m t ≠ 0) (hTangent : ∀ t v, ⟪m t,Q t v⟫_ℝ = 0)
-    (hRange : ∀ t η, ⟪m t,η⟫_ℝ = 0 → ∃ v, Q t v = η)
-    (hflow : ∀ t, Q₁ t = (M t).comp (Q t))
-    (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) :
-    velocityDerivative T hT Q Q₁ c hc hQ U f a₀ t +
-      M t (velocity T hT Q Q₁ c hc hQ U f a₀ t) +
-      pressureCoefficient T hT Q Q₁ c hc hQ U M m f a₀ t • m t = f t :=
-  physical_velocity_balance (Q t) (Q₁ t) (M t) (m t) (hm t) (hTangent t) (hRange t)
-    (hflow t) _ _ (f t) (coordinate_equation T hT Q Q₁ c hc hQ U f a₀ t)
 
 /-- The full coordinate solution depends bounded-linearly on initial datum and forcing. -/
 def coordinatesOperator : (V × C(Icc (0 : ℝ) T,E)) →L[ℝ] C(Icc (0 : ℝ) T,V) :=
@@ -139,9 +121,6 @@ theorem coordinatesOperator_apply (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) :
     coordinatesOperator T hT Q Q₁ c hc hQ U (a₀,f) = coordinates T hT Q Q₁ c hc hQ U f a₀ :=
   (U.solution_eq_operators _ _).symm
 
-/-- The physical forward inverse is an actual bounded linear map in its data. -/
-def velocityOperator : (V × C(Icc (0 : ℝ) T,E)) →L[ℝ] C(Icc (0 : ℝ) T,E) :=
-  (multiplier Q).comp (coordinatesOperator T hT Q Q₁ c hc hQ U)
 
 /-- Zero data give the zero path; this is the pointwise support-preservation mechanism. -/
 theorem velocity_zero : velocity T hT Q Q₁ c hc hQ U 0 0 = 0 := by

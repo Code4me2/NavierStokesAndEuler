@@ -68,16 +68,12 @@ theorem moment_analyticAt (n : ℕ) (s : ℝ) : AnalyticAt ℝ (moment n) s := b
   exact (analyticAt_iteratedDeriv_mgf (mem_interior_integrableExpSet s) n).div
     analyticAt_const period_ne_zero
 
-theorem moment_contDiff (n : ℕ) : ContDiff ℝ (∞ : WithTop ℕ∞) (moment n) :=
-  contDiff_iff_contDiffAt.mpr (fun s => (moment_analyticAt n s).contDiffAt)
 
 theorem normalizer_analyticAt (s : ℝ) : AnalyticAt ℝ expNormalizer s := by
   have heq : expNormalizer = moment 0 := funext normalizer_eq_moment
   rw [heq]
   exact moment_analyticAt 0 s
 
-theorem normalizer_contDiff : ContDiff ℝ (∞ : WithTop ℕ∞) expNormalizer :=
-  contDiff_iff_contDiffAt.mpr (fun s => (normalizer_analyticAt s).contDiffAt)
 
 theorem normalizer_hasDerivAt (s : ℝ) : HasDerivAt expNormalizer (moment 1 s) s := by
   have heq : expNormalizer = moment 0 := funext normalizer_eq_moment
@@ -158,9 +154,6 @@ theorem baseVariance_eq_integral (s : ℝ) :
 theorem baseVariance_zero : baseVariance 0 = 0 := by
   simp [baseVariance, expNormalizer_zero]
 
-theorem baseVariance_nonneg (s : ℝ) : 0 ≤ baseVariance s := by
-  rw [baseVariance_eq_integral]
-  exact angularMean_nonneg _ (fun θ => sq_nonneg _)
 
 theorem baseVariance_add_one_pos (s : ℝ) : 0 < baseVariance s + 1 := by
   have hp := div_pos (expNormalizer_pos (2 * s)) (sq_pos_of_pos (expNormalizer_pos s))
@@ -499,12 +492,6 @@ theorem baseVariance_unbounded (B : ℝ) : ∃ s : ℝ, 0 ≤ s ∧ B ≤ baseVa
   have hg := baseVariance_square_growth t ht
   linarith
 
-theorem baseVariance_tendsto_atTop : Filter.Tendsto baseVariance Filter.atTop Filter.atTop := by
-  rw [Filter.tendsto_atTop_atTop]
-  intro B
-  obtain ⟨s, hs, hB⟩ := baseVariance_unbounded B
-  refine ⟨s, fun t ht => hB.trans ?_⟩
-  exact baseVariance_strictMonoOn.monotoneOn hs (le_trans hs ht) ht
 
 theorem baseVariance_deriv_neg {s : ℝ} (hs : s < 0) : deriv baseVariance s < 0 := by
   rw [(baseVariance_hasDerivAt s).deriv]
@@ -568,9 +555,6 @@ theorem inverseRoot_contDiff : ContDiff ℝ ω inverseRoot := by
 theorem inverseRoot_zero : inverseRoot 0 = 0 := by
   simpa only [signedRoot_zero] using inverseRoot_left 0
 
-theorem inverseRoot_odd (s : ℝ) : inverseRoot (-s) = -inverseRoot s := by
-  apply signedRoot_strictMono.injective
-  rw [inverseRoot_right, signedRoot_odd, inverseRoot_right]
 
 theorem inverseRoot_deriv_zero : deriv inverseRoot 0 = 1 / Real.sqrt (1 / 2) := by
   have hinv := (inverseRoot_contDiff.differentiable (by simp) 0).hasDerivAt
@@ -702,8 +686,6 @@ theorem tiltVariance_zero_parameter (d μ : ℝ) : tiltVariance d 0 μ = d ^ 2 *
   simp only [tiltVariance, mul_zero, quadraticFactor_zero]
   ring
 
-theorem tiltVariance_zero_amplitude (d p : ℝ) : tiltVariance d p 0 = 0 := by
-  simp [tiltVariance]
 
 theorem solveScale_variance (d p r : ℝ) (hd : d ≠ 0) :
     tiltVariance d p (solveScale d p r) = r ^ 2 := by
@@ -731,14 +713,6 @@ theorem tiltVariance_strictMonoOn (d p : ℝ) (hd : 0 < d) :
   rw [← scaledRoot_sq, ← scaledRoot_sq]
   nlinarith
 
-theorem tiltVariance_tendsto_atTop (d p : ℝ) (hd : 0 < d) :
-    Filter.Tendsto (tiltVariance d p) Filter.atTop Filter.atTop := by
-  rw [Filter.tendsto_atTop_atTop]
-  intro B
-  obtain ⟨μ, hμ, _⟩ := exists_unique_nonneg_variance_parameter d p (max 0 B) hd (le_max_left _ _)
-  refine ⟨μ, fun ν hν => (le_max_right 0 B).trans ?_⟩
-  rw [← hμ.2]
-  exact (tiltVariance_strictMonoOn d p hd).monotoneOn hμ.1 (le_trans hμ.1 hν) hν
 
 theorem tiltVariance_eq_extended_integral (m d p μ : ℝ) :
     tiltVariance d p μ = angularMean (fun θ => (extendedExpTilt m d μ p θ - m) ^ 2) := by
@@ -879,22 +853,6 @@ theorem solvedTilt_zero_target (m d p θ : ℝ) : solvedTilt m d p 0 θ = m := b
     simp [solvedTilt, solveScale, extendedExpTilt, hp, cosineTilt, expTilt,
       normalizedExp, expNormalizer_zero]
 
-/-- The actual periodic analogue of `LoopMoments.exists_projected_twoPoint`:
-all prescribed nonnegative variances are realized, with no cosine-amplitude
-restriction. -/
-theorem exists_smooth_projected_tilt (p₁ p₂ m V : ℝ)
-    (hP : 2 < p₁ + p₂ * m) (hV : 0 ≤ V) :
-    ∃ t : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) t ∧
-      Function.Periodic t (2 * Real.pi) ∧ angularMean t = m ∧
-      angularMean (fun θ => (t θ - m) ^ 2) = V ∧
-      ∀ θ, 2 < p₁ + p₂ * t θ := by
-  let d := (p₁ + p₂ * m - 2) / 2
-  have hd : 0 < d := by dsimp [d]; linarith
-  have hm : 2 ≤ p₁ + p₂ * m - d := by dsimp [d]; linarith
-  refine ⟨solvedTilt m d p₂ (Real.sqrt V), solvedTilt_contDiff _ _ _ _,
-    solvedTilt_periodic _ _ _ _, solvedTilt_mean _ _ _ _, ?_,
-    solvedTilt_projection p₁ m d p₂ _ hd hm⟩
-  rw [solvedTilt_variance _ _ _ _ (ne_of_gt hd), Real.sq_sqrt hV]
 
 /-- Compact transverse-stress data have one amplitude that exceeds a
 prescribed variance target everywhere, as required before choosing the

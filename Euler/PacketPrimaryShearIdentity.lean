@@ -130,14 +130,5 @@ theorem historyWave_physical_hasFDerivAt (α k : ℝ) (hk : k ≠ 0)
   congr 2
   exact (D.FInv.field tg 0).adjoint_inner_left v D.m₀
 
-theorem historyWave_physical_norm (α k : ℝ) (hα : 0 ≤ α) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) τ) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field ⟨t,t.property.1,t.property.2.trans hτT.le⟩ 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    ‖fderiv ℝ (fun x => historyWave τ hτ hτT B δ hδ ξ hs α k t (Y x)) (X 0)‖ =
-      (α/δ) * (‖B.coefficients.labelVelocity 0 ξ t‖ *
-        ‖D.normal.field ⟨t,t.property.1,t.property.2.trans hτT.le⟩ 0‖) := by
-  rw [(historyWave_physical_hasFDerivAt τ hτ hτT B δ hδ ξ hs α k hk t X Y hX hY hleft).fderiv,
-    norm_smul,Real.norm_eq_abs,abs_of_nonneg (div_nonneg hα hδ.le),norm_rankOne]
 
 end EulerPacketPrimaryShear

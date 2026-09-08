@@ -164,13 +164,6 @@ def supportedOperatorMap : (Space →ᵇ E →L[ℝ] F) →L[ℝ]
     (supportedOperatorMap period S hS A u : CylinderL2 period F) =
       fullOperatorMap period A (u : CylinderL2 period E) := rfl
 
-theorem supportedOperatorMap_norm : ‖supportedOperatorMap (E := E) (F := F) period S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  exact (EulerLpOperatorField.supported_norm (liftMeasure period) (spatialSet period S)
-    (spatialSet_measurable period S hS) (fieldLift period A) ‖A‖ (norm_nonneg A)
-    (fun x _ => A.norm_coe_le_norm x.1))
 
 def supportedPathMap : C(K,Space →ᵇ E →L[ℝ] F) →L[ℝ]
     C(K,Supported period E S hS →L[ℝ] Supported period F S hS) :=

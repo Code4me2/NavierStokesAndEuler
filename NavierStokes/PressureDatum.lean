@@ -91,11 +91,6 @@ theorem pressure_le_mass {g a : ℝ → ℝ} {A : ℝ}
   dsimp [pressure]
   nlinarith
 
-/-- Shifting the logarithmic clock leaves the datum unchanged. -/
-theorem pressure_translate (g a : ℝ → ℝ) (c η : ℝ) :
-    pressure (fun y => g (y + c)) (fun y => a (y + c)) η = pressure g a η := by
-  unfold pressure
-  rw [integral_add_right_eq_self (fun y => g y * kernel (a y) η) c]
 
 /-- A strip containing the complete real axis and therefore `[-1,1]`. -/
 def strip : Set ℂ := {z | |z.im| < (1 / 2 : ℝ)}
@@ -248,12 +243,6 @@ theorem pressure_contDiff {g a : ℝ → ℝ} {A : ℝ}
     (complexPressure_analytic h (η : ℂ) (real_mem_strip η)).contDiffAt
   simpa only [complexPressure_ofReal, Complex.ofReal_re] using hc.real_of_complex
 
-theorem complexPressure_bounded_on_compact {g a : ℝ → ℝ} {A : ℝ}
-    (h : Admissible g a A) {s : Set ℂ} (hs : IsCompact s) (hss : s ⊆ strip) :
-    ∃ M : ℝ, ∀ z ∈ s, ‖complexPressure g a z‖ ≤ M := by
-  apply hs.exists_bound_of_continuousOn
-  intro z hz
-  exact ((hasDerivAt_complexPressure h (hss hz)).continuousAt).continuousWithinAt
 
 theorem integrable_exponent_weight {g a : ℝ → ℝ} {A : ℝ}
     (h : Admissible g a A) : Integrable (fun y => g y * a y) := by
@@ -351,11 +340,6 @@ theorem deriv_pressure_pos {g a : ℝ → ℝ} {A : ℝ}
   rw [deriv_pressure h]
   exact mul_pos (div_pos (by positivity) (by positivity)) (weighted_kernel_pos h hmass η)
 
-theorem deriv_pressure_pos_of_active {g a : ℝ → ℝ} {A : ℝ}
-    (h : Admissible g a A)
-    (hactive : 0 < volume {y | 0 < g y ∧ 0 < a y})
-    {η : ℝ} (hη : 0 < η) : 0 < deriv (pressure g a) η :=
-  deriv_pressure_pos h (exponent_mass_pos_of_active h hactive) hη
 
 theorem deriv_pressure_neg {g a : ℝ → ℝ} {A : ℝ}
     (h : Admissible g a A) (hmass : 0 < ∫ y, g y * a y)

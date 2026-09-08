@@ -51,10 +51,6 @@ def velocityJetPath (n : ℕ) (x : E) : C(Icc (0 : ℝ) T,E [×n]→L[ℝ] E) :=
 def displacementJetPath (n : ℕ) (x : E) : C(Icc (0 : ℝ) T,E [×n]→L[ℝ] E) :=
   tensorPathMap n (iteratedFDeriv ℝ n (displacementFamily T hT A) x)
 
-theorem jetPath_apply (n : ℕ) (x : E) (t : Icc (0 : ℝ) T) :
-    jetPath T hT A n x t = iteratedFDeriv ℝ n
-      (fun y => (flowData T hT A).forward t y) x :=
-  tensorPath_iteratedFDeriv _ (pathFamily_contDiff T hT A) n x t
 
 theorem velocityJetPath_apply (n : ℕ) (x : E) (t : Icc (0 : ℝ) T) :
     velocityJetPath T hT A n x t = iteratedFDeriv ℝ n
@@ -127,13 +123,6 @@ theorem displacement_jet_hasDerivWithinAt (n : ℕ) (x : E) (t : Icc (0 : ℝ) T
   rw [he, ← velocityJetPath_displacement]
   exact displacementJetPath_hasDerivWithinAt T hT A n x t
 
-theorem displacement_jet_continuous (n : ℕ) (x : E) :
-    Continuous (fun t => iteratedFDeriv ℝ n (displacement T hT A t) x) := by
-  have he : (fun t => iteratedFDeriv ℝ n (displacement T hT A t) x) =
-      extendPath T hT (displacementJetPath T hT A n x) :=
-    funext (fun t => (displacementJetPath_apply T hT A n x t).symm)
-  rw [he]
-  exact extendPath_continuous T hT _
 
 theorem velocity_jet_continuous (n : ℕ) (x : E) :
     Continuous (fun t : Icc (0 : ℝ) T => iteratedFDeriv ℝ n

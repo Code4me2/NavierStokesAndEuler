@@ -102,10 +102,6 @@ theorem denominator_pos (m D : ℕ) : 0 < denominator m D := by
 def center (m D : ℕ) (i : Fin m) : Plane :=
   (((i.val : ℝ) + 1) / denominator m D, 0)
 
-theorem center_rational (m D : ℕ) (i : Fin m) :
-    ∃ a b : ℚ, center m D i = ((a : ℝ), (b : ℝ)) := by
-  refine ⟨((i.val : ℚ) + 1) / (((m : ℚ) + 1) * 6 ^ D), 0, ?_⟩
-  simp [center, denominator]
 
 theorem center_first_pos (m D : ℕ) (i : Fin m) : 0 < (center m D i).1 := by
   exact div_pos (by positivity) (denominator_pos m D)
@@ -308,8 +304,6 @@ theorem exists_common_radius (m D : ℕ) :
     rw [hsub, map_sub] at hi
     exact cover_pow_injective n (sub_eq_zero.mp (lattice_norm_lt_one hxy hi))
 
-theorem torusEq_refl (x : Plane) : torusEq x x := by
-  refine ⟨⟨0, ?_⟩, ⟨0, ?_⟩⟩ <;> simp
 
 theorem torusEq_symm {x y : Plane} (h : torusEq x y) : torusEq y x := by
   rcases h with ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
@@ -371,17 +365,6 @@ theorem liftedSupport_disjoint_of_separation (level n : ℕ) (S T : Set Plane)
   rw [hp] at hcover
   exact hsep x hx y hy (torusEq_trans (torusEq_symm hcover) hYy)
 
-/-- The padded native slots are disjoint on the actual absolute lift, at
-arbitrary levels whose difference is at most `D`. -/
-theorem exists_disjoint_lifted_slots (m D : ℕ) :
-    ∃ r : ℝ, 0 < r ∧ ∀ level n, n ≤ D → ∀ i j : Fin m,
-      0 < n ∨ i ≠ j →
-      Disjoint (liftedSupport level (rectangle (center m D i) (2 * r)))
-        (liftedSupport (level + n) (rectangle (center m D j) (2 * r))) := by
-  obtain ⟨r, hr, hsep, _⟩ := exists_common_radius m D
-  refine ⟨r, hr, ?_⟩
-  intro level n hn i j hij
-  exact liftedSupport_disjoint_of_separation level n _ _ (hsep n hn i j hij)
 
 /-- A rectangle in any two prescribed auxiliary directions. -/
 def orientedRectangle (c a b : Plane) (r : ℝ) : Set Plane :=
@@ -431,22 +414,6 @@ theorem exists_oriented_slots (m D : ℕ) (a b : Plane) :
   · intro n hn i x hx y hy hxy
     exact hinj n hn i x (hsub i hx) y (hsub i hy) hxy
 
-/-- The manuscript's axes are `(1,-β)` and `(β,1)`, with `β=sqrt(2)-1`.
-They define genuine coordinates for every real `β`. -/
-theorem rotated_axes_injective (β : ℝ) :
-    Function.Injective (fun q : Plane =>
-      q.1 • ((1, -β) : Plane) + q.2 • ((β, 1) : Plane)) := by
-  intro q z h
-  have h1 : q.1 + β * q.2 = z.1 + β * z.2 := by
-    simpa [mul_comm] using congrArg Prod.fst h
-  have h2 : -β * q.1 + q.2 = -β * z.1 + z.2 := by
-    simpa [mul_comm] using congrArg Prod.snd h
-  have hdet : (1 + β ^ 2) ≠ 0 := by nlinarith [sq_nonneg β]
-  have hprod : (1 + β ^ 2) * (q.1 - z.1) = 0 := by
-    have hm := congrArg (fun t : ℝ => β * t) h2
-    nlinarith
-  have hq : q.1 = z.1 := sub_eq_zero.mp ((mul_eq_zero.mp hprod).resolve_left hdet)
-  exact Prod.ext hq (by rw [hq] at h2; linarith)
 
 /-- Application to any label family with a finite proper coloring and a
 bounded difference of interacting levels. Constructing that coloring from

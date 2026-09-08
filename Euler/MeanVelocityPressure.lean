@@ -45,13 +45,6 @@ theorem physical_h1
     (solenoidalFrame_hasDerivWithinAt T hT F F₁ hF) s.velocityLp s.acceleration
     s.velocity s.velocity_ac s.velocity_ae s.velocity_derivative
 
-/-- In label coordinates the actual physical velocity is solenoidal at every time. -/
-theorem inversePhysicalPath_solenoidal
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x) (t : ℝ) :
-    extendPath T hT FInv t (s.physicalPath t) ∈ solenoidalSpace := by
-  change FInv (projIcc 0 T hT t) (F (projIcc 0 T hT t) (s.velocity t : L2)) ∈ solenoidalSpace
-  rw [hInv]
-  exact (s.velocity t).property
 
 /-- The pressure residual in the strong equation, before using F_t=MF. -/
 def pressureResidual : TimeLp T L2 :=
@@ -79,23 +72,6 @@ theorem pressureResidual_ae :
     (hs₁.trans (congrArg (fun x : L2 => f t-x) ha))
     (hsmul.trans (congrArg (fun x : L2 => (2 : ℝ) • x) hv')))
 
-/-- The actual pressure residual has an ordinary weak L² gradient after F-adjoint
-transformation. This follows from the proved projected equation. -/
-theorem pressureResidual_gradient_ae :
-    ∀ᵐ t ∂timeMeasure T,
-      (extendPath T hT F t).adjoint (s.pressureResidual t) ∈ gradientSpace := by
-  filter_upwards [s.pressureResidual_ae, s.equation] with t hp he
-  apply (solenoidalProjection_eq_zero_iff _).1
-  have hb : f t - extendPath T hT F t (s.acceleration t : L2) -
-      (2 : ℝ) • extendPath T hT F₁ t (s.velocity t : L2) =
-      (f t - (2 : ℝ) • extendPath T hT F₁ t (s.velocity t : L2))-
-        extendPath T hT F t (s.acceleration t : L2) := by abel
-  have hh := congrArg (fun x : L2 => solenoidalProjection ((F (projIcc 0 T hT t)).adjoint x))
-    (hp.trans hb)
-  have hl := (solenoidalProjection.comp (F (projIcc 0 T hT t)).adjoint).map_sub
-    (f t - (2 : ℝ) • extendPath T hT F₁ t (s.velocity t : L2))
-    (extendPath T hT F t (s.acceleration t : L2))
-  exact hh.trans (hl.trans (sub_eq_zero.mpr he.symm))
 
 /-- The prescribed coefficient identity F_t=MF holds for the actual velocity field. -/
 theorem movingVelocityField_eq (M : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
@@ -109,18 +85,6 @@ theorem movingVelocityField_eq (M : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
   exact hmul.trans ((congrArg (fun x : L2 => M (projIcc 0 T hT t) x) hv).trans
     ((hM (projIcc 0 T hT t) (s.velocityLp t : L2)).symm.trans hv₁.symm))
 
-/-- The reconstructed fields satisfy the actual evolution B_t+MB+dq=f in L². -/
-theorem velocity_evolution (M : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
-    (hM : ∀ (t : Icc (0 : ℝ) T) (x : L2), F₁ t x = M t (F t x)) :
-    s.velocityDerivative + timeMultiplier T hT M s.velocityField + s.pressureResidual = f := by
-  calc
-    _ = s.velocityDerivative + timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp +
-        s.pressureResidual := congrArg
-      (fun x : TimeLp T L2 => s.velocityDerivative+x+s.pressureResidual)
-      (s.movingVelocityField_eq M hM)
-    _ = f := by
-      simp only [velocityDerivative, fieldProductDerivative, pressureResidual, two_smul]
-      abel
 
 /-- The initial physical velocity is exactly the source's localized boundary value. -/
 theorem physicalPath_initial

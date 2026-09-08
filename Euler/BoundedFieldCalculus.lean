@@ -123,8 +123,6 @@ private local instance : NormedSpace ℝ ((α →ᵇ U →L[ℝ] E) →L[ℝ] (�
 def compositionMap : (α →ᵇ E →L[ℝ] F) →L[ℝ] (α →ᵇ U →L[ℝ] E) →L[ℝ] (α →ᵇ U →L[ℝ] F) :=
   bilinearMap (compL ℝ U E F)
 
-theorem compositionMap_norm : ‖compositionMap (α := α) (U := U) (E := E) (F := F)‖ ≤ 1 :=
-  (bilinearMap_norm (compL ℝ U E F)).trans (norm_compL_le ℝ U E F)
 
 @[simp] theorem compositionMap_apply (A : α →ᵇ E →L[ℝ] F) (B : α →ᵇ U →L[ℝ] E) (x : α) :
     compositionMap A B x = (A x).comp (B x) := rfl

@@ -77,12 +77,6 @@ theorem coefficientJet_boundLevel_le_words (s n : ℕ) (t : K) :
       rw [he] at hh
       exact hh
 
-theorem coefficientJet_boundLevel_le_tensor (s n : ℕ) (t : K) :
-    boundLevel P (coefficientJet P A hA s t) n ≤
-      (4 : ℝ)^n*‖iteratedFDeriv ℝ n (translateCoefficientPath A) 0‖ := by
-  have hh := wordSum_le coefficientDirections coefficientDirections_norm (translateCoefficientPath A) n 0
-  norm_num only [Fintype.card_fin] at hh
-  exact (coefficientJet_boundLevel_le_words P A hA s n t).trans hh
 
 theorem coefficientJet_block_le_words (s q n : ℕ) (t : K) :
     EulerH6Pressure.coefficientBlock P (coefficientJet P A hA s t) q n ≤

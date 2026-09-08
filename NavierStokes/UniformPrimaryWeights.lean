@@ -104,25 +104,6 @@ theorem pull_polynomial {s : StripData D} {f : ι → ℕ → D → E}
   obtain ⟨C, hC, p, hb⟩ := hf.bound m
   exact ⟨C, hC, p, fun k => hb (e k)⟩
 
-/-- Restrict genuine joint phase/ODE jets to the common strip, allowing a
-uniform polynomial change of slow scale. -/
-theorem polynomial_on_joint {s : StripData D}
-    {V : PhaseJetBounds.Domain (ℕ × ι) D} {f : (ℕ × ι) → D → E}
-    (hf : PhaseJetBounds.PolynomialJets V f) {K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hscale : ∀ n l, V.scale (n, l) ≤ K * s.slow n ^ q)
-    (hdom : ∀ n l, s.domain ⊆ V.carrier (n, l)) :
-    PhaseJetBounds.PolynomialJets (jointDomain s) f := by
-  refine ⟨fun k => (hf.smooth k).mono (hdom k.1 k.2), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bound m
-  refine ⟨C * K ^ p, one_le_mul_of_one_le_of_one_le hC (one_le_pow₀ hK), q * p, ?_⟩
-  intro k j hj x hx
-  calc
-    _ ≤ C * V.scale k ^ p := hb k j hj x (hdom k.1 k.2 hx)
-    _ ≤ C * (K * s.slow k.1 ^ q) ^ p := mul_le_mul_of_nonneg_left
-      (pow_le_pow_left₀ (zero_le_one.trans (V.one_le_scale k)) (hscale k.1 k.2) p)
-      (zero_le_one.trans hC)
-    _ = _ := by simp only [jointDomain, mul_pow, ← pow_mul]; ring
 
 /-- This version retains the full inverse-edge polynomial in the
 majorant; it is not a polynomial-in-S replacement of the weight. -/
@@ -201,11 +182,6 @@ theorem smul_class {a : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
       (fun l n x => a l n x • f l n x) :=
   ha.bilinear hf (ContinuousLinearMap.lsmul ℝ ℝ)
 
-theorem mul_class {a b : ι → ℕ → D → ℝ}
-    (ha : UniformClass s w α a) (hb : UniformClass s v β b) :
-    UniformClass s (fun l n x => w l n x * v l n x) (α + β)
-      (fun l n x => a l n x * b l n x) := by
-  simpa only [smul_eq_mul] using smul_class ha hb
 
 theorem real_smul_class {a : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
     (ha : UniformClass s (fun _ _ _ => 1) β a) (hf : UniformClass s w α f) :
@@ -242,11 +218,6 @@ theorem band_smul_class [Countable ι] [Nonempty ι]
   apply uniform_of_pull (enumeration_surjective ι)
   exact (pull_class hf (enumeration ι)).band_smul (pull_bandBound ha (enumeration ι))
 
-theorem polynomial_class {f : ι → ℕ → D → E}
-    (hf : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q => f q.2 q.1)) :
-    UniformClass s (fun _ _ _ => 1) 0 f := by
-  exact LabelSumBounds.uniformClass_of_polynomialJets hf (K := 1) (q := 1) le_rfl
-    (fun n l => by simp [jointDomain]) (fun _ _ => subset_rfl)
 
 end Calculus
 
@@ -575,79 +546,10 @@ theorem phaseCutoffFundamental_class {s : StripData D} (A : Fin 2 → PhaseConst
     simp only [Real.rpow_zero, one_mul]
     rfl
 
-/-- Normal derivatives and the separated range are derived from the same
-joint phase data. The phase chart uses its actual unnormalized slot variable. -/
-theorem phaseNormal_jets {s : StripData D} (A : PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → χ q x ∈ (U.slot A.V A.openV).carrier q) :
-    PolynomialJets (jointDomain s) (fun q x => A.phase.normal q (χ q x)) ∧
-      (∀ q x, x ∈ s.domain → A.b ≤ ‖A.phase.normal q (χ q x)‖) ∧
-      (∀ q x, x ∈ s.domain → ‖A.phase.normal q (χ q x)‖ ≤ A.M ^ 2 + 3 * A.M) := by
-  refine ⟨?_, fun q x hx => A.normal_range.1 q _ (hmap q x hx),
-    fun q x hx => A.normal_range.2 q _ (hmap q x hx)⟩
-  apply ((EnvelopeJets.of_polynomial A.normal_jets).comp hχ hscale hmap).to_polynomial
-  intro q x hx
-  rfl
 
-/-- Uniform primary class from the actual joint phase/ODE construction.
-Only order-zero covariance separation and target data remain explicit. -/
-theorem phase_primary_waveClass [Countable ι] [Nonempty ι] {s : StripData D}
-    (A : Fin 2 → PhaseConstruction U) (pref : Fin 2 → (ℕ × ι) → ℝ)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (T : ι → ℕ → D → SmoothCovariance.Vec2) (mask : ι → ℕ → D → ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → χ q x ∈ U.carrier q ×ˢ Ioo (0 : ℝ) 1)
-    (hpref : ∀ j, PolynomialJets U (fun q _ => pref j q))
-    (hT : ∀ i, UniformMeanClass s 0 (fun l n x => T l n x i))
-    (hmask : UniformClass s (fun _ _ _ => 1) 0 mask)
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ l n x, x ∈ s.domain →
-      b ≤ |(normalizedMatrix (Real.sqrt (s.slow n)) (phaseMatrix A pref χ l n x)).det|)
-    (hentry : ∀ l n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * phaseMatrix A pref χ l n x i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ l n x, x ∈ s.domain → ∀ j,
-      c * s.zeta x ≤ SmoothCovariance.weights (phaseMatrix A pref χ l n x) (T l n x) j)
-    (j : Fin 2) :
-    UniformWaveClass s (phaseEnvelope A χ j) (1 / 2)
-      (fun l => primaryCoefficient s (phaseMatrix A pref χ l) (T l) (mask l) (phaseFundamental A χ j l) j) :=
-  primaryCoefficient_waveClass (phaseMatrix_jets A pref χ hscale hχ (fun q x hx => (hmap q x hx).1) hpref)
-    hT hmask (phaseFundamental_class A χ hscale hχ hmap j) hb hM hc hdet hentry hζ hlower j
 
 end ActualPhase
 
-/-- Direct binding to the actual externally-cut `LinearWaveBounds`
-coefficient. The cutoff occurs exactly once and every geometric class is
-uniform in the label. -/
-theorem cut_curl_class [Countable ι] [Nonempty ι]
-    {s : StripData D} {P : ι → ℕ → D → ℝ} {α κ : ℝ}
-    (a : ι → LinearWaveBounds.WaveCoefficients D)
-    (d : ι → LinearWaveBounds.GraphDirections D) (ψ : ι → ℕ → D → ℝ)
-    (ha : UniformWaveClass s P α (fun l => (a l).amplitude))
-    (hψ : UniformClass s (fun _ _ _ => 1) 0 ψ)
-    (hN : PhaseJetBounds.PolynomialJets (jointDomain s)
-      (fun q => (a q.2).normal s (d q.2) q.1))
-    {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ l n x, x ∈ s.domain → b ≤ ‖(a l).normal s (d l) n x‖)
-    (hupper : ∀ l n x, x ∈ s.domain → ‖(a l).normal s (d l) n x‖ ≤ M)
-    (hκ : 0 ≤ κ)
-    (hr : UniformClass s (fun _ _ _ => 1) (-κ) (fun l => (d l).radialField))
-    (hθ : UniformClass s (fun _ _ _ => 1) 0 (fun l _ _ => (d l).angular))
-    (hz : UniformClass s (fun _ _ _ => 1) 1 (fun l => (d l).axialField s))
-    (hR : UniformClass s (fun _ _ _ => 1) 0 (fun l n x => ((a l).radius n x)⁻¹))
-    (hK : UniformBandBound s (1 / 2) (fun l n => 1 / (a l).frequency n)) :
-    UniformWaveClass s P (α + 1 / 2 - κ)
-      (fun l => ((a l).withCutoff (ψ l)).curlCorrection s (d l)) := by
-  have hcut : UniformWaveClass s P α (fun l n x => ψ l n x • (a l).amplitude n x) := by
-    simpa only [zero_add] using real_smul_class hψ ha
-  have h := normalCurlRemainder_class hN hcut hb hlower hupper hκ hr hθ hz hR hK
-  simp only [
-    LinearWaveBounds.WaveCoefficients.withCutoff,
-    LinearWaveBounds.WaveCoefficients.normal] at h ⊢
-  exact h
 
 section ActualCutoff
 
@@ -655,48 +557,7 @@ open PrimaryPulseBounds PhaseJetBounds
 
 variable {U : Domain (ℕ × ι) PhaseCalculus.Slow}
 
-/-- The Gaussian profile appears once in the actual coefficient. -/
-theorem phase_cutoff_coefficient_eq (s : StripData D)
-    (A : Fin 2 → PhaseConstruction U) (pref : Fin 2 → (ℕ × ι) → ℝ)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (T : ι → ℕ → D → SmoothCovariance.Vec2) (mask : ι → ℕ → D → ℝ)
-    (j : Fin 2) (l : ι) (n : ℕ) (x : D) :
-    primaryCoefficient s (phaseMatrix A pref χ l) (T l) (mask l)
-      (phaseCutoffFundamental A χ j l) j n x =
-    GaussianTailFlat.profile (χ (n, l) x).2 •
-      primaryCoefficient s (phaseMatrix A pref χ l) (T l) (mask l)
-        (phaseFundamental A χ j l) j n x := by
-  simp only [primaryCoefficient, phaseCutoffFundamental, phaseFundamental, cutoffPulse,
-    map_smul, smul_smul, mul_comm]
 
-/-- Global slot-cutoff primary estimate: the actual cutoff extension and
-its Gaussian envelope both vanish outside the slot. The edge weight is
-still exactly `sqrt zeta`. -/
-theorem phase_cutoff_primary_waveClass [Countable ι] [Nonempty ι] {s : StripData D}
-    (A : Fin 2 → PhaseConstruction U) (pref : Fin 2 → (ℕ × ι) → ℝ)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (T : ι → ℕ → D → SmoothCovariance.Vec2) (mask : ι → ℕ → D → ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → (χ q x).1 ∈ U.carrier q)
-    (hpref : ∀ j, PolynomialJets U (fun q _ => pref j q))
-    (hT : ∀ i, UniformMeanClass s 0 (fun l n x => T l n x i))
-    (hmask : UniformClass s (fun _ _ _ => 1) 0 mask)
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ l n x, x ∈ s.domain →
-      b ≤ |(normalizedMatrix (Real.sqrt (s.slow n)) (phaseMatrix A pref χ l n x)).det|)
-    (hentry : ∀ l n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * phaseMatrix A pref χ l n x i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ l n x, x ∈ s.domain → ∀ j,
-      c * s.zeta x ≤ SmoothCovariance.weights (phaseMatrix A pref χ l n x) (T l n x) j)
-    (j : Fin 2) :
-    UniformWaveClass s (phaseSlotEnvelope A χ j) (1 / 2)
-      (fun l => primaryCoefficient s (phaseMatrix A pref χ l) (T l) (mask l)
-        (phaseCutoffFundamental A χ j l) j) :=
-  primaryCoefficient_waveClass (phaseMatrix_jets A pref χ hscale hχ hmap hpref)
-    hT hmask (phaseCutoffFundamental_class A χ hscale hχ hmap j)
-    hb hM hc hdet hentry hζ hlower j
 
 end ActualCutoff
 
@@ -724,15 +585,6 @@ theorem curlCorrection_class [Countable ι] [Nonempty ι]
     LinearWaveBounds.WaveCoefficients.normal] at h ⊢
   exact h
 
-/-- The primary half-power yields the advertised `1-kappa` curl bound. -/
-theorem primary_curl_exponent {s : StripData D} {P : ι → ℕ → D → ℝ} {κ : ℝ}
-    {f : ι → ℕ → D → E}
-    (hf : UniformWaveClass s P (1 / 2 + 1 / 2 - κ) f) :
-    UniformWaveClass s P (1 - κ) f := by
-  simpa only [show (1 / 2 + 1 / 2 : ℝ) = 1 by norm_num] using hf
 
-theorem primary_curl_budget {s : StripData D} {P : ι → ℕ → D → ℝ} {κ : ℝ}
-    {f : ι → ℕ → D → E} (hf : UniformWaveClass s P (1 - κ) f) (hκ : κ ≤ 8 / 25) :
-    UniformWaveClass s P (17 / 25) f := hf.mono_exponent (by linarith)
 
 end NavierStokes.UniformPrimaryWeights

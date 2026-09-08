@@ -513,38 +513,6 @@ private theorem majorant_enlarge (s : StripData E) (w : ℕ → E → ℝ) (α :
   unfold majorant
   nlinarith only [ht]
 
-/-- A stage's finite harmonic range can be folded into the external label
-with one constant before both.  This never infers uniformity over an
-unbounded harmonic family from separate class memberships. -/
-theorem finite_harmonic_uniform
-    (s : StripData E) (w : Label → ℕ → E → ℝ) (α : ℝ)
-    (H : Finset ℤ) (f : ℤ → Label → ℕ → E → V)
-    (hf : ∀ j ∈ H, UniformClass s w α (f j)) :
-    UniformClass s (fun l : Label × {j : ℤ // j ∈ H} => w l.1) α
-      (fun l => f l.2.1 l.1) := by
-  have hbounds (N : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∃ m : ℕ,
-      ∀ j ∈ H, ∀ l n x, x ∈ s.domain → ∀ k ≤ N,
-        ‖iteratedFDeriv ℝ k (f j l n) x‖ ≤ majorant s (w l) α C m n x := by
-    induction H using Finset.induction_on with
-    | empty => exact ⟨0,le_rfl,0,by simp⟩
-    | @insert j H hj ih =>
-        obtain ⟨A,hA,a,ha⟩ := (hf j (Finset.mem_insert_self _ _)).bounds N
-        obtain ⟨B,hB,b,hb⟩ := ih (fun k hk => hf k (Finset.mem_insert_of_mem hk))
-        refine ⟨A+B,add_nonneg hA hB,a+b,?_⟩
-        intro k hk l n x hx i hi
-        rcases Finset.mem_insert.mp hk with he | hk
-        · subst k
-          exact (ha l n x hx i hi).trans (majorant_enlarge s (w l) α hA
-            (le_add_of_nonneg_right hB) (Nat.le_add_right _ _) n x
-            ((hf j (Finset.mem_insert_self _ _)).weight_nonneg l n x hx))
-        · exact (hb k hk l n x hx i hi).trans (majorant_enlarge s (w l) α hB
-            (le_add_of_nonneg_left hA) (Nat.le_add_left _ _) n x
-            ((hf k (Finset.mem_insert_of_mem hk)).weight_nonneg l n x hx))
-  refine ⟨fun l => (hf l.2.1 l.2.2).weight_nonneg l.1,
-    fun l => (hf l.2.1 l.2.2).smooth l.1, ?_⟩
-  intro N
-  obtain ⟨C,hC,m,hb⟩ := hbounds N
-  exact ⟨C,hC,m,fun l => hb l.2.1 l.2.2 l.1⟩
 
 end FiniteHarmonics
 
@@ -581,18 +549,6 @@ theorem phaseNeighborhood_open (s : StripData P) (F : PhaseConstruction D)
     (((D.isOpen (l,n)).preimage (χ.continuous.comp continuous_fst)).inter
       (isOpen_Ioo.preimage (((g l n).coordinates_contDiff k).continuous.comp continuous_snd |>.snd)))
 
-/-- The output majorant is this same native Gaussian on the phase patch;
-there is no replacement by an unweighted bound. -/
-theorem phasePatch_envelope (s : StripData P) (F : PhaseConstruction D)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry) (r : Label → ℕ → ℝ)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (g l n) (r l n) (F.L (l,n)))
-    {l : Label} {n : ℕ} {k : Frequency} {x : P × Plane}
-    (hx : x ∈ phasePatch s F χ g r l n k) :
-    groupedEnvelope g r (fun l n => F.L (l,n))
-      (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n))) l n x =
-    referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) ((g l n).coordinates k x.2).2 :=
-  WaveEnvelopeTransport.copyEnvelope_eq_copy (hsep l n) _
-    ⟨hx.2,hx.1.2.2.1.le,hx.1.2.2.2.le⟩
 
 theorem selected_copy_smooth (s : StripData P) (F : PhaseConstruction D)
     (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry)
@@ -704,38 +660,6 @@ section ActualSourceControl
 variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   {D : PhaseJetBounds.Domain (Label × ℕ) PhaseCalculus.Slow}
 
-/-- The actual HR-source control, with an arbitrary fixed real projection.
-The two applications `part = realPart` and `part = imagPart` are the two
-literal Volterra solves in `complexCopyCoefficients`. -/
-noncomputable def actualSourceControl
-    (s : StripData P) (F : PhaseConstruction D) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (g : Label → ℕ → Geometry) (r : Label → ℕ → ℝ)
-    (hscale : ∀ l n, D.scale (l,n) = s.slow n)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (g l n) (r l n) (F.L (l,n)))
-    {K : ℝ} {a : ℕ} (hK : 1 ≤ K)
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (g l n) ≤ K*s.slow n^a)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : Label → CorrectionState.HarmonicBlock (P × Plane))
-    (G A : Label → HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ) (hj : j ≠ 0)
-    {α : ℝ}
-    (h : ∀ i : Fin 3, UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope g r (fun l n => F.L (l,n))
-        (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))) α (fun l n x =>
-        (HarmonicResidual.residualBlock c u (b l) (G l) (A l)).velocity n i j x))
-    (part : HarmonicCalculus.ComplexVector →L[ℝ] ProblemStatement.Space) :
-    ParticularCopyBounds.UniformModalControl (CommonCoverClass.sourceStrip (angleStrip s)) α
-      (fun l n => nativeFrame (F.frame (l,n)) (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)))
-      (fun l n => PrimaryCopyBridge.frameTangentData
-        (nativeFrame (F.frame (l,n)) (χ.comp (ContinuousLinearMap.fst ℝ P ℝ))) j
-        (fun x => part (ParticularWaveAssembly.sourceFamily c u (b l) (G l) (A l) j n x)))
-      j g (fun l n => F.L (l,n))
-      (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))
-      (phasePatch (angleStrip s) F (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) g r) :=
-  referenceControl (angleStrip s) F (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) g r
-    hscale hsep hK hgeometry j hj _
-    ((sourceFamily_uniform s g r (fun l n => F.L (l,n))
-      (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n))) α c u b G A
-      (fun _ => j) h).map part)
 
 end ActualSourceControl
 
@@ -1054,61 +978,6 @@ theorem scaled_selected_copy_energy
   simp only [zero_add] at he
   exact he
 
-/-- All input jets at every target band are derived from the selected
-reference phase, bounded affine clock data, and the *current* residual
-source class on that target band.  Neither transported modal energies nor
-transported output bounds are inputs. -/
-theorem scaled_selected_input_jets
-    (s : StripData P) (F : PhaseConstruction D)
-    (V : (Label × ℕ) → Set ℝ) (hV : ∀ i, IsOpen (V i))
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
-    (rate normalScale : (Label × ℕ) → ℝ)
-    (χ : P →L[ℝ] PhaseCalculus.Slow)
-    {A B R : ℝ} {a b : ℕ} (hA : 1 ≤ A) (hB : 1 ≤ B) (hR : 1 ≤ R)
-    (hrateBound : ∀ i, |rate i| ≤ R) (hnormal : ∀ i, |normalScale i| ≤ R)
-    (hlin : ∀ i, ‖transportArgument (φ i) (rate i)‖ ≤ A*T.scale i^a)
-    (hscale : ∀ i, D.scale i ≤ B*T.scale i^b)
-    (hmap : ∀ i, MapsTo (fun z : PhaseCalculus.Slow × ℝ => (φ i z.1,rate i*z.2))
-      ((T.slot V hV).carrier i) ((D.slot F.V F.openV).carrier i))
-    (hinterval : ∀ i, Icc 0 (F.L i/rate i) ⊆ V i)
-    (g : Label → ℕ → Geometry) (r : Label → ℕ → ℝ)
-    (hscaleTarget : ∀ l n, T.scale (l,n) = s.slow n)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (g l n) (r l n) (F.L (l,n)/rate (l,n)))
-    {C : ℝ} {c : ℕ} (hC : 1 ≤ C)
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (g l n) ≤ C*s.slow n^c)
-    (harmonic : Label → ℤ) {J : ℝ} (hJ : 1 ≤ J) (hj : ∀ l, |(harmonic l : ℝ)| ≤ J)
-    {α : ℝ} {f : Label → ℕ → P × Plane → ProblemStatement.Space}
-    (hf : UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope g r (fun l n => F.L (l,n)/rate (l,n))
-        (fun l n v => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) (rate (l,n)*v))) α f)
-    (N : ℕ) :
-    ∃ C0 : ℝ, 0 ≤ C0 ∧ ∃ m : ℕ, ∀ l n k (x : P × Plane), x.1 ∈ s.domain →
-      χ x.1 ∈ T.carrier (l,n) →
-      ((g l n).coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n) →
-      ∀ j ≤ N, ∀ v ∈ Icc 0 (F.L (l,n)/rate (l,n)),
-      ‖iteratedFDeriv ℝ j
-        ((PrimaryCopyBridge.copyFrame (nativeFrame (scaledSelectedFrame F φ rate normalScale (l,n)) χ)
-          (g l n) k).coefficient (harmonic l)) (x,v)‖ ≤ C0*s.growth n x.1^m ∧
-      ‖iteratedFDeriv ℝ j
-        ((PrimaryCopyBridge.copyFrame (nativeFrame (scaledSelectedFrame F φ rate normalScale (l,n)) χ)
-          (g l n) k).forcing (PrimaryCopyBridge.copySource (f l n) (g l n) k)) (x,v)‖ ≤
-        (s.epsilon n^α*Real.sqrt (s.zeta x.1))*C0*s.growth n x.1^m *
-          referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) (rate (l,n)*v) ∧
-      ∀ i : Fin 2, ‖iteratedFDeriv ℝ j
-        (synthesisColumn (PrimaryCopyBridge.copyFrame
-          (nativeFrame (scaledSelectedFrame F φ rate normalScale (l,n)) χ) (g l n) k) i)
-          (x,v)‖ ≤ C0*s.growth n x.1^m := by
-  have hd : FrameJets (T.slot V hV) (scaledSelectedFrame F φ rate normalScale) := by
-    have he := transported_frame_jets (selected_frame_jets F) φ (fun _ => 0) (fun _ => 0)
-        rate normalScale hA hB hR hrateBound hnormal hlin hscale
-        (by simpa only [add_zero,zero_add] using hmap)
-    simp only [add_zero] at he ⊢
-    exact he
-  exact frame_input_jets s V hV (scaledSelectedFrame F φ rate normalScale)
-    (fun i => F.L i/rate i)
-    (fun l n v => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) (rate (l,n)*v))
-    hd hinterval (fun _ _ _ => (referenceP_pos _ _ _ _).le) χ g r hscaleTarget hsep hC hgeometry
-    harmonic hJ hj hf N
 
 end TransportedSelectedInputs
 

@@ -317,29 +317,7 @@ noncomputable def nativeEnvelope (K : Cells (P × Plane) Frequency)
   exact if h : ∃ k, x ∈ K.carrier n k then
     envelope n ((g n).coordinates (Classical.choose h) x.2).2 else 0
 
-omit [NormedSpace ℝ P] in
-theorem nativeEnvelope_eq (K : Cells (P × Plane) Frequency)
-    (g : ℕ → Geometry) (envelope : ℕ → ℝ → ℝ) {n : ℕ} {k : Frequency} {x : P × Plane}
-    (hx : x ∈ K.carrier n k) :
-    nativeEnvelope K g envelope n x = envelope n ((g n).coordinates k x.2).2 := by
-  classical
-  let hex : ∃ j : Frequency, x ∈ K.carrier n j := ⟨k,hx⟩
-  unfold nativeEnvelope
-  rw [dite_eq_left hex]
-  have hchoose : Classical.choose hex = k :=
-    K.unique n (Classical.choose hex) k x (Classical.choose_spec hex) hx
-  rw [hchoose]
 
-omit [NormedSpace ℝ P] in
-theorem nativeEnvelope_nonneg (K : Cells (P × Plane) Frequency)
-    (g : ℕ → Geometry) (envelope : ℕ → ℝ → ℝ)
-    (he : ∀ n v, 0 ≤ envelope n v) (n : ℕ) (x : P × Plane) :
-    0 ≤ nativeEnvelope K g envelope n x := by
-  classical
-  unfold nativeEnvelope
-  split_ifs
-  · exact he _ _
-  · exact le_rfl
 
 omit [NormedSpace ℝ P] in
 theorem nativeEnvelope_le_one (K : Cells (P × Plane) Frequency)
@@ -581,83 +559,11 @@ theorem velocity_jets_deck (t : TangentData P ProblemStatement.Space)
       simpa only [Prod.mk_add_mk, add_zero] using
         complexCopyVelocity_deck t source g hab k q p (hperiodic p) Y) m x
 
-theorem pressure_jets_deck (t : TangentData P ProblemStatement.Space)
-    (source : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (hperiodic : ∀ p, PeriodicAt source p) (frequency : ℝ) (k q : Frequency) (m : ℕ) (x : P × Plane) :
-    iteratedFDeriv ℝ m (complexCopyPressure t source g hab (k+coverIndex g.gap q) frequency)
-      (x + (0,TorusAverages.latticePoint q)) =
-      iteratedFDeriv ℝ m (complexCopyPressure t source g hab k frequency) x :=
-  jets_of_translate (0,TorusAverages.latticePoint q)
-    (fun y => by
-      rcases y with ⟨p,Y⟩
-      simpa only [Prod.mk_add_mk, add_zero] using
-        complexCopyPressure_deck t source g hab k q frequency p (hperiodic p) Y) m x
 
-/-- A zero-gap cover permits reduction to the zero copy. For a refined
-cover the preceding deck theorem retains its actual index subgroup. -/
-theorem velocity_jets_zero_copy (t : TangentData P ProblemStatement.Space)
-    (source : P × Plane → ComplexVector) (g : Geometry) (hgap : g.gap = 0)
-    {a b : ℝ} (hab : a ≤ b) (hperiodic : ∀ p, PeriodicAt source p)
-    (q : Frequency) (m : ℕ) (x : P × Plane) :
-    iteratedFDeriv ℝ m (complexCopyVelocity t source g hab q) (x + (0,TorusAverages.latticePoint q)) =
-      iteratedFDeriv ℝ m (complexCopyVelocity t source g hab 0) x := by
-  simpa only [coverIndex, hgap, Function.iterate_zero, id_eq, zero_add] using
-    velocity_jets_deck t source g hab hperiodic 0 q m x
 
-theorem coefficient_jets_deck (d : PrimaryODE.FrameData (P × ℝ)) (g : Geometry)
-    (harmonic : ℤ) (k q : Frequency) (m : ℕ) (x : (P × Plane) × ℝ) :
-    iteratedFDeriv ℝ m ((PrimaryCopyBridge.copyFrame d g (k+coverIndex g.gap q)).coefficient harmonic)
-      (x + ((0,TorusAverages.latticePoint q),0)) =
-      iteratedFDeriv ℝ m ((PrimaryCopyBridge.copyFrame d g k).coefficient harmonic) x := by
-  apply jets_of_translate
-  rintro ⟨⟨p,Y⟩,v⟩
-  simp only [Prod.mk_add_mk, add_zero]
-  change d.coefficient harmonic ((p, (g.coordinates (k+coverIndex g.gap q)
-      (Y+TorusAverages.latticePoint q)).1), v) =
-    d.coefficient harmonic ((p, (g.coordinates k Y).1), v)
-  rw [g.coordinates_deck]
 
-theorem source_jets_deck (source : P × Plane → ProblemStatement.Space) (g : Geometry)
-    (hperiodic : ∀ p, PeriodicAt source p) (k q : Frequency) (m : ℕ) (x : (P × Plane) × ℝ) :
-    iteratedFDeriv ℝ m (PrimaryCopyBridge.copySource source g (k+coverIndex g.gap q))
-      (x + ((0,TorusAverages.latticePoint q),0)) =
-      iteratedFDeriv ℝ m (PrimaryCopyBridge.copySource source g k) x := by
-  apply jets_of_translate
-  rintro ⟨⟨p,Y⟩,v⟩
-  simp only [Prod.mk_add_mk, add_zero]
-  change source (p, g.path (k+coverIndex g.gap q) (Y+TorusAverages.latticePoint q) v) =
-    source (p, g.path k Y v)
-  rw [g.path_deck, hperiodic]
 
-theorem synthesis_jets_deck (d : PrimaryODE.FrameData (P × ℝ)) (g : Geometry)
-    (i : Fin 2) (k q : Frequency) (m : ℕ) (x : (P × Plane) × ℝ) :
-    iteratedFDeriv ℝ m (synthesisColumn (PrimaryCopyBridge.copyFrame d g (k+coverIndex g.gap q)) i)
-      (x + ((0,TorusAverages.latticePoint q),0)) =
-      iteratedFDeriv ℝ m (synthesisColumn (PrimaryCopyBridge.copyFrame d g k) i) x := by
-  apply jets_of_translate
-  rintro ⟨⟨p,Y⟩,v⟩
-  simp only [Prod.mk_add_mk, add_zero]
-  change synthesisColumn d i ((p, (g.coordinates (k+coverIndex g.gap q)
-      (Y+TorusAverages.latticePoint q)).1), v) =
-    synthesisColumn d i ((p, (g.coordinates k Y).1), v)
-  rw [g.coordinates_deck]
 
-theorem forcing_jets_deck (d : PrimaryODE.FrameData (P × ℝ))
-    (source : P × Plane → ProblemStatement.Space) (g : Geometry)
-    (hperiodic : ∀ p, PeriodicAt source p) (k q : Frequency) (m : ℕ) (x : (P × Plane) × ℝ) :
-    iteratedFDeriv ℝ m ((PrimaryCopyBridge.copyFrame d g (k+coverIndex g.gap q)).forcing
-      (PrimaryCopyBridge.copySource source g (k+coverIndex g.gap q)))
-      (x + ((0,TorusAverages.latticePoint q),0)) =
-      iteratedFDeriv ℝ m ((PrimaryCopyBridge.copyFrame d g k).forcing
-        (PrimaryCopyBridge.copySource source g k)) x := by
-  apply jets_of_translate
-  rintro ⟨⟨p,Y⟩,v⟩
-  simp only [Prod.mk_add_mk, add_zero]
-  change frameForcingLinear d ((p, (g.coordinates (k+coverIndex g.gap q)
-      (Y+TorusAverages.latticePoint q)).1), v)
-      (source (p, g.path (k+coverIndex g.gap q) (Y+TorusAverages.latticePoint q) v)) =
-    frameForcingLinear d ((p, (g.coordinates k Y).1), v) (source (p, g.path k Y v))
-  rw [g.coordinates_deck, g.path_deck, hperiodic]
 
 end PeriodicTranslation
 

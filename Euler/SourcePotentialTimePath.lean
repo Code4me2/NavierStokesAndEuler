@@ -50,14 +50,6 @@ theorem columnPath_norm : ‖columnPath (K := K)‖ ≤ 1 := by
   rw [LinearIsometryEquiv.norm_map]
   exact ((A t).norm_coe_le_norm y).trans (A.norm_coe_le_norm t)
 
-omit [CompactSpace K] in
-theorem columnPath_translation (A : C(K,Space →ᵇ Space)) (a : Space) :
-    translateCoefficientPath (columnPath A) a = columnPath (translateCoefficientPath A a) := by
-  apply ContinuousMap.ext
-  intro t
-  apply BoundedContinuousFunction.ext
-  intro y
-  rfl
 
 section Coefficient
 

@@ -90,21 +90,6 @@ theorem normalizedStream_eq {a : ℕ → ℕ} {h C Q : ℝ}
   rw [← mul_assoc, normalized_power hQ (normalizedCoordinates_q_pos hh hh1 hT)]
   rfl
 
-theorem normalizedStream_smoothAt {a : ℕ → ℕ} (ha : StrictMono a) {h Q : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    {p : Slow} (hT : 0 < p.2.2) : ContDiffAt ℝ ∞ (normalizedStream a h d Q) p := by
-  have hc := normalizedCoordinates_smoothAt hh hh1 hT
-  have hq := normalizedCoordinates_q_pos hh hh1 hT
-  have hcs := (SlowBorelBase.scaleMap Q).contDiff.contDiffAt.comp p hc
-  have hs : ContDiffAt ℝ ∞ (SlowBorelBase.slowSum a h (averageSequence d))
-      (SlowBorelBase.scaleMap Q (normalizedCoordinates h p)) :=
-    SlowBorelBase.slowSum_smoothAt ha (averageSequence_smooth hd) h
-      (show 0 < (SlowBorelBase.scaleMap Q (normalizedCoordinates h p)).1 from mul_pos hQ hq)
-  have hp : ContDiffAt ℝ ∞ (axialFactor h) p := hc.fst.rpow_const_of_ne hq.ne'
-  have hsc := hs.comp p hcs
-  apply hp.mul
-  exact hsc
 
 /-- Chain rule for the actual physical axial coordinate. -/
 theorem normalizedStream_deriv_Z {a : ℕ → ℕ} (ha : StrictMono a) {h C Q : ℝ}
@@ -359,16 +344,6 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
   (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
   (v : ModulatedProfileAssembly.Witness ld)
 
-/-- The corrected one-half identity for the same final aligned base. -/
-theorem final_radial_eq (upper : ℝ) (B : ℕ) {Q : ℝ} (hQ : 0 < Q)
-    {p : Slow} (hT : 0 < p.2.2) :
-    Q ^ CoordinateAlgebra.A F.data.h * FinalSlowBase.velocity H v upper B
-      (bandPoint F.data.h Q p) 0 =
-      -(Q ^ F.data.h * p.1 / 2) * PhaseCalculus.slowZ
-        (normalizedStream (FinalSlowBase.scales H v upper B) F.data.h
-          (FinalSlowBase.coefficients H v) Q) p :=
-  radial_eq_stream (FinalSlowBase.scales_strictMono H v upper B) F.data.h_pos F.data.h_lt_half hQ
-    (FinalSlowBase.coefficients_smooth H v) hT
 
 /-- The very same final weighted-bundle schedule supplies the averaged
 axial estimates. No replacement scale choice is introduced. -/

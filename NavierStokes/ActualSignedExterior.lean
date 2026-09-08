@@ -134,11 +134,6 @@ theorem nativeLabel_ext {S : Set BandLabel}
     nativeLabel (actualLabel L) = L :=
   nativeLabel_ext (congrArg Subtype.val (bandLabel_actualLabel L))
 
-noncomputable def labelEquiv : Label B N0 ≃ ActualSignedPhysicalData.NativeLabel (labels B N0) where
-  toFun := nativeLabel
-  invFun := actualLabel
-  left_inv := actualLabel_nativeLabel
-  right_inv := nativeLabel_actualLabel
 
 theorem actualLabel_reference (L : ActualSignedPhysicalData.NativeLabel (labels B N0)) :
     ActualSignedPhysicalBinding.reference (actualLabel L) = L.val.1 :=
@@ -362,25 +357,8 @@ noncomputable def cyclePotential : VelocityField := potential (cycleNativeStates
 
 noncomputable def cyclePressure : PressureField := pressure (cycleNativeStates x H hp)
 
-/-- The exterior statement concerns the signed request of the literal
-cycle after its particular update, without replacing the incoming state. -/
-theorem cycle_referenceRequest (l : Label B N0) (z : ActualSignedPhysicalBinding.Cylinder) :
-    ((cycleFamily x H hp).state (nativeLabel l)).referenceRequest
-        (ActualSignedPhysicalBinding.reference l) z =
-      (ActualCycleParameters.fixedParameters B N0).signedRequest
-        x.coefficients (commonContext B) x.state (ActualSignedPhysicalBinding.reference l)
-          (ActualSignedPhysicalBinding.toCommonCylinder l z) := by
-  change ((family (cycleNativeStates x H hp)).state (nativeLabel l)).referenceRequest _ _ = _
-  rw [family_referenceRequest_nativeLabel]
-  exact ActualSignedPhysicalBinding.nativeStateData_referenceRequest l ActualInitialization.patch
-    ((ActualCycleParameters.fixedParameters B N0).afterParticular
-      x.coefficients (commonContext B) x.state) H hp z
 
-theorem cycle_potential_zero {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ active) :
-    cyclePotential x H hp w = 0 := potential_zero (cycleNativeStates x H hp) hw hout
 
-theorem cycle_pressure_zero {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ active) :
-    cyclePressure x H hp w = 0 := pressure_zero (cycleNativeStates x H hp) hw hout
 
 theorem cycle_zero_germs {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ active) :
     (cyclePotential x H hp =ᶠ[𝓝 w] fun _ => 0) ∧
@@ -388,14 +366,7 @@ theorem cycle_zero_germs {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ 
   ⟨potential_zero_germ (cycleNativeStates x H hp) hw hout,
     pressure_zero_germ (cycleNativeStates x H hp) hw hout⟩
 
-theorem cycle_velocity_zero {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ active) :
-    SpatialCurl.spatialCurl (cyclePotential x H hp) w = 0 :=
-  velocity_zero (cycleNativeStates x H hp) hw hout
 
-theorem cycle_exterior (Nres : ℕ) {w : SpaceTime} (hw : w ∈ preterminal)
-    (hq : physicalQ h w < ChartScales.Q Nres) (hout : w ∉ active) :
-    cyclePotential x H hp w = 0 ∧ cyclePressure x H hp w = 0 :=
-  exterior_below (cycleNativeStates x H hp) Nres hw hq hout
 
 end Cycle
 

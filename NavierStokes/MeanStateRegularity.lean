@@ -221,9 +221,6 @@ structure PeriodicTriple (U : Set Plane) (m : Triple Point) : Prop where
   angular : Periodic U m.angular
   axial : Periodic U m.axial
 
-theorem BaseData.of_periodic {U : Set Plane} {b : Triple Point}
-    (hb : SmoothTriple (LocalRankDefect.positiveDomain U) b) (hp : PeriodicTriple U b) :
-    BaseData U b := ⟨hb, hp.radial.positive, hp.angular.positive, hp.axial.positive⟩
 
 structure MovingTriple {coord : ℝ} (U : SlowRegion coord) (a b : ℝ) (m : Triple Point) : Prop where
   radial : GaugeMomentBalances.MovingField U a b m.radial
@@ -417,13 +414,6 @@ theorem waveStage (H : PrimitiveData U a b c u) (g : VariableGaugeMean.GaugeData
     rw [SignedMeanGain.waveStage_covariance]
     exact MovingField.add (H.covariance i j) (hX i j)
 
-theorem waveStage_of_regular (H : PrimitiveData U a b c u) (g : VariableGaugeMean.GaugeData Plane)
-    (w : Oscillation Point) (q : OscillatoryScalar Point) (gaussian : Oscillation Point)
-    (hX : ∀ i j, GaugeDebtIncrement.Regular U a b
-      (SignedMeanGain.covarianceIncrement u.oscillation w i j))
-    (hXp : ∀ i j, Periodic U.carrier (SignedMeanGain.covarianceIncrement u.oscillation w i j)) :
-    PrimitiveData U a b c (SignedMeanGain.waveStage g c u w q gaussian) :=
-  H.waveStage g w q gaussian (fun i j => MovingField.of_regular (hX i j) (hXp i j))
 
 end PrimitiveData
 
@@ -469,22 +459,6 @@ theorem localData (G : SignedMeanGain.Geometry) (c : Context Point) (u : State P
       angular_mass := hmθ
       axial_mass := hmz }
 
-/-- The regularity endpoint for the actual covariance increment, including
-the one supplied by `WaveStateRegularity`, combines with primitive
-periodicity and supplies the complete signed-stage input record. -/
-theorem localData_of_regular (G : SignedMeanGain.Geometry) (c : Context Point) (u : State Point)
-    (w : Oscillation Point) (q : OscillatoryScalar Point) (gaussian : Oscillation Point)
-    (H : PrimitiveData G.region G.patch.a G.patch.b c u)
-    (ho : c.operators = G.operators)
-    (hX : ∀ i j, GaugeDebtIncrement.Regular G.region G.patch.a G.patch.b
-      (SignedMeanGain.covarianceIncrement u.oscillation w i j))
-    (hXp : ∀ i j, Periodic G.region.carrier (SignedMeanGain.covarianceIncrement u.oscillation w i j))
-    (hfixed : VariableGaugeMean.reconstructState G.gauge c u = u)
-    (hmθ : ∀ n s, s ∈ G.region.carrier → radialMoment 2 u.mean.angular n s = 0)
-    (hmz : ∀ n s, s ∈ G.region.carrier → radialMoment 1 u.mean.axial n s = 0) :
-    SignedMeanGain.LocalData G c u w q gaussian :=
-  localData G c u w q gaussian H ho
-    (fun i j => MovingField.of_regular (hX i j) (hXp i j)) hfixed hmθ hmz
 
 end
 

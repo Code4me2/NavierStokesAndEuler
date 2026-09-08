@@ -368,31 +368,7 @@ def naturalRemainder (O : NaturalOperators V) (d : AxisData V)
 def referencePair (O : NaturalOperators V) (d : AxisData V) (S : V →L[ℝ] V) : V × V :=
   (S d.one, -(1 / 2 : ℝ) • O.j1 (O.product d.inverseL d.zStar))
 
-/-- Scalar check of the angular grouping used before applying the actual
-linear radial inverse. No derivative terms are omitted in the expansion. -/
-theorem angular_remainder_expansion
-    (t h D η d U W H κ φ u bu buη φdot φη : ℝ) :
-    ((W + h - 2 * h * η * U) * φ + W * φdot + H * φη) +
-        d * κ * u * φ -
-        t * (((2 * D * η) * bu + (2 * h * η) * u) * φ +
-          d * buη * φ + (2 * D * η) * bu * φdot +
-          d * buη * φdot - d * u * φη) =
-      ((W - t * ((2 * D * η) * bu + d * buη)) +
-          h * (1 - 2 * η * (U + t * u)) + d * u * κ) * φ +
-        (W - t * ((2 * D * η) * bu + d * buη)) * φdot +
-        (H + t * d * u) * φη := by ring
 
-/-- Scalar check of the axial grouping, including the pressure terms. -/
-theorem axial_remainder_expansion
-    (t A D η d U Uη W H u bu buη udot uη P Pη Pdot : ℝ) :
-    ((A - 4 * A * η * U + d * Uη) * u + W * udot + H * uη) -
-        t * ((2 * A * η) * (u * u) + (2 * D * η) * bu * udot +
-          d * buη * udot - d * u * uη) +
-        (-4 * A * η * P + d * Pη - 2 * η * Pdot) =
-      A * (1 - 4 * η * U) * u - 2 * A * η * t * (u * u) +
-        (W - t * ((2 * D * η) * bu + d * buη)) * udot +
-        H * uη + d * Uη * u + t * d * u * uη -
-        4 * A * η * P + d * Pη - 2 * η * Pdot := by ring
 
 /-- Explicit propagation of local bounds through every term in the actual
 integrated remainders. Its numerical fields do not depend on t or a,
@@ -493,26 +469,7 @@ theorem remainderLip_nonneg (O : NaturalOperators V) (d : AxisData V)
     0 ≤ remainderLip O d S R M hR hM :=
   (controlledRemainder O d S R M hR hM 0 (by simp) 0 (by simpa using hM)).lip_nonneg
 
-/-- The actual remainder is bounded uniformly in both the small parameter
-and every normalized angular amplitude with norm at most M. -/
-theorem norm_naturalRemainder_le (O : NaturalOperators V) (d : AxisData V)
-    (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M)
-    (t : ℝ) (ht : |t| ≤ 1) (a : V) (ha : ‖a‖ ≤ M)
-    (x : V × V) (hx : ‖x‖ ≤ R) :
-    ‖naturalRemainder O d S t a x‖ ≤ remainderBound O d S R M hR hM := by
-  have h := (controlledRemainder O d S R M hR hM t ht a ha).norm_le x hx
-  simpa only [controlledRemainder_eval, controlledRemainder_bound_eq] using h
 
-/-- The local Lipschitz estimate is derived term by term from the actual
-polynomial operators, including the mixed and pressure terms. -/
-theorem naturalRemainder_sub_le (O : NaturalOperators V) (d : AxisData V)
-    (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M)
-    (t : ℝ) (ht : |t| ≤ 1) (a : V) (ha : ‖a‖ ≤ M)
-    (x y : V × V) (hx : ‖x‖ ≤ R) (hy : ‖y‖ ≤ R) :
-    ‖naturalRemainder O d S t a x - naturalRemainder O d S t a y‖ ≤
-      remainderLip O d S R M hR hM * ‖x - y‖ := by
-  have h := (controlledRemainder O d S R M hR hM t ht a ha).sub_le x y hx hy
-  simpa only [controlledRemainder_eval, controlledRemainder_lip_eq] using h
 
 /-- A finite threshold depending only on fixed operator/coefficient data,
 the reference pair, and the uniform norm bound M. In particular it does
@@ -639,54 +596,8 @@ theorem fixedPoint_integrated_equations (O : NaturalOperators V) (d : AxisData V
     rwa [hlin] at h
   · exact hu.symm
 
-/-- With the left resolvent identity, the two integrated equations also
-imply the nonlinear fixed-point equation. -/
-theorem integrated_equations_fixedPoint (O : NaturalOperators V) (d : AxisData V)
-    (S Q : V →L[ℝ] V) (hS : ∀ y : V, S (y + Q y) = y)
-    (t s : ℝ) (a : V) (x : V × V)
-    (hφ : x.1 + Q x.1 =
-      d.one + s • (naturalRemainder O d (ContinuousLinearMap.id ℝ V) t a x).1)
-    (hu : x.2 = -(1 / 2 : ℝ) • O.j1 (O.product d.inverseL d.zStar) +
-      s • (naturalRemainder O d (ContinuousLinearMap.id ℝ V) t a x).2) :
-    referencePair O d S + s • naturalRemainder O d S t a x = x := by
-  apply Prod.ext
-  · change S d.one + s • (naturalRemainder O d S t a x).1 = x.1
-    rw [naturalRemainder_fst_resolvent]
-    calc
-      S d.one + s • S ((naturalRemainder O d (ContinuousLinearMap.id ℝ V) t a x).1) =
-          S (d.one + s • (naturalRemainder O d (ContinuousLinearMap.id ℝ V) t a x).1) := by
-        rw [map_add, map_smul]
-      _ = S (x.1 + Q x.1) := congrArg S hφ.symm
-      _ = x.1 := hS x.1
-  · change -(1 / 2 : ℝ) • O.j1 (O.product d.inverseL d.zStar) +
-      s • (naturalRemainder O d S t a x).2 = x.2
-    rw [naturalRemainder_snd_resolvent]
-    exact hu.symm
 
-/-- A single coefficient-space norm error controls every angular parameter
-jet uniformly on the full real parameter interval. -/
-theorem axis_angular_jet_error (I : AxisCoefficientSpace.Window) (ε : ℝ)
-    (x x₀ : AxisCoefficientSpace.AxisSpace I ε × AxisCoefficientSpace.AxisSpace I ε)
-    (B : ℝ) (hB : ‖x - x₀‖ ≤ B) (n m : ℕ) (η : ℝ) :
-    |AxisCoefficientSpace.jet I (AxisWeightEstimates.weight ε) x.1.1 n m η -
-      AxisCoefficientSpace.jet I (AxisWeightEstimates.weight ε) x₀.1.1 n m η| ≤
-        |AxisWeightEstimates.weight ε n m| * B := by
-  have hcomponent : ‖x.1 - x₀.1‖ ≤ B := (norm_fst_le (x - x₀)).trans hB
-  exact (AxisCoefficientSpace.abs_jet_sub_le I (AxisWeightEstimates.weight ε)
-    x.1 x₀.1 n m η).trans
-      (mul_le_mul_of_nonneg_left hcomponent (abs_nonneg _))
 
-/-- The same uniform control for every axial parameter jet. -/
-theorem axis_axial_jet_error (I : AxisCoefficientSpace.Window) (ε : ℝ)
-    (x x₀ : AxisCoefficientSpace.AxisSpace I ε × AxisCoefficientSpace.AxisSpace I ε)
-    (B : ℝ) (hB : ‖x - x₀‖ ≤ B) (n m : ℕ) (η : ℝ) :
-    |AxisCoefficientSpace.jet I (AxisWeightEstimates.weight ε) x.2.1 n m η -
-      AxisCoefficientSpace.jet I (AxisWeightEstimates.weight ε) x₀.2.1 n m η| ≤
-        |AxisWeightEstimates.weight ε n m| * B := by
-  have hcomponent : ‖x.2 - x₀.2‖ ≤ B := (norm_snd_le (x - x₀)).trans hB
-  exact (AxisCoefficientSpace.abs_jet_sub_le I (AxisWeightEstimates.weight ε)
-    x.2 x₀.2 n m η).trans
-      (mul_le_mul_of_nonneg_left hcomponent (abs_nonneg _))
 
 /-- The coefficient fixed-point error controls actual mixed derivatives
 of the evaluated functions, uniformly on every smaller radial interval. -/

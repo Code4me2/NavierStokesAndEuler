@@ -91,11 +91,6 @@ theorem cosineTilt_contDiff (m amplitude : ℝ) :
     ContDiff ℝ (∞ : WithTop ℕ∞) (cosineTilt m amplitude) := by
   exact contDiff_const.add (contDiff_const.mul Real.contDiff_cos)
 
-/-- Joint smoothness in mean, amplitude, and angle. -/
-theorem cosineTilt_joint_contDiff :
-    ContDiff ℝ (∞ : WithTop ℕ∞) (fun x : (ℝ × ℝ) × ℝ =>
-      cosineTilt x.1.1 x.1.2 x.2) := by
-  exact (contDiff_fst.fst).add ((contDiff_fst.snd).mul (Real.contDiff_cos.comp contDiff_snd))
 
 theorem cosineTilt_mean (m amplitude : ℝ) : angularMean (cosineTilt m amplitude) = m := by
   unfold cosineTilt
@@ -143,30 +138,7 @@ theorem cosineTilt_stress_positive (p₁ p₂ m amplitude : ℝ)
   have hbound := cosineTilt_projection_bound p₁ p₂ m amplitude θ
   linarith
 
-/-- Sufficient projection margin for the explicit prescribed-variance loop.
-The margin is an additional hypothesis, not a consequence of `P>2`. -/
-theorem exists_cosine_moments_with_projection (p₁ p₂ m V : ℝ) (hV : 0 ≤ V)
-    (hmargin : 2 + |p₂ * Real.sqrt (2 * V)| < p₁ + p₂ * m) :
-    ∃ t : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) t ∧
-      Function.Periodic t (2 * Real.pi) ∧ angularMean t = m ∧
-      angularMean (fun θ => (t θ - m) ^ 2) = V ∧
-      ∀ θ, 2 < p₁ + p₂ * t θ := by
-  refine ⟨cosineTilt m (Real.sqrt (2 * V)), cosineTilt_contDiff _ _,
-    cosineTilt_periodic _ _, cosineTilt_mean _ _, ?_,
-    cosineTilt_stress_positive p₁ p₂ m _ hmargin⟩
-  rw [cosineTilt_variance, Real.sq_sqrt (mul_nonneg (by norm_num) hV)]
-  ring
 
-/-- Smooth parameter data remain smooth when the chosen signed amplitude is
-smooth. In particular, a smooth square root of a variance correction can be
-used without asserting that square root is smooth on all of `[0,∞)`. -/
-theorem cosineTilt_smooth_family {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (m amplitude : E → ℝ)
-    (hm : ContDiff ℝ (∞ : WithTop ℕ∞) m)
-    (hamp : ContDiff ℝ (∞ : WithTop ℕ∞) amplitude) :
-    ContDiff ℝ (∞ : WithTop ℕ∞) (fun x : E × ℝ => cosineTilt (m x.1) (amplitude x.1) x.2) := by
-  exact (hm.comp contDiff_fst).add
-    ((hamp.comp contDiff_fst).mul (Real.contDiff_cos.comp contDiff_snd))
 
 /-- Variance expansion for actual angular integrals. -/
 theorem angular_variance_identity (t : ℝ → ℝ) (m : ℝ)
@@ -549,54 +521,9 @@ theorem rephase_preserves_slope_condition (d : CircleDensity) (t : ℝ → ℝ) 
   rw [rephase_slope d t v φ hv]
   exact hR _
 
-open LoopMoments in
-theorem rephase_projection_positive (d : CircleDensity) (t : ℝ → ℝ) (p₁ p₂ v : ℝ)
-    (hv : v ≠ 0) (hprojection : ∀ θ, 2 < p₁ + p₂ * t θ) :
-    ∀ φ, 2 < p₁ + p₂ * (rephase d (fun θ => loopC v (t θ)) φ /
-      rephase d (fun θ => loopA v (t θ)) φ) := by
-  exact rephase_preserves_slope_condition d t v hv (fun z => 2 < p₁ + p₂ * z) hprojection
 
-/-- A fully constructed period-one shear loop for arbitrary positive first
-mean and nonnegative variance increment. No seed function or inverse is
-assumed. The speed increase is exactly the specified `ρ`. -/
-theorem exists_prescribed_mean_shear_loop (a b ρ : ℝ) (ha : 0 < a) (hρ : 0 ≤ ρ) :
-    ∃ A C : ℝ → ℝ,
-      ContDiff ℝ (∞ : WithTop ℕ∞) A ∧ ContDiff ℝ (∞ : WithTop ℕ∞) C ∧
-      Function.Periodic A 1 ∧ Function.Periodic C 1 ∧
-      (∫ φ in (0 : ℝ)..1, A φ) = a ∧ (∫ φ in (0 : ℝ)..1, C φ) = -b ∧
-      ∀ φ, 0 < A φ ∧
-        A φ * (1 + (C φ / A φ) ^ 2) = a * (1 + (-b / a) ^ 2) + ρ := by
-  let m := -b / a
-  let v := a * (1 + m ^ 2) + ρ
-  have hV : 0 ≤ ρ / a := div_nonneg hρ (le_of_lt ha)
-  obtain ⟨t, hts, htp, htm, htv⟩ := exists_cosine_moments m (ρ / a) hV
-  have hv : 0 < v := by
-    dsimp [v]
-    exact add_pos_of_pos_of_nonneg
-      (mul_pos ha (LoopMoments.one_add_sq_pos m)) hρ
-  obtain ⟨A, C, hA, hC, hpA, hpC, hmA, hmC, hs⟩ :=
-    exists_rephased_shear_loop t a m ρ v ha hv hts htp htm htv rfl
-  refine ⟨A, C, hA, hC, hpA, hpC, hmA, ?_, hs⟩
-  rw [hmC]
-  dsimp [m]
-  field_simp
 
-theorem rephase_const (d : CircleDensity) (c : ℝ) :
-    rephase d (fun _ => c) = fun _ => c := rfl
 
-open LoopMoments in
-/-- At zero amplitude the loop shears are exactly the nominal constants,
-independently of the phase parametrization. -/
-theorem zero_amplitude_is_nominal (d : CircleDensity) (a m : ℝ) :
-    rephase d (fun θ => loopA (a * (1 + m ^ 2)) (cosineTilt m 0 θ)) = (fun _ => a) ∧
-    rephase d (fun θ => loopC (a * (1 + m ^ 2)) (cosineTilt m 0 θ)) = (fun _ => a * m) := by
-  constructor <;> funext φ <;> dsimp [rephase, loopA, loopC, cosineTilt]
-  · have hnz := ne_of_gt (LoopMoments.one_add_sq_pos m)
-    simp only [zero_mul, add_zero]
-    exact mul_div_cancel_right₀ a hnz
-  · have hnz := ne_of_gt (LoopMoments.one_add_sq_pos m)
-    simp only [zero_mul, add_zero]
-    field_simp
 
 end
 

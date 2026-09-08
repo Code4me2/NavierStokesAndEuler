@@ -368,16 +368,6 @@ theorem ZeroOrderBounds.strictCone {R detGap entryBound inverseLower zeta : ℝ}
 theorem sqrt_S_eq (n : ℕ) : Real.sqrt (ChartScales.S n) = (n : ℝ) := by
   exact Real.sqrt_sq (Nat.cast_nonneg n)
 
-/-- The weaker inverse bound required by the square-root jet theorem is
-an immediate consequence, without losing the flat target factor. -/
-theorem ZeroOrderBounds.primary_weight_lower {n : ℕ} {detGap entryBound inverseLower zeta : ℝ}
-    {H : Mat2} {T : Vec2}
-    (h : ZeroOrderBounds (Real.sqrt (ChartScales.S n)) detGap entryBound inverseLower zeta H T)
-    (hn : 1 ≤ n) (ha : 0 ≤ inverseLower) (hzeta : 0 ≤ zeta) (j : Fin 2) :
-    inverseLower * zeta ≤ SmoothCovariance.weights H T j := by
-  apply h.weight_lower _ ha hzeta j
-  rw [sqrt_S_eq]
-  exact_mod_cast hn
 
 /-- For the actual native pair, all uniform zeroth-order constants are
 chosen before the band. Only pointwise pulse and normalized-direction
@@ -627,115 +617,10 @@ noncomputable def nativePrimaryCovariance
       ChartScales.timeCoefficient h n * ChartScales.slotLength r0 h n)
     d lam u (fun _ n => ChartScales.slotLength r0 h n) n p
 
-/-- Uniform zeroth-order bounds for the same actual primary covariance
-used in `PrimaryPulseBounds`.  All constants and the band threshold are
-chosen from the fixed compact model, reference range, and coefficient
-error constants.  In particular they are chosen before the band, the
-particular ODE coefficients, and the possibly flat target factor `zeta`.
-
-The only directional input is a pointwise ratio estimate for the actual
-uncut primary.  Gaussian size, positive column masses, determinant gap,
-and inverse-weight lower bounds are derived in the proof. -/
-theorem compact_native_primary_bounds {K : Set Q}
-    (hK : IsCompact K) (H0 : Q → Mat2) (T0 : Q → Vec2)
-    (hH0 : ∀ i j, ContinuousOn (fun p => H0 p i j) K)
-    (hT0 : ∀ i, ContinuousOn (fun p => T0 p i) K)
-    (hcone : ∀ p ∈ K, SmoothCovariance.StrictCone (H0 p) (T0 p))
-    {R : Set (ℝ × ℝ)} (hR : IsCompact R)
-    (hRpos : ∀ z ∈ R, 0 < z.1 ∧ 0 < z.2)
-    (vr vt : TorusInverse.Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    {r0 h C D E F : ℝ} (hr0 : 0 < r0) (hh : 0 ≤ h)
-    (hC : 0 ≤ C) (hD : 0 ≤ D) (hE : 0 ≤ E) (hF : 0 ≤ F) :
-    ∃ N : ℕ, 4 ≤ N ∧ ∃ detGap entryBound inverseLower : ℝ,
-      0 < detGap ∧ 1 ≤ entryBound ∧ 0 < inverseLower ∧
-      ∀ n : ℕ, N ≤ n →
-      ∀ (d : Fin 2 → ℕ → PrimaryODE.FrameData Q) (lam u : Fin 2 → ℕ → ℝ)
-        (U : Set Q),
-      (∀ c, ContinuousOn ((d c n).coefficient 1) (U ×ˢ Icc 0 (ChartScales.slotLength r0 h n))) →
-      ∀ p ∈ K, p ∈ U →
-      (∀ c, (d c n).Kinematics p (Icc 0 (ChartScales.slotLength r0 h n))) →
-      (∀ c, (lam c n, u c n) ∈ R) →
-      (∀ c, CoefficientControl (d c n) (lam c n) (u c n)
-        (ChartScales.slotLength r0 h n) (ChartScales.S n) C D p) →
-      (∀ c i v, v ∈ Icc 0 (ChartScales.slotLength r0 h n) →
-        |PrimaryPulseBounds.normalizedPulse (d c n) (lam c n) (u c n)
-              (ChartScales.slotLength r0 h n) (p, v / ChartScales.slotLength r0 h n) i.succ /
-            PrimaryPulseBounds.normalizedPulse (d c n) (lam c n) (u c n)
-              (ChartScales.slotLength r0 h n) (p, v / ChartScales.slotLength r0 h n) 0 - H0 p i c| ≤
-          E / ChartScales.slotLength r0 h n +
-            F * |v - ChartScales.slotLength r0 h n / 2| / ChartScales.slotLength r0 h n) →
-      ∀ zeta : ℝ, 0 ≤ zeta →
-        ZeroOrderBounds (Real.sqrt (ChartScales.S n)) detGap entryBound inverseLower zeta
-          (nativePrimaryCovariance vr vt r0 h d lam u n p)
-          (FlatCovariance.scaledTarget zeta (T0 p)) := by
-  obtain ⟨gap, b, B, hgap, hb, hB, href⟩ := compact_reference_bounds hR
-    Prod.fst Prod.snd continuous_fst.continuousOn continuous_snd.continuousOn
-    (fun z hz => (hRpos z hz).1) (fun z hz => (hRpos z hz).2)
-  let Kslot := 2 * r0 * ChartScales.Tg
-  let a := primaryLower C D Kslot
-  let A := primaryUpper C D Kslot
-  have ha : 0 < a := primaryLower_pos _ _ _
-  have hApos : 0 < A := primaryUpper_pos _ _ _
-  obtain ⟨N0, hN04, detGap, M, alpha, hgapM, hM, halpha, hpair⟩ :=
-    compact_chart_pair_bounds hK H0 T0 hH0 hT0 hcone vr vt hdet
-      (B := B) hr0 hh ha hApos hb hE hF
-  obtain ⟨N1, hN14, hN1⟩ := eventually_slow_large (2 * GrowingMode.coneConstant gap C)
-  obtain ⟨N2, hN24, hN2⟩ := eventually_slotRadius_large hr0 hh 1
-  refine ⟨max N0 (max N1 N2), hN04.trans (le_max_left _ _),
-    detGap, M, alpha, hgapM, hM, halpha, ?_⟩
-  intro n hn d lam u U hA p hp hpU hk hrange hcoeff hratio zeta hzeta
-  have hn0 : N0 ≤ n := (le_max_left _ _).trans hn
-  have hn1 : N1 ≤ n := (le_max_left _ _).trans ((le_max_right _ _).trans hn)
-  have hn2 : N2 ≤ n := (le_max_right _ _).trans ((le_max_right _ _).trans hn)
-  have hn4 : 4 ≤ n := hN04.trans hn0
-  have hL : 0 < ChartScales.slotLength r0 h n := slotLength_pos hr0 h n
-  let P : Fin 2 → PartitionedCovariance.Pulse := fun c =>
-    PrimaryPulseBounds.canonicalPrimaryPulse (d c n) (lam c n) (u c n)
-      hL U (hA c) p hpU (hk c)
-  have hPulse (c : Fin 2) : PulseCovariance.PulseBounds (slotRadius r0 h n) a A b B
-      (P c).ψ (P c).x := by
-    apply canonicalPrimaryPulse_bounds (d c n) (lam c n) (u c n) hL
-      (hN2 n hn2) (slotRadius_sq hr0 h n) U (hA c) p hpU (hk c)
-      hgap hb hB hC hD (ChartScales.S_pos (by omega)) (hN1 n hn1)
-    · simpa only [Kslot, mul_assoc] using (ChartScales.slotLength_bounds r0 h hr0.le hh hn4).2
-    · exact (hcoeff c).eigenvalue
-    · exact (hcoeff c).errors
-    · exact (hcoeff c).viscosity
-    · exact href (lam c n, u c n) (hrange c) _ hL
-  have hactual := hpair n hn0 p hp P hPulse
-    (fun c i v hv => by
-      rw [canonicalPrimaryPulse_ratio (d c n) (lam c n) (u c n) hL U (hA c) p hpU (hk c) hv]
-      exact hratio c i v hv) zeta hzeta
-  have heq : nativePrimaryCovariance vr vt r0 h d lam u n p =
-      PartitionedCovariance.pairMatrix vr vt r0 (fun _ => ChartScales.timeCoefficient h n) P := by
-    exact PrimaryPulseBounds.primaryCovariance_eq_canonicalPairMatrix _ _ _ _ _ n U p hpU
-      (fun _ => hL) hA hk vr vt r0 (fun _ => ChartScales.timeCoefficient h n) (fun _ => rfl)
-  rw [heq]
-  exact hactual
 
 end NativePrimary
 
 /-! ## Scalar-cone input adapter -/
 
-/-- The manuscript's two signed model columns satisfy all model-side
-inputs of `compact_native_primary_bounds` directly from the scalar cone.
-The actual pulse directions may be compared to these columns using the
-ratio hypothesis of that theorem. -/
-theorem scalar_cone_model {X : Type*} [TopologicalSpace X] {K : Set X}
-    {c₀ u m t : X → ℝ} (hc₀ : ContinuousOn c₀ K) (hu : ContinuousOn u K)
-    (hm : ContinuousOn m K) (ht : ContinuousOn t K)
-    (hc₀neg : ∀ p ∈ K, c₀ p < 0) (hupos : ∀ p ∈ K, 0 < u p)
-    (hcone : ∀ p ∈ K, |Covariance.normalMagnitude (c₀ p) (u p) * t p| < u p * m p) :
-    (∀ i j, ContinuousOn (fun p => PulseCovariance.signedModel (c₀ p) (u p) i j) K) ∧
-      (∀ i, ContinuousOn (fun p => Covariance.target (m p) (t p) i) K) ∧
-      (∀ p ∈ K, SmoothCovariance.StrictCone (PulseCovariance.signedModel (c₀ p) (u p))
-        (Covariance.target (m p) (t p))) := by
-  refine ⟨PulseCovariance.signedModel_continuousOn hc₀ hu, ?_, ?_⟩
-  · intro i
-    fin_cases i
-    · exact hm.fun_neg
-    · exact ht
-  · intro p hp
-    exact PulseCovariance.signedModel_strictCone (hc₀neg p hp) (hupos p hp) (hcone p hp)
 
 end NavierStokes.PrimaryCovarianceBounds

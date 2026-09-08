@@ -31,8 +31,5 @@ def geometryInputs :
     (J.sourceGrowthProfile_positive hball) (J.sourceGrowthProfile_initial hball)
     Ω hΩ hΩo hsub hΩball (J.sourceGrowthProfile_propagator hball) TiTotal hT1 hTiTotal
 
-theorem geometryInputs_growth :
-    (L.geometryInputs H m hm R S hS τ hτ hτT P J hball Ti TiTotal hτ1 hTi
-      hT1 hTiTotal Ω hΩ hΩo hsub hΩball).linear.g=J.sourceGrowthProfile hball := rfl
 
 end EulerParentPacketFrames.LabelData

@@ -56,19 +56,5 @@ def constructedSupportedEvolution (μ : Measure α) (S : Set α) (hS : Measurabl
       ((fundamentalPath T hT B).backward_forward t))
     (fundamental_pointwise_derivative T hT B)
 
-/-- The actual supported-L² propagator retains the exact localized H3 bound. -/
-theorem constructedSupportedEvolution_propagator_norm
-    (μ : Measure α) (S : Set α) (hS : MeasurableSet S)
-    (g : Icc (0 : ℝ) T → ℝ) (hg : ∀ t, 0 < g t) (C : ℝ) (hC : 0 ≤ C)
-    (hprop : ∀ t s : Icc (0 : ℝ) T, s ≤ t → ∀ x ∈ S,
-      ‖((fundamentalPath T hT B).forward t x).comp ((fundamentalPath T hT B).backward s x)‖ ≤
-        C*g t/g s)
-    (t s : Icc (0 : ℝ) T) (hst : s ≤ t) :
-    ‖(constructedSupportedEvolution T hT B μ S hS).propagator t s‖ ≤ C*g t/g s := by
-  change ‖(operator μ S hS ((fundamentalPath T hT B).forward t)).comp
-    (operator μ S hS ((fundamentalPath T hT B).backward s))‖ ≤ _
-  rw [← operator_mul]
-  exact operator_norm_le μ S hS _ (C*g t/g s)
-    (div_nonneg (mul_nonneg hC (hg t).le) (hg s).le) (hprop t s hst)
 
 end EulerLpSupportedConstructedEvolution

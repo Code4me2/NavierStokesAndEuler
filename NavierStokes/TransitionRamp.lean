@@ -295,30 +295,8 @@ theorem axialVelocity_hasDerivAt (hJ : IsOpen J) (T κ w₁ y : ℝ) {η : ℝ} 
   integrate_hasDerivAt hJ R.initialU (axialSlope_smooth T κ R.bigTime w₁ hJ
     (R.axialStock_smooth hJ)) y hη
 
-theorem prescribed_angular_control (hJ : IsOpen J) (T κ w₁ w₂ y : ℝ)
-    {η : ℝ} (hη : η ∈ J) :
-    -2 * deriv (fun x => R.logAmplitude T κ w₁ w₂ (x, η)) y =
-      (1 - step (R.bigTime + w₁) w₂ y) * damping T κ y * R.angularStock (y, η) +
-        (4 / 5 : ℝ) * step (R.bigTime + w₁) w₂ y := by
-  rw [(R.logAmplitude_hasDerivAt hJ T κ w₁ w₂ y hη).deriv]
-  unfold angularSlope baseSlope
-  ring
 
-theorem prescribed_axial_control (hJ : IsOpen J) (T κ w₁ y : ℝ)
-    {η : ℝ} (hη : η ∈ J) :
-    deriv (fun x => R.axialVelocity T κ w₁ (x, η)) y =
-      -(1 - step R.bigTime w₁ y) * damping T κ y * R.axialStock (y, η) / 2 := by
-  rw [(R.axialVelocity_hasDerivAt hJ T κ w₁ y hη).deriv]
-  unfold axialSlope baseSlope
-  ring
 
-/-- On the final hold the physical logarithmic slope `l` is exactly `3/5`. -/
-theorem final_logarithmic_slope (hJ : IsOpen J) {T κ w₁ w₂ y η : ℝ}
-    (hw₂ : 0 < w₂) (hy : R.bigTime + w₁ + w₂ ≤ y) (hη : η ∈ J) :
-    1 + deriv (fun x => R.logAmplitude T κ w₁ w₂ (x, η)) y = (3 / 5 : ℝ) := by
-  rw [(R.logAmplitude_hasDerivAt hJ T κ w₁ w₂ y hη).deriv,
-    angularSlope_after hw₂ R.angularStock hy]
-  norm_num
 
 end StockReference
 
@@ -385,12 +363,6 @@ theorem parameterJet_mul_radial {J : Set ℝ} (hJ : IsOpen J) {F : Field}
       ((hg.comp contDiff_fst).contDiffOn.mul (parameterJet_smooth hJ hF n))
         (p := p) ⟨mem_univ _, hp⟩).unique hd
 
-theorem parameterJet_congr {J : Set ℝ} (hJ : IsOpen J) {F G : Field}
-    (he : ∀ p, p.2 ∈ J → F p = G p) (n : ℕ) {p : Point} (hp : p.2 ∈ J) :
-    parameterJet n F p = parameterJet n G p := by
-  induction n generalizing p with
-  | zero => exact he p hp
-  | succ n ih => exact parameterPartial_congr hJ (fun _ hq => ih hq) hp
 
 theorem parameterJet_sub {J : Set ℝ} (hJ : IsOpen J) {F G : Field}
     (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier)
@@ -429,28 +401,6 @@ theorem integral_norm_bound {F : ℝ → ℝ} {a b M : ℝ} (hab : a ≤ b)
       exact hb t ⟨(uIoc_of_le hab ▸ ht).1.le, (uIoc_of_le hab ▸ ht).2⟩)
   simpa only [Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.mpr hab)] using hi
 
-/-- An initial layer contributes only its width, even at later radii. -/
-theorem initial_layer_bound {F : ℝ → ℝ} (hF : Continuous F) {T y M : ℝ}
-    (hT : 0 ≤ T) (hy : 0 ≤ y) (hM : 0 ≤ M)
-    (hb : ∀ t ∈ Icc (0 : ℝ) y, |F t| ≤ M)
-    (hz : ∀ t ∈ Icc T y, F t = 0) :
-    |∫ t in (0 : ℝ)..y, F t| ≤ M * T := by
-  by_cases hyt : y ≤ T
-  · have hi : |∫ t in (0 : ℝ)..y, F t| ≤ M * y := by
-      simpa only [sub_zero] using integral_norm_bound hy hb
-    exact hi.trans (mul_le_mul_of_nonneg_left hyt hM)
-  · have hTy : T ≤ y := (lt_of_not_ge hyt).le
-    have hsplit := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
-      (hF.intervalIntegrable 0 T) (hF.intervalIntegrable T y)
-    have hzero : (∫ t in T..y, F t) = 0 := by
-      calc
-        _ = ∫ _t in T..y, (0 : ℝ) :=
-          intervalIntegral.integral_congr (fun t ht => hz t (uIcc_of_le hTy ▸ ht))
-        _ = 0 := by simp
-    rw [hzero, add_zero] at hsplit
-    rw [← hsplit]
-    simpa only [sub_zero] using integral_norm_bound hT
-      (fun t ht => hb t ⟨ht.1, ht.2.trans hTy⟩)
 
 /-- A modification supported after `a` contributes only the traversed
 width; the estimate applies before, during, and at the end of its ramp. -/
@@ -1411,25 +1361,6 @@ theorem small_physical_of_log_control {K : Set ℝ} (hKJ : K ⊆ parameterInterv
     rw [physicalF_eq_log F hΛ hsmall hδ hδT hP0 hT hb hw₁ hw₂ (hKJ hη) hp, Real.log_exp]
     exact hc.log_value (R.logTime X) ⟨hy0, hyend⟩ η hη
 
-/-- Direct physical error thresholds, with the reference cutoff already
-fixed.  Setting `N = 1` supplies the value and first-parameter estimates
-needed for all five histories and both lag stocks. -/
-theorem exists_small_physical_control {K : Set ℝ} (hK : IsCompact K)
-    (hKJ : K ⊆ parameterInterval) (N : ℕ) {ε : ℝ} (hε : 0 < ε)
-    (hb : δ ≤ (ofNatural F hΛ hsmall hδ hδT hP0).bigTime) :
-    let R := ofNatural F hΛ hsmall hδ hδT hP0
-    ∃ T0 > 0, ∃ κ0 > 0, ∃ w0 > 0, T0 ≤ δ ∧ κ0 < 1 ∧
-      2 * w0 < R.finalTime - R.bigTime ∧
-      ∀ T ∈ Ioo (0 : ℝ) T0, ∀ κ ∈ Ico (0 : ℝ) κ0,
-      ∀ w₁ ∈ Ioo (0 : ℝ) w0, ∀ w₂ ∈ Ioo (0 : ℝ) w0,
-        R.SmallPhysicalControl K N ε T κ w₁ w₂ := by
-  let R := ofNatural F hΛ hsmall hδ hδT hP0
-  obtain ⟨T0, hT0, κ0, hκ0, w0, hw0, hTδ, hκ1, hwgap, hcontrol⟩ :=
-    R.exists_small_log_control parameterInterval_open hK hKJ N (hδ.le.trans hb) hδ hε
-  refine ⟨T0, hT0, κ0, hκ0, w0, hw0, hTδ, hκ1, hwgap, ?_⟩
-  intro T hT κ hκ w₁ hw₁ w₂ hw₂
-  exact small_physical_of_log_control F hΛ hsmall hδ hδT hP0 hKJ hT.1 hb hw₁.1 hw₂.1
-    (hcontrol T hT κ hκ w₁ hw₁ w₂ hw₂)
 
 theorem exists_joint_small_control {K : Set ℝ} (hK : IsCompact K)
     (hKJ : K ⊆ parameterInterval) (N : ℕ) {ε : ℝ} (hε : 0 < ε)
@@ -1504,46 +1435,6 @@ theorem normalized_initialLog_formula (E : NaturalEntrance.CoefficientProfile d 
   rw [Real.log_div (Real.exp_pos _).ne' hC.ne', Real.log_exp]
   ring
 
-omit F C hδ hδT in
-/-- The bound precedes the choice of normalization `C`.  Its only profile
-input is the uniform coefficient-space ball and the proved `Phi > 1/8`. -/
-theorem exists_uniform_initialLog_bound (hσ : 0 < σ)
-    (hscale : AxisReference.stabilityScale d.coefficients.epsilon (profileErrorConstant d) ≤ Λ) :
-    ∃ B > 0, ∀ C, 0 < C → ∀ E : NaturalEntrance.CoefficientProfile d Λ C,
-      ∀ δ, ∀ hδ : 0 < δ, ∀ hδT : 2 * δ < rampLimit, ∀ η ∈ Icc (-1 : ℝ) 1,
-        |Real.log C + (ofNatural E.family hΛ hsmall hδ hδT hP0).initialLog η| ≤ B := by
-  obtain ⟨A, hA, ha⟩ := exists_phase_bound d
-  let J0 := ReferenceJetBounds.jetConstant d.coefficients 0 0
-  have hJ0 : 0 ≤ J0 := ReferenceJetBounds.jetConstant_nonneg d.coefficients 0 0
-  let B := 1 + Λ * A + |Real.log (1 / 8 : ℝ)| + |Real.log (1 + J0)|
-  have hB : 0 < B := by dsimp [B]; positivity
-  refine ⟨B, hB, ?_⟩
-  intro C hC E δ hδ hδT η hη
-  have hηJ := original_interval_interior hη
-  have hphi := NaturalEntrance.coefficient_phi_lower d.coefficients hσ
-    (NaturalEntrance.profileErrorConstant_nonneg d) hscale E.coefficients E.norm_error
-    (by norm_num : (0 : ℝ) ≤ 4) (by norm_num : (4 : ℝ) ≤ 41 / 10) hηJ
-  let φ := AxisEvaluation.profile window d.coefficients.epsilon E.coefficients.1 (4, η)
-  have hφ : 0 < φ := lt_trans (by norm_num) hphi
-  have hupper : φ ≤ 1 + J0 := by
-    have he := (ReferenceJetBounds.coefficient_jet_bound d.coefficients E.coefficients E.norm_ball
-      0 0 (p := (4, η)) (by norm_num)).1
-    rw [AxisEvaluation.mixedSeries_zero] at he
-    exact (le_abs_self φ).trans (he.trans (by dsimp [J0]; linarith))
-  have hlo : Real.log (1 / 8 : ℝ) ≤ Real.log φ := Real.log_le_log (by norm_num) hphi.le
-  have hhi : Real.log φ ≤ Real.log (1 + J0) := Real.log_le_log hφ hupper
-  have hlog : |Real.log φ| ≤ |Real.log (1 / 8 : ℝ)| + |Real.log (1 + J0)| := by
-    apply abs_le.mpr
-    constructor
-    · linarith [neg_abs_le (Real.log (1 / 8 : ℝ)), abs_nonneg (Real.log (1 + J0))]
-    · linarith [le_abs_self (Real.log (1 + J0)), abs_nonneg (Real.log (1 / 8 : ℝ))]
-  rw [normalized_initialLog_formula hΛ hsmall hδ hδT hP0 E hC hφ.ne']
-  calc
-    _ ≤ |Λ * realPhase h j σ η| + |Real.log φ| := abs_add_le _ _
-    _ ≤ Λ * A + (|Real.log (1 / 8 : ℝ)| + |Real.log (1 + J0)|) := by
-      rw [abs_mul, abs_of_pos hΛ]
-      exact add_le_add (mul_le_mul_of_nonneg_left (ha η hη) hΛ.le) hlog
-    _ ≤ B := by dsimp [B]; linarith
 
 omit F in
 theorem initialU_error_jet (E : NaturalEntrance.CoefficientProfile d Λ C) (n : ℕ)

@@ -1,4 +1,4 @@
-import Euler.AnglePrimitiveTranslation
+import Euler.AngleMeanZeroPrimitive
 
 /-! The normalized angular primitive reverses joint reflection parity. -/
 
@@ -10,12 +10,6 @@ open MeasureTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-omit [CompleteSpace E] in
-theorem primitive_neg (P : ℝ) (f : ℝ → E) :
-    primitive P (fun θ => -f θ)=fun θ => -primitive P f θ := by
-  funext θ
-  simp only [primitive, rawPrimitive, intervalIntegral.integral_neg, smul_neg]
-  abel
 
 /-- Reflection of the argument contributes one minus sign to a primitive. -/
 theorem primitive_reflection (P : ℝ) (hP : P ≠ 0) (f : ℝ → E) (hf : Continuous f)

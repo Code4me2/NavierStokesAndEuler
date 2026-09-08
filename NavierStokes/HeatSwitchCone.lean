@@ -1079,20 +1079,6 @@ theorem preserves_true_cone (F : Profile) {anchor left : ℝ}
   refine ⟨hqpos, harpos, hvpos, hP, ?_⟩
   exact ConeAlgebra.finite_amplitude_cone hscale hP hvc hquad
 
-/-- Existence uses the already constructed compensation branch for the same
-outgoing profile, after taking the maximum of its threshold and the cone
-threshold. -/
-theorem exists_compensated_true_cone (F : Profile) {anchor left : ℝ}
-    (h : OutgoingCone.CleanOutgoingCone F.reset anchor left) (ha : 0 < anchor) :
-    ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR →
-      ∃ w : HeatedOutgoing.CompensationWitness F XR C,
-        ∀ p ∈ OutgoingCone.trueWindow F.data, TrueAt F XR w.coefficients p := by
-  obtain ⟨X₀, C, hX₀, hC, hw⟩ := HeatedOutgoing.exists_compensation F
-  obtain ⟨X₁, _, hc⟩ := preserves_true_cone F h ha C
-  refine ⟨max X₀ X₁, C, hX₀.trans_le (le_max_left _ _), hC, ?_⟩
-  intro XR hXR
-  obtain ⟨w⟩ := hw XR ((le_max_left _ _).trans hXR)
-  exact ⟨w, hc XR ((le_max_right _ _).trans hXR) w⟩
 
 theorem past_integrable_from {f : ℝ → ℝ} (hf : Continuous f) {a : ℝ}
     (ha : IntegrableOn f (Iic a)) (y : ℝ) : IntegrableOn f (Iic y) := by
@@ -1202,15 +1188,6 @@ theorem logE_mul_logU (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ → Coeff
     OutgoingProfile.Profile.U, OutgoingProfile.Profile.E, mul_div_cancel_left₀ _ hXR.ne',
     Real.log_exp, Prod.mk.eta] using hh
 
-theorem J_eq_heated_past_integral (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ → Coeff)
-    (y eta : ℝ) : OutgoingHistories.J F.reset F.amp (y, eta) =
-      ∫ t in Iic y, Real.exp (3 * t / 2) * logE F XR c (t, eta) * F.logU (t, eta) := by
-  rw [OutgoingHistories.J_eq_integral F.reset F.amp_contDiff]
-  apply setIntegral_congr_fun measurableSet_Iic
-  intro t _
-  change Real.exp (3 * t / 2) * F.logE (t, eta) * F.logU (t, eta) = _
-  dsimp only
-  rw [mul_assoc, mul_assoc, logE_mul_logU F hXR c (t, eta)]
 
 theorem changeRow_after_switch (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ → Coeff)
     (eta : ℝ) (i : Fin 3) {X : ℝ} (hX : OutgoingDilation.switchRadius F XR ≤ X) :
@@ -1223,26 +1200,5 @@ theorem changeRow_after_switch (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ 
       TerminalCompensation.cleanProfile, hc]
   rw [hz, add_zero]
 
-/-- Exact restored total moments identify a finite-point change with the
-remaining future heat debt. In particular finite histories do not become
-equal merely because compensation is completed. -/
-theorem changeRow_prefix_eq_neg_future_heat (F : Profile) {XR C : ℝ}
-    (w : HeatedOutgoing.CompensationWitness F XR C) {eta : ℝ}
-    (heta : eta ∈ HeatedOutgoing.parameterDomain) (i : Fin 3) {X : ℝ}
-    (hX : OutgoingDilation.switchRadius F XR ≤ X) :
-    (∫ t in Ioc 0 X, HeatedOutgoing.changeRow F XR w.coefficients eta i t) =
-      -(∫ t in Ioi X, HeatedOutgoing.heatRow F XR eta i t) := by
-  have hpos := (OutgoingDilation.switchRadius_pos F XR w.radius_pos).trans_le hX
-  have hi := w.changeRow_integrable eta i heta
-  have hsum := setIntegral_union Ioc_disjoint_Ioi_same measurableSet_Ioi
-    (hi.mono_set Ioc_subset_Ioi_self) (hi.mono_set (Ioi_subset_Ioi hpos.le))
-  rw [Ioc_union_Ioi_eq_Ioi hpos.le, w.changeRow_integral_zero eta i heta] at hsum
-  have htail : (∫ t in Ioi X, HeatedOutgoing.changeRow F XR w.coefficients eta i t) =
-      ∫ t in Ioi X, HeatedOutgoing.heatRow F XR eta i t := by
-    apply setIntegral_congr_fun measurableSet_Ioi
-    intro t ht
-    exact changeRow_after_switch F w.radius_pos w.coefficients eta i (hX.trans ht.le)
-  rw [htail] at hsum
-  linarith
 
 end NavierStokes.HeatSwitchCone

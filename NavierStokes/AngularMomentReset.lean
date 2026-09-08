@@ -251,13 +251,6 @@ theorem relative_square_moment (lam : ℝ) (c : Coeff) :
   dsimp [quadraticMoment]
   ring
 
-theorem pressure_change_integrable (lam : ℝ) (c : Coeff) :
-    Integrable (fun y => Real.exp (pressureSlope lam * y) * ((1 + relative c y) ^ 2 - 1)) := by
-  convert! ((weighted_relative_integrable (pressureSlope lam) c).const_mul 2).add
-    (weighted_relative_sq_integrable (pressureSlope lam) c) using 1
-  ext y
-  simp only [Pi.add_apply]
-  ring
 
 theorem pressure_change_moment (lam : ℝ) (c : Coeff) :
     (∫ y, Real.exp (pressureSlope lam * y) * ((1 + relative c y) ^ 2 - 1)) =
@@ -448,9 +441,6 @@ theorem exists_resetBranch (lam : ℝ) (hlam : 0 < lam) : Nonempty (ResetBranch 
     exact ⟨((hjet (c δ) y).1.trans (htotal δ hδ)).trans (min_le_left _ _),
       ((hjet (c δ) y).2.trans (htotal δ hδ)).trans (min_le_right _ _)⟩
 
-/-- One fixed choice of the proved small branch. -/
-def resetBranch (lam : ℝ) (hlam : 0 < lam) : ResetBranch lam :=
-  Classical.choice (exists_resetBranch lam hlam)
 
 /-! ## Actual modified angular fields -/
 
@@ -619,33 +609,7 @@ theorem angularScale_pos (lam e0 X0 y0 : ℝ) (he0 : 0 < e0) (hX : 0 < X0) :
   unfold angularScale
   exact mul_pos (mul_pos (mul_pos hX (Real.sqrt_pos.mpr (by positivity))) he0) (Real.exp_pos _)
 
-/-- The pressure change is an integrable compactly supported difference. We do
-not subtract divergent integrals of the pure exponential background over `ℝ`. -/
-theorem pressure_delta_integrable (lam e0 y0 : ℝ) (c : Coeff) :
-    Integrable (fun y => (modifiedE lam e0 y0 c y) ^ 2 - (baseE lam e0 y) ^ 2) := by
-  have hf : (fun y => (modifiedE lam e0 y0 c y) ^ 2 - (baseE lam e0 y) ^ 2) =
-      (fun y => (modifiedE lam e0 y0 c y + baseE lam e0 y) *
-        (modifiedE lam e0 y0 c y - baseE lam e0 y)) := by funext y; ring
-  rw [hf]
-  exact (((modifiedE_contDiff lam e0 y0 c).continuous.add (baseE_contDiff lam e0).continuous).mul
-    ((modifiedE_contDiff lam e0 y0 c).continuous.sub (baseE_contDiff lam e0).continuous)).integrable_of_hasCompactSupport
-      (modifiedE_sub_hasCompactSupport lam e0 y0 c).mul_left
 
-theorem angular_delta_integrable (lam e0 X0 y0 : ℝ) (c : Coeff) :
-    Integrable (fun y => radiusX X0 y * (modifiedH lam e0 X0 y0 c y - baseH lam e0 X0 y)) := by
-  have hf : (fun y => radiusX X0 y * (modifiedH lam e0 X0 y0 c y - baseH lam e0 X0 y)) =
-      (fun y => (radiusX X0 y * Real.sqrt (2 * radiusX X0 y)) *
-        (modifiedE lam e0 y0 c y - baseE lam e0 y)) := by
-    funext y
-    unfold modifiedH baseH
-    ring
-  rw [hf]
-  have hX : Continuous (radiusX X0) := continuous_const.mul Real.continuous_exp
-  have hw : Continuous (fun y => radiusX X0 y * Real.sqrt (2 * radiusX X0 y)) :=
-    hX.mul (Real.continuous_sqrt.comp (continuous_const.mul hX))
-  exact (hw.mul ((modifiedE_contDiff lam e0 y0 c).continuous.sub
-    (baseE_contDiff lam e0).continuous)).integrable_of_hasCompactSupport
-      (modifiedE_sub_hasCompactSupport lam e0 y0 c).mul_left
 
 theorem modifiedH_unchanged (lam e0 X0 y0 : ℝ) (c : Coeff) {y : ℝ}
     (hy : y ∉ Ioo (y0 - 1) (y0 + 3)) :
@@ -683,18 +647,6 @@ theorem logSlope_le (hlam : 0 < lam) (e0 y0 δ y : ℝ) (he0 : 0 < e0)
   rw [modifiedE_logSlope lam e0 y0 (B.coefficients δ) y he0.ne' hp.1.ne']
   exact hp.2
 
-/-- Any desired angular endpoint moment is reached when its normalized debt
-lies in the constructed common small interval. -/
-theorem exact_target (e0 X0 y0 Iold Itarget : ℝ) (he0 : 0 < e0) (hX : 0 < X0)
-    (hδ : (Itarget - Iold) / angularScale lam e0 X0 y0 ∈ Ioo (-B.radius) B.radius) :
-    Iold + (∫ y, radiusX X0 y *
-      (modifiedH lam e0 X0 y0
-        (B.coefficients ((Itarget - Iold) / angularScale lam e0 X0 y0)) y -
-          baseH lam e0 X0 y)) = Itarget := by
-  rw [B.angular_change e0 X0 y0 _ hX.le hδ]
-  have hs := (angularScale_pos lam e0 X0 y0 he0 hX).ne'
-  field_simp
-  ring
 
 end ResetBranch
 
@@ -763,24 +715,6 @@ theorem ResetBranch.pressure_interval_neutral {lam : ℝ} (B : ResetBranch lam)
 def prefixI (lam e0 X0 a b Iprior : ℝ) : ℝ :=
   Iprior + ∫ y in Icc a b, radiusX X0 y * baseH lam e0 X0 y
 
-theorem ResetBranch.exact_endpoint_moment {lam : ℝ} (B : ResetBranch lam)
-    (e0 X0 y0 a b Iprior Itarget : ℝ) (he0 : 0 < e0) (hX : 0 < X0)
-    (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b)
-    (hδ : (Itarget - prefixI lam e0 X0 a b Iprior) / angularScale lam e0 X0 y0 ∈
-      Ioo (-B.radius) B.radius) :
-    Iprior + (∫ y in Icc a b, radiusX X0 y * modifiedH lam e0 X0 y0
-      (B.coefficients ((Itarget - prefixI lam e0 X0 a b Iprior) / angularScale lam e0 X0 y0)) y) =
-        Itarget := by
-  let δ := (Itarget - prefixI lam e0 X0 a b Iprior) / angularScale lam e0 X0 y0
-  have hi := angular_interval_change lam e0 X0 y0 a b (B.coefficients δ) hX.le ha hb
-  rw [B.angular δ hδ] at hi
-  have hs : angularScale lam e0 X0 y0 ≠ 0 := (angularScale_pos lam e0 X0 y0 he0 hX).ne'
-  have hd : angularScale lam e0 X0 y0 * δ = Itarget - prefixI lam e0 X0 a b Iprior := by
-    dsimp [δ]
-    field_simp
-  rw [hd] at hi
-  dsimp [prefixI] at hi
-  linarith
 
 /-! ## Smooth dependence on the angular parameter -/
 
@@ -793,21 +727,5 @@ theorem relative_joint_contDiff :
   exact (h0.mul ((bump_contDiff 0).comp contDiff_snd)).add
     (h1.mul ((bump_contDiff 1).comp contDiff_snd))
 
-theorem ResetBranch.joint_contDiffOn {lam : ℝ} (B : ResetBranch lam)
-    (e0 y0 : ℝ) {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
-    {S : Set P} {δ : P → ℝ} (hδ : ContDiffOn ℝ ∞ δ S)
-    (hsmall : ∀ p ∈ S, δ p ∈ Ioo (-B.radius) B.radius) :
-    ContDiffOn ℝ ∞ (fun z : P × ℝ => modifiedE lam e0 y0 (B.coefficients (δ z.1)) z.2)
-      (S ×ˢ univ) := by
-  have hc : ContDiffOn ℝ ∞ (fun p => B.coefficients (δ p)) S :=
-    B.smooth.comp hδ hsmall
-  have hcz : ContDiffOn ℝ ∞ (fun z : P × ℝ => B.coefficients (δ z.1)) (S ×ˢ univ) :=
-    hc.comp contDiffOn_fst (fun _ hz => hz.1)
-  have hs : ContDiffOn ℝ ∞ (fun z : P × ℝ => z.2 - y0) (S ×ˢ univ) :=
-    contDiffOn_snd.sub contDiffOn_const
-  have hr : ContDiffOn ℝ ∞ (fun z : P × ℝ => relative (B.coefficients (δ z.1)) (z.2 - y0))
-      (S ×ˢ univ) :=
-    relative_joint_contDiff.contDiffOn.comp (hcz.prodMk hs) (mapsTo_univ _ _)
-  exact ((baseE_contDiff lam e0).comp contDiff_snd).contDiffOn.mul (contDiffOn_const.add hr)
 
 end NavierStokes.AngularMomentReset

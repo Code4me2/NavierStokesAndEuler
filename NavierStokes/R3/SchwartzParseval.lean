@@ -51,11 +51,6 @@ theorem integral_fourier_mul_conj (f g : ComplexTest) :
     g.continuous.fourierInv_fourier_eq g.integrable
       (FourierTransform.fourierCLE ℂ ComplexTest g).integrable]
 
-/-- The convention with conjugation on the first factor, used by complex inner products. -/
-theorem integral_conj_fourier_mul (f g : ComplexTest) :
-    (∫ ξ : Space, conj (𝓕 f ξ) * 𝓕 g ξ) =
-      ∫ x : Space, conj (f x) * g x := by
-  simpa only [mul_comm] using integral_fourier_mul_conj g f
 
 /-- A Schwartz function has a finite squared `L²` norm. -/
 theorem integrable_norm_sq (f : ComplexTest) :
@@ -74,11 +69,6 @@ theorem integral_norm_sq_fourier (f : ComplexTest) :
   simp only [Complex.mul_conj, Complex.normSq_eq_norm_sq, integral_complex_ofReal] at h
   exact Complex.ofReal_injective h
 
-/-- Parseval for the inverse Fourier transform of a Schwartz function. -/
-theorem integral_norm_sq_fourierInv (f : ComplexTest) :
-    (∫ ξ : Space, ‖𝓕⁻ f ξ‖ ^ 2) = ∫ x : Space, ‖f x‖ ^ 2 := by
-  have h := integral_norm_sq_fourier (FourierTransform.fourierInv f)
-  simpa only [FourierTransform.fourier_fourierInv_eq] using h.symm
 
 
 end NavierStokesR3.SchwartzParseval

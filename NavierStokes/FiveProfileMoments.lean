@@ -653,20 +653,6 @@ were proved nonzero above. -/
 noncomputable def actualLinearEquiv (P : Patch) (b A G : ℝ) (hb : GoodExponent b)
     (hA : A ≠ 0) : Coeff ≃L[ℝ] Debt := (linearEquiv P b hb).trans (physicalEquiv A G hA)
 
-theorem physicalMoments_hasFDerivAt_zero (P : Patch) (b A G : ℝ) (hb : GoodExponent b)
-    (hA : A ≠ 0) : HasFDerivAt (physicalMoments P b A G)
-      (actualLinearEquiv P b A G hb hA).toContinuousLinearMap 0 := by
-  have hn : normalizedMap P b =
-      UniformAngularReset.quadraticMap (linearEquiv P b hb) (quadraticCLM P) :=
-    funext (fun c => (normalizedMap_identity P b hb c).symm)
-  have hd : HasFDerivAt (normalizedMap P b) (linearEquiv P b hb).toContinuousLinearMap 0 := by
-    rw [hn]
-    simpa [UniformAngularReset.tangent] using
-      UniformAngularReset.quadraticMap_hasFDerivAt (linearEquiv P b hb) (quadraticCLM P) 0
-  have hp : physicalMoments P b A G = fun c => physicalEquiv A G hA (normalizedMap P b c) :=
-    funext (physicalMoments_eq P b A G hA)
-  rw [hp]
-  exact (physicalEquiv A G hA).hasFDerivAt.comp 0 hd
 
 theorem physicalDensity_zero_outside (P : Patch) (b A G : ℝ) (c : Coeff) {x : ℝ}
     (hx : x ∉ Ioo P.left P.right) : physicalDensity P b A G c x = 0 := by
@@ -785,104 +771,8 @@ theorem correction_family_contDiffOn {n : ℕ} (P : Patch) {S : Set ℝ} {c : �
   exact ((contDiffOn_pi.mp hc j).comp contDiffOn_fst (fun z hz => hz.1)).mul
     ((bump_contDiff P j).comp contDiff_snd).contDiffOn
 
-theorem physicalU_family_contDiffOn (P : Patch) {S : Set ℝ} {A G : ℝ → ℝ} {c : ℝ → Coeff}
-    (hA : ContDiffOn ℝ ∞ A S) (hG : ContDiffOn ℝ ∞ G S) (hc : ContDiffOn ℝ ∞ c S) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => physicalU P (A z.1) (G z.1) (c z.1) z.2) (S ×ˢ univ) :=
-  (hG.comp contDiffOn_fst (fun _ hz => hz.1)).add
-    ((hA.comp contDiffOn_fst (fun _ hz => hz.1)).mul (correction_family_contDiffOn P.leftHalf hc.fst))
 
-theorem physicalE_family_contDiffOn (P : Patch) (b : ℝ) {S : Set ℝ} {A : ℝ → ℝ} {c : ℝ → Coeff}
-    (hA : ContDiffOn ℝ ∞ A S) (hc : ContDiffOn ℝ ∞ c S) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => physicalE P b (A z.1) (c z.1) z.2) (S ×ˢ Ioi 0) := by
-  apply (hA.comp contDiffOn_fst (fun z hz => hz.1)).mul
-  apply ContDiffOn.add
-  · exact contDiffOn_snd.rpow_const_of_ne (fun z hz => ne_of_gt hz.2)
-  · exact (correction_family_contDiffOn P.rightHalf hc.snd).mono (fun z hz => ⟨hz.1, mem_univ _⟩)
 
-/-- Every fixed finite spatial jet of the physical edits is small with the
-physical debt, uniformly on compact parameter sets. The actual coefficient
-branch is smooth on an open neighborhood of the compact set. -/
-theorem compact_parameter_repair (P : Patch) (b : ℝ) (hb : GoodExponent b)
-    (S : Set ℝ) (hS : IsCompact S) (A G : ℝ → ℝ)
-    (hA : ContDiff ℝ ∞ A) (hG : ContDiff ℝ ∞ G) (hApos : ∀ p, 0 < A p) (N : ℕ) :
-    ∃ ε K : ℝ, 0 < ε ∧ 0 < K ∧ ∀ d : ℝ → Debt,
-      ContDiff ℝ ∞ d → (∀ p ∈ S, ‖d p‖ < ε) →
-      ∃ (c : ℝ → Coeff) (V : Set ℝ), IsOpen V ∧ S ⊆ V ∧ ContDiffOn ℝ ∞ c V ∧
-        (∀ p ∈ V, physicalMoments P b (A p) (G p) (c p) = d p ∧
-          ∀ x : ℝ, 0 < x → 0 < physicalE P b (A p) (c p) x) ∧
-        ∀ p ∈ S, ‖c p‖ ≤ K * ‖d p‖ ∧ ∀ k ≤ N, ∀ x : ℝ,
-          |iteratedDeriv k (fun y => A p * u P (c p) y) x| ≤ K * ‖d p‖ ∧
-          |iteratedDeriv k (fun y => A p * e P (c p) y) x| ≤ K * ‖d p‖ := by
-  obtain ⟨g, ε₀, C, hε₀, hC, hg, _, hgeq⟩ := exists_normalized_repair P b hb
-  obtain ⟨D, hD, hnorm⟩ := compact_normalization_bound S hS hA.contDiffOn hG.contDiffOn
-    (fun p _ => (hApos p).ne')
-  obtain ⟨J, hJ, hjets⟩ := finite_spatial_jet_bound P N
-  obtain ⟨L₀, hL₀⟩ := hS.exists_bound_of_continuousOn hA.continuous.continuousOn
-  let L : ℝ := 1 + |L₀|
-  have hL : 0 < L := by dsimp [L]; positivity
-  have hAbound : ∀ p ∈ S, |A p| ≤ L := by
-    intro p hp
-    exact (hL₀ p hp).trans (by dsimp [L]; linarith [le_abs_self L₀])
-  let K : ℝ := (1 + L) * (1 + J) * (C * D)
-  have hK : 0 < K := by dsimp [K]; positivity
-  have hKC : C * D ≤ K := by
-    dsimp [K]
-    nlinarith [mul_pos hC hD, mul_pos hL hJ]
-  have hKJ : L * J * (C * D) ≤ K := by
-    dsimp [K]
-    nlinarith [mul_pos hC hD, mul_pos hL (mul_pos hC hD), mul_pos hJ (mul_pos hC hD)]
-  refine ⟨ε₀ / D, K, div_pos hε₀ hD, hK, ?_⟩
-  intro d hd hsmall
-  let f : ℝ → Coeff := fun p => normalizedDebt (A p) (G p) (d p)
-  have hf : ContDiff ℝ ∞ f := normalizedDebt_contDiff hA hG hd (fun p => (hApos p).ne')
-  let V : Set ℝ := f ⁻¹' Metric.ball 0 ε₀
-  have hV : IsOpen V := Metric.isOpen_ball.preimage hf.continuous
-  have hSV : S ⊆ V := by
-    intro p hp
-    change ‖f p - 0‖ < ε₀
-    rw [sub_zero]
-    calc
-      ‖f p‖ ≤ D * ‖d p‖ := hnorm p hp (d p)
-      _ < D * (ε₀ / D) := mul_lt_mul_of_pos_left (hsmall p hp) hD
-      _ = ε₀ := by field_simp
-  let c : ℝ → Coeff := g ∘ f
-  have hc : ContDiffOn ℝ ∞ c V := hg.comp hf.contDiffOn (fun p hp => hp)
-  refine ⟨c, V, hV, hSV, hc, ?_, ?_⟩
-  · intro p hp
-    have hs := hgeq (f p) hp
-    constructor
-    · rw [physicalMoments_eq P b (A p) (G p) (hApos p).ne']
-      change physicalDebt (A p) (G p) (normalizedMap P b (g (f p))) = _
-      rw [hs.1]
-      exact physical_normalized_debt (A p) (G p) (hApos p).ne' (d p)
-    · intro x hx
-      exact mul_pos (hApos p) (hs.2.2.2 x hx)
-  · intro p hp
-    have hcp : ‖c p‖ ≤ C * D * ‖d p‖ := by
-      calc
-        _ ≤ C * ‖f p‖ := (hgeq (f p) (hSV hp)).2.1
-        _ ≤ C * (D * ‖d p‖) := mul_le_mul_of_nonneg_left (hnorm p hp (d p)) hC.le
-        _ = _ := by ring
-    refine ⟨hcp.trans (mul_le_mul_of_nonneg_right hKC (norm_nonneg _)), ?_⟩
-    intro k hk x
-    have hu := (hjets k hk (c p) x).1
-    have he := (hjets k hk (c p) x).2
-    have hbound : |A p| * (J * ‖c p‖) ≤ K * ‖d p‖ := by
-      calc
-        _ ≤ L * (J * ‖c p‖) := mul_le_mul_of_nonneg_right (hAbound p hp) (by positivity)
-        _ ≤ L * (J * (C * D * ‖d p‖)) :=
-          mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hcp hJ.le) hL.le
-        _ = (L * J * (C * D)) * ‖d p‖ := by ring
-        _ ≤ _ := mul_le_mul_of_nonneg_right hKJ (norm_nonneg _)
-    constructor
-    · unfold u
-      rw [iteratedDeriv_const_mul _ ((correction_contDiff P.leftHalf (c p).1).of_le
-        (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffAt, abs_mul]
-      exact (mul_le_mul_of_nonneg_left hu (abs_nonneg _)).trans hbound
-    · unfold e
-      rw [iteratedDeriv_const_mul _ ((correction_contDiff P.rightHalf (c p).2).of_le
-        (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffAt, abs_mul]
-      exact (mul_le_mul_of_nonneg_left he (abs_nonneg _)).trans hbound
 
 theorem smooth_solver_jet_bound {g : Coeff → Coeff} {r : ℝ} (hr : 0 < r)
     (hg : ContDiffOn ℝ ∞ g (Metric.ball 0 r)) (N : ℕ) :
@@ -1014,68 +904,6 @@ theorem mixed_jet_bound (P : Patch) (N : ℕ) :
   exact ⟨(linear_parameter_jet_bound _ hv m).trans (mul_le_mul_of_nonneg_right hU (norm_nonneg _)),
     (linear_parameter_jet_bound _ hv m).trans (mul_le_mul_of_nonneg_right hE (norm_nonneg _))⟩
 
-/-- Full mixed jets of both physical edits tend to zero with finite jets of
-the normalized debt. Bounds on the fixed smooth amplitude are kept explicit.
-This applies directly to the solver constructed in `exists_normalized_repair`. -/
-theorem physical_mixed_jets_small (P : Patch) {g : Coeff → Coeff} {r C : ℝ}
-    (hr : 0 < r) (hC : 0 < C) (hg : ContDiffOn ℝ ∞ g (Metric.ball 0 r))
-    (hvalue : ∀ z ∈ Metric.ball (0 : Coeff) r, ‖g z‖ ≤ C * ‖z‖) (N : ℕ) :
-    ∃ K : ℝ, 0 < K ∧ ∀ (V : Set ℝ), IsOpen V → ∀ (f : ℝ → Coeff) (A : ℝ → ℝ),
-      ContDiff ℝ ∞ f → ContDiffOn ℝ ∞ A V → ∀ B tau : ℝ,
-      0 ≤ B → 0 < tau → tau ≤ min 1 (r / 2) →
-      JetBounds.FiniteJetBound N A V B →
-      JetBounds.FiniteJetBound N f V (tau ^ (N + 1)) →
-      ∀ eta ∈ V, ∀ k ≤ N, ∀ m ≤ N, ∀ x : ℝ,
-        ‖iteratedFDeriv ℝ m (fun p => iteratedDeriv k (fun y => A p * u P (g (f p)) y) x) eta‖ ≤ K * B * tau ∧
-        ‖iteratedFDeriv ℝ m (fun p => iteratedDeriv k (fun y => A p * e P (g (f p)) y) x) eta‖ ≤ K * B * tau := by
-  obtain ⟨J, hJ, hjets⟩ := mixed_jet_bound P N
-  obtain ⟨D, hD, hparam⟩ := smooth_solver_parameter_jets hr hC hg hvalue N
-  let L : ℝ →L[ℝ] Coeff →L[ℝ] Coeff := ContinuousLinearMap.lsmul ℝ ℝ
-  let K : ℝ := J * (‖L‖ + 1) * (2 : ℝ) ^ N * D
-  have hK : 0 < K := by dsimp [K]; positivity
-  refine ⟨K, hK, ?_⟩
-  intro V hV f A hf hA B tau hB htau hmax hAb hfb eta heta k hk m hm x
-  have hmap : MapsTo f V (Metric.ball (0 : Coeff) r) := by
-    intro p hp
-    have hz := hfb 0 (Nat.zero_le N) p hp
-    rw [norm_iteratedFDeriv_zero] at hz
-    have ht1 := hmax.trans (min_le_left _ _)
-    have htr := hmax.trans (min_le_right _ _)
-    have hpow : tau ^ (N + 1) ≤ tau := by
-      simpa only [pow_one] using pow_le_pow_of_le_one htau.le ht1 (show 1 ≤ N + 1 by omega)
-    simpa only [Metric.mem_ball, dist_zero_right] using
-      (hz.trans hpow).trans_lt (lt_of_le_of_lt htr (by linarith : r / 2 < r))
-  let c : ℝ → Coeff := g ∘ f
-  have hc : ContDiffOn ℝ ∞ c V := hg.comp hf.contDiffOn hmap
-  have hcb : JetBounds.FiniteJetBound N c V (D * tau) := by
-    intro j hj p hp
-    exact hparam f hf tau p htau hmax (fun i hi => hfb i hi p hp) j hj
-  let v : ℝ → Coeff := fun p => A p • c p
-  have hv : ContDiffOn ℝ ∞ v V := hA.smul hc
-  have hvb : JetBounds.FiniteJetBound N v V (‖L‖ * (2 : ℝ) ^ N * B * (D * tau)) :=
-    JetBounds.FiniteJetBound.bilinear L hV
-      (hA.of_le (by exact_mod_cast (le_top : (N : ℕ∞) ≤ ⊤)))
-      (hc.of_le (by exact_mod_cast (le_top : (N : ℕ∞) ≤ ⊤))) hAb hcb
-  have hcost : J * (‖L‖ * (2 : ℝ) ^ N * B * (D * tau)) ≤ K * B * tau := by
-    dsimp [K]
-    nlinarith [show 0 ≤ J * (2 : ℝ) ^ N * B * D * tau by positivity]
-  have huFun : (fun p => iteratedDeriv k (fun y => A p * u P (g (f p)) y) x) =
-      fun p => iteratedDeriv k (u P (v p)) x := by
-    funext p
-    congr 1
-    funext y
-    simp [v, c, u, correction, Pi.smul_apply, smul_eq_mul, mul_assoc]
-    ring
-  have heFun : (fun p => iteratedDeriv k (fun y => A p * e P (g (f p)) y) x) =
-      fun p => iteratedDeriv k (e P (v p)) x := by
-    funext p
-    congr 1
-    funext y
-    simp [v, c, e, correction, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc]
-  rw [huFun, heFun]
-  have hjet := hjets k hk m v eta (hv.contDiffAt (hV.mem_nhds heta)) x
-  exact ⟨hjet.1.trans ((mul_le_mul_of_nonneg_left (hvb m hm eta heta) hJ.le).trans hcost),
-    hjet.2.trans ((mul_le_mul_of_nonneg_left (hvb m hm eta heta) hJ.le).trans hcost)⟩
 
 theorem u_tsupport_patch (P : Patch) (c : Coeff) : tsupport (u P c) ⊆ Ioo P.left P.right := by
   intro x hx
@@ -1095,9 +923,6 @@ theorem u_zero_outside (P : Patch) (c : Coeff) {x : ℝ} (hx : x ∉ Ioo P.left 
 theorem e_zero_outside (P : Patch) (c : Coeff) {x : ℝ} (hx : x ∉ Ioo P.left P.right) : e P c x = 0 :=
   Classical.byContradiction (fun hn => hx (e_tsupport_patch P c (subset_tsupport _ hn)))
 
-theorem physical_profiles_unchanged (P : Patch) (b A G : ℝ) (c : Coeff) {x : ℝ}
-    (hx : x ∉ Ioo P.left P.right) : physicalU P A G c x = G ∧ physicalE P b A c x = A * x ^ b := by
-  simp [physicalU, physicalE, u_zero_outside P c hx, e_zero_outside P c hx]
 
 theorem physical_edits_tsupport (P : Patch) (A : ℝ) (c : Coeff) :
     tsupport (fun x => A * u P c x) ⊆ Ioo P.left P.right ∧
@@ -1134,13 +959,6 @@ theorem local_profile_change (P : Patch) (b A G : ℝ) (c : Coeff) (U E : ℝ �
     ext i
     fin_cases i <;> simp [profileChangeDensity, u_zero_outside P c hx, e_zero_outside P c hx]
 
-theorem local_profile_moments (P : Patch) (b A G : ℝ) (c : Coeff) (U E : ℝ → ℝ)
-    (hU : ∀ x ∈ Ioo P.left P.right, U x = G)
-    (hE : ∀ x ∈ Ioo P.left P.right, E x = A * x ^ b) (i : Fin 5) :
-    (∫ x in Ioi (0 : ℝ), profileChangeDensity U E (fun y => A * u P c y) (fun y => A * e P c y) x i) =
-      physicalMoments P b A G c i := by
-  simp_rw [local_profile_change P b A G c U E hU hE]
-  exact physicalMoments_positive_axis P b A G c i
 
 noncomputable def normalizationCLM (A G : ℝ) : Debt →L[ℝ] Coeff :=
   ∑ i : Fin 5, ContinuousLinearMap.smulRightL ℝ Debt Coeff

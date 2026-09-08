@@ -160,13 +160,6 @@ theorem weakPotential_pairing (χ : Cutoff) (z : L2) (f : Test) :
   filter_upwards [testCurl_ae χ f] with x hx
   rw [hx]
 
-theorem weakPotential_norm_le (χ : Cutoff) (z : L2) :
-    ‖weakPotential χ z‖ ≤ cutoffBound χ * ‖z‖ := by
-  refine ((weakPotential χ).le_opNorm z).trans ?_
-  apply mul_le_mul_of_nonneg_right _ (norm_nonneg z)
-  change ‖(cutoffCurl χ).adjoint‖ ≤ cutoffBound χ
-  rw [LinearIsometryEquiv.norm_map]
-  exact cutoffCurl_norm_le χ
 
 /-- Compact vector tests determine the weak potential uniquely in the actual homogeneous space. -/
 theorem weakPotential_unique (χ : Cutoff) (z : L2) (u : homogeneousSpace)
@@ -180,11 +173,6 @@ theorem weakPotential_unique (χ : Cutoff) (z : L2) (u : homogeneousSpace)
   · intro f
     exact (hu f).trans (weakPotential_pairing χ z f).symm
 
-/-- A genuine uniquely solvable weak Poisson/Riesz problem for the cutoff-curl functional. -/
-theorem existsUnique_weakPotential (χ : Cutoff) (z : L2) :
-    ∃! u : homogeneousSpace, ∀ f : Test, ⟪u, homogeneousGradient f⟫_ℝ =
-      ∫ x, ⟪z x, vectorCurl (fun y => χ.field y • (f : Space → Space) y) x⟫_ℝ :=
-  ⟨weakPotential χ z, weakPotential_pairing χ z, fun u hu => weakPotential_unique χ z u hu⟩
 
 /-- The actual bounded positive mean boundary operator `Tχ Tχ*`. -/
 def boundaryOperator (χ : Cutoff) : L2 →L[ℝ] L2 := (cutoffCurl χ).comp (weakPotential χ)
@@ -203,13 +191,6 @@ theorem boundaryOperator_energy (χ : Cutoff) (z : L2) :
     ⟪boundaryOperator χ z, z⟫_ℝ = ‖weakPotential χ z‖ ^ 2 := by
   rw [boundaryOperator_pairing, real_inner_self_eq_norm_sq]
 
-theorem boundaryOperator_norm_le (χ : Cutoff) :
-    ‖boundaryOperator χ‖ ≤ cutoffBound χ ^ 2 := by
-  refine (ContinuousLinearMap.opNorm_comp_le _ _).trans ?_
-  change ‖cutoffCurl χ‖ * ‖(cutoffCurl χ).adjoint‖ ≤ _
-  rw [LinearIsometryEquiv.norm_map]
-  exact (mul_le_mul (cutoffCurl_norm_le χ) (cutoffCurl_norm_le χ)
-    (norm_nonneg (cutoffCurl χ)) (cutoffBound_nonneg χ)).trans_eq (sq (cutoffBound χ)).symm
 
 /-- The actual test-level cutoff curl is solenoidal. -/
 theorem testCurl_solenoidal (χ : Cutoff) (f : Test) :
@@ -283,14 +264,5 @@ theorem boundaryOperator_zero_off_support (χ : Cutoff) (z : L2) :
     (boundaryOperator χ z : Space → Space) =ᵐ[volume.restrict (tsupport χ.field)ᶜ] 0 :=
   (mem_supportedSpace_iff χ _).mp (boundaryOperator_supported χ z)
 
-/-- Symmetry follows from the actual Hilbert-adjoint construction. -/
-theorem boundaryOperator_symmetric (χ : Cutoff) (z w : L2) :
-    ⟪boundaryOperator χ z, w⟫_ℝ = ⟪z, boundaryOperator χ w⟫_ℝ := by
-  calc
-    ⟪boundaryOperator χ z, w⟫_ℝ = ⟪weakPotential χ z, weakPotential χ w⟫_ℝ :=
-      boundaryOperator_pairing χ z w
-    _ = ⟪weakPotential χ w, weakPotential χ z⟫_ℝ := real_inner_comm _ _
-    _ = ⟪boundaryOperator χ w, z⟫_ℝ := (boundaryOperator_pairing χ w z).symm
-    _ = ⟪z, boundaryOperator χ w⟫_ℝ := real_inner_comm _ _
 
 end EulerMeanBoundary

@@ -109,14 +109,6 @@ theorem coupling_step (a : ℝ)
   rw [sum_range_succ]
   linarith only [hd,ht,P.coupling_error]
 
-theorem tilt_step (σ : ℝ)
-    (h : |(scaleSequence S.J S.X (n+1))^2*σ^2-1| ≤
-      renewalCost S.J S.D 4 c frameConstant S.X n) :
-    1/2 ≤ σ^2*(scaleSequence S.J S.X (n+1))^2 ∧
-      σ^2*(scaleSequence S.J S.X (n+1))^2 ≤ 2 := by
-  have hh := abs_le.mp h
-  have he := S.renewal_series.term_le n
-  constructor <;> nlinarith only [hh.1,hh.2,he]
 
 end EulerPacketInduction.Stage
 

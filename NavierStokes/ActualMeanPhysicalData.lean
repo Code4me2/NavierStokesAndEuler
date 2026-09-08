@@ -266,11 +266,6 @@ theorem initial_nativeJets_of_class {α : ℝ} {f : Scalar}
   intro n hn
   simpa only [one_mul, pow_one] using slowScale_le_S (hN.trans hn)
 
-theorem initialRadial_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
-    PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (19 / 10))
-      (initialRadialFamily B N0 N).native :=
-  initial_nativeJets_of_class (initial_mean_moving B N0).radial
-    (ActualInitialMean.initial_cumulative_bounds B N0).velocity.radial N hN
 
 theorem initialAngular_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
     PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (9 / 10))
@@ -278,11 +273,6 @@ theorem initialAngular_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
   initial_nativeJets_of_class (initial_mean_moving B N0).angular
     (ActualInitialMean.initial_cumulative_bounds B N0).velocity.angular N hN
 
-theorem initialAxial_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
-    PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (9 / 10))
-      (initialAxialFamily B N0 N).native :=
-  initial_nativeJets_of_class (initial_mean_moving B N0).axial
-    (ActualInitialMean.initial_cumulative_bounds B N0).velocity.axial N hN
 
 theorem initialPressure_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
     PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (9 / 10))
@@ -290,21 +280,7 @@ theorem initialPressure_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
   initial_nativeJets_of_class (initial_pressure_moving B N0)
     (ActualInitialMean.initial_cumulative_bounds B N0).pressure N hN
 
-theorem initialAngular_field_eq (B N0 N n : ℕ) (hn : N ≤ n) {w : SpaceTime}
-    (ht : w ∈ PhysicalWaveSum.preterminal)
-    (hu : (PhysicalMeanJetBounds.graph h n ((initialAtlas N).gap n) w).2.1 ∈ standardRegion.carrier) :
-    (initialAngularFamily B N0 N).field w = ChartScales.Q n ^ (-CoordinateAlgebra.A h) *
-      (ActualInitialCoherence.initialized B N0).mean.angular n
-        (PhysicalMeanJetBounds.graph h n ((initialAtlas N).gap n) w) :=
-  (initialAngularFamily B N0 N).field_eq n hn ht hu
 
-theorem initialPressure_field_eq (B N0 N n : ℕ) (hn : N ≤ n) {w : SpaceTime}
-    (ht : w ∈ PhysicalWaveSum.preterminal)
-    (hu : (PhysicalMeanJetBounds.graph h n ((initialAtlas N).gap n) w).2.1 ∈ standardRegion.carrier) :
-    (initialPressureFamily B N0 N).field w = ChartScales.Q n ^ (-(2 * CoordinateAlgebra.A h)) *
-      (ActualInitialCoherence.initialized B N0).pressure n
-        (PhysicalMeanJetBounds.graph h n ((initialAtlas N).gap n) w) :=
-  (initialPressureFamily B N0 N).field_eq n hn ht hu
 
 /-! ## Scalar stream overlap from the actual primitive operators -/
 
@@ -864,11 +840,6 @@ theorem initialStream_moving (B N0 : ℕ) :
       (initialTemporalScalar B N0 + initialRankScalar B N0) :=
   MeanStateRegularity.MovingField.add (initialTemporal_moving B N0) (initialRank_moving B N0)
 
-theorem initialStream_nativeJets (B N0 N : ℕ) (hN : 1 ≤ N) :
-    PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (1 - ChartScales.kappa))
-      (initialStreamFamily B N0 N).native :=
-  initial_nativeJets_of_class (initialStream_moving B N0)
-    ((initialTemporal_class B N0).add (initialRank_class B N0)) N hN
 
 namespace CycleData
 
@@ -898,9 +869,6 @@ theorem angularIncrement_native (j : ℕ) :
   change (_ + _) + _ - _ = _
   abel
 
-theorem pressureIncrement_native (j : ℕ) :
-    (D.pressureIncrementFamily j).native = (CycleState.iterate p c seed (j+1)).state.pressure -
-      (CycleState.iterate p c seed j).state.pressure := rfl
 
 theorem angularIncrement_moving (j : ℕ) :
     GaugeMomentBalances.MovingField U G.inner G.outer (D.angularIncrementFamily j).native :=
@@ -925,24 +893,7 @@ section RunJets
 variable {B N0 N : ℕ} {p : ℕ → CycleParameters (ActualInitialization.Index B N0)}
     (H : InitialCycleInput B N0 N p)
 
-theorem cycleAngular_nativeJets (j : ℕ) (hN : 1 ≤ N)
-    (HC : CorrectionState.CumulativeBounds ActualInitialMean.strip
-      (CycleState.iterate p (commonContext B) (ActualInitialization.initialCycleState B N0) j).state) :
-    PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (9 / 10))
-      ((initialCycleData H).angularFamily j).native :=
-  initial_nativeJets_of_class ((initialCycleData H).primitives j).mean.angular HC.velocity.angular N hN
 
-theorem cyclePressure_nativeJets (j : ℕ) (hN : 1 ≤ N)
-    (HC : CorrectionState.CumulativeBounds ActualInitialMean.strip
-      (CycleState.iterate p (commonContext B) (ActualInitialization.initialCycleState B N0) j).state) :
-    PhysicalMeanJetBounds.NativeJets N standardRegion.carrier (h * (9 / 10))
-      ((initialCycleData H).pressureFamily j).native := by
-  have hs : (VariableGaugeMean.reconstructState initialGeometry.gauge (commonContext B)
-      (ActualInitialization.initialCycleState B N0).state).pressure =
-      (ActualInitialization.initialCycleState B N0).state.pressure := by
-    rw [initialGeometry_gauge]
-    rfl
-  exact initial_nativeJets_of_class ((initialCycleData H).pressure_moving hs j) HC.pressure N hN
 
 theorem angularIncrement_nativeJets (j : ℕ) (hN : 1 ≤ N) {α : ℝ}
     (HT : MeanIncrementBounds.IncrementBounds ActualInitialMean.strip α
@@ -993,27 +944,6 @@ theorem Atlas.field_on_chart {h d : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
   change ChartScales.Q n ^ (-d) * f n (PhysicalMeanJetBounds.graph h n (A.gap n) w) = _
   rw [hc]
 
-theorem Atlas.stream_curl {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
-    {U : Set Plane} (hU : IsOpen U) {f : Scalar}
-    (H : A.OverlapLaw U (CoordinateAlgebra.A h - 1 / 2) f)
-    (hf : ∀ n ≥ N, ContDiffOn ℝ ∞ (f n) (PhysicalMeanDomain.slowDomain U))
-    {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index) (n : ℕ) (hn : N ≤ n)
-    {w : SpaceTime} (ht : w ∈ PhysicalWaveSum.preterminal)
-    (hu : (PhysicalMeanJetBounds.graph h n (A.gap n) w).2.1 ∈ U)
-    (hw : w ∈ ActualMeanPotentialRealization.cartesianDomain a j) :
-    SpatialCurl.spatialCurl (A.family H).angularField w =
-      let G := PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (A.index n)
-      CyclePhysicalPrefixes.polarVelocityMap a j
-        (CyclePhysicalPrefixes.velocityMap G (ActualMeanPotentialRealization.meridional G (f n))) w := by
-  have hc := ActualMeanPotentialRealization.coherent_angularField_curl ha j (A.family H)
-    hU n hn ht hu hw ((hf n hn).contDiffAt ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds hu))
-  change SpatialCurl.spatialCurl (A.family H).angularField w =
-    CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap
-      (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (ChartScales.nativeIndex h n - A.gap n))
-      (ActualMeanPotentialRealization.meridional
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (ChartScales.nativeIndex h n - A.gap n))
-        (f n))) w at hc
-  simpa only [A.index_eq hn] using hc
 
 theorem Atlas.angular_field {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
     {U : Set Plane} {f : Scalar} (H : A.OverlapLaw U (CoordinateAlgebra.A h) f)
@@ -1099,14 +1029,7 @@ theorem stream_angularField (j : ℕ) :
     (D.streamFamily j).angularField = (D.temporalFamily j).angularField + (D.rankFamily j).angularField :=
   D.atlas.family_add_angular (D.temporalScalar_overlap j) (D.rankScalar_overlap j)
 
-theorem angularIncrement_angularField (j : ℕ) :
-    (D.angularIncrementFamily j).angularField =
-      (D.angularFamily (j+1)).angularField - (D.angularFamily j).angularField :=
-  D.atlas.family_sub_angular (D.state_overlap (j+1)).angular (D.state_overlap j).angular
 
-theorem pressureIncrement_field (j : ℕ) :
-    (D.pressureIncrementFamily j).field = (D.pressureFamily (j+1)).field - (D.pressureFamily j).field :=
-  D.atlas.family_sub_field (D.state_overlap (j+1)).pressure (D.state_overlap j).pressure
 
 end CycleData
 

@@ -218,23 +218,7 @@ noncomputable def actualError (upper : ℝ) (B : ℕ) : VelocityField :=
   FinalSlowBase.error FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation
     (actualUpper upper) B
 
-theorem actual_error_joint_jetRate (upper : ℝ) (B m : ℕ) (r : ℝ) (hr : 0 ≤ r) :
-    DiagonalResidual.JetRate originPast
-      (fun z => (cartesianChart FinalSlowBase.actualProfile.outgoing.data.h z).1)
-      (actualError upper B) m r :=
-  error_joint_jetRate FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation
-    (actualUpper upper) B (le_max_right _ _) m r hr
 
-theorem actual_error_joint_allJetsFlat (upper : ℝ) (B : ℕ) :
-    ResidualStability.AllJetsFlat originPast
-      (fun z => (cartesianChart FinalSlowBase.actualProfile.outgoing.data.h z).1)
-      (actualError upper B) :=
-  error_joint_allJetsFlat FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation
-    (actualUpper upper) B (le_max_right _ _)
 
-theorem actual_error_vanishingJointJets (upper : ℝ) (B : ℕ) :
-    JointResidualLimits.VanishingJointJets (actualError upper B) :=
-  error_vanishingJointJets FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation
-    (actualUpper upper) B (le_max_right _ _)
 
 end NavierStokes.GlobalBaseError

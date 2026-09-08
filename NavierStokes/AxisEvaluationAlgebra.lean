@@ -425,22 +425,7 @@ theorem parameterPrimitive_Y_value (I : Window) {ε : ℝ} (hε : 0 < ε)
   simp only [primitiveScale, Nat.pred_succ, Nat.add_zero]
   field_simp
 
-theorem parameterPrimitive_hasDerivAt (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) {Y η : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
-    (hη : η ∈ Ioo I.left I.right) :
-    HasDerivAt (fun y => profile I ε (parameterPrimitive I hε A) (y, η))
-      (deriv (fun x => profile I ε A (Y, x)) η) Y := by
-  have hd := mixedSeries_hasDerivAt_Y I hε (parameterPrimitive I hε A) 0 0 hY hη
-  rw [mixedSeries_zero, parameterPrimitive_Y_value I hε A (abs_lt.mpr hY) ⟨hη.1.le, hη.2.le⟩] at hd
-  rwa [profile_deriv_eta I hε A hY hη]
 
-theorem parameterPrimitive_axis_zero (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) {η : ℝ} (hη : η ∈ I.interval) :
-    profile I ε (parameterPrimitive I hε A) (0, η) = 0 := by
-  rw [profile_axis]
-  change inputJet I ε (parameterPrimitive I hε A) 0 0 η = _
-  rw [jet_parameterPrimitive_eval I hε A 0 0 hη]
-  simp [primitiveScale]
 
 theorem radial_segment_mem {Y y : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
     (hy : y ∈ uIcc (0 : ℝ) Y) : y ∈ Ioo (-20 : ℝ) 20 := by
@@ -475,25 +460,7 @@ theorem average_integral (I : Window) {ε : ℝ} (hε : 0 < ε)
   rw [average_times_Y I hε A (abs_lt.mpr hY) ⟨hη.1.le, hη.2.le⟩]
   exact primitive_integral I hε A hY hη
 
-theorem regularInverse_actual_equation (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (r : ℕ) (hr : 1 ≤ r) (A : AxisSpace I ε) {Y η : ℝ}
-    (hY : Y ∈ Ioo (-20 : ℝ) 20) (hη : η ∈ Ioo I.left I.right) :
-    Y * iteratedDeriv 2 (fun y => profile I ε (regularInverse I hε r hr A) (y, η)) Y +
-      (r : ℝ) * deriv (fun y => profile I ε (regularInverse I hε r hr A) (y, η)) Y =
-      profile I ε A (Y, η) := by
-  rw [← radialValue_eq_derivatives I hε r _ hY hη]
-  exact regularInverse_equation I hε r hr A (abs_lt.mpr hY) ⟨hη.1.le, hη.2.le⟩
 
-theorem inverseMixed_actual_equation (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (r : ℕ) (hr : 1 ≤ r) (A B : AxisSpace I ε) {Y η : ℝ}
-    (hY : Y ∈ Ioo (-20 : ℝ) 20) (hη : η ∈ Ioo I.left I.right) :
-    Y * iteratedDeriv 2 (fun y => profile I ε (inverseMixed I hε r hr A B) (y, η)) Y +
-      (r : ℝ) * deriv (fun y => profile I ε (inverseMixed I hε r hr A B) (y, η)) Y =
-      deriv (fun x => profile I ε A (Y, x)) η *
-        (Y * deriv (fun y => profile I ε B (y, η)) Y) := by
-  rw [← radialValue_eq_derivatives I hε r _ hY hη,
-    profile_deriv_eta I hε A hY hη, profile_deriv_Y I hε B hY hη]
-  exact inverseMixed_equation I hε r hr A B (abs_lt.mpr hY) ⟨hη.1.le, hη.2.le⟩
 
 theorem average_axis (I : Window) {ε : ℝ} (hε : 0 < ε)
     (A : AxisSpace I ε) {η : ℝ} (hη : η ∈ I.interval) :

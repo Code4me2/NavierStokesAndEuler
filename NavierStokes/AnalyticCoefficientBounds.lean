@@ -115,13 +115,6 @@ theorem UnitHolomorphic.abs_realJet_le {I : Window} {ρ : ℝ} {f : ℂ → ℂ}
     exact hf.norm_le_one z (closedBall_subset_closedTube I ρ hx
       (sphere_subset_closedBall hz))
 
-theorem UnitHolomorphic.abs_iteratedDeriv_le {I : Window} {ρ : ℝ} {f : ℂ → ℂ}
-    (hf : UnitHolomorphic I ρ f) (hρ : 0 < ρ) (m : ℕ)
-    {x : ℝ} (hx : x ∈ I.interval) :
-    |iteratedDeriv m (fun t : ℝ => (f t).re) x| ≤
-      (m.factorial : ℝ) * (ρ⁻¹) ^ m := by
-  rw [iteratedDeriv_realPart (hf.analytic x (real_mem_closedTube I hρ.le hx))]
-  exact hf.abs_realJet_le hρ m hx
 
 /-- The loss in passing from a complex radius to the coefficient radius. -/
 def radiusLoss (q : ℝ) : ℝ := ∑' m : ℕ, ((m : ℝ) + 1) ^ 2 * q ^ m
@@ -240,15 +233,6 @@ theorem UnitHolomorphic.coefficient_toAxisSpace {I : Window} {ε ρ : ℝ} {f : 
   rw [coefficient_ofJetFamily _ _ _ _ _ _ _ _ _ n hx]
   simp only [degreeZeroJet, realJet, iteratedDeriv_zero]
 
-theorem UnitHolomorphic.jet_toAxisSpace {I : Window} {ε ρ : ℝ} {f : ℂ → ℂ}
-    (hf : UnitHolomorphic I ρ f) (hε : 0 < ε) (hερ : ε < ρ)
-    (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
-    jet I (AxisWeightEstimates.weight ε) (hf.toAxisSpace hε hερ).1 n m x =
-      if n = 0 then iteratedDeriv m (fun t : ℝ => (f t).re) x else 0 := by
-  unfold UnitHolomorphic.toAxisSpace
-  rw [jet_ofJetFamily _ _ _ _ _ _ _ _ _ n m hx]
-  rw [iteratedDeriv_realPart (hf.analytic x (real_mem_closedTube I (hε.trans hερ).le hx))]
-  rfl
 
 /-- The normalized axis exponential, defined on the whole complex plane
 but bounded using the common complex neighborhood. -/
@@ -286,19 +270,6 @@ theorem re_le_realPartSup {F : ℂ → ℂ} {K : Set ℂ}
   le_csSup (hK.bddAbove_image (Complex.continuous_re.comp_continuousOn hF))
     (mem_image_of_mem (fun z => (F z).re) hz)
 
-/-- A compact wider complex neighborhood is enough: every radius-`ρ`
-closed disc about a real parameter must lie inside it. -/
-theorem normalizedExp_unitHolomorphic_of_compact
-    {I : Window} {ρ Λ C : ℝ} {F : ℂ → ℂ} {K : Set ℂ}
-    (hK : IsCompact K) (hF : AnalyticOnNhd ℂ F K)
-    (hcover : ∀ x ∈ I.interval, closedBall (x : ℂ) ρ ⊆ K)
-    (hΛ : 0 ≤ Λ) (hC : Real.exp (Λ * realPartSup F K) ≤ C) :
-    UnitHolomorphic I ρ (normalizedExp F Λ C) := by
-  have hsub : closedTube I ρ ⊆ K := by
-    rintro z ⟨x, hx, hz⟩
-    exact hcover x hx hz
-  exact normalizedExp_unitHolomorphic (hF.mono hsub)
-    (fun z hz => re_le_realPartSup hK hF.continuousOn (hsub hz)) hΛ hC
 
 theorem normalizedExp_re_of_real {F : ℂ → ℂ} {Λ C x : ℝ}
     (hreal : (F (x : ℂ)).im = 0) :

@@ -92,22 +92,7 @@ theorem iteratedDeriv_zero_on_nonpos {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     exact (hasDerivWithinAt_const x (Iic x) (0 : ℝ)).congr_of_mem
       (fun y hy => ih y (hy.trans hx)) (mem_Iic.mpr le_rfl)
 
-theorem primitive_iteratedDeriv_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (m : ℕ) :
-    iteratedDeriv m (primitive c j b) 0 = 0 :=
-  iteratedDeriv_zero_on_nonpos (primitive_contDiff hc j hb)
-    (fun _x hx => primitive_of_nonpos c j b hx) m 0 le_rfl
 
-/-- Exact fundamental theorem of calculus for the explicit derivative
-polynomial family constructed in `FlatCutoff`. -/
-theorem integral_derivativePolynomial {c : ℝ} (hc : 0 < c) (p : ℝ[X]) (x : ℝ) :
-    (∫ u in (0 : ℝ)..x, polynomialEdge c (derivativePolynomial c p) u) =
-      polynomialEdge c p x := by
-  have hcont : Continuous (polynomialEdge c (derivativePolynomial c p)) :=
-    (polynomialEdge_contDiff hc _ : ContDiff ℝ ∞ _).continuous
-  simpa only [polynomialEdge_zero, sub_zero] using
-    intervalIntegral.integral_eq_sub_of_hasDerivAt
-      (fun u _hu => polynomialEdge_hasDerivAt hc p u) (hcont.intervalIntegrable 0 x)
 
 theorem edge_hasDerivAt {c : ℝ} (hc : 0 < c) (x : ℝ) :
     HasDerivAt (edge c) (2 * c * edge c x / x ^ 3) x := by
@@ -172,48 +157,7 @@ theorem primitive_sourceCoefficient {c : ℝ} (hc : 0 < c) (j : ℕ)
     intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _hu => hderiv u)
       (hcont.intervalIntegrable 0 x)
 
-/-- An exact integration-by-parts recurrence for every smooth coefficient.
-The new coefficient is `(3-j) x² b + x³ b'`, which vanishes to at least
-second order at the endpoint. -/
-theorem primitive_recurrence {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (x : ℝ) :
-    (2 * c) * primitive c j b x =
-      scale c j x * b x - primitive c j (sourceCoefficient 0 j b) x := by
-  have hf := integrand_continuous hc j hb.continuous
-  have hr := integrand_continuous hc j (sourceCoefficient_contDiff 0 j hb).continuous
-  have hcf : Continuous (fun u => (2 * c) * integrand c j b u) := continuous_const.mul hf
-  have hsplit : primitive c j (sourceCoefficient c j b) x =
-      (2 * c) * primitive c j b x + primitive c j (sourceCoefficient 0 j b) x := by
-    unfold primitive
-    calc
-      (∫ u in (0 : ℝ)..x, integrand c j (sourceCoefficient c j b) u) =
-          ∫ u in (0 : ℝ)..x,
-            (2 * c) * integrand c j b u + integrand c j (sourceCoefficient 0 j b) u := by
-        apply intervalIntegral.integral_congr
-        intro u _hu
-        simp only [integrand, sourceCoefficient]
-        ring
-      _ = _ := by
-        rw [intervalIntegral.integral_add (hcf.intervalIntegrable 0 x)
-          (hr.intervalIntegrable 0 x), intervalIntegral.integral_const_mul]
-  rw [primitive_sourceCoefficient hc j hb x] at hsplit
-  linarith
 
-/-- An exact constant-coefficient case of the claimed terminal factorization:
-for `j = 3`, the remaining smooth factor is the constant `1 / (2c)`. -/
-theorem primitive_three_one {c : ℝ} (hc : 0 < c) (x : ℝ) :
-    primitive c 3 (fun _ => 1) x = edge c x / (2 * c) := by
-  have hc2 : 2 * c ≠ 0 := mul_ne_zero (by norm_num) hc.ne'
-  have hderiv : ∀ u : ℝ, HasDerivAt (fun y => edge c y / (2 * c))
-      (integrand c 3 (fun _ => 1) u) u := by
-    intro u
-    convert! (edge_hasDerivAt hc u).div_const (2 * c) using 1
-    simp only [integrand, mul_one]
-    rw [div_div, mul_comm (u ^ 3) (2 * c), mul_div_mul_left _ _ hc2]
-  have hcont := integrand_continuous hc 3 (continuous_const : Continuous (fun _ : ℝ => (1 : ℝ)))
-  simpa only [primitive, edge_zero, zero_div, sub_zero] using
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _hu => hderiv u)
-      (hcont.intervalIntegrable 0 x)
 
 /-- The natural primitive scale is strictly positive inside the active edge. -/
 theorem scale_pos (c : ℝ) (j : ℕ) {x : ℝ} (hx : 0 < x) : 0 < scale c j x :=
@@ -254,72 +198,8 @@ theorem primitive_normalized_tendsto {c : ℝ} (hc : 0 < c) (j : ℕ)
 def normalizedPrimitive (c : ℝ) (j : ℕ) (b : ℝ → ℝ) (x : ℝ) : ℝ :=
   if x = 0 then b 0 / (2 * c) else primitive c j b x / scale c j x
 
-theorem normalizedPrimitive_continuousWithinAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : Continuous b) :
-    ContinuousWithinAt (normalizedPrimitive c j b) (Ici 0) 0 := by
-  apply continuousWithinAt_Ioi_iff_Ici.mp
-  change Tendsto (normalizedPrimitive c j b) (𝓝[>] 0) (𝓝 (normalizedPrimitive c j b 0))
-  rw [show normalizedPrimitive c j b 0 = b 0 / (2 * c) by simp [normalizedPrimitive]]
-  refine (primitive_normalized_tendsto hc j hb).congr' ?_
-  filter_upwards [self_mem_nhdsWithin] with x hx
-  simp [normalizedPrimitive, (show 0 < x from hx).ne']
 
-/-- The actual integral factors on the closed positive half-line, with the
-factor proved continuous at zero above. No smoothness conclusion is inferred
-merely from this quotient definition. -/
-theorem normalizedPrimitive_factorization (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
-    {x : ℝ} (hx : 0 ≤ x) :
-    primitive c j b x = scale c j x * normalizedPrimitive c j b x := by
-  rcases eq_or_lt_of_le hx with hzero | hpos
-  · subst x
-    simp
-  · have hs : scale c j x ≠ 0 := (scale_pos c j hpos).ne'
-    simp only [normalizedPrimitive, ite_eq_right hpos.ne']
-    field_simp
 
-/-- A strictly positive endpoint coefficient gives an actual positive
-normalized primitive on a sufficiently short terminal interval. -/
-theorem primitive_normalized_eventually_pos {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : Continuous b) (hb0 : 0 < b 0) :
-    ∀ᶠ x in 𝓝[>] 0, 0 < primitive c j b x / scale c j x :=
-  (primitive_normalized_tendsto hc j hb).eventually
-    (lt_mem_nhds (div_pos hb0 (mul_pos (by norm_num) hc)))
 
-/-- The actual primitive vanishes faster than every natural power, even for
-a merely continuous coefficient. This does not assume flatness of the
-primitive or a factorization by a smooth function. -/
-theorem primitive_div_pow_tendsto_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : Continuous b) (loss : ℕ) :
-    Tendsto (fun x => primitive c j b x / x ^ loss) (𝓝[>] 0) (𝓝 0) := by
-  have hF : Tendsto (primitive c j b) (𝓝[>] 0) (𝓝 0) := by
-    simpa only [primitive_zero] using
-      ((primitive_hasDerivAt hc j hb 0).continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
-  cases loss with
-  | zero => simpa using hF
-  | succ n =>
-    have hn : (n + 1 : ℝ) ≠ 0 := by positivity
-    have hG : Tendsto (fun x : ℝ => x ^ (n + 1)) (𝓝[>] 0) (𝓝 0) := by
-      simpa using ((continuous_id.fun_pow (n + 1)).tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-    have hE : Tendsto (fun x => edge c x / x ^ (j + n)) (𝓝[>] 0) (𝓝 0) :=
-      (weighted_iteratedDeriv_tendsto_zero hc 0 (j + n)).mono_left nhdsWithin_le_nhds
-    have hB : Tendsto (fun x => b x / (n + 1 : ℝ)) (𝓝[>] 0)
-        (𝓝 (b 0 / (n + 1 : ℝ))) :=
-      ((hb.tendsto 0).mono_left nhdsWithin_le_nhds).div_const _
-    have hratio : Tendsto
-        (fun x => integrand c j b x / ((n + 1 : ℝ) * x ^ n)) (𝓝[>] 0) (𝓝 0) := by
-      have hlim := hE.mul hB
-      simp only [zero_mul] at hlim
-      refine hlim.congr' ?_
-      filter_upwards [self_mem_nhdsWithin] with x hx
-      dsimp [integrand]
-      rw [pow_add]
-      field_simp
-    refine HasDerivAt.lhopital_zero_nhdsGT
-      (Eventually.of_forall fun x => primitive_hasDerivAt hc j hb x)
-      (Eventually.of_forall fun x => ?_)
-      ?_ hF hG hratio
-    · simpa using (hasDerivAt_id x).fun_pow (n + 1)
-    · filter_upwards [self_mem_nhdsWithin] with x hx
-      exact mul_ne_zero hn (pow_ne_zero n (show 0 < x from hx).ne')
 
 end NavierStokes.FlatPrimitive

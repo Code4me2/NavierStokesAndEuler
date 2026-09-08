@@ -14,14 +14,6 @@ def middleDerivativeBound : ℝ := derivativeBound middleCutoff middle_compact m
 def innerDerivativeBound : ℝ := derivativeBound innerCutoff inner_compact inner_smooth 1
 def innerSecondBound : ℝ := derivativeBound innerCutoff inner_compact inner_smooth 2
 
-theorem outer_bound_nonneg : 0 ≤ outerDerivativeBound :=
-  le_trans (by norm_num) (one_le_derivativeBound _ _ _ _)
-theorem middle_bound_nonneg : 0 ≤ middleDerivativeBound :=
-  le_trans (by norm_num) (one_le_derivativeBound _ _ _ _)
-theorem inner_bound_nonneg : 0 ≤ innerDerivativeBound :=
-  le_trans (by norm_num) (one_le_derivativeBound _ _ _ _)
-theorem inner_second_nonneg : 0 ≤ innerSecondBound :=
-  le_trans (by norm_num) (one_le_derivativeBound _ _ _ _)
 
 theorem outer_gradient_energy_le (h : Space → ℝ) (hh : ContDiff ℝ ∞ h)
     (hLp : MemLp h 2 volume) (hharmonic : ∀ x ∈ Metric.ball 0 (1 : ℝ), Δ h x = 0) :

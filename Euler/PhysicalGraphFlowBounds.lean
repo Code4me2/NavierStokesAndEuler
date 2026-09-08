@@ -207,12 +207,6 @@ theorem velocityField_eq (ell : ℝ) (hell : 0 < ell) (t : Icc (0 : ℝ) T) (x :
       materialVelocity T G.time_nonneg (physicalCoefficient k m T G.A ell) t x :=
   (physical_materialVelocity_eq k m T G.time_nonneg G.A hgraph ell hell.ne' t x).symm
 
-include hgraph in
-theorem accelerationField_eq (ell : ℝ) (hell : 0 < ell) (t : Icc (0 : ℝ) T) (x : Vector3) :
-    (G.accelerationFieldL2 k m ell hell t).field x =
-      materialAcceleration T G.time_nonneg (physicalCoefficient k m T G.A ell)
-        (physicalCoefficient k m T G.A₁ ell) t x :=
-  (physical_materialAcceleration_eq k m T G.time_nonneg G.A G.A₁ hgraph ell hell.ne' t x).symm
 
 end Data
 end EulerPhysicalGraphFlowBounds

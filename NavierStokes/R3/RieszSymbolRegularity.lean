@@ -30,9 +30,6 @@ theorem norm_rieszSymbol_le (i j : Fin 3) (ξ : Space) :
     mul_le_mul (PiLp.norm_apply_le ξ i) (PiLp.norm_apply_le ξ j)
       (norm_nonneg (ξ j)) (norm_nonneg ξ)
 
-theorem abs_rieszSymbol_le (i j : Fin 3) (ξ : Space) :
-    |rieszSymbol i j ξ| ≤ 1 :=
-  norm_rieszSymbol_le i j ξ
 
 theorem norm_rieszSymbol_complex_le (i j : Fin 3) (ξ : Space) :
     ‖(rieszSymbol i j ξ : ℂ)‖ ≤ 1 := by

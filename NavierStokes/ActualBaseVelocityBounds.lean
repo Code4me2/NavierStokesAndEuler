@@ -271,9 +271,6 @@ theorem extension_uniform_jets {a : ℝ} (ha : 1 < a) (m : ℕ) :
 
 noncomputable def heatLoss (m : ℕ) : ℝ := powerLoss m * ((m : ℝ) + 2)
 
-theorem heatLoss_eq (m : ℕ) : heatLoss m = (4 * (m : ℝ) + 2) * ((m : ℝ) + 2) := by
-  unfold heatLoss powerLoss
-  ring
 
 theorem heatLoss_nonneg (m : ℕ) : 0 ≤ heatLoss m :=
   mul_nonneg (powerLoss_nonneg m) (by positivity)
@@ -535,22 +532,7 @@ theorem velocity_rate (upper : ℝ) (B m : ℕ) :
     exact (restricted_mem endpoint Sᶜ).mono (fun _ hz =>
       (outer_lt_box (W := W) upper).trans (lt_of_not_ge hz))
 
-/-- A common constant and neighborhood control the entire finite jet. -/
-theorem velocity_finite_rate (upper : ℝ) (B m : ℕ) :
-    FiniteJetRate endpoint (PhysicalWaveSum.physicalQ F.data.h) (FinalSlowBase.velocity H v upper B)
-      m (-heatLoss m) := by
-  have hq := endpoint_q_small F.data.h_pos F.data.h_lt_half
-  apply finiteJetRate_of_jetRate (hq.mono (fun _ hz => hz.1))
-  intro i hi
-  exact (velocity_rate H v upper B i).weaken hq (neg_le_neg (heatLoss_mono hi))
 
-/-- Public statement with the endpoint filter and existential loss explicit. -/
-theorem exists_fixed_loss (upper : ℝ) (B : ℕ) :
-    ∀ m : ℕ, ∃ L : ℝ, 0 ≤ L ∧
-      JetRate (𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space)))
-        (PhysicalWaveSum.physicalQ F.data.h) (FinalSlowBase.velocity H v upper B) m (-L) := by
-  intro m
-  exact ⟨heatLoss m, heatLoss_nonneg m, velocity_rate H v upper B m⟩
 
 end Actual
 

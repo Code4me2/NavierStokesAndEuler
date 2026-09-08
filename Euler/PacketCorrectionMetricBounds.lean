@@ -62,10 +62,5 @@ theorem inverseMetricTimeBound_le_source : inverseMetricTimeBound D ≤ 2*C0*C1 
   exact (inverseMetricTimeBound_le D).trans (mul_le_mul
     (mul_le_mul_of_nonneg_left h0 (by norm_num)) h1 (norm_nonneg _) (by positivity))
 
-include hR hC0 hF in
-theorem sourceMetricBudget_first_le_source (P : ℝ) [Fact (0 < P)]
-    (κ : ℝ) (hκ : |κ| ≤ 1) (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).first ≤ 3*C0*C0*R :=
-  inverseMetricFirstBound_le_source D R C0 hR hC0 hF
 
 end EulerPacketCorrectionCoefficients

@@ -38,9 +38,6 @@ def realTest (ψ : Space → ℝ) (hψ : ContDiff ℝ ∞ ψ) (hcψ : HasCompact
 @[simp] theorem realTest_apply (ψ : Space → ℝ) (hψ : ContDiff ℝ ∞ ψ)
     (hcψ : HasCompactSupport ψ) (x : Space) : realTest ψ hψ hcψ x = (ψ x : ℂ) := rfl
 
-theorem realTest_compact (ψ : Space → ℝ) (hψ : ContDiff ℝ ∞ ψ)
-    (hcψ : HasCompactSupport ψ) : HasCompactSupport (realTest ψ hψ hcψ : Space → ℂ) :=
-  hcψ.comp_left (g := fun r : ℝ => (r : ℂ)) (by simp)
 
 theorem partial_ofReal {ψ : Space → ℝ} (hψ : ContDiff ℝ ∞ ψ)
     (i : Fin 3) (x : Space) :

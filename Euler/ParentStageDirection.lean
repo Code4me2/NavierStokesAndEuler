@@ -62,33 +62,13 @@ theorem activation_parameters :
       (P.activationFrame hτ hτT).horizon=P.horizon ∧ (P.activationFrame hτ hτT).G=P.G ∧
       (P.activationFrame hτ hτT).error=P.error := ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 
-/-- The new covector really transports to the old frame's cross
-direction, with the same strictly positive ray scale used by Guards. -/
-theorem activation_ray :
-    (P.activationData hτ hτT).normal.field ⟨τ,hτ.le,hτT.le⟩ 0=
-      P.rayScale hτ hτT • P.crossDirection :=
-  activationDirection_transport
-    ((A.transverseData m hm R S hS).deformationEquiv ⟨τ,hτ.le,hτT.le⟩ 0) P.crossDirection
 
-theorem activation_scaled_ray :
-    0 < P.rayScale hτ hτT ∧
-      scaledRay P.m P.v
-        (fun t => (P.activationData hτ hτT).normal.field ((P.activationData hτ hτT).clamp t) 0)
-        (P.rayScale hτ hτT) τ P.a P.epsilon 0=![0,0,1] := by
-  exact actual_activation_scaled_ray (P.activationData hτ hτT) P.m P.v
-    ⟨τ,hτ.le,hτT.le⟩ P.a P.epsilon
-    (P.ray_nonzero τ ⟨le_rfl,hτT.le⟩) (P.velocity_nonzero τ ⟨le_rfl,hτT.le⟩)
-    (P.tangent τ ⟨le_rfl,hτT.le⟩) (P.activation_normal_choice hτ hτT)
 
 def activationHistory (H : LowBounds A) :
     HistoryData ((P.activationData hτ hτT).initial τ hτ hτT.le) :=
   A.historyOn H (P.activationNormal hτ hτT) (P.activationNormal_unit hτ hτT)
     (LinearIsometryEquiv.refl ℝ (referencePlane (P.activationNormal hτ hτT))) S hS τ hτ hτT
 
-theorem activation_history_eq [CompleteSpace U] (H : LowBounds A) :
-    P.activationHistory hτ hτT H=
-      (A.historyOn H m hm R S hS τ hτ hτT).reframe
-        (P.activationNormal hτ hτT) (P.activationNormal_unit hτ hτT) := rfl
 
 end EulerPacketSourceGeometry.ParentFrame
 
@@ -114,18 +94,7 @@ def forwardFrame : ParentFrame P.forwardData 0 :=
 theorem forward_normal_choice : P.forwardData.m₀=
     cross (unit (P.forwardFrame.m 0)) (unit (P.forwardFrame.v 0)) := rfl
 
-theorem forward_initial_frame (x : Space) :
-    P.forwardData.F.field ⟨0,le_rfl,A.T_pos.le⟩ x=ContinuousLinearMap.id ℝ Space :=
-  A.frame_initial x
 
-theorem forward_initial_normal (x : Space) :
-    P.forwardData.normal.field ⟨0,le_rfl,A.T_pos.le⟩ x=P.crossDirection := by
-  change (A.inverse.field A.zeroTime x).adjoint P.crossDirection=P.crossDirection
-  have h : A.inverse.field A.zeroTime x=ContinuousLinearMap.id ℝ Space := by
-    apply ContinuousLinearMap.ext
-    intro v
-    exact A.inverse_initial x v
-  rw [h,adjoint_id,id_apply]
 
 theorem forward_parameters :
     P.forwardFrame.a=P.a ∧ P.forwardFrame.sigma=P.sigma ∧

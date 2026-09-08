@@ -53,17 +53,6 @@ theorem rawPrimitive_joint_continuous (F : Y × ℝ → E) (hF : Continuous F) :
       integral_Icc_eq_integral_Ioc] using hi
   simpa only [rawPrimitive_fixed_interval, Pi.smul_def'] using continuous_snd.smul hi'
 
-omit [CompleteSpace E] in
-theorem primitive_joint_continuous (P : ℝ) (hP : 0 ≤ P) (F : Y × ℝ → E)
-    (hF : Continuous F) :
-    Continuous (fun p : Y × ℝ => primitive P (fun θ => F (p.1,θ)) p.2) := by
-  have hr := rawPrimitive_joint_continuous F hF
-  have hm := continuous_parametric_integral_of_continuous
-    (μ := volume) (f := fun y : Y => fun s : ℝ => rawPrimitive (fun θ => F (y,θ)) s)
-    hr (isCompact_Icc : IsCompact (Icc (0 : ℝ) P))
-  have hm' : Continuous (fun y : Y => ∫ s in (0 : ℝ)..P, rawPrimitive (fun θ => F (y,θ)) s) := by
-    simpa only [intervalIntegral.integral_of_le hP, integral_Icc_eq_integral_Ioc] using hm
-  exact hr.sub (continuous_const.smul (hm'.comp continuous_fst))
 
 end Continuous
 end EulerAngleMeanZeroPrimitive

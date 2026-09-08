@@ -141,14 +141,6 @@ theorem endpointPath_hasDerivAt (a : E) (r : ℝ) (hr : r ∈ Ioo 0 T) :
   simpa only [Function.comp_def, zero_sub, neg_smul, one_smul, hv,
     neg_neg, endpointPath] using hd
 
-/-- The same derivative with the original subtype-indexed coefficient. -/
-theorem endpointPath_hasDerivAt_field (a : E) (r : ℝ) (hr : r ∈ Ioo 0 T) :
-    HasDerivAt (endpointPath A T hT hT1 a)
-      (A.field ⟨r, hr.1.le, hr.2.le.trans hT1⟩
-        (endpointPath A T hT hT1 a r)) r := by
-  simpa only [SmoothTimeField.realField, EulerVolterraConvolution.extendPath,
-    projIcc_of_mem zero_le_one ⟨hr.1.le, hr.2.le.trans hT1⟩] using
-      endpointPath_hasDerivAt A T hT hT1 a r hr
 
 omit [FiniteDimensional ℝ E] in
 theorem reverseField_divergence

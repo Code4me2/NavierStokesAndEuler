@@ -441,29 +441,6 @@ theorem eq_zero_of_mem_closure {E : Type*} [NormedAddCommGroup E]
   have he := closure_mono hs hm
   simpa only [closure_singleton, mem_singleton_iff] using he
 
-/-- A second legitimate boundary interface: tangency on a set whose interior
-approaches the selected point.  Continuity of the actual divergence is derived
-from the supplied ambient jets. -/
-theorem realizedCoefficient_divergence_of_mem_closure_interior {K : ℝ} (hK : K ≠ 0)
-    {R : D → ℝ} {Vr Vθ Vz : D → D} {Φ : D → ℝ} {a : D → ComplexVector} {C : Set D} {x : D}
-    (hG : ∀ y ∈ C, GeometryAt R Vr Vθ Vz y)
-    (hΦ : ∀ y ∈ C, ContDiffAt ℝ ∞ Φ y) (ha : ∀ y ∈ C, ContDiffAt ℝ ∞ a y)
-    (hn : ∀ y ∈ C, phaseNormal R Vr Vθ Vz Φ y ≠ 0)
-    (ht : ∀ y ∈ C, normalDot (phaseNormal R Vr Vθ Vz Φ y) (a y) = 0)
-    (hx : x ∈ C) (hclosure : x ∈ closure (interior C)) :
-    cylindricalDivergence R Vr Vθ Vz
-      (vectorMode K Φ (realizedCoefficient K R Vr Vθ Vz Φ a)) x = 0 := by
-  have G := hG x hx
-  have hc := realizedCoefficient_contDiffAt K G.radius_smooth G.radius_ne
-    G.radial_smooth G.angular_smooth G.axial_smooth (hΦ x hx) (ha x hx) (hn x hx)
-  apply eq_zero_of_mem_closure
-    (cylindricalDivergence_contDiffAt G.radius_smooth G.radius_ne G.radial_smooth G.angular_smooth
-      G.axial_smooth (vectorMode_contDiffAt K (hΦ x hx) hc)).continuousAt hclosure
-  intro y hy
-  have hyC := interior_subset hy
-  apply realizedCoefficient_divergence_at hK (hG y hyC) (hΦ y hyC) (ha y hyC) (hn y hyC)
-  filter_upwards [isOpen_interior.mem_nhds hy] with z hz
-  exact ht z (interior_subset hz)
 
 end Curl
 

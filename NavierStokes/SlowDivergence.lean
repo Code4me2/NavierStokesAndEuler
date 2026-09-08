@@ -64,13 +64,6 @@ theorem radialFlux_smoothAt (Ω : RadialDomain) {U : Field}
         (((contDiffAt_const.mul contDiffAt_snd).mul contDiffAt_const).mul ha)).sub
           ((contDiffAt_const.sub (contDiffAt_snd.pow 2)).mul hη))
 
-/-- Joint C∞ regularity on every open profile domain avoiding L=0. -/
-theorem radialFlux_smooth (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h lam : ℝ)
-    (hL : ∀ p ∈ Ω.carrier, CoordinateAlgebra.L h p.2 ≠ 0) :
-    ContDiffOn ℝ ∞ (radialFlux h lam U) Ω.carrier := by
-  intro p hp
-  exact (radialFlux_smoothAt Ω hU h lam hp (hL p hp)).contDiffWithinAt
 
 /-- The first identity in (21), derived by FTC from the actual histories.
 The scalar radial statement also holds under total division when L=0. -/
@@ -132,48 +125,8 @@ theorem axial_source_intervalIntegrable (Ω : RadialDomain) {U : Field}
   simpa only [SimilarityProfile.Z, CoordinateAlgebra.axialCoeff, SimilarityProfile.partialX,
     SimilarityProfile.partialEta, radialPartial, parameterPartial, mul_assoc] using hc.intervalIntegrable
 
-/-- The printed expression is precisely the zero-axis integral of -Z U. -/
-theorem radialFlux_eq_integral (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h lam : ℝ) {p : Point} (hp : p ∈ Ω.carrier) :
-    radialFlux h lam U p =
-      ∫ x in (0 : ℝ)..p.1, -SimilarityProfile.Z h (-CoordinateAlgebra.A h + lam) U (x, p.2) := by
-  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (f := fun x => radialFlux h lam U (x, p.2))
-    (fun x hx => radialFlux_hasDerivAt Ω hU h lam (Ω.segment_mem hp hx))
-    (axial_source_intervalIntegrable Ω hU h (-CoordinateAlgebra.A h + lam) hp)
-  simpa only [radialFlux_at_axis, sub_zero, Prod.eta] using hi.symm
 
-/-- Physical incompressibility in flux coordinates `(t,s,z)`, `s=r²/2`.
-The radial flux has power q^lam and the axial velocity has power q^(-A+lam). -/
-theorem physical_flux_axial_balance (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (lam : ℝ) {p : SimilarityProfile.PhysicalPoint} (hp : p.1 < 1)
-    (hi : SimilarityProfile.inner h p ∈ Ω.carrier) :
-    SimilarityProfile.partialS (SimilarityProfile.pullback h lam (radialFlux h lam U)) p +
-      SimilarityProfile.partialZ (SimilarityProfile.pullback h (-CoordinateAlgebra.A h + lam) U) p = 0 := by
-  have hL : CoordinateAlgebra.L h (SimilarityProfile.inner h p).2 ≠ 0 :=
-    (SimilarityProfile.L_pos hh hh1 hp).ne'
-  rw [SimilarityProfile.partialS_pullback hh hh1 hp
-    ((radialFlux_smoothAt Ω hU h lam hi hL).differentiableAt (by simp))]
-  rw [SimilarityProfile.partialZ_pullback hh hh1 hp
-    ((hU.contDiffAt (Ω.isOpen.mem_nhds hi)).differentiableAt (by simp))]
-  have he : -CoordinateAlgebra.A h + lam - SimilarityProfile.D h = lam - 1 := by
-    dsimp [CoordinateAlgebra.A, SimilarityProfile.D, CoordinateAlgebra.D]
-    ring
-  rw [he]
-  simp only [SimilarityProfile.pullback]
-  rw [partialX_radialFlux Ω hU h lam hi hL]
-  ring
 
-/-- Specialization to the manuscript's lam_n = 2nh, with n represented honestly
-as a natural-number order. -/
-theorem slow_order_divergence (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h : ℝ) (n : ℕ)
-    {p : Point} (hp : p ∈ Ω.carrier) (hL : CoordinateAlgebra.L h p.2 ≠ 0) :
-    SimilarityProfile.partialX (radialFlux h (2 * (n : ℝ) * h) U) p +
-      SimilarityProfile.Z h (-CoordinateAlgebra.A h + 2 * (n : ℝ) * h) U p = 0 := by
-  rw [partialX_radialFlux Ω hU h (2 * (n : ℝ) * h) hp hL]
-  exact neg_add_cancel _
 
 end NavierStokes.SlowDivergence
 

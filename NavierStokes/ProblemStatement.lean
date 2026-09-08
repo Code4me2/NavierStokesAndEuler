@@ -129,13 +129,6 @@ theorem smooth_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V
     ContDiffAt ℝ ∞ g (t, x) := by
   exact hg.contDiffAt (prod_mem_nhds (Ico_mem_nhds ht.1 ht.2) Filter.univ_mem)
 
-/-- A unit-period identity also gives the negative unit shift. -/
-theorem unit_period_negative {V : Type*} {times : Set ℝ} {g : SpaceTime → V}
-    (hg : UnitSpatialPeriodsOn times g) {t : ℝ} (ht : t ∈ times)
-    (x : Space) (i : Fin 3) :
-    g (t, x - coordinateVector i) = g (t, x) := by
-  have h := hg t ht (x - coordinateVector i) i
-  simpa only [sub_add_cancel] using h.symm
 
 /-- The residual definition reduces to zero for zero velocity and pressure. -/
 @[simp] theorem zero_residual (t : ℝ) (x : Space) :
@@ -143,16 +136,7 @@ theorem unit_period_negative {V : Type*} {times : Set ℝ} {g : SpaceTime → V}
   simp [navierStokesResidual, temporalDerivative, advection, spatialLaplacian,
     spatialDerivative, pressureGradient]
 
-/-- The zero force satisfies the explicit support condition. -/
-theorem zero_force_time_support : CompactFutureTimeSupport (fun _ => 0) := by
-  exact ⟨0, le_refl 0, fun _ _ _ => rfl⟩
 
-/-- The blow-up condition excludes the zero velocity field. -/
-theorem zero_velocity_not_unbounded : ¬ SpeedUnboundedAtOne (fun _ => 0) := by
-  intro h
-  obtain ⟨t, x, _, _, hlarge⟩ := h 1 zero_lt_one 1 zero_lt_one
-  have hlt : (1 : ℝ) < 0 := by simpa only [norm_zero] using hlarge
-  exact (not_lt_of_ge zero_le_one) hlt
 
 /-- The quantified blow-up condition excludes every uniform finite bound on
 the physical presingular domain. This does not assert that the condition holds. -/

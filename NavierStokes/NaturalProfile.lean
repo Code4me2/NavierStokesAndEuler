@@ -85,8 +85,6 @@ theorem pullback_partialY {F : ℝ × ℝ → ℝ}
     partialY (pullback Λ F) p = Λ * partialY F (rescalePoint Λ p) :=
   (pullback_hasDerivAt_Y hF Λ hp).deriv
 
-theorem pullback_partialEta (Λ : ℝ) (F : ℝ × ℝ → ℝ) (p : ℝ × ℝ) :
-    partialEta (pullback Λ F) p = partialEta F (rescalePoint Λ p) := rfl
 
 theorem pullback_second_Y {F : ℝ × ℝ → ℝ}
     (hF : ContDiffOn ℝ ∞ F (AxisEvaluation.strip window 20))
@@ -112,15 +110,6 @@ theorem pullback_second_Y {F : ℝ × ℝ → ℝ}
   simp only [iteratedDeriv_succ, iteratedDeriv_zero]
   ring
 
-theorem pullback_radialDifferential {F : ℝ × ℝ → ℝ}
-    (hF : ContDiffOn ℝ ∞ F (AxisEvaluation.strip window 20))
-    (Λ : ℝ) (r : ℕ) {p : ℝ × ℝ} (hp : p ∈ domain Λ) :
-    radialDifferential r (pullback Λ F) p =
-      Λ * radialDifferential r F (rescalePoint Λ p) := by
-  unfold radialDifferential
-  rw [pullback_second_Y hF Λ hp, pullback_partialY hF Λ hp]
-  dsimp [rescalePoint]
-  ring
 
 theorem affineProfile_partialY {F : ℝ × ℝ → ℝ}
     (hF : ContDiffOn ℝ ∞ F (AxisEvaluation.strip window 20))

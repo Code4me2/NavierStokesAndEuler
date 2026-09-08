@@ -82,11 +82,7 @@ def coefficients : EulerCylinderDirichlet.Coefficients D.T U Space where
   potential_bound := B.potential_bound
   small := B.small
 
-theorem coefficient_frame (t : Icc (0 : ℝ) D.T) (x : Space) (v : U) :
-    B.coefficients.Q t x v = D.F.field t x (D.R v : Space) := rfl
 
-theorem coefficient_hessian (t : Icc (0 : ℝ) D.T) (x : Space) :
-    B.coefficients.H t x = B.H.field t x := rfl
 
 end HistoryData
 

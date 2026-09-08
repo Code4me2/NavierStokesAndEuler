@@ -52,16 +52,11 @@ theorem partialS_radialNormalize {K : Point → ℝ} {p : Point}
   exact (radial_slice_hasDerivAt hN).unique
     ((radial_slice_hasDerivAt hK).sub_const (K (radialAnchor p)))
 
-theorem radialNormalize_anchor (K : Point → ℝ) (t z : ℝ) :
-    radialNormalize K (t, (1, z)) = 0 := sub_self _
 
 /-- This is the entire summed swirl potential, with all slow orders retained. -/
 noncomputable def gaugedSwirl (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.Coefficients) : Point → ℝ :=
   radialNormalize (SlowBorelBase.swirlPotential a h C d)
 
-theorem gaugedSwirl_apply (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.Coefficients) (p : Point) :
-    gaugedSwirl a h C d p =
-      SlowBorelBase.swirlPotential a h C d p - SlowBorelBase.swirlPotential a h C d (p.1, (1, p.2.2)) := rfl
 
 noncomputable def potential (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.Coefficients) : VelocityField :=
   AxisymmetricFields.potential (SlowBorelBase.streamFactor a h C d) (gaugedSwirl a h C d)
@@ -185,14 +180,6 @@ noncomputable def heatPrimitive (C h : ℝ) (p : Point) : ℝ :=
 theorem heatPrimitive_anchor (C h t z : ℝ) : heatPrimitive C h (t, (1, z)) = 0 := by
   simp [heatPrimitive, ProfileHistories.primitive]
 
-theorem heatPrimitive_eq_integral (C h : ℝ) (p : Point) :
-    heatPrimitive C h p =
-      -(∫ r in (1 : ℝ)..p.2.1, extendedHeatCoefficient C h (p.1, (r, p.2.2))) := by
-  simpa only [heatPrimitive, ProfileHistories.primitive, shiftedHeat, extendedHeatCoefficient,
-    zero_add, sub_add_cancel] using congrArg (fun r : ℝ => -r)
-    (intervalIntegral.integral_comp_add_right
-      (fun r => extendedHeatCoefficient C h (p.1, (r, p.2.2)))
-      (a := 0) (b := p.2.1 - 1) (1 : ℝ))
 
 theorem heatPrimitive_smoothAt (C : ℝ) {h : ℝ} (hh : 0 < h)
     {p : Point} (hs : 0 < p.2.1) : ContDiffAt ℝ ∞ (heatPrimitive C h) p := by
@@ -343,52 +330,10 @@ theorem central_oneSidedExtension {a : ℕ → ℕ} (ha : StrictMono a) {h C R E
   exact (potential_eq_heatPotential ha hh hh1 hR hd hext hheat hw.2.1
     (hrad w hw.1) (hseg w hw.1 hw.2.1)).symm
 
-/-- At each positive scale, the gauge subtracts the radial constant of
-every active term in the actual common-cutoff sum. -/
-theorem gaugedSwirl_finite_sum {a : ℕ → ℕ} (ha : StrictMono a) {h C : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (d : SlowBorelBase.Coefficients)
-    {p : Point} (ht : p.1 < 1) : ∃ N : ℕ,
-    gaugedSwirl a h C d p = SimilarityProfile.q h p ^ (1 / 2 - CoordinateAlgebra.A h) *
-      (SlowBorelBase.bundleComponent C d 1 0 (SimilarityProfile.inner h p) -
-        SlowBorelBase.bundleComponent C d 1 0 (SimilarityProfile.inner h (radialAnchor p)) +
-      ∑ j ∈ Finset.range N, SlowBorelBase.coefficientWeight a h (SimilarityProfile.q h p) j *
-        (SlowBorelBase.bundleComponent C d 1 j (SimilarityProfile.inner h p) -
-          SlowBorelBase.bundleComponent C d 1 j (SimilarityProfile.inner h (radialAnchor p)))) := by
-  obtain ⟨N, hN⟩ := SlowBorelBase.slowSum_finite_at_scale ha h (SimilarityProfile.q_pos hh hh1 ht)
-  refine ⟨N, ?_⟩
-  change SimilarityProfile.q h p ^ (1 / 2 - CoordinateAlgebra.A h) *
-      SlowBorelBase.slowSum a h (SlowBorelBase.bundleComponent C d 1)
-        (SimilarityProfile.q h p, SimilarityProfile.inner h p) -
-    SimilarityProfile.q h p ^ (1 / 2 - CoordinateAlgebra.A h) *
-      SlowBorelBase.slowSum a h (SlowBorelBase.bundleComponent C d 1)
-        (SimilarityProfile.q h p, SimilarityProfile.inner h (radialAnchor p)) = _
-  rw [hN, hN]
-  simp only [mul_sub, Finset.sum_sub_distrib]
-  ring
 
-/-- The primitive hypotheses above are discharged for the actual repaired
-coefficient scheme with its literal leading profile and exterior support. -/
-theorem realized_central_oneSidedExtension {F : OutgoingProfile.Profile}
-    (W : NominalProfile.Witness F) {D : ProfileHistories.RadialDomain}
-    (Q : ProfileHistories.Profiles D) {S : Set ℝ} {lo hi : ℝ}
-    (M : AssembledSlowBase.FiniteModification W Q S lo hi)
-    {s : GlobalSlowProfiles.Scheme S F.data.h W.axis.normalization}
-    {d : SlowBorelBase.Coefficients} (hd : ModulatedExterior.RealizesScheme s M.contains d)
-    (hbase : s.base = (AssembledSlowBase.modifiedScheme W Q M).base)
-    (houter : s.B = AssembledSlowBase.nominalOuterRadius W)
-    (hds : SlowBorelBase.SmoothCoefficients d) {a : ℕ → ℕ} (ha : StrictMono a)
-    {x : Space} (hx : x 2 = 0) (hs : 0 < AxisymmetricFields.radialEnergy x) :
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (potential a F.data.h W.axis.normalization d) x) :=
-  central_oneSidedExtension ha F.data.h_pos F.data.h_lt_half (BaseExterior.nominalExteriorRadius_pos W).le
-    hds (ModulatedExterior.realized_exterior_coefficients W Q M hd hbase houter)
-    (fun _ hp => ModulatedExterior.realized_angular_pure_heat W Q M hd hbase hp) hx hs
 
 /-! ## All terminal points away from the singular origin -/
 
-theorem potential_eq_anchoredPotential (a : ℕ → ℕ) (h C : ℝ)
-    (d : SlowBorelBase.Coefficients) :
-    potential a h C d = SlowBaseEndpoint.anchoredPotential a h C d := rfl
 
 noncomputable def nonzeroAxialExtension {a : ℕ → ℕ} (ha : StrictMono a) {h C : ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2) {d : SlowBorelBase.Coefficients}
@@ -434,11 +379,6 @@ noncomputable def finalPotential (upper : ℝ) (B : ℕ) : VelocityField :=
   potential (FinalSlowBase.scales H v upper B) F.data.h W.axis.normalization
     (FinalSlowBase.coefficients H v)
 
-theorem finalPotential_eq_sub_gauge (upper : ℝ) (B : ℕ) (w : SpaceTime) :
-    finalPotential H v upper B w = FinalSlowBase.vectorPotential H v upper B w -
-      SlowBorelBase.swirlPotential (FinalSlowBase.scales H v upper B) F.data.h W.axis.normalization
-        (FinalSlowBase.coefficients H v) (w.1, (1, w.2 2)) • coordinateVector 2 :=
-  potential_eq_sub_gauge _ _ _ _ w
 
 theorem finalPotential_smooth (upper : ℝ) (B : ℕ) :
     ContDiffOn ℝ ∞ (finalPotential H v upper B) BaseResidual.past :=
@@ -464,13 +404,5 @@ hierarchy, modulation, and common cutoff schedule. -/
 noncomputable def constructedPotential (upper : ℝ) (B : ℕ) : VelocityField :=
   finalPotential FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation upper B
 
-theorem constructedPotential_properties (upper : ℝ) (B : ℕ) :
-    ContDiffOn ℝ ∞ (constructedPotential upper B) BaseResidual.past ∧
-    JointResidualLimits.AwayExtensions (constructedPotential upper B) ∧
-    EqOn (SpatialCurl.spatialCurl (constructedPotential upper B))
-      (FinalSlowBase.velocity FinalSlowBase.actualProfile.certificate
-        FinalSlowBase.actualProfile.modulation upper B) BaseResidual.past :=
-  ⟨finalPotential_smooth _ _ upper B, finalPotential_awayExtensions _ _ upper B,
-    fun _ ht => finalPotential_sameCurl _ _ upper B ht.1⟩
 
 end NavierStokes.TailGaugePotential

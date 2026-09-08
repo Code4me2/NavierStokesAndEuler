@@ -103,26 +103,6 @@ theorem cutoffOperation_iteratedFDeriv_bound (L : Cutoff → E)
 
 end LinearCutoffOperation
 
-theorem cutoffCurl_iteratedFDeriv_bound (n : ℕ) (χ : Cutoff) (R M₀ M₁ : ℝ)
-    (hM₀ : 0 ≤ M₀) (hM₁ : 0 ≤ M₁)
-    (hs : tsupport χ.field ⊆ Metric.closedBall (0 : Space) R)
-    (h₀ : ∀ x, ‖iteratedFDeriv ℝ n χ.field x‖ ≤ M₀)
-    (h₁ : ∀ x, ‖iteratedFDeriv ℝ (n+1) χ.field x‖ ≤ M₁) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => cutoffCurl (χ.translate b)) a‖ ≤
-      3 * cutoffCurlConstant *
-        (M₀ + M₁ * (volume (Metric.closedBall (0 : Space) R)).toReal ^ (1/3 : ℝ)) :=
-  cutoffOperation_iteratedFDeriv_bound cutoffCurl cutoffCurl_add cutoffCurl_scale cutoffCurl_sub
-    cutoffCurl_norm_le n χ R M₀ M₁ hM₀ hM₁ hs h₀ h₁ a
 
-theorem weakPotential_iteratedFDeriv_bound (n : ℕ) (χ : Cutoff) (R M₀ M₁ : ℝ)
-    (hM₀ : 0 ≤ M₀) (hM₁ : 0 ≤ M₁)
-    (hs : tsupport χ.field ⊆ Metric.closedBall (0 : Space) R)
-    (h₀ : ∀ x, ‖iteratedFDeriv ℝ n χ.field x‖ ≤ M₀)
-    (h₁ : ∀ x, ‖iteratedFDeriv ℝ (n+1) χ.field x‖ ≤ M₁) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => weakPotential (χ.translate b)) a‖ ≤
-      3 * cutoffCurlConstant *
-        (M₀ + M₁ * (volume (Metric.closedBall (0 : Space) R)).toReal ^ (1/3 : ℝ)) :=
-  cutoffOperation_iteratedFDeriv_bound weakPotential weakPotential_add weakPotential_scale weakPotential_sub
-    weakPotential_operatorNorm_le n χ R M₀ M₁ hM₀ hM₁ hs h₀ h₁ a
 
 end EulerMeanBoundary

@@ -163,13 +163,6 @@ theorem A1_shape (h r eta : K) (b : BaseJet K) (i j : Fin 6)
     (hij : i.val < 4 ∨ 4 ≤ j.val) : A1 h r eta b i j = 0 := by
   fin_cases i <;> fin_cases j <;> norm_num [A1] at hij <;> norm_num [A1]
 
-omit [CharZero K] in
-theorem A1_high_parameters_irrelevant (h r eta : K) (b : BaseJet K)
-    (phi u k p : Jet K) (q₄ q₅ q₄' q₅' : K) :
-    (A1 h r eta b).mulVec (parameterJetVector phi u k p q₄ q₅) =
-      (A1 h r eta b).mulVec (parameterJetVector phi u k p q₄' q₅') := by
-  ext i
-  fin_cases i <;> simp [A1, parameterJetVector, Matrix.mulVec, dotProduct, Fin.sum_univ_succ]
 
 /-- Direct multiplication of the displayed matrices reproduces the expanded
 right sides, with the pressure radial derivative explicitly substituted. -/
@@ -406,17 +399,6 @@ theorem expanded_iff_positiveOrder (h C eta X : K) {n : ℕ} (hn : 0 < n)
     axialRHS_eq_convolution h eta X hn phi u beta k p _ _ _ hbeta,
     pressureValue_eq_convolution h C eta X hn phi u beta]
 
-theorem jetSystem_iff_positiveOrder (h C r eta : K) (hr : r ≠ 0) {n : ℕ} (hn : 0 < n)
-    (phi u : ℕ → Jet K) (beta : ℕ → K) (k p : Jet K) (q₄ q₅ : K)
-    (previousAngularDiffusion previousAxialDiffusion omegaQuotient : K)
-    (hbeta : beta n = betaValue h (slowPower h n) eta (u n) k) :
-    JetSystem h (slowPower h n) C r eta (baseAtOrderZero phi u beta)
-      (lowerSource h eta (r ^ 2) n phi u beta previousAngularDiffusion previousAxialDiffusion omegaQuotient)
-      (phi n) (u n) k p q₄ q₅ ↔
-    PositiveOrderEquations h C eta (r ^ 2) n phi u beta k p
-      previousAngularDiffusion previousAxialDiffusion omegaQuotient :=
-  (jetSystem_iff_expanded hr _ _ _ _ _ _ _ _).trans
-    (expanded_iff_positiveOrder h C eta (r ^ 2) hn phi u beta k p _ _ _ hbeta)
 
 end Algebra
 
@@ -429,11 +411,7 @@ open SimilarityProfile
 noncomputable def actualJet (f : InnerProfile) (w : InnerPoint) : Jet ℝ :=
   ⟨f w, partialX f w, partialX (partialX f) w, partialEta f w⟩
 
-theorem timeValue_actualJet (h b : ℝ) (f : InnerProfile) (w : InnerPoint) :
-    timeValue h b w.2 w.1 (actualJet f w) = T h b f w := rfl
 
-theorem axialValue_actualJet (h b : ℝ) (f : InnerProfile) (w : InnerPoint) :
-    axialValue h b w.2 w.1 (actualJet f w) = Z h b f w := rfl
 
 theorem partialX_contDiffAt {f : InnerProfile} {w : InnerPoint}
     (hf : ContDiffAt ℝ 2 f w) : ContDiffAt ℝ 1 (partialX f) w := by
@@ -624,38 +602,7 @@ theorem profileSystem_iff_positiveOrder {h C r eta : ℝ} (hr : r ≠ 0)
 noncomputable def averageDefect (u : InnerProfile) : InnerProfile :=
   fun w => ProfileHistories.average u w - u w
 
-theorem averageDefect_smooth (Ω : ProfileHistories.RadialDomain) {u : InnerProfile}
-    (hu : ContDiffOn ℝ ∞ u Ω.carrier) : ContDiffOn ℝ ∞ (averageDefect u) Ω.carrier :=
-  (ProfileHistories.average_smooth Ω hu).sub hu
 
-theorem averageDefect_radial (Ω : ProfileHistories.RadialDomain) {u : InnerProfile}
-    (hu : ContDiffOn ℝ ∞ u Ω.carrier) {w : InnerPoint} (hw : w ∈ Ω.carrier) :
-    w.1 * (partialX u w + partialX (averageDefect u) w) + averageDefect u w = 0 := by
-  have hua := (hu.contDiffAt (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp)
-  have haa := ((ProfileHistories.average_smooth Ω hu).contDiffAt
-    (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp)
-  have hdx : partialX (averageDefect u) w =
-      partialX (ProfileHistories.average u) w - partialX u w := by
-    change (fderiv ℝ (fun v => ProfileHistories.average u v - u v) w) (1, 0) = _
-    rw [fderiv_fun_sub haa hua]
-    rfl
-  have hd := (hasDerivAt_id w.1).fun_mul
-    (ProfileHistories.radialPartial_hasDerivAt Ω (ProfileHistories.average_smooth Ω hu) hw)
-  have hp := ProfileHistories.primitive_hasDerivAt Ω hu hw
-  have heq : (fun x => x * ProfileHistories.average u (x, w.2)) =
-      (fun x => ProfileHistories.primitive u (x, w.2)) := by
-    funext x
-    exact (ProfileHistories.primitive_eq_mul_average u (x, w.2)).symm
-  simp only [id_eq] at hd
-  rw [heq] at hd
-  have hh := hd.unique hp
-  rw [hdx]
-  change w.1 * (partialX u w + (partialX (ProfileHistories.average u) w - partialX u w)) +
-    (ProfileHistories.average u w - u w) = 0
-  change 1 * ProfileHistories.average u (w.1, w.2) +
-    w.1 * partialX (ProfileHistories.average u) w = u w at hh
-  simp only [one_mul, Prod.eta] at hh
-  linear_combination hh
 
 theorem betaValue_averageDefect (Ω : ProfileHistories.RadialDomain) {u : InnerProfile}
     (hu : ContDiffOn ℝ ∞ u Ω.carrier) (h lam : ℝ) {w : InnerPoint}
@@ -678,46 +625,8 @@ theorem betaValue_averageDefect (Ω : ProfileHistories.RadialDomain) {u : InnerP
   simp only [div_eq_mul_inv]
   ring
 
-/-- Both identities in (21) hold for the same actual reconstructed flux. -/
-theorem averageDefect_divergence (Ω : ProfileHistories.RadialDomain) {u : InnerProfile}
-    (hu : ContDiffOn ℝ ∞ u Ω.carrier) (h lam : ℝ) {w : InnerPoint}
-    (hw : w ∈ Ω.carrier) (hL : ell h w.2 ≠ 0) :
-    partialX (SlowDivergence.radialFlux h lam u) w =
-      -axialValue h (-a h + lam) w.2 w.1 (actualJet u w) :=
-  SlowDivergence.partialX_radialFlux Ω hu h lam hw hL
 
 
-/-- The regular average row also recovers the actual radial average. Thus a
-smooth solution's third component cannot be an independent auxiliary field. -/
-theorem averageDefect_unique (Ω : ProfileHistories.RadialDomain) {u k : InnerProfile}
-    (hu : ContDiffOn ℝ ∞ u Ω.carrier) (hk : ContDiffOn ℝ ∞ k Ω.carrier)
-    (hrow : ∀ w ∈ Ω.carrier, w.1 * (partialX u w + partialX k w) + k w = 0)
-    {w : InnerPoint} (hw : w ∈ Ω.carrier) : k w = averageDefect u w := by
-  by_cases hX : w.1 = 0
-  · have hk0 := hrow w hw
-    have hw0 : w = (0, w.2) := by ext <;> simp [hX]
-    rw [hw0] at hk0 ⊢
-    simpa [averageDefect, ProfileHistories.average_at_axis] using hk0
-  have hd : ∀ x ∈ uIcc (0 : ℝ) w.1,
-      HasDerivAt (fun y => y * (u (y, w.2) + k (y, w.2))) (u (x, w.2)) x := by
-    intro x hx
-    have hxΩ := Ω.segment_mem hw hx
-    have hdu := ProfileHistories.radialPartial_hasDerivAt Ω hu hxΩ
-    have hdk := ProfileHistories.radialPartial_hasDerivAt Ω hk hxΩ
-    apply ((hasDerivAt_id x).fun_mul (hdu.fun_add hdk)).congr_deriv
-    have he := hrow (x, w.2) hxΩ
-    change x * (ProfileHistories.radialPartial u (x, w.2) +
-      ProfileHistories.radialPartial k (x, w.2)) + k (x, w.2) = 0 at he
-    simp only [id_eq]
-    linear_combination he
-  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt hd
-    (ProfileHistories.radial_slice_intervalIntegrable Ω hu hw)
-  have hi' : ProfileHistories.primitive u w = w.1 * (u w + k w) := by
-    simpa only [ProfileHistories.primitive, zero_mul, sub_zero, Prod.eta] using hi
-  rw [ProfileHistories.primitive_eq_mul_average] at hi'
-  have he := mul_left_cancel₀ hX hi'
-  unfold averageDefect
-  linarith
 
 end ActualProfiles
 
@@ -909,14 +818,6 @@ private theorem data_square_contDiffAt {n : WithTop ℕ∞} {F : CoefficientData
       | apply AnalyticAt.fun_mul)
 
 
-/-- One-sided smooth X data suffice for a smooth signed square pullback. -/
-theorem square_pullback_contDiffAt {n : WithTop ℕ∞} {f : ℝ × ℂ → ℂ} {w : ℝ × ℂ}
-    (hf : ContDiffWithinAt ℝ n f (Ici (0 : ℝ) ×ˢ (univ : Set ℂ)) (w.1 ^ 2, w.2)) :
-    ContDiffAt ℝ n (fun v : ℝ × ℂ => f (v.1 ^ 2, v.2)) w := by
-  change ContDiffWithinAt ℝ n _ univ _
-  apply hf.comp w ((contDiffAt_fst.pow 2).prodMk contDiffAt_snd).contDiffWithinAt
-  intro v _hv
-  exact ⟨sq_nonneg v.1, Set.mem_univ _⟩
 
 theorem coefficient0_contDiffAt {n : WithTop ℕ∞} {h lam C : ℂ} {F : CoefficientData}
     {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
@@ -957,26 +858,8 @@ theorem sourceField_contDiffOn_of_pullback {n : WithTop ℕ∞} {h C : ℂ}
     ContDiffOn ℝ n (fun v : ℝ × ℂ => sourceField h C F v.1 v.2 i) S :=
   fun w hw => (sourceField_contDiffAt_of_pullback (hF w hw) (hL w hw) i).contDiffWithinAt
 
-theorem coefficient0_contDiffOn {n : WithTop ℕ∞} {h lam C : ℂ} {F : CoefficientData}
-    {S : Set (ℝ × ℂ)}
-    (hF : ∀ w ∈ S, ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ∀ w ∈ S, ell h w.2 ≠ 0) (i j : Fin 6) :
-    ContDiffOn ℝ n (fun v : ℝ × ℂ => coefficient0 h lam C F v.1 v.2 i j) S :=
-  fun w hw => (coefficient0_contDiffAt (hF w hw) (hL w hw) i j).contDiffWithinAt
 
-theorem coefficient1_contDiffOn {n : WithTop ℕ∞} {h : ℂ} {F : CoefficientData}
-    {S : Set (ℝ × ℂ)}
-    (hF : ∀ w ∈ S, ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ∀ w ∈ S, ell h w.2 ≠ 0) (i j : Fin 6) :
-    ContDiffOn ℝ n (fun v : ℝ × ℂ => coefficient1 h F v.1 v.2 i j) S :=
-  fun w hw => (coefficient1_contDiffAt (hF w hw) (hL w hw) i j).contDiffWithinAt
 
-theorem sourceField_contDiffOn {n : WithTop ℕ∞} {h C : ℂ} {F : CoefficientData}
-    {S : Set (ℝ × ℂ)}
-    (hF : ∀ w ∈ S, ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ∀ w ∈ S, ell h w.2 ≠ 0) (i : Fin 6) :
-    ContDiffOn ℝ n (fun v : ℝ × ℂ => sourceField h C F v.1 v.2 i) S :=
-  fun w hw => (sourceField_contDiffAt (hF w hw) (hL w hw) i).contDiffWithinAt
 
 end ComplexCoefficients
 

@@ -157,14 +157,6 @@ theorem uniform_operator_bounds :
   intro lam hlam
   exact ⟨linearEquivNonneg lam hlam.1, linearEquivNonneg_coe lam hlam.1⟩
 
-theorem uniform_small_solutions :
-    ∃ β ε : ℝ, 0 < β ∧ 0 < ε ∧ ∀ lam ∈ lambdaRange,
-      ∀ d : Coeff, ‖d‖ ≤ ε → ∃! c : Coeff,
-        ‖c‖ ≤ 2 * β * ‖d‖ ∧ linearCLM lam c + quadraticCLM lam c c = d := by
-  apply SmoothMomentRepair.compact_uniform_small_correction lambdaRange isCompact_Icc
-    linearCLM quadraticCLM continuous_linearCLM.continuousOn continuous_quadraticCLM.continuousOn
-  intro lam hlam
-  exact ⟨linearEquivNonneg lam hlam.1, linearEquivNonneg_coe lam hlam.1⟩
 
 section SmoothUniformInverse
 
@@ -471,9 +463,6 @@ theorem baseHistory_hasDerivAt (d : TailData) (y : ℝ) :
     HasDerivAt (baseHistory d) (baseWeight d y) y :=
   (OutgoingSchedule.primitive_hasDerivAt (baseWeight_contDiff d).continuous y).const_add _
 
-theorem baseHistory_nonneg (d : TailData) {y : ℝ} (hy : 0 ≤ y) : 0 ≤ baseHistory d y := by
-  apply add_nonneg (mul_nonneg (by norm_num) d.core.P_pos.le)
-  exact intervalIntegral.integral_nonneg hy (fun t _ => (baseWeight_pos d t).le)
 
 /-- The actual unflattened angular-history ratio is uniformly bounded;
 the ideal incoming prefix is included explicitly. -/
@@ -520,7 +509,6 @@ theorem flattened_eq (d : TailData) (y eta : ℝ) :
   congr 2
   ring
 
-theorem flattenShape_pos (d : TailData) (y eta : ℝ) : 0 < flattenShape d y eta := Real.exp_pos _
 
 theorem flattenShape_le_one (d : TailData) (y eta : ℝ) : flattenShape d y eta ≤ 1 := by
   apply Real.exp_le_one_iff.mpr
@@ -900,22 +888,6 @@ theorem power28_le_square (d : TailData) : d.core.lam ^ (28 : ℕ) ≤ d.core.la
     Real.rpow_le_rpow_of_exponent_ge d.core.lam_pos (by linarith [d.core.lam_lt]) (by norm_num)
   simpa only [Real.rpow_natCast] using h
 
-/-- Uniform convergence of both actual first jets, with no hypotheses on the
-earlier scalar choices or on the angular parameter. -/
-theorem actual_debt_tends_to_zero (ε : ℝ) (hε : 0 < ε) :
-    ∃ lam0 : ℝ, 0 < lam0 ∧ ∀ d : TailData, d.core.lam < lam0 → ∀ eta : ℝ,
-      |normalizedDebt d eta| < ε ∧ |deriv (normalizedDebt d) eta| < ε := by
-  let C : ℝ := 3 * Real.exp 3
-  have hC : 0 < C := by dsimp [C]; positivity
-  refine ⟨min (1 / 15) (ε / C), lt_min (by norm_num) (div_pos hε hC), ?_⟩
-  intro d hd eta
-  have hsmall : d.core.lam ≤ 1 / 15 := (lt_of_lt_of_le hd (min_le_left _ _)).le
-  have hbound : C * d.core.lam ^ (28 : ℕ) < ε := by
-    apply lt_of_le_of_lt (mul_le_mul_of_nonneg_left (power28_le_self d) hC.le)
-    have h := lt_of_lt_of_le hd (min_le_right _ _)
-    nlinarith [(lt_div_iff₀ hC).mp h]
-  have hj := actual_debt_first_jet_bound d hsmall eta
-  exact ⟨hj.1.trans_lt hbound, hj.2.trans_lt hbound⟩
 
 /-- A reset for the actual scheduled debt, including the uniform first angular
 jet estimate needed for later profile estimates. -/
@@ -1246,29 +1218,6 @@ theorem physical_endpoint (eta : ℝ) :
 
 end ResetWitness
 
-/-- The actual complete outgoing profile allows the pressure-neutral angular
-reset for sufficiently small `lam`, with a common scalar threshold. -/
-theorem complete_angular_reset :
-    ∃ lam0 : ℝ, 0 < lam0 ∧ ∀ d : TailData, d.core.lam < lam0 →
-      ∃ c : ℝ → Coeff,
-        ContDiff ℝ ∞ (correctedAngular d c) ∧
-        (∀ p, 0 < correctedAngular d c p) ∧
-        (∀ eta y, y ∉ Ioo (d.releaseStart - 4) d.releaseStart →
-          correctedAngular d c (y, eta) = finalAngular d (y, eta)) ∧
-        (∀ eta, (∫ y, (correctedAngular d c (y, eta)) ^ 2 - (finalAngular d (y, eta)) ^ 2) = 0 ∧
-          Real.sqrt 2 * correctedHistory d c eta =
-            (Real.exp d.releaseStart * Real.sqrt (2 * Real.exp d.releaseStart) *
-              correctedAngular d c (d.releaseStart, eta)) / (1 - d.core.lam)) ∧
-        (∀ eta y, y ∈ Ioo (d.releaseStart - 4) d.releaseStart →
-          logSlope (fun t => correctedAngular d c (t, eta)) y ≤ -d.core.lam / 2) := by
-  obtain ⟨lam0, K, hlam0, _, hreset⟩ := exists_scheduled_reset
-  refine ⟨lam0, hlam0, ?_⟩
-  intro d hd
-  obtain ⟨w⟩ := hreset d hd
-  exact ⟨w.coefficients, correctedAngular_contDiff d w.coefficients w.smooth,
-    w.positive, fun eta _ hy => correctedAngular_unchanged d w.coefficients eta hy,
-    fun eta => ⟨w.pressure_neutral eta, w.physical_endpoint eta⟩,
-    fun eta _ hy => w.logSlope_le eta hy⟩
 
 theorem full_weight_ideal (d : TailData) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
     Real.exp (3 * y / 2) * finalAngular d (y, eta) =
@@ -1308,12 +1257,6 @@ theorem history_from_ideal_prefix (d : TailData) (eta : ℝ) (f : ℝ → ℝ)
   rw [he] at hdiff
   linarith
 
-theorem fullHistory_eq_integral (d : TailData) (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
-    fullHistory d eta y = ∫ t in Iic y, Real.exp (3 * t / 2) * finalAngular d (t, eta) := by
-  have hc : Continuous (fun t => Real.exp (3 * t / 2) * finalAngular d (t, eta)) :=
-    (Real.continuous_exp.comp ((continuous_const.mul continuous_id).div_const 2)).mul
-      ((finalAngular_contDiff d).continuous.comp (continuous_id.prodMk continuous_const))
-  exact (history_from_ideal_prefix d eta _ hc (fun t ht => full_weight_ideal d eta ht) hy).2.symm
 
 namespace ResetWitness
 
@@ -1337,25 +1280,6 @@ theorem correctedHistory_eq_integral (eta : ℝ) :
   exact (history_from_ideal_prefix d eta _ hc hp
     ((flattenEnd_pos d).le.trans (releaseStart_gt_flattenEnd d).le)).2.symm
 
-/-- The reset identity for the full physical angular integral, including the
-incoming ideal segment, with `X = exp y` and `H = sqrt (2*X) * E`. -/
-theorem physical_integral_endpoint (eta : ℝ) :
-    (∫ t in Iic d.releaseStart, Real.exp t * Real.sqrt (2 * Real.exp t) *
-      correctedAngular d w.coefficients (t, eta)) =
-      (Real.exp d.releaseStart * Real.sqrt (2 * Real.exp d.releaseStart) *
-        correctedAngular d w.coefficients (d.releaseStart, eta)) / (1 - d.core.lam) := by
-  have hf : (fun t => Real.exp t * Real.sqrt (2 * Real.exp t) *
-      correctedAngular d w.coefficients (t, eta)) =
-      (fun t => Real.sqrt 2 * (Real.exp (3 * t / 2) * correctedAngular d w.coefficients (t, eta))) := by
-    funext t
-    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2), AngularMomentReset.sqrt_exp_half]
-    have he : Real.exp t * Real.exp (t / 2) = Real.exp (3 * t / 2) := by
-      rw [← Real.exp_add]; congr 1; ring
-    calc
-      _ = Real.sqrt 2 * ((Real.exp t * Real.exp (t / 2)) * correctedAngular d w.coefficients (t, eta)) := by ring
-      _ = _ := by rw [he]
-  rw [hf, integral_const_mul, ← w.correctedHistory_eq_integral eta]
-  exact w.physical_endpoint eta
 
 end ResetWitness
 

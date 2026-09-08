@@ -137,17 +137,6 @@ theorem doublingEnvelope_reciprocal_eventually_small (b : ℕ → ℕ)
     exact_mod_cast (Nat.add_le_add_right hj 1).trans (doublingEnvelope_lower_bound b j)
   exact lt_of_le_of_lt (one_div_le_one_div_of_le (by positivity) hn) hN
 
-/-- The indices whose numerical cutoff support reaches a fixed positive scale
-form a finite set. This is the local-finiteness input, before introducing fields. -/
-theorem doublingEnvelope_finite_active (b : ℕ → ℕ) (q : ℝ) (hq : 0 < q) :
-    {j : ℕ | q ≤ 1 / (doublingEnvelope b j : ℝ)}.Finite := by
-  obtain ⟨N, hN⟩ := doublingEnvelope_reciprocal_eventually_small b q hq
-  apply (Finset.range N).finite_toSet.subset
-  intro j hj
-  change j ∈ Finset.range N
-  apply Finset.mem_range.mpr
-  by_contra hlt
-  exact (not_lt_of_ge hj) (hN j (Nat.le_of_not_gt hlt))
 
 /-- The numerical cutoff schedule of Lemma 11.3. Stage zero is exempt from a
 positive decay exponent, as in the source. Every positive stage enforces all
@@ -235,25 +224,6 @@ theorem weighted_tail_bound (g : ℕ → ℝ) (hg : Monotone g) (L q : ℝ)
       Summable.tsum_le_tsum hdom hsum hmajor
     _ = (1 / 2 : ℝ) ^ J * A := dyadic_tail_sum J A
 
-/-- If the prescribed order gains increase without bound, a single tail index
-works for an arbitrary target power and for every `q` in the unit interval.
-This concerns scalar majorants; it does not assert flatness of a PDE residual. -/
-theorem exists_uniform_tail_order (g : ℕ → ℝ) (hg : Monotone g)
-    (hgtop : Tendsto g atTop atTop) (L N : ℝ) (m : ℕ) :
-    ∃ J : ℕ, m ≤ J ∧ ∀ q : ℝ, 0 < q → q ≤ 1 →
-      (∑' n : ℕ, (1 / 2 : ℝ) ^ (J + 1 + n) * q ^ (g (J + 1 + n) / 2 - L)) ≤
-        (1 / 2 : ℝ) ^ J * q ^ N := by
-  obtain ⟨J₀, hJ₀⟩ := eventually_atTop.1
-    (hgtop.eventually (eventually_ge_atTop (2 * (N + L))))
-  let J := max m J₀
-  refine ⟨J, le_max_left _ _, ?_⟩
-  intro q hq hq1
-  have hgain := hJ₀ (J + 1) (by dsimp [J]; omega)
-  have hpower : q ^ (g (J + 1) / 2 - L) ≤ q ^ N := by
-    apply Real.rpow_le_rpow_of_exponent_ge hq hq1
-    linarith
-  exact (weighted_tail_bound g hg L q hq hq1 J).2.trans
-    (mul_le_mul_of_nonneg_left hpower (by positivity))
 
 end
 

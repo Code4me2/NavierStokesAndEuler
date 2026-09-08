@@ -84,8 +84,6 @@ theorem fixedPartial_periodic {f : Source} (hp : Periodic f) (v : Point) :
 theorem parameterPartial_periodic {f : Source} (hp : Periodic f) :
     Periodic (parameterPartial f) := fixedPartial_periodic hp (1, 0)
 
-theorem torusXPartial_periodic {f : Source} (hp : Periodic f) :
-    Periodic (torusXPartial f) := fixedPartial_periodic hp (0, (1, 0))
 
 theorem torusXJet_smooth {f : Source} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
     ContDiff ℝ ∞ (torusXJet n f) := by
@@ -319,8 +317,6 @@ theorem uniform_multiplied_coeff_bound {m : Frequency → ℂ} (hm : PolynomialG
 noncomputable def applyMultiplier (m : Frequency → ℂ) (f : Source) (z : Point) : ℂ :=
   series (fun k => m k * coefficient f z.1 k) z.2
 
-theorem inverse_eq_applyMultiplier (d : Direction) (f : Source) :
-    inverse d f = applyMultiplier (multiplier d) f := rfl
 
 theorem multiplied_coeff_rapid {m : Frequency → ℂ} (hm : PolynomialGrowth m)
     {f : Source} (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (p : ℝ) :
@@ -551,13 +547,6 @@ theorem parameterJet_succ (n : ℕ) (f : Source) :
     parameterJet (n + 1) f = parameterPartial (parameterJet n f) :=
   Function.iterate_succ_apply' _ _ _
 
-theorem parameterJet_zeroMean {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hm : ZeroMean f) (n : ℕ) : ZeroMean (parameterJet n f) := by
-  induction n with
-  | zero => exact hm
-  | succ n ih =>
-      rw [parameterJet_succ]
-      exact parameterPartial_zeroMean (parameterJet_smooth hf n) ih
 
 /-- All actual derivatives in the external parameter commute with inversion. -/
 theorem parameterJet_inverse (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
@@ -610,30 +599,8 @@ theorem parameterPartial_iterateInverse (d : Direction) {f : Source}
       rw [iterateInverse_succ, parameterPartial_inverse d (iterateInverse_smooth d hf hp n)
         (iterateInverse_periodic d hp n), ih, iterateInverse_succ]
 
-theorem parameterJet_iterateInverse (d : Direction) {f : Source}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (n q : ℕ) :
-    parameterJet q (iterateInverse d n f) = iterateInverse d n (parameterJet q f) := by
-  induction q with
-  | zero => rfl
-  | succ q ih =>
-      rw [parameterJet_succ, ih, parameterPartial_iterateInverse d
-        (parameterJet_smooth hf q) (parameterJet_periodic hp q), parameterJet_succ]
 
-theorem iterateInverse_solves (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (hm : ZeroMean f) (n : ℕ) :
-    directionalPartial d (iterateInverse d (n + 1) f) = iterateInverse d n f := by
-  rw [iterateInverse_succ]
-  exact inverse_solves d (iterateInverse_smooth d hf hp n)
-    (iterateInverse_periodic d hp n) (iterateInverse_zeroMean d hf hp hm n)
 
-theorem iterateInverse_preserves_parameter_support (d : Direction) (f : Source) (S : Set ℝ)
-    (hs : ∀ p, p ∉ S → ∀ Y, f (p, Y) = 0) (n : ℕ) :
-    ∀ p, p ∉ S → ∀ Y, iterateInverse d n f (p, Y) = 0 := by
-  induction n with
-  | zero => exact hs
-  | succ n ih =>
-      rw [iterateInverse_succ]
-      exact inverse_preserves_parameter_support d _ S ih
 
 /-- A genuine mixed coordinate jet: first actual parameter derivatives, then
 the indicated word of actual torus-coordinate derivatives. -/

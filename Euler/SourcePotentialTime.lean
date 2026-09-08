@@ -52,21 +52,5 @@ variable (P : ℝ) [Fact (0 < P)]
   (p f : C(Icc (0 : ℝ) T,LiftL2 P))
   (hd : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt (extendPath T hT p) (f t) (Icc (0 : ℝ) T) t)
 
-include hmt hd in
-/-- Q_t is constructed from m, m_t, A and A_t; no regularity of Q is assumed. -/
-theorem sourcePotentialPath_hasDerivWithinAt (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (potentialPath P (potentialCoefficient m c hc hm) p))
-      (potentialDerivative P T (potentialCoefficient m c hc hm)
-        (potentialTimeCoefficient m m₁ c hc hm) p f t) (Icc (0 : ℝ) T) t := by
-  have hcoeff : ∀ r ∈ Icc (0 : ℝ) T, ∀ y : Space,
-      HasDerivWithinAt (fun s => extendPath T hT (potentialCoefficient m c hc hm) s y)
-        (extendPath T hT (potentialTimeCoefficient m m₁ c hc hm) r y) (Icc (0 : ℝ) T) r := by
-    intro r hr y
-    have h := potentialCoefficient_hasDerivWithinAt T hT m m₁ c hc hm hmt ⟨r,hr⟩ y
-    exact h.congr_deriv (congrArg (fun z : Icc (0 : ℝ) T =>
-      potentialTimeCoefficient m m₁ c hc hm z y) (projIcc_of_mem hT hr).symm)
-  have h := potentialPath_hasDerivWithinAt P T hT (potentialCoefficient m c hc hm)
-    (potentialTimeCoefficient m m₁ c hc hm) p f hcoeff hd t
-  exact h
 
 end EulerSourcePotentialCoefficient

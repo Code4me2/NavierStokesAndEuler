@@ -55,9 +55,6 @@ def coverMap : SobolevSpace P 3 →L[ℝ] (LiftTangent →ᵇ Space) where
   cont := AddMonoidHomClass.continuous_of_bound (coverLinear P)
     (sobolevEmbeddingConstant P 3) (cover_norm_le P)
 
-theorem coverMap_norm_le : ‖coverMap P‖ ≤ sobolevEmbeddingConstant P 3 := by
-  apply opNorm_le_bound _ (sobolevEmbeddingConstant_nonneg P 3)
-  exact cover_norm_le P
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 
@@ -69,15 +66,6 @@ private local instance : NormedSpace ℝ C(K, LiftTangent →ᵇ Space) := infer
 def coverPathMap : C(K, SobolevSpace P 3) →L[ℝ] C(K, LiftTangent →ᵇ Space) :=
   (coverMap P).compLeftContinuous ℝ K
 
-theorem coverPathMap_norm_le :
-    ‖coverPathMap (K := K) P‖ ≤ sobolevEmbeddingConstant P 3 := by
-  apply opNorm_le_bound _ (sobolevEmbeddingConstant_nonneg P 3)
-  intro p
-  apply (ContinuousMap.norm_le _
-    (mul_nonneg (sobolevEmbeddingConstant_nonneg P 3) (norm_nonneg p))).2
-  intro t
-  exact (cover_norm_le P (p t)).trans
-    (mul_le_mul_of_nonneg_left (p.norm_coe_le_norm t) (sobolevEmbeddingConstant_nonneg P 3))
 
 def coverPath (p : C(K, LiftL2 P))
     (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p)) :

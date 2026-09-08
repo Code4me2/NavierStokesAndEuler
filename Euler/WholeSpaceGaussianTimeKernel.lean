@@ -60,10 +60,6 @@ theorem timeKernel_bound {t : ℝ} (ht : 0 < t) (y : Space) :
   simp only [Fin.sum_univ_three]
   ring
 
-theorem timeKernel_integrable {t : ℝ} (ht : 0 < t) : Integrable (timeKernel t) := by
-  apply ((wideKernel_integrable ht).const_mul ((15/2:ℝ)*t⁻¹)).mono'
-    (timeKernel_continuous t).aestronglyMeasurable
-  exact Eventually.of_forall (timeKernel_bound ht)
 
 def timeEnvelope (t : ℝ) (y : Space) : ℝ :=
   (15*t⁻¹*normalization (t/2))*Real.exp (-(4*t)⁻¹*‖y‖^2)

@@ -94,13 +94,6 @@ theorem velocityLp_translation (a : LiftTangent) (f : TimeLp T (CylinderL2 P E))
     (D.shifted_frame P a) (D.shifted_frameDerivative P a)
     (D.shifted_frame_back P a) (D.shifted_frameDerivative_back P a) (D.shifted_hessian P a) f
 
-theorem velocityPath_translation (a : LiftTangent) (f : TimeLp T (CylinderL2 P E)) (t : Icc (0 : ℝ) T) :
-    (D.shifted a.1).velocityPath P (timeLift T (translate P a).toContinuousLinearMap f) t =
-      translate P a (D.velocityPath P f t) :=
-  D.velocityPath_intertwines P (D.shifted a.1)
-    (translate P a).toContinuousLinearMap (translate P a).toContinuousLinearMap
-    (D.shifted_frame P a) (D.shifted_frameDerivative P a)
-    (D.shifted_frame_back P a) (D.shifted_frameDerivative_back P a) (D.shifted_hessian P a) f t
 
 theorem continuousVelocity_translation (a : LiftTangent)
     (f : C(Icc (0 : ℝ) T,CylinderL2 P E)) (t : Icc (0 : ℝ) T) :

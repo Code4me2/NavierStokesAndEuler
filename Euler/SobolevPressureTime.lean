@@ -63,21 +63,5 @@ theorem pressureSobolev_hasDerivAt {q : ℕ}
   intro s r
   exact pressure_resolvent period (K s) (K r) κ m c c hc hc (hpos s) (hpos r)
 
-/-- The complete Sobolev pressure-corrected source has the actual derivative obtained by the product rule. -/
-theorem projectedSource_hasDerivAt {q : ℕ}
-    (A : ℝ → SmoothCoefficient period) (K : ∀ s, CoefficientJet period standardDirection q (A s))
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ s x v, c * ‖v‖ ^ 2 ≤ ⟪(A s).coefficient x v, v⟫_ℝ)
-    (t : ℝ) (M' : SobolevSpace period q →L[ℝ] SobolevSpace period q)
-    (hM : HasDerivAt (fun s => coefficientSobolevOperator period (K s)) M' t) :
-    HasDerivAt (fun s => projectedSourceOperator period (K s) κ m c hc (hpos s))
-      (-(M'.comp (pressureSobolevOperator period (K t) κ m c hc (hpos t)) +
-        (coefficientSobolevOperator period (K t)).comp
-          (-((pressureSobolevOperator period (K t) κ m c hc (hpos t)).comp
-            (M'.comp (pressureSobolevOperator period (K t) κ m c hc (hpos t))))))) t := by
-  have hP := pressureSobolev_hasDerivAt period A K κ m c hc hpos t M' hM
-  have hMP := hM.clm_comp hP
-  simpa only [zero_sub, Pi.sub_def, projectedSourceOperator] using
-    (hasDerivAt_const t (ContinuousLinearMap.id ℝ (SobolevSpace period q))).sub hMP
 
 end EulerSobolevCoefficientPressure

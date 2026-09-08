@@ -76,27 +76,7 @@ theorem historyAmplitude_nonneg : 0 ≤ L.historyAmplitude := by
   unfold historyAmplitude
   positivity [gradientAmplitude_nonneg L.K]
 
-omit [CompleteSpace U] in
-theorem history_strain_norm (t : Icc (0 : ℝ) τ) (x : Space) :
-    ‖((G.transverseData m hm R S hS).initial τ hτ hτT.le).M.field t x‖ ≤
-      L.historyAmplitude := by
-  change ‖G.strain.field (initialInclusion G.T τ hτT.le t) x‖ ≤
-    27*(frameAmplitude L.K)^2*gradientAmplitude L.K
-  have h := L.strain_scaled_bound 0 (initialInclusion G.T τ hτT.le t) x
-  simpa only [norm_iteratedFDeriv_zero,majorant,Nat.zero_add,Nat.factorial_zero,
-    Nat.cast_one,pow_zero,one_pow,mul_one] using h
 
-omit [CompleteSpace U] in
-theorem history_hessian_norm (x : Space) :
-    ‖(G.historyOn H m hm R S hS τ hτ hτT).coefficients.labelHessian x‖ ≤
-      L.historyAmplitude := by
-  apply (ContinuousMap.norm_le _ L.historyAmplitude_nonneg).2
-  intro t
-  change ‖G.curvature.field (initialInclusion G.T τ hτT.le t) x‖ ≤
-    27*(frameAmplitude L.K)^2*gradientAmplitude L.K
-  have h := L.curvature_scaled_bound 0 (initialInclusion G.T τ hτT.le t) x
-  simpa only [norm_iteratedFDeriv_zero,majorant,Nat.zero_add,Nat.factorial_zero,
-    Nat.cast_one,pow_zero,one_pow,mul_one] using h
 
 /-- Apply the manuscript's scalar stage bounds to the literal source
 coefficients. The remaining inputs are older-stage center data, the

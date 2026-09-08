@@ -53,15 +53,5 @@ theorem smooth_inner_projectedRhs_eq_integral (φ : Space → Space)
       -∫ x, ⟪φ x, fderiv ℝ A.field x (A.field x)⟫_ℝ :=
   inner_projectedRhs_eq_integral φ hLp (smooth_mem_solenoidal φ hs hLp hdiv) A
 
-/-- In particular, every compactly supported smooth divergence-free test
-has the projected Euler pairing required by the Comparator bridge. -/
-theorem compact_inner_projectedRhs_eq_integral (φ : Space → Space)
-    (hs : ContDiff ℝ ∞ φ) (hc : HasCompactSupport φ)
-    (hdiv : ∀ x, divergence φ x = 0) (A : SmoothL2Field Space) :
-    ⟪(hs.continuous.memLp_of_hasCompactSupport hc).toLp φ,
-        (projectedRhs A).toLp⟫_ℝ =
-      -∫ x, ⟪φ x, fderiv ℝ A.field x (A.field x)⟫_ℝ :=
-  smooth_inner_projectedRhs_eq_integral φ hs
-    (hs.continuous.memLp_of_hasCompactSupport hc) hdiv A
 
 end EulerCompactProjectedPairing

@@ -108,12 +108,6 @@ theorem profileSource_factorization (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ
   · simp [hx]
   · field_simp [hx]
 
-theorem profileSource_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (profileSource C d y0) := by
-  have he : profileSource C d y0 = EdgeWeightJets.weighted 4 6 (sourceFactor C d y0) :=
-    funext (profileSource_factorization C d y0)
-  rw [he]
-  exact EdgeWeightJets.weighted_contDiff (by norm_num) 6 (sourceFactor_contDiff C d y0)
 
 noncomputable def primitiveCoefficient (C : ℝ) (d : TailData) (y0 : ℝ)
     (y : ℝ × ℝ) : ℝ :=
@@ -660,94 +654,9 @@ theorem physicalStress_scaled (C : ℝ) (d : TailData) (y0 : ℝ)
     exact Real.sqrt_sq (div_pos hr (Real.sqrt_pos.mpr (physicalScale_pos d ht))).le
   rw [he]
 
-/-- Global moment closure is supplied by the separate renormalized-moment and
-slow-order moment theorems.  Only agreement on the exterior ray is needed here. -/
-theorem forward_eq_physicalStress (C : ℝ) (d : TailData) (y0 t z : ℝ)
-    {F : ℝ → ℝ} {r : ℝ} (hr : 0 < r)
-    (hi : IntegrableOn (fun u => u ^ 2 * F u) (Ioi 0))
-    (hzero : (∫ u in Ioi (0 : ℝ), u ^ 2 * F u) = 0)
-    (hmatch : ∀ u, r ≤ u → F u = physicalSource C d y0 (radiusPoint t u z)) :
-    forwardStress F r = physicalStress C d y0 t z r := by
-  rw [(forward_eq_backward_iff hr hi).mpr hzero]
-  unfold physicalStress backwardStress
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro u hu
-  dsimp only
-  rw [hmatch u hu.le]
 
-theorem stressX_edge_jets (C : ℝ) (d : TailData) (y0 η : ℝ) (n : ℕ) :
-    iteratedFDeriv ℝ n (stressX C d y0) (Real.exp (y0 + 3), η) = 0 := by
-  let w : ℝ × ℝ := (Real.exp (y0 + 3), η)
-  have hS : IsOpen {w : ℝ × ℝ | 0 < w.1} := isOpen_lt continuous_const continuous_fst
-  have hw : w ∈ {w : ℝ × ℝ | 0 < w.1} := Real.exp_pos _
-  obtain ⟨D, hD, hchart⟩ := compact_jets_bound_on hS (xChart_contDiffOn y0)
-    (isCompact_singleton (x := w)) (singleton_subset_iff.mpr hw) n
-  have he : xChart y0 w = (η, 0) := by simp [xChart, w]
-  have hc := norm_iteratedFDerivWithin_comp_le (profileStress_contDiff C d y0).contDiffOn
-    (xChart_contDiffOn y0) (EdgeWeightJets.nat_le_infty n) uniqueDiffOn_univ hS.uniqueDiffOn
-    (mapsTo_univ _ _) hw (C := 0) (D := D)
-    (by
-      intro i hi
-      rw [iteratedFDerivWithin_univ, he, profileStress_edge_jets, norm_zero])
-    (by
-      intro i hi hin
-      rw [iteratedFDerivWithin_of_isOpen i hS hw]
-      exact (hchart i hin w (mem_singleton w)).trans
-        (by simpa only [pow_one] using pow_le_pow_right₀ hD hi))
-  rw [iteratedFDerivWithin_of_isOpen n hS hw] at hc
-  apply norm_le_zero_iff.mp
-  simp only [mul_zero, zero_mul] at hc
-  exact hc
 
-theorem physicalSource_weight_integrable (C : ℝ) (d : TailData) (y0 : ℝ)
-    {t r z : ℝ} (ht : t < 1) (hr : 0 < r) :
-    IntegrableOn (fun u => u ^ 2 * physicalSource C d y0 (radiusPoint t u z)) (Ioi r) := by
-  let Q := physicalScale d t z
-  let g : ℝ → ℝ := fun R => R ^ 2 * radialSource C d y0 (physicalEta d t z) R
-  have hQ : 0 < Q := physicalScale_pos d ht
-  have hs : 0 < Real.sqrt Q := Real.sqrt_pos.mpr hQ
-  have hg : IntegrableOn g (Ioi (r / Real.sqrt Q)) :=
-    radialSource_weight_integrable C d y0 (physicalEta d t z) (div_pos hr hs)
-  have hi : IntegrableOn (fun u => g (u / Real.sqrt Q)) (Ioi r) := by
-    have hh := (integrableOn_Ioi_comp_mul_right_iff g r (inv_pos.mpr hs)).mpr
-      (by simpa only [div_eq_mul_inv] using hg)
-    simpa only [div_eq_mul_inv] using hh
-  apply (hi.const_mul (Q * Q ^ (-CoordinateAlgebra.A d.h - 1 + 2 * d.h))).congr
-  filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
-  rw [physicalSource_radial_scaled C d y0 ht (hr.trans hu)]
-  dsimp only [g]
-  change Q * Q ^ (-CoordinateAlgebra.A d.h - 1 + 2 * d.h) *
-      ((u / Real.sqrt Q) ^ 2 * radialSource C d y0 (physicalEta d t z) (u / Real.sqrt Q)) =
-    u ^ 2 * (Q ^ (-CoordinateAlgebra.A d.h - 1 + 2 * d.h) *
-      radialSource C d y0 (physicalEta d t z) (u / Real.sqrt Q))
-  rw [div_pow, Real.sq_sqrt hQ.le]
-  field_simp [hQ.ne']
 
-/-- The literal terminal velocity is the actual fully switched heat edit from
-the outgoing schedule, with its original amplitude and log origin. -/
-theorem editedAngular_eq_physicalAngular (d : TailData) {K : ℝ} (hK : 0 < K)
-    {p : PhysicalPoint} (ht : p.1 < 1) (hs : 0 < p.2.1)
-    (hfull : 1 / 2 ≤ Real.log (X d.h p / K) + 1 / 5) :
-    PhysicalHeatCoordinates.editedAngular d K p =
-      physicalAngular (PhysicalHeatCoordinates.normalization d K) d (Real.log K - 1 / 5) p := by
-  rw [PhysicalHeatCoordinates.editedAngular_eq_heat d hK d.h_lt_half ht hs hfull]
-  unfold physicalAngular physicalTaper flattening PhysicalHeatCoordinates.shape
-  congr 2
-  ring
 
-theorem forward_eq_radialStress (C : ℝ) (d : TailData) (y0 η : ℝ)
-    {F : ℝ → ℝ} {R : ℝ} (hR : 0 < R)
-    (hi : IntegrableOn (fun u => u ^ 2 * F u) (Ioi 0))
-    (hzero : (∫ u in Ioi (0 : ℝ), u ^ 2 * F u) = 0)
-    (hmatch : ∀ u, R ≤ u → F u = radialSource C d y0 η u) :
-    forwardStress F R = radialStress C d y0 η R := by
-  rw [(forward_eq_backward_iff hR hi).mpr hzero]
-  unfold radialStress backwardStress
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro u hu
-  dsimp only
-  rw [hmatch u hu.le]
 
 end NavierStokes.SlowFirstOrderEdge

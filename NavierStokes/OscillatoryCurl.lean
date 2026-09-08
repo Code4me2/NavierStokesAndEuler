@@ -63,12 +63,6 @@ theorem inner_coordinates (u v : Space) :
     ⟪u, v⟫_ℝ = u 0 * v 0 + u 1 * v 1 + u 2 * v 2 := by
   simp [PiLp.inner_apply, Fin.sum_univ_three, mul_comm]
 
-/-- The Euclidean cross product agrees coordinatewise with the previously
-checked symbol algebra. -/
-theorem cross_coordinates (u v : Space) :
-    (fun i : Fin 3 => (cross u v) i) = CurlGeometry.cross (fun i => u i) (fun i => v i) := by
-  ext i
-  fin_cases i <;> simp [CurlGeometry.cross]
 
 theorem cross_triple (n a : Space) :
     cross n (cross n a) = ⟪n, a⟫_ℝ • n - ‖n‖ ^ 2 • a := by
@@ -122,9 +116,6 @@ theorem carrier_contDiff (k : ℝ) : ContDiff ℝ ∞ (carrier k) :=
 def phaseNormal (Φ : PressureField) : VelocityField :=
   fun z => gradientLinear (fderiv ℝ (fun y : Space => Φ (z.1, y)) z.2)
 
-theorem phaseNormal_eq_pressureGradient (Φ : PressureField) (z : SpaceTime) :
-    phaseNormal Φ z = pressureGradient Φ z.1 z.2 := by
-  simp [phaseNormal, gradientLinear, pressureGradient]
 
 def coefficient (Φ : PressureField) (a : VelocityField) : VelocityField :=
   fun z => normalCoefficient (phaseNormal Φ z) (a z)
@@ -177,29 +168,8 @@ theorem wave_eq {U : Set SpaceTime} {Φ : PressureField} {a : VelocityField}
   rw [cross_normalCoefficient (hn z hz) (htangent z hz)]
   simp only [neg_smul, smul_neg, neg_neg, carrier, neg_div, sub_eq_add_neg]
 
-theorem wave_contDiffOn {U : Set SpaceTime} {Φ : PressureField} {a : VelocityField}
-    (k : ℝ) (hU : IsOpen U) (hΦ : ContDiffOn ℝ ∞ Φ U) (ha : ContDiffOn ℝ ∞ a U)
-    (hn : ∀ z ∈ U, phaseNormal Φ z ≠ 0) : ContDiffOn ℝ ∞ (wave k Φ a) U := by
-  intro z hz
-  exact (SpatialCurl.contDiffAt_spatialCurl
-    ((potential_contDiffOn k hU hΦ ha hn).contDiffAt (hU.mem_nhds hz)) (by simp)).contDiffWithinAt
 
-/-- Divergence vanishes for the full realized wave, including its remainder. -/
-theorem wave_divergence_free {U : Set SpaceTime} {Φ : PressureField} {a : VelocityField}
-    (k : ℝ) (hU : IsOpen U) (hΦ : ContDiffOn ℝ ∞ Φ U) (ha : ContDiffOn ℝ ∞ a U)
-    (hn : ∀ z ∈ U, phaseNormal Φ z ≠ 0) {z : SpaceTime} (hz : z ∈ U) :
-    spatialDivergence (wave k Φ a) z.1 z.2 = 0 := by
-  have hpot : ContDiffAt ℝ ∞ (potential k Φ a) z :=
-    (potential_contDiffOn k hU hΦ ha hn).contDiffAt (hU.mem_nhds hz)
-  have hslice : ContDiffAt ℝ ∞ (fun y : Space => potential k Φ a (z.1, y)) z.2 :=
-    hpot.comp (f := fun y : Space => (z.1, y)) z.2 (contDiffAt_const.prodMk contDiffAt_id)
-  exact SpatialCurl.spatialDivergence_spatialCurl (potential k Φ a) z.1 z.2
-    (hslice.of_le (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)))
 
-theorem coefficient_support_subset (Φ : PressureField) (a : VelocityField) :
-    Function.support (coefficient Φ a) ⊆ Function.support a := by
-  intro z hz haz
-  exact hz (by simp [coefficient, normalCoefficient, haz])
 
 theorem potential_tsupport_subset (k : ℝ) (Φ : PressureField) (a : VelocityField) :
     tsupport (potential k Φ a) ⊆ tsupport a := by
@@ -225,9 +195,6 @@ theorem wave_tsupport_subset (k : ℝ) (Φ : PressureField) (a : VelocityField) 
     tsupport (wave k Φ a) ⊆ tsupport a :=
   (spatialCurl_tsupport_subset _).trans (potential_tsupport_subset k Φ a)
 
-theorem wave_hasCompactSupport (k : ℝ) (Φ : PressureField) {a : VelocityField}
-    (ha : HasCompactSupport a) : HasCompactSupport (wave k Φ a) :=
-  ha.of_isClosed_subset isClosed_closure (wave_tsupport_subset k Φ a)
 
 theorem phaseNormal_periodic {times : Set ℝ} {Φ : PressureField}
     (hΦ : UnitSpatialPeriodsOn times Φ) : UnitSpatialPeriodsOn times (phaseNormal Φ) := by
@@ -259,26 +226,11 @@ theorem wave_periodic {times : Set ℝ} {Φ : PressureField} {a : VelocityField}
     UnitSpatialPeriodsOn times (wave k Φ a) :=
   SpatialCurl.spatialCurl_periodic (potential_periodic k hcarrier hn ha)
 
-theorem wave_periodic_of_phase {times : Set ℝ} {Φ : PressureField} {a : VelocityField} (k : ℝ)
-    (hΦ : UnitSpatialPeriodsOn times Φ) (ha : UnitSpatialPeriodsOn times a) :
-    UnitSpatialPeriodsOn times (wave k Φ a) := by
-  apply wave_periodic k _ (phaseNormal_periodic hΦ) ha
-  intro t ht x i
-  change Real.sin (k * Φ (t, x + coordinateVector i)) = Real.sin (k * Φ (t, x))
-  rw [hΦ t ht x i]
 
 /-- The coefficient remaining after removing the sine oscillation. -/
 def strippedRemainder (k : ℝ) (B : VelocityField) : VelocityField :=
   fun z => (1 / k) • SpatialCurl.spatialCurl B z
 
-theorem wave_eq_stripped {U : Set SpaceTime} {Φ : PressureField} {a : VelocityField}
-    {k : ℝ} (hk : k ≠ 0) (hU : IsOpen U) (hΦ : ContDiffOn ℝ ∞ Φ U)
-    (ha : ContDiffOn ℝ ∞ a U) (hn : ∀ z ∈ U, phaseNormal Φ z ≠ 0)
-    (htangent : ∀ z ∈ U, ⟪phaseNormal Φ z, a z⟫_ℝ = 0) {z : SpaceTime} (hz : z ∈ U) :
-    wave k Φ a z = Real.cos (k * Φ z) • a z -
-      Real.sin (k * Φ z) • strippedRemainder k (coefficient Φ a) z := by
-  rw [wave_eq hk hU hΦ ha hn htangent hz]
-  simp only [strippedRemainder, smul_smul, div_eq_mul_inv, one_mul]
 
 /-- One additional coefficient derivative and one inverse frequency, with
 no derivative of the oscillatory carrier hidden in the bound. -/
@@ -299,13 +251,5 @@ theorem strippedRemainder_jet_bound {U : Set SpaceTime} {B : VelocityField}
         (by positivity)
     _ = _ := by ring
 
-theorem strippedRemainder_finiteJetBound {U : Set SpaceTime} {B : VelocityField}
-    (k : ℝ) (hU : IsOpen U) (hB : ContDiffOn ℝ ∞ B U) {m : ℕ} {C : ℝ}
-    (hjet : JetBounds.FiniteJetBound (m + 1) B U C) :
-    JetBounds.FiniteJetBound m (strippedRemainder k B) U
-      ((‖SpatialCurl.curlLinear.comp (ResidualStability.spaceRestriction Space)‖ / |k|) * C) := by
-  intro n hn z hz
-  exact (strippedRemainder_jet_bound k hU hB hz n).trans
-    (mul_le_mul_of_nonneg_left (hjet (n + 1) (Nat.add_le_add_right hn 1) z hz) (by positivity))
 
 end NavierStokes.OscillatoryCurl

@@ -52,26 +52,9 @@ theorem timeSolenoidalReflection_ae (T : ℝ) (u : TimeLp T solenoidalSpace) :
     timeSolenoidalReflection_ae T u] with t h₁ h₂
   exact h₁.trans ((congrArg solenoidalReflection h₂).trans (solenoidalReflection_involutive (u t)))
 
-theorem timeReflection_inner_shift (T : ℝ) (u v : TimeLp T L2) :
-    ⟪timeReflection T u,v⟫_ℝ = ⟪u,timeReflection T v⟫_ℝ :=
-  (congrArg (fun z : TimeLp T L2 => ⟪timeReflection T u,z⟫_ℝ)
-    (timeReflection_involutive T v)).symm.trans
-      ((timeReflection T).inner_map_map u (timeReflection T v))
 
-theorem timeSolenoidalReflection_inner_shift (T : ℝ) (u v : TimeLp T solenoidalSpace) :
-    ⟪timeSolenoidalReflection T u,v⟫_ℝ = ⟪u,timeSolenoidalReflection T v⟫_ℝ := by
-  have h := LinearIsometry.inner_map_map (𝕜 := ℝ)
-    (E := TimeLp T solenoidalSpace) (E' := TimeLp T solenoidalSpace)
-    (timeSolenoidalReflection T) u (timeSolenoidalReflection T v)
-  simpa only [timeSolenoidalReflection_involutive] using h
 
-theorem timeReflection_realPrimitive (T : ℝ) (u : TimeLp T L2) (t : ℝ) :
-    realPrimitive T (timeReflection T u) t = reflection (realPrimitive T u t) :=
-  realPrimitive_timeLift T reflection.toContinuousLinearMap u t
 
-theorem timeSolenoidalReflection_realPrimitive (T : ℝ) (u : TimeLp T solenoidalSpace) (t : ℝ) :
-    realPrimitive T (timeSolenoidalReflection T u) t = solenoidalReflection (realPrimitive T u t) :=
-  realPrimitive_timeLift T solenoidalReflection.toContinuousLinearMap u t
 
 theorem timeReflection_initialTrace (T : ℝ) (hT : 0 ≤ T) (u : TimeLp T L2) :
     initialTrace T hT (timeReflection T u) = reflection (initialTrace T hT u) :=

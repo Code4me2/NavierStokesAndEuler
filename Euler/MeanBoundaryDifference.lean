@@ -34,8 +34,6 @@ theorem cutoffBound_translate (χ : Cutoff) (a : Space) :
 def spatialDifference (a : Space) (h : ℝ) : L2 →L[ℝ] L2 :=
   h⁻¹ • ((translation (h • a)).toContinuousLinearMap - ContinuousLinearMap.id ℝ L2)
 
-theorem spatialDifference_apply (a : Space) (h : ℝ) (z : L2) :
-    spatialDifference a h z = h⁻¹ • (translation (h • a) z - z) := rfl
 
 def Cutoff.differenceQuotient (χ : Cutoff) (a : Space) (h : ℝ) : Cutoff :=
   ((χ.translate (h • a)).sub χ).scale h⁻¹
@@ -96,12 +94,5 @@ theorem mixedBoundaryOperator_differenceCommutator_norm_le
       rw [(translation (h • a)).norm_map]
       ring
 
-theorem mixedBoundaryOperator_differenceCommutator_norm_le_invariant
-    (a : Space) (h : ℝ) (χ ψ : Cutoff) :
-    ‖(spatialDifference a h).comp (mixedBoundaryOperator χ ψ) -
-        (mixedBoundaryOperator χ ψ).comp (spatialDifference a h)‖ ≤
-      cutoffBound (χ.differenceQuotient a h) * cutoffBound ψ +
-        cutoffBound χ * cutoffBound (ψ.differenceQuotient a h) := by
-  simpa only [cutoffBound_translate] using mixedBoundaryOperator_differenceCommutator_norm_le a h χ ψ
 
 end EulerMeanBoundary

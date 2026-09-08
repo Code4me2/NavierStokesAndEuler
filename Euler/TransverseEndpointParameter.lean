@@ -139,17 +139,5 @@ theorem contDiff_affineTrial (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q�
     ContDiff ℝ n (fun x => affineTrial T hT (Q x) (Q₁ x)) :=
   (contDiff_initialProductDerivative T hT Q Q₁ hQ hQ₁).clm_comp contDiff_const
 
-include c hc hLower hd in
-/-- Neighboring labels use precisely the same terminal coordinate, and the
-resulting physical derivatives have the coefficient parameter regularity. -/
-theorem contDiff_affineEndpoint
-    (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) (hH : ContDiff ℝ n H)
-    (m : P → Icc (0 : ℝ) T → E) (hm : ∀ x t v, ⟪m x t, Q x t v⟫_ℝ = 0)
-    (hRange : ∀ x t η, ⟪m x t, η⟫_ℝ = 0 → ∃ v : U, Q x t v = η) (ξT : U) :
-    ContDiff ℝ n (fun x => endpointDerivative T hT (m x) (H x)
-      K hK (hPotential x) hsmall (affineTrial T hT (Q x) (Q₁ x)) ξT) :=
-  (contDiff_endpointDerivative T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
-    hQ hQ₁ hH (fun x => affineTrial T hT (Q x) (Q₁ x))
-    (contDiff_affineTrial T hT Q Q₁ hQ hQ₁) m hm hRange).clm_apply contDiff_const
 
 end EulerTransverseEndpointParameter

@@ -32,43 +32,10 @@ variable (P T : ℝ) [Fact (0 < P)] (hT : 0 ≤ T)
   (hA : ∀ (c : AddSubgroup.zmultiples P) (t : Icc (0 : ℝ) T) z,
     A.field t (z.1,(c : ℝ)+z.2)=A.field t z)
 
-theorem displacementJet_bound (B R : ℝ)
-    (hB : 0 ≤ B) (hR : 0 < R) (hsmall : B*R*T ≤ 1/8)
-    (hb : ∀ n, ‖A.jet n‖ ≤ B*R^n*(n.factorial : ℝ)^2)
-    (n : ℕ) (t : Icc (0 : ℝ) T) (q : LiftDomain P) :
-    ‖displacementJet P T hT A t q n‖ ≤ B*(t : ℝ)*(4*R)^n*(n.factorial : ℝ)^2 :=
-  EulerSmoothFlowGevrey.displacement_bound T hT A B R hB hR hsmall hb
-    n t t.property (sectionPoint P q)
 
 variable (hdiv : ∀ t x,
   LinearMap.trace ℝ LiftTangent (fderiv ℝ (A.field t : LiftTangent → LiftTangent) x).toLinearMap=0)
 
-include hA hdiv in
-theorem compositionJet_memLp_and_bound (B R C S : ℝ)
-    (hB : 0 ≤ B) (hR : 0 < R) (hC : 0 ≤ C) (hS : 0 ≤ S)
-    (hsmall : B*R*T ≤ 1/8)
-    (hb : ∀ n, ‖A.jet n‖ ≤ B*R^n*(n.factorial : ℝ)^2)
-    (n : ℕ)
-    (hLp : ∀ t : Icc (0 : ℝ) T, ∀ j ≤ n,
-      MemLp (fun q => jetSeries P (A.field t : LiftTangent → LiftTangent) q j) 2 (liftMeasure P))
-    (hNorm : ∀ t : Icc (0 : ℝ) T, ∀ j ≤ n,
-      (eLpNorm (fun q => jetSeries P (A.field t : LiftTangent → LiftTangent) q j)
-        2 (liftMeasure P)).toReal ≤ C*S^j*(j.factorial : ℝ)^2)
-    (t : ℝ) :
-    MemLp (fun q => compositionJet P T hT A t q n) 2 (liftMeasure P) ∧
-      (eLpNorm (fun q => compositionJet P T hT A t q n) 2 (liftMeasure P)).toReal ≤
-        C*(flowRadius B R T S)^n*(n.factorial : ℝ)^2 := by
-  apply EulerGevreyJetCompositionLp.composition_memLp_and_bound (liftMeasure P)
-    (forward P T hT A (projIcc 0 T hT t))
-    (forward_measurePreserving P T hT A hA hdiv (projIcc 0 T hT t))
-    (jetSeries P (forwardCover T hT A t)) (jetSeries P (velocityCover T hT A t)) n
-    ((compositionJet_joint_measurable P T hT A hA n).comp (measurable_const.prodMk measurable_id)).aestronglyMeasurable
-    C (1+B*T) (4*R+1) S hC (by positivity) (by positivity) hS
-  · exact hLp (projIcc 0 T hT t)
-  · exact hNorm (projIcc 0 T hT t)
-  · intro j hj _ q
-    exact forward_positive_bound T hT A B R hB hR hsmall hb j hj
-      (projIcc 0 T hT t) (sectionPoint P q)
 
 include hA hdiv in
 theorem displacementJet_memLp_and_bound (B R C S : ℝ)

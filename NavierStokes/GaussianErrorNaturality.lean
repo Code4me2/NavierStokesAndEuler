@@ -295,25 +295,6 @@ theorem native_amplitude_transport (D : AssemblyData Parameter) (h : ℝ) (gap :
     (normalWeight_ne (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band) hK hKr)
     R.coefficient R.forcing R.source x.1.1 hx copy x.2 hslot
 
-/-- The fast transport hypothesis follows from the actual slot-direction
-identities stored by the primitive copy geometry. -/
-theorem fast_transport_of_slotDirections (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ) (n : ℕ)
-    (hn : D.directions.fastScale n • D.directions.fast =
-      ((0 : Parameter × ℝ), slotDirection ((CorrectionStep.ParticularParameters.fromReference D h gap).geometry n)))
-    (hr : D.directions.fastScale D.reference.band • D.directions.fast =
-      ((0 : Parameter × ℝ), slotDirection D.reference.geometry)) :
-    waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n)
-      (D.directions.fastScale n • D.directions.fast) =
-      clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (D.directions.fastScale D.reference.band • D.directions.fast) := by
-  rw [hn, hr]
-  have he := ScaledTangentTransport.slotDirection_transport D.reference.geometry (gap n) 0
-    (clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band))
-    (ratioPower_pos (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-      (CoordinateAlgebra.A h + 1 / 2)).ne'
-  have hh := congrArg (fun Y : Plane => ((0 : Parameter × ℝ), Y)) he
-  simp [waveChange_apply, parameterChange] at hh ⊢
-  exact hh
 
 /-- The actual transported reference solve has the derived Gaussian
 source weight on the full native cylinder, including uncovered points. -/
@@ -344,32 +325,6 @@ theorem fromReference_globalGaussian (D : AssemblyData Parameter) (h : ℝ) (gap
       (current_slot_of_reference_derivative D h gap j n R copy x hcopy)
   · exact native_source_transport D h gap j n i H hn hr x
 
-theorem fromReference_globalGaussian_cylinder (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    {U : Set Parameter} (R : ReferenceODE D j U) (hcutoff : ContDiff ℝ ∞ D.reference.cutoff)
-    (hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) (hKr : referenceFrequency D j ≠ 0)
-    (hfast : waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n)
-      (D.directions.fastScale n • D.directions.fast) =
-      clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (D.directions.fastScale D.reference.band • D.directions.fast))
-    (x : Cylinder)
-    (hx : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (PhysicalParticularWave.waveEquiv x).1.1 ∈ U) :
-    (nativeData D h gap j).globalGaussian D.directions n (PhysicalParticularWave.waveEquiv x) =
-      (velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) ^ 2 *
-        ratioPower (ChartScales.Q n) (ChartScales.Q D.reference.band) (1 / 2)) •
-      (referenceData D j).globalGaussian D.directions D.reference.band
-        (PhysicalParticularWave.waveEquiv
-          (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x)) := by
-  rw [pow_two, PhysicalResidualNaturality.weight_source (ChartScales.Q_pos n)
-    (ChartScales.Q_pos D.reference.band)]
-  simpa only [waveChange_waveEquiv] using
-    fromReference_globalGaussian D h gap j n i H hn hr R hcutoff hK hKr hfast
-      (PhysicalParticularWave.waveEquiv x) hx
 
 end ActualReference
 
@@ -450,37 +405,6 @@ theorem fromReference_gaussianBlock (D : AssemblyData Parameter) (h : ℝ) (gap 
     (mul_ne_zero hj0 (hfrequency n)) (mul_ne_zero hj0 (hfrequency D.reference.band))
     hfast x hxpos hx θ k
 
-/-- The same finite-block statement on the original full cylindrical
-coordinates, with the source weight explicitly written as `c^2 * l`. -/
-theorem fromReference_gaussianBlock_cylinder (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (N n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    {U : Set Parameter} (R : ∀ j ∈ modes N, ReferenceODE D j U)
-    (hcutoff : ContDiff ℝ ∞ D.reference.cutoff) (hfrequency : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    (hfast : waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n)
-      (D.directions.fastScale n • D.directions.fast) =
-      clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (D.directions.fastScale D.reference.band • D.directions.fast))
-    (x : Cylinder) (hxpos : 0 < x.1.1)
-    (hx : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (PhysicalParticularWave.waveEquiv x).1.1 ∈ U) (k : Fin 3) :
-    ((CorrectionStep.ParticularParameters.fromReference D h gap).gaussianBlock
-      D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N).oscillation n
-        (angleShuffle.symm (PhysicalParticularWave.waveEquiv x)) k =
-      (velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) ^ 2 *
-        ratioPower (ChartScales.Q n) (ChartScales.Q D.reference.band) (1 / 2)) *
-      ((referenceParameters D).gaussianBlock D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N).oscillation
-        D.reference.band
-        (angleShuffle.symm (PhysicalParticularWave.waveEquiv
-          (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x))) k := by
-  rw [pow_two, PhysicalResidualNaturality.weight_source (ChartScales.Q_pos n)
-    (ChartScales.Q_pos D.reference.band)]
-  exact fromReference_gaussianBlock D h gap N n i H hn hr R hcutoff hfrequency hfast
-    ((PhysicalParticularWave.waveEquiv x).1.1, (PhysicalParticularWave.waveEquiv x).2)
-    hxpos hx (PhysicalParticularWave.waveEquiv x).1.2 k
 
 end HarmonicAssembly
 

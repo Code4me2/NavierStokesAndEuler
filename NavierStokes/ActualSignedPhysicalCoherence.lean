@@ -49,12 +49,6 @@ theorem finsum_injective_support (e : α → β) (he : Injective e) (f : β → 
       · simp only [indicator_of_notMem hb, hz b hb]
     _ = _ := finsum_mem_range he
 
-theorem finsum_finite_support (s : Finset α) (f : α → V)
-    (hz : ∀ a, a ∉ s → f a = 0) : (∑ᶠ a, f a) = ∑ a ∈ s, f a := by
-  apply finsum_eq_sum_of_support_subset
-  intro a ha
-  by_contra hn
-  exact ha (hz a hn)
 
 end FiniteSums
 
@@ -722,15 +716,6 @@ theorem measuredPotential_germ (v : CorrectionStep.CycleCoefficients (Label B N0
     with z hz
   exact measuredPotential_eq_sum u H hp hfixed HS v hlabels n ha i hz
 
-theorem measuredPressure_germ (v : CorrectionStep.CycleCoefficients (Label B N0))
-    (hlabels : v.labels = activeLabels standardRegion B N0) (n : ℕ) {qbig a : ℝ}
-    (ha : 0 < a) (i : PolarCharts.Index) {w : SpaceTime}
-    (hw : w ∈ ActualPhysicalPrefixFields.cartesianChartDomain qbig n a i) :
-    ActualSignedExterior.pressure (measuredStates (N0 := N0) ActualInitialization.patch u H hp) =ᶠ[𝓝 w]
-      fun z => ∑ l ∈ v.labels n, CurrentSignedCurl.currentPressure l u n a i z := by
-  filter_upwards [(ActualPhysicalPrefixFields.cartesianChartDomain_open qbig n ha i).mem_nhds hw]
-    with z hz
-  exact measuredPressure_eq_sum u H hp hfixed HS v hlabels n ha i hz
 
 theorem measuredPotential_curl (v : CorrectionStep.CycleCoefficients (Label B N0))
     (hlabels : v.labels = activeLabels standardRegion B N0) (n : ℕ) {α : ℝ}

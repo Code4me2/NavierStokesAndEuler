@@ -42,16 +42,7 @@ theorem integrable_weighted_energy {χ : Space → ℝ} {w : VelocityField} {t :
     Integrable (fun x : Space => χ x * ‖w (t, x)‖ ^ 2) :=
   integrable_cutoff_mul hχ hcχ (hw.norm.pow 2)
 
-theorem integrable_weighted_dissipation {χ : Space → ℝ} {w : VelocityField} {t : ℝ}
-    (hχ : Continuous χ) (hcχ : HasCompactSupport χ)
-    (hw : ContDiff ℝ ∞ (fun x : Space => w (t, x))) :
-    Integrable (fun x : Space => χ x * gradientSq (fun y => w (t, y)) x) := by
-  apply integrable_cutoff_mul hχ hcχ
-  exact continuous_finsetSum _ (fun i _ => (spatial_partial_contDiff hw i).continuous.norm.pow 2)
 
-theorem weightedEnergy_nonneg {χ : Space → ℝ} (hχ : ∀ x, 0 ≤ χ x)
-    (w : VelocityField) (t : ℝ) : 0 ≤ weightedEnergy χ w t :=
-  integral_nonneg (fun x => mul_nonneg (hχ x) (sq_nonneg _))
 
 theorem weightedDissipation_nonneg {χ : Space → ℝ} (hχ : ∀ x, 0 ≤ χ x)
     (w : VelocityField) (t : ℝ) : 0 ≤ weightedDissipation χ w t :=
@@ -84,18 +75,6 @@ theorem weightedEnergy_hasDerivAt {a b t : ℝ} {χ : Space → ℝ} {w : Veloci
   · intro x
     exact (energy_density_derivative (time_differentiable_at_interior hw ht x)).const_mul (χ x)
 
-/-- The weighted energy integrand remains integrable after time differentiation. -/
-theorem integrable_weighted_energy_rate {a b t : ℝ} {χ : Space → ℝ} {w : VelocityField}
-    (hχ : Continuous χ) (hcχ : HasCompactSupport χ)
-    (hw : ContDiffOn ℝ ∞ w (Comparison.slab a b)) (ht : t ∈ Ioo a b) :
-    Integrable (fun x : Space => χ x * (2 * ⟪w (t, x), temporalDerivative w t x⟫_ℝ)) := by
-  have htime : ContinuousOn
-      (fun z : SpaceTime => deriv (fun r => w (r, z.2)) z.1) (Ioo a b ×ˢ univ) :=
-    CompactTimeIntegral.continuousOn_timeDeriv_of_contDiffOn (hw.of_le (nat_le_infty 1))
-  have htime' : Continuous (temporalDerivative w t) := by
-    simpa only [temporalDerivative, deriv] using! CompactTimeIntegral.continuous_slice htime ht
-  exact integrable_cutoff_mul hχ hcχ
-    (continuous_const.mul ((spatial_smooth hw (Ioo_subset_Icc_self ht)).continuous.inner htime'))
 
 /-- The localized balance follows from equality of the actual Navier--Stokes
 residuals. No integrability or support condition is imposed on either velocity. -/
@@ -186,36 +165,5 @@ theorem difference_energy_balance {χ : Space → ℝ} {u v : VelocityField}
   rw [hRate]
   ring
 
-/-- The balance with its time derivative justified on the interior of a closed
-slab. The only support hypothesis is on the scalar cutoff. -/
-theorem hasDerivAt_difference_energy_balance {a b t : ℝ} {χ : Space → ℝ}
-    {u v : VelocityField} {p q : PressureField}
-    (hχ : ContDiff ℝ ∞ χ) (hcχ : HasCompactSupport χ)
-    (hu : ContDiffOn ℝ ∞ u (Comparison.slab a b))
-    (hv : ContDiffOn ℝ ∞ v (Comparison.slab a b))
-    (hp : ContDiffOn ℝ ∞ p (Comparison.slab a b))
-    (hq : ContDiffOn ℝ ∞ q (Comparison.slab a b)) (ht : t ∈ Ioo a b)
-    (hdivu : ∀ x : Space, spatialDivergence u t x = 0)
-    (hdivv : ∀ x : Space, spatialDivergence v t x = 0)
-    (hNS : ∀ x : Space, ProblemStatement.navierStokesResidual 1 u p t x =
-      ProblemStatement.navierStokesResidual 1 v q t x) :
-    HasDerivAt (weightedEnergy χ (u - v))
-      (-2 * weightedDissipation χ (u - v) t -
-        2 * (∫ x : Space, χ x *
-          ⟪(u - v) (t, x), spatialDerivative u t x ((u - v) (t, x))⟫_ℝ) +
-        (∫ x : Space, ‖(u - v) (t, x)‖ ^ 2 *
-          ∑ i : Fin 3, spatialPartial i (spatialPartial i χ) x) +
-        (∫ x : Space, ‖(u - v) (t, x)‖ ^ 2 * fderiv ℝ χ x (v (t, x))) +
-        2 * ∫ x : Space, (p - q) (t, x) * fderiv ℝ χ x ((u - v) (t, x))) t := by
-  have hd : HasDerivAt (weightedEnergy χ (u - v))
-      (weightedEnergyRate χ (u - v) t) t :=
-    weightedEnergy_hasDerivAt hχ hcχ (hu.sub hv) ht
-  have hb := difference_energy_balance hχ hcχ
-    (spatial_smooth hu (Ioo_subset_Icc_self ht)) (spatial_smooth hv (Ioo_subset_Icc_self ht))
-    (spatial_smooth hp (Ioo_subset_Icc_self ht)) (spatial_smooth hq (Ioo_subset_Icc_self ht))
-    (time_differentiable_at_interior hu ht) (time_differentiable_at_interior hv ht)
-    hdivu hdivv hNS
-  convert! hd using 1
-  linarith
 
 end NavierStokesR3.LocalizedDifferenceEnergy

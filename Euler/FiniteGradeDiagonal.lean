@@ -33,14 +33,5 @@ theorem convolution_eq_range (M n : ℕ) (hn : n ≤ M)
   rw [convolution_eq_antidiagonal M n hn]
   exact Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j => B (u i) (v j)) n
 
-/-- No coefficient above the target grade enters its slow convolution. -/
-theorem convolution_congr_below (M n : ℕ) (hn : n ≤ M)
-    (B : V →ₗ[ℝ] W →ₗ[ℝ] Q) (u u' : ℕ → V) (v v' : ℕ → W)
-    (hu : ∀ i ≤ n, u i=u' i) (hv : ∀ i ≤ n, v i=v' i) :
-    convolution M B u v n = convolution M B u' v' n := by
-  rw [convolution_eq_range M n hn, convolution_eq_range M n hn]
-  apply sum_congr rfl
-  intro i hi
-  rw [hu i (by have h := mem_range.mp hi; omega), hv (n-i) (Nat.sub_le n i)]
 
 end EulerFiniteGrades

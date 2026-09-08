@@ -1200,22 +1200,6 @@ theorem actualObservations_eq {F : Profile} {A : NominalProfile.AxisStage F}
     mul_div_cancel_left₀ _ (angularScale_pos c.radius_pos).ne']
   rfl
 
-/-- A genuine uniform bound for the actual jets and stocks. Its constants
-are chosen before the incoming axis stage and before its controls. -/
-theorem actual_observation_estimate (F : Profile) :
-    ∃ r L : ℝ, 0 < r ∧ 0 ≤ L ∧
-      ∀ (A : NominalProfile.AxisStage F) (c : NominalProfile.Controls A)
-        (hsep : c.separation ≤ Real.exp (-8)) (eps : ℝ), eps ≤ r →
-        JetBounds.FiniteJetBound 1 (endpointError c) (Icc (-1) 1) eps →
-        JetBounds.FiniteJetBound 1 (NominalProfile.resetCoefficients F c.debt) (Icc (-1) 1) eps →
-        ∀ p ∈ window, NominalProfile.SmallDebt F c.debt p.2 →
-          ‖actualObservations c hsep p - observations F (0, p)‖ ≤ L * eps := by
-  obtain ⟨r, L, hr, hL, hb⟩ := model_estimate F
-  refine ⟨r, L, hr, hL, ?_⟩
-  intro A c hsep eps heps hG hc p hp hs
-  have hn := controls_norm c hG hc hp.2
-  rw [actualObservations_eq c hsep hp.1 (NominalProfile.physical_band_in_parameterInterval hp.2) hs]
-  exact (hb _ (hn.trans heps) p hp).2.trans (mul_le_mul_of_nonneg_left hn hL)
 
 /-- The radius and first-jet tolerance are fixed before every incoming
 axis stage and its matching controls. The input stocks are not hypotheses:

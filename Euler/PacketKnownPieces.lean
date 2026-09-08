@@ -54,9 +54,6 @@ theorem jet_zero_of_inactive (k : KnownPiece) (O : Operators) (p : ℕ)
     k.jet O p a z i = 0 := by
   simp only [jet, raw, hi, ite_false, slicedJet_zero']
 
-theorem active_profile_lt (k : KnownPiece) (p i : ℕ) (hi : k.active p i) :
-    k.profileIndex i < p := by
-  cases k <;> simp only [active, profileIndex] at * <;> omega
 
 end KnownPiece
 

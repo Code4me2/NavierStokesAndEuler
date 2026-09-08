@@ -462,9 +462,6 @@ noncomputable def nativeExtension {F : OutgoingProfile.Profile} (W : NominalProf
     (f : NativePoint → E) : NativePoint → E :=
   extension (nativeRadius F.data.h) (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) f
 
-theorem native_flatWeight {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F) (x : NativePoint) :
-    flatWeight (nativeRadius F.data.h) (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
-      (FinalSlowBase.edgeExponent W / 4) 1 x = PrimaryTargetBounds.movingWeight W x.1 := rfl
 
 omit [NormedSpace ℝ E] in
 theorem nativeExtension_inside {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
@@ -478,15 +475,6 @@ theorem nativeExtension_outside {F : OutgoingProfile.Profile} (W : NominalProfil
     (hx : nativeRadius F.data.h x ∉ Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)) :
     nativeExtension W f x = 0 := extension_outside _ _ _ _ hx
 
-omit [NormedSpace ℝ E] in
-/-- The literal extension is zero on all nonpositive physical radii. -/
-theorem nativeExtension_nonpositive {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (f : NativePoint → E) {x : NativePoint} (hR : x.1.1 ≤ 0) : nativeExtension W f x = 0 := by
-  apply nativeExtension_outside W f
-  intro hx
-  have hnonpos : nativeRadius F.data.h x ≤ 0 :=
-    div_nonpos_of_nonpos_of_nonneg hR (Real.sqrt_nonneg _)
-  exact (not_lt_of_ge hnonpos) ((PrimaryTargetBounds.leftRadius_pos W).trans hx.1)
 
 /-- Direct adapter for the exact moving weight used by the primary and
 signed constructions, in the native `(R,Z,T,u,v)` variable ordering. -/
@@ -656,30 +644,6 @@ theorem pulseEnvelope_nonneg {ι : Type*} {U : PhaseJetBounds.Domain ι PhaseCal
     (χ : ι → NativePoint → PhaseCalculus.Slow × ℝ) (j : Fin 2) (i : ι) (x : NativePoint) :
     0 ≤ pulseEnvelope F χ j i x := (PrimaryPulseBounds.referenceP_pos _ _ _ _).le
 
-/-- Apply the extension construction directly to the actual Cramer-scaled
-homogeneous pulse. The only raw regularity premise is its already-derived
-native interior jet estimate. -/
-theorem primaryVelocity_native_regular {F₀ : OutgoingProfile.Profile} (W : NominalProfile.Witness F₀)
-    {ι : Type*} {U : PhaseJetBounds.Domain ι PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U)
-    (pref : Fin 2 → ι → ℝ) (χ : ι → NativePoint → PhaseCalculus.Slow × ℝ)
-    (ε : ι → ℝ) (T : ι → NativePoint → SmoothCovariance.Vec2) (mask : ι → NativePoint → ℝ)
-    {V : JetDomain ι NativePoint} (j : Fin 2)
-    (hf : NativeJets V (fun i x => Real.sqrt (ε i) *
-      (Real.sqrt (PrimaryTargetBounds.movingWeight W x.1) * pulseEnvelope F χ j i x))
-      (primaryVelocity F pref χ ε T mask j))
-    {S : ι → ℝ} (hS : ∀ i, 1 ≤ S i)
-    (hχ : ∀ i, ContinuousOn (fun x => (χ i x).2) nativeSlowDomain)
-    (hdom : ∀ i, windowDomain nativeSlowDomain (nativeRadius F₀.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) ⊆ V.carrier i)
-    (q : ℕ) (hG : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F₀.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      V.growth i x ≤ S i * (max 1 (FinalSlowBase.edgeDistance W
-        (BaseChartJets.normalizedCoordinates F₀.data.h x.1).2)⁻¹) ^ q) :
-    ∀ i, NativeRegularity W (primaryVelocity F pref χ ε T mask j i) := by
-  apply NativeJets.native_regular_of_inner_growth W (by simpa only [mul_assoc] using hf)
-    (fun i => Real.sqrt_nonneg (ε i)) hS
-    (pulseEnvelope_continuousOn F χ hχ j) (fun i x _ => pulseEnvelope_nonneg F χ j i x) hdom q hG
 
 /-! ## Localization before radial extension -/
 
@@ -776,28 +740,6 @@ theorem NativeJets.native_regular_of_zero_germ_cover
     q (fun _ _ _ => le_rfl) i
   exact ⟨hs, hj, he⟩
 
-theorem primaryVelocity_native_regular_of_zero_germ_cover
-    {F₀ : OutgoingProfile.Profile} (W : NominalProfile.Witness F₀)
-    {ι : Type*} {U : PhaseJetBounds.Domain ι PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U)
-    (pref : Fin 2 → ι → ℝ) (χ : ι → NativePoint → PhaseCalculus.Slow × ℝ)
-    (ε : ι → ℝ) (T : ι → NativePoint → SmoothCovariance.Vec2) (mask : ι → NativePoint → ℝ)
-    {V : JetDomain ι NativePoint} (j : Fin 2)
-    (hf : NativeJets V (fun i x => Real.sqrt (ε i) *
-      (Real.sqrt (PrimaryTargetBounds.movingWeight W x.1) * pulseEnvelope F χ j i x))
-      (primaryVelocity F pref χ ε T mask j))
-    {S : ι → ℝ} (hχ : ∀ i, ContinuousOn (fun x => (χ i x).2) nativeSlowDomain)
-    (hcover : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F₀.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      x ∈ V.carrier i ∨ primaryVelocity F pref χ ε T mask j i =ᶠ[𝓝 x] fun _ => 0)
-    (q : ℕ) (hG : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F₀.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      x ∈ V.carrier i → V.growth i x ≤ S i * (max 1 (FinalSlowBase.edgeDistance W
-        (BaseChartJets.normalizedCoordinates F₀.data.h x.1).2)⁻¹) ^ q) :
-    ∀ i, NativeRegularity W (primaryVelocity F pref χ ε T mask j i) := by
-  exact NativeJets.native_regular_of_zero_germ_cover W (by simpa only [mul_assoc] using hf)
-    (fun i => Real.sqrt_nonneg (ε i)) (pulseEnvelope_continuousOn F χ hχ j)
-    (fun i x _ => pulseEnvelope_nonneg F χ j i x) hcover q hG
 
 /-- Extending by zero does not enlarge an interior tensor bound. This
 pointwise form keeps any constants already uniform in the external labels. -/
@@ -814,24 +756,6 @@ theorem NativeRegularity.jet_bound {F : OutgoingProfile.Profile} {W : NominalPro
   · rw [h.jet_outside n hx hi, norm_zero]
     exact hB
 
-/-- Every pre-existing uniform native constant and polynomial degree is
-unchanged by the literal extension. The regularity at the new radial boundary
-is supplied by the construction above. -/
-theorem NativeJets.nativeExtension_jets {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {ι : Type*} {V : JetDomain ι NativePoint} {w : ι → NativePoint → ℝ}
-    {f : ι → NativePoint → E} (hf : NativeJets V w f)
-    (hreg : ∀ i, NativeRegularity W (f i))
-    (hslow : ∀ i, V.carrier i ⊆ nativeSlowDomain) :
-    NativeJets V w (fun i => nativeExtension W (f i)) := by
-  refine ⟨hf.nonneg, fun i => (hreg i).smooth.mono (hslow i), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bound m
-  refine ⟨C, hC, p, ?_⟩
-  intro i x hx j hj
-  exact (hreg i).jet_bound j (hslow i hx)
-    (mul_nonneg (mul_nonneg (zero_le_one.trans hC)
-      (pow_nonneg (zero_le_one.trans (V.one_le_growth i hx)) _)) (hf.nonneg i x hx))
-    (fun _ => hb i x hx j hj)
 
 /-! ## The same extension in the mean-field variable ordering -/
 
@@ -862,20 +786,7 @@ theorem nativeRadius_meanNative {F : OutgoingProfile.Profile} (x : LocalSignedRe
 noncomputable def meanExtension {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
     (f : NativePoint → E) (x : LocalSignedRequest.Point) : E := nativeExtension W f (meanNative x)
 
-omit [NormedSpace ℝ E] in
-theorem meanExtension_inside {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (f : NativePoint → E) {x : LocalSignedRequest.Point}
-    (hx : (LocalSignedRequest.profileMap (2 * F.data.h) x).1 ∈
-      Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)) :
-    meanExtension W f x = f (meanNative x) :=
-  nativeExtension_inside W f (by rwa [nativeRadius_meanNative])
 
-omit [NormedSpace ℝ E] in
-theorem meanExtension_outside {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (f : NativePoint → E) {x : LocalSignedRequest.Point}
-    (hx : (LocalSignedRequest.profileMap (2 * F.data.h) x).1 ∉
-      Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)) :
-    meanExtension W f x = 0 := nativeExtension_outside W f (by rwa [nativeRadius_meanNative])
 
 theorem NativeRegularity.mean_smooth {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     {f : NativePoint → E} (h : NativeRegularity W f) :
@@ -889,13 +800,5 @@ theorem meanExtension_jet_norm {F : OutgoingProfile.Profile} (W : NominalProfile
       ‖iteratedFDeriv ℝ n (nativeExtension W f) (meanNative x)‖ :=
   meanNative.norm_iteratedFDeriv_comp_right (nativeExtension W f) x n
 
-theorem NativeRegularity.mean_edge {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {f : NativePoint → E} (h : NativeRegularity W f) (n : ℕ) {x : LocalSignedRequest.Point}
-    (hx : 0 < x.2.1.1)
-    (he : (LocalSignedRequest.profileMap (2 * F.data.h) x).1 = PrimaryTargetBounds.leftRadius W ∨
-      (LocalSignedRequest.profileMap (2 * F.data.h) x).1 = PrimaryTargetBounds.rightRadius W) :
-    iteratedFDeriv ℝ n (meanExtension W f) x = 0 := by
-  apply norm_eq_zero.mp
-  rw [meanExtension_jet_norm, h.edge n (meanNative x) hx (by rwa [nativeRadius_meanNative]), norm_zero]
 
 end NavierStokes.WaveEdgeExtension

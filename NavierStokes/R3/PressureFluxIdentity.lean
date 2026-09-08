@@ -100,14 +100,6 @@ def canonicalPressureLinear (g : Fin 3 → Fin 3 → Space → ℝ)
     canonicalPressureLinear g hg ψ = ∑ i : Fin 3, ∑ j : Fin 3, pressurePair i j (g i j) ψ := by
   simp only [canonicalPressureLinear, LinearMap.sum_apply, PressureFunctionals.pressurePairLinear_apply]
 
-theorem integrable_canonical_flux_terms {χ : Space → ℝ} {w : Space → Space}
-    (hχ : ContDiff ℝ ∞ χ) (hw : ContDiff ℝ ∞ w) (hcχ : HasCompactSupport χ)
-    {g : Fin 3 → Fin 3 → Space → ℝ} (hg : ∀ i j : Fin 3, Integrable (g i j))
-    (i j : Fin 3) :
-    Integrable (fun x : Space => (g i j x : ℂ) * rieszTest i j
-      (realTest (fun y : Space => fderiv ℝ χ y (w y))
-        (fluxFunction_smooth hχ hw) (fluxFunction_hasCompactSupport hcχ w)) x) :=
-  PressureFunctionals.integrable_l1_riesz_pair (hg i j) i j _
 
 /-- Compact integration by parts turns the given scalar pressure-gradient
 identification into the actual cutoff pressure flux. -/

@@ -87,12 +87,6 @@ theorem inputJet_bound (I : Window) {ε : ℝ} (hε : 0 < ε) (A : AxisSpace I �
 def productFamily (I : Window) (ε : ℝ) (A B : AxisSpace I ε) (n m : ℕ) (x : ℝ) : ℝ :=
   jetProduct (fun i k => inputJet I ε A i k x) (fun j l => inputJet I ε B j l x) n m
 
-theorem productFamily_eq (I : Window) (ε : ℝ) (A B : AxisSpace I ε)
-    (n m : ℕ) (x : ℝ) :
-    productFamily I ε A B n m x =
-      ∑ ij ∈ antidiagonal n,
-        leibnizSum (fun k => inputJet I ε A ij.1 k x)
-          (fun l => inputJet I ε B ij.2 l x) m := rfl
 
 theorem productFamily_continuous (I : Window) (ε : ℝ) (A B : AxisSpace I ε) (n m : ℕ) :
     ContinuousOn (productFamily I ε A B n m) I.interval := by
@@ -327,8 +321,6 @@ def product (I : Window) {ε : ℝ} (hε : 0 < ε) :
     AxisSpace I ε →L[ℝ] AxisSpace I ε →L[ℝ] AxisSpace I ε :=
   bilinearLift I hε (productData I hε)
 
-theorem norm_product_le (I : Window) {ε : ℝ} (hε : 0 < ε) : ‖product I hε‖ ≤ 64 :=
-  norm_bilinearLift_le I hε (productData I hε)
 
 theorem jet_product (I : Window) {ε : ℝ} (hε : 0 < ε) (A B : AxisSpace I ε)
     (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
@@ -479,17 +471,9 @@ def mulY (I : Window) {ε : ℝ} (hε : 0 < ε) : AxisSpace I ε →L[ℝ] AxisS
 theorem norm_average_le (I : Window) {ε : ℝ} (hε : 0 < ε) : ‖average I hε‖ ≤ 1 :=
   norm_linearLift_le I hε (averageData I hε)
 
-theorem norm_primitive_le (I : Window) {ε : ℝ} (hε : 0 < ε) : ‖primitive I hε‖ ≤ 80 :=
-  norm_linearLift_le I hε (primitiveData I hε)
 
-theorem norm_regularInverse_le (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r) :
-    ‖regularInverse I hε r hr‖ ≤ 80 := norm_linearLift_le I hε (inverseData I hε r hr)
 
-theorem norm_parameterPrimitive_le (I : Window) {ε : ℝ} (hε : 0 < ε) :
-    ‖parameterPrimitive I hε‖ ≤ 80 / ε := norm_linearLift_le I hε (parameterPrimitiveData I hε)
 
-theorem norm_mulY_le (I : Window) {ε : ℝ} (hε : 0 < ε) : ‖mulY I hε‖ ≤ 80 :=
-  norm_linearLift_le I hε (multiplyYData I hε)
 
 theorem jet_regularInverse_zero (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r)
     (A : AxisSpace I ε) (m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
@@ -716,24 +700,8 @@ def inverseDotProduct (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 �
     AxisSpace I ε →L[ℝ] AxisSpace I ε →L[ℝ] AxisSpace I ε :=
   bilinearLift I hε (inverseDotProductData I hε r hr)
 
-theorem norm_inverseMixed_le (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r) :
-    ‖inverseMixed I hε r hr‖ ≤ 5120 / ε := by
-  have h := norm_bilinearLift_le I hε (inverseMixedData I hε r hr)
-  change ‖inverseMixed I hε r hr‖ ≤ 64 * (80 / ε) at h
-  convert! h using 1 ; ring
 
-theorem norm_inverseParamProduct_le (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r) :
-    ‖inverseParamProduct I hε r hr‖ ≤ 5120 / ε := by
-  have h := norm_bilinearLift_le I hε (inverseParamProductData I hε r hr)
-  change ‖inverseParamProduct I hε r hr‖ ≤ 64 * (80 / ε) at h
-  convert! h using 1 ; ring
 
-theorem norm_inverseDotProduct_le (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r) :
-    ‖inverseDotProduct I hε r hr‖ ≤ 5120 := by
-  have h := norm_bilinearLift_le I hε (inverseDotProductData I hε r hr)
-  change ‖inverseDotProduct I hε r hr‖ ≤ 64 * 80 at h
-  norm_num at h ⊢
-  exact h
 
 theorem jet_inverseMixed (I : Window) {ε : ℝ} (hε : 0 < ε) (r : ℕ) (hr : 1 ≤ r)
     (A B : AxisSpace I ε) (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :

@@ -65,11 +65,5 @@ theorem restrictOperator_derivative {p q : ℕ} (h : q ≤ p) (i : Fin 4) (u : S
   apply value_injective period
   rfl
 
-/-- Restriction commutes with every genuine cylinder translation. -/
-theorem restrictOperator_translation {p q : ℕ} (h : q ≤ p) (a : LiftDomain period) (u : SobolevSpace period p) :
-    restrictOperator period h (sobolevTranslation period p a u) =
-      sobolevTranslation period q a (restrictOperator period h u) := by
-  apply value_injective period
-  rfl
 
 end EulerCylinderSobolevSpace

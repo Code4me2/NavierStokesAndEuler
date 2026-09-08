@@ -224,21 +224,6 @@ theorem potentialTruncation_eq (u : Space → Space) (hu : ContDiff ℝ ∞ u)
     simp only [hy, Pi.one_apply, one_mul]
   exact (curl_congr_nhds _ _ x he).trans (curl_radialPotential u hu hdiv x)
 
-/-- No all-order integrability is needed to construct compact solenoidal
-extensions agreeing with a smooth divergence-free field on a ball. -/
-theorem exists_compact_solenoidal_truncation
-    (u : Space → Space) (hu : ContDiff ℝ ∞ u) (hdiv : ∀ x, divergence u x = 0)
-    (r R : ℝ) (hr : 0 < r) (hrR : r < R) :
-    ∃ w : Space → Space, ContDiff ℝ ∞ w ∧ HasCompactSupport w ∧
-      tsupport w ⊆ Metric.closedBall 0 R ∧
-      (∀ x, divergence w x = 0) ∧ (∀ x ∈ Metric.ball 0 r, w x = u x) := by
-  let χ : ContDiffBump (0 : Space) := ⟨r, R, hr, hrR⟩
-  refine ⟨potentialTruncation u χ, potentialTruncation_smooth u hu χ χ.contDiff,
-    potentialTruncation_compact u χ χ.hasCompactSupport, ?_,
-    potentialTruncation_divergence u hu χ χ.contDiff, ?_⟩
-  · exact (potentialTruncation_support u χ).trans_eq χ.tsupport_eq
-  · intro x hx
-    exact potentialTruncation_eq u hu hdiv χ x (χ.eventuallyEq_one_of_mem_ball hx)
 
 theorem partialDerivative_mul (f g : Space → ℝ)
     (hf : Differentiable ℝ f) (hg : Differentiable ℝ g) (j : Fin 3) (x : Space) :
@@ -442,19 +427,12 @@ theorem truncationCutoff_eventually_one (R : ℝ) (hR : 0 < R) (x : Space)
 def finiteEnergyTruncation (u : Space → Space) (R : ℝ) : Space → Space :=
   potentialTruncation u (truncationCutoff R)
 
-theorem finiteEnergyTruncation_smooth
-    (u : Space → Space) (hu : ContDiff ℝ ∞ u) (R : ℝ) :
-    ContDiff ℝ ∞ (finiteEnergyTruncation u R) :=
-  potentialTruncation_smooth u hu _ (truncationCutoff_smooth R)
 
 theorem finiteEnergyTruncation_divergence
     (u : Space → Space) (hu : ContDiff ℝ ∞ u) (R : ℝ) (x : Space) :
     divergence (finiteEnergyTruncation u R) x = 0 :=
   potentialTruncation_divergence u hu _ (truncationCutoff_smooth R) x
 
-theorem finiteEnergyTruncation_compact (u : Space → Space) (R : ℝ) (hR : 0 < R) :
-    HasCompactSupport (finiteEnergyTruncation u R) :=
-  potentialTruncation_compact u _ (truncationCutoff_compact R hR)
 
 theorem finiteEnergyTruncation_support (u : Space → Space) (R : ℝ) (hR : 0 < R) :
     tsupport (finiteEnergyTruncation u R) ⊆ Metric.closedBall 0 (2 * R) :=

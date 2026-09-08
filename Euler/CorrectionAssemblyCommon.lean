@@ -55,19 +55,6 @@ theorem FiniteFamily.commonPath_hasDerivAt (F : FiniteFamily period hT A)
         ⟨t, ht.1.le, ht.2.le⟩ (F.solution 6 le_rfl ⟨t, ht.1.le, ht.2.le⟩))) t :=
   F.equation 6 le_rfl t ht
 
-/-- Every other genuine finite-order correction realizes this same common field.
-Consequently bounds proved for any particular finite solver may be transferred to the assembled solution. -/
-theorem FiniteFamily.realizes_common (F : FiniteFamily period hT A) (C : ComparisonData period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (u : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)))
-    (hi : u ⟨0, le_rfl, hT.le⟩ = 0)
-    (hd : ∀ t, value period (u t) ∈ divergenceFreeSpace period A.κ A.direction)
-    (hu : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (fun r => value period (extendPath T hT.le u r))
-        (value period (((A.atOrder period q).coefficients period hq).apply
-          ⟨t, ht.1.le, ht.2.le⟩ (u ⟨t, ht.1.le, ht.2.le⟩))) t)
-    (t : Icc (0 : ℝ) T) : value period (u t) = F.commonPath period t := by
-  rw [F.unique_at_order period C q hq u hi hd hu]
-  exact F.value_common period C q hq t
 
 /-- Bounded H3 evaluation fixes a canonical actual pointwise representative of the common correction. -/
 def FiniteFamily.pointField (F : FiniteFamily period hT A)

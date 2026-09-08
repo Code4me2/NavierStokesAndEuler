@@ -56,14 +56,6 @@ noncomputable def swapCylinder : Cylinder ≃ₗᵢ[ℝ] Cylinder where
 @[simp] theorem swapCylinder_swapCylinder (x : Cylinder) :
     swapCylinder (swapCylinder x) = x := rfl
 
-/-- This is exactly the continuous linear map used for `swapSlow` in the
-variable-gauge module, expressed using only frozen dependencies. -/
-theorem swapSlow_toContinuousLinearMap :
-    swapSlow.toContinuousLinearEquiv.toContinuousLinearMap =
-      (ContinuousLinearMap.id ℝ ℝ).prodMap
-        ((ContinuousLinearEquiv.prodComm ℝ ℝ ℝ).toContinuousLinearMap.prodMap
-          (ContinuousLinearMap.id ℝ Plane)) := by
-  rfl
 
 section Calculus
 
@@ -219,17 +211,7 @@ theorem dr_swap (o : MeanIncrementBounds.Operators Lift) (f : MeanIncrementBound
   simp only [MeanIncrementBounds.Operators.dr, WeightedClasses.graphDerivative,
     swapOperators, fderiv_swapField, swapField]
 
-theorem dz_swap (o : MeanIncrementBounds.Operators Lift) (f : MeanIncrementBounds.Field Lift) :
-    (swapOperators o).dz (swapField f) = swapField (o.dz f) := by
-  funext n x
-  simp only [MeanIncrementBounds.Operators.dz, swapOperators, fderiv_swapField, swapField]
 
-theorem time_swap (o : MeanIncrementBounds.Operators Lift) (f : MeanIncrementBounds.Field Lift) :
-    (swapOperators o).time (swapField f) = swapField (o.time f) := by
-  funext n x
-  simp only [MeanIncrementBounds.Operators.time, MeanIncrementBounds.Operators.slowTime,
-    MeanIncrementBounds.Operators.fastTime, swapOperators, fderiv_swapField, swapField,
-    Pi.add_apply]
 
 theorem radialDiv_swap (o : MeanIncrementBounds.Operators Lift)
     (k : ℝ) (f : MeanIncrementBounds.Field Lift) :
@@ -309,13 +291,6 @@ theorem fullResidual_swap (c : CorrectionState.Context Lift) (s : CorrectionStat
   rw [hlin, hquad, virtualDivergence_swap]
   rfl
 
-theorem fullGoodResidual_swap (c : CorrectionState.Context Lift) (s : CorrectionState.State Lift)
-    (n : ℕ) (x : Cylinder) (i : Fin 3) :
-    LiftedMeanResidual.fullGoodResidual (swapContext c) (swapState s) n x i =
-      LiftedMeanResidual.fullGoodResidual c s n (swapCylinder x) i := by
-  change LiftedMeanResidual.fullResidual (swapContext c) (swapState s) n x i - _ = _
-  rw [fullResidual_swap]
-  rfl
 
 /-- Literal operator data in the order `(T,Z)`.  No derivative identity is
 assumed: all derivative transport is supplied by the preceding theorems. -/
@@ -361,25 +336,6 @@ theorem MatchesAtTZ.toMatchesAt {o : MeanIncrementBounds.Operators Lift}
     rw [H.vT]
     rfl
 
-theorem matchesAtTZ_graphOperators (r : CorrectionState.ReconstructionData)
-    (epsilon fast : ℕ → ℝ) (G : PhysicalResidualBridge.ScaledGraph) (n : ℕ)
-    (hε : epsilon n = G.epsilon) (hM : r.frequency n = G.frequency)
-    (hc : fast n = G.fastCoefficient) (hd : r.exponent = G.exponent)
-    (hv : r.radialDirection = G.radialVector) :
-    MatchesAtTZ (CorrectionState.graphOperators r epsilon fast
-      (((0, 1) : Plane), (0 : Plane)) (((1, 0) : Plane), (0 : Plane)) G.temporalVector) G n := by
-  constructor
-  · exact hε
-  · exact hM
-  · exact hc
-  · rfl
-  · simp only [CorrectionState.graphOperators, hd, RadialPullback.radialJacobian,
-      GraphCalculus.radialSpeed]
-  · rfl
-  · rfl
-  · rfl
-  · simp only [CorrectionState.graphOperators, hv]
-  · rfl
 
 /-- The actual scaled physical graph, with the slow coordinates in `(T,Z)` order. -/
 noncomputable def graphMapTZ (G : PhysicalResidualBridge.ScaledGraph)

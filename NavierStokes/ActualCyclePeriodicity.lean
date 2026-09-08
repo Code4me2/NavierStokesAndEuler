@@ -353,27 +353,6 @@ theorem state_phase_translation (l : Index B N0) (n : ℕ)
   simpa only [ActualPrimaryCoherence.chartDeck, pointDeck, Prod.add_def, add_zero] using
     ActualPrimaryCoherence.chart_phase_periodic l.2 l.1 n hn k (z, 0)
 
-include H in
-/-- The per-label real velocity, pressure, and retained Gaussian field
-have the same periods as their literal coefficients. -/
-theorem fields_ordered (h : Periodic x) (l : Index B N0) (n : ℕ)
-    (hn : ActualWaveRegularityData.Ordered l n) (k : TorusInverse.Frequency) (θ : ℝ) :
-    TranslationOn ActualInitialization.geometry.domain (pointDeck k)
-      (fun z => (x.coefficients.blocks l).oscillation n (z, θ)) ∧
-    TranslationOn ActualInitialization.geometry.domain (pointDeck k)
-      (fun z => (x.coefficients.blocks l).oscillatoryPressure n (z, θ)) ∧
-    TranslationOn ActualInitialization.geometry.domain (pointDeck k)
-      (fun z => coefficientField (x.coefficients.blocks l) (x.coefficients.gaussian l) n (z, θ)) := by
-  have hΦ := state_phase_translation H l n hn k
-  refine ⟨?_, ?_, ?_⟩
-  · intro z hz
-    funext i
-    exact congrArg Complex.re ((h.velocity l n hn k i).field hΦ _ _ θ z hz)
-  · intro z hz
-    exact congrArg Complex.re ((h.pressure l n hn k).field hΦ _ _ θ z hz)
-  · intro z hz
-    funext i
-    exact congrArg Complex.re ((h.gaussian l n hn k i).field hΦ _ _ θ z hz)
 
 include H in
 /-- Every actual residual coefficient has the common periods on an ordered band.

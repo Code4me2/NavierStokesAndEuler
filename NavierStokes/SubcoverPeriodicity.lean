@@ -113,23 +113,7 @@ theorem complexCopyPressure_shift (t : TangentData P ProblemStatement.Space)
   simp only [complexCopyPressure, copyPressure_shift _ g hab j K frequency p hr Y,
     copyPressure_shift _ g hab j K frequency p hi Y]
 
-theorem complexCopyVelocity_shift_of_gap_zero (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) (hg : g.gap = 0)
-    {a b : ℝ} (hab : a ≤ b) (j K : Frequency) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint K) = f (p,Y)) (Y : Plane) :
-    complexCopyVelocity t f g hab (j + K) (p, Y + TorusAverages.latticePoint K) =
-      complexCopyVelocity t f g hab j (p,Y) := by
-  simpa only [hg, coverIndex, Function.iterate_zero, id_eq] using
-    complexCopyVelocity_shift t f g hab j K p hf Y
 
-theorem complexCopyPressure_shift_of_gap_zero (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) (hg : g.gap = 0)
-    {a b : ℝ} (hab : a ≤ b) (j K : Frequency) (frequency : ℝ) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint K) = f (p,Y)) (Y : Plane) :
-    complexCopyPressure t f g hab (j + K) frequency (p, Y + TorusAverages.latticePoint K) =
-      complexCopyPressure t f g hab j frequency (p,Y) := by
-  simpa only [hg, coverIndex, Function.iterate_zero, id_eq] using
-    complexCopyPressure_shift t f g hab j K frequency p hf Y
 
 end ParticularCopies
 
@@ -179,23 +163,6 @@ theorem commonPressure_shift (t : TangentData P ProblemStatement.Space)
   periodizedCopies_shift g κ _ K p
     (fun j Y => complexCopyPressure_shift t f g hab j K frequency p hf Y) Y
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-/-- With a compact cutoff, both fields are genuine finite sums over the
-same copy set at the specified point. -/
-theorem commonFields_finite_sum (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (hκ : HasCompactSupport κ) (frequency : ℝ) (p : P) (Y : Plane) :
-    ∃ I : Finset Frequency,
-      commonVelocity t f g hab κ (p,Y) =
-        ∑ j ∈ I, κ (g.coordinates j Y) • complexCopyVelocity t f g hab j (p,Y) ∧
-      commonPressure t f g hab κ frequency (p,Y) =
-        ∑ j ∈ I, κ (g.coordinates j Y) • complexCopyPressure t f g hab j frequency (p,Y) := by
-  obtain ⟨I,hI⟩ := g.finite_copy_cutoffs hκ ‖Y‖
-  refine ⟨I, ?_, ?_⟩
-  · unfold commonVelocity periodizedCopies
-    exact tsum_eq_sum (fun j hj => by rw [hI Y le_rfl j hj, zero_smul])
-  · unfold commonPressure periodizedCopies
-    exact tsum_eq_sum (fun j hj => by rw [hI Y le_rfl j hj, zero_smul])
 
 end CommonFields
 
@@ -224,15 +191,6 @@ theorem inverseCoverSource_subcoverPeriodic {P V : Type} (d : ℕ) (f : P × Pla
     (p : P) (hf : PeriodicAt f p) : SubcoverPeriodicAt d (inverseCoverSource d f) p :=
   fun Y k => inverseCoverSource_shift d f p k (fun Z => hf Z k) Y
 
-/-- Pushing a sublattice-periodic field back through the same cover
-recovers the corresponding unit-lattice shift. -/
-theorem cover_pullback_shift {P V : Type} (d : ℕ) (f : P × Plane → V)
-    (p : P) (k : Frequency)
-    (hf : ∀ Y : Plane,
-      f (p, Y + TorusAverages.latticePoint (coverIndex d k)) = f (p,Y)) (Y : Plane) :
-    f (p, coverPower d (Y + TorusAverages.latticePoint k)) = f (p, coverPower d Y) := by
-  rw [map_add, coverPower_lattice]
-  exact hf _
 
 section SubcoverFields
 
@@ -268,27 +226,7 @@ theorem commonPressure_subcoverPeriodic (t : TangentData P ProblemStatement.Spac
     SubcoverPeriodicAt d (commonPressure t f g hab κ frequency) p :=
   fun Y k => commonPressure_subcover_shift t f g hab κ frequency d k p (fun Z => hf Z k) Y
 
-/-- A single symmetry of the original source yields precisely the
-transported symmetry of the solved inverse-cover source. -/
-theorem commonVelocity_inverseCoverSource_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (d : ℕ) (k : Frequency) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint k) = f (p,Y)) (Y : Plane) :
-    commonVelocity t (inverseCoverSource d f) g hab κ
-        (p, Y + TorusAverages.latticePoint (coverIndex d k)) =
-      commonVelocity t (inverseCoverSource d f) g hab κ (p,Y) :=
-  commonVelocity_subcover_shift t _ g hab κ d k p
-    (inverseCoverSource_shift d f p k hf) Y
 
-theorem commonPressure_inverseCoverSource_shift (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (frequency : ℝ) (d : ℕ) (k : Frequency) (p : P)
-    (hf : ∀ Y : Plane, f (p, Y + TorusAverages.latticePoint k) = f (p,Y)) (Y : Plane) :
-    commonPressure t (inverseCoverSource d f) g hab κ frequency
-        (p, Y + TorusAverages.latticePoint (coverIndex d k)) =
-      commonPressure t (inverseCoverSource d f) g hab κ frequency (p,Y) :=
-  commonPressure_subcover_shift t _ g hab κ frequency d k p
-    (inverseCoverSource_shift d f p k hf) Y
 
 end SubcoverFields
 

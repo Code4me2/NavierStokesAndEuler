@@ -57,50 +57,8 @@ def correctedPath {q : ℕ} {T : ℝ} (D : CorrectionData period q (Icc (0 : ℝ
     (e : C(Icc (0 : ℝ) T,SobolevSpace period (q+1))) :
     C(Icc (0 : ℝ) T,SobolevSpace period (q+1)) := D.approximation+e
 
-/-- A zero initial correction preserves the actual initial field. -/
-theorem correctedPath_initial {q : ℕ} (T : ℝ) (hT : 0 ≤ T)
-    (D : CorrectionData period q (Icc (0 : ℝ) T))
-    (e : C(Icc (0 : ℝ) T,SobolevSpace period (q+1))) (he : e ⟨0,le_rfl,hT⟩=0) :
-    correctedPath period D e ⟨0,le_rfl,hT⟩=D.approximation ⟨0,le_rfl,hT⟩ := by
-  change D.approximation ⟨0,le_rfl,hT⟩+e ⟨0,le_rfl,hT⟩=_
-  rw [he,add_zero]
 
-/-- The corrected path retains the genuine lifted divergence constraint by addition in its closed subspace. -/
-theorem correctedPath_divergenceFree {q : ℕ} {T : ℝ}
-    (D : CorrectionData period q (Icc (0 : ℝ) T))
-    (e : C(Icc (0 : ℝ) T,SobolevSpace period (q+1)))
-    (hz : ∀ t, value period (D.approximation t) ∈ divergenceFreeSpace period D.κ D.direction)
-    (he : ∀ t, value period (e t) ∈ divergenceFreeSpace period D.κ D.direction) (t : Icc (0 : ℝ) T) :
-    value period (correctedPath period D e t) ∈ divergenceFreeSpace period D.κ D.direction :=
-  (divergenceFreeSpace period D.κ D.direction).add_mem (hz t) (he t)
 
-/-- Adding a genuine approximate pressure to the actual correction pressure preserves membership in the lifted gradient space. -/
-theorem corrected_pressure_mem_gradient {q : ℕ} {T : Type*} [TopologicalSpace T]
-    (D : CorrectionData period q T) (hq : 6 ≤ q) (t : T)
-    (e : SobolevSpace period (q+1)) (pa : SobolevSpace period q)
-    (hpa : value period pa ∈ gradientSpace period D.κ D.direction) :
-    value period (pa+D.pressure period hq t e) ∈ gradientSpace period D.κ D.direction :=
-  (gradientSpace period D.κ D.direction).add_mem hpa (D.pressure_mem_gradient period hq t e)
 
-/-- Actual approximate and correction derivatives give the zero-residual nonlinear equation for their sum, with the sum of their genuine pressures. -/
-theorem correctedPath_hasDerivAt {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)
-    (D : CorrectionData period q (Icc (0 : ℝ) T))
-    (e : C(Icc (0 : ℝ) T,SobolevSpace period (q+1)))
-    (pa : C(Icc (0 : ℝ) T,SobolevSpace period q)) (t : ℝ) (ht : t ∈ Ioo 0 T)
-    (hz : HasDerivAt (fun r => truncateOperator period q (extendPath T hT D.approximation r))
-      (D.residual ⟨t,ht.1.le,ht.2.le⟩-
-        nonlinearity period D hq ⟨t,ht.1.le,ht.2.le⟩ (D.approximation ⟨t,ht.1.le,ht.2.le⟩)-
-        coefficientSobolevOperator period (D.metric.jet ⟨t,ht.1.le,ht.2.le⟩) (pa ⟨t,ht.1.le,ht.2.le⟩)) t)
-    (he : HasDerivAt (fun r => truncateOperator period q (extendPath T hT e r))
-      (-D.rawSource period hq ⟨t,ht.1.le,ht.2.le⟩ (e ⟨t,ht.1.le,ht.2.le⟩)-
-        coefficientSobolevOperator period (D.metric.jet ⟨t,ht.1.le,ht.2.le⟩)
-          (D.pressure period hq ⟨t,ht.1.le,ht.2.le⟩ (e ⟨t,ht.1.le,ht.2.le⟩))) t) :
-    HasDerivAt (fun r => truncateOperator period q (extendPath T hT (correctedPath period D e) r))
-      (-nonlinearity period D hq ⟨t,ht.1.le,ht.2.le⟩ (correctedPath period D e ⟨t,ht.1.le,ht.2.le⟩)-
-        coefficientSobolevOperator period (D.metric.jet ⟨t,ht.1.le,ht.2.le⟩)
-          (pa ⟨t,ht.1.le,ht.2.le⟩+D.pressure period hq ⟨t,ht.1.le,ht.2.le⟩ (e ⟨t,ht.1.le,ht.2.le⟩))) t := by
-  have h := (hz.add he).congr_deriv
-    (residual_cancellation period D hq ⟨t,ht.1.le,ht.2.le⟩ (e ⟨t,ht.1.le,ht.2.le⟩) (pa ⟨t,ht.1.le,ht.2.le⟩))
-  convert h using 1 <;> rfl
 
 end EulerCorrectionResidualCancellation

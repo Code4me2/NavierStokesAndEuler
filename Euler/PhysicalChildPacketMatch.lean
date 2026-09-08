@@ -44,13 +44,6 @@ variable {raw : EulerPacketProfileRecursion.VectorField}
   (G : EulerPhysicalGraphFlowBounds.Data P A.T)
   (hG : G.A=B.liftedPacketCoefficient P V)
 
-include hV hG in
-theorem lifted_graph_constraint (k : ℝ) (hk : k*C.κ=1)
-    (t : Icc (0 : ℝ) A.T) (q : LiftTangent) :
-    graphConstraint k C.direction (G.A.field t q)=0 := by
-  rw [hG,B.liftedPacketCoefficient_eq_corrected P V hV]
-  simp only [graphConstraint_apply,transportDirection,real_inner_smul_right]
-  rw [← mul_assoc,hk,one_mul,sub_self]
 
 include hV hG in
 theorem graphPushforwardVelocity_corrected (k : ℝ)

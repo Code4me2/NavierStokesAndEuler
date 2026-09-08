@@ -156,24 +156,6 @@ theorem analyticOnNhd_primitive {U : Set ℂ} (ho : IsOpen U)
     (hg : DifferentiableOn ℂ g U) : AnalyticOnNhd ℂ (primitive g) U :=
   (differentiableOn_primitive ho hU h0 hg).analyticOnNhd ho
 
-/-- Reality is local to the real points of the given convex domain. -/
-theorem primitive_im_eq_zero {U : Set ℂ} (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U)
-    {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (x : ℂ) ∈ U → (g x).im = 0)
-    {x : ℝ} (hx : (x : ℂ) ∈ U) : (primitive g x).im = 0 := by
-  have heq : (∫ t in (0 : ℝ)..1, g ((t : ℂ) * (x : ℂ))) =
-      ∫ t in (0 : ℝ)..1, ((g ((t : ℂ) * (x : ℂ))).re : ℂ) := by
-    apply intervalIntegral.integral_congr
-    intro t ht
-    have htx := segment_mem hU h0 hx
-      (show t ∈ Icc (0 : ℝ) 1 by simpa only [uIcc_of_le zero_le_one] using ht)
-    have him : (g ((t : ℂ) * (x : ℂ))).im = 0 := by
-      simpa only [Complex.ofReal_mul] using hreal (t * x)
-        (by simpa only [Complex.ofReal_mul] using htx)
-    apply Complex.ext
-    · simp
-    · simpa using him
-  rw [primitive, heq, intervalIntegral.integral_ofReal]
-  simp
 
 /-- If the integrand extends a real function, its segment primitive extends
 the corresponding real segment integral exactly. -/
@@ -186,11 +168,6 @@ theorem primitive_ofReal (g : ℂ → ℂ) (f : ℝ → ℝ)
     rw [← Complex.ofReal_mul, hreal]
   rw [primitive, heq, intervalIntegral.integral_ofReal, Complex.ofReal_mul]
 
-theorem hasDerivAt_real_primitive {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) {x : ℝ} (hx : (x : ℂ) ∈ U) :
-    HasDerivAt (fun y : ℝ => (primitive g y).re) (g x).re x :=
-  (hasDerivAt_primitive ho hU h0 hg hx).real_of_complex
 
 /-- The normalized exponential built from the actual segment primitive. -/
 def amplitude (g : ℂ → ℂ) (Λ C : ℂ) (z : ℂ) : ℂ :=
@@ -214,22 +191,7 @@ theorem hasDerivAt_amplitude {U : Set ℂ} (ho : IsOpen U)
   unfold amplitude
   ring
 
-theorem analyticOnNhd_amplitude {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) (Λ C : ℂ) : AnalyticOnNhd ℂ (amplitude g Λ C) U := by
-  apply DifferentiableOn.analyticOnNhd _ ho
-  intro z hz
-  exact (hasDerivAt_amplitude ho hU h0 hg Λ C hz).differentiableAt.differentiableWithinAt
 
-/-- The actual logarithmic derivative of the nonvanishing normalized
-exponential is the prescribed scaled holomorphic gradient. -/
-theorem amplitude_log_derivative {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) (Λ : ℂ) {C : ℂ} (hC : C ≠ 0)
-    {z : ℂ} (hz : z ∈ U) :
-    deriv (amplitude g Λ C) z / amplitude g Λ C z = Λ * g z := by
-  rw [(hasDerivAt_amplitude ho hU h0 hg Λ C hz).deriv]
-  exact mul_div_cancel_right₀ _ (amplitude_ne_zero g Λ hC z)
 
 theorem amplitude_ofReal (g : ℂ → ℂ) (f : ℝ → ℝ)
     (hreal : ∀ x : ℝ, g x = (f x : ℂ)) (Λ C x : ℝ) :
@@ -254,14 +216,6 @@ theorem hasDerivAt_real_amplitude {U : Set ℂ} (ho : IsOpen U)
   simpa only [hreal, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
     Complex.ofReal_im, mul_zero, zero_mul, add_zero, sub_zero] using hd
 
-theorem real_amplitude_log_derivative {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) (f : ℝ → ℝ)
-    (hreal : ∀ x : ℝ, g x = (f x : ℂ)) (Λ : ℝ) {C : ℝ} (hC : 0 < C)
-    {x : ℝ} (hx : (x : ℂ) ∈ U) :
-    deriv (fun y : ℝ => (amplitude g Λ C y).re) x / (amplitude g Λ C x).re = Λ * f x := by
-  rw [(hasDerivAt_real_amplitude ho hU h0 hg f hreal Λ C hx).deriv]
-  exact mul_div_cancel_right₀ _ (ne_of_gt (amplitude_real_pos g f hreal Λ hC x))
 
 end NavierStokes.AnalyticPrimitive
 

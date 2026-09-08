@@ -27,14 +27,6 @@ theorem kernel_sq_smul {c : ℝ} (hc : 0 < c) (y : Space) :
   rw [he]
   ring
 
-theorem norm_mul_kernel_integrable {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y : Space => ‖y‖*kernel t y) := by
-  apply ((wideKernel_integrable ht).const_mul (1+2*t)).mono'
-    (continuous_norm.mul (kernel_smooth t).continuous).aestronglyMeasurable
-  exact Eventually.of_forall (fun y => by
-    change ‖‖y‖*kernel t y‖ ≤ (1+2*t)*wideKernel t y
-    rw [Real.norm_of_nonneg (mul_nonneg (norm_nonneg _) (kernel_nonneg ht y))]
-    exact norm_kernel_le ht y)
 
 section Averaging
 
@@ -78,14 +70,6 @@ theorem scaledAverage_continuous (f : Space → V) (hf : Continuous f)
       continuous_const.smul (hf.comp
         (show Continuous (fun t : ℝ => x+Real.sqrt t • y) by fun_prop)))
 
-theorem average_tendsto_zero [CompleteSpace V] (f : Space → V) (hf : Continuous f)
-    (C : ℝ) (hb : ∀ x, ‖f x‖ ≤ C) (x : Space) :
-    Tendsto (fun t : ℝ => average t f x) (𝓝[>] 0) (𝓝 (f x)) := by
-  have h : Tendsto (fun t : ℝ => scaledAverage t f x) (𝓝[>] 0)
-      (𝓝 (scaledAverage 0 f x)) :=
-    (scaledAverage_continuous f hf C hb x).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
-  rw [scaledAverage_zero] at h
-  exact h.congr' (eventually_nhdsWithin_of_forall (fun t ht => scaledAverage_eq ht f x))
 
 end Averaging
 end EulerWholeSpaceGaussian

@@ -69,15 +69,6 @@ depend on its derivative order as well as the parameter point. -/
 def LocalGaussianJets (c : ℝ) (U : Set E) (f : E × ℝ → F) : Prop :=
   ∀ n : ℕ, LocalGaussianBound c U (iteratedFDeriv ℝ n f)
 
-omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
-theorem LocalGaussianBound.of_uniform {c C : ℝ} {N : ℕ} {U : Set E}
-    {g : E × ℝ → F} (hC : 0 ≤ C)
-    (hbound : ∀ y ∈ U, ∀ δ ∈ Ioo (0 : ℝ) 1,
-      ‖g (y, δ)‖ ≤ C * edge c δ / δ ^ N) : LocalGaussianBound c U g := by
-  intro _ _
-  refine ⟨univ, univ_mem, C, hC, N, ?_⟩
-  intro y hy δ hδ
-  exact hbound y hy.2 δ hδ
 
 omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
 /-- Adapter from the unextended exponential written in analytic estimates. -/
@@ -223,21 +214,6 @@ theorem iteratedFDeriv_zeroExtension_edge {c : ℝ} (hc : 0 < c)
     iteratedFDeriv ℝ n (zeroExtension f) (x, 0) = 0 :=
   iteratedFDeriv_zeroExtension_nonpos hc hU hf hB n hx le_rfl
 
-/-- The main theorem stated directly with local exponential estimates of
-every actual tensor. The interval and neighborhood bounds remain explicit. -/
-theorem contDiffOn_zeroExtension_of_exp_bounds {c : ℝ} (hc : 0 < c)
-    {U : Set E} (hU : IsOpen U) {f : E × ℝ → F}
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ Ioi 0))
-    (hbound : ∀ n : ℕ, ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ C : ℝ, 0 ≤ C ∧ ∃ N : ℕ,
-      ∀ y ∈ V ∩ U, ∀ δ ∈ Ioo (0 : ℝ) 1,
-        ‖iteratedFDeriv ℝ n f (y, δ)‖ ≤ C * Real.exp (-c / δ ^ 2) / δ ^ N) :
-    ContDiffOn ℝ ∞ (zeroExtension f) (U ×ˢ univ) :=
-  contDiffOn_zeroExtension hc hU hf (fun n => LocalGaussianBound.of_exp_bound (hbound n))
 
-theorem contDiff_zeroExtension {c : ℝ} (hc : 0 < c) {f : E × ℝ → F}
-    (hf : ContDiffOn ℝ ∞ f (univ ×ˢ Ioi 0)) (hB : LocalGaussianJets c univ f) :
-    ContDiff ℝ ∞ (zeroExtension f) := by
-  simpa only [univ_prod_univ, contDiffOn_univ] using
-    contDiffOn_zeroExtension hc isOpen_univ hf hB
 
 end NavierStokes.FlatZeroExtension

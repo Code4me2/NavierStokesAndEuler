@@ -27,12 +27,6 @@ theorem initialPrimitive_pathLp (f : C(Icc (0 : ℝ) T,E)) :
     (show Ioc (0 : ℝ) (t : ℝ) ⊆ Icc (0 : ℝ) T from
       fun s hs => ⟨hs.1.le,hs.2.trans t.property.2⟩) he
 
-theorem initialTrace_pathLp (f : C(Icc (0 : ℝ) T,E)) :
-    initialTrace T hT (pathLp T hT f) =
-      -EulerContinuousTimeIntegral.integral T hT f ⟨T,hT,le_rfl⟩ := by
-  have he := initialPrimitive_eq_terminal_sub T hT (pathLp T hT f) ⟨T,hT,le_rfl⟩
-  rw [initialPrimitive_pathLp,terminalPrimitive_terminal,zero_sub] at he
-  simpa only [neg_neg] using congrArg Neg.neg he.symm
 
 theorem primitive_eq_path (p q : C(Icc (0 : ℝ) T,E))
     (hd : ∀ t : Icc (0 : ℝ) T,

@@ -68,12 +68,5 @@ theorem norm_fderiv_smul_unit (a : LiftTangent → ℝ) (m : Space) (hm : ‖m�
     ‖fderiv ℝ (fun y => a y • m) z‖ = ‖fderiv ℝ a z‖ := by
   rw [(ha.hasFDerivAt.smul_const m).fderiv,norm_smulRight_apply,hm,mul_one]
 
-theorem norm_fderiv_clm_apply_le (A : Space → Space →L[ℝ] Space) (u : Space → Space)
-    (x : Space) (hA : DifferentiableAt ℝ A x) (hu : DifferentiableAt ℝ u x) :
-    ‖fderiv ℝ (fun y => A y (u y)) x‖ ≤
-      ‖A x‖*‖fderiv ℝ u x‖+‖fderiv ℝ A x‖*‖u x‖ := by
-  rw [fderiv_clm_apply hA hu]
-  exact (norm_add_le _ _).trans (add_le_add (opNorm_comp_le _ _)
-    (by simpa only [opNorm_flip] using (fderiv ℝ A x).flip.le_opNorm (u x)))
 
 end EulerPacketGraphHessian

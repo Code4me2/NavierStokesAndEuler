@@ -92,13 +92,5 @@ theorem pointField_wordSum_gevrey (s q N n : ℕ) (hq : 3 ≤ q)
     simpa only [mul_comm] using hw
   exact hd.trans_eq (by rw [weight, div_div_eq_mul_div, inv_pow]; ring)
 
-theorem pointField_word_gevrey (s q N n : ℕ) (hq : 3 ≤ q)
-    (hns : n+q ≤ s) (hnN : n ≤ N) (ρ C : ℝ) (hρ : 0 < ρ)
-    (t : Icc (0 : ℝ) T) (hC : weightedNorm P q N ρ (A.realization s t) ≤ C)
-    (w : Fin n → Fin 4) (x : LiftDomain P) :
-    ‖iteratedFieldDerivative P w (A.pointField t) x‖ ≤
-      (sobolevEmbeddingConstant P 3*C)*(ρ⁻¹)^n*(n.factorial : ℝ)^2 :=
-  (single_le_sum (fun v _ => norm_nonneg (iteratedFieldDerivative P v (A.pointField t) x)) (mem_univ w)).trans
-    (A.pointField_wordSum_gevrey s q N n hq hns hnN ρ C hρ t hC x)
 
 end EulerAllOrderCorrectionData.FieldTower

@@ -65,25 +65,6 @@ theorem transverse_fast_zero (l : SignedLabel B N0) (n : ℕ) (k : Frequency) (x
   simp only [smul_zero] at h
   exact h
 
-/-- The product cutoff is differentiated literally. The transverse
-derivative term vanishes; no cutoff factor is silently moved into the mask. -/
-theorem cutoff_fast (l : SignedLabel B N0) (n : ℕ) (k : Frequency) (x : FullPoint) :
-    (directions B).Dfast (cutoff l k) n x =
-      transverse l k n x * (directions B).Dfast
-        (fun m y => GaussianTailFlat.profile (nativeTime l m k y)) n x := by
-  have ht := ((transverse_smooth l n k).differentiable (by simp)).differentiableAt (x := x)
-  have hg := ((GaussianTailFlat.profile_contDiff.comp (nativeTime_smooth l n k)).differentiable
-    (by simp)).differentiableAt (x := x)
-  simp only [Function.comp_def] at hg
-  have hz := transverse_fast_zero l n k x
-  change fderiv ℝ (transverse l k n) x ((directions B).fastField n x) = 0 at hz
-  change fderiv ℝ (fun y => transverse l k n y * GaussianTailFlat.profile (nativeTime l n k y))
-    x ((directions B).fastField n x) =
-      transverse l k n x * fderiv ℝ (fun y => GaussianTailFlat.profile (nativeTime l n k y))
-        x ((directions B).fastField n x)
-  rw [fderiv_fun_mul ht hg]
-  simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul, hz]
-  ring
 
 /-- The central Gaussian plateau kills the actual error even when the
 transverse cutoff is strictly between zero and one. -/

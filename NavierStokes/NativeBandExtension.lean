@@ -150,16 +150,6 @@ section LocalAlgebra
 
 variable {D : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-omit [NormedSpace ℝ D] in
-theorem strictCone_eventually {H : D → SmoothCovariance.Mat2}
-    {T : D → SmoothCovariance.Vec2} {x : D}
-    (hH : ∀ i j, ContinuousAt (fun y => H y i j) x)
-    (hT : ∀ i, ContinuousAt (fun y => T y i) x)
-    (hx : SmoothCovariance.StrictCone (H x) (T x)) :
-    ∀ᶠ y in 𝓝 x, SmoothCovariance.StrictCone (H y) (T y) := by
-  have hH' : ContinuousAt H x := continuousAt_pi.mpr (fun i => continuousAt_pi.mpr (hH i))
-  have hT' : ContinuousAt T x := continuousAt_pi.mpr hT
-  exact (hH'.prodMk hT') (SmoothCovariance.isOpen_strictConeRegion.mem_nhds hx)
 
 theorem cramer_amplitude_contDiffAt {H : D → SmoothCovariance.Mat2}
     {T : D → SmoothCovariance.Vec2} {x : D}
@@ -349,14 +339,6 @@ theorem outerFactor_contDiffAt (L : PrimaryGeometryAssembly.Index W a.N) {x : Na
   have ht := (SquaredPartition.gridMask_smooth r0 0).contDiffAt.comp x contDiffAt_snd.fst
   exact ho.mul (hq.mul ht)
 
-theorem bandPressure_eq_phasePressure (hr0 : 0 < r0) (vr vt : TorusInverse.Plane) (j : Fin 2)
-    (L : PrimaryGeometryAssembly.Index W a.N) (x : Native) :
-    bandPressure H v a hr0 vr vt j L x =
-      phasePressure (PrimaryGeometryAssembly.construction H v a hr0 j)
-        (ActualSignedGeometry.pulseCoordinates H v a)
-        (fun L => (ChartScales.carrier F.data.h (BaseChartJets.cellBand L) : ℝ))
-        (bandVelocity H v a hr0 vr vt j) L x :=
-  (phasePressure_smul _ _ _ (outerFactor H v a) (baseVelocity H v a hr0 vr vt j) L x).symm
 
 end Prepared
 
@@ -663,11 +645,6 @@ theorem band_pair_contDiffAt (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.
   · have hz := band_pair_zero_germ_cell H v a hr0 vr vt j L hx.1 hp
     exact ⟨(zero_germ_jets hz.1).1, (zero_germ_jets hz.2).1⟩
 
-theorem band_pair_contDiffOn (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) :
-    ContDiffOn ℝ ∞ (bandVelocity H v a hr0 vr vt j L) (radialInterior W) ∧
-      ContDiffOn ℝ ∞ (bandPressure H v a hr0 vr vt j L) (radialInterior W) :=
-  ⟨fun _ hx => (band_pair_contDiffAt H v a hr0 vr vt M j L hx).1.contDiffWithinAt,
-    fun _ hx => (band_pair_contDiffAt H v a hr0 vr vt M j L hx).2.contDiffWithinAt⟩
 
 theorem band_pair_edge_jets_closed (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) {x : Native}
     (hx : x ∈ radialInterior W) (hp : x.1 ∈ (PrimaryGeometryAssembly.domain W a.N).carrier L)
@@ -949,21 +926,7 @@ theorem bandPressure_eq_outer (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a
         preOuterPressure H v a hr0 vr vt j L x := by
   simp only [bandPressure, outerFactor, preOuterPressure, smul_smul]
 
-/-- Applying the intended Gaussian after attachment still applies that
-Gaussian exactly once: the outer slot cutoff is one on its support. -/
-theorem gaussian_bandVelocity (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) (x : Native) :
-    GaussianTailFlat.profile (ActualSignedGeometry.pulseCoordinates H v a L x).2 •
-      bandVelocity H v a hr0 vr vt j L x =
-    GaussianTailFlat.profile (ActualSignedGeometry.pulseCoordinates H v a L x).2 •
-      preOuterVelocity H v a hr0 vr vt j L x := by
-  rw [bandVelocity_eq_outer, smul_smul, profile_mul_outerCutoff]
 
-theorem gaussian_bandPressure (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) (x : Native) :
-    GaussianTailFlat.profile (ActualSignedGeometry.pulseCoordinates H v a L x).2 •
-      bandPressure H v a hr0 vr vt j L x =
-    GaussianTailFlat.profile (ActualSignedGeometry.pulseCoordinates H v a L x).2 •
-      preOuterPressure H v a hr0 vr vt j L x := by
-  rw [bandPressure_eq_outer, smul_smul, profile_mul_outerCutoff]
 
 include hr0 in
 theorem outerCutoff_native_polynomial :

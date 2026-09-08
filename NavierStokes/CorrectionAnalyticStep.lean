@@ -669,21 +669,6 @@ theorem iterate_invariant (D : StaticData G h index axial r c κ)
       D ih (hσ n) hκsmall (data n ih)
     simpa only [CycleState.iterate_succ, hσstep] using hn
 
-/-- The same induction also retains the actual increment estimates for
-each positive physical stage. -/
-theorem iterate_results (D : StaticData G h index axial r c κ)
-    (σ : ℕ → ℝ) (hσ : ∀ n, 1/5 ≤ σ n) (hσstep : ∀ n, σ (n+1) = σ n + 1/10)
-    (hκsmall : κ ≤ 1/100000)
-    (hseed : CycleAnalyticInvariant G c primary P S (σ 0) seed)
-    (data : ∀ n (H : CycleAnalyticInvariant G c primary P S (σ n) (state n)),
-      StepData G h index axial particular signed r c (state n) primary P S D H (hσ n)) :
-    (∀ n, CycleAnalyticInvariant G c primary P S (σ n) (state n)) ∧
-    ∀ n, StepResult G h index axial particular signed r c (state n) primary P S
-      (σ := σ n) (κ := κ) := by
-  have hi := iterate_invariant G h index axial particular signed r c seed primary P S
-    D σ hσ hσstep hκsmall hseed data
-  exact ⟨hi, fun n => step G h index axial particular signed r c (state n) primary P S
-    D (hi n) (hσ n) hκsmall (data n (hi n))⟩
 
 end Iteration
 

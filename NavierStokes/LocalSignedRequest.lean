@@ -757,41 +757,6 @@ theorem stress_unit_factor {Q : ℝ} (hQ : 0 < Q) (A : ℝ) :
   rw [← Real.rpow_sub hQ, ← Real.rpow_add hQ]
   convert! Real.rpow_zero Q using 1 ; ring_nf
 
-/-- Exact Q-normalization of one physical primitive.  The hypotheses refer
-to the actual represented source, not to the desired stress or its bounds. -/
-theorem normalizedRequest_represents {coord : ℝ} (U : SlowRegion coord)
-    (P : SignedStressPrimitive.Patch) (s : StripData Point)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point)
-    (n : ℕ) {Q : ℝ} (hQ : 0 < Q) (A : ℝ)
-    (q : S → ℝ) (Fθ Fz : PressureStream.Lift S → ℝ)
-    (C : S →L[ℝ] Plane) (k : ℕ) (t : S) (ht : C t ∈ U.carrier) (hqt : 0 < q t)
-    (hθ : ContDiffOn ℝ ∞ (u.thetaResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hz : ContDiffOn ℝ ∞ (u.axialResidual c n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hpθ : PhysicalMeanDomain.PeriodicOn U.carrier (u.thetaResidual c n))
-    (hpz : PhysicalMeanDomain.PeriodicOn U.carrier (u.axialResidual c n))
-    (hlength : Real.sqrt (SimilarityCoordinates.coordinateQ coord (C t)) =
-      Q ^ (-(1 / 2 : ℝ)) * Real.sqrt (q t))
-    (heθ : ∀ r Y, Fθ (r, (t, Y)) = Q ^ (-(2 * A + 1 / 2)) *
-      u.thetaResidual c n (Q ^ (-(1 / 2 : ℝ)) * r, (C t, TemporalMeanUpdate.coverMap k Y)))
-    (hez : ∀ r Y, Fz (r, (t, Y)) = Q ^ (-(2 * A + 1 / 2)) *
-      u.axialResidual c n (Q ^ (-(1 / 2 : ℝ)) * r, (C t, TemporalMeanUpdate.coverMap k Y)))
-    (r : ℝ) (Y : Plane) :
-    normalizedRequest s P coord c u n (Q ^ (-(1 / 2 : ℝ)) * r, (C t, Y)) =
-      (s.epsilon n)⁻¹ • (Q ^ (2 * A) • physicalRequestedStress P q Fθ Fz (r, t)) := by
-  have h1 := physicalBarSigma_chart P 2 (Real.rpow_pos_of_pos hQ _) hqt C k
-    (Q ^ (-(2 * A + 1 / 2))) U.isOpen ht hθ hpθ hlength heθ r
-  have h2 := physicalBarSigma_chart P 1 (Real.rpow_pos_of_pos hQ _) hqt C k
-    (Q ^ (-(2 * A + 1 / 2))) U.isOpen ht hz hpz hlength hez r
-  have hfct := stress_unit_factor hQ A
-  apply congrArg (fun v : SignedWaveUpdate.Vec2 => (s.epsilon n)⁻¹ • v)
-  funext i
-  fin_cases i
-  · change _ = Q ^ (2 * A) * SignedStressPrimitive.physicalBarSigma P 2 q Fθ (r, t)
-    rw [h1, ← mul_assoc, hfct, one_mul]
-    rfl
-  · change _ = Q ^ (2 * A) * SignedStressPrimitive.physicalBarSigma P 1 q Fz (r, t)
-    rw [h2, ← mul_assoc, hfct, one_mul]
-    rfl
 
 theorem physicalSigma_fiber_congr (P : SignedStressPrimitive.Patch) (e : ℕ)
     {q : S → ℝ} {q' : T → ℝ} {f : ℝ × S → ℝ} {g : ℝ × T → ℝ}
@@ -917,16 +882,6 @@ theorem physicalBarSigma_supported {coord : ℝ} (U : SlowRegion coord)
     (fun _ => U.qlo_pos.trans_le (U.q_mem x.2.1 hx).1)
     (frozenBar_smooth U.isOpen hx hf) (frozenBar_supported P hx hs) (x.1, 0) hn
 
-theorem physicalBarSigma_slice_compact {coord : ℝ} (U : SlowRegion coord)
-    (P : SignedStressPrimitive.Patch) (e : ℕ) {f : Point → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U.carrier))
-    (hs : MovingSupport P.a P.b coord U.carrier f) {s : Plane} (hsp : s ∈ U.carrier) :
-    HasCompactSupport (fun r => SignedStressPrimitive.physicalBarSigma P e
-      (SimilarityCoordinates.coordinateQ coord) f (r, s)) := by
-  simp_rw [frozenBar_sigma]
-  exact SignedStressPrimitive.physicalSigma_slice_compact P e contDiff_const
-    (fun _ => U.qlo_pos.trans_le (U.q_mem s hsp).1)
-    (frozenBar_smooth U.isOpen hsp hf) (frozenBar_supported P hsp hs) 0
 
 theorem physicalBarSigma_contDiffOn {coord : ℝ} (U : SlowRegion coord)
     (P : SignedStressPrimitive.Patch) (e : ℕ) {f : Point → ℝ}

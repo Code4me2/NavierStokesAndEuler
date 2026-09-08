@@ -135,11 +135,6 @@ theorem norm_B_sq (ψ : ComplexTest) :
   apply Real.sq_sqrt
   exact integral_nonneg fun ξ => by positivity
 
-theorem fourierHNormSq_three_le_norm_B_sq (ψ : ComplexTest) :
-    fourierHNormSq 3 ψ ≤ ‖B ψ‖ ^ 2 := by
-  rw [norm_B_sq]
-  exact integral_mono (integrable_fourierHNormSq_three ψ)
-    (integrable_fourierHNormSq_four ψ) (fourierHNormSq_three_integrand_le_four ψ)
 
 theorem sqrt_fourierHNormSq_three_le_norm_B (ψ : ComplexTest) :
     Real.sqrt (fourierHNormSq 3 ψ) ≤ ‖B ψ‖ := by

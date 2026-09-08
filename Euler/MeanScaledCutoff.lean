@@ -54,18 +54,5 @@ theorem physical_ball_eq (ℓ r : ℝ) (hℓ : 0 < ℓ) :
     have H := mul_lt_mul_of_pos_left h hℓ
     simpa only [← mul_assoc, mul_inv_cancel₀ hℓ.ne', one_mul] using H
 
-/-- Rescaling by at most one preserves the fixed factorial derivative bound. -/
-theorem scaledCutoff_gevrey (ℓ : ℝ) (hℓ : 0 < ℓ) (hℓ1 : ℓ ≤ 1) (n : ℕ) (x : Space) :
-    ‖iteratedFDeriv ℝ n (scaledCutoff ℓ hℓ).field x‖ ≤
-      (9 * (1 + 3 / EulerGevreyCutoff.bumpMass)^2)^3 * majorant 256 0 n := by
-  change ‖iteratedFDeriv ℝ n (fun y => EulerSpatialCutoffs.outerCutoff (ℓ • y)) x‖ ≤ _
-  rw [iteratedFDeriv_comp_const_smul ℓ
-    (EulerSpatialCutoffs.outerCutoff_contDiff.of_le (by simp)), norm_smul,
-    Real.norm_eq_abs, abs_of_nonneg (pow_nonneg hℓ.le n)]
-  have hpow : ℓ^n ≤ 1 := pow_le_one₀ hℓ.le hℓ1
-  calc
-    _ ≤ 1 * ‖iteratedFDeriv ℝ n EulerSpatialCutoffs.outerCutoff (ℓ • x)‖ :=
-      mul_le_mul_of_nonneg_right hpow (norm_nonneg _)
-    _ ≤ _ := by simpa only [one_mul] using EulerSpatialCutoffs.outerCutoff_gevrey n (ℓ • x)
 
 end EulerMeanBoundary

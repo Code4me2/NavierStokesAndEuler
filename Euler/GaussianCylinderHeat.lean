@@ -66,8 +66,6 @@ def lineHeatOperator (a : LiftTangent) (v : ℝ≥0) : LiftL2 period →L[ℝ] L
 @[simp] theorem lineHeatOperator_apply (a : LiftTangent) (v : ℝ≥0) (f : LiftL2 period) :
     lineHeatOperator period a v f = lineHeat period a v f := rfl
 
-theorem lineHeatOperator_norm_le (a : LiftTangent) (v : ℝ≥0) : ‖lineHeatOperator period a v‖ ≤ 1 :=
-  ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun f => by simpa using lineHeat_norm_le period a v f)
 
 /-- The heat average commutes with every cylinder translation. -/
 theorem lineHeat_translation (a : LiftTangent) (v : ℝ≥0) (b : LiftDomain period) (f : LiftL2 period) :

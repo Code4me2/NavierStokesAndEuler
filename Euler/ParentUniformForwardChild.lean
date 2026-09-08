@@ -1,4 +1,6 @@
-import Euler.ParentPacketForwardChildChoice
+import Euler.ParentParticleInverse
+import Euler.ParentPacketForwardInput
+import Euler.PacketForwardInitializedChildShear
 import Euler.PacketForwardUniformChild
 import Euler.PacketUniversalFrequency
 

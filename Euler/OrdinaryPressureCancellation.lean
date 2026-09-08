@@ -112,9 +112,5 @@ theorem potential_smooth (A : SmoothL2Field Space) (p : Space → ℝ)
   rw [he]
   exact (toDual ℝ Space).contDiff.comp A.smooth
 
-theorem gradient_pairing_zero_of_differentiable (A U : SmoothL2Field Space) (p : Space → ℝ)
-    (hp : Differentiable ℝ p) (hgrad : ∀ x, A.field x=gradient p x)
-    (hdiv : ∀ x, divergence U.field x=0) : ⟪A.toLp,U.toLp⟫_ℝ=0 :=
-  gradient_pairing_zero A U p (potential_smooth A p hp hgrad) hgrad hdiv
 
 end EulerOrdinarySobolev

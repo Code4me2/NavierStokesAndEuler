@@ -46,11 +46,6 @@ theorem partialSum_field (A : ℕ → SmoothL2Field Space) (n : ℕ) (x : Space)
   | zero => simp only [partialSum,zeroField,sum_range_zero]; rfl
   | succ n ih => simp only [partialSum,addField_field,ih,sum_range_succ]
 
-theorem partialSum_jet (A : ℕ → SmoothL2Field Space) (n q : ℕ) :
-    (partialSum A n).jetLp q=∑ i ∈ range n, (A i).jetLp q := by
-  induction n with
-  | zero => simp only [partialSum,zeroField_jet,sum_range_zero]
-  | succ n ih => simp only [partialSum,jetLp_addField,ih,sum_range_succ]
 
 theorem partialSum_value (A : ℕ → SmoothL2Field Space) (n : ℕ) :
     (partialSum A n).toLp=∑ i ∈ range n, (A i).toLp := by
@@ -104,9 +99,6 @@ theorem sumField_jet_tendsto (q : ℕ) :
     Tendsto (fun n => (partialSum A n).jetLp q) atTop (𝓝 ((sumField A hA).jetLp q)) :=
   (limitData A hA).jet_convergence q ⟨0,le_rfl,le_rfl⟩
 
-theorem sumField_value_tendsto :
-    Tendsto (fun n => (partialSum A n).toLp) atTop (𝓝 ((sumField A hA).toLp)) :=
-  (limitData A hA).toLp_convergence ⟨0,le_rfl,le_rfl⟩
 
 theorem sumField_Hm_tendsto (q : ℕ) :
     Tendsto (fun n => ∑ j ∈ range (q+1),

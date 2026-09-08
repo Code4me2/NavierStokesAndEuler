@@ -133,16 +133,5 @@ theorem transverseForward_backward (u : transverseDerivatives T hT m) :
   apply Subtype.ext
   exact coordinateDerivative_reconstruct T hT Q Q₁ c hc hQ hd m hRange u
 
-/-- A proved bounded linear equivalence to a parameter-independent Hilbert space. -/
-def transverseEquiv : zeroTraceDerivatives (U := U) T hT ≃L[ℝ] transverseDerivatives T hT m where
-  toLinearEquiv :=
-    { toFun := transverseForward T hT Q Q₁ hd m hTangent
-      invFun := transverseBackward T hT Q Q₁ c hc hQ hd m
-      left_inv := transverseBackward_forward T hT Q Q₁ c hc hQ hd m hTangent
-      right_inv := transverseForward_backward T hT Q Q₁ c hc hQ hd m hTangent hRange
-      map_add' := map_add _
-      map_smul' := map_smul _ }
-  continuous_toFun := (transverseForward T hT Q Q₁ hd m hTangent).continuous
-  continuous_invFun := (transverseBackward T hT Q Q₁ c hc hQ hd m).continuous
 
 end EulerTimeH1FrameTransport

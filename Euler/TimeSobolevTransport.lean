@@ -44,16 +44,5 @@ theorem transportTime_ae {s : ℕ} (hs : 6 ≤ s)
       fun t => asymmetricTransport period hs L hL (extendPath T hT u t) (v t) :=
   timeMultiplier_ae T hT (transportPath period hs L hL T u) v
 
-/-- Genuine heat smoothing and actual transport commute asymptotically in the energy-order L² time space. -/
-theorem transport_regularization_commutator {s : ℕ} (hs : 6 ≤ s)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1) (T : ℝ) (hT : 0 ≤ T)
-    (u : C(Icc (0 : ℝ) T, SobolevSpace period s))
-    (v : TimeLp T (SobolevSpace period (s+1))) :
-    Filter.Tendsto (fun n =>
-      transportTime period hs L hL T hT u
-        ((heatOperator period (s+1) (regularizerVariance n)).compLpL 2 (timeMeasure T) v) -
-      (heatOperator period s (regularizerVariance n)).compLpL 2 (timeMeasure T)
-        (transportTime period hs L hL T hT u v)) Filter.atTop (𝓝 0) :=
-  heat_time_commutator_tendsto period s (s+1) T hT (transportPath period hs L hL T u) v
 
 end EulerTimeSobolevTransport

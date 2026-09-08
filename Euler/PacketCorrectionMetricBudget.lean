@@ -130,14 +130,6 @@ def sourceMetricBudgetOfFields (κ : ℝ) (hκ : |κ| ≤ 1)
     (Z G : FieldTower P D.T) (q : ℕ) :
     (sourceMetricBudget D P κ hκ Z G q).c = D.inverseBound⁻¹ := rfl
 
-theorem sourceMetricBudget_bound_le (κ : ℝ) (hκ : |κ| ≤ 1)
-    (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).bound ≤ ‖D.F.field‖^2 :=
-  inverseMetricBound_le D
 
-theorem sourceMetricBudget_time_le (κ : ℝ) (hκ : |κ| ≤ 1)
-    (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).time ≤ 2*‖D.F.field‖*‖D.F₁.field‖ :=
-  inverseMetricTimeBound_le D
 
 end EulerPacketCorrectionCoefficients

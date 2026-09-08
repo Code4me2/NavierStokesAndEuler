@@ -85,20 +85,5 @@ theorem physicalGrowth_of_geometry
       simpa only [growthConstant,u,add_sub_cancel_left] using hb
     _ = growthConstant G*growthProfile D G H t/growthProfile D G H s*‖w s‖ := by ring
 
-/-- The profile and its physical growth property are derived together
-from the actual geometry stage. They are ready for the source-budget constructors. -/
-theorem exists_growth_of_geometry
-    (hinterval : G.S=Icc G.t₀ (G.t₀+D.T))
-    (hhorizon : G.time G.H=G.t₀+D.T)
-    (hstrain : ∀ (x : {x : Space // x ∈ Ω}) (t : Icc (0 : ℝ) D.T),
-      G.M x (G.t₀+t)=D.M.field t x.1)
-    (hnormal : ∀ (x : {x : Space // x ∈ Ω}) (t : Icc (0 : ℝ) D.T),
-      G.r x (G.t₀+t)=D.normal.field t x.1) :
-    ∃ (g : C(Icc (0 : ℝ) D.T,ℝ)) (C : ℝ),
-      (∀ t, 0 < g t) ∧ g ⟨0,le_rfl,D.T_pos.le⟩=1 ∧ 0 < C ∧ PhysicalGrowth D Ω g C := by
-  obtain ⟨F,F₁,Z,Z₁,H⟩ := G.exists_geometry
-  exact ⟨growthProfile D G H,growthConstant G,growthProfile_pos D G H hhorizon,
-    growthProfile_initial D G H,growthConstant_pos G,
-    physicalGrowth_of_geometry D G H hinterval hhorizon hstrain hnormal⟩
 
 end EulerPacketGeometrySourceGrowth

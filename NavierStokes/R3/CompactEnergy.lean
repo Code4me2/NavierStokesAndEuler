@@ -312,71 +312,7 @@ theorem energy_hasDerivAt {a b t : ℝ} {u : VelocityField} {K : Set Space}
   · intro x
     exact energy_density_derivative (time_differentiable_at_interior hu ht x)
 
-theorem integrable_dissipation_terms {u : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hcu : HasCompactSupport (fun x : Space => u (t, x))) (i : Fin 3) :
-    Integrable (fun x : Space => ‖spatialPartial i (fun y => u (t, y)) x‖ ^ 2) :=
-  integrable_norm_sq (spatial_partial_contDiff hu i).continuous (compact_partial hcu i)
 
-/-- The exact energy identity, with the derivative justified and all spatial
-integrals taken against ordinary Lebesgue volume on R³. -/
-theorem hasDerivAt_energy_balance {a b t : ℝ} {u f : VelocityField}
-    {p : PressureField} {K : Set Space}
-    (hK : IsCompact K) (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (hp : ContDiffOn ℝ ∞ p (slab a b))
-    (hf : Continuous (fun x : Space => f (t, x)))
-    (hsupp : ∀ r ∈ Icc a b, tsupport (fun x => u (r, x)) ⊆ K)
-    (ht : t ∈ Ioo a b)
-    (hdiv : ∀ x, spatialDivergence u t x = 0)
-    (hNS : ∀ x, navierStokesResidual u p t x = f (t, x)) :
-    HasDerivAt (l2Sq u)
-      (-2 * dissipation u t + 2 * ∫ x, ⟪u (t, x), f (t, x)⟫_ℝ) t := by
-  have h := energy_hasDerivAt hK hu hsupp ht
-  rw [energy_balance (spatial_smooth hu ⟨ht.1.le, ht.2.le⟩)
-    (spatial_smooth hp ⟨ht.1.le, ht.2.le⟩) hf
-    (slice_compact hK (hsupp t ⟨ht.1.le, ht.2.le⟩)) hdiv hNS] at h
-  exact h
 
-/-- A smooth compact force yields one uniform bound for the kinetic energy
-before time one. The proof includes square integrability at every time, then
-uses the PDE-derived energy inequality and a scalar integrating factor. -/
-theorem uniform_finite_energy {u f : VelocityField} {p : PressureField} {K : Set Space}
-    (hK : IsCompact K)
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain)
-    (hsupp : ∀ t ∈ Ico (0 : ℝ) 1, tsupport (fun x => u (t, x)) ⊆ K)
-    (hf : ContDiff ℝ ∞ f) (hcf : HasCompactSupport f)
-    (hinitial : ∀ x : Space, u (0, x) = 0)
-    (hdiv : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x, spatialDivergence u t x = 0)
-    (hNS : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x, navierStokesResidual u p t x = f (t, x)) :
-    ProblemStatement.UniformFiniteEnergy (Ico (0 : ℝ) 1) u := by
-  obtain ⟨C, hC, hforce⟩ := CompactForceBound.exists_uniform_l2sq_bound hf.continuous hcf
-  refine ⟨(1 / 2 : ℝ) * (C * Real.exp 1),
-    mul_nonneg (by norm_num) (mul_nonneg hC (Real.exp_pos _).le), ?_⟩
-  intro t ht
-  have hsub : slab 0 t ⊆ preSingularDomain := by
-    intro z hz
-    exact ⟨⟨hz.1.1, lt_of_le_of_lt hz.1.2 ht.2⟩, hz.2⟩
-  have huT := hu.mono hsub
-  have hpT := hp.mono hsub
-  have hsuppT : ∀ r ∈ Icc (0 : ℝ) t, tsupport (fun x => u (r, x)) ⊆ K := by
-    intro r hr
-    exact hsupp r ⟨hr.1, lt_of_le_of_lt hr.2 ht.2⟩
-  have hzero : l2Sq u 0 = 0 := by simp [l2Sq, hinitial]
-  have hbound : l2Sq u t ≤ C * Real.exp 1 := by
-    apply ScalarEnergyBound.forced_gronwall_uniform ht.1 ht.2.le hC
-      (l2Sq_continuousOn hK huT hsuppT) hzero
-      (fun r hr => energy_hasDerivAt hK huT hsuppT hr) _ t ⟨ht.1, le_rfl⟩
-    intro r hr
-    have hrT : r ∈ Icc (0 : ℝ) t := ⟨hr.1.le, hr.2.le⟩
-    have hr1 : r ∈ Ioo (0 : ℝ) 1 := ⟨hr.1, hr.2.trans ht.2⟩
-    have hrf := hforce r ⟨hr.1.le, hr1.2.le⟩
-    have hrate := energy_rate_le (spatial_smooth huT hrT) (spatial_smooth hpT hrT)
-      (hf.continuous.comp (continuous_const.prodMk continuous_id))
-      (slice_compact hK (hsuppT r hrT)) hrf.1 (hdiv r hr1) (hNS r hr1)
-    exact hrate.trans (add_le_add_right hrf.2 _)
-  refine ⟨integrable_norm_sq (spatial_smooth huT ⟨ht.1, le_rfl⟩).continuous
-    (slice_compact hK (hsupp t ht)), ?_⟩
-  exact mul_le_mul_of_nonneg_left hbound (by norm_num)
 
 end NavierStokesR3.CompactEnergy

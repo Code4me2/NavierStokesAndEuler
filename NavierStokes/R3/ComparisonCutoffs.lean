@@ -54,8 +54,6 @@ theorem baseCutoff_eq_zero {x : Space} (hx : 2 ≤ ‖x‖) : baseCutoff x = 0 :
 theorem baseCutoff_hasCompactSupport : HasCompactSupport baseCutoff :=
   baseBump.hasCompactSupport
 
-theorem baseCutoff_tsupport : tsupport baseCutoff = closedBall (0 : Space) 2 := by
-  exact baseBump.tsupport_eq
 
 theorem cutoff_smooth (R : ℝ) : ContDiff ℝ ∞ (cutoff R) :=
   baseCutoff_smooth.comp (by fun_prop)
@@ -79,10 +77,6 @@ theorem cutoff_eq_one {R : ℝ} (hR : 0 < R) {x : Space} (hx : ‖x‖ ≤ R) :
   rw [norm_scaled hR, div_le_one hR]
   exact hx
 
-theorem cutoff_eq_one_on_closedBall {R : ℝ} (hR : 0 < R) :
-    EqOn (cutoff R) (fun _ => 1) (closedBall (0 : Space) R) := by
-  intro x hx
-  exact cutoff_eq_one hR (by simpa [mem_closedBall, dist_zero_right] using hx)
 
 theorem cutoff_eq_zero {R : ℝ} (hR : 0 < R) {x : Space} (hx : 2 * R ≤ ‖x‖) :
     cutoff R x = 0 := by
@@ -109,8 +103,6 @@ theorem cutoff_hasCompactSupport {R : ℝ} (hR : 0 < R) :
 theorem weight_smooth (R : ℝ) : ContDiff ℝ ∞ (weight R) :=
   (cutoff_smooth R).pow 8
 
-theorem multiplier_smooth (R : ℝ) : ContDiff ℝ ∞ (multiplier R) :=
-  (cutoff_smooth R).pow 2
 
 theorem weight_nonneg (R : ℝ) (x : Space) : 0 ≤ weight R x :=
   pow_nonneg (cutoff_nonneg R x) 8
@@ -118,27 +110,17 @@ theorem weight_nonneg (R : ℝ) (x : Space) : 0 ≤ weight R x :=
 theorem weight_le_one (R : ℝ) (x : Space) : weight R x ≤ 1 := by
   exact pow_le_one₀ (cutoff_nonneg R x) (cutoff_le_one R x)
 
-theorem multiplier_nonneg (R : ℝ) (x : Space) : 0 ≤ multiplier R x :=
-  sq_nonneg _
 
-theorem multiplier_le_one (R : ℝ) (x : Space) : multiplier R x ≤ 1 := by
-  exact pow_le_one₀ (cutoff_nonneg R x) (cutoff_le_one R x)
 
 theorem weight_hasCompactSupport {R : ℝ} (hR : 0 < R) :
     HasCompactSupport (weight R) := by
   change HasCompactSupport ((fun a : ℝ => a ^ 8) ∘ cutoff R)
   exact (cutoff_hasCompactSupport hR).comp_left (by norm_num)
 
-theorem multiplier_hasCompactSupport {R : ℝ} (hR : 0 < R) :
-    HasCompactSupport (multiplier R) := by
-  change HasCompactSupport ((fun a : ℝ => a ^ 2) ∘ cutoff R)
-  exact (cutoff_hasCompactSupport hR).comp_left (by norm_num)
 
 theorem weight_eq_one {R : ℝ} (hR : 0 < R) {x : Space} (hx : ‖x‖ ≤ R) :
     weight R x = 1 := by simp [weight, cutoff_eq_one hR hx]
 
-theorem multiplier_eq_one {R : ℝ} (hR : 0 < R) {x : Space} (hx : ‖x‖ ≤ R) :
-    multiplier R x = 1 := by simp [multiplier, cutoff_eq_one hR hx]
 
 private theorem exists_derivative_bound (n : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ x : Space, ‖iteratedFDeriv ℝ n baseCutoff x‖ ≤ C := by
@@ -235,16 +217,6 @@ theorem cutoff_partial_partial_le {R : ℝ} (hR : 0 < R) (i j : Fin 3) (x : Spac
       derivativeConstant 2 / R ^ 2 :=
   (norm_partial_partial_le (cutoff_smooth R) i j x).trans (cutoff_second_fderiv_le hR x)
 
-theorem cutoff_laplacian_le {R : ℝ} (hR : 0 < R) (x : Space) :
-    ‖laplacian (cutoff R) x‖ ≤ (3 * derivativeConstant 2) / R ^ 2 := by
-  calc
-    ‖laplacian (cutoff R) x‖
-        ≤ ∑ i : Fin 3, ‖NavierStokes.PeriodicIntegration.spatialPartial i
-          (NavierStokes.PeriodicIntegration.spatialPartial i (cutoff R)) x‖ :=
-      norm_sum_le _ _
-    _ ≤ ∑ _ : Fin 3, derivativeConstant 2 / R ^ 2 :=
-      Finset.sum_le_sum (fun i _ => cutoff_partial_partial_le hR i i x)
-    _ = (3 * derivativeConstant 2) / R ^ 2 := by simp [mul_div_assoc]
 
 /-- Every fixed compact set lies in the plateau of all sufficiently large cutoffs. -/
 theorem compact_plateau {K : Set Space} (hK : IsCompact K) :

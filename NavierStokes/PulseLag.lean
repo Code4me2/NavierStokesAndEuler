@@ -415,12 +415,6 @@ theorem normalizedLag_hasDerivWithinAt (c : Parameters) (amp : ℝ → ℝ) (eta
   rw [forcing_eq_pulseRatio, ← normalizedLag_eq_affineLag c amp eta hy] at hd
   exact hd
 
-theorem normalizedLag_ode (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ)
-    {y : ℝ} (hy : 0 < y) :
-    deriv (normalizedLag c amp eta) y + decay c * normalizedLag c amp eta y =
-      pulseRatio c amp (y, eta) := by
-  rw [((normalizedLag_hasDerivWithinAt c amp eta hy.le).hasDerivAt (Ici_mem_nhds hy)).deriv]
-  ring
 
 theorem normalizedLag_error (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
     (amp : ℝ → ℝ) {eta : ℝ} (heta : |eta| ≤ 1) {y : ℝ} (hy : 0 ≤ y) :
@@ -522,17 +516,6 @@ theorem pulseError_eta_hasDerivAt (c : Parameters) {amp : ℝ → ℝ} {eta amp'
   (affineError_eta_hasDerivAt c ha y).congr_of_eventuallyEq
     (Filter.Eventually.of_forall (fun t => pulseError_eq_affineError c amp t hy))
 
-theorem pulseError_eta_bound (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
-    {amp : ℝ → ℝ} {eta amp' : ℝ} (ha : HasDerivAt amp amp' eta)
-    (heta : |eta| ≤ 1) {y : ℝ} (hy : 0 ≤ y) :
-    |deriv (fun t => pulseError c amp t y) eta| ≤
-      lagBound c.P c.m * (4 + |amp'|) * c.lam ^ 2 := by
-  rw [(pulseError_eta_hasDerivAt c ha hy).deriv]
-  apply (affineLag_error c hsmall _ _ hy).trans
-  have hq : |1 + 3 * eta ^ 2| ≤ 4 := by
-    simpa only [(parameterPolynomial_hasDerivAt eta).deriv] using parameterPolynomial_derivative_bound heta
-  have hpos := lagBound_pos c.P_pos c.m
-  gcongr
 
 noncomputable def scaledPulse (c : Parameters) (amp : ℝ → ℝ) (eta z : ℝ) : ℝ :=
   pulseRatio c amp (z / c.lam, eta)
@@ -690,24 +673,6 @@ theorem amplitude_fullError_bounds (d : OutgoingTail.TailData)
     linarith
   · exact hy
 
-/-- One positive threshold and one constant, selected before lambda,
-control the lag and its first parameter derivative throughout the pulse. -/
-theorem exists_uniform_lag_threshold (P m : ℝ) (hP : 0 < P) :
-    ∃ lam₀ C : ℝ, 0 < lam₀ ∧ 0 < C ∧ ∀ d : OutgoingTail.TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam₀ → ∀ eta y : ℝ, eta ^ 2 ≤ 1 → 0 ≤ y →
-        |fullError d.core (PulseAmplitude.amplitude d) eta y| ≤ C * d.core.lam ^ 2 ∧
-        |deriv (fun t => fullError d.core (PulseAmplitude.amplitude d) t y) eta| ≤
-          C * d.core.lam ^ 2 := by
-  obtain ⟨δ, hδ, hrate⟩ := PulseAmplitude.exists_rate_threshold (PulseAmplitude.errorConstant P m)
-  refine ⟨min δ (1 / 120), fullLagBound P m, lt_min hδ (by norm_num), fullLagBound_pos hP m, ?_⟩
-  intro d hdP hdm hwait hsmall eta y heta hy
-  have hl : d.core.lam ≤ 1 / 120 := (hsmall.trans_le (min_le_right _ _)).le
-  have he : PulseAmplitude.errorScale d.core ≤ 1 / 1000 := by
-    unfold PulseAmplitude.errorScale
-    rw [hdP, hdm]
-    exact hrate d.core.lam d.core.lam_pos (hsmall.trans_le (min_le_left _ _))
-  simpa only [hdP, hdm] using amplitude_fullError_bounds d hwait hl he heta hy
 
 theorem smooth_amplitude_fullError_bounds (c : Parameters)
     (hwait : c.wait = 60 * Real.log (1 / c.lam)) (hsmall : c.lam ≤ 1 / 120)
@@ -725,73 +690,7 @@ theorem smooth_amplitude_fullError_bounds (c : Parameters)
   · exact hamp' eta heta
   · exact hy
 
-/-- The same lag estimate for the amplitude which closes the energy after
-the actual angular-moment reset. -/
-theorem corrected_amplitude_fullError_bounds
-    {d : OutgoingTail.TailData} {K : ℝ} (w : UniformAngularReset.ResetWitness d K)
-    (hK : 0 < K) (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hsmall : d.core.lam ≤ 1 / 120)
-    (hscale : CorrectedPulseAmplitude.combinedScale d K ≤ 1 / 1000) :
-    ∀ eta y : ℝ, eta ^ 2 ≤ 1 → 0 ≤ y →
-      |fullError d.core (CorrectedPulseAmplitude.amplitude d w.coefficients) eta y| ≤
-        fullLagBound d.core.P d.core.m * d.core.lam ^ 2 ∧
-      |deriv (fun t => fullError d.core (CorrectedPulseAmplitude.amplitude d w.coefficients) t y) eta| ≤
-        fullLagBound d.core.P d.core.m * d.core.lam ^ 2 := by
-  have hs := CorrectedPulseAmplitude.amplitude_spec w hK hsmall hwait hscale
-  apply smooth_amplitude_fullError_bounds d.core hwait hsmall hs.1
-  · intro eta heta
-    rw [abs_of_pos (CorrectedPulseAmplitude.amplitude_pos d w.coefficients eta)]
-    exact (hs.2 eta heta).2.1.le
-  · intro eta heta
-    have hd := (hs.2 eta heta).2.2.2.1
-    linarith
 
-/-- The corrected amplitude and reset witness are actually constructed by
-`exists_corrected_amplitude`; an additional fixed threshold makes their
-first derivative at most one. The common lag constant is independent of
-lambda, the terminal parameter, eta, and pulse time. -/
-theorem exists_corrected_uniform_lag_threshold (P m : ℝ) (hP : 0 < P) :
-    ∃ lam₀ K C : ℝ, 0 < lam₀ ∧ 0 < K ∧ 0 < C ∧ ∀ d : OutgoingTail.TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam₀ → ∃ w : UniformAngularReset.ResetWitness d K,
-        ContDiff ℝ ∞ (CorrectedPulseAmplitude.amplitude d w.coefficients) ∧
-        ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-          9 / 10 < CorrectedPulseAmplitude.amplitude d w.coefficients eta ∧
-          CorrectedPulseAmplitude.amplitude d w.coefficients eta < 6 / 5 ∧
-          CorrectedPulseAmplitude.totalEnergy d w.coefficients
-            (CorrectedPulseAmplitude.amplitude d w.coefficients eta) eta = 0 ∧
-          ∀ y : ℝ, 0 ≤ y →
-            |fullError d.core (CorrectedPulseAmplitude.amplitude d w.coefficients) eta y| ≤
-              C * d.core.lam ^ 2 ∧
-            |deriv (fun t => fullError d.core (CorrectedPulseAmplitude.amplitude d w.coefficients) t y) eta| ≤
-              C * d.core.lam ^ 2 := by
-  obtain ⟨lamA, K, Cderiv, hlamA, hK, hCderiv, hA⟩ :=
-    CorrectedPulseAmplitude.exists_corrected_amplitude P m hP
-  obtain ⟨δ, hδ, hrate⟩ := PulseAmplitude.exists_rate_threshold Cderiv
-  refine ⟨min lamA (min δ (1 / 120)), K, fullLagBound P m,
-    lt_min hlamA (lt_min hδ (by norm_num)), hK, fullLagBound_pos hP m, ?_⟩
-  intro d hdP hdm hwait hl
-  have hlA : d.core.lam < lamA := hl.trans_le (min_le_left _ _)
-  have hlrest : d.core.lam < min δ (1 / 120) := hl.trans_le (min_le_right _ _)
-  have hsmall : d.core.lam ≤ 1 / 120 := (hlrest.trans_le (min_le_right _ _)).le
-  obtain ⟨w, hs, hspec⟩ := hA d hdP hdm hwait hlA
-  have hr := hrate d.core.lam d.core.lam_pos (hlrest.trans_le (min_le_left _ _))
-  have hderiv : ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-      |deriv (CorrectedPulseAmplitude.amplitude d w.coefficients) eta| ≤ 1 := by
-    intro eta heta
-    have hb := (hspec eta heta).2.2.2.1
-    have hsmallrate : Cderiv * d.core.lam * (1 + Real.log (1 / d.core.lam)) ≤ 1 / 1000 := by
-      simpa only [PulseAmplitude.logarithmicRate, mul_assoc] using hr
-    linarith
-  refine ⟨w, hs, fun eta heta => ?_⟩
-  have hb := hspec eta heta
-  refine ⟨hb.1, hb.2.1, hb.2.2.1, ?_⟩
-  intro y hy
-  have hlag := smooth_amplitude_fullError_bounds d.core hwait hsmall hs
-    (fun eta heta => by
-      rw [abs_of_pos (CorrectedPulseAmplitude.amplitude_pos d w.coefficients eta)]
-      exact (hspec eta heta).2.1.le) hderiv eta y heta hy
-  simpa only [hdP, hdm] using hlag
 
 end ActualPulse
 

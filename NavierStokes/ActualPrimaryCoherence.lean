@@ -766,15 +766,6 @@ theorem absoluteGaussian_smooth (j : Fin 2) (L : Label B N0) :
       simp [absoluteGaussian, absoluteGaussianCoefficient, vectorMode, mode, hy]
     exact (contDiffAt_const.congr_of_eventuallyEq hz).contDiffWithinAt
 
-theorem piece_excluded_smooth (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ) :
-    ContDiffOn ℝ ∞ ((piece U j L).excluded n) positiveChart := by
-  have hm : MapsTo (absoluteChart n) positiveChart positiveAbsolute := by
-    intro x hx
-    exact mul_pos (ChartScales.Q_pos n) hx
-  exact (((absoluteGaussian_smooth j L).comp (absoluteChart n).contDiff.contDiffOn hm).const_smul
-    (ChartScales.Q n ^ (2 * CoordinateAlgebra.A h + 1/2))).congr
-      (fun x _ => piece_excluded_representation U j L n x)
 
 theorem amplitudeRadius_chart (L : Label B N0) (n : ℕ) {x : ChartPoint}
     (hT : 0 < x.1.2.1.1) (hR : 0 < x.1.1) :
@@ -987,33 +978,7 @@ theorem piece_tangentVelocity_periodic (U : LocalSignedRequest.SlowRegion (2*h))
   simp only [carrier, chart_phase_periodic j L n hi k]
   rfl
 
-theorem piece_pressure_periodic (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ)
-    (hi : CommonWindow.index h n ≤ ChartScales.nativeIndex h (BaseChartJets.cellBand L))
-    (k : TorusInverse.Frequency) (x : ChartPoint) :
-    (piece U j L).pressure n (x+chartDeck k) = (piece U j L).pressure n x := by
-  change ((chartCutoff j L n (x+chartDeck k) • (chartCoefficients j L).pressure n (x+chartDeck k)) *
-    carrier ((chartCoefficients j L).frequency n) ((chartCoefficients j L).phase n) (x+chartDeck k)).re = _
-  rw [chart_cutoff_periodic j L n hi k, chart_pressure_periodic j L n hi k]
-  simp only [carrier, chart_phase_periodic j L n hi k]
-  rfl
 
-theorem piece_excluded_periodic (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ)
-    (hi : CommonWindow.index h n ≤ ChartScales.nativeIndex h (BaseChartJets.cellBand L))
-    (k : TorusInverse.Frequency) (x : ChartPoint) :
-    (piece U j L).excluded n (x+chartDeck k) = (piece U j L).excluded n x := by
-  have hd := along_translate (chartDeck k) (chart_cutoff_periodic j L n hi k)
-    (show ∀ y, (piece U j L).directions.fastField n (y+chartDeck k) =
-      (piece U j L).directions.fastField n y from fun _ => rfl) x
-  funext i
-  change ((along ((piece U j L).directions.fastField n) (chartCutoff j L n) (x+chartDeck k) •
-    (chartCoefficients j L).amplitude n (x+chartDeck k) + (1-chartCutoff j L n (x+chartDeck k)) •
-      (0 : ComplexVector)) i * carrier ((chartCoefficients j L).frequency n)
-      ((chartCoefficients j L).phase n) (x+chartDeck k)).re = _
-  rw [hd, chart_amplitude_periodic j L n hi k, chart_cutoff_periodic j L n hi k]
-  simp only [carrier, chart_phase_periodic j L n hi k]
-  rfl
 
 theorem radius_mem_of_amplitudeRadius_mem (L : Label B N0) (n : ℕ) {x : ChartPoint}
     (hT : 0 < x.1.2.1.1)
@@ -1032,32 +997,7 @@ theorem radius_mem_of_amplitudeRadius_mem (L : Label B N0) (n : ℕ) {x : ChartP
   exact ⟨by simpa only [mul_comm] using (le_div_iff₀ hq).mp hm.1,
     by simpa only [mul_comm] using (div_le_iff₀ hq).mp hm.2⟩
 
-theorem piece_pressure_support (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ) {x : ChartPoint}
-    (hT : 0 < x.1.2.1.1) (hne : (piece U j L).pressure n x ≠ 0) :
-    x.1.1 ∈ Icc (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.leftRadius nominal)
-      (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.rightRadius nominal) := by
-  apply radius_mem_of_amplitudeRadius_mem L n hT
-  by_contra hh
-  have hp := (absolutePair_zero_germ_outside j L (mul_pos (ChartScales.Q_pos n) hT) hh).2.self_of_nhds
-  change absolutePressure j L (toAbsolute n x.1) = 0 at hp
-  apply hne
-  rw [piece_pressure_representation]
-  simp [absolutePressureMode, mode, hp]
 
-theorem piece_excluded_support (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ) {x : ChartPoint}
-    (hT : 0 < x.1.2.1.1) (hne : (piece U j L).excluded n x ≠ 0) :
-    x.1.1 ∈ Icc (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.leftRadius nominal)
-      (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.rightRadius nominal) := by
-  apply radius_mem_of_amplitudeRadius_mem L n hT
-  by_contra hh
-  have hp := (absolutePair_zero_germ_outside j L (mul_pos (ChartScales.Q_pos n) hT) hh).1.self_of_nhds
-  change absoluteAmplitude j L (toAbsolute n x.1) = 0 at hp
-  apply hne
-  rw [piece_excluded_representation]
-  ext i
-  simp [absoluteGaussian, absoluteGaussianCoefficient, vectorMode, mode, hp]
 
 /-! ## Tangency of the actual native pulse -/
 
@@ -1217,11 +1157,6 @@ theorem piece_phase_smooth (U : LocalSignedRequest.SlowRegion (2*h))
       (HarmonicWaveInteraction.productStrip (BaseContextAssembly.nativeStrip nominal U)).domain :=
   (chart_phase_smooth j L n).mono (piece_domain_positive U)
 
-theorem piece_amplitude_smooth (U : LocalSignedRequest.SlowRegion (2*h))
-    (j : Fin 2) (L : Label B N0) (n : ℕ) :
-    ContDiffOn ℝ ∞ ((chartCoefficients j L).amplitude n)
-      (HarmonicWaveInteraction.productStrip (BaseContextAssembly.nativeStrip nominal U)).domain :=
-  (chart_amplitude_smooth j L n).mono (fun _ hx => (piece_domain_positive U hx).2)
 
 theorem chart_normal_copy (U : LocalSignedRequest.SlowRegion (2*h))
     (j : Fin 2) (L : Label B N0) (n : ℕ)
@@ -1926,11 +1861,6 @@ theorem piece_physical_pressure (U : LocalSignedRequest.SlowRegion (2*h))
   rw [absoluteChart_physical n hr]
   rfl
 
-theorem cartesianVelocity_smooth (j : Fin 2) (L : Label B N0) :
-    ContDiffOn ℝ ∞ (cartesianVelocity j L) {z : ProblemStatement.SpaceTime | z.1 < 1} := by
-  have ha : ContDiffOn ℝ ∞ (cartesianPotential j L) ((Iio 1) ×ˢ (univ : Set ProblemStatement.Space)) :=
-    (cartesianPotential_smooth j L).mono (fun _ hx => hx.1)
-  exact (SpatialCurl.contDiffOn_spatialCurl ha (by simp)).mono (fun _ hx => ⟨hx,trivial⟩)
 
 theorem cartesianVelocity_divergence (j : Fin 2) (L : Label B N0) {t : ℝ}
     (ht : t < 1) (x : ProblemStatement.Space) :

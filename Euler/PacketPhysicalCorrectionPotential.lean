@@ -21,16 +21,6 @@ def Budget.physicalPotential (k : ℝ) (Y : Icc (0 : ℝ) D.T → Space → Spac
     (t : Icc (0 : ℝ) D.T) : Space → ℝ :=
   B.normalizedGraphPotential P k t ∘ Y t
 
-theorem Budget.physicalPotential_joint_continuous (k : ℝ)
-    (Y : Icc (0 : ℝ) D.T → Space → Space)
-    (hY : Continuous (Function.uncurry Y)) :
-    Continuous (B.physicalPotential D P k Y).uncurry := by
-  have hc : Continuous (fun z : Icc (0 : ℝ) D.T × Space => (z.1,Y z.1 z.2)) :=
-    continuous_fst.prodMk hY
-  have hp : Continuous ((B.normalizedGraphPotential P k).uncurry ∘
-      (fun z : Icc (0 : ℝ) D.T × Space => (z.1,Y z.1 z.2))) :=
-    (B.normalizedGraphPotential_joint_continuous P k).comp hc
-  exact hp
 
 variable (X Y : Icc (0 : ℝ) D.T → Space → Space)
   (hX : ∀ t x, HasFDerivAt (X t) (D.F.field t x) x)

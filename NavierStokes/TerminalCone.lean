@@ -524,8 +524,6 @@ compensation coefficient or data-dependent edge-collar width. -/
 noncomputable def radiusThreshold (F : OutgoingProfile.Profile) : ℝ :=
   32 / Real.exp (HeatTailEdit.switchStart F.data)
 
-theorem radiusThreshold_pos (F : OutgoingProfile.Profile) : 0 < radiusThreshold F :=
-  div_pos (by norm_num) (Real.exp_pos _)
 
 theorem switchRadius_ge_32 (F : OutgoingProfile.Profile) {XR : ℝ}
     (hXR : radiusThreshold F ≤ XR) : 32 ≤ OutgoingDilation.switchRadius F XR := by
@@ -560,24 +558,5 @@ theorem full_interval_direction_margin (F : OutgoingProfile.Profile) {XR y eta :
     linarith
   exact profile_cone_margin F.data hsmall (switchRadius_ge_32 F hXR) hδ hδ' heta
 
-/-- The actual compensated velocity uses precisely the terminal field whose
-true cone was proved above.  The existing witness, its coefficients, and the
-base outgoing profile are retained. -/
-theorem same_witness_full_cone (F : OutgoingProfile.Profile) {XR C y eta : ℝ}
-    (w : HeatedOutgoing.CompensationWitness F XR C)
-    (hsmall : SmallTail F.data) (hXR : radiusThreshold F ≤ XR)
-    (hy : terminalStart F.data ≤ y) (hy' : y < OutgoingTail.tailEnd F.data)
-    (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    HeatedOutgoing.E F XR w.coefficients (XR * Real.exp y, eta) =
-      TerminalEdgeFactor.profileAngularVelocity (normalization F XR) F.data (shift F XR)
-        (profilePoint F y eta) ∧
-    HeatedOutgoing.U F XR (XR * Real.exp y, eta) = 0 ∧
-    2 < TerminalEdgeFactor.profileP (normalization F XR) F.data (shift F XR) (profilePoint F y eta) ∧
-    TerminalEdgeFactor.profileSpeed (normalization F XR) F.data (shift F XR) (profilePoint F y eta) <
-      ConeAlgebra.coneBound
-        (TerminalEdgeFactor.profileP (normalization F XR) F.data (shift F XR) (profilePoint F y eta))
-        (TerminalEdgeFactor.profileJ (normalization F XR) F.data (shift F XR) (profilePoint F y eta)) :=
-  ⟨E_eq_profileAngularVelocity F w.coefficients w.radius_pos hy heta,
-    U_eq_zero F w.radius_pos hy, full_interval_true_cone F hsmall hXR hy hy' heta⟩
 
 end NavierStokes.TerminalCone

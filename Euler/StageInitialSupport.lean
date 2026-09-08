@@ -55,10 +55,6 @@ theorem stages_initial_support (n : ℕ) :
   | zero => exact S.firstStage_initial_support
   | succ n ih => exact (stages S hq hB n).successor_initial_support hq hB ih
 
-theorem stages_initial_derivatives_support (n m : ℕ) :
-    tsupport (iteratedFDeriv ℝ m (fun x => (stages S hq hB n).state.evolution.velocity (0,x))) ⊆
-      Metric.closedBall 0 2 :=
-  (tsupport_iteratedFDeriv_subset m).trans (stages_initial_support S hq hB n)
 
 theorem stages_initial_curl_support (n : ℕ) :
     tsupport (vectorCurl (fun x => (stages S hq hB n).state.evolution.velocity (0,x))) ⊆
@@ -67,9 +63,6 @@ theorem stages_initial_curl_support (n : ℕ) :
   exact ((stages S hq hB n).state.evolution.velocity_smooth
     (stages S hq hB n).parent.zeroTime).differentiable (by simp)
 
-theorem packets_initial_support (n : ℕ) :
-    tsupport (fun x => (packets n).state.evolution.velocity (0,x)) ⊆ Metric.closedBall 0 2 :=
-  stages_initial_support constructionScales le_rfl le_rfl n
 
 theorem packets_initial_curl_support (n : ℕ) :
     tsupport (vectorCurl (fun x => (packets n).state.evolution.velocity (0,x))) ⊆

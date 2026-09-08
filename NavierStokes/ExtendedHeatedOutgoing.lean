@@ -647,9 +647,6 @@ theorem ScheduleBounds.physicalBand_subset {F : Profile} (b : ScheduleBounds F) 
 noncomputable def amplitudeBound (F : Profile) : ℝ :=
   128 * CorrectedPulseAmplitude.combinedConstant F.data.core.P F.data.core.m F.coefficientBound
 
-theorem ScheduleBounds.amplitudeBound_pos {F : Profile} (b : ScheduleBounds F) :
-    0 < amplitudeBound F := mul_pos (by norm_num)
-      (CorrectedPulseAmplitude.combinedConstant_pos F.data.core.P_pos F.data.core.m _ b.coefficient_pos)
 
 /-- The same reset and amplitude provide the original full specification,
 with the stronger quantitative data retained for the open extension. -/
@@ -813,22 +810,11 @@ namespace Witness
 
 variable {F : Profile} {XR C : ℝ} (w : Witness F XR C)
 
-theorem first_jet_open {eta : ℝ} (heta : eta ∈ parameterDomain) :
-    TerminalCompensation.FirstJetBound compensationPatch (shapedPatchAmplitude F)
-      w.coefficients eta (C / switchRadius F XR) :=
-  (w.first_jet eta (parameterDomain_subset heta)).toFirstJetBound (enlargedBand_mem_nhds heta)
 
 theorem physical_specification (b : ScheduleBounds F) :
     HeatedOutgoing.Specification F XR w.physical.coefficients :=
   w.physical.specification b.specification
 
-theorem fields_eq_physical (eta X : ℝ) (heta : eta ∈ HeatedOutgoing.parameterDomain) (hX : 0 < X) :
-    E F XR w.coefficients (X, eta) = HeatedOutgoing.E F XR w.physical.coefficients (X, eta) ∧
-    U F XR (X, eta) = HeatedOutgoing.U F XR (X, eta) ∧
-    H F XR w.coefficients (X, eta) = HeatedOutgoing.H F XR w.physical.coefficients (X, eta) ∧
-    Pi F XR w.coefficients (X, eta) = HeatedOutgoing.Pi F XR w.physical.coefficients (X, eta) :=
-  ⟨E_eq_physical F XR w.coefficients eta X heta hX, rfl,
-    H_eq_physical F XR w.coefficients eta X heta hX, Pi_eq_physical F XR w.coefficients eta X heta hX.le⟩
 
 theorem axisDatum_analytic_extension :
     AnalyticOnNhd ℂ (SchedulePressure.complexAxisPressure F.data) PressureDatum.strip ∧

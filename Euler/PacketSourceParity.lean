@@ -38,19 +38,5 @@ theorem sourceProfiles_parity (hT : M.T = D.T)
     ((homogeneousPrimaryRegularity D Iprimary (sourceOperators P M D I) rfl).changeTime hT.symm M.T_pos.le)
     ((homogeneousPrimaryParity D Iprimary (sourceOperators P M D I) rfl hSym hF hDM hIprimary).changeTime hT.symm) p
 
-theorem sourceProfiles_time_derivatives_odd (hT : M.T = D.T)
-    (eM : EulerMeanPacketProvider.EvenData M)
-    (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hDM : ∀ t x, D.M.field t (-x) = D.M.field t x)
-    (hI : reflection P (I.value : CylinderL2 P U) = -(I.value : CylinderL2 P U))
-    (hIprimary : reflection P (Iprimary.value : CylinderL2 P U) = -(Iprimary.value : CylinderL2 P U))
-    (p : ℕ) :
-    let G := sourceProfileWitness P M D hT I Iprimary p
-    JointOdd M.T G.high_t ∧ JointOdd M.T G.mean_t ∧ JointOdd M.T G.corrector_t := by
-  let G := sourceProfileWitness P M D hT I Iprimary p
-  have H := sourceProfiles_parity P M D I Iprimary hT eM hSym hF hDM hI hIprimary p
-  exact ⟨ProfileParity.highDerivative_odd M.T_pos G H,
-    ProfileParity.meanDerivative_odd M.T_pos G H,ProfileParity.correctorDerivative_odd M.T_pos G H⟩
 
 end EulerPacketCylinderField

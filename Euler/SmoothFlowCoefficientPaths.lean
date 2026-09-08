@@ -65,10 +65,6 @@ def displacementCoefficient : SmoothTimeField (Icc (0 : ℝ) T) E E :=
     (displacementCoefficient T hT A B R hB hR hsmall hb).field t x =
       (flowData T hT A).forward t x-x := rfl
 
-theorem displacementCoefficient_jet_norm (n : ℕ) :
-    ‖(displacementCoefficient T hT A B R hB hR hsmall hb).jet n‖ ≤
-      B*T*(4*R)^n*(n.factorial : ℝ)^2 := by
-  apply SmoothTimeField.ofPathFamily_jet_norm
 
 variable (A₁ : SmoothTimeField (Icc (0 : ℝ) T) E E)
   (htime : SmoothTimeField.TimeDerivative T hT A A₁)
@@ -98,9 +94,5 @@ def velocityCoefficient : SmoothTimeField (Icc (0 : ℝ) T) E E :=
     (velocityCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁).field t x =
       A.field t ((flowData T hT A).forward t x) := rfl
 
-theorem velocityCoefficient_jet_norm (n : ℕ) :
-    ‖(velocityCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁).jet n‖ ≤
-      B*(flowRadius B R T R)^n*(n.factorial : ℝ)^2 := by
-  apply SmoothTimeField.ofPathFamily_jet_norm
 
 end EulerSmoothBanachFlow

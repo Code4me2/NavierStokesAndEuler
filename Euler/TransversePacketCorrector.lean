@@ -121,27 +121,12 @@ def correctorDerivative : VectorField := fun z =>
   pointField P (G.correctorTimePath I) (G.correctorTimePath_orbit I)
     (D.clamp z.1) (z.2.1,(z.2.2 : AddCircle P))
 
-theorem corrector_hasDerivWithinAt (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    HasDerivWithinAt (fun r => G.corrector I (r,(x,θ)))
-      (G.correctorDerivative I (t,(x,θ))) (Icc (0 : ℝ) D.T) t := by
-  have h := pointField_hasDerivWithinAt P D.T D.T_pos.le (G.correctorPath I) (G.correctorTimePath I)
-    (G.correctorPath_orbit I) (G.correctorTimePath_orbit I) (G.correctorPath_time I) t (x,(θ : AddCircle P))
-  simpa only [corrector, correctorDerivative, Data.clamp, projIcc_of_mem D.T_pos.le t.property] using h
 
 theorem fullVelocityPath_mean_zero (t : Icc (0 : ℝ) D.T) (x : Space) :
     (∫ θ in (0 : ℝ)..P, pointField P (G.fullVelocityPath I) (G.velocityPath_orbit I)
       t (x,(θ : AddCircle P))) = 0 := by
   simpa only [vector, EulerSourceCylinderClassical.field, Data.clamp_coe] using G.vector_mean_zero I t x
 
-/-- This potential is exactly the manuscript's normalized angular integral of −m×A/|m|². -/
-theorem potentialPath_eq_periodic (t : Icc (0 : ℝ) D.T) :
-    pointField P (G.potentialPath I) (G.potentialPath_orbit I) t =
-      EulerPacketPeriodicPotential.field P (fun x => D.normal.field t x)
-        (pointField P (G.fullVelocityPath I) (G.velocityPath_orbit I) t) :=
-  EulerCylinderPotential.potentialField_eq_periodic P D.potentialCoefficientPath
-    D.potentialCoefficientPath_orbit (G.fullVelocityPath I) (G.velocityPath_orbit I)
-    (G.fullVelocityPath_mean_zero I) (fun t x => D.normal.field t x)
-    (potentialCoefficient_apply D.normal D.normalLower D.normalLower_pos D.normal_lower) t
 
 /-- The stored corrector is the literal slow curl with the actual inverse deformation. -/
 theorem corrector_formula (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :

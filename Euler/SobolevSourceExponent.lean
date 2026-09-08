@@ -13,7 +13,6 @@ open Finset EulerSmoothLimit EulerLpTranslation EulerLpTranslation.SmoothL2Field
 
 def fixedCost (q : ℕ) : ℝ := (2 : ℝ)^q*∑ j ∈ range (q+1), (j.factorial : ℝ)^2
 
-theorem fixedCost_nonneg (q : ℕ) : 0 ≤ fixedCost q := by unfold fixedCost; positivity
 
 theorem coefficient_radius_le (k R : ℝ) (hk : 12 ≤ k) (hR : R ≤ k^5) :
     sobolevCoefficientRadius (Fin 3) R ≤ k^6 := by

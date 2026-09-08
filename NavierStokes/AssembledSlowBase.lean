@@ -59,12 +59,6 @@ theorem extendEven_right_jets {S : Set ℝ} (w : ParametricRadialExtension.Param
       iteratedDerivWithin m (fun Y => xProfile f (Y, eta)) (Ici 0) X :=
   ParametricRadialExtension.extension_radial_jets w f.smooth (fun _ he R => f.even he R) m hX heta
 
-theorem extendEven_mixed_jets {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
-    (f : EvenProfile S) (m : ℕ) {p : ℝ × ℝ}
-    (hp : p ∈ Ici 0 ×ˢ Ioo (-w.inner) w.inner) :
-    iteratedFDeriv ℝ m (extendEven w f) p =
-      iteratedFDerivWithin ℝ m (xProfile f) (Ici 0 ×ˢ Ioo (-w.inner) w.inner) p :=
-  ParametricRadialExtension.extension_mixed_jets w f.smooth (fun _ he R => f.even he R) m hp
 
 theorem extendEven_support {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
     (f : EvenProfile S) {B : ℝ} (hB : 0 ≤ B) (hs : Exterior B S f) :
@@ -162,15 +156,6 @@ theorem extendedCoefficient_zero_exterior {S : Set ℝ} {h C : ℝ} (s : Scheme 
   · exact profiles_beta_exterior s n
   · exact profiles_pressure_exterior s hn
 
-theorem extendedCoefficient_inner {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) (i : Fin 4) {p : ℝ × ℝ}
-    (hX : 0 ≤ p.1) (hi : p.1 < inner) (heta : |p.2| ≤ 1) :
-    extendedCoefficient s hI n i p = SlowRecursion.profile (A.coefficients n (localIndex i)) p := by
-  rw [extendedCoefficient_eq s hI n i hX heta]
-  exact profiles_inner_eq L B0 hn i hX hi (hI (abs_le.mp heta))
 
 theorem extendedCoefficient_axis {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
     {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
@@ -183,18 +168,6 @@ theorem extendedCoefficient_axis {S : Set ℝ} {h C rho inner : ℝ} {U : Set �
   rw [mul_zero, Real.sqrt_zero]
   exact profiles_axis_zero L B0 hn i (hI (abs_le.mp heta))
 
-theorem extendedCoefficient_axis_jets {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) (i : Fin 4) (m : ℕ) {eta : ℝ}
-    (heta : |eta| ≤ 1) :
-    iteratedDeriv m (fun X => extendedCoefficient s hI n i (X, eta)) 0 =
-      iteratedDerivWithin m (fun X => SlowRecursion.profile (A.coefficients n (localIndex i)) (X, eta))
-        (Ici 0) 0 := by
-  unfold extendedCoefficient
-  rw [extendEven_right_jets _ _ m le_rfl (heta.trans (commonWindow s hI).one_lt_inner.le)]
-  exact profiles_axis_right_jets L B0 hn i m (hI (abs_le.mp heta))
 
 /-- A profile smooth on a neighborhood of the nonnegative X half-plane
 gives a genuine globally signed-radius even field by polynomial pullback. -/
@@ -379,15 +352,6 @@ theorem coefficients_fields_eq (Z0 : ZeroOrderSolved s inner)
   ⟨extendedCoefficient_eq s hI n 0 hX heta, extendedCoefficient_eq s hI n 1 hX heta,
     extendedCoefficient_eq s hI n 3 hX heta⟩
 
-theorem coefficients_fields_germ (Z0 : ZeroOrderSolved s inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) (n : ℕ) {p : ℝ × ℝ}
-    (hX : 0 < p.1) (heta : |p.2| ≤ 1) :
-    (coefficients L B0 Z0 hI).phi n =ᶠ[𝓝 p] (asSlowProfiles s).phi n ∧
-    (coefficients L B0 Z0 hI).axial n =ᶠ[𝓝 p] (asSlowProfiles s).axial n ∧
-    (coefficients L B0 Z0 hI).pressure n =ᶠ[𝓝 p] (asSlowProfiles s).pressure n :=
-  ⟨extendEven_germ _ _ hX (heta.trans_lt (commonWindow s hI).one_lt_inner),
-    extendEven_germ _ _ hX (heta.trans_lt (commonWindow s hI).one_lt_inner),
-    extendEven_germ _ _ hX (heta.trans_lt (commonWindow s hI).one_lt_inner)⟩
 
 theorem coefficients_stress_eq (Z0 : ZeroOrderSolved s inner)
     (hI : Icc (-1 : ℝ) 1 ⊆ S) (n : ℕ) {w : ℝ × ℝ}
@@ -475,27 +439,7 @@ theorem coefficients_stress_zero (Z0 : ZeroOrderSolved s inner)
     SlowStressSupport.stress_inner 1
     (fun _ he _ hR => (densities_zero_inner L B0 Z0 n hR he).2) hr (hI (abs_le.mp heta))⟩
 
-theorem coefficients_common_zero_core (Z0 : ZeroOrderSolved s inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) :
-    ∃ r : ℝ, 0 < r ∧ ∀ n : ℕ, ∀ X ∈ Ico 0 r, ∀ eta ∈ Icc (-1 : ℝ) 1,
-      (coefficients L B0 Z0 hI).stressTheta n (X, eta) = 0 ∧
-      (coefficients L B0 Z0 hI).stressAxial n (X, eta) = 0 :=
-  ⟨inner / 2, half_pos L.inner_pos, fun n _ hX _ he =>
-    coefficients_stress_zero L B0 Z0 hI n hX.1 hX.2.le (abs_le.mpr he)⟩
 
-/-- One actual coefficient family gives one schedule and one smooth
-divergence-free physical base. No scale bounds are supplied as hypotheses. -/
-theorem exists_assembled_base (Z0 : ZeroOrderSolved s inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) (hh : 0 < h) (hh1 : h < 1 / 2)
-    (lo hi : ℝ) (N : ℕ) :
-    ∃ a : ℕ → ℕ, N ≤ a 0 ∧
-      SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C (coefficients L B0 Z0 hI))
-        (SlowBorelBase.innerBox lo hi) a ∧
-      ContDiffOn ℝ ∞ (SlowBorelBase.baseVelocity a h C (coefficients L B0 Z0 hI))
-        (Iio 1 ×ˢ (univ : Set ProblemStatement.Space)) ∧
-      ∀ t : ℝ, t < 1 → ∀ x : ProblemStatement.Space,
-        ProblemStatement.spatialDivergence (SlowBorelBase.baseVelocity a h C (coefficients L B0 Z0 hI)) t x = 0 :=
-  SlowBorelBase.exists_base_fields hh hh1 (coefficients_smooth L B0 Z0 hI) C lo hi N
 
 end StressConstruction
 
@@ -1014,8 +958,6 @@ noncomputable def nominalBaseData :
         ((ReservedPatches.radialLeft_pos F W.controls.radius W.controls.radius_pos .positive).trans hR.1)) (by norm_num))]
       exact (nominal_positive_patch W hR).2)
 
-theorem nominalBaseData_beta : (nominalBaseData W d hD).fields.beta =
-    betaFromU d 0 (nominalBaseData W d hD).fields.axial := rfl
 
 end NominalBase
 
@@ -1343,46 +1285,8 @@ theorem nominalCoefficients_stress_eq {p : ℝ × ℝ}
   coefficients_stress_eq (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
     (nominalParameters_contains W) n hp heta
 
-theorem nominal_extended_flux (n : ℕ) {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta : |p.2| ≤ 1) :
-    p.1 * extendedCoefficient (nominalScheme W) (nominalParameters_contains W) n 2 p =
-      SlowDivergence.radialFlux F.data.h (AxisSourceRegularity.slowOrder F.data.h n)
-        ((nominalCoefficients W).axial n) p := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · have h := extended_flux_zero (nominalScheme W) (nominalParameters_contains W) rfl hX heta
-    simp only [AxisSourceRegularity.slowOrder, Nat.cast_zero, mul_zero, zero_mul] at h ⊢
-    exact h
-  · exact extended_flux (nominalScheme W) (nominalParameters_contains W) hn hX heta
 
-/-- A common smooth solenoidal physical base now follows from one actual
-nominal witness, including the derived zero-order equations. -/
-theorem nominal_exists_base (lo hi : ℝ) (N : ℕ) :
-    ∃ a : ℕ → ℕ, N ≤ a 0 ∧
-      SlowBorelBase.AdmissibleScales F.data.h
-        (SlowBorelBase.coefficientBundle W.axis.normalization (nominalCoefficients W))
-        (SlowBorelBase.innerBox lo hi) a ∧
-      ContDiffOn ℝ ∞ (SlowBorelBase.baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-        (Iio 1 ×ˢ (univ : Set ProblemStatement.Space)) ∧
-      ∀ t : ℝ, t < 1 → ∀ x : ProblemStatement.Space,
-        ProblemStatement.spatialDivergence
-          (SlowBorelBase.baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W)) t x = 0 :=
-  SlowBorelBase.exists_base_fields W.axis.small.h_pos (by linarith [W.axis.small.h_le])
-    (nominalCoefficients_smooth W) W.axis.normalization lo hi N
 
-theorem nominal_divergenceCoefficient (n : ℕ) {p : ℝ × ℝ}
-    (hX : 0 < p.1) (heta : p.2 ∈ nominalParameters W) :
-    SlowExpansionResidual.divergenceCoefficient F.data.h (asSlowProfiles (nominalScheme W)) n p = 0 := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · change SimilarityProfile.partialX
-        (AxisSourceRegularity.axisFactor (xProfile (profiles (nominalScheme W) 0).beta)) p +
-      SimilarityProfile.Z F.data.h
-        (SlowExpansionResidual.axialExponent F.data.h + SlowExpansionResidual.slowOrder F.data.h 0)
-        (xProfile (profiles (nominalScheme W) 0).axial) p = 0
-    rw [profiles_zero]
-    have h := betaFromU_x_divergence (nominalDomain W) 0 (nominalScheme W).base.axial hX heta
-    simp only [SlowExpansionResidual.axialExponent, SlowExpansionResidual.slowOrder,
-      Nat.cast_zero, mul_zero, zero_mul] at h ⊢
-    exact h
-  · exact profiles_divergenceCoefficient (nominalScheme W) hn hX heta
 
 theorem nominal_pressureCoefficient (n : ℕ) {p : ℝ × ℝ}
     (hX : 0 < p.1) (heta : p.2 ∈ nominalParameters W) :
@@ -1410,13 +1314,6 @@ theorem nominal_pressureCoefficient (n : ℕ) {p : ℝ × ℝ}
     field_simp [W.axis.normalization_pos.ne'] ; ring
   · exact profiles_pressureCoefficient (nominalScheme W) hn hX heta
 
-theorem nominal_densities_smooth (n : ℕ) :
-    Smooth (nominalParameters W)
-      (SlowResidualMatching.thetaDensity F.data.h W.axis.normalization (asSlowProfiles (nominalScheme W)) n) ∧
-    Smooth (nominalParameters W)
-      (SlowResidualMatching.zDensity F.data.h (asSlowProfiles (nominalScheme W)) n) :=
-  ⟨thetaDensity_smooth (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W) n,
-    zDensity_smooth (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W) n⟩
 
 theorem nominalCoefficients_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |eta| ≤ 1) :
     (nominalCoefficients W).phi n (0, eta) = 0 ∧
@@ -1429,13 +1326,6 @@ theorem nominalCoefficients_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |eta
    extendedCoefficient_axis (nominalLocalization W) (nominalBaseAgreement W)
       (nominalParameters_contains W) hn 3 heta⟩
 
-theorem nominalCoefficients_compactSupport {n : ℕ} (hn : 0 < n) :
-    HasCompactSupport ((nominalCoefficients W).phi n) ∧
-    HasCompactSupport ((nominalCoefficients W).axial n) ∧
-    HasCompactSupport ((nominalCoefficients W).pressure n) :=
-  ⟨extendedCoefficient_compactSupport (nominalScheme W) (nominalParameters_contains W) hn 0,
-   extendedCoefficient_compactSupport (nominalScheme W) (nominalParameters_contains W) hn 1,
-   extendedCoefficient_compactSupport (nominalScheme W) (nominalParameters_contains W) hn 3⟩
 
 theorem nominalCoefficients_positive_exterior {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
     (hp : nominalOuterX W ≤ p.1) :
@@ -1455,12 +1345,6 @@ theorem nominal_axial_primitive_zero {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
   change nominalOuterRadius W ^ 2 / 2 ≤ p.1
   rwa [nominalOuterRadius_square]
 
-theorem nominal_axial_average_zero {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
-    (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.average ((nominalCoefficients W).axial n) p = 0 := by
-  apply extended_axial_average_zero (nominalScheme W) (nominalParameters_contains W) hn _ heta
-  change nominalOuterRadius W ^ 2 / 2 ≤ p.1
-  rwa [nominalOuterRadius_square]
 
 theorem nominal_exterior_base {p : ℝ × ℝ} (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
     W.U p = 0 ∧ W.profiles.M p = 0 := by
@@ -1496,13 +1380,6 @@ theorem nominal_axial_primitive_zero_all (n : ℕ) {p : ℝ × ℝ}
     exact (nominal_exterior_base W hX heta).2
   · exact nominal_axial_primitive_zero W hn hX heta
 
-theorem nominal_axial_average_zero_all (n : ℕ) {p : ℝ × ℝ}
-    (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.average ((nominalCoefficients W).axial n) p = 0 := by
-  have hp : 0 < p.1 := (nominalOuterX_pos W).trans_le hX
-  have hm := nominal_axial_primitive_zero_all W n hX heta
-  rw [ProfileHistories.primitive_eq_mul_average] at hm
-  exact (mul_eq_zero.mp hm).resolve_left hp.ne'
 
 end CoherentHierarchy
 
@@ -1693,31 +1570,7 @@ theorem modifiedCoefficients_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |et
    extendedCoefficient_axis (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M) M.contains hn 1 heta,
    extendedCoefficient_axis (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M) M.contains hn 3 heta⟩
 
-theorem modified_extended_flux (n : ℕ) {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta : |p.2| ≤ 1) :
-    p.1 * extendedCoefficient (modifiedScheme W Q M) M.contains n 2 p =
-      SlowDivergence.radialFlux F.data.h (AxisSourceRegularity.slowOrder F.data.h n)
-        ((modifiedCoefficients W Q M).axial n) p := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · have h := extended_flux_zero (modifiedScheme W Q M) M.contains rfl hX heta
-    simp only [AxisSourceRegularity.slowOrder, Nat.cast_zero, mul_zero, zero_mul] at h ⊢
-    exact h
-  · exact extended_flux (modifiedScheme W Q M) M.contains hn hX heta
 
-theorem modified_divergenceCoefficient (n : ℕ) {p : ℝ × ℝ}
-    (hX : 0 < p.1) (heta : p.2 ∈ S) :
-    SlowExpansionResidual.divergenceCoefficient F.data.h (asSlowProfiles (modifiedScheme W Q M)) n p = 0 := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · change SimilarityProfile.partialX
-        (AxisSourceRegularity.axisFactor (xProfile (profiles (modifiedScheme W Q M) 0).beta)) p +
-      SimilarityProfile.Z F.data.h
-        (SlowExpansionResidual.axialExponent F.data.h + SlowExpansionResidual.slowOrder F.data.h 0)
-        (xProfile (profiles (modifiedScheme W Q M) 0).axial) p = 0
-    rw [profiles_zero]
-    have h := betaFromU_x_divergence (modifiedDomain W Q M) 0 (modifiedScheme W Q M).base.axial hX heta
-    simp only [SlowExpansionResidual.axialExponent, SlowExpansionResidual.slowOrder,
-      Nat.cast_zero, mul_zero, zero_mul] at h ⊢
-    exact h
-  · exact profiles_divergenceCoefficient (modifiedScheme W Q M) hn hX heta
 
 theorem modified_pressureCoefficient (n : ℕ) {p : ℝ × ℝ}
     (hX : 0 < p.1) (heta : p.2 ∈ S) :
@@ -1742,18 +1595,6 @@ theorem modified_pressureCoefficient (n : ℕ) {p : ℝ × ℝ}
     field_simp [W.axis.normalization_pos.ne'] ; ring
   · exact profiles_pressureCoefficient (modifiedScheme W Q M) hn hX heta
 
-theorem modified_exists_base (lower upper : ℝ) (N : ℕ) :
-    ∃ a : ℕ → ℕ, N ≤ a 0 ∧
-      SlowBorelBase.AdmissibleScales F.data.h
-        (SlowBorelBase.coefficientBundle W.axis.normalization (modifiedCoefficients W Q M))
-        (SlowBorelBase.innerBox lower upper) a ∧
-      ContDiffOn ℝ ∞ (SlowBorelBase.baseVelocity a F.data.h W.axis.normalization (modifiedCoefficients W Q M))
-        (Iio 1 ×ˢ (univ : Set ProblemStatement.Space)) ∧
-      ∀ t : ℝ, t < 1 → ∀ x : ProblemStatement.Space,
-        ProblemStatement.spatialDivergence
-          (SlowBorelBase.baseVelocity a F.data.h W.axis.normalization (modifiedCoefficients W Q M)) t x = 0 :=
-  SlowBorelBase.exists_base_fields W.axis.small.h_pos (by linarith [W.axis.small.h_le])
-    (modifiedCoefficients_smooth W Q M) W.axis.normalization lower upper N
 
 end ModifiedBase
 

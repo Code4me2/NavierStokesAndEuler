@@ -72,9 +72,6 @@ def field (L : Space →L[ℝ] Space) : SmoothL2Field Space where
 theorem velocity_memLp (L : Space →L[ℝ] Space) : MemLp (velocity L) 2 volume :=
   (velocity_smooth L).continuous.memLp_of_hasCompactSupport (velocity_compact L)
 
-theorem field_solenoidal (L : Space →L[ℝ] Space) :
-    (velocity_memLp L).toLp (velocity L) ∈ solenoidalSpace :=
-  smooth_mem_solenoidal (velocity L) (velocity_smooth L) (velocity_memLp L) (velocity_divergence L)
 
 def linear (β : ℝ) : Space →L[ℝ] Space :=
   (EuclideanSpace.proj 1).smulRight (EuclideanSpace.single 0 1+β • EuclideanSpace.single 2 1)

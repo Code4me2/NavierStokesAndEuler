@@ -202,8 +202,6 @@ noncomputable def nativeCylinderMap : Native →L[ℝ] PhysicalSignedWave.Cylind
   let swap := (ContinuousLinearMap.snd ℝ ℝ ℝ).prod (ContinuousLinearMap.fst ℝ ℝ ℝ)
   (r.prod ((swap.comp tz).prod y)).prod 0
 
-theorem nativeCylinderMap_apply (y : Native) :
-    nativeCylinderMap y = ActualSignedPhysicalData.nativeCylinder y := rfl
 
 noncomputable def nativeToCommon {B N0 : ℕ} (l : Label B N0) : Native →L[ℝ] FullPoint :=
   (ActualSignedPhysicalBinding.toCommonCylinder l).toContinuousLinearMap.comp nativeCylinderMap
@@ -252,13 +250,6 @@ theorem primary_mask_zero_outside {B N0 : ℕ} (l : Label B N0) (n : ℕ)
   by_contra hn
   exact ho (ActualPrimary.spatialMask_q_range l.1 (x.1.1,x.1.2.1) hn)
 
-theorem referenceScalar_zero_outside {B N0 : ℕ} (l : Label B N0)
-    (request : ℕ → PhysicalSignedWave.Cylinder → SignedWaveUpdate.Vec2)
-    (j : Fin 2) (n : ℕ) (x : PhysicalSignedWave.Cylinder)
-    (ho : SimilarityCoordinates.coordinateQ (2 * ActualPrimary.h) (x.1.2.1.2,x.1.2.1.1) ∉ Ioo (1/2 : ℝ) 2) :
-    ActualPeriodizedSignedRealization.referenceScalar (ActualSignedPhysicalBinding.primary l) request j n x = 0 := by
-  simp only [ActualPeriodizedSignedRealization.referenceScalar, SignedWaveUpdate.signedScalar,
-    primary_mask_zero_outside l n x ho, mul_zero]
 
 section ActualCoefficients
 
@@ -493,35 +484,6 @@ theorem nativeRegular_from_residuals
   nativeRegular ActualInitialization.patch u H hp
     (request_jets_from_residuals u α H hfixed hθ hz) L
 
-/-- This is the literal post-particular state used to construct the
-canonical signed physical family, with its initialization and gauge intact. -/
-theorem cycleNativeRegular
-    (x : CorrectionStep.CycleState (Label B N0))
-    (H : MeanStateRegularity.PrimitiveData ActualPrimary.standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b (ActualPrimary.commonContext B)
-        ((ActualCycleParameters.fixedParameters B N0).afterParticular
-          x.coefficients (ActualPrimary.commonContext B) x.state))
-    (hp : GaugeMomentBalances.MovingField ActualPrimary.standardRegion
-      ActualInitialization.patch.a ActualInitialization.patch.b
-        ((ActualCycleParameters.fixedParameters B N0).afterParticular
-          x.coefficients (ActualPrimary.commonContext B) x.state).pressure)
-    (α : ℝ)
-    (hfixed : VariableGaugeMean.reconstructState ActualInitialization.geometry.gauge
-      (ActualPrimary.commonContext B)
-        ((ActualCycleParameters.fixedParameters B N0).afterParticular
-          x.coefficients (ActualPrimary.commonContext B) x.state) =
-        ((ActualCycleParameters.fixedParameters B N0).afterParticular
-          x.coefficients (ActualPrimary.commonContext B) x.state))
-    (hθ : MeanClass ActualInitialization.geometry.strip α
-      (((ActualCycleParameters.fixedParameters B N0).afterParticular
-        x.coefficients (ActualPrimary.commonContext B) x.state).thetaResidual (ActualPrimary.commonContext B)))
-    (hz : MeanClass ActualInitialization.geometry.strip α
-      (((ActualCycleParameters.fixedParameters B N0).afterParticular
-        x.coefficients (ActualPrimary.commonContext B) x.state).axialResidual (ActualPrimary.commonContext B)))
-    (L : NativeLabel B N0) :
-    ActualSignedPhysicalData.NativeRegular ActualPrimary.slots ActualPrimary.outgoing.data.h_pos.le
-      ((ActualSignedExterior.cycleFamily x H hp).singleton L) :=
-  nativeRegular_from_residuals _ H hp α hfixed hθ hz L
 
 end ActualResiduals
 

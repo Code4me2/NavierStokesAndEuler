@@ -35,27 +35,6 @@ theorem scaledRayRate_algebra {a ε s₀ : ℝ} (ha : a ≠ 0) (hε : ε ≠ 0) 
 def scaledRay (m v r : ℝ → Space) (s₀ t₀ a ε τ : ℝ) (i : Fin 3) : ℝ :=
   movingRay m v r (physicalTime t₀ a ε τ) i / (s₀*rayScale ε i)
 
-/-- The physical ODE supplies exactly the scaled coefficient matrix whose
-entrywise errors are controlled in the existing propagation proof. -/
-theorem scaledRay_hasDerivAt (B M : Space →L[ℝ] Space)
-    {m v r : ℝ → Space} {s₀ t₀ a ε τ : ℝ}
-    (ha : a ≠ 0) (hε : ε ≠ 0) (hs₀ : s₀ ≠ 0)
-    (hm : HasDerivAt m (-B.adjoint (m (physicalTime t₀ a ε τ))) (physicalTime t₀ a ε τ))
-    (hv : HasDerivAt v (-B (v (physicalTime t₀ a ε τ)) +
-      (2*⟪m (physicalTime t₀ a ε τ),B (v (physicalTime t₀ a ε τ))⟫_ℝ /
-        ‖m (physicalTime t₀ a ε τ)‖^2) • m (physicalTime t₀ a ε τ)) (physicalTime t₀ a ε τ))
-    (hr : HasDerivAt r (-M.adjoint (r (physicalTime t₀ a ε τ))) (physicalTime t₀ a ε τ))
-    (hm0 : m (physicalTime t₀ a ε τ) ≠ 0) (hv0 : v (physicalTime t₀ a ε τ) ≠ 0)
-    (hmv : ⟪m (physicalTime t₀ a ε τ),v (physicalTime t₀ a ε τ)⟫_ℝ = 0) (i : Fin 3) :
-    HasDerivAt (fun σ => scaledRay m v r s₀ t₀ a ε σ i)
-      (∑ j : Fin 3, scaledRayEntry a ε
-        (frameMatrix M (unit (m (physicalTime t₀ a ε τ))) (unit (v (physicalTime t₀ a ε τ))))
-        (frameSkew (frameMatrix B (unit (m (physicalTime t₀ a ε τ))) (unit (v (physicalTime t₀ a ε τ)))))
-        i j * scaledRay m v r s₀ t₀ a ε τ j) τ := by
-  have h := ((movingRay_hasDerivAt B M hm hv hr hm0 hv0 hmv i).comp τ
-    (physicalTime_hasDerivAt t₀ a ε τ)).div_const (s₀*rayScale ε i)
-  rw [scaledRayRate_algebra ha hε hs₀] at h
-  simpa only [scaledRay, Function.comp_def] using h
 
 /-- The same rescaling for actual one-sided time derivatives. -/
 theorem scaledRay_hasDerivWithinAt (B M : Space →L[ℝ] Space)

@@ -25,13 +25,7 @@ def translated (A : Space →ᵇ V) (a : Space) : Space →ᵇ V :=
   ext x
   exact congrArg A (add_zero x)
 
-theorem translated_add (A : Space →ᵇ V) (a b : Space) :
-    translated (translated A a) b = translated A (b+a) := by
-  ext x
-  exact congrArg A (add_assoc x b a)
 
-theorem translated_norm_le (A : Space →ᵇ V) (a : Space) : ‖translated A a‖ ≤ ‖A‖ :=
-  BoundedContinuousFunction.norm_compContinuous_le _ _
 
 variable [NormedSpace ℝ V]
 

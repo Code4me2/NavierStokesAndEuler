@@ -22,13 +22,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
 def weightedPhysicalGradientCost (R CF ρ Cw : ℝ) : ℝ :=
   ((1+9*CF)*physicalFixedCost D R CF ρ⁻¹ 1)*(sobolevEmbeddingConstant P 3*Cw)
 
-theorem weightedPhysicalGradientCost_nonneg (R CF ρ Cw : ℝ)
-    (hR : 0 ≤ R) (hCF : 0 ≤ CF) (hρ : 0 < ρ) (hCw : 0 ≤ Cw) :
-    0 ≤ weightedPhysicalGradientCost D P R CF ρ Cw := by
-  have h := physicalFixedCost_nonneg D R CF ρ⁻¹ 1 hR hCF (inv_nonneg.mpr hρ.le)
-  have hs := sobolevEmbeddingConstant_nonneg P 3
-  unfold weightedPhysicalGradientCost
-  positivity
 
 variable {A : Data P D.T} (Q : Budget P D.T_pos A)
   (X Y : Icc (0 : ℝ) D.T → Space → Space)

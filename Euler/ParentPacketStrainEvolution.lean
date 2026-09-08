@@ -110,9 +110,6 @@ def centerCurvature (t : ℝ) : EndSpace :=
 def centerStrainDerivative (t : ℝ) : EndSpace :=
   extendPath G.T G.T_pos.le G.strainDerivative.field t 0
 
-theorem centerStrainDerivative_eq (t : ℝ) :
-    G.centerStrainDerivative t = -(G.centerStrain t).comp (G.centerStrain t)-G.centerCurvature t :=
-  G.strainDerivative_apply (projIcc 0 G.T G.T_pos.le t) 0
 
 theorem centerStrain_derivative (τ : ℝ) (hτ : 0 ≤ τ)
     (t : ℝ) (ht : t ∈ Icc τ G.T) :
@@ -144,12 +141,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
   (m : Space) (hm : ‖m‖=1) (R : U ≃ₗᵢ[ℝ] EulerTransverseFrameCoordinates.referencePlane m)
   (S : Set Space) (hS : IsCompact S)
 
-theorem transverse_strain_within (t : Icc (0 : ℝ) G.T) (x : Space) :
-    HasDerivWithinAt
-      (fun s => extendPath G.T G.T_pos.le (G.transverseData m hm R S hS).M.field s x)
-      (-((G.transverseData m hm R S hS).M.field t x).comp
-        ((G.transverseData m hm R S hS).M.field t x)-G.curvature.field t x)
-      (Icc (0 : ℝ) G.T) t := G.strain_within t x
 
 end Transverse
 

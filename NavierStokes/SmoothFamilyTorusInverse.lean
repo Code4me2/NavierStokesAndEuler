@@ -897,20 +897,6 @@ theorem parameterJetApply_smooth {f : Source P} (hf : ContDiff ℝ ∞ f)
   (ContinuousMultilinearMap.apply ℝ (fun _ : Fin q => P) ℂ v).contDiff.comp
     (parameterJet_smooth hf q)
 
-omit [FiniteDimensional ℝ P] in
-theorem parameterJet_eq_slice {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (q : ℕ) (p : P) (Y : Plane) :
-    parameterJet q f (p, Y) = iteratedFDeriv ℝ q (fun t => f (t, Y)) p := by
-  let L : P →L[ℝ] Point P := ContinuousLinearMap.inl ℝ P Plane
-  let g : Point P → ℂ := fun z => f (z + (0, Y))
-  have hg : ContDiff ℝ ∞ g := hf.comp (contDiff_id.add contDiff_const)
-  have he : (fun t => f (t, Y)) = g ∘ L := by ext t; simp [g, L]
-  rw [he, L.iteratedFDeriv_comp_right hg p (by exact_mod_cast le_top : (q : WithTop ℕ∞) ≤ ∞)]
-  change (iteratedFDeriv ℝ q f (p, Y)).compContinuousLinearMap _ =
-    (iteratedFDeriv ℝ q (fun z => f (z + (0, Y))) (p, 0)).compContinuousLinearMap _
-  rw [iteratedFDeriv_comp_add_right]
-  simp only [Prod.mk_add_mk, add_zero, zero_add]
-  rfl
 
 omit [FiniteDimensional ℝ P] in
 theorem parameterJetApply_succ {f : Source P} (hf : ContDiff ℝ ∞ f)
@@ -1011,11 +997,6 @@ theorem nonbarPart_zeroMean {f : Source P} (hf : ContDiff ℝ ∞ f)
   rw [mean_applyMultiplier nonzeroMultiplier_growth hf hp p]
   simp [nonzeroMultiplier]
 
-theorem centered_inverse_solves (d : Direction) {f : Source P}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) :
-    directionalPartial d (inverse d (nonbarPart f)) = nonbarPart f :=
-  inverse_solves d (nonbarPart_smooth hf hp) (nonbarPart_periodic hp)
-    (nonbarPart_zeroMean hf hp)
 
 theorem nonbarPart_finiteJets (n : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : Source P) (S : Set P) (C : ℝ),

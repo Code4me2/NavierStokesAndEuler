@@ -40,12 +40,5 @@ theorem representative_divergence (u : L2) (hu : u ∈ solenoidalSpace) (hs : Sm
   solenoidal_representative_divergence u hu (representative u hs)
     (representative_smooth u hs) (representative_ae u hs)
 
-/-- A smooth translation orbit in the genuine gradient space has a normalized classical pressure. -/
-theorem representative_pressure (p : L2) (hp : p ∈ gradientSpace) (hs : SmoothOrbit p) :
-    ContDiff ℝ ∞ (radialPotential (representative p hs)) ∧
-      radialPotential (representative p hs) 0 = 0 ∧
-      ∀ x, gradient (radialPotential (representative p hs)) x = representative p hs x :=
-  gradientSpace_radial_potential p hp (representative p hs)
-    (representative_ae p hs) (representative_smooth p hs)
 
 end EulerMeanClassical

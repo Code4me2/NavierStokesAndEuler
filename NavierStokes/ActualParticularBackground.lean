@@ -281,20 +281,6 @@ theorem background_normal_range {B N0 : ℕ} (b : Label B N0 → HarmonicBlock C
   rw [background_normal b hb j]
   exact ActualPrimaryBounds.chart_normal_range hx hi
 
-theorem background_defect {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
-    (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ) (n : ℕ)
-    (i : CopyIndex B N0) (x : Native) :
-    (backgroundFamily b j).defect nativeStrip (directions B) n i x =
-      ActualPhaseDefect.defect i.1.1 i.1.2 n (nativeToFull x) := by
-  rw [backgroundFamily_eq b hb j]
-  change (ParticularWaveBounds.reindexCoefficients nativeToFull
-    ((zeroRescale (j : ℝ) ActualPrimaryBounds.actualFamily).coefficients i)).defect
-    _ _ n x = _
-  unfold nativeStrip directions
-  rw [defect_reindex]
-  change (zeroRescale (j : ℝ) ActualPrimaryBounds.actualFamily).defect
-    _ _ n i (nativeToFull x) = _
-  rw [zeroRescale_defect, ActualPrimaryBounds.actualFamily_defect_eq]
 
 theorem background_inverse_frequency {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
     (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ) :
@@ -311,12 +297,5 @@ theorem background_inverse_frequency {B N0 : ℕ} (b : Label B N0 → HarmonicBl
   simp only [one_div, mul_inv_rev]
   ring
 
-theorem background_frequency_ne {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
-    (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) {j : ℤ} (hj : j ≠ 0)
-    (n : ℕ) (i : CopyIndex B N0) : (backgroundFamily b j).frequency n i ≠ 0 := by
-  change (carrier b j i.1).frequency n ≠ 0
-  rw [carrier_frequency b hb j]
-  exact mul_ne_zero (Int.cast_ne_zero.mpr hj)
-    (Scaling.carrier_frequency_pos (ChartScales.epsilon_pos ActualPrimary.h n)).ne'
 
 end NavierStokes.ActualParticularBackground

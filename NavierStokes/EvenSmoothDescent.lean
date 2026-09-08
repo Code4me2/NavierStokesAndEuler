@@ -25,8 +25,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 private theorem nat_le_infty (n : ℕ) : (n : WithTop ℕ∞) ≤ ∞ :=
   WithTop.coe_le_coe.mpr le_top
 
-private theorem nat_lt_infty (n : ℕ) : (n : WithTop ℕ∞) < ∞ :=
-  WithTop.coe_lt_coe.mpr (ENat.natCast_lt_top n)
 
 omit [CompleteSpace E] in
 theorem contDiff_iteratedDeriv {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
@@ -396,21 +394,6 @@ theorem contDiffWithinAt_descent_zero {r : ℝ} (hr : 0 < r) {f : ℝ → E}
   exact (hg 0 (by simp)).congr_of_eventuallyEq
     (hEq.symm.filter_mono nhdsWithin_le_nhds) hEq.eq_of_nhds.symm
 
-theorem contDiffOn_descent_local {r : ℝ} (hr : 0 < r) {f : ℝ → E}
-    (hf : ContDiffOn ℝ ∞ f (Ioo (-r) r))
-    (he : ∀ x ∈ Ioo (-r) r, f (-x) = f x) :
-    ContDiffOn ℝ ∞ (descent f) (Ico 0 (r ^ 2)) := by
-  intro X hX
-  by_cases hz : X = 0
-  · subst X
-    exact (contDiffWithinAt_descent_zero hr hf he).mono Ico_subset_Ici_self
-  · have hpos : 0 < X := lt_of_le_of_ne hX.1 (Ne.symm hz)
-    have hsqrt : Real.sqrt X ∈ Ioo (-r) r := by
-      constructor
-      · linarith [Real.sqrt_nonneg X]
-      · nlinarith [Real.sq_sqrt hX.1, Real.sqrt_nonneg X, hX.2]
-    exact ((hf.contDiffAt (isOpen_Ioo.mem_nhds hsqrt)).comp X
-      (Real.contDiffAt_sqrt hz)).contDiffWithinAt
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] in
 theorem descent_square_local {r : ℝ} {f : ℝ → E}

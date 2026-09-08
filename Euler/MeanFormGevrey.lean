@@ -78,12 +78,6 @@ theorem meanOperator_bound (hH : ContDiff ℝ ∞ H) (hC : ContDiff ℝ ∞ C)
 
 variable (D : P → V →L[ℝ] W)
 
-/-- Pullback by the genuine coordinate derivative preserves coefficient regularity. -/
-theorem pullbackMeanOperator_contDiff {n : ℕ∞ω}
-    (hD : ContDiff ℝ n D) (hH : ContDiff ℝ n H) (hC : ContDiff ℝ n C) :
-    ContDiff ℝ n (fun p => transportedOperator (D p) (meanOperator J R (H p) (C p))) :=
-  ((realAdjoint (U := V) (E := W)).contDiff.comp hD).clm_comp
-    ((meanOperator_contDiff J R H C hH hC).clm_comp hD)
 
 /-- The full actual fixed-space mean operator obeys a polynomial factorial bound. -/
 theorem pullbackMeanOperator_bound

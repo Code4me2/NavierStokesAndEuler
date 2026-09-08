@@ -134,18 +134,5 @@ theorem childInverse_joint_continuous (Y : Icc (0 : ℝ) A.T → Space → Space
   (flowData A.T G.time_nonneg (physicalCoefficient k m A.T G.A A.ell)).backward_joint_continuous.comp
     ((continuous_subtype_val.comp continuous_fst).prodMk hY)
 
-theorem child_particleMap_measurePreserving
-    (hparent : ∀ t, MeasurePreserving (fun x => x+A.displacement.field t x) volume volume)
-    (t : Icc (0 : ℝ) A.T) :
-    MeasurePreserving
-      (fun x => x+(A.child G k m hgraph nextEll hnext hnext1).displacement.field t x) volume volume := by
-  have he : (fun x => x+(A.child G k m hgraph nextEll hnext hnext1).displacement.field t x) =
-      (fun y => y+A.displacement.field t y) ∘
-        (flowData A.T G.time_nonneg (physicalCoefficient k m A.T G.A A.ell)).forward t :=
-    funext (A.child_particleMap G k m hgraph nextEll hnext hnext1 t)
-  rw [he]
-  exact (hparent t).comp
-    (physical_forward_measurePreserving k m A.T G.time_nonneg G.A hgraph G.divergence
-      A.ell A.ell_pos.ne' t)
 
 end EulerParentPacketFrames.Parent

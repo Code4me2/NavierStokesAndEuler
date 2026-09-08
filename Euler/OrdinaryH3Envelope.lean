@@ -67,10 +67,6 @@ def envelopeDerivative (U V : Evolution T hT) (δ : ℝ) (t : Icc (0 : ℝ) T) :
 theorem energyPath_nonneg (U V : Evolution T hT) (t : Icc (0 : ℝ) T) : 0 ≤ U.energyPath V t :=
   wordEnergy_nonneg 3 _
 
-theorem normEnvelope_nonneg (U V : Evolution T hT) (δ : ℝ) (t : Icc (0 : ℝ) T) :
-    0 ≤ U.normEnvelope V δ t := by
-  change 0 ≤ 40*sqrt _
-  positivity
 
 theorem normEnvelope_hasDerivWithinAt (U V : Evolution T hT) (δ : ℝ) (hδ : 0 < δ)
     (t : Icc (0 : ℝ) T) :

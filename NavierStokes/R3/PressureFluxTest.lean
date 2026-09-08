@@ -266,19 +266,6 @@ theorem memLp_and_lpNorm_fderiv_r_two_le {φ : Space → ℝ} {w : Space → Spa
       rw [hGeq]
       simp [comparisonLpNorm, eLpNorm_norm, Real.norm_eq_abs, abs_of_nonneg hL0, abs_of_nonneg hc]
 
-theorem lpNorm_fderiv_r_two_le {φ : Space → ℝ} {w : Space → Space}
-    (hφ : ContDiff ℝ ∞ φ) (hs : HasCompactSupport φ) (hw : ContDiff ℝ ∞ w)
-    (hw2 : MemLp w 2 volume) (hφ0 : ∀ x, 0 ≤ φ x) (hφ1 : ∀ x, φ x ≤ 1)
-    {L J : ℝ} (hL0 : 0 ≤ L) (hJ0 : 0 ≤ J)
-    (hL : ∀ x, ‖fderiv ℝ φ x‖ ≤ L)
-    (hJ : ∀ x, ‖fderiv ℝ (fderiv ℝ φ) x‖ ≤ J) :
-    comparisonLpNorm 2 (fderiv ℝ (r φ w)) ≤
-      40 * (L * Real.sqrt (∫ x, φ x ^ 8 * gradientSq w x) +
-        (L ^ 2 + J) * comparisonLpNorm 2 w) := by
-  have h := (memLp_and_lpNorm_fderiv_r_two_le hφ hs hw hw2 hφ0 hφ1 hL0 hJ0 hL hJ).2
-  have hA := Real.sqrt_nonneg (∫ x, φ x ^ 8 * gradientSq w x)
-  have hM := LpNormTools.lpNorm_nonneg 2 w
-  nlinarith [mul_nonneg hL0 hA, mul_nonneg hJ0 hM]
 
 /-- The actual test at radius `R` in the fixed cutoff family. -/
 def cutoffTest (R : ℝ) (w : Space → Space) : Space → ℝ :=
@@ -297,14 +284,7 @@ theorem cutoffTest_hasCompactSupport {R : ℝ} (hR : 0 < R) (w : Space → Space
     HasCompactSupport (cutoffTest R w) :=
   r_hasCompactSupport (ComparisonCutoffs.cutoff_hasCompactSupport hR) w
 
-theorem memLp_cutoffTest {R : ℝ} (hR : 0 < R) {w : Space → Space}
-    (hw : ContDiff ℝ ∞ w) (p : ℝ≥0∞) : MemLp (cutoffTest R w) p volume :=
-  memLp_r (ComparisonCutoffs.cutoff_smooth R) (ComparisonCutoffs.cutoff_hasCompactSupport hR) hw p
 
-theorem memLp_fderiv_cutoffTest {R : ℝ} (hR : 0 < R) {w : Space → Space}
-    (hw : ContDiff ℝ ∞ w) (p : ℝ≥0∞) : MemLp (fderiv ℝ (cutoffTest R w)) p volume :=
-  memLp_fderiv_r (ComparisonCutoffs.cutoff_smooth R)
-    (ComparisonCutoffs.cutoff_hasCompactSupport hR) hw p
 
 theorem cutoffTest_four_bound {R : ℝ} (hR : 0 < R) {w : Space → Space}
     (hw : ContDiff ℝ ∞ w) (hw2 : MemLp w 2 volume) :

@@ -76,19 +76,5 @@ structure FiniteFamily {T : ℝ} (hT : 0 < T) (A : Data period T) where
       (value period (((A.atOrder period q).coefficients period hq).apply
         ⟨t, ht.1.le, ht.2.le⟩ (solution q hq ⟨t, ht.1.le, ht.2.le⟩))) t
 
-/-- Choose an actual finite correction family from proved finite-existence statements.
-This is an assembly helper conditional on finite existence, not an independent source existence theorem. -/
-def finiteFamilyOfExists {T : ℝ} (hT : 0 < T) (A : Data period T)
-    (H : ∀ q (hq : 6 ≤ q), ∃ e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)),
-      e ⟨0, le_rfl, hT.le⟩ = 0 ∧
-      (∀ t, value period (e t) ∈ divergenceFreeSpace period A.κ A.direction) ∧
-      ∀ t (ht : t ∈ Ioo 0 T),
-        HasDerivAt (fun r => value period (extendPath T hT.le e r))
-          (value period (((A.atOrder period q).coefficients period hq).apply
-            ⟨t, ht.1.le, ht.2.le⟩ (e ⟨t, ht.1.le, ht.2.le⟩))) t) : FiniteFamily period hT A where
-  solution q hq := Classical.choose (H q hq)
-  initial q hq := (Classical.choose_spec (H q hq)).1
-  divergence q hq := (Classical.choose_spec (H q hq)).2.1
-  equation q hq := (Classical.choose_spec (H q hq)).2.2
 
 end EulerCorrectionAssembly

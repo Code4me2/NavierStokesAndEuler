@@ -63,10 +63,6 @@ theorem derivativePath_orbit :
   B.coefficients.endpointDerivative_orbit_contDiff P D.frame.translation_contDiff
     D.frameDerivative.translation_contDiff B.H.translation_contDiff Y.value Y.orbit
 
-theorem displacementPath_time (t : Icc (0 : ℝ) D.T) :
-    HasDerivWithinAt (extendPath D.T D.T_pos.le (displacementPath B Y))
-      (coordinatePath B Y t) (Icc (0 : ℝ) D.T) t :=
-  B.coefficients.endpointDisplacement_hasDerivWithinAt P Y.value t
 
 theorem coordinatePath_time (t : Icc (0 : ℝ) D.T) :
     HasDerivWithinAt (extendPath D.T D.T_pos.le (coordinatePath B Y))

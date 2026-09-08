@@ -42,7 +42,6 @@ def proj : ℝ → Icc v.left v.right := projIcc v.left v.right v.ordered
 theorem proj_of_mem {t : ℝ} (ht : t ∈ Icc v.left v.right) :
     (v.proj t : ℝ) = t := by simp only [proj, projIcc_of_mem v.ordered ht]
 
-theorem proj_coe (t : Icc v.left v.right) : v.proj t = t := projIcc_val _ _
 
 theorem continuous_proj : Continuous v.proj := continuous_projIcc
 
@@ -319,32 +318,6 @@ theorem projected_tangency_preserved {a b : ℝ} (hab : a ≤ b)
     simpa using hasDerivAt_const t (0 : ℝ)
   exact linear_solution_unique hab A (fun _ => 0) hA hd hzero hinit
 
-/-- Combined finite-interval existence, uniqueness, and moving tangency for
-equation (27). All analytic coefficient hypotheses are explicit. -/
-theorem exists_unique_tangent_solution {a b : ℝ} (hab : a ≤ b)
-    (n n' f : ℝ → H) (K : ℝ → H →L[ℝ] H) (δ : ℝ → ℝ)
-    (hn : ∀ t ∈ Icc a b, HasDerivAt n (n' t) t)
-    (hn' : ContinuousOn n' (Icc a b)) (hf : ContinuousOn f (Icc a b))
-    (hK : ContinuousOn K (Icc a b)) (hδ : ContinuousOn δ (Icc a b))
-    (hn0 : ∀ t ∈ Icc a b, n t ≠ 0) (x₀ : H) (hx₀ : ⟪n a, x₀⟫_ℝ = 0) :
-    ∃ u : ℝ → H, u a = x₀ ∧
-      (∀ t ∈ Icc a b, HasDerivAt u
-        (TangentProjection.projectedRhs (n t) (n' t) (u t) (K t (u t)) (f t) (δ t)) t) ∧
-      (∀ t ∈ Icc a b, ⟪n t, u t⟫_ℝ = 0) ∧
-      ∀ w : ℝ → H, w a = x₀ →
-        (∀ t ∈ Icc a b, HasDerivAt w
-          (TangentProjection.projectedRhs (n t) (n' t) (w t) (K t (w t)) (f t) (δ t)) t) →
-        EqOn w u (Icc a b) := by
-  have hncont : ContinuousOn n (Icc a b) :=
-    fun t ht => (hn t ht).continuousAt.continuousWithinAt
-  obtain ⟨u, hu, hdu⟩ := exists_projected_solution hab n n' f K δ
-    hncont hn' hf hK hδ hn0 x₀
-  refine ⟨u, hu, hdu, ?_, ?_⟩
-  · exact projected_tangency_preserved hab n n' f u K δ hδ hn0 hn hdu
-      (by simpa only [hu] using hx₀)
-  · intro w hw hdw
-    exact projected_solution_unique hab n n' f K δ hncont hn' hK hδ hn0 hdw hdu
-      (hw.trans hu.symm)
 
 end
 

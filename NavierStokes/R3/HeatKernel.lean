@@ -26,9 +26,6 @@ def heatKernelSecond (s : ℝ) (i j : Fin 3) (z : Space) : ℝ :=
   (z i * z j / (4 * s ^ 2) - (if i = j then 1 else 0) / (2 * s)) *
     heatKernel s z
 
-theorem heatKernel_pos {s : ℝ} (hs : 0 < s) (z : Space) : 0 < heatKernel s z := by
-  unfold heatKernel
-  exact mul_pos (Real.rpow_pos_of_pos (by positivity) _) (Real.exp_pos _)
 
 theorem heatKernel_nonneg {s : ℝ} (hs : 0 ≤ s) (z : Space) :
     0 ≤ heatKernel s z := by
@@ -62,9 +59,6 @@ theorem differentiable_heatKernel {s : ℝ} (hs : 0 < s) :
     Differentiable ℝ (heatKernel s) := fun z =>
   (hasFDerivAt_heatKernel hs z).differentiableAt
 
-theorem contDiff_heatKernel (s : ℝ) : ContDiff ℝ ∞ (heatKernel s) := by
-  unfold heatKernel
-  exact contDiff_const.mul (((contDiff_id.norm_sq ℝ).neg.div_const (4 * s)).exp)
 
 /-- The explicit Gaussian Hessian is the actual iterated coordinate derivative. -/
 theorem heatKernelSecond_eq_partial {s : ℝ} (hs : 0 < s)

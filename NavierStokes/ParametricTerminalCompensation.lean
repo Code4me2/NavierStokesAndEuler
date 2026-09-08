@@ -114,10 +114,6 @@ theorem composed_solver_derivWithin_bound {g : Coeff → Coeff} {ε C : ℝ}
   exact ((fderiv ℝ g (d η)).le_opNorm _).trans
     (mul_le_mul_of_nonneg_right (hbound (d η) hmem) (norm_nonneg _))
 
-theorem correction_parameter_derivWithin (P : Patch) {S : Set ℝ} {c : ℝ → Coeff} {η : ℝ}
-    (huniq : UniqueDiffWithinAt ℝ S η) (hc : DifferentiableWithinAt ℝ c S η) (x : ℝ) :
-    derivWithin (fun θ => correction P (c θ) x) S η = correction P (derivWithin c S η) x :=
-  ((correctionCLM P x).hasFDerivAt.comp_hasDerivWithinAt η hc.hasDerivWithinAt).derivWithin huniq
 
 /-- The constructed three-row inverse applies to a genuinely varying debt.
 The derivative estimate includes its actual first parameter derivative. -/
@@ -362,12 +358,6 @@ theorem exists_compensation_for_switch_family (P : Patch) (lam : ℝ) (hlam : 0 
   exact exists_compensation_for_scaled_family P lam hlam q hq hS huniq a ha hpos d Bq hBq
     (fun K hK => (hdata K hK).1) (fun K hK => (hdata K hK).2)
 
-/-- Inside the parameter domain these bounds are on ordinary derivatives. -/
-theorem interior_first_jet {P : Patch} {S : Set ℝ} {a : ℝ → ℝ} {c : ℝ → Coeff}
-    {η L : ℝ} (hS : S ∈ 𝓝 η) (hc : ‖derivWithin c S η‖ ≤ L)
-    (hE : FirstJetWithinBound P a c S η L) :
-    ‖deriv c η‖ ≤ L ∧ FirstJetBound P a c η L := by
-  exact ⟨by simpa only [derivWithin_of_mem_nhds hS] using hc, hE.toFirstJetBound hS⟩
 
 theorem scaled_triple_contDiffOn {S : Set ℝ} (K : ℝ) {p e i : ℝ → ℝ}
     (hp : ContDiffOn ℝ ∞ p S) (he : ContDiffOn ℝ ∞ e S) (hi : ContDiffOn ℝ ∞ i S) :
@@ -438,11 +428,6 @@ noncomputable def physicalDebt (T : OutgoingTail.TailData) (K η : ℝ) : Coeff 
     ParametricHeatTail.physicalEnergy T K η,
     ParametricHeatTail.physicalAngular T K η]
 
-theorem physicalDebt_eq_actual (T : OutgoingTail.TailData) (K η : ℝ) :
-    physicalDebt T K η =
-      ![HeatTailEdit.pressureDebt (HeatTailEdit.outgoingProfile T K η) T.h (1 - η ^ 2) K,
-        HeatTailEdit.energyDebt (HeatTailEdit.outgoingProfile T K η) T.h (1 - η ^ 2) K,
-        HeatTailEdit.angularDebt (HeatTailEdit.outgoingProfile T K η) T.h (1 - η ^ 2) K] := rfl
 
 theorem physical_scaled_debt_contDiffOn (T : OutgoingTail.TailData) {K : ℝ} (hK : 1 ≤ K) :
     ContDiffOn ℝ ∞ (fun η => scaledDebt K (physicalDebt T K η)) (Icc (-1 : ℝ) 1) :=

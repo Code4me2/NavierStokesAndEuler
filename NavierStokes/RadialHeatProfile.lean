@@ -344,21 +344,7 @@ theorem profileJet_ode {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
       ring
     _ = 0 := by rw [moment_ode ha hz, mul_zero]
 
-/-- The stated ODE holds at the endpoint with derivatives within the half-line. -/
-theorem profile_ode_within {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
-    z ^ 2 * iteratedDerivWithin 2 (profile a) (Ici 0) z +
-      (1 + 2 * a * z) * derivWithin (profile a) (Ici 0) z +
-      a * (a - 1) * profile a z = 0 := by
-  rw [← iteratedDerivWithin_one, iteratedDerivWithin_profile ha 1 hz,
-    iteratedDerivWithin_profile ha 2 hz]
-  exact profileJet_ode ha hz
 
-/-- On the open half-line these are the ordinary first and second derivatives. -/
-theorem profile_ode {a z : ℝ} (ha : 1 < a) (hz : 0 < z) :
-    z ^ 2 * iteratedDeriv 2 (profile a) z + (1 + 2 * a * z) * deriv (profile a) z +
-      a * (a - 1) * profile a z = 0 := by
-  rw [← iteratedDeriv_one, iteratedDeriv_profile ha 1 hz, iteratedDeriv_profile ha 2 hz]
-  exact profileJet_ode ha hz.le
 
 /-! ## Strict slope control and a quantitative first-order estimate -/
 
@@ -685,11 +671,6 @@ theorem radialProfile_joint_contDiffOn {a : ℝ} (ha : 1 < a) :
   intro p hp
   exact ⟨div_pos (sq_pos_of_pos hp.1) (by norm_num), hp.2⟩
 
-/-- This is exactly the displayed integral in Lemma 4.4. -/
-theorem profile_eq_integral (a z : ℝ) :
-    profile a z = (Real.Gamma a)⁻¹ *
-      ∫ v in Ioi (0 : ℝ), Real.exp (-v) * v ^ (a - 1) * (1 + z * v) ^ (1 - a) := by
-  simp only [profile, moment, kernel, Nat.cast_zero, add_zero, sub_zero]
 
 /-- The physical power is exactly `s^(-A)`, where `A = 1/2 + h`. -/
 theorem radialProfile_source_formula (h τ r : ℝ) :

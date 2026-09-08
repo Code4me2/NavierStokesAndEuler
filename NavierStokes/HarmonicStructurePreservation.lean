@@ -51,12 +51,6 @@ theorem withCarrier_eq {a b : CorrectionState.HarmonicBlock D}
   cases hangular
   rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem singleMode_addBlock_of_sameCarrier {a b : CorrectionState.HarmonicBlock D}
-    (hfrequency : b.frequency = a.frequency) (hphase : b.phase = a.phase)
-    (hangular : b.angularFrequency = a.angularFrequency) (j : ℤ) (n : ℕ) :
-    singleMode (addBlock a b) j n = singleMode a j n + singleMode b j n := by
-  rw [singleMode_addBlock, withCarrier_eq hfrequency hphase hangular]
 
 theorem amplitude_contDiffOn {U : Set D} {b : CorrectionState.HarmonicBlock D}
     (hb : ∀ n i, HarmonicResidual.SmoothCoefficients U (b.velocity n i))
@@ -91,21 +85,8 @@ theorem cylindricalDivergence_add {E : Type*} [NormedAddCommGroup E] [NormedSpac
     smul_add]
   abel
 
-theorem velocity_smooth_addBlock {U : Set D} {a b : CorrectionState.HarmonicBlock D}
-    (ha : ∀ n i, HarmonicResidual.SmoothCoefficients U (a.velocity n i))
-    (hb : ∀ n i, HarmonicResidual.SmoothCoefficients U (b.velocity n i)) :
-    ∀ n i, HarmonicResidual.SmoothCoefficients U ((addBlock a b).velocity n i) :=
-  fun n i => (ha n i).add (hb n i)
 
-theorem pressure_smooth_addBlock {U : Set D} {a b : CorrectionState.HarmonicBlock D}
-    (ha : ∀ n, HarmonicResidual.SmoothCoefficients U (a.pressure n))
-    (hb : ∀ n, HarmonicResidual.SmoothCoefficients U (b.pressure n)) :
-    ∀ n, HarmonicResidual.SmoothCoefficients U ((addBlock a b).pressure n) :=
-  fun n => (ha n).add (hb n)
 
-theorem phase_smooth_addBlock {U : Set D} {a b : CorrectionState.HarmonicBlock D}
-    (ha : ∀ n, ContDiffOn ℝ ∞ (a.phase n) U) :
-    ∀ n, ContDiffOn ℝ ∞ ((addBlock a b).phase n) U := ha
 
 /-- The carrier-retaining sum preserves modewise solenoidality when the
 second input is interpreted on the retained carrier. -/
@@ -160,12 +141,6 @@ theorem zeroPressure_addBlock {a b : CorrectionState.HarmonicBlock D}
   change (a.pressure n + b.pressure n) 0 = 0
   rw [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, ha n, hb n, add_zero]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem zeroMode_withCarrier {a b : CorrectionState.HarmonicBlock D}
-    (hb : ZeroMode b) : ZeroMode (withCarrier a b) := hb
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem zeroPressure_withCarrier {a b : CorrectionState.HarmonicBlock D}
-    (hb : ∀ n, b.pressure n 0 = 0) : ∀ n, (withCarrier a b).pressure n 0 = 0 := hb
 
 end NavierStokes.HarmonicStructurePreservation

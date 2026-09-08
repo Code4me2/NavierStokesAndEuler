@@ -88,8 +88,6 @@ theorem wordField_toLp_norm_le (A : SmoothL2Field V) {n : ℕ} (w : Fin n → Fi
   have h := (iteratedFDeriv ℝ n A.field x).le_opNorm (fun i => axis (w i))
   simpa only [wordDerivative,axis_norm,prod_const_one,mul_one] using h
 
-def wordSize (s : ℕ) (A : SmoothL2Field V) : ℝ :=
-  ∑ n ∈ range (s+1), ∑ w : Fin n → Fin 3, ‖(wordField A w).toLp‖
 
 def wordEnergy (s : ℕ) (A : SmoothL2Field V) : ℝ :=
   ∑ n ∈ range (s+1), ∑ w : Fin n → Fin 3, ‖(wordField A w).toLp‖^2

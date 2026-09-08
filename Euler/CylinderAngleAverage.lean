@@ -203,11 +203,6 @@ def supportedAverage : Supported P V S hS →L[ℝ] Supported P V S hS :=
 @[simp] theorem supportedAverage_coe (u : Supported P V S hS) :
     (supportedAverage P S hS u : CylinderL2 P V) = average P (u : CylinderL2 P V) := rfl
 
-theorem supportedAverage_norm : ‖supportedAverage (V := V) P S hS‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro u
-  change ‖averageIntegral P (u : CylinderL2 P V)‖ ≤ (1 : ℝ)*‖(u : CylinderL2 P V)‖
-  simpa only [one_mul] using averageIntegral_norm P (u : CylinderL2 P V)
 
 end Supported
 

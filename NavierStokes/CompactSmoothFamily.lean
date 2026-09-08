@@ -224,41 +224,7 @@ theorem family_apply_of_joint (K : Set Z) {U : Set P} {V : Set Z}
     {p : P} (hp : p ∈ U) (z : K) : family K F p z = F (p, z) :=
   family_apply K F p (slice_continuous (hF.mono (Set.prod_mono Subset.rfl hK)) hp) z
 
-/-- An arbitrary open neighborhood of `U × K` suffices; a fixed product
-neighborhood is extracted locally at each parameter using compactness. -/
-theorem contDiffOn_family_of_neighborhood (K : Set Z) [CompactSpace K]
-    (U : Set P) (W : Set (P × Z)) (hW : IsOpen W) (hUK : U ×ˢ K ⊆ W)
-    (F : P × Z → E) (hF : ContDiffOn ℝ ∞ F W) :
-    ContDiffOn ℝ ∞ (family K F) U := by
-  intro p hp
-  have hKc : IsCompact K := isCompact_iff_compactSpace.mpr inferInstance
-  have hs : ({p} : Set P) ×ˢ K ⊆ W := by
-    rintro ⟨q, z⟩ ⟨hq, hz⟩
-    have hqp : q = p := by simpa only [mem_singleton_iff] using hq
-    subst q
-    exact hUK ⟨hp, hz⟩
-  obtain ⟨U', V', hU', hV', hpU, hKV, hsub⟩ :=
-    generalized_tube_lemma isCompact_singleton hKc hW hs
-  have hp' : p ∈ U' := hpU (by simp)
-  have hlocal := contDiffOn_family_of_joint K U' V' hU' hV' hKV F (hF.mono hsub)
-  exact (hlocal.contDiffAt (hU'.mem_nhds hp')).contDiffWithinAt
 
-theorem iteratedFDeriv_family_apply_of_neighborhood (K : Set Z) [CompactSpace K]
-    (U : Set P) (W : Set (P × Z)) (hW : IsOpen W) (hUK : U ×ˢ K ⊆ W)
-    (F : P × Z → E) (hF : ContDiffOn ℝ ∞ F W)
-    {p : P} (hp : p ∈ U) (k : ℕ) (v : Fin k → P) (z : K) :
-    (iteratedFDeriv ℝ k (family K F) p v) z =
-      iteratedFDeriv ℝ k (fun q => F (q, z)) p v := by
-  have hKc : IsCompact K := isCompact_iff_compactSpace.mpr inferInstance
-  have hs : ({p} : Set P) ×ˢ K ⊆ W := by
-    rintro ⟨q, z⟩ ⟨hq, hz⟩
-    have hqp : q = p := by simpa only [mem_singleton_iff] using hq
-    subst q
-    exact hUK ⟨hp, hz⟩
-  obtain ⟨U', V', hU', hV', hpU, hKV, hsub⟩ :=
-    generalized_tube_lemma isCompact_singleton hKc hW hs
-  exact iteratedFDeriv_family_apply K U' V' hU' hV' hKV F (hF.mono hsub)
-    (hpU (by simp)) k v z
 
 end
 

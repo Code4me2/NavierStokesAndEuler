@@ -37,11 +37,6 @@ theorem continuous_slice_of_continuousOn {times : Set ℝ} {u : VelocityField}
   exact continuous_iff_continuousAt.2 (fun x => (hc x (mem_univ x)).continuousAt
     Filter.univ_mem)
 
-/-- No integrability hypothesis is needed for nonnegativity of the totalized
-integral defining the squared norm. -/
-theorem l2Sq_nonneg {E : Type*} [NormedAddCommGroup E] (f : Space → E) :
-    0 ≤ l2Sq f :=
-  integral_nonneg (fun _ => sq_nonneg _)
 
 /-- The elementary pointwise estimate used for the difference energy. -/
 theorem norm_sub_sq_le_twice {E : Type*} [SeminormedAddCommGroup E] (a b : E) :

@@ -218,12 +218,6 @@ theorem norm_field_le_mass {α : Type*} (c : Coefficients α) (k : ℝ) (Φ : α
     (kp : ℤ) (p : α × ℝ) : ‖field c k Φ kp p‖ ≤ coefficientMass c p.1 :=
   norm_evaluate_le_mass c p.1 _
 
-theorem norm_field_product_le {α : Type*} (c d : Coefficients α) (k : ℝ) (Φ : α → ℝ)
-    (kp : ℤ) (p : α × ℝ) :
-    ‖field (c * d) k Φ kp p‖ ≤ coefficientMass c p.1 * coefficientMass d p.1 := by
-  rw [field_mul, norm_mul]
-  exact mul_le_mul (norm_field_le_mass c k Φ kp p) (norm_field_le_mass d k Φ kp p)
-    (norm_nonneg _) (coefficientMass_nonneg c p.1)
 
 theorem convolution_apply {α : Type*} (c d : Coefficients α) (m : ℤ) (x : α) :
     (c * d) m x = ∑ j ∈ c.support, c j x * d (m - j) x := by
@@ -306,28 +300,6 @@ theorem chart_trace (c : Coefficients ProblemStatement.SpaceTime) (Ψ : ProblemS
   exact Finset.sum_congr rfl (fun j hj => congrArg (· * character j (Ψ q + (kp : ℝ) * θ))
     (hc j hj q θ))
 
-/-- The coefficient covariance is the actual angular average used by
-`MeanResidual`, when coefficients are angularly invariant and the phase
-has the stated integer angular increment. -/
-theorem meanResidual_product_covariance
-    (c d : Coefficients ProblemStatement.SpaceTime) (Ψ : ProblemStatement.SpaceTime → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0)
-    (hc : ∀ j ∈ c.support, MeanResidual.AngularInvariant (c j))
-    (hd : ∀ j ∈ d.support, MeanResidual.AngularInvariant (d j))
-    (hΨ : ∀ q θ, Ψ (MeanResidual.angularShift q θ) = Ψ q + (kp : ℝ) * θ)
-    (hconj : ConjugateSymmetric d) (q : ProblemStatement.SpaceTime) :
-    MeanResidual.average (fun y => evaluate c y (Ψ y) * evaluate d y (Ψ y)) q =
-      ∑ j ∈ c.support, c j q * conj (d j q) := by
-  have he : MeanResidual.average (fun y => evaluate c y (Ψ y) * evaluate d y (Ψ y)) q =
-      angularMean (fun θ => field c 1 Ψ kp (q, θ) * field d 1 Ψ kp (q, θ)) := by
-    simp only [MeanResidual.average, angularMean, MeanResidual.period, period,
-      Complex.real_smul, Complex.ofReal_inv]
-    congr 1
-    apply intervalIntegral.integral_congr
-    intro θ hθ
-    dsimp only
-    rw [chart_trace c Ψ kp hc hΨ, chart_trace d Ψ kp hd hΨ]
-  rw [he, angularMean_coefficient_covariance c hconj 1 Ψ hkp q]
 
 def BandLimited {α : Type*} (c : Coefficients α) (N : ℕ) : Prop :=
   ∀ j ∈ c.support, j.natAbs ≤ N
@@ -393,12 +365,6 @@ theorem band_quadraticIterate {α : Type*} (A B C : ℕ → α → ℂ) {c : Coe
     simpa only [quadraticIterate, pow_succ, mul_two] using
       band_quadraticStep (A n) (B n) (C n) ih
 
-theorem quadratic_angular_frequency_bound {α : Type*} (A B C : ℕ → α → ℂ)
-    {c : Coefficients α} (hc : BandLimited c 1) (n : ℕ) (kp : ℤ)
-    {j : ℤ} (hj : j ∈ (quadraticIterate A B C c n).support) :
-    (j * kp).natAbs ≤ 2 ^ n * kp.natAbs := by
-  rw [Int.natAbs_mul]
-  exact Nat.mul_le_mul_right _ (band_quadraticIterate A B C hc n j hj)
 
 theorem field_quadraticStep {α : Type*} (A B C : α → ℂ) (c : Coefficients α)
     (k : ℝ) (Φ : α → ℝ) (kp : ℤ) (p : α × ℝ) :
@@ -413,23 +379,6 @@ noncomputable def quadraticEnvelope {α : Type*} (A B C : ℕ → α → ℂ)
   | n + 1 => ‖A n x‖ + ‖B n x‖ * quadraticEnvelope A B C c x n +
       ‖C n x‖ * quadraticEnvelope A B C c x n ^ 2
 
-/-- The value envelope follows the actual quadratic update and contains
-no factor involving the harmonic band or its cardinality. -/
-theorem norm_quadraticIterate_le {α : Type*} (A B C : ℕ → α → ℂ) (c : Coefficients α)
-    (k : ℝ) (Φ : α → ℝ) (kp : ℤ) (p : α × ℝ) (n : ℕ) :
-    ‖field (quadraticIterate A B C c n) k Φ kp p‖ ≤ quadraticEnvelope A B C c p.1 n := by
-  induction n with
-  | zero => exact norm_field_le_mass c k Φ kp p
-  | succ n ih =>
-    rw [quadraticIterate, field_quadraticStep, quadraticEnvelope]
-    calc
-      _ ≤ ‖A n p.1‖ + ‖B n p.1‖ * ‖field (quadraticIterate A B C c n) k Φ kp p‖ +
-          ‖C n p.1‖ * ‖field (quadraticIterate A B C c n) k Φ kp p‖ ^ 2 := by
-        exact (norm_add_le _ _).trans (add_le_add
-          ((norm_add_le _ _).trans (by rw [norm_mul])) (by rw [norm_mul, norm_pow]))
-      _ ≤ _ := add_le_add
-        (add_le_add_right (mul_le_mul_of_nonneg_left ih (norm_nonneg _)) _)
-        (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (norm_nonneg _) ih 2) (norm_nonneg _))
 
 section Derivatives
 
@@ -445,17 +394,6 @@ theorem character_eq_carrier (j : ℤ) (k : ℝ) (Φ : E → ℝ) (x : E) :
   simp only [HarmonicCalculus.phaseFactor, Complex.ofReal_mul, Complex.ofReal_intCast]
   ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem wave_eq_evaluate (c : Coefficients E) (k : ℝ) (Φ : E → ℝ) (x : E) :
-    wave c k Φ x = evaluate c x (k * Φ x) := by
-  apply Finset.sum_congr rfl
-  intro j hj
-  change c j x * Complex.exp (HarmonicCalculus.phaseFactor (k * (j : ℝ)) * (Φ x : ℂ)) =
-    c j x * Complex.exp ((j : ℂ) * ((k * Φ x : ℝ) : ℂ) * Complex.I)
-  apply congrArg (c j x * ·)
-  apply congrArg Complex.exp
-  simp only [HarmonicCalculus.phaseFactor, Complex.ofReal_mul, Complex.ofReal_intCast]
-  ring
 
 noncomputable def derivativeCoefficient (V : E → E) (k : ℝ) (Φ : E → ℝ)
     (j : ℤ) (a : E → ℂ) (x : E) : ℂ :=
@@ -573,12 +511,6 @@ noncomputable def iteratedAlong (V : E → E) : ℕ → (E → ℂ) → E → �
   | 0, f => f
   | n + 1, f => HarmonicCalculus.along V (iteratedAlong V n f)
 
-theorem band_iteratedCoefficients (V : E → E) (k : ℝ) (Φ : E → ℝ)
-    {c : Coefficients E} {N : ℕ} (hc : BandLimited c N) (n : ℕ) :
-    BandLimited (iteratedCoefficients V k Φ c n) N := by
-  induction n with
-  | zero => exact hc
-  | succ n ih => exact ih.differentiate V k Φ
 
 theorem iteratedCoefficients_contDiffOn {U : Set E} (hU : IsOpen U)
     {V : E → E} {Φ : E → ℝ} (hV : ContDiffOn ℝ ∞ V U) (hΦ : ContDiffOn ℝ ∞ Φ U)
@@ -589,21 +521,6 @@ theorem iteratedCoefficients_contDiffOn {U : Set E} (hU : IsOpen U)
   | zero => exact hc
   | succ n ih => exact differentiate_contDiffOn hU hV hΦ k ih
 
-/-- All repeated actual directional derivatives retain the original
-finite set of harmonic values. Direction-field derivatives are included. -/
-theorem iteratedAlong_wave {U : Set E} (hU : IsOpen U)
-    {V : E → E} {Φ : E → ℝ} (hV : ContDiffOn ℝ ∞ V U) (hΦ : ContDiffOn ℝ ∞ Φ U)
-    (k : ℝ) {c : Coefficients E} (hc : ∀ j ∈ c.support, ContDiffOn ℝ ∞ (c j) U) (n : ℕ) :
-    EqOn (iteratedAlong V n (wave c k Φ)) (wave (iteratedCoefficients V k Φ c n) k Φ) U := by
-  induction n with
-  | zero => exact fun _ _ => rfl
-  | succ n ih =>
-    intro x hx
-    change HarmonicCalculus.along V (iteratedAlong V n (wave c k Φ)) x = _
-    rw [HarmonicCalculus.along_congr hU ih hx]
-    exact along_wave V k Φ _ ((hΦ.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))
-      (fun j hj => ((iteratedCoefficients_contDiffOn hU hV hΦ k hc n j hj).contDiffAt
-        (hU.mem_nhds hx)).differentiableAt (by simp))
 
 end Derivatives
 
