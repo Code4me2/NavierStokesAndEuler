@@ -1587,13 +1587,6 @@ theorem outgoing_axis_halfKernel (F : Profile) (R eta : ℝ) (hR : 0 < R) :
   rw [integral_div]
   linarith
 
-theorem outgoing_pressure_halfKernel (F : Profile) (R eta : ℝ) (hR : 0 < R)
-    {X : ℝ} (hX : 0 < X) :
-    OutgoingDilation.Pi F R (X, eta) = -(∫ x in Ioi X, halfKernel (OutgoingDilation.E F R) eta x) := by
-  rw [OutgoingDilation.Pi_canonical F R eta X hR hX]
-  simp_rw [halfKernel_eq]
-  rw [integral_div]
-  ring
 
 
 namespace Controls
@@ -2379,17 +2372,6 @@ theorem E_outgoing_between_patch_and_switch {X eta : ℝ} (hR : W.controls.radiu
 end Witness
 
 
-theorem exists_assembly_threshold_preserving {F : Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ (A : AxisStage F) (c : Controls A), R0 ≤ c.radius →
-      c.separation ≤ Real.exp (-8) →
-      (∀ eta ∈ HeatedOutgoing.parameterDomain, SmallDebt F c.debt eta) →
-        ∃ W : Witness F, W.axis = A ∧ HEq W.controls c := by
-  obtain ⟨R0, B, hR0, _hB, hw⟩ := ExtendedHeatedOutgoing.exists_witness F
-  refine ⟨R0, hR0, ?_⟩
-  intro A c hr hsep hs
-  obtain ⟨w⟩ := hw c.radius hr
-  exact ⟨⟨A, c, D, hF, B, w, hsep, hs⟩, rfl, HEq.rfl⟩
 
 /-- Retain the cutoff margin from the same analytic input construction;
 later ACT existence uses this margin without rechoosing the axis data. -/

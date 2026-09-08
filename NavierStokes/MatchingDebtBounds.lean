@@ -594,13 +594,6 @@ theorem MatchingBounds.smallDebt {F : OutgoingProfile.Profile} {A : NominalProfi
   rw [norm_iteratedFDeriv_zero] at hh
   exact hh.trans_le hr
 
-theorem MatchingBounds.of_heq {F : OutgoingProfile.Profile}
-    {A B : NominalProfile.AxisStage F} {c : NominalProfile.Controls A} {d : NominalProfile.Controls B}
-    {N : ℕ} {rho : ℝ} (hb : MatchingBounds c N rho) (hA : B = A) (hc : HEq d c) :
-    MatchingBounds d N rho := by
-  cases hA
-  cases hc
-  exact hb
 
 
 /-- Actual finite jets of the coefficients produced by the fixed nonlinear

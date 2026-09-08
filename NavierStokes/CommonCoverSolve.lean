@@ -441,15 +441,6 @@ theorem anchoredSolve_hasDerivAt (k : Frequency)
     SmoothPathFamily.pathFamily_apply _ _ hAc, SmoothPathFamily.pathFamily_apply _ _ hfc]
     using hd
 
-theorem copySolve_alongPath_hasDerivAt (k : Frequency)
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    {p : P} (hp : p ∈ U) (Y : Plane) (s : Icc a b) :
-    HasDerivAt (fun t => d.copySolve g hab k (p, g.path k Y t))
-      (d.coefficientAlong g k ((p, Y), s) (d.copySolve g hab k (p, g.path k Y s)) +
-        d.forcingAlong g k ((p, Y), s)) s := by
-  simpa only [copySolve_path] using d.anchoredSolve_hasDerivAt g hab k hA hB hf hp Y s
 
 theorem anchoredSolve_unique (k : Frequency)
     (hA : ContinuousOn d.coefficient (U ×ˢ univ))
@@ -515,12 +506,6 @@ copies are evaluated at their own absolute-lift points. -/
 noncomputable def commonSolve (κ : Plane → ℝ) (p : P × Plane) : E :=
   ∑' k : Frequency, d.localizedCopy g hab κ k p
 
-theorem localizedCopy_deck (κ : Plane → ℝ) (k n : Frequency)
-    (p : P) (hp : PeriodicAt d.source p) (Y : Plane) :
-    d.localizedCopy g hab κ (k + coverIndex g.gap n) (p, Y + TorusAverages.latticePoint n) =
-      d.localizedCopy g hab κ k (p, Y) := by
-  unfold localizedCopy
-  rw [g.coordinates_deck, d.copySolve_deck g hab k n p hp]
 
 
 
@@ -533,28 +518,10 @@ end Paths
 
 /-! ## A function on the quotient torus, not merely a periodic lift -/
 
-def LatticePeriodic {W : Type} (f : Plane → W) : Prop :=
-  ∀ Y : Plane, ∀ k : Frequency, f (Y + TorusAverages.latticePoint k) = f Y
 
-theorem latticePeriodic_first {W : Type} {f : Plane → W} (hf : LatticePeriodic f) (y : ℝ) :
-    Function.Periodic (fun x => f (x, y)) 1 := by
-  intro x
-  simpa [TorusAverages.latticePoint] using hf (x, y) (1, 0)
 
-theorem latticePeriodic_second {W : Type} {f : Plane → W} (hf : LatticePeriodic f) (x : ℝ) :
-    Function.Periodic (fun y => f (x, y)) 1 := by
-  intro y
-  simpa [TorusAverages.latticePoint] using hf (x, y) (0, 1)
 
-noncomputable def firstDescent {W : Type} (f : Plane → W) (hf : LatticePeriodic f)
-    (z : UnitAddCircle) (y : ℝ) : W := (latticePeriodic_first hf y).lift z
 
-theorem firstDescent_periodic {W : Type} (f : Plane → W) (hf : LatticePeriodic f)
-    (z : UnitAddCircle) : Function.Periodic (firstDescent f hf z) 1 := by
-  intro y
-  refine Quotient.inductionOn' z (fun x => ?_)
-  change f (x, y + 1) = f (x, y)
-  exact latticePeriodic_second hf x y
 
 
 

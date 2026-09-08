@@ -1,5 +1,6 @@
-import Euler.PacketGraphFlowFieldBounds
-import Euler.PacketGraphFlowSupBounds
+import Euler.PhysicalGraphFlowBounds
+import Euler.PacketGraphFlowFrequency
+import Euler.PhysicalGraphFlowSupBounds
 import Euler.PacketUniformFrequencyMargin
 
 /-! The quarter-power physical-flow bounds follow from the same tiny-power

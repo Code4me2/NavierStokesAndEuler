@@ -156,17 +156,6 @@ theorem one_sub_mul_tsum_pow {Q : R} (hs : Summable (fun k : ℕ => Q ^ k)) :
   funext k
   rw [← mul_neg_geom_sum, Finset.mul_sum]
 
-/-- The same convergent series is also a right inverse in a possibly
-noncommutative ring. -/
-theorem tsum_pow_mul_one_sub {Q : R} (hs : Summable (fun k : ℕ => Q ^ k)) :
-    (∑' k : ℕ, Q ^ k) * (1 - Q) = 1 := by
-  have h := hs.hasSum.mul_right (1 - Q)
-  refine tendsto_nhds_unique h.tendsto_sum_nat ?_
-  have hz : Tendsto (fun k : ℕ => 1 - Q ^ k) atTop (𝓝 (1 : R)) := by
-    simpa using tendsto_const_nhds.sub hs.tendsto_atTop_zero
-  convert! ← hz using 1
-  funext k
-  rw [← geom_sum_mul_neg, Finset.sum_mul]
 
 theorem summable_norm_neg_pow_of_factorial_bound (Q : R) {K : ℝ} (hK : 0 ≤ K)
     (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) :

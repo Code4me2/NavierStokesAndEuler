@@ -779,32 +779,6 @@ theorem transportKernel_smoothAt (h e α : ℝ) (v u f : ℕ → InnerProfile)
     ((contDiffAt_const.mul hf).div contDiffAt_fst hX))).add
       (hu.mul (AxisSourceRegularity.Z_smooth h (e + slowOrder h j) hf hL))
 
-theorem transportTerm_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h e α : ℝ) (v u f : ℕ → InnerProfile)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (v j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (u j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : TailIndex} (hi : i ∈ transportIndices N) :
-    ContDiffOn ℝ ∞ (transportTerm N h e α v u f i) O := by
-  intro w hw
-  apply ContDiffAt.contDiffWithinAt
-  cases i with
-  | none =>
-    exact (AxisSourceRegularity.Z2_smooth h (e + slowOrder h N)
-      ((hf N le_rfl).contDiffAt (hO.mem_nhds hw)) (hL w hw)).neg
-  | some ij =>
-    have hij := (mem_transportIndices_some N ij).mp hi
-    have hj : ij.2 ≤ N := by
-      have := (Finset.mem_product.mp hij.1).2
-      exact Nat.le_of_lt_succ (Finset.mem_range.mp this)
-    have hi' : ij.1 ≤ N := by
-      have := (Finset.mem_product.mp hij.1).1
-      exact Nat.le_of_lt_succ (Finset.mem_range.mp this)
-    exact transportKernel_smoothAt h e α v u f ij.1 ij.2
-      ((hv ij.1 hi').contDiffAt (hO.mem_nhds hw))
-      ((hu ij.1 hi').contDiffAt (hO.mem_nhds hw))
-      ((hf ij.2 hj).contDiffAt (hO.mem_nhds hw)) (hX w hw) (hL w hw)
 
 theorem transportCoefficient_smoothAt (h e α m : ℝ)
     (v u f source : ℕ → InnerProfile) (n : ℕ) {w : InnerPoint}
@@ -906,34 +880,6 @@ theorem pressurePower_lower {h : ℝ} (hh : 0 ≤ h) (N : ℕ)
     | some ij =>
       exact add_le_add_right (slowOrder_mono hh ((mem_transportIndices_some N ij).mp hi').2) _
 
-theorem pressureTerm_smoothOn {O : Set InnerPoint} (hO : IsOpen O)
-    (N : ℕ) (h C : ℝ) (f : SlowProfiles)
-    (hv : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j ≤ N, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    {i : PressureIndex} (hi : i ∈ pressureIndices N) :
-    ContDiffOn ℝ ∞ (pressureTerm N h C f i) O := by
-  cases i with
-  | inl i =>
-    have hi' : i ∈ transportIndices N := by simpa [pressureIndices] using hi
-    exact transportTerm_smoothOn hO N h 0 (-(1/2)) f.flux f.axial f.flux hv hu hv hX hL hi'
-  | inr i =>
-    have hi' : i ∈ transportIndices N := by simpa [pressureIndices] using hi
-    cases i with
-    | none =>
-      intro w hw
-      exact (transportCoefficient_smoothAt h 0 (-(1/2)) 0 f.flux f.axial f.flux (fun _ _ => 0) N
-        (fun j hj => (hv j hj).contDiffAt (hO.mem_nhds hw))
-        (fun j hj => (hu j hj).contDiffAt (hO.mem_nhds hw))
-        (fun j hj => (hv j hj).contDiffAt (hO.mem_nhds hw))
-        contDiffAt_const (hX w hw) (hL w hw)).contDiffWithinAt
-    | some ij =>
-      have hij := (mem_transportIndices_some N ij).mp hi'
-      have hiN : ij.1 ≤ N := Nat.le_of_lt_succ (Finset.mem_range.mp (Finset.mem_product.mp hij.1).1)
-      have hjN : ij.2 ≤ N := Nat.le_of_lt_succ (Finset.mem_range.mp (Finset.mem_product.mp hij.1).2)
-      exact (((contDiffOn_const.mul contDiffOn_fst).mul contDiffOn_const).neg).mul
-        ((hf ij.1 hiN).mul (hf ij.2 hjN))
 
 /-- Division by the physical radial energy is converted to a single q
 power and an ordinary smooth inner coefficient away from X=0. -/

@@ -235,14 +235,6 @@ section Extensions
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-omit [NormedSpace ℝ V] in
-theorem zero_germ_of_eqOn {f : SpaceTime → V} {U : Set SpaceTime}
-    (hU : IsOpen U) (hf : EqOn f (fun _ => 0) (U ∩ SpacetimeEndpoint.openPast 1))
-    {w : SpaceTime} (hw : w ∈ U) (ht : w.1 < 1) :
-    f =ᶠ[𝓝 w] fun _ => 0 := by
-  filter_upwards [(hU.inter (SpacetimeEndpoint.openPast_isOpen 1)).mem_nhds
-    (show w ∈ U ∩ SpacetimeEndpoint.openPast 1 from ⟨hw, ht, mem_univ _⟩)] with y hy
-  exact hf hy
 
 omit [NormedSpace ℝ V] in
 /-- At every preterminal point strictly outside the support radius the

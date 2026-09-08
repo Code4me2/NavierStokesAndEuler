@@ -2441,15 +2441,6 @@ theorem periodized_sum_eq_active (f : PhysicalCopyBounds.CopyFamily 1 Frequency)
       exact ActualPrimary.activeLabels_cover n hx l.1 l.2 hm
     _ = _ := Finset.sum_image (fun l _ l' _ he => primaryIndex_injective he)
 
-theorem potential_sum_eq_active (i : Fin 3) (n d : ℕ) (w : ProblemStatement.SpaceTime)
-    (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    (potentialFamily B N0 i).sum innerRadius ActualPrimary.h ActualPrimary.slots.radius w =
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        (potentialFamily B N0 i).periodized innerRadius ActualPrimary.h ActualPrimary.slots.radius
-          (primaryIndex l) w :=
-  periodized_sum_eq_active _ (potential_periodized_index i)
-    (potential_support B N0 i).periodized_support n d w hw hx
 
 
 theorem vectorSum_apply {H : ℕ} {K : Type*} (f : Fin 3 → PhysicalCopyBounds.CopyFamily H K)

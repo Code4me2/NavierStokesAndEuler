@@ -1,4 +1,4 @@
-import Euler.MeanVelocityOperator
+import Euler.MeanVelocityPressure
 import Euler.TransverseStrongEstimates
 import Euler.TimeH1PointwiseBounds
 

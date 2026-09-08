@@ -29,30 +29,7 @@ theorem unit_inner_self {x : E} (hx : x ≠ 0) : ⟪unit x, unit x⟫_ℝ = 1 :=
 theorem unit_inner_zero {x y : E} (hxy : ⟪x,y⟫_ℝ = 0) : ⟪unit x, unit y⟫_ℝ = 0 := by
   simp only [unit, real_inner_smul_left, real_inner_smul_right, hxy, mul_zero]
 
-theorem norm_hasDerivAt {f : ℝ → E} {f' : E} {t : ℝ}
-    (hf : HasDerivAt f f' t) (hft : f t ≠ 0) :
-    HasDerivAt (fun s => ‖f s‖) (⟪f t,f'⟫_ℝ / ‖f t‖) t := by
-  have hn := norm_ne_zero_iff.mpr hft
-  have hh := hf.norm_sq.sqrt (pow_ne_zero 2 hn)
-  have he : (fun s => Real.sqrt (‖f s‖^2)) = (fun s => ‖f s‖) := by
-    funext s
-    exact Real.sqrt_sq (norm_nonneg _)
-  rw [he, Real.sqrt_sq (norm_nonneg _)] at hh
-  convert hh using 1
-  field_simp
 
-theorem unit_hasDerivAt {f : ℝ → E} {f' : E} {t : ℝ}
-    (hf : HasDerivAt f f' t) (hft : f t ≠ 0) :
-    HasDerivAt (fun s => unit (f s))
-      (‖f t‖⁻¹ • f' - (⟪f t,f'⟫_ℝ / ‖f t‖^3) • f t) t := by
-  have hn := norm_ne_zero_iff.mpr hft
-  have h := ((norm_hasDerivAt hf hft).inv hn).smul hf
-  have he : -(⟪f t,f'⟫_ℝ / ‖f t‖) / ‖f t‖^2 = -(⟪f t,f'⟫_ℝ / ‖f t‖^3) := by
-    field_simp
-  change HasDerivAt (fun s => unit (f s))
-    (‖f t‖⁻¹ • f' + (-(⟪f t,f'⟫_ℝ / ‖f t‖) / ‖f t‖^2) • f t) t at h
-  rw [he] at h
-  simpa only [neg_smul, sub_eq_add_neg, add_comm] using h
 
 theorem norm_hasDerivWithinAt {f : ℝ → E} {f' : E} {t : ℝ} {S : Set ℝ}
     (hf : HasDerivWithinAt f f' S t) (hft : f t ≠ 0) :

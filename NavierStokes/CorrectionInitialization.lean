@@ -1290,24 +1290,6 @@ noncomputable def strip (s : StripData (D × ℝ)) : StripData D where
   zeta_smooth := s.zeta_smooth.comp (insert (D := D)).contDiff.contDiffOn (fun _ hx => hx)
   zeta_nonneg := fun x hx => s.zeta_nonneg (x, 0) hx
 
-/-- Restriction is a genuine linear pullback of every jet, with norm one. -/
-theorem class_restrict {s : StripData (D × ℝ)} {w : ℕ → D × ℝ → ℝ} {α : ℝ}
-    {f : ℕ → D × ℝ → E} (hf : MemClass s w α f) :
-    MemClass (strip s) (fun n x => w n (x, 0)) α (fun n x => f n (x, 0)) := by
-  refine ⟨fun n x hx => hf.weight_nonneg n (x, 0) hx,
-    fun n => (hf.smooth n).comp (insert (D := D)).contDiff.contDiffOn (fun _ hx => hx), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bounds m
-  refine ⟨C, hC, p, ?_⟩
-  intro n x hx j hj
-  have hl := PhysicalGraphBounds.norm_jet_comp_linear s.isOpen_domain (hf.smooth n)
-    (insert (D := D)) hx j
-  calc
-    ‖iteratedFDeriv ℝ j (fun x => f n (x, 0)) x‖ ≤
-        ‖iteratedFDeriv ℝ j (f n) (x, 0)‖ * ‖insert (D := D)‖ ^ j := hl
-    _ ≤ ‖iteratedFDeriv ℝ j (f n) (x, 0)‖ :=
-      mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) norm_insert_le)
-    _ ≤ _ := hb n (x, 0) hx j hj
 
 
 end AngularRestriction

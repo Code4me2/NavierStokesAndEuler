@@ -115,34 +115,8 @@ open WeightedClasses
 variable {P V : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-noncomputable def copyCell (g : Geometry) (r L : ℝ) (k : Frequency) : Set (P × Plane) :=
-  {z | g.coordinates k z.2 ∈ rectangle r L}
 
-omit [NormedSpace ℝ P] in
-theorem copyCell_closed (g : Geometry) (r L : ℝ) (k : Frequency) :
-    IsClosed (copyCell (P := P) g r L k) :=
-  (isClosed_Icc.prod isClosed_Icc).preimage
-    ((g.coordinates_contDiff k).continuous.comp continuous_snd)
 
-omit [NormedSpace ℝ P] in
-theorem copyCell_locallyFinite (g : Geometry) (r L : ℝ) :
-    LocallyFinite (copyCell (P := P) g r L) := by
-  classical
-  let κ : Plane → ℝ := (rectangle r L).indicator (fun _ => 1)
-  have hκ : HasCompactSupport κ :=
-    HasCompactSupport.intro' (K := rectangle r L) (isCompact_Icc.prod isCompact_Icc)
-      (isClosed_Icc.prod isClosed_Icc) (fun z hz => by simp [κ, hz])
-  intro z
-  obtain ⟨s, hs⟩ := g.finite_copy_cutoffs hκ (‖z.2‖ + 1)
-  refine ⟨{y : P × Plane | ‖y.2‖ < ‖z.2‖ + 1},
-    (isOpen_lt continuous_snd.norm continuous_const).mem_nhds (by simp), ?_⟩
-  apply s.finite_toSet.subset
-  intro k hk
-  obtain ⟨y, hy, hnorm⟩ := hk
-  by_contra hnot
-  have hh := hs y.2 hnorm.le k hnot
-  change g.coordinates k y.2 ∈ rectangle r L at hy
-  simp [κ, hy] at hh
 
 /-- Coefficients may differ in every native copy. This is an actual sum
 of common-cover fields, with no substitution of a native-periodic source. -/

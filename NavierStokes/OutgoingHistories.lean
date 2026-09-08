@@ -241,11 +241,6 @@ theorem dEta_energyWeight (w : ResetWitness d K) {Amp : ℝ → ℝ}
   rw [dEta_mul X_smooth (energyDensity_smooth w ha),
     dEta_X, zero_mul, zero_add, dEta_energyDensity w ha]
 
-theorem dEta_pressureWeight (w : ResetWitness d K) (p : Point) :
-    dEta (pressureWeight w) p = E w p * dEta (E w) p := by
-  have he := (dEta_hasDerivAt (pressureWeight_smooth w) p).unique
-    (((dEta_hasDerivAt (E_smooth w) p).pow 2).div_const 2)
-  simpa only [Nat.cast_ofNat, pow_one, Nat.reduceSub] using he.trans (by ring)
 
 theorem dEta_M_hasDerivAt (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp) (p : Point) :
     HasDerivAt (fun y => dEta (M d Amp) (y, p.2)) (X p * dEta (U d Amp) p) p.1 := by
@@ -275,11 +270,6 @@ theorem dEta_S_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
   simp only [dEta_energyWeight w ha] at hd
   exact hd
 
-theorem dEta_Pi_hasDerivAt (w : ResetWitness d K) (p : Point) :
-    HasDerivAt (fun y => dEta (Pi w) (y, p.2)) (E w p * dEta (E w) p) p.1 := by
-  have hd := dEta_prefix_hasDerivAt (initialPi_smooth d) (pressureWeight_smooth w) p
-  simp only [dEta_pressureWeight w] at hd
-  exact hd
 
 /-! ## Transport and the two genuine lags -/
 
@@ -374,8 +364,6 @@ theorem Ns_smooth (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ 
     ContDiff ℝ ∞ (Ns w Amp) :=
   (axialStock_smooth w ha).div X_smooth (fun p => (X_pos p).ne')
 
-theorem dY_Pi (w : ResetWitness d K) (p : Point) : dY (Pi w) p = E w p ^ 2 / 2 :=
-  (dY_hasDerivAt (Pi_smooth w) p).unique (Pi_hasDerivAt w p)
 
 theorem angularStock_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
     (ha : ContDiff ℝ ∞ Amp) (p : Point) :
@@ -391,22 +379,6 @@ theorem angularStock_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
   unfold angularSource
   ring
 
-theorem axialStock_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (p : Point) :
-    HasDerivAt (fun y => axialStock w Amp (y, p.2)) (X p * Sn w Amp p) p.1 := by
-  have hd := (((((XW_hasDerivAt d ha p).fun_mul (dY_hasDerivAt (U_smooth d ha) p)).fun_neg.fun_add
-    (((M_hasDerivAt d ha p).fun_sub ((dEta_M_hasDerivAt d ha p).const_mul p.2)).const_mul
-      (axialExponent d.h))).fun_add ((S_hasDerivAt w ha p).const_mul (4 * d.h * p.2))).fun_sub
-        ((dEta_S_hasDerivAt w ha p).const_mul (coordinateFactor p.2))).fun_add
-          ((X_hasDerivAt p).fun_mul (((Pi_hasDerivAt w p).const_mul (4 * velocityExponent d.h * p.2)).fun_sub
-            ((dEta_Pi_hasDerivAt w p).const_mul (coordinateFactor p.2))))
-  change HasDerivAt (fun y => axialStock w Amp (y, p.2)) _ p.1 at hd
-  apply hd.congr_deriv
-  rw [XW_eq_mul_W]
-  unfold Sn
-  rw [dY_Pi]
-  unfold energyDensity axialExponent velocityExponent
-  ring
 
 /-- Equation (9), with every moment and derivative constructed above. -/
 theorem Qs_integrated (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) :
@@ -852,38 +824,9 @@ theorem exponential_integral_left {f : ℝ → ℝ} (a b : ℝ) (hb : 0 < b)
       setIntegral_congr_fun measurableSet_Iic (fun t ht => he t (ht.trans hy))
     _ = _ := by rw [integral_const_mul, integral_exp_mul_Iic hb]; ring
 
-/-- A left closed interval determines the derivative even at its endpoint. -/
-theorem derivative_from_left {f g : ℝ → ℝ} {v y : ℝ} (hy : y ≤ 0)
-    (hf : DifferentiableAt ℝ f y) (hg : HasDerivAt g v y)
-    (he : ∀ t ≤ 0, f t = g t) : HasDerivAt f v y := by
-  have hd : deriv f y = v := (uniqueDiffOn_Iic 0 y hy).eq_deriv _
-    hf.hasDerivAt.hasDerivWithinAt (hg.hasDerivWithinAt.congr_of_mem he hy)
-  simpa only [hd] using hf.hasDerivAt
 
-theorem M_ideal (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : M d Amp (y, eta) = 4 * eta * Real.exp y := by
-  rw [M_eq_integral d ha]
-  have he := exponential_integral_left (f := fun t => Real.exp t * U d Amp (t, eta))
-    (4 * eta) 1 (by norm_num) (by
-      intro t ht
-      rw [U_ideal d Amp eta ht]
-      simp [mul_comm]) hy
-  simpa using he
 
-theorem dEta_M_ideal (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : dEta (M d Amp) (y, eta) = 4 * Real.exp y := by
-  have he : (fun eta => M d Amp (y, eta)) = (fun eta => 4 * eta * Real.exp y) :=
-    funext (fun eta => M_ideal d ha eta hy)
-  have hd := (((hasDerivAt_id eta).const_mul (4 : ℝ)).mul_const (Real.exp y))
-  rw [dEta_eq_deriv (M_smooth d ha), he]
-  simpa only [id_eq, mul_one] using hd.deriv
 
-theorem W_ideal (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : W d Amp (y, eta) = 1 - 4 * (1 - 2 * d.h * eta ^ 2) := by
-  unfold W XW
-  rw [M_ideal d ha eta hy, dEta_M_ideal d ha eta hy]
-  unfold X axialExponent coordinateFactor
-  field_simp [(Real.exp_pos y).ne'] ; ring
 
 theorem Pi_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
     Pi w (y, eta) = SchedulePressure.axisPressure d eta +
@@ -898,88 +841,22 @@ theorem Pi_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
 
 noncomputable def shapeRate (eta : ℝ) : ℝ := 2 * eta / (1 + eta ^ 2)
 
-theorem dEta_E_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    dEta (E w) (y, eta) = -(E w (y, eta) * shapeRate eta) := by
-  have he : (fun eta => E w (y, eta)) =
-      (fun eta => d.core.P * shape eta * Real.exp (y / 10)) := funext (fun eta => E_ideal w eta hy)
-  have hd := ((UniformAngularReset.shape_hasDerivAt eta).const_mul d.core.P).mul_const (Real.exp (y / 10))
-  rw [dEta_eq_deriv (E_smooth w), he, hd.deriv, E_ideal w eta hy]
-  unfold shapeRate
-  ring
 
-theorem dY_H_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    dY (H w) (y, eta) = (3 / 5) * H w (y, eta) := by
-  have he : ∀ t ≤ 0, H w (t, eta) = (d.core.P * shape eta) * Real.exp ((3 / 5 : ℝ) * t) := by
-    intro t ht
-    unfold H
-    rw [E_ideal w eta ht]
-    calc
-      _ = (d.core.P * shape eta) * (Real.exp (t / 2) * Real.exp (t / 10)) := by ring
-      _ = _ := by rw [← Real.exp_add]; congr 2; ring
-  have hg := (((hasDerivAt_id y).const_mul (3 / 5 : ℝ)).exp).const_mul (d.core.P * shape eta)
-  have hd := derivative_from_left hy (dY_hasDerivAt (H_smooth w) (y, eta)).differentiableAt hg he
-  rw [(dY_hasDerivAt (H_smooth w) (y, eta)).unique hd, he y hy]
-  simp only [id_eq]
-  ring
 
-theorem dY_U_ideal (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : dY (U d Amp) (y, eta) = 0 := by
-  have hd := derivative_from_left hy (dY_hasDerivAt (U_smooth d ha) (y, eta)).differentiableAt
-    (hasDerivAt_const y (4 * eta)) (fun t ht => U_ideal d Amp eta ht)
-  exact (dY_hasDerivAt (U_smooth d ha) (y, eta)).unique hd
 
-theorem dEta_U_ideal (d : TailData) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    (eta : ℝ) {y : ℝ} (hy : y ≤ 0) : dEta (U d Amp) (y, eta) = 4 := by
-  have he : (fun eta => U d Amp (y, eta)) = (fun eta => 4 * eta) := funext (fun eta => U_ideal d Amp eta hy)
-  rw [dEta_eq_deriv (U_smooth d ha), he]
-  simp
 
-theorem dEta_Pi_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    dEta (Pi w) (y, eta) = deriv (SchedulePressure.axisPressure d) eta -
-      5 * d.core.P ^ 2 * shape eta ^ 2 * shapeRate eta * Real.exp (y / 5) := by
-  have he : (fun eta => Pi w (y, eta)) = (fun eta => SchedulePressure.axisPressure d eta +
-      (5 / 2) * d.core.P ^ 2 * shape eta ^ 2 * Real.exp (y / 5)) := funext (fun eta => Pi_ideal w eta hy)
-  have hd := ((SchedulePressure.axisPressure_contDiff d).differentiable (by simp) eta).hasDerivAt.fun_add
-    ((((UniformAngularReset.shape_hasDerivAt eta).fun_pow 2).const_mul ((5 / 2) * d.core.P ^ 2)).mul_const
-      (Real.exp (y / 5)))
-  rw [dEta_eq_deriv (Pi_smooth w), he, hd.deriv]
-  unfold shapeRate
-  simp only [Nat.cast_ofNat, pow_one, Nat.reduceSub]
-  ring
 
 /-! ## The ideal past also fixes the source primitives -/
 
-noncomputable def incomingSq (d : TailData) (eta : ℝ) : ℝ :=
-  (3 / 5) * (4 * (1 - 2 * d.h * eta ^ 2) - 1) - d.h * (1 - 8 * eta ^ 2) +
-    (axialExponent d.h + 4 * coordinateFactor eta) * eta * shapeRate eta
 
 
 
 
 
 
-noncomputable def incomingSnConstant (d : TailData) (eta : ℝ) : ℝ :=
-  -4 * velocityExponent d.h * eta * (1 - 8 * eta ^ 2) -
-    4 * (axialExponent d.h + 4 * coordinateFactor eta) * eta -
-      coordinateFactor eta * deriv (SchedulePressure.axisPressure d) eta +
-        4 * velocityExponent d.h * eta * SchedulePressure.axisPressure d eta
-
-noncomputable def incomingSnGrowing (d : TailData) (eta : ℝ) : ℝ :=
-  d.core.P ^ 2 * shape eta ^ 2 *
-    (5 * coordinateFactor eta * shapeRate eta + (10 * velocityExponent d.h + 1) * eta)
 
 
-theorem dEta_S_zero (w : ResetWitness d K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp) (eta : ℝ) :
-    dEta (S w Amp) (0, eta) = 32 * eta +
-      (5 / 6) * d.core.P ^ 2 * shape eta ^ 2 * shapeRate eta := by
-  rw [S, dEta_history_zero (initialS_smooth d) (energyWeight_smooth w ha)]
-  have hd := (((hasDerivAt_id eta).pow 2).const_mul (16 : ℝ)).sub
-    (((UniformAngularReset.shape_hasDerivAt eta).pow 2).const_mul ((5 / 12) * d.core.P ^ 2))
-  change HasDerivAt (initialS d) _ eta at hd
-  rw [hd.deriv]
-  unfold shapeRate
-  simp only [Nat.cast_ofNat, pow_one, Nat.reduceSub, id_eq]
-  ring
+
 
 
 

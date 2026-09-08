@@ -555,34 +555,8 @@ theorem desiredIncrement_zeroMean (h : ℝ) (n : ℕ) {f : PressureStream.Lift S
   change -chartPrefactor h n * PressureStream.torusAverage (temporalInverse (centered f)) p = 0
   rw [temporalInverse_zeroMean (centered_smooth hf) (centered_periodic hp), mul_zero]
 
-/-- In particular this gives both the angular `r²` bar mass and axial `r`
-bar mass without an extra normalization term. -/
-theorem desiredIncrement_barMass (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f) (w : ℝ → ℝ) (s : S) :
-    (∫ r, w r * PressureStream.torusAverage (desiredIncrement h n f) (r, s)) = 0 := by
-  simp_rw [desiredIncrement_zeroMean h n hf hp, mul_zero, integral_zero]
 
-/-- Exact cancellation of the source's zero-bar part. -/
-theorem desiredIncrement_fastDerivative (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f) (z : PressureStream.Lift S) :
-    fastDerivative h n (desiredIncrement h n f) z = -centered f z := by
-  have hi := temporalInverse_smooth (centered_smooth hf) (centered_periodic hp)
-  have hD := (((hi.differentiable (by simp)) z).hasFDerivAt).const_smul (-chartPrefactor h n)
-  change HasFDerivAt (desiredIncrement h n f) _ z at hD
-  rw [fastDerivative, PressureStream.graphDz, hD.fderiv]
-  change ChartScales.timeCoefficient h n * (-chartPrefactor h n *
-    PressureStream.graphDz ((0 : S), vector .temporal) (temporalInverse (centered f)) z) = _
-  rw [temporalInverse_solves (centered_smooth hf) (centered_periodic hp) (centered_zeroMean hf)]
-  simp only [chartPrefactor, neg_mul, mul_neg, ← mul_assoc,
-    mul_inv_cancel₀ (ChartScales.timeCoefficient_pos h n).ne', one_mul]
 
-omit [FiniteDimensional ℝ S] in
-theorem fastDerivative_sub (h : ℝ) (n : ℕ) {f g : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g) (z : PressureStream.Lift S) :
-    fastDerivative h n (fun p => f p - g p) z = fastDerivative h n f z - fastDerivative h n g z := by
-  simp only [fastDerivative, PressureStream.graphDz,
-    fderiv_fun_sub ((hf.differentiable (by simp)) z) ((hg.differentiable (by simp)) z),
-    _root_.sub_apply, mul_sub]
 
 end ExactUpdate
 
@@ -644,31 +618,10 @@ noncomputable def axialAlias (d a b M : ℝ) (v : Plane) (h : ℝ) (n : ℕ)
 
 
 
-theorem axialUpdate_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) : ContDiff ℝ ∞ (axialUpdate d a b M v h n f) :=
-  PressureStream.streamGamma_contDiff ha hab hd (0, v)
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
 
 
-theorem radialUpdate_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (w : S × Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) : ContDiff ℝ ∞ (radialUpdate d a b M v w h n f) :=
-  PressureStream.streamBeta_contDiff ha hab hd (0, v) w
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
 
 
-theorem axialAlias_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) : ContDiff ℝ ∞ (axialAlias d a b M v h n f) :=
-  PressureStream.divideRadius_contDiff ha
-    (RadialPullback.physicalAlias_contDiff ha hab hd
-      (PressureStream.weightedSource_contDiff (desiredIncrement_smooth h n hf hp))
-      (PressureStream.weightedSource_supported (desiredIncrement_supported h n hs)) M (0, v))
-    (RadialPullback.physicalAlias_supported ha hab hd M (0, v) _)
 
 
 /-- No compactification error is removed from the reconstructed axial field. -/
@@ -681,37 +634,8 @@ theorem axialUpdate_eq_desired_sub_alias {d a b M : ℝ}
   exact PressureStream.streamGamma_eq_desired_sub_alias_global ha hab hd (0, v)
     (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs) z
 
-theorem update_divergence_zero {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (w : S × Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) (z : PressureStream.Lift S) :
-    PressureStream.graphDivergence (PressureStream.physicalSpeed d M) (0, v) w
-      (radialUpdate d a b M v w h n f) (axialUpdate d a b M v h n f) z = 0 :=
-  PressureStream.reconstructed_divergence_zero ha hab hd (0, v) w
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs) z
 
-theorem axialUpdate_zeroMean {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) (p : ℝ × S) :
-    PressureStream.torusAverage (axialUpdate d a b M v h n f) p = 0 := by
-  have he := PressureStream.streamGamma_bar_eq_desired (M := M) ha hab hd v
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
-    (desiredIncrement_periodic h n f) (desiredIncrement_barMass h n hf hp id) p
-  exact he.trans (desiredIncrement_zeroMean h n hf hp p)
 
-/-- Fast time cancels the axial zero-bar source, retaining exactly the
-fast-time derivative of the compactification alias. -/
-theorem axialUpdate_fast_residual {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) (z : PressureStream.Lift S) :
-    fastDerivative h n (axialUpdate d a b M v h n f) z + centered f z =
-      -fastDerivative h n (axialAlias d a b M v h n f) z := by
-  rw [axialUpdate_eq_desired_sub_alias ha hab hd v h n hf hp hs,
-    fastDerivative_sub h n (desiredIncrement_smooth h n hf hp)
-      (axialAlias_smooth ha hab hd v h n hf hp hs), desiredIncrement_fastDerivative h n hf hp]
-  ring
 
 
 end AxialReconstruction

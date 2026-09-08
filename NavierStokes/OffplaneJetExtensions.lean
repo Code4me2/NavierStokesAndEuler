@@ -219,20 +219,6 @@ theorem extension_of_powerLog_jets {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   have hq1 : PhysicalWaveSum.physicalQ h w ≤ 1 := hs.1.2.le.trans hqbig
   exact (hm w hs.1 hs.2.2 hq1).trans (hK _ ⟨hs.2.1.le, hq1⟩)
 
-theorem extension_of_power_jets {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hqbig : qbig ≤ 1) {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (CutStageEstimates.physicalSublevel h qbig))
-    (hb : ∀ m : ℕ, ∃ C e : ℝ, ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m f w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^ e)
-    {x : Space} (hx : x 2 ≠ 0)
-    (hqx : EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig) :
-    Nonempty (JointResidualLimits.OneSidedExtension f x) := by
-  apply extension_of_powerLog_jets hh hh1 hqbig hf _ hx hqx
-  intro m
-  obtain ⟨C, e, hm⟩ := hb m
-  refine ⟨C, 0, e, fun w hw _ hq1 => ?_⟩
-  simpa only [Real.rpow_zero, mul_one] using hm w hw hq1
 
 
 

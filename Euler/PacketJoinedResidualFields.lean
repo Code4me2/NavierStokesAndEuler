@@ -1,4 +1,5 @@
-import Euler.PacketResidualTailActual
+import Euler.PacketResidualTailFields
+import Euler.PacketSourceRegularity
 import Euler.PacketJoinedSourceResidual
 
 /-! Actual tail-grade and full residual fields for the joined source construction. -/

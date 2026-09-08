@@ -1,6 +1,7 @@
 import Euler.PacketMatrixNormalization
 import Euler.PacketInitializedResidualEquation
-import Euler.PacketInitializedRadius
+import Euler.PacketPrimaryCommonRadius
+import Euler.PacketCommonRadius
 import Euler.PacketSourceFrequency
 
 /-! The actual derivative of the initialized normalized approximation

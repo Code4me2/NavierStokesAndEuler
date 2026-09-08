@@ -687,10 +687,6 @@ theorem native_mem_of_data (L : PrimaryGeometryAssembly.Index W a.N) {x : Native
   apply (BaseContextAssembly.nativeStrip_mem W _ _).mpr
   exact ⟨⟨hx.1, hq⟩, hx.2⟩
 
-theorem native_mem_band (L : PrimaryGeometryAssembly.Index W a.N) {x : Native}
-    (hx : x ∈ (ActualSignedGeometry.nativeDomain H v a).carrier L) :
-    nativeQ F.data.h x ∈ Ioo (1 / 2 : ℝ) 2 :=
-  ((BaseContextAssembly.nativeStrip_mem W _ _).mp hx.1.2).1.2
 
 theorem band_pair_zero_jets_off_native (M : ClosedMargins H v a vr vt)
     (j : Fin 2) (L : PrimaryGeometryAssembly.Index W a.N) {x : Native}

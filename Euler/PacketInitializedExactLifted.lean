@@ -1,6 +1,7 @@
 import Euler.PacketInitializedResidualEquation
 import Euler.PacketInitializedAllOrderBudget
-import Euler.PacketInitializedRadius
+import Euler.PacketPrimaryCommonRadius
+import Euler.PacketCommonRadius
 import Euler.PacketJoinedCoefficientBudgets
 import Euler.PacketInitializedCorrectionParity
 

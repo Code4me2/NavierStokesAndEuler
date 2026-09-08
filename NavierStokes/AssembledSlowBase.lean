@@ -1199,9 +1199,6 @@ noncomputable def nominalCoefficients : SlowBorelBase.Coefficients :=
   coefficients (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
     (nominalParameters_contains W)
 
-theorem nominalCoefficients_smooth : SlowBorelBase.SmoothCoefficients (nominalCoefficients W) :=
-  coefficients_smooth (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
-    (nominalParameters_contains W)
 
 theorem nominalCoefficients_zero_fields {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta : |p.2| ≤ 1) :
     (nominalCoefficients W).phi 0 p = W.axis.normalization * W.f p ∧
@@ -1237,23 +1234,7 @@ theorem nominalCoefficients_stress_eq {p : ℝ × ℝ}
 
 
 
-theorem nominalCoefficients_positive_exterior {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
-    (hp : nominalOuterX W ≤ p.1) :
-    (nominalCoefficients W).phi n p = 0 ∧ (nominalCoefficients W).axial n p = 0 ∧
-    (nominalCoefficients W).pressure n p = 0 := by
-  have hp' : (nominalScheme W).B ^ 2 / 2 ≤ p.1 := by
-    change nominalOuterRadius W ^ 2 / 2 ≤ p.1
-    rwa [nominalOuterRadius_square]
-  exact ⟨extendedCoefficient_zero_exterior (nominalScheme W) (nominalParameters_contains W) hn 0 hp',
-    extendedCoefficient_zero_exterior (nominalScheme W) (nominalParameters_contains W) hn 1 hp',
-    extendedCoefficient_zero_exterior (nominalScheme W) (nominalParameters_contains W) hn 3 hp'⟩
 
-theorem nominal_axial_primitive_zero {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
-    (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.primitive ((nominalCoefficients W).axial n) p = 0 := by
-  apply extended_axial_primitive_zero (nominalScheme W) (nominalParameters_contains W) hn _ heta
-  change nominalOuterRadius W ^ 2 / 2 ≤ p.1
-  rwa [nominalOuterRadius_square]
 
 
 theorem nominal_exterior_base {p : ℝ × ℝ} (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
@@ -1268,27 +1249,7 @@ theorem nominal_exterior_base {p : ℝ × ℝ} (hX : nominalOuterX W ≤ p.1) (h
   rw [intervalIntegral.integral_of_le hXp]
   exact hh.2
 
-theorem nominalCoefficients_axial_zero_all (n : ℕ) {p : ℝ × ℝ}
-    (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) : (nominalCoefficients W).axial n p = 0 := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · exact (nominalCoefficients_zero_fields W ((nominalOuterX_pos W).le.trans hX) heta).2.1.trans
-      (nominal_exterior_base W hX heta).1
-  · exact (nominalCoefficients_positive_exterior W hn hX).2.1
 
-theorem nominal_axial_primitive_zero_all (n : ℕ) {p : ℝ × ℝ}
-    (hX : nominalOuterX W ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.primitive ((nominalCoefficients W).axial n) p = 0 := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · have hXp : 0 ≤ p.1 := (nominalOuterX_pos W).le.trans hX
-    have he : EqOn (fun r => (nominalCoefficients W).axial 0 (r, p.2))
-        (fun r => W.U (r, p.2)) (uIcc 0 p.1) := by
-      intro r hr
-      rw [uIcc_of_le hXp] at hr
-      exact (nominalCoefficients_zero_fields W (p := (r, p.2)) hr.1 heta).2.1
-    change (∫ r in (0 : ℝ)..p.1, (nominalCoefficients W).axial 0 (r, p.2)) = 0
-    rw [intervalIntegral.integral_congr he]
-    exact (nominal_exterior_base W hX heta).2
-  · exact nominal_axial_primitive_zero W hn hX heta
 
 
 end CoherentHierarchy

@@ -154,26 +154,9 @@ end Paths
 
 /-! ## Changing the integer representative of the native slot center -/
 
-noncomputable def recenterGeometry (g : Geometry) (l : Frequency) : Geometry :=
-  { g with center := g.center + TorusAverages.latticePoint l }
 
-theorem coordinates_recenter (g : Geometry) (l j : Frequency) (Y : Plane) :
-    (recenterGeometry g l).coordinates j Y = g.coordinates (j + l) Y := by
-  unfold Geometry.coordinates recenterGeometry
-  rw [TorusAverages.latticePoint_add]
-  congr 1
-  ext <;> simp only [Prod.fst_add, Prod.snd_add, Prod.fst_sub, Prod.snd_sub] <;> ring
 
-theorem point_recenter (g : Geometry) (l j : Frequency) (z : Plane) :
-    (recenterGeometry g l).point j z = g.point (j + l) z := by
-  unfold Geometry.point recenterGeometry
-  rw [TorusAverages.latticePoint_add]
-  congr 1
-  ext <;> simp only [Prod.fst_add, Prod.snd_add] <;> ring
 
-theorem path_recenter (g : Geometry) (l j : Frequency) (Y : Plane) (s : ℝ) :
-    (recenterGeometry g l).path j Y s = g.path (j + l) Y s := by
-  simp only [Geometry.path, coordinates_recenter, point_recenter]
 
 section Recenter
 

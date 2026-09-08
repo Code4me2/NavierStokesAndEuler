@@ -70,30 +70,6 @@ structure Window (coord a b : ℝ) where
   left : ∀ s ∈ carrier, lower ≤ stableLength coord s * a
   right : ∀ s ∈ carrier, stableLength coord s * b ≤ upper
 
-theorem exists_window_at {coord a b : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
-    (ha : 0 < a) (hab : a < b) {s₀ : Slow}
-    (hs : s₀ ∈ PositiveRepresentatives.stableTarget coord) :
-    ∃ W : Window coord a b, s₀ ∈ W.carrier := by
-  let L := stableLength coord s₀
-  have hL : 0 < L := stableLength_pos hs
-  have hl := (stableLength_contDiffAt hc hc1 hs).continuousAt
-  have hnear : ∀ᶠ s in 𝓝 s₀,
-      s ∈ PositiveRepresentatives.stableTarget coord ∧
-      L / 2 < stableLength coord s ∧ stableLength coord s < 2 * L := by
-    filter_upwards [(PositiveRepresentatives.stableTarget_open coord).mem_nhds hs,
-      hl (lt_mem_nhds (half_lt_self hL)), hl (gt_mem_nhds (show L < 2 * L by linarith))]
-      with s hst hlo hhi
-    exact ⟨hst, hlo, hhi⟩
-  obtain ⟨U, hUsub, hU, hzU⟩ := mem_nhds_iff.mp hnear
-  refine ⟨⟨U, hU, fun s hs => (hUsub hs).1, L / 2 * a, 2 * L * b,
-    mul_pos (half_pos hL) ha, ?_, ?_, ?_⟩, hzU⟩
-  · have hprod := mul_lt_mul_of_pos_left hab hL
-    have hprodpos := mul_pos hL ha
-    nlinarith
-  · intro s hsU
-    exact mul_le_mul_of_nonneg_right (hUsub hsU).2.1.le ha.le
-  · intro s hsU
-    exact mul_le_mul_of_nonneg_right (hUsub hsU).2.2.le (ha.trans hab).le
 
 
 namespace Window
@@ -136,62 +112,23 @@ theorem FiberAgreement.eventuallyEq {V : Type*} {U : Set Slow} (hU : IsOpen U) {
     (show p ∈ PhysicalMeanDomain.slowDomain (U ∩ positiveSlow) from ⟨hp, ht⟩)] with z hz
   exact h hz
 
-/-- A primitive model retains the fast torus coordinate and the physical
-radial variable; only the time coordinate is replaced by `q`. -/
-noncomputable def stableModel (coord : ℝ) (p : Lift) : Model :=
-  ((stableQ coord p.2.1, (p.1, p.2.1.2)), p.2.2)
 
 noncomputable def physicalModel (coord : ℝ) (p : Lift) : Model :=
   ((SimilarityCoordinates.coordinateQ coord p.2.1, (p.1, p.2.1.2)), p.2.2)
 
-noncomputable def modelDomain : Set Model := {y | 0 < y.1.1}
 
 
-theorem stableModel_contDiffOn {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1) :
-    ContDiffOn ℝ ∞ (stableModel coord)
-      (PhysicalMeanDomain.slowDomain (PositiveRepresentatives.stableTarget coord)) := by
-  intro p hp
-  have hq := (stableQ_contDiffAt hc hc1 hp).comp p contDiffAt_snd.fst
-  exact ((hq.prodMk (contDiffAt_fst.prodMk contDiffAt_snd.fst.snd)).prodMk
-    contDiffAt_snd.snd).contDiffWithinAt
 
-theorem stableModel_mem {coord : ℝ} {p : Lift}
-    (hp : p.2.1 ∈ PositiveRepresentatives.stableTarget coord) :
-    stableModel coord p ∈ modelDomain := stableQ_pos hp
 
-noncomputable def continuedSource (coord : ℝ) (F : Model → ℝ) : Lift → ℝ :=
-  F ∘ stableModel coord
 
 noncomputable def physicalSource (coord : ℝ) (F : Model → ℝ) : Lift → ℝ :=
   F ∘ physicalModel coord
 
-theorem continuedSource_smooth {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
-    {F : Model → ℝ} (hF : ContDiffOn ℝ ∞ F modelDomain) :
-    ContDiffOn ℝ ∞ (continuedSource coord F)
-      (PhysicalMeanDomain.slowDomain (PositiveRepresentatives.stableTarget coord)) :=
-  hF.comp (stableModel_contDiffOn hc hc1) (fun _ hp => stableModel_mem hp)
-
-theorem continuedSource_agreement {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
-    (F : Model → ℝ) (U : Set Slow) :
-    FiberAgreement U (continuedSource coord F) (physicalSource coord F) := by
-  intro p hp
-  simp only [continuedSource, physicalSource, comp_apply, stableModel, physicalModel,
-    stableQ_eq_coordinateQ hc hc1 hp.2]
-
-/-- A support condition on the explicit primitive model, before any mean
-operation is performed. -/
-def ModelSupported {V : Type*} [Zero V] (a b : ℝ) (F : Model → V) : Prop :=
-  ∀ y ∈ modelDomain, F y ≠ 0 →
-    y.1.2.1 ∈ Icc (Real.sqrt y.1.1 * a) (Real.sqrt y.1.1 * b)
 
 
 
-theorem continuedSource_supported {coord a b : ℝ} {F : Model → ℝ}
-    (hF : ModelSupported a b F) {U : Set Slow}
-    (hU : U ⊆ PositiveRepresentatives.stableTarget coord) :
-    VariableGaugeMean.SupportedGauge a b (stableLength coord) U (continuedSource coord F) := by
-  intro p hp hn
-  exact hF (stableModel coord p) (stableModel_mem (hU hp)) hn
+
+
 
 namespace Window
 
@@ -473,57 +410,13 @@ noncomputable def physicalDomain (U : Set Slow) : Set SpaceTime := physicalSlow 
 theorem physicalDomain_open {U : Set Slow} (hU : IsOpen U) : IsOpen (physicalDomain U) :=
   hU.preimage physicalSlow_contDiff.continuous
 
-theorem radius_pos_of_projection {w : SpaceTime}
-    (hw : PhysicalGraphBounds.radialProjection w ≠ 0) : 0 < AnnularEndpoint.radius w :=
-  (norm_pos_iff.mpr hw).trans_le (PolarCharts.norm_le_radius _)
 
-theorem radius_contDiffAt {w : SpaceTime} (hw : PhysicalGraphBounds.radialProjection w ≠ 0) :
-    ContDiffAt ℝ ∞ AnnularEndpoint.radius w := by
-  have hs : w.2 0 ^ 2 + w.2 1 ^ 2 ≠ 0 := by
-    intro hz
-    apply hw
-    apply Prod.ext
-    · change w.2 0 = 0
-      nlinarith [sq_nonneg (w.2 1), sq_nonneg (w.2 0)]
-    · change w.2 1 = 0
-      nlinarith [sq_nonneg (w.2 1), sq_nonneg (w.2 0)]
-  change ContDiffAt ℝ ∞ (fun z : SpaceTime => Real.sqrt (z.2 0 ^ 2 + z.2 1 ^ 2)) w
-  exact ((((AxisymmetricFields.projection 0).contDiff.comp contDiff_snd).contDiffAt.pow 2).add
-    (((AxisymmetricFields.projection 1).contDiff.comp contDiff_snd).contDiffAt.pow 2)).sqrt hs
 
-theorem physicalLift_contDiffAt (h : ℝ) (n : ℕ) {w : SpaceTime}
-    (hw : PhysicalGraphBounds.radialProjection w ≠ 0) : ContDiffAt ℝ ∞ (physicalLift h n) w :=
-  (radius_contDiffAt hw).prodMk (physicalSlow_contDiff.contDiffAt.prodMk
-    (PhysicalGraphBounds.contDiffAt_nativeGraph h n hw))
 
 noncomputable def physicalScalar (h : ℝ) (n : ℕ) (f : Lift → ℝ) : SpaceTime → ℝ :=
   f ∘ physicalLift h n
 
-theorem physicalScalar_zero_germ (h : ℝ) (n : ℕ) {U : Set Slow} (hU : IsOpen U)
-    {c e : ℝ} {f : Lift → ℝ} (hs : PhysicalMeanDomain.SupportedOn c e U f)
-    {w : SpaceTime} (hw : w ∈ physicalDomain U) (hr : AnnularEndpoint.radius w < c) :
-    physicalScalar h n f =ᶠ[𝓝 w] fun _ => 0 := by
-  filter_upwards [(physicalDomain_open hU).mem_nhds hw,
-    AnnularEndpoint.radius_continuous.continuousAt (gt_mem_nhds hr)] with z hz hzr
-  by_contra hn
-  exact (not_lt_of_ge (hs (physicalLift h n z) hz hn).1) hzr
 
-/-- A positive lower radial support bound removes the coordinate singularity
-on the symmetry axis.  No smoothness of the graph at the axis is assumed. -/
-theorem physicalScalar_smooth (h : ℝ) (n : ℕ) {U : Set Slow} (hU : IsOpen U)
-    {c e : ℝ} (hc : 0 < c) {f : Lift → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U))
-    (hs : PhysicalMeanDomain.SupportedOn c e U f) :
-    ContDiffOn ℝ ∞ (physicalScalar h n f) (physicalDomain U) := by
-  intro w hw
-  by_cases ha : PhysicalGraphBounds.radialProjection w = 0
-  · have hr : AnnularEndpoint.radius w = 0 := by
-      simp only [AnnularEndpoint.radius, ha, PolarCharts.radius, Prod.fst_zero, Prod.snd_zero,
-        zero_pow (by decide : 2 ≠ 0), zero_add, Real.sqrt_zero]
-    exact (contDiffAt_const.congr_of_eventuallyEq
-      (physicalScalar_zero_germ h n hU hs hw (hr ▸ hc))).contDiffWithinAt
-  · exact ((hf.contDiffAt ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds hw)).comp w
-      (physicalLift_contDiffAt h n ha)).contDiffWithinAt
 
 /-- `streamPotential` is already the azimuthal component of the vector
 potential, including its division by the radial variable. -/
@@ -536,45 +429,11 @@ noncomputable def azimuthalPotential (h : ℝ) (n : ℕ) (f : Lift → ℝ) (w :
 noncomputable def angularField (h : ℝ) (n : ℕ) (f : Lift → ℝ) : SpaceTime → Space :=
   azimuthalPotential h n f
 
-theorem azimuthalPotential_smooth (h : ℝ) (n : ℕ) {U : Set Slow} (hU : IsOpen U)
-    {c e : ℝ} (hc : 0 < c) {f : Lift → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U))
-    (hs : PhysicalMeanDomain.SupportedOn c e U f) :
-    ContDiffOn ℝ ∞ (azimuthalPotential h n f) (physicalDomain U) := by
-  intro w hw
-  by_cases ha : PhysicalGraphBounds.radialProjection w = 0
-  · have hr : AnnularEndpoint.radius w = 0 := by
-      simp [AnnularEndpoint.radius, ha, PolarCharts.radius]
-    have he : azimuthalPotential h n f =ᶠ[𝓝 w] fun _ => 0 := by
-      filter_upwards [physicalScalar_zero_germ h n hU hs hw (hr ▸ hc)] with z hz
-      simp only [azimuthalPotential, hz, mul_zero, zero_smul, add_zero]
-    exact (contDiffAt_const.congr_of_eventuallyEq he).contDiffWithinAt
-  · have hR := radius_contDiffAt ha
-    have hRn := (radius_pos_of_projection ha).ne'
-    have hψ := (physicalScalar_smooth h n hU hc hf hs).contDiffAt
-      ((physicalDomain_open hU).mem_nhds hw)
-    have h0 : ContDiffAt ℝ ∞ (fun z : SpaceTime => z.2 0) w :=
-      ((AxisymmetricFields.projection 0).contDiff.comp contDiff_snd).contDiffAt
-    have h1 : ContDiffAt ℝ ∞ (fun z : SpaceTime => z.2 1) w :=
-      ((AxisymmetricFields.projection 1).contDiff.comp contDiff_snd).contDiffAt
-    exact ((((h1.neg.div hR hRn).mul hψ).smul contDiffAt_const).add
-      (((h0.div hR hRn).mul hψ).smul contDiffAt_const)).contDiffWithinAt
 
 namespace SupportedContinuation
 
 variable {coord a b : ℝ} {W : Window coord a b} {f : Lift → ℝ}
 
-noncomputable def physicalExtension (e : SupportedContinuation W f) (h : ℝ) (n : ℕ)
-    {x : Space} (hx : (0, x 2) ∈ W.carrier) :
-    JointResidualLimits.OneSidedExtension (physicalScalar h n f) x where
-  value := physicalScalar h n e.value
-  domain := physicalDomain W.carrier
-  isOpen := physicalDomain_open W.isOpen
-  mem := by simpa only [physicalDomain, mem_preimage, physicalSlow, sub_self] using hx
-  smooth := physicalScalar_smooth h n W.isOpen W.lower_pos e.smooth (W.fixed_support e.supported)
-  agrees := by
-    intro w hw
-    exact e.agrees ⟨hw.1, show 0 < 1 - w.1 from sub_pos.mpr hw.2.1⟩
 
 
 

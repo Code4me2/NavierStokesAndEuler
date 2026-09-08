@@ -1,7 +1,7 @@
 import NavierStokes.ActualParticularStageControls
 import NavierStokes.PhysicalResidualNaturality
 import NavierStokes.ActualInitialCoherence
-import NavierStokes.SubcoverPeriodicity
+import NavierStokes.ParticularWaveBounds
 
 /-!
 # Native reference data from the actual common-cover state
@@ -110,57 +110,8 @@ noncomputable def pullFrame (e : D ≃L[ℝ] E) (g : HarmonicResidual.Frame E) :
   time x := e.symm (g.time (e x))
   viscosity := g.viscosity
 
-theorem pullContext_frame (e : D ≃L[ℝ] E) (c : Context E) (n : ℕ) :
-    HarmonicResidual.contextFrame (pullContext e c) n =
-      pullFrame e (HarmonicResidual.contextFrame c n) := by
-  unfold HarmonicResidual.contextFrame pullContext pullOperators pullFrame
-  congr 1 <;> funext x <;> simp only [map_add, map_smul, map_sub]
 
-theorem pullFrame_on (e : D ≃L[ℝ] E) (g : HarmonicResidual.Frame E) :
-    PhysicalResidualNaturality.FrameOn univ e 1 1 (pullFrame e g) g := by
-  constructor <;> simp [pullFrame]
 
-/-- The full residual, rather than only its on-graph values, is pulled back.
-No carrier nondegeneracy or differentiability premise is needed. -/
-theorem pull_residualSource (e : D ≃L[ℝ] E) (c : Context E) (u : State E)
-    (b : HarmonicBlock E) (G A : HarmonicResidual.BlockCoefficients E)
-    (j : ℤ) (n : ℕ) (x : D) :
-    ParticularWaveAssembly.residualSource (pullContext e c) (pullState e u)
-      (pullBlock e b) (pullBlockCoefficients e G) (pullBlockCoefficients e A) j n x =
-      ParticularWaveAssembly.residualSource c u b G A j n (e x) := by
-  have hlabel : PhysicalResidualNaturality.LabelOn univ e 1 1
-      (HarmonicResidual.ofBlock (pullBlock e b) (pullBlockCoefficients e G)
-        (pullBlockCoefficients e A) n) (HarmonicResidual.ofBlock b G A n) := by
-    constructor
-    · intro y hy; rfl
-    · rfl
-    · intro i k y hy
-      simp [HarmonicResidual.ofBlock, HarmonicResidual.realCoefficients_apply,
-        pullBlock]
-    · intro k y hy
-      simp [HarmonicResidual.ofBlock, HarmonicResidual.realCoefficients_apply,
-        pullBlock]
-    · intro i k y hy
-      simp [HarmonicResidual.ofBlock, HarmonicResidual.realCoefficients_apply,
-        pullBlockCoefficients]
-    · intro i k y hy
-      simp [HarmonicResidual.ofBlock, HarmonicResidual.realCoefficients_apply,
-        pullBlockCoefficients]
-  have hg : PhysicalResidualNaturality.FrameOn univ e 1 1
-      (HarmonicResidual.contextFrame (pullContext e c) n)
-      (HarmonicResidual.contextFrame c n) := by
-    rw [pullContext_frame]
-    exact pullFrame_on e _
-  have hb : ∀ y ∈ (univ : Set D), HarmonicResidual.contextBase (pullContext e c) n y =
-      (1 : ℝ) • HarmonicResidual.contextBase c n (e y) := by
-    intro y hy; simp [HarmonicResidual.contextBase, pullContext, pullTriple, pullField]
-  have hm : ∀ y ∈ (univ : Set D), HarmonicResidual.stateMean (pullState e u) n y =
-      (1 : ℝ) • HarmonicResidual.stateMean u n (e y) := by
-    intro y hy; simp [HarmonicResidual.stateMean, pullState, pullTriple, pullField]
-  funext i
-  have he := hlabel.waveResidualCoefficients isOpen_univ one_ne_zero hg hb hm i j x (mem_univ x)
-  simp only [one_mul, one_smul] at he
-  exact he
 
 noncomputable def pullStrip (e : D ≃L[ℝ] E) (s : StripData E) : StripData D where
   domain := e ⁻¹' s.domain
@@ -233,21 +184,6 @@ noncomputable def rebaseAssembly (D : ParticularWaveAssembly.AssemblyData P) (k 
   strip := pullStrip (inverseCover k) D.strip
   directions := pullDirections (inverseCover k) D.directions
 
-theorem rebaseAssembly_source (D : ParticularWaveAssembly.AssemblyData P) (k : ℕ)
-    (j : ℤ) (n : ℕ) (x : P × Plane) :
-    ParticularWaveAssembly.residualSource (rebaseAssembly D k).context
-      (rebaseAssembly D k).state (rebaseAssembly D k).carrierBlock
-      (rebaseAssembly D k).gaussianInput (rebaseAssembly D k).aliasInput j n x =
-      ParticularWaveAssembly.residualSource D.context D.state D.carrierBlock
-        D.gaussianInput D.aliasInput j n (x.1, (coverPower k).symm x.2) := by
-  change ParticularWaveAssembly.residualSource
-    (pullContext (inverseCover k) D.context) (pullState (inverseCover k) D.state)
-    (pullBlock (inverseCover k) D.carrierBlock)
-    (pullBlockCoefficients (inverseCover k) D.gaussianInput)
-    (pullBlockCoefficients (inverseCover k) D.aliasInput) j n x = _
-  simpa only [inverseCover_apply] using
-    (pull_residualSource (inverseCover (P := P) k) D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j n x)
 
 
 /-! ## Binding to the one actual initializer choice and current cycle state -/
@@ -256,15 +192,6 @@ open CorrectionInitialization CorrectionInitialization.ActualPrimary
 
 variable {B N0 : ℕ}
 
-noncomputable def referenceResidualSource
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) (j : ℤ) :
-    PhysicalResidualNaturality.Associated → ComplexVector :=
-  fun z => ParticularWaveAssembly.residualSource (ActualParticularStageControls.assembly x l).context
-    (ActualParticularStageControls.assembly x l).state (ActualParticularStageControls.assembly x l).carrierBlock
-    (ActualParticularStageControls.assembly x l).gaussianInput (ActualParticularStageControls.assembly x l).aliasInput
-    j (BaseChartJets.cellBand l.2)
-    (z.1, (coverPower (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2))).symm z.2)
 
 noncomputable def nativeAssembly
     (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
@@ -273,14 +200,6 @@ noncomputable def nativeAssembly
     (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2))
 
 
-theorem nativeAssembly_source
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) (j : ℤ) :
-    PhysicalParticularWave.referenceSource (nativeAssembly x l) j = referenceResidualSource x l j := by
-  funext z
-  exact rebaseAssembly_source (ActualParticularStageControls.assembly x l)
-    (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2)) j
-    (BaseChartJets.cellBand l.2) z
 
 
 
@@ -517,10 +436,6 @@ theorem associatedDirections_axial (B n : ℕ) (z : WaveSpace) :
 
 /-! ## Reverse index order and the original recurrence interface -/
 
-theorem ratioPower_reverse_mul {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (a : ℝ) :
-    ratioPower Q Qr a * ratioPower Qr Q a = 1 := by
-  unfold ratioPower
-  field_simp [(Real.rpow_pos_of_pos hQ a).ne', (Real.rpow_pos_of_pos hQr a).ne']
 
 
 

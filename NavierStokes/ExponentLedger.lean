@@ -29,21 +29,9 @@ def meanExponent (σ : ℝ) : ℝ := 1 + σ
 /-- The intermediate exponent `H₁ = C - 2κ`. -/
 def meanUpdateExponent (σ κ : ℝ) : ℝ := meanExponent σ - 2 * κ
 
-/-- Minimum of the four listed gains for the particular wave correction. -/
-def particularGain (σ κ : ℝ) : ℝ :=
-  min (min (min (1 / 2 - 3 * κ) (1 / 2 - κ))
-    (waveExponent σ - κ)) (2 / 5)
-
-/-- Minimum of the four listed gains for the signed wave correction. -/
-def signedGain (σ κ : ℝ) : ℝ :=
-  min (min (min (1 / 2 - 4 * κ) (2 / 5 - κ))
-    (1 / 2 - 2 * κ)) (waveExponent σ - 3 * κ)
 
 
-theorem mean_eq_wave_add_half (σ : ℝ) :
-    meanExponent σ = waveExponent σ + 1 / 2 := by
-  unfold meanExponent waveExponent
-  ring
+
 
 
 

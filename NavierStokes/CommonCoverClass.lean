@@ -420,8 +420,6 @@ section DyadicChanges
 noncomputable def bandRatio (a : ℝ) (n m : ℕ) : ℝ :=
   (2 : ℝ) ^ (((m : ℝ) - (n : ℝ)) * a)
 
-theorem bandRatio_pos (a : ℝ) (n m : ℕ) : 0 < bandRatio a n m :=
-  Real.rpow_pos_of_pos (by norm_num) _
 
 theorem bandRatio_eq_rpow (a : ℝ) (n m : ℕ) :
     bandRatio a n m = (ChartScales.Q n / ChartScales.Q m) ^ a := by
@@ -434,23 +432,7 @@ theorem bandRatio_eq_rpow (a : ℝ) (n m : ℕ) :
   ring
 
 
-theorem bandRatio_mul_power (a : ℝ) (n m : ℕ) :
-    bandRatio a n m * ChartScales.Q m ^ a = ChartScales.Q n ^ a := by
-  rw [bandRatio_eq_rpow, Real.div_rpow (ChartScales.Q_pos n).le (ChartScales.Q_pos m).le]
-  exact div_mul_cancel₀ _ (Real.rpow_pos_of_pos (ChartScales.Q_pos m) a).ne'
 
-theorem bandRatio_le (a : ℝ) {n m : ℕ} (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    bandRatio a n m ≤ (2 : ℝ) ^ (4 * |a|) := by
-  have hdiff : |(m : ℝ) - (n : ℝ)| ≤ 4 := by
-    have h1 : (n : ℝ) ≤ (m : ℝ) + 4 := by exact_mod_cast hnm
-    have h2 : (m : ℝ) ≤ (n : ℝ) + 4 := by exact_mod_cast hmn
-    rw [abs_le]
-    constructor <;> linarith
-  apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-  calc
-    ((m : ℝ) - (n : ℝ)) * a ≤ |((m : ℝ) - (n : ℝ)) * a| := le_abs_self _
-    _ = |(m : ℝ) - (n : ℝ)| * |a| := abs_mul _ _
-    _ ≤ 4 * |a| := mul_le_mul_of_nonneg_right hdiff (abs_nonneg _)
 
 
 
@@ -479,34 +461,8 @@ theorem bandChart_formula (D : ℝ) (n m : ℕ) (x : SlowPoint) :
 
 noncomputable def chartCost (D : ℝ) : ℝ := 1 + (2 : ℝ) ^ (4 * (1 + |D|))
 
-theorem chartCost_one_le (D : ℝ) : 1 ≤ chartCost D := by
-  unfold chartCost
-  linarith [Real.rpow_pos_of_pos (by norm_num : (0 : ℝ) < 2) (4 * (1 + |D|))]
 
-theorem bandRatio_le_chartCost {D a : ℝ} (ha : |a| ≤ 1 + |D|) {n m : ℕ}
-    (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) : bandRatio a n m ≤ chartCost D := by
-  refine (bandRatio_le a hnm hmn).trans ?_
-  refine (Real.rpow_le_rpow_of_exponent_le (by norm_num) (mul_le_mul_of_nonneg_left ha (by norm_num))).trans ?_
-  unfold chartCost
-  linarith
 
-theorem norm_bandChart_le (D : ℝ) {n m : ℕ} (hnm : n ≤ m + 4) (hmn : m ≤ n + 4) :
-    ‖bandChart D n m‖ ≤ chartCost D := by
-  apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (chartCost_one_le D))
-  intro x
-  have hb (a y : ℝ) (ha : |a| ≤ 1 + |D|) (hy : ‖y‖ ≤ ‖x‖) :
-      ‖bandRatio a n m * y‖ ≤ chartCost D * ‖x‖ := by
-    rw [norm_mul, Real.norm_eq_abs, abs_of_pos (bandRatio_pos _ _ _)]
-    exact mul_le_mul (bandRatio_le_chartCost ha hnm hmn) hy (norm_nonneg _)
-      (zero_le_one.trans (chartCost_one_le D))
-  rw [bandChart_apply, Prod.norm_def, Prod.norm_def]
-  apply max_le
-  · exact hb (1 / 2) x.1 (by rw [abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]; linarith [abs_nonneg D])
-      (norm_fst_le x)
-  · apply max_le
-    · exact hb D x.2.1 (by linarith) ((norm_fst_le x.2).trans (norm_snd_le x))
-    · exact hb 1 x.2.2 (by rw [abs_one]; linarith [abs_nonneg D])
-        ((norm_snd_le x.2).trans (norm_snd_le x))
 
 
 /-- Coarsest of a pair of simultaneously active levels. -/
@@ -657,9 +613,6 @@ noncomputable def bandCommonChart (D : ℝ) (n m : ℕ) (forward : Bool) (gap : 
 noncomputable def commonChartCost (D : ℝ) (gapBound : ℕ) : ℝ :=
   chartCost D + CommonCoverSolve.coveringBound gapBound
 
-theorem commonChartCost_one_le (D : ℝ) (gapBound : ℕ) : 1 ≤ commonChartCost D gapBound := by
-  unfold commonChartCost
-  linarith [chartCost_one_le D, CommonCoverSolve.coveringBound_pos gapBound]
 
 
 
@@ -668,19 +621,12 @@ end CommonBandChanges
 
 section PhysicalProfileWeights
 
-theorem bandChart_eq_transition (h : ℝ) (n m : ℕ) (x : SlowPoint) :
-    bandChart (CoordinateAlgebra.D h) n m x =
-      SimilarityHomogeneity.chartTransition h (ChartScales.Q n) (ChartScales.Q m) x :=
-  bandChart_formula _ _ _ _
 
 
 
 noncomputable def profileDomain (h a b : ℝ) : Set SlowPoint :=
   {x | x ∈ SimilarityHomogeneity.chartDomain ∧ SimilarityHomogeneity.chartX h x ∈ Ioo a b}
 
-theorem profileX_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {x : SlowPoint} (hx : 0 < x.2.2) : ContDiffAt ℝ ∞ (SimilarityHomogeneity.chartX h) x :=
-  (SimilarityHomogeneity.chartInner_smoothAt hh hh1 hx).fst
 
 
 

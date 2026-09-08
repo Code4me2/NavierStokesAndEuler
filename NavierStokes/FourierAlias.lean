@@ -149,126 +149,20 @@ theorem torusMean_intervalIntegral {g : State → F} (hg : Continuous g)
 
 
 
-/-- The alias is an exact term in the constructed inverse identity. -/
-theorem transport_compact_eq_sub_alias [CompleteSpace F] {a b M : ℝ} {v : Plane}
-    {f : State → F} {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f) (z : State) :
-    TransportPrimitive.fixedDeriv (1, M • v) (TransportPrimitive.compactIntegral χ M v f) z =
-      f z - cutoffAlias χ M v f z :=
-  TransportPrimitive.transport_compactIntegral hχ hf hs z
 
-theorem iteratedFDeriv_periodic {f : State → F}
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y))) (n : ℕ) :
-    ∀ U, TorusPeriodic (fun Y => iteratedFDeriv ℝ n f (U, Y)) := by
-  intro U Y k
-  have heq : (fun z : State => f (z + (0, ((k.1 : ℝ), (k.2 : ℝ))))) = f := by
-    funext z
-    change f (z.1 + 0, z.2 + ((k.1 : ℝ), (k.2 : ℝ))) = f z
-    simpa only [add_zero] using hp z.1 z.2 k
-  have h := congrArg (fun g : State → F => iteratedFDeriv ℝ n g (U, Y)) heq
-  rw [iteratedFDeriv_comp_add_right] at h
-  simpa only [Prod.mk_add_mk, add_zero] using h
 
-/-- Actual smooth periodic fields have bounded finite prefixes of full Fréchet
-jets on every compact radial slab. -/
-theorem periodic_finiteJet_bound {f : State → F} (hf : ContDiff ℝ ∞ f)
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y))) (a b : ℝ) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ j ≤ m, ∀ U ∈ Icc a b, ∀ Y : Plane,
-      ‖iteratedFDeriv ℝ j f (U, Y)‖ ≤ C := by
-  let K : Set State := Icc a b ×ˢ (Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1)
-  have hK : IsCompact K := isCompact_Icc.prod (isCompact_Icc.prod isCompact_Icc)
-  have hc : Continuous (fun z : State => ∑ j ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ j f z‖) :=
-    continuous_finsetSum _ (fun j _ => (TransportPrimitive.iteratedFDeriv_contDiff hf j).continuous.norm)
-  obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn hc.continuousOn
-  refine ⟨max C 0, le_max_right _ _, ?_⟩
-  intro j hj U hU Y
-  let k : Frequency := (-⌊Y.1⌋, -⌊Y.2⌋)
-  let Z : Plane := Y + ((k.1 : ℝ), (k.2 : ℝ))
-  have hZ : Z ∈ Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1 := by
-    constructor
-    · simpa only [Z, k, Prod.fst_add, Prod.fst, Int.cast_neg, ← sub_eq_add_neg, Int.fract]
-        using (show Int.fract Y.1 ∈ Icc (0 : ℝ) 1 from
-          ⟨Int.fract_nonneg _, (Int.fract_lt_one _).le⟩)
-    · simpa only [Z, k, Prod.snd_add, Prod.snd, Int.cast_neg, ← sub_eq_add_neg, Int.fract]
-        using (show Int.fract Y.2 ∈ Icc (0 : ℝ) 1 from
-          ⟨Int.fract_nonneg _, (Int.fract_lt_one _).le⟩)
-  have hperiod : iteratedFDeriv ℝ j f (U, Z) = iteratedFDeriv ℝ j f (U, Y) :=
-    iteratedFDeriv_periodic hp j U Y k
-  rw [← hperiod]
-  have hj' : j ∈ Finset.range (m + 1) := Finset.mem_range.mpr (Nat.lt_succ_of_le hj)
-  calc
-    _ ≤ ∑ i ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ i f (U, Z)‖ :=
-      Finset.single_le_sum (fun i _ => norm_nonneg _) hj'
-    _ ≤ ‖∑ i ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ i f (U, Z)‖‖ := Real.le_norm_self _
-    _ ≤ C := hC (U, Z) ⟨hU, hZ⟩
-    _ ≤ max C 0 := le_max_left _ _
 
 variable [CompleteSpace F]
 
 
-theorem cutoffAlias_supported {a b M : ℝ} {v : Plane} {f : State → F} {χ : ℝ → ℝ}
-    (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) :
-    RadialAlias.RadiallySupported a b (cutoffAlias χ M v f) := by
-  have hsc := TransportPrimitive.compactIntegral_supported (M := M) (v := v)
-    hf.continuous hs hleft hright
-  have hsd := TransportPrimitive.fixedDeriv_supported hsc (1, M • v)
-  intro z hz
-  by_contra hzn
-  have hfz : f z = 0 := by
-    by_contra hfz
-    exact hzn (hs hfz)
-  have hdz : TransportPrimitive.fixedDeriv (1, M • v)
-      (TransportPrimitive.compactIntegral χ M v f) z = 0 := by
-    by_contra hdz
-    exact hzn (hsd hdz)
-  have heq := transport_compact_eq_sub_alias (M := M) (v := v) hχ hf hs z
-  have ha : -cutoffAlias χ M v f z = 0 := by simpa [hfz, hdz] using heq.symm
-  exact hz (neg_eq_zero.mp ha)
 
 
 end Averages
 
 section IntegrationByParts
 
-theorem sourceJet_smooth (J : (State → ℂ) → State → ℂ) (f : State → ℂ) (p : ℕ)
-    (hf : ContDiff ℝ ∞ f)
-    (hJ : ∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n))) :
-    ContDiff ℝ ∞ (RadialAlias.sourceJet J f p) := by
-  cases p with
-  | zero => exact hf
-  | succ p =>
-    rw [RadialAlias.sourceJet_succ]
-    exact TransportPrimitive.fixedDeriv_contDiff (hJ p (Nat.lt_succ_self p)) (1, 0)
 
-/-- The existing repeated IBP identity, now for the actual U-dependent total
-integral. No alias is discarded. -/
-theorem totalIntegral_sourceJet {a b M : ℝ} {v : Plane}
-    (J : (State → ℂ) → State → ℂ) (f : State → ℂ) (p : ℕ) (hM : M ≠ 0)
-    (hf : ContDiff ℝ ∞ f) (hsf : RadialAlias.RadiallySupported a b f)
-    (hJ : ∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n)))
-    (hsJ : ∀ n < p, RadialAlias.RadiallySupported a b (J (RadialAlias.sourceJet J f n)))
-    (hr : ∀ n < p, RadialAlias.directionalDeriv v (J (RadialAlias.sourceJet J f n)) =
-      RadialAlias.sourceJet J f n) (z : State) :
-    TransportPrimitive.totalIntegral M v f z = (-M⁻¹) ^ p •
-      TransportPrimitive.totalIntegral M v (RadialAlias.sourceJet J f p) z := by
-  rw [TransportPrimitive.totalIntegral_eq_wholeAlias hf.continuous hsf,
-    TransportPrimitive.totalIntegral_eq_wholeAlias (sourceJet_smooth J f p hf hJ).continuous
-      (RadialAlias.sourceJet_radiallySupported J f p hsf hsJ)]
-  exact RadialAlias.wholeAlias_sourceJet J f p hM
-    (fun n hn => (hJ n hn).of_le (by simp)) hsJ hr
 
-theorem cutoffAlias_sourceJet {a b M : ℝ} {v : Plane}
-    (χ : ℝ → ℝ) (J : (State → ℂ) → State → ℂ) (f : State → ℂ) (p : ℕ) (hM : M ≠ 0)
-    (hf : ContDiff ℝ ∞ f) (hsf : RadialAlias.RadiallySupported a b f)
-    (hJ : ∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n)))
-    (hsJ : ∀ n < p, RadialAlias.RadiallySupported a b (J (RadialAlias.sourceJet J f n)))
-    (hr : ∀ n < p, RadialAlias.directionalDeriv v (J (RadialAlias.sourceJet J f n)) =
-      RadialAlias.sourceJet J f n) (z : State) :
-    cutoffAlias χ M v f z = (-M⁻¹) ^ p • cutoffAlias χ M v (RadialAlias.sourceJet J f p) z := by
-  rw [cutoffAlias, totalIntegral_sourceJet J f p hM hf hsf hJ hsJ hr]
-  exact smul_comm _ _ _
 
 
 end IntegrationByParts
@@ -303,40 +197,9 @@ theorem nonbarPart_zeroMean {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
 
 
 
-/-- The successive slow derivatives of actual directional Fourier inverses. -/
-noncomputable def fourierSourceJet (d : Direction) (f : State → ℂ) (p : ℕ) : State → ℂ :=
-  RadialAlias.sourceJet (inverse d) f p
 
 
-theorem inverse_radiallySupported (d : Direction) {a b : ℝ} {f : State → ℂ}
-    (hs : RadialAlias.RadiallySupported a b f) :
-    RadialAlias.RadiallySupported a b (inverse d f) := by
-  have hh : ∀ U, U ∉ Icc a b → ∀ Y, f (U, Y) = 0 := by
-    intro U hU Y
-    by_contra hn
-    exact hU (hs hn)
-  have hi := inverse_preserves_parameter_support d f (Icc a b) hh
-  intro z hz
-  by_contra hn
-  exact hz (hi z.1 hn z.2)
 
-theorem fourierSourceJet_properties (d : Direction) {a b : ℝ} {f : State → ℂ}
-    (hf : ContDiff ℝ ∞ f) (hp : ParametricTorusInverse.Periodic f)
-    (hm : ZeroMean f) (hs : RadialAlias.RadiallySupported a b f) (p : ℕ) :
-    ContDiff ℝ ∞ (fourierSourceJet d f p) ∧
-      ParametricTorusInverse.Periodic (fourierSourceJet d f p) ∧
-      ZeroMean (fourierSourceJet d f p) ∧
-      RadialAlias.RadiallySupported a b (fourierSourceJet d f p) := by
-  induction p with
-  | zero => exact ⟨hf, hp, hm, hs⟩
-  | succ p ih =>
-    have heq : fourierSourceJet d f (p + 1) = parameterPartial (inverse d (fourierSourceJet d f p)) :=
-      RadialAlias.sourceJet_succ (inverse d) f p
-    rw [heq]
-    have hi := inverse_smooth d ih.1 ih.2.1
-    exact ⟨parameterPartial_smooth hi, parameterPartial_periodic (inverse_periodic d _),
-      parameterPartial_zeroMean hi (inverse_zeroMean d ih.1 ih.2.1),
-      RadialAlias.radialSupport_slowDeriv (inverse_radiallySupported d ih.2.2.2)⟩
 
 
 
@@ -347,35 +210,6 @@ end ActualFourierInverse
 
 section SmallScale
 
-/-- The actual chart slow scale is subpower relative to epsilon. Consequently
-an arbitrary fixed slow loss can be absorbed into half of a positive epsilon
-gain. The reciprocal-frequency premise alone would not imply this for an
-unrestricted scale `S`. -/
-theorem inverse_frequency_eventually_small {M : ℕ → ℝ} {h κ A growth : ℝ}
-    (hh : 0 < h) (hκ : 0 < κ)
-    (hbound : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) :
-    ∀ᶠ n in atTop, |M n|⁻¹ ≤ ChartScales.epsilon h n ^ (κ / 2) := by
-  have ht : Tendsto (fun n : ℕ => A * (ChartScales.S n ^ growth *
-      ChartScales.epsilon h n ^ (κ / 2))) atTop (𝓝 0) := by
-    simpa only [mul_zero] using
-      (ChartScales.slow_power_epsilon_tendsto_zero h hh growth (κ / 2) (half_pos hκ)).const_mul A
-  have hs : ∀ᶠ n : ℕ in atTop, A * (ChartScales.S n ^ growth *
-      ChartScales.epsilon h n ^ (κ / 2)) < 1 :=
-    (tendsto_order.1 ht).2 1 zero_lt_one
-  filter_upwards [hbound, hs] with n hn hsn
-  have he : ChartScales.epsilon h n ^ κ =
-      ChartScales.epsilon h n ^ (κ / 2) * ChartScales.epsilon h n ^ (κ / 2) := by
-    rw [← Real.rpow_add (ChartScales.epsilon_pos h n)]
-    congr 1
-    ring
-  calc
-    _ ≤ A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth := hn
-    _ = (A * (ChartScales.S n ^ growth * ChartScales.epsilon h n ^ (κ / 2))) *
-        ChartScales.epsilon h n ^ (κ / 2) := by rw [he]; ring
-    _ ≤ 1 * ChartScales.epsilon h n ^ (κ / 2) :=
-      mul_le_mul_of_nonneg_right hsn.le (Real.rpow_nonneg (ChartScales.epsilon_pos h n).le _)
-    _ = _ := one_mul _
 
 
 

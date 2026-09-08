@@ -67,23 +67,7 @@ theorem partialT_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ) (q : Plan
 private def radiusProjection : Lift →L[ℝ] ℝ :=
   (ContinuousLinearMap.fst ℝ ℝ ℝ).comp (ContinuousLinearMap.fst ℝ Plane Plane)
 
-/-- This form keeps the exponent arithmetic of the derivative explicit. -/
-def radialAcceleration (d r : ℝ) : ℝ :=
-  d * ((d - 1) * r ^ (d - 1 - 1))
 
-private theorem hasFDerivAt_radialVector (d : ℝ) (vr : Plane) (p : Lift)
-    (hr : p.1.1 ≠ 0) :
-    HasFDerivAt (radialVector d vr)
-      ((0 : Lift →L[ℝ] Plane).prod
-        (((radialAcceleration d p.1.1) • radiusProjection).smulRight vr)) p := by
-  have hrad : HasFDerivAt (fun z : Lift => z.1.1) radiusProjection p :=
-    radiusProjection.hasFDerivAt
-  have hpow := hrad.rpow_const (p := d - 1) (Or.inl hr)
-  have hs : HasFDerivAt (fun z : Lift => radialSpeed d z.1.1)
-      (radialAcceleration d p.1.1 • radiusProjection) p := by
-    simpa only [radialSpeed, radialAcceleration, Pi.smul_apply, smul_eq_mul, smul_smul] using
-      hpow.fun_const_smul d
-  exact (hasFDerivAt_const (1, 0) p).prodMk (hs.smul_const vr)
 
 
 

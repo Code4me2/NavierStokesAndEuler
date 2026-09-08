@@ -244,34 +244,9 @@ theorem finite_jet_bounds {g : ℝ → ℝ}
   exact (hb j x).trans (Finset.single_le_sum (fun i _ => hC i)
     (Finset.mem_range.mpr (Nat.lt_succ_of_le hj)))
 
-theorem profileDeriv_contDiff : ContDiff ℝ ∞ (deriv profile) :=
-  (contDiff_infty_iff_deriv.mp profile_contDiff).2
 
-theorem profileDeriv_jet_bounded (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x, ‖iteratedFDeriv ℝ m (deriv profile) x‖ ≤ C := by
-  obtain ⟨C, hC, hb⟩ := profile_jet_bounded (m + 1)
-  refine ⟨C, hC, fun x => ?_⟩
-  simpa only [norm_iteratedFDeriv_eq_norm_iteratedDeriv, iteratedDeriv_succ'] using hb x
 
-theorem omittedProfile_contDiff : ContDiff ℝ ∞ (fun x => 1 - profile x) :=
-  contDiff_const.sub profile_contDiff
 
-theorem omittedProfile_jet_bounded (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x, ‖iteratedFDeriv ℝ m (fun y => 1 - profile y) x‖ ≤ C := by
-  cases m with
-  | zero =>
-    refine ⟨1, zero_le_one, fun x => ?_⟩
-    rw [norm_iteratedFDeriv_zero, Real.norm_eq_abs, abs_of_nonneg (by
-      linarith [(profile_mem_Icc x).2] : 0 ≤ 1 - profile x)]
-    linarith [(profile_mem_Icc x).1]
-  | succ m =>
-    obtain ⟨C, hC, hb⟩ := profile_jet_bounded (m + 1)
-    refine ⟨C, hC, fun x => ?_⟩
-    rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv,
-      iteratedDeriv_const_sub (Nat.succ_pos m) (1 : ℝ)]
-    change ‖iteratedDeriv (m + 1) (fun y => -profile y) x‖ ≤ C
-    rw [iteratedDeriv_fun_neg, norm_neg]
-    simpa only [norm_iteratedFDeriv_eq_norm_iteratedDeriv] using hb x
 
 theorem norm_affine_comp_jet_le {g : ℝ → ℝ} (hg : ContDiff ℝ ∞ g)
     (A : D →L[ℝ] ℝ) (b : ℝ) (x : D) (j : ℕ) :
@@ -328,45 +303,8 @@ noncomputable def cutoffError (L : ℝ) (θ : D → ℝ) (u f : D → E) (x : D)
 
 
 
-omit [NormedSpace ℝ D] in
-theorem cutoffError_eventually_zero (L : ℝ) {θ : D → ℝ} (u f : D → E) {x : D}
-    (hθ : ContinuousAt θ x) (hx : |θ x - 1 / 2| < 1 / 5) :
-    cutoffError L θ u f =ᶠ[𝓝 x] fun _ => 0 := by
-  have hprofile := (profile_eventually_one hx).comp_tendsto hθ
-  have hderiv := (profile_eventually_one hx).deriv.comp_tendsto hθ
-  filter_upwards [hprofile, hderiv] with y hy hdy
-  have hy' : profile (θ y) = 1 := by simpa using hy
-  have hdy' : deriv profile (θ y) = 0 := by simpa using hdy
-  simp [cutoffError, hy', hdy']
 
-theorem cutoffError_jet_zero_on_plateau (L : ℝ) {θ : D → ℝ} (u f : D → E) {x : D}
-    (hθ : ContinuousAt θ x) (hx : |θ x - 1 / 2| < 1 / 5) (j : ℕ) :
-    iteratedFDeriv ℝ j (cutoffError L θ u f) x = 0 := by
-  have he := cutoffError_eventually_zero L u f hθ hx
-  have he' : cutoffError L θ u f =ᶠ[𝓝[univ] x] fun _ => 0 := by
-    simpa only [nhdsWithin_univ] using he
-  simpa only [iteratedFDerivWithin_univ, iteratedFDeriv_fun_zero, Pi.zero_apply] using
-    he'.iteratedFDerivWithin_eq (𝕜 := ℝ) he.self_of_nhds j
 
-/-- This class bound is derived by all-order Leibniz, from the actual wave
-and source classes and the constructed cutoff profile. -/
-theorem cutoffError_mem_wave {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
-    {u f : ℕ → D → E} (hu : WaveClass s P α u) (hf : WaveClass s P α f)
-    (L : ℕ → ℝ) (A : ℕ → D →L[ℝ] ℝ) (b : ℕ → ℝ)
-    (hA : ∃ K : ℝ, 1 ≤ K ∧ ∃ p : ℕ, ∀ n, ‖A n‖ ≤ K * s.slow n ^ p)
-    (hL : BandBound s 0 (fun n => (L n)⁻¹)) :
-    WaveClass s P α (fun n => cutoffError (L n) (fun x => b n + A n x) (u n) (f n)) := by
-  have hd := (affine_profile_memClass s profileDeriv_contDiff profileDeriv_jet_bounded A b hA).band_smul hL
-  have ho := affine_profile_memClass s omittedProfile_contDiff omittedProfile_jet_bounded A b hA
-  have hdu := hd.smul hu
-  have hof := ho.smul hf
-  have hdu' : WaveClass s P α
-      (fun n x => ((L n)⁻¹ * deriv profile (b n + A n x)) • u n x) := by
-    simpa only [UnweightedClass, WaveClass, zero_add, add_zero, one_mul, smul_eq_mul] using hdu
-  have hof' : WaveClass s P α
-      (fun n x => (1 - profile (b n + A n x)) • f n x) := by
-    simpa only [UnweightedClass, WaveClass, zero_add, one_mul] using hof
-  exact hdu'.add hof'
 
 /-- A slow weight controlled by the actual two-sided exponential-flat edge.
 The comparison permits additional cutoffs of size at most one. -/
@@ -433,132 +371,10 @@ theorem cutoff_memClass {s : StripData D} (g : SlotFamily s) :
     UnweightedClass s 0 g.cutoff :=
   affine_profile_memClass s profile_contDiff profile_jet_bounded g.linear g.offset g.linear_bound
 
-theorem error_mem_wave {s : StripData D} (g : SlotFamily s) {P : ℕ → D → ℝ}
-    {α : ℝ} {u f : ℕ → D → E} (hu : WaveClass s P α u) (hf : WaveClass s P α f) :
-    WaveClass s P α (g.error u f) :=
-  cutoffError_mem_wave hu hf g.length g.linear g.offset g.linear_bound g.inverse_length_bound
 
-/-- The derivative in a direction with `D(v)=1` is the exact coefficient
-used in the retained cutoff error, because `v=L θ`. -/
-theorem cutoff_directional {s : StripData D} (g : SlotFamily s) (n : ℕ) (x w : D)
-    (hw : g.linear n w = (g.length n)⁻¹) :
-    fderiv ℝ (g.cutoff n) x w =
-      (g.length n)⁻¹ * deriv profile (g.coordinate n x) := by
-  have hp := (profile_contDiff.differentiable (by simp)).differentiableAt.hasDerivAt
-    (x := g.coordinate n x)
-  have hθ : HasFDerivAt (g.coordinate n) (g.linear n) x :=
-    (g.linear n).hasFDerivAt.const_add (g.offset n)
-  have hd := hp.hasFDerivAt.comp x hθ
-  have he := congrArg (fun A : D →L[ℝ] ℝ => A w) hd.fderiv
-  unfold cutoff
-  simpa [hw, mul_comm, Function.comp_def] using he
 
-theorem error_eq_directional {s : StripData D} (g : SlotFamily s) (u f : ℕ → D → E)
-    (n : ℕ) (x w : D) (hw : g.linear n w = (g.length n)⁻¹) :
-    g.error u f n x =
-      fderiv ℝ (g.cutoff n) x w • u n x + (1 - g.cutoff n x) • f n x := by
-  rw [g.cutoff_directional n x w hw]
-  rfl
 
-/-- Uniform polynomial-times-Gaussian bound for the two exact cutoff products.
-The only field estimates assumed are the original wave/source classes and
-the Gaussian upper bound for their common envelope. -/
-theorem error_gaussian_bound {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {u f : ℕ → D → E}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∃ d : ℕ, ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (g.error u f n) x‖ ≤
-        C * (1 + ChartScales.S n) ^ d *
-          Real.exp (-(c * g.length_scale / 50) * ChartScales.S n) := by
-  obtain ⟨A, hA, p, hb⟩ := (g.error_mem_wave hu hf).bounds m
-  obtain ⟨B, hB, hweight⟩ := edges.uniform_weight p
-  have hscale := g.length_scale_pos
-  have hconstant := scales.constant_one_le
-  have hdec : 0 < c * g.length_scale / 25 := by positivity
-  obtain ⟨C, hC, hgauss⟩ := fixed_power_gaussian_bound hdec (scales.power * α)
-  refine ⟨A * B * scales.constant ^ p * C, by positivity, scales.degree * p, ?_⟩
-  intro n x hx j hj
-  have hQ := ChartScales.Q_pos n
-  by_cases hmid : |g.coordinate n x - 1 / 2| < 1 / 5
-  · have hz := cutoffError_jet_zero_on_plateau (g.length n) (u n) (f n)
-      (g.coordinate_contDiff n).continuous.continuousAt hmid j
-    change iteratedFDeriv ℝ j (g.error u f n) x = 0 at hz
-    rw [hz, norm_zero]
-    have hS : 0 ≤ ChartScales.S n := sq_nonneg _
-    positivity
-  have htail : 1 / 5 ≤ |g.coordinate n x - 1 / 2| := le_of_not_gt hmid
-  have hsq : (1 / 25 : ℝ) ≤ (g.coordinate n x - 1 / 2) ^ 2 := by
-    have hh := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 5) htail 2
-    norm_num [sq_abs] at hh ⊢
-    exact hh
-  have hPg : P n x ≤ Real.exp (-(c * g.length_scale / 25) * ChartScales.S n) := by
-    apply (hP n x hx).trans
-    apply (Real.exp_le_exp.2 ?_).trans (gaussian_length_comparison hc.le (g.length_lower n))
-    nlinarith [mul_le_mul_of_nonneg_left hsq (mul_nonneg hc.le (g.length_pos n).le)]
-  have hslow0 : 0 ≤ s.slow n := zero_le_one.trans (s.one_le_slow n)
-  have hK0 : 0 ≤ scales.constant := zero_le_one.trans scales.constant_one_le
-  have hslowp : s.slow n ^ p ≤
-      scales.constant ^ p * (1 + ChartScales.S n) ^ (scales.degree * p) := by
-    simpa only [mul_pow, ← pow_mul] using pow_le_pow_left₀ hslow0 (scales.slow_le n) p
-  have hmajor : majorant s (fun n x => Real.sqrt (s.zeta x) * P n x) α A p n x ≤
-      (A * B * scales.constant ^ p) * ChartScales.Q n ^ (scales.power * α) *
-        ((1 + ChartScales.S n) ^ (scales.degree * p) *
-          Real.exp (-(c * g.length_scale / 25) * ChartScales.S n)) := by
-    rw [majorant, StripData.growth, mul_pow, scales.epsilon_eq,
-      ← Real.rpow_mul hQ.le]
-    calc
-      _ = (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) *
-          (Real.sqrt (s.zeta x) * max 1 (s.delta x)⁻¹ ^ p) * P n x := by ring
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) *
-          (Real.sqrt (s.zeta x) * max 1 (s.delta x)⁻¹ ^ p) *
-            Real.exp (-(c * g.length_scale / 25) * ChartScales.S n) :=
-        mul_le_mul_of_nonneg_left hPg (by positivity)
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) * B *
-            Real.exp (-(c * g.length_scale / 25) * ChartScales.S n) := by
-        gcongr
-        exact hweight x hx
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) *
-          (scales.constant ^ p * (1 + ChartScales.S n) ^ (scales.degree * p))) * B *
-            Real.exp (-(c * g.length_scale / 25) * ChartScales.S n) := by
-        gcongr
-      _ = _ := by ring
-  calc
-    _ ≤ majorant s (fun n x => Real.sqrt (s.zeta x) * P n x) α A p n x := hb n x hx j hj
-    _ ≤ _ := hmajor
-    _ = (A * B * scales.constant ^ p) * (1 + ChartScales.S n) ^ (scales.degree * p) *
-        (ChartScales.Q n ^ (scales.power * α) *
-          Real.exp (-(c * g.length_scale / 25) * ChartScales.S n)) := by ring
-    _ ≤ (A * B * scales.constant ^ p) * (1 + ChartScales.S n) ^ (scales.degree * p) *
-        (C * Real.exp (-((c * g.length_scale / 25) / 2) * ChartScales.S n)) := by
-      have hS : 0 ≤ ChartScales.S n := sq_nonneg _
-      exact mul_le_mul_of_nonneg_left (hgauss n) (by positivity)
-    _ = _ := by
-      rw [show c * g.length_scale / 25 / 2 = c * g.length_scale / 50 by ring]
-      ring
 
-/-- Every prescribed dyadic power is gained, for all actual stripped jets. -/
-theorem error_stripped_bound {s : StripData D} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → D → ℝ} {α c : ℝ} {u f : ℕ → D → E}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (m : ℕ) (N : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (g.error u f n) x‖ ≤ C * ChartScales.Q n ^ N := by
-  obtain ⟨A, hA, d, ha⟩ := g.error_gaussian_bound edges scales hu hf hc hP m
-  have hscale := g.length_scale_pos
-  obtain ⟨B, hB, hb⟩ := gaussian_beats_Q_power (by positivity : 0 < c * g.length_scale / 50) d N
-  refine ⟨A * B, by positivity, fun n x hx j hj => ?_⟩
-  calc
-    _ ≤ A * (1 + ChartScales.S n) ^ d *
-        Real.exp (-(c * g.length_scale / 50) * ChartScales.S n) := ha n x hx j hj
-    _ = A * ((1 + ChartScales.S n) ^ d *
-        Real.exp (-(c * g.length_scale / 50) * ChartScales.S n)) := by ring
-    _ ≤ A * (B * ChartScales.Q n ^ N) := mul_le_mul_of_nonneg_left (hb n) hA
-    _ = _ := by ring
 
 
 end SlotFamily

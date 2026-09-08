@@ -137,9 +137,6 @@ theorem mixedBoundaryOperator_translation (a : Space) (χ ψ : Cutoff) (z : L2) 
     cutoffCurl (χ.translate a) (weakPotential (ψ.translate a) (translation a z))
   rw [cutoffCurl_translation, weakPotential_translation]
 
-/-- The genuine spatial translation commutator on ordinary L². -/
-def translationCommutator (a : Space) (A : L2 →L[ℝ] L2) : L2 →L[ℝ] L2 :=
-  (translation a).toContinuousLinearMap.comp A - A.comp (translation a).toContinuousLinearMap
 
 
 

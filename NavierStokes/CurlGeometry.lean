@@ -28,11 +28,6 @@ def cross {R : Type*} [CommRing R] (u v : Vec3 R) : Vec3 R :=
 
 
 
-/-- The vector triple-product identity, before imposing tangency. -/
-theorem triple_product {R : Type*} [CommRing R] (n a : Vec3 R) :
-    cross n (cross n a) = dot n a • n - dot n n • a := by
-  funext j
-  fin_cases j <;> simp [cross, dot] <;> ring
 
 
 

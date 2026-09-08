@@ -99,40 +99,7 @@ theorem axial_smoothAt (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
   exact ((contDiffAt_const.mul contDiffAt_fst).sqrt (mul_ne_zero (by norm_num) hX)).mul
     (hux.add (hn.div hl (mul_ne_zero (by norm_num) hL)))
 
-theorem partialX_theta (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
-    (hX : w.1 ≠ 0) (hf : P.f w ≠ 0) (hL : L h w.2 ≠ 0) :
-    partialX (theta P h) w =
-      (partialX P.f w * w.1 * P.angularLag h w + P.f w * P.angularLag h w +
-        P.f w * w.1 * partialX (P.angularLag h) w) / L h w.2 +
-        2 * partialX P.f w + 2 * w.1 * partialX (partialX P.f) w := by
-  have hf' := partialX_hasDerivAt
-    ((P.f_smooth.contDiffAt (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp))
-  have hfx : HasDerivAt (fun x => partialX P.f (x, w.2))
-      (partialX (partialX P.f) w) w.1 := partialX_hasDerivAt
-    (((radialPartial_smooth Ω P.f_smooth).contDiffAt
-      (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp))
-  have hq := partialX_hasDerivAt
-    ((P.angularLag_smoothAt h hw hX (P.H_ne_zero hX hf)).differentiableAt (by simp))
-  have hd := (((hf'.fun_mul (hasDerivAt_id w.1)).fun_mul hq).div_const (L h w.2)).fun_add
-    (((hasDerivAt_id w.1).const_mul 2).fun_mul hfx)
-  have ht := partialX_hasDerivAt
-    ((theta_smoothAt P h hw hX hf hL).differentiableAt (by simp))
-  exact (ht.unique hd).trans (by simp only [id_eq, Prod.eta, mul_one]; ring)
 
-/-- The unweighted angular identity, using the actual regular lag equation. -/
-theorem theta_divergence_coefficient (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
-    (hX : w.1 ≠ 0) (hf : P.f w ≠ 0) (hL : L h w.2 ≠ 0) :
-    partialX (theta P h) w + theta P h w / w.1 =
-      P.f w * sourceTheta P h w / L h w.2 +
-        2 * (w.1 * partialX (partialX P.f) w + 2 * partialX P.f w) := by
-  have hq := P.angularLag_smoothAt h hw hX (P.H_ne_zero hX hf)
-  have he := P.angularLag_equation h hw hX (P.H_ne_zero hX hf)
-  rw [(partialX_hasDerivAt (hq.differentiableAt (by simp))).deriv] at he
-  change w.1 * partialX (P.angularLag h) w +
-    (1 + w.1 * partialX P.H w / P.H w) * P.angularLag h w = sourceTheta P h w at he
-  rw [partialX_theta P h hw hX hf hL, ← he, partialX_H P hw]
-  unfold theta Profiles.H
-  field_simp ; ring
 
 
 theorem partialX_axial (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)

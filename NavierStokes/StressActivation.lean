@@ -64,10 +64,6 @@ theorem weightedField_smooth (T κ : ℝ) {J : Set ℝ} (hJ : IsOpen J) {B : Fie
     ContDiffOn ℝ ∞ (weightedField T κ B) (logDomain J hJ).carrier :=
   ((activation_smooth T κ).comp contDiff_fst).contDiffOn.mul hB
 
-theorem weightedPrimitive_smooth (T κ : ℝ) {J : Set ℝ} (hJ : IsOpen J) {B : Field}
-    (hB : ContDiffOn ℝ ∞ B (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (weightedPrimitive T κ B) (logDomain J hJ).carrier :=
-  primitive_smooth (logDomain J hJ) (weightedField_smooth T κ hJ hB)
 
 
 theorem weightedPrimitive_zero {T : ℝ} (hT : 0 < T) (κ : ℝ) (B : Field)
@@ -211,19 +207,7 @@ noncomputable def primitiveFactor (T : ℝ) (B : Field) (p : Point) : ℝ :=
   p.1 ^ 2 * stepDenominator T p.1 *
     ParametricFlatFactor.factor (T ^ 2) 0 (flatCoefficient T B) (p.2, p.1)
 
-theorem flatCoefficient_smooth (T : ℝ) {J : Set ℝ} (hJ : IsOpen J) {B : Field}
-    (hB : ContDiffOn ℝ ∞ B (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (flatCoefficient T B) (J ×ˢ univ) :=
-  (hB.comp (contDiff_snd.prodMk contDiff_fst).contDiffOn (fun _ hp => ⟨hp.2, hp.1⟩)).div
-    ((stepDenominator_smooth T).comp contDiff_snd).contDiffOn
-    (fun p _ => (stepDenominator_pos T p.2).ne')
 
-theorem primitiveFactor_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : IsOpen J)
-    {B : Field} (hB : ContDiffOn ℝ ∞ B (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (primitiveFactor T B) (logDomain J hJ).carrier := by
-  exact ((contDiff_fst.pow 2).mul ((stepDenominator_smooth T).comp contDiff_fst)).contDiffOn.mul
-    ((flatFactor_local (sq_pos_of_pos hT) 0 hJ (flatCoefficient_smooth T hJ hB)).comp
-      (contDiff_snd.prodMk contDiff_fst).contDiffOn (fun _ hp => ⟨hp.2, hp.1⟩))
 
 @[simp] theorem primitiveFactor_zero (T : ℝ) (B : Field) (η : ℝ) :
     primitiveFactor T B (0, η) = 0 := by simp [primitiveFactor]
@@ -253,14 +237,6 @@ theorem controlled_difference_factorization {T : ℝ} (hT : 0 < T) (κ : ℝ)
   rw [controlled_sub T κ hJ hF y hη, weightedPrimitive_factorization hT]
   ring
 
-theorem weightedPrimitive_scale (T κ : ℝ) (B : Field) (p : Point) :
-    weightedPrimitive T κ B p = (1 - κ) * weightedPrimitive T 0 B p := by
-  unfold weightedPrimitive primitive weightedField activation
-  rw [← intervalIntegral.integral_const_mul]
-  apply intervalIntegral.integral_congr
-  intro t _
-  dsimp only
-  ring
 
 noncomputable def meanExp (x : ℝ) : ℝ :=
   average (fun p : Point => Real.exp p.1) (x, 0)
@@ -355,33 +331,7 @@ noncomputable def relativeFamily (T : ℝ) (L : Field) (q : FamilyPoint) : ℝ :
 noncomputable def differenceFamily (T : ℝ) (F : Field) (q : FamilyPoint) : ℝ :=
   -primitiveFactor T (radialPartial F) (q.1.2, q.2)
 
-theorem relativeFamily_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : IsOpen J)
-    {L : Field} (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (relativeFamily T L) ((univ : Set (ℝ × ℝ)) ×ˢ J) := by
-  have hD := radialPartial_smooth (logDomain J hJ) hL
-  have hp := primitiveFactor_smooth hT hJ hD
-  have hw := weightedPrimitive_smooth T 0 hJ hD
-  intro q hq
-  have hm : ContDiffAt ℝ ∞ (fun z : FamilyPoint => (z.1.2, z.2)) q :=
-    contDiffAt_fst.snd.prodMk contDiffAt_snd
-  have hp' := (hp.contDiffAt ((logDomain J hJ).isOpen.mem_nhds
-    (show (q.1.2, q.2) ∈ (logDomain J hJ).carrier from ⟨mem_univ _, hq.2⟩))).comp q hm
-  have hw' := (hw.contDiffAt ((logDomain J hJ).isOpen.mem_nhds
-    (show (q.1.2, q.2) ∈ (logDomain J hJ).carrier from ⟨mem_univ _, hq.2⟩))).comp q hm
-  have hh : ContDiffAt ℝ ∞
-      (fun z : FamilyPoint => -primitiveFactor T (radialPartial L) (z.1.2, z.2) *
-        meanExp (-((1 - z.1.1) * weightedPrimitive T 0 (radialPartial L) (z.1.2, z.2)))) q :=
-    hp'.neg.mul (meanExp_smooth.contDiffAt.comp q
-      ((contDiffAt_const.sub contDiffAt_fst.fst).mul hw').neg)
-  convert! hh.contDiffWithinAt using 1
-  funext z
-  simp only [relativeFamily, relativeFactor, weightedPrimitive_scale T z.1.1]
 
-theorem differenceFamily_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : IsOpen J)
-    {F : Field} (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (differenceFamily T F) ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  ((primitiveFactor_smooth hT hJ (radialPartial_smooth (logDomain J hJ) hF)).neg).comp
-    (contDiff_fst.snd.prodMk contDiff_snd).contDiffOn (fun _ hp => ⟨mem_univ _, hp.2⟩)
 
 /-- Compactness bounds the genuine η derivatives of a jointly smooth family.
 In particular the compact κ range contains zero; inverse powers of κ cannot enter. -/
@@ -479,49 +429,18 @@ theorem logHistory_smooth (X0 : ℝ) (initial : HistoryRow → ℝ → ℝ)
 
 noncomputable def fieldFamily (F : Field) (q : FamilyPoint) : ℝ := F (q.1.2, q.2)
 
-theorem fieldFamily_smooth {J : Set ℝ} (hJ : IsOpen J) {F : Field}
-    (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (fieldFamily F) ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  hF.comp (contDiff_fst.snd.prodMk contDiff_snd).contDiffOn
-    (fun _ hp => ⟨mem_univ _, hp.2⟩)
 
 noncomputable def controlledFamily (T : ℝ) (F : Field) (q : FamilyPoint) : ℝ :=
   controlled T q.1.1 F (q.1.2, q.2)
 
-theorem controlledFamily_smooth (T : ℝ) {J : Set ℝ} (hJ : IsOpen J) {F : Field}
-    (hF : ContDiffOn ℝ ∞ F (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (controlledFamily T F) ((univ : Set (ℝ × ℝ)) ×ˢ J) := by
-  have hw := fieldFamily_smooth hJ
-    (weightedPrimitive_smooth T 0 hJ (radialPartial_smooth (logDomain J hJ) hF))
-  have hc : ContDiffOn ℝ ∞
-      (fun q : FamilyPoint => fieldFamily F q -
-        (1 - q.1.1) * fieldFamily (weightedPrimitive T 0 (radialPartial F)) q)
-      ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-    (fieldFamily_smooth hJ hF).sub
-      ((contDiffOn_const.sub contDiffOn_fst.fst).mul hw)
-  apply hc.congr
-  intro q hq
-  have he := controlled_sub T q.1.1 hJ hF q.1.2 hq.2
-  rw [weightedPrimitive_scale] at he
-  dsimp only [controlledFamily, fieldFamily]
-  linarith
 
 noncomputable def angularFamily (T : ℝ) (L : Field) (q : FamilyPoint) : ℝ :=
   activatedAngular T q.1.1 L (q.1.2, q.2)
 
-theorem angularFamily_smooth (T : ℝ) {J : Set ℝ} (hJ : IsOpen J) {L : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (angularFamily T L) ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  (controlledFamily_smooth T hJ hL).exp
 
 noncomputable def angularDifferenceFamily (T : ℝ) (L : Field) (q : FamilyPoint) : ℝ :=
   fieldFamily (referenceAngular L) q * relativeFamily T L q
 
-theorem angularDifferenceFamily_smooth {T : ℝ} (hT : 0 < T)
-    {J : Set ℝ} (hJ : IsOpen J) {L : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier) :
-    ContDiffOn ℝ ∞ (angularDifferenceFamily T L) ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  (fieldFamily_smooth hJ hL.exp).mul (relativeFamily_smooth hT hJ hL)
 
 theorem angular_difference_factorization {T : ℝ} (hT : 0 < T) (κ : ℝ)
     {J : Set ℝ} (hJ : IsOpen J) {L : Field}

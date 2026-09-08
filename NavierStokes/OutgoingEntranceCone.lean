@@ -1597,32 +1597,8 @@ theorem second_ramp_cone_margins (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 / 
 
 /-! ## Uniform pressure-source estimates -/
 
-theorem pressureGradient_contDiff_eta (v : TailData) (y : ℝ) :
-    ContDiff ℝ ∞ (pressureGradient v y) := by
-  exact (contDiff_infty_iff_deriv.mp (SchedulePressure.axisPressure_contDiff v)).2.sub
-    ((((contDiff_const.mul shapeGradient_contDiff).mul (shape_contDiff.pow 2))).mul contDiff_const)
 
-theorem angularSquare_hasDerivAt_eta (c : Parameters) (y η : ℝ) :
-    HasDerivAt (fun t => angular c.P c.dropLength c.lam (y, t) ^ 2)
-      (-2 * shapeGradient η * angular c.P c.dropLength c.lam (y, η) ^ 2) η := by
-  convert! ((shape_hasDerivAt η).const_mul (radialAmplitude c.P c.dropLength c.lam y)).pow 2 using 1
-  simp only [angular]
-  ring
 
-theorem pressureAxialSource_hasDerivAt_eta (v : TailData) (y η : ℝ) :
-    HasDerivAt (pressureAxialSource v y)
-      ((2 + 4 * A v.h) * η * pressureGradient v y η -
-        d η * deriv (pressureGradient v y) η + 4 * A v.h * entrancePressure v y η +
-          (1 - 2 * η * shapeGradient η) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2) η := by
-  have hd : HasDerivAt d (-2 * η) η := by
-    convert! (hasDerivAt_const η (1 : ℝ)).fun_sub ((hasDerivAt_id η).fun_pow 2) using 1
-    simp []
-  have hp := ((pressureGradient_contDiff_eta v y).differentiable (by simp) η).hasDerivAt
-  convert! ((hd.fun_neg.fun_mul hp).fun_add
-    (((hasDerivAt_id η).const_mul (4 * A v.h)).fun_mul (entrancePressure_hasDerivAt_eta v y η))).fun_add
-      ((hasDerivAt_id η).fun_mul (angularSquare_hasDerivAt_eta v.core y η)) using 1
-  simp only [id_eq]
-  ring
 
 noncomputable def pressureSourceBound : ℝ := 10 * pressureBound + 10
 
@@ -1665,56 +1641,6 @@ theorem pressureAxialSource_bound (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 /
   have hn := mul_nonneg (abs_nonneg η) (sq_nonneg (angular v.core.P v.core.dropLength v.core.lam (y, η)))
   nlinarith [mul_nonneg pressureBound_pos.le hn]
 
-theorem pressureAxialSource_deriv_bound (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 / 100)
-    (hy : 0 ≤ y) (hyend : y ≤ v.core.endpoint) (hη : |η| ≤ 1) :
-    |deriv (pressureAxialSource v y) η| ≤ pressureSourceBound *
-      angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-  have hp := actual_pressure_bounds v hy hyend hη
-  have hE := sq_nonneg (angular v.core.P v.core.dropLength v.core.lam (y, η))
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by
-    unfold d
-    constructor <;> nlinarith [sq_nonneg η, parameter_square_le_one hη]
-  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := by
-    unfold A
-    constructor <;> linarith [v.h_pos]
-  have hp1 : |pressureGradient v y η| ≤ pressureBound * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    apply hp.2.1.trans
-    nlinarith [mul_le_mul_of_nonneg_right hη (mul_nonneg pressureBound_pos.le hE)]
-  have hfirst : |(2 + 4 * A v.h) * η * pressureGradient v y η| ≤
-      5 * pressureBound * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    rw [abs_mul, abs_mul, abs_of_nonneg (by linarith : 0 ≤ 2 + 4 * A v.h)]
-    have hc : (2 + 4 * A v.h) * |η| ≤ 5 := by
-      nlinarith [mul_le_mul_of_nonneg_left hη (by linarith : 0 ≤ 2 + 4 * A v.h)]
-    have hb := mul_le_mul hc hp1 (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 5)
-    nlinarith
-  have hsecond : |d η * deriv (pressureGradient v y) η| ≤
-      pressureBound * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    rw [abs_mul, abs_of_nonneg hd.1]
-    simpa only [one_mul] using mul_le_mul hd.2 hp.2.2 (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 1)
-  have hthird : |4 * A v.h * entrancePressure v y η| ≤
-      3 * pressureBound * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    rw [abs_mul, abs_of_nonneg hA.1]
-    have hb := mul_le_mul hA.2 hp.1 (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 3)
-    nlinarith
-  have hc : |1 - 2 * η * shapeGradient η| ≤ 1 := by
-    apply abs_le.mpr
-    have hb := eta_shapeGradient_bounds hη
-    constructor <;> nlinarith [sq_nonneg η]
-  have hfourth : |(1 - 2 * η * shapeGradient η) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2| ≤
-      angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    rw [abs_mul, abs_of_nonneg hE]
-    exact (mul_le_mul_of_nonneg_right hc hE).trans_eq (one_mul _)
-  rw [(pressureAxialSource_hasDerivAt_eta v y η).deriv]
-  have hs : |(2 + 4 * A v.h) * η * pressureGradient v y η -
-      d η * deriv (pressureGradient v y) η + 4 * A v.h * entrancePressure v y η +
-        (1 - 2 * η * shapeGradient η) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2| ≤
-      |(2 + 4 * A v.h) * η * pressureGradient v y η| +
-        |d η * deriv (pressureGradient v y) η| + |4 * A v.h * entrancePressure v y η| +
-          |(1 - 2 * η * shapeGradient η) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2| :=
-    (abs_add_le _ _).trans (add_le_add_left
-      ((abs_add_le _ _).trans (add_le_add_left (abs_sub _ _) _)) _)
-  unfold pressureSourceBound
-  nlinarith [mul_nonneg pressureBound_pos.le hE]
 
 /-! ## A single ordered choice of the preliminary parameters -/
 

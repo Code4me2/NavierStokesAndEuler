@@ -30,9 +30,6 @@ theorem cutoffBound_translate (χ : Cutoff) (a : Space) :
   rw [lpNorm_translated χ.field χ.smooth.continuous,
     lpNorm_translated (gradient χ.field) (contDiff_gradient χ.smooth).continuous]
 
-/-- The genuine directional spatial difference quotient, defined also at h = 0. -/
-def spatialDifference (a : Space) (h : ℝ) : L2 →L[ℝ] L2 :=
-  h⁻¹ • ((translation (h • a)).toContinuousLinearMap - ContinuousLinearMap.id ℝ L2)
 
 
 def Cutoff.differenceQuotient (χ : Cutoff) (a : Space) (h : ℝ) : Cutoff :=

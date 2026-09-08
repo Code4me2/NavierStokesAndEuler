@@ -169,71 +169,10 @@ theorem slotVelocity_mask_zero {U : UnsignedLabel} (P : PairData sys U)
   funext i
   simp [slotVelocity_formula, amplitude, hm]
 
-/-- The same finite set of signed labels works for all auxiliary points
-and all angles at a positive physical point. -/
-theorem finite_active_slots (D : ℝ) (N : ℕ) {q : ℝ} (hq : 0 < q)
-    (x : SlotColoring.Position) :
-    ∃ F : Finset SignedIndex, ∀ a : SignedIndex, a ∉ F →
-      mask D (tailLabel N a.1) q x = 0 := by
-  classical
-  let hs := finite_active_masks D N hq x
-  refine ⟨hs.toFinset.product Finset.univ, ?_⟩
-  intro a ha
-  by_contra hm
-  exact ha (Finset.mem_product.mpr ⟨hs.mem_toFinset.mpr hm, Finset.mem_univ _⟩)
 
-private theorem finsum_vector_apply {ι : Type*} (f : ι → Vector) (s : Finset ι)
-    (hf : ∀ a, a ∉ s → f a = 0) (i : Fin 3) :
-    (∑ᶠ a, f a) i = ∑ᶠ a, f a i := by
-  classical
-  have hv : (∑ᶠ a, f a) = ∑ a ∈ s, f a := by
-    apply finsum_eq_sum_of_support_subset
-    intro a ha
-    by_contra hn
-    exact ha (hf a hn)
-  have hi : (∑ᶠ a, f a i) = ∑ a ∈ s, f a i := by
-    apply finsum_eq_sum_of_support_subset
-    intro a ha
-    by_contra hn
-    exact ha (by change f a i = 0; rw [hf a hn]; rfl)
-  rw [hv, hi]
-  simp only [Finset.sum_apply]
 
-noncomputable def principalField {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (Y : Plane) (θ : ℝ) : Vector :=
-  ∑ᶠ a : SignedIndex,
-    slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ
 
-theorem principalField_finite {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position) :
-    ∃ F : Finset SignedIndex, ∀ Y θ,
-      principalField P hdet outer ε T q x Y θ =
-        ∑ a ∈ F, slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ := by
-  classical
-  obtain ⟨F, hF⟩ := finite_active_slots D N hq x
-  refine ⟨F, ?_⟩
-  intro Y θ
-  apply finsum_eq_sum_of_support_subset
-  intro a ha
-  by_contra hn
-  exact ha (slotVelocity_mask_zero (P a.1) hdet _ _ _ q x (hF a hn) _ Y θ)
 
-theorem principalField_apply {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position)
-    (Y : Plane) (θ : ℝ) (i : Fin 3) :
-    principalField P hdet outer ε T q x Y θ i =
-      ∑ᶠ a : SignedIndex,
-        slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ i := by
-  obtain ⟨F, hF⟩ := finite_active_slots D N hq x
-  exact finsum_vector_apply _ F
-    (fun a ha => slotVelocity_mask_zero (P a.1) hdet _ _ _ q x (hF a ha) _ Y θ) i
 
 
 
@@ -473,53 +412,11 @@ end CoefficientAssembly
 
 /-! ## The angular covariance is a genuine function on the auxiliary torus -/
 
-private noncomputable def latticeCover (k : TorusInverse.Frequency) : TorusInverse.Frequency :=
-  (3 * k.1 + k.2, k.1 + 5 * k.2)
-
-private theorem covering_add_lattice (Y : Plane) (k : TorusInverse.Frequency) :
-    TorusAverages.covering (Y + TorusAverages.latticePoint k) =
-      TorusAverages.covering Y + TorusAverages.latticePoint (latticeCover k) := by
-  ext <;> simp [TorusAverages.covering, TorusAverages.latticePoint, latticeCover] <;> ring
-
-private theorem covering_iterate_add_lattice (n : ℕ) (Y : Plane) (k : TorusInverse.Frequency) :
-    TorusAverages.covering^[n] (Y + TorusAverages.latticePoint k) =
-      TorusAverages.covering^[n] Y + TorusAverages.latticePoint (latticeCover^[n] k) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      rw [Function.iterate_succ_apply', ih, covering_add_lattice,
-        Function.iterate_succ_apply', Function.iterate_succ_apply']
 
 
-theorem slot_cross_zero {N : ℕ} (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position)
-    {a b : SignedIndex} (hab : a ≠ b) (Y : Plane) (θ : ℝ) (i : Fin 2) :
-    slotVelocity (P a.1) hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ 0 *
-      slotVelocity (P b.1) hdet (outer b.1) (ε b.1) (T b.1) q x b.2 Y θ i.succ = 0 := by
-  have hlevel (c : SignedIndex) : 1 ≤ (signedTailLabel N c).1 := by
-    change 1 ≤ c.1.1 + N
-    omega
-  have hne : signedTailLabel N a ≠ signedTailLabel N b :=
-    fun he => hab ((signedTailLabel_injective N) he)
-  have hz := sys.wave_cross_zero (hlevel a) (hlevel b) hne
-    ((P a.1).rawRadial_support hdet a.2) ((P b.1).rawTangent_support hdet b.2 i) hq x Y θ
-    (outer a.1 * Real.sqrt (ε a.1) * SmoothCovariance.amplitudes (P a.1).matrix (T a.1) a.2)
-    (outer b.1 * Real.sqrt (ε b.1) * SmoothCovariance.amplitudes (P b.1).matrix (T b.1) b.2)
-    ((P a.1).modes a.2) ((P b.1).modes b.2) ((P a.1).phases a.2) ((P b.1).phases b.2)
-  simp only [slotVelocity_zero, slotVelocity_succ, PairData.radialWave, PairData.tangentWave,
-    signedTailLabel, physicalMask_signedLabel, amplitude, mul_assoc] at hz ⊢
-  exact hz
 
-noncomputable def diagonalCovariance {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (a : SignedIndex) (i : Fin 2) (Y : Plane) : ℝ :=
-  (outer a.1 * amplitude (ε a.1) (mask D (tailLabel N a.1) q x) (P a.1).matrix (T a.1) a.2) ^ 2 *
-    covered (SlotColoring.nativeIndex h (tailLabel N a.1).1) ((P a.1).rawRadial hdet a.2) Y *
-      covered (SlotColoring.nativeIndex h (tailLabel N a.1).1) ((P a.1).rawTangent hdet a.2 i) Y * (1 / 2)
+
+
 
 
 

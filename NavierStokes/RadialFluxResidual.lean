@@ -147,18 +147,6 @@ theorem laplaceWeighted_radialB {V : Profile} {p : ProfilePoint}
   field_simp [hs] ; ring
 
 
-private theorem hasFDerivAt_velocity_at {B F U : Profile} {t : ℝ} {x : Space}
-    (hB : DifferentiableAt ℝ B (profilePoint t x))
-    (hF : DifferentiableAt ℝ F (profilePoint t x))
-    (hU : DifferentiableAt ℝ U (profilePoint t x)) :
-    HasFDerivAt (fun y => AxisymmetricResidual.velocity B F U (t, y))
-      (velocityJacobian B F U t x) x := by
-  have hb := hasFDerivAt_profile_composition B t x hB
-  have hf := hasFDerivAt_profile_composition F t x hF
-  have hu := hasFDerivAt_profile_composition U t x hU
-  exact hasFDerivAt_pack
-    ((((projection 0).hasFDerivAt.mul hb).add ((projection 1).hasFDerivAt.mul hf)).neg)
-    (((projection 0).hasFDerivAt.mul hf).sub ((projection 1).hasFDerivAt.mul hb)) hu
 
 
 

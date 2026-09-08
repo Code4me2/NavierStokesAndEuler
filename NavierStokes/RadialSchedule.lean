@@ -26,17 +26,11 @@ namespace NavierStokes.RadialSchedule
 
 def axialExponent (h : ℝ) : ℝ := 1 / 2 - h
 
-def axialShape (η : ℝ) : ℝ := 1 - η ^ 2
 
 def coordinateFactor (h η : ℝ) : ℝ := 1 - 2 * h * η ^ 2
 
-def idealAxialVelocity (η : ℝ) : ℝ := 4 * η
 
-def idealTransport (h η : ℝ) : ℝ :=
-  1 - 2 * axialExponent h * η * idealAxialVelocity η - axialShape η * 4
 
-/-- The logarithmic shape derivative of `(1 + η²)⁻¹`. -/
-def logShapeDerivative (η : ℝ) : ℝ := -(2 * η / (1 + η ^ 2))
 
 
 

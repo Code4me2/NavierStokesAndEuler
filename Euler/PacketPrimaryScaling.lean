@@ -1,4 +1,5 @@
-import Euler.PacketPrimaryFullShear
+import Euler.PacketPrimaryFactorization
+import Euler.PacketPrimaryShearIdentity
 import Euler.TransversePacketPrimaryHomogeneity
 import Euler.PacketCylinderFieldAlgebra
 
@@ -57,12 +58,6 @@ theorem vector_terminal_smul (a : ℝ) (t : Icc (0 : ℝ) D.T) (x : Space) (θ :
     H.orbit (G.smul a).orbit t t (congrArg (fun p => p t) hp)) (x,(θ : AddCircle period))
   exact (H.raw_eq t x θ).trans (he.trans ((G.smul a).raw_eq t x θ).symm)
 
-theorem scaled_terminal_wave_eq (a k : ℝ) (t : Icc (0 : ℝ) D.T) :
-    (fun x : Space => k⁻¹ • vector τ hτ hτT B (initialData D δ hδ (a • ξ) hs)
-      (t,(x,k*⟪D.m₀,x⟫_ℝ))) = fullWave τ hτ hτT B δ hδ ξ hs a k t := by
-  funext x
-  rw [vector_terminal_smul τ hτ hτT B δ hδ ξ hs]
-  simp only [fullWave,smul_smul,div_eq_mul_inv,mul_comm]
 
 
 end EulerPacketPrimaryShear

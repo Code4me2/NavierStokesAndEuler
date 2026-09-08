@@ -42,9 +42,6 @@ theorem gate_amplitude_eq (f : CopyFamily H K) (k : K) (I : WaveIndex H)
     {x : LiftPoint} (hx : x ∈ liftPast) : (gate f).amplitude k I x = f.amplitude k I x := by
   simp only [gate, ite_eq_left hx]
 
-theorem gate_amplitude_zero (f : CopyFamily H K) (k : K) (I : WaveIndex H)
-    {x : LiftPoint} (hx : x ∉ liftPast) : (gate f).amplitude k I x = 0 := by
-  simp only [gate, ite_eq_right hx]
 
 theorem gate_amplitude_ne_zero_iff (f : CopyFamily H K) (k : K) (I : WaveIndex H)
     (x : LiftPoint) :

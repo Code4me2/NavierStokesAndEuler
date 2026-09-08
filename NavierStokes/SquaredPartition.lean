@@ -50,7 +50,6 @@ def bump : ContDiffBump (0 : ℝ) where
 
 def translatedBump (k : ℤ) (x : ℝ) : ℝ := bump (x - k)
 
-theorem translatedBump_nonneg (k : ℤ) (x : ℝ) : 0 ≤ translatedBump k x := bump.nonneg
 
 theorem translatedBump_smooth (k : ℤ) : ContDiff ℝ ∞ (translatedBump k) :=
   bump.contDiff.comp (contDiff_id.sub contDiff_const)
@@ -112,8 +111,6 @@ theorem denominatorSquared_smooth : ContDiff ℝ ∞ denominatorSquared :=
 def lineMask (k : ℤ) (x : ℝ) : ℝ :=
   translatedBump k x / Real.sqrt (denominatorSquared x)
 
-theorem lineMask_nonneg (k : ℤ) (x : ℝ) : 0 ≤ lineMask k x :=
-  div_nonneg (translatedBump_nonneg k x) (Real.sqrt_nonneg _)
 
 theorem lineMask_smooth (k : ℤ) : ContDiff ℝ ∞ (lineMask k) :=
   (translatedBump_smooth k).div

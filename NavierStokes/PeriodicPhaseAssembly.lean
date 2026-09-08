@@ -158,16 +158,6 @@ theorem periodizeScalar_refine (g : Geometry) (f : Plane → ℝ) (d : ℕ) (Y :
       periodizeScalar g f (coverPower d Y) :=
   CopySolveCompatibility.native_copy_sum_refine g d f Y
 
-theorem periodizeScalar_transport (g : Geometry) (f : Plane → ℝ) (d : ℕ)
-    (shift rate : ℝ) (hrate : rate ≠ 0) (Y : Plane) :
-    periodizeScalar (CopySolveCompatibility.transportGeometry g d shift rate hrate)
-      (f ∘ CopySolveCompatibility.nativeTimeMap shift rate) Y =
-      periodizeScalar g f (coverPower d Y) := by
-  unfold periodizeScalar
-  apply tsum_congr
-  intro k
-  simp only [comp_apply, CopySolveCompatibility.transportGeometry,
-    CopySolveCompatibility.coordinates_refine, CopySolveCompatibility.coordinates_timeGeometry]
 
 /-- The clock itself is periodicized together with its cutoff. -/
 noncomputable def periodicClock (g : Geometry) (χ : Plane → ℝ) : Plane → ℝ :=
@@ -265,15 +255,6 @@ theorem angularLift_contDiff {Φ : P × Plane → ℝ} (hΦ : ContDiff ℝ ∞ �
     (contDiff_const.mul contDiff_fst.snd)
 
 
-omit [NormedSpace ℝ P] in
-theorem angularLift_germ {Φ Ψ : P × Plane → ℝ} (angular : ℝ)
-    {x : (P × ℝ) × Plane} (hΦ : Φ =ᶠ[𝓝 (x.1.1, x.2)] Ψ) :
-    angularLift Φ angular =ᶠ[𝓝 x] angularLift Ψ angular := by
-  have ht : Tendsto (fun z : (P × ℝ) × Plane => (z.1.1, z.2))
-      (𝓝 x) (𝓝 (x.1.1, x.2)) :=
-    (continuous_fst.fst.prodMk continuous_snd).continuousAt
-  filter_upwards [ht.eventually hΦ] with y hy
-  exact congrArg (fun t => t + angular * y.1.2) hy
 
 
 

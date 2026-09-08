@@ -75,12 +75,6 @@ theorem mean_wave_cmul {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
   hf.bilinear_wave hg hζ (ContinuousLinearMap.mul ℝ ℂ)
 
 
-theorem wave_cmul_mean {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
-    {f g : ℕ → D → ℂ} (hf : WaveClass s P α f) (hg : WaveClass s P β g)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    MeanClass s (α + β) (fun n x => f n x * g n x) :=
-  hf.bilinear_mean hg hP0 hP1 (ContinuousLinearMap.mul ℝ ℂ)
 
 
 /-- Evaluation of the actual derivative field at an actual vector field. -/
@@ -210,20 +204,6 @@ theorem wave_mean_weight {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ} {f
   intro n x hx
   exact mul_le_of_le_one_right (mul_nonneg (Real.sqrt_nonneg _) (hP n x hx)) (hζ x hx)
 
-theorem wave_square_weight_mean {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
-    {f : ℕ → D → E}
-    (hf : MemClass s (fun n x => (Real.sqrt (s.zeta x) * P n x) *
-      (Real.sqrt (s.zeta x) * P n x)) α f)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) : MeanClass s α f := by
-  apply hf.mono_weight (fun _ x hx => s.zeta_nonneg x hx)
-  intro n x hx
-  have hP2 : P n x * P n x ≤ 1 := by nlinarith [hP0 n x hx, hP1 n x hx]
-  calc
-    _ = (Real.sqrt (s.zeta x)) ^ 2 * (P n x * P n x) := by ring
-    _ = s.zeta x * (P n x * P n x) := by rw [Real.sq_sqrt (s.zeta_nonneg x hx)]
-    _ ≤ s.zeta x * 1 := mul_le_mul_of_nonneg_left hP2 (s.zeta_nonneg x hx)
-    _ = _ := mul_one _
 
 theorem wave_square_weight_wave {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
     {f : ℕ → D → E}
@@ -263,36 +243,9 @@ theorem wave_advects_stripped_mean {s : StripData D} {P : ℕ → D → ℝ} {α
     WaveClass s P (α + μ - κ) (fun n x => strippedTransport G a m n x i) :=
   wave_mean_weight (strippedTransport_class G hκ ha (meanVector_component hm) i) hζ hP
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem carrier_add (κ κ' : ℝ) (Φ : D → ℝ) (x : D) :
-    carrier κ Φ x * carrier κ' Φ x = carrier (κ + κ') Φ x := by
-  unfold carrier
-  rw [← Complex.exp_add]
-  congr 1
-  simp only [phaseFactor, Complex.ofReal_add]
-  ring
 
 
-theorem transport_mode_left (R : D → ℝ) (Vr Vθ Vz : D → D) (κ : ℝ)
-    (Φ : D → ℝ) (a b : D → ComplexVector) (x : D) (i : Fin 3) :
-    LinearWaveResidual.transport R Vr Vθ Vz (vectorMode κ Φ a) b x i =
-      LinearWaveResidual.transport R Vr Vθ Vz a b x i * carrier κ Φ x := by
-  simp only [LinearWaveResidual.transport, vectorMode, mode]
-  ring
 
-theorem transport_mode_right (R : D → ℝ) (Vr Vθ Vz : D → D) (κ : ℝ)
-    {Φ : D → ℝ} (a : D → ComplexVector) {b : D → ComplexVector} {x : D}
-    (hΦ : DifferentiableAt ℝ Φ x) (hb : ∀ i, DifferentiableAt ℝ (fun y => b y i) x)
-    (i : Fin 3) :
-    LinearWaveResidual.transport R Vr Vθ Vz a (vectorMode κ Φ b) x i =
-      (LinearWaveResidual.transport R Vr Vθ Vz a b x i +
-        phaseFactor κ * normalDot (phaseNormal R Vr Vθ Vz Φ x) (a x) * b x i) * carrier κ Φ x := by
-  have hd (V : D → D) (j : Fin 3) :
-      along V (fun y => vectorMode κ Φ b y j) x =
-        (along V (fun y => b y j) x + phaseFactor κ * Complex.ofReal (along V Φ x) * b x j) *
-          carrier κ Φ x := along_mode V κ hΦ (hb j)
-  simp only [LinearWaveResidual.transport, hd]
-  fin_cases i <;> simp [angularGenerator, vectorMode, mode, normalDot, phaseNormal, div_eq_mul_inv] <;> ring
 
 
 theorem normalDot_class {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
@@ -466,20 +419,6 @@ theorem bandBound_frequency {s : StripData D} {β : ℝ} {k : ℕ → ℝ} {j : 
 
 
 
-/-- Vanishing of a product on an open set forces the differentiated second
-factor to vanish wherever the first factor is nonzero. -/
-theorem mul_along_zero {U : Set D} (hU : IsOpen U) {f g : D → ℂ} {x : D}
-    (hx : x ∈ U) (hf : ContinuousAt f x)
-    (hfg : ∀ y ∈ U, f y * g y = 0) (V : D → D) : f x * along V g x = 0 := by
-  by_cases hz : f x = 0
-  · simp [hz]
-  have hfnz : ∀ᶠ y in 𝓝 x, f y ≠ 0 := hf.eventually_ne hz
-  have hgn : g =ᶠ[𝓝 x] (fun _ => 0) := by
-    filter_upwards [hfnz, hU.mem_nhds hx] with y hfy hy
-    exact (mul_eq_zero.mp (hfg y hy)).resolve_left hfy
-  unfold along
-  rw [hgn.fderiv_eq]
-  simp
 
 
 

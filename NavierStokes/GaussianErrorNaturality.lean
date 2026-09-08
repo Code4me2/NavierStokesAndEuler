@@ -124,25 +124,12 @@ theorem waveChange_waveEquiv (h Q Qr : ℝ) (gap : ℕ) (x : Cylinder) :
     waveChange h Q Qr gap (PhysicalParticularWave.waveEquiv x) =
       PhysicalParticularWave.waveEquiv (PhysicalParticularWave.cylinderChange h Q Qr gap x) := rfl
 
-/-- The actual untransported reference data, evaluated at its own band. -/
-noncomputable def referenceParameters (D : AssemblyData Parameter) :
-    CorrectionStep.ParticularParameters Parameter where
-  tangent j _ := D.reference.tangent j
-  geometry _ := D.reference.geometry
-  length _ := D.reference.length
-  length_pos _ := D.reference.length_pos
-  cutoff _ := D.reference.cutoff
-  background := D.background
-  directions := D.directions
 
 noncomputable def nativeData (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ) (j : ℤ) :
     PeriodizedWaveBounds.CopyData WaveSpace Frequency :=
   (CorrectionStep.ParticularParameters.fromReference D h gap).copyData
     D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j
 
-noncomputable def referenceData (D : AssemblyData Parameter) (j : ℤ) :
-    PeriodizedWaveBounds.CopyData WaveSpace Frequency :=
-  (referenceParameters D).copyData D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j
 
 theorem copyData_amplitude (p : CorrectionStep.ParticularParameters Parameter)
     (C : Context (Parameter × Plane)) (u : State (Parameter × Plane))
@@ -155,27 +142,7 @@ theorem copyData_amplitude (p : CorrectionStep.ParticularParameters Parameter)
   complexCopyVelocity_angle (p.tangent j n) (residualSource C u b G A j n)
     (p.geometry n) (p.length_pos n).le copy x.1.1 x.1.2 x.2
 
-theorem native_cutoff_transport (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (j : ℤ) (n : ℕ) (copy : Frequency) :
-    (nativeData D h gap j).cutoff n copy = fun x =>
-      (referenceData D j).cutoff D.reference.band copy
-        (waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) := by
-  funext x
-  change D.reference.cutoff
-      (CopySolveCompatibility.nativeTimeMap 0
-        (PhysicalParticularWave.clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band))
-        ((CopySolveCompatibility.transportGeometry D.reference.geometry (gap n) 0
-          (PhysicalParticularWave.clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band)) _).coordinates copy x.2)) =
-    D.reference.cutoff (D.reference.geometry.coordinates copy (coverPower (gap n) x.2))
-  erw [ScaledTangentTransport.coordinates_transport]
 
-theorem reference_cutoff_differentiable (D : AssemblyData Parameter) (j : ℤ)
-    (hcutoff : ContDiff ℝ ∞ D.reference.cutoff) (copy : Frequency) (x : WaveSpace) :
-    DifferentiableAt ℝ ((referenceData D j).cutoff D.reference.band copy) x := by
-  change DifferentiableAt ℝ (fun y : WaveSpace =>
-    D.reference.cutoff (D.reference.geometry.coordinates copy y.2)) x
-  exact ((hcutoff.comp (D.reference.geometry.coordinates_contDiff copy)).comp
-    contDiff_snd).contDiffAt.differentiableAt (by simp)
 
 /-- A nonzero actual directional derivative is supported in any closed
 set supporting the original cutoff. -/
@@ -188,35 +155,7 @@ theorem along_ne_zero_mem_closed {E : Type} [NormedAddCommGroup E] [NormedSpace 
     simp only [along, hz, _root_.zero_apply]
   exact (closure_minimal hf hK) (support_fderiv_subset ℝ hd)
 
-theorem reference_derivative_mem_slot (D : AssemblyData Parameter) (j : ℤ)
-    {U : Set Parameter} (R : PhysicalParticularWave.ReferenceODE D j U)
-    (copy : Frequency) {x : WaveSpace}
-    (hx : D.directions.Dfast (fun m => (referenceData D j).cutoff m copy) D.reference.band x ≠ 0) :
-    (D.reference.geometry.coordinates copy x.2).2 ∈ Icc 0 D.reference.length := by
-  let K : Set WaveSpace := {y | (D.reference.geometry.coordinates copy y.2).2 ∈ Icc 0 D.reference.length}
-  have hK : IsClosed K := isClosed_Icc.preimage
-    (((D.reference.geometry.coordinates_contDiff copy).continuous.comp continuous_snd).snd)
-  apply along_ne_zero_mem_closed hK (V := D.directions.fastField D.reference.band) _ hx
-  intro y hy
-  exact (R.cutoff hy).2
 
-theorem current_slot_of_reference_derivative (D : AssemblyData Parameter) (h : ℝ)
-    (gap : ℕ → ℕ) (j : ℤ) (n : ℕ) {U : Set Parameter}
-    (R : PhysicalParticularWave.ReferenceODE D j U) (copy : Frequency) (x : WaveSpace)
-    (hx : D.directions.Dfast (fun m => (referenceData D j).cutoff m copy) D.reference.band
-      (waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) ≠ 0) :
-    (((CorrectionStep.ParticularParameters.fromReference D h gap).geometry n).coordinates copy x.2).2 ∈
-      Icc 0 ((CorrectionStep.ParticularParameters.fromReference D h gap).length n) := by
-  let rate := PhysicalParticularWave.clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-  have hrate : 0 < rate := PhysicalParticularWave.ratioPower_pos
-    (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band) _
-  have hs := reference_derivative_mem_slot D j R copy hx
-  change (D.reference.geometry.coordinates copy (coverPower (gap n) x.2)).2 ∈
-    Icc 0 D.reference.length at hs
-  apply (ScaledTangentTransport.current_slot_iff D.reference.geometry (gap n) 0 rate hrate
-    copy x.2 0 (D.reference.length / rate)).mpr
-  have hlen : rate * (D.reference.length / rate) = D.reference.length := by field_simp
-  simpa only [zero_add, mul_zero, hlen] using hs
 
 theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
     {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤ d) (ha : a = c) (hb : b = d) :
@@ -253,47 +192,7 @@ section ActualReference
 open CommonCoverSolve TorusInverse ParticularWaveAssembly ParticularWaveBounds
 open CorrectionState PhysicalParticularWave
 
-theorem native_source_transport (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    (x : WaveSpace) :
-    (nativeData D h gap j).source n x =
-      (clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-        velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band)) •
-      (referenceData D j).source D.reference.band
-        (waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) := by
-  exact congrFun (H.source_eq hn hr j) (x.1.1, x.2)
 
-theorem native_amplitude_transport (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    {U : Set Parameter} (R : ReferenceODE D j U)
-    (hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) (hKr : referenceFrequency D j ≠ 0)
-    (copy : Frequency) (x : WaveSpace)
-    (hx : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) x.1.1 ∈ U)
-    (hslot : (((CorrectionStep.ParticularParameters.fromReference D h gap).geometry n).coordinates copy x.2).2 ∈
-      Icc 0 ((CorrectionStep.ParticularParameters.fromReference D h gap).length n)) :
-    (nativeData D h gap j).amplitude n copy x =
-      velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (referenceData D j).amplitude D.reference.band copy
-          (waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) := by
-  unfold nativeData referenceData
-  rw [copyData_amplitude, copyData_amplitude, H.source_eq hn hr j]
-  exact complexCopyVelocity_zeroEntry (D.reference.tangent j) (referenceSource D j)
-    (parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)) D.reference.geometry (gap n)
-    D.reference.length (clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band))
-    (velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band))
-    (normalWeight (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      ((j : ℝ) * D.carrierBlock.frequency n) (referenceFrequency D j))
-    D.reference.length_pos (ratioPower_pos (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band) _)
-    (normalWeight_ne (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band) hK hKr)
-    R.coefficient R.forcing R.source x.1.1 hx copy x.2 hslot
 
 
 

@@ -31,10 +31,6 @@ theorem contDiff_iteratedDeriv {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : �
     ContDiff ℝ ∞ (iteratedDeriv n f) := by
   simpa only [iteratedDeriv_eq_iterate] using hf.iterate_deriv n
 
-omit [CompleteSpace E] in
-theorem iteratedDeriv_iteratedDeriv (f : ℝ → E) (m n : ℕ) :
-    iteratedDeriv m (iteratedDeriv n f) = iteratedDeriv (m + n) f := by
-  simp only [iteratedDeriv_eq_iterate, Function.iterate_add_apply]
 
 noncomputable def average (f : ℝ → E) (x : ℝ) : E :=
   ∫ t in (0 : ℝ)..1, f (t * x)
@@ -85,25 +81,7 @@ theorem contDiff_average {f : ℝ → E} (hf : ContDiff ℝ ∞ f) :
     SmoothParameterIntegral.contDiff_integral_of_iteratedDeriv hs
       (measurable_scaled_jet hf) (dominated_scaled_jet hf)
 
-omit [CompleteSpace E] in
-theorem iteratedDeriv_average {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) (x : ℝ) :
-    iteratedDeriv n (average f) x =
-      ∫ t in (0 : ℝ)..1, t ^ n • iteratedDeriv n f (t * x) := by
-  change iteratedDeriv n (fun y => ∫ t in (0 : ℝ)..1, f (t * y)) x = _
-  have hs : ∀ᵐ t ∂volume.restrict (Ioc (0 : ℝ) 1),
-      ContDiff ℝ ∞ (fun x => f (t * x)) :=
-    Filter.Eventually.of_forall fun t => hf.comp (contDiff_const.mul contDiff_id)
-  have h := SmoothParameterIntegral.iteratedDeriv_integral hs
-    (measurable_scaled_jet hf) (dominated_scaled_jet hf) n x
-  simp_rw [iteratedDeriv_scale hf] at h
-  simpa only [average, intervalIntegral.integral_of_le zero_le_one] using h
 
-theorem iteratedDeriv_average_zero {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
-    iteratedDeriv n (average f) 0 = (1 / ((n : ℝ) + 1)) • iteratedDeriv n f 0 := by
-  rw [iteratedDeriv_average hf]
-  simp only [mul_zero]
-  rw [intervalIntegral.integral_smul_const, integral_pow]
-  simp
 
 theorem average_deriv_identity {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (x : ℝ) :
     x • average (deriv f) x = f x - f 0 := by
@@ -174,16 +152,6 @@ theorem radialDerivative_eq_div {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
   simpa only [smul_smul, inv_mul_cancel₀ hne, one_smul,
     one_div] using h
 
-theorem iteratedDeriv_radialDerivative_zero {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
-    iteratedDeriv n (radialDerivative f) 0 =
-      (1 / (2 * ((n : ℝ) + 1))) • iteratedDeriv (n + 2) f 0 := by
-  have ha := contDiff_average (contDiff_iteratedDeriv hf 2)
-  change iteratedDeriv n ((1 / 2 : ℝ) • average (iteratedDeriv 2 f)) 0 = _
-  rw [iteratedDeriv_const_smul (ha.of_le (nat_le_infty n)).contDiffAt,
-    iteratedDeriv_average_zero (contDiff_iteratedDeriv hf 2), iteratedDeriv_iteratedDeriv,
-    smul_smul]
-  congr 1
-  field_simp
 
 noncomputable def descent (f : ℝ → E) (X : ℝ) : E := f (Real.sqrt X)
 
@@ -238,10 +206,6 @@ theorem radialIterate_succ (f : ℝ → E) (n : ℕ) :
     radialIterate f (n + 1) = radialDerivative (radialIterate f n) :=
   Function.iterate_succ_apply' radialDerivative n f
 
-omit [CompleteSpace E] in
-theorem radialIterate_succ_right (f : ℝ → E) (n : ℕ) :
-    radialIterate f (n + 1) = radialIterate (radialDerivative f) n :=
-  Function.iterate_succ_apply radialDerivative n f
 
 omit [CompleteSpace E] in
 theorem contDiff_radialIterate {f : ℝ → E} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
@@ -271,29 +235,7 @@ theorem iteratedDerivWithin_descent {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
       (even_radialIterate he n) hX).derivWithin (uniqueDiffOn_Ici 0 X hX)
 
 
-theorem radialIterate_at_zero (n : ℕ) {f : ℝ → E} (hf : ContDiff ℝ ∞ f) :
-    radialIterate f n 0 =
-      ((n.factorial : ℝ) / ((2 * n).factorial : ℝ)) • iteratedDeriv (2 * n) f 0 := by
-  induction n generalizing f with
-  | zero => simp [radialIterate_zero]
-  | succ n ih =>
-    rw [radialIterate_succ_right, ih (contDiff_radialDerivative hf),
-      iteratedDeriv_radialDerivative_zero hf, smul_smul]
-    have hi : 2 * n + 2 = 2 * (n + 1) := by omega
-    rw [hi]
-    congr 1
-    rw [show 2 * (n + 1) = (2 * n + 1) + 1 by omega,
-      Nat.factorial_succ (2 * n + 1), Nat.factorial_succ (2 * n), Nat.factorial_succ n]
-    push_cast
-    field_simp ; ring
 
-/-- Exact right jets of the descended function. -/
-theorem iteratedDerivWithin_descent_zero {f : ℝ → E} (hf : ContDiff ℝ ∞ f)
-    (he : Function.Even f) (n : ℕ) :
-    iteratedDerivWithin n (descent f) (Ici 0) 0 =
-      ((n.factorial : ℝ) / ((2 * n).factorial : ℝ)) • iteratedDeriv (2 * n) f 0 := by
-  rw [iteratedDerivWithin_descent hf he n (show (0 : ℝ) ∈ Ici 0 from by simp)]
-  simpa only [descent, Real.sqrt_zero] using radialIterate_at_zero n hf
 
 /-! The local theorem uses an explicit cutoff extension. This extension is
 constructed here; the input is not assumed to have a global even extension. -/
@@ -363,11 +305,6 @@ theorem even_localized {r : ℝ} (hr : 0 < r) {f : ℝ → E}
     rw [(localized_eventually_zero hr hnx f).eq_of_nhds,
       (localized_eventually_zero hr hx' f).eq_of_nhds]
 
-omit [CompleteSpace E] in
-theorem descent_localized_eventuallyEq (r : ℝ) (f : ℝ → E) :
-    descent (localized r f) =ᶠ[𝓝 0] descent f :=
-  (localized_eventuallyEq r f).comp_tendsto
-    (by simpa only [Real.sqrt_zero] using Real.continuous_sqrt.tendsto (0 : ℝ))
 
 
 

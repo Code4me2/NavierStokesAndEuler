@@ -307,21 +307,6 @@ theorem nominal_angular_zero_eq {R eta : ℝ} (hR : 0 < R) (heta : eta ∈ nomin
       (baseFields (nominalDomain W) W.axis.normalization W.profiles (nominalParameters_domain W)).phi (R, eta) = _
   exact hh.trans (W.E_eq_sqrt_f (p := (R ^ 2 / 2, eta)) (by positivity)).symm
 
-theorem nominal_axial_mass_zero {eta : ℝ} (heta : eta ∈ nominalParameters W) :
-    SlowStressSupport.moment (nominalScheme W).B 1 (axialHistory (nominalScheme W) 0) eta = 0 := by
-  have he : SlowStressSupport.moment (nominalScheme W).B 1 (axialHistory (nominalScheme W) 0) eta =
-      PositiveOrderMoments.massHistory (nominalScheme W).base.axial ((nominalScheme W).B, eta) := by
-    apply intervalIntegral.integral_congr
-    intro R _
-    dsimp only
-    rw [axialHistory_eq _ _ heta, profiles_zero]
-    simp only [pow_one, PositiveOrderMoments.weightedAxial]
-  rw [he]
-  change PositiveOrderMoments.massHistory
-    (baseFields (nominalDomain W) W.axis.normalization W.profiles (nominalParameters_domain W)).axial
-      (nominalOuterRadius W, eta) = 0
-  rw [baseFields_mass _ _ _ _ (nominalOuterRadius_pos W).le heta]
-  exact nominal_mass_exterior W (nominalParameters_domain W) eta heta
 
 
 theorem nominal_first_angular_eq {p : ℝ × ℝ} (hX : nominalOuterX W < p.1)

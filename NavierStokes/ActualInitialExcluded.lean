@@ -498,17 +498,6 @@ theorem normalizedBase_prefix (alpha : ℝ) (m : ℕ) :
       rw [ChartScales.epsilon, ← Real.rpow_mul (ChartScales.Q_pos n).le]
       exact Real.rpow_le_rpow_of_exponent_ge (ChartScales.Q_pos n) (ChartScales.Q_le_one n) hexp
 
-theorem normalizedBase_envelope (alpha : ℝ) :
-    PrimaryPulseBounds.EnvelopeJets (BaseChartJets.unitScale (BaseContextAssembly.phaseDomain W U ℕ))
-      (fun n _ => ChartScales.epsilon F.data.h n ^ alpha) (normalizedBase H v upper B) := by
-  refine ⟨fun n _ _ => (Real.rpow_pos_of_pos (ChartScales.epsilon_pos F.data.h n) _).le,
-    normalizedBase_smooth H v upper B U, ?_⟩
-  intro m
-  obtain ⟨C, hC, hb⟩ := normalizedBase_prefix H v upper B U alpha m
-  refine ⟨C + 1, by linarith, 0, fun n p hp j hj => ?_⟩
-  simpa only [pow_zero, mul_one] using (hb n p hp j hj).trans
-    (mul_le_mul_of_nonneg_right (by linarith : C ≤ C + 1)
-      (Real.rpow_pos_of_pos (ChartScales.epsilon_pos F.data.h n) alpha).le)
 
 theorem baseError_zero_angle (n : ℕ) (x : BaseContextAssembly.Point) (i : Fin 3) :
     ActualBaseResidual.baseError H v upper B n (x, 0) i =
@@ -520,28 +509,7 @@ theorem baseError_zero_angle (n : ℕ) (x : BaseContextAssembly.Point) (i : Fin 
   congr 1
   fin_cases i <;> simp
 
-/-- Every actual base-error component has all powers on the full free
-auxiliary lift. No vanishing edge-weight premise is imposed on this term. -/
-theorem baseError_component_class (alpha : ℝ) (i : Fin 3) :
-    UnweightedClass (BaseContextAssembly.nativeStrip W U) alpha
-      (fun n x => ActualBaseResidual.baseError H v upper B n (x, 0) i) := by
-  have hh := BaseContextAssembly.envelope_pullback (BaseContextAssembly.nativeStrip W U)
-    (normalizedBase_envelope H v upper B U alpha)
-    (fun _ => BaseContextAssembly.slowCoordinates_maps W U) (fun _ => rfl)
-  have hi := hh.map (AxisymmetricFields.projection i)
-  apply WaveInteractionBounds.class_congr hi
-  intro n x _
-  exact (baseError_zero_angle H v upper B n x i).symm
 
-theorem baseError_angle_component_class (alpha : ℝ) (i : Fin 3) :
-    UnweightedClass (HarmonicWaveInteraction.productStrip (BaseContextAssembly.nativeStrip W U)) alpha
-      (fun n x => ActualBaseResidual.baseError H v upper B n x i) := by
-  have hh := HarmonicWaveInteraction.class_lift (baseError_component_class H v upper B U alpha i)
-  apply WaveInteractionBounds.class_congr hh
-  intro n x hx
-  exact (ActualBaseResidual.baseError_angle_eq H v upper B n
-    (BaseContextAssembly.nativeStrip_radius W U hx) (BaseContextAssembly.nativeStrip_time W U hx)
-      x.2 i).symm
 
 end NormalizedBase
 
@@ -989,45 +957,6 @@ variable {D : Type} {I : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   {s : StripData D} {w : I → ℕ → D → ℝ} {K : I → ℕ → Set D}
   {f g : I → ℕ → D → ℂ}
 
-/-- Only carrier jets on the actual coefficient support are used. Their
-fixed-order loss is absorbed by the independently proved all-power input. -/
-theorem uniform_flat_mul
-    (hf : ∀ α : ℝ, LabelSumBounds.UniformClass s w α f)
-    (hg : ∀ i n, ContDiffOn ℝ ∞ (g i n) s.domain)
-    (hz : ∀ i n x, x ∈ s.domain → x ∉ K i n → f i n =ᶠ[𝓝 x] fun _ => 0)
-    (hb : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∃ r : ℝ,
-      ∀ i n x, x ∈ s.domain → x ∈ K i n → ∀ j ≤ m,
-        ‖iteratedFDeriv ℝ j (g i n) x‖ ≤ majorant s (fun _ _ => 1) r C p n x)
-    (β : ℝ) : LabelSumBounds.UniformClass s w β (fun i n x => f i n x * g i n x) := by
-  refine ⟨(hf β).weight_nonneg, fun i n => ((hf β).smooth i n).mul (hg i n), ?_⟩
-  intro m
-  obtain ⟨B, hB, q, r, hgb⟩ := hb m
-  obtain ⟨A, hA, p, hfb⟩ := (hf (β-r)).bounds m
-  let c := ‖ContinuousLinearMap.mul ℝ ℂ‖ * (2 : ℝ)^m * A * B
-  refine ⟨c, by dsimp [c]; positivity, p+q, ?_⟩
-  intro i n x hx j hj
-  by_cases hK : x ∈ K i n
-  · have h := LabelSumBounds.bilinear_jet_bound (ContinuousLinearMap.mul ℝ ℂ)
-      s.isOpen_domain ((hf (β-r)).smooth i n) (hg i n) hx hj
-      (majorant_nonneg s (w i) (β-r) hA p n x ((hf (β-r)).weight_nonneg i n x hx))
-      (majorant_nonneg s (fun _ _ => 1) r hB q n x zero_le_one)
-      (hfb i n x hx) (hgb i n x hx hK)
-    refine h.trans_eq ?_
-    calc
-      _ = (‖ContinuousLinearMap.mul ℝ ℂ‖ * (2 : ℝ)^m) *
-          (majorant s (w i) (β-r) A p n x * majorant s (fun _ _ => 1) r B q n x) := by ring
-      _ = _ := by
-        rw [majorant_mul]
-        simp only [mul_one, sub_add_cancel]
-        unfold majorant c
-        ring
-  · have he : (fun y => f i n y * g i n y) =ᶠ[𝓝 x] fun _ => 0 := by
-      filter_upwards [hz i n x hx hK] with y hy
-      rw [hy, zero_mul]
-    rw [PeriodizedWaveBounds.jets_eq_of_germ he j]
-    simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply, norm_zero] using
-      majorant_nonneg s (w i) β (by dsimp [c]; positivity) (p+q) n x
-        ((hf β).weight_nonneg i n x hx)
 
 end FlatProducts
 
@@ -1040,23 +969,12 @@ variable {B N0 : ℕ}
 noncomputable abbrev gaussianStrip : StripData ActualPrimary.FullPoint :=
   HarmonicWaveInteraction.productStrip strip
 
-noncomputable def chartCarrier (l : SignedLabel B N0) (n : ℕ) : ActualPrimary.FullPoint → ℂ :=
-  HarmonicCalculus.carrier ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-    ((ActualPrimary.chartCoefficients l.1 l.2).phase n)
 
-theorem chartCarrier_smooth (l : SignedLabel B N0) (n : ℕ) :
-    ContDiffOn ℝ ∞ (chartCarrier l n) gaussianStrip.domain :=
-  HarmonicCalculus.contDiffOn_carrier ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-    (ActualPrimaryCoherence.piece_phase_smooth ActualPrimary.standardRegion l.1 l.2 n)
 
 noncomputable def gaussianField (l : SignedLabel B N0) :
     ℕ → ActualPrimary.FullPoint → Fin 3 → ℝ :=
   (ActualPrimary.piece ActualPrimary.standardRegion l.1 l.2).excluded
 
-theorem gaussianField_eq (l : SignedLabel B N0) (n : ℕ) (x : ActualPrimary.FullPoint) (i : Fin 3) :
-    gaussianField l n x i = (chartGaussian l n x i * HarmonicCalculus.carrier
-      ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-      ((ActualPrimary.chartCoefficients l.1 l.2).phase n) x).re := rfl
 
 theorem chartGaussian_cut_support (l : SignedLabel B N0) (n : ℕ) {x : ActualPrimary.FullPoint}
     (hx : chartGaussian l n x ≠ 0) :
@@ -1078,101 +996,13 @@ theorem chartGaussian_cut_support (l : SignedLabel B N0) (n : ℕ) {x : ActualPr
       _root_.zero_apply, Pi.zero_apply, zero_smul, smul_zero, add_zero])
   exact smul_ne_zero hψ ha
 
-theorem chartGaussian_zero_off_cut (l : SignedLabel B N0) (n : ℕ) {x : ActualPrimary.FullPoint}
-    (hx : x ∉ tsupport (((ActualPrimary.chartCoefficients l.1 l.2).withCutoff
-      (ActualPrimary.chartCutoff l.1 l.2)).amplitude n)) :
-    chartGaussian l n =ᶠ[𝓝 x] fun _ => 0 := by
-  apply notMem_tsupport_iff_eventuallyEq.mp
-  exact fun hz => hx (closure_mono (fun y hy => chartGaussian_cut_support l n hy) hz)
-
-theorem gaussianField_window (l : SignedLabel B N0) (n : ℕ) {x : ActualPrimary.FullPoint}
-    (hx : x ∈ gaussianStrip.domain) (i : Fin 3) (hn : gaussianField l n x i ≠ 0) :
-    ActualPrimaryCovariance.physicalWindow n x.1 ∈
-      LabelSumBounds.closedWindow (CoordinateAlgebra.D ActualPrimary.h)
-        (ActualPrimaryCovariance.signedLabelOf (l.2,l.1)) := by
-  have hc : chartGaussian l n x ≠ 0 := by
-    intro hz
-    exact hn (by simp only [gaussianField_eq, hz, Pi.zero_apply, zero_mul, Complex.zero_re])
-  exact (ActualPrimaryCovariance.piece_support (l.2,l.1) n x.1 hx x.2
-    (subset_tsupport _ (chartGaussian_cut_support l n hc))).1
 
 
-theorem gaussianField_all_gains_of_carrier
-    (hc : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∃ r : ℝ,
-      ∀ (l : SignedLabel B N0) n x, x ∈ gaussianStrip.domain →
-        x ∈ tsupport (((ActualPrimary.chartCoefficients l.1 l.2).withCutoff
-          (ActualPrimary.chartCutoff l.1 l.2)).amplitude n) → ∀ j ≤ m,
-        ‖iteratedFDeriv ℝ j (HarmonicCalculus.carrier
-          ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-          ((ActualPrimary.chartCoefficients l.1 l.2).phase n)) x‖ ≤
-            majorant gaussianStrip (fun _ _ => 1) r C p n x)
-    (β : ℝ) (i : Fin 3) :
-    LabelSumBounds.UniformClass gaussianStrip (fun _ _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun l : SignedLabel B N0 => fun n x => gaussianField l n x i) := by
-  have hf : LabelSumBounds.UniformClass gaussianStrip
-      (fun _ : SignedLabel B N0 => fun _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun l n x => chartGaussian l n x i * chartCarrier l n x) :=
-    uniform_flat_mul (s := gaussianStrip)
-    (f := fun (l : SignedLabel B N0) n x => chartGaussian l n x i)
-    (g := chartCarrier (B := B) (N0 := N0))
-    (fun α => (chartGaussian_all_gains (B := B) (N0 := N0) α).map (ContinuousLinearMap.proj i))
-    (chartCarrier_smooth (B := B) (N0 := N0))
-    (K := fun (l : SignedLabel B N0) n => tsupport (((ActualPrimary.chartCoefficients l.1 l.2).withCutoff
-      (ActualPrimary.chartCutoff l.1 l.2)).amplitude n))
-    (fun l n x _ hx => by
-      filter_upwards [chartGaussian_zero_off_cut l n hx] with y hy
-      exact congrFun hy i)
-    hc β
-  apply (hf.map Complex.reCLM).congr
-  intro l n x _
-  exact (gaussianField_eq l n x i).symm
 
-noncomputable def initialGaussian (B N0 : ℕ) : ℕ → ActualPrimary.FullPoint → Fin 3 → ℝ :=
-  LabelSumBounds.fieldSum (ActualPrimary.activeLabels ActualPrimary.standardRegion B N0)
-    (fun l => (ActualPrimary.piece ActualPrimary.standardRegion l.2 l.1).excluded)
 
-/-- The number of active labels may grow, but at most the fixed geometric
-overlap number contributes to an actual derivative at one point. -/
-theorem initialGaussian_class_of_fields (β : ℝ) (i : Fin 3)
-    (hf : LabelSumBounds.UniformClass gaussianStrip
-      (fun _ _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun l : SignedLabel B N0 => fun n x => gaussianField l n x i)) :
-    MemClass gaussianStrip (fun _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun n x => initialGaussian B N0 n x i) := by
-  have h := hf.reindex (fun l : ActualPrimary.Label B N0 × Fin 2 => (l.2,l.1))
-  have hχ (n : ℕ) : ContinuousOn
-      (fun x : ActualPrimary.FullPoint => ActualPrimaryCovariance.physicalWindow n x.1)
-      gaussianStrip.domain :=
-    (ActualPrimaryCovariance.physicalWindow_continuousOn n).comp
-      continuous_fst.continuousOn (fun _ hx => hx)
-  exact LabelSumBounds.window_sum_memClass (s := gaussianStrip)
-    (w := fun _ x => Real.sqrt (strip.zeta x.1))
-    (ActualPrimary.activeLabels ActualPrimary.standardRegion B N0)
-    (fun _ => ActualPrimaryCovariance.signedLabelOf)
-    (fun _ => ActualPrimaryCovariance.signedLabelOf_injective.injOn)
-    (fun _ l _ => l.1.val.property.1)
-    (CoordinateAlgebra.D ActualPrimary.h)
-    (fun n x => ActualPrimaryCovariance.physicalWindow n x.1)
-    hχ h
-    (fun _ _ _ => Real.sqrt_nonneg _)
-    (fun n l _ x hx hn => gaussianField_window (l.2,l.1) n hx i hn)
 
-theorem strip_zeta_le_one (x : Point) : strip.zeta x ≤ 1 :=
-  GaugeExcludedBounds.movingStrip_zeta_le_one ActualPrimary.standardRegion
-    (PrimaryTargetBounds.leftRadius_pos ActualPrimary.nominal)
-    (div_pos (FinalSlowBase.edgeExponent_pos ActualPrimary.nominal) (by norm_num)) zero_lt_one
-    (ChartScales.epsilon ActualPrimary.h) BaseContextAssembly.slowScale
-    (ChartScales.epsilon_pos ActualPrimary.h)
-    (ChartScales.epsilon_le_one ActualPrimary.h ActualPrimary.outgoing.data.h_pos.le)
-    BaseContextAssembly.one_le_slowScale x
 
-theorem initialGaussian_unweighted_of_fields (β : ℝ) (i : Fin 3)
-    (hf : LabelSumBounds.UniformClass gaussianStrip
-      (fun _ _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun l : SignedLabel B N0 => fun n x => gaussianField l n x i)) :
-    UnweightedClass gaussianStrip β (fun n x => initialGaussian B N0 n x i) :=
-  (initialGaussian_class_of_fields β i hf).mono_weight (fun _ _ _ => zero_le_one)
-    (fun _ x _ => Real.sqrt_le_one.mpr (strip_zeta_le_one x.1))
+
 
 end FullGaussian
 
@@ -1264,23 +1094,7 @@ theorem initialAlias_all_gains (B N0 : ℕ) (β : ℝ) :
   initialAlias_all_gains_of_data (ActualInitialMean.primary_mean_data B N0)
     (ActualInitialMean.rank_bounds B N0).cumulative β
 
-theorem initializedAlias_all_gains (B N0 : ℕ) (β : ℝ) :
-    MeanClass gaussianStrip β (ActualInitialMean.initialized B N0).errors.aliasError := by
-  have ht := (temporalAlias_all_gains_of_primaryData (ActualInitialMean.primary_mean_data B N0) β).2
-  have hp := (pressureAlias_all_gains_of_cumulative (ActualInitialMean.primary_mean_data B N0)
-    (ActualInitialMean.rank_bounds B N0).cumulative β).2
-  have he : (ActualInitialMean.initialized B N0).errors.aliasError =
-      VariableGaugeMean.temporalAliasState ActualPrimary.commonGauge ActualPrimary.h
-        (CommonWindow.index ActualPrimary.h) (ActualPrimary.commonContext B) (ActualInitialMean.primary B N0) +
-      VariableGaugeMean.pressureAliasState ActualPrimary.commonGauge (ActualPrimary.commonContext B)
-        (ActualInitialMean.ranked B N0) := ActualInitialCoherence.initialized_aliases B N0
-  rw [he]
-  exact ht.add hp
 
-theorem initializedAlias_unweighted (B N0 : ℕ) (β : ℝ) :
-    UnweightedClass gaussianStrip β (ActualInitialMean.initialized B N0).errors.aliasError :=
-  GaugeExcludedBounds.meanClass_unweighted (initializedAlias_all_gains B N0 β)
-    (fun x _ => strip_zeta_le_one x.1)
 
 end InitialAliases
 
@@ -1288,19 +1102,6 @@ section TotalExcluded
 
 open CorrectionInitialization ActualPrimaryBounds
 
-theorem initialized_errors_formula (B N0 : ℕ) :
-    (ActualInitialMean.initialized B N0).errors.total =
-      ActualBaseResidual.baseError ActualPrimary.certificate ActualPrimary.modulation ActualPrimary.upper B +
-      initialGaussian B N0 + (ActualInitialMean.initialized B N0).errors.aliasError := by
-  obtain ⟨hb, hg, _⟩ := GaugeInitialization.initializedBands_error_components
-    ActualPrimary.commonGauge ActualPrimary.rankData ActualPrimary.h (CommonWindow.index ActualPrimary.h)
-    ActualInitialMean.axial (ActualPrimary.commonContext B)
-    (ActualPrimary.activeLabels ActualPrimary.standardRegion B N0) ActualInitialMean.primaryPiece
-    (ActualInitialMean.baseError B)
-  change (ActualInitialMean.initialized B N0).errors.base = _ at hb
-  change (ActualInitialMean.initialized B N0).errors.gaussian = initialGaussian B N0 at hg
-  simp only [CorrectionState.ExcludedErrors.total, hb, hg]
-  rfl
 
 
 end TotalExcluded
@@ -1309,13 +1110,6 @@ section ConstructedEndpoint
 
 open CorrectionInitialization ActualPrimaryBounds
 
-/-- All actual derivatives of the restored primary Gaussian field retain
-the flat edge weight, uniformly over the whole label family. -/
-theorem gaussianField_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
-    LabelSumBounds.UniformClass gaussianStrip (fun _ _ x => Real.sqrt (strip.zeta x.1)) β
-      (fun l : SignedLabel B N0 => fun n x => gaussianField l n x i) :=
-  gaussianField_all_gains_of_carrier
-    (ActualPhaseJetBounds.carrier_jets_cut (B := B) (N0 := N0)) β i
 
 
 

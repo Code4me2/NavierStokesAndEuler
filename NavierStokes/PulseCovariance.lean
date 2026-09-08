@@ -450,22 +450,6 @@ theorem radiusProfile_lipschitz (s t : ℝ) :
 `h = c₀ sqrt(1+s²)`. -/
 noncomputable def modelDirection (c₀ s : ℝ) : Vec2 := ![c₀ * radiusProfile s, -s]
 
-theorem modelDirection_lipschitz (c₀ s t : ℝ) (i : Fin 2) :
-    |modelDirection c₀ s i - modelDirection c₀ t i| ≤ (|c₀| + 1) * |s - t| := by
-  fin_cases i
-  · change |c₀ * radiusProfile s - c₀ * radiusProfile t| ≤ _
-    rw [← mul_sub, abs_mul]
-    calc
-      |c₀| * |radiusProfile s - radiusProfile t| ≤ |c₀| * |s - t| :=
-        mul_le_mul_of_nonneg_left (radiusProfile_lipschitz s t) (abs_nonneg _)
-      _ ≤ (|c₀| + 1) * |s - t| := by nlinarith [abs_nonneg (s - t)]
-  · change |(-s) - (-t)| ≤ _
-    have he : |(-s) - (-t)| = |s - t| := by
-      calc
-        |(-s) - (-t)| = |-(s - t)| := congrArg abs (by ring)
-        _ = |s - t| := abs_neg _
-    rw [he]
-    nlinarith [mul_nonneg (abs_nonneg c₀) (abs_nonneg (s - t))]
 
 noncomputable def affineSlope (s₀ slope r v : ℝ) : ℝ :=
   s₀ + slope * (v - r ^ 2 / 2) / r ^ 2
@@ -473,17 +457,7 @@ noncomputable def affineSlope (s₀ slope r v : ℝ) : ℝ :=
 
 
 
-theorem affineSlope_distance (s₀ slope r v : ℝ) :
-    |affineSlope s₀ slope r v - s₀| = |slope| * |v - r ^ 2 / 2| / r ^ 2 := by
-  simp only [affineSlope, add_sub_cancel_left, abs_div, abs_mul,
-    abs_of_nonneg (sq_nonneg r)]
 
-theorem modelDirection_affine_drift (c₀ s₀ slope r v : ℝ) (i : Fin 2) :
-    |modelDirection c₀ (affineSlope s₀ slope r v) i - modelDirection c₀ s₀ i| ≤
-      ((|c₀| + 1) * |slope|) * |v - r ^ 2 / 2| / r ^ 2 := by
-  have hi := modelDirection_lipschitz c₀ (affineSlope s₀ slope r v) s₀ i
-  rw [affineSlope_distance] at hi
-  exact hi.trans_eq (by ring)
 
 noncomputable def actualColumn (ci : ℝ) (ψ x : ℝ → ℝ) (t : ℝ → Vec2) : Vec2 :=
   fun i => ci * ∫ v : ℝ, ψ v ^ 2 * x v * t v i
@@ -525,23 +499,6 @@ theorem ratio_continuousOn {t : ℝ → Vec2}
     ContinuousOn (fun v => t v i / x v) (Icc 0 (r ^ 2)) :=
   (ht i).div h.component_continuous.continuousOn (fun _ hv => (h.component_pos hv).ne')
 
-/-- Directional concentration for actual fundamental tangent components.
-The sole tangent estimate assumed is the pointwise ODE approximation to
-`h(v)N-s(v)K`, with affine `s` and the exact square-root profile `h`. -/
-theorem normalizedColumn_error {t : ℝ → Vec2}
-    (ht : ∀ i, ContinuousOn (fun v => t v i) (Icc 0 (r ^ 2)))
-    {E c₀ s₀ slope : ℝ} (hE : 0 ≤ E)
-    (htmodel : ∀ v ∈ Icc 0 (r ^ 2), ∀ i,
-      |t v i / x v - modelDirection c₀ (affineSlope s₀ slope r v) i| ≤ E / r ^ 2)
-    (i : Fin 2) :
-    |normalizedColumn ψ x t i - modelDirection c₀ s₀ i| ≤
-      (E + ((|c₀| + 1) * |slope|) * concentrationConstant a A b B) / r := by
-  apply h.averagedDirection_error_order (h.ratio_continuousOn ht i) hE
-    (mul_nonneg (by positivity) (abs_nonneg _))
-  intro v hv
-  exact (abs_sub_le (t v i / x v)
-    (modelDirection c₀ (affineSlope s₀ slope r v) i) (modelDirection c₀ s₀ i)).trans
-      (add_le_add (htmodel v hv i) (modelDirection_affine_drift c₀ s₀ slope r v i))
 
 
 end PulseBounds
@@ -581,31 +538,14 @@ theorem signedModel_strictCone {c₀ u m t : ℝ} (hc₀ : c₀ < 0) (hu : 0 < u
 abbrev SignedPulsePair (r a A b B c₀ u E : ℝ) :=
   (j : Fin 2) → TangentPulse r a A b B c₀ (signedSlopes u j) (signedSlopes u j) E
 
-noncomputable def actualMatrix {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) (ci : Vec2) : Mat2 :=
-  fun i j => actualColumn (ci j) (pulses j).cutoff (pulses j).component (pulses j).tangent i
 
 noncomputable def normalizedMatrix {r a A b B c₀ u E : ℝ}
     (pulses : SignedPulsePair r a A b B c₀ u E) : Mat2 :=
   fun i j => normalizedColumn (pulses j).cutoff (pulses j).component (pulses j).tangent i
 
-noncomputable def columnScales {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) (ci : Vec2) : Vec2 :=
-  fun j => ci j * mass (pulses j).cutoff (pulses j).component
 
-theorem signedSlopes_abs (u : ℝ) (j : Fin 2) : |signedSlopes u j| = |u| := by
-  fin_cases j <;> simp [signedSlopes]
 
-theorem actualMatrix_factorization {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) (ci : Vec2) :
-    actualMatrix pulses ci = FlatCovariance.columns (normalizedMatrix pulses) (columnScales pulses ci) := by
-  ext i j
-  exact congrFun ((pulses j).bounds.actualColumn_factorization (ci j) (pulses j).tangent) i
 
-theorem columnScales_pos {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) {ci : Vec2} (hci : ∀ j, 0 < ci j)
-    (j : Fin 2) : 0 < columnScales pulses ci j :=
-  mul_pos (hci j) (pulses j).bounds.mass_pos
 
 
 

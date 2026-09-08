@@ -1,5 +1,5 @@
 import Euler.FieldTowerGraph
-import Euler.CylinderGraphDerivative
+import Euler.CylinderGraphRealization
 import Euler.FieldTowerTimeRestriction
 
 /-! Canonical graph restrictions need no additional representative or

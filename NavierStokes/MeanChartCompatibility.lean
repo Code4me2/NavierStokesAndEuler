@@ -212,15 +212,6 @@ theorem fderiv_pull_apply (l : ℝ) (C : E →L[ℝ] F) (u : ℝ) {f : ℝ × F 
   rw [show pull l C u f = fun x => u * f (chartLinear l C x) from rfl, hd.fderiv]
   rfl
 
-theorem divideRadius_pull {l : ℝ} (hl : l ≠ 0) (C : E →L[ℝ] F)
-    (u : ℝ) (f : ℝ × F → ℝ) (z : ℝ × E) :
-    PressureStream.divideRadius (pull l C u f) z =
-      (u * l) * PressureStream.divideRadius f (chartLinear l C z) := by
-  change (u * f (chartLinear l C z)) / z.1 =
-    (u * l) * (f (chartLinear l C z) / (l * z.1))
-  by_cases hz : z.1 = 0
-  · simp [hz]
-  · field_simp
 
 theorem graphDr_pull (l : ℝ) (C : E →L[ℝ] F) (u : ℝ)
     (knew kold : ℝ → ℝ) (v : E) (w : F) {f : ℝ × F → ℝ} {z : ℝ × E}
@@ -238,19 +229,6 @@ theorem graphDr_pull (l : ℝ) (C : E →L[ℝ] F) (u : ℝ)
   simp only [smul_eq_mul, PressureStream.graphDr]
   ring
 
-theorem graphDz_pull (l : ℝ) (C : E →L[ℝ] F) (u k : ℝ) (v : E) (w : F)
-    {f : ℝ × F → ℝ} {z : ℝ × E}
-    (hf : DifferentiableAt ℝ f (chartLinear l C z)) (hvector : C v = k • w) :
-    PressureStream.graphDz v (pull l C u f) z =
-      (u * k) * PressureStream.graphDz w f (chartLinear l C z) := by
-  rw [PressureStream.graphDz, fderiv_pull_apply l C u hf]
-  have he : chartLinear l C (0, v) = k • ((0 : ℝ), w) := by
-    apply Prod.ext
-    · simp
-    · exact hvector
-  rw [he, map_smul]
-  simp only [smul_eq_mul, PressureStream.graphDz]
-  ring
 
 theorem physicalSpeed_vector {l R : ℝ} (hl : 0 < l) (hR : 0 ≤ R)
     (C : E →L[ℝ] F) (d M N : ℝ) (v : E) (w : F)
@@ -729,29 +707,8 @@ open TorusInverse
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- The potential uses the explicitly chosen common torus index. -/
-noncomputable def commonTemporalPotential (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (f : ℕ → PressureStream.Lift S → ℝ) (n : ℕ) :
-    PressureStream.Lift S → ℝ :=
-  PressureStream.streamPotential (r n).exponent (r n).inner (r n).outer ((r n).frequency n)
-    ((0 : S), (r n).radialDirection) (temporalAtIndex h n (index n) (f n))
 
-noncomputable def commonTemporalFields (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (epsilon : ℕ → ℝ) (axial : S × Plane)
-    (fθ fz : ℕ → PressureStream.Lift S → ℝ) : MeanIncrementBounds.Triple (PressureStream.Lift S) where
-  radial := fun n => PressureStream.streamBeta (epsilon n • axial)
-    (commonTemporalPotential r h index fz n)
-  angular := fun n => temporalAtIndex h n (index n) (fθ n)
-  axial := fun n => PressureStream.streamGamma
-    (PressureStream.physicalSpeed (r n).exponent ((r n).frequency n))
-    ((0 : S), (r n).radialDirection) (commonTemporalPotential r h index fz n)
 
-noncomputable def commonTemporalAlias (r : ℕ → CorrectionState.ReconstructionData)
-    (h : ℝ) (index : ℕ → ℕ) (f : ℕ → PressureStream.Lift S → ℝ) (n : ℕ) :
-    PressureStream.Lift S → ℝ :=
-  PressureStream.divideRadius (RadialPullback.physicalAlias (r n).exponent (r n).inner
-    (r n).outer ((r n).frequency n) ((0 : S), (r n).radialDirection)
-    (PressureStream.weightedSource (temporalAtIndex h n (index n) (f n))))
 
 
 variable [FiniteDimensional ℝ S]

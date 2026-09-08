@@ -329,14 +329,7 @@ theorem SlotSystem.cross_product_zero {D h : ℝ} {vr vt : Plane} (sys : SlotSys
 
 /-! ## Actual pulse columns and the positive inverse solve -/
 
-noncomputable def tangentExtension {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) : ℝ → Vec2 :=
-  ParametricODE.extend (sq_nonneg r)
-    ⟨fun v => P.tangent v, continuous_pi fun i => (P.tangent_continuous i).domRestrict⟩
 
-theorem tangentExtension_continuous {r a A b B c₀ s₀ slope E : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E) :
-    Continuous (tangentExtension P) := ParametricODE.continuous_extend _ _
 
 
 
@@ -568,51 +561,6 @@ theorem PairData.rawTangent_compact {D h : ℝ} {vr vt : Plane} {sys : SlotSyste
     HasCompactSupport (P.rawTangent hdet j i) :=
   nativePulse_compact vr vt _ hdet (P.ci_pos j).ne' ((P.pulses j).tangentProfile_compact sys.radius_pos i)
 
-/-- A finite family with the actual physical masks and actual slot supports.
-All cross terms vanish pointwise, regardless of repeated angular modes. -/
-theorem SlotSystem.finite_wave_covariance {ι : Type*} {D h : ℝ} {vr vt : Plane}
-    (sys : SlotSystem D h vr vt) (s : Finset ι) (label : ι → SlotColoring.Label)
-    (hlabel : Set.InjOn label (s : Set ι)) (hlevel : ∀ a ∈ s, 1 ≤ (label a).1)
-    (f g : ι → Plane → ℝ)
-    (hf : ∀ a ∈ s, support (f a) ⊆ slotSet h sys.radius vr vt (label a))
-    (hg : ∀ a ∈ s, support (g a) ⊆ slotSet h sys.radius vr vt (label a))
-    (hfc : ∀ a ∈ s, Continuous (f a)) (hfs : ∀ a ∈ s, HasCompactSupport (f a))
-    (hgc : ∀ a ∈ s, Continuous (g a)) (hgs : ∀ a ∈ s, HasCompactSupport (g a))
-    (mode : ι → ℤ) (hmode : ∀ a ∈ s, mode a ≠ 0) (phase : ι → Plane → ℝ) (scale : ι → ℝ)
-    {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position) :
-    doubleAverage (fun Y θ =>
-      (∑ a ∈ s, wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (f a) (mode a) (phase a) Y θ) *
-      (∑ a ∈ s, wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (g a) (mode a) (phase a) Y θ)) =
-    ∑ a ∈ s, doubleAverage (fun Y θ =>
-      wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (f a) (mode a) (phase a) Y θ *
-      wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (g a) (mode a) (phase a) Y θ) := by
-  have heq : (fun Y θ =>
-      (∑ a ∈ s, wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (f a) (mode a) (phase a) Y θ) *
-      (∑ a ∈ s, wave (scale a * physicalMask D (label a) q x)
-        (SlotColoring.nativeIndex h (label a).1) (g a) (mode a) (phase a) Y θ)) =
-      fun Y θ => ∑ a ∈ s,
-        wave (scale a * physicalMask D (label a) q x)
-          (SlotColoring.nativeIndex h (label a).1) (f a) (mode a) (phase a) Y θ *
-        wave (scale a * physicalMask D (label a) q x)
-          (SlotColoring.nativeIndex h (label a).1) (g a) (mode a) (phase a) Y θ := by
-    funext Y θ
-    apply sum_product_diagonal
-    intro a ha b hb hab
-    exact sys.wave_cross_zero (hlevel a ha) (hlevel b hb)
-      (fun he => hab (hlabel ha hb he)) (hf a ha) (hg b hb) hq x Y θ
-      (scale a) (scale b) (mode a) (mode b) (phase a) (phase b)
-  rw [heq]
-  apply doubleAverage_sum
-  · intro a ha Y
-    exact (wave_continuous_theta _ _ _ _ _ _).mul (wave_continuous_theta _ _ _ _ _ _)
-  · intro a ha
-    exact angularMean_wave_product_continuous _ _ (hfc a ha) (hfs a ha) (hgc a ha) (hgs a ha)
-      (mode a) (hmode a ha) (phase a)
 
 noncomputable def PairData.radialWave {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {U : UnsignedLabel}
     (P : PairData sys U) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
@@ -708,21 +656,6 @@ theorem physical_mask_tail_sum_sq (D : ℝ) (N : ℕ) {q : ℝ} (hq : 0 < q)
 
 noncomputable def velocityExponent (h : ℝ) : ℝ := 1 / 2 + h
 
-/-- The exact scalar change from chart covariance to physical covariance.
-The chart target contains `(Q/q)^(A+1/2)` and `A=1/2+h`. -/
-theorem physical_scale_identity {Q q : ℝ} (hQ : 0 < Q) (hq : 0 < q) (h : ℝ) :
-    (Q ^ (-velocityExponent h)) ^ 2 * Q ^ h *
-      (Q / q) ^ (velocityExponent h + 1 / 2) = q ^ (-velocityExponent h - 1 / 2) := by
-  rw [← Real.rpow_mul_natCast hQ.le, Real.div_rpow hQ.le hq.le]
-  rw [← Real.rpow_add hQ]
-  rw [← mul_div_assoc, ← Real.rpow_add hQ]
-  norm_num only [Nat.cast_ofNat]
-  have he : (-velocityExponent h * (2 : ℝ) + h) + (velocityExponent h + 1 / 2) = 0 := by
-    unfold velocityExponent
-    ring
-  rw [he, Real.rpow_zero, one_div, ← Real.rpow_neg hq.le]
-  congr 1
-  ring
 
 
 noncomputable def constructedSlotSystem (D h : ℝ) (hh : 0 ≤ h) (vr vt : Plane) : SlotSystem D h vr vt :=
@@ -744,50 +677,6 @@ theorem signedTailLabel_injective (N : ℕ) : Function.Injective (signedTailLabe
   apply signedLabel_injective (tailLabel N b.1)
   simpa only [signedTailLabel, hu] using hab
 
-/-- The complete finite-active-label formula, including both signs and every
-cross-label product. No pairwise distinction of angular frequencies is used. -/
-theorem finite_pair_covariance {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (outer ε : UnsignedLabel → ℝ) (T : UnsignedLabel → Vec2) (F : Finset UnsignedLabel)
-    (hε : ∀ U ∈ F, 0 ≤ ε U) (hcone : ∀ U ∈ F, SmoothCovariance.StrictCone (P U).matrix (T U))
-    {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position) (i : Fin 2) :
-    doubleAverage (fun Y θ =>
-      (∑ a ∈ F.product (Finset.univ : Finset (Fin 2)),
-        (P a.1).radialWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ) *
-      (∑ a ∈ F.product (Finset.univ : Finset (Fin 2)),
-        (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ)) =
-      ∑ U ∈ F, outer U ^ 2 * ε U * mask D (tailLabel N U) q x ^ 2 * T U i := by
-  let s := F.product (Finset.univ : Finset (Fin 2))
-  have havg := sys.finite_wave_covariance s (signedTailLabel N)
-    (signedTailLabel_injective N).injOn
-    (fun a _ => by change 1 ≤ a.1.1 + N; omega)
-    (fun a => (P a.1).rawRadial hdet a.2)
-    (fun a => (P a.1).rawTangent hdet a.2 i)
-    (fun a _ => (P a.1).rawRadial_support hdet a.2)
-    (fun a _ => (P a.1).rawTangent_support hdet a.2 i)
-    (fun a _ => (P a.1).rawRadial_continuous hdet a.2)
-    (fun a _ => (P a.1).rawRadial_compact hdet a.2)
-    (fun a _ => (P a.1).rawTangent_continuous hdet a.2 i)
-    (fun a _ => (P a.1).rawTangent_compact hdet a.2 i)
-    (fun a => (P a.1).modes a.2) (fun a _ => (P a.1).modes_ne a.2)
-    (fun a => (P a.1).phases a.2)
-    (fun a => outer a.1 * Real.sqrt (ε a.1) * SmoothCovariance.amplitudes (P a.1).matrix (T a.1) a.2)
-    hq x
-  have hdiag : doubleAverage (fun Y θ =>
-      (∑ a ∈ s, (P a.1).radialWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ) *
-      (∑ a ∈ s, (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ)) =
-      ∑ a ∈ s, doubleAverage (fun Y θ =>
-        (P a.1).radialWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ *
-        (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ) := by
-    simpa only [PairData.radialWave, PairData.tangentWave, amplitude, signedTailLabel,
-      physicalMask_signedLabel, signedLabel, physicalMask, mask, mul_assoc] using havg
-  change doubleAverage _ = _
-  rw [hdiag]
-  apply (Finset.sum_product F Finset.univ _).trans
-  apply Finset.sum_congr rfl
-  intro U hU
-  exact (P U).diagonal_pair_reconstruct hdet (outer U) (ε U) (hε U hU) (hcone U hU) q x i
 
 noncomputable def assembledRadial {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}
     (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
@@ -801,52 +690,6 @@ noncomputable def assembledTangent {D h : ℝ} {vr vt : Plane} {sys : SlotSystem
     (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (i : Fin 2) (Y : Plane) (θ : ℝ) : ℝ :=
   ∑ᶠ a : UnsignedLabel × Fin 2, (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ
 
-/-- At a fixed positive physical point the same finite active set works for
-every auxiliary point and angle. Thus no limit/interchange assumption enters
-the assembled covariance formula. -/
-theorem assembled_covariance {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (outer ε : UnsignedLabel → ℝ) (T : UnsignedLabel → Vec2)
-    {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position)
-    (hε : ∀ U, mask D (tailLabel N U) q x ≠ 0 → 0 ≤ ε U)
-    (hcone : ∀ U, mask D (tailLabel N U) q x ≠ 0 →
-      SmoothCovariance.StrictCone (P U).matrix (T U)) (i : Fin 2) :
-    doubleAverage (fun Y θ => assembledRadial P hdet outer ε T q x Y θ *
-      assembledTangent P hdet outer ε T q x i Y θ) =
-      ∑ᶠ U : UnsignedLabel, outer U ^ 2 * ε U * mask D (tailLabel N U) q x ^ 2 * T U i := by
-  classical
-  have hf := finite_active_masks D N hq x
-  let F := hf.toFinset
-  have hzero (U : UnsignedLabel) (hU : U ∉ F) : mask D (tailLabel N U) q x = 0 := by
-    by_contra hm
-    exact hU (hf.mem_toFinset.mpr hm)
-  have hr (Y : Plane) (θ : ℝ) : assembledRadial P hdet outer ε T q x Y θ =
-      ∑ a ∈ F.product (Finset.univ : Finset (Fin 2)),
-        (P a.1).radialWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ := by
-    apply finsum_eq_sum_of_support_subset
-    intro a ha
-    apply Finset.mem_product.mpr
-    refine ⟨?_, Finset.mem_univ _⟩
-    by_contra hn
-    exact ha (by simp [PairData.radialWave, amplitude, wave, hzero a.1 hn])
-  have ht (Y : Plane) (θ : ℝ) : assembledTangent P hdet outer ε T q x i Y θ =
-      ∑ a ∈ F.product (Finset.univ : Finset (Fin 2)),
-        (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ := by
-    apply finsum_eq_sum_of_support_subset
-    intro a ha
-    apply Finset.mem_product.mpr
-    refine ⟨?_, Finset.mem_univ _⟩
-    by_contra hn
-    exact ha (by simp [PairData.tangentWave, amplitude, wave, hzero a.1 hn])
-  simp_rw [hr, ht]
-  rw [finite_pair_covariance sys hdet N hN P outer ε T F
-    (fun U hU => hε U (hf.mem_toFinset.mp hU)) (fun U hU => hcone U (hf.mem_toFinset.mp hU)) hq x i]
-  symm
-  apply finsum_eq_sum_of_support_subset
-  intro U hU
-  by_contra hn
-  exact hU (by simp [hzero U hn])
 
 noncomputable def physicalOuter (h : ℝ) (N : ℕ) (U : UnsignedLabel) : ℝ :=
   ChartScales.Q (U.1 + N) ^ (-velocityExponent h)

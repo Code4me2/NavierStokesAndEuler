@@ -456,35 +456,6 @@ theorem path_hasDerivAt (g : Geometry) (k : Frequency) (Y : Plane) (s : ℝ) :
   simpa only [one_smul, id_eq] using
     (((hasDerivAt_id s).sub_const (g.coordinates k Y).2).smul_const (slotDirection g)).const_add Y
 
-/-- Differentiation of the actual reanchored copy solve is differentiation
-along the fixed common-coordinate slot vector. -/
-theorem along_copySolve (d : LinearData P V H) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    {U : Set P} (hU : IsOpen U) (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ))
-    {p : P} (hp : p ∈ U) (Y : Plane) (heta : (g.coordinates k Y).2 ∈ Ioo a b) :
-    HarmonicCalculus.along (fun _ => ((0 : P), slotDirection g)) (d.copySolve g hab k) (p, Y) =
-      d.coefficient (p, g.coordinates k Y) (d.copySolve g hab k (p, Y)) +
-        d.forcingMap (p, g.coordinates k Y) (d.source (p, Y)) := by
-  let t := (g.coordinates k Y).2
-  have hpath : HasDerivAt (fun s => (p, g.path k Y s)) ((0 : P), slotDirection g) t :=
-    (hasDerivAt_const t p).prodMk (path_hasDerivAt g k Y t)
-  have hcopy : DifferentiableAt ℝ (d.copySolve g hab k) (p, Y) :=
-    (d.copySolve_contDiffAt g hab hU k hA hB hf (p := (p, Y)) hp heta).differentiableAt (by simp)
-  have hc : HasFDerivAt (d.copySolve g hab k)
-      (fderiv ℝ (d.copySolve g hab k) (p, Y)) (p, g.path k Y t) := by
-    simpa only [t, g.path_current] using hcopy.hasFDerivAt
-  have hd : HasDerivAt (fun s => d.copySolve g hab k (p, g.path k Y s))
-      (fderiv ℝ (d.copySolve g hab k) (p, Y) ((0 : P), slotDirection g)) t :=
-    HasFDerivAt.comp_hasDerivAt (l := d.copySolve g hab k)
-      (l' := fderiv ℝ (d.copySolve g hab k) (p, Y))
-      (f := fun s => (p, g.path k Y s)) t hc hpath
-  have hs := d.copySolve_alongPath_hasDerivAt g hab k hA.continuousOn hB.continuousOn
-    hf.continuousOn hp Y ⟨t, heta.1.le, heta.2.le⟩
-  have he := hd.unique hs
-  simpa only [HarmonicCalculus.along, LinearData.coefficientAlong, LinearData.forcingAlong,
-    t, g.path_current, Prod.mk.eta] using he
 
 noncomputable def nativePoint (g : Geometry) (k : Frequency) (p : P × Plane) : P × Plane :=
   (p.1, g.coordinates k p.2)
@@ -644,47 +615,6 @@ theorem normalDot_complexify (N a : ProblemStatement.Space) :
   simp [normalDot, PiLp.inner_apply, Fin.sum_univ_three, mul_comm]
 
 
-/-- The pressure in `copyPressure` cancels the actual principal operator
-of the copy wave. The three matching hypotheses identify only primitive
-normal, damping, and base-action data with the displayed physical operator. -/
-theorem copySolve_principal (t : TangentData P ProblemStatement.Space) (g : Geometry)
-    {a b : ℝ} (hab : a ≤ b) {U : Set P} (hU : IsOpen U) (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ t.linearData.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ t.linearData.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ t.source (U ×ˢ univ))
-    (ε frequency : ℝ) (hfrequency : frequency ≠ 0)
-    (R F G Φ : P × Plane → ℝ) (Vr Vθ Vz : P × Plane → P × Plane)
-    {p : P} (hp : p ∈ U) (Y : Plane) (heta : (g.coordinates k Y).2 ∈ Ioo a b)
-    (hN : phaseNormal R Vr Vθ Vz Φ (p, Y) = t.normal (p, g.coordinates k Y))
-    (hδ : t.damping (p, g.coordinates k Y) =
-      ε * frequency ^ 2 * ‖phaseNormal R Vr Vθ Vz Φ (p, Y)‖ ^ 2)
-    (hK : CurlClassBounds.complexify
-        (t.action (p, g.coordinates k Y) (t.linearData.copySolve g hab k (p, Y))) =
-      LinearWaveResidual.shear R F G Vr (copyVelocity t g hab k) (p, Y)) :
-    LinearWaveResidual.principal ε frequency R F G Vr Vθ Vz
-      (fun _ => ((0 : P), slotDirection g)) Φ (copyVelocity t g hab k)
-      (copyPressure t g hab k frequency) (p, Y) = -CurlClassBounds.complexify (t.source (p, Y)) := by
-  have hu : DifferentiableAt ℝ (t.linearData.copySolve g hab k) (p, Y) :=
-    (t.linearData.copySolve_contDiffAt g hab hU k hA hB hf (p := (p, Y)) hp heta).differentiableAt (by simp)
-  have hd := along_copySolve t.linearData g hab hU k hA hB hf hp Y heta
-  simp only [TangentData.linearData, negativeTangentProjection_apply,
-    ← sub_eq_add_neg, TangentODE.projectedOperator_apply] at hd
-  have hdu : along (fun _ => ((0 : P), slotDirection g)) (t.linearData.copySolve g hab k) (p, Y) =
-      TangentProjection.projectedRhs (phaseNormal R Vr Vθ Vz Φ (p, Y))
-        (t.normalDot (p, g.coordinates k Y)) (t.linearData.copySolve g hab k (p, Y))
-        (t.action (p, g.coordinates k Y) (t.linearData.copySolve g hab k (p, Y)))
-        (t.source (p, Y)) (ε * frequency ^ 2 * ‖phaseNormal R Vr Vθ Vz Φ (p, Y)‖ ^ 2) := by
-    rw [← hδ, hN]
-    exact hd
-  have hh := principal_eq_neg_source_of_projected ε frequency hfrequency R F G Φ Vr Vθ Vz
-    (fun _ => ((0 : P), slotDirection g)) (t.linearData.copySolve g hab k)
-    (fun z => t.normalDot (nativePoint g k z))
-    (fun z => t.action (nativePoint g k z) (t.linearData.copySolve g hab k z)) t.source hu hdu hK
-  ext i
-  have hi := congrFun hh i
-  simp only [LinearWaveResidual.principal, projectedPressure, copyPressure, copyPressureReal,
-    copyVelocity, nativePoint, hN, Pi.neg_apply] at hi ⊢
-  exact hi
 
 
 theorem copyVelocity_class {s : StripData (P × Plane)} {W : ℕ → P × Plane → ℝ} {α : ℝ}

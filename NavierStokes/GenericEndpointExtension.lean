@@ -645,25 +645,6 @@ theorem clamped_contDiffOn {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f close
   hf.comp ((lowerClamp_contDiff.comp contDiff_fst).prodMk contDiff_snd).contDiffOn
     (fun z hz => ⟨lowerClamp_mem hz.1, mem_univ z.2⟩)
 
-omit [CompleteSpace V] in
-/-- Zero normal coefficients stay zero in the actual Borel series. -/
-theorem Gluing.smoothExtension_zero_fiber {T : ℝ} {f : ℝ × X → V}
-    (hf : ContDiffOn ℝ ∞ f (Gluing.past T)) {x : X}
-    (hz : ∀ t ≤ T, f (t, x) = 0) (t : ℝ) :
-    Gluing.smoothExtension T f hf (t, x) = 0 := by
-  by_cases ht : t ≤ T
-  · rw [Gluing.smoothExtension_eqOn_past hf
-      (show (t, x) ∈ Gluing.past T from ⟨ht, mem_univ x⟩)]
-    exact hz t ht
-  · unfold Gluing.smoothExtension Gluing.glue
-    simp only [ite_eq_right ht, SpatialBorelExtension.rightExtension]
-    apply SpatialBorelExtension.extension_zero_of_coefficients_zero
-    intro n
-    rw [Gluing.normalTrace_eq_time_jet hf,
-      iteratedDerivWithin_congr (show EqOn (fun s : ℝ => f (s, x)) (fun _ => 0) (Iic T)
-        from hz) (mem_Iic.mpr le_rfl)]
-    simp only [iteratedDerivWithin_eq_iteratedFDerivWithin,
-      iteratedFDerivWithin_fun_zero, Pi.zero_apply, _root_.zero_apply]
 
 noncomputable def upperClosed (f : ℝ × X → V) (hf : ContDiffOn ℝ ∞ f closedStrip) :
     ℝ × X → V := Gluing.smoothExtension 1 (clamped f) (clamped_contDiffOn hf)
@@ -678,12 +659,6 @@ theorem upperClosed_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStr
     (show (t, x) ∈ Gluing.past 1 from ⟨hhi, mem_univ x⟩)]
   simp only [clamped, lowerClamp_eq hlo]
 
-omit [CompleteSpace V] in
-theorem upperClosed_zero {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)
-    {x : X} (hz : ∀ t ∈ Icc (-1 : ℝ) 1, f (t, x) = 0) (t : ℝ) :
-    upperClosed f hf (t, x) = 0 :=
-  Gluing.smoothExtension_zero_fiber (clamped_contDiffOn hf)
-    (fun _ hs => hz _ (lowerClamp_mem hs)) t
 
 omit [CompleteSpace V] in
 theorem upperClosed_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)

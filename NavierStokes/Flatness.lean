@@ -73,27 +73,6 @@ theorem PowerFlat.mul (hf : PowerFlat l q f) (hg : PowerFlat l q g) :
       mul_le_mul hfx hgx' (abs_nonneg _) (mul_nonneg hC (pow_nonneg (abs_nonneg _) _))
     _ = (C * D) * |q x| ^ n := by ring
 
-/-- A flat scalar times a scalar with a fixed power loss remains flat. This
-models one factor in the residual product estimates, provided the stated
-bounds have already been established for the actual factors. -/
-theorem PowerFlat.mul_of_power_bound (hf : PowerFlat l q f)
-    (hq : ∀ᶠ x in l, q x ≠ 0) (loss : ℕ) {D : ℝ} (hD : 0 ≤ D)
-    (hg : ∀ᶠ x in l, |g x| ≤ D / |q x| ^ loss) :
-    PowerFlat l q (fun x => f x * g x) := by
-  intro n
-  obtain ⟨C, hC, hfb⟩ := hf (n + loss)
-  refine ⟨C * D, mul_nonneg hC hD, ?_⟩
-  filter_upwards [hq, hfb, hg] with x hqx hfx hgx
-  have hden : |q x| ^ loss ≠ 0 := pow_ne_zero _ (abs_ne_zero.mpr hqx)
-  calc
-    |f x * g x| = |f x| * |g x| := abs_mul _ _
-    _ ≤ (C * |q x| ^ (n + loss)) * (D / |q x| ^ loss) :=
-      mul_le_mul hfx hgx (abs_nonneg _)
-        (mul_nonneg hC (pow_nonneg (abs_nonneg _) _))
-    _ = ((C * D) * |q x| ^ n) * (|q x| ^ loss / |q x| ^ loss) := by
-      rw [pow_add]
-      ring
-    _ = (C * D) * |q x| ^ n := by rw [div_self hden, mul_one]
 
 
 

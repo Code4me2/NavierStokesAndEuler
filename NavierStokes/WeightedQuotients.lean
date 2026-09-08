@@ -257,9 +257,6 @@ theorem rpow_comp_jets_bound {f : E → ℝ} {s : Set E} (hs : IsOpen s)
 
 def chooseSum (n : ℕ) : ℝ := ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ)
 
-theorem chooseSum_nonneg (n : ℕ) : 0 ≤ chooseSum n := by
-  unfold chooseSum
-  positivity
 
 /-- A common bound for each input jet yields the usual Leibniz bound. -/
 theorem mul_jets_bound {f g : E → ℝ} {s : Set E} (hs : IsOpen s)
@@ -472,15 +469,6 @@ theorem envelope_bounds {w g r : E → ℝ} {x : E} (hw : 0 < w x) (hg : 0 < g x
     have h : ‖iteratedFDeriv ℝ i r x‖ / w x ≤ envelope w g r n x := by linarith [hi i hin]
     simpa only [mul_comm] using (div_le_iff₀ hw).mp h
 
-theorem envelope_polyBound {s : Set E} {S T w g r : E → ℝ}
-    (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hlower : PolyBound s S T (fun x => w x / g x))
-    (hg : ∀ n, PolyBound s S T (fun x => ‖iteratedFDeriv ℝ n g x‖ / w x))
-    (hr : ∀ n, PolyBound s S T (fun x => ‖iteratedFDeriv ℝ n r x‖ / w x)) (n : ℕ) :
-    PolyBound s S T (envelope w g r n) := by
-  apply PolyBound.add hS hT (PolyBound.add hS hT polyBound_one hlower)
-  exact PolyBound.sum (Finset.range (n + 1)) _ hS hT
-    (fun i _ => PolyBound.add hS hT (hg i) (hr i))
 
 
 

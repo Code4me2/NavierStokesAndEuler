@@ -103,36 +103,10 @@ theorem fderiv_field (e : D ≃ₗᵢ[ℝ] E) (f : MeanIncrementBounds.Field E)
   change fderiv ℝ (fun y => f n (e y)) x (e.symm v) = _
   rw [fderiv_pull, e.apply_symm_apply]
 
-theorem dr_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operators E)
-    (f : MeanIncrementBounds.Field E) : (operators e o).dr (field e f) = field e (o.dr f) := by
-  funext n x
-  simp only [MeanIncrementBounds.Operators.dr, WeightedClasses.graphDerivative,
-    operators, fderiv_field, field]
 
-theorem dz_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operators E)
-    (f : MeanIncrementBounds.Field E) : (operators e o).dz (field e f) = field e (o.dz f) := by
-  funext n x
-  simp only [MeanIncrementBounds.Operators.dz, operators, fderiv_field, field]
 
-theorem time_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operators E)
-    (f : MeanIncrementBounds.Field E) : (operators e o).time (field e f) = field e (o.time f) := by
-  funext n x
-  simp only [MeanIncrementBounds.Operators.time, MeanIncrementBounds.Operators.slowTime,
-    MeanIncrementBounds.Operators.fastTime, operators, fderiv_field, field, Pi.add_apply]
 
-theorem radialDiv_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operators E)
-    (k : ℝ) (f : MeanIncrementBounds.Field E) :
-    (operators e o).radialDiv k (field e f) = field e (o.radialDiv k f) := by
-  unfold MeanIncrementBounds.Operators.radialDiv
-  rw [dr_pull]
-  rfl
 
-theorem viscosity_pull (e : D ≃ₗᵢ[ℝ] E) (o : MeanIncrementBounds.Operators E)
-    (k : ℝ) (f : MeanIncrementBounds.Field E) :
-    (operators e o).viscosity k (field e f) = field e (o.viscosity k f) := by
-  unfold MeanIncrementBounds.Operators.viscosity
-  rw [dr_pull, dr_pull, dz_pull, dz_pull]
-  rfl
 
 
 
@@ -527,54 +501,9 @@ noncomputable def strip (e : D ≃ₗᵢ[ℝ] E) (s : WeightedClasses.StripData 
 
 
 
-theorem thetaResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) :
-    (state e u).thetaResidual (context e c) = field e (u.thetaResidual c) := by
-  change (operators e c.operators).time (field e u.mean.angular) +
-    (operators e c.operators).radialDiv 2
-      (field e (MeanIncrementBounds.thetaRadial c.base u.mean + u.covariance 0 1)) +
-    (operators e c.operators).dz
-      (field e (MeanIncrementBounds.thetaAxial c.base u.mean + u.covariance 2 1)) -
-    (operators e c.operators).viscosity 1 (field e u.mean.angular) -
-    (operators e c.operators).radialDiv 2 (field e c.virtualTheta) = _
-  rw [time_pull, radialDiv_pull, dz_pull, viscosity_pull, radialDiv_pull]
-  rfl
 
-theorem axialResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) :
-    (state e u).axialResidual (context e c) = field e (u.axialResidual c) := by
-  change (operators e c.operators).time (field e u.mean.axial) +
-    (operators e c.operators).radialDiv 1
-      (field e (MeanIncrementBounds.axialRadial c.base u.mean + u.covariance 0 2)) +
-    (operators e c.operators).dz
-      (field e (MeanIncrementBounds.axialAxial c.base u.mean + u.covariance 2 2 + u.pressure)) -
-    (operators e c.operators).viscosity 0 (field e u.mean.axial) -
-    (operators e c.operators).radialDiv 1 (field e c.virtualAxial) = _
-  rw [time_pull, radialDiv_pull, dz_pull, viscosity_pull, radialDiv_pull]
-  rfl
 
-theorem gr_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) :
-    (state e u).gr (context e c) = field e (u.gr c) := by
-  change -((operators e c.operators).time (field e u.mean.radial) +
-    (operators e c.operators).radialDiv 1
-      (field e (MeanIncrementBounds.radialRadial c.base u.mean + u.covariance 0 0)) +
-    (operators e c.operators).dz
-      (field e (MeanIncrementBounds.axialRadial c.base u.mean + u.covariance 2 0)) -
-    (operators e c.operators).invRadius *
-      field e (MeanIncrementBounds.radialAngular c.base u.mean + u.covariance 1 1) -
-    (operators e c.operators).viscosity 1 (field e u.mean.radial)) = _
-  rw [time_pull, radialDiv_pull, dz_pull, viscosity_pull]
-  rfl
 
-theorem radialResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) :
-    (state e u).radialResidual (context e c) = field e (u.radialResidual c) := by
-  unfold CorrectionState.State.radialResidual
-  rw [gr_pull]
-  change (operators e c.operators).dr (field e u.pressure) - field e (u.gr c) = _
-  rw [dr_pull]
-  rfl
 
 
 

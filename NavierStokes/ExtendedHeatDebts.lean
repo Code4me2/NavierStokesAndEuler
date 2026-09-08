@@ -506,54 +506,10 @@ theorem physicalAngular_eq_original (d : TailData) {K η : ℝ} (hK : 0 < K)
 
 /-! ## Exact radius rescaling and joint smoothness -/
 
-theorem correction_scale (h ν : ℝ) {K : ℝ} (hK : K ≠ 0) (X : ℝ) :
-    correction h K ν (K * X) = correction h 1 (ν / K) X := by
-  unfold correction switch HeatProfileExtension.scaledProfile
-  simp only [mul_div_cancel_left₀ X hK, div_one]
-  congr 2
-  simp only [div_eq_mul_inv, mul_inv_rev]
-  ring_nf
 
-theorem tailWeight_scale (d : TailData) {K : ℝ} (hK : K ≠ 0) (square : Bool) (X : ℝ) :
-    tailWeight d K square (K * X) = tailWeight d 1 square X := by
-  cases square <;> simp only [tailWeight, Bool.false_eq_true, ite_false, ite_true,
-    powerTail, mul_div_cancel_left₀ X hK, div_one]
 
-theorem editJet_scale_zero (h ν : ℝ) {K : ℝ} (hK : K ≠ 0) (square : Bool) (X : ℝ) :
-    editJet square h K 0 ν (K * X) = editJet square h 1 0 (ν / K) X := by
-  cases square
-  · exact correction_scale h ν hK X
-  · simp only [editJet, ite_true, squareCorrectionJet_zero, multiplier, correction_scale h ν hK X]
 
-theorem weightedJet_scale_zero (d : TailData) {K : ℝ} (hK : 0 < K)
-    (square : Bool) (q ν : ℝ) {X : ℝ} (hX : 0 ≤ X) :
-    weightedJet (tailWeight d K square) square d.h K q 0 ν (K * X) =
-      K ^ q * weightedJet (tailWeight d 1 square) square d.h 1 q 0 (ν / K) X := by
-  unfold weightedJet
-  rw [Real.mul_rpow hK.le hX, tailWeight_scale d hK.ne', editJet_scale_zero d.h ν hK.ne']
-  ring
 
-/-- A genuine change of variables in the improper integral gives all radius
-dependence through an explicit power and the rescaled diffusion. -/
-theorem nuDebt_scale (d : TailData) {K : ℝ} (hK : 0 < K)
-    (square : Bool) (q ν : ℝ) :
-    nuDebtJet d K square q 0 ν = K ^ (q + 1) * nuDebtJet d 1 square q 0 (ν / K) := by
-  let g : ℝ → ℝ := weightedJet (tailWeight d K square) square d.h K q 0 ν
-  have hcv := integral_comp_mul_left_Ioi g 1 hK
-  simp only [mul_one, smul_eq_mul] at hcv
-  have hcv' : nuDebtJet d K square q 0 ν = K * ∫ X in Ioi 1, g (K * X) := by
-    rw [hcv, ← mul_assoc, mul_inv_cancel₀ hK.ne', one_mul]
-    rfl
-  rw [hcv']
-  have heq : (∫ X in Ioi (1 : ℝ), g (K * X)) =
-      K ^ q * nuDebtJet d 1 square q 0 (ν / K) := by
-    unfold nuDebtJet weightedDebtJet
-    rw [← integral_const_mul]
-    apply setIntegral_congr_fun measurableSet_Ioi
-    intro X hX
-    exact weightedJet_scale_zero d hK square q ν (zero_le_one.trans hX.le)
-  rw [heq, Real.rpow_add_one hK.ne']
-  ring
 
 
 noncomputable def etaDebt (d : TailData) (K : ℝ) (square : Bool) (q η : ℝ) : ℝ :=

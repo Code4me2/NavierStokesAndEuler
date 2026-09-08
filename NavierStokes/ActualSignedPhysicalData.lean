@@ -36,25 +36,7 @@ variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   (mask factor cutoff : ℕ → D → ℝ) (unit Ndot : ℕ → D → Space)
   (A : ℕ → D → Space →L[ℝ] Space) (j : Fin 2)
 
-theorem repartition_amplitude (n : ℕ) (x : D) :
-    ((SignedWaveUpdate.coefficients a s d H T R (fun n x => mask n x * factor n x)
-      unit Ndot A j).withCutoff cutoff).amplitude n x =
-    ((SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).withCutoff
-      (fun n x => cutoff n x * factor n x)).amplitude n x := by
-  simp only [WaveCoefficients.withCutoff,
-    ActualPeriodizedSignedRealization.coefficients_amplitude_at,
-    ActualPeriodizedSignedRealization.signedScalar_mul_mask, mul_smul]
 
-theorem repartition_pressure (n : ℕ) (x : D) :
-    ((SignedWaveUpdate.coefficients a s d H T R (fun n x => mask n x * factor n x)
-      unit Ndot A j).withCutoff cutoff).pressure n x =
-    ((SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).withCutoff
-      (fun n x => cutoff n x * factor n x)).pressure n x := by
-  simp only [WaveCoefficients.withCutoff,
-    ActualPeriodizedSignedRealization.coefficients_pressure_at,
-    ActualPeriodizedSignedRealization.signedScalar_mul_mask,
-    Complex.real_smul, Complex.ofReal_mul]
-  ring
 
 
 
@@ -998,41 +980,6 @@ theorem pressure_periodized_physical (L : NativeLabel f.active) {a b delta : ℝ
   rfl
 
 
-/-- The original physical potential is the pulled-back native coefficient
-mode, with the potential scale derived by the actual curl construction. -/
-theorem referencePotential_eq_mode (L : NativeLabel f.active)
-    (hPhi : ContDiffOn ℝ ∞ ((f.primary L).base.phase L.val.1) (f.primary L).strip.domain)
-    (z : SpaceTime) (hr : 0 < z.2 0)
-    (hz : (PhysicalResidualBridge.commonGraph (ChartScales.Q L.val.1) h
-      (ChartScales.nativeIndex h L.val.1)).map z ∈ (f.primary L).strip.domain) :
-    (ActualPeriodizedSignedRealization.views (f.primary L) (layout sys hh L.val L.property 0)
-      (f.view L)).referencePotential (f.state L).referenceRequest (f.column L) z =
-      (ChartScales.Q L.val.1 ^ (-h) : ℝ) • HarmonicCalculus.vectorMode
-        ((f.primary L).base.frequency L.val.1) ((f.primary L).base.phase L.val.1)
-        (referencePotentialCoefficient sys hh f L)
-        ((PhysicalResidualBridge.commonGraph (ChartScales.Q L.val.1) h
-          (ChartScales.nativeIndex h L.val.1)).map z) := by
-  let V := ActualPeriodizedSignedRealization.views (f.primary L)
-    (layout sys hh L.val L.property 0) (f.view L)
-  have hK : (f.primary L).base.frequency L.val.1 ≠ 0 := by
-    rw [G.frequency L]
-    exact PartitionedCovariance.actual_carrier_ne_zero _ _
-  have hx : z ∈ (PhysicalResidualBridge.commonGraph (f.view L).referenceScale
-      (f.view L).exponent (f.view L).referenceCover).source (f.primary L).strip.domain := by
-    simp only [G.scale L, G.exponent L, G.cover L]
-    exact And.intro hr hz
-  have he := PhysicalCurlCovariance.referencePotential_eq_on (f.view L).referenceScale_pos
-    (f.view L).exponent (f.view L).referenceCover (f.primary L).strip.isOpen_domain
-    hK hK hPhi
-    ((ActualPeriodizedSignedRealization.periodizedPrimary (f.primary L)
-      (layout sys hh L.val L.property 0)).raw (f.state L).referenceRequest (f.column L) L.val.1)
-    V.physicalPhase (V.physicalRaw (f.state L).referenceRequest (f.column L))
-    (fun _ _ => rfl) (fun _ _ => rfl) hx
-  simp only [G.scale L, G.exponent L, G.cover L] at he
-  change V.referencePotential (f.state L).referenceRequest (f.column L) z = _ at he
-  simp only [CurlClassBounds.vectorPotential, CurlClassBounds.coefficient,
-    ← (G.chart L).normal] at he ⊢
-  exact he
 
 
 end PhysicalFamilies

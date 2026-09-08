@@ -418,12 +418,6 @@ theorem extension_add_period (p : X) (hp : ∀ j x, a j (x + p) = a j x)
   intro j
   simp only [term, hp]
 
-omit [CompleteSpace V] in
-/-- A zero spatial slice of every coefficient stays identically zero. -/
-theorem extension_zero_of_coefficients_zero {x : X} (hx : ∀ j, a j x = 0) (t : ℝ) :
-    extension a ha (t, x) = 0 := by
-  simp only [extension, term, BorelExtension.term, BorelExtension.monomial, hx,
-    smul_zero, tsum_zero]
 
 def rightExtension (T : ℝ) (z : ℝ × X) : V := extension a ha (z.1 - T, z.2)
 

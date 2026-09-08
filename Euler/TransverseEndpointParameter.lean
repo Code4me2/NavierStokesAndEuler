@@ -33,10 +33,6 @@ variable (T : ℝ) (hT : 0 ≤ T)
   (H : P → C(Icc (0 : ℝ) T, E →L[ℝ] E))
   {n : ℕ∞ω}
 
-theorem contDiff_initialEnergy (hH : ContDiff ℝ n H) :
-    ContDiff ℝ n (fun x => energyOperator T hT (H x)) :=
-  contDiff_const.sub
-    (contDiff_const.clm_comp ((contDiff_timeMultiplier T hT H hH).clm_comp contDiff_const))
 
 
 variable (c : ℝ) (hc : 0 < c) (hLower : ∀ x t v, c * ‖v‖ ^ 2 ≤ ‖Q x t v‖ ^ 2)

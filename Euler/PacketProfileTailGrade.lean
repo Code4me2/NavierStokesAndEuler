@@ -1,5 +1,6 @@
 import Euler.PacketTailGradeBounds
-import Euler.PacketResidualTailActual
+import Euler.PacketResidualTailFields
+import Euler.PacketSourceRegularity
 
 /-! Uniform profile budgets bound each literal residual grade of the finite packet. -/
 

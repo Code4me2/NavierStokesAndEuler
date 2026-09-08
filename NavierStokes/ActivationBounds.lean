@@ -458,40 +458,7 @@ theorem etaD_congr {J : Set ℝ} (hJ : IsOpen J) {H G : ScaledPoint → ℝ}
 
 /-! ## Independence of the continuation length on the natural overlap -/
 
-theorem continuation_radialPartial {R δ : ℝ} (hR : 0 < R) (hδ : 0 < δ)
-    (hδR : 2 * δ < R) {J : Set ℝ} (hJ : IsOpen J) {G : Field}
-    (hG : ContDiffOn ℝ ∞ G (ReferencePath.earlyStrip R hR J hJ).carrier)
-    {p : Point} (hη : p.2 ∈ J) :
-    radialPartial (ReferencePath.continuation δ G) p =
-      ReferencePath.slopeCutoff δ p.1 * radialPartial G p :=
-  (radialPartial_hasDerivAt (ReferencePath.fullStrip J hJ)
-    (ReferencePath.continuation_smooth hR hδ hδR hJ hG) (p := p) ⟨mem_univ _, hη⟩).unique
-      (ReferencePath.continuation_hasDerivAt hR hδ hδR hJ hG (p := p) hη)
 
-theorem controlled_continuation_independent {R δ₁ δ₂ : ℝ} (hR : 0 < R)
-    (hδ₁ : 0 < δ₁) (hδ₁R : 2 * δ₁ < R) (hδ₂ : 0 < δ₂) (hδ₂R : 2 * δ₂ < R)
-    {J : Set ℝ} (hJ : IsOpen J) {G : Field}
-    (hG : ContDiffOn ℝ ∞ G (ReferencePath.earlyStrip R hR J hJ).carrier)
-    (T κ : ℝ) {p : Point} (hη : p.2 ∈ J) (hp₁ : p.1 ≤ δ₁) (hp₂ : p.1 ≤ δ₂) :
-    controlled T κ (ReferencePath.continuation δ₁ G) p =
-      controlled T κ (ReferencePath.continuation δ₂ G) p := by
-  have hzero₁ := ReferencePath.continuation_eq_natural hR hδ₁ hδ₁R hJ hG
-    (p := (0, p.2)) hη hδ₁.le
-  have hzero₂ := ReferencePath.continuation_eq_natural hR hδ₂ hδ₂R hJ hG
-    (p := (0, p.2)) hη hδ₂.le
-  unfold controlled
-  rw [hzero₁, hzero₂]
-  congr 1
-  apply intervalIntegral.integral_congr
-  intro t ht
-  have ht₁ : t ≤ δ₁ := (mem_uIcc.mp ht).elim
-    (fun h => h.2.trans hp₁) (fun h => h.2.trans hδ₁.le)
-  have ht₂ : t ≤ δ₂ := (mem_uIcc.mp ht).elim
-    (fun h => h.2.trans hp₂) (fun h => h.2.trans hδ₂.le)
-  dsimp only
-  rw [continuation_radialPartial hR hδ₁ hδ₁R hJ hG (p := (t, p.2)) hη,
-    continuation_radialPartial hR hδ₂ hδ₂R hJ hG (p := (t, p.2)) hη,
-    ReferencePath.slopeCutoff_one hδ₁ ht₁, ReferencePath.slopeCutoff_one hδ₂ ht₂]
 
 
 namespace NaturalOverlap

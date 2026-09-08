@@ -92,26 +92,6 @@ section Means
 
 variable {h degree : ℝ}
 
-/-- Exact coherence and the native moving annulus supply the physical
-support for the same scalar field on the common valid sublevel. -/
-theorem mean_field_support (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hq : qbig ≤ ChartScales.Q M.firstBand) (hR : M.upperRadius ≤ R) :
-    SublevelShrinkingSupport h (outerConstant R) qbig M.family.field := by
-  intro w ht hqw hn
-  have hqpos := PhysicalWaveSum.physicalQ_pos hh hh1 ht
-  obtain ⟨n, hnN, hqn, hnq⟩ := PhysicalMeanJetBounds.exists_comparable_band
-    M.firstBand hqpos (hqw.le.trans hq)
-  have hlo : PhysicalWaveSum.physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-  have hu := M.region_covers (PhysicalMeanJetBounds.graph_slow_normalized
-    hh hh1 n (M.family.gap n) ht hlo hnq.le)
-  have hann := M.family.annulus_on_tsupport hh hh1 M.lower_pos M.radii_lt M.region_open
-    M.support n hnN ht hu hlo hnq.le (subset_tsupport _ hn)
-  have hb := AnnularEndpoint.radius_le_of_scaled_annulus hann hnq.le
-  apply hb.trans
-  apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg _)
-  dsimp only [outerConstant]
-  nlinarith [Real.sqrt_nonneg (2 : ℝ)]
 
 
 end Means

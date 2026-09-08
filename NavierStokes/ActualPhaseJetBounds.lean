@@ -142,9 +142,6 @@ noncomputable def phaseCell (n : ℕ) (i : CopyIndex B N0) : Set ActualPrimary.F
         (ActualPrimary.choice B N0).prepared.N).carrier i.1.2 ∧
     (ActualPrimaryBounds.fullCopy i.1 n i.2 x).2 ∈ (ActualPrimary.clockWindow i.1.2).core}
 
-theorem controlCell_subset_phaseCell (n : ℕ) (i : CopyIndex B N0) :
-    ActualPrimaryBounds.controlCell n i ⊆ phaseCell n i :=
-  fun _ hx => ⟨hx.1, hx.2.1, hx.2.2.1⟩
 
 theorem phaseCell_maps {n : ℕ} {i : CopyIndex B N0} {x : ActualPrimary.FullPoint}
     (hx : x ∈ phaseCell n i) :
@@ -517,97 +514,11 @@ theorem weightedPhase_eq_section (l : SignedLabel B N0) (n : ℕ) (x : ActualPri
     ActualPrimaryBounds.angularFrequency]
   ring
 
-theorem phaseCell_of_cut_tsupport (l : SignedLabel B N0) (n : ℕ)
-    {x : ActualPrimary.FullPoint} (hx : x ∈ ActualPrimaryBounds.fullStrip.domain)
-    (hs : x ∈ tsupport ((ActualPrimaryBounds.cutCoefficients l).amplitude n)) :
-    ∃ k : TorusInverse.Frequency, x ∈ phaseCell n (l,k) := by
-  rcases ActualPrimaryBounds.actual_input_cover l n hx with hc | hz
-  · obtain ⟨k,hk⟩ := hc
-    exact ⟨k, controlCell_subset_phaseCell n (l,k) hk⟩
-  · exact False.elim ((notMem_tsupport_iff_eventuallyEq.mpr hz.1) hs)
 
 
-theorem carrier_eq_character (l : SignedLabel B N0) (n : ℕ) :
-    HarmonicCalculus.carrier ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-      ((ActualPrimary.chartCoefficients l.1 l.2).phase n) =
-      PhysicalGraphBounds.character 1 ∘ weightedPhase l n := by
-  funext x
-  simp only [HarmonicCalculus.carrier, HarmonicCalculus.phaseFactor,
-    PhysicalGraphBounds.character, PhysicalGraphBounds.phaseFactor, Function.comp_apply,
-    weightedPhase, Complex.ofReal_mul, Complex.ofReal_one, one_mul]
-  congr 1
-  ring
 
-theorem inverse_power_eq_rpow (n m : ℕ) :
-    (ChartScales.epsilon ActualPrimary.h n)⁻¹ ^ (2*m) =
-      ChartScales.epsilon ActualPrimary.h n ^ (-(2*(m : ℝ))) := by
-  rw [← Real.rpow_natCast, Real.inv_rpow (ChartScales.epsilon_pos _ _).le,
-    ← Real.rpow_neg (ChartScales.epsilon_pos _ _).le]
-  norm_num
 
-/-- Restoring the unit-modulus exponential uses only positive inner
-phase jets.  Its finite-prefix loss is explicit, including order zero. -/
-theorem carrier_jets_phaseCell (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ n (i : CopyIndex B N0) x,
-      x ∈ ActualPrimaryBounds.fullStrip.domain → x ∈ phaseCell n i → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (HarmonicCalculus.carrier
-        ((ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n)
-        ((ActualPrimary.chartCoefficients i.1.1 i.1.2).phase n)) x‖ ≤
-      WeightedClasses.majorant ActualPrimaryBounds.fullStrip (fun _ _ => 1)
-        (-(2*(m : ℝ))) C p n x := by
-  obtain ⟨C,hC,p,hb⟩ := weightedPhase_positive_jets (B := B) (N0 := N0) m
-  refine ⟨(m.factorial : ℝ) * C^m, ?_, p*m, ?_⟩
-  · exact one_le_mul_of_one_le_of_one_le
-      (by exact_mod_cast (Nat.succ_le_of_lt (Nat.factorial_pos m))) (one_le_pow₀ hC)
-  intro n i x hx hc j hj
-  have hS := PhysicalGraphBounds.S_ge_one hc.1.1
-  have hQ : 1 ≤ ChartScales.Q n ^ (-(2*ActualPrimary.h)) := by
-    rw [← inverse_epsilon_sq]
-    exact one_le_pow₀ (one_le_inverse_epsilon n)
-  have hD : 1 ≤ C * ChartScales.S n^p * ChartScales.Q n ^ (-(2*ActualPrimary.h)) :=
-    one_le_mul_of_one_le_of_one_le (one_le_mul_of_one_le_of_one_le hC (one_le_pow₀ hS)) hQ
-  have hcomp := PhysicalClassBounds.composition_jet_bound
-    (PhysicalGraphBounds.character_smooth 1) ActualPrimaryBounds.fullStrip.isOpen_domain
-    (weightedPhase_contDiffOn i.1 n) hx m zero_le_one hD
-    (fun q _ => by rw [PhysicalGraphBounds.norm_character_jet]; simp)
-    (fun q hq hqm => hb n i x hc q hq hqm) j hj
-  rw [carrier_eq_character]
-  apply hcomp.trans
-  have hSG : ChartScales.S n ≤ ActualPrimaryBounds.fullStrip.growth n x := by
-    rw [← slow_eq_S hc.1.1]
-    exact ActualPrimaryBounds.fullStrip.slow_le_growth n x
-  calc
-    _ = ((m.factorial : ℝ) * C^m) *
-        ChartScales.S n ^ (p*m) * (ChartScales.epsilon ActualPrimary.h n)⁻¹ ^ (2*m) := by
-      rw [← inverse_epsilon_sq, mul_one, mul_pow, mul_pow, ← pow_mul, ← pow_mul]
-      ring
-    _ ≤ ((m.factorial : ℝ) * C^m) *
-        ActualPrimaryBounds.fullStrip.growth n x ^ (p*m) *
-          (ChartScales.epsilon ActualPrimary.h n)⁻¹ ^ (2*m) := by
-      gcongr
-      exact pow_nonneg (inv_nonneg.mpr (ChartScales.epsilon_pos _ _).le) _
-    _ = _ := by
-      rw [inverse_power_eq_rpow, WeightedClasses.majorant, mul_one]
-      change _ = ((m.factorial : ℝ) * C^m) *
-        ChartScales.epsilon ActualPrimary.h n ^ (-(2*(m : ℝ))) *
-          ActualPrimaryBounds.fullStrip.growth n x ^ (p*m)
-      ring
 
-/-- The actual cut amplitude's support supplies the needed native copy;
-no independent carrier-jet estimate is assumed. -/
-theorem carrier_jets_cut (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∃ r : ℝ, ∀ (l : SignedLabel B N0) n x,
-      x ∈ ActualPrimaryBounds.fullStrip.domain →
-      x ∈ tsupport ((ActualPrimaryBounds.cutCoefficients l).amplitude n) → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (HarmonicCalculus.carrier
-        ((ActualPrimary.chartCoefficients l.1 l.2).frequency n)
-        ((ActualPrimary.chartCoefficients l.1 l.2).phase n)) x‖ ≤
-      WeightedClasses.majorant ActualPrimaryBounds.fullStrip (fun _ _ => 1) r C p n x := by
-  obtain ⟨C,hC,p,hb⟩ := carrier_jets_phaseCell (B := B) (N0 := N0) m
-  refine ⟨C,zero_le_one.trans hC,p,-(2*(m : ℝ)),?_⟩
-  intro l n x hx hs j hj
-  obtain ⟨k,hk⟩ := phaseCell_of_cut_tsupport l n hx hs
-  exact hb n (l,k) x hx hk j hj
 
 theorem phase_jet_le_weighted {n : ℕ} {i : CopyIndex B N0} {x : ActualPrimary.FullPoint}
     (hx : x ∈ phaseCell n i) (j : ℕ) :

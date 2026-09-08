@@ -65,11 +65,6 @@ theorem state_gr_mem {s : StripData D} {c : CorrectionState.Context D}
     MeanClass s (min (9 / 10) γ - 2 * κ) (u.gr c) :=
   radialSource_mem ho hb hu.velocity u.covariance hW
 
-theorem meanClass_unweighted {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {s : StripData D} {β : ℝ} {f : ℕ → D → E}
-    (hf : MeanClass s β f) (hζ : ∀ x ∈ s.domain, s.zeta x ≤ 1) :
-    UnweightedClass s β f :=
-  hf.mono_weight (fun _ _ _ => zero_le_one) (fun _ x hx => hζ x hx)
 
 end RadialSource
 
@@ -119,17 +114,6 @@ end VectorLifts
 
 section MovingWeight
 
-theorem movingStrip_zeta_le_one {coord a b cL cR : ℝ} (U : SlowRegion coord)
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (x : MeanStateRegularity.Point) :
-    (movingStripData U a b cL cR ha hcL hcR ε L hε hεone hL).zeta x ≤ 1 := by
-  change WeightedRadialPrimitive.zeta cL cR (WeightedRadialPrimitive.logLength a b)
-    (WeightedRadialPrimitive.logPosition a (profileMap coord x).1) ≤ 1
-  unfold WeightedRadialPrimitive.zeta
-  exact (mul_le_mul (WeightedRadialPrimitive.edge_le_one hcL.le _)
-    (WeightedRadialPrimitive.edge_le_one hcR.le _) (FlatCutoff.edge_nonneg _ _)
-    zero_le_one).trans_eq (one_mul 1)
 
 end MovingWeight
 

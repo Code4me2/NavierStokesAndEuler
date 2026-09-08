@@ -31,13 +31,6 @@ section Reindex
 variable {E F : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- An invertible linear coordinate change transports the actual Fréchet
-derivative, including its totalized value away from differentiability. -/
-theorem normal_pull (e : E ≃ₗᵢ[ℝ] F) (R Φ : F → ℝ) (Vr Vθ Vz : F → F) :
-    phaseNormal (fun x => R (e x)) (StateReindex.vector e Vr) (StateReindex.vector e Vθ)
-      (StateReindex.vector e Vz) (fun x => Φ (e x)) = fun x => phaseNormal R Vr Vθ Vz Φ (e x) := by
-  funext x
-  simp only [phaseNormal, StateReindex.along_pull]
 
 theorem curl_pull (e : E ≃ₗᵢ[ℝ] F) (R : F → ℝ) (Vr Vθ Vz : F → F)
     (a : F → ComplexVector) :
@@ -46,18 +39,6 @@ theorem curl_pull (e : E ≃ₗᵢ[ℝ] F) (R : F → ℝ) (Vr Vθ Vz : F → F)
   funext x
   simp only [cylindricalCurl, StateReindex.along_pull_component]
 
-theorem realizedCoefficient_pull (e : E ≃ₗᵢ[ℝ] F) (K : ℝ) (R Φ : F → ℝ)
-    (Vr Vθ Vz : F → F) (a : F → ComplexVector) :
-    realizedCoefficient K (fun x => R (e x)) (StateReindex.vector e Vr) (StateReindex.vector e Vθ)
-      (StateReindex.vector e Vz) (fun x => Φ (e x)) (fun x => a (e x)) =
-        fun x => realizedCoefficient K R Vr Vθ Vz Φ a (e x) := by
-  have hc : coefficient (fun x => R (e x)) (StateReindex.vector e Vr) (StateReindex.vector e Vθ)
-      (StateReindex.vector e Vz) (fun x => Φ (e x)) (fun x => a (e x)) =
-        fun x => coefficient R Vr Vθ Vz Φ a (e x) := by
-    funext x
-    simp only [coefficient, normal_pull]
-  funext x
-  simp only [realizedCoefficient, hc, curlRemainder_eq, curl_pull]
 
 /-- Phase agreement on a neighborhood suffices for the complete curl
 correction; no global continuation of the phase identity is required. -/
@@ -105,126 +86,12 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
   (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
   (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
 
-include H hn hr in
-theorem raw_amplitude_pull (j : ℤ) :
-    (fun x => (raw D h gap j).amplitude n (PhysicalParticularWave.waveEquiv x)) =
-      PhysicalParticularWave.bandRaw D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-        (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j := by
-  funext x
-  exact congrFun (CorrectionStep.ParticularParameters.fromReference_coherent_amplitude
-    D h gap j n i H hn hr) (PhysicalParticularWave.waveEquiv x)
 
-include H hn hr in
-theorem raw_pressure_pull (j : ℤ) (hk : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) :
-    (fun x => (raw D h gap j).pressure n (PhysicalParticularWave.waveEquiv x)) =
-      PhysicalParticularWave.bandRawPressure D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-        (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j := by
-  funext x
-  exact congrFun (CorrectionStep.ParticularParameters.fromReference_coherent_pressure
-    D h gap j n i H hn hr hk) (PhysicalParticularWave.waveEquiv x)
 
-include H in
-/-- The phase identity is derived on the full positive-radius lift from
-the current-state band coherence and the same integer angular harmonic. -/
-theorem bandPhase_eq (j : ℤ) (hj : j ≠ 0) (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    {x : Cylinder} (hx : 0 < x.1.1) :
-    PhysicalParticularWave.bandPhase D h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j x =
-        (raw D h gap j).phase n (PhysicalParticularWave.waveEquiv x) := by
-  have hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0 :=
-    mul_ne_zero (by exact_mod_cast hj) (hf n)
-  apply mul_left_cancel₀ hK
-  have htarget := actualCarrier_phase D.background D.carrierBlock j hf n
-    ((PhysicalParticularWave.waveEquiv x).1.1, (PhysicalParticularWave.waveEquiv x).2)
-    (PhysicalParticularWave.waveEquiv x).1.2
-  have href := actualCarrier_phase D.background D.carrierBlock j hf D.reference.band
-    (PhysicalParticularWave.parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (PhysicalParticularWave.waveEquiv x).1.1, CommonCoverSolve.coverPower (gap n) (PhysicalParticularWave.waveEquiv x).2)
-    (PhysicalParticularWave.waveEquiv x).1.2
-  have hphase := H.block.phase
-    (x := ((PhysicalParticularWave.waveEquiv x).1.1, (PhysicalParticularWave.waveEquiv x).2)) hx
-  change D.carrierBlock.frequency n * D.carrierBlock.phase n _ =
-    D.carrierBlock.frequency D.reference.band * D.carrierBlock.phase D.reference.band _ at hphase
-  change ((j : ℝ) * D.carrierBlock.frequency n) * (raw D h gap j).phase n
-    (PhysicalParticularWave.waveEquiv x) = _ at htarget
-  change PhysicalParticularWave.referenceFrequency D j * PhysicalParticularWave.liftPhase D j
-    (PhysicalParticularWave.cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) = _ at href
-  rw [hphase, H.block.angular] at htarget
-  unfold PhysicalParticularWave.bandPhase
-  calc
-    _ = PhysicalParticularWave.referenceFrequency D j * PhysicalParticularWave.liftPhase D j
-        (PhysicalParticularWave.cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x) := by
-          field_simp [hf n]
-    _ = _ := href.trans htarget.symm
 
-include H in
-theorem bandPhase_germ (j : ℤ) (hj : j ≠ 0) (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    {x : Cylinder} (hx : 0 < x.1.1) :
-    (fun y => (raw D h gap j).phase n (PhysicalParticularWave.waveEquiv y)) =ᶠ[𝓝 x]
-      PhysicalParticularWave.bandPhase D h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-        (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j := by
-  filter_upwards [(isOpen_lt continuous_const continuous_fst.fst).mem_nhds hx] with y hy
-  exact (bandPhase_eq D h gap n i H j hj hf hy).symm
 
-include H hn hr in
-theorem corrected_amplitude_pull (T : TargetChart D s h n i) (j : ℤ) :
-    (fun x => (corrected D s h gap j).amplitude n (PhysicalParticularWave.waveEquiv x)) =
-      realizedCoefficient ((j : ℝ) * D.carrierBlock.frequency n)
-        PhysicalResidualBridge.ScaledGraph.radius
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).radial
-        PhysicalResidualBridge.ScaledGraph.angular
-        (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).axial
-        (fun x => (raw D h gap j).phase n (PhysicalParticularWave.waveEquiv x))
-        (PhysicalParticularWave.bandRaw D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-          (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j) := by
-  have hp := realizedCoefficient_pull PhysicalParticularWave.waveEquiv
-    ((j : ℝ) * D.carrierBlock.frequency n) (D.background.radius n) ((raw D h gap j).phase n)
-    (D.directions.radialField n) (fun _ => D.directions.angular)
-    (D.directions.axialField (CorrectionStep.ParticularParameters.nativeStrip s) n)
-    ((raw D h gap j).amplitude n)
-  rw [T.radius, T.radial, T.angular, T.axial, raw_amplitude_pull D h gap n i H hn hr j] at hp
-  exact hp.symm
 
-include H hn hr in
-theorem corrected_velocity_eq_band (T : TargetChart D s h n i) (j : ℤ) (hj : j ≠ 0)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0) {x : Cylinder} (hx : 0 < x.1.1) :
-    vectorMode ((corrected D s h gap j).frequency n) ((corrected D s h gap j).phase n)
-      ((corrected D s h gap j).amplitude n) (PhysicalParticularWave.waveEquiv x) =
-        PhysicalParticularWave.bandVelocity D h (ChartScales.Q_pos n)
-          (ChartScales.Q_pos D.reference.band) i (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j x := by
-  have hΦ := bandPhase_germ D h gap n i H j hj hf hx
-  have ha := congrFun (corrected_amplitude_pull D s h gap n i H hn hr T j) x
-  have hg := (realizedCoefficient_phase_germ hΦ ((j : ℝ) * D.carrierBlock.frequency n)
-    PhysicalResidualBridge.ScaledGraph.radius
-    (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).radial
-    PhysicalResidualBridge.ScaledGraph.angular
-    (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).axial
-    (PhysicalParticularWave.bandRaw D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-      (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j)).eq_of_nhds
-  funext k
-  change (corrected D s h gap j).amplitude n (PhysicalParticularWave.waveEquiv x) k *
-    carrier ((j : ℝ) * D.carrierBlock.frequency n) ((raw D h gap j).phase n) (PhysicalParticularWave.waveEquiv x) = _
-  rw [ha, hg]
-  change _ * carrier ((j : ℝ) * D.carrierBlock.frequency n)
-    (fun y => (raw D h gap j).phase n (PhysicalParticularWave.waveEquiv y)) x = _
-  exact congrArg₂ (· * ·) rfl (PhysicalCurlCovariance.carrier_eq_of_products
-    (congrArg (((j : ℝ) * D.carrierBlock.frequency n) * ·) hΦ.eq_of_nhds))
 
-include H hn hr in
-theorem corrected_pressure_eq_band (j : ℤ) (hj : j ≠ 0)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0) {x : Cylinder} (hx : 0 < x.1.1) :
-    mode ((corrected D s h gap j).frequency n) ((corrected D s h gap j).phase n)
-      ((corrected D s h gap j).pressure n) (PhysicalParticularWave.waveEquiv x) =
-        PhysicalParticularWave.bandPressureMode D h (ChartScales.Q_pos n)
-          (ChartScales.Q_pos D.reference.band) (gap n) ((j : ℝ) * D.carrierBlock.frequency n) j x := by
-  have hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0 :=
-    mul_ne_zero (by exact_mod_cast hj) (hf n)
-  have hp := congrFun (raw_pressure_pull D h gap n i H hn hr j hK) x
-  have hΦ := (bandPhase_eq D h gap n i H j hj hf hx).symm
-  change (raw D h gap j).pressure n (PhysicalParticularWave.waveEquiv x) * _ = _
-  rw [hp]
-  exact congrArg₂ (· * ·) rfl (PhysicalCurlCovariance.carrier_eq_of_products
-    (congrArg (((j : ℝ) * D.carrierBlock.frequency n) * ·) hΦ))
 
 end Band
 
@@ -235,13 +102,7 @@ noncomputable def block (D : AssemblyData Parameter) (s : WeightedClasses.StripD
   (CorrectionStep.ParticularParameters.fromReference D h gap).updateBlock s
     D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N
 
-/-- Cylindrical coordinates with the cycle's slow-coordinate order and the
-association used by the harmonic coefficient block. -/
-noncomputable def associatedCylinder : Cylinder ≃ₗᵢ[ℝ] (Associated × ℝ) :=
-  StateReindex.cylinder PhysicalResidualNaturality.associatedToLift.symm
 
-theorem angleShuffle_associatedCylinder (x : Cylinder) :
-    angleShuffle (associatedCylinder x) = PhysicalParticularWave.waveEquiv x := rfl
 
 section Assembly
 
@@ -317,21 +178,6 @@ variable (n i : ℕ)
   (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
   (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
 
-include H hn hr in
-theorem block_velocity_eq_band (T : TargetChart D s h n i) {N : ℕ}
-    (B : ∀ j ∈ modes N, BackgroundControl (CorrectionStep.ParticularParameters.nativeStrip s)
-      D.directions D.background D.carrierBlock j)
-    (hj : ∀ j ∈ modes N, j ≠ 0) (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    {x : Cylinder} (hx : 0 < x.1.1) (k : Fin 3) :
-    (block D s h gap N).oscillation n (associatedCylinder x) k =
-      PhysicalParticularWave.labelBandVelocity D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) i (gap n)
-        (fun j => (j : ℝ) * D.carrierBlock.frequency n) N x k := by
-  rw [block_velocity_represents D s h gap B hf]
-  unfold PhysicalParticularWave.labelBandVelocity
-  apply Finset.sum_congr rfl
-  intro j hmem
-  rw [angleShuffle_associatedCylinder, corrected_velocity_eq_band D s h gap n i H hn hr T j (hj j hmem) hf hx]
 
 
 end Assembly
@@ -445,37 +291,6 @@ variable {Γ : E → F} {r : E → ℝ} {R : F → ℝ}
 
 include G hK hb hKL hΦ hx hB
 
-/-- The complete differentiated coefficient has the velocity scale. This
-uses actual Fréchet derivatives, not an assumed curl-output covariance. -/
-theorem realizedCoefficient_scaled :
-    realizedCoefficient K r Sr Sθ Sz (fun y => b * Φ (Γ y)) (fun y => c • a (Γ y)) x =
-      c • realizedCoefficient L R Vr Vθ Vz Φ a (Γ x) := by
-  have hc : coefficient r Sr Sθ Sz (fun y => b * Φ (Γ y)) (fun y => c • a (Γ y)) =ᶠ[𝓝 x]
-      (fun y => ((c / (b * l) : ℝ) : ℂ) • coefficient R Vr Vθ Vz Φ a (Γ y)) := by
-    filter_upwards [G.isOpen.mem_nhds hx] with y hy
-    have hn := PhysicalCurlCovariance.phaseNormal_pull G.scale_ne (G.radius_ne y hy)
-      (G.differentiable y hy) (G.radial y hy) (G.angular y hy) (G.axial y hy)
-      (G.radius y hy) (hΦ y hy) b
-    simp only [coefficient, hn,
-      PhysicalCurlCovariance.normalCoefficient_scale _ _ (mul_ne_zero hb G.scale_ne) c]
-    ext k
-    simp only [Pi.smul_apply, Complex.real_smul, smul_eq_mul]
-  have hc' := (ParticularWaveAssembly.curl_germ hc r Sr Sθ Sz).eq_of_nhds
-  have hcurl := PhysicalCurlCovariance.cylindricalCurl_pull G.scale_ne (G.radius_ne x hx)
-    (G.differentiable x hx) (G.radial x hx) (G.angular x hx) (G.axial x hx)
-    (G.radius x hx) hB (((c / (b * l) : ℝ) : ℂ))
-  have hs : inverseCarrier K * ((c / (b * l) : ℝ) : ℂ) * (l : ℂ) =
-      (c : ℂ) * inverseCarrier L := by
-    rw [← hKL]
-    unfold inverseCarrier
-    push_cast
-    field_simp [Complex.ofReal_ne_zero.mpr hK, Complex.ofReal_ne_zero.mpr hb,
-      Complex.ofReal_ne_zero.mpr G.scale_ne]
-  simp only [realizedCoefficient, curlRemainder_eq, hc', hcurl]
-  ext k
-  simp only [Pi.add_apply, Pi.smul_apply, Complex.real_smul, smul_eq_mul]
-  rw [← mul_assoc (inverseCarrier K), ← mul_assoc (inverseCarrier K), hs]
-  ring
 
 
 end FullVariable

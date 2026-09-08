@@ -590,11 +590,7 @@ theorem pastIntegral_norm_le {a b M C : ℝ} {v : E} {f : ℝ × E → F}
 
 
 
-theorem pastIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
-    pastIntegral M v (fun x => c • f x) z = c • pastIntegral M v f z := integral_smul c _
 
-theorem totalIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
-    totalIntegral M v (fun x => c • f x) z = c • totalIntegral M v f z := integral_smul c _
 
 
 theorem iteratedFDeriv_supported {a b : ℝ} {f : ℝ × E → F}

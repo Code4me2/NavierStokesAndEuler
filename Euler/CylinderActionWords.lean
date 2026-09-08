@@ -46,9 +46,6 @@ theorem path_block_constant {ι : Type*} [Fintype ι] (directions : ι → LiftT
 
 end Path
 
-def timeTranslateIsometry (T : ℝ) (a : LiftTangent) :
-    TimeLp T (CylinderL2 P V) →ₗᵢ[ℝ] TimeLp T (CylinderL2 P V) :=
-  timeLiftIsometry T (translate P a)
 
 
 

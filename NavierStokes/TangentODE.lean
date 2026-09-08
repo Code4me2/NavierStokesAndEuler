@@ -134,9 +134,6 @@ theorem exists_contracting_iterate :
   exact ⟨N, ⟨_, hnonneg⟩, hN, LipschitzWith.of_dist_le_mul fun f g =>
     v.dist_iterate_next_le f g N⟩
 
-theorem exists_fixed : ∃ f : C(Icc v.left v.right, E), v.next f = f := by
-  obtain ⟨N, K, hK⟩ := v.exists_contracting_iterate
-  exact ⟨_, hK.isFixedPt_fixedPoint_iterate⟩
 
 
 end IntervalSystem

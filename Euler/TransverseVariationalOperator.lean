@@ -52,20 +52,6 @@ def dirichletSolver (J : V →L[ℝ] W) (H : W →L[ℝ] W)
   (coerciveInverse (dirichletOperator J H) (1 / 2) (by norm_num)
     (dirichletOperator_coercive J H L K hK hJ hH hsmall)).comp (-J.adjoint)
 
-/-- The constructed solution obeys the actual weak displacement equation. -/
-theorem dirichletSolver_weak (J : V →L[ℝ] W) (H : W →L[ℝ] W)
-    (L K : ℝ) (hK : 0 ≤ K)
-    (hJ : ∀ u, ‖J u‖ ^ 2 ≤ L * ‖u‖ ^ 2)
-    (hH : ∀ w, ⟪H w, w⟫_ℝ ≤ K * ‖w‖ ^ 2)
-    (hsmall : K * L ≤ 1 / 2) (f : W) (v : V) :
-    let u := dirichletSolver J H L K hK hJ hH hsmall f
-    ⟪u, v⟫_ℝ - ⟪H (J u), J v⟫_ℝ = -⟪f, J v⟫_ℝ := by
-  dsimp only
-  rw [← dirichletOperator_inner]
-  change ⟪dirichletOperator J H
-    (coerciveInverse (dirichletOperator J H) (1 / 2) (by norm_num)
-      (dirichletOperator_coercive J H L K hK hJ hH hsmall) (-J.adjoint f)), v⟫_ℝ = _
-  rw [operator_inverse_apply, inner_neg_left, adjoint_inner_left]
 
 
 

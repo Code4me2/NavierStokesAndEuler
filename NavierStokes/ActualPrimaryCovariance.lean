@@ -1103,19 +1103,6 @@ theorem piece_support (l : Label B N0 × Fin 2) (n : ℕ) (x : Point)
 
 
 
-theorem cutAmplitude_tsupport_disjoint (n : ℕ) {l m : Label B N0 × Fin 2} (hlm : l ≠ m) :
-    Disjoint
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport (cutAmplitude l.2 l.1 n))
-      ((Prod.fst ⁻¹' (BaseContextAssembly.nativeStrip nominal standardRegion).domain) ∩
-        tsupport (cutAmplitude m.2 m.1 n)) := by
-  apply Set.disjoint_left.mpr
-  rintro ⟨x, theta⟩ ⟨hx, hl⟩ ⟨_, hm⟩
-  obtain ⟨hwl, hsl⟩ := cutAmplitude_tsupport l.2 l.1 n hx theta hl
-  obtain ⟨hwm, hsm⟩ := cutAmplitude_tsupport m.2 m.1 n hx theta hm
-  have hne : signedLabelOf l ≠ signedLabelOf m := fun he => hlm (signedLabelOf_injective he)
-  exact Set.disjoint_left.mp (slots.disjoint _ _ (LabelSumBounds.closedWindow_adjacency
-    l.1.val.property.1 m.1.val.property.1 hne hwl hwm)) hsl hsm
 
 
 

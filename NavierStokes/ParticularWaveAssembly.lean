@@ -523,24 +523,6 @@ theorem actualBandVelocity_eq_reference (r : Reference P) (charts : BandCharts P
   unfold actualBandVelocity bandTangent bandGeometry referenceVelocity
   rw [hsource, commonVelocity_transport]
 
-theorem actualBandPressure_eq_reference (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) {j : ℤ} (hj : j ≠ 0) (n : ℕ)
-    (hfrequency : ∀ n, b.frequency n ≠ 0)
-    (hsource : residualSource c u b G A j n = transportSource
-      (residualSource c u b G A j r.band) (charts.parameter n) (charts.gap n) (charts.amplitude n))
-    (p : P) (Y : Plane) :
-    actualBandPressure r charts c u b G A j n (p,Y) =
-      (charts.amplitude n * b.frequency r.band / b.frequency n) •
-        referencePressure r c u b G A j (charts.parameter n p, coverPower (charts.gap n) Y) := by
-  have hjr : (j : ℝ) ≠ 0 := by exact_mod_cast hj
-  unfold actualBandPressure bandTangent bandGeometry referencePressure
-  rw [hsource, commonPressure_transport _ _ _ _ _ _ _ _ _
-    (mul_ne_zero hjr (hfrequency r.band)) (mul_ne_zero hjr (hfrequency n))]
-  have he : charts.amplitude n * ((j : ℝ) * b.frequency r.band) /
-      ((j : ℝ) * b.frequency n) = charts.amplitude n * b.frequency r.band / b.frequency n := by
-    field_simp [hjr, hfrequency n]
-  rw [he]
 
 
 

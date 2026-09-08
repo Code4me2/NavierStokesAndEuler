@@ -120,22 +120,6 @@ theorem scalar_tail_bound (g : ℕ → ℝ) (hg : Monotone g) (L q : ℝ)
   simpa only [hcancel] using
     DiagonalScale.weighted_tail_bound (fun j => 2 * g j) hmono L q hq hq1 J
 
-/-- One prefix can accommodate every derivative in a prescribed finite jet.
-No monotonicity assumption is needed on the loss function. -/
-theorem exists_prefix_gain (g L : ℕ → ℝ) (hgtop : Tendsto g atTop atTop)
-    (M Jmin : ℕ) (N : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∀ m ≤ M, N ≤ g (J + 1) - L m := by
-  let B : ℝ := (Finset.range (M + 1)).sup'
-    ⟨0, Finset.mem_range.mpr (Nat.succ_pos M)⟩ L
-  obtain ⟨K, hK⟩ := eventually_atTop.1
-    (hgtop.eventually (eventually_ge_atTop (N + B)))
-  refine ⟨max Jmin (max M K), le_max_left _ _, ?_, ?_⟩
-  · exact (le_max_left M K).trans (le_max_right _ _)
-  · intro m hm
-    have hmB : L m ≤ B :=
-      Finset.le_sup' L (Finset.mem_range.mpr (Nat.lt_succ_of_le hm))
-    have hgJ := hK (max Jmin (max M K) + 1) (by omega)
-    linarith
 
 end Scalar
 

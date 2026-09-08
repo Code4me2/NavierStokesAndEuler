@@ -404,30 +404,7 @@ theorem AngularContinuous.add {u v : Oscillation D}
     (hu : AngularContinuous u) (hv : AngularContinuous v) : AngularContinuous (u + v) :=
   fun n x i => (hu n x i).add (hv n x i)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_add_left {u v w : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) (hw : AngularContinuous w) :
-    bilinearCovariance (u + v) w = bilinearCovariance u w + bilinearCovariance v w := by
-  funext i j n x
-  have he : (fun θ : ℝ => (u + v) n (x, θ) i * w n (x, θ) j) =
-      (fun θ => u n (x, θ) i * w n (x, θ) j + v n (x, θ) i * w n (x, θ) j) := by
-    funext θ
-    simp only [Pi.add_apply]
-    ring
-  change (∫ θ in (0 : ℝ)..2 * Real.pi, (u + v) n (x, θ) i * w n (x, θ) j) /
-    (2 * Real.pi) = _
-  rw [he, intervalIntegral.integral_add (((hu n x i).fun_mul (hw n x j)).intervalIntegrable _ _)
-    (((hv n x i).fun_mul (hw n x j)).intervalIntegrable _ _), add_div]
-  rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_add_right {u v w : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) (hw : AngularContinuous w) :
-    bilinearCovariance u (v + w) = bilinearCovariance u v + bilinearCovariance u w := by
-  funext i j
-  rw [bilinearCovariance_comm u (v + w) i j,
-    congrFun (congrFun (bilinearCovariance_add_left hv hw hu) j) i]
-  simp only [Pi.add_apply, bilinearCovariance_comm v u j i, bilinearCovariance_comm w u j i]
 
 /-- The actual covariance increment contains both cross terms and the
 entire square of the exact increment. -/
@@ -1002,23 +979,7 @@ theorem AngularContinuous.sub {u v : Oscillation D}
     (hu : AngularContinuous u) (hv : AngularContinuous v) : AngularContinuous (u - v) :=
   fun n x i => (hu n x i).sub (hv n x i)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_neg_left (u v : Oscillation D) :
-    bilinearCovariance (-u) v = -bilinearCovariance u v := by
-  funext i j n x
-  change (∫ θ in (0 : ℝ)..2 * Real.pi, -u n (x, θ) i * v n (x, θ) j) /
-    (2 * Real.pi) = -((∫ θ in (0 : ℝ)..2 * Real.pi, u n (x, θ) i * v n (x, θ) j) /
-      (2 * Real.pi))
-  simp only [neg_mul, intervalIntegral.integral_neg, neg_div]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem bilinearCovariance_neg_right (u v : Oscillation D) :
-    bilinearCovariance u (-v) = -bilinearCovariance u v := by
-  funext i j
-  rw [bilinearCovariance_comm u (-v) i j,
-    congrFun (congrFun (bilinearCovariance_neg_left v u) j) i]
-  change -bilinearCovariance v u j i = -bilinearCovariance u v i j
-  rw [bilinearCovariance_comm v u j i]
 
 
 
@@ -5751,45 +5712,9 @@ noncomputable def fromReference
   background := D.background
   directions := D.directions
 
-theorem fromReference_amplitude
-    (D : AssemblyData PhysicalParticularWave.Parameter) (h : ℝ) (gap : ℕ→ℕ) (j : ℤ) (n : ℕ) :
-    ((fromReference D h gap).copyData D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.amplitude n =
-      angleLift (PhysicalParticularWave.residualBandAmplitude D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) (gap n) ((j:ℝ)*D.carrierBlock.frequency n) j n) :=
-  common_amplitude _ _ _ _ _ _ _ _
 
-theorem fromReference_pressure
-    (D : AssemblyData PhysicalParticularWave.Parameter) (h : ℝ) (gap : ℕ→ℕ) (j : ℤ) (n : ℕ)
-    (hk : (j:ℝ)*D.carrierBlock.frequency n ≠ 0) :
-    ((fromReference D h gap).copyData D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.pressure n =
-      angleLift (PhysicalParticularWave.residualBandPressure D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) (gap n) ((j:ℝ)*D.carrierBlock.frequency n) j n) :=
-  common_pressure _ _ _ _ _ _ _ _ hk
 
-/-- Full-lift current-state coherence identifies the actual solved amplitude
-with the one reference physical wave, before taking a graph restriction. -/
-theorem fromReference_coherent_amplitude
-    (D : AssemblyData PhysicalParticularWave.Parameter) (h : ℝ) (gap : ℕ→ℕ) (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band) :
-    ((fromReference D h gap).copyData D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.amplitude n =
-      angleLift (PhysicalParticularWave.bandAmplitude D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) (gap n) ((j:ℝ)*D.carrierBlock.frequency n) j) := by
-  rw [fromReference_amplitude, H.residualBandAmplitude_eq hn hr]
 
-theorem fromReference_coherent_pressure
-    (D : AssemblyData PhysicalParticularWave.Parameter) (h : ℝ) (gap : ℕ→ℕ) (j : ℤ) (n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    (hk : (j:ℝ)*D.carrierBlock.frequency n ≠ 0) :
-    ((fromReference D h gap).copyData D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.pressure n =
-      angleLift (PhysicalParticularWave.bandPressure D h (ChartScales.Q_pos n)
-        (ChartScales.Q_pos D.reference.band) (gap n) ((j:ℝ)*D.carrierBlock.frequency n) j) := by
-  rw [fromReference_pressure D h gap j n hk, H.residualBandPressure_eq hn hr]
 
 end ParticularParameters
 

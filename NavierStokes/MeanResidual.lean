@@ -101,12 +101,6 @@ theorem AngularContinuous.div_radius {f : Scalar} (hf : AngularContinuous f) (n 
 theorem AngularContinuous.const_mul {f : Scalar} (hf : AngularContinuous f) (c : ℝ) :
     AngularContinuous (fun q => c * f q) := fun q => continuous_const.mul (hf q)
 
-omit [NormedSpace ℝ E] in
-theorem AngularInvariant.angularContinuous {f : SpaceTime → E} (hf : AngularInvariant f) :
-    AngularContinuous f := by
-  intro q
-  change ∀ q a, f (angularShift q a) = f q at hf
-  simpa only [hf] using (continuous_const : Continuous (fun _ : ℝ => f q))
 
 theorem average_add {f g : SpaceTime → E} (hf : AngularContinuous f)
     (hg : AngularContinuous g) (q : SpaceTime) :
@@ -122,12 +116,6 @@ theorem average_sub {f g : SpaceTime → E} (hf : AngularContinuous f)
   rw [intervalIntegral.integral_sub ((hf q).intervalIntegrable _ _)
     ((hg q).intervalIntegrable _ _), smul_sub]
 
-theorem average_invariant [CompleteSpace E] {f : SpaceTime → E}
-    (hf : AngularInvariant f) (q : SpaceTime) :
-    average f q = f q := by
-  change ∀ q a, f (angularShift q a) = f q at hf
-  simp only [average, hf, intervalIntegral.integral_const, sub_zero, smul_smul,
-    inv_mul_cancel₀ period_ne_zero, one_smul]
 
 
 theorem average_mul_invariant {a f : Scalar} (ha : AngularInvariant a) (q : SpaceTime) :
@@ -136,14 +124,7 @@ theorem average_mul_invariant {a f : Scalar} (ha : AngularInvariant a) (q : Spac
   simp only [average, ha, intervalIntegral.integral_const_mul, smul_eq_mul]
   ring
 
-theorem average_div_radius (f : Scalar) (q : SpaceTime) (n : ℕ) :
-    average (fun y => f y / radius y ^ n) q = average f q / radius q ^ n := by
-  simp only [average, radius_angularShift, intervalIntegral.integral_div, smul_eq_mul]
-  ring
 
-theorem average_div_r (f : Scalar) (q : SpaceTime) :
-    average (fun y => f y / radius y) q = average f q / radius q := by
-  simpa only [pow_one] using average_div_radius f q 1
 
 theorem average_const_mul (c : ℝ) (f : Scalar) (q : SpaceTime) :
     average (fun y => c * f y) q = c * average f q :=
@@ -161,29 +142,6 @@ theorem average_smooth [CompleteSpace E] {f : SpaceTime → E} (hf : ContDiff �
   (TransportPrimitive.parameterIntegral_contDiff (hf.comp contDiff_angularShift)
     0 period).const_smul _
 
-/-- Differentiation under the actual compact angular integral. -/
-theorem direction_average [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (v q : SpaceTime) :
-    direction v (average f) q = average (direction v f) q := by
-  let g : SpaceTime × ℝ → E := fun qa => f (angularShift qa.1 qa.2)
-  have hg : ContDiff ℝ ∞ g := hf.comp contDiff_angularShift
-  have hI := TransportPrimitive.parameterIntegral_hasFDerivAt hg 0 period q
-  unfold direction average
-  rw [(hI.fun_const_smul (period⁻¹)).fderiv]
-  simp only [_root_.smul_apply]
-  congr 1
-  rw [ContinuousLinearMap.intervalIntegral_apply]
-  · apply intervalIntegral.integral_congr
-    intro a _
-    have hchain : HasFDerivAt (fun x => f (angularShift x a))
-        (fderiv ℝ f (angularShift q a)) q := by
-      simpa only [angularShift, Function.comp_def, id_eq, ContinuousLinearMap.comp_id] using
-        ((hf.differentiable (by simp)) (angularShift q a)).hasFDerivAt.comp q
-          ((hasFDerivAt_id q).add_const (a • angularVector))
-    exact congrArg (fun L : SpaceTime →L[ℝ] E => L v)
-      ((TransportPrimitive.parameter_hasFDerivAt hg q a).unique hchain)
-  · exact ((TransportPrimitive.parameterDerivative_contDiff hg).continuous.comp
-      (continuous_const.prodMk continuous_id)).intervalIntegrable _ _
 
 theorem AngularPeriodic.direction {f : SpaceTime → E} (hp : AngularPeriodic f)
     (v : SpaceTime) : AngularPeriodic (direction v f) := by
@@ -207,22 +165,6 @@ theorem AngularPeriodic.mul {f g : Scalar} (hf : AngularPeriodic f) (hg : Angula
   change f (angularShift q period) * g (angularShift q period) = f q * g q
   rw [hf q, hg q]
 
-/-- A full angular derivative has exactly zero average, by the fundamental theorem. -/
-theorem average_dtheta_zero [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (hp : AngularPeriodic f) (q : SpaceTime) :
-    average (dtheta f) q = 0 := by
-  have hd : ∀ a : ℝ, HasDerivAt (fun b => f (angularShift q b))
-      (dtheta f (angularShift q a)) a := by
-    intro a
-    have hs : HasDerivAt (fun b : ℝ => angularShift q b) angularVector a := by
-      simpa [angularShift] using ((hasDerivAt_id a).smul_const angularVector).const_add q
-    exact ((hf.differentiable (by simp)) (angularShift q a)).hasFDerivAt.comp_hasDerivAt a hs
-  have hc : AngularContinuous (dtheta f) :=
-    angularContinuous_of_continuous (direction_smooth angularVector hf).continuous
-  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun a _ => hd a)
-    ((hc q).intervalIntegrable 0 period)
-  rw [hp, angularShift_zero, sub_self] at hi
-  simp only [average, hi, smul_zero]
 
 
 theorem direction_add {f g : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
@@ -239,33 +181,9 @@ theorem direction_sub {f g : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
   rw [fderiv_fun_sub (hf.differentiable (by simp) q) (hg.differentiable (by simp) q)]
   rfl
 
-theorem direction_mul {f g : Scalar} (hf : ContDiff ℝ ∞ f)
-    (hg : ContDiff ℝ ∞ g) (v q : SpaceTime) :
-    direction v (fun y => f y * g y) q = direction v f q * g q + f q * direction v g q := by
-  unfold direction
-  rw [fderiv_fun_mul (hf.differentiable (by simp) q) (hg.differentiable (by simp) q)]
-  simp
-  ring
 
 
-theorem spatial_direction {f : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
-    (t : ℝ) (x : Space) (i : Fin 3) :
-    CylindricalResidual.dCoord i (fun y => f (t, y)) x =
-      direction (0, coordinateVector i) f (t, x) := by
-  have h := (hf.differentiable (by simp) (t, x)).hasFDerivAt.comp x
-    ((hasFDerivAt_const t x).prodMk (hasFDerivAt_id x))
-  change (fderiv ℝ (f ∘ fun y => (t, y)) x) _ = _
-  rw [h.fderiv]
-  rfl
 
-theorem spatial_second {f : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
-    (t : ℝ) (x : Space) (i : Fin 3) :
-    CylindricalResidual.dCoord i (CylindricalResidual.dCoord i (fun y => f (t, y))) x =
-      direction (0, coordinateVector i) (direction (0, coordinateVector i) f) (t, x) := by
-  rw [show CylindricalResidual.dCoord i (fun y => f (t, y)) =
-      fun y => direction (0, coordinateVector i) f (t, y) from
-    funext (fun y => spatial_direction hf t y i)]
-  exact spatial_direction (direction_smooth _ hf) t x i
 
 
 noncomputable def velocity (w : Components) : VelocityField :=
@@ -280,12 +198,6 @@ theorem velocity_smooth {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i)) :
   (((hw 0).smul contDiff_const).add ((hw 1).smul contDiff_const)).add
     ((hw 2).smul contDiff_const)
 
-theorem direction_velocity {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
-    (v q : SpaceTime) : direction v (velocity w) q =
-      pack (direction v (w 0) q) (direction v (w 1) q) (direction v (w 2) q) := by
-  exact AxisymmetricResidual.fderiv_pack_apply
-    ((hw 0).differentiable (by simp) q) ((hw 1).differentiable (by simp) q)
-    ((hw 2).differentiable (by simp) q) v
 
 
 noncomputable def laplacian (f : Scalar) (q : SpaceTime) : ℝ :=
@@ -314,230 +226,36 @@ noncomputable def residualAngular (w : Components) (p : Scalar) (q : SpaceTime) 
 noncomputable def residualAxial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
   dt (w 2) q + transport w (w 2) q - laplacian (w 2) q + dz p q
 
-theorem scalarLaplacian_eq {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    CylindricalResidual.scalarLaplacian (fun y => f (q.1, y)) q.2 = laplacian f q := by
-  simp only [CylindricalResidual.scalarLaplacian, spatial_second hf, spatial_direction hf,
-    laplacian, dr, dtheta, dz, angularVector, radius, smul_eq_mul]
-  ring
 
 
 
 
 
-noncomputable def conservativeRadial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (w 0) q + radialDivergence 1 (fun y => w 0 y * w 0 y) q +
-    dtheta (fun y => w 1 y * w 0 y) q / radius q +
-    dz (fun y => w 2 y * w 0 y) q - (w 1 q * w 1 q) / radius q - laplacian (w 0) q +
-    w 0 q / radius q ^ 2 + 2 * dtheta (w 1) q / radius q ^ 2 + dr p q
 
-noncomputable def conservativeAngular (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (w 1) q + radialDivergence 2 (fun y => w 0 y * w 1 y) q +
-    dtheta (fun y => w 1 y * w 1 y) q / radius q +
-    dz (fun y => w 2 y * w 1 y) q - laplacian (w 1) q +
-    w 1 q / radius q ^ 2 - 2 * dtheta (w 0) q / radius q ^ 2 + dtheta p q / radius q
 
-noncomputable def conservativeAxial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (w 2) q + radialDivergence 1 (fun y => w 0 y * w 2 y) q +
-    dtheta (fun y => w 1 y * w 2 y) q / radius q +
-    dz (fun y => w 2 y * w 2 y) q - laplacian (w 2) q + dz p q
 
-theorem conservativeRadial_eq {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
-    (p : Scalar) (q : SpaceTime) :
-    conservativeRadial w p q = residualRadial w p q + w 0 q * divergence w q := by
-  simp only [conservativeRadial, residualRadial, radialDivergence, transport, divergence,
-    dr, dtheta, dz, direction_mul (hw 0) (hw 0), direction_mul (hw 1) (hw 0),
-    direction_mul (hw 2) (hw 0)]
-  ring
 
-theorem conservativeAngular_eq {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
-    (p : Scalar) (q : SpaceTime) :
-    conservativeAngular w p q = residualAngular w p q + w 1 q * divergence w q := by
-  simp only [conservativeAngular, residualAngular, radialDivergence, transport, divergence,
-    dr, dtheta, dz, direction_mul (hw 0) (hw 1), direction_mul (hw 1) (hw 1),
-    direction_mul (hw 2) (hw 1)]
-  ring
 
-theorem conservativeAxial_eq {w : Components} (hw : ∀ i, ContDiff ℝ ∞ (w i))
-    (p : Scalar) (q : SpaceTime) :
-    conservativeAxial w p q = residualAxial w p q + w 2 q * divergence w q := by
-  simp only [conservativeAxial, residualAxial, radialDivergence, transport, divergence,
-    dr, dtheta, dz, direction_mul (hw 0) (hw 2), direction_mul (hw 1) (hw 2),
-    direction_mul (hw 2) (hw 2)]
-  ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem angularInvariant_radius (f : ℝ → E) : AngularInvariant (fun q => f (radius q)) := by
-  intro q a
-  exact congrArg f (radius_angularShift q a)
 
-theorem average_direction [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (v q : SpaceTime) :
-    average (direction v f) q = direction v (average f) q := (direction_average hf v q).symm
 
-theorem average_direction_twice [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (v w q : SpaceTime) :
-    average (direction v (direction w f)) q = direction v (direction w (average f)) q := by
-  rw [average_direction (direction_smooth w hf)]
-  rw [show average (direction w f) = direction w (average f) from
-    funext (average_direction hf w)]
 
-theorem average_dt {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    average (dt f) q = dt (average f) q := average_direction hf _ q
 
-theorem average_dr {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    average (dr f) q = dr (average f) q := average_direction hf _ q
 
-theorem average_dz {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    average (dz f) q = dz (average f) q := average_direction hf _ q
 
-theorem average_drdr {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    average (dr (dr f)) q = dr (dr (average f)) q := average_direction_twice hf _ _ q
 
-theorem average_dzdz {f : Scalar} (hf : ContDiff ℝ ∞ f) (q : SpaceTime) :
-    average (dz (dz f)) q = dz (dz (average f)) q := average_direction_twice hf _ _ q
 
-theorem angularContinuous_direction {f : Scalar} (hf : ContDiff ℝ ∞ f) (v : SpaceTime) :
-    AngularContinuous (direction v f) := angularContinuous_of_continuous (direction_smooth v hf).continuous
 
-theorem AngularContinuous.div_r {f : Scalar} (hf : AngularContinuous f) :
-    AngularContinuous (fun q => f q / radius q) := by
-  simpa only [pow_one] using hf.div_radius 1
 
-theorem angularContinuous_radialDivergence {f : Scalar} (hf : ContDiff ℝ ∞ f) (c : ℝ) :
-    AngularContinuous (radialDivergence c f) :=
-  (angularContinuous_direction hf _).add
-    ((angularInvariant_radius (fun r => c / r)).angularContinuous.mul
-      (angularContinuous_of_continuous hf.continuous))
 
-theorem angularContinuous_laplacian {f : Scalar} (hf : ContDiff ℝ ∞ f) :
-    AngularContinuous (laplacian f) :=
-  (((angularContinuous_direction (direction_smooth _ hf) _).add
-    (angularContinuous_direction hf _).div_r).add
-      ((angularContinuous_direction (direction_smooth _ hf) _).div_radius 2)).add
-        (angularContinuous_direction (direction_smooth _ hf) _)
 
-theorem average_radialDivergence {f : Scalar} (hf : ContDiff ℝ ∞ f)
-    (c : ℝ) (q : SpaceTime) :
-    average (radialDivergence c f) q = radialDivergence c (average f) q := by
-  have hr : AngularContinuous (dr f) := angularContinuous_of_continuous
-    (direction_smooth _ hf).continuous
-  have hc : AngularInvariant (fun y => c / radius y) := angularInvariant_radius _
-  have hcf := hc.angularContinuous.mul (angularContinuous_of_continuous hf.continuous)
-  unfold radialDivergence
-  rw [average_add hr hcf, average_mul_invariant hc, average_dr hf]
 
-theorem average_laplacian {f : Scalar} (hf : ContDiff ℝ ∞ f) (hp : AngularPeriodic f)
-    (q : SpaceTime) : average (laplacian f) q = meanLaplacian (average f) q := by
-  have hrr : AngularContinuous (dr (dr f)) := angularContinuous_of_continuous
-    (direction_smooth _ (direction_smooth _ hf)).continuous
-  have hr : AngularContinuous (dr f) := angularContinuous_of_continuous
-    (direction_smooth _ hf).continuous
-  have haa : AngularContinuous (dtheta (dtheta f)) := angularContinuous_of_continuous
-    (direction_smooth _ (direction_smooth _ hf)).continuous
-  have hzz : AngularContinuous (dz (dz f)) := angularContinuous_of_continuous
-    (direction_smooth _ (direction_smooth _ hf)).continuous
-  have hrd : AngularContinuous (fun y => dr f y / radius y) := by
-    simpa only [pow_one] using hr.div_radius 1
-  unfold laplacian meanLaplacian
-  rw [average_add ((hrr.add hrd).add (haa.div_radius 2)) hzz,
-    average_add (hrr.add hrd) (haa.div_radius 2), average_add hrr hrd]
-  rw [show (fun y => dr f y / radius y) = (fun y => dr f y / radius y ^ 1) by simp]
-  rw [average_div_radius, average_div_radius, average_drdr hf,
-    average_dr hf, average_dzdz hf,
-    average_dtheta_zero (f := dtheta f) (direction_smooth _ hf) (hp.direction angularVector)]
-  simp
 
-noncomputable def reynoldsRadial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (average (w 0)) q + radialDivergence 1 (average (fun y => w 0 y * w 0 y)) q +
-    dz (average (fun y => w 2 y * w 0 y)) q - average (fun y => w 1 y * w 1 y) q / radius q -
-    meanLaplacian (average (w 0)) q + average (w 0) q / radius q ^ 2 + dr (average p) q
 
-noncomputable def reynoldsAngular (w : Components) (q : SpaceTime) : ℝ :=
-  dt (average (w 1)) q + radialDivergence 2 (average (fun y => w 0 y * w 1 y)) q +
-    dz (average (fun y => w 2 y * w 1 y)) q - meanLaplacian (average (w 1)) q +
-    average (w 1) q / radius q ^ 2
 
-noncomputable def reynoldsAxial (w : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (average (w 2)) q + radialDivergence 1 (average (fun y => w 0 y * w 2 y)) q +
-    dz (average (fun y => w 2 y * w 2 y)) q - meanLaplacian (average (w 2)) q +
-    dz (average p) q
 
-theorem average_conservativeAngular {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p)
-    (hwper : ∀ i, AngularPeriodic (w i)) (hpper : AngularPeriodic p) (q : SpaceTime) :
-    average (conservativeAngular w p) q = reynoldsAngular w q := by
-  have h1 : AngularContinuous (dt (w 1)) := angularContinuous_direction (hw 1) _
-  have h2 := angularContinuous_radialDivergence ((hw 0).mul (hw 1)) 2
-  have h3 : AngularContinuous (fun y => dtheta (fun y => w 1 y * w 1 y) y / radius y) :=
-    (angularContinuous_direction ((hw 1).mul (hw 1)) _).div_r
-  have h4 : AngularContinuous (dz (fun y => w 2 y * w 1 y)) :=
-    angularContinuous_direction ((hw 2).mul (hw 1)) _
-  have h5 := angularContinuous_laplacian (hw 1)
-  have h6 := (angularContinuous_of_continuous (hw 1).continuous).div_radius 2
-  have h7 : AngularContinuous (fun y => 2 * dtheta (w 0) y / radius y ^ 2) :=
-    ((angularContinuous_direction (hw 0) _).const_mul 2).div_radius 2
-  have h8 : AngularContinuous (fun y => dtheta p y / radius y) :=
-    (angularContinuous_direction hp _).div_r
-  unfold conservativeAngular
-  simp (disch := solve_by_elim (maxDepth := 20) [AngularContinuous.add, AngularContinuous.sub])
-    only [average_add, average_sub]
-  rw [average_radialDivergence ((hw 0).mul (hw 1)),
-    average_laplacian (hw 1) (hwper 1)]
-  rw [average_dt (hw 1), average_dz ((hw 2).mul (hw 1))]
-  rw [show (fun y => dtheta (fun y => w 1 y * w 1 y) y / radius y) =
-      (fun y => dtheta (fun y => w 1 y * w 1 y) y / radius y ^ 1) by simp]
-  rw [show (fun y => dtheta p y / radius y) = (fun y => dtheta p y / radius y ^ 1) by simp]
-  rw [average_div_radius, average_div_radius, average_div_radius, average_div_radius,
-    average_const_mul, average_dtheta_zero ((hw 1).mul (hw 1)) ((hwper 1).mul (hwper 1)),
-    average_dtheta_zero (hw 0) (hwper 0), average_dtheta_zero hp hpper]
-  simp [reynoldsAngular, dt, dz]
 
-theorem average_conservativeRadial {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p)
-    (hwper : ∀ i, AngularPeriodic (w i)) (q : SpaceTime) :
-    average (conservativeRadial w p) q = reynoldsRadial w p q := by
-  have h1 : AngularContinuous (dt (w 0)) := angularContinuous_direction (hw 0) _
-  have h2 := angularContinuous_radialDivergence ((hw 0).mul (hw 0)) 1
-  have h3 : AngularContinuous (fun y => dtheta (fun y => w 1 y * w 0 y) y / radius y) :=
-    (angularContinuous_direction ((hw 1).mul (hw 0)) _).div_r
-  have h4 : AngularContinuous (dz (fun y => w 2 y * w 0 y)) :=
-    angularContinuous_direction ((hw 2).mul (hw 0)) _
-  have h5 := (angularContinuous_of_continuous ((hw 1).mul (hw 1)).continuous).div_r
-  have h6 := angularContinuous_laplacian (hw 0)
-  have h7 := (angularContinuous_of_continuous (hw 0).continuous).div_radius 2
-  have h8 : AngularContinuous (fun y => 2 * dtheta (w 1) y / radius y ^ 2) :=
-    ((angularContinuous_direction (hw 1) _).const_mul 2).div_radius 2
-  have h9 : AngularContinuous (dr p) := angularContinuous_direction hp _
-  unfold conservativeRadial
-  simp (disch := solve_by_elim (maxDepth := 20) [AngularContinuous.add, AngularContinuous.sub])
-    only [average_add, average_sub]
-  rw [average_radialDivergence ((hw 0).mul (hw 0)), average_laplacian (hw 0) (hwper 0),
-    average_dt (hw 0), average_dz ((hw 2).mul (hw 0)), average_dr hp]
-  simp only [average_div_r, average_div_radius, average_const_mul,
-    average_dtheta_zero ((hw 1).mul (hw 0)) ((hwper 1).mul (hwper 0)),
-    average_dtheta_zero (hw 1) (hwper 1), zero_div, mul_zero, add_zero]
-  rfl
 
-theorem average_conservativeAxial {w : Components} {p : Scalar}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hp : ContDiff ℝ ∞ p)
-    (hwper : ∀ i, AngularPeriodic (w i)) (q : SpaceTime) :
-    average (conservativeAxial w p) q = reynoldsAxial w p q := by
-  have h1 : AngularContinuous (dt (w 2)) := angularContinuous_direction (hw 2) _
-  have h2 := angularContinuous_radialDivergence ((hw 0).mul (hw 2)) 1
-  have h3 : AngularContinuous (fun y => dtheta (fun y => w 1 y * w 2 y) y / radius y) :=
-    (angularContinuous_direction ((hw 1).mul (hw 2)) _).div_r
-  have h4 : AngularContinuous (dz (fun y => w 2 y * w 2 y)) :=
-    angularContinuous_direction ((hw 2).mul (hw 2)) _
-  have h5 := angularContinuous_laplacian (hw 2)
-  have h6 : AngularContinuous (dz p) := angularContinuous_direction hp _
-  unfold conservativeAxial
-  simp (disch := solve_by_elim (maxDepth := 20) [AngularContinuous.add, AngularContinuous.sub])
-    only [average_add, average_sub]
-  rw [average_radialDivergence ((hw 0).mul (hw 2)), average_laplacian (hw 2) (hwper 2),
-    average_dt (hw 2), average_dz ((hw 2).mul (hw 2)), average_dz hp]
-  simp only [average_div_r,
-    average_dtheta_zero ((hw 1).mul (hw 2)) ((hwper 1).mul (hwper 2)), zero_div, add_zero]
-  rfl
 
 
 
@@ -583,50 +301,18 @@ theorem covariance_symm (osc : Components) (i j : Fin 3) : covariance osc i j = 
 
 
 
-theorem average_affine_product {a b f g : Scalar}
-    (ha : AngularInvariant a) (hb : AngularInvariant b)
-    (hf : AngularContinuous f) (hg : AngularContinuous g)
-    (q : SpaceTime) (hf0 : average f q = 0) (hg0 : average g q = 0) :
-    average (fun y => (a y + f y) * (b y + g y)) q =
-      a q * b q + average (fun y => f y * g y) q := by
-  have he : (fun y => (a y + f y) * (b y + g y)) =
-      (fun y => a y * b y + a y * g y + b y * f y + f y * g y) := by
-    funext y
-    ring
-  have h1 := ha.angularContinuous.mul hb.angularContinuous
-  have h2 := ha.angularContinuous.mul hg
-  have h3 := hb.angularContinuous.mul hf
-  have h4 := hf.mul hg
-  rw [he, average_add ((h1.add h2).add h3) h4, average_add (h1.add h2) h3,
-    average_add h1 h2, average_invariant (ha.mul hb),
-    average_mul_invariant ha, average_mul_invariant hb, hf0, hg0]
-  ring
 
 
 
 
-theorem direction_twice_add {f g : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
-    (hg : ContDiff ℝ ∞ g) (v w q : SpaceTime) :
-    direction v (direction w (fun y => f y + g y)) q =
-      direction v (direction w f) q + direction v (direction w g) q := by
-  rw [show direction w (fun y => f y + g y) =
-      (fun y => direction w f y + direction w g y) from funext (direction_add hf hg w)]
-  exact direction_add (direction_smooth _ hf) (direction_smooth _ hg) v q
 
 
 
-noncomputable def baseRadial (b : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (b 0) q + radialDivergence 1 (fun y => b 0 y * b 0 y) q +
-    dz (fun y => b 2 y * b 0 y) q - b 1 q * b 1 q / radius q -
-    meanLaplacian (b 0) q + b 0 q / radius q ^ 2 + dr p q
 
 noncomputable def baseAngular (b : Components) (q : SpaceTime) : ℝ :=
   dt (b 1) q + radialDivergence 2 (fun y => b 0 y * b 1 y) q +
     dz (fun y => b 2 y * b 1 y) q - meanLaplacian (b 1) q + b 1 q / radius q ^ 2
 
-noncomputable def baseAxial (b : Components) (p : Scalar) (q : SpaceTime) : ℝ :=
-  dt (b 2) q + radialDivergence 1 (fun y => b 0 y * b 2 y) q +
-    dz (fun y => b 2 y * b 2 y) q - meanLaplacian (b 2) q + dz p q
 
 
 

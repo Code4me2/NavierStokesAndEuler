@@ -398,8 +398,6 @@ noncomputable def graphCoefficient (G : PhysicalResidualBridge.ScaledGraph) (f :
 
 
 
-theorem graphSlow_smooth (G : PhysicalResidualBridge.ScaledGraph) : ContDiff ℝ ∞ (graphSlow G) :=
-  (contDiff_const.mul (contDiff_const.sub contDiff_fst)).prodMk (contDiff_const.mul contDiff_snd)
 
 
 

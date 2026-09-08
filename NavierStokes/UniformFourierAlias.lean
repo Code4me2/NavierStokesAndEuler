@@ -871,64 +871,9 @@ end FiberClass
 
 section BandScales
 
-/-- The actual slow scale, clipped only at the finitely many initial bands. -/
-noncomputable def bandSlow (n : ℕ) : ℝ := max 1 (ChartScales.S n)
 
-theorem one_le_bandSlow (n : ℕ) : 1 ≤ bandSlow n := le_max_left _ _
 
-theorem bandSlow_eventually_eq : ∀ᶠ n : ℕ in atTop, bandSlow n = ChartScales.S n := by
-  filter_upwards [eventually_ge_atTop 1] with n hn
-  apply max_eq_right
-  have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
-  change 1 ≤ (n : ℝ) ^ 2
-  nlinarith
 
-/-- Choose the number of integrations by parts before learning the finite
-polynomial slow-scale loss of the required source seminorm. -/
-theorem frequency_gain_absorbs_family_growth {M : ℕ → ℝ} {h κ A growth α : ℝ}
-    (hh : 0 < h) (hκ : 0 < κ)
-    (hbound : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (N : ℕ) :
-    ∃ p : ℕ, ∀ q : ℕ, ∀ C : ℝ, 0 ≤ C →
-      ∀ᶠ n in atTop,
-        C * ChartScales.epsilon h n ^ α * bandSlow n ^ q * (|M n|⁻¹) ^ p ≤
-          C * ChartScales.epsilon h n ^ N := by
-  obtain ⟨p, hp⟩ := exists_nat_gt (((N : ℝ) + 1 - α) / (κ / 2))
-  have hNp : (N : ℝ) + 1 ≤ α + (κ / 2) * (p : ℝ) := by
-    have hp' := (div_lt_iff₀ (half_pos hκ)).mp hp
-    nlinarith
-  refine ⟨p, ?_⟩
-  intro q C hC
-  have hslow := ChartScales.eventually_slow_power_epsilon_lt h hh (q : ℝ) 1 1
-    zero_lt_one zero_lt_one
-  simp only [Real.rpow_natCast, Real.rpow_one] at hslow
-  filter_upwards [FourierAlias.inverse_frequency_eventually_small hh hκ hbound,
-    hslow, bandSlow_eventually_eq] with n hn hsn hband
-  rw [hband]
-  have hε := ChartScales.epsilon_pos h n
-  have hS : 0 ≤ ChartScales.S n := sq_nonneg (n : ℝ)
-  have hpower : (|M n|⁻¹) ^ p ≤ ChartScales.epsilon h n ^ ((κ / 2) * (p : ℝ)) := by
-    rw [Real.rpow_mul_natCast hε.le]
-    exact pow_le_pow_left₀ (inv_nonneg.mpr (abs_nonneg _)) hn p
-  have hεα : 0 ≤ ChartScales.epsilon h n ^ α := (Real.rpow_pos_of_pos hε α).le
-  calc
-    _ ≤ C * ChartScales.epsilon h n ^ α * ChartScales.S n ^ q *
-        ChartScales.epsilon h n ^ ((κ / 2) * (p : ℝ)) :=
-      mul_le_mul_of_nonneg_left hpower (by positivity)
-    _ = C * ChartScales.epsilon h n ^ (α + (κ / 2) * (p : ℝ)) * ChartScales.S n ^ q := by
-      rw [Real.rpow_add hε]
-      ring
-    _ ≤ C * ChartScales.epsilon h n ^ ((N : ℝ) + 1) * ChartScales.S n ^ q :=
-      mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_exponent_ge hε
-          (ChartScales.epsilon_le_one h hh.le n) hNp) hC) (pow_nonneg hS q)
-    _ = (C * ChartScales.epsilon h n ^ N) *
-        (ChartScales.S n ^ q * ChartScales.epsilon h n) := by
-      rw [Real.rpow_add hε, Real.rpow_natCast, Real.rpow_one]
-      ring
-    _ ≤ (C * ChartScales.epsilon h n ^ N) * 1 :=
-      mul_le_mul_of_nonneg_left hsn.le (by positivity)
-    _ = C * ChartScales.epsilon h n ^ N := mul_one _
 
 end BandScales
 
@@ -938,49 +883,9 @@ open WeightedClasses WeightedRadialPrimitive
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The concrete radial strip with the manuscript's actual band scales. -/
-noncomputable def chartStrip (a b cL cR : ℝ) (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (h : ℝ) (hh : 0 < h) : StripData (ℝ × E) :=
-  logStripData a b cL cR ha hcL hcR (ChartScales.epsilon h) bandSlow
-    (ChartScales.epsilon_pos h) (ChartScales.epsilon_le_one h hh.le) one_le_bandSlow
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
-/-- Band-dependent sources in the actual all-order mean class have uniformly
-superflat aliases. The proof chooses one finite IBP order before extracting
-the required source seminorm and its polynomial growth degree. -/
-theorem meanClass_alias_superflat (d : Direction) {a b cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {f : ℕ → ℝ × (S × Plane) → ℂ}
-    (hf : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hgood : ∀ n, Admissible a b (f n))
-    {M : ℕ → ℝ} {κ A growth : ℝ} (hκ : 0 < κ)
-    (hM : ∀ᶠ n in atTop, M n ≠ 0)
-    (hfrequency : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-      ‖iteratedFDeriv ℝ j (exactAlias χ (M n) ((0 : S), vector d) (f n)) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  obtain ⟨p, hp⟩ := frequency_gain_absorbs_family_growth (α := α) hh hκ hfrequency N
-  obtain ⟨K, hK, hbound⟩ := exactAlias_finiteJets (S := S) d hab hχ hleft hright m p
-  obtain ⟨C, hC, q, hsource⟩ := meanClass_global_finiteJets ha hcL hcR
-    (ChartScales.epsilon h) bandSlow (ChartScales.epsilon_pos h)
-    (ChartScales.epsilon_le_one h hh.le) one_le_bandSlow hf
-    (fun n => (hgood n).2.2.2) (fun n => (hgood n).1) (m + 6 * p)
-  refine ⟨K * C, mul_nonneg hK hC, ?_⟩
-  filter_upwards [hM, hp q (K * C) (mul_nonneg hK hC)] with n hn hgain
-  intro j hj z
-  have hεα : 0 < ChartScales.epsilon h n ^ α :=
-    Real.rpow_pos_of_pos (ChartScales.epsilon_pos h n) α
-  have hslow : 0 ≤ bandSlow n := zero_le_one.trans (one_le_bandSlow n)
-  have hb := hbound (f n) (hgood n) (C * ChartScales.epsilon h n ^ α * bandSlow n ^ q)
-    (by positivity) (fun i hi x _ => hsource n i hi x (Set.mem_univ x)) (M n) hn j hj z
-  calc
-    _ ≤ K * (C * ChartScales.epsilon h n ^ α * bandSlow n ^ q) * (|M n|⁻¹) ^ p := hb
-    _ = (K * C) * ChartScales.epsilon h n ^ α * bandSlow n ^ q * (|M n|⁻¹) ^ p := by ring
-    _ ≤ (K * C) * ChartScales.epsilon h n ^ N := hgain
 
 omit [FiniteDimensional ℝ S] in
 theorem admissible_complexify {a b : ℝ} {f : ℝ × (S × Plane) → ℝ}
@@ -1011,31 +916,6 @@ theorem real_exactAlias_finiteJets (d : Direction) {a b : ℝ} {χ : ℝ → ℝ
   exact hsource i hi x hx
 
 
-theorem realMeanClass_alias_superflat (d : Direction) {a b cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {f : ℕ → ℝ × (S × Plane) → ℝ}
-    (hf : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, SourcePeriodic (f n))
-    (hm : ∀ n p, sourceMean (f n) p = 0)
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    {M : ℕ → ℝ} {κ A growth : ℝ} (hκ : 0 < κ)
-    (hM : ∀ᶠ n in atTop, M n ≠ 0)
-    (hfrequency : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-      ‖iteratedFDeriv ℝ j (exactAlias χ (M n) ((0 : S), vector d) (f n)) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  have hcomplex : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α
-      (fun n => complexify (f n)) := hf.map Complex.ofRealCLM
-  obtain ⟨C, hC, hb⟩ := meanClass_alias_superflat d ha hab hcL hcR hh hχ hleft hright hcomplex
-    (fun n => admissible_complexify (hfc n) (hp n) (hm n) (hs n)) hκ hM hfrequency m N
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [hb] with n hn
-  intro j hj z
-  rw [← norm_iteratedFDeriv_exactAlias_complexify hχ (hfc n) (hs n)]
-  exact hn j hj z
 
 
 

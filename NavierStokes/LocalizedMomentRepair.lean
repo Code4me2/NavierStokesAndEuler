@@ -135,10 +135,6 @@ theorem repair_tsupport_subset (a l u d : Fin n → ℝ) (hlu : ∀ j, l j < u j
     tsupport (repair a l u d) ⊆ repairRegion l u :=
   closure_minimal (repair_support_subset a l u d hlu) (repairRegion_isCompact l u).isClosed
 
-theorem repair_hasCompactSupport (a l u d : Fin n → ℝ) (hlu : ∀ j, l j < u j) :
-    HasCompactSupport (repair a l u d) :=
-  HasCompactSupport.of_support_subset_isCompact (repairRegion_isCompact l u)
-    (repair_support_subset a l u d hlu)
 
 theorem repair_tsupport_subset_open (a l u d : Fin n → ℝ) (hlu : ∀ j, l j < u j) :
     tsupport (repair a l u d) ⊆ ⋃ j, Ioo (l j) (u j) :=
@@ -263,19 +259,6 @@ theorem smooth_compact_derivative_bound (f : ℝ → ℝ) (hf : ContDiff ℝ ∞
 
 variable {n : ℕ}
 
-/-- Every derivative of the repair is the same linear combination of fixed coordinate repairs. -/
-theorem repair_iteratedDeriv_coordinate (a l u d : Fin n → ℝ) (k : ℕ) (t : ℝ) :
-    iteratedDeriv k (repair a l u d) t =
-      ∑ j, d j * iteratedDeriv k (repair a l u (Pi.single j 1)) t := by
-  rw [repair_eq_sum_coordinate a l u d]
-  rw [iteratedDeriv_finite_sum Finset.univ
-    (fun j x => d j * repair a l u (Pi.single j 1) x)
-    (fun j => contDiff_const.mul (repair_contDiff a l u (Pi.single j 1))) k t]
-  apply Finset.sum_congr rfl
-  intro j _
-  exact iteratedDeriv_const_mul (d j)
-    ((repair_contDiff a l u (Pi.single j 1)).of_le
-      (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).contDiffAt
 
 
 

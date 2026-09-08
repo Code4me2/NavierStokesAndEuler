@@ -122,15 +122,6 @@ theorem inverseCoefficients_factor (σ : ℝ) (κ : Vec2)
       (fun j => ne_of_gt (FlatCutoff.edge_pos (κ j) hp)) i]
     rw [congrFun (FlatCutoff.edge_div_edge σ (κ i)) x]
 
-/-- Taking the square root halves the *remaining* exponential exponent. -/
-theorem primaryAmplitude_factor (σ : ℝ) (κ : Vec2)
-    (G : ℝ → Mat2) (T : ℝ → Vec2) {x : ℝ} (hG : (G x).det ≠ 0) (i : Fin 2) :
-    primaryAmplitude σ κ G T x i = edge ((σ - κ i) / 2) x *
-      SmoothCovariance.amplitudes (G x) (T x) i := by
-  unfold primaryAmplitude
-  rw [inverseCoefficients_factor σ κ G T hG i,
-    Real.sqrt_mul (FlatCutoff.edge_nonneg (σ - κ i) x), sqrt_edge]
-  rfl
 
 
 

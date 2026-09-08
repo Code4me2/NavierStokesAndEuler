@@ -547,8 +547,6 @@ noncomputable def initialPressureIncrement (W : PhysicalStageBounds.WaveData h D
     (M : MeanInput h (2 * CoordinateAlgebra.A h)) : PressureField :=
   fun w => W.pressure w + M.family.field w
 
-noncomputable def initialPressureLoss (h waveAlpha waveShift meanAlpha : ℝ) (m : ℕ) : ℝ :=
-  PhysicalStageBounds.pressureLoss h (-(h * waveAlpha + waveShift)) (-(h * meanAlpha)) m
 
 theorem initialPressureIncrement_smooth (W : PhysicalStageBounds.WaveData h D I K Unit)
     (M : MeanInput h (2 * CoordinateAlgebra.A h))
@@ -556,28 +554,6 @@ theorem initialPressureIncrement_smooth (W : PhysicalStageBounds.WaveData h D I 
     ContDiffOn ℝ ∞ (initialPressureIncrement W M) (CutStageEstimates.physicalSublevel h qbig) :=
   ((W.pressure_smooth hh hh1).mono inter_subset_left).add (M.field_smooth hh hh1 hq)
 
-theorem initialPressureIncrement_bound (W : PhysicalStageBounds.WaveData h D I K Unit)
-    (M : MeanInput h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig : ℝ} (hq : qbig ≤ ChartScales.Q M.firstBand) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (initialPressureIncrement W M) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (-initialPressureLoss h W.alpha W.shift M.alpha m) := by
-  have hw0 := W.pressure_bound_with_gain (g := 0) (delta := -(h * W.alpha + W.shift))
-    hh hh1 (by linarith) m
-  have hm0 := M.field_bound_with_gain (g := 0) (delta := -(h * M.alpha))
-    hh hh1 hq (by linarith) m
-  simp only [zero_sub] at hw0 hm0
-  have hw := weaken_bound (qbig := qbig)
-    (s := -initialPressureLoss h W.alpha W.shift M.alpha m) hh hh1
-    (neg_le_neg (le_max_left _ _)) (by
-      obtain ⟨C, hC, hb⟩ := hw0
-      exact ⟨C, hC, fun w hw hqw => hb w hw.1 hqw⟩)
-  have hm := weaken_bound (s := -initialPressureLoss h W.alpha W.shift M.alpha m)
-    hh hh1 (neg_le_neg (le_max_right _ _)) hm0
-  have sw : ContDiffOn ℝ ∞ W.pressure (CutStageEstimates.physicalSublevel h qbig) :=
-    (W.pressure_smooth hh hh1).mono inter_subset_left
-  exact add_bounds hh hh1 sw (M.field_smooth hh hh1 hq) hw hm
 
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in

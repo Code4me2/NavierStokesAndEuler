@@ -11,18 +11,9 @@ namespace EulerPacketGraphFlowFrequency
 
 open Filter Real EulerSmoothFlowGevrey
 
-def inputExponent (ε : ℝ) : ℝ := min (ε/6) (1/4)
 
-theorem inputExponent_pos (ε : ℝ) (hε : 0 < ε) : 0 < inputExponent ε := by
-  unfold inputExponent
-  positivity
 
-theorem inputExponent_le_quarter (ε : ℝ) : inputExponent ε ≤ 1/4 := min_le_right _ _
 
-theorem six_inputExponent_le (ε : ℝ) : 6*inputExponent ε ≤ ε := by
-  have h := min_le_left (ε/6) (1/4 : ℝ)
-  dsimp [inputExponent]
-  linarith
 
 private theorem flow_radius_polynomial (B R T w : ℝ)
     (hB : 0 ≤ B) (hR : 0 ≤ R) (hT : 0 ≤ T) (hw : 71 ≤ w)
@@ -144,25 +135,5 @@ theorem physical_bounds_of_power (ε η K k B R T C1 ell : ℝ)
       _ = _ := by rw [← Real.rpow_add hk0]
   exact ⟨hd.trans hdisp,hv.trans hdisp,ha.trans h6,hr.trans hrad,hr1.trans hrad⟩
 
-theorem physical_bounds_eventually (ε K : ℝ) (hε : 0 < ε) (hK : 0 ≤ K) :
-    ∀ᶠ k : ℝ in atTop, ∀ B R T C1 ell : ℝ,
-      0 ≤ B → 0 ≤ R → 0 ≤ T → 0 ≤ C1 → 0 < ell →
-      R ≤ k^(inputExponent ε) → T ≤ k^(inputExponent ε) → C1 ≤ k^(inputExponent ε) →
-      B ≤ 2*k^(-(1/2 : ℝ)) →
-      K*(T*B)*(1+flowRadius B R T R) ≤ k^(-(1/2 : ℝ)+ε) ∧
-      K*B*(1+flowRadius B R T R) ≤ k^(-(1/2 : ℝ)+ε) ∧
-      K*(C1+3*B^2*R)*(1+flowRadius B R T (6*R)) ≤ k^ε ∧
-      ell⁻¹*(4*flowRadius B R T R*(1+k)) ≤ ell⁻¹*k^(1+ε) ∧
-      ell⁻¹*(4*flowRadius B R T (6*R)*(1+k)) ≤ ell⁻¹*k^(1+ε) := by
-  have hη := inputExponent_pos ε hε
-  have hηq := inputExponent_le_quarter ε
-  have hroot : 0 < 1/2-inputExponent ε := by linarith
-  filter_upwards [eventually_ge_atTop (1 : ℝ),
-    (_root_.tendsto_rpow_atTop hη).eventually_ge_atTop 71,
-    (_root_.tendsto_rpow_atTop hη).eventually_ge_atTop K,
-    (_root_.tendsto_rpow_atTop hroot).eventually_ge_atTop 2] with k hk hw hKw hr
-  intro B R T C1 ell hB hR hT hC1 hell hRw hTw hCw hsmall
-  exact physical_bounds_of_power ε (inputExponent ε) K k B R T C1 ell
-    hη hηq (six_inputExponent_le ε) hK hB hR hT hC1 hk hell hw hKw hRw hTw hCw hr hsmall
 
 end EulerPacketGraphFlowFrequency

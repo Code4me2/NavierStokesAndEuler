@@ -218,13 +218,6 @@ theorem height_lt_half : F.data.h < 1 / 2 := by linarith [W.axis.small.h_le]
 
 
 
-theorem nominal_higherInteriorSupport {left right : ℝ}
-    (hl : Real.exp left < nominalInner W / 8) (hr : nominalOuterX W < Real.exp right) :
-    BaseResidual.HigherInteriorSupport (nominalCoefficients W) left right := by
-  apply repaired_higherInteriorSupport (nominalLocalization W) (nominalBaseAgreement W)
-    (nominalZeroOrder W) (nominalParameters_contains W) rfl hl
-  change nominalOuterRadius W ^ 2 / 2 < Real.exp right
-  rwa [nominalOuterRadius_square]
 
 /-- The leading coefficient retains the actual natural axis datum. -/
 theorem nominal_leading_axis {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
@@ -424,15 +417,7 @@ theorem activeWindow_subset_box (upper : ℝ) :
   exact ⟨⟨(Real.exp_pos _).le.trans hw.1.1.le,
     hw.1.2.le.trans (le_max_right upper (activeUpper W))⟩, hw.2⟩
 
-theorem nominal_higher_support :
-    BaseResidual.HigherInteriorSupport (nominalCoefficients W) (activeLeft W) (activeRight W) :=
-  nominal_higherInteriorSupport W (activeLeft_margin W) (outer_before_upper W)
 
-theorem nominal_quotients_smooth {c : ℝ} (hc : 0 < c) (j : ℕ) :
-    ContDiff ℝ ∞ (BaseResidual.higherStressQuotient (nominalCoefficients W)
-      (BaseResidual.activeZeta c (activeLeft W) (activeRight W)) j) :=
-  BaseResidual.higherStressQuotient_smooth_of_support (nominalCoefficients_smooth W) hc
-    (nominal_higher_support W) j
 
 theorem modified_higher_support {D : ProfileHistories.RadialDomain} (Q : ProfileHistories.Profiles D)
     {S : Set ℝ} {lo hi : ℝ} (M : FiniteModification W Q S lo hi) :
@@ -455,12 +440,6 @@ open BaseResidual
 variable {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
   (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
 
-/-- This is one actual choice for the enlarged bundle.  The ordinary base
-schedule and the weighted stress estimate use this very same function. -/
-noncomputable def nominalScales : ℕ → ℕ :=
-  Classical.choose (exists_admissibleScales
-    (weightedBundle_smooth (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
-      W.axis.normalization) (height_pos W) (innerBox_isCompact 0 (scaleUpper W upper)) B)
 
 
 

@@ -218,11 +218,6 @@ noncomputable def gaussianCoefficients (c : CorrectionState.Context D)
   fun n i => ErrorHarmonics.conjugatePair 1
     (fun x => LinearWaveBounds.excludedSlotError (directions c) ψ a.amplitude 0 n (x, 0) i)
 
-noncomputable def goodCoefficients (s : StripData D) (c : CorrectionState.Context D)
-    (a : LinearWaveBounds.WaveCoefficients (D × ℝ)) (ψ : ℕ → D × ℝ → ℝ) :
-    HarmonicResidual.BlockCoefficients D :=
-  fun n i => ErrorHarmonics.conjugatePair 1
-    (fun x => a.constructedGood (HarmonicWaveInteraction.productStrip s) (directions c) ψ n (x, 0) i)
 
 theorem wave_slice {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ} {f : ℕ → D × ℝ → E}
@@ -246,18 +241,7 @@ theorem corrected_bounds : LinearWaveBounds.InputBounds (HarmonicWaveInteraction
   exact (h.coefficients.with_cutoff h.cutoff).add_curl_amplitude (by linarith [h.loss_le])
     (fun i => CurlClassBounds.class_component hc i)
 
-theorem good_class : WaveClass (HarmonicWaveInteraction.productStrip s) (fun n p => P n p.1)
-    (1 - 3 * κ) (a.constructedGood (HarmonicWaveInteraction.productStrip s) (directions c) ψ) := by
-  obtain ⟨b, M, hb, hlo, hhi⟩ := h.normal_bounds
-  have hg := h.coefficients.constructed_goodCoefficient_class (by linarith [h.loss_le]) h.cutoff
-    h.matching.radius h.normal_jets hb hlo hhi h.inverse_frequency
-  convert! hg using 1
-  ring
 
-theorem good_coefficients_class (j : ℤ) (i : Fin 3) : WaveClass s P (1 - 3 * κ)
-    (fun n x => goodCoefficients s c a ψ n i j x) :=
-  SignedWaveUpdate.conjugatePair_class
-    (wave_slice (CurlClassBounds.class_component h.good_class i)) j
 
 theorem primary_bounds : (primaryBlock s c a ψ kp).WaveBounds s P (1 / 2) := by
   intro i j _
@@ -343,22 +327,6 @@ theorem divergence_map {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
       L (cylindricalDivergence R Vr Vθ Vz v x) := by
   simp only [cylindricalDivergence, LinearWaveResidual.along_map L _ (hv _), map_add, map_smul]
 
-theorem linearResidual_realProjection {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    {U : Set X} (hU : IsOpen U) (ε : ℝ) (R : X → ℝ) {Vr Vθ Vz : X → X}
-    (Vt : X → X) (hVr : ContDiffOn ℝ ∞ Vr U) (hVθ : ContDiffOn ℝ ∞ Vθ U)
-    (hVz : ContDiffOn ℝ ∞ Vz U) {B : X → Fin 3 → ℝ} {v : X → ComplexVector} {p : X → ℂ}
-    (hv : ∀ i, ContDiffOn ℝ ∞ (fun y => v y i) U) {x : X}
-    (hB : ∀ i, DifferentiableAt ℝ (fun y => B y i) x)
-    (hp : DifferentiableAt ℝ p x) (hx : x ∈ U) (i : Fin 3) :
-    (LinearWaveResidual.linearResidual ε R Vr Vθ Vz Vt (LinearWaveResidual.realLift B)
-      (fun y j => realProjection (v y j)) (fun y => realProjection (p y)) x i).re =
-    (LinearWaveResidual.linearResidual ε R Vr Vθ Vz Vt (LinearWaveResidual.realLift B) v p x i).re := by
-  have h0 := LinearWaveResidual.realMap_linearResidual Complex.reCLM ε R Vt hU hVr hVθ hVz
-    hv hB hp hx
-  have h1 := LinearWaveResidual.realMap_linearResidual Complex.reCLM ε R Vt hU hVr hVθ hVz
-    (fun j => realProjection.contDiff.comp_contDiffOn (hv j)) hB
-    (realProjection.differentiableAt.comp x hp) hx
-  exact (congrFun h1 i).trans (by simpa using (congrFun h0 i).symm)
 
 theorem pair_field_of_invariant {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
     {f : X × ℝ → ℂ} {Φ : X × ℝ → ℝ} (k : ℝ) (kp : ℤ)
@@ -373,15 +341,6 @@ theorem pair_field_of_invariant {X : Type} [NormedAddCommGroup X] [NormedSpace �
   change ((f (p.1, 0) * carrier k Φ p).re : ℂ) = ((f p * carrier k Φ p).re : ℂ)
   rw [invariant_eq_zeroSlice hf p.1 p.2]
 
-theorem excluded_invariant {a : LinearWaveBounds.WaveCoefficients (D × ℝ)}
-    {ψ : ℕ → D × ℝ → ℝ} (ha : AngularData a ψ) (c : CorrectionState.Context D) (n : ℕ) :
-    Invariant ((0 : D), 1) (LinearWaveBounds.excludedSlotError (directions c) ψ a.amplitude 0 n) := by
-  have hf : Invariant ((0 : D), 1) ((directions c).fastField n) :=
-    Invariant.const ((directions c).fastScale n • (directions c).fast)
-  intro x t
-  simp only [LinearWaveBounds.excludedSlotError, LinearWaveBounds.GraphDirections.Dfast,
-    (ha.cutoff n).along hf x t, ha.cutoff n x t, ha.amplitude n x t,
-    Pi.zero_apply]
 
 namespace Inputs
 
@@ -403,19 +362,7 @@ theorem pressure_field (n : ℕ) (p : D × ℝ) :
     realProjection (mode (a.frequency n) (a.phase n) ((corrected s c a ψ).pressure n) p) :=
   pair_field_of_invariant _ _ (h.angular.corrected_pressure s c n) (h.phase_split n) p
 
-theorem good_field (n : ℕ) (p : D × ℝ) (i : Fin 3) :
-    field (goodCoefficients s c a ψ n i) (a.frequency n)
-      (fun x => a.phase n (x, 0)) (kp n) p =
-    realProjection (vectorMode (a.frequency n) (a.phase n)
-      (a.constructedGood (HarmonicWaveInteraction.productStrip s) (directions c) ψ n) p i) :=
-  pair_field_of_invariant _ _ ((h.angular.constructedGood s c n).component i) (h.phase_split n) p
 
-theorem gaussian_field (n : ℕ) (p : D × ℝ) (i : Fin 3) :
-    field (gaussianCoefficients c a ψ n i) (a.frequency n)
-      (fun x => a.phase n (x, 0)) (kp n) p =
-    realProjection (vectorMode (a.frequency n) (a.phase n)
-      (LinearWaveBounds.excludedSlotError (directions c) ψ a.amplitude 0 n) p i) :=
-  pair_field_of_invariant _ _ ((excluded_invariant h.angular c n).component i) (h.phase_split n) p
 
 theorem phase_slow_smooth (n : ℕ) : ContDiffOn ℝ ∞ (fun x => a.phase n (x, 0)) s.domain :=
   (h.phase_smooth n).comp (HarmonicWaveInteraction.inclusion (D := D)).contDiff.contDiffOn
@@ -438,10 +385,6 @@ theorem raw_velocity_smooth (n : ℕ) (i : Fin 3) :
       ((corrected s c a ψ).amplitude n) p i) (HarmonicWaveInteraction.productStrip s).domain :=
   contDiffOn_mode _ (h.phase_smooth n) ((h.corrected_bounds.amplitude i).smooth n)
 
-theorem raw_pressure_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (mode (a.frequency n) (a.phase n) ((corrected s c a ψ).pressure n))
-      (HarmonicWaveInteraction.productStrip s).domain :=
-  contDiffOn_mode _ (h.phase_smooth n) (h.corrected_bounds.pressure.smooth n)
 
 end Inputs
 
@@ -482,114 +425,10 @@ theorem axial_smooth (n : ℕ) :
     ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).axial s.domain :=
   (HarmonicMeanInteraction.slowGeometry c h.operators h.radius_pos).axial_class.smooth n
 
-omit h in
-theorem primary_amplitude_real (n : ℕ) :
-    HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n =
-      (primaryBlock s c a ψ kp).velocity n := by
-  funext i
-  exact HarmonicResidual.realCoefficients_eq_self
-    (ErrorHarmonics.conjugatePair_symmetric 1 (fun x => (corrected s c a ψ).amplitude n (x, 0) i))
 
-omit h in
-theorem primary_pressure_real (n : ℕ) :
-    HarmonicResidual.realCoefficients ((primaryBlock s c a ψ kp).pressure n) =
-      (primaryBlock s c a ψ kp).pressure n :=
-  HarmonicResidual.realCoefficients_eq_self
-    (ErrorHarmonics.conjugatePair_symmetric 1 (fun x => (corrected s c a ψ).pressure n (x, 0)))
 
-theorem harmonicResidual_context (n : ℕ) :
-    (corrected s c a ψ).harmonicResidual (HarmonicWaveInteraction.productStrip s) (directions c) n =
-      LinearWaveResidual.linearResidual (c.operators.epsilon n)
-        (fun p => c.operators.radius p.1)
-        (HarmonicResidual.liftDirection (HarmonicResidual.contextFrame c n).radial)
-        HarmonicResidual.angularDirection
-        (HarmonicResidual.liftDirection (HarmonicResidual.contextFrame c n).axial)
-        (HarmonicResidual.liftDirection (HarmonicResidual.contextFrame c n).time)
-        (fun p => HarmonicResidual.contextBase c n p.1)
-        (vectorMode (a.frequency n) (a.phase n) ((corrected s c a ψ).amplitude n))
-        (mode (a.frequency n) (a.phase n) ((corrected s c a ψ).pressure n)) := by
-  change LinearWaveResidual.linearResidual (s.epsilon n) (a.radius n)
-    ((directions c).radialField n) (fun _ => (directions c).angular)
-    ((directions c).axialField (HarmonicWaveInteraction.productStrip s) n)
-    (LinearWaveResidual.timeDirection (s.epsilon n) ((directions c).fastField n) (fun _ => (directions c).slow))
-    (LinearWaveResidual.complexBase (a.radius n) (a.radialBase n) (a.frequencyBase n) (a.axialBase n))
-    _ _ = _
-  have ht := directions_time s c h.matching.epsilon n
-  change LinearWaveResidual.timeDirection (s.epsilon n) ((directions c).fastField n)
-    (fun _ => (directions c).slow) = _ at ht
-  rw [h.matching.base n, h.matching.radius, directions_radial,
-    directions_axial s c h.matching.epsilon, ht]
-  rw [h.matching.epsilon]
-  rfl
 
-theorem linear_field_re (n : ℕ) (p : D × ℝ) (hp : p.1 ∈ s.domain) (i : Fin 3) :
-    (field (linearCoefficients s c a ψ kp n i) (a.frequency n)
-      (fun x => a.phase n (x, 0)) (kp n) p).re =
-    ((corrected s c a ψ).harmonicResidual (HarmonicWaveInteraction.productStrip s) (directions c) n p i).re := by
-  have he := HarmonicResidual.field_linearResidual s.isOpen_domain
-    (HarmonicResidual.contextFrame c n) (h.radial_smooth n) (h.axial_smooth n)
-    (B := HarmonicResidual.constantVector (HarmonicResidual.contextBase c n))
-    (fun j => HarmonicResidual.smoothCoefficients_constant (h.base_smooth n j))
-    (h.primary_smooth n) (h.pressure_smooth n) (h.phase_slow_smooth n)
-    (a.frequency n) (kp n) (p := p) ⟨hp, trivial⟩
-  have hv : HarmonicResidual.vectorField ((primaryBlock s c a ψ kp).velocity n)
-      (a.frequency n) (fun x => a.phase n (x, 0)) (kp n) =
-        fun y j => realProjection (vectorMode (a.frequency n) (a.phase n)
-          ((corrected s c a ψ).amplitude n) y j) := by
-    funext y j
-    exact h.primary_field n y j
-  have hpr : field ((primaryBlock s c a ψ kp).pressure n)
-      (a.frequency n) (fun x => a.phase n (x, 0)) (kp n) =
-        fun y => realProjection (mode (a.frequency n) (a.phase n)
-          ((corrected s c a ψ).pressure n) y) := by
-    funext y
-    exact h.pressure_field n y
-  have hbase : HarmonicResidual.vectorField
-      (HarmonicResidual.constantVector (HarmonicResidual.contextBase c n))
-      (a.frequency n) (fun x => a.phase n (x, 0)) (kp n) =
-        LinearWaveResidual.realLift (fun y j => (HarmonicResidual.contextBase c n y.1 j).re) := by
-    funext y j
-    rw [HarmonicResidual.vectorField_constantVector]
-    fin_cases j <;> simp [HarmonicResidual.contextBase, LinearWaveResidual.realLift]
-  rw [hv, hpr, hbase] at he
-  have hd := linearResidual_realProjection
-    (HarmonicWaveInteraction.productStrip s).isOpen_domain (c.operators.epsilon n)
-    (fun y => c.operators.radius y.1)
-    (HarmonicResidual.liftDirection (HarmonicResidual.contextFrame c n).time)
-    (by simpa only [directions_radial] using (h.geometry n).radial_smooth)
-    (h.geometry n).angular_smooth
-    (by simpa only [directions_axial s c h.matching.epsilon] using (h.geometry n).axial_smooth)
-    (B := fun (y : D × ℝ) j => (HarmonicResidual.contextBase c n y.1 j).re)
-    (h.raw_velocity_smooth n)
-    (fun j => (((Complex.reCLM.contDiff.comp_contDiffOn
-      ((h.base_smooth n j).comp contDiffOn_fst (fun _ hx => hx))).contDiffAt
-        ((HarmonicWaveInteraction.productStrip s).isOpen_domain.mem_nhds hp)).differentiableAt (by simp)))
-    (((h.raw_pressure_smooth n).contDiffAt
-      ((HarmonicWaveInteraction.productStrip s).isOpen_domain.mem_nhds hp)).differentiableAt (by simp)) hp i
-  have hbase' : LinearWaveResidual.realLift (fun (y : D × ℝ) j => (HarmonicResidual.contextBase c n y.1 j).re) =
-      fun y => HarmonicResidual.contextBase c n y.1 := by
-    funext y j
-    fin_cases j <;> simp [HarmonicResidual.contextBase, LinearWaveResidual.realLift]
-  rw [hbase'] at he hd
-  rw [linearCoefficients,
-    primary_amplitude_real (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp) n,
-    primary_pressure_real (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp) n]
-  exact (congrArg Complex.re (congrFun he i)).trans (hd.trans (by
-    rw [h.harmonicResidual_context n]
-    rfl))
 
-theorem linear_gaussian_coefficient (n : ℕ) (x : D) (hx : x ∈ s.domain) (i : Fin 3) (j : ℤ) :
-    HarmonicResidual.realCoefficients
-      (linearCoefficients s c a ψ kp n i - gaussianCoefficients c a ψ n i) j x =
-        goodCoefficients s c a ψ n i j x := by
-  apply HarmonicWaveInteraction.coefficient_eq_of_field_eq_at _ _ (a.frequency n)
-    (fun y => a.phase n (y, 0)) (h.angular_ne n) j x
-  intro θ
-  rw [HarmonicResidual.field_realCoefficients, HarmonicResidual.field_sub, Complex.sub_re,
-    h.linear_field_re n (x, θ) hx i, h.gaussian_field n (x, θ) i,
-    h.good_field n (x, θ) i, h.linear_identity n (x, θ) hx]
-  simp only [Pi.add_apply, Complex.add_re, realProjection_apply, Complex.ofReal_re,
-    add_sub_cancel_right]
 
 theorem full_primary_divergence (n : ℕ) (p : D × ℝ) (hp : p.1 ∈ s.domain) :
     cylindricalDivergence (fun q => c.operators.radius q.1)
@@ -624,33 +463,8 @@ theorem primary_band : (primaryBlock s c a ψ kp).BandLimited 1 :=
     (fun n x => (corrected s c a ψ).amplitude n (x, 0))
     (fun n x => (corrected s c a ψ).pressure n (x, 0))
 
-omit h in
-theorem primary_zeroMode : HarmonicWaveInteraction.ZeroMode (primaryBlock s c a ψ kp) :=
-  (SignedWaveUpdate.coefficientBlock_zero_coefficient a.frequency (fun n x => a.phase n (x, 0)) kp
-    (fun n x => (corrected s c a ψ).amplitude n (x, 0))
-    (fun n x => (corrected s c a ψ).pressure n (x, 0))).1
 
-theorem convection_class (j : ℤ) (i : Fin 3) :
-    WaveClass s P (1 - κ) (fun n x =>
-      HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-        (a.frequency n) (fun y => a.phase n (y, 0)) (kp n)
-        (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n)
-        (HarmonicMeanInteraction.blockAmplitude (primaryBlock s c a ψ kp) n) i j x) := by
-  have hc := HarmonicWaveInteraction.transport_wave_class c h.operators h.radius_pos
-    h.primary_bounds h.primary_bounds
-    (primary_zeroMode (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp))
-    (primary_zeroMode (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp))
-    (primary_band (s := s) (c := c) (a := a) (ψ := ψ) (kp := kp))
-    h.phase_slow_smooth h.frequency_ne h.primary_modeSolenoidal h.profile_nonneg h.profile_le_one j i
-  convert! hc using 1
-  ring
 
-theorem linear_good_class (j : ℤ) (i : Fin 3) :
-    WaveClass s P (1 - 3 * κ) (fun n x => HarmonicResidual.realCoefficients
-      (linearCoefficients s c a ψ kp n i - gaussianCoefficients c a ψ n i) j x) := by
-  apply LinearWaveBounds.class_congr (h.good_coefficients_class j i)
-  intro n x hx
-  exact (h.linear_gaussian_coefficient n x hx i j).symm
 
 
 

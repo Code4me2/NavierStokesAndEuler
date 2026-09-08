@@ -46,47 +46,7 @@ theorem spacing_pos (a : ℝ) {n : ℕ} (hn : 1 ≤ n) : 0 < spacing a n := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast (by omega : 0 < n)
   exact div_pos (Real.rpow_pos_of_pos (by norm_num) _) (pow_pos hn' _)
 
-theorem spacing_ratio (a : ℝ) {n m : ℕ} (hn : 1 ≤ n) (hm : 1 ≤ m) :
-    spacing a n / spacing a m =
-      ((m : ℝ) / (n : ℝ)) ^ 6 * (2 : ℝ) ^ (((m : ℝ) - (n : ℝ)) * a) := by
-  have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
-  have hm' : (m : ℝ) ≠ 0 := by exact_mod_cast (by omega : m ≠ 0)
-  have he : (2 : ℝ) ^ (-(m : ℝ) * a) ≠ 0 := ne_of_gt (Real.rpow_pos_of_pos (by norm_num) _)
-  have hp : (2 : ℝ) ^ (((m : ℝ) - (n : ℝ)) * a) =
-      (2 : ℝ) ^ (-(n : ℝ) * a) / (2 : ℝ) ^ (-(m : ℝ) * a) := by
-    rw [← Real.rpow_sub (by norm_num : (0 : ℝ) < 2)]
-    congr 1
-    ring
-  rw [hp]
-  unfold spacing
-  rw [div_pow]
-  field_simp
 
-/-- The mesh ratio is uniform across levels at distance at most four. -/
-theorem spacing_ratio_le (a A : ℝ) {n m : ℕ}
-    (hn : 1 ≤ n) (hm : 1 ≤ m) (hnm : n ≤ m + 4) (hmn : m ≤ n + 4)
-    (ha : |a| ≤ A) :
-    spacing a n / spacing a m ≤ (5 : ℝ) ^ 6 * (2 : ℝ) ^ (4 * A) := by
-  rw [spacing_ratio a hn hm]
-  have hn' : (0 : ℝ) < n := by exact_mod_cast (by omega : 0 < n)
-  have hm0 : (0 : ℝ) ≤ m := by positivity
-  have hm5 : (m : ℝ) ≤ 5 * (n : ℝ) := by exact_mod_cast (by omega : m ≤ 5 * n)
-  have hquot : (m : ℝ) / (n : ℝ) ≤ 5 := (div_le_iff₀ hn').mpr hm5
-  have hpow : ((m : ℝ) / (n : ℝ)) ^ 6 ≤ (5 : ℝ) ^ 6 :=
-    pow_le_pow_left₀ (div_nonneg hm0 hn'.le) hquot 6
-  have hdiff : |(m : ℝ) - (n : ℝ)| ≤ 4 := by
-    have h1 : (n : ℝ) ≤ (m : ℝ) + 4 := by exact_mod_cast hnm
-    have h2 : (m : ℝ) ≤ (n : ℝ) + 4 := by exact_mod_cast hmn
-    rw [abs_le]
-    constructor <;> linarith
-  have hexp : ((m : ℝ) - (n : ℝ)) * a ≤ 4 * A := by
-    calc
-      ((m : ℝ) - (n : ℝ)) * a ≤ |((m : ℝ) - (n : ℝ)) * a| := le_abs_self _
-      _ = |(m : ℝ) - (n : ℝ)| * |a| := abs_mul _ _
-      _ ≤ 4 * |a| := mul_le_mul_of_nonneg_right hdiff (abs_nonneg a)
-      _ ≤ 4 * A := mul_le_mul_of_nonneg_left ha (by norm_num)
-  exact mul_le_mul hpow (Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp)
-    (Real.rpow_nonneg (by norm_num) _) (by positivity)
 
 def axisExponent (D : ℝ) : Fin 3 → ℝ := ![1 / 2, D, 1]
 def width (D : ℝ) (j : Fin 3) (n : ℕ) : ℝ := spacing (axisExponent D j) n
@@ -175,23 +135,13 @@ theorem color_proper (D : ℝ) {L M : Label} (h : Adj D L M) : color L ≠ color
 
 
 
-def indexRadius (D : ℝ) : ℕ := ⌈2 * (ratioBound D + 1) + 1⌉₊
-
-def indexCenter (D : ℝ) (L : Label) (m : ℕ) (j : Fin 3) : ℤ :=
-  ⌊width D j L.1 / width D j m * (L.2.1 j : ℝ)⌋
-
-def candidateGrids (D : ℝ) (L : Label) (m : ℕ) : Finset Grid :=
-  Fintype.piFinset (fun j => Finset.Icc (indexCenter D L m j - (indexRadius D : ℤ))
-    (indexCenter D L m j + (indexRadius D : ℤ)))
 
 
 
 
 
-theorem integer_interval_card (c : ℤ) (K : ℕ) :
-    (Finset.Icc (c - (K : ℤ)) (c + (K : ℤ))).card = 2 * K + 1 := by
-  rw [Int.card_Icc]
-  omega
+
+
 
 
 

@@ -35,14 +35,6 @@ private local instance : NormedSpace ℝ (Space →ᵇ V) := inferInstance
 def pathEvaluation (x : Space) : C(K,Space →ᵇ V) →L[ℝ] C(K,V) :=
   (BoundedContinuousFunction.evalCLM ℝ x).compLeftContinuous ℝ K
 
-/-- Evaluation is a contraction in the genuine uniform path norm. -/
-theorem pathEvaluation_norm (x : Space) : ‖pathEvaluation (K := K) (V := V) x‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  exact ((A t).norm_coe_le_norm x).trans (A.norm_coe_le_norm t)
 
 /-- The source coefficient viewed as a time path at a spatial position. -/
 def pointPath (A : SmoothCoefficientPath K V) (x : Space) : C(K,V) :=

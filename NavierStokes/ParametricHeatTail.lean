@@ -460,12 +460,6 @@ theorem weightedJet_integrable (square : Bool) (n : ℕ) {ν : ℝ} (hν : 0 ≤
   chain_integrable (weightedJet_measurable hh hK hW square)
     (weightedJet_dominated hh hK hB hweight hpq square) n hν
 
-theorem weightedDebtJet_derivative (square : Bool) (n : ℕ) {ν : ℝ} (hν : 0 ≤ ν) :
-    HasDerivWithinAt (weightedDebtJet W square h K q n)
-      (weightedDebtJet W square h K q (n + 1) ν) (Ici 0) ν :=
-  integral_chain_hasDerivWithinAt (weightedJet_derivative hh hK square)
-    (weightedJet_measurable hh hK hW square)
-    (weightedJet_dominated hh hK hB hweight hpq square) n hν
 
 theorem weightedDebtJet_eq_iteratedDerivWithin (square : Bool) (n : ℕ) {ν : ℝ} (hν : 0 ≤ ν) :
     iteratedDerivWithin n (weightedDebtJet W square h K q 0) (Ici 0) ν =

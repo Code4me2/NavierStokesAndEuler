@@ -85,17 +85,6 @@ theorem mem_window_pos (F : Profile) (XR : ℝ) (hXR : 0 < XR)
   (left_pos F XR hXR s).trans hX.1
 
 
-theorem windows_disjoint (F : Profile) (XR : ℝ) (hXR : 0 < XR)
-    {s t : Slot} (hst : s ≠ t) : Disjoint (window F XR s) (window F XR t) := by
-  apply Set.disjoint_left.mpr
-  intro X hXs hXt
-  rcases offsets_separated hst with h | h
-  · have hr : right F XR s ≤ left F XR t :=
-      (radius_strictMono XR hXR).monotone (add_le_add_right h _)
-    exact (not_lt_of_ge hr) (hXt.1.trans hXs.2)
-  · have hr : right F XR t ≤ left F XR s :=
-      (radius_strictMono XR hXR).monotone (add_le_add_right h _)
-    exact (not_lt_of_ge hr) (hXs.1.trans hXt.2)
 
 theorem clock_bounds (F : Profile) (XR : ℝ) (hXR : 0 < XR) (s : Slot)
     {X : ℝ} (hX : X ∈ window F XR s) :

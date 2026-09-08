@@ -265,10 +265,6 @@ theorem periodicVelocity_eventuallyEq (A : VelocityField) {z : SpaceTime}
     (hz : z.2 ∈ plateau) : periodicVelocity A =ᶠ[𝓝 z] SpatialCurl.spatialCurl A :=
   SolenoidalDiagonal.spatialCurl_eventuallyEq (periodicPotential_eventuallyEq A hz)
 
-theorem periodicPressure_eventuallyEq (p : PressureField) {z : SpaceTime}
-    (hz : z.2 ∈ plateau) : periodicPressure p =ᶠ[𝓝 z] p :=
-  (PeriodicLocalization.periodize_eventuallyEq (cutPressure_supported p)
-    (plateau_subset_innerCube hz)).trans (cutPressure_eventuallyEq p hz)
 
 theorem periodicVelocity_eq (A : VelocityField) {z : SpaceTime} (hz : z.2 ∈ plateau) :
     periodicVelocity A z = SpatialCurl.spatialCurl A z :=

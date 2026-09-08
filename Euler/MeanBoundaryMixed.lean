@@ -143,20 +143,8 @@ theorem mixedBoundaryOperator_diagonal (χ : Cutoff) :
 
 
 
-theorem mixedBoundaryOperator_sub_left (χ ψ ρ : Cutoff) :
-    mixedBoundaryOperator (χ.sub ψ) ρ = mixedBoundaryOperator χ ρ - mixedBoundaryOperator ψ ρ := by
-  simp only [mixedBoundaryOperator, cutoffCurl_sub, ContinuousLinearMap.sub_comp]
 
-theorem mixedBoundaryOperator_sub_right (χ ψ ρ : Cutoff) :
-    mixedBoundaryOperator χ (ψ.sub ρ) = mixedBoundaryOperator χ ψ - mixedBoundaryOperator χ ρ := by
-  simp only [mixedBoundaryOperator, weakPotential_sub, ContinuousLinearMap.comp_sub]
 
-/-- The two actual coefficient differences are split between the two cutoff positions. -/
-theorem mixedBoundaryOperator_difference (χ₁ χ₀ ψ₁ ψ₀ : Cutoff) :
-    mixedBoundaryOperator χ₁ ψ₁ - mixedBoundaryOperator χ₀ ψ₀ =
-      mixedBoundaryOperator (χ₁.sub χ₀) ψ₁ + mixedBoundaryOperator χ₀ (ψ₁.sub ψ₀) := by
-  rw [mixedBoundaryOperator_sub_left, mixedBoundaryOperator_sub_right]
-  abel
 
 
 end EulerMeanBoundary

@@ -31,9 +31,6 @@ def transportCeiling (T C₀ C₁ c : ℝ) : ℝ :=
 /-- Uniform polynomial bound for the inverse of the transported form. -/
 def inverseCost (T C₀ C₁ c : ℝ) : ℝ := 2 * (transportCeiling T C₀ C₁ c)^2
 
-/-- One polynomial top constant handles both coefficient and forcing amplitudes. -/
-def solveCost (T C₀ C₁ CH c : ℝ) : ℝ :=
-  1 + inverseCost T C₀ C₁ c * (formCost T C₀ C₁ CH + forcingCost T C₀ C₁ + 1)
 
 variable {P U E : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]

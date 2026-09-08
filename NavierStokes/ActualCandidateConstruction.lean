@@ -143,8 +143,6 @@ noncomputable def basePressure (B n : ℕ) : Full → ℝ :=
   ActualBaseResidual.basePressure certificate modulation upper B n
 
 
-noncomputable def chartPressure (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n j : ℕ) : PressureField :=
-  CyclePhysicalPrefixes.pressure a i (graph n) n (basePressure B n) (cycle B N0 j).state
 
 
 noncomputable def chartPressureStages (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Index) (n : ℕ) : ℕ → PressureField :=

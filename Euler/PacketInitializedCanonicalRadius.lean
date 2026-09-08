@@ -1,4 +1,5 @@
-import Euler.PacketInitializedRadius
+import Euler.PacketPrimaryCommonRadius
+import Euler.PacketCommonRadius
 
 /-! The literal common radius of the initialized packet, with named
 budgets that retain it. Quantitative bounds must concern this radius,

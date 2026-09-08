@@ -43,18 +43,5 @@ theorem correction_eventually_lt_inverse_power (C p : ℝ) :
   apply (lt_div_iff₀ (Real.rpow_pos_of_pos hk p)).mpr
   simpa only [mul_assoc, mul_left_comm, mul_comm] using he
 
-/-- Fixed polynomial losses from physical differentiation or graph
-restriction are absorbed by the same actual correction target. -/
-theorem correction_with_power_loss_eventually (C loss p : ℝ) :
-    ∀ᶠ k : ℝ in atTop, C*k^loss*delta (expansion k) < k^(-p) := by
-  filter_upwards [correction_eventually_lt_inverse_power C (p+loss),
-    eventually_gt_atTop (0 : ℝ)] with k he hk
-  have hm := mul_lt_mul_of_pos_right he (Real.rpow_pos_of_pos hk loss)
-  have hp : k^(-(p+loss))*k^loss=k^(-p) := by
-    rw [← Real.rpow_add hk]
-    congr 1
-    ring
-  rw [hp] at hm
-  simpa only [mul_assoc, mul_left_comm, mul_comm] using hm
 
 end EulerPacketSourceFrequency

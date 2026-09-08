@@ -212,13 +212,7 @@ theorem omegaDivX_smooth (h : ℝ) (U v : ℕ → InnerProfile) (k : ℕ) (w : I
         (partialX_smooth (partialX_smooth (hv k le_rfl)))))).sub hp
 
 
-theorem partialX_analytic {v : InnerProfile} {w : InnerPoint}
-    (hv : AnalyticAt ℝ v w) : AnalyticAt ℝ (partialX v) w :=
-  ((ContinuousLinearMap.apply ℝ ℝ ((1, 0) : InnerPoint)).analyticAt _).comp hv.fderiv
 
-theorem partialEta_analytic {v : InnerProfile} {w : InnerPoint}
-    (hv : AnalyticAt ℝ v w) : AnalyticAt ℝ (partialEta v) w :=
-  ((ContinuousLinearMap.apply ℝ ℝ ((0, 1) : InnerPoint)).analyticAt _).comp hv.fderiv
 
 
 
@@ -244,85 +238,20 @@ noncomputable def profileJet (v : InnerProfile) (w : InnerPoint) : Jet2 ℝ wher
   dex := partialX (partialEta v) w
   dee := partialEta (partialEta v) w
 
-noncomputable def jetL {K : Type*} [Field K] (h e : K) : K := 1 - 2 * h * e ^ 2
-
-noncomputable def jetT {K : Type*} [Field K] (h b X e : K) (j : Jet2 K) : K :=
-  (-b * j.value + (1 / 2 - h) * e * j.de + X * j.dx) / jetL h e
-
-noncomputable def jetZNumerator {K : Type*} [Field K] (b X e : K) (j : Jet2 K) : K :=
-  2 * e * b * j.value + (1 - e ^ 2) * j.de - 2 * e * X * j.dx
-
-noncomputable def jetZNumeratorX {K : Type*} [Field K] (b X e : K) (j : Jet2 K) : K :=
-  2 * e * b * j.dx + (1 - e ^ 2) * j.dex - 2 * e * (j.dx + X * j.dxx)
-
-noncomputable def jetZNumeratorE {K : Type*} [Field K] (b X e : K) (j : Jet2 K) : K :=
-  2 * b * j.value + 2 * e * b * j.de - 2 * e * j.de +
-    (1 - e ^ 2) * j.dee - 2 * X * j.dx - 2 * e * X * j.dxe
-
-noncomputable def jetZ {K : Type*} [Field K] (h b X e : K) (j : Jet2 K) : K :=
-  jetZNumerator b X e j / jetL h e
-
-noncomputable def jetZX {K : Type*} [Field K] (h b X e : K) (j : Jet2 K) : K :=
-  jetZNumeratorX b X e j / jetL h e
-
-noncomputable def jetZE {K : Type*} [Field K] (h b X e : K) (j : Jet2 K) : K :=
-  (jetZNumeratorE b X e j * jetL h e + 4 * h * e * jetZNumerator b X e j) /
-    jetL h e ^ 2
-
-noncomputable def jetZ2 {K : Type*} [Field K] (h b X e : K) (j : Jet2 K) : K :=
-  (2 * e * (b - (1 / 2 - h)) * jetZ h b X e j +
-    (1 - e ^ 2) * jetZE h b X e j - 2 * e * X * jetZX h b X e j) / jetL h e
 
 
-theorem Z_eq_jet (h b : ℝ) (v : InnerProfile) (w : InnerPoint) :
-    Z h b v w = jetZ h b w.1 w.2 (profileJet v w) := rfl
-
-theorem Z_partials_eq_jet (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
-    (hv : ContDiffAt ℝ 2 v w) (hL : L h w.2 ≠ 0) :
-    partialX (Z h b v) w = jetZX h b w.1 w.2 (profileJet v w) ∧
-      partialEta (Z h b v) w = jetZE h b w.1 w.2 (profileJet v w) := by
-  have hvd := (hv.differentiableAt (by norm_num)).hasFDerivAt
-  have hxd := ((partialX_smoothAt hv (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasFDerivAt
-  have hed := ((partialEta_smoothAt hv (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasFDerivAt
-  have hx : HasFDerivAt (fun y : InnerPoint => y.1) (ContinuousLinearMap.fst ℝ ℝ ℝ) w :=
-    hasFDerivAt_fst
-  have he : HasFDerivAt (fun y : InnerPoint => y.2) (ContinuousLinearMap.snd ℝ ℝ ℝ) w :=
-    hasFDerivAt_snd
-  have hn := (((he.const_mul 2).mul_const b).mul hvd).add
-    (((hasFDerivAt_const (1 : ℝ) w).sub (he.mul he)).mul hed) |>.sub
-    (((he.const_mul 2).mul hx).mul hxd)
-  have hl := (hasFDerivAt_const (1 : ℝ) w).sub ((he.mul he).const_mul (2 * h))
-  have hL₀ : 1 - 2 * h * (w.2 * w.2) ≠ 0 := by
-    simpa only [L, CoordinateAlgebra.L, pow_two] using hL
-  have hL₁ : 1 - 2 * h * w.2 ^ 2 ≠ 0 := hL
-  have hz := hn.mul ((hasDerivAt_inv hL₀).comp_hasFDerivAt w hl)
-  simp only [Function.comp_def, ← pow_two] at hz
-  change HasFDerivAt (Z h b v) _ w at hz
-  constructor
-  · change (fderiv ℝ (Z h b v) w) (1, 0) = _
-    rw [hz.fderiv]
-    simp [jetZX, jetZNumeratorX, jetL, profileJet, partialX, partialEta, smul_eq_mul]
-    field_simp [hL₁] ; ring
-  · change (fderiv ℝ (Z h b v) w) (0, 1) = _
-    rw [hz.fderiv]
-    simp [jetZE, jetZNumeratorE, jetZNumerator, jetL, profileJet, partialX, partialEta,
-      smul_eq_mul]
-    field_simp [hL₁] ; ring
 
 
-noncomputable def jetShifted {K : Type*} [Field K] (h X e : K) (v : ℕ → Jet2 K) : ℕ → K
-  | 0 => 0
-  | k + 1 => jetZ2 h (2 * (k : K) * h - 1) X e (v k)
 
-/-- The same regular source formula over any field, so complex parameter
-extensions use precisely the algebra verified for the real profile derivatives. -/
-noncomputable def jetOmegaDivX {K : Type*} [Field K] (h X e : K)
-    (U : ℕ → K) (v : ℕ → Jet2 K) (k : ℕ) : K :=
-  jetT h (2 * (k : K) * h - 1) X e (v k) +
-    (∑ ij ∈ Finset.antidiagonal k,
-      ((v ij.1).value * ((v ij.2).value / 2 + X * (v ij.2).dx) +
-        U ij.1 * jetZ h (2 * (ij.2 : K) * h - 1) X e (v ij.2))) -
-    (4 * (v k).dx + 2 * X * (v k).dxx) - jetShifted h X e v k
+
+
+
+
+
+
+
+
+
 
 
 /-- Holomorphic extensions of the seven actual input jets. This is stronger
@@ -336,30 +265,10 @@ structure AnalyticJetAt (J : ℂ → Jet2 ℂ) (e : ℂ) : Prop where
   dex : AnalyticAt ℂ (fun z => (J z).dex) e
   dee : AnalyticAt ℂ (fun z => (J z).dee) e
 
-theorem jetL_analytic (h e : ℂ) : AnalyticAt ℂ (jetL h) e :=
-  analyticAt_const.sub (analyticAt_const.mul (analyticAt_id.pow 2))
 
 
-theorem jetZNumerator_analytic (b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
-    (hJ : AnalyticJetAt J e) : AnalyticAt ℂ (fun z => jetZNumerator b X z (J z)) e := by
-  exact ((((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul hJ.value).add
-    ((analyticAt_const.sub (analyticAt_id.pow 2)).mul hJ.de)).sub
-    (((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul hJ.dx)
 
-theorem jetZNumeratorX_analytic (b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
-    (hJ : AnalyticJetAt J e) : AnalyticAt ℂ (fun z => jetZNumeratorX b X z (J z)) e := by
-  exact ((((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul hJ.dx).add
-    ((analyticAt_const.sub (analyticAt_id.pow 2)).mul hJ.dex)).sub
-    ((analyticAt_const.mul analyticAt_id).mul (hJ.dx.add (analyticAt_const.mul hJ.dxx)))
 
-theorem jetZNumeratorE_analytic (b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
-    (hJ : AnalyticJetAt J e) : AnalyticAt ℂ (fun z => jetZNumeratorE b X z (J z)) e := by
-  exact (((((analyticAt_const.mul hJ.value).add
-    (((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul hJ.de)).sub
-    ((analyticAt_const.mul analyticAt_id).mul hJ.de)).add
-    ((analyticAt_const.sub (analyticAt_id.pow 2)).mul hJ.dee)).sub
-    (analyticAt_const.mul hJ.dx)).sub
-    (((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul hJ.dxe)
 
 
 

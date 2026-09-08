@@ -555,19 +555,9 @@ theorem SmoothShell.weighted_integrable {a b : ℝ} {F : MeanField} (hF : Smooth
   IntegratedMeanBalances.weighted_integrable (hF.slice_smooth p).continuous (hF.slice_compact p) n
 
 
-/-- The axial line of (32), with pressure retained inside the axial flux. -/
-noncomputable def axialBalance (ε : ℝ) (γ radialFlux axialFlux pressure virtualFlux : MeanField)
-    (x : MeanPoint) : ℝ :=
-  (-ε) * parameterPartial (1, 0) γ x +
-    radialDivergence 1 (fun r => radialFlux (r, x.2)) x.1 +
-    ε * parameterPartial (0, 1) (fun y => axialFlux y + pressure y) x -
-    ε * (axialRadialViscosity (fun r => γ (r, x.2)) x.1 +
-      ε ^ 2 * parameterPartial (0, 1) (parameterPartial (0, 1) γ) x) -
-    radialDivergence 1 (fun r => virtualFlux (r, x.2)) x.1
 
 
 
-noncomputable def pressureTotal (gr : MeanField) : MeanParameter → ℝ := radialMoment 0 gr
 
 noncomputable def pressureCoefficient (ρ : MeanField) (p : MeanParameter) : ℝ :=
   radialMoment 2 ρ p / 2
@@ -579,14 +569,7 @@ noncomputable def axialDefect (axialFlux gr : MeanField) (p : MeanParameter) : �
 
 /-! ## Restriction to the physical positive radial half-line -/
 
-theorem zero_of_not_mem_interval {a b r : ℝ} {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) (hr : r ∉ Icc a b) : f r = 0 := by
-  by_contra h
-  exact hr (hs h)
 
-theorem deriv_support_interval {a b : ℝ} {f : ℝ → ℝ}
-    (hs : support f ⊆ Icc a b) : support (deriv f) ⊆ Icc a b :=
-  support_deriv_subset.trans (closure_minimal hs isClosed_Icc)
 
 
 

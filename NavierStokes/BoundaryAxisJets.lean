@@ -117,27 +117,8 @@ theorem radialJet_congr {R : ℝ} {F G : ℝ × P → E} {z : P}
 noncomputable def localized (R : ℝ) (F : ℝ × P → E) (p : ℝ × P) : E :=
   EvenSmoothDescent.localized R (fun r => F (r, p.2)) p.1
 
-theorem evenCutoff_one {R r : ℝ} (hR : 0 < R) (hr : |r| ≤ R / 4) :
-    EvenSmoothDescent.evenCutoff R r = 1 := by
-  have hb : |(2 / R) * r| ≤ 1 / 2 := by
-    rw [abs_mul, abs_of_pos (div_pos (by norm_num) hR)]
-    rw [div_mul_eq_mul_div]
-    apply (div_le_iff₀ hR).mpr
-    nlinarith
-  have hbn : |(2 / R) * (-r)| ≤ 1 / 2 := by simpa only [mul_neg, abs_neg] using hb
-  simp only [EvenSmoothDescent.evenCutoff, SmoothCutoffs.scaledCutoff_one_of_abs_le hb,
-    SmoothCutoffs.scaledCutoff_one_of_abs_le hbn, mul_one]
 
-omit [CompleteSpace E] in
-theorem localized_eq {R r : ℝ} (hR : 0 < R) (hr : |r| ≤ R / 4) (F : ℝ × P → E) (z : P) :
-    localized R F (r, z) = F (r, z) := by
-  simp only [localized, EvenSmoothDescent.localized, evenCutoff_one hR hr, one_smul]
 
-omit [CompleteSpace E] in
-theorem radialJet_localized_eq {R : ℝ} (hR : 0 < R) (F : ℝ × P → E) (z : P) (k : ℕ)
-    {r : ℝ} (hr : r ∈ Ioo (-(R / 4)) (R / 4)) :
-    radialJet (localized R F) k r z = radialJet F k r z :=
-  radialJet_congr (fun _ hs => localized_eq hR (abs_lt.mpr hs).le F z) k r hr
 
 
 

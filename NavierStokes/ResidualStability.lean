@@ -42,16 +42,6 @@ theorem scalarFlat_zero : Flatness.PowerFlat l q (fun _ => 0) := by
   intro N
   exact ⟨0, le_rfl, Filter.Eventually.of_forall (fun _ => by simp)⟩
 
-theorem scalarFlat_sum {ι : Type*} (s : Finset ι) (f : ι → X → ℝ)
-    (hf : ∀ i ∈ s, Flatness.PowerFlat l q (f i)) :
-    Flatness.PowerFlat l q (fun x => ∑ i ∈ s, f i x) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using (scalarFlat_zero (l := l) (q := q))
-  | @insert i s hi ih =>
-      simpa only [Finset.sum_insert hi] using
-        (hf i (Finset.mem_insert_self _ _)).add
-          (ih (fun j hj => hf j (Finset.mem_insert_of_mem hj)))
 
 end Scalar
 

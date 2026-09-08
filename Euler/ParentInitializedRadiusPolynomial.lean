@@ -85,8 +85,6 @@ theorem parameterSize_bounds (K Ti TiTotal Cp B δ N : ℝ)
 
 def fullEnvelope (X : ℝ) : ℝ := radiusEnvelope (sourceEnvelope X)
 
-def fullPolynomial : Polynomial ℝ :=
-  radiusPolynomial.comp (sourceRadiusPolynomial.comp inputPolynomial)
 
 
 

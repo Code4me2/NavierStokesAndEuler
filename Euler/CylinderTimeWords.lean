@@ -47,23 +47,5 @@ variable (T : ℝ) (hT : 0 ≤ T) (p f : C(Icc (0 : ℝ) T,LiftL2 P))
   (hf : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a f))
   (hd : ∀ t : Icc (0 : ℝ) T, HasDerivWithinAt (extendPath T hT p) (f t) (Icc (0 : ℝ) T) t)
 
-include hd in
-/-- Time differentiation commutes with each actual spatial/angular word, including at endpoints. -/
-theorem pointField_word_hasDerivWithinAt (n : ℕ) (w : Fin n → Fin 4)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain P) :
-    HasDerivWithinAt (fun r => iteratedFieldDerivative P w (pointField P p hp (projIcc 0 T hT r)) x)
-      (iteratedFieldDerivative P w (pointField P f hf t) x) (Icc (0 : ℝ) T) t := by
-  let L := (EulerSobolevPointEvaluation.pointEvaluation P x).comp (wordBlock P 3 n w)
-  have h := L.hasFDerivAt.comp_hasDerivWithinAt (t : ℝ)
-    (sobolevPath_hasDerivWithinAt P T hT p f hp hf hd (3+n) t)
-  change HasDerivWithinAt
-    (fun r => EulerSobolevPointEvaluation.pointEvaluation P x
-      (wordBlock P 3 n w (sobolevPath P (3+n) p hp (projIcc 0 T hT r))))
-    (EulerSobolevPointEvaluation.pointEvaluation P x (wordBlock P 3 n w (sobolevPath P (3+n) f hf t)))
-    (Icc (0 : ℝ) T) t at h
-  rw [← pointField_word_eq_evaluation P f hf n w t x] at h
-  apply h.congr_of_mem _ t.property
-  intro r _
-  exact pointField_word_eq_evaluation P p hp n w (projIcc 0 T hT r) x
 
 end EulerCylinderSmoothOrbit

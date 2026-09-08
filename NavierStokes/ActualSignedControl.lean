@@ -43,33 +43,6 @@ noncomputable def phaseAction {U : Domain ι PhaseCalculus.Slow}
 
 
 
-/-- The three geometric jet estimates are obtained from the actual phase
-construction, rather than being supplied for the pressure output. -/
-theorem phase_geometry_jets {V : JetDomain ι D} {U : Domain ι PhaseCalculus.Slow}
-    (F : PhaseConstruction U) (χ : ι → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ i, U.scale i = V.scale i) (hχ : PolynomialJets V.toDomain χ)
-    (hmap : ∀ i x, x ∈ V.carrier i → χ i x ∈ U.carrier i ×ˢ Ioo (0 : ℝ) 1) :
-    PolynomialJets V.toDomain (phaseNormal F χ) ∧
-    PolynomialJets V.toDomain (phaseMotion F χ) ∧
-    PolynomialJets V.toDomain (phaseAction F χ) ∧
-    (∀ i x, x ∈ V.carrier i → F.b ≤ ‖phaseNormal F χ i x‖) ∧
-    (∀ i x, x ∈ V.carrier i → ‖phaseNormal F χ i x‖ ≤ F.M ^ 2 + 3 * F.M) := by
-  have hp := PrimaryCopyBounds.phasePoint_jets F χ hscale hχ
-  have hm := PrimaryCopyBounds.phasePoint_maps F χ hmap
-  have hb := F.phase.polynomial_jets U F.V F.openV F.baseF F.baseG
-    F.r_pos F.one_le_M F.constants F.epsilon_ne F.radius F.slot
-  have hN := ((EnvelopeJets.of_polynomial hb.1).comp hp hscale hm).to_polynomial
-    (fun _ _ _ => le_rfl)
-  have hNd := ((EnvelopeJets.of_polynomial hb.2.1).comp hp hscale hm).to_polynomial
-    (fun _ _ _ => le_rfl)
-  have hshear := ((EnvelopeJets.of_polynomial hb.2.2).comp hp hscale hm).to_polynomial
-    (fun _ _ _ => le_rfl)
-  have hF := ((EnvelopeJets.of_polynomial F.baseF).comp
-    (hχ.clm (ContinuousLinearMap.fst ℝ PhaseCalculus.Slow ℝ)) hscale
-    (fun i x hx => (hmap i x hx).1)).to_polynomial (fun _ _ _ => le_rfl)
-  exact ⟨hN, hNd, (hF.pair hshear).clm PrimaryCopyBridge.baseOperatorFamily,
-    fun i x hx => F.normal_range.1 i _ (hm i x hx),
-    fun i x hx => F.normal_range.2 i _ (hm i x hx)⟩
 
 /-- A proved reference certificate. The prepared-family constructor below
 derives its target and mask estimates and all three scalar margins. -/
