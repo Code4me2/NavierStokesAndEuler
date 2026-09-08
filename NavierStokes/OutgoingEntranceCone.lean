@@ -162,9 +162,8 @@ theorem shapeGradient_contDiff : ContDiff ℝ ∞ shapeGradient :=
   (contDiff_const.mul contDiff_id).div (contDiff_const.add (contDiff_id.pow 2))
     (fun η => by positivity)
 
-theorem parameter_square_le_one {η : ℝ} (hη : |η| ≤ 1) : η ^ 2 ≤ 1 := by
-  have h := sq_le_sq₀ (abs_nonneg η) (by norm_num : (0 : ℝ) ≤ 1) |>.mpr hη
-  simpa using h
+theorem parameter_square_le_one {η : ℝ} (hη : |η| ≤ 1) : η ^ 2 ≤ 1 :=
+  (sq_le_one_iff_abs_le_one η).mpr hη
 
 theorem eta_shapeGradient_bounds {η : ℝ} (hη : |η| ≤ 1) :
     η ^ 2 ≤ η * shapeGradient η ∧ η * shapeGradient η ≤ 1 := by

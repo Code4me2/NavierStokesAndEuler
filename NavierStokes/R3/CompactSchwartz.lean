@@ -53,10 +53,4 @@ def ofCompactSupport (f : Space → ℂ) (hf : ContDiff ℝ ∞ f)
     (hc : HasCompactSupport f) :
     tsupport (ofCompactSupport f hf hc) = tsupport f := rfl
 
-/-- Each iterated derivative remains supported inside the original support. -/
-theorem tsupport_iteratedFDeriv_subset (f : Space → ℂ) (n : ℕ) :
-    tsupport (iteratedFDeriv ℝ n f) ⊆ tsupport f :=
-  _root_.tsupport_iteratedFDeriv_subset n
-
-
 end NavierStokesR3.CompactSchwartz

@@ -435,7 +435,7 @@ theorem angular_integral_zero (F : Profile) (eta : ℝ) :
 
 theorem M_at_exp (F : Profile) (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
     F.M eta (Real.exp y) = massMoment F.data.core F.amp eta y := by
-  rw [M, ← ReleaseMoments.image_exp_Iic,
+  rw [M, ← Real.image_exp_Iic,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Iic
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
   simp_rw [F.mass_comp_exp]
@@ -443,7 +443,7 @@ theorem M_at_exp (F : Profile) (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
 
 theorem J_at_exp (F : Profile) (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
     F.J eta (Real.exp y) = angularMoment F.data.core F.amp eta y := by
-  rw [J, ← ReleaseMoments.image_exp_Iic,
+  rw [J, ← Real.image_exp_Iic,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Iic
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
   simp_rw [F.angular_comp_exp]
@@ -505,16 +505,6 @@ theorem Pi_tendsto_axis (F : Profile) (eta : ℝ) :
 
 end Profile
 
-theorem image_exp_Ioi (y : ℝ) : Real.exp '' Ioi y = Ioi (Real.exp y) := by
-  ext X
-  constructor
-  · rintro ⟨t, ht, rfl⟩
-    exact Real.exp_lt_exp.mpr ht
-  · intro hX
-    have hp : 0 < X := (Real.exp_pos y).trans hX
-    refine ⟨Real.log X, ?_, Real.exp_log hp⟩
-    exact Real.exp_lt_exp.mp (by rw [Real.exp_log hp]; exact hX)
-
 namespace Profile
 
 def canonicalKernel (F : Profile) (eta X : ℝ) : ℝ := F.E (X, eta) ^ 2 / X
@@ -537,7 +527,7 @@ theorem Pi_canonical (F : Profile) (eta : ℝ) {X : ℝ} (hX : 0 < X) :
   have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
     (fun y (_ : y ∈ Ioi (Real.log X)) => (Real.hasDerivAt_exp y).hasDerivWithinAt)
     Real.exp_injective.injOn (F.canonicalKernel eta)
-  rw [image_exp_Ioi, Real.exp_log hX] at h
+  rw [Real.image_exp_Ioi, Real.exp_log hX] at h
   simp_rw [F.canonicalKernel_comp_exp] at h
   change -(1 / 2 : ℝ) * (∫ y in Ioi (Real.log X), F.pressureWeight eta y) = _
   rw [← h]

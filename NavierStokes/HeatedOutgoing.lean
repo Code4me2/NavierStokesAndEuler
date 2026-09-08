@@ -638,7 +638,7 @@ theorem canonicalKernel_comp_exp (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (e
 
 theorem Pi_exp (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta y : ℝ) :
     Pi F XR c (Real.exp y, eta) = -(1 / 2 : ℝ) * ∫ t in Ioi y, E F XR c (Real.exp t, eta) ^ 2 := by
-  rw [Pi, ← OutgoingProfile.image_exp_Ioi,
+  rw [Pi, ← Real.image_exp_Ioi,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
   simp_rw [canonicalKernel_comp_exp]

@@ -44,12 +44,6 @@ theorem ofReal_limsup_eq_top_of_unbounded (f : L.Time → ℝ)
   obtain ⟨t,ht,hft⟩ := hf s s.property.2 b.toReal
   exact ⟨t,ht.le,(ENNReal.lt_ofReal_iff_toReal_lt (ne_of_lt hb)).mpr hft⟩
 
-theorem maximalGradientNorm_limsup :
-    Filter.limsup (fun t : L.Time => ENNReal.ofReal (L.maximalGradientNorm t))
-      L.endpointFilter=⊤ :=
-  L.ofReal_limsup_eq_top_of_unbounded L.maximalGradientNorm
-    (fun τ hτ K => L.maximalGradientNorm_unbounded_near_endpoint τ K hτ)
-
 theorem maximalC1Norm_limsup :
     Filter.limsup (fun t : L.Time => ENNReal.ofReal (L.maximalC1Norm t))
       L.endpointFilter=⊤ :=
@@ -67,12 +61,6 @@ namespace EulerPacketInduction
 
 open Filter
 open scoped Topology ENNReal
-
-
-theorem maximalGradientNorm_limsup :
-    Filter.limsup (fun t : MaximalTime => ENNReal.ofReal (maximalGradientNorm t))
-      (Filter.comap (fun t : MaximalTime => (t : ℝ)) (𝓝[<] lifespan.duration))=⊤ :=
-  lifespan.maximalGradientNorm_limsup
 
 theorem maximalC1Norm_limsup :
     Filter.limsup (fun t : MaximalTime => ENNReal.ofReal (maximalC1Norm t))

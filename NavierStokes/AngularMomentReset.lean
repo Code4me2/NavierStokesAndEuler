@@ -474,11 +474,8 @@ theorem pressure_integral_formula (lam e0 y0 : ℝ) (c : Coeff) :
     weighted_translate_integral (pressureSlope lam) y0 (fun y => (1 + relative c y) ^ 2 - 1)]
   ring
 
-theorem sqrt_exp_half (y : ℝ) : Real.sqrt (Real.exp y) = Real.exp (y / 2) := by
-  apply (Real.sqrt_eq_iff_mul_self_eq_of_pos (Real.exp_pos _)).mpr
-  rw [← Real.exp_add]
-  congr 1
-  ring
+theorem sqrt_exp_half (y : ℝ) : Real.sqrt (Real.exp y) = Real.exp (y / 2) :=
+  (Real.exp_half y).symm
 
 theorem angular_weight_formula (lam e0 X0 y : ℝ) (hX : 0 ≤ X0) :
     radiusX X0 y * baseH lam e0 X0 y =

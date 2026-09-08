@@ -27,8 +27,6 @@ structure Properties (u : VelocityField) (p : PressureField) (f : VelocityField)
   force_smooth : ContDiffOn ℝ ∞ f futureDomain
   velocity_support : ∃ K : Set Space, IsCompact K ∧
     ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, x ∉ K → u (t, x) = 0
-  pressure_support : ∃ K : Set Space, IsCompact K ∧
-    ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, x ∉ K → p (t, x) = 0
   force_support : ∃ K : Set Space, IsCompact K ∧ CompactSpatialForceDecay.SupportedIn K f
   zero_initial_velocity : ∀ x, u (0, x) = 0
   force_time_support : CompactFutureTimeSupport f
@@ -186,7 +184,6 @@ theorem of_periodic_local_model {u U : VelocityField} {p P : PressureField} {f :
   refine ⟨local_model_smooth h.velocity_smooth hu heu,
     local_model_smooth h.pressure_smooth hp hep, compactForce_smooth h.force_smooth,
     ⟨supportCylinder, isCompact_supportCylinder, fun t _ => hu t⟩,
-    ⟨supportCylinder, isCompact_supportCylinder, fun t _ => hp t⟩,
     ⟨outerSupport, outerSupport_compact, compactForce_supported f⟩, ?_,
     compactForce_time_support h.force_time_support,
     fun t ht => local_model_divergence hu heu (h.divergence_free t ht),
@@ -250,13 +247,6 @@ theorem of_localized_fields {A B : VelocityField} {P : PressureField} {f : Veloc
     Properties (velocity A B) (pressure P) (compactForce f) :=
   of_periodic_local_model h (velocity_supported A B) (pressure_supported P)
     (velocity_locally_eq A B) (pressure_locally_eq P)
-
-/-- Every compact whole-space force constructed here satisfies the exact
-spatial and temporal decay requirements of the comparator. -/
-theorem Properties.forceConditionDecay {u : VelocityField} {p : PressureField} {f : VelocityField}
-    (h : Properties u p f) : Comparator.ForceConditionDecay (ComparatorBridge.toComparator f) := by
-  obtain ⟨K, hK, hsupport⟩ := h.force_support
-  exact CompactSpatialForceDecay.forceConditionDecay hK h.force_smooth hsupport h.force_time_support
 
 /-- After equality with the compact candidate has been proved, smoothness on
 a compact space-time neighborhood of time one gives the contradiction. -/

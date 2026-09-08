@@ -211,7 +211,7 @@ theorem familyPhase_contDiffOn [FiniteDimensional ℝ E]
 
 
 /-- Smooth loops remain jointly smooth under the constructed parameter-dependent
-phase inverse. Their period becomes one by `rephaseFamily_periodic`. -/
+phase inverse, which is the reparameterization normalizing the loop period to one. -/
 theorem rephaseFamily_contDiffOn [FiniteDimensional ℝ E]
     (d : E → CircleDensity) (f : E × ℝ → V) (U : Set E) (hU : IsOpen U)
     (hrate : ContDiffOn ℝ ∞ (familyRate d) (U ×ˢ univ))

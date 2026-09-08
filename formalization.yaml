@@ -29,7 +29,7 @@ sources:
     relationship: "formalizes"
 
 related_formalizations:
-  - id: "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/Millenium/NavierStokes.lean"
+  - id: "https://github.com/google-deepmind/formal-conjectures/blob/8bf45ed70d48b2b2a501de9c00b26bfa38c573ee/FormalConjectures/Millenium/NavierStokes.lean"
     relationship: "builds-on"
     note: >-
       The Formal Conjectures Navier–Stokes formalization supplies the independent
@@ -43,7 +43,13 @@ classification:
     - "35Q31"
 
 status:
-  scope: "Full formalization of main results."
+  scope: >-
+    Full formalization of the main results. The four results below are proved with
+    no sorry. The repository additionally contains four intentional sorry
+    placeholders in the Comparator challenge statements
+    (ComparatorChallenges/Euler.lean and ComparatorChallenges/NavierStokes.lean),
+    which is what a Comparator challenge module is; lake build reports them as its
+    only four warnings.
   sorry_count: 0
   sorry_in_definitions: 0
   main_results:

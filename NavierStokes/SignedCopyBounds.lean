@@ -627,7 +627,7 @@ theorem coefficients_jets (h : NativeCovariance s K H T)
       (fun n x hx => mul_nonneg (Real.sqrt_nonneg _) (hW n x hx)) hb hl hu hK
 
 /-- The cutoff is applied exactly once. These are the coefficients consumed
-by `PeriodizedWaveBounds.CopyData.common_bounds_from_native`. -/
+by the whole-lift bounds for `PeriodizedWaveBounds.CopyData`. -/
 theorem coefficients_localized_jets (h : NativeCovariance s K H T)
     (hR : ∀ q, LocalJets s (fun _ x => s.zeta x) β K (fun n i x => R i n x q))
     (hm : LocalJets s (fun _ _ => 1) 0 K (fun n i => mask i n))

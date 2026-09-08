@@ -459,11 +459,8 @@ theorem scaled_transfer (hpos : 0 < Λ) {a b c s : ℝ} (hclose : |a - b| ≤ 1 
     _ = _ := by field_simp
 
 theorem transfer_difference {a b c r s : ℝ} (hclose : |a - b| ≤ r) (hbase : |b - c| ≤ s) :
-    |a - c| ≤ r + s := by
-  calc
-    _ = |(a - b) + (b - c)| := by ring_nf
-    _ ≤ |a - b| + |b - c| := abs_add_le _ _
-    _ ≤ _ := add_le_add hclose hbase
+    |a - c| ≤ r + s :=
+  (abs_sub_le a b c).trans (add_le_add hclose hbase)
 
 theorem transfer_absolute {a b r s : ℝ} (hclose : |a - b| ≤ r) (hbase : |b| ≤ s) :
     |a| ≤ r + s := by

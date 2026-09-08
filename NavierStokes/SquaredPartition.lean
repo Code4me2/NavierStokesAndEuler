@@ -645,31 +645,8 @@ theorem locallyFinite_pair_inter {ι κ X : Type*} [TopologicalSpace X]
 
 /-- Finite support makes an ordinary sum over pairs equal its iterated sum. -/
 theorem finsum_pair_eq {ι κ : Type*} {f : ι × κ → ℝ} (hf : (support f).Finite) :
-    (∑ᶠ p, f p) = ∑ᶠ i, ∑ᶠ k, f (i, k) := by
-  classical
-  let A : Finset ι := hf.toFinset.image Prod.fst
-  let B : Finset κ := hf.toFinset.image Prod.snd
-  have hA {i k} (h : f (i, k) ≠ 0) : i ∈ A :=
-    Finset.mem_image.mpr ⟨(i, k), hf.mem_toFinset.mpr h, rfl⟩
-  have hB {i k} (h : f (i, k) ≠ 0) : k ∈ B :=
-    Finset.mem_image.mpr ⟨(i, k), hf.mem_toFinset.mpr h, rfl⟩
-  have hp : support f ⊆ (A.product B : Finset (ι × κ)) :=
-    fun p hp => Finset.mem_product.mpr ⟨hA hp, hB hp⟩
-  have hi : support (fun i => ∑ᶠ k, f (i, k)) ⊆ (A : Set ι) := by
-    intro i hi
-    by_cases hmem : i ∈ A
-    · exact hmem
-    · exfalso
-      apply hi
-      apply finsum_eq_zero_of_forall_eq_zero
-      intro k
-      by_contra h
-      exact hmem (hA h)
-  rw [finsum_eq_sum_of_support_subset _ hp, finsum_eq_sum_of_support_subset _ hi]
-  apply (Finset.sum_product A B f).trans
-  apply Finset.sum_congr rfl
-  intro i _
-  exact (finsum_eq_sum_of_support_subset _ (fun k hk => hB hk)).symm
+    (∑ᶠ p, f p) = ∑ᶠ i, ∑ᶠ k, f (i, k) :=
+  finsum_curry f hf
 
 
 

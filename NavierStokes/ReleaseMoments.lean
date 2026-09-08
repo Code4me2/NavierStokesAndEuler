@@ -412,22 +412,13 @@ theorem radial_difference_comp_exp (d : TailData) (c : ℝ → Coeff) (eta y : �
       Real.sqrt 2 * (correctedWeight d c eta y - powerWeight d y) := by
   rw [smul_sub, radialH_comp_exp, radialPowerH_comp_exp, mul_sub]
 
-theorem image_exp_Iic (y : ℝ) : Real.exp '' Iic y = Ioc 0 (Real.exp y) := by
-  ext X
-  constructor
-  · rintro ⟨t, ht, rfl⟩
-    exact ⟨Real.exp_pos t, Real.exp_le_exp.mpr ht⟩
-  · intro hX
-    refine ⟨Real.log X, ?_, Real.exp_log hX.1⟩
-    exact Real.exp_le_exp.mp (by rw [Real.exp_log hX.1]; exact hX.2)
-
 namespace ResetWitness
 
 variable {d : TailData} {K : ℝ} (w : UniformAngularReset.ResetWitness d K)
 
 theorem radial_history_integrable (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
     IntegrableOn (radialH d w.coefficients eta) (Ioc 0 (Real.exp y)) := by
-  rw [← image_exp_Iic]
+  rw [← Real.image_exp_Iic]
   apply (integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Iic
     (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn _).mpr
   simp_rw [radialH_comp_exp]
@@ -436,7 +427,7 @@ theorem radial_history_integrable (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
 theorem radial_history_eq (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
     (∫ X in Ioc 0 (Real.exp y), radialH d w.coefficients eta X) =
       Real.sqrt 2 * history d w.coefficients eta y := by
-  rw [← image_exp_Iic,
+  rw [← Real.image_exp_Iic,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Iic
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
   simp_rw [radialH_comp_exp]

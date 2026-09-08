@@ -57,23 +57,6 @@ noncomputable def reindexState {ι κ : Type} (e : κ ≃ ι)
     (x : CycleState ι) :
     (reindexState e x).coefficients.residualBand = x.coefficients.residualBand := rfl
 
-theorem reindexCoefficients_symm {ι κ : Type} (e : κ ≃ ι)
-    (v : CycleCoefficients ι) :
-    reindexCoefficients e.symm (reindexCoefficients e v) = v := by
-  classical
-  rcases v with ⟨labels, blocks, gaussian, aliasCoefficients, residualBand⟩
-  simp only [reindexCoefficients]
-  congr 1
-  · funext n
-    ext l
-    simp
-  · funext l
-    simp
-  · funext l
-    simp
-  · funext l
-    simp
-
 
 
 

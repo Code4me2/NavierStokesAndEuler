@@ -678,9 +678,8 @@ theorem profileL_eq (d : TailData) {η : ℝ} (hη : η ^ 2 ≤ 1) :
   unfold CoordinateAlgebra.L
   nlinarith [d.h_pos]
 
-theorem eta_sq_le_one {η : ℝ} (hη : η ∈ Icc (-1 : ℝ) 1) : η ^ 2 ≤ 1 := by
-  nlinarith [mul_nonneg (show 0 ≤ η + 1 by linarith [hη.1])
-    (show 0 ≤ 1 - η by linarith [hη.2])]
+theorem eta_sq_le_one {η : ℝ} (hη : η ∈ Icc (-1 : ℝ) 1) : η ^ 2 ≤ 1 :=
+  (sq_le_one_iff_abs_le_one η).mpr (abs_le.mpr hη)
 
 noncomputable def profileS (y0 x : ℝ) : ℝ := Real.exp (y0 + 3 - x)
 noncomputable def profileRadius (y0 x : ℝ) : ℝ :=

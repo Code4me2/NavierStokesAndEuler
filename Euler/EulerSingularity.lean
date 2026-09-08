@@ -12,9 +12,10 @@ supremum. All packet, scale, local existence, continuation, and logarithmic
 estimate inputs have been constructed in the imported proofs.
 
 `Evolution.sobolevSolutionClass` supplies one continuous strong time
-derivative in every spatial Sobolev order for every shorter restriction. The norm
-specification theorems below identify the quantities in the statement
-with the pointwise suprema of the actual velocity, derivative, and curl.
+derivative in every spatial Sobolev order for every shorter restriction. The
+quantities named in the statements below are the maximal-solution norms of
+`EulerOrdinarySobolev.FiniteLifespan`, whose own specification theorems identify
+them with the pointwise suprema of the actual velocity, derivative, and curl.
 -/
 
 noncomputable section
@@ -68,43 +69,16 @@ end EulerOrdinarySobolev
 namespace EulerPacketInduction
 
 open Set Filter MeasureTheory EulerSmoothLimit EulerLpTranslation
-  EulerLpTranslation.SmoothL2Field EulerOrdinarySobolev EulerMeanCutoffCurl
+  EulerLpTranslation.SmoothL2Field EulerOrdinarySobolev
 open scoped ContDiff ENNReal Topology
 
-def maximalVorticityNorm (t : MaximalTime) : ℝ := lifespan.maximalVorticityNorm t
-
 def maximalVorticityDensity (r : ℝ) : ℝ := lifespan.maximalVorticityDensity r
-
-def maximalVorticityIntegral (t : MaximalTime) : ℝ := lifespan.maximalVorticityIntegral t
-
-theorem maximalVorticityNorm_spec (t : MaximalTime) (K : ℝ) :
-    maximalVorticityNorm t ≤ K ↔ ∀ x, ‖vectorCurl (maximalVelocity t) x‖ ≤ K :=
-  lifespan.maximalVorticityNorm_le_iff t K
-
-theorem maximalVorticityDensity_spec (t : MaximalTime) :
-    maximalVorticityDensity t=maximalVorticityNorm t :=
-  lifespan.maximalVorticityDensity_eq t
-
-theorem maximalVorticityIntegral_spec (t : MaximalTime) :
-    (∫ r in (0 : ℝ)..(t : ℝ), maximalVorticityDensity r)=maximalVorticityIntegral t :=
-  lifespan.maximalVorticityDensity_integral_eq t
 
 theorem initialDatum_nonzero : initialDatum.field ≠ 0 := lifespan.initial_nonzero
 
 theorem initialDatum_existence_iff (T : ℝ) :
     HasSmoothEulerSolution initialDatum.field T ↔ 0 < T ∧ T < lifespan.duration :=
   (hasSmoothEulerSolution_iff initialDatum T).trans (lifespan.hasEulerEvolution_iff T)
-
-theorem initialDatum_scalar_existence_iff (T : ℝ) :
-    HasScalarEulerEvolution initialDatum T ↔ 0 < T ∧ T < lifespan.duration :=
-  lifespan.hasScalarEulerEvolution_iff T
-
-theorem maximalVorticityIntegral_tendsto :
-    Tendsto maximalVorticityIntegral
-      (Filter.comap (fun t : MaximalTime => (t : ℝ)) (𝓝[<] lifespan.duration)) atTop := by
-  change Tendsto lifespan.maximalVorticityIntegral lifespan.endpointFilter atTop
-  rw [lifespan.endpointFilter_eq_atTop]
-  exact lifespan.vorticityIntegral_tendsto_atTop
 
 theorem maximalVorticity_integral_infinite :
     (∫⁻ r in Ico (0 : ℝ) lifespan.duration, ENNReal.ofReal (maximalVorticityDensity r))=⊤ :=

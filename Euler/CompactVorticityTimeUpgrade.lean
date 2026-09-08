@@ -3,7 +3,6 @@ import Euler.OrdinaryCauchyInterpolation
 import Euler.OrdinaryAdvectionLimit
 import Euler.WeakHilbertODE
 import Euler.WeakTimeContinuity
-import Euler.DevelopmentBridge
 
 /-!
 # Time regularity from the projected weak equation

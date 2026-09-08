@@ -275,7 +275,8 @@ theorem coefficients_jets
   exact hpr.add (hpi.map ((ContinuousLinearMap.mul ℝ ℂ) Complex.I)) hweight
 
 /-- The common cutoff is applied once, before the periodized sum and the
-exact curl. These are the native hypotheses of `common_bounds_from_native`. -/
+exact curl. These are the native hypotheses consumed by the whole-lift bounds
+in `PeriodizedWaveBounds`. -/
 theorem coefficients_localized_jets
     (hr : ModalControl s α d (fun n => realData (t n) (source n)) harmonic g L envelope cells)
     (hi : ModalControl s α d (fun n => imagData (t n) (source n)) harmonic g L envelope cells)

@@ -85,10 +85,8 @@ theorem productConstant_polynomial {q : ℕ} {A : SmoothCoefficient period}
         _ ≤ (9 : ℝ) ^ (q + 1) * L := by rw [pow_succ]; nlinarith only [hpower]
 
 /-- A simple bound used to keep the inverse majorant polynomial at each fixed order. -/
-theorem succ_le_three_pow (q : ℕ) : q + 1 ≤ 3 ^ q := by
-  induction q with
-  | zero => norm_num
-  | succ q ih => rw [pow_succ]; omega
+theorem succ_le_three_pow (q : ℕ) : q + 1 ≤ 3 ^ q :=
+  Nat.lt_pow_self (by norm_num)
 
 /-- The inverse majorant dominates nine times the fixed-order multiplier majorant. -/
 theorem inverse_majorant_dominates (q : ℕ) {L : ℝ} (hL : 1 ≤ L) :

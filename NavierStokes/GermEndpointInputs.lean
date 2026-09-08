@@ -1,4 +1,5 @@
-import NavierStokes.ActualEndpointInputs
+import NavierStokes.ActualPhysicalStageBounds
+import NavierStokes.OffplaneJetExtensions
 import NavierStokes.GermCandidateAssembly
 import NavierStokes.InitialPhysicalData
 
@@ -18,6 +19,15 @@ namespace NavierStokes.GermEndpointInputs
 open Set Function Filter ProblemStatement
 open scoped Topology ContDiff
 
+/-- The three off-plane endpoint obligations of `candidate_of_finite_stages`.
+This is an output package; the construction below does not assume its fields. -/
+structure EndpointInputs (h qbig : ℝ) (A V : ℕ → VelocityField) (P : ℕ → PressureField) : Prop where
+  potential : ∀ x : Space, x 2 ≠ 0 → EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig →
+    ∀ j, Nonempty (JointResidualLimits.OneSidedExtension (A j) x)
+  direct : ∀ x : Space, x 2 ≠ 0 → EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig →
+    ∀ j, Nonempty (JointResidualLimits.OneSidedExtension (V j) x)
+  pressure : ∀ x : Space, x 2 ≠ 0 → EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig →
+    ∀ j, Nonempty (JointResidualLimits.OneSidedExtension (P j) x)
 
 /-- Interior data for one actual physical field.  The exponent and logarithmic
 loss may depend on the derivative order and on the field.  In particular this
@@ -260,7 +270,7 @@ theorem endpoints_of_bounds (upper : ℝ) (bandFloor : ℕ) {qbig : ℝ}
     (JA : ∀ j, 1 ≤ j → PhysicalJets F.data.h qbig (A j))
     (JV : ∀ j, PhysicalJets F.data.h qbig (V j))
     (JP : ∀ j, 1 ≤ j → PhysicalJets F.data.h qbig (P j)) :
-    ActualEndpointInputs.EndpointInputs F.data.h qbig A V P := by
+    EndpointInputs F.data.h qbig A V P := by
   constructor
   · intro x hx hqx j
     cases j with
@@ -301,7 +311,7 @@ theorem germ_stage_endpoints (upper : ℝ) (bandFloor : ℕ) {qbig : ℝ}
     (JD : ∀ j, PhysicalJets F.data.h qbig (LocalAngularDiagonal.rawSeries D j))
     (JpInitial : PhysicalJets F.data.h qbig pInitial)
     (JpStages : ∀ j, PhysicalJets F.data.h qbig (pStages j)) :
-    ActualEndpointInputs.EndpointInputs F.data.h qbig
+    EndpointInputs F.data.h qbig
       (GermCandidateAssembly.potentialStages H v upper bandFloor initial stages)
       (LocalAngularDiagonal.rawSeries D)
       (MixedCandidateAssembly.pressureStages H v upper bandFloor pInitial pStages) := by
@@ -366,7 +376,7 @@ theorem actual_germ_stage_endpoints (B N0 N : ℕ) (hN : 4 ≤ N)
     (Jstages : ∀ j, PhysicalJets h qbig (stages j))
     (Jdirect : ∀ j, 1 ≤ j → PhysicalJets h qbig (LocalAngularDiagonal.rawSeries D j))
     (JpStages : ∀ j, PhysicalJets h qbig (pStages j)) :
-    ActualEndpointInputs.EndpointInputs h qbig
+    EndpointInputs h qbig
       (GermCandidateAssembly.potentialStages certificate modulation upper B initial stages)
       (LocalAngularDiagonal.rawSeries D)
       (MixedCandidateAssembly.pressureStages certificate modulation upper B pInitial pStages) := by
@@ -407,7 +417,7 @@ theorem actual_germ_stage_endpoints_of_estimates (B N0 N : ℕ) (hN : 4 ≤ N)
       (fun w => InitialPhysicalData.pressure B N0 w +
         (ActualMeanPhysicalData.initialPressureFamily B N0 N).field w)
       (CutStageEstimates.physicalSublevel h qbig)) :
-    ActualEndpointInputs.EndpointInputs h qbig
+    EndpointInputs h qbig
       (GermCandidateAssembly.potentialStages certificate modulation upper B initial stages)
       (LocalAngularDiagonal.rawSeries D)
       (MixedCandidateAssembly.pressureStages certificate modulation upper B pInitial pStages) := by

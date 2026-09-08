@@ -737,8 +737,8 @@ theorem frameJets_ofNormalLocal
     rw [he, abs_zero] at hbnd
     linarith
 
-/-- The form consumed by `PrimaryODE.norm_iteratedFDeriv_solution_le_polynomial`
-and `WeightedODEJets`: all parameter jets at fixed slot time share one
+/-- The form consumed by the polynomial ODE-jet bounds of `WeightedODEJets`
+and `PrimaryODE`: all parameter jets at fixed slot time share one
 constant and one power of S.  The constant is independent of the slot time. -/
 theorem PolynomialJets.parameter_bound {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {f : ι → Q × ℝ → F} (hf : PolynomialJets D f) (N : ℕ) :

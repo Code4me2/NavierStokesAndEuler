@@ -4,17 +4,13 @@ import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 import Mathlib.Topology.Algebra.Support
 
 /-!
-# The whole-space assertion of Part II, Theorem 1.1
+# Whole-space vocabulary for the R³ comparison
 
-This module states the R³ theorem, including its comparison claim, independently
-of the existing periodic target. The coordinates, Euclidean norm, and differential
-operators are those of `NavierStokes.ProblemStatement`; no periodicity assumption
-is made here. Time is the first coordinate of spacetime.
-
-The force is a globally smooth function whose topological support is compact and
-contained in strictly positive time. This represents the zero extension of an
-element of `C_c^∞(R³ × (0, ∞); R³)` and, in particular, requires support separated
-from initial time as well as from spatial and future-time infinity.
+This module fixes the coordinates, residual, and finite-energy notions used by
+the whole-space half of the development, independently of the periodic target.
+The coordinates, Euclidean norm, and differential operators are those of
+`NavierStokes.ProblemStatement`; no periodicity assumption is made here. Time is
+the first coordinate of spacetime.
 
 Smoothness of velocity and pressure at time zero is relative to the physical
 half-domain. The equation uses ordinary derivatives at positive times; zero
@@ -22,8 +18,10 @@ initial velocity is imposed separately. This avoids differentiating an arbitrary
 extension to negative time at the boundary. `∞` in the `ContDiff` scope means
 every finite differentiability order.
 
-`breakdownStatement` is the full proposition to prove. Introducing it does not
-assert that it has a proof or supply a witness.
+The whole-space theorem itself is stated and proved through the comparator
+interface: `NavierStokes.Comparator.navier_stokes_breakdown_R3` in
+`NavierStokes/ComparatorSolution.lean`, via
+`NavierStokes.R3CompactCandidate.Properties`.
 -/
 
 
@@ -49,9 +47,6 @@ abbrev preSingularDomain := NavierStokes.ProblemStatement.preSingularDomain
 /-- The physical domain for a global competing solution. -/
 abbrev futureDomain := NavierStokes.ProblemStatement.futureDomain
 
-/-- The open set in which the prescribed force must have compact support. -/
-def positiveTimeDomain : Set SpaceTime := Ioi 0 ×ˢ univ
-
 /-- The exact incompressible Navier--Stokes residual at viscosity `ν`.
 The viscosity multiplies only the spatial Laplacian. -/
 def navierStokesResidual (ν : ℝ) (u : VelocityField) (p : PressureField)
@@ -60,11 +55,6 @@ def navierStokesResidual (ν : ℝ) (u : VelocityField) (p : PressureField)
     NavierStokes.ProblemStatement.advection u t x -
     ν • NavierStokes.ProblemStatement.spatialLaplacian u t x +
     NavierStokes.ProblemStatement.pressureGradient p t x
-
-/-- Compact spacetime support contained in `t > 0`, using the closure of the
-nonzero set. Together with global smoothness this is the required force class. -/
-def CompactPositiveTimeSupport (f : VelocityField) : Prop :=
-  HasCompactSupport f ∧ tsupport f ⊆ positiveTimeDomain
 
 /-- Square integrability with respect to ordinary Lebesgue volume on R³.
 This condition is explicit because the real Bochner integral is totalized. -/
@@ -82,89 +72,11 @@ def UniformFiniteEnergy (times : Set ℝ) (u : VelocityField) : Prop :=
   ∃ E : ℝ, 0 ≤ E ∧ ∀ t ∈ times,
     SquareIntegrableAtTime u t ∧ kineticEnergy u t ≤ E
 
-/-- Pointwise unbounded speed in every left neighborhood of time one. For the
-continuous, compactly supported spatial slices in `CandidateProperties`, this
-expresses the L∞ blow-up assertion of Theorem 1.1. -/
-abbrev SpeedUnboundedAtOne := NavierStokes.ProblemStatement.SpeedUnboundedAtOne
-
-/-- The properties of the constructed fields in Theorem 1.1. The same single
-compact set `K` contains both spatial supports for every `0 ≤ t < 1`. -/
-structure CandidateProperties (ν : ℝ) (u : VelocityField) (p : PressureField)
-    (f : VelocityField) (K : Set Space) : Prop where
-  velocity_smooth : ContDiffOn ℝ ∞ u preSingularDomain
-  pressure_smooth : ContDiffOn ℝ ∞ p preSingularDomain
-  support_compact : IsCompact K
-  velocity_support : ∀ t ∈ Ico (0 : ℝ) 1,
-    tsupport (fun x : Space => u (t, x)) ⊆ K
-  pressure_support : ∀ t ∈ Ico (0 : ℝ) 1,
-    tsupport (fun x : Space => p (t, x)) ⊆ K
-  force_smooth : ContDiff ℝ ∞ f
-  force_support : CompactPositiveTimeSupport f
-  zero_initial_velocity : ∀ x : Space, u (0, x) = 0
-  divergence_free : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space,
-    NavierStokes.ProblemStatement.spatialDivergence u t x = 0
-  navier_stokes : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x : Space,
-    navierStokesResidual ν u p t x = f (t, x)
-  energy_bounded : UniformFiniteEnergy (Ico 0 1) u
-  speed_unbounded : SpeedUnboundedAtOne u
-
-/-- Data realizing the primary existence assertion at one viscosity. -/
-structure Candidate (ν : ℝ) where
-  velocity : VelocityField
-  pressure : PressureField
-  force : VelocityField
-  support : Set Space
-  properties : CandidateProperties ν velocity pressure force support
-
-/-- A global smooth solution with uniformly bounded kinetic energy for the
-given viscosity and the given force, starting from the same zero datum.
-
-There are no support, periodicity, pressure-growth, derivative-growth, or energy
-inequality assumptions on a competitor. The square-integrability requirement
-and its uniform energy bound use all of R³ and all nonnegative times. -/
-structure GlobalFiniteEnergySolution (ν : ℝ) (f : VelocityField) where
-  velocity : VelocityField
-  pressure : PressureField
-  velocity_smooth : ContDiffOn ℝ ∞ velocity futureDomain
-  pressure_smooth : ContDiffOn ℝ ∞ pressure futureDomain
-  zero_initial_velocity : ∀ x : Space, velocity (0, x) = 0
-  divergence_free : ∀ t ∈ Ici (0 : ℝ), ∀ x : Space,
-    NavierStokes.ProblemStatement.spatialDivergence velocity t x = 0
-  navier_stokes : ∀ t ∈ Ioi (0 : ℝ), ∀ x : Space,
-    navierStokesResidual ν velocity pressure t x = f (t, x)
-  energy_bounded : UniformFiniteEnergy (Ici 0) velocity
-
-/-- The primary existence assertion at one fixed viscosity. -/
-def candidateStatement (ν : ℝ) : Prop :=
-  ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField, ∃ K : Set Space,
-    CandidateProperties ν u p f K
-
-
-/-- The full assertion of Theorem 1.1: at every positive viscosity there is a
-candidate whose same prescribed force and zero datum have no global smooth
-solution with uniformly bounded kinetic energy. This is a target proposition,
-not an asserted theorem. -/
-def breakdownStatement : Prop :=
-  ∀ ν : ℝ, 0 < ν →
-    ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField, ∃ K : Set Space,
-      CandidateProperties ν u p f K ∧ ¬ Nonempty (GlobalFiniteEnergySolution ν f)
-
-
 /-- The unit-viscosity residual is exactly the existing differential expression. -/
 @[simp] theorem residual_at_viscosity_one (u : VelocityField) (p : PressureField)
     (t : ℝ) (x : Space) :
     navierStokesResidual 1 u p t x =
       NavierStokes.ProblemStatement.navierStokesResidual u p t x := by
   simp [navierStokesResidual, NavierStokes.ProblemStatement.navierStokesResidual]
-
-
-/-- Restricting the set of times preserves the same energy bound. -/
-theorem UniformFiniteEnergy.mono {times shorter : Set ℝ} {u : VelocityField}
-    (hu : UniformFiniteEnergy times u) (hsub : shorter ⊆ times) :
-    UniformFiniteEnergy shorter u := by
-  obtain ⟨E, hE, hu⟩ := hu
-  exact ⟨E, hE, fun t ht => hu t (hsub ht)⟩
-
-
 
 end NavierStokesR3.ProblemStatement

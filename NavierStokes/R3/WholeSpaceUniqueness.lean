@@ -67,37 +67,4 @@ theorem classical_uniqueness_on_Icc {T : ℝ} (hT : 0 < T)
   intro R hR t ht
   simpa only [WholeSpaceComparisonClosure.pressureEnvelope, neg_div] using hpressure R hR t ht
 
-/-- The exact compact candidate agrees with every smooth finite-energy
-competitor on each closed interval before time one. -/
-theorem candidate_unique_on_Icc {u : VelocityField} {p : PressureField}
-    {f : VelocityField} {K : Set Space} (h : CandidateProperties 1 u p f K)
-    {T : ℝ} (hT : T < 1) {v : VelocityField} {q : PressureField}
-    (hv : ContDiffOn ℝ ∞ v (Comparison.slab 0 T))
-    (hq : ContDiffOn ℝ ∞ q (Comparison.slab 0 T))
-    (hev : UniformFiniteEnergy (Icc (0 : ℝ) T) v)
-    (hdv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, spatialDivergence v t x = 0)
-    (hNSv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, navierStokesResidual 1 v q t x = f (t, x))
-    (hvzero : ∀ x, v (0, x) = 0) :
-    ∀ t ∈ Icc (0 : ℝ) T, ∀ x, u (t, x) = v (t, x) := by
-  by_cases hT0 : 0 < T
-  · have hsub : Comparison.slab 0 T ⊆ preSingularDomain := by
-      intro z hz
-      exact ⟨⟨hz.1.1, hz.1.2.trans_lt hT⟩, hz.2⟩
-    apply classical_uniqueness_on_Icc hT0 (h.velocity_smooth.mono hsub) hv
-      (h.pressure_smooth.mono hsub) hq h.support_compact
-    · intro t ht
-      exact h.velocity_support t ⟨ht.1, ht.2.trans_lt hT⟩
-    · exact hev
-    · intro t ht x
-      exact h.divergence_free t ⟨ht.1.le, ht.2.trans hT⟩ x
-    · exact hdv
-    · intro t ht x
-      exact (h.navier_stokes t ⟨ht.1, ht.2.trans hT⟩ x).trans (hNSv t ht x).symm
-    · intro x
-      exact (h.zero_initial_velocity x).trans (hvzero x).symm
-  · intro t ht x
-    have ht0 : t = 0 := le_antisymm (ht.2.trans (le_of_not_gt hT0)) ht.1
-    rw [ht0, h.zero_initial_velocity, hvzero]
-
-
 end NavierStokesR3.WholeSpaceUniqueness

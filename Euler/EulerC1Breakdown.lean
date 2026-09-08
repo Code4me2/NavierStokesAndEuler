@@ -64,51 +64,10 @@ end EulerOrdinarySobolev.FiniteLifespan
 
 namespace EulerPacketInduction
 
-open Set EulerSmoothLimit EulerLpTranslation EulerLpTranslation.SmoothL2Field
-  EulerOrdinarySobolev
-open scoped ContDiff
+open EulerOrdinarySobolev
 
 abbrev MaximalTime : Type := lifespan.Time
 
-def maximalVelocity (t : MaximalTime) : Space → Space := lifespan.maximalVelocity t
-
-def maximalPressure (t : MaximalTime) : Space → ℝ := lifespan.maximalPressure t
-
-def maximalVelocityNorm (t : MaximalTime) : ℝ := lifespan.maximalVelocityNorm t
-
-def maximalGradientNorm (t : MaximalTime) : ℝ := lifespan.maximalGradientNorm t
-
 def maximalC1Norm (t : MaximalTime) : ℝ := lifespan.maximalC1Norm t
-
-
-theorem maximalVelocity_initial : maximalVelocity lifespan.initialTime=initialDatum.field :=
-  lifespan.maximalVelocity_initial
-
-theorem maximalVelocity_smooth (t : MaximalTime) : ContDiff ℝ ∞ (maximalVelocity t) :=
-  lifespan.maximalVelocity_smooth t
-
-theorem maximalVelocity_joint_continuous :
-    Continuous (fun z : MaximalTime × Space => maximalVelocity z.1 z.2) :=
-  lifespan.maximalVelocity_joint_continuous
-
-theorem maximalVelocity_divergence (t : MaximalTime) (x : Space) :
-    divergence (maximalVelocity t) x=0 := lifespan.maximalVelocity_divergence t x
-
-theorem maximalPressure_spec (t : MaximalTime) :
-    ContDiff ℝ ∞ (maximalPressure t) ∧ maximalPressure t 0=0 ∧
-      ∀ x, _root_.gradient (maximalPressure t) x=(lifespan.maximalPressureField t).field x :=
-  lifespan.maximalPressure_spec t
-
-
-
-theorem maximalGradientNorm_continuous : Continuous maximalGradientNorm :=
-  lifespan.maximalGradientNorm_continuous
-
-theorem maximalC1Norm_continuous : Continuous maximalC1Norm :=
-  lifespan.maximalC1Norm_continuous
-
-
-
-
 
 end EulerPacketInduction

@@ -1057,7 +1057,7 @@ noncomputable def estimates (B N0 : ℕ)
 
 theorem endpoints (B N0 : ℕ)
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) :
-    ActualEndpointInputs.EndpointInputs h (ActualCandidateConstruction.qbig B N0)
+    GermEndpointInputs.EndpointInputs h (ActualCandidateConstruction.qbig B N0)
       (potentialStages B N0 hN) (directStages B N0 hN) (pressureStages B N0 hN) := by
   apply GermEndpointInputs.actual_germ_stage_endpoints_of_estimates B N0
     (ActualCandidateConstruction.firstBand B N0) (ActualCandidateConstruction.firstBand_four B N0)

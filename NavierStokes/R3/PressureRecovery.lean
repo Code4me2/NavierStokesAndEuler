@@ -51,11 +51,8 @@ def tensorAverage (T : ℝ) (a : ℝ → ℝ) (u v : VelocityField)
   timeAverage T a (fun z => tensorDiff u v z.1 i j z.2)
 
 theorem continuous_deriv_of_smooth {a : ℝ → ℝ} (ha : ContDiff ℝ ∞ a) :
-    Continuous (deriv a) := by
-  have hinf : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
-    simpa only [ENat.coe_top_add_one] using (le_rfl : (∞ : WithTop ℕ∞) ≤ ∞)
-  change Continuous (fun t => fderiv ℝ a t 1)
-  exact ((ha.fderiv_right hinf).clm_apply contDiff_const).continuous
+    Continuous (deriv a) :=
+  (contDiff_infty_iff_deriv.mp ha).2.continuous
 
 theorem Hypotheses.velocityAverage_memLp {T : ℝ} {u v : VelocityField} {p q : PressureField}
     (H : Hypotheses T u v p q) {a : ℝ → ℝ} (ha : ContinuousOn a (Icc 0 T)) (k : Fin 3) :

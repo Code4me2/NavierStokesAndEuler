@@ -328,7 +328,7 @@ theorem integral_log_radius (f : ℝ → ℝ) {XR : ℝ} (hXR : 0 < XR) (y : ℝ
       simpa only [mul_div_cancel_left₀ _ hXR.ne'] using
         OutgoingDilation.integral_dilate_Ioc (fun v => f (XR*v)) XR (XR*Real.exp y) hXR
     _ = _ := by
-      rw [← ReleaseMoments.image_exp_Iic,
+      rw [← Real.image_exp_Iic,
         integral_image_eq_integral_abs_deriv_smul measurableSet_Iic
           (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
       simp only [abs_of_pos (Real.exp_pos _), smul_eq_mul]

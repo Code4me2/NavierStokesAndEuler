@@ -3680,27 +3680,6 @@ theorem metric_transport_H1_bound (κ : ℝ) (m : Vector3)
   filter_upwards [hv] with x hx
   exact metricCorrection_pointwise_bound period K e D β x _ (hD x) hx
 
-/-- The noncompact transport estimate expressed in the genuine L² Hilbert norm. -/
-theorem metric_transport_L2_H1_bound (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3) (e : LiftL2 period)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period (fun y => e y) x))
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    {z : LiftL2 period} (hz : z ∈ divergenceFreeSpace period κ m)
-    (C D B : ℝ≥0) (hC : ∀ x, ‖K x‖ ≤ C)
-    (hD : ∀ x, ‖fderiv ℝ (localFieldLift period K x) 0‖ ≤ D)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) :
-    |∫ x, ⟪K x (e x), fderiv ℝ (localFieldLift period (fun y => e y) x) 0
-      (transportDirection κ m (z x))⟫_ℝ ∂liftMeasure period| ≤
-      (1 / 2 : ℝ) * D * ((|κ| + ‖m‖) * B) * ‖e‖ ^ 2 := by
-  have hn : (∫ x, ‖e x‖ ^ 2 ∂liftMeasure period) = ‖e‖ ^ 2 := by
-    rw [← real_inner_self_eq_norm_sq, L2.inner_def]
-    simp only [real_inner_self_eq_norm_sq]
-  simpa only [hn] using metric_transport_H1_bound period κ m K (fun x => e x)
-    hK he (Lp.memLp e) hDe hsym hz C D B hC hD hzB
-
 end EulerNoncompactTransport
 
 end
@@ -3755,193 +3734,7 @@ theorem energy_derivative_bound (K K' : H →L[ℝ] H) (e transport forcing : H)
   have ht' := (abs_le.mp ht).1
   nlinarith
 
-
-/-- The norm estimate used before summing Gevrey weights. All terms come from
-the actual differential equation; no estimate for the energy derivative is assumed. -/
-theorem regularized_metric_norm_evolution (K : ℝ → H →L[ℝ] H) (e : ℝ → H)
-    (t δ c B : ℝ) (K' : H →L[ℝ] H) (e' transport pressure forcing : H)
-    (hδ : 0 < δ) (hc : 0 < c) (hB : 0 ≤ B)
-    (hcoercive : c ^ 2 * ‖e t‖ ^ 2 ≤ ⟪K t (e t), e t⟫_ℝ)
-    (hK : HasDerivAt K K' t) (he : HasDerivAt e e' t)
-    (hsym : ∀ v w, ⟪K t v, w⟫_ℝ = ⟪v, K t w⟫_ℝ)
-    (heq : e' + transport + pressure = forcing)
-    (hp : ⟪K t (e t), pressure⟫_ℝ = 0)
-    (ht : |⟪K t (e t), transport⟫_ℝ| ≤ B * ‖e t‖ ^ 2) :
-    deriv (fun s => √(⟪K s (e s), e s⟫_ℝ + δ ^ 2)) t ≤
-      ((‖K'‖ + 2 * B) / (2 * c ^ 2)) * √(⟪K t (e t), e t⟫_ℝ + δ ^ 2) +
-        (‖K t‖ / c) * ‖forcing‖ := by
-  let E := √(⟪K t (e t), e t⟫_ℝ + δ ^ 2)
-  have hq : 0 ≤ ⟪K t (e t), e t⟫_ℝ :=
-    (mul_nonneg (sq_nonneg c) (sq_nonneg ‖e t‖)).trans hcoercive
-  have hE : 0 < E := sqrt_pos.2 (by nlinarith)
-  have hE2 : E ^ 2 = ⟪K t (e t), e t⟫_ℝ + δ ^ 2 := sq_sqrt (by nlinarith)
-  have hnorm : ‖e t‖ ≤ E / c := by
-    apply (le_div_iff₀ hc).2
-    nlinarith [norm_nonneg (e t)]
-  have hnorm2 : ‖e t‖ ^ 2 ≤ E ^ 2 / c ^ 2 := by
-    rw [← div_pow]
-    exact pow_le_pow_left₀ (norm_nonneg _) hnorm 2
-  have hdiff := metric_energy_evolution K e t K' e' transport pressure forcing hK he hsym heq hp
-  have hroot := HasDerivAt.sqrt (hdiff.add_const (δ ^ 2)) (by nlinarith :
-    ⟪K t (e t), e t⟫_ℝ + δ ^ 2 ≠ 0)
-  rw [hroot.deriv]
-  change (_ / (2 * E)) ≤ _
-  apply (div_le_iff₀ (by positivity : 0 < 2 * E)).2
-  have hb := energy_derivative_bound (K t) K' (e t) transport forcing B hB ht
-  have h1 := mul_le_mul_of_nonneg_left hnorm2
-    (show 0 ≤ ‖K'‖ + 2 * B by positivity)
-  have h2 := mul_le_mul_of_nonneg_left hnorm
-    (show 0 ≤ 2 * ‖K t‖ * ‖forcing‖ by positivity)
-  calc
-    _ ≤ (‖K'‖ + 2 * B) * ‖e t‖ ^ 2 + 2 * ‖K t‖ * ‖e t‖ * ‖forcing‖ := hb
-    _ ≤ (‖K'‖ + 2 * B) * (E ^ 2 / c ^ 2) +
-        2 * ‖K t‖ * (E / c) * ‖forcing‖ := by nlinarith
-    _ = _ := by dsimp [E]; field_simp
-
 end EulerMetricEnergyEvolution
-
-end
-
-section
-
-/-! Concrete L² transport and metric-energy evolution on the lifted cylinder. -/
-
-
-namespace EulerLiftedMetricEvolution
-
-open MeasureTheory InnerProductSpace EulerLiftedGradientSpace EulerLiftedPressure
-  EulerMetricTransport EulerNoncompactTransport EulerMetricEnergyEvolution
-open scoped ContDiff ENNReal NNReal Topology
-
-variable (period : ℝ) [Fact (0 < period)]
-
-/-- The actual directional transport derivative is square integrable under H¹ and bounded velocity. -/
-theorem liftedTransport_memLp (κ : ℝ) (m : Vector3) (e z : LiftL2 period)
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period)) (B : ℝ≥0)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) :
-    MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0
-      (transportDirection κ m (z x))) 2 (liftMeasure period) := by
-  apply hDe.of_le_mul (c := (|κ| + ‖m‖) * B)
-  · exact aestronglyMeasurable_apply period hDe.aestronglyMeasurable
-      (transportDirection_aestronglyMeasurable period κ m z)
-  filter_upwards [hzB] with x hx
-  have hv := (transportDirection_norm_le κ m (z x)).trans
-    (mul_le_mul_of_nonneg_left hx (add_nonneg (abs_nonneg _) (norm_nonneg _)))
-  calc
-    _ ≤ ‖fderiv ℝ (localFieldLift period (fun y => e y) x) 0‖ *
-        ‖transportDirection κ m (z x)‖ := ContinuousLinearMap.le_opNorm _ _
-    _ ≤ ‖fderiv ℝ (localFieldLift period (fun y => e y) x) 0‖ * ((|κ| + ‖m‖) * B) :=
-      mul_le_mul_of_nonneg_left hv (norm_nonneg _)
-    _ = _ := by ring
-
-/-- The genuine L² element represented by the lifted directional transport derivative. -/
-def liftedTransport (κ : ℝ) (m : Vector3) (e z : LiftL2 period)
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period)) (B : ℝ≥0)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) : LiftL2 period :=
-  (liftedTransport_memLp period κ m e z hDe B hzB).toLp _
-
-theorem liftedTransport_ae (κ : ℝ) (m : Vector3) (e z : LiftL2 period)
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period)) (B : ℝ≥0)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) :
-    liftedTransport period κ m e z hDe B hzB =ᵐ[liftMeasure period]
-      fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0
-        (transportDirection κ m (z x)) :=
-  (liftedTransport_memLp period κ m e z hDe B hzB).coeFn_toLp
-
-/-- The Hilbert metric pairing equals the actual spatial transport integral. -/
-theorem metric_transport_inner_eq (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : AEStronglyMeasurable K (liftMeasure period)) (C : ℝ≥0) (hC : ∀ x, ‖K x‖ ≤ C)
-    (e z : LiftL2 period)
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period)) (B : ℝ≥0)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) :
-    ⟪coefficientOperator K hKm C hC e, liftedTransport period κ m e z hDe B hzB⟫_ℝ =
-      ∫ x, ⟪K x (e x), fderiv ℝ (localFieldLift period (fun y => e y) x) 0
-        (transportDirection κ m (z x))⟫_ℝ ∂liftMeasure period := by
-  rw [L2.inner_def]
-  apply integral_congr_ae
-  filter_upwards [coefficientOperator_ae K hKm C hC e, liftedTransport_ae period κ m e z hDe B hzB]
-    with x hx hy
-  rw [hx, hy]
-
-/-- The transport bound required by the Hilbert energy theorem, with genuine spatial fields. -/
-theorem metric_transport_inner_bound (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : AEStronglyMeasurable K (liftMeasure period))
-    (e z : LiftL2 period)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period (fun y => e y) x))
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e y) x) 0)
-      2 (liftMeasure period))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    (hz : z ∈ divergenceFreeSpace period κ m)
-    (C D B : ℝ≥0) (hC : ∀ x, ‖K x‖ ≤ C)
-    (hD : ∀ x, ‖fderiv ℝ (localFieldLift period K x) 0‖ ≤ D)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B) :
-    |⟪coefficientOperator K hKm C hC e, liftedTransport period κ m e z hDe B hzB⟫_ℝ| ≤
-      (1 / 2 : ℝ) * D * ((|κ| + ‖m‖) * B) * ‖e‖ ^ 2 := by
-  rw [metric_transport_inner_eq]
-  exact metric_transport_L2_H1_bound period κ m K e hK he hDe hsym hz C D B hC hD hzB
-
-/-- A pointwise matrix family acting on the actual lifted L² space. -/
-def metricFamily (K : ℝ → LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : ∀ t, AEStronglyMeasurable (K t) (liftMeasure period))
-    (C : ℝ≥0) (hC : ∀ t x, ‖K t x‖ ≤ C) : ℝ → LiftL2 period →L[ℝ] LiftL2 period :=
-  fun t => coefficientOperator (K t) (hKm t) C (hC t)
-
-/-- The metric norm estimate for the actual lifted transport-pressure equation. -/
-theorem lifted_regularized_energy_evolution (κ : ℝ) (m : Vector3)
-    (K : ℝ → LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : ∀ t, AEStronglyMeasurable (K t) (liftMeasure period))
-    (C : ℝ≥0) (hC : ∀ t x, ‖K t x‖ ≤ C)
-    (e : ℝ → LiftL2 period) (t δ c : ℝ)
-    (K' : LiftL2 period →L[ℝ] LiftL2 period) (e' z p forcing : LiftL2 period)
-    (hδ : 0 < δ) (hc : 0 < c)
-    (hKt : HasDerivAt (metricFamily period K hKm C hC) K' t) (het : HasDerivAt e e' t)
-    (hKs : ∀ x, ContDiff ℝ ∞ (localFieldLift period (K t) x))
-    (hes : ∀ x, ContDiff ℝ ∞ (localFieldLift period (fun y => e t y) x))
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period (fun y => e t y) x) 0)
-      2 (liftMeasure period))
-    (hsym : ∀ x v w, ⟪K t x v, w⟫_ℝ = ⟪v, K t x w⟫_ℝ)
-    (hpos : ∀ x v, c ^ 2 * ‖v‖ ^ 2 ≤ ⟪K t x v, v⟫_ℝ)
-    (G : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hGm : AEStronglyMeasurable G (liftMeasure period)) (E : ℝ≥0) (hG : ∀ x, ‖G x‖ ≤ E)
-    (hKG : ∀ x v, K t x (G x v) = v)
-    (hep : e t ∈ divergenceFreeSpace period κ m) (hp : p ∈ gradientSpace period κ m)
-    (hz : z ∈ divergenceFreeSpace period κ m) (D B : ℝ≥0)
-    (hD : ∀ x, ‖fderiv ℝ (localFieldLift period (K t) x) 0‖ ≤ D)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B)
-    (heq : e' + liftedTransport period κ m (e t) z hDe B hzB +
-      coefficientOperator G hGm E hG p = forcing) :
-    deriv (fun s => Real.sqrt (⟪metricFamily period K hKm C hC s (e s), e s⟫_ℝ + δ ^ 2)) t ≤
-      ((‖K'‖ + (D : ℝ) * ((|κ| + ‖m‖) * B)) / (2 * c ^ 2)) *
-        Real.sqrt (⟪metricFamily period K hKm C hC t (e t), e t⟫_ℝ + δ ^ 2) +
-      ((C : ℝ) / c) * ‖forcing‖ := by
-  let A := metricFamily period K hKm C hC
-  let β : ℝ := (1 / 2 : ℝ) * D * ((|κ| + ‖m‖) * B)
-  have hβ : 0 ≤ β := by dsimp [β]; positivity
-  have hsymL : ∀ v w, ⟪A t v, w⟫_ℝ = ⟪v, A t w⟫_ℝ :=
-    coefficientOperator_inner_swap (K t) (hKm t) C (hC t) hsym
-  have hposL : c ^ 2 * ‖e t‖ ^ 2 ≤ ⟪A t (e t), e t⟫_ℝ :=
-    coefficientOperator_coercive (K t) (hKm t) C (hC t) (c ^ 2) hpos (e t)
-  have hpL : ⟪A t (e t), coefficientOperator G hGm E hG p⟫_ℝ = 0 :=
-    metric_pressure_cancellation period κ m (K t) G (hKm t) hGm C E (hC t) hG hsym hKG hep hp
-  have htL := metric_transport_inner_bound period κ m (K t) (hKm t) (e t) z
-    hKs hes hDe hsym hz C D B (hC t) hD hzB
-  have h := regularized_metric_norm_evolution A e t δ c β K' e'
-    (liftedTransport period κ m (e t) z hDe B hzB) (coefficientOperator G hGm E hG p)
-    forcing hδ hc hβ hposL hKt het hsymL heq hpL htL
-  have hA : ‖A t‖ ≤ C := coefficientOperator_norm_le (K t) (hKm t) C (hC t)
-  have hb : 2 * β = (D : ℝ) * ((|κ| + ‖m‖) * B) := by dsimp [β]; ring
-  rw [hb] at h
-  exact h.trans (add_le_add_right (mul_le_mul_of_nonneg_right
-    (div_le_div_of_nonneg_right hA hc.le) (norm_nonneg forcing)) _)
-
-end EulerLiftedMetricEvolution
 
 end
 
@@ -4041,62 +3834,6 @@ theorem metric_transport_inner_bound (κ : ℝ) (m : Vector3)
         simp only [real_inner_self_eq_norm_sq]
   simpa only [hn] using metric_transport_H1_bound period κ m K g
     hK he ((memLp_congr_ae hrep).mp (Lp.memLp e)) hDe hsym hz C D B hC hD hzB
-
-/-- A pointwise matrix family acting on the actual lifted L² space. -/
-def metricFamily (K : ℝ → LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : ∀ t, AEStronglyMeasurable (K t) (liftMeasure period))
-    (C : ℝ≥0) (hC : ∀ t x, ‖K t x‖ ≤ C) : ℝ → LiftL2 period →L[ℝ] LiftL2 period :=
-  fun t => coefficientOperator (K t) (hKm t) C (hC t)
-
-/-- The metric norm estimate for the actual lifted transport-pressure equation. -/
-theorem lifted_regularized_energy_evolution (κ : ℝ) (m : Vector3)
-    (K : ℝ → LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hKm : ∀ t, AEStronglyMeasurable (K t) (liftMeasure period))
-    (C : ℝ≥0) (hC : ∀ t x, ‖K t x‖ ≤ C)
-    (e : ℝ → LiftL2 period) (t δ c : ℝ)
-    (K' : LiftL2 period →L[ℝ] LiftL2 period) (e' z p forcing : LiftL2 period)
-    (hδ : 0 < δ) (hc : 0 < c)
-    (hKt : HasDerivAt (metricFamily period K hKm C hC) K' t) (het : HasDerivAt e e' t)
-    (hKs : ∀ x, ContDiff ℝ ∞ (localFieldLift period (K t) x))
-    (g : LiftDomain period → Vector3)
-    (hrep : (e t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g)
-    (hes : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x))
-    (hDe : MemLp (fun x => fderiv ℝ (localFieldLift period g x) 0)
-      2 (liftMeasure period))
-    (hsym : ∀ x v w, ⟪K t x v, w⟫_ℝ = ⟪v, K t x w⟫_ℝ)
-    (hpos : ∀ x v, c ^ 2 * ‖v‖ ^ 2 ≤ ⟪K t x v, v⟫_ℝ)
-    (G : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (hGm : AEStronglyMeasurable G (liftMeasure period)) (E : ℝ≥0) (hG : ∀ x, ‖G x‖ ≤ E)
-    (hKG : ∀ x v, K t x (G x v) = v)
-    (hep : e t ∈ divergenceFreeSpace period κ m) (hp : p ∈ gradientSpace period κ m)
-    (hz : z ∈ divergenceFreeSpace period κ m) (D B : ℝ≥0)
-    (hD : ∀ x, ‖fderiv ℝ (localFieldLift period (K t) x) 0‖ ≤ D)
-    (hzB : ∀ᵐ x ∂liftMeasure period, ‖z x‖ ≤ B)
-    (heq : e' + liftedTransport period κ m g z hDe B hzB +
-      coefficientOperator G hGm E hG p = forcing) :
-    deriv (fun s => Real.sqrt (⟪metricFamily period K hKm C hC s (e s), e s⟫_ℝ + δ ^ 2)) t ≤
-      ((‖K'‖ + (D : ℝ) * ((|κ| + ‖m‖) * B)) / (2 * c ^ 2)) *
-        Real.sqrt (⟪metricFamily period K hKm C hC t (e t), e t⟫_ℝ + δ ^ 2) +
-      ((C : ℝ) / c) * ‖forcing‖ := by
-  let A := metricFamily period K hKm C hC
-  let β : ℝ := (1 / 2 : ℝ) * D * ((|κ| + ‖m‖) * B)
-  have hβ : 0 ≤ β := by dsimp [β]; positivity
-  have hsymL : ∀ v w, ⟪A t v, w⟫_ℝ = ⟪v, A t w⟫_ℝ :=
-    coefficientOperator_inner_swap (K t) (hKm t) C (hC t) hsym
-  have hposL : c ^ 2 * ‖e t‖ ^ 2 ≤ ⟪A t (e t), e t⟫_ℝ :=
-    coefficientOperator_coercive (K t) (hKm t) C (hC t) (c ^ 2) hpos (e t)
-  have hpL : ⟪A t (e t), coefficientOperator G hGm E hG p⟫_ℝ = 0 :=
-    metric_pressure_cancellation period κ m (K t) G (hKm t) hGm C E (hC t) hG hsym hKG hep hp
-  have htL := metric_transport_inner_bound period κ m (K t) (hKm t) (e t) g z hrep
-    hKs hes hDe hsym hz C D B (hC t) hD hzB
-  have h := regularized_metric_norm_evolution A e t δ c β K' e'
-    (liftedTransport period κ m g z hDe B hzB) (coefficientOperator G hGm E hG p)
-    forcing hδ hc hβ hposL hKt het hsymL heq hpL htL
-  have hA : ‖A t‖ ≤ C := coefficientOperator_norm_le (K t) (hKm t) C (hC t)
-  have hb : 2 * β = (D : ℝ) * ((|κ| + ‖m‖) * B) := by dsimp [β]; ring
-  rw [hb] at h
-  exact h.trans (add_le_add_right (mul_le_mul_of_nonneg_right
-    (div_le_div_of_nonneg_right hA hc.le) (norm_nonneg forcing)) _)
 
 end EulerRepresentativeMetricEvolution
 
@@ -4528,24 +4265,6 @@ end
 
 section
 
-/-! Gevrey pressure regularity derived from actual cylinder derivative jets and coercivity. -/
-
-
-namespace EulerPressureGevrey
-
-open MeasureTheory InnerProductSpace EulerLiftedGradientSpace EulerSpatialSobolevInverse
-  EulerJetProductBounds EulerGevrey
-
-variable (period : ℝ) [Fact (0 < period)]
-
-
-
-end EulerPressureGevrey
-
-end
-
-section
-
 /-!
 The smooth compactly supported limit step for the proposed Euler construction.
 The hypotheses are summable uniform estimates for every actual iterated Fréchet
@@ -4645,18 +4364,6 @@ theorem besselWeight_add (d : ℕ) (s t : ℝ) (ξ : Domain d) :
   congr 1
   ring
 
-/-- One derivative factor is absorbed by one Sobolev order. -/
-theorem besselWeight_mul_norm_le (d : ℕ) (s : ℝ) (ξ : Domain d) :
-    besselWeight d s ξ * ‖ξ‖ ≤ besselWeight d (s + 1) ξ := by
-  have hn : ‖ξ‖ ≤ besselWeight d 1 ξ := by
-    unfold besselWeight
-    rw [← Real.sqrt_eq_rpow]
-    calc
-      ‖ξ‖ = Real.sqrt (‖ξ‖ ^ 2) := (Real.sqrt_sq (norm_nonneg ξ)).symm
-      _ ≤ _ := Real.sqrt_le_sqrt (by linarith)
-  rw [besselWeight_add]
-  exact mul_le_mul_of_nonneg_left hn (besselWeight_pos d s ξ).le
-
 /-- The reciprocal Bessel weight is in L² exactly in the range needed here. -/
 theorem reciprocal_weight_memLp (d : ℕ) (s : ℝ) (hs : (d : ℝ) < 2 * s) :
     MemLp (besselWeight d (-s)) 2 (volume : Measure (Domain d)) := by
@@ -4734,22 +4441,6 @@ theorem norm_apply_le_sobolevNorm (d : ℕ) (s : ℝ) (hs : (d : ℝ) < 2 * s)
   (norm_apply_le_fourier_L1 d f x).trans (fourier_L1_le_sobolevNorm d s hs f)
 
 open scoped LineDeriv
-
-omit [CompleteSpace F] in
-/-- The actual Fourier multiplier formula bounds each directional derivative. -/
-theorem fourier_lineDeriv_norm_le (d : ℕ) (f : 𝓢(Domain d, F)) (m ξ : Domain d) :
-    ‖𝓕 (∂_{m} f) ξ‖ ≤ (2 * Real.pi) * ‖ξ‖ * ‖m‖ * ‖𝓕 f ξ‖ := by
-  have ht : (fun ξ : Domain d => inner ℝ ξ m).HasTemperateGrowth :=
-    ((innerSL ℝ).flip m).hasTemperateGrowth
-  have he : 𝓕 (∂_{m} f) ξ = (2 * Real.pi * Complex.I) • ((inner ℝ ξ m) • 𝓕 f ξ) := by
-    rw [SchwartzMap.fourier_lineDerivOp_eq]
-    simp [SchwartzMap.smulLeftCLM_apply_apply ht]
-  have hc : ‖(2 * Real.pi * Complex.I : ℂ)‖ = 2 * Real.pi := by
-    simp [Real.pi_pos.le]
-  rw [he, norm_smul, norm_smul, hc]
-  have hi := norm_inner_le_norm (𝕜 := ℝ) ξ m
-  nlinarith [mul_le_mul_of_nonneg_left
-    (mul_le_mul_of_nonneg_right hi (norm_nonneg (𝓕 f ξ))) (show 0 ≤ 2 * Real.pi by positivity)]
 
 
 
@@ -6304,122 +5995,6 @@ end
 
 section
 
-/-! A genuine coordinate transport commutator on R³ × T without derivative loss. -/
-
-namespace EulerCylinderTransport
-
-open MeasureTheory EulerSobolev EulerCylinderSobolev EulerCylinderAlgebra EulerCylinderCoordinates
-open EulerLiftedGradientSpace EulerMetricTransport EulerTransportDerivatives
-open scoped ENNReal NNReal ContDiff Topology
-
-variable (period : ℝ)
-
-/-- Repeated differentiation in one of the four actual cylinder coordinate directions. -/
-noncomputable def pureFieldDerivative (n : ℕ) (i : Fin 4) (f : LiftDomain period → ℂ) :=
-  iteratedFieldDerivative period (fun _ : Fin n => i) f
-
-@[simp] theorem pureFieldDerivative_zero (i : Fin 4) (f : LiftDomain period → ℂ) :
-    pureFieldDerivative period 0 i f = f := rfl
-
-@[simp] theorem pureFieldDerivative_succ (n : ℕ) (i : Fin 4) (f : LiftDomain period → ℂ) :
-    pureFieldDerivative period (n+1) i f =
-      fieldDerivative period (standardDirection i) (pureFieldDerivative period n i f) := rfl
-
-theorem pureFieldDerivative_succ_right (n : ℕ) (i : Fin 4) (f : LiftDomain period → ℂ) :
-    pureFieldDerivative period (n+1) i f =
-      pureFieldDerivative period n i (pureFieldDerivative period 1 i f) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    rw [pureFieldDerivative_succ, ih, pureFieldDerivative_succ]
-    rfl
-
-
-
-
-
-
-variable [Fact (0 < period)]
-
-theorem word_H3_le_H5 {m : ℕ} (hm : m ≤ 2) (w : Fin m → Fin 4)
-    (f : LiftDomain period → ℂ) :
-    liftSobolevNorm period 3 (iteratedFieldDerivative period w f) ≤
-      85 * liftSobolevNorm period 5 f := by
-  have hA : liftSobolevNorm period 3 (iteratedFieldDerivative period w f) ≤
-      ∑ n ∈ Finset.range 4, ∑ _v : Fin n → Fin 4, liftSobolevNorm period 5 f := by
-    apply Finset.sum_le_sum
-    intro n hn
-    apply Finset.sum_le_sum
-    intro v _
-    obtain ⟨u, hu⟩ := iteratedFieldDerivative_comp_exists period v w f
-    rw [hu]
-    exact word_L2_le_liftSobolevNorm period (by have := Finset.mem_range.1 hn; omega) u f
-  have he (A : ℝ) : (∑ n ∈ Finset.range 4, ∑ _v : Fin n → Fin 4, A) = 85*A := by
-    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul]
-    norm_num [Finset.sum_range_succ]
-    ring
-  exact hA.trans_eq (he _)
-
-
-
-
-
-
-
-
-
-
-
-
-end EulerCylinderTransport
-
-end
-
-section
-
-/-! Smooth compact cylinder fields realize the strong-translation Sobolev jets. -/
-
-namespace EulerCompactSmoothJet
-
-open MeasureTheory EulerCylinderSobolev EulerLiftedGradientSpace EulerMetricTransport
-  EulerTransportDerivatives EulerLiftedWeakDerivative EulerSpatialSobolevInverse EulerPressureSpatialRegularity
-open scoped ContDiff ENNReal
-
-variable (period : ℝ) [Fact (0 < period)]
-
-
-
-theorem translation_hasDerivAt_smoothFieldLp (a : LiftTangent)
-    (f : LiftDomain period → Vector3) (hfc : HasCompactSupport f)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x)) :
-    HasDerivAt (fun t => translation period (translationPath period a t)
-      (smoothFieldLp period f hfc hf))
-      (smoothFieldLp period (fieldDerivative period a f)
-        (fieldDerivative_compact period a f hfc) (fieldDerivative_smooth period a f hf)) 0 :=
-  smoothFieldLp_translation_hasDerivAt period a f hfc hf
-
-/-- The actual strong L² translation jet of a smooth compact field. -/
-noncomputable def compactSmoothJet (n : ℕ) (f : LiftDomain period → Vector3)
-    (hfc : HasCompactSupport f) (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x)) :
-    SpatialJet period standardDirection n (smoothFieldLp period f hfc hf) :=
-  match n with
-  | 0 => .zero _
-  | n+1 => .succ (fun i => smoothFieldLp period (fieldDerivative period (standardDirection i) f)
-      (fieldDerivative_compact period _ f hfc) (fieldDerivative_smooth period _ f hf))
-      (fun i => compactSmoothJet n (fieldDerivative period (standardDirection i) f)
-        (fieldDerivative_compact period _ f hfc) (fieldDerivative_smooth period _ f hf))
-      (fun i => translation_hasDerivAt_smoothFieldLp period (standardDirection i) f hfc hf)
-
-
-
-
-
-end EulerCompactSmoothJet
-
-end
-
-section
-
 /-! Sobolev embedding for general smooth fields on R³, without Schwartz assumptions. -/
 
 namespace EulerSmoothSobolev
@@ -6947,111 +6522,6 @@ end
 
 section
 
-/-! Mixed coordinate transport commutators on the genuine cylinder. -/
-
-namespace EulerMixedCylinderTransport
-
-open MeasureTheory EulerSobolev EulerCylinderSobolev EulerCylinderAlgebra EulerCylinderTransport
-open EulerLiftedGradientSpace EulerMetricTransport EulerTransportDerivatives
-open scoped ENNReal NNReal ContDiff Topology
-
-variable (period : ℝ)
-
-/-- Ordered cylinder differentiation indexed by a list. -/
-noncomputable def listDerivative : List (Fin 4) → (LiftDomain period → ℂ) → LiftDomain period → ℂ
-  | [], f => f
-  | i::l, f => fieldDerivative period (standardDirection i) (listDerivative l f)
-
-/-- The same list as a finite derivative word. -/
-def listWord : (l : List (Fin 4)) → Fin l.length → Fin 4
-  | [], i => Fin.elim0 i
-  | i::l, j => Fin.cases i (listWord l) j
-
-@[simp] theorem listDerivative_nil (f : LiftDomain period → ℂ) : listDerivative period [] f = f := rfl
-@[simp] theorem listDerivative_cons (i : Fin 4) (l : List (Fin 4)) (f : LiftDomain period → ℂ) :
-    listDerivative period (i::l) f = fieldDerivative period (standardDirection i) (listDerivative period l f) := rfl
-
-theorem listDerivative_eq_word (l : List (Fin 4)) (f : LiftDomain period → ℂ) :
-    listDerivative period l f = iteratedFieldDerivative period (listWord l) f := by
-  induction l with
-  | nil => rfl
-  | cons i l ih =>
-    rw [listDerivative_cons, ih]
-    rfl
-
-
-
-theorem fieldDerivative_add (a : LiftTangent) (f g : LiftDomain period → ℂ)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    fieldDerivative period a (f+g) = fieldDerivative period a f + fieldDerivative period a g := by
-  funext x
-  have h := (((hf x).differentiable (by simp)) 0).hasFDerivAt.add
-    (((hg x).differentiable (by simp)) 0).hasFDerivAt
-  exact congrArg (fun A : LiftTangent →L[ℝ] ℂ => A a) h.fderiv
-
-theorem fieldDerivative_sub (a : LiftTangent) (f g : LiftDomain period → ℂ)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    fieldDerivative period a (f-g) = fieldDerivative period a f - fieldDerivative period a g := by
-  funext x
-  have h := (((hf x).differentiable (by simp)) 0).hasFDerivAt.sub
-    (((hg x).differentiable (by simp)) 0).hasFDerivAt
-  exact congrArg (fun A : LiftTangent →L[ℝ] ℂ => A a) h.fderiv
-
-theorem fieldDerivative_mul (a : LiftTangent) (f g : LiftDomain period → ℂ)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    fieldDerivative period a (f*g) = fieldDerivative period a f * g + f * fieldDerivative period a g := by
-  funext x
-  have h := (((hf x).differentiable (by simp)) 0).hasFDerivAt.mul
-    (((hg x).differentiable (by simp)) 0).hasFDerivAt
-  have he := congrArg (fun A : LiftTangent →L[ℝ] ℂ => A a) h.fderiv
-  have hfg : localFieldLift period (f*g) x = localFieldLift period f x * localFieldLift period g x := rfl
-  change fderiv ℝ (localFieldLift period (f*g) x) 0 a = _
-  rw [hfg]
-  have hzf : localFieldLift period f x 0 = f x := by simp [localFieldLift]
-  have hzg : localFieldLift period g x 0 = g x := by simp [localFieldLift]
-  rw [hzf, hzg] at he
-  simpa [fieldDerivative, add_comm, mul_comm] using he
-
-
-
-
-
-
-variable [Fact (0 < period)]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end EulerMixedCylinderTransport
-
-end
-
-section
-
 /-! Actual full cylinder gradients from the coordinate derivative Sobolev norms. -/
 
 namespace EulerCylinderGradient
@@ -7118,35 +6588,6 @@ theorem fieldFDeriv_memLp_of_coordinates (f : LiftDomain period → F)
 
 end General
 end EulerCylinderGradient
-
-end
-
-section
-
-/-! Real scalar and vector forms of the full mixed cylinder commutator estimate. -/
-
-namespace EulerRealMixedTransport
-
-open MeasureTheory EulerSobolev EulerCylinderSobolev EulerCylinderAlgebra EulerMixedCylinderTransport
-open EulerRealCylinder EulerVectorCylinder EulerLiftedGradientSpace EulerMetricTransport EulerTransportDerivatives
-open scoped ENNReal ContDiff
-
-variable (period : ℝ) [Fact (0 < period)]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end EulerRealMixedTransport
 
 end
 
@@ -9621,26 +9062,6 @@ end
 
 section
 
-namespace EulerAnglePartition
-
-open EulerGevreyCutoff Set
-open scoped ContDiff
-
-/-- A compact smooth partition function whose period translates telescope. -/
-def partition (T t : ℝ) : ℝ := transition (t / T) - transition (t / T - 1)
-
-
-
-
-
-
-
-end EulerAnglePartition
-
-end
-
-section
-
 namespace EulerEnergyBootstrap
 
 open Set Real
@@ -9680,41 +9101,6 @@ theorem shrinking_radius_cancels_loss (C B Δ ρ R₀ X : ℝ)
 
 
 end EulerEnergyBootstrap
-
-end
-
-section
-
-namespace EulerEnergyParameters
-
-open Real EulerGevreyCutoff
-
-theorem exponential_error_small (z : ℝ) (hz : 256 ≤ z) :
-    exp (-z) ≤ 1 / (8 * z ^ 3) := by
-  have hz0 : 0 < z := by linarith
-  have h := factorial_decay 4 z hz0.le
-  norm_num only [Nat.factorial, Nat.cast_ofNat] at h
-  apply (le_div_iff₀ (show 0 < 8 * z ^ 3 by positivity)).2
-  have hm := mul_le_mul_of_nonneg_right (show (192 : ℝ) ≤ z by linarith)
-    (show 0 ≤ z ^ 3 * exp (-z) by positivity)
-  nlinarith
-
-theorem radius_budget (z C B ρ₀ S : ℝ) (hz : 256 ≤ z)
-    (_hC : 0 ≤ C) (hCz : C ≤ z) (hB : 0 ≤ B) (hBz : B ≤ 1 / (8 * z ^ 3))
-    (hρ : 1 / z ^ 2 ≤ ρ₀) (hS : 0 ≤ S) (hS1 : S ≤ 1) :
-    2 * C * (B + exp (-z)) * S ≤ ρ₀ / 2 := by
-  have hz0 : 0 < z := by linarith
-  have he := exponential_error_small z hz
-  calc
-    _ ≤ 2 * z * (1 / (8 * z ^ 3) + 1 / (8 * z ^ 3)) * 1 := by gcongr
-    _ = (1 / z ^ 2) / 2 := by field_simp; ring
-    _ ≤ ρ₀ / 2 := by linarith
-
-
-
-
-
-end EulerEnergyParameters
 
 end
 
@@ -10024,19 +9410,6 @@ end
 
 section
 
-namespace EulerSobolevBreakdown
-
-open EulerSmoothLimit EulerSobolev EulerSmoothSobolev EulerEnergyBootstrap
-open Filter Set MeasureTheory
-open scoped ContDiff Topology
-
-
-end EulerSobolevBreakdown
-
-end
-
-section
-
 namespace EulerDeformationVolume
 
 open Matrix Set MeasureTheory
@@ -10181,22 +9554,6 @@ end
 
 section
 
-namespace EulerLiftedEulerAlgebra
-
-open InnerProductSpace
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
-
-
-
-
-
-end EulerLiftedEulerAlgebra
-
-end
-
-section
-
 namespace EulerWeightedPressure
 
 open Finset EulerPacketWeights EulerWeightedConvolution EulerGevrey
@@ -10323,26 +9680,6 @@ open EulerLiftedGradientSpace EulerSpatialSobolevInverse EulerJetProductBounds
 
 
 end EulerWeightedPressure
-
-end
-
-section
-
-/-!
-Partial verification of algebra in the sample's proposed Euler packet construction.
-This file does not prove existence of an Euler packet or finite-time Euler blowup.
-The equations assumed below are the finite-dimensional ODEs in the source, not
-assumptions that assert the unproved PDE construction.
--/
-
-namespace EulerPacketAlgebra
-
-open Matrix
-
-
-
-
-end EulerPacketAlgebra
 
 end
 

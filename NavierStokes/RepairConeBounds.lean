@@ -299,27 +299,15 @@ theorem actual_fields {F : Profile} {A : NominalProfile.AxisStage F}
 
 theorem integral_exp_Iic (f : ℝ → ℝ) (y : ℝ) :
     (∫ x in Ioc 0 (Real.exp y), f x) = ∫ t in Iic y, Real.exp t * f (Real.exp t) := by
-  rw [← ReleaseMoments.image_exp_Iic,
+  rw [← Real.image_exp_Iic,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Iic
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
   simp only [abs_of_pos (Real.exp_pos _), smul_eq_mul]
 
-theorem image_exp_Ioc (a b : ℝ) :
-    Real.exp '' Ioc a b = Ioc (Real.exp a) (Real.exp b) := by
-  ext x
-  constructor
-  · rintro ⟨t, ht, rfl⟩
-    exact ⟨Real.exp_lt_exp.mpr ht.1, Real.exp_le_exp.mpr ht.2⟩
-  · intro hx
-    have hxpos : 0 < x := (Real.exp_pos a).trans hx.1
-    refine ⟨Real.log x, ⟨?_, ?_⟩, Real.exp_log hxpos⟩
-    · simpa only [Real.log_exp] using Real.log_lt_log (Real.exp_pos a) hx.1
-    · simpa only [Real.log_exp] using Real.log_le_log hxpos hx.2
-
 theorem integral_exp_Ioc (f : ℝ → ℝ) {a b : ℝ} (hab : a ≤ b) :
     (∫ x in Ioc (Real.exp a) (Real.exp b), f x) =
       ∫ t in a..b, Real.exp t * f (Real.exp t) := by
-  rw [← image_exp_Ioc,
+  rw [← Real.image_exp_Ioc,
     integral_image_eq_integral_abs_deriv_smul measurableSet_Ioc
       (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn,
     intervalIntegral.integral_of_le hab]

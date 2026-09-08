@@ -12,11 +12,7 @@ namespace EulerGevrey
 
 /-- The elementary exponential bound needed for one fixed derivative shift. -/
 theorem succ_le_two_pow_real (n : ℕ) : (n : ℝ)+1 ≤ (2 : ℝ)^n := by
-  induction n with
-  | zero => norm_num
-  | succ n ih =>
-      rw [Nat.cast_add, Nat.cast_one, pow_succ]
-      nlinarith [show (0 : ℝ) ≤ n by positivity]
+  exact_mod_cast Nat.lt_two_pow_self
 
 /-- One fixed factorial shift is a fixed radius enlargement for coefficients. -/
 theorem majorant_one_le_radius_four (R : ℝ) (hR : 0 ≤ R) (n : ℕ) :
