@@ -156,15 +156,6 @@ theorem copySolve_invariant (d : LinearData P V E) (g : Geometry) (hab : a ≤ b
   unfold LinearData.copySolve
   exact slow_shift_apply (anchoredSolve_invariant d g hab θ hA hB hf j _) p Y t
 
-theorem localizedCopy_invariant (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (θ : P) (hA : Invariant (θ, (0 : Plane)) d.coefficient)
-    (hB : Invariant (θ, (0 : Plane)) d.forcingMap)
-    (hf : Invariant (θ, (0 : Plane)) d.source) (κ : Plane → ℝ) (j : Frequency) :
-    Invariant (θ, (0 : Plane)) (d.localizedCopy g hab κ j) := by
-  rintro ⟨p, Y⟩ t
-  change d.localizedCopy g hab κ j (p + t • θ, Y + t • (0 : Plane)) = _
-  rw [smul_zero, add_zero]
-  simp only [LinearData.localizedCopy, slow_shift_apply (copySolve_invariant d g hab θ hA hB hf j)]
 
 
 
@@ -348,19 +339,6 @@ theorem vectorMode_translate {a : D → HarmonicCalculus.ComplexVector}
   ext i
   exact mode_translate (ha.component i) hΦ K x t
 
-/-- This version works with any chosen angular section, independently of
-where the angular coordinate is stored in a product type. -/
-theorem mode_eq_field_along {P : Type} {f : D → ℂ}
-    (hf : Invariant θ f) (hΦ : AffinePhase θ m Φ) (σ : P → D)
-    (k : ℝ) (j kp : ℤ) (hkp : (kp : ℝ) = k * m) (p : P) (t : ℝ) :
-    HarmonicCalculus.mode ((j : ℝ) * k) Φ f (σ p + t • θ) =
-      HarmonicFields.field (AddMonoidAlgebra.single j (fun p => f (σ p))) k (fun p => Φ (σ p)) kp (p, t) := by
-  simp only [HarmonicCalculus.mode, HarmonicCalculus.carrier, HarmonicCalculus.phaseFactor,
-    HarmonicFields.field, HarmonicFields.evaluate_single, HarmonicFields.character]
-  rw [hf (σ p) t, hΦ (σ p) t]
-  simp only [hkp, Complex.ofReal_add, Complex.ofReal_mul, Complex.ofReal_intCast]
-  congr 2
-  ring
 
 
 end HarmonicPhase

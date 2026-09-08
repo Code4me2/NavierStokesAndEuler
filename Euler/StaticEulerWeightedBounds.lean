@@ -64,8 +64,6 @@ theorem budget_retainedRadius :
 theorem budget_staticTimeCost (q : ℕ) (hq : 6 ≤ q) :
     (correctionBudget P u C R hC hR hu hdiv).timeDerivativeCost P q hq=staticTimeCost P R := rfl
 
-theorem budget_staticPressureCost (q : ℕ) (hq : 6 ≤ q) :
-    (correctionBudget P u C R hC hR hu hdiv).pressureCost P q hq=staticPressureCost P R := rfl
 
 theorem correction_weighted (n : ℕ) (t : Icc (0 : ℝ) 1) :
     weightedNorm P 6 n (retainedRadius R)

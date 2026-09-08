@@ -447,17 +447,7 @@ def remainderLip (O : NaturalOperators V) (d : AxisData V)
     (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M) : ℝ :=
   (controlledRemainder O d S R M hR hM 0 (by simp) 0 (by simpa using hM)).lip
 
-theorem controlledRemainder_bound_eq (O : NaturalOperators V) (d : AxisData V)
-    (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M)
-    (t : ℝ) (ht : |t| ≤ 1) (a : V) (ha : ‖a‖ ≤ M) :
-    (controlledRemainder O d S R M hR hM t ht a ha).bound =
-      remainderBound O d S R M hR hM := by rfl
 
-theorem controlledRemainder_lip_eq (O : NaturalOperators V) (d : AxisData V)
-    (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M)
-    (t : ℝ) (ht : |t| ≤ 1) (a : V) (ha : ‖a‖ ≤ M) :
-    (controlledRemainder O d S R M hR hM t ht a ha).lip =
-      remainderLip O d S R M hR hM := by rfl
 
 theorem remainderBound_nonneg (O : NaturalOperators V) (d : AxisData V)
     (S : V →L[ℝ] V) (R M : ℝ) (hR : 0 ≤ R) (hM : 0 ≤ M) :

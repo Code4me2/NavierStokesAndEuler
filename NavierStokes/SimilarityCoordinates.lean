@@ -113,11 +113,6 @@ theorem positive_solution_unique {a τ z q₁ q₂ : ℝ}
     rw [he₁, he₂] at this
     exact (lt_irrefl τ this).elim
 
-theorem existsUnique_positive_solution {a τ : ℝ} (ha : 0 < a) (ha1 : a < 1)
-    (hτ : 0 < τ) (z : ℝ) : ∃! q : ℝ, 0 < q ∧ forwardScalar a z q = τ := by
-  obtain ⟨q, hq, he⟩ := exists_positive_solution ha ha1 hτ z
-  exact ⟨q, ⟨hq, he⟩, fun q' hq' =>
-    positive_solution_unique ha ha1 hτ hq'.1 hq hq'.2 he⟩
 
 /-- The unique positive coordinate, with value `1` outside the intended
 parameter domain. Only its restriction to that open domain is used. -/

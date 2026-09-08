@@ -75,25 +75,6 @@ theorem contDiff_fixedEndpointDerivative
     (contDiff_fixedEndpointCorrection T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
       hQ hQ₁ hH L hL))
 
-include c hc hLower hd in
-/-- The physical endpoint solution inherits the proved parameter regularity. -/
-theorem contDiff_endpointDerivative
-    (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) (hH : ContDiff ℝ n H)
-    (L : P → V →L[ℝ] TimeLp T E) (hL : ContDiff ℝ n L)
-    (m : P → Icc (0 : ℝ) T → E) (hm : ∀ x t v, ⟪m x t, Q x t v⟫_ℝ = 0)
-    (hRange : ∀ x t η, ⟪m x t, η⟫_ℝ = 0 → ∃ v : U, Q x t v = η) :
-    ContDiff ℝ n (fun x => endpointDerivative T hT (m x) (H x)
-      K hK (hPotential x) hsmall (L x)) := by
-  have he : (fun x => endpointDerivative T hT (m x) (H x)
-      K hK (hPotential x) hsmall (L x)) =
-      (fun x => fixedEndpointDerivative T hT (Q x) (Q₁ x) (H x)
-        c hc (hLower x) (hd x) K hK (hPotential x) hsmall (L x)) := by
-    funext x
-    exact (fixedEndpointDerivative_eq_endpoint T hT (Q x) (Q₁ x) (H x)
-      c hc (hLower x) (hd x) K hK (hPotential x) hsmall (m x) (hm x) (hRange x) (L x)).symm
-  rw [he]
-  exact contDiff_fixedEndpointDerivative T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
-    hQ hQ₁ hH L hL
 
 section AffineTrial
 
@@ -134,10 +115,6 @@ theorem affineTrial_tangent
 
 end AffineTrial
 
-omit [CompleteSpace U] [CompleteSpace E] in
-theorem contDiff_affineTrial (hQ : ContDiff ℝ n Q) (hQ₁ : ContDiff ℝ n Q₁) :
-    ContDiff ℝ n (fun x => affineTrial T hT (Q x) (Q₁ x)) :=
-  (contDiff_initialProductDerivative T hT Q Q₁ hQ hQ₁).clm_comp contDiff_const
 
 
 end EulerTransverseEndpointParameter

@@ -252,24 +252,6 @@ theorem selected_polar_closure (j : PolarCharts.Index) (n d : ℕ)
 
 /-! ## Selection above an arbitrary certified floor -/
 
-theorem exists_selected_band (N : ℕ) {w : SpaceTime}
-    (hw : w ∈ preterminal) (hactive : w ∈ active)
-    (hsmall : physicalQ ActualPrimary.h w ≤ ChartScales.Q N) :
-    ∃ n : ℕ, N ≤ n ∧ physicalQ ActualPrimary.h w ≤ ChartScales.Q n ∧
-      ChartScales.Q n < 2 * physicalQ ActualPrimary.h w ∧
-      scaledRadial n w ∈ annulus inner outer ∧
-      ∀ (j : PolarCharts.Index) (d : ℕ),
-        scaledRadial n w ∈ PolarCharts.chartDomain inner j →
-          PhysicalResidualJetBounds.polarGraph inner ActualPrimary.h j n d w ∈ nativeDomain ∧
-          PhysicalResidualJetBounds.polarGraph inner ActualPrimary.h j n d w ∈
-            closure (HarmonicResidual.liftDomain ActualInitialization.geometry.strip.domain) := by
-  obtain ⟨n, hn, hqQ, hQq⟩ := exists_comparable_band N
-    (physicalQ_pos ActualPrimary.outgoing.data.h_pos ActualPrimary.outgoing.data.h_lt_half hw)
-    hsmall
-  refine ⟨n, hn, hqQ, hQq, selected_annulus n hw hactive hqQ hQq, ?_⟩
-  intro j d hj
-  exact ⟨selected_polar_nativeDomain j n d hw hactive hqQ hQq hj,
-    selected_polar_closure j n d hw hactive hqQ hQq hj⟩
 
 
 end NavierStokes.ActualPolarCoverage

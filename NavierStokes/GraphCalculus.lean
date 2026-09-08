@@ -96,13 +96,6 @@ theorem partialT_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ) (q : Plan
   exact (hF.hasFDerivAt.comp_hasDerivAt q.2
     (hasDerivAt_graph_time d vr vt q.1 q.2)).deriv
 
-/-- The coordinate map is smooth to every order away from the axis. -/
-theorem contDiffAt_graph {n : WithTop ℕ∞} (d : ℝ) (vr vt : Plane) (q : Plane)
-    (hr : q.1 ≠ 0) : ContDiffAt ℝ n (graph d vr vt) q := by
-  unfold graph
-  exact contDiffAt_id.prodMk
-    (((contDiffAt_fst.rpow_const_of_ne hr).smul contDiffAt_const).add
-      (contDiffAt_snd.smul contDiffAt_const))
 
 private def radiusProjection : Lift →L[ℝ] ℝ :=
   (ContinuousLinearMap.fst ℝ ℝ ℝ).comp (ContinuousLinearMap.fst ℝ Plane Plane)
@@ -137,15 +130,6 @@ theorem fderiv_radialVector_timeVector (d : ℝ) (vr vt : Plane) (p : Lift)
   rw [(hasFDerivAt_radialVector d vr p hr).fderiv]
   simp [radiusProjection, timeVector]
 
-/-- The actual radial and time graph operators commute on every `C²` lift,
-away from the radial axis. This proves the relevant assertion of §8.1. -/
-theorem radialOp_timeOp_comm (d : ℝ) (vr vt : Plane) (F : Lift → ℝ) (p : Lift)
-    (hr : p.1.1 ≠ 0) (hF : ContDiffAt ℝ 2 F p) :
-    radialOp d vr (timeOp vt F) p = timeOp vt (radialOp d vr F) p := by
-  apply along_comm_of_cross_zero F (radialVector d vr) (fun _ => timeVector vt) p hF
-    (differentiableAt_radialVector d vr p hr) (differentiableAt_const _)
-  · exact fderiv_radialVector_timeVector d vr vt p hr
-  · simp
 
 theorem differentiableAt_timeOp (vt : Plane) (F : Lift → ℝ) (p : Lift)
     (hF : ContDiffAt ℝ 2 F p) : DifferentiableAt ℝ (timeOp vt F) p := by
@@ -159,46 +143,9 @@ theorem differentiableAt_radialOp (d : ℝ) (vr : Plane) (F : Lift → ℝ) (p :
     (differentiableAt_radialVector d vr p hr)
 
 
-/-- Differentiate the restricted time derivative in the radial direction. -/
-theorem partialR_partialT_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ)
-    (q : Plane) (hr : q.1 ≠ 0) (hF : ContDiff ℝ 2 F) :
-    partialR (partialT (pullback d vr vt F)) q =
-      radialOp d vr (timeOp vt F) (graph d vr vt q) := by
-  have ht : partialT (pullback d vr vt F) = pullback d vr vt (timeOp vt F) := by
-    funext z
-    exact partialT_pullback d vr vt F z (hF.differentiable (by norm_num) _)
-  rw [ht]
-  exact partialR_pullback d vr vt (timeOp vt F) q hr
-    (differentiableAt_timeOp vt F _ hF.contDiffAt)
-
-/-- Differentiate the restricted radial derivative in the time direction. -/
-theorem partialT_partialR_pullback (d : ℝ) (vr vt : Plane) (F : Lift → ℝ)
-    (q : Plane) (hr : q.1 ≠ 0) (hF : ContDiff ℝ 2 F) :
-    partialT (partialR (pullback d vr vt F)) q =
-      timeOp vt (radialOp d vr F) (graph d vr vt q) := by
-  have hrline :
-      (fun t => partialR (pullback d vr vt F) (q.1, t)) =
-        (fun t => pullback d vr vt (radialOp d vr F) (q.1, t)) := by
-    funext t
-    exact partialR_pullback d vr vt F (q.1, t) hr
-      (hF.differentiable (by norm_num) _)
-  unfold partialT
-  rw [hrline]
-  exact partialT_pullback d vr vt (radialOp d vr F) q
-    (differentiableAt_radialOp d vr F _ hr hF.contDiffAt)
 
 
-/-- A derivative in an auxiliary direction is the ordinary dot product
-with the two auxiliary partial derivatives. -/
-theorem auxiliary_directional_eq (F : Lift → ℝ) (p : Lift) (v : Plane) :
-    fderiv ℝ F p ((0, 0), v) =
-      v.1 * fderiv ℝ F p ((0, 0), (1, 0)) +
-        v.2 * fderiv ℝ F p ((0, 0), (0, 1)) := by
-  have hv : ((0, 0), v) =
-      v.1 • (((0, 0), (1, 0)) : Lift) + v.2 • (((0, 0), (0, 1)) : Lift) := by
-    ext <;> simp
-  rw [hv, map_add, map_smul, map_smul]
-  rfl
+
 
 
 

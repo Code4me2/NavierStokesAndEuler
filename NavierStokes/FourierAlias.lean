@@ -173,11 +173,6 @@ theorem totalIntegral_periodic {M : ℝ} {v : Plane} {f : State → F}
   rw [add_right_comm Y ((k.1 : ℝ), (k.2 : ℝ))]
   exact hp (U + u) (Y + (M * u) • v) k
 
-theorem cutoffAlias_periodic {χ : ℝ → ℝ} {M : ℝ} {v : Plane} {f : State → F}
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y))) :
-    ∀ U, TorusPeriodic (fun Y => cutoffAlias χ M v f (U, Y)) := by
-  intro U Y k
-  exact congrArg (fun q => deriv χ U • q) (totalIntegral_periodic hp U Y k)
 
 
 theorem cutoffAlias_zero_mean_of_integratedMean_zero {a b M : ℝ} {v : Plane}
@@ -191,13 +186,6 @@ theorem cutoffAlias_zero_mean_of_integratedMean_zero {a b M : ℝ} {v : Plane}
   change deriv χ U • sliceMean (TransportPrimitive.totalIntegral M v f) U = 0
   rw [torusMean_totalIntegral hab hf hp hs, hm, smul_zero]
 
-theorem cutoffAlias_zero_mean {a b M : ℝ} {v : Plane} {f : State → F}
-    (χ : ℝ → ℝ) (hab : a ≤ b) (hf : Continuous f)
-    (hp : ∀ U, TorusPeriodic (fun Y => f (U, Y)))
-    (hs : RadialAlias.RadiallySupported a b f) (hm : ∀ U, sliceMean f U = 0) (U : ℝ) :
-    sliceMean (cutoffAlias χ M v f) U = 0 := by
-  apply cutoffAlias_zero_mean_of_integratedMean_zero χ hab hf hp hs _ U
-  simp only [hm, intervalIntegral.integral_zero]
 
 /-- The alias is an exact term in the constructed inverse identity. -/
 theorem transport_compact_eq_sub_alias [CompleteSpace F] {a b M : ℝ} {v : Plane}
@@ -443,15 +431,6 @@ theorem totalIntegral_nonbarPart {a b M : ℝ} {v : Plane} {f : State → ℂ}
     simpa only [mean_eq_integral, sliceMean, torusMean] using hm
   rw [hm', sub_zero]
 
-/-- If the integrated bar vanishes, subtracting the bar does not change the
-alias at all. This is the exact reduction used for the pressure source. -/
-theorem cutoffAlias_eq_nonbarPart {a b M : ℝ} {v : Plane} {f : State → ℂ}
-    (χ : ℝ → ℝ) (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f)
-    (hm : (∫ U in a..b, sliceMean f U) = 0) :
-    cutoffAlias χ M v f = cutoffAlias χ M v (nonbarPart f) := by
-  funext z
-  unfold cutoffAlias
-  rw [totalIntegral_nonbarPart hf hs hm]
 
 /-- The successive slow derivatives of actual directional Fourier inverses. -/
 noncomputable def fourierSourceJet (d : Direction) (f : State → ℂ) (p : ℕ) : State → ℂ :=
@@ -535,11 +514,6 @@ theorem cutoffAlias_arbitrary_order (d : Direction) {a b : ℝ} {f : State → �
     (pow_nonneg (inv_nonneg.mpr (abs_nonneg M)) p)
 
 
-/-- The square average is the normalized Haar average of the actual descent. -/
-theorem torusMean_eq_haar {f : Plane → ℂ} (hf : Continuous f) (hp : TorusPeriodic f) :
-    torusMean f = ∫ z, SmoothFourierData.descendContinuous f hf hp z ∂torusMeasure := by
-  rw [← SmoothFourierData.coefficient_zero_eq_mean]
-  exact (SmoothFourierData.coefficient_zero_eq_integral f).symm
 
 
 end ActualFourierInverse
@@ -598,27 +572,6 @@ theorem inverse_frequency_power_le_epsilon {M : ℕ → ℝ} {h κ A growth : �
         (ChartScales.epsilon_le_one h hh.le n) hNp
     _ = ChartScales.epsilon h n ^ N := Real.rpow_natCast _ _
 
-/-- Uniform full-jet superflatness of the retained exact alias. Constants and
-the eventual threshold may depend on the requested jet order and epsilon
-power, but not on the frequency index, evaluation point, or smaller jet. -/
-theorem cutoffAlias_superflat (d : Direction) {a b : ℝ} {f : State → ℂ}
-    {χ : ℝ → ℝ} (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hp : ParametricTorusInverse.Periodic f) (hm : ParametricTorusInverse.ZeroMean f)
-    (hs : RadialAlias.RadiallySupported a b f)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {M : ℕ → ℝ} {h κ A growth : ℝ} (hh : 0 < h) (hκ : 0 < κ)
-    (hM : ∀ᶠ n in atTop, M n ≠ 0)
-    (hbound : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : State,
-      ‖iteratedFDeriv ℝ j (cutoffAlias χ (M n) (vector d) f) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  obtain ⟨p, hpM⟩ := inverse_frequency_power_le_epsilon hh hκ hbound N
-  obtain ⟨C, hC, hCbound⟩ := cutoffAlias_arbitrary_order d hab hχ hf hp hm hs hleft hright m p
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [hM, hpM] with n hn hnM
-  intro j hj z
-  exact (hCbound (M n) hn j hj z).trans (mul_le_mul_of_nonneg_left hnM hC)
 
 
 

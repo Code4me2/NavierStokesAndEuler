@@ -881,26 +881,6 @@ theorem exists_ordered_nominal_witness {F : OutgoingProfile.Profile} {D : ℝ}
     rfl
   · exact shapeTime_eq_of_heq hWA hWc
 
-/-- Actual nominal-profile existence from the fixed outgoing profile. The
-positive axial perturbation is chosen small enough for the fixed inverse,
-and all five moments are then repaired by its actual normalized solver. -/
-theorem exists_nominal_witness {F : OutgoingProfile.Profile} {D : ℝ}
-    (hF : OutgoingProfile.Specification F D) (hP : 2 ≤ F.data.core.P)
-    (hh : F.data.h ≤ 1 / 1000) (N : ℕ) {rho : ℝ}
-    (hrho : 0 < rho) (hradius : rho ≤ NominalProfile.resetSolver.radius) :
-    ∃ W : NominalProfile.Witness F, MatchingBounds W.controls N rho := by
-  obtain ⟨eps, heps, _heps1, hordered⟩ := exists_ordered_nominal_witness hF hP N hrho hradius
-  let j : ℝ := min (eps / 2) (1 / 2000)
-  have hj : 0 < j := lt_min (by positivity) (by norm_num)
-  have hjbound : |j| ≤ eps := by
-    rw [abs_of_pos hj]
-    exact (min_le_left _ _).trans (by linarith)
-  have hsmall : NaturalAxisData.SmallParameters F.data.h j :=
-    ⟨F.data.h_pos, hh, hj, (min_le_right _ _).trans (by norm_num)⟩
-  obtain ⟨Λ0, hΛ0, hscale⟩ := hordered j hjbound hsmall
-  obtain ⟨T, _hT, C0, _hC0, hnorm⟩ := hscale Λ0 (zero_lt_one.trans_le hΛ0) le_rfl
-  obtain ⟨W, _hj, _hL, _hC, _hT, hmatch⟩ := hnorm C0 le_rfl
-  exact ⟨W, hmatch⟩
 
 
 

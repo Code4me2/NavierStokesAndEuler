@@ -831,24 +831,7 @@ theorem axialLag_integrated_history (v : TailData) (y η : ℝ) :
   unfold axialLag geometricAxialLag pressureAxialLag normalizedEnergyHistory
   ring
 
-theorem geometricAxialLag_ideal (c : Parameters) (h η : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    geometricAxialLag c h y η = -20 * η + (32 + 32 * h) * η ^ 3 := by
-  unfold geometricAxialLag transportW
-  rw [averagedDrop_early c (by linarith), dropCoefficient_early c.m (by linarith),
-    averagedDropSquare_early c (by linarith)]
-  unfold L d
-  ring
 
-theorem pressureAxialLag_ideal (v : TailData) (η : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    pressureAxialLag v y η =
-      4 * A v.h * η * SchedulePressure.axisPressure v η -
-        d η * deriv (SchedulePressure.axisPressure v) η +
-          (5 / 6) * (5 * d η * shapeGradient η + (10 * A v.h + 1) * η) *
-            angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-  unfold pressureAxialLag averagedEnergy entrancePressure pressureGradient
-  rw [averagedClockEnergy_ideal v.core hy, pressureClock_ideal v.core hy]
-  unfold angular clockEnergy A
-  ring
 
 theorem entrancePressure_eq_future (v : TailData) {y : ℝ} (hy : 0 ≤ y)
     (hyend : y ≤ v.core.endpoint) : entrancePressure v y = FuturePressureBounds.Pi v y := by
@@ -2014,32 +1997,6 @@ theorem actual_stress_amplitude_lower {v : TailData} {K : ℝ}
   have hright := mul_le_mul_of_nonneg_left hq' hXR
   nlinarith
 
-/-- A single large physical radial scale gives the actual relaxed cone,
-uniformly in the complete first-ramp/drop/entrance region. -/
-theorem exists_actual_preliminary_cone_scale {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (hh1 : v.h ≤ 1 / 100)
-    (hP : Real.exp (v.core.dropLength + 1) ≤ v.core.P ^ 2)
-    (hhT : v.h ≤ Real.exp (-(v.core.holdStart + 3 / 5)) / 8)
-    (he : dropSpeed v.core.m ≤ dropThreshold)
-    (hlam : v.core.lam * entranceRatioBound v.core.P v.core.m ^ 2 ≤ 1 / 4) :
-    ∃ gap XR₀ : ℝ, 0 < gap ∧ 0 < XR₀ ∧ ∀ XR : ℝ, XR₀ < XR →
-      ∀ p ∈ preliminaryWindow v,
-        2 + gap < OutgoingHistories.p1 XR w Amp p *
-          (1 - coneB w Amp p * coneRatio w Amp p / coneA w p) ∧
-        coneA w p * (1 + (coneB w Amp p / coneA w p) ^ 2) + gap <
-          ConeAlgebra.coneBound
-            (OutgoingHistories.p1 XR w Amp p * (1 - coneB w Amp p * coneRatio w Amp p / coneA w p))
-            (OutgoingHistories.p1 XR w Amp p * (coneRatio w Amp p + coneB w Amp p / coneA w p)) := by
-  obtain ⟨gap, p₀, hg, hp₀, hcone⟩ := compact_actual_preliminary_cone w ha hh1 hP hhT he hlam
-  refine ⟨gap, (p₀ + 1) / coneFloor, hg, div_pos (by linarith) coneFloor_pos, ?_⟩
-  intro XR hXR p hp
-  have hXR0 : 0 < XR := (div_pos (by linarith : 0 < p₀ + 1) coneFloor_pos).trans hXR
-  have hs : p₀ < OutgoingHistories.p1 XR w Amp p := by
-    have hx := (div_lt_iff₀ coneFloor_pos).mp hXR
-    exact (by linarith : p₀ < XR * coneFloor).trans_le
-      (actual_stress_amplitude_lower w ha hh1 hhT hXR0.le hp)
-  exact hcone _ hs p hp
 
 /-- The same canonical identification is valid to the left of clock zero. -/
 theorem canonical_Qs_before_all {v : TailData} {K : ℝ}

@@ -337,8 +337,6 @@ theorem sourceRadiusPolynomial_eval (W : ℝ) : sourceRadiusPolynomial.eval W=so
     Polynomial.eval_one,inversePolynomial_eval,inverseBlockPolynomial_eval,
     coefficientPolynomial_eval,primitivePolynomial_eval,coeff]
 
-def sourceRadiusConstant : ℝ := coefficientCost sourceRadiusPolynomial
-def sourceRadiusPower : ℕ := sourceRadiusPolynomial.natDegree
 
 
 

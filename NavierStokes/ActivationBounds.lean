@@ -408,20 +408,6 @@ theorem history_scaled_factor {T : ℝ} (hT : T ≠ 0) (κ X0 : ℝ)
       dsimp only [scaledDistance, historyErrorFactor]
       ring
 
-theorem history_uniform_jets (X0 : ℝ) (initial : HistoryRow → ℝ → ℝ)
-    {J K : Set ℝ} (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J) {L U : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier)
-    (T0 : ℝ) (r : HistoryRow) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ T ∈ Ioc (0 : ℝ) T0, ∀ κ ∈ Icc (0 : ℝ) 1,
-      ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-        |iteratedDeriv n (fun ξ =>
-          logHistory X0 initial (activatedAngular T κ L) (controlled T κ U) r (y, ξ) -
-            logHistory X0 initial (referenceAngular L) U r (y, ξ)) η| ≤
-              M * y * activation T κ y := by
-  apply width_uniform_jet_bound hJ hK hKJ (historyErrorFactor_smooth X0 hJ hL hU r)
-  intro κ T hT u η hη
-  exact history_scaled_factor hT.ne' κ X0 initial hJ hL hU r u hη
 
 /-! ## Genuine parameter differentiation of the scaled factors -/
 
@@ -617,25 +603,6 @@ theorem fixed_history_scaled_factor {T δ : ℝ} (hT : 0 < T)
   exact history_scaled_factor hT.ne' κ N.endpoint _ parameterInterval_open
     (FromReference.refLog_smooth N hδ hδR) (FromReference.refAxial_smooth N hδ hδR) r u hη
 
-/-- The manuscript uses the same width for ACT and REF. Its first-ramp
-histories have the fixed-reference factors whenever `T ≤ δ0`. -/
-theorem diagonal_history_scaled_factor {T δ0 : ℝ} (hT : 0 < T)
-    (hTR : 2 * T < rampLimit) (hδ0 : 0 < δ0) (hδ0R : 2 * δ0 < rampLimit)
-    (hTδ0 : T ≤ δ0) (κ : ℝ) (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    (r : HistoryRow) {u η : ℝ} (hu : u ∈ Icc (0 : ℝ) 1) (hη : η ∈ parameterInterval) :
-    profileHistory (FromReference.histories N hT hT hTR κ P0 hP0) r
-        (radius N.endpoint (T * u), η) -
-      profileHistory (N.histories hT hTR P0 hP0) r (radius N.endpoint (T * u), η) =
-        scaledDistance ((κ, T), (u, η)) *
-          historyErrorFactor N.endpoint (FromReference.refLog N δ0) (FromReference.refAxial N δ0) r
-            ((κ, T), (u, η)) := by
-  have hy : T * u ≤ T := mul_le_of_le_one_right hT.le hu.2
-  have hx : 0 ≤ radius N.endpoint (T * u) := (mul_pos N.endpoint_pos (Real.exp_pos _)).le
-  have hxT := radius_mono N hy
-  have hxδ0 := radius_mono N (hy.trans hTδ0)
-  rw [histories_independent N hT hT hTR hδ0 hδ0R κ P0 hP0 r hη hx hxT hxδ0,
-    reference_histories_independent N hT hTR hδ0 hδ0R P0 hP0 r hη hx hxT hxδ0]
-  exact fixed_history_scaled_factor N hT hδ0 hδ0R κ P0 hP0 r u hη
 
 
 end NaturalOverlap

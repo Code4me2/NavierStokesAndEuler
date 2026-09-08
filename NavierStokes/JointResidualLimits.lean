@@ -171,13 +171,6 @@ theorem boundaryLimits_independent {f : SpaceTime → V} (hzero : VanishingJoint
   let := past_filter_neBot x
   exact tendsto_nhds_unique (boundaryLimits_joint hzero h₁ n x) (boundaryLimits_joint hzero h₂ n x)
 
-theorem iteratedFDeriv_eqOn_past {f g : SpaceTime → V}
-    (h : EqOn f g (SpacetimeEndpoint.openPast 1)) (n : ℕ) :
-    EqOn (iteratedFDeriv ℝ n f) (iteratedFDeriv ℝ n g) (SpacetimeEndpoint.openPast 1) := by
-  intro z hz
-  rw [← iteratedFDerivWithin_of_isOpen n (SpacetimeEndpoint.openPast_isOpen 1) hz,
-    ← iteratedFDerivWithin_of_isOpen n (SpacetimeEndpoint.openPast_isOpen 1) hz]
-  exact iteratedFDerivWithin_congr h hz n
 
 
 /-- Actual derivative recurrence on the open past; the jet family is not

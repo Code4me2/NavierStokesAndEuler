@@ -82,14 +82,6 @@ theorem profile_iteratedDeriv_Y (I : Window) {ε : ℝ} (hε : 0 < ε)
 def radialValue (I : Window) (ε : ℝ) (r : ℕ) (A : AxisSpace I ε) (p : ℝ × ℝ) : ℝ :=
   p.1 * mixedSeries I ε A 2 0 p + (r : ℝ) * mixedSeries I ε A 1 0 p
 
-theorem radialValue_eq_derivatives (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (r : ℕ) (A : AxisSpace I ε) {Y η : ℝ} (hY : Y ∈ Ioo (-20 : ℝ) 20)
-    (hη : η ∈ Ioo I.left I.right) :
-    radialValue I ε r A (Y, η) =
-      Y * iteratedDeriv 2 (fun y => profile I ε A (y, η)) Y +
-        (r : ℝ) * deriv (fun y => profile I ε A (y, η)) Y := by
-  rw [profile_iteratedDeriv_Y I hε A 2 hY hη, profile_deriv_Y I hε A hY hη]
-  rfl
 
 theorem polynomialJet_radial (r n : ℕ) (Y : ℝ) :
     Y * polynomialJet (n + 1) 2 Y + (r : ℝ) * polynomialJet (n + 1) 1 Y =
@@ -413,17 +405,6 @@ theorem parameterPrimitive_eq_deriv_eta (I : Window) {ε : ℝ} (hε : 0 < ε)
   rw [profile_deriv_eta I hε _ hY hη]
   exact parameterPrimitive_eta_value I hε A Y ⟨hη.1.le, hη.2.le⟩
 
-theorem parameterPrimitive_Y_value (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (A : AxisSpace I ε) {Y η : ℝ} (hY : |Y| < 20) (hη : η ∈ I.interval) :
-    mixedSeries I ε (parameterPrimitive I hε A) 1 0 (Y, η) =
-      mixedSeries I ε A 0 1 (Y, η) := by
-  rw [derivativeSeries I hε _ hY, parameterSeries]
-  apply tsum_congr
-  intro n
-  change ((n : ℝ) + 1) * Y ^ n * inputJet I ε (parameterPrimitive I hε A) (n + 1) 0 η = _
-  rw [jet_parameterPrimitive_eval I hε A (n + 1) 0 hη]
-  simp only [primitiveScale, Nat.pred_succ, Nat.add_zero]
-  field_simp
 
 
 

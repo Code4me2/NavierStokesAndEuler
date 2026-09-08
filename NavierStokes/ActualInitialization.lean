@@ -726,27 +726,6 @@ theorem initialAlias_radial (B N0 n : ℕ) (x : Point) :
   simp only [initialAlias, VariableGaugeMean.temporalAliasState, Matrix.cons_val_zero, zero_add]
   rfl
 
-/-- The remaining radial mean is controlled by the actual measured pressure debt. -/
-theorem initial_radial_mean_class (B N0 : ℕ) {alpha : ℝ}
-    (hdebt : UnweightedClass slowStrip alpha
-      (pressureDefect (ActualPrimary.commonContext B) (initialState B N0))) :
-    MeanClass strip alpha (fun n x =>
-      (initialState B N0).meanGoodResidual (ActualPrimary.commonContext B) n x 0) := by
-  have hr : GaugeRadialResidualBounds.RadialMatch geometry.region.carrier geometry.gauge
-      (ActualPrimary.commonContext B).operators := by
-    rw [← geometry_operators B]
-    exact GaugeRadialResidualBounds.RadialMatch.nativeOperators geometry.region.carrier
-      geometry.gauge geometry.epsilon geometry.fast geometry.axial geometry.time geometry.temporal
-  have hclass := GaugeRadialResidualBounds.radialMinusAlias_class geometry.region geometry.gauge
-    geometry.inner_pos geometry.exponent_pos geometry.left_pos geometry.right_pos
-    geometry.epsilon geometry.slow geometry.epsilon_pos geometry.epsilon_le_one geometry.slow_ge_one
-    geometry.length_eq (ActualPrimary.commonContext B) (initialState B N0)
-    (initial_primitive B N0) hr rfl hdebt
-  apply MeanIncrementBounds.class_congr hclass
-  intro n x hx
-  change (initialState B N0).meanGoodResidual (ActualPrimary.commonContext B) n x 0 = _
-  rw [initial_meanGood B N0 n (strip_time x hx) 0, initialAlias_radial]
-  rfl
 
 end NavierStokes.ActualInitialization
 
@@ -859,12 +838,6 @@ theorem initial_extraction_regular (B N0 n : ℕ) :
   · intro l hl
     exact angularMode_ne_zero l n
 
-theorem initial_goodWave_grouped (B N0 n : ℕ) {x : Point × ℝ}
-    (hx : x.1 ∈ strip.domain) (i : Fin 3) :
-    CorrectionStep.fullGoodWaveResidual (ActualPrimary.commonContext B) (initialState B N0) n x i =
-      ∑ l ∈ (coefficients B N0).labels n, (initialResidualBlock l).oscillation n x i :=
-  (initialCycleState_represents B N0).fullGoodWaveResidual_grouped_local strip.isOpen_domain
-    (initial_extraction_regular B N0 n) ⟨hx, trivial⟩ i
 
 end NavierStokes.ActualInitialization
 

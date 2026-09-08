@@ -25,11 +25,6 @@ theorem primitive_mixed_translation (a : LiftTangent) (u : LiftL2 P) :
 
 variable {X ι : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [Fintype ι]
 
-theorem primitive_block_bound (directions : ι → X) (q : ℕ)
-    (f : X → LiftL2 P) (hf : ContDiff ℝ ∞ f) (n : ℕ) (x : X) :
-    block directions q (fun y => primitive P (f y)) n x ≤ P*block directions q f n x :=
-  (block_comp_clm_le directions q (primitive P) f hf n x).trans
-    (mul_le_mul_of_nonneg_right (primitive_norm P) (block_nonneg directions q f n x))
 
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]

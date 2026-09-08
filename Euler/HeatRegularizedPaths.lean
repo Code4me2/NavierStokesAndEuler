@@ -58,9 +58,6 @@ theorem pathHeat_continuous {q : ℕ} (T : ℝ) (u : C(Icc (0 : ℝ) T, SobolevS
     (f := fun p : ℝ≥0 × Icc (0 : ℝ) T => (p.1, u p.2))
     (heatOperator_joint_continuous period q) (continuous_fst.prodMk (u.continuous.comp continuous_snd))
 
-/-- A continuous path regularized by three genuine spatial heat derivatives. -/
-def regularizedPath {q : ℕ} (T : ℝ) (n : ℕ) (u : C(Icc (0 : ℝ) T, SobolevSpace period q)) :
-    C(Icc (0 : ℝ) T, SobolevSpace period (q+3)) := mapPath period T (heatRegularizer period q n) u
 
 
 /-- Regularization at adjacent Sobolev levels has exactly the same underlying field. -/

@@ -931,21 +931,6 @@ theorem powered_physical_tail_of_chart_bound {a : ℕ → ℕ} {h : ℝ}
       dsimp [C]
       linarith
 
-theorem exists_powered_physical_tail_finite {a : ℕ → ℕ} {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : ℕ → Inner → V} (hf : ∀ j, ContDiff ℝ ∞ (f j)) (lo hi b : ℝ)
-    (ha : AdmissibleScales h f (innerBox lo hi) a) (M Jmin : ℕ) (P : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∃ δ C : ℝ, 0 < δ ∧ 0 < C ∧
-      ∀ m ≤ M, ∀ p : Chart, p.1 < 1 → (physicalChart h p).1 < δ →
-        (physicalChart h p).2.1 ∈ Icc lo hi →
-        ‖iteratedFDeriv ℝ m
-          (fun y => physicalProfile a h b f y - physicalUncutPrefix h b f J y) p‖ ≤
-            C * (physicalChart h p).1 ^ P := by
-  obtain ⟨J, hJmin, hJM, δ, hδ, hb⟩ :=
-    exists_ordinary_uncut_tail hh hf ha M Jmin (P - b + M)
-  obtain ⟨δ', C, hδ', hC, hbound⟩ := powered_physical_tail_of_chart_bound
-    hh hh1 hf lo hi b ha.strictMono J M P ((1 / 2 : ℝ) ^ J) δ (by positivity) hδ hb
-  exact ⟨J, hJmin, hJM, δ', C, hδ', hC, hbound⟩
 
 
 end PoweredTails
@@ -1124,18 +1109,6 @@ theorem baseVelocity_divergence_zero {a : ℕ → ℕ} (ha : StrictMono a) {h : 
     ((physicalProfile_smoothOn ha hh hh1 (bundleComponent_smooth hd C 1) _).of_le
       (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2)) ht x
 
-/-- Existence of the shared schedule and the actual smooth, exactly
-solenoidal base uses only the supplied smooth coefficient sequence. -/
-theorem exists_base_fields {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {d : Coefficients} (hd : SmoothCoefficients d) (C lo hi : ℝ) (B : ℕ) :
-    ∃ a : ℕ → ℕ, B ≤ a 0 ∧ AdmissibleScales h (coefficientBundle C d) (innerBox lo hi) a ∧
-      ContDiffOn ℝ ∞ (baseVelocity a h C d) (Iio 1 ×ˢ (univ : Set ProblemStatement.Space)) ∧
-      ∀ t : ℝ, t < 1 → ∀ x : ProblemStatement.Space,
-        ProblemStatement.spatialDivergence (baseVelocity a h C d) t x = 0 := by
-  obtain ⟨a, haB, ha⟩ := exists_admissibleScales (coefficientBundle_smooth hd C) hh
-    (innerBox_isCompact lo hi) B
-  exact ⟨a, haB, ha, baseVelocity_smooth ha.strictMono hh hh1 hd C,
-    fun _ ht x => baseVelocity_divergence_zero ha.strictMono hh hh1 hd C ht x⟩
 
 end BaseFields
 

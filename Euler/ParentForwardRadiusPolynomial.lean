@@ -97,15 +97,6 @@ theorem geometryForward_radius_primitives (δ : ℝ) (ξ : U) (X : ℝ)
     delta_inverse := hδX.trans hXV
     terminal := hξX.trans hXV }
 
-theorem geometryCanonicalRadius_power (δ : ℝ) (hδ : 0 < δ) (ξ : U) (X : ℝ)
-    (hKX : L.K ≤ X) (hTiX : Ti ≤ X) (hCpX : Cp ≤ X)
-    (hLX : H.L ≤ X) (hδX : δ⁻¹ ≤ X) (hξX : ‖ξ‖ ≤ X) :
-    L.geometryCanonicalRadius H m hm R S hS P G hball Ω hΩ hΩo hsub hΩball Ti hT1 hTi δ ξ ≤
-      fullConstant*X^fullPower := by
-  have hp := L.geometryForward_radius_primitives H m hm R S hS P G hball Ω hΩ hΩo hsub hΩball
-    Ti hT1 hTi δ ξ X hKX hTiX hCpX hLX hδX hξX
-  exact (EulerPacketForwardRadius.canonicalRadius_le_envelope (J).linear (J).mean (J).normal BC δ ξ
-    (sourceEnvelope X) hδ hp).trans (fullEnvelope_power X (L.K_one.trans hKX))
 
 
 

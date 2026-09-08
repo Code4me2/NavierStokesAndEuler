@@ -215,11 +215,6 @@ theorem continuous_zero_of_compactSupport (F : SchwartzMap Space ℂ → ℂ)
   rw [hz] at hlim
   exact tendsto_nhds_unique hlim tendsto_const_nhds
 
-/-- The continuous linear form version of compact-test extension. -/
-theorem eq_zero_of_compactSupport (F : SchwartzMap Space ℂ →L[ℂ] ℂ)
-    (hzero : ∀ ψ : SchwartzMap Space ℂ, HasCompactSupport (ψ : Space → ℂ) → F ψ = 0)
-    (ψ : SchwartzMap Space ℂ) : F ψ = 0 :=
-  continuous_zero_of_compactSupport F F.continuous hzero ψ
 
 
 end NavierStokesR3.SchwartzCompactApproximation

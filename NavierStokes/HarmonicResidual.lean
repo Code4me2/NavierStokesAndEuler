@@ -557,11 +557,6 @@ theorem band_nonconstant {c : Coefficients D} {N : ℕ} (hc : BandLimited c N) :
   exact hc j ((Finset.mem_erase.mp (show j ∈ c.support.erase 0 by
     simpa only [nonconstant, HarmonicFields.Coefficients.support, AddMonoidAlgebra.coeff_erase, Finsupp.support_erase] using hj)).2)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem nonconstant_support {c : Coefficients D} {j : ℤ}
-    (hj : j ∈ (nonconstant c).support) : j ≠ 0 := by
-  exact (Finset.mem_erase.mp (show j ∈ c.support.erase 0 by
-    simpa only [nonconstant, HarmonicFields.Coefficients.support, AddMonoidAlgebra.coeff_erase, Finsupp.support_erase] using hj)).1
 
 theorem SmoothCoefficients.nonconstant {U : Set D} {c : Coefficients D}
     (hc : SmoothCoefficients U c) : SmoothCoefficients U (nonconstant c) := by

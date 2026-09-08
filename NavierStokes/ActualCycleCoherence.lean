@@ -800,15 +800,6 @@ theorem iterate_coherent (j : ℕ) : Coherent (state B N0 j) := by
         rw [state_labels]
         exact hcover l n z hz hs) hS hcore
 
-include H W hS hcore hcover in
-theorem iterate_waves (j n m k : ℕ)
-    (hi : CommonWindow.index h n + k = CommonWindow.index h m) :
-    CycleStateCoherence.CycleWavesOn geometry (ActualCycleParameters.fixedParameters B N0)
-      (state B N0 j).coefficients (commonContext B) (state B N0 j).state (overlap n m) n m k :=
-  waves (H j) (W j) (iterate_coherent B N0 sigma S H W hS hcore hcover j)
-    (fun l n z hz hs => by
-      rw [state_labels]
-      exact hcover l n z hz hs) hS hcore n m k hi
 
 
 end Iteration

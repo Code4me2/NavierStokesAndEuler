@@ -165,25 +165,6 @@ def classicalLaplacian (g : LiftDomain period → Vector3) : LiftDomain period �
   fun x => ∑ i : Fin 4, fieldDerivative period (standardDirection i)
     (fieldDerivative period (standardDirection i) g) x
 
-/-- The jet Laplacian is represented by the actual classical Laplacian of every smooth representative. -/
-theorem jetLaplacian_ae {f : LiftL2 period} (J : SpatialJet period standardDirection 2 f)
-    (g : LiftDomain period → Vector3)
-    (hrep : (f : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g)
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x)) :
-    (jetLaplacian period J : LiftDomain period → Vector3) =ᵐ[liftMeasure period]
-      classicalLaplacian period g := by
-  have hword (i : Fin 4) : (J.word (fun _ : Fin 2 => i) : LiftDomain period → Vector3)
-      =ᵐ[liftMeasure period] fieldDerivative period (standardDirection i)
-        (fieldDerivative period (standardDirection i) g) := by
-    simpa only [iteratedFieldDerivative_succ, iteratedFieldDerivative_zero, Fin.tail]
-      using EulerStrongSmoothJet.jet_word_ae period (le_refl 2) f J (fun _ : Fin 2 => i) g hrep hg
-  have hall : ∀ᵐ x ∂liftMeasure period, ∀ i : Fin 4,
-      (J.word (fun _ : Fin 2 => i)) x = fieldDerivative period (standardDirection i)
-        (fieldDerivative period (standardDirection i) g) x := ae_all_iff.mpr hword
-  filter_upwards [Lp.coeFn_fun_finsetSum (Finset.univ : Finset (Fin 4))
-    (fun i => J.word (fun _ : Fin 2 => i)), hall] with x hx hh
-  rw [jetLaplacian, hx]
-  exact Finset.sum_congr rfl (fun i _ => hh i)
 
 
 end EulerMetricHeatEnergy

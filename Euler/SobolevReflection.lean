@@ -62,20 +62,6 @@ theorem sobolevReflection_word_norm {q : ℕ} (u : SobolevSpace period q) (w : S
   rw [sobolevReflection_apply, norm_smul, reflection_norm, norm_pow]
   norm_num
 
-/-- Reflection preserves the actual finite Sobolev norm. -/
-theorem sobolevReflection_norm {q : ℕ} (u : SobolevSpace period q) :
-    ‖sobolevReflection period q u‖ = ‖u‖ := by
-  apply le_antisymm
-  · change ‖(sobolevReflection period q u).val‖ ≤ ‖u.val‖
-    apply (pi_norm_le_iff_of_nonneg (norm_nonneg u.val)).mpr
-    intro w
-    rw [sobolevReflection_word_norm]
-    exact norm_le_pi_norm u.val w
-  · change ‖u.val‖ ≤ ‖(sobolevReflection period q u).val‖
-    apply (pi_norm_le_iff_of_nonneg (norm_nonneg _)).mpr
-    intro w
-    have hh := norm_le_pi_norm (sobolevReflection period q u).val w
-    rwa [sobolevReflection_word_norm] at hh
 
 
 /-- Truncating the Sobolev order commutes with actual reflection. -/

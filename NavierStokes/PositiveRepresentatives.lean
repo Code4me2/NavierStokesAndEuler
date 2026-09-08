@@ -571,12 +571,6 @@ theorem stablePullback_smoothAt {h : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2)
   ((stableQ_smoothAt hh hh1 hp).rpow_const_of_ne (stableQ_spec hp).1.ne').mul
     (hf.comp p (stableInner_smoothAt hh hh1 hp))
 
-theorem stablePullback_eventuallyEq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (exponent : ℝ) (f : (ℝ × ℝ) → ℝ) {p : Slow} (hp : 0 < p.2.2) :
-    stablePullback h exponent f =ᶠ[𝓝 p] physicalPullback h exponent f := by
-  filter_upwards [stableQ_eventuallyEq_chartQ hh hh1 hp,
-    stableInner_eventuallyEq_chartInner hh hh1 hp] with q hq hi
-  exact congrArg₂ (fun r x => r ^ exponent * f x) hq hi
 
 
 /-! ## Compact reference data are transferred only at positive time -/

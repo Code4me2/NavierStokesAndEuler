@@ -990,42 +990,6 @@ theorem common_curl_zero_germ (K : PeriodizedWaveBounds.Cells D I)
   simp only [PeriodizedWaveBounds.coefficient_zero, PeriodizedWaveBounds.curlRemainder_zero] at hh
   exact hh
 
-/-- Primitive local input estimates imply all five actual common-field
-classes. No global background normal, material defect, or remainder class
-is a premise. The unused region is handled by genuine zero germs. -/
-theorem common_bounds_from_native_local (K : PeriodizedWaveBounds.Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} {d : GraphDirections D} {W : ℕ → D → ℝ} {α κ : ℝ}
-    (hW : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (h : InputBounds s K.carrier (fun n _ => W n) α κ d (nativeFamily a))
-    (hκ : κ ≤ 1 / 2) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → b ≤ ‖a.background.normal s d n x‖)
-    (hupper : ∀ n i x, x ∈ s.domain → x ∈ K.carrier n i → ‖a.background.normal s d n x‖ ≤ M)
-    (hfreq : LocalUnweighted s K.carrier (1 / 2) (fun n _ _ => 1 / a.background.frequency n)) :
-    WaveClass s W α a.common.amplitude ∧
-    WaveClass s W α (a.commonCorrected s d).amplitude ∧
-    WaveClass s W (α + 1 / 2) a.common.pressure ∧
-    WaveClass s W (α + 1 / 2 - κ) (a.common.curlCorrection s d) ∧
-    WaveClass s W (α + 1 / 2 - 3 * κ) (a.globalGood s d) := by
-  have hw : ∀ n x, x ∈ s.domain → 0 ≤ Real.sqrt (s.zeta x) * W n x :=
-    fun n x hx => mul_nonneg (Real.sqrt_nonneg _) (hW n x hx)
-  have hc := h.curlCorrection_class hb hlower hupper hfreq
-  have hci j := hc.map (ContinuousLinearMap.proj j)
-  have hcorrected := h.add_curl_amplitude hκ hci
-  have hgood := h.retainedGood_class hκ hb hlower hupper hfreq
-  obtain ⟨ha, hp⟩ := a.common_classes K hs hw
-    (component_classes h.amplitude).to_localJets h.pressure.to_localJets
-  refine ⟨ha, ?_, hp, ?_, ?_⟩
-  · exact a.commonCorrected_class_of_native K hs d hw
-      (component_classes hcorrected.amplitude).to_localJets
-  · apply PeriodizedWaveBounds.memClass_of_local_germs hw hc.to_localJets
-    intro n x hx
-    classical
-    by_cases hi : ∃ i, x ∈ K.carrier n i
-    · obtain ⟨i, hi⟩ := hi
-      exact Or.inl ⟨i, hi, common_curl_germ a K hs s d hi⟩
-    · exact Or.inr (common_curl_zero_germ a K hs s d (not_exists.mp hi))
-  · exact a.globalGood_class_of_native K hs d hw hgood.to_localJets
 
 
 /-- The copy cell may be larger than the native phase patch. Primitive

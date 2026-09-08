@@ -792,56 +792,6 @@ theorem copy_growth_le
       25 * (BaseContextAssembly.slowScale (chart n) * max 1 ((viewStrip W U chart).delta x)⁻¹)
     ring)
 
-/-- The copy chart is assembled from the actual dyadic and slot maps.
-The only indexing restrictions are the active four-level window and
-the chosen common-cover budget; all analytic comparisons are derived. -/
-noncomputable def copyChart (hr0 : 0 < r0)
-    (hchart : ∀ n, 1 ≤ chart n)
-    (hnear : ∀ l n, chart n ≤ BaseChartJets.cellBand (reference l n) + 4 ∧
-      BaseChartJets.cellBand (reference l n) ≤ chart n + 4)
-    {budget : ℕ} (hi : CommonBaseContext.IndexBounds F.data.h index budget) :
-    ActualSignedControl.CopyChart (viewStrip W U chart) (nativeDomain H v a)
-      (preparedChart H v a hr0).weight
-      (phaseCell H v a sys hdet reference chart index sign) where
-  index := reference
-  linear l n _ := copyLinear sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n))
-  shift l n k := copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k 0
-  maps l n k x hx hi := by
-    rw [← copyPoint_affine]
-    exact hi
-  growthConstant := 25
-  linearConstant := slowChangeCost F.data.h +
-    25 * CommonCoverClass.bandArgumentCost (TorusAverages.slotChart vr vt hdet)
-      (budget + SlotColoring.nativeGap F.data.h)
-  growth_one := by norm_num
-  linear_one := by
-    have h1 := slowChangeCost_one F.data.h
-    have h2 := CommonCoverClass.bandArgumentCost_one_le (TorusAverages.slotChart vr vt hdet)
-      (budget + SlotColoring.nativeGap F.data.h)
-    linarith
-  growthDegree := 1
-  linearDegree := 1
-  growth_bound l n k x hx _ := by
-    rw [← copyPoint_affine, pow_one]
-    exact copy_growth_le H v a sys hdet U reference chart index sign hchart hnear l n k hx
-  linear_bound l n _ := by
-    rw [pow_one]
-    exact norm_copyLinear_le sys hdet F.data.h_pos.le hi (hchart n)
-      (a.large _ (reference l n).property).four_le (hnear l n).1 (hnear l n).2
-  weight_eq l n k x hx _ := by
-    rw [← copyPoint_affine]
-    exact copy_weight_eq H v a sys hdet U reference chart index sign hr0 l n k hx
-  ratioLower := 1 / 5
-  ratioUpper := 5
-  ratio_pos := by norm_num
-  ratio_one := by norm_num
-  scale_ratio l n := by
-    change 1 / 5 ≤ Real.sqrt (max 1 (ChartScales.S (chart n))) /
-        Real.sqrt (ChartScales.S (BaseChartJets.cellBand (reference l n))) ∧
-      Real.sqrt (max 1 (ChartScales.S (chart n))) /
-        Real.sqrt (ChartScales.S (BaseChartJets.cellBand (reference l n))) ≤ 5
-    rw [max_eq_right (PhysicalGraphBounds.S_ge_one (hchart n))]
-    exact sqrt_S_window (hchart n) (reference l n).val.property.1 (hnear l n).1 (hnear l n).2
 
 
 end PreparedCopies
@@ -1252,14 +1202,7 @@ noncomputable def activeReference (_ : Unit) (q : ℕ) : Label H v a :=
 noncomputable def activeChart (q : ℕ) : ℕ :=
   chart (activeEnumeration H v a reference chart q).val.2
 
-noncomputable def activeSign (_ : Unit) (q : ℕ) : Fin 2 :=
-  sign (activeEnumeration H v a reference chart q).val.1
-    (activeEnumeration H v a reference chart q).val.2
 
-theorem active_near (q : ℕ) :
-    activeChart H v a reference chart q ≤ BaseChartJets.cellBand (activeReference H v a reference chart () q) + 4 ∧
-      BaseChartJets.cellBand (activeReference H v a reference chart () q) ≤ activeChart H v a reference chart q + 4 :=
-  (activeEnumeration H v a reference chart q).property.2
 
 
 
@@ -1285,31 +1228,6 @@ noncomputable def cylinderStrip (s : StripData Native) : StripData Cylinder :=
   ParticularWaveBounds.reindexStrip (StateReindex.cylinder (ParticularWaveBounds.liftAssoc Plane))
     (HarmonicWaveInteraction.productStrip s)
 
-noncomputable def cylinderCopyChart {Λ I i : Type} {s : StripData Native}
-    {V : JetDomain i Native} {weight : i → Native → ℝ} {K : Λ → ℕ → I → Set Native}
-    (c : ActualSignedControl.CopyChart s V weight K) :
-    ActualSignedControl.CopyChart (cylinderStrip s) V weight
-      (fun l n k => cylinderNative ⁻¹' K l n k) where
-  index := c.index
-  linear l n k := (c.linear l n k).comp cylinderNativeLinear
-  shift := c.shift
-  maps l n k x hx hk := c.maps l n k (cylinderNative x) hx hk
-  growthConstant := c.growthConstant
-  linearConstant := c.linearConstant
-  growth_one := c.growth_one
-  linear_one := c.linear_one
-  growthDegree := c.growthDegree
-  linearDegree := c.linearDegree
-  growth_bound l n k x hx hk := c.growth_bound l n k (cylinderNative x) hx hk
-  linear_bound l n k := by
-    exact (ContinuousLinearMap.opNorm_comp_le _ _).trans
-      ((mul_le_of_le_one_right (norm_nonneg _) norm_cylinderNativeLinear).trans (c.linear_bound l n k))
-  weight_eq l n k x hx hk := c.weight_eq l n k (cylinderNative x) hx hk
-  ratioLower := c.ratioLower
-  ratioUpper := c.ratioUpper
-  ratio_pos := c.ratio_pos
-  ratio_one := c.ratio_one
-  scale_ratio := c.scale_ratio
 
 
 /-! ## The actual cutoffs locate every nonzero native contribution -/

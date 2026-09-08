@@ -341,12 +341,6 @@ noncomputable def signedPhasePatch (l : Index B N0) (n : ℕ) (k : Frequency) : 
         (ActualPrimary.choice B N0).prepared.N).carrier l.1 ∧
     ActualSignedStageControls.nativeTime l n k x ∈ Ioo (0 : ℝ) 1}
 
-theorem signedPhasePatch_open (l : Index B N0) (n : ℕ) (k : Frequency) :
-    IsOpen (signedPhasePatch l n k) :=
-  (((PrimaryGeometryAssembly.domain ActualPrimary.nominal
-    (ActualPrimary.choice B N0).prepared.N).isOpen l.1).preimage
-      (ActualSignedStageControls.nativePoint_smooth l n k).continuous.fst).inter
-    (isOpen_Ioo.preimage (ActualSignedStageControls.nativeTime_smooth l n k).continuous)
 
 theorem native_time_pos (l : Index B N0) (n : ℕ) (k : Frequency) {x : FullPoint}
     (hx : x ∈ ActualWaveRegularity.fullDomain ActualPrimary.standardRegion) :
@@ -375,17 +369,6 @@ theorem mask_zero_germ_outside_carrier (l : Index B N0) (n : ℕ) (k : Frequency
   rw [ActualPrimary.spatialMask_eq, hy, mul_zero]
 
 
-theorem signedPhasePatch_positive (l : Index B N0) (n : ℕ) (k : Frequency)
-    {x : FullPoint} (hx : x ∈ ActualWaveRegularity.fullDomain ActualPrimary.standardRegion ∩
-      signedPhasePatch l n k) : x ∈ ActualPrimaryCoherence.positiveRadialChart := by
-  have hp := (ActualPrimary.choice B N0).prepared.radius_pos l.1
-    (ActualSignedStageControls.nativePoint l n k x).1 hx.2.1
-  have hq := Real.sqrt_pos.mpr (ChartScales.Q_pos (BaseChartJets.cellBand l.1))
-  have hn := Real.sqrt_pos.mpr (ChartScales.Q_pos n)
-  change 0 < Real.sqrt (ChartScales.Q n) * x.1.1 /
-    Real.sqrt (ChartScales.Q (BaseChartJets.cellBand l.1)) at hp
-  have hmul := (div_pos_iff_of_pos_right hq).mp hp
-  exact ⟨(mul_pos_iff_of_pos_left hn).mp hmul, ActualPrimary.standardRegion.time_pos _ hx.1.1⟩
 
 
 

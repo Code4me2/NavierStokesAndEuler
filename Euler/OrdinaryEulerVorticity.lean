@@ -62,18 +62,8 @@ theorem pointwise_vorticity_le (t : Icc (0 : ℝ) T) (x : Space) :
 
 def vorticityIntegral (t : Icc (0 : ℝ) T) : ℝ := realIntegral T hT U.vorticityNormPath t
 
-theorem vorticityIntegral_nonneg (t : Icc (0 : ℝ) T) : 0 ≤ U.vorticityIntegral t :=
-  intervalIntegral.integral_nonneg_of_forall t.property.1
-    (fun r => U.vorticityNormPath_nonneg (projIcc 0 T hT r))
 
-theorem vorticityIntegral_initial : U.vorticityIntegral ⟨0,le_rfl,hT⟩=0 :=
-  intervalIntegral.integral_same
 
-theorem vorticityIntegral_continuous : Continuous U.vorticityIntegral :=
-  (show Continuous (realIntegral T hT U.vorticityNormPath) from
-    (show Differentiable ℝ (realIntegral T hT U.vorticityNormPath) from
-      fun t => (realIntegral_hasDerivAt T hT U.vorticityNormPath t).differentiableAt).continuous).comp
-        continuous_subtype_val
 
 theorem vorticityIntegral_mono (s t : Icc (0 : ℝ) T) (hst : (s : ℝ) ≤ t) :
     U.vorticityIntegral s ≤ U.vorticityIntegral t :=

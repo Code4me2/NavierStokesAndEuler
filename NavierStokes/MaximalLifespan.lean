@@ -194,13 +194,6 @@ theorem candidate_is_maximal {u : VelocityField} {p : PressureField}
   rintro ⟨T, v, q, hT, hv, _⟩
   exact candidate_no_solution_after_one h hT hv
 
-/-- Any shorter classical solution extends by the actual candidate field. -/
-theorem candidate_extends_shorter_solution {u v : VelocityField} {p q : PressureField}
-    {f : VelocityField} {T : ℝ} (h : CandidateProperties u p f)
-    (hv : ClassicalSolution f (fun _ => 0) T v q) (hT : T < 1) :
-    HasClassicalExtension f (fun _ => 0) T v := by
-  refine ⟨1, u, p, hT, candidate_is_classical_solution h, ?_⟩
-  simpa only [min_eq_left hT.le] using candidate_agree_on_overlap h hv
 
 
 

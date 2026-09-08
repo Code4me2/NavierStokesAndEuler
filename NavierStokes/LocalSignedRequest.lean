@@ -745,17 +745,7 @@ theorem physicalBarSigma_chart (P : SignedStressPrimitive.Patch) (e : ℕ)
   rw [hslice]
   exact torusAverage_coverPull_local l C k u hU hg hp v hs
 
-/-- This field has no band index: every normalized request below represents
-this same physical signed stress. -/
-noncomputable def physicalRequestedStress (P : SignedStressPrimitive.Patch) (q : S → ℝ)
-    (Fθ Fz : PressureStream.Lift S → ℝ) (x : ℝ × S) : SignedWaveUpdate.Vec2 :=
-  ![SignedStressPrimitive.physicalBarSigma P 2 q Fθ x,
-    SignedStressPrimitive.physicalBarSigma P 1 q Fz x]
 
-theorem stress_unit_factor {Q : ℝ} (hQ : 0 < Q) (A : ℝ) :
-    Q ^ (2 * A) * (Q ^ (-(2 * A + 1 / 2)) / Q ^ (-(1 / 2 : ℝ))) = 1 := by
-  rw [← Real.rpow_sub hQ, ← Real.rpow_add hQ]
-  convert! Real.rpow_zero Q using 1 ; ring_nf
 
 
 theorem physicalSigma_fiber_congr (P : SignedStressPrimitive.Patch) (e : ℕ)
@@ -867,20 +857,6 @@ theorem physicalAdjusted_moment_zero {coord : ℝ} (U : SlowRegion coord)
     (fun _ => U.qlo_pos.trans_le (U.q_mem s hsp).1)
     (frozenBar_smooth U.isOpen hsp hf) (frozenBar_supported P hsp hs) 0
 
-theorem physicalBarSigma_supported {coord : ℝ} (U : SlowRegion coord)
-    (P : SignedStressPrimitive.Patch) (e : ℕ) {f : Point → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U.carrier))
-    (hs : MovingSupport P.a P.b coord U.carrier f) :
-    MovingSupport P.a P.b coord U.carrier
-      (fun x => SignedStressPrimitive.physicalBarSigma P e
-        (SimilarityCoordinates.coordinateQ coord) f (x.1, x.2.1)) := by
-  intro x hx hn
-  change SignedStressPrimitive.physicalBarSigma P e
-    (SimilarityCoordinates.coordinateQ coord) f (x.1, x.2.1) ≠ 0 at hn
-  rw [frozenBar_sigma] at hn
-  exact SignedStressPrimitive.physicalSigma_supported P e contDiff_const
-    (fun _ => U.qlo_pos.trans_le (U.q_mem x.2.1 hx).1)
-    (frozenBar_smooth U.isOpen hx hf) (frozenBar_supported P hx hs) (x.1, 0) hn
 
 
 theorem physicalBarSigma_contDiffOn {coord : ℝ} (U : SlowRegion coord)

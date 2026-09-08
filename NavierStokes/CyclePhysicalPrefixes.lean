@@ -164,26 +164,7 @@ noncomputable def pressure (a : ℝ) (j : PolarCharts.Index) (G : ScaledGraph) (
     (p₀ : Cylinder → ℝ) (u : State CyclePoint) : PressureField :=
   polarPressureMap a j (cylindricalPressure G n p₀ u)
 
-theorem velocity_polar_forward {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (n : ℕ) (c : Context CyclePoint) (u : State CyclePoint)
-    {z : SpaceTime} (hz : z ∈ PhysicalCurlCovariance.validCylindrical a j) :
-    velocity a j G n c u (z.1, CylindricalResidual.chart z.2) =
-      CylindricalResidual.frame (z.2 1) (cylindricalVelocity G n c u z) := by
-  change CylindricalResidual.frame
-    (PhysicalCurlCovariance.polarInput a j (z.1, CylindricalResidual.chart z.2)).2
-    (cylindricalVelocity G n c u
-      (PhysicalCurlCovariance.polarCoordinates a j (z.1, CylindricalResidual.chart z.2))) = _
-  rw [PhysicalCurlCovariance.polarInput_forward ha j hz,
-    PhysicalCurlCovariance.polarCoordinates_forward ha j hz]
 
-theorem pressure_polar_forward {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (n : ℕ) (p₀ : Cylinder → ℝ) (u : State CyclePoint)
-    {z : SpaceTime} (hz : z ∈ PhysicalCurlCovariance.validCylindrical a j) :
-    pressure a j G n p₀ u (z.1, CylindricalResidual.chart z.2) =
-      cylindricalPressure G n p₀ u z := by
-  change cylindricalPressure G n p₀ u
-    (PhysicalCurlCovariance.polarCoordinates a j (z.1, CylindricalResidual.chart z.2)) = _
-  rw [PhysicalCurlCovariance.polarCoordinates_forward ha j hz]
 
 
 
@@ -389,23 +370,6 @@ theorem mixedVelocity_prefix {U : Set SpaceTime} (hU : IsOpen U)
       exact (congrFun (velocityStages_split p c seed a j G n k) z).symm
     _ = _ := congrFun (velocity_prefix p c seed a j G n J) z
 
-/-- The actual nonlinear residuals agree locally, as a consequence of the
-proved finite velocity/pressure identities. No residual estimate is assumed. -/
-theorem mixedResidual_prefix {U : Set SpaceTime} (hU : IsOpen U)
-    (A : ℕ → VelocityField) (hA : ∀ k, DifferentiableOn ℝ (A k) U)
-    (hcurl : ∀ k, EqOn (SpatialCurl.spatialCurl (A k))
-      (potentialParts p c seed a j G n k) U) (p₀ : Cylinder → ℝ) (J : ℕ) :
-    EqOn (fun z => navierStokesResidual
-      (MixedDiagonalResidual.uncutVelocity A (directStages p c seed a j G n) J)
-      (DiagonalJetBounds.uncutPrefix (pressureStages p c seed a j G n p₀) (J + 1)) z.1 z.2)
-      (fun z => navierStokesResidual
-        (velocity a j G n c (CycleState.iterate p c seed J).state)
-        (pressure a j G n p₀ (CycleState.iterate p c seed J).state) z.1 z.2) U := by
-  intro z hz
-  apply ResidualRegularity.residual_congr
-  · exact eventually_of_mem (hU.mem_nhds hz)
-      (fun _ hy => mixedVelocity_prefix p c seed a j G n hU A hA hcurl J hy)
-  · exact Filter.Eventually.of_forall (fun y => congrFun (pressure_prefix p c seed a j G n p₀ J) y)
 
 
 end MixedPrefixes

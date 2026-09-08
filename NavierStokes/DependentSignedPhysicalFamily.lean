@@ -415,35 +415,6 @@ variable {J : Type*} {a b h r0 Z P0 α σ : ℝ} {Δ : ℕ}
   (hfrequency : ∀ i k L, |((f i L).carrier k L).angular| ≤ P0 ∧
     |((f i L).carrier k L).axial| ≤ P0 ∧ |((f i L).carrier k L).radial| ≤ P0)
 
-/-- The physical factory is applied once to all labels. Its source and
-phase bounds are jointly quantified; individual physical bounds are not
-inputs to this constructor. -/
-noncomputable def waveData : PhysicalStageBounds.WaveData h E (Σ L, ι L) K J where
-  lowerRadius := a
-  upperRadius := b
-  nativeWidth := r0
-  slowBound := Z
-  frequencyBound := P0
-  alpha := α
-  shift := σ
-  harmonics := H
-  gapBound := Δ
-  lower_pos := ha
-  width_nonneg := hr0
-  slow_nonneg := hZ
-  frequency_one_le := hP
-  strip := s
-  weight := jointSource weight
-  source := jointSource source
-  source_bounds := hsource
-  copies i := diagonal (f i)
-  cells i := diagonalCells (f i) (c i)
-  chart i := diagonalChart (f i) (c i) source (ch i) (hchart i)
-  chart_maps := hmap
-  carrier i := diagonalCarrier (f i) (c i) (bc i) (hphase i)
-  support i := diagonalSupport (f i) (hsupport i)
-  smooth i := diagonalSmooth (f i) (hsmooth i)
-  frequencies := hfrequency
 
 
 

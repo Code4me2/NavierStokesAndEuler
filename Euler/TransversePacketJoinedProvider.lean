@@ -107,26 +107,11 @@ theorem highSolve_eq : highSolve (P := P) τ hτ hτT B raw =
 
 variable (h : Nonempty (Forcing P D raw))
 
-def highVectorField : Field P D.T (highSolve (P := P) τ hτ hτT B raw).1 :=
-  (vectorField τ hτ hτT B (Classical.choice h)).congr (fun t x θ => by
-    rw [highSolve_of_admissible τ hτ hτT B h])
-
-def highDerivativeField : Field P D.T (vectorDerivative τ hτ hτT B (Classical.choice h)) :=
-  vectorDerivativeField τ hτ hτT B (Classical.choice h)
 
 
 
-def highCorrectorField : Field P D.T (D.curlCorrector P (highSolve (P := P) τ hτ hτT B raw).1) where
-  path := correctorPath τ hτ hτT B (Classical.choice h)
-  orbit := correctorPath_orbit τ hτ hτT B (Classical.choice h)
-  raw_eq t x θ := by
-    rw [highSolve_of_admissible τ hτ hτT B h]
-    exact (correctorField τ hτ hτT B (Classical.choice h)).raw_eq t x θ
 
-def highCorrectorDerivativeField : Field P D.T (correctorDerivative τ hτ hτT B (Classical.choice h)) where
-  path := correctorTimePath τ hτ hτT B (Classical.choice h)
-  orbit := correctorTimePath_orbit τ hτ hτT B (Classical.choice h)
-  raw_eq t x θ := (correctorDerivativeField τ hτ hτT B (Classical.choice h)).raw_eq t x θ
+
 
 
 include h in

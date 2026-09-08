@@ -59,11 +59,6 @@ def realization (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
     (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) : Lp E 2 (μ.prod ν) :=
   (field_memLp w f hf hrep).toLp f
 
-theorem realization_ae (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
-    (hf : AEStronglyMeasurable f (μ.prod ν))
-    (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) :
-    (realization w f hf hrep : α × β → E) =ᵐ[μ.prod ν] f :=
-  (field_memLp w f hf hrep).coeFn_toLp
 
 variable [SFinite μ]
 

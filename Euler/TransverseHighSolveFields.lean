@@ -23,34 +23,10 @@ def highSolveCorrectorDerivative : VectorField := by
 
 variable (h : Nonempty (Forcing P D raw))
 
-def highSolveField : Field P D.T (highSolve P D I raw).1 where
-  path := (Classical.choice h).fullVelocityPath I
-  orbit := (Classical.choice h).velocityPath_orbit I
-  raw_eq t x θ := by
-    rw [highSolve_of_admissible D I raw h]
-    exact ((Classical.choice h).vectorField I).raw_eq t x θ
-
-def highSolveDerivativeField : Field P D.T (highSolveDerivative P D I raw) where
-  path := (Classical.choice h).fullDerivativePath I
-  orbit := (Classical.choice h).derivativePath_orbit I
-  raw_eq t x θ := by
-    simp only [highSolveDerivative, dite_eq_left h]
-    exact ((Classical.choice h).vectorDerivativeField I).raw_eq t x θ
 
 
-def highSolveCorrectorField : Field P D.T (D.curlCorrector P (highSolve P D I raw).1) where
-  path := (Classical.choice h).correctorPath I
-  orbit := (Classical.choice h).correctorPath_orbit I
-  raw_eq t x θ := by
-    rw [highSolve_of_admissible D I raw h]
-    exact ((Classical.choice h).curlCorrectorField I).raw_eq t x θ
 
-def highSolveCorrectorDerivativeField : Field P D.T (highSolveCorrectorDerivative P D I raw) where
-  path := (Classical.choice h).correctorTimePath I
-  orbit := (Classical.choice h).correctorTimePath_orbit I
-  raw_eq t x θ := by
-    simp only [highSolveCorrectorDerivative, dite_eq_left h]
-    exact ((Classical.choice h).correctorDerivativeField I).raw_eq t x θ
+
 
 
 

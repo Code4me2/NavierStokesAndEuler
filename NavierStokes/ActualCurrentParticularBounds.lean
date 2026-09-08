@@ -374,16 +374,6 @@ theorem smul_mode_jet_bound_local {V : Type*} [NormedAddCommGroup V]
         (pow_le_pow_right₀ (by norm_num) hk) hD) hA
     _ = _ := by dsimp [D]; ring
 
-omit [FiniteDimensional ℝ E] in
-theorem smoothNear_mode {a : E → ℂ} {Φ : E → ℝ} {x : E}
-    (ha : LocalPhysicalCopyBounds.SmoothNear a x)
-    (hΦ : LocalPhysicalCopyBounds.SmoothNear Φ x) (c : ℝ) :
-    LocalPhysicalCopyBounds.SmoothNear (fun y => a y * PhysicalGraphBounds.character c (Φ y)) x := by
-  obtain ⟨U, hU, hxU, haU⟩ := ha
-  obtain ⟨V, hV, hxV, hΦV⟩ := hΦ
-  exact ⟨U ∩ V, hU.inter hV, ⟨hxU, hxV⟩,
-    (haU.mono inter_subset_left).mul
-      ((PhysicalGraphBounds.character_smooth c).comp_contDiffOn (hΦV.mono inter_subset_right))⟩
 
 end Carrier
 

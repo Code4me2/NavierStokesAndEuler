@@ -67,8 +67,6 @@ theorem axial_contDiff {Gi : ℝ → ℝ} (hGi : ContDiff ℝ ∞ Gi) :
 theorem angular_pos (C T : ℝ) (li : ℝ → ℝ) (p : ℝ × ℝ) :
     0 < angular C T li p := Real.exp_pos _
 
-theorem log_angular (C T : ℝ) (li : ℝ → ℝ) (p : ℝ × ℝ) :
-    Real.log (angular C T li p) = logProfile C T li p := Real.log_exp _
 
 theorem angular_eq_inv_mul {C : ℝ} (hC : 0 < C) (T : ℝ) (li : ℝ → ℝ)
     (p : ℝ × ℝ) : angular C T li p = C⁻¹ * amplitude T li p := by
@@ -77,12 +75,6 @@ theorem angular_eq_inv_mul {C : ℝ} (hC : 0 < C) (T : ℝ) (li : ℝ → ℝ)
     -Real.log C + (p.1 / 10 + blend T li p) by ring,
     Real.exp_add, Real.exp_neg, Real.exp_log hC]
 
-theorem angular_before {C T y : ℝ} (hC : 0 < C) (hT : 0 < T) (hy : y ≤ 0)
-    (li : ℝ → ℝ) (eta : ℝ) :
-    angular C T li (y, eta) = C⁻¹ * Real.exp (y / 10 + li eta) := by
-  rw [angular_eq_inv_mul hC]
-  simp [amplitude, blend,
-    OutgoingSchedule.sigma_zero (div_nonpos_of_nonpos_of_nonneg hy hT.le)]
 
 theorem angular_after {C T y : ℝ} (hC : 0 < C) (hT : 0 < T) (hy : T ≤ y)
     (li : ℝ → ℝ) (eta : ℝ) :

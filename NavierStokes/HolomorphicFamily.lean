@@ -243,14 +243,6 @@ theorem hasDerivAt_parameter (c : ℂ) {σ : ℝ} {S : Set ℝ} (hS : IsOpen S)
   filter_upwards [hS.mem_nhds hr] with s hs
   exact (hvalues s hs z).symm
 
-/-- CauchyRestriction's bounded operator is the actual complex partial. -/
-theorem hasDerivAt_complex (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ)
-    (v : C(Disk c σ, E)) (F : ℂ → E)
-    (hF : DifferentiableOn ℂ F (ball c σ))
-    (hvalues : ∀ z : Disk c σ, v z = F z) (z : Disk c ρ) :
-    HasDerivAt F (derivativeCLM c hgap v z) z := by
-  rw [derivativeCLM_apply_of_eq c hgap v F (diffContOnCl_of_values c v F hF hvalues) hvalues]
-  exact (hF.differentiableAt (isOpen_ball.mem_nhds (z.2.trans_lt hgap))).hasDerivAt
 
 
 

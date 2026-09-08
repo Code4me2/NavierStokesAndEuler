@@ -753,12 +753,6 @@ end LocalizedComparison
 noncomputable def afterParticular (x : CorrectionStep.CycleState (Label B N0)) : State Point :=
   (ActualCycleParameters.fixedParameters B N0).afterParticular x.coefficients (commonContext B) x.state
 
-noncomputable def cycleStateData (l : Label B N0) (x : CorrectionStep.CycleState (Label B N0))
-    (H : MeanStateRegularity.PrimitiveData standardRegion ActualInitialization.patch.a
-      ActualInitialization.patch.b (commonContext B) (afterParticular x))
-    (hp : GaugeMomentBalances.MovingField standardRegion ActualInitialization.patch.a
-      ActualInitialization.patch.b (afterParticular x).pressure) : (nativeViews l).StateData :=
-  nativeStateData l ActualInitialization.patch (afterParticular x) H hp
 
 theorem afterParticular_pressure (x : CorrectionStep.CycleState (Label B N0))
     (H : MeanStateRegularity.PrimitiveData standardRegion ActualInitialization.patch.a

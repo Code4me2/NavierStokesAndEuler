@@ -41,10 +41,6 @@ namespace ParticleInverse
 
 variable {A : Parent} (I : ParticleInverse A)
 
-include I in
-theorem position_bijective (t : Icc (0 : ℝ) A.T) : Function.Bijective (A.position t) :=
-  ⟨Function.LeftInverse.injective (I.left_inverse t),
-    Function.RightInverse.surjective (I.right_inverse t)⟩
 
 theorem field_initial (x : Space) : I.field A.zeroTime x=x := by
   have h := I.left_inverse A.zeroTime x

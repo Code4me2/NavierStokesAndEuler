@@ -40,9 +40,6 @@ theorem tangentProj_normal {n : E} (hn : n ≠ 0) (f : E) :
   simp only [tangentProj, inner_sub_right, inner_smul_right]
   rw [div_mul_cancel₀ _ hn2, sub_self]
 
-theorem tangentProj_of_tangent (n f : E) (hf : ⟪n, f⟫_ℝ = 0) :
-    tangentProj n f = f := by
-  simp [tangentProj, hf]
 
 
 /-- The full normal identity includes the damping of an existing tangency defect. -/
@@ -86,22 +83,6 @@ theorem tangency_defect_derivative {n t : ℝ → E} {n' : E} {x : ℝ}
   rw [normal_projectedRhs hn0]
   ring
 
-/-- Integrating-factor proof of zero-data uniqueness for the scalar defect equation.
-The primitive `D` is explicit, so no existence assumption is hidden in this statement. -/
-theorem scalar_defect_zero (h δ D : ℝ → ℝ)
-    (hD : ∀ x, HasDerivAt D (δ x) x)
-    (hh : ∀ x, HasDerivAt h (-δ x * h x) x)
-    (x₀ : ℝ) (hzero : h x₀ = 0) : ∀ x, h x = 0 := by
-  have hp : ∀ x, HasDerivAt (fun y => Real.exp (D y) * h y) 0 x := by
-    intro x
-    convert! (hD x).exp.mul (hh x) using 1
-    ring
-  intro x
-  have heq := is_const_of_deriv_eq_zero (fun y => (hp y).differentiableAt)
-    (fun y => (hp y).deriv) x x₀
-  have hz : Real.exp (D x) * h x = 0 := by
-    simpa only [hzero, mul_zero] using heq
-  exact (mul_eq_zero.mp hz).resolve_left (Real.exp_ne_zero _)
 
 
 

@@ -508,14 +508,6 @@ variable {A : Type*} [NormedAddCommGroup A] [NormedSpace ℝ A]
 noncomputable def radialField (K : ℝ → ℝ) (v : A) (x : ℝ × A) : ℝ × A :=
   (1, K x.1 • v)
 
-theorem radialField_aux_derivative {K : ℝ → ℝ} (v w : A) {x : ℝ × A}
-    (hK : DifferentiableAt ℝ K x.1) : fderiv ℝ (radialField K v) x (0, w) = 0 := by
-  have hd := (hasFDerivAt_const (1 : ℝ) x).prodMk
-    ((hK.hasFDerivAt.comp x hasFDerivAt_fst).smul_const v)
-  dsimp only [Function.comp_def] at hd
-  change fderiv ℝ (fun y : ℝ × A => (1, K y.1 • v)) x (0, w) = 0
-  rw [hd.fderiv]
-  simp
 
 
 end ExplicitGraph
@@ -669,30 +661,6 @@ variable {s : StripData D} {w : ℕ → D → ℝ} {α κ : ℝ}
   {R : D → ℝ} {Vr Vθ Vz : ℕ → D → D} {K : ℕ → ℝ}
   {Φ : ℕ → D → ℝ} {a : ℕ → D → ComplexVector}
 
-/-- Actual all-order longitudinal contraction bounds from harmonic
-solenoidality and primitive coefficient/direction classes. -/
-theorem longitudinal_class (ha : MemClass s w α a) (hκ : 0 ≤ κ)
-    (hr : UnweightedClass s (-κ) Vr) (hz : UnweightedClass s 1 Vz)
-    (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹))
-    (hK : ∀ n, K n ≠ 0) (hfreq : BandBound s (1 / 2) (fun n => 1 / K n))
-    (hΦ : ∀ n, DifferentiableOn ℝ (Φ n) s.domain)
-    (hθ : ∀ n x, x ∈ s.domain → HarmonicCalculus.along (Vθ n) (fun y => a n y 1) x = 0)
-    (hdiv : ∀ n x, x ∈ s.domain → HarmonicCalculus.cylindricalDivergence R
-      (Vr n) (Vθ n) (Vz n) (HarmonicCalculus.vectorMode (K n) (Φ n) (a n)) x = 0) :
-    MemClass s w (α + 1 / 2 - κ) (fun n x => HarmonicCalculus.normalDot
-      (HarmonicCalculus.phaseNormal R (Vr n) (Vθ n) (Vz n) (Φ n) x) (a n x)) := by
-  have hS := strippedDivergence_class ha hκ hr hz hR
-  have hI := (hS.map (Complex.I • ContinuousLinearMap.id ℝ ℂ)).band_smul hfreq
-  have he : α - κ + 1 / 2 = α + 1 / 2 - κ := by ring
-  rw [he] at hI
-  apply class_congr hI
-  intro n x hx
-  dsimp only
-  rw [longitudinal_eq_inverseCarrier R (Vr n) (Vθ n) (Vz n) (hK n)
-    ((hΦ n x hx).differentiableAt (s.isOpen_domain.mem_nhds hx))
-    (fun i => ((class_component ha i).contDiffAt n hx 1).differentiableAt (by norm_num))
-    (hθ n x hx) (hdiv n x hx)]
-  simp [inverseCarrier, Complex.real_smul, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
 
 
 end Longitudinal
@@ -719,19 +687,6 @@ theorem curlRemainder_waveClass
         (coefficient R (Vr n) (Vθ n) (Vz n) (Φ n) (a n))) :=
   normalCurlRemainder_class hN ha hb hlower hupper hκ hr hθ hz hR hK
 
-theorem realizedCoefficient_waveClass
-    (hN : PhaseJetBounds.PolynomialJets (phaseDomain s)
-      (fun n => HarmonicCalculus.phaseNormal R (Vr n) (Vθ n) (Vz n) (Φ n)))
-    (ha : WaveClass s P α a) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖HarmonicCalculus.phaseNormal R (Vr n) (Vθ n) (Vz n) (Φ n) x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖HarmonicCalculus.phaseNormal R (Vr n) (Vθ n) (Vz n) (Φ n) x‖ ≤ M)
-    (hκ : 0 ≤ κ) (hκhalf : κ ≤ 1 / 2)
-    (hr : UnweightedClass s (-κ) Vr) (hθ : UnweightedClass s 0 Vθ)
-    (hz : UnweightedClass s 1 Vz) (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹))
-    (hK : BandBound s (1 / 2) (fun n => 1 / K n)) :
-    WaveClass s P α (fun n => realizedCoefficient (K n) R (Vr n) (Vθ n) (Vz n) (Φ n) (a n)) := by
-  have hrem := curlRemainder_waveClass hN ha hb hlower hupper hκ hr hθ hz hR hK
-  exact ha.add (hrem.mono_exponent (by linarith))
 
 end WaveClasses
 
@@ -774,11 +729,6 @@ theorem vectorPotential_tsupport_subset (K : ℝ) (R : D → ℝ) (Vr Vθ Vz : D
   simp [vectorPotential, HarmonicCalculus.vectorMode, HarmonicCalculus.mode,
     coefficient, normalCoefficient, normalCross, ha]
 
-theorem realizedWave_tsupport_subset (K : ℝ) (R : D → ℝ) (Vr Vθ Vz : D → D)
-    (Φ : D → ℝ) (a : D → ComplexVector) :
-    tsupport (cylindricalCurl R Vr Vθ Vz (vectorPotential K R Vr Vθ Vz Φ a)) ⊆ tsupport a :=
-  (cylindricalCurl_tsupport_subset R Vr Vθ Vz _).trans
-    (vectorPotential_tsupport_subset K R Vr Vθ Vz Φ a)
 
 end Support
 
@@ -800,22 +750,7 @@ theorem physicalCurl_class (hB : MemClass s w α B) :
     SpatialCurl.curlLinear (fderiv ℝ (fun y => B n (x.1, y)) x.2)
   rw [ResidualStability.space_fderiv_eq_full ((hB.contDiffAt n hx 1).differentiableAt (by norm_num))]
 
-theorem physical_strippedRemainder_class (hB : MemClass s w α B)
-    (hK : BandBound s (1 / 2) (fun n => 1 / K n)) :
-    MemClass s w (α + 1 / 2) (fun n => OscillatoryCurl.strippedRemainder (K n) (B n)) :=
-  (physicalCurl_class hB).band_smul hK
 
-theorem physical_normalCoefficient_class {N a : ℕ → VelocityField}
-    (hN : PhaseJetBounds.PolynomialJets (phaseDomain s) N) (ha : MemClass s w α a)
-    {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖N n x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖N n x‖ ≤ M) :
-    MemClass s w α (fun n x => OscillatoryCurl.normalCoefficient (N n x) (a n x)) := by
-  have hcross : MemClass s w α (fun n x => OscillatoryCurl.cross (N n x) (a n x)) := by
-    simpa only [one_mul, zero_add, OscillatoryCurl.cross] using
-      (polynomialJets_unweighted hN).bilinear ha OscillatoryCurl.crossLinear
-  simpa only [zero_add, OscillatoryCurl.normalCoefficient] using
-    class_mul_real (normalInverse_unweighted hN hb hlower hupper) hcross
 
 
 end PhysicalCurl

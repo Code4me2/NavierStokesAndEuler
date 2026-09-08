@@ -81,24 +81,9 @@ variable (htime : SmoothTimeField.TimeDerivative T hT A A₁)
   (B₁ R₁ : ℝ) (hB₁ : 0 ≤ B₁) (hR₁ : 0 ≤ R₁)
   (hb₁ : ∀ n, ‖A₁.jet n‖ ≤ B₁*R₁^n*(n.factorial : ℝ)^2)
 
-def deformationTimeCoefficient : SmoothTimeField (Icc (0 : ℝ) T) E (E →L[ℝ] E) :=
-  (velocityCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁).derivative
 
-def deformationSecondCoefficient : SmoothTimeField (Icc (0 : ℝ) T) E (E →L[ℝ] E) :=
-  (accelerationCoefficient T hT A B R hB hR hsmall hb A₁).derivative
 
-theorem displacementCoefficient_time : SmoothTimeField.TimeDerivative T hT
-    (displacementCoefficient T hT A B R hB hR hsmall hb)
-    (velocityCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁) := by
-  intro t x
-  exact displacementFamily_time_derivative T hT A x t
 
-theorem velocityCoefficient_time : SmoothTimeField.TimeDerivative T hT
-    (velocityCoefficient T hT A B R hB hR hsmall hb A₁ htime B₁ R₁ hB₁ hR₁ hb₁)
-    (accelerationCoefficient T hT A B R hB hR hsmall hb A₁) := by
-  intro t x
-  rw [accelerationCoefficient_apply]
-  exact velocityFamily_time_derivative T hT A A₁ htime x t
 
 
 

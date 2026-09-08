@@ -440,14 +440,6 @@ theorem Qs_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
   unfold Sq Qs
   field_simp [(X_pos p).ne', (H_pos w p).ne']
 
-theorem Ns_hasDerivAt (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (p : Point) :
-    HasDerivAt (fun y => Ns w Amp (y, p.2)) (Sn w Amp p - Ns w Amp p) p.1 := by
-  have hd := (axialStock_hasDerivAt w ha p).div (X_hasDerivAt p) (X_pos p).ne'
-  change HasDerivAt (fun y => Ns w Amp (y, p.2)) _ p.1 at hd
-  apply hd.congr_deriv
-  unfold Ns
-  field_simp [(X_pos p).ne']
 
 
 
@@ -1024,13 +1016,6 @@ theorem angular_source_past (w : ResetWitness d K) {Amp : ℝ → ℝ}
   rw [(div_eq_iff (mul_pos d.core.P_pos (shape_pos eta)).ne').mp hq]
   ring
 
-theorem angularStock_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    angularStock w Amp (y, eta) =
-      ∫ t in Iic y, X (t, eta) * angularSource w Amp (t, eta) := by
-  have hi := past_integral (angular_source_continuous w ha eta) (angular_source_past w ha eta).1 y
-  rw [(angular_source_past w ha eta).2] at hi
-  exact (angularStock_eq_source_primitive w ha y eta).trans hi.symm
 
 
 noncomputable def incomingSnConstant (d : TailData) (eta : ℝ) : ℝ :=
@@ -1115,23 +1100,11 @@ theorem axial_source_past (w : ResetWitness d K) {Amp : ℝ → ℝ}
   rw [axialStock_initial w ha]
   ring
 
-theorem axialStock_eq_source_integral (w : ResetWitness d K) {Amp : ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ Amp) (y eta : ℝ) :
-    axialStock w Amp (y, eta) = ∫ t in Iic y, X (t, eta) * Sn w Amp (t, eta) := by
-  have hi := past_integral (axial_source_continuous w ha eta) (axial_source_past w ha eta).1 y
-  rw [(axial_source_past w ha eta).2] at hi
-  exact (axialStock_eq_source_primitive w ha y eta).trans hi.symm
 
 
 /-! ## Entrance-radius factors -/
 
 noncomputable def physicalX (XR : ℝ) (p : Point) : ℝ := XR * X p
-noncomputable def physicalH (XR : ℝ) (w : ResetWitness d K) (p : Point) : ℝ := Real.sqrt (2 * XR) * H w p
-noncomputable def physicalM (XR : ℝ) (d : TailData) (Amp : ℝ → ℝ) (p : Point) : ℝ := XR * M d Amp p
-noncomputable def physicalI (XR : ℝ) (w : ResetWitness d K) (p : Point) : ℝ := XR * Real.sqrt (2 * XR) * I w p
-noncomputable def physicalJ (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ :=
-  XR * Real.sqrt (2 * XR) * J w Amp p
-noncomputable def physicalS (XR : ℝ) (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ := XR * S w Amp p
 
 
 

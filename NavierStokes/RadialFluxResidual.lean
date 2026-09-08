@@ -192,19 +192,6 @@ theorem divergence_radialB {V F U : Profile} {t : ℝ} {x : Space}
   rw [divergence_velocity_at (differentiableAt_radialB hV hne) hF hU]
   exact divergence_coefficient U hV hne
 
-/-- The substitution has exactly the intended physical radial flux. -/
-theorem radial_flux_velocity (V F U : Profile) (t : ℝ) (x : Space)
-    (hs : 0 < radialEnergy x) :
-    x 0 * AxisymmetricResidual.velocity (radialB V) F U (t, x) 0 +
-      x 1 * AxisymmetricResidual.velocity (radialB V) F U (t, x) 1 =
-        V (profilePoint t x) := by
-  calc
-    _ = -2 * radialEnergy x * radialB V (profilePoint t x) := by
-      simp [AxisymmetricResidual.velocity, componentX, componentY, lift, radialEnergy]
-      ring
-    _ = _ := by
-      change -2 * radialEnergy x * (-V (profilePoint t x) / (2 * radialEnergy x)) = _
-      field_simp [ne_of_gt hs]
 
 noncomputable def fluxResidual (V F U P : Profile) (p : ProfilePoint) : ℝ :=
   partialT V p + V p * (partialS V p - V p / (2 * p.2.1)) + U p * partialZ V p -

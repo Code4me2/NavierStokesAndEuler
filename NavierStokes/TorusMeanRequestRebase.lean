@@ -106,11 +106,6 @@ end Freeze
 
 /-! ## The evaluation point carries no torus or angle dependence -/
 
-theorem fullRequest_free_variables (s : StripData Point) (P : SignedStressPrimitive.Patch)
-    (coord : ℝ) (c : Context Point) (u : State Point) (n : ℕ)
-    (r : ℝ) (z Y Y' : Plane) (theta theta' : ℝ) :
-    LocalSignedRequest.fullRequest s P coord c u n ((r, (z, Y)), theta) =
-      LocalSignedRequest.fullRequest s P coord c u n ((r, (z, Y')), theta') := rfl
 
 
 

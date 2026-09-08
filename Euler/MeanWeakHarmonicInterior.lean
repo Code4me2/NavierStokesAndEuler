@@ -29,16 +29,6 @@ theorem weakScalarHarmonic_pointwise (f : Space → ℝ) (hf : MemLp f 2 volume)
       (scalarMollification_energy_le (interiorMollifier n) f hf)
       harmonicQuarterBallConstant_nonneg
 
-/-- The same bound for an actual vector L² field, without assuming a smooth representative. -/
-theorem weakHarmonic_pointwise (u : L2) (hu : WeakHarmonicOn (Metric.ball (0 : Space) 1) u) :
-    ∀ᵐ x ∂volume, x ∈ Metric.closedBall (0 : Space) (1/4 : ℝ) →
-      ‖u x‖ ^ 2 ≤ harmonicQuarterBallConstant * ‖u‖ ^ 2 := by
-  have H := ae_vector_bound_of_component_bounds (u : Space → Space) (Lp.memLp u)
-    (Metric.closedBall (0 : Space) (1/4 : ℝ)) harmonicQuarterBallConstant
-    (fun i => weakScalarHarmonic_pointwise (fun x => u x i)
-      (scalar_component_memLp u (Lp.memLp u) i)
-      (scalarWeakHarmonicOn_of_vector_tests _ u hu i))
-  simpa only [lpNorm_coe_L2] using H
 
 def weakHarmonicSmallBallConstant : ℝ := (Real.pi * 4 / 3) * harmonicQuarterBallConstant
 

@@ -91,13 +91,5 @@ theorem derivativeOperator_hasDerivAt {q : ℕ} (i : Fin 4) (u : SobolevSpace pe
     (u.val (emptyWord (q + 1)))) (u.val (derivativeIndex i (emptyWord q))) 0
   simpa only [word, emptyWord, derivativeIndex, hw] using hd
 
-/-- Coordinate differentiation commutes with actual Sobolev translation. -/
-theorem derivativeOperator_translation {q : ℕ} (i : Fin 4) (a : LiftDomain period)
-    (u : SobolevSpace period (q + 1)) :
-    derivativeOperator period q i (sobolevTranslation period (q + 1) a u) =
-      sobolevTranslation period q a (derivativeOperator period q i u) := by
-  apply Subtype.ext
-  funext w
-  rfl
 
 end EulerCylinderSobolevSpace

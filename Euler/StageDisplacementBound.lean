@@ -69,21 +69,8 @@ theorem stage_displacement_le_partial_sum (n : ℕ) (t : Time) (ht : H n t) (x :
     exact displacement_comp_le (X n t) (Y n t)
       (fun y => ih (hnest n t ht) y) (hsmall n t ht) x
 
-include hbase hnest hstep hsmall in
-theorem stage_displacement_le_of_partial_sums {C : ℝ}
-    (hC : ∀ n, ∑ i ∈ range n, δ i ≤ C)
-    (n : ℕ) (t : Time) (ht : H n t) (x : E) :
-    ‖X n t x - x‖ ≤ M + C := by
-  exact (stage_displacement_le_partial_sum H X Y M δ hbase hnest hstep hsmall n t ht x).trans
-    (add_le_add le_rfl (hC n))
 
 
-include hbase hnest hstep hsmall in
-theorem stage_displacement_le_tsum (hδ : Summable δ) (hδ0 : ∀ n, 0 ≤ δ n)
-    (n : ℕ) (t : Time) (ht : H n t) (x : E) :
-    ‖X n t x - x‖ ≤ M + ∑' i, δ i := by
-  exact (stage_displacement_le_partial_sum H X Y M δ hbase hnest hstep hsmall n t ht x).trans
-    (add_le_add le_rfl (hδ.sum_le_tsum (range n) (fun i _ => hδ0 i)))
 
 
 end Euler.ComparatorBridge

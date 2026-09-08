@@ -81,19 +81,6 @@ theorem endpointDerivative_unique (L : V →L[ℝ] TimeLp T E) (Y : V)
   have hn : ‖u - w‖ = 0 := by nlinarith only [hc, norm_nonneg (u - w)]
   exact sub_eq_zero.mp (norm_eq_zero.mp hn)
 
-/-- The stationary output depends only on the terminal trace, not on the trial lift. -/
-theorem endpointDerivative_eq_of_trial_terminal
-    (L₁ L₂ : V →L[ℝ] TimeLp T E)
-    (hL₁ : ∀ Y t, ⟪m t, initialRealPrimitive T (L₁ Y) t⟫_ℝ = 0)
-    (hL₂ : ∀ Y t, ⟪m t, initialRealPrimitive T (L₂ Y) t⟫_ℝ = 0)
-    (hterminal : ∀ Y, initialRealPrimitive T (L₁ Y) T = initialRealPrimitive T (L₂ Y) T) :
-    endpointDerivative T hT m H K hK hH hsmall L₁ =
-      endpointDerivative T hT m H K hK hH hsmall L₂ := by
-  apply ContinuousLinearMap.ext
-  intro Y
-  exact stationaryPart_eq_of_sub_mem (transverseDerivatives T hT m) (energyOperator T hT H)
-    (1 / 2) (by norm_num) (energyOperator_coercive T hT H K hK hH hsmall) (L₁ Y) (L₂ Y)
-    (sub_mem_transverse_of_terminal T hT m (L₁ Y) (L₂ Y) (hL₁ Y) (hL₂ Y) (hterminal Y))
 
 variable [CompleteSpace V]
 

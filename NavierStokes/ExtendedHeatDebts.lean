@@ -396,13 +396,6 @@ theorem nuConstant_nonneg (d : TailData) {L : ℝ} (hL : 0 ≤ L) (square : Bool
   exact div_nonneg (mul_nonneg (tailSize_nonneg d square)
     (editBound_nonneg square d.h hL n)) (by linarith)
 
-theorem nuDebtJet_hasDerivAt (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) (ν : ℝ) :
-    HasDerivAt (nuDebtJet d K square q n) (nuDebtJet d K square q (n + 1) ν) ν :=
-  weightedDebtJet_hasDerivAt d.h_pos hK
-    (tailWeight_continuousOn d (lt_of_lt_of_le zero_lt_one hK) square)
-    (tailSize_nonneg d square) (tailWeight_bound d (lt_of_lt_of_le zero_lt_one hK) square)
-    hq square n ν
 
 theorem nuDebt_contDiff (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
     {q : ℝ} (hq : tailDecay d square + q < 0) : ContDiff ℝ ∞ (nuDebtJet d K square q 0) :=
@@ -597,23 +590,8 @@ theorem etaDebt_joint_contDiffOn (d : TailData) (square : Bool) {q : ℝ}
     (contDiffOn_fst.prodMk (diffusion_contDiff.comp_contDiffOn contDiffOn_snd))
     (fun p hp => ⟨hp.1, mem_univ _⟩)
 
-theorem physicalPressure_joint_contDiffOn (d : TailData) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalPressure d p.1 p.2)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-  (etaDebt_joint_contDiffOn d true (ParametricHeatTail.pressure_decay d)).congr
-    (fun p hp => physicalPressure_eq d hp.1 p.2)
 
-theorem physicalEnergy_joint_contDiffOn (d : TailData) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalEnergy d p.1 p.2)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-  (etaDebt_joint_contDiffOn d true (ParametricHeatTail.energy_decay d)).congr
-    (fun p hp => physicalEnergy_eq d hp.1 p.2)
 
-theorem physicalAngular_joint_contDiffOn (d : TailData) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalAngular d p.1 p.2)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-  (contDiffOn_const.mul (etaDebt_joint_contDiffOn d false (ParametricHeatTail.angular_decay d))).congr
-    (fun p hp => physicalAngular_eq d hp.1 p.2)
 
 /-! ## Uniform estimates on a fixed enlarged physical band -/
 
@@ -1008,15 +986,6 @@ theorem etaIntegrandJet_integrable (d : TailData) {K : ℝ} (hK : 1 ≤ K)
   chain_integrable (etaIntegrandJet_measurable d hK square q)
     (etaIntegrandJet_dominated d hK square hq) n η
 
-/-- Every genuine eta derivative of the improper debt is the integral of
-the same genuine derivative of its integrand. -/
-theorem etaDebt_derivative_integral (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    (square : Bool) {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) (η : ℝ) :
-    iteratedDeriv n (etaDebt d K square q) η =
-      ∫ X in Ioi K, etaIntegrandJet d K square q n η X :=
-  iteratedDeriv_integral_chain (etaIntegrandJet_derivative d K square q)
-    (etaIntegrandJet_measurable d hK square q)
-    (etaIntegrandJet_dominated d hK square hq) n η
 
 theorem pressure_integrand_eq (d : TailData) {K X : ℝ} (hK : 0 < K) (hX : K < X) (η : ℝ) :
     squareChange (outgoingProfile d K η) d.h (diffusion η) K X / X =

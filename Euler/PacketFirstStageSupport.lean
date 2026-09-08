@@ -23,17 +23,6 @@ theorem forwardNext_initial_support
     (frequency S.J S.X 0) (S.normal_frequency 0) (supportScale S.J S.X 1)
     (S.support_pos 1) (S.support_one 1) (P.chooseForward hq hB) symmetric hP
 
-theorem forwardNext_initial_field_support
-    (hP : tsupport (fun x => P.state.evolution.velocity (0,x)) ⊆ Metric.closedBall 0 2) :
-    tsupport ((P.forwardNext hq hB).state.regularity.velocity
-      (P.forwardNext hq hB).parent.zeroTime).field ⊆ Metric.closedBall 0 2 := by
-  have he : ((P.forwardNext hq hB).state.regularity.velocity
-      (P.forwardNext hq hB).parent.zeroTime).field =
-      fun x => (P.forwardNext hq hB).state.evolution.velocity (0,x) :=
-    funext (fun x => ((P.forwardNext hq hB).state.regularity.velocity_match
-      (P.forwardNext hq hB).parent.zeroTime x).symm)
-  rw [he]
-  exact P.forwardNext_initial_support hq hB hP
 
 end EulerPacketInduction.Stage
 

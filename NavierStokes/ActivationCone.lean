@@ -257,24 +257,8 @@ theorem reducedStress_smooth {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
   (hF.mul (hA.add (hy.mul hdA))).prodMk
     (hF.mul (hB.add (hy.mul (hdB.sub ((hκ.mul hB).mul hdR)))))
 
-/-- A common coefficient bound makes the normalized stress direction nonzero
-on a uniform first collar; the bound does not involve inverse damping. -/
-theorem reducedStress_first_positive {F A B κ y dA dB dR α M : ℝ}
-    (hF : 0 < F) (hα : 0 < α) (hA : α ≤ A) (hy : 0 ≤ y)
-    (hdA : |dA| ≤ M) (hsmall : y * M ≤ α / 2) :
-    0 < (reducedStress F A B κ y dA dB dR).1 := by
-  apply mul_pos hF
-  have hlo := (abs_le.mp hdA).1
-  have hm := mul_le_mul_of_nonneg_left hlo hy
-  nlinarith
 
 
-theorem reducedStress_edge_projection (F A B κ dA dB dR : ℝ) :
-    (reducedStress F A B κ 0 dA dB dR).1 +
-      (B / A) * (reducedStress F A B κ 0 dA dB dR).2 =
-      F * (A + B ^ 2 / A) := by
-  simp only [reducedStress_at_edge]
-  ring
 
 
 /-- The quadratic cone gap after removing the square of the flat activation. -/

@@ -219,18 +219,6 @@ theorem norm_paired_kernel_le_scaled
     _ = D * comparisonLpNorm 1 g * comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by rw [hscale]; ring
 
 
-/-- The direct convolution specialization needs only measurability of the
-kernel and finite `L^(4/3)`, `L⁴`, and `L¹` norms. -/
-theorem norm_convolution_pairing_le
-    {k g : Space → ℝ} {r : Space → E}
-    (hkm : Measurable k) (hk : MemLp k (4 / 3) volume)
-    (hr : MemLp r 4 volume) (hg : Integrable g volume) :
-    ‖∫ x, g x • ∫ y, k (x - y) • r y‖ ≤
-      comparisonLpNorm 1 g * comparisonLpNorm (4 / 3) k * comparisonLpNorm 4 r := by
-  simpa only [comparisonLpNorm, eLpNorm_norm] using
-    norm_paired_kernel_le (K := fun x y => k (x - y))
-      (hkm.comp (measurable_fst.sub measurable_snd)) hk.norm hr hg
-      (fun _ _ => le_rfl)
 
 
 end NavierStokesR3.PairedKernelBound

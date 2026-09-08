@@ -352,22 +352,6 @@ theorem assembled_cross_covariance {D h : ℝ} {vr vt : Plane} (sys : SlotSystem
           (2 * ((P U).matrix.mulVec (fun j => a U j * b U j)) i) := by ring
       _ = _ := by rw [cross_reconstruct_component (P U).matrix (T U) (R U) (hcone U hm) i]
 
-/-- The signed-square covariance is retained exactly, with no sign restriction
-on the prescribed stress. -/
-theorem assembled_signed_square {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ) (hN : 1 ≤ N)
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (outer ε : UnsignedLabel → ℝ) (T R : UnsignedLabel → Vec2)
-    {q : ℝ} (hq : 0 < q) (x : SlotColoring.Position)
-    (hε : ∀ U, mask D (tailLabel N U) q x ≠ 0 → 0 ≤ ε U) (i : Fin 2) :
-    doubleAverage (fun Y θ => signedRadial P hdet outer ε T R q x Y θ *
-      signedTangent P hdet outer ε T R q x i Y θ) =
-      ∑ᶠ U : UnsignedLabel, outer U ^ 2 * ε U * mask D (tailLabel N U) q x ^ 2 *
-        squareColumn (P U).matrix (T U) (R U) i := by
-  simpa only [signedRadial, signedTangent, squareColumn, pow_two] using
-    assembled_bilinear_covariance sys hdet N hN P outer ε
-      (fun U => increment (P U).matrix (T U) (R U))
-      (fun U => increment (P U).matrix (T U) (R U)) hq x hε i
 
 /-! ## The physical signed target -/
 
@@ -662,35 +646,6 @@ theorem native_signed_square_class {s : StripData E} {H : ℕ → E → Mat2}
   unfold MeanClass
   simpa only [he, Real.rpow_one, smul_eq_mul] using hb
 
-/-- This version keeps the flat weights of the individual columns.  The
-column weight and its inverse-solve weight multiply back to the mean weight;
-an exponentially singular inverse is therefore not assumed unweighted. -/
-theorem balanced_signed_square_class {s : StripData E} {H : ℕ → E → Mat2}
-    {T R : ℕ → E → Vec2} {w v : Fin 2 → ℕ → E → ℝ} {β : ℝ} (i : Fin 2)
-    (hw : ∀ j n x, x ∈ s.domain → 0 < w j n x)
-    (hcone : ∀ n x, x ∈ s.domain → SmoothCovariance.StrictCone (H n x) (T n x))
-    (hY : ∀ j, MemClass s (w j) 0 (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hR : ∀ j, MemClass s (w j) β (fun n x => ((H n x)⁻¹.mulVec (R n x)) j))
-    (hlower : ∀ j, InverseControl s (w j) (fun n x => ((H n x)⁻¹.mulVec (T n x)) j))
-    (hH : ∀ j, MemClass s (v j) 0 (fun n x => H n x i j))
-    (hbalance : ∀ j n x, x ∈ s.domain → v j n x * w j n x ≤ s.zeta x) :
-    MeanClass s (2 * β) (fun n x => squareColumn (H n x) (T n x) (R n x) i) := by
-  have ht (j : Fin 2) : MeanClass s (β + β) (fun n x =>
-      H n x i j * (increment (H n x) (T n x) (R n x) j * increment (H n x) (T n x) (R n x) j)) := by
-    have hc := signed_quotient_class (hw j)
-      (fun n x hx => (amplitudes_are_inverse_weights (hcone n x hx) j).1) (hY j) (hR j) (hlower j)
-    have hi := memClass_congrOn hc
-      (fun n x hx => (increment_eq_inverse (H n x) (T n x) (R n x) (hcone n x hx) j).symm)
-    have hsq : MemClass s (w j) (β + β)
-        (fun n x => increment (H n x) (T n x) (R n x) j * increment (H n x) (T n x) (R n x) j) := by
-      apply (MemClass.mul hi hi).mono_weight (fun n x hx => (hw j n x hx).le)
-      intro n x hx
-      exact (Real.mul_self_sqrt (hw j n x hx).le).le
-    have hh := (MemClass.mul (hH j) hsq).mono_weight (fun n x hx => s.zeta_nonneg x hx) (hbalance j)
-    unfold MeanClass
-    simpa only [zero_add] using hh
-  have hsum := MemClass.sum Finset.univ _ (fun n x hx => s.zeta_nonneg x hx) (fun j _ => ht j)
-  simpa only [MeanClass, squareColumn, Matrix.mulVec, dotProduct, pow_two, two_mul] using hsum
 
 
 
@@ -712,54 +667,7 @@ theorem increment_sq_bound (H : Mat2) (T R : Vec2)
     _ ≤ d ^ 2 / (4 * (H⁻¹.mulVec T) j) := div_le_div_of_nonneg_right hr2 (by positivity)
     _ ≤ _ := div_le_div_of_nonneg_left (sq_nonneg d) (by positivity) (by linarith)
 
-theorem squareColumn_abs_bound (H : Mat2) (T R : Vec2)
-    (hcone : SmoothCovariance.StrictCone H T) (i : Fin 2)
-    {l d K : ℝ} (hl : 0 < l) (hd : 0 ≤ d) (hK : 0 ≤ K)
-    (hY : ∀ j, l ≤ (H⁻¹.mulVec T) j) (hR : ∀ j, |(H⁻¹.mulVec R) j| ≤ d)
-    (hH : ∀ j, |H i j| ≤ K) : |squareColumn H T R i| ≤ 2 * K * d ^ 2 / (4 * l) := by
-  have hb (j : Fin 2) : |H i j * increment H T R j ^ 2| ≤ K * (d ^ 2 / (4 * l)) := by
-    rw [abs_mul, abs_of_nonneg (sq_nonneg (increment H T R j))]
-    exact mul_le_mul (hH j) (increment_sq_bound H T R hcone j hl hd (hY j) (hR j))
-      (sq_nonneg _) hK
-  unfold squareColumn
-  simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
-  calc
-    _ ≤ |H i 0 * increment H T R 0 ^ 2| + |H i 1 * increment H T R 1 ^ 2| := abs_add_le _ _
-    _ ≤ K * (d ^ 2 / (4 * l)) + K * (d ^ 2 / (4 * l)) := add_le_add (hb 0) (hb 1)
-    _ = _ := by ring
 
-theorem mask_average_bound (D : ℝ) (N : ℕ) {q : ℝ} (hq : 0 < q)
-    (hqN : q ≤ ChartScales.Q N) (x : SlotColoring.Position) (f : UnsignedLabel → ℝ) (B : ℝ)
-    (hb : ∀ U, mask D (tailLabel N U) q x ≠ 0 → |f U| ≤ B) :
-    |∑ᶠ U : UnsignedLabel, mask D (tailLabel N U) q x ^ 2 * f U| ≤ B := by
-  classical
-  let F := (finite_active_masks D N hq x).toFinset
-  have hz (U : UnsignedLabel) (hU : U ∉ F) : mask D (tailLabel N U) q x = 0 := by
-    by_contra hm
-    exact hU ((finite_active_masks D N hq x).mem_toFinset.mpr hm)
-  have heq : (∑ᶠ U : UnsignedLabel, mask D (tailLabel N U) q x ^ 2 * f U) =
-      ∑ U ∈ F, mask D (tailLabel N U) q x ^ 2 * f U := by
-    apply finsum_eq_sum_of_support_subset
-    intro U hU
-    by_contra hn
-    exact hU (by simp [hz U hn])
-  have hs : (∑ U ∈ F, mask D (tailLabel N U) q x ^ 2) = 1 := by
-    rw [← physical_mask_tail_sum_sq D N hq hqN x]
-    symm
-    apply finsum_eq_sum_of_support_subset
-    intro U hU
-    by_contra hn
-    exact hU (by simp [hz U hn])
-  rw [heq]
-  calc
-    _ ≤ ∑ U ∈ F, |mask D (tailLabel N U) q x ^ 2 * f U| := Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ U ∈ F, mask D (tailLabel N U) q x ^ 2 * B := by
-      apply Finset.sum_le_sum
-      intro U hU
-      rw [abs_mul, abs_of_nonneg (sq_nonneg _)]
-      exact mul_le_mul_of_nonneg_left
-        (hb U ((finite_active_masks D N hq x).mem_toFinset.mp hU)) (sq_nonneg _)
-    _ = B := by rw [← Finset.sum_mul, hs, one_mul]
 
 
 /-! ## Smooth edge extension of the actual inverse amplitudes -/
@@ -774,34 +682,10 @@ noncomputable def extendedIncrement (H : E × ℝ → Mat2) (T R : E × ℝ → 
     (2 * Real.sqrt (((H p)⁻¹.mulVec (T p)) j)))
 
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem extendedIncrement_of_nonpos (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2)
-    (j : Fin 2) {p : E × ℝ} (hp : p.2 ≤ 0) : extendedIncrement H T R j p = 0 :=
-  FlatZeroExtension.zeroExtension_of_nonpos _ hp
 
 
-noncomputable def maskedExtendedIncrement (D : ℝ) (L : UnsignedLabel)
-    (q : E × ℝ → ℝ) (x : E × ℝ → SlotColoring.Position)
-    (H : E × ℝ → Mat2) (T R : E × ℝ → Vec2) (j : Fin 2) (p : E × ℝ) : ℝ :=
-  mask D L (q p) (x p) * extendedIncrement H T R j p
 
-theorem physical_mask_smooth (D : ℝ) (L : UnsignedLabel) :
-    ContDiff ℝ ∞ (fun p : ℝ × SlotColoring.Position => mask D L p.1 p.2) :=
-  ((SquaredPartition.dyadicMask_smooth (L.1 : ℤ)).comp contDiff_fst).mul
-    ((SquaredPartition.physicalSlowMask_smooth D L.1 L.2).comp contDiff_snd)
 
-theorem physical_mask_compactSupport (D : ℝ) (L : UnsignedLabel) (hL : 1 ≤ L.1) :
-    HasCompactSupport (fun p : ℝ × SlotColoring.Position => mask D L p.1 p.2) := by
-  have hc : IsCompact (tsupport (SquaredPartition.dyadicMask (L.1 : ℤ)) ×ˢ
-      tsupport (SquaredPartition.physicalSlowMask D L.1 L.2)) :=
-    (SquaredPartition.dyadicMask_compactSupport _).prod
-      (SquaredPartition.physicalSlowMask_compactSupport D hL L.2)
-  apply hc.of_isClosed_subset isClosed_closure
-  apply closure_minimal _ hc.isClosed
-  intro p hp
-  change SquaredPartition.dyadicMask (L.1 : ℤ) p.1 *
-    SquaredPartition.physicalSlowMask D L.1 L.2 p.2 ≠ 0 at hp
-  exact ⟨subset_closure (mul_ne_zero_iff.mp hp).1, subset_closure (mul_ne_zero_iff.mp hp).2⟩
 
 
 

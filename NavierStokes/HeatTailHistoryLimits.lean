@@ -94,11 +94,6 @@ theorem tailJet_hasDerivAt {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X
     (Eventually.of_forall fun u n ν => tailKernel_hasDerivAt hh square k n u ν)
     (tailKernel_measurable hh hX square k) (tailKernel_dominated hh hk hX square) n ν
 
-theorem tailJet_contDiff {h k X : ℝ} (hh : 0 < h) (hk : 0 < k) (hX : 1 ≤ X)
-    (square : Bool) : ContDiff ℝ ∞ (tailJet square h k 0 X) :=
-  ExtendedHeatDebts.contDiff_integral_chain
-    (Eventually.of_forall fun u n ν => tailKernel_hasDerivAt hh square k n u ν)
-    (tailKernel_measurable hh hX square k) (tailKernel_dominated hh hk hX square)
 
 
 theorem tailJet_tendsto_zero {h k : ℝ} (hh : 0 < h) (hk : 0 < k)

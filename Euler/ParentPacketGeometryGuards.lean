@@ -72,9 +72,6 @@ variable {G : Parent} (L : LabelData G)
 strain and pressure Hessian throughout the history interval. -/
 def historyAmplitude : ℝ := 27*(frameAmplitude L.K)^2*gradientAmplitude L.K
 
-theorem historyAmplitude_nonneg : 0 ≤ L.historyAmplitude := by
-  unfold historyAmplitude
-  positivity [gradientAmplitude_nonneg L.K]
 
 
 

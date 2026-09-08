@@ -974,25 +974,6 @@ theorem normalizedStrip_weight_margin (coord qlo qhi rlo rhi cL cR a b : ℝ)
       (WeightedRadialPrimitive.logPosition_mem hrlo (hmem r hr)))
   exact ⟨δ, hδ, fun p _ hp => hb p.1 hp⟩
 
-/-- No coefficient estimate is an input to this concrete `S_α → M_α` result. -/
-theorem concrete_rank_update_meanClass (coord qlo qhi rlo rhi cL cR A B lam a b α : ℝ)
-    (hc : 0 < coord) (hc1 : coord < 1) (hqlo : 0 < qlo)
-    (hrlo : 0 < rlo) (hcL : 0 < cL) (hcR : 0 < cR) (ha : 0 < a) (hab : a < b) (hB : B ≠ 0)
-    (hleft : rlo < Real.sqrt qlo * a) (hright : Real.sqrt qhi * b < rhi)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    {d : ℕ → ChartPoint → Debt}
-    (hd : WeightedClasses.UnweightedClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α d) :
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α (fun n => chartAngular coord A B lam a b (d n)) ∧
-    WeightedClasses.MeanClass (normalizedStripData coord qlo qhi rlo rhi cL cR
-      hc hc1 hrlo hcL hcR ε S hε hεone hS) α (fun n => chartAxial coord A B lam a b (d n)) := by
-  exact rank_update_meanClass
-    (normalizedStripData coord qlo qhi rlo rhi cL cR hc hc1 hrlo hcL hcR ε S hε hεone hS)
-    hc hc1 ha hab hB hqlo (fun p hp => hp.1)
-    (fun p hp => ⟨hp.2.1.1.le, hp.2.1.2.le⟩) (fun p hp => ⟨hp.2.2.1.le, hp.2.2.2.le⟩)
-    (normalizedStrip_weight_margin coord qlo qhi rlo rhi cL cR a b hc hc1 hrlo hcL hcR
-      ε S hε hεone hS hleft hright) hd
 
 end ConcreteStrip
 
@@ -1037,25 +1018,7 @@ noncomputable def normalizedPhysicalAxial (coord A B lam a b Q : ℝ)
     ((PhysicalCoordinateBounds.qCoord coord (PhysicalCoordinateBounds.dilation coord Q (chartInput p))) ^ (-A))
     (scaleDebt (Real.sqrt Q) (Q ^ (-A)) (d p)) (Real.sqrt Q * p.1) / Q ^ (-A)
 
-theorem normalizedPhysicalAngular_eq_chart {coord Q : ℝ}
-    (hc : 0 < coord) (hc1 : coord < 1) (hQ : 0 < Q) (A B lam a b : ℝ) (d : ChartPoint → Debt)
-    {p : ChartPoint} (hp : chartInput p ∈ PhysicalCoordinateBounds.positiveTime) :
-    normalizedPhysicalAngular coord A B lam a b Q d p = chartAngular coord A B lam a b d p := by
-  unfold normalizedPhysicalAngular
-  rw [angularIncrement_q_over_Q (PhysicalCoordinateBounds.qCoord_pos hc hc1
-    (PhysicalCoordinateBounds.dilation_positive hQ coord hp)) hQ,
-    chartQ_dilation hc hc1 hQ hp, chartEta_dilation hc hc1 hQ hp]
-  rfl
 
-theorem normalizedPhysicalAxial_eq_chart {coord Q : ℝ}
-    (hc : 0 < coord) (hc1 : coord < 1) (hQ : 0 < Q) (A B lam a b : ℝ) (d : ChartPoint → Debt)
-    {p : ChartPoint} (hp : chartInput p ∈ PhysicalCoordinateBounds.positiveTime) :
-    normalizedPhysicalAxial coord A B lam a b Q d p = chartAxial coord A B lam a b d p := by
-  unfold normalizedPhysicalAxial
-  rw [desiredAxialIncrement_q_over_Q (PhysicalCoordinateBounds.qCoord_pos hc hc1
-    (PhysicalCoordinateBounds.dilation_positive hQ coord hp)) hQ,
-    chartQ_dilation hc hc1 hQ hp, chartEta_dilation hc hc1 hQ hp]
-  rfl
 
 end PhysicalChart
 
@@ -1092,18 +1055,6 @@ theorem square_half_power (lam R : ℝ) (hR : 0 < R) :
   congr 1
   ring
 
-/-- The physical radial profile is the manuscript's `X^(-1/2-λ)` profile,
-where `X = r²/(2q)`, including the factor of two in its amplitude. -/
-theorem background_eq_shaped_profile {q r : ℝ} (hq : 0 < q) (hr : 0 < r)
-    (lam U B η : ℝ) :
-    background lam (shapedAmplitude B η * (2 : ℝ) ^ (1 / 2 + lam)) (Real.sqrt q) U r =
-      U * shapedAmplitude B η * (r ^ 2 / (2 * q)) ^ (-(1 / 2 + lam)) := by
-  have hX : r ^ 2 / (2 * q) = (r / Real.sqrt q) ^ 2 / 2 := by
-    rw [div_pow, Real.sq_sqrt hq.le]
-    ring
-  rw [hX, square_half_power lam _ (div_pos hr (Real.sqrt_pos.mpr hq))]
-  unfold background scaleField FiveRowRank.background
-  ring
 
 
 end ShapedPatch
@@ -1284,33 +1235,13 @@ theorem supportSet_isClosed (F : SmoothFamily E) : IsClosed F.supportSet := by
   exact (isClosed_le (hc.mul continuous_const) continuous_fst).inter
     (isClosed_le continuous_fst (hc.mul continuous_const))
 
-/-- The radial stream correction remains on the same physical mean patch;
-varying its endpoints introduces no support outside that patch. -/
-theorem radial_zero_outside (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (w : E × PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi)
-    (p : PressureStream.Lift E) (hnot : p ∉ F.supportSet) :
-    F.radial power lo hi M v w p = 0 := by
-  have he : F.potential power lo hi M v =ᶠ[𝓝 p] (fun _ => 0) := by
-    filter_upwards [F.supportSet_isClosed.isOpen_compl.mem_nhds hnot] with z hz
-    exact F.potential_zero_outside hlo0 horder hp v hlo hhi z
-      (fun h => hz (Ioo_subset_Icc_self h))
-  unfold radial PressureStream.streamBeta PressureStream.graphDz
-  rw [he.fderiv_eq, fderiv_fun_const]
-  simp
 
 
 end SmoothFamily
 
 section ReservedMeanPatch
 
-noncomputable def reservedAngularBase (F : OutgoingProfile.Profile) (XR : ℝ)
-    (c : ℝ → HeatedOutgoing.Coeff) (q U η r : ℝ) : ℝ :=
-  U * HeatedOutgoing.E F XR c ((r / Real.sqrt q) ^ 2 / 2, η)
 
-noncomputable def reservedAxialBase (F : OutgoingProfile.Profile) (XR q U η r : ℝ) : ℝ :=
-  U * HeatedOutgoing.U F XR ((r / Real.sqrt q) ^ 2 / 2, η)
 
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1499,12 +1430,6 @@ theorem rank_stream_meanClass (s : WeightedClasses.StripData ChartPoint)
   exact hder
 
 
-theorem radial_physical_scale_gain (s : WeightedClasses.StripData ChartPoint) {α : ℝ}
-    {β : ℕ → ChartPoint → ℝ} (hβ : WeightedClasses.MeanClass s α β) :
-    WeightedClasses.MeanClass s (α + 1) (fun n p => s.epsilon n * β n p) := by
-  have he : WeightedClasses.BandBound s 1 (fun n => s.epsilon n) := by
-    simpa only [Real.rpow_one] using WeightedClasses.bandBound_rpow s 1
-  simpa only [smul_eq_mul] using hβ.band_smul he
 
 end PrimitiveClass
 
@@ -1818,38 +1743,9 @@ end ActualChartIdentities
 
 section AllVelocityClasses
 
-theorem actual_rank_velocity_meanClass (s : WeightedClasses.StripData ChartPoint)
-    {coord A B lam a b power lo hi qlo qhi α : ℝ}
-    (hc : 0 < coord) (hc1 : coord < 1) (hlam : 0 < lam) (ha : 0 < a) (hab : a < b)
-    (hB : B ≠ 0) (hp : 0 < power) (hlo : 0 < lo) (horder : lo < hi) (hqlo : 0 < qlo)
-    (hleft : lo ≤ Real.sqrt qlo * a) (hright : Real.sqrt qhi * b ≤ hi)
-    (hT : ∀ p ∈ s.domain, chartInput p ∈ PhysicalCoordinateBounds.positiveTime)
-    (hq : ∀ p ∈ s.domain, chartQ coord p ∈ Icc qlo qhi)
-    (hR : ∀ p ∈ s.domain, p.1 ∈ Icc lo hi)
-    (hz : ∃ δ : ℝ, 0 < δ ∧ ∀ p ∈ s.domain, p ∈ supportBand a b qlo qhi → δ ≤ s.zeta p)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (w : PressureStream.Plane × PressureStream.Plane)
-    {d : ℕ → PressureStream.Plane → Debt}
-    (hd : WeightedClasses.UnweightedClass s α (fun n p => d n p.2.1)) :
-    WeightedClasses.MeanClass s α (fun n => chartAngular coord A B lam a b (fun p => d n p.2.1)) ∧
-      WeightedClasses.MeanClass s α (fun n => actualChartAxial coord A B lam a b power lo hi (M n) (v n) (d n)) ∧
-      WeightedClasses.MeanClass s α (fun n => actualChartRadial coord A B lam a b power lo hi (M n) (v n) w (d n)) := by
-  have hfields := rank_update_meanClass (A := A) (B := B) (lam := lam) s hc hc1 ha hab hB hqlo hT hq hR hz hd
-  have hstream := actual_rank_stream_meanClass (A := A) s hc hc1 hlam ha hab hB hp hlo horder hqlo
-    hleft hright hT hq hR hz M v w hd
-  have he := actual_rank_stream_identities (A := A) s hc hc1 hlam ha hab hB hp hlo horder hqlo
-    hleft hright hT hq hR hz M v w hd
-  exact ⟨hfields.1, meanClass_congr_on hfields.2 (fun n p hps => (he n p hps).1), hstream.2⟩
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem slow_streamPotential_phase_independent (lo hi power M : ℝ) (v : PressureStream.Plane)
-    (f : ℝ × E → ℝ) (r : ℝ) (s : E) (Y Y' : PressureStream.Plane) :
-    PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f) (r, s, Y) =
-      PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift f) (r, s, Y') := by
-  simp [PressureStream.streamPotential, PressureStream.divideRadius, RadialPullback.physicalCompact,
-    RadialPullback.pullback, TransportPrimitive.compactIntegral, TransportPrimitive.pastIntegral,
-    TransportPrimitive.totalIntegral, TransportPrimitive.shift, RadialPullback.normalizeSource,
-    RadialPullback.liftChart, PressureStream.weightedSource, slowLift]
 
 
 end AllVelocityClasses

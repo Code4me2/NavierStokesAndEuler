@@ -52,9 +52,6 @@ theorem eulerianSmoothField_jetLp_continuous (n : ℕ) :
   EulerPacketSourceVolumeSobolev.smoothField_jetLp_continuous D (reconstructedTower D P κ Z)
     k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF n
 
-def eulerianCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Space :=
-  EulerPacketSourceVolumeSobolev.smoothCoefficientPath D (reconstructedTower D P κ Z)
-    k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF
 
 
 def pressureForceSmoothField (t : Icc (0 : ℝ) D.T) : SmoothL2Field Space :=
@@ -73,9 +70,6 @@ theorem pressureForceSmoothField_jetLp_continuous (n : ℕ) :
   EulerPacketSourceVolumeSobolev.smoothField_jetLp_continuous D (pressureForceTower D P κ Z)
     k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF n
 
-def pressureForceCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Space :=
-  EulerPacketSourceVolumeSobolev.smoothCoefficientPath D (pressureForceTower D P κ Z)
-    k D.m₀ X Y hX hYX hXY hY R C hR hC hdet hF
 
 
 end EulerPacketPhysicalField

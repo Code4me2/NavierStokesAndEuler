@@ -401,21 +401,6 @@ theorem coherent_angularField_germ {a h : ℝ} (ha : 0 < a) (j : PolarCharts.Ind
   filter_upwards [(cartesianDomain_open a j).mem_nhds hw] with z hz
   exact bandAngularField_eq_cartesianPotential ha j h n (D.gap n) (D.gap_native n hn) (D.native n) hz
 
-/-- This is a curl identity for the coherent physical field itself, obtained
-from its proved value coherence and the actual Cartesian derivative. -/
-theorem coherent_angularField_curl {a h : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    {N Δ : ℕ} {U : Set (ℝ × ℝ)}
-    (D : PhysicalMeanJetBounds.CoherentFamily h (CoordinateAlgebra.A h - 1 / 2) N Δ U ℝ)
-    (hU : IsOpen U) (n : ℕ) (hn : N ≤ n) {w : SpaceTime}
-    (ht : w ∈ PhysicalWaveSum.preterminal) (hu : (PhysicalMeanJetBounds.graph h n (D.gap n) w).2.1 ∈ U)
-    (hw : w ∈ cartesianDomain a j)
-    (hΨ : ContDiffAt ℝ ∞ (D.native n) (PhysicalMeanJetBounds.graph h n (D.gap n) w)) :
-    SpatialCurl.spatialCurl D.angularField w =
-      let G := PhysicalResidualBridge.commonGraph (ChartScales.Q n) h (ChartScales.nativeIndex h n - D.gap n)
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G (meridional G (D.native n))) w := by
-  rw [PhysicalCurlCovariance.spatialCurl_congr (coherent_angularField_germ ha j D hU n hn ht hu hw)]
-  apply cartesianPotential_curl ha j _ (Real.rpow_pos_of_pos (ChartScales.Q_pos n) _) hw
-  rwa [chartPoint_eq_graph ha j h n (D.gap n) (D.gap_native n hn) hw]
 
 
 /-! ## Finite sums of the actual potentials -/
@@ -492,49 +477,12 @@ noncomputable def cycleMeanPotential {ι : Type} (p : CycleParameters ι)
   cartesianPotential a j G
     (VariableGaugeMean.rankPotential p.gauge p.rank c (p.afterTemporal v c u) n)
 
-theorem cycleMeanPotential_curl {ι : Type} (p : CycleParameters ι) (v : CycleCoefficients ι)
-    (c : Context Point) (u : State Point) {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (hl : 0 < G.radialScale) (n : ℕ) (H : GaugeMatches p.gauge c G n)
-    (hax : p.axial = axial) {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (ht : ContDiffAt ℝ ∞
-      (VariableGaugeMean.temporalPotential p.gauge p.timeExponent p.commonIndex c (p.afterSigned v c u) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w)))
-    (hr : ContDiffAt ℝ ∞ (VariableGaugeMean.rankPotential p.gauge p.rank c (p.afterTemporal v c u) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    SpatialCurl.spatialCurl (cycleMeanPotential p v c u a j G n) w =
-      CyclePhysicalPrefixes.polarVelocityMap a j (CyclePhysicalPrefixes.velocityMap G
-        (CyclePhysicalPrefixes.meridionalComponents (p.temporalIncrement v c u) n +
-          CyclePhysicalPrefixes.meridionalComponents (p.rankIncrement v c u) n)) w := by
-  simpa only [cycleMeanPotential, CycleParameters.temporalIncrement, CycleParameters.rankIncrement, hax]
-    using temporal_rank_curl ha j p.gauge p.rank p.timeExponent p.commonIndex c
-      (p.afterSigned v c u) (p.afterTemporal v c u) G hl n H hw ht hr
 
-theorem cycleMeanPotential_smoothAt {ι : Type} (p : CycleParameters ι) (v : CycleCoefficients ι)
-    (c : Context Point) (u : State Point) {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (G : ScaledGraph) (hl : 0 < G.radialScale) (n : ℕ) {w : SpaceTime} (hw : w ∈ cartesianDomain a j)
-    (ht : ContDiffAt ℝ ∞
-      (VariableGaugeMean.temporalPotential p.gauge p.timeExponent p.commonIndex c (p.afterSigned v c u) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w)))
-    (hr : ContDiffAt ℝ ∞ (VariableGaugeMean.rankPotential p.gauge p.rank c (p.afterTemporal v c u) n)
-      (chartPoint G (PhysicalCurlCovariance.polarCoordinates a j w))) :
-    ContDiffAt ℝ ∞ (cycleMeanPotential p v c u a j G n) w :=
-  (cartesianPotential_smoothAt ha j G (mul_pos hl (polarCoordinates_valid ha j hw).1).ne' ht).add
-    (cartesianPotential_smoothAt ha j G (mul_pos hl (polarCoordinates_valid ha j hw).1).ne' hr)
 
 /-! ## The actual initialized mean -/
 
 open CorrectionInitialization CorrectionInitialization.GaugeInitialization
 
-noncomputable def initializedMeanPotential {ι : Type}
-    (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : RankData (ℝ × ℝ))
-    (h : ℝ) (index : ℕ → ℕ) (c : Context Point)
-    (labels : ℕ → Finset ι) (pieces : ι → PrimaryPiece (Point × ℝ))
-    (baseError : Oscillation Point) (a : ℝ) (j : PolarCharts.Index) (G : ScaledGraph) (n : ℕ) :
-    VelocityField :=
-  cartesianPotential a j G (VariableGaugeMean.temporalPotential g h index c
-    (primaryBands g c labels pieces baseError) n) +
-  cartesianPotential a j G (VariableGaugeMean.rankPotential g r c
-    (temporalBands g h index axial c labels pieces baseError) n)
 
 theorem initializedBands_mean {ι : Type}
     (g : VariableGaugeMean.GaugeData (ℝ × ℝ)) (r : RankData (ℝ × ℝ))
@@ -569,25 +517,7 @@ theorem meridionalComponents_next {ι : Type} (p : CycleParameters ι)
   rw [p.next_mean, meridionalComponents_updated, meridionalComponents_updated]
   exact add_assoc _ _ _
 
-theorem meridionalComponents_iterate {ι : Type} (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (n J : ℕ) :
-    CyclePhysicalPrefixes.meridionalComponents (CycleState.iterate p c seed J).state.mean n =
-      CyclePhysicalPrefixes.meridionalComponents seed.state.mean n +
-        ∑ k ∈ Finset.range J, meanIncrementComponents (p k)
-          (CycleState.iterate p c seed k).coefficients c (CycleState.iterate p c seed k).state n := by
-  induction J with
-  | zero => simp only [CycleState.iterate_zero, Finset.range_zero, Finset.sum_empty, add_zero]
-  | succ J ih =>
-      change CyclePhysicalPrefixes.meridionalComponents
-        ((p J).next (CycleState.iterate p c seed J).coefficients c (CycleState.iterate p c seed J).state).mean n = _
-      rw [meridionalComponents_next, ih, Finset.sum_range_succ, add_assoc]
 
-/-- The finite sum is evaluated on the actual successive cycle states. -/
-noncomputable def cycleMeanPrefix {ι : Type} (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι)
-    (a : ℝ) (j : PolarCharts.Index) (G : ScaledGraph) (n J : ℕ) : VelocityField :=
-  fun w => ∑ k ∈ Finset.range J, cycleMeanPotential (p k)
-    (CycleState.iterate p c seed k).coefficients c (CycleState.iterate p c seed k).state a j G n w
 
 
 end NavierStokes.ActualMeanPotentialRealization

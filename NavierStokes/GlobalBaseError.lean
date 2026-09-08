@@ -188,22 +188,7 @@ theorem error_joint_jetRate (upper : ℝ) (B : ℕ)
   error_jetRate H v upper B hupper (isCompact_closedBall _ _) originPast_in_compact
     originPast_before (originPast_q_tendsto_zero F.data.h_pos F.data.h_lt_half) m r hr
 
-theorem error_joint_allJetsFlat (upper : ℝ) (B : ℕ)
-    (hupper : BaseExterior.nominalExteriorRadius W ≤ upper) :
-    ResidualStability.AllJetsFlat originPast (fun z => (cartesianChart F.data.h z).1)
-      (FinalSlowBase.error H v upper B) :=
-  error_allJetsFlat H v upper B hupper (isCompact_closedBall _ _) originPast_in_compact
-    originPast_before (originPast_q_tendsto_zero F.data.h_pos F.data.h_lt_half)
 
-/-- Full joint vanishing of all actual error jets at `(1,0)` from the past,
-with no bounded-similarity-radius premise. -/
-theorem error_vanishingJointJets (upper : ℝ) (B : ℕ)
-    (hupper : BaseExterior.nominalExteriorRadius W ≤ upper) :
-    JointResidualLimits.VanishingJointJets (FinalSlowBase.error H v upper B) := by
-  intro m
-  exact SimilarityApproach.jet_tendsto_zero
-    (error_joint_jetRate H v upper B hupper m 1 zero_le_one)
-    (originPast_q_tendsto_zero F.data.h_pos F.data.h_lt_half)
 
 end JointOrigin
 
@@ -214,9 +199,6 @@ the supplied constant, never on the physical point, derivative order, or `q`. -/
 noncomputable def actualUpper (upper : ℝ) : ℝ :=
   max upper (BaseExterior.nominalExteriorRadius FinalSlowBase.actualProfile.nominal)
 
-noncomputable def actualError (upper : ℝ) (B : ℕ) : VelocityField :=
-  FinalSlowBase.error FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation
-    (actualUpper upper) B
 
 
 

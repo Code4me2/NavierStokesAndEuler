@@ -70,17 +70,7 @@ theorem parameter_hasDerivAt {S : Set ℝ} (hS : IsOpen S) {f : Field} (hf : Smo
   ProfileHistories.parameterPartial_hasDerivAt (PositiveOrderMoments.parameterDomain S hS)
     hf (p := w) ⟨mem_univ _, hw⟩
 
-theorem dr_mul {S : Set ℝ} (hS : IsOpen S) {f g : Field}
-    (hf : Smooth S f) (hg : Smooth S g) {w : ℝ × ℝ} (hw : w.2 ∈ S) :
-    dr (fun p => f p * g p) w = dr f w * g w + f w * dr g w :=
-  (radial_hasDerivAt hS (hf.mul hg) hw).unique
-    ((radial_hasDerivAt hS hf hw).mul (radial_hasDerivAt hS hg hw))
 
-theorem de_mul {S : Set ℝ} (hS : IsOpen S) {f g : Field}
-    (hf : Smooth S f) (hg : Smooth S g) {w : ℝ × ℝ} (hw : w.2 ∈ S) :
-    de (fun p => f p * g p) w = de f w * g w + f w * de g w :=
-  (parameter_hasDerivAt hS (hf.mul hg) hw).unique
-    ((parameter_hasDerivAt hS hf hw).mul (parameter_hasDerivAt hS hg hw))
 
 theorem de_weighted {S : Set ℝ} (hS : IsOpen S) {f : Field}
     (hf : Smooth S f) (m : ℕ) {w : ℝ × ℝ} (hw : w.2 ∈ S) :
@@ -809,43 +799,7 @@ theorem interior_quotient_smooth {S : Set ℝ} (hS : IsOpen S) {f : Field} (hf :
     filter_upwards [support_eventually_zero hS hs hw.2 ho] with p hp
     simp [hp]
 
-/-- Every actual derivative tensor has a weighted bound because its support
-lies in one fixed compact subinterval of the positive-weight region. No
-stress norm bound is an input. The constant may depend on the derivative order. -/
-theorem interior_weighted_jets {S K : Set ℝ} (hS : IsOpen S) (hK : IsCompact K) (hKS : K ⊆ S)
-    {f : Field} (hf : Smooth S f) {a b l r : ℝ}
-    (hs : radialSupport S a b f) (hab : Icc a b ⊆ Ioo l r)
-    {zeta : ℝ → ℝ} (hz : ContinuousOn zeta (Ioo l r))
-    (hz0 : ∀ R ∈ Ioo l r, 0 < zeta R) (k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ R ∈ Ioo l r, ∀ eta ∈ K,
-      ‖iteratedFDeriv ℝ k f (R, eta)‖ ≤ C * zeta R := by
-  have hcj : ContinuousOn (iteratedFDeriv ℝ k f) (Icc a b ×ˢ K) := by
-    intro w hw
-    have hh := hf.contDiffAt ((isOpen_univ.prod hS).mem_nhds ⟨mem_univ _, hKS hw.2⟩)
-    exact (hh.iteratedFDeriv_right (m := 0) (by
-      simp only [zero_add]
-      exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))).continuousAt.continuousWithinAt
-  have hcz : ContinuousOn (fun w : ℝ × ℝ => zeta w.1) (Icc a b ×ˢ K) :=
-    hz.comp continuous_fst.continuousOn (fun w hw => hab hw.1)
-  have hc : ContinuousOn (fun w : ℝ × ℝ => ‖iteratedFDeriv ℝ k f w‖ / zeta w.1)
-      (Icc a b ×ˢ K) := hcj.norm.div hcz (fun w hw => (hz0 w.1 (hab hw.1)).ne')
-  obtain ⟨C, hC⟩ := (isCompact_Icc.prod hK).exists_bound_of_continuousOn hc
-  refine ⟨max C 0, le_max_right _ _, ?_⟩
-  intro R hR eta heta
-  by_cases hi : R ∈ Icc a b
-  · apply (div_le_iff₀ (hz0 R hR)).mp
-    exact (le_abs_self _).trans ((hC (R, eta) ⟨hi, heta⟩).trans (le_max_left _ _))
-  · have hj := jet_eq_zero_of_eventually (support_eventually_zero hS hs (w := (R, eta)) (hKS heta) hi) k
-    rw [hj, norm_zero]
-    exact mul_nonneg (le_max_right _ _) (hz0 R hR).le
 
-theorem stress_radialSupport (m : ℕ) {F : Field} {S : Set ℝ} {a B : ℝ} (hB : 0 ≤ B)
-    (hinner : ∀ eta ∈ S, ∀ R ∈ Icc 0 a, F (R, eta) = 0)
-    (hs : exterior B S F) (hm : ∀ eta ∈ S, moment B 0 F eta = 0) :
-    radialSupport S a B (stress m F) := by
-  intro eta heta R hR
-  by_contra hn
-  exact hR (stress_slice_support m hB hinner hs hm heta hn)
 
 
 theorem smooth_angularDensity {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
@@ -933,11 +887,6 @@ noncomputable def axialStress (h : ℝ) (n : ℕ) (v u : History) (p : Field) : 
 
 
 
-/-- The order-one angular input is a moment of the actual axial viscosity,
-not a condition on the total residual. It is supplied by differentiating
-the restored renormalized order-zero physical angular moment. -/
-noncomputable def LowerAngularViscosityMoment (S : Set ℝ) (B h : ℝ) (e₀ : Field) : Prop :=
-  ∀ eta ∈ S, moment B 2 (axialOp2 h (orderExponent h 0) e₀) eta = 0
 
 
 /-- A concrete two-edge weight of the form prescribed in (20). -/
@@ -946,31 +895,7 @@ noncomputable def logFlatWeight (l r cL cR R : ℝ) : ℝ :=
     FlatCutoff.edge cL (Real.log (R / l)) * FlatCutoff.edge cR (Real.log (r / R))
   else 0
 
-theorem logFlatWeight_pos {l r : ℝ} (hl : 0 < l) (cL cR : ℝ)
-    {R : ℝ} (hR : R ∈ Ioo l r) : 0 < logFlatWeight l r cL cR R := by
-  rw [logFlatWeight, ite_eq_left hR]
-  apply mul_pos
-  · exact FlatCutoff.edge_pos cL (Real.log_pos ((one_lt_div hl).mpr hR.1))
-  · exact FlatCutoff.edge_pos cR (Real.log_pos ((one_lt_div (hl.trans hR.1)).mpr hR.2))
 
-theorem logFlatWeight_contDiffOn {l r cL cR : ℝ} (hl : 0 < l)
-    (hcL : 0 < cL) (hcR : 0 < cR) :
-    ContDiffOn ℝ ∞ (logFlatWeight l r cL cR) (Ioo l r) := by
-  intro R hR
-  apply ContDiffAt.contDiffWithinAt
-  have hp := hl.trans hR.1
-  have hr := hp.trans hR.2
-  have hleft : ContDiffAt ℝ ∞ (fun x : ℝ => Real.log (x / l)) R :=
-    (contDiffAt_id.div_const l).log (div_ne_zero hp.ne' hl.ne')
-  have hright : ContDiffAt ℝ ∞ (fun x : ℝ => Real.log (r / x)) R :=
-    (contDiffAt_const.div contDiffAt_id hp.ne').log (div_ne_zero hr.ne' hp.ne')
-  have hs : ContDiffAt ℝ ∞ (fun x =>
-      FlatCutoff.edge cL (Real.log (x / l)) * FlatCutoff.edge cR (Real.log (r / x))) R :=
-    ((FlatCutoff.edge_contDiff hcL).contDiffAt.comp R hleft).mul
-      ((FlatCutoff.edge_contDiff hcR).contDiffAt.comp R hright)
-  apply hs.congr_of_eventuallyEq
-  filter_upwards [isOpen_Ioo.mem_nhds hR] with x hx
-  exact ite_eq_left hx
 
 
 end NavierStokes.SlowStressSupport

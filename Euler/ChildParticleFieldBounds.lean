@@ -247,13 +247,6 @@ theorem childAcceleration_apply (x : Space) :
       fderiv ℝ (fderiv ℝ G.parentDisplacement.field) (G.inner x) (G.velocity.field x) (G.velocity.field x)+
       G.acceleration.field x+fderiv ℝ G.parentDisplacement.field (G.inner x) (G.acceleration.field x) := rfl
 
-theorem child_label_bounds (K : ℝ)
-    (ha : EulerParameterWordGevrey.sobolevCoefficientAmplitude (Fin 3) 6 G.radius G.amplitude ≤ K)
-    (hr : EulerParameterWordGevrey.sobolevCoefficientRadius (Fin 3) G.radius ≤ K) :
-    HasLabelBound K G.childDisplacement ∧ HasLabelBound K G.childVelocity ∧ HasLabelBound K G.childAcceleration :=
-  ⟨hasLabelBound_of_jet_bound _ _ _ K G.amplitude_nonneg G.radius_nonneg G.childDisplacement_bound ha hr,
-   hasLabelBound_of_jet_bound _ _ _ K G.amplitude_nonneg G.radius_nonneg G.childVelocity_bound ha hr,
-   hasLabelBound_of_jet_bound _ _ _ K G.amplitude_nonneg G.radius_nonneg G.childAcceleration_bound ha hr⟩
 
 end Data
 end EulerChildParticleFieldBounds

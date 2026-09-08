@@ -72,39 +72,6 @@ variable {ι : Type*} [Fintype ι]
 
 include hdir hQ hQ₁ hH hRc hC₀ hC₁ hCH hCf hbQ hbQ₁ hbH hR
 
-/-- Actual cylinder/time L² coordinate velocity: one shift at the original
-radius and fixed Sobolev order, from forcing bounds at the base translation. -/
-theorem velocityLp_block_bound (f : TimeLp T (CylinderL2 P E))
-    (hf : ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap f))
-    (d : ℕ) (hfb : ∀ n, block directions q
-      (fun a => timeLift T (translate P a).toContinuousLinearMap f) n 0 ≤ Cf*majorant R d n)
-    (n : ℕ) (a : LiftTangent) :
-    block directions q (fun b => timeLift T (translate P b).toContinuousLinearMap (D.velocityLp P f)) n a ≤
-      majorant R (d+1) n := by
-  let g : LiftTangent → TimeLp T (CylinderL2 P E) :=
-    fun b => timeLift T (translate P b).toContinuousLinearMap f
-  change ContDiff ℝ ∞ g at hf
-  have he : (fun b : LiftTangent => (D.shifted b.1).velocityLp P
-      (timeLift T (translate P b).toContinuousLinearMap f)) =
-      fun b => timeLift T (translate P b).toContinuousLinearMap (D.velocityLp P f) :=
-    funext (fun b => D.velocityLp_translation P b f)
-  rw [← he]
-  apply EulerTransverseFixedSobolev.velocityLp_block_gevrey directions hdir q T D.time_pos.le
-    (fun b : LiftTangent => (D.shifted b.1).frame P)
-    (fun b : LiftTangent => (D.shifted b.1).frameDerivative P)
-    (fun b : LiftTangent => (D.shifted b.1).hessian P)
-    D.lower D.lower_pos (fun b => (D.shifted b.1).frame_lower P)
-    (fun b => (D.shifted b.1).frame_derivative P)
-    D.potential D.potential_nonneg (fun b => (D.shifted b.1).hessian_upper P) D.small
-    (D.frameOrbit_contDiff P hQ) (D.frameDerivativeOrbit_contDiff P hQ₁) (D.hessianOrbit_contDiff P hH)
-    Rc C₀ C₁ CH Cf R hRc hC₀ hC₁ hCH hCf
-    (fun k b => D.frameOrbit_bound P hQ k _ (hbQ k) b)
-    (fun k b => D.frameDerivativeOrbit_bound P hQ₁ k _ (hbQ₁ k) b)
-    (fun k b => D.hessianOrbit_bound P hH k _ (hbH k) b) hR
-    g hf d _ n a
-  intro k b
-  rw [time_block_constant P directions q T f hf k b]
-  exact hfb k
 
 
 end EulerCylinderDirichlet.Coefficients

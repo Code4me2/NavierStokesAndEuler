@@ -185,10 +185,6 @@ theorem contDiffOn_jet (I : Window) (w : ℕ → ℕ → ℝ)
   exact ((hasDerivWithinAt_jet I w A n (q + m) hx).congr_of_mem
     (fun y hy => iteratedDerivWithin_jet I w A n q m hy) hx).differentiableWithinAt
 
-theorem contDiffOn_coefficient (I : Window) (w : ℕ → ℕ → ℝ)
-    (A : CoefficientSpace I w) (n : ℕ) :
-    ContDiffOn ℝ ∞ (coefficient I w A n) I.interval :=
-  contDiffOn_jet I w A n 0
 
 
 /-- The inherited norm controls every actual parameter derivative with its weight. -/
@@ -199,11 +195,6 @@ theorem abs_jet_le (I : Window) (w : ℕ → ℕ → ℝ) (A : CoefficientSpace 
   exact mul_le_mul_of_nonneg_left
     (A.1.norm_coe_le_norm ((n, m), I.project x)) (abs_nonneg _)
 
-theorem abs_iteratedDerivWithin_coefficient_le (I : Window) (w : ℕ → ℕ → ℝ)
-    (A : CoefficientSpace I w) (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
-    |iteratedDerivWithin m (coefficient I w A n) I.interval x| ≤ |w n m| * ‖A‖ := by
-  rw [iteratedDerivWithin_coefficient I w A n m hx]
-  exact abs_jet_le I w A n m x
 
 /-- Norm convergence controls every derivative uniformly in the parameter. -/
 theorem abs_jet_sub_le (I : Window) (w : ℕ → ℕ → ℝ) (A B : CoefficientSpace I w)
@@ -387,16 +378,6 @@ def ofSmoothFamily (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m, 0 < w n
       (uniqueDiffOn_Icc I.nondegenerate))
     (fun n m _ hx => hasDerivWithinAt_iterated_smooth I F hF n m hx) C hC hbound
 
-theorem jet_ofSmoothFamily (I : Window) (w : ℕ → ℕ → ℝ) (hw : ∀ n m, 0 < w n m)
-    (F : ℕ → ℝ → ℝ) (hF : ∀ n, ContDiffOn ℝ ∞ (F n) I.interval)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hbound : ∀ n m x, x ∈ I.interval →
-      |iteratedDerivWithin m (F n) I.interval x| ≤ C * w n m)
-    (n m : ℕ) {x : ℝ} (hx : x ∈ I.interval) :
-    jet I w (ofSmoothFamily I w hw F hF C hC hbound).1 n m x =
-      iteratedDerivWithin m (F n) I.interval x := by
-  unfold ofSmoothFamily
-  exact jet_ofJetFamily I w hw _ _ _ C hC hbound n m hx
 
 
 

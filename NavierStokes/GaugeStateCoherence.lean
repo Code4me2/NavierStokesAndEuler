@@ -189,14 +189,6 @@ theorem pressureAlias_zero_of_nonpositive {a b d : ℝ} (ha : 0 < a) (hab : a < 
     (VariableGaugeMean.pressureSource a b hab ell f) hn
   exact (not_lt_of_ge (hh.1.trans hz)) (mul_pos hl ha)
 
-theorem pressureAlias_supported {a b d : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (M : ℝ) (ell : S → ℝ) (v : Plane) (f : PressureStream.Lift S → ℝ)
-    (V : Set S) (hl : ∀ s ∈ V, 0 < ell s) :
-    VariableGaugeMean.SupportedGauge a b ell V (pressureAlias d a b M hab ell v f) := by
-  intro z hz hn
-  exact RadialPullback.physicalAlias_supported (mul_pos (hl _ hz) ha)
-    (mul_lt_mul_of_pos_left hab (hl _ hz)) hd M ((0 : S), v)
-    (VariableGaugeMean.pressureSource a b hab ell f) hn
 
 theorem pressureAlias_congr_profile {d a b d' a' b' : ℝ} {hab : a < b} {hab' : a' < b'}
     (hd : d = d') (ha : a = a') (hb : b = b') (M : ℝ) (ell : S → ℝ)

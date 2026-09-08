@@ -184,10 +184,6 @@ theorem contDiffOn_potential {H K : Profile} {times : Set ℝ} {n : WithTop ℕ�
     ((contDiffOn_const.mul (h0.mul hHv)).smul contDiffOn_const)).add
     (hKv.smul contDiffOn_const)
 
-theorem contDiff_velocity {H K : Profile} {m n : WithTop ℕ∞}
-    (hH : ContDiff ℝ n H) (hK : ContDiff ℝ n K) (hmn : m + 1 ≤ n) :
-    ContDiff ℝ m (velocity H K) :=
-  SpatialCurl.contDiff_spatialCurl (contDiff_potential hH hK) hmn
 
 
 theorem contDiffOn_velocity {H K : Profile} {times : Set ℝ} {m n : WithTop ℕ∞}
@@ -270,17 +266,6 @@ theorem isCompact_cylinder (R Z : ℝ) :
   apply Real.sqrt_le_sqrt
   simpa only [Real.norm_eq_abs, sq_abs] using hs
 
-/-- Bounds on profile support give a literal closed cylinder in Cartesian
-space: `s ≤ R` and `|z| ≤ Z`. -/
-theorem tsupport_velocity_cylinder_subset (H K : Profile) (t R Z : ℝ)
-    (hH : tsupport H ⊆ {p : ProfilePoint | p.2.1 ≤ R ∧ |p.2.2| ≤ Z})
-    (hK : tsupport K ⊆ {p : ProfilePoint | p.2.1 ≤ R ∧ |p.2.2| ≤ Z}) :
-    tsupport (fun x : Space => velocity H K (t, x)) ⊆
-      {x : Space | radialEnergy x ≤ R ∧ |x 2| ≤ Z} := by
-  intro x hx
-  rcases tsupport_velocity_slice_subset H K t hx with h | h
-  · exact hH h
-  · exact hK h
 
 
 end NavierStokes.AxisymmetricFields

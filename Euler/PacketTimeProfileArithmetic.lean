@@ -98,17 +98,7 @@ theorem fast_corrector_high_high (γ H : ℝ) (hγ : 0 ≤ γ) (hγH : γ ≤ H)
     highScale γ H (i-1)*highScale γ H j ≤ highScale γ H p :=
   slow_high_high_high γ H hγ hγH hH (i-1) j p (by omega) hj (by omega)
 
-theorem fast_corrector_corrector_mean (γ H : ℝ) (hγ : 0 ≤ γ) (hγH : γ ≤ H) (hH : 1 ≤ H)
-    (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j) (hp : i+j=p+1) :
-    highScale γ H (i-1)*highScale γ H (j-1) ≤ meanScale H p :=
-  (slow_high_high_mean γ H hγ hγH hH (i-1) (j-1) (p-1) (by omega) (by omega) (by omega)).trans
-    (meanScale_mono H hH (Nat.sub_le p 1))
 
-theorem fast_corrector_corrector_high (γ H : ℝ) (hγ : 0 ≤ γ) (hγH : γ ≤ H) (hH : 1 ≤ H)
-    (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j) (hp : i+j=p+1) :
-    highScale γ H (i-1)*highScale γ H (j-1) ≤ highScale γ H p :=
-  (slow_high_high_high γ H hγ hγH hH (i-1) (j-1) (p-1) (by omega) (by omega) (by omega)).trans
-    (highScale_mono γ H hγ hH (Nat.sub_le p 1))
 
 theorem previous_linear_mean (γ H : ℝ) (hγ : 0 ≤ γ) (hγH : γ ≤ H) (hH : 1 ≤ H)
     (p : ℕ) (hp : 2 ≤ p) : highScale γ H (p-1) ≤ meanScale H p := by

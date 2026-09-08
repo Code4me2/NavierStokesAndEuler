@@ -164,11 +164,6 @@ theorem slot_coordinate_angleIndependent {s : WeightedClasses.StripData (D × �
   simp only [GaussianTailFlat.SlotFamily.coordinate, hp, map_add, map_smul, hangle,
     smul_zero, add_zero]
 
-theorem slot_cutoff_angleIndependent {s : WeightedClasses.StripData (D × ℝ)}
-    (g : GaussianTailFlat.SlotFamily s) (hangle : ∀ n, g.linear n ((0 : D), 1) = 0) :
-    AngleIndependent g.cutoff := by
-  intro n x θ
-  exact congrArg GaussianTailFlat.profile (slot_coordinate_angleIndependent g hangle n x θ)
 
 /-- The retained Gaussian term as a literal real carrier field. -/
 noncomputable def gaussianField (d : LinearWaveBounds.GraphDirections (D × ℝ))
@@ -217,32 +212,14 @@ section AliasErrors
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- The pressure alias already used in the correction state, represented in
-mode zero. Its metadata can be chosen to equal any associated label. -/
-noncomputable def pressureAliasBlock (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock (Lift S) :=
-  zeroBlock k Φ kp (fun n x => CorrectionState.pressureAlias r c u n (x, 0))
 
 
 
 
-/-- The temporal alias retains its actual differentiated shifted integral. -/
-noncomputable def temporalAliasBlock (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) : HarmonicBlock (Lift S) :=
-  zeroBlock k Φ kp (fun n x => CorrectionState.temporalAlias r h c u n (x, 0))
 
 
 
 
-/-- Replacing a pressure reconstruction changes the saved alias by its exact
-new-minus-old value, which is again mode zero. -/
-noncomputable def pressureAliasRefreshBlock (r : ReconstructionData)
-    (c : Context (Lift S)) (oldState newState : State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) : HarmonicBlock (Lift S) :=
-  zeroBlock k Φ kp (fun n x => CorrectionState.pressureAlias r c newState n (x, 0) -
-    CorrectionState.pressureAlias r c oldState n (x, 0))
 
 
 
@@ -373,17 +350,6 @@ noncomputable def accumulatedGaussianBlock (steps : ℕ) (g : ℕ → GaussianDa
     (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) : HarmonicBlock D :=
   sumBlock (Finset.range steps) k Φ kp (fun s => (g s).block k Φ kp)
 
-theorem accumulatedGaussianBlock_represents (steps : ℕ) (g : ℕ → GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (hg : ∀ s < steps, (g s).Compatible k Φ kp) :
-    (accumulatedGaussianBlock steps g k Φ kp).oscillation =
-      ∑ s ∈ Finset.range steps, (g s).error k := by
-  rw [accumulatedGaussianBlock, sumBlock_represents (Finset.range steps) k Φ kp
-    (fun s => (g s).block k Φ kp)
-    (fun _ _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)]
-  apply Finset.sum_congr rfl
-  intro s hs
-  exact (g s).block_represents k Φ kp (hg s (Finset.mem_range.mp hs))
 
 theorem accumulatedGaussianBlock_band (steps : ℕ) (g : ℕ → GaussianData D)
     (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
@@ -396,21 +362,7 @@ theorem accumulatedGaussianBlock_band (steps : ℕ) (g : ℕ → GaussianData D)
   exact ⟨fun n i => (he.1 n i).mono (hj s (Finset.mem_range.mp hs)),
     fun n => (he.2 n).mono (hj s (Finset.mem_range.mp hs))⟩
 
-/-- This bounds the values of the occupied harmonics, not merely their count. -/
-theorem accumulatedGaussianBlock_band_pow (steps : ℕ) (g : ℕ → GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (hj : ∀ s < steps, (g s).harmonic.natAbs ≤ 2 ^ s) :
-    HarmonicBlock.BandLimited (accumulatedGaussianBlock steps g k Φ kp) (2 ^ steps) := by
-  apply accumulatedGaussianBlock_band
-  intro s hs
-  exact (hj s hs).trans (Nat.pow_le_pow_right (by decide : 1 ≤ 2) (Nat.le_of_lt hs))
 
-theorem accumulatedGaussianBlock_real (steps : ℕ) (g : ℕ → GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (accumulatedGaussianBlock steps g k Φ kp) := by
-  apply sumBlock_real
-  intro s hs
-  exact pairedBlock_real (g s).harmonic k Φ kp _
 
 end FiniteStages
 
@@ -437,39 +389,11 @@ theorem accumulatedAlias_angleIndependent (steps : ℕ) (r : ReconstructionData)
   simp only [accumulatedAlias, Pi.add_apply, Finset.sum_apply, CorrectionState.pressureAlias,
     CorrectionState.temporalAlias]
 
-theorem accumulatedAliasBlock_represents (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    (accumulatedAliasBlock steps r h c u k Φ kp).oscillation = accumulatedAlias steps r h c u := by
-  funext n p i
-  rw [accumulatedAliasBlock, zeroBlock_evaluation]
-  exact congrFun (accumulatedAlias_angleIndependent steps r h c u n p.1 p.2).symm i
-
-theorem accumulatedAliasBlock_band (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    HarmonicBlock.BandLimited (accumulatedAliasBlock steps r h c u k Φ kp) 0 :=
-  zeroBlock_band k Φ kp _
-
-theorem accumulatedAliasBlock_real (steps : ℕ) (r : ReconstructionData) (h : ℝ)
-    (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) :
-    RealBlock (accumulatedAliasBlock steps r h c u k Φ kp) := zeroBlock_real k Φ kp _
 
 
 
-/-- The two retained error types for one label are added as actual finite
-coefficient families. The base error is handled separately in the physical
-decomposition and cancels from the good residual. -/
-noncomputable def accumulatedErrorBlock (steps : ℕ) (g : ℕ → GaussianData (Lift S))
-    (r : ReconstructionData) (h : ℝ) (c : Context (Lift S)) (u : ℕ → State (Lift S))
-    (k : ℕ → ℝ) (Φ : ℕ → Lift S → ℝ) (kp : ℕ → ℤ) : HarmonicBlock (Lift S) where
-  velocity n i := (accumulatedGaussianBlock steps g k Φ kp).velocity n i +
-    (accumulatedAliasBlock steps r h c u k Φ kp).velocity n i
-  pressure _ := 0
-  frequency := k
-  phase := Φ
-  angularFrequency := kp
+
+
 
 
 
@@ -530,26 +454,8 @@ noncomputable def axisymmetricBaseValue (B F U P : ℕ → Profile) : MeanVector
     -q.2.1 * AxisymmetricResidual.residualAngular (B n) (F n) (U n) (polarProfile q),
     AxisymmetricResidual.residualAxial (B n) (U n) (P n) (polarProfile q)]
 
-theorem axisymmetricBaseError_eq_value (B F U P : ℕ → Profile) (n : ℕ)
-    (q : ProfilePoint) (θ : ℝ)
-    (hB : AxisymmetricResidual.SliceC2 (B n) q.1)
-    (hF : AxisymmetricResidual.SliceC2 (F n) q.1)
-    (hU : AxisymmetricResidual.SliceC2 (U n) q.1)
-    (hP : AxisymmetricResidual.SliceDifferentiable (P n) q.1) :
-    axisymmetricBaseError B F U P n (q, θ) = axisymmetricBaseValue B F U P n q := by
-  unfold axisymmetricBaseError
-  rw [AxisymmetricResidual.navierStokesResidual_velocity hB hF hU hP
-    (polarSpace q.2.1 q.2.2 θ), profilePoint_polarSpace]
-  simp only [polarSpace, AxisymmetricResidual.pack_zero, AxisymmetricResidual.pack_one]
-  exact cylindricalComponents_pack q.2.1 θ
-    (AxisymmetricResidual.residualRadial (B n) (F n) (U n) (P n) (polarProfile q))
-    (AxisymmetricResidual.residualAngular (B n) (F n) (U n) (polarProfile q))
-    (AxisymmetricResidual.residualAxial (B n) (U n) (P n) (polarProfile q))
 
 
-noncomputable def axisymmetricBaseBlock (B F U P : ℕ → Profile)
-    (k : ℕ → ℝ) (Φ : ℕ → ProfilePoint → ℝ) (kp : ℕ → ℤ) : HarmonicBlock ProfilePoint :=
-  zeroBlock k Φ kp (axisymmetricBaseValue B F U P)
 
 
 

@@ -147,29 +147,6 @@ theorem angularAverage_add {f g : OscillatoryScalar D}
   funext n x
   exact HarmonicResidual.realAngularMean_add (hf n x) (hg n x)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem angularProduct_add_error (A B C E : OscillatoryScalar D)
-    (hA : ∀ n x, Continuous (fun θ : ℝ => A n (x, θ)))
-    (hB : ∀ n x, Continuous (fun θ : ℝ => B n (x, θ)))
-    (hC : ∀ n x, Continuous (fun θ : ℝ => C n (x, θ)))
-    (hE : ∀ n x, Continuous (fun θ : ℝ => E n (x, θ))) :
-    angularAverage ((A + C) * (B + E)) - angularAverage (A * B) =
-      angularAverage (A * E) + angularAverage (C * B) + angularAverage (C * E) := by
-  have he : (A + C) * (B + E) = A * B + (A * E + C * B + C * E) := by
-    funext n p
-    simp only [Pi.add_apply, Pi.mul_apply]
-    ring
-  rw [he, angularAverage_add
-    (fun n x => (hA n x).mul (hB n x))
-    (fun n x => ((hA n x).mul (hE n x)).add ((hC n x).mul (hB n x)) |>.add
-      ((hC n x).mul (hE n x))),
-    angularAverage_add
-      (fun n x => ((hA n x).mul (hE n x)).add ((hC n x).mul (hB n x)))
-      (fun n x => (hC n x).mul (hE n x)),
-    angularAverage_add
-      (fun n x => (hA n x).mul (hE n x))
-      (fun n x => (hC n x).mul (hB n x))]
-  abel
 
 
 end RealCoefficientCovariance

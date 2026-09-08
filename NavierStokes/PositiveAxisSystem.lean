@@ -819,23 +819,8 @@ private theorem data_square_contDiffAt {n : WithTop ℕ∞} {F : CoefficientData
 
 
 
-theorem coefficient0_contDiffAt {n : WithTop ℕ∞} {h lam C : ℂ} {F : CoefficientData}
-    {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ell h w.2 ≠ 0) (i j : Fin 6) :
-    ContDiffAt ℝ n (fun v : ℝ × ℂ => coefficient0 h lam C F v.1 v.2 i j) w :=
-  coefficient0_contDiffAt_of_pullback (data_square_contDiffAt hF) hL i j
 
-theorem coefficient1_contDiffAt {n : WithTop ℕ∞} {h : ℂ} {F : CoefficientData}
-    {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ell h w.2 ≠ 0) (i j : Fin 6) :
-    ContDiffAt ℝ n (fun v : ℝ × ℂ => coefficient1 h F v.1 v.2 i j) w :=
-  coefficient1_contDiffAt_of_pullback (data_square_contDiffAt hF) hL i j
 
-theorem sourceField_contDiffAt {n : WithTop ℕ∞} {h C : ℂ} {F : CoefficientData}
-    {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (F i) (w.1 ^ 2, w.2))
-    (hL : ell h w.2 ≠ 0) (i : Fin 6) :
-    ContDiffAt ℝ n (fun v : ℝ × ℂ => sourceField h C F v.1 v.2 i) w :=
-  sourceField_contDiffAt_of_pullback (data_square_contDiffAt hF) hL i
 
 theorem coefficient0_contDiffOn_of_pullback {n : WithTop ℕ∞} {h lam C : ℂ}
     {F : CoefficientData} {S : Set (ℝ × ℂ)}

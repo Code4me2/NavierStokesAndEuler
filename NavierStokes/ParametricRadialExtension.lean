@@ -232,19 +232,6 @@ theorem extension_eqOn {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
   intro p hp
   exact extension_eq w hF he hp.1 (abs_lt.mpr hp.2).le
 
-/-- Every full mixed derivative of the extension, including at the axis,
-is the genuine derivative within the physical closed half-plane. -/
-theorem extension_mixed_jets {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    (n : ℕ) {p : Plane} (hp : p ∈ Ici 0 ×ˢ Ioo (-w.inner) w.inner) :
-    iteratedFDeriv ℝ n (extension w F hF he) p =
-      iteratedFDerivWithin ℝ n (descent F) (Ici 0 ×ˢ Ioo (-w.inner) w.inner) p := by
-  have hu : UniqueDiffOn ℝ (Ici 0 ×ˢ Ioo (-w.inner) w.inner : Set Plane) :=
-    (uniqueDiffOn_Ici 0).prod isOpen_Ioo.uniqueDiffOn
-  rw [← iteratedFDerivWithin_eq_iteratedFDeriv hu
-    ((extension_contDiff w hF he).of_le (nat_le_infty n)).contDiffAt hp]
-  exact iteratedFDerivWithin_congr (extension_eqOn w hF he) hp n
 
 /-- Exact recovery on the signed radius.  This also covers the axis. -/
 theorem extension_pullback {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
@@ -276,31 +263,6 @@ theorem extension_radial_jets {S : Set ℝ} (w : ParameterWindow S) {F : Plane �
   rw [← hwithin]
   exact iteratedDerivWithin_congr (fun Y hY => extension_eq w hF he hY heta) hX
 
-/-- Identification with the actual Hadamard derivative chain from
-`BoundaryAxisJets`; the factor `2^n` comes from `X = R^2/2`. -/
-theorem extension_radialJet {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    (n : ℕ) {X eta : ℝ} (hX : 0 ≤ X) (heta : |eta| ≤ w.inner) :
-    iteratedDeriv n (fun Y => extension w F hF he (Y, eta)) X =
-      (2 : ℝ) ^ n • BoundaryAxisJets.axisJet F n (2 * X, eta) := by
-  have hetaS : eta ∈ S :=
-    w.outer_subset (abs_lt.mp (heta.trans_lt w.inner_lt_outer))
-  have hs : ContDiff ℝ ∞ (fun r => F (r, eta)) :=
-    hF.comp_contDiff (contDiff_id.prodMk contDiff_const)
-      (fun _ => ⟨mem_univ _, hetaS⟩)
-  have heven : Function.Even (fun r => F (r, eta)) := he eta hetaS
-  have hd := EvenSmoothDescent.contDiffOn_descent hs heven
-  rw [extension_radial_jets w hF he n hX heta]
-  calc
-    _ = (2 : ℝ) ^ n • iteratedDerivWithin n
-        (fun Y => F (Real.sqrt Y, eta)) (Ici 0) (2 * X) :=
-      iteratedDerivWithin_comp_const_smul hX (uniqueDiffOn_Ici 0)
-        (hd.of_le (nat_le_infty n)) 2
-        (fun Y hY => mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hY)
-    _ = _ := congrArg ((2 : ℝ) ^ n • ·)
-      (BoundaryAxisJets.axisJet_eq_iteratedDerivWithin hs heven n
-        (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hX)).symm
 
 
 /-- Exterior support is inherited globally in the parameter, not only on

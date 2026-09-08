@@ -14,16 +14,6 @@ theorem transport_quadratic_bound {X Y Z : Type*}
     (h : ‖x‖^2 ≤ a*‖y‖^2+b*‖z‖^2) : ‖x'‖^2 ≤ a*‖y'‖^2+b*‖z'‖^2 := by
   subst x'; subst y'; subst z'; exact h
 
-/-- A quadratic norm estimate passes to actual strong limits in three normed spaces. -/
-theorem limit_quadratic_bound {X Y Z : Type*}
-    [NormedAddCommGroup X] [NormedAddCommGroup Y] [NormedAddCommGroup Z]
-    (U : ℕ → X) (F : ℕ → Y) (V : ℕ → Z) (u : X) (f : Y) (v : Z) (a b : ℝ)
-    (hu : Filter.Tendsto U Filter.atTop (𝓝 u))
-    (hf : Filter.Tendsto F Filter.atTop (𝓝 f))
-    (hv : Filter.Tendsto V Filter.atTop (𝓝 v))
-    (hb : ∀ n, ‖V n‖^2 ≤ a*‖U n‖^2+b*‖F n‖^2) : ‖v‖^2 ≤ a*‖u‖^2+b*‖f‖^2 := by
-  exact le_of_tendsto_of_tendsto' (hv.norm.pow 2)
-    (((hu.norm.pow 2).const_mul a).add ((hf.norm.pow 2).const_mul b)) hb
 
 /-- A sequence whose squared differences are bounded by two Cauchy-sequence differences is Cauchy. -/
 theorem cauchy_of_quadratic_bound {X Y Z : Type*}

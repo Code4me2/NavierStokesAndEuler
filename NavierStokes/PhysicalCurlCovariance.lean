@@ -323,12 +323,6 @@ theorem along_reindex (e : E ≃L[ℝ] F) (V : F → F) {W : Type*}
   rw [hd.fderiv]
   simp
 
-theorem cylindricalCurl_reindex (e : E ≃L[ℝ] F) (R : F → ℝ) (Vr Vθ Vz : F → F)
-    {B : F → ComplexVector} {x : E} (hB : ∀ i, DifferentiableAt ℝ (fun y => B y i) (e x)) :
-    CurlClassBounds.cylindricalCurl (fun y => R (e y)) (reindexVector e Vr)
-      (reindexVector e Vθ) (reindexVector e Vz) (fun y => B (e y)) x =
-      CurlClassBounds.cylindricalCurl R Vr Vθ Vz B (e x) := by
-  simp only [CurlClassBounds.cylindricalCurl, along_reindex e _ (hB _)]
 
 theorem phaseNormal_reindex (e : E ≃L[ℝ] F) (R : F → ℝ) (Vr Vθ Vz : F → F)
     {Φ : F → ℝ} {x : E} (hΦ : DifferentiableAt ℝ Φ (e x)) :
@@ -346,27 +340,7 @@ theorem vectorPotential_reindex (e : E ≃L[ℝ] F) (K : ℝ) (R : F → ℝ) (V
     phaseNormal_reindex e R Vr Vθ Vz hΦ, carrier]
 
 
-theorem vectorPotential_cutoff (K : ℝ) (R : E → ℝ) (Vr Vθ Vz : E → E)
-    (Φ : E → ℝ) (a : E → ComplexVector) (χ : E → ℝ) (x : E) :
-    CurlClassBounds.vectorPotential K R Vr Vθ Vz Φ (fun y => χ y • a y) x =
-      χ x • CurlClassBounds.vectorPotential K R Vr Vθ Vz Φ a x := by
-  ext i
-  simp only [CurlClassBounds.vectorPotential, vectorMode, mode, CurlClassBounds.coefficient,
-    CurlClassBounds.normalCoefficient, CurlClassBounds.normalCross_real_smul,
-    Pi.smul_apply, Complex.real_smul, smul_eq_mul]
-  ring
 
-/-- A local equality of the full potentials, including their cutoffs and
-carriers, automatically propagates to equality of actual curls. -/
-theorem cylindricalCurl_congr {R : E → ℝ} {Vr Vθ Vz : E → E}
-    {A B : E → ComplexVector} {x : E} (hAB : A =ᶠ[𝓝 x] B) :
-    CurlClassBounds.cylindricalCurl R Vr Vθ Vz A x =
-      CurlClassBounds.cylindricalCurl R Vr Vθ Vz B x := by
-  have hcomp i : (fun y => A y i) =ᶠ[𝓝 x] fun y => B y i :=
-    hAB.mono (fun y hy => congrFun hy i)
-  have hD V i : along V (fun y => A y i) x = along V (fun y => B y i) x := by
-    exact congrArg (fun L : E →L[ℝ] ℂ => L (V x)) (hcomp i).fderiv_eq
-  simp only [CurlClassBounds.cylindricalCurl, hD, hAB.eq_of_nhds]
 
 noncomputable def radiusCLM : Cylinder →L[ℝ] ℝ :=
   (ContinuousLinearMap.fst ℝ ℝ (PhysicalResidualBridge.Plane × PhysicalResidualBridge.Plane)).comp
@@ -731,18 +705,6 @@ theorem spatialCurl_congr {A B : VelocityField} {z : SpaceTime} (hAB : A =ᶠ[�
   SpatialCurl.curl_eq_of_eventuallyEq
     (hAB.comp_tendsto (continuous_const.prodMk continuous_id).continuousAt)
 
-theorem cartesianPotential_overlap_germ {a : ℝ} (ha : 0 < a) (i j : PolarCharts.Index)
-    (B : SpaceTime → ComplexVector)
-    (hB : ∀ t r z : ℝ, Periodic (fun θ => B (t, AxisymmetricResidual.pack r θ z)) (2 * Real.pi))
-    {x : SpaceTime}
-    (hi : PhysicalGraphBounds.radialProjection x ∈ PolarCharts.chartDomain a i)
-    (hj : PhysicalGraphBounds.radialProjection x ∈ PolarCharts.chartDomain a j) :
-    cartesianPotential a i B =ᶠ[𝓝 x] cartesianPotential a j B := by
-  filter_upwards [PhysicalGraphBounds.radialProjection.continuous.continuousAt
-    ((PolarCharts.chartDomain_open a i).mem_nhds hi),
-    PhysicalGraphBounds.radialProjection.continuous.continuousAt
-    ((PolarCharts.chartDomain_open a j).mem_nhds hj)] with y hyi hyj
-  exact cartesianPotential_overlap ha i j B hB hyi hyj
 
 
 /-- A single actual Cartesian potential is selected from the compatible

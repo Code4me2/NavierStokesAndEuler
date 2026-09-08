@@ -555,25 +555,6 @@ theorem iterate_meanHypotheses {ι : Type} {coord : ℝ}
 
 
 
-/-- Specialization to the literal initializer: its mean-PDE hypotheses
-come from the proved initialization theorem, not an additional premise. -/
-theorem iterate_meanHypotheses_of_initialized {ι : Type} {coord : ℝ}
-    (U : LocalSignedRequest.SlowRegion coord) (B N0 : ℕ)
-    (p : ℕ → CycleParameters ι) (seed : CycleState ι)
-    (hseed : seed.state = ActualInitialCoherence.initialized B N0)
-    (hV : ∀ j, (p j).strip.domain = ActualInitialMeanEquation.strip.domain)
-    (H : ∀ j, StepData U (p j)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).coefficients
-      (CorrectionInitialization.ActualPrimary.commonContext B)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).state)
-    (j : ℕ) :
-    LiftedMeanResidual.MeanHypotheses ActualInitialMeanEquation.strip.domain
-      (CorrectionInitialization.ActualPrimary.commonContext B)
-      (CycleState.iterate p (CorrectionInitialization.ActualPrimary.commonContext B) seed j).state := by
-  apply iterate_meanHypotheses U p (CorrectionInitialization.ActualPrimary.commonContext B)
-    seed ActualInitialMeanEquation.strip.domain hV ?_ H j
-  rw [hseed]
-  exact ActualInitialMeanEquation.initialized_meanHypotheses B N0
 
 
 end NavierStokes.CycleMeanEquation

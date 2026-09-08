@@ -235,21 +235,6 @@ variable {ι E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable [NormedAddCommGroup F] [NormedSpace ℝ F]
 variable {D : PhaseJetBounds.Domain ι E} {w : ι → E → ℝ} {f g : ι → E → F}
 
-/-- Local equality transfers the actual derivative estimates; no derivatives
-of an extension outside the open carrier are used. -/
-theorem envelopeJets_congr (hf : EnvelopeJets D w f)
-    (he : ∀ i, EqOn (f i) (g i) (D.carrier i)) : EnvelopeJets D w g := by
-  refine ⟨hf.nonneg, fun i => (hf.smooth i).congr (he i).symm, ?_⟩
-  intro N
-  obtain ⟨C, hC, m, hb⟩ := hf.bound N
-  refine ⟨C, hC, m, ?_⟩
-  intro i x hx j hj
-  have heq : f i =ᶠ[𝓝 x] g i := eventually_of_mem ((D.isOpen i).mem_nhds hx) (he i)
-  have heq' : f i =ᶠ[𝓝[univ] x] g i := by simpa only [nhdsWithin_univ] using heq
-  have hjet := heq'.iteratedFDerivWithin_eq (𝕜 := ℝ) heq.self_of_nhds j
-  simp only [iteratedFDerivWithin_univ] at hjet
-  rw [← hjet]
-  exact hb i x hx j hj
 
 end EnvelopeTransfer
 
@@ -273,33 +258,6 @@ theorem norm_jet_comp_affine {U : Set F} (hU : IsOpen U) {f : F → G}
   simpa only [Function.comp_def, iteratedFDeriv_comp_add_left] using
     PhaseJetBounds.norm_jet_comp_linear hV hft L hx j
 
-theorem envelopeJets_precomp_affine {D : PhaseJetBounds.Domain ι E}
-    {D' : PhaseJetBounds.Domain ι F} {w : ι → F → ℝ} {f : ι → F → G}
-    (hf : EnvelopeJets D' w f) (L : ι → E →L[ℝ] F) (c : ι → F)
-    (hscale : ∀ i, D'.scale i = D.scale i)
-    (hmap : ∀ i, MapsTo (fun x => c i + L i x) (D.carrier i) (D'.carrier i))
-    {C : ℝ} {k : ℕ} (hC : 1 ≤ C) (hL : ∀ i, ‖L i‖ ≤ C * D.scale i ^ k) :
-    EnvelopeJets D (fun i x => w i (c i + L i x)) (fun i x => f i (c i + L i x)) := by
-  refine ⟨fun i x hx => hf.nonneg i _ (hmap i hx),
-    fun i => (hf.smooth i).comp (contDiffOn_const.add (L i).contDiff.contDiffOn) (hmap i), ?_⟩
-  intro N
-  obtain ⟨A, hA, m, hm⟩ := hf.bound N
-  refine ⟨A * C ^ N, one_le_mul_of_one_le_of_one_le hA (one_le_pow₀ hC), m + k * N, ?_⟩
-  intro i x hx j hj
-  have hc : 1 ≤ C * D.scale i ^ k :=
-    one_le_mul_of_one_le_of_one_le hC (one_le_pow₀ (D.one_le_scale i))
-  have hpow : ‖L i‖ ^ j ≤ (C * D.scale i ^ k) ^ N :=
-    (pow_le_pow_left₀ (norm_nonneg _) (hL i) j).trans (pow_le_pow_right₀ hc hj)
-  have hw := hf.nonneg i (c i + L i x) (hmap i hx)
-  have hb : 0 ≤ A * D'.scale i ^ m * w i (c i + L i x) :=
-    mul_nonneg (mul_nonneg (zero_le_one.trans hA)
-      (pow_nonneg (zero_le_one.trans (D'.one_le_scale i)) _)) hw
-  calc
-    _ ≤ ‖iteratedFDeriv ℝ j (f i) (c i + L i x)‖ * ‖L i‖ ^ j :=
-      norm_jet_comp_affine (D'.isOpen i) (hf.smooth i) (L i) (c i) (hmap i hx) j
-    _ ≤ (A * D'.scale i ^ m * w i (c i + L i x)) * (C * D.scale i ^ k) ^ N :=
-      mul_le_mul (hm i _ (hmap i hx) j hj) hpow (pow_nonneg (norm_nonneg _) _) hb
-    _ = _ := by rw [hscale, mul_pow, pow_add, pow_mul]; ring
 
 end AffineEvaluation
 
@@ -879,65 +837,6 @@ theorem frame_forcing_envelope_jets
   rw [forcing_eq_columns, Fin.sum_univ_three]
   rfl
 
-/-- A forced family in the genuine modal coordinates. The energy estimate
-comes from the four explicit modal errors and nonnegative viscosity, rather
-than an energy hypothesis about the ambient projected operator. -/
-theorem forced_modal_family_envelope_jets
-    (D : PhaseJetBounds.Domain ι Q) (V : ι → Set ℝ) (hV : ∀ i, IsOpen (V i))
-    (L : ι → ℝ) (hL : ∀ i, 0 < L i) (hI : ∀ i, Icc 0 (L i) ⊆ V i)
-    (d : ι → FrameData Q) (hd : PhaseJetBounds.FrameJets (productDomain D V hV) d)
-    (harmonic : ℤ) (hharmonic : harmonic ≠ 0)
-    (W rate referenceDamping : ι → ℝ → ℝ) (hW : ∀ i t, 0 < W i t)
-    (hdW : ∀ i t, HasDerivAt (W i) (rate i t * W i t) t)
-    (w : ι → Q → ℝ) (hw : ∀ i p, p ∈ D.carrier i → 0 ≤ w i p)
-    (f : ι → Q × ℝ → PrimaryODE.Space)
-    (hf : EnvelopeJets (productDomain D V hV) (fun i z => w i z.1 * W i z.2) f)
-    {K C E : ℝ} (hK : 1 ≤ K) (hC : 0 ≤ C) (hE : 0 ≤ E)
-    (hslot : ∀ i, L i ≤ K * D.scale i)
-    (href : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i),
-      rate i v = (d i).eigenvalue (p, v) - referenceDamping i v)
-    (hlam : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i), 0 ≤ (d i).eigenvalue (p, v))
-    (hvisc : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i), 0 ≤ (d i).viscosity (p, v))
-    (hviscError : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i),
-      referenceDamping i v - E / D.scale i ≤ (d i).viscosity (p, v))
-    (herror : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i),
-      |(d i).error11 (p, v)| ≤ C / D.scale i ∧ |(d i).error12 (p, v)| ≤ C / D.scale i ∧
-      |(d i).error21 (p, v)| ≤ C / D.scale i ∧ |(d i).error22 (p, v)| ≤ C / D.scale i) :
-    EnvelopeJets (productDomain D (fun i => Ioo 0 (L i)) (fun _ => isOpen_Ioo))
-      (fun i z => w i z.1 * W i z.2)
-      (fun i z => solution (hL i).le (d i) harmonic (fun _ => 0) (f i) z.1 z.2) := by
-  let μ := fun i => (E + 4 * C) / D.scale i
-  let K' := K + Real.exp ((E + 4 * C) * K) + 1
-  have hKK' : K ≤ K' := by dsimp [K']; linarith [Real.exp_pos ((E + 4 * C) * K)]
-  have hK' : 1 ≤ K' := hK.trans hKK'
-  have hμ : ∀ i, 0 ≤ μ i := fun i => div_nonneg (by positivity) (zero_le_one.trans (D.one_le_scale i))
-  have hExp : ∀ i, Real.exp (μ i * L i) ≤ K' := by
-    intro i
-    have hs : 0 < D.scale i := lt_of_lt_of_le zero_lt_one (D.one_le_scale i)
-    have hr : L i / D.scale i ≤ K := (div_le_iff₀ hs).mpr (by simpa only [mul_comm] using hslot i)
-    have hh : μ i * L i ≤ (E + 4 * C) * K := by
-      dsimp [μ]
-      calc
-        _ = (E + 4 * C) * (L i / D.scale i) := by ring
-        _ ≤ _ := mul_le_mul_of_nonneg_left hr (by positivity)
-    exact (Real.exp_le_exp.mpr hh).trans (by dsimp [K']; linarith)
-  have henergy : ∀ i p, p ∈ D.carrier i → ∀ v ∈ Icc 0 (L i), ∀ x : PrimaryODE.State,
-      ⟪x, (d i).coefficient harmonic (p, v) x⟫_ℝ ≤ (rate i v + μ i) * ‖x‖ ^ 2 := by
-    intro i p hp v hv x
-    rw [href i p hp v hv]
-    exact (d i).energy_bound (p, v) hharmonic (hlam i p hp v hv) (hvisc i p hp v hv)
-      (hviscError i p hp v hv) (herror i p hp v hv) x
-  have hs := forced_family_envelope_jets D V hV L μ hL hI
-    (fun i => (d i).coefficient harmonic) (hd.coefficient harmonic) W rate hW hdW w hw
-    (fun i => (d i).forcing (f i)) (frame_forcing_envelope_jets hd hf) hK' hμ
-    (fun i => (hslot i).trans (mul_le_mul_of_nonneg_right hKK' (zero_le_one.trans (D.one_le_scale i))))
-    hExp henergy
-  apply hs.congr
-  intro i z hz
-  exact JointODE.reparamSolution_eq_actualSolution (hL i).le _ _ _
-    (((hd.smoothOn i).coefficient harmonic).continuousOn.mono (prod_mono Subset.rfl (hI i)))
-    (((hd.smoothOn i).forcing (hf.smooth i)).continuousOn.mono (prod_mono Subset.rfl (hI i)))
-    ⟨hz.1, hz.2.1.le, hz.2.2.le⟩
 
 
 end ModalConstruction
@@ -1774,66 +1673,6 @@ theorem complexCopyCoefficients_tangent_of_modal
     (copyVelocity (imagData (t n) (source n)) (g n) (hL n).le (copy n) x) = 0 at htI
   rw [hadd, htR, htI, mul_zero, add_zero]
 
-/-- Complete class and actual residual statements for the constructed complex
-particular wave. Both Gaussian cutoff terms remain on the right-hand side. -/
-theorem constructed_particular_wave
-    {s : StripData (P × Plane)} {α κ : ℝ} {dirs : GraphDirections (P × Plane)}
-    (base : WaveCoefficients (P × Plane))
-    (t : ℕ → TangentData P ProblemStatement.Space) (source : ℕ → P × Plane → ComplexVector)
-    (g : ℕ → Geometry) (copy : ℕ → Frequency) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (W : ℕ → ℝ → ℝ)
-    (hr : CopyControl s α (fun n => (realData (t n) (source n)).linearData) g copy L W)
-    (hi : CopyControl s α (fun n => (imagData (t n) (source n)).linearData) g copy L W)
-    (hb : InputBounds s (fun n p => W n ((g n).coordinates (copy n) p.2).2) α κ dirs (zeroAmplitudes base))
-    (hN : PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain s)
-      (fun n p => (t n).normal (nativePoint (g n) (copy n) p)))
-    (hNdot : UnweightedClass s 0 (fun n p => (t n).normalDot (nativePoint (g n) (copy n) p)))
-    (hA : UnweightedClass s 0 (fun n p => (t n).action (nativePoint (g n) (copy n) p)))
-    (hf : WaveClass s (fun n p => W n ((g n).coordinates (copy n) p.2).2) α source)
-    {b M : ℝ} (hpos : 0 < b)
-    (hlower : ∀ n p, p ∈ s.domain → b ≤ ‖(t n).normal (nativePoint (g n) (copy n) p)‖)
-    (hupper : ∀ n p, p ∈ s.domain → ‖(t n).normal (nativePoint (g n) (copy n) p)‖ ≤ M)
-    (hfrequency : BandBound s (1 / 2) (fun n => 1 / base.frequency n))
-    (hgeometry : CopyGeometryMatch s dirs base t g copy)
-    (hfrequency_ne : ∀ n, base.frequency n ≠ 0)
-    (hsource_smooth : ∀ n, ContDiffOn ℝ ∞ (source n) (hr.slowDomain ×ˢ univ))
-    (hκ : κ ≤ 1 / 2) (ψ : ℕ → P × Plane → ℝ) (hψ : UnweightedClass s 0 ψ)
-    {R : P × Plane → ℝ} (hR : base.radius = fun _ => R)
-    (hg : ExactConditions s dirs ((complexCopyCoefficients base t source g copy L hL).corrected s dirs ψ)) :
-    let a := complexCopyCoefficients base t source g copy L hL
-    let P := fun n p => W n ((g n).coordinates (copy n) p.2).2
-    WaveClass s P α a.amplitude ∧
-    WaveClass s P α (a.corrected s dirs ψ).amplitude ∧
-    WaveClass s P (α + 1 / 2) (a.corrected s dirs ψ).pressure ∧
-    WaveClass s P (α + 1 / 2 - 3 * κ) (a.constructedGood s dirs ψ) ∧
-    ∀ n x, x ∈ s.domain →
-      (a.corrected s dirs ψ).harmonicResidual s dirs n x +
-        (fun i => source n x i * carrier (a.frequency n) (a.phase n) x) =
-      (fun i => (a.constructedGood s dirs ψ n x i +
-        excludedSlotError dirs ψ a.amplitude source n x i) * carrier (a.frequency n) (a.phase n) x) := by
-  let a := complexCopyCoefficients base t source g copy L hL
-  have h0 := complexCopy_inputBounds base t source g copy L hL W hr hi hb hN hNdot hA hf
-    hpos hlower hupper hfrequency
-  have hNa : PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain s) (a.normal s dirs) := by
-    apply hN.congr
-    intro n x hx
-    exact (hgeometry.normal n x hx).symm
-  have hlow : ∀ n x, x ∈ s.domain → b ≤ ‖a.normal s dirs n x‖ := by
-    intro n x hx
-    change b ≤ ‖base.normal s dirs n x‖
-    rw [hgeometry.normal n x hx]
-    exact hlower n x hx
-  have hupp : ∀ n x, x ∈ s.domain → ‖a.normal s dirs n x‖ ≤ M := by
-    intro n x hx
-    change ‖base.normal s dirs n x‖ ≤ M
-    rw [hgeometry.normal n x hx]
-    exact hupper n x hx
-  have hsolve := complexCopyCoefficients_principal base t source g copy L hL hr.open_slow hr.domain
-    hr.coefficient_smooth hr.forcingMap_smooth hsource_smooth hr.current_slot hgeometry hfrequency_ne
-  have hcorr := (h0.with_cutoff hψ).curlCorrection_class hR hNa hpos hlow hupp hfrequency
-  have hc := (h0.with_cutoff hψ).add_curl_amplitude hκ (fun i => CurlClassBounds.class_component hcorr i)
-  have hout := constructed_linear_wave_with_excluded h0 hκ hψ hR hNa hpos hlow hupp hfrequency hsolve hg
-  exact ⟨component_classes h0.amplitude, component_classes hc.amplitude, hc.pressure, hout.1, hout.2⟩
 
 
 
@@ -1922,14 +1761,6 @@ variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 noncomputable def scaleTangentSource (t : TangentData P ProblemStatement.Space) (c : ℝ) :
     TangentData P ProblemStatement.Space := { t with source := fun p => c • t.source p }
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem copyVelocity_scaleSource (t : TangentData P ProblemStatement.Space) (c : ℝ)
-    (g : Geometry) {a b : ℝ} (hab : a ≤ b) (k : Frequency) (p : P × Plane) :
-    copyVelocity (scaleTangentSource t c) g hab k p = c • copyVelocity t g hab k p := by
-  change CurlClassBounds.complexify
-    ((CopySolveCompatibility.scaleSource t.linearData c).copySolve g hab k p) = _
-  rw [CopySolveCompatibility.copySolve_scaleSource]
-  exact map_smul _ _ _
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
 theorem copyPressureReal_scaleSource (t : TangentData P ProblemStatement.Space) (c : ℝ)
@@ -1948,35 +1779,11 @@ theorem copyPressureReal_scaleSource (t : TangentData P ProblemStatement.Space) 
   simp only [TangentProjection.pressureCoefficient, map_smul, real_inner_smul_right]
   ring
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem copyPressure_scaleSource (t : TangentData P ProblemStatement.Space) (c : ℝ)
-    (g : Geometry) {a b : ℝ} (hab : a ≤ b) (k : Frequency) (frequency : ℝ) (p : P × Plane) :
-    copyPressure (scaleTangentSource t c) g hab k frequency p = c • copyPressure t g hab k frequency p := by
-  simp only [copyPressure, copyPressureReal_scaleSource, Complex.ofReal_mul, Complex.real_smul]
-  ring
 
 noncomputable def conjugateSource (f : P × Plane → ComplexVector) : P × Plane → ComplexVector :=
   fun p i => star (f p i)
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem realData_conjugate (t : TangentData P ProblemStatement.Space) (f : P × Plane → ComplexVector) :
-    realData t (conjugateSource f) = realData t f := by
-  have he : (fun p => realPart (conjugateSource f p)) = fun p => realPart (f p) := by
-    funext p
-    ext i
-    simp [conjugateSource]
-  unfold realData
-  rw [he]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem imagData_conjugate (t : TangentData P ProblemStatement.Space) (f : P × Plane → ComplexVector) :
-    imagData t (conjugateSource f) = scaleTangentSource (imagData t f) (-1) := by
-  have he : (fun p => imagPart (conjugateSource f p)) = fun p => (-1 : ℝ) • imagPart (f p) := by
-    funext p
-    ext i
-    simp [conjugateSource]
-  unfold imagData scaleTangentSource
-  rw [he]
 
 
 
@@ -2065,15 +1872,6 @@ noncomputable def periodizedCopies (g : Geometry) (κ : Plane → ℝ)
     (F : Frequency → P × Plane → H) (p : P × Plane) : H :=
   ∑' k : Frequency, κ (g.coordinates k p.2) • F k p
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace H] in
-/-- Compact localization makes the displayed series an actual finite sum
-at each point; no summability fallback is used by the construction. -/
-theorem periodizedCopies_eq_finite_sum (g : Geometry) {κ : Plane → ℝ} (hκ : HasCompactSupport κ)
-    (F : Frequency → P × Plane → H) (p : P × Plane) :
-    ∃ I : Finset Frequency, periodizedCopies g κ F p = ∑ k ∈ I, κ (g.coordinates k p.2) • F k p := by
-  obtain ⟨I, hI⟩ := g.finite_copy_cutoffs hκ ‖p.2‖
-  refine ⟨I, tsum_eq_sum (fun k hk => ?_)⟩
-  rw [hI p.2 le_rfl k hk, zero_smul]
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace H] in
 /-- On a plateau occupied by exactly one copy, periodization gives that
@@ -2086,14 +1884,6 @@ theorem periodizedCopies_eq_single (g : Geometry) (κ : Plane → ℝ)
   unfold periodizedCopies
   rw [tsum_eq_single k (fun l hl => by rw [hother l hl, zero_smul]), hk, one_smul]
 
-omit [NormedSpace ℝ P] [CompleteSpace H] in
-theorem periodizedCopies_eventuallyEq_single (g : Geometry) (κ : Plane → ℝ)
-    (F : Frequency → P × Plane → H) (k : Frequency) (p : P × Plane)
-    (hκ : ∀ᶠ y in 𝓝 p, κ (g.coordinates k y.2) = 1 ∧
-      ∀ l : Frequency, l ≠ k → κ (g.coordinates l y.2) = 0) :
-    periodizedCopies g κ F =ᶠ[𝓝 p] F k := by
-  filter_upwards [hκ] with y hy
-  exact periodizedCopies_eq_single g κ F k y hy.1 hy.2
 
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace H] in
@@ -2168,10 +1958,6 @@ theorem memClass_reindex (e : E ≃ₗᵢ[ℝ] F) {s : StripData F} {w : ℕ →
   rw [e.norm_iteratedFDeriv_comp_right]
   exact hb n (e x) hx j hj
 
-theorem waveClass_reindex (e : E ≃ₗᵢ[ℝ] F) {s : StripData F} {W : ℕ → F → ℝ} {α : ℝ}
-    {f : ℕ → F → H} (hf : WaveClass s W α f) :
-    WaveClass (reindexStrip e s) (fun n x => W n (e x)) α (fun n x => f n (e x)) :=
-  memClass_reindex e hf
 
 noncomputable def reindexVector (e : E ≃ₗᵢ[ℝ] F) (V : F → F) : E → E := fun x => e.symm (V (e x))
 

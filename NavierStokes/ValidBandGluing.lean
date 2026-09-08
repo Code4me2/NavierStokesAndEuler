@@ -103,14 +103,6 @@ theorem representative_jet_bound (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f
   rw [representative_iteratedFDeriv_eq hU hf hx m]
   exact hb
 
-/-- The same pointwise majorant transfers on the entire union. There is
-no multiplicity factor, regardless of the number of overlapping charts. -/
-theorem representative_jet_bound_on_union (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f)
-    (m : ℕ) {B : D → ℝ} (hb : ∀ i, ∀ x ∈ U i, ‖iteratedFDeriv ℝ m (f i) x‖ ≤ B x) :
-    ∀ x ∈ domain U, ‖iteratedFDeriv ℝ m (representative U f) x‖ ≤ B x := by
-  intro x hx
-  obtain ⟨i, hi⟩ := mem_domain_iff.mp hx
-  exact representative_jet_bound hU hf hi m (hb i x hi)
 
 
 
@@ -128,10 +120,6 @@ theorem spatialCurl_eq_of_germ {A B : VelocityField} {x : SpaceTime}
       exact continuousAt_const.prodMk continuousAt_id)
   exact congrArg SpatialCurl.curlLinear hs.fderiv_eq
 
-theorem representative_spatialCurl_eq {U : ι → Set SpaceTime} {A : ι → VelocityField}
-    (hU : ∀ i, IsOpen (U i)) (hA : Compatible U A) {i : ι} {x : SpaceTime} (hx : x ∈ U i) :
-    SpatialCurl.spatialCurl (representative U A) x = SpatialCurl.spatialCurl (A i) x :=
-  spatialCurl_eq_of_germ (representative_germ hU hA hx)
 
 
 end PhysicalCurl

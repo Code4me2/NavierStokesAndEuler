@@ -61,13 +61,6 @@ noncomputable def gaugedSwirl (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.C
 noncomputable def potential (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.Coefficients) : VelocityField :=
   AxisymmetricFields.potential (SlowBorelBase.streamFactor a h C d) (gaugedSwirl a h C d)
 
-theorem potential_eq_sub_gauge (a : ℕ → ℕ) (h C : ℝ) (d : SlowBorelBase.Coefficients)
-    (w : SpaceTime) :
-    potential a h C d w = BaseResidual.summedPotential a h C d w -
-      SlowBorelBase.swirlPotential a h C d (w.1, (1, w.2 2)) • coordinateVector 2 := by
-  simp only [potential, BaseResidual.summedPotential, AxisymmetricFields.potential, gaugedSwirl,
-    radialNormalize, radialAnchor, AxisymmetricFields.profilePoint, sub_smul]
-  abel
 
 theorem gaugedSwirl_smoothAt {a : ℕ → ℕ} (ha : StrictMono a) {h C : ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2) {d : SlowBorelBase.Coefficients}

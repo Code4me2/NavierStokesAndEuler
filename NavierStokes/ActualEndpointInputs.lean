@@ -56,22 +56,7 @@ noncomputable def initialPressureModel (B N0 N : ℕ) (hN : 4 ≤ N)
     ActualPhysicalStageBounds.initialPressureIncrement WP
       (ActualPhysicalStageBounds.actualInitialPressureInput B N0 N hN) w
 
-theorem initialPotentialModel_eq (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WA : PhysicalStageBounds.WaveData h DA IA KA (Fin 3)) (w : SpaceTime) :
-    initialPotentialModel B N0 N hN WA w =
-      TailGaugePotential.finalPotential certificate modulation upper B w +
-        (WA.vector w + (ActualMeanPhysicalData.initialStreamFamily B N0 N).angularField w) := by
-  change _ + (WA.vector w + (ActualMeanPhysicalData.initialTemporalFamily B N0 N).angularField w +
-    (ActualMeanPhysicalData.initialRankFamily B N0 N).angularField w) = _
-  rw [ActualMeanPhysicalData.initialStream_angularField]
-  simp only [Pi.add_apply]
-  abel
 
-theorem initialPressureModel_eq (B N0 N : ℕ) (hN : 4 ≤ N)
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit) (w : SpaceTime) :
-    initialPressureModel B N0 N hN WP w =
-      FinalSlowBase.pressure certificate modulation upper B w +
-        (WP.pressure w + (ActualMeanPhysicalData.initialPressureFamily B N0 N).field w) := rfl
 
 theorem initialPotentialModel_extension (B N0 N : ℕ) (hN : 4 ≤ N)
     (WA : PhysicalStageBounds.WaveData h DA IA KA (Fin 3))
@@ -114,45 +99,6 @@ section RawFamilies
 variable {DA DP : Type} [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP] {IA KA IP KP : Type*}
 
-/-- The physical bounds and exact initial representations supply all
-three endpoint inputs, including index zero.  No extension or endpoint
-limit is assumed for any raw stage. -/
-theorem endpointInputs_of_representations (B N0 N : ℕ) (hN : 4 ≤ N)
-    {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N)
-    (WA : PhysicalStageBounds.WaveData h DA IA KA (Fin 3))
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit)
-    {A V : ℕ → VelocityField} {P : ℕ → PressureField}
-    (E : MixedCandidateAssembly.StageEstimates h qbig A V P)
-    (hA : EqOn (A 0) (initialPotentialModel B N0 N hN WA) (CutStageEstimates.physicalSublevel h qbig))
-    (hV : EqOn (V 0) (initialDirectModel B N0 N) (CutStageEstimates.physicalSublevel h qbig))
-    (hP : EqOn (P 0) (initialPressureModel B N0 N hN WP) (CutStageEstimates.physicalSublevel h qbig)) :
-    EndpointInputs h qbig A V P := by
-  have hq1 := hq.trans (ChartScales.Q_le_one N)
-  constructor
-  · intro x hx hqx j
-    cases j with
-    | zero =>
-        exact OffplaneJetExtensions.extension_of_eqOn_sublevel outgoing.data.h_pos outgoing.data.h_lt_half
-          hA hx hqx (initialPotentialModel_extension B N0 N hN WA hq hx hqx)
-    | succ j =>
-        exact OffplaneJetExtensions.rawStage_extension outgoing.data.h_pos outgoing.data.h_lt_half hq1
-          E.potential_bound (Nat.succ_le_succ (Nat.zero_le j)) (E.potential_smooth (j + 1)) hx hqx
-  · intro x hx hqx j
-    cases j with
-    | zero =>
-        exact OffplaneJetExtensions.extension_of_eqOn_sublevel outgoing.data.h_pos outgoing.data.h_lt_half
-          hV hx hqx (initialDirectModel_extension B N0 N hN hq hx hqx)
-    | succ j =>
-        exact OffplaneJetExtensions.rawStage_extension outgoing.data.h_pos outgoing.data.h_lt_half hq1
-          E.direct_bound (Nat.succ_le_succ (Nat.zero_le j)) (E.direct_smooth (j + 1)) hx hqx
-  · intro x hx hqx j
-    cases j with
-    | zero =>
-        exact OffplaneJetExtensions.extension_of_eqOn_sublevel outgoing.data.h_pos outgoing.data.h_lt_half
-          hP hx hqx (initialPressureModel_extension B N0 N hN WP hq hx hqx)
-    | succ j =>
-        exact OffplaneJetExtensions.rawStage_extension outgoing.data.h_pos outgoing.data.h_lt_half hq1
-          E.pressure_bound (Nat.succ_le_succ (Nat.zero_le j)) (E.pressure_smooth (j + 1)) hx hqx
 
 
 

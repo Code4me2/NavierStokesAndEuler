@@ -1,6 +1,7 @@
 import Euler.ParentParticleInverse
 import Euler.ParentPacketForwardInput
-import Euler.PacketForwardInitializedChildShear
+import Euler.PacketForwardInitializedFlowAndShear
+import Euler.PhysicalChildSourceBound
 import Euler.PacketForwardUniformChild
 import Euler.PacketUniversalFrequency
 

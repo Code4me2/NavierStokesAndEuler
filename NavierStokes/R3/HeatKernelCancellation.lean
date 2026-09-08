@@ -51,17 +51,6 @@ theorem cutoffSquareDifference_abs_le_one {φ : Space → ℝ}
     |cutoffSquareDifference φ x y| ≤ 1 :=
   abs_sq_sub_sq_le_one (hφ y) (hφ x)
 
-theorem cutoffSquareDifference_abs_le_lipschitz {φ : Space → ℝ}
-    {L : ℝ≥0} (hφ : ∀ x, φ x ∈ Icc (0 : ℝ) 1)
-    (hLip : LipschitzWith L φ) (x y : Space) :
-    |cutoffSquareDifference φ x y| ≤ 2 * L * ‖x - y‖ := by
-  have hxy : |φ y - φ x| ≤ L * ‖x - y‖ := by
-    calc
-      |φ y - φ x| = dist (φ y) (φ x) := (Real.dist_eq _ _).symm
-      _ ≤ L * dist y x := hLip.dist_le_mul y x
-      _ = L * ‖x - y‖ := by rw [dist_comm, dist_eq_norm]
-  exact (abs_sq_sub_sq_le_two_mul_abs_sub (hφ y) (hφ x)).trans
-    (by nlinarith)
 
 
 /-- A form with a real scale parameter, convenient for scaled bump functions. -/

@@ -200,21 +200,7 @@ theorem amplitude_ofReal (g : ℂ → ℂ) (f : ℝ → ℝ)
   rw [amplitude, primitive_ofReal g f hreal x, ← Complex.ofReal_mul,
     ← Complex.ofReal_exp, ← Complex.ofReal_div]
 
-theorem amplitude_real_pos (g : ℂ → ℂ) (f : ℝ → ℝ)
-    (hreal : ∀ x : ℝ, g x = (f x : ℂ)) (Λ : ℝ) {C : ℝ} (hC : 0 < C) (x : ℝ) :
-    0 < (amplitude g Λ C x).re := by
-  rw [amplitude_ofReal g f hreal Λ C x, Complex.ofReal_re]
-  exact div_pos (Real.exp_pos _) hC
 
-theorem hasDerivAt_real_amplitude {U : Set ℂ} (ho : IsOpen U)
-    (hU : Convex ℝ U) (h0 : (0 : ℂ) ∈ U) {g : ℂ → ℂ}
-    (hg : DifferentiableOn ℂ g U) (f : ℝ → ℝ)
-    (hreal : ∀ x : ℝ, g x = (f x : ℂ)) (Λ C : ℝ) {x : ℝ} (hx : (x : ℂ) ∈ U) :
-    HasDerivAt (fun y : ℝ => (amplitude g Λ C y).re)
-      ((Λ * f x) * (amplitude g Λ C x).re) x := by
-  have hd := (hasDerivAt_amplitude ho hU h0 hg Λ C hx).real_of_complex
-  simpa only [hreal, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
-    Complex.ofReal_im, mul_zero, zero_mul, add_zero, sub_zero] using hd
 
 
 end NavierStokes.AnalyticPrimitive

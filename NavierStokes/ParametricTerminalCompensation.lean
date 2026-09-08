@@ -29,11 +29,6 @@ theorem FirstJetWithinBound.mono {P : Patch} {a : ℝ → ℝ} {c : ℝ → Coef
   intro x
   exact ⟨(h x).1.trans hLM, (h x).2.1.trans hLM, (h x).2.2.trans hLM⟩
 
-theorem FirstJetWithinBound.toFirstJetBound {P : Patch} {a : ℝ → ℝ} {c : ℝ → Coeff}
-    {S : Set ℝ} {η L : ℝ} (h : FirstJetWithinBound P a c S η L) (hS : S ∈ 𝓝 η) :
-    FirstJetBound P a c η L := by
-  intro x
-  simpa only [derivWithin_of_mem_nhds hS] using h x
 
 theorem compact_amplitude_within_bounds {S : Set ℝ} (hS : IsCompact S)
     (huniq : UniqueDiffOn ℝ S) {a : ℝ → ℝ} (ha : ContDiffOn ℝ ∞ a S)

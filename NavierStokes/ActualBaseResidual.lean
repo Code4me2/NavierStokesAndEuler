@@ -813,15 +813,6 @@ theorem basePressure_eq_fixedPressure (n : ℕ) (x : Full) :
     basePressure H v upper B n x = fixedPressure H v upper B n x.1 :=
   basePressure_angle_eq H v upper B n x.1 x.2
 
-/-- Full band transition. The auxiliary cover is arbitrary because this is
-the same physical base field on every free lift. -/
-theorem basePressure_band (n m k : ℕ) (x : Point) (theta : ℝ) :
-    basePressure H v upper B n (x, theta) =
-      (ChartScales.Q n / ChartScales.Q m) ^ (2 * CoordinateAlgebra.A F.data.h) *
-        basePressure H v upper B m (GaugeStateCoherence.bandChartEquiv F.data.h n m k x, theta) := by
-  simp only [basePressure, pressureAtScale, physicalPoint_bandChart]
-  rw [← mul_assoc, mul_comm ((ChartScales.Q n / ChartScales.Q m) ^ _) (ChartScales.Q m ^ _),
-    band_power_product]
 
 theorem baseError_band (n m k : ℕ) (x : Point) (theta : ℝ) (i : Fin 3) :
     baseError H v upper B n (x, theta) i =

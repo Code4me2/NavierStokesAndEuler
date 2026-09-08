@@ -603,18 +603,6 @@ theorem nominal_pressure_pure_heat {p : PhysicalPoint}
     ((nominalExteriorRadius_pos W).trans hx').le]
   exact nominal_angular_pure_heat W hpt
 
-/-- The actual summed nominal velocity and pressure are exactly the radial
-heat field outside one common profile radius, for every cutoff schedule. -/
-theorem nominal_base_eq_heat {a : ℕ → ℕ} (ha : StrictMono a) :
-    EqOn (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-      (heatVelocity (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) ∧
-    EqOn (basePressure a F.data.h W.axis.normalization (nominalCoefficients W))
-      (heatPressureField (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) :=
-  exterior_base_eq_heat ha F.data.h_pos F.data.h_lt_half (nominalExteriorRadius_pos W).le
-    (nominalCoefficients_smooth W) (nominal_exterior_coefficients W)
-    (fun _ hp => nominal_angular_pure_heat W hp) (fun _ hp => nominal_pressure_pure_heat W hp)
 
 /-- Exact zero residual in the actual summed exterior. No exterior
 solution property is supplied as a premise. -/
@@ -626,15 +614,6 @@ theorem nominal_base_residual_zero {a : ℕ → ℕ} (ha : StrictMono a)
     (nominalCoefficients_smooth W) (nominal_exterior_coefficients W)
     (fun _ hp => nominal_angular_pure_heat W hp) (fun _ hp => nominal_pressure_pure_heat W hp) hz
 
-theorem nominal_base_residual_germ_zero {a : ℕ → ℕ} (ha : StrictMono a)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) :
-    (fun y => navierStokesResidual
-      (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-      (basePressure a F.data.h W.axis.normalization (nominalCoefficients W)) y.1 y.2)
-        =ᶠ[𝓝 z] (fun _ => 0) := by
-  filter_upwards [(cartesianExterior_isOpen F.data.h_pos F.data.h_lt_half
-    (nominalExteriorRadius W)).mem_nhds hz] with y hy
-  exact nominal_base_residual_zero W ha hy
 
 
 end NominalExterior
@@ -674,22 +653,6 @@ theorem heatPressureField_contDiffOn_closed (C : ℝ) {h : ℝ} (hh : 0 < h) :
     (show MapsTo (fun z : SpaceTime => AxisymmetricFields.profilePoint z.1 z.2)
       closedCartesianHeatDomain closedHeatDomain from fun _ hz => hz)
 
-theorem near_one_in_exterior {h R : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hR : 0 ≤ R)
-    {x : Space} (hx : x 2 = 0) (_hs : 0 < AxisymmetricFields.radialEnergy x)
-    {t : ℝ} (ht : t ∈ Ioo (1 - AxisymmetricFields.radialEnergy x / (R + 1)) 1) :
-    (t, x) ∈ cartesianExterior h R := by
-  have hq : q h (AxisymmetricFields.profilePoint t x) = 1 - t := by
-    change NaturalCore.physicalQ h (t, (AxisymmetricFields.radialEnergy x, x 2)) = _
-    rw [hx]
-    exact NaturalCore.physicalQ_at_zero_z hh hh1 ht.2 _
-  refine ⟨ht.2, ?_⟩
-  change R < AxisymmetricFields.radialEnergy x / q h (AxisymmetricFields.profilePoint t x)
-  rw [hq]
-  apply (lt_div_iff₀ (sub_pos.mpr ht.2)).mpr
-  have hRp : 0 < R + 1 := by linarith
-  have hsmall : 1 - t < AxisymmetricFields.radialEnergy x / (R + 1) := by linarith [ht.1]
-  have hprod := (lt_div_iff₀ hRp).mp hsmall
-  nlinarith [sub_pos.mpr ht.2]
 
 open AssembledSlowBase
 

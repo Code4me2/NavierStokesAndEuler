@@ -40,9 +40,6 @@ theorem field_uniform_jet (β : ℝ) (hβ : |β| ≤ 1) :
     (mul_nonneg (velocityAmplitude_nonneg _) volumeFactor_nonneg) (by norm_num)
     (mul_le_mul_of_nonneg_right (velocityAmplitude_le_uniform β hβ) volumeFactor_nonneg) le_rfl
 
-def uniformLabelBound : ℝ :=
-  1+sobolevCoefficientAmplitude (Fin 3) 6 1024 uniformL2Amplitude+
-    sobolevCoefficientRadius (Fin 3) 1024
 
 
 

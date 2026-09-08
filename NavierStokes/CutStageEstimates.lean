@@ -343,29 +343,6 @@ theorem cut_product_bound_of_threshold {U S : Set E} (hU : IsOpen U) (hSU : S �
     rw [cut_product_jets_zero hU hq hA (hSU hx) a hprod m, norm_zero]
     exact mul_nonneg hε (Real.rpow_nonneg hqx.le _)
 
-/-- One numeric scale sequence controls every derivative budget `m ≤ j+2`
-of every positive stage.  The actual cut-stage estimate is proved from the
-raw estimates and the coordinate estimates. -/
-theorem exists_diagonal_cut_bounds {U S : Set E} (hU : IsOpen U) (hSU : S ⊆ U)
-    {q : E → ℝ} (hq : ContDiffOn ℝ ∞ q U) (hpos : ∀ x ∈ S, 0 < q x)
-    (Bq : ℕ → ℝ)
-    (hBq : ∀ k x, x ∈ S → q x ≤ 1 →
-      ‖iteratedFDeriv ℝ k q x‖ ≤ Bq k * q x ^ (1 - (k : ℝ)))
-    {A : ℕ → E → V} (hA : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (A j) U)
-    (g L : ℕ → ℝ) (C p : ℕ → ℕ → ℝ)
-    (hraw : RawStageBounds q A g L C p S) (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      DiagonalJetBounds.CutStageBounds (fun j => (a j : ℝ)) q A
-        (fun j => g j / 2) (cutLoss L) S := by
-  obtain ⟨K, hK, hb⟩ := exists_cut_stage_constants hU hSU hq hpos Bq hBq hA g L C p hraw
-  obtain ⟨a, halower, hapos, hadouble, hamono, _, hasmall⟩ :=
-    DiagonalScale.exists_diagonal_scales K (cutLog p) g hg lower
-  refine ⟨a, halower, hapos, hadouble, hamono, SolenoidalDiagonal.realScales_tendsto hamono, ?_⟩
-  intro j hj m hm x hx
-  exact cut_product_bound_of_threshold hU hSU hq hpos (hA j hj) m
-    (by exact_mod_cast hapos j) (by positivity) (hb j hj m) (hasmall j hj m hm) x hx
 
 section FiniteFamilies
 
@@ -465,16 +442,6 @@ theorem positiveStages_cut_bounds {q : E → ℝ} {A : ℕ → E → V}
   rw [he]
   exact hb j hj m hm x hx
 
-/-- The selected positive-stage series is the actual locally finite sum
-and is smooth on the full positive-coordinate domain. -/
-theorem positive_sum_smooth {U : Set E} (hU : IsOpen U) {q : E → ℝ}
-    (hq : ContDiffOn ℝ ∞ q U) (hpos : ∀ x ∈ U, 0 < q x)
-    {A : ℕ → E → V} (hA : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (A j) U)
-    {a : ℕ → ℕ} (ha : StrictMono a) :
-    ContDiffOn ℝ ∞ (SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) q
-      (positiveStages A)) U :=
-  SolenoidalDiagonal.potentialSum_contDiffOn (SolenoidalDiagonal.realScales_tendsto ha)
-    hU hpos hq (positiveStages_smooth hA)
 
 omit [NormedSpace ℝ E] in
 /-- Beyond strict cutoff support the product has a zero germ, regardless

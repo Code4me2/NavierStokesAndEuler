@@ -31,19 +31,6 @@ variable {P T : ℝ} [Fact (0 < P)] {raw raw' : VectorField}
   (G : Field P T raw) (H : Field P T raw') (hT : 0 ≤ T)
   (g h b : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t) (hh : ∀ t, 0 < h t) (hb : ∀ t, 0 < b t)
 
-theorem normalized_bilinear_path (L : Space →L[ℝ] Space →L[ℝ] Space) :
-    ((G.bilinear H L).normalized hT b hb).path =
-      (((G.normalized hT g hg).bilinear (H.normalized hT h hh) L).weighted hT
-        (productProfileRatio g h b hb)).path := by
-  apply path_eq_of_raw_eq
-  intro t x θ
-  change productProfileRatio g h b hb (projIcc 0 T hT t) •
-    L ((g (projIcc 0 T hT t))⁻¹ • raw (t,(x,θ))) ((h (projIcc 0 T hT t))⁻¹ • raw' (t,(x,θ))) =
-      (b (projIcc 0 T hT t))⁻¹ • L (raw (t,(x,θ))) (raw' (t,(x,θ)))
-  rw [projIcc_of_mem hT t.property]
-  simp only [productProfileRatio_apply,map_smul,smul_apply,smul_smul]
-  congr 1
-  field_simp [(hg t).ne',(hh t).ne',(hb t).ne']
 
 theorem normalized_scalarProduct_path (L : Space →L[ℝ] ℝ) (hL : ‖L‖ ≤ 1) :
     ((G.scalarProduct H L hL).normalized hT b hb).path =

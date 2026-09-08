@@ -979,12 +979,6 @@ theorem gaussianCoefficient_all_gains (β : ℝ) (i : Fin 3) (j : ℤ) :
       (fun l n x => chartGaussian l n (x, 0) i) := hs.map (ContinuousLinearMap.proj i)
   exact UniformBlockBounds.pair_uniform hi 1 j
 
-theorem gaussianCoefficient_zero (l : SignedLabel B N0) (n : ℕ) (i : Fin 3) (j : ℤ)
-    {x : Point} (hx : x ∉ labelCarrier l n) :
-    ErrorHarmonics.conjugatePair 1 (fun y => chartGaussian l n (y, 0) i) j x = 0 := by
-  have hz : chartGaussian l n (x, 0) = 0 := (chartGaussian_zero_germ l n hx).eq_of_nhds
-  simp only [ParticularWaveAssembly.pair_apply, hz, Pi.zero_apply, zero_div]
-  split_ifs <;> simp
 
 
 end ActualGaussianIdentification
@@ -1347,18 +1341,6 @@ theorem initializedErrors_all_gains (B N0 : ℕ) (β : ℝ) (i : Fin 3) :
       (fun n x => (ActualInitialMean.initialized B N0).errors.total n x i) :=
   initializedErrors_all_gains_of_gaussian B N0 β i (initialGaussian_unweighted B N0 β i)
 
-theorem initializedErrors_vector_all_gains (B N0 : ℕ) (β : ℝ) :
-    UnweightedClass gaussianStrip β (ActualInitialMean.initialized B N0).errors.total := by
-  have h0 := (initializedErrors_all_gains B N0 β 0).map
-    (ContinuousLinearMap.single ℝ (fun _ : Fin 3 => ℝ) 0)
-  have h1 := (initializedErrors_all_gains B N0 β 1).map
-    (ContinuousLinearMap.single ℝ (fun _ : Fin 3 => ℝ) 1)
-  have h2 := (initializedErrors_all_gains B N0 β 2).map
-    (ContinuousLinearMap.single ℝ (fun _ : Fin 3 => ℝ) 2)
-  apply WaveInteractionBounds.class_congr ((h0.add h1).add h2)
-  intro n x _
-  ext i
-  fin_cases i <;> simp
 
 end ConstructedEndpoint
 

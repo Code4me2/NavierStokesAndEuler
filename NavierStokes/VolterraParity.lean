@@ -648,17 +648,6 @@ theorem first_components_even {W : Field} {R : ℝ} {U : Set ℂ}
   simpa [parityVec_apply, paritySign, hi] using congrFun (hW r ⟨hr.1.le, hr.2.le⟩ z hz) i
 
 
-/-- Two derivatives with the same value and axis trace glue to an ordinary
-two-sided derivative. -/
-theorem hasDerivAt_glue_zero {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {f g : ℝ → E} {v : E} (hf : HasDerivAt f v 0) (hg : HasDerivAt g v 0)
-    (h0 : f 0 = g 0) :
-    HasDerivAt (fun r => if 0 ≤ r then f r else g r) v 0 := by
-  apply hasDerivAt_iff_tendsto_slope_zero.mpr
-  have hh := hf.tendsto_slope_zero.if' (p := fun r : ℝ => 0 ≤ r) hg.tendsto_slope_zero
-  convert! hh using 1
-  funext r
-  by_cases hr : 0 ≤ r <;> simp [hr, h0]
 
 
 /-- Uniqueness of the glued actual lifts in the holomorphic path class.

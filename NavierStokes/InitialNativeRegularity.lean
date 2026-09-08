@@ -152,11 +152,6 @@ theorem copyAmplitude_invariant (l : SignedLabel B N0) (k : Frequency) (n : ℕ)
   PrimaryResidualClass.invariant_fst (fun y => copied (CoordinateAlgebra.A ActualPrimary.h)
     cutNativeVelocity l n k (ActualSignedGeometry.meanEquiv.symm y))
 
-theorem copyPressureCoefficient_invariant (l : SignedLabel B N0) (k : Frequency) (n : ℕ) :
-    CopyAngularInvariance.Invariant ((0 : LocalSignedRequest.Point), 1)
-      (copyPressureCoefficient l k n) :=
-  PrimaryResidualClass.invariant_fst (fun y => copied (2 * CoordinateAlgebra.A ActualPrimary.h)
-    cutNativePressure l n k (ActualSignedGeometry.meanEquiv.symm y))
 
 theorem copyPotentialCoefficient_invariant (l : SignedLabel B N0) (k : Frequency) (n : ℕ) :
     CopyAngularInvariance.Invariant ((0 : LocalSignedRequest.Point), 1)

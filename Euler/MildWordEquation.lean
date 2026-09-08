@@ -96,19 +96,7 @@ theorem availableWordBlock_value {q n : ℕ} (h : n + 2 ≤ q) (w : Fin n → Fi
   rw [wordBlock_value]
   rfl
 
-/-- Actual derivative-word blocks commute with heat, including the endpoint at zero variance. -/
-theorem availableWordBlock_heat {q n : ℕ} (h : n + 2 ≤ q) (w : Fin n → Fin 4)
-    (v : ℝ≥0) (u : SobolevSpace period q) :
-    availableWordBlock period h w (heatOperator period q v u) =
-      heatOperator period 2 v (availableWordBlock period h w u) := by
-  apply value_injective period
-  rw [availableWordBlock_value, heatOperator_value, availableWordBlock_value]
-  rfl
 
-/-- Truncation preserves every derivative coordinate still within its range. -/
-theorem word_truncate_coordinate {q n : ℕ} (hn : n ≤ q) (w : Fin n → Fin 4)
-    (u : SobolevSpace period (q+1)) :
-    word period (truncateOperator period q u) hn w = word period u (Nat.le_trans hn (Nat.le_succ q)) w := rfl
 
 
 end EulerMildWordEquation

@@ -44,8 +44,6 @@ def idealSource (h η : ℝ) : ℝ :=
     (axialExponent h * η + axialShape η * idealAxialVelocity η) *
       logShapeDerivative η
 
-/-- The constant particular solution with `l = 3/5`. -/
-def idealLag (h η : ℝ) : ℝ := idealSource h η / (8 / 5)
 
 theorem ideal_transport_eq (h η : ℝ) :
     idealTransport h η = 1 - 4 * coordinateFactor h η := by
@@ -60,12 +58,6 @@ theorem ideal_source_displayed (h η : ℝ) :
   rw [ideal_transport_eq]
   ring
 
-theorem ideal_source_positive_decomposition (h η : ℝ) :
-    idealSource h η = 9 / 5 - h + (16 / 5) * h * η ^ 2 +
-      2 * (axialExponent h + 4 * axialShape η) * η ^ 2 / (1 + η ^ 2) := by
-  rw [ideal_source_displayed]
-  unfold coordinateFactor
-  ring
 
 
 
@@ -74,29 +66,10 @@ def radiusProfile (X₀ y : ℝ) : ℝ := X₀ * Real.exp y
 def angularVelocityProfile (e₀ lam y : ℝ) : ℝ :=
   e₀ * Real.exp (-(1 / 2 + lam) * y)
 
-def angularMomentumProfile (H₀ lam y : ℝ) : ℝ :=
-  H₀ * Real.exp (-lam * y)
-
-/-- Weight of `R` in `dM/dy = X E R`. -/
-theorem first_axial_moment_weight (X₀ e₀ lam y : ℝ) :
-    radiusProfile X₀ y * angularVelocityProfile e₀ lam y =
-      (X₀ * e₀) * Real.exp ((1 / 2 - lam) * y) := by
-  unfold radiusProfile angularVelocityProfile
-  calc
-    _ = (X₀ * e₀) * Real.exp (y + -(1 / 2 + lam) * y) := by
-      rw [Real.exp_add]
-      ring
-    _ = _ := by congr 2; ring
 
 
 
-/-- The two axial slopes differ whenever `lam > 0`, as do their translated weights. -/
-theorem axial_weight_gap_neg {lam δ : ℝ} (hlam : 0 < lam) (hδ : 0 < δ) :
-    Real.exp ((1 / 2 - 2 * lam) * δ) -
-      Real.exp ((1 / 2 - lam) * δ) < 0 := by
-  have hgap : (1 / 2 - 2 * lam) * δ < (1 / 2 - lam) * δ := by
-    nlinarith [mul_pos hlam hδ]
-  exact sub_neg.mpr (Real.exp_lt_exp.mpr hgap)
+
 
 
 
@@ -124,17 +97,6 @@ theorem pulse_energy_debt_bounds :
   unfold pulseEnergyDebt
   constructor <;> linarith
 
-/-- Equation (13) has opposite endpoint signs if its error is at most `1/100`.
-The asymptotic estimate needed to establish that bound is not formalized here. -/
-theorem pulse_amplitude_endpoint_signs {K error₀ error₁ : ℝ}
-    (hKlo : 1 / 5 ≤ K) (hKhi : K ≤ 1 / 4)
-    (herror₀ : |error₀| ≤ 1 / 100) (herror₁ : |error₁| ≤ 1 / 100) :
-    K * (9 / 10 : ℝ) ^ 2 - pulseEnergyDebt + error₀ < 0 ∧
-      0 < K * (6 / 5 : ℝ) ^ 2 - pulseEnergyDebt + error₁ := by
-  rcases pulse_energy_debt_bounds with ⟨hlo, hhi⟩
-  rcases abs_le.mp herror₀ with ⟨he₀lo, he₀hi⟩
-  rcases abs_le.mp herror₁ with ⟨he₁lo, he₁hi⟩
-  constructor <;> nlinarith
 
 
 /-- Constant-source lag solution, written in a form that also specifies its initial value. -/
@@ -142,13 +104,6 @@ def lagSolution (a c q₀ y : ℝ) : ℝ :=
   c / a + (q₀ - c / a) * Real.exp (-a * y)
 
 
-theorem lag_solution_hasDerivAt (a c q₀ y : ℝ) :
-    HasDerivAt (lagSolution a c q₀)
-      (-(a * (q₀ - c / a) * Real.exp (-a * y))) y := by
-  have he := ((hasDerivAt_id y).const_mul (-a)).exp
-  convert! (he.const_mul (q₀ - c / a)).const_add (c / a) using 1
-  simp only [mul_one, id_eq]
-  ring
 
 
 

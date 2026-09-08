@@ -89,13 +89,6 @@ theorem primitive_eq_scale_mul_factor (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ)
       FlatPrimitive.scale, FlatCutoff.edge_of_nonpos c hx]
   · exact primitive_factorization c j b y.1 (lt_of_not_ge hx)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem integral_original_factorization (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ)
-    (p : E) {x : ℝ} (hx : 0 < x) :
-    (∫ u in (0 : ℝ)..x, (Real.exp (-c / u ^ 2) / u ^ j) * b (p, u)) =
-      Real.exp (-c / x ^ 2) * x ^ (3 - (j : ℝ)) * factor c j b (p, x) := by
-  rw [FlatPrimitiveFactor.integral_exp_eq_primitive c j (fun u => b (p, u)) hx.le,
-    primitive_factorization c j b p hx, FlatPrimitiveFactor.scale_eq_rpow c j hx]
 
 theorem kernel_joint_contDiffAt (c : ℝ) (j : ℕ) {b : E × ℝ → ℝ}
     (hb : ContDiff ℝ ∞ b) (y : E × ℝ) {t : ℝ} (ht : 0 < t) :

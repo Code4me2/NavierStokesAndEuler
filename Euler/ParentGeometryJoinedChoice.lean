@@ -85,8 +85,6 @@ def state (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) : SmoothState F.p
 theorem state_label_constant (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) :
     (state I S k hk nextEll hnext hnext1 F hSym).labels.K=k^80 := F.label_constant
 
-theorem initial_trace : I.exactInitial k hk.four F.hn F.Q=I.high k+I.mean k :=
-  I.exactInitial_eq k hk.four F.hn F.Q
 
 end GeometryJoinedChoice
 end EulerParentPacketFrames

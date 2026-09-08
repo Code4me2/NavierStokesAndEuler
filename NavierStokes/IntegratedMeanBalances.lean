@@ -475,38 +475,8 @@ noncomputable def graphPartial (a : P → ℝ) (v : P) (w : ℝ × ℝ)
     (F : (P × ℝ) × ℝ → ℝ) (q : (P × ℝ) × ℝ) : ℝ :=
   slowPartial v F q + a q.1.1 * torusPartial w F q
 
-theorem graphPartial_smooth {a : P → ℝ} {F : (P × ℝ) × ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ a) (hF : ContDiff ℝ ∞ F) (v : P) (w : ℝ × ℝ) :
-    ContDiff ℝ ∞ (graphPartial a v w F) :=
-  (fixedPartial_smooth _ hF).add ((ha.comp contDiff_fst.fst).mul (fixedPartial_smooth _ hF))
 
-theorem graphPartial_periodic (a : P → ℝ) (v : P) (w : ℝ × ℝ)
-    {F : (P × ℝ) × ℝ → ℝ} (hp : TorusPeriodic F) :
-    TorusPeriodic (graphPartial a v w F) := by
-  have hs := fixedPartial_periodic ((v, 0), 0) hp
-  have ht := fixedPartial_periodic ((0, w.2), w.1) hp
-  constructor
-  · intro q
-    simp only [graphPartial, slowPartial, torusPartial]
-    rw [hs.first, ht.first]
-    simp only [Prod.add_def, add_zero]
-  · intro q
-    simp only [graphPartial, slowPartial, torusPartial]
-    rw [hs.second, ht.second]
-    simp only [Prod.add_def, add_zero]
 
-/-- Graph lift terms integrate to zero; only the genuine slow derivative remains. -/
-theorem torusAverage_graphPartial {a : P → ℝ} {F : (P × ℝ) × ℝ → ℝ}
-    (ha : ContDiff ℝ ∞ a) (hF : ContDiff ℝ ∞ F) (hp : TorusPeriodic F)
-    (v p : P) (w : ℝ × ℝ) :
-    torusAverage (graphPartial a v w F) p = fderiv ℝ (torusAverage F) p v := by
-  have hs : ContDiff ℝ ∞ (slowPartial v F) := fixedPartial_smooth _ hF
-  have ht : ContDiff ℝ ∞ (fun q => a q.1.1 * torusPartial w F q) :=
-    (ha.comp contDiff_fst.fst).mul (fixedPartial_smooth _ hF)
-  unfold graphPartial
-  rw [torusAverage_add hs ht, torusAverage_coeff_mul,
-    torusAverage_torusPartial_zero w hF hp, mul_zero, add_zero]
-  exact (torusAverage_fderiv hF p v).symm
 
 
 end Torus
@@ -615,40 +585,6 @@ noncomputable def axialBalance (ε : ℝ) (γ radialFlux axialFlux pressure virt
       ε ^ 2 * parameterPartial (0, 1) (parameterPartial (0, 1) γ) x) -
     radialDivergence 1 (fun r => virtualFlux (r, x.2)) x.1
 
-/-- The first identity in (34), derived from the pointwise angular balance. -/
-theorem integrated_angular_balance {a b : ℝ} (ε : ℝ)
-    {v radialFlux axialFlux virtualFlux : MeanField}
-    (hv : SmoothShell a b v) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hT : SmoothShell a b virtualFlux)
-    (hmass : radialMoment 2 v = 0) (p : MeanParameter) :
-    radialMoment 2 (angularBalance ε v radialFlux axialFlux virtualFlux) p =
-      ε * fderiv ℝ (radialMoment 2 axialFlux) p (0, 1) := by
-  have halg := moment_balance_algebra 2 (-ε) ε (ε ^ 2)
-    (fun r => parameterPartial (1, 0) v (r, p))
-    (radialDivergence 2 (fun r => radialFlux (r, p)))
-    (fun r => parameterPartial (0, 1) axialFlux (r, p))
-    (angularRadialViscosity (fun r => v (r, p)))
-    (fun r => parameterPartial (0, 1) (parameterPartial (0, 1) v) (r, p))
-    (radialDivergence 2 (fun r => virtualFlux (r, p)))
-    ((hv.partial (1, 0)).weighted_integrable 2 p)
-    (angular_divergence_integrable (hr.slice_smooth p) (hr.slice_compact p))
-    ((hz.partial (0, 1)).weighted_integrable 2 p)
-    (angular_viscosity_integrable (hv.slice_smooth p) (hv.slice_compact p))
-    (((hv.partial (0, 1)).partial (0, 1)).weighted_integrable 2 p)
-    (angular_divergence_integrable (hT.slice_smooth p) (hT.slice_compact p))
-  have ht := zero_mass_parameterPartial hv.smooth hv.supported 2 hmass p (1, 0)
-  have hzz := zero_mass_parameterPartial_twice hv.smooth hv.supported 2 hmass p (0, 1) (0, 1)
-  have hd := radialMoment_parameterPartial hz.smooth hz.supported 2 p (0, 1)
-  change moment 2 _ = _
-  simp only [angularBalance]
-  rw [halg, moment_angular_divergence (hr.slice_smooth p) (hr.slice_compact p),
-    moment_angular_divergence (hT.slice_smooth p) (hT.slice_compact p),
-    moment_angular_viscosity (hv.slice_smooth p) (hv.slice_compact p)]
-  change (-ε) * radialMoment 2 (parameterPartial (1, 0) v) p + 0 +
-    ε * radialMoment 2 (parameterPartial (0, 1) axialFlux) p -
-    ε * (0 + ε ^ 2 * radialMoment 2 (parameterPartial (0, 1) (parameterPartial (0, 1) v)) p) - 0 = _
-  rw [ht, hzz, ← hd]
-  ring
 
 /-- The second tangential integral, before eliminating the pressure moment. -/
 theorem integrated_axial_balance {a b : ℝ} (ε : ℝ)
@@ -772,20 +708,6 @@ theorem SmoothShell.zero_of_not_mem {a b : ℝ} {F : MeanField} (hF : SmoothShel
   by_contra h
   exact hx (hF.supported h)
 
-theorem angularBalance_supported {a b : ℝ} (ε : ℝ)
-    {v radialFlux axialFlux virtualFlux : MeanField}
-    (hv : SmoothShell a b v) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hT : SmoothShell a b virtualFlux) :
-    RadialAlias.RadiallySupported a b (angularBalance ε v radialFlux axialFlux virtualFlux) := by
-  intro x hx
-  by_contra hn
-  apply hx
-  simp [angularBalance,
-    (hv.partial (1, 0)).zero_of_not_mem hn, (hz.partial (0, 1)).zero_of_not_mem hn,
-    ((hv.partial (0, 1)).partial (0, 1)).zero_of_not_mem hn,
-    zero_of_not_mem_interval (radialDivergence_supported (hr.slice_support x.2) 2) hn,
-    zero_of_not_mem_interval (radialDivergence_supported (hT.slice_support x.2) 2) hn,
-    zero_of_not_mem_interval (angularViscosity_supported (hv.slice_support x.2)) hn]
 
 theorem axialBalance_supported {a b : ℝ} (ε : ℝ)
     {γ radialFlux axialFlux pressure virtualFlux : MeanField}
@@ -811,20 +733,6 @@ theorem positive_radialMoment {a b : ℝ} (ha : 0 < a) {F : MeanField}
   exact hs (right_ne_zero_of_mul hr)
 
 
-theorem integrated_axial_positive {a b : ℝ} (ha : 0 < a) (ε : ℝ)
-    {γ radialFlux axialFlux pressure virtualFlux gr ρ : MeanField}
-    (hγ : SmoothShell a b γ) (hr : SmoothShell a b radialFlux)
-    (hz : SmoothShell a b axialFlux) (hp : SmoothShell a b pressure)
-    (hT : SmoothShell a b virtualFlux) (hg : SmoothShell a b gr) (hρ : SmoothShell a b ρ)
-    (hmass : radialMoment 1 γ = 0)
-    (hderiv : ∀ r p, deriv (fun s => pressure (s, p)) r =
-      gr (r, p) - ρ (r, p) * pressureTotal gr p) (p : MeanParameter) :
-    (∫ r in Ioi (0 : ℝ), r * axialBalance ε γ radialFlux axialFlux pressure virtualFlux (r, p)) =
-      ε * fderiv ℝ (fun q => axialDefect axialFlux gr q +
-        pressureCoefficient ρ q * pressureTotal gr q) p (0, 1) := by
-  simpa only [pow_one] using
-    (positive_radialMoment ha (axialBalance_supported ε hγ hr hz hp hT) 1 p).trans
-      (integrated_axial_reconstructed ε hγ hr hz hp hT hg hρ hmass hderiv p)
 
 /-! ## The actual pressure primitive (33), without a supplied derivative identity -/
 
@@ -867,35 +775,9 @@ noncomputable def averagedRadialSource (f : PressureStream.Lift MeanParameter �
 noncomputable def normalizedMeanDensity (a b : ℝ) (hab : a < b) (x : MeanPoint) : ℝ :=
   PressureStream.rho a b hab x.1
 
-theorem averagedRadialSource_shell {a b : ℝ} {f : PressureStream.Lift MeanParameter → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f) :
-    SmoothShell a b (averagedRadialSource f) :=
-  ⟨PressureStream.torusAverage_contDiff hf, PressureStream.torusAverage_supported hs⟩
 
-theorem reconstructedMeanPressure_shell {d a b M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : ℝ × ℝ)
-    {f : PressureStream.Lift MeanParameter → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) :
-    SmoothShell a b (reconstructedMeanPressure d a b M hab v f) :=
-  ⟨PressureStream.torusAverage_contDiff (PressureStream.meanPressure_contDiff ha hab hd v hf hs),
-    PressureStream.torusAverage_supported (PressureStream.meanPressure_supported ha hab hd v hf hs)⟩
 
-theorem normalizedMeanDensity_shell (a b : ℝ) (hab : a < b) :
-    SmoothShell a b (normalizedMeanDensity a b hab) := by
-  refine ⟨(PressureStream.rho_contDiff a b hab).comp contDiff_fst, ?_⟩
-  exact fun _ hx => PressureStream.rho_support a b hab hx
 
-theorem constructed_pressure_deriv {d a b M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : ℝ × ℝ)
-    {f : PressureStream.Lift MeanParameter → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (hper : PressureStream.TorusPeriodicLift f)
-    (r : ℝ) (p : MeanParameter) :
-    deriv (fun s => reconstructedMeanPressure d a b M hab v f (s, p)) r =
-      averagedRadialSource f (r, p) - normalizedMeanDensity a b hab (r, p) *
-        pressureTotal (averagedRadialSource f) p := by
-  simpa only [reconstructedMeanPressure, averagedRadialSource, normalizedMeanDensity,
-    pressureTotal, radialMoment, moment, pow_zero, one_mul, PressureStream.pressureMass]
-    using (PressureStream.meanPressure_bar_hasDerivAt ha hab hd v hf hs hper p r).deriv
 
 
 end NavierStokes.IntegratedMeanBalances

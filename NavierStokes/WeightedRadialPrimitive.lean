@@ -391,13 +391,6 @@ theorem logPosition_mem {a b X : ℝ} (ha : 0 < a) (hX : X ∈ Ioo a b) :
   exact ⟨Real.log_pos ((one_lt_div ha).mpr hX.1),
     Real.log_lt_log (div_pos (lt_trans ha hX.1) ha) (div_lt_div_of_pos_right hX.2 ha)⟩
 
-theorem log_remaining {a b X : ℝ} (ha : 0 < a) (hX : X ∈ Ioo a b) :
-    logLength a b - logPosition a X = Real.log (b / X) := by
-  have hx := lt_trans ha hX.1
-  have hb := lt_trans hx hX.2
-  simp only [logLength, logPosition, Real.log_div hb.ne' ha.ne', Real.log_div hx.ne' ha.ne',
-    Real.log_div hb.ne' hx.ne']
-  ring
 
 
 def expCoordinate (a s : ℝ) : ℝ := a * Real.exp s
@@ -664,25 +657,6 @@ theorem compactIntegral_eq_radialCompactPrimitive
     TransportPrimitive.totalIntegral_eq_radialInterval hf hs]
   rfl
 
-/-- A uniform weighted inverse bound for the manuscript's actual shifted,
-compactified transport primitive. All shifts are quantified after the constant. -/
-theorem transport_compact_primitive_uniform
-    {a b c d cL cR : ℝ} (ha : 0 < a) (hac : a < c) (hcd : c < d) (hdb : d < b)
-    (hcL : 0 < cL) (hcR : 0 < cR) (m : ℕ) (χ : ℝ → ℝ)
-    (hχ : ∀ X, |χ X| ≤ 1)
-    (hleft : ∀ X, X ≤ c → χ X = 0) (hright : ∀ X, d ≤ X → χ X = 1) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : E) (f : ℝ × E → V), Continuous f →
-      RadialAlias.RadiallySupported a b f → ∀ A : ℝ, 0 ≤ A →
-      (∀ X ∈ Ioo a b, ∀ Y : E, ‖f (X, Y)‖ ≤ A * logWeight cL cR a b m X) →
-      ∀ z : ℝ × E, z.1 ∈ Ioo a b →
-        ‖TransportPrimitive.compactIntegral χ M v f z‖ ≤
-          K * A * logWeight cL cR a b m z.1 := by
-  obtain ⟨K, hK, hbound⟩ := shifted_radial_compact_primitive_uniform (E := E) (V := V)
-    ha hac hcd hdb hcL hcR m χ hχ hleft hright
-  refine ⟨K, hK, ?_⟩
-  intro M v f hf hs A hA hb z hz
-  rw [compactIntegral_eq_radialCompactPrimitive χ hf hs]
-  exact hbound M v f hf A hA hb z hz
 
 
 /-- The uncorrected past primitive obeys the left weighted estimate uniformly
@@ -1010,45 +984,6 @@ theorem logStrip_majorant_eq
 
 variable {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [CompleteSpace V]
 
-/-- The concrete compactified shifted inverse preserves the all-jet mean
-class `M_α` on the explicit logarithmic annulus. Both radial support and global
-smoothness of the input are named hypotheses; neither the inverse estimate nor
-smoothness of the output is assumed. The bandwise shifts may be arbitrary. -/
-theorem meanClass_canonical_transport
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    (α : ℝ) (M : ℕ → ℝ) (v : ℕ → E) (f : ℕ → ℝ × E → V)
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    (hclass : WeightedClasses.MeanClass
-      (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α f) :
-    WeightedClasses.MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α
-      (fun n => TransportPrimitive.compactIntegral (TransportPrimitive.interiorCutoff a b)
-        (M n) (v n) (f n)) := by
-  refine ⟨hclass.weight_nonneg, ?_, ?_⟩
-  · intro n
-    exact (TransportPrimitive.compactIntegral_contDiff
-      (TransportPrimitive.interiorCutoff_contDiff a b) (hf n) (hs n)).contDiffOn
-  · intro m
-    obtain ⟨C, hC, p, hsource⟩ := hclass.bounds m
-    obtain ⟨K, hK, hbound⟩ := canonical_transport_finiteJets_uniform (E := E) (V := V)
-      ha hab hcL hcR p m
-    refine ⟨K * C, mul_nonneg hK hC, p, ?_⟩
-    intro n z hz j hj
-    change z.1 ∈ Ioo a b at hz
-    have hA : 0 ≤ C * (ε n) ^ α * (S n) ^ p :=
-      mul_nonneg (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-        (pow_nonneg (zero_le_one.trans (hS n)) p)
-    have hinput : ∀ i : ℕ, i ≤ m → ∀ X ∈ Ioo a b, ∀ Y : E,
-        ‖iteratedFDeriv ℝ i (f n) (X, Y)‖ ≤
-          (C * (ε n) ^ α * (S n) ^ p) * logWeight cL cR a b p X := by
-      intro i hi X hX Y
-      have hpnt := hsource n (X, Y) hX i hi
-      rw [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α C p n (X, Y) hX] at hpnt
-      exact hpnt
-    have hout := hbound (M n) (v n) (f n) (hf n) (hs n)
-      (C * (ε n) ^ α * (S n) ^ p) hA hinput z hz j hj
-    rw [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α (K * C) p n z hz]
-    simpa only [mul_assoc] using hout
 
 
 end LogStrip

@@ -23,8 +23,6 @@ def radialFlux (h lam : ℝ) (U : Field) (p : Point) : ℝ :=
     (2 * p.2 * U p - 2 * p.2 * (CoordinateAlgebra.D h + lam) * average U p -
       CoordinateAlgebra.d p.2 * SimilarityProfile.partialEta (average U) p)
 
-theorem radialFlux_at_axis (h lam η : ℝ) (U : Field) : radialFlux h lam U (0, η) = 0 := by
-  simp [radialFlux]
 
 theorem radialFlux_div_radial (h lam : ℝ) (U : Field) {p : Point} (hX : p.1 ≠ 0) :
     radialFlux h lam U p / p.1 = (CoordinateAlgebra.L h p.2)⁻¹ *
@@ -93,37 +91,7 @@ theorem radialFlux_hasDerivAt (Ω : RadialDomain) {U : Field}
   filter_upwards [hn] with x hx
   exact radialFlux_eq_histories Ω hU h lam hx
 
-/-- Equality with the partial derivative used by the similarity calculus. -/
-theorem partialX_radialFlux (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h lam : ℝ) {p : Point} (hp : p ∈ Ω.carrier)
-    (hL : CoordinateAlgebra.L h p.2 ≠ 0) :
-    SimilarityProfile.partialX (radialFlux h lam U) p =
-      -SimilarityProfile.Z h (-CoordinateAlgebra.A h + lam) U p := by
-  have hv := ((radialFlux_smoothAt Ω hU h lam hp hL).differentiableAt (by simp)).hasFDerivAt
-  have hd := hv.comp_hasDerivAt p.1
-    ((hasDerivAt_id p.1).prodMk (hasDerivAt_const p.1 p.2))
-  exact hd.unique (radialFlux_hasDerivAt Ω hU h lam hp)
 
-theorem axial_source_intervalIntegrable (Ω : RadialDomain) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U Ω.carrier) (h b : ℝ) {p : Point} (hp : p ∈ Ω.carrier) :
-    IntervalIntegrable (fun x => -SimilarityProfile.Z h b U (x, p.2)) volume 0 p.1 := by
-  have hu : ContinuousOn (fun x => U (x, p.2)) (uIcc 0 p.1) :=
-    (radial_slice_continuous Ω hU p.2).mono (fun _ hx => Ω.segment_mem hp hx)
-  have hx : ContinuousOn (fun x => radialPartial U (x, p.2)) (uIcc 0 p.1) :=
-    (radial_slice_continuous Ω (radialPartial_smooth Ω hU) p.2).mono
-      (fun _ hx => Ω.segment_mem hp hx)
-  have hη : ContinuousOn (fun x => parameterPartial U (x, p.2)) (uIcc 0 p.1) :=
-    (radial_slice_continuous Ω (parameterPartial_smooth Ω hU) p.2).mono
-      (fun _ hx => Ω.segment_mem hp hx)
-  have hc : ContinuousOn (fun x =>
-      -((2 * p.2 * b * U (x, p.2) + CoordinateAlgebra.d p.2 * parameterPartial U (x, p.2) -
-        2 * p.2 * (x * radialPartial U (x, p.2))) / CoordinateAlgebra.L h p.2))
-          (uIcc 0 p.1) :=
-    ((((continuousOn_const.mul hu).add
-      (continuousOn_const.mul hη)).sub
-        (continuousOn_const.mul (continuousOn_id.mul hx))).div_const (CoordinateAlgebra.L h p.2)).neg
-  simpa only [SimilarityProfile.Z, CoordinateAlgebra.axialCoeff, SimilarityProfile.partialX,
-    SimilarityProfile.partialEta, radialPartial, parameterPartial, mul_assoc] using hc.intervalIntegrable
 
 
 

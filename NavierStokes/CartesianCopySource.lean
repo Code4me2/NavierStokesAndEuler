@@ -175,13 +175,5 @@ theorem sourceBounds_rotated {ι : Type*} {s : StripData Native} {w : ι → ℕ
   have hp := sourceBounds_pullback (b := b) ha hf
   exact ⟨uniform_rotated ha hf.uniform, hp.flat_geometry, hp.weight_le, hp.epsilon_eq, hp.slow_le⟩
 
-theorem sourceBounds_rotated_component {ι : Type*} {s : StripData Native} {w : ι → ℕ → Native → ℝ}
-    {f : ι → ℕ → Native → ComplexVector} {α h a b : ℝ} (ha : 0 < a)
-    (hf : LocalPhysicalCopyBounds.LocalSourceBounds s h α w f) (i : Fin 3) :
-    LocalPhysicalCopyBounds.LocalSourceBounds (pullStrip s a b ha) h α
-      (fun l n x => w l n (cylindricalMap x)) (fun l n x => rotatedSource f l n x i) := by
-  have hp := sourceBounds_rotated (b := b) ha hf
-  exact ⟨hp.uniform.map (ContinuousLinearMap.proj i), hp.flat_geometry,
-    hp.weight_le, hp.epsilon_eq, hp.slow_le⟩
 
 end NavierStokes.CartesianCopySource

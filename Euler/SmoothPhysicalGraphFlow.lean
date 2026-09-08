@@ -86,14 +86,6 @@ theorem physical_materialVelocity_eq (ell : ℝ) (hell : ell ≠ 0)
   rw [physicalCoefficient,scaled_materialVelocity_eq T hT (graphCoefficient k m T A) ell hell,
     graph_materialVelocity_eq k m T hT A hgraph]
 
-include hgraph in
-theorem physical_materialAcceleration_eq (ell : ℝ) (hell : ell ≠ 0)
-    (t : Icc (0 : ℝ) T) (x : Vector3) :
-    materialAcceleration T hT (physicalCoefficient k m T A ell) (physicalCoefficient k m T A₁ ell) t x =
-      ell • (materialAcceleration T hT A A₁ t (graphLinear k m (ell⁻¹ • x))).1 := by
-  rw [physicalCoefficient,physicalCoefficient,
-    scaled_materialAcceleration_eq T hT (graphCoefficient k m T A) ell
-      (graphCoefficient k m T A₁) hell,graph_materialAcceleration_eq k m T hT A A₁ hgraph]
 
 variable (hdiv : ∀ t z,
   LinearMap.trace ℝ LiftTangent (fderiv ℝ (A.field t : LiftTangent → LiftTangent) z).toLinearMap=0)

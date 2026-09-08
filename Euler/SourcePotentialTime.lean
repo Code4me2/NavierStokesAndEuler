@@ -25,28 +25,6 @@ variable (hmt : ∀ t ∈ Icc (0 : ℝ) T, ∀ y : Space,
   HasDerivWithinAt (fun r => extendPath T hT m.field r y)
     (extendPath T hT m₁.field t y) (Icc (0 : ℝ) T) t)
 
-include hmt in
-/-- The polynomial coefficient really differentiates the actual source multiplier. -/
-theorem potentialCoefficient_hasDerivWithinAt (t : Icc (0 : ℝ) T) (y : Space) :
-    HasDerivWithinAt (fun r => extendPath T hT (potentialCoefficient m c hc hm) r y)
-      (potentialTimeCoefficient m m₁ c hc hm t y) (Icc (0 : ℝ) T) t := by
-  have hn : extendPath T hT m.field t y ≠ 0 := by
-    change m.field (projIcc 0 T hT t) y ≠ 0
-    rw [projIcc_of_mem hT t.property]
-    intro hz
-    have h := hm t y
-    rw [hz, norm_zero, zero_pow (by decide : 2 ≠ 0)] at h
-    linarith
-  have h := potentialMultiplier_hasDerivWithinAt (Icc (0 : ℝ) T) t
-    (fun r => extendPath T hT m.field r y) (extendPath T hT m₁.field t y)
-    (hmt t t.property y) hn
-  convert h using 1 <;> try rfl
-  · funext r
-    exact potentialCoefficient_apply m c hc hm (projIcc 0 T hT r) y
-  · rw [potentialTimeCoefficient_apply]
-    change potentialMultiplierDerivative (m.field t y) (m₁.field t y) =
-      potentialMultiplierDerivative (m.field (projIcc 0 T hT t) y) (m₁.field (projIcc 0 T hT t) y)
-    rw [projIcc_of_mem hT t.property]
 
 variable (P : ℝ) [Fact (0 < P)]
   (p f : C(Icc (0 : ℝ) T,LiftL2 P))

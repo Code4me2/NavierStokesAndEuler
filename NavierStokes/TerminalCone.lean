@@ -510,14 +510,6 @@ theorem E_eq_profileAngularVelocity (F : OutgoingProfile.Profile) {XR : ℝ}
     ParametricHeatTail.diffusion]
   ring
 
-theorem U_eq_zero (F : OutgoingProfile.Profile) {XR : ℝ} (hXR : 0 < XR) {y eta : ℝ}
-    (hy : terminalStart F.data ≤ y) : HeatedOutgoing.U F XR (XR * Real.exp y, eta) = 0 := by
-  apply HeatedOutgoing.U_after_switch F XR eta (XR * Real.exp y) hXR
-  apply HeatedOutgoing.full_switch_above_radius (OutgoingDilation.switchRadius_pos F XR hXR)
-    (mul_pos hXR (Real.exp_pos y))
-  rw [tailTime_clock F hXR y]
-  dsimp only [terminalStart] at hy
-  linarith
 
 /-- Chosen only after the core schedule and `h`.  This bound contains no
 compensation coefficient or data-dependent edge-collar width. -/

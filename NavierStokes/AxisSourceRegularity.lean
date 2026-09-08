@@ -238,28 +238,6 @@ theorem Z2_analytic (h b : ℝ) {v : InnerProfile} {w : InnerPoint}
     (hv : AnalyticAt ℝ v w) (hL : L h w.2 ≠ 0) : AnalyticAt ℝ (Z2 h b v) w :=
   Z_analytic h (b - D h) (Z_analytic h b hv hL) hL
 
-/-- Joint analytic input germs give an analytic quotient germ, including at X=0. -/
-theorem omegaDivX_analytic (h : ℝ) (U v : ℕ → InnerProfile) (k : ℕ) (w : InnerPoint)
-    (hU : ∀ j, j ≤ k → AnalyticAt ℝ (U j) w)
-    (hv : ∀ j, j ≤ k → AnalyticAt ℝ (v j) w) (hL : L h w.2 ≠ 0) :
-    AnalyticAt ℝ (omegaDivX h U v k) w := by
-  have hs : AnalyticAt ℝ (fun y => ∑ ij ∈ Finset.antidiagonal k,
-      (v ij.1 y * (v ij.2 y / 2 + y.1 * partialX (v ij.2) y) +
-        U ij.1 y * Z h (slowOrder h ij.2 - 1) (v ij.2) y)) w := by
-    apply Finset.analyticAt_fun_sum
-    intro ij hij
-    obtain ⟨hi, hj⟩ := antidiagonal_indices_le hij
-    exact ((hv ij.1 hi).mul (((hv ij.2 hj).fun_div analyticAt_const (by norm_num)).add
-      (analyticAt_fst.mul (partialX_analytic (hv ij.2 hj))))).add
-      ((hU ij.1 hi).mul (Z_analytic h _ (hv ij.2 hj) hL))
-  have hp : AnalyticAt ℝ (shiftedAxialFactor h v k) w := by
-    cases k with
-    | zero => exact analyticAt_const
-    | succ k => exact Z2_analytic h _ (hv k (Nat.le_succ k)) hL
-  exact (((T_analytic h _ (hv k le_rfl) hL).add hs).sub
-    ((analyticAt_const.mul (partialX_analytic (hv k le_rfl))).add
-      ((analyticAt_const.mul analyticAt_fst).mul
-        (partialX_analytic (partialX_analytic (hv k le_rfl)))))).sub hp
 
 /-! ## Explicit finite jets and parameter-analytic source formulas -/
 
@@ -448,29 +426,6 @@ theorem jetZ2_analytic (h b X : ℂ) {J : ℂ → Jet2 ℂ} {e : ℂ}
     (((analyticAt_const.mul analyticAt_id).mul analyticAt_const).mul
       (jetZX_analytic h b X hJ hL))).fun_div (jetL_analytic h e) hL
 
-/-- The finite quotient source is holomorphic in the parameter whenever the
-finite input jets have holomorphic extensions and the sole denominator is nonzero. -/
-theorem jetOmegaDivX_analytic (h X : ℂ) (U : ℕ → ℂ → ℂ)
-    (v : ℕ → ℂ → Jet2 ℂ) (k : ℕ) (e : ℂ)
-    (hU : ∀ j, j ≤ k → AnalyticAt ℂ (U j) e)
-    (hv : ∀ j, j ≤ k → AnalyticJetAt (v j) e) (hL : jetL h e ≠ 0) :
-    AnalyticAt ℂ (fun z => jetOmegaDivX h X z (fun j => U j z) (fun j => v j z) k) e := by
-  have hs : AnalyticAt ℂ (fun z => ∑ ij ∈ Finset.antidiagonal k,
-      ((v ij.1 z).value * ((v ij.2 z).value / 2 + X * (v ij.2 z).dx) +
-        U ij.1 z * jetZ h (2 * (ij.2 : ℂ) * h - 1) X z (v ij.2 z))) e := by
-    apply Finset.analyticAt_fun_sum
-    intro ij hij
-    obtain ⟨hi, hj⟩ := antidiagonal_indices_le hij
-    exact ((hv ij.1 hi).value.mul (((hv ij.2 hj).value.fun_div analyticAt_const
-      (by norm_num)).add (analyticAt_const.mul (hv ij.2 hj).dx))).add
-      ((hU ij.1 hi).mul (jetZ_analytic h _ X (hv ij.2 hj) hL))
-  have hp : AnalyticAt ℂ (fun z => jetShifted h X z (fun j => v j z) k) e := by
-    cases k with
-    | zero => exact analyticAt_const
-    | succ k => exact jetZ2_analytic h _ X (hv k (Nat.le_succ k)) hL
-  exact (((jetT_analytic h _ X (hv k le_rfl) hL).add hs).sub
-    ((analyticAt_const.mul (hv k le_rfl).dx).add
-      (analyticAt_const.mul (hv k le_rfl).dxx))).sub hp
 
 noncomputable def complexifyJet (j : Jet2 ℝ) : Jet2 ℂ where
   value := j.value
@@ -510,24 +465,8 @@ noncomputable def lowerPressureSource (h C : ℝ) (φ U v : ℕ → InnerProfile
     (n : ℕ) (w : InnerPoint) : ℝ :=
   C⁻¹ ^ 2 * lowerConvolution φ φ n w - previousOmegaDivX h U v n w / 2
 
-theorem lowerConvolution_smooth (a b : ℕ → InnerProfile) (n : ℕ) (w : InnerPoint)
-    (ha : ∀ j, j < n → ContDiffAt ℝ ∞ (a j) w)
-    (hb : ∀ j, j < n → ContDiffAt ℝ ∞ (b j) w) :
-    ContDiffAt ℝ ∞ (lowerConvolution a b n) w := by
-  apply ContDiffAt.sum
-  intro ij hij
-  obtain ⟨hi, hj⟩ := lowerPairs_lt hij
-  exact (ha ij.1 hi).mul (hb ij.2 hj)
 
 
-theorem lowerConvolution_analytic (a b : ℕ → InnerProfile) (n : ℕ) (w : InnerPoint)
-    (ha : ∀ j, j < n → AnalyticAt ℝ (a j) w)
-    (hb : ∀ j, j < n → AnalyticAt ℝ (b j) w) :
-    AnalyticAt ℝ (lowerConvolution a b n) w := by
-  apply Finset.analyticAt_fun_sum
-  intro ij hij
-  obtain ⟨hi, hj⟩ := lowerPairs_lt hij
-  exact (ha ij.1 hi).mul (hb ij.2 hj)
 
 
 
@@ -542,38 +481,12 @@ noncomputable def jetLowerPressureSource {K : Type*} [Field K] (h C X e : K)
   C⁻¹ ^ 2 * (∑ ij ∈ lowerPairs n, φ ij.1 * φ ij.2) -
     jetPreviousOmega h X e U v n / 2
 
-theorem lowerPressureSource_eq_jet (h C : ℝ) (φ U v : ℕ → InnerProfile)
-    (n : ℕ) (w : InnerPoint)
-    (hv : ∀ j, j < n → ContDiffAt ℝ 2 (v j) w) (hL : L h w.2 ≠ 0) :
-    lowerPressureSource h C φ U v n w =
-      jetLowerPressureSource h C w.1 w.2 (fun j => φ j w) (fun j => U j w)
-        (fun j => profileJet (v j) w) n := by
-  cases n with
-  | zero => rfl
-  | succ k =>
-    simp only [lowerPressureSource, previousOmegaDivX, jetLowerPressureSource,
-      jetPreviousOmega]
-    rw [omegaDivX_eq_jet h U v k w (fun j hj => hv j (Nat.lt_succ_of_le hj)) hL]
-    rfl
 
-theorem jetLowerPressureSource_ofReal (h C X e : ℝ) (φ U : ℕ → ℝ)
-    (v : ℕ → Jet2 ℝ) (n : ℕ) :
-    ((jetLowerPressureSource h C X e φ U v n : ℝ) : ℂ) =
-      jetLowerPressureSource (h : ℂ) (C : ℂ) (X : ℂ) (e : ℂ)
-        (fun j => (φ j : ℂ)) (fun j => (U j : ℂ))
-        (fun j => complexifyJet (v j)) n := by
-  cases n <;> simp [jetLowerPressureSource, jetPreviousOmega, jetOmegaDivX_ofReal]
 
 
 
 /-! ## The other finite lower-order transport sources -/
 
-theorem transport_axisFactor (σ : ℝ) (v f : InnerProfile) (w : InnerPoint)
-    (hX : w.1 ≠ 0) :
-    axisFactor v w * (partialX f w + σ * f w / w.1) =
-      v w * (w.1 * partialX f w + σ * f w) := by
-  unfold axisFactor
-  field_simp [hX]
 
 noncomputable def shiftedProfileAxial (h b : ℝ) (f : ℕ → InnerProfile) : ℕ → InnerProfile
   | 0 => fun _ => 0
@@ -603,29 +516,7 @@ noncomputable def jetLowerTransportSource {K : Type*} [Field K] (h b σ X e : K)
       U ij.1 * jetZ h (b + 2 * (ij.2 : K) * h) X e (f ij.2))) -
     jetShiftedProfileAxial h b X e f n
 
-theorem lowerTransportSource_eq_jet (h b σ : ℝ) (v U f : ℕ → InnerProfile)
-    (n : ℕ) (w : InnerPoint)
-    (hf : ∀ j, j < n → ContDiffAt ℝ 2 (f j) w) (hL : L h w.2 ≠ 0) :
-    lowerTransportSource h b σ v U f n w =
-      jetLowerTransportSource h b σ w.1 w.2 (fun j => v j w) (fun j => U j w)
-        (fun j => profileJet (f j) w) n := by
-  cases n with
-  | zero => rfl
-  | succ k =>
-    simp only [lowerTransportSource, jetLowerTransportSource, shiftedProfileAxial,
-      jetShiftedProfileAxial]
-    rw [Z2_eq_jet h (b + slowOrder h k) (hf k (Nat.lt_succ_self k)) hL]
-    rfl
 
-theorem jetLowerTransportSource_ofReal (h b σ X e : ℝ) (v U : ℕ → ℝ)
-    (f : ℕ → Jet2 ℝ) (n : ℕ) :
-    ((jetLowerTransportSource h b σ X e v U f n : ℝ) : ℂ) =
-      jetLowerTransportSource (h : ℂ) (b : ℂ) (σ : ℂ) (X : ℂ) (e : ℂ)
-        (fun j => (v j : ℂ)) (fun j => (U j : ℂ))
-        (fun j => complexifyJet (f j)) n := by
-  cases n <;> simp [jetLowerTransportSource, jetShiftedProfileAxial,
-    jetZ2, jetZ, jetZE, jetZX, jetZNumerator, jetZNumeratorX, jetZNumeratorE,
-    jetL, complexifyJet]
 
 
 

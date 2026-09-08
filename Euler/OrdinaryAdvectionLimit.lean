@@ -78,13 +78,6 @@ theorem projectedRhsPath_eq (A : Icc (0 : ℝ) T → SmoothL2Field Space)
   intro t
   exact projectedRhs_toLp (A t)
 
-theorem pressurePath_eq (A : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n)) :
-    pressurePath A hA=(solenoidalProjection-ContinuousLinearMap.id ℝ L2).compLeftContinuous ℝ
-      (Icc (0 : ℝ) T) (advectionPath A hA) := by
-  apply ContinuousMap.ext
-  intro t
-  exact pressureField_toLp (A t)
 
 theorem advectionPath_sub_norm (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
     (hA : ∀ n, Continuous (fun t => (A t).jetLp n))

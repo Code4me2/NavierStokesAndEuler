@@ -471,61 +471,17 @@ def inverseMixedJet (r : ℕ) (f g : ℕ → ℕ → ℝ) (n m : ℕ) : ℝ :=
     (((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
       f ij.1 (kl.1 + 1) * g ij.2 kl.2
 
-/-- The mixed derivative is bounded after radial inversion, with explicit
-constant 5120/ε. Neither individual derivative is assumed bounded. -/
-theorem inverseMixedJet_bound {ε F G : ℝ} (hε : 0 < ε) (hF : 0 ≤ F) (hG : 0 ≤ G)
-    {r : ℕ} (hr : 1 ≤ r) (f g : ℕ → ℕ → ℝ)
-    (hf : ∀ n m, |f n m| ≤ F * weight ε n m)
-    (hg : ∀ n m, |g n m| ≤ G * weight ε n m) (n m : ℕ) :
-    |inverseMixedJet r f g n m| ≤ (5120 / ε) * F * G * weight ε (n + 1) m := by
-  have hD := radialDivisor_pos hr n
-  have hsum : |inverseMixedJet r f g n m| ≤
-      ∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-        (F * G) * ((((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
-          weight ε ij.1 (kl.1 + 1) * weight ε ij.2 kl.2) := by
-    apply abs_double_sum_le
-    intro ij hij kl hkl
-    exact abs_bilinear_term_le _ _ _ _ _ _ _ (by positivity) hF hG
-      (weight_pos hε _ _).le (weight_pos hε _ _).le (hf _ _) (hg _ _)
-  have hfactor :
-      (∑ ij ∈ antidiagonal n, ∑ kl ∈ antidiagonal m,
-        (F * G) * ((((m.choose kl.1 : ℝ) * ij.2) / radialDivisor r n) *
-          weight ε ij.1 (kl.1 + 1) * weight ε ij.2 kl.2)) =
-      (F * G) * mixedWeightSum ε r n m := by
-    simp only [mixedWeightSum, Finset.mul_sum]
-  rw [hfactor] at hsum
-  calc
-    _ ≤ (F * G) * mixedWeightSum ε r n m := hsum
-    _ ≤ (F * G) * ((5120 / ε) * weight ε (n + 1) m) :=
-      mul_le_mul_of_nonneg_left (mixedWeightSum_le hε hr n m) (mul_nonneg hF hG)
-    _ = _ := by ring
 
 /-- Coefficients of the radial averaging operator `Bf(Y)=∫₀¹ f(tY)dt`. -/
 def averageJet (f : ℕ → ℕ → ℝ) (n m : ℕ) : ℝ := f n m / ((n : ℝ) + 1)
 
-/-- Coefficients of the zero-datum primitive. -/
-def primitiveJet (f : ℕ → ℕ → ℝ) : ℕ → ℕ → ℝ
-  | 0, _ => 0
-  | n + 1, m => f n m / ((n : ℝ) + 1)
 
 /-- Coefficients of the regular zero-datum inverse of `Y f'' + r f'`. -/
 def regularInverseJet (r : ℕ) (f : ℕ → ℕ → ℝ) : ℕ → ℕ → ℝ
   | 0, _ => 0
   | n + 1, m => f n m / radialDivisor r n
 
-/-- The primitive is applied together with the parameter derivative. -/
-def parameterPrimitiveJet (f : ℕ → ℕ → ℝ) : ℕ → ℕ → ℝ
-  | 0, _ => 0
-  | n + 1, m => f n (m + 1) / ((n : ℝ) + 1)
 
-theorem averageJet_bound {ε F : ℝ} (_hε : 0 < ε) (_hF : 0 ≤ F)
-    (f : ℕ → ℕ → ℝ) (hf : ∀ n m, |f n m| ≤ F * weight ε n m) (n m : ℕ) :
-    |averageJet f n m| ≤ F * weight ε n m := by
-  unfold averageJet
-  rw [abs_div, abs_of_pos (by positivity : 0 < (n : ℝ) + 1)]
-  exact (div_le_self (abs_nonneg _) (by
-    have hn : (0 : ℝ) ≤ n := by positivity
-    linarith)).trans (hf n m)
 
 
 theorem radialDivisor_ge_one {r : ℕ} (hr : 1 ≤ r) (n : ℕ) : 1 ≤ radialDivisor r n := by
@@ -538,10 +494,6 @@ theorem radialDivisor_ge_one {r : ℕ} (hr : 1 ≤ r) (n : ℕ) : 1 ≤ radialDi
 
 
 
-/-- Put the already estimated mixed coefficient in its output radial degree. -/
-def regularInverseMixedJet (r : ℕ) (f g : ℕ → ℕ → ℝ) : ℕ → ℕ → ℝ
-  | 0, _ => 0
-  | n + 1, m => inverseMixedJet r f g n m
 
 
 end

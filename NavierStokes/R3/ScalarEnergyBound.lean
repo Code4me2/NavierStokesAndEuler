@@ -62,19 +62,5 @@ theorem forced_gronwall {T C : ℝ} {E E' : ℝ → ℝ}
     E t ≤ C * Real.exp t - C := by linarith
     _ = C * (Real.exp t - 1) := by ring
 
-/-- A bound independent of the endpoint of an interval contained in `[0, 1]`. -/
-theorem forced_gronwall_uniform {T C : ℝ} {E E' : ℝ → ℝ}
-    (hT : 0 ≤ T) (hT1 : T ≤ 1) (hC : 0 ≤ C)
-    (hcont : ContinuousOn E (Icc 0 T)) (hinitial : E 0 = 0)
-    (hderiv : ∀ t ∈ Ioo 0 T, HasDerivAt E (E' t) t)
-    (hbound : ∀ t ∈ Ioo 0 T, E' t ≤ E t + C) :
-    ∀ t ∈ Icc 0 T, E t ≤ C * Real.exp 1 := by
-  intro t ht
-  calc
-    E t ≤ C * (Real.exp t - 1) :=
-      forced_gronwall hT hcont hinitial hderiv hbound t ht
-    _ ≤ C * Real.exp t := mul_le_mul_of_nonneg_left (by linarith) hC
-    _ ≤ C * Real.exp 1 :=
-      mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (ht.2.trans hT1)) hC
 
 end NavierStokesR3.ScalarEnergyBound

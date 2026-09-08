@@ -56,12 +56,6 @@ theorem unitVelocityCoefficient_apply (t : Icc (0 : ℝ) 1) (x : Space) :
   rw [projIcc_of_mem zero_le_one t.property]
   exact h
 
-theorem unitForceCoefficient_apply (t : Icc (0 : ℝ) 1) (x : Space) :
-    (unitForceCoefficient P u C R hC hR hu hdiv).field t x =
-      EulerConstantEuler.force (exactPacket P u C R hC hR hu hdiv) (t,x) := by
-  simp only [unitForceCoefficient,SmoothTimeField.precompLinear_apply,inl_apply,
-    FieldTower.toSmoothTimeField_apply,EulerConstantEuler.force,ExactLiftedPacket.rawPressure,
-    FieldTower.rawField,projIcc_of_mem zero_le_one t.property]
 
 def velocityCoefficient : SmoothTimeField (Icc (0 : ℝ) (amplitude P C R hC hR)) Space Space :=
   EulerTimeRescaling.coefficient (amplitude P C R hC hR) (amplitude_pos P C R hC hR)
@@ -71,9 +65,6 @@ def derivativeCoefficient : SmoothTimeField (Icc (0 : ℝ) (amplitude P C R hC h
   EulerTimeRescaling.derivativeCoefficient (amplitude P C R hC hR) (amplitude_pos P C R hC hR)
     (unitDerivativeCoefficient P u C R hC hR hu hdiv)
 
-def forceCoefficient : SmoothTimeField (Icc (0 : ℝ) (amplitude P C R hC hR)) Space Space :=
-  EulerTimeRescaling.derivativeCoefficient (amplitude P C R hC hR) (amplitude_pos P C R hC hR)
-    (unitForceCoefficient P u C R hC hR hu hdiv)
 
 theorem coefficient_time :
     SmoothTimeField.TimeDerivative (amplitude P C R hC hR) (amplitude_pos P C R hC hR).le

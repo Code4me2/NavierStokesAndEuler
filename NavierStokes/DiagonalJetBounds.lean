@@ -176,19 +176,6 @@ theorem norm_tsum_sub_prefix_jet_le {F : ℕ → E → V} {x : E}
   exact (hsum.hasSum.norm_le_of_bounded hmajor.hasSum
     (fun n => hbound (J + 1 + n) (by omega))).trans htail
 
-/-- Direct version for any smooth family with locally finite supports. -/
-theorem norm_tsum_sub_prefix_jet_le_of_locallyFinite {F : ℕ → E → V} {x : E}
-    (hloc : LocallyFinite (fun j => support (F j)))
-    (hF : ∀ j, ContDiffAt ℝ ∞ (F j) x)
-    (g : ℕ → ℝ) (hg : Monotone g) (L q : ℝ) (hq : 0 < q) (hq1 : q ≤ 1)
-    (J m : ℕ)
-    (hbound : ∀ j, J < j →
-      ‖iteratedFDeriv ℝ m (F j) x‖ ≤ (1 / 2 : ℝ) ^ j * q ^ (g j - L)) :
-    ‖iteratedFDeriv ℝ m
-      (fun y => (∑' j : ℕ, F j y) - ∑ j ∈ Finset.range (J + 1), F j y) x‖ ≤
-        (1 / 2 : ℝ) ^ J * q ^ (g (J + 1) - L) :=
-  norm_tsum_sub_prefix_jet_le (eventually_zero_tail_of_locallyFinite hloc x)
-    hF g hg L q hq hq1 J m hbound
 
 /-- The stage estimates needed by the diagonal argument, stated on actual
 cut potentials and their actual derivatives. Stage zero is exempt; stage `j`
@@ -302,24 +289,6 @@ theorem exists_uncut_tail_order {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
   rw [← (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hdiff m).self_of_nhds]
   exact htail m hm x hx hqx hqx1
 
-/-- Filter version of the small-scale comparison. The prefix depends on
-the finite derivative ceiling and target power, never on the point. -/
-theorem exists_uncut_tail_order_eventually {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
-    {q : E → ℝ} {A : ℕ → E → V} {g L : ℕ → ℝ} {U : Set E}
-    (hU : IsOpen U) (hq : ContDiffOn ℝ ∞ q U)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U) (hg : Monotone g)
-    (hgtop : Tendsto g atTop atTop) (hb : CutStageBounds a q A g L U)
-    {l : Filter E} (hlU : ∀ᶠ x in l, x ∈ U) (hlq : ∀ᶠ x in l, 0 < q x)
-    (hqzero : Tendsto q l (𝓝 0)) (M Jmin : ℕ) (N : ℝ) :
-    ∃ J : ℕ, Jmin ≤ J ∧ M ≤ J ∧ ∀ᶠ x in l, ∀ m ≤ M,
-      ‖iteratedFDeriv ℝ m
-        (fun y => SolenoidalDiagonal.potentialSum a q A y -
-          uncutPrefix A (J + 1) y) x‖ ≤ (1 / 2 : ℝ) ^ J * (q x) ^ N := by
-  obtain ⟨J, hJmin, hJM, δ, hδ, hbound⟩ :=
-    exists_uncut_tail_order ha hU hq hA hg hgtop hb M Jmin N
-  refine ⟨J, hJmin, hJM, ?_⟩
-  filter_upwards [hlU, hlq, hqzero.eventually (gt_mem_nhds hδ)] with x hx hqx hsmall
-  exact fun m hm => hbound m hm x hx hqx hsmall
 
 end UncutPrefix
 

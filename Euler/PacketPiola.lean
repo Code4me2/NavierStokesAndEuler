@@ -52,26 +52,8 @@ theorem curl_pullbackCovector (Ξ Q : Space → Space) (hΞ : ContDiff ℝ 2 Ξ)
   change vectorCurl (fun y => (fderiv ℝ Ξ y).adjoint (Q y)) x = _
   rw [vectorCurl_eq_matrix _ x hp.differentiableAt, hp.fderiv, curlMatrix_add, hzero, add_zero]
 
-/-- The source's slow transformed curl `d × Q`, with `d=F⁻ᵀ ∇`. -/
-def transformedCurl (F : Space → Space ≃L[ℝ] Space) (Q : Space → Space) (x : Space) : Space :=
-  curlMatrix ((fderiv ℝ Q x).comp (F x).symm.toContinuousLinearMap)
 
-/-- For the actual Jacobian and unit determinant, `F⁻¹(d×Q)=curl(FᵀQ)`. -/
-theorem piola_curl (Ξ Q : Space → Space) (hΞ : ContDiff ℝ 2 Ξ)
-    (F : Space ≃L[ℝ] Space) (x : Space)
-    (hF : fderiv ℝ Ξ x = F.toContinuousLinearMap)
-    (hdet : (operatorMatrix F.toContinuousLinearMap).det = 1)
-    (hQ : DifferentiableAt ℝ Q x) :
-    F.symm (curlMatrix ((fderiv ℝ Q x).comp F.symm.toContinuousLinearMap)) =
-      vectorCurl (pullbackCovector Ξ Q) x := by
-  rw [curl_pullbackCovector Ξ Q hΞ x hQ, hF]
-  exact (curlMatrix_piola F hdet (fderiv ℝ Q x)).symm
 
-theorem pullbackCovector_smooth (Ξ Q : Space → Space)
-    (hΞ : ContDiff ℝ ∞ Ξ) (hQ : ContDiff ℝ ∞ Q) :
-    ContDiff ℝ ∞ (pullbackCovector Ξ Q) :=
-  ((realAdjoint (U := Space) (E := Space)).contDiff.comp
-    (hΞ.fderiv_right (m := ∞) (by simp))).clm_apply hQ
 
 
 end EulerPacketPiola

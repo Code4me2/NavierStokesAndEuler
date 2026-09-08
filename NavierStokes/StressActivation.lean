@@ -250,26 +250,6 @@ theorem weightedPrimitive_factorization {T : ℝ} (hT : 0 < T) (κ : ℝ) (B : F
   dsimp [FlatPrimitive.scale, primitiveFactor]
   field_simp [(stepDenominator_pos T p.1).ne']
 
-/-- The basic quantitative estimate is uniform as `κ` tends to zero and in
-the ramp length: its constant is only a bound for the reference coefficient. -/
-theorem weightedPrimitive_bound {T κ M y : ℝ} (hT : 0 < T) (hκ : κ ≤ 1)
-    (hM : 0 ≤ M) (hy : 0 ≤ y) (B : Field) (η : ℝ)
-    (hB : ∀ t ∈ Icc (0 : ℝ) y, |B (t, η)| ≤ M) :
-    |weightedPrimitive T κ B (y, η)| ≤ M * y * activation T κ y := by
-  have hb : ∀ t ∈ uIoc (0 : ℝ) y,
-      ‖activation T κ t * B (t, η)‖ ≤ M * activation T κ y := by
-    intro t ht
-    have ht' : t ∈ Ioc (0 : ℝ) y := by simpa only [uIoc_of_le hy] using ht
-    rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs,
-      abs_of_nonneg (activation_nonneg T κ t hκ)]
-    calc
-      _ ≤ activation T κ t * M := mul_le_mul_of_nonneg_left (hB t ⟨ht'.1.le, ht'.2⟩)
-        (activation_nonneg T κ t hκ)
-      _ ≤ activation T κ y * M := mul_le_mul_of_nonneg_right (activation_monotone hT hκ ht'.2) hM
-      _ = _ := mul_comm _ _
-  have hi := intervalIntegral.norm_integral_le_of_norm_le_const hb
-  simpa only [weightedPrimitive, primitive, weightedField, Real.norm_eq_abs,
-    sub_zero, abs_of_nonneg hy, mul_assoc, mul_left_comm, mul_comm] using hi
 
 theorem controlled_difference_factorization {T : ℝ} (hT : 0 < T) (κ : ℝ)
     {J : Set ℝ} (hJ : IsOpen J) {F : Field}
@@ -433,29 +413,6 @@ theorem compact_parameter_jet_bound {J K : Set ℝ} (hJ : IsOpen J)
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs] at hb
   exact hb.trans (le_max_left _ _)
 
-theorem scaled_family_jet_bound {T : ℝ} (_hT : 0 < T) {J K : Set ℝ}
-    (hJ : IsOpen J) (hK : IsCompact K) (hKJ : K ⊆ J)
-    {H : FamilyPoint → ℝ} (hH : ContDiffOn ℝ ∞ H ((univ : Set (ℝ × ℝ)) ×ˢ J))
-    {E : ℝ → ℝ → ℝ → ℝ}
-    (hE : ∀ κ y, ∀ η ∈ J, E κ y η = y * activation T κ y * H ((κ, y), η))
-    (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (E κ y) η| ≤ M * y * activation T κ y := by
-  obtain ⟨M, hM, hbound⟩ := compact_parameter_jet_bound hJ hK hKJ hH T n
-  refine ⟨M, hM, ?_⟩
-  intro κ hκ y hy η hη
-  have heq : E κ y =ᶠ[𝓝 η] (fun ξ => y * activation T κ y * H ((κ, y), ξ)) := by
-    filter_upwards [hJ.mem_nhds (hKJ hη)] with ξ hξ
-    exact hE κ y ξ hξ
-  rw [heq.iteratedDeriv_eq n]
-  have hh : ContDiffAt ℝ ∞ (fun ξ => H ((κ, y), ξ)) η :=
-    (hH.contDiffAt ((isOpen_univ.prod hJ).mem_nhds ⟨mem_univ _, hKJ hη⟩)).comp η
-      (contDiffAt_const.prodMk contDiffAt_id)
-  rw [iteratedDeriv_const_mul (n := n) _ (hh.of_le (WithTop.coe_le_coe.mpr le_top)), abs_mul,
-    abs_of_nonneg (mul_nonneg hy.1 (activation_nonneg T κ y hκ.2))]
-  have hb := mul_le_mul_of_nonneg_left (hbound κ hκ y hy η hη)
-    (mul_nonneg hy.1 (activation_nonneg T κ y hκ.2))
-  nlinarith
 
 
 
@@ -471,9 +428,6 @@ noncomputable def familyPrimitiveFactor (T : ℝ) (B : FamilyPoint → ℝ)
     ParametricFlatFactor.factor (T ^ 2) 0 (familyFlatCoefficient T B)
       ((q.1.1, q.2), q.1.2)
 
-theorem familyPrimitiveFactor_eq (T : ℝ) (B : FamilyPoint → ℝ) (κ y η : ℝ) :
-    familyPrimitiveFactor T B ((κ, y), η) =
-      primitiveFactor T (fun p => B ((κ, p.1), p.2)) (y, η) := rfl
 
 theorem familyPrimitiveFactor_smooth {T : ℝ} (hT : 0 < T) {J : Set ℝ} (hJ : IsOpen J)
     {B : FamilyPoint → ℝ}
@@ -710,13 +664,6 @@ noncomputable def historyDifferenceFamily (T X0 : ℝ) (L U : Field)
     (r : HistoryRow) : FamilyPoint → ℝ :=
   familyPrimitiveFactor T (historyIntegrandFamily T X0 L U r)
 
-theorem historyDifferenceFamily_smooth {T : ℝ} (hT : 0 < T) (X0 : ℝ)
-    {J : Set ℝ} (hJ : IsOpen J) {L U : Field}
-    (hL : ContDiffOn ℝ ∞ L (logDomain J hJ).carrier)
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) (r : HistoryRow) :
-    ContDiffOn ℝ ∞ (historyDifferenceFamily T X0 L U r)
-      ((univ : Set (ℝ × ℝ)) ×ˢ J) :=
-  familyPrimitiveFactor_smooth hT hJ (historyIntegrandFamily_smooth hT X0 hJ hL hU r)
 
 @[simp] theorem historyDifferenceFamily_zero (T X0 : ℝ) (L U : Field)
     (r : HistoryRow) (κ η : ℝ) :
@@ -1053,18 +1000,6 @@ theorem reference_histories_log_formula {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ
   · intro t
     exact refU_logPullback N hδ hδT t hη
 
-/-- The five *physical* histories inherit the constructed smooth factor. -/
-theorem histories_difference_factorization {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < rampLimit) (κ : ℝ) (P0 : ℝ → ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    (r : HistoryRow) (y : ℝ) {η : ℝ} (hη : η ∈ parameterInterval) :
-    profileHistory (histories N hT hδ hδT κ P0 hP0) r (radius N.endpoint y, η) -
-      profileHistory (N.histories hδ hδT P0 hP0) r (radius N.endpoint y, η) =
-        y * activation T κ y *
-          historyDifferenceFamily T N.endpoint (refLog N δ) (refAxial N δ) r ((κ, y), η) := by
-  rw [histories_log_formula N hT hδ hδT κ P0 hP0 r y hη,
-    reference_histories_log_formula N hδ hδT P0 hP0 r y hη]
-  exact history_difference_factorization hT κ N.endpoint _ parameterInterval_open
-    (refLog_smooth N hδ hδT) (refAxial_smooth N hδ hδT) r y hη
 
 
 theorem angular_equation {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)

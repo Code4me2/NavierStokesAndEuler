@@ -19,9 +19,6 @@ theorem velocity_odd (t : Icc (0 : ℝ) A.T) : Function.Odd (fun x => E.velocity
   change E.velocity (t,-x)= -E.velocity (t,x)
   rw [E.velocity_pullback,E.velocity_pullback,E.inverse.odd O t x,O.velocity t]
 
-theorem force_odd (t : Icc (0 : ℝ) A.T) : Function.Odd (E.force t) := by
-  intro x
-  rw [E.force_pullback,E.force_pullback,E.inverse.odd O t x,O.acceleration t]
 
 theorem velocity_zero (t : Icc (0 : ℝ) A.T) : E.velocity (t,0)=0 := by
   ext i

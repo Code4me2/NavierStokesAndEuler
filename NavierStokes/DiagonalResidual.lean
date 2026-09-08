@@ -266,33 +266,6 @@ theorem residual_jetRate_of_stages {U : Set SpaceTime} {l : Filter SpaceTime}
     abel
   rwa [hidentity] at hsum
 
-/-- Every actual residual jet is flat. This follows by choosing a different
-finite stage for each requested derivative and decay order; no fixed tail
-is assumed or proved flat to all orders. -/
-theorem allJetsFlat_residual_of_stages {U : Set SpaceTime} {l : Filter SpaceTime}
-    {q : SpaceTime → ℝ} {u : VelocityField} {p : PressureField}
-    {uStage : ℕ → VelocityField} {pStage : ℕ → PressureField}
-    {g Lbg Ltail Lres : ℕ → ℝ}
-    (hU : IsOpen U) (hlU : ∀ᶠ z in l, z ∈ U)
-    (hq : ∀ᶠ z in l, 0 < q z ∧ q z ≤ 1)
-    (hu : ContDiffOn ℝ ∞ u U) (hp : ContDiffOn ℝ ∞ p U)
-    (hus : ∀ J, ContDiffOn ℝ ∞ (uStage J) U)
-    (hps : ∀ J, ContDiffOn ℝ ∞ (pStage J) U)
-    (hg : Tendsto g atTop atTop)
-    (hbg : ∀ J m, JetRate l q (uStage J) m (-Lbg m))
-    (htu : ∀ J m, m ≤ J →
-      JetRate l q (fun z => u z - uStage J z) m (g J - Ltail m))
-    (htp : ∀ J m, m ≤ J →
-      JetRate l q (fun z => p z - pStage J z) m (g J - Ltail m))
-    (hres : ∀ J m, JetRate l q
-      (fun z => navierStokesResidual (uStage J) (pStage J) z.1 z.2) m (g J - Lres m)) :
-    AllJetsFlat l q (fun z => navierStokesResidual u p z.1 z.2) := by
-  intro m N
-  obtain ⟨C, hC, hbound⟩ := residual_jetRate_of_stages hU hlU hq hu hp hus hps
-    hg hbg htu htp hres m (N : ℝ) (Nat.cast_nonneg N)
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [hq, hbound] with z hz hb
-  simpa only [abs_norm, abs_of_pos hz.1, Real.rpow_natCast] using hb
 
 end Residual
 

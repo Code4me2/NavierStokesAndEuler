@@ -106,49 +106,8 @@ theorem advection_add
   simp only [add_apply, map_add]
   abel
 
-/-- Exact perturbation formula for the physical residual, at viscosity one.
-Every operator in this statement is the concrete operator in `ProblemStatement`. -/
-theorem navierStokesResidual_add_sub
-    (u e : VelocityField) (p q : PressureField) (t : ℝ) (x : Space)
-    (hut : DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t)
-    (het : DifferentiableAt ℝ (fun s : ℝ => e (s, x)) t)
-    (hu : ContDiff ℝ 2 (fun y : Space => u (t, y)))
-    (he : ContDiff ℝ 2 (fun y : Space => e (t, y)))
-    (hp : DifferentiableAt ℝ (fun y : Space => p (t, y)) x)
-    (hq : DifferentiableAt ℝ (fun y : Space => q (t, y)) x) :
-    navierStokesResidual (fun z => u z + e z) (fun z => p z + q z) t x -
-      navierStokesResidual u p t x =
-        temporalDerivative e t x - spatialLaplacian e t x + pressureGradient q t x +
-          spatialDerivative u t x (e (t, x)) + spatialDerivative e t x (u (t, x)) +
-          spatialDerivative e t x (e (t, x)) := by
-  have hdu := hu.differentiable (by norm_num)
-  have hde := he.differentiable (by norm_num)
-  unfold navierStokesResidual
-  rw [temporalDerivative_add u e t x hut het, advection_add u e t x (hdu x) (hde x),
-    spatialLaplacian_add u e t x hu he, pressureGradient_add p q t x hp hq]
-  unfold advection
-  abel
 
-/-- A spatial slice of a field smooth on the actual presingular domain is
-globally smooth in space at each interior time. -/
-theorem spatial_contDiff_of_presingular_smooth
-    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (g : SpaceTime → V) (hg : ContDiffOn ℝ ∞ g preSingularDomain)
-    (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) :
-    ContDiff ℝ ∞ (fun y : Space => g (t, y)) := by
-  apply contDiff_iff_contDiffAt.mpr
-  intro x
-  exact (smooth_at_interior hg ht x).comp x (contDiffAt_const.prodMk contDiffAt_id)
 
-/-- Interior time differentiability follows from the same domain smoothness;
-no extension through the singular time is assumed. -/
-theorem temporal_differentiable_of_presingular_smooth
-    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (g : SpaceTime → V) (hg : ContDiffOn ℝ ∞ g preSingularDomain)
-    (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) (x : Space) :
-    DifferentiableAt ℝ (fun s : ℝ => g (s, x)) t := by
-  exact ((smooth_at_interior hg ht x).differentiableAt (by simp)).comp t
-    (differentiableAt_id.prodMk (differentiableAt_const x))
 
 
 /-- A constant spatial scalar factors out of the actual spatial derivative. -/
@@ -213,33 +172,6 @@ theorem temporalDerivative_time_smul
   rw [fderiv_fun_smul ha hu]
   rfl
 
-/-- Exact time-switch identity for the physical PDE, when both velocity and
-pressure are multiplied by the same scalar time switch. -/
-theorem navierStokesResidual_time_smul
-    (u : VelocityField) (p : PressureField) (a : ℝ → ℝ) (t : ℝ) (x : Space)
-    (ha : DifferentiableAt ℝ a t)
-    (hut : DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t)
-    (hu : ContDiff ℝ 2 (fun y : Space => u (t, y)))
-    (hp : DifferentiableAt ℝ (fun y : Space => p (t, y)) x) :
-    navierStokesResidual (fun z => a z.1 • u z) (fun z => a z.1 • p z) t x =
-      a t • navierStokesResidual u p t x + (fderiv ℝ a t 1) • u (t, x) +
-        (a t * a t - a t) • advection u t x := by
-  have hdu := hu.differentiable (by norm_num)
-  have hadv : advection (fun z => a z.1 • u z) t x = (a t * a t) • advection u t x := by
-    change advection (fun z => a t • u z) t x = _
-    exact advection_const_smul u t x (a t) (hdu x)
-  have hlap : spatialLaplacian (fun z => a z.1 • u z) t x =
-      a t • spatialLaplacian u t x := by
-    change spatialLaplacian (fun z => a t • u z) t x = _
-    exact spatialLaplacian_const_smul u t x (a t) hu
-  have hgrad : pressureGradient (fun z => a z.1 • p z) t x =
-      a t • pressureGradient p t x := by
-    change pressureGradient (fun z => a t • p z) t x = _
-    exact pressureGradient_const_smul p t x (a t) hp
-  unfold navierStokesResidual
-  rw [temporalDerivative_time_smul u a t x ha hut, hadv, hlap, hgrad]
-  simp only [smul_add, smul_sub, sub_smul]
-  abel
 
 
 end NavierStokes.ResidualCalculus

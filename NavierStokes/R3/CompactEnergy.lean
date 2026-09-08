@@ -2,7 +2,10 @@ import NavierStokes.PeriodicUniqueness
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 import NavierStokes.R3.CompactTimeIntegral
 import NavierStokes.R3.ScalarEnergyBound
-import NavierStokes.R3.CompactForceBound
+import NavierStokes.ProblemStatement
+import Mathlib.MeasureTheory.Integral.Bochner.Set
+import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+import Mathlib.Topology.Algebra.Support
 
 /-!
 # Energy of compactly supported fields on Euclidean three-space
@@ -286,16 +289,6 @@ theorem zero_outside {u : VelocityField} {K : Set Space} {t : ℝ}
     u (t, x) = 0 :=
   image_eq_zero_of_notMem_tsupport (f := fun y => u (t, y)) (fun h => hx (hsupp h))
 
-theorem l2Sq_continuousOn {a b : ℝ} {u : VelocityField} {K : Set Space}
-    (hK : IsCompact K) (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (hsupp : ∀ t ∈ Icc a b, tsupport (fun x => u (t, x)) ⊆ K) :
-    ContinuousOn (l2Sq u) (Icc a b) := by
-  have hF : ContinuousOn (fun z : SpaceTime => ‖u z‖ ^ 2) (Icc a b ×ˢ univ) :=
-    (hu.norm_sq ℝ).continuousOn
-  apply CompactTimeIntegral.continuousOn_integral hK hF
-  intro t ht x hx
-  rw [zero_outside (hsupp t ht) hx]
-  simp
 
 /-- Differentiation under the ordinary whole-space energy integral follows
 from joint smoothness and fixed compact spatial support. -/

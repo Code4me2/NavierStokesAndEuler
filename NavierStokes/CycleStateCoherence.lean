@@ -489,12 +489,6 @@ theorem iterate_labels {ι : Type} (p : ℕ → CycleParameters ι) (c : Context
   | zero => rfl
   | succ j ih => exact ih
 
-theorem iterate_aliasCoefficients {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)
-    (seed : CycleState ι) (j : ℕ) :
-    (CycleState.iterate p c seed j).coefficients.aliasCoefficients = seed.coefficients.aliasCoefficients := by
-  induction j with
-  | zero => rfl
-  | succ j ih => exact ih
 
 /-- The primitive wave laws also propagate the complete individual
 harmonic blocks, so they remain available to the next reference solve. -/
@@ -631,16 +625,6 @@ theorem iterate_alias_error {ι : Type} (p : ℕ → CycleParameters ι) (c : Co
     rw [show x.state.errors.aliasError = _ from ih]
     abel
 
-theorem iterate_alias_separated {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)
-    (seed : CycleState ι) (g : VariableGaugeMean.GaugeData Plane)
-    (hg : ∀ j, (p j).gauge = g) (other : Oscillation Point)
-    (hseed : seed.state.errors.aliasError = other + VariableGaugeMean.pressureAliasState g c seed.state)
-    (J : ℕ) :
-    (CycleState.iterate p c seed J).state.errors.aliasError =
-      other + (∑ j ∈ Finset.range J, temporalAliasAt p c seed j) +
-        VariableGaugeMean.pressureAliasState g c (CycleState.iterate p c seed J).state := by
-  rw [iterate_alias_error p c seed g hg J, hseed]
-  abel
 
 
 end NavierStokes.CycleStateCoherence

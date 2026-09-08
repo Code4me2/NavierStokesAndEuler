@@ -47,21 +47,6 @@ theorem projectedSource_continuousAt {α : Type*} [TopologicalSpace α] {q : ℕ
   have hMP := hM.clm_comp hP
   exact hMP.const_sub (ContinuousLinearMap.id ℝ (SobolevSpace period q))
 
-/-- Differentiating the genuine resolvent gives the actual Hq pressure derivative −P M′ P. -/
-theorem pressureSobolev_hasDerivAt {q : ℕ}
-    (A : ℝ → SmoothCoefficient period) (K : ∀ s, CoefficientJet period standardDirection q (A s))
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ s x v, c * ‖v‖ ^ 2 ≤ ⟪(A s).coefficient x v, v⟫_ℝ)
-    (t : ℝ) (M' : SobolevSpace period q →L[ℝ] SobolevSpace period q)
-    (hM : HasDerivAt (fun s => coefficientSobolevOperator period (K s)) M' t) :
-    HasDerivAt (fun s => pressureSobolevOperator period (K s) κ m c hc (hpos s))
-      (-((pressureSobolevOperator period (K t) κ m c hc (hpos t)).comp
-        (M'.comp (pressureSobolevOperator period (K t) κ m c hc (hpos t))))) t := by
-  apply hasDerivAt_of_resolvent
-    (fun s => pressureSobolevOperator period (K s) κ m c hc (hpos s))
-    (fun s => coefficientSobolevOperator period (K s)) _ t M' hM
-  intro s r
-  exact pressure_resolvent period (K s) (K r) κ m c c hc hc (hpos s) (hpos r)
 
 
 end EulerSobolevCoefficientPressure

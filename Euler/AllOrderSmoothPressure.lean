@@ -34,15 +34,6 @@ theorem commonPath_pressure_equation {T : ℝ} (hT : 0 < T) (A : Data period T) 
   rw [(A.atOrder period 6).source_value period le_rfl] at h
   exact h
 
-/-- The constructed signed pressure has a genuine smooth spatial representative at every time. -/
-theorem exists_smooth_signed_pressure {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A) :
-    ∃ p : Icc (0 : ℝ) T → LiftDomain period → Vector3,
-      (∀ t x, ContDiff ℝ ∞ (localFieldLift period (p t) x)) ∧
-      ∀ t, (commonPressure period hT A B t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] p t := by
-  have h (t : Icc (0 : ℝ) T) := exists_smooth_representative period (commonPressure period hT A B t)
-    (fun n => pressureJet period hT A B n t)
-  choose p hp ha using h
-  exact ⟨p,hp,ha⟩
 
 
 end EulerAllOrderSmoothPressure

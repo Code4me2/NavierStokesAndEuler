@@ -21,9 +21,6 @@ variable {E F G : Type*}
 def derivativeSum (f : E → F) (N : ℕ) (z : ℝ) (x : E) : ℝ :=
   generatingSum (ftaylorSeries ℝ f x) N z
 
-theorem derivativeSum_nonneg (f : E → F) (N : ℕ) (z : ℝ) (x : E)
-    (hz : 0 ≤ z) : 0 ≤ derivativeSum f N z x :=
-  generatingSum_nonneg _ _ _ hz
 
 theorem derivativeSum_add_le (f g : E → F) (N : ℕ) (z : ℝ) (x : E)
     (hf : ContDiffAt ℝ N f x) (hg : ContDiffAt ℝ N g x) (hz : 0 ≤ z) :

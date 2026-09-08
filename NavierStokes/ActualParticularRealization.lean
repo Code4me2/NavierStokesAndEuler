@@ -351,50 +351,6 @@ end Assembly
 
 /-! ## Primitive frame matching -/
 
-theorem targetChart_of_frameMatch (D : AssemblyData Parameter)
-    (s : WeightedClasses.StripData Associated) (h : ℝ) (n i : ℕ)
-    (hm : CorrectionStep.WaveFrameMatch D.context (HarmonicWaveInteraction.productStrip s)
-      (reindexDirections angleShuffle D.directions) (reindexCoefficients angleShuffle D.background))
-    (hframe : HarmonicResidual.contextFrame D.context n =
-      PhysicalResidualNaturality.associatedFrame h (ChartScales.Q n) i) :
-    TargetChart D s h n i := by
-  have hr : StateReindex.vector (angleShuffle (P := Parameter)) (D.directions.radialField n) =
-      CorrectionStep.radialDirection D.context n :=
-    (reindex_radialField (angleShuffle (P := Parameter)) D.directions n).symm.trans (hm.radial n)
-  have hz : StateReindex.vector (angleShuffle (P := Parameter))
-      (D.directions.axialField (CorrectionStep.ParticularParameters.nativeStrip s) n) =
-        CorrectionStep.axialDirection D.context n := by
-    change reindexVector angleShuffle (D.directions.axialField
-      (CorrectionStep.ParticularParameters.nativeStrip s) n) = _
-    rw [← reindex_axialField, CorrectionStep.ParticularParameters.angleStrip_nativeStrip]
-    exact hm.axial n
-  have ht : StateReindex.vector (angleShuffle (P := Parameter)) (fun _ => D.directions.angular) =
-      CorrectionStep.angularDirection (D := Associated) := by
-    funext y
-    exact hm.angular
-  constructor
-  · funext x
-    exact (congrFun (hm.radius n) (associatedCylinder x)).trans
-      (congrArg (fun g : HarmonicResidual.Frame Associated => g.radius (associatedCylinder x).1) hframe)
-  · change StateReindex.vector associatedCylinder
-      (StateReindex.vector angleShuffle (D.directions.radialField n)) = _
-    rw [hr]
-    change StateReindex.vector associatedCylinder
-      (fun y => ((HarmonicResidual.contextFrame D.context n).radial y.1, 0)) = _
-    rw [hframe]
-    rfl
-  · change StateReindex.vector associatedCylinder
-      (StateReindex.vector angleShuffle (fun _ => D.directions.angular)) = _
-    rw [ht]
-    rfl
-  · change StateReindex.vector associatedCylinder
-      (StateReindex.vector angleShuffle (D.directions.axialField
-        (CorrectionStep.ParticularParameters.nativeStrip s) n)) = _
-    rw [hz]
-    change StateReindex.vector associatedCylinder
-      (fun y => ((HarmonicResidual.contextFrame D.context n).axial y.1, 0)) = _
-    rw [hframe]
-    rfl
 
 /-! ## One fixed Cartesian reference label -/
 
@@ -541,51 +497,7 @@ theorem cycle_velocity_cylindrical {z : SpaceTime}
   rw [← mul_assoc, ← Real.rpow_add (ChartScales.Q_pos n)]
   simp
 
-include H hn hr T C hstrip hcover Href hU R hdelta in
-/-- Cartesian realization of the literal stored finite harmonic block,
-using the same physical potential for every compatible covering. -/
-theorem cycle_velocity_realization {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).source
-      (bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U))
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    polarVelocityMap delta chart
-      (velocityMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-        ((cycleBlock D s h gap N).oscillation n)) (z.1, CylindricalResidual.chart z.2) =
-      SpatialCurl.spatialCurl (labelPotential D h (ChartScales.Q D.reference.band) I delta N)
-        (z.1, CylindricalResidual.chart z.2) := by
-  change CylindricalResidual.frame
-    (PhysicalCurlCovariance.polarInput delta chart (z.1, CylindricalResidual.chart z.2)).2
-    (velocityMap _ ((cycleBlock D s h gap N).oscillation n)
-      (PhysicalCurlCovariance.polarCoordinates delta chart (z.1, CylindricalResidual.chart z.2))) = _
-  rw [PhysicalCurlCovariance.polarInput_forward hdelta chart hchart,
-    PhysicalCurlCovariance.polarCoordinates_forward hdelta chart hchart,
-    cycle_velocity_cylindrical D s h gap n i H hn hr T C hstrip hcover Href hU R hdelta chart hz hchart,
-    CylindricalResidual.frame_inverse']
-  rfl
 
-include H hn hr C hcover R hdelta in
-theorem cycle_pressure_realization {z : SpaceTime} (hz : 0 < z.2 0)
-    (hp : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band)
-      (nativeMap h (ChartScales.Q n) i z).1.1 ∈ U)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    polarPressureMap delta chart
-      (pressureMap (PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i)
-        ((cycleBlock D s h gap N).oscillatoryPressure n)) (z.1, CylindricalResidual.chart z.2) =
-      labelPressure D h (ChartScales.Q D.reference.band) I delta N
-        (z.1, CylindricalResidual.chart z.2) := by
-  change pressureMap _ ((cycleBlock D s h gap N).oscillatoryPressure n)
-    (PhysicalCurlCovariance.polarCoordinates delta chart (z.1, CylindricalResidual.chart z.2)) = _
-  rw [PhysicalCurlCovariance.polarCoordinates_forward hdelta chart hchart]
-  change ((ChartScales.Q n) ^ (-CoordinateAlgebra.A h)) ^ 2 *
-    (cycleBlock D s h gap N).oscillatoryPressure n
-      (PhysicalResidualTZ.swapCylinder ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).map z)) = _
-  rw [cycleBlock_pressure, block_pressure_physical D s h gap n i H hn hr C R hz hp hdelta chart hchart,
-    hcover, ← mul_assoc, ← Real.rpow_mul_natCast (ChartScales.Q_pos n).le,
-    ← Real.rpow_add (ChartScales.Q_pos n)]
-  have hexp : -CoordinateAlgebra.A h * (2 : ℝ) + 2 * CoordinateAlgebra.A h = 0 := by ring
-  norm_num only [Nat.cast_ofNat]
-  rw [hexp]
-  simp
 
 end CyclePhysical
 
@@ -889,39 +801,7 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
   (Href : ReferenceChart D h (ChartScales.Q D.reference.band) (i + gap n))
   {U : Set Parameter} (hU : IsOpen U)
 
-include H hn hr T Href hU in
-theorem corrected_velocity_eq_reference {j : ℤ} {α κ : ℝ}
-    (C : LocalControl D.reference D.charts D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j D.background D.copy D.strip D.directions α κ)
-    (R : ReferenceODE D j U) {x : Cylinder}
-    (hx : x ∈ bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U) :
-    vectorMode ((corrected D s h gap j).frequency n) ((corrected D s h gap j).phase n)
-      ((corrected D s h gap j).amplitude n) (waveEquiv x) =
-        velocityWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-          vectorMode ((D.wave j).frequency D.reference.band) ((D.wave j).phase D.reference.band)
-            ((D.wave j).amplitude D.reference.band)
-            (waveEquiv (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x)) := by
-  rw [corrected_velocity_eq_band D s h gap n i H hn hr T j C.harmonic_ne C.frequency_ne hx.1,
-    bandVelocity_eq_reference D (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-      i (gap n) Href C (C.frequency_nonzero n) hU R hx,
-    referenceLiftVelocity_eq_wave D Href]
 
-include H hn hr Href in
-theorem corrected_pressure_eq_reference {j : ℤ} {α κ : ℝ}
-    (C : LocalControl D.reference D.charts D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j D.background D.copy D.strip D.directions α κ)
-    (R : ReferenceODE D j U) {x : Cylinder}
-    (hx : x ∈ bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) U) :
-    mode ((corrected D s h gap j).frequency n) ((corrected D s h gap j).phase n)
-      ((corrected D s h gap j).pressure n) (waveEquiv x) =
-        pressureWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-          mode ((D.wave j).frequency D.reference.band) ((D.wave j).phase D.reference.band)
-            ((D.wave j).pressure D.reference.band)
-            (waveEquiv (cylinderChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n) x)) := by
-  rw [corrected_pressure_eq_band D s h gap n i H hn hr j C.harmonic_ne C.frequency_ne hx.1,
-    bandPressureMode_eq_reference D h (ChartScales.Q_pos n) (ChartScales.Q_pos D.reference.band)
-      (gap n) (C.frequency_nonzero n) j (C.frequency_nonzero D.reference.band) R x hx.2.2,
-    referenceLiftPressure_eq_wave D Href.identity j C.harmonic_ne C.frequency_ne]
 
 
 

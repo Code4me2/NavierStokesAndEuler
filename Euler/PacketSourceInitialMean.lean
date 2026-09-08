@@ -46,23 +46,6 @@ theorem joinedSource_mean_initial_support (p : ℕ) (θ : ℝ) :
   rw [profiles_step _ _ p hp]
   exact EulerMeanPacketProvider.meanSolve_initial_support M _ h θ
 
-theorem joinedSource_mean_initial_zero (hL : M.L=0) (p : ℕ) (x : Space) (θ : ℝ) :
-    (joinedSourceProfiles P M D τ hτ hτT B primary p).mean (0,(x,θ)) = 0 := by
-  by_cases hp0 : p=0
-  · subst p
-    simp only [joinedSourceProfiles,profiles_zero]
-    rfl
-  by_cases hp1 : p=1
-  · subst p
-    simp only [joinedSourceProfiles,profiles_one,hm,Pi.zero_apply]
-  have hp : 2 ≤ p := by omega
-  let h : Nonempty (EulerMeanPacketProvider.Forcing M
-      (meanForce (joinedSourceOperators P M D τ hτ hτT B) p
-        (joinedSourceProfiles P M D τ hτ hτT B primary))) :=
-    ⟨joinedSource_meanForcing P M D hT τ hτ hτT B primary hprimary p hp⟩
-  unfold joinedSourceProfiles
-  rw [profiles_step _ _ p hp]
-  exact EulerMeanPacketProvider.meanSolve_zero_initial M hL _ h x θ
 
 end Joined
 

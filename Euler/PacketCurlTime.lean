@@ -40,18 +40,5 @@ theorem matrixSlowCurl_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P)
   have h := curlOperator.hasFDerivAt.comp_hasDerivWithinAt (t : ℝ) (hD.clm_comp hL)
   simpa only [Function.comp_def, map_add, curlOperator_apply, projIcc_of_mem hT t.property] using h
 
-/-- This is the literal lifted curl in the Piola packet construction, including both time endpoints. -/
-theorem liftedSlowCurl_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P)
-    (F : ℝ → Space → Space ≃L[ℝ] Space) (G₁ : Space →L[ℝ] Space)
-    (hG : HasDerivWithinAt (fun r => (F r x.1).symm.toContinuousLinearMap) G₁
-      (Icc (0 : ℝ) T) t) :
-    HasDerivWithinAt
-      (fun r => liftedSlowCurl P (F r) (pointField P p hp (projIcc 0 T hT r)) x)
-      (liftedSlowCurl P (F t) (pointField P f hf t) x +
-        curlMatrix ((fieldFDeriv P (pointField P p hp t) x).comp
-          ((ContinuousLinearMap.inl ℝ Space ℝ).comp G₁)))
-      (Icc (0 : ℝ) T) t :=
-  matrixSlowCurl_hasDerivWithinAt P T hT p f hp hf hd t x
-    (fun r => (F r x.1).symm.toContinuousLinearMap) G₁ hG
 
 end EulerPacketPiola

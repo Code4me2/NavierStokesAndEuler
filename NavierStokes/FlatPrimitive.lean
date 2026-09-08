@@ -77,20 +77,6 @@ theorem primitive_of_nonpos (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
       simp [integrand, edge_of_nonpos c hu0]
     _ = 0 := intervalIntegral.integral_zero
 
-/-- Smoothness and equality to zero on a closed half-line imply that every
-actual derivative vanishes there. This does not assume the derivative values. -/
-theorem iteratedDeriv_zero_on_nonpos {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
-    (hzero : ∀ x : ℝ, x ≤ 0 → f x = 0) (m : ℕ) :
-    ∀ x : ℝ, x ≤ 0 → iteratedDeriv m f x = 0 := by
-  induction m with
-  | zero => simpa only [iteratedDeriv_zero] using hzero
-  | succ m ih =>
-    intro x hx
-    rw [iteratedDeriv_succ]
-    apply (uniqueDiffOn_Iic x x (mem_Iic.mpr le_rfl)).eq_deriv (Iic x)
-      ((hf.differentiable_iteratedDeriv m (by exact_mod_cast ENat.natCast_lt_top m) x).hasDerivAt.hasDerivWithinAt)
-    exact (hasDerivWithinAt_const x (Iic x) (0 : ℝ)).congr_of_mem
-      (fun y hy => ih y (hy.trans hx)) (mem_Iic.mpr le_rfl)
 
 
 
@@ -139,23 +125,6 @@ theorem sourceCoefficient_contDiff (c : ℝ) (j : ℕ) {a : ℝ → ℝ}
   exact ((contDiff_const.add (contDiff_const.mul (contDiff_id.pow 2))).mul ha).add
     ((contDiff_id.pow 3).mul hd)
 
-/-- A genuine primitive factorization for the explicit family of coefficients
-obtained from any smooth factor `a`, proved by the fundamental theorem of
-calculus rather than assumed as a representation hypothesis. -/
-theorem primitive_sourceCoefficient {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {a : ℝ → ℝ} (ha : ContDiff ℝ ∞ a) (x : ℝ) :
-    primitive c j (sourceCoefficient c j a) x = scale c j x * a x := by
-  have hderiv : ∀ u : ℝ, HasDerivAt (fun y => scale c j y * a y)
-      (integrand c j (sourceCoefficient c j a) u) u := by
-    intro u
-    convert! (scale_hasDerivAt hc j u).mul
-      ((ha.differentiable (by simp) u).hasDerivAt) using 1
-    simp only [integrand, sourceCoefficient, scale]
-    ring
-  have hcont := integrand_continuous hc j (sourceCoefficient_contDiff c j ha).continuous
-  simpa only [primitive, scale_zero, zero_mul, sub_zero] using
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _hu => hderiv u)
-      (hcont.intervalIntegrable 0 x)
 
 
 
@@ -163,40 +132,7 @@ theorem primitive_sourceCoefficient {c : ℝ} (hc : 0 < c) (j : ℕ)
 theorem scale_pos (c : ℝ) (j : ℕ) {x : ℝ} (hx : 0 < x) : 0 < scale c j x :=
   mul_pos (div_pos (edge_pos c hx) (pow_pos hx j)) (pow_pos hx 3)
 
-/-- The leading quotient limit for an arbitrary continuous coefficient.
-This is a genuine asymptotic statement about the integral; smoothness of the
-quotient to all orders is a stronger assertion. -/
-theorem primitive_normalized_tendsto {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : Continuous b) :
-    Tendsto (fun x => primitive c j b x / scale c j x) (𝓝[>] 0)
-      (𝓝 (b 0 / (2 * c))) := by
-  have h2c : 0 < 2 * c := mul_pos (by norm_num) hc
-  have hDcont : Continuous (fun x : ℝ => 2 * c + (3 - (j : ℝ)) * x ^ 2) :=
-    continuous_const.add (continuous_const.mul (continuous_id.pow 2))
-  have hD : Tendsto (fun x : ℝ => 2 * c + (3 - (j : ℝ)) * x ^ 2)
-      (𝓝[>] 0) (𝓝 (2 * c)) := by
-    simpa using (hDcont.tendsto 0).mono_left nhdsWithin_le_nhds
-  have hDpos : ∀ᶠ x in 𝓝[>] (0 : ℝ), 0 < 2 * c + (3 - (j : ℝ)) * x ^ 2 :=
-    hD.eventually (lt_mem_nhds h2c)
-  have hF : Tendsto (primitive c j b) (𝓝[>] 0) (𝓝 0) := by
-    simpa only [primitive_zero] using
-      ((primitive_hasDerivAt hc j hb 0).continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
-  have hS : Tendsto (scale c j) (𝓝[>] 0) (𝓝 0) := by
-    simpa only [scale_zero] using
-      (((scale_contDiff hc j : ContDiff ℝ ∞ _).continuous.tendsto 0).mono_left nhdsWithin_le_nhds)
-  refine HasDerivAt.lhopital_zero_nhdsGT
-    (Eventually.of_forall fun x => primitive_hasDerivAt hc j hb x)
-    (Eventually.of_forall fun x => scale_hasDerivAt hc j x) ?_ hF hS ?_
-  · filter_upwards [self_mem_nhdsWithin, hDpos] with x hx hdx
-    exact (mul_pos (div_pos (edge_pos c hx) (pow_pos hx j)) hdx).ne'
-  · refine (((hb.tendsto 0).mono_left nhdsWithin_le_nhds).div hD h2c.ne').congr' ?_
-    filter_upwards [self_mem_nhdsWithin] with x hx
-    have hp : edge c x / x ^ j ≠ 0 := (div_pos (edge_pos c hx) (pow_pos hx j)).ne'
-    exact (mul_div_mul_left (b x) (2 * c + (3 - (j : ℝ)) * x ^ 2) hp).symm
 
-/-- The normalized factor with its rigorously identified endpoint value. -/
-def normalizedPrimitive (c : ℝ) (j : ℕ) (b : ℝ → ℝ) (x : ℝ) : ℝ :=
-  if x = 0 then b 0 / (2 * c) else primitive c j b x / scale c j x
 
 
 

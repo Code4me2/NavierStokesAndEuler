@@ -70,25 +70,6 @@ theorem coveringPotential_angle_derivative (P : ℝ) (m : Space → Space)
         ((hasDerivAt_const z.2 z.1).prodMk (hasDerivAt_id z.2))
   exact hline.unique (potential_hasDerivAt P (m z.1) (fun θ => A (z.1, θ)) hA z.2)
 
-/-- A literal source pair is a Piola curl for the actual constructed angular primitive. -/
-theorem coveringPotential_pair_piola (P κ : ℝ) (m₀ : Space) (Ξ : Space → Space)
-    (A : LiftTangent → Space) (hΞ : ContDiff ℝ 2 Ξ)
-    (F : Space → Space ≃L[ℝ] Space) (z : LiftTangent)
-    (hF : fderiv ℝ Ξ z.1 = (F z.1).toContinuousLinearMap)
-    (hdet : (operatorMatrix (F z.1).toContinuousLinearMap).det = 1)
-    (hm : (F z.1).symm.toContinuousLinearMap.adjoint m₀ ≠ 0)
-    (htan : ⟪(F z.1).symm.toContinuousLinearMap.adjoint m₀, A z⟫_ℝ = 0)
-    (hA : Continuous (fun θ => A (z.1, θ)))
-    (hq : DifferentiableAt ℝ
-      (coveringPotential P (fun y => (F y).symm.toContinuousLinearMap.adjoint m₀) A) z) :
-    (F z.1).symm (A z + κ • coveringSlowCurl (F z.1).symm.toContinuousLinearMap
-      (coveringPotential P (fun y => (F y).symm.toContinuousLinearMap.adjoint m₀) A) z) =
-      coveringCurl κ m₀ (coveringPullbackCovector Ξ
-        (coveringPotential P (fun y => (F y).symm.toContinuousLinearMap.adjoint m₀) A)) z := by
-  have hp := covering_piola_curl κ m₀ Ξ _ hΞ z (F z.1) hF hdet hq
-  rw [curl_lifted_split, coveringPotential_angle_derivative P _ A z hA hq,
-    cross_potentialMultiplier _ _ hm htan] at hp
-  simpa only [coveringSlowCurl, add_comm] using hp
 
 variable (period : ℝ)
 

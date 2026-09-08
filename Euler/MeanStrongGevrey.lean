@@ -70,46 +70,6 @@ variable (c : ℝ) (hc : 0 < c)
   (hfb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b f) a‖ ≤ Cf*majorant R d n)
   (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.velocityLp) a‖ ≤ majorant R (d+1) n)
 
-include hc hLower hF hF₁ hv hf hRc hR hRcR hCF hCF₁ hCf hstrong hFb hF₁b hfb hvb in
-/-- The actual strong fields have the source's successive factorial shifts. -/
-theorem spatial_gevrey_bounds :
-    (∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.acceleration) a‖ ≤
-      majorant R (d+2) n) ∧
-    (∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityField) a‖ ≤
-      (3*CF)*majorant R (d+1) n) ∧
-    (∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityDerivative) a‖ ≤
-      (3*(CF₁+CF))*majorant R (d+2) n) := by
-  have hR0 : 0 ≤ R := zero_le_one.trans hR
-  have hfb' (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b f) a‖ ≤
-      Cf*majorant R (d+1) n :=
-    (hfb n a).trans (mul_le_mul_of_nonneg_left (majorant_shift_mono R hR d n) hCf)
-  have hva (n a) := meanAcceleration_translation_gevrey T hT F F₁ c hc hLower s.velocityLp f
-    hF hF₁ hv hf Rc R CF CF₁ Cf 1 hRc hR0 hRcR hCF hCF₁ hCf zero_le_one
-    (by simpa only [mul_one] using hstrong) hFb hF₁b (d+1) hfb'
-    (by simpa only [one_mul] using hvb) n a
-  have heq := congrArg (fun v : TimeLp T solenoidalSpace =>
-    fun a : Space => timeSolenoidalTranslation T a v) (s.acceleration_eq_meanAcceleration c hc hLower)
-  have hab (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.acceleration) a‖ ≤
-      majorant R (d+2) n := by
-    have h := (congrArg (fun g : Space → TimeLp T solenoidalSpace => ‖iteratedFDeriv ℝ n g a‖) heq).trans_le (hva n a)
-    simpa only [Nat.add_assoc] using h
-  have hFR (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant R 0 n :=
-    (hFb n a).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 n) hCF)
-  have hF₁R (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F₁) a‖ ≤ CF₁*majorant R 0 n :=
-    (hF₁b n a).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc R hRc hRcR 0 n) hCF₁)
-  have hBb (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityField) a‖ ≤
-      (3*CF)*majorant R (d+1) n := by
-    simpa only [mul_one] using s.velocityField_translation_gevrey hF hv R CF 1 hR0 hCF zero_le_one
-      (d+1) hFR (by simpa only [one_mul] using hvb) n a
-  have hvb' (n a) : ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.velocityLp) a‖ ≤
-      1*majorant R (d+2) n := by
-    simpa only [one_mul, Nat.add_assoc] using (hvb n a).trans (majorant_shift_mono R hR (d+1) n)
-  have ha := s.acceleration_orbit_contDiff c hc hLower hF hF₁ hv hf
-  refine ⟨hab, hBb, ?_⟩
-  intro n a
-  simpa only [mul_one] using s.velocityDerivative_translation_gevrey hF hF₁ hv ha
-    R CF CF₁ 1 1 hR0 hCF hCF₁ zero_le_one zero_le_one (d+2) hFR hF₁R hvb'
-    (by simpa only [one_mul] using hab) n a
 
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

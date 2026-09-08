@@ -55,13 +55,6 @@ noncomputable def pressureGradient (n : ℕ) (e : History) (omega : Profile) (R 
 noncomputable def phiHistory (C : ℝ) (e : History) : History :=
   fun j R => C * e j R / R
 
-theorem cauchy_phiHistory (n : ℕ) (C : ℝ) (e : History) (R : ℝ) :
-    cauchy n (phiHistory C e) (phiHistory C e) R = (C / R) ^ 2 * cauchy n e e R := by
-  unfold cauchy PositiveAxisSystem.convolution phiHistory
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro j hj
-  ring
 
 
 /-- The five densities in (23), in the order printed there. -/
@@ -277,17 +270,7 @@ theorem moments_repair_target (lam A a b : ℝ) (target : Debt) {n : ℕ} (hn : 
 
 
 
-theorem repairU_zero_before (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ} (hR : R ≤ a) :
-    repairU lam A a b d R = 0 := by
-  by_contra h
-  have hm := repairU_tsupport lam A a b d hab (subset_closure h)
-  exact (not_lt_of_ge hR) hm.1
 
-theorem repairE_zero_before (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ} (hR : R ≤ a) :
-    repairE lam A a b d R = 0 := by
-  by_contra h
-  have hm := repairE_tsupport lam A a b d hab (subset_closure h)
-  exact (not_lt_of_ge hR) hm.1
 
 theorem repairU_zero_outside (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ}
     (hR : R ∉ Ioo a b) : repairU lam A a b d R = 0 := by
@@ -299,27 +282,9 @@ theorem repairE_zero_outside (lam A a b : ℝ) (d : Debt) (hab : a < b) {R : ℝ
   by_contra h
   exact hR (repairE_tsupport lam A a b d hab (subset_closure h))
 
-theorem rowDensity_repair_eq_outside (lam A a b : ℝ) (d : Debt) {n : ℕ} (hn : 0 < n)
-    (u e : History) (omega : Profile) (hab : a < b) {R : ℝ} (hR : R ∉ Ioo a b) :
-    rowDensity n (increment u n (repairU lam A a b d))
-      (increment e n (repairE lam A a b d)) omega R = rowDensity n u e omega R := by
-  rw [rowDensity_increment hn]
-  ext i
-  fin_cases i <;> simp [linearDensity, repairU_zero_outside lam A a b d hab hR,
-    repairE_zero_outside lam A a b d hab hR]
 
 
-theorem increment_eq_of_zero (u : History) (n j : ℕ) (du : Profile) (R : ℝ)
-    (hd : du R = 0) : increment u n du j R = u j R := by
-  by_cases hj : j = n
-  · subst j
-    simp [increment, hd]
-  · simp [increment, hj]
 
-theorem pressureGradient_increment_of_zero {n : ℕ} (hn : 0 < n) (e : History)
-    (omega de : Profile) (R : ℝ) (hd : de R = 0) :
-    pressureGradient n (increment e n de) omega R = pressureGradient n e omega R := by
-  simp only [pressureGradient, cauchy_increment hn, hd, mul_zero, zero_mul, add_zero]
 
 
 
@@ -371,8 +336,6 @@ abbrev JointHistory := ℕ → JointProfile
 
 noncomputable def slice (f : JointHistory) (eta : ℝ) : History := fun j R => f j (R, eta)
 
-noncomputable def jointIncrement (u : JointHistory) (n : ℕ) (du : JointProfile) : JointHistory :=
-  Function.update u n (fun w => u n w + du w)
 
 
 
@@ -414,12 +377,6 @@ noncomputable def pressureHistory (n : ℕ) (e : JointHistory) (omega : JointPro
 
 
 
-theorem pressureHistory_exterior {n : ℕ} {e : JointHistory} {omega : JointProfile} {B : ℝ}
-    (hB : 0 ≤ B) (hs : ∀ eta R, B ≤ R → jointPressureGradient n e omega (R, eta) = 0)
-    (hm : ∀ eta, positiveIntegral (fun R => jointPressureGradient n e omega (R, eta)) = 0)
-    {R eta : ℝ} (hR : B ≤ R) : pressureHistory n e omega (R, eta) = 0 := by
-  rw [pressureHistory, ProfileHistories.primitive,
-    ← positiveIntegral_eq_primitive hB hR (hs eta), hm eta]
 
 
 noncomputable def weightedAxial (u : JointProfile) (w : ℝ × ℝ) : ℝ := w.1 * u w
@@ -442,17 +399,7 @@ noncomputable def radialZ (h power : ℝ) (u : JointProfile) (w : ℝ × ℝ) : 
 theorem weightedAxial_contDiff {u : JointProfile} (hu : ContDiff ℝ ∞ u) :
     ContDiff ℝ ∞ (weightedAxial u) := contDiff_fst.mul hu
 
-theorem parameterPartial_contDiff {F : JointProfile} (hF : ContDiff ℝ ∞ F) :
-    ContDiff ℝ ∞ (ProfileHistories.parameterPartial F) :=
-  contDiffOn_univ.mp (ProfileHistories.parameterPartial_smooth globalDomain hF.contDiffOn)
 
-theorem weightedAxial_parameterPartial {u : JointProfile} (hu : ContDiff ℝ ∞ u) (w : ℝ × ℝ) :
-    ProfileHistories.parameterPartial (weightedAxial u) w =
-      w.1 * ProfileHistories.parameterPartial u w := by
-  have hd := (ProfileHistories.parameterPartial_hasDerivAt globalDomain hu.contDiffOn (mem_univ w)).const_mul w.1
-  have he := ProfileHistories.parameterPartial_hasDerivAt globalDomain
-    (weightedAxial_contDiff hu).contDiffOn (mem_univ w)
-  exact he.unique hd
 
 theorem massHistory_parameterPartial {u : JointProfile} (hu : ContDiff ℝ ∞ u) (w : ℝ × ℝ) :
     ProfileHistories.parameterPartial (massHistory u) w = parameterMassHistory u w :=

@@ -420,18 +420,6 @@ theorem mixedSeries_sub_bound (I : Window) {ε R : ℝ} (hε : 0 < ε)
     _ ≤ _ := mixedSeries_bound I hε hR hR20 (A - B) k m hp
 
 
-theorem coefficient_iteratedDeriv (I : Window) (ε : ℝ) (A : AxisSpace I ε)
-    (n m : ℕ) {η : ℝ} (hη : η ∈ Ioo I.left I.right) :
-    iteratedDeriv m (coefficient I (weight ε) A n) η = jet I (weight ε) A.1 n m η := by
-  induction m generalizing η with
-  | zero => rfl
-  | succ m ih =>
-      rw [iteratedDeriv_succ]
-      have heq : iteratedDeriv m (coefficient I (weight ε) A n) =ᶠ[𝓝 η]
-          jet I (weight ε) A.1 n m := by
-        filter_upwards [Ioo_mem_nhds hη.1 hη.2] with x hx
-        exact ih hx
-      rw [heq.deriv_eq, (hasDerivAt_jet_interior I (weight ε) A n m hη).deriv]
 
 
 /-- A window larger than the target interval, with arbitrarily small margin. -/
@@ -440,10 +428,6 @@ def enlargedUnitWindow (δ : ℝ) (hδ : 0 < δ) : Window where
   right := 1 + δ
   nondegenerate := by linarith
 
-theorem unitInterval_in_enlargedWindow {δ : ℝ} (hδ : 0 < δ) :
-    Icc (-1 : ℝ) 1 ⊆ Ioo (enlargedUnitWindow δ hδ).left (enlargedUnitWindow δ hδ).right := by
-  intro x hx
-  constructor <;> dsimp [enlargedUnitWindow] <;> linarith [hx.1, hx.2]
 
 
 end NavierStokes.AxisEvaluation

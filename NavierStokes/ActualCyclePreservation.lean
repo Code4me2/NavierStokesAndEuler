@@ -639,14 +639,6 @@ theorem signed_inputSupport (l : Index B N0) :
 
 end SignedEquations
 
-noncomputable def nativeParticularData {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) (j : ℤ) :=
-  (ActualParticularStageControls.canonicalParameters (l.2,l.1)).copyData
-    (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
-    (StateReindex.state cycleAssoc.symm x.state)
-    (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j
 
 
 
@@ -723,14 +715,6 @@ theorem stepResult_of_particular (H : Invariant σ x)
   CorrectionAnalyticStep.step _ _ _ _ _ _ _ _ _ _ _ _
     (staticData B) H hσ kappa_small (stepData_of_particular H hN hσ hl P)
 
-theorem afterTemporal_debt_of_particular (H : Invariant σ x)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (hσ : 1/5 ≤ σ)
-    (hl : (v).labels = ActualPrimary.activeLabels ActualPrimary.standardRegion B N0)
-    (P : ActualParticularCycleData.Data x σ) :
-    UnweightedClass ActualInitialization.slowStrip (1+σ-2*κ)
-      (debt c (ActualIntermediateDebtBounds.postTemporal x)) :=
-  ActualIntermediateDebtBounds.afterTemporal_debt_from_stepData
-    (staticData B) H hσ (P.inputs H hN) (stepData_of_particular H hN hσ hl P)
 
 end Factory
 

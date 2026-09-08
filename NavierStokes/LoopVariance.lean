@@ -147,9 +147,6 @@ theorem logSlope_strictMono : StrictMono logSlope := by
 tilt variance is obtained by multiplication and the substitution `s=μp`. -/
 def baseVariance (s : ℝ) : ℝ := expNormalizer (2 * s) / expNormalizer s ^ 2 - 1
 
-theorem baseVariance_eq_integral (s : ℝ) :
-    baseVariance s = angularMean (fun θ => (normalizedExp s θ - 1) ^ 2) :=
-  (normalizedExp_variance s).symm
 
 theorem baseVariance_zero : baseVariance 0 = 0 := by
   simp [baseVariance, expNormalizer_zero]
@@ -691,17 +688,6 @@ theorem solveScale_variance (d p r : ℝ) (hd : d ≠ 0) :
     tiltVariance d p (solveScale d p r) = r ^ 2 := by
   rw [← scaledRoot_sq, solveScale_spec d p r hd]
 
-theorem exists_unique_nonneg_variance_parameter (d p V : ℝ) (hd : 0 < d) (hV : 0 ≤ V) :
-    ∃! μ : ℝ, 0 ≤ μ ∧ tiltVariance d p μ = V := by
-  refine ⟨solveScale d p (Real.sqrt V),
-    ⟨solveScale_nonneg d p _ hd (Real.sqrt_nonneg V), ?_⟩, ?_⟩
-  · rw [solveScale_variance d p _ (ne_of_gt hd), Real.sq_sqrt hV]
-  · intro μ hμ
-    apply solveScale_unique d p (Real.sqrt V) μ hd
-    have hnonneg : 0 ≤ scaledRoot d p μ := by
-      exact mul_nonneg (mul_nonneg hd.le hμ.1) (Real.sqrt_nonneg _)
-    have hsquare : scaledRoot d p μ ^ 2 = V := by rw [scaledRoot_sq, hμ.2]
-    nlinarith [Real.sq_sqrt hV, Real.sqrt_nonneg V]
 
 theorem tiltVariance_strictMonoOn (d p : ℝ) (hd : 0 < d) :
     StrictMonoOn (tiltVariance d p) (Ici 0) := by

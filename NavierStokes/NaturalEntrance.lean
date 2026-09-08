@@ -332,21 +332,6 @@ def referenceRemainder {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFamily 
     (p : entranceSet) : ℝ :=
   sourceRemainder h j σ p 0 (sourceJets v.epsilon_pos (referencePair v) p)
 
-theorem reference_phi_value {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFamily h j σ P0)
-    (p : entranceSet) :
-    sourceJets v.epsilon_pos (referencePair v) p 0 =
-      AxisSeries.profile (NaturalAxisData.chi h j σ p.val.2) p.val.1 := by
-  have hη : p.val.2 ∈ window.interval :=
-    ⟨(original_interval_interior p.property.2).1.le, (original_interval_interior p.property.2).2.le⟩
-  change AxisEvaluation.mixedSeries window v.epsilon (referencePair v).1 0 0 p.val = _
-  rw [AxisEvaluation.mixedSeries_zero]
-  change AxisEvaluation.profile window v.epsilon
-    (referenceCoefficients window v.epsilon_pos (v.elements .chi) v.axisData).1
-      (p.val.1, p.val.2) = _
-  rw [AxisReference.referenceCoefficients_profile_eq_series window v.epsilon_pos
-    (v.elements .chi) v.axisData v.compatible hη]
-  rw [v.value .chi hη]
-  rfl
 
 
 theorem reference_phiY_zero {h j σ : ℝ} {P0 : ℝ → ℝ} (v : CoefficientFamily h j σ P0)
@@ -1344,31 +1329,6 @@ theorem ns_eq_scaled_regularAxialLag {h j Λ : ℝ} {P0 a : ℝ → ℝ}
   unfold ns
   field_simp
 
-/-- The constructed entrance coordinates are the dimensionless stocks
-of the actual regular angular and axial primitives. -/
-theorem EntranceProfile.regular_lag_coordinates {h j σ Λ C : ℝ} {P0 : ℝ → ℝ}
-    {d : AnalyticInputs h j σ P0} (F : EntranceProfile d Λ C)
-    (hsmall : NaturalAxisData.SmallParameters h j) (hΛ : 0 < Λ)
-    {p : ℝ × ℝ} (hp : rescalePoint Λ p ∈ entranceSet) (hX : 0 < p.1) :
-    p1 F.profile.family.f p = p.1 * regularAngularLag h F.profile.family.f
-        F.profile.family.U F.profile.family.Ubar p / NaturalAxisData.L h p.2 ∧
-      p2 F.profile.family.f F.profile.family.U p =
-        p.1 * regularAxialLag h F.profile.family.U F.profile.family.Ubar F.profile.family.Pi p /
-          (NaturalAxisData.L h p.2 * angularVelocity F.profile.family.f p) := by
-  have hL : NaturalAxisData.L h p.2 ≠ 0 := (NaturalAxisData.L_pos hsmall hp.2).ne'
-  have hdom : p ∈ domain Λ := entrance_mem_strip hp
-  have hf : ∀ x ∈ uIcc (0 : ℝ) p.1, F.profile.family.f (x, p.2) ≠ 0 := by
-    intro x hx
-    have hx' : x ∈ Icc (0 : ℝ) p.1 := by simpa only [uIcc_of_le hX.le] using hx
-    exact (F.profile.family.positive (x, p.2) (domain_segment hΛ hdom hx)
-      (mul_nonneg hΛ.le hx'.1) ((mul_le_mul_of_nonneg_left hx'.2 hΛ.le).trans hp.1.2)).ne'
-  refine ⟨p1_eq_scaled_regularAngularLag F.profile.family.natural hΛ hdom hX.ne' hL hf, ?_⟩
-  have hn : ns F.profile.family.U p =
-      regularAxialLag h F.profile.family.U F.profile.family.Ubar F.profile.family.Pi p /
-        NaturalAxisData.L h p.2 :=
-    ns_eq_scaled_regularAxialLag F.profile.family.natural hΛ hdom hX.ne' hL
-  unfold p2
-  rw [hn, ← mul_div_assoc, div_div]
 
 
 end NavierStokes.NaturalEntrance

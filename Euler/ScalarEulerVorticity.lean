@@ -102,25 +102,6 @@ theorem vorticity_eq_zero_along_trajectory
   · exact hz
   · exact ht
 
-/-- Vorticity support is contained in the image of its initial support under
-any complete continuous particle flow with a right inverse at the target time.
-The support propagation itself follows from the reference Euler equation. -/
-theorem vorticity_tsupport_subset_flow_image
-    (X : ℝ → Space → Space) (Y : Space → Space) (T t : ℝ)
-    (ht : t ∈ Icc 0 T)
-    (hX : ∀ a, ContinuousOn (fun r => X r a) (Icc 0 T))
-    (hXd : ∀ a r, r ∈ Ioo 0 T → HasDerivAt (fun s => X s a) (v (X r a) r) r)
-    (hX0 : ∀ a, X 0 a = a) (hXt : Continuous (X t))
-    (hXY : ∀ x, X t (Y x) = x)
-    (hc : HasCompactSupport (vectorCurl u₀)) :
-    tsupport (vectorCurl (v · t)) ⊆ X t '' tsupport (vectorCurl u₀) := by
-  have he : (v · 0) = u₀ := funext h.initial_condition
-  have hcomp : HasCompactSupport (vectorCurl (v · 0)) := by simpa only [he] using hc
-  have hs := ComparatorBridge.tsupport_subset_flow_image
-    (fun r => vectorCurl (v · r)) X Y t hcomp hXt hXY
-    (fun a ha => h.vorticity_eq_zero_along_trajectory (fun r => X r a) T
-      (hX a) (hXd a) (by simpa only [hX0 a] using ha) t ht)
-  simpa only [he] using hs
 
 
 

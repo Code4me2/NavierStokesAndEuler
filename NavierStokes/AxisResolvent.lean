@@ -182,10 +182,6 @@ theorem summable_neg_pow_of_factorial_bound (Q : R) {K : ℝ} (hK : 0 ≤ K)
     Summable (fun k : ℕ => (-Q) ^ k) :=
   (summable_norm_neg_pow_of_factorial_bound Q hK hQ).of_norm
 
-theorem hasSum_alternatingResolvent (Q : R) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) :
-    HasSum (fun k : ℕ => (-Q) ^ k) (alternatingResolvent Q) :=
-  (summable_neg_pow_of_factorial_bound Q hK hQ).hasSum
 
 theorem one_add_mul_alternatingResolvent (Q : R) {K : ℝ} (hK : 0 ≤ K)
     (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) :
@@ -199,16 +195,6 @@ theorem alternatingResolvent_mul_one_add (Q : R) {K : ℝ} (hK : 0 ≤ K)
   simpa only [alternatingResolvent, sub_neg_eq_add] using
     tsum_pow_mul_one_sub (summable_neg_pow_of_factorial_bound Q hK hQ)
 
-omit [CompleteSpace R] in
-theorem norm_alternatingResolvent_le (Q : R) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) :
-    ‖alternatingResolvent Q‖ ≤ ∑' k : ℕ, factorialMajorant K k := by
-  apply (norm_tsum_le_tsum_norm
-    (summable_norm_neg_pow_of_factorial_bound Q hK hQ)).trans
-  apply Summable.tsum_le_tsum
-    (fun k => by simpa only [norm_neg_pow_eq] using hQ k)
-    (summable_norm_neg_pow_of_factorial_bound Q hK hQ)
-    (summable_factorialMajorant hK)
 
 end BanachRing
 
@@ -271,27 +257,7 @@ theorem alternatingResolvent_equation (Q : E →L[ℝ] E) {K : ℝ} (hK : 0 ≤ 
   simpa only [_root_.add_apply, _root_.one_apply_eq_self] using
     one_add_apply_alternatingResolvent Q hK hQ x
 
-/-- The inverse gives the unique solution of the integrated linear equation. -/
-theorem alternatingResolvent_unique (Q : E →L[ℝ] E) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k)
-    {x b : E} (hx : x + Q x = b) : x = alternatingResolvent Q b := by
-  calc
-    x = alternatingResolvent Q ((1 + Q) x) :=
-      (alternatingResolvent_apply_one_add Q hK hQ x).symm
-    _ = alternatingResolvent Q b := by
-      exact congrArg (fun y => alternatingResolvent Q y)
-        (by simpa only [_root_.add_apply, _root_.one_apply_eq_self] using hx)
 
-/-- Both continuous directions are constructed explicitly from the series. -/
-def oneAddEquiv (Q : E →L[ℝ] E) {K : ℝ} (hK : 0 ≤ K)
-    (hQ : ∀ k : ℕ, ‖Q ^ k‖ ≤ factorialMajorant K k) : E ≃L[ℝ] E where
-  toLinearEquiv :=
-    { (1 + Q).toLinearMap with
-      invFun := fun x => alternatingResolvent Q x
-      left_inv := alternatingResolvent_apply_one_add Q hK hQ
-      right_inv := one_add_apply_alternatingResolvent Q hK hQ }
-  continuous_toFun := (1 + Q).continuous
-  continuous_invFun := (alternatingResolvent Q).continuous
 
 end BanachOperators
 

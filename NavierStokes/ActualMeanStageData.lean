@@ -256,18 +256,6 @@ theorem actualAngularSupport_shrinkingSupport
       (actualAngularSupport D Hm qbig hq).field :=
   actualAngularData_shrinkingSupport D Hm qbig hq
 
-theorem actualAngular_zero_germ
-    (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
-    (Hm : GaugeMomentBalances.MovingField standardRegion commonGauge.radial.inner
-      commonGauge.radial.outer D.native)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N)
-    {w : SpaceTime} (hw : w ∈ MixedAxisPreservation.localDomain h qbig)
-    (hr : DirectAngularDiagonal.radius w <
-      innerRadius h ActualInitialization.geometry.patch.a (DirectAngularDiagonal.slowPoint w)) :
-    D.angularField =ᶠ[𝓝 w] fun _ => 0 := by
-  have he := (actualAngularData D Hm qbig hq).field_zero_germ
-    (LocalAngularDiagonal.localSlowDomain_open outgoing.data.h_pos outgoing.data.h_lt_half qbig) hw hr
-  rwa [actualAngularData_field] at he
 
 
 end Actual

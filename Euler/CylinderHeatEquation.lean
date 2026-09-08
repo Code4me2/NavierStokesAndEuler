@@ -56,10 +56,6 @@ theorem realHeatList_eq_toNNReal (directions : List LiftTangent) (t : ℝ) (f : 
       lineHeat period a t.toNNReal (heatList period tail t.toNNReal f)
     rw [realLineHeat_eq_toNNReal, ih]
 
-theorem realHeatList_continuous (directions : List LiftTangent) (f : LiftL2 period) :
-    Continuous (fun t : ℝ => realHeatList period directions t f) := by
-  simp_rw [realHeatList_eq_toNNReal]
-  exact (heatList_continuous period directions f).comp continuous_real_toNNReal
 
 /-- Every strong coordinate derivative commutes with every finite heat product. -/
 theorem realHeatList_strongDerivative (directions : List LiftTangent) (a : LiftTangent) (t : ℝ)

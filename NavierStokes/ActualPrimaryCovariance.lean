@@ -1100,11 +1100,6 @@ theorem piece_support (l : Label B N0 × Fin 2) (n : ℕ) (x : Point)
         (slotSet h slots.radius radialVector temporalVector (signedLabelOf l)) :=
   cutAmplitude_tsupport l.2 l.1 n hx theta ht
 
-theorem cutAmplitude_tsupport_active (l : Label B N0 × Fin 2) (n : ℕ) {x : Point}
-    (hx : x ∈ (BaseContextAssembly.nativeStrip nominal standardRegion).domain) (theta : ℝ)
-    (ht : (x, theta) ∈ tsupport (cutAmplitude l.2 l.1 n)) :
-    l ∈ activeLabels standardRegion B N0 n :=
-  activeLabels_cover n hx l.1 l.2 (cutAmplitude_tsupport_physical l.2 l.1 n hx theta ht).1
 
 
 

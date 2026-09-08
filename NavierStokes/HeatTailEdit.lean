@@ -437,15 +437,7 @@ theorem outgoingProfile_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
     ((contDiffAt_const.add hl).prodMk contDiffAt_snd)).contDiffWithinAt
 
 
-theorem outgoingEdit_pos (d : TailData) {ν K X : ℝ} (hν : 0 ≤ ν) (hX : 0 < X)
-    (eta : ℝ) : 0 < outgoingEdit d ν K eta X :=
-  edit_pos d.h_pos hν hX (outgoingProfile_pos d K eta X)
 
-/-- Exact matching before tail logarithmic time `0.2`. -/
-theorem outgoingEdit_before (d : TailData) (ν eta : ℝ) {K X : ℝ}
-    (hK : 0 < K) (hX : 0 < X) (hXK : X ≤ K) :
-    outgoingEdit d ν K eta X = outgoingProfile d K eta X :=
-  edit_before _ _ _ hK hX hXK
 
 /-- At tail logarithmic time `0.5`, the full heat factor is present. -/
 theorem outgoingEdit_full (d : TailData) (ν eta : ℝ) {K X : ℝ}
@@ -563,29 +555,8 @@ theorem outgoingProfile_at_switch (d : TailData) {K : ℝ} (hK : 0 < K) (eta : �
 
 
 
-theorem outgoing_pressure_eta_jet_zero (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    iteratedDeriv (n + 1) (fun eta => pressureDebt (outgoingProfile d K eta) d.h ν K) eta = 0 := by
-  have heq : (fun eta => pressureDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => pressureDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_pressureDebt_eq d ν eta hK
-  rw [heq, SmoothCutoffs.iteratedDeriv_const_succ]
 
-theorem outgoing_energy_eta_jet_zero (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    iteratedDeriv (n + 1) (fun eta => energyDebt (outgoingProfile d K eta) d.h ν K) eta = 0 := by
-  have heq : (fun eta => energyDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => energyDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_energyDebt_eq d ν eta hK
-  rw [heq, SmoothCutoffs.iteratedDeriv_const_succ]
 
-theorem outgoing_angular_eta_jet_zero (d : TailData) (ν : ℝ) {K : ℝ} (hK : 0 < K)
-    (n : ℕ) (eta : ℝ) :
-    iteratedDeriv (n + 1) (fun eta => angularDebt (outgoingProfile d K eta) d.h ν K) eta = 0 := by
-  have heq : (fun eta => angularDebt (outgoingProfile d K eta) d.h ν K) =
-      (fun _ => angularDebt (powerTail d.h (outgoingAmplitude d) K (outgoingShape d)) d.h ν K) :=
-    funext fun eta => outgoing_angularDebt_eq d ν eta hK
-  rw [heq, SmoothCutoffs.iteratedDeriv_const_succ]
 
 
 

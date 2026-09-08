@@ -1153,21 +1153,6 @@ theorem StateOn.meanGoodResidual {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
 
 /-! ## Literal reference views of one state -/
 
-/-- The state is stored once on the reference lift.  Band values are
-constructed by pullback, rather than chosen independently. -/
-noncomputable def stateView (e : ℕ → D ≃L[ℝ] E) (c l : ℕ → ℝ)
-    (r : CorrectionState.State E) (nr : ℕ) : CorrectionState.State D where
-  mean :=
-    { radial := fun n x => c n * r.mean.radial nr (e n x)
-      angular := fun n x => c n * r.mean.angular nr (e n x)
-      axial := fun n x => c n * r.mean.axial nr (e n x) }
-  pressure n x := (c n*c n) * r.pressure nr (e n x)
-  oscillation n x i := c n * r.oscillation nr (e n x.1,x.2) i
-  oscillatoryPressure n x := (c n*c n) * r.oscillatoryPressure nr (e n x.1,x.2)
-  errors :=
-    { base := fun n x i => (c n*c n*l n) * r.errors.base nr (e n x.1,x.2) i
-      gaussian := fun n x i => (c n*c n*l n) * r.errors.gaussian nr (e n x.1,x.2) i
-      aliasError := fun n x i => (c n*c n*l n) * r.errors.aliasError nr (e n x.1,x.2) i }
 
 
 

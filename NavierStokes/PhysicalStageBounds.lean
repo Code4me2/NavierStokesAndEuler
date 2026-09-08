@@ -577,16 +577,6 @@ section RepresentationTransfer
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- Actual field equality on the valid open physical domain identifies all
-ambient derivatives. No regularity of either totalization outside the domain
-is required. -/
-theorem jets_eq_of_eqOn_open {f g : E → V} {U : Set E} (hU : IsOpen U)
-    (he : EqOn f g U) {x : E} (hx : x ∈ U) (m : ℕ) :
-    iteratedFDeriv ℝ m f x = iteratedFDeriv ℝ m g x := by
-  have hg : f =ᶠ[𝓝 x] g := by
-    filter_upwards [hU.mem_nhds hx] with y hy
-    exact he hy
-  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hg m).self_of_nhds
 
 
 

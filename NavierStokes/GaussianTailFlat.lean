@@ -56,20 +56,6 @@ theorem profile_eventually_zero {v : ℝ} (hv : 1 / 3 < |v - 1 / 2|) :
   rw [profileBump.tsupport_eq]
   simpa [Metric.mem_closedBall, Real.dist_eq, profileBump] using (not_le.mpr hv)
 
-theorem profile_iteratedDeriv_support (m : ℕ) :
-    support (iteratedDeriv (m + 1) profile) ⊆
-      {v : ℝ | 1 / 5 ≤ |v - 1 / 2| ∧ |v - 1 / 2| ≤ 1 / 3} := by
-  intro v hv
-  change iteratedDeriv (m + 1) profile v ≠ 0 at hv
-  constructor
-  · by_contra h
-    apply hv
-    rw [(profile_eventually_one (lt_of_not_ge h)).iteratedDeriv_eq (m + 1),
-      SmoothCutoffs.iteratedDeriv_const_succ]
-  · by_contra h
-    apply hv
-    rw [(profile_eventually_zero (lt_of_not_ge h)).iteratedDeriv_eq (m + 1),
-      SmoothCutoffs.iteratedDeriv_const_succ]
 
 theorem profile_iteratedDeriv_compact (m : ℕ) :
     HasCompactSupport (iteratedDeriv m profile) := by
@@ -90,13 +76,6 @@ noncomputable def slotCutoff (L : ℝ) (v : ℝ) : ℝ := profile (v / L)
 theorem slotCutoff_contDiff (L : ℝ) : ContDiff ℝ ∞ (slotCutoff L) :=
   profile_contDiff.comp (contDiff_id.div_const L)
 
-theorem slotCutoff_deriv (L v : ℝ) :
-    deriv (slotCutoff L) v = L⁻¹ * deriv profile (v / L) := by
-  have hp := (profile_contDiff.differentiable (by simp)).differentiableAt.hasDerivAt
-    (x := v / L)
-  have hh := hp.comp v ((hasDerivAt_id v).div_const L)
-  unfold slotCutoff
-  simpa [Function.comp_def, div_eq_mul_inv, mul_comm] using hh.deriv
 
 theorem slot_normalized_distance {L : ℝ} (hL : 0 < L) (v : ℝ) :
     |v / L - 1 / 2| = |v - L / 2| / L := by
@@ -121,15 +100,6 @@ theorem slotCutoff_zero {L v : ℝ} (hL : 0 < L) (hv : L / 3 ≤ |v - L / 2|) :
   linarith
 
 
-/-- The precise Gaussian tail bound uses the full plateau radius. -/
-theorem gaussian_off_plateau {c L v : ℝ} (hc : 0 ≤ c) (hL : 0 < L)
-    (hv : L / 5 ≤ |v - L / 2|) :
-    Real.exp (-c * (v - L / 2) ^ 2 / L) ≤ Real.exp (-(c / 25) * L) := by
-  have hsq : (L / 5) ^ 2 ≤ (v - L / 2) ^ 2 := by
-    simpa only [sq_abs] using pow_le_pow_left₀ (by positivity : 0 ≤ L / 5) hv 2
-  apply Real.exp_le_exp.2
-  apply (div_le_iff₀ hL).2
-  nlinarith [mul_le_mul_of_nonneg_left hsq hc]
 
 
 /-- The square root of the actual flat edge is another member of that family. -/
@@ -357,11 +327,6 @@ noncomputable def cutoffError (L : ℝ) (θ : D → ℝ) (u f : D → E) (x : D)
   (L⁻¹ * deriv profile (θ x)) • u x + (1 - profile (θ x)) • f x
 
 
-theorem cutoffError_contDiffOn {U : Set D} (L : ℝ) {θ : D → ℝ} {u f : D → E}
-    (hθ : ContDiffOn ℝ ∞ θ U) (hu : ContDiffOn ℝ ∞ u U) (hf : ContDiffOn ℝ ∞ f U) :
-    ContDiffOn ℝ ∞ (cutoffError L θ u f) U := by
-  exact ((contDiffOn_const.mul (profileDeriv_contDiff.comp_contDiffOn hθ)).smul hu).add
-    ((contDiffOn_const.sub (profile_contDiff.comp_contDiffOn hθ)).smul hf)
 
 omit [NormedSpace ℝ D] in
 theorem cutoffError_eventually_zero (L : ℝ) {θ : D → ℝ} (u f : D → E) {x : D}
@@ -749,61 +714,8 @@ theorem error_contDiff_of_slot {s : StripData D} (g : SlotFamily s) {u f : ℕ �
 
 open PhysicalGraphBounds ProblemStatement
 
-/-- Every fixed physical derivative retains arbitrarily high decay powers.
-The loss is supplied by the proved physical graph theorem. -/
-theorem error_physical_bound {s : StripData LiftPoint} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → LiftPoint → ℝ} {α c : ℝ} {u f : ℕ → LiftPoint → E}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (hu_smooth : ∀ n, ContDiffOn ℝ ∞ (u n) {x | g.coordinate n x ∈ Ioo (0 : ℝ) 1})
-    (hf_smooth : ∀ n, ContDiff ℝ ∞ (f n))
-    {h a b : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (ha : 0 < a) (m : ℕ) (N : ℝ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ, 4 ≤ n → ∀ p : SpaceTime,
-      scaledRadial n p ∈ annulus a b → |p.1| ≤ 1 → physicalLift h n p ∈ s.domain →
-      ∀ q : ℝ, 0 < q → q / 2 ≤ ChartScales.Q n → ChartScales.Q n ≤ 2 * q →
-      ‖iteratedFDeriv ℝ m (g.error u f n ∘ physicalLift h n) p‖ ≤ C * q ^ N := by
-  obtain ⟨A, hA, hab⟩ := g.error_stripped_bound edges scales hu hf hc hP m
-    (N + (graphLoss m + 1))
-  obtain ⟨C, hC, hbound⟩ := stripped_class_physical_bound (E := E) (b := b) hh hh1 ha m
-    (N + (graphLoss m + 1)) 0 A hA
-  refine ⟨C, hC, fun n hn p hp ht hd q hq hlo hhi => ?_⟩
-  have hb := hbound n hn p hp ht q hq hlo hhi (g.error u f n)
-    (g.error_contDiff_of_slot hu_smooth hf_smooth n) (fun i hi => by
-      simpa only [Real.rpow_zero, mul_one] using hab n (physicalLift h n p) hd i hi)
-  simpa only [add_sub_cancel_right] using hb
 
 
-/-- The same result for the actual oscillatory carrier. The phase estimates
-are the primitive estimates consumed by `carrier_class_physical_bound`. -/
-theorem error_carrier_physical_bound {s : StripData LiftPoint} (g : SlotFamily s)
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    {P : ℕ → LiftPoint → ℝ} {α c : ℝ} {u f : ℕ → LiftPoint → ℂ}
-    (hu : WaveClass s P α u) (hf : WaveClass s P α f) (hc : 0 < c)
-    (hP : ∀ n x, x ∈ s.domain →
-      P n x ≤ Real.exp (-c * (g.coordinate n x - 1 / 2) ^ 2 * g.length n))
-    (hu_smooth : ∀ n, ContDiffOn ℝ ∞ (u n) {x | g.coordinate n x ∈ Ioo (0 : ℝ) 1})
-    (hf_smooth : ∀ n, ContDiff ℝ ∞ (f n))
-    {h a b B e H : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2) (ha : 0 < a)
-    (hB : 1 ≤ B) (he : 0 ≤ e) (hH : 0 ≤ H) (m : ℕ) (N : ℝ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ, 4 ≤ n → ∀ p : SpaceTime,
-      scaledRadial n p ∈ annulus a b → |p.1| ≤ 1 → physicalLift h n p ∈ s.domain →
-      ∀ q : ℝ, 0 < q → q / 2 ≤ ChartScales.Q n → ChartScales.Q n ≤ 2 * q →
-      ∀ (Φ : LiftPoint → ℝ) (j : ℤ), ContDiff ℝ ∞ Φ → |(j : ℝ)| ≤ H →
-      (∀ i ≤ m, ‖iteratedFDeriv ℝ i Φ (physicalLift h n p)‖ ≤
-        B * ChartScales.S n ^ e * ChartScales.Q n ^ (-1 : ℝ)) →
-      ‖iteratedFDeriv ℝ m
-        ((fun y => g.error u f n y * character ((ChartScales.carrier h n : ℝ) * (j : ℝ)) (Φ y)) ∘
-          physicalLift h n) p‖ ≤ C * q ^ N := by
-  obtain ⟨A, hA, hab⟩ := g.error_stripped_bound edges scales hu hf hc hP m (N + waveLoss h m)
-  obtain ⟨C, hC, hb⟩ := carrier_class_physical_bound (b := b) hh hh1 ha m
-    (N + waveLoss h m) 0 e A B H hA hB he hH
-  refine ⟨C, hC, fun n hn p hp ht hd q hq hlo hhi Φ j hΦ hj hΦb => ?_⟩
-  have hh := hb n hn p hp ht q hq hlo hhi (g.error u f n) Φ j
-    (g.error_contDiff_of_slot hu_smooth hf_smooth n) hΦ hj (fun i hi => by
-      simpa only [Real.rpow_zero, mul_one] using hab n (physicalLift h n p) hd i hi) hΦb
-  simpa only [add_sub_cancel_right] using hh
 
 
 end SlotFamily
@@ -816,9 +728,6 @@ noncomputable def derivativeError {s : StripData D} (g : SlotFamily s)
     (u : ℕ → D → E) (n : ℕ) (x : D) : E :=
   ((g.length n)⁻¹ * deriv profile (g.coordinate n x)) • u n x
 
-noncomputable def omittedSource {s : StripData D} (g : SlotFamily s)
-    (f : ℕ → D → E) (n : ℕ) (x : D) : E :=
-  (1 - profile (g.coordinate n x)) • f n x
 
 
 private theorem jet_eq_zero_of_eventually {u : D → E} {x : D}
@@ -827,29 +736,6 @@ private theorem jet_eq_zero_of_eventually {u : D → E} {x : D}
   simpa only [iteratedFDerivWithin_univ, iteratedFDeriv_fun_zero, Pi.zero_apply] using
     he'.iteratedFDerivWithin_eq (𝕜 := ℝ) he.self_of_nhds j
 
-theorem derivativeError_jet_support {s : StripData D} (g : SlotFamily s)
-    (u : ℕ → D → E) (n j : ℕ) :
-    support (iteratedFDeriv ℝ j (g.derivativeError u n)) ⊆
-      {x | 1 / 5 ≤ |g.coordinate n x - 1 / 2| ∧ |g.coordinate n x - 1 / 2| ≤ 1 / 3} := by
-  classical
-  intro x hx
-  change iteratedFDeriv ℝ j (g.derivativeError u n) x ≠ 0 at hx
-  have hzero (hv : deriv profile =ᶠ[𝓝 (g.coordinate n x)] fun _ => 0) : False := by
-    apply hx
-    apply jet_eq_zero_of_eventually (j := j)
-    have hcomp := hv.comp_tendsto (g.coordinate_contDiff n).continuous.continuousAt
-    filter_upwards [hcomp] with y hy
-    have hy' : deriv profile (g.coordinate n y) = 0 := hy
-    simp [derivativeError, hy']
-  constructor
-  · by_contra ht
-    apply hzero
-    filter_upwards [(profile_eventually_one (lt_of_not_ge ht)).deriv] with y hy
-    simpa using hy
-  · by_contra ht
-    apply hzero
-    filter_upwards [(profile_eventually_zero (lt_of_not_ge ht)).deriv] with y hy
-    simpa using hy
 
 
 

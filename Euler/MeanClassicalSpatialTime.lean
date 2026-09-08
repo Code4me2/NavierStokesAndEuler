@@ -18,32 +18,6 @@ open Set MeasureTheory EulerSmoothLimit EulerMeanSolenoidal
   EulerMeanTimeContinuousTranslation EulerMeanSmoothRepresentative EulerVolterraConvolution
 open scoped ContDiff
 
-/-- Actual smooth representatives of a continuous L² path and its genuine
-continuous derivative, with no separate mixed-derivative hypothesis. -/
-theorem exists_classical_pair (T : ℝ) (hT : 0 ≤ T)
-    (p q : C(Icc (0 : ℝ) T,L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p))
-    (hq : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a q))
-    (hder : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT p) (q t) (Icc (0 : ℝ) T) t) :
-    ∃ B Bt : Icc (0 : ℝ) T → Space → Space,
-      Continuous (fun z : Icc (0 : ℝ) T × Space => B z.1 z.2) ∧
-      Continuous (fun z : Icc (0 : ℝ) T × Space => Bt z.1 z.2) ∧
-      (∀ t, ContDiff ℝ ∞ (B t)) ∧ (∀ t, ContDiff ℝ ∞ (Bt t)) ∧
-      (∀ t, (p t : Space → Space) =ᵐ[volume] B t) ∧
-      (∀ t, (q t : Space → Space) =ᵐ[volume] Bt t) ∧
-      ∀ t : Icc (0 : ℝ) T, ∀ x : Space,
-        HasDerivWithinAt (fun r => B (projIcc 0 T hT r) x) (Bt t x) (Icc (0 : ℝ) T) t := by
-  let B := fun t : Icc (0 : ℝ) T =>
-    representative (p t) (pathTranslation_evaluation_contDiff T p hp t)
-  let Bt := fun t : Icc (0 : ℝ) T =>
-    representative (q t) (pathTranslation_evaluation_contDiff T q hq t)
-  refine ⟨B, Bt, path_representative_joint_continuous T p hp,
-    path_representative_joint_continuous T q hq,
-    path_representative_smooth T p hp, path_representative_smooth T q hq,
-    path_representative_ae T p hp, path_representative_ae T q hq, ?_⟩
-  intro t x
-  exact EulerMeanPathTimeDerivative.representative_hasDerivWithinAt T hT p q hder hp hq t x
 
 end EulerMeanClassicalSpatialTime
 

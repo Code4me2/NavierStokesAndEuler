@@ -159,26 +159,5 @@ theorem initializedPrimaryRemainder_physical_fderiv_inv (N : ℕ) (hN : 1 ≤ N)
       mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hf hb) (norm_nonneg _)
     _ = _ := by unfold initializedRemainderDerivativeCost; field_simp; ring
 
-/-- The finite packet's actual center gradient differs from its exact
-primary shear by O(1/k), with the genuine inverse frame norm. -/
-theorem initializedVelocity_gradient_error (N : ℕ) (hN : 1 ≤ N)
-    (k : ℝ) (hk : 4 ≤ k) (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ))
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y) :
-    ‖fderiv ℝ (fun y => initializedVelocity M D τ hτ hτT B δ hδ ξ hs α N k⁻¹
-      (t,(Y y,k*inner ℝ D.m₀ (Y y)))) (X 0) -
-      (α/δ) • rankOne ℝ (canonicalVelocity τ hτ hτT B ξ hs t 0) (D.normal.field t 0)‖ ≤
-      (initializedRemainderDerivativeCost L.R S.H0/k)*‖D.FInv.field t 0‖ := by
-  have hk0 : k ≠ 0 := by linarith
-  rw [initializedVelocity_gradient_split M D hTime τ hτ hτT B δ hδ ξ hs α
-    N hN k hk0 t X Y hX hY hleft,add_sub_cancel_left]
-  have he : Y ∘ X = id := funext hleft
-  have hdY := EulerLagrangian.derivative_pullback_inverse Y X (D.deformationEquiv t 0) 0 hX hY
-  rw [he,fderiv_id,id_comp] at hdY
-  have h := initializedPrimaryRemainder_physical_fderiv_inv M D hTime τ hτ hτT B δ hδ ξ hs α
-    L H NB W LM WM BC hRc hcost hδ1 hα hR WP S hgrowth N hN k hk hbase t Y (X 0) hY
-  rw [hdY] at h
-  exact h
 
 end EulerPacketTerminalDatum

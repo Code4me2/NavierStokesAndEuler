@@ -321,12 +321,6 @@ theorem velocity_zero {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ act
     SpatialCurl.spatialCurl (potential s) w = 0 :=
   PhysicalCurlCovariance.spatialCurl_zero_of_zero_near (potential_zero_germ s hw hout)
 
-/-- Any fixed residual floor is allowed, since the stronger exterior
-identity above holds on the whole preterminal set. -/
-theorem exterior_below (Nres : ℕ) {w : SpaceTime} (hw : w ∈ preterminal)
-    (_hq : physicalQ h w < ChartScales.Q Nres) (hout : w ∉ active) :
-    potential s w = 0 ∧ pressure s w = 0 :=
-  ⟨potential_zero s hw hout, pressure_zero s hw hout⟩
 
 end Fields
 

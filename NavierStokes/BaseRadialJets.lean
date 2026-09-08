@@ -158,16 +158,6 @@ theorem radial_eq {a : ℕ → ℕ} (ha : StrictMono a) {h C Q : ℝ}
   rw [hv, normalizedStream_deriv_Z ha hh hh1 hQ hd hT, hpow]
   ring
 
-/-- Expanded formula, including the exact one-half factor. -/
-theorem radial_eq_stream {a : ℕ → ℕ} (ha : StrictMono a) {h C Q : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    {p : Slow} (hT : 0 < p.2.2) :
-    radial a h C d Q p = -(Q ^ h * p.1 / 2) *
-      PhaseCalculus.slowZ (normalizedStream a h d Q) p := by
-  rw [radial_eq ha hh hh1 hQ hd hT]
-  unfold reducedRadial
-  ring
 
 /-- The same scalar component schedule controls the actual normalized sum.
 The result is uniform in every band/label index of `D`. -/

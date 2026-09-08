@@ -128,19 +128,7 @@ theorem finsum_eq_active_sum {E : Type*} [AddCommMonoid E] (n : ℕ)
 
 
 
-theorem currentPotential_finsum (u : State Point) (n : ℕ)
-    {qbig a : ℝ} {i : PolarCharts.Index} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ ActualPhysicalPrefixFields.cartesianChartDomain qbig n a i) :
-    (∑ᶠ l : Index B N0, CurrentSignedCurl.currentPotential l u n a i z) =
-      ∑ l ∈ activeLabels standardRegion B N0 n, CurrentSignedCurl.currentPotential l u n a i z :=
-  finsum_eq_active_sum n _ (fun l hn => currentPotential_zero l u n hz hn)
 
-theorem currentPressure_finsum (u : State Point) (n : ℕ)
-    {qbig a : ℝ} {i : PolarCharts.Index} {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ ActualPhysicalPrefixFields.cartesianChartDomain qbig n a i) :
-    (∑ᶠ l : Index B N0, CurrentSignedCurl.currentPressure l u n a i z) =
-      ∑ l ∈ activeLabels standardRegion B N0 n, CurrentSignedCurl.currentPressure l u n a i z :=
-  finsum_eq_active_sum n _ (fun l hn => currentPressure_zero l u n hz hn)
 
 
 

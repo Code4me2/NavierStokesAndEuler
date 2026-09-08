@@ -336,58 +336,9 @@ theorem normalized_rank_on {h : ℝ} (hh : 0 < h) (hh1 : h < 1/2)
 
 /-! ## All five rows, against the full base -/
 
-theorem fiveRows_chart {l c : ℝ} (hl : 0 < l)
-    {v g f z vr gr fr zr : ℝ → ℝ} {d dr : MeanRankUpdate.Debt}
-    (H : FiveRowRank.FiveRows vr gr dr fr zr)
-    (hv : ∀ R, v R = c * vr (l*R)) (hg : ∀ R, g R = c * gr (l*R))
-    (hf : ∀ R, f R = c * fr (l*R)) (hz : ∀ R, z R = c * zr (l*R))
-    (hd : d = MeanRankUpdate.scaleDebt l⁻¹ c dr) :
-    FiveRowRank.FiveRows v g d f z := by
-  have ev : v = MeanRankUpdate.scaleField l⁻¹ c vr := by
-    funext R
-    simpa only [MeanRankUpdate.scaleField, div_inv_eq_mul, mul_comm R l] using hv R
-  have eg : g = MeanRankUpdate.scaleField l⁻¹ c gr := by
-    funext R
-    simpa only [MeanRankUpdate.scaleField, div_inv_eq_mul, mul_comm R l] using hg R
-  have ef : f = MeanRankUpdate.scaleField l⁻¹ c fr := by
-    funext R
-    simpa only [MeanRankUpdate.scaleField, div_inv_eq_mul, mul_comm R l] using hf R
-  have ez : z = MeanRankUpdate.scaleField l⁻¹ c zr := by
-    funext R
-    simpa only [MeanRankUpdate.scaleField, div_inv_eq_mul, mul_comm R l] using hz R
-  rw [ev, eg, ef, ez, hd]
-  exact MeanRankUpdate.fiveRows_scaled (inv_pos.mpr hl) c H
-
-theorem scalarOn_slice {l c : ℝ} (hl : 0 < l) (P : S ≃L[ℝ] T) (k : ℕ)
-    {V : Set S} {f : PressureStream.Lift S → ℝ} {g : PressureStream.Lift T → ℝ}
-    (H : ScalarOn (PhysicalMeanDomain.slowDomain V) (GaugeStateCoherence.chartEquiv l hl.ne' P k) c f g)
-    {s : S} (hs : s ∈ V) (R : ℝ) : f (R,(s,0)) = c * g (l*R,(P s,0)) := by
-  simpa only [GaugeStateCoherence.chartEquiv_apply, map_zero] using H (R,(s,0)) hs
 
 
-/-- The physical axial unit has the required chart differential, with the
-actual viscosity/axial coefficient `Q^h`. -/
-theorem band_axial_vector (h : ℝ) (n m k : ℕ) :
-    ((bandSlowEquiv h n m).toContinuousLinearMap.prodMap (TemporalMeanUpdate.coverMap k))
-      (ChartScales.Q n ^ h • (((0,1) : PressureStream.Plane), (0 : PressureStream.Plane))) =
-      bandScale n m • (ChartScales.Q m ^ h • (((0,1) : PressureStream.Plane), (0 : PressureStream.Plane))) := by
-  have hQ : 0 < ChartScales.Q n / ChartScales.Q m := div_pos (ChartScales.Q_pos n) (ChartScales.Q_pos m)
-  have he : ChartScales.Q n ^ h = (ChartScales.Q n / ChartScales.Q m)^h * ChartScales.Q m ^ h := by
-    rw [Real.div_rpow (ChartScales.Q_pos n).le (ChartScales.Q_pos m).le]
-    exact (div_mul_cancel₀ _ (Real.rpow_pos_of_pos (ChartScales.Q_pos m) h).ne').symm
-  have hp : (ChartScales.Q n / ChartScales.Q m)^CoordinateAlgebra.D h * ChartScales.Q n ^ h =
-      bandScale n m * ChartScales.Q m ^ h := by
-    rw [he, ← mul_assoc, ← Real.rpow_add hQ]
-    congr 2
-    unfold CoordinateAlgebra.D
-    ring
-  apply Prod.ext
-  · apply Prod.ext
-    · simp [bandSlowEquiv_apply]
-    · change (ChartScales.Q n / ChartScales.Q m)^CoordinateAlgebra.D h * (ChartScales.Q n ^ h * 1) =
-        bandScale n m * (ChartScales.Q m ^ h * 1)
-      simpa only [mul_one] using hp
-  · simp
+
 
 
 end NavierStokes.RankStateCoherence

@@ -442,17 +442,6 @@ theorem Pi_increment (d : TailData) (a y eta : ℝ) :
   unfold Pi
   linarith
 
-theorem Pi_hasDerivAt_y (d : TailData) (y eta : ℝ) :
-    HasDerivAt (fun t => Pi d t eta) ((1 / 2) * finalAngular d (y, eta) ^ 2) y := by
-  have hf : Continuous (fun t => finalAngular d (t, eta) ^ 2) :=
-    (((finalAngular_contDiff d).continuous.comp
-      (continuous_id.prodMk continuous_const)).pow 2)
-  have heq : (fun t => Pi d t eta) = fun t =>
-      Pi d 0 eta + (1 / 2) * primitive (fun v => finalAngular d (v, eta) ^ 2) t := by
-    funext t
-    exact Pi_increment d 0 t eta
-  rw [heq]
-  exact ((primitive_hasDerivAt hf y).const_mul (1 / 2)).const_add _
 
 
 theorem Pi_eq_axisPressure_add (d : TailData) (y eta : ℝ) :

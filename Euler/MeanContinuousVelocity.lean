@@ -59,18 +59,6 @@ theorem physicalPath_translation_contDiff (hTpos : 0 < T)
     funext (fun a => congrArg (translation a) (s.continuousVelocity_eq_physicalPath hTpos hF t))
   exact Eq.mp (congrArg (fun g : Space → L2 => ContDiff ℝ n g) heq) hp
 
-/-- The actual uniform-time velocity has the explicit H¹ trace amplitude. -/
-theorem continuousVelocity_translation_gevrey (hTpos : 0 < T)
-    (hB : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a s.velocityField))
-    (hBt : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a s.velocityDerivative))
-    (R C D : ℝ) (hR : 0 ≤ R) (hC : 0 ≤ C) (hD : 0 ≤ D) (d : ℕ)
-    (hBb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityField) a‖ ≤ C*majorant R d n)
-    (hBtb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeTranslation T b s.velocityDerivative) a‖ ≤ D*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => pathTranslation T b s.continuousVelocity) a‖ ≤
-      ((T⁻¹*Real.sqrt T)*C+(2*Real.sqrt T)*D)*majorant R d n :=
-  reconstruction_translation_gevrey T hTpos s.velocityField s.velocityDerivative
-    hB hBt R C D hR hC hD d hBb hBtb n a
 
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

@@ -87,13 +87,6 @@ def limitEvolution (V : ℕ → Evolution T hT) (hpos : 0 < T)
     (h0 : CauchySeq (fun k => fieldPath (V k).velocity (V k).velocity_continuous)) : Evolution T hT :=
   (eulerLimitData V hb h0).toEvolution hpos (Classical.choose (hb 3)) (Classical.choose_spec (hb 3))
 
-theorem limitEvolution_jet_convergence (V : ℕ → Evolution T hT) (hpos : 0 < T)
-    (hb : ∀ q, ∃ M : ℝ, ∀ k t, tensorNorm q ((V k).velocity t) ≤ M)
-    (h0 : CauchySeq (fun k => fieldPath (V k).velocity (V k).velocity_continuous)) (q : ℕ) :
-    Tendsto (fun k => jetPath (V k).velocity (V k).velocity_continuous q) atTop
-      (𝓝 (jetPath (limitEvolution V hpos hb h0).velocity
-        (limitEvolution V hpos hb h0).velocity_continuous q)) :=
-  (eulerLimitData V hb h0).jetPath_convergence q
 
 theorem limitEvolution_initial (V : ℕ → Evolution T hT) (hpos : 0 < T)
     (hb : ∀ q, ∃ M : ℝ, ∀ k t, tensorNorm q ((V k).velocity t) ≤ M)

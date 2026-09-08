@@ -34,12 +34,6 @@ def activatedData (m v : ℝ → Space) (hm : m τ ≠ 0) (hv : v τ ≠ 0)
   D.activation ⟨τ,hτ.le,hτT.le⟩ (cross (unit (m τ)) (unit (v τ)))
     (activation_cross_ne_zero _ _ hm hv hmv)
 
-def activatedHistory (m v : ℝ → Space) (hm : m τ ≠ 0) (hv : v τ ≠ 0)
-    (hmv : ⟪m τ,v τ⟫_ℝ=0) :
-    HistoryData ((activatedData D τ hτ hτT m v hm hv hmv).initial τ hτ hτT.le) :=
-  B.reframe (activationDirection (D.deformationEquiv ⟨τ,hτ.le,hτT.le⟩ 0)
-    (cross (unit (m τ)) (unit (v τ))))
-    (activationDirection_unit _ (activation_cross_ne_zero _ _ hm hv hmv))
 
 
 end EulerPacketActivationHistory

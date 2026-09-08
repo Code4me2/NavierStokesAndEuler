@@ -200,38 +200,12 @@ theorem temporalAliasState_mean_bounds {α : ℝ}
   exact ⟨temporalAlias_vector_mem (actualGauge h a b Mbase hab index) h index c u hs,
     temporalAlias_angle_mem (actualGauge h a b Mbase hab index) h index c u hs⟩
 
-include hM D hgapLower hgapUpper hS in
-theorem temporalAliasState_bounds {α : ℝ}
-    (H : MeanStateRegularity.PrimitiveData U a b c u)
-    (hfixed : (reconstructState (actualGauge h a b Mbase hab index) c u).pressure = u.pressure)
-    (hfast : c.operators.fastCoefficient =
-      fun n => ChartScales.Tg ^ index n * ChartScales.Q n ^ (1 + h))
-    (hv : c.operators.vT = (0, (0, TorusInverse.vector .temporal)))
-    (hraw : MeanClass (actualStrip (b := b) U ha hcL hcR hh L hL) α (u.axialResidual c)) (β : ℝ) :
-    UnweightedClass (actualStrip (b := b) U ha hcL hcR hh L hL) β
-      (fun n z => temporalAliasState (actualGauge h a b Mbase hab index) h index c u n (z, 0)) ∧
-      UnweightedClass (HarmonicWaveInteraction.productStrip (actualStrip (b := b) U ha hcL hcR hh L hL)) β
-        (temporalAliasState (actualGauge h a b Mbase hab index) h index c u) := by
-  obtain ⟨hm, hl⟩ := temporalAliasState_mean_bounds U ha hab hcL hcR hh hM index D
-    hgapLower hgapUpper L hL hS c u H hfixed hfast hv hraw β
-  have hζ (x : Point) : (actualStrip (b := b) U ha hcL hcR hh L hL).zeta x ≤ 1 :=
-    movingStrip_zeta_le_one U ha hcL hcR _ L _ _ hL x
-  exact ⟨meanClass_unweighted hm (fun x _ => hζ x),
-    meanClass_unweighted hl (fun x _ => hζ x.1)⟩
 
 end ActualAliases
 
 section ReconstructedInput
 
-theorem primitiveData_reconstruct {coord a b : ℝ} {U : SlowRegion coord}
-    {c : CorrectionState.Context Point} {u : CorrectionState.State Point}
-    (H : MeanStateRegularity.PrimitiveData U a b c u) (g : GaugeData TorusInverse.Plane) :
-    MeanStateRegularity.PrimitiveData U a b c (reconstructState g c u) :=
-  ⟨H.operators, H.base, H.mean, H.covariance, H.virtualTheta, H.virtualAxial⟩
 
-theorem reconstructed_pressure_fixed (g : GaugeData TorusInverse.Plane)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point) :
-    (reconstructState g c (reconstructState g c u)).pressure = (reconstructState g c u).pressure := rfl
 
 
 end ReconstructedInput

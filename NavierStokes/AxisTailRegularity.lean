@@ -352,10 +352,6 @@ theorem radiusPoint_contDiff : ContDiff ℝ ∞ radiusPoint := by
   change ContDiff ℝ ∞ (fun w : InnerPoint => (w.1 ^ 2 / 2, w.2))
   exact ((contDiff_fst.pow 2).div_const 2).prodMk contDiff_snd
 
-theorem toRadius_smoothOn {O : Set InnerPoint} {f : InnerProfile}
-    (hf : ContDiffOn ℝ ∞ f O) :
-    ContDiffOn ℝ ∞ (toRadius f) (radiusPoint ⁻¹' O) :=
-  hf.comp radiusPoint_contDiff.contDiffOn (fun _ hw => hw)
 
 
 

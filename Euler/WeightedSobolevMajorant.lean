@@ -1,4 +1,5 @@
-import Euler.WeightedSobolevEnergy
+import Euler.SobolevViscousEnergy
+import Euler.WeightedCylinderEnergy
 
 /-! Actual finite-Sobolev viscous PDE energy with continuous scalar majorants, requiring no measurability of coefficient-bound witnesses. -/
 

@@ -370,23 +370,6 @@ theorem extendedResidual_boundary_jets {A : VelocityField} {p : PressureField}
     (JointResidualLimits.actual_derivative_recurrence (periodicResidual_smooth hA hp))
     (boundaryLimits_locallyUniform hz eA ep) n x
 
-/-- Time activation preserves these same limits at every spatial point. -/
-theorem localizedResidual_joint {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) (x : Space) :
-    Tendsto (iteratedFDeriv ℝ n
-      (fun z => navierStokesResidual (SpatialLocalization.localizedVelocity A)
-        (SpatialLocalization.localizedPressure p) z.1 z.2))
-      (𝓝[SpacetimeEndpoint.openPast 1] (1, x)) (𝓝 (boundaryLimits A p eA ep x n)) := by
-  apply (boundaryLimits_joint hz eA ep n x).congr'
-  have he := ResidualRegularity.residual_eventuallyEq
-    (TimeLocalization.activatedVelocity_eventuallyEq_late
-      (SpatialLocalization.periodicVelocity A) (by norm_num : (3 : ℝ) / 4 < 1) x)
-    (TimeLocalization.activatedPressure_eventuallyEq_late
-      (SpatialLocalization.periodicPressure p) (by norm_num : (3 : ℝ) / 4 < 1) x)
-  exact ((SolenoidalDiagonal.iteratedFDeriv_eventuallyEq he n).filter_mono
-    nhdsWithin_le_nhds).symm
 
 
 /-- The entire family required by `CandidateFromLimits` is now derived

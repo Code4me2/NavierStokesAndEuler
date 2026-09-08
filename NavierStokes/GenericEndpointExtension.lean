@@ -839,12 +839,6 @@ theorem extension_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
     ⟨⟨hz.1.1.le, hz.1.2.le⟩, hz.2⟩]
   exact closedField_eq openStrip_isOpen hf hz
 
-theorem extension_zero_of_fiber {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
-    (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)
-    {x : X} (hz : ∀ t ∈ Ioo (-1 : ℝ) 1, f (t, x) = 0) (t : ℝ) :
-    extension f hf hb (t, x) = 0 :=
-  closedStripExtension_zero (stripClosedField_contDiffOn hf hb)
-    (fun _ hs => stripClosedField_zero hf hb hz hs) t
 
 theorem extension_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
     (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)

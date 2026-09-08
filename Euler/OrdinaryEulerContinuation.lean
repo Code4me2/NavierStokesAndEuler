@@ -32,11 +32,6 @@ theorem exists_extension (hTpos : 0 < T) :
   · exact U.concatenate_initial V hTpos (regularizedTime_pos A) hmatch
   · exact U.concatenate_left V hTpos (regularizedTime_pos A) hmatch
 
-theorem gradientIntegral_mono (s t : Icc (0 : ℝ) T) (hst : (s : ℝ) ≤ t) :
-    U.gradientIntegral s ≤ U.gradientIntegral t := by
-  apply intervalIntegral.integral_mono_interval le_rfl s.property.1 hst
-    (Eventually.of_forall (fun r => U.gradientNormPath_nonneg (projIcc 0 T hT r)))
-    ((extendPath_continuous T hT U.gradientNormPath).intervalIntegrable 0 t)
 
 end Evolution
 
@@ -55,12 +50,6 @@ theorem no_endpoint : ¬ HasEulerEvolution A L.duration := by
   obtain ⟨S,hS,hE⟩ := h.extend
   exact L.maximal S hS hE
 
-theorem gradientIntegral_unbounded (G : ℝ) :
-    ∃ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration) (t : Icc (0 : ℝ) S),
-      G < (L.evolution S hS hSL).gradientIntegral t := by
-  by_contra hn
-  push Not at hn
-  exact L.no_endpoint (L.endpoint_of_bounded_gradient G hn)
 
 theorem gradient_unbounded (K : ℝ) :
     ∃ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration) (t : Icc (0 : ℝ) S) (x : Space),
@@ -104,22 +93,6 @@ theorem gradient_unbounded_near_endpoint (τ K : ℝ) (hτ : τ < L.duration) :
     exact le_trans (le_abs_self _) ((L.evolution R hR hRL).gradientNormPath.norm_coe_le_norm _)
   · exact (hn S hS hSL t x (hτR.trans (lt_of_not_ge ht))).trans (le_max_right C K)
 
-theorem gradientIntegral_agrees (S T : ℝ) (hS : 0 < S) (hT : 0 < T)
-    (hSL : S < L.duration) (hTL : T < L.duration) (hST : S ≤ T)
-    (t : Icc (0 : ℝ) S) :
-    (L.evolution S hS hSL).gradientIntegral t=
-      (L.evolution T hT hTL).gradientIntegral ⟨t,t.property.1,t.property.2.trans hST⟩ := by
-  apply intervalIntegral.integral_congr
-  intro r hr
-  have hrs : r ∈ Icc (0 : ℝ) (t : ℝ) := by simpa only [uIcc_of_le t.property.1] using hr
-  have hrS : r ∈ Icc (0 : ℝ) S := ⟨hrs.1,hrs.2.trans t.property.2⟩
-  have hrT : r ∈ Icc (0 : ℝ) T := ⟨hrs.1,hrS.2.trans hST⟩
-  change (L.evolution S hS hSL).gradientNormPath (projIcc 0 S hS.le r)=
-    (L.evolution T hT hTL).gradientNormPath (projIcc 0 T hT.le r)
-  rw [projIcc_of_mem hS.le hrS,projIcc_of_mem hT.le hrT]
-  change ‖EulerMeanSobolevBoundedField.finiteField ((L.evolution S hS hSL).velocity ⟨r,hrS⟩).derivative‖=
-    ‖EulerMeanSobolevBoundedField.finiteField ((L.evolution T hT hTL).velocity ⟨r,hrT⟩).derivative‖
-  rw [L.evolution_agrees_at S T hS hT hSL hTL r hrs.1 hrS.2 hrT.2]
 
 
 end FiniteLifespan

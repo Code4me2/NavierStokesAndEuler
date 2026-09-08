@@ -23,9 +23,6 @@ variable {E F : Type*} [NormedAddCommGroup E] [NormedAddCommGroup F]
 theorem lpNorm_nonneg (p : ℝ≥0∞) (f : Space → E) : 0 ≤ comparisonLpNorm p f :=
   ENNReal.toReal_nonneg
 
-theorem lpNorm_congr_ae {p : ℝ≥0∞} {f g : Space → E}
-    (hfg : f =ᵐ[volume] g) : comparisonLpNorm p f = comparisonLpNorm p g :=
-  congrArg ENNReal.toReal (eLpNorm_congr_ae hfg)
 
 theorem lpNorm_mono_of_norm_le_ae {p : ℝ≥0∞} {f : Space → E} {g : Space → F}
     (hg : MemLp g p volume) (hfg : ∀ᵐ x ∂volume, ‖f x‖ ≤ ‖g x‖) :

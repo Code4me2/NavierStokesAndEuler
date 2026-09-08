@@ -95,11 +95,6 @@ theorem gradient_mem (A : SmoothL2Field Space) (p : Space → ℝ)
   simpa only [partialDerivative,fderiv_coordinate A.field x
     (A.smooth.differentiable (by simp) x)] using h
 
-theorem gradient_pairing_zero (A U : SmoothL2Field Space) (p : Space → ℝ)
-    (hp : ContDiff ℝ ∞ p) (hgrad : ∀ x, A.field x=gradient p x)
-    (hdiv : ∀ x, divergence U.field x=0) : ⟪A.toLp,U.toLp⟫_ℝ=0 :=
-  pressure_pairing_zero (gradient_mem A p hp hgrad)
-    (smooth_mem_solenoidal U.field U.smooth U.memLp hdiv)
 
 theorem potential_smooth (A : SmoothL2Field Space) (p : Space → ℝ)
     (hp : Differentiable ℝ p) (hgrad : ∀ x, A.field x=gradient p x) :

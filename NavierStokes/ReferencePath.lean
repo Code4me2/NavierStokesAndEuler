@@ -573,21 +573,7 @@ theorem refU_smooth {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit) :
       exact N.refU_eq_natural_initial δ hq.le
     exact (hs.congr_of_eventuallyEq heq).contDiffWithinAt
 
-theorem refF_frozen {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit)
-    {p : Point} (hη : p.2 ∈ parameterInterval) (hX : N.endpoint * Real.exp (2 * δ) ≤ p.1) :
-    N.refF δ p = Real.exp (continuation δ N.logF (2 * δ, p.2)) := by
-  have hp : 0 < p.1 := (mul_pos N.endpoint_pos (Real.exp_pos _)).trans_le hX
-  rw [N.refF_eq_logtime hδ hδT hη hp,
-    continuation_frozen rampLimit_pos hδ hδT parameterInterval_open N.logF_smooth
-      (p := (N.logTime p.1, p.2)) hη ((N.le_logTime_iff hp).2 hX)]
 
-theorem refU_frozen {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit)
-    {p : Point} (hη : p.2 ∈ parameterInterval) (hX : N.endpoint * Real.exp (2 * δ) ≤ p.1) :
-    N.refU δ p = continuation δ N.logU (2 * δ, p.2) := by
-  have hp : 0 < p.1 := (mul_pos N.endpoint_pos (Real.exp_pos _)).trans_le hX
-  rw [N.refU_eq_logtime hδ hδT hη hp,
-    continuation_frozen rampLimit_pos hδ hδT parameterInterval_open N.logU_smooth
-      (p := (N.logTime p.1, p.2)) hη ((N.le_logTime_iff hp).2 hX)]
 
 /-- Actual pressure, moments, and lag variables are recomputed from REF. -/
 def histories {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ < rampLimit)

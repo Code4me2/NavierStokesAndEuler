@@ -34,10 +34,6 @@ def solutionLabelData : LabelData (solutionParent β hβ ell hell hell1) :=
     uniformL2Amplitude_nonneg (by norm_num) (field_uniform_jet β hβ)
     (velocity_divergence (linear β)) ell hell hell1
 
-def solutionInverse : ParticleInverse (solutionParent β hβ ell hell hell1) :=
-  EulerStaticEuler.baseInverse 1 (field (linear β)) uniformL2Amplitude 1024
-    uniformL2Amplitude_nonneg (by norm_num) (field_uniform_jet β hβ)
-    (velocity_divergence (linear β)) ell hell hell1
 
 def solutionEvolution : Evolution (solutionParent β hβ ell hell hell1) :=
   EulerStaticEuler.baseEvolution 1 (field (linear β)) uniformL2Amplitude 1024

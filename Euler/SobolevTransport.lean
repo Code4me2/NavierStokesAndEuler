@@ -31,22 +31,6 @@ theorem transportBilinear_apply {q : ℕ} (hq : 6 ≤ q)
   simp only [transportBilinear, sum_apply, ContinuousLinearMap.bilinearComp_apply,
     productHqBilinear_apply]
 
-/-- The actual transport loses exactly one derivative, with an explicit fixed-order constant. -/
-theorem transportBilinear_bound {q : ℕ} (hq : 6 ≤ q)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u v : SobolevSpace period (q+1)) :
-    ‖transportBilinear period hq L hL u v‖ ≤ (4 * sobolevProductConstant period q) * ‖u‖ * ‖v‖ := by
-  rw [transportBilinear_apply]
-  have hi (i : Fin 4) : ‖productHq period hq (L i) (hL i)
-      (truncateOperator period q u) (derivativeOperator period q i v)‖ ≤
-      sobolevProductConstant period q * ‖u‖ * ‖v‖ :=
-    (productHq_norm period hq (L i) (hL i) _ _).trans
-      (mul_le_mul (mul_le_mul_of_nonneg_left (truncateOperator_bound period u)
-        (sobolevProductConstant_nonneg period q)) (derivativeOperator_bound period i v)
-        (norm_nonneg _) (mul_nonneg (sobolevProductConstant_nonneg period q) (norm_nonneg u)))
-  have h := (norm_sum_le _ _).trans (Finset.sum_le_sum (fun i (_ : i ∈ (Finset.univ : Finset (Fin 4))) => hi i))
-  simpa only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, Nat.cast_ofNat,
-    mul_assoc] using h
 
 
 /-- The genuine transport is represented by the literal sum of pointwise directional products. -/

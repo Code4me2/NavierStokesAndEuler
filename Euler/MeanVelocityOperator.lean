@@ -119,10 +119,6 @@ variable (T : ℝ) (hT : 0 ≤ T)
     -B*‖z‖^2 ≤ ⟪M0 z, z⟫_ℝ+L*⟪A z, z⟫_ℝ)
   (hsmall : K*(T^2/2)+B*T ≤ 1/2)
 
-/-- The genuine bounded linear mean velocity inverse on actual forcing classes. -/
-def meanVelocitySolver : TimeLp T L2 →L[ℝ] TimeLp T L2 :=
-  (meanVelocityMap T hT FInv F₁).comp ((meanDerivatives T hT FInv).subtypeL.comp
-    (meanSolver T hT FInv H M0 A L K B hK hB hFInv₀ hH hboundary hsmall))
 
 
 end EulerMeanVariationalInverse

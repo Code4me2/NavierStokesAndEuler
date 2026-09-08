@@ -46,15 +46,6 @@ theorem fundamental_pointwise_derivative (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) 
   convert hd using 1
   all_goals rfl
 
-/-- A genuine supported-L² evolution constructed from the original bounded coefficient. -/
-def constructedSupportedEvolution (μ : Measure α) (S : Set α) (hS : MeasurableSet S) :
-    Evolution T hT (operatorPath μ S hS T B) :=
-  liftEvolution μ S hS T hT B (fundamentalPath T hT B).forward (fundamentalPath T hT B).backward
-    (fun t x _ => congrArg (fun A : Field (α := α) (V := V) => A x)
-      ((fundamentalPath T hT B).forward_backward t))
-    (fun t x _ => congrArg (fun A : Field (α := α) (V := V) => A x)
-      ((fundamentalPath T hT B).backward_forward t))
-    (fundamental_pointwise_derivative T hT B)
 
 
 end EulerLpSupportedConstructedEvolution

@@ -54,19 +54,6 @@ theorem current_slot_iff (g : Geometry) (gap : ℕ) (shift rate : ℝ)
   · intro h
     constructor <;> nlinarith [h.1, h.2]
 
-/-- A compact reference cutoff still has only finitely many active
-transported copies, uniformly on each common-coordinate ball. -/
-theorem finite_transported_copy_cutoffs (g : Geometry) (gap : ℕ) (shift rate : ℝ)
-    (hrate : rate ≠ 0) {cutoff : Plane → ℝ} (hcutoff : HasCompactSupport cutoff) (R : ℝ) :
-    ∃ I : Finset Frequency, ∀ Y : Plane, ‖Y‖ ≤ R → ∀ copy : Frequency, copy ∉ I →
-      (cutoff ∘ CopySolveCompatibility.nativeTimeMap shift rate)
-        ((CopySolveCompatibility.transportGeometry g gap shift rate hrate).coordinates copy Y) = 0 := by
-  obtain ⟨I, hI⟩ := g.finite_copy_cutoffs hcutoff ((6 : ℝ) ^ gap * R)
-  refine ⟨I, ?_⟩
-  intro Y hY copy hcopy
-  simp only [Function.comp_apply, coordinates_transport]
-  exact hI (coverPower gap Y) ((norm_coverPower_le gap Y).trans
-    (mul_le_mul_of_nonneg_left hY (by positivity))) copy hcopy
 
 end Geometry
 

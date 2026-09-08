@@ -123,26 +123,6 @@ theorem finite_amplitude_cone {c j v p : ℝ} (hp : 0 < p)
     nlinarith [sq_nonneg v]
   · exact relaxed_cone_of_le_two hP (le_of_not_gt hv)
 
-/-- For fixed normalized parameters, a positive leading coefficient and strict
-quadratic margin give the relaxed cone at every sufficiently large amplitude. -/
-theorem sufficiently_large_amplitude_cone {c j v : ℝ} (hc : 0 < c)
-    (hmargin : (v - 2) * j ^ 2 < 2 * c ^ 2) :
-    ∃ p₀ : ℝ, ∀ p : ℝ, p₀ < p →
-      2 < p * c ∧ v < coneBound (p * c) (p * j) := by
-  let δ := 2 * c ^ 2 - (v - 2) * j ^ 2
-  have hδ : 0 < δ := sub_pos.mpr hmargin
-  let p₀ := max 0 (max (2 / c) (max (v / c) (4 * c * v / δ)))
-  refine ⟨p₀, fun p hlarge => ?_⟩
-  have h₀ : 0 ≤ p₀ := le_max_left _ _
-  have h₂ : 2 / c ≤ p₀ := (le_max_left _ _).trans (le_max_right _ _)
-  have hᵥ : v / c ≤ p₀ :=
-    ((le_max_left _ _).trans (le_max_right _ _)).trans (le_max_right _ _)
-  have hδbound : 4 * c * v / δ ≤ p₀ :=
-    ((le_max_right _ _).trans (le_max_right _ _)).trans (le_max_right _ _)
-  have hP : 2 < p * c := (div_lt_iff₀ hc).mp (lt_of_le_of_lt h₂ hlarge)
-  refine ⟨hP, finite_amplitude_cone (lt_of_le_of_lt h₀ hlarge) hP ?_ ?_⟩
-  · exact (div_lt_iff₀ hc).mp (lt_of_le_of_lt hᵥ hlarge)
-  · exact (div_lt_iff₀ hδ).mp (lt_of_le_of_lt hδbound hlarge)
 
 
 end NavierStokes.ConeAlgebra

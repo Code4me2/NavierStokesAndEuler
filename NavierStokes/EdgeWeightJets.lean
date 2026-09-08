@@ -197,14 +197,6 @@ theorem edge_mul_iteratedFDeriv_bound {c : ℝ} (hc : 0 < c) (j : ℕ)
             (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hi) hA.le)
             hD.le) he) (pow_nonneg hx.le N)
 
-theorem edge_mul_iteratedFDeriv_bound_unit {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → ℝ} (hB : ContDiff ℝ ∞ B) {S : Set E} (hS : IsCompact S) (n : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ p ∈ S, ∀ x ∈ Ioo (0 : ℝ) 1,
-      ‖iteratedFDeriv ℝ n (fun y : E × ℝ =>
-        (FlatCutoff.edge c y.2 / y.2 ^ j) * B y) (p, x)‖ ≤
-          C * FlatCutoff.edge c x / x ^ N := by
-  obtain ⟨C, hC, N, hbound⟩ := edge_mul_iteratedFDeriv_bound hc j hB hS n (by norm_num : (0 : ℝ) < 1)
-  exact ⟨C, hC, N, fun p hp x hx => hbound n le_rfl p hp x hx.1 hx.2.le⟩
 
 
 theorem edge_div_pow_iteratedFDeriv_zero {c : ℝ} (hc : 0 < c) (j n : ℕ) :
@@ -307,17 +299,6 @@ theorem norm_radialIterate_le {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
       rw [show m + 1 + n = m + (n + 1) by omega] at hi
       exact h.trans hi
 
-/-- The left side contains the actual nested radial and parameter derivatives,
-and is controlled by the full joint tensor of total order. -/
-theorem norm_mixed_derivatives_le {f : E × ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
-    (m n : ℕ) (p : E) (x : ℝ) :
-    ‖iteratedFDeriv ℝ m (fun q => iteratedDeriv n (fun t => f (q, t)) x) p‖ ≤
-      ‖iteratedFDeriv ℝ (m + n) f (p, x)‖ := by
-  have heq : (fun q => iteratedDeriv n (fun t => f (q, t)) x) =
-      fun q => radialIterate f n (q, x) := funext (fun q => (radialIterate_eq hf n q x).symm)
-  rw [heq]
-  exact (norm_iteratedFDeriv_parameter_le (radialIterate_contDiff hf n) m p x).trans
-    (norm_radialIterate_le hf n m (p, x))
 
 
 end MixedDerivatives
@@ -428,17 +409,6 @@ theorem edge_mul_edge (c d x : ℝ) :
     congr 1
     ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem weighted_mul (c d : ℝ) (j k : ℕ) (B D : E × ℝ → ℝ) :
-    (fun y => weighted c j B y * weighted d k D y) =
-      weighted (c + d) (j + k) (fun y => B y * D y) := by
-  funext y
-  simp only [weighted, pow_add]
-  rw [show (FlatCutoff.edge c y.2 / y.2 ^ j * B y) *
-      (FlatCutoff.edge d y.2 / y.2 ^ k * D y) =
-      (FlatCutoff.edge c y.2 * FlatCutoff.edge d y.2) /
-        (y.2 ^ j * y.2 ^ k) * (B y * D y) by ring]
-  rw [edge_mul_edge]
 
 
 
@@ -452,12 +422,6 @@ theorem edge_pow (c x : ℝ) {k : ℕ} (hk : 0 < k) :
     congr 1
     ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem weighted_pow (c : ℝ) (j : ℕ) (B : E × ℝ → ℝ) {k : ℕ} (hk : 0 < k) :
-    (fun y => weighted c j B y ^ k) =
-      weighted ((k : ℝ) * c) (j * k) (fun y => B y ^ k) := by
-  funext y
-  simp only [weighted, mul_pow, div_pow, edge_pow c y.2 hk, pow_mul]
 
 
 end Products

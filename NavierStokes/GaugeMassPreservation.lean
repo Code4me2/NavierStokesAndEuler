@@ -129,12 +129,6 @@ theorem radialMoment_congr_torusAverage (k : ℕ) (f g : ScalarField Point)
   filter_upwards [] with R
   exact congrArg (fun x => R ^ k * x) (he R)
 
-theorem radialMoment_zero_of_torusAverage (k : ℕ) (f : ScalarField Point)
-    (n : ℕ) (s : Plane) (he : ∀ R, PressureStream.torusAverage (f n) (R, s) = 0) :
-    CorrectionState.radialMoment k f n s = 0 := by
-  rw [StateMomentBalances.state_radialMoment_eq]
-  change (∫ R, R ^ k * PressureStream.torusAverage (f n) (R, s)) = 0
-  simp_rw [he, mul_zero, integral_zero]
 
 /-- The two conserved mean masses, restricted to a specified slow set. -/
 noncomputable def ZeroMassesOn (U : Set Plane) (u : State Point) : Prop :=

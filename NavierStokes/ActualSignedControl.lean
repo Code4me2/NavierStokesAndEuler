@@ -309,20 +309,6 @@ noncomputable def referenceBounds (hcone : LeadingStressWeights.FullTrueCone v�
 
 end PreparedChart
 
-/-- A supplied prepared family is only restricted to a later tail.
-Every surviving phase and representative is the same one used by the
-primary construction. No determinant or final control record is assumed. -/
-theorem exists_referenceBounds (a : PrimaryGeometryAssembly.Prepared H₀ v₀ upper B r0 N0)
-    (hcone : LeadingStressWeights.FullTrueCone v₀) (hr0 : 0 < r0)
-    (vr vt : TorusInverse.Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) :
-    ∃ N : ℕ, ∃ hN : a.N ≤ N,
-      ∀ c : PreparedChart H₀ v₀ (a.restrict N hN) D,
-        Nonempty (ReferenceBounds c.native (PrimaryGeometryAssembly.domain W₀ N)
-          (PrimaryGeometryAssembly.construction H₀ v₀ (a.restrict N hN) hr0)
-          (preparedPrefactor r0 vr vt) c.coordinate c.target c.mask c.weight) := by
-  obtain ⟨N, hN, dg, eb, il, hdg, heb, hil, hz⟩ :=
-    PrimaryTargetBounds.exists_restricted_actual_bounds H₀ v₀ a hcone vr vt hdet hr0
-  exact ⟨N, hN, fun c => ⟨c.referenceBounds hcone hr0 vr vt dg eb il hdg heb hil hz⟩⟩
 
 end Prepared
 
@@ -553,41 +539,6 @@ noncomputable def copiedCoefficients
 
 include h
 
-/-- The native signed estimates are obtained from the constructed
-reference, without accepting a completed native covariance record. -/
-theorem copied_coefficients_jets
-    (base : Λ → I → LinearWaveBounds.WaveCoefficients X)
-    (dirs : Λ → I → LinearWaveBounds.GraphDirections X)
-    (request : ℕ → X → Vec2) {β : ℝ} {W : Λ → ℕ → X → ℝ}
-    (hzeta : ∀ x ∈ s.domain, 0 < s.zeta x)
-    (hR : ∀ q, UniformLocalJets s (fun _ _ x => s.zeta x) β K (fun _ n _ x => request n x q))
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (j : Fin 2)
-    (henv : ∀ l n i x, x ∈ s.domain → x ∈ K l n i →
-      c.pull (pulseEnvelope F χ j) l n i x ≤ W l n x)
-    (hnormal : ∀ l n i x, x ∈ s.domain → x ∈ K l n i →
-      (fun y => normal.value l n • c.pull (phaseNormal (F j) χ) l n i y) =ᶠ[𝓝 x]
-        (base l i).normal s (dirs l i) n)
-    (hfrequency : UniformPrimaryWeights.UniformBandBound s (1 / 2)
-      (fun li : Λ × I => fun n => 1 / (base li.1 li.2).frequency n)) :
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) (β + 1 / 2) K
-      (fun l n i => (copiedCoefficients (F := F) (pref := pref) (χ := χ) (T := T) (mask := mask)
-        c scale normal clock base dirs request j l i).amplitude n) ∧
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) (β + 1) K
-      (fun l n i => (copiedCoefficients (F := F) (pref := pref) (χ := χ) (T := T) (mask := mask)
-        c scale normal clock base dirs request j l i).pressure n) := by
-  have hg := h.copied_geometry_jets c normal clock j
-  have hN := uniform_local_congr hg.1 hnormal
-  apply SignedCopyBounds.uniform_coefficients_jets (M := normal.upper * ((F j).M ^ 2 + 3 * (F j).M))
-    (h.nativeCovariance c scale hzeta) hR
-    (c.unweighted h.mask_jets) (h.copied_unit_jets c j hW henv) hW hN hg.2.1 hg.2.2
-    (mul_pos normal.lower_pos (F j).b_pos) _ _ hfrequency j
-  · intro l n i x hx hi
-    rw [← Filter.EventuallyEq.eq_of_nhds (hnormal l n i x hx hi)]
-    exact (h.copied_normal_bounds c normal j l n i hx hi).1
-  · intro l n i x hx hi
-    rw [← Filter.EventuallyEq.eq_of_nhds (hnormal l n i x hx hi)]
-    exact (h.copied_normal_bounds c normal j l n i hx hi).2
 
 end ReferenceBounds
 
@@ -654,12 +605,7 @@ variable {a : PrimaryGeometryAssembly.Prepared H₀ v₀ upper B r0 N0}
   {s : StripData X} {K : Λ → ℕ → I → Set X}
   (copy : CopyChart s C.native C.weight K)
 
-noncomputable def copiedMatrix : Λ → I → ℕ → X → Mat2 :=
-  fun l i n => copy.pull (pulseMatrix (PrimaryGeometryAssembly.construction H₀ v₀ a hr0)
-    (preparedPrefactor r0 vr vt) C.coordinate) l n i
 
-noncomputable def copiedTarget (scale : PositiveScale Λ) : Λ → I → ℕ → X → Vec2 :=
-  fun l i n x => scale.value l n ^ 2 • copy.pull C.target l n i x
 
 noncomputable def copiedCoefficients (scale normal clock : PositiveScale Λ)
     (base : Λ → I → LinearWaveBounds.WaveCoefficients X)

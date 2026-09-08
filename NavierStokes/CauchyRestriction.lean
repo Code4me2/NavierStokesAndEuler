@@ -156,11 +156,6 @@ def derivativeCLM (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ) :
        C(Disk c σ, E) →ₗ[ℂ] C(Disk c ρ, E)).mkContinuous
     (σ - ρ)⁻¹ (norm_cauchyMap_le c hgap)
 
-theorem norm_derivativeCLM_le (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ) :
-    ‖derivativeCLM (E := E) c hgap‖ ≤ (σ - ρ)⁻¹ := by
-  have hδ : 0 < σ - ρ := sub_pos.mpr hgap
-  apply ContinuousLinearMap.opNorm_le_bound _ (by positivity)
-  exact norm_cauchyMap_le c hgap
 
 
 variable [CompleteSpace E]

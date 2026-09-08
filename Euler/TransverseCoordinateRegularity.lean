@@ -67,12 +67,6 @@ theorem terminalPrimitive_coordinateDerivative (u : TimeLp T E) (t : Icc (0 : �
     (frameLeftInverseDerivativePath T Q Q₁ c hc hQ)
     (frameLeftInversePath_hasDerivWithinAt T Q Q₁ c hc hQ hT hd) u t t.property).symm
 
-/-- The initial coordinate trace vanishes for every admissible displacement. -/
-theorem coordinatePrimitive_initial (m : Icc (0 : ℝ) T → E)
-    (u : transverseDerivatives T hT m) :
-    coordinatePrimitive T hT Q c hc hQ (u : TimeLp T E) 0 = 0 := by
-  have hu : realPrimitive T (u : TimeLp T E) 0 = 0 := u.property.1
-  simp only [coordinatePrimitive, productPrimitive, hu, map_zero]
 
 /-- The terminal coordinate trace vanishes identically. -/
 theorem coordinatePrimitive_terminal (u : TimeLp T E) :
@@ -141,14 +135,6 @@ theorem transverse_range (m : Icc (0 : ℝ) T → E)
     ∃ x : U, Q t x = realPrimitive T (u : TimeLp T E) t :=
   hRange t _ (u.property.2 t)
 
-/-- Canonical coordinates reconstruct every admissible transverse displacement. -/
-theorem coordinatePrimitive_reconstruct (m : Icc (0 : ℝ) T → E)
-    (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ x : U, Q t x = η)
-    (u : transverseDerivatives T hT m) (t : Icc (0 : ℝ) T) :
-    Q t (coordinatePrimitive T hT Q c hc hQ (u : TimeLp T E) t) =
-      realPrimitive T (u : TimeLp T E) t :=
-  coordinatePrimitive_reconstruct_of_range T hT Q c hc hQ (u : TimeLp T E)
-    (transverse_range T hT Q m hRange u) t
 
 include hd in
 /-- The transverse derivative is the derivative of its reconstructed coordinates. -/

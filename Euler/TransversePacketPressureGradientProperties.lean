@@ -23,10 +23,6 @@ theorem scalarGradient_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support)
   pressureGradient_zero_outside (G.scalar I) t D.support D.support_compact.isClosed
     (G.scalar_zero_outside I t) x hx θ
 
-theorem scalarGradientField_supported (t : Icc (0 : ℝ) D.T) :
-    (G.scalarGradientField I).path t ∈ Supported P Space D.support D.support_measurable :=
-  (G.scalarGradientField I).supported_of_raw_zero D.support D.support_measurable
-    (fun t => G.scalarGradient_zero_outside I t) t
 
 theorem scalarGradient_odd
     (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)

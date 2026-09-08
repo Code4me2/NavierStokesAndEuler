@@ -202,9 +202,6 @@ theorem tsupport_curl_cutoff_subset (χ : Space → ℝ) (A : Space → Space) :
     tsupport (curl (fun y => χ y • A y)) ⊆ tsupport χ :=
   (tsupport_curl_subset _).trans (tsupport_smul_subset_left χ A)
 
-theorem hasCompactSupport_curl_cutoff {χ : Space → ℝ} (hχ : HasCompactSupport χ)
-    (A : Space → Space) : HasCompactSupport (curl (fun y => χ y • A y)) :=
-  hasCompactSupport_curl hχ.smul_right
 
 
 

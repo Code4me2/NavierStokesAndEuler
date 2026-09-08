@@ -296,38 +296,6 @@ theorem hasDerivAt_envelope {rate : ℝ → ℝ} (hrate : Continuous rate)
   unfold GaussianEnvelope.envelope
   simpa only [mul_comm] using h
 
-/-- The actual viscous two-mode estimate. The damping may be smaller than
-the reference by `dampingError / S`, and the full operator error is at most
-`matrixError / S`. Neither error is multiplied by the harmonic index. -/
-theorem viscous_propagator_estimate
-    {a b midpoint S dampingError matrixError : ℝ}
-    (hS : 0 < S) (hdampingError : 0 ≤ dampingError) (hmatrixError : 0 ≤ matrixError)
-    (lam damping referenceDamping rate : ℝ → ℝ)
-    (E : ℝ → Plane →L[ℝ] Plane) {u f : ℝ → Plane}
-    (hrate : Continuous rate)
-    (hreference : ∀ t ∈ Ico a b, rate t = lam t - referenceDamping t)
-    (hlam : ∀ t ∈ Ico a b, 0 ≤ lam t)
-    (hdamping : ∀ t ∈ Ico a b, referenceDamping t - dampingError / S ≤ damping t)
-    (hE : ∀ t ∈ Ico a b, ‖E t‖ ≤ matrixError / S)
-    (hu : ContinuousOn u (Icc a b)) (hf : ContinuousOn f (Icc a b))
-    (hode : ∀ t ∈ Ico a b, HasDerivWithinAt u
-      (coefficient (lam t) (damping t) (E t) (u t) + f t) (Ici t) t) :
-    ∀ t ∈ Icc a b,
-      ‖u t‖ ≤ Real.exp (((dampingError + matrixError) / S) * (t - a)) *
-        GaussianEnvelope.envelope rate midpoint t *
-        (‖u a‖ / GaussianEnvelope.envelope rate midpoint a +
-          ∫ s in a..t, ‖f s‖ / GaussianEnvelope.envelope rate midpoint s) := by
-  apply norm_le_envelope_mul_integral_on
-    (fun t => coefficient (lam t) (damping t) (E t)) rate
-    (GaussianEnvelope.envelope rate midpoint)
-    (div_nonneg (add_nonneg hdampingError hmatrixError) hS.le)
-    (GaussianEnvelope.envelope_pos rate midpoint) (hasDerivAt_envelope hrate midpoint)
-    hu hf hode
-  intro t ht x
-  apply (coefficient_energy_le (hlam t ht) (damping t) (E t) x).trans
-  apply mul_le_mul_of_nonneg_right _ (sq_nonneg ‖x‖)
-  rw [hreference t ht, add_div]
-  linarith [hdamping t ht, hE t ht]
 
 /-- A nonzero integer harmonic only increases nonnegative fundamental damping. -/
 theorem high_harmonic_damping {j : ℤ} (hj : j ≠ 0) {D d δ : ℝ}
@@ -349,9 +317,6 @@ noncomputable def referenceViscosity (lam u ell t : ℝ) : ℝ :=
   lam * (1 + (PulseGrowth.slotMagnitude u ell t) ^ 2) /
     ((1 + u ^ 2) * Real.sqrt (1 + u ^ 2))
 
-theorem reference_rate_split (lam u ell t : ℝ) :
-    GaussianEnvelope.referenceRate lam u ell t =
-      referenceEigenvalue lam u ell t - referenceViscosity lam u ell t := rfl
 
 theorem referenceEigenvalue_nonneg {lam : ℝ} (hlam : 0 ≤ lam) (u ell t : ℝ) :
     0 ≤ referenceEigenvalue lam u ell t :=

@@ -372,38 +372,6 @@ theorem fromReference_gaussian_character (D : AssemblyData Parameter) (h : ℝ) 
   simp only [Pi.smul_apply, smul_mul_assoc, Complex.smul_re, smul_eq_mul]
   rfl
 
-/-- Naturality of the actual finite Gaussian harmonic block, with all
-angular variables retained. No equality of Gaussian outputs is assumed. -/
-theorem fromReference_gaussianBlock (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ)
-    (N n i : ℕ)
-    (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-      (ChartScales.Q_pos D.reference.band) i (gap n) n)
-    (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    {U : Set Parameter} (R : ∀ j ∈ modes N, ReferenceODE D j U)
-    (hcutoff : ContDiff ℝ ∞ D.reference.cutoff) (hfrequency : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    (hfast : waveChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) (gap n)
-      (D.directions.fastScale n • D.directions.fast) =
-      clockWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) •
-        (D.directions.fastScale D.reference.band • D.directions.fast))
-    (x : Parameter × Plane) (hxpos : 0 < x.1.1)
-    (hx : parameterChange h (ChartScales.Q n) (ChartScales.Q D.reference.band) x.1 ∈ U)
-    (θ : ℝ) (k : Fin 3) :
-    ((CorrectionStep.ParticularParameters.fromReference D h gap).gaussianBlock
-      D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N).oscillation n (x, θ) k =
-      sourceWeight h (ChartScales.Q n) (ChartScales.Q D.reference.band) *
-      ((referenceParameters D).gaussianBlock D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N).oscillation
-        D.reference.band
-        (PhysicalResidualNaturality.associatedChart h (ChartScales.Q_pos n)
-          (ChartScales.Q_pos D.reference.band) (gap n) x, θ) k := by
-  unfold CorrectionStep.ParticularParameters.gaussianBlock
-  rw [assembledBlock_value, assembledBlock_value, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro j hj
-  have hj0 : (j : ℝ) ≠ 0 := by exact_mod_cast ((mem_modes N j).mp hj).1
-  exact fromReference_gaussian_character D h gap j n i H hn hr (R j hj) hcutoff
-    (mul_ne_zero hj0 (hfrequency n)) (mul_ne_zero hj0 (hfrequency D.reference.band))
-    hfast x hxpos hx θ k
 
 
 end HarmonicAssembly

@@ -82,16 +82,6 @@ theorem commonPotential_smooth (n : ℕ) :
     ((j : ℝ) * D.carrierBlock.frequency n) (C.background.phase_smooth n)
     (commonRaw_smooth D C n) (C.normal_nonzero n)
 
-/-- The constructed common coefficient, including its native cutoff,
-gives exactly the wave already used by the assembly. -/
-theorem commonPotential_curl (n : ℕ) {x : (P × ℝ) × Plane} (hx : x ∈ D.strip.domain) :
-    CurlClassBounds.cylindricalCurl (D.background.radius n) (D.directions.radialField n)
-      (fun _ => D.directions.angular) (D.directions.axialField D.strip n)
-      (commonPotential D j n) x =
-    vectorMode ((D.wave j).frequency n) ((D.wave j).phase n) ((D.wave j).amplitude n) x := by
-  exact CurlClassBounds.cylindricalCurl_vectorPotential (C.background.cylindrical n)
-    (C.frequency_nonzero n) (C.background.phase_smooth n) (commonRaw_smooth D C n)
-    (C.normal_nonzero n) (fun y hy => commonRaw_tangent D C n hy) hx
 
 
 
@@ -1068,22 +1058,6 @@ theorem referenceVelocity_zero_of_source (D : AssemblyData Parameter) (j : ℤ) 
       D.reference.geometry D.reference.length_pos.le copy p Y (fun v hv => hf _), smul_zero]
   · exact tsum_zero
 
-theorem referencePotential_zero_of_source (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ)
-    (hQr : 0 < Qr) {delta : ℝ}
-    (hf : ∀ p : Parameter, p.1 ≤ Qr ^ (-(1 / 2 : ℝ)) * delta →
-      ∀ Y : Plane, referenceSource D j (p, Y) = 0)
-    (z : SpaceTime) (hz : z.2 0 ≤ delta) : referencePotential D h Qr I j z = 0 := by
-  have hp : (nativeMap h Qr I z).1.1.1 ≤ Qr ^ (-(1 / 2 : ℝ)) * delta := by
-    change Qr ^ (-(1 / 2 : ℝ)) * z.2 0 ≤ Qr ^ (-(1 / 2 : ℝ)) * delta
-    exact mul_le_mul_of_nonneg_left hz (Real.rpow_pos_of_pos hQr _).le
-  have ha : physicalRaw D h Qr I j z = 0 := by
-    change Qr ^ (-CoordinateAlgebra.A h) • referenceVelocity D.reference D.context D.state
-      D.carrierBlock D.gaussianInput D.aliasInput j ((nativeMap h Qr I z).1.1, (nativeMap h Qr I z).2) = 0
-    rw [referenceVelocity_zero_of_source D j _ (hf _ hp), smul_zero]
-  ext component
-  simp [referencePotential, PhysicalCurlCovariance.referencePotential, CurlClassBounds.vectorPotential,
-    HarmonicCalculus.vectorMode, HarmonicCalculus.mode, CurlClassBounds.coefficient,
-    CurlClassBounds.normalCoefficient, CurlClassBounds.normalCross, ha]
 
 
 
@@ -1141,34 +1115,9 @@ theorem complexPhysicalPressure_smoothAt : ContDiffAt ℝ ∞ (complexPhysicalPr
     ((C.background.phase_smooth D.reference.band).contDiffAt (D.strip.isOpen_domain.mem_nhds hx)).comp z hm
   exact hp.mul ((contDiffAt_const.mul (Complex.ofRealCLM.contDiff.comp_contDiffAt z hphi)).cexp)
 
-theorem physicalPressure_smoothAt : ContDiffAt ℝ ∞ (physicalPressure D h Qr I delta j)
-    (z.1, CylindricalResidual.chart z.2) := by
-  have hv : ContDiffAt ℝ ∞ (pressureVector (complexPhysicalPressure D h Qr I j)) z := by
-    apply contDiffAt_pi.mpr
-    intro component
-    fin_cases component
-    · exact contDiffAt_const
-    · exact contDiffAt_const
-    · exact complexPhysicalPressure_smoothAt D H C hQr hz hx
-  have hper (t r z : ℝ) : Periodic (fun theta => pressureVector (complexPhysicalPressure D h Qr I j)
-      (t, AxisymmetricResidual.pack r theta z)) (2 * Real.pi) := by
-    intro theta
-    simp only [pressureVector, complexPhysicalPressure_periodic D h Qr I j
-      (C.frequency_ne D.reference.band) t r z theta]
-  exact (AxisymmetricFields.projection 2).contDiff.comp_contDiffAt _
-    (PhysicalCurlCovariance.globalCartesianPotential_smoothAt_forward hdelta chart hper hchart hv)
 
 end PhysicalRegularity
 
-theorem labelPotential_smoothAt (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ}
-    (H : ReferenceChart D h Qr I) {N : ℕ} {α κ : ℝ} (C : D.controls N α κ)
-    (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0) (hx : nativeMap h Qr I z ∈ D.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    ContDiffAt ℝ ∞ (labelPotential D h Qr I delta N) (z.1, CylindricalResidual.chart z.2) := by
-  apply ContDiffAt.sum
-  intro j hj
-  exact physicalPotential_smoothAt D H (C j hj) hQr hz hx hdelta chart hchart
 
 
 

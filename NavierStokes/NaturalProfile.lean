@@ -79,11 +79,6 @@ theorem pullback_hasDerivAt_Y {F : ℝ × ℝ → ℝ}
   simp only [Function.comp_def, mul_one] at hd
   convert! hd using 1 ; simp only [rescalePoint, partialY, mul_comm]
 
-theorem pullback_partialY {F : ℝ × ℝ → ℝ}
-    (hF : ContDiffOn ℝ ∞ F (AxisEvaluation.strip window 20))
-    (Λ : ℝ) {p : ℝ × ℝ} (hp : p ∈ domain Λ) :
-    partialY (pullback Λ F) p = Λ * partialY F (rescalePoint Λ p) :=
-  (pullback_hasDerivAt_Y hF Λ hp).deriv
 
 
 theorem pullback_second_Y {F : ℝ × ℝ → ℝ}

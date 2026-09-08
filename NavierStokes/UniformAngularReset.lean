@@ -1197,24 +1197,6 @@ theorem pressure_interval_neutral (eta : ℝ) :
       rw [correctedAngular_unchanged d w.coefficients eta hy, sub_self])]
   exact w.pressure_neutral eta
 
-theorem physical_endpoint (eta : ℝ) :
-    Real.sqrt 2 * correctedHistory d w.coefficients eta =
-      (Real.exp d.releaseStart * Real.sqrt (2 * Real.exp d.releaseStart) *
-        correctedAngular d w.coefficients (d.releaseStart, eta)) / (1 - d.core.lam) := by
-  have hout : d.releaseStart ∉ Ioo (d.releaseStart - 4) d.releaseStart := by simp
-  rw [w.exact_endpoint eta, correctedAngular_unchanged d w.coefficients eta hout,
-    finalAngular_uniform_wait d eta (releaseStart_gt_flattenEnd d).le le_rfl,
-    Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2), AngularMomentReset.sqrt_exp_half]
-  unfold baseWeight
-  have hex : Real.exp d.releaseStart * Real.exp (d.releaseStart / 2) =
-      Real.exp (3 * d.releaseStart / 2) := by rw [← Real.exp_add]; congr 1; ring
-  calc
-    _ = (Real.exp d.releaseStart * Real.exp (d.releaseStart / 2)) * Real.sqrt 2 *
-        (radialAmplitude d.core.P d.core.dropLength d.core.lam d.releaseStart / 2) /
-          (1 - d.core.lam) := by
-      rw [hex]
-      field_simp [show 1 - d.core.lam ≠ 0 by linarith [d.core.lam_lt]]
-    _ = _ := by ring
 
 end ResetWitness
 
@@ -1262,23 +1244,6 @@ namespace ResetWitness
 
 variable {d : TailData} {K : ℝ} (w : ResetWitness d K)
 
-theorem correctedHistory_eq_integral (eta : ℝ) :
-    correctedHistory d w.coefficients eta =
-      ∫ t in Iic d.releaseStart, Real.exp (3 * t / 2) * correctedAngular d w.coefficients (t, eta) := by
-  have hc : Continuous (fun t => Real.exp (3 * t / 2) * correctedAngular d w.coefficients (t, eta)) :=
-    (Real.continuous_exp.comp ((continuous_const.mul continuous_id).div_const 2)).mul
-      ((correctedAngular_contDiff d w.coefficients w.smooth).continuous.comp
-        (continuous_id.prodMk continuous_const))
-  have hp : ∀ t ≤ 0, Real.exp (3 * t / 2) * correctedAngular d w.coefficients (t, eta) =
-      (d.core.P * shape eta) * Real.exp ((8 / 5 : ℝ) * t) := by
-    intro t ht
-    have hout : t ∉ Ioo (d.releaseStart - 4) d.releaseStart := by
-      intro hw
-      linarith [flattenEnd_pos d, last_four_after_flatten d, hw.1]
-    rw [correctedAngular_unchanged d w.coefficients eta hout]
-    exact full_weight_ideal d eta ht
-  exact (history_from_ideal_prefix d eta _ hc hp
-    ((flattenEnd_pos d).le.trans (releaseStart_gt_flattenEnd d).le)).2.symm
 
 
 end ResetWitness

@@ -44,18 +44,6 @@ structure AxisPreparation (F : Profile) (j : ℝ) where
     NaturalEntrance.entranceNormalization inputs Λ delta ≤ C →
       Nonempty (NaturalEntrance.EntranceProfile inputs Λ C)
 
-theorem prepare_axis (F : Profile) (hP : 2 ≤ F.data.core.P) {j : ℝ}
-    (hj : NaturalAxisData.SmallParameters F.data.h j) : Nonempty (AxisPreparation F j) := by
-  have he := NaturalEntrance.ideal_prefix_entranceProfile hj
-    (SchedulePressure.admissible F.data) hP
-    (fun y hy => SchedulePressure.clockWeight_ideal F.data hy)
-    (fun y hy => SchedulePressure.shapeExponent_ideal F.data hy)
-  have hd : F.axisDatum = PressureDatum.pressure
-      (SchedulePressure.clockWeight F.data) (SchedulePressure.shapeExponent F.data) :=
-    F.axisDatum_eq.trans (SchedulePressure.axisPressure_eq F.data)
-  rw [← hd] at he
-  obtain ⟨delta, sigma, hdelta, hsigma, inputs, bound, hbound, entrances⟩ := he
-  exact ⟨⟨delta, sigma, hdelta, hsigma, inputs, bound, hbound, entrances⟩⟩
 
 /-- The scale is selected before the normalization; both retain the same
 outgoing profile and the same analytic axis data. -/
@@ -207,13 +195,6 @@ theorem resetCoefficients_equation (F : Profile) (debt : ℝ → Debt) (eta : �
   rw [resetCoefficients, resetSolver.equation _ (smallDebt_mem hs)]
   exact FiveProfileMoments.physical_normalized_debt _ _ (idealAmplitude_pos F eta).ne' _
 
-theorem resetCoefficients_smooth (F : Profile) {debt : ℝ → Debt} {V : Set ℝ}
-    (hd : ContDiffOn ℝ ∞ debt V) (hs : ∀ eta ∈ V, SmallDebt F debt eta) :
-    ContDiffOn ℝ ∞ (resetCoefficients F debt) V := by
-  apply resetSolver.smooth.comp
-    (FiveProfileMoments.normalizedDebt_contDiffOn (idealAmplitude_smooth F).contDiffOn
-      idealU_smooth.contDiffOn hd (fun eta _ => (idealAmplitude_pos F eta).ne'))
-  exact fun eta heta => smallDebt_mem (hs eta heta)
 
 /-! ## Literal row densities and compact edits -/
 
@@ -714,17 +695,6 @@ theorem E_eq_sqrt_mul_f
   · rw [f, ite_eq_right hp, mul_div_cancel₀ _
       (Real.sqrt_pos.2 (mul_pos (by norm_num : (0 : ℝ) < 2) hX)).ne']
 
-theorem natural_prefix
-    (hsep : ShapeTransition.separation c.shapeTime A.normalization F.data.core.P ≤ Real.exp (-8))
-    (hscale : 1 ≤ A.scale) {p : Point} (hp : p.1 ≤ 4 / A.scale) :
-    c.f p = A.natural.profile.family.f p ∧ c.U p = A.natural.profile.family.U p := by
-  have hXi : (4 : ℝ) / A.scale ≤ Xi := by
-    apply (div_le_iff₀ A.scale_pos).mpr
-    have := mul_le_mul_of_nonneg_left hscale Xi_pos.le
-    norm_num [Xi] at *
-    linarith
-  exact ⟨(c.f_before_Xi (hp.trans hXi)).trans (c.seed_initial hp).1,
-    (c.physical_before_Xi hsep (hp.trans hXi)).1.trans (c.seed_initial hp).2⟩
 
 end Controls
 
@@ -2106,46 +2076,9 @@ theorem heated_seed_fields (coef : ℝ → HeatedOutgoing.Coeff)
   · rw [c.heatedE_before coef (hp.trans (c.Xi_lt_heatJoin hsep).le), hc.2]
     rfl
 
-theorem heated_seed_moments (coef : ℝ → HeatedOutgoing.Coeff)
-    (hsep : c.separation ≤ Real.exp (-8)) {X : ℝ} (hX : X ≤ Xi) (eta : ℝ) :
-    moments c.U (c.heatedE coef) X eta = moments c.seedProfiles.U c.seedProfiles.E X eta := by
-  ext i
-  apply setIntegral_congr_fun measurableSet_Ioc
-  intro x hx
-  rcases c.heated_seed_fields coef hsep (p := (x, eta)) (hx.2.trans hX) with ⟨_, hU, hE⟩
-  simp only [density, hU, hE]
 
 
-theorem Pi_smoothAt (hsep : c.separation ≤ Real.exp (-8)) {p : Point}
-    (hX : 0 < p.1) (hη : p.2 ∈ ReferencePath.parameterInterval) (hs : SmallDebt F c.debt p.2) :
-    ContDiffAt ℝ ∞ c.Pi p := by
-  have hp := c.admissible_nonnegative hX.le hη hs
-  apply ((c.profiles hsep).pressure_smooth.contDiffAt (c.admissibleDomain.isOpen.mem_nhds hp)).congr_of_eventuallyEq
-  filter_upwards [continuousAt_fst.eventually (Ioi_mem_nhds hX)] with q hq
-  exact (c.profiles_pressure hsep hq.le).symm
 
-theorem heated_pressure_blend {B : ℝ} (w : HeatedOutgoing.CompensationWitness F c.radius B)
-    (hsep : c.separation ≤ Real.exp (-8)) {p : Point}
-    (hX : 0 < p.1) (hη : p.2 ∈ HeatedOutgoing.parameterDomain) (hs : SmallDebt F c.debt p.2) :
-    c.heatedPi w.coefficients p = c.Pi p + c.heatBlend p.1 *
-      (HeatedOutgoing.Pi F c.radius w.coefficients p - c.Pi p) := by
-  by_cases ha : p.1 ≤ c.heatJoin
-  · rw [c.heated_pressure_before w.coefficients ha, c.heatBlend_before ha]
-    ring
-  · have hhot := c.heated_pressure_after w hsep (X := p.1) (eta := p.2) (le_of_not_ge ha) hη hs
-    change c.heatedPi w.coefficients (p.1, p.2) = _
-    rw [hhot]
-    by_cases hR : p.1 ≤ c.radius
-    · have hi := c.pressure_after_match hsep (X := p.1) (eta := p.2) (le_of_not_ge ha)
-        (physical_band_in_parameterInterval hη) hs
-      have ho := w.Pi_before_patch p.2 p.1 hη hX
-        (hR.trans (HeatedOutgoing.entrance_before_patch F c.radius c.radius_pos).le)
-      change HeatedOutgoing.Pi F c.radius w.coefficients p = _
-      rw [show c.Pi p = OutgoingDilation.Pi F c.radius p from hi,
-        show HeatedOutgoing.Pi F c.radius w.coefficients p = OutgoingDilation.Pi F c.radius p from ho]
-      ring
-    · rw [c.heatBlend_after (le_of_not_ge hR)]
-      ring
 
 
 theorem heatedE_positive {B : ℝ} (w : HeatedOutgoing.CompensationWitness F c.radius B)

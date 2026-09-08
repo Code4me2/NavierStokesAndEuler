@@ -81,16 +81,6 @@ theorem time_block_constant {ι : Type*} [Fintype ι] (directions : ι → LiftT
     (fun a b u => timeTranslateIsometry_add P T a b u)
     (fun u => timeTranslateIsometry_zero P T u) directions q f hf n a
 
-theorem pathLp_orbit_contDiff (T : ℝ) (hT : 0 ≤ T) (f : C(Icc (0 : ℝ) T,CylinderL2 P V))
-    (hf : ContDiff ℝ ∞ (fun a => pathTranslate P a f)) :
-    ContDiff ℝ ∞ (fun a => timeLift T (translate P a).toContinuousLinearMap (pathLp T hT f)) := by
-  have he : (fun a => timeLift T (translate P a).toContinuousLinearMap (pathLp T hT f)) =
-      (pathLpOperator T hT) ∘ (fun a => pathTranslate P a f) := by
-    funext a
-    convert (pathLp_timeLift T hT (translate P a).toContinuousLinearMap f).symm using 1
-    rfl
-  rw [he]
-  exact (pathLpOperator (E := CylinderL2 P V) T hT).contDiff.comp hf
 
 /-- The actual Ctime-to-time-L² inclusion preserves all mixed word blocks
 with exactly the square-root time length factor. -/

@@ -60,13 +60,6 @@ theorem force_joint_continuous : Continuous (force S) := by
       ((EulerLiftedGradientSpace.coveringMap_isOpenQuotient P).continuous.comp
         (continuous_snd.prodMk continuous_const)))
 
-theorem pressure_joint_continuous : Continuous (pressure S) := by
-  have hc : Continuous (projIcc 0 T hT.le) := continuous_projIcc
-  change Continuous (fun q : ℝ × Space => S.graphPotential 1 (projIcc 0 T hT.le q.1) q.2)
-  have hi : Continuous (fun q : ℝ × Space => (projIcc 0 T hT.le q.1,q.2)) :=
-    (hc.comp continuous_fst).prodMk continuous_snd
-  have hh := (S.graphPotential_joint_continuous 1).comp hi
-  exact hh
 
 theorem pressure_smooth (t : ℝ) : ContDiff ℝ ∞ (fun x => pressure S (t,x)) :=
   S.rawGraphPotential_smooth 1 (by norm_num [data]) t

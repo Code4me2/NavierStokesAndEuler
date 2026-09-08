@@ -713,18 +713,6 @@ theorem leadingVirtualStress_eq (n : ℕ) {x : Point} (hT : 0 < x.2.1.1) (hR : 0
   · exact (BaseChartJets.normalizedCoordinates_eta F.data.h_pos F.data.h_lt_half
       (p := slowCoordinates x) hT).le
 
-noncomputable def waveCoefficients (phase : ℕ → Point × ℝ → ℝ)
-    (amplitude : ℕ → Point × ℝ → HarmonicCalculus.ComplexVector)
-    (pressure : ℕ → Point × ℝ → ℂ) (frequency : ℕ → ℝ) :
-    LinearWaveBounds.WaveCoefficients (Point × ℝ) where
-  radius _ x := x.1.1
-  radialBase n x := radialBase H v upper B n x.1
-  frequencyBase n x := frequencyBase H v upper B n x.1
-  axialBase n x := axialBase H v upper B n x.1
-  phase := phase
-  amplitude := amplitude
-  pressure := pressure
-  frequency := frequency
 
 
 noncomputable def radialSlow (n : ℕ) (p : Slow) : ℝ :=
@@ -748,35 +736,7 @@ theorem radialSlow_smoothAt (n : ℕ) {p : Slow} (hp : 0 < p.2.2) :
   exact (physicalComponent_smoothAt H v upper B n 0 (x := insertSlow p) hp).comp p
     insertSlow.contDiff.contDiffAt
 
-/-- The slot clock can vary with the native construction. Its slow and
-angular coordinates stay literal, so no phase estimate enters the binding. -/
-noncomputable def nativeCoordinates (clock : ℕ → Point → ℝ) (n : ℕ) (x : Point × ℝ) : PhaseCalculus.Slot :=
-  (slowCoordinates x.1, (x.2, clock n x.1))
 
-theorem primaryCoefficients_match
-    (U : LocalSignedRequest.SlowRegion (2 * F.data.h))
-    {D : PhaseJetBounds.Domain ℕ Slow} (P : PrimaryPulseBounds.PhaseConstruction D)
-    (hF : P.phase.F = frequencySlow H v upper B)
-    (hG : P.phase.G = axialSlow H v upper B)
-    (chi : ℕ → Point × ℝ → PhaseCalculus.Slot)
-    (hchi : ∀ n x, (chi n x).1 = slowCoordinates x.1)
-    (amplitude : ℕ → Point × ℝ → HarmonicCalculus.ComplexVector)
-    (pressure : ℕ → Point × ℝ → ℂ) (frequency : ℕ → ℝ) :
-    PrimaryResidualClass.Matches (nativeStrip W U)
-      (context H v upper B (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
-        (PrimaryTargetBounds.radii_ordered W))
-      (PrimaryMaterialDefect.coefficients P (radialSlow H v upper B) chi amplitude pressure frequency) := by
-  refine ⟨rfl, ?_, ?_⟩
-  · funext n x
-    change (chi n x).1.1 = x.1.1
-    rw [hchi]
-    rfl
-  · intro n
-    funext x i
-    simp only [PrimaryMaterialDefect.coefficients, LinearWaveResidual.complexBase,
-      LinearWaveResidual.base, hchi, hF, hG, HarmonicResidual.contextBase, context, base,
-      radialSlow_pullback]
-    fin_cases i <;> rfl
 
 
 
@@ -784,12 +744,6 @@ noncomputable def nativeContext : CorrectionState.Context Point :=
   context H v upper B (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
     (PrimaryTargetBounds.radii_ordered W)
 
-theorem native_operator_bounds (U : LocalSignedRequest.SlowRegion (2 * F.data.h)) :
-    MeanIncrementBounds.OperatorBounds (nativeStrip W U) (nativeContext H v upper B).operators
-      ChartScales.kappa :=
-  operator_bounds F.data.h_pos.le U (PrimaryTargetBounds.leftRadius_pos W)
-    (PrimaryTargetBounds.radii_ordered W) (div_pos (FinalSlowBase.edgeExponent_pos W) (by norm_num))
-    zero_lt_one
 
 theorem native_base_bounds (U : LocalSignedRequest.SlowRegion (2 * F.data.h)) :
     MeanIncrementBounds.BaseBounds (nativeStrip W U) (nativeContext H v upper B).base :=
@@ -836,8 +790,6 @@ theorem native_stress_properties (U : LocalSignedRequest.SlowRegion (2 * F.data.
 
 end ActualFields
 
-noncomputable def constructedContext (upper : ℝ) (B : ℕ) : CorrectionState.Context Point :=
-  nativeContext FinalSlowBase.actualProfile.certificate FinalSlowBase.actualProfile.modulation upper B
 
 
 end NavierStokes.BaseContextAssembly

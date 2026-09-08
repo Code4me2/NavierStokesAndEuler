@@ -873,13 +873,6 @@ theorem norm_coverChange_le {d e Δ : ℕ} (hd : d ≤ Δ) (he : e ≤ Δ) :
         have := coverBound_ge_one Δ; linarith)
     _ = _ := (pow_two _).symm
 
-/-- Re-expressing a source by the true linear cover change preserves its
-physical wave exactly. This does not require finer native periodicity. -/
-theorem commonWave_reexpress (a h : ℝ) (n d e : ℕ) (r0 : ℝ)
-    (c : CarrierData) (amp : LiftPoint → ℂ) (j : ℤ) (w : SpaceTime) :
-    commonWave a h n d r0 c (amp ∘ coverChange d e) j w =
-      commonWave a h n e r0 c amp j w := by
-  simp only [commonWave, Function.comp_apply, coverChange_common]
 
 
 theorem RegularFamily.sum_locally_finite {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}

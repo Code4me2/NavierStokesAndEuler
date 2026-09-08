@@ -1,6 +1,7 @@
 import Euler.ParameterSobolevInverse
 import Euler.ParameterSobolevCommutator
-import Euler.ParameterWordInverse
+import Euler.ParameterWordProduct
+import Euler.BoundedInverseGevrey
 
 /-!
 # A single-radius inverse estimate in genuine fixed Sobolev blocks

@@ -40,17 +40,6 @@ theorem asymmetricTransport_eq {s : ℕ} (hs : 6 ≤ s)
   rw [asymmetricTransport_apply, transportBilinear_apply]
 
 
-/-- The genuine asymmetric transport bound needed to multiply a bounded Hs path with an L²-time H^(s+1) path. -/
-theorem asymmetricTransport_bound {s : ℕ} (hs : 6 ≤ s)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u : SobolevSpace period s) (v : SobolevSpace period (s+1)) :
-    ‖asymmetricTransport period hs L hL u v‖ ≤ 4*sobolevProductConstant period s*‖u‖*‖v‖ := by
-  rw [asymmetricTransport_apply]
-  have h := (norm_sum_le _ _).trans (Finset.sum_le_sum (s := (Finset.univ : Finset (Fin 4))) (fun i _ =>
-    (productHq_norm period hs (L i) (hL i) u (derivativeOperator period s i v)).trans
-      (mul_le_mul_of_nonneg_left (derivativeOperator_bound period i v)
-        (mul_nonneg (sobolevProductConstant_nonneg period s) (norm_nonneg u)))))
-  exact h.trans_eq (by simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring)
 
 
 end EulerAsymmetricTransport

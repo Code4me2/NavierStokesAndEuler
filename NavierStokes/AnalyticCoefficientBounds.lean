@@ -90,19 +90,6 @@ theorem hasDerivAt_realJet {f : ℂ → ℂ} {x : ℝ}
   unfold realJet
   simpa only [iteratedDeriv_succ] using hm.differentiableAt.hasDerivAt.real_of_complex
 
-/-- The real-axis jets really are the ordinary iterated real derivatives. -/
-theorem iteratedDeriv_realPart {f : ℂ → ℂ} {x : ℝ}
-    (hf : AnalyticAt ℂ f (x : ℂ)) (m : ℕ) :
-    iteratedDeriv m (fun t : ℝ => (f t).re) x = realJet f m x := by
-  induction m generalizing x with
-  | zero => simp [realJet]
-  | succ m ih =>
-      have heq : iteratedDeriv m (fun t : ℝ => (f t).re) =ᶠ[𝓝 x] realJet f m := by
-        filter_upwards [(Complex.continuous_ofReal.tendsto x).eventually
-          hf.eventually_analyticAt] with y hy
-        exact ih hy
-      rw [iteratedDeriv_succ, heq.deriv_eq]
-      exact (hasDerivAt_realJet hf m).deriv
 
 theorem UnitHolomorphic.abs_realJet_le {I : Window} {ρ : ℝ} {f : ℂ → ℂ}
     (hf : UnitHolomorphic I ρ f) (hρ : 0 < ρ) (m : ℕ)

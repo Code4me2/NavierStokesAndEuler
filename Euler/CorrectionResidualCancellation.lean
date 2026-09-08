@@ -52,10 +52,6 @@ theorem residual_cancellation {q : ℕ} {T : Type*} [TopologicalSpace T]
   rw [rawSource_eq_residual_increment period D hq t e,map_add]
   abel
 
-/-- The actual continuous corrected path is the prescribed approximation plus the constructed error. -/
-def correctedPath {q : ℕ} {T : ℝ} (D : CorrectionData period q (Icc (0 : ℝ) T))
-    (e : C(Icc (0 : ℝ) T,SobolevSpace period (q+1))) :
-    C(Icc (0 : ℝ) T,SobolevSpace period (q+1)) := D.approximation+e
 
 
 

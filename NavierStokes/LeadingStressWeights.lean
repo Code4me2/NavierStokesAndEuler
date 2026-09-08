@@ -1021,18 +1021,6 @@ theorem radialPullback_eq {D : RadialDomain} (P : Profiles D) (h : ℝ) {q : ℝ
     (hX : 0 < q.2) : radialPullback (logStress P h) q = stress P h (q.2, q.1) := by
   simp only [radialPullback, logChart, logStress, logPoint, Function.comp_apply, Real.exp_log hX]
 
-theorem radialPullback_jet_eq {D : RadialDomain} (P : Profiles D) (h : ℝ) {q : ℝ × ℝ}
-    (hX : 0 < q.2) (n : ℕ) :
-    iteratedFDeriv ℝ n (radialPullback (logStress P h)) q =
-      iteratedFDeriv ℝ n (fun p : ℝ × ℝ => stress P h (p.2, p.1)) q := by
-  have he : radialPullback (logStress P h) =ᶠ[𝓝 q]
-      (fun p : ℝ × ℝ => stress P h (p.2, p.1)) := by
-    filter_upwards [continuousAt_snd.eventually (Ioi_mem_nhds hX)] with p hp
-    exact radialPullback_eq P h hp
-  have he' : radialPullback (logStress P h) =ᶠ[𝓝[univ] q]
-      (fun p : ℝ × ℝ => stress P h (p.2, p.1)) := by simpa using he
-  simpa only [iteratedFDerivWithin_univ] using
-    (he'.iteratedFDerivWithin_eq (radialPullback_eq P h hX) n (𝕜 := ℝ))
 
 
 

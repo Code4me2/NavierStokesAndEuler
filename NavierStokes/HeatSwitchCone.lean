@@ -1180,25 +1180,8 @@ theorem logS_eq_past_integral (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ �
   change (∫ t in Iic y, f t) - _ = (∫ t in Iic y, f t) + _
   ring
 
-theorem logE_mul_logU (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ → Coeff) (p : Point) :
-    logE F XR c p * F.logU p = F.logE p * F.logU p := by
-  have hh := HeatedOutgoing.E_times_U F XR c p.2 (XR * Real.exp p.1) hXR
-    (mul_pos hXR (Real.exp_pos _))
-  simpa only [logE, HeatedOutgoing.U, OutgoingDilation.U, OutgoingDilation.E,
-    OutgoingProfile.Profile.U, OutgoingProfile.Profile.E, mul_div_cancel_left₀ _ hXR.ne',
-    Real.log_exp, Prod.mk.eta] using hh
 
 
-theorem changeRow_after_switch (F : Profile) {XR : ℝ} (hXR : 0 < XR) (c : ℝ → Coeff)
-    (eta : ℝ) (i : Fin 3) {X : ℝ} (hX : OutgoingDilation.switchRadius F XR ≤ X) :
-    HeatedOutgoing.changeRow F XR c eta i X = HeatedOutgoing.heatRow F XR eta i X := by
-  have hpos := (OutgoingDilation.switchRadius_pos F XR hXR).trans_le hX
-  rw [HeatedOutgoing.changeRow_decomposition F XR c eta i X hXR hpos]
-  have hc := OutgoingDilation.correction_zero_after_switch F XR X hXR (c eta) hX
-  have hz : HeatedOutgoing.patchRow F XR c eta i X = 0 := by
-    fin_cases i <;> simp [HeatedOutgoing.patchRow, TerminalCompensation.physicalProfile,
-      TerminalCompensation.cleanProfile, hc]
-  rw [hz, add_zero]
 
 
 end NavierStokes.HeatSwitchCone

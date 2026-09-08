@@ -32,16 +32,6 @@ variable (p q : C(K,LiftL2 P))
   (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p))
   (hq : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a q))
 
-theorem scalarProductPath_supported_left (L : Space →L[ℝ] ℝ) (hL : ‖L‖ ≤ 1)
-    (hs : ∀ t, p t ∈ Supported P Space S hS) (t : K) :
-    scalarProductPath P L hL p q hp hq t ∈ Supported P Space S hS := by
-  apply (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) _).mpr
-  have hzero := (mem_supportedSpace_ae (liftMeasure P) (spatialSet P S)
-    (spatialSet_measurable P S hS) (p t)).mp (hs t)
-  filter_upwards [hzero,scalarProductPath_ae P L hL p q hp hq t,pointField_ae P p hp t]
-    with x hz hr hrep hx
-  rw [hr, ← hrep, hz hx, map_zero, zero_smul]
 
 
 

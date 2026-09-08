@@ -363,19 +363,6 @@ theorem unit_periods_joint_extension {T : ℝ} {f : SpaceTime → V}
   exact extendTrace_periodic (ProblemStatement.coordinateVector i)
     (field_locallyUniform_limit hzero hlim) (fun s hs y => hperiod s hs y i) t x
 
-/-- A constructive endpoint extension theorem with exact full boundary jets. -/
-theorem exists_joint_endpoint_extension {T : ℝ} {f : SpaceTime → V}
-    {J : SpaceTime → FormalMultilinearSeries ℝ SpaceTime V}
-    {L : Space → FormalMultilinearSeries ℝ SpaceTime V}
-    (hzero : ∀ z : SpaceTime, z.1 < T → (J z 0).curry0 = f z)
-    (hderiv : ∀ n : ℕ, ∀ z : SpaceTime, z.1 < T →
-      HasFDerivAt (fun y => J y n) (J z (n + 1)).curryLeft z)
-    (hlim : ∀ n : ℕ, TendstoLocallyUniformly (fun t x => J (t, x) n)
-      (fun x => L x n) (𝓝[<] T)) :
-    ∃ g : SpaceTime → V, EqOn g f (openPast T) ∧ ContDiffOn ℝ ∞ g (closedPast T) ∧
-      ∀ n : ℕ, ∀ x : Space, iteratedFDerivWithin ℝ n g (closedPast T) (T, x) = L x n := by
-  exact ⟨extendTrace T f (fun x => (L x 0).curry0), fun z hz => extendTrace_of_lt hz.1,
-    contDiffOn_joint_extension hzero hderiv hlim, boundary_jets_eq_limits hzero hderiv hlim⟩
 
 end Normed
 

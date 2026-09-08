@@ -133,23 +133,8 @@ def transverseDisplacement : TimeLp T E →L[ℝ] C(Icc (0 : ℝ) T, E) :=
     ((transverseDerivatives T hT m).subtypeL.comp
       (transverseSolver T hT m H K hK hH hsmall))
 
-/-- The solved displacement vanishes at the initial endpoint. -/
-theorem transverseDisplacement_initial (f : TimeLp T E) :
-    transverseDisplacement T hT m H K hK hH hsmall f ⟨0, le_rfl, hT⟩ = 0 :=
-  (transverseSolver T hT m H K hK hH hsmall f).property.1
 
-/-- The solved displacement vanishes at the terminal endpoint. -/
-theorem transverseDisplacement_terminal (f : TimeLp T E) :
-    transverseDisplacement T hT m H K hK hH hsmall f ⟨T, hT, le_rfl⟩ = 0 := by
-  change terminalPrimitive T hT
-    (transverseSolver T hT m H K hK hH hsmall f : TimeLp T E) ⟨T, hT, le_rfl⟩ = 0
-  exact terminalPrimitive_terminal T hT
-    (transverseSolver T hT m H K hK hH hsmall f : TimeLp T E)
 
-/-- The solved displacement belongs to the actual moving transverse plane. -/
-theorem transverseDisplacement_tangent (f : TimeLp T E) (t : Icc (0 : ℝ) T) :
-    ⟪m t, transverseDisplacement T hT m H K hK hH hsmall f t⟫_ℝ = 0 :=
-  (transverseSolver T hT m H K hK hH hsmall f).property.2 t
 
 
 /-- The actual weak transverse displacement equation, tested against every
@@ -164,27 +149,7 @@ theorem transverseSolver_weak (f : TimeLp T E) (v : transverseDerivatives T hT m
     (T ^ 2 / 2) K hK (transversePrimitive_norm_sq T hT m)
     (timeMultiplier_quadratic_upper T hT H K hH) hsmall f v
 
-/-- The constructed weak inverse is unique in the actual transverse displacement space. -/
-theorem transverseSolver_unique (f : TimeLp T E) (u : transverseDerivatives T hT m)
-    (hu : ∀ v : transverseDerivatives T hT m,
-      ⟪(u : TimeLp T E), (v : TimeLp T E)⟫_ℝ -
-          ⟪timeMultiplier T hT H (transversePrimitive T hT m u),
-            transversePrimitive T hT m v⟫_ℝ =
-        -⟪f, transversePrimitive T hT m v⟫_ℝ) :
-    u = transverseSolver T hT m H K hK hH hsmall f :=
-  dirichletSolver_unique (transversePrimitive T hT m) (timeMultiplier T hT H)
-    (T ^ 2 / 2) K hK (transversePrimitive_norm_sq T hT m)
-    (timeMultiplier_quadratic_upper T hT H K hH) hsmall f u hu
 
-/-- The solved derivative has a polynomial finite-time bound, with no exponential in H. -/
-theorem transverseSolver_norm (f : TimeLp T E) :
-    ‖transverseSolver T hT m H K hK hH hsmall f‖ ≤ 2 * T * ‖f‖ := by
-  apply (dirichletSolver_norm (transversePrimitive T hT m) (timeMultiplier T hT H)
-    (T ^ 2 / 2) K hK (transversePrimitive_norm_sq T hT m)
-    (timeMultiplier_quadratic_upper T hT H K hH) hsmall f).trans
-  exact mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_left (transversePrimitive_norm_le T hT m) (by norm_num))
-    (norm_nonneg f)
 
 /-- Zero forcing has zero displacement, the pointwise-in-label support preservation property. -/
 @[simp] theorem transverseDisplacement_zero :

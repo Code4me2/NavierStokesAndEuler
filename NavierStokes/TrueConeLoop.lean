@@ -278,58 +278,7 @@ def HasConeMargin (ε p₁ p₂ A C : ℝ) : Prop :=
   ε ≤ A ∧ ε ≤ A * (1 + (C / A) ^ 2) - 2 ∧ ε ≤ p₁ + p₂ * (C / A) - 2 ∧
     ε ≤ coneBound (p₁ + p₂ * (C / A)) (p₂ - p₁ * (C / A)) - A * (1 + (C / A) ^ 2)
 
-/-- Compact slow parameters and a periodic fast parameter turn strict
-pointwise cone inequalities into one positive margin at every fast angle. -/
-theorem compact_periodic_trueCone_margins {X : Type*} [TopologicalSpace X]
-    (p₁ p₂ : X → ℝ) (A C : X × ℝ → ℝ) {K : Set X} (hK : IsCompact K)
-    (hp₁ : ContinuousOn p₁ K) (hp₂ : ContinuousOn p₂ K)
-    (hA : ContinuousOn A (K ×ˢ (univ : Set ℝ)))
-    (hC : ContinuousOn C (K ×ˢ (univ : Set ℝ)))
-    (hAp : ∀ x ∈ K, Function.Periodic (fun φ => A (x, φ)) 1)
-    (hCp : ∀ x ∈ K, Function.Periodic (fun φ => C (x, φ)) 1)
-    (hcone : ∀ x ∈ K, ∀ φ, InTrueCone (p₁ x) (p₂ x) (A (x, φ)) (C (x, φ))) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ x ∈ K, ∀ φ,
-      HasConeMargin ε (p₁ x) (p₂ x) (A (x, φ)) (C (x, φ)) := by
-  let Q : Set (X × ℝ) := K ×ˢ Icc 0 1
-  have hQ : IsCompact Q := hK.prod isCompact_Icc
-  have hAQ : ContinuousOn A Q := hA.mono (fun z hz => ⟨hz.1, mem_univ _⟩)
-  have hCQ : ContinuousOn C Q := hC.mono (fun z hz => ⟨hz.1, mem_univ _⟩)
-  have hp₁Q : ContinuousOn (fun z : X × ℝ => p₁ z.1) Q :=
-    hp₁.comp continuousOn_fst (fun _ hz => hz.1)
-  have hp₂Q : ContinuousOn (fun z : X × ℝ => p₂ z.1) Q :=
-    hp₂.comp continuousOn_fst (fun _ hz => hz.1)
-  let t : X × ℝ → ℝ := fun z => C z / A z
-  let P : X × ℝ → ℝ := fun z => p₁ z.1 + p₂ z.1 * t z
-  let J : X × ℝ → ℝ := fun z => p₂ z.1 - p₁ z.1 * t z
-  let v : X × ℝ → ℝ := fun z => A z * (1 + t z ^ 2)
-  have ht : ContinuousOn t Q := hCQ.div hAQ
-    (fun z hz => ne_of_gt (hcone z.1 hz.1 z.2).1)
-  have hP : ContinuousOn P Q := hp₁Q.add (hp₂Q.mul ht)
-  have hJ : ContinuousOn J Q := hp₂Q.sub (hp₁Q.mul ht)
-  have hv : ContinuousOn v Q := hAQ.mul (continuousOn_const.add (ht.pow 2))
-  obtain ⟨εa, hεa, hma⟩ := UniformCone.positive_uniform_margin hQ hAQ
-    (fun z hz => (hcone z.1 hz.1 z.2).1)
-  obtain ⟨εc, hεc, hmc⟩ := UniformCone.compact_trueCone_margins hQ hP hJ hv
-    (fun z hz => (hcone z.1 hz.1 z.2).2)
-  refine ⟨min εa εc, lt_min hεa hεc, fun x hx φ => ?_⟩
-  have hpair : Function.Periodic (fun θ => (A (x, θ), C (x, θ))) 1 := by
-    intro θ
-    exact Prod.ext (hAp x hx θ) (hCp x hx θ)
-  obtain ⟨θ, hθ, heq⟩ := hpair.exists_mem_Ico₀ (by norm_num) φ
-  have hAE : A (x, φ) = A (x, θ) := congrArg Prod.fst heq
-  have hCE : C (x, φ) = C (x, θ) := congrArg Prod.snd heq
-  rw [hAE, hCE]
-  have hmem : (x, θ) ∈ Q := ⟨hx, hθ.1, hθ.2.le⟩
-  exact ⟨(min_le_left _ _).trans (hma (x, θ) hmem),
-    (min_le_right _ _).trans (hmc (x, θ) hmem).1,
-    (min_le_right _ _).trans (hmc (x, θ) hmem).2.1,
-    (min_le_right _ _).trans (hmc (x, θ) hmem).2.2⟩
 
-theorem constructed_smooth (a m d p δ : ℝ) (ha : 0 < a) (hd : d ≠ 0) (hδ : 0 < δ) :
-    ContDiff ℝ ∞ (constructedA a m d p δ ha hd hδ) ∧
-      ContDiff ℝ ∞ (constructedC a m d p δ ha hd hδ) := by
-  have h := smooth_loop_shears (seedTilt a m d p δ) (seedSpeed a m δ) (seedTilt_contDiff a m d p δ)
-  exact ⟨rephase_contDiff _ _ h.1, rephase_contDiff _ _ h.2⟩
 
 theorem constructed_periodic (a m d p δ : ℝ) (ha : 0 < a) (hd : d ≠ 0) (hδ : 0 < δ) :
     Function.Periodic (constructedA a m d p δ ha hd hδ) 1 ∧
@@ -689,40 +638,6 @@ theorem family_joint_contDiffOn [FiniteDimensional ℝ E]
     ParametricRephase.rephaseFamily_contDiffOn (familyDensity a m p d δ hd hδ)
       (unphasedC a m p d δ) _ hU hrate hf.2⟩
 
-/-- Full compact-family true-cone realization. The set `B` can be the two
-interval boundary faces (including any compact auxiliary parameter set).
-The output agrees exactly with the nominal shear on an open neighborhood
-of `B`, and is jointly C∞ in slow parameters and periodic angle. -/
-theorem exists_compact_trueCone_family [FiniteDimensional ℝ E]
-    (a m p₁ p₂ : E → ℝ) {K B : Set E}
-    (hK : IsCompact K) (hB : IsCompact B) (hBK : B ⊆ K)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m)
-    (hp₁ : ContDiff ℝ ∞ p₁) (hp₂ : ContDiff ℝ ∞ p₂)
-    (haK : ∀ x ∈ K, 0 < a x)
-    (hPK : ∀ x ∈ K, 2 < p₁ x + p₂ x * m x)
-    (hrelaxed : ∀ x ∈ K, nominalSpeed (a x) (m x) <
-      coneBound (p₁ x + p₂ x * m x) (p₂ x - p₁ x * m x))
-    (htrueB : ∀ x ∈ B, 2 < nominalSpeed (a x) (m x)) :
-    ∃ U N : Set E, ∃ A C : E × ℝ → ℝ,
-      IsOpen U ∧ K ⊆ U ∧ IsOpen N ∧ B ⊆ N ∧ N ⊆ U ∧
-      ContDiffOn ℝ ∞ A (U ×ˢ (univ : Set ℝ)) ∧
-      ContDiffOn ℝ ∞ C (U ×ˢ (univ : Set ℝ)) ∧
-      (∀ x ∈ K, Function.Periodic (fun φ => A (x, φ)) 1 ∧
-        Function.Periodic (fun φ => C (x, φ)) 1 ∧
-        (∫ φ in (0 : ℝ)..1, A (x, φ)) = a x ∧
-        (∫ φ in (0 : ℝ)..1, C (x, φ)) = a x * m x ∧
-        ∀ φ, InTrueCone (p₁ x) (p₂ x) (A (x, φ)) (C (x, φ))) ∧
-      (∀ x ∈ N, ∀ φ, A (x, φ) = a x ∧ C (x, φ) = a x * m x) := by
-  obtain ⟨c⟩ := exists_family_choices a m p₁ p₂ hK hB ha.continuous hm.continuous
-    hp₁.continuous hp₂.continuous haK hPK htrueB
-  let U : Set E := {x | 0 < a x}
-  let A := familyA a m p₂ c.d c.delta (ne_of_gt c.d_pos) c.delta_pos
-  let C := familyC a m p₂ c.d c.delta (ne_of_gt c.d_pos) c.delta_pos
-  obtain ⟨N, hN, hBN, hNU, hmatch⟩ :=
-    family_nominal_neighborhood a m p₁ p₂ c ha.continuous hm.continuous hBK
-  have hs := family_joint_contDiffOn a m p₂ c.d c.delta ha hm hp₂ (ne_of_gt c.d_pos) c.delta_pos
-  exact ⟨U, N, A, C, isOpen_lt continuous_const ha.continuous, haK,
-    hN, hBN, hNU, hs.1, hs.2, family_pointwise_properties a m p₁ p₂ c hrelaxed, hmatch⟩
 
 
 end SmoothFamily

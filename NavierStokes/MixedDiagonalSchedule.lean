@@ -134,36 +134,6 @@ private theorem family_raw_bounds {h : ℝ} {S : Set SpaceTime}
   · exact raw_bounds_mono_loss hpos (direct_loss_le LA LB LP) hB
   · exact raw_bounds_mono_loss hpos (pressure_loss_le LA LB LP) hP
 
-/-- Simultaneous bounds for the fixed three input families and one actual
-integer schedule. No cut-stage estimate is a hypothesis. -/
-theorem exists_three_component_schedule {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {S : Set SpaceTime} (hS : S ⊆ PhysicalWaveSum.preterminal)
-    {A B : ℕ → VelocityField} {P : ℕ → PressureField}
-    (hA : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (A j) PhysicalWaveSum.preterminal)
-    (hB : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (B j) PhysicalWaveSum.preterminal)
-    (hP : ∀ j, 1 ≤ j → ContDiffOn ℝ ∞ (P j) PhysicalWaveSum.preterminal)
-    (g LA LB LP : ℕ → ℝ) (CA CB CP pA pB pP : ℕ → ℕ → ℝ)
-    (rawA : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) A g LA CA pA S)
-    (rawB : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) B g LB CB pB S)
-    (rawP : CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) P g LP CP pP S)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
-    ∃ a : ℕ → ℕ, lower ≤ a 0 ∧ (∀ j, 0 < a j) ∧
-      (∀ j, 2 * a j ≤ a (j + 1)) ∧ StrictMono a ∧
-      Tendsto (fun j => (a j : ℝ)) atTop atTop ∧
-      ThreeCutBounds a h A B P (fun j => g j / 2) (commonLoss LA LB LP) S := by
-  have hs : ∀ c j, 1 ≤ j → ContDiffOn ℝ ∞ (family A B P c j) PhysicalWaveSum.preterminal := by
-    intro c
-    fin_cases c
-    · exact hA
-    · exact hB
-    · exact hP
-  obtain ⟨a, hal, hap, had, ham, hat, hb⟩ :=
-    CutStageEstimates.exists_physical_finite_diagonal_cut_bounds hh hh1 hS hs g (commonRawLoss LA LB LP)
-      (scalarFamily (fun j m => |CA j m|) (fun j m => |CB j m|) (fun j m => |CP j m|))
-      (scalarFamily pA pB pP)
-      (family_raw_bounds (fun w hw => PhysicalWaveSum.physicalQ_pos hh hh1 (hS hw)) rawA rawB rawP) hg lower
-  exact ⟨a, hal, hap, had, ham, hat,
-    ⟨hb Component.potential, hb Component.direct, hb Component.pressure⟩⟩
 
 section InitialStage
 
@@ -201,16 +171,6 @@ theorem physical_initial_split {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   exact full_sum_eq_initial_add_positive (SolenoidalDiagonal.realScales_tendsto ha)
     (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).continuousAt (PhysicalWaveSum.physicalQ_pos hh hh1 hw) A
 
-theorem physical_initial_split_germ {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {a : ℕ → ℕ} (ha : StrictMono a) {V : Type*}
-    [NormedAddCommGroup V] [NormedSpace ℝ V] (A : ℕ → SpaceTime → V)
-    {w : SpaceTime} (hw : w ∈ PhysicalWaveSum.preterminal) :
-    SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A =ᶠ[𝓝 w]
-      (fun z => SolenoidalDiagonal.cutStage (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A 0 z +
-        SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h)
-          (CutStageEstimates.positiveStages A) z) := by
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with z hz
-  exact physical_initial_split hh hh1 ha A hz
 
 
 

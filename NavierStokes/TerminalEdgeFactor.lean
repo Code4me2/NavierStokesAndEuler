@@ -238,12 +238,6 @@ theorem radialFlatDensity_integral {c R r : ℝ} (hc : 0 < c) (hR : 0 < R) (hr :
   simpa only [sub_neg_eq_add, zero_add] using
     integral_Ioi_of_hasDerivAt_of_tendsto' hd (radialFlatDensity_integrable hc hR hr j ha) hz
 
-theorem chart_tau_identity (d : TailData) (p : EdgeParam) :
-    1 - timeOf p = chartQ d p * (1 - chartEta d p ^ 2) := by
-  exact SimilarityCoordinates.tau_coordinate_identity
-    (by linarith [d.h_pos] : 0 < 2 * d.h)
-    (by linarith [d.h_lt_half] : 2 * d.h < 1)
-    (p := (1 - timeOf p, p.2)) (sub_pos.mpr (timeOf_lt_one p))
 
 
 noncomputable def logTaper (d : TailData) (y0 : ℝ) (y : ℝ) : ℝ := tailShape d (y - y0)
@@ -496,11 +490,6 @@ theorem angularFactor_zero (C : ℝ) (d : TailData) (y0 : ℝ) (p : EdgeParam) :
   simp only [angularFactor, zero_pow (by norm_num : 3 ≠ 0), zero_div, zero_mul,
     add_zero, boundaryCoefficient]
 
-theorem angularFactor_zero_pos {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) (p : EdgeParam) :
-    0 < angularFactor C d y0 (p, 0) := by
-  rw [angularFactor_zero]
-  exact mul_pos (div_pos (mul_pos (by norm_num) (carrier_pos hC d y0 (p, 0)))
-    (radius_pos d y0 (p, 0))) (taperSlopeFactor_zero_pos d)
 
 
 
@@ -1529,21 +1518,7 @@ noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 : ℝ)
 noncomputable def physicalStressFactor (C : ℝ) (d : TailData) (y0 : ℝ)
     (y : EdgeParam × ℝ) : ℝ × ℝ := (angularFactor C d y0 y, y.2 ^ 6 * axialFactor C d y0 y)
 
-theorem physicalStressFactor_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
-    ContDiff ℝ ∞ (physicalStressFactor C d y0) :=
-  (angularFactor_contDiff C d y0).prodMk ((contDiff_snd.pow 6).mul (axialFactor_contDiff C d y0))
 
-theorem physicalStress_factorization (C : ℝ) (d : TailData) (y0 : ℝ) (y : EdgeParam × ℝ) :
-    physicalStress C d y0 y =
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) • physicalStressFactor C d y0 y := by
-  apply Prod.ext
-  · exact angularStress_factorization C d y0 y
-  · change axialStress C d y0 y =
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) * (y.2 ^ 6 * axialFactor C d y0 y)
-    rw [axialStress_factorization]
-    by_cases hx : y.2 = 0
-    · simp [hx]
-    · field_simp [hx]
 
 
 

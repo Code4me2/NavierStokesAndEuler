@@ -31,13 +31,6 @@ theorem support_mono {h C D qbig : ℝ} {f : SpaceTime → V}
   intro w ht hq hn
   exact (hf w ht hq hn).trans (mul_le_mul_of_nonneg_right hCD (Real.sqrt_nonneg _))
 
-theorem support_congr {h C qbig : ℝ} {f g : SpaceTime → V}
-    (hf : SublevelShrinkingSupport h C qbig f)
-    (he : EqOn f g (CutStageEstimates.physicalSublevel h qbig)) :
-    SublevelShrinkingSupport h C qbig g := by
-  intro w ht hq hn
-  apply hf w ht hq
-  rwa [he ⟨ht, hq⟩]
 
 theorem support_map_zero {E : Type*} [NormedAddCommGroup E]
     {h C qbig : ℝ} {f : SpaceTime → V}
@@ -244,25 +237,6 @@ theorem NativeOuterBounds.radius_pos {R : ℝ}
     (H : NativeOuterBounds R WA MA MB WP MP) : 0 < R :=
   ((MA 0).lower_pos.trans (MA 0).radii_lt).trans_le (H.potentialMean 0)
 
-/-- All three increment families share this explicit constant, independently
-of stage-dependent harmonics, native bands, cover gaps, and jet constants. -/
-theorem all_increment_support (hh : 0 < h) (hh1 : h < 1 / 2) {qbig R : ℝ}
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand)
-    (H : NativeOuterBounds R WA MA MB WP MP) :
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (potentialIncrement (WA j) (MA j))) ∧
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (directStages MB j)) ∧
-    (∀ j, SublevelShrinkingSupport h (outerConstant R) qbig (pressureIncrement (WP j) (MP j))) := by
-  refine ⟨?_, ?_, ?_⟩
-  · intro j
-    exact potentialIncrement_support (WA j) (MA j) hh hh1 (hqA j)
-      (H.potentialWave j) (H.potentialMean j)
-  · intro j
-    exact mean_angular_support (MB j) hh hh1 (hqB j) (H.directMean j)
-  · intro j
-    exact pressureIncrement_support (WP j) (MP j) hh hh1 (hqP j)
-      (H.pressureWave j) (H.pressureMean j)
 
 
 
@@ -283,8 +257,6 @@ section FixedPatch
 noncomputable def geometryOuterConstant (G : SignedMeanGain.Geometry) : ℝ :=
   outerConstant G.patch.b
 
-theorem geometryOuterConstant_pos (G : SignedMeanGain.Geometry) : 0 < geometryOuterConstant G :=
-  outerConstant_pos (G.patch.a_pos.trans G.patch.a_lt_b)
 
 /-- The concrete common constant for the manuscript's fixed actual patch. -/
 noncomputable def actualOuterConstant : ℝ := geometryOuterConstant ActualInitialization.geometry
@@ -329,11 +301,6 @@ abbrev ActualMeanFamily (degree : ℝ) (N gap : ℕ) :=
   PhysicalMeanJetBounds.CoherentFamily CorrectionInitialization.ActualPrimary.h degree N gap
     CorrectionInitialization.ActualPrimary.standardRegion.carrier ℝ
 
-/-- Native support on the single fixed actual patch. -/
-abbrev ActualNativeSupport {degree : ℝ} {N gap : ℕ} (D : ActualMeanFamily degree N gap) :=
-  PhysicalMeanJetBounds.NativeSupport CorrectionInitialization.ActualPrimary.h
-    ActualInitialization.geometry.patch.a ActualInitialization.geometry.patch.b N
-    CorrectionInitialization.ActualPrimary.standardRegion.carrier D.native
 
 
 end FixedPatch

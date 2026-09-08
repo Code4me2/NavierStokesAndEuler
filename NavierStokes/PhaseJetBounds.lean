@@ -948,20 +948,6 @@ section BandChoices
 variable {ι E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {D : Domain ι E}
 
-/-- The genuine nonzero angular rounding preserves uniform boundedness.
-It is constant in the chart variables even when it jumps across labels. -/
-theorem rounded_frequency_jets (k target : ι → ℝ) {M : ℝ} (hM : 1 ≤ M)
-    (hk : ∀ i, 1 ≤ k i) (ht : ∀ i, |target i| ≤ M) :
-    PolynomialJets D (fun i _ => PhaseEstimates.roundedFrequency (k i) (target i)) := by
-  apply PolynomialJets.const_uniform _ (show 1 ≤ M + 1 by linarith)
-  intro i
-  have hkpos : 0 < k i := lt_of_lt_of_le zero_lt_one (hk i)
-  have herr := PhaseEstimates.roundedFrequency_error hkpos (target i)
-  have hinv : 1 / k i ≤ 1 := (div_le_one hkpos).mpr (hk i)
-  have hsum := abs_add_le (PhaseEstimates.roundedFrequency (k i) (target i) - target i) (target i)
-  rw [sub_add_cancel] at hsum
-  rw [Real.norm_eq_abs]
-  linarith [ht i]
 
 
 

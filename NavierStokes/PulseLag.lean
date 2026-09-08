@@ -398,22 +398,6 @@ theorem normalizedLag_eq_affineLag (c : Parameters) (amp : ℝ → ℝ) (eta : �
   rw [he]
   field_simp [(momentScale_pos c 0).ne', (shape_pos eta).ne']
 
-/-- The actual mass lag satisfies the pulse ODE, including its right
-derivative at pulse time zero. -/
-theorem normalizedLag_hasDerivWithinAt (c : Parameters) (amp : ℝ → ℝ) (eta : ℝ)
-    {y : ℝ} (hy : 0 ≤ y) :
-    HasDerivWithinAt (normalizedLag c amp eta)
-      (pulseRatio c amp (y, eta) - decay c * normalizedLag c amp eta y) (Ici 0) y := by
-  have h := lag_hasDerivAt (decay c) (prefixCoefficient c 0 * parameterPolynomial eta)
-    (forcing_contDiff c (parameterPolynomial eta) (amp eta)).continuous y
-  change HasDerivAt (affineLag c (parameterPolynomial eta) (amp eta))
-    (forcing c (parameterPolynomial eta) (amp eta) y -
-      decay c * affineLag c (parameterPolynomial eta) (amp eta) y) y at h
-  have hd := (h.hasDerivWithinAt (s := Ici 0)).congr
-    (fun t ht => normalizedLag_eq_affineLag c amp eta ht)
-    (normalizedLag_eq_affineLag c amp eta hy)
-  rw [forcing_eq_pulseRatio, ← normalizedLag_eq_affineLag c amp eta hy] at hd
-  exact hd
 
 
 theorem normalizedLag_error (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
@@ -652,43 +636,8 @@ theorem fullError_bounds_of_amplitude_bounds (c : Parameters)
     dsimp [fullLagBound]
     ring
 
-/-- The concrete energy-closing amplitude satisfies the lag estimate. -/
-theorem amplitude_fullError_bounds (d : OutgoingTail.TailData)
-    (hwait : d.core.wait = 60 * Real.log (1 / d.core.lam))
-    (hsmall : d.core.lam ≤ 1 / 120) (hscale : PulseAmplitude.errorScale d.core ≤ 1 / 1000)
-    {eta y : ℝ} (heta : eta ^ 2 ≤ 1) (hy : 0 ≤ y) :
-    |fullError d.core (PulseAmplitude.amplitude d) eta y| ≤
-        fullLagBound d.core.P d.core.m * d.core.lam ^ 2 ∧
-      |deriv (fun t => fullError d.core (PulseAmplitude.amplitude d) t y) eta| ≤
-        fullLagBound d.core.P d.core.m * d.core.lam ^ 2 := by
-  have hs := PulseAmplitude.amplitude_spec d hsmall hwait hscale
-  have hb := hs.2 eta heta
-  apply fullError_bounds_of_amplitude_bounds d.core hwait hsmall
-    ((PulseAmplitude.amplitude_contDiff d).differentiable (by simp) eta).hasDerivAt
-  · have h := sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1)
-    nlinarith [sq_abs eta]
-  · rw [abs_of_pos (PulseAmplitude.amplitude_pos d eta)]
-    exact hb.2.1.le
-  · have hd := hb.2.2.2.1
-    linarith
-  · exact hy
 
 
-theorem smooth_amplitude_fullError_bounds (c : Parameters)
-    (hwait : c.wait = 60 * Real.log (1 / c.lam)) (hsmall : c.lam ≤ 1 / 120)
-    {amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ amp)
-    (hamp : ∀ eta : ℝ, eta ^ 2 ≤ 1 → |amp eta| ≤ 6 / 5)
-    (hamp' : ∀ eta : ℝ, eta ^ 2 ≤ 1 → |deriv amp eta| ≤ 1) :
-    ∀ eta y : ℝ, eta ^ 2 ≤ 1 → 0 ≤ y →
-      |fullError c amp eta y| ≤ fullLagBound c.P c.m * c.lam ^ 2 ∧
-        |deriv (fun t => fullError c amp t y) eta| ≤ fullLagBound c.P c.m * c.lam ^ 2 := by
-  intro eta y heta hy
-  apply fullError_bounds_of_amplitude_bounds c hwait hsmall
-    (ha.differentiable (by simp) eta).hasDerivAt
-  · exact (sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1)).mp (by simpa using heta)
-  · exact hamp eta heta
-  · exact hamp' eta heta
-  · exact hy
 
 
 

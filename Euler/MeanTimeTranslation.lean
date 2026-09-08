@@ -41,10 +41,6 @@ theorem translation_continuous (u : L2) : Continuous (fun a : Space => translati
   exact continuous_const.compMeasurePreservingLp hg
     (fun a => measurePreserving_add_right (volume : Measure Space) a) (by norm_num)
 
-/-- The same strong continuity holds on the closed solenoidal subspace. -/
-theorem solenoidalTranslation_continuous (u : solenoidalSpace) :
-    Continuous (fun a : Space => solenoidalTranslation a u) :=
-  (translation_continuous (u : L2)).subtype_mk (fun a => translation_solenoidal_mem a u.property)
 
 /-- Actual spatial translation at every Bochner time slice. -/
 def timeTranslation (T : ℝ) (a : Space) : TimeLp T L2 →ₗᵢ[ℝ] TimeLp T L2 :=

@@ -132,14 +132,6 @@ theorem copySum_memClass {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
   memClass_of_local_germs hw hj (fun n x _ => copySum_germ_cover K n (f n) (hs n) x)
 
 
-omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
-theorem copySum_support (K : Cells D I) (n : ℕ) (f : I → D → E)
-    (hs : ∀ i, support (f i) ⊆ K.carrier n i) :
-    support (copySum f) ⊆ ⋃ i, K.carrier n i := by
-  intro x hx
-  by_contra hn
-  have hz := copySum_zero_germ K n f hs (by simpa using hn)
-  exact hx hz.self_of_nhds
 
 omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
 theorem copySum_eventually_finite (K : Cells D I) (n : ℕ) (f : I → D → E)
@@ -326,14 +318,6 @@ theorem native_cutoff_support (g : Geometry) {K : Set Plane} {κ : Plane → ℝ
     support (fun z : P × Plane => κ (g.coordinates k z.2)) ⊆ nativeCell g K k :=
   fun _ hx => hκ hx
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem native_localized_support (g : Geometry) {K : Set Plane} {κ : Plane → ℝ}
-    (hκ : support κ ⊆ K) (f : Frequency → P × Plane → E) (k : Frequency) :
-    support (fun z => κ (g.coordinates k z.2) • f k z) ⊆ nativeCell g K k := by
-  intro z hz
-  apply hκ
-  intro he
-  exact hz (by simp only [he, zero_smul])
 
 
 end NativeCells
@@ -1062,43 +1046,8 @@ theorem globalGood_class_of_native (K : Cells D I)
     MemClass s w α (a.globalGood s d) :=
   copySum_memClass K hw (a.localGood_support K hs s d) hg
 
-/-- If the literal incoming source is supported in the union of native
-cores, the global Gaussian error is flat whenever the native error jets
-are uniformly flat.  No global error class is assumed. -/
-theorem globalGaussian_class_of_covered_source (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (hsource : ∀ n, support (a.source n) ⊆ ⋃ i, K.carrier n i)
-    {s : StripData D} (d : GraphDirections D) {w : ℕ → D → ℝ} {α : ℝ}
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    (hg : LocalJets s w α K.carrier (a.localGaussian d)) :
-    MemClass s w α (a.globalGaussian d) := by
-  apply memClass_of_local_germs hw hg
-  intro n x _
-  classical
-  by_cases h : ∃ i, x ∈ K.carrier n i
-  · obtain ⟨i, hi⟩ := h
-    exact Or.inl ⟨i, hi, a.globalGaussian_germ K hs d n hi⟩
-  · have hn := not_exists.mp h
-    exact Or.inr ((a.globalGaussian_uncovered_germ K hs d hn).trans (source_zero_germ K hsource hn))
 
-/-- A nonzero uncovered source is retained and estimated from its own
-primitive jets on that complement. -/
-theorem globalGaussian_class_with_complement (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} (d : GraphDirections D) {w : ℕ → D → ℝ} {α : ℝ}
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    (hg : LocalJets s w α K.carrier (a.localGaussian d))
-    (hf : ComplementJets s w α K.carrier a.source) :
-    MemClass s w α (a.globalGaussian d) :=
-  memClass_of_local_and_complement_germs hw hg hf
-    (fun n _ _ _ hx => a.globalGaussian_germ K hs d n hx)
-    (fun _ _ _ hx => a.globalGaussian_uncovered_germ K hs d hx)
 
-/-- The homogeneous construction has only the periodized derivative tail. -/
-theorem globalGaussian_of_source_zero (d : GraphDirections D)
-    (hf : a.source = fun _ _ => 0) : a.globalGaussian d = a.globalTail d := by
-  funext n x
-  simp [globalGaussian, hf]
 
 
 
@@ -1153,35 +1102,12 @@ theorem differentialGood_zero_germ (K : Cells D I)
   filter_upwards [hp, hr] with y hpy hry
   exact (congrArg₂ (· + ·) hpy hry).trans (zero_add 0)
 
-theorem globalGood_eq_differentialGood (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    (s : StripData D) (d : GraphDirections D) :
-    a.globalGood s d = a.differentialGood s d := by
-  classical
-  funext n x
-  by_cases h : ∃ i, x ∈ K.carrier n i
-  · obtain ⟨i, hi⟩ := h
-    exact (a.globalGood_germ K hs s d n hi).self_of_nhds.trans
-      (a.differentialGood_germ K hs s d n hi).self_of_nhds.symm
-  · exact (a.globalGood_zero_germ K hs s d (not_exists.mp h)).self_of_nhds.trans
-      (a.differentialGood_zero_germ K hs s d (not_exists.mp h)).self_of_nhds.symm
 
 /-- Only the carrier, geometry, and base fields of this coefficient are
 used in the background estimates. -/
 noncomputable def backgroundOnly : WaveCoefficients D :=
   { a.background with amplitude := fun _ _ => 0, pressure := fun _ _ => 0 }
 
-theorem common_inputBounds (K : Cells D I)
-    (hs : ∀ n i, support (a.cutoff n i) ⊆ K.carrier n i)
-    {s : StripData D} {d : GraphDirections D} {W : ℕ → D → ℝ} {α κ : ℝ}
-    (hb : InputBounds s W α κ d a.backgroundOnly)
-    (ha : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α K.carrier
-      (fun n i => (a.localized i).amplitude n))
-    (hp : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) (α + 1 / 2) K.carrier
-      (fun n i => (a.localized i).pressure n)) :
-    InputBounds s W α κ d a.common := by
-  obtain ⟨hva, hvp⟩ := a.common_classes K hs (hb.amplitude 0).weight_nonneg ha hp
-  exact { hb with amplitude := fun i => hva.map (ContinuousLinearMap.proj i), pressure := hvp }
 
 
 theorem localGaussian_wave_jets {s : StripData D} (d : GraphDirections D)
@@ -1436,30 +1362,6 @@ noncomputable def particularData (r : Reference P) (charts : BandCharts P)
 
 
 
-/-- This is the same actual periodization as `ParticularWaveAssembly`,
-with its single physical reference and original source. -/
-theorem particularData_common (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) {j : ℤ} (hj : j ≠ 0)
-    (hfrequency : ∀ n, b.frequency n ≠ 0)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) :
-    (particularData r charts c u b G A j base).common =
-      actualCommonCoefficients r charts c u b G A j base := by
-  let a := particularData r charts c u b G A j base
-  have ha : a.common.amplitude = (actualCommonCoefficients r charts c u b G A j base).amplitude := by
-    funext n
-    rw [actualCommon_amplitude_periodization]
-    rfl
-  have hp : a.common.pressure = (actualCommonCoefficients r charts c u b G A j base).pressure := by
-    funext n
-    rw [actualCommon_pressure_periodization r charts c u b G A hj hfrequency]
-    rfl
-  calc
-    a.common = { actualCarrier base b j with amplitude := a.common.amplitude, pressure := a.common.pressure } := rfl
-    _ = { actualCarrier base b j with
-      amplitude := (actualCommonCoefficients r charts c u b G A j base).amplitude,
-      pressure := (actualCommonCoefficients r charts c u b G A j base).pressure } := by rw [ha, hp]
-    _ = _ := rfl
 
 
 end ActualParticularData

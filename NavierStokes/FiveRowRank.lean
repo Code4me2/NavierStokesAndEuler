@@ -109,19 +109,11 @@ def gamma (lam C a b : ℝ) (d : Debt) : ℝ → ℝ :=
 /-- The unaltered power-law angular mean on the repair patch. -/
 def background (lam C R : ℝ) : ℝ := C * R ^ (-1 - 2 * lam)
 
-theorem deltaV_contDiff (lam C a b : ℝ) (d : Debt) : ContDiff ℝ ∞ (deltaV lam C a b d) :=
-  LocalizedMomentRepair.repair_contDiff _ _ _ _
 
 theorem gamma_contDiff (lam C a b : ℝ) (d : Debt) : ContDiff ℝ ∞ (gamma lam C a b d) :=
   LocalizedMomentRepair.repair_contDiff _ _ _ _
 
-theorem deltaV_hasCompactSupport (lam C a b : ℝ) (d : Debt) (hab : a < b) :
-    HasCompactSupport (deltaV lam C a b d) :=
-  LocalizedMomentRepair.repair_hasCompactSupport _ _ _ _ (cell_lower_lt_upper a b hab)
 
-theorem gamma_hasCompactSupport (lam C a b : ℝ) (d : Debt) (hab : a < b) :
-    HasCompactSupport (gamma lam C a b d) :=
-  LocalizedMomentRepair.repair_hasCompactSupport _ _ _ _ (cell_lower_lt_upper a b hab)
 
 theorem deltaV_tsupport_subset (lam C a b : ℝ) (d : Debt) (hab : a < b) :
     tsupport (deltaV lam C a b d) ⊆ Ioo a b :=
@@ -394,36 +386,6 @@ theorem axialDebt_norm_le (C : ℝ) (d : Debt) : ‖axialDebt C d‖ ≤ ‖C⁻
   rw [axialDebt_rescale, norm_smul]
   exact mul_le_mul_of_nonneg_left (axialDebt_one_norm d) (norm_nonneg _)
 
-/-- Every prescribed finite spatial jet is bounded linearly in the debt, uniformly in
-space. The geometric constant is independent of the nonzero amplitude `C`; all
-amplitude dependence is the displayed inverse factor. -/
-theorem finite_jet_bound (lam a b : ℝ) (hab : a < b) (N : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (C : ℝ) (k : ℕ), k ≤ N → ∀ (d e : Debt) (R : ℝ),
-      |iteratedDeriv k (deltaV lam C a b d) R - iteratedDeriv k (deltaV lam C a b e) R| +
-      |iteratedDeriv k (gamma lam C a b d) R - iteratedDeriv k (gamma lam C a b e) R| ≤
-        K * ‖C⁻¹‖ * ‖d - e‖ := by
-  obtain ⟨Kv, hKv, hv⟩ := LocalizedMomentRepair.repair_finite_jet_bound
-    (angularPowers lam) (cellLower a b) (cellUpper a b) (cell_lower_lt_upper a b hab) N
-  obtain ⟨Kg, hKg, hg⟩ := LocalizedMomentRepair.repair_finite_jet_bound
-    (axialPowers lam) (cellLower a b) (cellUpper a b) (cell_lower_lt_upper a b hab) N
-  refine ⟨Kv + Kg, add_nonneg hKv hKg, ?_⟩
-  intro C k hk d e R
-  have hvd : ‖angularDebt C d - angularDebt C e‖ ≤ ‖C⁻¹‖ * ‖d - e‖ := by
-    have hs : angularDebt C (d - e) = angularDebt C d - angularDebt C e :=
-      (angularDebtLinearMap C).map_sub d e
-    rw [← hs]
-    exact angularDebt_norm_le C (d - e)
-  have hgd : ‖axialDebt C d - axialDebt C e‖ ≤ ‖C⁻¹‖ * ‖d - e‖ := by
-    have hs : axialDebt C (d - e) = axialDebt C d - axialDebt C e :=
-      (axialDebtLinearMap C).map_sub d e
-    rw [← hs]
-    exact axialDebt_norm_le C (d - e)
-  calc
-    _ ≤ Kv * ‖angularDebt C d - angularDebt C e‖ + Kg * ‖axialDebt C d - axialDebt C e‖ :=
-      add_le_add (hv k hk _ _ R) (hg k hk _ _ R)
-    _ ≤ Kv * (‖C⁻¹‖ * ‖d - e‖) + Kg * (‖C⁻¹‖ * ‖d - e‖) :=
-      add_le_add (mul_le_mul_of_nonneg_left hvd hKv) (mul_le_mul_of_nonneg_left hgd hKg)
-    _ = (Kv + Kg) * ‖C⁻¹‖ * ‖d - e‖ := by ring
 
 
 end JetBounds

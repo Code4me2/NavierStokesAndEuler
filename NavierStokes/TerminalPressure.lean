@@ -844,11 +844,6 @@ noncomputable def outgoingPressure (C : ℝ) (d : OutgoingTail.TailData) (y0 : �
     SimilarityProfile.PhysicalProfile :=
   TerminalStress.canonicalPressure (TerminalStress.swirlCoefficient C d.h (outgoingTaper d y0))
 
-theorem outgoingPressure_contDiffAt (C : ℝ) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {p : SimilarityProfile.PhysicalPoint} (ht : p.1 < 1) (hs : 0 < p.2.1) :
-    ContDiffAt ℝ ∞ (outgoingPressure C d y0) p :=
-  canonicalPressure_contDiffAt C d.h_pos d.h_lt_half ht hs (outgoingTaper_contDiff d y0)
-    (outgoingTaper_bounds d y0) (outgoingTaper_plateau d y0)
 
 /-- Fully expanded formula for the actual pressure derivative needed in the
 terminal edge chart. The integration coordinate is the physical `s=r^2/2`. -/
@@ -863,19 +858,6 @@ theorem outgoingPressure_partialZ (C : ℝ) (d : OutgoingTail.TailData) (y0 : �
     (outgoingTaper_bounds d y0) (outgoingTaper_plateau d y0)
   simpa only [outgoingPressure, axialPressureIntegral, outgoingTaper_deriv, outgoingTaper] using he
 
-theorem outgoingPressure_partialZ_bound (C : ℝ) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {p : SimilarityProfile.PhysicalPoint} (ht : p.1 < 1) (hs : 0 < p.2.1) :
-    |SimilarityProfile.partialZ (outgoingPressure C d y0) p| ≤
-      (2 / (1 - 2 * d.h)) * SimilarityProfile.q d.h p ^ (-CoordinateAlgebra.D d.h) *
-        TerminalStress.physicalHeat C (1 + d.h) p ^ 2 *
-          (1 - OutgoingTail.tailShape d (Real.log (SimilarityProfile.X d.h p) - y0)) := by
-  have hb := canonicalPressure_partialZ_bound C d.h_pos d.h_lt_half ht hs
-    (outgoingTaper_contDiff d y0) (outgoingTaper_bounds d y0) (outgoingTaper_deriv_nonneg d y0)
-    (outgoingTaper_plateau d y0)
-  apply hb.trans
-  exact mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_right (logScaleDerivative_bound d.h_pos d.h_lt_half ht) (sq_nonneg _))
-    (sub_nonneg.mpr (outgoingTaper_bounds d y0 _).2)
 
 
 /-! ## Compact support of the terminal forcing and its positive mass -/

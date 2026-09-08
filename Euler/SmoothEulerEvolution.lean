@@ -109,17 +109,5 @@ theorem pointwise_time_derivative_of_classical
   rw [projIcc_of_mem hT ⟨hr.1.le,hr.2.le⟩]
   exact (hmatch ⟨r,hr.1.le,hr.2.le⟩ x).symm
 
-theorem sobolev_evolution_of_classical
-    (u : ℝ × Space → Space) (p : ℝ × Space → ℝ)
-    (hmatch : ∀ (t : Icc (0 : ℝ) T) x, u (t,x)=(U t).field x)
-    (hgradient : ∀ (t : Icc (0 : ℝ) T) x, gradient (fun y => p (t,y)) x=(G t).field x)
-    (hdiff : ∀ t ∈ Ioo 0 T, ∀ x, DifferentiableAt ℝ u (t,x))
-    (heuler : ∀ t ∈ Ioo 0 T, ∀ x, EulerLagrangian.momentumResidual u p (t,x)=0)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (sobolevPath U hU q))
-      (sobolevPath (rhs U hU G) (rhs_jet_continuous U hU G hG) q t)
-      (Icc (0 : ℝ) T) t :=
-  sobolev_evolution T hT U G hU hG
-    (pointwise_time_derivative_of_classical T hT U G u p hmatch hgradient hdiff heuler) q t
 
 end EulerSmoothEulerEvolution

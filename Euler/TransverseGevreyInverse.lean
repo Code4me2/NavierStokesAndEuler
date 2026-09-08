@@ -137,43 +137,6 @@ theorem fixedFrameSolution_gevrey
     (inverseCost T C₀ C₁ c) (formCost T C₀ C₁ CH) (forcingCost T C₀ C₁)
     (solveCost T C₀ C₁ CH c) Rc R hCR hFR hM hMC hMF hRc hR hinv hbA d hbrhs n x
 
-include hd hQ hQ₁ hH hRc hC₀ hC₁ hCH hbQ hbQ₁ hbH in
-/-- The factorial estimate applies to the recovered coordinate derivative of
-the original physical transverse solver. -/
-theorem transverseCoordinates_gevrey
-    (m : P → Icc (0 : ℝ) T → E)
-    (hTangent : ∀ y t v, ⟪m y t, Q y t v⟫_ℝ = 0)
-    (hRange : ∀ y t η, ⟪m y t, η⟫_ℝ = 0 → ∃ v : U, Q y t v = η)
-    (R : ℝ) (hR : 2 * solveCost T C₀ C₁ CH c * (Rc+1) ≤ R)
-    (f : P → TimeLp T E) (hf : ContDiff ℝ ∞ f) (d : ℕ)
-    (hbf : ∀ n x, ‖iteratedFDeriv ℝ n f x‖ ≤ majorant R d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => coordinateDerivative T hT (Q y) (Q₁ y) c hc (hLower y)
-      (transverseSolver T hT (m y) (H y) K hK (hPotential y) hsmall (f y) : TimeLp T E)) x‖ ≤
-      majorant R (d+1) n := by
-  let v := fun y => fixedFrameSolver T hT (Q y) (Q₁ y) (H y) c hc (hLower y) (hd y)
-    K hK (hPotential y) hsmall (f y)
-  have hv : ContDiff ℝ ∞ v :=
-    contDiff_fixedFrameSolution T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall hQ hQ₁ hH f hf
-  have hb (j : ℕ) (y : P) : ‖iteratedFDeriv ℝ j v y‖ ≤ majorant R (d+1) j :=
-    fixedFrameSolution_gevrey T hT Q Q₁ H c hc hLower hd K hK hPotential hsmall
-      hQ hQ₁ hH Rc C₀ C₁ CH hRc hC₀ hC₁ hCH hbQ hbQ₁ hbH R hR f hf d hbf j y
-  have heq : (fun y => coordinateDerivative T hT (Q y) (Q₁ y) c hc (hLower y)
-      (transverseSolver T hT (m y) (H y) K hK (hPotential y) hsmall (f y) : TimeLp T E)) =
-      fun y => (v y : TimeLp T U) := by
-    funext y
-    have he := fixedFrameSolver_eq_transverse T hT (Q y) (Q₁ y) (H y) c hc (hLower y) (hd y)
-      K hK (hPotential y) hsmall (m y) (hTangent y) (hRange y) (f y)
-    exact (congrArg (fun z : zeroTraceDerivatives (U := U) T hT => (z : TimeLp T U)) he).symm
-  rw [heq]
-  have hM := solveCost_one_le T C₀ C₁ CH c hT hC₀ hC₁ hCH
-  have hR0 : 0 ≤ R := by nlinarith
-  have hout := contraction_bound (zeroTraceDerivatives (U := U) T hT).subtypeL
-    (zeroTraceDerivatives (U := U) T hT).norm_subtypeL_le v hv R 1 hR0 zero_le_one (d+1)
-    (by simpa only [one_mul] using hb) n x
-  simp only [one_mul] at hout
-  convert hout using 1
-  rfl
 
 
 end EulerTransverseGevreyInverse

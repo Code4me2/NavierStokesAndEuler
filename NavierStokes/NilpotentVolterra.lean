@@ -1022,20 +1022,5 @@ theorem integralSolution_spec_open {R : ℝ} (hR : 0 ≤ R)
   exact ⟨fun z hz => (hlocal z hz).1.differentiableWithinAt, fun z hz => (hlocal z hz).2⟩
 
 
-/-- Zero axis data make the axis derivative depend only on the given forcing. -/
-theorem IsRegularSolution.axis_derivative_eq_forcing
-    {R : ℝ} {U : Set ℂ} {A₀ A₁ : VolterraAnalyticBounds.Coeff}
-    {f W : VolterraAnalyticBounds.Field} (hsol : IsRegularSolution R U A₀ A₁ f W)
-    (hU : IsOpen U) {z : ℂ} (hz : z ∈ U) (i : Fin 6) :
-    radialDeriv W 0 z i = (1 / ((VolterraAnalyticBounds.exponent i : ℝ) + 1)) • f 0 z i := by
-  have hp : VolterraAnalyticBounds.parameterDeriv W 0 z = 0 := by
-    funext j
-    have he : (fun w => W 0 w j) =ᶠ[𝓝 z] (fun _ : ℂ => (0 : ℂ)) := by
-      filter_upwards [hU.mem_nhds hz] with w hw
-      exact congrFun (hsol.axis_zero w hw) j
-    exact he.deriv_eq.trans (deriv_const z 0)
-  rw [hsol.axis_derivative z hz i]
-  simp only [equationRHS, VolterraAnalyticBounds.matrixAction,
-    hsol.axis_zero z hz, hp, Matrix.mulVec_zero, add_zero, Pi.add_apply, Pi.zero_apply]
 
 end NavierStokes.NilpotentVolterra

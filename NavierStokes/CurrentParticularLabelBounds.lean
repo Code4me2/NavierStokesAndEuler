@@ -224,11 +224,6 @@ theorem finite_modes_jet_bound (n : ℕ) {w : SpaceTime}
 
 end Summation
 
-theorem modes_card (N : ℕ) : (ParticularWaveAssembly.modes N).card = 2 * N := by
-  classical
-  unfold ParticularWaveAssembly.modes
-  rw [Finset.card_erase_of_mem (by simp), Int.card_Icc]
-  omega
 
 section ActualSums
 

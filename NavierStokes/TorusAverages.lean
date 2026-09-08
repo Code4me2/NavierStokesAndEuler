@@ -394,10 +394,6 @@ theorem nativeField_continuous {V : Type*} [TopologicalSpace V]
     Continuous (nativeField L center f) :=
   hf.comp (L.symm.continuous.comp (continuous_id.sub continuous_const))
 
-theorem nativeField_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (L : Plane ≃L[ℝ] Plane) (center : Plane) {f : Plane → V} (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (nativeField L center f) :=
-  hf.comp (L.symm.contDiff.comp (contDiff_id.sub contDiff_const))
 
 theorem nativeField_hasCompactSupport {V : Type*} [Zero V]
     (L : Plane ≃L[ℝ] Plane) (center : Plane) {f : Plane → V} (hf : HasCompactSupport f) :
@@ -425,15 +421,6 @@ theorem integral_nativeField {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ
     LinearEquiv.det_coe_symm L.toLinearEquiv
   rw [hd, inv_inv, ENNReal.toReal_ofReal (abs_nonneg _)]
 
-/-- The native compact-slot average is obtained from periodization and a
-Jacobian theorem, with no assumed averaging identity. -/
-theorem integral_periodize_nativeField {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (L : Plane ≃L[ℝ] Plane) (center : Plane) {f : Plane → V}
-    (hf : Continuous f) (hcf : HasCompactSupport f) :
-    (∫ z in fundamentalSquare, periodize (nativeField L center f) z) =
-      |LinearMap.det (L : Plane →ₗ[ℝ] Plane)| • ∫ z, f z := by
-  rw [integral_periodize ((nativeField_continuous L center hf).integrable_of_hasCompactSupport
-    (nativeField_hasCompactSupport L center hcf)), integral_nativeField]
 
 /-- The linear map with the radial and longitudinal vectors as its columns. -/
 noncomputable def slotLinearMap (vr vt : Plane) : Plane →ₗ[ℝ] Plane :=

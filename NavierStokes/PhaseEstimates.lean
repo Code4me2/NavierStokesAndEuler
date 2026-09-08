@@ -48,10 +48,6 @@ theorem roundedFrequency_integer {k : ℝ} (hk : k ≠ 0) (target : ℝ) :
   field_simp
 
 
-theorem roundedFrequency_ne_zero {k : ℝ} (hk : k ≠ 0) (target : ℝ) :
-    roundedFrequency k target ≠ 0 := by
-  apply div_ne_zero _ hk
-  exact_mod_cast nonzeroRound_ne_zero (k * target)
 
 theorem roundedFrequency_error {k : ℝ} (hk : 0 < k) (target : ℝ) :
     |roundedFrequency k target - target| ≤ 1 / k := by
@@ -971,12 +967,6 @@ theorem eventually_band_conditions (h : ℝ) (hh : 0 < h) :
   · simpa only [Real.rpow_two] using hnk.le
   · simpa only [Real.rpow_two, Real.rpow_one, mul_comm] using hn1.le
 
-theorem eventually_phaseError_le (h : ℝ) (hh : 0 < h) :
-    ∀ᶠ n : ℕ in atTop,
-      phaseError (ChartScales.S n) (ChartScales.epsilon h n) (ChartScales.carrier h n) ≤
-        4 / ChartScales.S n := by
-  filter_upwards [eventually_band_conditions h hh] with n hn
-  exact phaseError_le_four_div (lt_of_lt_of_le zero_lt_one hn.1) hn.2.1 hn.2.2.1 hn.2.2.2
 
 
 end NavierStokes.PhaseEstimates

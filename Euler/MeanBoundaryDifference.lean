@@ -62,37 +62,6 @@ theorem mixedBoundaryOperator_differenceCommutator (a : Space) (h : ℝ) (χ ψ 
   rw [mixedBoundaryOperator_scale_left, mixedBoundaryOperator_scale_right]
   simp only [ContinuousLinearMap.add_comp, ContinuousLinearMap.smul_comp, smul_add]
 
-/-- The commutator is bounded by the actual two cutoff difference quotients. -/
-theorem mixedBoundaryOperator_differenceCommutator_norm_le
-    (a : Space) (h : ℝ) (χ ψ : Cutoff) :
-    ‖(spatialDifference a h).comp (mixedBoundaryOperator χ ψ) -
-        (mixedBoundaryOperator χ ψ).comp (spatialDifference a h)‖ ≤
-      cutoffBound (χ.differenceQuotient a h) * cutoffBound (ψ.translate (h • a)) +
-        cutoffBound χ * cutoffBound (ψ.differenceQuotient a h) := by
-  rw [mixedBoundaryOperator_differenceCommutator]
-  apply ContinuousLinearMap.opNorm_le_bound _
-    (add_nonneg (mul_nonneg (cutoffBound_nonneg _) (cutoffBound_nonneg _))
-      (mul_nonneg (cutoffBound_nonneg _) (cutoffBound_nonneg _)))
-  intro z
-  change ‖mixedBoundaryOperator (χ.differenceQuotient a h) (ψ.translate (h • a))
-      (translation (h • a) z) + mixedBoundaryOperator χ (ψ.differenceQuotient a h)
-        (translation (h • a) z)‖ ≤ _
-  calc
-    _ ≤ ‖mixedBoundaryOperator (χ.differenceQuotient a h) (ψ.translate (h • a))
-          (translation (h • a) z)‖ +
-        ‖mixedBoundaryOperator χ (ψ.differenceQuotient a h) (translation (h • a) z)‖ :=
-      norm_add_le _ _
-    _ ≤ (cutoffBound (χ.differenceQuotient a h) * cutoffBound (ψ.translate (h • a))) *
-          ‖translation (h • a) z‖ +
-        (cutoffBound χ * cutoffBound (ψ.differenceQuotient a h)) * ‖translation (h • a) z‖ := by
-      apply add_le_add
-      · exact ((mixedBoundaryOperator _ _).le_opNorm _).trans
-          (mul_le_mul_of_nonneg_right (mixedBoundaryOperator_norm_le _ _) (norm_nonneg _))
-      · exact ((mixedBoundaryOperator _ _).le_opNorm _).trans
-          (mul_le_mul_of_nonneg_right (mixedBoundaryOperator_norm_le _ _) (norm_nonneg _))
-    _ = _ := by
-      rw [(translation (h • a)).norm_map]
-      ring
 
 
 end EulerMeanBoundary

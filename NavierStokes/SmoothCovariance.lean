@@ -167,39 +167,7 @@ theorem contDiffOn_amplitudes
   (contDiffOn_weights hH hT (fun x hx => (hcone x hx).det_ne_zero) i).sqrt
     (fun x hx => ne_of_gt ((hcone x hx).weights_pos i))
 
-/-- The complete amplitude vector, not only its coordinates, is smooth. -/
-theorem contDiffOn_amplitude_vector
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hcone : ∀ x ∈ s, StrictCone (H x) (T x)) :
-    ContDiffOn ℝ ∞ (fun x => amplitudes (H x) (T x)) s :=
-  contDiffOn_pi.mpr (contDiffOn_amplitudes hH hT hcone)
 
-/-- Smooth dependence of the coefficients as named in the original exact
-signed-slot module. All six scalar input functions are genuinely smooth. -/
-theorem contDiffOn_signed_coefficients {a b sm sp m t : E → ℝ}
-    (ha : ContDiffOn ℝ ∞ a s) (hb : ContDiffOn ℝ ∞ b s)
-    (hsm : ContDiffOn ℝ ∞ sm s) (hsp : ContDiffOn ℝ ∞ sp s)
-    (hm : ContDiffOn ℝ ∞ m s) (ht : ContDiffOn ℝ ∞ t s)
-    (hpos : ∀ x ∈ s, 0 < a x ∧ 0 < b x ∧ 0 < sm x ∧ 0 < sp x)
-    (i : Fin 2) :
-    ContDiffOn ℝ ∞
-      (fun x => Covariance.coefficients (a x) (b x) (sm x) (sp x) (m x) (t x) i) s := by
-  fin_cases i
-  · change ContDiffOn ℝ ∞
-      (fun x => (b x * m x - a x * t x) / (2 * a x * b x * sm x)) s
-    apply ((hb.mul hm).sub (ha.mul ht)).div
-      (((contDiffOn_const.mul ha).mul hb).mul hsm)
-    intro x hx
-    rcases hpos x hx with ⟨hap, hbp, hsmp, hspp⟩
-    exact ne_of_gt (by positivity)
-  · change ContDiffOn ℝ ∞
-      (fun x => (b x * m x + a x * t x) / (2 * a x * b x * sp x)) s
-    apply ((hb.mul hm).add (ha.mul ht)).div
-      (((contDiffOn_const.mul ha).mul hb).mul hsp)
-    intro x hx
-    rcases hpos x hx with ⟨hap, hbp, hsmp, hspp⟩
-    exact ne_of_gt (by positivity)
 
 
 end Smooth
@@ -257,22 +225,6 @@ theorem compact_uniform_positive (hK : IsCompact K)
   · exact (hbound x hx).trans ((min_le_right _ _).trans (min_le_left _ _))
   · exact (hbound x hx).trans ((min_le_right _ _).trans (min_le_right _ _))
 
-/-- The same compact family keeps every positive amplitude uniformly away
-from zero; no claim is made for a family touching a zero-stress edge. -/
-theorem compact_uniform_amplitudes (hK : IsCompact K)
-    (hH : ∀ i j, ContinuousOn (fun x => H x i j) K)
-    (hT : ∀ i, ContinuousOn (fun x => T x i) K)
-    (hcone : ∀ x ∈ K, StrictCone (H x) (T x)) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ x ∈ K,
-      δ ≤ |(H x).det| ∧ ∀ i,
-        δ ≤ weights (H x) (T x) i ∧ δ ≤ amplitudes (H x) (T x) i := by
-  obtain ⟨δ, hδ, hbound⟩ := compact_uniform_positive hK hH hT hcone
-  refine ⟨min δ (Real.sqrt δ), lt_min hδ (Real.sqrt_pos.mpr hδ), ?_⟩
-  intro x hx
-  refine ⟨(min_le_left _ _).trans (hbound x hx).1, ?_⟩
-  intro i
-  exact ⟨(min_le_left _ _).trans ((hbound x hx).2 i),
-    (min_le_right _ _).trans (Real.sqrt_le_sqrt ((hbound x hx).2 i))⟩
 
 end Compact
 

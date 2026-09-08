@@ -480,21 +480,7 @@ theorem periodized_uniform {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
     · exact (hx (by simp only [copied, ite_eq_right hn])).elim
   · exact copied_uniformLocalJets hf
 
-theorem periodized_velocity_uniform :
-    LabelSumBounds.UniformWaveClass nativeStrip envelope (1 / 2)
-      (periodized (CoordinateAlgebra.A ActualPrimary.h)
-        (fun l : SignedLabel B N0 => fun x => CurlClassBounds.complexify (ActualPrimary.attachedRawVelocity l.1 l.2 x))) := by
-  apply periodized_uniform complex_velocity_native_jets
-  intro l x hx
-  apply ActualPrimary.attachedRawVelocity_core l.1 l.2 x
-  intro hz
-  exact hx (by rw [hz, map_zero])
 
-theorem periodized_pressure_uniform :
-    LabelSumBounds.UniformWaveClass nativeStrip envelope 1
-      (periodized (2 * CoordinateAlgebra.A ActualPrimary.h)
-        (fun l : SignedLabel B N0 => ActualPrimary.attachedRawPressure l.1 l.2)) :=
-  periodized_uniform pressure_native_jets (fun l x => ActualPrimary.attachedRawPressure_core l.1 l.2 x)
 
 end ActualCopySums
 

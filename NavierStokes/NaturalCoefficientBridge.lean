@@ -357,14 +357,6 @@ noncomputable def historiesProfiles {D : ProfileHistories.RadialDomain}
     (zeroSequence (fun p => SlowDivergence.radialFlux h 0 Q.U p / p.1))
     (zeroSequence Q.pressure)
 
-theorem historiesProfiles_flux {D : ProfileHistories.RadialDomain}
-    (h C : ℝ) (Q : ProfileHistories.Profiles D) :
-    (historiesProfiles h C Q).flux 0 = SlowDivergence.radialFlux h 0 Q.U := by
-  funext p
-  change p.1 * (SlowDivergence.radialFlux h 0 Q.U p / p.1) = _
-  by_cases hp : p.1 = 0
-  · simp [SlowDivergence.radialFlux, hp]
-  · rw [mul_comm, div_mul_cancel₀ _ hp]
 
 section Transition
 
@@ -377,19 +369,6 @@ variable (hP0 : ContDiff ℝ ∞ P0) (hT : 0 < T)
 variable (hb : δ ≤ (TransitionRamp.ofNatural F hΛ hsmall hδ hδT hP0).bigTime)
 variable (hw₁ : 0 < w₁) (hw₂ : 0 < w₂)
 
-/-- Concrete matching for the exact stock continuation later used by the
-nominal profile. -/
-theorem transition_initial_fields :
-    let Q := TransitionRamp.physicalProfiles F hΛ hsmall hδ hδT hP0
-      (κ := κ) hT hb hw₁ hw₂
-    EqOn Q.f F.f (initialBand Λ) ∧ EqOn Q.U F.U (initialBand Λ) := by
-  constructor
-  · intro p hp
-    exact (TransitionRamp.physical_fields_natural F hΛ hsmall hδ hδT hP0
-      T κ w₁ w₂ hp.1.2).1
-  · intro p hp
-    exact (TransitionRamp.physical_fields_natural F hΛ hsmall hδ hδT hP0
-      T κ w₁ w₂ hp.1.2).2
 
 
 end Transition
@@ -447,33 +426,7 @@ theorem radial_densities_zero {R η : ℝ} (hR : R ∈ Icc (0 : ℝ) a) (hη : �
     simp only [SlowResidualMatching.thetaDensity, SlowResidualMatching.zDensity,
       SlowResidualMatching.radiusPoint, he.1, he.2, mul_zero, and_self]
 
-/-- Both defining radial integrals vanish. This proves the integration
-constants are zero, rather than only proving a derivative equation. -/
-theorem radial_primitives_zero {R η : ℝ} (hR : R ∈ Icc (0 : ℝ) a) (hη : η ∈ S) :
-    ProfileHistories.primitive (SlowResidualMatching.thetaDensity h C f 0) (R, η) = 0 ∧
-      ProfileHistories.primitive (SlowResidualMatching.zDensity h f 0) (R, η) = 0 := by
-  have hint (F : InnerProfile) (hF : ∀ ρ ∈ Icc (0 : ℝ) a, F (ρ, η) = 0) :
-      ProfileHistories.primitive F (R, η) = 0 := by
-    change (∫ ρ in (0 : ℝ)..R, F (ρ, η)) = 0
-    calc
-      _ = ∫ _ρ in (0 : ℝ)..R, (0 : ℝ) := by
-        apply intervalIntegral.integral_congr
-        intro ρ hρ
-        rw [uIcc_of_le hR.1] at hρ
-        exact hF ρ ⟨hρ.1, hρ.2.trans hR.2⟩
-      _ = 0 := by simp
-  exact ⟨hint _ (fun ρ hρ => (radial_densities_zero (C := C) ha hzero hρ hη).1),
-    hint _ (fun ρ hρ => (radial_densities_zero (C := C) ha hzero hρ hη).2)⟩
 
-/-- The canonical negative stress primitives are zero on the entire inner
-half-line, including their defined zero extension across the axis. -/
-theorem radial_stresses_zero {R η : ℝ} (hR : R ≤ a) (hη : η ∈ S) :
-    SlowStressSupport.stress 2 (SlowResidualMatching.thetaDensity h C f 0) (R, η) = 0 ∧
-      SlowStressSupport.stress 1 (SlowResidualMatching.zDensity h f 0) (R, η) = 0 := by
-  exact ⟨SlowStressSupport.stress_inner 2
-      (fun η hη R hR => (radial_densities_zero (C := C) ha hzero hR hη).1) hR hη,
-    SlowStressSupport.stress_inner 1
-      (fun η hη R hR => (radial_densities_zero (C := C) ha hzero hR hη).2) hR hη⟩
 
 end RadialPrimitives
 

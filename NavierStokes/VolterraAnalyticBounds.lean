@@ -548,22 +548,6 @@ theorem norm_wordLayer_le {A₀ A₁ : Coeff} {F : Field} {T ρ σ B M : ℝ} {c
       simpa using norm_word_le hB hM hT hgap hshape hA₀ hA₁ hF ha (List.ofFn v) hr hz i
     _ = _ := by simp [mul_assoc, mul_comm, mul_left_comm]
 
-/-- Absolute convergence of the actual Volterra-word expansion at every
-point of a smaller closed parameter disk, uniformly bounded by one summable
-sequence independent of that point. -/
-theorem summable_norm_wordLayer {A₀ A₁ : Coeff} {F : Field}
-    {T ρ σ B M : ℝ} {c : ℂ}
-    (hB : 0 ≤ B) (hM : 0 ≤ M) (hT : 0 ≤ T) (hgap : ρ < σ)
-    (hshape : DerivativeShape A₁)
-    (hA₀ : MatrixBound A₀ T c σ M) (hA₁ : MatrixBound A₁ T c σ M)
-    (hF : RadialBound F T c σ B 0)
-    (ha : ∀ v, AnalyticField (word A₀ A₁ v F) T c σ)
-    {r : ℝ} (hr : r ∈ Icc 0 T)
-    {z : ℂ} (hz : z ∈ closedBall c ρ) (i : Fin 6) :
-    Summable (fun k => ‖wordLayer A₀ A₁ F k r z i‖) :=
-  Summable.of_nonneg_of_le (fun _ => norm_nonneg _)
-    (fun k => norm_wordLayer_le hB hM hT hgap hshape hA₀ hA₁ hF ha k hr hz i)
-    (summable_wordLayers (mul_nonneg hM hT) (zero_le_one.trans (le_max_left _ _)))
 
 
 

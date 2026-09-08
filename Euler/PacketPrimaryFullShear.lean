@@ -108,21 +108,5 @@ theorem fullWave_physical_canonical_norm (α k : ℝ) (hα : 0 ≤ α) (hk : k �
     envelopedVelocity_independent_profile τ hτ hτT B δ 1 hδ zero_lt_one]
   rfl
 
-/-- The source amplitude choice gives exactly the requested center shear
-for the genuine primary, at any chosen target time. The size in this
-choice uses the velocity independent of the narrow profile δ. -/
-theorem fullWave_target_shear (h k : ℝ) (hh : 0 ≤ h) (hk : k ≠ 0)
-    (t : Icc (0 : ℝ) D.T) (X Y : Space → Space)
-    (hX : HasFDerivAt X (D.F.field t 0) 0)
-    (hY : DifferentiableAt ℝ Y (X 0)) (hleft : ∀ y, Y (X y)=y)
-    (hv : canonicalVelocity τ hτ hτT B ξ hs t 0 ≠ 0) :
-    ‖fderiv ℝ (fun x => fullWave τ hτ hτT B δ hδ ξ hs
-      (δ*h/(‖D.normal.field t 0‖*‖canonicalVelocity τ hτ hτT B ξ hs t 0‖)) k t (Y x)) (X 0)‖ = h := by
-  have hm : ‖D.normal.field t 0‖ ≠ 0 := norm_ne_zero_iff.mpr (HistoryData.normal_ne_zero t 0)
-  have hw : ‖canonicalVelocity τ hτ hτT B ξ hs t 0‖ ≠ 0 := norm_ne_zero_iff.mpr hv
-  rw [fullWave_physical_canonical_norm τ hτ hτT B δ hδ ξ hs _ k
-    (div_nonneg (mul_nonneg hδ.le hh) (mul_nonneg (norm_nonneg _) (norm_nonneg _)))
-    hk t X Y hX hY hleft]
-  field_simp [hδ.ne',hm,hw]
 
 end EulerPacketPrimaryShear

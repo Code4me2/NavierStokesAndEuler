@@ -69,20 +69,9 @@ theorem pointPath_derivative_bound (A : SmoothCoefficientPath K V)
   exact h.trans ((mul_le_mul_of_nonneg_right (pathEvaluation_norm (K := K) (V := V) 0)
     (norm_nonneg _)).trans (by simpa only [one_mul] using A.norm_iteratedFDeriv_translation_le n C hC hb x))
 
-/-- Every prescribed factorial coefficient bound survives the time-path construction. -/
-theorem pointPath_gevrey (A : SmoothCoefficientPath K V)
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C) (d : ℕ)
-    (hb : ∀ n t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C*majorant Rc d n)
-    (n : ℕ) (x : Space) :
-    ‖iteratedFDeriv ℝ n (pointPath A) x‖ ≤ C*majorant Rc d n :=
-  pointPath_derivative_bound A n _ (mul_nonneg hC (majorant_nonneg Rc hRc d n)) (hb n) x
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-/-- Independent angle variables can be added by a fixed spatial projection. -/
-theorem pointPath_pullback_contDiff (L : P →L[ℝ] Space) (A : SmoothCoefficientPath K V) :
-    ContDiff ℝ ∞ (fun x => pointPath A (L x)) :=
-  (pointPath_contDiff A).comp L.contDiff
 
 /-- A spatial projection of norm at most one preserves the literal source derivative bounds. -/
 theorem pointPath_pullback_derivative_bound (L : P →L[ℝ] Space) (hL : ‖L‖ ≤ 1)
@@ -96,15 +85,6 @@ theorem pointPath_pullback_derivative_bound (L : P →L[ℝ] Space) (hL : ‖L�
   exact h.trans ((mul_le_mul (pointPath_derivative_bound A n C hC hb (L x))
     (pow_le_one₀ (norm_nonneg L) hL) (pow_nonneg (norm_nonneg L) n) hC).trans_eq (mul_one C))
 
-/-- Joint spatial/angle coefficient bounds follow from the source spatial bounds. -/
-theorem pointPath_pullback_gevrey (L : P →L[ℝ] Space) (hL : ‖L‖ ≤ 1)
-    (A : SmoothCoefficientPath K V)
-    (Rc C : ℝ) (hRc : 0 ≤ Rc) (hC : 0 ≤ C) (d : ℕ)
-    (hb : ∀ n t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C*majorant Rc d n)
-    (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => pointPath A (L y)) x‖ ≤ C*majorant Rc d n :=
-  pointPath_pullback_derivative_bound L hL A n _
-    (mul_nonneg hC (majorant_nonneg Rc hRc d n)) (hb n) x
 
 end Evaluation
 
@@ -138,25 +118,7 @@ def framePathMap (T : ℝ) : C(Icc (0 : ℝ) T,Space →L[ℝ] Space) →L[ℝ]
   (referenceRestriction m₀ Rperp).compLeftContinuous ℝ (Icc (0 : ℝ) T)
 
 
-/-- Orthogonal reference restriction does not enlarge the coefficient path norm. -/
-theorem framePathMap_norm (T : ℝ) : ‖framePathMap m₀ Rperp T‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro A
-  rw [one_mul]
-  apply (ContinuousMap.norm_le _ (norm_nonneg A)).2
-  intro t
-  calc
-    ‖framePathMap m₀ Rperp T A t‖ ≤ ‖A t‖ * ‖referenceEmbedding m₀ Rperp‖ := opNorm_comp_le _ _
-    _ ≤ ‖A t‖ * 1 := mul_le_mul_of_nonneg_left (referenceEmbedding_norm m₀ Rperp) (norm_nonneg _)
-    _ ≤ ‖A‖ := by simpa only [mul_one] using A.norm_coe_le_norm t
 
-/-- The actual source frame depends smoothly on position in time-path operator norm. -/
-theorem sourceFrame_contDiff (T : ℝ)
-    (A : SmoothCoefficientPath (Icc (0 : ℝ) T) (Space →L[ℝ] Space)) :
-    ContDiff ℝ ∞ (fun x => framePath m₀ Rperp T (pointPath A x)) := by
-  exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞)
-    (E := C(Icc (0 : ℝ) T,Space →L[ℝ] Space))
-    (F := C(Icc (0 : ℝ) T,U →L[ℝ] Space)) (framePathMap m₀ Rperp T)).comp (pointPath_contDiff A)
 
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]

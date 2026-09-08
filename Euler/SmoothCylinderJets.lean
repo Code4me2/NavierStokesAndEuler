@@ -94,11 +94,6 @@ theorem velocityJetPath_label_continuous (n : ℕ) :
   (tensorPathMap n).continuous.comp
     (ContDiff.continuous_iteratedFDeriv (by simp) (velocityFamily_contDiff T hT A))
 
-omit [Fact (0 < P)] in
-theorem displacementJetPath_label_continuous (n : ℕ) :
-    Continuous (displacementJetPath T hT A n) :=
-  (tensorPathMap n).continuous.comp
-    (ContDiff.continuous_iteratedFDeriv (by simp) (displacementFamily_contDiff T hT A))
 
 include hA in
 theorem compositionJet_joint_measurable (n : ℕ) :

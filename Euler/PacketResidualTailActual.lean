@@ -77,9 +77,5 @@ def literalTailGradeField (hT : 0 < T)
     rw [C.interval_eq]
     exact (G i hi).corrector.sliceDifferentiable (G i hi).correctorDerivative hT.le (G i hi).corrector_time t x θ
 
-theorem literalTailGradeField_path (hT : 0 < T)
-    (G : ∀ i, i ≤ N → ProfileRegularity P T hT.le S (a i))
-    (C : CoefficientData P T O) (ha : a 0=0) (n : ℕ) (hn : N+1 ≤ n) :
-    (literalTailGradeField hT G C ha n hn).path = (tailGradeField hT G C ha n hn).path := rfl
 
 end EulerPacketCylinderField.ProfileRegularity

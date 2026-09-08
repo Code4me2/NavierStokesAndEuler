@@ -87,7 +87,6 @@ theorem gain_tendsto_atTop {h : ℝ} (hh : 0 < h) : Tendsto (gain h) atTop atTop
   simpa only [add_zero] using gain_add_tendsto_atTop hh 0
 
 
-theorem kappa_admissible : 0 ≤ kappa ∧ kappa ≤ 1 / 100000 := by norm_num [kappa]
 
 theorem kappa_pos : 0 < kappa := by norm_num [kappa]
 
@@ -104,7 +103,6 @@ noncomputable def wavePressureNative (κ : ℝ) (j : ℕ) : ℝ := waveNative κ
 noncomputable def meanNative (κ : ℝ) (j : ℕ) : ℝ :=
   ExponentLedger.meanUpdateExponent (inputSigma j) κ
 
-noncomputable def radialNative (κ : ℝ) (j : ℕ) : ℝ := meanNative κ j + 1
 
 theorem waveNative_formula (κ : ℝ) {j : ℕ} (hj : 1 ≤ j) :
     waveNative κ j = (j : ℝ) / 10 + (3 / 5 - κ) := by
@@ -167,16 +165,6 @@ structure Offsets where
 noncomputable def offsets (h : ℝ) : Offsets :=
   ⟨h, 0, 0, 2 * CoordinateAlgebra.A h, 0⟩
 
-theorem fixed_offset_inequalities {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000)
-    {j : ℕ} (hj : 1 ≤ j) :
-    gain h j ≤ h * waveNative κ j + (-h) + (offsets h).wavePotential ∧
-    gain h j ≤ h * meanNative κ j + (offsets h).meanStream ∧
-    gain h j ≤ h * meanNative κ j + (offsets h).directAngular ∧
-    gain h j ≤ h * wavePressureNative κ j + (-(2 * CoordinateAlgebra.A h)) + (offsets h).wavePressure ∧
-    gain h j ≤ h * meanNative κ j + (offsets h).meanPressure := by
-  simpa only [offsets, add_assoc, neg_add_cancel, add_zero] using
-    And.intro (gain_le_wave hh hκ hj) (And.intro (gain_le_mean hh hκ hj)
-      (And.intro (gain_le_mean hh hκ hj) (And.intro (gain_le_wavePressure hh hκ hj) (gain_le_mean hh hκ hj))))
 
 /-! ## Residual indexing after a finite number of cycles -/
 
@@ -191,15 +179,8 @@ theorem residualMean_formula (J : ℕ) : residualMean J = (J : ℝ) / 10 + 6 / 5
   rw [residualMean, ExponentLedger.meanExponent, sigma_formula]
   ring
 
-theorem cycle_wave_output (n : ℕ) :
-    ExponentLedger.waveExponent (sigma n) + 1 / 10 = residualWave (n + 1) := by
-  rw [residualWave, sigma_succ, ExponentLedger.wave_increment]
 
 
-theorem residual_minimum (J : ℕ) : min (residualWave J) (residualMean J) = residualWave J := by
-  apply min_eq_left
-  rw [residualWave_formula, residualMean_formula]
-  linarith
 
 theorem residual_physical_gap (h : ℝ) (J : ℕ) :
     h * residualWave J = gain h J + 7 * h / 10 := by
@@ -207,11 +188,6 @@ theorem residual_physical_gap (h : ℝ) (J : ℕ) :
   unfold gain
   ring
 
-theorem residual_mean_physical_gap (h : ℝ) (J : ℕ) :
-    h * residualMean J = gain h J + 6 * h / 5 := by
-  rw [residualMean_formula]
-  unfold gain
-  ring
 
 theorem gain_le_residualWave {h : ℝ} (hh : 0 ≤ h) (J : ℕ) :
     gain h J ≤ h * residualWave J := by
@@ -234,14 +210,7 @@ theorem residualRate_eq (h beta : ℝ) (J m : ℕ) :
   rw [residualRate, residual_physical_gap]
   ring
 
-theorem gain_le_residual_rate {h : ℝ} (hh : 0 ≤ h) (beta : ℝ) (J m : ℕ) :
-    gain h J - residualLoss h beta m ≤ residualRate h beta J m := by
-  rw [residualRate_eq]
-  linarith
 
-theorem residualRate_tendsto_atTop {h : ℝ} (hh : 0 < h) (beta : ℝ) (m : ℕ) :
-    Tendsto (fun J => residualRate h beta J m) atTop atTop := by
-  simpa only [residualRate_eq] using gain_add_tendsto_atTop hh (7 * h / 10 - residualLoss h beta m)
 
 
 

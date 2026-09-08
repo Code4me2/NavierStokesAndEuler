@@ -83,12 +83,6 @@ theorem hasDerivAt_adjoint (Q : ℝ → U →L[ℝ] E) (Q₁ : U →L[ℝ] E) (t
     HasDerivAt (fun s => (Q s).adjoint) Q₁.adjoint t := by
   exact ((realAdjoint (U := U) (E := E)).hasFDerivAt).comp_hasDerivAt t hQ
 
-/-- The Gram derivative is the literal product rule. -/
-theorem hasDerivAt_gram (Q : ℝ → U →L[ℝ] E) (Q₁ : U →L[ℝ] E) (t : ℝ)
-    (hQ : HasDerivAt Q Q₁ t) :
-    HasDerivAt (fun s => gram (Q s))
-      (Q₁.adjoint.comp (Q t) + (Q t).adjoint.comp Q₁) t :=
-  (hasDerivAt_adjoint Q Q₁ t hQ).clm_comp hQ
 
 
 open MeasureTheory Set EulerTimeLp EulerVolterraConvolution

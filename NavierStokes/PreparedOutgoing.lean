@@ -77,43 +77,6 @@ theorem exists_prepared : Nonempty PreparedProfile := by
     height_upper := by rw [hh]; exact hHsmall
     clean := hclean }⟩
 
-/-- The actual nominal matching radius can exceed any prescribed bound while
-the outgoing profile and all its schedule choices remain fixed. -/
-theorem PreparedProfile.large_nominal (d : PreparedProfile) (floor left : ℝ)
-    (hleft : left ≤ 0) :
-    ∃ W : NominalProfile.Witness d.profile,
-      floor < W.controls.radius ∧
-      OutgoingCone.ProfileCleanCone d.profile W.controls.radius left := by
-  obtain ⟨R0, _hR0, hclean⟩ := d.clean left hleft
-  have hrho : 0 < NominalProfile.resetSolver.radius / 2 :=
-    div_pos NominalProfile.resetSolver.radius_pos (by norm_num)
-  have hradius : NominalProfile.resetSolver.radius / 2 ≤ NominalProfile.resetSolver.radius := by
-    linarith [NominalProfile.resetSolver.radius_pos]
-  obtain ⟨eps, heps, _heps1, hordered⟩ :=
-    MatchingDebtBounds.exists_ordered_nominal_witness d.specification d.amplitude_lower
-      0 hrho hradius
-  let j : ℝ := min (eps / 2) (1 / 2000)
-  have hj : 0 < j := lt_min (by positivity) (by norm_num)
-  have hjbound : |j| ≤ eps := by
-    rw [abs_of_pos hj]
-    exact (min_le_left _ _).trans (by linarith)
-  have hsmall : NaturalAxisData.SmallParameters d.profile.data.h j :=
-    ⟨d.profile.data.h_pos, d.height_upper, hj,
-      (min_le_right _ _).trans (by norm_num)⟩
-  obtain ⟨L0, hL0, hscale⟩ := hordered j hjbound hsmall
-  obtain ⟨T, _hT, C0, _hC0, hnorm⟩ := hscale L0 (zero_lt_one.trans_le hL0) le_rfl
-  obtain ⟨C, _hCpos, hC0, hR, _hsep⟩ :=
-    (NominalProfile.eventually_matching_geometry d.profile T (max floor R0) C0).exists
-  obtain ⟨W, _hjW, _hLW, hCW, _hTW, _hmatch⟩ := hnorm C hC0
-  have hrad : W.controls.radius = NominalProfile.matchingRadius d.profile C := by
-    change NominalProfile.matchingRadius d.profile W.axis.normalization = _
-    rw [hCW]
-  refine ⟨W, ?_, ?_⟩
-  · rw [hrad]
-    exact (le_max_left _ _).trans_lt hR
-  · apply hclean
-    rw [hrad]
-    exact (le_max_right _ _).trans_lt hR
 
 /-- An actual fixed prepared profile, obtained from the proved existence. -/
 noncomputable def prepared : PreparedProfile := Classical.choice exists_prepared

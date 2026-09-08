@@ -96,14 +96,6 @@ theorem PowerFlat.mul_of_power_bound (hf : PowerFlat l q f)
     _ = (C * D) * |q x| ^ n := by rw [div_self hden, mul_one]
 
 
-/-- Flatness gives an actual zero limit when the scale tends to zero.
-This is a scalar limit theorem, not a theorem about differentiability. -/
-theorem PowerFlat.tendsto_zero (hf : PowerFlat l q f)
-    (hq : Tendsto q l (𝓝 0)) : Tendsto f l (𝓝 0) := by
-  obtain ⟨C, _, hb⟩ := hf 1
-  apply squeeze_zero_norm' (f := f) (a := fun x => C * |q x|)
-  · simpa only [Real.norm_eq_abs, pow_one] using hb
-  · simpa only [abs_zero, mul_zero] using hq.abs.const_mul C
 
 
 end NavierStokes.Flatness

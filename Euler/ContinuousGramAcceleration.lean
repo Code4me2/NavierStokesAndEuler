@@ -44,37 +44,6 @@ theorem accelerationPath_equation (v : C(Icc (0 : ℝ) T, U))
       (Q t).adjoint (f t-(2 : ℝ) • Q₁ t (v t)) :=
   gram_inverse_apply (Q t) c hc (hQ t) _
 
-/-- The continuous acceleration has the same explicit coefficient bound as the L² inverse. -/
-theorem accelerationPath_norm (v : C(Icc (0 : ℝ) T, U))
-    (f : C(Icc (0 : ℝ) T, E)) :
-    ‖accelerationPath T Q Q₁ c hc hQ v f‖ ≤
-      c⁻¹*‖Q‖*(‖f‖+2*‖Q₁‖*‖v‖) := by
-  apply (ContinuousMap.norm_le _ (by positivity)).2
-  intro t
-  have hQv : ‖Q₁ t (v t)‖ ≤ ‖Q₁‖*‖v‖ :=
-    ((Q₁ t).le_opNorm _).trans
-      (mul_le_mul (Q₁.norm_coe_le_norm t) (v.norm_coe_le_norm t) (norm_nonneg (v t)) (norm_nonneg Q₁))
-  have hr : ‖f t-(2 : ℝ) • Q₁ t (v t)‖ ≤ ‖f‖+2*‖Q₁‖*‖v‖ := by
-    calc
-      _ ≤ ‖f t‖+‖(2 : ℝ) • Q₁ t (v t)‖ := norm_sub_le _ _
-      _ = ‖f t‖+2*‖Q₁ t (v t)‖ := by norm_num only [norm_smul, Real.norm_ofNat]
-      _ ≤ ‖f‖+2*(‖Q₁‖*‖v‖) :=
-        add_le_add (f.norm_coe_le_norm t) (mul_le_mul_of_nonneg_left hQv (by norm_num))
-      _ = _ := by ring
-  have hAdj : ‖(Q t).adjoint‖ ≤ ‖Q‖ := by
-    simpa only [LinearIsometryEquiv.norm_map] using Q.norm_coe_le_norm t
-  calc
-    _ ≤ ‖gramInverse (Q t) c hc (hQ t)‖ *
-        ‖(Q t).adjoint (f t-(2 : ℝ) • Q₁ t (v t))‖ :=
-      (gramInverse (Q t) c hc (hQ t)).le_opNorm _
-    _ ≤ c⁻¹*(‖Q‖*‖f t-(2 : ℝ) • Q₁ t (v t)‖) :=
-      mul_le_mul (gramInverse_norm (Q t) c hc (hQ t))
-        (((Q t).adjoint.le_opNorm _).trans
-          (mul_le_mul_of_nonneg_right hAdj (norm_nonneg _)))
-        (norm_nonneg _) (inv_nonneg.mpr hc.le)
-    _ ≤ c⁻¹*(‖Q‖*(‖f‖+2*‖Q₁‖*‖v‖)) :=
-      mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hr (norm_nonneg Q)) (inv_nonneg.mpr hc.le)
-    _ = _ := by ring
 
 /-- Every genuine L² strong acceleration with the given continuous data is
 almost everywhere this constructed continuous path. -/

@@ -59,30 +59,6 @@ theorem meanMomentum_weak
     inner_zero_right, mul_zero, add_zero, meanPrimitive, comp_apply,
     Submodule.subtypeL_apply, meanTestMap_coe] using h
 
-/-- An actual weak mean solution has an AC momentum representative with the
-explicit Bochner L² derivative forced by the variational identity. -/
-theorem meanMomentum_ac (hTpos : 0 < T)
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F' t) (Icc (0 : ℝ) T) t)
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x)
-    (H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (M0 A : L2 →L[ℝ] L2) (L : ℝ)
-    (u : meanDerivatives T hT FInv) (f : TimeLp T L2)
-    (hu : ∀ w : meanDerivatives T hT FInv,
-      ⟪(u : TimeLp T L2), (w : TimeLp T L2)⟫_ℝ-
-        ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv w⟫_ℝ+
-        ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv w⟫_ℝ+
-        L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv w⟫_ℝ =
-        -⟪f, meanPrimitive T hT FInv w⟫_ℝ) :
-    ∃ p : ℝ → solenoidalSpace,
-      AbsolutelyContinuousOnInterval p 0 T ∧
-      (momentum T hT (solenoidalFrame T F) (u : TimeLp T L2) : ℝ → solenoidalSpace)
-        =ᵐ[timeMeasure T] p ∧
-      ∀ᵐ t ∂timeMeasure T,
-        HasDerivAt p (momentumForcing T hT (solenoidalFrame T F) (solenoidalFrame T F')
-          H (u : TimeLp T L2) f t) t := by
-  apply exists_ac_representative_of_weak T hTpos
-  intro v hv
-  exact meanMomentum_weak T hT FInv F F' hF hInv H M0 A L u f hu v hv
 
 
 end EulerMeanVariationalInverse

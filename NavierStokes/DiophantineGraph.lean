@@ -115,9 +115,6 @@ def frequencyL1 (m n : ℤ) : ℝ := |(m : ℝ)| + |(n : ℝ)|
 /-- This is the usual Euclidean length of the integer frequency. -/
 def frequencyLength (m n : ℤ) : ℝ := Real.sqrt ((m : ℝ) ^ 2 + (n : ℝ) ^ 2)
 
-theorem frequencyL1_nonneg (m n : ℤ) : 0 ≤ frequencyL1 m n := by
-  unfold frequencyL1
-  positivity
 
 theorem frequencyLength_nonneg (m n : ℤ) : 0 ≤ frequencyLength m n :=
   Real.sqrt_nonneg _
@@ -170,27 +167,7 @@ theorem lower_of_conjugate_bound {a b D : ℝ} (hprod : 1 ≤ |a| * |b|)
 
 
 
-/-- The manuscript's estimate with an explicit constant and Euclidean length. -/
-theorem radial_diophantine (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
-    (1 / 6 : ℝ) / (1 + frequencyLength m n) ≤ |radialSymbol m n| := by
-  rw [div_div]
-  apply lower_of_conjugate_bound (radial_product_lower m n hmn)
-  · have := frequencyLength_nonneg m n
-    positivity
-  · have := radialConjugate_upper m n
-    have := frequencyL1_le_twice_length m n
-    linarith
 
-/-- The manuscript's estimate for the second graph direction. -/
-theorem time_diophantine (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
-    (1 / 6 : ℝ) / (1 + frequencyLength m n) ≤ |timeSymbol m n| := by
-  rw [div_div]
-  apply lower_of_conjugate_bound (time_product_lower m n hmn)
-  · have := frequencyLength_nonneg m n
-    positivity
-  · have := timeConjugate_upper m n
-    have := frequencyL1_le_twice_length m n
-    linarith
 
 theorem radialSymbol_ne_zero (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
     radialSymbol m n ≠ 0 := by
@@ -241,12 +218,6 @@ theorem time_reciprocal_bound (m n : ℤ) (hmn : m ≠ 0 ∨ n ≠ 0) :
 def coveringFrequency (k : ℤ × ℤ) : ℤ × ℤ :=
   (3 * k.1 + k.2, k.1 + 5 * k.2)
 
-theorem coveringFrequency_injective : Function.Injective coveringFrequency := by
-  intro k l hkl
-  have h₁ := congrArg Prod.fst hkl
-  have h₂ := congrArg Prod.snd hkl
-  simp only [coveringFrequency] at h₁ h₂
-  apply Prod.ext <;> linarith
 
 
 

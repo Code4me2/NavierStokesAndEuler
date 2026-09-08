@@ -26,10 +26,6 @@ theorem strip_roundtrip (e : D ≃ₗᵢ[ℝ] E) (s : StripData D) :
   simp only [ParticularWaveBounds.reindexStrip, preimage_preimage, e.symm_apply_apply]
   rfl
 
-theorem majorant_pull (e : D ≃ₗᵢ[ℝ] E) (s : StripData E) (w : ℕ → E → ℝ)
-    (α C : ℝ) (p n : ℕ) (x : D) :
-    majorant (ParticularWaveBounds.reindexStrip e s) (fun k y => w k (e y)) α C p n x =
-      majorant s w α C p n (e x) := rfl
 
 
 
@@ -67,22 +63,8 @@ theorem meanCumulativeBounds_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
   ⟨meanClass_pull e hb.radial, meanClass_pull e hb.angular, meanClass_pull e hb.axial⟩
 
 
-theorem context_operatorBounds_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
-    {c : CorrectionState.Context E} {κ : ℝ}
-    (ho : MeanIncrementBounds.OperatorBounds s c.operators κ) :
-    MeanIncrementBounds.OperatorBounds (ParticularWaveBounds.reindexStrip e s)
-      (StateReindex.context e c).operators κ := operatorBounds_pull e ho
 
-theorem context_baseBounds_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
-    {c : CorrectionState.Context E} (hb : MeanIncrementBounds.BaseBounds s c.base) :
-    MeanIncrementBounds.BaseBounds (ParticularWaveBounds.reindexStrip e s)
-      (StateReindex.context e c).base := baseBounds_pull e hb
 
-theorem cumulativeBounds_pull (e : D ≃ₗᵢ[ℝ] E) {s : StripData E}
-    {u : CorrectionState.State E} (hu : CorrectionState.CumulativeBounds s u) :
-    CorrectionState.CumulativeBounds (ParticularWaveBounds.reindexStrip e s)
-      (StateReindex.state e u) :=
-  ⟨meanCumulativeBounds_pull e hu.velocity, meanClass_pull e hu.pressure⟩
 
 
 /-! ## Returning solver classes to the original chart -/
@@ -149,21 +131,6 @@ theorem residualBlock_uniform_pull {ι : Type*} (e : D ≃ₗᵢ[ℝ] E)
   simpa only [StateReindex.residualBlock_pull] using uniformVelocity_pull e hb
 
 
-/-- Actual residual classes proved in the associated solver chart return
-to the original state without an extra operator-bounds hypothesis. -/
-theorem residualBlock_uniform_return {ι : Type*} (e : D ≃ₗᵢ[ℝ] E)
-    {s : StripData D} {P : ι → ℕ → D → ℝ} {α : ℝ}
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : ι → CorrectionState.HarmonicBlock D) (G A : ι → HarmonicResidual.BlockCoefficients D)
-    (hb : UniformHarmonicInteraction.UniformVelocity (ParticularWaveBounds.reindexStrip e.symm s)
-      (fun l n y => P l n (e.symm y)) α
-      (fun l => HarmonicResidual.residualBlock (StateReindex.context e.symm c)
-        (StateReindex.state e.symm u) (StateReindex.block e.symm (b l))
-        (StateReindex.blockCoefficients e.symm (G l))
-        (StateReindex.blockCoefficients e.symm (A l)))) :
-    UniformHarmonicInteraction.UniformVelocity s P α
-      (fun l => HarmonicResidual.residualBlock c u (b l) (G l) (A l)) := by
-  simpa only [residualBlock_return] using uniformVelocity_return e hb
 
 section Association
 

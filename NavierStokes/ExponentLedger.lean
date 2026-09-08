@@ -39,11 +39,6 @@ def signedGain (σ κ : ℝ) : ℝ :=
   min (min (min (1 / 2 - 4 * κ) (2 / 5 - κ))
     (1 / 2 - 2 * κ)) (waveExponent σ - 3 * κ)
 
-/-- The five distinct gains listed for the signed bar residual, after divergence.
-The subtracted bump repeats the fourth bound and so contributes no new minimum. -/
-def signedBarGain (σ κ : ℝ) : ℝ :=
-  min (min (min (min (9 / 50 - 2 * κ) (1 / 2 - 3 * κ))
-    (σ - 3 * κ)) (1 - κ)) (1 - 2 * κ)
 
 theorem mean_eq_wave_add_half (σ : ℝ) :
     meanExponent σ = waveExponent σ + 1 / 2 := by
@@ -110,26 +105,10 @@ theorem signed_gain_exceeds_tenth {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
 
 
 
-theorem old_difference_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < 9 / 50 - 2 * κ := by
-  linarith
 
-theorem curl_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < 1 / 2 - 3 * κ := by
-  linarith
 
-theorem square_bar_margin {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
-    (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < σ - 3 * κ := by
-  linarith
 
-theorem axial_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < 1 - κ := by
-  linarith
 
-theorem pressure_bar_margin {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    17 / 100 < 1 - 2 * κ := by
-  linarith
 
 
 /-! ## Steps 3 and 4: mean and defect updates -/
@@ -170,23 +149,8 @@ theorem signed_increment_lower_bound {σ κ : ℝ} (hσ : 1 / 5 ≤ σ)
   unfold waveExponent
   linarith
 
-theorem signed_increment_above_cumulative_difference {σ κ : ℝ}
-    (hσ : 1 / 5 ≤ σ) (hκ : κ ≤ 1 / 100000) :
-    17 / 25 < waveExponent σ - κ := by
-  have h := signed_increment_lower_bound hσ hκ
-  linarith
 
-theorem particular_increment_above_cumulative_difference {σ : ℝ}
-    (hσ : 1 / 5 ≤ σ) :
-    17 / 25 < waveExponent σ := by
-  have h := wave_at_least_seven_tenths hσ
-  linarith
 
-theorem mean_increment_above_cumulative_mean {σ κ : ℝ}
-    (hσ : 1 / 5 ≤ σ) (hκ : κ ≤ 1 / 100000) :
-    9 / 10 < meanUpdateExponent σ κ := by
-  unfold meanUpdateExponent meanExponent
-  linarith
 
 
 
@@ -214,21 +178,6 @@ theorem stage_parameter_admissible (n : ℕ) :
   have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   linarith
 
-/-- The same fixed κ works for the numerical comparisons at every finite stage. -/
-theorem all_stage_arithmetic (n : ℕ) {κ : ℝ} (hκ : κ ≤ 1 / 100000) :
-    waveExponent (stageParameter (n + 1)) <
-        waveExponent (stageParameter n) + particularGain (stageParameter n) κ ∧
-    waveExponent (stageParameter (n + 1)) <
-        waveExponent (stageParameter n) + signedGain (stageParameter n) κ ∧
-    waveExponent (stageParameter (n + 1)) < meanUpdateExponent (stageParameter n) κ ∧
-    meanExponent (stageParameter (n + 1)) <
-        meanExponent (stageParameter n) + min (17 / 100) (1 - 4 * κ) ∧
-    meanExponent (stageParameter (n + 1)) <
-        meanExponent (stageParameter n) + 9 / 10 - 4 * κ := by
-  rw [stage_parameter_succ]
-  exact ⟨particular_gain_exceeds_tenth (stage_parameter_admissible n) hκ,
-    signed_gain_exceeds_tenth (stage_parameter_admissible n) hκ,
-    mean_update_wave_margin hκ, completed_mean_margin hκ, completed_defect_margin hκ⟩
 
 end
 

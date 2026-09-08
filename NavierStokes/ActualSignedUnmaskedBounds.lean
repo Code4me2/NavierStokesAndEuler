@@ -396,31 +396,6 @@ theorem own_zero_outside (request : ℕ → Full → SignedWaveUpdate.Vec2)
 
 /-! ## The request is the measured current residual -/
 
-/-- The actual residual-to-request construction supplies the unmasked
-potential and pressure estimates. No bound for either output is assumed. -/
-theorem actual_own_potential_pressure_class (G : SignedMeanGain.Geometry)
-    (hs : G.strip = ActualPrimaryBounds.strip)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point) (α : ℝ)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hfixed : VariableGaugeMean.reconstructState G.gauge c u = u)
-    (hθ : MeanClass G.strip α (u.thetaResidual c))
-    (hz : MeanClass G.strip α (u.axialResidual c)) :
-    let request := LocalSignedRequest.fullRequest G.strip G.patch G.coord c u
-    LabelSumBounds.UniformClass fullStrip
-      (fun (i : Label B N0 × Copy) n x => Real.sqrt (fullStrip.zeta x) * envelope i.1 n x) α
-      (ownField (potential request)) ∧
-    LabelSumBounds.UniformClass fullStrip
-      (fun (i : Label B N0 × Copy) n x => Real.sqrt (fullStrip.zeta x) * envelope i.1 n x) α
-      (ownField (pressure request)) := by
-  dsimp only
-  have hr := fullRequest_jets_from_residuals G c u α H hfixed hθ hz
-    (phaseCell (B := B) (N0 := N0))
-  have hr' : ∀ q, PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun _ _ x => fullStrip.zeta x) (α - 1) (phaseCell (B := B) (N0 := N0))
-      (fun _ n _ x => LocalSignedRequest.fullRequest G.strip G.patch G.coord c u n x q) := by
-    simp only [hs] at hr ⊢
-    exact hr
-  simpa only [sub_add_cancel] using own_potential_pressure_class hr'
 
 
 end NavierStokes.ActualSignedUnmaskedBounds

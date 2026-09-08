@@ -377,43 +377,6 @@ def residualDifference (u w : VelocityField) (p r : PressureField) : VelocityFie
   fun z => navierStokesResidual (fun y => u y + w y) (fun y => p y + r y) z.1 z.2 -
     navierStokesResidual u p z.1 z.2
 
-/-- Flat perturbations preserve all-jet residual flatness relative to any
-smooth background with fixed-power jet growth. No residual estimate is an
-input. The linear terms use at most two extra derivatives of the perturbation;
-the transport products use at most one extra derivative. -/
-theorem allJetsFlat_residualDifference {u w : VelocityField} {p r : PressureField}
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hq : ∀ᶠ z in l, q z ≠ 0)
-    (hu : ContDiffOn ℝ ∞ u U) (hw : ContDiffOn ℝ ∞ w U)
-    (hp : ContDiffOn ℝ ∞ p U) (hr : ContDiffOn ℝ ∞ r U)
-    (hgrowth : AllJetsGrowth l q u) (hwflat : AllJetsFlat l q w)
-    (hrflat : AllJetsFlat l q r) : AllJetsFlat l q (residualDifference u w p r) := by
-  let L : (Space →L[ℝ] Space) →L[ℝ] Space →L[ℝ] Space :=
-    (ContinuousLinearMap.apply ℝ Space).flip
-  have hDu := ResidualRegularity.contDiffOn_spatialDerivative hU hu
-  have hDw := ResidualRegularity.contDiffOn_spatialDerivative hU hw
-  have hDug := hgrowth.space_fderiv hU hl hu
-  have hDwf := hwflat.space_fderiv hU hl hw
-  have hcross₁ : AllJetsFlat l q (fun z => spatialDerivative u z.1 z.2 (w z)) :=
-    hwflat.bilinear_growth_left hDug L hU hl hq hDu hw
-  have hcross₂ : AllJetsFlat l q (fun z => spatialDerivative w z.1 z.2 (u z)) :=
-    hDwf.bilinear_growth_right hgrowth L hU hl hq hDw hu
-  have hself : AllJetsFlat l q (fun z => spatialDerivative w z.1 z.2 (w z)) :=
-    hwflat.bilinear_growth_left hDwf.growth L hU hl hq hDw hw
-  have htime := ResidualRegularity.contDiffOn_temporalDerivative hU hw
-  have hlap := ResidualRegularity.contDiffOn_spatialLaplacian hU hw
-  have hgrad := ResidualRegularity.contDiffOn_pressureGradient hU hr
-  have hlinear := ((hwflat.temporalDerivative hU hl hw).sub
-    (hwflat.spatialLaplacian hU hl hw) hU hl htime hlap).add
-      (hrflat.pressureGradient hU hl hr) hU hl (htime.sub hlap) hgrad
-  have hfirst := hlinear.add hcross₁ hU hl ((htime.sub hlap).add hgrad) (hDu.clm_apply hw)
-  have hsecond := hfirst.add hcross₂ hU hl
-    (((htime.sub hlap).add hgrad).add (hDu.clm_apply hw)) (hDw.clm_apply hu)
-  have hall := hsecond.add hself hU hl
-    ((((htime.sub hlap).add hgrad).add (hDu.clm_apply hw)).add (hDw.clm_apply hu))
-    (hDw.clm_apply hw)
-  apply hall.congr_on hU hl
-  intro z hz
-  exact (residual_add_sub_on hU hu hw hp hr hz).symm
 
 end PhysicalOperators
 
@@ -687,9 +650,6 @@ open ProblemStatement
 def scaleFilter (U : Set SpaceTime) (q : SpaceTime → ℝ) : Filter SpaceTime :=
   Filter.principal U ⊓ Filter.comap q (𝓝[>] (0 : ℝ))
 
-theorem eventually_mem_scaleFilter (U : Set SpaceTime) (q : SpaceTime → ℝ) :
-    ∀ᶠ z in scaleFilter U q, z ∈ U :=
-  (show ∀ᶠ z in Filter.principal U, z ∈ U from by simp).filter_mono inf_le_left
 
 
 

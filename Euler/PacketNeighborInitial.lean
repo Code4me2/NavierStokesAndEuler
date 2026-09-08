@@ -90,17 +90,6 @@ theorem scaledRay_initial_error {m v r : ℝ → Space} {s₀ t₀ a ε D : ℝ}
 
 variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
 
-omit [CompleteSpace U] in
-theorem frame_pair_operator_difference_le {T ε D : ℝ}
-    (A B : U →L[ℝ] C(Icc (0:ℝ) T, Space)) (ξ : U) (t : Icc (0:ℝ) T)
-    {p q : Space} (hp : ‖p‖ = 1) (hq : ‖q‖ = 1)
-    (hε : 0 < ε) (hε1 : ε ≤ 1) (hAB : ‖A-B‖ ≤ D) :
-    |⟪p,A ξ t⟫_ℝ/ε-⟪p,B ξ t⟫_ℝ/ε|+|⟪q,A ξ t⟫_ℝ-⟪q,B ξ t⟫_ℝ| ≤
-      2*D*‖ξ‖/ε := by
-  have hn : ‖A ξ t-B ξ t‖ ≤ D*‖ξ‖ := by
-    exact (((A-B) ξ).norm_coe_le_norm t).trans (((A-B).le_opNorm ξ).trans
-      (mul_le_mul_of_nonneg_right hAB (norm_nonneg ξ)))
-  simpa only [mul_assoc] using frame_pair_difference_le hp hq hε hε1 hn
 
 variable (T : ℝ) (hT : 0 ≤ T)
   (Q Q₁ : C(Icc (0 : ℝ) T, U →L[ℝ] Space))

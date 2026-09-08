@@ -329,66 +329,6 @@ theorem Representations.pressure_smooth (j : ℕ) :
     exact ((cycleInputs R M hN W).pressure_smooth (cycleInputs_validScale R M hN W hq)
       outgoing.data.h_pos outgoing.data.h_lt_half j).congr (fun _ hw => (e.pressure_succ j hw).symm)
 
-/-- The complete estimate record is constructed from native data and
-exact physical realizations. The residual comparison floor is separate
-from the mean-family floor, so it can be chosen one band larger. -/
-noncomputable def stageEstimates_of_representations
-    (hqbig : 0 < qbig) {Nres : ℕ} (hNres : 4 ≤ Nres)
-    (hGeom : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    (d : ∀ J, ActualCycleResidualBounds.PhysicalData B Nres
-      (ActualCyclePreservation.state B N0 J).state
-      (MixedDiagonalResidual.uncutVelocity A Bdirect J)
-      (DiagonalJetBounds.uncutPrefix P (J + 1))) :
-    MixedCandidateAssembly.StageEstimates h qbig A Bdirect P := by
-  let Cyc := cycleInputs R M hN W
-  have hmeta := cycleInputs_metadata R M hN W
-  have hscale := cycleInputs_validScale R M hN W hq
-  have hraw := Cyc.represented_raw_bounds hmeta hscale outgoing.data.h_pos
-    outgoing.data.h_lt_half ActualCyclePreservation.kappa_small A Bdirect P
-    e.potential_succ e.direct_succ e.pressure_succ
-  let CA := hraw.choose
-  let CB := hraw.choose_spec.choose
-  let CP := hraw.choose_spec.choose_spec.choose
-  have hc := hraw.choose_spec.choose_spec.choose_spec
-  refine {
-    potential_smooth := e.potential_smooth R M hN W WA WP hq
-    direct_smooth := e.direct_smooth R M hN W WA WP hq
-    pressure_smooth := e.pressure_smooth R M hN W WA WP hq
-    gain := ActualIterationLedger.gain h
-    gain_zero := ActualIterationLedger.gain_nonneg outgoing.data.h_pos.le 0
-    gain_pos := fun _ hj => ActualIterationLedger.gain_pos outgoing.data.h_pos hj
-    gain_mono := ActualIterationLedger.gain_monotone outgoing.data.h_pos.le
-    gain_top := ActualIterationLedger.gain_tendsto_atTop outgoing.data.h_pos
-    potentialLoss := PhysicalStageBounds.potentialLoss h h 0
-    directLoss := PhysicalStageBounds.directLoss h 0
-    pressureLoss := PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0
-    potentialConstant := CA
-    directConstant := CB
-    pressureConstant := CP
-    potentialLog := fun _ _ => 0
-    directLog := fun _ _ => 0
-    pressureLog := fun _ _ => 0
-    potential_bound := hc.2.1
-    direct_bound := hc.2.2.1
-    pressure_bound := hc.2.2.2
-    backgroundLoss := backgroundLoss WA.alpha WA.shift
-    residualLoss := ActualCycleResidualBounds.fixedLoss
-    finite_background := ?_
-    finite_residual := ?_ }
-  · intro J m
-    have hb := background_from_representations certificate modulation Cyc hmeta hscale
-      ActualCyclePreservation.kappa_small hqbig upper B WA
-      (actualInitialTemporalInput B N0 N hN) (actualInitialRankInput B N0 N hN)
-      (actualInitialAngularInput B N0 N hN) hq hq hq A Bdirect
-      e.potential_zero e.direct_zero e.potential_succ e.direct_succ J m
-    simp only [backgroundLoss, actualInitialTemporalInput, actualInitialRankInput,
-      actualInitialAngularInput, MeanInput.ofMoving, min_self] at hb ⊢
-    exact hb
-  · exact ActualCycleResidualBounds.finite_residual_rates hGeom hNres
-      (fun _ => ActualCycleParameters.fixedParameters B N0)
-      (fun J => MixedDiagonalResidual.uncutVelocity A Bdirect J)
-      (fun J => DiagonalJetBounds.uncutPrefix P (J + 1))
-      (fun J => ActualCyclePreservation.broad_invariant (R.invariant J)) d
 
 
 end StageEstimates

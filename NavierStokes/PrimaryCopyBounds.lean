@@ -701,11 +701,6 @@ theorem affine_profile_jets (U : Domain ι D) (f : ℝ → ℝ) (hf : ContDiff �
         (by positivity) (by linarith)
     _ = _ := by rw [mul_pow, ← pow_mul]; ring
 
-theorem outerCutoff_affine_jets (U : Domain ι D) (L : ι → D →L[ℝ] ℝ)
-    (c : ι → ℝ) {K : ℝ} (hK : 1 ≤ K) (q : ℕ)
-    (hL : ∀ i, ‖L i‖ ≤ K * U.scale i ^ q) :
-    PolynomialJets U (fun i x => outerCutoff (L i x + c i)) :=
-  affine_profile_jets U outerCutoff outerCutoff_smooth outerCutoff_jet_bounded L c hK q hL
 
 theorem gaussianCutoff_affine_jets (U : Domain ι D) (L : ι → D →L[ℝ] ℝ)
     (c : ι → ℝ) {K : ℝ} (hK : 1 ≤ K) (q : ℕ)
@@ -715,16 +710,6 @@ theorem gaussianCutoff_affine_jets (U : Domain ι D) (L : ι → D →L[ℝ] ℝ
     GaussianTailFlat.profile_jet_bounded L c hK q hL
 
 
-theorem outerCutoff_affine_support (L : D →L[ℝ] ℝ) (c : ℝ) :
-    tsupport (fun x => outerCutoff (L x + c)) ⊆ {x | L x + c ∈ Ioo (0 : ℝ) 1} := by
-  have hs : tsupport (fun x => outerCutoff (L x + c)) ⊆
-      {x | L x + c ∈ Icc (1 / 12 : ℝ) (11 / 12)} := by
-    apply closure_minimal _ (isClosed_Icc.preimage (L.continuous.add continuous_const))
-    intro x hx
-    exact outerCutoff_support (subset_tsupport outerCutoff hx)
-  intro x hx
-  have h := hs hx
-  constructor <;> linarith [h.1, h.2]
 
 
 /-! ### Transfer to the actual copy coordinates -/
@@ -800,34 +785,6 @@ theorem NativeJets.copy_localJets (hf : NativeJets V w f)
         rw [majorant, mul_pow, ← pow_mul, pow_add]
         ring
 
-/-- A literal cutoff times the native function gives its own support
-proof.  Local finiteness and uniqueness then retain the very same uniform
-constants in the actual infinite copy sum. -/
-theorem NativeJets.localized_copy_sum_uniformClass (hf : NativeJets V w f)
-    (s : StripData X) (W : Λ → ℕ → X → ℝ) (α : ℝ)
-    (κ : ι → D → ℝ) (hκ : PolynomialJets V.toDomain κ)
-    (index : Λ → ℕ → ι) (L : Λ → ℕ → I → X →L[ℝ] D) (c : Λ → ℕ → I → D)
-    (K : Λ → PeriodizedWaveBounds.Cells X I)
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hcut : ∀ l n i x, κ (index l n) (L l n i x + c l n i) ≠ 0 → x ∈ (K l).carrier n i)
-    (hmap : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i →
-      L l n i x + c l n i ∈ V.carrier (index l n))
-    {A B : ℝ} (hA : 1 ≤ A) (hB : 1 ≤ B) (a b : ℕ)
-    (hgrowth : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i →
-      V.growth (index l n) (L l n i x + c l n i) ≤ A * s.growth n x ^ a)
-    (hlinear : ∀ l n i, ‖L l n i‖ ≤ B * s.slow n ^ b)
-    (hweight : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i →
-      w (index l n) (L l n i x + c l n i) ≤ s.epsilon n ^ α * W l n x) :
-    LabelSumBounds.UniformClass s W α
-      (fun l n => PeriodizedWaveBounds.copySum
-        (affineCopy (fun i x => κ i x • f i x) index L c l n)) := by
-  apply PeriodizedWaveBounds.copySum_uniformClass K hW
-  · intro l n i x hx
-    apply hcut l n i x
-    intro he
-    exact hx (by simp only [affineCopy, he, zero_smul])
-  · exact (hf.polynomial_smul hκ).copy_localJets s W α index L c
-      (fun l => (K l).carrier) hW hmap hA hB a b hgrowth hlinear hweight
 
 
 end Copies
@@ -1048,53 +1005,6 @@ theorem preparedPrefactor_jets (r0 : ℝ) (vr vt : TorusInverse.Plane) (N : ℕ)
     (PolynomialJets.const_fixed (D := PrimaryGeometryAssembly.domain W₀ N)
       (PartitionedCovariance.nativePrefactor vr vt r0 * (2 * r0)))
 
-/-- The determinant, entry and inverse-weight constants are produced by
-the actual same-profile construction before the label and copy chart are
-chosen.  The target is the literal leading stress of that same profile. -/
-theorem exists_prepared_primary_jets
-    (hcone : LeadingStressWeights.FullTrueCone v₀) (upper : ℝ) (B : ℕ)
-    (r0 : ℝ) (hr0 : 0 < r0)
-    (hbox : 2 * NominalConeAssembly.activeRight W₀ ≤ FinalSlowBase.boxRadius W₀ upper)
-    (N0 : ℕ) (vr vt : TorusInverse.Plane) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) :
-    ∃ a : PrimaryGeometryAssembly.Prepared H₀ v₀ upper B r0 N0,
-      ∀ (V : JetDomain (PrimaryGeometryAssembly.Index W₀ a.N) D)
-        (χ : PrimaryGeometryAssembly.Index W₀ a.N → D → PhaseCalculus.Slow × ℝ)
-        (mask : PrimaryGeometryAssembly.Index W₀ a.N → D → ℝ),
-      (∀ L, (PrimaryGeometryAssembly.domain W₀ a.N).scale L = V.scale L) →
-      PolynomialJets V.toDomain χ →
-      (∀ L x, x ∈ V.carrier L →
-        χ L x ∈ (PrimaryGeometryAssembly.domain W₀ a.N).carrier L ×ˢ Ioo (0 : ℝ) 1) →
-      (∀ L x, x ∈ V.carrier L → (χ L x).1 ∈
-        PositiveRepresentatives.positivePart (PrimaryGeometryAssembly.referenceSet W₀)) →
-      (∀ k, NativeJets V (fun L x => PrimaryTargetBounds.movingWeight W₀ (χ L x).1)
-        (fun L x => PrimaryTargetBounds.actualTarget v₀ (χ L x).1 k)) →
-      PolynomialJets V.toDomain mask →
-      (∀ L x, x ∈ V.carrier L → 0 < PrimaryTargetBounds.movingWeight W₀ (χ L x).1) →
-      ∀ j : Fin 2,
-      NativeJets V
-        (fun L x => Real.sqrt (ChartScales.epsilon F₀.data.h (BaseChartJets.cellBand L)) *
-          (Real.sqrt (PrimaryTargetBounds.movingWeight W₀ (χ L x).1) *
-            pulseEnvelope (PrimaryGeometryAssembly.construction H₀ v₀ a hr0) χ j L x))
-        (primaryVelocity (PrimaryGeometryAssembly.construction H₀ v₀ a hr0)
-          (preparedPrefactor r0 vr vt) χ
-          (fun L => ChartScales.epsilon F₀.data.h (BaseChartJets.cellBand L))
-          (fun L x k => PrimaryTargetBounds.actualTarget v₀ (χ L x).1 k) mask j) := by
-  obtain ⟨a, dg, eb, il, hdg, heb, hil, hz⟩ := PrimaryTargetBounds.exists_constructed_bounds
-    H₀ v₀ hcone upper B r0 hr0 hbox N0 vr vt hdet
-  refine ⟨a, ?_⟩
-  intro V χ mask hscale hχ hmap hpositive hT hm hw j
-  apply primaryVelocity_jets (PrimaryGeometryAssembly.construction H₀ v₀ a hr0)
-    (preparedPrefactor r0 vr vt) χ
-    (fun L => ChartScales.epsilon F₀.data.h (BaseChartJets.cellBand L))
-    (fun L x k => PrimaryTargetBounds.actualTarget v₀ (χ L x).1 k) mask
-    (fun L x => PrimaryTargetBounds.movingWeight W₀ (χ L x).1)
-    hscale hχ hmap (fun j => preparedPrefactor_jets r0 vr vt a.N j)
-    hT hm hw hdg heb hil _ j
-  intro L x hx
-  have h := hz L (χ L x).1 (hpositive L x hx) (hmap L x hx).1
-  have hsc : V.scale L = ChartScales.S (BaseChartJets.cellBand L) := (hscale L).symm
-  simp only [hsc, pulseMatrix] at h ⊢
-  exact h
 
 
 end Prepared
@@ -1245,39 +1155,6 @@ theorem norm_nativePointLinear_le (g : Geometry) :
       (mul_le_mul hc (norm_snd_le x) (norm_nonneg _) (zero_le_one.trans hcost))
 
 
-theorem NativeJets.native_copy_localJets
-    {V : JetDomain ι (P × TorusInverse.Plane)} {w : ι → P × TorusInverse.Plane → ℝ} {f : ι → P × TorusInverse.Plane → H}
-    (hf : NativeJets V w f) (s : StripData (P × TorusInverse.Plane))
-    (W : Λ → ℕ → P × TorusInverse.Plane → ℝ) (α : ℝ)
-    (index : Λ → ℕ → ι) (g : Λ → ℕ → Geometry) (Ω : Λ → ℕ → Set TorusInverse.Plane)
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hmap : ∀ l n k x, x ∈ s.domain → (g l n).coordinates k x.2 ∈ Ω l n →
-      ParticularWaveBounds.nativePoint (g l n) k x ∈ V.carrier (index l n))
-    {A B : ℝ} (hA : 1 ≤ A) (hB : 1 ≤ B) (a b : ℕ)
-    (hgrowth : ∀ l n k x, x ∈ s.domain → (g l n).coordinates k x.2 ∈ Ω l n →
-      V.growth (index l n) (ParticularWaveBounds.nativePoint (g l n) k x) ≤ A * s.growth n x ^ a)
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (g l n) ≤ B * s.slow n ^ b)
-    (hweight : ∀ l n k x, x ∈ s.domain → (g l n).coordinates k x.2 ∈ Ω l n →
-      w (index l n) (ParticularWaveBounds.nativePoint (g l n) k x) ≤ s.epsilon n ^ α * W l n x) :
-    PeriodizedWaveBounds.UniformLocalJets s W α
-      (fun l n => PeriodizedWaveBounds.nativeCell (g l n) (Ω l n))
-      (fun l n k x => f (index l n) (ParticularWaveBounds.nativePoint (g l n) k x)) := by
-  have h := hf.copy_localJets s W α index
-    (fun l n _ => nativePointLinear (g l n))
-    (fun l n k => ParticularWaveBounds.nativePoint (g l n) k 0)
-    (fun l n => PeriodizedWaveBounds.nativeCell (g l n) (Ω l n)) hW
-    (by simp only [← nativePoint_affine]; exact hmap) hA hB a b
-    (by simp only [← nativePoint_affine]; exact hgrowth)
-    (fun l n _ => (norm_nativePointLinear_le (g l n)).trans (hgeometry l n))
-    (by simp only [← nativePoint_affine]; exact hweight)
-  have he : affineCopy f index (fun l n _ => nativePointLinear (g l n))
-      (fun l n k => ParticularWaveBounds.nativePoint (g l n) k 0) =
-      (fun l n k x => f (index l n) (ParticularWaveBounds.nativePoint (g l n) k x)) := by
-    funext l n k x
-    dsimp only [affineCopy]
-    rw [← nativePoint_affine]
-  rw [he] at h
-  exact h
 
 
 end NativeCopies

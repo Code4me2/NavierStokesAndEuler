@@ -32,15 +32,6 @@ theorem multilinearBundling_ae (D : Lp (P [×n]→L[ℝ] V) 2 μ) (v : Fin n →
   exact ContinuousLinearMap.coeFn_compLp (𝕜 := ℝ) (𝕜' := ℝ)
     (E := P [×n]→L[ℝ] V) (F := V) (σ := RingHom.id ℝ) L D
 
-theorem multilinearBundling_apply_norm_le (D : Lp (P [×n]→L[ℝ] V) 2 μ) :
-    ‖multilinearBundling (P := P) (V := V) μ n D‖ ≤ ‖D‖ := by
-  apply ContinuousMultilinearMap.opNorm_le_bound (norm_nonneg D)
-  intro v
-  rw [mul_comm]
-  apply Lp.norm_le_mul_norm_of_ae_le_mul
-  filter_upwards [multilinearBundling_ae μ n D v] with x hx
-  rw [hx, mul_comm]
-  exact (D x).le_opNorm v
 
 
 end EulerLpDerivative

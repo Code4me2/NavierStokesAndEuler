@@ -42,13 +42,6 @@ variable {U : ℕ → Type} [∀ n, NormedAddCommGroup (U n)] [∀ n, InnerProdu
 def exactPartial (N : ℕ) : Space → Space :=
   fun x => ∑ n ∈ range N, (A n).exactInitial (frequency J X n) (hk n) (hn n) (Q n) x
 
-theorem exactPartial_eq (N : ℕ) : exactPartial A J X hk hn Q N=initialPartial A J X N := by
-  funext x
-  unfold exactPartial initialPartial
-  apply sum_congr rfl
-  intro n _
-  rw [Input.exactInitial_eq]
-  rfl
 
 variable (hJ : 2 ≤ J) (C c : ℝ) (hC : 0 < C) (hc : 0 ≤ c)
   (p q : ℕ) (hX : 1 ≤ X)

@@ -51,21 +51,6 @@ theorem parameterTube_conjugate (J : AxisCoefficientSpace.Window) {ρ : ℝ} {z 
   refine ⟨x, hx, ?_⟩
   simpa only [Complex.dist_conj_comm, Complex.conj_ofReal] using hd
 
-theorem smallTube_subset_domain {ρ τ : ℝ} (hτρ : τ ≤ ρ) (hτ : τ ≤ 1 / 40) :
-    AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow τ ⊆
-      parameterDomain (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow ρ) := by
-  intro z hz
-  rcases hz with ⟨x, hx, hd⟩
-  have hzρ : z ∈ AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow ρ :=
-    ⟨x, hx, lt_of_lt_of_le hd hτρ⟩
-  refine ⟨⟨hzρ, parameterTube_conjugate _ hzρ⟩, ?_⟩
-  have hre : |z.re - x| ≤ dist z (x : ℂ) := by
-    simpa only [dist_eq_norm, Complex.sub_re, Complex.ofReal_re] using
-      Complex.abs_re_le_norm (z - (x : ℂ))
-  have hb := abs_lt.mp (lt_of_le_of_lt hre hd)
-  change -21 / 20 ≤ x ∧ x ≤ 21 / 20 at hx
-  change -11 / 10 < z.re ∧ z.re < 11 / 10
-  constructor <;> linarith [hx.1, hx.2, hb.1, hb.2]
 
 theorem histories_congr_below {D D' : ProfileHistories.RadialDomain}
     (P : ProfileHistories.Profiles D) (Q : ProfileHistories.Profiles D')
@@ -164,15 +149,6 @@ theorem element_profile {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (fields_real E hT hδ hδT κ hP0 i X heta)
   exact congrArg Complex.re hc
 
-theorem realFields_smooth {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0)
-    (i : Fin 4) : ContDiffOn ℝ ∞ (realFields (N := N) hT hδ hδT κ hP0 i) N.radialDomain.carrier := by
-  let P := StressActivation.FromReference.histories N hT hδ hδT κ P0 hP0
-  fin_cases i
-  · exact P.f_smooth
-  · exact P.U_smooth
-  · exact P.Ubar_smooth
-  · exact P.pressure_smooth
 
 theorem real_domain_mem (N : ReferencePath.Input) {X eta : ℝ} (hX : 0 ≤ X)
     (heta : eta ∈ ReferencePath.parameterInterval) : (X, eta) ∈ N.radialDomain.carrier := by
@@ -286,13 +262,6 @@ theorem hierarchy_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
   exact base_values E hT hδ hδT κ hP0 C _ hX heta
 
 
-theorem hierarchy_on_collar {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) (hP0 : ContDiff ℝ ∞ P0) (C : ℝ)
-    {n : ℕ} (hn : 0 < n) {X eta : ℝ} (hX : 0 < X)
-    (hcollar : X ≤ N.endpoint * Real.exp δ) (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    SlowRecursion.OrderEquations h C (hierarchy E hT hδ hδT κ hP0 C).coefficients n (X, eta) :=
-  (hierarchy E hT hδ hδT κ hP0 C).equations n hn X
-    ⟨hX, lt_of_le_of_lt hcollar (collar_lt_square N δ)⟩ eta (parameterDomain_real E.real_mem heta)
 
 end ActualBase
 
@@ -313,8 +282,6 @@ theorem exists_tube_of_pressure_eq :
 
 noncomputable def tubeWidth : ℝ := Classical.choose (exists_tube_of_pressure_eq hp hP0 F hΛ hsmall hσ)
 
-theorem tubeWidth_pos : 0 < tubeWidth hp hP0 F hΛ hsmall hσ :=
-  (Classical.choose_spec (exists_tube_of_pressure_eq hp hP0 F hΛ hsmall hσ)).1
 
 /-- This witness is obtained from the actual coefficient-space natural
 solution and the proved pressure integral, not supplied by the caller. -/
@@ -331,10 +298,6 @@ noncomputable def fromNatural {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
     (hδT : 2 * δ < ReferencePath.rampLimit) (κ : ℝ) :=
   hierarchy (constructedTube hp hP0 F hΛ hsmall hσ) hT hδ hδT κ (actualPressure_smooth hp hP0) C
 
-theorem fromNatural_window {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    (eta : ℂ) ∈ parameterDomain
-      (AxisHolomorphic.parameterTube ActivationHolomorphic.parameterWindow (tubeWidth hp hP0 F hΛ hsmall hσ)) :=
-  parameterDomain_real (constructedTube hp hP0 F hΛ hsmall hσ).real_mem heta
 
 
 theorem fromNatural_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
@@ -352,34 +315,6 @@ theorem fromNatural_base_values {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
 
 
 
-theorem fromNatural_stock_prefix {T δ κ w₁ w₂ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < ReferencePath.rampLimit)
-    (hb : δ ≤ (TransitionRamp.ofNatural F.family hΛ hsmall hδ hδT (actualPressure_smooth hp hP0)).bigTime)
-    (hw₁ : 0 < w₁) (hw₂ : 0 < w₂) {X eta : ℝ} (hX : 0 ≤ X)
-    (hcollar : X ≤ (ReferenceJetBounds.referenceInput F hΛ).endpoint * Real.exp δ)
-    (heta : eta ∈ ReferencePath.parameterInterval) :
-    let A := fromNatural hp hP0 F hΛ hsmall hσ hT hδ hδT κ
-    let Q := TransitionRamp.physicalProfiles F.family hΛ hsmall hδ hδT
-      (actualPressure_smooth hp hP0) (κ := κ) hT hb hw₁ hw₂
-    SlowRecursion.profile (A.coefficients 0 0) (X, eta) = C * Q.f (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 1) (X, eta) = Q.U (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 2) (X, eta) = Q.Ubar (X, eta) - Q.U (X, eta) ∧
-    SlowRecursion.profile (A.coefficients 0 3) (X, eta) = Q.pressure (X, eta) := by
-  let P := StressActivation.FromReference.histories (ReferenceJetBounds.referenceInput F hΛ)
-    hT hδ hδT κ P0 (actualPressure_smooth hp hP0)
-  let Q := TransitionRamp.physicalProfiles F.family hΛ hsmall hδ hδT
-    (actualPressure_smooth hp hP0) (κ := κ) hT hb hw₁ hw₂
-  have he (Y : ℝ) (hY : Y ≤ X) : Q.f (Y, eta) = P.f (Y, eta) ∧ Q.U (Y, eta) = P.U (Y, eta) :=
-    TransitionRamp.physical_fields_eq_activation F.family hΛ hsmall hδ hδT
-      (actualPressure_smooth hp hP0) hT hb hw₁ hw₂ heta (le_trans hY hcollar)
-  have hhist := histories_congr_below Q P hX rfl
-    (fun Y hY => (he Y hY.2).1) (fun Y hY => (he Y hY.2).2)
-  have hv := fromNatural_base_values hp hP0 F hΛ hsmall hσ hT hδ hδT κ hX heta
-  dsimp only at hv ⊢
-  exact ⟨hv.1.trans (congrArg (C * ·) (he X le_rfl).1.symm),
-    hv.2.1.trans (he X le_rfl).2.symm,
-    hv.2.2.1.trans (congrArg₂ (· - ·) hhist.1.symm (he X le_rfl).2.symm),
-    hv.2.2.2.trans hhist.2.symm⟩
 
 
 

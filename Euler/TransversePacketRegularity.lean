@@ -40,19 +40,7 @@ theorem vectorDerivative_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.suppor
   exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
     _ _ (G.derivativePath I (D.clamp t)).property (x,(θ : AddCircle P)) hx
 
-theorem vector_support (t θ : ℝ) :
-    tsupport (fun x : Space => G.vector I (t,(x,θ))) ⊆ D.support := by
-  apply closure_minimal _ D.support_compact.isClosed
-  intro x hx
-  by_contra hn
-  exact hx (G.vector_zero_outside I t x hn θ)
 
-theorem scalar_support (t θ : ℝ) :
-    tsupport (fun x : Space => G.scalar I (t,(x,θ))) ⊆ D.support := by
-  apply closure_minimal _ D.support_compact.isClosed
-  intro x hx
-  by_contra hn
-  exact hx (G.scalar_zero_outside I t x hn θ)
 
 
 

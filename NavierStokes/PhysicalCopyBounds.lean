@@ -512,15 +512,6 @@ theorem physical_native_offset (g : Geometry) (k : TorusInverse.Frequency)
   rw [nativeGraph_eq_cover_commonLift h n d w]
   simpa only [hgap] using native_offset g k (commonLift h n d w).2
 
-/-- The physical slot-width bound follows from the native cell width and
-the exact cover map, rather than being assumed for a periodized field. -/
-theorem physical_native_width (g : Geometry) (k : TorusInverse.Frequency)
-    (h : ℝ) (n d : ℕ) (hgap : g.gap = d) {U : Set Plane} {r0 : ℝ}
-    (hU : ∀ z ∈ U, |PhysicalGraphBounds.etaCoordinate (g.basis z)| ≤ r0)
-    (w : SpaceTime) (hw : g.coordinates k (commonLift h n d w).2 ∈ U) :
-    |PhysicalGraphBounds.etaCoordinate (PhysicalGraphBounds.nativeGraph h n w - nativeCenter g k)| ≤ r0 := by
-  rw [physical_native_offset g k h n d hgap w]
-  exact hU _ hw
 
 variable {F : CopyFamily H TorusInverse.Frequency}
 

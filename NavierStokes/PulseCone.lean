@@ -490,20 +490,6 @@ noncomputable def sourceThreshold (P m : ℝ) : ℝ :=
   min (1 / 120) (1 / (8 * sourceConstant P m))
 
 
-theorem source_error_small (c : Parameters)
-    (hsmall : c.lam ≤ sourceThreshold c.P c.m) :
-    sourceConstant c.P c.m * c.lam ^ 29 ≤ 1 / 8 := by
-  have hc := sourceConstant_pos c.P_pos c.m
-  have hlam : c.lam ≤ 1 := by
-    have h := hsmall.trans (min_le_left _ _)
-    linarith
-  have hp : c.lam ^ 29 ≤ c.lam := by
-    simpa only [pow_one] using
-      pow_le_pow_of_le_one c.lam_pos.le hlam (show 1 ≤ 29 by norm_num)
-  have hprod := (le_div_iff₀ (show 0 < 8 * sourceConstant c.P c.m by positivity)).mp
-    (hsmall.trans (min_le_right _ _))
-  have hm := mul_le_mul_of_nonneg_left hp hc.le
-  nlinarith
 
 /-- Exact stability estimate for a scalar lag around a constant source.
 The source error is allowed to have either sign. -/

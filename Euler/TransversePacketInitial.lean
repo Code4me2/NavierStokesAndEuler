@@ -61,9 +61,6 @@ theorem vector_initial_of_zero (hi : I.value = 0) (x : Space) (θ : ℝ) :
   simpa only [vector,EulerSourceCylinderClassical.field,Data.clamp,
     projIcc_of_mem D.T_pos.le (show (0 : ℝ) ∈ Icc 0 D.T from ⟨le_rfl,D.T_pos.le⟩)] using h
 
-theorem vector_zero_initial (x : Space) (θ : ℝ) :
-    G.vector (InitialData.zero P D) (0,(x,θ)) = 0 :=
-  G.vector_initial_of_zero (InitialData.zero P D) rfl x θ
 
 end Forcing
 

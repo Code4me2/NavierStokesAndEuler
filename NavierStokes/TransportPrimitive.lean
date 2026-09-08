@@ -587,19 +587,7 @@ theorem pastIntegral_norm_le {a b M C : ℝ} {v : E} {f : ℝ × E → F}
       (fun s hs Y => by simpa only [norm_norm] using hbound s hs Y) z
 
 
-theorem pastIntegral_add {a b M : ℝ} {v : E} {f g : ℝ × E → F}
-    (hf : Continuous f) (hg : Continuous g)
-    (hsf : RadialAlias.RadiallySupported a b f) (hsg : RadialAlias.RadiallySupported a b g)
-    (z : ℝ × E) :
-    pastIntegral M v (fun x => f x + g x) z = pastIntegral M v f z + pastIntegral M v g z :=
-  integral_add (shifted_integrable hf hsf z).integrableOn (shifted_integrable hg hsg z).integrableOn
 
-theorem totalIntegral_add {a b M : ℝ} {v : E} {f g : ℝ × E → F}
-    (hf : Continuous f) (hg : Continuous g)
-    (hsf : RadialAlias.RadiallySupported a b f) (hsg : RadialAlias.RadiallySupported a b g)
-    (z : ℝ × E) :
-    totalIntegral M v (fun x => f x + g x) z = totalIntegral M v f z + totalIntegral M v g z :=
-  integral_add (shifted_integrable hf hsf z) (shifted_integrable hg hsg z)
 
 
 theorem pastIntegral_smul (M c : ℝ) (v : E) (f : ℝ × E → F) (z : ℝ × E) :
@@ -757,22 +745,6 @@ theorem iteratedFDeriv_futureIntegral [CompleteSpace F] {a b M : ℝ} {v : E}
   exact (futureIntegral_eq_total_sub_past (iteratedFDeriv_contDiff hf n).continuous
     (iteratedFDeriv_supported hs n) z).symm
 
-theorem futureIntegral_norm_le {a b M C : ℝ} {v : E} {f : ℝ × E → F}
-    (hab : a ≤ b) (hf : Continuous f) (hs : RadialAlias.RadiallySupported a b f)
-    (hbound : ∀ s ∈ Icc a b, ∀ Y : E, ‖f (s, Y)‖ ≤ C) (z : ℝ × E) :
-    ‖futureIntegral M v f z‖ ≤ C * (b - a) := by
-  have hnorm : RadialAlias.RadiallySupported a b (fun x => ‖f x‖) := by
-    intro x hx
-    exact hs (norm_ne_zero_iff.mp hx)
-  calc
-    ‖futureIntegral M v f z‖ ≤ ∫ u in Ioi (0 : ℝ), ‖f (shift M v z u)‖ :=
-      norm_integral_le_integral_norm _
-    _ ≤ ∫ u : ℝ, ‖f (shift M v z u)‖ :=
-      setIntegral_le_integral (shifted_integrable hf hs z).norm
-        (Eventually.of_forall fun _ => norm_nonneg _)
-    _ ≤ ‖totalIntegral M v (fun x => ‖f x‖) z‖ := Real.le_norm_self _
-    _ ≤ C * (b - a) := totalIntegral_norm_le (f := fun x => ‖f x‖) hab hf.norm hnorm
-      (fun s hs Y => by simpa only [norm_norm] using hbound s hs Y) z
 
 
 /-- The total integral agrees with the separately formalized radial alias. -/

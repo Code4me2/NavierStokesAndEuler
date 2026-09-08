@@ -61,12 +61,7 @@ def data (t : Icc (0 : ℝ) T) : EulerChildParticleFieldBounds.Data where
     exact physical_forward_measurePreserving k m T G.time_nonneg G.A hgraph G.divergence ell hell.ne' t
 
 
-omit G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs in
-def childAmplitude (K M : ℝ) : ℝ :=
-  K+M+9*((embeddingCost*K)*K)*M+9*(((embeddingCost*K)*K)*(4*K))*M^2
 
-omit G k m hgraph ell hell D V W K hK hD hV hW M R hM hR hd hv hw hds hvs in
-def childRadius (K M R : ℝ) : ℝ := (1+R)*((1+M)*(16*K)+2)+R
 
 
 

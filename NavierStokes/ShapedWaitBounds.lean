@@ -1137,26 +1137,6 @@ theorem axialLag_hold_ratio_deriv_bound (v : TailData) {η t : ℝ}
   unfold axialRatioDerivativeWaitConstant
   nlinarith
 
-theorem canonical_Ns_hold_ratio_deriv_bound {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    {η t : ℝ} (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
-    |deriv (fun θ => OutgoingHistories.Ns w Amp (v.core.holdStart + t, θ) /
-      OutgoingHistories.E w (v.core.holdStart + t, θ)) η| ≤
-      axialRatioDerivativeWaitConstant v.core.P v.core.m * (1 + t) * Real.exp (-(1 / 2 - v.core.lam) * t) := by
-  have hpulse : v.core.holdStart + t ≤ v.core.pulseStart := by
-    dsimp [Parameters.pulseStart]
-    linarith
-  have hend : v.core.holdStart + t ≤ v.core.endpoint := by
-    dsimp [Parameters.endpoint]
-    linarith [v.core.pulseLength_pos]
-  have hf : (fun θ => OutgoingHistories.Ns w Amp (v.core.holdStart + t, θ) /
-      OutgoingHistories.E w (v.core.holdStart + t, θ)) =
-      fun θ => axialLag v (v.core.holdStart + t) θ /
-        angular v.core.P v.core.dropLength v.core.lam (v.core.holdStart + t, θ) := by
-    funext θ
-    rw [canonical_Ns_before w ha hpulse, OutgoingHistories.E_before w θ hend]
-  rw [hf]
-  exact axialLag_hold_ratio_deriv_bound v hh1 hη ht htw
 
 /-! ## Canonical combined statements and pulse-entry powers -/
 
@@ -1173,69 +1153,14 @@ theorem canonical_Qs_hold_lower {v : TailData} {K : ℝ}
   rw [canonical_Qs_before w ha (by linarith [v.core.holdStart_pos]) hpulse]
   exact angularLag_hold_lower v hh1 hhlam hhT hη ht
 
-theorem canonical_Qs_hold_error {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    {η t : ℝ} (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
-    |OutgoingHistories.Qs w Amp (v.core.holdStart + t, η) - equilibrium v.core v.h η| ≤
-      19 * Real.exp (-(1 - v.core.lam) * t) := by
-  have hpulse : v.core.holdStart + t ≤ v.core.pulseStart := by
-    dsimp [Parameters.pulseStart]
-    linarith
-  rw [canonical_Qs_before w ha (by linarith [v.core.holdStart_pos]) hpulse]
-  exact angularLag_hold_error v hh1 hη ht
 
-theorem canonical_Qs_hold_deriv_error {v : TailData} {K : ℝ}
-    (w : UniformAngularReset.ResetWitness v K) {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp)
-    {η t : ℝ} (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1) (ht : 0 ≤ t) (htw : t ≤ v.core.wait) :
-    |deriv (fun θ => OutgoingHistories.Qs w Amp (v.core.holdStart + t, θ) - equilibrium v.core v.h θ) η| ≤
-      206 * Real.exp (-(1 - v.core.lam) * t) := by
-  have hpulse : v.core.holdStart + t ≤ v.core.pulseStart := by
-    dsimp [Parameters.pulseStart]
-    linarith
-  have hf : (fun θ => OutgoingHistories.Qs w Amp (v.core.holdStart + t, θ) - equilibrium v.core v.h θ) =
-      fun θ => angularLag v.core v.h θ (v.core.holdStart + t) - equilibrium v.core v.h θ := by
-    funext θ
-    rw [canonical_Qs_before w ha (by linarith [v.core.holdStart_pos]) hpulse]
-  rw [hf]
-  exact angularLag_hold_deriv_error v hh1 hη ht
 
 noncomputable def holdConstant (P m : ℝ) : ℝ :=
   206 + axialWaitConstant P m + axialRatioDerivativeWaitConstant P m
 
-theorem holdConstant_bounds {P : ℝ} (hP : 0 < P) (m : ℝ) :
-    0 < holdConstant P m ∧ 206 ≤ holdConstant P m ∧
-      axialWaitConstant P m ≤ holdConstant P m ∧ axialRatioDerivativeWaitConstant P m ≤ holdConstant P m := by
-  have h1 := axialWaitConstant_pos hP m
-  have h2 := axialRatioDerivativeWaitConstant_pos hP m
-  unfold holdConstant
-  constructor
-  · linarith
-  constructor
-  · linarith
-  constructor <;> linarith
 
 
 
-/-- A logarithmic wait gives the claimed polynomial smallness of the axial
-history, including its harmless linear factor, with no hidden `λ` constant. -/
-theorem polynomial_decay_le_power (c : Parameters) (hlam : c.lam ≤ 1 / 120)
-    (hwait : -60 * Real.log c.lam ≤ c.wait) :
-    (1 + c.wait) * Real.exp (-(1 / 2 - c.lam) * c.wait) ≤ 120 * c.lam ^ 29 := by
-  have ht : 0 ≤ c.wait := by linarith [c.wait_gt]
-  have hlin : 1 + c.wait ≤ 120 * Real.exp (c.wait / 120) := by
-    have he := Real.add_one_le_exp (c.wait / 120)
-    linarith
-  have hl := mul_le_mul_of_nonneg_right hlam ht
-  have harg : c.wait / 120 + -(1 / 2 - c.lam) * c.wait ≤ 29 * Real.log c.lam := by
-    nlinarith
-  calc
-    _ ≤ (120 * Real.exp (c.wait / 120)) * Real.exp (-(1 / 2 - c.lam) * c.wait) :=
-      mul_le_mul_of_nonneg_right hlin (Real.exp_pos _).le
-    _ = 120 * Real.exp (c.wait / 120 + -(1 / 2 - c.lam) * c.wait) := by rw [Real.exp_add]; ring
-    _ ≤ 120 * Real.exp (29 * Real.log c.lam) := by gcongr
-    _ = _ := by
-      change 120 * Real.exp (((29 : ℕ) : ℝ) * Real.log c.lam) = 120 * c.lam ^ 29
-      rw [Real.exp_nat_mul, Real.exp_log c.lam_pos]
 
 
 end NavierStokes.ShapedWaitBounds

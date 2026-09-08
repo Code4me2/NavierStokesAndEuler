@@ -46,14 +46,6 @@ theorem comp_norm_le (A : SmoothCoefficientPath K V) (φ : C(L,K)) :
 
 
 
-/-- A continuous change of time parameter preserves each literal spatial
-derivative bound with exactly the same constant. -/
-theorem comp_derivative_bound (A : SmoothCoefficientPath K V) (φ : C(L,K))
-    (n : ℕ) (C : ℝ)
-    (hb : ∀ t x, ‖iteratedFDeriv ℝ n (A.field t : Space → V) x‖ ≤ C)
-    (t : L) (x : Space) :
-    ‖iteratedFDeriv ℝ n ((A.comp φ).field t : Space → V) x‖ ≤ C :=
-  hb (φ t) x
 
 
 end SmoothCoefficientPath

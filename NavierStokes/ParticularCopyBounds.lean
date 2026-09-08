@@ -545,19 +545,6 @@ theorem jets_of_translate {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ 
   rw [← iteratedFDeriv_comp_add_right]
   exact congrArg (fun f => iteratedFDeriv ℝ m f x) (funext he)
 
-/-- Periodic translation preserves every full jet of the actual solution.
-The copy index moves by the genuine common-cover index map. -/
-theorem velocity_jets_deck (t : TangentData P ProblemStatement.Space)
-    (source : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (hperiodic : ∀ p, PeriodicAt source p) (k q : Frequency) (m : ℕ) (x : P × Plane) :
-    iteratedFDeriv ℝ m (complexCopyVelocity t source g hab (k+coverIndex g.gap q))
-      (x + (0,TorusAverages.latticePoint q)) =
-      iteratedFDeriv ℝ m (complexCopyVelocity t source g hab k) x :=
-  jets_of_translate (0,TorusAverages.latticePoint q)
-    (fun y => by
-      rcases y with ⟨p,Y⟩
-      simpa only [Prod.mk_add_mk, add_zero] using
-        complexCopyVelocity_deck t source g hab k q p (hperiodic p) Y) m x
 
 
 

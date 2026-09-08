@@ -36,22 +36,6 @@ theorem movingRayRate_identity (B M : Space →L[ℝ] Space) (p q x : Space)
 def movingRay (m v r : ℝ → Space) (t : ℝ) (i : Fin 3) : ℝ :=
   ⟪normalizedFrame m v t i,r t⟫_ℝ
 
-/-- The actual moving-coordinate ray obeys `-(M-S)ᵀ`, with the skew
-matrix already derived from the older primary ODE. -/
-theorem movingRay_hasDerivAt (B M : Space →L[ℝ] Space)
-    {m v r : ℝ → Space} {t : ℝ}
-    (hm : HasDerivAt m (-B.adjoint (m t)) t)
-    (hv : HasDerivAt v (-B (v t) + (2*⟪m t,B (v t)⟫_ℝ / ‖m t‖^2) • m t) t)
-    (hr : HasDerivAt r (-M.adjoint (r t)) t)
-    (hm0 : m t ≠ 0) (hv0 : v t ≠ 0) (hmv : ⟪m t,v t⟫_ℝ = 0) (i : Fin 3) :
-    HasDerivAt (fun s => movingRay m v r s i)
-      (-(∑ j : Fin 3, (frameMatrix M (unit (m t)) (unit (v t)) j i -
-        EulerPacketRay.frameSkew (frameMatrix B (unit (m t)) (unit (v t))) j i) *
-          movingRay m v r t j)) t := by
-  have h := (normalizedFrame_hasDerivAt B hm hv hm0 hv0 hmv i).inner ℝ hr
-  have he := movingRayRate_identity B M (unit (m t)) (unit (v t)) (r t)
-    (unit_inner_self hm0) (unit_inner_self hv0) (unit_inner_zero hmv) i
-  simpa only [movingRay, normalizedFrame, inner_neg_right, adjoint_inner_right, he] using h
 
 /-- The same physical coordinate equation holds with one-sided endpoint derivatives. -/
 theorem movingRay_hasDerivWithinAt (B M : Space →L[ℝ] Space)

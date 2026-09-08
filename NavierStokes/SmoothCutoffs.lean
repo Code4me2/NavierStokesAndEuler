@@ -265,13 +265,6 @@ theorem timeSwitch_eventually_one {t : ℝ} (ht : 3 / 4 < t) :
 
 
 
-theorem timeSwitch_iteratedDeriv_formula (n : ℕ) (t : ℝ) :
-    iteratedDeriv (n + 1) timeSwitch t =
-      -((4 / 3 : ℝ) ^ (n + 1) * iteratedDeriv (n + 1) cutoff ((4 / 3) * t)) := by
-  unfold timeSwitch
-  rw [iteratedDeriv_const_sub (Nat.succ_pos n) (1 : ℝ)]
-  change iteratedDeriv (n + 1) (fun s => -(scaledCutoff (4 / 3) s)) t = _
-  rw [iteratedDeriv_fun_neg, scaledCutoff_iteratedDeriv]
 
 
 end NavierStokes.SmoothCutoffs

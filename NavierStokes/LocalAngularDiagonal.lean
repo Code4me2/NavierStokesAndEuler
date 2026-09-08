@@ -51,14 +51,7 @@ noncomputable def rawSeries
     (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) : ℕ → VelocityField :=
   fun j => DirectAngularDiagonal.angularField (D j).scalar
 
-theorem rawSeries_eq
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) (j : ℕ) :
-    rawSeries D j = DirectAngularDiagonal.angularField (D j).scalar := rfl
 
-theorem rawSeries_smooth (hh : 0 < h) (hh1 : h < 1 / 2)
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) (j : ℕ) :
-    ContDiffOn ℝ ∞ (rawSeries D j) (CutStageEstimates.physicalSublevel h qbig) :=
-  (D j).field_smooth (localSlowDomain_open hh hh1 qbig)
 
 /-- Axis preservation uses exactly the same local scalars and support,
 without imposing global raw smoothness. -/

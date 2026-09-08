@@ -442,16 +442,6 @@ theorem radial_history_eq (eta : ℝ) {y : ℝ} (hy : 0 ≤ y) :
   simp_rw [radialH_comp_exp]
   rw [integral_const_mul, ← history_eq_integral w eta hy]
 
-theorem radial_history_eta_independent (eta eta' : ℝ) {X : ℝ} (hX : 0 < X)
-    (hrel : d.releaseStart ≤ Real.log X) :
-    (∫ u in Ioc 0 X, radialH d w.coefficients eta u) =
-      ∫ u in Ioc 0 X, radialH d w.coefficients eta' u := by
-  have hy0 : 0 ≤ Real.log X :=
-    (flattenEnd_pos d).le.trans ((releaseStart_gt_flattenEnd d).le.trans hrel)
-  have hi := radial_history_eq w eta hy0
-  have hi' := radial_history_eq w eta' hy0
-  rw [Real.exp_log hX] at hi hi'
-  rw [hi, hi', history_eta_independent w eta eta' hrel]
 
 
 /-- The eventual physical history, in the manuscript's `X` coordinate. -/

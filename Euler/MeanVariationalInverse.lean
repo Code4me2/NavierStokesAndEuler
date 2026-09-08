@@ -162,32 +162,6 @@ theorem meanForcing_inner_eq_integral (T : ℝ) (hT : 0 ≤ T)
   filter_upwards [meanPrimitive_ae T hT FInv v] with t ht
   exact congrArg (fun z : L2 => ⟪f t, z⟫_ℝ) ht
 
-/-- Rewriting the form as actual time integrals is independent of how its
-argument was constructed. This also keeps the integral interface lightweight. -/
-theorem weak_integral_of_weak (T : ℝ) (hT : 0 ≤ T)
-    (FInv H : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (M0 A : L2 →L[ℝ] L2) (L : ℝ)
-    (u v : meanDerivatives T hT FInv) (f : TimeLp T L2)
-    (h : ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ-
-      ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ+
-      ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ+
-      L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ =
-      -⟪f, meanPrimitive T hT FInv v⟫_ℝ) :
-    (∫ t, ⟪(u : TimeLp T L2) t, (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T)-
-      (∫ t, ⟪H (projIcc 0 T hT t) (realPrimitive T (u : TimeLp T L2) t),
-        realPrimitive T (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T)+
-      ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ+
-      L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ =
-      -(∫ t, ⟪f t, realPrimitive T (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T) := by
-  have hi : ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ =
-      ∫ t, ⟪(u : TimeLp T L2) t, (v : TimeLp T L2) t⟫_ℝ ∂timeMeasure T :=
-    MeasureTheory.L2.inner_def (u : TimeLp T L2) (v : TimeLp T L2)
-  have hp := meanPotential_inner_eq_integral T hT FInv H u v
-  have hf := meanForcing_inner_eq_integral T hT FInv f v
-  have hleft := congrArg
-    (fun r : ℝ => r + ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ +
-      L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ)
-    (congrArg₂ (fun x y : ℝ => x-y) hi hp)
-  exact hleft.symm.trans (h.trans (congrArg (fun r : ℝ => -r) hf))
 
 variable (T : ℝ) (hT : 0 ≤ T)
   (FInv : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
@@ -212,18 +186,8 @@ def meanEta : TimeLp T L2 →L[ℝ] C(Icc (0 : ℝ) T, L2) :=
   (terminalPrimitive T hT).comp ((meanDerivatives T hT FInv).subtypeL.comp
     (meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall))
 
-/-- Recover the actual continuous solenoidal label displacement `z=FInv η`. -/
-def meanDisplacement (f : TimeLp T L2) : C(Icc (0 : ℝ) T, L2) :=
-  ⟨fun t => FInv t (meanEta T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f t),
-    FInv.continuous.clm_apply
-      (meanEta T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f).continuous⟩
 
 
-/-- The actual physical displacement has zero terminal trace. -/
-theorem meanEta_terminal (f : TimeLp T L2) :
-    meanEta T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f ⟨T, hT, le_rfl⟩ = 0 :=
-  terminalPrimitive_terminal T hT
-    (meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f : TimeLp T L2)
 
 
 
@@ -276,18 +240,5 @@ theorem meanSolver_unique (f : TimeLp T L2) (u : meanDerivatives T hT FInv)
   simpa only [Submodule.coe_inner, add_apply, smul_apply, inner_add_left,
     real_inner_smul_left, add_assoc] using hu v
 
-include hK hB hF0 hH hboundary hsmall in
-/-- Existence and uniqueness for the source's mean form, conditional on the
-explicit coefficient and solenoidal boundary lower bounds. -/
-theorem existsUnique_mean_weak_solution (f : TimeLp T L2) :
-    ∃! u : meanDerivatives T hT FInv, ∀ v : meanDerivatives T hT FInv,
-      ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ-
-        ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ+
-        ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ+
-        L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ =
-        -⟪f, meanPrimitive T hT FInv v⟫_ℝ :=
-  ⟨meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f,
-    meanSolver_weak T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f,
-    fun u hu => meanSolver_unique T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f u hu⟩
 
 end EulerMeanVariationalInverse

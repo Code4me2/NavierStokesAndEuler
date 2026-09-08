@@ -70,19 +70,6 @@ def LocalGaussianJets (c : ℝ) (U : Set E) (f : E × ℝ → F) : Prop :=
   ∀ n : ℕ, LocalGaussianBound c U (iteratedFDeriv ℝ n f)
 
 
-omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
-/-- Adapter from the unextended exponential written in analytic estimates. -/
-theorem LocalGaussianBound.of_exp_bound {c : ℝ} {U : Set E} {g : E × ℝ → F}
-    (hbound : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ C : ℝ, 0 ≤ C ∧ ∃ N : ℕ,
-      ∀ y ∈ V ∩ U, ∀ δ ∈ Ioo (0 : ℝ) 1,
-        ‖g (y, δ)‖ ≤ C * Real.exp (-c / δ ^ 2) / δ ^ N) :
-    LocalGaussianBound c U g := by
-  intro x hx
-  obtain ⟨V, hV, C, hC, N, hb⟩ := hbound x hx
-  refine ⟨V, hV, C, hC, N, ?_⟩
-  intro y hy δ hδ
-  rw [edge_of_pos c hδ.1]
-  exact hb y hy δ hδ
 
 theorem edge_div_pow_tendsto_zero {c : ℝ} (hc : 0 < c) (N : ℕ) :
     Tendsto (fun δ : ℝ => edge c δ / δ ^ N) (𝓝 0) (𝓝 0) := by

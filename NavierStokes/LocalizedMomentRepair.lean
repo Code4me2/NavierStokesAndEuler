@@ -206,15 +206,6 @@ def repairLinearMap (a l u : Fin n → ℝ) : (Fin n → ℝ) →ₗ[ℝ] (ℝ �
   map_add' := repair_add a l u
   map_smul' r d := repair_smul a l u d r
 
-theorem continuous_repair_eval (a l u : Fin n → ℝ) (t : ℝ) :
-    Continuous (fun d => repair a l u d t) := by
-  unfold repair coefficients Matrix.mulVec dotProduct
-  apply continuous_finsetSum
-  intro j _
-  apply Continuous.mul _ continuous_const
-  apply continuous_finsetSum
-  intro k _
-  exact continuous_const.mul (continuous_apply k)
 
 
 /-- Decomposition into the finite family of repairs of coordinate debts. -/

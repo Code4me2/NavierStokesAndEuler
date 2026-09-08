@@ -179,14 +179,6 @@ theorem sourceJet_succ (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E
     sourceJet J f (p + 1) = slowDeriv (J (sourceJet J f p)) := by
   simp only [sourceJet, Function.iterate_succ_apply', Function.comp_apply]
 
-/-- When the inverse commutes with slow differentiation, these are literally
-`∂u^p (J^p f)`, as in the manuscript. -/
-theorem sourceJet_eq_deriv_inverse_iterate
-    (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
-    (hcomm : Function.Commute slowDeriv J) :
-    sourceJet J f p = slowDeriv^[p] (J^[p] f) := by
-  rw [sourceJet, hcomm.comp_iterate]
-  rfl
 
 /-- Arbitrarily many integrations by parts. The hypotheses concern actual
 directional derivatives, smoothness and support; no integral estimate is assumed. -/
@@ -212,15 +204,6 @@ theorem wholeAlias_sourceJet [CompleteSpace F] {a b M : ℝ} {v Y : E}
       rw [hp, hstep, smul_smul, ← pow_succ]
 
 
-theorem sourceJet_continuous
-    (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
-    (hf : Continuous f) (hJ : ∀ n < p, ContDiff ℝ 1 (J (sourceJet J f n))) :
-    Continuous (sourceJet J f p) := by
-  cases p with
-  | zero => exact hf
-  | succ p =>
-      rw [sourceJet_succ]
-      exact slowDeriv_continuous (hJ p (Nat.lt_succ_self p))
 
 theorem sourceJet_radiallySupported {a b : ℝ}
     (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
@@ -233,16 +216,6 @@ theorem sourceJet_radiallySupported {a b : ℝ}
       rw [sourceJet_succ]
       exact radialSupport_slowDeriv (hs p (Nat.lt_succ_self p))
 
-theorem wholeAlias_norm_le {a b M C : ℝ} {v Y : E} {f : ℝ × E → F}
-    (hab : a ≤ b) (hf : Continuous f) (hs : RadiallySupported a b f)
-    (hbound : ∀ u ∈ Icc a b, ∀ Z : E, ‖f (u, Z)‖ ≤ C) :
-    ‖wholeAlias M v Y f‖ ≤ C * |b - a| := by
-  rw [← aliasIntegral_eq_wholeAlias hf hs]
-  apply intervalIntegral.norm_integral_le_of_norm_le_const
-  intro u hu
-  have hu' : u ∈ Icc a b := by
-    simpa only [uIcc_of_le hab] using uIoc_subset_uIcc hu
-  exact hbound u hu' _
 
 
 end NavierStokes.RadialAlias

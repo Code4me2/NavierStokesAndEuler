@@ -578,7 +578,6 @@ namespace Witness
 variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     {d : LoopData W} (v : Witness d)
 
-theorem same_axis_pressure : v.profiles.pressure0 = F.axisDatum := v.pressure0
 
 theorem fields_outside {p : Point} (hp : p.1 ∉ Ioo d.modulation.left (repairPatch W).right) :
     v.profiles.f p = W.profiles.f p ∧ v.profiles.U p = W.profiles.U p := by
@@ -1107,20 +1106,5 @@ theorem exists_of_certificate {F : OutgoingProfile.Profile} (W : NominalProfile.
   have hs := NominalConeAssembly.modulated_shears_eq W.profiles (W.domain_contains hx.le heta) hx hf.ne'
   simpa only [NominalConeAssembly.p1_eq_stock, NominalConeAssembly.p2_eq_stock, hs.1, hs.2] using hc
 
-/-- The already constructed nominal cone theorem supplies a concrete
-profile, its actual finite modulation, and the full active true cone. -/
-theorem exists_modulated_profile :
-    ∃ (F : OutgoingProfile.Profile) (W : NominalProfile.Witness F)
-      (d : LoopData W) (v : Witness d), ∀ p : Point,
-      NominalConeAssembly.activeLeft W < p.1 → p.1 < NominalConeAssembly.activeRight W →
-      p.2 ∈ Icc (-1 : ℝ) 1 →
-      TrueConeLoop.InTrueCone
-        (ActivationStocks.profileStockOne v.profiles F.data.h p)
-        (ActivationStocks.profileStockTwo v.profiles F.data.h p)
-        (ModulatedCone.angularShear v.profiles.E p)
-        (ModulatedCone.signedAxialShear v.profiles.E v.profiles.U p) := by
-  obtain ⟨F, W, hW⟩ := NominalConeAssembly.exists_nominal_cone
-  obtain ⟨d, v, hv⟩ := exists_of_certificate W hW
-  exact ⟨F, W, d, v, hv⟩
 
 end NavierStokes.ModulatedProfileAssembly

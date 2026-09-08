@@ -40,18 +40,6 @@ section Continuous
 
 variable {Y : Type*} [TopologicalSpace Y] [FirstCountableTopology Y] [LocallyCompactSpace Y]
 
-omit [CompleteSpace E] in
-theorem rawPrimitive_joint_continuous (F : Y × ℝ → E) (hF : Continuous F) :
-    Continuous (fun p : Y × ℝ => rawPrimitive (fun θ => F (p.1,θ)) p.2) := by
-  have hG : Continuous (fun z : (Y × ℝ) × ℝ => F (z.1.1,z.1.2*z.2)) :=
-    hF.comp (continuous_fst.fst.prodMk (continuous_fst.snd.mul continuous_snd))
-  have hi := continuous_parametric_integral_of_continuous
-    (μ := volume) (f := fun p : Y × ℝ => fun s : ℝ => F (p.1,p.2*s)) hG
-    (isCompact_Icc : IsCompact (Icc (0 : ℝ) 1))
-  have hi' : Continuous (fun p : Y × ℝ => ∫ s in (0 : ℝ)..1, F (p.1,p.2*s)) := by
-    simpa only [intervalIntegral.integral_of_le (zero_le_one : (0 : ℝ) ≤ 1),
-      integral_Icc_eq_integral_Ioc] using hi
-  simpa only [rawPrimitive_fixed_interval, Pi.smul_def'] using continuous_snd.smul hi'
 
 
 end Continuous

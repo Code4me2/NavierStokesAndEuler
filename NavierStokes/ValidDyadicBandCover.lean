@@ -142,26 +142,6 @@ theorem field_zero_germ {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   obtain ⟨n, hn, hband, _⟩ := exists_band hh hh1 N hw.1 (hw.2.le.trans hqbig)
   exact (field_germ hh hh1 hf hn hband).trans (hz n hn hband)
 
-/-- Endpoint selection concerns only the positive limiting scale.  The
-endpoint itself is not inserted into any preterminal formula. -/
-theorem endpoint_band {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (N : ℕ)
-    {x : Space} (hx : x 2 ≠ 0)
-    (hq : EndpointCoordinates.endpointRoot (2 * h) (x 2) ≤ ChartScales.Q N) :
-    ∃ n : ℕ, N ≤ n ∧
-      ChartScales.Q n / 2 < EndpointCoordinates.endpointRoot (2 * h) (x 2) ∧
-      EndpointCoordinates.endpointRoot (2 * h) (x 2) < 2 * ChartScales.Q n ∧
-      ∀ᶠ w in 𝓝[SpacetimeEndpoint.openPast 1] (1, x), w ∈ band h n := by
-  obtain ⟨n, hn, hlo, hhi⟩ := PhysicalMeanJetBounds.exists_comparable_band N
-    (EndpointCoordinates.endpointRoot_pos (2 * h) hx) hq
-  have hl : ChartScales.Q n / 2 < EndpointCoordinates.endpointRoot (2 * h) (x 2) := by
-    linarith
-  have hr : EndpointCoordinates.endpointRoot (2 * h) (x 2) < 2 * ChartScales.Q n := by
-    have := ChartScales.Q_pos n
-    linarith
-  refine ⟨n, hn, hl, hr, ?_⟩
-  have ht := MixedDiagonalExtensions.physicalQ_tendsto_endpoint hh hh1 hx
-  filter_upwards [self_mem_nhdsWithin, ht.eventually (isOpen_Ioo.mem_nhds ⟨hl, hr⟩)] with w hw hq
-  exact ⟨hw.1, hq⟩
 
 
 end NavierStokes.ValidDyadicBandCover

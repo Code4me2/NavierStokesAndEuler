@@ -292,21 +292,6 @@ theorem first_angular_eq_backward (F : OutgoingProfile.Profile) {XR cost L C : �
 
 /-! ## Identifying the common extension with its actual radial primitive -/
 
-theorem coefficients_stress_eq_window {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    (Z0 : ZeroOrderSolved s inner) (hI : Icc (-1 : ℝ) 1 ⊆ S) (n : ℕ)
-    {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta : |p.2| ≤ (commonWindow s hI).inner) :
-    (coefficients L B0 Z0 hI).stressTheta n p = SlowResidualMatching.thetaStress h C (asSlowProfiles s) n p ∧
-    (coefficients L B0 Z0 hI).stressAxial n p = SlowResidualMatching.zStress h (asSlowProfiles s) n p := by
-  constructor
-  · change extendCoreZero _ _ _ p = _
-    rw [extendCoreZero_eq _ L.inner_pos _ (fun _ he _ hr => thetaEven_zero L B0 Z0 n hr he) hX heta]
-    exact thetaEven_eq L B0 Z0 n (Real.sqrt_nonneg _)
-  · change extendCoreZero _ _ _ p = _
-    rw [extendCoreZero_eq _ L.inner_pos _ (fun _ he _ hr => zEven_zero L B0 Z0 n hr he) hX heta]
-    exact zEven_eq L B0 Z0 n (Real.sqrt_nonneg _)
 
 
 section Nominal
@@ -485,16 +470,6 @@ theorem edgeJets_of_interior_equality {F : OutgoingProfile.Profile} (W : Nominal
     he m hpi hp.2]
   exact hb p hp
 
-theorem nominal_first_edgeJets {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {c left : ℝ} (hc : 0 < c) (hl : left < terminalShift W + 2) :
-    BaseResidual.PolynomialEdgeJets
-      (BaseResidual.outerWindow (Real.exp (terminalShift W + 3 - 1)) (terminalShift W + 3))
-      (BaseResidual.activeZeta c left (terminalShift W + 3))
-      (BaseResidual.activeDelta left (terminalShift W + 3))
-      (BaseResidual.stressPair (nominalCoefficients W) 1) := by
-  have hs := nominalCoefficients_smooth W
-  exact edgeJets_of_interior_equality W ((hs.stressTheta 1).prodMk (hs.stressAxial 1))
-    (nominal_first_pair_eq W) hc hl
 
 /-! ## Transfer through a finite modification with the restored angular row -/
 

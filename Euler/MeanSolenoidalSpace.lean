@@ -212,10 +212,6 @@ variable (A : Space → Space →L[ℝ] Space)
   (c : ℝ) (hc : 0 < c)
   (hpositive : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A x v, v⟫_ℝ)
 
-/-- The concrete inverse of the projected ordinary-space coefficient multiplier. -/
-def metricInverse : solenoidalSpace →L[ℝ] solenoidalSpace :=
-  projectedInverse solenoidalSpace (coefficientOperator A hA C hbound) c hc
-    (coefficientOperator_coercive A hA C hbound c hpositive)
 
 
 

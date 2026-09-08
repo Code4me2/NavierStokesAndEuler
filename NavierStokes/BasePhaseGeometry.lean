@@ -1088,29 +1088,6 @@ theorem normal_inner_shear {g : Plane} (hg : g ≠ 0) :
       rw [real_inner_smul_right, real_inner_self_eq_norm_sq, normalDirection_unit hg]
       ring
 
-/-- A compact fixed reference profile chooses every uniform constant
-before the band threshold.  `A` may include all prescribed base-chart,
-derivative, and radial-annulus constants. -/
-theorem ordered_constants {K : Set Slow} (hK : IsCompact K)
-    {F0 G0 : Slow → ℝ}
-    (hF : ContinuousOn F0 K) (hg : ContinuousOn (PhaseEstimates.shearVector F0 G0) K)
-    (hR : ∀ q ∈ K, 0 < q.1)
-    (hc : ∀ q ∈ K, ReferenceCone (F0 q) (PhaseEstimates.shearVector F0 G0 q))
-    (h r0 u A T : ℝ) (hh : 0 < h) (N0 : ℕ) :
-    ∃ M : ℝ, 1 ≤ M ∧ A ≤ M ∧ |u| ≤ M ∧ 1 / (2 * r0) ≤ M ∧
-      4 * r0 * ChartScales.Tg ≤ M ∧
-      (∀ q ∈ K, ParameterBounds M q.1 (F0 q) (PhaseEstimates.shearVector F0 G0 q)) ∧
-      ∃ N ≥ N0, ∀ n ≥ N, LargeBand h M u n ∧ T ≤ ChartScales.S n := by
-  obtain ⟨M0, hM0, hp⟩ := compact_parameter_bounds hK hF hg hR hc
-  let M := max M0 (max A (max |u| (max (1 / (2 * r0)) (4 * r0 * ChartScales.Tg))))
-  have h0 : M0 ≤ M := le_max_left _ _
-  have hM : 1 ≤ M := hM0.trans h0
-  refine ⟨M, hM, (le_max_left _ _).trans (le_max_right _ _),
-    (le_max_left _ _).trans ((le_max_right _ _).trans (le_max_right _ _)),
-    (le_max_left _ _).trans ((le_max_right _ _).trans ((le_max_right _ _).trans (le_max_right _ _))),
-    (le_max_right _ _).trans ((le_max_right _ _).trans ((le_max_right _ _).trans (le_max_right _ _))),
-    fun q hq => (hp q hq).mono h0, ?_⟩
-  exact exists_large_band h M u T hh hM N0
 
 
 /-- The actual selected mesh representatives and their derived compact

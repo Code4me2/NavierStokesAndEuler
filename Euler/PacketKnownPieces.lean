@@ -32,10 +32,6 @@ def active (k : KnownPiece) (p i : ℕ) : Prop :=
 instance (k : KnownPiece) (p i : ℕ) : Decidable (k.active p i) := by
   cases k <;> unfold active <;> infer_instance
 
-def profileIndex (k : KnownPiece) (i : ℕ) : ℕ :=
-  match k with
-  | .high | .mean => i
-  | .corrector => i-1
 
 def raw (k : KnownPiece) (p : ℕ) (a : ℕ → Profile) (i : ℕ) : VectorField :=
   if k.active p i then

@@ -84,10 +84,6 @@ theorem constant_real_mul {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
 theorem band_epsilon (s : StripData D) : BandBound s 1 s.epsilon := by
   simpa only [Real.rpow_one] using bandBound_rpow s 1
 
-theorem mean_unweighted {s : StripData D} {α : ℝ} {f : ℕ → D → E}
-    (hf : MeanClass s α f) (hζ : ∀ x ∈ s.domain, s.zeta x ≤ 1) :
-    UnweightedClass s α f :=
-  hf.mono_weight (fun _ _ _ => zero_le_one) (fun _ x hx => hζ x hx)
 
 /-- Raw direction data. Its numerical and class hypotheses are separate. -/
 structure GraphDirections (D : Type*) [NormedAddCommGroup D] [NormedSpace ℝ D] where

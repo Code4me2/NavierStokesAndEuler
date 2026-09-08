@@ -73,20 +73,5 @@ theorem coordinateVelocityPath_translation_contDiff (hTpos : 0 < T) {n : ℕ∞�
     (reconstruction_contDiff T hT (fun a : Space => timeSolenoidalTranslation T a s.velocityLp)
       (fun a : Space => timeSolenoidalTranslation T a s.acceleration) hv ha)
 
-/-- Every spatial coordinate-velocity derivative has the same uniform-time trace cost. -/
-theorem coordinateVelocityPath_translation_gevrey (hTpos : 0 < T)
-    (hv : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.velocityLp))
-    (ha : ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.acceleration))
-    (R Cv Ca : ℝ) (hR : 0 ≤ R) (hCv : 0 ≤ Cv) (hCa : 0 ≤ Ca) (d : ℕ)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.velocityLp) a‖ ≤ Cv*majorant R d n)
-    (hab : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => timeSolenoidalTranslation T b s.acceleration) a‖ ≤ Ca*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => coordinatePathTranslation T b s.coordinateVelocityPath) a‖ ≤
-      ((T⁻¹*Real.sqrt T)*Cv+(2*Real.sqrt T)*Ca)*majorant R d n :=
-  (congrArg (fun g : Space → C(Icc (0 : ℝ) T,solenoidalSpace) => ‖iteratedFDeriv ℝ n g a‖)
-    (s.coordinateVelocityPath_orbit_eq hTpos)).trans_le
-      (reconstruction_gevrey T hTpos (fun b : Space => timeSolenoidalTranslation T b s.velocityLp)
-        (fun b : Space => timeSolenoidalTranslation T b s.acceleration)
-        hv ha R Cv Ca hR hCv hCa d hvb hab n a)
 
 end EulerMeanVariationalInverse.StrongMeanEvolution

@@ -1,5 +1,7 @@
 import Euler.PacketInitializedResidualEquation
-import Euler.PacketInitializedCorrectionChoice
+import Euler.PacketInitializedAllOrderBudget
+import Euler.PacketInitializedRadius
+import Euler.PacketJoinedCoefficientBudgets
 import Euler.PacketInitializedCorrectionParity
 
 /-! Source budgets and the actual initialized residual construct exact

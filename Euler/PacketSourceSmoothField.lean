@@ -53,9 +53,5 @@ def smoothCoefficientPath : SmoothCoefficientPath (Icc (0 : ℝ) D.T) Space :=
     (smoothField D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF)
     (smoothField_jetLp_continuous D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF)
 
-theorem smoothCoefficientPath_apply (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (smoothCoefficientPath D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF).field t x =
-      Z.pointField t (cylinderGraph P k m (Y t x)) :=
-  EulerMeanSobolevBoundedField.coefficientPath_apply _ _ t x
 
 end EulerPacketSourceVolumeSobolev

@@ -502,16 +502,6 @@ variable {Label : Type*} {E V : Type}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-private theorem majorant_enlarge (s : StripData E) (w : ℕ → E → ℝ) (α : ℝ)
-    {C B : ℝ} {p q : ℕ} (hC : 0 ≤ C) (hCB : C ≤ B) (hpq : p ≤ q)
-    (n : ℕ) (x : E) (hw : 0 ≤ w n x) :
-    majorant s w α C p n x ≤ majorant s w α B q n x := by
-  have hp := raise_polynomial_bound hC hCB (s.growth_nonneg n x) le_rfl
-    (s.one_le_growth n x) hpq
-  have ht := mul_le_mul_of_nonneg_right hp
-    (mul_nonneg (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le hw)
-  unfold majorant
-  nlinarith only [ht]
 
 
 end FiniteHarmonics
@@ -559,99 +549,6 @@ theorem selected_copy_smooth (s : StripData P) (F : PhaseConstruction D)
   exact PrimaryCopyBridge.reindex_smoothOn _ _ ((selected_frame_jets F).smoothOn (l,n))
     (frameArgument χ).contDiff.contDiffOn (fun z hz => ⟨hz.1.2.1,hz.2⟩)
 
-/-- The reference/native control is assembled from the selected phase and
-the current source class.  Its energy and all input jets are conclusions.
-Only the geometric separation and scale comparison remain geometric inputs. -/
-noncomputable def referenceControl
-    (s : StripData P) (F : PhaseConstruction D) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (g : Label → ℕ → Geometry) (r : Label → ℕ → ℝ)
-    (hscale : ∀ l n, D.scale (l,n) = s.slow n)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (g l n) (r l n) (F.L (l,n)))
-    {A : ℝ} {a : ℕ} (hA : 1 ≤ A)
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (g l n) ≤ A*s.slow n^a)
-    (j : ℤ) (hj : j ≠ 0) {α : ℝ} (f : Label → ℕ → P × Plane → ProblemStatement.Space)
-    (hf : UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope g r (fun l n => F.L (l,n))
-        (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))) α f) :
-    ParticularCopyBounds.UniformModalControl (CommonCoverClass.sourceStrip s) α
-      (fun l n => nativeFrame (F.frame (l,n)) χ)
-      (fun l n => PrimaryCopyBridge.frameTangentData (nativeFrame (F.frame (l,n)) χ) j (f l n))
-      j g (fun l n => F.L (l,n))
-      (fun l n => referenceP (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)))
-      (phasePatch s F χ g r) := by
-  let K := F.M + Real.exp ((F.E+4*F.C)*F.M) + A + 1
-  have hKM : F.M ≤ K := by dsimp [K]; linarith [Real.exp_pos ((F.E+4*F.C)*F.M)]
-  have hKA : A ≤ K := by dsimp [K]; linarith [F.one_le_M, Real.exp_pos ((F.E+4*F.C)*F.M)]
-  have hK : 1 ≤ K := F.one_le_M.trans hKM
-  have hnonneg : 0 ≤ F.E+4*F.C := by linarith [F.C_nonneg,F.E_nonneg]
-  have hlength (l : Label) (n : ℕ) : F.L (l,n) ≤ F.M*D.scale (l,n) := by
-    have hh := F.slot (l,n) (F.L (l,n)) (F.interval (l,n) ⟨(F.L_pos (l,n)).le,le_rfl⟩)
-    simpa only [abs_of_pos (F.L_pos (l,n))] using hh
-  have hsourceSmooth (l : Label) (n : ℕ) (k : Frequency) :
-      ContDiffOn ℝ ∞ (PrimaryCopyBridge.copySource (f l n) (g l n) k)
-        (phaseNeighborhood s F χ g l n k ×ˢ F.V (l,n)) :=
-    PrimaryCopyBridge.copySource_contDiffOn (g l n) k (hf.smooth l n)
-      (fun z hz => hz.1.1)
-  refine {
-    neighborhood := phaseNeighborhood s F χ g
-    open_neighborhood := phaseNeighborhood_open s F χ g
-    contains := fun _ _ _ _ _ hx => hx.1
-    interval := fun l n => F.V (l,n)
-    open_interval := fun l n => F.openV (l,n)
-    length_pos := fun l n => F.L_pos (l,n)
-    contains_interval := fun l n => F.interval (l,n)
-    bridge := ?_
-    coefficient_smooth := fun l n k => (selected_copy_smooth s F χ g l n k).coefficient j
-    forcing_smooth := fun l n k => (selected_copy_smooth s F χ g l n k).forcing (hsourceSmooth l n k)
-    columns_smooth := ?_
-    current_slot := fun _ _ _ _ hx => hx.2.2
-    rate := fun l n => GaussianEnvelope.referenceRate (F.lam (l,n)) (F.u (l,n)) (F.L (l,n))
-    envelope_pos := fun _ _ _ => referenceP_pos _ _ _ _
-    envelope_deriv := fun _ _ _ => referenceP_hasDerivAt _ _ _ _
-    errorRate := fun l n => (F.E+4*F.C)/D.scale (l,n)
-    errorRate_nonneg := fun l n => div_nonneg hnonneg (zero_le_one.trans (D.one_le_scale (l,n)))
-    constant := K
-    constant_ge_one := hK
-    coordinate_power := a
-    length_bound := ?_
-    exponential_bound := ?_
-    coordinate_bound := fun l n => (hgeometry l n).trans
-      (mul_le_mul_of_nonneg_right hKA (pow_nonneg (zero_le_one.trans (s.one_le_slow n)) _))
-    energy := ?_
-    input_jets := ?_ }
-  · intro l n k
-    apply PrimaryCopyBridge.inputs_of_smooth_frame
-    · exact frame_smooth_mono (selected_copy_smooth s F χ g l n k)
-        (prod_mono Subset.rfl (F.interval (l,n)))
-    · exact (hsourceSmooth l n k).mono (prod_mono Subset.rfl (F.interval (l,n)))
-    · intro x hx
-      exact PrimaryCopyBridge.reindex_kinematics _ _ (selected_kinematics F (l,n) hx.2.1)
-  · intro l n k i
-    have hs := (synthesisColumn_polynomial (selected_frame_jets F) i).smooth (l,n)
-    exact hs.comp (frameArgument χ).contDiff.contDiffOn (fun z hz => ⟨hz.1.2.1,hz.2⟩)
-  · intro l n
-    change F.L (l,n) ≤ K*s.slow n
-    rw [← hscale l n]
-    exact (hlength l n).trans (mul_le_mul_of_nonneg_right hKM (zero_le_one.trans (D.one_le_scale (l,n))))
-  · intro l n
-    have hS : 0 < D.scale (l,n) := zero_lt_one.trans_le (D.one_le_scale (l,n))
-    have hμ : 0 ≤ (F.E+4*F.C)/D.scale (l,n) := div_nonneg hnonneg hS.le
-    have he : ((F.E+4*F.C)/D.scale (l,n))*F.L (l,n) ≤ (F.E+4*F.C)*F.M := by
-      calc
-        _ ≤ ((F.E+4*F.C)/D.scale (l,n))*(F.M*D.scale (l,n)) :=
-          mul_le_mul_of_nonneg_left (hlength l n) hμ
-        _ = _ := by field_simp
-    apply (Real.exp_le_exp.mpr he).trans
-    dsimp [K]
-    linarith [F.one_le_M]
-  · intro l n k x hx hcell v hv z
-    exact selected_energy F (l,n) hcell.1.2.1 hv hj z
-  · intro N
-    obtain ⟨C,hC,m,hb⟩ := selected_input_jets s F χ g r hscale hsep hA hgeometry
-      (fun _ => j) (J := |(j : ℝ)|+1) (by linarith [abs_nonneg (j:ℝ)])
-      (fun _ => by linarith) hf N
-    exact ⟨C,hC,m,fun l n k x hx hcell i hi v hv =>
-      hb l n k x hx hcell.1.2.1 hcell.2 i hi v hv⟩
 
 end ReferenceControl
 

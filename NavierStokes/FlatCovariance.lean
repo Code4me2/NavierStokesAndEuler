@@ -69,10 +69,6 @@ theorem edge_mul (c d x : ℝ) : edge c x * edge d x = edge (c + d) x := by
     congr 1
     ring
 
-theorem edge_sq (c x : ℝ) : edge c x ^ 2 = edge (2 * c) x := by
-  rw [pow_two, edge_mul]
-  congr 1
-  ring
 
 
 theorem determinant_columns (G : Mat2) (c : Vec2) :
@@ -115,10 +111,6 @@ theorem primaryAmplitude_of_nonpos (σ : ℝ) (κ : Vec2)
     primaryAmplitude σ κ G T x i = 0 := by
   simp [primaryAmplitude, inverseCoefficients_of_nonpos σ κ G T hx]
 
-theorem signedAmplitude_of_nonpos (σ τ : ℝ) (κ : Vec2)
-    (G : ℝ → Mat2) (T R : ℝ → Vec2) {x : ℝ} (hx : x ≤ 0) (i : Fin 2) :
-    signedAmplitude σ τ κ G T R x i = 0 := by
-  simp [signedAmplitude, inverseCoefficients_of_nonpos τ κ G R hx]
 
 /-- Exact cancellation of the column exponential in the actual inverse.
 This identity includes the edge and the full zero half-line. -/
@@ -179,13 +171,6 @@ theorem inverseCoefficients_target_factor (σ : ℝ) (κ : Vec2)
     dotProduct, Fin.sum_univ_two]
   ring
 
-theorem signedAmplitude_target_factor (σ τ : ℝ) (κ : Vec2)
-    (G : ℝ → Mat2) (T R : ℝ → Vec2) (f : ℝ → ℝ) (x : ℝ) (i : Fin 2) :
-    signedAmplitude σ τ κ G T (fun y j => f y * R y j) x i =
-      f x * signedAmplitude σ τ κ G T R x i := by
-  unfold signedAmplitude
-  rw [inverseCoefficients_target_factor]
-  ring
 
 theorem inverseCoefficients_pos {σ : ℝ} {κ : Vec2}
     {G : ℝ → Mat2} {T : ℝ → Vec2} {x : ℝ}
@@ -296,52 +281,12 @@ theorem signedAmplitude_div_pow_contDiffOn
 end Smooth
 
 
-/-- A smooth function that is zero on the nonpositive half-line has every
-derivative zero at the joining point. -/
-theorem iteratedDeriv_zero_of_nonpos_zero {f : ℝ → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hzero : ∀ x ≤ 0, f x = 0) (n : ℕ) :
-    iteratedDeriv n f 0 = 0 := by
-  have hz : iteratedDeriv n (fun _ : ℝ => (0 : ℝ)) = fun _ => 0 := by
-    induction n with
-    | zero => rw [iteratedDeriv_zero]
-    | succ n ih =>
-      rw [iteratedDeriv_succ, ih]
-      funext x
-      exact deriv_const x 0
-  have heq : EqOn f (fun _ : ℝ => (0 : ℝ)) (Iio 0) :=
-    fun x hx => hzero x hx.le
-  have hd := heq.iteratedDeriv_of_isOpen isOpen_Iio n
-  rw [hz] at hd
-  have hc : Continuous (iteratedDeriv n f) := hf.continuous_iteratedDeriv n
-    (WithTop.coe_le_coe.mpr (le_top : (n : ℕ∞) ≤ ⊤))
-  have hcl := hd.closure hc continuous_const
-  apply hcl
-  simp
 
 section GlobalFlatness
 
 variable {σ τ : ℝ} {κ : Vec2} {G : ℝ → Mat2} {T R : ℝ → Vec2}
 
-theorem primaryAmplitude_div_pow_contDiff
-    (hG : ∀ i j, ContDiff ℝ ∞ (fun x => G x i j))
-    (hT : ∀ i, ContDiff ℝ ∞ (fun x => T x i))
-    (hcone : ∀ x, SmoothCovariance.StrictCone (G x) (T x))
-    (hgap : ∀ i, κ i < σ) (i : Fin 2) (loss : ℕ) :
-    ContDiff ℝ ∞ (fun x => primaryAmplitude σ κ G T x i / x ^ loss) :=
-  contDiffOn_univ.mp (primaryAmplitude_div_pow_contDiffOn
-    (fun i j => (hG i j).contDiffOn) (fun i => (hT i).contDiffOn)
-    (fun x _ => hcone x) hgap i loss)
 
-theorem signedAmplitude_div_pow_contDiff
-    (hG : ∀ i j, ContDiff ℝ ∞ (fun x => G x i j))
-    (hT : ∀ i, ContDiff ℝ ∞ (fun x => T x i))
-    (hR : ∀ i, ContDiff ℝ ∞ (fun x => R x i))
-    (hcone : ∀ x, SmoothCovariance.StrictCone (G x) (T x))
-    (hgap : ∀ i, (σ + κ i) / 2 < τ) (i : Fin 2) (loss : ℕ) :
-    ContDiff ℝ ∞ (fun x => signedAmplitude σ τ κ G T R x i / x ^ loss) :=
-  contDiffOn_univ.mp (signedAmplitude_div_pow_contDiffOn
-    (fun i j => (hG i j).contDiffOn) (fun i => (hT i).contDiffOn)
-    (fun i => (hR i).contDiffOn) (fun x _ => hcone x) hgap i loss)
 
 
 
@@ -351,15 +296,7 @@ section ParameterFamilies
 
 variable {E : Type*}
 
-/-- Evaluation of the actual inverse amplitude at a smooth signed edge
-coordinate, with independent smooth parameters in the normalized data. -/
-def parameterPrimary (σ : ℝ) (κ : Vec2) (d : E → ℝ)
-    (G : E → Mat2) (T : E → Vec2) (z : E) : Vec2 :=
-  primaryAmplitude σ κ (fun _ => G z) (fun _ => T z) (d z)
 
-def parameterSigned (σ τ : ℝ) (κ : Vec2) (d : E → ℝ)
-    (G : E → Mat2) (T R : E → Vec2) (z : E) : Vec2 :=
-  signedAmplitude σ τ κ (fun _ => G z) (fun _ => T z) (fun _ => R z) (d z)
 
 
 

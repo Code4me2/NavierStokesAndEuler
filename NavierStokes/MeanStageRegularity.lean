@@ -140,10 +140,6 @@ theorem temporalStage_primitive (H : PrimitiveData U g.radial.inner g.radial.out
   rw [GaugeDebtIncrement.temporalStage_covariance]
   exact H.covariance i j
 
-theorem temporalStage_reconstructed (g : VariableGaugeMean.GaugeData Plane)
-    (c : Context Point) (u : State Point) (h : ℝ) (index : ℕ → ℕ) (axial : Plane × Plane) :
-    VariableGaugeMean.reconstructState g c (VariableGaugeMean.temporalStageState g h index axial c u) =
-      VariableGaugeMean.temporalStageState g h index axial c u := rfl
 
 
 end Temporal
@@ -265,18 +261,6 @@ theorem rankStage_preserves (H : PrimitiveData U g.radial.inner g.radial.outer c
         VariableGaugeMean.rankStageState g r axial c u :=
   ⟨rankStage_primitive H hg hell axial, rankStage_reconstructed g r c u axial⟩
 
-/-- An earlier geometric certificate suffices.  The new state's debt is
-computed and its smoothness is derived before performing rank repair. -/
-theorem rankStage_from_geometry {v : State Point}
-    (H : PrimitiveData U g.radial.inner g.radial.outer c u)
-    (hg : LocalRankDefect.RankGeometry g r U.carrier c v)
-    (hell : ∀ n, g.length n = VariableGaugeMean.qLength coord) (axial : Plane × Plane) :
-    PrimitiveData U g.radial.inner g.radial.outer c
-        (VariableGaugeMean.rankStageState g r axial c u) ∧
-      VariableGaugeMean.reconstructState g c (VariableGaugeMean.rankStageState g r axial c u) =
-        VariableGaugeMean.rankStageState g r axial c u :=
-  rankStage_preserves H
-    (rankGeometry_for_state H hg.primitive_inner_pos g.radial.inner_lt_outer hg) hell axial
 
 end Rank
 

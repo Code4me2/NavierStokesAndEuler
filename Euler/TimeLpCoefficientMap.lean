@@ -69,16 +69,6 @@ def coefficientMap : C(Icc (0 : ℝ) T, E →L[ℝ] F) →L[ℝ] (TimeLp T E →
     change ‖timeMultiplier T hT A‖ ≤ (1 : ℝ) * ‖A‖
     simpa only [one_mul] using timeMultiplier_norm (E := E) (F := F) T hT A)
 
-/-- Coefficient derivatives give genuine operator-norm derivatives of the time multiplier. -/
-theorem hasDerivAt_timeMultiplier
-    (A : ℝ → C(Icc (0 : ℝ) T, E →L[ℝ] F))
-    (A₁ : C(Icc (0 : ℝ) T, E →L[ℝ] F)) (x : ℝ)
-    (hA : HasDerivAt A A₁ x) :
-    HasDerivAt (fun r => timeMultiplier T hT (A r)) (timeMultiplier T hT A₁) x := by
-  change HasDerivAt ((coefficientMap T hT) ∘ A) (coefficientMap T hT A₁) x
-  exact HasFDerivAt.comp_hasDerivAt
-    (F := C(Icc (0 : ℝ) T, E →L[ℝ] F)) (E := TimeLp T E →L[ℝ] TimeLp T F) x
-    (coefficientMap (E := E) (F := F) T hT).hasFDerivAt hA
 
 /-- Every order of actual coefficient regularity passes to operator norm regularity. -/
 theorem contDiff_timeMultiplier {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]

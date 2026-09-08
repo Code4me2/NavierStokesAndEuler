@@ -1,4 +1,7 @@
-import Euler.PDEEnergyLimit
+import Euler.SobolevViscousEnergy
+import Euler.WeightedCylinderEnergy
+import Euler.TimeLpPairing
+import Euler.SobolevEnergyPaths
 import Euler.TimeLpSubinterval
 
 /-! Genuine finite-Sobolev PDE energy passage on every time subinterval. -/
@@ -9,7 +12,7 @@ namespace EulerPDESubintervalEnergyLimit
 
 open MeasureTheory Set Real InnerProductSpace EulerLiftedGradientSpace EulerSpatialSobolevInverse
   EulerCylinderSobolev EulerCylinderSobolevSpace EulerMetricHeatEnergy EulerFiniteMetricEnergy
-  EulerWeightedSobolevEnergy EulerWeightedCylinderEnergy EulerSobolevMetricTransport
+  EulerWeightedCylinderEnergy EulerSobolevMetricTransport
   EulerVolterraConvolution EulerTimeLp EulerTimeLpPairing EulerPacketWeights EulerTimeLpSubinterval
 open scoped Topology
 

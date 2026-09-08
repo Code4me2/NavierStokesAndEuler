@@ -745,11 +745,6 @@ theorem average_total_product {base mean osc : Components}
   unfold fluxDifference covariance
   ring
 
-theorem fluxDifference_diagonal (base mean osc : Components) (i : Fin 3) (q : SpaceTime) :
-    fluxDifference base mean osc i i q =
-      2 * base i q * mean i q + (mean i q) ^ 2 + covariance osc i i q := by
-  unfold fluxDifference
-  ring
 
 theorem direction_twice_add {f g : SpaceTime → E} (hf : ContDiff ℝ ∞ f)
     (hg : ContDiff ℝ ∞ g) (v w q : SpaceTime) :
@@ -913,49 +908,6 @@ theorem base_residuals {b : Components} {p : Scalar}
   rw [average_invariant hip.2.2, reynoldsAxial_invariant hbi hpi] at hZ
   exact ⟨hR, hA, hZ⟩
 
-/-- Exact physical mean balances (32) for the actual cylindrical residual.
-The tensor entries are the prescribed physical radial flux entries; `covariance`
-is the integral of the entire oscillatory field, including any curl corrections. -/
-theorem exact_mean_balances {b m o : Components} {p pb pm : Scalar}
-    (hb : ∀ i, ContDiff ℝ ∞ (b i)) (hm : ∀ i, ContDiff ℝ ∞ (m i))
-    (ho : ∀ i, ContDiff ℝ ∞ (o i)) (hp : ContDiff ℝ ∞ p)
-    (hpb : ContDiff ℝ ∞ pb) (hpm : ContDiff ℝ ∞ pm)
-    (hbi : ∀ i, AngularInvariant (b i)) (hmi : ∀ i, AngularInvariant (m i))
-    (hop : ∀ i, AngularPeriodic (o i)) (hpp : AngularPeriodic p) (hpbi : AngularInvariant pb)
-    (hz : ∀ i q, average (o i) q = 0) (hpavg : average p = fun q => pb q + pm q)
-    (hdiv : ∀ y, 0 < radius y → divergence (total b m o) y = 0)
-    (hbdiv : ∀ y, 0 < radius y → divergence b y = 0)
-    (Ttheta Tz : Scalar) (q : SpaceTime) (hr : 0 < radius q) :
-    (average (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 1) q -
-      CylindricalResidual.cylindricalResidual (velocity b) pb q.1 q.2 1 -
-      radialDivergence 2 Ttheta q = Etheta b m o Ttheta q) ∧
-    (average (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 2) q -
-      CylindricalResidual.cylindricalResidual (velocity b) pb q.1 q.2 2 -
-      radialDivergence 1 Tz q = Ez b m o pm Tz q) ∧
-    (average (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 0) q -
-      CylindricalResidual.cylindricalResidual (velocity b) pb q.1 q.2 0 = dr pm q - gr b m o q) := by
-  have ht := total_smooth hb hm ho
-  have htp := total_periodic hbi hmi hop
-  have hbase := base_residuals hb hpb hbi hpbi hbdiv q hr
-  have heA : (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 1) = residualAngular (total b m o) p :=
-    funext (cylindricalResidual_angular ht hp)
-  have heZ : (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 2) = residualAxial (total b m o) p :=
-    funext (cylindricalResidual_axial ht hp)
-  have heR : (fun y => CylindricalResidual.cylindricalResidual
-      (velocity (total b m o)) p y.1 y.2 0) = residualRadial (total b m o) p :=
-    funext (cylindricalResidual_radial ht hp)
-  rw [heA, heZ, heR, cylindricalResidual_angular hb hpb, cylindricalResidual_axial hb hpb,
-    cylindricalResidual_radial hb hpb, hbase.1, hbase.2.1, hbase.2.2,
-    average_residualAngular ht hp htp hpp hdiv q hr,
-    average_residualAxial ht hp htp hdiv q hr, average_residualRadial ht hp htp hdiv q hr]
-  exact ⟨reynoldsAngular_total_sub hb hm ho hbi hmi hz Ttheta q,
-    reynoldsAxial_total_sub hb hm ho hpb hpm hbi hmi hz hpavg Tz q,
-    reynoldsRadial_total_sub hb hm ho hpb hpm hbi hmi hz hpavg q⟩
 
 
 
@@ -1001,46 +953,9 @@ theorem cartesianResidual_eq {u : VelocityField} {p : PressureField}
   rw [CylindricalResidual.navierStokesResidual_cylindrical hu hp hr,
     hrep.components, hpull, CylindricalResidual.frame_inverse]
 
-theorem cartesianDivergence_eq {u : VelocityField} {w : Components}
-    (hw : ∀ i, ContDiff ℝ ∞ (w i)) (hrep : Represents u w)
-    (q : SpaceTime) (hr : 0 < radius q)
-    (hu : ContDiffAt ℝ 2 u (q.1, CylindricalResidual.chart q.2)) :
-    spatialDivergence u q.1 (CylindricalResidual.chart q.2) = divergence w q := by
-  have hs : DifferentiableAt ℝ (fun x => u (q.1, x)) (CylindricalResidual.chart q.2) :=
-    (hu.differentiableAt (by norm_num)).comp _
-      ((differentiableAt_const _).prodMk differentiableAt_id)
-  rw [CylindricalResidual.divergence_cylindrical hs hr, hrep.components, cylindricalDivergence_eq hw]
-
-theorem average_cartesianResidual_eq {u : VelocityField} {p : PressureField}
-    {w : Components} {P : Scalar} (hrep : Represents u w)
-    (hpull : CylindricalResidual.pressurePullback p = P)
-    (hu : ∀ y, 0 < radius y → ContDiffAt ℝ 2 u (y.1, CylindricalResidual.chart y.2))
-    (hp : ∀ y, 0 < radius y → DifferentiableAt ℝ p (y.1, CylindricalResidual.chart y.2))
-    (q : SpaceTime) (hr : 0 < radius q) (i : Fin 3) :
-    average (cartesianResidual u p i) q =
-      average (fun y => CylindricalResidual.cylindricalResidual (velocity w) P y.1 y.2 i) q := by
-  apply average_congr
-  intro a _
-  have hra : 0 < radius (angularShift q a) := by simpa only [radius_angularShift] using hr
-  exact cartesianResidual_eq hrep hpull _ hra (hu _ hra) (hp _ hra) i
 
 
-theorem average_invariant_of_periodic [CompleteSpace E] {f : SpaceTime → E}
-    (hf : ContDiff ℝ ∞ f) (hp : AngularPeriodic f) : AngularInvariant (average f) := by
-  intro q a
-  have hd : ∀ b : ℝ, HasDerivAt (fun c => average f (angularShift q c)) 0 b := by
-    intro b
-    have hs : HasDerivAt (fun c : ℝ => angularShift q c) angularVector b := by
-      simpa [angularShift] using ((hasDerivAt_id b).smul_const angularVector).const_add q
-    have hder : HasDerivAt (fun c => average f (angularShift q c))
-        (dtheta (average f) (angularShift q b)) b :=
-      (((average_smooth hf).differentiable (by simp)) (angularShift q b)).hasFDerivAt.comp_hasDerivAt b hs
-    have hz : dtheta (average f) (angularShift q b) = 0 := by
-      rw [show dtheta (average f) (angularShift q b) = average (dtheta f) (angularShift q b) from
-        direction_average hf angularVector (angularShift q b), average_dtheta_zero hf hp]
-    rwa [hz] at hder
-  simpa only [angularShift_zero] using
-    is_const_of_deriv_eq_zero (fun b => (hd b).differentiableAt) (fun b => (hd b).deriv) a 0
+
 
 
 

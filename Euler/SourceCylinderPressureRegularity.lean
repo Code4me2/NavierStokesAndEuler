@@ -34,10 +34,5 @@ theorem pressureField_eq_pointField (t : Icc (0 : ℝ) T) :
     (pressureField_continuous P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero t)
     (pressureField_ae P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero t)).symm
 
-theorem pressureField_joint_continuous :
-    Continuous (fun z : Icc (0 : ℝ) T × LiftDomain P =>
-      pressureField P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero z.1 z.2) := by
-  simp_rw [pressureField_eq_pointField]
-  exact scalarPointField_joint_continuous P _ _
 
 end EulerSourceCylinderClassical

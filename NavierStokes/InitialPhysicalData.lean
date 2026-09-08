@@ -2542,28 +2542,7 @@ theorem potential_germ_eq_active (n d : ℕ) {w : ProblemStatement.SpaceTime}
   filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw, hn] with z hzt hzx
   exact potential_eq_active n d z hzt hzx
 
-theorem curl_eq_active (n d : ℕ) {w : ProblemStatement.SpaceTime}
-    (hw : w ∈ PhysicalWaveSum.preterminal)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d w ∈ strip.domain) :
-    SpatialCurl.spatialCurl (potential B N0) w =
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        ActualPrimaryCoherence.cartesianVelocity l.2 l.1 w := by
-  rw [PhysicalCurlCovariance.spatialCurl_congr (potential_germ_eq_active n d hw hx)]
-  exact primary_cartesianCurl_sum _ hw
 
-theorem pressure_eq_active (n d : ℕ) (z : ProblemStatement.SpaceTime)
-    (ht : z.1 < 1) (hr : 0 < z.2 0)
-    (hx : PhysicalMeanJetBounds.graph ActualPrimary.h n d
-      (z.1, CylindricalResidual.chart z.2) ∈ strip.domain) :
-    pressure B N0 (z.1, CylindricalResidual.chart z.2) =
-      ∑ l ∈ ActualPrimary.activeLabels ActualPrimary.standardRegion B N0 n,
-        ActualPrimaryCoherence.physicalPressure l.2 l.1 z := by
-  change Complex.reCLM ((pressureFamily B N0).sum innerRadius ActualPrimary.h
-    ActualPrimary.slots.radius (z.1, CylindricalResidual.chart z.2)) = _
-  rw [pressure_sum_eq_active n d (z.1, CylindricalResidual.chart z.2) ht hx, map_sum]
-  apply Finset.sum_congr rfl
-  intro l hl
-  exact pressure_periodized_eq (l.2, l.1) z ht hr
 
 
 

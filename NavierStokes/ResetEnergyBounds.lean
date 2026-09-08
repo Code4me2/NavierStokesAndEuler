@@ -399,26 +399,6 @@ theorem normalizedResetEnergy_deriv_abs_le (eta : ℝ) (heta : eta ^ 2 ≤ 1) :
 
 end NormalizedBounds
 
-/-- The outgoing schedule supplies the actual correction and all bounds.
-There is no separate smallness assumption on a chosen correction. -/
-theorem exists_scheduled_reset_energy_bounds :
-    ∃ lam0 K C : ℝ, 0 < lam0 ∧ 0 < K ∧ 0 < C ∧
-      ∀ d : TailData, d.core.lam < lam0 → ∃ w : ResetWitness d K,
-        ContDiff ℝ ∞ (normalizedResetEnergy d w.coefficients) ∧
-        ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-          |normalizedResetEnergy d w.coefficients eta| ≤ C * d.core.lam ^ (29 : ℕ) ∧
-          |deriv (normalizedResetEnergy d w.coefficients) eta| ≤ C * d.core.lam ^ (29 : ℕ) := by
-  obtain ⟨lam0, K, hlam0, hK, hreset⟩ := exists_scheduled_reset
-  refine ⟨lam0, K, 72 * K, hlam0, hK, mul_pos (by norm_num) hK, ?_⟩
-  intro d hd
-  obtain ⟨w⟩ := hreset d hd
-  refine ⟨w, normalizedResetEnergy_contDiff d w.smooth, ?_⟩
-  intro eta heta
-  constructor
-  · have h := normalizedResetEnergy_abs_le w eta heta
-    have hp := pow_nonneg d.core.lam_pos.le (29 : ℕ)
-    nlinarith [mul_nonneg hK.le hp]
-  · exact normalizedResetEnergy_deriv_abs_le w eta heta
 
 
 end NavierStokes.ResetEnergyBounds

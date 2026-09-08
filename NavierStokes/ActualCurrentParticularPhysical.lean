@@ -481,35 +481,6 @@ theorem copyData_phase {x : CycleState (Label B N0)}
   rw [copyData_eq_actual x l j (ActualParticularStageControls.preserves_frequency hx l)]
   exact ActualParticularDynamics.data_phase hx l j
 
-/-- The native smoothness hypotheses are consequences of the actual
-source class and support theorem; no physical jet estimate is assumed. -/
-theorem native_smooth_of_current_source (x : CycleState (Label B N0))
-    (hx : ActualParticularStageControls.PreservesCarriers x)
-    (hs : ActualParticularStageControls.InputSupport x)
-    (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
-    {α : ℝ} (j : ℤ) (hj : j ≠ 0)
-    (H : LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip ActualParticularStageControls.slowStrip))
-      ActualParticularStageControls.nativeEnvelope α (ActualParticularStageControls.currentSource x j))
-    (l : Label B N0) (hz : RawBoundaryZero x l j) (n : ℕ) :
-    ContDiffOn ℝ ∞ (nativePotential x l j n) nativeDomain ∧
-      ContDiffOn ℝ ∞ (fun z => (nativePressure x l j n z).re) nativeDomain := by
-  have hc := ActualParticularStageControls.common_bounds x hx hs hN j hj H
-  have ha := (ActualParticularStageControls.native_wave_to_weighted hc.1).each l
-  have hp := (ActualParticularStageControls.native_wave_to_weighted hc.2.2.1).each l
-  have he := copyData_eq_actual x l j (ActualParticularStageControls.preserves_frequency hx l)
-  have ha' : WeightedClasses.MemClass ActualWaveRegularityData.particularFullStrip
-      (fun _ z => Real.sqrt (ActualWaveRegularityData.particularFullStrip.zeta z)) α
-      (copyData x l j).common.amplitude := by
-    rw [he]
-    exact ha
-  have hp' : WeightedClasses.MemClass ActualWaveRegularityData.particularFullStrip
-      (fun _ z => Real.sqrt (ActualWaveRegularityData.particularFullStrip.zeta z)) (α + 1/2)
-      (copyData x l j).common.pressure := by
-    rw [he]
-    exact hp
-  exact ⟨nativePotential_contDiffOn x l j (copyData_phase hx l j) ha' hz n,
-    nativePressure_re_contDiffOn x l j (copyData_phase hx l j) hp' hz n⟩
 
 theorem nativeMap_polar_mem_iff (n : ℕ) (a : ℝ) (i : PolarCharts.Index) (w : SpaceTime) :
     PhysicalParticularWave.nativeMap CorrectionInitialization.ActualPrimary.h (ChartScales.Q n)

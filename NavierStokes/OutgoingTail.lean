@@ -694,12 +694,6 @@ theorem tailRate_primitive (d : TailData) (t : ℝ) :
     ((tailRate_contDiff d).continuous.intervalIntegrable 0 t)
   simpa [primitive, tailShape_early d (show (0 : ℝ) ≤ 1 by norm_num)] using hi
 
-theorem tail_integrating_factor (d : TailData) (t : ℝ) :
-    Real.exp (primitive (tailRate d) t) =
-      Real.exp ((1 - d.h) * t) * tailShape d t / (1 - d.rho) := by
-  rw [tailRate_primitive, Real.exp_sub, Real.exp_add,
-    Real.exp_log (tailShape_pos d t),
-    Real.exp_log (show 0 < 1 - d.rho by linarith [d.rho_lt_half])]
 
 
 def tailNumerator (d : TailData) (t : ℝ) : ℝ :=
@@ -708,9 +702,6 @@ def tailNumerator (d : TailData) (t : ℝ) : ℝ :=
 
 def tailLag (d : TailData) (t : ℝ) : ℝ := tailNumerator d t / tailShape d t
 
-theorem tailNumerator_contDiff (d : TailData) : ContDiff ℝ ∞ (tailNumerator d) :=
-  (contDiff_const.mul contDiff_id).exp.mul
-    (contDiff_const.sub (primitive_contDiff (weightedTailDerivative_contDiff d)))
 
 
 theorem tailNumerator_hasDerivAt (d : TailData) (t : ℝ) :
@@ -741,8 +732,6 @@ theorem tailLag_initial (d : TailData) : tailLag d 0 = tailDebt d := by
   simp [tailLag, tailNumerator, weightedTailDerivative, primitive, tailDebt,
     tailShape_early d (show (0 : ℝ) ≤ 1 by norm_num)]
 
-theorem tailLag_terminal (d : TailData) : tailLag d 3 = 0 := by
-  simp [tailLag, tailNumerator]
 
 
 def holdLag (d : TailData) (t : ℝ) : ℝ :=
@@ -824,17 +813,6 @@ def extendedAngularMoment (d : TailData) (amp : ℝ → ℝ) (eta y : ℝ) : ℝ
     ∫ t in (0 : ℝ)..y,
       Real.sqrt 2 * Real.exp (3 * t / 2) * finalAngular d (t, eta) * axial d.core amp (t, eta)
 
-theorem extendedAngularMoment_eq (d : TailData) (amp : ℝ → ℝ) (eta y : ℝ) :
-    extendedAngularMoment d amp eta y = angularMoment d.core amp eta y := by
-  unfold extendedAngularMoment angularMoment
-  congr 1
-  apply intervalIntegral.integral_congr
-  intro t _
-  dsimp only
-  calc
-    _ = (Real.sqrt 2 * Real.exp (3 * t / 2)) *
-        (finalAngular d (t, eta) * axial d.core amp (t, eta)) := by ring
-    _ = _ := by rw [axial_product_unchanged]; ring
 
 
 theorem carrier_hasDerivAt (d : TailData) {y : ℝ} (hy : d.releaseStart ≤ y) :

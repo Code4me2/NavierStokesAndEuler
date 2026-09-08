@@ -38,12 +38,6 @@ theorem Q_le_half {n : ℕ} (hn : 1 ≤ n) : ChartScales.Q n ≤ 1 / 2 := by
         (neg_le_neg (by exact_mod_cast hn : (1 : ℝ) ≤ n))
     _ = 1 / 2 := by norm_num
 
-theorem legacy_nativeData_excludes_strip (B : SignedMeanGain.NativeData ActualInitialization.geometry)
-    {x : Point} (hx : x ∈ ActualInitialization.geometry.strip.domain) : False := by
-  have hs := ActualInitialization.geometry.strip_subset hx
-  have hlarge : (1 / 2 : ℝ) < SimilarityCoordinates.coordinateQ (2 * h) x.2.1 := hs.2.1
-  have hsmall := (B.tail_bound 0 x hx).trans (Q_le_half (B.index_pos 0))
-  exact (not_lt_of_ge hsmall) hlarge
 
 theorem normalized_axis_scale : SimilarityCoordinates.coordinateQ (2 * h) (1, 0) = 1 := by
   symm
@@ -51,20 +45,6 @@ theorem normalized_axis_scale : SimilarityCoordinates.coordinateQ (2 * h) (1, 0)
     (by linarith [outgoing.data.h_lt_half]) (by norm_num) (by norm_num)
     (by simp [SimilarityCoordinates.forwardScalar])
 
-theorem actual_strip_nonempty : ActualInitialization.geometry.strip.domain.Nonempty := by
-  let G := ActualInitialization.geometry
-  refine ⟨((G.patch.a + G.patch.b) / 2, ((1, 0), (0, 0))), ?_⟩
-  apply (LocalSignedRequest.movingStrip_domain G.region G.patch.a G.patch.b
-    G.leftWeight G.rightWeight G.patch.a_pos G.left_pos G.right_pos
-    G.epsilon G.slow G.epsilon_pos G.epsilon_le_one G.slow_ge_one _).mpr
-  constructor
-  · change 0 < (1 : ℝ) ∧ SimilarityCoordinates.coordinateQ (2 * h) (1, 0) ∈ Ioo (1 / 2 : ℝ) 2
-    rw [normalized_axis_scale]
-    norm_num
-  · change ((G.patch.a + G.patch.b) / 2) /
-      Real.sqrt (SimilarityCoordinates.coordinateQ (2 * h) (1, 0)) ∈ Ioo G.patch.a G.patch.b
-    rw [normalized_axis_scale, Real.sqrt_one, div_one]
-    constructor <;> linarith [G.patch.a_lt_b]
 
 
 /-! ## Shared matrix, scaled target and ratio of the signed coefficients -/
@@ -474,15 +454,7 @@ noncomputable def cycleParameters
 
 
 
-theorem fixedParameters_eq_cycle (B N0 : ℕ) :
-    ActualCycleParameters.fixedParameters B N0 =
-      cycleParameters (fun l : Label B N0 × Fin 2 =>
-        ActualParticularStageControls.canonicalParameters (l.2, l.1)) := rfl
 
-theorem parameters_eq_cycle (x : CycleState (Label B N0 × Fin 2)) :
-    ActualCycleParameters.parameters x =
-      cycleParameters (fun l => ActualParticularStageControls.parameters
-        (ActualCycleParameters.particularState x) (ActualCycleParameters.swap B N0 l)) := rfl
 
 
 
@@ -502,20 +474,6 @@ theorem cycle_cross_eq
   rw [hlabels]
   rfl
 
-theorem cycle_requested_cross_tail
-    (particular : (Label B N0 × Fin 2) → ParticularParameters CycleSlow)
-    (v : CycleCoefficients (Label B N0 × Fin 2)) (c : Context Point) (u : State Point)
-    (hlabels : v.labels = activeLabels standardRegion B N0) {n : ℕ}
-    (hn : (choice B N0).prepared.N + 1 ≤ n) {x : Point}
-    (hx : x ∈ ActualInitialization.geometry.strip.domain) (i : Fin 2) :
-    StateMomentBalances.meanBar (LabelSumBounds.symmetricCovariance
-      (LabelSumBounds.fieldSum v.labels (fun l => (ActualInitialization.tangentBlock l).oscillation))
-      (LabelSumBounds.fieldSum v.labels
-        (fun l => ((cycleParameters particular).signedTangent v c u l).oscillation)) 0 i.succ) n x =
-      LocalSignedRequest.requestedStress ActualInitialization.geometry.patch
-        ActualInitialization.geometry.coord c ((cycleParameters particular).afterParticular v c u) n x i := by
-  rw [cycle_cross_eq particular v c u hlabels]
-  exact requested_cross_tail B N0 c _ hn hx i
 
 
 

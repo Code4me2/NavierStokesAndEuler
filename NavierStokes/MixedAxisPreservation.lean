@@ -370,17 +370,6 @@ theorem initializedBase_germ {h : ℝ} {Ω : Set SpaceTime}
   filter_upwards [initial.zero_germ hh hh1 hΩ hw ht haxis] with y hy
   simp only [initializedBase, hy, add_zero]
 
-theorem initialized_eq_base_germ {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {scales : ℕ → ℝ}
-    (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω) {w : SpaceTime}
-    (hw : w ∈ Ω) (ht : w ∈ PhysicalWaveSum.preterminal)
-    (haxis : PhysicalGraphBounds.radialProjection w = 0)
-    (hsmall : |scales 0 * PhysicalWaveSum.physicalQ h w| < 1 / 2) :
-    initializedDiagonal base initial p D scales =ᶠ[𝓝 w] SpatialCurl.spatialCurl base :=
-  (mixedDiagonal_eq_base_germ (initializedBase base initial) p D hh hh1 hs hΩ hw ht haxis hsmall).trans
-    (SolenoidalDiagonal.spatialCurl_eventuallyEq (initializedBase_germ base initial hh hh1 hΩ hw ht haxis))
 
 
 theorem initialized_origin_eventually {h : ℝ} {Ω : Set SpaceTime}
@@ -490,27 +479,8 @@ end FinalBase
 /-- The exponent belongs to the already selected, constructed profile. -/
 noncomputable def constructedExponent : ℝ := FinalSlowBase.actualProfile.outgoing.data.h
 
-theorem constructed_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (p : ℕ → PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (D : ℕ → AngularSupport (localDomain constructedExponent qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    Tendsto (fun t : ℝ =>
-      ‖mixedDiagonal (TailGaugePotential.constructedPotential upper B) p D scales (t, 0)‖)
-      (𝓝[<] 1) atTop :=
-  local_final_origin_blowup FinalSlowBase.actualProfile.certificate
-    FinalSlowBase.actualProfile.modulation upper B hqbig p D hs
 
 
-theorem initialized_constructed_origin_blowup (upper : ℝ) (B : ℕ) {qbig : ℝ} (hqbig : 0 < qbig)
-    (initial : PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (p : ℕ → PotentialStage.{u} constructedExponent (localDomain constructedExponent qbig))
-    (D : ℕ → AngularSupport (localDomain constructedExponent qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    Tendsto (fun t : ℝ =>
-      ‖initializedDiagonal (TailGaugePotential.constructedPotential upper B) initial p D scales (t, 0)‖)
-      (𝓝[<] 1) atTop :=
-  local_initialized_final_origin_blowup FinalSlowBase.actualProfile.certificate
-    FinalSlowBase.actualProfile.modulation upper B hqbig initial p D hs
 
 
 end NavierStokes.MixedAxisPreservation

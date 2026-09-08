@@ -173,15 +173,6 @@ theorem complexProfile_joint_smooth (I : Window) {ε R s : ℝ} (hε : 0 < ε)
   exact (hlocal.contDiffAt ((isOpen_Ioo.prod isOpen_ball).mem_nhds
     ⟨hp.1, mem_ball_self hσ⟩)).contDiffWithinAt
 
-/-- Every tube contained in the constructed strip inherits joint smoothness. -/
-theorem complexProfile_joint_smooth_tube (I J : Window) {ε R s δ : ℝ}
-    (hε : 0 < ε) (hR : 1 ≤ R) (hs : R / 20 < s) (hs1 : s < 1)
-    (htube : parameterTube J δ ⊆ parameterStrip I (ε * (1 - s)))
-    (A : AxisSpace I ε) (k : ℕ) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℂ => complexProfile I ε A k p.1 p.2)
-      (Ioo (-R) R ×ˢ parameterTube J δ) :=
-  (complexProfile_joint_smooth I hε hR hs hs1 A k).mono
-    (Set.prod_mono Subset.rfl htube)
 
 
 

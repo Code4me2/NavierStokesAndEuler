@@ -383,19 +383,6 @@ theorem shear_perturbation_bound {μ R M ε X E₀ E₁ EX₀ EX₁ UX₀ UX₁ 
         mul_le_mul hrad hquotC (abs_nonneg _) (by positivity)
       _ = _ := by ring
 
-/-- Equality on an open collar includes equality of the actual shears. -/
-theorem shears_eq_on_open {E U F V : RadialParameter → ℝ} {O : Set RadialParameter}
-    (hO : IsOpen O) (hE : EqOn E F O) (hU : EqOn U V O)
-    {p : RadialParameter} (hp : p ∈ O) :
-    angularShear E p = angularShear F p ∧
-      signedAxialShear E U p = signedAxialShear F V p := by
-  have hnear : ∀ᶠ X in 𝓝 p.1, (X, p.2) ∈ O :=
-    (continuousAt_id.prodMk continuousAt_const) (hO.mem_nhds hp)
-  have hED : deriv (fun X => E (X, p.2)) p.1 = deriv (fun X => F (X, p.2)) p.1 :=
-    Filter.EventuallyEq.deriv_eq (hnear.mono (fun X hX => hE hX))
-  have hUD : deriv (fun X => U (X, p.2)) p.1 = deriv (fun X => V (X, p.2)) p.1 :=
-    Filter.EventuallyEq.deriv_eq (hnear.mono (fun X hX => hU hX))
-  simp only [angularShear, signedAxialShear, hED, hUD, hE hp, and_self]
 
 /-- The genuine derivative with the parameter held fixed. -/
 noncomputable def radialDerivative (E : RadialParameter → ℝ) (p : RadialParameter) : ℝ :=

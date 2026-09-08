@@ -37,9 +37,5 @@ variable (P : ℝ) [Fact (0 < P)]
   (D : Data U) (I : InitialData P D) (raw : VectorField)
   (h : Nonempty (Forcing P D raw))
 
-/-- The total high operator has the required pressure-gradient witness on admissible forcing. -/
-def highSolvePressureGradientField : Field P D.T (pressureGradient (highSolve P D I raw).2) :=
-  ((Classical.choice h).scalarGradientField I).congr (fun _ _ _ => by
-    rw [highSolve_of_admissible D I raw h])
 
 end EulerTransversePacketProvider

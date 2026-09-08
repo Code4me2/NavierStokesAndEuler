@@ -40,18 +40,6 @@ noncomputable def reindexState {ι κ : Type} (e : κ ≃ ι)
   coefficients := reindexCoefficients e x.coefficients
   axisymmetricAlias := x.axisymmetricAlias
 
-noncomputable def reindexParameters {ι κ : Type} (e : κ ≃ ι)
-    (p : CycleParameters ι) : CycleParameters κ where
-  gauge := p.gauge
-  strip := p.strip
-  patch := p.patch
-  coordinate := p.coordinate
-  timeExponent := p.timeExponent
-  commonIndex := p.commonIndex
-  axial := p.axial
-  particular l := p.particular (e l)
-  signed l := p.signed (e l)
-  rank := p.rank
 
 @[simp] theorem reindexCoefficients_mem {ι κ : Type} (e : κ ≃ ι)
     (v : CycleCoefficients ι) (n : ℕ) (l : κ) :
@@ -86,10 +74,6 @@ theorem reindexCoefficients_symm {ι κ : Type} (e : κ ≃ ι)
   · funext l
     simp
 
-theorem reindexState_symm {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι) : reindexState e.symm (reindexState e x) = x := by
-  rcases x with ⟨state, coefficients, axis⟩
-  simp only [reindexState, reindexCoefficients_symm]
 
 
 
@@ -142,14 +126,6 @@ noncomputable def parameters {B N0 : ℕ} (x : CycleState (Index B N0)) :
     (fun l => ActualParticularStageControls.parameters (particularState x) (swap B N0 l))
     ActualSignedStageControls.parameters ActualPrimary.rankData
 
-/-- The same literal builder expressed in the particular solver's label
-order.  This has no additional geometric or analytic choices. -/
-noncomputable def parametersInParticularOrder {B N0 : ℕ}
-    (x : CycleState (ParticularIndex B N0)) : CycleParameters (ParticularIndex B N0) :=
-  CycleParameters.ofGeometry ActualInitialization.geometry ActualPrimary.h
-    (CommonWindow.index ActualPrimary.h) ActualInitialization.axial
-    (ActualParticularStageControls.parameters x)
-    (fun l => ActualSignedStageControls.parameters ((swap B N0).symm l)) ActualPrimary.rankData
 
 
 @[simp] theorem parameters_gauge {B N0 : ℕ} (x : CycleState (Index B N0)) :
@@ -194,7 +170,6 @@ noncomputable def bandFloor (B N0 : ℕ) : ℕ := (ActualPrimary.choice B N0).pr
 
 noncomputable def sourceBand {B N0 : ℕ} (l : Index B N0) : ℕ := BaseChartJets.cellBand l.1
 
-theorem bandFloor_ge (B N0 : ℕ) : N0 ≤ bandFloor B N0 := ActualPrimary.threshold B N0
 
 
 
@@ -280,14 +255,6 @@ theorem signed_tangent_carrier {B N0 : ℕ} (l : Index B N0)
   exact ⟨hs.frequency.trans hp.frequency.symm, hs.phase.trans hp.phase.symm,
     hs.angular.trans hp.angular.symm⟩
 
-theorem parameters_signed_carrier {B N0 : ℕ} (x : CycleState (Index B N0))
-    (c : Context CyclePoint) (l : Index B N0)
-    (H : SameCarrier (x.coefficients.blocks l) (ActualInitialization.tangentBlock l)) :
-    SameCarrier (x.coefficients.blocks l)
-      ((parameters x).signedBlock x.coefficients c x.state l) := by
-  have hs := signed_tangent_carrier l (parameters x).strip
-    ((parameters x).signedRequest x.coefficients c x.state)
-  exact ⟨hs.frequency.trans H.frequency, hs.phase.trans H.phase, hs.angular.trans H.angular⟩
 
 
 

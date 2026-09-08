@@ -277,9 +277,6 @@ theorem jet_bilinearLift (I : Window) {ε : ℝ} (hε : 0 < ε)
     inputJet I ε (bilinearLift I hε F A B) n m x = F.value A B n m x :=
   jet_bilinearValue I hε F A B n m hx
 
-theorem norm_bilinearLift_le (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (F : BoundedBilinearJetFamily I ε) : ‖bilinearLift I hε F‖ ≤ F.boundConstant :=
-  LinearMap.mkContinuous₂_norm_le _ F.bound_nonneg _
 
 def productData (I : Window) {ε : ℝ} (hε : 0 < ε) : BoundedBilinearJetFamily I ε where
   value := productFamily I ε

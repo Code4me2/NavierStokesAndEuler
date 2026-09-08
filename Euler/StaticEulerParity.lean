@@ -67,26 +67,6 @@ theorem unit_force_odd (t : ℝ) (x : Space) :
     (symmetry P u C R hC hR hodd) (projIcc 0 1 zero_le_one t) (x,0)
   simpa only [Prod.neg_mk,neg_zero] using h
 
-theorem unit_pressure_even (t : ℝ) (x : Space) :
-    EulerConstantEuler.pressure (exactPacket P u C R hC hR hu hdiv) (t,-x) =
-      EulerConstantEuler.pressure (exactPacket P u C R hC hR hu hdiv) (t,x) := by
-  have h := radialPotential_even
-    (fun y => EulerConstantEuler.force (exactPacket P u C R hC hR hu hdiv) (t,y))
-    (unit_force_odd P u C R hC hR hu hdiv hodd t) x
-  change radialPotential ((exactPacket P u C R hC hR hu hdiv).graphPressure 1
-      (projIcc 0 1 zero_le_one t)) (-x) =
-    radialPotential ((exactPacket P u C R hC hR hu hdiv).graphPressure 1
-      (projIcc 0 1 zero_le_one t)) x
-  have he : (exactPacket P u C R hC hR hu hdiv).graphPressure 1
-      (projIcc 0 1 zero_le_one t) =
-      fun y => EulerConstantEuler.force (exactPacket P u C R hC hR hu hdiv) (t,y) := by
-    funext y
-    simp only [ExactLiftedPacket.graphPressure,EulerConstantEuler.force,
-      ExactLiftedPacket.rawPressure,FieldTower.rawField,cylinderGraph,coveringMap,
-      inputData,EulerSmallCorrection.input,EulerConstantCorrection.data,
-      one_smul,inner_zero_left,mul_zero]
-  rw [he]
-  exact h
 
 theorem localVelocity_odd (t : ℝ) (x : Space) :
     localVelocity P u C R hC hR hu hdiv (t,-x)= -localVelocity P u C R hC hR hu hdiv (t,x) := by

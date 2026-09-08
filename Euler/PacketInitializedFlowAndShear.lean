@@ -4,7 +4,8 @@ import Euler.PacketGraphFlowFieldBounds
 import Euler.PacketGraphFlowSupBounds
 import Euler.PacketExactGlobalShear
 import Euler.PacketExactPressureError
-import Euler.PacketInitializedHessianChoice
+import Euler.PacketInitializedPhysicalFieldsChoice
+import Euler.PacketPhysicalCorrectionPotential
 import Euler.PacketInitializedTimeBounds
 import Euler.PacketLiftedSmallness
 

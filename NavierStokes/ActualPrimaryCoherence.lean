@@ -746,25 +746,6 @@ theorem absoluteGaussianCoefficient_smooth (j : Fin 2) (L : Label B N0) :
       (absoluteCutoff_smooth j L).contDiffOn
   exact hd.smul (absoluteAmplitude_smooth j L)
 
-theorem absoluteGaussian_smooth (j : Fin 2) (L : Label B N0) :
-    ContDiffOn ℝ ∞ (absoluteGaussian j L) positiveAbsolute := by
-  have ha : ContDiffOn ℝ ∞ (absoluteGaussianCoefficient j L) positiveRadialAbsolute :=
-    (absoluteGaussianCoefficient_smooth j L).mono (fun _ hx => hx.2)
-  have hs : ContDiffOn ℝ ∞ (absoluteGaussian j L) positiveRadialAbsolute := by
-    apply contDiffOn_pi.mpr
-    intro i
-    exact Complex.reCLM.contDiff.comp_contDiffOn (HarmonicCalculus.contDiffOn_mode 1
-      (absolutePhase_smooth j L) (contDiffOn_pi.mp ha i))
-  intro x hx
-  by_cases hr : 0 < x.1.1.1
-  · exact (hs.contDiffAt (positiveRadialAbsolute_open.mem_nhds ⟨hr,hx⟩)).contDiffWithinAt
-  · have hp := (absolutePair_zero_germ_outside j L hx
-      (amplitudeRadius_outside_nonpositive L (le_of_not_gt hr))).1
-    have hz : absoluteGaussian j L =ᶠ[𝓝 x] fun _ => 0 := by
-      filter_upwards [hp] with y hy
-      funext i
-      simp [absoluteGaussian, absoluteGaussianCoefficient, vectorMode, mode, hy]
-    exact (contDiffAt_const.congr_of_eventuallyEq hz).contDiffWithinAt
 
 
 theorem amplitudeRadius_chart (L : Label B N0) (n : ℕ) {x : ChartPoint}
@@ -980,22 +961,6 @@ theorem piece_tangentVelocity_periodic (U : LocalSignedRequest.SlowRegion (2*h))
 
 
 
-theorem radius_mem_of_amplitudeRadius_mem (L : Label B N0) (n : ℕ) {x : ChartPoint}
-    (hT : 0 < x.1.2.1.1)
-    (hm : amplitudeRadius L (absoluteChart n x) ∈
-      Icc (PrimaryTargetBounds.leftRadius nominal) (PrimaryTargetBounds.rightRadius nominal)) :
-    x.1.1 ∈ Icc (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.leftRadius nominal)
-      (VariableGaugeMean.qLength (2*h) x.1.2.1 * PrimaryTargetBounds.rightRadius nominal) := by
-  have hr : 0 < x.1.1 := by
-    by_contra hh
-    exact amplitudeRadius_outside_nonpositive L
-      (mul_nonpos_of_nonneg_of_nonpos (Real.sqrt_nonneg _) (le_of_not_gt hh)) hm
-  rw [amplitudeRadius_chart L n hT hr] at hm
-  have hq : 0 < VariableGaugeMean.qLength (2*h) x.1.2.1 :=
-    VariableGaugeMean.qLength_pos (by linarith [outgoing.data.h_pos])
-      (by linarith [outgoing.data.h_lt_half]) hT
-  exact ⟨by simpa only [mul_comm] using (le_div_iff₀ hq).mp hm.1,
-    by simpa only [mul_comm] using (div_le_iff₀ hq).mp hm.2⟩
 
 
 

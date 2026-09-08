@@ -1207,18 +1207,6 @@ theorem physicalF_held (hJ : IsOpen J) {T κ w₁ w₂ C X η : ℝ}
   rw [← hv]
   field_simp
 
-theorem endpointLog_eq_actual (hJ : IsOpen J) {T κ w₁ w₂ C η : ℝ}
-    (hw₂ : 0 < w₂) (hstart : R.bigTime + w₁ + w₂ ≤ R.finalTime)
-    (hR : R.radius0 < 110) (hC : 0 < C) (hη : η ∈ J) :
-    R.endpointLog T κ w₁ w₂ C η =
-      Real.log (C * (Real.sqrt (2 * (110 : ℝ)) * R.physicalF T κ w₁ w₂ (110, η))) := by
-  rw [R.physicalF_held_log hJ hw₂ hstart hR le_rfl hη]
-  norm_num only [div_self (by norm_num : (110 : ℝ) ≠ 0), Real.log_one, mul_zero, sub_zero]
-  rw [Real.log_mul hC.ne' (mul_ne_zero (Real.sqrt_pos.2 (by norm_num)).ne' (Real.exp_pos _).ne'),
-    Real.log_mul (Real.sqrt_pos.2 (by norm_num)).ne' (Real.exp_pos _).ne',
-    Real.log_exp, Real.log_sqrt (by norm_num)]
-  unfold endpointLog
-  ring
 
 /-- Quantitative conclusions for the actual integral fields.  The theorem
 below constructs one common set of parameter thresholds for all these jets. -/
@@ -1405,19 +1393,6 @@ theorem endpoint_rescale (η : ℝ) :
     NaturalProfile.rescalePoint Λ ((Input.ofNatural hΛ F).endpoint, η) = (4, η) := by
   exact Prod.ext ((Input.ofNatural hΛ F).scale_endpoint) rfl
 
-omit F in
-theorem exists_phase_bound (d : AnalyticInputs h j σ P0) :
-    ∃ B > 0, ∀ η ∈ Icc (-1 : ℝ) 1, |realPhase h j σ η| ≤ B := by
-  have hc : ContinuousOn (realPhase h j σ) (Icc (-1 : ℝ) 1) := by
-    intro η hη
-    have hw := original_interval_interior hη
-    exact (d.realPhase_hasDerivAt ⟨hw.1.le, hw.2.le⟩).continuousAt.continuousWithinAt
-  obtain ⟨B, hb⟩ := isCompact_Icc.exists_bound_of_continuousOn hc
-  refine ⟨1 + |B|, by positivity, ?_⟩
-  intro η hη
-  have he := hb η hη
-  rw [Real.norm_eq_abs] at he
-  linarith [le_abs_self B]
 
 omit F in
 theorem normalized_initialLog_formula (E : NaturalEntrance.CoefficientProfile d Λ C)

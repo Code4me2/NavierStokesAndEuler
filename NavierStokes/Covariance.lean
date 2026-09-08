@@ -134,15 +134,6 @@ theorem amplitudes_sq {a b scaleMinus scalePlus m t : ℝ}
   funext i
   exact Real.sq_sqrt (le_of_lt (coefficients_pos ha hb hMinus hPlus hcone i))
 
-/-- Squared positive velocity amplitudes reproduce the exact model covariance. -/
-theorem reconstruct_from_amplitudes {a b scaleMinus scalePlus m t : ℝ}
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (hcone : |a * t| < b * m) :
-    (signedMatrix a b scaleMinus scalePlus).mulVec
-        (fun i => (amplitudes a b scaleMinus scalePlus m t i) ^ 2) = target m t := by
-  rw [amplitudes_sq ha hb hMinus hPlus hcone]
-  exact reconstruct m t (ne_of_gt ha) (ne_of_gt hb) (ne_of_gt hMinus) (ne_of_gt hPlus)
 
 
 /-- Positive normal magnitude in the manuscript's signed directions. -/

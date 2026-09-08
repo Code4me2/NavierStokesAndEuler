@@ -100,11 +100,6 @@ theorem initial_vector_support (θ : ℝ) :
     ((G.vector_spatial_smooth 0).continuous.comp (continuous_id.prodMk continuous_const))
     (G.initial_vector_ae θ)
 
-theorem initial_vector_compact (θ : ℝ) : HasCompactSupport (fun x => G.vector (0,(x,θ))) :=
-  scaledBoundary_continuous_compact D.ℓ D.ℓ_pos D.L (G.solution.label 0 : L2)
-    (fun x => G.vector (0,(x,θ)))
-    ((G.vector_spatial_smooth 0).continuous.comp (continuous_id.prodMk continuous_const))
-    (G.initial_vector_ae θ)
 
 /-- The time-space representative is jointly continuous on the actual interval. -/
 theorem vector_joint_continuous :

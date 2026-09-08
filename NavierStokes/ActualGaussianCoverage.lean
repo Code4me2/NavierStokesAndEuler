@@ -996,10 +996,6 @@ theorem actualMask_support (L : PrimaryGeometryAssembly.Index W a.N) :
     change x.2.2 ≤ 5 * (ChartScales.slotLength r0 profile.data.h (BaseChartJets.cellBand L) / 1) / 6
     simpa only [div_eq_mul_inv, inv_one, mul_one, one_mul, mul_comm, mul_assoc, mul_left_comm] using ht
 
-include hr0 in
-theorem actualMask_tsupport (L : PrimaryGeometryAssembly.Index W a.N) :
-    tsupport (ActualSignedGeometry.nativeCutoff H v a L) ⊆ actualSourceCore H v a L :=
-  closure_minimal (actualMask_support H v a hr0 L) (actualSourceCore_closed H v a L)
 
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
@@ -1017,15 +1013,6 @@ theorem actualMask_transported_support (L : PrimaryGeometryAssembly.Index W a.N)
   have hs := actualMask_support H v a hr0 L hx
   exact ⟨hs.1, mem_iUnion.mpr ⟨k, (mem_sourceCell_clock hc _).mpr hs.2⟩⟩
 
-include hr0 in
-theorem actualMask_transported_tsupport (L : PrimaryGeometryAssembly.Index W a.N)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Geometry) (k : Frequency) {c : ℝ} (hc : 0 < c) :
-    tsupport (fun x : P × Plane => ActualSignedGeometry.nativeCutoff H v a L
-      (χ x.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k x.2))) ⊆
-      sourceRegion (χ ⁻¹' actualSlowCore H v a L) g r0
-        (ChartScales.slotLength r0 profile.data.h (BaseChartJets.cellBand L)) c :=
-  closure_minimal (actualMask_transported_support H v a hr0 L χ g k hc)
-    (sourceRegion_closed ((actualSlowCore_closed H v a L).preimage χ.continuous) _ _ _ _)
 
 
 end ActualParametersAndMasks

@@ -110,17 +110,6 @@ theorem maximalField_jet_continuous (n : ℕ) :
   rw [he]
   exact (L.evolution S hS hSL).velocity_continuous n
 
-theorem maximalPressureField_jet_continuous (n : ℕ) :
-    Continuous (fun t : L.Time => (L.maximalPressureField t).jetLp n) := by
-  apply L.continuous_of_shorter_restrictions
-  intro S hS hSL
-  have he : (fun t : Icc (0 : ℝ) S =>
-      (L.maximalPressureField (L.shorterTime S hSL t)).jetLp n)=
-      (fun t => ((L.evolution S hS hSL).pressureForce t).jetLp n) := by
-    funext t
-    rw [L.maximalPressureField_eq_evolution S hS hSL t]
-  rw [he]
-  exact (L.evolution S hS hSL).pressure_continuous n
 
 theorem maximalField_initial : L.maximalField L.initialTime=A :=
   L.evolution_initial (L.intermediateHorizon L.initialTime)

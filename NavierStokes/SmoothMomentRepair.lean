@@ -273,52 +273,5 @@ theorem compact_inverse_quadratic_bounds [CompleteSpace E]
   intro p hp
   exact ⟨(hβ₀ p hp).trans (le_max_left _ _), (hK₀ p hp).trans (le_max_left _ _)⟩
 
-/-- A common positive discrepancy threshold and linear correction bound exist
-for every continuous invertible quadratic family on a compact parameter set. -/
-theorem compact_uniform_small_correction [CompleteSpace E]
-    {P : Type*} [TopologicalSpace P] (S : Set P) (hS : IsCompact S)
-    (B : P → E →L[ℝ] E) (A : P → E →L[ℝ] E →L[ℝ] E)
-    (hB : ContinuousOn B S) (hA : ContinuousOn A S)
-    (hinv : ∀ p ∈ S, (B p).IsInvertible) :
-    ∃ β ε : ℝ, 0 < β ∧ 0 < ε ∧ ∀ p ∈ S, ∀ d : E, ‖d‖ ≤ ε →
-      ∃! c : E, ‖c‖ ≤ 2 * β * ‖d‖ ∧ B p c + A p c c = d := by
-  obtain ⟨β, K, hβ, hK, hbound⟩ := compact_inverse_quadratic_bounds S hS B A hB hA hinv
-  let r : ℝ := 1 / (4 * β * K)
-  let ε : ℝ := r / (2 * β)
-  have hr : 0 < r := by change 0 < 1 / (4 * β * K); positivity
-  have hε : 0 < ε := by change 0 < r / (2 * β); positivity
-  have hsmall : 4 * β * K * r ≤ 1 := by
-    change 4 * β * K * (1 / (4 * β * K)) ≤ 1
-    apply le_of_eq
-    field_simp
-  refine ⟨β, ε, hβ, hε, ?_⟩
-  intro p hp d hd
-  have hradius : 2 * β * ‖d‖ ≤ r := by
-    calc
-      _ ≤ 2 * β * ε := mul_le_mul_of_nonneg_left hd (by positivity)
-      _ = r := by change 2 * β * (r / (2 * β)) = r; field_simp
-  have hsmall' : 4 * β * K * (2 * β * ‖d‖) ≤ 1 :=
-    (mul_le_mul_of_nonneg_left hradius (by positivity)).trans hsmall
-  obtain ⟨e, he⟩ := hinv p hp
-  have heinv : ‖e.symm.toContinuousLinearMap‖ ≤ β := by
-    have h := (hbound p hp).1
-    rwa [← he, ContinuousLinearMap.inverse_equiv] at h
-  have hsolve : ∃! c : E, ‖c‖ ≤ 2 * β * ‖d‖ ∧ e c + A p c c = d := by
-    apply MomentRepair.exists_unique_small_correction e (fun c => A p c c) d β K
-      (2 * β * ‖d‖) hβ.le hK.le (by positivity)
-    · intro x
-      exact (e.symm.toContinuousLinearMap.le_opNorm x).trans
-        (mul_le_mul_of_nonneg_right heinv (norm_nonneg x))
-    · intro c _
-      exact (quadratic_norm_le (A p) c).trans
-        (mul_le_mul_of_nonneg_right (hbound p hp).2 (sq_nonneg ‖c‖))
-    · intro c _ f _
-      apply (quadratic_sub_le (A p) c f).trans
-      apply mul_le_mul_of_nonneg_right _ (norm_nonneg (c - f))
-      exact mul_le_mul_of_nonneg_right (hbound p hp).2
-        (add_nonneg (norm_nonneg c) (norm_nonneg f))
-    · exact hsmall'
-    · exact le_rfl
-  simpa only [← he, ContinuousLinearEquiv.coe_coe] using hsolve
 
 end NavierStokes.SmoothMomentRepair

@@ -10,22 +10,13 @@ def meanShift (p : ℕ) : ℕ := 100*p-140
 def highForceShift (p : ℕ) : ℕ := highShift p-10
 def meanForceShift (p : ℕ) : ℕ := meanShift p-10
 
-theorem primary_shift : highShift 1=20 := rfl
 
 theorem slow_high_high_room (i j p : ℕ) (hi : 1 ≤ i) (hj : 1 ≤ j) (hp : i+j=p) :
     highShift i+highShift j+2+8 ≤ meanForceShift p := by
   dsimp only [highShift, meanShift, meanForceShift]
   omega
 
-theorem slow_mean_high_room (i j p : ℕ) (hi : 2 ≤ i) (hj : 1 ≤ j) (hp : i+j=p) :
-    meanShift i+highShift j+2+8 ≤ meanForceShift p := by
-  dsimp only [highShift, meanShift, meanForceShift]
-  omega
 
-theorem slow_mean_mean_room (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j) (hp : i+j=p) :
-    meanShift i+meanShift j+2+8 ≤ meanForceShift p := by
-  dsimp only [meanShift, meanForceShift]
-  omega
 
 theorem fast_mean_high_room (i j p : ℕ) (hi : 2 ≤ i) (hj : 1 ≤ j) (hp : i+j=p+1) :
     meanShift i+highShift j+2+8 ≤ highForceShift p := by
@@ -37,11 +28,6 @@ theorem fast_corrector_high_room (i j p : ℕ) (hi : 2 ≤ i) (hj : 1 ≤ j) (hp
   dsimp only [highShift, meanShift, meanForceShift]
   omega
 
-theorem fast_corrector_corrector_room (i j p : ℕ) (hi : 2 ≤ i) (hj : 2 ≤ j)
-    (hp : i+j=p+1) :
-    highShift (i-1)+highShift (j-1)+2+8 ≤ meanForceShift p := by
-  dsimp only [highShift, meanShift, meanForceShift]
-  omega
 
 theorem previous_linear_room (p : ℕ) (hp : 2 ≤ p) :
     highShift (p-1)+2+8 ≤ meanForceShift p := by

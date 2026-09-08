@@ -96,11 +96,6 @@ theorem liftOperator_bound {q : ℕ} (A : LiftL2 period →L[ℝ] LiftL2 period)
   intro w
   exact (A.le_opNorm _).trans (mul_le_mul_of_nonneg_left (word_norm_le period u w) (norm_nonneg A))
 
-/-- The operator norm bound for an operator lifted to the complete Sobolev space. -/
-theorem norm_liftOperator_le (q : ℕ) (A : LiftL2 period →L[ℝ] LiftL2 period)
-    (hA : ∀ a f, A (translation period a f) = translation period a (A f)) :
-    ‖liftOperator period q A hA‖ ≤ ‖A‖ :=
-  ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg A) (liftOperator_bound period A hA)
 
 /-- The action on the underlying field is exactly the original L² operator. -/
 @[simp]

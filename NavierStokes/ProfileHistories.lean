@@ -657,17 +657,7 @@ theorem H_ne_zero {p : Point} (hX : p.1 ≠ 0) (hf : P.f p ≠ 0) : P.H p ≠ 0 
 theorem E_ne_zero {p : Point} (hX : 0 < p.1) (hf : P.f p ≠ 0) : P.E p ≠ 0 :=
   mul_ne_zero (ne_of_gt (Real.sqrt_pos.2 (by positivity))) hf
 
-theorem logH_radial_deriv {p : Point} (hp : p ∈ D.carrier) (hH : P.H p ≠ 0) :
-    deriv (fun x => Real.log (P.H (x, p.2))) p.1 = radialPartial P.H p / P.H p :=
-  ((radialPartial_hasDerivAt D P.H_smooth hp).log hH).deriv
 
-theorem logE_parameter_deriv {p : Point} (hp : p ∈ D.carrier)
-    (hX : 0 < p.1) (hf : P.f p ≠ 0) :
-    deriv (fun η => Real.log (P.E (p.1, η))) p.2 = parameterPartial P.H p / P.H p := by
-  rw [((P.Eη_hasDerivAt hp).log (P.E_ne_zero hX hf)).deriv, P.parameterPartial_H hp]
-  have hs : Real.sqrt (2 * p.1) ≠ 0 := ne_of_gt (Real.sqrt_pos.2 (by positivity))
-  dsimp [Eη, E, H]
-  field_simp
 
 
 

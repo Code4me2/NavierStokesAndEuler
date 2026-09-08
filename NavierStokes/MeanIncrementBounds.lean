@@ -1043,31 +1043,6 @@ variable {a b d cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
   (hsf : ∀ n, RadialAlias.RadiallySupported a b (gr o base (updated mean inc) W n))
   (hsg : ∀ n, RadialAlias.RadiallySupported a b (gr o base mean W n))
 
-include hd ho hb hm hh hH hκ hW hf hg hsf hsg in
-/-- Every tangential effect beyond the actual fast derivative has the
-claimed exponent, including the recomputed axial pressure contribution. -/
-theorem tangential_recomputedPressure_change_mem
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane)
-    (Tθ Tz : Field (PressureStream.Lift P)) :
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) (H + 1 - 2 * κ)
-      (thetaResidual o base (updated mean inc) W Tθ - thetaResidual o base mean W Tθ -
-        o.fastTime inc.angular) ∧
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) (H + 1 - 2 * κ)
-      (axialResidual o base (updated mean inc) W
-          (reconstructedPressure d a b hab M v o base (updated mean inc) W) Tz -
-        axialResidual o base mean W (reconstructedPressure d a b hab M v o base mean W) Tz -
-        o.fastTime inc.axial) := by
-  refine ⟨thetaResidual_change_sub_fast_mem ho hb hm hh hH W hW Tθ, ?_⟩
-  let p0 := reconstructedPressure d a b hab M v o base mean W
-  let p1 := reconstructedPressure d a b hab M v o base (updated mean inc) W
-  have hδ : MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) H (p1 - p0) :=
-    reconstructedPressure_change_mem ha hab hd hcL hcR ε S hε hεone hS
-      ho hb hm hh hH hκ W hW hf hg hsf hsg M v
-  have hp0 : SmoothOn (logStripData a b cL cR ha hcL hcR ε S hε hεone hS).domain p0 :=
-    fun n => (PressureStream.meanPressure_contDiff ha hab hd (v n) (hg n) (hsg n)).contDiffOn
-  have he : p0 + (p1 - p0) = p1 := by abel
-  simpa only [he] using
-    axialResidual_change_sub_fast_mem ho hb hm hh hH W hW p0 (p1 - p0) Tz hp0 hδ
 
 
 end ReconstructedTangential
@@ -1112,82 +1087,15 @@ theorem physical_dz (f : Field SpaceTime) :
   ext n q
   simp only [Operators.dz, physicalOperators, one_mul, MeanResidual.dz, MeanResidual.direction]
 
-theorem physical_time (f : Field SpaceTime) :
-    physicalOperators.time f = fun n => MeanResidual.dt (f n) := by
-  ext n q
-  simp only [Operators.time, Operators.slowTime, Operators.fastTime, physicalOperators,
-    Pi.add_apply, zero_mul, add_zero, one_mul, map_neg, neg_neg,
-    MeanResidual.dt, MeanResidual.direction]
 
-theorem physical_radialDiv (c : ℝ) (f : Field SpaceTime) :
-    physicalOperators.radialDiv c f = fun n => MeanResidual.radialDivergence c (f n) := by
-  ext n q
-  simp only [Operators.radialDiv, physical_dr]
-  simp only [Operators.invRadius, physicalOperators,
-    Pi.add_apply, Pi.smul_apply, Pi.mul_apply, smul_eq_mul, MeanResidual.radialDivergence,
-    div_eq_mul_inv]
-  ring
 
-theorem physical_viscosity (c : ℝ) (f : Field SpaceTime) (n : ℕ) (q : SpaceTime) :
-    physicalOperators.viscosity c f n q =
-      MeanResidual.meanLaplacian (f n) q - c * (f n q / MeanResidual.radius q ^ 2) := by
-  simp only [Operators.viscosity, physical_dr, physical_dz]
-  simp only [Operators.invRadius, physicalOperators, one_mul, MeanResidual.meanLaplacian, div_eq_mul_inv]
-  ring
 
-private theorem physical_thetaRadial (b m w : MeanResidual.Components) :
-    thetaRadial (physicalTriple b) (physicalTriple m) + physicalCovariance w 0 1 =
-      physicalField (MeanResidual.fluxDifference b m w 0 1) := by
-  ext n q
-  simp only [thetaRadial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply]
 
-private theorem physical_thetaAxial (b m w : MeanResidual.Components) :
-    thetaAxial (physicalTriple b) (physicalTriple m) + physicalCovariance w 2 1 =
-      physicalField (MeanResidual.fluxDifference b m w 2 1) := by
-  ext n q
-  simp only [thetaAxial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply]
-  ring
 
-private theorem physical_axialRadial (b m w : MeanResidual.Components) :
-    axialRadial (physicalTriple b) (physicalTriple m) + physicalCovariance w 0 2 =
-      physicalField (MeanResidual.fluxDifference b m w 0 2) := by
-  ext n q
-  simp only [axialRadial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply]
 
-private theorem physical_axialAxial (b m w : MeanResidual.Components) :
-    axialAxial (physicalTriple b) (physicalTriple m) + physicalCovariance w 2 2 =
-      physicalField (MeanResidual.fluxDifference b m w 2 2) := by
-  ext n q
-  simp only [axialAxial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply, Pi.smul_apply, smul_eq_mul]
-  ring
 
-private theorem physical_radialRadial (b m w : MeanResidual.Components) :
-    radialRadial (physicalTriple b) (physicalTriple m) + physicalCovariance w 0 0 =
-      physicalField (MeanResidual.fluxDifference b m w 0 0) := by
-  ext n q
-  simp only [radialRadial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply, Pi.smul_apply, smul_eq_mul]
-  ring
 
-private theorem physical_radialAxial (b m w : MeanResidual.Components) :
-    axialRadial (physicalTriple b) (physicalTriple m) + physicalCovariance w 2 0 =
-      physicalField (MeanResidual.fluxDifference b m w 2 0) := by
-  ext n q
-  simp only [axialRadial, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply]
-  ring
 
-private theorem physical_radialAngular (b m w : MeanResidual.Components) :
-    radialAngular (physicalTriple b) (physicalTriple m) + physicalCovariance w 1 1 =
-      physicalField (MeanResidual.fluxDifference b m w 1 1) := by
-  ext n q
-  simp only [radialAngular, physicalTriple, physicalField, physicalCovariance,
-    MeanResidual.fluxDifference, Pi.add_apply, Pi.mul_apply, Pi.smul_apply, smul_eq_mul]
-  ring
 
 
 

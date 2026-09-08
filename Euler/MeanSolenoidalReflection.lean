@@ -79,13 +79,6 @@ theorem reflection_solenoidal_mem {u : L2} (hu : u ∈ solenoidalSpace) :
     _ = ⟪reflection g, u⟫_ℝ := reflection.inner_map_map _ _
     _ = 0 := hu _ (reflection_gradient_mem hg)
 
-theorem solenoidalSpace_map_reflection :
-    solenoidalSpace.map reflection.toLinearMap = solenoidalSpace := by
-  apply le_antisymm
-  · rintro u ⟨v, hv, rfl⟩
-    exact reflection_solenoidal_mem hv
-  · intro u hu
-    exact ⟨reflection u, reflection_solenoidal_mem hu, reflection_involutive u⟩
 
 
 theorem reflection_translation (a : Space) (u : L2) :

@@ -124,14 +124,6 @@ theorem pressureField_zero_outside (t : Icc (0 : ℝ) T) (y : Space) (hy : y ∉
   classicalPrimitive_zero P _ _ _ y
     (normalResidual_zero_outside P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m t y hy) θ
 
-theorem pressureField_tsupport_subset (t : Icc (0 : ℝ) T) :
-    tsupport (pressureField P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm hf₀ ha₀zero t) ⊆
-      spatialSet P S := by
-  apply closure_minimal _ (hSc.isClosed.preimage continuous_fst)
-  intro x hx
-  by_contra hn
-  exact hx (pressureField_zero_outside P S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ M m cm hcm hm
-    hf₀ ha₀zero t x.1 hn x.2)
 
 
 /-- Equation (11) with the actual angular derivative of the normalized pressure. -/

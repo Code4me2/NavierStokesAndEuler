@@ -48,16 +48,6 @@ theorem embedding_representative (u : L2) (f : Space → Space)
       (ν := (volume : Measure (AddCircle P)))).ae hrep] with z hl hr
   exact hl.trans hr
 
-/-- The conclusion is membership in the actual closed lifted-gradient orthogonal complement. -/
-theorem embedding_mem (κ : ℝ) (m : Space) (u : L2) (hu : u ∈ solenoidalSpace)
-    (f : Space → Space) (hf : ContDiff ℝ ∞ f) (hrep : (u : Space → Space) =ᵐ[volume] f) :
-    embedding P u ∈ divergenceFreeSpace P κ m := by
-  apply mem_of_classical P κ m (embedding P u) (fun z : LiftDomain P => f z.1)
-    (embedding_representative P u f hrep)
-  · intro z
-    exact hf.comp (contDiff_const.add contDiff_fst)
-  · exact lift_classical_divergence P κ m f hf
-      (EulerMeanClassical.solenoidal_representative_divergence u hu f hf hrep)
 
 
 end EulerMeanCylinderSolenoidal

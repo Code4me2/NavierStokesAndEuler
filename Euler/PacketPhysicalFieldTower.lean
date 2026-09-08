@@ -31,17 +31,7 @@ def graphPath (k : ℝ) : C(Icc (0 : ℝ) D.T,Lp Space 2 (volume : Measure Space
   (reconstructedTower D P κ Z).canonicalGraphWordPath
     (physicalPhase P k D.m₀) (physicalPhase_continuous P k D.m₀) 0 Fin.elim0
 
-theorem graphPath_ae (k : ℝ) (t : Icc (0 : ℝ) D.T) :
-    (graphPath D P κ Z k t : Space → Space) =ᵐ[volume]
-      fun x => κ • D.F.field t x (Z.pointField t (cylinderGraph P k D.m₀ x)) := by
-  have h := (reconstructedTower D P κ Z).canonicalGraphWordPath_ae
-    (physicalPhase P k D.m₀) (physicalPhase_continuous P k D.m₀) 0 Fin.elim0 t
-  simpa only [graphPath,EulerCylinderSobolev.iteratedFieldDerivative_zero,
-    reconstructedTower_pointField,physicalPhase,cylinderGraph] using h
 
-def graphTensorPath (k : ℝ) (n : ℕ) :
-    C(Icc (0 : ℝ) D.T,Lp (Space [×n]→L[ℝ] Space) 2 (volume : Measure Space)) :=
-  (reconstructedTower D P κ Z).physicalTensorPath k D.m₀ n
 
 
 variable (X Y : Icc (0 : ℝ) D.T → Space → Space)
@@ -51,8 +41,6 @@ variable (X Y : Icc (0 : ℝ) D.T → Space → Space)
   (hY : Continuous (Function.uncurry Y))
   (hdet : ∀ t x, (D.F.field t x).det=1)
 
-def eulerianPath (k : ℝ) : C(Icc (0 : ℝ) D.T,Lp Space 2 (volume : Measure Space)) :=
-  transportPath X Y (fun t x => D.F.field t x) hX hYX hXY hY hdet (graphPath D P κ Z k)
 
 
 

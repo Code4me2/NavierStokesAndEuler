@@ -123,14 +123,6 @@ theorem velocityLp_weakly_continuous (φ : Lp ℝ³ 2 (volume : Measure ℝ³)) 
     _ < δ * M + ε / 2 + δ * M := by linarith [herr t]
     _ = ε := by dsimp [δ]; field_simp; ring
 
-/-- Function-level form of weak `L²` continuity, without quotient representatives. -/
-theorem velocity_pairing_continuousOn
-    (φ : ℝ³ → ℝ³) (hφ : MemLp φ 2 volume) :
-    ContinuousOn (fun t : ℝ => ∫ x : ℝ³, inner ℝ (φ x) (v x t)) (Ici 0) := by
-  apply continuousOn_iff_continuous_domRestrict.mpr
-  change Continuous (fun t : Ici (0 : ℝ) => ∫ x : ℝ³, inner ℝ (φ x) (v x t))
-  simpa only [velocityLp, inner_toLp_eq_integral] using
-    h.velocityLp_weakly_continuous (hφ.toLp φ)
 
 
 end Euler.EulerExistenceAndSmoothnessR3

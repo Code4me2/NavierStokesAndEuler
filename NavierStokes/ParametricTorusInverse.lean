@@ -581,23 +581,7 @@ theorem iterateInverse_smooth (d : Direction) {f : Source} (hf : ContDiff ℝ �
       rw [iterateInverse_succ]
       exact inverse_smooth d ih (iterateInverse_periodic d hp n)
 
-theorem iterateInverse_zeroMean (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (hm : ZeroMean f) (n : ℕ) : ZeroMean (iterateInverse d n f) := by
-  induction n with
-  | zero => exact hm
-  | succ n ih =>
-      rw [iterateInverse_succ]
-      exact inverse_zeroMean d (iterateInverse_smooth d hf hp n)
-        (iterateInverse_periodic d hp n)
 
-theorem parameterPartial_iterateInverse (d : Direction) {f : Source}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (n : ℕ) :
-    parameterPartial (iterateInverse d n f) = iterateInverse d n (parameterPartial f) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      rw [iterateInverse_succ, parameterPartial_inverse d (iterateInverse_smooth d hf hp n)
-        (iterateInverse_periodic d hp n), ih, iterateInverse_succ]
 
 
 

@@ -30,25 +30,6 @@ theorem sum_geometric_Ico_le (q : ℝ) (hq : 0 ≤ q) (hqhalf : q ≤ 1/2) (a b 
 variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-theorem finite_tail_norm_le (κ B : ℝ) (hκ : 0 ≤ κ) (hB : 0 ≤ B)
-    (hsmall : κ*B ≤ 1/2) (N : ℕ) (c : ℕ → E)
-    (hc : ∀ n ∈ Ico (N+1) (2*N+3), ‖c n‖ ≤ B^(n+1)) :
-    ‖∑ n ∈ Ico (N+1) (2*N+3), κ^n • c n‖ ≤ 2*B*(κ*B)^(N+1) := by
-  calc
-    _ ≤ ∑ n ∈ Ico (N+1) (2*N+3), ‖κ^n • c n‖ := norm_sum_le _ _
-    _ = ∑ n ∈ Ico (N+1) (2*N+3), κ^n*‖c n‖ := by
-      simp only [norm_smul, norm_pow, Real.norm_of_nonneg hκ]
-    _ ≤ ∑ n ∈ Ico (N+1) (2*N+3), κ^n*B^(n+1) :=
-      sum_le_sum (fun n hn => mul_le_mul_of_nonneg_left (hc n hn) (pow_nonneg hκ n))
-    _ = B*(∑ n ∈ Ico (N+1) (2*N+3), (κ*B)^n) := by
-      rw [mul_sum]
-      apply sum_congr rfl
-      intro n _
-      simp only [pow_succ, mul_pow]
-      ring
-    _ ≤ B*(2*(κ*B)^(N+1)) := mul_le_mul_of_nonneg_left
-      (sum_geometric_Ico_le (κ*B) (mul_nonneg hκ hB) hsmall (N+1) (2*N+3)) hB
-    _ = _ := by ring
 
 
 end EulerPacketTailBound

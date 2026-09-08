@@ -238,14 +238,6 @@ theorem profile_derivative_bound {a : ℝ} (ha : 1 < a) (n : ℕ) {z : ℝ} (hz 
     abs_of_pos (moment_pos ha n hz)]
   exact mul_le_mul_of_nonneg_left (moment_le_gamma ha n hz) (abs_nonneg _)
 
-theorem iteratedDeriv_profile {a z : ℝ} (ha : 1 < a) (n : ℕ) (hz : 0 < z) :
-    iteratedDeriv n (profile a) z = profileJet a n z := by
-  have hc : ContDiffAt ℝ n (profile a) z :=
-    ((profile_contDiffOn ha).contDiffAt (Ici_mem_nhds hz)).of_le
-      (WithTop.coe_le_coe.mpr le_top)
-  have he := iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici 0) hc hz.le
-  simpa only [iteratedDerivWithin, iteratedDeriv, he] using
-    iteratedDerivWithin_profile ha n hz.le
 
 /-! ## The vanishing boundary term and the actual ODE -/
 

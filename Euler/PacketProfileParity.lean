@@ -47,11 +47,7 @@ variable {P T : ℝ} [Fact (0 < P)] {S : Set Space} {a : Profile}
 
 include H
 
-theorem highDerivative_odd : JointOdd T G.high_t :=
-  G.high.timeDerivative_odd G.highDerivative hT G.high_time H.high
 
-theorem meanDerivative_odd : JointOdd T G.mean_t :=
-  G.mean.timeDerivative_odd G.meanDerivative hT G.mean_time H.mean
 
 theorem correctorDerivative_odd : JointOdd T G.corrector_t :=
   G.corrector.timeDerivative_odd G.correctorDerivative hT G.corrector_time H.corrector

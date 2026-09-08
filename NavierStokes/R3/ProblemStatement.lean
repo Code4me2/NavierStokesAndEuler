@@ -139,9 +139,6 @@ def candidateStatement (ν : ℝ) : Prop :=
   ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField, ∃ K : Set Space,
     CandidateProperties ν u p f K
 
-/-- The primary existence assertion for every positive viscosity. -/
-def coreBreakdownStatement : Prop :=
-  ∀ ν : ℝ, 0 < ν → candidateStatement ν
 
 /-- The full assertion of Theorem 1.1: at every positive viscosity there is a
 candidate whose same prescribed force and zero datum have no global smooth

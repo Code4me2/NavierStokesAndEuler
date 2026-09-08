@@ -571,17 +571,7 @@ theorem cyclePressureData_eq : EqOn (cyclePressureData x R).pressure
       (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive)) preterminal :=
   fun _ hw => pressure_field_eq _ hw
 
-theorem cyclePotentialData_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (cyclePotentialData x R).vector =ᶠ[𝓝 w]
-      ActualSignedExterior.cyclePotential x R.primitive
-        (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive) :=
-  potential_field_germ _ hw
 
-theorem cyclePressureData_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (cyclePressureData x R).pressure =ᶠ[𝓝 w]
-      ActualSignedExterior.cyclePressure x R.primitive
-        (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive) :=
-  pressure_field_germ _ hw
 
 
 

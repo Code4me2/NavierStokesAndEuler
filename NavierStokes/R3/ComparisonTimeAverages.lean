@@ -62,14 +62,6 @@ theorem continuousOn_time_weight {E : Type*} [NormedAddCommGroup E] [NormedSpace
     ContinuousOn (fun z : SpaceTime => a z.1 • f z) (slab 0 T) :=
   (ha.comp continuous_fst.continuousOn (fun _ hz => hz.1)).smul hf
 
-/-- Each time slice at a fixed spatial point is integrable, including at the
-endpoints of the closed time interval. -/
-theorem timeAverage_timeSlice_integrable {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] {T : ℝ} {a : ℝ → ℝ} {f : SpaceTime → E}
-    (ha : ContinuousOn a (Icc 0 T)) (hf : ContinuousOn f (slab 0 T)) (x : Space) :
-    IntegrableOn (fun t => a t • f (t, x)) (Icc 0 T) :=
-  (ha.smul (hf.comp (continuous_id.prodMk continuous_const).continuousOn
-    (fun _ ht => ⟨ht, mem_univ x⟩))).integrableOn_Icc
 
 
 /-- A field with a uniform spatial `L¹` bound has an integrable weighted
@@ -158,30 +150,6 @@ theorem memLp_two_timeIntegral {E : Type*} [NormedAddCommGroup E]
   simpa only [Pi.pow_apply, norm_pow, norm_norm, Prod.swap_prod_mk] using
     norm_integral_sq_le_measure_mul_integral_sq hxtwo
 
-/-- The quantitative estimate behind square-integrability of the time
-integral. -/
-theorem l2Sq_timeIntegral_le {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] {T : ℝ} {f : SpaceTime → E}
-    (hf : AEStronglyMeasurable f
-      (((volume : Measure ℝ).restrict (Icc 0 T)).prod (volume : Measure Space)))
-    (hsq : Integrable (fun z : SpaceTime => ‖f z‖ ^ 2)
-      (((volume : Measure ℝ).restrict (Icc 0 T)).prod (volume : Measure Space))) :
-    l2Sq (fun x : Space => ∫ t in Icc 0 T, f (t, x)) ≤
-      ((volume : Measure ℝ).restrict (Icc 0 T)).real univ *
-        ∫ t in Icc 0 T, ∫ x : Space, ‖f (t, x)‖ ^ 2 := by
-  have hAvg := memLp_two_timeIntegral hf hsq
-  have hAvgSq := (memLp_two_iff_integrable_sq_norm hAvg.1).1 hAvg
-  calc
-    l2Sq (fun x : Space => ∫ t in Icc 0 T, f (t, x)) ≤
-        ∫ x : Space, ((volume : Measure ℝ).restrict (Icc 0 T)).real univ *
-          ∫ t in Icc 0 T, ‖f (t, x)‖ ^ 2 := by
-      apply integral_mono_ae hAvgSq (hsq.integral_prod_right.const_mul _)
-      filter_upwards [hsq.prod_left_ae, hf.prod_swap.prodMk_left] with x hxint hxmeas
-      have hxtwo := (memLp_two_iff_integrable_sq_norm hxmeas).2 hxint
-      simpa only [Prod.swap_prod_mk] using norm_integral_sq_le_measure_mul_integral_sq hxtwo
-    _ = ((volume : Measure ℝ).restrict (Icc 0 T)).real univ *
-        ∫ t in Icc 0 T, ∫ x : Space, ‖f (t, x)‖ ^ 2 := by
-      rw [integral_const_mul, ← integral_integral_swap hsq]
 
 /-- Squared norm integrability of the weighted joint field follows from a
 uniform spatial square-integral bound. -/
@@ -215,15 +183,6 @@ theorem timeAverage_memLp_two {E : Type*} [NormedAddCommGroup E]
     (timeAverage_integrand_integrable_sq_norm ha hf hslice hbound)
 
 
-/-- Uniform finite kinetic energy gives square-integrability of every
-continuously weighted time average of a velocity. -/
-theorem timeAverage_memLp_two_of_uniformFiniteEnergy {T : ℝ} {a : ℝ → ℝ}
-    {u : VelocityField} (ha : ContinuousOn a (Icc 0 T))
-    (hu_cont : ContinuousOn u (slab 0 T)) (hu : UniformFiniteEnergy (Icc 0 T) u) :
-    MemLp (timeAverage T a u) 2 volume := by
-  obtain ⟨M, _, hM⟩ := uniformFiniteEnergy_l2Sq_bound hu
-  exact timeAverage_memLp_two ha hu_cont (fun t ht => (hM t ht).1)
-    (fun t ht => (hM t ht).2)
 
 
 /-- A uniform finite-energy bound also bounds every scalar coordinate's
@@ -302,24 +261,6 @@ theorem timeAverage_tensorDiff_integrable {T : ℝ} {a : ℝ → ℝ}
   exact timeAverage_integrable ha (continuousOn_tensorDiff_field hu_cont hv_cont i j)
     (fun t ht => (hM t ht i j).1) (fun t ht => (hM t ht i j).2)
 
-/-- A deliberately coarse bound for the `L¹` norm of an `L²` pairing. It is
-sufficient for the Fubini argument and uses no pointwise bound on either field. -/
-theorem l2_inner_integrable_and_norm_integral_le {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] {f g : Space → E} (hf : MemLp f 2 volume)
-    (hg : MemLp g 2 volume) :
-    Integrable (fun x => ⟪f x, g x⟫_ℝ) ∧
-      (∫ x : Space, ‖⟪f x, g x⟫_ℝ‖) ≤ l2Sq f + l2Sq g := by
-  have hf_sq := (memLp_two_iff_integrable_sq_norm hf.1).1 hf
-  have hg_sq := (memLp_two_iff_integrable_sq_norm hg.1).1 hg
-  have hpoint (x : Space) : ‖⟪f x, g x⟫_ℝ‖ ≤ ‖f x‖ ^ 2 + ‖g x‖ ^ 2 := by
-    apply (norm_inner_le_norm (f x) (g x)).trans
-    nlinarith [sq_nonneg (‖f x‖ - ‖g x‖), mul_nonneg (norm_nonneg (f x)) (norm_nonneg (g x))]
-  have hint := (hf_sq.add hg_sq).mono' (hf.1.inner hg.1) (Filter.Eventually.of_forall hpoint)
-  refine ⟨hint, ?_⟩
-  calc
-    (∫ x : Space, ‖⟪f x, g x⟫_ℝ‖) ≤ ∫ x : Space, ‖f x‖ ^ 2 + ‖g x‖ ^ 2 :=
-      integral_mono hint.norm (hf_sq.add hg_sq) hpoint
-    _ = l2Sq f + l2Sq g := integral_add hf_sq hg_sq
 
 
 /-- A complex scalar spatial test factors out of the time integral. -/

@@ -90,9 +90,5 @@ theorem backward_joint_continuous : Continuous (Function.uncurry V.backward) :=
   V.flow_joint_continuous.comp
     (continuous_fst.prodMk (continuous_const.prodMk continuous_snd))
 
-theorem forward_displacement (t : ℝ) (x : E) :
-    dist (V.forward t x) x ≤ V.speedBound*|t| := by
-  simpa only [forward, V.flow_initial, Real.dist_eq, sub_zero] using
-    (V.flow_lipschitz_time 0 x).dist_le_mul t 0
 
 end EulerBoundedLipschitzFlow.Data

@@ -61,23 +61,6 @@ theorem inversePath_coefficient_bound (n : ℕ) (x : P) :
   exact (inversePath_gevrey T Q c hc hQ hQr Rc C₀ hRc hC₀ hbQ Ri hRi n x).trans
     (majorant_one_le_radius_four Ri (inverseRadius_bounds c C₀ Rc Ri hc hRc hRi).1 n)
 
-include hQr hRc hC₀ hRi hbQ in
-/-- The actual left inverse `K⁻¹ Q*` has a polynomial multiplier amplitude. -/
-theorem frameLeftInversePath_bound (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => frameLeftInversePath T (Q y) c hc (hQ y)) x‖ ≤
-      (3*Ri*C₀)*majorant (4*Ri) 0 n := by
-  obtain ⟨hi,hbase⟩ := inverseRadius_bounds c C₀ Rc Ri hc hRc hRi
-  have hrad : 0 ≤ 4*Ri := by positivity
-  have hbQ' (j : ℕ) (y : P) : ‖iteratedFDeriv ℝ j Q y‖ ≤ C₀*majorant (4*Ri) 0 j :=
-    (hbQ j y).trans (mul_le_mul_of_nonneg_left (majorant_radius_mono Rc (4*Ri) hRc hbase 0 j) hC₀)
-  have hbAdj := EulerContinuousPathComposition.adjoint_bound Q hQr (4*Ri) C₀ hrad hC₀ 0 hbQ'
-  have h := compose_bound (fun y => gramInversePath T (Q y) c hc (hQ y))
-    (fun y => adjointMap (Q y)) (gramInversePath_contDiff T c hc Q hQ hQr)
-    (contDiff_adjoint Q hQr) (4*Ri) Ri C₀ hrad hi hC₀ 0 0
-    (inversePath_coefficient_bound T Q c hc hQ hQr Rc C₀ Ri hRc hC₀ hRi hbQ) hbAdj n x
-  simp only [Nat.add_zero] at h
-  convert h using 1
-  all_goals rfl
 
 
 

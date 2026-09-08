@@ -87,9 +87,6 @@ theorem iteratedDeriv_extension_eq_profileJet {a : ℝ} (ha : 1 < a)
   exact (EndpointExtension.glue_eqOn_right (matching_jets ha n) hz).trans
     (iteratedDerivWithin_profile ha n hz)
 
-theorem iteratedDeriv_extension_zero {a : ℝ} (ha : 1 < a) (n : ℕ) :
-    iteratedDeriv n (extension a) 0 = endpointJet a n :=
-  iteratedDeriv_extension_eq_profileJet ha n le_rfl
 
 
 theorem extension_pos {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
@@ -146,17 +143,6 @@ theorem extension_sub_one_bound {a : ℝ} (ha : 1 < a) (z : ℝ) :
     (fun y _ => hc y) hb (mem_univ (0 : ℝ)) (mem_univ z)
   simpa only [extension_zero ha, sub_zero, Real.norm_eq_abs] using hm
 
-/-- Positivity persists on a genuine two-sided neighborhood of the origin. -/
-theorem extension_positive_near_zero {a : ℝ} (ha : 1 < a) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ z : ℝ, |z| < δ →
-      (1 / 2 : ℝ) < extension a z ∧ extension a z < 3 / 2 := by
-  have hev : ∀ᶠ z in 𝓝 (0 : ℝ), (1 / 2 : ℝ) < extension a z ∧ extension a z < 3 / 2 :=
-    ((extension_contDiff ha).continuous.continuousAt.preimage_mem_nhds
-      (Ioo_mem_nhds (by rw [extension_zero ha]; norm_num)
-        (by rw [extension_zero ha]; norm_num)))
-  obtain ⟨δ, hδ, hnear⟩ := Metric.eventually_nhds_iff.mp hev
-  refine ⟨δ, hδ, fun z hz => hnear ?_⟩
-  simpa only [Real.dist_eq, sub_zero] using hz
 
 
 /-! ## Physical parameter composition -/

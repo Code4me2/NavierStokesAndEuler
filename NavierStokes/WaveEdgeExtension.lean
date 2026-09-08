@@ -602,31 +602,6 @@ theorem NativeRegularity.jet_outside {F : OutgoingProfile.Profile} {W : NominalP
     iteratedFDeriv ℝ n (nativeExtension W f) x = 0 := by
   rw [h.jets n x hx, nativeExtension_outside W _ hi]
 
-theorem NativeJets.native_regular_of_inner_growth {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {ι : Type*} {V : JetDomain ι NativePoint} {A S : ι → ℝ}
-    {P : ι → NativePoint → ℝ} {f : ι → NativePoint → E}
-    (hf : NativeJets V (fun i x => A i * Real.sqrt (PrimaryTargetBounds.movingWeight W x.1) * P i x) f)
-    (hA : ∀ i, 0 ≤ A i) (hS : ∀ i, 1 ≤ S i)
-    (hP : ∀ i, ContinuousOn (P i) nativeSlowDomain)
-    (hP0 : ∀ i x, x ∈ nativeSlowDomain → 0 ≤ P i x)
-    (hdom : ∀ i, windowDomain nativeSlowDomain (nativeRadius F.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) ⊆ V.carrier i)
-    (q : ℕ) (hG : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      V.growth i x ≤ S i * (max 1 (FinalSlowBase.edgeDistance W
-        (BaseChartJets.normalizedCoordinates F.data.h x.1).2)⁻¹) ^ q) :
-    ∀ i, NativeRegularity W (f i) := by
-  have hG' : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      V.growth i x ≤ S i * edgeGrowth (nativeRadius F.data.h)
-        (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) x ^ q := by
-    intro i x hx
-    exact (hG i x hx).trans (mul_le_mul_of_nonneg_left
-      (pow_le_pow_left₀ (zero_le_one.trans (le_max_left _ _))
-        (inner_edgeGrowth_le_native W hx.1 hx.2) q) (zero_le_one.trans (hS i)))
-  intro i
-  obtain ⟨hs, hj, he⟩ := NativeJets.native_zero_extension W hf hA hS hP hP0 hdom q hG' i
-  exact ⟨hs, hj, he⟩
 
 /-! ## The constructed primary pulse and its actual envelope -/
 
@@ -639,10 +614,6 @@ theorem pulseEnvelope_continuousOn {ι : Type*} {U : PhaseJetBounds.Domain ι Ph
     continuous_iff_continuousAt.mpr (fun t => (PrimaryPulseBounds.referenceP_hasDerivAt _ _ _ t).continuousAt)
   exact hc.comp_continuousOn (continuousOn_const.mul (hχ i))
 
-theorem pulseEnvelope_nonneg {ι : Type*} {U : PhaseJetBounds.Domain ι PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U)
-    (χ : ι → NativePoint → PhaseCalculus.Slow × ℝ) (j : Fin 2) (i : ι) (x : NativePoint) :
-    0 ≤ pulseEnvelope F χ j i x := (PrimaryPulseBounds.referenceP_pos _ _ _ _).le
 
 
 /-! ## Localization before radial extension -/
@@ -700,45 +671,6 @@ noncomputable def nativeDomain {F : OutgoingProfile.Profile} (W : NominalProfile
       (zero_le_one.trans ((V.one_le_scale i).trans (le_max_left _ _)))
       (one_le_pow₀ (edgeGrowth_one_le _ _ _ _)))
 
-/-- The source chart need only cover points where the actual localized
-formula has a nonzero germ. This permits slow-cell and outer-slot localization
-before taking the radial zero extension. -/
-theorem NativeJets.native_regular_of_zero_germ_cover
-    {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {ι : Type*} {V : JetDomain ι NativePoint} {A S : ι → ℝ}
-    {P : ι → NativePoint → ℝ} {f : ι → NativePoint → E}
-    (hf : NativeJets V (fun i x => A i * Real.sqrt (PrimaryTargetBounds.movingWeight W x.1) * P i x) f)
-    (hA : ∀ i, 0 ≤ A i)
-    (hP : ∀ i, ContinuousOn (P i) nativeSlowDomain)
-    (hP0 : ∀ i x, x ∈ nativeSlowDomain → 0 ≤ P i x)
-    (hcover : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      x ∈ V.carrier i ∨ f i =ᶠ[𝓝 x] fun _ => 0)
-    (q : ℕ) (hG : ∀ i x, x ∈ windowDomain nativeSlowDomain (nativeRadius F.data.h)
-      (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) →
-      x ∈ V.carrier i → V.growth i x ≤ S i * (max 1 (FinalSlowBase.edgeDistance W
-        (BaseChartJets.normalizedCoordinates F.data.h x.1).2)⁻¹) ^ q) :
-    ∀ i, NativeRegularity W (f i) := by
-  have hG' : ∀ i x, x ∈ (nativeDomain W V S q).carrier i → x ∈ V.carrier i →
-      V.growth i x ≤ (nativeDomain W V S q).growth i x := by
-    intro i x hx hi
-    calc
-      _ ≤ S i * (max 1 (FinalSlowBase.edgeDistance W
-          (BaseChartJets.normalizedCoordinates F.data.h x.1).2)⁻¹) ^ q := hG i x hx hi
-      _ ≤ max (V.scale i) (S i) * (max 1 (FinalSlowBase.edgeDistance W
-          (BaseChartJets.normalizedCoordinates F.data.h x.1).2)⁻¹) ^ q :=
-        mul_le_mul_of_nonneg_right (le_max_right _ _) (pow_nonneg (zero_le_one.trans (le_max_left _ _)) _)
-      _ ≤ _ := mul_le_mul_of_nonneg_left
-        (pow_le_pow_left₀ (zero_le_one.trans (le_max_left _ _))
-          (inner_edgeGrowth_le_native W hx.1 hx.2) q)
-        (zero_le_one.trans ((V.one_le_scale i).trans (le_max_left _ _)))
-  have hfull := NativeJets.on_zero_germ_cover (V' := nativeDomain W V S q) hf hcover
-    (fun i x hx => mul_nonneg (mul_nonneg (hA i) (Real.sqrt_nonneg _)) (hP0 i x hx.1)) hG'
-  intro i
-  obtain ⟨hs, hj, he⟩ := NativeJets.native_zero_extension W hfull hA
-    (fun i => (V.one_le_scale i).trans (le_max_left _ _)) hP hP0 (fun _ => Subset.rfl)
-    q (fun _ _ _ => le_rfl) i
-  exact ⟨hs, hj, he⟩
 
 
 /-- Extending by zero does not enlarge an interior tensor bound. This
@@ -777,11 +709,6 @@ noncomputable def meanNative : LocalSignedRequest.Point ≃ₗᵢ[ℝ] NativePoi
 theorem meanNative_apply (x : LocalSignedRequest.Point) :
     meanNative x = (PrimaryTargetBounds.meanPoint x, x.2.2) := rfl
 
-theorem nativeRadius_meanNative {F : OutgoingProfile.Profile} (x : LocalSignedRequest.Point) :
-    nativeRadius F.data.h (meanNative x) = (LocalSignedRequest.profileMap (2 * F.data.h) x).1 := by
-  unfold nativeRadius PrimaryTargetBounds.profileRadius
-  rw [meanNative_apply, PrimaryTargetBounds.meanPoint_scalar]
-  rfl
 
 noncomputable def meanExtension {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
     (f : NativePoint → E) (x : LocalSignedRequest.Point) : E := nativeExtension W f (meanNative x)
@@ -793,12 +720,6 @@ theorem NativeRegularity.mean_smooth {F : OutgoingProfile.Profile} {W : NominalP
     ContDiffOn ℝ ∞ (meanExtension W f) {x : LocalSignedRequest.Point | 0 < x.2.1.1} :=
   h.smooth.comp meanNative.contDiff.contDiffOn (fun _ hx => hx)
 
-/-- Reordering the coordinates preserves the norm of every full tensor. -/
-theorem meanExtension_jet_norm {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (f : NativePoint → E) (n : ℕ) (x : LocalSignedRequest.Point) :
-    ‖iteratedFDeriv ℝ n (meanExtension W f) x‖ =
-      ‖iteratedFDeriv ℝ n (nativeExtension W f) (meanNative x)‖ :=
-  meanNative.norm_iteratedFDeriv_comp_right (nativeExtension W f) x n
 
 
 end NavierStokes.WaveEdgeExtension

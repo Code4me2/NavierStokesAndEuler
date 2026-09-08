@@ -647,11 +647,6 @@ theorem physicalMoments_eq (P : Patch) (b A G : ℝ) (hA : A ≠ 0) (c : Coeff) 
   simp only [physicalDensity_eq]
   exact hc
 
-/-- The full physical derivative in the five raw bump coefficients is an
-explicit continuous linear equivalence. Its two actual moment determinants
-were proved nonzero above. -/
-noncomputable def actualLinearEquiv (P : Patch) (b A G : ℝ) (hb : GoodExponent b)
-    (hA : A ≠ 0) : Coeff ≃L[ℝ] Debt := (linearEquiv P b hb).trans (physicalEquiv A G hA)
 
 
 theorem physicalDensity_zero_outside (P : Patch) (b A G : ℝ) (c : Coeff) {x : ℝ}
@@ -673,13 +668,6 @@ theorem physicalDensity_zero_outside (P : Patch) (b A G : ℝ) (c : Coeff) {x : 
   ext i
   fin_cases i <;> simp [physicalDebt, normalizedDensity, hu, he]
 
-theorem physicalMoments_positive_axis (P : Patch) (b A G : ℝ) (c : Coeff) (i : Fin 5) :
-    (∫ x in Ioi (0 : ℝ), physicalDensity P b A G c x i) = physicalMoments P b A G c i := by
-  apply setIntegral_eq_integral_of_forall_compl_eq_zero
-  intro x hx
-  have hout : x ∉ Ioo P.left P.right := fun h => hx (P.left_pos.trans h.1)
-  rw [physicalDensity_zero_outside P b A G c hout]
-  rfl
 
 theorem physicalDensity_integrable (P : Patch) (b A G : ℝ) (hA : A ≠ 0) (c : Coeff) (i : Fin 5) :
     Integrable (fun x => physicalDensity P b A G c x i) := by
@@ -735,33 +723,6 @@ theorem normalizedDebt_eq_sum (A G : ℝ) (d : Debt) :
   simp only [map_smul] at he
   exact he.symm
 
-theorem compact_normalization_bound (S : Set ℝ) (hS : IsCompact S) {A G : ℝ → ℝ}
-    (hA : ContDiffOn ℝ ∞ A S) (hG : ContDiffOn ℝ ∞ G S) (hAn : ∀ p ∈ S, A p ≠ 0) :
-    ∃ K : ℝ, 0 < K ∧ ∀ p ∈ S, ∀ d : Debt, ‖normalizedDebt (A p) (G p) d‖ ≤ K * ‖d‖ := by
-  have hi : ∀ i : Fin 5, ∃ B : ℝ, 0 ≤ B ∧ ∀ p ∈ S,
-      ‖normalizedDebt (A p) (G p) (Pi.single i 1)‖ ≤ B := by
-    intro i
-    obtain ⟨B, hB⟩ := hS.exists_bound_of_continuousOn
-      (normalizedDebt_contDiffOn hA hG (d := fun _ => Pi.single i 1) contDiffOn_const hAn).continuousOn
-    exact ⟨max B 0, le_max_right _ _, fun p hp => (hB p hp).trans (le_max_left _ _)⟩
-  choose B hB hbound using hi
-  let K : ℝ := 1 + ∑ i, B i
-  have hK : 0 < K := by
-    have hs := Finset.sum_nonneg (s := Finset.univ) (fun i _ => hB i)
-    dsimp [K]
-    linarith
-  refine ⟨K, hK, ?_⟩
-  intro p hp d
-  rw [normalizedDebt_eq_sum]
-  calc
-    _ ≤ ∑ i, ‖d i • normalizedDebt (A p) (G p) (Pi.single i 1)‖ := norm_sum_le _ _
-    _ ≤ ∑ i, ‖d‖ * B i := by
-      apply Finset.sum_le_sum
-      intro i _
-      rw [norm_smul]
-      exact mul_le_mul (norm_le_pi_norm d i) (hbound i p hp) (norm_nonneg _) (norm_nonneg _)
-    _ = (∑ i, B i) * ‖d‖ := by rw [← Finset.mul_sum, mul_comm]
-    _ ≤ K * ‖d‖ := mul_le_mul_of_nonneg_right (by dsimp [K]; linarith) (norm_nonneg d)
 
 theorem correction_family_contDiffOn {n : ℕ} (P : Patch) {S : Set ℝ} {c : ℝ → Fin n → ℝ}
     (hc : ContDiffOn ℝ ∞ c S) :

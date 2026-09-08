@@ -279,16 +279,6 @@ theorem materialPhaseDefect_slot_formula (ε p pz x₀ : ℝ)
   rw [materialPhaseDefect_slot ε p pz x₀ b F G q (ne_of_gt hR)]
   exact PhaseCalculus.backwardMaterialOp_phase ε p pz x₀ b F G q hε hR hF hG
 
-/-- A base coefficient depending only on slow coordinates has precisely
-the slow differential along a slot direction. -/
-theorem slot_base_derivative (f : PhaseCalculus.Slow → ℝ) (q w : PhaseCalculus.Slot)
-    (hf : DifferentiableAt ℝ f q.1) :
-    along (fun _ => w) (fun y : PhaseCalculus.Slot => f y.1) q = fderiv ℝ f q.1 w.1 := by
-  have hd := (hf.hasFDerivAt.comp q (hasFDerivAt_id (𝕜 := ℝ) q).fst).fderiv
-  dsimp only [Function.comp_def] at hd
-  unfold along
-  rw [hd]
-  rfl
 
 
 
@@ -303,32 +293,8 @@ noncomputable def projectedPressure (κ : ℝ) (Vf : E → E)
   (Complex.I / (κ : ℂ)) * projectionNumerator Vf n a Ka f x /
     Complex.ofReal (‖n x‖ ^ 2)
 
-theorem projectedPressure_force (κ : ℝ) (Vf : E → E)
-    (n : E → EuclideanSpace ℝ (Fin 3)) (a Ka f : E → ComplexVector) (x : E)
-    (hκ : κ ≠ 0) (i : Fin 3) :
-    phaseFactor κ * Complex.ofReal (n x i) * projectedPressure κ Vf n a Ka f x =
-      -Complex.ofReal (n x i) * projectionNumerator Vf n a Ka f x /
-        Complex.ofReal (‖n x‖ ^ 2) := by
-  have hk : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ
-  have hc : phaseFactor κ * (Complex.I / (κ : ℂ)) = -1 := by
-    unfold phaseFactor
-    field_simp [hk]
-    simp []
-  unfold projectedPressure
-  calc
-    _ = (phaseFactor κ * (Complex.I / (κ : ℂ))) * Complex.ofReal (n x i) *
-        projectionNumerator Vf n a Ka f x / Complex.ofReal (‖n x‖ ^ 2) := by ring
-    _ = _ := by rw [hc]; ring
 
 
-theorem contDiffOn_normalDot {U : Set E} {n : E → EuclideanSpace ℝ (Fin 3)}
-    {a : E → ComplexVector} (hn : ContDiffOn ℝ ∞ n U)
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun y => a y i) U) :
-    ContDiffOn ℝ ∞ (fun y => normalDot (n y) (a y)) U := by
-  have hc i : ContDiffOn ℝ ∞ (fun y => Complex.ofReal (n y i)) U :=
-    Complex.ofRealCLM.contDiff.comp_contDiffOn
-      ((EuclideanSpace.proj i : EuclideanSpace ℝ (Fin 3) →L[ℝ] ℝ).contDiff.comp_contDiffOn hn)
-  exact (((hc 0).mul (ha 0)).add ((hc 1).mul (ha 1))).add ((hc 2).mul (ha 2))
 
 
 /-! ## Real-linear transfer of the complex calculation -/
@@ -449,33 +415,8 @@ noncomputable def bilinearAdvection (u v : Space → Space) (q : Space) : Space 
     (u q 1 / q 0) • (CylindricalResidual.dCoord 1 v q + CylindricalResidual.connection (v q)) +
     u q 2 • CylindricalResidual.dCoord 2 v q
 
-noncomputable def cylindricalLinearResidual (ε : ℝ) (B a : VelocityField) (p : PressureField)
-    (t : ℝ) (q : Space) : Space :=
-  temporalDerivative a t q + bilinearAdvection (fun y => B (t, y)) (fun y => a (t, y)) q +
-    bilinearAdvection (fun y => a (t, y)) (fun y => B (t, y)) q +
-    CylindricalResidual.scalarGradient (fun y => p (t, y)) q -
-    ε • CylindricalResidual.vectorLaplacian (fun y => a (t, y)) q
 
-/-- Linearization in the original Cartesian derivative definitions. -/
-noncomputable def cartesianLinearResidual (ε : ℝ) (B a : VelocityField) (p : PressureField)
-    (t : ℝ) (x : Space) : Space :=
-  temporalDerivative a t x + spatialDerivative a t x (B (t, x)) +
-    spatialDerivative B t x (a (t, x)) + pressureGradient p t x -
-    ε • spatialLaplacian a t x
 
-theorem cartesianBilinearAdvection_components {u v : Space → Space} {q : Space}
-    (hv : DifferentiableAt ℝ v (CylindricalResidual.chart q)) (hr : q 0 ≠ 0) :
-    fderiv ℝ v (CylindricalResidual.chart q) (u (CylindricalResidual.chart q)) =
-      CylindricalResidual.frame (q 1)
-        (bilinearAdvection (CylindricalResidual.components u) (CylindricalResidual.components v) q) := by
-  have he := CylindricalResidual.cartesianDerivative_components hv hr
-    (CylindricalResidual.components u q)
-  have hu : CylindricalResidual.frame (q 1) (CylindricalResidual.components u q) =
-      u (CylindricalResidual.chart q) := CylindricalResidual.frame_inverse' _ _
-  rw [hu] at he
-  have he' := congrArg (CylindricalResidual.frame (q 1)) he
-  simp only [CylindricalResidual.frame_inverse'] at he'
-  exact he'
 
 
 noncomputable def spaceDirection (i : Fin 3) (_ : SpaceTime) : SpaceTime :=

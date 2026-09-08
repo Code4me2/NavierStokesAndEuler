@@ -16,23 +16,7 @@ variable (P : ℝ) [Fact (0 < P)] (M : EulerMeanPacketProvider.Data)
   (D : EulerTransversePacketProvider.Data U) (hT : M.T = D.T)
   (I Iprimary : EulerTransversePacketProvider.InitialData P D)
 
-def sourceTailGradeField (N n : ℕ) (hn : N+1 ≤ n) :
-    Field P M.T (fun z => recursiveGrade (sourceOperators P M D I) N
-      (sourceProfiles P M D I Iprimary) z n) :=
-  ProfileRegularity.tailGradeField M.T_pos
-    (fun i _ => sourceProfileWitness P M D hT I Iprimary i)
-    (sourceCoefficientData P M D I hT) (profiles_zero _ _) n hn
 
-def sourceLiteralTailGradeField (N n : ℕ) (hn : N+1 ≤ n) :
-    Field P M.T (fun z => slicedMomentumGrade (Icc (0 : ℝ) M.T) (N+1)
-      ((sourceOperators P M D I).inverseFrame z)
-      ((sourceOperators P M D I).strain z)
-      ((sourceOperators P M D I).normal z)
-      (assembledVelocity N (sourceProfiles P M D I Iprimary))
-      (assembledPressure N (sourceProfiles P M D I Iprimary)) z n) :=
-  ProfileRegularity.literalTailGradeField M.T_pos
-    (fun i _ => sourceProfileWitness P M D hT I Iprimary i)
-    (sourceCoefficientData P M D I hT) (profiles_zero _ _) n hn
 
 
 def sourceTailSumField (N : ℕ) (κ : ℝ) :

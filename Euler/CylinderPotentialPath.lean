@@ -71,23 +71,6 @@ theorem potentialField_source_formula
     ((smoothField_continuous P _ (pointField_smooth P p hp t)).comp
       (continuous_const.prodMk (AddCircle.continuous_mk' P))) θ
 
-/-- The L² construction is the same actual field used in the compact Piola construction. -/
-theorem potentialField_eq_periodic
-    (hmean : ∀ t y, (∫ s in (0 : ℝ)..P, pointField P p hp t (y,(s : AddCircle P))) = 0)
-    (m : K → Space → Space) (hBm : ∀ t y, B t y = potentialMultiplier (m t y))
-    (t : K) :
-    potentialField P B hB p hp t = EulerPacketPeriodicPotential.field P (m t) (pointField P p hp t) := by
-  funext x
-  obtain ⟨θ,hθ⟩ := QuotientAddGroup.mk_surjective x.2
-  have hx : x=(x.1,(θ : AddCircle P)) := by
-    apply Prod.ext
-    · rfl
-    · exact hθ.symm
-  rw [hx, potentialField_source_formula P B hB p hp hmean m hBm t x.1 θ]
-  have h := EulerPacketPeriodicPotential.field_cover P (m t) (pointField P p hp t)
-    (smoothField_continuous P _ (pointField_smooth P p hp t)) (hmean t) (x.1,θ)
-  simpa only [coveringMap, EulerPacketPiola.coveringPotential, localFieldLift,
-    Prod.fst_zero, Prod.snd_zero, zero_add] using h.symm
 
 include hB hp in
 /-- Angular integration and multiplication retain the input radius and external shift. -/

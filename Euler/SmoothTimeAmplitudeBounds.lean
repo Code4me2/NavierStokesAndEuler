@@ -32,13 +32,6 @@ theorem coefficient_jet_norm (ε : ℝ) (hε : 0 < ε)
   exact mul_le_mul (smul_id_norm_le ε⁻¹ (inv_nonneg.mpr hε.le))
     (A.compTime_jet_norm (timeMap ε hε) n) (norm_nonneg _) (inv_nonneg.mpr hε.le)
 
-theorem derivativeCoefficient_jet_norm (ε : ℝ) (hε : 0 < ε)
-    (A : SmoothTimeField (Icc (0 : ℝ) 1) E V) (n : ℕ) :
-    ‖(derivativeCoefficient ε hε A).jet n‖ ≤ (ε⁻¹)^2*‖A.jet n‖ := by
-  apply ((A.compTime (timeMap ε hε)).map_jet_norm_le
-    ((ε⁻¹)^2 • ContinuousLinearMap.id ℝ V) n).trans
-  exact mul_le_mul (smul_id_norm_le ((ε⁻¹)^2) (sq_nonneg _))
-    (A.compTime_jet_norm (timeMap ε hε) n) (norm_nonneg _) (sq_nonneg _)
 
 theorem mapField_hasJetBound (a : ℝ) (ha : 0 ≤ a) (F : SmoothL2Field V)
     (C R : ℝ) (hF : F.HasJetBound C R) :

@@ -61,18 +61,6 @@ theorem StripData.slow_le_growth (s : StripData D) (n : ℕ) (x : D) :
   exact le_mul_of_one_le_right ((zero_le_one.trans (s.one_le_slow n)))
     (le_max_left _ _)
 
-theorem StripData.separate_powers_le_growth (s : StripData D) (p q n : ℕ) (x : D) :
-    s.slow n ^ p * (max 1 (s.delta x)⁻¹) ^ q ≤ s.growth n x ^ (p + q) := by
-  have he0 : 0 ≤ max 1 (s.delta x)⁻¹ := zero_le_one.trans (le_max_left _ _)
-  have he : max 1 (s.delta x)⁻¹ ≤ s.growth n x := by
-    calc
-      _ = 1 * max 1 (s.delta x)⁻¹ := (one_mul _).symm
-      _ ≤ s.slow n * max 1 (s.delta x)⁻¹ :=
-        mul_le_mul_of_nonneg_right (s.one_le_slow n) he0
-  rw [pow_add]
-  exact mul_le_mul
-    (pow_le_pow_left₀ (zero_le_one.trans (s.one_le_slow n)) (s.slow_le_growth n x) p)
-    (pow_le_pow_left₀ he0 he q) (pow_nonneg he0 q) (pow_nonneg (s.growth_nonneg n x) p)
 
 def majorant (s : StripData D) (w : ℕ → D → ℝ) (α C : ℝ) (p n : ℕ) (x : D) : ℝ :=
   C * s.epsilon n ^ α * s.growth n x ^ p * w n x

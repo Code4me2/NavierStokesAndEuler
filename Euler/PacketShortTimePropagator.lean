@@ -82,16 +82,6 @@ theorem propagator_norm_le_two (S : Set Space) (L : ℝ) (hL : 0 ≤ L)
     hd hb hshort s t hst
   simpa only [coordinate_at,propagator_self] using h
 
-theorem propagator_norm_le_two_of_deformation (C C₁ : ℝ) (hC : 0 ≤ C) (hC₁ : 0 ≤ C₁)
-    (hdet : ∀ t x, (operatorMatrix (D.F.field t x)).det=1)
-    (hF : ∀ t x, ‖D.F.field t x‖ ≤ C)
-    (hF₁ : ∀ t x, ‖D.F₁.field t x‖ ≤ C₁)
-    (hshort : shortTimeRate C C₁*D.T ≤ 1/2)
-    (t s : Icc (0 : ℝ) D.T) (hst : s ≤ t) (x : Space) :
-    ‖propagator D t s x‖ ≤ 2 :=
-  propagator_norm_le_two D univ (shortTimeRate C C₁) (shortTimeRate_nonneg C C₁ hC hC₁)
-    (fun r y _ => sourceGenerator_norm_le D C C₁ hC hC₁ hdet hF hF₁ r y)
-    hshort t s hst x (mem_univ _)
 
 
 end EulerPacketSourcePropagator

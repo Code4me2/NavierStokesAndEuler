@@ -519,32 +519,6 @@ theorem exists_ordered_profile_cone :
   subst K'
   exact Hlam d hdP hdm hwait hlam hh w left hleft
 
-theorem normal_data_continuousOn {d : TailData} {K : ℝ} (w : ResetWitness d K)
-    {Amp : ℝ → ℝ} (ha : ContDiff ℝ ∞ Amp) (XR : ℝ) {s : Set (ℝ × ℝ)}
-    (heta : ∀ p ∈ s, |p.2| ≤ 1) (hQ : ∀ p ∈ s, 0 < OutgoingHistories.Qs w Amp p)
-    (hA : ∀ p ∈ s, 0 < coneA w p) :
-    ContinuousOn (normalP w Amp XR) s ∧ ContinuousOn (normalJ w Amp XR) s ∧
-      ContinuousOn (normalV w Amp) s := by
-  have hca := (OutgoingEntranceCone.coneA_continuous w).continuousOn (s := s)
-  have hcb := (OutgoingEntranceCone.coneB_continuous w ha).continuousOn (s := s)
-  have hcr : ContinuousOn (coneRatio w Amp) s := by
-    apply (OutgoingHistories.Ns_smooth w ha).continuous.continuousOn.div
-      ((OutgoingHistories.E_smooth w).continuous.mul (OutgoingHistories.Qs_smooth w ha).continuous).continuousOn
-    intro p hp
-    exact (mul_pos (OutgoingHistories.E_pos w p) (hQ p hp)).ne'
-  have hp1 : ContinuousOn (OutgoingHistories.p1 XR w Amp) s := by
-    have hx : Continuous (fun p : ℝ × ℝ => XR * Real.exp p.1 * OutgoingHistories.Qs w Amp p) :=
-      (continuous_const.mul (Real.continuous_exp.comp continuous_fst)).mul (OutgoingHistories.Qs_smooth w ha).continuous
-    have hL : Continuous (fun p : ℝ × ℝ => 1 - 2 * d.h * p.2 ^ 2) :=
-      continuous_const.sub (continuous_const.mul (continuous_snd.pow 2))
-    apply hx.continuousOn.div hL.continuousOn
-    intro p hp
-    exact (CoordinateAlgebra.L_pos d.h_pos.le d.h_lt_half
-      (OutgoingEntranceCone.parameter_square_le_one (heta p hp))).ne'
-  have hane : ∀ p ∈ s, coneA w p ≠ 0 := fun p hp => (hA p hp).ne'
-  exact ⟨hp1.mul (continuousOn_const.sub ((hcb.mul hcr).div hca hane)),
-    hp1.mul (hcr.add (hcb.div hca hane)),
-    hca.mul (continuousOn_const.add ((hcb.div hca hane).pow 2))⟩
 
 
 

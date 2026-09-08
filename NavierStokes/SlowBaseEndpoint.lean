@@ -356,13 +356,6 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
     (v : ModulatedProfileAssembly.Witness ld)
 
-/-- The original potential of the actual entrance-aligned base extends at
-nonzero axial coordinate, with its selected scale sequence unchanged. -/
-noncomputable def finalPotentialNonzeroAxial (upper : ℝ) (B : ℕ) {x : Space}
-    (hx : x 2 ≠ 0) :
-    JointResidualLimits.OneSidedExtension (FinalSlowBase.vectorPotential H v upper B) x :=
-  potentialNonzeroAxial (FinalSlowBase.scales_strictMono H v upper B)
-    F.data.h_pos F.data.h_lt_half (FinalSlowBase.coefficients_smooth H v) W.axis.normalization hx
 
 
 noncomputable def finalPressureNonzeroAxial (upper : ℝ) (B : ℕ) {x : Space}

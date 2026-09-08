@@ -373,21 +373,7 @@ theorem zDensity_exterior {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
 
 
 
-theorem thetaDensity_positive_integral_zero {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 2 ≤ n)
-    {eta : ℝ} (heta : eta ∈ S) :
-    (∫ R in Ioi (0 : ℝ), SlowResidualMatching.thetaDensity h C (asSlowProfiles s) n (R, eta)) = 0 := by
-  have he := SlowStressSupport.moment_eq_positive s.B_pos.le (thetaDensity_exterior s hbase hn) heta 0
-  simp only [pow_zero, one_mul, thetaDensity_moment_zero s hbase hn heta] at he
-  exact he.symm
 
-theorem zDensity_positive_integral_zero {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 2 ≤ n)
-    {eta : ℝ} (heta : eta ∈ S) :
-    (∫ R in Ioi (0 : ℝ), SlowResidualMatching.zDensity h (asSlowProfiles s) n (R, eta)) = 0 := by
-  have he := SlowStressSupport.moment_eq_positive s.B_pos.le (zDensity_exterior s hbase hn) heta 0
-  simp only [pow_zero, one_mul, zDensity_moment_zero s hbase hn heta] at he
-  exact he.symm
 
 /-- Both canonical negative radial primitives have the same exterior
 radius for all `n ≥ 2`.  There is no output-support hypothesis. -/
@@ -425,19 +411,6 @@ theorem nominal_stresses_exterior {n : ℕ} (hn : 2 ≤ n) :
 
 
 
-/-- One compact rectangle contains both stress supports for the entire
-higher-order family.  Its radial lower edge is strictly positive. -/
-theorem nominalCoefficients_stress_support {n : ℕ} (hn : 2 ≤ n) :
-    tsupport (fun p => ((nominalCoefficients W).stressTheta n p,
-        (nominalCoefficients W).stressAxial n p)) ⊆
-      Icc (nominalInner W / 8) (nominalOuterX W) ×ˢ
-        Icc (-(commonWindow (nominalScheme W) (nominalParameters_contains W)).outer)
-          (commonWindow (nominalScheme W) (nominalParameters_contains W)).outer := by
-  have hs := nominal_stresses_exterior W hn
-  have h := coefficients_stress_support (nominalLocalization W) (nominalBaseAgreement W)
-    (nominalZeroOrder W) (nominalParameters_contains W) n (nominalOuterRadius_pos W).le hs.1 hs.2
-  simp only [nominalOuterRadius_square] at h
-  exact h
 
 
 end Nominal

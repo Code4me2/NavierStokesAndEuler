@@ -81,27 +81,7 @@ theorem iteratedDeriv_zero_function (n : ℕ) : iteratedDeriv n (fun _ : ℝ => 
   | zero => rfl
   | succ n ih => simp only [iteratedDeriv_succ,ih,deriv_const']
 
-theorem flat_left_of_zero {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) {a : ℝ}
-    (hz : ∀ x < a, f x = 0) (n : ℕ) : iteratedDeriv n f a = 0 := by
-  have heq : EqOn (iteratedDeriv n f) (fun _ => 0) (Iio a) := by
-    intro x hx
-    have he : f =ᶠ[𝓝 x] (fun _ => 0) := by
-      filter_upwards [Iio_mem_nhds hx] with y hy
-      exact hz y hy
-    rw [he.iteratedDeriv_eq n,iteratedDeriv_zero_function]
-  have hc := heq.closure (hf.continuous_iteratedDeriv n (by exact_mod_cast le_top)) continuous_const
-  exact hc (by simp)
 
-theorem flat_right_of_zero {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f) {b : ℝ}
-    (hz : ∀ x, b < x → f x = 0) (n : ℕ) : iteratedDeriv n f b = 0 := by
-  have heq : EqOn (iteratedDeriv n f) (fun _ => 0) (Ioi b) := by
-    intro x hx
-    have he : f =ᶠ[𝓝 x] (fun _ => 0) := by
-      filter_upwards [Ioi_mem_nhds hx] with y hy
-      exact hz y hy
-    rw [he.iteratedDeriv_eq n,iteratedDeriv_zero_function]
-  have hc := heq.closure (hf.continuous_iteratedDeriv n (by exact_mod_cast le_top)) continuous_const
-  exact hc (by simp)
 
 
 
@@ -604,15 +584,6 @@ theorem exists_radial_derivative_bound {K : Set E} (hK : IsCompact K)
       dsimp [C]
       ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace ℝ V] in
-theorem radial_lower_bound {K : Set E} {a b c m : ℝ} {T : E × ℝ → V}
-    (hlower : ∀ p ∈ K, ∀ y ∈ Ioo a b, m * weight c a b y ≤ ‖T (p,y)‖)
-    {p : E} (hp : p ∈ K) {X : ℝ} (hX : X ∈ Ioo (Real.exp a) (Real.exp b)) :
-    m * radialWeight c a b X ≤ ‖radialPullback T (p,X)‖ := by
-  have hXp : 0 < X := (Real.exp_pos a).trans hX.1
-  rw [radialWeight,ite_eq_left hXp]
-  exact hlower p hp (Real.log X)
-    ⟨(Real.lt_log_iff_exp_lt hXp).2 hX.1,(Real.log_lt_iff_lt_exp hXp).2 hX.2⟩
 
 /-- The complete estimates in both fixed profile charts. -/
 noncomputable def WeightedBounds (K : Set E) (c a b : ℝ) (T : E × ℝ → V) : Prop :=
@@ -699,35 +670,6 @@ theorem compact_positive_collar {K : Set E} (hK : IsCompact K)
   have hpos : 0 < g (p,x) := (hdom (show (p,x) ∈ K ×ˢ Icc (0 : ℝ) d from ⟨hp,hx⟩)).2
   simpa only [Real.norm_eq_abs,abs_of_pos hpos] using hh
 
-/-- A positive angular edge factor yields a genuine smooth unit direction
-for the stress, even where the stress itself vanishes at the edge. -/
-theorem EdgeFactor.direction_collar {K : Set E} (hK : IsCompact K) {c : ℝ}
-    {T : E × ℝ → ℝ × ℝ} (F : EdgeFactor K c T)
-    (hfirst : ∀ p ∈ K, 0 < (F.coefficient (p,0)).1) :
-    ∃ d : ℝ, ∃ W : Set (E × ℝ), 0 < d ∧ d < F.width ∧ IsOpen W ∧
-      K ×ˢ Icc (0 : ℝ) d ⊆ W ∧
-      ContDiffOn ℝ ∞ (fun q => direction (F.coefficient q)) W ∧
-      (∀ p ∈ K, ∀ x : ℝ, 0 < x → x ≤ d →
-        direction (T (p,x)) = direction (F.coefficient (p,x))) ∧
-      (∀ p ∈ K, ∀ x : ℝ, 0 < x → x ≤ d → 0 < (T (p,x)).1) := by
-  obtain ⟨d0,ε,hd0,hε,hdom,hbound⟩ := compact_positive_collar hK F.domain_open
-    F.smooth.fst.continuousOn F.boundary_mem hfirst
-  let W := {q | q ∈ F.domain ∧ 0 < (F.coefficient q).1}
-  let d := min d0 (F.width/2)
-  have hd : 0 < d := lt_min hd0 (half_pos F.width_pos)
-  have hdd : d ≤ d0 := min_le_left _ _
-  have hdw : d < F.width := (min_le_right _ _).trans_lt (half_lt_self F.width_pos)
-  have hpos (p : E) (hp : p ∈ K) (x : ℝ) (hx : x ∈ Icc (0 : ℝ) d) :
-      0 < (F.coefficient (p,x)).1 := hε.trans_le (hbound p hp x ⟨hx.1,hx.2.trans hdd⟩)
-  refine ⟨d,W,hd,hdw,positive_domain_open F.domain_open F.smooth.fst.continuousOn,?_,?_,?_,?_⟩
-  · exact fun q hq => ⟨hdom ⟨hq.1,hq.2.1,hq.2.2.trans hdd⟩,hpos q.1 hq.1 q.2 hq.2⟩
-  · exact direction_smooth (F.smooth.mono (fun _ hq => hq.1)) (fun _ hq => hq.2.ne')
-  · intro p hp x hx hxd
-    rw [F.identity p hp x hx (hxd.trans_lt hdw)]
-    exact direction_smul (div_pos (FlatCutoff.edge_pos _ hx) (pow_pos hx _)).ne' _
-  · intro p hp x hx hxd
-    rw [F.identity p hp x hx (hxd.trans_lt hdw),Prod.smul_fst,smul_eq_mul]
-    exact mul_pos (div_pos (FlatCutoff.edge_pos _ hx) (pow_pos hx _)) (hpos p hp x ⟨hx.le,hxd⟩)
 
 noncomputable def directionProjection (s t : ℝ) : ℝ := 1+s*t
 noncomputable def directionGap (v s t : ℝ) : ℝ := 2*(directionProjection s t)^2 - (v-2)*(t-s)^2
@@ -1106,44 +1048,6 @@ theorem natural_activation_strict_direction {h j σ Λ C : ℝ} {P0 : ℝ → �
     actualP2 T κ N.endpoint L U (0,η) / actualP1 T κ L (0,η)
   rw [hAz,hBz]
 
-theorem natural_activation_true_direction {h j σ Λ C : ℝ} {P0 : ℝ → ℝ}
-    {d : NaturalAxisCoefficients.AnalyticInputs h j σ P0}
-    (hΛ : 0 < Λ) (F : NaturalEntrance.EntranceProfile d Λ C)
-    (hP0 : ContDiff ℝ ∞ P0) (hsmall : NaturalAxisData.SmallParameters h j)
-    {δ : ℝ} (hδ : 0 < δ) (hδlim : 2*δ < ReferencePath.rampLimit)
-    {T κ : ℝ} (hT : 0 < T) (hκ : κ < 1) :
-    let N := ReferencePath.Input.ofNatural hΛ F.profile.family
-    let L := FromReference.refLog N δ
-    let U := FromReference.refAxial N δ
-    let I := ActivationStocks.FromReference.initial N hδ hδlim P0 hP0
-    let S := fun q : ℝ × ℝ => activatedStress h N.endpoint I L U T κ (q.2,q.1)
-    ∃ G : EdgeFactor (Icc (-1 : ℝ) 1) (T^2) S,
-      HasTrueDirectionCollar (Icc (-1 : ℝ) 1) S G.coefficient
-        (fun q => shearSize T κ N.endpoint L U (q.2,q.1))
-        (fun q => shearSlope T κ N.endpoint L U (q.2,q.1)) G.width := by
-  let N := ReferencePath.Input.ofNatural hΛ F.profile.family
-  let L := FromReference.refLog N δ
-  let U := FromReference.refAxial N δ
-  have hL := FromReference.refLog_smooth N hδ hδlim
-  have hU := FromReference.refAxial_smooth N hδ hδlim
-  have hKJ : Icc (-1 : ℝ) 1 ⊆ ReferencePath.parameterInterval :=
-    NaturalAxisCoefficients.original_interval_interior
-  obtain ⟨G,hdir⟩ := natural_activation_strict_direction hΛ F hP0 hsmall hδ hδlim hT hκ
-  obtain ⟨τ,α,M,hτ,_,hα,_,hb⟩ := natural_reference_bounds hΛ F hδ hδlim
-  have hA0 : ∀ η ∈ Icc (-1 : ℝ) 1, 0 < referenceP1 L (0,η) := by
-    intro η hη
-    exact hα.trans_le (hb 0 ⟨le_rfl,hτ.le⟩ η hη).1
-  obtain ⟨O,hO,hKO,hv,hs⟩ := actual_shear_domain hT κ N.endpoint_pos
-    ReferencePath.parameterInterval_open hKJ hL hU hA0
-  refine ⟨G,hdir.true_of_speed isCompact_Icc hO hKO hv.continuousOn ?_⟩
-  intro η hη
-  obtain ⟨hAz,hBz⟩ := actual_shear_coordinates_zero hT κ N.endpoint_pos
-    ReferencePath.parameterInterval_open hL hU (hKJ hη)
-  change 2 < shearSize T κ N.endpoint L U (0,η)
-  unfold shearSize
-  rw [hAz,hBz]
-  have hh := (hb 0 ⟨le_rfl,hτ.le⟩ η hη).2.1
-  linarith
 
 end ActualActivation
 

@@ -214,17 +214,7 @@ theorem commonPressure_subcover_shift (t : TangentData P ProblemStatement.Space)
       commonPressure t f g hab κ frequency (p,Y) :=
   commonPressure_shift t f g hab κ frequency (coverIndex d k) p hf Y
 
-theorem commonVelocity_subcoverPeriodic (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (d : ℕ) (p : P) (hf : SubcoverPeriodicAt d f p) :
-    SubcoverPeriodicAt d (commonVelocity t f g hab κ) p :=
-  fun Y k => commonVelocity_subcover_shift t f g hab κ d k p (fun Z => hf Z k) Y
 
-theorem commonPressure_subcoverPeriodic (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (frequency : ℝ) (d : ℕ) (p : P) (hf : SubcoverPeriodicAt d f p) :
-    SubcoverPeriodicAt d (commonPressure t f g hab κ frequency) p :=
-  fun Y k => commonPressure_subcover_shift t f g hab κ frequency d k p (fun Z => hf Z k) Y
 
 
 

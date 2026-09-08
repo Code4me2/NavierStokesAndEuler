@@ -1185,34 +1185,12 @@ theorem angularMean_fullGoodResidual {U : Set D} {c : CorrectionState.Context D}
     H.avg_nonlinearField n hx i, avg_virtualDivergence, meanExpression_state H n hx i]
   rfl
 
-theorem meanGoodResidual_errors (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (n : ℕ) (x : D) (i : Fin 3)
-    (hb : Continuous (fun θ : ℝ => u.errors.base n (x, θ) i))
-    (hg : Continuous (fun θ : ℝ => u.errors.gaussian n (x, θ) i))
-    (ha : Continuous (fun θ : ℝ => u.errors.aliasError n (x, θ) i)) :
-    u.meanGoodResidual c n x i = u.reducedMeanResidual c n x i -
-      CorrectionState.angularAverage (fun k p => u.errors.gaussian k p i) n x -
-      CorrectionState.angularAverage (fun k p => u.errors.aliasError k p i) n x := by
-  change u.reducedMeanResidual c n x i + avg (fun p => u.errors.base n p i) x -
-    avg (fun p => u.errors.base n p i + u.errors.gaussian n p i + u.errors.aliasError n p i) x =
-      u.reducedMeanResidual c n x i - avg (fun p => u.errors.gaussian n p i) x -
-        avg (fun p => u.errors.aliasError n p i) x
-  rw [avg_add (hb.add hg) ha, avg_add hb hg]
-  ring
 
 
 section CanonicalGraph
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- The actual power-graph profile is smooth on every positive radial strip. -/
-theorem graphOperators_profile_smooth (r : CorrectionState.ReconstructionData)
-    (epsilon fast : ℕ → ℝ) (axial slowTime : S × PressureStream.Plane) (temporal : PressureStream.Plane)
-    {U : Set (PressureStream.Lift S)} (hpos : ∀ x ∈ U, 0 < x.1) :
-    ContDiffOn ℝ ∞
-      (CorrectionState.graphOperators r epsilon fast axial slowTime temporal).radialProfile U := by
-  change ContDiffOn ℝ ∞ (fun x : PressureStream.Lift S => r.exponent * x.1 ^ (r.exponent - 1)) U
-  exact contDiffOn_const.mul (contDiffOn_fst.rpow_const_of_ne (fun x hx => (hpos x hx).ne'))
 
 
 end CanonicalGraph

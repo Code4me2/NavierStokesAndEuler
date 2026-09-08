@@ -37,9 +37,6 @@ noncomputable def startingThreshold (requested : ℕ) : ℕ := max requested geo
 theorem geometricThreshold_le_startingThreshold (requested : ℕ) :
     geometricThreshold ≤ startingThreshold requested := le_max_right _ _
 
-theorem startingThreshold_le_prepared (B requested : ℕ) :
-    startingThreshold requested ≤ (choice B (startingThreshold requested)).prepared.N :=
-  ActualPrimary.threshold B (startingThreshold requested)
 
 section Cells
 

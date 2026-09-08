@@ -121,14 +121,6 @@ theorem activation_lower_of_initial (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0 <
   rw [baseHorizon_eq_timeWidth J hX]
   linarith only [hfirst,hsum]
 
-theorem reciprocal_activation_le_base (J : ℕ) (hJ : 1 ≤ J) (X : ℝ) (hX : 0 < X)
-    (a β : ℕ → ℝ) (ha : 1/2 ≤ a 0) (ha₂ : a 0 ≤ 2)
-    (hβ : 1/2 ≤ β 0*X^2) (hβ₂ : β 0*X^2 ≤ 2) {n : ℕ} (hn : 1 ≤ n) :
-    (activationTime J X a β n)⁻¹ ≤ 12/baseHorizon J X := by
-  have hb := baseHorizon_pos J hJ hX
-  have hs := activation_lower_of_initial J hJ X hX a β ha ha₂ hβ hβ₂ hn
-  have hi := one_div_le_one_div_of_le (div_pos hb (by norm_num)) hs
-  simpa only [one_div,inv_div] using hi
 
 
 end EulerParentHistoryFrequency

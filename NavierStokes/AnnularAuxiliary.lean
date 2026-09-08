@@ -52,12 +52,6 @@ theorem auxiliary_eq {S : Set ℝ}
     auxiliary w a F p = F p := by
   rw [auxiliary, positiveMap_eq ha hX, w.parameterMap_eq heta]
 
-theorem auxiliary_germ {S : Set ℝ}
-    (w : ParametricRadialExtension.ParameterWindow S) {a : ℝ} (ha : 0 < a)
-    (F : ℝ × ℝ → ℝ) {p : ℝ × ℝ} (hX : a < p.1) (heta : |p.2| < w.inner) :
-    auxiliary w a F =ᶠ[𝓝 p] F := by
-  filter_upwards [(isOpen_Ioi.prod isOpen_Ioo).mem_nhds ⟨hX, abs_lt.mp heta⟩] with q hq
-  exact auxiliary_eq w ha F hq.1.le (abs_lt.mpr hq.2).le
 
 
 section Transplant
@@ -78,16 +72,6 @@ theorem transplant_inside {base aux replacement : α → E} {x : α}
   rw [transplant, hx]
   abel
 
-/-- Arbitrary nonlinear density changes transfer pointwise. This includes
-quadratic energy, transport, and pressure densities. -/
-theorem transplant_density_difference (H : α → E → V)
-    {base aux replacement : α → E} {K : Set α}
-    (hbase : EqOn base aux K) (hedit : ∀ x ∉ K, replacement x = aux x) (x : α) :
-    H x (transplant base aux replacement x) - H x (base x) =
-      H x (replacement x) - H x (aux x) := by
-  by_cases hx : x ∈ K
-  · rw [transplant_inside (hbase hx), hbase hx]
-  · rw [transplant_outside (hedit x hx), hedit x hx, sub_self, sub_self]
 
 end Transplant
 

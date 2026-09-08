@@ -97,9 +97,5 @@ theorem fieldProduct_h1 (p q : TimeLp T E) (η : ℝ → E)
     fieldProduct_ae T hT A p η hp,
     fieldProduct_hasDerivAt_ae T hT A A' hA p q η hp hηder⟩
 
-/-- The constructed derivative has the expected operator-norm bound. -/
-theorem fieldProductDerivative_norm_le (p q : TimeLp T E) :
-    ‖fieldProductDerivative T hT A A' p q‖ ≤ ‖A'‖*‖p‖+‖A‖*‖q‖ :=
-  (norm_add_le _ _).trans (add_le_add (timeApply_bound T hT A' p) (timeApply_bound T hT A q))
 
 end EulerTimeH1FieldProduct

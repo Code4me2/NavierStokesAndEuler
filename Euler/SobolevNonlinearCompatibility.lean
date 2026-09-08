@@ -71,11 +71,6 @@ theorem restrict_projectedSource {p q : ℕ} (hqp : q ≤ p) {A : SmoothCoeffici
   apply value_injective period
   rw [value_restrictOperator, projectedSourceOperator_value, projectedSourceOperator_value, value_restrictOperator]
 
-/-- The actual order-zero algebraic term as a bilinear map on one complete Sobolev level. -/
-def algebraicAtBilinear {s : ℕ} (hs : 6 ≤ s)
-    (C : Fin 3 → SobolevSpace period s →L[ℝ] SobolevSpace period s) :
-    SobolevSpace period s →L[ℝ] SobolevSpace period s →L[ℝ] SobolevSpace period s :=
-  ∑ i : Fin 3, postcompose (C i) (productHqBilinear period hs (coordinate 3 i) (coordinate_norm_le 3 i))
 
 
 end EulerSobolevNonlinearCompatibility

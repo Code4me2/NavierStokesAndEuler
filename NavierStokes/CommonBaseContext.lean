@@ -77,17 +77,6 @@ theorem fastCoefficient_add (h : ℝ) (i k : ℕ → ℕ) (n : ℕ) :
   ring
 
 
-theorem fastCoefficient_bounds {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
-    (H : IndexBounds h index K) (n : ℕ) :
-    ChartScales.timeCoefficient h n / ChartScales.Tg ^ K ≤ fastCoefficient h index n ∧
-      fastCoefficient h index n ≤ ChartScales.timeCoefficient h n := by
-  refine ⟨?_, fastCoefficient_mono h (H.le_native n)⟩
-  apply (div_le_iff₀ (pow_pos ChartScales.Tg_pos K)).mpr
-  have hm := fastCoefficient_mono h (i := ChartScales.nativeIndex h)
-    (j := fun m => index m + K) (n := n) (H.native_le_add n)
-  rw [fastCoefficient_add] at hm
-  simp only [mul_comm]
-  exact hm
 
 
 noncomputable def reconstruction (h : ℝ) (index : ℕ → ℕ) (a b : ℝ) (hab : a < b) :
@@ -104,8 +93,6 @@ noncomputable def operators (h : ℝ) (index : ℕ → ℕ) (a b : ℝ) (hab : a
   CorrectionState.graphOperators (reconstruction h index a b hab) (ChartScales.epsilon h)
     (fastCoefficient h index) ((0,1),0) ((1,0),0) (TorusInverse.vector .temporal)
 
-theorem operators_native (h a b : ℝ) (hab : a < b) :
-    operators h (ChartScales.nativeIndex h) a b hab = BaseContextAssembly.operators h a b hab := rfl
 
 theorem operators_match_physical (h : ℝ) (index : ℕ → ℕ) (a b : ℝ) (hab : a < b) (n : ℕ) :
     PhysicalResidualTZ.MatchesAtTZ (operators h index a b hab)
@@ -211,28 +198,7 @@ theorem pull_fderiv {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     fderiv ℝ (pull gap f n) x v = fderiv ℝ (f n) (coverLift (gap n) x) (coverLift (gap n) v) :=
   PhysicalResidualTZ.fderiv_reindex (coverLift (gap n)) (f n) x v
 
-theorem pull_dr (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
-    (operators h index a b hab).dr (pull gap f) =
-      pull gap ((operators h (fun n => index n + gap n) a b hab).dr f) := by
-  funext n x
-  change fderiv ℝ (pull gap f n) x (1,(0,0)) +
-      radialFrequency h index n * (RadialPullback.radialJacobian (ChartScales.radialExponent h) x.1 *
-        fderiv ℝ (pull gap f n) x (0,(0,TorusInverse.vector .radial))) =
-    fderiv ℝ (f n) (coverLift (gap n) x) (1,(0,0)) +
-      radialFrequency h (fun n => index n + gap n) n *
-        (RadialPullback.radialJacobian (ChartScales.radialExponent h) x.1 *
-          fderiv ℝ (f n) (coverLift (gap n) x) (0,(0,TorusInverse.vector .radial)))
-  rw [pull_fderiv, pull_fderiv, coverLift_eR, coverLift_vR, map_smul, radialFrequency_add]
-  simp only [smul_eq_mul]
-  ring
 
-theorem pull_dz (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
-    (operators h index a b hab).dz (pull gap f) =
-      pull gap ((operators h (fun n => index n + gap n) a b hab).dz f) := by
-  funext n x
-  change ChartScales.epsilon h n * fderiv ℝ (pull gap f n) x (0,((0,1),0)) =
-    ChartScales.epsilon h n * fderiv ℝ (f n) (coverLift (gap n) x) (0,((0,1),0))
-  rw [pull_fderiv, coverLift_eZ]
 
 theorem pull_slowTime (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
     (operators h index a b hab).slowTime (pull gap f) =
@@ -253,11 +219,6 @@ theorem pull_fastTime (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f :
   simp only [smul_eq_mul]
   ring
 
-theorem pull_time (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (f : ℕ → Point → ℝ) :
-    (operators h index a b hab).time (pull gap f) =
-      pull gap ((operators h (fun n => index n + gap n) a b hab).time f) := by
-  rw [MeanIncrementBounds.Operators.time, pull_slowTime, pull_fastTime]
-  rfl
 
 
 theorem coverLift_radialField (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ) (n : ℕ) (x : Point) :
@@ -300,14 +261,6 @@ theorem coverLift_timeField (h a b : ℝ) (hab : a < b) (index gap : ℕ → ℕ
   rw [map_sub, map_smul, map_smul, coverLift_vT, coverLift_eT, smul_smul, fastCoefficient_add]
   rw [mul_comm (fastCoefficient h index n)]
 
-theorem pull_eq_coverPull (k : ℕ) (f : Point → ℝ) :
-    (fun x => f (coverLift k x)) =
-      MeanChartCompatibility.coverPull 1 (ContinuousLinearMap.id ℝ Plane) k 1 f := by
-  funext x
-  change f (x.1,(x.2.1,CommonCoverSolve.coverPower k x.2.2)) =
-    1 * f (1 * x.1,(x.2.1,TemporalMeanUpdate.coverMap k x.2.2))
-  rw [MeanChartCompatibility.coverMap_eq_coverPower]
-  simp
 
 
 
@@ -469,35 +422,6 @@ theorem context_stress_properties (U : LocalSignedRequest.SlowRegion (2 * F.data
 
 
 
-/-- Context coherence is proved on every free auxiliary lift point. -/
-theorem contextOn_add (index gap : ℕ → ℕ) (U : Set Point) (n : ℕ) :
-    PhysicalResidualNaturality.ContextOn U (coverLift (gap n)) 1 1
-      (context H v upper B index) (context H v upper B (fun m => index m + gap m)) n n := by
-  constructor
-  · constructor
-    · intro x hx
-      simp only [one_smul]
-      exact coverLift_radialField F.data.h _ _
-        (PrimaryTargetBounds.radii_ordered W) index gap n x
-    · intro x hx
-      simp only [one_smul]
-      exact coverLift_axialField F.data.h _ _
-        (PrimaryTargetBounds.radii_ordered W) index gap n
-    · intro x hx
-      simp only [one_mul, one_smul]
-      exact coverLift_timeField F.data.h _ _
-        (PrimaryTargetBounds.radii_ordered W) index gap n
-    · intro x hx
-      exact (one_mul x.1).symm
-    · simp only [mul_one, one_mul]
-      rfl
-  · constructor <;> intro x hx <;> simp only [one_mul] <;> rfl
-  · intro x hx
-    simp only [one_mul]
-    rfl
-  · intro x hx
-    simp only [one_mul]
-    rfl
 
 
 theorem context_stress_classes (hcone : LeadingStressWeights.FullTrueCone v)

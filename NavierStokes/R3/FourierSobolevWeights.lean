@@ -129,11 +129,6 @@ theorem norm_B_eq_sqrt (ψ : ComplexTest) :
   rw [ENNReal.toReal_ofReal (Real.rpow_nonneg hi _), Real.sqrt_eq_rpow]
   simp only [fourierHNormSq, one_div]
 
-theorem norm_B_sq (ψ : ComplexTest) :
-    ‖B ψ‖ ^ 2 = fourierHNormSq 4 ψ := by
-  rw [norm_B_eq_sqrt]
-  apply Real.sq_sqrt
-  exact integral_nonneg fun ξ => by positivity
 
 
 theorem sqrt_fourierHNormSq_three_le_norm_B (ψ : ComplexTest) :

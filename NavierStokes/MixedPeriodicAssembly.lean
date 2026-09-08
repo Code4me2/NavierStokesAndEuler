@@ -374,12 +374,6 @@ def angularDiagonal (h : ℝ) (a : ℕ → ℝ)
     VelocityField :=
   DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar)
 
-/-- The direct angular sum is zero on the axis, without changing the
-potential's axial value or requiring a radial integral cancellation. -/
-theorem angularDiagonal_origin (h : ℝ) (a : ℕ → ℝ)
-    (D : ℕ → DirectAngularDiagonal.AngularData DirectAngularDiagonal.preterminalSlow)
-    (t : ℝ) : angularDiagonal h a D (t, 0) = 0 :=
-  DirectAngularDiagonal.angularSum_axis a _ _ t 0 rfl rfl
 
 
 end NavierStokes.MixedPeriodicAssembly

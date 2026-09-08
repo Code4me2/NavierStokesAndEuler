@@ -456,49 +456,7 @@ theorem complexProfile_hasDerivAt_Y (I : Window) {ε R s : ℝ} (hε : 0 < ε)
       (fun n => normalizedJet_bound I hε hR hs hs1 A k n hY.le z.re))
     (abs_lt.mp hY)
 
-/-- Every member of the holomorphic family is the actual corresponding radial derivative. -/
-theorem complexProfile_iteratedDeriv_Y (I : Window) {ε R s : ℝ} (hε : 0 < ε)
-    (hR : 1 ≤ R) (hs : R / 20 < s) (hs1 : s < 1) (A : AxisSpace I ε)
-    (k r : ℕ) {Y : ℝ} (hY : |Y| < R) {z : ℂ}
-    (hz : z ∈ parameterStrip I (ε * (1 - s))) :
-    iteratedDeriv r (fun y => complexProfile I ε A k y z) Y =
-      complexProfile I ε A (k + r) Y z := by
-  induction r generalizing Y with
-  | zero => simp
-  | succ r ih =>
-      rw [iteratedDeriv_succ]
-      have heq : (iteratedDeriv r (fun y => complexProfile I ε A k y z)) =ᶠ[𝓝 Y]
-          (fun y => complexProfile I ε A (k + r) y z) := by
-        filter_upwards [Ioo_mem_nhds (abs_lt.mp hY).1 (abs_lt.mp hY).2] with y hy
-        exact ih (abs_lt.mpr hy)
-      rw [heq.deriv_eq, (complexProfile_hasDerivAt_Y I hε hR hs hs1 A (k + r) hY hz).deriv]
-      simp only [Nat.add_assoc]
 
-/-- On the real axis, every genuine complex derivative is the corresponding
-already constructed compatible parameter jet. -/
-theorem complexProfile_iteratedDeriv_ofReal (I : Window) {ε R s : ℝ} (hε : 0 < ε)
-    (hR : 1 ≤ R) (hs : R / 20 < s) (hs1 : s < 1) (A : AxisSpace I ε)
-    (k m : ℕ) {Y x : ℝ} (hY : |Y| ≤ R) (hx : x ∈ Ioo I.left I.right) :
-    iteratedDeriv m (complexProfile I ε A k Y) (x : ℂ) =
-      (mixedSeries I ε A k m (Y, x) : ℂ) := by
-  have hY20 : |Y| < 20 := hY.trans_lt (by linarith)
-  have ha : 0 < ε * (1 - s) := mul_pos hε (by linarith)
-  induction m generalizing x with
-  | zero => simpa only [iteratedDeriv_zero] using complexProfile_ofReal I ε A k Y x
-  | succ m ih =>
-      rw [iteratedDeriv_succ]
-      have hx' : (x : ℂ) ∈ parameterStrip I (ε * (1 - s)) := by
-        exact ⟨hx, by simpa only [Complex.ofReal_im, abs_zero] using half_pos ha⟩
-      have han : AnalyticAt ℂ (iteratedDeriv m (complexProfile I ε A k Y)) (x : ℂ) := by
-        simpa only [iteratedDeriv_eq_iterate] using
-          ((complexProfile_analytic I hε hR hs hs1 A k hY) (x : ℂ) hx').iterated_deriv m
-      have heq : (fun t : ℝ => iteratedDeriv m (complexProfile I ε A k Y) (t : ℂ)) =ᶠ[𝓝 x]
-          (fun t : ℝ => (mixedSeries I ε A k m (Y, t) : ℂ)) := by
-        filter_upwards [Ioo_mem_nhds hx.1 hx.2] with t ht
-        exact ih ht
-      have hreal := (mixedSeries_hasDerivAt_eta I hε A k m (abs_lt.mp hY20) hx).ofReal_comp
-      exact han.differentiableAt.hasDerivAt.comp_ofReal.unique
-        (hreal.congr_of_eventuallyEq heq)
 
 /-- The open complex tube around a closed real window. -/
 noncomputable def parameterTube (J : Window) (δ : ℝ) : Set ℂ :=

@@ -111,18 +111,6 @@ def liftEvolution : Evolution T hT (operatorPath μ S hS T B) where
     rw [operator_mul] at hd
     exact hd
 
-/-- The pointwise localized (H3) estimate is the actual L² propagator norm,
-with the identical relative profile factor. -/
-theorem liftEvolution_propagator_norm (g : Icc (0 : ℝ) T → ℝ) (hg : ∀ t, 0 < g t)
-    (C : ℝ) (hC : 0 ≤ C)
-    (hprop : ∀ t s : Icc (0 : ℝ) T, s ≤ t → ∀ x ∈ S,
-      ‖(Φ t x).comp (Ψ s x)‖ ≤ C*g t/g s)
-    (t s : Icc (0 : ℝ) T) (hst : s ≤ t) :
-    ‖(liftEvolution μ S hS T hT B Φ Ψ hRight hLeft hΦ).propagator t s‖ ≤ C*g t/g s := by
-  change ‖(operator μ S hS (Φ t)).comp (operator μ S hS (Ψ s))‖ ≤ _
-  rw [← operator_mul]
-  exact operator_norm_le μ S hS (Φ t*Ψ s) (C*g t/g s)
-    (div_nonneg (mul_nonneg hC (hg t).le) (hg s).le) (hprop t s hst)
 
 
 

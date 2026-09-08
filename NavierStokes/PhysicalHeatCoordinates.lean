@@ -51,22 +51,6 @@ noncomputable def editedAngular (d : OutgoingTail.TailData) (K : ℝ)
 noncomputable def shape (d : OutgoingTail.TailData) (K y : ℝ) : ℝ :=
   OutgoingTail.tailShape d (y - Real.log K + 1 / 5)
 
-theorem editedAngular_eq_heat (d : OutgoingTail.TailData) {K : ℝ}
-    (hK : 0 < K) (hh1 : d.h < 1 / 2) {p : PhysicalPoint}
-    (ht : p.1 < 1) (hs : 0 < p.2.1)
-    (hfull : 1 / 2 ≤ Real.log (X d.h p / K) + 1 / 5) :
-    editedAngular d K p =
-      TerminalStress.physicalHeat (normalization d K) (1 + d.h) p *
-        TerminalStress.flattening d.h (shape d K) p := by
-  have hq := q_pos d.h_pos hh1 ht
-  have hX : 0 < X d.h p := div_pos hs hq
-  have he := ParametricHeatTail.physicalEdit_heat_carrier d hK hq hs
-    (diffusion_eq_ratio d.h_pos hh1 ht) hfull
-  change editedAngular d K p =
-    TerminalStress.physicalHeat (normalization d K) (1 + d.h) p *
-      OutgoingTail.tailShape d (Real.log (X d.h p / K) + 1 / 5) at he
-  rw [Real.log_div hX.ne' hK.ne'] at he
-  exact he
 
 theorem editedAngular_eq_pure_heat (d : OutgoingTail.TailData) {K : ℝ}
     (hK : 0 < K) (hh1 : d.h < 1 / 2) {p : PhysicalPoint}

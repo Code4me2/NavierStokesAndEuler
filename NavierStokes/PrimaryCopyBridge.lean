@@ -236,11 +236,6 @@ theorem reconstructedPath_tangent (hab : a ≤ b) {Ω : Set (P × Plane)}
   exact PrimaryODE.ambientSolution_tangent hab (copyFrame d g k) j (fun _ => 0)
     (copySource t.source g k) q v
 
-theorem reconstructedCopy_eq_copySolve (hab : a ≤ b) {Ω : Set (P × Plane)}
-    (h : Inputs d t j g k Ω a b) {q : P × Plane} (hq : q ∈ Ω)
-    (hv : (g.coordinates k q.2).2 ∈ Icc a b) :
-    reconstructedCopy d t j g k hab q = t.linearData.copySolve g hab k q :=
-  reconstructedPath_eq_anchoredSolve d t j g k hab h hq hv
 
 /-! The smooth endpoint-rescaled modal representative used by the jet
 estimates identifies with the very same copy solve. -/
@@ -401,9 +396,6 @@ variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 theorem copyParameter_contDiff : ContDiff ℝ ∞ (copyParameter (P := P) g k) :=
   contDiff_fst.prodMk (((g.coordinates_contDiff k).comp contDiff_snd).fst)
 
-theorem copyArgument_contDiff :
-    ContDiff ℝ ∞ (fun z : (P × Plane) × ℝ => (copyParameter g k z.1, z.2)) :=
-  ((copyParameter_contDiff g k).comp contDiff_fst).prodMk contDiff_snd
 
 
 theorem copySource_contDiffOn {f : P × Plane → Space} {S : Set (P × Plane)}
@@ -452,9 +444,6 @@ variable {P : Type} [NormedAddCommGroup P]
   (d : PrimaryODE.FrameData (P × ℝ)) (t : CommonCoverSolve.TangentData P Space)
   (j : ℤ) (g : CommonCoverSolve.Geometry) (k : Frequency) {a b : ℝ}
 
-noncomputable def seededReconstructedPath (hab : a ≤ b) (x₀ : P × Plane → State)
-    (q : P × Plane) : ℝ → Space :=
-  PrimaryODE.ambientSolution hab (copyFrame d g k) j x₀ (copySource t.source g k) q
 
 
 

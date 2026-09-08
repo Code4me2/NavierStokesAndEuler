@@ -20,10 +20,6 @@ namespace NavierStokes.AxisProfile
 
 noncomputable section
 
-/-- The coefficient of `Y^n` in `(Y ∂YY + m ∂Y) a`, at the formal
-coefficient level. -/
-def radialOperatorCoeff (m : ℕ) (a : ℕ → ℝ) (n : ℕ) : ℝ :=
-  ((n : ℝ) + 1) * ((n : ℝ) + m) * a (n + 1)
 
 /-- The regular zero-datum formal inverse used in the scaled equations. -/
 def radialInverseCoeff (m : ℕ) (f : ℕ → ℝ) : ℕ → ℝ
@@ -111,11 +107,6 @@ theorem hasDerivAt_leadingAxial (Z L Y : ℝ) :
   simpa only [id_eq, mul_one] using (hasDerivAt_id Y).const_mul (-Z / (2 * L))
 
 
-/-- The derivative as a function, permitting a second differentiation. -/
-theorem deriv_leadingAxial (Z L : ℝ) :
-    deriv (leadingAxial Z L) = fun _ : ℝ => -Z / (2 * L) := by
-  funext Y
-  exact (hasDerivAt_leadingAxial Z L Y).deriv
 
 
 end

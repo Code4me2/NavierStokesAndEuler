@@ -31,16 +31,6 @@ theorem bounds_of_accumulated_error {e : ℕ → ℝ} {η v : ℝ}
   have ha := abs_le.mp hv
   constructor <;> linarith only [hs,hη,ha.1,ha.2]
 
-theorem accumulate_step {a e : ℕ → ℝ} (n : ℕ)
-    (ha : 1/2 ≤ a n) (ha2 : a n ≤ 2) (he : 0 ≤ e n)
-    (hprev : |a n-1| ≤ 2*∑ i ∈ range n, e i)
-    (hstep : |a (n+1)/a n-1| ≤ e n) :
-    |a (n+1)-1| ≤ 2*∑ i ∈ range (n+1), e i := by
-  have hi := relative_step_error (by linarith only [ha] : 0 < a n) ha2 he hstep
-  have ht := abs_add_le (a (n+1)-a n) (a n-1)
-  rw [show a (n+1)-a n+(a n-1)=a (n+1)-1 by ring] at ht
-  rw [sum_range_succ]
-  linarith only [hi,hprev,ht]
 
 
 

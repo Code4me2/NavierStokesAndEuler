@@ -415,30 +415,5 @@ theorem exists_oriented_slots (m D : ℕ) (a b : Plane) :
     exact hinj n hn i x (hsub i hx) y (hsub i hy) hxy
 
 
-/-- Application to any label family with a finite proper coloring and a
-bounded difference of interacting levels. Constructing that coloring from
-the physical grid is a separate combinatorial obligation. -/
-theorem colored_labels_have_slots {Label : Type*} (m D : ℕ) (a b : Plane)
-    (Adj : Label → Label → Prop) (color : Label → Fin m) (level : Label → ℕ)
-    (hcolor : ∀ i j, Adj i j → color i ≠ color j)
-    (hlevel : ∀ i j, Adj i j → level i ≤ level j + D ∧ level j ≤ level i + D) :
-    ∃ r : ℝ, 0 < r ∧ ∀ i j, Adj i j →
-      Disjoint
-        (liftedSupport (level i) (orientedRectangle (center m D (color i)) a b (2 * r)))
-        (liftedSupport (level j) (orientedRectangle (center m D (color j)) a b (2 * r))) := by
-  obtain ⟨r, hr, hslots, _⟩ := exists_oriented_slots m D a b
-  refine ⟨r, hr, ?_⟩
-  intro i j hij
-  have hc := hcolor i j hij
-  have hd := hlevel i j hij
-  rcases le_total (level i) (level j) with hle | hle
-  · have hd' : level j - level i ≤ D := by omega
-    have h := hslots (level i) (level j - level i) hd' (color i) (color j) (Or.inr hc)
-    have heq : level i + (level j - level i) = level j := by omega
-    simpa only [heq] using h
-  · have hd' : level i - level j ≤ D := by omega
-    have h := hslots (level j) (level i - level j) hd' (color j) (color i) (Or.inr hc.symm)
-    have heq : level j + (level i - level j) = level i := by omega
-    simpa only [heq] using h.symm
 
 end NavierStokes.SlotGeometry

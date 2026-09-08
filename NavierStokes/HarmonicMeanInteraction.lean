@@ -494,48 +494,7 @@ theorem nonlinear_difference_algebra (g : HarmonicResidual.Frame D)
   unfold HarmonicResidual.nonlinearResidual HarmonicResidual.linearResidual transportDifference
   abel
 
-theorem transportDifference_band (g : HarmonicResidual.Frame D)
-    (k : ℝ) (Φ : D → ℝ) (kp : ℤ) (B₀ B₁ : D → ComplexVector)
-    {a : HarmonicResidual.VectorCoefficients D} {N : ℕ} (ha : ∀ i, BandLimited (a i) N) (i : Fin 3) :
-    BandLimited (transportDifference g k Φ kp B₀ B₁ a i) N := by
-  have hleft (B : D → ComplexVector) :
-      BandLimited (HarmonicResidual.transport g k Φ kp (HarmonicResidual.constantVector B) a i) N := by
-    have h := HarmonicResidual.band_transport g k Φ kp (fun j => band_constantCoefficient (fun x => B x j)) ha i
-    simp only [zero_add] at h
-    exact h
-  have hright (B : D → ComplexVector) :
-      BandLimited (HarmonicResidual.transport g k Φ kp a (HarmonicResidual.constantVector B) i) N := by
-    have h := HarmonicResidual.band_transport g k Φ kp ha (fun j => band_constantCoefficient (fun x => B x j)) i
-    simp only [add_zero] at h
-    exact h
-  exact (HarmonicResidual.band_sub (hleft B₁) (hleft B₀)).add
-    (HarmonicResidual.band_sub (hright B₁) (hright B₀))
 
-theorem residualDifferenceBlock_algebra (c : CorrectionState.Context D)
-    (s₀ s₁ : CorrectionState.State D) (b : CorrectionState.HarmonicBlock D)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D) (n : ℕ) (i : Fin 3) :
-    (residualDifferenceBlock c s₀ s₁ b G A₀ A₁).velocity n i =
-      HarmonicResidual.nonconstant (HarmonicResidual.realCoefficients
-        (transportDifference (HarmonicResidual.contextFrame c n) (b.frequency n) (b.phase n)
-          (b.angularFrequency n)
-          (HarmonicResidual.contextBase c n + HarmonicResidual.stateMean s₀ n)
-          (HarmonicResidual.contextBase c n + HarmonicResidual.stateMean s₁ n)
-          (blockAmplitude b n) i - (A₁ n i - A₀ n i))) := by
-  let N₀ := HarmonicResidual.nonlinearResidual (HarmonicResidual.contextFrame c n)
-    (b.frequency n) (b.phase n) (b.angularFrequency n)
-    (HarmonicResidual.constantVector (HarmonicResidual.contextBase c n + HarmonicResidual.stateMean s₀ n))
-    (blockAmplitude b n) (HarmonicResidual.realCoefficients (b.pressure n)) i
-  let N₁ := HarmonicResidual.nonlinearResidual (HarmonicResidual.contextFrame c n)
-    (b.frequency n) (b.phase n) (b.angularFrequency n)
-    (HarmonicResidual.constantVector (HarmonicResidual.contextBase c n + HarmonicResidual.stateMean s₁ n))
-    (blockAmplitude b n) (HarmonicResidual.realCoefficients (b.pressure n)) i
-  change HarmonicResidual.nonconstant (HarmonicResidual.realCoefficients (N₁ - G n i - A₁ n i)) -
-    HarmonicResidual.nonconstant (HarmonicResidual.realCoefficients (N₀ - G n i - A₀ n i)) = _
-  rw [← nonconstant_sub, ← realCoefficients_sub]
-  congr 2
-  calc
-    (N₁ - G n i - A₁ n i) - (N₀ - G n i - A₀ n i) = (N₁ - N₀) - (A₁ n i - A₀ n i) := by abel
-    _ = _ := by rw [nonlinear_difference_algebra]
 
 
 

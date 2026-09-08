@@ -169,9 +169,6 @@ theorem dilation_family_mapsTo :
   change 0 < z.2.1 / z.1 ∧ z.2.2 ∈ (univ : Set ℝ)
   exact ⟨div_pos hz.2.1 hz.1, mem_univ _⟩
 
-theorem E_family_contDiffOn (F : Profile) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × (ℝ × ℝ) => E F z.1 z.2) familyDomain :=
-  F.E_contDiffOn.comp dilation_family_contDiffOn dilation_family_mapsTo
 
 
 

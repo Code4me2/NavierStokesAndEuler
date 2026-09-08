@@ -196,27 +196,6 @@ theorem contDiffOn_family_of_joint (K : Set Z) [CompactSpace K] (U : Set P) (V :
   exact contDiffOn_family_nat K U V hU hV hK n F
     (hF.of_le (ENat.natCast_le_of_coe_top_le_withTop le_rfl n))
 
-/-- Evaluating an actual compact-family jet gives the genuine parameter jet
-of the original fixed-point slice. -/
-theorem iteratedFDeriv_family_apply (K : Set Z) [CompactSpace K] (U : Set P) (V : Set Z)
-    (hU : IsOpen U) (hV : IsOpen V) (hK : K ⊆ V)
-    (F : P × Z → E) (hF : ContDiffOn ℝ ∞ F (U ×ˢ V))
-    {p : P} (hp : p ∈ U) (k : ℕ) (v : Fin k → P) (z : K) :
-    (iteratedFDeriv ℝ k (family K F) p v) z =
-      iteratedFDeriv ℝ k (fun q => F (q, z)) p v := by
-  let ev : C(K, E) →L[ℝ] E := ContinuousMap.evalCLM ℝ z
-  have hfamily := contDiffOn_family_of_joint K U V hU hV hK F hF
-  have hcomp := ev.iteratedFDerivWithin_comp_left (hfamily p hp) hU.uniqueDiffOn hp
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl k)
-  have hsame : EqOn (ev ∘ family K F) (fun q => F (q, z)) U := by
-    intro q hq
-    exact family_apply K F q
-      (slice_continuous (hF.continuousOn.mono (Set.prod_mono Subset.rfl hK)) hq) z
-  have heq := iteratedFDerivWithin_congr (𝕜 := ℝ) hsame hp k
-  have hv := congrArg (fun L : P [×k]→L[ℝ] E => L v) (hcomp.symm.trans heq)
-  change (iteratedFDerivWithin ℝ k (family K F) U p v) z =
-    iteratedFDerivWithin ℝ k (fun q => F (q, z)) U p v at hv
-  simpa only [iteratedFDerivWithin_of_isOpen k hU hp] using hv
 
 omit [NormedSpace ℝ P] [NormedSpace ℝ Z] [NormedSpace ℝ E] in
 theorem family_apply_of_joint (K : Set Z) {U : Set P} {V : Set Z}

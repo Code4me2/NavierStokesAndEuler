@@ -10,8 +10,6 @@ namespace EulerMeanHarmonic
 open MeasureTheory InnerProductSpace Laplacian EulerSmoothLimit
 open scoped ContDiff
 
-def harmonicSmallBallConstant : ℝ :=
-  (Real.pi * 4 / 3) * harmonicInteriorConstant ^ 2
 
 
 theorem volume_ball_toReal (r : ℝ) (hr : 0 ≤ r) :

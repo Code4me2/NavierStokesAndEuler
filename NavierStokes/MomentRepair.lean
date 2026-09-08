@@ -73,9 +73,6 @@ theorem repair_exact (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V)
   rw [hi]
   simp [moments]
 
-theorem repair_unchanged_when_exact (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V) (u : V) :
-    repair L b u (moments L u) = u := by
-  simp [repair, coefficients, synthesize]
 
 
 
@@ -111,10 +108,6 @@ end Support
 def twoPointMatrix (x₁ x₂ w₁ w₂ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
   !![w₁, w₂; x₁ * w₁, x₂ * w₂]
 
-theorem twoPointMatrix_det (x₁ x₂ w₁ w₂ : ℝ) :
-    (twoPointMatrix x₁ x₂ w₁ w₂).det = w₁ * w₂ * (x₂ - x₁) := by
-  simp [twoPointMatrix, Matrix.det_fin_two]
-  ring
 
 
 section NonlinearRepair

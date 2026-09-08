@@ -25,17 +25,6 @@ theorem heat_timeLp_tendsto (q : ℕ) (T : ℝ) (u : TimeLp T (SobolevSpace peri
     have h := (heatOperator_continuous period x).continuousAt.tendsto.comp regularizerVariance_tendsto
     simpa only [heatOperator_zero, Function.comp_def] using h
 
-/-- Actual heat approximation commutes asymptotically with every continuous bounded time-dependent Sobolev operator. -/
-theorem heat_time_commutator_tendsto (p q : ℕ) (T : ℝ) (hT : 0 ≤ T)
-    (A : C(Icc (0 : ℝ) T, SobolevSpace period q →L[ℝ] SobolevSpace period p))
-    (u : TimeLp T (SobolevSpace period q)) :
-    Filter.Tendsto (fun n =>
-      timeMultiplier T hT A ((heatOperator period q (regularizerVariance n)).compLpL 2 (timeMeasure T) u) -
-        (heatOperator period p (regularizerVariance n)).compLpL 2 (timeMeasure T) (timeMultiplier T hT A u))
-      Filter.atTop (𝓝 0) := by
-  have hA := (timeMultiplier T hT A).continuous.continuousAt.tendsto.comp (heat_timeLp_tendsto period q T u)
-  have hB := heat_timeLp_tendsto period p T (timeMultiplier T hT A u)
-  simpa only [sub_self, Function.comp_def] using hA.sub hB
 
 
 end EulerSobolevTimeRegularization

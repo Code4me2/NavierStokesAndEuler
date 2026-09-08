@@ -1,4 +1,6 @@
-import Euler.PacketInitializedCorrectionChoice
+import Euler.PacketInitializedAllOrderBudget
+import Euler.PacketInitializedRadius
+import Euler.PacketJoinedCoefficientBudgets
 import Euler.PacketInitializedCorrectionBounds
 import Euler.PacketCorrectionRapidDecay
 

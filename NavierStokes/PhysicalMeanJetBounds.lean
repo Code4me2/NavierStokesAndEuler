@@ -876,31 +876,5 @@ noncomputable def CoherentFamily.reconstructPressure
     exact he.trans (VariableGaugeMean.physicalMeanPressure_naturality hh hh1 ha hab hd n
       (ChartScales.nativeIndex h n - D.gap n) M hU (hf n hn) (hp n hn) (hs n hn) z ht hu)
 
-/-- Reconstruct the azimuthal stream potential from a coherent axial
-source.  Its physical degree is exactly `A h - 1/2`. -/
-noncomputable def CoherentFamily.reconstructStream
-    (D : CoherentFamily h (CoordinateAlgebra.A h) N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    {d : ℝ} (hd : 0 < d) (M : ℝ) (hU : IsOpen U)
-    (hf : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) :
-    CoherentFamily h (CoordinateAlgebra.A h - 1 / 2) N Δ U ℝ where
-  native n := VariableGaugeMean.streamPotential d a b
-    (MeanChartCompatibility.radialFrequency h n (ChartScales.nativeIndex h n - D.gap n) d M)
-    (VariableGaugeMean.qLength (2 * h)) (TorusInverse.vector .radial) (D.native n)
-  physical := VariableGaugeMean.streamPotential d a b M
-    (VariableGaugeMean.qLength (2 * h)) (TorusInverse.vector .radial) D.physical
-  gap := D.gap
-  gap_le := D.gap_le
-  gap_native := D.gap_native
-  coherent := by
-    intro n hn z ht hu
-    have he := streamPotential_fiberLocal d a b M (VariableGaugeMean.qLength (2 * h))
-      (TorusInverse.vector .radial) D.physical
-      (VariableGaugeMean.fieldOnPhysicalTZ h n (ChartScales.nativeIndex h n - D.gap n)
-        (CoordinateAlgebra.A h) (D.native n)) z.2.1
-      (fun r Y => D.coherent n hn (r, (z.2.1, Y)) ht hu) z.1 z.2.2
-    exact he.trans (VariableGaugeMean.physicalStreamPotential_naturality hh hh1 ha hab hd n
-      (ChartScales.nativeIndex h n - D.gap n) M hU (hf n hn) (hs n hn) z ht hu)
 
 end NavierStokes.PhysicalMeanJetBounds

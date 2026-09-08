@@ -88,12 +88,6 @@ def Budget.rawSourceTower (B : Budget period hT A) : FieldTower period T :=
 def Budget.timeDerivativeTower (B : Budget period hT A) : FieldTower period T :=
   (B.family period).timeDerivativeTower period (B.comparisonData period)
 
-theorem Budget.rawSource_eq_realization (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :
-    (A.atOrder period q).rawSource period hq t ((B.fieldTower period).realization (q+1) t) =
-      (B.rawSourceTower period).realization q t := by
-  rw [← B.solution_eq_realization period q hq]
-  exact (B.family period).rawSourcePath_eq_realization period (B.comparisonData period) q hq t
 
 theorem Budget.source_eq_timeDerivativeTower (B : Budget period hT A)
     (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :

@@ -498,44 +498,6 @@ theorem solution_forward_bound (hab : a ≤ b) (d : FrameData Q) {j : ℤ} (hj :
     hPpos hP hu hforce (fun v hv => (hode v (Ico_subset_Icc_self hv)).hasDerivWithinAt) he
   simpa only [solution_initial] using hbnd
 
-/-- The same forward propagator constant applies to every nonzero harmonic.
-The start of the finite interval may be any earlier slot time. -/
-theorem homogeneous_forward_bound (hab : a ≤ b) (d : FrameData Q) {j : ℤ} (hj : j ≠ 0)
-    (x₀ : Q → State) {U : Set Q}
-    (hA : ContinuousOn (d.coefficient j) (U ×ˢ Icc a b))
-    {p : Q} (hp : p ∈ U) (referenceDamping rate P : ℝ → ℝ)
-    {S C D L : ℝ} (hS : 0 < S) (hC : 0 ≤ C) (hD : 0 ≤ D)
-    (hslot : b - a ≤ L * S)
-    (hPpos : ∀ v, 0 < P v) (hP : ∀ v, HasDerivAt P (rate v * P v) v)
-    (hreference : ∀ v ∈ Icc a b, rate v = d.eigenvalue (p, v) - referenceDamping v)
-    (hlam : ∀ v ∈ Icc a b, 0 ≤ d.eigenvalue (p, v))
-    (hν : ∀ v ∈ Icc a b, 0 ≤ d.viscosity (p, v))
-    (hνerr : ∀ v ∈ Icc a b, referenceDamping v - D / S ≤ d.viscosity (p, v))
-    (herr : ∀ v ∈ Icc a b,
-      |d.error11 (p, v)| ≤ C / S ∧ |d.error12 (p, v)| ≤ C / S ∧
-      |d.error21 (p, v)| ≤ C / S ∧ |d.error22 (p, v)| ≤ C / S) :
-    ∀ v ∈ Icc a b, ‖solution hab d j x₀ (fun _ => 0) p v‖ ≤
-      Real.exp ((D + 4 * C) * L) * (P v / P a) * ‖x₀ p‖ := by
-  have hf : ContinuousOn (d.forcing (fun _ => 0)) (U ×ˢ Icc a b) := by
-    rw [FrameData.forcing_zero_function]
-    exact continuousOn_const
-  have hbnd := solution_forward_bound hab d hj x₀ (fun _ => 0) hA hf hp referenceDamping rate P
-    hS hC hD hPpos hP hreference hlam hν hνerr herr
-  simp only [FrameData.forcing_zero, norm_zero, zero_div, intervalIntegral.integral_zero, add_zero] at hbnd
-  intro v hv
-  have hexp : Real.exp (((D + 4 * C) / S) * (v - a)) ≤ Real.exp ((D + 4 * C) * L) := by
-    apply Real.exp_le_exp.mpr
-    have hfactor : ((D + 4 * C) / S) * (L * S) = (D + 4 * C) * L := by
-      field_simp
-    rw [← hfactor]
-    exact mul_le_mul_of_nonneg_left ((sub_le_sub_right hv.2 a).trans hslot)
-      (div_nonneg (by positivity) hS.le)
-  calc
-    _ ≤ Real.exp (((D + 4 * C) / S) * (v - a)) * P v * (‖x₀ p‖ / P a) := hbnd v hv
-    _ ≤ Real.exp ((D + 4 * C) * L) * P v * (‖x₀ p‖ / P a) :=
-      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hexp (hPpos v).le)
-        (div_nonneg (norm_nonneg _) (hPpos a).le)
-    _ = _ := by ring
 
 /-- Zero-initial source solves are constructed by the same operator, and retain
 every prescribed small amplitude factor in the source bound. -/
@@ -574,25 +536,6 @@ section PhaseFrame
 
 variable {Q : Type}
 
-/-- Build the actual frame from a supplied phase covector.  All frame rates
-are computed from its supplied derivative; viscosity is the physical scalar
-multiple of the squared phase norm. -/
-noncomputable def FrameData.ofNormal (n nDot : Q × ℝ → Space)
-    (hne : ∀ z, MovingFrameODE.tail (n z) ≠ 0)
-    (F : Q × ℝ → ℝ) (g : Q × ℝ → State)
-    (lam h hRate viscosityScale : Q × ℝ → ℝ) : FrameData Q where
-  beta z := MovingFrameODE.normalScale (n z)
-  betaDot z := PhaseEstimates.scaleDerivative (n z) (nDot z)
-  rho z := MovingFrameODE.radialSlope (n z)
-  rhoDot z := PhaseEstimates.slopeDerivative (n z) (nDot z)
-  rotation z := PhaseEstimates.angularVelocity (n z) (nDot z)
-  F := F
-  shear := g
-  frame z := MovingFrameODE.normalFrame (n z) (hne z)
-  eigenvalue := lam
-  eigenvector := h
-  eigenRate := hRate
-  viscosity z := viscosityScale z * ‖n z‖ ^ 2
 
 
 
@@ -705,33 +648,8 @@ theorem referenceRate_contDiffOn {U : Set Q} (V : Set ℝ)
   exact (hl.div hr (fun z _ => (PulseGrowth.radius_pos _).ne')).sub
     ((hl.mul hs2).div (hu2.mul hur) (fun z _ => (PulseGrowth.dampingDenominator_pos _).ne'))
 
-/-- The manuscript normalization `z₊(0)=P(0), z₋(0)=0` is itself a smooth
-parameter family, obtained from the explicit reference rate. -/
-theorem primarySeed_reference_contDiffOn {ell : ℝ} (hell : 0 ≤ ell)
-    (U : Set Q) (V : Set ℝ) (hU : IsOpen U) (hV : IsOpen V) (hI : Icc 0 ell ⊆ V)
-    (lam u : Q → ℝ) (hlam : ContDiffOn ℝ ∞ lam U) (hu : ContDiffOn ℝ ∞ u U) :
-    ContDiffOn ℝ ∞ (primarySeed 0 (referenceEnvelope lam u ell)) U := by
-  have hm : ell / 2 ∈ Icc 0 ell := by constructor <;> linarith
-  have hE := initialEnvelope_contDiffOn hell U V hU hV hI
-    (fun z : Q × ℝ => GaussianEnvelope.referenceRate (lam z.1) (u z.1) ell z.2)
-    (referenceRate_contDiffOn V lam u ell hlam hu) ⟨ell / 2, hm⟩
-  exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞) MovingFrameODE.pairCLM).comp_contDiffOn
-    (hE.prodMk contDiffOn_const)
 
 
-/-- Parameter smoothness of the constructed extension at every time in the
-closed slot, including its endpoints. -/
-theorem solution_contDiffOn {a b : ℝ} (hab : a ≤ b) (d : FrameData Q)
-    (U : Set Q) (V : Set ℝ) (hU : IsOpen U) (hV : IsOpen V) (hI : Icc a b ⊆ V)
-    (hd : d.SmoothOn (U ×ˢ V)) (j : ℤ) (x₀ : Q → State) (f : Q × ℝ → Space)
-    (hx₀ : ContDiffOn ℝ ∞ x₀ U) (hf : ContDiffOn ℝ ∞ f (U ×ˢ V)) (v : Icc a b) :
-    ContDiffOn ℝ ∞ (fun q => solution hab d j x₀ f q v) U := by
-  have hpath := solutionPath_contDiffOn hab d U V hU hV hI hd j x₀ f hx₀ hf
-  have heval := (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := ∞)
-    (ContinuousMap.evalCLM ℝ v)).comp_contDiffOn hpath
-  apply heval.congr
-  intro q _
-  exact extendedFamily_eq_path _ _ _ _ _ _
 
 
 end SmoothPrimary
@@ -740,16 +658,6 @@ section Joint
 
 variable {Q : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-/-- Genuine joint parameter/time smoothness of the constructed solution on
-the closed slot.  The joint theorem constructs a smooth representative by
-time rescaling, rather than claiming the clamped extension smooth outside. -/
-theorem solution_joint_contDiffOn {a b : ℝ} (hab : a ≤ b) (d : FrameData Q)
-    (U : Set Q) (V : Set ℝ) (hU : IsOpen U) (hV : IsOpen V) (hI : Icc a b ⊆ V)
-    (hd : d.SmoothOn (U ×ˢ V)) (j : ℤ) (x₀ : Q → State) (f : Q × ℝ → Space)
-    (hx₀ : ContDiffOn ℝ ∞ x₀ U) (hf : ContDiffOn ℝ ∞ f (U ×ˢ V)) :
-    ContDiffOn ℝ ∞ (fun z : Q × ℝ => solution hab d j x₀ f z.1 z.2) (U ×ˢ Icc a b) :=
-  JointODE.contDiffOn_solutionExtension_joint hab U V hU hV hI
-    (d.coefficient j) x₀ (d.forcing f) (hd.coefficient j) hx₀ (hd.forcing hf)
 
 
 end Joint
@@ -762,66 +670,7 @@ private theorem norm_pack_le (x : ℝ) (v : State) : ‖MovingFrameODE.pack x v�
   nlinarith [norm_nonneg (MovingFrameODE.pack x v), norm_nonneg v, abs_nonneg x,
     sq_abs x, mul_nonneg (abs_nonneg x) (norm_nonneg v)]
 
-theorem FrameData.ambient_norm_le {Q : Type} (d : FrameData Q) (z : Q × ℝ) (w : State)
-    {R H : ℝ} (hrho : |d.rho z| ≤ R) (hh : |d.eigenvector z| ≤ H) :
-    ‖d.ambient z w‖ ≤ 2 * (1 + R + H) * ‖w‖ := by
-  have hR : 0 ≤ R := (abs_nonneg _).trans hrho
-  have hH : 0 ≤ H := (abs_nonneg _).trans hh
-  have hw (i : Fin 2) : |w i| ≤ ‖w‖ := by
-    simpa only [Real.norm_eq_abs] using PiLp.norm_apply_le w i
-  have hx : |w 0 + w 1| ≤ 2 * ‖w‖ := (abs_add_le _ _).trans (by linarith [hw 0, hw 1])
-  have hdiff : |w 0 - w 1| ≤ 2 * ‖w‖ := (abs_sub _ _).trans (by linarith [hw 0, hw 1])
-  have htail : ‖(-d.rho z * (w 0 + w 1)) • d.frame z 0 +
-      (d.eigenvector z * (w 0 - w 1)) • d.frame z 1‖ ≤
-      |d.rho z| * |w 0 + w 1| + |d.eigenvector z| * |w 0 - w 1| := by
-    apply (norm_add_le _ _).trans_eq
-    simp only [norm_smul, Real.norm_eq_abs, abs_mul, abs_neg, (d.frame z).norm_eq_one, mul_one]
-  change ‖MovingFrameODE.pack (w 0 + w 1)
-    ((-d.rho z * (w 0 + w 1)) • d.frame z 0 +
-      (d.eigenvector z * (w 0 - w 1)) • d.frame z 1)‖ ≤ _
-  apply (norm_pack_le _ _).trans
-  have hrx := mul_le_mul hrho hx (abs_nonneg _) hR
-  have hhy := mul_le_mul hh hdiff (abs_nonneg _) hH
-  nlinarith
 
-/-- The inverse coordinate transformation is uniformly bounded too, so the
-modal forward estimate is a genuine ambient tangent propagator estimate. -/
-theorem FrameData.norm_le_ambient {Q : Type} (d : FrameData Q) (z : Q × ℝ) (w : State)
-    {H : ℝ} (hne : d.eigenvector z ≠ 0) (hh : |1 / d.eigenvector z| ≤ H) :
-    ‖w‖ ≤ (1 + H) * ‖d.ambient z w‖ := by
-  have hH : 0 ≤ H := (abs_nonneg _).trans hh
-  have hx : |w 0 + w 1| ≤ ‖d.ambient z w‖ := by
-    simpa only [FrameData.ambient, MovingFrameODE.tangent, MovingFrameODE.pack_zero, Real.norm_eq_abs]
-      using PiLp.norm_apply_le (d.ambient z w) 0
-  have hy : |d.eigenvector z * (w 0 - w 1)| ≤ ‖d.ambient z w‖ := by
-    have he : ⟪d.frame z 1, MovingFrameODE.tail (d.ambient z w)⟫_ℝ =
-        d.eigenvector z * (w 0 - w 1) := by
-      simp only [FrameData.ambient, MovingFrameODE.tangent, MovingFrameODE.tail_pack,
-        inner_add_right, inner_smul_right, MovingFrameODE.frame_inner10,
-        MovingFrameODE.frame_inner11, mul_zero, mul_one, zero_add]
-    rw [← he]
-    apply (abs_real_inner_le_norm _ _).trans
-    rw [(d.frame z).norm_eq_one 1, one_mul]
-    exact PhaseEstimates.tail_norm_le _
-  have hdiff : |w 0 - w 1| ≤ H * ‖d.ambient z w‖ := by
-    calc
-      |w 0 - w 1| = |1 / d.eigenvector z| * |d.eigenvector z * (w 0 - w 1)| := by
-        rw [← abs_mul]
-        congr 1
-        field_simp
-      _ ≤ _ := mul_le_mul hh hy (abs_nonneg _) hH
-  have hp : 2 * |w 0| ≤ |w 0 + w 1| + |w 0 - w 1| := by
-    have hi := abs_add_le (w 0 + w 1) (w 0 - w 1)
-    have he : w 0 + w 1 + (w 0 - w 1) = 2 * w 0 := by ring
-    rw [he, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 2)] at hi
-    exact hi
-  have hq : 2 * |w 1| ≤ |w 0 + w 1| + |w 0 - w 1| := by
-    have hi := abs_sub (w 0 + w 1) (w 0 - w 1)
-    have he : w 0 + w 1 - (w 0 - w 1) = 2 * w 1 := by ring
-    rw [he, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 2)] at hi
-    exact hi
-  have hn := MovingFrameODE.plane_norm_le_coordinate_sum w
-  nlinarith
 
 section AmbientForward
 

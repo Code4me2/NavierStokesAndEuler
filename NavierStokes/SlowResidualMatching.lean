@@ -149,28 +149,6 @@ theorem previousOmega_ofBeta (h : ℝ) (phi axial beta pressure : ℕ → InnerP
     exact AxisSourceRegularity.omega_quotient_eq h axial beta n w
       (fun j hj => hb j (Nat.lt_succ_of_le hj)) hL hX
 
-theorem positiveOrder_pressure_coefficient (h C : ℝ)
-    (phi axial beta pressure : ℕ → InnerProfile) (k : InnerProfile) (n : ℕ)
-    {w : InnerPoint} (hX : w.1 ≠ 0) (hL : CoordinateAlgebra.L h w.2 ≠ 0)
-    (hb : ∀ j < n, ContDiffAt ℝ 2 (beta j) w)
-    (he : PositiveAxisSystem.PositiveOrderEquations h C w.2 w.1 n
-      (fun j => PositiveAxisSystem.actualJet (phi j) w)
-      (fun j => PositiveAxisSystem.actualJet (axial j) w) (fun j => beta j w)
-      (PositiveAxisSystem.actualJet k w) (PositiveAxisSystem.actualJet (pressure n) w)
-      (PositiveAxisSystem.precedingDiffusion h (PositiveAxisSystem.angularPower h) phi n w)
-      (PositiveAxisSystem.precedingDiffusion h (PositiveAxisSystem.axialPower h) axial n w)
-      (AxisSourceRegularity.previousOmegaDivX h axial beta n w)) :
-    pressureCoefficient h C (ofBeta phi axial beta pressure) n w = 0 := by
-  apply (pressureCoefficient_eq_zero_iff h C _ n w).2
-  have hp := previousOmega_ofBeta h phi axial beta pressure n w hX hL hb
-  have hd : previous (fun j => omegaCoefficient h (ofBeta phi axial beta pressure) j w) n /
-      (2 * w.1) = AxisSourceRegularity.previousOmegaDivX h axial beta n w / 2 := by
-    rw [← hp]
-    ring
-  rw [hd]
-  dsimp only [ofBeta]
-  rw [convolution_eq_positiveAxis]
-  simpa only [PositiveAxisSystem.actualJet, PositiveAxisSystem.inverseSquare, inv_pow] using he.2.1
 
 theorem partialX_congr_germ {f g : InnerProfile} {w : InnerPoint}
     (hfg : f =ᶠ[𝓝 w] g) : partialX f =ᶠ[𝓝 w] partialX g := by
@@ -296,31 +274,8 @@ noncomputable def transportTailSize (N : ℕ) (h e α : ℝ)
   pairTailSize N (transportKernel h e α v u f w) +
     |Z2 h (e + slowOrder h N) (f N) w|
 
-theorem transportTailSize_nonneg (N : ℕ) (h e α : ℝ)
-    (v u f : ℕ → InnerProfile) (w : InnerPoint) :
-    0 ≤ transportTailSize N h e α v u f w :=
-  add_nonneg (pairTailSize_nonneg _ _) (abs_nonneg _)
 
-/-- Both the omitted quadratic interactions and the last axial viscosity
-are bounded, with their true next-order power. -/
-theorem transportTail_bound {q h : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) (hh : 0 ≤ h)
-    (N : ℕ) (e α : ℝ) (v u f : ℕ → InnerProfile) (w : InnerPoint) :
-    |transportTail N q h e α v u f w| ≤
-      transportTailSize N h e α v u f w * q ^ (e - 1 + slowOrder h (N + 1)) := by
-  change |pairTail N (fun n => q ^ (e - 1 + slowOrder h n))
-      (transportKernel h e α v u f w) -
-      q ^ (e - 1 + slowOrder h (N + 1)) * Z2 h (e + slowOrder h N) (f N) w| ≤ _
-  refine (abs_sub _ _).trans ?_
-  rw [abs_mul, abs_of_pos (Real.rpow_pos_of_pos hq _)]
-  have hb := pairTail_bound hq hq1 hh N (e - 1) (transportKernel h e α v u f w)
-  dsimp only [transportTailSize]
-  nlinarith
 
-noncomputable def pressureTailSize (N : ℕ) (h C : ℝ) (f : SlowProfiles)
-    (w : InnerPoint) : ℝ :=
-  transportTailSize N h 0 (-1 / 2) f.flux f.axial f.flux w +
-    |omegaCoefficient h f N w| +
-    |2 * w.1 * C⁻¹ ^ 2| * pairTailSize N (fun i j => f.phi i w * f.phi j w)
 
 
 
@@ -1036,58 +991,6 @@ theorem common_tail_power_lower {h : ℝ} (hh : 0 ≤ h) (N : ℕ) :
   · ring
   constructor <;> linarith
 
-/-- Compact coefficient jets give a uniform bound for every fixed inner
-derivative of a finite sum of actual powers. The exponent is unchanged by
-inner differentiation. -/
-theorem finite_monomial_inner_jet_bound {ι : Type*} (s : Finset ι)
-    (b : ι → ℝ) (F : ι → InnerProfile) (bmin : ℝ)
-    {O K : Set InnerPoint} (hO : IsOpen O) (hK : IsCompact K) (hKO : K ⊆ O)
-    (hF : ∀ i ∈ s, ContDiffOn ℝ ∞ (F i) O) (hb : ∀ i ∈ s, bmin ≤ b i) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ K,
-      ‖iteratedFDeriv ℝ m (fun y => ∑ i ∈ s, q ^ b i * F i y) w‖ ≤ C * q ^ bmin := by
-  classical
-  have hex : ∀ i : ι, ∃ D : ℝ, 1 ≤ D ∧
-      ∀ w ∈ K, i ∈ s → ‖iteratedFDeriv ℝ m (F i) w‖ ≤ D := by
-    intro i
-    by_cases hi : i ∈ s
-    · obtain ⟨D, hD, hDb⟩ := SlowBorelBase.compact_jet_bound hO (hF i hi) hK hKO m
-      exact ⟨D, hD, fun w hw _ => hDb w hw⟩
-    · exact ⟨1, le_rfl, fun _ _ hi' => (hi hi').elim⟩
-  choose D hD hDb using hex
-  have hDn : ∀ i, 0 ≤ D i := fun i => zero_le_one.trans (hD i)
-  let C := 1 + ∑ i ∈ s, D i
-  have hC : 0 < C := by
-    have := Finset.sum_nonneg (fun i (_ : i ∈ s) => hDn i)
-    dsimp [C]
-    linarith
-  refine ⟨C, hC, fun q hq hq1 w hw => ?_⟩
-  have hwO := hKO hw
-  have hmn : (m : WithTop ℕ∞) ≤ ∞ := ENat.natCast_le_of_coe_top_le_withTop le_rfl m
-  have hsum := iteratedFDerivWithin_fun_sum_apply (𝕜 := ℝ) (i := m) hO.uniqueDiffOn hwO
-    (fun i hi => ((hF i hi w hwO).const_smul (q ^ b i)).of_le hmn)
-  have hs : iteratedFDeriv ℝ m (fun y => ∑ i ∈ s, q ^ b i * F i y) w =
-      ∑ i ∈ s, iteratedFDeriv ℝ m (fun y => q ^ b i * F i y) w := by
-    simpa only [iteratedFDerivWithin_of_isOpen _ hO hwO, smul_eq_mul] using hsum
-  rw [hs]
-  calc
-    _ ≤ ∑ i ∈ s, ‖iteratedFDeriv ℝ m (fun y => q ^ b i * F i y) w‖ := norm_sum_le _ _
-    _ ≤ ∑ i ∈ s, D i * q ^ bmin := by
-      apply Finset.sum_le_sum
-      intro i hi
-      have he : iteratedFDeriv ℝ m (fun y => q ^ b i * F i y) w =
-          q ^ b i • iteratedFDeriv ℝ m (F i) w := by
-        simpa only [smul_eq_mul] using iteratedFDeriv_const_smul_apply' (a := q ^ b i)
-          (((hF i hi).contDiffAt (hO.mem_nhds hwO)).of_le hmn)
-      rw [he, norm_smul (q ^ b i : ℝ) (iteratedFDeriv ℝ m (F i) w),
-        Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hq _)]
-      calc
-        _ ≤ q ^ b i * D i := mul_le_mul_of_nonneg_left (hDb i w hw hi) (Real.rpow_nonneg hq.le _)
-        _ ≤ q ^ bmin * D i := mul_le_mul_of_nonneg_right
-          (Real.rpow_le_rpow_of_exponent_ge hq hq1 (hb i hi)) (hDn i)
-        _ = _ := mul_comm _ _
-    _ = (∑ i ∈ s, D i) * q ^ bmin := (Finset.sum_mul _ _ _).symm
-    _ ≤ C * q ^ bmin := mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
-      (Real.rpow_nonneg hq.le _)
 
 
 
@@ -1379,16 +1282,6 @@ theorem normalized_axial_viscosity {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   simp only [pullback, hqp, hip, Real.one_rpow, one_mul]
 
 
-theorem hierarchy_profile_smoothAt {R : ℝ} {U : Set ℂ} {h C : ℝ}
-    {base : Fin 5 → InnerProfile} (A : SlowRecursion.LocalHierarchy R U h C base)
-    (hR : 0 < R) (hU : IsOpen U) (n : ℕ) (i : Fin 5)
-    {w : InnerPoint} (hX : w.1 ∈ Ioo (0 : ℝ) (R ^ 2)) (heta : (w.2 : ℂ) ∈ U) :
-    ContDiffAt ℝ ∞ (SlowRecursion.profile (A.coefficients n i)) w := by
-  have hsub : Ioo (0 : ℝ) (R ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U ⊆
-      Ico (0 : ℝ) (R ^ 2) ×ˢ PositiveAxisExistence.realParameterDomain U :=
-    fun _ hw => ⟨⟨hw.1.1.le, hw.1.2⟩, hw.2⟩
-  exact ((A.profiles_smooth hR hU n i).mono hsub).contDiffAt
-    ((isOpen_Ioo.prod (PositiveAxisExistence.realParameterDomain_isOpen hU)).mem_nhds ⟨hX, heta⟩)
 
 
 

@@ -75,13 +75,6 @@ theorem pressureDefect_eq_mass (c : Context Point) (u : State Point) (n : ℕ) (
     pressureDefect c u n s = PressureStream.pressureMass (u.gr c n) s := by
   simp only [pressureDefect, radialMoment, pow_zero, one_mul]
 
-/-- Pressure reconstruction preserves every primitive input field: this
-record deliberately contains no output regularity assertion for pressure. -/
-theorem primitiveData_reconstructState {coord a b : ℝ} {U : SlowRegion coord}
-    (g : VariableGaugeMean.GaugeData Plane) {c : Context Point} {u : State Point}
-    (H : MeanStateRegularity.PrimitiveData U a b c u) :
-    MeanStateRegularity.PrimitiveData U a b c (VariableGaugeMean.reconstructState g c u) :=
-  ⟨H.operators, H.base, H.mean, H.covariance, H.virtualTheta, H.virtualAxial⟩
 
 section Identity
 
@@ -186,18 +179,6 @@ local notation "slowStrip" => PhysicalMeanDomain.localSlowStripData U.carrier U.
   epsilon slow hepsilon hepsilon_one hslow
 
 
-/-- The iteration's radial component: an S_(1+sigma) pressure debt gives
-M_(1+sigma) for the current alias-subtracted radial residual. -/
-theorem similarity_class (c : Context Point) (u : State Point)
-    (H : MeanStateRegularity.PrimitiveData U a b c u)
-    (hr : RadialMatch U.carrier gauge c.operators)
-    (hfixed : (VariableGaugeMean.reconstructState gauge c u).pressure = u.pressure)
-    (hdebt : UnweightedClass slowStrip (1 + sigma) (pressureDefect c u)) :
-    MeanClass strip (1 + sigma) (fun n x =>
-      u.radialResidual c n x - VariableGaugeMean.pressureAliasState gauge c u n (x, 0) 0) := by
-  have hh : 0 ≤ h := by linarith [U.coord_pos]
-  exact radialMinusAlias_class U gauge ha (ChartScales.radialExponent_pos h hh)
-    hcL hcR epsilon slow hepsilon hepsilon_one hslow (fun _ => rfl) c u H hr hfixed hdebt
 
 
 end Similarity

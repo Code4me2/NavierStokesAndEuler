@@ -61,22 +61,6 @@ theorem nonemptyPrefix_jetRate {l : Filter D} {q : D → ℝ} {A : ℕ → D →
     exact ih.add (hpos (J + 1) (by omega)) hU hlU
       (ContDiffOn.sum (fun j _ => hA j)) (hA (J + 1))
 
-theorem prefix_background {l : Filter D} {q : D → ℝ} {A : ℕ → D → V}
-    {g L Lzero : ℕ → ℝ} {C : ℕ → ℕ → ℝ} {U S : Set D}
-    (hU : IsOpen U) (hlU : ∀ᶠ x in l, x ∈ U)
-    (hS : ∀ᶠ x in l, x ∈ S) (hq : ∀ᶠ x in l, 0 < q x ∧ q x ≤ 1)
-    (hA : ∀ j, ContDiffOn ℝ ∞ (A j) U)
-    (hraw : CutStageEstimates.RawStageBounds q A g L C (fun _ _ => 0) S)
-    (hg : ∀ j, 1 ≤ j → 0 ≤ g j)
-    (hzero : ∀ m, JetRate l q (A 0) m (-Lzero m)) (J m : ℕ) :
-    JetRate l q (DiagonalJetBounds.uncutPrefix A (J + 1)) m (-max (L m) (Lzero m)) := by
-  apply nonemptyPrefix_jetRate hU hlU hA
-  · exact (hzero m).weaken hq (neg_le_neg (le_max_right _ _))
-  · intro j hj
-    apply (raw_jetRate hraw hS hq hj m).weaken hq
-    have hmax := le_max_left (L m) (Lzero m)
-    have hgain := hg j hj
-    linarith
 
 end General
 

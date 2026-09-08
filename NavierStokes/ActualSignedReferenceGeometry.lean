@@ -151,15 +151,6 @@ variable (x : CorrectionStep.CycleState (Label B N0))
       ((ActualCycleParameters.fixedParameters B N0).afterParticular
         x.coefficients (commonContext B) x.state).pressure)
 
-/-- The actual post-particular cycle family is definitionally the same
-family used above, including its state and request. -/
-noncomputable def cycleSingletonGeometry
-    (L : ActualSignedPhysicalData.NativeLabel (ActualSignedExterior.cycleFamily x H hp).active) :
-    ActualSignedPhysicalData.ReferenceGeometry (h := h) slots
-      ((ActualSignedExterior.cycleFamily x H hp).singleton L) :=
-  singletonGeometry ActualInitialization.patch
-    ((ActualCycleParameters.fixedParameters B N0).afterParticular
-      x.coefficients (commonContext B) x.state) H hp L
 
 
 end Cycle

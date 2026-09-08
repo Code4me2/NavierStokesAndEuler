@@ -341,13 +341,6 @@ theorem exists_coefficientFamily_on_neighborhood {h j σ ρ : ℝ}
   rw [boundedAxisElement_coefficient hε hερ hB (hf k) (hb' k) n hx]
   simp only [f, complexField_ofReal hp, Complex.ofReal_re]
 
-theorem exists_coefficientFamily {h j σ : ℝ}
-    (hsmall : NaturalAxisData.SmallParameters h j) (hσ : 0 < σ)
-    {g a : ℝ → ℝ} {cap : ℝ} (hp : PressureDatum.Admissible g a cap) :
-    Nonempty (CoefficientFamily h j σ (PressureDatum.pressure g a)) := by
-  obtain ⟨ρ, hρ, K, hK, hcover, hKU⟩ := exists_common_neighborhood hsmall hσ
-  obtain ⟨v, _⟩ := exists_coefficientFamily_on_neighborhood hp hρ hK hcover hKU
-  exact ⟨v⟩
 
 /-- The coefficient family and the open convex domain for its primitive
 can be chosen together, with an explicit strict gap between the two radii. -/

@@ -255,47 +255,7 @@ theorem continuousOn_projectedForcing {s : Set ℝ}
 
 variable [CompleteSpace H]
 
-/-- The actual projected tangent equation has a solution on the entire finite
-interval when its coefficients are continuous and its normal never vanishes. -/
-theorem exists_projected_solution {a b : ℝ} (hab : a ≤ b)
-    (n n' f : ℝ → H) (K : ℝ → H →L[ℝ] H) (δ : ℝ → ℝ)
-    (hn : ContinuousOn n (Icc a b)) (hn' : ContinuousOn n' (Icc a b))
-    (hf : ContinuousOn f (Icc a b)) (hK : ContinuousOn K (Icc a b))
-    (hδ : ContinuousOn δ (Icc a b)) (hn0 : ∀ t ∈ Icc a b, n t ≠ 0)
-    (x₀ : H) :
-    ∃ u : ℝ → H, u a = x₀ ∧ ∀ t ∈ Icc a b,
-      HasDerivAt u (TangentProjection.projectedRhs (n t) (n' t) (u t)
-        (K t (u t)) (f t) (δ t)) t := by
-  obtain ⟨u, hu, hdu⟩ := exists_linear_solution hab
-    (fun t => projectedOperator (n t) (n' t) (K t) (δ t))
-    (fun t => -TangentProjection.tangentProj (n t) (f t))
-    (continuousOn_projectedOperator n n' K δ hn hn' hK hδ hn0)
-    (continuousOn_projectedForcing n f hn hf hn0) x₀
-  refine ⟨u, hu, fun t ht => ?_⟩
-  simpa only [← sub_eq_add_neg, projectedOperator_apply] using hdu t ht
 
-omit [CompleteSpace H] in
-/-- Uniqueness holds for all solutions of equation (27), independent of whether
-their common initial value is tangent. -/
-theorem projected_solution_unique {a b : ℝ} (hab : a ≤ b)
-    (n n' f : ℝ → H) (K : ℝ → H →L[ℝ] H) (δ : ℝ → ℝ)
-    (hn : ContinuousOn n (Icc a b)) (hn' : ContinuousOn n' (Icc a b))
-    (hK : ContinuousOn K (Icc a b)) (hδ : ContinuousOn δ (Icc a b))
-    (hn0 : ∀ t ∈ Icc a b, n t ≠ 0) {u w : ℝ → H}
-    (hu : ∀ t ∈ Icc a b, HasDerivAt u
-      (TangentProjection.projectedRhs (n t) (n' t) (u t) (K t (u t)) (f t) (δ t)) t)
-    (hw : ∀ t ∈ Icc a b, HasDerivAt w
-      (TangentProjection.projectedRhs (n t) (n' t) (w t) (K t (w t)) (f t) (δ t)) t)
-    (hinit : u a = w a) : EqOn u w (Icc a b) := by
-  apply linear_solution_unique hab
-    (fun t => projectedOperator (n t) (n' t) (K t) (δ t))
-    (fun t => -TangentProjection.tangentProj (n t) (f t))
-    (continuousOn_projectedOperator n n' K δ hn hn' hK hδ hn0)
-    (u := u) (w := w) _ _ hinit
-  · intro t ht
-    simpa only [← sub_eq_add_neg, projectedOperator_apply] using hu t ht
-  · intro t ht
-    simpa only [← sub_eq_add_neg, projectedOperator_apply] using hw t ht
 
 omit [CompleteSpace H] in
 /-- On the finite interval, tangency propagates from the left endpoint.

@@ -62,17 +62,5 @@ theorem CorrectionData.source_gradient_zero {q : ℕ} {T : Type*} [TopologicalSp
     (velocityComponents_norm D.κ D.direction D.scale_bound D.direction_bound)
     D.linear.operatorPath (fun i => (D.quadratic i).operatorPath) D.approximation D.residual t u
 
-/-- The actual Euler correction equation has a positive-time mild solution with zero initial error and the genuine divergence constraint. -/
-theorem exists_local_euler_correction {q : ℕ} (hq : 6 ≤ q) (ν : ℝ) (hν : 0 < ν)
-    (S : ℝ) (hS : 0 < S) (D : CorrectionData period q (Icc (0 : ℝ) S)) :
-    ∃ (T : ℝ) (hT : 0 < T) (hTS : T ≤ S),
-      ∃ e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)),
-        ‖e‖ ≤ 1 ∧ e ⟨0, le_rfl, hT.le⟩ = 0 ∧
-        (∀ t, value period (e t) ∈ divergenceFreeSpace period D.κ D.direction) ∧
-        ∀ t, e t = quadraticDuhamel period ν hν hT.le hTS (D.coefficients period hq) 0 e t := by
-  have hzero : gradientProjection period D.κ D.direction (value period (0 : SobolevSpace period (q+1))) = 0 := map_zero _
-  obtain ⟨T, hT, hTS, e, he, hi, hd, hsol⟩ := exists_local_quadratic_divergenceFree period q ν hν S hS
-    D.κ D.direction 0 hzero (D.coefficients period hq) (D.source_gradient_zero period hq)
-  exact ⟨T, hT, hTS, e, by simpa only [norm_zero, zero_add] using he, hi, hd, hsol⟩
 
 end EulerCorrectionOperators

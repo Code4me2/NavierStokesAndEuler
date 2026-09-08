@@ -533,16 +533,6 @@ theorem refined_signed_inputSupport (l : Index B N0) (s : StripData Point)
   · intro n x hx hn
     exact refined_signed_gaussian_zero l s request n hx hn
 
-theorem refined_tangent_inputSupport (l : Index B N0) (s : StripData Point)
-    (request : ℕ → Point × ℝ → SignedWaveUpdate.Vec2) :
-    HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
-      (ActualCoreSupport.refinedCarrier l)
-      ((ActualSignedStageControls.parameters l).tangentBlock s request) 0 0 := by
-  apply block_inputSupport_of_zero
-  · intro n x hx hn
-    exact (refined_signed_common_zero l s request n (x := (x,0)) hx hn).1
-  · intro n x hx hn
-    exact (refined_signed_common_zero l s request n (x := (x,0)) hx hn).2
 
 
 end RefinedSignedSupport
@@ -658,17 +648,6 @@ variable (c : Context Point) (u : State Point) (b : HarmonicBlock Point)
 
 include hN hs
 
-theorem canonical_source_zero_germ (j : ℤ) (n : ℕ)
-    {z : (CycleSlow × ℝ) × TorusInverse.Plane}
-    (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain)
-    (hn : (z.1.1, z.2) ∉ ActualCarrierTransport.canonicalSourceRegion l n) :
-    ParticularWaveAssembly.sourceFamily (StateReindex.context cycleAssoc.symm c)
-      (StateReindex.state cycleAssoc.symm u) (StateReindex.block cycleAssoc.symm b)
-      (StateReindex.blockCoefficients cycleAssoc.symm G) (StateReindex.blockCoefficients cycleAssoc.symm A)
-      j n =ᶠ[𝓝 z] fun _ => 0 :=
-  ActualGaussianCoverage.sourceFamily_zero_germ _ _ _ _ _ (parameterDomain_open.prod isOpen_univ)
-    (ActualCarrierTransport.canonicalSourceRegion_closed l) (associated_inputSupport hN l hs)
-    j n ⟨hz, mem_univ _⟩ hn
 
 
 end CanonicalParticular

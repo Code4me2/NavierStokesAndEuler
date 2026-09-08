@@ -567,10 +567,6 @@ theorem physical_coordinate_derivative_bounds {a : ℝ} (ha : 0 < a) (ha1 : a < 
         (mul_le_mul_of_nonneg_left (hqb.trans (le_max_left _ _)) hCq.le) hw
     _ ≤ C * physicalQ a p ^ (-(n : ℝ)) := mul_le_mul_of_nonneg_right hqC hw
 
-theorem norm_fderiv_eq_iterated_one (F : Point → ℝ) (p : Point) :
-    ‖fderiv ℝ F p‖ = ‖iteratedFDeriv ℝ 1 F p‖ := by
-  simpa only [norm_iteratedFDeriv_zero, Nat.zero_add] using
-    (norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := p) (n := 0))
 
 
 end NavierStokes.PhysicalCoordinateBounds

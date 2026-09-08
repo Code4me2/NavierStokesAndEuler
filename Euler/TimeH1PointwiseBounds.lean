@@ -84,12 +84,6 @@ theorem norm_le_initial_add (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
     _ ≤ Real.sqrt t*‖g‖+‖η 0‖ := add_le_add hi le_rfl
     _ = ‖η 0‖+Real.sqrt t*‖g‖ := add_comm _ _
 
-include hT hη hder in
-/-- The uniform-in-time version needed by fixed-index inverse estimates. -/
-theorem norm_le_initial_add_uniform (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T) :
-    ‖η t‖ ≤ ‖η 0‖+Real.sqrt T*‖g‖ :=
-  (norm_le_initial_add T hT g η hη hder t ht).trans
-    (add_le_add le_rfl (mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg g)))
 
 
 end EulerTimeH1PointwiseBounds

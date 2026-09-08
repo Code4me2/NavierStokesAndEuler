@@ -108,12 +108,6 @@ theorem h3_tensorNorm_of_gradientIntegral (U : Evolution T hT) (G : ℝ)
   tensorNorm_le_wordCount _ 3 _ (U.wordBound_of_gradientIntegral G hG t)
 
 
-theorem higher_tensorNorm_of_gradientIntegral (U : Evolution T hT) (m : ℕ) (hm : 3 ≤ m)
-    (G : ℝ) (hG : ∀ t, U.gradientIntegral t ≤ G) (t : Icc (0 : ℝ) T) :
-    tensorNorm m (U.velocity t) ≤ wordCount m*
-      Real.sqrt (wordEnergy m (U.velocity ⟨0,le_rfl,hT⟩)*
-        Real.exp (tameEnergyConstant m*U.gradientH3Bound G*T)) :=
-  U.tensorNorm_uniform m hm _ (U.wordBound_of_gradientIntegral G hG) t
 
 
 end EulerOrdinarySobolev.Evolution

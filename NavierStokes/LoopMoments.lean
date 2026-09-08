@@ -81,11 +81,6 @@ theorem energy_moment (s : Finset ι) (w t : ι → ℝ) (a m ρ : ℝ)
   rw [avg_add, avg_const s w 1 hmass, hsecond]
   field_simp; ring
 
-/-- A nonnegative weighted variance cannot decrease the nominal speed. -/
-theorem variance_nonneg (s : Finset ι) (w t : ι → ℝ) (m : ℝ)
-    (hw : ∀ i ∈ s, 0 ≤ w i) :
-    0 ≤ avg s w (fun i => (t i - m) ^ 2) := by
-  exact avg_nonneg s w _ hw (fun i _ => sq_nonneg (t i - m))
 
 
 /-- The rephasing density relative to the old averaging parameter. -/
@@ -208,18 +203,8 @@ def TwoPoint.IsProbability (q : TwoPoint) : Prop :=
 def symmetricPair (m V : ℝ) : TwoPoint :=
   ⟨1 / 2, 1 / 2, m - Real.sqrt V, m + Real.sqrt V⟩
 
-theorem symmetricPair_probability (m V : ℝ) : (symmetricPair m V).IsProbability := by
-  norm_num [TwoPoint.IsProbability, symmetricPair]
 
-theorem symmetricPair_mean (m V : ℝ) : (symmetricPair m V).mean = m := by
-  dsimp [TwoPoint.mean, symmetricPair]
-  ring
 
-theorem symmetricPair_variance (m V : ℝ) (hV : 0 ≤ V) :
-    (symmetricPair m V).centeredSecond m = V := by
-  dsimp [TwoPoint.centeredSecond, symmetricPair]
-  have hsq := Real.sq_sqrt hV
-  nlinarith
 
 /-- An asymmetric law preserves a lower bound on the projection `p*t`,
 while allowing any nonnegative variance. For `p = 0`, use `symmetricPair`.
@@ -233,38 +218,10 @@ theorem oneSidedPair_denom_pos (p d V : ℝ) (hd : 0 < d) (hV : 0 ≤ V) :
   have hprod := mul_nonneg hV (sq_nonneg p)
   nlinarith
 
-theorem oneSidedPair_probability (m p d V : ℝ) (hd : 0 < d) (hV : 0 ≤ V) :
-    (oneSidedPair m p d V).IsProbability := by
-  have hden := oneSidedPair_denom_pos p d V hd hV
-  dsimp [TwoPoint.IsProbability, oneSidedPair]
-  refine ⟨div_nonneg (mul_nonneg hV (sq_nonneg p)) (le_of_lt hden),
-    div_nonneg (sq_nonneg d) (le_of_lt hden), ?_⟩
-  field_simp; ring
 
-theorem oneSidedPair_mean (m p d V : ℝ) (hp : p ≠ 0) (hd : 0 < d) (hV : 0 ≤ V) :
-    (oneSidedPair m p d V).mean = m := by
-  have hden := ne_of_gt (oneSidedPair_denom_pos p d V hd hV)
-  have hdne := ne_of_gt hd
-  dsimp [TwoPoint.mean, oneSidedPair]
-  field_simp; ring
 
-theorem oneSidedPair_variance (m p d V : ℝ)
-    (hp : p ≠ 0) (hd : 0 < d) (hV : 0 ≤ V) :
-    (oneSidedPair m p d V).centeredSecond m = V := by
-  have hden := ne_of_gt (oneSidedPair_denom_pos p d V hd hV)
-  have hdne := ne_of_gt hd
-  dsimp [TwoPoint.centeredSecond, oneSidedPair]
-  field_simp; ring
 
-theorem oneSidedPair_lower_projection (m p d V : ℝ) (hp : p ≠ 0) :
-    p * ((oneSidedPair m p d V).leftValue - m) = -d := by
-  dsimp [oneSidedPair]
-  field_simp; ring
 
-theorem oneSidedPair_upper_projection (m p d V : ℝ) :
-    p * ((oneSidedPair m p d V).rightValue - m) = V * p ^ 2 / d := by
-  dsimp [oneSidedPair]
-  ring
 
 
 

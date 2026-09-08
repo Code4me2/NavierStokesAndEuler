@@ -17,8 +17,6 @@ def derivativeBound (f : Space → ℝ) (hc : HasCompactSupport f)
     (hs : ContDiff ℝ ∞ f) (n : ℕ) : ℝ :=
   max 1 (Classical.choose (derivative_bound_exists f hc hs n))
 
-theorem one_le_derivativeBound (f : Space → ℝ) (hc : HasCompactSupport f)
-    (hs : ContDiff ℝ ∞ f) (n : ℕ) : 1 ≤ derivativeBound f hc hs n := le_max_left _ _
 
 theorem norm_iteratedFDeriv_le_derivativeBound (f : Space → ℝ) (hc : HasCompactSupport f)
     (hs : ContDiff ℝ ∞ f) (n : ℕ) (x : Space) :

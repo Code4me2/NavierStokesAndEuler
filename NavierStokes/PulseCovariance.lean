@@ -21,9 +21,6 @@ namespace NavierStokes.PulseCovariance
 open Set MeasureTheory Filter
 open scoped Topology
 
-private theorem inverse_length_mass (r u v : ℝ) (hr : r ≠ 0) :
-    (u / r ^ 2) * (v * r) = u * v / r := by
-  field_simp
 
 private theorem normalize_mass_product (u k r : ℝ) (hk : k ≠ 0) :
     u * r ^ 2 = (u / k) * r * (k * r) := by
@@ -474,11 +471,6 @@ noncomputable def affineSlope (s₀ slope r v : ℝ) : ℝ :=
   s₀ + slope * (v - r ^ 2 / 2) / r ^ 2
 
 
-theorem hasDerivAt_affineSlope (s₀ slope r v : ℝ) :
-    HasDerivAt (affineSlope s₀ slope r) (slope / r ^ 2) v := by
-  unfold affineSlope
-  simpa only [id_eq, mul_one] using
-    (((hasDerivAt_id v).sub_const (r ^ 2 / 2)).const_mul slope).div_const (r ^ 2) |>.const_add s₀
 
 
 theorem affineSlope_distance (s₀ slope r v : ℝ) :
@@ -527,20 +519,6 @@ theorem actualColumn_factorization (ci : ℝ) (t : ℝ → Vec2) :
   exact (mul_div_cancel_right₀
     (ci * (∫ v : ℝ, weight ψ x v * (t v i / x v))) h.mass_pos.ne').symm.trans (by ring)
 
-theorem actualColumn_eq_intervalIntegral (ci : ℝ) (t : ℝ → Vec2) (i : Fin 2) :
-    actualColumn ci ψ x t i = ci * ∫ v in (0 : ℝ)..r ^ 2, ψ v ^ 2 * x v * t v i := by
-  unfold actualColumn
-  congr 1
-  rw [intervalIntegral.integral_of_le (sq_nonneg r)]
-  symm
-  apply setIntegral_eq_integral_of_forall_compl_eq_zero
-  intro v hv
-  have hout : v ∉ Icc (r ^ 2 / 6) (5 * r ^ 2 / 6) := by
-    intro hin
-    apply hv
-    have hr2 : 0 < r ^ 2 := sq_pos_of_pos h.radius_pos
-    constructor <;> nlinarith [hin.1, hin.2]
-  simp [h.cutoff_zero v hout]
 
 theorem ratio_continuousOn {t : ℝ → Vec2}
     (ht : ∀ i, ContinuousOn (fun v => t v i) (Icc 0 (r ^ 2))) (i : Fin 2) :
@@ -731,35 +709,5 @@ theorem compact_actual_positive_inverse
   obtain ⟨hd, hw, _⟩ := hstable p hp (normalizedMatrix pulses) (T p) hdist
   exact actualMatrix_positive_of_normalized pulses hci (T p) hd hw
 
-/-- Scalar cone inequalities and continuity of the four scalar model data
-suffice.  Compactness supplies both the uniform cone tolerance and the uniform
-bounds on `c₀,u`, hence one slot threshold for every actual pulse pair. -/
-theorem compact_actual_positive_inverse_of_scalar_cone
-    {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsCompact K)
-    {c₀ u m t : X → ℝ} (hc₀ : ContinuousOn c₀ K) (hu : ContinuousOn u K)
-    (hm : ContinuousOn m K) (ht : ContinuousOn t K)
-    (hc₀neg : ∀ p ∈ K, c₀ p < 0) (hupos : ∀ p ∈ K, 0 < u p)
-    (hcone : ∀ p ∈ K, |Covariance.normalMagnitude (c₀ p) (u p) * t p| < u p * m p)
-    {a A b B E : ℝ} (hE : 0 ≤ E) :
-    ∃ R : ℝ, 1 ≤ R ∧ ∀ p ∈ K, ∀ r : ℝ, R ≤ r →
-      ∀ pulses : SignedPulsePair r a A b B (c₀ p) (u p) E,
-      ∀ ci : Vec2, (∀ j, 0 < ci j) →
-        (actualMatrix pulses ci).det ≠ 0 ∧
-        (∀ i, 0 < SmoothCovariance.weights (actualMatrix pulses ci) (Covariance.target (m p) (t p)) i) ∧
-        (∀ i, 0 < SmoothCovariance.amplitudes (actualMatrix pulses ci) (Covariance.target (m p) (t p)) i) := by
-  obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn hc₀
-  obtain ⟨U, hU⟩ := hK.exists_bound_of_continuousOn hu
-  have htarget : ∀ i, ContinuousOn (fun p => Covariance.target (m p) (t p) i) K := by
-    intro i
-    fin_cases i
-    · simpa [Covariance.target] using hm.fun_neg
-    · simpa [Covariance.target] using ht
-  apply compact_actual_positive_inverse hK (signedModel_continuousOn hc₀ hu) htarget
-    (fun p hp => signedModel_strictCone (hc₀neg p hp) (hupos p hp) (hcone p hp)) hE
-    (le_max_left 0 C) (le_max_left 0 U)
-  · intro p hp
-    exact (show |c₀ p| ≤ C by simpa only [Real.norm_eq_abs] using hC p hp).trans (le_max_right _ _)
-  · intro p hp
-    exact (show |u p| ≤ U by simpa only [Real.norm_eq_abs] using hU p hp).trans (le_max_right _ _)
 
 end NavierStokes.PulseCovariance

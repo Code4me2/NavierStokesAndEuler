@@ -57,10 +57,6 @@ theorem activationTime_strictMono : StrictMono (activationTime J X a β) := by
   rw [activationTime_succ]
   exact lt_add_of_pos_right _ (stepLength_pos J hJ X hX a β ha ha₂ hβ hβ₂ n)
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem activationTime_nonneg (n : ℕ) : 0 ≤ activationTime J X a β n := by
-  simpa only [activationTime_zero] using
-    (activationTime_strictMono J hJ X hX a β ha ha₂ hβ hβ₂).monotone (Nat.zero_le n)
 
 include hJ hX ha ha₂ hβ hβ₂ in
 theorem activationTime_pos {n : ℕ} (hn : 0 < n) : 0 < activationTime J X a β n := by
@@ -81,11 +77,6 @@ theorem horizonTime_succ_le (n : ℕ) (hw : timeWidth J X (n+1) ≤ timeWidth J 
   exact nested_horizon_of_width_ratio (timeWidth_pos J hJ hX n).le
     (stepLength_bounds J hJ X hX a β ha ha₂ hβ hβ₂ n).2 hw
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem horizonTime_antitone (hw : ∀ n, timeWidth J X (n+1) ≤ timeWidth J X n/2) :
-    Antitone (horizonTime J X a β) := by
-  exact antitone_nat_of_succ_le (fun n =>
-    horizonTime_succ_le J hJ X hX a β ha ha₂ hβ hβ₂ n (hw n))
 
 
 include hJ hX ha ha₂ hβ hβ₂ in
@@ -97,15 +88,6 @@ theorem activationTime_lower {n : ℕ} (hn : 1 ≤ n) :
   rw [baseHorizon_eq_timeWidth J hX]
   linarith only [hfirst,hm]
 
-include hJ hX ha ha₂ hβ hβ₂ in
-theorem common_positive_interval (n : ℕ) : baseHorizon J X/12 < horizonTime J X a β n := by
-  by_cases hn : n=0
-  · subst n
-    rw [horizonTime_zero J hX]
-    have hb := baseHorizon_pos J hJ hX
-    linarith only [hb]
-  · exact (activationTime_lower J hJ X hX a β ha ha₂ hβ hβ₂ (by omega)).trans_lt
-      (activationTime_lt_horizon J hJ X hX a β n)
 
 
 

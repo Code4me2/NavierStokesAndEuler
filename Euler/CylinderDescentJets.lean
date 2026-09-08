@@ -54,21 +54,8 @@ theorem descend_smooth (hf : ContDiff ℝ ∞ f) (q : LiftDomain P) :
   rw [localFieldLift_descend_cover P f hperiod]
   exact hf.comp (contDiff_const.add contDiff_id)
 
-include hperiod in
-theorem jetSeries_eq_local (q : LiftDomain P) (n : ℕ) :
-    jetSeries P f q n=iteratedFDeriv ℝ n (localFieldLift P (descend P f) q) 0 := by
-  obtain ⟨z,rfl⟩ := (coveringMap_isOpenQuotient P).surjective q
-  rw [jetSeries_cover P f hperiod,localFieldLift_descend_cover P f hperiod,
-    iteratedFDeriv_comp_add_left,add_zero]
 
 
-include hperiod in
-omit [NormedAddCommGroup W] [NormedSpace ℝ W] in
-theorem descend_comp_map (Φ : LiftTangent → LiftTangent) :
-    descend P (f ∘ Φ) = descend P f ∘ descendMap P Φ := by
-  funext q
-  exact (descend_cover P f (fiber_constant_of_deck P f hperiod)
-    (Φ (sectionPoint P q))).symm
 
 include hperiod in
 theorem jetSeries_comp (Φ : LiftTangent → LiftTangent)

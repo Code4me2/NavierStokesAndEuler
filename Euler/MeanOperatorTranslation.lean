@@ -44,14 +44,6 @@ theorem translateOperator_neg_cancel (a : Space) (A : L2 →L[ℝ] L2) :
   intro u
   simp only [translateOperator_apply, neg_neg, translation_add, neg_add_cancel, translation_zero]
 
-theorem translateOperator_norm_le (a : Space) (A : L2 →L[ℝ] L2) :
-    ‖translateOperator a A‖ ≤ ‖A‖ := by
-  apply opNorm_le_bound _ (norm_nonneg _)
-  intro u
-  calc
-    ‖translateOperator a A u‖ = ‖A (translation (-a) u)‖ := (translation a).norm_map _
-    _ ≤ ‖A‖*‖translation (-a) u‖ := A.le_opNorm _
-    _ = ‖A‖*‖u‖ := by rw [(translation (-a)).norm_map]
 
 
 /-- Translate the spatial operator at every time in the coefficient path. -/

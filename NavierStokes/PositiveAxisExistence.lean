@@ -473,20 +473,7 @@ theorem xProfile_square {R : ℝ} {U : Set ℂ} {W : Field}
     (hr : r ∈ Ioo (-R) R) : xProfile W i (r ^ 2, eta) = (W r (eta : ℂ) i).re :=
   ParametricEvenDescent.descend_square_local (realRadialComponent_even hparity i hi) heta hr
 
-theorem xProfile_axis_zero {U : Set ℂ} {W : Field}
-    (haxis : ∀ z ∈ U, W 0 z = 0) (i : Fin 6) {eta : ℝ}
-    (heta : eta ∈ realParameterDomain U) : xProfile W i (0, eta) = 0 := by
-  simp only [xProfile_apply, Real.sqrt_zero, haxis _ heta, Pi.zero_apply, Complex.zero_re]
 
-theorem xProfile_axis_jet {R : ℝ} (hR : 0 < R) {U : Set ℂ} {W : Field}
-    (hW : ContDiffOn ℝ ∞ (fun p : ℝ × ℂ => W p.1 p.2) (radialDomain R ×ˢ U))
-    (hparity : ∀ r ∈ Icc (-R) R, ∀ z ∈ U, W (-r) z = parityVec (W r z))
-    (i : Fin 6) (hi : i.val < 4) {eta : ℝ} (heta : eta ∈ realParameterDomain U) (n : ℕ) :
-    iteratedDerivWithin n (fun X => xProfile W i (X, eta)) (Ici 0) 0 =
-      ((n.factorial : ℝ) / ((2 * n).factorial : ℝ)) •
-        iteratedDeriv (2 * n) (fun r => (W r (eta : ℂ) i).re) 0 :=
-  ParametricEvenDescent.iteratedDerivWithin_descend_axis_local hR
-    (realRadialComponent_smooth hW i) (realRadialComponent_even hparity i hi) heta n
 
 end SquaredRadius
 
@@ -718,62 +705,6 @@ theorem profileSystem_lowerHistoryData (h lam C r eta : ℝ) (n : ℕ)
       (actualLowerSource h n phi u beta omegaQuotient (r ^ 2, eta)) phiNew uNew k p := by
   rfl
 
-theorem positiveSolution_extends_order {R T : ℝ} (hR : 0 < R) (hRT : R < T)
-    {U : Set ℂ} (hU : IsOpen U) (h C : ℝ) {n : ℕ} (hn : 0 < n)
-    (phi u beta : ℕ → InnerProfile) (omegaQuotient : InnerProfile)
-    {F : CoefficientData} (hF : LowerInputRegularity T U (h : ℂ) F)
-    (hreal : RealCompatible R U F (lowerHistoryData h n phi u beta omegaQuotient))
-    {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2)) (heta : eta ∈ realParameterDomain U) :
-    let W := positiveSolution hR.le (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F
-    ExtendsPositiveOrder h C n phi u beta (xProfile W 0) (xProfile W 1)
-      (xProfile W 2) (xProfile W 3) omegaQuotient (X, eta) := by
-  let W := positiveSolution hR.le (h : ℂ) ((slowPower h n : ℝ) : ℂ) (C : ℂ) F
-  let phiNew := xProfile W 0
-  let uNew := xProfile W 1
-  let k := xProfile W 2
-  let p := xProfile W 3
-  let phi' := Function.update phi n phiNew
-  let u' := Function.update u n uNew
-  let beta' := Function.update beta n (newBeta h n uNew k)
-  let r := Real.sqrt X
-  have hr0 : r ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr hX.1)
-  have hr : r ∈ Ioo (-R) R := by
-    constructor
-    · linarith [Real.sqrt_nonneg X]
-    · have hsq := Real.sq_sqrt hX.1.le
-      dsimp [r]
-      nlinarith [Real.sqrt_nonneg X, hX.2]
-  have hrX : r ^ 2 = X := Real.sq_sqrt hX.1.le
-  have hWsm := positiveSolution_jointly_smooth hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF
-  have hpar : ∀ s ∈ Icc (-R) R, ∀ z ∈ U, W (-s) z = parityVec (W s z) :=
-    fun s hs z hz => positiveSolution_parity hR.le hRT hU ((slowPower h n : ℝ) : ℂ) (C : ℂ) hF hs hz
-  have hnew (i : Fin 6) (hi : i.val < 4) : ContDiffAt ℝ ∞ (xProfile W i) (r ^ 2, eta) :=
-    xProfile_contDiffAt hR hU hWsm hpar i hi hr hr0 heta
-  have hs := positiveSolution_profiles_system hR hRT hU h (slowPower h n) C hF hreal hr hr0 heta
-  have hs' := (profileSystem_lowerHistoryData h (slowPower h n) C r eta n phi u beta
-    omegaQuotient phiNew uNew k p).mp hs
-  have hsUpdated : ProfileSystem h (slowPower h n) C r eta
-      (baseAtOrderZero (fun j => actualJet (phi' j) (r ^ 2, eta))
-        (fun j => actualJet (u' j) (r ^ 2, eta)) (fun j => beta' j (r ^ 2, eta)))
-      (actualLowerSource h n phi' u' beta' omegaQuotient (r ^ 2, eta))
-      (phi' n) (u' n) k p := by
-    simpa only [phi', u', beta', baseAtOrderZero_update hn,
-      actualLowerSource_update, Function.update_self] using hs'
-  have hphi : ContDiffAt ℝ 2 (phi' n) (r ^ 2, eta) := by
-    simpa only [phi', Function.update_self] using
-      (show ContDiffAt ℝ 2 phiNew (r ^ 2, eta) from
-        (hnew 0 (by decide)).of_le (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2))
-  have hu : ContDiffAt ℝ 2 (u' n) (r ^ 2, eta) := by
-    simpa only [u', Function.update_self] using
-      (show ContDiffAt ℝ 2 uNew (r ^ 2, eta) from
-        (hnew 1 (by decide)).of_le (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2))
-  have hbet : beta' n (r ^ 2, eta) = betaValue h (slowPower h n) eta
-      (actualJet (u' n) (r ^ 2, eta)) (actualJet k (r ^ 2, eta)) := by
-    simp only [beta', u', Function.update_self, newBeta]
-  have hresult := (profileSystem_iff_positiveOrder hr0 hn phi' u' beta' k p omegaQuotient
-    hphi hu ((hnew 2 (by decide)).differentiableAt (by simp))
-    ((hnew 3 (by decide)).differentiableAt (by simp)) hbet).mp hsUpdated
-  simpa only [ExtendsPositiveOrder, hrX] using hresult
 
 end PositiveOrder
 
@@ -796,35 +727,6 @@ noncomputable def candidateLift {R : ℝ} (hR : 0 ≤ R) (A₀ A₁ : Coeff) (f 
     (NilpotentVolterra.liftedField hR (sideData hR true (matrixPath R A₀))
       (sideData hR true (matrixPath R A₁)) (sideData hR true (forcingPath R f)) (V true))
 
-/-- Actual uniqueness in the holomorphic continuous-path class. It is
-deduced from the decaying Volterra-word majorant, with no norm smallness. -/
-theorem assembledSolution_unique {R T : ℝ} (hR : 0 ≤ R) (hRT : R < T)
-    {U : Set ℂ} (hU : IsOpen U) {A₀ A₁ : Coeff} {f : Field}
-    (hdata : SmoothHolomorphicSystem T U A₀ A₁ f) (hshape : DerivativeShape A₁)
-    {V : Bool → ℂ → NilpotentVolterra.Path R} (hV : SidePathSolution hR U A₀ A₁ f V)
-    (r : ℝ) {z : ℂ} (hz : z ∈ U) :
-    candidateLift hR A₀ A₁ f V r z = assembledSolution hR A₀ A₁ f r z := by
-  let B₀ := fun b => sideData hR b (matrixPath R A₀)
-  let B₁ := fun b => sideData hR b (matrixPath R A₁)
-  let g := fun b => sideData hR b (forcingPath R f)
-  let C := fun b => NilpotentVolterra.integralSolution hR (B₀ b) (B₁ b) (g b)
-  have hB₀ (b : Bool) : DifferentiableOn ℂ (B₀ b) U :=
-    sideData_holomorphic hR b
-      (matrixPath_holomorphic hRT hU hdata.smooth.zeroth hdata.zeroth_holomorphic)
-  have hB₁ (b : Bool) : DifferentiableOn ℂ (B₁ b) U :=
-    sideData_holomorphic hR b
-      (matrixPath_holomorphic hRT hU hdata.smooth.first hdata.first_holomorphic)
-  have hg (b : Bool) : DifferentiableOn ℂ (g b) U :=
-    sideData_holomorphic hR b
-      (forcingPath_holomorphic hRT hU hdata.smooth.forcing hdata.forcing_holomorphic)
-  have hshapeB (b : Bool) : DerivativeShape (NilpotentVolterra.rawCoefficient hR (B₁ b)) :=
-    side_shape hR (matrixPath_shape hR hshape) b
-  have hc (b : Bool) : DifferentiableOn ℂ (C b) U ∧
-      ∀ z ∈ U, C b z = NilpotentVolterra.pathInverse hR exponent
-        (NilpotentVolterra.rhsPath (B₀ b) (B₁ b) (g b) (C b) z) :=
-    NilpotentVolterra.integralSolution_spec_open hR hU (hB₀ b) (hB₁ b) (hg b) (hshapeB b)
-  exact glued_solution_unique hR hU hB₀ hB₁ hV.1 (fun b => (hc b).1) hshapeB
-    hV.2 (fun b => (hc b).2) r hz
 
 end Uniqueness
 

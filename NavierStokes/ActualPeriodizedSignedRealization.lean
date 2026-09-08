@@ -425,15 +425,6 @@ theorem actual_commonCorrected_eq (D : V.StateData) (j : Fin 2) :
       (views B l V).exactCoefficients (stateData B l D).request j :=
   commonCorrected_eq B l V D.request j
 
-/-- This equality holds before restriction to a physical graph, at every
-point of the full slow/angle/fast strip. -/
-theorem actual_amplitude_transport (D : V.StateData) (j : Fin 2)
-    (n : ℕ) (x : Cylinder) (hx : x ∈ V.strip.domain) :
-    (actualCopyData B l V D j).common.amplitude n x =
-      V.velocity n • (periodizedPrimary B l).raw D.referenceRequest j reference (V.map n x) := by
-  rw [actualCopyData, common_amplitude]
-  exact (views B l V).amplitude_transport D.request D.referenceRequest j n x
-    (D.request_transport n x hx)
 
 
 
@@ -679,12 +670,6 @@ noncomputable def periodizedAngular {request : ℕ → Cylinder → Vec2} {refer
 
 variable {reference : ℕ} (V : B.Views reference) (D : V.StateData)
 
-/-- The integer harmonic block is built from the same corrected native
-sum.  No independent wave is substituted into the iteration. -/
-noncomputable def actualBlock (j : Fin 2) (angularFrequency : ℕ → ℤ) :
-    CorrectionState.HarmonicBlock PhysicalResidualBridge.Lift :=
-  SignedWaveUpdate.blockOfCoefficients
-    ((actualCopyData B l V D j).commonCorrected V.strip V.directions) angularFrequency
 
 
 

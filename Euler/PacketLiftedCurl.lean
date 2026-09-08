@@ -117,33 +117,6 @@ theorem fieldDerivative_liftedCurl_component (κ : ℝ) (m : Vector3)
     (fieldDerivative_smooth period _ _ (component_smooth period Q hQ (i + 2)))
     (fieldDerivative_smooth period _ _ (component_smooth period Q hQ (i + 1))) x
 
-/-- The constant lifted divergence of an actual lifted curl vanishes pointwise. -/
-theorem lifted_divergence_curl (κ : ℝ) (m : Vector3) (Q : LiftDomain period → Vector3)
-    (hQ : ∀ x, ContDiff ℝ ∞ (localFieldLift period Q x)) (x : LiftDomain period) :
-    (∑ i : Fin 3, (fieldDerivative period (coordinateDirection κ m i)
-      (liftedCurl period κ m Q) x) i) = 0 := by
-  simp only [fieldDerivative_liftedCurl_component period κ m Q hQ, Fin.sum_univ_three]
-  have h01 := fieldDerivatives_commute period (coordinateDirection κ m 0)
-    (coordinateDirection κ m 1) (fun y => Q y 2) (component_smooth period Q hQ 2) x
-  have h02 := fieldDerivatives_commute period (coordinateDirection κ m 0)
-    (coordinateDirection κ m 2) (fun y => Q y 1) (component_smooth period Q hQ 1) x
-  have h12 := fieldDerivatives_commute period (coordinateDirection κ m 1)
-    (coordinateDirection κ m 2) (fun y => Q y 0) (component_smooth period Q hQ 0) x
-  change
-    (fieldDerivative period (coordinateDirection κ m 0)
-      (fieldDerivative period (coordinateDirection κ m 1) (fun y => Q y 2)) x -
-     fieldDerivative period (coordinateDirection κ m 0)
-      (fieldDerivative period (coordinateDirection κ m 2) (fun y => Q y 1)) x) +
-    (fieldDerivative period (coordinateDirection κ m 1)
-      (fieldDerivative period (coordinateDirection κ m 2) (fun y => Q y 0)) x -
-     fieldDerivative period (coordinateDirection κ m 1)
-      (fieldDerivative period (coordinateDirection κ m 0) (fun y => Q y 2)) x) +
-    (fieldDerivative period (coordinateDirection κ m 2)
-      (fieldDerivative period (coordinateDirection κ m 0) (fun y => Q y 1)) x -
-     fieldDerivative period (coordinateDirection κ m 2)
-      (fieldDerivative period (coordinateDirection κ m 1) (fun y => Q y 0)) x) = 0
-  rw [h01, h02, h12]
-  ring
 
 theorem component_compact (Q : LiftDomain period → Vector3) (hQ : HasCompactSupport Q)
     (i : Fin 3) : HasCompactSupport (fun x => Q x i) :=

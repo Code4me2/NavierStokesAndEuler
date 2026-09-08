@@ -602,11 +602,6 @@ theorem hasFDerivAt_slotTime (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ) (p 
   rw [he]
   exact ((ContinuousLinearMap.fst ℝ ℝ Space).hasFDerivAt.const_mul _).add_const _
 
-theorem slotTime_derivative (h : ℝ) (n : ℕ) (center : Plane) (r0 : ℝ)
-    (p v : SpaceTime) :
-    fderiv ℝ (slotTime h n center r0) p v = ChartScales.Q n ^ (-1 - h) * v.1 := by
-  rw [(hasFDerivAt_slotTime h n center r0 p).fderiv]
-  rfl
 
 
 /-- Exact integer rounding gives a uniform upper carrier power. -/
@@ -1113,20 +1108,6 @@ theorem slotMap_positive_jet_bound {κ : Plane → Plane} (hκ : ContDiff ℝ �
     hleft.trans ((mul_le_mul norm_embedPolar_le (hbaseb i him) (norm_nonneg _) zero_le_one).trans_eq (one_mul K))
   simpa only [add_assoc, Function.comp_def] using add_le_add hleft' hright
 
-theorem slotMap_physical (κ : Plane → Plane) (h : ℝ) (n : ℕ)
-    (center : Plane) (r0 : ℝ) (p : SpaceTime) :
-    slotMap κ (ChartScales.timeCoefficient h n) center r0 (physicalLift h n p) =
-      (((κ (scaledRadial n p)).1,
-        (ChartScales.Q n ^ (-CoordinateAlgebra.D h) * p.2 2, (1 - p.1) / ChartScales.Q n)),
-       ((κ (scaledRadial n p)).2, slotTime h n center r0 p)) := by
-  rw [slotMap_formula]
-  have hxy : liftXY (physicalLift h n p) = scaledRadial n p := by
-    simp [liftXY_apply, physicalLift, physicalChart, chartLinear_apply, scaledRadial,
-      radialProjection_apply, smul_eq_mul]
-  rw [hxy]
-  ext <;> simp [physicalLift, physicalChart, chartLinear_apply, slotTime,
-    Real.rpow_neg_one, div_eq_mul_inv]
-  ring
 
 /-- Composition of (26) with the actual native slot map. This is the phase
 whose exponential is used in the physical carrier estimate. -/

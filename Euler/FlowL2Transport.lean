@@ -59,17 +59,6 @@ def transportPath (u : C(K,Lp E 2 (volume : Measure Vector3))) :
     (inversePath Y hY).continuous
     (inversePath_measurePreserving X Y F hX hYX hXY hY hdet) (by norm_num)
 
-theorem transportPath_norm (u : C(K,Lp E 2 (volume : Measure Vector3))) (t : K) :
-    ‖transportPath X Y F hX hYX hXY hY hdet u t‖ = ‖u t‖ :=
-  Lp.norm_compMeasurePreserving (u t)
-    (inversePath_measurePreserving X Y F hX hYX hXY hY hdet t)
 
-theorem transportPath_ae (u : C(K,Lp E 2 (volume : Measure Vector3)))
-    (f : K → Vector3 → E) (hu : ∀ t, (u t : Vector3 → E) =ᵐ[volume] f t) (t : K) :
-    (transportPath X Y F hX hYX hXY hY hdet u t : Vector3 → E) =ᵐ[volume]
-      fun x => f t (Y t x) :=
-  (Lp.coeFn_compMeasurePreserving (u t)
-    (inversePath_measurePreserving X Y F hX hYX hXY hY hdet t)).trans
-    ((inversePath_measurePreserving X Y F hX hYX hXY hY hdet t).quasiMeasurePreserving.ae_eq_comp (hu t))
 
 end EulerFlowL2Transport

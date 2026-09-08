@@ -76,19 +76,6 @@ theorem coefficients_repartition :
     _ = {a with amplitude := v.amplitude, pressure := v.pressure} := by rw [ha, hp]
     _ = v := rfl
 
-/-- The outer bump is one on the Gaussian support, so it can be removed
-from the raw mask without changing the actual once-cutoff signed wave. -/
-theorem coefficients_outer (clock : ℕ → D → ℝ) :
-    (SignedWaveUpdate.coefficients a s d H T R
-      (fun n x => mask n x * PrimaryCopyBounds.outerCutoff (clock n x))
-      unit Ndot A j).withCutoff (fun n x => GaussianTailFlat.profile (clock n x)) =
-    (SignedWaveUpdate.coefficients a s d H T R mask unit Ndot A j).withCutoff
-      (fun n x => GaussianTailFlat.profile (clock n x)) := by
-  rw [coefficients_repartition]
-  have he : (fun n x => GaussianTailFlat.profile (clock n x) * PrimaryCopyBounds.outerCutoff (clock n x)) =
-      (fun n x => GaussianTailFlat.profile (clock n x)) :=
-    funext fun n => funext fun x => PrimaryCopyBounds.profile_mul_outerCutoff (clock n x)
-  rw [he]
 
 
 end Repartition
@@ -328,14 +315,6 @@ theorem dynamic_localized_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) (
   rw [mul_left_comm, PrimaryCopyBounds.profile_mul_outerCutoff]
 
 
-theorem dynamic_commonCorrected_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    (dynamicCopyData sys hh label hl gap B V request j).commonCorrected V.strip V.directions =
-      (ActualPeriodizedSignedRealization.views B (layout sys hh label hl gap) V).exactCoefficients request j := by
-  rw [commonCorrected_eq_of_localized
-    (dynamicCopyData sys hh label hl gap B V request j)
-    (ActualPeriodizedSignedRealization.copyData B (layout sys hh label hl gap) V request j) rfl
-    (dynamic_localized_eq sys hh label hl gap B V request j),
-    ActualPeriodizedSignedRealization.commonCorrected_eq]
 
 end ActualCopies
 
@@ -394,10 +373,6 @@ theorem rotateCoefficient_real_smul (Y : Plane) (c : ℝ) (v : ComplexVector) :
     rotateCoefficient Y (c • v) = c • rotateCoefficient Y v := by
   simpa only [rotationMap_apply] using (rotationMap Y).map_smul c v
 
-theorem rotateCoefficient_complex_smul (Y : Plane) (c : ℂ) (v : ComplexVector) :
-    rotateCoefficient Y (c • v) = c • rotateCoefficient Y v := by
-  ext i
-  fin_cases i <;> simp [rotateCoefficient, Complex.real_smul, Pi.smul_apply, smul_eq_mul] <;> ring
 
 theorem rotateCoefficient_vectorMode (Y : Plane) (K : ℝ) (Phi : Cylinder → ℝ)
     (v : Cylinder → ComplexVector) (x : Cylinder) (i : Fin 3) :
@@ -1481,9 +1456,6 @@ end NativeSources
 
 /-! ## A fixed native region for the selected carrier profiles -/
 
-noncomputable def carrierRegion (h a b : ℝ) : Set PhysicalGraphBounds.Slow :=
-  {p | p.1 ∈ Ioo (a / 8) (4 * b + 1) ∧
-    (p.2.2, p.2.1) ∈ PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4}
 
 
 
@@ -2036,30 +2008,7 @@ theorem labelPotential_eq_reference {x : SpaceTime}
   simp only [he] at H
   exact H
 
-theorem labelPressure_eq_reference {x : SpaceTime}
-    (hx : x ∈ referencePatch (h := h) f L a b delta j) :
-    labelPressure sys hh f L a x =
-      ActualPeriodizedSignedRealization.physicalPressure (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta x := by
-  let z := PhysicalCurlCovariance.polarCoordinates delta j x
-  have hz : z ∈ PhysicalCurlCovariance.validCylindrical delta j := polarCoordinates_valid hd j hx.1
-  have he : (z.1, CylindricalResidual.chart z.2) = x := polarCoordinates_backward hd j hx.1
-  have hb' : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PhysicalGraphBounds.annulus a b := by simpa only [he] using hx.2.1
-  have hj' : PhysicalGraphBounds.scaledRadial L.val.1 (z.1, CylindricalResidual.chart z.2) ∈
-      PolarCharts.chartDomain a j := by simpa only [he] using hx.2.2.1
-  have H := pressure_periodized_physical sys hh f G L ha hd j z hz hb' hj'
-  simp only [he] at H
-  exact H
 
-include hPhi in
-theorem labelPotential_germ {x : SpaceTime}
-    (hx : x ∈ interior (referencePatch (h := h) f L a b delta j)) :
-    labelPotential sys hh f L a =ᶠ[𝓝 x]
-      ActualPeriodizedSignedRealization.physicalPotential (f.primary L)
-        (layout sys hh L.val L.property 0) (f.view L) (f.state L) (f.column L) delta :=
-  eventually_of_mem (isOpen_interior.mem_nhds hx) (fun _ hy =>
-    labelPotential_eq_reference sys hh f G L hPhi ha hd j (interior_subset hy))
 
 
 

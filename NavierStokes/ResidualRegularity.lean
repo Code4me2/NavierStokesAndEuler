@@ -95,16 +95,6 @@ theorem contDiffOn_residual_product {times : Set ℝ} {u : VelocityField} {p : P
       (times ×ˢ (univ : Set Space)) :=
   contDiffOn_residual (ht.prod isOpen_univ) hu hp
 
-/-- The candidate's relative smoothness hypotheses suffice at all interior times. -/
-theorem contDiffOn_residual_interior {u : VelocityField} {p : PressureField}
-    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ p preSingularDomain) :
-    ContDiffOn ℝ ∞ (fun z => navierStokesResidual u p z.1 z.2)
-      (Ioo (0 : ℝ) 1 ×ˢ (univ : Set Space)) := by
-  have hsub : Ioo (0 : ℝ) 1 ×ˢ (univ : Set Space) ⊆ preSingularDomain := by
-    intro z hz
-    exact ⟨⟨hz.1.1.le, hz.1.2⟩, hz.2⟩
-  exact contDiffOn_residual_product isOpen_Ioo (hu.mono hsub) (hp.mono hsub)
 
 /-! ## Exact spatial periods -/
 
@@ -186,16 +176,6 @@ theorem residual_periods {u : VelocityField} {p : PressureField} {times : Set �
   dsimp only at htime hadv hlap hgrad ⊢
   rw [htime, hadv, hlap, hgrad]
 
-theorem residual_periods_interior {u : VelocityField} {p : PressureField}
-    (hu : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hp : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p) :
-    UnitSpatialPeriodsOn (Ioo (0 : ℝ) 1)
-      (fun z => navierStokesResidual u p z.1 z.2) := by
-  apply residual_periods isOpen_Ioo
-  · intro t ht x i
-    exact hu t ⟨ht.1.le, ht.2⟩ x i
-  · intro t ht x i
-    exact hp t ⟨ht.1.le, ht.2⟩ x i
 
 /-! ## Locality, without differentiability assumptions -/
 

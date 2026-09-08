@@ -209,20 +209,5 @@ theorem compact_family_trueCone_stable {K : Set X} (hK : IsCompact K)
   exact ⟨ρ, hρ, fun x hx P' J' v' hdist =>
     hstable (f x) (mem_image_of_mem f hx) (P', J', v') hdist⟩
 
-/-- Coordinatewise perturbations of a compact true-cone family preserve
-the exact quadratic criterion as well as the lower bound `v > 2`. -/
-theorem compact_family_quadratic_stable {K : Set X} (hK : IsCompact K)
-    {P J v : X → ℝ} (hP : ContinuousOn P K) (hJ : ContinuousOn J K)
-    (hv : ContinuousOn v K)
-    (hcone : ∀ x ∈ K, 2 < v x ∧ 2 < P x ∧ v x < coneBound (P x) (J x)) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ x ∈ K, ∀ P' J' v' : ℝ,
-      |P' - P x| ≤ ρ → |J' - J x| ≤ ρ → |v' - v x| ≤ ρ →
-        2 < v' ∧ v' < P' ∧ (v' - 2) * J' ^ 2 < 2 * (P' - v') ^ 2 := by
-  obtain ⟨ρ, hρ, hstable⟩ := compact_family_trueCone_stable hK hP hJ hv hcone
-  refine ⟨ρ, hρ, fun x hx P' J' v' hP' hJ' hv' => ?_⟩
-  have hdist : dist (P', J', v') (P x, J x, v x) ≤ ρ := by
-    simpa only [Prod.dist_eq, Real.dist_eq] using max_le hP' (max_le hJ' hv')
-  obtain ⟨hv₂, hP₂, hroot⟩ := hstable x hx P' J' v' hdist
-  exact ⟨hv₂, (true_cone_iff hv₂).mp ⟨hP₂, hroot⟩⟩
 
 end NavierStokes.UniformCone

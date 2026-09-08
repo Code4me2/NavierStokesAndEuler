@@ -402,16 +402,6 @@ theorem totalIntegral_radialSlice (M : ℝ) (v : Plane) (f : ℝ × (S × Plane)
   simp only [TransportPrimitive.shift, radialSlice, Prod.mk_add_mk, Prod.smul_mk,
     smul_zero, add_zero]
 
-theorem sourceMean_totalIntegral {a b M : ℝ} {v : Plane} {f : ℝ × (S × Plane) → F}
-    (hab : a ≤ b) (hf : ContDiff ℝ ∞ f) (hp : SourcePeriodic f)
-    (hs : RadialAlias.RadiallySupported a b f) (U : ℝ) (s : S) :
-    sourceMean (TransportPrimitive.totalIntegral M ((0 : S), v) f) (U, s) =
-      ∫ u in a..b, sourceMean f (u, s) := by
-  change FourierAlias.torusMean (fun Y => TransportPrimitive.totalIntegral M ((0 : S), v) f
-    (U, (s, Y))) = _
-  simp_rw [totalIntegral_radialSlice]
-  exact FourierAlias.torusMean_totalIntegral hab (radialSlice_smooth hf s).continuous
-    (fun u => hp u s) (radialSlice_supported hs s) U
 
 
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
@@ -447,20 +437,6 @@ theorem familyMean_eq_parameterMean (f : P × Plane → ℂ) (p : P) :
     SmoothFamilyTorusInverse.mean f p = parameterMean f p :=
   SmoothFamilyTorusInverse.mean_eq_integral f p
 
-theorem torusMean_map {F H : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]
-    [NormedAddCommGroup H] [NormedSpace ℝ H] [CompleteSpace F] [CompleteSpace H]
-    (L : F →L[ℝ] H) {f : Plane → F} (hf : Continuous f) :
-    FourierAlias.torusMean (fun Y => L (f Y)) = L (FourierAlias.torusMean f) := by
-  have hx (y : ℝ) : (∫ x in (0 : ℝ)..1, L (f (x, y))) =
-      L (∫ x in (0 : ℝ)..1, f (x, y)) :=
-    L.intervalIntegral_comp_comm
-      ((hf.comp (continuous_id.prodMk continuous_const)).intervalIntegrable _ _)
-  have hc : Continuous (fun y => ∫ x in (0 : ℝ)..1, f (x, y)) :=
-    FourierAlias.continuous_parameter_interval (g := fun p : ℝ × ℝ => f (p.2, p.1))
-      (hf.comp (continuous_snd.prodMk continuous_fst)) (by norm_num)
-  unfold FourierAlias.torusMean
-  simp_rw [hx]
-  exact L.intervalIntegral_comp_comm (hc.intervalIntegrable _ _)
 
 /-- A genuine real directional inverse, obtained from the actual complex
 Fourier inverse by real part. -/
@@ -750,44 +726,7 @@ theorem familyInverse_finiteJets (d : Direction) (a b : ℝ) (m : ℕ) :
   rw [norm_iteratedFDeriv_fromProduct]
   exact hout j hj (z.1, z.2.1) hz z.2.2
 
-theorem realCenterSource_finiteJets (a b : ℝ) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℝ) (C : ℝ),
-      ContDiff ℝ ∞ f → SourcePeriodic f → 0 ≤ C →
-      FiniteJetBound (m + 4) f (Prod.fst ⁻¹' Icc a b) C →
-      FiniteJetBound m (realCenterSource f) (Prod.fst ⁻¹' Icc a b) (K * C) := by
-  obtain ⟨K, hK, hb⟩ := realCentered_finiteJets (P := ℝ × S) m
-  refine ⟨K, hK, ?_⟩
-  intro f C hf hp hC hsource
-  have hin : ∀ j ≤ m + 4, ∀ p ∈ (Prod.fst ⁻¹' Icc a b : Set (ℝ × S)), ∀ Y,
-      ‖iteratedFDeriv ℝ j (toProduct f) (p, Y)‖ ≤ C := by
-    intro j hj p hpA Y
-    rw [norm_iteratedFDeriv_toProduct]
-    exact hsource j hj (p.1, (p.2, Y)) hpA
-  have hout := hb (toProduct f) (Prod.fst ⁻¹' Icc a b) C (toProduct_smooth hf)
-    (fun p => hp p.1 p.2) hC hin
-  intro j hj z hz
-  change ‖iteratedFDeriv ℝ j (fromProduct (realCentered (toProduct f))) z‖ ≤ _
-  rw [norm_iteratedFDeriv_fromProduct]
-  exact hout j hj (z.1, z.2.1) hz z.2.2
 
-/-- Actual, source-uniform finite-seminorm estimate for the translated total
-integral. Every integration by parts consumes one radial derivative and five
-orders for the genuine torus inverse. -/
-theorem totalIntegral_finiteJets (d : Direction) {a b : ℝ} (hab : a ≤ b) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℂ), Admissible a b f →
-      ∀ C : ℝ, 0 ≤ C → FiniteJetBound (m + 6 * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-        ‖iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M ((0 : S), vector d) f) z‖ ≤
-          K * C * (|M|⁻¹) ^ p := by
-  apply totalIntegral_uniform_of_inverse (Admissible a b) (familyInverse d) 5 hab
-    (fun _ hf => ⟨hf.1, hf.2.2.2⟩)
-    (fun _ hf => familyInverse_smooth d hf.1 hf.2.1)
-    (fun _ hf => familyInverse_supported d hf.2.2.2)
-    (fun _ hf => familyInverse_solves d hf.1 hf.2.1 hf.2.2.1)
-    (fun _ hf => admissible_step d hf) _ m p
-  intro k
-  obtain ⟨K, hK, hb⟩ := familyInverse_finiteJets (S := S) d a b k
-  exact ⟨K, hK, fun f hf C hC hsource => hb f C hf.1 hf.2.1 hC hsource⟩
 
 /-- The retained alias has the same arbitrary inverse-frequency gain, with
 all source dependence confined to a finite actual derivative bound. -/
@@ -1171,36 +1110,6 @@ theorem radial_realMeanClass_alias_superflat {a b cL cR h α : ℝ}
   simpa only [abs_of_pos (ChartScales.radialCoefficient_pos h n)] using
     ChartScales.radialCoefficient_inv_upper h hh.le hn
 
-theorem realMeanClass_alias_superflat_of_integratedMean_zero (d : Direction)
-    {a b cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a ≤ b) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {χ : ℝ → ℝ} (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    {f : ℕ → ℝ × (S × Plane) → ℝ}
-    (hf : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, SourcePeriodic (f n))
-    (hm : ∀ n s, (∫ U in a..b, sourceMean (f n) (U, s)) = 0)
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    {M : ℕ → ℝ} {κ A growth : ℝ} (hκ : 0 < κ)
-    (hM : ∀ᶠ n in atTop, M n ≠ 0)
-    (hfrequency : ∀ᶠ n in atTop, |M n|⁻¹ ≤
-      A * ChartScales.epsilon h n ^ κ * ChartScales.S n ^ growth) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-      ‖iteratedFDeriv ℝ j (exactAlias χ (M n) ((0 : S), vector d) (f n)) z‖ ≤
-        C * ChartScales.epsilon h n ^ N := by
-  have hcenter : MeanClass (chartStrip a b cL cR ha hcL hcR h hh) α
-      (fun n => realCenterSource (f n)) :=
-    meanClass_realCenterSource ha hcL hcR (ChartScales.epsilon h) bandSlow
-      (ChartScales.epsilon_pos h) (ChartScales.epsilon_le_one h hh.le) one_le_bandSlow hf hfc hp
-  obtain ⟨C, hC, hb⟩ := realMeanClass_alias_superflat d ha hab hcL hcR hh hχ hleft hright hcenter
-    (fun n => realCenterSource_smooth (hfc n) (hp n)) (fun n => realCenterSource_periodic (hp n))
-    (fun n => realCenterSource_zeroMean (hfc n) (hp n)) (fun n => realCenterSource_supported (hs n))
-    hκ hM hfrequency m N
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [hb] with n hn
-  intro j hj z
-  rw [exactAlias_eq_realCenterSource χ (hfc n) (hp n) (hs n) (hm n)]
-  exact hn j hj z
 
 
 end UniformFamilies

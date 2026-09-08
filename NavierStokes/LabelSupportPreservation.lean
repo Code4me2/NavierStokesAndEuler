@@ -473,26 +473,6 @@ variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 include hS hsupport hinj
 
-/-- A single actual particular mode, with its actual Gaussian error,
-has the same carrier as its incoming label. -/
-theorem particular_mode_inputSupport (j : ℤ) (l : Label) :
-    HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ) (sourceRegions F clock reference gap r S l)
-      (ParticularWaveAssembly.nativeModeBlock j (b l)
-        ((data F clock reference gap r hr base tangent ctx u b G A j l).commonCorrected outStrip d))
-      (ParticularWaveAssembly.nativeModeBlock j (b l)
-        { base l with
-          amplitude := (data F clock reference gap r hr base tangent ctx u b G A j l).globalGaussian d
-          pressure := fun _ _ => 0 }).velocity 0 := by
-  apply modeBlock_inputSupport
-  · intro n x hx hn
-    exact (particular_zero_germs F clock reference gap r hr base tangent ctx u b G A j
-      s S hS hsupport hinj outStrip d l n (x := ((x.1, 0), x.2)) hx.1 hn).1.self_of_nhds
-  · intro n x hx hn
-    exact (particular_zero_germs F clock reference gap r hr base tangent ctx u b G A j
-      s S hS hsupport hinj outStrip d l n (x := ((x.1, 0), x.2)) hx.1 hn).2.1.self_of_nhds
-  · intro n x hx hn
-    exact (particular_zero_germs F clock reference gap r hr base tangent ctx u b G A j
-      s S hS hsupport hinj outStrip d l n (x := ((x.1, 0), x.2)) hx.1 hn).2.2.self_of_nhds
 
 
 end ParticularAssembly
@@ -543,24 +523,7 @@ section TransportedMask
 variable {P Q : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-/-- Clock transport of a native mask keeps the actual source window.
-The primitive mask may contain all radial and dyadic slow cutoffs. -/
-theorem transported_mask_support (χ : P →L[ℝ] Q) (g : Geometry) (k : Frequency)
-    {S : Set Q} {r L c : ℝ} (hc : 0 < c) {mask : Q × Plane → ℝ}
-    (hm : support mask ⊆ S ×ˢ ActualGaussianCoverage.sourceCell r L 1) :
-    support (fun x : P × Plane => mask
-      (χ x.1, CopySolveCompatibility.nativeTimeMap 0 c (g.coordinates k x.2))) ⊆
-      ActualGaussianCoverage.sourceRegion (χ ⁻¹' S) g r L c := by
-  intro x hx
-  have hs := hm hx
-  exact ⟨hs.1, mem_iUnion.mpr ⟨k, (ActualGaussianCoverage.mem_sourceCell_clock hc _).mpr hs.2⟩⟩
 
-/-- The slow pullback and the locally finite native union form one closed
-carrier. This is the closure used by the next residual-source calculation. -/
-theorem transported_carrier_closed (χ : P →L[ℝ] Q) (g : Geometry)
-    {S : Set Q} (hS : IsClosed S) (r L c : ℝ) :
-    IsClosed (ActualGaussianCoverage.sourceRegion (χ ⁻¹' S) g r L c) :=
-  ActualGaussianCoverage.sourceRegion_closed (hS.preimage χ.continuous) g r L c
 
 
 

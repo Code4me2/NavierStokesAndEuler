@@ -649,22 +649,7 @@ theorem actAxial_real {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.ram
     (StressActivation.FromReference.refAxial_smooth N hδ hδT)
     (fun x _ hη => E.refAxial_real hδ hδT x hη) x hη
 
-theorem refF_real {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit)
-    (x : ℝ) {η : ℝ} (hη : η ∈ ReferencePath.parameterInterval) :
-    E.refF δ (x,(η : ℂ)) = (N.refF δ (x,η) : ℂ) := by
-  by_cases hx : x ≤ N.endpoint
-  · simp only [refF,attach,ite_eq_left hx,ReferencePath.Input.refF,E.f_real]
-  · simp only [refF,attach,ite_eq_right hx,ReferencePath.Input.refF,logPoint]
-    rw [E.refLog_real hδ hδT _ hη,Complex.ofReal_exp]
-    rfl
 
-theorem refU_real {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit)
-    (x : ℝ) {η : ℝ} (hη : η ∈ ReferencePath.parameterInterval) :
-    E.refU δ (x,(η : ℂ)) = (N.refU δ (x,η) : ℂ) := by
-  by_cases hx : x ≤ N.endpoint
-  · simp only [refU,attach,ite_eq_left hx,ReferencePath.Input.refU,E.U_real]
-  · simp only [refU,attach,ite_eq_right hx,ReferencePath.Input.refU,logPoint]
-    exact E.refAxial_real hδ hδT _ hη
 
 theorem actF_real {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit)
     (T κ x : ℝ) {η : ℝ} (hη : η ∈ ReferencePath.parameterInterval) :
@@ -682,15 +667,6 @@ theorem actU_real {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLim
   · simp only [actU,attach,ite_eq_right hx,StressActivation.FromReference.U,logPoint]
     exact E.actAxial_real hδ hδT T κ _ hη
 
-theorem actF_ne_zero (T κ δ : ℝ) {p : CPoint} (hx : 0 ≤ p.1) (hz : p.2 ∈ Ω) :
-    E.actF T κ δ p ≠ 0 := by
-  by_cases he : p.1 ≤ N.endpoint
-  · have hp := E.initial_half p.1 ⟨hx,he⟩ p.2 hz
-    rw [actF,attach,ite_eq_left he]
-    intro hn
-    simp only [hn,Complex.zero_re,lt_self_iff_false] at hp
-  · simp only [actF,attach,ite_eq_right he]
-    exact Complex.exp_ne_zero _
 
 end NaturalExtension
 
@@ -1066,16 +1042,6 @@ theorem real_profiles {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
   · exact average_ofReal (fun y => E.natural.actU_real hδ hδT T κ y hη) x
   · exact pressure_ofReal (fun y => E.natural.actF_real hδ hδT T κ y hη) (E.pressure0_real η) x
 
-theorem reference_regular {δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < ReferencePath.rampLimit) :
-    Regular (Ioi (-R)) Ω (E.natural.refF δ) ∧
-    Regular (Ioi (-R)) Ω (E.natural.refU δ) ∧
-    Regular (Ioi (-R)) Ω (average (E.natural.refU δ)) ∧
-    Regular (Ioi (-R)) Ω (pressure E.pressure0 (E.natural.refF δ)) := by
-  have hf := E.natural.refF_regular E.isOpen hδ hδT
-  have hu := E.natural.refU_regular E.isOpen hδ hδT
-  exact ⟨hf,hu,hu.average isOpen_Ioi E.isOpen
-    (fun _ hx _ ht => scale_half_interval E.natural.radius_pos hx ht),
-      regular_pressure E.natural.radius_pos E.isOpen hf E.pressure0_analytic⟩
 
 
 end InitialTube
@@ -1100,15 +1066,6 @@ theorem exists_initialTube {h j σ Λ C : ℝ} {g a : ℝ → ℝ} {cap : ℝ}
     pressure0_real := PressureDatum.complexPressure_ofReal g a
   }⟩⟩
 
-theorem natural_average_identity {h j Λ : ℝ} {P0 a : ℝ → ℝ}
-    {f U V Pr : ProfileHistories.Field} (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a f U V Pr)
-    {p : ProfileHistories.Point} (hp : p ∈ NaturalProfile.domain Λ) : ProfileHistories.average U p = V p := by
-  by_cases hx : p.1 = 0
-  · have he : p = (0,p.2) := Prod.ext hx rfl
-    rw [he,ProfileHistories.average_at_axis,hs.U_axis p.2 hp.2,hs.average_axis p.2 hp.2]
-  · rw [ProfileHistories.average_eq_quotient U hx]
-    change (∫ X in (0 : ℝ)..p.1, U (X,p.2)) / p.1 = V p
-    rw [← hs.average_integral p hp,mul_div_cancel_left₀ _ hx]
 
 
 
@@ -1135,23 +1092,6 @@ theorem iteratedDeriv_ofReal {S : Set ℝ} (hS : IsOpen S) {g : ℝ → ℝ}
     exact (((iteratedDeriv_smooth hS hg k).contDiffAt (hS.mem_nhds hx)).differentiableAt
       (by simp)).hasDerivAt.ofReal_comp.deriv
 
-/-- The holomorphic radial jets extend the actual real radial derivatives,
-including at the axis; agreement is derived from equality of the functions. -/
-theorem radialJet_real {S : Set ℝ} {Ω : Set ℂ} (hS : IsOpen S) (_ : IsOpen Ω)
-    {F : CField} (hF : Regular S Ω F) {g : ℝ → ℝ} {η : ℝ} (hη : (η : ℂ) ∈ Ω)
-    (heq : ∀ x ∈ S, F (x,(η : ℂ)) = (g x : ℂ)) (k : ℕ) {x : ℝ} (hx : x ∈ S) :
-    radialJet F k (x,(η : ℂ)) = ((iteratedDeriv k g x : ℝ) : ℂ) := by
-  have hs : ContDiffOn ℝ ∞ (fun x => F (x,(η : ℂ))) S :=
-    hF.smooth.comp (contDiff_id.prodMk contDiff_const).contDiffOn (fun _ hx => ⟨hx,hη⟩)
-  have hgr : ContDiffOn ℝ ∞ g S := by
-    apply (Complex.reCLM.contDiff.comp_contDiffOn hs).congr
-    intro y hy
-    change g y = (F (y,(η : ℂ))).re
-    rw [heq y hy,Complex.ofReal_re]
-  have he : (fun y => F (y,(η : ℂ))) =ᶠ[𝓝 x] (fun y => (g y : ℂ)) := by
-    filter_upwards [hS.mem_nhds hx] with y hy
-    exact heq y hy
-  exact (he.iteratedDeriv_eq k).trans (iteratedDeriv_ofReal hS hgr k hx)
 
 
 theorem scale_symmetric_interval {R x t : ℝ} (hx : x ∈ Ioo (-R) R) (ht : t ∈ Icc (0 : ℝ) 1) :
@@ -1162,18 +1102,6 @@ theorem scale_symmetric_interval {R x t : ℝ} (hx : x ∈ Ioo (-R) R) (ht : t �
     _ ≤ |x| := mul_le_of_le_one_left (abs_nonneg x) ht.2
     _ < R := abs_lt.mpr hx
 
-theorem InitialTube.natural_regular {N : ReferencePath.Input} {h R : ℝ} {P0 : ℝ → ℝ} {Ω : Set ℂ}
-    (E : InitialTube N h P0 R Ω) :
-    Regular (Ioo (-R) R) Ω E.natural.f ∧
-    Regular (Ioo (-R) R) Ω E.natural.U ∧
-    Regular (Ioo (-R) R) Ω (average E.natural.U) ∧
-    Regular (Ioo (-R) R) Ω (pressure E.pressure0 E.natural.f) := by
-  refine ⟨E.natural.f_regular,E.natural.U_regular,?_,?_⟩
-  · exact E.natural.U_regular.average isOpen_Ioo E.isOpen
-      (fun _ hx _ ht => scale_symmetric_interval hx ht)
-  · exact (regular_parameter E.pressure0_analytic).add
-      ((E.natural.f_regular.pow 2).primitive isOpen_Ioo E.isOpen
-        (fun _ hx _ ht => scale_symmetric_interval hx ht))
 
 
 

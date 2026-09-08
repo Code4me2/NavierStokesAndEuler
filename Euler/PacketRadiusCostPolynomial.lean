@@ -143,9 +143,5 @@ def radiusConstant : ℝ := coefficientCost radiusPolynomial
 def radiusPower : ℕ := radiusPolynomial.natDegree
 
 
-theorem radiusEnvelope_power (W : ℝ) (hW : 1 ≤ W) :
-    radiusEnvelope W ≤ radiusConstant*W^radiusPower := by
-  rw [← radiusPolynomial_eval]
-  exact (le_abs_self _).trans (eval_bound radiusPolynomial W hW)
 
 end EulerPacketRadiusPolynomial

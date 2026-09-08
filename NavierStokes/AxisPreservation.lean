@@ -39,16 +39,6 @@ theorem wave_sum_zero_near_axis {H : ℕ} {f : WaveFamily H}
   rw [hy]
   exact Finset.sum_eq_zero hz
 
-theorem vector_sum_zero_near_axis {H : ℕ} {f : Fin 3 → WaveFamily H}
-    {a b h r0 Z : ℝ} {gap : ℕ}
-    (hf : ∀ i, RegularFamily (f i) a b h r0 Z gap) (ha : 0 < a)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {w : SpaceTime}
-    (hw : w ∈ preterminal) (haxis : PhysicalGraphBounds.radialProjection w = 0) :
-    vectorSum f a h r0 =ᶠ[𝓝 w] fun _ => 0 := by
-  have hz : ∀ᶠ y in 𝓝 w, ∀ i : Fin 3, (f i).sum a h r0 y = 0 :=
-    (Filter.eventually_all).2 (fun i => wave_sum_zero_near_axis (hf i) ha hh hh1 hw haxis)
-  filter_upwards [hz] with y hy
-  simp only [vectorSum, hy, map_zero, Finset.sum_const_zero]
 
 
 /-- Only finitely many zero germs are intersected at each positive-scale
@@ -138,12 +128,6 @@ theorem physicalQ_origin_tendsto {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :
   filter_upwards [self_mem_nhdsWithin (a := (1 : ℝ)) (s := Iio 1)] with t ht
   exact (physicalQ_origin hh hh1 ht).symm
 
-/-- The zeroth potential is kept separate from the annular wave increments.
-Each increment may have its own finite harmonic band. -/
-noncomputable def waveSeries (base : VelocityField) (H : ℕ → ℕ)
-    (f : (j : ℕ) → Fin 3 → WaveFamily (H j)) (a h r0 : ℝ) : ℕ → VelocityField
-  | 0 => base
-  | j + 1 => vectorSum (f j) a h r0
 
 
 end

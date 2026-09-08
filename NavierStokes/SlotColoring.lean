@@ -235,22 +235,6 @@ theorem adj_index_bound (D : ℝ) {L M : Label} (h : Adj D L M) (j : Fin 3) :
       (overlapping_centers D L M h.overlap j)
   · exact Nat.le_ceil _
 
-theorem adj_mem_candidates (D : ℝ) {L M : Label} (h : Adj D L M) : M ∈ candidates D L := by
-  apply Finset.mem_biUnion.mpr
-  refine ⟨M.1, ?_, ?_⟩
-  · simp only [Finset.mem_Icc]
-    have h1 := h.left_level_le
-    have h2 := h.right_level_le
-    omega
-  · apply Finset.mem_image.mpr
-    refine ⟨M.2, ?_, rfl⟩
-    apply Finset.mem_product.mpr
-    refine ⟨?_, Finset.mem_univ _⟩
-    apply Fintype.mem_piFinset.mpr
-    intro j
-    have hj := abs_le.mp (adj_index_bound D h j)
-    simp only [Finset.mem_Icc]
-    omega
 
 theorem integer_interval_card (c : ℤ) (K : ℕ) :
     (Finset.Icc (c - (K : ℤ)) (c + (K : ℤ))).card = 2 * K + 1 := by
@@ -275,25 +259,7 @@ theorem candidatesAtLevel_card_le (D : ℝ) (L : Label) (m : ℕ) :
 
 def degreeBound (D : ℝ) : ℕ := 18 * (2 * indexRadius D + 1) ^ 3
 
-theorem candidates_card_le (D : ℝ) (L : Label) :
-    (candidates D L).card ≤ degreeBound D := by
-  have hlevels : (Finset.Icc (L.1 - 4) (L.1 + 4)).card ≤ 9 := by
-    rw [Nat.card_Icc]
-    omega
-  calc
-    (candidates D L).card ≤
-        ∑ m ∈ Finset.Icc (L.1 - 4) (L.1 + 4), (candidatesAtLevel D L m).card :=
-      Finset.card_biUnion_le
-    _ ≤ ∑ _m ∈ Finset.Icc (L.1 - 4) (L.1 + 4), (2 * indexRadius D + 1) ^ 3 * 2 :=
-      Finset.sum_le_sum (fun m _ => candidatesAtLevel_card_le D L m)
-    _ = (Finset.Icc (L.1 - 4) (L.1 + 4)).card * ((2 * indexRadius D + 1) ^ 3 * 2) := by simp
-    _ ≤ 9 * ((2 * indexRadius D + 1) ^ 3 * 2) := Nat.mul_le_mul_right _ hlevels
-    _ = degreeBound D := by unfold degreeBound; ring
 
-/-- The actual finite neighbor set, obtained by filtering an explicit finite box. -/
-def neighbors (D : ℝ) (L : Label) : Finset Label := by
-  classical
-  exact (candidates D L).filter (Adj D L)
 
 
 

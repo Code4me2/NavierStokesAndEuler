@@ -47,17 +47,7 @@ theorem extendEven_pullback {S : Set ℝ} (w : ParametricRadialExtension.Paramet
     extendEven w f (R ^ 2 / 2, eta) = f (R, eta) :=
   ParametricRadialExtension.extension_pullback w f.smooth (fun _ he r => f.even he r) R heta
 
-theorem extendEven_germ {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
-    (f : EvenProfile S) {p : ℝ × ℝ} (hX : 0 < p.1) (heta : |p.2| < w.inner) :
-    extendEven w f =ᶠ[𝓝 p] xProfile f := by
-  filter_upwards [(isOpen_Ioi.prod isOpen_Ioo).mem_nhds ⟨hX, abs_lt.mp heta⟩] with q hq
-  exact extendEven_eq w f hq.1.le (abs_lt.mpr hq.2).le
 
-theorem extendEven_right_jets {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
-    (f : EvenProfile S) (m : ℕ) {X eta : ℝ} (hX : 0 ≤ X) (heta : |eta| ≤ w.inner) :
-    iteratedDeriv m (fun Y => extendEven w f (Y, eta)) X =
-      iteratedDerivWithin m (fun Y => xProfile f (Y, eta)) (Ici 0) X :=
-  ParametricRadialExtension.extension_radial_jets w f.smooth (fun _ he R => f.even he R) m hX heta
 
 
 theorem extendEven_support {S : Set ℝ} (w : ParametricRadialExtension.ParameterWindow S)
@@ -138,11 +128,6 @@ theorem extendedCoefficient_support {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
   · exact profiles_beta_exterior s n
   · exact profiles_pressure_exterior s hn
 
-theorem extendedCoefficient_compactSupport {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) (i : Fin 4) :
-    HasCompactSupport (extendedCoefficient s hI n i) :=
-  (isCompact_Icc.prod isCompact_Icc).of_isClosed_subset isClosed_closure
-    (extendedCoefficient_support s hI hn i)
 
 theorem extendedCoefficient_zero_exterior {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
     (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) (i : Fin 4) {p : ℝ × ℝ}
@@ -425,19 +410,6 @@ theorem coefficients_stress_support (Z0 : ZeroOrderSolved s inner)
     have hz := coefficients_stress_zero_parameter L B0 Z0 hI n (le_of_not_ge hh)
     exact hn (Prod.ext hz.1 hz.2)
 
-theorem coefficients_stress_zero (Z0 : ZeroOrderSolved s inner)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) (n : ℕ) {w : ℝ × ℝ}
-    (hX : 0 ≤ w.1) (hi : w.1 ≤ inner / 2) (heta : |w.2| ≤ 1) :
-    (coefficients L B0 Z0 hI).stressTheta n w = 0 ∧
-    (coefficients L B0 Z0 hI).stressAxial n w = 0 := by
-  rw [(coefficients_stress_eq L B0 Z0 hI n hX heta).1,
-    (coefficients_stress_eq L B0 Z0 hI n hX heta).2]
-  have hr : Real.sqrt (2 * w.1) ≤ Real.sqrt inner :=
-    Real.sqrt_le_sqrt (by linarith)
-  exact ⟨SlowStressSupport.stress_inner 2
-    (fun _ he _ hR => (densities_zero_inner L B0 Z0 n hR he).1) hr (hI (abs_le.mp heta)),
-    SlowStressSupport.stress_inner 1
-    (fun _ he _ hR => (densities_zero_inner L B0 Z0 n hR he).2) hr (hI (abs_le.mp heta))⟩
 
 
 
@@ -560,14 +532,6 @@ theorem extended_axial_primitive_zero {h C : ℝ} (s : Scheme S h C)
   rw [hr2] at he
   exact he.symm.trans hm
 
-theorem extended_axial_average_zero {h C : ℝ} (s : Scheme S h C)
-    (hI : Icc (-1 : ℝ) 1 ⊆ S) {n : ℕ} (hn : 0 < n) {p : ℝ × ℝ}
-    (hX : s.B ^ 2 / 2 ≤ p.1) (heta : |p.2| ≤ 1) :
-    ProfileHistories.average (extendedCoefficient s hI n 1) p = 0 := by
-  have hp : 0 < p.1 := (div_pos (sq_pos_of_pos s.B_pos) (by norm_num)).trans_le hX
-  have hm := extended_axial_primitive_zero s hI hn hX heta
-  rw [ProfileHistories.primitive_eq_mul_average] at hm
-  exact (mul_eq_zero.mp hm).resolve_left hp.ne'
 
 end ActualFlux
 
@@ -1270,11 +1234,6 @@ theorem nominalCoefficients_zero_fields {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta 
     rw [profiles_zero]
     exact baseFields_pressure (nominalDomain W) W.axis.normalization W.profiles (nominalParameters_domain W) hX
 
-theorem nominalCoefficients_stress_zero {p : ℝ × ℝ}
-    (hp : p.1 ≤ nominalInner W / 8) (n : ℕ) :
-    (nominalCoefficients W).stressTheta n p = 0 ∧ (nominalCoefficients W).stressAxial n p = 0 :=
-  coefficients_stress_zero_left (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
-    (nominalParameters_contains W) n hp
 
 theorem nominalCoefficients_stress_eq {p : ℝ × ℝ}
     (hp : 0 ≤ p.1) (heta : |p.2| ≤ 1) (n : ℕ) :

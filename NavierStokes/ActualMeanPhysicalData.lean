@@ -215,14 +215,10 @@ theorem initialized_overlap (B N0 N : ℕ) :
   intro n hn m hm k hk
   exact ActualInitialCoherence.initialized_on_overlap B N0 n m k hk
 
-noncomputable def initialRadialFamily (B N0 N : ℕ) :=
-  (initialAtlas N).radialFamily (initialized_overlap B N0 N)
 
 noncomputable def initialAngularFamily (B N0 N : ℕ) :=
   (initialAtlas N).angularFamily (initialized_overlap B N0 N)
 
-noncomputable def initialAxialFamily (B N0 N : ℕ) :=
-  (initialAtlas N).axialFamily (initialized_overlap B N0 N)
 
 noncomputable def initialPressureFamily (B N0 N : ℕ) :=
   (initialAtlas N).pressureFamily (initialized_overlap B N0 N)
@@ -1007,12 +1003,6 @@ theorem Atlas.family_sub_field {h d : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
   funext w
   exact congrFun (A.physical_sub U d f g) (PhysicalMeanJetBounds.physicalPoint h w)
 
-theorem Atlas.family_sub_angular {h d : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
-    {U : Set Plane} {f g : Scalar} (Hf : A.OverlapLaw U d f) (Hg : A.OverlapLaw U d g) :
-    (A.family (Hf.sub Hg)).angularField = (A.family Hf).angularField - (A.family Hg).angularField := by
-  funext w
-  simp only [PhysicalMeanJetBounds.CoherentFamily.angularField, A.family_sub_field Hf Hg,
-    Pi.sub_apply, sub_smul]
 
 theorem initialStream_angularField (B N0 N : ℕ) :
     (initialStreamFamily B N0 N).angularField =

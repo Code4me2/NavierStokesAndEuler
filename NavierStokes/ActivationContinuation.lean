@@ -1518,7 +1518,6 @@ theorem profiles_mem {p : Point} (hp : p.2 ∈ Icc (-1 : ℝ) 1) (hX : 0 ≤ p.1
     p ∈ r.reference.domain.carrier :=
   ReferenceJetBounds.reference_mem _ hX hp
 
-theorem bigTime_pos : 0 < r.reference.bigTime := r.refTime_pos.trans_le r.before_big
 
 
 theorem startRadius_pos : 0 < r.startRadius :=
@@ -1982,11 +1981,7 @@ variable {h j σ Λ C : ℝ} {P0 : ℝ → ℝ}
     {hΛ : 0 < Λ} {hsmall : NaturalAxisData.SmallParameters h j}
     {hP0 : ContDiff ℝ ∞ P0} (r : RampParameters F hΛ hsmall hP0)
 
-noncomputable def endpointAxial : ℝ → ℝ :=
-  r.reference.endpointU r.actTime r.kappa r.widthU
 
-noncomputable def endpointLogarithm : ℝ → ℝ :=
-  r.reference.endpointLog r.actTime r.kappa r.widthU r.widthA C
 
 
 

@@ -26,11 +26,6 @@ theorem jet_truncate (N n : ℕ) (u : ℕ → Domain → E) (z : Domain) :
   · simp only [truncate_of_gt N n _ (by omega), Pi.zero_def]
     exact jet_zero z
 
-theorem jet_shiftUp (N n : ℕ) (u : ℕ → Domain → E) (z : Domain) :
-    jet (shiftUp N u n) z = shiftUp N (fun i => jet (u i) z) n := by
-  cases n with
-  | zero => exact jet_zero z
-  | succ n => exact jet_truncate N n u z
 
 theorem differentiableAt_truncate (N n : ℕ) (u : ℕ → Domain → E) (z : Domain)
     (hu : ∀ i ≤ N, DifferentiableAt ℝ (u i) z) :
@@ -40,12 +35,6 @@ theorem differentiableAt_truncate (N n : ℕ) (u : ℕ → Domain → E) (z : Do
   · simpa only [truncate_of_gt N n _ (by omega), Pi.zero_def] using
       (differentiableAt_const (c := (0 : E)))
 
-theorem differentiableAt_shiftUp (N n : ℕ) (u : ℕ → Domain → E) (z : Domain)
-    (hu : ∀ i ≤ N, DifferentiableAt ℝ (u i) z) :
-    DifferentiableAt ℝ (shiftUp N u n) z := by
-  cases n with
-  | zero => exact differentiableAt_const (c := (0 : E))
-  | succ n => exact differentiableAt_truncate N n u z hu
 
 
 

@@ -22,15 +22,6 @@ theorem weightedNorm_restrict {p q : ℕ} (hqp : q ≤ p) (r N : ℕ) (hN : N+r 
   exact blockNorm_unique period (toJet period (restrictOperator period hqp u)) (toJet period u) rfl
     (by have := Finset.mem_range.mp hn; omega) (by have := Finset.mem_range.mp hn; omega)
 
-/-- The actual radius-loss sum is identical under every restriction retaining its cutoff. -/
-theorem weightedLoss_restrict {p q : ℕ} (hqp : q ≤ p) (r N : ℕ) (hN : N+r ≤ q) (ρ : ℝ)
-    (u : SobolevSpace period p) :
-    weightedLoss period r N ρ (restrictOperator period hqp u) = weightedLoss period r N ρ u := by
-  apply Finset.sum_congr rfl
-  intro n hn
-  apply congrArg (fun x : ℝ => (n : ℝ)*EulerPacketWeights.weight ρ n*x)
-  exact blockNorm_unique period (toJet period (restrictOperator period hqp u)) (toJet period u) rfl
-    (by have := Finset.mem_range.mp hn; omega) (by have := Finset.mem_range.mp hn; omega)
 
 /-- Actual derivative words agree after restricting the input to any sufficiently high Sobolev level. -/
 theorem wordAtLevel_restrict {p q r n : ℕ} (hqp : q ≤ p) (w : Fin n → Fin 4) (hq : n+r ≤ q)

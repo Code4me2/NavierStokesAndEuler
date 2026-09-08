@@ -62,13 +62,6 @@ theorem angular_derivative_zero_history (δ : ℝ) (hδ : 0 < δ) (ξ : U)
   rw [profile_deriv_zero δ hδ] at hp
   exact (hp.const_mul (innerCutoff x)).smul_const (B.coefficients.labelVelocity x ξ t)
 
-omit P [Fact (0 < P)] Y in
-theorem angular_derivative_zero_origin (δ : ℝ) (hδ : 0 < δ) (ξ : U)
-    (hs : tsupport innerCutoff ⊆ D.support) (t : Icc (0 : ℝ) τ) :
-    deriv (fun θ : ℝ => vector τ hτ hτT B (initialData D δ hδ ξ hs) (t,(0,θ))) 0 =
-      δ⁻¹ • B.coefficients.labelVelocity 0 ξ t := by
-  simpa only [innerCutoff_zero,one_mul] using
-    (angular_derivative_zero_history τ hτ hτT B δ hδ ξ hs t 0).deriv
 
 
 end EulerTransversePacketPrimary

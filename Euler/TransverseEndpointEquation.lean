@@ -125,31 +125,6 @@ theorem coordinateVelocityPath_hasDerivWithinAt_generator (hTpos : 0 < T)
   rwa [rawCoordinateAcceleration_eq_generator T hT Q Q₁ Q₂ c hc hQ H
     hTpos hd hd₁ hframe u hweak huRange t] at hdv
 
-/-- The stationary history velocity is the same actual solution as the packet's
-homogeneous forward inverse, whenever both are placed on this time interval. -/
-theorem coordinateVelocity_eq_forward (hTpos : 0 < T)
-    (hd : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (hd₁ : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q₁) (Q₂ t) (Icc (0 : ℝ) T) t)
-    (hframe : ∀ t, Q₂ t = -((H t).comp (Q t)))
-    (u : TimeLp T E)
-    (hweak : ∀ v : TimeLp T U, initialTrace T hT v = 0 →
-      ⟪momentum T hT Q u, v⟫_ℝ =
-        -⟪initialMomentumForcing T hT Q Q₁ H u, primitiveTimeLp T hT v⟫_ℝ)
-    (huRange : ∀ t : Icc (0 : ℝ) T, ∃ x : U, Q t x = initialRealPrimitive T u t)
-    (evolution : Evolution T hT (generator T Q Q₁ c hc hQ)) (t : Icc (0 : ℝ) T) :
-    coordinateVelocityPath T hT Q Q₁ c hc hQ H u t =
-      coordinates T hT Q Q₁ c hc hQ evolution 0
-        (coordinateVelocityPath T hT Q Q₁ c hc hQ H u 0) t := by
-  change _ = evolution.solution (forcingOperator T Q c hc hQ 0)
-    (coordinateVelocityPath T hT Q Q₁ c hc hQ H u 0) t
-  rw [map_zero]
-  apply evolution.solution_unique 0 _ (coordinateVelocityPath T hT Q Q₁ c hc hQ H u) _ rfl t
-  intro s
-  simpa only [ContinuousMap.zero_apply, add_zero] using
-    coordinateVelocityPath_hasDerivWithinAt_generator T hT Q Q₁ Q₂ c hc hQ H
-      hTpos hd hd₁ hframe u hweak huRange s
 
 /-- The nonzero-terminal inverse used in activation has genuine first and
 second coordinate derivatives satisfying the source's homogeneous equation. -/

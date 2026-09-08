@@ -75,16 +75,6 @@ theorem globalGaussian_equiv (e : D ≃L[ℝ] E)
 
 end EquivariantCutoff
 
-/-- Exchanging the two bands inverts the physical Gaussian weight. -/
-theorem gaussianWeight_swap (exponent : ℝ) (n m : ℕ) :
-    (bandVelocityScale exponent n m * bandVelocityScale exponent n m * bandScale n m)⁻¹ =
-      bandVelocityScale exponent m n * bandVelocityScale exponent m n * bandScale m n := by
-  have hr : ChartScales.Q m / ChartScales.Q n = (ChartScales.Q n / ChartScales.Q m)⁻¹ :=
-    (inv_div _ _).symm
-  unfold bandVelocityScale bandScale
-  simp only [hr, Real.inv_rpow (div_nonneg (ChartScales.Q_pos n).le (ChartScales.Q_pos m).le),
-    mul_inv_rev]
-  ring
 
 section ActualFourierField
 

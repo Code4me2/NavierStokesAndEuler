@@ -345,38 +345,6 @@ theorem phaseMatrix_jets {s : StripData D}
   intro n x hx
   rfl
 
-/-- The matrix jets in this constructor are proved from the actual primary
-ODE, including its Gaussian initial normalization and slot integrals. -/
-noncomputable def phaseControl {s : StripData D}
-    {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (χ : ℕ → D → PhaseCalculus.Slow × ℝ) (T : ℕ → D → Vec2)
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hχ : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ U.carrier n)
-    (hpref : ∀ j, PhaseJetBounds.PolynomialJets U (fun n _ => pref j n))
-    (hT : ∀ i, MeanClass s 0 (fun n x => T n x i))
-    (hζ : ∀ x ∈ s.domain, 0 < s.zeta x)
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ n x, x ∈ s.domain →
-      b ≤ |(PrimaryPulseBounds.normalizedMatrix (Real.sqrt (s.slow n)) (phaseMatrix F pref χ n x)).det|)
-    (hentry : ∀ n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * phaseMatrix F pref χ n x i j| ≤ M)
-    (hlower : ∀ n x, x ∈ s.domain → ∀ j,
-      c * s.zeta x ≤ SmoothCovariance.weights (phaseMatrix F pref χ n x) (T n x) j) :
-    CovarianceControl s (phaseMatrix F pref χ) T where
-  matrix_jets := phaseMatrix_jets F pref χ hscale hχ hmap hpref
-  target_jets := hT
-  zeta_pos := hζ
-  b := b
-  M := M
-  c := c
-  b_pos := hb
-  M_one := hM
-  c_pos := hc
-  determinant := hdet
-  entries := hentry
-  lower := hlower
 
 
 /-! ## Literal harmonic blocks, with the same carrier metadata -/

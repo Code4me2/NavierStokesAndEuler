@@ -63,10 +63,6 @@ theorem smoothField_realization (q : ℕ) (t : Icc (0 : ℝ) T) :
   apply value_injective 1
   erw [ordinarySobolev_value,A.smoothField_toLp,A.value_eq]
 
-theorem smoothField_path (q : ℕ) :
-    sobolevPath A.smoothField A.smoothField_jet_continuous q=A.realization q := by
-  apply ContinuousMap.ext
-  exact A.smoothField_realization q
 
 end SobolevTower
 

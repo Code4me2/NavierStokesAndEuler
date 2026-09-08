@@ -1,4 +1,5 @@
-import Euler.PacketWithinStage
+import Euler.PacketScaledVelocitySystem
+import Euler.ClosedIntervalDerivativeExtension
 
 /-!
 Relative stability with an actual initial velocity discrepancy.  This keeps

@@ -40,9 +40,6 @@ theorem basePressureCoefficient_lower {a b : ℝ} (ha : 0 < a) (hab : a < b) :
   rw [integral_const_mul, PressureStream.rho_integral, mul_one] at hm
   exact div_le_div_of_nonneg_right hm (by norm_num)
 
-theorem basePressureCoefficient_pos {a b : ℝ} (ha : 0 < a) (hab : a < b) :
-    0 < basePressureCoefficient a b hab :=
-  lt_of_lt_of_le (by positivity : 0 < a ^ 2 / 2) (basePressureCoefficient_lower ha hab)
 
 noncomputable def pressureCoefficient {S : Type} (g : VariableGaugeMean.GaugeData S)
     (n : ℕ) (s : S) : ℝ :=
@@ -131,12 +128,6 @@ end GeneralGauge
 
 section SimilarityCoefficient
 
-theorem similarity_pressureCoefficient {h d a b M : ℝ} (hab : a < b) (index : ℕ → ℕ)
-    (hc : 0 < 2 * h) (hc1 : 2 * h < 1) (n : ℕ) {s : Plane} (hs : 0 < s.1) :
-    pressureCoefficient (VariableGaugeMean.similarityGauge h d a b M hab index) n s =
-      basePressureCoefficient a b hab * SimilarityCoordinates.coordinateQ (2 * h) s := by
-  unfold pressureCoefficient VariableGaugeMean.similarityGauge VariableGaugeMean.qLength
-  rw [Real.sq_sqrt (SimilarityCoordinates.coordinateQ_spec hc hc1 hs).1.le]
 
 
 end SimilarityCoefficient
@@ -634,26 +625,6 @@ theorem pressureCoefficient_smooth {coord : ℝ} (U : SlowRegion coord)
   exact contDiffOn_const.mul (((VariableGaugeMean.qLength_contDiffOn U.coord_pos U.coord_lt_one).mono
     (fun s hs => U.time_pos s hs)).pow 2)
 
-theorem q_pressureCoefficient_fderiv {coord : ℝ} (U : SlowRegion coord)
-    (g : VariableGaugeMean.GaugeData Plane)
-    (hg : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (n : ℕ) {s : Plane} (hs : s ∈ U.carrier) (v : Plane) :
-    fderiv ℝ (pressureCoefficient g n) s v =
-      basePressureCoefficient g.radial.inner g.radial.outer g.radial.inner_lt_outer *
-        ((v.1 + 2 * s.2 * SimilarityCoordinates.coordinateQ coord s ^ coord * v.2) /
-          SimilarityCoordinates.scalarSlope coord s.2 (SimilarityCoordinates.coordinateQ coord s)) := by
-  have he : pressureCoefficient g n =ᶠ[𝓝 s]
-      (fun t => basePressureCoefficient g.radial.inner g.radial.outer g.radial.inner_lt_outer *
-        SimilarityCoordinates.coordinateQ coord t) := by
-    filter_upwards [U.isOpen.mem_nhds hs] with t ht
-    exact q_pressureCoefficient U g hg n ht
-  rw [he.fderiv_eq]
-  have hd := ((SimilarityCoordinates.coordinateQ_smooth U.coord_pos U.coord_lt_one
-    (U.time_pos s hs)).differentiableAt (by simp)).hasFDerivAt
-  rw [(hd.const_mul (basePressureCoefficient g.radial.inner g.radial.outer
-    g.radial.inner_lt_outer)).fderiv]
-  change basePressureCoefficient _ _ _ * fderiv ℝ (SimilarityCoordinates.coordinateQ coord) s v = _
-  rw [SimilarityCoordinates.coordinateQ_fderiv_apply U.coord_pos U.coord_lt_one (U.time_pos s hs)]
 
 
 theorem axialDebtPotential_smooth {coord : ℝ} (U : SlowRegion coord)
@@ -668,33 +639,6 @@ theorem axialDebtPotential_smooth {coord : ℝ} (U : SlowRegion coord)
     ((pressureCoefficient_smooth U g hg n).mul
       (hf.radialMoment_smooth ha g.radial.inner_lt_outer 0 n))
 
-/-- The product rule is applied to the actual measured coefficient. In
-particular, the last summand is present even if the unweighted debts are known. -/
-theorem axialDebtPotential_fderiv {coord : ℝ} (U : SlowRegion coord)
-    (g : VariableGaugeMean.GaugeData Plane) (ha : 0 < g.radial.inner)
-    (hg : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (c : Context Point) (u : State Point)
-    (hZ : MovingField U g.radial.inner g.radial.outer (axialAxialFlux c u))
-    (hf : MovingField U g.radial.inner g.radial.outer (u.gr c))
-    (n : ℕ) {s : Plane} (hs : s ∈ U.carrier) (v : Plane) :
-    fderiv ℝ (axialDebtPotential g c u n) s v =
-      fderiv ℝ (CorrectionState.axialDefect c u n) s v +
-      pressureCoefficient g n s * fderiv ℝ (CorrectionState.pressureDefect c u n) s v +
-      fderiv ℝ (pressureCoefficient g n) s v * CorrectionState.pressureDefect c u n s := by
-  have hP : ContDiffOn ℝ ∞ (CorrectionState.pressureDefect c u n) U.carrier :=
-    hf.radialMoment_smooth ha g.radial.inner_lt_outer 0 n
-  have hJ : ContDiffOn ℝ ∞ (CorrectionState.axialDefect c u n) U.carrier :=
-    (hZ.radialMoment_smooth ha g.radial.inner_lt_outer 1 n).sub
-      ((hf.radialMoment_smooth ha g.radial.inner_lt_outer 2 n).const_smul (1 / 2 : ℝ))
-  have hp := ((hP.contDiffAt (U.isOpen.mem_nhds hs)).differentiableAt (by simp)).hasFDerivAt
-  have hj := ((hJ.contDiffAt (U.isOpen.mem_nhds hs)).differentiableAt (by simp)).hasFDerivAt
-  have hc := (((pressureCoefficient_smooth U g hg n).contDiffAt
-    (U.isOpen.mem_nhds hs)).differentiableAt (by simp)).hasFDerivAt
-  change fderiv ℝ (fun s => CorrectionState.axialDefect c u n s +
-    pressureCoefficient g n s * CorrectionState.pressureDefect c u n s) s v = _
-  rw [(hj.fun_add (hc.fun_mul hp)).fderiv]
-  simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
-  ring
 
 
 theorem pressureCoefficient_unweighted {coord : ℝ} (U : SlowRegion coord)

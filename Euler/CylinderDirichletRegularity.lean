@@ -55,13 +55,6 @@ theorem hessianOrbit_contDiff (hH : ContDiff ℝ ∞ (translateCoefficientPath D
   (fullPathMap (K := Icc (0 : ℝ) T) (E := E) (F := E) P).contDiff.comp
     (hH.comp contDiff_fst)
 
-theorem accelerationLp_translation (a : LiftTangent) (f : TimeLp T (CylinderL2 P E)) :
-    (D.shifted a.1).accelerationLp P (timeLift T (translate P a).toContinuousLinearMap f) =
-      timeLift T (translate P a).toContinuousLinearMap (D.accelerationLp P f) :=
-  D.accelerationLp_intertwines P (D.shifted a.1)
-    (translate P a).toContinuousLinearMap (translate P a).toContinuousLinearMap
-    (D.shifted_frame P a) (D.shifted_frameDerivative P a)
-    (D.shifted_frame_back P a) (D.shifted_frameDerivative_back P a) (D.shifted_hessian P a) f
 
 variable (hQ : ContDiff ℝ ∞ (translateCoefficientPath D.Q))
   (hQ₁ : ContDiff ℝ ∞ (translateCoefficientPath D.Q₁))

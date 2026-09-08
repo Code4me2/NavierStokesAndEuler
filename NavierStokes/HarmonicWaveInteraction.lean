@@ -502,14 +502,6 @@ theorem nonlinearCoefficients_wave_class {s : StripData D} {κ α β : ℝ} {P :
     (min_le_left _ _)).add ((square_wave_class c ho hR a hb hb0 hN hΦ hk hdb hP0 hP1 j i).mono_exponent
       (min_le_right _ _))
 
-noncomputable def nonlinearErrorBlock (c : CorrectionState.Context D)
-    (a b : CorrectionState.HarmonicBlock D) : CorrectionState.HarmonicBlock D where
-  velocity := fun n i => HarmonicResidual.nonconstant
-    (HarmonicResidual.realCoefficients (nonlinearCoefficients c a b n i))
-  pressure := fun _ => 0
-  frequency := a.frequency
-  phase := a.phase
-  angularFrequency := a.angularFrequency
 
 
 
@@ -984,23 +976,8 @@ theorem crossCoefficients_band (g : HarmonicResidual.Frame D)
     exact h
   exact hleft.add hright
 
-theorem interactionBlock_band (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.BandLimited M) (hb : b.BandLimited N) :
-    (interactionBlock c u a b).BandLimited (max (M + N) (N + N)) := by
-  refine ⟨fun n i => ?_, fun _ => HarmonicResidual.band_zero _⟩
-  apply HarmonicResidual.band_nonconstant
-  apply HarmonicResidual.band_realCoefficients
-  have hcross := crossCoefficients_band (HarmonicResidual.contextFrame c n)
-    (a.frequency n) (a.phase n) (a.angularFrequency n) (tripleField u.mean n)
-    (fun r => HarmonicResidual.band_realCoefficients (hb.1 n r)) i
-  exact (hcross.mono (by omega)).add (nonlinearCoefficients_band c ha hb n i)
 
 
-theorem interactionBlock_zero (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (a b : CorrectionState.HarmonicBlock D) : ZeroMode (interactionBlock c u a b) := by
-  intro n i
-  simp [interactionBlock, HarmonicResidual.nonconstant]
 
 
 

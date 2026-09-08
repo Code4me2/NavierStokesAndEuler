@@ -107,43 +107,8 @@ variable {P : Type} {V : Type*}
 end SlowCoordinates
 
 
-theorem reference_envelope_on_path {g : Geometry} {r L : ℝ}
-    (hsep : Separated g r L) (lam u : ℝ) (k : Frequency) (Y : Plane)
-    (hξ : (g.coordinates k Y).1 ∈ Icc (-r) r) {s : ℝ} (hs : s ∈ Icc 0 L) :
-    copyEnvelope g r L (GaussianEnvelope.envelope (GaussianEnvelope.referenceRate lam u L) (L / 2))
-      (g.path k Y s) =
-      GaussianEnvelope.envelope (GaussianEnvelope.referenceRate lam u L) (L / 2) s :=
-  copyEnvelope_path hsep _ k Y hξ hs
 
 
-/-- A concrete geometric criterion, uniform in the band and covering gap.
-After multiplying slot time by `ci`, the full rectangle has transverse
-half-width `r0`, so its injectivity does not deteriorate as `L` grows. -/
-theorem separated_bandGeometry (B : Plane ≃L[ℝ] Plane) (h : ℝ) (n gap : ℕ)
-    (center : Plane) {r r0 R : ℝ} (hr : r < R) (hr0 : r0 < R)
-    (hsmall : ‖(B : Plane →L[ℝ] Plane)‖ * R < 1 / 2) :
-    Separated (bandGeometry B h n gap center) r (ChartScales.slotLength r0 h n) := by
-  apply (TorusAverages.quotientPoint_injOn_small_chart B (center + B (0, r0)) R hsmall).mono
-  rintro Y ⟨z, hz, rfl⟩
-  have hci := ChartScales.timeCoefficient_pos h n
-  have htime : 0 ≤ ChartScales.timeCoefficient h n * z.2 ∧
-      ChartScales.timeCoefficient h n * z.2 ≤ 2 * r0 := by
-    refine ⟨mul_nonneg hci.le hz.2.1, ?_⟩
-    have ht := (le_div_iff₀ hci).1 hz.2.2
-    simpa only [mul_comm] using ht
-  refine ⟨(z.1, ChartScales.timeCoefficient h n * z.2 - r0), ?_, ?_⟩
-  · rw [Metric.mem_ball, dist_zero_right, Prod.norm_def, max_lt_iff,
-      Real.norm_eq_abs, Real.norm_eq_abs]
-    constructor
-    · exact (abs_le.mpr hz.1).trans_lt hr
-    · apply (abs_le.mpr ?_).trans_lt hr0
-      dsimp only
-      constructor <;> linarith [htime.1, htime.2]
-  · change (center + B (0, r0)) + B (z.1, ChartScales.timeCoefficient h n * z.2 - r0) =
-      center + scaledBasis B _ _ z
-    rw [scaledBasis_apply, add_assoc, ← map_add]
-    congr 2
-    ext <;> simp
 
 
 section GroupedSources
@@ -204,21 +169,6 @@ theorem grouped_eventually_eq_copy {g : Geometry} {r L : ℝ}
   by_contra hne
   exact hynot (hsupport l hne)
 
-omit [NormedSpace ℝ P] [NormedSpace ℝ V] in
-theorem grouped_eventually_zero {g : Geometry} {r L : ℝ}
-    (F : Frequency → P × Plane → V)
-    (hsupport : ∀ k, support (F k) ⊆ copyCell g r L k)
-    {z : P × Plane} (hz : ∀ k, z ∉ copyCell g r L k) :
-    grouped F =ᶠ[𝓝 z] fun _ => 0 := by
-  classical
-  have hn := (copyCell_locallyFinite (P := P) g r L).iInter_compl_mem_nhds
-    (copyCell_closed g r L) z
-  filter_upwards [hn] with y hy
-  have hzero : ∀ k, F k y = 0 := by
-    intro k
-    by_contra hne
-    exact (mem_iInter₂.mp hy k (hz k)) (hsupport k hne)
-  simp only [grouped, hzero, tsum_zero]
 
 omit [NormedSpace ℝ P] [NormedSpace ℝ V] in
 theorem grouped_on_entire_path {g : Geometry} {r L : ℝ}
@@ -232,21 +182,6 @@ theorem grouped_on_entire_path {g : Geometry} {r L : ℝ}
     coordinates_path_in_rectangle g k Y hξ hv
   exact (grouped_eventually_eq_copy hsep F hsupport hmem).self_of_nhds
 
-omit [NormedSpace ℝ P] [NormedSpace ℝ V] in
-/-- A transverse support exclusion for the actual copy coefficient excludes
-the entire grouped source on the entire integration path. -/
-theorem grouped_path_zero_of_transverse_support {g : Geometry} {r L : ℝ}
-    (hsep : Separated g r L) (F : Frequency → P × Plane → V)
-    (hsupport : ∀ k, support (F k) ⊆ copyCell g r L k)
-    (k : Frequency) (p : P) (Y : Plane) (T : Set ℝ)
-    (htransverse : support (F k) ⊆ {z | (g.coordinates k z.2).1 ∈ T})
-    (hξ : (g.coordinates k Y).1 ∈ Icc (-r) r) (hξT : (g.coordinates k Y).1 ∉ T) :
-    ∀ v ∈ Icc 0 L, grouped F (p, g.path k Y v) = 0 := by
-  intro v hv
-  rw [grouped_on_entire_path hsep F hsupport k p Y hξ v hv]
-  by_contra hne
-  have hh := htransverse hne
-  exact hξT (by simpa only [Set.mem_ofPred_eq, path_transverse] using hh)
 
 
 private theorem jet_congr {f g : P × Plane → V} {x : P × Plane}
@@ -265,66 +200,6 @@ open WeightedClasses
 variable {P V : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- Full joint derivatives of the actual source along every point of the
-slot. The inverse-edge factor remains frozen in `s.growth n z.1`.
-The source may depend on the common coordinate in any way allowed by its
-actual WaveClass; native periodicity is not a premise. -/
-theorem waveClass_sourceArgument_bound
-    (s : StripData P) (B : Plane ≃L[ℝ] Plane) {h : ℝ} (hh : 0 ≤ h)
-    (gapBound : ℕ) (band gap : ℕ → ℕ) (center : ℕ → Plane) (r L : ℕ → ℝ)
-    (hband : ∀ n, 4 ≤ band n) (hgap : ∀ n, gap n ≤ gapBound)
-    (hslow : ∀ n, s.slow n = ChartScales.S (band n))
-    (hsep : ∀ n, Separated (bandGeometry B h (band n) (gap n) (center n)) (r n) (L n))
-    (W : ℕ → ℝ → ℝ) (hW : ∀ n v, 0 ≤ W n v)
-    {α : ℝ} {f : ℕ → P × Plane → V}
-    (hf : WaveClass (sourceStrip s)
-      (fun n z => copyEnvelope (bandGeometry B h (band n) (gap n) (center n)) (r n) (L n) (W n) z.2)
-      α f) (N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ d : ℕ, ∀ n (k : Frequency) (z : P × Plane), z.1 ∈ s.domain →
-      ((bandGeometry B h (band n) (gap n) (center n)).coordinates k z.2).1 ∈ Icc (-(r n)) (r n) →
-      ∀ v ∈ Icc 0 (L n), ∀ j ≤ N,
-      ‖iteratedFDeriv ℝ j
-        (fun x : Joint P => f n (sourceArgument (bandGeometry B h (band n) (gap n) (center n)) k x))
-        (z, v)‖ ≤
-      C * s.growth n z.1 ^ d * (s.epsilon n ^ α * Real.sqrt (s.zeta z.1)) * W n v := by
-  obtain ⟨A, hA, p, ha⟩ := hf.bounds N
-  let K := bandArgumentCost B gapBound
-  have hK : 1 ≤ K := bandArgumentCost_one_le B gapBound
-  refine ⟨A * K ^ N, by positivity, p + N, ?_⟩
-  intro n k z hz hξ v hv j hj
-  let g := bandGeometry B h (band n) (gap n) (center n)
-  have hmap : sourceArgument g k (z, v) ∈ (sourceStrip s).domain := hz
-  have hlocal : sourceArgument g k 0 + sourceLinear P g (z, v) ∈ (sourceStrip s).domain := by
-    rw [← sourceArgument_affine]
-    exact hmap
-  have hjet := CommonCoverClass.norm_affine_jet_le_on (sourceStrip s).isOpen_domain
-    (hf.smooth n) (sourceLinear P g) (sourceArgument g k 0) hlocal j
-  simp_rw [← sourceArgument_affine] at hjet
-  have hsrc := ha n (sourceArgument g k (z, v)) hmap j hj
-  change ‖iteratedFDeriv ℝ j (f n) (sourceArgument g k (z, v))‖ ≤
-    A * s.epsilon n ^ α * s.growth n z.1 ^ p *
-      (Real.sqrt (s.zeta z.1) * copyEnvelope g (r n) (L n) (W n) (g.path k z.2 v)) at hsrc
-  rw [copyEnvelope_path (hsep n) (W n) k z.2 hξ hv] at hsrc
-  have hG := s.one_le_growth n z.1
-  have hGn := s.growth_nonneg n z.1
-  have hlin : ‖sourceLinear P g‖ ≤ K * s.growth n z.1 := by
-    apply (norm_sourceLinear_le g).trans
-    apply (bandGeometry_argumentCost_le B hh (hband n) (hgap n) (center n)).trans
-    rw [← hslow n]
-    exact mul_le_mul_of_nonneg_left (s.slow_le_growth n z.1) (zero_le_one.trans hK)
-  have hpow : ‖sourceLinear P g‖ ^ j ≤ K ^ N * s.growth n z.1 ^ N := by
-    rw [← mul_pow]
-    exact (pow_le_pow_left₀ (norm_nonneg _) hlin j).trans
-      (pow_le_pow_right₀ (one_le_mul_of_one_le_of_one_le hK hG) hj)
-  have hw := hW n v
-  have he := s.epsilon_pos n
-  calc
-    _ ≤ ‖iteratedFDeriv ℝ j (f n) (sourceArgument g k (z, v))‖ *
-        ‖sourceLinear P g‖ ^ j := hjet
-    _ ≤ (A * s.epsilon n ^ α * s.growth n z.1 ^ p * (Real.sqrt (s.zeta z.1) * W n v)) *
-        (K ^ N * s.growth n z.1 ^ N) :=
-      mul_le_mul hsrc hpow (pow_nonneg (norm_nonneg _) _) (by positivity)
-    _ = _ := by rw [pow_add]; ring
 
 end SourceJetTransport
 

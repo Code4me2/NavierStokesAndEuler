@@ -73,37 +73,5 @@ theorem meanAccelerationPath_translation_contDiff {n : ℕ∞ω}
   exact Eq.mpr (congrArg (fun g : Space → C(Icc (0 : ℝ) T,solenoidalSpace) => ContDiff ℝ n g)
     (meanAccelerationPath_orbit_eq T F F₁ c hc hLower v f)) hs
 
-/-- All actual spatial acceleration derivatives have a uniform-time bound
-with one factorial shift and an explicit polynomial radius condition. -/
-theorem meanAccelerationPath_translation_gevrey
-    (hF : ContDiff ℝ ∞ (fun a : Space => translatePath T a F))
-    (hF₁ : ContDiff ℝ ∞ (fun a : Space => translatePath T a F₁))
-    (hv : ContDiff ℝ ∞ (fun a : Space => coordinatePathTranslation T a v))
-    (hf : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a f))
-    (Rc R CF CF₁ Cf Cv : ℝ) (hRc : 0 ≤ Rc) (hR : 0 ≤ R) (hRcR : Rc ≤ R)
-    (hCF : 0 ≤ CF) (hCF₁ : 0 ≤ CF₁) (hCf : 0 ≤ Cf) (hCv : 0 ≤ Cv)
-    (hstrong : 2*gramCost c CF (3*CF*(Cf+6*CF₁*Cv))*(Rc+1) ≤ R)
-    (hFb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F) a‖ ≤ CF*majorant Rc 0 n)
-    (hF₁b : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => translatePath T b F₁) a‖ ≤ CF₁*majorant Rc 0 n)
-    (d : ℕ)
-    (hfb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => pathTranslation T b f) a‖ ≤ Cf*majorant R d n)
-    (hvb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => coordinatePathTranslation T b v) a‖ ≤ Cv*majorant R d n)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space =>
-      coordinatePathTranslation T b (meanAccelerationPath T F F₁ c hc hLower v f)) a‖ ≤
-      majorant R (d+1) n := by
-  have hs := acceleration_gevrey T
-    (fun a : Space => solenoidalFrame T (translatePath T a F))
-    (fun a : Space => solenoidalFrame T (translatePath T a F₁))
-    c hc (translatedFrame_lower T F c hLower)
-    (fun a : Space => coordinatePathTranslation T a v) (fun a : Space => pathTranslation T a f)
-    (contDiff_solenoidalFrame T (fun a => translatePath T a F) hF)
-    (contDiff_solenoidalFrame T (fun a => translatePath T a F₁) hF₁) hv hf
-    Rc R CF CF₁ Cf Cv hRc hR hRcR hCF hCF₁ hCf hCv hstrong
-    (solenoidalFrame_bound T (fun b => translatePath T b F) hF Rc CF hRc hCF 0 hFb)
-    (solenoidalFrame_bound T (fun b => translatePath T b F₁) hF₁ Rc CF₁ hRc hCF₁ 0 hF₁b)
-    d hfb hvb n a
-  exact (congrArg (fun g : Space → C(Icc (0 : ℝ) T,solenoidalSpace) => ‖iteratedFDeriv ℝ n g a‖)
-    (meanAccelerationPath_orbit_eq T F F₁ c hc hLower v f)).trans_le hs
 
 end EulerMeanContinuousAcceleration

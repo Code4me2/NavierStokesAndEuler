@@ -284,15 +284,6 @@ theorem realized_residual_germ_zero (hds : SmoothCoefficients d)
     (nominalExteriorRadius W)).mem_nhds hz] with y hy
   exact realized_base_residual_zero W Q M hd hbase houter hds henergy ha hy
 
-theorem realized_residual_jets_zero (hds : SmoothCoefficients d)
-    (henergy : RestoredSquaredSwirl W Q (S := S)) {a : ℕ → ℕ} (ha : StrictMono a)
-    {z : SpaceTime} (hz : z ∈ cartesianExterior F.data.h (nominalExteriorRadius W)) (m : ℕ) :
-    iteratedFDeriv ℝ m (fun y => navierStokesResidual
-      (baseVelocity a F.data.h W.axis.normalization d)
-      (basePressure a F.data.h W.axis.normalization d) y.1 y.2) z = 0 := by
-  rw [(SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (realized_residual_germ_zero W Q M hd hbase houter hds henergy ha hz) m).self_of_nhds,
-    iteratedFDeriv_fun_zero, Pi.zero_apply]
 
 end SchemeRealization
 
@@ -330,14 +321,6 @@ theorem actual_base_eq_heat {a : ℕ → ℕ} (ha : StrictMono a) :
   realized_base_eq_heat W v.profiles v.finiteModification (actual_realizes v) rfl rfl
     (ConstructedSlowBase.Modulated.coefficients_smooth v) (actual_squared_swirl_restored v) ha
 
-theorem actual_fields_eq_heat (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    EqOn (ConstructedSlowBase.Modulated.velocity v c hc upper B)
-      (heatVelocity (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) ∧
-    EqOn (ConstructedSlowBase.Modulated.pressure v c hc upper B)
-      (heatPressureField (nominalHeatNormalization W) F.data.h)
-      (cartesianExterior F.data.h (nominalExteriorRadius W)) :=
-  actual_base_eq_heat v (ConstructedSlowBase.Modulated.scales_strictMono v c hc upper B)
 
 
 

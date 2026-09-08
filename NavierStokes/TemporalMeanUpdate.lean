@@ -284,12 +284,6 @@ noncomputable def chartPrefactor (h : ℝ) (n : ℕ) : ℝ :=
 theorem chartPrefactor_pos (h : ℝ) (n : ℕ) : 0 < chartPrefactor h n :=
   inv_pos.mpr (ChartScales.timeCoefficient_pos h n)
 
-theorem chartPrefactor_eq (h : ℝ) (n : ℕ) :
-    chartPrefactor h n = ChartScales.Q n ^ (-1 - h) *
-      (ChartScales.Tg ^ ChartScales.nativeIndex h n)⁻¹ := by
-  have he : -1 - h = -(1 + h) := by ring
-  simp only [chartPrefactor, ChartScales.timeCoefficient, mul_inv_rev, he,
-    Real.rpow_neg (ChartScales.Q_pos n).le]
 
 /-- The exponential-looking native factors together cost just one power of
 the slow band scale. -/
@@ -298,14 +292,6 @@ theorem chartPrefactor_bound (h : ℝ) (hh : 0 ≤ h) {n : ℕ} (hn : 4 ≤ n) :
   rw [Real.norm_eq_abs, abs_of_pos (chartPrefactor_pos h n)]
   exact ChartScales.timeCoefficient_inv_upper h hh hn
 
-theorem chartPrefactor_bandBound {D : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    (s : WeightedClasses.StripData D) (h : ℝ) (hh : 0 ≤ h)
-    (hs : ∀ n, s.slow n = ChartScales.S (n + 4)) :
-    WeightedClasses.BandBound s 0 (fun n => chartPrefactor h (n + 4)) := by
-  refine ⟨ChartScales.Tg, ChartScales.Tg_pos.le, 1, ?_⟩
-  intro n
-  simpa only [Real.rpow_zero, mul_one, pow_one, hs] using
-    chartPrefactor_bound h hh (Nat.le_add_left 4 n)
 
 
 /-- Finite initial bands are absorbed into an explicit constant. The native
@@ -626,14 +612,6 @@ theorem torusAverage_pullbackCover (i : ℕ) {f : PressureStream.Lift S → ℝ}
     (hf.continuous.comp (continuous_const.prodMk (continuous_const.prodMk continuous_id)))
     (hp p.1 p.2) i
 
-theorem centered_pullbackCover (i : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f) :
-    centered (pullbackCover i f) = pullbackCover i (centered f) := by
-  funext z
-  change f (z.1, (z.2.1, coverMap i z.2.2)) -
-    PressureStream.torusAverage (pullbackCover i f) (z.1, z.2.1) =
-      f (z.1, (z.2.1, coverMap i z.2.2)) - PressureStream.torusAverage f (z.1, z.2.1)
-  rw [torusAverage_pullbackCover i hf hp]
 
 
 end NativePullback
@@ -678,13 +656,6 @@ theorem axialPotential_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0
   PressureStream.streamPotential_contDiff ha hab hd (0, v)
     (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
 
-theorem axialPotential_supported {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : PressureStream.TorusPeriodicLift f)
-    (hs : RadialAlias.RadiallySupported a b f) :
-    RadialAlias.RadiallySupported a b (axialPotential d a b M v h n f) :=
-  PressureStream.streamPotential_supported ha hab hd (0, v)
-    (desiredIncrement_smooth h n hf hp) (desiredIncrement_supported h n hs)
 
 theorem axialUpdate_smooth {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
     (v : Plane) (h : ℝ) (n : ℕ) {f : PressureStream.Lift S → ℝ}
@@ -1136,45 +1107,7 @@ theorem dividedAlias_superflat {a b d cL cR h α : ℝ}
     (hgc n) (hgs n) (C * ChartScales.epsilon h n ^ N) hcε hn j hj z
   exact he.trans_eq (by ring)
 
-/-- Superflatness of the exact alias in the constructed temporal axial update. -/
-theorem axialAlias_superflat {a b d cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 < h)
-    {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass (UniformFourierAlias.chartStrip a b cL cR ha hcL hcR h hh) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) (m N : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ n in atTop, ∀ j ≤ m, ∀ z : PressureStream.Lift S,
-      ‖iteratedFDeriv ℝ j
-        (axialAlias d a b (ChartScales.radialCoefficient h n) (vector .radial) h n (f n)) z‖ ≤
-          C * ChartScales.epsilon h n ^ N := by
-  let st := UniformFourierAlias.chartStrip (E := S × Plane) a b cL cR ha hcL hcR h hh
-  let g := fun n => desiredIncrement h n (f n)
-  have hg : WeightedClasses.MeanClass st α g := meanClass_desiredIncrement ha hcL hcR hh.le
-    (ChartScales.epsilon h) UniformFourierAlias.bandSlow (ChartScales.epsilon_pos h)
-    (ChartScales.epsilon_le_one h hh.le) UniformFourierAlias.one_le_bandSlow
-    (fun n => le_max_right 1 (ChartScales.S n)) hf hfc hp
-  have hgc := fun n => desiredIncrement_smooth h n (hfc n) (hp n)
-  have hgp := fun n => desiredIncrement_periodic h n (f n)
-  have hgs := fun n => desiredIncrement_supported h n (hs n)
-  have hw : WeightedClasses.MeanClass st α (fun n => PressureStream.weightedSource (g n)) := by
-    unfold PressureStream.weightedSource
-    simpa only [smul_eq_mul, id_eq] using
-      meanClass_radialMultiply a b (φ := id) contDiff_id
-        (s := st) (fun z hz => ⟨hz.1.le, hz.2.le⟩) hgc hg
-  have hwm : ∀ n p, PressureStream.torusAverage (PressureStream.weightedSource (g n)) p = 0 := by
-    intro n p
-    rw [PressureStream.torusAverage_weightedSource, desiredIncrement_zeroMean h n (hfc n) (hp n), mul_zero]
-  exact dividedAlias_superflat ha hab hd hcL hcR hh hw
-    (fun n => PressureStream.weightedSource_contDiff (hgc n))
-    (fun n => PressureStream.weightedSource_periodic (hgp n)) hwm
-    (fun n => PressureStream.weightedSource_supported (hgs n)) m N
 
-omit [FiniteDimensional ℝ S] [NormedSpace ℝ S] in
-theorem temporalVector_norm_le_one : ‖((0 : ℝ), ((0 : S), vector .temporal))‖ ≤ 1 := by
-  have ha : |Real.sqrt 2 - 1| ≤ 1 := abs_le.mpr
-    ⟨by linarith [Real.sqrt_nonneg (2 : ℝ)], by linarith [ChartScales.sqrt_two_lt_two]⟩
-  simp only [Prod.norm_def, vector, norm_zero, Real.norm_eq_abs, abs_one]
-  exact max_le zero_le_one (max_le zero_le_one (max_le ha le_rfl))
 
 omit [FiniteDimensional ℝ S] [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem timeCoefficient_norm_le_one {h : ℝ} (hh : 0 ≤ h) {n : ℕ} (hn : 4 ≤ n) :

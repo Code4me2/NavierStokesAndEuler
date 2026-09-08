@@ -52,11 +52,6 @@ theorem integral_fourierInv_mul {f g : Space → ℂ}
   simpa only [Real.fourierInv_eq_fourier_neg] using h
 
 
-/-- Pair the actual double Riesz transform with a Schwartz function in Fourier space. -/
-theorem rieszTest_pairing_fourier (i j : Fin 3) (ψ φ : ComplexTest) :
-    (∫ x : Space, rieszTest i j ψ x * φ x) =
-      ∫ ξ : Space, (rieszSymbol i j ξ : ℂ) * 𝓕 ψ ξ * 𝓕 φ (-ξ) := by
-  exact integral_fourierInv_mul (integrable_rieszMultiplier i j ψ) φ.integrable
 
 /-- Hermitian Fourier pairing for the actual double Riesz transform. -/
 theorem rieszTest_pairing_fourier_conj (i j : Fin 3) (ψ φ : ComplexTest) :

@@ -287,15 +287,6 @@ theorem curlRemainder_contDiffAt (K : ℝ) {R : D → ℝ} {Vr Vθ Vz : D → D}
   rw [he]
   exact (cylindricalCurl_contDiffAt hR hRn hr hθ hz hB).const_smul (inverseCarrier K)
 
-theorem realizedCoefficient_contDiffAt (K : ℝ) {R : D → ℝ} {Vr Vθ Vz : D → D}
-    {Φ : D → ℝ} {a : D → ComplexVector} {x : D}
-    (hR : ContDiffAt ℝ ∞ R x) (hRn : R x ≠ 0)
-    (hr : ContDiffAt ℝ ∞ Vr x) (hθ : ContDiffAt ℝ ∞ Vθ x) (hz : ContDiffAt ℝ ∞ Vz x)
-    (hΦ : ContDiffAt ℝ ∞ Φ x) (ha : ContDiffAt ℝ ∞ a x)
-    (hn : phaseNormal R Vr Vθ Vz Φ x ≠ 0) :
-    ContDiffAt ℝ ∞ (realizedCoefficient K R Vr Vθ Vz Φ a) x :=
-  ha.add (curlRemainder_contDiffAt K hR hRn hr hθ hz
-    (normalCoefficient_contDiffAt (phaseNormal_contDiffAt hR hRn hr hθ hz hΦ) ha hn))
 
 /-- Curl realization itself uses the first coefficient derivatives and
 tangency at the selected point, with no surrounding geometric identities. -/
@@ -421,25 +412,7 @@ theorem realizedCoefficient_divergence_at {K : ℝ} (hK : K ≠ 0)
   exact divergence_curl_zero_at G (vectorPotential_contDiffAt K G.radius_smooth G.radius_ne
     G.radial_smooth G.angular_smooth G.axial_smooth hΦ ha hn)
 
-theorem cylindricalDivergence_contDiffAt {R : D → ℝ} {Vr Vθ Vz : D → D}
-    {a : D → ComplexVector} {x : D}
-    (hR : ContDiffAt ℝ ∞ R x) (hRn : R x ≠ 0)
-    (hr : ContDiffAt ℝ ∞ Vr x) (hθ : ContDiffAt ℝ ∞ Vθ x) (hz : ContDiffAt ℝ ∞ Vz x)
-    (ha : ContDiffAt ℝ ∞ a x) : ContDiffAt ℝ ∞ (cylindricalDivergence R Vr Vθ Vz a) x := by
-  have hai := contDiffAt_pi.mp ha
-  exact (((contDiffAt_along hr (hai 0)).add ((hR.inv hRn).smul (hai 0))).add
-    ((hR.inv hRn).smul (contDiffAt_along hθ (hai 1)))).add (contDiffAt_along hz (hai 2))
 
-omit [NormedSpace ℝ D] in
-theorem eq_zero_of_mem_closure {E : Type*} [NormedAddCommGroup E]
-    {f : D → E} {C : Set D} {x : D} (hf : ContinuousAt f x)
-    (hx : x ∈ closure C) (hzero : EqOn f (fun _ => 0) C) : f x = 0 := by
-  have hm := mem_closure_image hf hx
-  have hs : f '' C ⊆ ({0} : Set E) := by
-    rintro y ⟨z, hz, rfl⟩
-    exact hzero hz
-  have he := closure_mono hs hm
-  simpa only [closure_singleton, mem_singleton_iff] using he
 
 
 end Curl

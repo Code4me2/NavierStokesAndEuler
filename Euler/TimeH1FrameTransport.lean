@@ -118,12 +118,6 @@ def transverseBackward : transverseDerivatives T hT m →L[ℝ] zeroTraceDerivat
         (frameLeftInverseDerivativePath T Q Q₁ c hc hQ)
         (frameLeftInversePath_hasDerivWithinAt T Q Q₁ c hc hQ hT hd), u.property.1, map_zero])
 
-/-- The backward transport is the actual inverse on every fixed coordinate derivative. -/
-theorem transverseBackward_forward (v : zeroTraceDerivatives (U := U) T hT) :
-    transverseBackward T hT Q Q₁ c hc hQ hd m
-      (transverseForward T hT Q Q₁ hd m hTangent v) = v := by
-  apply Subtype.ext
-  exact coordinateDerivative_productDerivative T hT Q Q₁ c hc hQ hd (v : TimeLp T U)
 
 include hRange in
 /-- The forward transport recovers every physical transverse derivative. -/

@@ -203,17 +203,7 @@ theorem E_eq_physical (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
     (show (X, eta) ∈ HeatedOutgoing.domain from ⟨hX, heta⟩)]
   rfl
 
-theorem H_eq_physical (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (heta : eta ∈ HeatedOutgoing.parameterDomain) (hX : 0 < X) :
-    H F XR c (X, eta) = HeatedOutgoing.H F XR c (X, eta) := by
-  rw [H, HeatedOutgoing.H, E_eq_physical F XR c eta X heta hX]
 
-theorem Pi_eq_physical (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (heta : eta ∈ HeatedOutgoing.parameterDomain) (hX : 0 ≤ X) :
-    Pi F XR c (X, eta) = HeatedOutgoing.Pi F XR c (X, eta) := by
-  unfold Pi HeatedOutgoing.Pi canonicalKernel HeatedOutgoing.canonicalKernel
-  congr 1
-  exact setIntegral_congr_fun measurableSet_Ioi (fun u hu => by rw [E_eq_physical F XR c eta u heta (hX.trans_lt hu)])
 
 theorem heatE_eq_edit (F : Profile) (XR eta X : ℝ) :
     heatE F XR (X, eta) = ExtendedHeatDebts.edit (fun u => OutgoingDilation.E F XR (u, eta))

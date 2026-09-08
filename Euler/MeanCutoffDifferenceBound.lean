@@ -35,24 +35,6 @@ theorem lpNorm_le_bound_volume {E : Type*} [NormedAddCommGroup E]
   simpa only [toReal_eLpNorm hf, ENNReal.toReal_mul, ENNReal.toReal_ofReal hC,
     ENNReal.toReal_rpow] using H
 
-/-- The classical mean value inequality bounds a directional difference quotient uniformly. -/
-theorem norm_differenceQuotient_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (f : Space → E) (hf : Differentiable ℝ f) (M : ℝ) (hM : 0 ≤ M)
-    (hDf : ∀ x, ‖fderiv ℝ f x‖ ≤ M) (a : Space) (h : ℝ) (x : Space) :
-    ‖h⁻¹ • (f (x + h • a) - f x)‖ ≤ M * ‖a‖ := by
-  by_cases hh : h = 0
-  · simp only [hh, inv_zero, zero_smul, norm_zero]
-    exact mul_nonneg hM (norm_nonneg a)
-  have H := Convex.norm_image_sub_le_of_norm_fderiv_le
-    (𝕜 := ℝ) (f := f) (s := Set.univ) (C := M) (x := x) (y := x+h•a)
-    (fun y _ => hf y) (fun y _ => hDf y) (convex_univ : Convex ℝ (Set.univ : Set Space))
-    (Set.mem_univ x) (Set.mem_univ (x+h•a))
-  simp only [add_sub_cancel_left, norm_smul, Real.norm_eq_abs] at H
-  rw [norm_smul, norm_inv, Real.norm_eq_abs]
-  calc
-    _ ≤ |h|⁻¹ * (M * (|h| * ‖a‖)) := mul_le_mul_of_nonneg_left H (inv_nonneg.mpr (abs_nonneg h))
-    _ = M * ‖a‖ := by
-      field_simp [abs_ne_zero.mpr hh]
 
 theorem differenceQuotient_fderiv (χ : Cutoff) (a : Space) (h : ℝ) (x : Space) :
     fderiv ℝ (χ.differenceQuotient a h).field x =

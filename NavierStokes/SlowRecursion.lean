@@ -363,12 +363,6 @@ theorem profile_radialDerivative {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOp
       SimilarityProfile.partialX (profile F) (X, eta) :=
   congrArg Complex.re (radialDerivative_value hR hU F hX heta)
 
-theorem profile_parameterDerivative {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
-    (F : AxisFunction R U) {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2))
-    (heta : (eta : ℂ) ∈ U) :
-    profile (parameterDerivative hU F) (X, eta) =
-      SimilarityProfile.partialEta (profile F) (X, eta) :=
-  congrArg Complex.re (parameterDerivative_value hR hU F hX heta)
 
 theorem profile_radialDerivative_germ {R : ℝ} (hR : 0 < R) {U : Set ℂ} (hU : IsOpen U)
     (F : AxisFunction R U) {X eta : ℝ} (hX : X ∈ Ioo (0 : ℝ) (R ^ 2))
@@ -1159,16 +1153,6 @@ theorem sequence_average {core buffer : ℝ} {U : Set ℂ} {h : ℝ}
   · exact average_from_equation hcore c.open_set _ _ heta ⟨lt_of_le_of_ne hX.1 (Ne.symm hz), hX.2⟩
       (fun Y hY => (sequence_positive_order c hcore hbuffer C base hn hY heta).1)
 
-theorem profile_axis_jet {R : ℝ} (hR : 0 < R) {U : Set ℂ} (F : AxisFunction R U)
-    {eta : ℝ} (heta : (eta : ℂ) ∈ U) (k : ℕ) :
-    iteratedDerivWithin k (fun X => profile F (X, eta)) (Ici 0) 0 =
-      ((k.factorial : ℝ) / ((2 * k).factorial : ℝ)) •
-        iteratedDeriv (2 * k) (fun r => (F (r, (eta : ℂ))).re) 0 := by
-  apply EvenSmoothDescent.iteratedDerivWithin_descent_zero_local
-    (f := fun r => (F (r, (eta : ℂ))).re) hR
-  · exact Complex.reCLM.contDiff.comp_contDiffOn
-      (F.2.smooth.comp (contDiff_id.prodMk contDiff_const).contDiffOn (fun r hr => ⟨hr, heta⟩))
-  · exact fun r hr => congrArg Complex.re (F.2.even _ heta r hr)
 
 /-- A base made from four genuine profiles; its divergence coefficient is
 computed by the same canonical derivative operator used in the recursion. -/

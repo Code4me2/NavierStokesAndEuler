@@ -45,13 +45,6 @@ theorem inner_projectedRhs_eq_integral (φ : Space → Space)
   filter_upwards [hLp.coeFn_toLp, (advectionField A A).toLp_ae] with x hφx hAx
   rw [hφx, hAx, advectionField_field]
 
-/-- Smooth divergence-free `L²` tests remove the pressure projection. -/
-theorem smooth_inner_projectedRhs_eq_integral (φ : Space → Space)
-    (hs : ContDiff ℝ ∞ φ) (hLp : MemLp φ 2 (volume : Measure Space))
-    (hdiv : ∀ x, divergence φ x = 0) (A : SmoothL2Field Space) :
-    ⟪hLp.toLp φ, (projectedRhs A).toLp⟫_ℝ =
-      -∫ x, ⟪φ x, fderiv ℝ A.field x (A.field x)⟫_ℝ :=
-  inner_projectedRhs_eq_integral φ hLp (smooth_mem_solenoidal φ hs hLp hdiv) A
 
 
 end EulerCompactProjectedPairing

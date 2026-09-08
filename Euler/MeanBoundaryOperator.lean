@@ -161,17 +161,6 @@ theorem weakPotential_pairing (χ : Cutoff) (z : L2) (f : Test) :
   rw [hx]
 
 
-/-- Compact vector tests determine the weak potential uniquely in the actual homogeneous space. -/
-theorem weakPotential_unique (χ : Cutoff) (z : L2) (u : homogeneousSpace)
-    (hu : ∀ f : Test, ⟪u, homogeneousGradient f⟫_ℝ =
-      ∫ x, ⟪z x, vectorCurl (fun y => χ.field y • (f : Space → Space) y) x⟫_ℝ) :
-    u = weakPotential χ z := by
-  apply ext_inner_right ℝ
-  intro v
-  refine homogeneousGradient_dense.induction_on v ?_ ?_
-  · exact isClosed_eq (continuous_const.inner continuous_id) (continuous_const.inner continuous_id)
-  · intro f
-    exact (hu f).trans (weakPotential_pairing χ z f).symm
 
 
 /-- The actual bounded positive mean boundary operator `Tχ Tχ*`. -/

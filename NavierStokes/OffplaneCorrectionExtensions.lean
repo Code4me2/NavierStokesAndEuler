@@ -150,8 +150,6 @@ noncomputable def physicalModel (coord : ℝ) (p : Lift) : Model :=
 
 noncomputable def modelDomain : Set Model := {y | 0 < y.1.1}
 
-theorem modelDomain_open : IsOpen modelDomain :=
-  isOpen_lt continuous_const (continuous_fst.comp continuous_fst)
 
 theorem stableModel_contDiffOn {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 1) :
     ContDiffOn ℝ ∞ (stableModel coord)
@@ -194,11 +192,6 @@ def ModelPeriodic (F : Model → ℝ) : Prop :=
   ∀ y : MeanRankUpdate.ModelPoint, 0 < y.1 →
     FourierAlias.TorusPeriodic (fun Y => F (y, Y))
 
-theorem continuedSource_periodic {coord : ℝ} {F : Model → ℝ} (hF : ModelPeriodic F)
-    {U : Set Slow} (hU : U ⊆ PositiveRepresentatives.stableTarget coord) :
-    PhysicalMeanDomain.PeriodicOn U (continuedSource coord F) := by
-  intro r s hs
-  exact hF (stableQ coord s, (r, s.2)) (stableQ_pos (hU hs))
 
 theorem continuedSource_supported {coord a b : ℝ} {F : Model → ℝ}
     (hF : ModelSupported a b F) {U : Set Slow}
@@ -411,46 +404,9 @@ namespace SupportedContinuation
 
 variable {coord a b : ℝ} {W : Window coord a b}
 
-noncomputable def scaleSlow {f : Lift → ℝ} (e : SupportedContinuation W f)
-    {c : Slow → ℝ} (C : Slow → ℝ) (hC : ContDiffOn ℝ ∞ C W.carrier)
-    (he : EqOn C c (W.carrier ∩ positiveSlow)) :
-    SupportedContinuation W (fun p => c p.2.1 * f p) where
-  value := fun p => C p.2.1 * e.value p
-  smooth := (hC.comp contDiffOn_snd.fst (fun _ hp => hp)).mul e.smooth
-  supported := fun p hp hn => e.supported p hp (right_ne_zero_of_mul hn)
-  agrees := fun _ hp => congrArg₂ (fun x y : ℝ => x * y) (he hp) (e.agrees hp)
 
-noncomputable def finiteSum {ι : Type*} (s : Finset ι) (f : ι → Lift → ℝ)
-    (e : ∀ i, SupportedContinuation W (f i)) :
-    SupportedContinuation W (fun p => ∑ i ∈ s, f i p) where
-  value := fun p => ∑ i ∈ s, (e i).value p
-  smooth := ContDiffOn.sum (fun i _ => (e i).smooth)
-  supported := by
-    intro p hp hn
-    by_contra hr
-    apply hn
-    apply Finset.sum_eq_zero
-    intro i _
-    by_contra hi
-    exact hr ((e i).supported p hp hi)
-  agrees := by
-    intro p hp
-    exact Finset.sum_congr rfl (fun i _ => (e i).agrees hp)
 
-/-- Actual radial/torus integration produces smooth slow debt coefficients
-on the continued neighborhood. -/
-theorem pressureMass_smooth {f : Lift → ℝ} (e : SupportedContinuation W f) :
-    ContDiffOn ℝ ∞ (PressureStream.pressureMass e.value) W.carrier := by
-  have hm := PhysicalMeanDomain.liftedPressureMass_contDiffOn W.isOpen e.smooth (W.fixed_support e.supported)
-  have hmap : ContDiffOn ℝ ∞ (fun s : Slow => ((0 : ℝ), (s, (0 : Slow)))) W.carrier :=
-    contDiffOn_const.prodMk (contDiffOn_id.prodMk contDiffOn_const)
-  exact hm.comp hmap (fun _ hp => hp)
 
-theorem pressureMass_agreement {f : Lift → ℝ} (e : SupportedContinuation W f) :
-    EqOn (PressureStream.pressureMass e.value) (PressureStream.pressureMass f)
-      (W.carrier ∩ positiveSlow) := by
-  intro s hs
-  exact PhysicalMeanDomain.liftedPressureMass_fiberLocal e.value f s (e.agrees.fiber hs.1 hs.2) 0 0
 
 theorem support_on_past {f : Lift → ℝ} (e : SupportedContinuation W f)
     (hc : 0 < coord) (hc1 : coord < 1) {p : Lift}
@@ -505,36 +461,10 @@ noncomputable def physicalReferenceSolve (coord : ℝ)
     (g : CommonCoverSolve.Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Slow → ℝ) : Lift → E :=
   fun p => (pullLinearData (physicalParameter coord) d).commonSolve g hab κ ((p.1, p.2.1), p.2.2)
 
-theorem continuedReferenceSolve_eq (coord : ℝ)
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Slow → ℝ) :
-    continuedReferenceSolve coord d g hab κ = d.commonSolve g hab κ ∘ stableModel coord := rfl
-
-theorem physicalReferenceSolve_eq (coord : ℝ)
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Slow → ℝ) :
-    physicalReferenceSolve coord d g hab κ = d.commonSolve g hab κ ∘ physicalModel coord := rfl
 
 
 
-/-- Radial support of the primitive forcing propagates through the
-zero-entry Volterra solve and the actual sum of its native copies. -/
-theorem referenceSolve_model_supported
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {s t : ℝ} (hst : s ≤ t) (κ : Slow → ℝ)
-    {a b : ℝ} (hs : ModelSupported a b d.source) :
-    ModelSupported a b (d.commonSolve g hst κ) := by
-  intro y hy hn
-  by_contra hr
-  have hsource : ∀ Y : Slow, d.source (y.1, Y) = 0 := by
-    intro Y
-    by_contra hne
-    exact hr (hs (y.1, Y) hy hne)
-  have hcopy (k : TorusInverse.Frequency) : d.copySolve g hst k y = 0 :=
-    d.copySolve_zero_of_source_zero g hst k y.1 y.2 (fun _ _ => hsource _)
-  apply hn
-  simp only [CommonCoverSolve.LinearData.commonSolve, CommonCoverSolve.LinearData.localizedCopy,
-    hcopy, smul_zero, tsum_zero]
+
 
 
 end ContinuedReferenceODE
@@ -549,13 +479,6 @@ section FullReferenceCarrier
 variable {V E : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
     [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-noncomputable def referenceCarrierModel
-    (d : CommonCoverSolve.LinearData MeanRankUpdate.ModelPoint V E)
-    (g : CommonCoverSolve.Geometry) {s t : ℝ} (hst : s ≤ t) (κ : Slow → ℝ)
-    (w : PeriodicPhaseAssembly.ClockWindow) (A B : MeanRankUpdate.ModelPoint → ℝ)
-    (frequency : ℝ) (L : E →L[ℝ] ℂ) (y : Model) : ℝ :=
-  (HarmonicCalculus.mode frequency (PeriodicPhaseAssembly.phase g w.cutoff A B)
-    (fun z => L (d.commonSolve g hst κ z)) y).re
 
 
 
@@ -563,21 +486,7 @@ end FullReferenceCarrier
 
 section RankModels
 
-theorem rankAngular_model_supported (coord A B lam a b : ℝ) (hab : a < b)
-    (d : MeanRankUpdate.Debt) :
-    ModelSupported a b (fun y => MeanRankUpdate.angularModel coord A B lam a b d y.1) := by
-  intro y hy hn
-  have hr := MeanRankUpdate.angularIncrement_tsupport lam (MeanRankUpdate.modelAmplitude coord B y.1)
-    a b (MeanRankUpdate.modelVelocity A y.1) (Real.sqrt_pos.mpr hy) hab d (subset_tsupport _ hn)
-  exact ⟨hr.1.le, hr.2.le⟩
 
-theorem rankAxial_model_supported (coord A B lam a b : ℝ) (hab : a < b)
-    (d : MeanRankUpdate.Debt) :
-    ModelSupported a b (fun y => MeanRankUpdate.axialModel coord A B lam a b d y.1) := by
-  intro y hy hn
-  have hr := MeanRankUpdate.desiredAxialIncrement_tsupport lam (MeanRankUpdate.modelAmplitude coord B y.1)
-    a b (MeanRankUpdate.modelVelocity A y.1) (Real.sqrt_pos.mpr hy) hab d (subset_tsupport _ hn)
-  exact ⟨hr.1.le, hr.2.le⟩
 
 
 
@@ -722,10 +631,6 @@ noncomputable def azimuthalExtension (e : SupportedContinuation W f) (h : ℝ) (
     dsimp only [azimuthalPotential]
     rw [he]
 
-noncomputable def angularExtension (e : SupportedContinuation W f) (h : ℝ) (n : ℕ)
-    {x : Space} (hx : (0, x 2) ∈ W.carrier) :
-    JointResidualLimits.OneSidedExtension (angularField h n f) x :=
-  e.azimuthalExtension h n hx
 
 end SupportedContinuation
 
@@ -755,24 +660,6 @@ theorem mean_model_extensions {h a b d : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   exact ⟨⟨ep⟩, ⟨eA⟩, ⟨AnnularEndpoint.curlExtension eA⟩⟩
 
 
-theorem mean_models_supported {coord a b d : ℝ} (hc : 0 < coord) (hc1 : coord < 1)
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (M : ℝ) (v : Slow)
-    (F : Model → ℝ) (hF : ContDiffOn ℝ ∞ F modelDomain) (hs : ModelSupported a b F) :
-    VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength coord) positiveSlow
-      (VariableGaugeMean.meanPressure d a b M hab (VariableGaugeMean.qLength coord) v (physicalSource coord F)) ∧
-    VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength coord) positiveSlow
-      (VariableGaugeMean.streamPotential d a b M (VariableGaugeMean.qLength coord) v (physicalSource coord F)) := by
-  constructor
-  · intro p hp hn
-    obtain ⟨W, hw⟩ := exists_window_at hc hc1 ha hab
-      (PositiveRepresentatives.positiveTime_mem_stableTarget hc hc1 hp)
-    let e : SupportedContinuation W (physicalSource coord F) := SupportedContinuation.ofModel hc hc1 F hF hs
-    exact (e.pressure hc hc1 ha hab hd M v).support_on_past hc hc1 hw hp hn
-  · intro p hp hn
-    obtain ⟨W, hw⟩ := exists_window_at hc hc1 ha hab
-      (PositiveRepresentatives.positiveTime_mem_stableTarget hc hc1 hp)
-    let e : SupportedContinuation W (physicalSource coord F) := SupportedContinuation.ofModel hc hc1 F hF hs
-    exact (e.stream hc hc1 ha hab hd M v).support_on_past hc hc1 hw hp hn
 
 theorem physicalScalar_shrinkingSupport (h : ℝ) (n : ℕ) {a b : ℝ} {f : Lift → ℝ}
     (hf : VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength (2 * h)) positiveSlow f) :
@@ -785,13 +672,6 @@ theorem physicalScalar_shrinkingSupport (h : ℝ) (n : ℕ) {a b : ℝ} {f : Lif
     b * Real.sqrt (SimilarityCoordinates.coordinateQ (2 * h) (1 - w.1, w.2 2))
   simpa only [mul_comm] using hs
 
-theorem azimuthalPotential_shrinkingSupport (h : ℝ) (n : ℕ) {a b : ℝ} {f : Lift → ℝ}
-    (hf : VariableGaugeMean.SupportedGauge a b (VariableGaugeMean.qLength (2 * h)) positiveSlow f) :
-    AnnularEndpoint.ShrinkingSupport h b (azimuthalPotential h n f) := by
-  intro w ht hn
-  apply physicalScalar_shrinkingSupport h n hf w ht
-  intro hz
-  exact hn (by simp only [azimuthalPotential, hz, mul_zero, zero_smul, add_zero])
 
 end PhysicalFields
 
@@ -859,29 +739,6 @@ theorem diagonal_extension {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 
 end DiagonalCutoffs
 
-/-- All stages of actual moving mean reconstruction can be summed with the
-chosen cutoff schedule at a nonzero-axial endpoint.  The model assumptions
-are on the primitive source of each stage. -/
-theorem mean_diagonal_extensions {h a b d : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (M : ℕ → ℝ) (v : ℕ → Slow) (n : ℕ → ℕ)
-    (F : ℕ → Model → ℝ) (hF : ∀ j, ContDiffOn ℝ ∞ (F j) modelDomain)
-    (hs : ∀ j, ModelSupported a b (F j)) {scale : ℕ → ℝ} (hscale : Tendsto scale atTop atTop)
-    {x : Space} (hx : x 2 ≠ 0) :
-    let p := fun j => physicalScalar h (n j) (VariableGaugeMean.meanPressure d a b (M j) hab
-      (VariableGaugeMean.qLength (2 * h)) (v j) (physicalSource (2 * h) (F j)))
-    let A := fun j => azimuthalPotential h (n j) (VariableGaugeMean.streamPotential d a b (M j)
-      (VariableGaugeMean.qLength (2 * h)) (v j) (physicalSource (2 * h) (F j)))
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (SolenoidalDiagonal.potentialSum scale (PhysicalWaveSum.physicalQ h) p) x) ∧
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (SolenoidalDiagonal.potentialSum scale (PhysicalWaveSum.physicalQ h) A) x) ∧
-    Nonempty (JointResidualLimits.OneSidedExtension
-      (SolenoidalDiagonal.velocitySum scale (PhysicalWaveSum.physicalQ h) A) x) := by
-  have he := fun j => mean_model_extensions hh hh1 ha hab hd (M j) (v j) (n j) (F j) (hF j) (hs j) hx
-  obtain ⟨eA⟩ := diagonal_extension hh hh1 hscale hx (fun j => (he j).2.1)
-  exact ⟨diagonal_extension hh hh1 hscale hx (fun j => (he j).1), ⟨eA⟩,
-    ⟨AnnularEndpoint.curlExtension eA⟩⟩
 
 
 end NavierStokes.OffplaneCorrectionExtensions

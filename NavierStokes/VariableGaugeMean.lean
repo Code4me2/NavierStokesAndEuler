@@ -179,27 +179,9 @@ noncomputable def cutoffModel (d a b : ℝ) (y : MeanRankUpdate.ModelPoint) : �
 noncomputable def densityModel (a b : ℝ) (hab : a < b) (y : MeanRankUpdate.ModelPoint) : ℝ :=
   (Real.sqrt y.1)⁻¹ * PressureStream.rho a b hab (y.2.1 / Real.sqrt y.1)
 
-theorem cutoffModel_contDiffOn {a : ℝ} (ha : 0 < a) (d b : ℝ) :
-    ContDiffOn ℝ ∞ (cutoffModel d a b) PhysicalCoordinateBounds.positiveTime := by
-  intro y hy
-  exact ((RadialPullback.physicalCutoff_contDiff ha d b).contDiffAt.comp y
-    (contDiffAt_snd.fst.div (contDiffAt_fst.sqrt (ne_of_gt hy))
-      (Real.sqrt_pos.mpr hy).ne')).contDiffWithinAt
 
-theorem densityModel_contDiffOn {a b : ℝ} (hab : a < b) :
-    ContDiffOn ℝ ∞ (densityModel a b hab) PhysicalCoordinateBounds.positiveTime := by
-  intro y hy
-  have hs : ContDiffAt ℝ ∞ (fun y : MeanRankUpdate.ModelPoint => Real.sqrt y.1) y :=
-    contDiffAt_fst.sqrt (ne_of_gt hy)
-  exact ((hs.inv (Real.sqrt_pos.mpr hy).ne').mul
-    ((PressureStream.rho_contDiff a b hab).contDiffAt.comp y
-      (contDiffAt_snd.fst.div hs (Real.sqrt_pos.mpr hy).ne'))).contDiffWithinAt
 
-theorem cutoff_q_eq_kernel (coord d a b : ℝ) :
-    cutoff d a b (qLength coord) = MeanRankUpdate.chartKernel coord (cutoffModel d a b) := rfl
 
-theorem density_q_eq_kernel (coord a b : ℝ) (hab : a < b) :
-    density a b hab (qLength coord) = MeanRankUpdate.chartKernel coord (densityModel a b hab) := rfl
 
 
 

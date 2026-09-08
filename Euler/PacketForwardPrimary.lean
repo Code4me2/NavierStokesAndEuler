@@ -99,16 +99,6 @@ theorem forwardPrimary_initial (O : Operators) (x : Space) (θ : ℝ) :
     (smoothField_continuous period _ (field_smooth δ hδ ξ)) (terminal_ae δ hδ ξ),
     field_coe,map_smul]
 
-theorem forwardPrimary_initial_angular (O : Operators) (x : Space) :
-    HasDerivAt (fun θ : ℝ => (forwardPrimary D δ hδ ξ hs O).high (0,(x,θ)))
-      ((innerCutoff x*δ⁻¹) • D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ x ξ) 0 := by
-  have he : (fun θ : ℝ => (forwardPrimary D δ hδ ξ hs O).high (0,(x,θ))) =
-      fun θ => (innerCutoff x*profile δ θ) • D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ x ξ :=
-    funext (forwardPrimary_initial D δ hδ ξ hs O x)
-  rw [he]
-  have hp := (profile_hasDerivAt δ hδ 0).differentiableAt.hasDerivAt
-  rw [profile_deriv_zero δ hδ] at hp
-  exact (hp.const_mul (innerCutoff x)).smul_const (D.frame.field ⟨0,le_rfl,D.T_pos.le⟩ x ξ)
 
 
 end EulerPacketTerminalDatum

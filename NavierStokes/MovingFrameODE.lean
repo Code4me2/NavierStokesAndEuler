@@ -418,10 +418,6 @@ theorem contDiffAt_normalDirection (hn : ContDiffAt ℝ m n q) (hne : tail (n q)
   exact ((contDiffAt_normalScale hn hne).inv (normalScale_pos hne).ne').smul
     (tailCLM.contDiff.contDiffAt.comp q hn)
 
-theorem contDiffAt_transverseDirection (hn : ContDiffAt ℝ m n q)
-    (hne : tail (n q) ≠ 0) :
-    ContDiffAt ℝ m (fun p => quarterTurn (normalDirection (n p))) q :=
-  quarterTurn.contDiff.contDiffAt.comp q (contDiffAt_normalDirection hn hne)
 
 end SmoothFrame
 

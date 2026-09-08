@@ -43,14 +43,6 @@ theorem blockNorm_metric_lower {s q n : ℕ} (u : SobolevSpace period s) (h : n+
   rw [blockNorm_baseWords period u h, Finset.mul_sum]
   exact Finset.sum_le_sum fun w _ => sobolevNorm_le_baseWordMetric period K _ c hc hK
 
-/-- The upper metric comparison is independent of the external word count. -/
-theorem blockNorm_metric_upper {s q n : ℕ} (u : SobolevSpace period s) (h : n+q ≤ s)
-    (K : LiftL2 period →L[ℝ] LiftL2 period) :
-    (∑ w : Fin n → Fin 4, baseWordMetricNorm period K
-      (EulerH6Pressure.SpatialJet.derivativeJet (q := q) (toJet period u) w h)) ≤
-      Real.sqrt ‖K‖ * blockNorm period (toJet period u) q n := by
-  rw [blockNorm_baseWords period u h, Finset.mul_sum]
-  exact Finset.sum_le_sum fun w _ => baseWordMetric_le_sobolevNorm period K _
 
 /-- The metric-weighted energy is exactly the external-word sum of fixed-base metric roots. -/
 theorem metricSum_eq {s : ℕ} (q N : ℕ) (hN : N+q ≤ s) (ρ : ℝ)

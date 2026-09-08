@@ -228,25 +228,7 @@ theorem nominal_stressZeroCore :
   repaired_stressZeroCore (nominalLocalization W) (nominalBaseAgreement W)
     (nominalZeroOrder W) (nominalParameters_contains W)
 
-theorem nominal_jetRate {l : Filter ProblemStatement.SpaceTime} {a : ℕ → ℕ} {hi : ℝ}
-    (P : BaseResidual.PhysicalApproach l F.data.h 0 hi)
-    (ha : AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (nominalCoefficients W))
-      (innerBox 0 hi) a) (m : ℕ) (n : ℝ) (hn : 0 ≤ n) :
-    DiagonalResidual.JetRate l (fun z => (cartesianChart F.data.h z).1)
-      (BaseResidual.baseResidual a F.data.h W.axis.normalization (nominalCoefficients W)) m n :=
-  repaired_jetRate (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
-    (nominalParameters_contains W) (height_pos W) (height_lt_half W) P ha
-    (nominal_finiteIdentities W) m n hn
 
-theorem nominal_allJetsFlat {l : Filter ProblemStatement.SpaceTime} {a : ℕ → ℕ} {hi : ℝ}
-    (P : BaseResidual.PhysicalApproach l F.data.h 0 hi)
-    (ha : AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (nominalCoefficients W))
-      (innerBox 0 hi) a) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1)
-      (BaseResidual.baseResidual a F.data.h W.axis.normalization (nominalCoefficients W)) :=
-  repaired_allJetsFlat (nominalLocalization W) (nominalBaseAgreement W) (nominalZeroOrder W)
-    (nominalParameters_contains W) (height_pos W) (height_lt_half W) P ha
-    (nominal_finiteIdentities W)
 
 theorem nominal_higherInteriorSupport {left right : ℝ}
     (hl : Real.exp left < nominalInner W / 8) (hr : nominalOuterX W < Real.exp right) :
@@ -271,14 +253,6 @@ theorem nominal_leading_axis {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
 theorem nominal_leading_origin : (nominalCoefficients W).axial 0 (0, 0) = W.axis.j := by
   simpa using nominal_leading_axis W (eta := 0) (by constructor <;> norm_num)
 
-theorem nominal_origin {a : ℕ → ℕ} (ha : StrictMono a) {t : ℝ} (ht : t < 1) :
-    baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) •
-        ProblemStatement.coordinateVector 2 := by
-  rw [BaseResidual.baseVelocity_at_origin ha (height_pos W) (height_lt_half W)
-    (nominalCoefficients_smooth W) W.axis.normalization
-    (fun _ hn => (nominalCoefficients_axis W hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1) ht,
-    nominal_leading_origin]
 
 theorem nominal_axis_tendsto {a : ℕ → ℕ} (ha : StrictMono a) :
     Tendsto (fun t : ℝ => ‖baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W) (t, 0)‖)
@@ -289,36 +263,11 @@ theorem nominal_axis_tendsto {a : ℕ → ℕ} (ha : StrictMono a) :
   rw [nominal_leading_origin]
   exact W.axis.small.j_pos
 
-theorem nominal_speedUnbounded {a : ℕ → ℕ} (ha : StrictMono a) :
-    ProblemStatement.SpeedUnboundedAtOne
-      (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W)) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (nominal_axis_tendsto W ha)
-
-theorem nominal_velocity_smooth {a : ℕ → ℕ} (ha : StrictMono a) :
-    ContDiffOn ℝ ∞ (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W))
-      BaseResidual.past :=
-  baseVelocity_smooth ha (height_pos W) (height_lt_half W) (nominalCoefficients_smooth W)
-    W.axis.normalization
-
-theorem nominal_pressure_smooth {a : ℕ → ℕ} (ha : StrictMono a) :
-    ContDiffOn ℝ ∞ (basePressure a F.data.h W.axis.normalization (nominalCoefficients W))
-      BaseResidual.past :=
-  BaseResidual.basePressure_smooth ha (height_pos W) (height_lt_half W)
-    (nominalCoefficients_smooth W) W.axis.normalization
-
-theorem nominal_stressForce_smooth {a : ℕ → ℕ} (ha : StrictMono a) :
-    ContDiffOn ℝ ∞ (BaseResidual.baseStressForce a F.data.h W.axis.normalization (nominalCoefficients W))
-      BaseResidual.past :=
-  BaseResidual.baseStressForce_smooth_past ha (height_pos W) (height_lt_half W)
-    (div_pos (nominalInner_pos W) (by norm_num)) (nominalCoefficients_smooth W) (nominal_stressZeroCore W)
 
 
-theorem nominal_divergence_zero {a : ℕ → ℕ} (ha : StrictMono a) {t : ℝ} (ht : t < 1)
-    (x : ProblemStatement.Space) :
-    ProblemStatement.spatialDivergence
-      (baseVelocity a F.data.h W.axis.normalization (nominalCoefficients W)) t x = 0 :=
-  baseVelocity_divergence_zero ha (height_pos W) (height_lt_half W)
-    (nominalCoefficients_smooth W) W.axis.normalization ht x
+
+
+
 
 end Nominal
 
@@ -432,21 +381,6 @@ theorem weighted_on_actual_scales {a : ℕ → ℕ} {h C : ℝ} (hh : 0 < h)
     (activeZeta_edgeJets (Real.exp_lt_exp.mp ((hl.trans_le hi).trans hr)) hc)
     (higherStressQuotient_smooth_of_support hd hc hs) ha
 
-/-- The terminal amplitude and the normalization of the slow swirl field
-are independent constants.  This proof keeps them independent. -/
-theorem firstStress_edgeJets (Cedge : ℝ) (tail : OutgoingTail.TailData) (y0 : ℝ)
-    {d : Coefficients} (hd : SmoothCoefficients d)
-    {c left width inner : ℝ} (hc : 0 < c) (hw : 0 < width)
-    (hl : Real.exp left < inner) (hi : inner ≤ Real.exp (y0 + 3 - width))
-    (hz : ∀ w : Inner, w.1 < inner → stressPair d 1 w = 0)
-    (he : ∀ w ∈ outerWindow (Real.exp (y0 + 3 - width)) (y0 + 3),
-      stressPair d 1 =ᶠ[𝓝 w] (fun v => (SlowFirstOrderEdge.stressX Cedge tail y0 v, 0))) :
-    PolynomialEdgeJets (activeWindow left (y0 + 3))
-      (activeZeta c left (y0 + 3)) (activeDelta left (y0 + 3)) (stressPair d 1) := by
-  have hlog : left < y0 + 3 - width := Real.exp_lt_exp.mp (hl.trans_le hi)
-  exact edgeJets_of_outer_collar (stressPair_smooth hd 1) hc hl hi
-    (Real.exp_lt_exp.mpr (by linarith)) hz
-    (firstOrder_pair_outer_edgeJets Cedge tail y0 hc hw hlog he)
 
 
 end CommonWeightedSchedule
@@ -565,14 +499,7 @@ theorem nominalScales_admissible :
   weightedBundle_base_scales (nominalCoefficients_smooth W) (nominal_quotients_smooth W hc)
     (nominalScales_spec W c hc upper B).2
 
-theorem nominalScales_strictMono : StrictMono (nominalScales W c hc upper B) :=
-  (nominalScales_spec W c hc upper B).2.strictMono
 
-theorem nominalScales_admissible_on {lo hi : ℝ} (hlo : 0 ≤ lo) (hhi : hi ≤ scaleUpper W upper) :
-    AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (nominalCoefficients W))
-      (innerBox lo hi) (nominalScales W c hc upper B) :=
-  admissibleScales_mono (nominalScales_admissible W c hc upper B)
-    (fun _ hw => ⟨⟨hlo.trans hw.1.1, hw.1.2.trans hhi⟩, hw.2⟩)
 
 
 
@@ -747,12 +674,6 @@ theorem vectorPotential_smooth (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
     ContDiffOn ℝ ∞ (vectorPotential v c hc upper B) BaseResidual.past :=
   modifiedScales_potential_smooth W c hc upper B v.profiles v.finiteModification
 
-theorem smooth_and_divergence (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ContDiffOn ℝ ∞ (velocity v c hc upper B) BaseResidual.past ∧
-    ContDiffOn ℝ ∞ (pressure v c hc upper B) BaseResidual.past ∧
-    ∀ t < (1 : ℝ), ∀ x : ProblemStatement.Space,
-      ProblemStatement.spatialDivergence (velocity v c hc upper B) t x = 0 :=
-  modifiedScales_smooth_and_divergence W c hc upper B v.profiles v.finiteModification
 
 theorem origin (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t < 1) :
     velocity v c hc upper B (t, 0) =

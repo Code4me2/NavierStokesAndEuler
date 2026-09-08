@@ -79,11 +79,6 @@ def normalizedPressure : C(Icc (0 : ℝ) T,CylinderL2 P ℝ) :=
   sourcePressure P M m cm hcm hm (includePath P S hS f)
     (includePath P S hS (normalizedVelocity P T hT S hS Q Q₁ c hc hQ g hg f a₀))
 
-theorem pressurePath_weight_eq :
-    pressurePath P S hS T hT Q Q₁ c hc hQ (weight g f) a₀ M m cm hcm hm =
-      weight g (normalizedPressure P S hS T hT Q Q₁ c hc hQ f a₀ M m cm hcm hm g hg) := by
-  rw [pressurePath_eq_sourcePressure, velocity_weight_eq, include_weight, include_weight]
-  exact sourcePressure_weight P M m cm hcm hm g _ _
 
 
 end EulerSourceCylinderEquation

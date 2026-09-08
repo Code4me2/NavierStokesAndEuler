@@ -518,28 +518,6 @@ theorem weighted_half_control {s : Set E} {S T w g r : E → ℝ}
     apply (div_le_iff₀ (Real.sqrt_pos.mpr (hw x hx))).2
     simpa only [mul_assoc, mul_left_comm, mul_comm] using h
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- An explicit weighted lower estimate supplies the reciprocal envelope.
-This assumption is pointwise, with no normalized smooth factor. -/
-theorem polyBound_of_lower {s : Set E} {S T w g : E → ℝ}
-    (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hg : ∀ x ∈ s, 0 < g x) {c₀ : ℝ} (hc₀ : 0 < c₀) (K N : ℕ)
-    (hlower : ∀ x ∈ s, c₀ * w x / (S x ^ K * T x ^ N) ≤ g x) :
-    PolyBound s S T (fun x => w x / g x) := by
-  refine ⟨c₀⁻¹ + 1, by have := inv_pos.mpr hc₀; linarith, K, N, ?_⟩
-  intro x hx
-  have hP : 0 < S x ^ K * T x ^ N :=
-    mul_pos (pow_pos (zero_lt_one.trans_le (hS x hx)) _)
-      (pow_pos (zero_lt_one.trans_le (hT x hx)) _)
-  have h := (div_le_iff₀ hP).mp (hlower x hx)
-  apply (div_le_iff₀ (hg x hx)).2
-  calc
-    w x = c₀⁻¹ * (c₀ * w x) := by rw [← mul_assoc, inv_mul_cancel₀ hc₀.ne', one_mul]
-    _ ≤ c₀⁻¹ * (g x * (S x ^ K * T x ^ N)) :=
-      mul_le_mul_of_nonneg_left h (inv_pos.mpr hc₀).le
-    _ ≤ (c₀⁻¹ + 1) * (g x * (S x ^ K * T x ^ N)) := by
-      exact mul_le_mul_of_nonneg_right (by linarith) (mul_pos (hg x hx) hP).le
-    _ = _ := by ring
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 /-- Convert the usual weighted upper inequality to the envelope notation. -/
@@ -589,20 +567,6 @@ omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem inverse_distance_one_le {U : Set E} {p : E × ℝ} (hp : p ∈ edgeStrip U) :
     1 ≤ p.2⁻¹ := (one_le_inv₀ hp.2.1).mpr hp.2.2.le
 
-/-- The hypotheses are inequalities for the input's actual derivatives. -/
-theorem WeightedJets.of_bounds {c : ℝ} {U : Set E} {S : E × ℝ → ℝ} {f : E × ℝ → ℝ}
-    (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p)
-    (h : ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ K N : ℕ, ∀ p ∈ edgeStrip U,
-      ‖iteratedFDeriv ℝ n f p‖ ≤ C * S p ^ K * FlatCutoff.edge c p.2 / p.2 ^ N) :
-    WeightedJets c U S f := by
-  intro n
-  obtain ⟨C, hC, K, N, hb⟩ := h n
-  apply polyBound_of_weighted hS (fun p hp => inverse_distance_one_le hp)
-    (fun p hp => FlatCutoff.edge_pos c hp.2.1) hC K N
-  intro p hp
-  convert! hb p hp using 1
-  simp only [div_eq_mul_inv, inv_pow]
-  ring
 
 theorem weighted_half_jets {c : ℝ} {U : Set E} (hU : IsOpen U)
     {S g r : E × ℝ → ℝ} (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p)
@@ -648,37 +612,6 @@ theorem WeightedJets.localGaussian {c : ℝ} {U : Set E} {S f : E × ℝ → ℝ
       simp only [div_eq_mul_inv, inv_pow]
       ring
 
-/-- Joint smooth zero extension, and vanishing of every full edge tensor,
-derived solely from weighted input-jet inequalities and a positive lower bound. -/
-theorem weighted_zero_extension {c : ℝ} (hc : 0 < c) {U : Set E} (hU : IsOpen U)
-    {S g r : E × ℝ → ℝ} (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p)
-    (hscale : LocallyBoundedScale U S)
-    (hpos : ∀ p ∈ U ×ˢ Ioi (0 : ℝ), 0 < g p)
-    (hg : ContDiffOn ℝ ∞ g (U ×ˢ Ioi 0)) (hr : ContDiffOn ℝ ∞ r (U ×ˢ Ioi 0))
-    (hlower : PolyBound (edgeStrip U) S (fun p => p.2⁻¹)
-      (fun p => FlatCutoff.edge c p.2 / g p))
-    (hgj : WeightedJets c U S g) (hrj : WeightedJets c U S r) :
-    ContDiffOn ℝ ∞ (FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p))) (U ×ˢ univ) ∧
-    ContDiffOn ℝ ∞ (FlatZeroExtension.zeroExtension (fun p => r p / (2 * Real.sqrt (g p))))
-      (U ×ˢ univ) ∧
-    ∀ n : ℕ, ∀ x ∈ U,
-      iteratedFDeriv ℝ n (FlatZeroExtension.zeroExtension (fun p => Real.sqrt (g p))) (x, 0) = 0 ∧
-      iteratedFDeriv ℝ n (FlatZeroExtension.zeroExtension
-        (fun p => r p / (2 * Real.sqrt (g p)))) (x, 0) = 0 := by
-  obtain ⟨ha, hb⟩ := weighted_half_jets hU hS hpos hg hr hlower hgj hrj
-  have haB := ha.localGaussian hS hscale
-  have hbB := hb.localGaussian hS hscale
-  have has : ContDiffOn ℝ ∞ (fun p => Real.sqrt (g p)) (U ×ˢ Ioi (0 : ℝ)) :=
-    hg.sqrt (fun p hp => (hpos p hp).ne')
-  have hbs : ContDiffOn ℝ ∞ (fun p => r p / (2 * Real.sqrt (g p))) (U ×ˢ Ioi (0 : ℝ)) :=
-    hr.div (contDiffOn_const.mul has) (fun p hp =>
-      mul_ne_zero (by norm_num) (Real.sqrt_pos.mpr (hpos p hp)).ne')
-  have hc2 : 0 < c / 2 := by linarith
-  refine ⟨FlatZeroExtension.contDiffOn_zeroExtension hc2 hU has haB,
-    FlatZeroExtension.contDiffOn_zeroExtension hc2 hU hbs hbB, ?_⟩
-  intro n x hx
-  exact ⟨FlatZeroExtension.iteratedFDeriv_zeroExtension_edge hc2 hU has haB n hx,
-    FlatZeroExtension.iteratedFDeriv_zeroExtension_edge hc2 hU hbs hbB n hx⟩
 
 
 

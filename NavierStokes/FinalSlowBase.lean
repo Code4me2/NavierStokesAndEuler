@@ -200,13 +200,6 @@ noncomputable def leadingAxial : PhaseCalculus.Slow → ℝ :=
 
 
 
-/-- The actual covariance target, including its positive chart factor. -/
-noncomputable def covarianceTarget (q : ℝ) (N : ℕ) (U : PartitionedCovariance.UnsignedLabel)
-    (p : PhaseCalculus.Slow) : MovingFrameODE.Plane :=
-  let w := (BaseChartJets.normalizedCoordinates F.data.h p).2
-  let T := PartitionedCovariance.chartTarget F.data.h q N
-    ![(coefficients H v).stressTheta 0 w, (coefficients H v).stressAxial 0 w] U
-  !₂[T 0, T 1]
 
 
 /-- The sequence is selected once from the aligned enlarged bundle. -/
@@ -360,36 +353,6 @@ theorem weighted_jets (upper : ℝ) (B m : ℕ) :
   obtain ⟨D, hD, N, hb⟩ := weighted_bound H v upper B m
   exact ⟨D, hD, N, fun q hq hq1 w hw => hb q hq hq1 w (by simpa only [← annulus_eq W] using hw)⟩
 
-/-- The weighted difference can use the literal leading stress even at
-the parameter endpoints. Its ambient tensors agree by continuity. -/
-theorem stress_difference_jets_eq (upper : ℝ) (B m : ℕ) {q : ℝ} (hq : 0 < q)
-    {w : Inner} (hX : 0 < w.1) (heta : w.2 ∈ Icc (-1 : ℝ) 1) :
-    blownJet m (fun y => normalizedStress H v upper B y -
-      BaseResidual.stressPair (coefficients H v) 0 y.2) (q, w) =
-    blownJet m (fun y => normalizedStress H v upper B y - leadingStress v y.2) (q, w) := by
-  apply iteratedFDeriv_eq_on_dense
-    (s := Ioi (0 : ℝ) ×ˢ (Ioi (0 : ℝ) ×ˢ Ioo (-1 : ℝ) 1))
-    (t := Ioi (0 : ℝ) ×ˢ (Ioi (0 : ℝ) ×ˢ Icc (-1 : ℝ) 1))
-    (isOpen_Ioi.prod (isOpen_Ioi.prod isOpen_Ioo))
-    (fun _ hy => ⟨hy.1, hy.2.1, hy.2.2.1.le, hy.2.2.2.le⟩) _ _ _ _ m
-    (show ((1 : ℝ), w) ∈ Ioi (0 : ℝ) ×ˢ (Ioi (0 : ℝ) ×ˢ Icc (-1 : ℝ) 1) from ⟨by norm_num, hX, heta⟩)
-  · intro y hy
-    simpa only [closure_prod_eq, closure_Ioi, closure_Ioo (by norm_num : (-1 : ℝ) ≠ 1), mem_prod, mem_Ici]
-      using (show 0 ≤ y.1 ∧ 0 ≤ y.2.1 ∧ y.2.2 ∈ Icc (-1 : ℝ) 1 from ⟨hy.1.le, hy.2.1.le, hy.2.2⟩)
-  · intro y hy
-    apply ContDiffAt.comp y _ (scaleMap q).contDiff.contDiffAt
-    exact (normalizedStress_smoothAt H v upper B (by simpa using mul_pos hq hy.1)).sub
-      ((BaseResidual.stressPair_smooth (coefficients_smooth H v) 0).contDiffAt.comp _ contDiffAt_snd)
-  · intro y hy
-    apply ContDiffAt.comp y _ (scaleMap q).contDiff.contDiffAt
-    have hs : ContDiffAt ℝ ∞ (leadingStress v) (scaleMap q y).2 := by
-      simpa only [scaleMap_apply] using leadingStress_smoothAt v hy.2.1 hy.2.2
-    exact (normalizedStress_smoothAt H v upper B (by simpa using mul_pos hq hy.1)).sub
-      (hs.comp (scaleMap q y) contDiffAt_snd)
-  · intro y hy
-    change normalizedStress H v upper B (scaleMap q y) - BaseResidual.stressPair (coefficients H v) 0 y.2 =
-      normalizedStress H v upper B (scaleMap q y) - leadingStress v y.2
-    rw [leading_stress_eq H v hy.2.1.le (abs_le.mpr ⟨hy.2.2.1.le, hy.2.2.2.le⟩)]
 
 
 theorem physical_stress_eq_normalized (upper : ℝ) (B : ℕ) {p : Chart} (hp : p.1 < 1) :
@@ -409,14 +372,6 @@ theorem coefficient_stress_zero_right (n : ℕ) {p : Inner}
     (coefficients H v).stressTheta n p = 0 ∧ (coefficients H v).stressAxial n p = 0 :=
   EntranceAlignedBase.modulated_stress_zero_right H v n hp heta
 
-theorem coefficient_stress_support (n : ℕ) :
-    SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-      (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W)
-      ((coefficients H v).stressTheta n) ∧
-    SlowStressSupport.radialSupport (Icc (-1 : ℝ) 1)
-      (NominalConeAssembly.activeLeft W) (NominalConeAssembly.activeRight W)
-      ((coefficients H v).stressAxial n) :=
-  EntranceAlignedBase.modulated_all_stress_support H v n
 
 
 

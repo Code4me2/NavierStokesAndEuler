@@ -171,11 +171,5 @@ theorem mixedBoundaryOperator_difference (χ₁ χ₀ ψ₁ ψ₀ : Cutoff) :
   rw [mixedBoundaryOperator_sub_left, mixedBoundaryOperator_sub_right]
   abel
 
-theorem mixedBoundaryOperator_difference_norm_le (χ₁ χ₀ ψ₁ ψ₀ : Cutoff) :
-    ‖mixedBoundaryOperator χ₁ ψ₁ - mixedBoundaryOperator χ₀ ψ₀‖ ≤
-      cutoffBound (χ₁.sub χ₀) * cutoffBound ψ₁ + cutoffBound χ₀ * cutoffBound (ψ₁.sub ψ₀) := by
-  rw [mixedBoundaryOperator_difference]
-  exact (norm_add_le _ _).trans (add_le_add (mixedBoundaryOperator_norm_le _ _)
-    (mixedBoundaryOperator_norm_le _ _))
 
 end EulerMeanBoundary

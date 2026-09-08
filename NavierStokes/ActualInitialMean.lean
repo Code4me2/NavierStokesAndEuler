@@ -656,10 +656,6 @@ theorem initial_zeroMasses (B N0 : ℕ) :
     GaugeMassPreservation.ZeroMassesOn ActualPrimary.standardRegion.carrier (initialized B N0) :=
   (initial_bounds B N0).2.2.2
 
-theorem initial_mean_smooth (B N0 : ℕ) :
-    MeanIncrementBounds.SmoothTriple (PhysicalMeanDomain.slowDomain ActualPrimary.standardRegion.carrier)
-      (initialized B N0).mean :=
-  (rank_bounds B N0).mean_smooth
 
 
 

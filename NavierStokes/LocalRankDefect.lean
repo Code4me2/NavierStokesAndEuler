@@ -1023,22 +1023,5 @@ theorem increment_supportedGauge {a b : ℝ} (ha : 0 < a) (hab : a < b) (hU : Is
 
 end RankGeometry
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-/-- A fixed reserved profile interval has a uniform positive distance from
-both outer moving edges after division by the actual local length. -/
-theorem normalized_support_margin {a b lo hi : ℝ} (hal : a < lo) (hhb : hi < b)
-    (ell : ℕ → P → ℝ) (U : Set P) (f : ScalarField (Point P))
-    (hell : ∀ n x, x ∈ U → 0 < ell n x)
-    (hs : ∀ n, VariableGaugeMean.SupportedGauge lo hi (ell n) U (f n)) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ n p, p.2.1 ∈ U → f n p ≠ 0 →
-      δ ≤ p.1 / ell n p.2.1 - a ∧ δ ≤ b - p.1 / ell n p.2.1 := by
-  refine ⟨min (lo - a) (b - hi), lt_min (sub_pos.mpr hal) (sub_pos.mpr hhb), ?_⟩
-  intro n p hp hn
-  have hr := hs n p hp hn
-  have hl : lo ≤ p.1 / ell n p.2.1 := (le_div_iff₀ (hell n _ hp)).mpr (by simpa only [mul_comm] using hr.1)
-  have hh : p.1 / ell n p.2.1 ≤ hi := (div_le_iff₀ (hell n _ hp)).mpr (by simpa only [mul_comm] using hr.2)
-  have h1 := min_le_left (lo - a) (b - hi)
-  have h2 := min_le_right (lo - a) (b - hi)
-  constructor <;> linarith
 
 end NavierStokes.LocalRankDefect

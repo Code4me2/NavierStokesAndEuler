@@ -460,12 +460,6 @@ noncomputable def phases (hcone : LeadingStressWeights.FullTrueCone v)
       (domain W (prepared H v hcone upper B r0 hbox N0).N) :=
   construction H v (prepared H v hcone upper B r0 hbox N0) hr0
 
-/-- A canonical box large enough for every enlarged chart of the active
-annulus. This uses exactly `FinalSlowBase.scales H v (2*activeRight) B`. -/
-noncomputable def canonicalPrepared (hcone : LeadingStressWeights.FullTrueCone v)
-    (B : ℕ) (r0 : ℝ) (N0 : ℕ) :
-    Prepared H v (2 * NominalConeAssembly.activeRight W) B r0 N0 :=
-  prepared H v hcone (2 * NominalConeAssembly.activeRight W) B r0 (le_max_left _ _) N0
 
 
 

@@ -1173,13 +1173,6 @@ theorem normalizedSlowDomain_open {coord : ℝ} (hc : 0 < coord) (hc1 : coord < 
   simp [normalizedSlowDomain, MeanRankUpdate.normalizedDomain, chartQ_eq_slow,
     PhysicalCoordinateBounds.positiveTime, MeanRankUpdate.chartInput_apply]
 
-theorem normalizedDomain_eq (coord qlo qhi rlo rhi : ℝ) :
-    MeanRankUpdate.normalizedDomain coord qlo qhi rlo rhi =
-      stripDomain rlo rhi (normalizedSlowDomain coord qlo qhi) := by
-  ext p
-  simp only [MeanRankUpdate.normalizedDomain, stripDomain, normalizedSlowDomain, Set.mem_ofPred_eq,
-    chartQ_eq_slow, PhysicalCoordinateBounds.positiveTime, MeanRankUpdate.chartInput_apply]
-  tauto
 
 
 section TemporalClasses

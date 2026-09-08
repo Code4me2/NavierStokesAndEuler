@@ -128,14 +128,6 @@ theorem contDiff_glue {a : ℝ} {left right : ℝ → V}
   exact (hasDerivAt_gluedJet hleft hright hmatch n x).differentiableAt
 
 
-/-- Every within-derivative of the zero curve is zero. -/
-theorem iteratedDerivWithin_zero_curve (s : Set ℝ) (n : ℕ) :
-    iteratedDerivWithin n (fun _ : ℝ => (0 : V)) s = fun _ => 0 := by
-  induction n with
-  | zero => simp only [iteratedDerivWithin_zero]
-  | succ n ih =>
-    funext x
-    simp only [iteratedDerivWithin_succ, ih, derivWithin_fun_const, Pi.zero_apply]
 
 
 end Normed

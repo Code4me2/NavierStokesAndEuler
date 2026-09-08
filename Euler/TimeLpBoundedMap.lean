@@ -28,8 +28,6 @@ theorem timeLift_ae (T : ℝ) (A : E →L[ℝ] F) (u : TimeLp T E) :
     timeLift T A u =ᵐ[timeMeasure T] fun t => A (u t) := A.coeFn_compLpL u
 
 
-theorem timeLift_apply_norm_le (T : ℝ) (A : E →L[ℝ] F) (u : TimeLp T E) :
-    ‖timeLift T A u‖ ≤ ‖A‖*‖u‖ := A.norm_compLp_le u
 
 
 

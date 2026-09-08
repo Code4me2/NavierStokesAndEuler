@@ -612,20 +612,6 @@ theorem physical_axial_viscosity_zero_of_X_profile {h τ C T : ℝ}
     rw [hf]
   exact ⟨hi.congr hfg, (integral_congr_ae hfg).symm.trans hz⟩
 
-theorem uTheta_axial_viscosity_integral {h t C T : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ht : t < 1) (hT : 0 < T)
-    {F E : ℝ × ℝ → ℝ}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ Ioo (-1 : ℝ) 1))
-    (hFE : ∀ R : ℝ, 0 < R → ∀ eta ∈ Ioo (-1 : ℝ) 1,
-      F (R, eta) = E (R ^ 2 / 2, eta))
-    (he : ∀ eta ∈ Ioo (-1 : ℝ) 1, ∀ X : ℝ, T ≤ X →
-      E (X, eta) = C * X ^ (-A h) *
-        RadialHeatProfile.profile (1 + h) (2 * (1 - eta ^ 2) / X))
-    (hm : ∀ eta ∈ Ioo (-1 : ℝ) 1, xMoment h C E eta = 0) (z : ℝ) :
-    (∫ r in Ioi (0 : ℝ), r ^ 2 * deriv (deriv (uTheta h E t r)) z) = 0 := by
-  unfold uTheta
-  simpa only [show 2 = 1 + 1 from rfl, iteratedDeriv_succ, iteratedDeriv_one, iteratedDeriv_zero] using
-    (physical_axial_viscosity_zero_of_X_profile hh hh1 (sub_pos.mpr ht) hT hF hFE he hm z).2
 
 theorem uTheta_eq_similarity_pullback (h : ℝ) (E : ℝ × ℝ → ℝ) (t r z : ℝ) :
     uTheta h E t r z = SimilarityProfile.pullback h (-A h) E (t, (r ^ 2 / 2, z)) := by
@@ -635,27 +621,6 @@ theorem uTheta_eq_similarity_pullback (h : ℝ) (E : ℝ × ℝ → ℝ) (t r z 
       (r ^ 2 / 2) / SimilarityCoordinates.coordinateQ (2 * h) (1 - t, z) := by ring
   rw [he]
 
-/-- The scaling used to transfer the physical order-one viscosity moment to
-the radial profile moment: `r = sqrt(q) R` contributes `q^(3/2)`. -/
-theorem integral_weighted_radial_scale (b : ℝ) {q : ℝ} (hq : 0 < q) (g : ℝ → ℝ) :
-    (∫ r in Ioi (0 : ℝ), r ^ 2 * (q ^ b * g (r / Real.sqrt q))) =
-      q ^ (b + 3 / 2) * ∫ R in Ioi (0 : ℝ), R ^ 2 * g R := by
-  have hf : (fun r => r ^ 2 * (q ^ b * g (r / Real.sqrt q))) =
-      fun r => (q * q ^ b) * ((r / Real.sqrt q) ^ 2 * g (r / Real.sqrt q)) := by
-    funext r
-    rw [div_pow, Real.sq_sqrt hq.le]
-    field_simp [hq.ne']
-  rw [hf, integral_const_mul]
-  have hs := integral_comp_mul_right_Ioi (fun R => R ^ 2 * g R) 0
-    (inv_pos.mpr (Real.sqrt_pos.mpr hq))
-  simp only [inv_inv, smul_eq_mul, ← div_eq_mul_inv, zero_div] at hs
-  rw [hs, ← mul_assoc]
-  have hp : q * q ^ b * Real.sqrt q = q ^ (b + 3 / 2) := by
-    calc
-      _ = q ^ (1 : ℝ) * q ^ b * q ^ (1 / 2 : ℝ) := by rw [Real.rpow_one, Real.sqrt_eq_rpow]
-      _ = q ^ ((1 + b) + 1 / 2) := by rw [Real.rpow_add hq, Real.rpow_add hq]
-      _ = _ := by congr 1; ring
-  rw [hp]
 
 
 

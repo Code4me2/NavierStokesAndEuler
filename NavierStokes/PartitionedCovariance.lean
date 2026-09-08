@@ -389,30 +389,10 @@ theorem ofTangentPulse_column {r a A b B c₀ s₀ slope E : ℝ}
     rw [tangentExtension_eq P hv]
   · simp [ofTangentPulse, cutoff_zero_outside_slot P hv]
 
-theorem ofTangentPulse_fits {r a A b B c₀ s₀ slope E ci r0 : ℝ}
-    (P : PulseCovariance.TangentPulse r a A b B c₀ s₀ slope E)
-    (hci : 0 < ci) (hfit : ci * r ^ 2 = 2 * r0) :
-    support (ofTangentPulse P).ψ ⊆ Icc 0 (2 * r0 / ci) := by
-  intro v hv
-  have hin : v ∈ Icc 0 (r ^ 2) := by
-    by_contra hout
-    exact hv (cutoff_zero_outside_slot P hout)
-  have he : 2 * r0 / ci = r ^ 2 := by rw [← hfit]; field_simp
-  rwa [he]
 
 noncomputable def pairMatrix (vr vt : Plane) (r : ℝ) (ci : Vec2) (P : Fin 2 → Pulse) : Mat2 :=
   fun i j => nativePrefactor vr vt r * (P j).column (ci j) i
 
-theorem pairMatrix_of_actual_pulses {r a A b B c₀ u E : ℝ}
-    (P : PulseCovariance.SignedPulsePair r a A b B c₀ u E)
-    (vr vt : Plane) (r0 : ℝ) (ci : Vec2) :
-    pairMatrix vr vt r0 ci (fun j => ofTangentPulse (P j)) =
-      PulseCovariance.actualMatrix P (fun j => nativePrefactor vr vt r0 * ci j) := by
-  ext i j
-  change nativePrefactor vr vt r0 * (ofTangentPulse (P j)).column (ci j) i = _
-  rw [ofTangentPulse_column]
-  unfold PulseCovariance.actualMatrix PulseCovariance.actualColumn
-  ring
 
 
 noncomputable def amplitude (ε mask : ℝ) (H : Mat2) (T : Vec2) (j : Fin 2) : ℝ :=
@@ -975,13 +955,6 @@ theorem cosine_rounded_phase (k ε target pz x0 : ℝ) (hk : k ≠ 0)
       roundedPhaseRemainder k ε target pz x0 F G s v Y) :=
   cosine_actual_phase k ε _ pz x0 F G s v _ (PhaseEstimates.roundedFrequency_integer hk target) Y θ
 
-theorem rounded_phase_cos_sq_mean (k ε target pz x0 : ℝ) (hk : k ≠ 0)
-    (F G : PhaseCalculus.Slow → ℝ) (s : PhaseCalculus.Slow) (v : Plane → ℝ) (Y : Plane) :
-    SmoothLoop.angularMean (fun θ =>
-      Real.cos (k * PhaseCalculus.phase ε (PhaseEstimates.roundedFrequency k target) pz x0 F G
-        (s, θ, v Y)) ^ 2) = 1 / 2 := by
-  simp_rw [cosine_rounded_phase k ε target pz x0 hk F G s v Y]
-  exact TorusAverages.angularMean_cos_sq_harmonic _ (PhaseEstimates.nonzeroRound_ne_zero _) _
 
 theorem actual_carrier_ne_zero (h : ℝ) (n : ℕ) : (ChartScales.carrier h n : ℝ) ≠ 0 :=
   (Scaling.carrier_frequency_pos (ChartScales.epsilon_pos h n)).ne'

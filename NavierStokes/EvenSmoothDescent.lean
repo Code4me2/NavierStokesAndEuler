@@ -187,13 +187,6 @@ theorem iteratedDeriv_radialDerivative_zero {f : ℝ → E} (hf : ContDiff ℝ �
 
 noncomputable def descent (f : ℝ → E) (X : ℝ) : E := f (Real.sqrt X)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] in
-theorem descent_square {f : ℝ → E} (he : Function.Even f) (x : ℝ) :
-    descent f (x ^ 2) = f x := by
-  rw [descent, Real.sqrt_sq_eq_abs]
-  rcases le_or_gt 0 x with hx | hx
-  · rw [abs_of_nonneg hx]
-  · rw [abs_of_neg hx, he]
 
 omit [NormedSpace ℝ E] [CompleteSpace E] in
 theorem continuous_descent {f : ℝ → E} (hf : Continuous f) : Continuous (descent f) :=
@@ -383,16 +376,6 @@ theorem descent_localized_eventuallyEq (r : ℝ) (f : ℝ → E) :
   (localized_eventuallyEq r f).comp_tendsto
     (by simpa only [Real.sqrt_zero] using Real.continuous_sqrt.tendsto (0 : ℝ))
 
-/-- Smoothness at the boundary requires only a smooth even germ on a symmetric
-open interval. The global cutoff extension is constructed in the proof. -/
-theorem contDiffWithinAt_descent_zero {r : ℝ} (hr : 0 < r) {f : ℝ → E}
-    (hf : ContDiffOn ℝ ∞ f (Ioo (-r) r))
-    (he : ∀ x ∈ Ioo (-r) r, f (-x) = f x) :
-    ContDiffWithinAt ℝ ∞ (descent f) (Ici 0) 0 := by
-  have hg := contDiffOn_descent (contDiff_localized hr hf) (even_localized hr he)
-  have hEq := descent_localized_eventuallyEq r f
-  exact (hg 0 (by simp)).congr_of_eventuallyEq
-    (hEq.symm.filter_mono nhdsWithin_le_nhds) hEq.eq_of_nhds.symm
 
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] in

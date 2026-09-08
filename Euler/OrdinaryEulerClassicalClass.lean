@@ -119,23 +119,6 @@ theorem evolutionOfScalarEuler_derivative (hpos : 0 < T) (t : Icc (0 : ℝ) T) :
   have h := congrArg (observation 3 (le_refl 3) (x,(0 : AddCircle (1 : ℝ)))) hh
   simpa only [sobolevPath,ContinuousMap.coe_mk,observation_apply] using h
 
-include hB in
-theorem evolutionOfScalarEuler_pressureForce (hpos : 0 < T) (t : Icc (0 : ℝ) T) :
-    (evolutionOfScalarEuler A B hA hd p hdiv hp he).pressureForce t=
-      scalarEulerForce (A t) (B t) := by
-  let U := evolutionOfScalarEuler A B hA hd p hdiv hp he
-  have hd' := evolutionOfScalarEuler_derivative A B hA hB hd p hdiv hp he hpos t
-  apply field_ext
-  funext x
-  have hv := congrArg (fun C : SmoothL2Field Space => C.field x) hd'
-  rw [Evolution.derivative_field] at hv
-  change -fderiv ℝ (A t).field x ((A t).field x)-(U.pressureForce t).field x=(B t).field x at hv
-  rw [scalarEulerForce_field]
-  apply add_left_cancel (a := (B t).field x)
-  calc
-    (B t).field x+(U.pressureForce t).field x = -fderiv ℝ (A t).field x ((A t).field x) :=
-      ((sub_eq_iff_eq_add).mp hv).symm
-    _ = (B t).field x+-((B t).field x+fderiv ℝ (A t).field x ((A t).field x)) := by abel
 
 
 end Identification
@@ -182,22 +165,6 @@ def IsSmoothScalarEuler (A : Icc (0 : ℝ) T → SmoothL2Field Space) : Prop :=
           fderiv ℝ (A ⟨t,ht.1.le,ht.2.le⟩).field x
             ((A ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0)
 
-theorem isSmoothScalarEuler_of_sobolev
-    (A B : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n))
-    (hB : ∀ n, Continuous (fun t => (B t).jetLp n)) (q : ℕ)
-    (hd : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (extendPath T hT (sobolevPath A hA q))
-        (sobolevPath B hB q ⟨t,ht.1.le,ht.2.le⟩) t)
-    (p : ℝ → Space → ℝ)
-    (hdiv : ∀ t x, divergence (A t).field x=0)
-    (hp : ∀ t ∈ Ioo 0 T, Differentiable ℝ (p t))
-    (he : ∀ t (ht : t ∈ Ioo 0 T) x,
-      (B ⟨t,ht.1.le,ht.2.le⟩).field x+
-        fderiv ℝ (A ⟨t,ht.1.le,ht.2.le⟩).field x
-          ((A ⟨t,ht.1.le,ht.2.le⟩).field x)+gradient (p t) x=0) :
-    IsSmoothScalarEuler (hT := hT) A :=
-  ⟨hA,B,p,hB,l2_timeDerivative_of_sobolev A B hA hB q hd,hdiv,hp,he⟩
 
 
 theorem scalarEuler_iff_projected (A : Icc (0 : ℝ) T → SmoothL2Field Space) :

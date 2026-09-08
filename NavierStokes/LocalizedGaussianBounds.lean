@@ -71,33 +71,6 @@ theorem localGaussian_zero_of_inactive (d : GraphDirections D)
   · exact localGaussian_zero_of_cutoff_source a d hψ hf
   · exact a.localGaussian_zero_of_fields d hu hf
 
-/-- Gaussian and plateau hypotheses are imposed only on the analytic
-patch `C`.  No raw-field derivative bound on `K \ C` is assumed. -/
-theorem localGaussian_all_gains_from_supported_native
-    {s : StripData D} (d : GraphDirections D) (C K : ℕ → I → Set D)
-    {W : ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hψ : LocalJets s (fun _ _ => 1) 0 C a.cutoff)
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α C a.amplitude)
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α C (fun n _ => a.source n))
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : ℕ → I → D → ℝ) (L : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n, ell * ChartScales.S n ≤ L n) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ C n i →
-      W n x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n))
-    (hcentral : ∀ n i x, x ∈ s.domain → x ∈ C n i → |θ n i x - 1 / 2| < 1 / 5 →
-      (a.cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (houtside : ∀ n i x, x ∈ s.domain → x ∈ K n i → x ∉ C n i →
-      ((a.cutoff n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)) ∨
-        ((a.amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ (a.source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ) : LocalJets s (fun _ _ => 1) β K (a.localGaussian d) := by
-  apply localJets_extend_by_zero (fun _ _ _ => zero_le_one)
-    (a.localGaussian_all_gains_from_native d hWnonneg hψ hfast hu hf edges scales θ L hL
-      ell hell hLell hc hW hcentral β)
-  intro n i x hx hi hn
-  exact localGaussian_zero_of_inactive a d (houtside n i x hx hi hn)
 
 
 
@@ -254,21 +227,6 @@ theorem of_zero_germs (s : StripData D) (w : L → ℕ → D → ℝ) (α : ℝ)
     rw [jets_eq_of_germ (hg l n x hx hn) j]
     simp [majorant]
 
-theorem of_germs {s : StripData D} {w : L → ℕ → D → ℝ} {α : ℝ}
-    {K : L → ℕ → I → Set D} {f g : L → ℕ → D → E}
-    (hg : LabelSumBounds.UniformClass s w α g)
-    (he : ∀ l n x, x ∈ s.domain → (∀ i, x ∉ K l n i) → f l n =ᶠ[𝓝 x] g l n) :
-    UniformComplementJets s w α K f := by
-  constructor
-  · intro l n x hx hn
-    exact ((hg.smooth l n).contDiffAt (s.isOpen_domain.mem_nhds hx)).congr_of_eventuallyEq
-      (he l n x hx hn)
-  · intro m
-    obtain ⟨A, hA, p, hb⟩ := hg.bounds m
-    refine ⟨A, hA, p, ?_⟩
-    intro l n x hx hn j hj
-    rw [jets_eq_of_germ (he l n x hx hn) j]
-    exact hb l n x hx j hj
 
 end UniformComplementJets
 

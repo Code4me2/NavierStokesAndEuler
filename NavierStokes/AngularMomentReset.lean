@@ -389,57 +389,6 @@ structure ResetBranch (lam : ℝ) where
     |relative (coefficients δ) y| ≤ 1 / 2 ∧
     |deriv (relative (coefficients δ)) y| ≤ lam / 4
 
-/-- No branch fields are hypotheses: all of them are constructed from the explicit bumps. -/
-theorem exists_resetBranch (lam : ℝ) (hlam : 0 < lam) : Nonempty (ResetBranch lam) := by
-  obtain ⟨c, ε0, K, hε0, hK, hc, hc0, heq⟩ := exists_normalized_branch lam hlam
-  obtain ⟨D, hD, hjet⟩ := relative_first_jet_bound
-  let b : ℝ := min (1 / 2) (lam / 4)
-  let ε : ℝ := min ε0 (b / (D * K))
-  let L : ℝ := (1 + D) * K
-  have hb : 0 < b := lt_min (by norm_num) (by positivity)
-  have hDK : 0 < D * K := mul_pos hD hK
-  have hε : 0 < ε := lt_min hε0 (div_pos hb hDK)
-  have hL : 0 < L := mul_pos (by linarith) hK
-  have hsub : Ioo (-ε) ε ⊆ Ioo (-ε0) ε0 := by
-    intro δ hδ
-    have he : ε ≤ ε0 := min_le_left _ _
-    constructor <;> linarith [hδ.1, hδ.2]
-  have htotal : ∀ δ ∈ Ioo (-ε) ε, D * ‖c δ‖ ≤ b := by
-    intro δ hδ
-    have hnorm := (heq δ (hsub hδ)).2.2
-    have habs : |δ| ≤ ε := (abs_lt.mpr hδ).le
-    have he : ε ≤ b / (D * K) := min_le_right _ _
-    have he' := (le_div_iff₀ hDK).mp he
-    nlinarith
-  have hcoeff : ∀ δ ∈ Ioo (-ε) ε, ‖c δ‖ ≤ L * |δ| := by
-    intro δ hδ
-    apply ((heq δ (hsub hδ)).2.2).trans
-    apply mul_le_mul_of_nonneg_right _ (abs_nonneg δ)
-    dsimp [L]
-    nlinarith
-  refine ⟨{
-    coefficients := c
-    radius := ε
-    bound := L
-    radius_pos := hε
-    bound_pos := hL
-    smooth := hc.mono hsub
-    at_zero := hc0
-    angular := fun δ hδ => (heq δ (hsub hδ)).1
-    pressure := fun δ hδ => (heq δ (hsub hδ)).2.1
-    coefficient_bound := hcoeff
-    first_jet_bound := ?_
-    small_jets := ?_ }⟩
-  · intro δ hδ y
-    have hn := (heq δ (hsub hδ)).2.2
-    have hL' : D * K ≤ L := by dsimp [L]; nlinarith
-    have hbound : D * ‖c δ‖ ≤ L * |δ| :=
-      (mul_le_mul_of_nonneg_left hn hD.le).trans
-        (by simpa only [mul_assoc] using mul_le_mul_of_nonneg_right hL' (abs_nonneg δ))
-    exact ⟨(hjet (c δ) y).1.trans hbound, (hjet (c δ) y).2.trans hbound⟩
-  · intro δ hδ y
-    exact ⟨((hjet (c δ) y).1.trans (htotal δ hδ)).trans (min_le_left _ _),
-      ((hjet (c δ) y).2.trans (htotal δ hδ)).trans (min_le_right _ _)⟩
 
 
 /-! ## Actual modified angular fields -/
@@ -483,9 +432,6 @@ theorem modifiedE_sub_support (lam e0 y0 : ℝ) (c : Coeff) :
   have hs := relative_support c hn
   constructor <;> linarith [hs.1, hs.2]
 
-theorem modifiedE_sub_hasCompactSupport (lam e0 y0 : ℝ) (c : Coeff) :
-    HasCompactSupport (modifiedE lam e0 y0 c - baseE lam e0) :=
-  HasCompactSupport.of_support_subset_isCompact isCompact_Icc (modifiedE_sub_support lam e0 y0 c)
 
 /-- Choosing `y0 = T - 3` places the whole edit strictly inside `(T - 4, T)`. -/
 theorem modifiedE_sub_tsupport (lam e0 y0 : ℝ) (c : Coeff) :
@@ -669,25 +615,6 @@ theorem outside_window {a b y0 y : ℝ} (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b)
   intro h
   exact hy ⟨ha.trans h.1.le, h.2.le.trans hb⟩
 
-theorem angular_interval_change (lam e0 X0 y0 a b : ℝ) (c : Coeff)
-    (hX : 0 ≤ X0) (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b) :
-    (∫ y in Icc a b, radiusX X0 y * modifiedH lam e0 X0 y0 c y) -
-      (∫ y in Icc a b, radiusX X0 y * baseH lam e0 X0 y) =
-      angularScale lam e0 X0 y0 * ∫ y, Real.exp (angularSlope lam * y) * relative c y := by
-  have hm : IntegrableOn (fun y => radiusX X0 y * modifiedH lam e0 X0 y0 c y) (Icc a b) :=
-    ((radiusX_continuous X0).mul (modifiedH_continuous lam e0 X0 y0 c)).continuousOn.integrableOn_Icc
-  have he : IntegrableOn (fun y => radiusX X0 y * baseH lam e0 X0 y) (Icc a b) :=
-    ((radiusX_continuous X0).mul (baseH_continuous lam e0 X0)).continuousOn.integrableOn_Icc
-  rw [← integral_sub hm he]
-  have hi : (fun y => radiusX X0 y * modifiedH lam e0 X0 y0 c y -
-      radiusX X0 y * baseH lam e0 X0 y) =
-      (fun y => radiusX X0 y * (modifiedH lam e0 X0 y0 c y - baseH lam e0 X0 y)) := by
-    funext y
-    ring
-  rw [hi, setIntegral_eq_integral_of_forall_compl_eq_zero]
-  · exact angular_integral_formula lam e0 X0 y0 c hX
-  · intro y hy
-    rw [modifiedH_unchanged lam e0 X0 y0 c (outside_window ha hb hy), sub_self, mul_zero]
 
 theorem pressure_interval_change (lam e0 y0 a b : ℝ) (c : Coeff)
     (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b) :
@@ -712,8 +639,6 @@ theorem ResetBranch.pressure_interval_neutral {lam : ℝ} (B : ResetBranch lam)
   apply sub_eq_zero.mp
   rw [pressure_interval_change lam e0 y0 a b (B.coefficients δ) ha hb, B.pressure δ hδ, mul_zero]
 
-def prefixI (lam e0 X0 a b Iprior : ℝ) : ℝ :=
-  Iprior + ∫ y in Icc a b, radiusX X0 y * baseH lam e0 X0 y
 
 
 /-! ## Smooth dependence on the angular parameter -/

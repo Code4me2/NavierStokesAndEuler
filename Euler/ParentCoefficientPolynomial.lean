@@ -52,8 +52,6 @@ theorem leafPolynomial_eval (K : ℝ) : leafPolynomial.eval K=leafEnvelope K := 
     Polynomial.eval_add,Polynomial.eval_mul,Polynomial.eval_pow,Polynomial.eval_ofNat,
     Polynomial.eval_one,Polynomial.eval_X,Polynomial.eval_C]
 
-def leafConstant : ℝ := coefficientCost leafPolynomial
-def leafPower : ℕ := leafPolynomial.natDegree
 
 
 

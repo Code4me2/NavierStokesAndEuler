@@ -48,11 +48,6 @@ noncomputable def initialDirectData (B N0 : ℕ) :
   ActualMeanStageData.initialAngularData B N0 (ActualCandidateConstruction.firstBand B N0)
     (ActualCandidateConstruction.qbig B N0) le_rfl
 
-theorem initialDirectData_field (B N0 : ℕ) :
-    DirectAngularDiagonal.angularField (initialDirectData B N0).scalar = initialDirect B N0 := by
-  exact (ActualMeanStageData.initialAngularData_field B N0
-    (ActualCandidateConstruction.firstBand B N0) (ActualCandidateConstruction.qbig B N0) le_rfl).trans
-      (ActualCandidateConstruction.angularMeanStages_zero B N0).symm
 
 theorem initialPotential_eq_stage (B N0 : ℕ) :
     initialPotential B N0 =
@@ -92,11 +87,6 @@ theorem initialPotential_smooth (B N0 : ℕ) :
   exact ActualPhysicalStageBounds.initialIncrement_smooth _ _ _
     outgoing.data.h_pos outgoing.data.h_lt_half le_rfl le_rfl
 
-theorem initialPressure_smooth (B N0 : ℕ) :
-    ContDiffOn ℝ ∞ (initialPressure B N0) (ActualCandidateConstruction.physicalDomain B N0) := by
-  rw [initialPressure_eq_increment]
-  exact ActualPhysicalStageBounds.initialPressureIncrement_smooth _ _
-    outgoing.data.h_pos outgoing.data.h_lt_half le_rfl
 
 
 theorem initialPotential_support (B N0 : ℕ) :

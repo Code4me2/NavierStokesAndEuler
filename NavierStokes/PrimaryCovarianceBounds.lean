@@ -365,8 +365,6 @@ theorem ZeroOrderBounds.strictCone {R detGap entryBound inverseLower zeta : ℝ}
     SmoothCovariance.StrictCone H T :=
   (SmoothCovariance.weights_pos_iff H T).mp (h.weights_pos hR ha hzeta)
 
-theorem sqrt_S_eq (n : ℕ) : Real.sqrt (ChartScales.S n) = (n : ℝ) := by
-  exact Real.sqrt_sq (Nat.cast_nonneg n)
 
 
 /-- For the actual native pair, all uniform zeroth-order constants are
@@ -606,16 +604,6 @@ structure CoefficientControl (d : PrimaryODE.FrameData Q) (lam u L S C D : ℝ) 
   viscosity : ∀ v ∈ Icc 0 L,
     |d.viscosity (p, v) - ViscousPropagator.referenceViscosity lam u L v| ≤ D / S
 
-/-- The literal `primaryCovariance` with the native chart prefactor and
-slot length; the integrands still use the actual constructed ODE solution. -/
-noncomputable def nativePrimaryCovariance
-    (vr vt : TorusInverse.Plane) (r0 h : ℝ)
-    (d : Fin 2 → ℕ → PrimaryODE.FrameData Q) (lam u : Fin 2 → ℕ → ℝ)
-    (n : ℕ) (p : Q) : Mat2 :=
-  PrimaryPulseBounds.primaryCovariance
-    (fun _ n => PartitionedCovariance.nativePrefactor vr vt r0 *
-      ChartScales.timeCoefficient h n * ChartScales.slotLength r0 h n)
-    d lam u (fun _ n => ChartScales.slotLength r0 h n) n p
 
 
 end NativePrimary

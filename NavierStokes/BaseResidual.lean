@@ -1483,99 +1483,6 @@ def FiniteIdentities (h C : ℝ) (d : Coefficients) (f : SlowProfiles) : Prop :=
     navierStokesResidual (prefixVelocity J h C d) (prefixPressure J h C d) z.1 z.2 =
       prefixStressForce J h C d z + truncationResidual J h C f z.1 z.2
 
-/-- The nonlinear residual estimate for the concrete asymptotic sum. Every
-rate used in its proof is derived above from smooth coefficients, the chosen
-scales, and the explicit finite identities. -/
-theorem baseResidual_jetRate {l : Filter SpaceTime} {a : ℕ → ℕ} {h C lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h lo hi) (hlo : 0 < lo)
-    {d : Coefficients} (hd : SmoothCoefficients d)
-    (ha : AdmissibleScales h (coefficientBundle C d) (innerBox lo hi) a)
-    (f : SlowProfiles) {O : Set Inner} (hO : IsOpen O) (hKO : innerBox lo hi ⊆ O)
-    (hv : ∀ j, ContDiffOn ℝ ∞ (f.flux j) O)
-    (hu : ∀ j, ContDiffOn ℝ ∞ (f.axial j) O)
-    (hf : ∀ j, ContDiffOn ℝ ∞ (f.phi j) O)
-    (hX : ∀ w ∈ O, w.1 ≠ 0) (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0)
-    (hfinite : FiniteIdentities h C d f) (m : ℕ) (n : ℝ) (hn : 0 ≤ n) :
-    JetRate l (fun z => (cartesianChart h z).1) (baseResidual a h C d) m n := by
-  let b : ℝ := CoordinateAlgebra.A h + m + 2
-  have hA : 0 < CoordinateAlgebra.A h := by unfold CoordinateAlgebra.A; linarith
-  have hm : (0 : ℝ) ≤ m := Nat.cast_nonneg m
-  have hb : 0 ≤ b := by dsimp [b]; positivity
-  obtain ⟨N, hN⟩ := exists_nat_ge ((n + b + 2 * CoordinateAlgebra.A h + 6 * m + 12) / h)
-  let J := max (m + 2) N
-  have hJ : m + 2 ≤ J := le_max_left _ _
-  have hJN : (N : ℝ) ≤ J := by exact_mod_cast le_max_right (m + 2) N
-  have hgain : n + b + 2 * CoordinateAlgebra.A h + 6 * m + 12 ≤ h * ((J : ℝ) + 1) := by
-    have hn' := (div_le_iff₀ hh).mp hN
-    nlinarith
-  have hq := A.positive_small hh hh1
-  have hU := annularPast_isOpen
-  have hlU := A.in_annularPast hh hh1 hlo
-  have hus := (baseVelocity_smooth ha.strictMono hh hh1 hd C).mono annularPast_subset
-  have hps := (basePressure_smooth ha.strictMono hh hh1 hd C).mono annularPast_subset
-  have huJs := (prefixVelocity_smooth hh hh1 hd J C).mono annularPast_subset
-  have hpJs := (prefixPressure_smooth hh hh1 hd J C).mono annularPast_subset
-  have htS := baseStressForce_smooth ha.strictMono hh hh1 hd C
-  have htJ := prefixStressForce_smooth hh hh1 hd J C
-  have hbg : FiniteJetRate l (fun z => (cartesianChart h z).1) (prefixVelocity J h C d)
-      (m + 1) (-b) := by
-    convert! prefixVelocity_growth (C := C) hh hh1 A hd J (m + 1) using 1
-    dsimp [b]
-    push_cast
-    ring
-  have hvel : FiniteJetRate l (fun z => (cartesianChart h z).1)
-      (fun z => baseVelocity a h C d z - prefixVelocity J h C d z) (m + 2) (n + b) := by
-    apply finiteRate_weaken (velocity_prefix_rate hh hh1 A hd ha J (m + 2) (by omega)) hq
-    push_cast
-    nlinarith
-  have hpres : FiniteJetRate l (fun z => (cartesianChart h z).1)
-      (fun z => basePressure a h C d z - prefixPressure J h C d z) (m + 1) (n + b) := by
-    apply finiteRate_weaken (pressure_prefix_rate hh hh1 A hd ha J (m + 1) (by omega)) hq
-    push_cast
-    nlinarith
-  have hstress : JetRate l (fun z => (cartesianChart h z).1)
-      (fun z => baseStressForce a h C d z - prefixStressForce J h C d z) m n := by
-    apply (finiteRate_at (stress_prefix_rate hh hh1 A hlo hd ha J m (by omega)) le_rfl).weaken hq
-    dsimp [b] at hgain
-    nlinarith
-  have htail : JetRate l (fun z => (cartesianChart h z).1)
-      (fun z => truncationResidual J h C f z.1 z.2) m n := by
-    apply (finiteRate_at (truncationResidual_rate hh hh1 A hlo hO hKO J C f
-      (fun j _ => hv j) (fun j _ => hu j) (fun j _ => hf j) hX hL m) le_rfl).weaken hq
-    dsimp [b] at hgain
-    nlinarith
-  let EJ : SpaceTime → Space := fun z =>
-    navierStokesResidual (prefixVelocity J h C d) (prefixPressure J h C d) z.1 z.2 -
-      prefixStressForce J h C d z
-  have hEJ : JetRate l (fun z => (cartesianChart h z).1) EJ m n :=
-    htail.congr_on hU hlU (fun z hz => by dsimp [EJ]; rw [hfinite J z hz]; abel)
-  have hEJs : ContDiffOn ℝ ∞ EJ annularPast :=
-    (ResidualRegularity.contDiffOn_residual hU huJs hpJs).sub htJ
-  let Df := residualDifference (prefixVelocity J h C d)
-    (fun z => baseVelocity a h C d z - prefixVelocity J h C d z)
-    (prefixPressure J h C d) (fun z => basePressure a h C d z - prefixPressure J h C d z)
-  have hDf : JetRate l (fun z => (cartesianChart h z).1) Df m n :=
-    residualDifference_jetRate hU hlU hq huJs (hus.sub huJs) hpJs (hps.sub hpJs)
-      m hb hn hbg hvel hpres
-  have hDfs : ContDiffOn ℝ ∞ Df annularPast :=
-    (ResidualRegularity.contDiffOn_residual hU (huJs.add (hus.sub huJs))
-      (hpJs.add (hps.sub hpJs))).sub (ResidualRegularity.contDiffOn_residual hU huJs hpJs)
-  have hsum := (hEJ.add hDf hU hlU hEJs hDfs).add (jetRate_neg hstress) hU hlU
-    (hEJs.add hDfs) (htS.sub htJ).neg
-  have hvelsum : (fun z => prefixVelocity J h C d z +
-      (baseVelocity a h C d z - prefixVelocity J h C d z)) = baseVelocity a h C d := by
-    funext z
-    abel
-  have hpressum : (fun z => prefixPressure J h C d z +
-      (basePressure a h C d z - prefixPressure J h C d z)) = basePressure a h C d := by
-    funext z
-    abel
-  have heq : (fun z => EJ z + Df z + -(baseStressForce a h C d z - prefixStressForce J h C d z)) =
-      baseResidual a h C d := by
-    funext z
-    simp only [EJ, Df, residualDifference, hvelsum, hpressum, baseResidual]
-    abel
-  rwa [heq] at hsum
 
 
 end NonlinearAssembly
@@ -1920,23 +1827,6 @@ theorem normalizedTensor_weighted_bound {a : ℕ → ℕ} {h C : ℝ} (hh : 0 < 
     (fun _j hj w hw => higherStressQuotient_factor d zeta hj (hz w hw).ne')
     (weightedBundle_quotient_scales hd hq ha) m
 
-/-- The common schedule is constructed from coefficient smoothness. The
-weighted estimate is an output, not part of the admissibility assumptions. -/
-theorem exists_weighted_base_scales {h : ℝ} (hh : 0 < h) (C : ℝ)
-    {d : Coefficients} (hd : SmoothCoefficients d) {K W O : Set Inner}
-    (hK : IsCompact K) (hWK : W ⊆ K) (hO : IsOpen O) (hWO : W ⊆ O)
-    {zeta delta : Inner → ℝ} (hzs : ContDiff ℝ ∞ zeta)
-    (hz : ∀ w ∈ O, 0 < zeta w) (hdelta : ∀ w ∈ W, 0 < delta w ∧ delta w ≤ 1)
-    (hfirst : PolynomialEdgeJets W zeta delta (stressPair d 1))
-    (hweight : PolynomialEdgeJets W zeta delta zeta)
-    (hq : ∀ j, ContDiff ℝ ∞ (higherStressQuotient d zeta j)) (B : ℕ) :
-    ∃ a : ℕ → ℕ, B ≤ a 0 ∧ AdmissibleScales h (coefficientBundle C d) K a ∧
-      ∀ m : ℕ, ∃ D : ℝ, 0 < D ∧ ∃ N : ℕ, ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ W,
-        ‖blownJet m (fun y => normalizedTensor a h d y - stressPair d 0 y.2) (q, w)‖ ≤
-          D * q ^ h * zeta w * (delta w)⁻¹ ^ N := by
-  obtain ⟨a, hB, ha⟩ := exists_admissibleScales (weightedBundle_smooth hd hq C) hh hK B
-  exact ⟨a, hB, weightedBundle_base_scales hd hq ha,
-    normalizedTensor_weighted_bound hh hd hK hWK hO hWO hzs hz hdelta hfirst hweight hq ha⟩
 
 end WeightedTensor
 

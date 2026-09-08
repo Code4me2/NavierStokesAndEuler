@@ -41,9 +41,6 @@ theorem position_smooth : ContDiff ℝ ∞ position := by
   · exact contDiff_snd.fst
   · exact contDiff_snd.snd
 
-theorem slow_smooth : ContDiff ℝ ∞ slow :=
-  (contDiff_apply ℝ ℝ 0).prodMk
-    ((contDiff_apply ℝ ℝ 1).prodMk (contDiff_apply ℝ ℝ 2))
 
 theorem norm_slow_sub_le {x y : Position} {c : ℝ}
     (h : ∀ j, |x j - y j| ≤ c) : ‖slow x - slow y‖ ≤ c := by
@@ -154,17 +151,6 @@ theorem grid_mesh_tendsto_zero :
     hS.inv_tendsto_atTop
   simpa only [div_eq_mul_inv, mul_zero] using hi.const_mul (3 : ℝ)
 
-/-- All enlarged boxes of active sufficiently fine labels lie in a single
-prescribed open base-control chart. -/
-theorem enlarged_eventually_in_chart {K U : Set Slow} (hK : IsCompact K)
-    (hU : IsOpen U) (hKU : K ⊆ U) :
-    ∃ N : ℕ, ∀ L : ActiveLabel K, N ≤ L.val.1 → gridBox L.val.1 L.val.2 2 ⊆ U := by
-  obtain ⟨r, hr, hsub⟩ := hK.exists_cthickening_subset_open hU hKU
-  obtain ⟨N, hN⟩ := eventually_atTop.mp ((tendsto_order.1 grid_mesh_tendsto_zero).2 r hr)
-  refine ⟨N, fun L hL q hq => hsub ?_⟩
-  apply Metric.mem_cthickening_of_dist_le q (representative K L) r K (representative_mem K L)
-  simpa only [dist_eq_norm] using
-    (representative_enlarged_distance K L hq).trans (hN _ hL).le
 
 /-! ## Reference frame and exact unstable-mode parameters -/
 

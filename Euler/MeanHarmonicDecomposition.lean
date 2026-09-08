@@ -80,8 +80,6 @@ theorem homogeneous_curl_solenoidal (u : homogeneousSpace) :
     rw [curlTensor_test_eq]
     exact curl_mem_solenoidal _ ((contDiff_piLp 2).mp f.smooth) (test_memLp (curlTest f))
 
-theorem harmonicPart_solenoidal (χ : Cutoff) (z : L2) :
-    harmonicPart χ z ∈ solenoidalSpace := homogeneous_curl_solenoidal (weakPotential χ z)
 
 /-- The source's `z - w` is genuinely weakly harmonic where the actual cutoff equals one. -/
 theorem weakHarmonicOn_sub_harmonicPart (χ : Cutoff) (U : Set Space) (z : L2)

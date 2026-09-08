@@ -78,8 +78,6 @@ theorem extraPolynomial_eval (X : ℝ) : extraPolynomial.eval X=extraEnvelope X 
     Polynomial.eval_ofNat,Polynomial.eval_C,Polynomial.eval_pow,Polynomial.eval_X,
     outputPolynomial_eval,gradePolynomial_eval,velocityPolynomial_eval,coefficientPolynomial_eval]
 
-def extraConstant : ℝ := coefficientCost extraPolynomial
-def extraPower : ℕ := extraPolynomial.natDegree
 
 
 

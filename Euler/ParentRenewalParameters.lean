@@ -27,8 +27,6 @@ theorem start_lt_targetTime : G.t₀ < G.targetTime := by
   change G.t₀ < G.t₀+(G.ε/G.a)*G.target
   exact lt_add_of_pos_right _ (mul_pos (div_pos G.epsilon_pos G.a_pos) G.target_pos)
 
-theorem targetTime_pos (hstart : 0 ≤ G.t₀) : 0 < G.targetTime :=
-  hstart.trans_lt G.start_lt_targetTime
 
 theorem nextCoupling_pos : 0 < G.nextCoupling := by
   obtain ⟨F,F1,Z,Z1,J⟩ := G.exists_geometry
@@ -143,17 +141,6 @@ theorem epsilon_eq (hδ : 0 < G.δ) : P.epsilon=Real.sqrt (P.a/G.hchild) := by
 
 
 
-/-- The actual next source matrix has the prescribed target shear and
-the original packet's center error. -/
-theorem target_remainder (hδ : 0 < G.δ) (hT : G.targetTime ≤ D.T) :
-    ‖D.M.field (D.clamp G.targetTime) 0-G.M G.center G.targetTime-
-      G.hchild • rankOne ℝ (unit (G.w G.center G.targetTime))
-        (unit (G.r G.center G.targetTime))‖ ≤ P.error := by
-  have h := P.remainder_bound G.targetTime ⟨le_rfl,hT⟩
-  change ‖D.M.field (D.clamp G.targetTime) 0-P.B G.targetTime-
-    P.shear • rankOne ℝ (unit (P.v G.targetTime)) (unit (P.m G.targetTime))‖ ≤ P.error at h
-  rw [J.matrix_eq,J.ray_eq,J.velocity_eq,J.shear_eq hδ] at h
-  exact h
 
 theorem coupling_pos : 0 < P.a := by rw [J.a_eq]; exact G.nextCoupling_pos
 
@@ -161,14 +148,6 @@ theorem coupling_error : |P.a/G.a-1| ≤ G.couplingError := by
   rw [J.a_eq]
   exact G.nextCoupling_error
 
-theorem coupling_interval :
-    (1-G.couplingError)*G.a ≤ P.a ∧ P.a ≤ (1+G.couplingError)*G.a := by
-  have h := abs_le.mp J.coupling_error
-  constructor
-  · have hh : 1-G.couplingError ≤ P.a/G.a := by linarith only [h.1]
-    exact (le_div_iff₀ G.a_pos).mp hh
-  · have hh : P.a/G.a ≤ 1+G.couplingError := by linarith only [h.2]
-    exact (div_le_iff₀ G.a_pos).mp hh
 
 
 theorem sigma_sq (herror : G.tiltError ≤ 1/2) : P.sigma^2=G.nextTilt := by
@@ -219,11 +198,6 @@ theorem activation_compression (ht : 0 < G.targetTime) (hT : G.targetTime < D.T)
   have h := J.activation_normal_le ht hT
   linarith only [h,hmargin]
 
-theorem activation_compression_of_error_le_one
-    (ht : 0 < G.targetTime) (hT : G.targetTime < D.T) (he : P.error ≤ 1) :
-    ⟪D.M.field ⟨G.targetTime,ht.le,hT.le⟩ 0 (unit (P.m G.targetTime)),
-      unit (P.m G.targetTime)⟫_ℝ < 0 :=
-  J.activation_compression ht hT (G.compression_margin he)
 
 end RenewalAtTarget
 end EulerParentPacketFrames

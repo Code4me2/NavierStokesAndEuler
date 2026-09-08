@@ -26,8 +26,6 @@ def coreVelocity (q h : ℝ) : ℝ := q ^ (-(1 / 2 + h))
 /-- The radial length scale. -/
 def radialLength (q : ℝ) : ℝ := q ^ (1 / 2 : ℝ)
 
-/-- The axial length scale. -/
-def axialLength (q h : ℝ) : ℝ := q ^ (1 / 2 - h)
 
 /-- Reynolds number at physical viscosity one. -/
 def reynolds (velocity length : ℝ) : ℝ := velocity * length
@@ -145,27 +143,6 @@ def waveLength (Q h : ℝ) : ℝ :=
 def waveVelocity (Q h envelope : ℝ) : ℝ :=
   coreVelocity Q h * Real.sqrt (Q ^ h) * envelope
 
-/-- Exact cancellation leaves the envelope and a bounded rounding factor. -/
-theorem wave_reynolds_exact {Q : ℝ} (hQ : 0 < Q) (h envelope : ℝ) :
-    reynolds (waveVelocity Q h envelope) (waveLength Q h) =
-      envelope / ((carrierFrequency (Q ^ h) : ℝ) * Real.sqrt (Q ^ h)) := by
-  have hp : 0 < Q ^ h := Real.rpow_pos_of_pos hQ h
-  have hk := carrier_frequency_pos hp
-  have hs : 0 < Real.sqrt (Q ^ h) := Real.sqrt_pos.mpr hp
-  have hc : (coreVelocity Q h * Real.sqrt (Q ^ h)) *
-      (radialLength Q * Real.sqrt (Q ^ h)) = 1 := by
-    rw [wave_amplitude_power hQ h, wave_length_power hQ h,
-      wave_power_cancellation hQ h]
-  apply (eq_div_iff (mul_ne_zero hk.ne' hs.ne')).mpr
-  unfold reynolds waveVelocity waveLength
-  calc
-    (coreVelocity Q h * Real.sqrt (Q ^ h) * envelope *
-        (radialLength Q / (carrierFrequency (Q ^ h) : ℝ))) *
-        ((carrierFrequency (Q ^ h) : ℝ) * Real.sqrt (Q ^ h)) =
-        envelope * ((coreVelocity Q h * Real.sqrt (Q ^ h)) *
-          (radialLength Q * Real.sqrt (Q ^ h))) := by
-      field_simp
-    _ = envelope := by rw [hc, mul_one]
 
 
 

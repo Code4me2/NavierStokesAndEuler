@@ -315,28 +315,6 @@ theorem assembledBlock_classes {D : Type} [NormedAddCommGroup D] [NormedSpace �
     rw [he]
     exact hh
 
-theorem assembledBlock_mean_zero {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    (N : ℕ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ)
-    (v : ℤ → ℕ → D → ComplexVector) (p : ℤ → ℕ → D → ℂ)
-    (hkp : ∀ n, kp n ≠ 0) :
-    (∀ i, angularAverage (fun n x => (assembledBlock N k Φ kp v p).oscillation n x i) = 0) ∧
-      angularAverage (assembledBlock N k Φ kp v p).oscillatoryPressure = 0 := by
-  constructor
-  · intro i
-    funext n x
-    change (∫ θ in (0 : ℝ)..2 * Real.pi,
-      (field ((assembledBlock N k Φ kp v p).velocity n i) (k n) (Φ n) (kp n) (x,θ)).re) /
-      (2 * Real.pi) = 0
-    rw [SignedWaveUpdate.angularAverage_re_field, angularMean_field _ _ _ (hkp n),
-      (assembledBlock_zero N k Φ kp v p).1 n i]
-    rfl
-  · funext n x
-    change (∫ θ in (0 : ℝ)..2 * Real.pi,
-      (field ((assembledBlock N k Φ kp v p).pressure n) (k n) (Φ n) (kp n) (x,θ)).re) /
-      (2 * Real.pi) = 0
-    rw [SignedWaveUpdate.angularAverage_re_field, angularMean_field _ _ _ (hkp n),
-      (assembledBlock_zero N k Φ kp v p).2 n]
-    rfl
 
 noncomputable def fullModeBlock {D : Type} (j : ℤ) (k : ℕ → ℝ) (Φ : ℕ → D → ℝ)
     (kp : ℕ → ℤ) (a : LinearWaveBounds.WaveCoefficients (D × ℝ)) : HarmonicBlock D :=
@@ -1475,11 +1453,6 @@ theorem local_result :
     C.normal_lower C.normal_upper C.inverse_frequency C.geometry C.frequency_nonzero
     C.loss_le_half C.slot.cutoff C.slot.cutoff_memClass C.radius_eq C.exact_conditions
 
-theorem gaussian_flat (β : ℝ) : UnweightedClass s β
-    (excludedSlotError dirs C.slot.cutoff
-      (actualCopyCoefficients r charts c u b G A j base copy).amplitude (sourceFamily c u b G A j)) :=
-  LinearWaveBounds.excludedSlotError_all_gains C.slot dirs C.slot_fast C.flat_edges C.band_scales
-    C.local_result.1 C.source_bounds C.gaussian_rate_pos C.gaussian_envelope β
 
 theorem raw_tangent : ∀ n x, x ∈ s.domain →
     normalDot ((actualCarrier base b j).normal s dirs n x)

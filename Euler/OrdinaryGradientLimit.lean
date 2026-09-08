@@ -51,15 +51,6 @@ end Evolution
 
 variable {T : ℝ} {hT : 0 ≤ T}
 
-def limitEvolutionOfGradientIntegral (V : ℕ → Evolution T hT) (hpos : 0 < T)
-    (R G : ℝ) (hR : ∀ k, tensorNorm 3 ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ R)
-    (hG : ∀ k t, (V k).gradientIntegral t ≤ G)
-    (hinit : ∀ q, ∃ C : ℝ, ∀ k, tensorNorm q ((V k).velocity ⟨0,le_rfl,hT⟩) ≤ C)
-    (hcauchy : CauchySeq (fun k => ((V k).velocity ⟨0,le_rfl,hT⟩).toLp)) : Evolution T hT :=
-  limitEvolution V hpos
-    (Evolution.all_order_bounds_of_h3 V (gradientTensorBound R G)
-      (fun k => (V k).h3_tensorNorm_gradient_uniform R G (hR k) (hG k)) hinit)
-    (Evolution.cauchyPath_of_initial_gradient V G hG hcauchy)
 
 
 

@@ -34,42 +34,6 @@ theorem Budget.residualEnvelope_le_target (B : Budget period hT A)
     (show 0 ≤ 2*(B.spatial q hq).full.residual by have := (B.spatial q hq).full.residual_pos; positivity)).trans
       (B.small q hq)
 
-/-- Both the correction and its genuine first spatial derivatives retain
-the quantitative residual bound at the fixed smaller radius. -/
-theorem Budget.fieldTower_reducedNorms_residual (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (N : ℕ) (hNq : N+6 ≤ q)
-    (s : ℕ) (hs : N+6 ≤ s) (t : Icc (0 : ℝ) T) :
-    weightedNorm period 6 N (B.reducedRadius period) ((B.fieldTower period).realization s t) ≤
-        metricAmplification B.metric.c*B.residualEnvelope period q hq t ∧
-    (∑ i : Fin 4, weightedNorm period 6 N (B.reducedRadius period)
-        (derivativeOperator period s i ((B.fieldTower period).realization (s+1) t))) ≤
-        (8/B.initialRadius)*(metricAmplification B.metric.c*B.residualEnvelope period q hq t) := by
-  have hR := (B.spatial q hq).full.radius_pos t
-  have hrR : B.reducedRadius period ≤ B.radius t := by
-    have h := B.reducedRadius_le_half period t
-    linarith
-  have hfrac : 4/B.radius t ≤ 8/B.initialRadius := by
-    apply (div_le_div_iff₀ hR B.radius_pos).mpr
-    linarith [(B.radius_bounds period t).1]
-  have hE : 0 ≤ metricAmplification B.metric.c*B.residualEnvelope period q hq t :=
-    mul_nonneg (zero_le_one.trans (metricAmplification_one_le B.metric.c_pos))
-      (B.residualEnvelope_nonneg period q hq t)
-  constructor
-  · exact (weightedNorm_mono_radius period 6 N (B.reducedRadius_pos period).le hrR _).trans
-      (B.fieldTower_weightedNorm_residual period q hq N (by omega) (by omega) s hs t)
-  · calc
-      _ ≤ ∑ i : Fin 4, weightedNorm period 6 N (B.radius t/2)
-          (derivativeOperator period s i ((B.fieldTower period).realization (s+1) t)) :=
-        sum_le_sum fun i _ => weightedNorm_mono_radius period 6 N
-          (B.reducedRadius_pos period).le (B.reducedRadius_le_half period t) _
-      _ ≤ (4/B.radius t)*weightedNorm period 6 (N+1) (B.radius t)
-          ((B.fieldTower period).realization (s+1) t) :=
-        weightedNorm_derivative_half period 6 N hs (B.radius t) hR _
-      _ ≤ (4/B.radius t)*(metricAmplification B.metric.c*B.residualEnvelope period q hq t) :=
-        mul_le_mul_of_nonneg_left
-          (B.fieldTower_weightedNorm_residual period q hq (N+1) (by omega) (by omega) (s+1) (by omega) t)
-          (by positivity)
-      _ ≤ _ := mul_le_mul_of_nonneg_right hfrac hE
 
 /-- The fixed polynomial cost when the solver's residual envelope is retained. -/
 def Budget.residualSourceCost (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) : ℝ :=
@@ -77,32 +41,6 @@ def Budget.residualSourceCost (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) 
   sourceBound period S.B0 S.B1 S.A0 S.A2 1
     (metricAmplification B.metric.c) ((8/B.initialRadius)*metricAmplification B.metric.c)
 
-private theorem sourceBound_residual (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :
-    let S := (B.spatial q hq).full
-    sourceBound period S.B0 S.B1 S.A0 S.A2 S.residual
-        (metricAmplification B.metric.c*B.residualEnvelope period q hq t)
-        ((8/B.initialRadius)*(metricAmplification B.metric.c*B.residualEnvelope period q hq t)) ≤
-      B.residualSourceCost period q hq*B.residualEnvelope period q hq t := by
-  have hμ : 0 ≤ metricAmplification B.metric.c := zero_le_one.trans (metricAmplification_one_le B.metric.c_pos)
-  have hDE := mul_nonneg (div_nonneg (by norm_num : (0 : ℝ) ≤ 8) B.radius_pos.le) hμ
-  have he := B.residualEnvelope_nonneg period q hq t
-  have he1 : B.residualEnvelope period q hq t ≤ 1 :=
-    (B.residualEnvelope_le_target period q hq t).trans (by have := B.delta_le_one; linarith)
-  have hG := (B.growth_pos period).le
-  have ht0 := t.property.1
-  have hexp : 1 ≤ Real.exp (3*B.growthCoefficient*t.val) := Real.one_le_exp_iff.mpr (by positivity)
-  have hr0 := (B.spatial q hq).full.residual_pos.le
-  have hr : (B.spatial q hq).full.residual ≤ B.residualEnvelope period q hq t := by
-    have hm := mul_le_mul_of_nonneg_left hexp (show 0 ≤ 2*(B.spatial q hq).full.residual by positivity)
-    dsimp [Budget.residualEnvelope]
-    linarith
-  have h := sourceBound_scaling period (B0 := (B.spatial q hq).full.B0)
-    (B1 := (B.spatial q hq).full.B1) (A0 := (B.spatial q hq).full.A0)
-    (B.spatial q hq).full.A2_nonneg hμ hDE he he1 hr
-  convert h using 1
-  · congr 1 <;> ring
-  · rfl
 
 
 end EulerAllOrderDriftCorrection

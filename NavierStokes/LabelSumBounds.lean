@@ -305,10 +305,6 @@ theorem labelRegion_subset_closedWindow {d : ℝ} {l : SlotColoring.Label} {x : 
   refine ⟨⟨by linarith [ht.1], by linarith [ht.2]⟩, ?_⟩
   exact SquaredPartition.physicalSlowMask_tsupport_subset_physicalBox d hl _ _ hx.2
 
-theorem physicalMask_tsupport_closedWindow {d : ℝ} {l : SlotColoring.Label} {x : WindowPoint}
-    (hl : 1 ≤ l.1) (hq : 0 < x.1) (hx : x ∈ tsupport (PhysicalWaveSum.physicalMask d l)) :
-    (SquaredPartition.logCoordinate x.1, x.2) ∈ closedWindow d l :=
-  labelRegion_subset_closedWindow hl (PhysicalWaveSum.physicalMask_tsupport_subset d l hx) hq
 
 
 theorem window_card_le {d : ℝ} {x : WindowPoint} (F : Finset ι)
@@ -1083,30 +1079,7 @@ theorem uniformClass_of_envelopeJets {s : StripData D}
     _ = _ := by unfold majorant; ring
 
 
-theorem uniformClass_of_polynomialJets {s : StripData D}
-    {V : PhaseJetBounds.Domain (ℕ × ι) D} {a : (ℕ × ι) → D → E}
-    (ha : PhaseJetBounds.PolynomialJets V a) {K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hscale : ∀ n l, V.scale (n, l) ≤ K * s.slow n ^ q)
-    (hdom : ∀ n l, s.domain ⊆ V.carrier (n, l)) :
-    UniformClass s (fun _ _ _ => 1) 0 (fun l n => a (n, l)) :=
-  uniformClass_of_envelopeJets (PrimaryPulseBounds.EnvelopeJets.of_polynomial ha)
-    hK hscale hdom (fun _ _ _ _ => zero_le_one) (by intro l n x hx; simp)
 
-theorem slotSet_isCompact (h r : ℝ) (vr vt : TorusInverse.Plane) (l : SlotColoring.Label) :
-    IsCompact (PartitionedCovariance.slotSet h r vr vt l) := by
-  have he : PartitionedCovariance.slotSet h r vr vt l =
-      (fun z : ℝ × ℝ => PartitionedCovariance.slotCenter h l + z.1 • vr + z.2 • vt) ''
-        (Icc (-(2 * r)) (2 * r) ×ˢ Icc (-(2 * r)) (2 * r)) := by
-    ext x
-    constructor
-    · rintro ⟨ξ, η, hξ, hη, he⟩
-      exact ⟨(ξ, η), ⟨abs_le.mp hξ, abs_le.mp hη⟩, he.symm⟩
-    · rintro ⟨⟨ξ, η⟩, ⟨hξ, hη⟩, he⟩
-      exact ⟨ξ, η, abs_le.mpr hξ, abs_le.mpr hη, he.symm⟩
-  rw [he]
-  exact (isCompact_Icc.prod isCompact_Icc).image
-    ((continuous_const.add (continuous_fst.smul continuous_const)).add
-      (continuous_snd.smul continuous_const))
 
 
 end NavierStokes.LabelSumBounds

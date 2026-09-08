@@ -237,22 +237,6 @@ theorem residualSource_outside (c : CorrectionState.Context D) (u : CorrectionSt
     simp only [hn, excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj, zero_sub]
 
 
-theorem residualSource_support (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {K : Set D} (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupported K (b.velocity n i)) (hp : NonzeroSupported K (b.pressure n))
-    (hG : ∀ i, NonzeroSupported K (G n i)) (hA : ∀ i, NonzeroSupported K (A n i)) (j : ℤ) :
-    support (ParticularWaveAssembly.residualSource c u b G A j n) ⊆ K := by
-  intro x hx
-  by_contra hnot
-  apply hx
-  rw [residualSource_outside c u b G A hK n hv hp j hnot]
-  ext i
-  by_cases hj : j = 0
-  · simp [excludedSource, HarmonicResidual.nonconstant, hj]
-  · simp only [excludedSource, HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj,
-      (hG i).realProjection j hj x hnot, (hA i).realProjection j hj x hnot, neg_zero, sub_zero,
-      Pi.zero_apply]
 
 
 /-! ## Support of the actual real fields suffices -/
@@ -327,15 +311,6 @@ theorem realCoefficient_eq_zero_of_field
   simp only [extract, field_realCoefficients, hf, Complex.ofReal_zero, zero_mul]
   simp [HarmonicFields.angularMean]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- Fourier uniqueness transfers support of the evaluated real field to
-its actual real-projected coefficients; no coefficient support is assumed. -/
-theorem realCoefficients_supported_of_field
-    (c : HarmonicFields.Coefficients D) (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) {K : Set D}
-    (hf : ∀ x, x ∉ K → ∀ θ, (HarmonicFields.field c k Φ kp (x, θ)).re = 0) :
-    NonzeroSupported K (realCoefficients c) :=
-  fun j _ x hx => realCoefficient_eq_zero_of_field c k Φ hkp j x (hf x hx)
 
 
 
@@ -428,23 +403,6 @@ theorem transport_zero_of_product_germ (R : D → ℝ) (Vr Vθ Vz : D → D)
     ext j
     fin_cases j <;> simp [LinearWaveResidual.transport, hv, hd, angularGenerator]
 
-theorem transport_sum_self_of_product_germs {ι : Type*} (s : Finset ι)
-    (R : D → ℝ) (Vr Vθ Vz : D → D) (u : ι → D → ComplexVector) {x : D}
-    (hu : ∀ l ∈ s, ∀ i, DifferentiableAt ℝ (fun y => u l y i) x)
-    (hp : ∀ l ∈ s, ∀ k ∈ s, l ≠ k →
-      ∀ᶠ y in 𝓝 x, ∀ i j, u l y i * u k y j = 0) :
-    LinearWaveResidual.transport R Vr Vθ Vz (∑ l ∈ s, u l) (∑ l ∈ s, u l) x =
-      ∑ l ∈ s, LinearWaveResidual.transport R Vr Vθ Vz (u l) (u l) x := by
-  classical
-  rw [Actual.transport_sum_left]
-  apply Finset.sum_congr rfl
-  intro l hl
-  rw [Actual.transport_sum_right s R Vr Vθ Vz (u l) u hu]
-  apply Finset.sum_eq_single l
-  · intro k hk hkl
-    exact transport_zero_of_product_germ R Vr Vθ Vz
-      (fun i => (hu l hl i).continuousAt) (hp l hl k hk (Ne.symm hkl))
-  · exact fun h => (h hl).elim
 
 section ColoredSlots
 
@@ -455,19 +413,6 @@ variable {ι : Type*} {d h : ℝ} {vr vt : TorusInverse.Plane}
   {label : ℕ → ι → SlotColoring.Label} {χ : ℕ → D → WindowPoint}
   {Y : ℕ → D → TorusInverse.Plane} {U : Set D} {u v : ι → Oscillation D}
 
-omit [NormedSpace ℝ D] in
-theorem supported_product_germ (hU : IsOpen U)
-    (hu : SupportedOscillations sys label χ Y U u)
-    (hv : SupportedOscillations sys label χ Y U v)
-    {l k : ι} {n : ℕ} (hl : 1 ≤ (label n l).1) (hk : 1 ≤ (label n k).1)
-    (hne : label n l ≠ label n k) {x : D × ℝ} (hx : x.1 ∈ U) :
-    ∀ᶠ y in 𝓝 x, ∀ i j,
-      LinearWaveResidual.realLift (u l n) y i * LinearWaveResidual.realLift (v k n) y j = 0 := by
-  filter_upwards [(liftDomain_open hU).mem_nhds ⟨hx, mem_univ x.2⟩] with y hy
-  intro i j
-  change (u l n y i : ℂ) * (v k n y j : ℂ) = 0
-  rw [← Complex.ofReal_mul,
-    supported_cross_product_zero hu hv hl hk hne hy.1 y.2 i j, Complex.ofReal_zero]
 
 
 
@@ -576,16 +521,6 @@ theorem InputSupportOn.of_fields
     exact realCoefficients_supportedOn_of_field _ _ _ (hkp n)
       (fun x hx hn θ => hA n x hx hn θ i)
 
-theorem residualSource_complement_germ_on
-    (c : CorrectionState.Context D) (u : CorrectionState.State D)
-    (b : CorrectionState.HarmonicBlock D) (G A : HarmonicResidual.BlockCoefficients D)
-    {U K : Set D} (hU : IsOpen U) (hK : IsClosed K) (n : ℕ)
-    (hv : ∀ i, NonzeroSupportedOn U K (realCoefficients (b.velocity n i)))
-    (hp : NonzeroSupportedOn U K (realCoefficients (b.pressure n)))
-    (j : ℤ) {x : D} (hx : x ∈ U) (hn : x ∉ K) :
-    ParticularWaveAssembly.residualSource c u b G A j n =ᶠ[𝓝 x] excludedSource G A j n :=
-  residualSource_complement_germ_of_real c u b G A (hU.isClosed_compl.union hK) n
-    (fun i => (hv i).enlarge) hp.enlarge j (by simpa using And.intro hx hn)
 
 /-- The source has a genuine zero neighborhood at every uncovered point
 of the open strip.  Only incoming coefficient support on that strip is used. -/
@@ -625,28 +560,6 @@ open CommonCoverSolve TorusInverse
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-/-- Angular extraction and the actual coordinate identity transfer support
-in a geometric native slot to support in the union of all copy cells. -/
-theorem coefficient_nativeSupport_of_field
-    (c : HarmonicFields.Coefficients (P × Plane)) (k : ℝ) (Φ : P × Plane → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) (g : Geometry) (K : Set Plane)
-    {U : Set (P × Plane)} (level : ℕ) (slot : Set Plane) (Y : P × Plane → Plane)
-    (hcoord : ∀ x, x ∈ U → coverPower g.gap x.2 = (SlotGeometry.cover ^ level) (Y x))
-    (hslot : slot ⊆ (fun v => g.center + g.basis v) '' K)
-    (hf : ∀ x, x ∈ U → ∀ θ, (field c k Φ kp (x, θ)).re ≠ 0 →
-      Y x ∈ SlotGeometry.liftedSupport level slot) :
-    NonzeroSupportedOn U (nativeUnion g K) (realCoefficients c) := by
-  apply realCoefficients_supportedOn_of_field c k Φ hkp
-  intro x hx hn θ
-  by_contra hne
-  obtain ⟨v, hv, ht⟩ := hf x hx θ hne
-  apply hn
-  apply (mem_nativeUnion_iff g K x).mpr
-  refine ⟨v, hslot hv, ?_⟩
-  change SlotGeometry.torusEq ((SlotGeometry.cover ^ g.gap) x.2) v
-  rw [← coverPower_apply, hcoord x hx]
-  exact ht
 
 
 
@@ -670,44 +583,11 @@ theorem sourceFamily_zero_germ_on
     continuous_fst.fst.prodMk continuous_snd
   exact he.comp_tendsto hc.continuousAt
 
-/-- This is the source-complement input for the global Gaussian estimate
-on the full angular lift.  It has every exponent with constant zero, and
-does not assert support or regularity outside the incoming open strip. -/
-theorem sourceFamily_zero_complementJets
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : CorrectionState.HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : ℕ → Geometry) (K : ℕ → Set Plane) (hK : ∀ n, IsCompact (K n))
-    {U : Set (P × Plane)} (hU : IsOpen U)
-    (hs : InputSupportOn U (fun n => nativeUnion (g n) (K n)) b G A)
-    (s : WeightedClasses.StripData ((P × ℝ) × Plane))
-    (hdom : ∀ x, x ∈ s.domain → (x.1.1, x.2) ∈ U)
-    (j : ℤ) (w : ℕ → (P × ℝ) × Plane → ℝ) (α : ℝ) :
-    PeriodizedWaveBounds.ComplementJets s w α
-      (fun n => PeriodizedWaveBounds.nativeCell (g n) (K n))
-      (ParticularWaveAssembly.sourceFamily c u b G A j) := by
-  apply zero_complementJets_of_germs
-  intro n x hx hn
-  exact sourceFamily_zero_germ_on c u b G A g K hK hU hs j n (hdom x hx) hn
 
 end RelativeNativeCoverage
 
 /-! ## Unrestricted zero modes and the exact excluded-tail obstruction -/
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem realCoefficient_eq_zero_of_field_constant
-    (c : HarmonicFields.Coefficients D) (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) {j : ℤ} (hj : j ≠ 0) (x : D) (m : ℝ)
-    (hf : ∀ θ, (field c k Φ kp (x, θ)).re = m) :
-    realCoefficients c j x = 0 := by
-  rw [← extract_field (realCoefficients c) k Φ hkp j x]
-  trans extract (field (constantCoefficient (fun _ : D => (m : ℂ))) k Φ kp) k Φ kp j x
-  · unfold extract
-    congr 1
-    funext θ
-    rw [field_realCoefficients, hf θ, field_constant]
-  · rw [extract_field _ _ _ hkp]
-    simp [constantCoefficient, hj]
 
 
 

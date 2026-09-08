@@ -242,23 +242,6 @@ theorem extendedPrimitive_periodic
     intro θ
     simp [extendedPrimitive, hz]
 
-omit [FiniteDimensional ℝ P] in
-theorem extendedPrimitive_mean_zero
-    {K U : Set P} (χ : CompactCutoff K U)
-    (f : P × ℝ → ℝ) (m c : P → ℝ)
-    (hf : ∀ p ∈ U, Continuous (fun θ => f (p, θ))) (p : P) :
-    intervalIntegral (fun θ => extendedPrimitive χ f m c (p, θ)) 0 1 volume = 0 := by
-  by_cases hp : p ∈ U
-  · have hq : Continuous (fun θ => centeredSource f m c (p, θ)) := by
-      change Continuous (fun θ => c p * (f (p, θ) - m p))
-      exact continuous_const.mul ((hf p hp).sub continuous_const)
-    change intervalIntegral
-      (fun θ => χ.value p * normalizedPrimitiveFamily (centeredSource f m c) (p, θ))
-      0 1 volume = 0
-    rw [intervalIntegral.integral_const_mul, normalizedPrimitiveFamily_mean_zero _ p hq,
-      mul_zero]
-  · have hz : χ.value p = 0 := (χ.zero_near p hp).eq_of_nhds
-    simp [extendedPrimitive, hz]
 
 omit [FiniteDimensional ℝ P] in
 theorem extendedPrimitive_hasDerivAt
@@ -483,20 +466,6 @@ theorem realized_profiles_uniform_eta_jets
     hU (asRadialPrimitive_contDiff _ hprim.2) hperiodB KX Kη hKX hKη k
   exact ⟨CE, CU, hCE, hCU, fun n hn X hX η hη => ⟨hbE n hn X hX η hη, hbU n hn X hX η hη⟩⟩
 
-/-- The constructed profiles agree exactly with the nominal profiles on one
-open neighborhood of the prescribed boundary set, for every frequency. -/
-theorem realized_profiles_boundary_match
-    (r : TrueConeRealization a m p₁ p₂ K B) (E U : RadialParameter → ℝ)
-    (ha : ContDiff ℝ ∞ a) (hm : ContDiff ℝ ∞ m) (hBK : B ⊆ K) :
-    ∃ N : Set RadialParameter, IsOpen N ∧ B ⊆ N ∧ ∀ n X η : ℝ, (X, η) ∈ N →
-      realizedE r E n X η = E (X, η) ∧ realizedU r E U n X η = U (X, η) := by
-  obtain ⟨N, hN, hBN, hz⟩ := r.boundary_vanishing E ha hm hBK
-  refine ⟨N, hN, hBN, ?_⟩
-  intro n X η hp
-  have h := hz (X, η) hp (n * Real.log X)
-  simp only [realizedE, realizedU, RadialModulation.modulatedE, RadialModulation.modulatedU,
-    asRadialPrimitive, RadialModulation.phasePoint, h.1, h.2, zero_div,
-    Real.exp_zero, mul_one, add_zero, and_self]
 
 theorem theta_derivative_asRadialPrimitive
     (Q : RadialParameter × ℝ → ℝ) (hQ : ContDiff ℝ ∞ Q) (X η θ : ℝ) :

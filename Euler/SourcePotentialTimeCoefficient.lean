@@ -119,17 +119,6 @@ theorem potentialTimeCoefficient_apply (t : K) (y : Space) :
   exact normalTimeMap_potential (m.field t y) (m₁.field t y)
     (normalFunctional m c hc hm t y) hn (normalFunctional_apply m c hc hm t y)
 
-theorem potentialTimeCoefficient_translation :
-    translateCoefficientPath (potentialTimeCoefficient m m₁ c hc hm) =
-      fun a => potentialPathMap (timeNormalPath
-        (translateCoefficientPath (normalFunctional m c hc hm) a)
-        (translateCoefficientPath (normalColumn m₁).field a)) := by
-  funext a
-  apply ContinuousMap.ext
-  intro t
-  apply BoundedContinuousFunction.ext
-  intro y
-  rfl
 
 
 

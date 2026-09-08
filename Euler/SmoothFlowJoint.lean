@@ -117,24 +117,6 @@ theorem liftForward_hasFDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
   rw [he]
   exact h
 
-theorem liftBackward_contDiffAt_two
-    (htime : SmoothTimeField.TimeDerivative T hT A A₁)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) (x : E) :
-    ContDiffAt ℝ 2 (liftBackward T hT A) (t,x) := by
-  let y := (flowData T hT A).backward t x
-  have hg : ContDiffAt ℝ 2 (liftForward T hT A) (t,y) :=
-    contDiffAt_fst.prodMk (forward_joint_contDiffAt_two T hT A A₁ htime t ht y)
-  apply EulerSmoothImplicitLift.contDiffAt_of_identity
-    (liftBackward T hT A) (liftForward T hT A) id (t,x) 2 (by norm_num)
-    ((continuous_fst.prodMk (flowData T hT A).backward_joint_continuous).continuousAt)
-    hg contDiff_id.contDiffAt
-    (timeLiftEquiv (jacobianEquiv T hT A ⟨t,ht.1.le,ht.2.le⟩ y)
-      (velocityFamily T hT A y ⟨t,ht.1.le,ht.2.le⟩))
-  · exact liftForward_hasFDerivAt T hT A t ht y
-  · intro p
-    ext
-    · rfl
-    · exact (flowData T hT A).forward_backward p.1 p.2
 
 
 end EulerSmoothBanachFlow

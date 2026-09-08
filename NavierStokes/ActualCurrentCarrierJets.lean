@@ -119,16 +119,6 @@ theorem weightedPhase_smoothNear {n : ℕ} {i : ActualPhaseJetBounds.CopyIndex B
     hf.comp ActualParticularBackground.nativeToFull.toContinuousLinearEquiv.contDiff.contDiffOn
       (fun _ hy => hy)⟩
 
-theorem phase_smoothNear {n : ℕ} {i : ActualPhaseJetBounds.CopyIndex B N0}
-    {z : Native} (hz : z ∈ ParticularPaddedBackground.cells n i) :
-    LocalPhysicalCopyBounds.SmoothNear (phase i.1 n) z := by
-  obtain ⟨U, hU, hx, hf⟩ := weightedPhase_smoothNear hz
-  have hk : (ChartScales.carrier ActualPrimary.h n : ℝ) ≠ 0 :=
-    (ActualPrimary.chartCoefficients_frequency_pos i.1.1 i.1.2 n).ne'
-  refine ⟨U, hU, hx, (hf.div_const (ChartScales.carrier ActualPrimary.h n : ℝ)).congr ?_⟩
-  intro y _
-  rw [weightedPhase_eq]
-  field_simp [hk]
 
 /-- Constants are chosen before the active label, band, copy, point, and
 positive derivative order. Reindexing is an isometry and adds no loss. -/

@@ -38,8 +38,6 @@ theorem outputPolynomial_eval (X : ℝ) : (outputPolynomial P).eval X=outputEnve
   simp only [Polynomial.eval_add,Polynomial.eval_mul,Polynomial.eval_one,Polynomial.eval_ofNat,
     Polynomial.eval_C,Polynomial.eval_pow,Polynomial.eval_X,velocityPolynomial_eval,div_eq_mul_inv,one_mul]
 
-def outputConstant : ℝ := coefficientCost (outputPolynomial P)
-def outputPower : ℕ := (outputPolynomial P).natDegree
 
 
 

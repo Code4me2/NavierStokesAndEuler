@@ -46,7 +46,6 @@ theorem density_support (P : Patch) : support (density P) ⊆ Icc P.left P.right
 
 theorem density_integral (P : Patch) : (∫ r, density P r) = 1 := PressureStream.rho_integral _ _ _
 
-theorem density_nonneg (P : Patch) (r : ℝ) : 0 ≤ density P r := PressureStream.rho_nonneg _ _ _ r
 
 noncomputable def densityLift (P : Patch) (z : ℝ × ℝ) : ℝ := density P z.1
 
@@ -105,8 +104,6 @@ theorem inversePower_contDiff (P : Patch) (e : ℕ) : ContDiff ℝ ∞ (inverseP
   ((RadialPullback.positiveRadius_contDiff _).pow e).inv
     (fun r => pow_ne_zero _ (RadialPullback.positiveRadius_pos (by linarith [P.a_pos]) r).ne')
 
-theorem inversePower_nonneg (P : Patch) (e : ℕ) (r : ℝ) : 0 ≤ inversePower P e r :=
-  inv_nonneg.mpr (pow_nonneg (RadialPullback.positiveRadius_pos (by linarith [P.a_pos]) r).le e)
 
 theorem inversePower_eq (P : Patch) (e : ℕ) {r : ℝ} (hr : P.a ≤ r) :
     inversePower P e r = (r ^ e)⁻¹ := by
@@ -263,20 +260,6 @@ theorem sigma_eq_negative_primitive (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
   rw [sigma, inversePower_eq P e (primitive_supported P e hF.continuous hs h).1]
   ring
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem adjusted_supported (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
-    (hs : RadialAlias.RadiallySupported P.a P.b F) :
-    RadialAlias.RadiallySupported P.a P.b (adjusted P e F) := by
-  intro z hz
-  by_contra hn
-  have hF : F z = 0 := by
-    by_contra h
-    exact hn (hs h)
-  have hB : bumpCorrection P e F z = 0 := by
-    by_contra h
-    have hp := bumpCorrection_supported P e F h
-    exact hn ⟨P.a_lt_left.le.trans hp.1, hp.2.trans P.right_lt_b.le⟩
-  exact hz (by simp [adjusted, hF, hB])
 
 theorem adjusted_moment_zero (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
     (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) :
@@ -323,19 +306,6 @@ theorem weighted_sigma_hasDerivAt (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
   ring
 
 
-theorem angular_divergence (P : Patch) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) {r : ℝ} (hr : 0 < r) :
-    IntegratedMeanBalances.radialDivergence 2 (fun t => sigma P 2 F (t, p)) r =
-      -adjusted P 2 F (r, p) := by
-  have hsD := ((IntegratedMeanBalances.radial_slice_smooth (sigma_contDiff P 2 hF hs) p).differentiable (by simp) r).hasDerivAt
-  have he := ((hasDerivAt_pow 2 r).mul hsD).unique (weighted_sigma_hasDerivAt P 2 hF hs p r)
-  norm_num at he
-  apply mul_left_cancel₀ (pow_ne_zero 2 hr.ne')
-  dsimp [IntegratedMeanBalances.radialDivergence]
-  calc
-    _ = 2 * r * sigma P 2 F (r, p) + r ^ 2 * deriv (fun t => sigma P 2 F (t, p)) r := by
-      field_simp ; ring
-    _ = _ := by nlinarith [he]
 
 theorem axial_divergence (P : Patch) {F : ℝ × E → ℝ}
     (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) {r : ℝ} (hr : 0 < r) :
@@ -507,17 +477,7 @@ theorem bump_improvedClass_of_moment_identity (P : Patch) (e : ℕ) {cL cR : ℝ
 noncomputable def barSigma (P : Patch) (e : ℕ) (F : PressureStream.Lift E → ℝ) : ℝ × E → ℝ :=
   sigma P e (PressureStream.torusAverage F)
 
-theorem barSigma_contDiff (P : Patch) (e : ℕ) {F : PressureStream.Lift E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) :
-    ContDiff ℝ ∞ (barSigma P e F) :=
-  sigma_contDiff P e (PressureStream.torusAverage_contDiff hF) (PressureStream.torusAverage_supported hs)
 
-theorem barSigma_eq_primitive (P : Patch) (e : ℕ) {F : PressureStream.Lift E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (z : ℝ × E) :
-    barSigma P e F z = -(∫ r in (0 : ℝ)..z.1,
-      r ^ e * adjusted P e (PressureStream.torusAverage F) (r, z.2)) / z.1 ^ e :=
-  sigma_eq_negative_primitive P e (PressureStream.torusAverage_contDiff hF)
-    (PressureStream.torusAverage_supported hs) z
 
 /-- Slow coefficients are constant along the ordinary radial integration. -/
 theorem sigma_slow_mul (P : Patch) (e : ℕ) (k : E → ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) :
@@ -547,11 +507,6 @@ theorem mass_slow_mul (e : ℕ) (k : E → ℝ) (F : ℝ × E → ℝ) (p : E) :
   apply integral_congr_ae
   exact Filter.Eventually.of_forall (fun _ => by ring)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem bump_slow_mul (P : Patch) (e : ℕ) (k : E → ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) :
-    bumpCorrection P e (fun y => k y.2 * F y) z = k z.2 * bumpCorrection P e F z := by
-  simp only [bumpCorrection, mass_slow_mul]
-  ring
 
 end Primitive
 
@@ -626,19 +581,6 @@ theorem nativeSource_mass (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
     mass e (nativeSource q F) p = mass e F p / lengthScale q p ^ (e + 1) :=
   integral_dilate_weighted e (fun r => F (r, p)) (lengthScale_pos hq p)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem physicalDensity_moment (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p) (p : E) :
-    (∫ r, r ^ e * physicalDensity P e q (r, p)) = 1 := by
-  let s := lengthScale q p
-  have hs : 0 < s := lengthScale_pos hq p
-  have h := integral_dilate_weighted e (momentDensity P e) (inv_pos.mpr hs)
-  simp only [momentDensity_moment] at h
-  have he : (fun r => r ^ e * physicalDensity P e q (r, p)) =
-      fun r => (r ^ e * momentDensity P e (s⁻¹ * r)) / s ^ (e + 1) := by
-    funext r
-    simp [physicalDensity, s, div_eq_mul_inv, mul_comm, mul_left_comm]
-  rw [he, integral_div, h, inv_pow]
-  field_simp [hs.ne']
 
 theorem physicalDensity_contDiff (P : Patch) (e : ℕ) {q : E → ℝ}
     (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p) : ContDiff ℝ ∞ (physicalDensity P e q) := by
@@ -706,18 +648,6 @@ theorem physicalSigma_eq_negative_primitive (P : Patch) (e : ℕ) {q : E → ℝ
   · simp [hr]
   · field_simp [hl.ne', hr]
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem physicalDensity_support (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p) (p : E) :
-    support (fun r => physicalDensity P e q (r, p)) ⊆
-      Icc (lengthScale q p * P.left) (lengthScale q p * P.right) := by
-  intro r hr
-  have hmd : momentDensity P e (r / lengthScale q p) ≠ 0 := by
-    intro h
-    apply hr
-    simp [physicalDensity, h]
-  have h := momentDensity_support P e hmd
-  exact ⟨by simpa only [mul_comm] using (le_div_iff₀ (lengthScale_pos hq p)).mp h.1,
-    by simpa only [mul_comm] using (div_le_iff₀ (lengthScale_pos hq p)).mp h.2⟩
 
 
 
@@ -734,16 +664,6 @@ theorem physicalAdjusted_moment_zero (P : Patch) (e : ℕ) {q : E → ℝ}
   have hm := congrArg (fun t => t * lengthScale q p ^ (e + 1)) hh
   simpa only [zero_mul, div_mul_cancel₀ _ (pow_ne_zero _ (lengthScale_pos hpos p).ne')] using hm.symm
 
-theorem physicalSigma_slice_compact (P : Patch) (e : ℕ) {q : E → ℝ}
-    (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : PhysicalSupport P q F) (p : E) :
-    HasCompactSupport (fun r => physicalSigma P e q F (r, p)) := by
-  apply HasCompactSupport.of_support_subset_isCompact
-    (isCompact_Icc (a := lengthScale q p * P.a) (b := lengthScale q p * P.b))
-  intro r hr
-  have h := physicalSigma_supported P e hq hpos hF hs (r, p) hr
-  exact ⟨by simpa only [mul_comm] using (le_div_iff₀ (lengthScale_pos hpos p)).mp h.1,
-    by simpa only [mul_comm] using (div_le_iff₀ (lengthScale_pos hpos p)).mp h.2⟩
 
 theorem physicalAdjusted_contDiff (P : Patch) (e : ℕ) {q : E → ℝ}
     (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p) {F : ℝ × E → ℝ}
@@ -847,9 +767,6 @@ noncomputable def qChartTensor (P : Patch) (e : ℕ) (q : E → ℝ) (A : ℝ)
     (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
   q z.2 ^ (2 * A) * physicalSigma P e q F (lengthScale q z.2 * z.1, z.2)
 
-noncomputable def qChartBump (P : Patch) (e : ℕ) (q : E → ℝ) (A : ℝ)
-    (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
-  q z.2 ^ (2 * A + 1 / 2) * physicalBump P e q F (lengthScale q z.2 * z.1, z.2)
 
 
 theorem tensor_units_identity (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
@@ -861,41 +778,10 @@ theorem tensor_units_identity (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p,
   unfold physicalSigma lengthScale
   rw [← mul_assoc, Real.sqrt_eq_rpow, ← Real.rpow_add (hq z.2)]
 
-/-- Exact chart tensor units, with no preferred band in the physical definition. -/
-theorem qChartTensor_eq (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
-    (A : ℝ) (F : ℝ × E → ℝ) : qChartTensor P e q A F = sigma P e (normalizedResidual q A F) := by
-  funext z
-  rw [qChartTensor, tensor_units_identity P e hq A F (lengthScale q z.2 * z.1, z.2)]
-  simp only [mul_div_cancel_left₀ _ (lengthScale_pos hq z.2).ne']
-
-theorem normalizedResidual_contDiff {q : E → ℝ} (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p)
-    (A : ℝ) {F : ℝ × E → ℝ} (hF : ContDiff ℝ ∞ F) : ContDiff ℝ ∞ (normalizedResidual q A F) := by
-  have hp : ContDiff ℝ ∞ (fun z : ℝ × E => q z.2 ^ (2 * A + 1 / 2)) := by
-    rw [contDiff_iff_contDiffAt]
-    intro z
-    exact (hq.comp contDiff_snd).contDiffAt.rpow_const_of_ne (hpos z.2).ne'
-  exact hp.mul (nativeSource_contDiff hq hpos hF)
-
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem normalizedResidual_supported (P : Patch) {q : E → ℝ} (hq : ∀ p, 0 < q p)
-    (A : ℝ) {F : ℝ × E → ℝ} (hs : PhysicalSupport P q F) :
-    RadialAlias.RadiallySupported P.a P.b (normalizedResidual q A F) :=
-  fun _ h => nativeSource_supported P hq hs (right_ne_zero_of_mul h)
 
 
-/-- A fixed-Q chart is an exact reparametrization of the physical-q stress;
-the physical stress itself was defined without Q. -/
-theorem fixedQ_tensor_identity (P : Patch) (e : ℕ) {q : E → ℝ} (hq : ∀ p, 0 < q p)
-    {Q : ℝ} (hQ : 0 < Q) (A : ℝ) (F : ℝ × E → ℝ) (R : ℝ) (p : E) :
-    Q ^ (2 * A) * physicalSigma P e q F (Real.sqrt Q * R, p) =
-      (Q / q p) ^ (2 * A) * sigma P e (normalizedResidual q A F)
-        ((Real.sqrt Q / Real.sqrt (q p)) * R, p) := by
-  have hcoord : (Real.sqrt Q / Real.sqrt (q p)) * R = (Real.sqrt Q * R) / lengthScale q p := by
-    unfold lengthScale
-    ring
-  rw [hcoord, ← tensor_units_identity P e hq A F (Real.sqrt Q * R, p),
-    Real.div_rpow hQ.le (hq p).le]
-  field_simp [(Real.rpow_pos_of_pos (hq p) (2 * A)).ne']
+
+
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem fixedQ_density_identity (P : Patch) (e : ℕ) (q : E → ℝ)
@@ -919,29 +805,7 @@ open IntegratedMeanBalances
 noncomputable def axialMomentPotential (axialFlux gr ρ : MeanField) (p : MeanParameter) : ℝ :=
   axialDefect axialFlux gr p + pressureCoefficient ρ p * pressureTotal gr p
 
-theorem axialMomentPotential_contDiff (P : Patch) {axialFlux gr ρ : MeanField}
-    (hz : SmoothShell P.a P.b axialFlux) (hg : SmoothShell P.a P.b gr)
-    (hρ : SmoothShell P.a P.b ρ) : ContDiff ℝ ∞ (axialMomentPotential axialFlux gr ρ) := by
-  have h1 := radialMoment_smooth hz.smooth hz.supported 1
-  have h2 := radialMoment_smooth hg.smooth hg.supported 2
-  have h3 := radialMoment_smooth hρ.smooth hρ.supported 2
-  have h4 := radialMoment_smooth hg.smooth hg.supported 0
-  exact (h1.sub (contDiff_const.mul h2)).add ((h3.div_const 2).mul h4)
 
-/-- The pressure coefficient remains inside the actual slow derivative. -/
-theorem axial_bump_identity (P : Patch) (ε : ℝ)
-    {γ radialFlux axialFlux pressure virtualFlux gr ρ : MeanField}
-    (hγ : SmoothShell P.a P.b γ) (hr : SmoothShell P.a P.b radialFlux)
-    (hz : SmoothShell P.a P.b axialFlux) (hp : SmoothShell P.a P.b pressure)
-    (hT : SmoothShell P.a P.b virtualFlux) (hg : SmoothShell P.a P.b gr)
-    (hρ : SmoothShell P.a P.b ρ) (hmass : radialMoment 1 γ = 0)
-    (hderiv : ∀ r p, deriv (fun s => pressure (s, p)) r =
-      gr (r, p) - ρ (r, p) * pressureTotal gr p) (z : MeanPoint) :
-    bumpCorrection P 1 (axialBalance ε γ radialFlux axialFlux pressure virtualFlux) z =
-      momentDensity P 1 z.1 * (ε * fderiv ℝ (axialMomentPotential axialFlux gr ρ) z.2 (0, 1)) := by
-  unfold bumpCorrection mass
-  rw [integrated_axial_reconstructed ε hγ hr hz hp hT hg hρ hmass hderiv]
-  rfl
 
 
 
@@ -969,67 +833,11 @@ theorem compact_jet_bounds {X Y : Type*} [NormedAddCommGroup X] [NormedSpace ℝ
     have h := Finset.single_le_sum (fun j _ => hC j) (Finset.mem_range.mpr (Nat.lt_succ_of_le hj))
     exact (hbound j x hx).trans (by linarith)
 
-/-- Smooth coordinate changes and multipliers have actual finite-jet operator
-bounds on compact sets; the bound is uniform over every input function. -/
-theorem compact_change_jet_bound {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    {K : Set X} (hK : IsCompact K) {a : X → ℝ} (ha : ContDiff ℝ ∞ a)
-    {φ : X → X} (hφ : ContDiff ℝ ∞ φ) (m : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ f : X → ℝ, ContDiff ℝ ∞ f → ∀ x ∈ K, ∀ B : ℝ, 0 ≤ B →
-      (∀ i ≤ m, ‖iteratedFDeriv ℝ i f (φ x)‖ ≤ B) → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (fun y => a y * f (φ y)) x‖ ≤ C * B := by
-  obtain ⟨A, hA, haB⟩ := compact_jet_bounds hK ha m
-  obtain ⟨L, hL, hφB⟩ := compact_jet_bounds hK hφ m
-  let D : ℝ := (m.factorial : ℝ) * L ^ m
-  have hD : 0 < D := mul_pos (Nat.cast_pos.mpr (Nat.factorial_pos m)) (pow_pos (zero_lt_one.trans_le hL) m)
-  refine ⟨(2 : ℝ) ^ m * A * D, by positivity, ?_⟩
-  intro f hf x hx B hB hfb j hj
-  have hcomp : ∀ i ≤ m, ‖iteratedFDeriv ℝ i (f ∘ φ) x‖ ≤ D * B := by
-    intro i hi
-    have h := norm_iteratedFDeriv_comp_le hf hφ (nat_le_smooth i) x
-      (fun k hk => hfb k (hk.trans hi)) (D := L)
-      (fun k hk hki => (hφB k (hki.trans hi) x hx).trans
-        (by simpa only [pow_one] using pow_le_pow_right₀ hL hk))
-    apply h.trans
-    have hfac : (i.factorial : ℝ) ≤ m.factorial := by exact_mod_cast Nat.factorial_le hi
-    calc
-      _ ≤ (m.factorial : ℝ) * B * L ^ m := by
-        exact mul_le_mul (mul_le_mul_of_nonneg_right hfac hB) (pow_le_pow_right₀ hL hi)
-          (pow_nonneg (zero_le_one.trans hL) _) (mul_nonneg (Nat.cast_nonneg _) hB)
-      _ = D * B := by dsimp [D]; ring
-  have h := ParametricKernelBounds.norm_iteratedFDeriv_mul_le_of_bounds ha (hf.comp hφ) j x
-    (zero_le_one.trans hA) (mul_nonneg hD.le hB)
-    (fun i hi => haB i (hi.trans hj) x hx) (fun i hi => hcomp i (hi.trans hj))
-  have hsum : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) = (2 : ℝ) ^ j := by
-    exact_mod_cast Nat.sum_range_choose j
-  rw [hsum] at h
-  apply h.trans
-  calc
-    _ ≤ (2 : ℝ) ^ m * A * (D * B) :=
-      mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num) hj) (zero_le_one.trans hA))
-        (mul_nonneg hD.le hB)
-    _ = _ := by ring
-
-noncomputable def changeChart (ρ : E → ℝ) (A : ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
-  ρ z.2 ^ (-2 * A) * F (z.1 / Real.sqrt (ρ z.2), z.2)
-noncomputable def inverseChangeChart (ρ : E → ℝ) (A : ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
-  ρ z.2 ^ (2 * A) * F (Real.sqrt (ρ z.2) * z.1, z.2)
 
 
 
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem fixedQ_density_common_ratio (P : Patch) (e : ℕ) {ρ : E → ℝ}
-    (hρ : ∀ p, 0 < ρ p) {Q : ℝ} (hQ : 0 < Q) (z : ℝ × E) :
-    Real.sqrt Q ^ (e + 1) *
-      physicalDensity P e (fun p => Q * ρ p) (Real.sqrt Q * z.1, z.2) =
-      physicalDensity P e ρ z := by
-  rw [fixedQ_density_identity]
-  have hs : Real.sqrt Q / Real.sqrt (Q * ρ z.2) = (Real.sqrt (ρ z.2))⁻¹ := by
-    rw [Real.sqrt_mul hQ.le]
-    field_simp [(Real.sqrt_pos.mpr hQ).ne', (Real.sqrt_pos.mpr (hρ z.2)).ne']
-  rw [hs, inv_pow]
-  simp only [physicalDensity, lengthScale, div_eq_mul_inv, mul_comm]
+
 
 
 end ChartComparison

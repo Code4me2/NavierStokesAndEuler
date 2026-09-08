@@ -48,9 +48,6 @@ theorem forwardMap_inverseMap (d : E → CircleDensity) (z : E × ℝ) :
 
 
 
-theorem inversePhase_add_one (d : E → CircleDensity) (p : E) (φ : ℝ) :
-    inversePhase d (p, φ + 1) = inversePhase d (p, φ) + 2 * Real.pi :=
-  phaseInverse_add_one (d p) φ
 
 
 variable [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -111,10 +108,6 @@ theorem inverseMap_contDiffAt_of_phase (d : E → CircleDensity) (z : E × ℝ)
     (hforward.to_localInverse hL hone).congr_of_eventuallyEq heq
   simpa only [a, forwardMap_inverseMap] using hinv
 
-theorem inversePhase_contDiffAt_of_phase (d : E → CircleDensity) (z : E × ℝ)
-    (hphase : ContDiffAt ℝ ∞ (familyPhase d) (inverseMap d z)) :
-    ContDiffAt ℝ ∞ (inversePhase d) z :=
-  (inverseMap_contDiffAt_of_phase d z hphase).snd
 
 theorem inverseMap_contDiffOn_of_phase (d : E → CircleDensity) (U : Set E)
     (hU : IsOpen U) (hphase : ContDiffOn ℝ ∞ (familyPhase d) (U ×ˢ univ)) :
@@ -221,11 +214,6 @@ theorem inverseMap_contDiffOn [FiniteDimensional ℝ E]
     ContDiffOn ℝ ∞ (inverseMap d) (U ×ˢ univ) :=
   inverseMap_contDiffOn_of_phase d U hU (familyPhase_contDiffOn d U hU hrate)
 
-theorem inversePhase_contDiffOn [FiniteDimensional ℝ E]
-    (d : E → CircleDensity) (U : Set E) (hU : IsOpen U)
-    (hrate : ContDiffOn ℝ ∞ (familyRate d) (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (inversePhase d) (U ×ˢ univ) :=
-  (inverseMap_contDiffOn d U hU hrate).snd
 
 
 /-- Smooth loops remain jointly smooth under the constructed parameter-dependent

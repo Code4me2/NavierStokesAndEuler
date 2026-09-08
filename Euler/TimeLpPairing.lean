@@ -65,26 +65,5 @@ theorem integral_three_paths (T : ℝ) (hT : 0 ≤ T)
   change IntervalIntegrable (fun t => extendPath T hT c t * extendPath T hT f t) volume 0 T at hc
   rw [intervalIntegral.integral_add (ha.add hb) hc, intervalIntegral.integral_add ha hb]
 
-/-- An actual integral energy inequality survives uniform state convergence and strong L² forcing convergence, with the signed loss term unchanged. -/
-theorem integral_energy_limit (T : ℝ) (hT : 0 ≤ T)
-    (a b : C(Icc (0 : ℝ) T, ℝ)) (c : TimeLp T ℝ)
-    (X Y : ℕ → C(Icc (0 : ℝ) T, ℝ)) (F : ℕ → TimeLp T ℝ)
-    (x y : C(Icc (0 : ℝ) T, ℝ)) (f : TimeLp T ℝ)
-    (hX : Filter.Tendsto X Filter.atTop (𝓝 x)) (hY : Filter.Tendsto Y Filter.atTop (𝓝 y))
-    (hF : Filter.Tendsto F Filter.atTop (𝓝 f))
-    (henergy : ∀ n, X n ⟨T, hT, le_rfl⟩ - X n ⟨0, le_rfl, hT⟩ ≤
-      (∫ t in (0 : ℝ)..T, extendPath T hT a t * extendPath T hT (X n) t) +
-      (∫ t in (0 : ℝ)..T, extendPath T hT b t * extendPath T hT (Y n) t) +
-      ∫ t, c t * F n t ∂timeMeasure T) :
-    x ⟨T, hT, le_rfl⟩ - x ⟨0, le_rfl, hT⟩ ≤
-      (∫ t in (0 : ℝ)..T, extendPath T hT a t * extendPath T hT x t) +
-      (∫ t in (0 : ℝ)..T, extendPath T hT b t * extendPath T hT y t) +
-      ∫ t, c t * f t ∂timeMeasure T := by
-  have ht := (continuous_eval_const (⟨T, hT, le_rfl⟩ : Icc (0 : ℝ) T)).continuousAt.tendsto.comp hX
-  have h0 := (continuous_eval_const (⟨0, le_rfl, hT⟩ : Icc (0 : ℝ) T)).continuousAt.tendsto.comp hX
-  exact le_of_tendsto_of_tendsto' (ht.sub h0)
-    (((integral_product_path_tendsto T hT a X x hX).add
-      (integral_product_path_tendsto T hT b Y y hY)).add
-      (integral_product_timeLp_tendsto T c F f hF)) henergy
 
 end EulerTimeLpPairing

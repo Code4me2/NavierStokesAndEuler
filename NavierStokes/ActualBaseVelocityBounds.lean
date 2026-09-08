@@ -272,8 +272,6 @@ theorem extension_uniform_jets {a : ℝ} (ha : 1 < a) (m : ℕ) :
 noncomputable def heatLoss (m : ℕ) : ℝ := powerLoss m * ((m : ℝ) + 2)
 
 
-theorem heatLoss_nonneg (m : ℕ) : 0 ≤ heatLoss m :=
-  mul_nonneg (powerLoss_nonneg m) (by positivity)
 
 theorem heat_velocity_rate {l : Filter SpaceTime} (hl : l ≤ endpoint)
     {h R : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hR : 0 < R)
@@ -399,9 +397,6 @@ theorem heatLoss_controls_middle {h : ℝ} (hh1 : h < 1 / 2) (m : ℕ) :
   have hm : 0 ≤ (m : ℝ) := by positivity
   linarith
 
-theorem heatLoss_mono {n m : ℕ} (hnm : n ≤ m) : heatLoss n ≤ heatLoss m := by
-  unfold heatLoss powerLoss
-  gcongr
 
 section Actual
 

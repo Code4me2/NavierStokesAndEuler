@@ -187,42 +187,11 @@ theorem q_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   rw [show 1 - (1 - Q * p.2.2) = Q * p.2.2 by ring]
   exact coordinateQ_scale_h hh hh1 hQ hp
 
-theorem eta_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) {p : ChartPoint} (hp : 0 < p.2.2) :
-    SimilarityProfile.eta h (chartToPhysical h Q p) = chartEta h p := by
-  change coordinateEta (2 * h) (1 - (1 - Q * p.2.2), Q ^ D h * p.2.1) = _
-  rw [show 1 - (1 - Q * p.2.2) = Q * p.2.2 by ring]
-  exact coordinateEta_scale_h hh hh1 hQ hp
-
-theorem X_chartToPhysical {h Q : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hQ : 0 < Q) {p : ChartPoint} (hp : 0 < p.2.2) :
-    SimilarityProfile.X h (chartToPhysical h Q p) = chartX h p := by
-  unfold SimilarityProfile.X
-  rw [q_chartToPhysical hh hh1 hQ hp]
-  change (Q * (p.1 ^ 2 / 2)) / (Q * chartQ h p) = (p.1 ^ 2 / 2) / chartQ h p
-  exact mul_div_mul_left _ _ hQ.ne'
 
 
 
-theorem chartTransition_refl {Q : ℝ} (hQ : 0 < Q) (h : ℝ) (p : ChartPoint) :
-    chartTransition h Q Q p = p := by
-  simp [chartTransition, hQ.ne']
 
-theorem chartTransition_comp {h Q Q' Q'' : ℝ}
-    (hQ : 0 < Q) (hQ' : 0 < Q') (hQ'' : 0 < Q'') (p : ChartPoint) :
-    chartTransition h Q' Q'' (chartTransition h Q Q' p) =
-      chartTransition h Q Q'' p := by
-  have hr : Q' / Q'' * (Q / Q') = Q / Q'' := by field_simp
-  have hpow (a : ℝ) : (Q' / Q'') ^ a * (Q / Q') ^ a = (Q / Q'') ^ a := by
-    rw [← Real.mul_rpow (div_pos hQ' hQ'').le (div_pos hQ hQ').le, hr]
-  apply Prod.ext
-  · dsimp [chartTransition]
-    rw [← mul_assoc, hpow]
-  · apply Prod.ext
-    · dsimp [chartTransition]
-      rw [← mul_assoc, hpow]
-    · dsimp [chartTransition]
-      rw [← mul_assoc, hr]
+
 
 
 /-- The usual open annular-chart domain; profile annulus restrictions can
@@ -257,12 +226,6 @@ theorem chartInner_smoothAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 noncomputable def chartWeight {E : Type*} (h : ℝ) (ζ : ℝ → E) (p : ChartPoint) : E :=
   ζ (chartX h p)
 
-/-- In particular an arbitrarily flat weight is transported with factor one. -/
-theorem chartWeight_transition {E : Type*} {h Q Q' : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q) (hQ' : 0 < Q')
-    {p : ChartPoint} (hp : 0 < p.2.2) (ζ : ℝ → E) :
-    chartWeight h ζ (chartTransition h Q Q' p) = chartWeight h ζ p :=
-  congrArg ζ (chartX_transition hh hh1 hQ hQ' hp)
 
 /-- The lesser of one and the two logarithmic distances to fixed profile
 edges. Positivity is asserted only inside a positive profile interval. -/
@@ -277,12 +240,6 @@ theorem profileLogDistance_pos {left right X : ℝ} (hl : 0 < left)
 noncomputable def chartLogDistance (h left right : ℝ) (p : ChartPoint) : ℝ :=
   profileLogDistance left right (chartX h p)
 
-theorem chartLogDistance_transition {h Q Q' : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hQ : 0 < Q) (hQ' : 0 < Q')
-    {p : ChartPoint} (hp : 0 < p.2.2) (left right : ℝ) :
-    chartLogDistance h left right (chartTransition h Q Q' p) =
-      chartLogDistance h left right p :=
-  congrArg (profileLogDistance left right) (chartX_transition hh hh1 hQ hQ' hp)
 
 
 end NavierStokes.SimilarityHomogeneity

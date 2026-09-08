@@ -501,34 +501,6 @@ theorem virtualDivergence_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Con
   rw [radialDiv_pull, radialDiv_pull]
   rfl
 
-theorem fullResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) (n : ℕ) (x : D × ℝ) (i : Fin 3) :
-    LiftedMeanResidual.fullResidual (context e c) (state e u) n x i =
-      LiftedMeanResidual.fullResidual c u n (cylinder e x) i := by
-  have hl := linearResidual_field_pull (cylinder e) (c.operators.epsilon n)
-    (fun y : E × ℝ => c.operators.radius y.1)
-    (LiftedMeanResidual.radialDirection c n) LiftedMeanResidual.angularDirection
-    (LiftedMeanResidual.axialDirection c n) (LiftedMeanResidual.timeDirection c n)
-    (LiftedMeanResidual.complexBase c n) (LiftedMeanResidual.complexPerturbation u n)
-    (LiftedMeanResidual.complexPressure u n) x
-  have hq := transport_field_pull (cylinder e) (fun y : E × ℝ => c.operators.radius y.1)
-    (LiftedMeanResidual.radialDirection c n) LiftedMeanResidual.angularDirection
-    (LiftedMeanResidual.axialDirection c n)
-    (LiftedMeanResidual.complexPerturbation u n) (LiftedMeanResidual.complexPerturbation u n) x
-  rw [angularDirection_pull] at hl hq
-  unfold LiftedMeanResidual.fullResidual LiftedMeanResidual.nonlinearResidual
-  rw [radialDirection_pull, axialDirection_pull, timeDirection_pull,
-    complexBase_pull, complexPerturbation_pull, complexPressure_pull]
-  rw [show (fun y : D × ℝ => (context e c).operators.radius y.1) =
-    (fun y : D × ℝ => c.operators.radius (cylinder e y).1) from rfl]
-  change ((LinearWaveResidual.linearResidual (c.operators.epsilon n)
-    (fun y : D × ℝ => c.operators.radius (cylinder e y).1)
-    (vector (cylinder e) (LiftedMeanResidual.radialDirection c n)) LiftedMeanResidual.angularDirection
-    (vector (cylinder e) (LiftedMeanResidual.axialDirection c n))
-    (vector (cylinder e) (LiftedMeanResidual.timeDirection c n))
-    _ _ _ x + LinearWaveResidual.transport _ _ _ _ _ _ x) i).re + _ + _ = _
-  rw [hl, hq, virtualDivergence_pull]
-  rfl
 
 
 /-! ## Exact return from the alternate layout -/
@@ -582,22 +554,7 @@ noncomputable def strip (e : D ≃ₗᵢ[ℝ] E) (s : WeightedClasses.StripData 
 
 /-! ## Real linearization and the mean equations -/
 
-theorem realTransport_pull (e : D ≃ₗᵢ[ℝ] E) (R : E → ℝ)
-    (Vr Vt Vz : E → E) (u v : E → Fin 3 → ℝ) (x : D) :
-    LinearWaveResidual.realTransport (fun y => R (e y)) (vector e Vr) (vector e Vt) (vector e Vz)
-      (fun y => u (e y)) (fun y => v (e y)) x =
-      LinearWaveResidual.realTransport R Vr Vt Vz u v (e x) := by
-  funext i
-  simp only [LinearWaveResidual.realTransport, along_pull_component]
 
-theorem realFrameLaplacian_pull (e : D ≃ₗᵢ[ℝ] E) (R : E → ℝ)
-    (Vr Vt Vz : E → E) (a : E → Fin 3 → ℝ) (x : D) :
-    LinearWaveResidual.realFrameLaplacian (fun y => R (e y))
-      (vector e Vr) (vector e Vt) (vector e Vz) (fun y => a (e y)) x =
-      LinearWaveResidual.realFrameLaplacian R Vr Vt Vz a (e x) := by
-  funext i
-  simp only [LinearWaveResidual.realFrameLaplacian, scalarLaplacian_component_pull,
-    along_pull_component]
 
 
 theorem thetaResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
@@ -663,12 +620,6 @@ theorem meanResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context 
   rw [reducedMeanResidual_pull]
   rfl
 
-theorem meanGoodResidual_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context E)
-    (u : CorrectionState.State E) (n : ℕ) (x : D) (i : Fin 3) :
-    (state e u).meanGoodResidual (context e c) n x i = u.meanGoodResidual c n (e x) i := by
-  change (state e u).meanResidual (context e c) n x i - _ = _
-  rw [meanResidual_pull]
-  rfl
 
 theorem block_bandLimited (e : D ≃ₗᵢ[ℝ] E) {b : CorrectionState.HarmonicBlock E} {N : ℕ}
     (hb : b.BandLimited N) : (block e b).BandLimited N :=
@@ -686,9 +637,6 @@ abbrev Associated (S : Type) := (ℝ × S) × TorusInverse.Plane
 noncomputable def associatedTorusAverage (f : Associated S → ℝ) (p : ℝ × S) : ℝ :=
   ∫ y in (0 : ℝ)..1, ∫ x in (0 : ℝ)..1, f (p, (x, y))
 
-/-- The actual radial integral of that torus average. -/
-noncomputable def associatedMass (f : Associated S → ℝ) (s : S) : ℝ :=
-  ∫ r, associatedTorusAverage f (r, s)
 
 
 

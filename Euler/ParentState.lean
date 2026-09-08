@@ -1,6 +1,6 @@
 import Euler.ParentEulerSobolevChild
 import Euler.ParentEulerParity
-import Euler.ParentEulerEndpoints
+import Euler.ParentEulerSobolev
 import Euler.ParentPacketCorrectionParity
 
 /-! The recursive physical state consists of the actual Euler solution,

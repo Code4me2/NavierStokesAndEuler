@@ -120,23 +120,6 @@ theorem physical_vector_of_components {Q : ℝ} (hQ : 0 < Q) (h θ : ℝ)
     ← Real.rpow_add hQ]
   simp
 
-theorem state_fullResidual_reconstructed {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : CorrectionState.Context D} {s : CorrectionState.State D} {labels : ℕ → Finset ι}
-    {b : ι → CorrectionState.HarmonicBlock D} {G A : ι → HarmonicResidual.BlockCoefficients D}
-    (hrep : HarmonicResidual.BlockRepresentation labels b G A s)
-    (hmean : LiftedMeanResidual.MeanHypotheses U c s) {n : ℕ}
-    (hreg : HarmonicResidual.ExtractionRegular U c s labels b G A n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    LiftedMeanResidual.fullResidual c s n x i =
-      (∑ l ∈ labels n, (HarmonicResidual.residualBlock c s (b l) (G l) (A l)).oscillation n x i) +
-      s.meanGoodResidual c n x.1 i + s.errors.total n x i := by
-  change HarmonicResidual.stateFullResidual c s n x i = _
-  rw [HarmonicResidual.stateFullResidual_reconstructed hU hrep hreg hx i,
-    HarmonicResidual.stateMeanCoefficientValue_eq_average hU hrep hreg hx.1 i]
-  congr 1
-  congr 1
-  exact LiftedMeanResidual.angularMean_fullGoodResidual hmean n hx.1 i
 
 /-! ## The actual polar common graph and rotating Cartesian basis -/
 

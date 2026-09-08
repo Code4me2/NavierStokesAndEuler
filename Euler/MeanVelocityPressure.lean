@@ -51,39 +51,8 @@ def pressureResidual : TimeLp T L2 :=
   f - timeMultiplier T hT (solenoidalFrame T F) s.acceleration -
     (2 : ℝ) • timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp
 
-/-- The residual has its literal pointwise strong-equation representative. -/
-theorem pressureResidual_ae :
-    (s.pressureResidual : ℝ → L2) =ᵐ[timeMeasure T] fun t =>
-      f t - extendPath T hT F t (s.acceleration t : L2) -
-        (2 : ℝ) • extendPath T hT F₁ t (s.velocity t : L2) := by
-  filter_upwards [Lp.coeFn_sub (f-timeMultiplier T hT (solenoidalFrame T F) s.acceleration)
-      ((2 : ℝ) • timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp),
-    Lp.coeFn_sub f (timeMultiplier T hT (solenoidalFrame T F) s.acceleration),
-    Lp.coeFn_smul (2 : ℝ) (timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp),
-    timeMultiplier_ae T hT (solenoidalFrame T F) s.acceleration,
-    timeMultiplier_ae T hT (solenoidalFrame T F₁) s.velocityLp, s.velocity_ae]
-    with t hs₂ hs₁ hsmul ha hv hvrep
-  simp only [Pi.sub_apply, Pi.smul_apply] at hs₂ hs₁ hsmul
-  change (f-timeMultiplier T hT (solenoidalFrame T F) s.acceleration-
-    (2 : ℝ) • timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp) t = _
-  have hv' := hv.trans (congrArg
-    (fun w : solenoidalSpace => F₁ (projIcc 0 T hT t) (w : L2)) hvrep)
-  exact hs₂.trans (congrArg₂ (fun x y : L2 => x-y)
-    (hs₁.trans (congrArg (fun x : L2 => f t-x) ha))
-    (hsmul.trans (congrArg (fun x : L2 => (2 : ℝ) • x) hv')))
 
 
-/-- The prescribed coefficient identity F_t=MF holds for the actual velocity field. -/
-theorem movingVelocityField_eq (M : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))
-    (hM : ∀ (t : Icc (0 : ℝ) T) (x : L2), F₁ t x = M t (F t x)) :
-    timeMultiplier T hT M s.velocityField =
-      timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp := by
-  apply Lp.ext
-  filter_upwards [timeMultiplier_ae T hT M s.velocityField,
-    timeMultiplier_ae T hT (solenoidalFrame T F) s.velocityLp,
-    timeMultiplier_ae T hT (solenoidalFrame T F₁) s.velocityLp] with t hmul hv hv₁
-  exact hmul.trans ((congrArg (fun x : L2 => M (projIcc 0 T hT t) x) hv).trans
-    ((hM (projIcc 0 T hT t) (s.velocityLp t : L2)).symm.trans hv₁.symm))
 
 
 /-- The initial physical velocity is exactly the source's localized boundary value. -/

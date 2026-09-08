@@ -54,27 +54,5 @@ theorem FiniteFamily.value_base (F : FiniteFamily period hT A) (C : ComparisonDa
       value period (F.solution 6 le_rfl t)) rfl
     (fun n hn ih => (F.value_succ period C n hn t).trans ih) q hq
 
-/-- Every other actual finite-order correction with zero trace and the same genuine PDE and divergence condition equals the supplied finite correction.
-No comparison estimate or compatibility is assumed. -/
-theorem FiniteFamily.unique_at_order (F : FiniteFamily period hT A) (C : ComparisonData period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (u : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)))
-    (hi : u ⟨0, le_rfl, hT.le⟩ = 0)
-    (hd : ∀ t, value period (u t) ∈ divergenceFreeSpace period A.κ A.direction)
-    (hu : ∀ t (ht : t ∈ Ioo 0 T),
-      HasDerivAt (fun r => value period (extendPath T hT.le u r))
-        (value period (((A.atOrder period q).coefficients period hq).apply
-          ⟨t, ht.1.le, ht.2.le⟩ (u ⟨t, ht.1.le, ht.2.le⟩))) t) :
-    u = F.solution q hq := by
-  apply inviscid_correction_unique period hq T hT.le (A.atOrder period q)
-    (C.stabilityBudget period q) u (F.solution q hq)
-  · rw [hi, F.initial]
-  · exact hu
-  · exact F.equation q hq
-  · intro t
-    change value period (A.approximation.realization (q+1) t) ∈ _
-    rw [A.approximation.value_eq]
-    exact C.divergence t
-  · exact hd
-  · exact F.divergence q hq
 
 end EulerCorrectionAssembly

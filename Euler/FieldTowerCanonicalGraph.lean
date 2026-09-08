@@ -32,15 +32,5 @@ theorem canonicalGraphWordPath_norm_sq_le (n : ℕ) (w : Fin n → Fin 4)
   A.graphWordPath_norm_sq_le A.pointField A.pointField_smooth A.pointField_ae θ hθ n w t
 
 
-theorem canonicalGraphWordPath_hasDerivAt (B : EulerAllOrderCorrectionData.FieldTower P T)
-    (hT : 0 ≤ T) (n : ℕ) (w : Fin n → Fin 4) (q : ℕ) (hq : n+1 ≤ q)
-    (t : ℝ) (ht : t ∈ Ioo 0 T)
-    (hd : HasDerivAt (extendPath T hT (A.realization q))
-      (B.realization q ⟨t,ht.1.le,ht.2.le⟩) t) :
-    HasDerivAt (extendPath T hT (A.canonicalGraphWordPath θ hθ n w))
-      (B.canonicalGraphWordPath θ hθ n w ⟨t,ht.1.le,ht.2.le⟩) t :=
-  A.graphWordPath_hasDerivAt B A.pointField B.pointField A.pointField_smooth B.pointField_smooth
-    A.pointField_ae B.pointField_ae θ hθ hT n w t ht
-    (A.realization_hasDerivAt_of_le B hq hT ⟨t,ht.1.le,ht.2.le⟩ hd)
 
 end EulerAllOrderCorrectionData.FieldTower

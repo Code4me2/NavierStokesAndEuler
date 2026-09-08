@@ -314,50 +314,6 @@ noncomputable def transportedTangent
     (PrimaryCopyBridge.frameTangentData (nativeFrame (F.frame (l,n)) χ) j (referenceSource l n))
     (ψ (l,n)) (gap l n) 0 (clock.value l n) (amplitude l n) (normal.value l n))
 
-/-- The full control for the literal target HR source and the exact
-angle-lifted `ScaledTangentTransport` datum.  Inserting the current source
-does not require it to equal a scaled old source. -/
-noncomputable def actualControl
-    (s : StripData P) (F : PhaseConstruction D) (χ : P →L[ℝ] Slow)
-    (φ : (Label × ℕ) → Slow →L[ℝ] Slow) (ψ : (Label × ℕ) → P → P)
-    (hχ : ∀ i p, χ (ψ i p) = φ i (χ p))
-    (clock normal : ActualSignedControl.PositiveScale Label)
-    (reference : Label → ℕ → Geometry)
-    (referenceSource : Label → ℕ → P × Plane → ProblemStatement.Space)
-    (gap : Label → ℕ → ℕ) (amplitude r : Label → ℕ → ℝ)
-    {A B C : ℝ} {a : ℕ} (hA : 1 ≤ A) (hB : 1 ≤ B) (hC : 1 ≤ C)
-    (hφ : ∀ i, ‖φ i‖ ≤ A) (hscale : ∀ i, D.scale i ≤ B*s.slow i.2)
-    (hsep : ∀ l n, WaveEnvelopeTransport.Separated (reference l n) (r l n) (F.L (l,n)))
-    (hgeometry : ∀ l n, CommonCoverClass.argumentCost (geometry reference gap clock l n) ≤ C*s.slow n^a)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : Label → CorrectionState.HarmonicBlock (P × Plane))
-    (G A0 : Label → HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ) (hj : j ≠ 0)
-    {α : ℝ}
-    (hsource : ∀ i : Fin 3, UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope (geometry reference gap clock) r (length F clock) (envelope F clock)) α
-      (fun l n x => (HarmonicResidual.residualBlock c u (b l) (G l) (A0 l)).velocity n i j x))
-    (part : HarmonicCalculus.ComplexVector →L[ℝ] ProblemStatement.Space) :
-    ParticularCopyBounds.UniformModalControl (CommonCoverClass.sourceStrip (angleStrip s)) α
-      (fun l n => nativeFrame (frame F φ clock normal (l,n)) (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)))
-      (fun l n => withSource (transportedTangent F χ ψ clock normal referenceSource gap amplitude j l n)
-        (fun x => part (ParticularWaveAssembly.sourceFamily c u (b l) (G l) (A0 l) j n x)))
-      j (geometry reference gap clock) (length F clock) (envelope F clock)
-      (patch (angleStrip s) F (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) φ clock
-        (geometry reference gap clock) r) := by
-  have ht : (fun l n => withSource
-      (transportedTangent F χ ψ clock normal referenceSource gap amplitude j l n)
-      (fun x => part (ParticularWaveAssembly.sourceFamily c u (b l) (G l) (A0 l) j n x))) =
-      (fun l n => PrimaryCopyBridge.frameTangentData
-        (nativeFrame (frame F φ clock normal (l,n)) (χ.comp (ContinuousLinearMap.fst ℝ P ℝ))) j
-        (fun x => part (ParticularWaveAssembly.sourceFamily c u (b l) (G l) (A0 l) j n x))) := by
-    funext l n
-    exact angle_transport_withSource (F.frame (l,n)) χ (φ (l,n)) (ψ (l,n)) (hχ (l,n))
-      (referenceSource l n) _ j (gap l n) (clock.value l n) (amplitude l n) (normal.value l n)
-  rw [ht]
-  exact scaledControl (angleStrip s) F (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) φ clock normal
-    reference gap r hA hB hC hφ hscale hsep hgeometry j hj _
-    ((sourceFamily_uniform s (geometry reference gap clock) r (length F clock) (envelope F clock)
-      α c u b G A0 (fun _ => j) hsource).map part)
 
 /-! ## The clock change preserves the native Gaussian and polynomial geometry cost -/
 

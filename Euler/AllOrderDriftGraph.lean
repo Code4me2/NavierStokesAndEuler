@@ -17,17 +17,8 @@ variable (P : ℝ) [Fact (0 < P)]
   (B : Budget P hT A)
   (θ : Vector3 → AddCircle P) (hθ : Continuous θ)
 
-def Budget.graphCorrectionWordPath (n : ℕ) (w : Fin n → Fin 4) :
-    C(Icc (0 : ℝ) T,Lp Vector3 2 (volume : Measure Vector3)) :=
-  (B.fieldTower P).canonicalGraphWordPath θ hθ n w
 
-def Budget.graphTimeDerivativeWordPath (n : ℕ) (w : Fin n → Fin 4) :
-    C(Icc (0 : ℝ) T,Lp Vector3 2 (volume : Measure Vector3)) :=
-  (B.timeDerivativeTower P).canonicalGraphWordPath θ hθ n w
 
-def Budget.graphPressureWordPath (n : ℕ) (w : Fin n → Fin 4) :
-    C(Icc (0 : ℝ) T,Lp Vector3 2 (volume : Measure Vector3)) :=
-  (B.pressureTower P).canonicalGraphWordPath θ hθ n w
 
 theorem Budget.correctionTower_pointField (t : Icc (0 : ℝ) T) :
     (B.fieldTower P).pointField t = B.pointField P t :=

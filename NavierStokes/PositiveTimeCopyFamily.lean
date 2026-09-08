@@ -52,11 +52,6 @@ theorem gate_amplitude_ne_zero_iff (f : CopyFamily H K) (k : K) (I : WaveIndex H
   classical
   by_cases hx : x ∈ liftPast <;> simp [gate, hx]
 
-theorem gate_amplitude_germ (f : CopyFamily H K) (k : K) (I : WaveIndex H)
-    {x : LiftPoint} (hx : x ∈ liftPast) :
-    (gate f).amplitude k I =ᶠ[𝓝 x] f.amplitude k I := by
-  filter_upwards [liftPast_open.mem_nhds hx] with y hy
-  exact gate_amplitude_eq f k I hy
 
 
 theorem gate_amplitude_support_subset (f : CopyFamily H K) (k : K) (I : WaveIndex H) :
@@ -111,18 +106,8 @@ theorem term_zero (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∉ pretermi
   exact gate_amplitude_zero f k I (fun hl => hw ((commonLift_mem_liftPast_iff h
     I.1.val.1 (f.gap I.1) w).mp hl))
 
-theorem term_germ (I : WaveIndex H) (k : K) {w : SpaceTime} (hw : w ∈ preterminal) :
-    (gate f).term a h r0 I k =ᶠ[𝓝 w] f.term a h r0 I k := by
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
-  exact term_eq f a h r0 I k hy
 
 
-theorem term_support_subset (I : WaveIndex H) (k : K) :
-    support ((gate f).term a h r0 I k) ⊆ support (f.term a h r0 I k) := by
-  intro w hw
-  by_cases ht : w ∈ preterminal
-  · simpa only [mem_support, term_eq f a h r0 I k ht] using hw
-  · exact (hw (term_zero f a h r0 I k ht)).elim
 
 
 theorem periodized_eq (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ preterminal) :
@@ -135,10 +120,6 @@ theorem periodized_zero (I : WaveIndex H) {w : SpaceTime} (hw : w ∉ pretermina
     (gate f).periodized a h r0 I w = 0 := by
   simp only [CopyFamily.periodized, term_zero f a h r0 I _ hw, tsum_zero]
 
-theorem periodized_germ (I : WaveIndex H) {w : SpaceTime} (hw : w ∈ preterminal) :
-    (gate f).periodized a h r0 I =ᶠ[𝓝 w] f.periodized a h r0 I := by
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
-  exact periodized_eq f a h r0 I hy
 
 
 theorem sum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
@@ -146,8 +127,6 @@ theorem sum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
   exact congrArg (fun g : WaveIndex H → ℂ => ∑ᶠ I, g I)
     (funext (fun I => periodized_eq f a h r0 I hw))
 
-theorem sum_zero {w : SpaceTime} (hw : w ∉ preterminal) : (gate f).sum a h r0 w = 0 := by
-  simp only [CopyFamily.sum, periodized_zero f a h r0 _ hw, finsum_zero]
 
 theorem sum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
     (gate f).sum a h r0 =ᶠ[𝓝 w] f.sum a h r0 := by

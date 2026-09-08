@@ -104,14 +104,6 @@ variable {P : ℝ} [Fact (0 < P)]
   (hq : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a q))
   (he : ∀ (t : Icc (0 : ℝ) D.T) x θ, p (t,(x,θ)) = scalarPointField P q hq t (x,(θ : AddCircle P)))
 
-def compactPressureField : Field P D.T (coordinatePressure D k p) :=
-  ((liftedGradientField P p q hq he k⁻¹ D.m₀).smul (k^2)).congr (fun t x θ => by
-    change k • pressureGradient p (t,(x,θ)) +
-      k^2 • ((pressureJet p (t,(x,θ))).2 angleDirection • D.m₀) =
-      k^2 • (k⁻¹ • pressureGradient p (t,(x,θ)) +
-        (pressureJet p (t,(x,θ))).2 angleDirection • D.m₀)
-    simp only [smul_add,smul_smul]
-    rw [show k^2*k⁻¹ = k by field_simp [hk]])
 
 
 end EulerPacketCoordinates

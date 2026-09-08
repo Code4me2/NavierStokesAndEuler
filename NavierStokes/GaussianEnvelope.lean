@@ -248,22 +248,5 @@ theorem reference_gaussian_bounds {lam u ell time : ℝ}
   · exact ht
   · exact PulseGrowth.netGrowth_slot_midpoint lam u ell (ne_of_gt hell)
 
-/-- The reference envelope has positive Gaussian constants uniform in slot length. -/
-theorem reference_uniform_gaussian_bounds {lam u : ℝ} (hlam : 0 < lam) (hu : 0 < u) :
-    ∃ c C : ℝ, 0 < c ∧ 0 < C ∧ ∀ ell : ℝ, 0 < ell → ∀ time ∈ Icc 0 ell,
-      Real.exp (-C * (time - ell / 2) ^ 2 / ell) ≤
-          envelope (referenceRate lam u ell) (ell / 2) time ∧
-        envelope (referenceRate lam u ell) (ell / 2) time ≤
-          Real.exp (-c * (time - ell / 2) ^ 2 / ell) := by
-  refine ⟨u * referenceMinSlope lam u / 2, u * referenceMaxSlope lam u / 2,
-    div_pos (mul_pos hu (referenceMinSlope_pos hlam hu)) (by norm_num),
-    div_pos (mul_pos hu (referenceMaxSlope_pos hlam hu)) (by norm_num), ?_⟩
-  intro ell hell time ht
-  have hmax : -(u * referenceMaxSlope lam u / 2) * (time - ell / 2) ^ 2 / ell =
-      -(u * referenceMaxSlope lam u) * (time - ell / 2) ^ 2 / (2 * ell) := by ring
-  have hmin : -(u * referenceMinSlope lam u / 2) * (time - ell / 2) ^ 2 / ell =
-      -(u * referenceMinSlope lam u) * (time - ell / 2) ^ 2 / (2 * ell) := by ring
-  rw [hmax, hmin]
-  exact reference_gaussian_bounds hlam hu hell ht
 
 end NavierStokes.GaussianEnvelope

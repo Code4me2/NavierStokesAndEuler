@@ -14,11 +14,6 @@ theorem gradeBase_nonneg (R : ℝ) (N : ℕ) : 0 ≤ gradeBase R N := by
   unfold gradeBase
   positivity
 
-theorem gradeBase_ge_one (R : ℝ) (hR : 1 ≤ R) (N : ℕ) (hN : 1 ≤ N) :
-    1 ≤ gradeBase R N := by
-  have hn : (1 : ℝ) ≤ N := by exact_mod_cast hN
-  have hbase : (1 : ℝ) ≤ 4*R*(550*(N : ℝ))^2 := by nlinarith
-  exact one_le_pow₀ hbase
 
 theorem factorial_le_grade_power (N p d : ℕ) (hN : 1 ≤ N) (hp : p ≤ 2*N+2)
     (hd : d ≤ 110*(p+1)) : (d.factorial : ℝ) ≤ (550*(N : ℝ))^d := by

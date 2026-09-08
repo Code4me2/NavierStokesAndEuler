@@ -262,23 +262,6 @@ theorem exponent_weight_admissible {g a : ℝ → ℝ} {A : ℝ}
   exponent_nonneg := h.exponent_nonneg
   exponent_le := h.exponent_le
 
-theorem exponent_mass_pos_of_active {g a : ℝ → ℝ} {A : ℝ}
-    (h : Admissible g a A)
-    (hactive : 0 < volume {y | 0 < g y ∧ 0 < a y}) :
-    0 < ∫ y, g y * a y := by
-  apply (integral_pos_iff_support_of_nonneg
-    (fun y => mul_nonneg (h.nonneg y) (h.exponent_nonneg y))
-    (integrable_exponent_weight h)).mpr
-  have heq : Function.support (fun y => g y * a y) = {y | 0 < g y ∧ 0 < a y} := by
-    ext y
-    simp only [Function.mem_support, mem_ofPred_eq, ne_eq, mul_eq_zero, not_or]
-    constructor
-    · rintro ⟨hg, ha⟩
-      exact ⟨lt_of_le_of_ne (h.nonneg y) (Ne.symm hg),
-        lt_of_le_of_ne (h.exponent_nonneg y) (Ne.symm ha)⟩
-    · rintro ⟨hg, ha⟩
-      exact ⟨ne_of_gt hg, ne_of_gt ha⟩
-  rwa [heq]
 
 theorem complexKernelDeriv_ofReal (a η : ℝ) :
     complexKernelDeriv a (η : ℂ) =
@@ -427,13 +410,5 @@ theorem exponent_mass_pos_of_ideal_prefix {g a : ℝ → ℝ} {A P : ℝ}
   rw [heq] at hp
   exact lt_of_lt_of_le (by positivity) hp
 
-theorem pressure_neg_of_ideal_prefix {g a : ℝ → ℝ} {A P : ℝ}
-    (h : Admissible g a A) (hP : 0 < P)
-    (hg : ∀ y ≤ 0, g y = P ^ 2 * Real.exp ((1 / 5 : ℝ) * y))
-    (ha : ∀ y ≤ 0, a y = 1) (η : ℝ) : pressure g a η < 0 := by
-  apply lt_of_le_of_lt (pressure_le_of_ideal_prefix h hg ha η)
-  have hb : 0 < ((1 + η ^ 2)⁻¹) ^ 2 := by positivity
-  have hneg : -(5 / 2 : ℝ) * P ^ 2 < 0 := mul_neg_of_neg_of_pos (by norm_num) (by positivity)
-  exact mul_neg_of_neg_of_pos hneg hb
 
 end NavierStokes.PressureDatum

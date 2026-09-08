@@ -138,13 +138,6 @@ theorem coefficient_xJet {f : Plane → ℂ} (hf : ContDiff ℝ ∞ f)
       rw [ih, coefficient_partialX (xJet_smooth hf p) (xJet_periodic hp p) hk,
         xJet_succ, pow_succ, mul_assoc]
 
-/-- A coefficient-decay estimate obtained from a bound on an actual derivative. -/
-theorem coefficient_decay_first {f : Plane → ℂ} (hf : ContDiff ℝ ∞ f)
-    (hp : UnitPeriodic f) {k : Frequency} (hk : k.1 ≠ 0) (p : ℕ) {C : ℝ}
-    (hb : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1, ‖xJet p f (x, y)‖ ≤ C) :
-    ‖coefficient f k‖ ≤ ‖(omega * (k.1 : ℂ))⁻¹‖ ^ p * C := by
-  rw [coefficient_xJet hf hp hk p, norm_mul, norm_pow]
-  exact mul_le_mul_of_nonneg_left (coefficient_norm_le k hb) (pow_nonneg (norm_nonneg _) p)
 
 /-- The negative Fourier character on the unit square. -/
 def kernel (k : Frequency) (z : Plane) : ℂ :=

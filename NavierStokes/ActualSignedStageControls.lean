@@ -1263,17 +1263,6 @@ theorem raw_principal_zero {β : ℝ} {request : ℕ → FullPoint → SignedWav
     (Scaling.carrier_frequency_pos (fullStrip.epsilon_pos n)).ne'
     (actual_unit_ode hx hc) (actual_unit_action hx)
 
-theorem fullRequest_principal_zero {β : ℝ} (s : StripData Point)
-    (P : SignedStressPrimitive.Patch) (coord : ℝ)
-    (c : CorrectionState.Context Point) (u : CorrectionState.State Point)
-    (hR : ∀ q, PeriodizedWaveBounds.UniformLocalJets fullStrip
-      (fun _ _ x => fullStrip.zeta x) β (phaseCell (B := B) (N0 := N0))
-      (fun _ n _ x => LocalSignedRequest.fullRequest s P coord c u n x q))
-    {l : SignedLabel B N0} {n : ℕ} {k : Frequency} {x : FullPoint}
-    (hx : x ∈ fullStrip.domain) (hc : x ∈ phaseCell l n k) :
-    (((parameters l).copyData ActualPrimaryBounds.strip
-      (LocalSignedRequest.fullRequest s P coord c u)).raw k).principal fullStrip (directions B) n x = 0 :=
-  raw_principal_zero hR (request_frozen s P coord c u) hx hc
 
 
 end NavierStokes.ActualSignedStageControls

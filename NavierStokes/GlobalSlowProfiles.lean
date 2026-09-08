@@ -1765,15 +1765,6 @@ noncomputable def asSlowProfiles {S : Set ℝ} {h C : ℝ} (s : Scheme S h C) :
     (fun j => xProfile (profiles s j).axial) (fun j => xProfile (profiles s j).beta)
     (fun j => xProfile (profiles s j).pressure)
 
-/-- Exact global divergence at every positive order. -/
-theorem profiles_divergenceCoefficient {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    {n : ℕ} (hn : 0 < n) {w : ℝ × ℝ} (hX : 0 < w.1) (heta : w.2 ∈ S) :
-    SlowExpansionResidual.divergenceCoefficient h (asSlowProfiles s) n w = 0 := by
-  change SimilarityProfile.partialX (AxisSourceRegularity.axisFactor (xProfile (profiles s n).beta)) w +
-    SimilarityProfile.Z h (SlowExpansionResidual.axialExponent h + SlowExpansionResidual.slowOrder h n)
-      (xProfile (profiles s n).axial) w = 0
-  rw [profiles_beta_eq s hn]
-  exact betaFromU_x_divergence s.domain (AxisSourceRegularity.slowOrder h n) (profiles s n).axial hX heta
 
 /-- Exact global pressure row, with the actual preceding radial residual. -/
 theorem profiles_pressureCoefficient {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
@@ -1837,20 +1828,6 @@ theorem profiles_axis_zero {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
 
 
 
-theorem profiles_axis_right_jets {S : Set ℝ} {h C rho inner : ℝ} {U : Set ℂ}
-    {base : Fin 5 → SimilarityProfile.InnerProfile} {s : Scheme S h C}
-    {A : SlowRecursion.LocalHierarchy rho U h C base}
-    (L : Localization s A inner) (B0 : BaseAgreement s A inner)
-    {n : ℕ} (hn : 0 < n) (i : Fin 4) (m : ℕ) {eta : ℝ} (heta : eta ∈ S) :
-    iteratedDerivWithin m (fun X => xProfile (component (profiles s n) i) (X, eta)) (Ici 0) 0 =
-    iteratedDerivWithin m (fun X => SlowRecursion.profile (A.coefficients n (localIndex i)) (X, eta)) (Ici 0) 0 := by
-  have he : (fun X => xProfile (component (profiles s n) i) (X, eta)) =ᶠ[𝓝[Ici 0] 0]
-      fun X => SlowRecursion.profile (A.coefficients n (localIndex i)) (X, eta) := by
-    have hN : ∀ᶠ X : ℝ in 𝓝 0, X < inner := isOpen_Iio.mem_nhds L.inner_pos
-    filter_upwards [self_mem_nhdsWithin, hN.filter_mono nhdsWithin_le_nhds] with X hX hXi
-    exact profiles_inner_eq L B0 hn i (w := (X, eta)) hX hXi heta
-  simp only [iteratedDerivWithin_eq_iteratedFDerivWithin]
-  rw [he.iteratedFDerivWithin_eq (profiles_inner_eq L B0 hn i (w := (0, eta)) le_rfl L.inner_pos heta) m]
 
 /-- Germ locality transfers the two solved tangential equations. No
 agreement outside the fixed inner region is required. -/
@@ -1877,20 +1854,6 @@ theorem profiles_inner_tangential {S : Set ℝ} {h C rho inner : ℝ} {U : Set �
   exact SlowResidualMatching.hierarchy_tangential_coefficients A hn
     ⟨hX, hi.trans L.inner_radius⟩ (L.parameter_embedding w.2 heta)
 
-theorem compactSupport_of_even_exterior {S : Set ℝ} (f : EvenProfile S) {B : ℝ}
-    (hf : Exterior B S f) {eta : ℝ} (heta : eta ∈ S) : HasCompactSupport (fun R => f (R, eta)) := by
-  apply HasCompactSupport.of_support_subset_isCompact (K := Icc (-B) B) isCompact_Icc
-  intro R hR
-  by_contra hout
-  apply hR
-  change f (R, eta) = 0
-  by_cases hBR : B ≤ R
-  · exact hf eta heta R hBR
-  · have hneg : B ≤ -R := by
-      by_contra hn
-      exact hout ⟨by linarith, (lt_of_not_ge hBR).le⟩
-    rw [← f.even heta R]
-    exact hf eta heta (-R) hneg
 
 
 

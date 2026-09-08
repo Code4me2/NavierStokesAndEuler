@@ -90,15 +90,5 @@ theorem pathTranslation_evaluation_contDiff (T : ℝ)
     (ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := n)
       (E := C(Icc (0 : ℝ) T, L2)) (F := L2) (ContinuousMap.evalCLM ℝ t)) hp
 
-/-- Time evaluation preserves every uniform spatial factorial bound without loss. -/
-theorem pathTranslation_evaluation_gevrey (T : ℝ)
-    (p : C(Icc (0 : ℝ) T, L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p))
-    (R C : ℝ) (hR : 0 ≤ R) (hC : 0 ≤ C) (d : ℕ)
-    (hb : ∀ n a, ‖iteratedFDeriv ℝ n (fun b : Space => pathTranslation T b p) a‖ ≤ C*majorant R d n)
-    (t : Icc (0 : ℝ) T) (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => translation b (p t)) a‖ ≤ C*majorant R d n :=
-  contraction_bound (ContinuousMap.evalCLM ℝ t : C(Icc (0 : ℝ) T, L2) →L[ℝ] L2)
-    (evaluation_norm_le T t) (fun b : Space => pathTranslation T b p) hp R C hR hC d hb n a
 
 end EulerMeanTimeContinuousTranslation

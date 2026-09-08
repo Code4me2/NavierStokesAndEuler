@@ -748,15 +748,6 @@ theorem physicalAngular_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
 
 
 
-theorem physicalAngular_hasDerivWithinAt (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    HasDerivWithinAt (physicalAngular d K)
-      (Real.sqrt 2 * (nuDebtJet d K false (1 / 2) 1 (diffusion eta) * (-2 * eta)))
-      (Icc (-1 : ℝ) 1) eta := by
-  have he : physicalAngular d K = fun eta => Real.sqrt 2 * etaDebt d K false (1 / 2) eta :=
-    funext (physicalAngular_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact (etaDebt_hasDerivWithinAt d hK false (angular_decay d) hη).const_mul _
 
 theorem physicalPressure_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K)
     (n : ℕ) {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
@@ -856,15 +847,6 @@ theorem correctionJet_eq_iteratedDerivWithin {h K X ν : ℝ} (hh : 0 < h)
         (fun u hu => ih hu) hν).derivWithin ((uniqueDiffOn_Ici 0) ν hν)
 
 
-theorem multiplier_nu_jet {h K X ν : ℝ} (hh : 0 < h) (hX : 0 < X)
-    (hν : 0 ≤ ν) (n : ℕ) :
-    iteratedDerivWithin (n + 1) (fun u => multiplier h u K X) (Ici 0) ν =
-      correctionJet h K (n + 1) ν X := by
-  have he : (fun u => multiplier h u K X) = fun u => 1 + (multiplier h u K X - 1) := by
-    funext u
-    ring
-  rw [he, iteratedDerivWithin_const_add (Nat.succ_pos n) (1 : ℝ)]
-  exact correctionJet_eq_iteratedDerivWithin hh hX hν (n + 1)
 
 
 theorem multiplier_zero {h : ℝ} (hh : 0 < h) (K X : ℝ) : multiplier h 0 K X = 1 := by
@@ -979,39 +961,6 @@ theorem profile_first_jet_neg {h z : ℝ} (hh : 0 < h) (hz : 0 ≤ z) :
   rw [he]
   exact mul_neg_of_neg_of_pos (mul_neg_of_pos_of_neg hg (neg_neg_of_pos hh)) hm
 
-theorem nuDebt_linear_first_neg (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    {q : ℝ} (hq : tailDecay d false + q < 0) {ν : ℝ} (hν : 0 ≤ ν) :
-    nuDebtJet d K false q 1 ν < 0 := by
-  have hKp : 0 < K := lt_of_lt_of_le zero_lt_one hK
-  let g := weightedJet (tailWeight d K false) false d.h K q 1 ν
-  have hi : IntegrableOn g (Ioi K) :=
-    weightedJet_integrable d.h_pos hK (tailWeight_continuousOn d hKp false)
-      (tailSize_nonneg d false) (tailWeight_bound d hKp false) hq false 1 hν
-  have hg : ∀ X ∈ Ioi K, g X < 0 := by
-    intro X hX
-    have hXp : 0 < X := hKp.trans hX
-    have he : 0 < tailWeight d K false X := by
-      change 0 < powerTail d.h (outgoingAmplitude d) K (outgoingShape d) X
-      exact mul_pos (mul_pos (outgoingAmplitude_pos d)
-        (Real.rpow_pos_of_pos (div_pos hXp hKp) _)) (tailShape_pos d _)
-    have hc : correctionJet d.h K 1 ν X < 0 := by
-      change switch K X * (2 / X) ^ 1 * RadialHeatProfile.profileJet (1 + d.h) 1 (2 * ν / X) < 0
-      exact mul_neg_of_pos_of_neg (mul_pos (switch_pos hKp hX) (pow_pos (by positivity) _))
-        (profile_first_jet_neg d.h_pos (by positivity))
-    exact mul_neg_of_pos_of_neg (mul_pos (Real.rpow_pos_of_pos hXp q) he) hc
-  have hs : Function.support (fun X => -g X) ∩ Ioi K = Ioi K := by
-    rw [inter_eq_right]
-    intro X hX
-    exact (neg_pos.mpr (hg X hX)).ne'
-  have hp : 0 < ∫ X in Ioi K, -g X := by
-    rw [setIntegral_pos_iff_support_of_nonneg_ae]
-    · rw [hs, Real.volume_Ioi]
-      simp
-    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with X hX
-      exact (neg_pos.mpr (hg X hX)).le
-    · exact hi.neg
-  rw [integral_neg] at hp
-  exact neg_pos.mp hp
 
 
 end NavierStokes.ParametricHeatTail

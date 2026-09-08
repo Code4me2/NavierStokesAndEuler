@@ -55,17 +55,6 @@ theorem jet_equation (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
     ((G.scalar_spatial_smooth t).differentiable (by simp) (x,θ))]
   exact G.equation t x θ
 
-theorem vector_angle_jet (t : ℝ) (x : Space) (θ : ℝ) :
-    (slicedJet (Icc (0 : ℝ) D.T) G.vector (t,(x,θ))).2 angleDirection = 0 := by
-  rw [EulerPacketPointJets.slicedJet_angle]
-  have hfst : HasFDerivAt (Prod.fst : Space × ℝ → Space)
-      (ContinuousLinearMap.fst ℝ Space ℝ) (x,θ) := hasFDerivAt_fst
-  have hd := ((pathRepresentative_smooth D.T G.velocityPath G.velocityPath_orbit (D.clamp t)).differentiable
-    (by simp) x).hasFDerivAt.comp (x,θ) hfst
-  change (fderiv ℝ (fun y : Space × ℝ =>
-    pathRepresentative D.T G.velocityPath G.velocityPath_orbit (D.clamp t) y.1) (x,θ)) (0,1) = 0
-  have he := congrArg (fun A : (Space × ℝ) →L[ℝ] Space => A (0,1)) hd.fderiv
-  simpa only [Function.comp_def, comp_apply, ContinuousLinearMap.coe_fst', map_zero] using he
 
 theorem scalar_angle_jet (t : ℝ) (x : Space) (θ : ℝ) :
     (pressureJet G.scalar (t,(x,θ))).2 angleDirection = 0 := by

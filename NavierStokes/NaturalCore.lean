@@ -92,9 +92,6 @@ theorem profileDomain_isOpen {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (Λ : ℝ)
       ((NaturalProfile.domain_isOpen Λ).mem_nhds hp.2)
   exact inter_mem ht hs
 
-theorem coreDomain_isOpen {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (Λ : ℝ) :
-    IsOpen (coreDomain h Λ) :=
-  (profileDomain_isOpen hh hh1 Λ).preimage (contDiff_profilePoint (n := ∞)).continuous
 
 theorem physicalQ_at_zero_z {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {t : ℝ} (ht : t < 1) (s : ℝ) : physicalQ h (t, (s, 0)) = 1 - t := by
@@ -244,25 +241,6 @@ theorem swirlPotential_contDiffAt {h Λ : ℝ} {f : ℝ × ℝ → ℝ}
         ((NaturalProfile.domain_isOpen Λ).mem_nhds hp.2)).comp p
           (similarityPoint_contDiffAt hh hh1 hp.1))
 
-theorem meridionalPotential_partialS {h Λ : ℝ} {V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
-    {p : ProfilePoint} (hp : p ∈ profileDomain h Λ) :
-    partialS (meridionalPotential h V) p =
-      physicalQ h p ^ (-NaturalAxisData.A h) / physicalQ h p *
-        NaturalAxisBridge.partialY V (similarityPoint h p) := by
-  have hVs : DifferentiableAt ℝ
-      (fun X => V (X, physicalEta h p)) (p.2.1 / physicalQ h p) :=
-    ((hV.contDiffAt ((NaturalProfile.domain_isOpen Λ).mem_nhds hp.2)).comp
-      (p.2.1 / physicalQ h p) (contDiffAt_id.prodMk contDiffAt_const)).differentiableAt (by simp)
-  rw [partialS_eq_deriv_slice
-    ((meridionalPotential_contDiffAt hh hh1 hV hp).differentiableAt (by simp))]
-  have hd := (hVs.hasDerivAt.comp p.2.1
-    ((hasDerivAt_id p.2.1).div_const (physicalQ h p))).const_mul
-      (physicalQ h p ^ (-NaturalAxisData.A h))
-  convert! hd.deriv using 1
-  dsimp only [meridionalPotential, similarityPoint,
-    physicalQ, physicalEta, NaturalAxisBridge.partialY]
-  ring
 
 theorem swirlPotential_partialS {h Λ : ℝ} {f : ℝ × ℝ → ℝ}
     (hh : 0 < h) (hh1 : h < 1 / 2) (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
@@ -298,56 +276,10 @@ theorem corePotential_contDiffAt {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
     ((contDiffAt_const.mul (h0.mul hH)).smul contDiffAt_const)).add
       (hK.smul contDiffAt_const)
 
-theorem coreVelocity_contDiffOn {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ)) :
-    ContDiffOn ℝ ∞ (coreVelocity h f V) (coreDomain h Λ) := by
-  intro z hz
-  exact (SpatialCurl.contDiffAt_spatialCurl
-    (corePotential_contDiffAt hh hh1 hf hV hz) infty_add_one_le).contDiffWithinAt
-
-/-- Divergence vanishes as an identity of the actual physical Fréchet
-derivatives, by Schwarz's theorem for the Cartesian potential. -/
-theorem coreVelocity_divergence {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
-    {t : ℝ} {x : Space} (hx : (t, x) ∈ coreDomain h Λ) :
-    spatialDivergence (coreVelocity h f V) t x = 0 := by
-  apply SpatialCurl.spatialDivergence_spatialCurl
-  exact ((corePotential_contDiffAt hh hh1 hf hV hx).comp x
-    (contDiffAt_const.prodMk contDiffAt_id)).of_le (nat_le_infty 2)
 
 
-theorem coreVelocity_angular {h Λ : ℝ} {f V : ℝ × ℝ → ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hf : ContDiffOn ℝ ∞ f (NaturalProfile.domain Λ))
-    (hV : ContDiffOn ℝ ∞ V (NaturalProfile.domain Λ))
-    {t : ℝ} {x : Space} (hx : (t, x) ∈ coreDomain h Λ) :
-    x 0 * coreVelocity h f V (t, x) 1 - x 1 * coreVelocity h f V (t, x) 0 =
-      2 * radialEnergy x * (physicalQ h (profilePoint t x) ^ (-h) /
-        physicalQ h (profilePoint t x)) * f (similarityPoint h (profilePoint t x)) := by
-  have hH := (meridionalPotential_contDiffAt hh hh1 hV hx).differentiableAt (by simp)
-  have hK := (swirlPotential_contDiffAt hh hh1 hf hx).differentiableAt (by simp)
-  change x 0 * velocity (meridionalPotential h V) (swirlPotential h f) (t, x) 1 -
-    x 1 * velocity (meridionalPotential h V) (swirlPotential h f) (t, x) 0 = _
-  rw [velocity_one _ _ t x hH hK, velocity_zero _ _ t x hH hK,
-    swirlPotential_partialS hh hh1 hf hx]
-  dsimp only [radialEnergy]
-  ring
 
-theorem scaled_sqrt_identity {q s : ℝ} (hq : 0 < q) (hs : 0 ≤ s) (h : ℝ) :
-    Real.sqrt (2 * s) * (q ^ (-h) / q) =
-      q ^ (-NaturalAxisData.A h) * Real.sqrt (2 * (s / q)) := by
-  have hc : q ^ (-h) / q = q ^ (-NaturalAxisData.A h) / Real.sqrt q := by
-    rw [Real.sqrt_eq_rpow, ← Real.rpow_sub hq, ← Real.rpow_sub_one hq.ne']
-    congr 1
-    dsimp only [NaturalAxisData.A]
-    ring
-  rw [show 2 * (s / q) = (2 * s) / q by ring,
-    Real.sqrt_div (mul_nonneg (by norm_num) hs), hc]
-  ring
+
 
 
 /-- The axial velocity is exactly the prescribed nonzero axis datum,
@@ -405,23 +337,7 @@ theorem speedUnbounded_of_axis_tendsto {u : VelocityField}
   exact ⟨t, 0, ⟨(le_max_left _ _).trans_lt hlo, ht⟩,
     (le_max_right _ _).trans_lt hlo, hMt⟩
 
-theorem coreVelocity_speedUnbounded {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (hj : 0 < j)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr) :
-    SpeedUnboundedAtOne (coreVelocity h f V) :=
-  speedUnbounded_of_axis_tendsto (coreVelocity_axis_tendsto_atTop hh hh1 hj hs)
 
-/-- Any field which agrees with the core along the axis sufficiently near
-time one has the exact target's quantified unbounded-speed property. -/
-theorem extension_speedUnbounded {h j Λ : ℝ} {P0 a0 : ℝ → ℝ}
-    {f U V Pr : ℝ × ℝ → ℝ} {u : VelocityField}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hj : 0 < j)
-    (hs : NaturalProfile.IsNaturalSolution h j Λ P0 a0 f U V Pr)
-    (hagrees : ∀ᶠ t in 𝓝[<] (1 : ℝ), u (t, 0) = coreVelocity h f V (t, 0)) :
-    SpeedUnboundedAtOne u := by
-  apply speedUnbounded_of_axis_tendsto
-  apply (coreVelocity_axis_tendsto_atTop hh hh1 hj hs).congr'
-  exact hagrees.mono (fun t ht => congrArg norm ht.symm)
 
 
 

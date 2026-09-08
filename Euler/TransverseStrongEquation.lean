@@ -228,33 +228,5 @@ theorem exists_strong_of_weak_momentum (hTpos : 0 < T)
     rw [← ht]
     exact he
 
-include hd hd₁ in
-/-- The actual coercively constructed transverse solver satisfies the strong
-projected equation (10), with genuine first and second time derivatives. -/
-theorem transverseSolver_strong (hTpos : 0 < T)
-    (m : Icc (0 : ℝ) T → E)
-    (hm : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (hRange : ∀ t η, ⟪m t, η⟫_ℝ = 0 → ∃ x : U, Q t x = η)
-    (H : C(Icc (0 : ℝ) T, E →L[ℝ] E)) (K : ℝ) (hK : 0 ≤ K)
-    (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖ ^ 2)
-    (hsmall : K * (T ^ 2 / 2) ≤ 1 / 2)
-    (hframe : ∀ t, Q₂ t = -((H t).comp (Q t))) (f : TimeLp T E) :
-    let u : TimeLp T E := transverseSolver T hT m H K hK hH hsmall f
-    ∃ v : ℝ → U,
-      AbsolutelyContinuousOnInterval (coordinatePrimitive T hT Q c hc hQ u) 0 T ∧
-      AbsolutelyContinuousOnInterval v 0 T ∧
-      (coordinateDerivative T hT Q Q₁ c hc hQ u : ℝ → U) =ᵐ[timeMeasure T] v ∧
-      (∀ᵐ t ∂timeMeasure T, HasDerivAt (coordinatePrimitive T hT Q c hc hQ u) (v t) t) ∧
-      (∀ᵐ t ∂timeMeasure T,
-        HasDerivAt v (coordinateSecondDerivative T hT Q Q₁ Q₂ c hc hQ H u f t) t) ∧
-      ∀ᵐ t ∂timeMeasure T,
-        gram (extendPath T hT Q t) (coordinateSecondDerivative T hT Q Q₁ Q₂ c hc hQ H u f t) =
-          (extendPath T hT Q t).adjoint (f t - (2 : ℝ) • extendPath T hT Q₁ t (v t)) := by
-  apply exists_strong_of_weak_momentum T hT Q Q₁ Q₂ c hc hQ hd hd₁ hTpos H
-  · exact transverse_range T hT Q m hRange (transverseSolver T hT m H K hK hH hsmall f)
-  · exact hframe
-  · intro v hv
-    exact momentum_weak T hT Q Q₁ hd m hm H (transverseSolver T hT m H K hK hH hsmall f) f
-      (transverseSolver_weak T hT m H K hK hH hsmall f) v hv
 
 end EulerTransverseStrongEquation

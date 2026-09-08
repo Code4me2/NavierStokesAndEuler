@@ -124,13 +124,7 @@ theorem activatedPressure_zero_germ (p : PressureField) (x : Space) :
   filter_upwards [hs] with z hz
   simp only [activatedPressure, hz, zero_mul]
 
-theorem pastVelocity_eq_activated (u : VelocityField) {t : ℝ} (ht : 0 ≤ t) (x : Space) :
-    pastVelocity u (t, x) = activatedVelocity u (t, x) :=
-  zeroBefore_of_nonneg _ ht x
 
-theorem pastPressure_eq_activated (p : PressureField) {t : ℝ} (ht : 0 ≤ t) (x : Space) :
-    pastPressure p (t, x) = activatedPressure p (t, x) :=
-  zeroBefore_of_nonneg _ ht x
 
 
 
@@ -207,9 +201,6 @@ theorem pastResidual_eventually_zero_nonpos (u : VelocityField) (p : PressureFie
       (zeroBefore_eventually_zero_at_zero x (activatedVelocity_zero_germ u x))
       (zeroBefore_eventually_zero_at_zero x (activatedPressure_zero_germ p x))
 
-theorem pastResidual_zero_nonpos (u : VelocityField) (p : PressureField)
-    {t : ℝ} (ht : t ≤ 0) (x : Space) : pastResidual u p (t, x) = 0 :=
-  (pastResidual_eventually_zero_nonpos u p ht x).self_of_nhds
 
 theorem pastResidual_eq_activated (u : VelocityField) (p : PressureField)
     {t : ℝ} (ht : 0 ≤ t) (x : Space) :

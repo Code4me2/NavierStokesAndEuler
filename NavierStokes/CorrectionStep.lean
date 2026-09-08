@@ -444,12 +444,6 @@ theorem covariance_add {u v : Oscillation D}
   unfold covarianceIncrement
   abel
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem covariance_actual_update (s : State D) (m : Triple D) (p : ScalarField D)
-    (v : Oscillation D) (q : OscillatoryScalar D) (e : ExcludedErrors D)
-    (hu : AngularContinuous s.oscillation) (hv : AngularContinuous v) :
-    (s.addIncrement m p v q e).covariance = s.covariance + covarianceIncrement s.oscillation v :=
-  covariance_add hu hv
 
 end ActualCovariance
 
@@ -497,32 +491,6 @@ noncomputable def fullDifferentialIncrement (c : Context D) (s : State D)
     LinearWaveResidual.transport R (radialDirection c n) angularDirection (axialDirection c n) b a x +
     LinearWaveResidual.transport R (radialDirection c n) angularDirection (axialDirection c n) b b x
 
-theorem fullResidual_actual_update {U : Set (D × ℝ)} (hU : IsOpen U)
-    (c : Context D) (s : State D) (m : Triple D) (p : ScalarField D)
-    (v : Oscillation D) (q : OscillatoryScalar D) (e : ExcludedErrors D) (n : ℕ)
-    (hr : ContDiffOn ℝ ∞ (radialDirection c n) U)
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun x => complexPerturbation s n x i) U)
-    (hb : ∀ i, ContDiffOn ℝ ∞ (fun x => complexIncrement m v n x i) U)
-    (hp : ContDiffOn ℝ ∞ (complexPressure s n) U)
-    (hq : ContDiffOn ℝ ∞ (complexPressureIncrement p q n) U)
-    {x : D × ℝ} (hx : x ∈ U) (i : Fin 3) :
-    fullResidual c (s.addIncrement m p v q e) n x i - fullResidual c s n x i =
-      (fullDifferentialIncrement c s m p v q n x i).re + e.base n x i := by
-  have hd := nonlinearResidual_add_sub hU (c.operators.epsilon n)
-    (fun y : D × ℝ => c.operators.radius y.1) (timeDirection c n) hr
-    (show ContDiffOn ℝ ∞ (angularDirection : D × ℝ → D × ℝ) U from contDiffOn_const)
-    (show ContDiffOn ℝ ∞ (axialDirection c n) U from contDiffOn_const)
-    (complexBase c n) (complexPerturbation s n) (complexIncrement m v n)
-    (complexPressure s n) (complexPressureIncrement p q n) ha hb hp hq hx
-  have hdreal := congrArg Complex.re (congrFun hd i)
-  simp only [Pi.sub_apply, Pi.add_apply, Complex.sub_re, Complex.add_re] at hdreal
-  simp only [fullResidual]
-  rw [complexPerturbation_actual_update, complexPressure_actual_update]
-  simp only [State.addIncrement, ExcludedErrors.add, Pi.add_apply]
-  change _ = (fullDifferentialIncrement c s m p v q n x i).re + _
-  unfold fullDifferentialIncrement
-  simp only [Pi.add_apply, Complex.add_re]
-  linarith
 
 
 end ActualFullUpdate
@@ -559,125 +527,8 @@ theorem temporalIncrement_smooth (r : ReconstructionData) (h : ℝ)
   · exact (TemporalMeanUpdate.axialUpdate_smooth ha r.inner_lt_outer hd r.radialDirection
       h n (hz n) (hpz n) (hsz n)).contDiffOn
 
-theorem temporalStage_theta_exact {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    (r : ReconstructionData) (h : ℝ) (axial slow : S × PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (hcompat : c.operators = graphOperators r c.operators.epsilon
-      (ChartScales.timeCoefficient h) axial slow (TorusInverse.vector .temporal))
-    (hprofile : ContDiffOn ℝ ∞ c.operators.radialProfile U)
-    (hb : SmoothTriple U c.base) (hm : SmoothTriple U u.mean)
-    (hW : ∀ i j, SmoothOn U (u.covariance i j))
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported r.inner r.outer (u.axialResidual c n)) :
-    Agree U ((temporalStage r h axial c u).thetaResidual c)
-      (meanBar (u.thetaResidual c) + thetaRemainder c.operators c.base u.mean
-        (temporalIncrement r h axial c u)) := by
-  have hi := temporalIncrement_smooth r h axial c u U ha hd hθ hz hpθ hpz hsz
-  have he := thetaResidual_change hU c.operators hprofile hb hm hi u.covariance hW c.virtualTheta
-  have hnew : (temporalStage r h axial c u).thetaResidual c =
-      MeanIncrementBounds.thetaResidual c.operators c.base
-        (updated u.mean (temporalIncrement r h axial c u)) u.covariance c.virtualTheta := by
-    simp [temporalStage, reconstructPressure, State.thetaResidual, State.addIncrement]
-    rfl
-  intro n x hx
-  have he' := he n hx
-  have hf := (temporal_fast_cancellation r h axial c u ha hd hθ hz hpθ hpz hsz n x).1
-  have hfast : c.operators.fastTime (temporalIncrement r h axial c u).angular n x =
-      TemporalMeanUpdate.fastDerivative h n ((temporalIncrement r h axial c u).angular n) x := by
-    conv_lhs => rw [hcompat]
-    rfl
-  rw [hnew]
-  simp only [Pi.add_apply, Pi.sub_apply, hfast] at he'
-  simp only [TemporalMeanUpdate.centered] at hf
-  change _ = PressureStream.torusAverage (u.thetaResidual c n) (x.1, x.2.1) + _
-  change _ + (u.thetaResidual c n x - _) = 0 at hf
-  change _ - u.thetaResidual c n x = _ at he'
-  linarith
 
-theorem temporalStage_axial_exact {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    (r : ReconstructionData) (h : ℝ) (axial slow : S × PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (hcompat : c.operators = graphOperators r c.operators.epsilon
-      (ChartScales.timeCoefficient h) axial slow (TorusInverse.vector .temporal))
-    (hprofile : ContDiffOn ℝ ∞ c.operators.radialProfile U)
-    (hb : SmoothTriple U c.base) (hm : SmoothTriple U u.mean)
-    (hW : ∀ i j, SmoothOn U (u.covariance i j))
-    (hp : SmoothOn U u.pressure) (hnp : SmoothOn U (temporalStage r h axial c u).pressure)
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported r.inner r.outer (u.axialResidual c n)) :
-    Agree U (fun n x => (temporalStage r h axial c u).axialResidual c n x -
-      temporalAlias r h c u n (x, 0) 2)
-      (meanBar (u.axialResidual c) + axialRemainder c.operators c.base u.mean
-        (temporalIncrement r h axial c u) (temporalPressureChange r h axial c u)) := by
-  have hi := temporalIncrement_smooth r h axial c u U ha hd hθ hz hpθ hpz hsz
-  have he := axialResidual_change hU c.operators hprofile hb hm hi u.covariance hW
-    u.pressure (temporalPressureChange r h axial c u) c.virtualAxial hp (hnp.sub hp)
-  have hpressure : u.pressure + temporalPressureChange r h axial c u =
-      (temporalStage r h axial c u).pressure := by
-    unfold temporalPressureChange
-    abel
-  have hnew : (temporalStage r h axial c u).axialResidual c =
-      MeanIncrementBounds.axialResidual c.operators c.base
-        (updated u.mean (temporalIncrement r h axial c u)) u.covariance
-        (u.pressure + temporalPressureChange r h axial c u) c.virtualAxial := by
-    rw [hpressure]
-    simp [temporalStage, reconstructPressure, State.axialResidual, State.addIncrement]
-    rfl
-  intro n x hx
-  have he' := he n hx
-  have hf := (temporal_fast_cancellation r h axial c u ha hd hθ hz hpθ hpz hsz n x).2
-  have hfast : c.operators.fastTime (temporalIncrement r h axial c u).axial n x =
-      TemporalMeanUpdate.fastDerivative h n ((temporalIncrement r h axial c u).axial n) x := by
-    conv_lhs => rw [hcompat]
-    rfl
-  rw [hnew]
-  simp only [Pi.add_apply, Pi.sub_apply, hfast] at he'
-  simp only [TemporalMeanUpdate.centered] at hf
-  change _ = PressureStream.torusAverage (u.axialResidual c n) (x.1, x.2.1) + _
-  change _ + (u.axialResidual c n x - _) = _ at hf
-  change _ - u.axialResidual c n x = _ at he'
-  dsimp only
-  linarith
 
-/-- The increment bound is proved for the actual inverse and stream, from
-the current residual classes. No increment or updated-residual class is
-assumed. The inverse-direction hypothesis is the concrete graph direction. -/
-theorem temporalIncrement_mem (r : ReconstructionData) (h : ℝ)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) {cL cR H : ℝ}
-    (ha : 0 < r.inner) (hd : 0 < r.exponent) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (L : ℕ → ℝ) (hε : ∀ n, 0 < c.operators.epsilon n)
-    (hεone : ∀ n, c.operators.epsilon n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n) (hM : ∀ n, r.frequency n ≠ 0)
-    (hvr : r.radialDirection = TorusInverse.vector .radial)
-    (hθclass : MeanClass (WeightedRadialPrimitive.logStripData r.inner r.outer cL cR
-      ha hcL hcR c.operators.epsilon L hε hεone hL) H (u.thetaResidual c))
-    (hzclass : MeanClass (WeightedRadialPrimitive.logStripData r.inner r.outer cL cR
-      ha hcL hcR c.operators.epsilon L hε hεone hL) H (u.axialResidual c))
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported r.inner r.outer (u.axialResidual c n)) :
-    IncrementBounds (WeightedRadialPrimitive.logStripData r.inner r.outer cL cR
-      ha hcL hcR c.operators.epsilon L hε hεone hL) H (temporalIncrement r h axial c u) := by
-  refine ⟨?_, ?_, ?_⟩
-  · exact TemporalMeanUpdate.meanClass_scaledRadialUpdate ha r.inner_lt_outer hd hcL hcR hh
-      c.operators.epsilon L hε hεone hL hscale r.frequency (fun _ => r.radialDirection) axial
-      hzclass hz hpz hsz
-  · exact TemporalMeanUpdate.meanClass_desiredIncrement ha hcL hcR hh
-      c.operators.epsilon L hε hεone hL hscale hθclass hθ hpθ
-  · simpa only [temporalIncrement, hvr] using
-      (TemporalMeanUpdate.meanClass_axialUpdate ha r.inner_lt_outer hd hcL hcR hh
-        c.operators.epsilon L hε hεone hL hscale r.frequency hM hzclass hz hpz hsz)
 
 end TemporalComposition
 
@@ -696,17 +547,6 @@ open CorrectionState
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
-omit [FiniteDimensional ℝ S] in
-theorem temporalStage_pressure_formula (r : ReconstructionData) (h : ℝ)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) :
-    (temporalStage r h axial c u).pressure =
-      reconstructedPressure r.exponent r.inner r.outer r.inner_lt_outer r.frequency
-        (fun _ => r.radialDirection) c.operators c.base
-        (updated u.mean (temporalIncrement r h axial c u)) u.covariance := by
-  simp [temporalStage, reconstructPressure, State.addIncrement,
-    State.gr]
-  rfl
 
 
 
@@ -825,21 +665,7 @@ open CorrectionState
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-noncomputable def rankPressureChange (p : ReconstructionData) (r : RankData S)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) : ScalarField (PressureStream.Lift S) :=
-  (rankStage p r axial c u).pressure - u.pressure
 
-theorem slow_directional_zero {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    {f : ScalarField (PressureStream.Lift S)} (hf : SmoothOn U f)
-    (hslow : DefectIncrementBounds.IsSlow f) (v : PressureStream.Plane)
-    (n : ℕ) {x : PressureStream.Lift S} (hx : x ∈ U) :
-    fderiv ℝ (f n) x (0, (0, v)) = 0 := by
-  apply directional_zero_of_line_const ((hf.at_point hU n hx).differentiableAt (by simp))
-  intro t
-  rcases x with ⟨R, s, Y⟩
-  simp only [Prod.smul_mk, smul_zero, Prod.mk_add_mk, add_zero]
-  rw [hslow, hslow]
 
 
 
@@ -927,21 +753,6 @@ theorem normalizedRank_potential (p : ReconstructionData) (coord A B lam a b : �
         (p.frequency n) p.radialDirection (debt c u n) := by
   rfl
 
-theorem normalizedRank_radial (p : ReconstructionData) (coord A B lam a b : ℝ)
-    (axial : PressureStream.Plane × PressureStream.Plane)
-    (c : Context MeanRankUpdate.ChartPoint) (u : State MeanRankUpdate.ChartPoint) :
-    (rankIncrement p (normalizedRankData coord A B lam a b) axial c u).radial =
-      fun n x => c.operators.epsilon n * MeanRankUpdate.actualChartRadial coord A B lam a b
-        p.exponent p.inner p.outer (p.frequency n) p.radialDirection axial (debt c u n) x := by
-  funext n x
-  change -(fderiv ℝ (rankPotential p (normalizedRankData coord A B lam a b) c u n) x
-    (0, c.operators.epsilon n • axial)) = _
-  have hv : ((0 : ℝ), c.operators.epsilon n • axial) =
-      c.operators.epsilon n • ((0 : ℝ), axial) := by simp
-  rw [hv, map_smul]
-  simp only [smul_eq_mul, normalizedRank_potential,
-    MeanRankUpdate.actualChartRadial, PressureStream.streamBeta, PressureStream.graphDz,
-    mul_neg]
 
 
 end ConcreteRankConstruction
@@ -952,16 +763,6 @@ open CorrectionState
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-theorem rankStage_pressure_formula (p : ReconstructionData) (r : RankData S)
-    (axial : S × PressureStream.Plane) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) :
-    (rankStage p r axial c u).pressure =
-      reconstructedPressure p.exponent p.inner p.outer p.inner_lt_outer p.frequency
-        (fun _ => p.radialDirection) c.operators c.base
-        (updated u.mean (rankIncrement p r axial c u)) u.covariance := by
-  simp [rankStage, reconstructPressure, State.addIncrement,
-    State.gr]
-  rfl
 
 
 end RankPressureConstruction
@@ -981,9 +782,6 @@ noncomputable def refreshPressureAlias (p : ReconstructionData)
       current.errors.aliasError + (pressureAlias p c current - pressureAlias p c old) } }
 
 
-theorem refreshPressureAlias_fullResidual (p : ReconstructionData)
-    (c : Context (PressureStream.Lift S)) (old current : State (PressureStream.Lift S)) :
-    fullResidual c (refreshPressureAlias p c old current) = fullResidual c current := rfl
 
 
 /-- The exact current radial alias cancels only the alias part of the
@@ -1136,20 +934,6 @@ theorem meanCoefficientValue_eq_meanResidual {ι : Type*} {U : Set D}
   rw [HarmonicResidual.stateMeanCoefficientValue_eq_average H.isOpen hrep h hx i]
   exact angularMean_fullGoodResidual H n hx i
 
-theorem fullResidual_reconstructed_with_mean {ι : Type*} {U : Set D}
-    {c : Context D} {u : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasError : ι → HarmonicResidual.BlockCoefficients D}
-    (hrep : HarmonicResidual.BlockRepresentation labels blocks gaussian aliasError u)
-    (H : LiftedMeanResidual.MeanHypotheses U c u) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c u labels blocks gaussian aliasError n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    fullResidual c u n x i =
-      (∑ l ∈ labels n,
-        (HarmonicResidual.residualBlock c u (blocks l) (gaussian l) (aliasError l)).oscillation n x i) +
-      u.meanGoodResidual c n x.1 i + u.errors.total n x i := by
-  rw [fullResidual_harmonic_decomposition H.isOpen hrep h hx i,
-    meanCoefficientValue_eq_meanResidual hrep H h hx.1 i]
 
 noncomputable def meanLift (m : Triple D) : Oscillation D :=
   fun n x => meanComponents m n x.1
@@ -1233,9 +1017,6 @@ theorem meanAddition_fullDivergence {U : Set D} (hU : IsOpen U)
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-theorem fullDivergence_reconstructPressure (p : ReconstructionData)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S)) :
-    fullDivergence c (reconstructPressure p c u) = fullDivergence c u := rfl
 
 theorem meanDivergence_eq_graph (p : ReconstructionData)
     (epsilon fast : ℕ → ℝ) (axial slowTime : S × PressureStream.Plane)
@@ -1251,38 +1032,9 @@ theorem meanDivergence_eq_graph (p : ReconstructionData)
 
 variable [FiniteDimensional ℝ S]
 
-theorem temporalIncrement_meanDivergence_zero (p : ReconstructionData) (h : ℝ)
-    (axial slowTime : S × PressureStream.Plane) (temporal : PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (ha : 0 < p.inner) (hd : 0 < p.exponent)
-    (hcompat : c.operators = graphOperators p c.operators.epsilon c.operators.fastCoefficient
-      axial slowTime temporal)
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported p.inner p.outer (u.axialResidual c n))
-    (n : ℕ) (x : PressureStream.Lift S) :
-    meanDivergence c (temporalIncrement p h axial c u) n x = 0 := by
-  rw [meanDivergence_eq_graph p c.operators.epsilon c.operators.fastCoefficient
-    axial slowTime temporal c hcompat]
-  exact TemporalMeanUpdate.update_divergence_zero ha p.inner_lt_outer hd p.radialDirection
-    (c.operators.epsilon n • axial) h n (hz n) (hpz n) (hsz n) x
 
 
 
-omit [FiniteDimensional ℝ S] in
-theorem rankIncrement_meanDivergence_zero (p : ReconstructionData) (r : RankData S)
-    (axial slowTime : S × PressureStream.Plane) (temporal : PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (ha : 0 < p.inner) (hd : 0 < p.exponent)
-    (hcompat : c.operators = graphOperators p c.operators.epsilon c.operators.fastCoefficient
-      axial slowTime temporal)
-    (hf : ∀ n, ContDiff ℝ ∞ (rankDesiredAxial r c u n))
-    (hs : ∀ n, RadialAlias.RadiallySupported p.inner p.outer (rankDesiredAxial r c u n))
-    (n : ℕ) (x : PressureStream.Lift S) :
-    meanDivergence c (rankIncrement p r axial c u) n x = 0 := by
-  rw [meanDivergence_eq_graph p c.operators.epsilon c.operators.fastCoefficient
-    axial slowTime temporal c hcompat]
-  exact rank_divergence_zero p r axial c u ha hd n (hf n) (hs n) x
 
 
 end MeanDivergencePreservation
@@ -1314,11 +1066,6 @@ noncomputable def commonTemporalStage (r : ℕ → ReconstructionData) (h : ℝ)
     (MeanChartCompatibility.commonTemporalIncrement r h index axial c u) 0 0 0
     ⟨0, 0, commonTemporalError r h index c u⟩)
 
-noncomputable def commonTemporalPressureChange (r : ℕ → ReconstructionData) (h : ℝ)
-    (index : ℕ → ℕ) (axial : S × PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S)) :
-    ScalarField (PressureStream.Lift S) :=
-  (commonTemporalStage r h index axial c u).pressure - u.pressure
 
 theorem common_fastTime (h : ℝ) (index : ℕ → ℕ) (c : Context (PressureStream.Lift S))
     (hv : c.operators.vT = (0, (0, TorusInverse.vector .temporal)))
@@ -1331,27 +1078,6 @@ theorem common_fastTime (h : ℝ) (index : ℕ → ℕ) (c : Context (PressureSt
 variable [FiniteDimensional ℝ S]
 
 
-theorem commonTemporalIncrement_smooth (r : ℕ → ReconstructionData) (h : ℝ)
-    (index : ℕ → ℕ) (axial : S × PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (U : Set (PressureStream.Lift S))
-    (ha : ∀ n, 0 < (r n).inner) (hd : ∀ n, 0 < (r n).exponent)
-    (hθ : ∀ n, ContDiff ℝ ∞ (u.thetaResidual c n))
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpθ : ∀ n, PressureStream.TorusPeriodicLift (u.thetaResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported (r n).inner (r n).outer (u.axialResidual c n)) :
-    SmoothTriple U (MeanChartCompatibility.commonTemporalIncrement r h index axial c u) := by
-  refine ⟨fun n => ?_, fun n => ?_, fun n => ?_⟩
-  · exact (PressureStream.streamBeta_contDiff (ha n) (r n).inner_lt_outer (hd n)
-      (0, (r n).radialDirection) (c.operators.epsilon n • axial)
-      (MeanChartCompatibility.temporalAtIndex_smooth h n (index n) (hz n) (hpz n))
-      (MeanChartCompatibility.temporalAtIndex_supported h n (index n) (hsz n))).contDiffOn
-  · exact (MeanChartCompatibility.temporalAtIndex_smooth h n (index n) (hθ n) (hpθ n)).contDiffOn
-  · exact (PressureStream.streamGamma_contDiff (ha n) (r n).inner_lt_outer (hd n)
-      (0, (r n).radialDirection)
-      (MeanChartCompatibility.temporalAtIndex_smooth h n (index n) (hz n) (hpz n))
-      (MeanChartCompatibility.temporalAtIndex_supported h n (index n) (hsz n))).contDiffOn
 
 
 
@@ -1391,60 +1117,9 @@ theorem triple_ext {a b : Triple D} (hr : a.radial = b.radial)
   simp only [Triple.mk.injEq] at *
   exact ⟨hr, ht, hz⟩
 
-theorem scaleTriple_mem {s : StripData D} {H : ℝ} {a : ℕ → ℝ} {m : Triple D}
-    (ha : BandBound s 0 a) (hm : IncrementBounds s H m) :
-    IncrementBounds s H (scaleTriple a m) := by
-  constructor
-  · simpa only [scaleTriple, smul_eq_mul, add_zero] using hm.radial.band_smul ha
-  · simpa only [scaleTriple, smul_eq_mul, add_zero] using hm.angular.band_smul ha
-  · simpa only [scaleTriple, smul_eq_mul, add_zero] using hm.axial.band_smul ha
 
 variable [FiniteDimensional ℝ S]
 
-/-- Changing the common clock multiplies the actual inverse and its
-actual stream realization by the same band scalar. -/
-theorem commonTemporalIncrement_eq_scale (p : ReconstructionData) (h : ℝ)
-    (index : ℕ → ℕ) (axial : S × PressureStream.Plane)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (ha : 0 < p.inner) (hd : 0 < p.exponent)
-    (hz : ∀ n, ContDiff ℝ ∞ (u.axialResidual c n))
-    (hpz : ∀ n, PressureStream.TorusPeriodicLift (u.axialResidual c n))
-    (hsz : ∀ n, RadialAlias.RadiallySupported p.inner p.outer (u.axialResidual c n)) :
-    MeanChartCompatibility.commonTemporalIncrement (fun _ => p) h index axial c u =
-      scaleTriple (fun n => MeanChartCompatibility.commonRatio h n (index n))
-        (temporalIncrement p h axial c u) := by
-  have hpot n : MeanChartCompatibility.commonTemporalPotential (fun _ => p) h index
-      (u.axialResidual c) n = fun x => MeanChartCompatibility.commonRatio h n (index n) *
-        TemporalMeanUpdate.axialPotential p.exponent p.inner p.outer (p.frequency n)
-          p.radialDirection h n (u.axialResidual c n) x := by
-    unfold MeanChartCompatibility.commonTemporalPotential
-    rw [MeanChartCompatibility.temporalAtIndex_eq_native, streamPotential_const_mul]
-    rfl
-  have hdpot n x := ((TemporalMeanUpdate.axialPotential_smooth (M := p.frequency n) ha p.inner_lt_outer hd
-    p.radialDirection h n (hz n) (hpz n) (hsz n)).differentiable (by simp) x).hasFDerivAt.fun_const_smul
-      (MeanChartCompatibility.commonRatio h n (index n))
-  simp only [smul_eq_mul] at hdpot
-  apply triple_ext
-  · funext n x
-    change PressureStream.streamBeta (c.operators.epsilon n • axial)
-      (MeanChartCompatibility.commonTemporalPotential (fun _ => p) h index (u.axialResidual c) n) x = _
-    rw [hpot]
-    simp only [PressureStream.streamBeta, PressureStream.graphDz, (hdpot n x).fderiv,
-      _root_.smul_apply, smul_eq_mul, scaleTriple, temporalIncrement,
-      TemporalMeanUpdate.radialUpdate]
-    ring
-  · funext n x
-    exact congrFun (MeanChartCompatibility.temporalAtIndex_eq_native h n (index n)
-      (u.thetaResidual c n)) x
-  · funext n x
-    change PressureStream.streamGamma (PressureStream.physicalSpeed p.exponent (p.frequency n))
-      (0, p.radialDirection)
-      (MeanChartCompatibility.commonTemporalPotential (fun _ => p) h index (u.axialResidual c) n) x = _
-    rw [hpot]
-    simp only [PressureStream.streamGamma, PressureStream.graphDr, PressureStream.divideRadius,
-      (hdpot n x).fderiv, _root_.smul_apply, smul_eq_mul, scaleTriple,
-      temporalIncrement, TemporalMeanUpdate.axialUpdate]
-    ring
 
 
 end CommonTemporalScale
@@ -1489,26 +1164,7 @@ theorem addBlock_waveBounds {s : StripData D} {P : ℕ → D → ℝ} {α β : �
     (hαβ : α ≤ β) : (addBlock a b).WaveBounds s P α :=
   fun i j hj => (ha i j hj).add ((hb i j hj).mono_exponent hαβ)
 
-theorem addBlock_pressureBounds {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
-    {a b : HarmonicBlock D} (ha : a.PressureBounds s P α) (hb : b.PressureBounds s P β)
-    (hαβ : α ≤ β) : (addBlock a b).PressureBounds s P α :=
-  fun j hj => (ha j hj).add ((hb j hj).mono_exponent hαβ)
 
-/-- The cumulative difference is the literal coefficient difference from
-the same primary field, including all previous corrections. -/
-theorem addBlock_differenceBounds {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
-    (primary old increment : HarmonicBlock D)
-    (hold : ∀ i j, j ≠ 0 → WaveClass s P α
-      (fun n x => old.velocity n i j x - primary.velocity n i j x))
-    (hi : increment.WaveBounds s P β) (hαβ : α ≤ β) :
-    ∀ i j, j ≠ 0 → WaveClass s P α
-      (fun n x => (addBlock old increment).velocity n i j x - primary.velocity n i j x) := by
-  intro i j hj
-  apply WaveInteractionBounds.class_congr ((hold i j hj).add ((hi i j hj).mono_exponent hαβ))
-  intro n x hx
-  change old.velocity n i j x - primary.velocity n i j x + increment.velocity n i j x =
-    old.velocity n i j x + increment.velocity n i j x - primary.velocity n i j x
-  ring
 
 theorem block_waveBounds_all {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
     (b : HarmonicBlock D) (hb : b.WaveBounds s P α)
@@ -1531,30 +1187,6 @@ theorem block_angularContinuous (b : HarmonicBlock D) : AngularContinuous b.osci
     (HarmonicFields.field_angular_continuous (b.velocity n i) (b.frequency n)
       (b.phase n) (b.angularFrequency n) x)
 
-/-- Both old/new cross covariances and the entire new-wave square are
-estimated as actual angular integrals. There is no tensor-update premise. -/
-theorem sameCarrier_covarianceIncrement_mem {s : StripData D} {P : ℕ → D → ℝ} {α β : ℝ}
-    (a b : HarmonicBlock D) (hcarrier : SameCarrier a b) (N M : ℕ)
-    (hNa : a.BandLimited N) (hMb : b.BandLimited M)
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ∀ n i, a.velocity n i 0 = 0) (hb0 : ∀ n i, b.velocity n i 0 = 0)
-    (hαβ : α ≤ β) (hkp : ∀ n, a.angularFrequency n ≠ 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    TensorClass s (α + β) (covarianceIncrement a.oscillation b.oscillation) := by
-  have hca := block_waveBounds_all a ha ha0 hP0
-  have hcb := block_waveBounds_all b hb hb0 hP0
-  intro i j
-  have hcross := HarmonicCovariance.mixedBlockCovariance_mem a b N hNa
-    hcarrier.frequency hcarrier.phase hcarrier.angular hca hcb hP0 hP1 hkp i j
-  have hreverse : MeanClass s (α + β) (bilinearCovariance b.oscillation a.oscillation i j) := by
-    rw [bilinearCovariance_comm]
-    exact HarmonicCovariance.mixedBlockCovariance_mem a b N hNa
-      hcarrier.frequency hcarrier.phase hcarrier.angular hca hcb hP0 hP1 hkp j i
-  have hsquare : MeanClass s (α + β) (bilinearCovariance b.oscillation b.oscillation i j) :=
-    (HarmonicCovariance.blockCovariance_mem b M hMb hcb hP0 hP1
-      (fun n => by simpa only [hcarrier.angular] using hkp n) i j).mono_exponent (by linarith)
-  exact (hcross.add hreverse).add hsquare
 
 
 end HarmonicStateUpdates
@@ -1563,34 +1195,6 @@ section MeanWaveComposition
 
 open CorrectionState
 
-/-- The actual residual block retains a target exponent through a mean
-update. Its change is estimated by the two differentiated cross-advections. -/
-theorem meanUpdate_residualBlock_mem {s : StripData D} {κ α H β : ℝ} {P : ℕ → D → ℝ}
-    (c : Context D) (ho : OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (u v : State D) (m : Triple D) (he : v.mean = updated u.mean m)
-    (hbase : SmoothTriple s.domain c.base) (hmean : SmoothTriple s.domain u.mean)
-    (hm : IncrementBounds s H m) (b : HarmonicBlock D) (hb : b.WaveBounds s P α)
-    (hN : ∀ i, UnweightedClass s 0
-      (fun n x => HarmonicMeanInteraction.slowNormal c ho hR b.phase n x i))
-    (hk : BandBound s (-(1 / 2)) b.frequency)
-    (hkp : BandBound s (-(1 / 2)) (fun n => (b.angularFrequency n : ℝ)))
-    (hP : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, HarmonicFields.BandLimited (A₁ n i - A₀ n i) 0)
-    (hold : (HarmonicResidual.residualBlock c u b G A₀).WaveBounds s P β)
-    (hβ : β ≤ α + H - 1 / 2) :
-    (HarmonicResidual.residualBlock c v b G A₁).WaveBounds s P β := by
-  have hchange := HarmonicMeanInteraction.residualDifferenceBlock_class c ho hκ hR
-    u v m he hbase hmean hm b hb hN hk hkp hP G A₀ A₁ hA
-  intro i j hj
-  apply WaveInteractionBounds.class_congr ((hold i j hj).add ((hchange i j hj).mono_exponent hβ))
-  intro n x hx
-  change (HarmonicResidual.residualBlock c u b G A₀).velocity n i j x +
-    ((HarmonicResidual.residualBlock c v b G A₁).velocity n i j x -
-      (HarmonicResidual.residualBlock c u b G A₀).velocity n i j x) =
-    (HarmonicResidual.residualBlock c v b G A₁).velocity n i j x
-  ring
 
 
 end MeanWaveComposition
@@ -1708,54 +1312,6 @@ theorem symmetricCovariance_mem {s : StripData D} {P : ℕ → D → ℝ} {α β
       hcarrier.frequency hcarrier.phase hcarrier.angular hca hcb hP0 hP1 hkp j i
   exact hcross.add hreverse
 
-/-- The three signed errors have exponents `δ+β`, `α+η`, and `2β`.
-The stronger bound on the old-minus-primary field is used only for the
-first term. No class of a resulting covariance is assumed. -/
-theorem signedTensorRemainder_mem {s : StripData D} {P : ℕ → D → ℝ}
-    {α δ β η γ : ℝ} (primary old tangent curl : HarmonicBlock D) (N : ℕ)
-    (hop : SameCarrier old primary) (hot : SameCarrier old tangent)
-    (hoc : SameCarrier old curl)
-    (hpN : primary.BandLimited N) (hoN : old.BandLimited N)
-    (htN : tangent.BandLimited N) (hcN : curl.BandLimited N)
-    (ho : old.WaveBounds s P α)
-    (hd : (subBlock old primary).WaveBounds s P δ)
-    (ht : tangent.WaveBounds s P β) (hc : curl.WaveBounds s P η)
-    (hp0 : ∀ n i, primary.velocity n i 0 = 0) (ho0 : ∀ n i, old.velocity n i 0 = 0)
-    (ht0 : ∀ n i, tangent.velocity n i 0 = 0) (hc0 : ∀ n i, curl.velocity n i 0 = 0)
-    (hβη : β ≤ η) (hγd : γ ≤ δ + β) (hγc : γ ≤ α + η) (hγs : γ ≤ 2 * β)
-    (hkp : ∀ n, old.angularFrequency n ≠ 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    TensorClass s γ (signedTensorRemainder primary.oscillation old.oscillation
-      tangent.oscillation curl.oscillation) := by
-  have hdt : SameCarrier (subBlock old primary) tangent :=
-    ⟨hot.frequency, hot.phase, hot.angular⟩
-  have htc : SameCarrier tangent curl :=
-    ⟨hoc.frequency.trans hot.frequency.symm, hoc.phase.trans hot.phase.symm,
-      hoc.angular.trans hot.angular.symm⟩
-  have hd0 : ∀ n i, (subBlock old primary).velocity n i 0 = 0 := by
-    intro n i
-    change old.velocity n i 0 - primary.velocity n i 0 = 0
-    rw [ho0, hp0, sub_self]
-  have hsum0 : ∀ n i, (addBlock tangent curl).velocity n i 0 = 0 := by
-    intro n i
-    change tangent.velocity n i 0 + curl.velocity n i 0 = 0
-    rw [ht0, hc0, add_zero]
-  have hdiff := symmetricCovariance_mem (subBlock old primary) tangent hdt (max N N)
-    (subBlock_band hoN hpN) hd ht hd0 ht0 hkp hP0 hP1
-  have hcurl := symmetricCovariance_mem old curl hoc N hoN ho hc ho0 hc0 hkp hP0 hP1
-  have hsum := block_waveBounds_all (addBlock tangent curl)
-    (addBlock_waveBounds ht hc hβη) hsum0 hP0
-  have hsquare := HarmonicCovariance.blockCovariance_mem (addBlock tangent curl) (max N N)
-    (addBlock_band htN hcN) hsum hP0 hP1
-    (fun n => by simpa only [addBlock, hot.angular] using hkp n)
-  rw [subBlock_oscillation old primary hop] at hdiff
-  simp only [addBlock_oscillation tangent curl htc] at hsquare
-  rw [signedTensorRemainder_exact _ _ _ _ (block_angularContinuous primary)
-    (block_angularContinuous old) (block_angularContinuous tangent) (block_angularContinuous curl)]
-  intro i j
-  exact ((hdiff i j).mono_exponent hγd |>.add ((hcurl i j).mono_exponent hγc)).add
-    ((hsquare i j).mono_exponent (by linarith))
 
 
 end SignedTensorRemainder
@@ -1767,14 +1323,6 @@ open CorrectionState PhysicalMeanDomain
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
 
-theorem commonRatio_bandBound {s : StripData D} (h : ℝ) (index : ℕ → ℕ) (gap : ℕ)
-    (hgap : ∀ n, ChartScales.nativeIndex h n ≤ index n + gap) :
-    BandBound s 0 (fun n => MeanChartCompatibility.commonRatio h n (index n)) := by
-  refine ⟨ChartScales.Tg ^ gap, (pow_pos ChartScales.Tg_pos gap).le, 0, ?_⟩
-  intro n
-  simp only [Real.norm_eq_abs, abs_of_pos (MeanChartCompatibility.commonRatio_pos h n (index n)),
-    Real.rpow_zero, pow_zero, mul_one]
-  exact MeanChartCompatibility.commonRatio_le (hgap n)
 
 
 
@@ -2167,22 +1715,9 @@ noncomputable def gaugeRefreshPressureAlias (g : GaugeData S)
       current.errors.aliasError + (pressureAliasState g c current - pressureAliasState g c old) } }
 
 
-theorem gaugeRefreshPressureAlias_fullResidual (g : GaugeData S)
-    (c : Context (PressureStream.Lift S)) (old current : State (PressureStream.Lift S)) :
-    fullResidual c (gaugeRefreshPressureAlias g c old current) = fullResidual c current := rfl
 
 
-noncomputable def gaugePressureAliasBlock (g : GaugeData S) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) (b : HarmonicBlock (PressureStream.Lift S)) :
-    HarmonicBlock (PressureStream.Lift S) :=
-  ErrorHarmonics.zeroBlock b.frequency b.phase b.angularFrequency
-    (fun n x => pressureAliasState g c u n (x, 0))
 
-noncomputable def gaugeTemporalAliasBlock (g : GaugeData S) (h : ℝ) (index : ℕ → ℕ)
-    (c : Context (PressureStream.Lift S)) (u : State (PressureStream.Lift S))
-    (b : HarmonicBlock (PressureStream.Lift S)) : HarmonicBlock (PressureStream.Lift S) :=
-  ErrorHarmonics.zeroBlock b.frequency b.phase b.angularFrequency
-    (fun n x => temporalAliasState g h index c u n (x, 0))
 
 
 
@@ -2263,37 +1798,7 @@ theorem gaugeWaveStage_covariance (g : GaugeData S) (c : Context (PressureStream
     (gaugeWaveStage g c u w q e).covariance = u.covariance + covarianceIncrement u.oscillation w :=
   covariance_add hu hw
 
-theorem gaugeWaveStage_theta_change {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    (g : GaugeData S) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) (w : Oscillation (PressureStream.Lift S))
-    (q : OscillatoryScalar (PressureStream.Lift S)) (e : ExcludedErrors (PressureStream.Lift S))
-    (hu : AngularContinuous u.oscillation) (hw : AngularContinuous w)
-    (hb : SmoothTriple U c.base) (hm : SmoothTriple U u.mean)
-    (hW : ∀ i j, SmoothOn U (u.covariance i j))
-    (hX : ∀ i j, SmoothOn U (covarianceIncrement u.oscillation w i j)) :
-    Agree U ((gaugeWaveStage g c u w q e).thetaResidual c - u.thetaResidual c)
-      (thetaCovarianceChange c.operators (covarianceIncrement u.oscillation w)) := by
-  change Agree U (MeanIncrementBounds.thetaResidual c.operators c.base
-    (gaugeWaveStage g c u w q e).mean (gaugeWaveStage g c u w q e).covariance c.virtualTheta - _ ) _
-  rw [gaugeWaveStage_mean, gaugeWaveStage_covariance g c u w q e hu hw]
-  exact thetaResidual_covariance_change hU c.operators hb hm u.covariance
-    (covarianceIncrement u.oscillation w) hW hX c.virtualTheta
 
-theorem gaugeWaveStage_gr_change {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    (g : GaugeData S) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) (w : Oscillation (PressureStream.Lift S))
-    (q : OscillatoryScalar (PressureStream.Lift S)) (e : ExcludedErrors (PressureStream.Lift S))
-    (hu : AngularContinuous u.oscillation) (hw : AngularContinuous w)
-    (hb : SmoothTriple U c.base) (hm : SmoothTriple U u.mean)
-    (hW : ∀ i j, SmoothOn U (u.covariance i j))
-    (hX : ∀ i j, SmoothOn U (covarianceIncrement u.oscillation w i j)) :
-    Agree U ((gaugeWaveStage g c u w q e).gr c - u.gr c)
-      (radialCovarianceChange c.operators (covarianceIncrement u.oscillation w)) := by
-  change Agree U (MeanIncrementBounds.gr c.operators c.base
-    (gaugeWaveStage g c u w q e).mean (gaugeWaveStage g c u w q e).covariance - _) _
-  rw [gaugeWaveStage_mean, gaugeWaveStage_covariance g c u w q e hu hw]
-  exact gr_covariance_change hU c.operators hb hm u.covariance
-    (covarianceIncrement u.oscillation w) hW hX
 
 theorem axialResidual_pressure_change {U : Set D} (hU : IsOpen U) (o : Operators D)
     {b m : Triple D} (hb : SmoothTriple U b) (hm : SmoothTriple U m)
@@ -2308,35 +1813,6 @@ theorem axialResidual_pressure_change {U : Set D} (hU : IsOpen U) (o : Operators
   simp only [Pi.add_apply]
   ring
 
-theorem gaugeWaveStage_axial_change {U : Set (PressureStream.Lift S)} (hU : IsOpen U)
-    (g : GaugeData S) (c : Context (PressureStream.Lift S))
-    (u : State (PressureStream.Lift S)) (w : Oscillation (PressureStream.Lift S))
-    (q : OscillatoryScalar (PressureStream.Lift S)) (e : ExcludedErrors (PressureStream.Lift S))
-    (hu : AngularContinuous u.oscillation) (hw : AngularContinuous w)
-    (hb : SmoothTriple U c.base) (hm : SmoothTriple U u.mean)
-    (hW : ∀ i j, SmoothOn U (u.covariance i j))
-    (hX : ∀ i j, SmoothOn U (covarianceIncrement u.oscillation w i j))
-    (hp : SmoothOn U u.pressure) (hδp : SmoothOn U (gaugeWavePressureChange g c u w q e)) :
-    Agree U ((gaugeWaveStage g c u w q e).axialResidual c - u.axialResidual c)
-      (axialCovarianceChange c.operators (covarianceIncrement u.oscillation w) +
-        c.operators.dz (gaugeWavePressureChange g c u w q e)) := by
-  have hpressure : (gaugeWaveStage g c u w q e).pressure =
-      u.pressure + gaugeWavePressureChange g c u w q e := by unfold gaugeWavePressureChange; abel
-  have hc := axialResidual_covariance_change hU c.operators hb hm u.covariance
-    (covarianceIncrement u.oscillation w) hW hX
-    (u.pressure + gaugeWavePressureChange g c u w q e) c.virtualAxial (hp.add hδp)
-  have hd := axialResidual_pressure_change hU c.operators hb hm u.covariance hW
-    u.pressure (gaugeWavePressureChange g c u w q e) c.virtualAxial hp hδp
-  intro n x hx
-  have hc' := hc n hx
-  have hd' := hd n hx
-  change MeanIncrementBounds.axialResidual c.operators c.base (gaugeWaveStage g c u w q e).mean
-    (gaugeWaveStage g c u w q e).covariance (gaugeWaveStage g c u w q e).pressure c.virtualAxial n x - _ = _
-  rw [gaugeWaveStage_mean, gaugeWaveStage_covariance g c u w q e hu hw, hpressure]
-  simp only [Pi.add_apply, Pi.sub_apply] at hc' hd' ⊢
-  change _ - MeanIncrementBounds.axialResidual c.operators c.base u.mean u.covariance
-    u.pressure c.virtualAxial n x = _
-  linarith
 
 
 theorem gaugeWaveStage_cumulative {s : StripData (PressureStream.Lift S)} {α : ℝ}
@@ -2498,30 +1974,9 @@ section ActualSignedStage
 
 open CorrectionState
 
-noncomputable def stateSignedBlock (p : SignedParameters LocalSignedRequest.Point)
-    (s : StripData LocalSignedRequest.Point) (patch : SignedStressPrimitive.Patch) (coord : ℝ)
-    (c : Context LocalSignedRequest.Point) (u : State LocalSignedRequest.Point) :
-    HarmonicBlock LocalSignedRequest.Point :=
-  p.exactBlock s (LocalSignedRequest.fullRequest s patch coord c u)
 
-noncomputable def stateSignedTangent (p : SignedParameters LocalSignedRequest.Point)
-    (s : StripData LocalSignedRequest.Point) (patch : SignedStressPrimitive.Patch) (coord : ℝ)
-    (c : Context LocalSignedRequest.Point) (u : State LocalSignedRequest.Point) :
-    HarmonicBlock LocalSignedRequest.Point :=
-  p.tangentBlock s (LocalSignedRequest.fullRequest s patch coord c u)
 
-noncomputable def stateSignedCurl (p : SignedParameters LocalSignedRequest.Point)
-    (s : StripData LocalSignedRequest.Point) (patch : SignedStressPrimitive.Patch) (coord : ℝ)
-    (c : Context LocalSignedRequest.Point) (u : State LocalSignedRequest.Point) :
-    HarmonicBlock LocalSignedRequest.Point :=
-  p.curlBlock s (LocalSignedRequest.fullRequest s patch coord c u)
 
-noncomputable def stateSignedGaussian (p : SignedParameters LocalSignedRequest.Point)
-    (s : StripData LocalSignedRequest.Point) (patch : SignedStressPrimitive.Patch) (coord : ℝ)
-    (c : Context LocalSignedRequest.Point) (u : State LocalSignedRequest.Point) :
-    HarmonicBlock LocalSignedRequest.Point :=
-  SignedWaveUpdate.gaussianBlock (p.coefficients s (LocalSignedRequest.fullRequest s patch coord c u))
-    p.directions p.cutoff p.angularFrequency
 
 
 
@@ -3075,21 +2530,6 @@ structure SignedParameters.GaussianControl (p : SignedParameters D) (s : StripDa
   envelope : ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
     P n x.1 ≤ Real.exp (-rate * (slot.coordinate n x - 1 / 2) ^ 2 * slot.length n)
 
-theorem SignedParameters.GaussianControl.coefficient_flat
-    {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.GaussianControl s P) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i)) (N : ℝ) :
-    UnweightedClass (HarmonicWaveInteraction.productStrip s) N
-      (LinearWaveBounds.excludedSlotError p.directions p.cutoff (p.coefficients s request).amplitude 0) := by
-  have hi := SignedWaveUpdate.coefficients_inputBounds hc.baseBounds hc.covariance hR hc.mask hc.fundamental
-    hc.normal hc.normalMotion hc.action hc.lower_pos hc.norm_lower hc.norm_upper hc.inverseFrequency p.column
-  have ha := LinearWaveBounds.component_classes hi.amplitude
-  rw [h.cutoff]
-  exact LinearWaveBounds.excludedSlotError_all_gains h.slot p.directions h.fast h.edges h.scales
-    ha (MemClass.zero ha.weight_nonneg) h.rate_pos h.envelope N
 
 
 theorem SignedParameters.Dynamics.full_divergence_zero
@@ -5682,14 +5122,6 @@ theorem iterate_representation (p : ℕ → CycleParameters ι) (c : Context Cyc
   | succ n ih =>
     exact (p n).next_representation (iterate p c seed n).coefficients c (iterate p c seed n).state ih (hc n)
 
-theorem iterate_bands (p : ℕ → CycleParameters ι) (c : Context CyclePoint) (seed : CycleState ι)
-    (hseed : CoefficientBands seed.coefficients) :
-    ∀ n, CoefficientBands (iterate p c seed n).coefficients := by
-  intro n
-  induction n with
-  | zero => exact hseed
-  | succ n ih =>
-    exact (p n).next_coefficient_bands (iterate p c seed n).coefficients c (iterate p c seed n).state ih
 
 
 end CycleState
@@ -7102,124 +6534,6 @@ local notation "u₁" => SignedMeanGain.waveStage G.gauge c u w₁ q₁ e₁
 local notation "w₂" => SignedMeanGain.tangentField f a + SignedMeanGain.curlField f a
 local notation "u₂" => SignedMeanGain.waveStage G.gauge c u₁ w₂ q₂ e₂
 
-/-- The two actual wave updates, temporal inverse, and rank solve form one
-mean/debt gain. All intermediate residual and flux regularity is derived
-from the original primitive fields and the actual covariance increments. -/
-theorem fourStage_mean_gain
-    (hσ : 1/5 ≤ σ) (hκ : 0 ≤ κ) (hκsmall : κ ≤ 1/100000)
-    (H : MeanStateRegularity.PrimitiveData G.region G.patch.a G.patch.b c u)
-    (hop : c.operators = G.operators)
-    (ho : OperatorBounds G.strip G.operators κ) (hb : BaseBounds G.strip c.base)
-    (hu : CorrectionState.CumulativeBounds G.strip u)
-    (hfixed : (reconstructState G.gauge c u).pressure = u.pressure)
-    (hmθ : ∀ n z, z ∈ G.region.carrier → radialMoment 2 u.mean.angular n z = 0)
-    (hmz : ∀ n z, z ∈ G.region.carrier → radialMoment 1 u.mean.axial n z = 0)
-    (hθ : MeanClass G.strip (1+σ) (u.thetaResidual c))
-    (hz : MeanClass G.strip (1+σ) (u.axialResidual c))
-    (hd : DefectBounds G.slowStrip σ c u)
-    (hX₁ : ∀ i j, GaugeMomentBalances.MovingField G.region G.patch.a G.patch.b
-      (SignedMeanGain.covarianceIncrement u.oscillation w₁ i j))
-    (hX₁class : SignedMeanGain.TensorClass G.strip (1+σ)
-      (SignedMeanGain.covarianceIncrement u.oscillation w₁))
-    (hX₂ : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.incrementTensor f a i j))
-    (hS : ∀ i j, SignedMeanGain.MovingField G (SignedMeanGain.crossTensor f a i j))
-    (hold : (u₁).oscillation = SignedMeanGain.oldField f a)
-    (e : ℕ → ι → SignedMeanGain.NativeIndex)
-    (he : ∀ n, Set.InjOn (e n) (a.labels n : Set ι))
-    (hlabels : ∀ n, (a.labels n).image (e n) = B.labels n)
-    (hp : ∀ n l, l ∈ a.labels n → (f.primary l).velocity n = (B.primaryBlocks (e n l)).velocity n)
-    (hcp : ∀ n l, l ∈ a.labels n → BandReindexedSignedMeanGain.SameCarrierAt
-      (f.primary l) (B.primaryBlocks (e n l)) n)
-    (ht : ∀ n l, l ∈ a.labels n → (f.tangent l).velocity n = (B.signedBlocks c u₁ (e n l)).velocity n)
-    (hct : ∀ n l, l ∈ a.labels n → BandReindexedSignedMeanGain.SameCarrierAt
-      (f.tangent l) (B.signedBlocks c u₁ (e n l)) n)
-    (r : RankData PressureStream.Plane) (h : ℝ) (index : ℕ → ℕ)
-    (axial : PressureStream.Plane × PressureStream.Plane)
-    (hh : 0 ≤ h) (hscale : ∀ n, ChartScales.S n ≤ G.slow n)
-    (gap : ℕ) (hgap : ∀ n, ChartScales.nativeIndex h n ≤ index n + gap)
-    (hv : c.operators.vT = (0, (0, TorusInverse.vector .temporal)))
-    (hfast : ∀ n, c.operators.fastCoefficient n = ChartScales.Tg ^ index n * ChartScales.Q n ^ (1+h))
-    (hV : LocalRankDefect.IsSlowOn G.region.carrier c.base.angular)
-    (hG : LocalRankDefect.IsSlowOn G.region.carrier c.base.axial)
-    (hg : LocalRankDefect.RankGeometry G.gauge r G.region.carrier c
-      (temporalStageState G.gauge h index axial c u₂))
-    {A₀ B₀ : ℝ} (hparam : RankStateBounds.NormalizedParameters G.coord A₀ B₀ r G.region.carrier)
-    (hB : B₀ ≠ 0) (hleft : G.patch.a < r.inner) (hright : r.outer < G.patch.b) :
-    let t := temporalStageState G.gauge h index axial c u₂
-    let v := rankStageState G.gauge r axial c t
-    IncrementBounds G.strip (1+σ-2*κ) (temporalIncrementState G.gauge h index axial c u₂) ∧
-    IncrementBounds G.strip (1+σ-2*κ) (rankIncrementState G.gauge r axial c t) ∧
-    MeanClass G.strip (1+σ-2*κ) (v.pressure-u.pressure) ∧
-    CorrectionState.CumulativeBounds G.strip v ∧
-    DefectBounds G.slowStrip (σ+1/10) c v ∧
-    MeanClass G.strip (1+(σ+1/10)) (v.thetaResidual c) ∧
-    MeanClass G.strip (1+(σ+1/10))
-      (v.axialResidual c - fun n x => temporalAliasState G.gauge h index c u₂ n (x,0) 2) := by
-  have hs : movingStripData G.region G.gauge.radial.inner G.gauge.radial.outer
-      G.leftWeight G.rightWeight G.inner_pos G.left_pos G.right_pos
-      G.epsilon G.slow G.epsilon_pos G.epsilon_le_one G.slow_ge_one = G.strip := by
-    simp only [SignedMeanGain.Geometry.strip, G.inner_eq, G.outer_eq]
-  have H₀ : MeanStateRegularity.PrimitiveData G.region G.gauge.radial.inner G.gauge.radial.outer c u := by
-    simpa only [G.inner_eq, G.outer_eq] using H
-  have HX₁ : ∀ i j, GaugeDebtIncrement.Regular G.region G.gauge.radial.inner G.gauge.radial.outer
-      (SignedMeanGain.covarianceIncrement u.oscillation w₁ i j) := by
-    simpa only [G.inner_eq, G.outer_eq] using
-      (fun i j => MeanStateRegularity.MovingField.regular (hX₁ i j))
-  have hc : OperatorBounds G.strip c.operators κ := by simpa only [hop] using ho
-  have hfirst := gaugeWaveStage_mean_from_covariance G.region G.gauge G.inner_pos G.exponent_pos
-    G.left_pos G.right_pos G.epsilon G.slow G.epsilon_pos G.epsilon_le_one G.slow_ge_one G.length_eq
-    c u w₁ q₁ e₁ H.operators.regular H.base.smooth H₀.mean.regular
-    (fun i j => MeanStateRegularity.MovingField.regular (H₀.covariance i j)) HX₁
-    (hs.symm ▸ hc) (hs.symm ▸ hX₁class) hfixed (hs.symm ▸ hb) (hs.symm ▸ hu)
-    (show 9/10 ≤ (1+σ)-κ by linarith) le_rfl
-    (hs.symm ▸ hθ.mono_exponent (by linarith)) (hs.symm ▸ hz.mono_exponent (by linarith))
-    (fun i => (hd i).mono_exponent (by linarith))
-  rw [hs] at hfirst
-  obtain ⟨hp₁, hu₁, hθ₁, hz₁, hd₁⟩ := hfirst
-  have H₁ := H.waveStage G.gauge w₁ q₁ e₁ hX₁
-  have HX₂ : ∀ i j, GaugeMomentBalances.MovingField G.region G.patch.a G.patch.b
-      (SignedMeanGain.covarianceIncrement (u₁).oscillation w₂ i j) := by
-    simp only [hold]
-    exact hX₂
-  have Hsigned := MeanStateRegularity.localData G c u₁ w₂ q₂ e₂ H₁ hop HX₂
-    (GaugeMomentBalances.reconstructState_idempotent _ _ _)
-    (by simpa only [SignedMeanGain.waveStage_mean] using hmθ)
-    (by simpa only [SignedMeanGain.waveStage_mean] using hmz)
-  have hdebt₁ : DefectBounds G.slowStrip (σ-κ) c u₁ := by
-    simpa only [DefectBounds, SignedMeanGain.Geometry.slowStrip,
-      show 1+(σ-κ) = 1+σ-κ by ring] using hd₁
-  obtain ⟨hp₂, hu₂, hθ₂, hz₂, hbarθ, hbarz, hd₂⟩ :=
-    bandNativeSignedStage_mean_debt G B c u₁ hσ hκ hκsmall f a e he hlabels hp hcp ht hct
-      q₂ e₂ hold Hsigned ho hu₁ H.base.smooth H₁.mean.regular
-      (fun i j => MeanStateRegularity.MovingField.regular (H₁.covariance i j)) hX₂ hS
-      hθ₁ hz₁ hdebt₁
-  have H₂ := H₁.waveStage G.gauge w₂ q₂ e₂ HX₂
-  have H₂g : MeanStateRegularity.PrimitiveData G.region G.gauge.radial.inner G.gauge.radial.outer c u₂ := by
-    simpa only [G.inner_eq, G.outer_eq] using H₂
-  have hθreg := H₂g.theta G.inner_pos G.gauge.radial.inner_lt_outer
-  have hzreg := H₂g.axial_reconstructed G.inner_pos G.exponent_pos G.length_eq rfl
-  have hmean := meanStages_constructed G.gauge r h index axial c u₂ G.region G.inner_pos G.exponent_pos
-    G.left_pos G.right_pos G.epsilon G.slow G.epsilon_pos G.epsilon_le_one G.slow_ge_one G.length_eq
-    rfl hσ hκsmall hh hscale gap hgap hv hfast (hs.symm ▸ hc) (hs.symm ▸ hb) (hs.symm ▸ hu₂)
-    H.operators.regular H.base.smooth hV hG H₂g.mean.regular.smooth
-    ⟨H₂g.mean.radial.supported, H₂g.mean.angular.supported, H₂g.mean.axial.supported⟩
-    (fun i j => (H₂g.covariance i j).smooth) (fun i j => (H₂g.covariance i j).supported)
-    hθreg.smooth hzreg.smooth hθreg.periodic hzreg.periodic hθreg.supported hzreg.supported
-    (hs.symm ▸ hθ₂) (hs.symm ▸ hz₂) (hs.symm ▸ hbarθ) (hs.symm ▸ hbarz)
-    (by simpa only [DefectBounds, SignedMeanGain.Geometry.slowStrip,
-      show 1+(σ-2*κ) = 1+σ-2*κ by ring] using hd₂)
-    hg hparam hB (by simpa only [G.inner_eq] using hleft) (by simpa only [G.outer_eq] using hright)
-  rw [hs] at hmean
-  obtain ⟨hi, hr, hpmean, hcum, hdebt, htheta, haxial⟩ := hmean
-  refine ⟨hi, hr, ?_, hcum, hdebt, htheta, haxial⟩
-  apply class_congr (((hp₁.mono_exponent (by linarith)).add hp₂).add hpmean)
-  intro n x hx
-  change (rankStageState G.gauge r axial c (temporalStageState G.gauge h index axial c u₂)).pressure n x -
-      u.pressure n x = ((u₁).pressure n x - u.pressure n x +
-      ((u₂).pressure n x - (u₁).pressure n x)) +
-      ((rankStageState G.gauge r axial c (temporalStageState G.gauge h index axial c u₂)).pressure n x -
-      (u₂).pressure n x)
-  ring
 
 end MeanCycle
 
@@ -7745,20 +7059,6 @@ theorem reindex_coefficients_roundtrip (e : D ≃ₗᵢ[ℝ] E) (G : HarmonicRes
   funext n i
   exact StateReindex.coefficients_roundtrip e (G n i)
 
-/-- Returning the actual mixed old/new block and its new Gaussian term
-commutes with the entire nonlinear residual, including all derivatives. -/
-theorem residual_update_return (e : D ≃ₗᵢ[ℝ] E) (c : Context D) (u : State D)
-    (a : HarmonicBlock D) (b : HarmonicBlock E)
-    (G A : HarmonicResidual.BlockCoefficients D) (g : HarmonicResidual.BlockCoefficients E) :
-    StateReindex.block e
-      (HarmonicResidual.residualBlock (StateReindex.context e.symm c) (StateReindex.state e.symm u)
-        (HarmonicWaveInteraction.addBlock (StateReindex.block e.symm a) b)
-        (StateReindex.blockCoefficients e.symm G+g) (StateReindex.blockCoefficients e.symm A)) =
-      HarmonicResidual.residualBlock c u (HarmonicWaveInteraction.addBlock a (StateReindex.block e b))
-        (G+StateReindex.blockCoefficients e g) A := by
-  rw [← StateReindex.residualBlock_pull, StateReindex.context_roundtrip, StateReindex.state_roundtrip,
-    reindex_addBlock, StateReindex.block_roundtrip, reindex_coefficients_add,
-    reindex_coefficients_roundtrip, reindex_coefficients_roundtrip]
 
 
 end Reindex

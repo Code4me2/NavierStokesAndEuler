@@ -35,11 +35,6 @@ theorem frame_adjoint_inverse (t : Icc (0 : ℝ) D.T) (x v : Space) :
   intro w
   rw [adjoint_inner_left,adjoint_inner_left,D.inverse_left]
 
-theorem inverse_adjoint_frame (t : Icc (0 : ℝ) D.T) (x v : Space) :
-    (D.FInv.field t x).adjoint ((D.F.field t x).adjoint v) = v := by
-  apply ext_inner_right ℝ
-  intro w
-  rw [adjoint_inner_left,adjoint_inner_left,D.inverse_right]
 
 theorem metric_inner (t : Icc (0 : ℝ) D.T) (x v w : Space) :
     ⟪(metricCoefficient D).path t x v,w⟫_ℝ =

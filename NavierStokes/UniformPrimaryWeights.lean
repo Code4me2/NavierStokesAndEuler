@@ -528,23 +528,6 @@ theorem phaseFundamental_class {s : StripData D} (A : Fin 2 → PhaseConstructio
     simp only [Real.rpow_zero, one_mul]
     rfl
 
-/-- The actual smooth cutoff extension is controlled by the original
-Gaussian slot envelope, including its zero region. -/
-theorem phaseCutoffFundamental_class {s : StripData D} (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → (χ q x).1 ∈ U.carrier q)
-    (j : Fin 2) : UniformClass s (phaseSlotEnvelope A χ j) 0 (phaseCutoffFundamental A χ j) := by
-  have hp := (cutoffPulse_envelope_jets U (A j).frame (A j).lam (A j).u (A j).L (A j).pulse_jets).comp
-    hχ hscale (fun q x hx => ⟨hmap q x hx, mem_univ _⟩)
-  apply LabelSumBounds.uniformClass_of_envelopeJets hp (K := 1) (q := 1) le_rfl
-    (fun n l => by simp [jointDomain]) (fun _ _ => subset_rfl)
-  · intro l n x hx
-    exact hp.nonneg (n, l) x hx
-  · intro l n x hx
-    simp only [Real.rpow_zero, one_mul]
-    rfl
 
 
 

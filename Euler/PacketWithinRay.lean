@@ -1,4 +1,5 @@
-import Euler.PacketWithinStage
+import Euler.PacketScaledVelocitySystem
+import Euler.ClosedIntervalDerivativeExtension
 
 /-! Ray control for the genuine within-interval packet equations. -/
 

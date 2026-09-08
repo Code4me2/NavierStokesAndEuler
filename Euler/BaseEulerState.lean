@@ -90,24 +90,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteS
   (ξ : U) (hξ : (R ξ : Space)=EuclideanSpace.single 1 1)
   (S : Set Space) (hS : IsCompact S)
 
-include hξ in
-theorem initial_pressure_numerator (t : Icc (0 : ℝ) initialTime)
-    (x : Space) (hx : ‖ell • x‖ < 1) :
-    1/2 ≤ ⟪((initialParent β hβ ell hell hell1).transverseData
-      (EuclideanSpace.single 0 1) (by simp) R S hS).normal.field t x,
-      (initialParent β hβ ell hell hell1).strain.field t x
-        (EulerPacketForwardFactorization.uncutVelocity
-          ((initialParent β hβ ell hell hell1).transverseData
-            (EuclideanSpace.single 0 1) (by simp) R S hS) ξ t x)⟫_ℝ := by
-  have hξnorm : ‖ξ‖=1 := by
-    have hn : ‖(R ξ : Space)‖=1 := by rw [hξ]; simp
-    exact (R.norm_map ξ).symm.trans hn
-  apply source_numerator_pos (initialLabelData β hβ ell hell hell1)
-    (EuclideanSpace.single 0 1) (by simp) R S hS ξ hξnorm x _ _ _ t
-  · rw [initialStrain_plateau β hβ ell hell hell1 x hx,hξ,linear_q]
-    simp [EuclideanSpace.inner_single_left,PiLp.add_apply,PiLp.smul_apply]
-  · exact initialTime_small.1.trans (by norm_num)
-  · exact initialTime_small.2.trans (by norm_num)
 
 
 end EulerBaseDatum

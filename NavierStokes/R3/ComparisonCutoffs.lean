@@ -211,11 +211,6 @@ theorem norm_partial_partial_le {f : Space → ℝ} (hf : ContDiff ℝ ∞ f)
     (coordinateVector j) (hv j)).trans
     ((fderiv ℝ (fderiv ℝ f) x).unit_le_opNorm (coordinateVector i) (hv i))
 
-theorem cutoff_partial_partial_le {R : ℝ} (hR : 0 < R) (i j : Fin 3) (x : Space) :
-    ‖NavierStokes.PeriodicIntegration.spatialPartial i
-      (NavierStokes.PeriodicIntegration.spatialPartial j (cutoff R)) x‖ ≤
-      derivativeConstant 2 / R ^ 2 :=
-  (norm_partial_partial_le (cutoff_smooth R) i j x).trans (cutoff_second_fderiv_le hR x)
 
 
 /-- Every fixed compact set lies in the plateau of all sufficiently large cutoffs. -/

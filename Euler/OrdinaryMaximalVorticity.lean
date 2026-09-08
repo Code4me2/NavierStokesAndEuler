@@ -50,8 +50,6 @@ theorem maximalVorticityNorm_le_iff (t : L.Time) (K : ℝ) :
     L.maximalVorticityNorm t ≤ K ↔ ∀ x, ‖vectorCurl (L.maximalVelocity t) x‖ ≤ K :=
   vorticityNorm_le_iff _ K
 
-theorem maximalVorticityNorm_continuous : Continuous L.maximalVorticityNorm :=
-  vorticityNorm_continuous L.maximalField L.maximalField_jet_continuous
 
 theorem maximalVorticityNorm_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
     (t : Icc (0 : ℝ) S) :

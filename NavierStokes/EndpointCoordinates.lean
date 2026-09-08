@@ -156,17 +156,7 @@ theorem chartExtension_eq_physical {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
       (p.2.1 / SimilarityProfile.q h p, p.2.2 / SimilarityProfile.q h p ^ ((1 - 2 * h) / 2)))
   rw [qExtension_eq_physical hh hh1 hp]
 
-theorem chartExtension_eventuallyEq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : PhysicalPoint} (hp : p.1 < 1) :
-    chartExtension h =ᶠ[𝓝 p] SlowBorelBase.physicalChart h := by
-  filter_upwards [(isOpen_lt continuous_fst continuous_const).mem_nhds hp] with q hq
-  exact chartExtension_eq_physical hh hh1 hq
 
-theorem jets_eq_of_eventuallyEq {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup V] [NormedSpace ℝ V] {f g : E → V} {p : E}
-    (he : f =ᶠ[𝓝 p] g) (n : ℕ) : iteratedFDeriv ℝ n f p = iteratedFDeriv ℝ n g p := by
-  have he' : f =ᶠ[𝓝[univ] p] g := by simpa only [nhdsWithin_univ] using he
-  simpa only [iteratedFDerivWithin_univ] using he'.iteratedFDerivWithin_eq he.self_of_nhds n
 
 
 noncomputable def lowerDomain (h c : ℝ) : Set PhysicalPoint :=
@@ -244,11 +234,6 @@ theorem cartesianExtension_eq_physical {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     cartesianExtension h z = SlowBorelBase.cartesianChart h z :=
   chartExtension_eq_physical hh hh1 hz
 
-theorem cartesianExtension_eventuallyEq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {z : ProblemStatement.SpaceTime} (hz : z.1 < 1) :
-    cartesianExtension h =ᶠ[𝓝 z] SlowBorelBase.cartesianChart h := by
-  filter_upwards [(isOpen_lt continuous_fst continuous_const).mem_nhds hz] with p hp
-  exact cartesianExtension_eq_physical hh hh1 hp
 
 
 theorem cartesian_endpoint_neighborhood {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
@@ -271,12 +256,6 @@ theorem cartesian_endpoint_neighborhood {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 
 /-! ## Smooth composition and genuine derivative transfer -/
 
-theorem composition_smoothAt {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) {z : ProblemStatement.SpaceTime}
-    (hz : z ∈ cartesianDomain h) {f : Chart → V}
-    (hf : ContDiffAt ℝ ∞ f (cartesianExtension h z)) :
-    ContDiffAt ℝ ∞ (fun p => f (cartesianExtension h p)) z :=
-  hf.comp z (cartesianExtension_smoothAt hh hh1 hz)
 
 
 

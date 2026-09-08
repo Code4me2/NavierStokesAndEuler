@@ -154,10 +154,6 @@ theorem bessel_contiguous (k : ℕ) (t : ℝ) :
   unfold bessel
   ring
 
-theorem second_deriv_bessel (k : ℕ) (t : ℝ) :
-    deriv (deriv (bessel k)) t = bessel (k + 2) t := by
-  rw [deriv_bessel]
-  simpa only [neg_neg, Nat.add_assoc] using (hasDerivAt_bessel (k + 1) t).fun_neg.deriv
 
 
 theorem bessel_zero (k : ℕ) : bessel k 0 = 1 / (k.factorial : ℝ) := by
@@ -191,14 +187,6 @@ theorem deriv_profile (χ : ℝ) :
   funext Y
   exact (hasDerivAt_profile χ Y).deriv
 
-theorem second_deriv_profile (χ Y : ℝ) :
-    deriv (deriv (profile χ)) Y = (χ / 2) ^ 2 * bessel 3 ((χ / 2) * Y) := by
-  rw [deriv_profile]
-  have h := ((hasDerivAt_bessel 2 ((χ / 2) * Y)).comp Y
-    ((hasDerivAt_id Y).const_mul (χ / 2))).const_mul (-(χ / 2))
-  convert! h.deriv using 1
-  simp only [mul_one]
-  ring
 
 
 /-- The exact successive-term ratio, including its sign. -/

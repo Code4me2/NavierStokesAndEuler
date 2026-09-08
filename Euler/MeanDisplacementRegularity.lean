@@ -31,31 +31,14 @@ def labelDerivative : meanDerivatives T hT FInv →L[ℝ] TimeLp T L2 :=
 def labelPath (u : meanDerivatives T hT FInv) : ℝ → L2 :=
   productPrimitive T hT FInv (u : TimeLp T L2)
 
-/-- The label path takes values in the actual ordinary solenoidal space. -/
-theorem labelPath_solenoidal (u : meanDerivatives T hT FInv) (t : ℝ)
-    (ht : t ∈ Icc (0 : ℝ) T) : labelPath T hT FInv u t ∈ solenoidalSpace := by
-  change FInv (projIcc 0 T hT t) (realPrimitive T (u : TimeLp T L2) t) ∈ solenoidalSpace
-  simpa only [projIcc_of_mem hT ht, terminalPrimitive_apply] using u.property ⟨t, ht⟩
 
 variable (hFInv : ∀ t : Icc (0 : ℝ) T,
   HasDerivWithinAt (extendPath T hT FInv) (FInv' t) (Icc (0 : ℝ) T) t)
 
 
-include hFInv in
-/-- Its L² derivative is obtained from the literal product rule. -/
-theorem labelPath_hasDerivAt_ae (u : meanDerivatives T hT FInv) :
-    ∀ᵐ t ∂timeMeasure T,
-      HasDerivAt (labelPath T hT FInv u) (labelDerivative T hT FInv FInv' u t) t :=
-  productPrimitive_hasDerivAt_ae T hT FInv FInv' hFInv (u : TimeLp T L2)
 
 
 
-/-- The norm comparison required by the source H¹ model follows from the
-actual coefficient bounds and the sharp terminal Poincaré bound. -/
-theorem labelDerivative_norm_le (u : meanDerivatives T hT FInv) :
-    ‖labelDerivative T hT FInv FInv' u‖ ≤
-      (‖FInv'‖ * Real.sqrt (T^2/2) + ‖FInv‖) * ‖u‖ :=
-  productDerivative_norm_le T hT FInv FInv' (u : TimeLp T L2)
 
 
 variable (F F' : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2))

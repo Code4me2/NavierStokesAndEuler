@@ -33,25 +33,7 @@ theorem meanBar_eq_sigma_add_defect (G : Geometry) (e : ℕ)
   unfold crossDefect
   abel
 
-theorem crossDefect_mem_of_cross (G : Geometry) (e : ℕ)
-    (f X : ScalarField Point) (α : ℝ)
-    (hcross : Agree G.strip.domain (StateMomentBalances.meanBar X) (physicalSigma G e f)) :
-    MeanClass G.strip α (crossDefect G e f X) := by
-  apply class_congr (MemClass.zero (fun n x hx => G.strip.zeta_nonneg x hx))
-  intro n x hx
-  simp only [crossDefect, Pi.sub_apply, hcross n hx, sub_self]
 
-/-- A baseline weighted estimate and actual tail agreement suffice for
-every exponent.  The finitely many earlier bands are retained, not set to zero. -/
-theorem crossDefect_all_exponents_of_tail (G : Geometry) (e : ℕ)
-    (f X : ScalarField Point) {α : ℝ}
-    (hbase : MeanClass G.strip α (crossDefect G e f X)) (N : ℕ)
-    (htail : ∀ n, N ≤ n → ∀ x ∈ G.strip.domain,
-      StateMomentBalances.meanBar X n x = physicalSigma G e f n x) :
-    ∀ β : ℝ, MeanClass G.strip β (crossDefect G e f X) := by
-  apply FiniteHeadClass.meanClass_all_exponents hbase N
-  intro n hn x hx
-  exact sub_eq_zero.mpr (htail n hn x hx)
 
 /-- The physical cancellation keeps the radial divergence of the actual
 cross defect.  No cancellation on the finite head is assumed. -/
