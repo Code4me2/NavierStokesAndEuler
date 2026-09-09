@@ -32,6 +32,10 @@ near that time, and the time integral of the vorticity’s $L^\infty$ norm diver
 
 ## Where to start
 
+- [`docs/proof-companion/README.md`](docs/proof-companion/README.md) — a graduate-PDE
+  companion with worked calculations, exact source interfaces, and explicit unresolved
+  analytic obligations; an integrated partial reconstruction, not an independently reviewed proof.
+
 - [`Euler/Solution.lean`](Euler/Solution.lean) — the two delivered Euler theorems,
   `Euler.euler_breakdown_R3` and `Euler.exists_compact_smooth_euler_singularity`.
 - [`NavierStokes/ComparatorSolution.lean`](NavierStokes/ComparatorSolution.lean) — the two
