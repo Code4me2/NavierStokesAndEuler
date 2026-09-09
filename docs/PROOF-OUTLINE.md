@@ -123,9 +123,10 @@ This is analysis, not glue.
   `t < T*`, by `H³` stability against the packet horizons.
 * `no_global_solution_of_confined_vorticity`
   (`Euler/CompactVorticityContradiction.lean`), via `FiniteLifespan.false_of_vorticity_agree_on_compact`,
-  is where `False` is actually produced: a global solution agreeing with the canonical field on
-  the compact set gives, by joint continuity of its curl, a uniform bound `M` on `‖ω‖_∞`, hence
-  `∫₀^{T*} ‖ω‖_∞ ≤ M·T*`, which contradicts Beale–Kato–Majda.
+  is where `False` is actually produced on the delivered path: agreement of a global solution
+  with the canonical field on the compact vorticity set would give a smooth continuation past the
+  finite maximal lifespan, contradicting maximality. The Beale–Kato–Majda integral blow-up remains
+  proved and is packaged in `Euler/Showcase.lean`, but it is no longer the delivered contradiction route.
 * Supporting: `Euler/FiniteEnergyTruncation.lean`, `Euler/TruncatedBackwardFlow.lean` and
   `Euler/FlowEscapeBound.lean` (short-time compact-vorticity persistence, via global flows of
   compact solenoidal truncations rather than trajectories of the untruncated velocity), reaching
@@ -236,11 +237,13 @@ for the whole development belongs there. In dependency order:
    `NavierStokes.ActualCandidateAssembly` — the construction of a single witness of
    `ProblemStatement.candidateStatement` — accounts for about 96% of those lines. Everything
    else is thin.
-2. **There is one construction, not two.** Alternatives (C) and (D) share the same witness.
-   `R3CompactCandidate.selected_compact_candidate` (`NavierStokes/R3ActualCandidate.lean`)
-   extracts the whole-space candidate from the *same* `ActualCandidateAssembly.selected_witness`,
-   by keeping the cut fields *before* periodization
-   (`R3CompactCandidate.of_localized_fields`, `NavierStokes/R3CompactCandidate.lean`).
+2. **There is one construction, not two.** Alternatives (C) and (D) share the same witness data.
+   The compact whole-space candidate is now built first from the cut fields and the residual-limit
+   theorem (`MixedPeriodicAssembly.exists_compact_candidate`, recorded in
+   `ActualCandidateAssembly.selected_witness` and extracted by
+   `R3CompactCandidate.selected_compact_candidate`). The periodic candidate is then obtained by
+   lattice periodization (`MixedPeriodicAssembly.candidate_of_periodization` /
+   `exists_candidate_force`).
 3. **The singularity does not come from the correction machinery.** It comes from a fixed slow
    base profile with an explicit closed form; see §2.2. The vast `Actual*` / `Cycle*` /
    `Correction*` apparatus exists to show that the infinite correction series converges to
@@ -254,9 +257,10 @@ for the whole development belongs there. In dependency order:
   `fun _ => 0`. The Clay statement permits a nonzero force, and `u° = 0` trivially satisfies its
   initial-data conditions; all of the construction lives in the forcing. A reader should not
   expect a nontrivial initial velocity anywhere in this development.
-* **Forcing.** The exact `ν = 1` residual of the constructed velocity/pressure pair, which the
-  construction arranges to be smooth, unit-periodic (whole space: compactly supported in space)
-  and to vanish for all times beyond a fixed finite time
+* **Forcing.** The exact `ν = 1` residual of the compact cut velocity/pressure pair, extended
+  smoothly through time one by the residual-limit construction and then periodized for the torus
+  branch. The construction arranges it to be smooth, unit-periodic in the torus branch
+  (compactly supported in space in the whole-space branch) and to vanish for all times beyond a fixed finite time
   (`ProblemStatement.CompactFutureTimeSupport`). For general viscosity the adapters use
   `fν(t,x) = ν² · f(ν t, x)` and rescale a hypothetical solution back to viscosity one
   (`ComparatorBridge.normalized_solution`).
@@ -343,9 +347,11 @@ path in `NavierStokes/CandidateConsequences.lean`.
   (`NavierStokes/CorrectionStep/WaveGains.lean`) → `CorrectionAnalyticStep.step`
   (`NavierStokes/CorrectionAnalyticStep.lean`, where the analytic invariant is shown to be
   preserved by every cycle) → `ActualCandidateConstruction.cycle`.
-* **Localization.** `NavierStokes/SpatialLocalization.lean` (cut the potential *before* taking
-  the curl, then periodize by a lattice sum), `NavierStokes/TimeLocalization.lean` (the smooth
-  time switch), combined in `NavierStokes/MixedPeriodicAssembly.lean`.
+* **Localization.** `NavierStokes/SpatialLocalization.lean` cuts the potential *before* taking
+  the curl and cuts the direct angular field separately. `NavierStokes/MixedPeriodicAssembly.lean`
+  first builds the compact candidate from those cut fields, then periodizes the compact velocity,
+  pressure and force by a lattice sum. `NavierStokes/TimeLocalization.lean` supplies the smooth
+  time switch.
 
 **D. `NavierStokes.CorrectionStep`, the cycle bookkeeping.**
 `NavierStokes/CorrectionStep.lean` is now an aggregator over six parts under
@@ -381,7 +387,8 @@ former single file gave. In dependency order:
 | `ProblemStatement.candidateStatement` | `NavierStokes/ProblemStatement.lean` | the contract the whole construction meets |
 | `ActualCandidateAssembly.selected_candidate` | `NavierStokes/ActualCandidateAssembly.lean` | the periodic witness exists |
 | `R3CompactCandidate.selected_compact_candidate` | `NavierStokes/R3ActualCandidate.lean` | the same witness, before periodization |
-| `R3CompactCandidate.of_localized_fields` | `NavierStokes/R3CompactCandidate.lean` | compact whole-space fields from the cut fields |
+| `MixedPeriodicAssembly.exists_compact_candidate` | `NavierStokes/MixedPeriodicAssembly.lean` | compact whole-space fields from the cut fields |
+| `MixedPeriodicAssembly.candidate_of_periodization` | `NavierStokes/MixedPeriodicAssembly.lean` | periodize a compact candidate |
 | `GermCandidateAssembly.exists_candidate_witness_of_finite_stages` | `NavierStokes/GermCandidateAssembly.lean` | finite-stage obligations ⇒ a witness |
 | `MixedCandidateAssembly.StageEstimates.exists_schedule` | `NavierStokes/MixedCandidateAssembly.lean` | the diagonal schedule |
 | `SolenoidalDiagonal.potentialSum` | `NavierStokes/SolenoidalDiagonal.lean` | the smooth divergence-free field |

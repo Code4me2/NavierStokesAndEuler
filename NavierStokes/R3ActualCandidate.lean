@@ -17,7 +17,8 @@ open ProblemStatement
 
 theorem selected_compact_candidate :
     ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField, Properties u p f := by
-  obtain ⟨a, _, ea, eb, ep, forcing, hc, _⟩ := ActualCandidateAssembly.selected_witness
-  exact ⟨_, _, _, of_localized_fields hc⟩
+  obtain ⟨a, _, ea, eb, ep, forcing, hc, hsmooth, hcons, hH3, hdecay, hjets,
+    compactForcing, hcompact⟩ := ActualCandidateAssembly.selected_witness
+  exact ⟨_, _, compactForcing, hcompact⟩
 
 end NavierStokes.R3CompactCandidate

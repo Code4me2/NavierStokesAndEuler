@@ -47,6 +47,20 @@ theorem next_localized (T ei ep : ℝ) (hT : 0 ≤ T) (hTcap : T ≤ baseHorizon
   · linarith only [hib.2,his,hd]
   · exact hTcap
 
+/-- The initial-gradient increment of the next packet, `h·r` for its target
+shear `h` and error ratio `r` plus the frequency error, fits the stage's
+`initialIncrement` budget once its bad-pressure cost does. -/
+theorem initial_cost_of_bad_cost (h r : ℝ) (hh : 0 ≤ h) (hr : 0 ≤ r)
+    (hbad : 2*(gradientConstant*previousShear S.J S.X n)*h*r ≤
+      badCost S.J 4 gradientConstant gradientConstant hessianConstant 80 (scaleSequence S.J S.X) n) :
+    h*r+(frequency S.J S.X n)^(-(1/4 : ℝ)) ≤ initialIncrement S.J S.X n := by
+  have hm : 1 ≤ 2*(gradientConstant*previousShear S.J S.X n) := by
+    have h := mul_le_mul_of_nonneg_left (S.previousShear_one n) gradient_nonneg
+    nlinarith only [gradient_properties.1,h]
+  have hh := mul_le_mul_of_nonneg_right hm (mul_nonneg hh hr)
+  unfold initialIncrement
+  nlinarith only [hbad,hh]
+
 theorem ratio_absorption (r : ℝ) (hr : 0 ≤ r)
     (hbad : 2*gradientConstant*previousShear S.J S.X n*shear S.J S.X n*r ≤
       badCost S.J 4 gradientConstant gradientConstant hessianConstant 80 (scaleSequence S.J S.X) n) :

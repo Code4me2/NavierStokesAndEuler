@@ -1,6 +1,6 @@
 name = "NavierStokesAndEuler"
 version = "0.1.0"
-defaultTargets = ["NavierStokes", "Euler", "ComparatorChallenges"]
+defaultTargets = ["Common", "NavierStokes", "Euler", "ComparatorChallenges"]
 
 [[require]]
 name = "mathlib"
@@ -13,6 +13,11 @@ name = "Comparator"
 scope = "leanprover"
 git = "https://github.com/leanprover/comparator.git"
 rev = "v4.34.0-rc2"
+
+[[lean_lib]]
+name = "Common"
+leanOptions = { autoImplicit = false, warningAsError = true }
+globs = ["Common", "Common.+"]
 
 [[lean_lib]]
 name = "NavierStokes"

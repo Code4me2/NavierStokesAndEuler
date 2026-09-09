@@ -366,12 +366,12 @@ theorem assembly_source
       (ActualParticularStageControls.assembly x l).state (ActualParticularStageControls.assembly x l).carrierBlock
       (ActualParticularStageControls.assembly x l).gaussianInput (ActualParticularStageControls.assembly x l).aliasInput
       j n z = ParticularWaveAssembly.residualSource (commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
         j n (CorrectionStep.cycleAssoc.symm z) := by
   funext i
   exact congrArg (fun b => b.velocity n i j z)
     (StateReindex.residualBlock_pull CorrectionStep.cycleAssoc.symm (commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0)
 
 
 theorem state_sourceWeight (n m : ℕ) :
@@ -428,8 +428,8 @@ abbrev BlockComparison (x : CorrectionStep.CycleState (ActualParticularStageCont
   PhysicalResidualNaturality.BlockFieldsOn (PhysicalMeanDomain.slowDomain V)
     (GaugeStateCoherence.bandChartEquiv h n m k) (GaugeStateCoherence.bandVelocityScale h n m)
     (GaugeStateCoherence.bandScale n m) (x.coefficients.blocks l) (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) n m
+    (x.coefficients.gaussian l) 0
+    (x.coefficients.gaussian l) 0 n m
 
 
 /-! ## Regularity and support are transported, not postulated anew -/

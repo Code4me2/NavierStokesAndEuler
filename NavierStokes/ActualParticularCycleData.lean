@@ -69,7 +69,7 @@ structure Data {B N0 : ℕ} (x : CycleState (Index B N0)) (σ : ℝ) : Prop wher
     (fun l n z =>
       (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l)).velocity n i j z +
+        0).velocity n i j z +
       (HarmonicWaveInteraction.linearGoodBlock (ActualPrimary.commonContext B)
         (x.coefficients.blocks l) (block x l) (gaussianBlock x l).velocity).velocity n i j z)
 
@@ -105,7 +105,7 @@ noncomputable def nativeData (x : CycleState (Index B N0)) (l : Index B N0) (j :
     (StateReindex.state cycleAssoc.symm x.state)
     (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j
+    (StateReindex.blockCoefficients cycleAssoc.symm 0) j
 
 theorem preservesCarriers (H : Invariant σ x) :
     ActualParticularDynamics.PreservesCarriers (ActualCycleParameters.particularState x) :=
@@ -133,7 +133,7 @@ theorem native_phase (H : Invariant σ x) (l : Index B N0) (j : ℤ) :
 theorem native_source_pull (l : Index B N0) (j : ℤ) (n : ℕ) :
     (nativeData x l j).source n = fun z =>
       ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
         j n (ActualCarrierTransport.associatedPoint z.1.1 z.2) :=
   ActualParticularStageControls.currentSource_pull (ActualCycleParameters.particularState x) (l.2,l.1) j n
 
@@ -159,7 +159,7 @@ theorem native_source_exterior (H : Invariant σ x) (l : Index B N0) (j : ℤ) (
     (nativeData x l j).source n z = 0 := by
   rw [native_source_pull]
   apply (HarmonicSourceSupport.residualSource_zero_germ_on (ActualPrimary.commonContext B) x.state
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     ActualInitialization.geometry.domain_open (ActualCoreSupport.refinedCarrier_closed l)
     (H.inputSupport l) j n hz.1 ?_).self_of_nhds
   intro hc
@@ -171,7 +171,7 @@ theorem native_inactive (H : Invariant σ x) (hN : ActualCarrierGeometry.geometr
     (hz : z ∈ ActualWaveRegularity.nativeDomain ActualWaveRegularity.particularChart ActualPrimary.standardRegion) :
     (nativeData x l j).common.amplitude n =ᶠ[𝓝 z] fun _ => 0 := by
   exact (ActualCycleAssembly.refined_particular_zero_germs hN l (ActualPrimary.commonContext B)
-    x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     (H.inputSupport l) j ActualWaveRegularityData.particularFullStrip n hz.1
       (fun hc => hn (ActualCycleCoherence.core_ordered l n hz.1 hc))).1
 
@@ -267,7 +267,7 @@ theorem native_residual (H : Invariant σ x) :
         (ActualCycleParameters.particularState x).state
         ((ActualCycleParameters.particularState x).coefficients.blocks l)
         ((ActualCycleParameters.particularState x).coefficients.gaussian l)
-        ((ActualCycleParameters.particularState x).coefficients.aliasCoefficients l)) := by
+        0) := by
   intro i j hj
   have hh := (H.residual i j hj).reindex
     (fun l : ActualParticularStageControls.Label B N0 => (l.2,l.1))
@@ -355,9 +355,9 @@ theorem source_inactive (H : Invariant σ x) (l : Index B N0) (n : ℕ)
     (hn : ¬ActualWaveRegularityData.Ordered l n) (j : ℤ) {z : Point}
     (hz : z ∈ ActualInitialization.geometry.domain) :
     ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) j n z = 0 :=
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0 j n z = 0 :=
   (HarmonicSourceSupport.residualSource_zero_germ_on (ActualPrimary.commonContext B) x.state
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     ActualInitialization.geometry.domain_open (ActualCoreSupport.refinedCarrier_closed l)
     (H.inputSupport l) j n hz (fun hc => hn (ActualCycleCoherence.core_ordered l n hz hc))).self_of_nhds
 
@@ -665,7 +665,7 @@ theorem field_cancellation (H : Invariant σ x)
     linearBlockField (ActualPrimary.commonContext B) (x.coefficients.blocks l) (block x l) n z +
       (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l)).oscillation n z =
+        0).oscillation n z =
       (goodBlock x l).oscillation n z + (gaussianBlock x l).oscillation n z := by
   have hh := ActualParticularDynamics.cycle_context_linear_cancellation
     (preservesCarriers H) (native_inputSupport H) hN x.coefficients.residualBand
@@ -676,7 +676,7 @@ theorem field_cancellation (H : Invariant σ x)
         x.coefficients.residualBand (l.2,l.1)) n z +
       (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l)).oscillation n z =
+        0).oscillation n z =
       (goodBlock x l).oscillation n z + (StateReindex.block cycleAssoc
         (ActualParticularDynamics.actualGaussian (ActualCycleParameters.particularState x) (l.2,l.1)
           x.coefficients.residualBand)).oscillation n z at hh
@@ -688,12 +688,12 @@ theorem linear_bounds (H : Invariant σ x) (hN : ActualCarrierGeometry.geometric
       (fun l n z =>
         (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
           (x.coefficients.blocks l) (x.coefficients.gaussian l)
-          (x.coefficients.aliasCoefficients l)).velocity n i j z +
+          0).velocity n i j z +
         (HarmonicWaveInteraction.linearGoodBlock (ActualPrimary.commonContext B)
           (x.coefficients.blocks l) (block x l) (gaussianBlock x l).velocity).velocity n i j z) := by
   apply linearGoodBlock_cancel_uniform (ActualPrimary.commonContext B) x.coefficients.blocks (block x)
     (fun l => HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0)
     (goodBlock x) (fun l => (gaussianBlock x l).velocity)
   · intro n
     exact contDiffOn_const.add ((contDiffOn_const.mul
@@ -717,7 +717,7 @@ theorem linear_bounds (H : Invariant σ x) (hN : ActualCarrierGeometry.geometric
     have hs : SameCarrier (x.coefficients.blocks l)
         (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
           (x.coefficients.blocks l) (x.coefficients.gaussian l)
-          (x.coefficients.aliasCoefficients l)) := ⟨rfl,rfl,rfl⟩
+          0) := ⟨rfl,rfl,rfl⟩
     rw [withCarrier_of_same hs, withCarrier_of_same (good_carrier x l)]
     change _ + _ = _ + (gaussianBlock x l).oscillation n (z,θ) i
     exact congrArg (fun f : Fin 3 → ℝ => f i) (field_cancellation H hN l n (z,θ) hz)

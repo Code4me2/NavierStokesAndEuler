@@ -1,8 +1,10 @@
 import Euler.ParentGeometryChoiceCenter
 import Euler.ParentTargetRenewal
 
-/-! Actual frame renewal for the very correction and flow chosen by
-the geometric packet factories. Center source matching is derived. -/
+/-! Frame renewal for the correction and flow chosen by the geometric packet
+factories: each choice's renewed frame at its target time, matched exactly to
+its `lowGeometry` (`renewal_matches`), from which the successor assembly reads
+the new shear, coupling, tilt and compression. Center source matching is derived. -/
 
 noncomputable section
 
@@ -57,31 +59,10 @@ def renewal : ParentFrame (F.parent.transverseData m hm R support hSupport)
     (fun t _ => S.evolution.centerCurvature_bound CH hCH t)
     I.delta_pos k (fun t _ => center_error I S k hk nextEll hnext hnext1 F hSym t)
 
-local notation "Pnew" => F.renewal hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-
-theorem renewal_matches : RenewalAtTarget (I.geometry.lowGeometry I.halfBall) Pnew := by
+theorem renewal_matches : RenewalAtTarget (I.geometry.lowGeometry I.halfBall)
+    (F.renewal hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport) := by
   unfold renewal
   apply SmoothState.forwardTargetRenewal_matches
-
-theorem renewal_costs : (Pnew).G=K ∧ (Pnew).error=k^(-(1/4 : ℝ)) := ⟨rfl,rfl⟩
-
-theorem renewal_parameters (hTilt : (I.geometry.lowGeometry I.halfBall).tiltError ≤ 1/2) :
-    (Pnew).shear=I.geometry.hchild ∧ 0 < (Pnew).a ∧
-    |(Pnew).a/I.frame.a-1| ≤ (I.geometry.lowGeometry I.halfBall).couplingError ∧
-    0 < (Pnew).sigma ∧
-    |(I.geometry.y⁻¹)^2*(Pnew).sigma^2-1| ≤ (I.geometry.lowGeometry I.halfBall).tiltError := by
-  have H := F.renewal_matches hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-  exact ⟨H.shear_eq I.delta_pos,H.coupling_pos,H.coupling_error,H.sigma_pos hTilt,H.tilt_error hTilt⟩
-
-theorem renewal_compression (e : ℝ) (he : e ≤ 1) :
-    ⟪(Pnew).B (I.geometry.lowGeometry I.halfBall).targetTime
-      (unit ((Pnew).m (I.geometry.lowGeometry I.halfBall).targetTime)),
-      unit ((Pnew).m (I.geometry.lowGeometry I.halfBall).targetTime)⟫_ℝ+e < 0 := by
-  have H := F.renewal_matches hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-  rw [H.background_compression_eq]
-  have hm := (I.geometry.lowGeometry I.halfBall).compression_margin he
-  have hc := (I.geometry.lowGeometry I.halfBall).nextCompression_le
-  linarith only [hm,hc]
 
 end EulerParentPacketFrames.GeometryForwardChoice
 
@@ -115,30 +96,9 @@ def renewal : ParentFrame (F.parent.transverseData m hm R support hSupport)
     (fun t _ => S.evolution.centerCurvature_bound CH hCH t)
     I.delta_pos k (fun t _ => center_error I S k hk nextEll hnext hnext1 F hSym t)
 
-local notation "Pnew" => F.renewal hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-
-theorem renewal_matches : RenewalAtTarget (I.geometry.lowGeometry I.halfBall) Pnew := by
+theorem renewal_matches : RenewalAtTarget (I.geometry.lowGeometry I.halfBall)
+    (F.renewal hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport) := by
   unfold renewal
   apply SmoothState.joinedTargetRenewal_matches
-
-theorem renewal_costs : (Pnew).G=K ∧ (Pnew).error=k^(-(1/4 : ℝ)) := ⟨rfl,rfl⟩
-
-theorem renewal_parameters (hTilt : (I.geometry.lowGeometry I.halfBall).tiltError ≤ 1/2) :
-    (Pnew).shear=I.geometry.hchild ∧ 0 < (Pnew).a ∧
-    |(Pnew).a/I.frame.a-1| ≤ (I.geometry.lowGeometry I.halfBall).couplingError ∧
-    0 < (Pnew).sigma ∧
-    |(I.geometry.y⁻¹)^2*(Pnew).sigma^2-1| ≤ (I.geometry.lowGeometry I.halfBall).tiltError := by
-  have H := F.renewal_matches hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-  exact ⟨H.shear_eq I.delta_pos,H.coupling_pos,H.coupling_error,H.sigma_pos hTilt,H.tilt_error hTilt⟩
-
-theorem renewal_compression (e : ℝ) (he : e ≤ 1) :
-    ⟪(Pnew).B (I.geometry.lowGeometry I.halfBall).targetTime
-      (unit ((Pnew).m (I.geometry.lowGeometry I.halfBall).targetTime)),
-      unit ((Pnew).m (I.geometry.lowGeometry I.halfBall).targetTime)⟫_ℝ+e < 0 := by
-  have H := F.renewal_matches hSym CM CH K hCM0 hK hMK hHK hCM hCH m hm R support hSupport
-  rw [H.background_compression_eq]
-  have hm := (I.geometry.lowGeometry I.halfBall).compression_margin he
-  have hc := (I.geometry.lowGeometry I.halfBall).nextCompression_le
-  linarith only [hm,hc]
 
 end EulerParentPacketFrames.GeometryJoinedChoice

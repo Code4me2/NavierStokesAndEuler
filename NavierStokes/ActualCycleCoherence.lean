@@ -44,8 +44,8 @@ def BlocksCoherent {ι : Type} (v : CycleCoefficients ι) : Prop :=
   ∀ l n m k, CommonWindow.index h n + k = CommonWindow.index h m →
     BlockFieldsOn (PhysicalMeanDomain.slowDomain (overlap n m))
       (bandChartEquiv h n m k) (bandVelocityScale h n m) (bandScale n m)
-      (v.blocks l) (v.blocks l) (v.gaussian l) (v.aliasCoefficients l)
-      (v.gaussian l) (v.aliasCoefficients l) n m
+      (v.blocks l) (v.blocks l) (v.gaussian l) 0
+      (v.gaussian l) 0 n m
 
 def AxisCoherent (a : AxisymmetricAlias) : Prop :=
   ∀ n m k, CommonWindow.index h n + k = CommonWindow.index h m →
@@ -177,7 +177,7 @@ noncomputable def particularSource {B N0 : ℕ} (x : CycleState (Index B N0))
     PhysicalParticularWave.Parameter × PressureStream.Plane → HarmonicCalculus.ComplexVector :=
   ParticularWaveAssembly.residualSource (commonContext B) x.state
     (x.coefficients.blocks (l.2,l.1)) (x.coefficients.gaussian (l.2,l.1))
-    (x.coefficients.aliasCoefficients (l.2,l.1)) j n ∘ cycleAssoc.symm
+    0 j n ∘ cycleAssoc.symm
 
 theorem particularSource_eq {B N0 : ℕ} (x : CycleState (Index B N0))
     (l : ActualParticularStageControls.Label B N0) (j : ℤ) (n : ℕ) :
@@ -325,13 +325,13 @@ theorem source_support (hS : ∀ l n, IsClosed (S l n))
   by_contra hn
   exact hne (HarmonicSourceSupport.residualSource_zero_germ_on (commonContext B) x.state
     (x.coefficients.blocks (l.2,l.1)) (x.coefficients.gaussian (l.2,l.1))
-    (x.coefficients.aliasCoefficients (l.2,l.1)) ActualInitialization.geometry.domain_open
+    0 ActualInitialization.geometry.domain_open
     (hS (l.2,l.1)) (H.inputSupport (l.2,l.1)) j n hp hn).self_of_nhds
 
 include H in
 theorem source_positive_smooth (l : Index B N0) (j : ℤ) (n : ℕ) :
     ContDiffOn ℝ ∞ (ParticularWaveAssembly.residualSource (commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) j n)
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0 j n)
       (LocalRankDefect.positiveDomain standardRegion.carrier) := by
   let U := LocalRankDefect.positiveDomain standardRegion.carrier
   have hu : U ⊆ ActualInitialization.geometry.domain := fun _ hz => hz.2
@@ -356,26 +356,23 @@ theorem source_positive_smooth (l : Index B N0) (j : ℤ) (n : ℕ) :
       (HarmonicWaveInteraction.inclusion (D := Point)).contDiff.contDiffOn
       (fun z hz => ⟨hz.1, standardRegion.time_pos z.2.1 hz.2⟩)
   have hd : (HarmonicResidual.ofBlock (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) n).Regular U :=
+      (x.coefficients.gaussian l) 0 n).Regular U :=
     ⟨hp, fun i => (show HarmonicResidual.SmoothCoefficients U
       ((x.coefficients.blocks l).velocity n i) from fun k => (H.coefficientSmooth l n i k).mono hu).realCoefficients,
       (show HarmonicResidual.SmoothCoefficients U
       ((x.coefficients.blocks l).pressure n) from fun k => (H.pressureCoefficientSmooth l n k).mono hu).realCoefficients⟩
   have hg (i : Fin 3) : HarmonicResidual.SmoothCoefficients U
       (x.coefficients.gaussian l n i) := fun k => (H.gaussianCoefficientSmooth l n i k).mono hu
-  have ha (i : Fin 3) : HarmonicResidual.SmoothCoefficients U
-      (x.coefficients.aliasCoefficients l n i) := by
-    rw [H.aliasCoefficients l]
-    exact HarmonicResidual.smoothCoefficients_zero U
   exact contDiffOn_pi.mpr (fun i => HarmonicResidual.LabelData.waveResidualCoefficients_smooth
-    (LocalRankDefect.positiveDomain_open standardRegion.isOpen) hf _ _ hb hm _ hd hg ha i j)
+    (LocalRankDefect.positiveDomain_open standardRegion.isOpen) hf _ _ hb hm _ hd hg
+    (fun _ => HarmonicResidual.smoothCoefficients_zero U) i j)
 
 include H in
 theorem source_smooth (hS : ∀ l n, IsClosed (S l n))
     (hpos : ∀ l n z, z ∈ ActualInitialization.geometry.domain → z ∈ S l n → 0 < z.1)
     (l : Index B N0) (j : ℤ) (n : ℕ) :
     ContDiffOn ℝ ∞ (ParticularWaveAssembly.residualSource (commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) j n)
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0 j n)
       ActualInitialization.geometry.domain := by
   apply ActualInitialization.geometry.domain_open.contDiffOn_iff.mpr
   intro z hz
@@ -384,7 +381,7 @@ theorem source_smooth (hS : ∀ l n, IsClosed (S l n))
       ((LocalRankDefect.positiveDomain_open standardRegion.isOpen).mem_nhds ⟨hr,hz⟩)
   · apply contDiffAt_const.congr_of_eventuallyEq
     exact HarmonicSourceSupport.residualSource_zero_germ_on (commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
       ActualInitialization.geometry.domain_open (hS l) (H.inputSupport l) j n hz
       (fun hc => hr (hpos l n z hz hc))
 

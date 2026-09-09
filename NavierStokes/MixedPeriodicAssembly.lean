@@ -1,20 +1,36 @@
-import NavierStokes.PeriodicResidualLimits
+import NavierStokes.R3CompactCandidate
+import NavierStokes.JointResidualLimits
+import NavierStokes.SpatialLocalization
 import NavierStokes.DirectAngularDiagonal
+import Mathlib.Algebra.Order.Round
 
 /-!
-# Spatial localization of a curl field and a direct angular field
+# The compact candidate from the mixed sums, and its lattice periodization
 
 The manuscript cuts direct angular means as vector fields, separately from
 the potentials whose curls give the other components.  The construction here
-keeps that distinction.  The existing spatial cutoff is axisymmetric; its
-action on direct angular means can therefore be supplied by the angular-field
-calculus.  No compactly supported potential for an arbitrary angular mean is
-postulated.
+keeps that distinction (`cutVelocity`).  The existing spatial cutoff is
+axisymmetric; its action on direct angular means can therefore be supplied by
+the angular-field calculus.  No compactly supported potential for an arbitrary
+angular mean is postulated.
 
-The endpoint results below take the original mixed fields, their actual
-one-sided extensions, and the joint residual limits as inputs.  They construct
-the periodic fields and their residual limits.  They do not establish the
-correction iteration or the existence of singular incoming fields.
+The inputs are the original mixed fields `A`, `v`, `p`, smooth before time
+one, their one-sided extensions off the origin, and the joint vanishing of the
+residual jets at the origin.  The order of construction is:
+
+1. the compact whole-space candidate on the cut fields, supported in
+   `SpatialLocalization.supportCylinder` (`exists_compact_candidate`, through
+   `R3CompactCandidate.of_limits`); the force's jets at time one are the
+   boundary limits of the cut residual (`JointResidualLimits.boundaryLimits`);
+2. the periodic candidate as the lattice sum of the compact one
+   (`candidate_of_periodization`, `exists_candidate_force`).
+
+The support cylinder lies in `PeriodicLocalization.innerCube (1/4)`, so the
+lattice translates of the cut fields have disjoint supports: the periodized
+fields agree with a single translate near every point, and every property of
+the periodic candidate is checked on one copy after moving the point to its
+fundamental-cube representative.  Nothing here establishes the correction
+iteration or the existence of the singular incoming fields.
 -/
 
 noncomputable section
@@ -44,9 +60,37 @@ def cutResidual (A v : VelocityField) (p : PressureField) : VelocityField :=
   fun z => navierStokesResidual (cutVelocity A v)
     (SpatialLocalization.cutPressure p) z.1 z.2
 
-def periodicResidual (A v : VelocityField) (p : PressureField) : VelocityField :=
-  fun z => navierStokesResidual (periodicVelocity A v)
-    (SpatialLocalization.periodicPressure p) z.1 z.2
+/-! ## Fundamental-cube representatives -/
+
+/-- The nearest lattice point to `x`; `representative x` is `x` moved into the
+inner cube by that lattice translation. Its discontinuities are harmless: it is
+only used to evaluate periodic fields at one point of each lattice orbit. -/
+def nearestIndex (x : Space) : Fin 3 → ℤ := fun i => round (x i)
+
+def representative (x : Space) : Space :=
+  x - CompactForceDecay.integerShift (nearestIndex x)
+
+theorem representative_mem_innerCube (x : Space) :
+    representative x ∈ PeriodicLocalization.innerCube (1 / 4) := by
+  intro i
+  have h := abs_sub_round (x i)
+  change |(representative x) i| < 1 - 1 / 4
+  simp only [representative, PiLp.sub_apply, CompactForceDecay.integerShift_apply, nearestIndex]
+  linarith
+
+@[simp] theorem representative_zero : representative (0 : Space) = 0 := by
+  ext i
+  simp [representative, nearestIndex, CompactForceDecay.integerShift_apply]
+
+/-- A field with unit spatial periods at time `t` takes the same value at a
+point and at its representative. -/
+theorem eq_representative {V : Type*} {g : SpaceTime → V} {times : Set ℝ}
+    (hg : UnitSpatialPeriodsOn times g) {t : ℝ} (ht : t ∈ times) (x : Space) :
+    g (t, representative x) = g (t, x) :=
+  (CompactForceDecay.periodic_integerShift (g := fun z : SpaceTime => g (t, z.2))
+    (fun _ _ y i => hg t ht y i) t (nearestIndex x)).sub_eq x
+
+/-! ## Smoothness, periods and local agreement of the periodized fields -/
 
 theorem periodicVelocity_smoothOn {A v : VelocityField} {times : Set ℝ}
     (hA : ContDiffOn ℝ ∞ A (times ×ˢ (univ : Set Space)))
@@ -88,11 +132,23 @@ theorem periodicVelocity_origin (A v : VelocityField) (t : ℝ) :
     periodicVelocity A v (t, 0) = velocity A v (t, 0) :=
   (periodicVelocity_eventuallyEq A v SpatialLocalization.zero_mem_plateau).self_of_nhds
 
-theorem periodicResidual_eventuallyEq_cut (A v : VelocityField) (p : PressureField)
-    {z : SpaceTime} (hz : z.2 ∈ PeriodicLocalization.innerCube (1 / 4)) :
-    periodicResidual A v p =ᶠ[𝓝 z] cutResidual A v p :=
-  ResidualRegularity.residual_eventuallyEq (periodicVelocity_eventuallyEq_cut A v hz)
-    (SpatialLocalization.periodicPressure_eventuallyEq_cut p hz)
+theorem cutVelocity_origin (A v : VelocityField) (t : ℝ) :
+    cutVelocity A v (t, 0) = velocity A v (t, 0) :=
+  (cutVelocity_eventuallyEq A v SpatialLocalization.zero_mem_plateau).self_of_nhds
+
+theorem activated_periodicVelocity_eventuallyEq_cut (A v : VelocityField) (z : SpaceTime)
+    (hz : z.2 ∈ PeriodicLocalization.innerCube (1 / 4)) :
+    TimeLocalization.activatedVelocity (periodicVelocity A v) =ᶠ[𝓝 z]
+      TimeLocalization.activatedVelocity (cutVelocity A v) := by
+  filter_upwards [periodicVelocity_eventuallyEq_cut A v hz] with w hw
+  simp only [TimeLocalization.activatedVelocity, hw]
+
+theorem activated_periodicPressure_eventuallyEq_cut (p : PressureField) (z : SpaceTime)
+    (hz : z.2 ∈ PeriodicLocalization.innerCube (1 / 4)) :
+    TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure p) =ᶠ[𝓝 z]
+      TimeLocalization.activatedPressure (SpatialLocalization.cutPressure p) := by
+  filter_upwards [SpatialLocalization.periodicPressure_eventuallyEq_cut p hz] with w hw
+  simp only [TimeLocalization.activatedPressure, hw]
 
 theorem cutResidual_eventuallyEq_original (A v : VelocityField) (p : PressureField)
     {z : SpaceTime} (hz : z.2 ∈ SpatialLocalization.plateau) :
@@ -114,26 +170,6 @@ theorem spatialDivergence_periodic {u : VelocityField} {times : Set ℝ}
   dsimp only at he ⊢
   rw [he]
 
-/-- Disjoint support permits checking the divergence on one local copy.
-No convergence or differentiability of a formal infinite sum is assumed. -/
-theorem periodize_divergence_free {v : VelocityField}
-    (hs : PeriodicLocalization.SupportedInCube (1 / 4) v) (t : ℝ)
-    (hd : ∀ x, spatialDivergence v t x = 0) (x : Space) :
-    spatialDivergence (PeriodicLocalization.periodize v) t x = 0 := by
-  have hp := spatialDivergence_periodic
-    (PeriodicLocalization.unitSpatialPeriodsOn_periodize v univ)
-  have he := PeriodicLocalization.periodize_eventuallyEq hs
-    (z := (t, PeriodicResidualLimits.representative x))
-    (PeriodicResidualLimits.representative_mem_innerCube x)
-  calc
-    _ = spatialDivergence (PeriodicLocalization.periodize v) t
-        (PeriodicResidualLimits.representative x) :=
-      ((CompactForceDecay.periodic_integerShift hp t
-        (PeriodicResidualLimits.nearestIndex x)).sub_eq x).symm
-    _ = spatialDivergence v t (PeriodicResidualLimits.representative x) :=
-      spatialDivergence_congr he
-    _ = 0 := hd _
-
 theorem spatialDivergence_add {u v : VelocityField} {t : ℝ} {x : Space}
     (hu : DifferentiableAt ℝ (fun y => u (t, y)) x)
     (hv : DifferentiableAt ℝ (fun y => v (t, y)) x) :
@@ -142,26 +178,92 @@ theorem spatialDivergence_add {u v : VelocityField} {t : ℝ} {x : Space}
   simp only [spatialDivergence, spatialDerivative, fderiv_fun_add hu hv,
     _root_.add_apply, PiLp.add_apply, Finset.sum_add_distrib]
 
-/-- The angular-field calculus supplies `hd` from axisymmetry.  The curl
-component and the lattice periodization introduce no new divergence. -/
-theorem periodicVelocity_divergence_free {A v : VelocityField} {times : Set ℝ}
+/-! ## The cut fields: smoothness, support, divergence, blowup -/
+
+theorem cutVelocity_smoothOn {A v : VelocityField} {times : Set ℝ}
     (hA : ContDiffOn ℝ ∞ A (times ×ˢ (univ : Set Space)))
-    (hv : ContDiffOn ℝ ∞ v (times ×ˢ (univ : Set Space)))
-    (hd : ∀ t ∈ times, ∀ x, spatialDivergence (SpatialLocalization.cutPotential v) t x = 0)
-    {t : ℝ} (ht : t ∈ times) (x : Space) :
-    spatialDivergence (periodicVelocity A v) t x = 0 := by
+    (hv : ContDiffOn ℝ ∞ v (times ×ˢ (univ : Set Space))) :
+    ContDiffOn ℝ ∞ (cutVelocity A v) (times ×ˢ (univ : Set Space)) := by
+  have hc : ContDiffOn ℝ ∞ (fun z : SpaceTime => SpatialLocalization.spatialCutoff z.2)
+      (times ×ˢ (univ : Set Space)) :=
+    (SpatialLocalization.spatialCutoff_contDiff.comp contDiff_snd).contDiffOn
+  exact (SpatialCurl.contDiffOn_spatialCurl (hc.smul hA) (by simp)).add (hc.smul hv)
+
+theorem cutPressure_smoothOn {p : PressureField} {times : Set ℝ}
+    (hp : ContDiffOn ℝ ∞ p (times ×ˢ (univ : Set Space))) :
+    ContDiffOn ℝ ∞ (SpatialLocalization.cutPressure p) (times ×ˢ (univ : Set Space)) :=
+  (SpatialLocalization.spatialCutoff_contDiff.comp contDiff_snd).contDiffOn.mul hp
+
+theorem cutVelocity_zero_outside (A v : VelocityField) (t : ℝ) {x : Space}
+    (hx : x ∉ SpatialLocalization.supportCylinder) : cutVelocity A v (t, x) = 0 := by
+  have hcurl : SpatialLocalization.cutVelocity A (t, x) = 0 :=
+    image_eq_zero_of_notMem_tsupport (f := fun y => SpatialLocalization.cutVelocity A (t, y))
+      (fun hm => hx (SpatialLocalization.cutVelocity_tsupport A t hm))
+  have hc : SpatialLocalization.spatialCutoff x = 0 := by
+    by_contra hn
+    exact hx (SpatialLocalization.spatialCutoff_support_subset hn)
+  simp [cutVelocity, SpatialLocalization.cutPotential, hcurl, hc]
+
+theorem cutPressure_zero_outside (p : PressureField) (t : ℝ) {x : Space}
+    (hx : x ∉ SpatialLocalization.supportCylinder) :
+    SpatialLocalization.cutPressure p (t, x) = 0 := by
+  have hc : SpatialLocalization.spatialCutoff x = 0 := by
+    by_contra hn
+    exact hx (SpatialLocalization.spatialCutoff_support_subset hn)
+  simp [SpatialLocalization.cutPressure, hc]
+
+theorem activated_cutVelocity_zero_outside (A v : VelocityField) (t : ℝ) {x : Space}
+    (hx : x ∉ SpatialLocalization.supportCylinder) :
+    TimeLocalization.activatedVelocity (cutVelocity A v) (t, x) = 0 := by
+  simp [TimeLocalization.activatedVelocity, cutVelocity_zero_outside A v t hx]
+
+/-- Vanishing off the support cylinder is a support bound in the cube of
+half-width `1/4`, the bound `PeriodicLocalization` needs. -/
+theorem supportedInCube_of_zero_outside {V : Type*} [NormedAddCommGroup V] {g : SpaceTime → V}
+    (hg : ∀ t : ℝ, ∀ x : Space, x ∉ SpatialLocalization.supportCylinder → g (t, x) = 0) :
+    PeriodicLocalization.SupportedInCube (1 / 4) g := by
+  intro z hz i
+  refine SpatialLocalization.supportCylinder_coordinate_bound ?_ i
+  by_contra hx
+  exact hz (hg z.1 z.2 hx)
+
+/-- The angular-field calculus supplies `hd` from axisymmetry; the curl
+component introduces no divergence. -/
+theorem cutVelocity_divergence_free {A v : VelocityField}
+    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
+    (hv : ContDiffOn ℝ ∞ v (SpacetimeEndpoint.openPast 1))
+    (hd : ∀ t < 1, ∀ x, spatialDivergence (SpatialLocalization.cutPotential v) t x = 0)
+    {t : ℝ} (ht : t < 1) (x : Space) : spatialDivergence (cutVelocity A v) t x = 0 := by
+  have hc : ContDiffOn ℝ ∞ (fun z : SpaceTime => SpatialLocalization.spatialCutoff z.2)
+      (Iio 1 ×ˢ (univ : Set Space)) :=
+    (SpatialLocalization.spatialCutoff_contDiff.comp contDiff_snd).contDiffOn
   have hleft := SpatialCurl.contDiff_spatialSlice
-    (SpatialLocalization.periodicVelocity_smoothOn hA) ht
-  have hright := SpatialCurl.contDiff_spatialSlice
-    (PeriodicLocalization.contDiffOn_periodize (SpatialLocalization.cutPotential_supported v)
-      ((SpatialLocalization.spatialCutoff_contDiff.comp contDiff_snd).contDiffOn.smul hv)) ht
-  change spatialDivergence (fun z => SpatialLocalization.periodicVelocity A z +
-    PeriodicLocalization.periodize (SpatialLocalization.cutPotential v) z) t x = 0
+    (SpatialCurl.contDiffOn_spatialCurl (m := ∞) (hc.smul hA) (by simp)) ht
+  have hright := SpatialCurl.contDiff_spatialSlice (hc.smul hv) ht
+  change spatialDivergence (fun z =>
+    SpatialCurl.spatialCurl ((fun z : SpaceTime => SpatialLocalization.spatialCutoff z.2) • A) z +
+      ((fun z : SpaceTime => SpatialLocalization.spatialCutoff z.2) • v) z) t x = 0
   rw [spatialDivergence_add
     (hleft.differentiable (by simp) x) (hright.differentiable (by simp) x),
-    SpatialLocalization.periodicVelocity_divergence_free hA ht x,
-    periodize_divergence_free (SpatialLocalization.cutPotential_supported v) t (hd t ht) x,
-    add_zero]
+    SpatialCurl.spatialDivergence_spatialCurl_on ((hc.smul hA).of_le (natCast_le_infty 2)) ht x]
+  change 0 + spatialDivergence (SpatialLocalization.cutPotential v) t x = 0
+  rw [hd t ht x, add_zero]
+
+theorem cutVelocity_speed_unbounded {A v : VelocityField}
+    (haxis : Tendsto (fun t : ℝ => ‖velocity A v (t, 0)‖) (𝓝[<] 1) atTop) :
+    SpeedUnboundedAtOne (cutVelocity A v) := by
+  have hb : Tendsto (fun t : ℝ => ‖cutVelocity A v (t, 0)‖) (𝓝[<] 1) atTop := by
+    simpa only [cutVelocity_origin] using haxis
+  intro M _ δ hδ
+  have hlow : Ioi (max 0 (1 - δ)) ∈ 𝓝[<] (1 : ℝ) :=
+    mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds (max_lt (by norm_num) (by linarith)))
+  have hlarge := hb.eventually (eventually_gt_atTop M)
+  have hbefore : ∀ᶠ t in 𝓝[<] (1 : ℝ), t < 1 := self_mem_nhdsWithin
+  obtain ⟨t, ht, hMt, hlo⟩ := (hbefore.and (hlarge.and hlow)).exists
+  exact ⟨t, 0, ⟨(le_max_left _ _).trans_lt hlo, ht⟩,
+    (le_max_right _ _).trans_lt hlo, hMt⟩
+
+/-! ## The residual of the cut fields: local extensions and jets -/
 
 theorem cutResidual_smoothOn {A v : VelocityField} {p : PressureField} {U : Set SpaceTime}
     (hU : IsOpen U) (hA : ContDiffOn ℝ ∞ A U)
@@ -237,94 +339,203 @@ theorem cutResidual_vanishingJointJets {A v : VelocityField} {p : PressureField}
     (cutResidual_eventuallyEq_original A v p (z := (1, 0))
       SpatialLocalization.zero_mem_plateau) n).filter_mono nhdsWithin_le_nhds).symm
 
-theorem periodicResidual_periodic (A v : VelocityField) (p : PressureField) :
-    UnitSpatialPeriodsOn univ (periodicResidual A v p) :=
-  ResidualRegularity.residual_periods isOpen_univ
-    (periodicVelocity_periodic A v univ) (SpatialLocalization.periodicPressure_periodic p univ)
-
-theorem periodicResidual_jets_locally_cut (A v : VelocityField) (p : PressureField)
-    (x : Space) (n : ℕ) :
-    iteratedFDeriv ℝ n (periodicResidual A v p) =ᶠ[𝓝 ((1 : ℝ), x)]
-      (fun z => iteratedFDeriv ℝ n (cutResidual A v p)
-        (z.1, z.2 - CompactForceDecay.integerShift (PeriodicResidualLimits.nearestIndex x))) := by
-  have hp := CompactForceDecay.iteratedFDeriv_periods (periodicResidual_periodic A v p) n
-  have hm : Continuous (fun z : SpaceTime =>
-      z.2 - CompactForceDecay.integerShift (PeriodicResidualLimits.nearestIndex x)) :=
-    continuous_snd.sub continuous_const
-  have he : ∀ᶠ z : SpaceTime in 𝓝 ((1 : ℝ), x),
-      z.2 - CompactForceDecay.integerShift (PeriodicResidualLimits.nearestIndex x) ∈
-        PeriodicLocalization.innerCube (1 / 4) :=
-    hm.continuousAt.preimage_mem_nhds ((PeriodicLocalization.isOpen_innerCube _).mem_nhds
-      (PeriodicResidualLimits.representative_mem_innerCube x))
-  filter_upwards [he] with z hz
-  rw [← (CompactForceDecay.periodic_integerShift hp z.1
-    (PeriodicResidualLimits.nearestIndex x)).sub_eq z.2]
-  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (periodicResidual_eventuallyEq_cut A v p hz) n).self_of_nhds
-
-/-- Constructed tensor limits for every point, including all lattice copies
-of the singular point.  No continuity of the chosen representative is used. -/
+/-- The jets of the periodic force at time one: the boundary limits of the
+cut residual, read at the representative of each point. At every lattice
+copy of the singular point they vanish. -/
 def boundaryLimits (A v : VelocityField) (p : PressureField)
     (eA : JointResidualLimits.AwayExtensions A)
     (ev : JointResidualLimits.AwayExtensions v)
     (ep : JointResidualLimits.AwayExtensions p) (x : Space) :
     FormalMultilinearSeries ℝ SpaceTime Space :=
   JointResidualLimits.boundaryLimits (cutResidual A v p)
-    (cutResidual_awayExtensions eA ev ep) (PeriodicResidualLimits.representative x)
+    (cutResidual_awayExtensions eA ev ep) (representative x)
 
 @[simp] theorem boundaryLimits_zero (A v : VelocityField) (p : PressureField)
     (eA : JointResidualLimits.AwayExtensions A)
     (ev : JointResidualLimits.AwayExtensions v)
     (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
     boundaryLimits A v p eA ev ep 0 n = 0 := by
-  simp only [boundaryLimits, PeriodicResidualLimits.representative_zero,
-    JointResidualLimits.boundaryLimits_zero]
+  simp only [boundaryLimits, representative_zero, JointResidualLimits.boundaryLimits_zero]
 
-theorem boundaryLimits_joint {A v : VelocityField} {p : PressureField}
+/-! ## The compact candidate -/
+
+/-- The compact whole-space candidate on the cut fields. Its force is the
+Taylor--Borel extension of the cut residual, supported in the cube of
+half-width `1/4` at every time, with the boundary limits of the cut residual
+as its jets at time one. The two inputs beyond smoothness and the residual
+limits, divergence-freeness and unbounded speed of the activated cut velocity,
+are supplied by `cutVelocity_divergence_free` and `cutVelocity_speed_unbounded`
+in the construction. The compact candidate is recorded in witness data before
+periodization and later extracted by
+`R3CompactCandidate.selected_compact_candidate`. -/
+theorem exists_compact_candidate {A v : VelocityField} {p : PressureField}
+    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
+    (hv : ContDiffOn ℝ ∞ v (SpacetimeEndpoint.openPast 1))
+    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
     (hz : JointResidualLimits.VanishingJointJets (originalResidual A v p))
     (eA : JointResidualLimits.AwayExtensions A)
     (ev : JointResidualLimits.AwayExtensions v)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) (x : Space) :
-    Tendsto (iteratedFDeriv ℝ n (periodicResidual A v p))
-      (𝓝[SpacetimeEndpoint.openPast 1] (1, x))
-      (𝓝 (boundaryLimits A v p eA ev ep x n)) := by
-  have hlim := JointResidualLimits.boundaryLimits_joint
-    (cutResidual_vanishingJointJets hz) (cutResidual_awayExtensions eA ev ep) n
-    (PeriodicResidualLimits.representative x)
-  have hc := hlim.comp (PeriodicResidualLimits.spatial_sub_tendsto_past
-    (CompactForceDecay.integerShift (PeriodicResidualLimits.nearestIndex x)) x)
-  exact hc.congr' ((periodicResidual_jets_locally_cut A v p x n).filter_mono
-    nhdsWithin_le_nhds).symm
+    (ep : JointResidualLimits.AwayExtensions p)
+    (hd : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space,
+      spatialDivergence (TimeLocalization.activatedVelocity (cutVelocity A v)) t x = 0)
+    (hunbounded : SpeedUnboundedAtOne (TimeLocalization.activatedVelocity (cutVelocity A v))) :
+    ∃ F : VelocityField,
+      R3CompactCandidate.Properties (TimeLocalization.activatedVelocity (cutVelocity A v))
+        (TimeLocalization.activatedPressure (SpatialLocalization.cutPressure p)) F ∧
+      ContDiff ℝ ∞ F ∧
+      PeriodicLocalization.SupportedInCube (1 / 4) F ∧
+      (∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n F (1, x) =
+        JointResidualLimits.boundaryLimits (cutResidual A v p)
+          (cutResidual_awayExtensions eA ev ep) x n) := by
+  have hu : ContDiffOn ℝ ∞ (cutVelocity A v) preSingularDomain :=
+    cutVelocity_smoothOn (hA.mono (fun _ h => ⟨h.1.2, h.2⟩)) (hv.mono (fun _ h => ⟨h.1.2, h.2⟩))
+  have hpc : ContDiffOn ℝ ∞ (SpatialLocalization.cutPressure p) preSingularDomain :=
+    cutPressure_smoothOn (hp.mono (fun _ h => ⟨h.1.2, h.2⟩))
+  let L := JointResidualLimits.boundaryLimits (cutResidual A v p)
+    (cutResidual_awayExtensions eA ev ep)
+  have hlim : CandidateFromLimits.ResidualLimits (cutVelocity A v)
+      (SpatialLocalization.cutPressure p) L := by
+    intro n
+    apply JointResidualLimits.locallyUniform_of_joint_limits
+      (F := iteratedFDeriv ℝ n (cutResidual A v p))
+    intro x
+    simpa only [JointResidualLimits.past_filter] using
+      JointResidualLimits.boundaryLimits_joint (cutResidual_vanishingJointJets hz)
+        (cutResidual_awayExtensions eA ev ep) n x
+  have hus : ∀ t : ℝ, ∀ x : Space, x ∉ SpatialLocalization.supportCylinder →
+      cutVelocity A v (t, x) = 0 := fun t x hx => cutVelocity_zero_outside A v t hx
+  have hps : ∀ t : ℝ, ∀ x : Space, x ∉ SpatialLocalization.supportCylinder →
+      SpatialLocalization.cutPressure p (t, x) = 0 := fun t x hx => cutPressure_zero_outside p t hx
+  refine ⟨CandidateFromLimits.force _ _ hu hpc L hlim,
+    R3CompactCandidate.of_limits hu hpc SpatialLocalization.isCompact_supportCylinder hus hps
+      L hlim hd hunbounded,
+    CandidateFromLimits.force_smooth _ _ hu hpc L hlim, ?_,
+    CandidateFromLimits.force_boundary_jets _ _ hu hpc L hlim⟩
+  exact supportedInCube_of_zero_outside (fun t x hx =>
+    CandidateFromLimits.force_zero_outside _ _ hu hpc L hlim
+      SpatialLocalization.isClosed_supportCylinder hus hps hx t)
 
+/-! ## Lattice periodization -/
 
-theorem boundaryLimits_locallyUniform {A v : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A v p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ev : JointResidualLimits.AwayExtensions v)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    TendstoLocallyUniformly (fun t x => iteratedFDeriv ℝ n (periodicResidual A v p) (t, x))
-      (fun x => boundaryLimits A v p eA ev ep x n) (𝓝[<] (1 : ℝ)) := by
-  apply JointResidualLimits.locallyUniform_of_joint_limits
-    (F := iteratedFDeriv ℝ n (periodicResidual A v p))
+/-- The jets of a periodized field at time one are the jets of one translate. -/
+theorem periodize_jets {f : VelocityField} (hf : PeriodicLocalization.SupportedInCube (1 / 4) f)
+    (n : ℕ) (x : Space) :
+    iteratedFDeriv ℝ n (PeriodicLocalization.periodize f) (1, x) =
+      iteratedFDeriv ℝ n f (1, representative x) := by
+  rw [← eq_representative (CompactForceDecay.iteratedFDeriv_periods
+    (PeriodicLocalization.unitSpatialPeriodsOn_periodize f univ) n) (mem_univ (1 : ℝ)) x]
+  exact (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
+    (PeriodicLocalization.periodize_eventuallyEq hf (z := (1, representative x))
+      (representative_mem_innerCube x)) n).self_of_nhds
+
+/-- Initial data survives the compact-to-periodic localization. -/
+theorem periodized_zero_initial {u U : VelocityField}
+    (hzero : ∀ x : Space, u (0, x) = 0)
+    (hUper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) U)
+    (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u) :
+    ∀ x : Space, U (0, x) = 0 := by
   intro x
-  simpa only [JointResidualLimits.past_filter] using boundaryLimits_joint hz eA ev ep n x
+  rw [← eq_representative hUper ⟨le_rfl, zero_lt_one⟩ x,
+    (heu (0, representative x) (representative_mem_innerCube x)).self_of_nhds]
+  exact hzero _
 
-theorem periodicVelocity_speed_unbounded {A v : VelocityField}
-    (haxis : Tendsto (fun t : ℝ => ‖velocity A v (t, 0)‖) (𝓝[<] 1) atTop) :
-    SpeedUnboundedAtOne (periodicVelocity A v) := by
-  have hb : Tendsto (fun t : ℝ => ‖periodicVelocity A v (t, 0)‖) (𝓝[<] 1) atTop := by
-    simpa only [periodicVelocity_origin] using haxis
-  intro M _ δ hδ
-  have hlow : Ioi (max 0 (1 - δ)) ∈ 𝓝[<] (1 : ℝ) :=
-    mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds (max_lt (by norm_num) (by linarith)))
-  have hlarge := hb.eventually (eventually_gt_atTop M)
-  have hbefore : ∀ᶠ t in 𝓝[<] (1 : ℝ), t < 1 := self_mem_nhdsWithin
-  obtain ⟨t, ht, hMt, hlo⟩ := (hbefore.and (hlarge.and hlow)).exists
-  exact ⟨t, 0, ⟨(le_max_left _ _).trans_lt hlo, ht⟩,
-    (le_max_right _ _).trans_lt hlo, hMt⟩
+/-- Future time support survives periodization. -/
+theorem periodized_force_time_support {f : VelocityField}
+    (hforce : CompactFutureTimeSupport f) :
+    CompactFutureTimeSupport (PeriodicLocalization.periodize f) := by
+  obtain ⟨T, hT, hz⟩ := hforce
+  refine ⟨T, hT, fun t ht x => ?_⟩
+  simp [PeriodicLocalization.periodize, PeriodicLocalization.translate, hz t ht]
 
-/-- Apply the existing force construction to the actual mixed periodic
-velocity.  All remaining analytic assumptions concern the incoming fields. -/
+/-- Divergence-freeness can be checked on the representative copy. -/
+theorem periodized_divergence_free {u U : VelocityField}
+    (hdiv : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence u t x = 0)
+    (hUper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) U)
+    (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u) :
+    ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence U t x = 0 := by
+  intro t ht x
+  calc spatialDivergence U t x = spatialDivergence U t (representative x) :=
+        (eq_representative (spatialDivergence_periodic hUper) ht x).symm
+    _ = spatialDivergence u t (representative x) :=
+        spatialDivergence_congr (heu (t, representative x) (representative_mem_innerCube x))
+    _ = 0 := hdiv t ht _
+
+/-- The equation can be checked on the representative copy. -/
+theorem periodized_navier_stokes {u U : VelocityField} {p P : PressureField} {f : VelocityField}
+    (hf : PeriodicLocalization.SupportedInCube (1 / 4) f)
+    (hns : ∀ t ∈ Ico (0 : ℝ) 1, 0 < t → ∀ x : Space,
+      navierStokesResidual u p t x = f (t, x))
+    (hUper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) U)
+    (hPper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) P)
+    (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u)
+    (hep : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → P =ᶠ[𝓝 z] p) :
+    ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x : Space,
+      navierStokesResidual U P t x = PeriodicLocalization.periodize f (t, x) := by
+  intro t ht x
+  have hUo : UnitSpatialPeriodsOn (Ioo (0 : ℝ) 1) U := fun s hs => hUper s ⟨hs.1.le, hs.2⟩
+  have hPo : UnitSpatialPeriodsOn (Ioo (0 : ℝ) 1) P := fun s hs => hPper s ⟨hs.1.le, hs.2⟩
+  have hper := PeriodicLocalization.unitSpatialPeriodsOn_periodize f univ
+  let xr := representative x
+  have hresper : navierStokesResidual U P t x = navierStokesResidual U P t xr :=
+    (eq_representative (ResidualRegularity.residual_periods isOpen_Ioo hUo hPo) ht x).symm
+  have hlocU : U =ᶠ[𝓝 (t, xr)] u := heu (t, xr) (representative_mem_innerCube x)
+  have hlocP : P =ᶠ[𝓝 (t, xr)] p := hep (t, xr) (representative_mem_innerCube x)
+  have hresloc : navierStokesResidual U P t xr = navierStokesResidual u p t xr := by
+    exact ResidualRegularity.residual_congr (z := (t, xr)) hlocU hlocP
+  have hcompact : navierStokesResidual u p t xr = f (t, xr) := hns t ⟨ht.1.le, ht.2⟩ ht.1 xr
+  have hinner : f (t, xr) = PeriodicLocalization.periodize f (t, xr) :=
+    (PeriodicLocalization.periodize_eq_on_innerCube hf (representative_mem_innerCube x) t).symm
+  have hforceper : PeriodicLocalization.periodize f (t, xr) =
+      PeriodicLocalization.periodize f (t, x) := eq_representative hper (mem_univ t) x
+  exact hresper.trans (hresloc.trans (hcompact.trans (hinner.trans hforceper)))
+
+/-- The compact blow-up points already lie in the inner cube by support. -/
+theorem periodized_speed_unbounded {u U : VelocityField}
+    (hu : PeriodicLocalization.SupportedInCube (1 / 4) u)
+    (hspeed : SpeedUnboundedAtOne u)
+    (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u) :
+    SpeedUnboundedAtOne U := by
+  intro M hM δ hδ
+  obtain ⟨t, x, ht, hnear, hlarge⟩ := hspeed M hM δ hδ
+  have hx : x ∈ PeriodicLocalization.innerCube (1 / 4) := by
+    intro i
+    have hne : u (t, x) ≠ 0 := by
+      intro h0
+      rw [h0, norm_zero] at hlarge
+      exact absurd hlarge (not_lt.mpr hM.le)
+    have hb : |x i| ≤ 1 / 4 := hu (t, x) hne i
+    change |x i| < 1 - 1 / 4
+    linarith
+  exact ⟨t, x, ht, hnear, by rwa [(heu (t, x) hx).self_of_nhds]⟩
+
+/-- Periodization of a compactly supported candidate. -/
+theorem candidate_of_periodization {u : VelocityField} {p : PressureField} {f : VelocityField}
+    (h : R3CompactCandidate.Properties u p f)
+    (hu : PeriodicLocalization.SupportedInCube (1 / 4) u)
+    (hf : PeriodicLocalization.SupportedInCube (1 / 4) f)
+    {U : VelocityField} {P : PressureField}
+    (hU : ContDiffOn ℝ ∞ U preSingularDomain) (hP : ContDiffOn ℝ ∞ P preSingularDomain)
+    (hUper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) U)
+    (hPper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) P)
+    (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u)
+    (hep : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → P =ᶠ[𝓝 z] p) :
+    CandidateProperties U P (PeriodicLocalization.periodize f) where
+  velocity_smooth := hU
+  pressure_smooth := hP
+  force_smooth := PeriodicLocalization.contDiffOn_periodize hf h.force_smooth
+  velocity_periodic := hUper
+  pressure_periodic := hPper
+  force_periodic := PeriodicLocalization.unitSpatialPeriodsOn_periodize f _
+  zero_initial_velocity := periodized_zero_initial h.zero_initial_velocity hUper heu
+  force_time_support := periodized_force_time_support h.force_time_support
+  divergence_free := periodized_divergence_free h.divergence_free hUper heu
+  navier_stokes := periodized_navier_stokes hf h.navier_stokes hUper hPper heu hep
+  speed_unbounded := periodized_speed_unbounded hu h.speed_unbounded heu
+
+/-- The periodic candidate: the compact candidate of `exists_compact_candidate`,
+periodized. Its force is smooth on all of spacetime and its jets at time one
+are `boundaryLimits`. All remaining analytic assumptions concern the incoming
+fields. -/
 theorem exists_candidate_force {A v : VelocityField} {p : PressureField}
     (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
     (hv : ContDiffOn ℝ ∞ v (SpacetimeEndpoint.openPast 1))
@@ -341,23 +552,33 @@ theorem exists_candidate_force {A v : VelocityField} {p : PressureField}
       ContDiff ℝ ∞ F ∧
       (∀ n : ℕ, ∀ x : Space,
         iteratedFDeriv ℝ n F (1, x) = boundaryLimits A v p eA ev ep x n) := by
-  have hu : ContDiffOn ℝ ∞ (periodicVelocity A v) preSingularDomain :=
-    periodicVelocity_smoothOn (hA.mono (fun _ h => ⟨h.1.2, h.2⟩))
-      (hv.mono (fun _ h => ⟨h.1.2, h.2⟩))
-  have hpc : ContDiffOn ℝ ∞ (SpatialLocalization.periodicPressure p) preSingularDomain :=
-    SpatialLocalization.periodicPressure_smoothOn (hp.mono (fun _ h => ⟨h.1.2, h.2⟩))
-  let L := boundaryLimits A v p eA ev ep
-  have hlim := boundaryLimits_locallyUniform hz eA ev ep
-  refine ⟨CandidateFromLimits.force _ _ hu hpc L hlim, ?_,
-    CandidateFromLimits.force_smooth _ _ hu hpc L hlim,
-    CandidateFromLimits.force_boundary_jets _ _ hu hpc L hlim⟩
-  apply CandidateFromLimits.candidate_properties _ _ hu hpc L hlim
-    (periodicVelocity_periodic A v _) (SpatialLocalization.periodicPressure_periodic p _) ?_
-    (periodicVelocity_speed_unbounded haxis)
-  intro t ht x
-  exact periodicVelocity_divergence_free hA hv hd ht.2 x
-
-
-
+  have hA' : ContDiffOn ℝ ∞ A preSingularDomain := hA.mono (fun _ h => ⟨h.1.2, h.2⟩)
+  have hv' : ContDiffOn ℝ ∞ v preSingularDomain := hv.mono (fun _ h => ⟨h.1.2, h.2⟩)
+  have hp' : ContDiffOn ℝ ∞ p preSingularDomain := hp.mono (fun _ h => ⟨h.1.2, h.2⟩)
+  obtain ⟨F, hF, hFs, hFc, hjet⟩ := exists_compact_candidate hA hv hp hz eA ev ep
+    (TimeLocalization.activatedVelocity_divergence_free _ (cutVelocity_smoothOn hA' hv')
+      (fun t ht x => cutVelocity_divergence_free hA hv hd ht.2 x))
+    (TimeLocalization.activatedVelocity_speed_unbounded _ (cutVelocity_speed_unbounded haxis))
+  refine ⟨PeriodicLocalization.periodize F,
+    candidate_of_periodization hF
+      (supportedInCube_of_zero_outside (fun t x hx => activated_cutVelocity_zero_outside A v t hx))
+      hFc
+      (TimeLocalization.activatedVelocity_smooth _ (periodicVelocity_smoothOn hA' hv'))
+      (TimeLocalization.activatedPressure_smooth _
+        (SpatialLocalization.periodicPressure_smoothOn hp'))
+      (TimeLocalization.activatedVelocity_periodic _ _ (periodicVelocity_periodic A v _))
+      (TimeLocalization.activatedPressure_periodic _ _
+        (SpatialLocalization.periodicPressure_periodic p _))
+      (activated_periodicVelocity_eventuallyEq_cut A v)
+      (activated_periodicPressure_eventuallyEq_cut p), ?_, ?_⟩
+  · have hset : (univ : Set ℝ) ×ˢ (univ : Set Space) = (univ : Set SpaceTime) := by
+      ext z
+      simp
+    exact contDiffOn_univ.mp (by
+      simpa [hset] using PeriodicLocalization.contDiffOn_periodize (times := univ) hFc
+        hFs.contDiffOn)
+  · intro n x
+    rw [periodize_jets hFc n x, hjet n (representative x)]
+    rfl
 
 end NavierStokes.MixedPeriodicAssembly

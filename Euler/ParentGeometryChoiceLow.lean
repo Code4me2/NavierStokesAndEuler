@@ -2,8 +2,11 @@ import Euler.ParentGeometryForwardChoice
 import Euler.ParentGeometryJoinedChoice
 import Euler.ParentPacketChildLowGuards
 
-/-! The same geometrically selected correction supplies the actual
-child's whole-horizon physical bounds and its next localized source guard. -/
+/-! The geometrically selected correction supplies the child's low source
+bounds (`lowBounds`, an update of the parent's by the packet's error terms,
+so its values are definitional) and its whole-horizon physical bounds
+(`physical_bounds`). Each choice calls its own pipeline's estimate; the
+conclusions have the same shape and feed one successor assembly. -/
 
 noncomputable section
 
@@ -35,23 +38,6 @@ def lowBounds (CM CH : ℝ)
     F.Q res V rfl F.flow F.coefficient k (mul_inv_cancel₀ hk.pos.ne') F.graph nextEll hnext hnext1
     I.geometry I.halfBall I.delta_pos I.delta_le_one I.low
     (k^(-(1/4 : ℝ))) (k^(-(1/4 : ℝ))) CM CH F.errors hCM hCH hsmall
-
-theorem lowBounds_values (CM CH : ℝ)
-    (hCM : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (fun y => S.evolution.velocity (t,y)) x‖ ≤ CM)
-    (hCH : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (S.evolution.force t) x‖ ≤ CH)
-    (hsmall : (I.low.K+2*CM*I.geometry.hchild*(I.geometry.δ*goodRatio+I.geometry.earlyRatio)+
-          k^(-(1/4 : ℝ)))*(I.parent.T^2/2)+
-        (I.low.Be+(I.geometry.hchild*I.geometry.earlyRatio+k^(-(1/4 : ℝ))))*I.parent.T+
-        boundaryLocalizationC2*(I.low.Bc+(I.geometry.hchild*I.geometry.earlyRatio+k^(-(1/4 : ℝ))))*
-          I.low.r^3*I.parent.T ≤ 1/2) :
-    (F.lowBounds CM CH hCM hCH hsmall).Be=I.low.Be+(I.geometry.hchild*I.geometry.earlyRatio+k^(-(1/4 : ℝ))) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).Bc=I.low.Bc+(I.geometry.hchild*I.geometry.earlyRatio+k^(-(1/4 : ℝ))) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).K=I.low.K+2*CM*I.geometry.hchild*(I.geometry.δ*goodRatio+I.geometry.earlyRatio)+
-      k^(-(1/4 : ℝ)) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).r=I.low.r ∧
-    (F.lowBounds CM CH hCM hCH hsmall).L=
-      boundaryLocalizationC1*(F.lowBounds CM CH hCM hCH hsmall).Bc+1 :=
-  ⟨rfl,rfl,rfl,rfl,rfl⟩
 
 theorem physical_bounds (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) (CM CH : ℝ)
     (hCM : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (fun y => S.evolution.velocity (t,y)) x‖ ≤ CM)
@@ -101,23 +87,6 @@ def lowBounds (CM CH : ℝ)
     F.Q res V rfl F.flow F.coefficient k (mul_inv_cancel₀ hk.pos.ne') F.graph nextEll hnext hnext1
     I.geometry I.halfBall I.cutoff_support I.delta_pos I.delta_le_one I.low
     (k^(-(1/4 : ℝ))) (k^(-(1/4 : ℝ))) CM CH F.errors hCM hCH hsmall
-
-theorem lowBounds_values (CM CH : ℝ)
-    (hCM : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (fun y => S.evolution.velocity (t,y)) x‖ ≤ CM)
-    (hCH : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (S.evolution.force t) x‖ ≤ CH)
-    (hsmall : (I.low.K+2*CM*I.geometry.hchild*(I.geometry.δ*goodRatio+I.geometry.badRatio)+
-          k^(-(1/4 : ℝ)))*(I.parent.T^2/2)+
-        (I.low.Be+(I.geometry.hchild*I.geometry.badRatio+k^(-(1/4 : ℝ))))*I.parent.T+
-        boundaryLocalizationC2*(I.low.Bc+(I.geometry.hchild*I.geometry.badRatio+k^(-(1/4 : ℝ))))*
-          I.low.r^3*I.parent.T ≤ 1/2) :
-    (F.lowBounds CM CH hCM hCH hsmall).Be=I.low.Be+(I.geometry.hchild*I.geometry.badRatio+k^(-(1/4 : ℝ))) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).Bc=I.low.Bc+(I.geometry.hchild*I.geometry.badRatio+k^(-(1/4 : ℝ))) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).K=I.low.K+2*CM*I.geometry.hchild*(I.geometry.δ*goodRatio+I.geometry.badRatio)+
-      k^(-(1/4 : ℝ)) ∧
-    (F.lowBounds CM CH hCM hCH hsmall).r=I.low.r ∧
-    (F.lowBounds CM CH hCM hCH hsmall).L=
-      boundaryLocalizationC1*(F.lowBounds CM CH hCM hCH hsmall).Bc+1 :=
-  ⟨rfl,rfl,rfl,rfl,rfl⟩
 
 theorem physical_bounds (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) (CM CH : ℝ)
     (hCM : ∀ (t : Icc (0 : ℝ) I.parent.T) x, ‖fderiv ℝ (fun y => S.evolution.velocity (t,y)) x‖ ≤ CM)

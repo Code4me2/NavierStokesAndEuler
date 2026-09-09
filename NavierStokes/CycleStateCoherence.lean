@@ -483,12 +483,12 @@ theorem block_fields_next {ι : Type} {G : Geometry} {p : CycleParameters ι}
     (hc : ∀ l, SameCarrier (v.blocks l) (p.signedBlock v c u l)) (l : ι)
     (H : BlockFieldsOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv G.h n m k)
       (bandVelocityScale G.h n m) (bandScale n m) (v.blocks l) (v.blocks l)
-      (v.gaussian l) (v.aliasCoefficients l) (v.gaussian l) (v.aliasCoefficients l) n m) :
+      (v.gaussian l) 0 (v.gaussian l) 0 n m) :
     BlockFieldsOn (PhysicalMeanDomain.slowDomain V) (bandChartEquiv G.h n m k)
       (bandVelocityScale G.h n m) (bandScale n m)
       ((p.nextCoefficients v c u).blocks l) ((p.nextCoefficients v c u).blocks l)
-      ((p.nextCoefficients v c u).gaussian l) ((p.nextCoefficients v c u).aliasCoefficients l)
-      ((p.nextCoefficients v c u).gaussian l) ((p.nextCoefficients v c u).aliasCoefficients l) n m := by
+      ((p.nextCoefficients v c u).gaussian l) 0
+      ((p.nextCoefficients v c u).gaussian l) 0 n m := by
   refine ⟨H.phase, H.angular, H.angular_ne, ?_, ?_, ?_, H.aliasError⟩
   · intro x hx theta i
     change (p.finalBlock v c u l).oscillation n (x,theta) i =

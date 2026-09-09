@@ -39,7 +39,7 @@ abbrev Invariant {B N0 : ℕ} (σ : ℝ) (x : CycleState (Index B N0)) :=
 
 noncomputable def source {B N0 : ℕ} (x : CycleState (Index B N0)) (l : Index B N0) : HarmonicBlock Point :=
   HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
 
 noncomputable def modes (M : ℕ) : Finset ℤ := Finset.Icc (-(M : ℤ)) M
 
@@ -74,7 +74,7 @@ theorem source_zero_germ (l : Index B N0) (j : ℤ) (n : ℕ) {z : Point}
     (fun y => fun i => (source x l).velocity n i j y) =ᶠ[𝓝 z] fun _ => 0 := by
   have he := HarmonicSourceSupport.residualSource_zero_germ_on
     (ActualPrimary.commonContext B) x.state (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.gaussian l) 0
     ActualInitialization.geometry.domain_open (labelCarrier_closed l) (H.inputSupport l) j n hz hout
   filter_upwards [he] with y hy
   funext i
@@ -186,7 +186,7 @@ theorem current_pressureAlias_class (α : ℝ) :
   exact hh.1
 
 theorem alias_eq_lift : x.state.errors.aliasError = fun n z => x.axisymmetricAlias n z.1 :=
-  H.representation.alias_eq_lift H.aliasCoefficients
+  H.representation.alias_eq_lift
 
 theorem meanGood_eq_reduced_sub (n : ℕ) {z : Point}
     (hz : z ∈ ActualInitialization.geometry.strip.domain) (i : Fin 3) :
@@ -263,7 +263,7 @@ theorem extraction_regular (n : ℕ)
           tsupport ((x.coefficients.blocks k).oscillation n))) :
     LocalResidualGrouping.ExtractionRegular ActualInitialization.geometry.strip.domain
       (ActualPrimary.commonContext B) x.state x.coefficients.labels x.coefficients.blocks
-      x.coefficients.gaussian x.coefficients.aliasCoefficients n := by
+      x.coefficients.gaussian (fun _ => 0) n := by
   let G := ActualInitialization.geometry
   constructor
   · exact HarmonicResidual.contextFrame_regular (ActualPrimary.commonContext B) n contDiffOn_fst
@@ -294,7 +294,6 @@ theorem extraction_regular (n : ℕ)
   · intro l hl i j
     exact (H.gaussianFlat 0 i j).smooth l n
   · intro l hl i
-    rw [H.aliasCoefficients l]
     exact HarmonicResidual.smoothCoefficients_zero _
   · exact hdisj
   · intro l hl
@@ -305,7 +304,7 @@ grouping and cancels only through the proved angular mean equation. -/
 theorem fullResidual_decomposition {n : ℕ}
     (hreg : LocalResidualGrouping.ExtractionRegular ActualInitialization.geometry.strip.domain
       (ActualPrimary.commonContext B) x.state x.coefficients.labels x.coefficients.blocks
-      x.coefficients.gaussian x.coefficients.aliasCoefficients n)
+      x.coefficients.gaussian (fun _ => 0) n)
     {z : Cylinder} (hz : z ∈ HarmonicResidual.liftDomain ActualInitialization.geometry.strip.domain)
     (i : Fin 3) :
     LiftedMeanResidual.fullResidual (ActualPrimary.commonContext B) x.state n z i =
@@ -696,7 +695,7 @@ theorem actual_disjoint (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (
 theorem actual_extraction_regular (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (n : ℕ) :
     LocalResidualGrouping.ExtractionRegular ActualInitialization.geometry.strip.domain
       (ActualPrimary.commonContext B) x.state x.coefficients.labels x.coefficients.blocks
-      x.coefficients.gaussian x.coefficients.aliasCoefficients n :=
+      x.coefficients.gaussian (fun _ => 0) n :=
   H.extraction_regular n (fun _ _ _ _ hne => H.actual_disjoint hN n hne)
 
 theorem source_phase (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) (i : Fin 3) (j : ℤ) :

@@ -120,20 +120,27 @@ open scoped BigOperators
 namespace CycleRepresentation
 variable {ι : Type} {v : CycleCoefficients ι} {u : State CyclePoint} {axis : AxisymmetricAlias}
 
+/-- The generic grouping representation with the wave alias slot set to
+zero: the alias sum vanishes term by term. -/
 theorem withAxis (h : CycleRepresentation v u axis) :
-    AxisymmetricResidualGrouping.Representation v.labels v.blocks v.gaussian v.aliasCoefficients u axis :=
-  ⟨h.velocity, h.pressure, h.gaussian, h.aliasError⟩
+    AxisymmetricResidualGrouping.Representation v.labels v.blocks v.gaussian (fun _ => 0) u axis :=
+  ⟨h.velocity, h.pressure, h.gaussian, fun n x i => by
+    change u.errors.aliasError n x i =
+      (∑ l ∈ v.labels n, coefficientField (v.blocks l) 0 n x i) + axis n x.1 i
+    rw [h.aliasError n x i]
+    simp only [coefficientField, Pi.zero_apply, HarmonicResidual.field_zero, Complex.zero_re,
+      Finset.sum_const_zero, zero_add]⟩
 
 
 
 
 theorem fullResidual_reconstructed_local (h : CycleRepresentation v u axis)
     {U : Set CyclePoint} (hU : IsOpen U) {c : Context CyclePoint} {n : ℕ}
-    (hr : LocalResidualGrouping.ExtractionRegular U c u v.labels v.blocks v.gaussian v.aliasCoefficients n)
+    (hr : LocalResidualGrouping.ExtractionRegular U c u v.labels v.blocks v.gaussian (fun _ => 0) n)
     {x : CyclePoint × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
     fullResidual c u n x i = (∑ l ∈ v.labels n,
-      (HarmonicResidual.residualBlock c u (v.blocks l) (v.gaussian l) (v.aliasCoefficients l)).oscillation n x i) +
-      (HarmonicResidual.stateMeanCoefficientValue v.labels v.blocks v.gaussian v.aliasCoefficients c u n x.1 i -
+      (HarmonicResidual.residualBlock c u (v.blocks l) (v.gaussian l) 0).oscillation n x i) +
+      (HarmonicResidual.stateMeanCoefficientValue v.labels v.blocks v.gaussian (fun _ => 0) c u n x.1 i -
         axis n x.1 i) + u.errors.total n x i :=
   LocalResidualGrouping.stateFullResidual_reconstructed hU h.withAxis hr hx i
 
@@ -217,7 +224,7 @@ theorem velocity_zero_germ_of_inputSupport {ι : Type} {v : CycleCoefficients ι
     {U : Set CyclePoint} {S : ι → ℕ → Set CyclePoint}
     (hU : IsOpen U) (hS : ∀ l n, IsClosed (S l n))
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn U (S l)
-      (v.blocks l) (v.gaussian l) (v.aliasCoefficients l))
+      (v.blocks l) (v.gaussian l) 0)
     (hr : CycleRealCoefficients v) (l : ι) (n : ℕ) {x : CyclePoint}
     (hx : x ∈ U) (hn : x ∉ S l n) (i : Fin 3) (j : ℤ) (hj : j ≠ 0) :
     (v.blocks l).velocity n i j =ᶠ[𝓝 x] fun _ => 0 := by
@@ -239,12 +246,10 @@ open scoped ContDiff BigOperators
 namespace CycleRepresentation
 variable {ι : Type} {v : CycleCoefficients ι} {u : State CyclePoint} {axis : AxisymmetricAlias}
 
-theorem alias_eq_lift (h : CycleRepresentation v u axis) (hz : ∀ l, v.aliasCoefficients l = 0) :
+theorem alias_eq_lift (h : CycleRepresentation v u axis) :
     u.errors.aliasError = fun n x => axis n x.1 := by
   funext n x i
-  rw [h.aliasError]
-  simp only [hz, coefficientField, Pi.zero_apply, HarmonicResidual.field_zero, Complex.zero_re,
-    Finset.sum_const_zero, zero_add]
+  exact h.aliasError n x i
 
 theorem gaussian_angularContinuous (h : CycleRepresentation v u axis) :
     AngularContinuous u.errors.gaussian := by
@@ -259,8 +264,9 @@ theorem gaussian_angularContinuous (h : CycleRepresentation v u axis) :
 end CycleRepresentation
 
 /-- The quantitative and local regularity invariant is stated on the
-actual stored fields of `CycleState`, including the independent alias.
-Its definition makes no assertion that an arbitrary step preserves it. -/
+actual stored fields of `CycleState`, including the independent
+axisymmetric alias. Its definition makes no assertion that an arbitrary
+step preserves it. -/
 structure CycleAnalyticInvariant {ι : Type} (G : SignedMeanGain.Geometry)
     (c : Context CyclePoint) (primary : ι → HarmonicBlock CyclePoint)
     (P : ι → ℕ → CyclePoint → ℝ) (labelCarrier : ι → ℕ → Set CyclePoint)
@@ -269,9 +275,9 @@ structure CycleAnalyticInvariant {ι : Type} (G : SignedMeanGain.Geometry)
   bands : CoefficientBands x.coefficients
   realCoefficients : CycleRealCoefficients x.coefficients
   inputSupport : ∀ l, HarmonicSourceSupport.InputSupportOn G.domain (labelCarrier l)
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
   sourceBand : ∀ l, (HarmonicResidual.residualBlock c x.state (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)).BandLimited x.coefficients.residualBand
+    (x.coefficients.gaussian l) 0).BandLimited x.coefficients.residualBand
   zeroVelocity : ∀ l, HarmonicWaveInteraction.ZeroMode (x.coefficients.blocks l)
   zeroPressure : ∀ l n, (x.coefficients.blocks l).pressure n 0 = 0
   carrier : ∀ l, SameCarrier (x.coefficients.blocks l) (primary l)
@@ -295,7 +301,7 @@ structure CycleAnalyticInvariant {ι : Type} (G : SignedMeanGain.Geometry)
   covariance : ∀ i j, MeanClass G.strip 1 (x.state.covariance i j)
   residual : UniformHarmonicInteraction.UniformVelocity G.strip P (1/2+σ)
     (fun l => HarmonicResidual.residualBlock c x.state (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
   mean : MeanResidualBounds G.strip σ c x.state
   meanHypotheses : LiftedMeanResidual.MeanHypotheses G.strip.domain c x.state
   debt : DefectBounds G.slowStrip σ c x.state
@@ -311,7 +317,6 @@ structure CycleAnalyticInvariant {ι : Type} (G : SignedMeanGain.Geometry)
     (fun _ _ z => Real.sqrt (G.strip.zeta z)) β
     (fun l n z => x.coefficients.gaussian l n i j z)
   gaussianMean : angularMeanVector x.state.errors.gaussian = 0
-  aliasCoefficients : ∀ l, x.coefficients.aliasCoefficients l = 0
   axisFlat : ∀ β, MeanClass G.strip β x.axisymmetricAlias
   baseAngular : ∀ n z, z ∈ G.domain → ∀ i,
     Continuous (fun θ : ℝ => x.state.errors.base n (z, θ) i)
@@ -326,7 +331,7 @@ from the good-mean invariant and the actual all-power axis alias. -/
 theorem raw_mean_bounds (H : CycleAnalyticInvariant G c primary P labelCarrier σ x) :
     MeanClass G.strip (1+σ) (x.state.thetaResidual c) ∧
     MeanClass G.strip (1+σ) (x.state.axialResidual c) := by
-  have ha := H.representation.alias_eq_lift H.aliasCoefficients
+  have ha := H.representation.alias_eq_lift
   have hca : AngularContinuous x.state.errors.aliasError := by
     rw [ha]
     intro n z i
@@ -415,7 +420,7 @@ theorem waveStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
     (hP1 : ∀ l n x, x ∈ p.strip.domain → P l n x ≤ 1)
     (hlinearP : ∀ i j, j ≠ 0 → UniformWaveClass p.strip P (1+σ-3*κ)
       (fun l n x =>
-        (HarmonicResidual.residualBlock c u (v.blocks l) (v.gaussian l) (v.aliasCoefficients l)).velocity n i j x +
+        (HarmonicResidual.residualBlock c u (v.blocks l) (v.gaussian l) 0).velocity n i j x +
         (HarmonicWaveInteraction.linearGoodBlock c (v.blocks l) (p.particularBlock v c u l)
           (p.particularGaussianBlock v c u l).velocity).velocity n i j x))
     (hlinearS : UniformVelocity p.strip P (1+σ-4*κ)
@@ -423,7 +428,7 @@ theorem waveStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
         (p.signedBlock v c u l) (p.signedGaussianBlock v c u l).velocity)) :
     UniformVelocity p.strip P (1/2+σ+1/10)
       (fun l => HarmonicResidual.residualBlock c (p.afterSigned v c u) (p.finalBlock v c u l)
-        ((p.nextCoefficients v c u).gaussian l) (v.aliasCoefficients l)) ∧
+        ((p.nextCoefficients v c u).gaussian l) 0) ∧
       (∀ l, HarmonicWaveInteraction.ModeSolenoidal p.strip c (p.finalBlock v c u l)) := by
   have hκhalf : κ ≤ 1/2 := by linarith
   have hpart0 l := p.particularBlock_zero v c u l
@@ -438,7 +443,7 @@ theorem waveStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
     v.blocks (p.particularBlock v c u) (fun i j _ => hold i j) (fun i j _ => hpart i j)
     hzero hpart0 hband (p.particularBlock_band v c u) hphase hk hkp hdiv hpartdiv
     hNormal hFreq hAng hzpart hP0 hP1 hpold hppart v.gaussian
-    (fun l => (p.particularGaussianBlock v c u l).velocity) v.aliasCoefficients v.aliasCoefficients
+    (fun l => (p.particularGaussianBlock v c u l).velocity) (fun _ => 0) (fun _ => 0)
     (fun _ _ _ => by rw [sub_self]; exact HarmonicResidual.band_zero _)
     (fun i j hj => (hlinearP i j hj).mono_exponent (show 1/2+σ+1/10 ≤ 1+σ-3*κ by linarith))
     (by linarith) (by linarith) (by linarith)
@@ -477,7 +482,7 @@ theorem waveStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
     (fun l => (p.signed l).exactBlock_band p.strip (p.signedRequest v c u))
     hphase hk hkp hbdiv hsdiv hNormal hFreq hAng hzsigned hP0 hP1 hbpressure hpsigned
     (fun l => v.gaussian l + (p.particularGaussianBlock v c u l).velocity)
-    (fun l => (p.signedGaussianBlock v c u l).velocity) v.aliasCoefficients v.aliasCoefficients
+    (fun l => (p.signedGaussianBlock v c u l).velocity) (fun _ => 0) (fun _ => 0)
     (fun _ _ _ => by rw [sub_self]; exact HarmonicResidual.band_zero _)
     (fun i j hj => (hfirst i j hj).add ((hlinearS i j hj).mono_exponent
       (show 1/2+σ+1/10 ≤ 1+σ-4*κ by linarith)))
@@ -627,13 +632,13 @@ theorem next_gaussian_mem {w : ι → ℕ → CyclePoint → ℝ} {β : ℝ}
 
 theorem next_inputSupport {U : Set CyclePoint} {S : ι → ℕ → Set CyclePoint}
     (hold : ∀ l, HarmonicSourceSupport.InputSupportOn U (S l)
-      (v.blocks l) (v.gaussian l) (v.aliasCoefficients l))
+      (v.blocks l) (v.gaussian l) 0)
     (hp : ∀ l, HarmonicSourceSupport.InputSupportOn U (S l)
       (p.particularBlock v c u l) (p.particularGaussianBlock v c u l).velocity 0)
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn U (S l)
       (p.signedBlock v c u l) (p.signedGaussianBlock v c u l).velocity 0) :
     ∀ l, HarmonicSourceSupport.InputSupportOn U (S l) ((p.nextCoefficients v c u).blocks l)
-      ((p.nextCoefficients v c u).gaussian l) ((p.nextCoefficients v c u).aliasCoefficients l) :=
+      ((p.nextCoefficients v c u).gaussian l) 0 :=
   fun l => LabelSupportPreservation.inputSupport_two_updates (hold l) (hp l) (hs l)
 
 theorem next_oscillation_smooth {U : Set CyclePoint}

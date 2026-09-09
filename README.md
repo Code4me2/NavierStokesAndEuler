@@ -59,7 +59,9 @@ The trust gate for this repository is Comparator, which rebuilds the solution in
 and compares it against an independent statement of the problem. **Comparator's guarantee
 depends on the solution never having been compiled outside that sandbox, so run it in a fresh
 clone in which `lake build` has not been run.** For the full preconditions and the exact
-commands, see the [ComparatorChallenges README](ComparatorChallenges/README.md).
+commands, see the [ComparatorChallenges README](ComparatorChallenges/README.md). The branch-local
+fresh-clone checklist with pinned dependency inputs is in
+[`docs/VALIDATION-PLAN.md`](docs/VALIDATION-PLAN.md).
 
 ## Building the formalizations
 
@@ -73,8 +75,9 @@ lake build
 ```
 
 `lake exe cache get` covers Mathlib only; everything in this repository is compiled locally: the
-three libraries are 2,344 modules, roughly 11,100 Lake jobs, and a cold build takes about 15
-minutes of wall clock on 20 cores. The `NavierStokes` and `Euler` libraries are built with
-`autoImplicit = false` and `warningAsError = true`, so they have to compile warning-free. The
-only expected warnings are the four intentional `sorry` placeholders in the
-`ComparatorChallenges` reference statements, whose library does not set `warningAsError`.
+shared `Common` library plus the `NavierStokes`, `Euler`, and `ComparatorChallenges` libraries
+are roughly 11,100 Lake jobs, and a cold build takes about 15 minutes of wall clock on 20 cores.
+`Common`, `NavierStokes`, and `Euler` are built with `autoImplicit = false` and
+`warningAsError = true`, so they have to compile warning-free. The only expected warnings are the
+four intentional `sorry` placeholders in the `ComparatorChallenges` reference statements, whose
+library does not set `warningAsError`.

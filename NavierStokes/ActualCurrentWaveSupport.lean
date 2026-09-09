@@ -341,7 +341,7 @@ theorem current_raw_pressure_zero_germs
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {z : ActualCurrentParticularPhysical.Native}
     (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain)
     (hr : ActualCoreSupport.radialRatio
@@ -354,7 +354,7 @@ theorem current_raw_pressure_zero_germs
       fun _ => 0) := by
   have hz' := particular_radial_zero_germs hN (l.2,l.1) (ActualPrimary.commonContext B)
     x.state (x.coefficients.blocks l) (x.coefficients.gaussian l)
-    (x.coefficients.aliasCoefficients l) hs j
+    0 hs j
     (CorrectionStep.ParticularParameters.nativeStrip ActualParticularStageControls.associatedStrip)
     n hz hr
   exact ⟨hz'.1, hz'.2.2.1⟩
@@ -366,7 +366,7 @@ theorem current_native_zero_germs
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {z : ActualCurrentParticularPhysical.Native}
     (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain)
     (hr : ActualCoreSupport.radialRatio
@@ -394,7 +394,7 @@ theorem current_native_zero_germs_off_carrier
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {z : ActualCurrentParticularPhysical.Native}
     (hz : z.1.1 ∈ ActualCarrierTransport.parameterDomain)
     (hn : ActualCarrierTransport.associatedPoint z.1.1 z.2 ∉
@@ -403,7 +403,7 @@ theorem current_native_zero_germs_off_carrier
     (ActualCurrentParticularPhysical.nativePressure x l j n =ᶠ[𝓝 z] fun _ => 0) := by
   have hg := ActualCycleAssembly.refined_particular_zero_germs hN (l.2,l.1)
     (ActualPrimary.commonContext B) x.state (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) hs j
+    (x.coefficients.gaussian l) 0 hs j
     (CorrectionStep.ParticularParameters.nativeStrip ActualParticularStageControls.associatedStrip)
     n hz hn
   have ha : (ActualCurrentParticularPhysical.copyData x l j).common.amplitude n =ᶠ[𝓝 z]
@@ -445,7 +445,7 @@ theorem current_modes_zero_off_carrier
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n)
     (hn : ActualCarrierTransport.associatedPoint
@@ -464,7 +464,7 @@ theorem current_modes_support
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n) :
     (ActualCurrentParticularPhysical.localPotentialMode x l j n w ≠ 0 →
@@ -494,7 +494,7 @@ theorem current_modes_zero
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {w : SpaceTime}
     (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n)
     (hr : profileRadius ActualPrimary.h w ∉
@@ -519,7 +519,7 @@ theorem current_mode_annulus
     (l : ActualCurrentParticularPhysical.Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)) (j : ℤ) (N : ℕ) :
+      (x.coefficients.gaussian l) 0) (j : ℤ) (N : ℕ) :
     BandAnnulus ActualPrimary.h (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
       (PrimaryTargetBounds.rightRadius ActualPrimary.nominal) N
       (ActualCurrentParticularPhysical.localPotentialMode x l j) ∧
@@ -541,7 +541,7 @@ theorem current_annulus
     (x : CorrectionStep.CycleState (ActualCurrentParticularPhysical.Label B N0))
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)) (N : ℕ) :
+      (x.coefficients.gaussian l) 0) (N : ℕ) :
     BandAnnulus ActualPrimary.h (PrimaryTargetBounds.leftRadius ActualPrimary.nominal)
       (PrimaryTargetBounds.rightRadius ActualPrimary.nominal) N
       (ActualCurrentParticularPhysical.localPotential x) ∧
@@ -562,7 +562,7 @@ theorem current_local_axis_germs
     (x : CorrectionStep.CycleState (ActualCurrentParticularPhysical.Label B N0))
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (n : ℕ) {w : SpaceTime} (hw : w ∈ ValidDyadicBandCover.band ActualPrimary.h n)
     (haxis : PhysicalGraphBounds.radialProjection w = 0) :
     (ActualCurrentParticularPhysical.localPotential x n =ᶠ[𝓝 w] fun _ => 0) ∧
@@ -581,7 +581,7 @@ variable (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     (x : CorrectionStep.CycleState (ActualCurrentParticularPhysical.Label B N0))
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2,l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     {N : ℕ} {qbig : ℝ}
     (hA : ValidDyadicBandCover.Compatible ActualPrimary.h N
       (ActualCurrentParticularPhysical.localPotential x))

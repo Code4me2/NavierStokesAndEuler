@@ -81,7 +81,6 @@ noncomputable def coefficients (B N0 : ℕ) : CorrectionStep.CycleCoefficients (
   labels := ActualPrimary.activeLabels ActualPrimary.standardRegion B N0
   blocks := primaryBlock
   gaussian l := (gaussianBlock l).velocity
-  aliasCoefficients _ := 0
   residualBand := 2
 
 theorem coefficients_band (B N0 : ℕ) : CorrectionStep.CoefficientBands (coefficients B N0) := by
@@ -91,8 +90,6 @@ theorem coefficients_band (B N0 : ℕ) : CorrectionStep.CoefficientBands (coeffi
       fun n => ((primaryBlock_band l).2 n).mono (by norm_num [coefficients])⟩
   · intro l n i
     exact ((gaussianBlock_band l).1 n i).mono (by norm_num [coefficients])
-  · intro l n i j hj
-    simp [coefficients] at hj
 
 theorem gaussian_coefficientField (l : Index B N0) :
     CorrectionStep.coefficientField (primaryBlock l) (gaussianBlock l).velocity =
@@ -183,7 +180,7 @@ theorem initialCycleState_represents (B N0 : ℕ) :
   · intro n x i
     change (initialState B N0).errors.aliasError n x i = _
     rw [(initialState_error_components B N0).2.2]
-    simp [initialCycleState, coefficients, CorrectionStep.coefficientField, HarmonicFields.field]
+    simp [initialCycleState, coefficients]
 
 end NavierStokes.ActualInitialization
 
@@ -1280,7 +1277,6 @@ theorem initial_invariant (B N0 : ℕ) :
   oscillationSupport := initial_oscillation_support B N0
   gaussianFlat := gaussian_coefficients_flat B N0
   gaussianMean := initial_gaussian_mean_zero B N0
-  aliasCoefficients := fun _ => rfl
   axisFlat := initial_axis_flat B N0
   baseAngular := initial_base_angular B N0
 

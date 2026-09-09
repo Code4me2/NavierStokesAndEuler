@@ -337,15 +337,14 @@ theorem source_ordered (h : Periodic x) (l : Index B N0) (n : ℕ)
     TranslationOn ActualInitialization.geometry.domain (pointDeck k)
       (ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l) j n) := by
+        0 j n) := by
   apply residualSource_translation ActualInitialization.geometry.domain_open
     (ActualPrimary.commonContext B) x.state (x.coefficients.blocks l)
-    (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) n
+    (x.coefficients.gaussian l) 0 n
     (context_frame_translation B n k) (context_base_translation B n k)
     (state_mean_translation H n k) (state_phase_translation H l n hn k)
     (h.velocity l n hn k) (h.pressure l n hn k) (h.gaussian l n hn k)
   intro i
-  rw [H.aliasCoefficients l]
   exact CoefficientsTranslation.zero
 
 include H in
@@ -354,12 +353,12 @@ theorem source_all (h : Periodic x)
       z ∈ ActualInitialization.geometry.domain →
       ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l) j n z = 0)
+        0 j n z = 0)
     (l : Index B N0) (n : ℕ) (j : ℤ) (k : TorusInverse.Frequency) :
     TranslationOn ActualInitialization.geometry.domain (pointDeck k)
       (ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l) j n) := by
+        0 j n) := by
   by_cases hn : ActualWaveRegularityData.Ordered l n
   · exact source_ordered H h l n hn j k
   · intro z hz
@@ -376,21 +375,21 @@ noncomputable def copies {B N0 : ℕ} (x : CycleState (Index B N0))
     (StateReindex.state cycleAssoc.symm x.state)
     (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)) j
+    (StateReindex.blockCoefficients cycleAssoc.symm 0) j
 
 theorem copies_source {B N0 : ℕ} (x : CycleState (Index B N0))
     (l : Index B N0) (j : ℤ) (n : ℕ) (z : ActualWaveRegularity.ParticularSpace) :
     (copies x l j).source n z =
       ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l) j n
+        0 j n
         (ActualWaveRegularity.particularChart.symm z).1 := by
   change ParticularWaveAssembly.residualSource
     (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
     (StateReindex.state cycleAssoc.symm x.state)
     (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l))
+    (StateReindex.blockCoefficients cycleAssoc.symm 0)
       j n (z.1.1, z.2) = _
   unfold ParticularWaveAssembly.residualSource
   rw [StateReindex.residualBlock_pull]
@@ -425,7 +424,7 @@ theorem copies_source_periodic (h : Periodic x)
       z ∈ ActualInitialization.geometry.domain →
       ParticularWaveAssembly.residualSource (ActualPrimary.commonContext B) x.state
         (x.coefficients.blocks l) (x.coefficients.gaussian l)
-        (x.coefficients.aliasCoefficients l) j n z = 0)
+        0 j n z = 0)
     (l : Index B N0) (j : ℤ) (n : ℕ) (z : ActualWaveRegularity.ParticularSpace)
     (hz : z ∈ ActualWaveRegularity.nativeDomain ActualWaveRegularity.particularChart
       ActualPrimary.standardRegion) :

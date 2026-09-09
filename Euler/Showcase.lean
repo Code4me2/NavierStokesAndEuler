@@ -7,10 +7,63 @@ Restatements of the Euler result in the development's own vocabulary, kept
 as documented provenance. None of them is consumed by `Euler.Solution`; this
 module imports it and is therefore outside the closure of the two delivered
 theorems. Every statement here was formerly in `Euler.EulerSingularity`,
-`Euler.EulerFiniteLifespan`, `Euler.EulerC1Breakdown` or `Euler.EulerC1Limsup`.
+`Euler.EulerFiniteLifespan`, `Euler.EulerC1Breakdown` or `Euler.EulerC1Limsup`,
+except the final section, which records the Beale--Kato--Majda route to the
+step-3 contradiction that `Euler.CompactVorticityContradiction` used to take
+before it was rerouted through the maximality of the lifespan.
 -/
 
 noncomputable section
+
+namespace EulerOrdinarySobolev.FiniteLifespan
+
+open Set EulerSmoothLimit EulerLpTranslation EulerLpTranslation.SmoothL2Field
+  EulerMeanCutoffCurl
+
+variable {A : SmoothL2Field Space} (L : FiniteLifespan A)
+
+/-- The Beale--Kato--Majda route to the step-3 contradiction: a compact `K`
+that carries all the canonical vorticity, and a comparison field continuous
+on `[0,T*] × K` agreeing with it there, bound the vorticity supremum
+uniformly below the maximal time, contradicting the proved BKM criterion.
+Not used by the delivered theorems, which contradict maximality instead. -/
+theorem false_of_vorticity_agree_on_compact (w : ℝ → Space → Space)
+    (K : Set Space) (hK : IsCompact K)
+    (hw : ContinuousOn (fun z : ℝ × Space => w z.1 z.2) (Icc 0 L.duration ×ˢ K))
+    (hagree : ∀ (t : L.Time), ∀ x ∈ K, vectorCurl (L.maximalVelocity t) x = w t x)
+    (hconf : ∀ t : L.Time, tsupport (vectorCurl (L.maximalVelocity t)) ⊆ K) : False := by
+  obtain ⟨M, hM⟩ := (isCompact_Icc.prod hK).exists_bound_of_continuousOn hw
+  have hcurl : ∀ (t : L.Time) x, ‖vectorCurl (L.maximalVelocity t) x‖ ≤ max M 0 := by
+    intro t x
+    by_cases hx : x ∈ K
+    · rw [hagree t x hx]
+      exact (hM ((t : ℝ), x) ⟨⟨t.property.1, t.property.2.le⟩, hx⟩).trans (le_max_left _ _)
+    · rw [image_eq_zero_of_notMem_tsupport (fun hm => hx (hconf t hm)), norm_zero]
+      exact le_max_right _ _
+  obtain ⟨S, hS, hSL, t, hlarge⟩ := L.vorticityIntegral_unbounded (max M 0 * L.duration)
+  have hbound : ∀ s x, ‖vectorCurl ((L.evolution S hS hSL).velocity s).field x‖ ≤ max M 0 := by
+    intro s x
+    rw [← L.maximalVelocity_eq_evolution S hS hSL s]
+    exact hcurl _ x
+  have hupper := (L.evolution S hS hSL).vorticityIntegral_le_const (max M 0) hbound t
+  have ht : (t : ℝ) ≤ L.duration := t.property.2.trans hSL.le
+  exact (not_lt_of_ge (hupper.trans (mul_le_mul_of_nonneg_left ht (le_max_right _ _)))) hlarge
+
+/-- The step-3 conclusion re-derived along the BKM route, for comparison
+with `Euler.ComparatorBridge.no_global_solution_of_confined_vorticity`. -/
+theorem no_global_solution_of_confined_vorticity_bkm (K : Set Space) (hK : IsCompact K)
+    (hconf : ∀ t : L.Time, tsupport (vectorCurl (L.maximalVelocity t)) ⊆ K) :
+    ¬ ∃ v p, Euler.EulerExistenceAndSmoothnessR3 A.field v p := by
+  rintro ⟨v, p, h⟩
+  have hcompact (t : L.Time) : HasCompactSupport (vectorCurl (L.maximalVelocity t)) :=
+    hK.of_isClosed_subset (isClosed_tsupport _) (hconf t)
+  have hmatch := Euler.ComparatorBridge.comparator_agrees_with_canonical L h hcompact
+  refine L.false_of_vorticity_agree_on_compact (fun t x => vectorCurl (v · t) x) K hK
+    (h.vorticity_continuousOn.mono (fun z hz => ⟨hz.1.1, mem_univ _⟩)) ?_ hconf
+  intro t x _
+  rw [hmatch t]
+
+end EulerOrdinarySobolev.FiniteLifespan
 
 namespace EulerPacketInduction
 

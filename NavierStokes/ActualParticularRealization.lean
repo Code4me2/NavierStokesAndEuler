@@ -167,22 +167,6 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
 
 end CyclePhysical
 
-/-! ## Binding to the current cycle inputs -/
-
-/-- These are equalities of the current input fields and primitive solver
-data. There is no equality of a solved field in the interface. -/
-structure CurrentInputs {ι : Type} (D : AssemblyData Parameter)
-    (p : CorrectionStep.CycleParameters ι) (v : CorrectionStep.CycleCoefficients ι)
-    (c : Context CorrectionStep.CyclePoint) (u : State CorrectionStep.CyclePoint)
-    (l : ι) (h : ℝ) (gap : ℕ → ℕ) : Prop where
-  context : D.context = StateReindex.context CorrectionStep.cycleAssoc.symm c
-  state : D.state = StateReindex.state CorrectionStep.cycleAssoc.symm u
-  carrier : D.carrierBlock = StateReindex.block CorrectionStep.cycleAssoc.symm (v.blocks l)
-  gaussian : D.gaussianInput = StateReindex.blockCoefficients CorrectionStep.cycleAssoc.symm (v.gaussian l)
-  aliasError : D.aliasInput = StateReindex.blockCoefficients CorrectionStep.cycleAssoc.symm (v.aliasCoefficients l)
-  parameters : p.particular l = CorrectionStep.ParticularParameters.fromReference D h gap
-
-
 /-! ## Full-variable transport of the curl correction -/
 
 section FullVariable
@@ -275,28 +259,6 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
 
 
 end ActualReferenceFields
-
-/-! ## Direct consumers for the current correction step -/
-
-section CurrentCycle
-
-open ProblemStatement PhysicalParticularWave CyclePhysicalPrefixes
-
-variable {ι : Type} {D : AssemblyData Parameter}
-  {p : CorrectionStep.CycleParameters ι} {v : CorrectionStep.CycleCoefficients ι}
-  {c : Context CorrectionStep.CyclePoint} {u : State CorrectionStep.CyclePoint}
-  {label : ι} {h : ℝ} {gap : ℕ → ℕ} (J : CurrentInputs D p v c u label h gap)
-  (n i : ℕ)
-  (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
-    (ChartScales.Q_pos D.reference.band) i (gap n) n)
-  (hn : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-  (hr : PhysicalResidualNaturality.PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-  {α κ : ℝ} (C : D.controls v.residualBand α κ)
-
-
-
-end CurrentCycle
-
 
 section LocalIdentity
 

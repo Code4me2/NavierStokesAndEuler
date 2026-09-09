@@ -181,7 +181,7 @@ theorem particular_coefficients (v : CycleCoefficients (Index B N0))
       (StateReindex.context cycleAssoc.symm c) (StateReindex.state cycleAssoc.symm u)
       (StateReindex.block cycleAssoc.symm (v.blocks l))
       (StateReindex.blockCoefficients cycleAssoc.symm (v.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (v.aliasCoefficients l)) j
+      (StateReindex.blockCoefficients cycleAssoc.symm 0) j
       (particular_phase v c u l hc j) n hn k (hsource j hj)
   refine ⟨?_, ?_, ?_⟩
   · intro i m

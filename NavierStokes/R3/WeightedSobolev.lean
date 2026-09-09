@@ -2,7 +2,7 @@ import NavierStokes.R3.ComparisonSetup
 import NavierStokes.R3.LpNormTools
 import NavierStokes.R3.GradientOperator
 import NavierStokes.R3.WeightedInterpolation
-import Mathlib.Analysis.FunctionalSpaces.SobolevInequality
+import Common.SobolevL6
 
 /-!
 # Weighted Sobolev estimates for compact cutoffs
@@ -21,28 +21,23 @@ namespace NavierStokesR3.WeightedSobolev
 
 open ProblemStatement Comparison
 
-/-- The fixed whole-space `H¹ → L⁶` Sobolev constant in dimension three. -/
+/-- The fixed whole-space `H¹ → L⁶` Sobolev constant in dimension three.  The
+body is kept literal (rather than routed through `Common.SobolevL6`) because
+`PressureFlux` unfolds it by `simp`; `sobolevConstant_eq` records the identification. -/
 def sobolevConstant : ℝ :=
   (eLpNormLESNormFDerivOfEqInnerConst (volume : Measure Space) 2 : ℝ)
+
+theorem sobolevConstant_eq : sobolevConstant = (Common.SobolevL6.sobolevConstant : ℝ) := rfl
 
 theorem sobolevConstant_nonneg : 0 ≤ sobolevConstant := NNReal.coe_nonneg _
 
 
 /-- Mathlib's homogeneous Sobolev inequality specialized to Euclidean `R³`.
 The finite derivative norm is supplied by compact support and `C¹` regularity. -/
-theorem lpNorm_six_le {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [CompleteSpace E]
+theorem lpNorm_six_le {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     {f : Space → E} (hf : ContDiff ℝ 1 f) (hs : HasCompactSupport f) :
-    comparisonLpNorm 6 f ≤ sobolevConstant * comparisonLpNorm 2 (fderiv ℝ f) := by
-  have hn : Module.finrank ℝ Space = 3 := by simp [Space, NavierStokes.ProblemStatement.Space]
-  have h := eLpNorm_le_eLpNorm_fderiv_of_eq_inner (volume : Measure Space)
-    hf hs (p := 2) (p' := 6) (by norm_num) (by omega) (by rw [hn]; norm_num)
-  have hd : MemLp (fderiv ℝ f) 2 (volume : Measure Space) :=
-    (hf.continuous_fderiv (by simp)).memLp_of_hasCompactSupport (hs.fderiv ℝ)
-  have hfin : (eLpNormLESNormFDerivOfEqInnerConst (volume : Measure Space) 2 : ℝ≥0∞) *
-      eLpNorm (fderiv ℝ f) 2 volume ≠ (⊤ : ℝ≥0∞) :=
-    ENNReal.mul_ne_top ENNReal.coe_ne_top hd.eLpNorm_ne_top
-  simpa [comparisonLpNorm, sobolevConstant, ENNReal.toReal_mul] using ENNReal.toReal_mono hfin h
+    comparisonLpNorm 6 f ≤ sobolevConstant * comparisonLpNorm 2 (fderiv ℝ f) :=
+  Common.SobolevL6.toReal_eLpNorm_six_le_of_hasCompactSupport hf hs
 
 /-- Multiplication by any positive natural power of a compact cutoff preserves
 compact support, even if the multiplied function is not compactly supported. -/

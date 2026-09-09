@@ -29,12 +29,16 @@ noncomputable def cycleAssoc : CyclePoint ≃ₗᵢ[ℝ] (CycleSlow × TorusInve
   ParticularWaveBounds.liftAssoc PressureStream.Plane
 
 /-- Finite labeled coefficient data of the current fields. Correct
-representation is a separate invariant, not part of the construction. -/
+representation is a separate invariant, not part of the construction.
+
+The generic residual layer (`HarmonicResidual`, `ParticularWaveAssembly`)
+also accepts a per-label wave alias coefficient; the cycle never uses
+one, so every call below passes `0` in that slot and the axisymmetric
+alias is carried separately in `CycleState.axisymmetricAlias`. -/
 structure CycleCoefficients (ι : Type) where
   labels : ℕ → Finset ι
   blocks : ι → HarmonicBlock CyclePoint
   gaussian : ι → HarmonicResidual.BlockCoefficients CyclePoint
-  aliasCoefficients : ι → HarmonicResidual.BlockCoefficients CyclePoint
   residualBand : ℕ
 
 /-- Fixed geometric and primitive solver data for an actual correction
@@ -61,14 +65,14 @@ noncomputable def particularBlock (l : ι) : HarmonicBlock CyclePoint :=
     (StateReindex.context cycleAssoc.symm c) (StateReindex.state cycleAssoc.symm u)
     (StateReindex.block cycleAssoc.symm (v.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (v.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (v.aliasCoefficients l)) v.residualBand)
+    (StateReindex.blockCoefficients cycleAssoc.symm 0) v.residualBand)
 
 noncomputable def particularGaussianBlock (l : ι) : HarmonicBlock CyclePoint :=
   StateReindex.block cycleAssoc ((p.particular l).gaussianBlock
     (StateReindex.context cycleAssoc.symm c) (StateReindex.state cycleAssoc.symm u)
     (StateReindex.block cycleAssoc.symm (v.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (v.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (v.aliasCoefficients l)) v.residualBand)
+    (StateReindex.blockCoefficients cycleAssoc.symm 0) v.residualBand)
 
 noncomputable def particularVelocity : Oscillation CyclePoint :=
   LabelSumBounds.fieldSum v.labels (fun l => (p.particularBlock v c u l).oscillation)

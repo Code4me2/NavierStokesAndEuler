@@ -343,7 +343,7 @@ noncomputable def particularCopyData {ι : Type} (p : CycleParameters ι)
   (p.particular l).copyData (StateReindex.context cycleAssoc.symm c)
     (StateReindex.state cycleAssoc.symm u) (StateReindex.block cycleAssoc.symm (v.blocks l))
     (StateReindex.blockCoefficients cycleAssoc.symm (v.gaussian l))
-    (StateReindex.blockCoefficients cycleAssoc.symm (v.aliasCoefficients l)) j
+    (StateReindex.blockCoefficients cycleAssoc.symm 0) j
 
 
 

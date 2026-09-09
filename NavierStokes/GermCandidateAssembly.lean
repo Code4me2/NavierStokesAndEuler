@@ -100,6 +100,12 @@ structure WitnessData (h qbig : ℝ) (A B : ℕ → VelocityField) (P : ℕ → 
   boundary_jets : ∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n forcing (1, x) =
     MixedPeriodicAssembly.boundaryLimits (scheduledSum h schedule A) (scheduledSum h schedule B)
       (scheduledSum h schedule P) ea eb ep x n
+  compact_forcing : VelocityField
+  compact_candidate : R3CompactCandidate.Properties
+    (TimeLocalization.activatedVelocity
+      (MixedPeriodicAssembly.cutVelocity (scheduledSum h schedule A) (scheduledSum h schedule B)))
+    (TimeLocalization.activatedPressure (SpatialLocalization.cutPressure (scheduledSum h schedule P)))
+    compact_forcing
 
 section ActualBase
 
@@ -244,15 +250,32 @@ theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ
   have hcut := LocalAngularDiagonal.spatialCut_angularSum_divergence
     F.data.h_pos F.data.h_lt_half D hat ha0 hamin (hgap 0)
   have haxis := origin_blowup H v upper bandFloor hqbig initial stages D hInitialAxis hStagesAxis hat
+  let ASum := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) A
+  let BSum := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) B
+  let PSum := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) P
+  have hAsmooth : ContDiffOn ℝ ∞ ASum (SpacetimeEndpoint.openPast 1) :=
+    (hs.potential.mono (fun _ hx => hx.1))
+  have hBsmooth : ContDiffOn ℝ ∞ BSum (SpacetimeEndpoint.openPast 1) :=
+    (hs.direct.mono (fun _ hx => hx.1))
+  have hPsmooth : ContDiffOn ℝ ∞ PSum (SpacetimeEndpoint.openPast 1) :=
+    (hs.pressure.mono (fun _ hx => hx.1))
   obtain ⟨forcing, hc, hsmooth, hcons, hH3, hdecay, hjets⟩ :=
     CandidateConsequences.mixed_exists_force_with_consequences
-      (A := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) A)
-      (v := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) B)
-      (p := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) P)
-      (hs.potential.mono (fun _ hx => hx.1)) (hs.direct.mono (fun _ hx => hx.1))
-      (hs.pressure.mono (fun _ hx => hx.1)) hcut hz ea eb ep haxis
+      (A := ASum) (v := BSum) (p := PSum)
+      hAsmooth hBsmooth hPsmooth hcut hz ea eb ep haxis
+  have hApre : ContDiffOn ℝ ∞ ASum preSingularDomain :=
+    hAsmooth.mono (fun _ h => ⟨h.1.2, h.2⟩)
+  have hBpre : ContDiffOn ℝ ∞ BSum preSingularDomain :=
+    hBsmooth.mono (fun _ h => ⟨h.1.2, h.2⟩)
+  obtain ⟨compactForcing, hcompact, _⟩ := MixedPeriodicAssembly.exists_compact_candidate
+    (A := ASum) (v := BSum) (p := PSum) hAsmooth hBsmooth hPsmooth hz ea eb ep
+    (TimeLocalization.activatedVelocity_divergence_free _
+      (MixedPeriodicAssembly.cutVelocity_smoothOn hApre hBpre)
+      (fun t ht x => MixedPeriodicAssembly.cutVelocity_divergence_free hAsmooth hBsmooth hcut ht.2 x))
+    (TimeLocalization.activatedVelocity_speed_unbounded _
+      (MixedPeriodicAssembly.cutVelocity_speed_unbounded haxis))
   exact ⟨⟨a, ⟨hal, hap, had, ham, hat, hgap, hs, hz⟩, ea, eb, ep, forcing, hc, hsmooth, hcons,
-    hH3, hdecay, hjets⟩⟩
+    hH3, hdecay, hjets, compactForcing, hcompact⟩⟩
 
 end ActualBase
 

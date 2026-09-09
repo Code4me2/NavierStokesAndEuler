@@ -87,7 +87,7 @@ structure WaveData {ι : Type} (G : SignedMeanGain.Geometry)
     (LabelSumBounds.fieldSum (v).labels (fun l => ((p).signedTangent v c u l).oscillation))
   particularLinear : ∀ i j, j ≠ 0 → LabelSumBounds.UniformWaveClass (p).strip P (1+σ-3*κ)
     (fun l n z =>
-      (HarmonicResidual.residualBlock c u ((v).blocks l) ((v).gaussian l) ((v).aliasCoefficients l)).velocity n i j z +
+      (HarmonicResidual.residualBlock c u ((v).blocks l) ((v).gaussian l) 0).velocity n i j z +
       (HarmonicWaveInteraction.linearGoodBlock c ((v).blocks l) ((p).particularBlock v c u l)
         ((p).particularGaussianBlock v c u l).velocity).velocity n i j z)
   signedLinear : UniformHarmonicInteraction.UniformVelocity (p).strip P (1+σ-4*κ)
@@ -364,7 +364,7 @@ private theorem assemble
     signed_solenoidal := W.signedSolenoidal
     angular := H.angular
     signed_carrier := W.carrier }
-  have hAlias := H.representation.alias_eq_lift H.aliasCoefficients
+  have hAlias := H.representation.alias_eq_lift
   have hAliasContinuous : AngularContinuous (u).errors.aliasError := by
     rw [hAlias]
     intro n z i
@@ -429,7 +429,6 @@ private theorem assemble
     gaussianFlat := fun β => (p).next_gaussian_mem v c u (H.gaussianFlat β)
       (W.particularGaussian β) (W.signedGaussian β)
     gaussianMean := ?_
-    aliasCoefficients := H.aliasCoefficients
     axisFlat := hAxis
     baseAngular := ?_ }
   · have hpn := hpr.1

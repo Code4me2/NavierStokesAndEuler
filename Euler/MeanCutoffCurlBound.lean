@@ -1,5 +1,5 @@
 import Euler.EulerProof
-import Mathlib.Analysis.FunctionalSpaces.SobolevInequality
+import Common.SobolevL6
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 
 /-! A genuine ordinary-space cutoff-curl dual estimate. All spatial norms and
@@ -16,23 +16,17 @@ open scoped ContDiff ENNReal NNReal
 def vectorCurl (f : Space → Space) : Space → Space :=
   curl (fun i x => f x i)
 
-/-- The fixed homogeneous Sobolev constant for dimension three and exponent two. -/
-def sobolevConstant : ℝ≥0 :=
-  eLpNormLESNormFDerivOfEqInnerConst (volume : Measure Space) 2
+-- The fixed homogeneous Sobolev constant for dimension three and exponent two,
+-- shared with the Navier–Stokes library through `Common.SobolevL6`.
+export Common.SobolevL6 (sobolevConstant)
 
 /-- The ordinary homogeneous Sobolev inequality, with no dependence on support size. -/
 theorem homogeneous_sobolev (f : Space → Space)
     (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
-    lpNorm f 6 volume ≤ (sobolevConstant : ℝ) * lpNorm (fderiv ℝ f) 2 volume := by
-  have hd : Continuous (fderiv ℝ f) := (hf.fderiv_right (m := ∞) (by simp)).continuous
-  have hdm : MemLp (fderiv ℝ f) 2 volume := hd.memLp_of_hasCompactSupport (hfc.fderiv ℝ)
-  have h := eLpNorm_le_eLpNorm_fderiv_of_eq_inner (volume : Measure Space)
-    (hf.of_le (by simp) : ContDiff ℝ 1 f) hfc (p := 2) (p' := 6)
-    (by norm_num) (by simp [Space]) (by norm_num [Space])
-  have hr := ENNReal.toReal_mono (by finiteness [hdm.eLpNorm_ne_top]) h
-  simpa [ENNReal.toReal_mul, ENNReal.coe_toReal,
-    toReal_eLpNorm hf.continuous.aestronglyMeasurable,
-    toReal_eLpNorm hd.aestronglyMeasurable, sobolevConstant] using hr
+    lpNorm f 6 volume ≤ (sobolevConstant : ℝ) * lpNorm (fderiv ℝ f) 2 volume :=
+  Common.SobolevL6.lpNorm_six_le (hf.of_le (by simp))
+    (hf.continuous.memLp_of_hasCompactSupport hfc)
+    ((hf.fderiv_right (m := ∞) (by simp)).continuous.memLp_of_hasCompactSupport (hfc.fderiv ℝ))
 
 /-- A three-vector's Euclidean norm is at most the sum of its component norms. -/
 theorem norm_le_sum_coordinates (v : Space) : ‖v‖ ≤ ∑ i : Fin 3, ‖v i‖ := by

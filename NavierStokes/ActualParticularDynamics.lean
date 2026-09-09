@@ -1539,12 +1539,12 @@ theorem cycle_context_linear_cancellation {x : CycleState (Label B N0)} (Hc : Pr
     (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     {α : ℝ} (N : ℕ) (Hs : SourceClasses x N α) (l : Label B N0)
     (hBand : (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)).BandLimited N)
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0).BandLimited N)
     (n : ℕ) (z : CyclePoint × ℝ)
     (hz : z.1 ∈ (BaseContextAssembly.nativeStrip ActualPrimary.nominal ActualPrimary.standardRegion).domain) :
     linearBlockField (ActualPrimary.commonContext B) (x.coefficients.blocks l) (cycleUpdate x l N) n z +
       (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)).oscillation n z =
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0).oscillation n z =
       (StateReindex.block cycleAssoc (actualGood x l N)).oscillation n z +
         (StateReindex.block cycleAssoc (actualGaussian x l N)).oscillation n z := by
   have hBand' : (HarmonicResidual.residualBlock (assembly x l).context (assembly x l).state
@@ -1552,7 +1552,7 @@ theorem cycle_context_linear_cancellation {x : CycleState (Label B N0)} (Hc : Pr
     change (HarmonicResidual.residualBlock (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
       (StateReindex.state cycleAssoc.symm x.state) (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
       (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l))).BandLimited N
+      (StateReindex.blockCoefficients cycleAssoc.symm 0)).BandLimited N
     rw [StateReindex.residualBlock_pull]
     exact StateReindex.block_bandLimited cycleAssoc.symm hBand
   have hz' : (StateReindex.cylinder cycleAssoc z).1 ∈ associatedStrip.domain := by
@@ -1572,11 +1572,11 @@ theorem cycle_context_linear_cancellation {x : CycleState (Label B N0)} (Hc : Pr
       (assembly x l).carrierBlock (assembly x l).gaussianInput (assembly x l).aliasInput).oscillation n
         (StateReindex.cylinder cycleAssoc z) =
       (HarmonicResidual.residualBlock (ActualPrimary.commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)).oscillation n z := by
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0).oscillation n z := by
     change (HarmonicResidual.residualBlock (StateReindex.context cycleAssoc.symm (ActualPrimary.commonContext B))
       (StateReindex.state cycleAssoc.symm x.state) (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
       (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l))).oscillation n _ = _
+      (StateReindex.blockCoefficients cycleAssoc.symm 0)).oscillation n _ = _
     rw [StateReindex.residualBlock_pull, StateReindex.block_oscillation]
     simp only [StateReindex.oscillation, StateReindex.cylinder_apply,
       cycleAssoc.symm_apply_apply, Prod.eta]

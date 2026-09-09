@@ -169,7 +169,7 @@ noncomputable def assembly (x : CycleState (Label B N0)) (l : Label B N0) :
   state := StateReindex.state cycleAssoc.symm x.state
   carrierBlock := StateReindex.block cycleAssoc.symm (x.coefficients.blocks l)
   gaussianInput := StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l)
-  aliasInput := StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l)
+  aliasInput := StateReindex.blockCoefficients cycleAssoc.symm 0
   background := background l
   copy := fun _ => 0
   strip := ParticularParameters.nativeStrip associatedStrip
@@ -520,12 +520,12 @@ theorem associated_residual_class (x : CycleState (Label B N0)) {α : ℝ}
     (H : UniformHarmonicInteraction.UniformVelocity
       (BaseContextAssembly.nativeStrip nominal standardRegion) meanEnvelope α
       (fun l => HarmonicResidual.residualBlock (commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))) :
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0)) :
     UniformHarmonicInteraction.UniformVelocity associatedStrip envelope α
       (fun l => HarmonicResidual.residualBlock (assembly x l).context (assembly x l).state
         (assembly x l).carrierBlock (assembly x l).gaussianInput (assembly x l).aliasInput) := by
   exact MeanBoundsReindex.residualBlock_uniform_pull cycleAssoc.symm (commonContext B) x.state
-    x.coefficients.blocks x.coefficients.gaussian x.coefficients.aliasCoefficients H
+    x.coefficients.blocks x.coefficients.gaussian (fun _ => 0) H
 
 noncomputable def currentSource (x : CycleState (Label B N0)) (j : ℤ)
     (l : Label B N0) : ℕ → Native → HarmonicCalculus.ComplexVector :=
@@ -536,7 +536,7 @@ theorem current_source_class (x : CycleState (Label B N0)) {α : ℝ}
     (H : UniformHarmonicInteraction.UniformVelocity
       (BaseContextAssembly.nativeStrip nominal standardRegion) meanEnvelope α
       (fun l => HarmonicResidual.residualBlock (commonContext B) x.state
-        (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)))
+        (x.coefficients.blocks l) (x.coefficients.gaussian l) 0))
     (j : ℤ) (hj : j ≠ 0) :
     LabelSumBounds.UniformWaveClass (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
       nativeEnvelope α (currentSource x j) := by
@@ -1011,18 +1011,18 @@ theorem data_cutoff_support (x : CycleState (Label B N0)) (l : Label B N0) (j : 
 abbrev InputSupport (x : CycleState (Label B N0)) : Prop :=
   ∀ l, HarmonicSourceSupport.InputSupportOn ActualCarrierTransportBase.domain
     (ActualCarrierTransportBase.labelCarrier (supportLabel l))
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
 
 theorem currentSource_pull (x : CycleState (Label B N0)) (l : Label B N0) (j : ℤ) (n : ℕ) :
     currentSource x j l n = fun z =>
       ParticularWaveAssembly.residualSource (commonContext B) x.state (x.coefficients.blocks l)
-        (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l) j n (nativeToFull z).1 := by
+        (x.coefficients.gaussian l) 0 j n (nativeToFull z).1 := by
   funext z
   change ParticularWaveAssembly.residualSource
       (StateReindex.context cycleAssoc.symm (commonContext B)) (StateReindex.state cycleAssoc.symm x.state)
       (StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
       (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-      (StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l))
+      (StateReindex.blockCoefficients cycleAssoc.symm 0)
       j n (z.1.1,z.2) = _
   unfold ParticularWaveAssembly.residualSource
   rw [StateReindex.residualBlock_pull]
@@ -1041,7 +1041,7 @@ theorem currentSource_zero_germ (x : CycleState (Label B N0)) (hs : InputSupport
     exact hout ((ActualCarrierTransportBase.labelCarrier_iff_canonicalSourceRegion hN
       (supportLabel l) n hz z.2).mp hc)
   have he := HarmonicSourceSupport.residualSource_zero_germ_on (commonContext B) x.state
-    (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     (PhysicalMeanDomain.slowDomain_open standardRegion.isOpen)
     (fun n => ActualInitialExcluded.labelCarrier_closed l n) (hs l) j n
     (x := (nativeToFull z).1) hz hnot
@@ -1345,7 +1345,7 @@ abbrev ResidualBounds (x : CycleState (Label B N0)) (α : ℝ) : Prop :=
   UniformHarmonicInteraction.UniformVelocity
     (BaseContextAssembly.nativeStrip nominal standardRegion) meanEnvelope α
     (fun l => HarmonicResidual.residualBlock (commonContext B) x.state
-      (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.blocks l) (x.coefficients.gaussian l) 0)
 
 noncomputable def associatedUpdate (x : CycleState (Label B N0)) (N : ℕ) (l : Label B N0) :
     HarmonicBlock (Parameter × Plane) :=
@@ -1374,7 +1374,7 @@ theorem associated_assembled_bounds (x : CycleState (Label B N0))
     associatedStrip (associatedContext (B := B)) (StateReindex.state cycleAssoc.symm x.state)
     (fun l => StateReindex.block cycleAssoc.symm (x.coefficients.blocks l))
     (fun l => StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.gaussian l))
-    (fun l => StateReindex.blockCoefficients cycleAssoc.symm (x.coefficients.aliasCoefficients l))
+    (fun l => StateReindex.blockCoefficients cycleAssoc.symm 0)
     N (fun l n z _ => envelope_nonneg l n (z.1.1,z.2))
     (fun j hj => (hm j hj).2.1) (fun j hj => (hm j hj).2.2.1)
     (fun j hj => (hm j hj).2.2.2.2)

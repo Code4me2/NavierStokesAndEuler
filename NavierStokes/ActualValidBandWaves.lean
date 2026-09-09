@@ -139,7 +139,7 @@ theorem refined_support (l : ActualParticularStageControls.Label B N0) :
       (ActualCoreSupport.refinedCarrier (l.2, l.1))
       ((ActualCycleParameters.particularState x).coefficients.blocks l)
       ((ActualCycleParameters.particularState x).coefficients.gaussian l)
-      ((ActualCycleParameters.particularState x).coefficients.aliasCoefficients l) :=
+      0 :=
   ActualCycleAssembly.inputSupport_mono (H.inputSupport (l.2, l.1)) (hcore (l.2, l.1))
 
 theorem nativePotential_eq_actual (l : ActualParticularStageControls.Label B N0)

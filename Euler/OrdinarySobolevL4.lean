@@ -1,59 +1,35 @@
-import Euler.LpSmoothApproximation
 import Euler.MeanCutoffCurlBound
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
 /-! The ordinary three-dimensional H¹ product estimate. The homogeneous
-L⁶ inequality is extended from compact fields by genuine cutoff limits;
-the L⁴ bound and product estimate therefore require no support hypothesis. -/
+L⁶ inequality comes support-free from `Common.SobolevL6`; the L⁴ bound and
+product estimate therefore require no support hypothesis. -/
 
 noncomputable section
 
 namespace EulerOrdinarySobolev
 
-open MeasureTheory Filter EulerSmoothLimit EulerLpTranslation EulerMeanCutoffCurl
+open MeasureTheory Filter EulerSmoothLimit EulerMeanCutoffCurl
 open scoped ContDiff Topology ENNReal
 
 variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
 
+/-- The support-free homogeneous `L⁶` bound (`Common.SobolevL6.eLpNorm_six_le`).
+The derivative hypothesis is not needed for this extended-norm form and is kept
+only for the call sites. -/
 theorem eLpNorm_six_le (f : Space → V) (hf : ContDiff ℝ ∞ f)
-    (hL : MemLp f 2 volume) (hD : MemLp (fderiv ℝ f) 2 volume) :
-    eLpNorm f 6 volume ≤ (sobolevConstant : ℝ≥0∞)*eLpNorm (fderiv ℝ f) 2 volume := by
-  have hd (n : ℕ) : eLpNorm (fderiv ℝ (cutoffField f n)) 2 volume =
-      ENNReal.ofReal ‖cutoffDerivativeLp f hf n‖ := by
-    rw [ofReal_norm,Lp.enorm_def]
-    exact (eLpNorm_congr_ae (cutoffDerivativeLp_ae f hf n)).symm
-  have hb (n : ℕ) : eLpNorm (cutoffField f n) 6 volume ≤
-      (sobolevConstant : ℝ≥0∞)*ENNReal.ofReal ‖cutoffDerivativeLp f hf n‖ := by
-    rw [← hd]
-    exact eLpNorm_le_eLpNorm_fderiv_of_eq_inner (volume : Measure Space)
-      ((cutoffField_smooth f hf n).of_le (by simp)) (cutoffField_compact f n)
-      (p := 2) (p' := 6) (by norm_num) (by simp [Space]) (by norm_num [Space])
-  have ht := ENNReal.continuous_ofReal.continuousAt.tendsto.comp
-    (cutoffDerivativeLp_tendsto f hf hL hD).norm
-  have hc : Tendsto
-      (fun n => (sobolevConstant : ℝ≥0∞)*ENNReal.ofReal ‖cutoffDerivativeLp f hf n‖)
-      atTop (𝓝 ((sobolevConstant : ℝ≥0∞)*ENNReal.ofReal ‖hD.toLp (fderiv ℝ f)‖)) :=
-    (ENNReal.continuous_const_mul (by simp : (sobolevConstant : ℝ≥0∞) ≠ ⊤)).continuousAt.tendsto.comp ht
-  calc
-    _ ≤ atTop.liminf (fun n => eLpNorm (cutoffField f n) 6 volume) :=
-      Lp.eLpNorm_lim_le_liminf_eLpNorm
-        (fun n => (cutoffField_smooth f hf n).continuous.aestronglyMeasurable) f
-        (Eventually.of_forall (cutoffField_tendsto f))
-    _ ≤ atTop.liminf
-        (fun n => (sobolevConstant : ℝ≥0∞)*ENNReal.ofReal ‖cutoffDerivativeLp f hf n‖) :=
-      liminf_le_liminf (Eventually.of_forall hb)
-    _ = (sobolevConstant : ℝ≥0∞)*ENNReal.ofReal ‖hD.toLp (fderiv ℝ f)‖ := hc.liminf_eq
-    _ = _ := by rw [ofReal_norm,Lp.enorm_toLp]
+    (hL : MemLp f 2 volume) (_hD : MemLp (fderiv ℝ f) 2 volume) :
+    eLpNorm f 6 volume ≤ (sobolevConstant : ℝ≥0∞)*eLpNorm (fderiv ℝ f) 2 volume :=
+  Common.SobolevL6.eLpNorm_six_le (hf.of_le (by simp)) hL
 
 theorem memLp_six (f : Space → V) (hf : ContDiff ℝ ∞ f)
     (hL : MemLp f 2 volume) (hD : MemLp (fderiv ℝ f) 2 volume) : MemLp f 6 volume :=
-  ⟨hf.continuous.aestronglyMeasurable,(eLpNorm_six_le f hf hL hD).trans_lt (by finiteness)⟩
+  Common.SobolevL6.memLp_six (hf.of_le (by simp)) hL hD
 
 theorem norm_six_le (f : Space → V) (hf : ContDiff ℝ ∞ f)
     (hL : MemLp f 2 volume) (hD : MemLp (fderiv ℝ f) 2 volume) :
-    (eLpNorm f 6 volume).toReal ≤ (sobolevConstant : ℝ)*(eLpNorm (fderiv ℝ f) 2 volume).toReal := by
-  have h := ENNReal.toReal_mono (by finiteness) (eLpNorm_six_le f hf hL hD)
-  simpa only [ENNReal.toReal_mul,ENNReal.coe_toReal] using h
+    (eLpNorm f 6 volume).toReal ≤ (sobolevConstant : ℝ)*(eLpNorm (fderiv ℝ f) 2 volume).toReal :=
+  Common.SobolevL6.toReal_eLpNorm_six_le (hf.of_le (by simp)) hL hD
 
 section Interpolation
 

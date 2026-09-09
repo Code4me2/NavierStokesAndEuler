@@ -1,9 +1,11 @@
 import Euler.ParentGeometryChoiceCenter
 import Euler.ParentForwardInitialSupport
 
-/-! The initial traces of the actual chosen Euler states are the same
-compact high and mean increments used in the initial-data convergence
-proof. Restriction to a shorter horizon preserves these equalities. -/
+/-! The initial traces of the chosen Euler states are the compact high and
+mean increments used in the initial-data convergence proof: the packet
+child's time-zero increment is the rescaled normalized packet velocity
+(`child_initial_increment`), which each source pipeline identifies with its
+exact physical velocity at time zero and splits into `high k + mean k`. -/
 
 noncomputable section
 
@@ -11,11 +13,6 @@ namespace EulerParentPacketFrames
 
 open Set EulerSmoothLimit EulerPacketTerminalDatum EulerPacketSourceFrequency
   EulerAllOrderDriftCorrection EulerPacketPhysicalLowBounds EulerPhysicalL2Scaling
-
-namespace SmoothState
-
-
-end SmoothState
 
 variable {U : Type} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
 
@@ -44,35 +41,16 @@ theorem normalized_initial :
 variable (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support)
 local notation "T" => state I S k hk nextEll hnext hnext1 F hSym
 
-theorem initial_increment : S.velocityIncrement T 0 = I.exactInitial k hk.four F.hn F.Q := by
-  funext x
-  have he : (T).evolution.velocity (0,x) =
-      addVelocity I.parent.ell (fun y => S.evolution.velocity (0,y))
-        (I.parent.normalizedPacketVelocity I.normal I.normal_unit I.coordinates
-          I.support I.support_compact F.Q res k S.evolution.inverse I.parent.zeroTime) x :=
-    I.parent.exactPacketVelocity_eq_addVelocity I.normal I.normal_unit I.coordinates
-      I.support I.support_compact F.Q res k S.evolution.inverse S.evolution.velocity I.parent.zeroTime x
-  change (T).evolution.velocity (0,x)-S.evolution.velocity (0,x)=_
-  rw [he]
-  simp only [addVelocity,add_sub_cancel_left,
-    normalized_initial I S k hk nextEll hnext hnext1 F,EulerPacketInitial.Input.exactInitial,scale]
-  rfl
-
-theorem initial_increment_eq : S.velocityIncrement T 0 = I.high k+I.mean k :=
-  (initial_increment I S k hk nextEll hnext hnext1 F hSym).trans
-    (I.exactInitial_eq k hk.four F.hn F.Q)
+theorem initial_increment_eq : S.velocityIncrement T 0 = I.high k+I.mean k := by
+  refine (S.child_initial_increment I.normal I.normal_unit I.coordinates I.support I.support_compact
+    F.Q res rfl F.flow F.coefficient k (mul_inv_cancel₀ hk.pos.ne') F.graph nextEll hnext hnext1 T rfl).trans ?_
+  rw [normalized_initial I S k hk nextEll hnext hnext1 F]
+  exact I.exactInitial_eq k hk.four F.hn F.Q
 
 theorem state_velocity_initial :
     (fun x => (T).evolution.velocity (0,x)) =
-      (fun x => S.evolution.velocity (0,x))+(I.high k+I.mean k) := by
-  funext x
-  have he := congrFun (initial_increment_eq I S k hk nextEll hnext hnext1 F hSym) x
-  change (T).evolution.velocity (0,x)-S.evolution.velocity (0,x)=(I.high k+I.mean k) x at he
-  exact (sub_eq_iff_eq_add.mp he).trans (add_comm _ _)
-
-theorem restricted_initial_increment (s : ℝ) (hs : 0 < s) (hT : s ≤ I.parent.T) :
-    (S.restrictTime s hs hT).velocityIncrement ((T).restrictTime s hs hT) 0 =
-      I.high k+I.mean k := initial_increment_eq I S k hk nextEll hnext hnext1 F hSym
+      (fun x => S.evolution.velocity (0,x))+(I.high k+I.mean k) :=
+  S.velocity_initial_of_increment T _ (initial_increment_eq I S k hk nextEll hnext hnext1 F hSym)
 
 end GeometryJoinedChoice
 
@@ -124,34 +102,16 @@ theorem normalized_initial :
 variable (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support)
 local notation "T" => state I S k hk nextEll hnext hnext1 F hSym
 
-theorem initial_increment : S.velocityIncrement T 0 = I.exactInitial k hk.four F.hn F.Q := by
-  funext x
-  have he : (T).evolution.velocity (0,x) =
-      addVelocity I.parent.ell (fun y => S.evolution.velocity (0,y))
-        (I.parent.normalizedPacketVelocity I.normal I.normal_unit I.coordinates
-          I.support I.support_compact F.Q res k S.evolution.inverse I.parent.zeroTime) x :=
-    I.parent.exactPacketVelocity_eq_addVelocity I.normal I.normal_unit I.coordinates
-      I.support I.support_compact F.Q res k S.evolution.inverse S.evolution.velocity I.parent.zeroTime x
-  change (T).evolution.velocity (0,x)-S.evolution.velocity (0,x)=_
-  rw [he]
-  simp only [addVelocity,add_sub_cancel_left,
-    normalized_initial I S k hk nextEll hnext hnext1 F,GeometryForwardInput.exactInitial,scale]
-
-theorem initial_increment_eq : S.velocityIncrement T 0 = I.high k+I.mean k :=
-  (initial_increment I S k hk nextEll hnext hnext1 F hSym).trans
-    (I.exactInitial_eq k hk.four F.hn F.Q)
+theorem initial_increment_eq : S.velocityIncrement T 0 = I.high k+I.mean k := by
+  refine (S.child_initial_increment I.normal I.normal_unit I.coordinates I.support I.support_compact
+    F.Q res rfl F.flow F.coefficient k (mul_inv_cancel₀ hk.pos.ne') F.graph nextEll hnext hnext1 T rfl).trans ?_
+  rw [normalized_initial I S k hk nextEll hnext hnext1 F]
+  exact I.exactInitial_eq k hk.four F.hn F.Q
 
 theorem state_velocity_initial :
     (fun x => (T).evolution.velocity (0,x)) =
-      (fun x => S.evolution.velocity (0,x))+(I.high k+I.mean k) := by
-  funext x
-  have he := congrFun (initial_increment_eq I S k hk nextEll hnext hnext1 F hSym) x
-  change (T).evolution.velocity (0,x)-S.evolution.velocity (0,x)=(I.high k+I.mean k) x at he
-  exact (sub_eq_iff_eq_add.mp he).trans (add_comm _ _)
-
-theorem restricted_initial_increment (s : ℝ) (hs : 0 < s) (hT : s ≤ I.parent.T) :
-    (S.restrictTime s hs hT).velocityIncrement ((T).restrictTime s hs hT) 0 =
-      I.high k+I.mean k := initial_increment_eq I S k hk nextEll hnext hnext1 F hSym
+      (fun x => S.evolution.velocity (0,x))+(I.high k+I.mean k) :=
+  S.velocity_initial_of_increment T _ (initial_increment_eq I S k hk nextEll hnext hnext1 F hSym)
 
 end GeometryForwardChoice
 end EulerParentPacketFrames

@@ -170,7 +170,7 @@ theorem current_modes_window
     (x : CycleState (Label B N0)) (l : Label B N0)
     (hs : HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2, l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (j : ℤ) (n : ℕ) {w : SpaceTime} (hw : w ∈ ValidDyadicBandCover.band h n) :
     (ActualCurrentParticularPhysical.localPotentialMode x l j n w ≠ 0 →
       window w ∈ LabelSumBounds.closedWindow (CoordinateAlgebra.D h) (signedLabel l)) ∧
@@ -232,7 +232,7 @@ variable (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     (x : CycleState (Label B N0))
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier (l.2, l.1)) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l))
+      (x.coefficients.gaussian l) 0)
     (n m : ℕ) {w : SpaceTime} (hw : w ∈ ValidDyadicBandCover.band h n)
 
 include hN hs hw
@@ -297,7 +297,7 @@ theorem current_modes_contDiffAt (l : Label B N0) (j : ℤ) (hj : j ≠ 0) (n : 
         (ActualCoreSupport.refinedCarrier (l.2, l.1))
         ((ActualCycleParameters.particularState x).coefficients.blocks l)
         ((ActualCycleParameters.particularState x).coefficients.gaussian l)
-        ((ActualCycleParameters.particularState x).coefficients.aliasCoefficients l) :=
+        0 :=
       H.inputSupport (l.2, l.1)
     have hh := ActualCurrentWaveSupport.current_mode_annulus hN
       (ActualCycleParameters.particularState x) l hs j 0

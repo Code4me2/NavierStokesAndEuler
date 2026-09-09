@@ -1,24 +1,21 @@
+import Euler.PacketStageSuccessor
 import Euler.PacketStageInputs
 import Euler.PacketStageEstimates
-import Euler.PacketStagePhysicalBounds
 import Euler.ParentGeometryChoiceLow
 import Euler.ParentGeometryChoiceRenewal
 import Euler.ParentGeometryChoiceInitial
 
-/-! The positive-history normal step. One actual correction constructs
-the next Euler state, localized low bounds, renewed frame and exact
-initial increment, without any premise about a future stage. -/
+/-! The positive-history step. After the first packet the joined packet
+choice, with its guards' `badRatio`, is packaged as a `Step` and assembled by
+`next`; its exact initial increment is the high and mean field of the input. -/
 
 noncomputable section
 
 namespace EulerPacketInduction.Stage
 
-open Set Finset Real InnerProductSpace EulerSmoothLimit EulerParentPacketFrames
-  EulerBaseDatum EulerPacketSupport EulerPacketSourceGeometry EulerPacketNormalizedPrimary
-  EulerPacketInductionScales EulerPacketLowConstants EulerPacketSourceScaleChoice
-  EulerPacketSourceScaleSequence EulerPacketSourceScaleActual EulerPacketBaseGuardScales
-  EulerParentRenewalScale EulerPacketGeometryLowBounds EulerParentNeighborThreshold
-  EulerMeanHarmonic
+open Set Real EulerSmoothLimit EulerParentPacketFrames EulerBaseDatum EulerPacketSupport
+  EulerPacketInductionScales EulerPacketLowConstants EulerPacketSourceScaleSequence
+  EulerParentNeighborThreshold EulerPacketGeometryLowBounds
 
 variable {q : ℕ} {B : ℝ} {S : Scales (q : ℝ) B} {n : ℕ} (P : Stage S n)
   (hn : n ≠ 0) (hq : requiredExponent ≤ q)
@@ -41,157 +38,78 @@ def chooseJoined : P.JoinedChoice hn hq hB := by
 
 local notation "F" => P.chooseJoined hn hq hB
 
-def joinedParent : Parent := (F).parent
+/-- The joined child state, named so the shared successor record does not have
+to unfold the geometry choice while checking later fields. -/
+def joinedState : SmoothState (F).parent :=
+  GeometryJoinedChoice.state I P.restrictedState k hk ell (S.support_pos (n+1)) (S.support_one (n+1)) F symmetric
 
-def joinedState : SmoothState (P.joinedParent hn hq hB) :=
-  GeometryJoinedChoice.state I P.restrictedState k hk ell
-    (S.support_pos (n+1)) (S.support_one (n+1)) F symmetric
+/-- Whole-horizon physical bounds for the joined child, kept as one named proof
+to avoid elaborating the packet estimate twice inside `Step`. -/
+theorem joinedPhysicalBounds (t : Icc (0 : ℝ) (F).parent.T) (x : Space) :
+    ‖fderiv ℝ (fun y => (P.joinedState hn hq hB).evolution.velocity (t,y)) x‖ ≤
+        gradientConstant*previousShear S.J S.X n+(G).hchild*(goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)) ∧
+      ‖fderiv ℝ ((P.joinedState hn hq hB).evolution.force t) x‖ ≤
+        hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n+
+          2*(gradientConstant*previousShear S.J S.X n)*(G).hchild*(goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)) :=
+  (F).physical_bounds symmetric _ _ P.restricted_gradient_bound P.restricted_hessian_bound t x
 
-theorem joined_smallness :
-    (P.restrictedLow.K+2*(gradientConstant*previousShear S.J S.X n)*(G).hchild*
-        ((G).δ*goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)))*(P.nextHorizon^2/2)+
-      (P.restrictedLow.Be+((G).hchild*(G).badRatio+k^(-(1/4 : ℝ))))*P.nextHorizon+
-      boundaryLocalizationC2*(P.restrictedLow.Bc+((G).hchild*(G).badRatio+k^(-(1/4 : ℝ))))*
-        P.restrictedLow.r^3*P.nextHorizon ≤ 1/2 := by
-  have he : 0 ≤ k^(-(1/4 : ℝ)) := rpow_nonneg (hk).pos.le _
-  have h := P.next_localized P.nextHorizon
-    ((G).hchild*(G).badRatio+k^(-(1/4 : ℝ)))
-    (2*(gradientConstant*previousShear S.J S.X n)*(G).hchild*
-      ((G).δ*goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)))
-    P.nextHorizon_pos.le P.nextHorizon_le_base
-    (by positivity [(G).child_nonneg,(G).badRatio_nonneg])
-    (by positivity [gradient_nonneg,S.previousShear_one n,(G).child_nonneg,(G).delta_nonneg,
-      goodRatio_pos,(G).badRatio_nonneg])
-    (P.joined_initial_cost hn hq hB) (P.joined_pressure_cost hn hq hB)
-  rw [restrictedLow_pressure,restrictedLow_exterior,restrictedLow_core,restrictedLow_radius]
-  convert h using 1; ring
-
-def joinedLow : LowBounds (P.joinedParent hn hq hB) :=
-  (F).lowBounds (gradientConstant*previousShear S.J S.X n)
+/-- The joined choice's parent, state, low bounds, physical bounds and renewed
+frame, with the guards' shear, spike and `badRatio`. -/
+def joinedStep : P.Step where
+  parent := (F).parent
+  state := P.joinedState hn hq hB
+  hchild := (G).hchild
+  δ := (G).δ
+  ratio := (G).badRatio
+  ratio_nonneg := (G).badRatio_nonneg
+  hchild_eq := P.joinedGuards_shear hn hq hB
+  delta_eq := P.joinedGuards_delta hn hq hB
+  parent_horizon := rfl
+  parent_scale := rfl
+  label_eq := (F).label_constant
+  low := (F).lowBounds (gradientConstant*previousShear S.J S.X n)
     (hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n)
-    P.restricted_gradient_bound P.restricted_hessian_bound (P.joined_smallness hn hq hB)
-
-def joinedRenewal : ParentFrame (frameData (P.joinedParent hn hq hB))
-    (P.joinedGeometry hn hq hB).targetTime :=
-  (F).renewal symmetric (gradientConstant*previousShear S.J S.X n)
+    P.restricted_gradient_bound P.restricted_hessian_bound
+    (P.smallness (G).hchild (G).δ (G).badRatio (G).child_nonneg (G).delta_nonneg (G).badRatio_nonneg
+      (initial_cost_of_bad_cost _ _ (G).child_nonneg (G).badRatio_nonneg (P.joined_bad_cost hn hq hB))
+      (P.joined_pressure_cost hn hq hB))
+  low_exterior := rfl
+  low_core := rfl
+  low_pressure := rfl
+  low_boundary := rfl
+  low_radius := rfl
+  physical_bounds := P.joinedPhysicalBounds hn hq hB
+  bad_cost := P.joined_bad_cost hn hq hB
+  pressure_cost := P.joined_pressure_cost hn hq hB
+  geometry := P.joinedGeometry hn hq hB
+  geometry_targetTime := P.joinedGeometry_targetTime hn hq hB
+  geometry_coupling := P.joinedFrame_a hn
+  geometry_y := rfl
+  geometry_delta_pos := (I).delta_pos
+  geometry_shear := rfl
+  renewal_errors := P.joined_renewal_errors hn hq hB
+  renewal := (F).renewal symmetric (gradientConstant*previousShear S.J S.X n)
     (hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n)
     (frameConstant*(1+previousShear S.J S.X n))
     (mul_nonneg gradient_nonneg (zero_le_one.trans (S.previousShear_one n)))
-    (next_frame_bounds (S := S) (n := n)).1 (next_frame_bounds (S := S) (n := n)).2.1 (next_frame_bounds (S := S) (n := n)).2.2
+    (next_frame_bounds (S := S) (n := n)).1 (next_frame_bounds (S := S) (n := n)).2.1
+    (next_frame_bounds (S := S) (n := n)).2.2
     P.restricted_gradient_bound P.restricted_hessian_bound
     firstNormal firstNormal_unit firstFrame support compact
-
-theorem joinedRenewal_matches :
-    RenewalAtTarget (P.joinedGeometry hn hq hB) (P.joinedRenewal hn hq hB) :=
-  (F).renewal_matches symmetric (gradientConstant*previousShear S.J S.X n)
+  renewal_matches := (F).renewal_matches symmetric (gradientConstant*previousShear S.J S.X n)
     (hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n)
     (frameConstant*(1+previousShear S.J S.X n))
     (mul_nonneg gradient_nonneg (zero_le_one.trans (S.previousShear_one n)))
-    (next_frame_bounds (S := S) (n := n)).1 (next_frame_bounds (S := S) (n := n)).2.1 (next_frame_bounds (S := S) (n := n)).2.2
+    (next_frame_bounds (S := S) (n := n)).1 (next_frame_bounds (S := S) (n := n)).2.1
+    (next_frame_bounds (S := S) (n := n)).2.2
     P.restricted_gradient_bound P.restricted_hessian_bound
     firstNormal firstNormal_unit firstFrame support compact
+  renewal_G := rfl
+  renewal_error := rfl
 
-def joinedNextFrame : ParentFrame (frameData (P.joinedParent hn hq hB)) P.nextTime :=
-  (P.joinedRenewal hn hq hB).changeActivation (P.joinedGeometry_targetTime hn hq hB)
-
-def joinedNext : Stage S (n+1) := by
-  have hbad : 2*gradientConstant*previousShear S.J S.X n*shear S.J S.X n*(G).badRatio ≤
-      EulerPacketPressureScale.badCost S.J 4 gradientConstant gradientConstant hessianConstant 80
-        (scaleSequence S.J S.X) n := by
-    have h := P.joined_bad_cost hn hq hB
-    change 2*(gradientConstant*previousShear S.J S.X n)*shear S.J S.X n*(G).badRatio ≤ _ at h
-    nlinarith only [h]
-  have habsorb := ratio_absorption (S := S) (n := n) (G).badRatio (G).badRatio_nonneg hbad
-  have hparams := literal_step (P.joinedRenewal_matches hn hq hB) S.J S.X n S.renewal_series
-    (by norm_num) (P.joined_renewal_errors hn hq hB) rfl
-  have hcoupling : |(P.joinedRenewal hn hq hB).a/P.frame.a-1| ≤
-      renewalCost S.J S.D 4 (q : ℝ) frameConstant S.X n := by
-    have h := hparams.1
-    change |(P.joinedRenewal hn hq hB).a/(P.joinedFrame hn).a-1| ≤ _ at h
-    rwa [P.joinedFrame_a hn] at h
-  refine {
-    parent := P.joinedParent hn hq hB
-    state := P.joinedState hn hq hB
-    low := P.joinedLow hn hq hB
-    time := P.nextTime
-    time_nonneg := P.nextTime_pos.le
-    time_zero := fun h => by omega
-    time_lower := fun _ => P.nextTime_lower
-    horizon_eq := rfl
-    horizon_le := P.nextHorizon_le_base
-    scale_eq := rfl
-    label_eq := (F).label_constant
-    gradient_bound := ?gradient_bound
-    hessian_bound := ?hessian_bound
-    exterior_bound := ?exterior_bound
-    core_bound := ?core_bound
-    pressure_bound := ?pressure_bound
-    boundary_eq := rfl
-    radius_eq := P.radius_eq
-    frame := P.joinedNextFrame hn hq hB
-    frame_shear := ?frame_shear
-    frame_bound := ?frame_bound
-    frame_error := ?frame_error
-    coupling_error := ?coupling_error
-    tilt_lower := ?tilt_lower
-    tilt_upper := ?tilt_upper
-    compression := ?compression }
-  case gradient_bound =>
-    intro t x
-    exact ((F).physical_bounds symmetric _ _ P.restricted_gradient_bound
-      P.restricted_hessian_bound t x).1.trans habsorb.1
-  case hessian_bound =>
-    intro t x
-    have h := ((F).physical_bounds symmetric _ _ P.restricted_gradient_bound
-      P.restricted_hessian_bound t x).2
-    apply h.trans
-    change hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n+
-      2*(gradientConstant*previousShear S.J S.X n)*shear S.J S.X n*
-        (goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)) ≤
-      hessianConstant*shear S.J S.X n*previousShear S.J S.X n
-    nlinarith only [habsorb.2]
-  case exterior_bound =>
-    exact (P.initial_step_bound _ (P.joined_initial_cost hn hq hB)).1
-  case core_bound =>
-    exact (P.initial_step_bound _ (P.joined_initial_cost hn hq hB)).2
-  case pressure_bound =>
-    change P.low.K+2*(gradientConstant*previousShear S.J S.X n)*(G).hchild*
-      ((G).δ*goodRatio+(G).badRatio)+k^(-(1/4 : ℝ)) ≤ _
-    have h := P.pressure_step_bound _ (P.joined_pressure_cost hn hq hB)
-    convert h using 1; ring
-  case frame_shear =>
-    rw [joinedNextFrame,ParentFrame.changeActivation_shear]
-    exact (P.joinedRenewal_matches hn hq hB).shear_eq (I).delta_pos
-  case frame_bound =>
-    change ((P.joinedRenewal hn hq hB).changeActivation _).G ≤ _
-    rw [ParentFrame.changeActivation_G]
-    exact le_rfl
-  case frame_error =>
-    change ((P.joinedRenewal hn hq hB).changeActivation _).error ≤ _
-    rw [ParentFrame.changeActivation_error]
-    exact le_rfl
-  case coupling_error =>
-    rw [joinedNextFrame,ParentFrame.changeActivation_a]
-    exact P.coupling_step _ hcoupling
-  case tilt_lower =>
-    rw [joinedNextFrame,ParentFrame.changeActivation_sigma]
-    exact hparams.2.1
-  case tilt_upper =>
-    rw [joinedNextFrame,ParentFrame.changeActivation_sigma]
-    exact hparams.2.2
-  case compression =>
-    intro _
-    have hc := (P.joinedRenewal_matches hn hq hB).background_compression_of_error_le_one
-      (priorError S.J S.D S.X (n+1)) (S.priorError_one (n+1))
-    change ⟪((P.joinedRenewal hn hq hB).changeActivation _).B P.nextTime
-        (unit (((P.joinedRenewal hn hq hB).changeActivation _).m P.nextTime)),
-      unit (((P.joinedRenewal hn hq hB).changeActivation _).m P.nextTime)⟫_ℝ+
-        priorError S.J S.D S.X (n+1) < 0
-    rw [ParentFrame.changeActivation_B,ParentFrame.changeActivation_m]
-    simpa only [← P.joinedGeometry_targetTime hn hq hB] using hc
+def joinedNext : Stage S (n+1) := P.next (P.joinedStep hn hq hB)
 
 theorem joinedNext_time : (P.joinedNext hn hq hB).time=P.nextTime := rfl
-
 
 theorem joinedNext_initial_velocity :
     (fun x => (P.joinedNext hn hq hB).state.evolution.velocity (0,x)) =

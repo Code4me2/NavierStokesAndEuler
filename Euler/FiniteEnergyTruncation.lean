@@ -2,6 +2,7 @@ import Euler.EulerProof
 import Euler.CompactParameterIntegral
 import Euler.MeanCutoffCurlBound
 import Euler.RadialPotentialL2
+import Common.Cutoffs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
@@ -339,88 +340,28 @@ theorem potentialTruncation_energy_bound
     _ ≤ (2 + 1152 * C ^ 2) * (∫ x : Space, ‖u x‖ ^ 2) := by
       nlinarith [mul_le_mul_of_nonneg_left hBE (by positivity : 0 ≤ 288 * C ^ 2)]
 
-/-- A fixed bump is dilated, so its weighted derivative bound is independent
-of the truncation radius. -/
-def scaledCutoff (χ : Space → ℝ) (R : ℝ) (x : Space) : ℝ := χ (R⁻¹ • x)
-
-theorem scaledCutoff_smooth (χ : Space → ℝ) (hχ : ContDiff ℝ ∞ χ) (R : ℝ) :
-    ContDiff ℝ ∞ (scaledCutoff χ R) :=
-  hχ.comp (contDiff_id.const_smul R⁻¹)
-
-theorem scaledCutoff_compact (χ : Space → ℝ) (hχ : HasCompactSupport χ)
-    (R : ℝ) (hR : R ≠ 0) : HasCompactSupport (scaledCutoff χ R) :=
-  hχ.comp_smul (inv_ne_zero hR)
-
-theorem scaledCutoff_derivative_position_bound
-    (χ : Space → ℝ) (hχ : ContDiff ℝ ∞ χ) (C : ℝ)
-    (hC : ∀ x, ‖fderiv ℝ χ x‖ * ‖x‖ ≤ C) (R : ℝ) (x : Space) :
-    ‖fderiv ℝ (scaledCutoff χ R) x‖ * ‖x‖ ≤ C := by
-  have hd := ((hχ.differentiable (by simp)) (R⁻¹ • x)).hasFDerivAt.comp x
-    ((hasFDerivAt_id x).const_smul R⁻¹)
-  have he : (fderiv ℝ χ (R⁻¹ • x)).comp (R⁻¹ • ContinuousLinearMap.id ℝ Space) =
-      R⁻¹ • fderiv ℝ χ (R⁻¹ • x) := by
-    ext y
-    simp
-  change HasFDerivAt (scaledCutoff χ R) _ x at hd
-  rw [he] at hd
-  rw [hd.fderiv, norm_smul]
-  convert hC (R⁻¹ • x) using 1
-  simp [norm_smul]
-  ring
-
-theorem exists_derivative_position_bound (χ : Space → ℝ) (hχ : ContDiff ℝ ∞ χ)
-    (hχcompact : HasCompactSupport χ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x, ‖fderiv ℝ χ x‖ * ‖x‖ ≤ C := by
-  have hcompact : HasCompactSupport (fun x : Space => ‖fderiv ℝ χ x‖ * ‖x‖) :=
-    (hχcompact.fderiv ℝ).norm.mul_right
-  have hcont : Continuous (fun x : Space => ‖fderiv ℝ χ x‖ * ‖x‖) :=
-    (hχ.fderiv_right (m := ∞) (by simp)).continuous.norm.mul continuous_norm
-  obtain ⟨C, hC⟩ := hcompact.exists_bound_of_continuous hcont
-  have hb (x : Space) : ‖fderiv ℝ χ x‖ * ‖x‖ ≤ C := by
-    simpa only [Real.norm_of_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _))] using hC x
-  exact ⟨C, by simpa using hb 0, hb⟩
-
-def unitTruncationBump : ContDiffBump (0 : Space) :=
-  ⟨1, 2, by norm_num, by norm_num⟩
-
-def truncationCutoff (R : ℝ) : Space → ℝ := scaledCutoff unitTruncationBump R
+/-- The truncation cutoff at radius `R`: the dilated radius-1-to-2 bump of
+`Common.Cutoffs` on `Space`.  Its scale-invariant derivative bound makes the
+truncation energy constant independent of `R`. -/
+def truncationCutoff (R : ℝ) : Space → ℝ := Common.Cutoffs.cutoff Space R
 
 theorem truncationCutoff_smooth (R : ℝ) : ContDiff ℝ ∞ (truncationCutoff R) :=
-  scaledCutoff_smooth unitTruncationBump unitTruncationBump.contDiff R
+  Common.Cutoffs.cutoff_smooth R
 
-theorem truncationCutoff_norm_le (R : ℝ) (x : Space) : ‖truncationCutoff R x‖ ≤ 1 := by
-  change ‖unitTruncationBump (R⁻¹ • x)‖ ≤ 1
-  rw [Real.norm_of_nonneg unitTruncationBump.nonneg]
-  exact unitTruncationBump.le_one
+theorem truncationCutoff_norm_le (R : ℝ) (x : Space) : ‖truncationCutoff R x‖ ≤ 1 :=
+  Common.Cutoffs.norm_cutoff_le_one R x
 
 theorem truncationCutoff_compact (R : ℝ) (hR : 0 < R) :
     HasCompactSupport (truncationCutoff R) :=
-  scaledCutoff_compact unitTruncationBump unitTruncationBump.hasCompactSupport R hR.ne'
+  Common.Cutoffs.cutoff_hasCompactSupport hR
 
 theorem truncationCutoff_support (R : ℝ) (hR : 0 < R) :
-    tsupport (truncationCutoff R) ⊆ Metric.closedBall 0 (2 * R) := by
-  apply closure_minimal _ Metric.isClosed_closedBall
-  intro x hx
-  have hz : R⁻¹ • x ∈ Function.support (unitTruncationBump : Space → ℝ) := hx
-  rw [unitTruncationBump.support_eq] at hz
-  have hn : R⁻¹ * ‖x‖ < 2 := by
-    simpa only [unitTruncationBump, mem_ball_zero_iff, norm_smul,
-      Real.norm_of_nonneg (inv_nonneg.mpr hR.le)] using hz
-  have hxR : ‖x‖ < 2 * R := by
-    rw [← div_eq_inv_mul] at hn
-    exact (div_lt_iff₀ hR).mp hn
-  exact mem_closedBall_zero_iff.mpr hxR.le
+    tsupport (truncationCutoff R) ⊆ Metric.closedBall 0 (2 * R) :=
+  Common.Cutoffs.cutoff_tsupport_subset hR
 
 theorem truncationCutoff_eventually_one (R : ℝ) (hR : 0 < R) (x : Space)
-    (hx : ‖x‖ < R) : truncationCutoff R =ᶠ[𝓝 x] 1 := by
-  have hz : R⁻¹ • x ∈ Metric.ball (0 : Space) unitTruncationBump.rIn := by
-    change ‖R⁻¹ • x - 0‖ < 1
-    rw [sub_zero, norm_smul, Real.norm_of_nonneg (inv_nonneg.mpr hR.le),
-      ← div_eq_inv_mul, div_lt_one hR]
-    exact hx
-  have hp := unitTruncationBump.eventuallyEq_one_of_mem_ball hz
-  have hscale : Continuous (fun y : Space => R⁻¹ • y) := continuous_id.const_smul R⁻¹
-  exact hp.comp_tendsto hscale.continuousAt
+    (hx : ‖x‖ < R) : truncationCutoff R =ᶠ[𝓝 x] 1 :=
+  Common.Cutoffs.cutoff_eventuallyEq_one hR hx
 
 /-- The truncation family used by the finite-energy flow argument. -/
 def finiteEnergyTruncation (u : Space → Space) (R : ℝ) : Space → Space :=
@@ -443,12 +384,11 @@ theorem finiteEnergyTruncation_eq
     finiteEnergyTruncation u R x = u x :=
   potentialTruncation_eq u hu hdiv _ x (truncationCutoff_eventually_one R hR x hx)
 
-private theorem unitTruncationBump_derivative_bound :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x, ‖fderiv ℝ (unitTruncationBump : Space → ℝ) x‖ * ‖x‖ ≤ C :=
-  exists_derivative_position_bound _ unitTruncationBump.contDiff unitTruncationBump.hasCompactSupport
-
-/-- A fixed finite constant independent of the velocity and cutoff radius. -/
-def truncationEnergyConstant : ℝ := 2 + 1152 * unitTruncationBump_derivative_bound.choose ^ 2
+/-- A fixed finite constant independent of the velocity and cutoff radius: the
+scale-invariant derivative bound `2 * derivativeConstant 1` of the dilated cutoff
+fed through `potentialTruncation_energy_bound`. -/
+def truncationEnergyConstant : ℝ :=
+  2 + 1152 * (2 * Common.Cutoffs.derivativeConstant Space 1) ^ 2
 
 theorem truncationEnergyConstant_nonneg : 0 ≤ truncationEnergyConstant := by
   unfold truncationEnergyConstant
@@ -461,11 +401,9 @@ theorem finiteEnergyTruncation_energy_bound
     (huL2 : MemLp u 2 volume) (R : ℝ) (hR : 0 < R) :
     MemLp (finiteEnergyTruncation u R) 2 volume ∧
       (∫ x : Space, ‖finiteEnergyTruncation u R x‖ ^ 2) ≤
-        truncationEnergyConstant * (∫ x : Space, ‖u x‖ ^ 2) := by
-  apply potentialTruncation_energy_bound u hu hdiv huL2 _ (truncationCutoff_smooth R)
-    (truncationCutoff_compact R hR) unitTruncationBump_derivative_bound.choose
-    (truncationCutoff_norm_le R)
-  exact scaledCutoff_derivative_position_bound unitTruncationBump
-    unitTruncationBump.contDiff _ unitTruncationBump_derivative_bound.choose_spec.2 R
+        truncationEnergyConstant * (∫ x : Space, ‖u x‖ ^ 2) :=
+  potentialTruncation_energy_bound u hu hdiv huL2 _ (truncationCutoff_smooth R)
+    (truncationCutoff_compact R hR) _ (truncationCutoff_norm_le R)
+    (fun x => Common.Cutoffs.cutoff_fderiv_mul_norm_le hR x)
 
 end Euler.ComparatorBridge

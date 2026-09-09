@@ -458,14 +458,12 @@ structure CycleRepresentation {ι : Type} (v : CycleCoefficients ι)
   velocity : ∀ n x i, u.oscillation n x i = ∑ l ∈ v.labels n, (v.blocks l).oscillation n x i
   pressure : ∀ n x, u.oscillatoryPressure n x = ∑ l ∈ v.labels n, (v.blocks l).oscillatoryPressure n x
   gaussian : ∀ n x i, u.errors.gaussian n x i = ∑ l ∈ v.labels n, coefficientField (v.blocks l) (v.gaussian l) n x i
-  aliasError : ∀ n x i, u.errors.aliasError n x i =
-    (∑ l ∈ v.labels n, coefficientField (v.blocks l) (v.aliasCoefficients l) n x i) + axis n x.1 i
+  aliasError : ∀ n x i, u.errors.aliasError n x i = axis n x.1 i
 
 /-- A common integer bound for stored coefficient values, including errors. -/
 structure CoefficientBands {ι : Type} (v : CycleCoefficients ι) : Prop where
   velocityPressure : ∀ l, (v.blocks l).BandLimited v.residualBand
   gaussian : ∀ l n i, HarmonicFields.BandLimited (v.gaussian l n i) v.residualBand
-  aliasError : ∀ l n i, HarmonicFields.BandLimited (v.aliasCoefficients l n i) v.residualBand
 
 namespace CycleParameters
 variable {ι : Type} (p : CycleParameters ι) (v : CycleCoefficients ι)
@@ -484,7 +482,6 @@ noncomputable def nextCoefficients : CycleCoefficients ι where
   blocks := p.finalBlock v c u
   gaussian := fun l => v.gaussian l + (p.particularGaussianBlock v c u l).velocity +
     (p.signedGaussianBlock v c u l).velocity
-  aliasCoefficients := v.aliasCoefficients
   residualBand := 2 * max v.residualBand 1
 
 noncomputable def nextAxisymmetricAlias (axis : AxisymmetricAlias) : AxisymmetricAlias :=
@@ -548,10 +545,8 @@ theorem next_representation {axis : AxisymmetricAlias}
       show (p.nextCoefficients v c u).labels = v.labels from rfl, Finset.sum_add_distrib]
   · intro n x i
     rw [p.next_alias_error]
-    simp only [Pi.add_apply, Pi.sub_apply, hrep.aliasError n x i, nextCoefficients,
-      coefficientField, finalBlock, addBlock, nextAxisymmetricAlias]
+    simp only [Pi.add_apply, Pi.sub_apply, hrep.aliasError n x i, nextAxisymmetricAlias]
     simp only [VariableGaugeMean.temporalAliasState, VariableGaugeMean.pressureAliasState]
-    ring
 
 theorem next_coefficient_bands (h : CoefficientBands v) :
     CoefficientBands (p.nextCoefficients v c u) := by
@@ -564,15 +559,14 @@ theorem next_coefficient_bands (h : CoefficientBands v) :
       (((p.particularGaussianBlock_band v c u l).1 n i).mono (le_max_left _ _))).add
       ((((p.signed l).gaussianBlock_band p.strip (p.signedRequest v c u)).1 n i).mono (le_max_right _ _))
   exact ⟨fun l => ⟨fun n i => ((hb l).1 n i).mono hn, fun n => ((hb l).2 n).mono hn⟩,
-    fun l n i => (hg l n i).mono hn,
-    fun l n i => (h.aliasError l n i).mono ((le_max_left _ _).trans hn)⟩
+    fun l n i => (hg l n i).mono hn⟩
 
 /-- The residual value bound of the next actual state is derived from
 stored coefficient bands, independently of a norm estimate. -/
 theorem next_residual_band (h : CoefficientBands v) (l : ι) :
     (HarmonicResidual.residualBlock c (p.next v c u)
       ((p.nextCoefficients v c u).blocks l) ((p.nextCoefficients v c u).gaussian l)
-      ((p.nextCoefficients v c u).aliasCoefficients l)).BandLimited
+      0).BandLimited
       (p.nextCoefficients v c u).residualBand := by
   have hb : (p.finalBlock v c u l).BandLimited (max v.residualBand 1) := by
     simpa only [max_self] using p.finalBlock_band v c u h.velocityPressure l
@@ -581,11 +575,8 @@ theorem next_residual_band (h : CoefficientBands v) (l : ι) :
     exact (((h.gaussian l n i).mono (le_max_left _ _)).add
       (((p.particularGaussianBlock_band v c u l).1 n i).mono (le_max_left _ _))).add
       ((((p.signed l).gaussianBlock_band p.strip (p.signedRequest v c u)).1 n i).mono (le_max_right _ _))
-  have ha n i : HarmonicFields.BandLimited
-      ((p.nextCoefficients v c u).aliasCoefficients l n i) (max v.residualBand 1) :=
-    (h.aliasError l n i).mono (le_max_left _ _)
   have he := HarmonicResidual.residualBlock_band c (p.next v c u) (p.finalBlock v c u l)
-    ((p.nextCoefficients v c u).gaussian l) ((p.nextCoefficients v c u).aliasCoefficients l) hb hg ha
+    ((p.nextCoefficients v c u).gaussian l) 0 hb hg (fun _ _ => HarmonicResidual.band_zero _)
   have hn : max (max v.residualBand 1 + max v.residualBand 1) (max v.residualBand 1) =
       2 * max v.residualBand 1 := by omega
   simp only [hn] at he

@@ -860,7 +860,7 @@ theorem cycle_particular_inputSupport (hN : ActualCarrierGeometry.geometricThres
     (x : CycleState (Index B N0)) (c : Context Point)
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualInitialization.labelCarrier l) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)) (l : Index B N0) :
+      (x.coefficients.gaussian l) 0) (l : Index B N0) :
     HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualInitialization.labelCarrier l)
       ((ActualCycleParameters.fixedParameters B N0).particularBlock x.coefficients c x.state l)
@@ -868,14 +868,14 @@ theorem cycle_particular_inputSupport (hN : ActualCarrierGeometry.geometricThres
   particular_inputSupport_of_factorization l (ActualInitialization.labelCarrier l)
     (ActualCarrierTransport.activeSlowCore l) (ActualInitialization.labelCarrier_closed l)
     (fun n _p hp Y => ActualCarrierTransport.labelCarrier_iff_canonicalSourceRegion hN l n hp Y)
-    c x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    c x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     (hs l) ActualInitialization.geometry.strip x.coefficients.residualBand
 
 theorem cycle_refined_particular_inputSupport (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     (x : CycleState (Index B N0)) (c : Context Point)
     (hs : ∀ l, HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier l) (x.coefficients.blocks l)
-      (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)) (l : Index B N0) :
+      (x.coefficients.gaussian l) 0) (l : Index B N0) :
     HarmonicSourceSupport.InputSupportOn ActualInitialization.geometry.domain
       (ActualCoreSupport.refinedCarrier l)
       ((ActualCycleParameters.fixedParameters B N0).particularBlock x.coefficients c x.state l)
@@ -883,7 +883,7 @@ theorem cycle_refined_particular_inputSupport (hN : ActualCarrierGeometry.geomet
   particular_inputSupport_of_factorization l (ActualCoreSupport.refinedCarrier l)
     (refinedSlowCore l) (ActualCoreSupport.refinedCarrier_closed l)
     (refined_carrier_factorization hN l)
-    c x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) (x.coefficients.aliasCoefficients l)
+    c x.state (x.coefficients.blocks l) (x.coefficients.gaussian l) 0
     (hs l) ActualInitialization.geometry.strip x.coefficients.residualBand
 
 /-- All four actual common fields have zero germs off the refined
@@ -973,7 +973,7 @@ theorem old_supported (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)
     LabelSumBounds.SupportedOscillations ActualPrimary.slots label
       ActualPrimaryCovariance.physicalWindow ActualPrimaryCovariance.absoluteAuxiliary
       ActualInitialization.geometry.strip.domain (fun l => (x.coefficients.blocks l).oscillation) :=
-  supported_of_inputSupport hN _ x.coefficients.gaussian x.coefficients.aliasCoefficients
+  supported_of_inputSupport hN _ x.coefficients.gaussian (fun _ => 0)
     (fun l => inputSupport_mono (H.inputSupport l) (hcarrier l)) H.zeroVelocity
 
 variable (hN : ActualCarrierGeometry.geometricThreshold ≤ N0)

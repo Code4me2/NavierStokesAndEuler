@@ -1043,7 +1043,12 @@ def Witness (B N0 : ℕ) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) 
             (fun i => CompactForceDecay.spacetimeCoordinate (directions i))) j| ≤
               C * (1 + t) ^ (-K)) ∧
       (∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n forcing (1, x) =
-        MixedPeriodicAssembly.boundaryLimits ASum BSum PSum ea eb ep x n)
+        MixedPeriodicAssembly.boundaryLimits ASum BSum PSum ea eb ep x n) ∧
+      ∃ compactForcing : VelocityField,
+        R3CompactCandidate.Properties
+          (TimeLocalization.activatedVelocity (MixedPeriodicAssembly.cutVelocity ASum BSum))
+          (TimeLocalization.activatedPressure (SpatialLocalization.cutPressure PSum))
+          compactForcing
 
 theorem witness (B N0 : ℕ) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) :
     Witness B N0 hN := by
@@ -1057,7 +1062,8 @@ theorem witness (B N0 : ℕ) (hN : ActualCarrierGeometry.geometricThreshold ≤ 
     (endpoints B N0 hN).potential (endpoints B N0 hN).direct (endpoints B N0 hN).pressure
     (initialPotential_stage B N0).axisZeroOn (fun j => (positive_stage B N0 hN j).1.axisZeroOn)
   exact ⟨w.schedule, w.selected, w.ea, w.eb, w.ep, w.forcing, w.candidate, w.forcing_smooth,
-    w.consequences, w.h3_blowup, w.forcing_decay, w.boundary_jets⟩
+    w.consequences, w.h3_blowup, w.forcing_decay, w.boundary_jets, w.compact_forcing,
+    w.compact_candidate⟩
 
 /-! One closed choice fixes all three raw sequences together. -/
 

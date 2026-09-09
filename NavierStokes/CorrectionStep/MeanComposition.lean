@@ -671,10 +671,10 @@ theorem meanStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
       (p.finalBlock v c u l).velocity n i j =ᶠ[𝓝 x] fun _ => 0)
     (hold : UniformHarmonicInteraction.UniformVelocity p.strip P (1/2+σ+1/10)
       (fun l => HarmonicResidual.residualBlock c (p.afterSigned v c u) (p.finalBlock v c u l)
-        ((p.nextCoefficients v c u).gaussian l) (v.aliasCoefficients l))) :
+        ((p.nextCoefficients v c u).gaussian l) 0)) :
     UniformHarmonicInteraction.UniformVelocity p.strip P (1/2+(σ+1/10))
       (fun l => HarmonicResidual.residualBlock c (p.next v c u) ((p.nextCoefficients v c u).blocks l)
-        ((p.nextCoefficients v c u).gaussian l) ((p.nextCoefficients v c u).aliasCoefficients l)) := by
+        ((p.nextCoefficients v c u).gaussian l) 0) := by
   have hh := incrementBounds_updated hTemporal hRank
   have he : (p.next v c u).mean = updated (p.afterSigned v c u).mean
       (updated (p.temporalIncrement v c u) (p.rankIncrement v c u)) := by
@@ -683,7 +683,7 @@ theorem meanStages_residual_gain {P : ι → ℕ → CyclePoint → ℝ} {σ κ 
     simpa only [p.afterSigned_mean v c u] using hm
   have hout := meanStage_residual_uniform c ho (by linarith) hR (p.afterSigned v c u) (p.next v c u)
     (updated (p.temporalIncrement v c u) (p.rankIncrement v c u)) he hb hms hh (p.finalBlock v c u)
-    hvelocity hNormal hFreq hAng hz ((p.nextCoefficients v c u).gaussian) v.aliasCoefficients v.aliasCoefficients
+    hvelocity hNormal hFreq hAng hz ((p.nextCoefficients v c u).gaussian) (fun _ => 0) (fun _ => 0)
     (fun _ _ _ => by rw [sub_self]; exact HarmonicResidual.band_zero _) hold (by linarith)
   simp only [add_assoc] at hout ⊢
   exact hout

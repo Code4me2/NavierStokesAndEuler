@@ -2,8 +2,9 @@ import Euler.PacketStageGuards
 import Euler.ParentRenewalScaleApplication
 import Euler.PacketStageLowPropagation
 
-/-! The actual stage guards satisfy the fixed pressure, initial-gradient
-and frame-renewal budgets used by the induction. -/
+/-! The actual stage guards satisfy the fixed pressure and frame-renewal
+budgets used by the induction. The initial-gradient budget follows from the
+bad-pressure cost in either case (`initial_cost_of_bad_cost`). -/
 
 noncomputable section
 
@@ -45,17 +46,6 @@ theorem joined_bad_cost :
     (by rw [rpow_ofNat]; exact P.label_eq.le) (P.history_inverse_shear hn) (P.joinedGuards_CM hn hq hB).le
     (P.joinedGuards_CH hn hq hB).le (P.joined_horizon_bound hn)
     (by erw [P.joinedFrame_sigma]; exact P.normalized_sigma) (P.joinedGuards_shear hn hq hB).le le_rfl
-
-theorem joined_initial_cost :
-    (G).hchild*(G).badRatio+(frequency S.J S.X n)^(-(1/4 : ℝ)) ≤ initialIncrement S.J S.X n := by
-  have hb := P.joined_bad_cost hn hq hB
-  have hm : 1 ≤ 2*(gradientConstant*previousShear S.J S.X n) := by
-    have h := mul_le_mul_of_nonneg_left (S.previousShear_one n) gradient_nonneg
-    nlinarith only [gradient_properties.1,h]
-  have hn0 := mul_nonneg (G).child_nonneg (G).badRatio_nonneg
-  have hh := mul_le_mul_of_nonneg_right hm hn0
-  unfold initialIncrement
-  nlinarith only [hb,hh]
 
 theorem joined_pressure_cost :
     2*(gradientConstant*previousShear S.J S.X n)*(G).hchild*((G).δ*goodRatio+(G).badRatio)+
@@ -107,17 +97,6 @@ theorem forward_bad_cost :
     _ le_rfl le_rfl
   rw [P.forwardFrame_sigma]
   exact P.normalized_sigma
-
-theorem forward_initial_cost :
-    (G).hchild*(G).earlyRatio+(frequency S.J S.X 0)^(-(1/4 : ℝ)) ≤ initialIncrement S.J S.X 0 := by
-  have hb := P.forward_bad_cost hq hB
-  have hm : 1 ≤ 2*(gradientConstant*previousShear S.J S.X 0) := by
-    have h := mul_le_mul_of_nonneg_left (S.previousShear_one 0) gradient_nonneg
-    nlinarith only [gradient_properties.1,h]
-  have hn0 := mul_nonneg (G).child_nonneg (G).earlyRatio_nonneg
-  have hh := mul_le_mul_of_nonneg_right hm hn0
-  unfold initialIncrement
-  nlinarith only [hb,hh]
 
 theorem forward_pressure_cost :
     2*(gradientConstant*previousShear S.J S.X 0)*(G).hchild*((G).δ*goodRatio+(G).earlyRatio)+

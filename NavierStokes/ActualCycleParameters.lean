@@ -31,7 +31,6 @@ noncomputable def reindexCoefficients {ι κ : Type} (e : κ ≃ ι)
   labels n := (v.labels n).map e.symm.toEmbedding
   blocks l := v.blocks (e l)
   gaussian l := v.gaussian (e l)
-  aliasCoefficients l := v.aliasCoefficients (e l)
   residualBand := v.residualBand
 
 noncomputable def reindexState {ι κ : Type} (e : κ ≃ ι)
