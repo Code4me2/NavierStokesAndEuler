@@ -135,12 +135,6 @@ noncomputable def ZeroMassesOn (U : Set Plane) (u : State Point) : Prop :=
   ∀ n s, s ∈ U → CorrectionState.radialMoment 2 u.mean.angular n s = 0 ∧
     CorrectionState.radialMoment 1 u.mean.axial n s = 0
 
-theorem ZeroMassesOn.of_global {U : Set Plane} {u : State Point}
-    (hu : CorrectionState.ZeroMasses u) : ZeroMassesOn U u := by
-  intro n s _
-  constructor
-  · exact congrFun (congrFun hu.1 n) s
-  · exact congrFun (congrFun hu.2 n) s
 
 section Temporal
 

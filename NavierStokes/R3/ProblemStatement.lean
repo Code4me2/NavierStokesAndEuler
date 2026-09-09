@@ -41,11 +41,7 @@ abbrev SpaceTime := NavierStokes.ProblemStatement.SpaceTime
 abbrev VelocityField := NavierStokes.ProblemStatement.VelocityField
 abbrev PressureField := NavierStokes.ProblemStatement.PressureField
 
-/-- The physical domain before the asserted singular time. -/
-abbrev preSingularDomain := NavierStokes.ProblemStatement.preSingularDomain
 
-/-- The physical domain for a global competing solution. -/
-abbrev futureDomain := NavierStokes.ProblemStatement.futureDomain
 
 /-- The exact incompressible Navier--Stokes residual at viscosity `ν`.
 The viscosity multiplies only the spatial Laplacian. -/

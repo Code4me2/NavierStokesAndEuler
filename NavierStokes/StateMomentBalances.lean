@@ -585,19 +585,6 @@ theorem RadialShell.partial {a b : ℝ} {F : (ℝ × S → ℝ)} (hF : RadialShe
     (v : S) : RadialShell a b (parameterPartial v F) :=
   ⟨parameterPartial_smooth v hF.smooth, parameterPartial_supported v hF.supported⟩
 
-theorem RadialShell.add {a b : ℝ} {F G : (ℝ × S → ℝ)}
-    (hF : RadialShell a b F) (hG : RadialShell a b G) :
-    RadialShell a b (fun x => F x + G x) := by
-  refine ⟨hF.smooth.add hG.smooth, ?_⟩
-  intro x hx
-  by_contra hn
-  have hFx : F x = 0 := by
-    by_contra h
-    exact hn (hF.supported h)
-  have hGx : G x = 0 := by
-    by_contra h
-    exact hn (hG.supported h)
-  exact hx (by simp [hFx, hGx])
 
 theorem RadialShell.slice_smooth {a b : ℝ} {F : (ℝ × S → ℝ)} (hF : RadialShell a b F)
     (p : S) : ContDiff ℝ ∞ (fun r => F (r, p)) :=
@@ -717,11 +704,7 @@ structure FluxInputs (a b : ℝ) (u R Z T : ScalarField (Lift S)) : Prop where
   axial_periodic : ∀ n, PressureStream.TorusPeriodicLift (Z n)
   stress_periodic : ∀ n, PressureStream.TorusPeriodicLift (T n)
 
-abbrev AngularInputs (a b : ℝ) (c : Context (Lift S)) (u : State (Lift S)) :=
-  FluxInputs a b u.mean.angular (thetaRadialFlux c u) (thetaAxialFlux c u) c.virtualTheta
 
-abbrev AxialInputs (a b : ℝ) (c : Context (Lift S)) (u : State (Lift S)) :=
-  FluxInputs a b u.mean.axial (axialRadialFlux c u) (axialAxialFlux c u) c.virtualAxial
 
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem state_radialMoment_eq (k : ℕ) (f : ScalarField (Lift S)) (n : ℕ) (s : S) :
@@ -729,194 +712,25 @@ theorem state_radialMoment_eq (k : ℕ) (f : ScalarField (Lift S)) (n : ℕ) (s 
       IntegratedMeanBalances.radialMoment k (averaged f n) s :=
   MeanMomentBounds.pressureMass_radialWeighted k (f n) s
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem periodic_add {f g : Lift S → ℝ} (hf : PressureStream.TorusPeriodicLift f)
-    (hg : PressureStream.TorusPeriodicLift g) : PressureStream.TorusPeriodicLift (fun x => f x + g x) := by
-  intro R s Y k
-  exact congrArg₂ (· + ·) (hf R s Y k) (hg R s Y k)
-
-theorem averaged_thetaResidual {a b : ℝ} (ha : 0 < a)
-    (r : ReconstructionData) (ε fast : ℕ → ℝ) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AngularInputs a b c u)
-    (n : ℕ) :
-    averaged (u.thetaResidual c) n = angularBalanceAlong (ε n) z t
-      (averaged u.mean.angular n) (averaged (thetaRadialFlux c u) n)
-      (averaged (thetaAxialFlux c u) n) (averaged c.virtualTheta n) := by
-  have he : u.thetaResidual c = fluxResidual (nativeOperators r ε fast z t v) 2 1
-      u.mean.angular (thetaRadialFlux c u) (thetaAxialFlux c u) c.virtualTheta := by
-    simp only [State.thetaResidual, MeanIncrementBounds.thetaResidual, fluxResidual,
-      thetaRadialFlux, thetaAxialFlux, ho]
-  rw [he]
-  funext x
-  rw [averaged_fluxResidual ha r ε fast z t v 2 1 H.velocity H.radial H.axial H.stress
-    H.velocity_periodic H.radial_periodic H.axial_periodic H.stress_periodic,
-    balance_angular]
-
-theorem state_angular_moment {a b : ℝ} (ha : 0 < a)
-    (r : ReconstructionData) (ε fast : ℕ → ℝ) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AngularInputs a b c u)
-    (hmass : CorrectionState.radialMoment 2 u.mean.angular = 0) (n : ℕ) (s : S) :
-    CorrectionState.radialMoment 2 (u.thetaResidual c) n s =
-      ε n * fderiv ℝ (CorrectionState.thetaDefect c u n) s z := by
-  have hm : IntegratedMeanBalances.radialMoment 2 (averaged u.mean.angular n) = 0 := by
-    funext q
-    rw [← state_radialMoment_eq, hmass]
-    rfl
-  have hdebt : CorrectionState.thetaDefect c u n =
-      IntegratedMeanBalances.radialMoment 2 (averaged (thetaAxialFlux c u) n) := by
-    funext q
-    exact state_radialMoment_eq 2 (thetaAxialFlux c u) n q
-  rw [state_radialMoment_eq, averaged_thetaResidual ha r ε fast z t v c u ho H n, hdebt]
-  exact integrated_angular_along (ε n) z t (averaged_radialShell H.velocity n)
-    (averaged_radialShell H.radial n) (averaged_radialShell H.axial n)
-    (averaged_radialShell H.stress n) hm s
-
-noncomputable def pressureRecipe (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) : ScalarField (Lift S) :=
-  fun n => PressureStream.meanPressure r.exponent r.inner r.outer (r.frequency n)
-    r.inner_lt_outer r.radialDirection (u.gr c n)
-
-
-theorem pressureRecipe_shell (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c)) :
-    DefectIncrementBounds.Shell r.inner r.outer (pressureRecipe r c u) :=
-  ⟨fun n => PressureStream.meanPressure_contDiff ha r.inner_lt_outer hd r.radialDirection
-      (hg.smooth n) (hg.supported n),
-    fun n => PressureStream.meanPressure_supported ha r.inner_lt_outer hd r.radialDirection
-      (hg.smooth n) (hg.supported n)⟩
-
-noncomputable def pressureCoefficient (r : ReconstructionData) : ℝ :=
-  IntegratedMeanBalances.moment 2 (PressureStream.rho r.inner r.outer r.inner_lt_outer) / 2
-
-noncomputable def axialDebtPotential (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) : ScalarField S :=
-  fun n s => CorrectionState.axialDefect c u n s +
-    pressureCoefficient r * CorrectionState.pressureDefect c u n s
-
-theorem pressureRecipe_moment (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c))
-    (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n)) (n : ℕ) (s : S) :
-    IntegratedMeanBalances.radialMoment 1 (averaged (pressureRecipe r c u) n) s =
-      -(1 / 2 : ℝ) * CorrectionState.radialMoment 2 (u.gr c) n s +
-        pressureCoefficient r * CorrectionState.pressureDefect c u n s := by
-  rw [state_radialMoment_eq]
-  simpa only [pressureRecipe, averaged, IntegratedMeanBalances.radialMoment,
-    pressureCoefficient, CorrectionState.pressureDefect, CorrectionState.radialMoment,
-    pow_zero, one_mul] using
-    (IntegratedMeanBalances.constructed_pressure_moment (M := r.frequency n)
-      ha r.inner_lt_outer hd r.radialDirection (hg.smooth n) (hg.supported n) (pg n) s)
-
-
-theorem physicalCompact_periodic (d a b M : ℝ) (v : PressureStream.Plane)
-    {f : Lift S → ℝ} (hp : PressureStream.TorusPeriodicLift f) :
-    PressureStream.TorusPeriodicLift (RadialPullback.physicalCompact d a b M (0, v) f) := by
-  intro R s Y k
-  have he : (fun q : ℝ => RadialPullback.normalizeSource d a f
-      (TransportPrimitive.shift M ((0 : S), v)
-        (RadialPullback.powerChart d a R, (s, Y + ((k.1 : ℝ), (k.2 : ℝ)))) q)) =
-      fun q : ℝ => RadialPullback.normalizeSource d a f
-      (TransportPrimitive.shift M ((0 : S), v)
-        (RadialPullback.powerChart d a R, (s, Y)) q) := by
-    funext q
-    simp only [RadialPullback.normalizeSource, RadialPullback.liftChart,
-      TransportPrimitive.shift, Prod.add_def, Prod.smul_def, smul_zero, add_zero]
-    simpa only [Prod.add_def, Prod.smul_def, add_right_comm] using
-      congrArg (fun u : ℝ => RadialPullback.sourceMultiplier d a
-        (RadialPullback.powerChart d a R + q) • u)
-        (hp (RadialPullback.inverseChart d a (RadialPullback.powerChart d a R + q)) s
-          (Y + (M * q) • v) k)
-  simp only [RadialPullback.physicalCompact, RadialPullback.pullback, RadialPullback.liftChart,
-    Function.comp_def,
-    TransportPrimitive.compactIntegral, TransportPrimitive.pastIntegral, TransportPrimitive.totalIntegral,
-    he]
 
 
 
 
 
 
-theorem pressureRecipe_periodic (r : ReconstructionData) (c : Context (Lift S))
-    (u : State (Lift S)) (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n)) :
-    ∀ n, PressureStream.TorusPeriodicLift (pressureRecipe r c u n) := by
-  intro n
-  exact physicalCompact_periodic r.exponent r.inner r.outer (r.frequency n) r.radialDirection
-    (PressureStream.pressureSource_periodic r.inner_lt_outer (pg n))
 
-theorem averaged_axialResidual (r : ReconstructionData) (ha : 0 < r.inner)
-    (ε fast : ℕ → ℝ) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AxialInputs r.inner r.outer c u)
-    (hp : DefectIncrementBounds.Shell r.inner r.outer u.pressure)
-    (pp : ∀ n, PressureStream.TorusPeriodicLift (u.pressure n)) (n : ℕ) :
-    averaged (u.axialResidual c) n = axialBalanceAlong (ε n) z t
-      (averaged u.mean.axial n) (averaged (axialRadialFlux c u) n)
-      (averaged (axialAxialFlux c u + u.pressure) n) (averaged c.virtualAxial n) := by
-  have he : u.axialResidual c = fluxResidual (nativeOperators r ε fast z t v) 1 0
-      u.mean.axial (axialRadialFlux c u) (axialAxialFlux c u + u.pressure) c.virtualAxial := by
-    simp only [State.axialResidual, MeanIncrementBounds.axialResidual, fluxResidual,
-      axialRadialFlux, axialAxialFlux, ho]
-  rw [he]
-  funext x
-  rw [averaged_fluxResidual ha r ε fast z t v 1 0 H.velocity H.radial (H.axial.add hp) H.stress
-    H.velocity_periodic H.radial_periodic (fun n => periodic_add (H.axial_periodic n) (pp n))
-    H.stress_periodic, balance_axial]
 
-theorem axial_flux_pressure_moment (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (hZ : DefectIncrementBounds.Shell r.inner r.outer (axialAxialFlux c u))
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c))
-    (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n))
-    (hrecipe : u.pressure = pressureRecipe r c u) :
-    CorrectionState.radialMoment 1 (axialAxialFlux c u + u.pressure) = axialDebtPotential r c u := by
-  have hp : DefectIncrementBounds.Shell r.inner r.outer u.pressure := by
-    rw [hrecipe]
-    exact pressureRecipe_shell r ha hd c u hg
-  have hsum := DefectIncrementBounds.barMoment_add hZ hp 1
-  change CorrectionState.radialMoment 1 (axialAxialFlux c u + u.pressure) =
-    CorrectionState.radialMoment 1 (axialAxialFlux c u) + CorrectionState.radialMoment 1 u.pressure at hsum
-  rw [hsum]
-  funext n s
-  have hpval : CorrectionState.radialMoment 1 u.pressure n s =
-      -(1 / 2 : ℝ) * CorrectionState.radialMoment 2 (u.gr c) n s +
-        pressureCoefficient r * CorrectionState.pressureDefect c u n s := by
-    rw [state_radialMoment_eq, hrecipe]
-    exact pressureRecipe_moment r ha hd c u hg pg n s
-  simp only [Pi.add_apply, hpval, axialDebtPotential, CorrectionState.axialDefect,
-    Pi.sub_apply, Pi.smul_apply, smul_eq_mul, axialAxialFlux]
-  ring
 
-theorem state_axial_moment (r : ReconstructionData) (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (ε fast : ℕ → ℝ) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S))
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AxialInputs r.inner r.outer c u)
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c))
-    (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n))
-    (hrecipe : u.pressure = pressureRecipe r c u)
-    (hmass : CorrectionState.radialMoment 1 u.mean.axial = 0) (n : ℕ) (s : S) :
-    CorrectionState.radialMoment 1 (u.axialResidual c) n s =
-      ε n * fderiv ℝ (axialDebtPotential r c u n) s z := by
-  have hp : DefectIncrementBounds.Shell r.inner r.outer u.pressure := by
-    rw [hrecipe]
-    exact pressureRecipe_shell r ha hd c u hg
-  have pp : ∀ n, PressureStream.TorusPeriodicLift (u.pressure n) := by
-    rw [hrecipe]
-    exact pressureRecipe_periodic r c u pg
-  have hm : IntegratedMeanBalances.radialMoment 1 (averaged u.mean.axial n) = 0 := by
-    funext q
-    rw [← state_radialMoment_eq, hmass]
-    rfl
-  have hdebt : IntegratedMeanBalances.radialMoment 1
-      (averaged (axialAxialFlux c u + u.pressure) n) = axialDebtPotential r c u n := by
-    funext q
-    rw [← state_radialMoment_eq, axial_flux_pressure_moment r ha hd c u H.axial hg pg hrecipe]
-  rw [state_radialMoment_eq, averaged_axialResidual r ha ε fast z t v c u ho H hp pp n]
-  rw [integrated_axial_along (ε n) z t (averaged_radialShell H.velocity n)
-    (averaged_radialShell H.radial n) (averaged_radialShell (H.axial.add hp) n)
-    (averaged_radialShell H.stress n) hm s, hdebt]
+
+
+
+
+
+
+
+
+
+
 
 /-! ## Actual all-jet debt bounds yield the improved signed bump order -/
 
@@ -924,23 +738,7 @@ section ClassBounds
 
 open WeightedClasses MeanMomentBounds SignedStressPrimitive
 
-theorem slowClass_smooth {ε slow : ℕ → ℝ}
-    {hε : ∀ n, 0 < ε n} {hε1 : ∀ n, ε n ≤ 1} {hslow : ∀ n, 1 ≤ slow n}
-    {α : ℝ} {f : ℕ → S → ℝ}
-    (hf : UnweightedClass (slowStripData ε slow hε hε1 hslow) α f) (n : ℕ) :
-    ContDiff ℝ ∞ (f n) := contDiffOn_univ.mp (hf.smooth n)
 
-theorem slowClass_globalBandJets {ε slow : ℕ → ℝ}
-    {hε : ∀ n, 0 < ε n} {hε1 : ∀ n, ε n ≤ 1} {hslow : ∀ n, 1 ≤ slow n}
-    {α : ℝ} {f : ℕ → S → ℝ}
-    (hf : UnweightedClass (slowStripData ε slow hε hε1 hslow) α f) :
-    GlobalBandJets ε slow α f := by
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bounds m
-  refine ⟨C, hC, p, ?_⟩
-  intro n x j hj
-  simpa only [majorant, slowStripData, StripData.growth, inv_one, max_self, mul_one]
-    using hb n x (Set.mem_univ x) j hj
 
 noncomputable def slowProjection : Lift S →L[ℝ] S :=
   (ContinuousLinearMap.fst ℝ S PressureStream.Plane).comp
@@ -953,81 +751,10 @@ theorem norm_slowProjection_le : ‖slowProjection (S := S)‖ ≤ 1 := by
   simp only [one_mul, Prod.norm_def]
   exact (le_max_left _ _).trans (le_max_right _ _)
 
-theorem slowClass_lift (P : Patch) {cL cR : ℝ} (hcL : 0 < cL) (hcR : 0 < cR)
-    {ε slow : ℕ → ℝ} {hε : ∀ n, 0 < ε n} {hε1 : ∀ n, ε n ≤ 1} {hslow : ∀ n, 1 ≤ slow n}
-    {α : ℝ} {f : ℕ → S → ℝ}
-    (hf : UnweightedClass (slowStripData ε slow hε hε1 hslow) α f) :
-    UnweightedClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      α (fun n (x : Lift S) => f n x.2.1) := by
-  apply globalBandJets_unweighted_log P.a_pos hcL hcR hε hε1 hslow
-    (fun n => (slowClass_smooth hf n).comp contDiff_snd.fst)
-  exact (slowClass_globalBandJets hf).compLinear (slowClass_smooth hf)
-    slowProjection norm_slowProjection_le
 
-theorem fderiv_parameterLift {f : S → ℝ} (hf : ContDiff ℝ ∞ f)
-    (p : S × PressureStream.Plane) (z : S) :
-    fderiv ℝ (fun y : S × PressureStream.Plane => f y.1) p (z, 0) = fderiv ℝ f p.1 z := by
-  change fderiv ℝ (f ∘ Prod.fst) p (z, 0) = _
-  rw [(((hf.differentiable (by simp)) p.1).hasFDerivAt.comp p hasFDerivAt_fst).fderiv]
-  rfl
 
-/-- The hypothesis is a bound on the actual slow debt. The residual moment
-identity is supplied by the state theorems below, rather than a bump estimate. -/
-theorem bump_class_from_actual_debt (P : Patch) (e : ℕ) {cL cR : ℝ}
-    (hcL : 0 < cL) (hcR : 0 < cR) (ε slow : ℕ → ℝ)
-    (hε : ∀ n, 0 < ε n) (hε1 : ∀ n, ε n ≤ 1) (hslow : ∀ n, 1 ≤ slow n)
-    (α : ℝ) (F : ScalarField (Lift S)) (D : ScalarField S) (z : S)
-    (hD : UnweightedClass (slowStripData ε slow hε hε1 hslow) α D)
-    (hidentity : ∀ n s, CorrectionState.radialMoment e F n s = ε n * fderiv ℝ (D n) s z) :
-    MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      (α + 1) (fun n => bumpCorrection P e (meanBar F n)) := by
-  apply bump_improvedClass_of_moment_identity P e hcL hcR ε slow hε hε1 hslow α
-    (meanBar F) (fun n (p : S × PressureStream.Plane) => D n p.1) (z, 0)
-    (fun n => (slowClass_smooth hD n).comp contDiff_fst) (slowClass_lift P hcL hcR hD)
-  intro n p
-  change IntegratedMeanBalances.radialMoment e (averaged F n) p.1 = _
-  rw [← state_radialMoment_eq, hidentity, fderiv_parameterLift (slowClass_smooth hD n)]
 
-theorem state_angular_bump_improvedClass (P : Patch) {cL cR : ℝ}
-    (hcL : 0 < cL) (hcR : 0 < cR) (r : ReconstructionData) (ha : 0 < r.inner)
-    (ε fast slow : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hε1 : ∀ n, ε n ≤ 1)
-    (hslow : ∀ n, 1 ≤ slow n) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S)) (α : ℝ)
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AngularInputs r.inner r.outer c u)
-    (hmass : ZeroMasses u)
-    (hD : UnweightedClass (slowStripData ε slow hε hε1 hslow) α (thetaDefect c u)) :
-    MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      (α + 1) (fun n => bumpCorrection P 2 (meanBar (u.thetaResidual c) n)) := by
-  apply bump_class_from_actual_debt P 2 hcL hcR ε slow hε hε1 hslow α
-    (u.thetaResidual c) (thetaDefect c u) z hD
-  exact state_angular_moment ha r ε fast z t v c u ho H hmass.1
 
-theorem state_axial_bump_improvedClass (P : Patch) {cL cR : ℝ}
-    (hcL : 0 < cL) (hcR : 0 < cR) (r : ReconstructionData)
-    (ha : 0 < r.inner) (hd : 0 < r.exponent)
-    (ε fast slow : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hε1 : ∀ n, ε n ≤ 1)
-    (hslow : ∀ n, 1 ≤ slow n) (z t : S) (v : PressureStream.Plane)
-    (c : Context (Lift S)) (u : State (Lift S)) (α : ℝ)
-    (ho : c.operators = nativeOperators r ε fast z t v) (H : AxialInputs r.inner r.outer c u)
-    (hg : DefectIncrementBounds.Shell r.inner r.outer (u.gr c))
-    (pg : ∀ n, PressureStream.TorusPeriodicLift (u.gr c n))
-    (hrecipe : u.pressure = pressureRecipe r c u) (hmass : ZeroMasses u)
-    (hP : UnweightedClass (slowStripData ε slow hε hε1 hslow) α (pressureDefect c u))
-    (hZ : UnweightedClass (slowStripData ε slow hε hε1 hslow) α (axialDefect c u)) :
-    MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      (α + 1) (fun n => bumpCorrection P 1 (meanBar (u.axialResidual c) n)) := by
-  have hC := hP.map ((ContinuousLinearMap.lsmul ℝ ℝ) (pressureCoefficient r))
-  have hD : UnweightedClass (slowStripData ε slow hε hε1 hslow) α (axialDebtPotential r c u) := by
-    have h := hZ.add hC
-    simp only [ContinuousLinearMap.lsmul_apply, smul_eq_mul] at h ⊢
-    exact h
-  apply bump_class_from_actual_debt P 1 hcL hcR ε slow hε hε1 hslow α
-    (u.axialResidual c) (axialDebtPotential r c u) z hD
-  exact state_axial_moment r ha hd ε fast z t v c u ho H hg pg hrecipe hmass.2
 
 
 

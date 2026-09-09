@@ -139,7 +139,6 @@ theorem radiusPolynomial_eval (W : ℝ) : radiusPolynomial.eval W=radiusEnvelope
   congr 3
   ring_nf
 
-def radiusPower : ℕ := radiusPolynomial.natDegree
 
 
 

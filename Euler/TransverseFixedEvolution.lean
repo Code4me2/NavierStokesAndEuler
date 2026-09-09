@@ -47,9 +47,6 @@ def velocityPath : TimeLp T E →L[ℝ] C(Icc (0 : ℝ) T,U) :=
   (valuePart T hT).comp (velocityLp T hT Q Q₁ H c hc hQ hd K hK hH hsmall)+
     (derivativePart T hT).comp (accelerationLp T hT Q Q₁ H c hc hQ hd K hK hH hsmall)
 
-theorem velocityLp_zero_trace (f : TimeLp T E) :
-    initialTrace T hT (velocityLp T hT Q Q₁ H c hc hQ hd K hK hH hsmall f) = 0 :=
-  (fixedFrameSolver T hT Q Q₁ H c hc hQ hd K hK hH hsmall f).property
 
 theorem accelerationLp_ae (f : TimeLp T E) :
     (accelerationLp T hT Q Q₁ H c hc hQ hd K hK hH hsmall f : ℝ → U) =ᵐ[timeMeasure T]

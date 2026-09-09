@@ -89,11 +89,6 @@ theorem velocityPath_supported (t : Icc (0 : ℝ) D.T) :
     (EulerTransversePacketEndpoint.velocityPath_supported B (endpointData τ hτ hτT Y))
     (fun s => ((zeroForcing (D.tail τ hτ.le hτT)).velocityPath (forwardInitial τ hτ hτT B Y) s).property) t
 
-theorem derivativePath_supported (t : Icc (0 : ℝ) D.T) :
-    derivativePath τ hτ hτT B Y t ∈ Supported P Space D.support D.support_measurable :=
-  join_mem D.T τ hτ.le hτT.le _ _ (derivative_match τ hτ hτT B Y) _
-    (EulerTransversePacketEndpoint.derivativePath_supported B (endpointData τ hτ hτT Y))
-    (fun s => ((zeroForcing (D.tail τ hτ.le hτT)).derivativePath (forwardInitial τ hτ hτT B Y) s).property) t
 
 theorem velocityPath_mean_zero (t : Icc (0 : ℝ) D.T) :
     average P (velocityPath τ hτ hτT B Y t) = 0 := by

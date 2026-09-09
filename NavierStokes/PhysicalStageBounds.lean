@@ -169,47 +169,10 @@ structure MeanData (h degree : ℝ) where
   slow_growth : ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ n ≥ firstBand, slow n ≤ C * ChartScales.S n ^ p
   native_class : PhysicalMeanDomain.LocalBandJets region (ChartScales.epsilon h) slow alpha family.native
 
-theorem MeanData.nativeJets {h degree : ℝ} (M : MeanData h degree) :
-    PhysicalMeanJetBounds.NativeJets M.firstBand M.region (h * M.alpha) M.family.native := by
-  obtain ⟨C, hC, p, hp⟩ := M.slow_growth
-  exact PhysicalMeanJetBounds.NativeJets.of_localBandJets M.native_class
-    (fun _ _ => rfl) M.slow_nonneg hC hp
 
-theorem MeanData.field_smooth {h degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand) :
-    ContDiffOn ℝ ∞ M.family.field (CutStageEstimates.physicalSublevel h qbig) := by
-  apply (M.family.field_smooth hh hh1 M.lower_pos M.radii_lt M.region_open
-    M.region_covers M.smooth M.support).mono
-  intro w hw
-  exact ⟨hw.1, hw.2.trans_le hq⟩
 
-theorem MeanData.angular_smooth {h degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand) :
-    ContDiffOn ℝ ∞ M.family.angularField (CutStageEstimates.physicalSublevel h qbig) := by
-  apply (M.family.angularField_smooth hh hh1 M.lower_pos M.radii_lt M.region_open
-    M.region_covers M.smooth M.support).mono
-  intro w hw
-  exact ⟨hw.1, hw.2.trans_le hq⟩
 
-theorem MeanData.field_bound {h degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m M.family.field w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (h * M.alpha - PhysicalMeanJetBounds.loss degree m) := by
-  obtain ⟨C, hC, hb⟩ := M.family.field_jet_bound hh hh1 M.lower_pos M.radii_lt M.band_four
-    M.region_open M.region_covers M.smooth M.support M.nativeJets m
-  exact ⟨C, hC, fun w hw hq1 => hb w hw.1 (abs_time_le_one hh hh1 hw.1 hq1) (hw.2.le.trans hq)⟩
 
-theorem MeanData.angular_bound {h degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m M.family.angularField w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (h * M.alpha - PhysicalMeanJetBounds.loss degree m) := by
-  obtain ⟨C, hC, hb⟩ := M.family.angularField_jet_bound hh hh1 M.lower_pos M.radii_lt M.band_four
-    M.region_open M.region_covers M.smooth M.support M.nativeJets m
-  exact ⟨C, hC, fun w hw hq1 => hb w hw.1 (abs_time_le_one hh hh1 hw.1 hq1) (hw.2.le.trans hq)⟩
 
 section GainComparison
 
@@ -249,31 +212,7 @@ theorem WaveData.pressure_bound_with_gain (W : WaveData h D I K Unit)
   unfold PhysicalClassBounds.physicalLoss
   linarith
 
-theorem MeanData.field_bound_with_gain {degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hg : g ≤ h * M.alpha + delta) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m M.family.field w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
-        (g - (PhysicalMeanJetBounds.loss degree m + delta)) := by
-  obtain ⟨C, hC, hb⟩ := M.field_bound hh hh1 hq m
-  refine ⟨C, hC, fun w hw hq1 => (hb w hw hq1).trans ?_⟩
-  exact mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_exponent_ge (PhysicalWaveSum.physicalQ_pos hh hh1 hw.1) hq1
-      (by linarith)) hC
 
-theorem MeanData.angular_bound_with_gain {degree qbig : ℝ} (M : MeanData h degree)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hg : g ≤ h * M.alpha + delta) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m M.family.angularField w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
-        (g - (PhysicalMeanJetBounds.loss degree m + delta)) := by
-  obtain ⟨C, hC, hb⟩ := M.angular_bound hh hh1 hq m
-  refine ⟨C, hC, fun w hw hq1 => (hb w hw hq1).trans ?_⟩
-  exact mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_exponent_ge (PhysicalWaveSum.physicalQ_pos hh hh1 hw.1) hq1
-      (by linarith)) hC
 
 end GainComparison
 
@@ -281,13 +220,7 @@ section Assembly
 
 variable {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
 
-noncomputable def potentialIncrement (W : WaveData h D I K (Fin 3))
-    (M : MeanData h (CoordinateAlgebra.A h - 1 / 2)) : VelocityField :=
-  fun w => W.vector w + M.family.angularField w
 
-noncomputable def pressureIncrement (W : WaveData h D I K Unit)
-    (M : MeanData h (2 * CoordinateAlgebra.A h)) : PressureField :=
-  fun w => W.pressure w + M.family.field w
 
 /-- These losses depend only on fixed physical parameters and jet order.
 The five offsets are fixed once for the whole stage sequence. -/
@@ -310,61 +243,9 @@ private theorem norm_add_jet_le {E V : Type*} [NormedAddCommGroup E] [NormedSpac
   rw [fun_iteratedFDeriv_add_apply (hf.of_le (natCast_le_infty m)) (hg.of_le (natCast_le_infty m))]
   exact norm_add_le _ _
 
-theorem potentialIncrement_smooth {qbig : ℝ} (W : WaveData h D I K (Fin 3))
-    (M : MeanData h (CoordinateAlgebra.A h - 1 / 2)) (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) :
-    ContDiffOn ℝ ∞ (potentialIncrement W M) (CutStageEstimates.physicalSublevel h qbig) :=
-  ((W.vector_smooth hh hh1).mono inter_subset_left).add (M.angular_smooth hh hh1 hq)
 
-theorem pressureIncrement_smooth {qbig : ℝ} (W : WaveData h D I K Unit)
-    (M : MeanData h (2 * CoordinateAlgebra.A h)) (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hq : qbig ≤ ChartScales.Q M.firstBand) :
-    ContDiffOn ℝ ∞ (pressureIncrement W M) (CutStageEstimates.physicalSublevel h qbig) :=
-  ((W.pressure_smooth hh hh1).mono inter_subset_left).add (M.field_smooth hh hh1 hq)
 
-theorem potentialIncrement_bound {qbig g waveOffset meanOffset : ℝ}
-    (W : WaveData h D I K (Fin 3)) (M : MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hwave : g ≤ h * W.alpha + W.shift + waveOffset)
-    (hmean : g ≤ h * M.alpha + meanOffset) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (potentialIncrement W M) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g - potentialLoss h waveOffset meanOffset m) := by
-  obtain ⟨C₁, hC₁, h₁⟩ := W.vector_bound_with_gain hh hh1 hwave m
-  obtain ⟨C₂, hC₂, h₂⟩ := M.angular_bound_with_gain hh hh1 hq hmean m
-  refine ⟨C₁ + C₂, add_nonneg hC₁ hC₂, fun w hw hq1 => ?_⟩
-  have hpos := PhysicalWaveSum.physicalQ_pos hh hh1 hw.1
-  have ha := norm_bound_mono_loss (l₂ := potentialLoss h waveOffset meanOffset m)
-    hC₁ hpos hq1 (le_max_left _ _) (h₁ w hw.1 hq1)
-  have hb := norm_bound_mono_loss (l₂ := potentialLoss h waveOffset meanOffset m)
-    hC₂ hpos hq1 (le_max_right _ _) (h₂ w hw hq1)
-  have hsa := (W.vector_smooth hh hh1).contDiffAt (PhysicalWaveSum.preterminal_open.mem_nhds hw.1)
-  have hsb := (M.angular_smooth hh hh1 hq).contDiffAt
-    ((CutStageEstimates.physicalSublevel_open hh hh1 qbig).mem_nhds hw)
-  exact (norm_add_jet_le hsa hsb m).trans ((add_le_add ha hb).trans_eq (by ring))
 
-theorem pressureIncrement_bound {qbig g waveOffset meanOffset : ℝ}
-    (W : WaveData h D I K Unit) (M : MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : qbig ≤ ChartScales.Q M.firstBand)
-    (hwave : g ≤ h * W.alpha + W.shift + waveOffset)
-    (hmean : g ≤ h * M.alpha + meanOffset) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (pressureIncrement W M) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g - pressureLoss h waveOffset meanOffset m) := by
-  obtain ⟨C₁, hC₁, h₁⟩ := W.pressure_bound_with_gain hh hh1 hwave m
-  obtain ⟨C₂, hC₂, h₂⟩ := M.field_bound_with_gain hh hh1 hq hmean m
-  refine ⟨C₁ + C₂, add_nonneg hC₁ hC₂, fun w hw hq1 => ?_⟩
-  have hpos := PhysicalWaveSum.physicalQ_pos hh hh1 hw.1
-  have ha := norm_bound_mono_loss (l₂ := pressureLoss h waveOffset meanOffset m)
-    hC₁ hpos hq1 (le_max_left _ _) (h₁ w hw.1 hq1)
-  have hb := norm_bound_mono_loss (l₂ := pressureLoss h waveOffset meanOffset m)
-    hC₂ hpos hq1 (le_max_right _ _) (h₂ w hw hq1)
-  have hsa := (W.pressure_smooth hh hh1).contDiffAt (PhysicalWaveSum.preterminal_open.mem_nhds hw.1)
-  have hsb := (M.field_smooth hh hh1 hq).contDiffAt
-    ((CutStageEstimates.physicalSublevel_open hh hh1 qbig).mem_nhds hw)
-  exact (norm_add_jet_le hsa hsb m).trans ((add_le_add ha hb).trans_eq (by ring))
 
 end Assembly
 
@@ -377,10 +258,6 @@ indices keep the supplied correction increments exactly. -/
 noncomputable def addBaseAtZero (base : X → V) (increments : ℕ → X → V) (j : ℕ) (x : X) : V :=
   if j = 0 then base x + increments 0 x else increments j x
 
-@[simp] theorem addBaseAtZero_zero (base : X → V) (increments : ℕ → X → V) :
-    addBaseAtZero base increments 0 = fun x => base x + increments 0 x := by
-  funext x
-  simp [addBaseAtZero]
 
 theorem addBaseAtZero_pos (base : X → V) (increments : ℕ → X → V) {j : ℕ} (hj : 1 ≤ j) :
     addBaseAtZero base increments j = increments j := by
@@ -393,28 +270,10 @@ section Sequences
 
 variable {h qbig : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {I K : Type*}
 
-noncomputable def potentialStages (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3))
-    (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2)) : ℕ → VelocityField :=
-  addBaseAtZero base (fun j => potentialIncrement (W j) (M j))
 
-noncomputable def directStages (M : ℕ → MeanData h (CoordinateAlgebra.A h)) : ℕ → VelocityField :=
-  fun j => (M j).family.angularField
 
-noncomputable def pressureStages (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit)
-    (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h)) : ℕ → PressureField :=
-  addBaseAtZero base (fun j => pressureIncrement (W j) (M j))
 
-theorem potentialStages_zero (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3)) (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2)) :
-    potentialStages base W M 0 = fun w => base w + ((W 0).vector w + (M 0).family.angularField w) :=
-  addBaseAtZero_zero _ _
 
-theorem pressureStages_zero (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit) (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h)) :
-    pressureStages base W M 0 = fun w => base w + ((W 0).pressure w + (M 0).family.field w) :=
-  addBaseAtZero_zero _ _
 
 
 

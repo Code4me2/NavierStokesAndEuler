@@ -348,9 +348,6 @@ theorem radial_power_lower {h : ℝ} (hh : 0 ≤ h) (N : ℕ)
 
 /-! ## Actual smoothness through `X = 0` and even radial pullbacks -/
 
-theorem radiusPoint_contDiff : ContDiff ℝ ∞ radiusPoint := by
-  change ContDiff ℝ ∞ (fun w : InnerPoint => (w.1 ^ 2 / 2, w.2))
-  exact ((contDiff_fst.pow 2).div_const 2).prodMk contDiff_snd
 
 
 

@@ -39,8 +39,6 @@ def lineHeatDerivativeOperator (a : LiftTangent) (v : ℝ≥0) : LiftL2 period �
       map_smul' := lineHeatDerivative_smul period a v }
     ((v : ℝ)⁻¹ * gaussianAbsMoment v) (lineHeatDerivative_norm_le period a v)
 
-@[simp] theorem lineHeatDerivativeOperator_apply (a : LiftTangent) (v : ℝ≥0) (f : LiftL2 period) :
-    lineHeatDerivativeOperator period a v f = lineHeatDerivative period a v f := rfl
 
 /-- Genuine cylinder mollifications are differentiable along every one-parameter translation orbit. -/
 theorem mollify_lineOrbit_differentiable (a : LiftTangent) (n : ℕ) (f : LiftL2 period) :

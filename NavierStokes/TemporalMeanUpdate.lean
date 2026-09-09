@@ -629,95 +629,9 @@ section WeightedStream
 variable {E V : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- A fixed smooth radial multiplier preserves the actual all-jet class.
-The constant is obtained from the derivative product rule on the compact annulus. -/
-theorem meanClass_radialMultiply (a b : ℝ) {φ : ℝ → ℝ} (hφ : ContDiff ℝ ∞ φ)
-    {s : WeightedClasses.StripData (ℝ × E)} {α : ℝ} {g : ℕ → ℝ × E → V}
-    (hdomain : ∀ z ∈ s.domain, z.1 ∈ Icc a b) (hg : ∀ n, ContDiff ℝ ∞ (g n))
-    (hclass : WeightedClasses.MeanClass s α g) :
-    WeightedClasses.MeanClass s α (fun n z => φ z.1 • g n z) := by
-  refine ⟨hclass.weight_nonneg, fun n => ((hφ.comp contDiff_fst).smul (hg n)).contDiffOn, ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hbound⟩ := hclass.bounds m
-  obtain ⟨K, hK, hmul⟩ := RadialPullback.radial_multiplier_finiteJets_uniform (E := E) (V := V) a b hφ m
-  refine ⟨K * C, mul_nonneg hK hC, p, ?_⟩
-  intro n z hz j hj
-  have hA := WeightedClasses.majorant_nonneg s (fun _ z => s.zeta z) α hC p n z
-    (s.zeta_nonneg z hz)
-  have hout := hmul (g n) (hg n) z (hdomain z hz)
-    (WeightedClasses.majorant s (fun _ z => s.zeta z) α C p n z) hA (hbound n z hz) j hj
-  apply hout.trans_eq
-  unfold WeightedClasses.majorant
-  ring
 
-/-- Division by the positive radius preserves the class for supported
-fields. A globally smooth positive regularization proves all derivative bounds. -/
-theorem meanClass_divideRadius {a b : ℝ} (ha : 0 < a)
-    {s : WeightedClasses.StripData (ℝ × E)} {α : ℝ} {g : ℕ → ℝ × E → ℝ}
-    (hdomain : ∀ z ∈ s.domain, z.1 ∈ Icc a b) (hg : ∀ n, ContDiff ℝ ∞ (g n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (g n))
-    (hclass : WeightedClasses.MeanClass s α g) :
-    WeightedClasses.MeanClass s α (fun n => PressureStream.divideRadius (g n)) := by
-  let φ : ℝ → ℝ := fun r => (RadialPullback.positiveRadius (a / 4) r)⁻¹
-  have hφ : ContDiff ℝ ∞ φ := (RadialPullback.positiveRadius_contDiff (a / 4)).inv
-    (fun r => (RadialPullback.positiveRadius_pos (by positivity) r).ne')
-  have heq : (fun n => PressureStream.divideRadius (g n)) = (fun n z => φ z.1 • g n z) := by
-    funext n z
-    by_cases hr : a ≤ z.1
-    · dsimp [PressureStream.divideRadius, φ]
-      rw [RadialPullback.positiveRadius_eq_self (by positivity) (by linarith)]
-      simp only [div_eq_mul_inv, mul_comm]
-    · have hg0 : g n z = 0 := by
-        by_contra hn
-        exact hr (hs n hn).1
-      simp [PressureStream.divideRadius, hg0]
-  rw [heq]
-  exact meanClass_radialMultiply a b hφ hdomain hg hclass
 
-/-- The actual stream potential preserves the original exponential weight
-and its exponent, uniformly for all bandwise transport coefficients. -/
-theorem meanClass_streamPotential {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (α : ℝ) (M : ℕ → ℝ) (v : ℕ → E) (g : ℕ → ℝ × E → ℝ)
-    (hg : ∀ n, ContDiff ℝ ∞ (g n)) (hs : ∀ n, RadialAlias.RadiallySupported a b (g n))
-    (hclass : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α g) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => PressureStream.streamPotential d a b (M n) (v n) (g n)) := by
-  let s : WeightedClasses.StripData (ℝ × E) :=
-    WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR
-  have hdomain : ∀ z ∈ s.domain, z.1 ∈ Icc a b := fun z hz => ⟨hz.1.le, hz.2.le⟩
-  have hw : WeightedClasses.MeanClass s α (fun n => PressureStream.weightedSource (g n)) := by
-    unfold PressureStream.weightedSource
-    simpa only [smul_eq_mul, id_eq] using
-      meanClass_radialMultiply a b (φ := id) contDiff_id hdomain hg hclass
-  have hwc := fun n => PressureStream.weightedSource_contDiff (hg n)
-  have hws := fun n => PressureStream.weightedSource_supported (hs n)
-  have hic := RadialPullback.meanClass_physicalCompact ha hab hd hcL hcR ε R hε hεone hR α M v
-    (fun n => PressureStream.weightedSource (g n)) hwc hws hw
-  exact meanClass_divideRadius ha hdomain
-    (fun n => RadialPullback.physicalCompact_contDiff ha hab hd (hwc n) (hws n) (M n) (v n))
-    (fun n => RadialPullback.physicalCompact_supported ha hab hd (hwc n) (hws n) (M n) (v n)) hic
 
-/-- A fixed full axial direction may include every slow variable. Its actual
-derivative of the stream has the same class exponent. -/
-theorem meanClass_streamBeta {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (α : ℝ) (M : ℕ → ℝ) (v : ℕ → E) (w : E) (g : ℕ → ℝ × E → ℝ)
-    (hg : ∀ n, ContDiff ℝ ∞ (g n)) (hs : ∀ n, RadialAlias.RadiallySupported a b (g n))
-    (hclass : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α g) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => PressureStream.streamBeta w (PressureStream.streamPotential d a b (M n) (v n) (g n))) := by
-  have hi := meanClass_streamPotential ha hab hd hcL hcR ε R hε hεone hR α M v g hg hs hclass
-  have hD := (hi.directional (0, w)).map (-ContinuousLinearMap.id ℝ ℝ)
-  unfold WeightedClasses.MeanClass PressureStream.streamBeta PressureStream.graphDz
-  simpa only [
-    _root_.neg_apply, ContinuousLinearMap.id_apply] using hD
 
 end WeightedStream
 
@@ -729,10 +643,6 @@ noncomputable def aliasFactor (d a r : ℝ) : ℝ :=
   RadialPullback.radialJacobian d (RadialPullback.positiveRadius (a / 4) r) /
     RadialPullback.positiveRadius (a / 4) r
 
-theorem aliasFactor_smooth {a : ℝ} (ha : 0 < a) (d : ℝ) : ContDiff ℝ ∞ (aliasFactor d a) := by
-  have hr := RadialPullback.positiveRadius_contDiff (a / 4)
-  have hn (r : ℝ) := (RadialPullback.positiveRadius_pos (show 0 < a / 4 by positivity) r).ne'
-  exact (contDiff_const.mul (hr.rpow_const_of_ne hn)).div hr hn
 
 /-- The physical divided alias is exactly a fixed radial multiplier times
 the normalized transport alias pulled through the power chart. -/
@@ -753,47 +663,6 @@ theorem dividedAlias_eq_pullback {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd 
     simp only [PressureStream.divideRadius, RadialPullback.physicalAlias, UniformFourierAlias.exactAlias,
       RadialPullback.liftChart, hχ, mul_zero, zero_smul, zero_div]
 
-/-- A uniform full-jet estimate for the actual physical alias follows from
-the corresponding normalized alias estimate. The transfer constant is fixed
-before the source, transport coefficient, and transport direction are given. -/
-theorem dividedAlias_finiteJets_transfer {d a b : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (m : ℕ) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : E) (g : ℝ × E → ℝ),
-      ContDiff ℝ ∞ g → RadialAlias.RadiallySupported a b g →
-      ∀ C : ℝ, 0 ≤ C →
-      (∀ j ≤ m, ∀ z : ℝ × E, ‖iteratedFDeriv ℝ j (UniformFourierAlias.exactAlias
-        (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)) M v
-          (RadialPullback.normalizeSource d a g)) z‖ ≤ C) →
-      ∀ j ≤ m, ∀ z : ℝ × E,
-        ‖iteratedFDeriv ℝ j (PressureStream.divideRadius (RadialPullback.physicalAlias d a b M v g)) z‖ ≤
-          K * C := by
-  obtain ⟨KP, hKP, hcomp⟩ := RadialPullback.radial_comp_finiteJets_uniform (E := E) (V := ℝ)
-    a b (RadialPullback.powerChart_contDiff ha d) m
-  obtain ⟨KM, hKM, hmul⟩ := RadialPullback.radial_multiplier_finiteJets_uniform (E := E) (V := ℝ)
-    a b (aliasFactor_smooth ha d) m
-  refine ⟨KM * KP, mul_nonneg hKM hKP, ?_⟩
-  intro M v g hg hs C hC hbound j hj z
-  let A := UniformFourierAlias.exactAlias (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d))
-    M v (RadialPullback.normalizeSource d a g)
-  have hAs : ContDiff ℝ ∞ A := UniformFourierAlias.exactAlias_smooth
-    (TransportPrimitive.interiorCutoff_contDiff (a ^ d) (b ^ d))
-    (RadialPullback.normalizeSource_contDiff ha hd hg) (RadialPullback.normalizeSource_supported ha hab hd hs)
-  by_cases hz : z.1 ∈ Icc a b
-  · rw [dividedAlias_eq_pullback ha hab hd v g]
-    change ‖iteratedFDeriv ℝ j (fun y => aliasFactor d a y.1 •
-      (A ∘ RadialPullback.liftChart (RadialPullback.powerChart d a)) y) z‖ ≤ _
-    have hc := hcomp A hAs z hz C hC
-      (fun i hi => hbound i hi (RadialPullback.liftChart (RadialPullback.powerChart d a) z))
-    have hm := hmul (A ∘ RadialPullback.liftChart (RadialPullback.powerChart d a))
-      (hAs.comp (RadialPullback.liftChart_contDiff (RadialPullback.powerChart_contDiff ha d))) z hz
-      (KP * C) (mul_nonneg hKP hC) hc j hj
-    exact hm.trans_eq (by ring)
-  · have hz0 : iteratedFDeriv ℝ j
-        (PressureStream.divideRadius (RadialPullback.physicalAlias d a b M v g)) z = 0 := by
-      by_contra hn
-      exact hz (TransportPrimitive.iteratedFDeriv_supported
-        (PressureStream.divideRadius_supported (RadialPullback.physicalAlias_supported ha hab hd M v g)) j hn)
-    rw [hz0, norm_zero]
-    exact mul_nonneg (mul_nonneg hKM hKP) hC
 
 end AliasPullback
 
@@ -877,101 +746,7 @@ theorem interiorCutoff_deriv_zero_right {a b U : ℝ} (hab : a < b)
     exact TransportPrimitive.interiorCutoff_one hab hu.le
   exact ((hasDerivAt_const U (1 : ℝ)).congr_of_eventuallyEq he).deriv
 
-/-- The physical alias has support in one fixed compact subannulus,
-uniformly in the source, band, and direction. -/
-theorem dividedAlias_interior_support {a b d : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d) :
-    ∃ c e : ℝ, a < c ∧ c < e ∧ e < b ∧ ∀ (M : ℝ) (v : E) (g : ℝ × E → ℝ),
-      RadialAlias.RadiallySupported c e (PressureStream.divideRadius (RadialPullback.physicalAlias d a b M v g)) := by
-  have hb : 0 < b := ha.trans hab
-  have haU : 0 < a ^ d := Real.rpow_pos_of_pos ha d
-  have habU : a ^ d < b ^ d := Real.rpow_lt_rpow ha.le hab hd
-  let cU := (2 * a ^ d + b ^ d) / 3
-  let eU := (a ^ d + 2 * b ^ d) / 3
-  have hacU : a ^ d < cU := by dsimp [cU]; linarith
-  have hceU : cU < eU := by dsimp [cU, eU]; linarith
-  have hebU : eU < b ^ d := by dsimp [eU]; linarith
-  have hcU : 0 < cU := haU.trans hacU
-  have heU : 0 < eU := hcU.trans hceU
-  let c := cU ^ d⁻¹
-  let e := eU ^ d⁻¹
-  have hac : a < c := by
-    simpa only [Real.rpow_rpow_inv ha.le hd.ne'] using
-      Real.rpow_lt_rpow haU.le hacU (inv_pos.mpr hd)
-  have hce : c < e := Real.rpow_lt_rpow hcU.le hceU (inv_pos.mpr hd)
-  have heb : e < b := by
-    simpa only [Real.rpow_rpow_inv hb.le hd.ne'] using
-      Real.rpow_lt_rpow heU.le hebU (inv_pos.mpr hd)
-  have hcPow : c ^ d = cU := Real.rpow_inv_rpow hcU.le hd.ne'
-  have hePow : e ^ d = eU := Real.rpow_inv_rpow heU.le hd.ne'
-  have hleft (r : ℝ) (hr : r < c) :
-      deriv (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)) (RadialPullback.powerChart d a r) = 0 := by
-    apply interiorCutoff_deriv_zero_left habU
-    change RadialPullback.powerChart d a r < cU
-    by_cases hra : a ≤ r
-    · rw [RadialPullback.powerChart_eq ha (by linarith) d]
-      exact (Real.rpow_lt_rpow (ha.trans_le hra).le hr hd).trans_eq hcPow
-    · exact (RadialPullback.powerChart_lt_left ha hd (lt_of_not_ge hra)).trans hacU
-  have hright (r : ℝ) (hr : e < r) :
-      deriv (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)) (RadialPullback.powerChart d a r) = 0 := by
-    apply interiorCutoff_deriv_zero_right habU
-    change eU < RadialPullback.powerChart d a r
-    rw [RadialPullback.powerChart_eq ha (by linarith) d, ← hePow]
-    exact Real.rpow_lt_rpow (ha.trans (hac.trans hce)).le hr hd
-  refine ⟨c, e, hac, hce, heb, ?_⟩
-  intro M v g z hz
-  constructor
-  · by_contra hn
-    have he := hleft z.1 (lt_of_not_ge hn)
-    exact hz (by simp only [PressureStream.divideRadius, RadialPullback.physicalAlias,
-      he, mul_zero, zero_smul, zero_div])
-  · by_contra hn
-    have he := hright z.1 (lt_of_not_ge hn)
-    exact hz (by simp only [PressureStream.divideRadius, RadialPullback.physicalAlias,
-      he, mul_zero, zero_smul, zero_div])
 
-/-- A fixed interior support converts uniform band bounds into the full
-weighted class by an actual positive minimum of the exponential weight. -/
-theorem meanClass_of_interior_bounds {a b c e cL cR α : ℝ}
-    (ha : 0 < a) (hac : a < c) (he : e < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    {f : ℕ → ℝ × E → V} (hfc : ∀ n, ContDiff ℝ ∞ (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported c e (f n))
-    (hf : ∀ m : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∀ n j, j ≤ m → ∀ z : ℝ × E,
-      ‖iteratedFDeriv ℝ j (f n) z‖ ≤ C * ε n ^ α * R n ^ p) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f := by
-  let st := WeightedRadialPrimitive.logStripData (E := E) a b cL cR ha hcL hcR ε R hε hεone hR
-  have hmem (r : ℝ) (hr : r ∈ Icc c e) : ((r, (0 : E)) : ℝ × E) ∈ st.domain :=
-    ⟨hac.trans_le hr.1, hr.2.trans_lt he⟩
-  have hcont : ContinuousOn (fun r : ℝ => st.zeta (r, (0 : E))) (Icc c e) :=
-    st.zeta_smooth.continuousOn.comp (continuous_id.prodMk continuous_const).continuousOn hmem
-  have hpos (r : ℝ) (hr : r ∈ Icc c e) : 0 < st.zeta (r, (0 : E)) :=
-    WeightedRadialPrimitive.zeta_pos cL cR (WeightedRadialPrimitive.logPosition_mem ha (hmem r hr))
-  obtain ⟨η, hη, hηbound⟩ := UniformCone.positive_uniform_margin isCompact_Icc hcont hpos
-  refine ⟨fun n z hz => st.zeta_nonneg z hz, fun n => (hfc n).contDiffOn, ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hbound⟩ := hf m
-  refine ⟨C / η, div_nonneg hC hη.le, p, ?_⟩
-  intro n z hz j hj
-  by_cases hzi : z.1 ∈ Icc c e
-  · have hζ : η ≤ st.zeta z := hηbound z.1 hzi
-    have hgr : R n ^ p ≤ st.growth n z ^ p :=
-      pow_le_pow_left₀ (zero_le_one.trans (hR n)) (st.slow_le_growth n z) p
-    have hA : 0 ≤ C / η * ε n ^ α * st.growth n z ^ p :=
-      mul_nonneg (mul_nonneg (div_nonneg hC hη.le) (Real.rpow_pos_of_pos (hε n) α).le)
-        (pow_nonneg (st.growth_nonneg n z) p)
-    calc
-      _ ≤ C * ε n ^ α * R n ^ p := hbound n j hj z
-      _ ≤ C * ε n ^ α * st.growth n z ^ p :=
-        mul_le_mul_of_nonneg_left hgr (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-      _ = (C / η * ε n ^ α * st.growth n z ^ p) * η := by field_simp
-      _ ≤ (C / η * ε n ^ α * st.growth n z ^ p) * st.zeta z := mul_le_mul_of_nonneg_left hζ hA
-      _ = _ := rfl
-  · have hzero : iteratedFDeriv ℝ j (f n) z = 0 :=
-      Classical.byContradiction (fun hn => hzi (TransportPrimitive.iteratedFDeriv_supported (hs n) j hn))
-    rw [hzero, norm_zero]
-    exact WeightedClasses.majorant_nonneg st (fun _ z => st.zeta z) α
-      (div_nonneg hC hη.le) p n z (st.zeta_nonneg z hz)
 
 end InteriorAliasClass
 
@@ -979,81 +754,7 @@ section CompleteWeightedUpdate
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
-theorem dividedAlias_global_bounds {a b d cL cR α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (M : ℕ → ℝ) (hM : ∀ n, M n ≠ 0) {g : ℕ → PressureStream.Lift S → ℝ}
-    (hg : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α g)
-    (hgc : ∀ n, ContDiff ℝ ∞ (g n)) (hgp : ∀ n, PressureStream.TorusPeriodicLift (g n))
-    (hgm : ∀ n p, PressureStream.torusAverage (g n) p = 0)
-    (hgs : ∀ n, RadialAlias.RadiallySupported a b (g n)) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∀ n j, j ≤ m → ∀ z : PressureStream.Lift S,
-      ‖iteratedFDeriv ℝ j (PressureStream.divideRadius
-        (RadialPullback.physicalAlias d a b (M n) ((0 : S), vector .radial) (g n))) z‖ ≤
-          C * ε n ^ α * R n ^ p := by
-  have haU : 0 < a ^ d := Real.rpow_pos_of_pos ha d
-  have habU : a ^ d < b ^ d := Real.rpow_lt_rpow ha.le hab hd
-  have hcLU : 0 < d ^ 2 * cL := mul_pos (sq_pos_of_pos hd) hcL
-  have hcRU : 0 < d ^ 2 * cR := mul_pos (sq_pos_of_pos hd) hcR
-  let G := fun n => RadialPullback.normalizeSource d a (g n)
-  have hG := UniformFourierAlias.meanClass_normalizeSource ha hab hd hcL hcR ε R hε hεone hR hg hgc
-  have hGc : ∀ n, ContDiff ℝ ∞ (G n) := fun n => RadialPullback.normalizeSource_contDiff ha hd (hgc n)
-  have hGp : ∀ n, UniformFourierAlias.SourcePeriodic (G n) := fun n => normalizeSource_periodic d a (hgp n)
-  have hGm : ∀ n p, UniformFourierAlias.sourceMean (G n) p = 0 := by
-    intro n p
-    change PressureStream.torusAverage (RadialPullback.normalizeSource d a (g n)) p = 0
-    rw [normalizeSource_torusAverage, hgm, mul_zero]
-  have hGs := fun n => RadialPullback.normalizeSource_supported ha hab hd (hgs n)
-  obtain ⟨C, hC, p, hsource⟩ := UniformFourierAlias.meanClass_global_finiteJets
-    haU hcLU hcRU ε R hε hεone hR hG hGs hGc m
-  let χ := TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)
-  have hχ : ContDiff ℝ ∞ χ := TransportPrimitive.interiorCutoff_contDiff _ _
-  have hleft : ∀ U ≤ a ^ d, χ U = 0 := fun U hU =>
-    TransportPrimitive.interiorCutoff_zero habU (by linarith)
-  have hright : ∀ U, b ^ d ≤ U → χ U = 1 := fun U hU =>
-    TransportPrimitive.interiorCutoff_one habU (by linarith)
-  obtain ⟨KA, hKA, hbA⟩ := UniformFourierAlias.real_exactAlias_finiteJets (S := S) .radial
-    habU.le hχ hleft hright m 0
-  obtain ⟨KT, hKT, hbT⟩ := dividedAlias_finiteJets_transfer (E := S × Plane) ha hab hd m
-  refine ⟨KT * KA * C, mul_nonneg (mul_nonneg hKT hKA) hC, p, ?_⟩
-  intro n j hj z
-  let B := C * ε n ^ α * R n ^ p
-  have hB : 0 ≤ B := mul_nonneg (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-    (pow_nonneg (zero_le_one.trans (hR n)) _)
-  have hAb : ∀ i ≤ m, ∀ y : PressureStream.Lift S,
-      ‖iteratedFDeriv ℝ i (UniformFourierAlias.exactAlias χ (M n) ((0 : S), vector .radial) (G n)) y‖ ≤ KA * B := by
-    intro i hi y
-    have he := hbA (G n) (hGc n) (hGp n) (hGm n) (hGs n) B hB
-      (fun k hk x _ => hsource n k (by simpa using hk) x (Set.mem_univ x)) (M n) (hM n) i hi y
-    simpa only [pow_zero, mul_one] using he
-  have he := hbT (M n) ((0 : S), vector .radial) (g n) (hgc n) (hgs n)
-    (KA * B) (mul_nonneg hKA hB) hAb j hj z
-  exact he.trans_eq (by dsimp [B]; ring)
 
-/-- The actual divided compactification alias lies in the same weighted
-class; its fixed interior support supplies the full edge weight. -/
-theorem meanClass_dividedAlias {a b d cL cR α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (M : ℕ → ℝ) (hM : ∀ n, M n ≠ 0) {g : ℕ → PressureStream.Lift S → ℝ}
-    (hg : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α g)
-    (hgc : ∀ n, ContDiff ℝ ∞ (g n)) (hgp : ∀ n, PressureStream.TorusPeriodicLift (g n))
-    (hgm : ∀ n p, PressureStream.torusAverage (g n) p = 0)
-    (hgs : ∀ n, RadialAlias.RadiallySupported a b (g n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => PressureStream.divideRadius
-        (RadialPullback.physicalAlias d a b (M n) ((0 : S), vector .radial) (g n))) := by
-  obtain ⟨c, e, hac, _, heb, hs⟩ := dividedAlias_interior_support (E := S × Plane) ha hab hd
-  apply meanClass_of_interior_bounds ha hac heb hcL hcR ε R hε hεone hR
-  · intro n
-    exact PressureStream.divideRadius_contDiff ha
-      (RadialPullback.physicalAlias_contDiff ha hab hd (hgc n) (hgs n) (M n) (0, vector .radial))
-      (RadialPullback.physicalAlias_supported ha hab hd (M n) (0, vector .radial) (g n))
-  · exact fun n => hs (M n) (0, vector .radial) (g n)
-  · exact dividedAlias_global_bounds ha hab hd hcL hcR ε R hε hεone hR M hM hg hgc hgp hgm hgs
 
 
 

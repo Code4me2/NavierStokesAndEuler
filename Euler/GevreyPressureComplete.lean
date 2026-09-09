@@ -24,22 +24,6 @@ theorem coefficientBlock_mono {s p q : ℕ} (hpq : p ≤ q) {A : SmoothCoefficie
     (Finset.sum_nonneg (fun r _ => (boundLevel_nonneg K : 0 ≤ boundLevel period K (n+r))))
     (pow_nonneg (by norm_num) q)
 
-/-- The actual nonlinear external pressure commutator bound includes the zero-cutoff case. -/
-theorem nonlinear_externalPressure_bound_all {s : ℕ} (hs : 6 ≤ s) {A : SmoothCoefficient period}
-    (K : EulerSpatialSobolevInverse.CoefficientJet period standardDirection s A)
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c*‖v‖^2 ≤ ⟪A.coefficient x v,v⟫_ℝ)
-    (N : ℕ) (hN : N+6 ≤ s) (ρ Rc M : ℝ) (hρ : 0 < ρ) (hRc : 0 ≤ Rc) (hM : 1 ≤ M)
-    (hbase : (EulerH6Pressure.CoefficientJet.restrict K 6 (by omega)).pressureConstant c ≤ M)
-    (hsmall : 4*M*(ρ*Rc) ≤ 1)
-    (hcoeff : ∀ l, 1 ≤ l → l ≤ N → coefficientBlock period K 6 l ≤ Rc^l*(l.factorial : ℝ)^2)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u v : SobolevSpace period (s+1)) :
-    externalPressureNorm period K N ρ (transportPressure period hs K κ m c hc hpos L hL u v) ≤
-      (32*Rc*M*productConstant period 3)*weightedNorm period 6 N ρ u*weightedLoss period 6 N ρ v := by
-  cases N with
-  | zero => simp [externalPressureNorm, weightedLoss, commutatorBlock_zero]
-  | succ N => exact nonlinear_externalPressure_bound period hs K κ m c hc hpos N hN ρ Rc M hρ hRc hM hbase hsmall hcoeff L hL u v
 
 /-- Actual base transport-pressure commutators are bounded by the product of the two velocity energies at the same cutoff. -/
 theorem nonlinear_basePressure_bound {s : ℕ} (hs : 6 ≤ s) {A : SmoothCoefficient period}

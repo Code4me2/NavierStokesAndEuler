@@ -69,8 +69,6 @@ def field (L : Space →L[ℝ] Space) : SmoothL2Field Space where
   integrable n := ((velocity_smooth L).continuous_iteratedFDeriv (m := n) (by simp)).memLp_of_hasCompactSupport
     ((velocity_compact L).iteratedFDeriv n)
 
-theorem velocity_memLp (L : Space →L[ℝ] Space) : MemLp (velocity L) 2 volume :=
-  (velocity_smooth L).continuous.memLp_of_hasCompactSupport (velocity_compact L)
 
 
 def linear (β : ℝ) : Space →L[ℝ] Space :=

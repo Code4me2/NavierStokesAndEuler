@@ -78,16 +78,5 @@ theorem gluePath_right (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b)
   change glueFunction a b ha hb u v (projIcc 0 (a+b) (add_nonneg ha hb) (a+t)).val = _
   rw [projIcc_of_mem (add_nonneg ha hb) htu, glueFunction_right a b ha hb u v hmatch (a+t) (by linarith [ht.1]), add_sub_cancel_left]
 
-/-- The actual pasted path is bounded by any common uniform bound for its two pieces. -/
-theorem gluePath_norm_le (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b)
-    (u : C(Icc (0 : ℝ) a, E)) (v : C(Icc (0 : ℝ) b, E))
-    (hmatch : u ⟨a,ha,le_rfl⟩ = v ⟨0,le_rfl,hb⟩) (R : ℝ) (hR : 0 ≤ R)
-    (hu : ‖u‖ ≤ R) (hv : ‖v‖ ≤ R) : ‖gluePath a b ha hb u v hmatch‖ ≤ R := by
-  apply (ContinuousMap.norm_le _ hR).mpr
-  intro t
-  change ‖if t.val ≤ a then extendPath a ha u t.val else extendPath b hb v (t.val-a)‖ ≤ R
-  split
-  · exact (extendPath_norm_le a ha u t.val).trans hu
-  · exact (extendPath_norm_le b hb v (t.val-a)).trans hv
 
 end EulerTimePathGluing

@@ -393,10 +393,6 @@ theorem profile_derivWithin {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
   simpa [profileJet, derivativeCoeff] using
     (profile_hasDerivWithinAt ha hz).derivWithin ((uniqueDiffOn_Ici 0) z hz)
 
-theorem profile_deriv {a z : ℝ} (ha : 1 < a) (hz : 0 < z) :
-    deriv (profile a) z = (Real.Gamma a)⁻¹ * (1 - a) * moment a 1 z := by
-  simpa [profileJet, derivativeCoeff] using
-    ((profile_hasDerivWithinAt ha hz.le).hasDerivAt (Ici_mem_nhds hz)).deriv
 
 theorem profile_derivWithin_neg {a z : ℝ} (ha : 1 < a) (hz : 0 ≤ z) :
     derivWithin (profile a) (Ici 0) z < 0 := by

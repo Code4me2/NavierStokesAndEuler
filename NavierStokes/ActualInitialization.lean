@@ -41,8 +41,6 @@ noncomputable def primaryBlock (l : Index B N0) : HarmonicBlock Point :=
 noncomputable def tangentBlock (l : Index B N0) : HarmonicBlock Point :=
   (primaryPiece l).tangentBlock (phase l) (angularMode l)
 
-noncomputable def curlBlock (l : Index B N0) : HarmonicBlock Point :=
-  (primaryPiece l).differenceBlock (phase l) (angularMode l)
 
 noncomputable def gaussianBlock (l : Index B N0) : HarmonicBlock Point :=
   (primaryPiece l).excludedBlock (phase l) (angularMode l)
@@ -679,26 +677,6 @@ theorem primary_coefficients_smooth {B N0 : ℕ} (l : Index B N0) (n : ℕ) (i :
     (HarmonicWaveInteraction.inclusion (D := Point)).contDiff.contDiffOn (fun _ hx => ⟨hx, trivial⟩)
 
 
-theorem gaussian_coefficients_smooth {B N0 : ℕ} (l : Index B N0) (n : ℕ) (i : Fin 3) :
-    SmoothCoefficients strip.domain ((gaussianBlock l).velocity n i) := by
-  have hm : MapsTo (ActualPrimaryCoherence.absoluteChart n)
-      (HarmonicResidual.liftDomain strip.domain) ActualPrimaryCoherence.positiveAbsolute := by
-    intro x hx
-    exact mul_pos (ChartScales.Q_pos n) (strip_time x.1 hx.1)
-  have he : LinearWaveBounds.excludedSlotError (primaryPiece l).directions (primaryPiece l).cutoff
-      (primaryPiece l).coefficients.amplitude 0 n =
-      fun x => ChartScales.Q n ^ (2 * CoordinateAlgebra.A ActualPrimary.h + 1/2) •
-        ActualPrimaryCoherence.absoluteGaussianCoefficient l.2 l.1 (ActualPrimaryCoherence.absoluteChart n x) :=
-    funext (ActualPrimaryCoherence.gaussianCoefficient_representation ActualPrimary.standardRegion l.2 l.1 n)
-  have hs : ContDiffOn ℝ ∞ (LinearWaveBounds.excludedSlotError (primaryPiece l).directions
-      (primaryPiece l).cutoff (primaryPiece l).coefficients.amplitude 0 n)
-      (HarmonicResidual.liftDomain strip.domain) := by
-    rw [he]
-    exact ((ActualPrimaryCoherence.absoluteGaussianCoefficient_smooth l.2 l.1).comp
-      (ActualPrimaryCoherence.absoluteChart n).contDiff.contDiffOn hm).const_smul _
-  apply smooth_conjugatePair
-  exact (contDiffOn_pi.mp hs i).comp
-    (HarmonicWaveInteraction.inclusion (D := Point)).contDiff.contDiffOn (fun _ hx => ⟨hx, trivial⟩)
 
 /-- Harmonic solenoidality is extracted from the actual corrected curl. -/
 theorem primary_modeSolenoidal {B N0 : ℕ} (l : Index B N0) :

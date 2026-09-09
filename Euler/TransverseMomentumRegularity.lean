@@ -105,31 +105,6 @@ theorem momentum_weak_of_product_tests
     adjoint_inner_left]
   linarith only [htest]
 
-/-- The variational equation determines the weak derivative of actual momentum. -/
-theorem momentum_weak
-    (hQ : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (m : Icc (0 : ℝ) T → E)
-    (hm : ∀ t x, ⟪m t, Q t x⟫_ℝ = 0)
-    (H : C(Icc (0 : ℝ) T, E →L[ℝ] E))
-    (u : transverseDerivatives T hT m) (f : TimeLp T E)
-    (hu : ∀ v : transverseDerivatives T hT m,
-      ⟪(u : TimeLp T E), (v : TimeLp T E)⟫_ℝ -
-        ⟪timeMultiplier T hT H (transversePrimitive T hT m u),
-          transversePrimitive T hT m v⟫_ℝ =
-        -⟪f, transversePrimitive T hT m v⟫_ℝ)
-    (v : TimeLp T U) (hv : initialTrace T hT v = 0) :
-    ⟪momentum T hT Q (u : TimeLp T E), v⟫_ℝ =
-      -⟪momentumForcing T hT Q Q₁ H (u : TimeLp T E) f,
-        primitiveTimeLp T hT v⟫_ℝ := by
-  have htest := hu ⟨productDerivative T hT Q Q₁ v,
-    productDerivative_mem_transverse T hT Q Q₁ hQ m hm v hv⟩
-  change ⟪(u : TimeLp T E), productDerivative T hT Q Q₁ v⟫_ℝ -
-    ⟪timeMultiplier T hT H (primitiveTimeLp T hT (u : TimeLp T E)),
-      primitiveTimeLp T hT (productDerivative T hT Q Q₁ v)⟫_ℝ =
-    -⟪f, primitiveTimeLp T hT (productDerivative T hT Q Q₁ v)⟫_ℝ at htest
-  exact momentum_weak_of_product_tests T hT Q Q₁ hQ H
-    (u : TimeLp T E) f v htest
 
 
 end EulerTransverseMomentumRegularity

@@ -79,16 +79,6 @@ theorem continuous_representative_odd (u : LiftL2 period) (g : LiftDomain period
     rfl
   exact congrFun (MeasureTheory.Measure.eq_of_ae_eq ha (hg.comp continuous_neg) hg.neg)
 
-/-- The canonical smooth correction is odd at every spatial and angular point. -/
-theorem FiniteFamily.pointField_odd (F : FiniteFamily period hT A)
-    (C : ComparisonData period hT A) (P : ParityData period A)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
-    F.pointField period t (-x) = -F.pointField period t x := by
-  have hc : Continuous (F.pointField period t) :=
-    EulerMetricTransport.smoothField_continuous period (F.pointField period t)
-      (F.pointField_smooth period C t)
-  exact continuous_representative_odd period (F.commonPath period t) (F.pointField period t)
-    (F.commonPath_odd period C P t) hc (F.pointField_ae period t) x
 
 
 

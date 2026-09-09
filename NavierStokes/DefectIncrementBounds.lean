@@ -44,8 +44,6 @@ theorem zero_of_not_mem (hf : Shell a b f) (n : ℕ) (x : Point P)
   by_contra hn
   exact hx (hf.supported n hn)
 
-theorem zero : Shell a b (0 : ScalarField (Point P)) :=
-  ⟨fun _ => contDiff_const, fun _ _ hx => (hx rfl).elim⟩
 
 theorem add (hf : Shell a b f) (hg : Shell a b g) : Shell a b (f + g) := by
   refine ⟨fun n => (hf.smooth n).add (hg.smooth n), ?_⟩
@@ -101,8 +99,6 @@ theorem mul_coefficient (hf : Shell a b f) (ha : 0 < a)
     (hg : SmoothOn (positiveDomain (P := P)) g) : Shell a b (f * g) := by
   simpa only [mul_comm] using hf.coefficient_mul ha hg
 
-theorem smoothOn (hf : Shell a b f) (U : Set (Point P)) : SmoothOn U f :=
-  fun n => (hf.smooth n).contDiffOn
 
 end Shell
 
@@ -115,9 +111,6 @@ theorem ShellTriple.updated {a b : ℝ} {m h : Triple (Point P)}
     (hm : ShellTriple a b m) (hh : ShellTriple a b h) : ShellTriple a b (updated m h) :=
   ⟨hm.radial.add hh.radial, hm.angular.add hh.angular, hm.axial.add hh.axial⟩
 
-theorem ShellTriple.smooth {a b : ℝ} {m : Triple (Point P)}
-    (hm : ShellTriple a b m) (U : Set (Point P)) : SmoothTriple U m :=
-  ⟨hm.radial.smoothOn U, hm.angular.smoothOn U, hm.axial.smoothOn U⟩
 
 /-- The radial chart has its actual radius and a coefficient smooth on the
 physical positive radial region. No estimate on a residual is assumed. -/
@@ -261,11 +254,6 @@ theorem barMoment_sub {a b : ℝ} {f g : ScalarField (Point P)}
   exact integral_sub (hf.barIntegrable k n p) (hg.barIntegrable k n p)
 
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-@[simp] theorem barMoment_zero (k : ℕ) : barMoment k (0 : ScalarField (Point P)) = 0 := by
-  funext n p
-  simp [barMoment, CorrectionState.radialMoment, PressureStream.pressureMass,
-    PressureStream.torusAverage, PressureStream.torusInner]
 
 theorem barMoment_mem
     {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
@@ -486,19 +474,7 @@ theorem defects_after_solved_rows
 
 end ExactMoments
 
-theorem unweighted_sub {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {s : StripData D} {α : ℝ} {f g : ScalarField D}
-    (hf : UnweightedClass s α f) (hg : UnweightedClass s α g) :
-    UnweightedClass s α (f - g) := by
-  have hn : UnweightedClass s α (-g) := by
-    exact hg.map (-ContinuousLinearMap.id ℝ ℝ)
-  simp only [sub_eq_add_neg]
-  exact hf.add hn
 
-theorem unweighted_smul {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {s : StripData D} {α : ℝ} {f : ScalarField D}
-    (hf : UnweightedClass s α f) (c : ℝ) : UnweightedClass s α (c • f) := by
-  exact hf.map (c • ContinuousLinearMap.id ℝ ℝ)
 
 section IntegratedBounds
 
@@ -519,34 +495,7 @@ variable (ho : OperatorBounds
     (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε S hε hεone hS) H h)
   (hH : 9 / 10 ≤ H)
 
-include ha hab hcL hcR hop hbs hms hhs hW ho hb hm hh hH in
-/-- The remainder bound is derived from the primitive mean classes and the
-literal equation-(32) source, then integrated by the actual moment map. -/
-theorem remainders_mem (i : Fin 3) :
-    UnweightedClass (MeanMomentBounds.slowStripData (D := P) ε S hε hεone hS) (H + 9 / 10 - 2 * κ)
-      (fun n p => remainders o base m h W n p i) := by
-  have hrc := actualRadialError_mem ho hb hm hh hH W
-    (fun i j => (hW i j).smoothOn
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε S hε hεone hS).domain)
-  have hrs := actualRadialError_shell ha hop hbs hms hhs W hW
-  have hr0 := barMoment_mem ha hab hcL hcR ε S hε hεone hS hrs hrc 0
-  have hr2 := barMoment_mem ha hab hcL hcR ε S hε hεone hS hrs hrc 2
-  have ht := barMoment_mem ha hab hcL hcR ε S hε hεone hS
-    (thetaQuadratic_shell hms hhs) (thetaQuadratic_mem ho hm hh hH) 2
-  have hz := barMoment_mem ha hab hcL hcR ε S hε hεone hS
-    (axialQuadratic_shell hms hhs) (axialQuadratic_mem ho hm hh hH) 1
-  fin_cases i
-  · exact hr0
-  · exact ht
-  · exact unweighted_sub hz (unweighted_smul hr2 (1 / 2))
 
-include ha hab hcL hcR hop hbs hms hhs hW ho hb hm hh hH in
-theorem defects_after_rank_mem
-    (hrows : linearRows o base h = -defects o base m W) (i : Fin 3) :
-    UnweightedClass (MeanMomentBounds.slowStripData (D := P) ε S hε hεone hS) (H + 9 / 10 - 2 * κ)
-      (fun n p => defects o base (updated m h) W n p i) := by
-  rw [defects_after_solved_rows ha hop hbs hms hhs W hW hrows]
-  exact remainders_mem ha hab hcL hcR ε S hε hεone hS hop hbs hms hhs W hW ho hb hm hh hH i
 
 end IntegratedBounds
 
@@ -595,32 +544,7 @@ theorem Shell.sliceIntegrable {a b : ℝ} {f : ScalarField (Point P)} (hf : Shel
     ((hf.smooth n).continuous.comp (continuous_id.prodMk continuous_const))
     (IntegratedMeanBalances.radial_slice_compact (hf.supported n) (p, 0)) k
 
-theorem fiveRows_mass_zero {o : Operators (Point P)} {base m h : Triple (Point P)}
-    {W : Fin 3 → Fin 3 → ScalarField (Point P)}
-    (hv : IsSlow h.angular) (hg : IsSlow h.axial)
-    (hrows : ∀ n p, FiveRowRank.FiveRows (slowSlice base.angular n p) (slowSlice base.axial n p)
-      (defects o base m W n p) (slowSlice h.angular n p) (slowSlice h.axial n p)) :
-    barMoment 2 h.angular = 0 ∧ barMoment 1 h.axial = 0 := by
-  constructor
-  · funext n p
-    rw [barMoment_slow hv]
-    exact (hrows n p).1
-  · funext n p
-    rw [barMoment_slow hg]
-    simpa only [pow_one, Pi.zero_apply] using (hrows n p).2.1
 
-theorem fiveRows_preserve_masses {a b : ℝ} {o : Operators (Point P)}
-    {base m h : Triple (Point P)} {W : Fin 3 → Fin 3 → ScalarField (Point P)}
-    (hm : ShellTriple a b m) (hh : ShellTriple a b h)
-    (hv : IsSlow h.angular) (hg : IsSlow h.axial)
-    (hrows : ∀ n p, FiveRowRank.FiveRows (slowSlice base.angular n p) (slowSlice base.axial n p)
-      (defects o base m W n p) (slowSlice h.angular n p) (slowSlice h.axial n p)) :
-    barMoment 2 (updated m h).angular = barMoment 2 m.angular ∧
-      barMoment 1 (updated m h).axial = barMoment 1 m.axial := by
-  obtain ⟨hzv, hzg⟩ := fiveRows_mass_zero hv hg hrows
-  change barMoment 2 (m.angular + h.angular) = _ ∧ barMoment 1 (m.axial + h.axial) = _
-  rw [barMoment_add hm.angular hh.angular, barMoment_add hm.axial hh.axial, hzv, hzg]
-  simp
 
 /-- The three moment rows are exactly those solved in (35), including the
 minus sign and factor one half in the axial pressure moment. -/
@@ -773,14 +697,6 @@ theorem solved_rows {a b : ℝ} (ha : 0 < a) (hop : PositiveOperators c.operator
     (rankIncrement_angular_slow p r axial c u) (hg.axial_slow axial)
     u.covariance (hg.fiveRows axial)
 
-theorem preserve_masses {a b : ℝ} (hm : ShellTriple a b u.mean)
-    (hh : ShellTriple a b (CorrectionState.rankIncrement p r axial c u)) :
-    CorrectionState.radialMoment 2 (CorrectionState.rankStage p r axial c u).mean.angular =
-        CorrectionState.radialMoment 2 u.mean.angular ∧
-      CorrectionState.radialMoment 1 (CorrectionState.rankStage p r axial c u).mean.axial =
-        CorrectionState.radialMoment 1 u.mean.axial :=
-  fiveRows_preserve_masses hm hh (rankIncrement_angular_slow p r axial c u)
-    (hg.axial_slow axial) (hg.fiveRows axial)
 
 
 theorem debt_eq_remainders {a b : ℝ} (ha : 0 < a) (hop : PositiveOperators c.operators)
@@ -820,25 +736,7 @@ variable {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < 
       (CorrectionState.rankIncrement p r axial c u))
   (hH : 9 / 10 ≤ H)
 
-include ha hab hcL hcR axial hg hop hbs hms hhs hW hV hG ho hb hm hh hH in
-/-- The constructed rank solve followed by actual pressure recomputation
-has the claimed stronger defects. The inputs are primitive fields and their
-classes; no solved-row, defect-remainder, or pressure-error estimate is assumed. -/
-theorem rankStage_defect_class (i : Fin 3) :
-    UnweightedClass (MeanMomentBounds.slowStripData (D := P) ε S hε hεone hS)
-      (H + 9 / 10 - 2 * κ)
-      (fun n x => CorrectionState.debt c (CorrectionState.rankStage p r axial c u) n x i) := by
-  rw [rankStage_debt_eq]
-  exact defects_after_rank_mem ha hab hcL hcR ε S hε hεone hS hop hbs hms hhs
-    u.covariance hW ho hb hm hh hH (hg.solved_rows axial ha hop hbs hhs hV hG) i
 
-include ha hab hcL hcR axial hg hop hbs hms hhs hW hV hG ho hb hm hh hH in
-theorem rankStage_defectBounds {σ : ℝ} (hσ : 1 + σ ≤ H + 9 / 10 - 2 * κ) :
-    CorrectionState.DefectBounds (MeanMomentBounds.slowStripData (D := P) ε S hε hεone hS) σ c
-      (CorrectionState.rankStage p r axial c u) := by
-  intro i
-  exact (rankStage_defect_class ha hab hcL hcR ε S hε hεone hS axial hg hop hbs hms hhs hW
-    hV hG ho hb hm hh hH i).mono_exponent hσ
 
 end ConstructedBounds
 

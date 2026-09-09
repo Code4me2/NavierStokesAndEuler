@@ -562,35 +562,7 @@ section Copies
 variable {I : Type} {a : PeriodizedWaveBounds.CopyData D I} {s : StripData D}
   {d : GraphDirections D} {C : ℕ → I → Set D} {P : ℕ → I → D → ℝ} {α κ : ℝ}
 
-theorem rawJets_of_localInput
-    (h : LocalizedWaveBounds.InputBounds s C P α κ d (LocalizedWaveBounds.rawFamily a))
-    (hψ : LocalizedWaveBounds.LocalUnweighted s C 0 a.cutoff)
-    (n : ℕ) (i : I) {x : D} (hx : x ∈ s.domain) (hi : x ∈ C n i)
-    (hΦ : ContDiffAt ℝ ∞ (a.background.phase n) x)
-    (hR : a.background.radius n x ≠ 0) (hN : a.background.normal s d n x ≠ 0) :
-    RawJetsAt (a.raw i) s d (fun n => a.cutoff n i) n x :=
-  ⟨h.radial_profile.smooth n i x hx hi, hΦ, h.radius.smooth n i x hx hi,
-    (h.radial_base.smooth n i x hx hi).differentiableAt (by simp),
-    (h.frequency_base.smooth n i x hx hi).differentiableAt (by simp),
-    (h.axial_base.smooth n i x hx hi).differentiableAt (by simp),
-    contDiffAt_pi.mpr (fun j => (h.amplitude j).smooth n i x hx hi),
-    (h.pressure.smooth n i x hx hi).differentiableAt (by simp),
-    hψ.smooth n i x hx hi, hR, hN⟩
 
-theorem native_cancellation_of_principal
-    (h : LocalizedWaveBounds.InputBounds s C P α κ d (LocalizedWaveBounds.rawFamily a))
-    (hψ : LocalizedWaveBounds.LocalUnweighted s C 0 a.cutoff)
-    (n : ℕ) (i : I) {x : D} (hx : x ∈ s.domain) (hi : x ∈ C n i)
-    (hΦ : ContDiffAt ℝ ∞ (a.background.phase n) x)
-    (hR : a.background.radius n x ≠ 0) (hN : a.background.normal s d n x ≠ 0)
-    (g : AngularData (a.raw i) s d (fun n => a.cutoff n i) n)
-    (hDr : along (d.radialField n) (a.background.radius n) x = 1)
-    (hsolve : (a.raw i).principal s d n x = -a.source n x) :
-    (a.corrected s d i).harmonicResidual s d n x +
-        (fun j => a.source n x j * carrier (a.background.frequency n) (a.background.phase n) x) =
-      (fun j => (a.localGood s d n i x j + a.localGaussian d n i x j) *
-        carrier (a.background.frequency n) (a.background.phase n) x) :=
-  (rawJets_of_localInput h hψ n i hx hi hΦ hR hN).cancellation g hDr a.source hsolve
 
 theorem native_realizes_curl_at (n : ℕ) (i : I) (x : D)
     (h : RawJetsAt (a.raw i) s d (fun n => a.cutoff n i) n x)

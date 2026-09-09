@@ -27,9 +27,6 @@ theorem reconstructedTower_pointField (t : Icc (0 : ℝ) D.T) (x : LiftDomain P)
   rw [reconstructedTower,FieldTower.smul_pointField,FieldTower.multiply_pointField]
   rfl
 
-def graphPath (k : ℝ) : C(Icc (0 : ℝ) D.T,Lp Space 2 (volume : Measure Space)) :=
-  (reconstructedTower D P κ Z).canonicalGraphWordPath
-    (physicalPhase P k D.m₀) (physicalPhase_continuous P k D.m₀) 0 Fin.elim0
 
 
 

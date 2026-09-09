@@ -900,8 +900,6 @@ theorem scales_admissible (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
   weightedBundle_base_scales (modulated_smooth H v) (modulated_quotients_smooth H v hc)
     (scales_spec H v c hc upper B).2
 
-theorem scales_strictMono (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    StrictMono (scales H v c hc upper B) := (scales_spec H v c hc upper B).2.strictMono
 
 theorem scales_weighted (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
     ConstructedSlowBase.WeightedStressBound (scales H v c hc upper B) F.data.h (modulatedCoefficients H v)

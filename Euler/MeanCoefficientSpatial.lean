@@ -41,8 +41,6 @@ def fieldDirection (DA : Space →ᵇ (Space →L[ℝ] V)) (a : Space) : Space �
     (fun x => (DA x).le_opNorm a |>.trans
       (mul_le_mul_of_nonneg_right (DA.norm_coe_le_norm x) (norm_nonneg a)))
 
-@[simp] theorem fieldDirection_apply (DA : Space →ᵇ (Space →L[ℝ] V)) (a x : Space) :
-    fieldDirection DA a x = DA x a := rfl
 
 theorem fieldDirection_norm_le (DA : Space →ᵇ (Space →L[ℝ] V)) (a : Space) :
     ‖fieldDirection DA a‖ ≤ ‖DA‖ * ‖a‖ :=
@@ -61,8 +59,6 @@ def fieldDerivativeMap (DA : Space →ᵇ (Space →L[ℝ] V)) : Space →L[ℝ]
   cont := AddMonoidHomClass.continuous_of_bound (fieldDerivativeLinear DA) ‖DA‖
     (fieldDirection_norm_le DA)
 
-@[simp] theorem fieldDerivativeMap_apply (DA : Space →ᵇ (Space →L[ℝ] V)) (a x : Space) :
-    fieldDerivativeMap DA a x = DA x a := rfl
 
 theorem translated_taylor_bound (A : Space →ᵇ V) (DA : Space →ᵇ (Space →L[ℝ] V))
     (hA : ContDiff ℝ ∞ (A : Space → V))

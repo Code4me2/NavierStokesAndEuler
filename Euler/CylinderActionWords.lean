@@ -51,22 +51,5 @@ end Path
 
 
 
-/-- The actual Ctime-to-time-L² inclusion preserves all mixed word blocks
-with exactly the square-root time length factor. -/
-theorem pathLp_block_le {ι : Type*} [Fintype ι] (directions : ι → LiftTangent) (q : ℕ)
-    (T : ℝ) (hT : 0 ≤ T) (f : C(Icc (0 : ℝ) T,CylinderL2 P V))
-    (hf : ContDiff ℝ ∞ (fun a => pathTranslate P a f)) (n : ℕ) (a : LiftTangent) :
-    block directions q (fun b => timeLift T (translate P b).toContinuousLinearMap (pathLp T hT f)) n a ≤
-      Real.sqrt T*block directions q (fun b => pathTranslate P b f) n a := by
-  have he : (fun b => timeLift T (translate P b).toContinuousLinearMap (pathLp T hT f)) =
-      (pathLpOperator T hT) ∘ (fun b => pathTranslate P b f) := by
-    funext b
-    convert (pathLp_timeLift T hT (translate P b).toContinuousLinearMap f).symm using 1
-    rfl
-  rw [he]
-  exact (block_comp_clm_le directions q (pathLpOperator (E := CylinderL2 P V) T hT) _ hf n a).trans
-    (mul_le_mul_of_nonneg_right
-      (EulerMeanTimeContinuousTranslation.pathLpOperator_norm_sqrt T hT)
-      (block_nonneg directions q _ n a))
 
 end EulerLpCylinderTranslation

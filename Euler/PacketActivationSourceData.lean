@@ -14,41 +14,10 @@ open Set InnerProductSpace ContinuousLinearMap EulerSmoothLimit
 
 variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
 
-def Data.reframe (D : Data U) (m : Space) (hm : ‖m‖=1) : Data (referencePlane m) where
-  T := D.T
-  T_pos := D.T_pos
-  support := D.support
-  support_compact := D.support_compact
-  m₀ := m
-  m₀_unit := hm
-  R := LinearIsometryEquiv.refl ℝ (referencePlane m)
-  F := D.F
-  F₁ := D.F₁
-  FInv := D.FInv
-  M := D.M
-  inverse_left := D.inverse_left
-  inverse_right := D.inverse_right
-  frame_time := D.frame_time
-  strain_equation := D.strain_equation
-
-def HistoryData.reframe {D : Data U} (B : HistoryData D) (m : Space) (hm : ‖m‖=1) :
-    HistoryData (D.reframe m hm) where
-  H := B.H
-  jacobi := B.jacobi
-  potential := B.potential
-  potential_nonneg := B.potential_nonneg
-  potential_bound := B.potential_bound
-  small := B.small
-
-def Data.activation (D : Data U) (t₀ : Icc (0 : ℝ) D.T) (n : Space) (hn : n ≠ 0) :
-    Data (referencePlane (activationDirection (D.deformationEquiv t₀ 0) n)) :=
-  D.reframe (activationDirection (D.deformationEquiv t₀ 0) n)
-    (activationDirection_unit _ hn)
 
 
-def HistoryData.activation {D : Data U} (B : HistoryData D)
-    (t₀ : Icc (0 : ℝ) D.T) (n : Space) (hn : n ≠ 0) : HistoryData (D.activation t₀ n hn) :=
-  B.reframe (activationDirection (D.deformationEquiv t₀ 0) n) (activationDirection_unit _ hn)
+
+
 
 theorem Data.activationRayScale_bounds (D : Data U) (t₀ : Icc (0 : ℝ) D.T) (n : Space)
     (hn : ‖n‖=1) :

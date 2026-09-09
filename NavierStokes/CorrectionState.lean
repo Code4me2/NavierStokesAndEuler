@@ -189,12 +189,6 @@ def PressureBounds (s : StripData D) (P : ℕ → D → ℝ) (α : ℝ)
 
 end HarmonicBlock
 
-/-- A representation on a finite set of labels active in a fixed chart.
-Global local-finiteness is a separate property of the physical label assembly. -/
-def Represents {ι : Type} (labels : Finset ι) (blocks : ι → HarmonicBlock D)
-    (s : State D) : Prop :=
-  s.oscillation = ∑ l ∈ labels, (blocks l).oscillation ∧
-    s.oscillatoryPressure = ∑ l ∈ labels, (blocks l).oscillatoryPressure
 
 /-- The mean portion of the cumulative bounds after initialization. -/
 structure CumulativeBounds (s : StripData D) (u : State D) : Prop where
@@ -236,8 +230,6 @@ def DefectBounds (s : StripData S) (σ : ℝ) (c : Context (PressureStream.Lift 
     (u : State (PressureStream.Lift S)) : Prop :=
   ∀ i : Fin 3, UnweightedClass s (1 + σ) (fun n x => debt c u n x i)
 
-def ZeroMasses (u : State (PressureStream.Lift S)) : Prop :=
-  radialMoment 2 u.mean.angular = 0 ∧ radialMoment 1 u.mean.axial = 0
 
 end Moments
 

@@ -461,27 +461,6 @@ theorem correctedConstant_pos : 0 < correctedConstant := by
   unfold correctedConstant
   positivity
 
-theorem corrected_bounds {d : TailData} {K : ℝ}
-    (w : ResetWitness d K) {y eta : ℝ} (hy : 0 ≤ y) (heta : |eta| ≤ 1) :
-    |correctedPi w y eta| ≤ correctedConstant * (1 + editSize d K) *
-      correctedAngular d w.coefficients (y, eta) ^ 2 ∧
-    |deriv (correctedPi w y) eta| ≤ correctedConstant * (1 + editSize d K) *
-      correctedAngular d w.coefficients (y, eta) ^ 2 := by
-  have hsize := editSize_nonneg w
-  have hM := envelopeConstant_pos
-  have he := Real.exp_pos (5 : ℝ)
-  have hfirst : (9 / 2 : ℝ) * envelopeConstant ≤ correctedConstant * (1 + editSize d K) := by
-    unfold correctedConstant
-    nlinarith [mul_nonneg hM.le hsize, mul_nonneg he.le hsize]
-  have hderiv : 8 * envelopeConstant * |eta| + 48 * Real.exp 5 * editSize d K ≤
-      correctedConstant * (1 + editSize d K) := by
-    have hη := mul_le_mul_of_nonneg_left heta (show 0 ≤ 8 * envelopeConstant by positivity)
-    unfold correctedConstant
-    nlinarith [mul_nonneg hM.le hsize]
-  exact ⟨(correctedPi_abs_le w hy heta).trans
-      (mul_le_mul_of_nonneg_right hfirst (sq_nonneg _)),
-    (correctedPi_deriv_abs_le w hy heta).trans
-      (mul_le_mul_of_nonneg_right hderiv (sq_nonneg _))⟩
 
 theorem corrected_bounds_of_small {d : TailData} {K : ℝ}
     (w : ResetWitness d K) (hsmall : editSize d K ≤ 1) {y eta : ℝ}

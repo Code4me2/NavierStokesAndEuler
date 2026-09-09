@@ -26,10 +26,6 @@ variable (P : ℝ) [Fact (0 < P)] {U : Type*}
 def pointField (t : K) (x : LiftDomain P) : U :=
   L (EulerCylinderSmoothOrbit.pointField P (pathMap P J p) (pathMap_orbit_contDiff P J p hp) t x)
 
-theorem pointField_joint_continuous :
-    Continuous (fun z : K × LiftDomain P => pointField P J L p hp z.1 z.2) :=
-  L.continuous.comp (EulerCylinderSmoothOrbit.pointField_joint_continuous P
-    (pathMap P J p) (pathMap_orbit_contDiff P J p hp))
 
 theorem pointField_smooth (t : K) (x : LiftDomain P) :
     ContDiff ℝ ∞ (localFieldLift P (pointField P J L p hp t) x) :=

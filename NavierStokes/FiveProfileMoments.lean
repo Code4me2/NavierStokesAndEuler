@@ -722,13 +722,6 @@ theorem normalizedDebt_eq_sum (A G : ℝ) (d : Debt) :
   exact he.symm
 
 
-theorem correction_family_contDiffOn {n : ℕ} (P : Patch) {S : Set ℝ} {c : ℝ → Fin n → ℝ}
-    (hc : ContDiffOn ℝ ∞ c S) :
-    ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => correction P (c z.1) z.2) (S ×ˢ univ) := by
-  apply ContDiffOn.sum
-  intro j _
-  exact ((contDiffOn_pi.mp hc j).comp contDiffOn_fst (fun z hz => hz.1)).mul
-    ((bump_contDiff P j).comp contDiff_snd).contDiffOn
 
 
 

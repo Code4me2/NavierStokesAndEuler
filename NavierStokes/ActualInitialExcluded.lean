@@ -971,9 +971,6 @@ noncomputable abbrev gaussianStrip : StripData ActualPrimary.FullPoint :=
 
 
 
-noncomputable def gaussianField (l : SignedLabel B N0) :
-    ℕ → ActualPrimary.FullPoint → Fin 3 → ℝ :=
-  (ActualPrimary.piece ActualPrimary.standardRegion l.1 l.2).excluded
 
 
 theorem chartGaussian_cut_support (l : SignedLabel B N0) (n : ℕ) {x : ActualPrimary.FullPoint}

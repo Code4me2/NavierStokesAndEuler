@@ -39,17 +39,12 @@ theorem heat_argument {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 noncomputable def normalization (d : OutgoingTail.TailData) (K : ℝ) : ℝ :=
   HeatTailEdit.outgoingAmplitude d * K ^ HeatTailEdit.exponent d.h
 
-theorem normalization_pos (d : OutgoingTail.TailData) {K : ℝ} (hK : 0 < K) :
-    0 < normalization d K :=
-  mul_pos (HeatTailEdit.outgoingAmplitude_pos d) (Real.rpow_pos_of_pos hK _)
 
 noncomputable def editedAngular (d : OutgoingTail.TailData) (K : ℝ)
     (p : PhysicalPoint) : ℝ :=
   q d.h p ^ (-HeatTailEdit.exponent d.h) *
     ParametricHeatTail.physicalEdit d K (eta d.h p) (X d.h p)
 
-noncomputable def shape (d : OutgoingTail.TailData) (K y : ℝ) : ℝ :=
-  OutgoingTail.tailShape d (y - Real.log K + 1 / 5)
 
 
 theorem editedAngular_eq_pure_heat (d : OutgoingTail.TailData) {K : ℝ}

@@ -28,31 +28,10 @@ instance diskCompactSpace (c : ℂ) (r : ℝ) : CompactSpace (Disk c r) :=
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-noncomputable def inclusion (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ) : C(Disk c ρ, Disk c σ) where
-  toFun z := ⟨z.1, closedBall_subset_closedBall h z.2⟩
-  continuous_toFun := continuous_subtype_val.subtype_mk _
 
-def restrictionLinear (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ) :
-    C(Disk c σ, E) →ₗ[ℂ] C(Disk c ρ, E) where
-  toFun f := f.comp (inclusion c h)
-  map_add' f g := by ext z; rfl
-  map_smul' a f := by ext z; rfl
 
-theorem norm_restrictionLinear_le (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ)
-    (f : C(Disk c σ, E)) : ‖restrictionLinear c h f‖ ≤ ‖f‖ := by
-  apply (ContinuousMap.norm_le _ (norm_nonneg f)).2
-  intro z
-  exact f.norm_coe_le_norm _
 
-def restrictionCLM (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ) :
-    C(Disk c σ, E) →L[ℂ] C(Disk c ρ, E) :=
-  (restrictionLinear c h).mkContinuous 1 (by
-    intro f
-    simpa only [one_mul] using norm_restrictionLinear_le c h f)
 
-@[simp] theorem restrictionCLM_apply (c : ℂ) {ρ σ : ℝ} (h : ρ ≤ σ)
-    (f : C(Disk c σ, E)) (z : Disk c ρ) :
-    restrictionCLM c h f z = f ⟨z.1, closedBall_subset_closedBall h z.2⟩ := rfl
 
 
 theorem offset_ne_zero {δ : ℝ} (hδ : 0 < δ) (θ : ℝ) : circleMap 0 δ θ ≠ 0 := by
@@ -219,14 +198,7 @@ theorem derivativeCLM_apply_of_eq (c : ℂ) {ρ σ : ℝ} (hgap : ρ < σ)
   simpa only [zpow_neg, zpow_two, pow_two, one_div] using
     circle_kernel_identity (sub_pos.mpr hgap) z θ (F (circleMap z (σ - ρ) θ))
 
-noncomputable def ofContinuousOn (c : ℂ) (r : ℝ) (F : ℂ → E)
-    (hF : ContinuousOn F (closedBall c r)) : C(Disk c r, E) :=
-  ⟨fun z => F z, hF.domRestrict⟩
 
-omit [NormedSpace ℂ E] [CompleteSpace E] in
-@[simp] theorem ofContinuousOn_apply (c : ℂ) (r : ℝ) (F : ℂ → E)
-    (hF : ContinuousOn F (closedBall c r)) (z : Disk c r) :
-    ofContinuousOn c r F hF z = F z := rfl
 
 
 

@@ -68,32 +68,16 @@ instance {R : ℝ} {U : Set ℂ} : CoeFun (AxisFunction R U) (fun _ => Raw) := �
 theorem AxisFunction.smooth {R : ℝ} {U : Set ℂ} (F : AxisFunction R U) :
     ContDiffOn ℝ ∞ F (Ioo (-R) R ×ˢ U) := F.2.smooth
 
-theorem AxisFunction.holomorphic {R : ℝ} {U : Set ℂ} (F : AxisFunction R U)
-    {r : ℝ} (hr : r ∈ Ioo (-R) R) : DifferentiableOn ℂ (fun z => F (r, z)) U :=
-  F.2.holomorphic r hr
 
 theorem AxisFunction.even {R : ℝ} {U : Set ℂ} (F : AxisFunction R U)
     {r : ℝ} (hr : r ∈ Ioo (-R) R) {z : ℂ} (hz : z ∈ U) : F (-r, z) = F (r, z) :=
   F.2.even z hz r hr
 
-theorem AxisFunction.real {R : ℝ} {U : Set ℂ} (F : AxisFunction R U)
-    {r : ℝ} (hr : r ∈ Ioo (-R) R) {eta : ℝ} (heta : (eta : ℂ) ∈ U) :
-    (F (r, (eta : ℂ))).im = 0 := F.2.real r hr eta heta
 
 noncomputable def realConstant (R : ℝ) (U : Set ℂ) (c : ℝ) : AxisFunction R U :=
   algebraMap ℝ (AxisFunction R U) c
 
-@[simp] theorem realConstant_apply (R : ℝ) (U : Set ℂ) (c : ℝ) (p : ℝ × ℂ) :
-    realConstant R U c p = (c : ℂ) := rfl
 
-@[simp] theorem add_apply {R : ℝ} {U : Set ℂ} (F G : AxisFunction R U) (p : ℝ × ℂ) :
-    (F + G) p = F p + G p := rfl
-@[simp] theorem mul_apply {R : ℝ} {U : Set ℂ} (F G : AxisFunction R U) (p : ℝ × ℂ) :
-    (F * G) p = F p * G p := rfl
-@[simp] theorem sub_apply {R : ℝ} {U : Set ℂ} (F G : AxisFunction R U) (p : ℝ × ℂ) :
-    (F - G) p = F p - G p := rfl
-@[simp] theorem neg_apply {R : ℝ} {U : Set ℂ} (F : AxisFunction R U) (p : ℝ × ℂ) :
-    (-F) p = -F p := rfl
 @[simp] theorem zero_apply {R : ℝ} {U : Set ℂ} (p : ℝ × ℂ) :
     (0 : AxisFunction R U) p = 0 := rfl
 @[simp] theorem one_apply {R : ℝ} {U : Set ℂ} (p : ℝ × ℂ) :

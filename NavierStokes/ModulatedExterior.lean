@@ -293,13 +293,7 @@ theorem actual_squared_swirl_restored : RestoredSquaredSwirl W v.profiles (S := 
     ((ReservedPatches.left_lt_right F W.controls.radius W.controls.radius_pos .positive).le.trans
       (nominalOuterX_gt_patch W).le)
 
-theorem actual_realizes :
-    RealizesScheme (modifiedScheme W v.profiles v.finiteModification) v.finiteModification.contains
-      (ConstructedSlowBase.Modulated.coefficients v) := ⟨rfl, rfl, rfl⟩
 
-theorem actual_exterior_coefficients :
-    ExteriorCoefficients (ConstructedSlowBase.Modulated.coefficients v) (nominalExteriorRadius W) :=
-  realized_exterior_coefficients W v.profiles v.finiteModification (actual_realizes v) rfl rfl
 
 
 

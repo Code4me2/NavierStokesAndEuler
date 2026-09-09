@@ -25,39 +25,10 @@ theorem norm_sq_eq_integral (u : Lp E 2 μ) :
   rw [ENNReal.toReal_ofReal (Real.rpow_nonneg (integral_nonneg (fun _ => sq_nonneg _)) _)]
   rw [inv_eq_one_div, ← Real.sqrt_eq_rpow, Real.sq_sqrt (integral_nonneg (fun _ => sq_nonneg _))]
 
-theorem fiber_integral (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
-    (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) :
-    (fun x => ∫ y, ‖f (x,y)‖^2 ∂ν) =ᵐ[μ] fun x => ‖w x‖^2 := by
-  filter_upwards [hrep] with x hx
-  rw [norm_sq_eq_integral]
-  apply integral_congr_ae
-  filter_upwards [hx] with y hy
-  rw [hy]
 
 variable [SFinite ν]
 
-theorem field_memLp (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
-    (hf : AEStronglyMeasurable f (μ.prod ν))
-    (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) :
-    MemLp f 2 (μ.prod ν) := by
-  apply (memLp_two_iff_integrable_sq_norm hf).2
-  apply (integrable_prod_iff (hf.norm.pow 2)).2
-  constructor
-  · filter_upwards [hrep] with x hx
-    have hm : MemLp (fun y => f (x,y)) 2 ν := (memLp_congr_ae hx).1 (Lp.memLp (w x))
-    exact (memLp_two_iff_integrable_sq_norm hm.aestronglyMeasurable).1 hm
-  · have ho : Integrable (fun x => ‖w x‖^2) μ :=
-      (memLp_two_iff_integrable_sq_norm (Lp.aestronglyMeasurable w)).1 (Lp.memLp w)
-    apply ho.congr
-    filter_upwards [fiber_integral w f hrep] with x hx
-    change ‖w x‖^2 = ∫ y, ‖‖f (x,y)‖^2‖ ∂ν
-    simpa only [norm_pow, norm_norm] using hx.symm
 
-/-- The genuine product-space representative of the given nested L² element. -/
-def realization (w : Lp (Lp E 2 ν) 2 μ) (f : α × β → E)
-    (hf : AEStronglyMeasurable f (μ.prod ν))
-    (hrep : ∀ᵐ x ∂μ, (w x : β → E) =ᵐ[ν] fun y => f (x,y)) : Lp E 2 (μ.prod ν) :=
-  (field_memLp w f hf hrep).toLp f
 
 
 variable [SFinite μ]

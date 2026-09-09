@@ -53,13 +53,6 @@ theorem realAngularProduct_eq (a b : Coefficients D) (k : ℝ) (Φ : D → ℝ)
 
 
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem angularAverage_add {f g : OscillatoryScalar D}
-    (hf : ∀ n x, Continuous (fun θ : ℝ => f n (x, θ)))
-    (hg : ∀ n x, Continuous (fun θ : ℝ => g n (x, θ))) :
-    angularAverage (f + g) = angularAverage f + angularAverage g := by
-  funext n x
-  exact HarmonicResidual.realAngularMean_add (hf n x) (hg n x)
 
 
 

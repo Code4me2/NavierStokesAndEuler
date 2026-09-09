@@ -48,10 +48,6 @@ theorem contDiff_of_patch_zero {f : E → F} {U : Set E} (hU : IsOpen U)
   · exact hf.contDiffAt (hU.mem_nhds hx)
   · exact contDiffAt_const.congr_of_eventuallyEq (hz x hx)
 
-theorem contDiff_of_patch_tsupport {f : E → F} {U : Set E} (hU : IsOpen U)
-    (hf : ContDiffOn ℝ ∞ f U) (hs : tsupport f ⊆ U) : ContDiff ℝ ∞ f :=
-  contDiff_of_patch_zero hU hf (fun _ hx =>
-    notMem_tsupport_iff_eventuallyEq.mp (fun hxs => hx (hs hxs)))
 
 /-- Construct the replacement using a smooth bump inside the actual open
 patch.  Its values and all its derivatives agree with the raw input near `x`.
@@ -420,48 +416,8 @@ structure PatchData (f : CopyFamily H K) (a h r0 : ℝ) where
     PhysicalGraphBounds.scaledRadial I.1.val.1 y ∈ PolarCharts.chartDomain a chart →
     slotSlow ((f.carrier k I.1).withChart chart) a h I.1.val.1 r0 y ∈ slowCore k I.1
 
-/-- The constructed, already localized amplitude is globally smooth if its
-closed native support is contained in the local smooth patch.  This is a
-conclusion; raw phase profiles retain only local smoothness. -/
-theorem PatchData.amplitude_contDiff (hp : PatchData f a h r0) (k : K) (I : WaveIndex H) :
-    ContDiff ℝ ∞ (f.amplitude k I) := by
-  apply contDiff_of_patch_tsupport (hp.amplitudeOpen k I) (hp.amplitudeSmooth k I)
-  exact (closure_minimal (hp.amplitudeSupport k I) (hp.amplitudeClosed k I)).trans
-    (hp.amplitudeSubset k I)
 
-/-- Closed cores keep every supported phase evaluation inside the genuine
-smooth patch even at the boundary of the amplitude's support. -/
-theorem PatchData.smoothData (hp : PatchData f a h r0)
-    (hr : SupportData f a b h r0 Z Δ) (ha : 0 < a) : SmoothData f a h r0 := by
-  constructor
-  · intro k I w hw hts
-    have hgeo := hr.tsupport_geometry I k hts
-    have hx : commonLift h I.1.val.1 (f.gap I.1) w ∈ hp.amplitudeCore k I :=
-      closed_property_on_tsupport isOpen_univ (mem_univ w)
-        (commonLift_continuousAt_of_annulus ha _ _ hgeo.1) (hp.amplitudeClosed k I)
-        (fun y _ hy => hp.amplitudeSupport k I (globalWave_ne_zero_amp hy)) hts
-    exact SmoothNear.of_open (hp.amplitudeOpen k I) (hp.amplitudeSmooth k I)
-      (hp.amplitudeSubset k I hx)
-  · intro k I w hw hts chart hchart
-    have hgeo := hr.tsupport_geometry I k hts
-    have haxis := PhysicalGraphBounds.scaledRadial_ne_zero (PhysicalGraphBounds.annulus_axisFree ha hgeo.1)
-    let U : Set SpaceTime := preterminal ∩ (PhysicalGraphBounds.scaledRadial I.1.val.1) ⁻¹'
-      PolarCharts.chartDomain a chart
-    have hU : IsOpen U := preterminal_open.inter
-      ((PolarCharts.chartDomain_open a chart).preimage (PhysicalGraphBounds.scaledRadial I.1.val.1).continuous)
-    have hwU : w ∈ U := ⟨hw, hchart⟩
-    have hx : slotSlow ((f.carrier k I.1).withChart chart) a h I.1.val.1 r0 w ∈ hp.slowCore k I.1 :=
-      closed_property_on_tsupport hU hwU
-        (slotSlow_continuousAt ha ((f.carrier k I.1).withChart chart) h I.1.val.1 r0 haxis)
-        (hp.slowClosed k I.1)
-        (fun y hy hne => hp.slowSupport k I y hy.1 (globalWave_ne_zero_amp hne) chart hy.2) hts
-    exact ⟨SmoothNear.of_open (hp.slowOpen k I.1) (hp.FSmooth k I.1) (hp.slowSubset k I.1 hx),
-      SmoothNear.of_open (hp.slowOpen k I.1) (hp.GSmooth k I.1) (hp.slowSubset k I.1 hx)⟩
 
-theorem PatchData.sum_smooth (hp : PatchData f a h r0)
-    (hr : SupportData f a b h r0 Z Δ) (hc : SupportCells f) (ha : 0 < a)
-    (hh : 0 < h) (hh1 : h < 1 / 2) : ContDiffOn ℝ ∞ (f.sum a h r0) preterminal :=
-  hr.sum_smooth (hp.smoothData hr ha) hc ha hh hh1
 
 
 theorem SupportData.sum_locally_finite (hr : SupportData f a b h r0 Z Δ)

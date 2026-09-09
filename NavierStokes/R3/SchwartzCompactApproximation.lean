@@ -177,8 +177,6 @@ theorem seminorm_truncate_sub_le (ψ : SchwartzMap Space ℂ) {R : ℝ}
 def approximate (ψ : SchwartzMap Space ℂ) (n : ℕ) : SchwartzMap Space ℂ :=
   truncate ψ ((n : ℝ) + 1) (by positivity)
 
-@[simp] theorem approximate_apply (ψ : SchwartzMap Space ℂ) (n : ℕ) (x : Space) :
-    approximate ψ n x = cutoff ((n : ℝ) + 1) x • ψ x := rfl
 
 theorem approximate_hasCompactSupport (ψ : SchwartzMap Space ℂ) (n : ℕ) :
     HasCompactSupport (approximate ψ n : Space → ℂ) :=

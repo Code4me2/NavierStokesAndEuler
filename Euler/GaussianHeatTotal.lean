@@ -43,8 +43,6 @@ def heatListOperator (directions : List LiftTangent) (v : ℝ≥0) : LiftL2 peri
       map_smul' := heatList_smul period directions v }
     1 (fun f => by simpa using heatList_norm_le period directions v f)
 
-@[simp] theorem heatListOperator_apply (directions : List LiftTangent) (v : ℝ≥0) (f : LiftL2 period) :
-    heatListOperator period directions v f = heatList period directions v f := rfl
 
 theorem heatList_translation (directions : List LiftTangent) (v : ℝ≥0) (b : LiftDomain period) (f : LiftL2 period) :
     translation period b (heatList period directions v f) = heatList period directions v (translation period b f) := by

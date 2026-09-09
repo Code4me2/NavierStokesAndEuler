@@ -37,16 +37,7 @@ theorem class_congr {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
   rw [← hjet]
   exact hb n x hx j hj
 
-theorem class_neg {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
-    {f : ℕ → D → E} (hf : MemClass s w α f) :
-    MemClass s w α (fun n x => -f n x) := by
-  simpa only [_root_.neg_apply, ContinuousLinearMap.id_apply] using
-    hf.map (-(ContinuousLinearMap.id ℝ E))
 
-theorem class_sub {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
-    {f g : ℕ → D → E} (hf : MemClass s w α f) (hg : MemClass s w α g) :
-    MemClass s w α (fun n x => f n x - g n x) := by
-  simpa only [sub_eq_add_neg] using hf.add (class_neg hg)
 
 
 theorem class_conj {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
@@ -64,14 +55,6 @@ theorem class_const_cmul {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
 
 
 
-/-- Evaluation of the actual derivative field at an actual vector field. -/
-theorem class_along {s : StripData D} {w : ℕ → D → ℝ} {α β : ℝ}
-    {f : ℕ → D → E} {V : ℕ → D → D}
-    (hf : MemClass s w α f) (hV : UnweightedClass s β V) :
-    MemClass s w (α + β) (fun n => along (V n) (f n)) := by
-  have h := hV.bilinear hf.fderiv (ContinuousLinearMap.apply ℝ E)
-  simp only [one_mul, add_comm β α, ContinuousLinearMap.apply_apply] at h
-  exact h
 
 
 /-- Actual geometric coefficient fields, rather than assumed derivative closure. -/
@@ -222,15 +205,6 @@ theorem transport_realLift (R : D → ℝ) (Vr Vθ Vz : D → D)
 
 
 
-theorem divergence_congr {U : Set D} (hU : IsOpen U)
-    (R : D → ℝ) (Vr Vθ Vz : D → D) {a b : D → ComplexVector}
-    (hab : EqOn a b U) {x : D} (hx : x ∈ U) :
-    cylindricalDivergence R Vr Vθ Vz a x = cylindricalDivergence R Vr Vθ Vz b x := by
-  have hi (i : Fin 3) : EqOn (fun y => a y i) (fun y => b y i) U :=
-    fun y hy => congrFun (hab hy) i
-  unfold cylindricalDivergence
-  rw [along_congr hU (hi 0) hx, along_congr hU (hi 1) hx,
-    along_congr hU (hi 2) hx, hab hx]
 
 
 

@@ -365,11 +365,6 @@ end LinearData
 
 namespace Geometry
 
-theorem nativeArgument_contDiff (g : Geometry) (k : Frequency) :
-    ContDiff ℝ ∞ (fun w : (P × Plane) × ℝ =>
-      (w.1.1, ((g.coordinates k w.1.2).1, w.2))) :=
-  contDiff_fst.fst.prodMk
-    (((g.coordinates_contDiff k).comp contDiff_fst.snd).fst.prodMk contDiff_snd)
 
 theorem pathArgument_contDiff (g : Geometry) (k : Frequency) :
     ContDiff ℝ ∞ (fun w : (P × Plane) × ℝ => (w.1.1, g.path k w.1.2 w.2)) := by
@@ -384,81 +379,14 @@ namespace LinearData
 
 variable (d : LinearData P V E) (g : Geometry) {U : Set P}
 
-theorem coefficientAlong_continuousOn (k : Frequency)
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ)) :
-    ContinuousOn (d.coefficientAlong g k) ((U ×ˢ univ) ×ˢ univ) :=
-  hA.comp (g.nativeArgument_contDiff k).continuous.continuousOn
-    (fun _ hw => ⟨hw.1.1, mem_univ _⟩)
 
-theorem forcingAlong_continuousOn (k : Frequency)
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ)) :
-    ContinuousOn (d.forcingAlong g k) ((U ×ˢ univ) ×ˢ univ) :=
-  (hB.comp (g.nativeArgument_contDiff k).continuous.continuousOn
-    (fun _ hw => ⟨hw.1.1, mem_univ _⟩)).clm_apply
-    (hf.comp (g.pathArgument_contDiff k).continuous.continuousOn
-      (fun _ hw => ⟨hw.1.1, mem_univ _⟩))
 
-theorem coefficientAlong_contDiffOn (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (d.coefficientAlong g k) ((U ×ˢ univ) ×ˢ univ) :=
-  hA.comp (g.nativeArgument_contDiff k).contDiffOn
-    (fun _ hw => ⟨hw.1.1, mem_univ _⟩)
 
-theorem forcingAlong_contDiffOn (k : Frequency)
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (d.forcingAlong g k) ((U ×ˢ univ) ×ˢ univ) :=
-  (hB.comp (g.nativeArgument_contDiff k).contDiffOn
-    (fun _ hw => ⟨hw.1.1, mem_univ _⟩)).clm_apply
-    (hf.comp (g.pathArgument_contDiff k).contDiffOn
-      (fun _ hw => ⟨hw.1.1, mem_univ _⟩))
 
 variable [CompleteSpace E] {a b : ℝ} (hab : a ≤ b)
 
-/-- The constructed extension satisfies the original forced equation on the
-copy path, including both endpoints as a differentiable extension. -/
-theorem anchoredSolve_hasDerivAt (k : Frequency)
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    {p : P} (hp : p ∈ U) (Y : Plane) (s : Icc a b) :
-    HasDerivAt (d.anchoredSolve g hab k (p, Y))
-      (d.coefficientAlong g k ((p, Y), s) (d.anchoredSolve g hab k (p, Y) s) +
-        d.forcingAlong g k ((p, Y), s)) s := by
-  have hAc : Continuous (fun t : Icc a b => d.coefficientAlong g k ((p, Y), t)) :=
-    SmoothPathFamily.slice_continuous
-      ((d.coefficientAlong_continuousOn g k hA).mono
-        (Set.prod_mono Subset.rfl (subset_univ _))) ⟨hp, mem_univ _⟩
-  have hfc : Continuous (fun t : Icc a b => d.forcingAlong g k ((p, Y), t)) :=
-    SmoothPathFamily.slice_continuous
-      ((d.forcingAlong_continuousOn g k hB hf).mono
-        (Set.prod_mono Subset.rfl (subset_univ _))) ⟨hp, mem_univ _⟩
-  have hd := ParametricODE.solutionExtension_hasDerivAt hab
-    (d.coefficientPath g k (p, Y)) 0 (d.forcingPath g k (p, Y)) s
-  unfold anchoredSolve
-  simpa only [coefficientPath, forcingPath,
-    SmoothPathFamily.pathFamily_apply _ _ hAc, SmoothPathFamily.pathFamily_apply _ _ hfc]
-    using hd
 
 
-theorem anchoredSolve_unique (k : Frequency)
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    {p : P} (hp : p ∈ U) (Y : Plane) {u : ℝ → E} (hu0 : u a = 0)
-    (hu : ∀ s ∈ Icc a b, HasDerivAt u
-      (d.coefficientAlong g k ((p, Y), s) (u s) + d.forcingAlong g k ((p, Y), s)) s) :
-    EqOn u (d.anchoredSolve g hab k (p, Y)) (Icc a b) := by
-  apply TangentODE.linear_solution_unique hab
-    (fun s => d.coefficientAlong g k ((p, Y), s))
-    (fun s => d.forcingAlong g k ((p, Y), s))
-    ((d.coefficientAlong_continuousOn g k hA).comp
-      (continuous_const.prodMk continuous_id).continuousOn
-      (fun s _ => ⟨⟨hp, mem_univ _⟩, mem_univ s⟩)) hu
-    (fun s hs => d.anchoredSolve_hasDerivAt g hab k hA hB hf hp Y ⟨s, hs⟩)
-  rw [d.anchoredSolve_initial]
-  exact hu0
 
 end LinearData
 
@@ -537,32 +465,7 @@ variable {P V E : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 /-! Joint regularity is derived from the actual ODE construction. -/
 
-theorem anchoredSolve_contDiffOn {U : Set P} (hU : IsOpen U) (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ)) :
-    ContDiffOn ℝ ∞ (fun z : (P × Plane) × ℝ => d.anchoredSolve g hab k z.1 z.2)
-      ((U ×ˢ univ) ×ˢ Ioo a b) := by
-  exact JointODE.contDiffOn_solutionExtension_joint_interior hab (U ×ˢ univ) univ
-    (hU.prod isOpen_univ) isOpen_univ (subset_univ _)
-    (d.coefficientAlong g k) (fun _ => 0) (d.forcingAlong g k)
-    (d.coefficientAlong_contDiffOn g k hA) contDiffOn_const
-    (d.forcingAlong_contDiffOn g k hB hf)
 
-theorem copySolve_contDiffAt {U : Set P} (hU : IsOpen U) (k : Frequency)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ))
-    {p : P × Plane} (hp : p.1 ∈ U) (heta : (g.coordinates k p.2).2 ∈ Ioo a b) :
-    ContDiffAt ℝ ∞ (d.copySolve g hab k) p := by
-  have hz : (p, (g.coordinates k p.2).2) ∈ ((U ×ˢ (univ : Set Plane)) ×ˢ Ioo a b) :=
-    ⟨⟨hp, mem_univ _⟩, heta⟩
-  have hs := (d.anchoredSolve_contDiffOn g hab hU k hA hB hf).contDiffAt
-    (((hU.prod isOpen_univ).prod isOpen_Ioo).mem_nhds hz)
-  have hc : ContDiff ℝ ∞ (fun q : P × Plane => (q, (g.coordinates k q.2).2)) :=
-    contDiff_id.prodMk (((g.coordinates_contDiff k).comp contDiff_snd).snd)
-  have hcomp := hs.comp p hc.contDiffAt
-  exact hcomp
 
 
 
@@ -609,7 +512,6 @@ noncomputable def coordinateLinear : Plane →L[ℝ] Plane :=
 noncomputable def pointLinear : Plane →L[ℝ] Plane :=
   ((coverPower g.gap).symm : Plane →L[ℝ] Plane).comp (g.basis : Plane →L[ℝ] Plane)
 
-noncomputable def horizontal : Plane →L[ℝ] Plane := (ContinuousLinearMap.fst ℝ ℝ ℝ).prod 0
 
 
 theorem coordinates_eq_affine (k : Frequency) (Y : Plane) :
@@ -637,25 +539,6 @@ theorem norm_pointLinear_le {D : ℕ} (hd : g.gap ≤ D) :
 
 end Geometry
 
-/-- All actual derivative orders of an affine pullback have the expected
-operator-norm cost. No independent jet family is supplied. -/
-theorem norm_iteratedFDeriv_affine_le {X Y W : Type}
-    [NormedAddCommGroup X] [NormedSpace ℝ X]
-    [NormedAddCommGroup Y] [NormedSpace ℝ Y]
-    [NormedAddCommGroup W] [NormedSpace ℝ W]
-    {f : Y → W} (hf : ContDiff ℝ ∞ f) (L : X →L[ℝ] Y) (c : Y) (x : X) (n : ℕ) :
-    ‖iteratedFDeriv ℝ n (fun z => f (c + L z)) x‖ ≤
-      ‖iteratedFDeriv ℝ n f (c + L x)‖ * ‖L‖ ^ n := by
-  have hh : ContDiff ℝ ∞ (fun z => f (c + z)) :=
-    hf.comp (contDiff_const.add contDiff_id)
-  have hd := L.iteratedFDeriv_comp_right hh x (i := n)
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl n)
-  change ‖iteratedFDeriv ℝ n ((fun z => f (c + z)) ∘ L) x‖ ≤ _
-  rw [hd]
-  simpa only [iteratedFDeriv_comp_add_left, Finset.prod_const, Finset.card_univ,
-    Fintype.card_fin] using
-      (iteratedFDeriv ℝ n (fun z => f (c + z)) (L x)).norm_compContinuousLinearMap_le
-        (fun _ : Fin n => L)
 
 
 

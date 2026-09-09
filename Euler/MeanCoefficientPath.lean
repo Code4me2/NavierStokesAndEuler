@@ -32,9 +32,6 @@ def pathDirection (DA : C(K, Space →ᵇ (Space →L[ℝ] V))) (a : Space) : C(
   ⟨fun t => fieldDerivativeMap (DA t) a,
     ((derivativeBundling (V := V)).continuous.comp DA.continuous).clm_apply continuous_const⟩
 
-omit [CompactSpace K] in
-@[simp] theorem pathDirection_apply (DA : C(K, Space →ᵇ (Space →L[ℝ] V)))
-    (a : Space) (t : K) (x : Space) : pathDirection DA a t x = DA t x a := rfl
 
 theorem pathDirection_norm_le (DA : C(K, Space →ᵇ (Space →L[ℝ] V))) (a : Space) :
     ‖pathDirection DA a‖ ≤ ‖DA‖ * ‖a‖ := by
@@ -55,8 +52,6 @@ def pathDerivativeMap (DA : C(K, Space →ᵇ (Space →L[ℝ] V))) :
   cont := AddMonoidHomClass.continuous_of_bound (pathDerivativeLinear DA) ‖DA‖
     (pathDirection_norm_le DA)
 
-@[simp] theorem pathDerivativeMap_apply (DA : C(K, Space →ᵇ (Space →L[ℝ] V)))
-    (a : Space) (t : K) (x : Space) : pathDerivativeMap DA a t x = DA t x a := rfl
 
 theorem pathDerivativeMap_norm_le (DA : C(K, Space →ᵇ (Space →L[ℝ] V))) :
     ‖pathDerivativeMap DA‖ ≤ ‖DA‖ :=

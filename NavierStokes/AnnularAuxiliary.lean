@@ -40,10 +40,6 @@ theorem positiveMap_pos {a : ℝ} (ha : 0 < a) (X : ℝ) : 0 < positiveMap a X :
       dsimp [positiveMap]
       nlinarith
 
-noncomputable def auxiliary {S : Set ℝ}
-    (w : ParametricRadialExtension.ParameterWindow S) (a : ℝ)
-    (F : ℝ × ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
-  F (positiveMap a p.1, w.parameterMap p.2)
 
 
 

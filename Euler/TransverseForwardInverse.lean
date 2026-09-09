@@ -53,10 +53,6 @@ def coordinateDerivative (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) : C(Icc (0 : ℝ)
 def velocity (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) : C(Icc (0 : ℝ) T,E) :=
   multiplier Q (coordinates T hT Q Q₁ c hc hQ U f a₀)
 
-/-- The physical time derivative, with the literal product-rule expression. -/
-def velocityDerivative (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) : C(Icc (0 : ℝ) T,E) :=
-  multiplier Q₁ (coordinates T hT Q Q₁ c hc hQ U f a₀) +
-    multiplier Q (coordinateDerivative T hT Q Q₁ c hc hQ U f a₀)
 
 /-- The constructed coordinate attains the prescribed initial datum. -/
 @[simp] theorem coordinates_initial (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) :
@@ -80,53 +76,13 @@ theorem coordinates_hasDerivWithinAt (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : 
   simp only [extendPath, projIcc_of_mem hT hs]
   rfl
 
-/-- The constructed derivative satisfies the literal projected equation (12). -/
-theorem coordinate_equation (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) :
-    gram (Q t) (coordinateDerivative T hT Q Q₁ c hc hQ U f a₀ t) =
-      (Q t).adjoint (f t - (2 : ℝ) • Q₁ t (coordinates T hT Q Q₁ c hc hQ U f a₀ t)) := by
-  change gram (Q t) ((-2 : ℝ) • gramInverse (Q t) c hc (hQ t)
-      ((Q t).adjoint (Q₁ t (coordinates T hT Q Q₁ c hc hQ U f a₀ t))) +
-      gramInverse (Q t) c hc (hQ t) ((Q t).adjoint (f t))) = _
-  rw [map_add, map_smul, gram_inverse_apply, gram_inverse_apply, map_sub, map_smul]
-  module
 
 
-/-- The physical product-rule expression is its actual every-time derivative. -/
-theorem velocity_hasDerivWithinAt
-    (hQd : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT Q) (Q₁ t) (Icc (0 : ℝ) T) t)
-    (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (velocity T hT Q Q₁ c hc hQ U f a₀))
-      (velocityDerivative T hT Q Q₁ c hc hQ U f a₀ t) (Icc (0 : ℝ) T) t := by
-  have hd := (hQd t).clm_apply (coordinates_hasDerivWithinAt T hT Q Q₁ c hc hQ U f a₀ t)
-  convert hd using 1
-  · rfl
-  · simp only [extendPath, projIcc_of_mem hT t.property]
-    rfl
-
-/-- The literal normal pressure coefficient in source equation (11). -/
-def pressureCoefficient (M : Icc (0 : ℝ) T → E →L[ℝ] E) (m : Icc (0 : ℝ) T → E)
-    (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) (t : Icc (0 : ℝ) T) : ℝ :=
-  (⟪m t,f t⟫_ℝ - 2*⟪m t,M t (velocity T hT Q Q₁ c hc hQ U f a₀ t)⟫_ℝ) / ‖m t‖^2
 
 
-/-- The full coordinate solution depends bounded-linearly on initial datum and forcing. -/
-def coordinatesOperator : (V × C(Icc (0 : ℝ) T,E)) →L[ℝ] C(Icc (0 : ℝ) T,V) :=
-  U.initialOperator.comp (ContinuousLinearMap.fst ℝ V C(Icc (0 : ℝ) T,E)) +
-    U.forcingOperator.comp ((forcingOperator T Q c hc hQ).comp
-      (ContinuousLinearMap.snd ℝ V C(Icc (0 : ℝ) T,E)))
-
-/-- The bounded linear data map is exactly the constructed coordinate path. -/
-theorem coordinatesOperator_apply (f : C(Icc (0 : ℝ) T,E)) (a₀ : V) :
-    coordinatesOperator T hT Q Q₁ c hc hQ U (a₀,f) = coordinates T hT Q Q₁ c hc hQ U f a₀ :=
-  (U.solution_eq_operators _ _).symm
 
 
-/-- Zero data give the zero path; this is the pointwise support-preservation mechanism. -/
-theorem velocity_zero : velocity T hT Q Q₁ c hc hQ U 0 0 = 0 := by
-  have hz := (coordinatesOperator T hT Q Q₁ c hc hQ U).map_zero
-  rw [show (0 : V × C(Icc (0 : ℝ) T,E)) = (0,0) from rfl, coordinatesOperator_apply] at hz
-  change multiplier Q (coordinates T hT Q Q₁ c hc hQ U 0 0) = 0
-  rw [hz, map_zero]
+
+
 
 end EulerTransverseForwardInverse

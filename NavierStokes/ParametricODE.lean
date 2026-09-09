@@ -106,9 +106,6 @@ def coefficientAction : Coefficient a b E →L[ℝ] Curve a b E →L[ℝ] Curve 
       change ‖applyCoefficient A u‖ ≤ 1 * ‖A‖ * ‖u‖
       simpa only [one_mul] using norm_applyCoefficient_le (E := E) A u)
 
-omit [CompleteSpace E] in
-theorem coefficientAction_apply (A : Coefficient a b E) (u : Curve a b E) (t : Icc a b) :
-    coefficientAction (E := E) A u t = A t (u t) := rfl
 
 def volterra : Coefficient a b E →L[ℝ] Curve a b E →L[ℝ] Curve a b E :=
   ((ContinuousLinearMap.compL ℝ (Curve a b E) (Curve a b E) (Curve a b E))

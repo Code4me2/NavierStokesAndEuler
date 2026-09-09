@@ -64,10 +64,7 @@ theorem sourcePolynomial_eval (X : ℝ) : sourcePolynomial.eval X=sourceEnvelope
   simp only [sourcePolynomial,sourceEnvelope,Polynomial.eval_comp,
     sourceRadiusPolynomial_eval,inputPolynomial_eval]
 
-def sourceConstant : ℝ := coefficientCost sourcePolynomial
-def sourcePower : ℕ := sourcePolynomial.natDegree
 
-theorem sourceConstant_pos : 0 < sourceConstant := coefficientCost_pos _
 
 
 def parameterSize (K Ti TiTotal Cp B δ N : ℝ) : ℝ := 1+K+Ti+TiTotal+Cp+B+δ⁻¹+N
@@ -83,7 +80,6 @@ theorem parameterSize_bounds (K Ti TiTotal Cp B δ N : ℝ)
   unfold parameterSize
   exact ⟨by linarith,by linarith,by linarith,by linarith,by linarith,by linarith,by linarith,by linarith⟩
 
-def fullEnvelope (X : ℝ) : ℝ := radiusEnvelope (sourceEnvelope X)
 
 
 

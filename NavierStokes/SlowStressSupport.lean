@@ -792,27 +792,7 @@ theorem interior_quotient_smooth {S : Set ℝ} (hS : IsOpen S) {f : Field} (hf :
 
 
 
-theorem smooth_angularDensity {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
-    {v u e : History} (hv : ∀ j, j ≤ n → Smooth S (v j))
-    (hu : ∀ j, j ≤ n → Smooth S (u j)) (he : ∀ j, j ≤ n → Smooth S (e j))
-    (h : ℝ) (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0) :
-    Smooth S (angularDensity h n v u e) :=
-  (((((contDiffOn_fst.pow 2).mul (smooth_timeOp hS (he n le_rfl) h _ hell)).add
-    (smooth_dr hS (smooth_weighted (smooth_conv hv he) 1))).add
-      ((contDiffOn_fst.pow 2).mul (smooth_axialOp hS (smooth_conv hu he) h _ hell))).sub
-        (smooth_dr hS (smooth_angularViscousFlux hS (he n le_rfl)))).sub
-          ((contDiffOn_fst.pow 2).mul (smooth_axialOp2 hS (he (n - 1) (Nat.sub_le _ _)) h _ hell))
 
-theorem smooth_axialDensity {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
-    {v u : History} {p : Field} (hv : ∀ j, j ≤ n → Smooth S (v j))
-    (hu : ∀ j, j ≤ n → Smooth S (u j)) (hp : Smooth S p)
-    (h : ℝ) (hell : ∀ eta ∈ S, PositiveAxisSystem.ell h eta ≠ 0) :
-    Smooth S (axialDensity h n v u p) :=
-  ((((contDiffOn_fst.mul (smooth_timeOp hS (hu n le_rfl) h _ hell)).add
-    (smooth_dr hS (smooth_conv hv hu))).add
-      (contDiffOn_fst.mul (smooth_axialOp hS ((smooth_conv hu hu).add hp) h _ hell))).sub
-        (smooth_dr hS (smooth_axialViscousFlux hS (hu n le_rfl)))).sub
-          (contDiffOn_fst.mul (smooth_axialOp2 hS (hu (n - 1) (Nat.sub_le _ _)) h _ hell))
 
 theorem exterior_weighted {S : Set ℝ} {B : ℝ} {f : Field} (hf : exterior B S f) (m : ℕ) :
     exterior B S (weighted m f) := by
@@ -869,11 +849,7 @@ theorem exterior_axialDensity {S : Set ℝ} (hS : IsOpen S) {n : ℕ}
   simp [axialDensity, exterior_timeOp hS (hu n le_rfl) (hU n le_rfl) h (orderExponent h n) eta heta R hR,
     hr eta heta R hR, hz eta heta R hR, hk eta heta R hR, hprev eta heta R hR]
 
-noncomputable def angularStress (h : ℝ) (n : ℕ) (v u e : History) : Field :=
-  stress 2 (angularDensity h n v u e)
 
-noncomputable def axialStress (h : ℝ) (n : ℕ) (v u : History) (p : Field) : Field :=
-  stress 1 (axialDensity h n v u p)
 
 
 

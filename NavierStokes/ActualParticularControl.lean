@@ -142,8 +142,6 @@ noncomputable def frameArgument (χ : P →L[ℝ] PhaseCalculus.Slow) :
     (ContinuousLinearMap.fst ℝ (P × Plane) ℝ))).prod
     (ContinuousLinearMap.snd ℝ (P × Plane) ℝ)
 
-@[simp] theorem frameArgument_apply (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (z : (P × Plane) × ℝ) : frameArgument χ z = (χ z.1.1,z.2) := rfl
 
 @[simp] theorem copyFrame_coefficient (d : PrimaryODE.FrameData PhaseCalculus.Slow)
     (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Geometry) (k : Frequency) (j : ℤ)
@@ -157,11 +155,6 @@ noncomputable def frameArgument (χ : P →L[ℝ] PhaseCalculus.Slow) :
     synthesisColumn (PrimaryCopyBridge.copyFrame (nativeFrame d χ) g k) i z =
       synthesisColumn d i (frameArgument χ z) := rfl
 
-@[simp] theorem copyFrame_forcingLinear (d : PrimaryODE.FrameData PhaseCalculus.Slow)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Geometry) (k : Frequency)
-    (z : (P × Plane) × ℝ) :
-    frameForcingLinear (PrimaryCopyBridge.copyFrame (nativeFrame d χ) g k) z =
-      frameForcingLinear d (frameArgument χ z) := rfl
 
 noncomputable def frameDomain {ι : Type*}
     (U : PhaseJetBounds.Domain ι (PhaseCalculus.Slow × ℝ))
@@ -440,23 +433,6 @@ noncomputable def forgetAngle : ((P × ℝ) × Plane) →L[ℝ] (P × Plane) :=
   ((ContinuousLinearMap.fst ℝ P ℝ).comp (ContinuousLinearMap.fst ℝ (P × ℝ) Plane)).prod
     (ContinuousLinearMap.snd ℝ (P × ℝ) Plane)
 
-/-- The additional angular variable is genuinely absent from the current
-source.  Its introduction preserves the same moving strip weight. -/
-theorem sourceFamily_uniform
-    (s : StripData P) (g : Label → ℕ → Geometry) (r L : Label → ℕ → ℝ)
-    (W : Label → ℕ → ℝ → ℝ) (α : ℝ)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : Label → CorrectionState.HarmonicBlock (P × Plane))
-    (G A : Label → HarmonicResidual.BlockCoefficients (P × Plane)) (j : Label → ℤ)
-    (h : ∀ i : Fin 3, UniformWaveClass (CommonCoverClass.sourceStrip s)
-      (groupedEnvelope g r L W) α (fun l n x =>
-        (HarmonicResidual.residualBlock c u (b l) (G l) (A l)).velocity n i (j l) x)) :
-    UniformWaveClass (CommonCoverClass.sourceStrip (angleStrip s))
-      (groupedEnvelope g r L W) α (fun l =>
-        ParticularWaveAssembly.sourceFamily c u (b l) (G l) (A l) (j l)) := by
-  exact uniform_parameter_pull
-    (residualSource_uniform (CommonCoverClass.sourceStrip s) (groupedEnvelope g r L W) α c u b G A j h)
-    (forgetAngle (P := P))
 
 end CurrentResidual
 
@@ -483,17 +459,7 @@ private theorem frame_smooth_mono {Q : Type} [NormedAddCommGroup Q] [NormedSpace
     h.eigenvalue.mono hVU, h.eigenvector.mono hVU, h.eigenRate.mono hVU,
     h.viscosity.mono hVU, fun x hx => h.eigenvector_ne_zero x (hVU hx)⟩
 
-noncomputable def phaseNeighborhood (s : StripData P) (F : PhaseConstruction D)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry)
-    (l : Label) (n : ℕ) (k : Frequency) : Set (P × Plane) :=
-  {x | x.1 ∈ s.domain ∧ χ x.1 ∈ D.carrier (l,n) ∧
-    ((g l n).coordinates k x.2).2 ∈ Ioo 0 (F.L (l,n))}
 
-noncomputable def phasePatch (s : StripData P) (F : PhaseConstruction D)
-    (χ : P →L[ℝ] PhaseCalculus.Slow) (g : Label → ℕ → Geometry)
-    (r : Label → ℕ → ℝ) (l : Label) (n : ℕ) (k : Frequency) : Set (P × Plane) :=
-  phaseNeighborhood s F χ g l n k ∩
-    {x | ((g l n).coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n)}
 
 
 

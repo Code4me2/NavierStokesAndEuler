@@ -99,32 +99,7 @@ theorem nonconstant (ha : CoefficientsTranslation U v a) :
   rw [nonconstant_eq_sub]
   exact ha.sub (constant (ha 0))
 
-omit [NormedSpace ℝ D] in
-theorem sum {ι : Type} (s : Finset ι) (f : ι → HarmonicFields.Coefficients D)
-    (hf : ∀ i ∈ s, CoefficientsTranslation U v (f i)) :
-    CoefficientsTranslation U v (∑ i ∈ s, f i) := by
-  classical
-  revert hf
-  induction s using Finset.induction_on with
-  | empty =>
-      intro _
-      simpa only [Finset.sum_empty] using
-        (zero : CoefficientsTranslation U v (0 : HarmonicFields.Coefficients D))
-  | @insert i s hi ih =>
-      intro hf
-      rw [Finset.sum_insert hi]
-      exact (hf i (Finset.mem_insert_self _ _)).add
-        (ih (fun j hj => hf j (Finset.mem_insert_of_mem hj)))
 
-omit [NormedSpace ℝ D] in
-theorem field (ha : CoefficientsTranslation U v a) {Φ : D → ℝ}
-    (hΦ : TranslationOn U v Φ) (k : ℝ) (kp : ℤ) (θ : ℝ) :
-    TranslationOn U v (fun x => HarmonicFields.field a k Φ kp (x, θ)) := by
-  intro x hx
-  simp only [HarmonicFields.field_expansion]
-  apply Finset.sum_congr rfl
-  intro j _
-  rw [ha j x hx, hΦ x hx]
 
 end CoefficientsTranslation
 

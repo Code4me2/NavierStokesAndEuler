@@ -57,22 +57,6 @@ def intoLarger (a : Space) (S Ω : Set Space) (hS : MeasurableSet S) (hΩ : Meas
 def translatedField (A : Field (α := Space) (V := V)) (a : Space) : Field (α := Space) (V := V) :=
   EulerMeanCoefficients.translated A a
 
-/-- Actual coefficient multiplication intertwines the support-changing translation. -/
-theorem operator_intertwines (a : Space) (S Ω : Set Space) (hS : MeasurableSet S) (hΩ : MeasurableSet Ω)
-    (hsub : shiftedSet a S ⊆ Ω) (A : Field (α := Space) (V := V))
-    (u : supportedSpace (V := V) volume S hS) :
-    operator volume Ω hΩ (translatedField A a) (intoLarger a S Ω hS hΩ hsub u) =
-      intoLarger a S Ω hS hΩ hsub (operator volume S hS A u) := by
-  apply Subtype.ext
-  apply Lp.ext
-  filter_upwards [full_ae volume (translatedField A a) (translation a (u : L2Space V)),
-    translation_ae a (u : L2Space V), translation_ae a (full volume A (u : L2Space V)),
-    (measurePreserving_add_right (volume : Measure Space) a).quasiMeasurePreserving.ae
-      (full_ae volume A (u : L2Space V))] with x hl hu hr ha
-  change (full volume (translatedField A a) (translation a (u : L2Space V))) x =
-    (translation a (full volume A (u : L2Space V))) x
-  rw [hl, hu, hr, ha]
-  rfl
 
 /-- Compactly supported data have a qualitative translation neighborhood
 inside any prescribed larger open support region. -/

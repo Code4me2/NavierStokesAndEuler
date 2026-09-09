@@ -99,9 +99,6 @@ noncomputable def reindexConstruction {ι κ : Type} {D : Domain ι Slow}
   damping_error i := F.damping_error (e i)
   modal_errors i := F.modal_errors (e i)
 
-@[simp] theorem reindex_frame {ι κ : Type} {D : Domain ι Slow}
-    (F : PhaseConstruction D) (e : κ → ι) (i : κ) :
-    (reindexConstruction F e).frame i = F.frame (e i) := rfl
 
 /-! The original physical slot, Gaussian cutoff, and actual current-state data. -/
 
@@ -183,10 +180,6 @@ noncomputable def parameters (x : CycleState (Label B N0)) (l : Label B N0) :
   ParticularParameters.fromReference (assembly x l) h (gap l)
 
 
-theorem parameters_length (x : CycleState (Label B N0)) (l : Label B N0) (n : ℕ) :
-    (parameters x l).length n = (phases B N0 l.1).L l.2 /
-      PhysicalParticularWave.clockWeight h (ChartScales.Q n)
-        (ChartScales.Q (BaseChartJets.cellBand l.2)) := rfl
 
 /-- Fixed primitive data for all iterations of the same labeled construction. -/
 noncomputable def canonicalParameters (l : Label B N0) : ParticularParameters Parameter where
@@ -323,7 +316,6 @@ noncomputable def signedConstruction {ι : Type} {D : Domain ι Slow}
 noncomputable def jointDomain : Domain (Label B N0) Slow :=
   reindexDomain (PrimaryGeometryAssembly.domain nominal (choice B N0).prepared.N) Prod.snd
 
-noncomputable def jointPhase : PhaseFamily (Label B N0) := signedPhase (phases B N0)
 
 theorem phase_common_bounds (j : Fin 2) :
     (phases B N0 j).r = (phases B N0 0).r ∧
@@ -356,8 +348,6 @@ noncomputable def jointConstruction : PhaseConstruction (jointDomain (B := B) (N
     (fun j => (phase_common_bounds j).2.2.2.2)
     phase_frequency_eq phase_axial_eq
 
-@[simp] theorem joint_frame (l : Label B N0) :
-    (jointConstruction (B := B) (N0 := N0)).frame l = (phases B N0 l.1).frame l.2 := rfl
 
 /-! Changing the native clock preserves the same grouped Gaussian exactly. -/
 

@@ -122,30 +122,7 @@ theorem linearMatrix_det (lam : ℝ) :
   simp [linearMatrix, Matrix.det_fin_two]
   ring
 
-theorem linearMatrix_det_ne_zero (lam : ℝ) (hlam : 0 < lam) :
-    (linearMatrix lam).det ≠ 0 := by
-  rw [linearMatrix_det]
-  apply mul_ne_zero
-  · exact mul_ne_zero (mul_ne_zero (by norm_num) (moment_pos _).ne') (moment_pos _).ne'
-  · apply ne_of_lt
-    apply sub_neg.mpr
-    apply Real.exp_lt_exp.mpr
-    unfold angularSlope pressureSlope
-    linarith
 
-/-- The integral derivative is an actual continuous linear equivalence. -/
-def linearEquiv (lam : ℝ) (hlam : 0 < lam) : Coeff ≃L[ℝ] Coeff :=
-  LinearEquiv.toContinuousLinearEquiv
-    { toFun := (linearMatrix lam).mulVec
-      invFun := (linearMatrix lam)⁻¹.mulVec
-      map_add' := Matrix.mulVec_add _
-      map_smul' := fun r c => Matrix.mulVec_smul _ r c
-      left_inv := fun c => by
-        rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _
-          (isUnit_iff_ne_zero.mpr (linearMatrix_det_ne_zero lam hlam)), Matrix.one_mulVec]
-      right_inv := fun c => by
-        rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _
-          (isUnit_iff_ne_zero.mpr (linearMatrix_det_ne_zero lam hlam)), Matrix.one_mulVec] }
 
 def relative (c : Coeff) (y : ℝ) : ℝ := c 0 * bump 0 y + c 1 * bump 1 y
 
@@ -194,8 +171,6 @@ def quadraticCLM (lam : ℝ) : Coeff →L[ℝ] Coeff →L[ℝ] Coeff :=
     ((LinearMap.toContinuousLinearMap (𝕜 := ℝ) (E := Coeff) (F' := Coeff)).toLinearMap.comp
       (quadraticBilin lam))
 
-theorem linearEquiv_apply (lam : ℝ) (hlam : 0 < lam) (c : Coeff) :
-    linearEquiv lam hlam c = (linearMatrix lam).mulVec c := rfl
 
 theorem quadraticCLM_apply (lam : ℝ) (c d : Coeff) :
     quadraticCLM lam c d =
@@ -320,17 +295,6 @@ theorem relative_first_jet_bound :
         (mul_le_mul hc1 (hb1 y) (abs_nonneg _) (norm_nonneg _))
       _ ≤ (2 + D0 + D1) * ‖c‖ := by nlinarith [norm_nonneg c]
 
-theorem positive_and_slope_of_small (lam : ℝ) (hlam : 0 < lam) (c : Coeff) (y : ℝ)
-    (h0 : |relative c y| ≤ 1 / 2) (h1 : |deriv (relative c) y| ≤ lam / 4) :
-    0 < 1 + relative c y ∧ -lam + deriv (relative c) y / (1 + relative c y) ≤ -lam / 2 := by
-  have hlo : -(1 / 2 : ℝ) ≤ relative c y := (abs_le.mp h0).1
-  have hden : 0 < 1 + relative c y := by linarith
-  refine ⟨hden, ?_⟩
-  have hd : deriv (relative c) y ≤ lam / 4 := (le_abs_self _).trans h1
-  have hratio : deriv (relative c) y / (1 + relative c y) ≤ lam / 2 := by
-    apply (div_le_iff₀ hden).mpr
-    nlinarith
-  linarith
 
 /-- A constructed branch, with exact normalized integrals and quantitative first-jet control. -/
 structure ResetBranch (lam : ℝ) where
@@ -363,24 +327,15 @@ def baseE (lam e0 y : ℝ) : ℝ := e0 * Real.exp ((-1 / 2 - lam) * y)
 def modifiedE (lam e0 y0 : ℝ) (c : Coeff) (y : ℝ) : ℝ :=
   baseE lam e0 y * (1 + relative c (y - y0))
 
-def radiusX (X0 y : ℝ) : ℝ := X0 * Real.exp y
 
-def baseH (lam e0 X0 y : ℝ) : ℝ := Real.sqrt (2 * radiusX X0 y) * baseE lam e0 y
 
-def modifiedH (lam e0 X0 y0 : ℝ) (c : Coeff) (y : ℝ) : ℝ :=
-  Real.sqrt (2 * radiusX X0 y) * modifiedE lam e0 y0 c y
 
-def angularScale (lam e0 X0 y0 : ℝ) : ℝ :=
-  X0 * Real.sqrt (2 * X0) * e0 * Real.exp (angularSlope lam * y0)
 
-def logSlope (E : ℝ → ℝ) (y : ℝ) : ℝ := 1 / 2 + deriv E y / E y
 
 theorem baseE_contDiff (lam e0 : ℝ) : ContDiff ℝ ∞ (baseE lam e0) :=
   contDiff_const.mul (contDiff_const.mul contDiff_id).exp
 
 
-theorem baseE_pos (lam e0 y : ℝ) (he0 : 0 < e0) : 0 < baseE lam e0 y :=
-  mul_pos he0 (Real.exp_pos _)
 
 
 
@@ -427,44 +382,8 @@ theorem pressure_integral_formula (lam e0 y0 : ℝ) (c : Coeff) :
 theorem sqrt_exp_half (y : ℝ) : Real.sqrt (Real.exp y) = Real.exp (y / 2) :=
   (Real.exp_half y).symm
 
-theorem angular_weight_formula (lam e0 X0 y : ℝ) (hX : 0 ≤ X0) :
-    radiusX X0 y * baseH lam e0 X0 y =
-      X0 * Real.sqrt (2 * X0) * e0 * Real.exp (angularSlope lam * y) := by
-  have hs : Real.sqrt (2 * radiusX X0 y) = Real.sqrt (2 * X0) * Real.exp (y / 2) := by
-    unfold radiusX
-    rw [← mul_assoc, Real.sqrt_mul (by positivity), sqrt_exp_half]
-  unfold baseH
-  rw [hs]
-  unfold radiusX baseE
-  calc
-    _ = X0 * Real.sqrt (2 * X0) * e0 *
-        (Real.exp y * Real.exp (y / 2) * Real.exp ((-1 / 2 - lam) * y)) := by ring
-    _ = _ := by
-      rw [← Real.exp_add, ← Real.exp_add]
-      congr 2
-      unfold angularSlope
-      ring
 
-theorem angular_integral_formula (lam e0 X0 y0 : ℝ) (c : Coeff) (hX : 0 ≤ X0) :
-    (∫ y, radiusX X0 y * (modifiedH lam e0 X0 y0 c y - baseH lam e0 X0 y)) =
-      angularScale lam e0 X0 y0 * ∫ y, Real.exp (angularSlope lam * y) * relative c y := by
-  have hf : (fun y => radiusX X0 y * (modifiedH lam e0 X0 y0 c y - baseH lam e0 X0 y)) =
-      (fun y => (X0 * Real.sqrt (2 * X0) * e0) *
-        (Real.exp (angularSlope lam * y) * relative c (y - y0))) := by
-    funext y
-    calc
-      _ = (radiusX X0 y * baseH lam e0 X0 y) * relative c (y - y0) := by
-        unfold modifiedH modifiedE baseH
-        ring
-      _ = _ := by rw [angular_weight_formula lam e0 X0 y hX]; ring
-  rw [hf, integral_const_mul, weighted_translate_integral]
-  unfold angularScale
-  ring
 
-theorem angularScale_pos (lam e0 X0 y0 : ℝ) (he0 : 0 < e0) (hX : 0 < X0) :
-    0 < angularScale lam e0 X0 y0 := by
-  unfold angularScale
-  exact mul_pos (mul_pos (mul_pos hX (Real.sqrt_pos.mpr (by positivity))) he0) (Real.exp_pos _)
 
 
 
@@ -473,23 +392,8 @@ namespace ResetBranch
 
 variable {lam : ℝ} (B : ResetBranch lam)
 
-theorem pressure_neutral (e0 y0 δ : ℝ) (hδ : δ ∈ Ioo (-B.radius) B.radius) :
-    (∫ y, (modifiedE lam e0 y0 (B.coefficients δ) y) ^ 2 - (baseE lam e0 y) ^ 2) = 0 := by
-  rw [pressure_integral_formula, B.pressure δ hδ, mul_zero]
 
-theorem angular_change (e0 X0 y0 δ : ℝ) (hX : 0 ≤ X0)
-    (hδ : δ ∈ Ioo (-B.radius) B.radius) :
-    (∫ y, radiusX X0 y *
-      (modifiedH lam e0 X0 y0 (B.coefficients δ) y - baseH lam e0 X0 y)) =
-      angularScale lam e0 X0 y0 * δ := by
-  rw [angular_integral_formula lam e0 X0 y0 (B.coefficients δ) hX, B.angular δ hδ]
 
-theorem positive (hlam : 0 < lam) (e0 y0 δ y : ℝ) (he0 : 0 < e0)
-    (hδ : δ ∈ Ioo (-B.radius) B.radius) :
-    0 < modifiedE lam e0 y0 (B.coefficients δ) y := by
-  apply mul_pos (baseE_pos lam e0 y he0)
-  exact (positive_and_slope_of_small lam hlam (B.coefficients δ) (y - y0)
-    (B.small_jets δ hδ (y - y0)).1 (B.small_jets δ hδ (y - y0)).2).1
 
 
 

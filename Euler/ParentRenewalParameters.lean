@@ -133,8 +133,6 @@ theorem shear_eq (hδ : 0 < G.δ) : P.shear=G.hchild := by
   rw [J.coefficient_eq,J.ray_eq,J.velocity_eq]
   exact G.target_shear_normalization hδ
 
-theorem epsilon_eq (hδ : 0 < G.δ) : P.epsilon=Real.sqrt (P.a/G.hchild) := by
-  rw [ParentFrame.epsilon,J.shear_eq hδ]
 
 
 
@@ -164,15 +162,6 @@ theorem tilt_interval (herror : G.tiltError ≤ 1/2) :
   have h := abs_le.mp (J.tilt_error herror)
   constructor <;> linarith only [h.1,h.2,herror]
 
-theorem sigma_small (herror : G.tiltError ≤ 1/2) (hy : G.y ≤ 1/8) : P.sigma ≤ 1/4 := by
-  have hi : 8 ≤ G.y⁻¹ := by
-    rw [← one_div]
-    apply (le_div_iff₀ G.y_pos).mpr
-    linarith only [hy]
-  have hin : 64 ≤ (G.y⁻¹)^2 := by nlinarith only [hi]
-  have hm := mul_le_mul_of_nonneg_right hin (sq_nonneg P.sigma)
-  have hu := (J.tilt_interval herror).2
-  nlinarith only [hm,hu,sq_nonneg (P.sigma-1/4)]
 
 theorem background_compression_eq :
     ⟪P.B G.targetTime (unit (P.m G.targetTime)),unit (P.m G.targetTime)⟫_ℝ=
@@ -180,20 +169,7 @@ theorem background_compression_eq :
   rw [J.matrix_eq,J.ray_eq]
   exact real_inner_comm _ _
 
-/-- The new packet error is retained in the compression margin. -/
-theorem activation_normal_le (ht : 0 < G.targetTime) (hT : G.targetTime < D.T) :
-    ⟪D.M.field ⟨G.targetTime,ht.le,hT.le⟩ 0 (unit (P.m G.targetTime)),
-      unit (P.m G.targetTime)⟫_ℝ ≤ -G.compressionScale+3*(G.G+G.d)+P.error := by
-  have h := P.activation_normal_le ht hT
-  rw [J.background_compression_eq] at h
-  exact h.trans (add_le_add G.nextCompression_le le_rfl)
 
-theorem activation_compression (ht : 0 < G.targetTime) (hT : G.targetTime < D.T)
-    (hmargin : 3*(G.G+G.d)+P.error < G.compressionScale) :
-    ⟪D.M.field ⟨G.targetTime,ht.le,hT.le⟩ 0 (unit (P.m G.targetTime)),
-      unit (P.m G.targetTime)⟫_ℝ < 0 := by
-  have h := J.activation_normal_le ht hT
-  linarith only [h,hmargin]
 
 
 end RenewalAtTarget

@@ -33,15 +33,5 @@ theorem coverField_contDiff (f : LiftDomain P → V)
   rw [coverField_eq_local]
   exact hf 0
 
-omit [Fact (0 < P)] in
-/-- The raw spatial derivative is exactly the spatial restriction of the cylinder derivative. -/
-theorem coverField_spatial_fderiv (f : LiftDomain P → V)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift P f x)) (x : Space) (θ : ℝ) :
-    fderiv ℝ (fun y : Space => f (y,(θ : AddCircle P))) x =
-      (fieldFDeriv P f (x,(θ : AddCircle P))).comp (ContinuousLinearMap.inl ℝ Space ℝ) := by
-  have hi : HasFDerivAt (fun y : Space => (y,θ)) (ContinuousLinearMap.inl ℝ Space ℝ) x :=
-    (hasFDerivAt_id (𝕜 := ℝ) x).prodMk (hasFDerivAt_const θ x)
-  have hd := ((coverField_contDiff P f hf).differentiable (by simp) (x,θ)).hasFDerivAt.comp x hi
-  simpa only [Function.comp_def, coverField_fderiv] using hd.fderiv
 
 end EulerCylinderSmoothOrbit

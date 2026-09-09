@@ -92,9 +92,6 @@ theorem spatialDivergence_spatialCurl (A : VelocityField) (t : ℝ) (x : Space)
   exact divergence_curl hA
 
 
-theorem contDiff_curl {A : Space → Space} {m n : WithTop ℕ∞}
-    (hA : ContDiff ℝ n A) (hmn : m + 1 ≤ n) : ContDiff ℝ m (curl A) :=
-  curlLinear.contDiff.comp (hA.fderiv_right hmn)
 
 
 theorem contDiffAt_spatialCurl {A : VelocityField} {z : SpaceTime} {m n : WithTop ℕ∞}

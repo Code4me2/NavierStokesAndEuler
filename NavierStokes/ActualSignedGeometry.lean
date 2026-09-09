@@ -235,9 +235,6 @@ noncomputable def preparedChart (hr0 : 0 < r0) :
       fun L p hp => g.x_range L p hp.2⟩
   inverse_edge L p hp := nativeSlow_inverse_edge H v a L hp
 
-@[simp] theorem preparedChart_coordinate (hr0 : 0 < r0) (L : Label H v a) (x : Native) :
-    (preparedChart H v a hr0).coordinate L x =
-      (x.1, x.2.2 / (PrimaryGeometryAssembly.construction H v a hr0 0).L L) := rfl
 
 end Prepared
 
@@ -731,12 +728,7 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
   {Λ : Type} (reference : Λ → ℕ → Label H v a)
   (chart index : ℕ → ℕ) (sign : Λ → ℕ → Fin 2)
 
-noncomputable def copyLabel (l : Λ) (n : ℕ) : SlotColoring.Label :=
-  PartitionedCovariance.signedLabel (PrimaryGeometryAssembly.label W (reference l n)) (sign l n)
 
-noncomputable def phaseCell (l : Λ) (n : ℕ) (k : TorusInverse.Frequency) : Set Native :=
-  copyPoint sys hdet (copyLabel H v a reference sign l n) (chart n) (index (chart n)) k ⁻¹'
-    (nativeDomain H v a).carrier (reference l n)
 
 
 
@@ -1140,13 +1132,8 @@ abbrev ActivePair := {q : Λ × ℕ // ActivePairCondition H v a reference chart
 
 variable [Countable Λ] [Nonempty (ActivePair H v a reference chart)]
 
-noncomputable def activeEnumeration : ℕ → ActivePair H v a reference chart :=
-  Classical.choose (exists_surjective_nat (ActivePair H v a reference chart))
 
 
-noncomputable def activeReference (_ : Unit) (q : ℕ) : Label H v a :=
-  reference (activeEnumeration H v a reference chart q).val.1
-    (activeEnumeration H v a reference chart q).val.2
 
 
 
@@ -1161,8 +1148,6 @@ noncomputable def cylinderNativeLinear : Cylinder →L[ℝ] Native :=
   (ParticularWaveBounds.liftAssoc Plane).toContinuousLinearEquiv.toContinuousLinearMap.comp
     (ContinuousLinearMap.fst ℝ PhysicalResidualBridge.Lift ℝ)
 
-@[simp] theorem cylinderNativeLinear_apply (x : Cylinder) :
-    cylinderNativeLinear x = cylinderNative x := rfl
 
 theorem norm_cylinderNativeLinear : ‖cylinderNativeLinear‖ ≤ 1 := by
   apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
@@ -1238,12 +1223,7 @@ noncomputable def swapParameter : Slow ≃ₗᵢ[ℝ] Slow where
     change ‖(x.1, (x.2.2, x.2.1))‖ = ‖x‖
     simp only [Prod.norm_def, max_comm ‖x.2.1‖ ‖x.2.2‖]
 
-noncomputable def parameterLinear (h Q Qr : ℝ) : Slow →L[ℝ] Slow :=
-  swapParameter.toContinuousLinearEquiv.toContinuousLinearMap.comp
-    ((slowChange h Q Qr).comp swapParameter.toContinuousLinearEquiv.toContinuousLinearMap)
 
-@[simp] theorem parameterLinear_apply (h Q Qr : ℝ) (x : Slow) :
-    parameterLinear h Q Qr x = PhysicalParticularWave.parameterChange h Q Qr x := rfl
 
 
 end NavierStokes.ActualSignedGeometry

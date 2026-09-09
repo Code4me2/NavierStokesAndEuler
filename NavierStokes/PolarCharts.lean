@@ -277,12 +277,6 @@ section Scaling
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The exact multilinear chain rule for a linear input change. -/
-theorem norm_jet_comp_linear {f : Plane → Plane} (hf : ContDiff ℝ ∞ f)
-    (L : E →L[ℝ] Plane) (p : E) (k : ℕ) :
-    ‖iteratedFDeriv ℝ k (f ∘ L) p‖ ≤ ‖iteratedFDeriv ℝ k f (L p)‖ * ‖L‖ ^ k := by
-  rw [L.iteratedFDeriv_comp_right hf p (natCast_le_infty k)]
-  simpa using (iteratedFDeriv ℝ k f (L p)).norm_compContinuousLinearMap_le (fun _ => L)
 
 
 end Scaling
@@ -299,9 +293,6 @@ theorem norm_scalePlane_le {Q : ℝ} (hQ : 0 < Q) :
   intro p
   rw [scalePlane_apply, norm_smul, Real.norm_of_nonneg (Real.rpow_nonneg hQ.le _)]
 
-/-- The physical input is scaled by `1 / sqrt Q` before taking the polar chart. -/
-noncomputable def physicalChart (a : ℝ) (j : Index) (Q : ℝ) : Plane → Plane :=
-  chart a j ∘ scalePlane Q
 
 
 
@@ -322,13 +313,6 @@ theorem scalePlane_eq_inv_sqrt {Q : ℝ} (hQ : 0 < Q) (p : Plane) :
     scalePlane Q p = (Real.sqrt Q)⁻¹ • p := by
   rw [scalePlane_apply, Real.rpow_neg hQ.le, Real.sqrt_eq_rpow]
 
-theorem physicalChart_eq {a Q : ℝ} (ha : 0 < a) (hQ : 0 < Q) (j : Index) {p : Plane}
-    (hp : scalePlane Q p ∈ chartDomain a j) :
-    physicalChart a j Q p = (radius p / Real.sqrt Q, (localChart j p).2) := by
-  rw [physicalChart, comp_apply, chart_eq_localChart ha j hp,
-    scalePlane_eq_inv_sqrt hQ, localChart_smul j (inv_pos.mpr (Real.sqrt_pos.2 hQ))]
-  rw [localChart_apply]
-  simp only [inv_mul_eq_div]
 
 
 /-- Angles from two valid local inverse charts differ by an integer full turn. -/

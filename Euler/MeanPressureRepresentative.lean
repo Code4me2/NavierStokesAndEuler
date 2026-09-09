@@ -106,9 +106,6 @@ theorem pressureScalar_spec (t : Icc (0 : ℝ) T) :
     (pathRepresentative T (s.pressurePath c hc hLower fC) hR t)
     (pathRepresentative_ae T _ hR t) (hAdj.clm_apply (pathRepresentative_smooth T _ hR t))
 
-/-- The source mean pressure has no angular dependence. -/
-def pressureProfile (t : Icc (0 : ℝ) T) (x : Space) (_θ : ℝ) : ℝ :=
-  pressureScalar T hT F F₁ FInv s c hc hLower fC hR t x
 
 
 /-- The physical pressure force is exactly the actual residual, because the

@@ -74,7 +74,6 @@ noncomputable def natural : NaturalEntrance.EntranceProfile A.preparation.inputs
 noncomputable def referenceInput : ReferencePath.Input :=
   ReferencePath.Input.ofNatural A.scale_pos A.natural.profile.family
 
-theorem reference_scale : A.referenceInput.scale = A.scale := rfl
 
 noncomputable def reference (δ : ℝ) (hδ : 0 < δ) (hδsmall : 2 * δ < ReferencePath.rampLimit) :
     ProfileHistories.Profiles A.referenceInput.radialDomain :=
@@ -2100,12 +2099,6 @@ noncomputable def extendedProfiles {B : ℝ} (w : ExtendedHeatedOutgoing.Witness
   pressure0 := F.axisDatum
   pressure0_smooth := fun _ _ => F.axisDatum_contDiff.contDiffAt
 
-theorem extended_fields_smoothAt {B : ℝ} (w : ExtendedHeatedOutgoing.Witness F c.radius B)
-    (hsep : c.separation ≤ Real.exp (-8)) {p : Point} (hp : p ∈ c.extendedDomain.carrier) :
-    ContDiffAt ℝ ∞ (c.extendedf w.coefficients) p ∧ ContDiffAt ℝ ∞ c.U p ∧
-      ContDiffAt ℝ ∞ (c.extendedPi w.coefficients) p :=
-  ⟨c.extendedf_smoothAt w hsep hp, c.U_smoothAt hsep hp.1.1 hp.1.2,
-    (c.extendedProfiles w hsep).pressure_smooth.contDiffAt (c.extendedDomain.isOpen.mem_nhds hp)⟩
 
 theorem extendedE_physical (coef : ℝ → ExtendedHeatedOutgoing.Coeff) {p : Point}
     (hX : 0 < p.1) (hη : p.2 ∈ HeatedOutgoing.parameterDomain) :
@@ -2247,9 +2240,6 @@ theorem exists_parameter_interval :
   have hp := hV hη
   exact W.controls.extendedDomain_nonnegative hX hp.1.1.2 hp.2 hp.1.2
 
-theorem fields_smooth {p : Point} (hp : p ∈ W.domain.carrier) :
-    ContDiffAt ℝ ∞ W.f p ∧ ContDiffAt ℝ ∞ W.U p ∧ ContDiffAt ℝ ∞ W.Pi p :=
-  W.controls.extended_fields_smoothAt W.heat W.separated hp
 
 theorem E_eq_sqrt_f {p : Point} (hX : 0 < p.1) : W.E p = Real.sqrt (2 * p.1) * W.f p :=
   W.controls.extendedE_eq_sqrt_f W.heat.coefficients W.separated hX

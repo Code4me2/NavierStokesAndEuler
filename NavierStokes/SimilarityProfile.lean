@@ -21,7 +21,6 @@ abbrev InnerProfile := InnerPoint → ℝ
 abbrev PhysicalProfile := PhysicalPoint → ℝ
 
 abbrev D := CoordinateAlgebra.D
-abbrev d := CoordinateAlgebra.d
 abbrev L := CoordinateAlgebra.L
 
 def q (h : ℝ) (p : PhysicalPoint) : ℝ :=

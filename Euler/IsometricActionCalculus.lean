@@ -31,15 +31,6 @@ theorem hasFDerivAt_all (τ : P → E →ₗᵢ[ℝ] E)
     abel_nf
   simpa only [Function.comp_def, id_eq, sub_self, he, ContinuousLinearMap.comp_id] using hd
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem orbits_tendstoUniformly (τ : P → E →ₗᵢ[ℝ] E) {ι : Type*} {l : Filter ι}
-    (u : ι → E) (v : E) (hu : Tendsto u l (𝓝 v)) :
-    TendstoUniformly (fun n a => τ a (u n)) (fun a => τ a v) l := by
-  apply Metric.tendstoUniformly_iff.mpr
-  intro ε hε
-  filter_upwards [hu.eventually (Metric.ball_mem_nhds v hε)] with n hn a
-  rw [(τ a).dist_map]
-  simpa only [Metric.mem_ball, dist_comm] using hn
 
 theorem derivatives_tendstoUniformly (τ : P → E →ₗᵢ[ℝ] E) {ι : Type*} {l : Filter ι}
     (D : ι → P →L[ℝ] E) (D₀ : P →L[ℝ] E) (hD : Tendsto D l (𝓝 D₀)) :

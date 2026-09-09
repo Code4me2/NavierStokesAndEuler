@@ -43,22 +43,6 @@ theorem inverse_strain_hasDerivWithinAt (s : Set ℝ) (t : ℝ) (ht : t ∈ s)
   have h := inverse_hasDerivWithinAt s t ht F G (M.comp (F t)) hFG hGF hF
   rwa [ContinuousLinearMap.comp_assoc M (F t) (G t), hFG t ht, ContinuousLinearMap.comp_id] at h
 
-def adjointVector (m₀ : Space) : (Space →L[ℝ] Space) →L[ℝ] Space :=
-  (ContinuousLinearMap.apply ℝ Space m₀).comp
-    (ContinuousLinearMap.adjoint.toContinuousLinearEquiv.toContinuousLinearMap
-      : (Space →L[ℝ] Space) →L[ℝ] (Space →L[ℝ] Space))
 
-/-- The actual transported normal satisfies m_t=−M* m. -/
-theorem normal_hasDerivWithinAt (s : Set ℝ) (t : ℝ) (ht : t ∈ s)
-    (F G : ℝ → Space →L[ℝ] Space) (M : Space →L[ℝ] Space) (m₀ : Space)
-    (hFG : ∀ r ∈ s, (F r).comp (G r) = ContinuousLinearMap.id ℝ Space)
-    (hGF : ∀ r ∈ s, (G r).comp (F r) = ContinuousLinearMap.id ℝ Space)
-    (hF : HasDerivWithinAt F (M.comp (F t)) s t) :
-    HasDerivWithinAt (fun r => (G r).adjoint m₀) (-(M.adjoint ((G t).adjoint m₀))) s t := by
-  have h := (adjointVector m₀).hasFDerivAt.comp_hasDerivWithinAt t
-    (inverse_strain_hasDerivWithinAt s t ht F G M hFG hGF hF)
-  convert h using 1 <;> try rfl
-  change -(M.adjoint ((G t).adjoint m₀)) = (-((G t).comp M)).adjoint m₀
-  simp only [map_neg, adjoint_comp, neg_apply, comp_apply]
 
 end EulerDeformationTime

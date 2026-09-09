@@ -96,8 +96,6 @@ noncomputable def matrixOperator : Matrix (Fin 6) (Fin 6) ℂ →L[ℂ] (Vec →
   ((Matrix.toLin' : Matrix (Fin 6) (Fin 6) ℂ ≃ₗ[ℂ] Vec →ₗ[ℂ] Vec).trans
     LinearMap.toContinuousLinearMap).toContinuousLinearEquiv.toContinuousLinearMap
 
-@[simp] theorem matrixOperator_apply (A : Matrix (Fin 6) (Fin 6) ℂ) (v : Vec) :
-    matrixOperator A v = A.mulVec v := rfl
 
 @[simp] theorem matrixOperator_toMatrix (A : Matrix (Fin 6) (Fin 6) ℂ) :
     LinearMap.toMatrix' (matrixOperator A).toLinearMap = A :=

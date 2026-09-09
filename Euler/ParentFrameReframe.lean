@@ -40,21 +40,10 @@ def reframe : ParentFrame (A.transverseData m' hm' R' S hS) τ where
   B₁_bound := P.B₁_bound
   remainder_bound := P.remainder_bound
 
-@[simp] theorem reframe_B : (P.reframe m' hm' R').B=P.B := rfl
-@[simp] theorem reframe_B₁ : (P.reframe m' hm' R').B₁=P.B₁ := rfl
-@[simp] theorem reframe_m : (P.reframe m' hm' R').m=P.m := rfl
 @[simp] theorem reframe_v : (P.reframe m' hm' R').v=P.v := rfl
-@[simp] theorem reframe_c : (P.reframe m' hm' R').c=P.c := rfl
-@[simp] theorem reframe_G : (P.reframe m' hm' R').G=P.G := rfl
-@[simp] theorem reframe_error : (P.reframe m' hm' R').error=P.error := rfl
-@[simp] theorem reframe_a : (P.reframe m' hm' R').a=P.a := rfl
 @[simp] theorem reframe_sigma : (P.reframe m' hm' R').sigma=P.sigma := rfl
 @[simp] theorem reframe_shear : (P.reframe m' hm' R').shear=P.shear := rfl
-@[simp] theorem reframe_epsilon : (P.reframe m' hm' R').epsilon=P.epsilon := rfl
-@[simp] theorem reframe_horizon : (P.reframe m' hm' R').horizon=P.horizon := rfl
 
-@[simp] theorem reframe_rayScale (hτ : 0 < τ) (hτT : τ < A.T) :
-    (P.reframe m' hm' R').rayScale hτ hτT=P.rayScale hτ hτT := rfl
 
 @[simp] theorem reframe_terminalBound (CM CH : ℝ) :
     (P.reframe m' hm' R').terminalBound CM CH=P.terminalBound CM CH := rfl

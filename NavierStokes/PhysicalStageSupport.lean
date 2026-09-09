@@ -188,9 +188,6 @@ variable
   (WP : ℕ → WaveData h DP IP KP Unit)
   (MP : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
 
-theorem NativeOuterBounds.radius_pos {R : ℝ}
-    (H : NativeOuterBounds R WA MA MB WP MP) : 0 < R :=
-  ((MA 0).lower_pos.trans (MA 0).radii_lt).trans_le (H.potentialMean 0)
 
 
 

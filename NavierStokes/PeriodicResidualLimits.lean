@@ -215,18 +215,6 @@ theorem boundaryLimits_joint {A : VelocityField} {p : PressureField}
     nhdsWithin_le_nhds).symm
 
 
-/-- The locally uniform limits are a conclusion of joint convergence;
-neither uniform convergence nor continuity of the chosen representatives is input. -/
-theorem boundaryLimits_locallyUniform {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    TendstoLocallyUniformly (fun t x => iteratedFDeriv ℝ n (periodicResidual A p) (t, x))
-      (fun x => boundaryLimits A p eA ep x n) (𝓝[<] (1 : ℝ)) := by
-  apply JointResidualLimits.locallyUniform_of_joint_limits
-    (F := iteratedFDeriv ℝ n (periodicResidual A p))
-  intro x
-  simpa only [JointResidualLimits.past_filter] using boundaryLimits_joint hz eA ep n x
 
 
 @[simp] theorem representative_integerShift (k : Fin 3 → ℤ) :
@@ -271,46 +259,7 @@ theorem boundaryLimits_independent {A : VelocityField} {p : PressureField}
 
 /-! ## Direct candidate bridge with only original local analytic inputs -/
 
-theorem periodicVelocity_speed_unbounded {A : VelocityField}
-    (haxis : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖)
-      (𝓝[<] 1) atTop) : SpeedUnboundedAtOne (SpatialLocalization.periodicVelocity A) :=
-  (TimeLocalization.activatedVelocity_speed_unbounded_iff
-    (SpatialLocalization.periodicVelocity A)).mp
-      (SpatialLocalization.localizedVelocity_speed_unbounded A haxis)
 
-/-- A conditional candidate for the actual localized fields. No periodic
-residual estimates, force, boundary tensors, or divergence assumption are inputs.
-The potential extension input is essential and is not inferred from velocity regularity. -/
-theorem exists_candidate_force {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p)
-    (haxis : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖)
-      (𝓝[<] 1) atTop) :
-    ∃ F : VelocityField,
-      CandidateProperties (SpatialLocalization.localizedVelocity A)
-        (SpatialLocalization.localizedPressure p) F ∧
-      ContDiff ℝ ∞ F ∧
-      (∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n F (1, x) = boundaryLimits A p eA ep x n) := by
-  have hu : ContDiffOn ℝ ∞ (SpatialLocalization.periodicVelocity A) preSingularDomain :=
-    SpatialLocalization.periodicVelocity_smoothOn
-      (hA.mono (fun _ hz => ⟨hz.1.2, hz.2⟩))
-  have hpc : ContDiffOn ℝ ∞ (SpatialLocalization.periodicPressure p) preSingularDomain :=
-    SpatialLocalization.periodicPressure_smoothOn
-      (hp.mono (fun _ hz => ⟨hz.1.2, hz.2⟩))
-  let L := boundaryLimits A p eA ep
-  have hlim := boundaryLimits_locallyUniform hz eA ep
-  refine ⟨CandidateFromLimits.force _ _ hu hpc L hlim, ?_,
-    CandidateFromLimits.force_smooth _ _ hu hpc L hlim,
-    CandidateFromLimits.force_boundary_jets _ _ hu hpc L hlim⟩
-  apply CandidateFromLimits.candidate_properties _ _ hu hpc L hlim
-    (SpatialLocalization.periodicVelocity_periodic A _)
-    (SpatialLocalization.periodicPressure_periodic p _) ?_
-    (periodicVelocity_speed_unbounded haxis)
-  intro t ht x
-  exact SpatialLocalization.periodicVelocity_divergence_free hA ht.2 x
 
 
 end NavierStokes.PeriodicResidualLimits

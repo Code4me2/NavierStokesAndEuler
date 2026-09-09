@@ -51,16 +51,6 @@ theorem pressureGradient_add
   rw [fderiv_fun_add hp hq]
   simp only [add_apply, add_smul, Finset.sum_add_distrib]
 
-/-- Divergence remains additive for these same genuine spatial derivatives. -/
-theorem spatialDivergence_add
-    (u e : VelocityField) (t : ℝ) (x : Space)
-    (hu : DifferentiableAt ℝ (fun y : Space => u (t, y)) x)
-    (he : DifferentiableAt ℝ (fun y : Space => e (t, y)) x) :
-    spatialDivergence (fun z => u z + e z) t x =
-      spatialDivergence u t x + spatialDivergence e t x := by
-  unfold spatialDivergence
-  rw [spatialDerivative_add u e t x hu he]
-  simp only [add_apply, PiLp.add_apply, Finset.sum_add_distrib]
 
 
 

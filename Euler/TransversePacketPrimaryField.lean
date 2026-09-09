@@ -119,9 +119,5 @@ theorem vector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   (vectorField τ hτ hτT B Y).raw_odd_of_reflection_neg t
     (velocityPath_reflection_neg τ hτ hτT B Y hSym hF hM hH hY t) x θ
 
-theorem vectorDerivative_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    vectorDerivative τ hτ hτT B Y (t,(-x,-θ)) = -vectorDerivative τ hτ hτT B Y (t,(x,θ)) :=
-  (vectorDerivativeField τ hτ hτT B Y).raw_odd_of_reflection_neg t
-    (derivativePath_reflection_neg τ hτ hτT B Y hSym hF hM hH hY t) x θ
 
 end EulerTransversePacketPrimary

@@ -70,15 +70,8 @@ noncomputable def freezeDirections (d : LinearWaveBounds.GraphDirections D) (m :
     LinearWaveBounds.GraphDirections D :=
   { d with radialScale := fun _ => d.radialScale m, fastScale := fun _ => d.fastScale m }
 
-@[simp] theorem freezeStrip_domain (s : StripData D) (m : ℕ) :
-    (freezeStrip s m).domain = s.domain := rfl
 
-@[simp] theorem freezeStrip_epsilon (s : StripData D) (m n : ℕ) :
-    (freezeStrip s m).epsilon n = s.epsilon m := rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-@[simp] theorem freezeState_covariance (u : State D) (m n : ℕ) (i j : Fin 3) :
-    (freezeState u m).covariance i j n = u.covariance i j m := rfl
 
 @[simp] theorem freezeState_theta (c : Context D) (u : State D) (m n : ℕ) :
     (freezeState u m).thetaResidual (freezeContext c m) n = u.thetaResidual c m := rfl
@@ -110,16 +103,6 @@ end Freeze
 
 
 
-/-- Equality uses exactly the source and target epsilons. No equality of
-their unrelated domains, phase frames, or native backgrounds is needed. -/
-theorem stateRequest_freeze (s sr : StripData Cylinder) (P : SignedStressPrimitive.Patch)
-    (h : ℝ) (c : Context Point) (u : State Point) (m n : ℕ)
-    (hepsilon : sr.epsilon n = s.epsilon m) (x : Cylinder) :
-    PhysicalSignedWave.stateRequest sr P h (freezeContext c m) (freezeState u m) n x =
-      PhysicalSignedWave.stateRequest s P h c u m x := by
-  change (sr.epsilon n)⁻¹ • _ = (s.epsilon m)⁻¹ • _
-  rw [hepsilon]
-  rfl
 
 theorem stateRequest_freeze_full (s : StripData Point) (sr : StripData Cylinder)
     (P : SignedStressPrimitive.Patch) (h : ℝ) (c : Context Point) (u : State Point) (m n : ℕ)
@@ -130,11 +113,6 @@ theorem stateRequest_freeze_full (s : StripData Point) (sr : StripData Cylinder)
   rw [hepsilon]
   rfl
 
-@[simp] theorem stateRequest_freezeStrip (s : StripData Cylinder) (P : SignedStressPrimitive.Patch)
-    (h : ℝ) (c : Context Point) (u : State Point) (m n : ℕ) (x : Cylinder) :
-    PhysicalSignedWave.stateRequest (freezeStrip s m) P h (freezeContext c m) (freezeState u m) n x =
-      PhysicalSignedWave.stateRequest s P h c u m x :=
-  stateRequest_freeze s (freezeStrip s m) P h c u m n rfl x
 
 /-! ## Identity band views of the native primary -/
 
@@ -172,17 +150,7 @@ noncomputable def identityViews (B : PhysicalSignedWave.PrimaryData U) (m : ℕ)
   directions := B.directions
   background := B.base
 
-@[simp] theorem identityViews_map (B : PhysicalSignedWave.PrimaryData U) (m : ℕ)
-    (h Q : ℝ) (cover : ℕ) (hQ : 0 < Q) (hfrequency : B.base.frequency m ≠ 0)
-    (n : ℕ) (x : Cylinder) :
-    (identityViews B m h Q cover hQ hfrequency).map n x = x := by
-  simp [PhysicalSignedWave.PrimaryData.Views.map, identityViews,
-    PhysicalParticularWave.cylinderChange, ratioPower_self hQ, CommonCoverSolve.coverPower]
 
-@[simp] theorem identityViews_velocity (B : PhysicalSignedWave.PrimaryData U) (m : ℕ)
-    (h Q : ℝ) (cover : ℕ) (hQ : 0 < Q) (hfrequency : B.base.frequency m ≠ 0) (n : ℕ) :
-    (identityViews B m h Q cover hQ hfrequency).velocity n = 1 :=
-  ratioPower_self hQ _
 
 /-! ## The actual common state supplies the request of these native views -/
 
@@ -241,17 +209,7 @@ noncomputable def stateData : (identityViews B m h Q cover hQ hfrequency).StateD
   reference_axial_periodic _ := by
     simpa only [freezeState_axial] using (H.axial P.a_pos P.a_lt_b hp).periodic m
 
-theorem stateData_request (s : StripData Cylinder) (n : ℕ)
-    (hepsilon : B.strip.epsilon n = s.epsilon m) (x : Cylinder) :
-    (stateData B m h Q cover hQ hfrequency hh hh1 R P c u H hp hslow).request n x =
-      PhysicalSignedWave.stateRequest s P h c u m x :=
-  stateRequest_freeze s B.strip P h c u m n hepsilon x
 
-theorem stateData_referenceRequest (s : StripData Cylinder)
-    (hepsilon : B.strip.epsilon m = s.epsilon m) (x : Cylinder) :
-    (stateData B m h Q cover hQ hfrequency hh hh1 R P c u H hp hslow).referenceRequest m x =
-      PhysicalSignedWave.stateRequest s P h c u m x :=
-  stateRequest_freeze s B.strip P h c u m m hepsilon x
 
 /-- Exact binding to the original common-coordinate full signed request.
 The swap only puts the slow coordinates into their original `(time,axial)` order. -/

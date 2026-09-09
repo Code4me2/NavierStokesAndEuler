@@ -114,28 +114,6 @@ theorem zeroRescale_defect (q : ℝ) (a : WaveFamily D I)
     (s : StripData D) (d : GraphDirections D) :
     (zeroRescale q a).defect s d = a.defect s d := rfl
 
-theorem inputBounds_zeroRescale {s : StripData D} {K : ℕ → I → Set D}
-    {P : ℕ → I → D → ℝ} {α κ : ℝ} {d : GraphDirections D} {a : WaveFamily D I}
-    (h : InputBounds s K P α κ d a) (q : ℝ) (W : ℕ → I → D → ℝ)
-    (hW : ∀ n i x, x ∈ s.domain → 0 ≤ W n i x) (β : ℝ) :
-    InputBounds s K W β κ d (zeroRescale q a) where
-  loss_nonneg := h.loss_nonneg
-  radial_profile := h.radial_profile
-  radial_scale := h.radial_scale
-  fast_scale := h.fast_scale
-  frequency_scale := LocalizedWaveBounds.constant_real_mul h.frequency_scale q
-  radius := h.radius
-  inverse_radius := h.inverse_radius
-  radial_base := h.radial_base
-  frequency_base := h.frequency_base
-  axial_base := h.axial_base
-  radial_base_aux := h.radial_base_aux
-  frequency_base_aux := h.frequency_base_aux
-  axial_base_aux := h.axial_base_aux
-  normal := h.normal
-  defect := h.defect
-  amplitude := fun _ => LocalClass.zero (fun n i x hx => mul_nonneg (Real.sqrt_nonneg _) (hW n i x hx))
-  pressure := LocalClass.zero (fun n i x hx => mul_nonneg (Real.sqrt_nonneg _) (hW n i x hx))
 
 end Isometry
 
@@ -161,8 +139,6 @@ noncomputable def nativeToFull : Native ≃ₗᵢ[ℝ] ActualPrimary.FullPoint :
 noncomputable def nativeStrip : StripData Native :=
   ParticularWaveBounds.reindexStrip nativeToFull ActualPrimaryBounds.fullStrip
 
-noncomputable def cells {B N0 : ℕ} (n : ℕ) (i : CopyIndex B N0) : Set Native :=
-  nativeToFull ⁻¹' ActualPrimaryBounds.controlCell n i
 
 noncomputable def directions (B : ℕ) : GraphDirections Native :=
   ParticularWaveBounds.reindexDirections nativeToFull (ActualPrimaryBounds.directions B)
@@ -233,28 +209,6 @@ theorem backgroundFamily_eq {B N0 : ℕ} (b : Label B N0 → HarmonicBlock Cycle
   · rfl
   · exact carrier_frequency b hb j i.1
 
-/-- All order-zero background classes, at every derivative order, are
-derived from the primary inputs. The envelope can be any nonnegative one
-because the velocity and pressure slots are zero. Constants remain uniform
-in the spatial label and lattice copy. -/
-theorem actual_background_inputs {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
-    (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ)
-    (W : ℕ → CopyIndex B N0 → Native → ℝ)
-    (hW : ∀ n i x, x ∈ nativeStrip.domain → 0 ≤ W n i x) :
-    InputBounds nativeStrip cells W 0 ChartScales.kappa (directions B) (backgroundFamily b j) := by
-  rw [backgroundFamily_eq b hb j]
-  let Wfull : ℕ → CopyIndex B N0 → ActualPrimary.FullPoint → ℝ :=
-    fun n i x => W n i (nativeToFull.symm x)
-  have hWfull : ∀ n i x, x ∈ ActualPrimaryBounds.fullStrip.domain → 0 ≤ Wfull n i x := by
-    intro n i x hx
-    apply hW
-    change nativeToFull (nativeToFull.symm x) ∈ ActualPrimaryBounds.fullStrip.domain
-    simpa only [nativeToFull.apply_symm_apply] using hx
-  have hh := inputBounds_reindex nativeToFull
-    (inputBounds_zeroRescale (ActualPrimaryBounds.actual_local_inputs (B := B) (N0 := N0))
-      (j : ℝ) Wfull hWfull 0)
-  simp only [Wfull, nativeToFull.symm_apply_apply] at hh
-  exact hh
 
 theorem background_normal {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
     (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ) (n : ℕ)
@@ -271,31 +225,8 @@ theorem background_normal {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePo
     _ _ n i (nativeToFull x) = _
   rw [zeroRescale_normal, ActualPrimaryBounds.actualFamily_normal_eq]
 
-theorem background_normal_range {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
-    (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ)
-    {n : ℕ} {i : CopyIndex B N0} {x : Native}
-    (hx : x ∈ nativeStrip.domain) (hi : x ∈ cells n i) :
-    ActualPrimaryBounds.normalFloor B N0 ≤ ‖(backgroundFamily b j).normal nativeStrip (directions B) n i x‖ ∧
-      ‖(backgroundFamily b j).normal nativeStrip (directions B) n i x‖ ≤
-        ActualPrimaryBounds.normalCeiling B N0 := by
-  rw [background_normal b hb j]
-  exact ActualPrimaryBounds.chart_normal_range hx hi
 
 
-theorem background_inverse_frequency {B N0 : ℕ} (b : Label B N0 → HarmonicBlock CyclePoint)
-    (hb : ∀ l, SameCarrier (b l) (primaryBlock l)) (j : ℤ) :
-    LocalUnweighted nativeStrip cells (1 / 2 : ℝ)
-      (fun n i (_ : Native) => 1 / (backgroundFamily b j).frequency n i) := by
-  have hh := localClass_reindex nativeToFull
-    (LocalizedWaveBounds.constant_real_mul
-      (ActualPrimaryBounds.inverse_carrier_local (B := B) (N0 := N0)) ((j : ℝ)⁻¹))
-  apply hh.congr
-  intro n i x
-  change (j : ℝ)⁻¹ * (1 / (ChartScales.carrier ActualPrimary.h n : ℝ)) =
-    1 / (carrier b j i.1).frequency n
-  rw [carrier_frequency b hb j]
-  simp only [one_div, mul_inv_rev]
-  ring
 
 
 end NavierStokes.ActualParticularBackground

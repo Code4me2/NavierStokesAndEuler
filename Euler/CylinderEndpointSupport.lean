@@ -55,22 +55,11 @@ theorem endpointCoordinate_supported (t : Icc (0 : ℝ) T) :
     (D.velocityPath_supported P S hS (D.endpointForcing P Y)
       (D.endpointForcing_supported P S hS Y hY) t)
 
-theorem endpointAcceleration_supported (t : Icc (0 : ℝ) T) :
-    D.endpointAcceleration P Y t ∈ Supported P U S hS := by
-  rw [D.endpointAcceleration_eq_forced P Y,ContinuousMap.neg_apply]
-  exact (Supported P U S hS).neg_mem
-    (D.accelerationPath_supported P S hS (D.endpointForcing P Y)
-      (D.endpointForcing_supported P S hS Y hY) t)
 
 theorem endpointVelocity_supported (t : Icc (0 : ℝ) T) :
     D.endpointVelocity P Y t ∈ Supported P E S hS :=
   D.frame_supported P S hS _ (D.endpointCoordinate_supported P S hS Y hY t) t
 
-theorem endpointDerivative_supported (t : Icc (0 : ℝ) T) :
-    D.endpointDerivative P Y t ∈ Supported P E S hS :=
-  (Supported P E S hS).add_mem
-    (D.frameDerivative_supported P S hS _ (D.endpointCoordinate_supported P S hS Y hY t) t)
-    (D.frame_supported P S hS _ (D.endpointAcceleration_supported P S hS Y hY t) t)
 
 end Support
 

@@ -35,13 +35,6 @@ variable {P : ℝ} [Fact (0 < P)]
   (hbIt : ∀ n a, ‖iteratedFDeriv ℝ n (translateCoefficientPath D.inverseDerivative) a‖ ≤
     C*majorant Rc 0 n)
 
-include hRc hC hA hR hbA hbK in
-theorem potentialPath_normalized_bound (n : ℕ) :
-    block standardDirection q
-      (fun a : LiftTangent => pathTranslate P a (normalize g hg (G.potentialPath I))) n 0 ≤
-      (3*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d n :=
-  EulerTransversePacketPaths.potential_block_bound (G.fullVelocityPath I)
-    (G.velocityPath_orbit I) g hg q Rc C R A hRc hC hA hR d hbA hbK n
 
 
 include hRc hC hA hR hbA hbK hbI in

@@ -18,8 +18,6 @@ def shiftTimeMap (S T a : ℝ) (ha : 0 ≤ a) (haT : a + T ≤ S) :
     (add_le_add le_rfl t.property.2).trans haT⟩
   continuous_toFun := (continuous_subtype_val.const_add a).subtype_mk _
 
-@[simp] theorem shiftTimeMap_val (S T a : ℝ) (ha : 0 ≤ a) (haT : a + T ≤ S)
-    (t : Icc (0 : ℝ) T) : ((shiftTimeMap S T a ha haT t) : ℝ) = a + t := rfl
 
 namespace Evolution
 
@@ -54,10 +52,6 @@ def shiftTime (U : Evolution S hS) (a : ℝ) (ha : 0 ≤ a)
     (U.shiftTime a ha T hT haT).velocity t =
       U.velocity (shiftTimeMap S T a ha haT t) := rfl
 
-@[simp] theorem shiftTime_pressureForce (U : Evolution S hS) (a : ℝ) (ha : 0 ≤ a)
-    (T : ℝ) (hT : 0 ≤ T) (haT : a + T ≤ S) (t : Icc (0 : ℝ) T) :
-    (U.shiftTime a ha T hT haT).pressureForce t =
-      U.pressureForce (shiftTimeMap S T a ha haT t) := rfl
 
 @[simp] theorem shiftTime_initial (U : Evolution S hS) (a : ℝ) (ha : 0 ≤ a)
     (T : ℝ) (hT : 0 ≤ T) (haT : a + T ≤ S) :

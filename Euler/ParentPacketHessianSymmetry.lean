@@ -51,9 +51,6 @@ variable {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U]
   (m : Space) (hm : ‖m‖=1) (R : U ≃ₗᵢ[ℝ] referencePlane m)
   (S : Set Space) (hS : IsCompact S) (H : LowBounds G)
 
-theorem history_symmetric (t : Icc (0 : ℝ) G.T) (x : Space) :
-    ((G.historyData m hm R S hS H).H.field t x).IsSymmetric :=
-  G.curvature_symmetric p hp hacceleration t x
 
 theorem initial_history_symmetric (τ : ℝ) (hτ : 0 < τ) (hτT : τ ≤ G.T)
     (t : Icc (0 : ℝ) τ) (x : Space) :

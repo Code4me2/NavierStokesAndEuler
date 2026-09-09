@@ -46,8 +46,6 @@ def boundedPath : C(Icc (0 : ℝ) T,X →ᵇ V) where
   toFun := boundedSlice T f hf C hC
   continuous_toFun := (boundedSlice_lipschitz T hT f q hf C D hC hD hq hd).continuous
 
-@[simp] theorem boundedPath_apply (t : Icc (0 : ℝ) T) (x : X) :
-    boundedPath T hT f q hf C D hC hD hq hd t x = f x t := rfl
 
 
 end EulerBoundedPathFamily

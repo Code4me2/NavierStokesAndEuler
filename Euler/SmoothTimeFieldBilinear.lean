@@ -66,9 +66,6 @@ def bilinearPath (B : V →L[ℝ] W →L[ℝ] Z)
   ⟨fun t => bilinearMap B (A.field t) (C.field t),
     ((bilinearMap (α := E) B).continuous.comp A.field.continuous).clm_apply C.field.continuous⟩
 
-@[simp] theorem bilinearPath_apply (B : V →L[ℝ] W →L[ℝ] Z)
-    (A : SmoothTimeField K E V) (C : SmoothTimeField K E W) (t : K) (x : E) :
-    bilinearPath B A C t x = B (A.field t x) (C.field t x) := rfl
 
 def uncurryRightPath (n : ℕ) (J : C(K,E →ᵇ (E [×n]→L[ℝ] (E →L[ℝ] Z)))) :
     C(K,E →ᵇ (E [×(n+1)]→L[ℝ] Z)) :=

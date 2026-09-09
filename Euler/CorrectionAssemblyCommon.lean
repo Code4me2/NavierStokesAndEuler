@@ -47,13 +47,6 @@ def FiniteFamily.commonJet (F : FiniteFamily period hT A) (C : ComparisonData pe
   exact EulerH6Pressure.SpatialJet.restrict
     (toJet period (F.solution (n+6) (by omega) t)) n (by omega)
 
-/-- The common L² path satisfies the actual nonlinear inviscid equation. -/
-theorem FiniteFamily.commonPath_hasDerivAt (F : FiniteFamily period hT A)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT.le (F.commonPath period))
-      (value period (((A.atOrder period 6).coefficients period le_rfl).apply
-        ⟨t, ht.1.le, ht.2.le⟩ (F.solution 6 le_rfl ⟨t, ht.1.le, ht.2.le⟩))) t :=
-  F.equation 6 le_rfl t ht
 
 
 /-- Bounded H3 evaluation fixes a canonical actual pointwise representative of the common correction. -/
@@ -84,13 +77,5 @@ theorem FiniteFamily.pointField_smooth (F : FiniteFamily period hT A) (C : Compa
   rw [he]
   exact hg x
 
-/-- The canonical smooth field has pointwise zero lifted divergence. -/
-theorem FiniteFamily.pointField_divergence (F : FiniteFamily period hT A) (C : ComparisonData period hT A)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
-    (∑ i : Fin 3, (fieldDerivative period (coordinateDirection A.κ A.direction i)
-      (F.pointField period t) x) i) = 0 :=
-  divergenceFree_classical_divergence_zero period A.κ A.direction (F.commonPath period t)
-    (F.commonPath_divergence period t) (F.pointField period t) (F.pointField_ae period t)
-    (F.pointField_smooth period C t) x
 
 end EulerCorrectionAssembly

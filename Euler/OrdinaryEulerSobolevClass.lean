@@ -50,24 +50,6 @@ theorem exists_evolution_iff_projected (hpos : 0 < T)
   · intro hA
     exact ⟨evolutionOfProjectedEquation A hA,rfl⟩
 
-theorem Evolution.sobolevTimeDerivative (U : Evolution T hT) (q : ℕ) (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (sobolevPath U.velocity U.velocity_continuous q))
-      (sobolevPath U.derivative U.derivative_continuous q t) (Icc (0 : ℝ) T) t := by
-  apply sobolev_derivative_of_l2 T hT U.velocity U.derivative U.velocity_continuous
-    U.derivative_continuous _ q t
-  intro r hr
-  have h := U.velocityPath_hasDerivWithinAt ⟨r,hr.1.le,hr.2.le⟩
-  rw [U.velocityPath_extend] at h
-  exact h.hasDerivAt (Icc_mem_nhds hr.1 hr.2)
 
-theorem Evolution.sobolevSolutionClass (U : Evolution T hT) (q : ℕ) :
-    Continuous (sobolevPath U.velocity U.velocity_continuous q) ∧
-      Continuous (sobolevPath U.derivative U.derivative_continuous q) ∧
-      ∀ t : Icc (0 : ℝ) T,
-        HasDerivWithinAt (extendPath T hT (sobolevPath U.velocity U.velocity_continuous q))
-          (sobolevPath U.derivative U.derivative_continuous q t) (Icc (0 : ℝ) T) t :=
-  ⟨(sobolevPath U.velocity U.velocity_continuous q).continuous,
-    (sobolevPath U.derivative U.derivative_continuous q).continuous,
-    U.sobolevTimeDerivative q⟩
 
 end EulerOrdinarySobolev

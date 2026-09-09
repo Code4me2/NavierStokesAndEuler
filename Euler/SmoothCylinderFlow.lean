@@ -28,26 +28,12 @@ theorem velocity_deck (c : AddSubgroup.zmultiples P) (t : ℝ) (z : LiftTangent)
 def forward (t : ℝ) : LiftDomain P → LiftDomain P :=
   EulerCylinderPeriodicFlow.flow P (flowData T hT A) 0 t
 
-def backward (t : ℝ) : LiftDomain P → LiftDomain P :=
-  EulerCylinderPeriodicFlow.flow P (flowData T hT A) t 0
 
 
 
-include hA in
-theorem forward_joint_continuous : Continuous (Function.uncurry (forward P T hT A)) :=
-  EulerCylinderPeriodicFlow.forward_joint_continuous P (flowData T hT A) (velocity_deck P T hT A hA)
 
-include hA in
-theorem backward_joint_continuous : Continuous (Function.uncurry (backward P T hT A)) :=
-  EulerCylinderPeriodicFlow.backward_joint_continuous P (flowData T hT A) (velocity_deck P T hT A hA)
 
-include hA in
-theorem backward_forward (t : ℝ) : Function.LeftInverse (backward P T hT A t) (forward P T hT A t) :=
-  EulerCylinderPeriodicFlow.flow_inverse P (flowData T hT A) (velocity_deck P T hT A hA) 0 t
 
-include hA in
-theorem forward_backward (t : ℝ) : Function.RightInverse (backward P T hT A t) (forward P T hT A t) :=
-  EulerCylinderPeriodicFlow.flow_inverse P (flowData T hT A) (velocity_deck P T hT A hA) t 0
 
 variable (hdiv : ∀ t x,
   LinearMap.trace ℝ LiftTangent (fderiv ℝ (A.field t : LiftTangent → LiftTangent) x).toLinearMap=0)

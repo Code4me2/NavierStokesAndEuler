@@ -21,17 +21,7 @@ def Budget.commonPressure (B : Budget period hT A) :
     C(Icc (0 : ℝ) T, LiftL2 period) :=
   (B.family period).commonPressure period
 
-/-- Every constructed finite signed pressure realizes this same common L² pressure. -/
-theorem Budget.signedPressurePath_value_common (B : Budget period hT A)
-    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :
-    value period ((B.family period).signedPressurePath period q hq t) =
-      B.commonPressure period t :=
-  (B.family period).signedPressurePath_value_common period (B.comparisonData period) q hq t
 
-/-- The constructed pressure lies in the genuine closed lifted gradient space. -/
-theorem Budget.commonPressure_gradient (B : Budget period hT A) (t : Icc (0 : ℝ) T) :
-    B.commonPressure period t ∈ gradientSpace period A.κ A.direction :=
-  (B.family period).commonPressure_gradient period t
 
 /-- Actual continuous Sobolev realizations at every order of the same constructed pressure. -/
 def Budget.pressureTower (B : Budget period hT A) : FieldTower period T :=
@@ -69,22 +59,8 @@ theorem Budget.pointPressure_smooth (B : Budget period hT A)
     ContDiff ℝ ∞ (localFieldLift period (B.pointPressure period t) x) :=
   (B.family period).pointPressure_smooth period (B.comparisonData period) t x
 
-/-- The actual graph pressure-gradient vector field of the constructed correction. -/
-def Budget.graphPressure (B : Budget period hT A) (k : ℝ)
-    (t : Icc (0 : ℝ) T) (x : Vector3) : Vector3 :=
-  A.κ • B.pointPressure period t (cylinderGraph period k A.direction x)
 
-/-- The actual graph vector field is jointly continuous in time and space. -/
-theorem Budget.graphPressure_joint_continuous (B : Budget period hT A) (k : ℝ) :
-    Continuous (B.graphPressure period k).uncurry :=
-  (B.family period).graphPressure_joint_continuous period k
 
-/-- Reciprocal-frequency graph restriction of the actual pressure has a genuine smooth potential. -/
-theorem Budget.graphPressure_has_potential (B : Budget period hT A)
-    (k : ℝ) (hk : k * A.κ = 1) (t : Icc (0 : ℝ) T) :
-    ∃ q : Vector3 → ℝ, ContDiff ℝ ∞ q ∧
-      ∀ x, gradient q x = B.graphPressure period k t x :=
-  (B.family period).graphPressure_has_potential period (B.comparisonData period) k hk t
 
 /-- The scalar graph pressure constructed by radial integration, with its additive gauge fixed at zero. -/
 def Budget.normalizedGraphPotential (B : Budget period hT A) (k : ℝ)

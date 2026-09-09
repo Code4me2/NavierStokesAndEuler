@@ -103,9 +103,6 @@ variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 def fieldPathLift : C(K,Space →ᵇ W) →L[ℝ] C(K,LiftDomain period →ᵇ W) :=
   (fieldLift period).compLeftContinuous ℝ K
 
-omit [CompactSpace K] [Fact (0 < period)] in
-@[simp] theorem fieldPathLift_apply (A : C(K,Space →ᵇ W)) (t : K) (x : LiftDomain period) :
-    fieldPathLift period A t x = A t x.1 := rfl
 
 
 end Fields

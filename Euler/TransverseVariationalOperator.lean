@@ -43,14 +43,6 @@ theorem dirichletOperator_coercive (J : V →L[ℝ] W) (H : W →L[ℝ] W)
   have hs := mul_le_mul_of_nonneg_right hsmall (sq_nonneg ‖u‖)
   nlinarith only [hH (J u), hj, hs]
 
-/-- The actual forcing-to-derivative solution map constructed by Lax--Milgram. -/
-def dirichletSolver (J : V →L[ℝ] W) (H : W →L[ℝ] W)
-    (L K : ℝ) (hK : 0 ≤ K)
-    (hJ : ∀ u, ‖J u‖ ^ 2 ≤ L * ‖u‖ ^ 2)
-    (hH : ∀ w, ⟪H w, w⟫_ℝ ≤ K * ‖w‖ ^ 2)
-    (hsmall : K * L ≤ 1 / 2) : W →L[ℝ] V :=
-  (coerciveInverse (dirichletOperator J H) (1 / 2) (by norm_num)
-    (dirichletOperator_coercive J H L K hK hJ hH hsmall)).comp (-J.adjoint)
 
 
 

@@ -94,16 +94,6 @@ theorem velocityPath_supported (t : Icc (0 : ℝ) T) :
   rw [spatialCutoff_path_fix P S hS f hf] at h
   exact h.symm
 
-include hf in
-theorem accelerationPath_supported (t : Icc (0 : ℝ) T) :
-    D.accelerationPath P f t ∈ Supported P U S hS := by
-  apply (spatialCutoff_fix P S hS _).2
-  have h := D.accelerationPath_intertwines P D (spatialCutoff P S hS) (spatialCutoff P S hS)
-    (D.frame_cutoff P S hS) (D.frameDerivative_cutoff P S hS)
-    (D.frame_cutoff_back P S hS) (D.frameDerivative_cutoff_back P S hS)
-    (D.hessian_cutoff P S hS) f t
-  rw [spatialCutoff_path_fix P S hS f hf] at h
-  exact h.symm
 
 include hf in
 theorem physicalVelocity_supported (t : Icc (0 : ℝ) T) :
@@ -116,15 +106,5 @@ theorem physicalVelocity_supported (t : Icc (0 : ℝ) T) :
   rw [spatialCutoff_path_fix P S hS f hf] at h
   exact h.symm
 
-include hf in
-theorem physicalDerivative_supported (t : Icc (0 : ℝ) T) :
-    D.physicalDerivative P f t ∈ Supported P E S hS := by
-  apply (spatialCutoff_fix P S hS _).2
-  have h := D.physicalDerivative_intertwines P D (spatialCutoff P S hS) (spatialCutoff P S hS)
-    (D.frame_cutoff P S hS) (D.frameDerivative_cutoff P S hS)
-    (D.frame_cutoff_back P S hS) (D.frameDerivative_cutoff_back P S hS)
-    (D.hessian_cutoff P S hS) f t
-  rw [spatialCutoff_path_fix P S hS f hf] at h
-  exact h.symm
 
 end EulerCylinderDirichlet.Coefficients

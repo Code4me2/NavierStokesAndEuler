@@ -36,13 +36,6 @@ namespace ProfileBudget
 
 variable {S : Scales (Icc (0 : ℝ) T)} {R : ℝ}
 
-theorem prefixBound {p : ℕ} {a : ℕ → Profile}
-    (G : ∀ i, i < p → ProfileRegularity P T hT support (a i))
-    (hG : ∀ i (hi : i < p), ProfileBudget (G i hi) S R i) :
-    PrefixBound (ProfileRegularity.prefixFields G) hT S R where
-  high i hi _ := (hG i hi).high
-  mean i hi _ := (hG i hi).mean
-  corrector i hi _ := (hG i hi).corrector
 
 theorem transfer {p : ℕ} {support' : Set Space} (hTpos : 0 < T)
     {G : ProfileRegularity P T hT support a} (hG : ProfileBudget G S R p)

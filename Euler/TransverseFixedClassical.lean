@@ -43,13 +43,7 @@ def physicalDerivativePath (f : C(Icc (0 : ℝ) T,E)) : C(Icc (0 : ℝ) T,E) :=
   multiplier Q₁ (velocityPath T hT Q Q₁ H c hc hQ hd K hK hH hsmall (pathLp T hT f))+
     multiplier Q (classicalAcceleration T hT Q Q₁ H c hc hQ hd K hK hH hsmall f)
 
-theorem displacementPath_initial (f : TimeLp T E) :
-    displacementPath T hT Q Q₁ H c hc hQ hd K hK hH hsmall f ⟨0,le_rfl,hT⟩ = 0 :=
-  velocityLp_zero_trace T hT Q Q₁ H c hc hQ hd K hK hH hsmall f
 
-theorem displacementPath_terminal (f : TimeLp T E) :
-    displacementPath T hT Q Q₁ H c hc hQ hd K hK hH hsmall f ⟨T,hT,le_rfl⟩ = 0 :=
-  terminalPrimitive_terminal T hT _
 
 theorem classicalAcceleration_equation (f : C(Icc (0 : ℝ) T,E)) (t : Icc (0 : ℝ) T) :
     gram (Q t) (classicalAcceleration T hT Q Q₁ H c hc hQ hd K hK hH hsmall f t) =

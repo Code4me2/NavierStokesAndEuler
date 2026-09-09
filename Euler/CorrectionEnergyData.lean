@@ -1,4 +1,6 @@
-import Euler.CorrectionEnergyBound
+import Euler.CorrectionEnergyTime
+import Euler.EnergyMetricPaths
+import Euler.GevreyMetricEstimate
 import Euler.GevreyGrowthBudget
 import Euler.NonlinearEnergyConstants
 
@@ -8,10 +10,11 @@ noncomputable section
 
 namespace EulerCorrectionEnergyData
 
-open MeasureTheory Set InnerProductSpace EulerLiftedGradientSpace EulerCylinderSobolevSpace EulerCylinderSobolev
-  EulerSpatialSobolevInverse EulerCorrectionOperators EulerCorrectionEnergyTime EulerCorrectionEnergyBound
-  EulerEnergyMetricPaths EulerGevreyMetricEstimate EulerGevreyGrowthCoefficient EulerGevreyRestriction
-  EulerH6Pressure EulerSobolevGevreyOperators EulerRegularizedMetricPaths EulerNonlinearEnergyConstants
+open MeasureTheory Set InnerProductSpace EulerLiftedGradientSpace EulerCylinderSobolevSpace
+  EulerCylinderSobolev EulerSpatialSobolevInverse EulerCorrectionOperators
+  EulerCorrectionEnergyTime EulerEnergyMetricPaths EulerGevreyMetricEstimate
+  EulerGevreyGrowthCoefficient EulerGevreyRestriction EulerH6Pressure
+  EulerSobolevGevreyOperators EulerRegularizedMetricPaths EulerNonlinearEnergyConstants
   EulerTimeLp EulerVolterraConvolution
 open scoped Topology
 

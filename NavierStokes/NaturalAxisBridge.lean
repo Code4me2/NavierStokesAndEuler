@@ -84,9 +84,6 @@ theorem profile_sub (I : Window) {ε : ℝ} (hε : 0 < ε)
   simpa only [AxisEvaluation.mixedSeries_zero] using
     AxisEvaluation.mixedSeries_sub I hε A B 0 0 hp
 
-theorem profile_zero (I : Window) (ε : ℝ) (p : ℝ × ℝ) :
-    AxisEvaluation.profile I ε (0 : AxisSpace I ε) p = 0 := by
-  simp [AxisEvaluation.profile, coefficient]
 
 theorem radialEvaluation_add (I : Window) {ε : ℝ} (hε : 0 < ε)
     (r : ℕ) (A B : AxisSpace I ε) {p : ℝ × ℝ} (hp : |p.1| < 20) :

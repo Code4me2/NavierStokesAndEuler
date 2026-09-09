@@ -46,9 +46,6 @@ theorem parameterFactor_smooth {S : Set E} (hS : IsOpen S) {J : Set ℝ} (hJ : I
       (hf.comp ((contDiff_fst.prodMk contDiff_snd.snd).prodMk contDiff_snd.fst).contDiffOn
         (fun _ hp => ⟨⟨hp.1, hp.2.2⟩, mem_univ _⟩))
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] in
-@[simp] theorem parameterFactor_zero (B : E × Point → ℝ) (q : E) (η : ℝ) :
-    parameterFactor B (q, (0, η)) = 0 := by simp [parameterFactor]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem parameterFactor_identity (B : E × Point → ℝ) (q : E) (κ : ℝ) (p : Point) :
@@ -365,9 +362,6 @@ theorem historyErrorFactor_smooth (X0 : ℝ) {J : Set ℝ} (hJ : IsOpen J) {L U 
   parameterFactor_smooth isOpen_univ hJ
     ((contDiffOn_fst.snd.mul contDiffOn_snd.fst).mul (densityErrorFactor_smooth X0 hJ hL hU r))
 
-@[simp] theorem historyErrorFactor_zero (X0 : ℝ) (L U : Field)
-    (r : HistoryRow) (κ T η : ℝ) : historyErrorFactor X0 L U r ((κ, T), (0, η)) = 0 := by
-  exact parameterFactor_zero _ _ _
 
 theorem history_scaled_factor {T : ℝ} (hT : T ≠ 0) (κ X0 : ℝ)
     (initial : HistoryRow → ℝ → ℝ) {J : Set ℝ} (hJ : IsOpen J) {L U : Field}

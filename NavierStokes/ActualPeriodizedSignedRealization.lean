@@ -97,39 +97,6 @@ theorem gaussian_mask_sum {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     _ = l.mask n Y • (l.gaussian n Y • a) := (l.mask_summable n Y).tsum_smul_const _
     _ = _ := smul_comm _ _ _
 
-/-- Local finiteness of the actual native cutoffs permits arbitrary
-smooth slow factors; only their germs on the native support are needed. -/
-theorem maskedSum_contDiffOn {D E : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (n : ℕ) (projection : D → Plane) (hprojection : ContDiff ℝ ∞ projection)
-    {O : Set D} (hO : IsOpen O) (f : Frequency → D → E)
-    (hf : ∀ k x, x ∈ O → (l.geometry n).coordinates k (projection x) ∈ tsupport (l.cutoff n) →
-      ContDiffAt ℝ ∞ (f k) x) :
-    ContDiffOn ℝ ∞ (fun x => ∑' k, l.nativeMask n k (projection x) • f k x) O := by
-  classical
-  have hc (k : Frequency) : ContDiff ℝ ∞ (fun x => (l.geometry n).coordinates k (projection x)) :=
-    ((l.geometry n).coordinates_contDiff k).comp hprojection
-  have ht (k : Frequency) (x : D) (hx : x ∈ O) :
-      ContDiffAt ℝ ∞ (fun y => l.nativeMask n k (projection y) • f k y) x := by
-    by_cases hs : (l.geometry n).coordinates k (projection x) ∈ tsupport (l.cutoff n)
-    · exact (((l.cutoff_smooth n).comp (hc k)).contDiffAt).smul (hf k x hx hs)
-    · have hz := (notMem_tsupport_iff_eventuallyEq.mp hs).comp_tendsto (hc k).continuous.continuousAt
-      apply (contDiffAt_const (c := (0 : E))).congr_of_eventuallyEq
-      filter_upwards [hz] with y hy
-      change l.cutoff n ((l.geometry n).coordinates k (projection y)) = 0 at hy
-      simp only [nativeMask, hy, zero_smul]
-  apply hO.contDiffOn_iff.mpr
-  intro x hx
-  obtain ⟨J, hJ⟩ := (l.geometry n).finite_copy_cutoffs (l.cutoff_compact n) (‖projection x‖ + 1)
-  have he : (fun y => ∑' k, l.nativeMask n k (projection y) • f k y) =ᶠ[𝓝 x]
-      fun y => ∑ k ∈ J, l.nativeMask n k (projection y) • f k y := by
-    filter_upwards [(isOpen_lt hprojection.continuous.norm continuous_const).mem_nhds
-      (show ‖projection x‖ < ‖projection x‖ + 1 by linarith)] with y hy
-    apply tsum_eq_sum
-    intro k hk
-    change l.cutoff n ((l.geometry n).coordinates k (projection y)) • f k y = 0
-    rw [hJ (projection y) hy.le k hk, zero_smul]
-  exact (ContDiffAt.sum (fun k _ => ht k x hx)).congr_of_eventuallyEq he
 
 end Layout
 
@@ -208,8 +175,6 @@ noncomputable def views {reference : ℕ} (V : B.Views reference) :
   directions := V.directions
   background := V.background
 
-@[simp] theorem views_map {reference : ℕ} (V : B.Views reference) :
-    (views B l V).map = V.map := rfl
 
 /-- Reuse the actual current state, reference state, and their full-fiber
 coherence. There is no second signed choice or request. -/
@@ -246,11 +211,7 @@ variable {reference : ℕ} (V : B.Views reference)
 
 noncomputable def sharedMask (n : ℕ) (x : Cylinder) : ℝ := B.mask reference (V.map n x)
 
-noncomputable def totalMask (n : ℕ) (x : Cylinder) : ℝ :=
-  sharedMask B V n x * l.mask reference (V.map n x).1.2.2
 
-noncomputable def copyMask (k : Frequency) (n : ℕ) (x : Cylinder) : ℝ :=
-  sharedMask B V n x * l.nativeMask reference k (V.map n x).1.2.2
 
 noncomputable def commonUnit (j : Fin 2) (n : ℕ) (x : Cylinder) : Space :=
   (periodizedPrimary B l).fundamental j reference (V.map n x)
@@ -276,119 +237,21 @@ noncomputable def coefficientsWith (request : ℕ → Cylinder → Vec2) (j : Fi
     (fun n x => (V.normal n * V.clock n) • B.normalMotion reference (V.map n x))
     (fun n x => V.clock n • B.action reference (V.map n x)) j
 
-noncomputable def commonCoefficients (request : ℕ → Cylinder → Vec2) (j : Fin 2) : WaveCoefficients Cylinder :=
-  coefficientsWith B l V request j (sharedMask B V) (commonUnit B l V j)
-
-noncomputable def nativeCoefficients (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency) :
-    WaveCoefficients Cylinder :=
-  coefficientsWith B l V request j (copyMask B l V k) (nativeUnit B l V j k)
-
-theorem views_coefficients (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    (views B l V).coefficients request j =
-      coefficientsWith B l V request j (totalMask B l V) (commonUnit B l V j) := rfl
 
 
-theorem coefficientsWith_amplitude (request : ℕ → Cylinder → Vec2) (j : Fin 2)
-    (mask : ℕ → Cylinder → ℝ) (unit : ℕ → Cylinder → Space) (n : ℕ) (x : Cylinder) :
-    (coefficientsWith B l V request j mask unit).amplitude n x =
-      SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-        (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request mask j n x •
-          CurlClassBounds.complexify (unit n x) :=
-  coefficients_amplitude_at _ _ _ _ _ _ _ _ _ _ _ _ _
-
-theorem coefficientsWith_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2)
-    (mask : ℕ → Cylinder → ℝ) (unit : ℕ → Cylinder → Space) (n : ℕ) (x : Cylinder) :
-    (coefficientsWith B l V request j mask unit).pressure n x =
-      SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-        (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request mask j n x •
-          homogeneousPressure (V.frequency n)
-            (((periodizedPrimary B l).viewBase V.background V.frequency (fun n => V.map n) reference).normal
-              V.strip V.directions n x)
-            ((V.normal n * V.clock n) • B.normalMotion reference (V.map n x))
-            (V.clock n • B.action reference (V.map n x)) (unit n x) :=
-  coefficients_pressure_at _ _ _ _ _ _ _ _ _ _ _ _ _
-
-theorem copy_scalar (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency)
-    (n : ℕ) (x : Cylinder) :
-    SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-      (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request (copyMask B l V k) j n x =
-      l.nativeMask reference k (V.map n x).1.2.2 *
-        SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-          (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request (sharedMask B V) j n x := by
-  unfold SignedWaveUpdate.signedScalar copyMask
-  ring
-
-theorem total_scalar (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
-    SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-      (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request (totalMask B l V) j n x =
-      l.mask reference (V.map n x).1.2.2 *
-        SignedWaveUpdate.signedScalar V.strip (fun n x => B.matrix reference (V.map n x))
-          (B.viewTarget V.strip V.velocity (fun n => V.map n) reference) request (sharedMask B V) j n x := by
-  unfold SignedWaveUpdate.signedScalar totalMask
-  ring
-
-theorem native_amplitude (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency)
-    (n : ℕ) (x : Cylinder) :
-    (nativeCoefficients B l V request j k).amplitude n x =
-      l.nativeMask reference k (V.map n x).1.2.2 • (commonCoefficients B l V request j).amplitude n x := by
-  simp only [nativeCoefficients, commonCoefficients, coefficientsWith_amplitude]
-  rw [copy_scalar, mul_smul]
-  by_cases hk : l.nativeMask reference k (V.map n x).1.2.2 = 0
-  · simp only [hk, zero_smul]
-  · rw [commonUnit_eq_native B l V j k n x hk]
-
-theorem native_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency)
-    (n : ℕ) (x : Cylinder) :
-    (nativeCoefficients B l V request j k).pressure n x =
-      l.nativeMask reference k (V.map n x).1.2.2 • (commonCoefficients B l V request j).pressure n x := by
-  simp only [nativeCoefficients, commonCoefficients, coefficientsWith_pressure]
-  rw [copy_scalar, mul_smul]
-  by_cases hk : l.nativeMask reference k (V.map n x).1.2.2 = 0
-  · simp only [hk, zero_smul]
-  · rw [commonUnit_eq_native B l V j k n x hk]
-
-theorem view_amplitude (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
-    ((views B l V).coefficients request j).amplitude n x =
-      l.mask reference (V.map n x).1.2.2 • (commonCoefficients B l V request j).amplitude n x := by
-  rw [views_coefficients]
-  simp only [commonCoefficients, coefficientsWith_amplitude]
-  rw [total_scalar, mul_smul]
-
-theorem view_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
-    ((views B l V).coefficients request j).pressure n x =
-      l.mask reference (V.map n x).1.2.2 • (commonCoefficients B l V request j).pressure n x := by
-  rw [views_coefficients]
-  simp only [commonCoefficients, coefficientsWith_pressure]
-  rw [total_scalar, mul_smul]
-
-/-- Every lattice copy is built by the actual native signed quotient and
-projected homogeneous pressure; the cutoff is applied before summation. -/
-noncomputable def copyData (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    PeriodizedWaveBounds.CopyData Cylinder Frequency where
-  background := (periodizedPrimary B l).viewBase V.background V.frequency (fun n => V.map n) reference
-  amplitude n k := (nativeCoefficients B l V request j k).amplitude n
-  pressure n k := (nativeCoefficients B l V request j k).pressure n
-  cutoff n k x := l.nativeGaussian reference k (V.map n x).1.2.2
-  source := fun _ _ => 0
 
 
-theorem common_amplitude (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
-    (copyData B l V request j).common.amplitude n x =
-      (((views B l V).coefficients request j).withCutoff (views B l V).cutoff).amplitude n x := by
-  change (∑' k, l.nativeGaussian reference k (V.map n x).1.2.2 •
-    (nativeCoefficients B l V request j k).amplitude n x) =
-      l.gaussian reference (V.map n x).1.2.2 • ((views B l V).coefficients request j).amplitude n x
-  simp_rw [native_amplitude]
-  rw [l.gaussian_mask_sum, view_amplitude]
 
-theorem common_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
-    (copyData B l V request j).common.pressure n x =
-      (((views B l V).coefficients request j).withCutoff (views B l V).cutoff).pressure n x := by
-  change (∑' k, (l.nativeGaussian reference k (V.map n x).1.2.2 : ℂ) *
-    (nativeCoefficients B l V request j k).pressure n x) =
-      (l.gaussian reference (V.map n x).1.2.2 : ℂ) * ((views B l V).coefficients request j).pressure n x
-  simp_rw [native_pressure, ← Complex.real_smul]
-  rw [l.gaussian_mask_sum, view_pressure]
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -399,16 +262,8 @@ theorem common_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : �
 
 
 
-/-- One genuine periodized Cartesian potential, retaining the same pulse,
-reference state, scales, and integer covers as the native copies. -/
-noncomputable def physicalPotential (D : V.StateData) (j : Fin 2) (delta : ℝ) : VelocityField :=
-  (views B l V).physicalPotential D.referenceRequest j delta
 
-noncomputable def physicalVelocity (D : V.StateData) (j : Fin 2) (delta : ℝ) : VelocityField :=
-  SpatialCurl.spatialCurl (physicalPotential B l V D j delta)
 
-noncomputable def physicalPressure (D : V.StateData) (j : Fin 2) (delta : ℝ) : PressureField :=
-  (views B l V).physicalPressure D.referenceRequest j delta
 
 
 
@@ -493,103 +348,14 @@ variable {B l} {request : ℕ → Cylinder → Vec2} {reference : ℕ} {column :
 
 include R
 
-theorem matrix_smooth (i j : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => B.matrix reference x i j) B.strip.domain := by
-  have hm := PrimaryPulseBounds.primaryCovariance_entry_polynomial U B.prefactor
-    (fun j => (B.pulse j).frame) (fun j => (B.pulse j).lam) (fun j => (B.pulse j).u)
-    (fun j => (B.pulse j).L) R.prefactor (fun j => (B.pulse j).pulse_jets)
-    (fun j => (B.pulse j).lam_pos) (fun j => (B.pulse j).u_pos) (fun j => (B.pulse j).L_pos) i j
-  exact (hm.smooth reference).comp R.coordinate R.coordinate_mem
 
-theorem scalar_smooth (j : Fin 2) :
-    ContDiffOn ℝ ∞ (referenceScalar B request j reference) B.strip.domain := by
-  have hi := SmoothCovariance.contDiffOn_inverse_solution R.matrix_smooth R.request
-    (fun x hx => (R.cone x hx).det_ne_zero) j
-  have ha := SmoothCovariance.contDiffOn_amplitudes R.matrix_smooth R.target R.cone j
-  have hd : ∀ x ∈ B.strip.domain, 2 * SmoothCovariance.amplitudes
-      (B.matrix reference x) (B.target reference x) j ≠ 0 := by
-    intro x hx
-    exact mul_ne_zero (by norm_num) ((R.cone x hx).amplitudes_pos j).ne'
-  exact (contDiffOn_const.mul (hi.div (contDiffOn_const.mul ha) hd)).mul R.mask
 
-theorem unit_smoothAt (j : Fin 2) (k : Frequency) {x : Cylinder} (hx : x ∈ B.strip.domain)
-    (hs : (l.geometry reference).coordinates k x.1.2.2 ∈ tsupport (l.cutoff reference)) :
-    ContDiffAt ℝ ∞ (referenceNativeUnit B l j reference k) x := by
-  have hc : ContDiff ℝ ∞ (fun y : Cylinder => l.nativeClock reference k y.1.2.2) :=
-    (((l.geometry reference).coordinates_contDiff k).comp contDiff_fst.snd.snd).snd.div_const _
-  have hu : ContDiffAt ℝ ∞ (PrimaryPulseBounds.normalizedPulse ((B.pulse j).frame reference)
-      ((B.pulse j).lam reference) ((B.pulse j).u reference) ((B.pulse j).L reference))
-      ((B.coordinate reference x).1, l.nativeClock reference k x.1.2.2) :=
-    ((B.pulse j).pulse_jets.smooth reference).contDiffAt
-    (((U.isOpen reference).prod isOpen_Ioo).mem_nhds
-      ⟨R.coordinate_mem x hx, R.native_time k x hx hs⟩)
-  exact hu.comp x
-    ((R.coordinate.contDiffAt (B.strip.isOpen_domain.mem_nhds hx)).prodMk hc.contDiffAt)
 
-/-- Smoothness is derived from the actual native sum, including its
-zero germs between support cells. -/
-theorem raw_smooth (j : Fin 2) :
-    ContDiffOn ℝ ∞ ((periodizedPrimary B l).raw request j reference) B.strip.domain := by
-  rw [reference_raw_eq_sum]
-  apply l.maskedSum_contDiffOn reference (fun x : Cylinder => x.1.2.2) contDiff_fst.snd.snd
-    B.strip.isOpen_domain
-  intro k x hx hs
-  have hg : ContDiff ℝ ∞ (fun y : Cylinder => l.nativeGaussian reference k y.1.2.2) :=
-    GaussianTailFlat.profile_contDiff.comp
-      ((((l.geometry reference).coordinates_contDiff k).comp contDiff_fst.snd.snd).snd.div_const _)
-  exact hg.contDiffAt.smul
-    ((R.scalar_smooth j).contDiffAt (B.strip.isOpen_domain.mem_nhds hx) |>.smul
-      (CurlClassBounds.complexify.contDiff.contDiffAt.comp x (R.unit_smoothAt j k hx hs)))
 
-theorem raw_tangent {x : Cylinder} (hx : x ∈ B.strip.domain) :
-    normalDot (B.base.normal B.strip B.directions reference x)
-      ((periodizedPrimary B l).raw request column reference x) = 0 := by
-  classical
-  rw [reference_raw_formula]
-  by_cases hm : l.mask reference x.1.2.2 = 0
-  · simp only [hm, zero_smul, smul_zero, normalDot]
-    simp
-  · have hk : ∃ k, l.nativeMask reference k x.1.2.2 ≠ 0 := by
-      by_contra h
-      push Not at h
-      apply hm
-      change (∑' k, l.nativeMask reference k x.1.2.2) = 0
-      simp only [h, tsum_zero]
-    obtain ⟨k, hk⟩ := hk
-    rw [referenceUnit_eq_native B l column reference k x hk]
-    have ht : normalDot (B.base.normal B.strip B.directions reference x)
-        (CurlClassBounds.complexify (referenceNativeUnit B l column reference k x)) = 0 := by
-      rw [SignedWaveUpdate.normalDot_complexify, R.normal_frame k x hx hk]
-      exact_mod_cast ((B.pulse column).frame reference).ambient_tangent
-        ((B.coordinate reference x).1,
-          (B.pulse column).L reference * l.nativeClock reference k x.1.2.2) _
-    simp only [smul_smul]
-    simpa only [one_smul, Complex.ofReal_one, one_mul, ht, mul_zero] using
-      PhysicalParticularWave.normalDot_scaled 1
-        (l.gaussian reference x.1.2.2 * (l.mask reference x.1.2.2 * referenceScalar B request column reference x))
-        (B.base.normal B.strip B.directions reference x)
-        (CurlClassBounds.complexify (referenceNativeUnit B l column reference k x))
 
 end SupportedRegular
 
-theorem fast_invariant : CopyAngularInvariance.Invariant ((0, 1) : Cylinder)
-    (fun x : Cylinder => x.1.2.2) := by
-  intro x t
-  simp only [Prod.fst_add, Prod.smul_fst, smul_zero, add_zero]
 
-/-- Angular invariance is inherited from the same primary inputs.  The
-new clock and native mask depend only on the auxiliary torus coordinate. -/
-noncomputable def periodizedAngular {request : ℕ → Cylinder → Vec2} {reference : ℕ}
-    (A : B.Angular request reference) : (periodizedPrimary B l).Angular request reference where
-  mode := A.mode
-  phase := A.phase
-  coordinate := (A.coordinate.map Prod.fst).map₂
-    (fast_invariant.map (l.clock reference)) Prod.mk
-  target := A.target
-  request := A.request
-  mask := A.mask.map₂ (fast_invariant.map (l.mask reference)) (· * ·)
-  normalMotion := A.normalMotion
-  action := A.action
 
 variable {reference : ℕ} (V : B.Views reference) (D : V.StateData)
 

@@ -78,52 +78,8 @@ theorem velocity_translation_contDiff
     (sourceCoordinateSolver_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
       hBe hBc hL hr hrquarter hext hcore hInv hF K hK hF0 hH hsmall f hf)
 
-/-- The actual acceleration has genuine spatial regularity, supplied by the
-uniformly coercive translated Gram solve. -/
-theorem acceleration_translation_contDiff
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f)) :
-    ContDiff ℝ ∞ (fun a : Space => timeSolenoidalTranslation T a s.acceleration) := by
-  have hFr : ContDiff ℝ ∞ (fun a : Space => translatePath T a (operatorPath T F.field)) := by
-    simpa only [translatePath_operatorPath] using operatorPathTranslation_contDiff T F
-  have hF₁r : ContDiff ℝ ∞ (fun a : Space => translatePath T a (operatorPath T F₁.field)) := by
-    simpa only [translatePath_operatorPath] using operatorPathTranslation_contDiff T F₁
-  have hv := velocity_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-    hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
-  have heq := s.acceleration_eq_meanAcceleration (meanFrameCoercivity T FInv)
-    (meanFrameCoercivity_pos T FInv) (solenoidalFrame_lower T FInv (operatorPath T F.field) hInv)
-  have horbit := congrArg (fun v : TimeLp T solenoidalSpace =>
-    fun a : Space => timeSolenoidalTranslation T a v) heq
-  exact Eq.mpr (congrArg (fun g : Space → TimeLp T solenoidalSpace => ContDiff ℝ ∞ g) horbit)
-    (meanAcceleration_translation_contDiff T hT (operatorPath T F.field) (operatorPath T F₁.field)
-      (meanFrameCoercivity T FInv) (meanFrameCoercivity_pos T FInv)
-      (solenoidalFrame_lower T FInv (operatorPath T F.field) hInv) s.velocityLp f hFr hF₁r hv hf)
 
-/-- Both actual physical fields B and B_t, and their pressure residual, have
-smooth spatial translation orbits. -/
-theorem physical_translation_contDiff
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f)) :
-    ContDiff ℝ ∞ (fun a : Space => timeTranslation T a s.velocityField) ∧
-      ContDiff ℝ ∞ (fun a : Space => timeTranslation T a s.velocityDerivative) ∧
-      ContDiff ℝ ∞ (fun a : Space => timeTranslation T a s.pressureResidual) := by
-  have hFr : ContDiff ℝ ∞ (fun a : Space => translatePath T a (operatorPath T F.field)) := by
-    simpa only [translatePath_operatorPath] using operatorPathTranslation_contDiff T F
-  have hF₁r : ContDiff ℝ ∞ (fun a : Space => translatePath T a (operatorPath T F₁.field)) := by
-    simpa only [translatePath_operatorPath] using operatorPathTranslation_contDiff T F₁
-  have hv := velocity_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-    hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
-  have ha := acceleration_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-    hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
-  exact ⟨s.velocityField_translation_contDiff hFr hv,
-    s.velocityDerivative_translation_contDiff hFr hF₁r hv ha,
-    s.pressureResidual_translation_contDiff hFr hF₁r hv ha hf⟩
 
-/-- The actual reconstructed velocity has a smooth spatial orbit uniformly in time. -/
-theorem continuousVelocity_translation_contDiff
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f)) :
-    ContDiff ℝ ∞ (fun a : Space => pathTranslation T a s.continuousVelocity) := by
-  have hp := physical_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-    hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
-  exact s.continuousVelocity_translation_contDiff hp.1 hp.2.1
 
 
 

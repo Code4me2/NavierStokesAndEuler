@@ -1,6 +1,8 @@
 import Euler.PacketCylinderFieldUnique
 import Euler.PacketCylinderJetOperations
-import Euler.CylinderPathBilinearBounds
+import Euler.CylinderPathBilinear
+import Euler.CylinderPathProductBounds
+import Euler.ParameterSobolevFiniteSum
 import Euler.CylinderConstantMapBounds
 import Euler.PacketMajorantShift
 
@@ -29,9 +31,6 @@ theorem WordBound.transfer (h : G.WordBound q R A d) (H : Field P T raw) : H.Wor
   rw [← G.path_eq_of_same_raw H]
   exact h
 
-theorem WordBound.congr (h : G.WordBound q R A d)
-    (he : ∀ (t : Icc (0 : ℝ) T) x θ, raw' (t,(x,θ)) = raw (t,(x,θ))) :
-    (G.congr he).WordBound q R A d := h
 
 theorem WordBound.mono_amplitude (h : G.WordBound q R A d) (hR : 0 ≤ R) (hAB : A ≤ B) :
     G.WordBound q R B d := fun n => (h n).trans
@@ -116,10 +115,6 @@ theorem WordBound.scalarProduct (hG : G.WordBound 6 R A d) (hH : H.WordBound 6 R
     (G.scalarProduct H L hL).WordBound 6 R (3*productBlockConstant P*A*B) (d+e) :=
   scalarProductPath_majorant P L hL G.path H.path G.orbit H.orbit R A B hR hA hB d e 0 hG hH
 
-theorem WordBound.bilinear (hG : G.WordBound 6 R A d) (hH : H.WordBound 6 R B e)
-    (L : Space →L[ℝ] Space →L[ℝ] Space) (hR : 0 ≤ R) (hA : 0 ≤ A) (hB : 0 ≤ B) :
-    (G.bilinear H L).WordBound 6 R (9*productBlockConstant P*‖L‖*A*B) (d+e) :=
-  bilinearProductPath_majorant P L G.path H.path G.orbit H.orbit R A B hR hA hB d e 0 hG hH
 
 theorem WordBound.spatialTransport (hG : G.WordBound 6 R A d) (hH : H.WordBound 6 R B e)
     (hR : 0 ≤ R) (hA : 0 ≤ A) (hB : 0 ≤ B) :

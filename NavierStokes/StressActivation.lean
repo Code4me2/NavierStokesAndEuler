@@ -209,8 +209,6 @@ noncomputable def primitiveFactor (T : ℝ) (B : Field) (p : Point) : ℝ :=
 
 
 
-@[simp] theorem primitiveFactor_zero (T : ℝ) (B : Field) (η : ℝ) :
-    primitiveFactor T B (0, η) = 0 := by simp [primitiveFactor]
 
 theorem weightedPrimitive_factorization {T : ℝ} (hT : 0 < T) (κ : ℝ) (B : Field)
     (p : Point) : weightedPrimitive T κ B p = p.1 * activation T κ p.1 * primitiveFactor T B p := by
@@ -262,8 +260,6 @@ noncomputable def activatedAngular (T κ : ℝ) (L : Field) : Field :=
   fun p => Real.exp (controlled T κ L p)
 noncomputable def referenceP1 (L : Field) : Field := fun p => -2 * radialPartial L p
 noncomputable def radius (X0 y : ℝ) : ℝ := X0 * Real.exp y
-noncomputable def referenceNs (X0 : ℝ) (U : Field) : Field :=
-  fun p => -2 * radialPartial U p / radius X0 p.1
 
 theorem activatedAngular_pos (T κ : ℝ) (L : Field) (p : Point) :
     0 < activatedAngular T κ L p := Real.exp_pos _
@@ -283,24 +279,12 @@ theorem activation_angular_equation (T κ : ℝ) {J : Set ℝ} (hJ : IsOpen J) {
   unfold referenceP1
   ring
 
-/-- The second equation in (18), with `n_s` obtained from the reference field. -/
-theorem activation_axial_equation (T κ : ℝ) {X0 : ℝ} (hX0 : 0 < X0)
-    {J : Set ℝ} (hJ : IsOpen J) {U : Field}
-    (hU : ContDiffOn ℝ ∞ U (logDomain J hJ).carrier) (y : ℝ) {η : ℝ} (hη : η ∈ J) :
-    HasDerivAt (fun x => controlled T κ U (x, η))
-      (-(damping T κ y * radius X0 y * referenceNs X0 U (y, η)) / 2) y := by
-  convert! controlled_hasDerivAt T κ hJ hU y hη using 1
-  have hr : radius X0 y ≠ 0 := ne_of_gt (mul_pos hX0 (Real.exp_pos y))
-  unfold referenceNs
-  field_simp
 
 noncomputable def relativeFactor (T κ : ℝ) (L : Field) (p : Point) : ℝ :=
   -primitiveFactor T (radialPartial L) p *
     meanExp (-weightedPrimitive T κ (radialPartial L) p)
 
 
-@[simp] theorem relativeFactor_zero (T κ : ℝ) (L : Field) (η : ℝ) :
-    relativeFactor T κ L (0, η) = 0 := by simp [relativeFactor]
 
 theorem angular_relative_difference {T : ℝ} (hT : 0 < T) (κ : ℝ)
     {J : Set ℝ} (hJ : IsOpen J) {L : Field}
@@ -333,29 +317,6 @@ noncomputable def differenceFamily (T : ℝ) (F : Field) (q : FamilyPoint) : ℝ
 
 
 
-/-- Compactness bounds the genuine η derivatives of a jointly smooth family.
-In particular the compact κ range contains zero; inverse powers of κ cannot enter. -/
-theorem compact_parameter_jet_bound {J K : Set ℝ} (hJ : IsOpen J)
-    (hK : IsCompact K) (hKJ : K ⊆ J) {H : FamilyPoint → ℝ}
-    (hH : ContDiffOn ℝ ∞ H ((univ : Set (ℝ × ℝ)) ×ˢ J)) (T : ℝ) (n : ℕ) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ κ ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) T, ∀ η ∈ K,
-      |iteratedDeriv n (fun ξ => H ((κ, y), ξ)) η| ≤ M := by
-  have hc : ContinuousOn
-      (fun q : FamilyPoint => iteratedFDeriv ℝ n (fun ξ => H (q.1, ξ)) q.2)
-      ((univ : Set (ℝ × ℝ)) ×ˢ J) := by
-    intro q hq
-    exact (ParametricFlatFactor.contDiffAt_partial_iteratedFDeriv
-      (fun v ξ => H (v, ξ)) n q.1 q.2
-      (hH.contDiffAt ((isOpen_univ.prod hJ).mem_nhds hq))).continuousAt.continuousWithinAt
-  have hcompact : IsCompact ((Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) T) ×ˢ K) :=
-    (isCompact_Icc.prod isCompact_Icc).prod hK
-  obtain ⟨M, hM⟩ := hcompact.exists_bound_of_continuousOn
-    (hc.mono (fun q hq => ⟨mem_univ _, hKJ hq.2⟩))
-  refine ⟨max M 0, le_max_right _ _, ?_⟩
-  intro κ hκ y hy η hη
-  have hb := hM ((κ, y), η) ⟨⟨hκ, hy⟩, hη⟩
-  rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, Real.norm_eq_abs] at hb
-  exact hb.trans (le_max_left _ _)
 
 
 
@@ -536,10 +497,6 @@ noncomputable def historyDifferenceFamily (T X0 : ℝ) (L U : Field)
   familyPrimitiveFactor T (historyIntegrandFamily T X0 L U r)
 
 
-@[simp] theorem historyDifferenceFamily_zero (T X0 : ℝ) (L U : Field)
-    (r : HistoryRow) (κ η : ℝ) :
-    historyDifferenceFamily T X0 L U r ((κ, 0), η) = 0 := by
-  simp [historyDifferenceFamily, familyPrimitiveFactor]
 
 theorem history_difference_factorization {T : ℝ} (hT : 0 < T) (κ X0 : ℝ)
     (initial : HistoryRow → ℝ → ℝ) {J : Set ℝ} (hJ : IsOpen J) {L U : Field}
@@ -873,22 +830,7 @@ theorem reference_histories_log_formula {δ : ℝ} (hδ : 0 < δ) (hδT : 2 * δ
 
 
 
-theorem angular_equation {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < rampLimit) (κ y : ℝ) {η : ℝ} (hη : η ∈ parameterInterval) :
-    HasDerivAt (fun t => Real.log (f N T κ δ (radius N.endpoint t, η)))
-      (-(damping T κ y * referenceP1 (refLog N δ) (y, η)) / 2) y := by
-  convert! activation_angular_equation T κ parameterInterval_open (refLog_smooth N hδ hδT) y hη using 1
-  funext t
-  exact congrArg Real.log (f_logPullback N hT hδ hδT κ t hη)
 
-theorem axial_equation {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ)
-    (hδT : 2 * δ < rampLimit) (κ y : ℝ) {η : ℝ} (hη : η ∈ parameterInterval) :
-    HasDerivAt (fun t => U N T κ δ (radius N.endpoint t, η))
-      (-(damping T κ y * radius N.endpoint y * referenceNs N.endpoint (refAxial N δ) (y, η)) / 2) y := by
-  convert! activation_axial_equation T κ N.endpoint_pos parameterInterval_open
-    (refAxial_smooth N hδ hδT) y hη using 1
-  funext t
-  exact U_logPullback N hT hδ hδT κ t hη
 
 end FromReference
 

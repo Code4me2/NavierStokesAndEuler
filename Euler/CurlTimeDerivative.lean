@@ -88,8 +88,6 @@ def curlMatrixCLM : (Space →L[ℝ] Space) →L[ℝ] Space :=
       map_add' := curlMatrix_add
       map_smul' := curlMatrix_smul }).toContinuousLinearMap
 
-@[simp] theorem curlMatrixCLM_apply (A : Space →L[ℝ] Space) :
-    curlMatrixCLM A = curlMatrix A := rfl
 
 /-- Spatial curl commutes with ordinary time differentiation at each point
 of local joint `C²` regularity. -/

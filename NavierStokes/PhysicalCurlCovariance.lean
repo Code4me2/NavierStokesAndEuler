@@ -558,13 +558,6 @@ theorem reference_correctedWave {Q : ℝ} (hQ : 0 < Q) (h : ℝ) (k : ℕ)
 
 
 
-theorem spatialCurl_zero_of_zero_near {A : VelocityField} {z : SpaceTime}
-    (hA : A =ᶠ[𝓝 z] fun _ => 0) : SpatialCurl.spatialCurl A z = 0 := by
-  have hs : (fun y => A (z.1, y)) =ᶠ[𝓝 z.2] fun _ => 0 :=
-    hA.comp_tendsto (continuous_const.prodMk continuous_id).continuousAt
-  change SpatialCurl.curl (fun y => A (z.1, y)) z.2 = 0
-  rw [SpatialCurl.curl_eq_of_eventuallyEq hs]
-  simp [SpatialCurl.curl]
 
 
 /-! ## A concrete Cartesian potential in an actual inverse polar chart -/
@@ -655,24 +648,6 @@ theorem cartesianPotential_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarCharts.
   eventually_of_mem ((validCylindrical_open a j).mem_nhds hz)
     (fun _ hw => cartesianPotential_forward ha j B hw)
 
-/-- The constructed Cartesian potential has the prescribed actual curl in
-its polar chart. No potential-representation premise remains. -/
-theorem cartesianPotential_curl {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    {B : SpaceTime → ComplexVector} {z : SpaceTime} (hz : z ∈ validCylindrical a j)
-    (hB : ContDiffAt ℝ ∞ B z) (i : Fin 3) :
-    CylindricalResidual.frame (-(z.2 1))
-      (SpatialCurl.spatialCurl (cartesianPotential a j B) (z.1, CylindricalResidual.chart z.2)) i =
-      (CurlClassBounds.cylindricalCurl LinearWaveResidual.coordinateRadius
-        (LinearWaveResidual.spaceDirection 0) (LinearWaveResidual.spaceDirection 1)
-        (LinearWaveResidual.spaceDirection 2) B z i).re := by
-  have hBc : ContDiffAt ℝ ∞ B (polarCoordinates a j (z.1, CylindricalResidual.chart z.2)) := by
-    rw [polarCoordinates_forward ha j hz]
-    exact hB
-  have hd : DifferentiableAt ℝ B z := hB.differentiableAt (by simp)
-  have hdi k : DifferentiableAt ℝ (fun w => B w k) z := (differentiableAt_pi.mp hd) k
-  rw [curl_of_representation ((cartesianPotential_smoothAt ha j hBc).differentiableAt (by simp))
-    (realVector_differentiableAt hdi) hz.1.ne' (cartesianPotential_forward_germ ha j B hz)]
-  simpa only [realVector_apply] using (real_cylindricalCurl _ _ _ _ hdi i).symm
 
 theorem frame_periodic : Periodic CylindricalResidual.frame (2 * Real.pi) := by
   intro θ
@@ -809,24 +784,11 @@ theorem globalCartesianPotential_smoothOn {a : ℝ} (ha : 0 < a)
       linarith
     exact contDiffAt_const.congr_of_eventuallyEq (globalCartesianPotential_zero_germ ha hzero hrad)
 
-noncomputable def cartesianVelocity (a : ℝ) (B : SpaceTime → ComplexVector) : VelocityField :=
-  SpatialCurl.spatialCurl (globalCartesianPotential a B)
 
 
 
 
 
-theorem globalCartesianPotential_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    (B : SpaceTime → ComplexVector)
-    (hper : ∀ t r z : ℝ, Periodic (fun θ => B (t, AxisymmetricResidual.pack r θ z)) (2 * Real.pi))
-    {z : SpaceTime} (hz : z ∈ validCylindrical a j) :
-    (fun w : SpaceTime => globalCartesianPotential a B (w.1, CylindricalResidual.chart w.2)) =ᶠ[𝓝 z]
-      (fun w => CylindricalResidual.frame (w.2 1) (realVector (B w))) := by
-  filter_upwards [(validCylindrical_open a j).mem_nhds hz] with y hy
-  have hj : PhysicalGraphBounds.radialProjection (y.1, CylindricalResidual.chart y.2) ∈
-      PolarCharts.chartDomain a j := by
-    simpa [PhysicalGraphBounds.radialProjection_apply, CylindricalResidual.chart, PolarCharts.polar] using hy.2.2
-  rw [globalCartesianPotential_eq_local ha B hper j hj, cartesianPotential_forward ha j B hy]
 
 
 /-- Integer angular frequency makes the complete potential periodic,

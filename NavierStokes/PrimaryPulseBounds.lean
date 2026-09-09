@@ -898,33 +898,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 
 
-/-- The actual normal-cross-product curl correction with the rounded
-carrier and any nonzero integer harmonic. -/
-noncomputable def primaryCurlRemainder (s : StripData E)
-    (N : ℕ → E → Space) (R : E → ℝ) (Vr Vθ Vz : ℕ → E → E)
-    (harmonic : ℕ → ℤ) (a : ℕ → E → HarmonicCalculus.ComplexVector) :
-    ℕ → E → HarmonicCalculus.ComplexVector := fun n =>
-  CurlClassBounds.curlRemainder
-    (CurlClassBounds.carrierFrequency s n * (harmonic n : ℝ)) R (Vr n) (Vθ n) (Vz n)
-    (fun x => CurlClassBounds.normalCoefficient (N n x) (a n x))
 
-theorem primaryCurlRemainder_waveClass
-    {s : StripData E} {P : ℕ → E → ℝ} {κ : ℝ}
-    {N : ℕ → E → Space} {R : E → ℝ} {Vr Vθ Vz : ℕ → E → E}
-    {harmonic : ℕ → ℤ} {a : ℕ → E → HarmonicCalculus.ComplexVector}
-    (hN : PhaseJetBounds.PolynomialJets (phaseDomain s) N)
-    (ha : WaveClass s P (1 / 2) a)
-    {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ n x, x ∈ s.domain → b ≤ ‖N n x‖)
-    (hupper : ∀ n x, x ∈ s.domain → ‖N n x‖ ≤ M)
-    (hκ : 0 ≤ κ) (hr : UnweightedClass s (-κ) Vr) (hθ : UnweightedClass s 0 Vθ)
-    (hz : UnweightedClass s 1 Vz) (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹))
-    (hharmonic : ∀ n, harmonic n ≠ 0) :
-    WaveClass s P (1 - κ) (primaryCurlRemainder s N R Vr Vθ Vz harmonic a) := by
-  have h := CurlClassBounds.normalCurlRemainder_class hN ha hb hlower hupper hκ hr hθ hz hR
-    (CurlClassBounds.harmonic_inverse_bandBound s harmonic hharmonic)
-  simp only [show (1 / 2 + 1 / 2 : ℝ) = 1 by norm_num] at h
-  exact h
 
 
 end PrimaryClass
@@ -1202,61 +1176,12 @@ theorem EnvelopeJets.polynomial_smul {D : PhaseJetBounds.Domain ι E}
         (by positivity) (by positivity) (fun l hl => hm i l hl x hx) (hk i x hx)
     _ = _ := by rw [pow_add]; ring
 
-theorem EnvelopeJets.mono_weight {D : PhaseJetBounds.Domain ι E}
-    {w v : ι → E → ℝ} {f : ι → E → F} (hf : EnvelopeJets D w f)
-    (hvw : ∀ i x, x ∈ D.carrier i → w i x ≤ v i x) : EnvelopeJets D v f := by
-  refine ⟨fun i x hx => (hf.nonneg i x hx).trans (hvw i x hx), hf.smooth, ?_⟩
-  intro N
-  obtain ⟨C, hC, m, hm⟩ := hf.bound N
-  refine ⟨C, hC, m, ?_⟩
-  intro i x hx j hj
-  exact (hm i x hx j hj).trans (mul_le_mul_of_nonneg_left (hvw i x hx)
-    (mul_nonneg (zero_le_one.trans hC) (pow_nonneg (zero_le_one.trans (D.one_le_scale i)) m)))
 
 private theorem jet_eq_of_eventuallyEq {f g : E → F} {x : E}
     (h : f =ᶠ[𝓝 x] g) (j : ℕ) : iteratedFDeriv ℝ j f x = iteratedFDeriv ℝ j g x := by
   have h' : f =ᶠ[𝓝[univ] x] g := by simpa using h
   simpa only [iteratedFDerivWithin_univ] using h'.iteratedFDerivWithin_eq h.eq_of_nhds j
 
-/-- A compactly contained cutoff extends the actual slot solution with all
-jets. No smoothness of the uncut solution outside the slot is used. -/
-theorem EnvelopeJets.localize {D D' : PhaseJetBounds.Domain ι E}
-    {w : ι → E → ℝ} {f : ι → E → F} {a : ι → E → ℝ}
-    (hf : EnvelopeJets D w f) (ha : PhaseJetBounds.PolynomialJets D' a)
-    (hscale : ∀ i, D.scale i = D'.scale i) (hsub : ∀ i, D.carrier i ⊆ D'.carrier i)
-    (hw : ∀ i x, x ∈ D'.carrier i → 0 ≤ w i x)
-    (hsupport : ∀ i, tsupport (a i) ∩ D'.carrier i ⊆ D.carrier i) :
-    EnvelopeJets D' w (fun i x => a i x • f i x) := by
-  have hasmall : PhaseJetBounds.PolynomialJets D a := by
-    apply ((EnvelopeJets.of_polynomial ha).restrict (D' := D)
-      (fun i => (hscale i).symm) hsub).to_polynomial
-    intro i x hx
-    rfl
-  have hp := hf.polynomial_smul hasmall
-  have hout (i) (x) (hx : x ∈ D'.carrier i) (hn : x ∉ D.carrier i) :
-      (fun y => a i y • f i y) =ᶠ[𝓝 x] fun _ => (0 : F) := by
-    have hn' : x ∉ tsupport (a i) := fun h => hn (hsupport i ⟨h, hx⟩)
-    filter_upwards [notMem_tsupport_iff_eventuallyEq.mp hn'] with y hy
-    simp only [hy, Pi.zero_apply, zero_smul]
-  refine ⟨hw, ?_, ?_⟩
-  · intro i x hx
-    by_cases hn : x ∈ D.carrier i
-    · exact ((hp.smooth i).contDiffAt ((D.isOpen i).mem_nhds hn)).contDiffWithinAt
-    · exact (contDiffAt_const.congr_of_eventuallyEq (hout i x hx hn)).contDiffWithinAt
-  · intro N
-    obtain ⟨C, hC, m, hm⟩ := hp.bound N
-    refine ⟨C, hC, m, ?_⟩
-    intro i x hx j hj
-    by_cases hn : x ∈ D.carrier i
-    · simpa only [hscale i] using hm i x hn j hj
-    · rw [jet_eq_of_eventuallyEq (hout i x hx hn) j]
-      have hz : ‖iteratedFDeriv ℝ j (fun _ : E => (0 : F)) x‖ = 0 := by
-        cases j with
-        | zero => simp only [norm_iteratedFDeriv_zero, norm_zero]
-        | succ j => simp only [iteratedFDeriv_succ_const, Pi.zero_apply, norm_zero]
-      rw [hz]
-      exact mul_nonneg (mul_nonneg (zero_le_one.trans hC)
-        (pow_nonneg (zero_le_one.trans (D'.one_le_scale i)) m)) (hw i x hx)
 
 
 end Localization
@@ -1504,54 +1429,8 @@ open PhaseJetBounds WeightedClasses
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {s : StripData E} {D : Domain ℕ Slow}
 
-noncomputable def PhaseConstruction.chartNormal (p : PhaseConstruction D)
-    (χ : ℕ → E → Slow × ℝ) (n : ℕ) (x : E) : Space :=
-  p.phase.normal n ((χ n x).1, p.L n * (χ n x).2)
 
-/-- The normal appearing in the curl coefficient is the actual phase
-normal. Its jets and lower bound are derived from the same phase inputs. -/
-theorem PhaseConstruction.chartNormal_bounds (p : PhaseConstruction D)
-    (χ : ℕ → E → Slow × ℝ) (hscale : ∀ n, D.scale n = s.slow n)
-    (hχ : PolynomialJets (phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ D.carrier n)
-    (hslot : ∀ n x, x ∈ s.domain → p.L n * (χ n x).2 ∈ p.V n) :
-    PolynomialJets (phaseDomain s) (p.chartNormal χ) ∧
-    (∀ n x, x ∈ s.domain → p.b ≤ ‖p.chartNormal χ n x‖) ∧
-    (∀ n x, x ∈ s.domain → ‖p.chartNormal χ n x‖ ≤ p.M ^ 2 + 3 * p.M) := by
-  have hL : PolynomialJets (phaseDomain s) (fun n _ => p.L n) := by
-    apply PolynomialJets.const _ (m := 1) p.one_le_M
-    intro n
-    have hh := p.slot n (p.L n) (p.interval n ⟨(p.L_pos n).le, le_rfl⟩)
-    simpa only [phaseDomain, pow_one, Real.norm_eq_abs, hscale n] using hh
-  have hg := (hχ.clm (ContinuousLinearMap.fst ℝ Slow ℝ)).pair
-    (hL.mul (hχ.clm (ContinuousLinearMap.snd ℝ Slow ℝ)))
-  have hmaps : ∀ n, MapsTo (fun x => ((χ n x).1, p.L n * (χ n x).2))
-      s.domain ((D.slot p.V p.openV).carrier n) :=
-    fun n x hx => ⟨hmap n x hx, hslot n x hx⟩
-  have hj := (EnvelopeJets.of_polynomial p.normal_jets).comp hg hscale hmaps
-  refine ⟨hj.to_polynomial (fun _ _ _ => le_rfl), ?_, ?_⟩
-  · intro n x hx
-    exact p.normal_range.1 n _ (hmaps n hx)
-  · intro n x hx
-    exact p.normal_range.2 n _ (hmaps n hx)
 
-/-- The exact-curl remainder bound specializes to the actual phase normal,
-without an assumed normal-jet or propagator estimate. -/
-theorem PhaseConstruction.curlRemainder_waveClass (p : PhaseConstruction D)
-    (χ : ℕ → E → Slow × ℝ) (hscale : ∀ n, D.scale n = s.slow n)
-    (hχ : PolynomialJets (phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ D.carrier n)
-    (hslot : ∀ n x, x ∈ s.domain → p.L n * (χ n x).2 ∈ p.V n)
-    {P : ℕ → E → ℝ} {a : ℕ → E → HarmonicCalculus.ComplexVector}
-    (ha : WaveClass s P (1 / 2) a) {κ : ℝ} (hκ : 0 ≤ κ)
-    {R : E → ℝ} {Vr Vθ Vz : ℕ → E → E} {harmonic : ℕ → ℤ}
-    (hr : UnweightedClass s (-κ) Vr) (hθ : UnweightedClass s 0 Vθ)
-    (hz : UnweightedClass s 1 Vz) (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹))
-    (hharmonic : ∀ n, harmonic n ≠ 0) :
-    WaveClass s P (1 - κ)
-      (primaryCurlRemainder s (p.chartNormal χ) R Vr Vθ Vz harmonic a) := by
-  obtain ⟨hn, hlo, hup⟩ := p.chartNormal_bounds χ hscale hχ hmap hslot
-  exact primaryCurlRemainder_waveClass hn ha p.b_pos hlo hup hκ hr hθ hz hR hharmonic
 
 end PhaseCurl
 

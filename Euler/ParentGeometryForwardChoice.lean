@@ -129,8 +129,6 @@ def state (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) : SmoothState F.p
     I.geometry.δ I.delta_pos I.geometry.initialCoordinate I.cutoff_support I.alpha
     (truncation k) F.hn k hk.four F.Q F.flow F.coefficient F.graph nextEll hnext hnext1 F.labels
 
-theorem state_label_constant (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) :
-    (state I S k hk nextEll hnext hnext1 F hSym).labels.K=k^80 := F.label_constant
 
 end GeometryForwardChoice
 end EulerParentPacketFrames

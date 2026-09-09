@@ -388,24 +388,8 @@ theorem mixedSeries_sub (I : Window) {ε : ℝ} (hε : 0 < ε)
   simp only [mixedSeries, term_sub]
   exact (mixedSeries_summable I hε A k m hp).tsum_sub (mixedSeries_summable I hε B k m hp)
 
-def evaluationLinearMap (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (k m : ℕ) (p : ℝ × ℝ) (hp : |p.1| < 20) : AxisSpace I ε →ₗ[ℝ] ℝ where
-  toFun A := mixedSeries I ε A k m p
-  map_add' A B := mixedSeries_add I hε A B k m hp
-  map_smul' c A := by simpa using mixedSeries_smul I ε c A k m p
 
-/-- Bounded evaluation of each actual mixed derivative from the complete
-coefficient space. The constant is uniform in the parameter coordinate. -/
-def evaluationCLM (I : Window) {ε R : ℝ} (hε : 0 < ε)
-    (hR : 1 ≤ R) (hR20 : R < 20) (k m : ℕ) (p : ℝ × ℝ) (hp : |p.1| ≤ R) :
-    AxisSpace I ε →L[ℝ] ℝ :=
-  (evaluationLinearMap I hε k m p (hp.trans_lt hR20)).mkContinuous (jetBound ε R k m)
-    (fun A => mixedSeries_bound I hε hR hR20 A k m hp)
 
-@[simp] theorem evaluationCLM_apply (I : Window) {ε R : ℝ} (hε : 0 < ε)
-    (hR : 1 ≤ R) (hR20 : R < 20) (k m : ℕ) (p : ℝ × ℝ) (hp : |p.1| ≤ R)
-    (A : AxisSpace I ε) :
-    evaluationCLM I hε hR hR20 k m p hp A = mixedSeries I ε A k m p := rfl
 
 /-- Norm convergence in the coefficient space controls every evaluated jet
 uniformly throughout a smaller radial interval. -/

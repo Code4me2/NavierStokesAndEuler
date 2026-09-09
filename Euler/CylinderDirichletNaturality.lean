@@ -35,23 +35,7 @@ variable (P : ℝ) [Fact (0 < P)] {T : ℝ} {U V E F : Type*}
 
 include hQ hQ₁ hback hback₁ hH
 
-theorem velocityLp_intertwines (f : TimeLp T (CylinderL2 P E)) :
-    G.velocityLp P (timeLift T B f) = timeLift T A (D.velocityLp P f) :=
-  EulerFixedFrameNaturality.velocityLp_intertwines T D.time_pos.le A B
-    (D.frame P) (D.frameDerivative P) (G.frame P) (G.frameDerivative P) (D.hessian P) (G.hessian P)
-    D.lower D.lower_pos (D.frame_lower P) G.lower G.lower_pos (G.frame_lower P)
-    (D.frame_derivative P) (G.frame_derivative P) D.potential G.potential
-    D.potential_nonneg G.potential_nonneg (D.hessian_upper P) (G.hessian_upper P)
-    D.small G.small hQ hQ₁ hback hback₁ hH f
 
-theorem accelerationLp_intertwines (f : TimeLp T (CylinderL2 P E)) :
-    G.accelerationLp P (timeLift T B f) = timeLift T A (D.accelerationLp P f) :=
-  EulerFixedFrameNaturality.accelerationLp_intertwines T D.time_pos.le A B
-    (D.frame P) (D.frameDerivative P) (G.frame P) (G.frameDerivative P) (D.hessian P) (G.hessian P)
-    D.lower D.lower_pos (D.frame_lower P) G.lower G.lower_pos (G.frame_lower P)
-    (D.frame_derivative P) (G.frame_derivative P) D.potential G.potential
-    D.potential_nonneg G.potential_nonneg (D.hessian_upper P) (G.hessian_upper P)
-    D.small G.small hQ hQ₁ hback hback₁ hH f
 
 theorem velocityPath_intertwines (f : TimeLp T (CylinderL2 P E)) (t : Icc (0 : ℝ) T) :
     G.velocityPath P (timeLift T B f) t = A (D.velocityPath P f t) :=

@@ -68,24 +68,5 @@ theorem basePressureNorm_unshifted {s : ℕ} {A : SmoothCoefficient period}
     (weightedNorm_mono period (by norm_num : 5 ≤ 6) N ρ hρ p)
     (mul_nonneg (by norm_num) (baseCoefficientSum_nonneg period K)))
 
-/-- The actual nonlinear transport pressure has the required external commutator bound with no extra velocity order. -/
-theorem nonlinear_externalPressure_bound {s : ℕ} (hs : 6 ≤ s) {A : SmoothCoefficient period}
-    (K : EulerSpatialSobolevInverse.CoefficientJet period standardDirection s A)
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c*‖v‖^2 ≤ ⟪A.coefficient x v,v⟫_ℝ)
-    (N : ℕ) (hN : (N+1)+6 ≤ s) (ρ Rc M : ℝ) (hρ : 0 < ρ) (hRc : 0 ≤ Rc) (hM : 1 ≤ M)
-    (hbase : (EulerH6Pressure.CoefficientJet.restrict K 6 (by omega)).pressureConstant c ≤ M)
-    (hsmall : 4*M*(ρ*Rc) ≤ 1)
-    (hcoeff : ∀ l, 1 ≤ l → l ≤ N+1 → coefficientBlock period K 6 l ≤ Rc^l*(l.factorial : ℝ)^2)
-    (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u v : SobolevSpace period (s+1)) :
-    externalPressureNorm period K (N+1) ρ (transportPressure period hs K κ m c hc hpos L hL u v) ≤
-      (32*Rc*M*productConstant period 3)*weightedNorm period 6 (N+1) ρ u*weightedLoss period 6 (N+1) ρ v := by
-  have hhalf : ρ*Rc ≤ 1/2 := by nlinarith [mul_nonneg hρ.le hRc]
-  have hcN : ∀ l, 1 ≤ l → l ≤ N → coefficientBlock period K 6 l ≤ Rc^l*(l.factorial : ℝ)^2 :=
-    fun l hl hn => hcoeff l hl (by omega)
-  have hp := transportPressure_shifted period hs K κ m c hc hpos N (by omega) ρ Rc M hρ hRc hM hbase hsmall hcN L hL u v
-  exact (externalPressureNorm_shifted period K N hN ρ Rc hρ hRc hhalf hcoeff _).trans
-    ((mul_le_mul_of_nonneg_left hp (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hRc)).trans_eq (by ring))
 
 end EulerGevreyPressureEnergy

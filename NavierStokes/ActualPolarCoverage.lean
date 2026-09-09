@@ -39,15 +39,7 @@ noncomputable def nativeDomain : Set Cylinder :=
 theorem inner_pos : 0 < inner :=
   div_pos (PrimaryTargetBounds.leftRadius_pos ActualPrimary.nominal) (by norm_num)
 
-theorem outer_pos : 0 < outer :=
-  mul_pos (by norm_num) (PrimaryTargetBounds.rightRadius_pos ActualPrimary.nominal)
 
-theorem inner_lt_outer : inner < outer := by
-  have ha := PrimaryTargetBounds.leftRadius_pos ActualPrimary.nominal
-  have hab := PrimaryTargetBounds.radii_ordered ActualPrimary.nominal
-  change PrimaryTargetBounds.leftRadius ActualPrimary.nominal / 4 <
-    2 * PrimaryTargetBounds.rightRadius ActualPrimary.nominal
-  linarith
 
 theorem nativeDomain_open : IsOpen nativeDomain :=
   HarmonicResidual.liftDomain_open

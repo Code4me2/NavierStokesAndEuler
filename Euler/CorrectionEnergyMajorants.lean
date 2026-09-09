@@ -8,10 +8,10 @@ noncomputable section
 namespace EulerCorrectionEnergyMajorants
 
 open MeasureTheory Set InnerProductSpace EulerLiftedGradientSpace EulerCylinderSobolevSpace
-  EulerCorrectionOperators EulerCorrectionEnergyData EulerCorrectionEnergyTime EulerCorrectionEnergyBound
-  EulerEnergyMetricPaths EulerGevreyMetricEstimate EulerGevreyGrowthCoefficient EulerGevreyRestriction
-  EulerNonlinearEnergyConstants EulerTimeLpSubintervalBound EulerTimeLp EulerVolterraConvolution
-  EulerRegularizedTopBlocks EulerWeightedCylinderEnergy
+  EulerCorrectionOperators EulerCorrectionEnergyData EulerCorrectionEnergyTime
+  EulerEnergyMetricPaths EulerGevreyMetricEstimate EulerGevreyGrowthCoefficient
+  EulerGevreyRestriction EulerNonlinearEnergyConstants EulerTimeLpSubintervalBound EulerTimeLp
+  EulerVolterraConvolution EulerRegularizedTopBlocks EulerWeightedCylinderEnergy
 open scoped Topology
 
 variable (period : ℝ) [Fact (0 < period)]
@@ -70,13 +70,6 @@ def growthPath {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
 def radiusLossPath {T : ℝ} (R Rdot : C(Icc (0 : ℝ) T, ℝ)) (hR : ∀ t, 0 < R t) : C(Icc (0 : ℝ) T, ℝ) :=
   ⟨fun t => Rdot t/R t, Rdot.continuous.div R.continuous (fun t => (hR t).ne')⟩
 
-/-- The literal continuous nonlinear forcing majorant. -/
-def forcingMajorant {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
-    {D : CorrectionData period (q+1) (Icc (0 : ℝ) T)} {N : ℕ} {R : C(Icc (0 : ℝ) T, ℝ)}
-    (S : SpatialBudget period hq D N R) (hN : N+6 ≤ q+1) {hT : 0 ≤ T} (K : MetricBudget period T hT D)
-    (e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1))) : C(Icc (0 : ℝ) T, ℝ) :=
-  forcingBoundPath period N hN T R S.radius_pos (K.operatorPath period) e
-    S.B S.M S.B0 S.B1 S.A0 S.A2 S.residual K.c S.Rc
 
 /-- The actual metric-growth coefficient is bounded by the continuous affine majorant. -/
 theorem growthPath_bound {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
@@ -90,20 +83,6 @@ theorem growthPath_bound {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
     (energyPath period N hN T R (K.operatorPath period) e t) K.c_pos hν D.scale_bound D.direction_bound
     (K.time_le t) (K.first_le t) S.B0_nonneg (energy_nonneg period S hN K e t)
 
-/-- The actual full-order nonlinear forcing has the continuous majorant derived from its genuine coefficient budgets. -/
-theorem forcingMajorant_bound {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
-    {D : CorrectionData period (q+1) (Icc (0 : ℝ) T)} {N : ℕ} {R : C(Icc (0 : ℝ) T, ℝ)}
-    (S : SpatialBudget period hq D N R) (hN : N+6 ≤ q+1) {hT : 0 ≤ T} (K : MetricBudget period T hT D)
-    (hG : Continuous (fun t => (D.metric.coefficient t).operator))
-    (e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1))) (U : TimeLp T (SobolevSpace period (2+q)))
-    (hU : Filter.Tendsto (fun n => pathLp T hT (maximalApproximation period q T n e)) Filter.atTop (𝓝 U)) :
-    (weightedCorrectionForcing period hq T hT D hG N hN R e U : ℝ → ℝ) ≤ᵐ[timeMeasure T]
-      extendPath T hT (forcingMajorant period S hN K e) :=
-  weightedCorrectionForcing_bound period hq T hT D hG (baseMetricJet period hq D) N hN R S.radius_pos
-    S.Rc S.M S.B S.Rc_nonneg S.M_one_le S.B_nonneg S.inverse_five S.inverse_six S.radius_small
-    S.metric_derivatives S.metric_base (S.base_bound period) e U hU S.B0 S.B1 S.A0 S.A2 S.residual S.A2_nonneg
-    S.background S.background_derivative S.linear S.quadratic S.residual_bound (K.operatorPath period) K.c K.c_pos
-    (K.operator_coercive period)
 
 /-- The explicit cutoff-independent constant in the scalar shrinking-radius estimate. -/
 def combinedConstant {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}

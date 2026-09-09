@@ -85,11 +85,6 @@ theorem representative_strongWord (u : LiftL2 period) (hu : SmoothOrbit period u
   · exact smoothField_continuous period _
       (iteratedFieldDerivative_smooth period w _ (representative_smooth period u hu))
 
-/-- Every actual classical mixed derivative lies in L²; this is proved from the solved orbit. -/
-theorem classicalWord_memLp (u : LiftL2 period) (hu : SmoothOrbit period u)
-    {n : ℕ} (w : Fin n → Fin 4) :
-    MemLp (iteratedFieldDerivative period w (representative period u hu)) 2 (liftMeasure period) :=
-  (Lp.memLp (strongWord period u w)).ae_eq (strongWord_ae period u hu w)
 
 /-- The actual classical Hq norm is exactly the finite mixed-word base sum. -/
 theorem classicalBaseSize_eq (q : ℕ) (u : LiftL2 period) (hu : SmoothOrbit period u) :

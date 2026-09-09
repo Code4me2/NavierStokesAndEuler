@@ -665,17 +665,6 @@ theorem modified_first_pair_eq
   exact Prod.ext ((modified_first_theta_eq_nominal W Q M hI hc.1 he).trans
     (nominal_first_angular_eq W hc.1 hp.2 hc.2)) (modified_first_axial_zero W Q M hc.1.le)
 
-theorem modified_first_edgeJets
-    (hI : ∀ eta ∈ S, Q.I (nominalOuterX W, eta) = W.profiles.I (nominalOuterX W, eta))
-    {c left : ℝ} (hc : 0 < c) (hl : left < terminalShift W + 2) :
-    BaseResidual.PolynomialEdgeJets
-      (BaseResidual.outerWindow (Real.exp (terminalShift W + 3 - 1)) (terminalShift W + 3))
-      (BaseResidual.activeZeta c left (terminalShift W + 3))
-      (BaseResidual.activeDelta left (terminalShift W + 3))
-      (BaseResidual.stressPair (modifiedCoefficients W Q M) 1) := by
-  have hs := modifiedCoefficients_smooth W Q M
-  exact edgeJets_of_interior_equality W ((hs.stressTheta 1).prodMk (hs.stressAxial 1))
-    (modified_first_pair_eq W Q M hI) hc hl
 
 end Modified
 
@@ -832,17 +821,5 @@ theorem first_pair_zero_right {F : OutgoingProfile.Profile} (W : NominalProfile.
 
 
 
-/-- The actual constructed modulation witness supplies the additional
-angular anchor, using the same profile and the same finite modification. -/
-theorem modulated_first_edgeJets {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {d : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness d)
-    {c left : ℝ} (hc : 0 < c) (hl : left < terminalShift W + 2) :
-    BaseResidual.PolynomialEdgeJets
-      (BaseResidual.outerWindow (Real.exp (terminalShift W + 3 - 1)) (terminalShift W + 3))
-      (BaseResidual.activeZeta c left (terminalShift W + 3))
-      (BaseResidual.activeDelta left (terminalShift W + 3))
-      (BaseResidual.stressPair (modifiedCoefficients W v.profiles v.finiteModification) 1) :=
-  modified_first_edgeJets W v.profiles v.finiteModification
-    (fun _ heta => v.slow_outer_angular heta) hc hl
 
 end NavierStokes.FirstOrderBaseEdge

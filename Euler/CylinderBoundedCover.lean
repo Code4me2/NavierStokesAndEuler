@@ -71,10 +71,6 @@ def coverPath (p : C(K, LiftL2 P))
     (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p)) :
     C(K, LiftTangent →ᵇ Space) := coverPathMap P (sobolevPath P 3 p hp)
 
-@[simp] theorem coverPath_apply (p : C(K, LiftL2 P))
-    (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p))
-    (t : K) (x : LiftTangent) :
-    coverPath P p hp t x = pointField P p hp t (coveringMap P x) := rfl
 
 def coverOrbit (p : C(K, LiftL2 P))
     (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p))
@@ -108,13 +104,5 @@ theorem coverOrbit_apply (p : C(K, LiftL2 P))
   rw [coveringMap_add]
   exact he
 
-@[simp] theorem coverOrbit_zero (p : C(K, LiftL2 P))
-    (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate P a p)) :
-    coverOrbit P p hp 0 = coverPath P p hp := by
-  apply ContinuousMap.ext
-  intro t
-  apply BoundedContinuousFunction.ext
-  intro x
-  simpa only [add_zero] using coverOrbit_apply P p hp 0 t x
 
 end EulerCylinderBoundedCover

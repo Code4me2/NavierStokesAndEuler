@@ -1,6 +1,7 @@
 import Euler.SmoothFlowAcceleration
 import Euler.SmoothFlowJacobian
-import Euler.SmoothPathJoint
+import Euler.SmoothPathTimeJets
+import Mathlib.Analysis.Calculus.FDeriv.Partial
 
 /-! Genuine joint time-space regularity of the constructed flow and its
 inverse. Interior C² uses only the actual first time derivative of the
@@ -14,7 +15,7 @@ open scoped ContDiff Topology
 namespace EulerSmoothBanachFlow
 
 open Set Filter EulerVolterraConvolution EulerContinuousTimeIntegral
-  EulerSmoothPathJoint EulerContinuousPathCalculus
+  EulerContinuousPathCalculus
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   (T : ℝ) (hT : 0 ≤ T) (A A₁ : SmoothTimeField (Icc (0 : ℝ) T) E E)

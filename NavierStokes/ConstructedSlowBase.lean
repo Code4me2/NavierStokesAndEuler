@@ -43,12 +43,6 @@ noncomputable def potential (a : ℕ → ℕ) (h C : ℝ) (d : Coefficients) :
   AxisymmetricFields.potential (streamFactor a h C d) (swirlPotential a h C d)
 
 
-theorem potential_smooth {a : ℕ → ℕ} (ha : StrictMono a) {h : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) {d : Coefficients} (hd : SmoothCoefficients d) (C : ℝ) :
-    ContDiffOn ℝ ∞ (potential a h C d) BaseResidual.past :=
-  AxisymmetricFields.contDiffOn_potential
-    (physicalProfile_smoothOn ha hh hh1 (bundleComponent_smooth hd C 0) _)
-    (physicalProfile_smoothOn ha hh hh1 (bundleComponent_smooth hd C 1) _)
 
 section RepairedFamily
 
@@ -232,13 +226,6 @@ variable {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
 include M
 
 
-theorem modified_finiteIdentities :
-    BaseResidual.FiniteIdentities F.data.h W.axis.normalization
-      (modifiedCoefficients W Q M) (asSlowProfiles (modifiedScheme W Q M)) := by
-  apply repaired_finiteIdentities (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M)
-    (modifiedZeroOrder W Q M) M.contains (height_pos W) (height_lt_half W) rfl
-  intro n w hw
-  exact modified_pressureCoefficient W Q M n hw.1 (M.contains ⟨hw.2.1.le, hw.2.2.le⟩)
 
 
 
@@ -261,17 +248,7 @@ theorem modified_leading_axis {eta : ℝ} (heta : eta ∈ Icc (-1 : ℝ) 1) :
       (nominalCoefficients_zero_fields W (p := (0, eta)) le_rfl (abs_le.mpr heta)).2.1.symm
     _ = _ := nominal_leading_axis W heta
 
-theorem modified_leading_origin : (modifiedCoefficients W Q M).axial 0 (0, 0) = W.axis.j := by
-  simpa using modified_leading_axis W Q M (eta := 0) (by constructor <;> norm_num)
 
-theorem modified_origin {a : ℕ → ℕ} (ha : StrictMono a) {t : ℝ} (ht : t < 1) :
-    baseVelocity a F.data.h W.axis.normalization (modifiedCoefficients W Q M) (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) •
-        ProblemStatement.coordinateVector 2 := by
-  rw [BaseResidual.baseVelocity_at_origin ha (height_pos W) (height_lt_half W)
-    (modifiedCoefficients_smooth W Q M) W.axis.normalization
-    (fun _ hn => (modifiedCoefficients_axis W Q M hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1) ht,
-    modified_leading_origin]
 
 
 
@@ -336,12 +313,6 @@ theorem activeLeft_margin : Real.exp (activeLeft W) < nominalInner W / 8 := by
   rw [exp_activeLeft]
   linarith [nominalInner_pos W]
 
-theorem core_before_outer : nominalInner W / 8 < nominalOuterX W := by
-  have hi := (nominalInner_lt_stop W).trans (nominalStop_lt_initial W)
-  have ho := (W.controls.Xi_lt_heatJoin W.separated).trans
-    (W.controls.heatJoin_lt_radius.trans (nominalOuterX_gt_radius W))
-  have hxi := nominalInitial_le_Xi W
-  linarith [nominalInner_pos W]
 
 theorem switch_before_collar : BaseExterior.nominalHeatSwitch W < Real.exp (terminalShift W + 2) := by
   change BaseExterior.nominalHeatSwitch W <
@@ -360,21 +331,10 @@ theorem collar_before_upper : Real.exp (terminalShift W + 2) < activeUpper W :=
 theorem outer_before_upper : nominalOuterX W < activeUpper W :=
   (outer_before_collar W).trans (collar_before_upper W)
 
-theorem core_before_collar : nominalInner W / 8 ≤ Real.exp (terminalShift W + 3 - 1) := by
-  have hh := (core_before_outer W).trans (outer_before_collar W)
-  simpa only [show terminalShift W + 3 - 1 = terminalShift W + 2 by ring] using hh.le
-
-theorem activeLeft_before_collar : activeLeft W < terminalShift W + 2 :=
-  Real.exp_lt_exp.mp ((activeLeft_margin W).trans
-    ((core_before_outer W).trans (outer_before_collar W)))
 
 
 
-theorem activeWindow_subset_box (upper : ℝ) :
-    BaseResidual.activeWindow (activeLeft W) (activeRight W) ⊆ innerBox 0 (scaleUpper W upper) := by
-  intro w hw
-  exact ⟨⟨(Real.exp_pos _).le.trans hw.1.1.le,
-    hw.1.2.le.trans (le_max_right upper (activeUpper W))⟩, hw.2⟩
+
 
 
 
@@ -431,31 +391,12 @@ theorem modifiedScales_spec : B ≤ modifiedScales W c hc upper B Q M 0 ∧
     (weightedBundle_smooth (modifiedCoefficients_smooth W Q M) (modified_quotients_smooth W Q M hc)
       W.axis.normalization) (height_pos W) (innerBox_isCompact 0 (scaleUpper W upper)) B)
 
-theorem modifiedScales_admissible :
-    AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (modifiedCoefficients W Q M))
-      (innerBox 0 (scaleUpper W upper)) (modifiedScales W c hc upper B Q M) :=
-  weightedBundle_base_scales (modifiedCoefficients_smooth W Q M) (modified_quotients_smooth W Q M hc)
-    (modifiedScales_spec W c hc upper B Q M).2
-
-theorem modifiedScales_strictMono : StrictMono (modifiedScales W c hc upper B Q M) :=
-  (modifiedScales_spec W c hc upper B Q M).2.strictMono
-
-
-theorem modifiedScales_origin {t : ℝ} (ht : t < 1) :
-    baseVelocity (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-      (modifiedCoefficients W Q M) (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) •
-        ProblemStatement.coordinateVector 2 :=
-  modified_origin W Q M (modifiedScales_strictMono W c hc upper B Q M) ht
 
 
 
-theorem modifiedScales_potential_smooth :
-    ContDiffOn ℝ ∞
-      (potential (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-        (modifiedCoefficients W Q M)) past :=
-  potential_smooth (modifiedScales_strictMono W c hc upper B Q M) (height_pos W) (height_lt_half W)
-    (modifiedCoefficients_smooth W Q M) W.axis.normalization
+
+
+
 
 end SelectedSchedules
 
@@ -468,25 +409,6 @@ variable {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
 variable {D : ProfileHistories.RadialDomain} (Q : ProfileHistories.Profiles D)
   {S : Set ℝ} {lo hi : ℝ} (M : FiniteModification W Q S lo hi)
 
-/-- A finite modification additionally retains its literal angular history.
-This fixes the first-order integration constant; the actual modulation
-witness proves this equality from its five restored rows. -/
-theorem modifiedScales_weighted_bound
-    (hI : ∀ eta ∈ S, Q.I (nominalOuterX W, eta) = W.profiles.I (nominalOuterX W, eta)) :
-    WeightedStressBound (modifiedScales W c hc upper B Q M) F.data.h (modifiedCoefficients W Q M)
-      c (activeLeft W) (activeRight W) := by
-  refine weighted_on_actual_scales (height_pos W) (modifiedCoefficients_smooth W Q M) hc
-    (activeLeft_margin W) (core_before_collar W) ?_ (modified_higher_support W Q M) ?_
-    (FirstOrderBaseEdge.modified_first_edgeJets W Q M hI hc (activeLeft_before_collar W))
-    (innerBox_isCompact 0 (scaleUpper W upper)) (activeWindow_subset_box W upper)
-    (modifiedScales_spec W c hc upper B Q M).2
-  · apply Real.exp_lt_exp.mpr
-    change terminalShift W + 3 - 1 < terminalShift W + 3
-    linarith
-  · intro w hw
-    have hz := coefficients_stress_zero_left (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M)
-      (modifiedZeroOrder W Q M) M.contains 1 hw.le
-    exact Prod.ext hz.1 hz.2
 
 end ActualWeightedStress
 
@@ -500,8 +422,6 @@ modulation, using its preserved histories and its original nominal witness. -/
 noncomputable def coefficients : Coefficients :=
   modifiedCoefficients W v.profiles v.finiteModification
 
-theorem coefficients_smooth : SmoothCoefficients (coefficients v) :=
-  modifiedCoefficients_smooth W v.profiles v.finiteModification
 
 noncomputable def scales (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) : ℕ → ℕ :=
   modifiedScales W c hc upper B v.profiles v.finiteModification
@@ -514,29 +434,14 @@ theorem scales_spec (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
       (innerBox 0 (scaleUpper W upper)) (scales v c hc upper B) :=
   modifiedScales_spec W c hc upper B v.profiles v.finiteModification
 
-theorem scales_admissible (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    AdmissibleScales F.data.h (coefficientBundle W.axis.normalization (coefficients v))
-      (innerBox 0 (scaleUpper W upper)) (scales v c hc upper B) :=
-  modifiedScales_admissible W c hc upper B v.profiles v.finiteModification
 
-theorem scales_strictMono (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    StrictMono (scales v c hc upper B) := (scales_spec v c hc upper B).2.strictMono
 
 noncomputable def velocity (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
     ProblemStatement.VelocityField :=
   baseVelocity (scales v c hc upper B) F.data.h W.axis.normalization (coefficients v)
 
-noncomputable def pressure (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ProblemStatement.PressureField :=
-  basePressure (scales v c hc upper B) F.data.h W.axis.normalization (coefficients v)
 
-noncomputable def stressForce (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ProblemStatement.SpaceTime → ProblemStatement.Space :=
-  BaseResidual.baseStressForce (scales v c hc upper B) F.data.h W.axis.normalization (coefficients v)
 
-noncomputable def error (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ProblemStatement.SpaceTime → ProblemStatement.Space :=
-  BaseResidual.baseResidual (scales v c hc upper B) F.data.h W.axis.normalization (coefficients v)
 
 noncomputable def vectorPotential (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
     ProblemStatement.VelocityField :=
@@ -545,35 +450,13 @@ noncomputable def vectorPotential (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
 theorem velocity_eq_curl (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
     velocity v c hc upper B = SpatialCurl.spatialCurl (vectorPotential v c hc upper B) := rfl
 
-theorem vectorPotential_smooth (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ContDiffOn ℝ ∞ (vectorPotential v c hc upper B) BaseResidual.past :=
-  modifiedScales_potential_smooth W c hc upper B v.profiles v.finiteModification
 
 
-theorem origin (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t < 1) :
-    velocity v c hc upper B (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) • ProblemStatement.coordinateVector 2 :=
-  modifiedScales_origin W c hc upper B v.profiles v.finiteModification ht
 
 
-theorem finiteIdentities :
-    BaseResidual.FiniteIdentities F.data.h W.axis.normalization (coefficients v)
-      (asSlowProfiles (modifiedScheme W v.profiles v.finiteModification)) :=
-  modified_finiteIdentities W v.profiles v.finiteModification
-
-theorem residual_identity (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) (z : ProblemStatement.SpaceTime) :
-    ProblemStatement.navierStokesResidual (velocity v c hc upper B) (pressure v c hc upper B) z.1 z.2 =
-      stressForce v c hc upper B z + error v c hc upper B z :=
-  BaseResidual.baseResidual_identity _ _ _ _ z
 
 
-/-- Every finite identity and support input of this weighted estimate is
-proved for the same actual modulation witness. -/
-theorem weighted_bound (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    WeightedStressBound (scales v c hc upper B) F.data.h (coefficients v)
-      c (activeLeft W) (activeRight W) :=
-  modifiedScales_weighted_bound W c hc upper B v.profiles v.finiteModification
-    (fun _ heta => v.slow_outer_angular heta)
+
 
 end Modulated
 

@@ -41,18 +41,6 @@ def meanDerivatives (T : ℝ) (hT : 0 ≤ T)
     intro a u hu t
     simpa only [map_smul, ContinuousMap.smul_apply] using solenoidalSpace.smul_mem a (hu t)
 
-/-- Every genuine absolutely continuous terminal-zero path with an L² derivative
-and the label-solenoidal constraint is represented in this Hilbert space. -/
-theorem derivative_mem_of_ac (T : ℝ) (hT : 0 ≤ T)
-    (FInv : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) (u : TimeLp T L2) (η : ℝ → L2)
-    (hη : AbsolutelyContinuousOnInterval η 0 T)
-    (hder : ∀ᵐ t ∂timeMeasure T, HasDerivAt η (u t) t) (hterminal : η T = 0)
-    (hsolenoidal : ∀ t : Icc (0 : ℝ) T, FInv t (η t) ∈ solenoidalSpace) :
-    u ∈ meanDerivatives T hT FInv := by
-  intro t
-  change FInv t (realPrimitive T u t) ∈ solenoidalSpace
-  rw [← eq_realPrimitive_of_ac_hasDerivAt_ae T hT u η hη hder hterminal t t.property]
-  exact hsolenoidal t
 
 /-- Every time constraint is the preimage of the actual closed solenoidal subspace. -/
 theorem meanDerivatives_closed (T : ℝ) (hT : 0 ≤ T)

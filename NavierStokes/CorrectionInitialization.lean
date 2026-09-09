@@ -54,17 +54,6 @@ open PartitionedCovariance
 variable {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
   {D h : ℝ} {vr vt : Plane}
 
-/-- The actual leading covariance, including all physical partition factors. -/
-noncomputable def primaryCovariance (sys : SlotSystem D h vr vt)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (N : ℕ)
-    (P : X → (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (q : X → ℝ) (position : X → SlotColoring.Position) (target : X → Vec2)
-    (i : Fin 2) (x : X) : ℝ :=
-  doubleAverage (fun Y θ =>
-    assembledRadial (P x) hdet (physicalOuter h N) (physicalViscosity h N)
-      (chartTarget h (q x) N (target x)) (q x) (position x) Y θ *
-    assembledTangent (P x) hdet (physicalOuter h N) (physicalViscosity h N)
-      (chartTarget h (q x) N (target x)) (q x) (position x) i Y θ)
 
 
 
@@ -176,17 +165,6 @@ open WeightedClasses LinearWaveBounds
 
 variable {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
-/-- The signed inverse quotient at twice the primary target is exactly the
-positive primary square root; this identifies the two actual constructions. -/
-theorem increment_twice_target {H : SmoothCovariance.Mat2} {T : SmoothCovariance.Vec2}
-    (hc : SmoothCovariance.StrictCone H T) (j : Fin 2) :
-    SignedCovariance.increment H T ((2 : ℝ) • T) j = SmoothCovariance.amplitudes H T j := by
-  rw [SignedCovariance.increment, SmoothCovariance.inverse_formula _ _ hc.det_ne_zero,
-    SignedWaveUpdate.weights_smul]
-  apply (div_eq_iff (mul_ne_zero (by norm_num) (hc.amplitudes_pos j).ne')).mpr
-  have hs : SmoothCovariance.amplitudes H T j ^ 2 = SmoothCovariance.weights H T j :=
-    Real.sq_sqrt (hc.weights_pos j).le
-  nlinarith
 
 noncomputable def coefficients (a : WaveCoefficients X) (s : StripData X)
     (d : GraphDirections X) (H : ℕ → X → SmoothCovariance.Mat2)
@@ -230,49 +208,6 @@ theorem inputBounds {s : StripData X} {d : GraphDirections X} {a : WaveCoefficie
     SignedWaveUpdate.coefficients_inputBounds hbase hcov (twice_target_class hcov.target_jets)
       hm hv hN hNdot hA hb hlo hhi hK j
 
-/-- The only ODE used here is the constructed normalized primary fundamental.
-In particular no principal equation for the output coefficient is assumed. -/
-theorem phase_principal_zero {s : StripData X} {d : GraphDirections X}
-    (a : WaveCoefficients X) {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (χ : ℕ → X → PhaseCalculus.Slow × ℝ)
-    {T : ℕ → X → SmoothCovariance.Vec2} {mask : ℕ → X → ℝ}
-    {Ndot : ℕ → X → PrimaryODE.Space}
-    {A : ℕ → X → PrimaryODE.Space →L[ℝ] PrimaryODE.Space}
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hχ : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → χ n x ∈ U.carrier n ×ˢ Ioo (0 : ℝ) 1)
-    (hcov : SignedWaveUpdate.CovarianceControl s (SignedWaveUpdate.phaseMatrix F pref χ) T)
-    (hm : UnweightedClass s 0 mask)
-    (hHf : SignedWaveUpdate.FrozenAlong d.fast (SignedWaveUpdate.phaseMatrix F pref χ))
-    (hTf : SignedWaveUpdate.FrozenAlong d.fast T) (hmf : SignedWaveUpdate.FrozenAlong d.fast mask)
-    (hK : ∀ n, a.frequency n ≠ 0) (j : Fin 2)
-    (hcoef : ∀ n, ContinuousOn (((F j).frame n).coefficient 1)
-      (U.carrier n ×ˢ Icc 0 ((F j).L n)))
-    (hkin : ∀ n x, x ∈ s.domain → ((F j).frame n).Kinematics (χ n x).1 (Icc 0 ((F j).L n)))
-    (hclock : ∀ n x, x ∈ s.domain → ∀ t : ℝ,
-      χ n (x + t • d.fastField n x) = ((χ n x).1, (χ n x).2 + t / (F j).L n))
-    (hnormal : ∀ n x, x ∈ s.domain →
-      ((F j).frame n).normal ((χ n x).1, (F j).L n * (χ n x).2) = a.normal s d n x)
-    (hmotion : ∀ n x, x ∈ s.domain →
-      ((F j).frame n).normalMotion ((χ n x).1, (F j).L n * (χ n x).2) = Ndot n x)
-    (haction : ∀ n x, x ∈ s.domain → ∀ z : PrimaryODE.Space,
-      MovingFrameODE.baseAction (((F j).frame n).F ((χ n x).1, (F j).L n * (χ n x).2))
-        (((F j).frame n).shear ((χ n x).1, (F j).L n * (χ n x).2)) z = A n x z)
-    (hdamp : ∀ n x, x ∈ s.domain →
-      ((F j).frame n).viscosity ((χ n x).1, (F j).L n * (χ n x).2) =
-        s.epsilon n * a.frequency n ^ 2 * ‖a.normal s d n x‖ ^ 2)
-    (hphysical : ∀ n x, x ∈ s.domain →
-      CurlClassBounds.complexify (A n x (SignedWaveUpdate.phaseFundamental F χ j n x)) =
-      LinearWaveResidual.shear (a.radius n) (a.frequencyBase n) (a.axialBase n) (d.radialField n)
-        (fun y => CurlClassBounds.complexify (SignedWaveUpdate.phaseFundamental F χ j n y)) x) :
-    ∀ n x, x ∈ s.domain →
-      (coefficients a s d (SignedWaveUpdate.phaseMatrix F pref χ) T mask
-        (SignedWaveUpdate.phaseFundamental F χ j) Ndot A j).principal s d n x = 0 := by
-  exact SignedWaveUpdate.phase_coefficients_principal_zero a F pref χ hscale hχ hmap hcov
-    (twice_target_class hcov.target_jets) hm hHf hTf
-    (fun n x t => congrArg (fun z : SmoothCovariance.Vec2 => (2 : ℝ) • z) (hTf n x t))
-    hmf hK j hcoef hkin hclock hnormal hmotion haction hdamp hphysical
 
 /-- The physical shear operator is built from the actual radial derivatives
 of the two background profiles. -/
@@ -357,21 +292,6 @@ theorem native_normal {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
     PhaseCalculus.phaseNormal_formula _ _ _ _ _ _
       ((χ n x).1, P.phase.theta n, (χ n x).2.2) (s.epsilon_pos n).ne' hF hG]
 
-theorem native_slow_derivative {s : StripData X} {d : GraphDirections X}
-    {χ : ℕ → X → PhaseCalculus.Slot} (hχ : PrimaryMaterialDefect.NativeCoordinates s d χ)
-    (F : ℕ → PhaseCalculus.Slow → ℝ) (n : ℕ) {x : X} (hx : x ∈ s.domain)
-    (hF : DifferentiableAt ℝ (F n) (χ n x).1) :
-    HarmonicCalculus.along (d.radialField n) (fun y => F n (χ n y).1) x =
-      PhaseCalculus.slowR (F n) (χ n x).1 := by
-  have hd := fderiv_comp x hF (hχ.differentiable n x hx).fst
-  change (fderiv ℝ (F n ∘ fun y => (χ n y).1) x) (d.radialField n x) = _
-  rw [hd, ContinuousLinearMap.comp_apply]
-  have hs := congrArg Prod.fst (hχ.radialField n hx)
-  change (fderiv ℝ (χ n) x (d.radialField n x)).1 = (1, 0) at hs
-  rw [fderiv.fst (hχ.differentiable n x hx)]
-  change (fderiv ℝ (F n) (χ n x).1) ((fderiv ℝ (χ n) x (d.radialField n x)).1) = _
-  rw [hs]
-  rfl
 
 theorem native_slow_auxiliary {s : StripData X} {d : GraphDirections X}
     {χ : ℕ → X → PhaseCalculus.Slot} (hχ : PrimaryMaterialDefect.NativeCoordinates s d χ)
@@ -511,11 +431,6 @@ theorem frame_tail_ne_zero {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
   exact (PhaseEstimates.normal_lower_bounds hB (P.K_unit n)
     (P.error_small n z hz) (P.normal_close n z hz)).2.2.1
 
-theorem frame_normal {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (P : PrimaryPulseBounds.PhaseConstruction U) (n : ℕ)
-    {z : PhaseCalculus.Slow × ℝ} (hz : z ∈ (U.slot P.V P.openV).carrier n) :
-    (P.frame n).normal z = P.phase.normal n z := by
-  exact PrimaryODE.FrameData.ofNormalLocal_normal _ _ _ _ _ _ _ _ (frame_tail_ne_zero P n hz)
 
 theorem frame_kinematics {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
     (P : PrimaryPulseBounds.PhaseConstruction U) (n : ℕ)
@@ -534,48 +449,13 @@ theorem frame_kinematics {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
   · intro v _
     exact PrimaryODE.hasDerivAt_referenceProfile (P.c0 n) (P.u n) (P.L n) v
 
-theorem frame_normalMotion {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (P : PrimaryPulseBounds.PhaseConstruction U) (n : ℕ)
-    {z : PhaseCalculus.Slow × ℝ} (hz : z ∈ (U.slot P.V P.openV).carrier n) :
-    (P.frame n).normalMotion z = P.phase.velocity n z := by
-  have hF := ((P.baseF.smooth n).contDiffAt ((U.isOpen n).mem_nhds hz.1)).differentiableAt (by simp)
-  have hG := ((P.baseG.smooth n).contDiffAt ((U.isOpen n).mem_nhds hz.1)).differentiableAt (by simp)
-  exact PrimaryODE.FrameData.ofNormalLocal_normalMotion _ _ _ _ _ _ _ _
-    (PhaseCalculus.hasDerivAt_phaseNormal_slot _ _ _ _ _ _ _ _ _ (P.epsilon_ne n) hF hG)
-    (frame_tail_ne_zero P n hz)
 
-theorem native_frame_action {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (P : PrimaryPulseBounds.PhaseConstruction U) (s : StripData X) (d : GraphDirections X)
-    (χ : ℕ → X → PhaseCalculus.Slot) (b : ℕ → PhaseCalculus.Slow → ℝ)
-    (frequency : ℕ → ℝ) (hχ : PrimaryMaterialDefect.NativeCoordinates s d χ)
-    (hmap : ∀ n, MapsTo (fun x => (χ n x).1) s.domain (U.carrier n))
-    (n : ℕ) {x : X} (hx : x ∈ s.domain) (v : PrimaryODE.Space) :
-    MovingFrameODE.baseAction ((P.frame n).F ((χ n x).1, (χ n x).2.2))
-        ((P.frame n).shear ((χ n x).1, (χ n x).2.2)) v =
-      physicalAction ((PrimaryMaterialDefect.coefficients P b χ 0 0 frequency).radius n)
-        ((PrimaryMaterialDefect.coefficients P b χ 0 0 frequency).frequencyBase n)
-        ((PrimaryMaterialDefect.coefficients P b χ 0 0 frequency).axialBase n)
-        (d.radialField n) x v := by
-  have hF := ((P.baseF.smooth n).contDiffAt ((U.isOpen n).mem_nhds (hmap n hx))).differentiableAt (by simp)
-  have hG := ((P.baseG.smooth n).contDiffAt ((U.isOpen n).mem_nhds (hmap n hx))).differentiableAt (by simp)
-  have hFr := native_slow_derivative hχ P.phase.F n hx hF
-  have hGr := native_slow_derivative hχ P.phase.G n hx hG
-  simp only [PrimaryPulseBounds.PhaseConstruction.frame, PhaseJetBounds.PhaseFamily.frameData,
-    PrimaryODE.FrameData.ofNormalLocal, PhaseJetBounds.PhaseFamily.shear,
-    PhaseEstimates.shearVector, PrimaryMaterialDefect.coefficients, physicalAction,
-    PrimaryCopyBridge.baseOperator_apply, hFr, hGr]
 
 noncomputable def pulseCoordinates {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
     (P : PrimaryPulseBounds.PhaseConstruction U) (χ : ℕ → X → PhaseCalculus.Slot) :
     ℕ → X → PhaseCalculus.Slow × ℝ :=
   fun n x => ((χ n x).1, (χ n x).2.2 / P.L n)
 
-omit [NormedAddCommGroup X] [NormedSpace ℝ X] in
-theorem pulseCoordinates_scaled {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (P : PrimaryPulseBounds.PhaseConstruction U) (χ : ℕ → X → PhaseCalculus.Slot)
-    (n : ℕ) (x : X) : P.L n * (pulseCoordinates P χ n x).2 = (χ n x).2.2 := by
-  dsimp only [pulseCoordinates]
-  field_simp [(P.L_pos n).ne']
 
 noncomputable def nativeCoefficients {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
     (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
@@ -590,77 +470,6 @@ noncomputable def nativeCoefficients {U : PhaseJetBounds.Domain ℕ PhaseCalculu
     (fun n x => (F j).phase.velocity n ((χ n x).1, (χ n x).2.2))
     (fun n => physicalAction (a.radius n) (a.frequencyBase n) (a.axialBase n) (d.radialField n)) j
 
-/-- The native coefficient has its actual primary pressure and satisfies
-the principal equation by the constructed ODE. All matching assumptions
-concern the chart, the scalar viscosity and the primitive slow inputs. -/
-theorem native_principal_zero {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (s : StripData X) (d : GraphDirections X) (χ : ℕ → X → PhaseCalculus.Slot)
-    (b : ℕ → PhaseCalculus.Slow → ℝ) (frequency : ℕ → ℝ)
-    (T : ℕ → X → SmoothCovariance.Vec2) (mask : ℕ → X → ℝ) (j : Fin 2)
-    (hχ : PrimaryMaterialDefect.NativeCoordinates s d χ)
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hcoords : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s)
-      (pulseCoordinates (F j) χ))
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ U.carrier n ∧
-      (χ n x).2.2 ∈ Ioo (0 : ℝ) ((F j).L n))
-    (heps : ∀ n, (F j).phase.epsilon n = s.epsilon n)
-    (hν : ∀ n, (F j).viscosity n = s.epsilon n * frequency n ^ 2)
-    (hcov : SignedWaveUpdate.CovarianceControl s
-      (SignedWaveUpdate.phaseMatrix F pref (pulseCoordinates (F j) χ)) T)
-    (hm : UnweightedClass s 0 mask)
-    (hslow : ∀ n x (t : ℝ), (χ n (x + t • d.fast)).1 = (χ n x).1)
-    (hTf : SignedWaveUpdate.FrozenAlong d.fast T) (hmf : SignedWaveUpdate.FrozenAlong d.fast mask)
-    (hclock : ∀ n x, x ∈ s.domain → ∀ t : ℝ,
-      χ n (x + t • d.fastField n x) = ((χ n x).1, (χ n x).2.1, (χ n x).2.2 + t))
-    (hfrequency : ∀ n, frequency n ≠ 0) :
-    ∀ n x, x ∈ s.domain → (nativeCoefficients F pref s d χ b frequency T mask j).principal s d n x = 0 := by
-  let a := PrimaryMaterialDefect.coefficients (F j) b χ 0 0 frequency
-  let ψ := pulseCoordinates (F j) χ
-  have hψmap : ∀ n x, x ∈ s.domain → ψ n x ∈ U.carrier n ×ˢ Ioo (0 : ℝ) 1 := by
-    intro n x hx
-    exact ⟨(hmap n x hx).1, div_pos (hmap n x hx).2.1 ((F j).L_pos n),
-      (div_lt_one ((F j).L_pos n)).mpr (hmap n x hx).2.2⟩
-  have hV (n : ℕ) (x : X) (hx : x ∈ s.domain) :
-      ((χ n x).1, (χ n x).2.2) ∈ (U.slot (F j).V (F j).openV).carrier n :=
-    ⟨(hmap n x hx).1, (F j).interval n ⟨(hmap n x hx).2.1.le, (hmap n x hx).2.2.le⟩⟩
-  have hHf : SignedWaveUpdate.FrozenAlong d.fast (SignedWaveUpdate.phaseMatrix F pref ψ) := by
-    intro n x t
-    simp only [SignedWaveUpdate.phaseMatrix, PrimaryPulseBounds.chartCovariance, ψ,
-      pulseCoordinates, hslow]
-  change ∀ n x, x ∈ s.domain →
-    (coefficients a s d (SignedWaveUpdate.phaseMatrix F pref ψ) T mask
-      (SignedWaveUpdate.phaseFundamental F ψ j)
-      (fun n x => (F j).phase.velocity n ((χ n x).1, (χ n x).2.2))
-      (fun n => physicalAction (a.radius n) (a.frequencyBase n) (a.axialBase n) (d.radialField n)) j).principal s d n x = 0
-  apply phase_principal_zero a F pref ψ hscale hcoords hψmap hcov hm hHf hTf hmf hfrequency j
-  · exact frame_coefficient_continuous (F j)
-  · intro n x hx
-    exact frame_kinematics (F j) n (hmap n x hx).1
-  · intro n x hx t
-    simp only [ψ, pulseCoordinates, hclock n x hx t, add_div]
-  · intro n x hx
-    change ((F j).frame n).normal ((χ n x).1, (F j).L n * (pulseCoordinates (F j) χ n x).2) = _
-    rw [pulseCoordinates_scaled, frame_normal (F j) n (hV n x hx)]
-    exact (native_normal (F j) s d χ b 0 0 frequency hχ (fun n x hx => (hmap n x hx).1) heps n hx).symm
-  · intro n x hx
-    change ((F j).frame n).normalMotion ((χ n x).1, (F j).L n * (pulseCoordinates (F j) χ n x).2) = _
-    rw [pulseCoordinates_scaled]
-    exact frame_normalMotion (F j) n (hV n x hx)
-  · intro n x hx v
-    change MovingFrameODE.baseAction
-      (((F j).frame n).F ((χ n x).1, (F j).L n * (pulseCoordinates (F j) χ n x).2))
-      (((F j).frame n).shear ((χ n x).1, (F j).L n * (pulseCoordinates (F j) χ n x).2)) v = _
-    rw [pulseCoordinates_scaled]
-    exact native_frame_action (F j) s d χ b frequency hχ (fun n x hx => (hmap n x hx).1) n hx v
-  · intro n x hx
-    change (F j).viscosity n *
-      ‖(F j).phase.normal n ((χ n x).1, (F j).L n * (pulseCoordinates (F j) χ n x).2)‖ ^ 2 = _
-    rw [pulseCoordinates_scaled, hν, native_normal (F j) s d χ b 0 0 frequency hχ
-      (fun n x hx => (hmap n x hx).1) heps n hx]
-    rfl
-  · intro n x _
-    exact physicalAction_eq_shear _ _ _ _ _ x
 
 /-- All primary coefficient and pressure estimates are derived from the
 same native ODE and matrix. The background record has zero amplitude and
@@ -717,102 +526,8 @@ theorem native_inputBounds {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
 
 
 
-theorem native_tangent {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (s : StripData X) (d : GraphDirections X) (χ : ℕ → X → PhaseCalculus.Slot)
-    (b : ℕ → PhaseCalculus.Slow → ℝ) (frequency : ℕ → ℝ)
-    (T : ℕ → X → SmoothCovariance.Vec2) (mask : ℕ → X → ℝ) (j : Fin 2)
-    (hχ : PrimaryMaterialDefect.NativeCoordinates s d χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ U.carrier n ∧ (χ n x).2.2 ∈ (F j).V n)
-    (heps : ∀ n, (F j).phase.epsilon n = s.epsilon n)
-    (n : ℕ) {x : X} (hx : x ∈ s.domain) :
-    HarmonicCalculus.normalDot ((nativeCoefficients F pref s d χ b frequency T mask j).normal s d n x)
-      ((nativeCoefficients F pref s d χ b frequency T mask j).amplitude n x) = 0 := by
-  apply SignedWaveUpdate.coefficients_tangent
-  · intro m y hy
-    have ht := SignedWaveUpdate.phaseFundamental_tangent F (pulseCoordinates (F j) χ) j m y
-    change ⟪((F j).frame m).normal ((χ m y).1, (F j).L m * (pulseCoordinates (F j) χ m y).2),
-      SignedWaveUpdate.phaseFundamental F (pulseCoordinates (F j) χ) j m y⟫_ℝ = 0 at ht
-    rw [pulseCoordinates_scaled, frame_normal (F j) m (hmap m y hy)] at ht
-    rw [native_normal (F j) s d χ b 0 0 frequency hχ (fun m y hy => (hmap m y hy).1) heps m hy]
-    exact ht
-  · exact hx
 
-theorem physicalAction_invariant {θ : X} {R F G : X → ℝ} {Vr : X → X}
-    (hR : CopyAngularInvariance.Invariant θ R) (hF : CopyAngularInvariance.Invariant θ F)
-    (hG : CopyAngularInvariance.Invariant θ G) (hVr : CopyAngularInvariance.Invariant θ Vr) :
-    CopyAngularInvariance.Invariant θ (physicalAction R F G Vr) := by
-  intro x t
-  simp only [physicalAction, hR x t, hF x t, hF.along hVr x t, hG.along hVr x t]
 
-/-- Angular symmetry is derived from the coordinate translation and the
-primitive slow data, including the actual reconstructed primary pressure. -/
-theorem native_angularInputs {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (s : StripData X) (d : GraphDirections X) (χ : ℕ → X → PhaseCalculus.Slot)
-    (b : ℕ → PhaseCalculus.Slow → ℝ) (frequency : ℕ → ℝ)
-    (T : ℕ → X → SmoothCovariance.Vec2) (mask cutoff : ℕ → X → ℝ) (j : Fin 2)
-    (hangle : ∀ n x (t : ℝ), χ n (x + t • d.angular) =
-      ((χ n x).1, (χ n x).2.1 + t, (χ n x).2.2))
-    (hc : ∀ n, ContDiffOn ℝ ∞ (χ n) s.domain)
-    (hmap : ∀ n, MapsTo (fun x => (χ n x).1) s.domain (U.carrier n))
-    (hT : SignedWaveUpdate.FrozenAlong d.angular T)
-    (hm : SignedWaveUpdate.FrozenAlong d.angular mask)
-    (hcut : SignedWaveUpdate.FrozenAlong d.angular cutoff)
-    (hprofile : CopyAngularInvariance.Invariant d.angular d.radialProfile) :
-    let a := PrimaryMaterialDefect.coefficients (F j) b χ 0 0 frequency
-    let ψ := pulseCoordinates (F j) χ
-    SignedWaveUpdate.AngularInputs s d a (SignedWaveUpdate.phaseMatrix F pref ψ) T
-      (fun n x => (2 : ℝ) • T n x) mask (SignedWaveUpdate.phaseFundamental F ψ j)
-      (fun n x => (F j).phase.velocity n ((χ n x).1, (χ n x).2.2))
-      (fun n => physicalAction (a.radius n) (a.frequencyBase n) (a.axialBase n) (d.radialField n))
-      cutoff (F j).phase.p := by
-  let a := PrimaryMaterialDefect.coefficients (F j) b χ 0 0 frequency
-  have hi (n : ℕ) (f : PhaseCalculus.Slow → ℝ) :
-      CopyAngularInvariance.Invariant d.angular (fun x => f (χ n x).1) := by
-    intro x t
-    simp only [hangle]
-  have hr (n : ℕ) : CopyAngularInvariance.Invariant d.angular (a.radius n) := by
-    intro x t
-    simp only [a, PrimaryMaterialDefect.coefficients, hangle]
-  have hVr (n : ℕ) : CopyAngularInvariance.Invariant d.angular (d.radialField n) := by
-    intro x t
-    simp only [GraphDirections.radialField, hprofile x t]
-  refine {
-    radius := hr
-    radial_base := fun n => hi n (b n)
-    frequency_base := fun n => hi n ((F j).phase.F n)
-    axial_base := fun n => hi n ((F j).phase.G n)
-    radial_profile := hprofile
-    phase := ?_
-    phase_smooth := ?_
-    matrix := ?_
-    primary_target := hT
-    signed_target := fun n x t => congrArg (fun v : SmoothCovariance.Vec2 => (2 : ℝ) • v) (hT n x t)
-    mask := hm
-    fundamental := ?_
-    normal_motion := ?_
-    action := fun n => physicalAction_invariant (hr n) (hi n ((F j).phase.F n))
-      (hi n ((F j).phase.G n)) (hVr n)
-    cutoff := hcut }
-  · intro n x t
-    simp only [PrimaryMaterialDefect.coefficients, PrimaryMaterialDefect.pulledPhase,
-      PhaseCalculus.phase, hangle]
-    ring
-  · intro n
-    have hF := ((F j).baseF.smooth n).comp (hc n).fst (hmap n)
-    have hG := ((F j).baseG.smooth n).comp (hc n).fst (hmap n)
-    exact (((contDiffOn_const.mul (hc n).snd.fst).add
-      (contDiffOn_const.mul (hc n).fst.snd.fst)).add
-      (contDiffOn_const.mul (hc n).fst.fst)).sub
-      ((hc n).snd.snd.mul ((contDiffOn_const.mul hF).add (contDiffOn_const.mul hG)))
-  · intro n x t
-    simp only [SignedWaveUpdate.phaseMatrix, PrimaryPulseBounds.chartCovariance,
-      pulseCoordinates, hangle]
-  · intro n x t
-    simp only [SignedWaveUpdate.phaseFundamental, pulseCoordinates, hangle]
-  · intro n x t
-    simp only [hangle]
 
 section NativePair
 
@@ -1175,59 +890,9 @@ section InitializedExcludedMean
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D] {ι : Type}
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem angularMeanVector_sum (labels : Finset ι) (f : ι → Oscillation D)
-    (hc : ∀ l ∈ labels, CorrectionStep.AngularContinuous (f l)) :
-    CorrectionStep.angularMeanVector (∑ l ∈ labels, f l) =
-      ∑ l ∈ labels, CorrectionStep.angularMeanVector (f l) := by
-  funext n x i
-  simpa only [CorrectionStep.angularMeanVector, angularAverage,
-    HarmonicResidual.realAngularMean, HarmonicFields.period, Finset.sum_apply] using
-    HarmonicResidual.realAngularMean_sum labels (fun l θ => f l n (x, θ) i)
-      (fun l hl => hc l hl n x i)
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-/-- The stored base error cancels once. The primary Gaussian means vanish,
-and the two literal alias fields remain with their actual signs. -/
-theorem initialized_meanGood (p : ReconstructionData) (r : RankData S) (h : ℝ)
-    (axial : S × PressureStream.Plane) (c : Context (Lift S))
-    (labels : Finset ι) (pieces : ι → PrimaryPiece (Lift S × ℝ))
-    (baseError : Oscillation (Lift S))
-    (hb : CorrectionStep.AngularContinuous baseError)
-    (hg : ∀ l ∈ labels, CorrectionStep.AngularContinuous (pieces l).excluded)
-    (hz : ∀ l ∈ labels, CorrectionStep.angularMeanVector (pieces l).excluded = 0) :
-    (initialized p r h axial c labels pieces baseError).meanGoodResidual c =
-      (initialized p r h axial c labels pieces baseError).reducedMeanResidual c -
-        (fun n x => temporalAlias p h c (primaryStage p c labels pieces baseError) n (x, 0) +
-          pressureAlias p c (afterRank p r h axial c labels pieces baseError) n (x, 0)) := by
-  let u := initialized p r h axial c labels pieces baseError
-  obtain ⟨hb', hg', ha'⟩ := initialized_error_components p r h axial c labels pieces baseError
-  have hgc : CorrectionStep.AngularContinuous u.errors.gaussian := by
-    rw [show u.errors.gaussian = ∑ l ∈ labels, (pieces l).excluded from hg']
-    intro n x i
-    simpa only [Finset.sum_apply] using
-      continuous_finsetSum labels (fun l hl => hg l hl n x i)
-  have hac : CorrectionStep.AngularContinuous u.errors.aliasError := by
-    rw [show u.errors.aliasError = _ from ha']
-    intro n x i
-    change Continuous (fun _ : ℝ =>
-      temporalAlias p h c (primaryStage p c labels pieces baseError) n (x, 0) i +
-        pressureAlias p c (afterRank p r h axial c labels pieces baseError) n (x, 0) i)
-    exact continuous_const
-  have hgz : CorrectionStep.angularMeanVector u.errors.gaussian = 0 := by
-    rw [show u.errors.gaussian = ∑ l ∈ labels, (pieces l).excluded from hg',
-      angularMeanVector_sum labels (fun l => (pieces l).excluded) hg]
-    exact Finset.sum_eq_zero hz
-  have hbc : CorrectionStep.AngularContinuous u.errors.base := by rwa [show u.errors.base = _ from hb']
-  rw [CorrectionStep.meanGoodResidual_exact_errors c u hbc hgc hac, hgz, sub_zero]
-  congr 1
-  funext n x i
-  rw [show u.errors.aliasError = _ from ha']
-  change HarmonicResidual.realAngularMean (fun _ : ℝ =>
-    temporalAlias p h c (primaryStage p c labels pieces baseError) n (x, 0) i +
-      pressureAlias p c (afterRank p r h axial c labels pieces baseError) n (x, 0) i) = _
-  exact HarmonicResidual.realAngularMean_const _
 
 end InitializedExcludedMean
 
@@ -1275,20 +940,6 @@ theorem norm_insert_le : ‖insert (D := D)‖ ≤ 1 := by
   intro x
   simp [Prod.norm_def]
 
-/-- The actual coefficient domain on the angular slice. -/
-noncomputable def strip (s : StripData (D × ℝ)) : StripData D where
-  domain := {x | (x, 0) ∈ s.domain}
-  isOpen_domain := s.isOpen_domain.preimage (insert (D := D)).continuous
-  epsilon := s.epsilon
-  epsilon_pos := s.epsilon_pos
-  epsilon_le_one := s.epsilon_le_one
-  slow := s.slow
-  one_le_slow := s.one_le_slow
-  delta := fun x => s.delta (x, 0)
-  delta_pos := fun x hx => s.delta_pos (x, 0) hx
-  zeta := fun x => s.zeta (x, 0)
-  zeta_smooth := s.zeta_smooth.comp (insert (D := D)).contDiff.contDiffOn (fun _ hx => hx)
-  zeta_nonneg := fun x hx => s.zeta_nonneg (x, 0) hx
 
 
 
@@ -1315,24 +966,6 @@ theorem block_band (a : LinearWaveBounds.WaveCoefficients (D × ℝ))
   ⟨fun _ _ => ErrorHarmonics.band_conjugatePair 1 _,
     fun _ => ErrorHarmonics.band_conjugatePair 1 _⟩
 
-theorem conjugatePair_class {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
-    (a : ℕ → D → ℂ) (ha : WaveClass s P α a) (j m : ℤ) :
-    WaveClass s P α (fun n x => ErrorHarmonics.conjugatePair j (a n) m x) := by
-  classical
-  have hhalf : WaveClass s P α (fun n x => a n x / 2) := by
-    apply WaveInteractionBounds.class_congr (WaveInteractionBounds.class_const_cmul ha (2 : ℂ)⁻¹)
-    intro n x _
-    simp only [div_eq_mul_inv, mul_comm]
-  have hs (k : ℤ) : WaveClass s P α (fun n x =>
-      (AddMonoidAlgebra.single j (fun x => a n x / 2) : Coefficients D) k x) := by
-    change WaveClass s P α (fun n x => Finsupp.single j (fun x => a n x / 2) k x)
-    by_cases hk : j = k
-    · simpa [Finsupp.single_apply, hk] using hhalf
-    · simpa [Finsupp.single_apply, hk] using
-        (MemClass.zero ha.weight_nonneg : WaveClass s P α (fun _ _ => (0 : ℂ)))
-  apply WaveInteractionBounds.class_congr ((hs m).add (WaveInteractionBounds.class_conj (hs (-m))))
-  intro n x _
-  rfl
 
 
 
@@ -1866,13 +1499,6 @@ theorem continuous_slice {f : PressureStream.Lift S → ℝ}
   hf.comp_continuous (continuous_const.prodMk (continuous_const.prodMk continuous_id))
     (fun _ => hx)
 
-omit [NormedSpace ℝ S] in
-theorem meanBar_add_on (f g : ScalarField (PressureStream.Lift S))
-    (hf : ∀ n, ContinuousOn (f n) (slowDomain V))
-    (hg : ∀ n, ContinuousOn (g n) (slowDomain V)) :
-    Agree (slowDomain V) (meanBar (f + g)) (meanBar f + meanBar g) := by
-  intro n x hx
-  exact FourierAlias.torusMean_add (continuous_slice (hf n) hx) (continuous_slice (hg n) hx)
 
 omit [NormedSpace ℝ S] in
 theorem meanBar_sub_on (f g : ScalarField (PressureStream.Lift S))
@@ -2231,11 +1857,6 @@ variable {F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U} {pref : Fin 2 �
 
 include C
 
-theorem frequency_ne (n : ℕ) : frequency n ≠ 0 := by
-  intro hz
-  have h := C.angular_frequency n
-  rw [hz, zero_mul] at h
-  exact C.angular_ne n (by exact_mod_cast h.symm)
 
 theorem envelope_eq : SignedWaveUpdate.phaseEnvelope F (pulseCoordinates (F j) χ) j =
     fun n p => envelope F χ j n p.1 := by
@@ -2259,72 +1880,6 @@ theorem inputBounds : InputBounds (HarmonicWaveInteraction.productStrip s)
   rw [C.envelope_eq] at he
   exact he
 
-theorem inputs : PrimaryResidualClass.Inputs s (envelope F χ j) ChartScales.kappa c
-    (piece F pref s c χ b frequency T mask cutoff j).coefficients cutoff kp := by
-  let st := HarmonicWaveInteraction.productStrip s
-  let dirs := PrimaryResidualClass.directions c
-  let a := PrimaryMaterialDefect.coefficients (F j) b χ 0 0 frequency
-  have hV (n : ℕ) (x : D × ℝ) (hx : x.1 ∈ s.domain) :
-      (χ n x).1 ∈ U.carrier n ∧ (χ n x).2.2 ∈ (F j).V n :=
-    ⟨(C.chart_range n x hx).1, (F j).interval n
-      ⟨(C.chart_range n x hx).2.1.le, (C.chart_range n x hx).2.2.le⟩⟩
-  have ha := native_angularInputs F pref st dirs χ b frequency T mask cutoff j C.angle
-    C.chart_smooth (fun n x hx => (C.chart_range n x hx).1) C.target_angle C.mask_angle
-    C.cutoff_angle (PrimaryResidualClass.invariant_fst c.operators.radialProfile)
-  have hn := native_normal_jets (F j) st dirs χ b 0 0 frequency C.coordinates C.native_jets C.scale hV C.epsilon
-  have hsolve := native_principal_zero F pref st dirs χ b frequency T mask j C.coordinates C.scale
-    C.normalized_jets C.chart_range C.epsilon C.viscosity C.covariance C.mask_bound C.slow_frozen
-    C.target_frozen C.mask_frozen C.clock C.frequency_ne
-  refine {
-    matching := ⟨C.matching.epsilon, C.matching.radius, C.matching.base⟩
-    operators := C.operators
-    loss_le := by norm_num [ChartScales.kappa]
-    coefficients := C.inputBounds
-    cutoff := C.cutoff_bound
-    angular := {
-      radius := ha.radius
-      radialBase := ha.radial_base
-      frequencyBase := ha.frequency_base
-      axialBase := ha.axial_base
-      phase := fun n => ⟨(F j).phase.p n, ha.phase n⟩
-      amplitude := ha.amplitude j
-      pressure := ha.pressure j
-      cutoff := C.cutoff_angle }
-    phase_smooth := ha.phase_smooth
-    phase_split := ?_
-    frequency_ne := C.frequency_ne
-    angular_ne := C.angular_ne
-    normal_jets := hn
-    normal_bounds := ⟨(F j).b, (F j).M ^ 2 + 3 * (F j).M, (F j).b_pos, ?_, ?_⟩
-    inverse_frequency := C.inverse_frequency
-    geometry := C.geometry
-    tangent := ?_
-    principal_zero := fun n x hx _ => hsolve n x hx
-    profile_nonneg := ?_
-    profile_le_one := ?_
-    radius_pos := ?_ }
-  · intro n x θ
-    have hh := CopyAngularInvariance.affinePhase_eq_zeroSlice (ha.phase n) x θ
-    change frequency n * a.phase n (x, θ) = frequency n * a.phase n (x, 0) + _
-    rw [hh, mul_add, ← mul_assoc, C.angular_frequency n]
-  · intro n x hx
-    exact (native_normal_range (F j) st dirs χ b 0 0 frequency C.coordinates hV C.epsilon n hx).1
-  · intro n x hx
-    exact (native_normal_range (F j) st dirs χ b 0 0 frequency C.coordinates hV C.epsilon n hx).2
-  · intro n x hx
-    exact native_tangent F pref st dirs χ b frequency T mask j C.coordinates hV C.epsilon n hx
-  · intro n x hx
-    exact (PrimaryPulseBounds.referenceP_pos _ _ _ _).le
-  · intro n x hx
-    change PrimaryPulseBounds.referenceP _ _ _ ((F j).L n * (pulseCoordinates (F j) χ n (x, 0)).2) ≤ 1
-    rw [pulseCoordinates_scaled]
-    exact PrimaryPulseBounds.referenceP_le_one ((F j).lam_pos n) ((F j).u_pos n) ((F j).L_pos n)
-      ⟨(C.chart_range n (x, 0) hx).2.1.le, (C.chart_range n (x, 0) hx).2.2.le⟩
-  · intro x hx
-    have hr := congrArg (fun f : ℕ → D × ℝ → ℝ => f 0 (x, 0)) C.matching.radius
-    change (χ 0 (x, 0)).1.1 = c.operators.radius x at hr
-    rw [← hr]
-    exact C.radius_pos 0 (x, 0) hx
 
 
 end Control
@@ -3475,8 +3030,6 @@ theorem covariance_eq_integral (B N0 : ℕ) : covariance B N0 =
   exact PrimaryTargetBounds.preparedCovariance_eq_construction certificate modulation (choice B N0).prepared
     radialVector temporalVector slots.radius_pos
 
-noncomputable def nativeContext (B : ℕ) : CorrectionState.Context LocalSignedRequest.Point :=
-  BaseContextAssembly.nativeContext certificate modulation upper B
 
 noncomputable def gauge : VariableGaugeMean.GaugeData TorusInverse.Plane where
   radial := BaseContextAssembly.reconstruction h (PrimaryTargetBounds.leftRadius nominal)
@@ -3555,9 +3108,6 @@ noncomputable def rawPressure (j : Fin 2) (L : Label B N0) :
       ((phases B N0 j).phase.shear L (phasePoint L x)) (rawVelocity j L x))
     (fun _ => 0)
 
-noncomputable def cutPressure (j : Fin 2) (L : Label B N0)
-    (x : PhaseCalculus.Slow × TorusInverse.Plane) : ℂ :=
-  gaussian L x • rawPressure j L x
 
 noncomputable def geometry (j : Fin 2) (L : Label B N0) : CommonCoverSolve.Geometry where
   gap := ChartScales.nativeIndex h (BaseChartJets.cellBand L)
@@ -3582,13 +3132,7 @@ noncomputable def periodicPhase (j : Fin 2) (L : Label B N0)
         ((phases B N0 j).phase.p L * (phases B N0 j).phase.F L p +
           (phases B N0 j).phase.pz L * (phases B N0 j).phase.G L p)
 
-noncomputable def commonVelocity (j : Fin 2) (L : Label B N0)
-    (p : PhaseCalculus.Slow) (Y : TorusInverse.Plane) : ProblemStatement.Space :=
-  ∑' k : TorusInverse.Frequency, cutVelocity j L (p, (geometry j L).coordinates k Y)
 
-noncomputable def commonPressure (j : Fin 2) (L : Label B N0)
-    (p : PhaseCalculus.Slow) (Y : TorusInverse.Plane) : ℂ :=
-  ∑' k : TorusInverse.Frequency, cutPressure j L (p, (geometry j L).coordinates k Y)
 
 /-- Both signs use the identical physical slot length. -/
 theorem length_sign (j : Fin 2) (L : Label B N0) :

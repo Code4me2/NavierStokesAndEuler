@@ -31,10 +31,6 @@ variable {a : PeriodizedWaveBounds.CopyData D I} {s : StripData D}
 
 include g
 
-theorem common_amplitude (n : ℕ) :
-    CopyAngularInvariance.Invariant d.angular (a.common.amplitude n) :=
-  a.common_amplitude_invariant d.angular (fun n i => g.cutoff i n)
-    (fun n i => g.amplitude i n) n
 
 theorem common_pressure (n : ℕ) :
     CopyAngularInvariance.Invariant d.angular (a.common.pressure n) :=
@@ -185,59 +181,6 @@ theorem NativeDynamics.context_linear_identity (hκ : κ ≤ 1 / 2)
   have he := congrArg Complex.re (congrFun (d.common_equation hκ hR n hx) i)
   simpa only [add_mul, Complex.add_re, Pi.add_apply] using he
 
-include i₀ in
-/-- This is the literal HWI linear remainder of the constructed common
-signed block; its class follows from the native quotient and unit ODE. -/
-theorem NativeDynamics.linearGood_bounds (hκ : κ ≤ 1 / 2)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) β (fun n x => request n x i))
-    (hkp : ∀ n, p.base.frequency n * d.slope n = (p.angularFrequency n : ℝ))
-    (hkpne : ∀ n, p.angularFrequency n ≠ 0)
-    (c : Context D) (hB : MeanIncrementBounds.SmoothTriple s.domain c.base)
-    (hrad : ∀ n, ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).radial s.domain)
-    (hm : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base)
-    (a : HarmonicBlock D) (hcarrier : SameCarrier a (p.exactBlock s request)) :
-    (HarmonicWaveInteraction.linearGoodBlock c a (p.exactBlock s request)
-      (p.gaussianBlock s request).velocity).WaveBounds s P (β + 1 - 3 * κ) := by
-  let zero : HarmonicBlock D := ErrorHarmonics.zeroBlock a.frequency a.phase a.angularFrequency 0
-  have hb := h.block_bounds hκ request hR
-  have hbs := HarmonicWaveInteraction.waveBounds_smooth hb.2.1 (p.exactBlock_zero s request)
-  have hps (n : ℕ) : HarmonicResidual.SmoothCoefficients s.domain ((p.exactBlock s request).pressure n) := by
-    intro j
-    by_cases hj : j = 0
-    · subst j
-      rw [p.exactBlock_pressure_zero s request n]
-      exact contDiffOn_const
-    exact (hb.2.2.1 j hj).smooth n
-  have hphase (n : ℕ) : ContDiffOn ℝ ∞ (a.phase n) s.domain := by
-    rw [← hcarrier.phase]
-    exact ((d.angular i₀).phase_smooth n).comp (SignedWaveUpdate.zeroSection (D := D)).contDiff.contDiffOn
-      (fun x hx => hx)
-  have hkp' (n : ℕ) : a.angularFrequency n ≠ 0 := by
-    rw [← hcarrier.angular]
-    exact hkpne n
-  have hgcarrier : SameCarrier a (p.goodBlock s request) :=
-    ⟨hcarrier.frequency, hcarrier.phase, hcarrier.angular⟩
-  have hecarrier : SameCarrier a (p.gaussianBlock s request) :=
-    ⟨hcarrier.frequency, hcarrier.phase, hcarrier.angular⟩
-  have hc := linearGoodBlock_cancel_mem c a (p.exactBlock s request) zero
-    (p.goodBlock s request) (p.gaussianBlock s request).velocity hrad
-    (fun _ => contDiffOn_const) hB hbs hps hphase hkp'
-    (fun n i => ErrorHarmonics.zeroBlock_symmetric _ _ _ _ n i)
-    (SignedWaveUpdate.coefficientBlock_symmetric _ _ _ _ _).1 hb.2.2.2.2 ?_
-  · intro i j hj
-    simpa [zero, ErrorHarmonics.zeroBlock, HarmonicFields.constantCoefficient,
-      Finsupp.single_apply, hj, Ne.symm hj] using hc i j hj
-  · intro n x hx θ i
-    have he := congrFun (d.context_linear_identity i₀ hκ hR hkp c hB hrad hm a hcarrier n (x,θ) hx) i
-    rw [withCarrier_of_same hgcarrier]
-    have heval : (HarmonicFields.field ((p.gaussianBlock s request).velocity n i)
-        (a.frequency n) (a.phase n) (a.angularFrequency n) (x,θ)).re =
-        (p.gaussianBlock s request).oscillation n (x,θ) i := by
-      simp only [HarmonicBlock.oscillation, hecarrier.frequency, hecarrier.phase, hecarrier.angular]
-    rw [heval]
-    simpa only [zero, HarmonicWaveInteraction.withCarrier, ErrorHarmonics.zeroBlock,
-      HarmonicBlock.oscillation, HarmonicResidual.field_constant, Pi.zero_apply, Complex.ofReal_zero,
-      Complex.zero_re, Pi.add_apply, add_zero] using he
 
 end PeriodizedSignedParameters
 
@@ -485,45 +428,6 @@ theorem context_linear_cancellation (hκ : κ ≤ 1 / 2)
   rw [p.context_linear_sum s c u b G A N C dyn hκ hB hrad hm n x hx]
   exact p.cancellation_sum s c u b G A N C dyn hκ hN n x hx
 
-include dyn in
-/-- The current residual is cancelled by the actual finite inverse. The
-remaining coefficient is precisely the computed retained-good block. -/
-theorem linearGood_bounds (hκ : κ ≤ 1 / 2)
-    (hN : (HarmonicResidual.residualBlock c u b G A).BandLimited N)
-    (hB : MeanIncrementBounds.SmoothTriple s.domain c.base)
-    (hrad : ∀ n, ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).radial s.domain)
-    (hm : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s)
-      (reindexDirections angleShuffle p.directions) (reindexCoefficients angleShuffle p.background))
-    (hphase : ∀ n, ContDiffOn ℝ ∞ (b.phase n) s.domain)
-    (hkp : ∀ n, b.angularFrequency n ≠ 0)
-    (hW : ∀ n x, x ∈ (nativeStrip s).domain → 0 ≤ W n x) :
-    ∀ i j, j ≠ 0 → WaveClass s (fun n x => W n (angleShuffle (x,0)))
-      (α + 1 / 2 - 3 * κ) (fun n x =>
-        (HarmonicResidual.residualBlock c u b G A).velocity n i j x +
-        (HarmonicWaveInteraction.linearGoodBlock c b (p.updateBlock s c u b G A N)
-          (p.gaussianBlock c u b G A N).velocity).velocity n i j x) := by
-  have hb := p.assembled_bounds s c u b G A N C hW hκ
-  have hz : HarmonicWaveInteraction.ZeroMode (p.updateBlock s c u b G A N) :=
-    (assembledBlock_zero _ _ _ _ _ _).1
-  have hpz : ∀ n, (p.updateBlock s c u b G A N).pressure n 0 = 0 :=
-    (assembledBlock_zero _ _ _ _ _ _).2
-  have hbs := HarmonicWaveInteraction.waveBounds_smooth hb.1 hz
-  have hps (n : ℕ) : HarmonicResidual.SmoothCoefficients s.domain
-      ((p.updateBlock s c u b G A N).pressure n) := by
-    intro j
-    by_cases hj : j = 0
-    · subst j
-      rw [hpz]
-      exact contDiffOn_const
-    exact (hb.2.1 j hj).smooth n
-  apply linearGoodBlock_cancel_mem c b (p.updateBlock s c u b G A N)
-    (HarmonicResidual.residualBlock c u b G A) (p.goodBlock s c u b G A N)
-    (p.gaussianBlock c u b G A N).velocity hrad (fun _ => contDiffOn_const)
-    hB hbs hps hphase hkp (HarmonicResidual.residualBlock_conjugate _ _ _ _ _)
-    (assembledBlock_real _ _ _ _ _ _).1 hb.2.2
-  intro n x hx θ i
-  have he := congrFun (p.context_linear_cancellation s c u b G A N C dyn hκ hN hB hrad hm n (x,θ) hx) i
-  exact he
 
 end ParticularParameters
 

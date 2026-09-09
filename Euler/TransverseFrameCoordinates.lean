@@ -49,10 +49,6 @@ theorem reconstruct (F : E ≃L[ℝ] E) (m₀ η : E)
 
 
 
-/-- Any orthonormal identification with the fixed plane gives the source's `R⊥` coordinates. -/
-def frameCoordinates (F : E ≃L[ℝ] E) (m₀ : E)
-    (R : U ≃ₗᵢ[ℝ] referencePlane m₀) : E →L[ℝ] U :=
-  R.symm.toContinuousLinearEquiv.toContinuousLinearMap.comp (coordinates F m₀)
 
 
 
@@ -60,13 +56,6 @@ section Paths
 
 variable {X : Type*} [TopologicalSpace X]
 
-/-- Applying a continuous inverse-frame path produces actual continuous
-transverse coordinates, not separate incompatible pointwise choices. -/
-def coordinatePath (m₀ : E) (R : U ≃ₗᵢ[ℝ] referencePlane m₀)
-    (A : C(X, E →L[ℝ] E)) (η : C(X, E)) : C(X, U) :=
-  ⟨fun t => R.symm ((referencePlane m₀).orthogonalProjectionOnto (A t (η t))),
-    R.symm.continuous.comp ((referencePlane m₀).orthogonalProjectionOnto.continuous.comp
-      (A.continuous.clm_apply η.continuous))⟩
 
 
 

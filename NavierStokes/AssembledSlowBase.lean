@@ -1433,13 +1433,6 @@ theorem modifiedCoefficients_zero_fields {p : ℝ × ℝ} (hX : 0 ≤ p.1) (heta
     rw [profiles_zero]
     exact baseFields_pressure (modifiedDomain W Q M) W.axis.normalization Q M.halfPlane hX
 
-theorem modifiedCoefficients_axis {n : ℕ} (hn : 0 < n) {eta : ℝ} (heta : |eta| ≤ 1) :
-    (modifiedCoefficients W Q M).phi n (0, eta) = 0 ∧
-    (modifiedCoefficients W Q M).axial n (0, eta) = 0 ∧
-    (modifiedCoefficients W Q M).pressure n (0, eta) = 0 :=
-  ⟨extendedCoefficient_axis (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M) M.contains hn 0 heta,
-   extendedCoefficient_axis (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M) M.contains hn 1 heta,
-   extendedCoefficient_axis (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M) M.contains hn 3 heta⟩
 
 
 

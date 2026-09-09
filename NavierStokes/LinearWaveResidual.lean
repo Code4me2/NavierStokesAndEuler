@@ -282,16 +282,7 @@ theorem materialPhaseDefect_slot_formula (ε p pz x₀ : ℝ)
 
 
 
-/-- Numerator in the pressure from the projected equation. The derivative
-of `n` is the actual derivative in the fast direction. -/
-noncomputable def projectionNumerator (Vf : E → E) (n : E → EuclideanSpace ℝ (Fin 3))
-    (a Ka f : E → ComplexVector) (x : E) : ℂ :=
-  normalDot (n x) (Ka x) - normalDot (along Vf n x) (a x) + normalDot (n x) (f x)
 
-noncomputable def projectedPressure (κ : ℝ) (Vf : E → E)
-    (n : E → EuclideanSpace ℝ (Fin 3)) (a Ka f : E → ComplexVector) (x : E) : ℂ :=
-  (Complex.I / (κ : ℂ)) * projectionNumerator Vf n a Ka f x /
-    Complex.ofReal (‖n x‖ ^ 2)
 
 
 

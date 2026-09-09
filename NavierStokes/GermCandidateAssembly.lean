@@ -258,38 +258,6 @@ theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ
     (hs.potential.mono (fun _ hx => hx.1)) (hs.direct.mono (fun _ hx => hx.1))
     (hs.pressure.mono (fun _ hx => hx.1)) hcut hz ea eb ep haxis
 
-/-- The manuscript's exact candidate target follows from the same primitive
-finite-stage data; no separate candidate witness is assumed. -/
-theorem candidate_of_finite_stages (upper : ℝ) (bandFloor : ℕ)
-    {qbig C : ℝ} (hqbig : 0 < qbig)
-    (initial : VelocityField) (stages : ℕ → VelocityField)
-    (D : ℕ → DirectAngularDiagonal.AngularData (LocalAngularDiagonal.localSlowDomain F.data.h qbig))
-    (pInitial : PressureField) (pStages : ℕ → PressureField)
-    (E : StageEstimates F.data.h qbig
-      (potentialStages H v upper bandFloor initial stages) (LocalAngularDiagonal.rawSeries D)
-      (pressureStages H v upper bandFloor pInitial pStages))
-    (hInitial : MixedDiagonalExtensions.SublevelShrinkingSupport F.data.h C qbig initial)
-    (hStages : ∀ j, MixedDiagonalExtensions.SublevelShrinkingSupport F.data.h C qbig (stages j))
-    (hDirect : ∀ j, MixedDiagonalExtensions.SublevelShrinkingSupport F.data.h C qbig
-      (LocalAngularDiagonal.rawSeries D j))
-    (hpInitial : MixedDiagonalExtensions.SublevelShrinkingSupport F.data.h C qbig pInitial)
-    (hpStages : ∀ j, MixedDiagonalExtensions.SublevelShrinkingSupport F.data.h C qbig (pStages j))
-    (eA : ∀ x : Space, x 2 ≠ 0 →
-      EndpointCoordinates.endpointRoot (2 * F.data.h) (x 2) < qbig → ∀ j,
-      Nonempty (OneSidedExtension (potentialStages H v upper bandFloor initial stages j) x))
-    (eB : ∀ x : Space, x 2 ≠ 0 →
-      EndpointCoordinates.endpointRoot (2 * F.data.h) (x 2) < qbig → ∀ j,
-      Nonempty (OneSidedExtension (LocalAngularDiagonal.rawSeries D j) x))
-    (eP : ∀ x : Space, x 2 ≠ 0 →
-      EndpointCoordinates.endpointRoot (2 * F.data.h) (x 2) < qbig → ∀ j,
-      Nonempty (OneSidedExtension (pressureStages H v upper bandFloor pInitial pStages j) x))
-    (hInitialAxis : AxisZeroOn (MixedAxisPreservation.localDomain F.data.h qbig) initial)
-    (hStagesAxis : ∀ j, AxisZeroOn (MixedAxisPreservation.localDomain F.data.h qbig) (stages j)) :
-    candidateStatement := by
-  obtain ⟨a, _, ea, eb, ep, forcing, hc, _⟩ :=
-    exists_candidate_witness_of_finite_stages H v upper bandFloor hqbig initial stages D
-      pInitial pStages E hInitial hStages hDirect hpInitial hpStages eA eB eP hInitialAxis hStagesAxis
-  exact ⟨_, _, forcing, hc⟩
 
 end ActualBase
 

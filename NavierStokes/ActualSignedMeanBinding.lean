@@ -26,7 +26,6 @@ abbrev Point := LocalSignedRequest.Point
 abbrev FullPoint := Point × ℝ
 abbrev Vec2 := SignedWaveUpdate.Vec2
 abbrev Mat2 := SignedWaveUpdate.Mat2
-abbrev Space := ProblemStatement.Space
 abbrev Frequency := TorusInverse.Frequency
 
 /-! ## The legacy normalized-tail input cannot describe this chart -/
@@ -151,9 +150,6 @@ theorem primaryBlock_eq_model (L : Label B N0) (j : Fin 2) :
       ((chartCoefficients j L).withCutoff (chartCutoff j L))
       (fun _ => PrimaryGeometryAssembly.angularMode certificate modulation (choice B N0).prepared j L) := rfl
 
-theorem primary_tangent_band (l : Label B N0 × Fin 2) :
-    (ActualInitialization.tangentBlock l).BandLimited 1 :=
-  CorrectionInitialization.PrimaryHarmonics.block_band _ _ _
 
 
 theorem signed_tangent_ratio (request : ℕ → FullPoint → Vec2) (L : Label B N0)

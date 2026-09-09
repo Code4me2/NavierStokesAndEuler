@@ -400,25 +400,6 @@ theorem bandVelocityScale_eq_ratioPower (h : ℝ) (n m : ℕ) :
 /-! ## Actual support, on the same moving shell -/
 
 
-theorem meanPressure_supported {a b d : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (M : ℝ) (ell : S → ℝ) (v : Plane) {U : Set S} (hU : IsOpen U)
-    (hl : ∀ s ∈ U, 0 < ell s) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U))
-    (hs : VariableGaugeMean.SupportedGauge a b ell U f) :
-    VariableGaugeMean.SupportedGauge a b ell U (VariableGaugeMean.meanPressure d a b M hab ell v f) := by
-  intro z hz hn
-  let g := PhysicalMeanDomain.freezeSlow z.2.1 f
-  have hg : ContDiff ℝ ∞ g := VariableGaugeMean.freezeSlow_contDiff hU hz hf
-  have hgs : RadialAlias.RadiallySupported (ell z.2.1 * a) (ell z.2.1 * b) g :=
-    fun p hp => hs (p.1, (z.2.1, p.2.2)) hz hp
-  have hvalue : PressureStream.meanPressure d (ell z.2.1 * a) (ell z.2.1 * b) M
-      (mul_lt_mul_of_pos_left hab (hl _ hz)) v g z =
-      VariableGaugeMean.meanPressure d a b M hab ell v f z := by
-    rw [VariableGaugeMean.meanPressure_eq_fixed hab d M ell v f z (hl _ hz)]
-    exact PhysicalMeanDomain.meanPressure_fiberLocal d _ _ M _ v g f z.2.1 (fun _ _ => rfl) z.1 z.2.2
-  apply PressureStream.meanPressure_supported (M := M) (mul_pos (hl _ hz) ha)
-    (mul_lt_mul_of_pos_left hab (hl _ hz)) hd v hg hgs
-  exact fun hh => hn (hvalue.symm.trans hh)
 
 
 

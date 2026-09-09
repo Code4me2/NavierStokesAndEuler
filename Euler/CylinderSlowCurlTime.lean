@@ -57,15 +57,6 @@ theorem path_hasDerivWithinAt (t : Icc (0 : ℝ) T) :
   convert h using 1 <;> try rfl
   simp [derivative, path, Finset.sum_add_distrib]
 
-include hGt hd in
-/-- The reconstructed classical curl has the derivative of the actual L² construction. -/
-theorem field_hasDerivWithinAt (t : Icc (0 : ℝ) T) (x : LiftDomain P) :
-    HasDerivWithinAt (fun r => field P G hG p hp (projIcc 0 T hT r) x)
-      (pointField P (derivative P T G G₁ p f)
-        (derivative_orbit P T G G₁ hG hG₁ p f hp hf) t x) (Icc (0 : ℝ) T) t :=
-  pointField_hasDerivWithinAt P T hT (path P G p) (derivative P T G G₁ p f)
-    (path_orbit P G hG p hp) (derivative_orbit P T G G₁ hG hG₁ p f hp hf)
-    (path_hasDerivWithinAt P T hT G G₁ p f hp hf hGt hd) t x
 
 include hG hG₁ hp hf in
 /-- The true curl time derivative retains the same radius and one spatial shift. -/

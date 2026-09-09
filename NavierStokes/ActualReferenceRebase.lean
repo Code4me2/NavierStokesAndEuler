@@ -71,8 +71,6 @@ noncomputable def pullState (e : D ≃L[ℝ] E) (u : State E) : State D where
 noncomputable def pullCoefficients (e : D ≃L[ℝ] E) (a : Coefficients E) : Coefficients D :=
   AddMonoidAlgebra.ofCoeff (Finsupp.mapRange (fun f : E → ℂ => fun x => f (e x)) rfl a.coeff)
 
-@[simp] theorem pullCoefficients_apply (e : D ≃L[ℝ] E) (a : Coefficients E)
-    (j : ℤ) (x : D) : pullCoefficients e a j x = a j (e x) := rfl
 
 theorem pullCoefficients_support (e : D ≃L[ℝ] E) (a : Coefficients E) :
     (pullCoefficients e a).support = a.support := by
@@ -161,11 +159,7 @@ variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 noncomputable def inverseCover (k : ℕ) : (P × Plane) ≃L[ℝ] (P × Plane) :=
   (ContinuousLinearEquiv.refl ℝ P).prodCongr (coverPower k).symm
 
-@[simp] theorem inverseCover_apply (k : ℕ) (x : P × Plane) :
-    inverseCover k x = (x.1, (coverPower k).symm x.2) := rfl
 
-@[simp] theorem inverseCover_symm_apply (k : ℕ) (x : P × Plane) :
-    (inverseCover (P := P) k).symm x = (x.1, coverPower k x.2) := rfl
 
 /-- All fields, all directions and the complete source are expressed in the
 native fast coordinate.  This assembly is only a reference view; the target
@@ -193,11 +187,6 @@ open CorrectionInitialization CorrectionInitialization.ActualPrimary
 variable {B N0 : ℕ}
 
 
-noncomputable def nativeAssembly
-    (x : CorrectionStep.CycleState (ActualParticularStageControls.Label B N0))
-    (l : ActualParticularStageControls.Label B N0) : ParticularWaveAssembly.AssemblyData Parameter :=
-  rebaseAssembly (ActualParticularStageControls.assembly x l)
-    (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2))
 
 
 
@@ -356,18 +345,7 @@ end FiberLocality
 
 /-! ## Actual common-band comparison, without truncated reverse gaps -/
 
-noncomputable def commonReferenceChart (l : ActualParticularStageControls.Label B N0) (n : ℕ) :
-    PhysicalResidualNaturality.Associated ≃L[ℝ] PhysicalResidualNaturality.Associated :=
-  (PhysicalResidualNaturality.associatedChart h (ChartScales.Q_pos n)
-    (ChartScales.Q_pos (BaseChartJets.cellBand l.2)) (ActualParticularStageControls.gap l n)).trans
-      (inverseCover (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2)))
 
-@[simp] theorem commonReferenceChart_apply (l : ActualParticularStageControls.Label B N0)
-    (n : ℕ) (z : PhysicalResidualNaturality.Associated) :
-    commonReferenceChart l n z =
-      (parameterChange h (ChartScales.Q n) (ChartScales.Q (BaseChartJets.cellBand l.2)) z.1,
-        (coverPower (ActualParticularStageControls.gap l (BaseChartJets.cellBand l.2))).symm
-          (coverPower (ActualParticularStageControls.gap l n) z.2)) := rfl
 
 theorem associatedChart_stateChart (n m k : ℕ) (z : PhysicalResidualNaturality.Associated) :
     CorrectionStep.cycleAssoc.symm

@@ -67,12 +67,6 @@ theorem smoothOrbit_contDiff (n : ℕ) (u : L2) : ContDiff ℝ ∞ (smoothOrbit 
   (kernel_compact n).contDiff_convolution_left (ContinuousLinearMap.lsmul ℝ ℝ)
     (kernel_smooth n) (EulerMeanTimeTranslation.translation_continuous u).locallyIntegrable
 
-theorem mollify_tendsto (u : L2) : Tendsto (fun n => mollify n u) atTop (𝓝 u) := by
-  have hr : Tendsto (fun n => (bump n).rOut) atTop (𝓝 (0 : ℝ)) := by
-    simpa only [bump,mul_zero] using cutoffScale_tendsto.const_mul 2
-  have h := ContDiffBump.convolution_tendsto_right_of_continuous
-    (μ := (volume : Measure Space)) hr (EulerMeanTimeTranslation.translation_continuous u) 0
-  simpa only [translation_zero,mollify,smoothOrbit,kernel] using h
 
 theorem mollify_eq_integral (n : ℕ) (u : L2) :
     mollify n u=∫ y : Space, kernel n y • translation (-y) u := by
@@ -111,7 +105,6 @@ def mollifier (n : ℕ) : L2 →L[ℝ] L2 :=
     change ‖mollify n u‖ ≤ 1*‖u‖
     simpa only [one_mul] using mollify_norm_le n u)
 
-@[simp] theorem mollifier_apply (n : ℕ) (u : L2) : mollifier n u=mollify n u := rfl
 
 theorem mollify_translation (n : ℕ) (a : Space) (u : L2) :
     translation a (mollify n u)=mollify n (translation a u) := by

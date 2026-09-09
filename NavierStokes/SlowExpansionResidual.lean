@@ -55,12 +55,7 @@ noncomputable def previous (a : ℕ → ℝ) : ℕ → ℝ
 @[simp] theorem previous_zero (a : ℕ → ℝ) : previous a 0 = 0 := rfl
 @[simp] theorem previous_succ (a : ℕ → ℝ) (n : ℕ) : previous a (n + 1) = a n := rfl
 
-@[simp] theorem finiteSeries_order_zero (q h b : ℝ) (a : ℕ → ℝ) :
-    finiteSeries 0 q h b a = q ^ b * a 0 := by simp [finiteSeries]
 
-@[simp] theorem pairTail_order_zero (w : ℕ → ℝ) (K : ℕ → ℕ → ℝ) :
-    pairTail 0 w K = 0 := by
-  simp [pairTail, pairs, Finset.sum_filter]
 
 theorem finiteConvolution_eq {N n : ℕ} (hn : n ≤ N) (K : ℕ → ℕ → ℝ) :
     finiteConvolution N K n = convolution K n := by
@@ -418,11 +413,6 @@ def transportTail (N : ℕ) (q h e α : ℝ) (v u f : ℕ → InnerProfile) (w :
       (fun j => partialX (f j) w) (fun j => Z h (e + slowOrder h j) (f j) w)) -
     q ^ (e - 1 + slowOrder h (N + 1)) * Z2 h (e + slowOrder h N) (f N) w
 
-@[simp] theorem transportTail_order_zero (q h e α : ℝ)
-    (v u f : ℕ → InnerProfile) (w : InnerPoint) :
-    transportTail 0 q h e α v u f w =
-      -q ^ (e - 1 + 2 * h) * Z2 h e (f 0) w := by
-  simp [transportTail, slowOrder_succ]
 
 theorem q_mul_X {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : ProfilePoint} (hp : p.1 < 1) :

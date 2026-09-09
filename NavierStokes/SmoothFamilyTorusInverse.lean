@@ -42,8 +42,6 @@ noncomputable def fixedPartial (v : Point P) (f : Source P) (z : Point P) : ℂ 
 noncomputable def parameterPartial (v : P) (f : Source P) : Source P :=
   fixedPartial (v, 0) f
 
-noncomputable def parameterDerivative (f : Source P) (z : Point P) : P →L[ℝ] ℂ :=
-  (fderiv ℝ f z).comp (ContinuousLinearMap.inl ℝ P Plane)
 
 noncomputable def torusXJet (n : ℕ) (f : Source P) : Source P :=
   (fixedPartial (0, (1, 0)))^[n] f
@@ -62,9 +60,6 @@ theorem fixedPartial_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) (v : Point 
 theorem parameterPartial_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) (v : P) :
     ContDiff ℝ ∞ (parameterPartial v f) := fixedPartial_smooth hf (v, 0)
 
-theorem parameterDerivative_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (parameterDerivative f) :=
-  (hf.fderiv_right (by simp)).clm_comp contDiff_const
 
 theorem fixedPartial_periodic {f : Source P} (hp : Periodic f) (v : Point P) :
     Periodic (fixedPartial v f) := by
@@ -99,10 +94,6 @@ theorem slice_hasFDerivAt {f : Source P} (hf : ContDiff ℝ ∞ f) (p : P) (Y : 
   ((hf.differentiable (by simp)) (p, Y)).hasFDerivAt.comp Y
     ((hasFDerivAt_const p Y).prodMk (hasFDerivAt_id Y))
 
-theorem parameter_hasFDerivAt {f : Source P} (hf : ContDiff ℝ ∞ f) (p : P) (Y : Plane) :
-    HasFDerivAt (fun q => f (q, Y)) (parameterDerivative f (p, Y)) p :=
-  ((hf.differentiable (by simp)) (p, Y)).hasFDerivAt.comp p
-    ((hasFDerivAt_id p).prodMk (hasFDerivAt_const Y p))
 
 theorem slice_torusXJet {f : Source P} (hf : ContDiff ℝ ∞ f) (n : ℕ) (p : P) :
     slice (torusXJet n f) p = SmoothFourierData.xJet n (slice f p) := by
@@ -815,20 +806,8 @@ theorem inverse_finiteJets (d : Direction) (n : ℕ) :
     f S C hf hp hC (by simpa only [Nat.add_assoc] using h)
   exact hh
 
-noncomputable def parameterJet (q : ℕ) (f : Source P) (z : Point P) :
-    ContinuousMultilinearMap ℝ (fun _ : Fin q => P) ℂ :=
-  (iteratedFDeriv ℝ q f z).compContinuousLinearMap
-    (fun _ => ContinuousLinearMap.inl ℝ P Plane)
 
 
-omit [FiniteDimensional ℝ P] in
-theorem parameterJet_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) (q : ℕ) :
-    ContDiff ℝ ∞ (parameterJet q f) := by
-  have hq : ContDiff ℝ ∞ (iteratedFDeriv ℝ q f) :=
-    hf.iteratedFDeriv_right (by exact_mod_cast (le_top : (⊤ : ℕ∞) + (q : ℕ∞) ≤ ⊤))
-  exact (ContinuousMultilinearMap.compContinuousLinearMapL
-    (fun _ : Fin q => ContinuousLinearMap.inl ℝ P Plane)).contDiff.comp
-    hq
 
 
 

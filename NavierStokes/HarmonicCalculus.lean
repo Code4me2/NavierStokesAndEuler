@@ -397,14 +397,7 @@ theorem longitudinal_identity (R : E → ℝ) (Vr Vθ Vz : E → E)
     simpa only [cylindricalDivergence, strippedDivergence, haθ, smul_zero, add_zero] using he
   exact eq_neg_of_add_eq_zero_left (by simpa only [add_comm] using he')
 
-/-- The complex coefficient in the direction of the unit real normal. -/
-noncomputable def longitudinalCoefficient (n : EuclideanSpace ℝ (Fin 3))
-    (a : ComplexVector) : ℂ := normalDot n a / (‖n‖ : ℂ)
 
-@[simp] theorem norm_longitudinalCoefficient (n : EuclideanSpace ℝ (Fin 3))
-    (a : ComplexVector) :
-    ‖longitudinalCoefficient n a‖ = ‖normalDot n a‖ / ‖n‖ := by
-  simp [longitudinalCoefficient]
 
 theorem norm_strippedDivergence_le (R : E → ℝ) (Vr Vz : E → E)
     (a : E → ComplexVector) (x : E) :

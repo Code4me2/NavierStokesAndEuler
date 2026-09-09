@@ -67,18 +67,8 @@ noncomputable def particularState {B N0 : ℕ} (x : CycleState (Index B N0)) :
 @[simp] theorem particularState_state {B N0 : ℕ} (x : CycleState (Index B N0)) :
     (particularState x).state = x.state := rfl
 
-@[simp] theorem particularState_blocks {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (particularState x).coefficients.blocks (swap B N0 l) = x.coefficients.blocks l := rfl
 
-@[simp] theorem particularState_gaussian {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (particularState x).coefficients.gaussian (swap B N0 l) = x.coefficients.gaussian l := rfl
 
-@[simp] theorem particularState_alias {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (particularState x).coefficients.aliasCoefficients (swap B N0 l) =
-      x.coefficients.aliasCoefficients l := rfl
 
 @[simp] theorem particularState_mem {B N0 : ℕ} (x : CycleState (Index B N0))
     (n : ℕ) (l : Index B N0) :

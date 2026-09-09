@@ -206,10 +206,6 @@ theorem axisDatum_analytic_extension (F : Profile) :
   intro eta
   rw [F.axisDatum_eq, SchedulePressure.complexAxisPressure_ofReal]
 
-theorem natural_axis_pressureData (F : Profile) (hP : 2 ≤ F.data.core.P) :
-    NaturalAxisData.PressureData F.axisDatum := by
-  rw [F.axisDatum_eq]
-  exact SchedulePressure.natural_axis_pressureData F.data hP
 
 end Profile
 

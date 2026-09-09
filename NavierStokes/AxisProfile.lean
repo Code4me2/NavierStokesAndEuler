@@ -21,13 +21,7 @@ namespace NavierStokes.AxisProfile
 noncomputable section
 
 
-/-- The regular zero-datum formal inverse used in the scaled equations. -/
-def radialInverseCoeff (m : ℕ) (f : ℕ → ℝ) : ℕ → ℝ
-  | 0 => 0
-  | n + 1 => f n / (((n : ℝ) + 1) * ((n : ℝ) + m))
 
-@[simp] theorem radialInverseCoeff_zero (m : ℕ) (f : ℕ → ℝ) :
-    radialInverseCoeff m f 0 = 0 := rfl
 
 
 /-- The leading angular series coefficient from Proposition 5.1:
@@ -35,8 +29,6 @@ def radialInverseCoeff (m : ℕ) (f : ℕ → ℝ) : ℕ → ℝ
 def profileCoeff (χ : ℝ) (n : ℕ) : ℝ :=
   (-χ / 2) ^ n / ((n.factorial : ℝ) * ((n + 1).factorial : ℝ))
 
-@[simp] theorem profileCoeff_zero (χ : ℝ) : profileCoeff χ 0 = 1 := by
-  norm_num [profileCoeff]
 
 /-- Exact recurrence for the displayed regular series. -/
 theorem profileCoeff_recurrence (χ : ℝ) (n : ℕ) :
@@ -93,8 +85,6 @@ theorem quarticUpper_lt_neg_eighteen_hundredths
 
 
 
-/-- The leading axial profile displayed in the scaled construction. -/
-def leadingAxial (Z L Y : ℝ) : ℝ := -Y * Z / (2 * L)
 
 
 

@@ -66,8 +66,6 @@ noncomputable def transformData (d : LinearData P V E) (φ : Q → P) (k : ℕ) 
   forcingMap z := d.forcingMap (φ z.1, z.2)
   source z := d.source (φ z.1, coverPower k z.2)
 
-noncomputable def pullbackData (d : LinearData P V E) (k : ℕ) : LinearData P V E :=
-  transformData d id k
 
 theorem coefficientAlong_transform (d : LinearData P V E) (φ : Q → P)
     (g : Geometry) (k : ℕ) (j : Frequency) (q : Q) (Y : Plane) (s : ℝ) :
@@ -129,23 +127,7 @@ theorem copySolve_transform (d : LinearData P V E) (φ : Q → P)
   unfold LinearData.copySolve
   rw [coordinates_refine, anchoredSolve_transform]
 
-theorem localizedCopy_transform (d : LinearData P V E) (φ : Q → P)
-    (g : Geometry) (hab : a ≤ b) (k : ℕ) (κ : Plane → ℝ) (j : Frequency) (q : Q) (Y : Plane) :
-    (transformData d φ k).localizedCopy (refineGeometry g k) hab κ j (q, Y) =
-      d.localizedCopy g hab κ j (φ q, coverPower k Y) := by
-  unfold LinearData.localizedCopy
-  rw [coordinates_refine, copySolve_transform]
 
-/-- Equality of the actual periodized solves, obtained term by term before
-forming the sum. No periodicity hypothesis on a native inhomogeneous solve
-is used, or needed. -/
-theorem commonSolve_transform (d : LinearData P V E) (φ : Q → P)
-    (g : Geometry) (hab : a ≤ b) (k : ℕ) (κ : Plane → ℝ) (q : Q) (Y : Plane) :
-    (transformData d φ k).commonSolve (refineGeometry g k) hab κ (q, Y) =
-      d.commonSolve g hab κ (φ q, coverPower k Y) := by
-  apply tsum_congr
-  intro j
-  exact localizedCopy_transform d φ g hab k κ j q Y
 
 
 
@@ -242,18 +224,7 @@ theorem copySolve_scaleSource (d : LinearData P V E) (g : Geometry) (hab : a ≤
     (scaleSource d c).copySolve g hab j (p, Y) = c • d.copySolve g hab j (p, Y) := by
   simp only [LinearData.copySolve, anchoredSolve_scaleSource]
 
-theorem localizedCopy_scaleSource (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (c : ℝ) (κ : Plane → ℝ) (j : Frequency) (p : P) (Y : Plane) :
-    (scaleSource d c).localizedCopy g hab κ j (p, Y) =
-      c • d.localizedCopy g hab κ j (p, Y) := by
-  simp only [LinearData.localizedCopy, copySolve_scaleSource]
-  exact smul_comm _ _ _
 
-theorem commonSolve_scaleSource (d : LinearData P V E) (g : Geometry) (hab : a ≤ b)
-    (c : ℝ) (κ : Plane → ℝ) (p : P) (Y : Plane) :
-    (scaleSource d c).commonSolve g hab κ (p, Y) = c • d.commonSolve g hab κ (p, Y) := by
-  simp only [LinearData.commonSolve, localizedCopy_scaleSource]
-  exact tsum_const_smul'' c
 
 end SourceScale
 
@@ -328,99 +299,13 @@ theorem forcingAlong_timeData (d : LinearData P V E) (g : Geometry)
 
 variable [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-omit [NormedSpace ℝ P] in
-theorem timeData_coefficient_continuousOn (d : LinearData P V E) (τ rate : ℝ) {U : Set P}
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ)) :
-    ContinuousOn (timeData d τ rate).coefficient (U ×ˢ univ) := by
-  have hmap : Continuous (fun z : P × Plane => (z.1, nativeTimeMap τ rate z.2)) :=
-    continuous_fst.prodMk ((nativeTimeMap_continuous τ rate).comp continuous_snd)
-  exact (hA.comp hmap.continuousOn (fun z hz => ⟨hz.1, mem_univ _⟩)).const_smul rate
 
-omit [NormedSpace ℝ P] in
-theorem timeData_forcingMap_continuousOn (d : LinearData P V E) (τ rate : ℝ) {U : Set P}
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ)) :
-    ContinuousOn (timeData d τ rate).forcingMap (U ×ˢ univ) := by
-  have hmap : Continuous (fun z : P × Plane => (z.1, nativeTimeMap τ rate z.2)) :=
-    continuous_fst.prodMk ((nativeTimeMap_continuous τ rate).comp continuous_snd)
-  exact (hB.comp hmap.continuousOn (fun z hz => ⟨hz.1, mem_univ _⟩)).const_smul rate
 
 variable [CompleteSpace E] {a b : ℝ}
 
-/-- Clock transport is proved from uniqueness of the actual zero-entry
-Volterra solution on the transported interval. -/
-theorem anchoredSolve_timeData (d : LinearData P V E) (g : Geometry)
-    (τ rate : ℝ) (hrate : 0 < rate) (hab : a ≤ b) {U : Set P}
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    (j : Frequency) {p : P} (hp : p ∈ U) (Y : Plane) {s : ℝ} (hs : s ∈ Icc a b) :
-    (timeData d τ rate).anchoredSolve (timeGeometry g τ rate hrate.ne') hab j (p, Y) s =
-      d.anchoredSolve g (time_interval_mono τ hrate hab) j (p, Y) (τ + rate * s) := by
-  let u := fun t => d.anchoredSolve g (time_interval_mono τ hrate hab) j (p, Y) (τ + rate * t)
-  have hu0 : u a = 0 := d.anchoredSolve_initial g _ j (p, Y)
-  have hu (t : ℝ) (ht : t ∈ Icc a b) : HasDerivAt u
-      ((timeData d τ rate).coefficientAlong (timeGeometry g τ rate hrate.ne') j ((p, Y), t) (u t) +
-        (timeData d τ rate).forcingAlong (timeGeometry g τ rate hrate.ne') j ((p, Y), t)) t := by
-    have ht' : τ + rate * t ∈ Icc (τ + rate * a) (τ + rate * b) :=
-      ⟨time_interval_mono τ hrate ht.1, time_interval_mono τ hrate ht.2⟩
-    have hold := d.anchoredSolve_hasDerivAt g (time_interval_mono τ hrate hab)
-      j hA hB hf hp Y ⟨τ + rate * t, ht'⟩
-    have hclock : HasDerivAt (fun t : ℝ => τ + rate * t) rate t := by
-      simpa only [mul_one, id_eq] using ((hasDerivAt_id t).const_mul rate).const_add τ
-    have hderiv := hold.scomp t hclock
-    simpa only [u, coefficientAlong_timeData, forcingAlong_timeData,
-      _root_.smul_apply, smul_add, Function.comp_def] using hderiv
-  exact ((timeData d τ rate).anchoredSolve_unique (timeGeometry g τ rate hrate.ne') hab j
-    (timeData_coefficient_continuousOn d τ rate hA)
-    (timeData_forcingMap_continuousOn d τ rate hB) hf hp Y hu0 hu hs).symm
 
-theorem copySolve_timeData (d : LinearData P V E) (g : Geometry)
-    (τ rate : ℝ) (hrate : 0 < rate) (hab : a ≤ b) {U : Set P}
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    (j : Frequency) {p : P} (hp : p ∈ U) (Y : Plane)
-    (hs : ((timeGeometry g τ rate hrate.ne').coordinates j Y).2 ∈ Icc a b) :
-    (timeData d τ rate).copySolve (timeGeometry g τ rate hrate.ne') hab j (p, Y) =
-      d.copySolve g (time_interval_mono τ hrate hab) j (p, Y) := by
-  unfold LinearData.copySolve
-  rw [anchoredSolve_timeData d g τ rate hrate hab hA hB hf j hp Y hs]
-  congr 1
-  exact congrArg Prod.snd (coordinates_timeGeometry g τ rate hrate.ne' j Y)
 
-theorem localizedCopy_timeData (d : LinearData P V E) (g : Geometry)
-    (τ rate : ℝ) (hrate : 0 < rate) (hab : a ≤ b) {U : Set P}
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    (κ : Plane → ℝ) (hκ : support κ ⊆ univ ×ˢ Icc (τ + rate * a) (τ + rate * b))
-    (j : Frequency) {p : P} (hp : p ∈ U) (Y : Plane) :
-    (timeData d τ rate).localizedCopy (timeGeometry g τ rate hrate.ne') hab
-        (κ ∘ nativeTimeMap τ rate) j (p, Y) =
-      d.localizedCopy g (time_interval_mono τ hrate hab) κ j (p, Y) := by
-  simp only [LinearData.localizedCopy, Function.comp_apply, coordinates_timeGeometry]
-  by_cases hz : κ (g.coordinates j Y) = 0
-  · simp only [hz, zero_smul]
-  · congr 1
-    apply copySolve_timeData d g τ rate hrate hab hA hB hf j hp Y
-    have hbounds := (hκ hz).2
-    have ht := congrArg Prod.snd (coordinates_timeGeometry g τ rate hrate.ne' j Y)
-    change τ + rate * ((timeGeometry g τ rate hrate.ne').coordinates j Y).2 = _ at ht
-    constructor <;> nlinarith [hbounds.1, hbounds.2]
 
-theorem commonSolve_timeData (d : LinearData P V E) (g : Geometry)
-    (τ rate : ℝ) (hrate : 0 < rate) (hab : a ≤ b) {U : Set P}
-    (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn d.source (U ×ˢ univ))
-    (κ : Plane → ℝ) (hκ : support κ ⊆ univ ×ˢ Icc (τ + rate * a) (τ + rate * b))
-    {p : P} (hp : p ∈ U) (Y : Plane) :
-    (timeData d τ rate).commonSolve (timeGeometry g τ rate hrate.ne') hab
-        (κ ∘ nativeTimeMap τ rate) (p, Y) =
-      d.commonSolve g (time_interval_mono τ hrate hab) κ (p, Y) := by
-  apply tsum_congr
-  intro j
-  exact localizedCopy_timeData d g τ rate hrate hab hA hB hf κ hκ j hp Y
 
 end TimeData
 
@@ -440,18 +325,6 @@ noncomputable def transportData (d : LinearData P V E) (φ : Q → P) (k : ℕ)
 noncomputable def transportGeometry (g : Geometry) (k : ℕ) (τ rate : ℝ) (hrate : rate ≠ 0) :
     Geometry := refineGeometry (timeGeometry g τ rate hrate) k
 
-theorem commonSolve_transport {a b : ℝ} (d : LinearData P V E) (φ : Q → P)
-    (g : Geometry) (hab : a ≤ b) (k : ℕ) (τ rate amplitude : ℝ) (hrate : 0 < rate)
-    {U : Set P} (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ)) (hf : ContinuousOn d.source (U ×ˢ univ))
-    (κ : Plane → ℝ) (hκ : support κ ⊆ univ ×ˢ Icc (τ + rate * a) (τ + rate * b))
-    (q : Q) (hq : φ q ∈ U) (Y : Plane) :
-    (transportData d φ k τ rate amplitude).commonSolve
-        (transportGeometry g k τ rate hrate.ne') hab (κ ∘ nativeTimeMap τ rate) (q, Y) =
-      amplitude • d.commonSolve g (time_interval_mono τ hrate hab) κ (φ q, coverPower k Y) := by
-  unfold transportData transportGeometry
-  rw [commonSolve_scaleSource, commonSolve_transform,
-    commonSolve_timeData d g τ rate hrate hab hA hB hf κ hκ hq]
 
 
 
@@ -508,20 +381,6 @@ theorem commonSolve_eq_of_sameInputs (d e : LinearData P V E) (g : Geometry)
 
 variable [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-theorem commonSolve_of_compatibleInputs (d : LinearData P V E) (e : LinearData Q V E)
-    (φ : Q → P) (g : Geometry) (hab : a ≤ b) (k : ℕ)
-    (τ rate amplitude : ℝ) (hrate : 0 < rate)
-    {U : Set P} (hA : ContinuousOn d.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn d.forcingMap (U ×ˢ univ)) (hf : ContinuousOn d.source (U ×ˢ univ))
-    (κ : Plane → ℝ) (hκ : support κ ⊆ univ ×ˢ Icc (τ + rate * a) (τ + rate * b))
-    (q : Q) (hq : φ q ∈ U)
-    (hi : SameInputsAt e (transportData d φ k τ rate amplitude) q) (Y : Plane) :
-    e.commonSolve (transportGeometry g k τ rate hrate.ne') hab
-        (κ ∘ nativeTimeMap τ rate) (q, Y) =
-      amplitude • d.commonSolve g (time_interval_mono τ hrate hab) κ (φ q, coverPower k Y) := by
-  rw [commonSolve_eq_of_sameInputs e (transportData d φ k τ rate amplitude)
-    _ hab q hi]
-  exact commonSolve_transport d φ g hab k τ rate amplitude hrate hA hB hf κ hκ q hq Y
 
 
 end InputCompatibility

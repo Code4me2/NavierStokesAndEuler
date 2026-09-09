@@ -28,39 +28,16 @@ noncomputable def physicalQ (h : ℝ) (p : ProfilePoint) : ℝ :=
 noncomputable def physicalEta (h : ℝ) (p : ProfilePoint) : ℝ :=
   SimilarityCoordinates.coordinateEta (2 * h) (1 - p.1, p.2.2)
 
-noncomputable def similarityPoint (h : ℝ) (p : ProfilePoint) : ℝ × ℝ :=
-  (p.2.1 / physicalQ h p, physicalEta h p)
-
-noncomputable def profileDomain (h Λ : ℝ) : Set ProfilePoint :=
-  {p | p.1 < 1 ∧ similarityPoint h p ∈ NaturalProfile.domain Λ}
-
-
-/-- The actual integral from zero to the radial profile coordinate. -/
-noncomputable def radialPrimitive (f : ℝ × ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
-  ∫ v in (0 : ℝ)..p.1, f (v, p.2)
-
-
-noncomputable def swirlPotential (h : ℝ) (f : ℝ × ℝ → ℝ) : Profile := fun p =>
-  -(physicalQ h p ^ (-h)) * radialPrimitive f (similarityPoint h p)
 
 
 
-theorem physicalQ_pos {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : ProfilePoint} (hp : p.1 < 1) : 0 < physicalQ h p :=
-  (SimilarityCoordinates.coordinateQ_spec (by linarith) (by linarith)
-    (sub_pos.mpr hp)).1
 
-theorem physicalQ_contDiffAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : ProfilePoint} (hp : p.1 < 1) : ContDiffAt ℝ ∞ (physicalQ h) p := by
-  exact (SimilarityCoordinates.coordinateQ_smooth (by linarith) (by linarith)
-    (p := (1 - p.1, p.2.2)) (sub_pos.mpr hp)).comp p
-    ((contDiffAt_const.sub contDiffAt_fst).prodMk contDiffAt_snd.snd)
 
-theorem physicalEta_contDiffAt {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {p : ProfilePoint} (hp : p.1 < 1) : ContDiffAt ℝ ∞ (physicalEta h) p := by
-  exact (SimilarityCoordinates.coordinateEta_smooth (by linarith) (by linarith)
-    (p := (1 - p.1, p.2.2)) (sub_pos.mpr hp)).comp p
-    ((contDiffAt_const.sub contDiffAt_fst).prodMk contDiffAt_snd.snd)
+
+
+
+
+
 
 
 

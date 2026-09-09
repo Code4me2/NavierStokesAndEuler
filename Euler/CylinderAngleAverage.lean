@@ -194,8 +194,6 @@ def supportedAverage : Supported P V S hS →L[ℝ] Supported P V S hS :=
   ((average P).comp (Supported P V S hS).subtypeL).codRestrict
     (Supported P V S hS) (average_mem P S hS)
 
-@[simp] theorem supportedAverage_coe (u : Supported P V S hS) :
-    (supportedAverage P S hS u : CylinderL2 P V) = average P (u : CylinderL2 P V) := rfl
 
 
 end Supported

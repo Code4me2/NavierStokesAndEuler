@@ -40,13 +40,6 @@ variable {P : ℝ} [Fact (0 < P)]
   (hbIt : ∀ n a, ‖iteratedFDeriv ℝ n (translateCoefficientPath D.inverseDerivative) a‖ ≤
     C*majorant Rc 0 n)
 
-include hRc hC hA hR hbA hbK in
-theorem potentialPath_normalized_bound (n : ℕ) :
-    block standardDirection q
-      (fun a : LiftTangent => pathTranslate P a (normalize g hg (potentialPath τ hτ hτT B Y))) n 0 ≤
-      (3*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d n :=
-  EulerTransversePacketPaths.potential_block_bound (velocityPath τ hτ hτT B Y)
-    (velocityPath_orbit τ hτ hτT B Y) g hg q Rc C R A hRc hC hA hR d hbA hbK n
 
 
 include hRc hC hA hR hbA hbK hbI in
@@ -110,7 +103,6 @@ theorem derivativeCost_nonneg : 0 ≤ H.derivativeCost := by
 
 def commonCost : ℝ := H.velocityCost+H.derivativeCost
 def pressureAmplitude : ℝ := P*pressureCost (Fin 4) q N.Ri N.C N.C 0 H.commonCost
-def potentialAmplitude : ℝ := 3*N.blockAmplitude*(P*H.commonCost)
 def correctorAmplitude : ℝ := 27*N.blockAmplitude^2*(P*H.commonCost)
 def correctorTimeAmplitude : ℝ := 108*N.blockAmplitude^2*(P*H.commonCost)
 
@@ -201,16 +193,6 @@ theorem pressure_gradient_bound (n : ℕ) :
     (H.pressure_bound N Y A hA d hYb) n
   simpa only [show d+3+1=d+4 by omega,mul_assoc] using h
 
-theorem potential_bound (n : ℕ) :
-    block standardDirection q (fun a => pathTranslate P a
-      (normalize L.fullProfile L.fullProfile_pos (potentialPath τ hτ hτT B Y))) n 0 ≤
-        (H.potentialAmplitude (P := P) N*A)*majorant L.R (d+3) n := by
-  have hc := N.coefficient_bounds
-  have h := potentialPath_normalized_bound τ hτ hτT B Y L.fullProfile L.fullProfile_pos
-    q N.coefficientRadius N.coefficientAmplitude L.R (H.commonCost*A)
-    hc.1 hc.2.1 (mul_nonneg H.commonCost_nonneg hA) N.radius (d+3)
-    (H.velocity_common_bound Y A hA d hYb) (fun j a => (hc.2.2 j a).2.2.1) n
-  exact h.trans_eq (by unfold potentialAmplitude EulerTransversePacketJoin.NormalBudget.blockAmplitude; ring)
 
 
 theorem corrector_bound (n : ℕ) :

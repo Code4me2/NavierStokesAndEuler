@@ -662,24 +662,10 @@ noncomputable def constructedSlotSystem (D h : ℝ) (hh : 0 ≤ h) (vr vt : Plan
 
 
 
-noncomputable def assembledRadial {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (Y : Plane) (θ : ℝ) : ℝ :=
-  ∑ᶠ a : UnsignedLabel × Fin 2, (P a.1).radialWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ
-
-noncomputable def assembledTangent {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (i : Fin 2) (Y : Plane) (θ : ℝ) : ℝ :=
-  ∑ᶠ a : UnsignedLabel × Fin 2, (P a.1).tangentWave hdet (outer a.1) (ε a.1) (T a.1) q x a.2 i Y θ
 
 
-noncomputable def physicalOuter (h : ℝ) (N : ℕ) (U : UnsignedLabel) : ℝ :=
-  ChartScales.Q (U.1 + N) ^ (-velocityExponent h)
 
-noncomputable def physicalViscosity (h : ℝ) (N : ℕ) (U : UnsignedLabel) : ℝ :=
-  ChartScales.epsilon h (U.1 + N)
+
 
 noncomputable def chartTarget (h q : ℝ) (N : ℕ) (T0 : Vec2) (U : UnsignedLabel) : Vec2 :=
   (ChartScales.Q (U.1 + N) / q) ^ (velocityExponent h + 1 / 2) • T0

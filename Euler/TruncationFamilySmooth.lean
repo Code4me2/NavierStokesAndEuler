@@ -92,13 +92,7 @@ theorem potentialTruncation_square_family_smooth (v : Space × ℝ → Space)
       potentialTruncation (fun y => v (y, xt.2 ^ 2)) χ xt.1) :=
   potentialTruncation_family_smooth _ (nonnegative_time_square_smooth v hv) χ hχ
 
-/-- The continuous time map used to recover the original compact time interval. -/
-def sqrtTimeMap (T : ℝ) : C(Icc (0 : ℝ) T, Icc (0 : ℝ) (Real.sqrt T)) where
-  toFun t := ⟨Real.sqrt t, Real.sqrt_nonneg _, Real.sqrt_le_sqrt t.property.2⟩
-  continuous_toFun := (Real.continuous_sqrt.comp continuous_subtype_val).subtype_mk _
 
-@[simp] theorem sqrtTimeMap_apply (T : ℝ) (t : Icc (0 : ℝ) T) :
-    (sqrtTimeMap T t : ℝ) = Real.sqrt t := rfl
 
 
 

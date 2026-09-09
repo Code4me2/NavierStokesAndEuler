@@ -116,19 +116,12 @@ noncomputable def waveChange (h Q Qr : ℝ) (gap : ℕ) : WaveSpace →L[ℝ] Wa
     ((PhysicalParticularWave.cylinderChange h Q Qr gap).comp
       PhysicalParticularWave.waveEquiv.symm.toContinuousLinearEquiv.toContinuousLinearMap)
 
-@[simp] theorem waveChange_apply (h Q Qr : ℝ) (gap : ℕ) (x : WaveSpace) :
-    waveChange h Q Qr gap x =
-      ((PhysicalParticularWave.parameterChange h Q Qr x.1.1, x.1.2), coverPower gap x.2) := rfl
 
 theorem waveChange_waveEquiv (h Q Qr : ℝ) (gap : ℕ) (x : Cylinder) :
     waveChange h Q Qr gap (PhysicalParticularWave.waveEquiv x) =
       PhysicalParticularWave.waveEquiv (PhysicalParticularWave.cylinderChange h Q Qr gap x) := rfl
 
 
-noncomputable def nativeData (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ) (j : ℤ) :
-    PeriodizedWaveBounds.CopyData WaveSpace Frequency :=
-  (CorrectionStep.ParticularParameters.fromReference D h gap).copyData
-    D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j
 
 
 theorem copyData_amplitude (p : CorrectionStep.ParticularParameters Parameter)
@@ -163,26 +156,6 @@ theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
   subst_vars
   rfl
 
-theorem complexCopyVelocity_zeroEntry
-    (t : TangentData Parameter ProblemStatement.Space) (f : Parameter × Plane → ComplexVector)
-    (parameter : Parameter → Parameter) (g : Geometry) (gap : ℕ)
-    (L rate amplitude normalScale : ℝ) (hL : 0 < L) (hrate : 0 < rate) (hnormal : normalScale ≠ 0)
-    {U : Set Parameter} (hA : ContinuousOn t.linearData.coefficient (U ×ˢ univ))
-    (hB : ContinuousOn t.linearData.forcingMap (U ×ˢ univ))
-    (hf : ContinuousOn f (U ×ˢ univ)) (q : Parameter) (hq : parameter q ∈ U)
-    (copy : Frequency) (Y : Plane)
-    (hslot : ((CopySolveCompatibility.transportGeometry g gap 0 rate hrate.ne').coordinates copy Y).2 ∈
-      Icc 0 (L / rate)) :
-    complexCopyVelocity (ScaledTangentTransport.transportTangent t parameter gap 0 rate amplitude normalScale)
-      (ScaledTangentTransport.transportSource f parameter gap rate amplitude)
-      (CopySolveCompatibility.transportGeometry g gap 0 rate hrate.ne') (div_pos hL hrate).le copy (q, Y) =
-        amplitude • complexCopyVelocity t f g hL.le copy (parameter q, coverPower gap Y) := by
-  have he := ScaledTangentTransport.complexCopyVelocity_transport t f parameter g (div_pos hL hrate).le
-    gap 0 rate amplitude normalScale hrate hnormal hA hB hf q hq copy Y hslot
-  refine he.trans (congrArg (fun z : ComplexVector => amplitude • z) ?_)
-  apply interval_congr (fun a b hab => complexCopyVelocity t f g (a := a) (b := b) hab
-    copy (parameter q, coverPower gap Y)) _ _ (by ring)
-  field_simp ; simp
 
 end ReferenceData
 

@@ -218,14 +218,7 @@ variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 noncomputable def phase (g : Geometry) (χ : Plane → ℝ) (A B : P → ℝ)
     (z : P × Plane) : ℝ := A z.1 - periodicClock g χ z.2 * B z.1
 
-noncomputable def nativePhase (g : Geometry) (A B : P → ℝ) (k : Frequency)
-    (z : P × Plane) : ℝ := A z.1 - (g.coordinates k z.2).2 * B z.1
 
-theorem phase_contDiff (g : Geometry) (w : ClockWindow) {A B : P → ℝ}
-    (hA : ContDiff ℝ ∞ A) (hB : ContDiff ℝ ∞ B) :
-    ContDiff ℝ ∞ (phase g w.cutoff A B) :=
-  (hA.comp contDiff_fst).sub
-    (((periodicClock_contDiff g w).comp contDiff_snd).mul (hB.comp contDiff_fst))
 
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
@@ -234,14 +227,6 @@ theorem phase_periodic (g : Geometry) (χ : Plane → ℝ) (A B : P → ℝ)
     phase g χ A B (p, Y + latticePoint n) = phase g χ A B (p, Y) := by
   simp only [phase, periodicClock_periodic]
 
-omit [NormedSpace ℝ P] in
-theorem phase_germ (g : Geometry) (w : ClockWindow)
-    (hinj : InjOn quotientPoint ((fun z => g.center + g.basis z) '' w.outer))
-    (A B : P → ℝ) (k : Frequency) {z : P × Plane}
-    (hz : g.coordinates k z.2 ∈ w.core) :
-    phase g w.cutoff A B =ᶠ[𝓝 z] nativePhase g A B k := by
-  filter_upwards [periodicClock_germ g w hinj k hz] with x hx
-  simp only [phase, nativePhase, hx]
 
 
 
@@ -249,10 +234,6 @@ theorem phase_germ (g : Geometry) (w : ClockWindow)
 noncomputable def angularLift (Φ : P × Plane → ℝ) (angular : ℝ)
     (x : (P × ℝ) × Plane) : ℝ := Φ (x.1.1, x.2) + angular * x.1.2
 
-theorem angularLift_contDiff {Φ : P × Plane → ℝ} (hΦ : ContDiff ℝ ∞ Φ) (angular : ℝ) :
-    ContDiff ℝ ∞ (angularLift Φ angular) :=
-  (hΦ.comp (contDiff_fst.fst.prodMk contDiff_snd)).add
-    (contDiff_const.mul contDiff_fst.snd)
 
 
 

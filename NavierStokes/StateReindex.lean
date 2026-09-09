@@ -97,11 +97,6 @@ noncomputable def state (e : D ≃ₗᵢ[ℝ] E) (u : CorrectionState.State E) :
   oscillatoryPressure := fun n x => u.oscillatoryPressure n (cylinder e x)
   errors := errors e u.errors
 
-theorem fderiv_field (e : D ≃ₗᵢ[ℝ] E) (f : MeanIncrementBounds.Field E)
-    (n : ℕ) (x : D) (v : E) :
-    fderiv ℝ (field e f n) x (e.symm v) = fderiv ℝ (f n) (e x) v := by
-  change fderiv ℝ (fun y => f n (e y)) x (e.symm v) = _
-  rw [fderiv_pull, e.apply_symm_apply]
 
 
 
@@ -447,12 +442,6 @@ theorem timeDirection_pull (e : D ≃ₗᵢ[ℝ] E) (c : CorrectionState.Context
   simp only [LiftedMeanResidual.timeDirection, LiftedMeanResidual.liftDirection,
     LiftedMeanResidual.temporalVector, context, operators, vector, ParticularWaveBounds.reindexVector, cylinder_symm_apply, map_sub, map_smul]
 
-theorem angularDirection_pull (e : D ≃ₗᵢ[ℝ] E) :
-    vector (cylinder e) (LiftedMeanResidual.angularDirection (D := E)) =
-      LiftedMeanResidual.angularDirection := by
-  funext x
-  change (e.symm 0, 1) = (0, 1)
-  rw [map_zero]
 
 
 
@@ -518,7 +507,6 @@ section Association
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
-abbrev Associated (S : Type) := (ℝ × S) × TorusInverse.Plane
 
 
 

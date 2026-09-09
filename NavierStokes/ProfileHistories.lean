@@ -622,12 +622,6 @@ theorem angularLag_hasDerivAt (h : ℝ) {p : Point} (hp : p ∈ D.carrier)
       ((hasDerivAt_id p.1).fun_mul (radialPartial_hasDerivAt D P.H_smooth hp))
         (mul_ne_zero hX hH)
 
-theorem axialLag_hasDerivAt (h : ℝ) {p : Point} (hp : p ∈ D.carrier) (hX : p.1 ≠ 0) :
-    HasDerivAt (fun x => P.axialLag h (x, p.2))
-      ((P.axialSource h p * p.1 - primitive (P.axialSource h) p) / p.1 ^ 2) p.1 := by
-  unfold axialLag
-  simpa only [id_eq, Prod.eta, mul_one] using
-    (primitive_hasDerivAt D (P.axialSource_smooth h) hp).fun_div (hasDerivAt_id p.1) hX
 
 /-- The angular differential equation (6), with logarithmic slopes as ratios
 of genuine derivatives. -/

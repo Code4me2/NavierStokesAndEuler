@@ -24,23 +24,12 @@ namespace NavierStokes.SmoothMomentRepair
 
 variable (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-abbrev QuadraticCoefficients := (E →L[ℝ] E) × (E →L[ℝ] E →L[ℝ] E)
-abbrev RepairData := QuadraticCoefficients E × E
 
 variable {E}
 
-/-- The same type holds an unknown correction on input and a moment debt on output. -/
-def forward (z : RepairData E) : RepairData E :=
-  (z.1, z.1.1 z.2 + z.1.2 z.2 z.2)
-
-def base (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ] E) : RepairData E :=
-  ((B.toContinuousLinearMap, A), 0)
 
 
-/-- This universal coefficient map is polynomial, hence analytic. -/
-theorem forward_contDiff : ContDiff ℝ ⊤ (forward : RepairData E → RepairData E) :=
-  contDiff_fst.prodMk ((contDiff_fst.fst.clm_apply contDiff_snd).add
-    ((contDiff_fst.snd.clm_apply contDiff_snd).clm_apply contDiff_snd))
+
 
 
 

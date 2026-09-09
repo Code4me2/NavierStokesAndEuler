@@ -32,69 +32,12 @@ variable {X Y V W : Type}
   [NormedAddCommGroup V] [NormedSpace ℝ V]
   [NormedAddCommGroup W] [NormedSpace ℝ W]
 
-/-- A point-dependent bound on a finite prefix of actual Fréchet jets. -/
-def EnvelopeJets (m : ℕ) (f : X → V) (envelope : X → ℝ) : Prop :=
-  ∀ j ≤ m, ∀ x, ‖iteratedFDeriv ℝ j f x‖ ≤ envelope x
 
-theorem EnvelopeJets.nonneg {m : ℕ} {f : X → V} {e : X → ℝ}
-    (hf : EnvelopeJets m f e) (x : X) : 0 ≤ e x :=
-  (norm_nonneg _).trans (hf 0 (Nat.zero_le _) x)
 
-theorem EnvelopeJets.mono {m : ℕ} {f : X → V} {e e' : X → ℝ}
-    (hf : EnvelopeJets m f e) (he : ∀ x, e x ≤ e' x) : EnvelopeJets m f e' :=
-  fun j hj x => (hf j hj x).trans (he x)
 
-theorem affine_jet_bound {f : Y → V} (hf : ContDiff ℝ ∞ f)
-    (L : X →L[ℝ] Y) (c : Y) {K : ℝ} (hK : 1 ≤ K) (hL : ‖L‖ ≤ K)
-    (m : ℕ) (x : X) {A : ℝ}
-    (hb : ∀ j ≤ m, ‖iteratedFDeriv ℝ j f (c + L x)‖ ≤ A) :
-    ∀ j ≤ m, ‖iteratedFDeriv ℝ j (fun z => f (c + L z)) x‖ ≤ A * K ^ m := by
-  have hA : 0 ≤ A := (norm_nonneg _).trans (hb 0 (Nat.zero_le _))
-  intro j hj
-  refine (CommonCoverSolve.norm_iteratedFDeriv_affine_le hf L c x j).trans ?_
-  exact mul_le_mul (hb j hj)
-    ((pow_le_pow_left₀ (norm_nonneg _) hL j).trans (pow_le_pow_right₀ hK hj))
-    (pow_nonneg (norm_nonneg _) _) hA
 
-theorem EnvelopeJets.affine {m : ℕ} {f : Y → V} {e : Y → ℝ}
-    (hb : EnvelopeJets m f e) (hf : ContDiff ℝ ∞ f)
-    (L : X →L[ℝ] Y) (c : Y) {K : ℝ} (hK : 1 ≤ K) (hL : ‖L‖ ≤ K) :
-    EnvelopeJets m (fun x => f (c + L x)) (fun x => e (c + L x) * K ^ m) := by
-  intro j hj x
-  exact affine_jet_bound hf L c hK hL m x (fun i hi => hb i hi _) j hj
 
-/-- The weight is evaluated at the same point in both factors; it need not
-be differentiated in this bound. -/
-theorem clm_apply_jet_bound {f : X → V →L[ℝ] W} {g : X → V}
-    (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g) (m : ℕ) (x : X)
-    {A B : ℝ} (hA : ∀ j ≤ m, ‖iteratedFDeriv ℝ j f x‖ ≤ A)
-    (hB : ∀ j ≤ m, ‖iteratedFDeriv ℝ j g x‖ ≤ B) :
-    ∀ j ≤ m, ‖iteratedFDeriv ℝ j (fun y => f y (g y)) x‖ ≤ 2 ^ m * A * B := by
-  have hA0 : 0 ≤ A := (norm_nonneg _).trans (hA 0 (Nat.zero_le _))
-  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0 (Nat.zero_le _))
-  intro j hj
-  refine (norm_iteratedFDeriv_clm_apply hf hg x (natCast_le_infty j)).trans ?_
-  calc
-    _ ≤ ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * A * B := by
-      apply Finset.sum_le_sum
-      intro i hi
-      have hij : i ≤ j := Nat.le_of_lt_succ (Finset.mem_range.mp hi)
-      exact mul_le_mul (mul_le_mul_of_nonneg_left (hA i (hij.trans hj)) (by positivity))
-        (hB (j - i) ((Nat.sub_le _ _).trans hj)) (norm_nonneg _) (mul_nonneg (by positivity) hA0)
-    _ = 2 ^ j * A * B := by
-      rw [← Finset.sum_mul, ← Finset.sum_mul]
-      congr 2
-      exact_mod_cast Nat.sum_range_choose j
-    _ ≤ 2 ^ m * A * B :=
-      mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num) hj) hA0) hB0
 
-theorem EnvelopeJets.clm_apply {m : ℕ} {f : X → V →L[ℝ] W} {g : X → V}
-    {A B : X → ℝ} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
-    (hA : EnvelopeJets m f A) (hB : EnvelopeJets m g B) :
-    EnvelopeJets m (fun x => f x (g x)) (fun x => 2 ^ m * A x * B x) :=
-  fun j hj x => clm_apply_jet_bound hf hg m x (fun i hi => hA i hi x)
-    (fun i hi => hB i hi x) j hj
 
 end Envelopes
 
@@ -198,9 +141,6 @@ theorem norm_sourceLinear_le (g : CCS) : ‖sourceLinear P g‖ ≤ argumentCost
 
 
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-@[simp] theorem sourceArgument_slow (g : CCS) (k : Frequency) (w : Joint P) :
-    (sourceArgument g k w).1 = w.1.1 := rfl
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
 @[simp] theorem nativeArgument_slow (g : CCS) (k : Frequency) (w : Joint P) :
@@ -372,13 +312,6 @@ theorem currentArgument_affine (g : CCS) (k : Frequency) (p : P × Plane) :
   simp only [currentArgument, g.coordinates_eq_affine k p.2, currentLinear_apply]
   ext <;> simp
 
-theorem currentArgument_smooth (g : CCS) (k : Frequency) :
-    ContDiff ℝ ∞ (currentArgument (P := P) g k) := by
-  have he : currentArgument (P := P) g k =
-      fun p => currentArgument g k 0 + currentLinear P g p :=
-    funext (currentArgument_affine g k)
-  rw [he]
-  exact contDiff_const.add (currentLinear P g).contDiff
 
 theorem norm_currentLinear_le (g : CCS) : ‖currentLinear P g‖ ≤ argumentCost g := by
   apply ContinuousLinearMap.opNorm_le_bound _ (zero_le_one.trans (one_le_argumentCost g))
@@ -463,8 +396,6 @@ noncomputable def chartCost (D : ℝ) : ℝ := 1 + (2 : ℝ) ^ (4 * (1 + |D|))
 
 
 
-/-- Coarsest of a pair of simultaneously active levels. -/
-noncomputable def commonIndex (h : ℝ) (n m : ℕ) : ℕ := min (ChartScales.nativeIndex h n) (ChartScales.nativeIndex h m)
 
 
 
@@ -588,20 +519,9 @@ end SourceClasses
 
 section CommonBandChanges
 
-/-- Either direction of a bounded covering change. The inverse is a map on
-the universal cover; no extra periodicity is imposed on its input. -/
-noncomputable def coverChange (forward : Bool) (d : ℕ) : Plane →L[ℝ] Plane :=
-  if forward then (CommonCoverSolve.coverPower d : Plane →L[ℝ] Plane)
-  else ((CommonCoverSolve.coverPower d).symm : Plane →L[ℝ] Plane)
 
 
-noncomputable def bandCommonChart (D : ℝ) (n m : ℕ) (forward : Bool) (gap : ℕ) :
-    SlowPoint × Plane →L[ℝ] SlowPoint × Plane :=
-  (bandChart D n m).prodMap (coverChange forward gap)
 
-@[simp] theorem bandCommonChart_apply (D : ℝ) (n m : ℕ) (forward : Bool) (gap : ℕ)
-    (x : SlowPoint × Plane) :
-    bandCommonChart D n m forward gap x = (bandChart D n m x.1, coverChange forward gap x.2) := rfl
 
 noncomputable def commonChartCost (D : ℝ) (gapBound : ℕ) : ℝ :=
   chartCost D + CommonCoverSolve.coveringBound gapBound
@@ -617,8 +537,6 @@ section PhysicalProfileWeights
 
 
 
-noncomputable def profileDomain (h a b : ℝ) : Set SlowPoint :=
-  {x | x ∈ SimilarityHomogeneity.chartDomain ∧ SimilarityHomogeneity.chartX h x ∈ Ioo a b}
 
 
 
@@ -633,17 +551,9 @@ section MeshChanges
 
 
 
-noncomputable def meshLinear (D : ℝ) (L M : SlotColoring.Label) :
-    SlotColoring.Position →L[ℝ] SlotColoring.Position :=
-  ContinuousLinearMap.pi (fun j : Fin 3 =>
-    (SlotColoring.width D j L.1 / SlotColoring.width D j M.1) •
-      (ContinuousLinearMap.proj j : SlotColoring.Position →L[ℝ] ℝ))
 
 
 
-@[simp] theorem meshLinear_apply (D : ℝ) (L M : SlotColoring.Label)
-    (x : SlotColoring.Position) (j : Fin 3) :
-    meshLinear D L M x j = (SlotColoring.width D j L.1 / SlotColoring.width D j M.1) * x j := rfl
 
 
 theorem mesh_ratioBound_pos (D : ℝ) : 0 < SlotColoring.ratioBound D := by

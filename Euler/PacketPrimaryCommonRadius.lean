@@ -51,10 +51,6 @@ namespace GradeGuards
 
 variable {H N C}
 
-theorem enlargeRadius (W : GradeGuards (P := P) H N C) (R' : ℝ) (h : L.R ≤ R') :
-    GradeGuards (P := P) (H.enlargeRadius R' h) (N.enlargeRadius R' h) C :=
-  ⟨W.terminal_nonneg, W.common.trans h, W.corrector.trans h,
-    W.correctorTime.trans h, W.pressureGradient.trans h⟩
 
 end GradeGuards
 end EulerTransversePacketPrimary.Budget

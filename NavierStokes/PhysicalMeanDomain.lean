@@ -811,16 +811,6 @@ theorem meanClass_liftedTorusAverage {a b cL cR : ℝ}
         exact hb n (p.1, (p.2.1, Y)) hp j hj)
   rwa [(liftedTorusAverage_fiberLocal.germ he).jet_eq j p.1 p.2.2] at hout
 
-theorem meanClass_centered {a b cL cR : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.centered (f n)) :=
-  MeanIncrementBounds.Class.sub hclass
-    (meanClass_liftedTorusAverage ha hcL hcR ε L hε hεone hL U hU hf hclass)
 
 omit [CompleteSpace V] in
 theorem jet_zero_outside {a b : ℝ} {U : Set S} (hU : IsOpen U)
@@ -923,40 +913,7 @@ theorem LocalBandJets.liftedPressureMass {a b : ℝ} (hab : a ≤ b)
   rw [(liftedPressureMass_fiberLocal.germ he).jet_eq j p.1 p.2.2] at hout
   exact hout.trans_eq (by ring)
 
-omit [FiniteDimensional ℝ S] in
-omit [CompleteSpace V] in
-theorem localBandJets_unweighted {a b cL cR : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → V}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hjets : LocalBandJets U ε L α f) :
-    UnweightedClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f := by
-  let st := localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU
-  refine ⟨fun _ _ _ => zero_le_one, fun n => (hf n).mono (fun _ hp => hp.2), ?_⟩
-  intro m
-  obtain ⟨C, hC, k, hb⟩ := hjets m
-  refine ⟨C, hC, k, ?_⟩
-  intro n p hp j hj
-  apply (hb n p hp.2 j hj).trans
-  change C * ε n ^ α * L n ^ k ≤ C * ε n ^ α * st.growth n p ^ k * 1
-  rw [mul_one]
-  exact mul_le_mul_of_nonneg_left
-    (pow_le_pow_left₀ (zero_le_one.trans (hL n)) (st.slow_le_growth n p) k)
-    (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
 
-theorem meanClass_pressureMass_lift {a b cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    UnweightedClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n p => PressureStream.pressureMass (f n) p.2.1) := by
-  apply localBandJets_unweighted ha hcL hcR ε L hε hεone hL U hU
-    (fun n => liftedPressureMass_contDiffOn hU (hf n) (hs n))
-  exact (meanClass_localBandJets ha hcL hcR ε L hε hεone hL U hU hf hs hclass).liftedPressureMass
-    hab.le hU hf hs
 
 omit [FiniteDimensional ℝ S] in
 theorem meanClass_radialMultiply {a b cL cR : ℝ}
@@ -974,50 +931,9 @@ theorem meanClass_radialMultiply {a b cL cR : ℝ}
   simp only [zero_add] at h
   exact h
 
-theorem pressureSource_contDiffOn {a b : ℝ} (hab : a < b)
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    ContDiffOn ℝ ∞ (PressureStream.pressureSource a b hab f) (slowDomain U) :=
-  (pressureSource_fiberLocal a b hab).contDiffOn_of_supported
-    (fun _ h hsup => PressureStream.pressureSource_contDiff hab h hsup) hU hf hs
 
-theorem pressureSource_supportedOn {a b : ℝ} (hab : a < b)
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    SupportedOn a b U (PressureStream.pressureSource a b hab f) :=
-  (pressureSource_fiberLocal a b hab).supportedOn
-    (fun _ _ hsup => PressureStream.pressureSource_supported hab hsup) hU hf hs
 
-theorem meanClass_pressureSource {a b cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => PressureStream.pressureSource a b hab (f n)) := by
-  have hm := meanClass_pressureMass_lift ha hab hcL hcR ε L hε hεone hL U hU hf hs hclass
-  have hρ := memClass_restrict ha hcL hcR ε L hε hεone hL U hU
-    (MeanIncrementBounds.rho_meanClass (P := S × PressureStream.Plane) ha hab hcL hcR ε L hε hεone hL)
-  have hprod := MeanIncrementBounds.Class.mul_coefficient hρ hm
-  simp only [zero_add] at hprod
-  exact MeanIncrementBounds.Class.sub hclass hprod
 
-theorem meanClass_meanPressure {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => PressureStream.meanPressure d a b (M n) hab (v n) (f n)) :=
-  meanClass_physicalCompact ha hab hd hcL hcR ε L hε hεone hL U hU α M v _
-    (fun n => pressureSource_contDiffOn hab hU (hf n) (hs n))
-    (fun n => pressureSource_supportedOn hab hU (hf n) (hs n))
-    (meanClass_pressureSource ha hab hcL hcR ε L hε hεone hL U hU hf hs hclass)
 
 end PressureClasses
 
@@ -1034,107 +950,11 @@ noncomputable def localSlowStripData (U : Set S) (hU : IsOpen U)
     zeta_smooth := contDiffOn_const
     zeta_nonneg := fun _ _ => zero_le_one }
 
-theorem meanClass_pressureMass {a b cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    UnweightedClass (localSlowStripData U hU ε L hε hεone hL) α
-      (fun n => PressureStream.pressureMass (f n)) := by
-  have hm := fun n => liftedPressureMass_contDiffOn hU (hf n) (hs n)
-  have hb := (meanClass_localBandJets ha hcL hcR ε L hε hεone hL U hU hf hs hclass).liftedPressureMass
-    hab.le hU hf hs
-  refine ⟨fun _ _ _ => zero_le_one, ?_, ?_⟩
-  · intro n
-    exact (hm n).comp (MeanMomentBounds.insertSlow (P := S)).contDiff.contDiffOn (fun _ hp => hp)
-  · intro m
-    obtain ⟨C, hC, k, hbound⟩ := hb m
-    refine ⟨C, hC, k, ?_⟩
-    intro n s hsu j hj
-    change ‖iteratedFDeriv ℝ j
-      (MeanMomentBounds.liftedPressureMass (f n) ∘ MeanMomentBounds.insertSlow) s‖ ≤ _
-    rw [MeanRankUpdate.iteratedFDeriv_comp_linear (slowDomain_open hU) (hm n)
-      MeanMomentBounds.insertSlow j hsu]
-    have hn := (iteratedFDeriv ℝ j (MeanMomentBounds.liftedPressureMass (f n))
-      (MeanMomentBounds.insertSlow s)).norm_compContinuousLinearMap_le
-        (fun _ => MeanMomentBounds.insertSlow (P := S))
-    simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at hn
-    have hp : ‖MeanMomentBounds.insertSlow (P := S)‖ ^ j ≤ 1 :=
-      pow_le_one₀ (norm_nonneg _) MeanMomentBounds.norm_insertSlow_le
-    have h := hn.trans ((mul_le_of_le_one_right (norm_nonneg _) hp).trans
-      (hbound n (MeanMomentBounds.insertSlow s) hsu j hj))
-    simpa only [majorant, StripData.growth, localSlowStripData, MeanMomentBounds.slowStripData,
-      inv_one, max_self, mul_one] using h
 
 
-theorem meanClass_radialMoment {a b cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (k : ℕ) :
-    UnweightedClass (localSlowStripData U hU ε L hε hεone hL) α
-      (fun n => IntegratedMeanBalances.radialMoment k (PressureStream.torusAverage (f n))) := by
-  have h := meanClass_pressureMass ha hab hcL hcR ε L hε hεone hL U hU
-    (fun n => (contDiffOn_fst.pow k).mul (hf n))
-    (fun n p hp hn => hs n p hp (right_ne_zero_of_mul hn))
-    (meanClass_radialMultiply ha hcL hcR ε L hε hεone hL U hU hclass (contDiff_id.pow k))
-  change UnweightedClass _ α (fun n =>
-    PressureStream.pressureMass (MeanMomentBounds.radialWeighted k (f n))) at h
-  simpa only [MeanMomentBounds.pressureMass_radialWeighted_fun] using h
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S] in
-theorem SupportedOn.sub {a b : ℝ} {U : Set S} {f g : PressureStream.Lift S → ℝ}
-    (hf : SupportedOn a b U f) (hg : SupportedOn a b U g) :
-    SupportedOn a b U (fun p => f p - g p) := by
-  intro p hp hn
-  by_cases hz : f p = 0
-  · exact hg p hp (fun hz' => hn (by simp [hz, hz']))
-  · exact hf p hp hz
 
-/-- The local pressure is the same linear integral operator used globally. -/
-theorem meanPressure_sub_on {a b d M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
-    {U : Set S} (hU : IsOpen U) {f g : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hg : ContDiffOn ℝ ∞ g (slowDomain U))
-    (hsf : SupportedOn a b U f) (hsg : SupportedOn a b U g)
-    {p : PressureStream.Lift S} (hp : p.2.1 ∈ U) :
-    PressureStream.meanPressure d a b M hab v (fun x => f x - g x) p =
-      PressureStream.meanPressure d a b M hab v f p - PressureStream.meanPressure d a b M hab v g p := by
-  obtain ⟨c, _, hcs, hcf, hef⟩ := exists_fiber_localization hU hp hf
-  obtain ⟨e, _, hes, heg, heqg⟩ := exists_fiber_localization hU hp hg
-  have hF := hef.self_of_nhds
-  have hG := heqg.self_of_nhds
-  have hsub : ∀ r Y, localize c f (r, (p.2.1, Y)) - localize e g (r, (p.2.1, Y)) =
-      f (r, (p.2.1, Y)) - g (r, (p.2.1, Y)) := fun r Y => congrArg₂ (fun x y : ℝ => x - y) (hF r Y) (hG r Y)
-  rw [← meanPressure_fiberLocal d a b M hab v
-      (fun x => localize c f x - localize e g x) (fun x => f x - g x) p.2.1 hsub p.1 p.2.2,
-    congrFun (MeanIncrementBounds.meanPressure_sub ha hab hd hcf heg
-      (localize_supported hcs hsf) (localize_supported hes hsg) M v) p,
-    meanPressure_fiberLocal d a b M hab v _ _ p.2.1 hF p.1 p.2.2,
-    meanPressure_fiberLocal d a b M hab v _ _ p.2.1 hG p.1 p.2.2]
 
-theorem meanClass_meanPressure_change {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f g : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hg : ∀ n, ContDiffOn ℝ ∞ (g n) (slowDomain U))
-    (hsf : ∀ n, SupportedOn a b U (f n)) (hsg : ∀ n, SupportedOn a b U (g n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α (f - g))
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n p => PressureStream.meanPressure d a b (M n) hab (v n) (f n) p -
-        PressureStream.meanPressure d a b (M n) hab (v n) (g n) p) := by
-  apply MeanRankUpdate.meanClass_congr_on
-    (meanClass_meanPressure ha hab hd hcL hcR ε L hε hεone hL U hU
-      (fun n => (hf n).sub (hg n)) (fun n => (hsf n).sub (hsg n)) hclass M v)
-  intro n p hp
-  exact (meanPressure_sub_on ha hab hd (v n) hU (hf n) (hg n) (hsf n) (hsg n) hp.2).symm
 
 end MomentsAndChanges
 
@@ -1204,44 +1024,6 @@ theorem desiredIncrement_contDiffOn (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpen
 
 end TemporalClasses
 
-theorem dividedAlias_finiteJets_fiber {d a b : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (m : ℕ) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : PressureStream.Plane) (g : PressureStream.Lift S → ℝ),
-      ContDiff ℝ ∞ g → RadialAlias.RadiallySupported a b g →
-      ∀ C : ℝ, 0 ≤ C → ∀ s : S,
-      (∀ j ≤ m, ∀ z : PressureStream.Lift S, z.2.1 = s → ‖iteratedFDeriv ℝ j (UniformFourierAlias.exactAlias
-        (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d)) M (0, v)
-          (RadialPullback.normalizeSource d a g)) z‖ ≤ C) →
-      ∀ j ≤ m, ∀ z : PressureStream.Lift S, z.2.1 = s →
-        ‖iteratedFDeriv ℝ j (PressureStream.divideRadius (RadialPullback.physicalAlias d a b M (0, v) g)) z‖ ≤
-          K * C := by
-  obtain ⟨KP, hKP, hcomp⟩ := RadialPullback.radial_comp_finiteJets_uniform (E := S × PressureStream.Plane) (V := ℝ)
-    a b (RadialPullback.powerChart_contDiff ha d) m
-  obtain ⟨KM, hKM, hmul⟩ := RadialPullback.radial_multiplier_finiteJets_uniform (E := S × PressureStream.Plane) (V := ℝ)
-    a b (TemporalMeanUpdate.aliasFactor_smooth ha d) m
-  refine ⟨KM * KP, mul_nonneg hKM hKP, ?_⟩
-  intro M v g hg hs C hC s hbound j hj z hzs
-  let A := UniformFourierAlias.exactAlias (TransportPrimitive.interiorCutoff (a ^ d) (b ^ d))
-    M (0, v) (RadialPullback.normalizeSource d a g)
-  have hAs : ContDiff ℝ ∞ A := UniformFourierAlias.exactAlias_smooth
-    (TransportPrimitive.interiorCutoff_contDiff (a ^ d) (b ^ d))
-    (RadialPullback.normalizeSource_contDiff ha hd hg) (RadialPullback.normalizeSource_supported ha hab hd hs)
-  by_cases hz : z.1 ∈ Icc a b
-  · rw [TemporalMeanUpdate.dividedAlias_eq_pullback ha hab hd (0, v) g]
-    change ‖iteratedFDeriv ℝ j (fun y => TemporalMeanUpdate.aliasFactor d a y.1 •
-      (A ∘ RadialPullback.liftChart (RadialPullback.powerChart d a)) y) z‖ ≤ _
-    have hc := hcomp A hAs z hz C hC
-      (fun i hi => hbound i hi (RadialPullback.liftChart (RadialPullback.powerChart d a) z) hzs)
-    have hm := hmul (A ∘ RadialPullback.liftChart (RadialPullback.powerChart d a))
-      (hAs.comp (RadialPullback.liftChart_contDiff (RadialPullback.powerChart_contDiff ha d))) z hz
-      (KP * C) (mul_nonneg hKP hC) hc j hj
-    exact hm.trans_eq (by ring)
-  · have hz0 : iteratedFDeriv ℝ j
-        (PressureStream.divideRadius (RadialPullback.physicalAlias d a b M (0, v) g)) z = 0 := by
-      by_contra hn
-      exact hz (TransportPrimitive.iteratedFDeriv_supported
-        (PressureStream.divideRadius_supported (RadialPullback.physicalAlias_supported ha hab hd M (0, v) g)) j hn)
-    rw [hz0, norm_zero]
-    exact mul_nonneg (mul_nonneg hKM hKP) hC
 
 theorem totalIntegral_jet_bound_fiber {a b M : ℝ} (hab : a ≤ b) (v : PressureStream.Plane)
     {f : PressureStream.Lift S → V} (hf : ContDiff ℝ ∞ f)
@@ -1257,122 +1039,15 @@ theorem totalIntegral_jet_bound_fiber {a b M : ℝ} (hab : a ≤ b) (v : Pressur
   simp only [totalIntegral_freeze] at he
   exact he
 
-/-- A bounded source gives a bounded actual cutoff alias, with a constant
-independent of the transport shift and the slow fiber. -/
-theorem exactAlias_bounded_fiber {a b : ℝ} (hab : a ≤ b) {χ : ℝ → ℝ}
-    (hχ : ContDiff ℝ ∞ χ) (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    (m : ℕ) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : PressureStream.Plane)
-      (f : PressureStream.Lift S → V), ContDiff ℝ ∞ f →
-      RadialAlias.RadiallySupported a b f → ∀ C : ℝ, 0 ≤ C → ∀ s : S,
-      (∀ i ≤ m, ∀ R ∈ Icc a b, ∀ Y, ‖iteratedFDeriv ℝ i f (R, (s, Y))‖ ≤ C) →
-      ∀ j ≤ m, ∀ z : PressureStream.Lift S, z.2.1 = s →
-      ‖iteratedFDeriv ℝ j (UniformFourierAlias.exactAlias χ M ((0 : S), v) f) z‖ ≤ K * C := by
-  obtain ⟨K, hK, hmul⟩ := radial_multiplier_finiteJets_uniform
-    (E := S × PressureStream.Plane) (V := V) a b (contDiff_infty_iff_deriv.mp hχ).2 m
-  refine ⟨K * (b - a), mul_nonneg hK (sub_nonneg.mpr hab), ?_⟩
-  intro M v f hf hs C hC s hb j hj z hzs
-  by_cases hz : z.1 ∈ Icc a b
-  · have hi : ∀ i ≤ m, ‖iteratedFDeriv ℝ i (TransportPrimitive.totalIntegral M ((0 : S), v) f) z‖ ≤ C * (b - a) := by
-      intro i hi
-      exact totalIntegral_jet_bound_fiber hab v hf hs i z C (by simpa only [hzs] using hb i hi)
-    have he := hmul (TransportPrimitive.totalIntegral M ((0 : S), v) f)
-      (TransportPrimitive.totalIntegral_contDiff hf hs) z hz (C * (b - a))
-      (mul_nonneg hC (sub_nonneg.mpr hab)) hi j hj
-    exact he.trans_eq (by ring)
-  · have hz0 : iteratedFDeriv ℝ j (UniformFourierAlias.exactAlias χ M ((0 : S), v) f) z = 0 := by
-      by_contra hn
-      exact hz (TransportPrimitive.iteratedFDeriv_supported
-        (UniformFourierAlias.exactAlias_supported hleft hright) j hn)
-    rw [hz0, norm_zero]
-    exact mul_nonneg (mul_nonneg hK (sub_nonneg.mpr hab)) hC
 
-omit [CompleteSpace V] in
-theorem normalizeSource_bounded_fiber {a d : ℝ} (ha : 0 < a) (hd : 0 < d)
-    (lo hi : ℝ) (m : ℕ) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : PressureStream.Lift S → V),
-      ContDiff ℝ ∞ f → ∀ C : ℝ, 0 ≤ C → ∀ s : S,
-      (∀ i ≤ m, ∀ R Y, ‖iteratedFDeriv ℝ i f (R, (s, Y))‖ ≤ C) →
-      ∀ j ≤ m, ∀ R ∈ Icc lo hi, ∀ Y,
-      ‖iteratedFDeriv ℝ j (normalizeSource d a f) (R, (s, Y))‖ ≤ K * C := by
-  obtain ⟨KC, hKC, hbC⟩ := radial_comp_finiteJets_uniform (E := S × PressureStream.Plane) (V := V)
-    lo hi (inverseChart_contDiff ha d) m
-  obtain ⟨KM, hKM, hbM⟩ := radial_multiplier_finiteJets_uniform (E := S × PressureStream.Plane) (V := V)
-    lo hi (sourceMultiplier_contDiff ha hd) m
-  refine ⟨KM * KC, mul_nonneg hKM hKC, ?_⟩
-  intro f hf C hC s hb j hj R hR Y
-  have hc : ∀ i ≤ m,
-      ‖iteratedFDeriv ℝ i (f ∘ liftChart (inverseChart d a)) (R, (s, Y))‖ ≤ KC * C :=
-    fun i hi => hbC f hf (R, (s, Y)) hR C hC (fun k hk => hb k hk _ _) i hi
-  have he := hbM (f ∘ liftChart (inverseChart d a))
-    (hf.comp (liftChart_contDiff (inverseChart_contDiff ha d))) (R, (s, Y)) hR
-    (KC * C) (mul_nonneg hKC hC) hc j hj
-  exact he.trans_eq (by ring)
 
-theorem dividedAlias_bounded_fiber {a b d : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : PressureStream.Plane)
-      (f : PressureStream.Lift S → ℝ), ContDiff ℝ ∞ f →
-      RadialAlias.RadiallySupported a b f → ∀ C : ℝ, 0 ≤ C → ∀ s : S,
-      (∀ i ≤ m, ∀ R Y, ‖iteratedFDeriv ℝ i f (R, (s, Y))‖ ≤ C) →
-      ∀ j ≤ m, ∀ z : PressureStream.Lift S, z.2.1 = s →
-      ‖iteratedFDeriv ℝ j (PressureStream.divideRadius (physicalAlias d a b M ((0 : S), v) f)) z‖ ≤ K * C := by
-  have habU : a ^ d < b ^ d := Real.rpow_lt_rpow ha.le hab hd
-  obtain ⟨KN, hKN, hbN⟩ := normalizeSource_bounded_fiber (S := S) (V := ℝ) ha hd (a ^ d) (b ^ d) m
-  obtain ⟨KA, hKA, hbA⟩ := exactAlias_bounded_fiber (S := S) (V := ℝ) habU.le
-    (TransportPrimitive.interiorCutoff_contDiff (a ^ d) (b ^ d))
-    (fun u hu => TransportPrimitive.interiorCutoff_zero habU (by linarith))
-    (fun u hu => TransportPrimitive.interiorCutoff_one habU (by linarith)) m
-  obtain ⟨KT, hKT, hbT⟩ := dividedAlias_finiteJets_fiber (S := S) ha hab hd m
-  refine ⟨KT * KA * KN, mul_nonneg (mul_nonneg hKT hKA) hKN, ?_⟩
-  intro M v f hf hs C hC s hb j hj z hzs
-  have hN := hbN f hf C hC s hb
-  have hA := hbA M v (normalizeSource d a f) (normalizeSource_contDiff ha hd hf)
-    (normalizeSource_supported ha hab hd hs) (KN * C) (mul_nonneg hKN hC) s hN
-  have he := hbT M v f hf hs (KA * (KN * C)) (mul_nonneg hKA (mul_nonneg hKN hC))
-    s hA j hj z hzs
-  exact he.trans_eq (by ring)
 
-theorem dividedAlias_fiberLocal (d a b M : ℝ) (v : PressureStream.Plane) :
-    FiberLocal (S := S) (fun f => PressureStream.divideRadius (physicalAlias d a b M ((0 : S), v) f)) := by
-  intro f g s he r Y
-  exact congrArg (fun x : ℝ => x / r) (physicalAlias_fiberLocal d a b M v f g s he r Y)
 
 section AliasClasses
 
 variable [FiniteDimensional ℝ S]
 
-theorem dividedAlias_contDiffOn {a b d M : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    ContDiffOn ℝ ∞ (PressureStream.divideRadius (physicalAlias d a b M ((0 : S), v) f)) (slowDomain U) :=
-  (dividedAlias_fiberLocal d a b M v).contDiffOn_of_supported
-    (fun g hg hsg => PressureStream.divideRadius_contDiff ha
-      (physicalAlias_contDiff ha hab hd hg hsg M (0, v))
-      (physicalAlias_supported ha hab hd M (0, v) g)) hU hf hs
 
-theorem LocalBandJets.dividedAlias {a b d : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    {U : Set S} (hU : IsOpen U) {ε L : ℕ → ℝ}
-    (hε : ∀ n, 0 < ε n) (hL : ∀ n, 1 ≤ L n) {α : ℝ}
-    {f : ℕ → PressureStream.Lift S → ℝ} (hjets : LocalBandJets U ε L α f)
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n)) (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    LocalBandJets U ε L α (fun n => PressureStream.divideRadius
-      (physicalAlias d a b (M n) ((0 : S), v n) (f n))) := by
-  intro m
-  obtain ⟨K, hK, hbound⟩ := dividedAlias_bounded_fiber (S := S) ha hab hd m
-  obtain ⟨C, hC, k, hb⟩ := hjets m
-  refine ⟨K * C, mul_nonneg hK hC, k, ?_⟩
-  intro n p hp j hj
-  obtain ⟨c, _, hcs, hcf, he⟩ := exists_fiber_localization hU hp (hf n)
-  have hA : 0 ≤ C * ε n ^ α * L n ^ k :=
-    mul_nonneg (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-      (pow_nonneg (zero_le_one.trans (hL n)) _)
-  have ho := hbound (M n) (v n) _ hcf (localize_supported hcs (hs n))
-    (C * ε n ^ α * L n ^ k) hA p.2.1
-    (fun i hi R Y => by rw [he.jet_eq i R Y]; exact hb n (R, (p.2.1, Y)) hp i hi) j hj p rfl
-  rw [((dividedAlias_fiberLocal d a b (M n) (v n)).germ he).jet_eq j p.1 p.2.2] at ho
-  exact ho.trans_eq (by ring)
 
 end AliasClasses
 
@@ -1380,64 +1055,7 @@ section FinalStreamClasses
 
 variable [FiniteDimensional ℝ S]
 
-omit [CompleteSpace V] in
-theorem localBandJets_meanClass_of_support {a b c e cL cR : ℝ}
-    (ha : 0 < a) (hac : a < c) (heb : e < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → V}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn c e U (f n)) (hb : LocalBandJets U ε L α f) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f := by
-  let st := localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU
-  let sb := logStripData (E := S × PressureStream.Plane) a b cL cR ha hcL hcR ε L hε hεone hL
-  have hmem (r : ℝ) (hr : r ∈ Icc c e) : (r, (0 : S × PressureStream.Plane)) ∈ sb.domain :=
-    ⟨hac.trans_le hr.1, hr.2.trans_lt heb⟩
-  have hcont : ContinuousOn (fun r : ℝ => sb.zeta (r, 0)) (Icc c e) :=
-    sb.zeta_smooth.continuousOn.comp (continuous_id.prodMk continuous_const).continuousOn hmem
-  have hpos (r : ℝ) (hr : r ∈ Icc c e) : 0 < sb.zeta (r, 0) :=
-    zeta_pos cL cR (logPosition_mem ha (hmem r hr))
-  obtain ⟨δ, hδ, hmargin⟩ := UniformCone.positive_uniform_margin isCompact_Icc hcont hpos
-  refine ⟨fun _ p hp => st.zeta_nonneg p hp, fun n => (hf n).mono (fun _ hp => hp.2), ?_⟩
-  intro m
-  obtain ⟨C, hC, k, hbound⟩ := hb m
-  refine ⟨C / δ, div_nonneg hC hδ.le, k, ?_⟩
-  intro n p hp j hj
-  by_cases hpi : p.1 ∈ Icc c e
-  · have hζ : δ ≤ st.zeta p := hmargin p.1 hpi
-    have hgr : L n ^ k ≤ st.growth n p ^ k :=
-      pow_le_pow_left₀ (zero_le_one.trans (hL n)) (st.slow_le_growth n p) k
-    have hA : 0 ≤ C / δ * ε n ^ α * st.growth n p ^ k :=
-      mul_nonneg (mul_nonneg (div_nonneg hC hδ.le) (Real.rpow_pos_of_pos (hε n) α).le)
-        (pow_nonneg (st.growth_nonneg n p) _)
-    calc
-      _ ≤ C * ε n ^ α * L n ^ k := hbound n p hp.2 j hj
-      _ ≤ C * ε n ^ α * st.growth n p ^ k :=
-        mul_le_mul_of_nonneg_left hgr (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-      _ = (C / δ * ε n ^ α * st.growth n p ^ k) * δ := by field_simp
-      _ ≤ (C / δ * ε n ^ α * st.growth n p ^ k) * st.zeta p := mul_le_mul_of_nonneg_left hζ hA
-      _ = _ := rfl
-  · rw [jet_zero_outside hU (hf n) (hs n) hp.2 (fun hi => hpi ⟨hi.1.le, hi.2.le⟩) j, norm_zero]
-    exact majorant_nonneg st _ α (div_nonneg hC hδ.le) k n p (st.zeta_nonneg p hp)
 
-/-- The actual divided alias preserves the local mean class. No mean-zero
-condition or nonzero transport coefficient is needed for this basic bound. -/
-theorem meanClass_dividedAlias {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => PressureStream.divideRadius (physicalAlias d a b (M n) ((0 : S), v n) (f n))) := by
-  obtain ⟨c, e, hac, _, heb, hsup⟩ :=
-    TemporalMeanUpdate.dividedAlias_interior_support (E := S × PressureStream.Plane) ha hab hd
-  apply localBandJets_meanClass_of_support ha hac heb hcL hcR ε L hε hεone hL U hU
-    (fun n => dividedAlias_contDiffOn ha hab hd (v n) hU (hf n) (hs n))
-    (fun n p _ hp => hsup (M n) (0, v n) (f n) hp)
-  exact (meanClass_localBandJets ha hcL hcR ε L hε hεone hL U hU hf hs hclass).dividedAlias
-    ha hab hd hU hε hL hf hs M v
 
 omit [FiniteDimensional ℝ S] in
 theorem meanClass_divideRadius {a b cL cR : ℝ}
@@ -1474,21 +1092,6 @@ theorem meanClass_streamPotential {a b d cL cR : ℝ}
     (fun n p hp hn => hs n p hp (right_ne_zero_of_mul hn)) hw
   exact meanClass_divideRadius ha hcL hcR ε L hε hεone hL U hU hi
 
-theorem meanClass_streamBeta {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (w : S × PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => PressureStream.streamBeta w (PressureStream.streamPotential d a b (M n) ((0 : S), v n) (f n))) := by
-  have hi := meanClass_streamPotential ha hab hd hcL hcR ε L hε hεone hL U hU hf hs hclass M v
-  have hD := (hi.directional (0, w)).map (-ContinuousLinearMap.id ℝ ℝ)
-  simp only [
-    _root_.neg_apply, ContinuousLinearMap.id_apply] at hD ⊢
-  exact hD
 
 theorem streamGamma_eq_desired_sub_alias_on {a b d M : ℝ}
     (ha : 0 < a) (hab : a < b) (hd : 0 < d) (v : PressureStream.Plane)
@@ -1508,25 +1111,6 @@ theorem streamGamma_eq_desired_sub_alias_on {a b d M : ℝ}
   simpa only [PressureStream.streamGamma, PressureStream.graphDr, PressureStream.divideRadius,
     hpot.fderiv_eq, hpot.self_of_nhds, halias, hval] using h
 
-theorem meanClass_streamGamma {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => PressureStream.streamGamma (PressureStream.physicalSpeed d (M n)) ((0 : S), v n)
-        (PressureStream.streamPotential d a b (M n) ((0 : S), v n) (f n))) := by
-  have hw := meanClass_radialMultiply ha hcL hcR ε L hε hεone hL U hU hclass (φ := id) contDiff_id
-  have hA := meanClass_dividedAlias ha hab hd hcL hcR ε L hε hεone hL U hU
-    (f := fun n => PressureStream.weightedSource (f n))
-    (fun n => contDiffOn_fst.mul (hf n))
-    (fun n p hp hn => hs n p hp (right_ne_zero_of_mul hn)) hw M v
-  apply MeanRankUpdate.meanClass_congr_on (MeanIncrementBounds.Class.sub hclass hA)
-  intro n p hp
-  exact streamGamma_eq_desired_sub_alias_on ha hab hd (v n) hU (hf n) (hs n) hp.2
 
 
 end FinalStreamClasses

@@ -144,25 +144,7 @@ theorem BandAnnulus.axis_zero_germ {h a b : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   rw [profileRadius_zero_of_axis h haxis]
   exact fun hc => (not_le_of_gt ha) hc.1
 
-theorem BandAnnulus.map_zero {F : Type*} [NormedAddCommGroup F]
-    {h a b : ℝ} {N : ℕ} {f : ℕ → SpaceTime → E}
-    (hs : BandAnnulus h a b N f) (T : ℕ → SpaceTime → E → F)
-    (hT : ∀ n w, T n w 0 = 0) :
-    BandAnnulus h a b N (fun n w => T n w (f n w)) := by
-  intro n hn w hw hne
-  apply hs n hn w hw
-  intro hz
-  exact hne (by change T n w (f n w) = 0; rw [hz, hT])
 
-theorem BandAnnulus.add {h a b : ℝ} {N : ℕ} {f g : ℕ → SpaceTime → E}
-    (hf : BandAnnulus h a b N f) (hg : BandAnnulus h a b N g) :
-    BandAnnulus h a b N (fun n w => f n w + g n w) := by
-  intro n hn w hw hne
-  by_cases hz : f n w = 0
-  · apply hg n hn w hw
-    intro hgz
-    exact hne (by change f n w + g n w = 0; rw [hz, hgz, add_zero])
-  · exact hf n hn w hw hz
 
 theorem BandAnnulus.finset_sum {ι : Type*} {h a b : ℝ} {N : ℕ}
     {f : ι → ℕ → SpaceTime → E} (s : ℕ → Finset ι)

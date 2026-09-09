@@ -24,59 +24,8 @@ open scoped ContDiff Topology BigOperators
 
 /-! ## Source indices do not change physical copy fields -/
 
-/-- Add an unused tag to native source indices. The actual copies, their
-carriers, and their physical fields are unchanged. -/
-noncomputable def taggedSource {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {I K J T : Type*} (tag : T) (W : PhysicalStageBounds.WaveData h D I K J) :
-    PhysicalStageBounds.WaveData h D (T × I) K J where
-  lowerRadius := W.lowerRadius
-  upperRadius := W.upperRadius
-  nativeWidth := W.nativeWidth
-  slowBound := W.slowBound
-  frequencyBound := W.frequencyBound
-  alpha := W.alpha
-  shift := W.shift
-  harmonics := W.harmonics
-  gapBound := W.gapBound
-  lower_pos := W.lower_pos
-  width_nonneg := W.width_nonneg
-  slow_nonneg := W.slow_nonneg
-  frequency_one_le := W.frequency_one_le
-  strip := W.strip
-  weight i := W.weight i.2
-  source i := W.source i.2
-  source_bounds := {
-    uniform := W.source_bounds.uniform.reindex Prod.snd
-    flat_geometry := W.source_bounds.flat_geometry
-    weight_le := by
-      obtain ⟨c, hc, hb⟩ := W.source_bounds.weight_le
-      exact ⟨c, hc, fun i => hb i.2⟩
-    epsilon_eq := W.source_bounds.epsilon_eq
-    slow_le := W.source_bounds.slow_le }
-  copies := W.copies
-  cells := W.cells
-  chart i := {
-    sourceIndex k L := (tag, (W.chart i).sourceIndex k L)
-    map := (W.chart i).map
-    domain := (W.chart i).domain
-    open_domain := (W.chart i).open_domain
-    smooth := (W.chart i).smooth
-    positive_jets := (W.chart i).positive_jets
-    amplitude_eq := (W.chart i).amplitude_eq
-    contains := (W.chart i).contains }
-  chart_maps := W.chart_maps
-  carrier := W.carrier
-  support := W.support
-  smooth := W.smooth
-  frequencies := W.frequencies
 
-@[simp] theorem taggedSource_vector {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {I K T : Type*} (tag : T) (W : PhysicalStageBounds.WaveData h D I K (Fin 3)) :
-    (taggedSource tag W).vector = W.vector := rfl
 
-@[simp] theorem taggedSource_pressure {h : ℝ} {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    {I K T : Type*} (tag : T) (W : PhysicalStageBounds.WaveData h D I K Unit) :
-    (taggedSource tag W).pressure = W.pressure := rfl
 
 /-! ## One fixed native iteration -/
 

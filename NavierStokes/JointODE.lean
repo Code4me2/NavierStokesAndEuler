@@ -196,37 +196,7 @@ theorem reparamSolution_eq_actualSolution (hab : a ≤ b) {U : Set P}
   rw [hy1] at h1
   simpa only [w, affineTime_one, Prod.mk.eta] using h1
 
-/-- Genuine joint parameter/current-time C∞ for the actual solution on the
-closed interval, including its endpoints in the relative smoothness sense. -/
-theorem contDiffOn_solutionExtension_joint (hab : a ≤ b) (U : Set P) (V : Set ℝ)
-    (hU : IsOpen U) (hV : IsOpen V) (hI : Icc a b ⊆ V)
-    (A : P × ℝ → E →L[ℝ] E) (x₀ : P → E) (f : P × ℝ → E)
-    (hA : ContDiffOn ℝ ∞ A (U ×ˢ V)) (hx₀ : ContDiffOn ℝ ∞ x₀ U)
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ V)) :
-    ContDiffOn ℝ ∞
-      (fun z : P × ℝ => ParametricODE.solutionExtension hab
-        (SmoothPathFamily.pathFamily A z.1) (x₀ z.1)
-        (SmoothPathFamily.pathFamily f z.1) z.2) (U ×ˢ Icc a b) := by
-  have hs : ContDiffOn ℝ ∞ (reparamSolution a A x₀ f) (U ×ˢ Icc a b) :=
-    fun z hz => (reparamSolution_contDiffAt U V hU hV hI A x₀ f hA hx₀ hf hz).contDiffWithinAt
-  apply hs.congr
-  intro z hz
-  exact (reparamSolution_eq_actualSolution hab A x₀ f
-    (hA.continuousOn.mono (prod_mono Subset.rfl hI))
-    (hf.continuousOn.mono (prod_mono Subset.rfl hI)) hz).symm
 
-/-- The interior form used when localizing a solution inside the slot. -/
-theorem contDiffOn_solutionExtension_joint_interior (hab : a ≤ b) (U : Set P) (V : Set ℝ)
-    (hU : IsOpen U) (hV : IsOpen V) (hI : Icc a b ⊆ V)
-    (A : P × ℝ → E →L[ℝ] E) (x₀ : P → E) (f : P × ℝ → E)
-    (hA : ContDiffOn ℝ ∞ A (U ×ˢ V)) (hx₀ : ContDiffOn ℝ ∞ x₀ U)
-    (hf : ContDiffOn ℝ ∞ f (U ×ˢ V)) :
-    ContDiffOn ℝ ∞
-      (fun z : P × ℝ => ParametricODE.solutionExtension hab
-        (SmoothPathFamily.pathFamily A z.1) (x₀ z.1)
-        (SmoothPathFamily.pathFamily f z.1) z.2) (U ×ˢ Ioo a b) :=
-  (contDiffOn_solutionExtension_joint hab U V hU hV hI A x₀ f hA hx₀ hf).mono
-    (prod_mono Subset.rfl Ioo_subset_Icc_self)
 
 end
 

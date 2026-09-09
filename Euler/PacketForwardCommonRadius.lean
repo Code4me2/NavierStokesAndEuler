@@ -101,15 +101,5 @@ theorem commonRadius_guards (hC : 0 ≤ terminalCost) (R' : ℝ)
   exact ⟨hm.trans hR,hl.trans hR,⟨hmv.trans hR,hmt.trans hR,hmp.trans hR⟩,
     wf,wp,hc.trans hR,hrc.trans hR,he.trans hR⟩
 
-theorem exists_common_radius (hC : 0 ≤ terminalCost) :
-    ∃ (R' : ℝ) (hM : Rm ≤ R') (hL : L.R ≤ R'),
-      EulerMeanPacketProvider.Budget.GradeGuards (M.enlargeRadius R' hM) ∧
-      EulerTransversePacketForward.Budget.GradeGuards (P := P)
-        (L.enlargeRadius R' hL) (N.enlargeRadius R' hL) 1 ∧
-      EulerTransversePacketForward.Budget.GradeGuards (P := P)
-        (L.enlargeRadius R' hL) (N.enlargeRadius R' hL) terminalCost ∧
-      CB.termCost ≤ R' ∧ sobolevCoefficientRadius (Fin 4) CB.Rc ≤ R' ∧ extra ≤ R' :=
-  ⟨commonRadius M L N CB terminalCost extra,
-    commonRadius_guards M L N CB terminalCost extra hC _ le_rfl⟩
 
 end EulerPacketForwardCommonRadius

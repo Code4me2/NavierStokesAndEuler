@@ -339,13 +339,6 @@ theorem normalTrace_eq_time_jet {T : ℝ} {f : (ℝ × X) → V}
   (time_slice_iteratedDerivWithin (uniqueDiffOn_Iic T) hf x n
     (mem_Iic.mpr (le_refl T))).symm
 
-omit [FiniteDimensional ℝ X] in
-theorem normalTrace_add_period {T : ℝ} {f : (ℝ × X) → V}
-    (hf : ContDiffOn ℝ ∞ f (past T)) (p : X)
-    (hperiod : ∀ t ≤ T, ∀ x : X, f (t, x + p) = f (t, x)) (n : ℕ) (x : X) :
-    normalTrace T f n (x + p) = normalTrace T f n x := by
-  rw [normalTrace_eq_time_jet hf, normalTrace_eq_time_jet hf]
-  exact iteratedDerivWithin_congr (fun t ht => hperiod t ht x) (mem_Iic.mpr (le_refl T))
 
 section Complete
 
@@ -372,34 +365,8 @@ theorem smoothExtension_eqOn_past {T : ℝ} {f : (ℝ × X) → V}
     (hf : ContDiffOn ℝ ∞ f (past T)) : EqOn (smoothExtension T f hf) f (past T) :=
   glue_eqOn_past T f _
 
-omit [CompleteSpace V] in
-theorem smoothExtension_zero_from {T : ℝ} {f : (ℝ × X) → V}
-    (hf : ContDiffOn ℝ ∞ f (past T)) {t : ℝ} (ht : T + 1 ≤ t) (x : X) :
-    smoothExtension T f hf (t, x) = 0 := by
-  have hnot : ¬t ≤ T := by linarith
-  simp only [smoothExtension, glue, ite_eq_right hnot]
-  exact SpatialBorelExtension.rightExtension_zero_from (normalTrace T f)
-    (normalTrace_contDiff hf) T ht x
 
-/-- Every full mixed jet on the past, including the boundary, is preserved. -/
-theorem smoothExtension_iteratedFDeriv {T : ℝ} {f : (ℝ × X) → V}
-    (hf : ContDiffOn ℝ ∞ f (past T)) (n : ℕ) {z : (ℝ × X)} (hz : z ∈ past T) :
-    iteratedFDeriv ℝ n (smoothExtension T f hf) z = iteratedFDerivWithin ℝ n f (past T) z := by
-  rw [← iteratedFDerivWithin_eq_iteratedFDeriv (past_uniqueDiff T)
-    ((smoothExtension_contDiff hf).of_le (natCast_le_infty n)).contDiffAt hz]
-  exact iteratedFDerivWithin_congr (smoothExtension_eqOn_past hf) hz n
 
-omit [CompleteSpace V] in
-theorem smoothExtension_add_period {T : ℝ} {f : (ℝ × X) → V}
-    (hf : ContDiffOn ℝ ∞ f (past T)) (p : X)
-    (hperiod : ∀ t ≤ T, ∀ x : X, f (t, x + p) = f (t, x)) (t : ℝ) (x : X) :
-    smoothExtension T f hf (t, x + p) = smoothExtension T f hf (t, x) := by
-  by_cases ht : t ≤ T
-  · simp only [smoothExtension, glue, ite_eq_left ht]
-    exact hperiod t ht x
-  · simp only [smoothExtension, glue, ite_eq_right ht]
-    exact SpatialBorelExtension.rightExtension_add_period (normalTrace T f)
-      (normalTrace_contDiff hf) T p (normalTrace_add_period hf p hperiod) t x
 
 end Complete
 
@@ -580,28 +547,6 @@ private theorem closedInterval_subset_closure_openInterval :
   rw [closure_Ioo (by norm_num : (-1 : ℝ) ≠ 1)]
 
 
-omit [FiniteDimensional ℝ X] in
-/-- Every spatial additive period passes to both completed boundary values. -/
-theorem stripClosedField_add_period {f : ℝ × X → V}
-    (hf : ContDiffOn ℝ ∞ f openStrip)
-    (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)
-    (p : X) (hp : ∀ t ∈ Ioo (-1 : ℝ) 1, ∀ x : X, f (t, x + p) = f (t, x))
-    {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) (x : X) :
-    closedField openStrip f (t, x + p) = closedField openStrip f (t, x) := by
-  have he (y : X) : ContinuousOn (fun t : ℝ => closedField openStrip f (t, y))
-      (Icc (-1 : ℝ) 1) :=
-    (stripClosedField_contDiffOn hf hb).continuousOn.comp
-      (continuous_id.prodMk continuous_const).continuousOn
-      (fun s hs => ⟨hs, mem_univ y⟩)
-  have hperiod : EqOn (fun t : ℝ => closedField openStrip f (t, x + p))
-      (fun t : ℝ => closedField openStrip f (t, x)) (Ioo (-1 : ℝ) 1) := by
-    intro s hs
-    change closedField openStrip f (s, x + p) = closedField openStrip f (s, x)
-    rw [closedField_eq openStrip_isOpen hf (x := (s, x + p)) ⟨hs, mem_univ (x + p)⟩,
-      closedField_eq openStrip_isOpen hf (x := (s, x)) ⟨hs, mem_univ x⟩]
-    exact hp s hs x
-  exact hperiod.of_subset_closure (he (x + p)) (he x) Ioo_subset_Icc_self
-    closedInterval_subset_closure_openInterval ht
 
 /-- A fixed smooth retraction of the past into the closed strip, equal to
 the identity for `t ≥ -1/2`. -/
@@ -652,12 +597,6 @@ theorem upperClosed_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStr
   simp only [clamped, lowerClamp_eq hlo]
 
 
-omit [CompleteSpace V] in
-theorem upperClosed_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)
-    (p : X) (hp : ∀ t ∈ Icc (-1 : ℝ) 1, ∀ x : X, f (t, x + p) = f (t, x))
-    (t : ℝ) (x : X) : upperClosed f hf (t, x + p) = upperClosed f hf (t, x) :=
-  Gluing.smoothExtension_add_period (clamped_contDiffOn hf) p
-    (fun _ hs y => hp _ (lowerClamp_mem hs) y) t x
 
 noncomputable def reflect (f : ℝ × X → V) (z : ℝ × X) : V := f (-z.1, z.2)
 
@@ -689,12 +628,6 @@ theorem lowerClosed_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStr
   simp only [reflect, neg_neg]
 
 
-omit [CompleteSpace V] in
-theorem lowerClosed_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f closedStrip)
-    (p : X) (hp : ∀ t ∈ Icc (-1 : ℝ) 1, ∀ x : X, f (t, x + p) = f (t, x))
-    (t : ℝ) (x : X) : lowerClosed f hf (t, x + p) = lowerClosed f hf (t, x) :=
-  upperClosed_add_period (reflect_contDiffOn hf) p
-    (fun s hs y => hp (-s) ⟨by linarith [hs.2], by linarith [hs.1]⟩ y) (-t) x
 
 /-- Use the lower continuation for negative parameters and the upper
 continuation for positive ones. They agree on a whole central strip. -/
@@ -730,28 +663,7 @@ theorem closedStripExtension_contDiff {f : ℝ × X → V}
     exact ite_eq_right (not_le_of_gt hy)
 
 
-omit [CompleteSpace V] in
-theorem closedStripExtension_add_period {f : ℝ × X → V}
-    (hf : ContDiffOn ℝ ∞ f closedStrip) (p : X)
-    (hp : ∀ t ∈ Icc (-1 : ℝ) 1, ∀ x : X, f (t, x + p) = f (t, x))
-    (t : ℝ) (x : X) :
-    closedStripExtension f hf (t, x + p) = closedStripExtension f hf (t, x) := by
-  by_cases ht : t ≤ 0
-  · simp only [closedStripExtension, ite_eq_left ht]
-    exact lowerClosed_add_period hf p hp t x
-  · simp only [closedStripExtension, ite_eq_right ht]
-    exact upperClosed_add_period hf p hp t x
 
-omit [CompleteSpace V] in
-theorem closedStripExtension_zero_parameter {f : ℝ × X → V}
-    (hf : ContDiffOn ℝ ∞ f closedStrip) {t : ℝ} (ht : 2 ≤ |t|) (x : X) :
-    closedStripExtension f hf (t, x) = 0 := by
-  rcases le_abs.mp ht with hpos | hneg
-  · rw [closedStripExtension, ite_eq_right (by linarith : ¬t ≤ 0)]
-    exact Gluing.smoothExtension_zero_from (clamped_contDiffOn hf) (by linarith) x
-  · rw [closedStripExtension, ite_eq_left (by linarith : t ≤ 0)]
-    exact Gluing.smoothExtension_zero_from
-      (clamped_contDiffOn (reflect_contDiffOn hf)) (by linarith) x
 
 /-- The constructed extension takes only interior smoothness and bounds on
 the actual joint derivatives as inputs. -/
@@ -772,28 +684,8 @@ theorem extension_eq {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
   exact closedField_eq openStrip_isOpen hf hz
 
 
-theorem extension_add_period {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
-    (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)
-    (p : X) (hp : ∀ t ∈ Ioo (-1 : ℝ) 1, ∀ x : X, f (t, x + p) = f (t, x))
-    (t : ℝ) (x : X) : extension f hf hb (t, x + p) = extension f hf hb (t, x) :=
-  closedStripExtension_add_period (stripClosedField_contDiffOn hf hb) p
-    (fun _ hs y => stripClosedField_add_period hf hb p hp hs y) t x
 
-theorem extension_zero_parameter {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
-    (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)
-    {t : ℝ} (ht : 2 ≤ |t|) (x : X) : extension f hf hb (t, x) = 0 :=
-  closedStripExtension_zero_parameter (stripClosedField_contDiffOn hf hb) ht x
 
-theorem extension_iteratedFDeriv {f : ℝ × X → V} (hf : ContDiffOn ℝ ∞ f openStrip)
-    (hb : ∀ n : ℕ, ∃ C : ℝ, ∀ z ∈ openStrip, ‖iteratedFDeriv ℝ n f z‖ ≤ C)
-    (n : ℕ) {z : ℝ × X} (hz : z ∈ openStrip) :
-    iteratedFDeriv ℝ n (extension f hf hb) z = iteratedFDeriv ℝ n f z := by
-  have heq : extension f hf hb =ᶠ[𝓝 z] f := by
-    filter_upwards [openStrip_isOpen.mem_nhds hz] with y hy
-    exact extension_eq hf hb hy
-  have heq' : extension f hf hb =ᶠ[𝓝[univ] z] f := by simpa using heq
-  simpa only [iteratedFDerivWithin_univ] using
-    heq'.iteratedFDerivWithin_eq heq.self_of_nhds n
 
 end Strip
 

@@ -21,8 +21,6 @@ def unitSqrtTime : C(Icc (0 : ℝ) 1, Icc (0 : ℝ) 1) where
     simpa only [Real.sqrt_one] using Real.sqrt_le_sqrt t.property.2⟩
   continuous_toFun := (Real.continuous_sqrt.comp continuous_subtype_val).subtype_mk _
 
-@[simp] theorem unitSqrtTime_apply (t : Icc (0 : ℝ) 1) :
-    (unitSqrtTime t : ℝ) = Real.sqrt t := rfl
 
 end Euler.ComparatorBridge
 

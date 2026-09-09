@@ -107,15 +107,6 @@ theorem density_eq_scaled {a b : ℝ} (hab : a < b) (ell : S → ℝ)
   rw [mul_div_cancel₀ _ hl.ne'] at h
   exact h.symm
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem density_integral {a b : ℝ} (hab : a < b) (ell : S → ℝ) (s : S)
-    (hl : 0 < ell s) (Y : PressureStream.Plane) :
-    (∫ r, density a b hab ell (r, (s, Y))) = 1 := by
-  have he : (fun r => density a b hab ell (r, (s, Y))) =
-      PressureStream.rho (ell s * a) (ell s * b) (mul_lt_mul_of_pos_left hab hl) :=
-    funext fun r => density_eq_scaled hab ell (r, (s, Y)) hl
-  rw [he]
-  exact PressureStream.rho_integral _ _ _
 
 theorem radialRatio_contDiffOn {ell : S → ℝ} {U : Set S}
     (hl : ContDiffOn ℝ ∞ ell U) (hp : ∀ s ∈ U, 0 < ell s) :
@@ -769,10 +760,6 @@ noncomputable def slowToChartTZ (h : ℝ) (n : ℕ) : Plane →L[ℝ] Plane :=
   (ChartScales.Q n ^ (-1 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ).prod
     (ChartScales.Q n ^ (-CoordinateAlgebra.D h) • ContinuousLinearMap.snd ℝ ℝ ℝ)
 
-noncomputable def swapSlow : PressureStream.Lift Plane →L[ℝ] PressureStream.Lift Plane :=
-  (ContinuousLinearMap.id ℝ ℝ).prodMap
-    ((ContinuousLinearEquiv.prodComm ℝ ℝ ℝ).toContinuousLinearMap.prodMap
-      (ContinuousLinearMap.id ℝ Plane))
 
 noncomputable def physicalToChartTZ (h : ℝ) (n i : ℕ) :
     PressureStream.Lift Plane →L[ℝ] PressureStream.Lift Plane :=

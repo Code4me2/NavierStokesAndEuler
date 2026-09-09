@@ -104,9 +104,6 @@ def restrictedFrame : ParentFrame (frameData P.restrictedParent) P.time :=
 @[simp] theorem restrictedFrame_shear : P.restrictedFrame.shear=P.frame.shear := rfl
 @[simp] theorem restrictedFrame_G : P.restrictedFrame.G=P.frame.G := rfl
 @[simp] theorem restrictedFrame_error : P.restrictedFrame.error=P.frame.error := rfl
-@[simp] theorem restrictedFrame_B : P.restrictedFrame.B=P.frame.B := rfl
-@[simp] theorem restrictedFrame_m : P.restrictedFrame.m=P.frame.m := rfl
-@[simp] theorem restrictedFrame_v : P.restrictedFrame.v=P.frame.v := rfl
 
 theorem restrictedFrame_horizon :
     P.restrictedFrame.horizon=EulerPacketSourceScaleGuards.horizon S.J S.X

@@ -291,8 +291,6 @@ theorem right_primitive_uniform
     weight_reflect] using h
 
 
-def compactPrimitive (χ : ℝ → ℝ) (f : ℝ → V) (L x : ℝ) : V :=
-  intervalIntegral f 0 x volume - χ x • intervalIntegral f 0 L volume
 
 
 end Integrals

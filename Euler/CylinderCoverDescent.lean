@@ -39,17 +39,6 @@ theorem descend_continuous {V : Type*} [TopologicalSpace V] (f : LiftTangent →
   rw [h]
   exact hf
 
-theorem descend_joint_continuous {K V : Type*} [TopologicalSpace K] [TopologicalSpace V]
-    (f : K → LiftTangent → V) (hf : Continuous (Function.uncurry f))
-    (he : ∀ t a b, coveringMap P a=coveringMap P b → f t a=f t b) :
-    Continuous (fun z : K × LiftDomain P => descend P (f z.1) z.2) := by
-  apply (IsOpenQuotientMap.id.prodMap (coveringMap_isOpenQuotient P)).isQuotientMap.continuous_iff.mpr
-  have h : (fun z : K × LiftDomain P => descend P (f z.1) z.2) ∘
-      Prod.map id (coveringMap P) = Function.uncurry f := by
-    funext z
-    exact descend_cover P (f z.1) (he z.1) z.2
-  rw [h]
-  exact hf
 
 omit [Fact (0 < P)] in
 theorem fiber_constant_of_deck {V : Type*} (f : LiftTangent → V)
@@ -89,10 +78,6 @@ theorem descendMap_cover (z : LiftTangent) :
     descendMap P f (coveringMap P z)=coveringMap P (f z) :=
   descend_cover P (coveringMap P ∘ f) (map_fiber_constant P f hdeck) z
 
-include hdeck in
-theorem descendMap_continuous (hf : Continuous f) : Continuous (descendMap P f) :=
-  descend_continuous P _ ((coveringMap_isOpenQuotient P).continuous.comp hf)
-    (map_fiber_constant P f hdeck)
 
 include hdeck in
 theorem descendMap_measurePreserving (hf : MeasurePreserving f volume volume) :
@@ -101,14 +86,5 @@ theorem descendMap_measurePreserving (hf : MeasurePreserving f volume volume) :
     (descend_measurable P _ ((coveringMap_isOpenQuotient P).continuous.measurable.comp hf.measurable))
     hdeck (fun z => (descendMap_cover P f hdeck z).symm)
 
-include hdeck in
-theorem descendMap_leftInverse (g : LiftTangent → LiftTangent)
-    (hg : ∀ (c : AddSubgroup.zmultiples P) z,
-      g (z.1,(c : ℝ)+z.2)=((g z).1,(c : ℝ)+(g z).2))
-    (hgf : Function.LeftInverse g f) :
-    Function.LeftInverse (descendMap P g) (descendMap P f) := by
-  intro q
-  obtain ⟨z,rfl⟩ := (coveringMap_isOpenQuotient P).surjective q
-  rw [descendMap_cover P f hdeck,descendMap_cover P g hg,hgf]
 
 end EulerCylinderCoverDescent

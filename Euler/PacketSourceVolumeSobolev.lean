@@ -58,16 +58,5 @@ theorem tensorPath_ae (n : ℕ) (t : Icc (0 : ℝ) D.T) :
       (continuousInverse_differentiable D X Y hX hXY hYjoint) hXY R C hR hC hdet hF n i hi hin)
     (continuousInverse_contDiff D X Y hX hXY hYjoint) t
 
-theorem tensorPath_norm_le (n : ℕ) (t : Icc (0 : ℝ) D.T) :
-    ‖tensorPath D Z k m X Y hX hYX hXY hYjoint R C hR hC hdet hF n t‖ ≤
-      ((n.factorial : ℝ)*(finiteOrderConstant C R n)^n)*∑ i : Fin (n+1),
-        frequencyFactor k m^i.val*(4 : ℝ)^i.val*Real.sqrt (2/P+2*P)*‖Z.realization (i.val+1) t‖ :=
-  Z.volumeTensorPath_norm_le k m (inversePath Y hYjoint)
-    (inversePath_volume D X Y hX hYX hXY hYjoint hdet) n
-    (finiteOrderConstant C R n) (zero_le_one.trans (finiteOrderConstant_one_le C R hR n))
-    (fun i _ _ => continuousInverse_jet_continuous D X Y hX hXY hYjoint i)
-    (fun i hi hin => inverseFlow_finiteOrderBound D X Y hX
-      (continuousInverse_differentiable D X Y hX hXY hYjoint) hXY R C hR hC hdet hF n i hi hin)
-    (continuousInverse_contDiff D X Y hX hXY hYjoint) t
 
 end EulerPacketSourceVolumeSobolev

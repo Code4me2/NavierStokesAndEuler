@@ -28,12 +28,6 @@ def FiniteFamily.pointTimeDerivative (F : FiniteFamily period hT A)
   pointEvaluation period x (restrictOperator period (by omega : 3 ≤ 6)
     (((A.atOrder period 6).coefficients period le_rfl).apply t (F.solution 6 le_rfl t)))
 
-/-- The actual pointwise time derivative is jointly continuous in time and space. -/
-theorem FiniteFamily.pointTimeDerivative_joint_continuous (F : FiniteFamily period hT A) :
-    Continuous (F.pointTimeDerivative period).uncurry :=
-  path_representative_joint_continuous period
-    ((restrictOperator period (by omega : 3 ≤ 6)).compLeftContinuous ℝ (Icc (0 : ℝ) T)
-      (sourcePath ((A.atOrder period 6).coefficients period le_rfl) (F.solution 6 le_rfl)))
 
 /-- The pointwise time derivative is the literal raw-source and signed-pressure expression. -/
 theorem FiniteFamily.pointTimeDerivative_eq_pressure (F : FiniteFamily period hT A)
@@ -47,17 +41,6 @@ theorem FiniteFamily.pointTimeDerivative_eq_pressure (F : FiniteFamily period hT
     ((A.atOrder period 6).metric.jet t)]
   rfl
 
-/-- The canonical common field has its genuine pointwise first time derivative at every interior time. -/
-theorem FiniteFamily.pointField_hasDerivAt (F : FiniteFamily period hT A)
-    (x : LiftDomain period) (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (fun r => F.pointField period (projIcc 0 T hT.le r) x)
-      (F.pointTimeDerivative period ⟨t, ht.1.le, ht.2.le⟩ x) t := by
-  have hd := sobolev_hasDerivAt period T hT.le
-    ((A.atOrder period 6).coefficients period le_rfl) (F.solution 6 le_rfl)
-    (F.equation 6 le_rfl) t ht
-  have he := (((pointEvaluation period x).comp (restrictOperator period (by omega : 3 ≤ 6))).hasFDerivAt).comp_hasDerivAt t hd
-  simpa only [Function.comp_def, ContinuousLinearMap.comp_apply, restrictOperator_truncate,
-    FiniteFamily.pointField, FiniteFamily.pointTimeDerivative, extendPath] using he
 
 
 end EulerCorrectionAssembly

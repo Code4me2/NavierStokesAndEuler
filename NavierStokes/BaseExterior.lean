@@ -324,7 +324,6 @@ end ExteriorSummation
 section PressureScaling
 
 
-theorem eta_radial (h t s s' z : ℝ) : eta h (t, (s, z)) = eta h (t, (s', z)) := rfl
 
 theorem pullback_radial_scaled (h b : ℝ) (f : InnerProfile) {p : PhysicalPoint}
     (hq : 0 < q h p) (u : ℝ) :

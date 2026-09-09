@@ -42,7 +42,6 @@ noncomputable def amplitude (T : ℝ) (li : ℝ → ℝ) (p : ℝ × ℝ) : ℝ 
 noncomputable def angular (C T : ℝ) (li : ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
   Real.exp (logProfile C T li p)
 
-noncomputable def axial (Gi : ℝ → ℝ) (p : ℝ × ℝ) : ℝ := Gi p.2
 
 theorem blend_contDiff (T : ℝ) {li : ℝ → ℝ} (hli : ContDiff ℝ ∞ li) :
     ContDiff ℝ ∞ (blend T li) :=
@@ -62,11 +61,7 @@ theorem amplitude_contDiff (T : ℝ) {li : ℝ → ℝ} (hli : ContDiff ℝ ∞ 
 theorem angular_contDiff (C T : ℝ) {li : ℝ → ℝ} (hli : ContDiff ℝ ∞ li) :
     ContDiff ℝ ∞ (angular C T li) := (logProfile_contDiff C T hli).exp
 
-theorem axial_contDiff {Gi : ℝ → ℝ} (hGi : ContDiff ℝ ∞ Gi) :
-    ContDiff ℝ ∞ (axial Gi) := hGi.comp contDiff_snd
 
-theorem angular_pos (C T : ℝ) (li : ℝ → ℝ) (p : ℝ × ℝ) :
-    0 < angular C T li p := Real.exp_pos _
 
 
 theorem angular_eq_inv_mul {C : ℝ} (hC : 0 < C) (T : ℝ) (li : ℝ → ℝ)
@@ -191,12 +186,6 @@ theorem blend_abs_le {T B : ℝ} {li : ℝ → ℝ} {y eta : ℝ}
       (mul_le_mul_of_nonneg_left hf hs0)
     _ = B := by ring
 
-theorem amplitude_le {T B : ℝ} {li : ℝ → ℝ} {y eta : ℝ}
-    (hy : y ≤ T) (hli : |li eta| ≤ B) (hf : |logShape eta| ≤ B) :
-    amplitude T li (y, eta) ≤ Real.exp (T / 10 + B) := by
-  apply Real.exp_le_exp.mpr
-  exact add_le_add (div_le_div_of_nonneg_right hy (by norm_num))
-    ((le_abs_self _).trans (blend_abs_le hli hf))
 
 /-! ## Uniform finite parameter jets from the input jets -/
 

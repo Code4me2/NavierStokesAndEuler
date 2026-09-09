@@ -56,11 +56,7 @@ noncomputable def bump (P : Patch) (j : Fin 3) : ℝ → ℝ :=
 theorem bump_contDiff (P : Patch) (j : Fin 3) : ContDiff ℝ ∞ (bump P j) :=
   LocalizedMomentRepair.bump_contDiff _ _
 
-theorem bump_nonneg (P : Patch) (j : Fin 3) (x : ℝ) : 0 ≤ bump P j x :=
-  LocalizedMomentRepair.bump_nonneg _ _ _
 
-theorem bump_le_one (P : Patch) (j : Fin 3) (x : ℝ) : bump P j x ≤ 1 :=
-  LocalizedMomentRepair.bump_le_one _ _ _
 
 theorem bump_tsupport (P : Patch) (j : Fin 3) :
     tsupport (bump P j) ⊆ Ioo (lower P j) (upper P j) :=
@@ -587,13 +583,6 @@ theorem amplitudeFactors_contDiffOn {U : Set ℝ} {a : ℝ → ℝ}
 
 
 
-/-- The value, normalized radial derivative, and parameter derivative of the
-actual additive profile perturbation are all small. -/
-noncomputable def FirstJetBound (P : Patch) (a : ℝ → ℝ) (c : ℝ → Coeff)
-    (η L : ℝ) : Prop :=
-  ∀ x : ℝ, |a η * correction P (c η) x| ≤ L ∧
-    |a η * deriv (correction P (c η)) x| ≤ L ∧
-    |deriv (fun θ => a θ * correction P (c θ) x) η| ≤ L
 
 
 theorem physicalProfile_eq_clean_outside (P : Patch) (lam R a : ℝ) (c : Coeff) (X : ℝ)
@@ -610,10 +599,6 @@ theorem physicalProfile_eq_clean_outside (P : Patch) (lam R a : ℝ) (c : Coeff)
 
 
 
-theorem FirstJetBound.mono {P : Patch} {a : ℝ → ℝ} {c : ℝ → Coeff} {η L M : ℝ}
-    (h : FirstJetBound P a c η L) (hLM : L ≤ M) : FirstJetBound P a c η M := by
-  intro x
-  exact ⟨(h x).1.trans hLM, (h x).2.1.trans hLM, (h x).2.2.trans hLM⟩
 
 
 /-- All three physical moment changes are genuine integrable functions. -/

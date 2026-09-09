@@ -1,7 +1,6 @@
 import Euler.FlowL2Transport
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Euler.LpPointwiseMultiplier
-import Euler.VolumeSobolevComposition
 
 /-! Strong Sobolev continuity under genuine varying volume-preserving
 maps. Faà di Bruno gives actual derivative tensors, and dominated

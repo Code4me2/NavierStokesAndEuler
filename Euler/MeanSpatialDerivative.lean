@@ -47,22 +47,6 @@ theorem fderiv_representative_apply (u : EulerMeanSolenoidal.L2) (hu : SmoothOrb
     (orbitDerivative_ae_fderiv u hu v)
   exact (congrFun H x).symm
 
-theorem representative_directional_memLp (u : EulerMeanSolenoidal.L2) (hu : SmoothOrbit u) (v : Space) :
-    MemLp (fun x => fderiv ℝ (representative u hu) x v) 2 (volume : Measure Space) :=
-  (Lp.memLp (orbitDerivative u v)).ae_eq (orbitDerivative_ae_fderiv u hu v)
 
-/-- The full classical first derivative is genuinely square-integrable. -/
-theorem representative_fderiv_memLp (u : EulerMeanSolenoidal.L2) (hu : SmoothOrbit u) :
-    MemLp (fderiv ℝ (representative u hu)) 2 (volume : Measure Space) := by
-  let f (i : Fin 3) (x : Space) := ‖fderiv ℝ (representative u hu) x (EuclideanSpace.single i 1)‖
-  have hf (i : Fin 3) : MemLp (f i) 2 (volume : Measure Space) :=
-    (representative_directional_memLp u hu (EuclideanSpace.single i 1)).norm
-  have hs : MemLp (∑ i : Fin 3, f i) 2 (volume : Measure Space) :=
-    memLp_finsetSum' Finset.univ (fun i _ => hf i)
-  apply hs.mono'
-    ((representative_smooth u hu).fderiv_right (m := ∞) (by simp)).continuous.aestronglyMeasurable
-  apply Filter.Eventually.of_forall
-  intro x
-  simpa only [Finset.sum_apply, f] using opNorm_le_sum_columns (fderiv ℝ (representative u hu) x)
 
 end EulerMeanSmoothRepresentative

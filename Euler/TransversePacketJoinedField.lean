@@ -48,11 +48,6 @@ def vectorDerivativeField : Field P D.T (vectorDerivative τ hτ hτT B G) where
 theorem vectorField_time : TimeDerivative D.T_pos.le (vectorField τ hτ hτT B G)
     (vectorDerivativeField τ hτ hτT B G) := velocityPath_time τ hτ hτT B G
 
-theorem vector_hasDerivWithinAt (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    HasDerivWithinAt (fun s => vector τ hτ hτT B G (s,(x,θ)))
-      (vectorDerivative τ hτ hτT B G (t,(x,θ))) (Icc (0 : ℝ) D.T) t :=
-  (vectorField τ hτ hτT B G).raw_hasDerivWithinAt D.T_pos.le
-    (vectorDerivativeField τ hτ hτT B G) (vectorField_time τ hτ hτT B G) t x θ
 
 theorem scalar_eq_pointField (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
     scalar τ hτ hτT B G (t,(x,θ)) =

@@ -31,8 +31,6 @@ def algebraic (κ : ℝ) (Z : VectorField) (z : Domain) : Space :=
 def coordinatePressure (k : ℝ) (p : ScalarField) (z : Domain) : Space :=
   k • pressureGradient p z + k^2 • ((pressureJet p z).2 angleDirection • D.m₀)
 
-def liftedPressure (κ : ℝ) (p : ScalarField) (z : Domain) : Space :=
-  κ • pressureGradient p z + (pressureJet p z).2 angleDirection • D.m₀
 
 theorem transport_formula (κ : ℝ) (Z : VectorField) (z : Domain) :
     transport D κ Z z =

@@ -127,45 +127,10 @@ section Smooth
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {s : Set E} {H : E → Mat2} {T : E → Vec2}
 
-theorem contDiffOn_determinant
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s) :
-    ContDiffOn ℝ ∞ (fun x => (H x).det) s := by
-  simpa only [Pi.mul_apply, Pi.sub_apply, Matrix.det_fin_two] using
-    ((hH 0 0).mul (hH 1 1)).sub ((hH 0 1).mul (hH 1 0))
 
-theorem contDiffOn_numerator
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s) (i : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => cramerNumerator (H x) (T x) i) s := by
-  fin_cases i
-  · simpa [Pi.mul_apply, Pi.sub_apply, cramerNumerator] using ((hT 0).mul (hH 1 1)).sub ((hH 0 1).mul (hT 1))
-  · simpa [Pi.mul_apply, Pi.sub_apply, cramerNumerator] using ((hH 0 0).mul (hT 1)).sub ((hT 0).mul (hH 1 0))
 
-/-- Smoothness requires a nonvanishing determinant, independently of positivity. -/
-theorem contDiffOn_weights
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hdet : ∀ x ∈ s, (H x).det ≠ 0) (i : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => weights (H x) (T x) i) s :=
-  (contDiffOn_numerator hH hT i).div (contDiffOn_determinant hH) hdet
 
-theorem contDiffOn_inverse_solution
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hdet : ∀ x ∈ s, (H x).det ≠ 0) (i : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => (H x)⁻¹.mulVec (T x) i) s := by
-  apply (contDiffOn_weights hH hT hdet i).congr
-  intro x hx
-  exact congrFun (inverse_formula (H x) (T x) (hdet x hx)) i
 
-/-- Positive square-root amplitudes are smooth on the strict cone. -/
-theorem contDiffOn_amplitudes
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H x i j) s)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T x i) s)
-    (hcone : ∀ x ∈ s, StrictCone (H x) (T x)) (i : Fin 2) :
-    ContDiffOn ℝ ∞ (fun x => amplitudes (H x) (T x) i) s :=
-  (contDiffOn_weights hH hT (fun x hx => (hcone x hx).det_ne_zero) i).sqrt
-    (fun x hx => ne_of_gt ((hcone x hx).weights_pos i))
 
 
 

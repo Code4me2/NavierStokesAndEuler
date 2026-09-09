@@ -78,10 +78,6 @@ theorem velocityPath_supported (t : Icc (0 : ℝ) D.T) :
   B.coefficients.physicalVelocity_supported P D.support D.support_measurable
     (forcingPath G) (fun s => (G.path s).property) t
 
-theorem derivativePath_supported (t : Icc (0 : ℝ) D.T) :
-    B.derivativePath G t ∈ Supported P Space D.support D.support_measurable :=
-  B.coefficients.physicalDerivative_supported P D.support D.support_measurable
-    (forcingPath G) (fun s => (G.path s).property) t
 
 theorem coordinatePath_mean_zero (t : Icc (0 : ℝ) D.T) : average P (B.coordinatePath G t) = 0 :=
   B.coefficients.velocityPath_mean_zero P (forcingPath G) G.mean_zero t
@@ -112,11 +108,6 @@ theorem derivativeField_ae (t : Icc (0 : ℝ) D.T) :
     B.derivativePath G t =ᵐ[liftMeasure P] B.derivativeField G t :=
   pointField_ae P (B.derivativePath G) (B.derivativePath_orbit G) t
 
-theorem field_hasDerivWithinAt (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) :
-    HasDerivWithinAt (fun s => B.field G (D.clamp s) x)
-      (B.derivativeField G t x) (Icc (0 : ℝ) D.T) t :=
-  pointField_hasDerivWithinAt P D.T D.T_pos.le (B.velocityPath G) (B.derivativePath G)
-    (B.velocityPath_orbit G) (B.derivativePath_orbit G) (B.velocityPath_time G) t x
 
 theorem field_zero_outside (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) (hx : x.1 ∉ D.support) :
     B.field G t x = 0 := by

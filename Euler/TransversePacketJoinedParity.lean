@@ -58,10 +58,6 @@ theorem vector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   (vectorField τ hτ hτT B G).raw_odd_of_reflection_neg t
     (velocityPath_reflection_neg τ hτ hτT B G hSym hF hM hH hraw t) x θ
 
-theorem vectorDerivative_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    vectorDerivative τ hτ hτT B G (t,(-x,-θ)) = -vectorDerivative τ hτ hτT B G (t,(x,θ)) :=
-  (vectorField τ hτ hτT B G).timeDerivative_odd (vectorDerivativeField τ hτ hτT B G)
-    D.T_pos (vectorField_time τ hτ hτT B G) (vector_odd τ hτ hτT B G hSym hF hM hH hraw) t x θ
 
 theorem scalar_even (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
     scalar τ hτ hτT B G (t,(-x,-θ)) = scalar τ hτ hτT B G (t,(x,θ)) := by

@@ -336,15 +336,6 @@ theorem amplitude_unique (d : TailData) (c : ℝ → Coeff) (eta e : ℝ)
   exact (energyPolynomial_strictMonoOn d c eta e heta h hshift he).injOn hA.1 hr.1.le
     (hn.symm.trans hn')
 
-theorem realized_energy_eq (d : TailData) (c : ℝ → Coeff) (eta : ℝ) :
-    (∫ y, Real.exp y * (axial d.core (amplitude d c) (y, eta) ^ 2 -
-      correctedAngular d c (y, eta) ^ 2 / 2)) = totalEnergy d c (amplitude d c eta) eta := by
-  unfold totalEnergy energyIntegrand
-  apply integral_congr_ae
-  exact Eventually.of_forall (fun y => by
-    dsimp only
-    rw [PulseAmplitude.axial_eq_of_amplitude_eq d.core (amplitude d c)
-      (fun _ => amplitude d c eta) eta y rfl])
 
 def radialEnergyIntegrand (d : TailData) (c : ℝ → Coeff) (amp : ℝ → ℝ) (eta XR X : ℝ) : ℝ :=
   axial d.core amp (Real.log (X / XR), eta) ^ 2 - correctedAngular d c (Real.log (X / XR), eta) ^ 2 / 2

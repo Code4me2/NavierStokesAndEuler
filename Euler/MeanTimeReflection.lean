@@ -17,8 +17,6 @@ def solenoidalReflection : solenoidalSpace →ₗᵢ[ℝ] solenoidalSpace where
     solenoidalSpace (fun u => reflection_solenoidal_mem u.property)
   norm_map' := fun u => reflection.norm_map (u : L2)
 
-@[simp] theorem solenoidalReflection_coe (u : solenoidalSpace) :
-    (solenoidalReflection u : L2) = reflection (u : L2) := rfl
 
 @[simp] theorem solenoidalReflection_involutive (u : solenoidalSpace) :
     solenoidalReflection (solenoidalReflection u) = u :=

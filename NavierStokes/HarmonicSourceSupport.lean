@@ -32,9 +32,6 @@ theorem zero : NonzeroSupported K (0 : HarmonicFields.Coefficients D) := by
   intro j hj x hx
   rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem mono (hc : NonzeroSupported K c) {L : Set D} (hKL : K ⊆ L) :
-    NonzeroSupported L c := fun j hj x hx => hc j hj x (fun hk => hx (hKL hk))
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem add (hc : NonzeroSupported K c) (hd : NonzeroSupported K d) :
@@ -100,18 +97,7 @@ theorem realProjection (hc : NonzeroSupported K c) : NonzeroSupported K (realCoe
   simp only [realCoefficients_apply, hc j hj x hx, hc (-j) (neg_ne_zero.mpr hj) x hx,
     map_zero, add_zero, mul_zero]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem nonconstant (hc : NonzeroSupported K c) : NonzeroSupported K (HarmonicResidual.nonconstant c) := by
-  intro j hj x hx
-  simpa only [HarmonicResidual.nonconstant, AddMonoidAlgebra.coeff_erase, Finsupp.erase_ne hj] using hc j hj x hx
 
-omit [NormedSpace ℝ D] in
-theorem tsupport (hc : NonzeroSupported K c) (hK : IsClosed K) {j : ℤ} (hj : j ≠ 0) :
-    _root_.tsupport (c j) ⊆ K := by
-  apply closure_minimal _ hK
-  intro x hx
-  by_contra hn
-  exact hx (hc j hj x hn)
 
 
 end NonzeroSupported
@@ -450,25 +436,6 @@ variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
 
-theorem sourceFamily_zero_germ_on
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : CorrectionState.HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : ℕ → Geometry) (K : ℕ → Set Plane) (hK : ∀ n, IsCompact (K n))
-    {U : Set (P × Plane)} (hU : IsOpen U)
-    (hs : InputSupportOn U (fun n => nativeUnion (g n) (K n)) b G A)
-    (j : ℤ) (n : ℕ) {x : (P × ℝ) × Plane}
-    (hx : (x.1.1, x.2) ∈ U)
-    (hn : ∀ k, x ∉ PeriodizedWaveBounds.nativeCell (g n) (K n) k) :
-    ParticularWaveAssembly.sourceFamily c u b G A j n =ᶠ[𝓝 x] fun _ => 0 := by
-  have hnot : (x.1.1, x.2) ∉ nativeUnion (g n) (K n) := by
-    simp only [nativeUnion, mem_iUnion, not_exists]
-    exact hn
-  have he := residualSource_zero_germ_on c u b G A hU
-    (fun n => nativeUnion_closed (g n) (hK n)) hs j n hx hnot
-  have hc : Continuous (fun y : (P × ℝ) × Plane => (y.1.1, y.2)) :=
-    continuous_fst.fst.prodMk continuous_snd
-  exact he.comp_tendsto hc.continuousAt
 
 
 end RelativeNativeCoverage

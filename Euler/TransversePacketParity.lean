@@ -75,12 +75,6 @@ theorem velocityPath_reflection_neg (t : Icc (0 : ℝ) D.T) :
     D.T D.T_pos.le D.frame D.frameDerivative D.frameLower D.frameLower_pos D.frame_lower
     (D.frame_even hF) (D.frameDerivative_even hF hM) G.path I.value (G.path_reflection_neg hraw) hinit t
 
-include hSym hF hM hraw hinit in
-theorem derivativePath_reflection_neg (t : Icc (0 : ℝ) D.T) :
-    reflection P (G.fullDerivativePath I t) = -G.fullDerivativePath I t :=
-  EulerSourceCylinderParity.velocityDerivative_reflection_neg P D.support D.support_measurable hSym
-    D.T D.T_pos.le D.frame D.frameDerivative D.frameLower D.frameLower_pos D.frame_lower
-    (D.frame_even hF) (D.frameDerivative_even hF hM) G.path I.value (G.path_reflection_neg hraw) hinit t
 
 include hSym hF hM hraw hinit in
 theorem vector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
@@ -88,11 +82,6 @@ theorem vector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   (G.vectorField I).raw_odd_of_reflection_neg t
     (G.velocityPath_reflection_neg I hSym hF hM hraw hinit t) x θ
 
-include hSym hF hM hraw hinit in
-theorem vectorDerivative_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    G.vectorDerivative I (t,(-x,-θ)) = -G.vectorDerivative I (t,(x,θ)) :=
-  (G.vectorDerivativeField I).raw_odd_of_reflection_neg t
-    (G.derivativePath_reflection_neg I hSym hF hM hraw hinit t) x θ
 
 include hSym hF hM hraw hinit in
 theorem corrector_odd_of_data (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :

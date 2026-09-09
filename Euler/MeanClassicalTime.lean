@@ -81,14 +81,6 @@ theorem classicalAcceleration_ae
   accelerationPath_ae T (solenoidalFrame T F) (solenoidalFrame T F₁) c hc hLower hT
     s.velocityLp s.acceleration f s.coordinateVelocityPath fC s.coordinateVelocityPath_ae hf s.gram_equation_ae
 
-/-- Coordinate velocity has the classical acceleration at every time within the interval. -/
-theorem velocity_hasDerivWithinAt
-    (hf : (f : ℝ → L2) =ᵐ[timeMeasure T] extendPath T hT fC)
-    (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt s.velocity (s.classicalAcceleration c hc hLower fC t) (Icc (0 : ℝ) T) t :=
-  hasDerivWithinAt_of_continuous_representative T hT s.acceleration
-    (s.classicalAcceleration c hc hLower fC) (s.classicalAcceleration_ae c hc hLower fC hf)
-    s.velocity s.velocity_ac s.velocity_derivative t
 
 /-- The physical derivative path is the actual continuous product-rule expression. -/
 def classicalPhysicalDerivative : C(Icc (0 : ℝ) T, L2) :=

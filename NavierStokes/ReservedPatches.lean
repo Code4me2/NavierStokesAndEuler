@@ -402,8 +402,6 @@ theorem square_half_power (lam R : ℝ) (hR : 0 < R) :
 
 /-! ## Supported perturbations preserve the other complete open windows -/
 
-def Supported (F : Profile) (XR : ℝ) (s : Slot) (v : ℝ × ℝ → ℝ) : Prop :=
-  ∀ eta, support (fun X => v (X, eta)) ⊆ closedPatch F XR s
 
 
 

@@ -71,28 +71,6 @@ structure DirectionMatch (s : StripData E) (d : GraphDirections E)
   fast : ∀ n x, x ∈ s'.domain → fderiv ℝ (ψ n) x (d'.fastField n x) = d.fastField n (ψ n x)
   slow : ∀ n x, x ∈ s'.domain → fderiv ℝ (ψ n) x d'.slow = d.slow
 
-theorem NativeCoordinates.comp
-    {s : StripData E} {d : GraphDirections E} {χ : ℕ → E → Slot}
-    (hχ : NativeCoordinates s d χ)
-    {s' : StripData E'} {d' : GraphDirections E'} {ψ : ℕ → E' → E}
-    (hψ : DirectionMatch s d s' d' ψ) :
-    NativeCoordinates s' d' (fun n => χ n ∘ ψ n) := by
-  have hd n x hx := fderiv_comp x (hχ.differentiable n (ψ n x) (hψ.maps n hx))
-    (hψ.differentiable n x hx)
-  refine ⟨fun n x hx => (hχ.differentiable n (ψ n x) (hψ.maps n hx)).comp x
-    (hψ.differentiable n x hx), ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.radial n x hx]
-    exact hχ.radial n _ (hψ.maps n hx)
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.auxiliary n x hx]
-    exact hχ.auxiliary n _ (hψ.maps n hx)
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.angular n x hx]
-    exact hχ.angular n _ (hψ.maps n hx)
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.axial n x hx]
-    exact hχ.axial n _ (hψ.maps n hx)
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.fast n x hx]
-    exact hχ.fast n _ (hψ.maps n hx)
-  · intro n x hx; rw [hd n x hx, ContinuousLinearMap.comp_apply, hψ.slow n x hx]
-    exact hχ.slow n _ (hψ.maps n hx)
 
 end CommonPullback
 
@@ -303,14 +281,5 @@ theorem defect_class (P : PrimaryPulseBounds.PhaseConstruction U)
 
 end Primary
 
-/-- One finite-prefix constant and one polynomial degree work for every
-band and point.  This is the explicit jet form of the order-one class. -/
-theorem finite_jet_bounds {s : StripData E} {f : ℕ → E → ℝ}
-    (hf : UnweightedClass s 1 f) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∀ n x, x ∈ s.domain → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f n) x‖ ≤ C * s.epsilon n * s.growth n x ^ p := by
-  obtain ⟨C, hC, p, hb⟩ := hf.bounds m
-  exact ⟨C, hC, p, fun n x hx j hj => by
-    simpa only [majorant, Real.rpow_one, mul_one] using hb n x hx j hj⟩
 
 end NavierStokes.PrimaryMaterialDefect

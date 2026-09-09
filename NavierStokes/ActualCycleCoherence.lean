@@ -87,16 +87,9 @@ theorem initial_axis (B N0 : ℕ) : AxisCoherent (ActualInitialization.initialAl
 theorem initial (B N0 : ℕ) : Coherent (ActualInitialization.initialCycleState B N0) :=
   ⟨initial_state B N0, initial_blocks B N0, initial_axis B N0, rfl⟩
 
-theorem BlocksCoherent.reindex {ι κ : Type} (e : κ ≃ ι) {v : CycleCoefficients ι}
-    (H : BlocksCoherent v) : BlocksCoherent (ActualCycleParameters.reindexCoefficients e v) := by
-  intro l n m k hi
-  exact H (e l) n m k hi
 
 
 
-theorem StateCoherent.atlas {u : State Point} (H : StateCoherent u) (N : ℕ) :
-    (ActualMeanPhysicalData.initialAtlas N).StateOverlap standardRegion.carrier u :=
-  fun n _ m _ k hi => H n m k hi
 
 theorem Coherent.reference_state {B N0 : ℕ} {x : CycleState (Index B N0)} (H : Coherent x)
     (n m k : ℕ) (hi : CommonWindow.index h n + k = CommonWindow.index h m) :
@@ -726,14 +719,6 @@ theorem step (hS : ∀ l n, IsClosed (S l n))
     Coherent (x.step (ActualCycleParameters.fixedParameters B N0) (commonContext B)) :=
   step_of_waves H W C (waves H W C hcover hS hcore)
 
-include H W in
-theorem next_primitive :
-    MeanStateRegularity.PrimitiveData standardRegion geometry.inner geometry.outer
-      (commonContext B) (x.step (ActualCycleParameters.fixedParameters B N0) (commonContext B)).state :=
-  ((ActualCycleParameters.fixedParameters B N0).next_primitive x.coefficients (commonContext B)
-    x.state standardRegion (realizes B N0).inner_pos (realizes B N0).exponent_pos
-    (realizes B N0).length H.primitives (covariance_moving H W).1 (covariance_moving H W).2
-    (rank_geometry H)).1
 
 
 
@@ -746,12 +731,7 @@ noncomputable def state (B N0 : ℕ) : ℕ → CycleState (Index B N0) :=
     (commonContext B) (ActualInitialization.initialCycleState B N0)
 
 
-theorem state_succ (B N0 j : ℕ) : state B N0 (j + 1) =
-    (state B N0 j).step (ActualCycleParameters.fixedParameters B N0) (commonContext B) := rfl
 
-theorem state_labels (B N0 j : ℕ) :
-    (state B N0 j).coefficients.labels = activeLabels standardRegion B N0 :=
-  CycleStateCoherence.iterate_labels _ _ _ j
 
 
 /-- Collection of the already proved actual transport laws into precisely

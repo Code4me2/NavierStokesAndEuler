@@ -1,8 +1,15 @@
-import Euler.GevreyInviscidEnergyCompactness
+import Euler.CorrectionEnergyBootstrap
+import Euler.CorrectionBudgetRestriction
+import Euler.CorrectionContinuation
+import Euler.GevreyPathNorm
+import Euler.CorrectionMildEquation
+import Euler.ViscosityDefect
+import Euler.GevreyStabilityBudget
+import Euler.GevreyFamilyCompactness
+import Euler.GevreyEnergyPathLimit
 import Euler.CorrectionLimitEquation
 import Euler.InviscidSobolevEvolution
 import Euler.InviscidCorrectionCompatibility
-import Euler.GlobalInviscidGevrey
 
 /-! Coherent prescribed cylinder data at every finite Sobolev order. -/
 

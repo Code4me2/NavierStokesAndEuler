@@ -192,11 +192,7 @@ theorem leading_coefficient_jets (hcone : LeadingStressWeights.FullTrueCone v) (
   rw [leading_stress_jets H v m ((NominalConeAssembly.activeLeft_pos W).trans hw.1.1) hw.2]
   exact hb w hw
 
-noncomputable def leadingFrequency : PhaseCalculus.Slow → ℝ :=
-  BaseChartJets.leadingFrequency F.data.h W.axis.normalization (coefficients H v)
 
-noncomputable def leadingAxial : PhaseCalculus.Slow → ℝ :=
-  BaseChartJets.leadingAxial F.data.h (coefficients H v)
 
 
 
@@ -261,10 +257,6 @@ theorem normalizedStress_smoothAt (upper : ℝ) (B : ℕ) {y : Chart} (hy : 0 < 
 theorem velocity_eq_curl (upper : ℝ) (B : ℕ) :
     velocity H v upper B = SpatialCurl.spatialCurl (vectorPotential H v upper B) := rfl
 
-theorem vectorPotential_smooth (upper : ℝ) (B : ℕ) :
-    ContDiffOn ℝ ∞ (vectorPotential H v upper B) BaseResidual.past :=
-  ConstructedSlowBase.potential_smooth (scales_strictMono H v upper B) F.data.h_pos F.data.h_lt_half
-    (coefficients_smooth H v) W.axis.normalization
 
 theorem velocity_smooth (upper : ℝ) (B : ℕ) :
     ContDiffOn ℝ ∞ (velocity H v upper B) BaseResidual.past :=
@@ -313,16 +305,6 @@ theorem leading_origin : (coefficients H v).axial 0 (0, 0) = W.axis.j := by
   simp only [mul_zero, zero_add] at he
   exact he
 
-theorem origin (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t < 1) :
-    velocity H v upper B (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) • ProblemStatement.coordinateVector 2 := by
-  rw [show velocity H v upper B (t, 0) =
-      ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * (coefficients H v).axial 0 (0, 0)) •
-        ProblemStatement.coordinateVector 2 from
-    BaseResidual.baseVelocity_at_origin (scales_strictMono H v upper B) F.data.h_pos F.data.h_lt_half
-      (coefficients_smooth H v) W.axis.normalization
-      (fun _ hn => (EntranceAlignedBase.modulated_positive_axis H v hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1) ht,
-    leading_origin]
 
 theorem axis_tendsto (upper : ℝ) (B : ℕ) :
     Tendsto (fun t : ℝ => ‖velocity H v upper B (t, 0)‖) (𝓝[<] 1) atTop := by
@@ -459,17 +441,9 @@ theorem exterior_residual_zero (upper : ℝ) (B : ℕ) {z : ProblemStatement.Spa
     (scales_strictMono H v upper B) hz
 
 
-noncomputable def completedVelocity (upper : ℝ) (B : ℕ) : ProblemStatement.VelocityField :=
-  ModulatedExterior.completedVelocity (BaseExterior.nominalHeatNormalization W) F.data.h (velocity H v upper B)
 
-noncomputable def completedPressure (upper : ℝ) (B : ℕ) : ProblemStatement.PressureField :=
-  ModulatedExterior.completedPressure (BaseExterior.nominalHeatNormalization W) F.data.h (pressure H v upper B)
 
-theorem completedVelocity_before (upper : ℝ) (B : ℕ) {z : ProblemStatement.SpaceTime} (ht : z.1 < 1) :
-    completedVelocity H v upper B z = velocity H v upper B z := ite_eq_left ht
 
-theorem completedPressure_before (upper : ℝ) (B : ℕ) {z : ProblemStatement.SpaceTime} (ht : z.1 < 1) :
-    completedPressure H v upper B z = pressure H v upper B z := ite_eq_left ht
 
 
 end Fields

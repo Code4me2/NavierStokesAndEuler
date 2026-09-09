@@ -35,8 +35,6 @@ namespace Periodic
 
 variable {U : Set Plane} {f g : Scalar}
 
-theorem positive (hf : Periodic U f) : PositivePeriodic U f :=
-  fun n R _ s hs => hf n R s hs
 
 theorem zero : Periodic U (0 : Scalar) := fun _ _ _ _ _ _ => rfl
 
@@ -90,12 +88,6 @@ theorem inv_periodic (ho : OperatorData U o) : PositivePeriodic U o.invRadius :=
   intro n R hR s hs Y k
   simp only [Operators.invRadius, ho.regular.radius_eq]
 
-/-- The actual reconstruction operators meet the primitive hypotheses. -/
-theorem native (U : Set Plane) (r : ReconstructionData) (ε fast : ℕ → ℝ)
-    (z t v : Plane) : OperatorData U (StateMomentBalances.nativeOperators r ε fast z t v) := by
-  refine ⟨⟨rfl, ?_⟩, fun _ _ _ _ _ _ _ => rfl⟩
-  exact (StateMomentBalances.nativeOperators_positive r ε fast z t v).radialProfile.mono
-    (fun _ hx => hx.1)
 
 end OperatorData
 
@@ -239,8 +231,6 @@ theorem of_regular (hm : GaugeDebtIncrement.RegularTriple U a b m)
 theorem regular (hm : MovingTriple U a b m) : GaugeDebtIncrement.RegularTriple U a b m :=
   ⟨MovingField.regular hm.radial, MovingField.regular hm.angular, MovingField.regular hm.axial⟩
 
-theorem periodic (hm : MovingTriple U a b m) : PeriodicTriple U.carrier m :=
-  ⟨hm.radial.periodic, hm.angular.periodic, hm.axial.periodic⟩
 
 theorem updated (hm : MovingTriple U a b m) (hh : MovingTriple U a b h) :
     MovingTriple U a b (MeanIncrementBounds.updated m h) :=

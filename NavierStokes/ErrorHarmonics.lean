@@ -294,24 +294,9 @@ structure GaussianData (D : Type) [NormedAddCommGroup D] [NormedSpace ℝ D] whe
   harmonic : ℤ
   phase : ℕ → D × ℝ → ℝ
 
-noncomputable def GaussianData.error (g : GaussianData D) (k : ℕ → ℝ) : Oscillation D :=
-  gaussianField g.directions g.cutoff g.amplitude g.source g.harmonic k g.phase
 
-noncomputable def GaussianData.block (g : GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) : HarmonicBlock D :=
-  gaussianBlock g.directions g.cutoff g.amplitude g.source g.harmonic k Φ kp
 
-def GaussianData.Compatible (g : GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) : Prop :=
-  (∀ n, ContDiff ℝ ∞ (g.cutoff n)) ∧ AngleIndependent g.cutoff ∧
-    AngleIndependent g.amplitude ∧ AngleIndependent g.source ∧
-    ∀ n x θ, k n * g.phase n (x, θ) = k n * Φ n x + (kp n : ℝ) * θ
 
-theorem GaussianData.block_represents (g : GaussianData D)
-    (k : ℕ → ℝ) (Φ : ℕ → D → ℝ) (kp : ℕ → ℤ) (hg : g.Compatible k Φ kp) :
-    (g.block k Φ kp).oscillation = g.error k :=
-  gaussianBlock_represents g.directions g.harmonic k Φ g.phase kp
-    hg.1 hg.2.1 hg.2.2.1 hg.2.2.2.1 hg.2.2.2.2
 
 
 

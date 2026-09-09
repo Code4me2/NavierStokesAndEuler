@@ -78,8 +78,6 @@ theorem exists_prepared : Nonempty PreparedProfile := by
     clean := hclean }⟩
 
 
-/-- An actual fixed prepared profile, obtained from the proved existence. -/
-noncomputable def prepared : PreparedProfile := Classical.choice exists_prepared
 
 
 end NavierStokes.PreparedOutgoing

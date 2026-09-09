@@ -19,30 +19,14 @@ open scoped ContDiff Topology BigOperators
 
 abbrev Plane := BaseContextAssembly.Plane
 abbrev Point := BaseContextAssembly.Point
-abbrev Slow := BaseContextAssembly.Slow
 
 /-- Scalar hypotheses on the chosen common index, including every low band. -/
 structure IndexBounds (h : ℝ) (index : ℕ → ℕ) (K : ℕ) : Prop where
   le_native : ∀ n, index n ≤ ChartScales.nativeIndex h n
   gap_le : ∀ n, ChartScales.nativeIndex h n - index n ≤ K
 
-theorem IndexBounds.native_le_add {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
-    (H : IndexBounds h index K) (n : ℕ) : ChartScales.nativeIndex h n ≤ index n + K := by
-  have hi := H.le_native n
-  have hg := H.gap_le n
-  omega
 
-theorem IndexBounds.add_gap {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
-    (H : IndexBounds h index K) (n : ℕ) :
-    index n + (ChartScales.nativeIndex h n - index n) = ChartScales.nativeIndex h n :=
-  Nat.add_sub_of_le (H.le_native n)
 
-theorem IndexBounds.commonRatio {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
-    (H : IndexBounds h index K) (n : ℕ) :
-    0 < MeanChartCompatibility.commonRatio h n (index n) ∧
-      MeanChartCompatibility.commonRatio h n (index n) ≤ ChartScales.Tg ^ K :=
-  ⟨MeanChartCompatibility.commonRatio_pos h n (index n),
-    MeanChartCompatibility.commonRatio_le (H.native_le_add n)⟩
 
 noncomputable def radialFrequency (h : ℝ) (index : ℕ → ℕ) (n : ℕ) : ℝ :=
   ChartScales.Lambda ^ index n * ChartScales.Q n ^ (ChartScales.radialExponent h / 2)
@@ -120,20 +104,10 @@ noncomputable def coverLift (k : ℕ) : Point ≃L[ℝ] Point :=
   (ContinuousLinearEquiv.refl ℝ ℝ).prodCongr
     ((ContinuousLinearEquiv.refl ℝ Plane).prodCongr (CommonCoverSolve.coverPower k))
 
-@[simp] theorem coverLift_apply (k : ℕ) (x : Point) :
-    coverLift k x = (x.1, (x.2.1, CommonCoverSolve.coverPower k x.2.2)) := rfl
 
-@[simp] theorem coverLift_slow (k : ℕ) (x : Point) :
-    BaseContextAssembly.slowCoordinates (coverLift k x) = BaseContextAssembly.slowCoordinates x := rfl
 
-@[simp] theorem coverLift_eR (k : ℕ) : coverLift k (1,(0,0)) = (1,(0,0)) := by
-  simp only [coverLift_apply, map_zero]
 
-@[simp] theorem coverLift_eZ (k : ℕ) : coverLift k (0,((0,1),0)) = (0,((0,1),0)) := by
-  simp only [coverLift_apply, map_zero]
 
-@[simp] theorem coverLift_eT (k : ℕ) : coverLift k (0,((1,0),0)) = (0,((1,0),0)) := by
-  simp only [coverLift_apply, map_zero]
 
 theorem coverPower_radial (k : ℕ) :
     CommonCoverSolve.coverPower k (TorusInverse.vector .radial) =
@@ -149,30 +123,8 @@ theorem coverPower_temporal (k : ℕ) :
 
 
 
-theorem coverPower_comp (i k : ℕ) (Y : Plane) :
-    CommonCoverSolve.coverPower k (CommonCoverSolve.coverPower i Y) =
-      CommonCoverSolve.coverPower (i+k) Y := by
-  simp only [CommonCoverSolve.coverPower_apply]
-  rw [← _root_.mul_apply_eq_comp, ← pow_add, Nat.add_comm]
 
-theorem coverLift_physicalToChart (h : ℝ) (n i k : ℕ) (x : Point) :
-    coverLift k (PhysicalResidualTZ.physicalToChartTZ h n i x) =
-      PhysicalResidualTZ.physicalToChartTZ h n (i+k) x := by
-  apply Prod.ext
-  · rfl
-  · apply Prod.ext
-    · rfl
-    · change CommonCoverSolve.coverPower k (TemporalMeanUpdate.coverMap i x.2.2) =
-        TemporalMeanUpdate.coverMap (i+k) x.2.2
-      rw [MeanChartCompatibility.coverMap_eq_coverPower, MeanChartCompatibility.coverMap_eq_coverPower,
-        coverPower_comp]
 
-theorem IndexBounds.physicalToChart {h : ℝ} {index : ℕ → ℕ} {K : ℕ}
-    (H : IndexBounds h index K) (n : ℕ) (x : Point) :
-    coverLift (ChartScales.nativeIndex h n - index n)
-      (PhysicalResidualTZ.physicalToChartTZ h n (index n) x) =
-    PhysicalResidualTZ.physicalToChartTZ h n (ChartScales.nativeIndex h n) x := by
-  rw [coverLift_physicalToChart, H.add_gap n]
 
 noncomputable def pull {E : Type*} (gap : ℕ → ℕ) (f : ℕ → Point → E) (n : ℕ) (x : Point) : E :=
   f n (coverLift (gap n) x)
@@ -220,17 +172,8 @@ variable {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
     coverLift k x ∈ (BaseContextAssembly.nativeStrip W U).domain ↔
       x ∈ (BaseContextAssembly.nativeStrip W U).domain := Iff.rfl
 
-@[simp] theorem coverLift_delta (k : ℕ) (x : Point) :
-    (BaseContextAssembly.nativeStrip W U).delta (coverLift k x) =
-      (BaseContextAssembly.nativeStrip W U).delta x := rfl
 
-@[simp] theorem coverLift_zeta (k : ℕ) (x : Point) :
-    (BaseContextAssembly.nativeStrip W U).zeta (coverLift k x) =
-      (BaseContextAssembly.nativeStrip W U).zeta x := rfl
 
-@[simp] theorem coverLift_growth (k n : ℕ) (x : Point) :
-    (BaseContextAssembly.nativeStrip W U).growth n (coverLift k x) =
-      (BaseContextAssembly.nativeStrip W U).growth n x := rfl
 
 /-- True covering norms produce one finite-jet constant before the band is
 chosen. No isometry property is assumed of the cover. -/

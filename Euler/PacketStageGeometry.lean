@@ -47,7 +47,6 @@ def changeActivation : ParentFrame D t := h ▸ P
 @[simp] theorem changeActivation_horizon : (P.changeActivation h).horizon=P.horizon := by cases h; rfl
 @[simp] theorem changeActivation_B : (P.changeActivation h).B=P.B := by cases h; rfl
 @[simp] theorem changeActivation_m : (P.changeActivation h).m=P.m := by cases h; rfl
-@[simp] theorem changeActivation_v : (P.changeActivation h).v=P.v := by cases h; rfl
 
 end EulerPacketSourceGeometry.ParentFrame
 

@@ -19,8 +19,6 @@ variable {K E : Type*} [TopologicalSpace K] [CompactSpace K]
 def freezePath (t : K) : C(K,E) →L[ℝ] C(K,E) :=
   (ContinuousLinearMap.const ℝ K).comp (ContinuousMap.evalCLM ℝ t)
 
-omit [CompactSpace K] in
-@[simp] theorem freezePath_apply (t s : K) (p : C(K,E)) : freezePath t p s = p t := rfl
 
 theorem freezePath_norm (t : K) : ‖freezePath (E := E) t‖ ≤ 1 := by
   apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one

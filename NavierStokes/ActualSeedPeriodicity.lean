@@ -36,15 +36,6 @@ theorem conjugatePair_periodic {E : Type} [NormedAddCommGroup E] [NormedSpace �
       ErrorHarmonics.conjugatePair 1 f j x := by
   simp only [SignedWaveUpdate.conjugatePair_apply, hf]
 
-/-- The stored phase uses the same ordered common cover. -/
-theorem phase_periodic (l : ActualInitialization.Index B N0) (n : ℕ)
-    (hn : ActualWaveRegularityData.Ordered l n) (k : TorusInverse.Frequency)
-    (x : Point) :
-    ActualInitialization.phase l n (x + pointDeck k) =
-      ActualInitialization.phase l n x := by
-  simpa only [ActualInitialization.phase, ActualInitialization.primaryPiece,
-    ActualPrimary.piece, ← zeroSlice_add_deck] using
-    ActualPrimaryCoherence.chart_phase_periodic l.2 l.1 n hn k (x, 0)
 
 /-- Every harmonic coefficient of the actual exact-curl seed velocity is
 periodic, including the conjugate mode. -/

@@ -118,11 +118,6 @@ theorem activatedVelocity_divergence_free (u : VelocityField)
 
 
 
-theorem activatedVelocity_norm_le (u : VelocityField) (z : SpaceTime) :
-    ‖activatedVelocity u z‖ ≤ ‖u z‖ := by
-  have hs := timeSwitch_mem_Icc z.1
-  rw [activatedVelocity, norm_smul, Real.norm_eq_abs, abs_of_nonneg hs.1]
-  exact mul_le_of_le_one_left (norm_nonneg _) hs.2
 
 /-- Activating the field does not remove speed blowup, because the switch is
 identically one on the final quarter of the time interval. -/
@@ -139,13 +134,6 @@ theorem activatedVelocity_speed_unbounded (u : VelocityField)
     linarith
   · simpa only [activatedVelocity_eq_late u hlate.le x] using hlarge
 
-theorem activatedVelocity_speed_unbounded_iff (u : VelocityField) :
-    SpeedUnboundedAtOne (activatedVelocity u) ↔ SpeedUnboundedAtOne u := by
-  constructor
-  · intro hu M hM δ hδ
-    obtain ⟨t, x, ht, hnear, hlarge⟩ := hu M hM δ hδ
-    exact ⟨t, x, ht, hnear, hlarge.trans_le (activatedVelocity_norm_le u (t, x))⟩
-  · exact activatedVelocity_speed_unbounded u
 
 
 end NavierStokes.TimeLocalization

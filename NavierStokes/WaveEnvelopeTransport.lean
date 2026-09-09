@@ -116,10 +116,6 @@ variable {P V : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
 
-/-- Coefficients may differ in every native copy. This is an actual sum
-of common-cover fields, with no substitution of a native-periodic source. -/
-noncomputable def grouped (F : Frequency → P × Plane → V) (z : P × Plane) : V :=
-  ∑' k : Frequency, F k z
 
 
 

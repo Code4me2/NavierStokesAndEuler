@@ -27,7 +27,6 @@ open PhysicalWaveSum PhysicalCopyBounds
 open scoped Topology ContDiff BigOperators
 
 abbrev Label := ActualSignedPhysicalBinding.Label
-abbrev Native := ActualSignedPhysicalData.Native
 abbrev SourceIndex := Σ (_ : BandLabel), ActualSignedPhysicalData.SourceIndex
 
 variable {B N0 : ℕ}
@@ -439,17 +438,9 @@ variable
     (DependentSignedPhysicalFamily.jointSource
       ((ActualSignedExterior.family s).pressureSource slots outgoing.data.h_pos.le)))
 
-@[simp] theorem potentialOfNative_alpha :
-    (potentialOfNative s hgeo hn hpotential).alpha = α := rfl
 
-@[simp] theorem pressureOfNative_alpha :
-    (pressureOfNative s hgeo hn hpressure).alpha = α := rfl
 
-@[simp] theorem potentialOfNative_shift :
-    (potentialOfNative s hgeo hn hpotential).shift = -h := rfl
 
-@[simp] theorem pressureOfNative_shift :
-    (pressureOfNative s hgeo hn hpressure).shift = -(2 * CoordinateAlgebra.A h) := rfl
 
 
 
@@ -503,18 +494,9 @@ noncomputable def pressureFromResiduals :
       simp only [sub_add_cancel] at he
       exact he)
 
-@[simp] theorem potentialFromResiduals_alpha :
-    (potentialFromResiduals (N0 := N0) u H hp α hfixed hθ hz).alpha = α := rfl
 
-@[simp] theorem pressureFromResiduals_alpha :
-    (pressureFromResiduals (N0 := N0) u H hp α hfixed hθ hz).alpha = α := rfl
 
-@[simp] theorem potentialFromResiduals_shift :
-    (potentialFromResiduals (N0 := N0) u H hp α hfixed hθ hz).shift = -h := rfl
 
-@[simp] theorem pressureFromResiduals_shift :
-    (pressureFromResiduals (N0 := N0) u H hp α hfixed hθ hz).shift =
-      -(2 * CoordinateAlgebra.A h) := rfl
 
 end ActualProducers
 
@@ -539,16 +521,9 @@ noncomputable def cyclePressureData :
     (ActualSignedPhysicalBinding.afterParticular_pressure x R.primitive)
     (1 + σ - ChartScales.kappa) R.reconstructed R.theta R.axial
 
-@[simp] theorem cyclePotentialData_alpha :
-    (cyclePotentialData x R).alpha = 1 + σ - ChartScales.kappa := rfl
 
-@[simp] theorem cyclePressureData_alpha :
-    (cyclePressureData x R).alpha = 1 + σ - ChartScales.kappa := rfl
 
-@[simp] theorem cyclePotentialData_shift : (cyclePotentialData x R).shift = -h := rfl
 
-@[simp] theorem cyclePressureData_shift :
-    (cyclePressureData x R).shift = -(2 * CoordinateAlgebra.A h) := rfl
 
 theorem cyclePotentialData_eq : EqOn (cyclePotentialData x R).vector
     (ActualSignedExterior.cyclePotential x R.primitive

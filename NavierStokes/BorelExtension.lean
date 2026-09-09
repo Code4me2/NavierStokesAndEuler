@@ -284,50 +284,15 @@ theorem extension_jets (a : ℕ → E) (k : ℕ) :
   · intro j hj
     simp [Ne.symm hj]
 
-omit [CompleteSpace E] in
-theorem extension_zero_of_one_le_abs (a : ℕ → E) {s : ℝ} (hs : 1 ≤ |s|) :
-    extension a s = 0 := by
-  calc
-    extension a s = ∑' _ : ℕ, (0 : E) := by
-      apply tsum_congr
-      intro j
-      have hb := scale_ge_one a j
-      have harg : 1 ≤ |(scale a j : ℝ) * s| := by
-        rw [abs_mul, abs_of_nonneg (Nat.cast_nonneg _)]
-        exact one_le_mul_of_one_le_of_one_le hb hs
-      simp only [term, SmoothCutoffs.cutoff_zero_of_one_le_abs harg, zero_smul]
-    _ = 0 := tsum_zero
 
 
 
 
 
-/-- Translate the constructed extension to any joining time. -/
-def rightExtension (T : ℝ) (a : ℕ → E) (t : ℝ) : E := extension a (t - T)
 
-theorem rightExtension_contDiff (T : ℝ) (a : ℕ → E) :
-    ContDiff ℝ ∞ (rightExtension T a) :=
-  (extension_contDiff a).comp (contDiff_id.sub contDiff_const)
 
-theorem rightExtension_jets (T : ℝ) (a : ℕ → E) (k : ℕ) :
-    iteratedDeriv k (rightExtension T a) T = a k := by
-  unfold rightExtension
-  simp only [sub_eq_add_neg, iteratedDeriv_comp_add_const, add_neg_cancel]
-  exact extension_jets a k
 
-theorem rightExtension_right_jets (T : ℝ) (a : ℕ → E) (k : ℕ) :
-    iteratedDerivWithin k (rightExtension T a) (Ici T) T = a k := by
-  rw [iteratedDerivWithin_eq_iteratedFDerivWithin,
-    iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Ici T)
-      ((rightExtension_contDiff T a).of_le (natCast_le_infty k)).contDiffAt
-      (mem_Ici.mpr le_rfl)]
-  exact rightExtension_jets T a k
 
-omit [CompleteSpace E] in
-theorem rightExtension_zero_from (T : ℝ) (a : ℕ → E) {t : ℝ} (ht : T + 1 ≤ t) :
-    rightExtension T a t = 0 := by
-  apply extension_zero_of_one_le_abs
-  exact le_trans (by linarith : 1 ≤ t - T) (le_abs_self _)
 
 
 

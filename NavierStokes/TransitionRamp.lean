@@ -63,8 +63,6 @@ theorem integrate_hasDerivAt {J : Set ℝ} (hJ : IsOpen J) (initial : ℝ → �
   simpa only [integrate, zero_add] using (hasDerivAt_const y (initial η)).fun_add
     (primitive_hasDerivAt (logDomain J hJ) hs (p := (y, η)) ⟨mem_univ _, hη⟩)
 
-@[simp] theorem integrate_initial (initial : ℝ → ℝ) (slope : Field) (η : ℝ) :
-    integrate initial slope (0, η) = initial η := by simp [integrate, primitive]
 
 theorem integrate_congr (initial : ℝ → ℝ) (slope₁ slope₂ : Field) (p : Point)
     (he : ∀ t ∈ uIcc (0 : ℝ) p.1, slope₁ (t, p.2) = slope₂ (t, p.2)) :

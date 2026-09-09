@@ -226,11 +226,6 @@ theorem heatE_after (F : Profile) (XR eta X : ℝ) (hXR : 0 < XR) (hle : switchR
   dsimp only
   rw [OutgoingDilation.E_eq_clean_switch_profile F XR eta X hXR hle]
 
-theorem E_after_switch (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ) (hXR : 0 < XR)
-    (hle : switchRadius F XR ≤ X) :
-    E F XR c (X, eta) = ExtendedHeatDebts.physicalEdit F.data (switchRadius F XR) eta X := by
-  rw [E, HeatedOutgoing.patchIncrement, OutgoingDilation.correction_zero_after_switch F XR X hXR (c eta) hle,
-    mul_zero, add_zero, heatE_after F XR eta X hXR hle]
 
 theorem E_before_patch (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
     (hXR : 0 < XR) (hX : 0 < X) (hp : X ≤ patchRadius F XR) :
@@ -351,18 +346,6 @@ theorem changeRow_integral_zero (eta : ℝ) (i : Fin 3) (heta : eta ∈ paramete
       simp only [Pi.add_apply, Pi.zero_apply] at h
       linarith
 
-theorem positive (eta X : ℝ) (heta : eta ∈ parameterDomain) (hX : 0 < X) :
-    0 < E F XR w.coefficients (X, eta) := by
-  by_cases hp : X / patchRadius F XR ∈ Icc compensationPatch.left compensationPatch.right
-  · rw [E_on_patch F XR w.coefficients eta X w.radius_pos hX hp]
-    exact w.patch_positive eta (parameterDomain_subset heta) X hX
-  · rw [E, HeatedOutgoing.patchIncrement, HeatedOutgoing.correction_zero_outside (w.coefficients eta) hp,
-      mul_zero, add_zero]
-    by_cases hle : X ≤ switchRadius F XR
-    · rw [heatE_before F XR eta X w.radius_pos hX hle]
-      exact OutgoingDilation.positive F XR _
-    · rw [heatE_after F XR eta X w.radius_pos (lt_of_not_ge hle).le]
-      exact w.heat_positive eta (parameterDomain_subset heta) X hX
 
 end Witness
 
@@ -372,48 +355,11 @@ theorem kernel_decomposition (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X
     (E F XR c (X, eta) ^ 2 - OutgoingDilation.E F XR (X, eta) ^ 2) / X
   ring
 
-theorem energy_decomposition (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ) :
-    energyDensity F XR c eta X = OutgoingDilation.energyDensity F XR eta X - changeRow F XR c eta 1 X / 2 := by
-  change OutgoingDilation.U F XR (X, eta) ^ 2 - E F XR c (X, eta) ^ 2 / 2 =
-    OutgoingDilation.U F XR (X, eta) ^ 2 - OutgoingDilation.E F XR (X, eta) ^ 2 / 2 -
-      (E F XR c (X, eta) ^ 2 - OutgoingDilation.E F XR (X, eta) ^ 2) / 2
-  ring
 
-theorem renormalized_decomposition (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ) :
-    H F XR c (X, eta) - OutgoingDilation.powerH F XR X =
-      (OutgoingDilation.H F XR (X, eta) - OutgoingDilation.powerH F XR X) + changeRow F XR c eta 2 X := by
-  change Real.sqrt (2 * X) * E F XR c (X, eta) - _ =
-    (Real.sqrt (2 * X) * OutgoingDilation.E F XR (X, eta) - _) +
-      Real.sqrt (2 * X) * (E F XR c (X, eta) - OutgoingDilation.E F XR (X, eta))
-  ring
 
-theorem E_times_U (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : 0 < X) :
-    E F XR c (X, eta) * U F XR (X, eta) = OutgoingDilation.E F XR (X, eta) * U F XR (X, eta) := by
-  have hh : heatE F XR (X, eta) * U F XR (X, eta) = OutgoingDilation.E F XR (X, eta) * U F XR (X, eta) := by
-    by_cases hle : X ≤ switchRadius F XR
-    · rw [heatE_before F XR eta X hXR hX hle]
-    · have hu : U F XR (X, eta) = 0 := HeatedOutgoing.U_after_switch F XR eta X hXR (lt_of_not_ge hle).le
-      rw [hu, mul_zero, mul_zero]
-  have hp : HeatedOutgoing.patchIncrement F XR c (X, eta) * U F XR (X, eta) = 0 := by
-    rw [HeatedOutgoing.patchIncrement, mul_assoc]
-    change shapedPatchAmplitude F eta *
-      (TerminalCompensation.correction compensationPatch (c eta) (X / patchRadius F XR) *
-        OutgoingDilation.U F XR (X, eta)) = 0
-    rw [OutgoingDilation.correction_times_U_zero F XR eta X hXR, mul_zero]
-  rw [E, add_mul, hh, hp, add_zero]
 
-theorem J_integrand_eq (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : 0 < X) :
-    H F XR c (X, eta) * U F XR (X, eta) = OutgoingDilation.H F XR (X, eta) * OutgoingDilation.U F XR (X, eta) := by
-  simpa only [H, OutgoingDilation.H, U, HeatedOutgoing.U, mul_assoc] using
-    congrArg (fun z => Real.sqrt (2 * X) * z) (E_times_U F XR c eta X hXR hX)
 
-theorem M_unchanged (F : Profile) (XR eta X : ℝ) : M F XR eta X = OutgoingDilation.M F XR eta X := rfl
 
-theorem J_unchanged (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ) (hXR : 0 < XR) :
-    J F XR c eta X = OutgoingDilation.J F XR eta X :=
-  setIntegral_congr_fun measurableSet_Ioc (fun u hu => J_integrand_eq F XR c eta u hXR hu.1)
 
 theorem canonicalKernel_comp_exp (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta y : ℝ) :
     |Real.exp y| • canonicalKernel F XR c eta (Real.exp y) = E F XR c (Real.exp y, eta) ^ 2 := by
@@ -439,67 +385,16 @@ theorem canonicalKernel_integrable (eta : ℝ) :
   rw [funext (kernel_decomposition F XR w.coefficients eta)]
   exact (OutgoingDilation.canonicalKernel_integrable F XR eta w.radius_pos).add (w.changeRow_integrable eta 0)
 
-theorem pressure_integral_unchanged (eta : ℝ) (heta : eta ∈ parameterDomain) :
-    (∫ X in Ioi 0, canonicalKernel F XR w.coefficients eta X) =
-      ∫ X in Ioi 0, OutgoingDilation.canonicalKernel F XR eta X := by
-  simp_rw [kernel_decomposition]
-  rw [integral_add (OutgoingDilation.canonicalKernel_integrable F XR eta w.radius_pos)
-    (w.changeRow_integrable eta 0), w.changeRow_integral_zero eta 0 heta, add_zero]
 
-theorem axisDatum_eq (eta : ℝ) (heta : eta ∈ parameterDomain) :
-    axisDatum F XR w.coefficients eta = F.axisDatum eta := by
-  rw [axisDatum, w.pressure_integral_unchanged eta heta]
-  change OutgoingDilation.axisDatum F XR eta = F.axisDatum eta
-  rw [OutgoingDilation.axisDatum_unchanged F XR w.radius_pos]
 
-theorem energy_integrable (eta : ℝ) : IntegrableOn (energyDensity F XR w.coefficients eta) (Ioi 0) := by
-  rw [funext (energy_decomposition F XR w.coefficients eta)]
-  exact (OutgoingDilation.energy_integrable F XR eta w.radius_pos).sub ((w.changeRow_integrable eta 1).div_const 2)
 
-theorem totalS_eq (eta : ℝ) (heta : eta ∈ parameterDomain) :
-    totalS F XR w.coefficients eta = OutgoingDilation.totalS F XR eta := by
-  unfold totalS OutgoingDilation.totalS
-  simp_rw [energy_decomposition]
-  rw [integral_sub (OutgoingDilation.energy_integrable F XR eta w.radius_pos)
-    ((w.changeRow_integrable eta 1).div_const 2), integral_div,
-    w.changeRow_integral_zero eta 1 heta, zero_div, sub_zero]
 
-theorem renormalized_integrable (eta : ℝ) :
-    IntegrableOn (fun X => H F XR w.coefficients (X, eta) - OutgoingDilation.powerH F XR X) (Ioi 0) := by
-  rw [funext (renormalized_decomposition F XR w.coefficients eta)]
-  exact (OutgoingDilation.renormalized_integrable F XR eta w.radius_pos).add (w.changeRow_integrable eta 2)
 
-theorem renormalized_zero (eta : ℝ) (heta : eta ∈ parameterDomain) :
-    (∫ X in Ioi 0, H F XR w.coefficients (X, eta) - OutgoingDilation.powerH F XR X) = 0 := by
-  simp_rw [renormalized_decomposition]
-  rw [integral_add (OutgoingDilation.renormalized_integrable F XR eta w.radius_pos)
-    (w.changeRow_integrable eta 2), w.changeRow_integral_zero eta 2 heta, add_zero]
-  exact OutgoingDilation.renormalized_zero F XR eta w.radius_pos
 
-include w in
-theorem mass_integrable (eta : ℝ) : IntegrableOn (fun X => U F XR (X, eta)) (Ioi 0) :=
-  OutgoingDilation.mass_integrable F XR eta w.radius_pos
 
-theorem angular_integrable (eta : ℝ) :
-    IntegrableOn (fun X => H F XR w.coefficients (X, eta) * U F XR (X, eta)) (Ioi 0) :=
-  IntegrableOn.congr_fun (OutgoingDilation.angular_integrable F XR eta w.radius_pos)
-    (fun X hX => (J_integrand_eq F XR w.coefficients eta X w.radius_pos hX).symm) measurableSet_Ioi
 
-include w in
-theorem mass_zero (eta : ℝ) : (∫ X in Ioi 0, U F XR (X, eta)) = 0 :=
-  OutgoingDilation.mass_total_zero F XR eta w.radius_pos
 
-theorem angular_zero (eta : ℝ) :
-    (∫ X in Ioi 0, H F XR w.coefficients (X, eta) * U F XR (X, eta)) = 0 := by
-  calc
-    _ = ∫ X in Ioi 0, OutgoingDilation.H F XR (X, eta) * OutgoingDilation.U F XR (X, eta) :=
-      setIntegral_congr_fun measurableSet_Ioi (fun X hX => J_integrand_eq F XR w.coefficients eta X w.radius_pos hX)
-    _ = 0 := OutgoingDilation.angular_total_zero F XR eta w.radius_pos
 
-theorem after_pulse (eta X : ℝ) (hX : 0 < X) (hfar : OutgoingDilation.pulseEndRadius F XR ≤ X) :
-    U F XR (X, eta) = 0 ∧ M F XR eta X = 0 ∧ J F XR w.coefficients eta X = 0 := by
-  rw [M_unchanged, J_unchanged F XR w.coefficients eta X w.radius_pos]
-  exact OutgoingDilation.after_pulse F XR eta X w.radius_pos hX hfar
 
 theorem Pi_before_patch (eta X : ℝ) (heta : eta ∈ parameterDomain) (hX : 0 < X)
     (hpatch : X ≤ patchRadius F XR) : Pi F XR w.coefficients (X, eta) = OutgoingDilation.Pi F XR (X, eta) := by
@@ -515,16 +410,6 @@ theorem Pi_before_patch (eta X : ℝ) (heta : eta ∈ parameterDomain) (hX : 0 <
   rw [integral_add hb hi, hz, add_zero]
   exact (OutgoingDilation.Pi_canonical F XR eta X w.radius_pos hX).symm
 
-theorem ideal_prefix (eta X : ℝ) (heta : eta ∈ parameterDomain) (hX : 0 < X) (hX' : X ≤ XR) :
-    E F XR w.coefficients (X, eta) = F.data.core.P * OutgoingSchedule.shape eta * (X / XR) ^ (1 / 10 : ℝ) ∧
-    U F XR (X, eta) = 4 * eta ∧
-    Pi F XR w.coefficients (X, eta) = F.axisDatum eta +
-      (5 / 2) * F.data.core.P ^ 2 * OutgoingSchedule.shape eta ^ 2 * (X / XR) ^ (1 / 5 : ℝ) := by
-  have hp := hX'.trans (HeatedOutgoing.entrance_before_patch F XR w.radius_pos).le
-  rw [E_before_patch F XR w.coefficients eta X w.radius_pos hX hp, w.Pi_before_patch eta X heta hX hp]
-  have h := OutgoingDilation.ideal_prefix F XR eta X w.radius_pos hX hX'
-  rw [OutgoingDilation.axisDatum_unchanged F XR w.radius_pos] at h
-  exact h
 
 theorem logE_square_integrable (eta : ℝ) :
     Integrable (fun y => E F XR w.coefficients (Real.exp y, eta) ^ 2) := by
@@ -588,16 +473,6 @@ theorem fields_contDiffAt {p : ℝ × ℝ} (hp : p ∈ domain) :
     (H_contDiffOn F XR w.radius_pos w.coefficients_contDiffOn).contDiffAt hn,
     w.Pi_contDiffOn.contDiffAt hn⟩
 
-theorem Pi_tendsto_axis (eta : ℝ) (heta : eta ∈ parameterDomain) :
-    Tendsto (fun X => Pi F XR w.coefficients (X, eta)) (𝓝[>] (0 : ℝ)) (𝓝 (F.axisDatum eta)) := by
-  have he : (fun X => Pi F XR w.coefficients (X, eta)) =ᶠ[𝓝[>] (0 : ℝ)]
-      (fun X => OutgoingDilation.Pi F XR (X, eta)) := by
-    filter_upwards [self_mem_nhdsWithin,
-      mem_nhdsWithin_of_mem_nhds (Iio_mem_nhds (OutgoingDilation.patchRadius_pos F XR w.radius_pos))] with X hX hp
-    exact w.Pi_before_patch eta X heta hX hp.le
-  have ht := OutgoingDilation.Pi_tendsto_axis F XR eta w.radius_pos
-  rw [OutgoingDilation.axisDatum_unchanged F XR w.radius_pos] at ht
-  exact ht.congr' he.symm
 
 end Witness
 
@@ -608,9 +483,6 @@ place the entire physical band strictly inside that set. -/
 noncomputable def energyDomain (F : Profile) : Set ℝ :=
   parameterDomain ∩ {eta | CorrectedPulseAmplitude.constantTerm F.data F.reset.coefficients eta < -(1 / 5)}
 
-theorem energyDomain_open (F : Profile) : IsOpen (energyDomain F) :=
-  parameterDomain_open.inter
-    (isOpen_lt (CorrectedPulseAmplitude.constantTerm_contDiff F.data F.reset.smooth).continuous continuous_const)
 
 structure ScheduleBounds (F : Profile) : Prop where
   coefficient_pos : 0 < F.coefficientBound
@@ -618,21 +490,7 @@ structure ScheduleBounds (F : Profile) : Prop where
   wait_eq : F.data.core.wait = 60 * Real.log (1 / F.data.core.lam)
   scale_small : CorrectedPulseAmplitude.combinedScale F.data F.coefficientBound ≤ 1 / 1000
 
-theorem ScheduleBounds.constantTerm_bound {F : Profile} (b : ScheduleBounds F)
-    {eta : ℝ} (heta : eta ∈ HeatedOutgoing.parameterDomain) :
-    CorrectedPulseAmplitude.constantTerm F.data F.reset.coefficients eta ≤ -(23 / 100) := by
-  have he := HeatedOutgoing.parameter_sq_le_one heta
-  have ho := CorrectedPulseAmplitude.old_error_bounds F.data F.coefficientBound b.coefficient_pos
-    b.lambda_small b.wait_eq eta he
-  have hs := CorrectedPulseAmplitude.energyShift_bounds F.reset b.coefficient_pos eta he
-  exact (CorrectedPulseAmplitude.numerical_coefficient_bounds F.data F.reset.coefficients eta
-    (CorrectedPulseAmplitude.combinedScale F.data F.coefficientBound) he ho hs.1 b.scale_small).2.2.2.2
 
-theorem ScheduleBounds.physicalBand_subset {F : Profile} (b : ScheduleBounds F) :
-    HeatedOutgoing.parameterDomain ⊆ energyDomain F := by
-  intro eta heta
-  exact ⟨NavierStokes.ExtendedHeatedOutgoing.physicalBand_subset heta,
-    lt_of_le_of_lt (b.constantTerm_bound heta) (by norm_num)⟩
 
 noncomputable def amplitudeBound (F : Profile) : ℝ :=
   128 * CorrectedPulseAmplitude.combinedConstant F.data.core.P F.data.core.m F.coefficientBound
@@ -681,54 +539,11 @@ theorem ScheduleBounds.specification {F : Profile} (b : ScheduleBounds F) :
     rw [F.totalS_eq]
     exact (hs.2 eta heta).2.2.1
 
-theorem base_energy_zero (F : Profile) (XR eta : ℝ) (hXR : 0 < XR)
-    (heta : eta ∈ energyDomain F) : OutgoingDilation.totalS F XR eta = 0 := by
-  rw [OutgoingDilation.totalS_scaling F XR eta hXR, F.totalS_eq]
-  have h := CorrectedPulseAmplitude.amplitude_totalEnergy_zero F.data F.reset.coefficients eta heta.2.le
-  change CorrectedPulseAmplitude.totalEnergy F.data F.reset.coefficients (F.amp eta) eta = 0 at h
-  rw [h, mul_zero]
-
-theorem Witness.energy_zero {F : Profile} {XR C : ℝ} (w : Witness F XR C)
-    (eta : ℝ) (heta : eta ∈ energyDomain F) : totalS F XR w.coefficients eta = 0 := by
-  rw [w.totalS_eq eta heta.1]
-  exact base_energy_zero F XR eta w.radius_pos heta
 
 
-theorem E_full_switch (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : 0 < X)
-    (hfull : 1 / 2 ≤ Real.log (X / switchRadius F XR) + 1 / 5) :
-    E F XR c (X, eta) =
-      (OutgoingDilation.carrierAmplitude F * (switchRadius F XR) ^ HeatTailEdit.exponent F.data.h) *
-        X ^ (-HeatTailEdit.exponent F.data.h) * HeatProfileExtension.physicalProfile (1 + F.data.h) X eta *
-          OutgoingTail.tailShape F.data (Real.log (X / switchRadius F XR) + 1 / 5) := by
-  have hK := OutgoingDilation.switchRadius_pos F XR hXR
-  rw [E_after_switch F XR c eta X hXR (HeatedOutgoing.full_switch_above_radius hK hX hfull)]
-  unfold ExtendedHeatDebts.physicalEdit ExtendedHeatDebts.edit ExtendedHeatDebts.multiplier ExtendedHeatDebts.correction
-  rw [HeatTailEdit.switch_one (by linarith), one_mul, add_sub_cancel,
-    HeatTailEdit.outgoingProfile_eq_powerTail_of_log F.data hK hX (by linarith)]
-  change HeatTailEdit.outgoingAmplitude F.data * (X / switchRadius F XR) ^ (-HeatTailEdit.exponent F.data.h) *
-    OutgoingTail.tailShape F.data (Real.log (X / switchRadius F XR) + 1 / 5) *
-    HeatProfileExtension.physicalProfile (1 + F.data.h) X eta = _
-  rw [Real.div_rpow hX.le hK.le, Real.rpow_neg hK.le, div_inv_eq_mul]
-  unfold OutgoingDilation.carrierAmplitude
-  ring
 
-theorem E_eventual_extended_heat (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : 0 < X)
-    (hlate : 3 ≤ Real.log (X / switchRadius F XR) + 1 / 5) :
-    E F XR c (X, eta) =
-      (OutgoingDilation.carrierAmplitude F * (switchRadius F XR) ^ HeatTailEdit.exponent F.data.h) *
-        X ^ (-HeatTailEdit.exponent F.data.h) * HeatProfileExtension.physicalProfile (1 + F.data.h) X eta := by
-  rw [E_full_switch F XR c eta X hXR hX (by linarith), OutgoingTail.tailShape_late F.data hlate, mul_one]
 
-theorem E_eventual_heat (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
-    (hXR : 0 < XR) (hX : 0 < X) (heta : eta ∈ HeatedOutgoing.parameterDomain)
-    (hlate : 3 ≤ Real.log (X / switchRadius F XR) + 1 / 5) :
-    E F XR c (X, eta) =
-      (OutgoingDilation.carrierAmplitude F * (switchRadius F XR) ^ HeatTailEdit.exponent F.data.h) *
-        RadialHeatProfile.spatialProfile (1 + F.data.h) (ParametricHeatTail.diffusion eta) X := by
-  rw [E_eq_physical F XR c eta X heta hX]
-  exact HeatedOutgoing.E_eventual_heat F XR c eta X hXR hX hlate
+
 
 theorem E_between_patch_and_switch (F : Profile) (XR : ℝ) (c : ℝ → Coeff)
     (eta X : ℝ) (hXR : 0 < XR) (hX : 0 < X)
@@ -763,9 +578,6 @@ theorem exists_symmetric_neighborhood {V : Set ℝ} (hV : IsOpen V)
       linarith [heta.2]
     · exact hband ⟨le_of_not_gt hlow, le_of_not_gt hhigh⟩
 
-theorem ScheduleBounds.exists_parameter_interval {F : Profile} (b : ScheduleBounds F) :
-    ∃ a : ℝ, 1 < a ∧ a < 3 / 2 ∧ Ioo (-a) a ⊆ energyDomain F :=
-  exists_symmetric_neighborhood (energyDomain_open F) b.physicalBand_subset
 
 namespace Witness
 
@@ -777,14 +589,6 @@ theorem physical_specification (b : ScheduleBounds F) :
   w.physical.specification b.specification
 
 
-theorem axisDatum_analytic_extension :
-    AnalyticOnNhd ℂ (SchedulePressure.complexAxisPressure F.data) PressureDatum.strip ∧
-      ∀ eta ∈ parameterDomain, SchedulePressure.complexAxisPressure F.data (eta : ℂ) =
-        (axisDatum F XR w.coefficients eta : ℂ) := by
-  refine ⟨F.axisDatum_analytic_extension.1, ?_⟩
-  intro eta heta
-  rw [w.axisDatum_eq eta heta]
-  exact F.axisDatum_analytic_extension.2 eta
 
 end Witness
 
@@ -835,35 +639,6 @@ structure Specification (F : Profile) (XR : ℝ) (c : ℝ → Coeff) : Prop wher
         X ^ (-HeatTailEdit.exponent F.data.h) * HeatProfileExtension.physicalProfile (1 + F.data.h) X eta
   physical_specification : HeatedOutgoing.Specification F XR c
 
-theorem Witness.specification {F : Profile} {XR C : ℝ} (w : Witness F XR C) (b : ScheduleBounds F) :
-    Specification F XR w.coefficients where
-  neighborhood_open := energyDomain_open F
-  neighborhood_contains := b.physicalBand_subset
-  fields_smooth := fun _ hp => w.fields_contDiffAt ⟨hp.1, hp.2.1⟩
-  angular_positive := fun eta heta X hX => w.positive eta X heta.1 hX
-  axial_unchanged := rfl
-  mass_unchanged := M_unchanged F XR
-  angular_unchanged := fun eta X => J_unchanged F XR w.coefficients eta X w.radius_pos
-  mass_integrable := w.mass_integrable
-  angular_integrable := w.angular_integrable
-  energy_integrable := w.energy_integrable
-  pressure_integrable := w.canonicalKernel_integrable
-  renormalized_integrable := w.renormalized_integrable
-  mass_zero := w.mass_zero
-  angular_zero := w.angular_zero
-  energy_zero := w.energy_zero
-  renormalized_zero := fun eta heta => w.renormalized_zero eta heta.1
-  pressure_canonical := fun _ _ => rfl
-  axis_unchanged := fun eta heta => w.axisDatum_eq eta heta.1
-  axis_limit := fun eta heta => w.Pi_tendsto_axis eta heta.1
-  analytic_axis_datum := ⟨w.axisDatum_analytic_extension.1,
-    fun eta heta => w.axisDatum_analytic_extension.2 eta heta.1⟩
-  after_pulse := w.after_pulse
-  before_patch := fun eta heta X hX hp =>
-    ⟨E_before_patch F XR w.coefficients eta X w.radius_pos hX hp, w.Pi_before_patch eta X heta.1 hX hp⟩
-  ideal_prefix := fun eta heta X hX hp => w.ideal_prefix eta X heta.1 hX hp
-  terminal_extended_heat := fun eta X hX htail => E_eventual_extended_heat F XR w.coefficients eta X w.radius_pos hX htail
-  physical_specification := w.physical_specification b
 
 
 

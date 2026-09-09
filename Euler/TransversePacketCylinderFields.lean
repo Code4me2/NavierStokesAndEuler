@@ -49,9 +49,6 @@ def correctorDerivativeField : Field P D.T (G.correctorDerivative I) where
       (D.clamp t) (x,(θ : AddCircle P)) = _
     rw [Data.clamp_coe]
 
-theorem correctorField_time :
-    TimeDerivative D.T_pos.le (G.correctorField I) (G.correctorDerivativeField I) :=
-  G.correctorPath_time I
 
 
 

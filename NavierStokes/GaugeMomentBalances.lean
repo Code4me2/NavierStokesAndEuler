@@ -564,20 +564,6 @@ theorem reconstructed_state_axial_moment {coord : ℝ} (U : SlowRegion coord)
     exact axial_flux_pressure_moment U g ha hd hg c u H.axial hf n hq
   rwa [he, ← heq.fderiv_eq]
 
-theorem state_axial_moment {coord : ℝ} (U : SlowRegion coord)
-    (g : VariableGaugeMean.GaugeData Plane) (ha : 0 < g.radial.inner) (hd : 0 < g.radial.exponent)
-    (hg : ∀ n, g.length n = VariableGaugeMean.qLength coord)
-    (ε fast : ℕ → ℝ) (z t v : Plane) (c : Context Point) (u : State Point)
-    (ho : c.operators = nativeOperators g.radial ε fast z t v)
-    (H : MovingAxialInputs U g.radial.inner g.radial.outer c u)
-    (hf : MovingField U g.radial.inner g.radial.outer (u.gr c))
-    (hfixed : VariableGaugeMean.reconstructState g c u = u)
-    (hmass : ∀ n s, s ∈ U.carrier → CorrectionState.radialMoment 1 u.mean.axial n s = 0)
-    (n : ℕ) {s : Plane} (hs : s ∈ U.carrier) :
-    CorrectionState.radialMoment 1 (u.axialResidual c) n s =
-      ε n * fderiv ℝ (axialDebtPotential g c u n) s z := by
-  simpa only [hfixed] using
-    reconstructed_state_axial_moment U g ha hd hg ε fast z t v c u ho H hf hmass n hs
 
 end MovingState
 

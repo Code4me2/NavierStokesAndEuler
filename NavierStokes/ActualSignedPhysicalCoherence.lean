@@ -182,18 +182,7 @@ theorem toCommon_nativeGraph (l : Label B N0) (z : SpaceTime) (hr : 0 < z.2 0) :
     (((1 - z.1) / ChartScales.Q m, ChartScales.Q m ^ (-CoordinateAlgebra.D h) * z.2 2), Y)), z.2 1))
       (he _)
 
-theorem nativePoint_radius (n : ℕ) (z : SpaceTime) (hr : 0 < z.2 0) :
-    (ActualSignedPotentialCoherence.nativePoint n z).1.1 =
-      ChartScales.Q n ^ (-(1 / 2 : ℝ)) * z.2 0 := by
-  simp only [ActualSignedPotentialCoherence.nativePoint,
-    PhysicalResidualBridge.commonGraph_map (ChartScales.Q_pos _) h _ hr,
-    PhysicalResidualTZ.swapCylinder_apply, PhysicalResidualTZ.swapSlow_apply]
 
-theorem nativePoint_time (n : ℕ) (z : SpaceTime) (hr : 0 < z.2 0) :
-    (ActualSignedPotentialCoherence.nativePoint n z).1.2.1.1 = (1 - z.1) / ChartScales.Q n := by
-  simp only [ActualSignedPotentialCoherence.nativePoint,
-    PhysicalResidualBridge.commonGraph_map (ChartScales.Q_pos _) h _ hr,
-    PhysicalResidualTZ.swapCylinder_apply, PhysicalResidualTZ.swapSlow_apply]
 
 section ReferenceAlgebra
 

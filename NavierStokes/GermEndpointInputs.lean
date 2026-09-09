@@ -70,15 +70,6 @@ theorem of_rawStage {A : ℕ → SpaceTime → V} {g L : ℕ → ℝ}
   refine ⟨hf, fun m => ⟨C j m, p j m, g j - L m, ?_⟩⟩
   exact fun w hw _ hq => hb j hj m w ⟨hw.1, hw⟩ hq
 
-/-- A smaller scale cap preserves the same constants. -/
-theorem mono {qsmall : ℝ} (J : PhysicalJets h qbig f) (hq : qsmall ≤ qbig) :
-    PhysicalJets h qsmall f := by
-  have hsub : CutStageEstimates.physicalSublevel h qsmall ⊆
-      CutStageEstimates.physicalSublevel h qbig :=
-    fun _ hw => ⟨hw.1, hw.2.trans_le hq⟩
-  exact ⟨J.smooth.mono hsub, fun m => by
-    obtain ⟨C, p, e, hb⟩ := J.bound m
-    exact ⟨C, p, e, fun w hw => hb w (hsub hw)⟩⟩
 
 /-- Physical identities on the open validity region identify every actual
 ordinary jet.  Values at a chart face or beyond the region are irrelevant. -/

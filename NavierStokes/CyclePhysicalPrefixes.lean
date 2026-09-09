@@ -209,8 +209,6 @@ noncomputable def pressureStages (p₀ : Cylinder → ℝ) (k : ℕ) : PressureF
     (fun k => stepPressure (p k) (CycleState.iterate p c seed k).coefficients c
       (CycleState.iterate p c seed k).state a j G n)
 
-@[simp] theorem velocityStages_zero :
-    velocityStages p c seed a j G n 0 = velocity a j G n c seed.state := rfl
 
 @[simp] theorem pressureStages_zero (p₀ : Cylinder → ℝ) :
     pressureStages p c seed a j G n p₀ 0 = pressure a j G n p₀ seed.state := rfl

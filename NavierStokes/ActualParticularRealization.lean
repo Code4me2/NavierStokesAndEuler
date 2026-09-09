@@ -24,7 +24,6 @@ abbrev Parameter := PhysicalParticularWave.Parameter
 abbrev Plane := TorusInverse.Plane
 abbrev Associated := Parameter × Plane
 abbrev WaveSpace := PhysicalParticularWave.WaveSpace
-abbrev Cylinder := PhysicalParticularWave.Cylinder
 
 section Reindex
 
@@ -53,10 +52,6 @@ theorem realizedCoefficient_phase_germ {Φ Ψ : E → ℝ} {x : E} (hΦ : Φ =�
 
 end Reindex
 
-noncomputable def raw (D : AssemblyData Parameter) (h : ℝ) (gap : ℕ → ℕ) (j : ℤ) :
-    LinearWaveBounds.WaveCoefficients WaveSpace :=
-  ((CorrectionStep.ParticularParameters.fromReference D h gap).copyData
-    D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common
 
 noncomputable def corrected (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
     (h : ℝ) (gap : ℕ → ℕ) (j : ℤ) : LinearWaveBounds.WaveCoefficients WaveSpace :=
@@ -97,10 +92,6 @@ end Band
 
 /-! ## The literal finite harmonic block -/
 
-noncomputable def block (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
-    (h : ℝ) (gap : ℕ → ℕ) (N : ℕ) : HarmonicBlock Associated :=
-  (CorrectionStep.ParticularParameters.fromReference D h gap).updateBlock s
-    D.context D.state D.carrierBlock D.gaussianInput D.aliasInput N
 
 
 
@@ -111,66 +102,9 @@ variable (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
 
 open CopyAngularInvariance
 
-theorem corrected_amplitude_invariant (j : ℤ)
-    (B : BackgroundControl (CorrectionStep.ParticularParameters.nativeStrip s)
-      D.directions D.background D.carrierBlock j) (n : ℕ) :
-    Invariant (((0 : Parameter), (1 : ℝ)), (0 : Plane))
-      ((corrected D s h gap j).amplitude n) := by
-  have ha : Invariant D.directions.angular ((raw D h gap j).amplitude n) := by
-    rw [B.angular]
-    change Invariant _ (((CorrectionStep.ParticularParameters.fromReference D h gap).copyData
-      D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.amplitude n)
-    rw [CorrectionStep.ParticularParameters.common_amplitude]
-    exact angleLift_invariant _
-  have hphi := actualCarrier_affine D.background D.carrierBlock j n
-  rw [← B.angular] at hphi ⊢
-  exact realizedCoefficient_invariant (B.radius_invariant n) (B.radial_invariant n)
-    (Invariant.const _) (B.axial_invariant n) hphi ha ((j : ℝ) * D.carrierBlock.frequency n)
 
-theorem corrected_pressure_invariant {n : ℕ} (j : ℤ)
-    (hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) :
-    Invariant (((0 : Parameter), (1 : ℝ)), (0 : Plane))
-      ((corrected D s h gap j).pressure n) := by
-  change Invariant _ (((CorrectionStep.ParticularParameters.fromReference D h gap).copyData
-    D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j).common.pressure n)
-  rw [CorrectionStep.ParticularParameters.common_pressure _ _ _ _ _ _ _ _ hK]
-  exact angleLift_invariant _
 
-theorem block_velocity_represents {N : ℕ}
-    (B : ∀ j ∈ modes N, BackgroundControl (CorrectionStep.ParticularParameters.nativeStrip s)
-      D.directions D.background D.carrierBlock j)
-    (hf : ∀ m, D.carrierBlock.frequency m ≠ 0) (n : ℕ) (x : Associated × ℝ) (k : Fin 3) :
-    (block D s h gap N).oscillation n x k =
-      ∑ j ∈ modes N, (vectorMode ((corrected D s h gap j).frequency n)
-        ((corrected D s h gap j).phase n) ((corrected D s h gap j).amplitude n)
-          (angleShuffle x) k).re := by
-  rw [block, CorrectionStep.ParticularParameters.updateBlock, assembledBlock_value]
-  apply Finset.sum_congr rfl
-  intro j hj
-  have hi := invariant_angleShuffle (corrected_amplitude_invariant D s h gap j (B j hj) n) x.1 x.2
-  change Complex.re (_ * _) = ((corrected D s h gap j).amplitude n (angleShuffle x) k *
-    carrier ((actualCarrier D.background D.carrierBlock j).frequency n)
-      ((actualCarrier D.background D.carrierBlock j).phase n) (angleShuffle x)).re
-  rw [actualCarrier_character D.background D.carrierBlock j hf n x, hi]
-  rfl
 
-theorem block_pressure_represents {N : ℕ}
-    (hj : ∀ j ∈ modes N, j ≠ 0) (hf : ∀ m, D.carrierBlock.frequency m ≠ 0)
-    (n : ℕ) (x : Associated × ℝ) :
-    (block D s h gap N).oscillatoryPressure n x =
-      ∑ j ∈ modes N, (mode ((corrected D s h gap j).frequency n)
-        ((corrected D s h gap j).phase n) ((corrected D s h gap j).pressure n) (angleShuffle x)).re := by
-  rw [block, CorrectionStep.ParticularParameters.updateBlock, assembledBlock_pressure_value]
-  apply Finset.sum_congr rfl
-  intro j hmem
-  have hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0 :=
-    mul_ne_zero (by exact_mod_cast hj j hmem) (hf n)
-  have hi := invariant_angleShuffle (corrected_pressure_invariant D s h gap j hK) x.1 x.2
-  change Complex.re (_ * _) = ((corrected D s h gap j).pressure n (angleShuffle x) *
-    carrier ((actualCarrier D.background D.carrierBlock j).frequency n)
-      ((actualCarrier D.background D.carrierBlock j).phase n) (angleShuffle x)).re
-  rw [actualCarrier_character D.background D.carrierBlock j hf n x, hi]
-  rfl
 
 variable (n i : ℕ)
   (H : PhysicalResidualNaturality.BandCoherence D h (ChartScales.Q_pos n)
@@ -207,9 +141,6 @@ end Physical
 
 /-! ## The cycle's actual coordinate layout -/
 
-noncomputable def cycleBlock (D : AssemblyData Parameter) (s : WeightedClasses.StripData Associated)
-    (h : ℝ) (gap : ℕ → ℕ) (N : ℕ) : HarmonicBlock CorrectionStep.CyclePoint :=
-  StateReindex.block CorrectionStep.cycleAssoc (block D s h gap N)
 
 
 
@@ -251,14 +182,6 @@ structure CurrentInputs {ι : Type} (D : AssemblyData Parameter)
   aliasError : D.aliasInput = StateReindex.blockCoefficients CorrectionStep.cycleAssoc.symm (v.aliasCoefficients l)
   parameters : p.particular l = CorrectionStep.ParticularParameters.fromReference D h gap
 
-theorem CurrentInputs.particularBlock {ι : Type} {D : AssemblyData Parameter}
-    {p : CorrectionStep.CycleParameters ι} {v : CorrectionStep.CycleCoefficients ι}
-    {c : Context CorrectionStep.CyclePoint} {u : State CorrectionStep.CyclePoint}
-    {l : ι} {h : ℝ} {gap : ℕ → ℕ} (J : CurrentInputs D p v c u l h gap) :
-    p.particularBlock v c u l = cycleBlock D
-      (reindexStrip CorrectionStep.cycleAssoc.symm p.strip) h gap v.residualBand := by
-  unfold CorrectionStep.CycleParameters.particularBlock cycleBlock block
-  rw [J.parameters, J.context, J.state, J.carrier, J.gaussian, J.aliasError]
 
 /-! ## Full-variable transport of the curl correction -/
 
@@ -374,14 +297,6 @@ variable {ι : Type} {D : AssemblyData Parameter}
 
 end CurrentCycle
 
-/-- The Cartesian image of the actual common-chart domain and valid
-polar branch; no extension of the raw formulas beyond this set is used. -/
-noncomputable def physicalDomain (D : AssemblyData Parameter) (h : ℝ) (n i gap : ℕ)
-    (U : Set Parameter) (delta : ℝ) (chart : PolarCharts.Index) : Set ProblemStatement.SpaceTime :=
-  (fun z : ProblemStatement.SpaceTime => (z.1, CylindricalResidual.chart z.2)) ''
-    ((PhysicalResidualBridge.commonGraph (ChartScales.Q n) h i).source
-      (PhysicalParticularWave.bandDomain D h (ChartScales.Q n) (ChartScales.Q D.reference.band) gap U) ∩
-        PhysicalCurlCovariance.validCylindrical delta chart)
 
 section LocalIdentity
 

@@ -242,9 +242,6 @@ theorem stress_factorization (F A B κ y e dA dB dR : ℝ) (hκ : κ = 1 - e) :
 noncomputable def reducedStress (F A B κ y dA dB dR : ℝ) : ℝ × ℝ :=
   (F * (A + y * dA), F * (B + y * (dB - κ * B * dR)))
 
-@[simp] theorem reducedStress_at_edge (F A B κ dA dB dR : ℝ) :
-    reducedStress F A B κ 0 dA dB dR = (F * A, F * B) := by
-  simp [reducedStress]
 
 /-- This extension is smooth without dividing by either activation or damping. -/
 theorem reducedStress_smooth {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -261,14 +258,8 @@ theorem reducedStress_smooth {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
 
 
 
-/-- The quadratic cone gap after removing the square of the flat activation. -/
-noncomputable def normalizedConeGap (r v y dP dv dJ : ℝ) : ℝ :=
-  2 * (r + y * (dP - dv)) ^ 2 - (v - 2) * (y * dJ) ^ 2
 
 
-@[simp] theorem normalizedConeGap_at_edge (r v dP dv dJ : ℝ) :
-    normalizedConeGap r v 0 dP dv dJ = 2 * r ^ 2 := by
-  simp [normalizedConeGap]
 
 
 /-- The actual cone coordinates formed from two stock coordinates and a shear ratio. -/

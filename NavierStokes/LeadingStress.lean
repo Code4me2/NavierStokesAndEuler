@@ -194,26 +194,13 @@ theorem radius_mul_rpow {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     _ = _ := by rw [← Real.rpow_add (SimilarityProfile.q_pos hh hh1 hp), add_comm]
 
 
-noncomputable def fluxProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h 0 (SlowDivergence.radialFlux h 0 P.U)
-
-noncomputable def swirlProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h (-A h - 1 / 2) P.f
-
-noncomputable def axialProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h (-A h) P.U
-
-noncomputable def pressureProfile (h : ℝ) : SimilarityProfile.PhysicalProfile :=
-  pullback h (-2 * A h) P.pressure
 
 
 
-noncomputable def physicalVelocity (h : ℝ) : ProblemStatement.VelocityField :=
-  AxisymmetricResidual.velocity (RadialFluxResidual.radialB (fluxProfile P h))
-    (swirlProfile P h) (axialProfile P h)
 
-noncomputable def physicalPressure (h : ℝ) : ProblemStatement.PressureField :=
-  AxisymmetricResidual.pressure (pressureProfile P h)
+
+
+
 
 
 

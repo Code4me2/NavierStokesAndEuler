@@ -1166,9 +1166,6 @@ theorem residual_jetRate {u : VelocityField} {P : PressureField}
 
 end Invariant
 
-theorem initial_invariant (B N0 : ℕ) :
-    Invariant (1/5) (ActualInitialization.initialCycleState B N0) :=
-  ActualInitialization.initial_invariant B N0
 
 theorem origin_positive_small : ∀ᶠ w in GlobalBaseError.originPast,
     0 < physicalQ ActualPrimary.h w ∧ physicalQ ActualPrimary.h w ≤ 1 := by

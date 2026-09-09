@@ -14,7 +14,5 @@ theorem raw_eq (hG : TimeDerivative hT.le G G₁) (hH : TimeDerivative hT.le H H
     (t : Icc (0 : ℝ) T) (x : Space) (θ : ℝ) : raw₁ (t,(x,θ)) = raw₂ (t,(x,θ)) :=
   (G.slicedJet_temporal hT G₁ hG t x θ).symm.trans (H.slicedJet_temporal hT H₁ hH t x θ)
 
-theorem path_eq (hG : TimeDerivative hT.le G G₁) (hH : TimeDerivative hT.le H H₁) :
-    G₁.path = H₁.path := G₁.path_eq_of_raw_eq H₁ (fun t x θ => (raw_eq (hT := hT) hG hH t x θ).symm)
 
 end EulerPacketCylinderField.TimeDerivative

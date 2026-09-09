@@ -237,8 +237,6 @@ theorem hasDerivAt_phaseNormal_slot (ε p pz x0 θ v : ℝ) (F G : Slow → ℝ)
   simpa only [one_smul, zero_add, id_eq] using (hasDerivAt_const v n0).fun_add
     ((hasDerivAt_id v).smul_const (normalSlotDerivative ε p pz F G s))
 
-/-- The comparison vector `B (s,K)` used after equation (26). -/
-def referenceNormal (B s Kθ Kz : ℝ) : Vec3 := !₂[B * s, B * Kθ, B * Kz]
 
 theorem vec3_norm_sq (w : Vec3) :
     ‖w‖ ^ 2 = (w 0) ^ 2 + (w 1) ^ 2 + (w 2) ^ 2 := by

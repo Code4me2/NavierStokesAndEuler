@@ -81,16 +81,5 @@ theorem reflection_solenoidal_mem {u : L2} (hu : u ∈ solenoidalSpace) :
 
 
 
-theorem reflection_translation (a : Space) (u : L2) :
-    reflection (translation a u) = translation (-a) (reflection u) := by
-  apply Lp.ext
-  filter_upwards [reflection_ae (translation a u),
-    measurePreserving_reflection.quasiMeasurePreserving.ae (translation_ae a u),
-    translation_ae (-a) (reflection u),
-    (measurePreserving_add_right (volume : Measure Space) (-a)).quasiMeasurePreserving.ae
-      (reflection_ae u)] with x h₁ h₂ h₃ h₄
-  rw [h₁, h₂, h₃, h₄]
-  congr 1
-  abel
 
 end EulerMeanSolenoidal

@@ -27,10 +27,6 @@ section SourceCoefficientCompatibility
 
 open CorrectionState HarmonicFields MeasureTheory
 
-theorem angularMean_const_mul (a : ℂ) (f : ℝ → ℂ) :
-    angularMean (fun θ => a * f θ) = a * angularMean f := by
-  simp only [angularMean, intervalIntegral.integral_const_mul]
-  ring
 
 
 end SourceCoefficientCompatibility
@@ -100,79 +96,20 @@ noncomputable def SignedParameters.coefficients (p : SignedParameters D) (s : St
   SignedWaveUpdate.coefficients p.base (HarmonicWaveInteraction.productStrip s) p.directions
     p.matrix p.target request p.mask p.fundamental p.normalMotion p.action p.column
 
-noncomputable def SignedParameters.exactBlock (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : HarmonicBlock D :=
-  SignedWaveUpdate.blockOfCoefficients
-    ((p.coefficients s request).corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff)
-    p.angularFrequency
 
-noncomputable def SignedParameters.tangentBlock (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : HarmonicBlock D :=
-  SignedWaveUpdate.blockOfCoefficients ((p.coefficients s request).withCutoff p.cutoff) p.angularFrequency
 
-noncomputable def SignedParameters.curlBlock (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : HarmonicBlock D :=
-  subBlock (p.exactBlock s request) (p.tangentBlock s request)
 
-theorem SignedParameters.exactBlock_split (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) :
-    (p.exactBlock s request).oscillation =
-      (p.tangentBlock s request).oscillation + (p.curlBlock s request).oscillation :=
-  correctedBlock_split (p.coefficients s request) (HarmonicWaveInteraction.productStrip s)
-    p.directions p.cutoff p.angularFrequency
 
 theorem sectionStrip_productStrip (s : StripData D) :
     SignedWaveUpdate.sectionStrip (HarmonicWaveInteraction.productStrip s) = s := by
   cases s
   rfl
 
-theorem SignedParameters.exactBlock_band (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : (p.exactBlock s request).BandLimited 1 :=
-  SignedWaveUpdate.coefficientBlock_band _ _ _ _ _
-
-theorem SignedParameters.tangentBlock_band (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : (p.tangentBlock s request).BandLimited 1 :=
-  SignedWaveUpdate.coefficientBlock_band _ _ _ _ _
 
 
-theorem SignedParameters.exactBlock_zero (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) :
-    ∀ n i, (p.exactBlock s request).velocity n i 0 = 0 :=
-  (SignedWaveUpdate.coefficientBlock_zero_coefficient _ _ _ _ _).1
 
 
-/-- Every output bound here is derived from the same explicit signed
-quotient and curl, on the exact product strip used by the current state. -/
-theorem SignedParameters.block_bounds (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2)
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ B κ : ℝ}
-    (hbase : LinearWaveBounds.InputBounds (HarmonicWaveInteraction.productStrip s) P₀ α₀ κ
-      p.directions p.base) (hκ : κ ≤ 1 / 2)
-    (hcov : SignedWaveUpdate.CovarianceControl (HarmonicWaveInteraction.productStrip s) p.matrix p.target)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i))
-    (hm : UnweightedClass (HarmonicWaveInteraction.productStrip s) 0 p.mask)
-    (hv : MemClass (HarmonicWaveInteraction.productStrip s) (fun n x => P n x.1) 0 p.fundamental)
-    (hN : PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain (HarmonicWaveInteraction.productStrip s))
-      (p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions))
-    (hNdot : UnweightedClass (HarmonicWaveInteraction.productStrip s) 0 p.normalMotion)
-    (hA : UnweightedClass (HarmonicWaveInteraction.productStrip s) 0 p.action)
-    {b M : ℝ} (hb : 0 < b)
-    (hlo : ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
-      b ≤ ‖p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions n x‖)
-    (hhi : ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
-      ‖p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions n x‖ ≤ M)
-    (hK : BandBound (HarmonicWaveInteraction.productStrip s) (1 / 2) (fun n => 1 / p.base.frequency n))
-    {radius : D × ℝ → ℝ} (hradius : p.base.radius = fun _ => radius)
-    (hψ : UnweightedClass (HarmonicWaveInteraction.productStrip s) 0 p.cutoff) :
-    (p.tangentBlock s request).WaveBounds s P (B - κ) ∧
-      (p.exactBlock s request).WaveBounds s P (B - κ) ∧
-      (p.exactBlock s request).PressureBounds s P (B + 1 / 2 - κ) ∧
-      (p.curlBlock s request).WaveBounds s P (B + 1 / 2 - 2 * κ) := by
-  have he := constructedSignedBlock_bounds hbase hκ hcov hR hm hv hN hNdot hA hb hlo hhi hK
-    hradius hψ p.angularFrequency p.column
-  simpa only [SignedParameters.tangentBlock, SignedParameters.exactBlock, SignedParameters.curlBlock,
-    SignedParameters.coefficients, sectionStrip_productStrip] using he
+
 
 structure SignedParameters.Control (p : SignedParameters D) (s : StripData D)
     (P₀ : ℕ → D × ℝ → ℝ) (P : ℕ → D → ℝ) (α₀ κ : ℝ) where
@@ -199,18 +136,6 @@ structure SignedParameters.Control (p : SignedParameters D) (s : StripData D)
   radius_eq : p.base.radius = fun _ => radius
   cutoff : UnweightedClass (HarmonicWaveInteraction.productStrip s) 0 p.cutoff
 
-theorem SignedParameters.Control.bounds {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    (h : p.Control s P₀ P α₀ κ) (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i)) :
-    (p.tangentBlock s request).WaveBounds s P (B - κ) ∧
-      (p.exactBlock s request).WaveBounds s P (B - κ) ∧
-      (p.exactBlock s request).PressureBounds s P (B + 1 / 2 - κ) ∧
-      (p.curlBlock s request).WaveBounds s P (B + 1 / 2 - 2 * κ) :=
-  p.block_bounds s request h.baseBounds h.kappa_le_half h.covariance hR h.mask h.fundamental
-    h.normal h.normalMotion h.action h.lower_pos h.norm_lower h.norm_upper h.inverseFrequency
-    h.radius_eq h.cutoff
 
 end SignedParameters
 
@@ -310,30 +235,6 @@ theorem linearGoodBlock_cancel {U : Set D} (hU : IsOpen U)
     HarmonicMeanInteraction.nonconstant_apply_of_ne _ hj, AddMonoidAlgebra.coeff_add,
     Finsupp.add_apply, Pi.add_apply] using he
 
-theorem linearGoodBlock_cancel_mem {s : StripData D} {P : ℕ → D → ℝ} {γ : ℝ}
-    (c : Context D) (a b source good : HarmonicBlock D)
-    (g : HarmonicResidual.BlockCoefficients D)
-    (hr : ∀ n, ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).radial s.domain)
-    (hz : ∀ n, ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).axial s.domain)
-    (hB : SmoothTriple s.domain c.base)
-    (hb : ∀ n i, HarmonicResidual.SmoothCoefficients s.domain (b.velocity n i))
-    (hp : ∀ n, HarmonicResidual.SmoothCoefficients s.domain (b.pressure n))
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hkp : ∀ n, a.angularFrequency n ≠ 0)
-    (hs : ∀ n i, HarmonicFields.ConjugateSymmetric (source.velocity n i))
-    (hg : ∀ n i, HarmonicFields.ConjugateSymmetric (good.velocity n i))
-    (hgood : good.WaveBounds s P γ)
-    (hcancel : ∀ n x, x ∈ s.domain → ∀ θ i, linearBlockField c a b n (x, θ) i +
-      (HarmonicWaveInteraction.withCarrier a source).oscillation n (x, θ) i =
-      (HarmonicWaveInteraction.withCarrier a good).oscillation n (x, θ) i +
-      (HarmonicFields.field (g n i) (a.frequency n) (a.phase n) (a.angularFrequency n) (x, θ)).re) :
-    ∀ i j, j ≠ 0 → WaveClass s P γ (fun n x => source.velocity n i j x +
-      (HarmonicWaveInteraction.linearGoodBlock c a b g).velocity n i j x) := by
-  intro i j hj
-  apply WaveInteractionBounds.class_congr (hgood i j hj)
-  intro n x hx
-  exact (linearGoodBlock_cancel s.isOpen_domain c a b source good g n (hr n) (hz n)
-    (fun l => HarmonicMeanInteraction.tripleField_smooth hB n l) (hb n) (hp n)
-    (hΦ n) (hkp n) (hs n) (hg n) hx j hj i (fun θ => hcancel n x hx θ i)).symm
 
 end LinearCoefficientBridge
 
@@ -466,42 +367,8 @@ theorem linearBlockField_eq_modeResidual {U : Set D} (hU : IsOpen U)
     (by rw [hpress]; exact Complex.reCLM.contDiff.comp_contDiffOn hp') hx]
   exact he.symm
 
-theorem SignedParameters.Control.full_bounds {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    (h : p.Control s P₀ P α₀ κ) (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i)) :
-    let z := p.coefficients s request
-    WaveClass (HarmonicWaveInteraction.productStrip s) (fun n x => P n x.1) (B - κ)
-        (z.corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff).amplitude ∧
-      WaveClass (HarmonicWaveInteraction.productStrip s) (fun n x => P n x.1) (B + 1 / 2 - κ)
-        (z.corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff).pressure ∧
-      WaveClass (HarmonicWaveInteraction.productStrip s) (fun n x => P n x.1) (B + 1 / 2 - 2 * κ)
-        (fun n x => (z.corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff).amplitude n x -
-          (z.withCutoff p.cutoff).amplitude n x) ∧
-      WaveClass (HarmonicWaveInteraction.productStrip s) (fun n x => P n x.1) (B + 1 / 2 - 4 * κ)
-        (z.constructedGood (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff) :=
-  SignedWaveUpdate.signed_bounds h.baseBounds h.kappa_le_half h.covariance hR h.mask h.fundamental
-    h.normal h.normalMotion h.action h.lower_pos h.norm_lower h.norm_upper h.inverseFrequency
-    h.radius_eq h.cutoff p.column
 
-noncomputable def SignedParameters.goodBlock (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : HarmonicBlock D :=
-  SignedWaveUpdate.coefficientBlock p.base.frequency (fun n x => p.base.phase n (x,0)) p.angularFrequency
-    (fun n x => (p.coefficients s request).constructedGood
-      (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff n (x,0)) 0
 
-theorem SignedParameters.Control.good_bounds {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    (h : p.Control s P₀ P α₀ κ) (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i)) :
-    (p.goodBlock s request).WaveBounds s P (B + 1 / 2 - 4 * κ) := by
-  have hg := SignedWaveUpdate.class_zeroSection (h.full_bounds request hR).2.2.2
-  rw [sectionStrip_productStrip] at hg
-  exact (SignedWaveUpdate.coefficientBlock_classes p.base.frequency
-    (fun n x => p.base.phase n (x,0)) p.angularFrequency hg
-    (MemClass.zero (α := (0 : ℝ)) hg.weight_nonneg)).1
 
 /-- The ODE and phase data of the fixed primary column, before performing
 any signed update. All equalities concern primitive inputs. -/
@@ -533,66 +400,9 @@ structure SignedParameters.Dynamics (p : SignedParameters D) (s : StripData D)
         (p.directions.radialField n) (fun y => CurlClassBounds.complexify (p.fundamental n y)) x
   cutoff_smooth : ∀ n, ContDiff ℝ ∞ (p.cutoff n)
 
-theorem SignedParameters.Dynamics.phase_eq {p : SignedParameters D} {s : StripData D}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2} (h : p.Dynamics s request)
-    (n : ℕ) (x : D) (θ : ℝ) :
-    p.base.frequency n * p.base.phase n (x,θ) =
-      p.base.frequency n * p.base.phase n (x,0) + (p.angularFrequency n : ℝ) * θ := by
-  rw [CopyAngularInvariance.affinePhase_eq_zeroSlice
-    (Φ := p.base.phase n) (m := h.slope n)
-    (by simpa only [h.angular_direction] using h.angular.phase n) x θ,
-    mul_add, ← mul_assoc, h.angular_frequency]
 
-theorem SignedParameters.Dynamics.good_represents {p : SignedParameters D} {s : StripData D}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2} (h : p.Dynamics s request) :
-    (p.goodBlock s request).oscillation = fun n x i =>
-      ((p.coefficients s request).constructedGood (HarmonicWaveInteraction.productStrip s)
-        p.directions p.cutoff n x i * HarmonicCalculus.carrier (p.base.frequency n) (p.base.phase n) x).re := by
-  have hi (n : ℕ) : CopyAngularInvariance.Invariant p.directions.angular
-      ((p.coefficients s request).constructedGood (HarmonicWaveInteraction.productStrip s)
-        p.directions p.cutoff n) :=
-    ParticularWaveAssembly.constructedGood_invariant (a := p.coefficients s request)
-      p.cutoff h.angular.radius h.angular.radial_base h.angular.frequency_base h.angular.axial_base
-      h.angular.radialField (fun _ => CopyAngularInvariance.Invariant.const _)
-      (fun n => ⟨h.slope n, h.angular.phase n⟩)
-      (h.angular.amplitude p.column) (h.angular.pressure p.column) h.angular.cutoff n
-  let z : LinearWaveBounds.WaveCoefficients (D × ℝ) :=
-    {p.base with amplitude := ((p.coefficients s request).constructedGood
-      (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff), pressure := 0}
-  have he := (SignedWaveUpdate.blockOfCoefficients_represents z p.angularFrequency
-    (fun n x θ => CopyAngularInvariance.invariant_eq_zeroSlice
-      (by simpa only [h.angular_direction] using hi n) x θ)
-    (fun _ _ _ => rfl) h.phase_eq).1
-  exact he
 
-theorem SignedParameters.Dynamics.exact_represents {p : SignedParameters D} {s : StripData D}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2} (h : p.Dynamics s request) :
-    let z := (p.coefficients s request).corrected (HarmonicWaveInteraction.productStrip s)
-      p.directions p.cutoff
-    (p.exactBlock s request).oscillation =
-      (fun n x i => (HarmonicCalculus.vectorMode (p.base.frequency n) (p.base.phase n) (z.amplitude n) x i).re) ∧
-    (p.exactBlock s request).oscillatoryPressure =
-      (fun n x => (HarmonicCalculus.mode (p.base.frequency n) (p.base.phase n) (z.pressure n) x).re) :=
-  SignedWaveUpdate.signedBlock_represents h.angular h.angular_direction p.angularFrequency
-    h.angular_frequency p.column
 
-theorem SignedParameters.Dynamics.linear_identity {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.Dynamics s request) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i)) :
-    let z := p.coefficients s request
-    ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
-      (z.corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff).harmonicResidual
-        (HarmonicWaveInteraction.productStrip s) p.directions n x =
-      (fun i => (z.constructedGood (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff n x i +
-        LinearWaveBounds.excludedSlotError p.directions p.cutoff z.amplitude 0 n x i) *
-        HarmonicCalculus.carrier (p.base.frequency n) (p.base.phase n) x) :=
-  SignedWaveUpdate.signed_linear_identity hc.baseBounds hc.kappa_le_half hc.covariance hR
-    hc.mask hc.fundamental hc.normal hc.normalMotion hc.action hc.lower_pos hc.norm_lower hc.norm_upper
-    hc.inverseFrequency hc.radius_eq hc.cutoff h.angular h.geometry h.matrix_frozen h.target_frozen
-    h.request_frozen h.mask_frozen h.frequency_nonzero h.ode h.action_eq p.column
 
 theorem productStrip_domain (s : StripData D) :
     (HarmonicWaveInteraction.productStrip s).domain = HarmonicResidual.liftDomain s.domain := by
@@ -612,135 +422,11 @@ theorem withCarrier_of_same {a b : HarmonicBlock D} (h : SameCarrier a b) :
   subst bkp
   rfl
 
-theorem SignedParameters.frame_corrected (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) {c : Context D}
-    (h : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base) :
-    WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions
-      ((p.coefficients s request).corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff) :=
-  ⟨h.epsilon, h.radius, h.radial, h.angular, h.axial, h.time, h.radialBase, h.angularBase, h.axialBase⟩
 
-noncomputable def SignedParameters.gaussianBlock (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) : HarmonicBlock D :=
-  SignedWaveUpdate.gaussianBlock (p.coefficients s request) p.directions p.cutoff p.angularFrequency
 
-theorem SignedParameters.exactBlock_pressure_zero (p : SignedParameters D) (s : StripData D)
-    (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) :
-    ∀ n, (p.exactBlock s request).pressure n 0 = 0 :=
-  (SignedWaveUpdate.coefficientBlock_zero_coefficient _ _ _ _ _).2
 
-theorem SignedParameters.Dynamics.gaussian_represents {p : SignedParameters D} {s : StripData D}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2} (h : p.Dynamics s request) :
-    (p.gaussianBlock s request).oscillation = fun n x i =>
-      (LinearWaveBounds.excludedSlotError p.directions p.cutoff (p.coefficients s request).amplitude 0 n x i *
-        HarmonicCalculus.carrier (p.base.frequency n) (p.base.phase n) x).re :=
-  SignedWaveUpdate.gaussianBlock_represents h.angular h.angular_direction h.cutoff_smooth
-    p.angularFrequency h.angular_frequency p.column
 
-/-- The actual signed field, with the literal `Context` operators, has the
-computed good residual plus its computed Gaussian error. -/
-theorem SignedParameters.Dynamics.context_linear_identity
-    {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.Dynamics s request) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i))
-    (c : Context D) (hB : SmoothTriple s.domain c.base)
-    (hmatch : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base)
-    (a : HarmonicBlock D) (hcarrier : SameCarrier a (p.exactBlock s request))
-    (n : ℕ) (x : D × ℝ) (hx : x.1 ∈ s.domain) :
-    linearBlockField c a (p.exactBlock s request) n x =
-      (p.goodBlock s request).oscillation n x + (p.gaussianBlock s request).oscillation n x := by
-  let z := (p.coefficients s request).corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff
-  have hb := hc.full_bounds request hR
-  have hr := (h.geometry n).radial_smooth
-  have hz := (h.geometry n).axial_smooth
-  rw [productStrip_domain, hmatch.radial] at hr
-  rw [productStrip_domain, hmatch.axial] at hz
-  have hp := h.angular.phase_smooth n
-  rw [productStrip_domain] at hp
-  have hv (i : Fin 3) : ContDiffOn ℝ ∞ (fun y => z.amplitude n y i)
-      (HarmonicResidual.liftDomain s.domain) := by
-    simpa only [productStrip_domain] using (CurlClassBounds.class_component hb.1 i).smooth n
-  have hpressure : ContDiffOn ℝ ∞ (z.pressure n) (HarmonicResidual.liftDomain s.domain) := by
-    simpa only [productStrip_domain] using hb.2.1.smooth n
-  have hvrep : (HarmonicWaveInteraction.withCarrier a (p.exactBlock s request)).oscillation n =
-      fun y i => (HarmonicCalculus.vectorMode (z.frequency n) (z.phase n) (z.amplitude n) y i).re := by
-    rw [withCarrier_of_same hcarrier]
-    exact congrFun h.exact_represents.1 n
-  have hprep : (HarmonicWaveInteraction.withCarrier a (p.exactBlock s request)).oscillatoryPressure n =
-      fun y => (HarmonicCalculus.mode (z.frequency n) (z.phase n) (z.pressure n) y).re := by
-    rw [withCarrier_of_same hcarrier]
-    exact congrFun h.exact_represents.2 n
-  rw [linearBlockField_eq_modeResidual s.isOpen_domain c a (p.exactBlock s request)
-    (HarmonicWaveInteraction.productStrip s) p.directions z (p.frame_corrected s request hmatch)
-    n hB hr hz hp hv hpressure hvrep hprep ⟨hx, trivial⟩]
-  rw [h.good_represents, h.gaussian_represents]
-  funext i
-  have he := congrArg Complex.re (congrFun (h.linear_identity hc hR n x hx) i)
-  simpa only [add_mul, Complex.add_re, Pi.add_apply] using he
 
-/-- The literal harmonic linear remainder has the gain proved for the
-constructed signed coefficient. No output residual class is an input. -/
-theorem SignedParameters.Dynamics.linearGood_bounds
-    {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.Dynamics s request) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i))
-    (c : Context D) (hB : SmoothTriple s.domain c.base)
-    (hmatch : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base)
-    (a : HarmonicBlock D) (hcarrier : SameCarrier a (p.exactBlock s request)) :
-    (HarmonicWaveInteraction.linearGoodBlock c a (p.exactBlock s request)
-      (p.gaussianBlock s request).velocity).WaveBounds s P (B + 1 / 2 - 4 * κ) := by
-  let zero : HarmonicBlock D := ErrorHarmonics.zeroBlock a.frequency a.phase a.angularFrequency 0
-  have hbounds := hc.bounds request hR
-  have hbs := HarmonicWaveInteraction.waveBounds_smooth hbounds.2.1 (p.exactBlock_zero s request)
-  have hps (n : ℕ) : HarmonicResidual.SmoothCoefficients s.domain ((p.exactBlock s request).pressure n) := by
-    intro j
-    by_cases hj : j = 0
-    · subst j
-      rw [p.exactBlock_pressure_zero s request n]
-      exact contDiffOn_const
-    exact (hbounds.2.2.1 j hj).smooth n
-  have hphase (n : ℕ) : ContDiffOn ℝ ∞ (a.phase n) s.domain := by
-    rw [← hcarrier.phase]
-    exact (h.angular.phase_smooth n).comp (SignedWaveUpdate.zeroSection (D := D)).contDiff.contDiffOn
-      (fun x hx => hx)
-  have hkp (n : ℕ) : a.angularFrequency n ≠ 0 := by
-    rw [← hcarrier.angular]
-    exact h.angular_nonzero n
-  have hrad (n : ℕ) : ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).radial s.domain := by
-    have he := (h.geometry n).radial_smooth
-    rw [hmatch.radial] at he
-    have hh := (contDiff_fst.comp_contDiffOn he).comp
-      (SignedWaveUpdate.zeroSection (D := D)).contDiff.contDiffOn (fun x hx => hx)
-    exact hh
-  have hgcarrier : SameCarrier a (p.goodBlock s request) :=
-    ⟨hcarrier.frequency, hcarrier.phase, hcarrier.angular⟩
-  have hecarrier : SameCarrier a (p.gaussianBlock s request) :=
-    ⟨hcarrier.frequency, hcarrier.phase, hcarrier.angular⟩
-  have hcancel := linearGoodBlock_cancel_mem c a (p.exactBlock s request) zero
-    (p.goodBlock s request) (p.gaussianBlock s request).velocity hrad
-    (fun _ => contDiffOn_const) hB hbs hps hphase hkp
-    (fun n i => ErrorHarmonics.zeroBlock_symmetric _ _ _ _ n i)
-    (SignedWaveUpdate.coefficientBlock_symmetric _ _ _ _ _).1
-    (hc.good_bounds request hR) ?_
-  · intro i j hj
-    simpa [zero, ErrorHarmonics.zeroBlock, HarmonicFields.constantCoefficient,
-      Finsupp.single_apply, hj, Ne.symm hj] using hcancel i j hj
-  · intro n x hx θ i
-    have he := congrFun (h.context_linear_identity hc hR c hB hmatch a hcarrier n (x,θ) hx) i
-    rw [withCarrier_of_same hgcarrier]
-    have heval : (HarmonicFields.field ((p.gaussianBlock s request).velocity n i)
-        (a.frequency n) (a.phase n) (a.angularFrequency n) (x,θ)).re =
-        (p.gaussianBlock s request).oscillation n (x,θ) i := by
-      simp only [HarmonicBlock.oscillation, hecarrier.frequency, hecarrier.phase, hecarrier.angular]
-    rw [heval]
-    simpa only [zero, HarmonicWaveInteraction.withCarrier, ErrorHarmonics.zeroBlock,
-      HarmonicBlock.oscillation, HarmonicResidual.field_constant, Pi.zero_apply, Complex.ofReal_zero,
-      Complex.zero_re, Pi.add_apply, add_zero] using he
 
 end ConstructedSignedLinear
 
@@ -764,66 +450,7 @@ structure SignedParameters.GaussianControl (p : SignedParameters D) (s : StripDa
 
 
 
-theorem SignedParameters.Dynamics.full_divergence_zero
-    {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.Dynamics s request) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i))
-    (ht : ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
-      ⟪p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions n x, p.fundamental n x⟫_ℝ = 0)
-    (c : Context D)
-    (hmatch : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base)
-    (n : ℕ) (x : D × ℝ) (hx : x.1 ∈ s.domain) :
-    HarmonicCalculus.cylindricalDivergence (fun q => c.operators.radius q.1)
-      (radialDirection c n) angularDirection (axialDirection c n)
-      (fun q i => ((p.exactBlock s request).oscillation n q i : ℂ)) x = 0 := by
-  let z := (p.coefficients s request).corrected (HarmonicWaveInteraction.productStrip s) p.directions p.cutoff
-  have hb := hc.full_bounds request hR
-  have hdiff (i : Fin 3) : DifferentiableAt ℝ
-      (fun y => HarmonicCalculus.vectorMode (p.base.frequency n) (p.base.phase n) (z.amplitude n) y i) x := by
-    exact ((HarmonicCalculus.contDiffOn_mode (p.base.frequency n) (h.angular.phase_smooth n)
-      ((CurlClassBounds.class_component hb.1 i).smooth n)).contDiffAt
-      ((HarmonicWaveInteraction.productStrip s).isOpen_domain.mem_nhds hx)).differentiableAt (by simp)
-  have hd := (SignedWaveUpdate.signed_curl_realization hc.baseBounds hc.covariance hR
-    hc.mask hc.fundamental hc.normal hc.normalMotion hc.action hc.lower_pos hc.norm_lower hc.norm_upper
-    hc.inverseFrequency hc.cutoff p.column n (h.geometry n) (h.frequency_nonzero n)
-    (h.angular.phase_smooth n) ht x hx).2
-  change HarmonicCalculus.cylindricalDivergence (p.base.radius n) (p.directions.radialField n)
-    (fun _ => p.directions.angular) (p.directions.axialField (HarmonicWaveInteraction.productStrip s) n)
-    (HarmonicCalculus.vectorMode (p.base.frequency n) (p.base.phase n) (z.amplitude n)) x = 0 at hd
-  let L : ℂ →L[ℝ] ℂ := Complex.ofRealCLM.comp Complex.reCLM
-  have he := ParticularWaveAssembly.divergence_map L (p.base.radius n) (p.directions.radialField n)
-    (fun _ => p.directions.angular) (p.directions.axialField (HarmonicWaveInteraction.productStrip s) n) hdiff
-  rw [hd] at he
-  have ha : angularDirection (D := D) = fun _ => p.directions.angular := by
-    rw [h.angular_direction]
-    rfl
-  rw [h.exact_represents.1, ← hmatch.radius, ← hmatch.radial, ← hmatch.axial, ha]
-  simp only [L, ContinuousLinearMap.comp_apply, Complex.ofRealCLM_apply, Complex.reCLM_apply,
-    map_zero] at he
-  exact he
 
-theorem SignedParameters.Dynamics.modeSolenoidal
-    {p : SignedParameters D} {s : StripData D}
-    {P₀ : ℕ → D × ℝ → ℝ} {P : ℕ → D → ℝ} {α₀ κ B : ℝ}
-    {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
-    (h : p.Dynamics s request) (hc : p.Control s P₀ P α₀ κ)
-    (hR : ∀ i, MeanClass (HarmonicWaveInteraction.productStrip s) (B - 1 / 2 - κ)
-      (fun n x => request n x i))
-    (ht : ∀ n x, x ∈ (HarmonicWaveInteraction.productStrip s).domain →
-      ⟪p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions n x, p.fundamental n x⟫_ℝ = 0)
-    (c : Context D)
-    (hmatch : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base) :
-    HarmonicWaveInteraction.ModeSolenoidal s c (p.exactBlock s request) := by
-  apply HarmonicWaveInteraction.modeSolenoidal_of_full c (p.exactBlock s request)
-  · intro n
-    exact (h.angular.phase_smooth n).comp (SignedWaveUpdate.zeroSection (D := D)).contDiff.contDiffOn
-      (fun x hx => hx)
-  · exact h.angular_nonzero
-  · exact HarmonicWaveInteraction.waveBounds_smooth (hc.bounds request hR).2.1 (p.exactBlock_zero s request)
-  · exact h.full_divergence_zero hc hR ht c hmatch
 
 end ConstructedSignedInvariants
 

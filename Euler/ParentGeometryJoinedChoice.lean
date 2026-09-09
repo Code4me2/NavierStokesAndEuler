@@ -82,8 +82,6 @@ def state (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) : SmoothState F.p
     I.geometry.δ I.delta_pos I.terminal I.cutoff_support I.alpha (truncation k) F.hn k hk.four
     I.historyTime I.history_pos I.history_lt F.Q F.flow F.coefficient F.graph nextEll hnext hnext1 F.labels
 
-theorem state_label_constant (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) :
-    (state I S k hk nextEll hnext hnext1 F hSym).labels.K=k^80 := F.label_constant
 
 
 end GeometryJoinedChoice

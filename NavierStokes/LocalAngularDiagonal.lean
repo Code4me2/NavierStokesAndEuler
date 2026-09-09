@@ -53,12 +53,6 @@ noncomputable def rawSeries
 
 
 
-/-- Axis preservation uses exactly the same local scalars and support,
-without imposing global raw smoothness. -/
-noncomputable def angularSupport
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig)) :
-    ℕ → MixedAxisPreservation.AngularSupport (MixedAxisPreservation.localDomain h qbig) :=
-  fun j => MixedAxisPreservation.AngularSupport.ofAngularData (D j) (fun _ hw => hw)
 
 
 
@@ -112,21 +106,6 @@ theorem physicalQ_smooth (hh : 0 < h) (hh1 : h < 1 / 2) :
       (DirectAngularDiagonal.physicalDomain (localSlowDomain h qbig)) :=
   fun _ hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw.1).contDiffWithinAt
 
-theorem angularSum_divergence (hh : 0 < h) (hh1 : h < 1 / 2)
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig))
-    {a : ℕ → ℝ} (hat : Tendsto a atTop atTop) (ha0 : 0 < a 0)
-    (ham : ∀ j, a 0 ≤ a j) (hgap : 1 / a 0 < qbig)
-    {w : SpaceTime} (ht : w.1 < 1) :
-    spatialDivergence
-      (DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar))
-      w.1 w.2 = 0 := by
-  by_cases hq : PhysicalWaveSum.physicalQ h w < qbig
-  · exact DirectAngularDiagonal.angularSum_divergence (localSlowDomain_open hh hh1 qbig) D hat
-      (DirectAngularDiagonal.qCoefficient h) (qCoefficient_smooth hh hh1) (physicalQ_smooth hh hh1)
-      (fun _ hx => PhysicalWaveSum.physicalQ_pos hh hh1 hx.1) (x := w) ⟨ht, hq⟩
-  · rw [DirectAngularDiagonal.divergence_congr
-      (angularSum_zero_germ hh hh1 D ha0 ham hgap ht (le_of_not_gt hq))]
-    simp [spatialDivergence, spatialDerivative]
 
 /-- Multiplication by the existing axisymmetric spatial cutoff preserves
 divergence of the same local-data diagonal on every preterminal point. -/

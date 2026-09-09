@@ -22,15 +22,7 @@ noncomputable section
 open ProblemStatement Set Filter
 open scoped BigOperators ContDiff Topology
 
-/-- The closed spatial unit cube, transported to the Euclidean space used by
-the PDE statement. -/
-def unitCube : Set Space :=
-  (WithLp.equiv 2 (Fin 3 → ℝ)).symm ''
-    Set.pi univ (fun _ : Fin 3 => Icc (0 : ℝ) 1)
 
-theorem isCompact_unitCube : IsCompact unitCube := by
-  exact (isCompact_univ_pi (fun _ : Fin 3 => isCompact_Icc)).image
-    (PiLp.continuous_toLp 2 (fun _ : Fin 3 => ℝ))
 
 /-- Integer coordinate translation. -/
 def integerShift (n : Fin 3 → ℤ) : Space :=
@@ -45,10 +37,6 @@ def integerShift (n : Fin 3 → ℤ) : Space :=
 def fractionalPoint (x : Space) : Space :=
   (WithLp.equiv 2 (Fin 3 → ℝ)).symm (fun i => Int.fract (x i))
 
-theorem fractionalPoint_mem_unitCube (x : Space) : fractionalPoint x ∈ unitCube := by
-  refine ⟨fun i => Int.fract (x i), ?_, rfl⟩
-  intro i _
-  exact ⟨Int.fract_nonneg _, (Int.fract_lt_one _).le⟩
 
 theorem fractionalPoint_eq_sub (x : Space) :
     fractionalPoint x = x - integerShift (fun i => Int.floor (x i)) := by
@@ -73,29 +61,11 @@ theorem periodic_integerShift {g : SpaceTime → V}
       exact ((hbase i).zsmul (n i)).add_period ih
   exact hs Finset.univ
 
-/-- All points have the same field value as a point in the closed unit cube. -/
-theorem periodic_fractionalPoint {g : SpaceTime → V}
-    (hg : UnitSpatialPeriodsOn univ g) (t : ℝ) (x : Space) :
-    g (t, fractionalPoint x) = g (t, x) := by
-  rw [fractionalPoint_eq_sub]
-  exact (periodic_integerShift hg t (fun i => Int.floor (x i))).sub_eq x
 
 section Normed
 
 variable [NormedAddCommGroup V]
 
-/-- A bound for a continuous periodic field on a compact interval follows
-from compactness of the interval times the actual fundamental cube. -/
-theorem periodic_bound_on_timeInterval {g : SpaceTime → V}
-    (hg : Continuous g) (hper : UnitSpatialPeriodsOn univ g) (a b : ℝ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t ∈ Icc a b, ∀ x : Space, ‖g (t, x)‖ ≤ C := by
-  obtain ⟨C, hC⟩ := (isCompact_Icc.prod isCompact_unitCube).exists_bound_of_continuousOn
-    hg.continuousOn
-  refine ⟨max C 1, lt_of_lt_of_le zero_lt_one (le_max_right _ _), ?_⟩
-  intro t ht x
-  rw [← periodic_fractionalPoint hper t x]
-  exact (hC (t, fractionalPoint x) ⟨ht, fractionalPoint_mem_unitCube x⟩).trans
-    (le_max_left _ _)
 
 variable [NormedSpace ℝ V]
 
@@ -132,39 +102,6 @@ theorem iteratedFDeriv_eq_zero_after {f : SpaceTime → V} {T : ℝ}
 
 end Normed
 
-/-- Every actual full derivative has arbitrary polynomial decay. The input
-smoothness and periods are global; compact future time support is the exact
-notion from the PDE specification. -/
-theorem iteratedFDeriv_decay (f : VelocityField)
-    (hf : ContDiff ℝ ∞ f) (hper : UnitSpatialPeriodsOn univ f)
-    (hsupport : CompactFutureTimeSupport f) (m : ℕ) (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space,
-      ‖iteratedFDeriv ℝ m f (t, x)‖ ≤ C * (1 + t) ^ (-K) := by
-  obtain ⟨T, hT, hzero⟩ := hsupport
-  have hcont : Continuous (iteratedFDeriv ℝ m f) :=
-    ContDiff.continuous_iteratedFDeriv
-      (ENat.natCast_le_of_coe_top_le_withTop le_rfl m) hf
-  obtain ⟨M, hMpos, hM⟩ := periodic_bound_on_timeInterval hcont
-    (iteratedFDeriv_periods hper m) 0 (T + 1)
-  let C : ℝ := M * (1 + (T + 1)) ^ K
-  have hbase : 0 < 1 + (T + 1) := by linarith
-  have hCpos : 0 < C := mul_pos hMpos (Real.rpow_pos_of_pos hbase K)
-  refine ⟨C, hCpos, ?_⟩
-  intro t ht x
-  by_cases hsmall : t ≤ T + 1
-  · have hpow : (1 + (T + 1)) ^ (-K) ≤ (1 + t) ^ (-K) :=
-      Real.rpow_le_rpow_of_nonpos (by linarith) (by linarith)
-        (neg_nonpos.mpr hK)
-    have hcancel : C * (1 + (T + 1)) ^ (-K) = M := by
-      dsimp [C]
-      rw [mul_assoc, ← Real.rpow_add hbase]
-      simp
-    calc
-      ‖iteratedFDeriv ℝ m f (t, x)‖ ≤ M := hM t ⟨ht, hsmall⟩ x
-      _ = C * (1 + (T + 1)) ^ (-K) := hcancel.symm
-      _ ≤ C * (1 + t) ^ (-K) := mul_le_mul_of_nonneg_left hpow hCpos.le
-  · rw [iteratedFDeriv_eq_zero_after hzero m (by linarith : T < t) x, norm_zero]
-    exact mul_nonneg hCpos.le (Real.rpow_nonneg (by linarith) _)
 
 /-- The four coordinate directions in the product spacetime norm. -/
 def spacetimeCoordinate : Fin 4 → SpaceTime :=
@@ -190,19 +127,6 @@ theorem mixed_component_le_full (f : VelocityField) (m : ℕ) (z : SpaceTime)
       ‖iteratedFDeriv ℝ m f z‖ := by simpa using hop
   simpa only [Real.norm_eq_abs] using hproj.trans heval
 
-/-- Arbitrary polynomial decay for every coordinate mixed differential of
-every output component, with the same constant as the full derivative bound. -/
-theorem mixed_coordinate_decay (f : VelocityField)
-    (hf : ContDiff ℝ ∞ f) (hper : UnitSpatialPeriodsOn univ f)
-    (hsupport : CompactFutureTimeSupport f) (m : ℕ) (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space,
-      ∀ directions : Fin m → Fin 4, ∀ j : Fin 3,
-        |(iteratedFDeriv ℝ m f (t, x) (fun i => spacetimeCoordinate (directions i))) j| ≤
-          C * (1 + t) ^ (-K) := by
-  obtain ⟨C, hC, hbound⟩ := iteratedFDeriv_decay f hf hper hsupport m K hK
-  refine ⟨C, hC, ?_⟩
-  intro t ht x directions j
-  exact (mixed_component_le_full f m (t, x) directions j).trans (hbound t ht x)
 
 end
 

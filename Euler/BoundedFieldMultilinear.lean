@@ -29,9 +29,6 @@ def multilinearValue (L : ContinuousMultilinearMap ℝ V W)
         (Finset.prod_le_prod (fun _ _ => norm_nonneg _)
           (fun i _ => (f i).norm_coe_le_norm x)) (norm_nonneg L)))
 
-@[simp] theorem multilinearValue_apply (L : ContinuousMultilinearMap ℝ V W)
-    (f : ∀ i, α →ᵇ V i) (x : α) :
-    multilinearValue L f x = L (fun i => f i x) := rfl
 
 theorem multilinearValue_norm (L : ContinuousMultilinearMap ℝ V W)
     (f : ∀ i, α →ᵇ V i) :
@@ -76,9 +73,6 @@ def multilinearMap (L : ContinuousMultilinearMap ℝ V W) :
     ContinuousMultilinearMap ℝ (fun i => α →ᵇ V i) (α →ᵇ W) :=
   (multilinearAlgebra L).mkContinuous ‖L‖ (multilinearValue_norm L)
 
-@[simp] theorem multilinearMap_apply (L : ContinuousMultilinearMap ℝ V W)
-    (f : ∀ i, α →ᵇ V i) (x : α) :
-    multilinearMap L f x = L (fun i => f i x) := rfl
 
 
 end EulerBoundedFieldCalculus

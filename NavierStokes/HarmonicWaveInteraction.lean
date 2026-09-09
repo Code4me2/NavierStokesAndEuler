@@ -309,20 +309,7 @@ noncomputable def addBlock (a b : CorrectionState.HarmonicBlock D) :
   phase := a.phase
   angularFrequency := a.angularFrequency
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem addBlock_oscillation (a b : CorrectionState.HarmonicBlock D) (n : ℕ)
-    (p : D × ℝ) (i : Fin 3) :
-    (addBlock a b).oscillation n p i = a.oscillation n p i +
-      (withCarrier a b).oscillation n p i := by
-  simp only [addBlock, withCarrier, CorrectionState.HarmonicBlock.oscillation,
-    HarmonicResidual.field_add, Complex.add_re]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem addBlock_pressure (a b : CorrectionState.HarmonicBlock D) (n : ℕ) (p : D × ℝ) :
-    (addBlock a b).oscillatoryPressure n p = a.oscillatoryPressure n p +
-      (withCarrier a b).oscillatoryPressure n p := by
-  simp only [addBlock, withCarrier, CorrectionState.HarmonicBlock.oscillatoryPressure,
-    HarmonicResidual.field_add, Complex.add_re]
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem blockAmplitude_addBlock (a b : CorrectionState.HarmonicBlock D) (n : ℕ) :

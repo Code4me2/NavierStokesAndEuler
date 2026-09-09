@@ -113,11 +113,6 @@ namespace EulerPacketCylinderField.Field
 
 open EulerPacketProfileRecursion EulerGevrey EulerOperatorGevreyCalculus
 
-theorem WordBound.mono_radius {P T : ℝ} [Fact (0 < P)]
-    {raw : VectorField} {G : Field P T raw} {q d : ℕ} {R R' A : ℝ}
-    (hG : G.WordBound q R A d) (hR : 0 ≤ R) (hA : 0 ≤ A) (h : R ≤ R') :
-    G.WordBound q R' A d := fun n => (hG n).trans
-      (mul_le_mul_of_nonneg_left (majorant_radius_mono R R' hR h d n) hA)
 
 end EulerPacketCylinderField.Field
 
@@ -180,14 +175,5 @@ theorem commonRadius_guards (R' : ℝ) (h : commonRadius M L N CB ≤ R') :
   · exact ⟨hmv.trans h,hmt.trans h,hmp.trans h⟩
   · exact ⟨hlv.trans h,hlc.trans h,hlct.trans h,hlp.trans h⟩
 
-/-- Concrete source-preserving rebudgeting at one common radius closes all
-linear grade guards and the nonlinear coefficient/finite-sum guards. -/
-theorem exists_common_radius :
-    ∃ (R' : ℝ) (hM : Rm ≤ R') (hL : L.R ≤ R'),
-      EulerMeanPacketProvider.Budget.GradeGuards (M.enlargeRadius R' hM) ∧
-      EulerTransversePacketJoin.Budget.GradeGuards (P := P)
-        (L.enlargeRadius R' hL) (N.enlargeRadius R' hL) ∧
-      CB.termCost ≤ R' ∧ sobolevCoefficientRadius (Fin 4) CB.Rc ≤ R' :=
-  ⟨commonRadius M L N CB,commonRadius_guards M L N CB _ le_rfl⟩
 
 end EulerPacketCommonRadius

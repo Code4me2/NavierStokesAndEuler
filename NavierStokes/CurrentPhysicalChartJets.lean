@@ -271,8 +271,6 @@ noncomputable def realVectorCLM : ComplexVector →L[ℝ] ProblemStatement.Space
        simp [PhysicalCurlCovariance.realVector_apply, Complex.real_smul] } :
     ComplexVector →ₗ[ℝ] ProblemStatement.Space).mkContinuous 3 realVector_norm_le
 
-@[simp] theorem realVectorCLM_apply (z : ComplexVector) :
-    realVectorCLM z = PhysicalCurlCovariance.realVector z := rfl
 
 theorem norm_realVectorCLM_le : ‖realVectorCLM‖ ≤ 3 :=
   ContinuousLinearMap.opNorm_le_bound _ (by norm_num) realVector_norm_le

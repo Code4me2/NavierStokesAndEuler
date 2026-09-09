@@ -214,12 +214,6 @@ noncomputable def actualAngularData
     DirectAngularDiagonal.angularField (actualAngularData D Hm qbig hq).scalar = D.angularField :=
   coefficient_angularField D
 
-@[simp] theorem actualAngularData_inner
-    (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
-    (Hm : GaugeMomentBalances.MovingField standardRegion commonGauge.radial.inner
-      commonGauge.radial.outer D.native)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (actualAngularData D Hm qbig hq).inner = innerRadius h ActualInitialization.geometry.patch.a := rfl
 
 noncomputable def actualAngularSupport
     (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
@@ -229,13 +223,6 @@ noncomputable def actualAngularSupport
     MixedAxisPreservation.AngularSupport (MixedAxisPreservation.localDomain h qbig) :=
   MixedAxisPreservation.AngularSupport.ofAngularData (actualAngularData D Hm qbig hq) (fun _ hw => hw)
 
-@[simp] theorem actualAngularSupport_field
-    (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
-    (Hm : GaugeMomentBalances.MovingField standardRegion commonGauge.radial.inner
-      commonGauge.radial.outer D.native)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (actualAngularSupport D Hm qbig hq).field = D.angularField :=
-  coefficient_angularField D
 
 theorem actualAngularData_shrinkingSupport
     (D : PhysicalMeanJetBounds.CoherentFamily h degree N Δ standardRegion.carrier ℝ)
@@ -265,11 +252,7 @@ end Actual
 noncomputable def initialAngularData (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
   actualAngularData (initialAngularFamily B N0 N) (initial_mean_moving B N0).angular qbig hq
 
-noncomputable def initialTemporalData (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
-  actualAngularData (initialTemporalFamily B N0 N) (initialTemporal_moving B N0) qbig hq
 
-noncomputable def initialRankData (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
-  actualAngularData (initialRankFamily B N0 N) (initialRank_moving B N0) qbig hq
 
 noncomputable def initialStreamData (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
   actualAngularData (initialStreamFamily B N0 N) (initialStream_moving B N0) qbig hq
@@ -278,13 +261,7 @@ noncomputable def initialStreamData (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ C
     DirectAngularDiagonal.angularField (initialAngularData B N0 N qbig hq).scalar =
       (initialAngularFamily B N0 N).angularField := coefficient_angularField (initialAngularFamily B N0 N)
 
-@[simp] theorem initialTemporalData_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    DirectAngularDiagonal.angularField (initialTemporalData B N0 N qbig hq).scalar =
-      (initialTemporalFamily B N0 N).angularField := coefficient_angularField (initialTemporalFamily B N0 N)
 
-@[simp] theorem initialRankData_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    DirectAngularDiagonal.angularField (initialRankData B N0 N qbig hq).scalar =
-      (initialRankFamily B N0 N).angularField := coefficient_angularField (initialRankFamily B N0 N)
 
 @[simp] theorem initialStreamData_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
     DirectAngularDiagonal.angularField (initialStreamData B N0 N qbig hq).scalar =
@@ -306,13 +283,7 @@ noncomputable def initialStreamSupport (B N0 N : ℕ) (qbig : ℝ) (hq : qbig �
     (initialAngularSupport B N0 N qbig hq).field = (initialAngularFamily B N0 N).angularField :=
   coefficient_angularField (initialAngularFamily B N0 N)
 
-@[simp] theorem initialTemporalSupport_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (initialTemporalSupport B N0 N qbig hq).field = (initialTemporalFamily B N0 N).angularField :=
-  coefficient_angularField (initialTemporalFamily B N0 N)
 
-@[simp] theorem initialRankSupport_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (initialRankSupport B N0 N qbig hq).field = (initialRankFamily B N0 N).angularField :=
-  coefficient_angularField (initialRankFamily B N0 N)
 
 @[simp] theorem initialStreamSupport_field (B N0 N : ℕ) (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
     (initialStreamSupport B N0 N qbig hq).field = (initialStreamFamily B N0 N).angularField :=
@@ -343,15 +314,7 @@ noncomputable def cycleAngularData (H : InitialCycleInput B N0 N p) (k : ℕ)
   actualAngularData ((initialCycleData H).angularIncrementFamily k)
     ((initialCycleData H).angularIncrement_moving k) qbig hq
 
-noncomputable def cycleTemporalData (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
-  actualAngularData ((initialCycleData H).temporalFamily k)
-    ((initialCycleData H).temporal_moving k) qbig hq
 
-noncomputable def cycleRankData (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
-  actualAngularData ((initialCycleData H).rankFamily k)
-    ((initialCycleData H).rank_moving k) qbig hq
 
 noncomputable def cycleStreamData (H : InitialCycleInput B N0 N p) (k : ℕ)
     (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :=
@@ -364,17 +327,7 @@ noncomputable def cycleStreamData (H : InitialCycleInput B N0 N p) (k : ℕ)
       ((initialCycleData H).angularIncrementFamily k).angularField :=
   coefficient_angularField ((initialCycleData H).angularIncrementFamily k)
 
-@[simp] theorem cycleTemporalData_field (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    DirectAngularDiagonal.angularField (cycleTemporalData H k qbig hq).scalar =
-      ((initialCycleData H).temporalFamily k).angularField :=
-  coefficient_angularField ((initialCycleData H).temporalFamily k)
 
-@[simp] theorem cycleRankData_field (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    DirectAngularDiagonal.angularField (cycleRankData H k qbig hq).scalar =
-      ((initialCycleData H).rankFamily k).angularField :=
-  coefficient_angularField ((initialCycleData H).rankFamily k)
 
 @[simp] theorem cycleStreamData_field (H : InitialCycleInput B N0 N p) (k : ℕ)
     (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
@@ -408,17 +361,7 @@ noncomputable def cycleStreamSupport (H : InitialCycleInput B N0 N p) (k : ℕ)
       ((initialCycleData H).angularIncrementFamily k).angularField :=
   coefficient_angularField ((initialCycleData H).angularIncrementFamily k)
 
-@[simp] theorem cycleTemporalSupport_field (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (cycleTemporalSupport H k qbig hq).field =
-      ((initialCycleData H).temporalFamily k).angularField :=
-  coefficient_angularField ((initialCycleData H).temporalFamily k)
 
-@[simp] theorem cycleRankSupport_field (H : InitialCycleInput B N0 N p) (k : ℕ)
-    (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :
-    (cycleRankSupport H k qbig hq).field =
-      ((initialCycleData H).rankFamily k).angularField :=
-  coefficient_angularField ((initialCycleData H).rankFamily k)
 
 @[simp] theorem cycleStreamSupport_field (H : InitialCycleInput B N0 N p) (k : ℕ)
     (qbig : ℝ) (hq : qbig ≤ ChartScales.Q N) :

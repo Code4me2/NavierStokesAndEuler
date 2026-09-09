@@ -114,8 +114,6 @@ theorem radialJet_congr {R : ℝ} {F G : ℝ × P → E} {z : P}
     rw [radialJet_succ, radialJet_succ]
     exact radialDerivative_congr (fun s hs => ih s hs) hr
 
-noncomputable def localized (R : ℝ) (F : ℝ × P → E) (p : ℝ × P) : E :=
-  EvenSmoothDescent.localized R (fun r => F (r, p.2)) p.1
 
 
 
@@ -339,8 +337,6 @@ theorem radialJet_holomorphic {U : Set ℂ} (hU : IsOpen U) {F : ℝ × ℂ → 
 noncomputable def complexPartial (F : ℝ × ℂ → B) (p : ℝ × ℂ) : B :=
   deriv (fun z => F (p.1, z)) p.2
 
-noncomputable def complexJet (F : ℝ × ℂ → B) (m : ℕ) (p : ℝ × ℂ) : B :=
-  iteratedDeriv m (fun z => F (p.1, z)) p.2
 
 omit [CompleteSpace B] in
 theorem complexPartial_eq_real_fderiv {U : Set ℂ} (hU : IsOpen U) {F : ℝ × ℂ → B}

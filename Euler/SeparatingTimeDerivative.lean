@@ -59,10 +59,5 @@ theorem hasDerivWithinAt (t : Icc (0 : ℝ) T) :
   simpa only [extendPath,projIcc_of_mem hT hr,integral_apply] using
     eq_initial_add_integral T hT f g L hsep hd ⟨r,hr⟩
 
-include hsep hd in
-theorem hasDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT f) (g ⟨t,ht.1.le,ht.2.le⟩) t :=
-  (hasDerivWithinAt T hT f g L hsep hd ⟨t,ht.1.le,ht.2.le⟩).hasDerivAt
-    (Icc_mem_nhds ht.1 ht.2)
 
 end EulerSeparatingTimeDerivative

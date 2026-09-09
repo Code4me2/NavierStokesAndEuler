@@ -239,19 +239,6 @@ theorem graph_q_eq {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (n d : ℕ)
     (inv_pos.mpr (ChartScales.Q_pos n)) (sub_pos.mpr hw)
   simpa only [hp, div_eq_mul_inv, mul_comm] using he
 
-theorem graph_slow_normalized {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (n d : ℕ) {w : SpaceTime} (hw : w ∈ preterminal)
-    (hlo : physicalQ h w / 2 ≤ ChartScales.Q n) (hhi : ChartScales.Q n ≤ 2 * physicalQ h w) :
-    (graph h n d w).2.1 ∈ PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 := by
-  refine ⟨graph_time_pos h n d hw, ?_⟩
-  rw [graph_q_eq hh hh1 n d hw]
-  have hQ := ChartScales.Q_pos n
-  have hq := physicalQ_pos hh hh1 hw
-  constructor
-  · apply (lt_div_iff₀ hQ).mpr
-    nlinarith
-  · apply (div_lt_iff₀ hQ).mpr
-    nlinarith
 
 theorem graph_length_pos {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (n d : ℕ)
     {w : SpaceTime} (hw : w ∈ preterminal) :
@@ -387,55 +374,7 @@ def NativeJets (N : ℕ) (U : Set PhysicalGraphBounds.Plane) (gain : ℝ)
   ∀ m : ℕ, ∃ A : ℝ, 0 ≤ A ∧ ∃ e : ℕ, ∀ n ≥ N, ∀ z, z.2.1 ∈ U → ∀ j ≤ m,
     ‖iteratedFDeriv ℝ j (f n) z‖ ≤ A * ChartScales.Q n ^ gain * ChartScales.S n ^ e
 
-/-- A uniform estimate for the same coherent physical field.  A comparable
-band is selected at each point and used through an exact field germ. -/
-theorem CoherentFamily.field_jet_bound (D : CoherentFamily h degree N Δ U E)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {gain : ℝ} (hj : NativeJets N U gain D.native)
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      physicalQ h w ≤ ChartScales.Q N →
-      ‖iteratedFDeriv ℝ m D.field w‖ ≤ C * physicalQ h w ^ (gain - loss degree m) := by
-  obtain ⟨A, hA, e, hjet⟩ := hj m
-  obtain ⟨C, hC, hb⟩ := bandField_jet_bound (E := E) (b := 2 * b)
-    hh.le hh1.le (div_pos ha (by norm_num : (0 : ℝ) < 4)) Δ m gain degree e A hA
-  refine ⟨C, hC, ?_⟩
-  intro w hw ht hsmall
-  have hq := physicalQ_pos hh hh1 hw
-  by_cases hts : w ∈ tsupport D.field
-  · obtain ⟨n, hn, hqn, hnq⟩ := exists_comparable_band N hq hsmall
-    have hlo : physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-    have hu := hcover (graph_slow_normalized hh hh1 n (D.gap n) hw hlo hnq.le)
-    have hann := D.annulus_on_tsupport hh hh1 ha hab hU hs n hn hw hu hlo hnq.le hts
-    rw [iteratedFDeriv_eq_of_eventuallyEq (D.field_germ hU n hn hw hu) m]
-    apply hb n (hN.trans hn) (D.gap n) (D.gap_le n hn) w hann ht
-      (physicalQ h w) hq hlo hnq.le (D.native n)
-    · exact SmoothNear.of_open (PhysicalMeanDomain.slowDomain_open hU) (hsm n hn) hu
-    · intro j hjm
-      simpa only [Real.rpow_natCast] using hjet n hn _ hu j hjm
-  · rw [jet_zero_off_tsupport _ _ hts, norm_zero]
-    positivity
 
-theorem CoherentFamily.field_smoothAt (D : CoherentFamily h degree N Δ U E)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {w : SpaceTime} (hw : w ∈ preterminal)
-    (hsmall : physicalQ h w ≤ ChartScales.Q N) : ContDiffAt ℝ ∞ D.field w := by
-  classical
-  by_cases hts : w ∈ tsupport D.field
-  · obtain ⟨n, hn, hqn, hnq⟩ := exists_comparable_band N (physicalQ_pos hh hh1 hw) hsmall
-    have hlo : physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-    have hu := hcover (graph_slow_normalized hh hh1 n (D.gap n) hw hlo hnq.le)
-    have hann := D.annulus_on_tsupport hh hh1 ha hab hU hs n hn hw hu hlo hnq.le hts
-    have hnative := (hsm n hn).contDiffAt ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds hu)
-    have hc := (hnative.comp w (graph_smoothAt (div_pos ha (by norm_num : (0 : ℝ) < 4)) h n
-      (D.gap n) hann)).const_smul (ChartScales.Q n ^ (-degree))
-    exact hc.congr_of_eventuallyEq (D.field_germ hU n hn hw hu)
-  · exact contDiffAt_const.congr_of_eventuallyEq (notMem_tsupport_iff_eventuallyEq.mp hts)
 
 /-! ## The local mean-class consumer -/
 
@@ -466,22 +405,7 @@ smoothness, including the zero neighborhood at the spatial axis. -/
 noncomputable def physicalDomain (h : ℝ) (N : ℕ) : Set SpaceTime :=
   {w | w ∈ preterminal ∧ physicalQ h w < ChartScales.Q N}
 
-theorem physicalDomain_open {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) (N : ℕ) :
-    IsOpen (physicalDomain h N) := by
-  apply isOpen_iff_mem_nhds.mpr
-  intro w hw
-  exact inter_mem (preterminal_open.mem_nhds hw.1)
-    ((physicalQ_smoothAt hh hh1 hw.1).continuousAt (isOpen_Iio.mem_nhds hw.2))
 
-theorem CoherentFamily.field_smooth (D : CoherentFamily h degree N Δ U E)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) :
-    ContDiffOn ℝ ∞ D.field (physicalDomain h N) := by
-  intro w hw
-  exact (D.field_smoothAt hh hh1 ha hab hU hcover hsm hs hw.1 hw.2.le).contDiffWithinAt
 
 @[simp] theorem loss_velocity (h : ℝ) (m : ℕ) :
     loss (CoordinateAlgebra.A h) m = PhysicalGraphBounds.graphLoss m + 1 + CoordinateAlgebra.A h := rfl
@@ -693,65 +617,8 @@ theorem CoherentFamily.angularField_zero_germ (D : CoherentFamily h degree N Δ 
   change D.field z • _ = _
   simp only [hz, zero_smul]
 
-theorem CoherentFamily.angularField_jet_bound (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {gain : ℝ} (hj : NativeJets N U gain D.native)
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      physicalQ h w ≤ ChartScales.Q N →
-      ‖iteratedFDeriv ℝ m D.angularField w‖ ≤ C * physicalQ h w ^ (gain - loss degree m) := by
-  obtain ⟨A, hA, e, hjet⟩ := hj m
-  obtain ⟨C, hC, hb⟩ := bandAngularField_jet_bound (b := 2 * b)
-    hh.le hh1.le (div_pos ha (by norm_num : (0 : ℝ) < 4)) Δ m gain degree e A hA
-  refine ⟨C, hC, ?_⟩
-  intro w hw ht hsmall
-  have hq := physicalQ_pos hh hh1 hw
-  by_cases hts : w ∈ tsupport D.field
-  · obtain ⟨n, hn, hqn, hnq⟩ := exists_comparable_band N hq hsmall
-    have hlo : physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-    have hu := hcover (graph_slow_normalized hh hh1 n (D.gap n) hw hlo hnq.le)
-    have hann := D.annulus_on_tsupport hh hh1 ha hab hU hs n hn hw hu hlo hnq.le hts
-    rw [iteratedFDeriv_eq_of_eventuallyEq (D.angularField_germ hU n hn hw hu) m]
-    apply hb n (hN.trans hn) (D.gap n) (D.gap_le n hn) w hann ht
-      (physicalQ h w) hq hlo hnq.le (D.native n)
-    · exact SmoothNear.of_open (PhysicalMeanDomain.slowDomain_open hU) (hsm n hn) hu
-    · intro j hjm
-      simpa only [Real.rpow_natCast] using hjet n hn _ hu j hjm
-  · rw [jet_zero_off_tsupport _ _
-      (notMem_tsupport_iff_eventuallyEq.mpr (D.angularField_zero_germ hts)), norm_zero]
-    positivity
 
-theorem CoherentFamily.angularField_smoothAt (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {w : SpaceTime} (hw : w ∈ preterminal)
-    (hsmall : physicalQ h w ≤ ChartScales.Q N) : ContDiffAt ℝ ∞ D.angularField w := by
-  classical
-  by_cases hts : w ∈ tsupport D.field
-  · obtain ⟨n, hn, hqn, hnq⟩ := exists_comparable_band N (physicalQ_pos hh hh1 hw) hsmall
-    have hlo : physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-    have hu := hcover (graph_slow_normalized hh hh1 n (D.gap n) hw hlo hnq.le)
-    have hann := D.annulus_on_tsupport hh hh1 ha hab hU hs n hn hw hu hlo hnq.le hts
-    have haxis := PhysicalGraphBounds.scaledRadial_ne_zero
-      (PhysicalGraphBounds.annulus_axisFree (div_pos ha (by norm_num : (0 : ℝ) < 4)) hann)
-    exact (D.field_smoothAt hh hh1 ha hab hU hcover hsm hs hw hsmall).smul
-      ((angularVector_smooth.contDiffAt (PhysicalGraphBounds.axisFree_open.mem_nhds haxis)).comp w
-        PhysicalGraphBounds.radialProjection.contDiff.contDiffAt)
-  · exact contDiffAt_const.congr_of_eventuallyEq (D.angularField_zero_germ hts)
 
-theorem CoherentFamily.angularField_smooth (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 4) 4 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) :
-    ContDiffOn ℝ ∞ D.angularField (physicalDomain h N) := by
-  intro w hw
-  exact (D.angularField_smoothAt hh hh1 ha hab hU hcover hsm hs hw.1 hw.2.le).contDiffWithinAt
 
 
 
@@ -792,13 +659,6 @@ theorem meanPressure_fiberLocal (d a b M : ℝ) (hab : a < b)
   rw [he, show PressureStream.pressureMass f s = PressureStream.pressureMass g s from
     PhysicalMeanDomain.liftedPressureMass_fiberLocal f g s he R W]
 
-theorem streamPotential_fiberLocal (d a b M : ℝ)
-    (ell : PhysicalGraphBounds.Plane → ℝ) (v : PressureStream.Plane) :
-    PhysicalMeanDomain.FiberLocal (VariableGaugeMean.streamPotential d a b M ell v) := by
-  intro f g s he r Y
-  apply congrArg (fun x : ℝ => x / r)
-  exact VariableGaugeMean.compactPrimitive_fiberLocal d a b M ell v _ _ s
-    (PhysicalMeanDomain.weightedSource_fiberLocal f g s he) r Y
 
 /-- Reconstruct the physical pressure from the coherent momentum source.
 The output coherence is proved from the actual integral operator; it is not

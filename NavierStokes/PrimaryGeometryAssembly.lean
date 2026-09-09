@@ -105,8 +105,6 @@ noncomputable def earlierIndex {h lo hi : ℝ} {N M : ℕ} (hNM : N ≤ M)
     (L : BaseChartJets.CellIndex h lo hi M) : BaseChartJets.CellIndex h lo hi N :=
   ⟨L.val, hNM.trans L.property⟩
 
-@[simp] theorem earlierIndex_band {h lo hi : ℝ} {N M : ℕ} (hNM : N ≤ M)
-    (L : BaseChartJets.CellIndex h lo hi M) : BaseChartJets.cellBand (earlierIndex hNM L) = BaseChartJets.cellBand L := rfl
 
 theorem polynomial_restrict_reindex {ι κ E V : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V]
@@ -199,15 +197,8 @@ theorem physicalMask_has_index {N : ℕ} (L : PartitionedCovariance.UnsignedLabe
   refine ⟨⟨A, ?_⟩, hA⟩
   simpa only [hA] using hN
 
-/-- Mean-flow charts use `(T,Z)`, while the phase chart uses `(R,(Z,T))`.
-This explicit map prevents their equal product types hiding a swap. -/
-noncomputable def fromTimeAxial (R : ℝ) (tz : ℝ × ℝ) : Slow := (R, (tz.2, tz.1))
 
-@[simp] theorem fromTimeAxial_time (R : ℝ) (tz : ℝ × ℝ) :
-    (fromTimeAxial R tz).2.2 = tz.1 := rfl
 
-@[simp] theorem fromTimeAxial_axial (R : ℝ) (tz : ℝ × ℝ) :
-    (fromTimeAxial R tz).2.1 = tz.2 := rfl
 
 variable {W} (H : NominalConeAssembly.Certificate W)
   {ld : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness ld)
@@ -453,12 +444,6 @@ noncomputable def prepared (hcone : LeadingStressWeights.FullTrueCone v)
     (N0 : ℕ) : Prepared H v upper B r0 N0 :=
   Classical.choice (exists_prepared H v hcone upper B r0 hbox N0)
 
-noncomputable def phases (hcone : LeadingStressWeights.FullTrueCone v)
-    (upper : ℝ) (B : ℕ) (r0 : ℝ) (hr0 : 0 < r0)
-    (hbox : 2 * NominalConeAssembly.activeRight W ≤ FinalSlowBase.boxRadius W upper)
-    (N0 : ℕ) : Fin 2 → PrimaryPulseBounds.PhaseConstruction
-      (domain W (prepared H v hcone upper B r0 hbox N0).N) :=
-  construction H v (prepared H v hcone upper B r0 hbox N0) hr0
 
 
 

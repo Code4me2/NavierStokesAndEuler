@@ -31,8 +31,6 @@ noncomputable def localGaussian (request : ℕ → FullPoint → SignedWaveUpdat
     (l : SignedLabel B N0) (n : ℕ) (k : Frequency) : FullPoint → HarmonicCalculus.ComplexVector :=
   (copies request l).localGaussian (directions B) n k
 
-theorem source_zero (request : ℕ → FullPoint → SignedWaveUpdate.Vec2) (l : SignedLabel B N0) :
-    (copies request l).source = fun _ _ => 0 := rfl
 
 theorem localGaussian_formula (request : ℕ → FullPoint → SignedWaveUpdate.Vec2)
     (l : SignedLabel B N0) (n : ℕ) (k : Frequency) (x : FullPoint) :

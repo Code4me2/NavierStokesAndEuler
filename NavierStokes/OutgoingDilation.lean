@@ -72,7 +72,6 @@ def canonicalKernel (F : Profile) (XR eta X : ℝ) : ℝ := E F XR (X, eta) ^ 2 
 def M (F : Profile) (XR eta X : ℝ) : ℝ := ∫ u in Ioc 0 X, U F XR (u, eta)
 def I (F : Profile) (XR eta X : ℝ) : ℝ := ∫ u in Ioc 0 X, H F XR (u, eta)
 def J (F : Profile) (XR eta X : ℝ) : ℝ := ∫ u in Ioc 0 X, H F XR (u, eta) * U F XR (u, eta)
-def S (F : Profile) (XR eta X : ℝ) : ℝ := ∫ u in Ioc 0 X, energyDensity F XR eta u
 def totalS (F : Profile) (XR eta : ℝ) : ℝ := ∫ u in Ioi 0, energyDensity F XR eta u
 def renormalizedI (F : Profile) (XR eta : ℝ) : ℝ := ∫ u in Ioi 0, H F XR (u, eta) - powerH F XR u
 def axisDatum (F : Profile) (XR eta : ℝ) : ℝ := -(1 / 2 : ℝ) * ∫ u in Ioi 0, canonicalKernel F XR eta u

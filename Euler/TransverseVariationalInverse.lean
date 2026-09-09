@@ -93,11 +93,6 @@ def transversePrimitive (T : ℝ) (hT : 0 ≤ T) (m : Icc (0 : ℝ) T → E) :
     transverseDerivatives T hT m →L[ℝ] TimeLp T E :=
   (primitiveTimeLp T hT).comp (transverseDerivatives T hT m).subtypeL
 
-/-- The sharp time Poincaré bound holds on the actual transverse space. -/
-theorem transversePrimitive_norm_sq (T : ℝ) (hT : 0 ≤ T)
-    (m : Icc (0 : ℝ) T → E) (u : transverseDerivatives T hT m) :
-    ‖transversePrimitive T hT m u‖ ^ 2 ≤ T ^ 2 / 2 * ‖u‖ ^ 2 :=
-  primitiveTimeLp_norm_sq_le T hT (u : TimeLp T E)
 
 
 variable [CompleteSpace E]
@@ -107,18 +102,6 @@ variable (K : ℝ) (hK : 0 ≤ K)
 variable (hH : ∀ t x, ⟪H t x, x⟫_ℝ ≤ K * ‖x‖ ^ 2)
 variable (hsmall : K * (T ^ 2 / 2) ≤ 1 / 2)
 
-/-- The actual transverse forcing-to-derivative map, constructed from the
-primitive and the given time-dependent Hessian. -/
-def transverseSolver : TimeLp T E →L[ℝ] transverseDerivatives T hT m :=
-  dirichletSolver (transversePrimitive T hT m) (timeMultiplier T hT H)
-    (T ^ 2 / 2) K hK (transversePrimitive_norm_sq T hT m)
-    (timeMultiplier_quadratic_upper T hT H K hH) hsmall
-
-/-- The continuous displacement is constructed by integrating its solved derivative. -/
-def transverseDisplacement : TimeLp T E →L[ℝ] C(Icc (0 : ℝ) T, E) :=
-  (terminalPrimitive T hT).comp
-    ((transverseDerivatives T hT m).subtypeL.comp
-      (transverseSolver T hT m H K hK hH hsmall))
 
 
 
@@ -127,9 +110,7 @@ def transverseDisplacement : TimeLp T E →L[ℝ] C(Icc (0 : ℝ) T, E) :=
 
 
 
-/-- Zero forcing has zero displacement, the pointwise-in-label support preservation property. -/
-@[simp] theorem transverseDisplacement_zero :
-    transverseDisplacement T hT m H K hK hH hsmall 0 = 0 := map_zero _
+
 
 
 

@@ -22,8 +22,6 @@ variable {P : ℝ} [Fact (0 < P)]
   {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
   {D : Data U} (B : HistoryData D) (Y : InitialData P D)
 
-def displacementPath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
-  B.coefficients.endpointDisplacement P (Y.value : CylinderL2 P U)
 
 def coordinatePath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
   B.coefficients.endpointCoordinate P (Y.value : CylinderL2 P U)
@@ -35,11 +33,7 @@ def velocityPath : C(Icc (0 : ℝ) D.T,CylinderL2 P Space) :=
 def derivativePath : C(Icc (0 : ℝ) D.T,CylinderL2 P Space) :=
   B.coefficients.endpointDerivative P (Y.value : CylinderL2 P U)
 
-theorem displacement_initial : displacementPath B Y ⟨0,le_rfl,D.T_pos.le⟩ = 0 :=
-  B.coefficients.endpointDisplacement_initial P Y.value
 
-theorem displacement_terminal : displacementPath B Y ⟨D.T,D.T_pos.le,le_rfl⟩ = Y.value :=
-  B.coefficients.endpointDisplacement_terminal P Y.value
 
 theorem coordinatePath_orbit :
     ContDiff ℝ ∞ (fun a => pathTranslate P a (coordinatePath B Y)) :=
@@ -74,10 +68,6 @@ theorem velocityPath_supported (t : Icc (0 : ℝ) D.T) :
   B.coefficients.endpointVelocity_supported P D.support D.support_measurable
     Y.value Y.value.property t
 
-theorem derivativePath_supported (t : Icc (0 : ℝ) D.T) :
-    derivativePath B Y t ∈ Supported P Space D.support D.support_measurable :=
-  B.coefficients.endpointDerivative_supported P D.support D.support_measurable
-    Y.value Y.value.property t
 
 theorem coordinatePath_mean_zero (t : Icc (0 : ℝ) D.T) :
     average P (coordinatePath B Y t) = 0 :=

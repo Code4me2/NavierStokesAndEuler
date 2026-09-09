@@ -77,19 +77,9 @@ variable {V : JetDomain ι D} {U : Domain ι PhaseCalculus.Slow}
 
 include h
 
-theorem matrix_jets (j k : Fin 2) :
-    PolynomialJets V.toDomain (fun i x => pulseMatrix F pref χ i x j k) :=
-  pulseMatrix_jets F pref χ h.scale h.coordinate_jets
-    (fun i x hx => (h.coordinate_mem i x hx).1) h.prefactor_jets j k
 
 
 
-theorem cutoff_jets : PolynomialJets V.toDomain
-    (fun i x => GaussianTailFlat.profile (χ i x).2) := by
-  apply (h.coordinate_jets.clm (ContinuousLinearMap.snd ℝ PhaseCalculus.Slow ℝ)).compact_comp
-    isOpen_univ GaussianTailFlat.profile_contDiff.contDiffOn isCompact_Icc (subset_univ _)
-  intro i x hx
-  exact ⟨(h.coordinate_mem i x hx).2.1.le, (h.coordinate_mem i x hx).2.2.le⟩
 
 end ReferenceBounds
 
@@ -129,30 +119,8 @@ variable {s : StripData X} {V : JetDomain ι D} {ζ : ι → D → ℝ}
 noncomputable def pull (f : ι → D → E) : Λ → ℕ → I → X → E :=
   affineCopy f c.index c.linear c.shift
 
-theorem unweighted {f : ι → D → E} (hf : PolynomialJets V.toDomain f) :
-    UniformLocalJets s (fun _ _ _ => 1) 0 K (c.pull f) := by
-  apply (NativeJets.of_polynomial hf).copy_localJets s (fun _ _ _ => 1) 0
-    c.index c.linear c.shift K (fun _ _ _ _ => zero_le_one) c.maps c.growth_one c.linear_one
-    c.growthDegree c.linearDegree c.growth_bound c.linear_bound
-  intro l n i x hx hi
-  simp
 
-theorem weighted {f : ι → D → E} (hf : NativeJets V ζ f) :
-    UniformLocalJets s (fun _ _ x => s.zeta x) 0 K (c.pull f) := by
-  apply hf.copy_localJets s (fun _ _ x => s.zeta x) 0 c.index c.linear c.shift K
-    (fun _ _ x hx => s.zeta_nonneg x hx) c.maps c.growth_one c.linear_one
-    c.growthDegree c.linearDegree c.growth_bound c.linear_bound
-  intro l n i x hx hi
-  simp only [Real.rpow_zero, one_mul, c.weight_eq l n i x hx hi, le_refl]
 
-theorem envelope {w : ι → D → ℝ} {f : ι → D → E} (hf : NativeJets V w f)
-    {W : Λ → ℕ → X → ℝ} (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hw : ∀ l n i x, x ∈ s.domain → x ∈ K l n i →
-      w (c.index l n) (c.linear l n i x + c.shift l n i) ≤ W l n x) :
-    UniformLocalJets s W 0 K (c.pull f) := by
-  apply hf.copy_localJets s W 0 c.index c.linear c.shift K hW c.maps c.growth_one c.linear_one
-    c.growthDegree c.linearDegree c.growth_bound c.linear_bound
-  simpa only [Real.rpow_zero, one_mul] using hw
 
 end CopyChart
 
@@ -294,12 +262,6 @@ variable (a b : PositiveScale Λ)
 theorem value_pos (l : Λ) (n : ℕ) : 0 < a.value l n := a.lower_pos.trans_le (a.bounds l n).1
 
 
-theorem square_bandBound (s : StripData X) :
-    UniformPrimaryWeights.UniformBandBound s 0 (fun l n => a.value l n ^ 2) := by
-  refine ⟨a.upper ^ 2, sq_nonneg _, 0, ?_⟩
-  intro l n
-  simpa only [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg (a.value l n)), Real.rpow_zero,
-    pow_zero, mul_one] using pow_le_pow_left₀ (a.value_pos l n).le (a.bounds l n).2 2
 
 noncomputable def mul : PositiveScale Λ where
   value l n := a.value l n * b.value l n
@@ -312,20 +274,6 @@ noncomputable def mul : PositiveScale Λ where
 
 end PositiveScale
 
-theorem uniform_band_smul [Countable Λ] [Nonempty Λ]
-    {s : StripData X} {K : Λ → ℕ → I → Set X} {w : Λ → ℕ → X → ℝ} {α β : ℝ}
-    {f : Λ → ℕ → I → X → E} {r : Λ → ℕ → ℝ}
-    (hf : UniformLocalJets s w α K f) (hr : UniformPrimaryWeights.UniformBandBound s β r)
-    (hw : ∀ l n x, x ∈ s.domain → 0 ≤ w l n x) :
-    UniformLocalJets s w (α + β) K (fun l n i x => r l n • f l n i x) := by
-  let e := UniformPrimaryWeights.enumeration Λ
-  apply SignedCopyBounds.uniform_local_of_pull (UniformPrimaryWeights.enumeration_surjective Λ)
-  have hr' : UniformPrimaryWeights.UniformBandBound (UniformPrimaryWeights.reindexedStrip s e) β
-      (fun (_ : I) k => r (e k).2 (e k).1) := by
-    obtain ⟨C, hC, p, hb⟩ := hr
-    exact ⟨C, hC, p, fun _ k => hb (e k).2 (e k).1⟩
-  exact SignedCopyBounds.local_indexed_band_smul (SignedCopyBounds.local_pull hf e) hr'
-    (fun k => hw (e k).2 (e k).1)
 
 theorem uniform_local_congr {s : StripData X} {K : Λ → ℕ → I → Set X}
     {w : Λ → ℕ → X → ℝ} {α : ℝ} {f g : Λ → ℕ → I → X → E}
@@ -385,46 +333,6 @@ variable [Countable Λ] [Nonempty Λ]
   {s : StripData X} {K : Λ → ℕ → I → Set X}
   (c : CopyChart s V ζ K) (scale : PositiveScale Λ)
 
-/-- Construct the actual uniform native covariance record from the
-derived reference jets and the primitive view geometry. -/
-noncomputable def nativeCovariance (hzeta : ∀ x ∈ s.domain, 0 < s.zeta x) :
-    SignedCopyBounds.UniformNativeCovariance s K
-      (fun l i n => c.pull (pulseMatrix F pref χ) l n i)
-      (fun l i n x => scale.value l n ^ 2 • c.pull T l n i x) where
-  matrix_jets j k := c.unweighted (h.matrix_jets j k)
-  target_jets q := by
-    have ht := uniform_band_smul (c.weighted (h.target_jets q)) (scale.square_bandBound s)
-      (fun _ _ x hx => s.zeta_nonneg x hx)
-    simp only [zero_add] at ht
-    exact ht
-  zeta_pos := hzeta
-  determinantGap := c.ratioLower ^ 2 * h.determinantGap
-  entryBound := c.ratioUpper * h.entryBound
-  primaryLower := scale.lower ^ 2 * h.primaryLower
-  gap_pos := mul_pos (sq_pos_of_pos c.ratio_pos) h.gap_pos
-  entry_one := one_le_mul_of_one_le_of_one_le c.ratio_one h.entry_one
-  lower_pos := mul_pos (sq_pos_of_pos scale.lower_pos) h.lower_pos
-  determinant := by
-    intro l n i x hx hi
-    have hz := h.zero_order (c.index l n) _ (c.maps l n i x hx hi)
-    rw [c.weight_eq l n i x hx hi] at hz
-    exact (rescale_margins hz (Real.one_le_sqrt.mpr (V.one_le_scale _)) h.gap_pos.le h.lower_pos.le
-      (s.zeta_nonneg x hx) scale.lower_pos (scale.bounds l n).1 c.ratio_pos
-      (c.scale_ratio l n).1 (c.scale_ratio l n).2).1
-  entries := by
-    intro l n i x hx hi
-    have hz := h.zero_order (c.index l n) _ (c.maps l n i x hx hi)
-    rw [c.weight_eq l n i x hx hi] at hz
-    exact (rescale_margins hz (Real.one_le_sqrt.mpr (V.one_le_scale _)) h.gap_pos.le h.lower_pos.le
-      (s.zeta_nonneg x hx) scale.lower_pos (scale.bounds l n).1 c.ratio_pos
-      (c.scale_ratio l n).1 (c.scale_ratio l n).2).2.1
-  lower := by
-    intro l n i x hx hi
-    have hz := h.zero_order (c.index l n) _ (c.maps l n i x hx hi)
-    rw [c.weight_eq l n i x hx hi] at hz
-    exact (rescale_margins hz (Real.one_le_sqrt.mpr (V.one_le_scale _)) h.gap_pos.le h.lower_pos.le
-      (s.zeta_nonneg x hx) scale.lower_pos (scale.bounds l n).1 c.ratio_pos
-      (c.scale_ratio l n).1 (c.scale_ratio l n).2).2.2
 
 
 include h

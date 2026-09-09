@@ -45,8 +45,6 @@ def bilinearValue (B : E →L[ℝ] F →L[ℝ] G) (f : α →ᵇ E) (g : α →�
       (mul_le_mul (mul_le_mul_of_nonneg_left (f.norm_coe_le_norm x) (norm_nonneg B))
         (g.norm_coe_le_norm x) (norm_nonneg _) (mul_nonneg (norm_nonneg B) (norm_nonneg f))))
 
-@[simp] theorem bilinearValue_apply (B : E →L[ℝ] F →L[ℝ] G) (f : α →ᵇ E) (g : α →ᵇ F) (x : α) :
-    bilinearValue B f g x = B (f x) (g x) := rfl
 
 theorem bilinearValue_norm (B : E →L[ℝ] F →L[ℝ] G) (f : α →ᵇ E) (g : α →ᵇ F) :
     ‖bilinearValue B f g‖ ≤ ‖B‖*‖f‖*‖g‖ :=
@@ -81,19 +79,10 @@ def bilinearLinear (B : E →L[ℝ] F →L[ℝ] G) : (α →ᵇ E) →ₗ[ℝ] (
 def bilinearMap (B : E →L[ℝ] F →L[ℝ] G) : (α →ᵇ E) →L[ℝ] (α →ᵇ F) →L[ℝ] (α →ᵇ G) :=
   (bilinearLinear B).mkContinuous₂ ‖B‖ (bilinearValue_norm B)
 
-@[simp] theorem bilinearMap_apply (B : E →L[ℝ] F →L[ℝ] G) (f : α →ᵇ E) (g : α →ᵇ F) (x : α) :
-    bilinearMap B f g x = B (f x) (g x) := rfl
 
 theorem bilinearMap_norm (B : E →L[ℝ] F →L[ℝ] G) : ‖bilinearMap (α := α) B‖ ≤ ‖B‖ :=
   (bilinearLinear B).mkContinuous₂_norm_le (norm_nonneg B) (bilinearValue_norm B)
 
-/-- Pointwise postcomposition preserves the coefficient map's norm bound. -/
-theorem postcomposition_norm (L : E →L[ℝ] F) : ‖L.compLeftContinuousBounded α‖ ≤ ‖L‖ := by
-  apply opNorm_le_bound _ (norm_nonneg L)
-  intro f
-  apply (BoundedContinuousFunction.norm_le (mul_nonneg (norm_nonneg L) (norm_nonneg f))).2
-  intro x
-  exact (L.le_opNorm (f x)).trans (mul_le_mul_of_nonneg_left (f.norm_coe_le_norm x) (norm_nonneg L))
 
 end Bilinear
 
@@ -124,8 +113,6 @@ def compositionMap : (α →ᵇ E →L[ℝ] F) →L[ℝ] (α →ᵇ U →L[ℝ] 
   bilinearMap (compL ℝ U E F)
 
 
-@[simp] theorem compositionMap_apply (A : α →ᵇ E →L[ℝ] F) (B : α →ᵇ U →L[ℝ] E) (x : α) :
-    compositionMap A B x = (A x).comp (B x) := rfl
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 

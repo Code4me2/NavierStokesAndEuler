@@ -38,10 +38,5 @@ theorem finsetSum {ι : Type*} (s : Finset ι) (f f' : ι → VectorField)
   simp only [ContinuousMap.sum_apply]
   exact h
 
-theorem of_path_eq (hG : TimeDerivative hT G G')
-    (h : H.path=G.path) (h' : H'.path=G'.path) : TimeDerivative hT H H' := by
-  unfold TimeDerivative
-  rw [h,h']
-  exact hG
 
 end EulerPacketCylinderField.TimeDerivative

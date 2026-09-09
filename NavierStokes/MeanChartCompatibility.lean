@@ -793,8 +793,6 @@ section PhysicalProfile
 
 open TorusInverse
 
-noncomputable def slowProjection (z : PressureStream.Lift Plane) : SimilarityHomogeneity.ChartPoint :=
-  (z.1, z.2.1)
 
 
 

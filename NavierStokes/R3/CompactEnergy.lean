@@ -39,13 +39,7 @@ theorem compact_inner_left {f g : Space → Space} (hf : HasCompactSupport f) :
   simp only [mem_support, not_not] at hx ⊢
   rw [hx, inner_zero_left]
 
-theorem compact_norm_sq {f : Space → Space} (hf : HasCompactSupport f) :
-    HasCompactSupport (fun x => ‖f x‖ ^ 2) := by
-  exact hf.comp_left (g := fun v : Space => ‖v‖ ^ 2) (by simp)
 
-theorem integrable_norm_sq {f : Space → Space} (hf : Continuous f)
-    (hcf : HasCompactSupport f) : Integrable (fun x => ‖f x‖ ^ 2) :=
-  (hf.norm.pow 2).integrable_of_hasCompactSupport (compact_norm_sq hcf)
 
 theorem compact_component {f : Space → Space} (hf : HasCompactSupport f) (i : Fin 3) :
     HasCompactSupport (fun x => f x i) :=
@@ -117,25 +111,7 @@ theorem integral_fderiv_apply {f : Space → ℝ} {v : Space → Space}
   have h := integral_mul_partial (component_contDiff hv i) hf (compact_component hcv i) i
   simpa only [spatialPartial, fderiv_component hv] using h
 
-theorem integral_fderiv_apply_zero {f : Space → ℝ} {v : Space → Space}
-    (hf : ContDiff ℝ ∞ f) (hv : ContDiff ℝ ∞ v) (hcv : HasCompactSupport v)
-    (hdiv : ∀ x, (∑ i : Fin 3, spatialPartial i v x i) = 0) :
-    (∫ x, fderiv ℝ f x (v x)) = 0 := by
-  rw [integral_fderiv_apply hf hv hcv]
-  simp only [hdiv, mul_zero, integral_zero, neg_zero]
 
-/-- Divergence-free transport contributes zero to the whole-space energy. -/
-theorem integral_transport_energy_zero {w v : Space → Space}
-    (hw : ContDiff ℝ ∞ w) (hv : ContDiff ℝ ∞ v) (hcv : HasCompactSupport v)
-    (hdiv : ∀ x, (∑ i : Fin 3, spatialPartial i v x i) = 0) :
-    (∫ x, ⟪w x, fderiv ℝ w x (v x)⟫_ℝ) = 0 := by
-  have h := integral_fderiv_apply_zero (hw.norm_sq ℝ) hv hcv hdiv
-  have hfun : (fun x => fderiv ℝ (fun y => ‖w y‖ ^ 2) x (v x)) =
-      (fun x => 2 * ⟪w x, fderiv ℝ w x (v x)⟫_ℝ) := by
-    funext x
-    exact fderiv_normsq hw x (v x)
-  rw [hfun, integral_const_mul] at h
-  linarith
 
 theorem integral_inner_partial {f g : Space → Space}
     (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
@@ -155,153 +131,17 @@ theorem integral_inner_partial {f g : Space → Space}
       (compact_partial hcf i))] at h
   exact eq_neg_of_add_eq_zero_left h
 
-theorem integral_laplacian_energy {u : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hcu : HasCompactSupport (fun x : Space => u (t, x))) :
-    (∫ x, ⟪u (t, x), spatialLaplacian u t x⟫_ℝ) =
-      -(∑ i : Fin 3, ∫ x, ‖spatialPartial i (fun y => u (t, y)) x‖ ^ 2) := by
-  have hsum : (∫ x, ⟪u (t, x), spatialLaplacian u t x⟫_ℝ) =
-      ∑ i : Fin 3, ∫ x, ⟪u (t, x),
-        spatialPartial i (spatialPartial i (fun y => u (t, y))) x⟫_ℝ := by
-    simp only [spatialLaplacian, inner_sum]
-    exact integral_finsetSum _ (fun i _ => integrable_inner_left hu.continuous
-      (spatial_partial_contDiff (spatial_partial_contDiff hu i) i).continuous hcu)
-  rw [hsum, ← Finset.sum_neg_distrib]
-  apply Finset.sum_congr rfl
-  intro i _
-  simpa only [spatialPartial, real_inner_self_eq_norm_sq] using!
-    integral_inner_partial hu (spatial_partial_contDiff hu i) hcu i
-
-/-- The pressure need not have compact support: the compact velocity already
-makes every integration-by-parts product integrable. -/
-theorem integral_pressure_energy_zero {u : VelocityField} {p : PressureField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hp : ContDiff ℝ ∞ (fun x : Space => p (t, x)))
-    (hcu : HasCompactSupport (fun x : Space => u (t, x)))
-    (hdiv : ∀ x, spatialDivergence u t x = 0) :
-    (∫ x, ⟪u (t, x), pressureGradient p t x⟫_ℝ) = 0 := by
-  have hfun : (fun x => ⟪u (t, x), pressureGradient p t x⟫_ℝ) =
-      (fun x => fderiv ℝ (fun y => p (t, y)) x (u (t, x))) := by
-    funext x
-    exact inner_pressureGradient p t x (u (t, x))
-  rw [hfun]
-  exact integral_fderiv_apply_zero hp hu hcu hdiv
-
-/-- The full squared spatial L2 norm with ordinary Euclidean volume. -/
-def l2Sq (u : VelocityField) (t : ℝ) : ℝ := ∫ x : Space, ‖u (t, x)‖ ^ 2
-
-def energyRate (u : VelocityField) (t : ℝ) : ℝ :=
-  ∫ x : Space, 2 * ⟪u (t, x), temporalDerivative u t x⟫_ℝ
-
-def dissipation (u : VelocityField) (t : ℝ) : ℝ :=
-  ∑ i : Fin 3, ∫ x : Space, ‖spatialPartial i (fun y => u (t, y)) x‖ ^ 2
-
-theorem dissipation_nonneg (u : VelocityField) (t : ℝ) : 0 ≤ dissipation u t :=
-  Finset.sum_nonneg (fun _ _ => integral_nonneg (fun _ => sq_nonneg _))
-
-/-- The exact forced Navier--Stokes energy balance on all of Euclidean space. -/
-theorem energy_balance {u f : VelocityField} {p : PressureField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hp : ContDiff ℝ ∞ (fun x : Space => p (t, x)))
-    (hf : Continuous (fun x : Space => f (t, x)))
-    (hcu : HasCompactSupport (fun x : Space => u (t, x)))
-    (hdiv : ∀ x, spatialDivergence u t x = 0)
-    (hNS : ∀ x, navierStokesResidual u p t x = f (t, x)) :
-    energyRate u t = -2 * dissipation u t + 2 * ∫ x, ⟪u (t, x), f (t, x)⟫_ℝ := by
-  have hL := (hu.inner ℝ (spatialLaplacian_contDiff hu)).continuous
-  have hN := (hu.inner ℝ ((hu.fderiv_right infty_add_one_le_infty).clm_apply hu)).continuous
-  have hP := (hu.inner ℝ (pressureGradient_contDiff hp)).continuous
-  have hF : Continuous (fun x : Space => ⟪u (t, x), f (t, x)⟫_ℝ) := hu.continuous.inner hf
-  have hiL : Integrable (fun x => ⟪u (t, x), spatialLaplacian u t x⟫_ℝ) :=
-    hL.integrable_of_hasCompactSupport (compact_inner_left hcu)
-  have hiN : Integrable (fun x => ⟪u (t, x), advection u t x⟫_ℝ) :=
-    hN.integrable_of_hasCompactSupport (compact_inner_left hcu)
-  have hiP : Integrable (fun x => ⟪u (t, x), pressureGradient p t x⟫_ℝ) :=
-    hP.integrable_of_hasCompactSupport (compact_inner_left hcu)
-  have hiF : Integrable (fun x => ⟪u (t, x), f (t, x)⟫_ℝ) :=
-    hF.integrable_of_hasCompactSupport (compact_inner_left hcu)
-  have hiLN : Integrable (fun x => ⟪u (t, x), spatialLaplacian u t x⟫_ℝ -
-      ⟪u (t, x), advection u t x⟫_ℝ) := hiL.sub hiN
-  have hiLNP : Integrable (fun x => ⟪u (t, x), spatialLaplacian u t x⟫_ℝ -
-      ⟪u (t, x), advection u t x⟫_ℝ - ⟪u (t, x), pressureGradient p t x⟫_ℝ) := hiLN.sub hiP
-  have hEq : (fun x => ⟪u (t, x), temporalDerivative u t x⟫_ℝ) =
-      (fun x => ⟪u (t, x), spatialLaplacian u t x⟫_ℝ -
-        ⟪u (t, x), advection u t x⟫_ℝ - ⟪u (t, x), pressureGradient p t x⟫_ℝ +
-        ⟪u (t, x), f (t, x)⟫_ℝ) := by
-    funext x
-    have heq : temporalDerivative u t x =
-        spatialLaplacian u t x - advection u t x - pressureGradient p t x + f (t, x) := by
-      have h := hNS x
-      unfold navierStokesResidual at h
-      rw [← h]
-      abel
-    rw [heq]
-    simp only [inner_add_right, inner_sub_right]
-  unfold energyRate
-  rw [integral_const_mul, hEq,
-    integral_add hiLNP hiF,
-    integral_sub hiLN hiP, integral_sub hiL hiN,
-    integral_laplacian_energy hu hcu,
-    integral_pressure_energy_zero hu hp hcu hdiv]
-  have htransport := integral_transport_energy_zero hu hu hcu hdiv
-  change (∫ x, ⟪u (t, x), advection u t x⟫_ℝ) = 0 at htransport
-  rw [htransport]
-  simp only [sub_zero, dissipation]
-  ring
-
-/-- Young's inequality controls the forcing by the two actual squared L2
-norms. All terms are integrable before the integral is compared. -/
-theorem energy_rate_le {u f : VelocityField} {p : PressureField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hp : ContDiff ℝ ∞ (fun x : Space => p (t, x)))
-    (hf : Continuous (fun x : Space => f (t, x)))
-    (hcu : HasCompactSupport (fun x : Space => u (t, x)))
-    (hfi : Integrable (fun x : Space => ‖f (t, x)‖ ^ 2))
-    (hdiv : ∀ x, spatialDivergence u t x = 0)
-    (hNS : ∀ x, navierStokesResidual u p t x = f (t, x)) :
-    energyRate u t ≤ l2Sq u t + l2Sq f t := by
-  have hui := integrable_norm_sq hu.continuous hcu
-  have hip := integrable_inner_left hu.continuous hf hcu
-  have hsum : Integrable (fun x : Space => ‖u (t, x)‖ ^ 2 + ‖f (t, x)‖ ^ 2) := hui.add hfi
-  have hpoint (x : Space) :
-      2 * ⟪u (t, x), f (t, x)⟫_ℝ ≤ ‖u (t, x)‖ ^ 2 + ‖f (t, x)‖ ^ 2 := by
-    have hinner := (le_abs_self ⟪u (t, x), f (t, x)⟫_ℝ).trans
-      (abs_real_inner_le_norm (u (t, x)) (f (t, x)))
-    nlinarith [sq_nonneg (‖u (t, x)‖ - ‖f (t, x)‖)]
-  have hforce : 2 * (∫ x, ⟪u (t, x), f (t, x)⟫_ℝ) ≤ l2Sq u t + l2Sq f t := by
-    rw [← integral_const_mul]
-    unfold l2Sq
-    rw [← integral_add hui hfi]
-    exact integral_mono (hip.const_mul 2) hsum hpoint
-  rw [energy_balance hu hp hf hcu hdiv hNS]
-  have hd := dissipation_nonneg u t
-  linarith
-
-theorem slice_compact {u : VelocityField} {K : Set Space}
-    (hK : IsCompact K) {t : ℝ} (hsupp : tsupport (fun x => u (t, x)) ⊆ K) :
-    HasCompactSupport (fun x => u (t, x)) :=
-  hK.of_isClosed_subset (isClosed_tsupport _) hsupp
-
-theorem zero_outside {u : VelocityField} {K : Set Space} {t : ℝ}
-    (hsupp : tsupport (fun x => u (t, x)) ⊆ K) {x : Space} (hx : x ∉ K) :
-    u (t, x) = 0 :=
-  image_eq_zero_of_notMem_tsupport (f := fun y => u (t, y)) (fun h => hx (hsupp h))
 
 
-/-- Differentiation under the ordinary whole-space energy integral follows
-from joint smoothness and fixed compact spatial support. -/
-theorem energy_hasDerivAt {a b t : ℝ} {u : VelocityField} {K : Set Space}
-    (hK : IsCompact K) (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (hsupp : ∀ r ∈ Icc a b, tsupport (fun x => u (r, x)) ⊆ K)
-    (ht : t ∈ Ioo a b) : HasDerivAt (l2Sq u) (energyRate u t) t := by
-  have hF : ContDiffOn ℝ 1 (fun z : SpaceTime => ‖u z‖ ^ 2) (Icc a b ×ˢ univ) :=
-    (hu.norm_sq ℝ).of_le (natCast_le_infty 1)
-  refine CompactTimeIntegral.hasDerivAt_integral_of_contDiffOn_of_hasDerivAt hK hF ?_ ht ?_
-  · intro r hr x hx
-    rw [zero_outside (hsupp r hr) hx]
-    simp
-  · intro x
-    exact energy_density_derivative (time_differentiable_at_interior hu ht x)
+
+
+
+
+
+
+
+
+
 
 
 

@@ -470,21 +470,9 @@ theorem CycleTransport.axis {ι : Type} {G : Geometry} {p : CycleParameters ι}
         VariableGaugeMean.pressureAliasState p.gauge c u m (bandChartEquiv G.h n m k x,0) i))
   ring
 
-theorem CycleTransport.step {ι : Type} {G : Geometry} {p : CycleParameters ι}
-    {x : CycleState ι} {c : Context Point} {V : Set Plane} {n m k : ℕ}
-    (H : CycleTransport G p x.coefficients c x.state V n m k)
-    (HA : AxisBand G V n m k x.axisymmetricAlias) :
-    StateBand G V n m k (x.step p c).state ∧
-      AxisBand G V n m k (x.step p c).axisymmetricAlias := ⟨H.next, H.axis HA⟩
 
 
 
-theorem iterate_labels {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)
-    (seed : CycleState ι) (j : ℕ) :
-    (CycleState.iterate p c seed j).coefficients.labels = seed.coefficients.labels := by
-  induction j with
-  | zero => rfl
-  | succ j ih => exact ih
 
 
 /-- The primitive wave laws also propagate the complete individual
@@ -589,11 +577,6 @@ theorem iterate_state_axis {ι : Type} (G : Geometry) (p : ℕ → CycleParamete
 
 /-! ## Explicit retention of the current pressure and all temporal aliases -/
 
-noncomputable def temporalAliasAt {ι : Type} (p : ℕ → CycleParameters ι)
-    (c : Context Point) (seed : CycleState ι) (j : ℕ) : Oscillation Point :=
-  let x := CycleState.iterate p c seed j
-  VariableGaugeMean.temporalAliasState (p j).gauge (p j).timeExponent (p j).commonIndex c
-    ((p j).afterSigned x.coefficients c x.state)
 
 
 

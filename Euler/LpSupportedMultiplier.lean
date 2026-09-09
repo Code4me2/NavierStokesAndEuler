@@ -49,10 +49,6 @@ def operator (A : Field (α := α) (V := V)) :
   ((full μ A).comp (supportedSpace μ S hS).subtypeL).codRestrict
     (supportedSpace μ S hS) (full_mem μ S hS A)
 
-/-- The supported operator retains the actual pointwise representative. -/
-theorem operator_ae (A : Field (α := α) (V := V)) (u : supportedSpace (V := V) μ S hS) :
-    ((operator μ S hS A u : supportedSpace μ S hS) : Lp V 2 μ) =ᵐ[μ]
-      fun x => A x ((u : Lp V 2 μ) x) := full_ae μ A u
 
 /-- The actual L² bound only requires control on the set supporting the input. -/
 theorem operator_apply_norm_le (A : Field (α := α) (V := V)) (C : ℝ)

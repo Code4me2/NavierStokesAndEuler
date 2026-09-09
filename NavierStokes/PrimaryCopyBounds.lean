@@ -149,9 +149,6 @@ theorem bilinear {f : ι → D → E} {g : ι → D → F}
         (B * V.growth i x ^ q * v i x) := by gcongr; linarith
     _ = _ := by rw [pow_add]; ring
 
-theorem mul {f g : ι → D → ℝ} (hf : NativeJets V w f) (hg : NativeJets V v g) :
-    NativeJets V (fun i x => w i x * v i x) (fun i x => f i x * g i x) :=
-  hf.bilinear hg (ContinuousLinearMap.mul ℝ ℝ)
 
 theorem smul {f : ι → D → ℝ} {g : ι → D → E}
     (hf : NativeJets V w f) (hg : NativeJets V v g) :
@@ -464,43 +461,6 @@ theorem constant_weight (a : ι → E) (v : ι → ℝ) (hv : ∀ i, 0 ≤ v i)
     exact mul_nonneg (mul_nonneg (zero_le_one.trans hC)
       (pow_nonneg (zero_le_one.trans (V.one_le_growth i hx)) _)) (hv i)
 
-/-- A compactly contained outer cutoff extends the true native function.
-Every cutoff derivative is included in the product estimate. -/
-theorem localize {V' : JetDomain ι D} {a : ι → D → ℝ}
-    (hf : NativeJets V w f) (ha : PolynomialJets V'.toDomain a)
-    (hscale : ∀ i, V'.scale i = V.scale i)
-    (hsub : ∀ i, V.carrier i ⊆ V'.carrier i)
-    (hgrowth : ∀ i x, x ∈ V.carrier i → V.growth i x = V'.growth i x)
-    (hw : ∀ i x, x ∈ V'.carrier i → 0 ≤ w i x)
-    (hsupport : ∀ i, tsupport (a i) ∩ V'.carrier i ⊆ V.carrier i) :
-    NativeJets V' w (fun i x => a i x • f i x) := by
-  have ha' : PolynomialJets V.toDomain a := by
-    refine ⟨fun i => (ha.smooth i).mono (hsub i), ?_⟩
-    intro m
-    obtain ⟨C, hC, p, hb⟩ := ha.bound m
-    exact ⟨C, hC, p, fun i j hj x hx => by simpa only [hscale] using hb i j hj x (hsub i hx)⟩
-  have hp := hf.polynomial_smul ha'
-  have hout (i : ι) (x : D) (hx : x ∈ V'.carrier i) (hn : x ∉ V.carrier i) :
-      (fun y => a i y • f i y) =ᶠ[𝓝 x] fun _ => (0 : E) := by
-    have ht : x ∉ tsupport (a i) := fun ht => hn (hsupport i ⟨ht, hx⟩)
-    filter_upwards [notMem_tsupport_iff_eventuallyEq.mp ht] with y hy
-    simp only [hy, Pi.zero_apply, zero_smul]
-  refine ⟨hw, ?_, ?_⟩
-  · intro i x hx
-    by_cases hi : x ∈ V.carrier i
-    · exact ((hp.smooth i).contDiffAt ((V.isOpen i).mem_nhds hi)).contDiffWithinAt
-    · exact (contDiffAt_const.congr_of_eventuallyEq (hout i x hx hi)).contDiffWithinAt
-  · intro m
-    obtain ⟨C, hC, p, hb⟩ := hp.bound m
-    refine ⟨C, hC, p, ?_⟩
-    intro i x hx j hj
-    by_cases hi : x ∈ V.carrier i
-    · simpa only [hgrowth i x hi] using hb i x hi j hj
-    · rw [PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq (hout i x hx hi) j,
-        iteratedFDeriv_fun_zero]
-      simp only [Pi.zero_apply, norm_zero]
-      exact mul_nonneg (mul_nonneg (zero_le_one.trans hC)
-        (pow_nonneg (zero_le_one.trans (V'.one_le_growth i hx)) _)) (hw i x hx)
 
 end NativeJets
 

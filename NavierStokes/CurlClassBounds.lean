@@ -488,8 +488,6 @@ section ExplicitGraph
 
 variable {A : Type*} [NormedAddCommGroup A] [NormedSpace ℝ A]
 
-noncomputable def radialField (K : ℝ → ℝ) (v : A) (x : ℝ × A) : ℝ × A :=
-  (1, K x.1 • v)
 
 
 

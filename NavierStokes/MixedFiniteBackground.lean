@@ -64,10 +64,6 @@ theorem nonemptyPrefix_jetRate {l : Filter D} {q : D → ℝ} {A : ℕ → D →
 
 end General
 
-/-- The one derivative needed for the potential is paid independently of
-the correction index. The direct field pays no curl derivative. -/
-noncomputable def backgroundLoss (LA LB LAzero LBzero : ℕ → ℝ) (m : ℕ) : ℝ :=
-  max (max (LA (m + 1)) (LAzero (m + 1))) (max (LB m) (LBzero m))
 
 
 noncomputable def stageVelocity (A B : ℕ → VelocityField) (j : ℕ) : VelocityField :=

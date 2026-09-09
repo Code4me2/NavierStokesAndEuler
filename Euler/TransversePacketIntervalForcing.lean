@@ -65,13 +65,6 @@ def terminalInitial : InitialData P D where
     C(Icc (0 : ℝ) D.T,CylinderL2 P U) →L[ℝ] CylinderL2 P U).contDiff.comp (B.coordinatePath_orbit G)
   mean_zero := B.coordinatePath_mean_zero G ⟨D.T,D.T_pos.le,le_rfl⟩
 
-/-- The history trace in the same fixed reference-plane coordinates is the
-actual initial datum passed to the forward interval. -/
-def forwardInitial (τ : ℝ) (hτ : 0 < τ) (hτT : τ < D.T) :
-    InitialData P (D.tail τ hτ.le hτT) where
-  value := ((B.initial τ hτ hτT.le).terminalInitial (G.initial τ hτ hτT.le)).value
-  orbit := ((B.initial τ hτ hτT.le).terminalInitial (G.initial τ hτ hτT.le)).orbit
-  mean_zero := ((B.initial τ hτ hτT.le).terminalInitial (G.initial τ hτ hτT.le)).mean_zero
 
 
 end HistoryData

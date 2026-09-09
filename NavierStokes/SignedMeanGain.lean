@@ -935,13 +935,6 @@ namespace NativeData
 
 variable {G : Geometry} (B : NativeData G)
 
-noncomputable def block (A : PartitionedCovariance.UnsignedLabel → ℕ → Point → SignedWaveUpdate.Vec2)
-    (l : NativeIndex) : HarmonicBlock Point :=
-  SignedWaveUpdate.coefficientBlock (B.frequency l) (B.phase l) (B.angular l)
-    (fun n x => CurlClassBounds.complexify
-      ((PartitionedCovariance.physicalOuter B.exponent (B.index n) l.1 *
-        (Real.sqrt (PartitionedCovariance.physicalViscosity B.exponent (B.index n) l.1) *
-          A l.1 n x l.2 * B.mask l.1 n x)) • B.unit l n x)) 0
 
 
 

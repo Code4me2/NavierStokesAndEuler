@@ -22,8 +22,6 @@ def angleDirection : Domain := (0, (0, 1))
 def spatialInjection : Space →L[ℝ] Domain :=
   (0 : Space →L[ℝ] ℝ).prod ((ContinuousLinearMap.id ℝ Space).prod (0 : Space →L[ℝ] ℝ))
 
-def jet {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (f : Domain → E) (z : Domain) : Jet E := (f z, fderiv ℝ f z)
 
 def linearPart (M : Space →L[ℝ] Space) : VectorJet →ₗ[ℝ] Space where
   toFun J := J.2 timeDirection + M J.1
@@ -73,11 +71,6 @@ def fieldSum {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   evaluate M κ (fun n => u n z)
 
 
-/-- This is the literal normalized momentum expression evaluated through its true first derivatives. -/
-def momentumResidual (κ : ℝ) (FInv M : Space →L[ℝ] Space) (m : Space)
-    (u : Domain → Space) (p : Domain → ℝ) (z : Domain) : Space :=
-  linearPart M (jet u z) + slowPressure FInv (jet p z) + κ⁻¹ • fastPressure m (jet p z) +
-    slowAdvection FInv (jet u z) (jet u z) + κ⁻¹ • fastAdvection m (jet u z) (jet u z)
 
 
 end EulerPacketPointJets

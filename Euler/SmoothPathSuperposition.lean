@@ -103,8 +103,5 @@ private theorem superposition_contDiff_nat (n : ℕ) :
     exact contDiff_multiplier A.derivative.superposition
       (ih (Space →L[ℝ] V) A.derivative)
 
-theorem superposition_contDiff (A : SmoothCoefficientPath K V) :
-    ContDiff ℝ ∞ A.superposition :=
-  contDiff_infty.mpr (fun n => superposition_contDiff_nat n V A)
 
 end EulerMeanCoefficients.SmoothCoefficientPath

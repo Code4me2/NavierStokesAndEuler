@@ -97,11 +97,6 @@ def pressureL2Operator (A : SmoothCoefficient period) (κ : ℝ) (m : Vector3) (
     (pressureSolver (gradientSpace period κ m) A.operator c hc
       (coefficientOperator_coercive A.coefficient A.measurable A.bound A.norm_bound c hpos))
 
-/-- The bounded L² pressure operator agrees with the already constructed actual coercive pressure. -/
-@[simp]
-theorem pressureL2Operator_apply (A : SmoothCoefficient period) (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v, v⟫_ℝ) (f : LiftL2 period) :
-    pressureL2Operator period A κ m c hc hpos f = A.pressure κ m c hc hpos f := rfl
 
 /-- The genuine coercive projected pressure inverse is a bounded map on every finite Sobolev space. -/
 def pressureSobolevOperator {q : ℕ} {A : SmoothCoefficient period}

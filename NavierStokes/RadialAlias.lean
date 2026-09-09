@@ -205,16 +205,6 @@ theorem wholeAlias_sourceJet [CompleteSpace F] {a b M : ℝ} {v Y : E}
 
 
 
-theorem sourceJet_radiallySupported {a b : ℝ}
-    (J : (ℝ × E → F) → (ℝ × E → F)) (f : ℝ × E → F) (p : ℕ)
-    (hf : RadiallySupported a b f)
-    (hs : ∀ n < p, RadiallySupported a b (J (sourceJet J f n))) :
-    RadiallySupported a b (sourceJet J f p) := by
-  cases p with
-  | zero => exact hf
-  | succ p =>
-      rw [sourceJet_succ]
-      exact radialSupport_slowDeriv (hs p (Nat.lt_succ_self p))
 
 
 

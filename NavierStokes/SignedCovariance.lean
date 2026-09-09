@@ -22,7 +22,6 @@ open scoped BigOperators Topology ContDiff
 
 abbrev Vec2 := Fin 2 → ℝ
 abbrev Mat2 := Matrix (Fin 2) (Fin 2) ℝ
-abbrev Plane := TorusInverse.Plane
 
 /-- The numerator is the actual inverse-matrix solve. -/
 noncomputable def increment (H : Mat2) (T R : Vec2) (j : Fin 2) : ℝ :=
@@ -81,33 +80,18 @@ theorem cross_reconstruct (H : Mat2) (T R : Vec2)
 /-! ## The same physical masks, slots, and phases for arbitrary coefficients -/
 
 
-noncomputable def tangentWith {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt}
-    {U : UnsignedLabel} (P : PairData sys U) (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
-    (outer ε : ℝ) (a : Vec2) (q : ℝ) (x : SlotColoring.Position) (j i : Fin 2) : Plane → ℝ → ℝ :=
-  wave (outer * (Real.sqrt ε * a j * mask D U q x))
-    (SlotColoring.nativeIndex h U.1) (P.rawTangent hdet j i) (P.modes j) (P.phases j)
 
 
 
 
 
 
-noncomputable def assembledTangentWith {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (a : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (i : Fin 2) (Y : Plane) (θ : ℝ) : ℝ :=
-  ∑ᶠ v : UnsignedLabel × Fin 2, tangentWith (P v.1) hdet (outer v.1) (ε v.1) (a v.1) q x v.2 i Y θ
 
 
 
 
 
 
-noncomputable def signedTangent {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T R : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (i : Fin 2) : Plane → ℝ → ℝ :=
-  assembledTangentWith P hdet outer ε (fun U => increment (P U).matrix (T U) (R U)) q x i
 
 theorem cross_reconstruct_component (H : Mat2) (T R : Vec2)
     (hcone : SmoothCovariance.StrictCone H T) (i : Fin 2) :

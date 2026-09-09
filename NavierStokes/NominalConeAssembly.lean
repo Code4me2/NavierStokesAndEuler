@@ -526,36 +526,6 @@ theorem shear_dilation_cancel {r z f : ℝ} (hr : r ≠ 0) (hz : z ≠ 0) (hf : 
     mul_div_mul_left _ _ (mul_ne_zero hr hz)]
   field_simp [hf] ; ring
 
-/-- The logarithmic radial chart changes actual derivatives, not independent
-formal jets. This statement is also valid for the matching profile before
-the heat splice. -/
-theorem physical_log_shears {D : RadialDomain} (P : Profiles D) {R : ℝ}
-    (hR : 0 < R) (p : Point) (hp : chart R p ∈ D.carrier)
-    (hf : P.f (chart R p) ≠ 0) :
-    ActivationContinuation.shearA P (chart R p) =
-        1 - 2 * deriv (fun y => P.E (R * Real.exp y, p.2)) p.1 / P.E (chart R p) ∧
-      ActivationContinuation.shearB P (chart R p) =
-        -2 * deriv (fun y => P.U (R * Real.exp y, p.2)) p.1 / P.E (chart R p) := by
-  have hc := (Real.hasDerivAt_exp p.1).const_mul R
-  have hfd := (radialPartial_hasDerivAt D P.f_smooth hp).comp p.1 hc
-  have hud := (radialPartial_hasDerivAt D P.U_smooth hp).comp p.1 hc
-  have hr := (((hasDerivAt_id p.1).div_const 2).exp).const_mul (Real.sqrt (2 * R))
-  dsimp only [chart, Function.comp_def, id_eq] at hfd hud hr
-  have he : (fun y => P.E (R * Real.exp y, p.2)) =
-      (fun y => (Real.sqrt (2 * R) * Real.exp (y / 2)) * P.f (R * Real.exp y, p.2)) := by
-    funext y
-    exact congrArg (fun t => t * P.f (R * Real.exp y, p.2)) (sqrt_chart hR y)
-  constructor
-  · rw [he, (hr.fun_mul hfd).deriv]
-    change -2 * (R * Real.exp p.1) * radialPartial P.f (chart R p) / P.f (chart R p) = _
-    rw [show P.E (chart R p) = (Real.sqrt (2 * R) * Real.exp (p.1 / 2)) * P.f (chart R p) from
-      congrArg (fun t => t * P.f (chart R p)) (sqrt_chart hR p.1)]
-    exact shear_dilation_cancel (Real.sqrt_pos.2 (by positivity)).ne'
-      (Real.exp_ne_zero _) hf _ _
-  · rw [hud.deriv]
-    unfold ActivationContinuation.shearB
-    dsimp only [chart]
-    ring
 
 theorem physical_shear_cancel {r f X : ℝ} (hr : r ≠ 0) (hf : f ≠ 0)
     (hsq : r ^ 2 = 2 * X) (df : ℝ) :

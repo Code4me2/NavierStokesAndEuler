@@ -184,9 +184,6 @@ theorem chartInner_transition {h Q Q' : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
 
 
 
-/-- The usual open annular-chart domain; profile annulus restrictions can
-be added using the chart-transition invariance `chartX_transition`. -/
-noncomputable def chartDomain : Set ChartPoint := {p | 0 < p.1 ∧ 0 < p.2.2}
 
 
 

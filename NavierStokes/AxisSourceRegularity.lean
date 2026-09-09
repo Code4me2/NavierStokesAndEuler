@@ -229,14 +229,6 @@ structure Jet2 (K : Type*) where
   dex : K
   dee : K
 
-noncomputable def profileJet (v : InnerProfile) (w : InnerPoint) : Jet2 ℝ where
-  value := v w
-  dx := partialX v w
-  de := partialEta v w
-  dxx := partialX (partialX v) w
-  dxe := partialEta (partialX v) w
-  dex := partialX (partialEta v) w
-  dee := partialEta (partialEta v) w
 
 
 
@@ -278,12 +270,8 @@ structure AnalyticJetAt (J : ℂ → Jet2 ℂ) (e : ℂ) : Prop where
 
 
 
-noncomputable def lowerPairs (n : ℕ) : Finset (ℕ × ℕ) :=
-  (Finset.antidiagonal n).filter (fun ij => 0 < ij.1 ∧ 0 < ij.2)
 
 
-noncomputable def lowerConvolution (a b : ℕ → InnerProfile) (n : ℕ) (w : InnerPoint) : ℝ :=
-  ∑ ij ∈ lowerPairs n, a ij.1 w * b ij.2 w
 
 noncomputable def previousOmegaDivX (h : ℝ) (U v : ℕ → InnerProfile) : ℕ → InnerProfile
   | 0 => fun _ => 0

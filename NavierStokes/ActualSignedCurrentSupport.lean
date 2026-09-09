@@ -61,18 +61,6 @@ theorem pressureMode_zero (l : Index B N0) (u : State Point) (n : ℕ) {x : Full
   simp only [ActualSignedPotentialCoherence.pressureMode, mode,
     (common_zero l u n hx hn).2, zero_mul]
 
-theorem native_zero_germs (l : Index B N0) (u : State Point) (n : ℕ) {x : FullPoint}
-    (hx : x.1 ∈ ActualInitialization.geometry.domain)
-    (hn : l ∉ activeLabels standardRegion B N0 n) :
-    (ActualSignedPotentialCoherence.potential l u n =ᶠ[𝓝 x] fun _ => 0) ∧
-      (ActualSignedPotentialCoherence.pressureMode l u n =ᶠ[𝓝 x] fun _ => 0) := by
-  have hU : {y : FullPoint | y.1 ∈ ActualInitialization.geometry.domain} ∈ 𝓝 x :=
-    (ActualInitialization.geometry.domain_open.preimage continuous_fst).mem_nhds hx
-  constructor
-  · filter_upwards [hU] with y hy
-    exact potential_zero l u n hy hn
-  · filter_upwards [hU] with y hy
-    exact pressureMode_zero l u n hy hn
 
 theorem cylindrical_zero (l : Index B N0) (u : State Point) (n : ℕ)
     {z : ProblemStatement.SpaceTime}

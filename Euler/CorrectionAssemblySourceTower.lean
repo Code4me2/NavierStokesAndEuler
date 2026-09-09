@@ -82,8 +82,6 @@ open Set EulerLiftedGradientSpace EulerCylinderSobolevSpace EulerAllOrderCorrect
 variable (period : ℝ) [Fact (0 < period)]
 variable {T : ℝ} {hT : 0 < T} {A : Data period T}
 
-def Budget.rawSourceTower (B : Budget period hT A) : FieldTower period T :=
-  (B.family period).rawSourceTower period (B.comparisonData period)
 
 def Budget.timeDerivativeTower (B : Budget period hT A) : FieldTower period T :=
   (B.family period).timeDerivativeTower period (B.comparisonData period)

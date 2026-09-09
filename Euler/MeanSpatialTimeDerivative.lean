@@ -21,35 +21,7 @@ theorem hasDerivWithinAt_submodule_iff {E : Type*} [NormedAddCommGroup E] [Norme
   rfl
 
 
-theorem ordinarySobolev_hasDerivWithinAt (q : ℕ) (u : ℝ → EulerMeanSolenoidal.L2)
-    (hu : ∀ t, SmoothOrbit (u t)) (v : EulerMeanSolenoidal.L2) (hv : SmoothOrbit v)
-    (U : Set ℝ) (t : ℝ)
-    (hjet : ∀ n ≤ q, HasDerivWithinAt
-      (fun s => iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a (u s)) 0)
-      (iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a v) 0) U t) :
-    HasDerivWithinAt (fun s => ordinarySobolev q (u s) (hu s)) (ordinarySobolev q v hv) U t := by
-  apply (hasDerivWithinAt_submodule_iff (sobolevSubspace 1 q).toSubmodule _ _ _ _).mpr
-  apply hasDerivWithinAt_pi.mpr
-  intro w
-  change HasDerivWithinAt (fun s => (ordinarySobolev q (u s) (hu s)).val w)
-    ((ordinarySobolev q v hv).val w) U t
-  simp_rw [ordinarySobolev_coordinate]
-  let L := ordinaryLift.toContinuousLinearMap.comp
-    (ContinuousMultilinearMap.apply ℝ (fun _ : Fin w.1.val => Space) EulerMeanSolenoidal.L2
-      (coordinateTuple w.2))
-  exact L.hasFDerivAt.comp_hasDerivWithinAt t (hjet w.1.val (Nat.le_of_lt_succ w.1.isLt))
 
 
-theorem representative_hasDerivWithinAt (u : ℝ → EulerMeanSolenoidal.L2)
-    (hu : ∀ t, SmoothOrbit (u t)) (v : EulerMeanSolenoidal.L2) (hv : SmoothOrbit v)
-    (U : Set ℝ) (t : ℝ)
-    (hjet : ∀ n ≤ 3, HasDerivWithinAt
-      (fun s => iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a (u s)) 0)
-      (iteratedFDeriv ℝ n (fun a : Space => EulerMeanSolenoidal.translation a v) 0) U t)
-    (x : Space) :
-    HasDerivWithinAt (fun s => representative (u s) (hu s) x) (representative v hv x) U t := by
-  have H := (pointEvaluation 1 (x, 0)).hasFDerivAt.comp_hasDerivWithinAt t
-    (ordinarySobolev_hasDerivWithinAt 3 u hu v hv U t hjet)
-  simpa only [Function.comp_def, pointEvaluation_ordinary] using H
 
 end EulerMeanSmoothRepresentative

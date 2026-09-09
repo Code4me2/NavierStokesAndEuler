@@ -21,8 +21,6 @@ def boundedOfCompactSupport (f : E → V) (hf : Continuous f)
   continuous_toFun := hf
   map_bounded' := Metric.isBounded_range_iff.mp (hs.isCompact_range hf).isBounded
 
-@[simp] theorem boundedOfCompactSupport_apply (f : E → V) (hf : Continuous f)
-    (hs : HasCompactSupport f) (x : E) : boundedOfCompactSupport f hf hs x = f x := rfl
 
 /-- Uniformly compact spatial support upgrades joint continuity to continuity in the
 bounded-continuous-function norm. No compactness assumption on the parameter space is needed. -/
@@ -64,9 +62,5 @@ def compactSupportBoundedPath
     (hK.of_isClosed_subset (isClosed_tsupport _) (hs t))
   continuous_toFun := continuous_boundedOfCompactSupport u hu K hK hs
 
-@[simp] theorem compactSupportBoundedPath_apply
-    (u : A × E → V) (hu : Continuous u) (K : Set E) (hK : IsCompact K)
-    (hs : ∀ t, tsupport (fun x => u (t, x)) ⊆ K) (t : A) (x : E) :
-    compactSupportBoundedPath u hu K hK hs t x = u (t, x) := rfl
 
 end EulerComparator

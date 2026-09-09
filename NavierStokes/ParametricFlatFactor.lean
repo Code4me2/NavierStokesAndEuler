@@ -209,15 +209,6 @@ theorem factor_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
     (kernel_jet_measurable c j hb) (kernel_locallyDominated hc j hb)
 
 
-theorem primitive_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) :
-    ContDiff ℝ ∞ (primitive c j b) := by
-  have heq : primitive c j b =
-      fun y => FlatPrimitive.scale c j y.2 * factor c j b y :=
-    funext (primitive_eq_scale_mul_factor c j b)
-  rw [heq]
-  exact ((FlatPrimitive.scale_contDiff hc j).comp contDiff_snd).mul
-    (factor_contDiff hc j hb)
 
 
 

@@ -253,40 +253,6 @@ theorem cutPressure_eventuallyEq (p : PressureField) {z : SpaceTime}
   change spatialCutoff w.2 = 1 at hw
   simp only [cutPressure, hw, one_mul]
 
-/-- Local equality includes all nearby physical times and all spatial directions. -/
-theorem periodicPotential_eventuallyEq (A : VelocityField) {z : SpaceTime}
-    (hz : z.2 ∈ plateau) : periodicPotential A =ᶠ[𝓝 z] A :=
-  (PeriodicLocalization.periodize_eventuallyEq (cutPotential_supported A)
-    (plateau_subset_innerCube hz)).trans (cutPotential_eventuallyEq A hz)
-
-theorem periodicVelocity_eventuallyEq (A : VelocityField) {z : SpaceTime}
-    (hz : z.2 ∈ plateau) : periodicVelocity A =ᶠ[𝓝 z] SpatialCurl.spatialCurl A :=
-  SolenoidalDiagonal.spatialCurl_eventuallyEq (periodicPotential_eventuallyEq A hz)
-
-
-theorem periodicVelocity_eq (A : VelocityField) {z : SpaceTime} (hz : z.2 ∈ plateau) :
-    periodicVelocity A z = SpatialCurl.spatialCurl A z :=
-  (periodicVelocity_eventuallyEq A hz).self_of_nhds
-
-
-
-
-
-
-
-theorem periodicVelocity_origin (A : VelocityField) (t : ℝ) :
-    periodicVelocity A (t, 0) = SpatialCurl.spatialCurl A (t, 0) :=
-  periodicVelocity_eq A zero_mem_plateau
-
-
-
-/-- The previously constructed time switch is applied to the spatially
-localized fields.  It is independent of the spatial variables. -/
-noncomputable def localizedVelocity (A : VelocityField) : VelocityField :=
-  TimeLocalization.activatedVelocity (periodicVelocity A)
-
-noncomputable def localizedPressure (p : PressureField) : PressureField :=
-  TimeLocalization.activatedPressure (periodicPressure p)
 
 
 
@@ -304,11 +270,6 @@ noncomputable def localizedPressure (p : PressureField) : PressureField :=
 
 
 
-theorem localizedVelocity_eq (A : VelocityField) {z : SpaceTime}
-    (ht : 3 / 4 ≤ z.1) (hz : z.2 ∈ plateau) :
-    localizedVelocity A z = SpatialCurl.spatialCurl A z := by
-  rw [localizedVelocity, TimeLocalization.activatedVelocity_eq_late _ ht,
-    periodicVelocity_eq A hz]
 
 
 
@@ -317,18 +278,21 @@ theorem localizedVelocity_eq (A : VelocityField) {z : SpaceTime}
 
 
 
-theorem localizedVelocity_origin (A : VelocityField) {t : ℝ} (ht : 3 / 4 ≤ t) :
-    localizedVelocity A (t, 0) = SpatialCurl.spatialCurl A (t, 0) :=
-  localizedVelocity_eq A ht zero_mem_plateau
 
-theorem localizedVelocity_origin_blowup (A : VelocityField)
-    (hA : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖) (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ => ‖localizedVelocity A (t, 0)‖) (𝓝[<] 1) atTop := by
-  apply hA.congr'
-  have hlate : ∀ᶠ t in 𝓝[<] (1 : ℝ), 3 / 4 < t :=
-    mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds (by norm_num))
-  filter_upwards [hlate] with t ht
-  rw [localizedVelocity_origin A ht.le]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 private theorem unbounded_of_origin_blowup {u : VelocityField}
     (hu : Tendsto (fun t : ℝ => ‖u (t, 0)‖) (𝓝[<] 1) atTop) :
@@ -343,10 +307,6 @@ private theorem unbounded_of_origin_blowup {u : VelocityField}
   exact ⟨t, 0, ⟨(le_max_left _ _).trans_lt hlo, ht⟩,
     (le_max_right _ _).trans_lt hlo, hMt⟩
 
-theorem localizedVelocity_speed_unbounded (A : VelocityField)
-    (hA : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl A (t, 0)‖) (𝓝[<] 1) atTop) :
-    SpeedUnboundedAtOne (localizedVelocity A) :=
-  unbounded_of_origin_blowup (localizedVelocity_origin_blowup A hA)
 
 
 end

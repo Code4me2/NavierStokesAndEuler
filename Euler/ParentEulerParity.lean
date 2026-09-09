@@ -14,17 +14,8 @@ variable {A : Parent} (E : Evolution A) (O : OddData A)
 
 include O
 
-theorem velocity_odd (t : Icc (0 : ℝ) A.T) : Function.Odd (fun x => E.velocity (t,x)) := by
-  intro x
-  change E.velocity (t,-x)= -E.velocity (t,x)
-  rw [E.velocity_pullback,E.velocity_pullback,E.inverse.odd O t x,O.velocity t]
 
 
-theorem velocity_zero (t : Icc (0 : ℝ) A.T) : E.velocity (t,0)=0 := by
-  ext i
-  have hi : Function.Odd (fun x : Space => (E.velocity (t,x)) i) :=
-    fun x => congrArg (fun v : Space => v i) (E.velocity_odd O t x)
-  exact hi.map_zero
 
 
 theorem strain_origin (t : Icc (0 : ℝ) A.T) :

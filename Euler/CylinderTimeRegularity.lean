@@ -28,11 +28,6 @@ def pointField (p : C(K,LiftL2 period))
     (t : K) (x : LiftDomain period) : Space :=
   EulerSobolevPointEvaluation.pointEvaluation period x (sobolevPath period 3 p hp t)
 
-/-- The reconstructed field is jointly continuous in time and cylinder position. -/
-theorem pointField_joint_continuous (p : C(K,LiftL2 period))
-    (hp : ContDiff ℝ ∞ (fun a : LiftTangent => pathTranslate period a p)) :
-    Continuous (fun z : K × LiftDomain period => pointField period p hp z.1 z.2) :=
-  EulerSobolevJointEvaluation.path_representative_joint_continuous period (sobolevPath period 3 p hp)
 
 /-- The bounded point evaluation is exactly the smooth representative of each actual L² slice. -/
 theorem pointField_eq_representative (p : C(K,LiftL2 period))

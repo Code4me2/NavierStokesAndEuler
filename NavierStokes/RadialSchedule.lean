@@ -24,10 +24,6 @@ open MeasureTheory
 
 namespace NavierStokes.RadialSchedule
 
-def axialExponent (h : ℝ) : ℝ := 1 / 2 - h
-
-
-def coordinateFactor (h η : ℝ) : ℝ := 1 - 2 * h * η ^ 2
 
 
 
@@ -40,7 +36,8 @@ def coordinateFactor (h η : ℝ) : ℝ := 1 - 2 * h * η ^ 2
 
 
 
-def radiusProfile (X₀ y : ℝ) : ℝ := X₀ * Real.exp y
+
+
 
 
 

@@ -61,9 +61,6 @@ def pathPullback (A : C(K,E →ᵇ V)) (d : C(K,E →ᵇ E))
     (L : ℝ≥0) (hL : ∀ t, LipschitzWith L (A t)) : C(K,E →ᵇ V) :=
   ⟨fun t => pullback (A t) (d t), continuous_pullback A d L hL⟩
 
-@[simp] theorem pathPullback_apply (A : C(K,E →ᵇ V)) (d : C(K,E →ᵇ E))
-    (L : ℝ≥0) (hL : ∀ t, LipschitzWith L (A t)) (t : K) (x : E) :
-    pathPullback A d L hL t x = A t (x+d t x) := rfl
 
 end EulerBoundedFieldPullback
 

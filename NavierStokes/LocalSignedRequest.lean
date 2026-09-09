@@ -126,8 +126,6 @@ noncomputable def inverseProfileMap (coord : ℝ) (x : Point) : Point :=
 @[simp] theorem chartQ_profileMap (coord : ℝ) (x : Point) :
     MeanRankUpdate.chartQ coord (profileMap coord x) = MeanRankUpdate.chartQ coord x := rfl
 
-@[simp] theorem chartQ_inverseProfileMap (coord : ℝ) (x : Point) :
-    MeanRankUpdate.chartQ coord (inverseProfileMap coord x) = MeanRankUpdate.chartQ coord x := rfl
 
 theorem profileMap_inverse (coord : ℝ) (x : Point) (hq : 0 < MeanRankUpdate.chartQ coord x) :
     profileMap coord (inverseProfileMap coord x) = x := by
@@ -546,16 +544,6 @@ theorem meanClass_liftedTorusAverage {coord : ℝ} (U : SlowRegion coord)
   intro n x hx
   rw [torusAverage_inverseProfileMap, inverseProfileMap_profile coord x (U.chartQ_pos hx.1)]
 
-theorem meanClass_centered {coord : ℝ} (U : SlowRegion coord)
-    (a b cL cR : ℝ) (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    {α : ℝ} {f : ℕ → Point → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (PhysicalMeanDomain.slowDomain U.carrier))
-    (hclass : MeanClass (movingStripData U a b cL cR ha hcL hcR ε L hε hεone hL) α f) :
-    MeanClass (movingStripData U a b cL cR ha hcL hcR ε L hε hεone hL) α
-      (fun n => TemporalMeanUpdate.centered (f n)) :=
-  MeanIncrementBounds.Class.sub hclass
-    (meanClass_liftedTorusAverage U a b cL cR ha hcL hcR ε L hε hεone hL hf hclass)
 
 /-- The physical signed primitive, in the actual moving weight, costs no
 power of epsilon.  The only constants come from the fixed profile and the

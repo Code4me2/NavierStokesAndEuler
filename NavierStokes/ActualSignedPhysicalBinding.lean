@@ -29,7 +29,6 @@ abbrev Point := LocalSignedRequest.Point
 abbrev Cylinder := PhysicalSignedWave.Cylinder
 abbrev Slow := PhaseCalculus.Slow
 abbrev Plane := TorusInverse.Plane
-abbrev Space := ProblemStatement.Space
 abbrev Label (B N0 : ℕ) := ActualSignedStageControls.SignedLabel B N0
 
 open CorrectionInitialization CorrectionInitialization.ActualPrimary
@@ -69,10 +68,6 @@ noncomputable def toCommonCylinder (l : Label B N0) : Cylinder ≃L[ℝ] Cylinde
   PhysicalResidualTZ.swapCylinder.toContinuousLinearEquiv.trans
     ((toCommon l).prodCongr (ContinuousLinearEquiv.refl ℝ ℝ))
 
-@[simp] theorem toCommon_apply (l : Label B N0) (x : Point) :
-    toCommon l x = (x.1, (x.2.1,
-      (CommonCoverSolve.coverPower (ChartScales.nativeIndex h (reference l) -
-        CommonWindow.index h (reference l))).symm x.2.2)) := rfl
 
 @[simp] theorem toCommonCylinder_apply (l : Label B N0) (x : Cylinder) :
     toCommonCylinder l x = ((x.1.1, ((x.1.2.1.2, x.1.2.1.1),

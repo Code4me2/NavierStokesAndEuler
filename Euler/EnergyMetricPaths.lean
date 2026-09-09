@@ -69,20 +69,5 @@ theorem energyLoss_of_value_eq {p q : ℕ} (N : ℕ) (hp : N+6 ≤ p) (hq : N+6 
   rw [energyValues_eq_word, energyValues_eq_word]
   exact word_of_value_eq period u v huv (energyLength_le hp I a) (energyLength_le hq I a) (energyWord I a)
 
-/-- Genuine maximal-regularity representatives have exactly the original metric energy and loss almost everywhere in time. -/
-theorem maximal_metric_paths {q : ℕ} (N : ℕ) (hN : N+6 ≤ q+1) (T : ℝ) (hT : 0 ≤ T)
-    (R : C(Icc (0 : ℝ) T, ℝ)) (K : C(Icc (0 : ℝ) T, LiftL2 period →L[ℝ] LiftL2 period))
-    (e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1))) (U : TimeLp T (SobolevSpace period (2+q)))
-    (hU : Filter.Tendsto (fun n => pathLp T hT (maximalApproximation period q T n e)) Filter.atTop (𝓝 U)) :
-    ∀ᵐ t ∂timeMeasure T,
-      energyNorm period N (by omega : N+6 ≤ (q+1)+1) (R (projIcc 0 T hT t)) (K (projIcc 0 T hT t))
-        (reindexMaximalTime period q T U t) = energyPath period N hN T R K e (projIcc 0 T hT t) ∧
-      energyLoss period N (by omega : N+6 ≤ (q+1)+1) (R (projIcc 0 T hT t)) (K (projIcc 0 T hT t))
-        (reindexMaximalTime period q T U t) = lossPath period N hN T R K e (projIcc 0 T hT t) := by
-  filter_upwards [reindexMaximalTime_restriction period T hT e U hU] with t ht
-  have hv : value period (reindexMaximalTime period q T U t) = value period (e (projIcc 0 T hT t)) := congrArg (value period) ht
-  rw [energyPath_apply, lossPath_apply]
-  exact ⟨energyNorm_of_value_eq period N (by omega) hN _ _ _ _ hv,
-    energyLoss_of_value_eq period N (by omega) hN _ _ _ _ hv⟩
 
 end EulerEnergyMetricPaths

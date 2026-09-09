@@ -24,7 +24,6 @@ def normalMap : (Space →L[ℝ] Space) →L[ℝ] Space :=
     (ContinuousLinearMap.adjoint.toContinuousLinearEquiv.toContinuousLinearMap :
       (Space →L[ℝ] Space) →L[ℝ] (Space →L[ℝ] Space))
 
-@[simp] theorem normalMap_apply (A : Space →L[ℝ] Space) : normalMap m₀ A = A.adjoint m₀ := rfl
 
 theorem normalMap_norm (hm₀ : ‖m₀‖ = 1) : ‖normalMap m₀‖ ≤ 1 := by
   apply opNorm_le_bound _ zero_le_one

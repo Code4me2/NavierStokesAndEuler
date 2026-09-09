@@ -64,12 +64,6 @@ theorem field_smooth (m : Space → Space) (A : LiftDomain P → Space)
   rw [he]
   exact hQ.comp (contDiff_const.add contDiff_id)
 
-theorem field_continuous (m : Space → Space) (A : LiftDomain P → Space)
-    (hm : ContDiff ℝ ∞ m) (hnz : ∀ y, m y ≠ 0)
-    (hA : ∀ x, ContDiff ℝ ∞ (localFieldLift P A x))
-    (hmean : ∀ y, (∫ θ in (0 : ℝ)..P, A (y,(θ : AddCircle P))) = 0) :
-    Continuous (field P m A) :=
-  smoothField_continuous P _ (field_smooth P m A hm hnz hA hmean)
 
 theorem field_vanishes (m : Space → Space) (A : LiftDomain P → Space)
     (y : Space) (hy : ∀ θ : AddCircle P, A (y,θ)=0) (θ : AddCircle P) :

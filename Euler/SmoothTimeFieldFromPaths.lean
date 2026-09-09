@@ -55,8 +55,6 @@ def ofPathFamily : SmoothTimeField (Icc (0 : ℝ) T) E V where
     (jetFamily_hasDerivWithinAt T hT f q hf hq hd n)
   jet_eq n t x := jetFamily_apply T f hf n x t
 
-@[simp] theorem ofPathFamily_apply (t : Icc (0 : ℝ) T) (x : E) :
-    (ofPathFamily T hT f q hf hq hd C D hC hD).field t x = f x t := rfl
 
 @[simp] theorem ofPathFamily_jet_apply (n : ℕ) (t : Icc (0 : ℝ) T) (x : E) :
     (ofPathFamily T hT f q hf hq hd C D hC hD).jet n t x =

@@ -26,7 +26,6 @@ def polynomial : Polynomial ℝ := 1+
 def uniformConstant : ℝ := coefficientCost polynomial
 def uniformPower : ℕ := polynomial.natDegree
 
-theorem uniformConstant_pos : 0 < uniformConstant := coefficientCost_pos _
 
 theorem polynomial_eval (W : ℝ) : polynomial.eval W=envelope W := by
   unfold polynomial envelope EulerPacketInitializedCost.envelope

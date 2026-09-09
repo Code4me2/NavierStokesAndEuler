@@ -26,8 +26,6 @@ def coordinateOrdinaryPath : C(Icc (0 : ℝ) D.T,L2) :=
   (solenoidalSpace.subtypeL.compLeftContinuous ℝ (Icc (0 : ℝ) D.T))
     G.solution.coordinateVelocityPath
 
-@[simp] theorem coordinateOrdinaryPath_apply (t : Icc (0 : ℝ) D.T) :
-    G.coordinateOrdinaryPath t = (G.solution.velocity t : L2) := rfl
 
 theorem coordinateOrdinaryPath_orbit :
     ContDiff ℝ ∞ (fun a : Space => pathTranslation D.T a G.coordinateOrdinaryPath) := by

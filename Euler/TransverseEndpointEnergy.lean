@@ -107,10 +107,6 @@ def dirichletToNeumann (L : U →L[ℝ] TimeLp T E) : U →L[ℝ] U :=
   endpointOperator (transverseDerivatives T hT m) (energyOperator T hT H)
     (1 / 2) (by norm_num) (energyOperator_coercive T hT H K hK hH hsmall) L
 
-omit [CompleteSpace U] in
-theorem endpointDisplacement_initial (L : U →L[ℝ] TimeLp T E) (Y : U) :
-    endpointDisplacement T hT m H K hK hH hsmall L Y ⟨0, le_rfl, hT⟩ = 0 :=
-  initialPrimitive_initial T hT _
 
 omit [CompleteSpace U] in
 theorem endpointDerivative_sub_mem (L : U →L[ℝ] TimeLp T E) (Y : U) :

@@ -28,8 +28,6 @@ noncomputable def inputSigma (j : ℕ) : ℝ := sigma (j - 1)
 /-- One common physical gain for all increment types and finite residuals. -/
 noncomputable def gain (h : ℝ) (j : ℕ) : ℝ := h * (j : ℝ) / 10
 
-/-- The same admissible loss is used at every cycle. -/
-noncomputable def kappa : ℝ := 1 / 100000
 
 @[simp] theorem sigma_zero : sigma 0 = 1 / 5 := ExponentLedger.stage_parameter_zero
 
@@ -88,7 +86,6 @@ theorem gain_tendsto_atTop {h : ℝ} (hh : 0 < h) : Tendsto (gain h) atTop atTop
 
 
 
-theorem kappa_pos : 0 < kappa := by norm_num [kappa]
 
 
 /-! ## The native increment exponents and their physical comparison -/
@@ -161,9 +158,6 @@ structure Offsets where
   wavePressure : ℝ
   meanPressure : ℝ
 
-/-- These five constants do not depend on an increment or derivative index. -/
-noncomputable def offsets (h : ℝ) : Offsets :=
-  ⟨h, 0, 0, 2 * CoordinateAlgebra.A h, 0⟩
 
 
 /-! ## Residual indexing after a finite number of cycles -/
@@ -193,10 +187,6 @@ theorem gain_le_residualWave {h : ℝ} (hh : 0 ≤ h) (J : ℕ) :
 
 
 
-/-- The full-phase derivative cost is a fixed parameter `beta`, not a
-stage-dependent loss. -/
-noncomputable def residualLoss (h beta : ℝ) (m : ℕ) : ℝ :=
-  PhysicalGraphBounds.graphLoss m + 1 + (2 * CoordinateAlgebra.A h + 1 / 2) + beta * m
 
 
 

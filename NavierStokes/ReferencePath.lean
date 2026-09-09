@@ -779,7 +779,6 @@ theorem ref_field_error_jet_close {K : Set ℝ} (hK : IsCompact K)
   exact hb
 
 def Xbig : ℝ := 100
-def Xi : ℝ := 110
 
 theorem freeze_before_Xbig (hscale : 1 ≤ N.scale) {δ : ℝ} (hδT : 2 * δ < rampLimit) :
     N.endpoint * Real.exp (2 * δ) < Xbig := by

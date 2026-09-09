@@ -82,21 +82,6 @@ theorem inverse_formula {a b scaleMinus scalePlus : ℝ} (m t : ℝ)
     (ne_of_gt hMinus) (ne_of_gt hPlus)]
   rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hdet, Matrix.one_mulVec]
 
-theorem solution_unique {a b scaleMinus scalePlus m t : ℝ}
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (y : Fin 2 → ℝ)
-    (hy : (signedMatrix a b scaleMinus scalePlus).mulVec y = target m t) :
-    y = coefficients a b scaleMinus scalePlus m t := by
-  have hdet : IsUnit (signedMatrix a b scaleMinus scalePlus).det :=
-    isUnit_iff_ne_zero.mpr (determinant_ne_zero ha hb hMinus hPlus)
-  calc
-    y = (signedMatrix a b scaleMinus scalePlus)⁻¹.mulVec
-        ((signedMatrix a b scaleMinus scalePlus).mulVec y) := by
-      rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hdet, Matrix.one_mulVec]
-    _ = (signedMatrix a b scaleMinus scalePlus)⁻¹.mulVec (target m t) := by rw [hy]
-    _ = coefficients a b scaleMinus scalePlus m t :=
-      inverse_formula m t ha hb hMinus hPlus
 
 /-- A strict geometric cone condition makes both squared amplitudes positive. -/
 theorem coefficients_pos {a b scaleMinus scalePlus m t : ℝ}
@@ -113,17 +98,7 @@ theorem coefficients_pos {a b scaleMinus scalePlus m t : ℝ}
     exact div_pos (by linarith) (by positivity)
 
 
-/-- The primary velocity amplitudes are positive square roots of the solve. -/
-def amplitudes (a b scaleMinus scalePlus m t : ℝ) : Fin 2 → ℝ :=
-  fun i => Real.sqrt (coefficients a b scaleMinus scalePlus m t i)
 
-theorem amplitudes_pos {a b scaleMinus scalePlus m t : ℝ}
-    (ha : 0 < a) (hb : 0 < b)
-    (hMinus : 0 < scaleMinus) (hPlus : 0 < scalePlus)
-    (hcone : |a * t| < b * m) :
-    ∀ i, 0 < amplitudes a b scaleMinus scalePlus m t i := by
-  intro i
-  exact Real.sqrt_pos.mpr (coefficients_pos ha hb hMinus hPlus hcone i)
 
 
 

@@ -46,10 +46,6 @@ theorem physical_h1
     s.velocity s.velocity_ac s.velocity_ae s.velocity_derivative
 
 
-/-- The pressure residual in the strong equation, before using F_t=MF. -/
-def pressureResidual : TimeLp T L2 :=
-  f - timeMultiplier T hT (solenoidalFrame T F) s.acceleration -
-    (2 : ℝ) • timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp
 
 
 

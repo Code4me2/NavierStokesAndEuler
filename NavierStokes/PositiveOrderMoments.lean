@@ -329,18 +329,8 @@ noncomputable def slice (f : JointHistory) (eta : ℝ) : History := fun j R => f
 
 
 
-noncomputable def globalDomain : ProfileHistories.RadialDomain where
-  carrier := univ
-  isOpen := isOpen_univ
-  scale_mem := by intro p hp t ht; trivial
 
-theorem primitive_contDiff {F : JointProfile} (hF : ContDiff ℝ ∞ F) :
-    ContDiff ℝ ∞ (ProfileHistories.primitive F) :=
-  contDiffOn_univ.mp (ProfileHistories.primitive_smooth globalDomain hF.contDiffOn)
 
-theorem primitive_hasDerivAt {F : JointProfile} (hF : ContDiff ℝ ∞ F) (w : ℝ × ℝ) :
-    HasDerivAt (fun R => ProfileHistories.primitive F (R, w.2)) (F w) w.1 :=
-  ProfileHistories.primitive_hasDerivAt globalDomain hF.contDiffOn (mem_univ w)
 
 /-- Compact positive-radius sources identify the actual primitive with the
 positive-radius total integral, without imposing values at negative radii. -/
@@ -385,39 +375,11 @@ noncomputable def radialZ (h power : ℝ) (u : JointProfile) (w : ℝ × ℝ) : 
   (2 * w.2 * power * u w + PositiveAxisSystem.edge w.2 * ProfileHistories.parameterPartial u w -
     w.2 * w.1 * ProfileHistories.radialPartial u w) / PositiveAxisSystem.ell h w.2
 
-theorem weightedAxial_contDiff {u : JointProfile} (hu : ContDiff ℝ ∞ u) :
-    ContDiff ℝ ∞ (weightedAxial u) := contDiff_fst.mul hu
 
 
 
-theorem massHistory_parameterPartial {u : JointProfile} (hu : ContDiff ℝ ∞ u) (w : ℝ × ℝ) :
-    ProfileHistories.parameterPartial (massHistory u) w = parameterMassHistory u w :=
-  ProfileHistories.parameterPartial_primitive globalDomain (weightedAxial_contDiff hu).contDiffOn (mem_univ w)
 
 
-/-- The first repaired row is exactly the mass condition making the recomputed
-radial flux vanish outside the source. Parameter differentiation is justified
-by the actual smooth history theorem. -/
-theorem fluxHistory_exterior (h lam : ℝ) {u : JointProfile} (hu : ContDiff ℝ ∞ u) {B : ℝ}
-    (hB : 0 ≤ B) (hs : ∀ eta R, B ≤ R → u (R, eta) = 0)
-    (hm : ∀ eta, positiveIntegral (fun R => R * u (R, eta)) = 0)
-    {R eta : ℝ} (hR : B ≤ R) : fluxHistory h lam u (R, eta) = 0 := by
-  have hmass : ∀ z, massHistory u (R, z) = 0 := by
-    intro z
-    rw [massHistory, ProfileHistories.primitive,
-      ← positiveIntegral_eq_primitive hB hR (fun t ht => by
-        change t * u (t, z) = 0
-        rw [hs z t ht, mul_zero])]
-    exact hm z
-  have hp : parameterMassHistory u (R, eta) = 0 := by
-    rw [← massHistory_parameterPartial hu]
-    have hd := ProfileHistories.parameterPartial_hasDerivAt globalDomain
-      (primitive_contDiff (weightedAxial_contDiff hu)).contDiffOn (mem_univ (R, eta))
-    have he : (fun z => massHistory u (R, z)) = fun _ => (0 : ℝ) := funext hmass
-    change HasDerivAt (fun z => massHistory u (R, z)) _ eta at hd
-    rw [he] at hd
-    exact hd.unique (hasDerivAt_const eta 0)
-  simp [fluxHistory, hs eta R hR, hmass eta, hp]
 
 
 

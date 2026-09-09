@@ -321,19 +321,7 @@ theorem zDensity_eq {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
   · exact s.domain.denominator
   · exact fun _ hw j _ => radial_divergence s hbase j hw
 
-theorem thetaDensity_smooth {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 0 < n) :
-    Smooth S (SlowResidualMatching.thetaDensity h C (asSlowProfiles s) n) :=
-  (SlowStressSupport.smooth_angularDensity s.domain.isOpen
-    (fun j _ => fluxHistory_smooth s j) (fun j _ => axialHistory_smooth s j)
-    (fun j _ => angularHistory_smooth s j) h s.domain.denominator).congr (thetaDensity_eq s hbase hn)
 
-theorem zDensity_smooth {S : Set ℝ} {h C : ℝ} (s : Scheme S h C)
-    (hbase : s.base.beta = betaFromU s.domain 0 s.base.axial) {n : ℕ} (hn : 0 < n) :
-    Smooth S (SlowResidualMatching.zDensity h (asSlowProfiles s) n) :=
-  (SlowStressSupport.smooth_axialDensity s.domain.isOpen
-    (fun j _ => fluxHistory_smooth s j) (fun j _ => axialHistory_smooth s j)
-    (pressureField_smooth s n) h s.domain.denominator).congr (zDensity_eq s hbase hn)
 
 /-- Cancellation of the actual coefficient density, not an assumed moment
 of an abstract source. -/

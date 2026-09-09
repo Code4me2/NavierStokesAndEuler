@@ -518,8 +518,6 @@ noncomputable def descendContinuous (f : Plane → ℂ) (hf : Continuous f)
   toFun := descend f hp
   continuous_toFun := descend_continuous hf hp
 
-@[simp] theorem torusLift_descendContinuous (f : Plane → ℂ) (hf : Continuous f)
-    (hp : UnitPeriodic f) : torusLift (descendContinuous f hf hp) = f := rfl
 
 /-- Pointwise reconstruction for an arbitrary actual smooth unit-periodic
 function on the plane; neither rapid decay nor reconstruction is a premise. -/

@@ -1333,10 +1333,6 @@ theorem potential_smooth (B N0 : ℕ) :
   (potentialWaveData B N0).vector_smooth ActualPrimary.outgoing.data.h_pos
     ActualPrimary.outgoing.data.h_lt_half
 
-theorem pressure_smooth (B N0 : ℕ) :
-    ContDiffOn ℝ ∞ (pressure B N0) PhysicalWaveSum.preterminal :=
-  (pressureWaveData B N0).pressure_smooth ActualPrimary.outgoing.data.h_pos
-    ActualPrimary.outgoing.data.h_lt_half
 
 end PhysicalData
 

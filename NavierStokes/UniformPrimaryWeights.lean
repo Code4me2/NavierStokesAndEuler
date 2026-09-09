@@ -87,48 +87,11 @@ noncomputable def enumeration (ι : Type*) [Countable ι] [Nonempty ι] : ℕ �
 theorem enumeration_surjective (ι : Type*) [Countable ι] [Nonempty ι] :
     Surjective (enumeration ι) := Classical.choose_spec (exists_surjective_nat (ℕ × ι))
 
-/-- The actual slow scale on the joint index, in the `(band,label)` order
-used by the phase and ODE constructions. -/
-noncomputable def jointDomain (s : StripData D) : PhaseJetBounds.Domain (ℕ × ι) D where
-  scale q := s.slow q.1
-  carrier _ := s.domain
-  isOpen _ := s.isOpen_domain
-  one_le_scale q := s.one_le_slow q.1
-
-theorem pull_polynomial {s : StripData D} {f : ι → ℕ → D → E}
-    (hf : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q => f q.2 q.1))
-    (e : ℕ → ℕ × ι) :
-    PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain (reindexedStrip s e)) (pull e f) := by
-  refine ⟨fun k => hf.smooth (e k), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bound m
-  exact ⟨C, hC, p, fun k => hb (e k)⟩
 
 
-/-- This version retains the full inverse-edge polynomial in the
-majorant; it is not a polynomial-in-S replacement of the weight. -/
-noncomputable def UniformInverseControl (s : StripData D) (w g : ι → ℕ → D → ℝ) : Prop :=
-  ∃ C : ℝ, 0 ≤ C ∧ ∃ p : ℕ, ∀ l n x, x ∈ s.domain →
-    w l n x / g l n x ≤ C * s.growth n x ^ p
 
-theorem pull_inverseControl {s : StripData D} {w g : ι → ℕ → D → ℝ}
-    (h : UniformInverseControl s w g) (e : ℕ → ℕ × ι) :
-    SignedCovariance.InverseControl (reindexedStrip s e) (pull e w) (pull e g) := by
-  obtain ⟨C, hC, p, hb⟩ := h
-  exact ⟨C, hC, p, fun k => hb (e k).2 (e k).1⟩
 
-theorem inverseControl_of_lower {s : StripData D} {w g : ι → ℕ → D → ℝ}
-    (hg : ∀ l n x, x ∈ s.domain → 0 < g l n x) {c : ℝ} (hc : 0 < c) (p : ℕ)
-    (hlower : ∀ l n x, x ∈ s.domain → c * w l n x / s.growth n x ^ p ≤ g l n x) :
-    UniformInverseControl s w g := by
-  refine ⟨c⁻¹, (inv_pos.mpr hc).le, p, fun l n x hx => ?_⟩
-  have hG : 0 < s.growth n x ^ p := pow_pos (zero_lt_one.trans_le (s.one_le_growth n x)) _
-  have hl := (div_le_iff₀ hG).mp (hlower l n x hx)
-  apply (div_le_iff₀ (hg l n x hx)).mpr
-  calc
-    w l n x = c⁻¹ * (c * w l n x) := by rw [← mul_assoc, inv_mul_cancel₀ hc.ne', one_mul]
-    _ ≤ c⁻¹ * (g l n x * s.growth n x ^ p) := mul_le_mul_of_nonneg_left hl (inv_pos.mpr hc).le
-    _ = _ := by ring
+
 
 section WeightedOperations
 
@@ -136,18 +99,6 @@ variable [Countable ι] [Nonempty ι]
   {s : StripData D} {w g r : ι → ℕ → D → ℝ} {β : ℝ}
 
 
-theorem signed_quotient_class (hw : ∀ l n x, x ∈ s.domain → 0 < w l n x)
-    (hp : ∀ l n x, x ∈ s.domain → 0 < g l n x)
-    (hg : UniformClass s w 0 g) (hr : UniformClass s w β r)
-    (hlower : UniformInverseControl s w g) :
-    UniformClass s (fun l n x => Real.sqrt (w l n x)) β
-      (fun l n x => r l n x / (2 * Real.sqrt (g l n x))) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact SignedCovariance.signed_quotient_class
-    (fun k => hw (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hp (enumeration ι k).2 (enumeration ι k).1)
-    (pull_class hg (enumeration ι)) (pull_class hr (enumeration ι))
-    (pull_inverseControl hlower (enumeration ι))
 
 end WeightedOperations
 
@@ -165,17 +116,8 @@ theorem fderiv_class {f : ι → ℕ → D → E} (hf : UniformClass s w α f) :
   rw [norm_iteratedFDeriv_fderiv]
   exact hb l n x hx (j + 1) (Nat.add_le_add_right hj 1)
 
-theorem smul_class {a : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (ha : UniformClass s v β a) (hf : UniformClass s w α f) :
-    UniformClass s (fun l n x => v l n x * w l n x) (β + α)
-      (fun l n x => a l n x • f l n x) :=
-  ha.bilinear hf (ContinuousLinearMap.lsmul ℝ ℝ)
 
 
-theorem real_smul_class {a : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (ha : UniformClass s (fun _ _ _ => 1) β a) (hf : UniformClass s w α f) :
-    UniformClass s w (β + α) (fun l n x => a l n x • f l n x) := by
-  simpa only [one_mul] using smul_class ha hf
 
 theorem along_class {V : ι → ℕ → D → D} {f : ι → ℕ → D → E}
     (hV : UniformClass s (fun _ _ _ => 1) β V) (hf : UniformClass s w α f) :
@@ -200,12 +142,6 @@ theorem pull_bandBound {a : ι → ℕ → ℝ} (ha : UniformBandBound s β a)
   obtain ⟨C, hC, p, hb⟩ := ha
   exact ⟨C, hC, p, fun k => hb (e k).2 (e k).1⟩
 
-theorem band_smul_class [Countable ι] [Nonempty ι]
-    {a : ι → ℕ → ℝ} {f : ι → ℕ → D → E}
-    (hf : UniformClass s w α f) (ha : UniformBandBound s β a) :
-    UniformClass s w (α + β) (fun l n x => a l n • f l n x) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact (pull_class hf (enumeration ι)).band_smul (pull_bandBound ha (enumeration ι))
 
 
 end Calculus
@@ -217,43 +153,10 @@ variable [Countable ι] [Nonempty ι]
   {H : ι → ℕ → D → SmoothCovariance.Mat2}
   {T : ι → ℕ → D → SmoothCovariance.Vec2} {w : ι → ℕ → D → ℝ}
 
-/-- The inverse matrix is differentiated after reindexing the genuine
-integrated entries. The determinant gap and entry bound are common to
-all labels; the target retains its full vanishing weight. -/
-theorem covariance_weights_class
-    (hr : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q _ => r q.2 q.1))
-    (hrne : ∀ l n, r l n ≠ 0)
-    (hH : ∀ i j, PhaseJetBounds.PolynomialJets (jointDomain s) (fun q x => H q.2 q.1 x i j))
-    (hT : ∀ i, UniformClass s w 0 (fun l n x => T l n x i))
-    {b M : ℝ} (hb : 0 < b) (hM : 1 ≤ M)
-    (hdet : ∀ l n x, x ∈ s.domain → b ≤ |(PrimaryPulseBounds.normalizedMatrix (r l n) (H l n x)).det|)
-    (hentry : ∀ l n x, x ∈ s.domain → ∀ i j, |r l n * H l n x i j| ≤ M)
-    (j : Fin 2) :
-    UniformClass s w 0 (fun l n x => SmoothCovariance.weights (H l n x) (T l n x) j) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact PrimaryPulseBounds.covariance_weights_class
-    (s := reindexedStrip s (enumeration ι))
-    (r := fun k => r (enumeration ι k).2 (enumeration ι k).1)
-    (H := pull (enumeration ι) H) (T := pull (enumeration ι) T) (w := pull (enumeration ι) w)
-    (pull_polynomial (f := fun l n _ => r l n) hr (enumeration ι))
-    (fun k => hrne (enumeration ι k).2 (enumeration ι k).1)
-    (fun i j => pull_polynomial (f := fun l n x => H l n x i j) (hH i j) (enumeration ι))
-    (fun i => pull_class (hT i) (enumeration ι)) hb hM
-    (fun k => hdet (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hentry (enumeration ι k).2 (enumeration ι k).1) j
 
 
 end Covariance
 
-/-- The exact normalization used by the primary covariance. -/
-theorem sqrt_slow_polynomial (s : StripData D) :
-    PhaseJetBounds.PolynomialJets (jointDomain (ι := ι) s) (fun q _ => Real.sqrt (s.slow q.1)) := by
-  apply PhaseJetBounds.PolynomialJets.const _ (C := 1) (m := 1) le_rfl
-  intro q
-  have hs := s.one_le_slow q.1
-  have hsq := Real.sq_sqrt (zero_le_one.trans hs)
-  simp only [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _), one_mul, pow_one, jointDomain]
-  nlinarith [Real.sqrt_nonneg (s.slow q.1)]
 
 section Primary
 
@@ -275,96 +178,10 @@ theorem component_class {a : ι → ℕ → D → ComplexVector}
     (ha : UniformClass s w α a) (i : Fin 3) :
     UniformClass s w α (fun l n x => a l n x i) := ha.map (ContinuousLinearMap.proj i)
 
-theorem vector_class {a : ι → ℕ → D → ComplexVector}
-    (ha : ∀ i : Fin 3, UniformClass s w α (fun l n x => a l n x i)) :
-    UniformClass s w α a := by
-  have hsum := UniformClass.sum Finset.univ
-    (fun i l n x => (ContinuousLinearMap.single ℝ (fun _ : Fin 3 => ℂ) i) (a l n x i))
-    (ha 0).weight_nonneg (fun i _ => (ha i).map (ContinuousLinearMap.single ℝ (fun _ : Fin 3 => ℂ) i))
-  apply hsum.congr
-  intro l n x hx
-  ext i
-  simp
 
-/-- The normal inverse is computed from the actual jointly bounded normal,
-not supplied as a separately bounded potential coefficient. -/
-theorem normalCoefficient_class [Countable ι] [Nonempty ι]
-    {N : ι → ℕ → D → RealVector} {a : ι → ℕ → D → ComplexVector}
-    (hN : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q => N q.2 q.1))
-    (ha : UniformClass s w α a) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ l n x, x ∈ s.domain → b ≤ ‖N l n x‖)
-    (hupper : ∀ l n x, x ∈ s.domain → ‖N l n x‖ ≤ M) :
-    UniformClass s w α (fun l n x => normalCoefficient (N l n x) (a l n x)) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact CurlClassBounds.normalCoefficient_class (s := reindexedStrip s (enumeration ι))
-    (pull_polynomial hN (enumeration ι)) (pull_class ha (enumeration ι)) hb
-    (fun k => hlower (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hupper (enumeration ι k).2 (enumeration ι k).1)
 
-/-- This version permits radius and direction fields to vary with both
-band and label. All cylindrical connection terms are retained. -/
-theorem cylindricalCurl_class
-    {R : ι → ℕ → D → ℝ} {Vr Vθ Vz : ι → ℕ → D → D}
-    {a : ι → ℕ → D → ComplexVector} (ha : UniformClass s w α a) (hκ : 0 ≤ κ)
-    (hr : UniformClass s (fun _ _ _ => 1) (-κ) Vr)
-    (hθ : UniformClass s (fun _ _ _ => 1) 0 Vθ)
-    (hz : UniformClass s (fun _ _ _ => 1) 1 Vz)
-    (hR : UniformClass s (fun _ _ _ => 1) 0 (fun l n x => (R l n x)⁻¹)) :
-    UniformClass s w (α - κ)
-      (fun l n => cylindricalCurl (R l n) (Vr l n) (Vθ l n) (Vz l n) (a l n)) := by
-  have hDr (i : Fin 3) : UniformClass s w (α - κ)
-      (fun l n => HarmonicCalculus.along (Vr l n) (fun x => a l n x i)) := by
-    simpa only [sub_eq_add_neg] using along_class hr (component_class ha i)
-  have hDz (i : Fin 3) : UniformClass s w (α - κ)
-      (fun l n => HarmonicCalculus.along (Vz l n) (fun x => a l n x i)) :=
-    (along_class hz (component_class ha i)).mono_exponent (by linarith)
-  have hDθ (i : Fin 3) : UniformClass s w (α - κ)
-      (fun l n x => (R l n x)⁻¹ • HarmonicCalculus.along (Vθ l n) (fun y => a l n y i) x) := by
-    apply (real_smul_class hR (along_class hθ (component_class ha i))).mono_exponent
-    linarith
-  have hconn (i : Fin 3) : UniformClass s w (α - κ) (fun l n x => (R l n x)⁻¹ • a l n x i) :=
-    (real_smul_class hR (component_class ha i)).mono_exponent (by linarith)
-  apply vector_class
-  intro i
-  fin_cases i
-  · exact (hDθ 2).sub (hDz 1)
-  · exact (hDz 0).sub (hDr 2)
-  · exact ((hDr 1).add (hconn 1)).sub (hDθ 0)
 
-theorem curlRemainder_class [Countable ι] [Nonempty ι]
-    {R : ι → ℕ → D → ℝ} {Vr Vθ Vz : ι → ℕ → D → D} {K : ι → ℕ → ℝ}
-    {a : ι → ℕ → D → ComplexVector} (ha : UniformClass s w α a) (hκ : 0 ≤ κ)
-    (hr : UniformClass s (fun _ _ _ => 1) (-κ) Vr)
-    (hθ : UniformClass s (fun _ _ _ => 1) 0 Vθ)
-    (hz : UniformClass s (fun _ _ _ => 1) 1 Vz)
-    (hR : UniformClass s (fun _ _ _ => 1) 0 (fun l n x => (R l n x)⁻¹))
-    (hK : UniformBandBound s (1 / 2) (fun l n => 1 / K l n)) :
-    UniformClass s w (α + 1 / 2 - κ)
-      (fun l n => curlRemainder (K l n) (R l n) (Vr l n) (Vθ l n) (Vz l n) (a l n)) := by
-  have hc := (cylindricalCurl_class ha hκ hr hθ hz hR).map
-    (Complex.I • ContinuousLinearMap.id ℝ ComplexVector)
-  have hh := band_smul_class hc hK
-  simp only [ _root_.smul_apply, ContinuousLinearMap.id_apply,
-    show α - κ + 1 / 2 = α + 1 / 2 - κ by ring] at hh ⊢
-  exact hh
 
-theorem normalCurlRemainder_class [Countable ι] [Nonempty ι]
-    {R : ι → ℕ → D → ℝ} {Vr Vθ Vz : ι → ℕ → D → D} {K : ι → ℕ → ℝ}
-    {N : ι → ℕ → D → RealVector} {a : ι → ℕ → D → ComplexVector}
-    (hN : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q => N q.2 q.1))
-    (ha : UniformClass s w α a) {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ l n x, x ∈ s.domain → b ≤ ‖N l n x‖)
-    (hupper : ∀ l n x, x ∈ s.domain → ‖N l n x‖ ≤ M)
-    (hκ : 0 ≤ κ)
-    (hr : UniformClass s (fun _ _ _ => 1) (-κ) Vr)
-    (hθ : UniformClass s (fun _ _ _ => 1) 0 Vθ)
-    (hz : UniformClass s (fun _ _ _ => 1) 1 Vz)
-    (hR : UniformClass s (fun _ _ _ => 1) 0 (fun l n x => (R l n x)⁻¹))
-    (hK : UniformBandBound s (1 / 2) (fun l n => 1 / K l n)) :
-    UniformClass s w (α + 1 / 2 - κ) (fun l n =>
-      curlRemainder (K l n) (R l n) (Vr l n) (Vθ l n) (Vz l n)
-        (fun x => normalCoefficient (N l n x) (a l n x))) :=
-  curlRemainder_class (normalCoefficient_class hN ha hb hlower hupper) hκ hr hθ hz hR hK
 
 /-- The half-power frequency gain is uniform even when the nonzero
 integer harmonic varies with the label. -/
@@ -392,42 +209,12 @@ open PrimaryPulseBounds PhaseJetBounds
 
 variable {U : Domain (ℕ × ι) PhaseCalculus.Slow}
 
-/-- The same actual integrated pulse matrix, now indexed jointly by band
-and label. Its entries are not independent input functions. -/
-noncomputable def phaseMatrix (A : Fin 2 → PhaseConstruction U)
-    (pref : Fin 2 → (ℕ × ι) → ℝ) (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ) :
-    ι → ℕ → D → SmoothCovariance.Mat2 := fun l n x =>
-  primaryCovariance pref (fun j => (A j).frame) (fun j => (A j).lam)
-    (fun j => (A j).u) (fun j => (A j).L) (n, l) (χ (n, l) x).1
-
-noncomputable def phaseFundamental (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ) (j : Fin 2) :
-    ι → ℕ → D → ProblemStatement.Space := fun l n x =>
-  normalizedPulse ((A j).frame (n, l)) ((A j).lam (n, l)) ((A j).u (n, l))
-    ((A j).L (n, l)) (χ (n, l) x)
-
-noncomputable def phaseEnvelope (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ) (j : Fin 2) : ι → ℕ → D → ℝ := fun l n x =>
-  referenceP ((A j).lam (n, l)) ((A j).u (n, l)) ((A j).L (n, l))
-    ((A j).L (n, l) * (χ (n, l) x).2)
 
 
 
 
-theorem phaseFundamental_class {s : StripData D} (A : Fin 2 → PhaseConstruction U)
-    (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → χ q x ∈ U.carrier q ×ˢ Ioo (0 : ℝ) 1)
-    (j : Fin 2) : UniformClass s (phaseEnvelope A χ j) 0 (phaseFundamental A χ j) := by
-  have hp := (A j).pulse_jets.comp hχ hscale hmap
-  apply LabelSumBounds.uniformClass_of_envelopeJets hp (K := 1) (q := 1) le_rfl
-    (fun n l => by simp [jointDomain]) (fun _ _ => subset_rfl)
-  · intro l n x hx
-    exact hp.nonneg (n, l) x hx
-  · intro l n x hx
-    simp only [Real.rpow_zero, one_mul]
-    rfl
+
+
 
 
 
@@ -445,29 +232,6 @@ variable {U : Domain (ℕ × ι) PhaseCalculus.Slow}
 
 end ActualCutoff
 
-/-- Apply this directly to `a.withCutoff` when the stronger Gaussian
-slot-envelope bound has already been derived for its actual amplitude. -/
-theorem curlCorrection_class [Countable ι] [Nonempty ι]
-    {s : StripData D} {P : ι → ℕ → D → ℝ} {α κ : ℝ}
-    (a : ι → LinearWaveBounds.WaveCoefficients D)
-    (d : ι → LinearWaveBounds.GraphDirections D)
-    (ha : UniformWaveClass s P α (fun l => (a l).amplitude))
-    (hN : PhaseJetBounds.PolynomialJets (jointDomain s)
-      (fun q => (a q.2).normal s (d q.2) q.1))
-    {b M : ℝ} (hb : 0 < b)
-    (hlower : ∀ l n x, x ∈ s.domain → b ≤ ‖(a l).normal s (d l) n x‖)
-    (hupper : ∀ l n x, x ∈ s.domain → ‖(a l).normal s (d l) n x‖ ≤ M)
-    (hκ : 0 ≤ κ)
-    (hr : UniformClass s (fun _ _ _ => 1) (-κ) (fun l => (d l).radialField))
-    (hθ : UniformClass s (fun _ _ _ => 1) 0 (fun l _ _ => (d l).angular))
-    (hz : UniformClass s (fun _ _ _ => 1) 1 (fun l => (d l).axialField s))
-    (hR : UniformClass s (fun _ _ _ => 1) 0 (fun l n x => ((a l).radius n x)⁻¹))
-    (hK : UniformBandBound s (1 / 2) (fun l n => 1 / (a l).frequency n)) :
-    UniformWaveClass s P (α + 1 / 2 - κ) (fun l => (a l).curlCorrection s (d l)) := by
-  have h := normalCurlRemainder_class hN ha hb hlower hupper hκ hr hθ hz hR hK
-  simp only [
-    LinearWaveBounds.WaveCoefficients.normal] at h ⊢
-  exact h
 
 
 

@@ -561,13 +561,6 @@ theorem actualLowerSource_congr (h : ℝ) {n : ℕ}
     precedingDiffusion_congr h (angularPower h) hphi,
     precedingDiffusion_congr h (axialPower h) hu]
 
-theorem actualLowerSource_update (h : ℝ) (n : ℕ) (phi u beta : ℕ → InnerProfile)
-    (phiNew uNew betaNew omegaQuotient : InnerProfile) (w : InnerPoint) :
-    actualLowerSource h n (Function.update phi n phiNew) (Function.update u n uNew)
-      (Function.update beta n betaNew) omegaQuotient w =
-        actualLowerSource h n phi u beta omegaQuotient w := by
-  apply actualLowerSource_congr
-  all_goals intro j hj; exact Function.update_of_ne (Nat.ne_of_lt hj) _ _
 
 
 

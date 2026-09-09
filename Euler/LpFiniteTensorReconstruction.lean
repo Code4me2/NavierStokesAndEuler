@@ -59,8 +59,6 @@ def tensorCoordinates (n : ℕ) :
   ContinuousLinearMap.pi (fun w =>
     (ContinuousLinearMap.id ℝ (Space [×n]→L[ℝ] V)).flipMultilinear (fun i => direction (w i)))
 
-@[simp] theorem tensorCoordinates_apply (n : ℕ) (A : Space [×n]→L[ℝ] V)
-    (w : Fin n → Fin 3) : tensorCoordinates n A w = A (fun i => direction (w i)) := rfl
 
 theorem tensorCoordinates_injective (n : ℕ) :
     Function.Injective (tensorCoordinates (V := V) n) := by

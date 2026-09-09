@@ -68,10 +68,6 @@ theorem outerRadius_tendsto_zero {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   simp only [Real.sqrt_zero, mul_zero] at he ⊢
   exact he
 
-theorem outerRadius_continuousAt {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {w : SpaceTime} (ht : w.1 < 1) : ContinuousAt (outerRadius h C) w :=
-  continuousAt_const.mul (Real.continuous_sqrt.continuousAt.comp
-    (PhysicalWaveSum.physicalQ_smoothAt hh hh1 ht).continuousAt)
 
 /-- One geometric neighborhood works for every member of any family with
 the same outer support constant.  No sign or size assumption on `C` is needed. -/
@@ -126,24 +122,7 @@ section Sums
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- Multiplying a correction by any scalar cutoff preserves its outer
-support; the cutoff can depend on all physical variables. -/
-theorem ShrinkingSupport.smul {h C : ℝ} {f : SpaceTime → V}
-    (hf : ShrinkingSupport h C f) (c : SpaceTime → ℝ) :
-    ShrinkingSupport h C (fun w => c w • f w) := by
-  intro w ht hn
-  apply hf w ht
-  intro hz
-  exact hn (by simp only [hz, smul_zero])
 
-omit [NormedSpace ℝ V] in
-theorem ShrinkingSupport.add {h C : ℝ} {f g : SpaceTime → V}
-    (hf : ShrinkingSupport h C f) (hg : ShrinkingSupport h C g) :
-    ShrinkingSupport h C (fun w => f w + g w) := by
-  intro w ht hn
-  by_contra hs
-  exact hn (by simp only [hf.zero_of_separated ht (lt_of_not_ge hs),
-    hg.zero_of_separated ht (lt_of_not_ge hs), add_zero])
 
 omit [NormedSpace ℝ V] in
 theorem ShrinkingSupport.finset_sum {ι : Type*} {h C : ℝ} {f : ι → SpaceTime → V}
@@ -156,32 +135,8 @@ theorem ShrinkingSupport.finset_sum {ι : Type*} {h C : ℝ} {f : ι → SpaceTi
   intro i hi
   exact (hf i hi).zero_of_separated ht (lt_of_not_ge hs)
 
-omit [NormedSpace ℝ V] in
-theorem ShrinkingSupport.tsum {ι : Type*} {h C : ℝ} {f : ι → SpaceTime → V}
-    (hf : ∀ i, ShrinkingSupport h C (f i)) :
-    ShrinkingSupport h C (fun w => ∑' i, f i w) := by
-  intro w ht hn
-  by_contra hs
-  apply hn
-  have he : ∀ i, f i w = 0 := fun i => (hf i).zero_of_separated ht (lt_of_not_ge hs)
-  simp only [he, tsum_zero]
 
-omit [NormedSpace ℝ V] in
-theorem ShrinkingSupport.finsum {ι : Type*} {h C : ℝ} {f : ι → SpaceTime → V}
-    (hf : ∀ i, ShrinkingSupport h C (f i)) :
-    ShrinkingSupport h C (fun w => ∑ᶠ i, f i w) := by
-  intro w ht hn
-  by_contra hs
-  apply hn
-  apply finsum_eq_zero_of_forall_eq_zero
-  intro i
-  exact (hf i).zero_of_separated ht (lt_of_not_ge hs)
 
-theorem ShrinkingSupport.potentialSum {h C : ℝ} {f : ℕ → SpaceTime → V}
-    (hf : ∀ j, ShrinkingSupport h C (f j)) (a : ℕ → ℝ) (q : SpaceTime → ℝ) :
-    ShrinkingSupport h C (SolenoidalDiagonal.potentialSum a q f) :=
-  ShrinkingSupport.tsum (fun j => (hf j).smul
-    (fun w => SmoothCutoffs.scaledCutoff (a j) (q w)))
 
 end Sums
 
@@ -236,27 +191,7 @@ section Extensions
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
 
-omit [NormedSpace ℝ V] in
-/-- At every preterminal point strictly outside the support radius the
-field is zero on an ambient neighborhood. -/
-theorem ShrinkingSupport.zero_germ {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : SpaceTime → V} (hf : ShrinkingSupport h C f) {w : SpaceTime}
-    (ht : w.1 < 1) (hs : outerRadius h C w < radius w) :
-    f =ᶠ[𝓝 w] fun _ => 0 := by
-  have he := (outerRadius_continuousAt hh hh1 ht).eventually_lt
-    radius_continuous.continuousAt hs
-  filter_upwards [he, PhysicalWaveSum.preterminal_open.mem_nhds ht] with y hy hyt
-  exact hf.zero_of_separated hyt hy
 
-theorem ShrinkingSupport.derivative_support {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {f : SpaceTime → V} (hf : ShrinkingSupport h C f) (m : ℕ) :
-    ShrinkingSupport h C (iteratedFDeriv ℝ m f) := by
-  intro w ht hn
-  by_contra hs
-  have he := (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq
-    (hf.zero_germ hh hh1 ht (lt_of_not_ge hs)) m).self_of_nhds
-  apply hn
-  simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply] using he
 
 
 /-- The extension is the literal zero function on an actual ambient open
@@ -282,14 +217,6 @@ end Extensions
 
 section Curl
 
-theorem ShrinkingSupport.spatialCurl {h C : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {A : SpaceTime → Space} (hA : ShrinkingSupport h C A) :
-    ShrinkingSupport h C (SpatialCurl.spatialCurl A) := by
-  intro w ht hn
-  by_contra hs
-  have he := SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq
-    (hA.zero_germ hh hh1 ht (lt_of_not_ge hs))
-  exact hn (he.trans (SpatialCurl.curl_zero _))
 
 
 end Curl

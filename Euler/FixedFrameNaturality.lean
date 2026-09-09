@@ -33,8 +33,6 @@ def zeroTraceMap (A : U →L[ℝ] V) :
       have hu : initialTrace T hT (u : TimeLp T U) = 0 := u.property
       rw [initialTrace_timeLift,hu,map_zero])
 
-@[simp] theorem zeroTraceMap_coe (A : U →L[ℝ] V) (u : zeroTraceDerivatives (U := U) T hT) :
-    (zeroTraceMap T hT A u : TimeLp T V) = timeLift T A (u : TimeLp T U) := rfl
 
 
 omit [CompleteSpace U] [CompleteSpace V] [CompleteSpace E] [CompleteSpace F] in

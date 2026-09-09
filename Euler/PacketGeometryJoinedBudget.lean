@@ -39,28 +39,5 @@ theorem sourceGrowthProfile_amplitude (t : Icc (0 : ℝ) (D.T-τ)) :
   (J.halfBall_controlledGrowth hball).choose_spec.2.2.2 t
 
 
-def joinedBudget (q : ℕ)
-    (A V : Icc (0 : ℝ) D.T → SmoothL2Field Space)
-    (W : Icc (0 : ℝ) τ → SmoothL2Field Space)
-    (F₂ : SmoothCoefficientPath (Icc (0 : ℝ) τ) (Space →L[ℝ] Space))
-    (ℓ K Ti : ℝ) (hℓ : 0 ≤ ℓ) (hℓ1 : ℓ ≤ 1) (hK : 0 ≤ K)
-    (hτ1 : τ ≤ 1) (hTi : τ⁻¹ ≤ Ti)
-    (hA : ∀ t, HasLabelBound K (A t)) (hV : ∀ t, HasLabelBound K (V t))
-    (hW : ∀ t, HasLabelBound K (W t))
-    (hF : ∀ t x, D.F.field t x = ContinuousLinearMap.id ℝ Space+fderiv ℝ (A t).field (ℓ • x))
-    (hF₁ : ∀ t x, D.F₁.field t x = fderiv ℝ (V t).field (ℓ • x))
-    (hF₂ : ∀ t x, F₂.field t x = fderiv ℝ (W t).field (ℓ • x))
-    (h₂ : ∀ t ∈ Icc (0 : ℝ) τ, ∀ x : Space,
-      HasDerivWithinAt (fun s => extendPath τ hτ.le (D.initial τ hτ hτT.le).F₁.field s x)
-        (extendPath τ hτ.le F₂.field t x) (Icc (0 : ℝ) τ) t)
-    (hdet : ∀ t x, (operatorMatrix (D.F.field t x)).det = 1)
-    (Ω : Set Space) (hΩ : MeasurableSet Ω) (hΩo : IsOpen Ω)
-    (hsub : D.support ⊆ Ω) (hΩball : ∀ x ∈ Ω, ‖x‖ ≤ (1/2 : ℝ)) :
-    EulerTransversePacketJoin.Budget D τ hτ hτT H (Fin 4) q :=
-  EulerPacketParentPhysicalBudgets.joinedBudget D τ hτ hτT H q A V W F₂
-    ℓ K Ti (560*P.horizon^10/P.epsilon) hℓ hℓ1 hK hτ1 hTi J.growth_constant_pos.le
-    hA hV hW hF hF₁ hF₂ h₂ hdet (J.sourceGrowthProfile hball)
-    (J.sourceGrowthProfile_positive hball) (J.sourceGrowthProfile_initial hball)
-    Ω hΩ hΩo hsub hΩball (J.sourceGrowthProfile_propagator hball)
 
 end EulerPacketSourceGeometry.Guards

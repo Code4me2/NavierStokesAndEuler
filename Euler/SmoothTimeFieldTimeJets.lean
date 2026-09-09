@@ -27,9 +27,6 @@ private local instance (n : ℕ) : NormedSpace ℝ (E →ᵇ (E [×n]→L[ℝ] V
 def sliceFamily (x : E) : C(Icc (0 : ℝ) T,V) :=
   A.superposition ((ContinuousLinearMap.const ℝ (Icc (0 : ℝ) T)) x)
 
-omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ V] in
-@[simp] theorem sliceFamily_apply (x : E) (t : Icc (0 : ℝ) T) :
-    sliceFamily T A x t = A.field t x := rfl
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ V] in
 theorem sliceFamily_contDiff : ContDiff ℝ ∞ (sliceFamily T A) :=

@@ -6,7 +6,6 @@ import Mathlib.Analysis.Normed.Group.Continuity
 import Mathlib.Analysis.Normed.Field.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
-import NavierStokes.Flatness
 
 /-!
 # Exact radial aliases and Fourier suppression
@@ -99,8 +98,6 @@ theorem continuous_parameter_interval {H : Type} [TopologicalSpace H]
   rw [heq]
   exact continuous_parametric_integral_of_continuous (f := fun x u => g (x, u)) hg isCompact_Icc
 
-theorem torusMean_const [CompleteSpace F] (c : F) : torusMean (fun _ => c) = c := by
-  simp [torusMean]
 
 theorem torusMean_neg (f : Plane → F) : torusMean (fun Y => -f Y) = -torusMean f := by
   simp only [torusMean, intervalIntegral.integral_neg]
@@ -171,24 +168,9 @@ section ActualFourierInverse
 
 open ParametricTorusInverse
 
-/-- Remove the actual full torus mean at each fixed radial coordinate. -/
-noncomputable def nonbarPart (f : State → ℂ) (z : State) : ℂ := f z - mean f z.1
-
-theorem nonbarPart_smooth {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
-    ContDiff ℝ ∞ (nonbarPart f) :=
-  hf.sub ((coefficient_smooth hf 0).comp contDiff_fst)
 
 
-theorem nonbarPart_zeroMean {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
-    ZeroMean (nonbarPart f) := by
-  intro U
-  rw [mean_eq_integral]
-  change torusMean (fun Y => f (U, Y) - mean f U) = 0
-  rw [torusMean_sub (f := fun Y => f (U, Y)) (g := fun _ => mean f U)
-    (hf.continuous.comp (continuous_const.prodMk continuous_id)) continuous_const, torusMean_const]
-  change sliceMean f U - mean f U = 0
-  have heq : sliceMean f U = mean f U := (mean_eq_integral f U).symm
-  rw [heq, sub_self]
+
 
 
 

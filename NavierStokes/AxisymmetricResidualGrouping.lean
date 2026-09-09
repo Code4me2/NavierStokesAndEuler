@@ -37,10 +37,6 @@ omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
     addAxisymmetricAlias (eraseAxisymmetricAlias s a) a = s := by
   simp [addAxisymmetricAlias, eraseAxisymmetricAlias]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-@[simp] theorem erase_addAxisymmetricAlias (s : State D) (a : MeanVector D) :
-    eraseAxisymmetricAlias (addAxisymmetricAlias s a) a = s := by
-  simp [addAxisymmetricAlias, eraseAxisymmetricAlias]
 
 @[simp] theorem stateFullResidual_addAxisymmetricAlias (c : Context D) (s : State D)
     (a : MeanVector D) :
@@ -134,20 +130,7 @@ theorem Representation.erase {ι : Type*} {labels : ℕ → Finset ι}
     rw [h.aliasError]
     exact add_sub_cancel_right _ _
 
-theorem extractionRegular_erase {ι : Type*} {U : Set D} {c : Context D} {s : State D}
-    {labels : ℕ → Finset ι} {blocks : ι → HarmonicBlock D}
-    {gaussian aliasCoeffs : ι → HarmonicResidual.BlockCoefficients D} {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c s labels blocks gaussian aliasCoeffs n)
-    (axis : MeanVector D) :
-    HarmonicResidual.ExtractionRegular U c (eraseAxisymmetricAlias s axis)
-      labels blocks gaussian aliasCoeffs n :=
-  ⟨h.frame, h.base, h.mean, h.pressure, h.blocks, h.gaussian, h.aliasError,
-    h.disjoint, h.angular_nonzero⟩
 
-@[simp] theorem residualBlock_erase (c : Context D) (s : State D) (axis : MeanVector D)
-    (b : HarmonicBlock D) (gaussian aliasCoeffs : HarmonicResidual.BlockCoefficients D) :
-    HarmonicResidual.residualBlock c (eraseAxisymmetricAlias s axis) b gaussian aliasCoeffs =
-      HarmonicResidual.residualBlock c s b gaussian aliasCoeffs := rfl
 
 @[simp] theorem stateMeanCoefficientValue_erase {ι : Type*} (labels : ℕ → Finset ι)
     (blocks : ι → HarmonicBlock D)
@@ -187,73 +170,7 @@ theorem represented_goodResidual_angular_continuous {ι : Type*} {U : Set D}
     Complex.continuous_re.comp (HarmonicFields.field_angular_continuous _ _ _ _ _)))
 
 
-/-- Actual nonconstant residual grouping, with no smoothness or support
-assumption on the independent axisymmetric alias. -/
-theorem stateGoodWaveResidual_grouped {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : Context D} {s : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasCoeffs : ι → HarmonicResidual.BlockCoefficients D}
-    {axis : MeanVector D}
-    (hrep : Representation labels blocks gaussian aliasCoeffs s axis) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c s labels blocks gaussian aliasCoeffs n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    HarmonicResidual.stateGoodWaveResidual c s n x i =
-      ∑ l ∈ labels n,
-        (HarmonicResidual.residualBlock c s (blocks l) (gaussian l) (aliasCoeffs l)).oscillation n x i := by
-  have hr := extractionRegular_erase h axis
-  have hc := represented_goodResidual_angular_continuous hU hrep.erase hr hx.1 i
-  have he := stateGoodWaveResidual_addAxisymmetricAlias c (eraseAxisymmetricAlias s axis)
-    axis n x i (hc.intervalIntegrable _ _)
-  rw [add_eraseAxisymmetricAlias] at he
-  rw [he, HarmonicResidual.stateGoodWaveResidual_grouped hU hrep.erase hr hx i]
-  rfl
 
-/-- The independent alias changes the actual zero mode by its negative. -/
-theorem stateGoodResidual_angularAverage {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : Context D} {s : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasCoeffs : ι → HarmonicResidual.BlockCoefficients D}
-    {axis : MeanVector D}
-    (hrep : Representation labels blocks gaussian aliasCoeffs s axis) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c s labels blocks gaussian aliasCoeffs n)
-    {x : D} (hx : x ∈ U) (i : Fin 3) :
-    angularAverage (fun m y => HarmonicResidual.stateGoodResidual c s m y i) n x =
-      HarmonicResidual.stateMeanCoefficientValue labels blocks gaussian aliasCoeffs
-        c s n x i - axis n x i := by
-  have hr := extractionRegular_erase h axis
-  have hc := represented_goodResidual_angular_continuous hU hrep.erase hr hx i
-  have he := angularAverage_sub_axisymmetric
-    (fun m y => HarmonicResidual.stateGoodResidual c (eraseAxisymmetricAlias s axis) m y i)
-    (fun m y => axis m y i) n x (hc.intervalIntegrable _ _)
-  have hb : (fun m y => HarmonicResidual.stateGoodResidual c
-      (eraseAxisymmetricAlias s axis) m y i - axis m y.1 i) =
-      (fun m y => HarmonicResidual.stateGoodResidual c s m y i) := by
-    funext m y
-    rw [stateGoodResidual_eraseAxisymmetricAlias]
-    exact add_sub_cancel_right _ _
-  rw [hb, ← HarmonicResidual.stateMeanCoefficientValue_eq_average hU hrep.erase hr hx i,
-    stateMeanCoefficientValue_erase] at he
-  exact he
 
-/-- The complete residual retains the actual excluded errors and the corrected
-mean mode. In particular the independent alias is never silently discarded. -/
-theorem stateFullResidual_reconstructed {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : Context D} {s : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasCoeffs : ι → HarmonicResidual.BlockCoefficients D}
-    {axis : MeanVector D}
-    (hrep : Representation labels blocks gaussian aliasCoeffs s axis) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c s labels blocks gaussian aliasCoeffs n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    HarmonicResidual.stateFullResidual c s n x i =
-      (∑ l ∈ labels n,
-        (HarmonicResidual.residualBlock c s (blocks l) (gaussian l) (aliasCoeffs l)).oscillation n x i) +
-      (HarmonicResidual.stateMeanCoefficientValue labels blocks gaussian aliasCoeffs
-        c s n x.1 i - axis n x.1 i) + s.errors.total n x i := by
-  have he := stateGoodWaveResidual_grouped hU hrep h hx i
-  simp only [HarmonicResidual.stateGoodWaveResidual] at he
-  rw [stateGoodResidual_angularAverage hU hrep h hx.1 i] at he
-  simp only [HarmonicResidual.stateGoodResidual, Pi.sub_apply] at he
-  linarith
 
 end NavierStokes.AxisymmetricResidualGrouping

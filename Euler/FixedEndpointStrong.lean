@@ -164,14 +164,6 @@ theorem continuousCoordinateVelocity_eq (ξ : U) (t : Icc (0 : ℝ) T) :
   have hreg := coordinateSlope_h1 T hT Q Q₁ H c hc hQ hd K hK hH hsmall Q₂ hTpos hd₁ hframe ξ
   exact reconstruction_eq_path T hTpos _ _ _ hreg.1 hreg.2.1 hreg.2.2 t
 
-include hd₁ hframe hTpos in
-theorem historyVelocity_eq (ξ : U) (t : Icc (0 : ℝ) T) :
-    historyVelocity T hT Q Q₁ H c hc hQ hd K hK hH hsmall ξ t =
-      Q t (coordinateVelocityPath T hT Q Q₁ c hc hQ H
-        (fixedEndpointDerivative T hT Q Q₁ H c hc hQ hd K hK hH hsmall
-          (affineTrial T hT Q Q₁) ξ) t) := by
-  change Q t (continuousCoordinateVelocity T hT Q Q₁ H c hc hQ hd K hK hH hsmall ξ t) = _
-  rw [continuousCoordinateVelocity_eq T hT Q Q₁ H c hc hQ hd K hK hH hsmall Q₂ hTpos hd₁ hframe]
 
 include hd₁ hframe hTpos in
 theorem continuousCoordinateVelocity_hasDerivWithinAt_generator (ξ : U) (t : Icc (0 : ℝ) T) :

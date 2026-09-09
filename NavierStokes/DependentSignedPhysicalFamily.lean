@@ -170,9 +170,6 @@ noncomputable def diagonalCells (f : BandLabel → CopyFamily H K)
   cells L := (c L).cells L
   support I k := (c I.1).support I k
 
-@[simp] theorem diagonalCells_cells (f : BandLabel → CopyFamily H K)
-    (c : ∀ L, SupportCells (f L)) (L : BandLabel) :
-    (diagonalCells f c).cells L = (c L).cells L := rfl
 
 theorem diagonalSupport (f : BandLabel → CopyFamily H K) {a b h r0 Z : ℝ} {Δ : ℕ}
     (s : ∀ L, LocalPhysicalCopyBounds.SupportData (f L) a b h r0 Z Δ) :

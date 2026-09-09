@@ -45,9 +45,6 @@ private local instance : NormedSpace ℝ (C(K,Supported P V S hS) →L[ℝ] C(K,
 def supportedPathAverage : C(K,Supported P V S hS) →L[ℝ] C(K,Supported P V S hS) :=
   (supportedAverage P S hS).compLeftContinuous ℝ K
 
-omit [CompactSpace K] in
-@[simp] theorem supportedPathAverage_apply (p : C(K,Supported P V S hS)) (t : K) :
-    supportedPathAverage P S hS p t = supportedAverage P S hS (p t) := rfl
 
 
 

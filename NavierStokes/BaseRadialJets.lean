@@ -159,80 +159,8 @@ theorem radial_eq {a : ℕ → ℕ} (ha : StrictMono a) {h C Q : ℝ}
   ring
 
 
-/-- The same scalar component schedule controls the actual normalized sum.
-The result is uniform in every band/label index of `D`. -/
-theorem scaled_sum_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {f : ℕ → Inner → ℝ} (hf : ∀ j, ContDiff ℝ ∞ (f j))
-    (ha : SlowBorelBase.AdmissibleScales h f (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    PolynomialJets (unitScale D) (fun i p =>
-      SlowBorelBase.slowSum a h f (SlowBorelBase.scaleMap (Q i) (normalizedCoordinates h p))) := by
-  let err : Chart → ℝ := fun y => SlowBorelBase.slowSum a h f y - f 0 y.2
-  have hs : ContDiffOn ℝ ∞ err sumRegion := by
-    intro y hy
-    exact ((SlowBorelBase.slowSum_smoothAt ha.strictMono hf h hy.1).sub
-      ((hf 0).contDiffAt.comp y contDiffAt_snd)).contDiffWithinAt
-  have he := normalized_error_envelope hh hqlo hqhi hlo Q hQ hsmall err hs
-    (fun j => SlowBorelBase.normalized_correction_bound hh hf (SlowBorelBase.innerBox_isCompact lo hi) ha j)
-  have hc := normalizedCoordinates_polynomial hh hh1 hqlo H
-  have hmap (i : ι) (p : Slow) (hp : p ∈ (unitScale D).carrier i) :
-      normalizedCoordinates h p ∈ innerRegion qlo qhi lo hi := by
-    exact ⟨H.q_range i p hp, H.x_range i p hp,
-      abs_lt.mp (normalizedCoordinates_eta hh hh1 (H.time i p hp))⟩
-  have hec := he.comp hc (fun _ => rfl) hmap
-  have hlead : PolynomialJets (unitScale D) (fun _ p => f 0 (normalizedCoordinates h p).2) := by
-    apply (hc.clm (ContinuousLinearMap.snd ℝ ℝ Inner)).compact_comp isOpen_univ
-      (hf 0).contDiffOn (SlowBorelBase.innerBox_isCompact lo hi) (subset_univ _)
-    intro i p hp
-    have heta := abs_lt.mp (normalizedCoordinates_eta hh hh1 (H.time i p hp))
-    exact ⟨⟨(H.x_range i p hp).1.le, (H.x_range i p hp).2.le⟩, heta.1.le, heta.2.le⟩
-  have hep := hec.to_polynomial (fun i _ _ =>
-    Real.rpow_le_one (hQ i).le (hQ1 i) (show 0 ≤ 2 * h by linarith))
-  apply (hep.add hlead).congr
-  intro i p hp
-  simp only [err, Function.comp_apply, SlowBorelBase.scaleMap_apply, sub_add_cancel]
 
-theorem normalizedStream_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    PolynomialJets (unitScale D) (fun i => normalizedStream a h d (Q i)) := by
-  have hs := scaled_sum_polynomial hh hh1 hqlo hqhi hlo H (averageSequence_smooth hd)
-    (averageSequence_admissible hd ha) Q hQ hQ1 hsmall
-  exact (geometry_factors_polynomial hh hh1 hr hM hqlo H).2.mul hs
 
-theorem reducedRadial_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    PolynomialJets (unitScale D) (fun i => reducedRadial a h d (Q i)) := by
-  have hs := normalizedStream_polynomial hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1 hsmall
-  have hR : PolynomialJets (unitScale D) (fun _ p => p.1) := by
-    have hb : ∀ i, ∀ p ∈ (unitScale D).carrier i,
-        ‖(ContinuousLinearMap.fst ℝ ℝ (ℝ × ℝ)) p + 0‖ ≤ M * (unitScale D).scale i ^ 0 := by
-      intro i p hp
-      simpa only [ContinuousLinearMap.coe_fst', add_zero, pow_zero, mul_one] using
-        (norm_fst_le p).trans (H.bounded i p hp)
-    simpa only [ContinuousLinearMap.coe_fst', add_zero] using
-      (PolynomialJets.affine (D := unitScale D) (ContinuousLinearMap.fst ℝ ℝ (ℝ × ℝ))
-        (fun _ => 0) (m := 0) hM hb)
-  exact (hR.div_const 2).neg.mul (hs.directional (0, (1, 0)))
 
 /-- A band-only nonnegative factor is an exact envelope and has no slow
 derivatives. This does not divide by any vanishing spatial weight. -/
@@ -246,24 +174,6 @@ theorem scalar_envelope {ι E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
   | zero => simpa only [norm_iteratedFDeriv_zero, Real.norm_eq_abs, one_mul] using le_of_eq (abs_of_nonneg (hw i))
   | succ j => simp only [iteratedFDeriv_succ_const, Pi.zero_apply, norm_zero, one_mul]; exact hw i
 
-/-- The actual physical radial coefficient has an all-order `Q^h`
-envelope, uniformly before the band and label are selected. -/
-theorem radial_envelope {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    EnvelopeJets (unitScale D) (fun i _ => Q i ^ h) (fun i => radial a h C d (Q i)) := by
-  have hp := reducedRadial_polynomial hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1 hsmall
-  have hw := scalar_envelope D (fun i => Q i ^ h) (fun i => (Real.rpow_pos_of_pos (hQ i) h).le)
-  apply (hw.smul_polynomial hp).congr
-  intro i p hp
-  simpa only [smul_eq_mul] using (radial_eq ha.strictMono hh hh1 (hQ i) hd (H.time i p hp)).symm
 
 
 
@@ -275,21 +185,6 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
   (v : ModulatedProfileAssembly.Witness ld)
 
 
-/-- The very same final weighted-bundle schedule supplies the averaged
-axial estimates. No replacement scale choice is introduced. -/
-theorem final_radial_envelope {ι : Type*} {D : Domain ι Slow}
-    (upper : ℝ) (B : ℕ) {r M qlo qhi lo hi : ℝ}
-    (hr : 0 < r) (hM : 1 ≤ M) (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (hhi : hi ≤ FinalSlowBase.boxRadius W upper)
-    (hgeom : GeometryBounds D F.data.h r M qlo qhi lo hi)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    EnvelopeJets (unitScale D) (fun i _ => Q i ^ F.data.h) (fun i p =>
-      Q i ^ CoordinateAlgebra.A F.data.h *
-        FinalSlowBase.velocity H v upper B (bandPoint F.data.h (Q i) p) 0) :=
-  radial_envelope F.data.h_pos F.data.h_lt_half hr hM hqlo hqhi hlo hgeom
-    (FinalSlowBase.coefficients_smooth H v)
-    (FinalSlowBase.scales_admissible_on H v upper B hlo.le hhi) Q hQ hQ1 hsmall
 
 end FinalBase
 

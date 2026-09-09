@@ -359,10 +359,6 @@ attribute [local irreducible] sobolevNorm embeddingConstant
 
 
 
-/-- The actual commutator of an iterated directional derivative with multiplication. -/
-noncomputable def commutator (d n : ℕ) (v : Domain d) (b h : 𝓢(Domain d, ℂ)) :
-    𝓢(Domain d, ℂ) :=
-  directional d n v (product d b h) - product d b (directional d n v h)
 
 
 

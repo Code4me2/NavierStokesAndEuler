@@ -642,22 +642,6 @@ theorem harmonicResidual_eq {s : StripData D} {P : ℕ → D → ℝ} {α κ : �
     (((h.pressure.smooth n).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp))
     (hg.pressure_angular n x hx) hx
 
-/-- The correction used in the estimates is realized by an actual curl. -/
-theorem curlPotential_realizes {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
-    {d : GraphDirections D} {a : WaveCoefficients D}
-    (h : InputBounds s P α κ d a) (n : ℕ)
-    (G : CurlClassBounds.CylindricalGeometry s.domain (a.radius n) (d.radialField n)
-      (fun _ => d.angular) (d.axialField s n))
-    (hK : a.frequency n ≠ 0) (hΦ : ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hn : ∀ x ∈ s.domain, a.normal s d n x ≠ 0)
-    (ht : ∀ x ∈ s.domain, normalDot (a.normal s d n x) (a.amplitude n x) = 0)
-    {x : D} (hx : x ∈ s.domain) :
-    CurlClassBounds.cylindricalCurl (a.radius n) (d.radialField n) (fun _ => d.angular)
-        (d.axialField s n) (a.curlPotential s d n) x =
-      vectorMode (a.frequency n) (a.phase n)
-        ((a.addAmplitude (a.curlCorrection s d)).amplitude n) x := by
-  exact CurlClassBounds.cylindricalCurl_vectorPotential G hK hΦ
-    ((component_classes h.amplitude).smooth n) hn ht hx
 
 theorem curlCorrection_divergence {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
     {d : GraphDirections D} {a : WaveCoefficients D}
@@ -687,21 +671,6 @@ theorem cutoff_tangent {s : StripData D} {d : GraphDirections D} {a : WaveCoeffi
       ring
     _ = 0 := by rw [ht x hx, mul_zero]
 
-/-- Under the nondegeneracy and tangency hypotheses, the actual cutoff
-potential realizes the same corrected velocity whose residual is estimated. -/
-theorem corrected_realizes_curl {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
-    {d : GraphDirections D} {a : WaveCoefficients D}
-    (h : InputBounds s P α κ d a) {ψ : ℕ → D → ℝ} (hψ : UnweightedClass s 0 ψ) (n : ℕ)
-    (G : CurlClassBounds.CylindricalGeometry s.domain (a.radius n) (d.radialField n)
-      (fun _ => d.angular) (d.axialField s n))
-    (hK : a.frequency n ≠ 0) (hΦ : ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hn : ∀ x ∈ s.domain, a.normal s d n x ≠ 0)
-    (ht : ∀ x ∈ s.domain, normalDot (a.normal s d n x) (a.amplitude n x) = 0)
-    {x : D} (hx : x ∈ s.domain) :
-    CurlClassBounds.cylindricalCurl (a.radius n) (d.radialField n) (fun _ => d.angular)
-        (d.axialField s n) ((a.withCutoff ψ).curlPotential s d n) x =
-      vectorMode (a.frequency n) (a.phase n) ((a.corrected s d ψ).amplitude n) x :=
-  curlPotential_realizes (h.with_cutoff hψ) n G hK hΦ hn (cutoff_tangent ψ n ht) hx
 
 theorem corrected_divergence {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
     {d : GraphDirections D} {a : WaveCoefficients D}

@@ -340,82 +340,15 @@ section PolynomialControl
 
 variable {X : Type*}
 
-/-- An upper bound with a fixed finite power of each allowed large scale.
-The controlled function need not have any regularity. -/
-def PolyBound (s : Set X) (S T : X → ℝ) (f : X → ℝ) : Prop :=
-  ∃ C : ℝ, 1 ≤ C ∧ ∃ K N : ℕ, ∀ x ∈ s, f x ≤ C * S x ^ K * T x ^ N
 
 variable {s : Set X} {S T f g : X → ℝ}
 
-theorem PolyBound.mono (hf : PolyBound s S T f) (h : ∀ x ∈ s, g x ≤ f x) :
-    PolyBound s S T g := by
-  obtain ⟨C, hC, K, N, hb⟩ := hf
-  exact ⟨C, hC, K, N, fun x hx => (h x hx).trans (hb x hx)⟩
 
-theorem polyBound_one : PolyBound s S T (fun _ => 1) := by
-  exact ⟨1, le_rfl, 0, 0, by simp⟩
 
-theorem polyBound_zero : PolyBound s S T (fun _ => 0) :=
-  polyBound_one.mono (by intro x hx; norm_num)
 
-theorem PolyBound.add (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hf : PolyBound s S T f) (hg : PolyBound s S T g) :
-    PolyBound s S T (fun x => f x + g x) := by
-  obtain ⟨C, hC, K, N, hb⟩ := hf
-  obtain ⟨D, hD, L, M, hd⟩ := hg
-  refine ⟨C + D, by linarith, K + L, N + M, ?_⟩
-  intro x hx
-  have hS0 := zero_le_one.trans (hS x hx)
-  have hT0 := zero_le_one.trans (hT x hx)
-  have hk : S x ^ K ≤ S x ^ (K + L) := pow_le_pow_right₀ (hS x hx) (Nat.le_add_right _ _)
-  have hl : S x ^ L ≤ S x ^ (K + L) := pow_le_pow_right₀ (hS x hx) (Nat.le_add_left _ _)
-  have hn : T x ^ N ≤ T x ^ (N + M) := pow_le_pow_right₀ (hT x hx) (Nat.le_add_right _ _)
-  have hm : T x ^ M ≤ T x ^ (N + M) := pow_le_pow_right₀ (hT x hx) (Nat.le_add_left _ _)
-  calc
-    _ ≤ C * S x ^ K * T x ^ N + D * S x ^ L * T x ^ M := add_le_add (hb x hx) (hd x hx)
-    _ ≤ C * S x ^ (K + L) * T x ^ (N + M) + D * S x ^ (K + L) * T x ^ (N + M) := by
-      apply add_le_add
-      · gcongr
-      · gcongr
-    _ = _ := by ring
 
-theorem PolyBound.sum {ι : Type*} (u : Finset ι) (F : ι → X → ℝ)
-    (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hF : ∀ i ∈ u, PolyBound s S T (F i)) :
-    PolyBound s S T (fun x => ∑ i ∈ u, F i x) := by
-  classical
-  induction u using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using (polyBound_zero (s := s) (S := S) (T := T))
-  | @insert i u hi ih =>
-      simp only [Finset.sum_insert hi]
-      exact (hF i (Finset.mem_insert_self _ _)).add hS hT
-        (ih (fun j hj => hF j (Finset.mem_insert_of_mem hj)))
 
-theorem PolyBound.pow (_hS : ∀ x ∈ s, 1 ≤ S x) (_hT : ∀ x ∈ s, 1 ≤ T x)
-    (hf : PolyBound s S T f) (hf0 : ∀ x ∈ s, 0 ≤ f x) (k : ℕ) :
-    PolyBound s S T (fun x => f x ^ k) := by
-  obtain ⟨C, hC, K, N, hb⟩ := hf
-  refine ⟨C ^ k, one_le_pow₀ hC, K * k, N * k, ?_⟩
-  intro x hx
-  calc
-    _ ≤ (C * S x ^ K * T x ^ N) ^ k := pow_le_pow_left₀ (hf0 x hx) (hb x hx) k
-    _ = _ := by simp only [mul_pow, pow_mul]
 
-theorem PolyBound.const_mul (hS : ∀ x ∈ s, 1 ≤ S x) (hT : ∀ x ∈ s, 1 ≤ T x)
-    (hf : PolyBound s S T f) {a : ℝ} (ha : 0 ≤ a) :
-    PolyBound s S T (fun x => a * f x) := by
-  obtain ⟨C, hC, K, N, hb⟩ := hf
-  refine ⟨(a + 1) * C, ?_, K, N, ?_⟩
-  · nlinarith
-  · intro x hx
-    have hm : 0 ≤ C * S x ^ K * T x ^ N :=
-      mul_nonneg (mul_nonneg (zero_le_one.trans hC)
-        (pow_nonneg (zero_le_one.trans (hS x hx)) _))
-        (pow_nonneg (zero_le_one.trans (hT x hx)) _)
-    calc
-      _ ≤ a * (C * S x ^ K * T x ^ N) := mul_le_mul_of_nonneg_left (hb x hx) ha
-      _ ≤ (a + 1) * (C * S x ^ K * T x ^ N) := by nlinarith
-      _ = _ := by ring
 
 end PolynomialControl
 
@@ -423,49 +356,7 @@ section WeightedJets
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- A finite envelope of the input jets and the positive denominator lower bound.
-This function is never differentiated. -/
-def envelope (w g r : E → ℝ) (n : ℕ) (x : E) : ℝ :=
-  1 + w x / g x + ∑ i ∈ Finset.range (n + 1),
-    (‖iteratedFDeriv ℝ i g x‖ / w x + ‖iteratedFDeriv ℝ i r x‖ / w x)
 
-theorem envelope_bounds {w g r : E → ℝ} {x : E} (hw : 0 < w x) (hg : 0 < g x) (n : ℕ) :
-    1 ≤ envelope w g r n x ∧ w x / envelope w g r n x ≤ g x ∧
-      (∀ i ≤ n, ‖iteratedFDeriv ℝ i g x‖ ≤ w x * envelope w g r n x) ∧
-      (∀ i ≤ n, ‖iteratedFDeriv ℝ i r x‖ ≤ w x * envelope w g r n x) := by
-  have hterm (i : ℕ) : 0 ≤ ‖iteratedFDeriv ℝ i g x‖ / w x +
-      ‖iteratedFDeriv ℝ i r x‖ / w x := by positivity
-  have hsum : 0 ≤ ∑ i ∈ Finset.range (n + 1),
-      (‖iteratedFDeriv ℝ i g x‖ / w x + ‖iteratedFDeriv ℝ i r x‖ / w x) :=
-    Finset.sum_nonneg (fun i _ => hterm i)
-  have hB : 1 ≤ envelope w g r n x := by
-    dsimp only [envelope]
-    have hfrac : 0 ≤ w x / g x := (div_pos hw hg).le
-    linarith
-  have hlow : w x / g x ≤ envelope w g r n x := by
-    dsimp only [envelope]
-    linarith
-  have hlow' : w x / envelope w g r n x ≤ g x := by
-    apply (div_le_iff₀ (zero_lt_one.trans_le hB)).2
-    simpa only [mul_comm] using (div_le_iff₀ hg).mp hlow
-  have hi (i : ℕ) (hin : i ≤ n) :
-      ‖iteratedFDeriv ℝ i g x‖ / w x + ‖iteratedFDeriv ℝ i r x‖ / w x ≤
-        envelope w g r n x := by
-    have ht := Finset.single_le_sum
-      (f := fun i => ‖iteratedFDeriv ℝ i g x‖ / w x + ‖iteratedFDeriv ℝ i r x‖ / w x)
-      (fun i _ => hterm i) (Finset.mem_range.mpr (Nat.lt_succ_of_le hin))
-    dsimp only [envelope]
-    have hlo : 0 ≤ w x / g x := (div_pos hw hg).le
-    linarith
-  refine ⟨hB, hlow', ?_, ?_⟩
-  · intro i hin
-    have hnonneg : 0 ≤ ‖iteratedFDeriv ℝ i r x‖ / w x := by positivity
-    have h : ‖iteratedFDeriv ℝ i g x‖ / w x ≤ envelope w g r n x := by linarith [hi i hin]
-    simpa only [mul_comm] using (div_le_iff₀ hw).mp h
-  · intro i hin
-    have hnonneg : 0 ≤ ‖iteratedFDeriv ℝ i g x‖ / w x := by positivity
-    have h : ‖iteratedFDeriv ℝ i r x‖ / w x ≤ envelope w g r n x := by linarith [hi i hin]
-    simpa only [mul_comm] using (div_le_iff₀ hw).mp h
 
 
 
@@ -477,55 +368,14 @@ section GaussianEdge
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-abbrev edgeStrip (U : Set E) : Set (E × ℝ) := U ×ˢ Ioo 0 1
-
-/-- All full derivative tensors satisfy an exponential weight times fixed
-powers of the allowed scale and inverse edge distance. -/
-def WeightedJets (c : ℝ) (U : Set E) (S : E × ℝ → ℝ) (f : E × ℝ → ℝ) : Prop :=
-  ∀ n : ℕ, PolyBound (edgeStrip U) S (fun p => p.2⁻¹)
-    (fun p => ‖iteratedFDeriv ℝ n f p‖ / FlatCutoff.edge c p.2)
-
-/-- An external scale may vary with parameters, but is locally bounded at
-the edge. Any fixed `S ≥ 1` satisfies this condition. -/
-def LocallyBoundedScale (U : Set E) (S : E × ℝ → ℝ) : Prop :=
-  ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ M : ℝ, 1 ≤ M ∧
-    ∀ y ∈ V ∩ U, ∀ δ ∈ Ioo (0 : ℝ) 1, S (y, δ) ≤ M
-
-
-theorem sqrt_edge (c δ : ℝ) : Real.sqrt (FlatCutoff.edge c δ) = FlatCutoff.edge (c / 2) δ := by
-  by_cases hδ : δ ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos c hδ, FlatCutoff.edge_of_nonpos (c / 2) hδ]
-  · have hp : 0 < δ := lt_of_not_ge hδ
-    rw [FlatCutoff.edge_of_pos c hp, FlatCutoff.edge_of_pos (c / 2) hp, ← Real.exp_half]
-    congr 1
-    ring
 
 
 
 
-theorem WeightedJets.localGaussian {c : ℝ} {U : Set E} {S f : E × ℝ → ℝ}
-    (hS : ∀ p ∈ edgeStrip U, 1 ≤ S p) (hscale : LocallyBoundedScale U S)
-    (hf : WeightedJets c U S f) : FlatZeroExtension.LocalGaussianJets c U f := by
-  intro n x hx
-  obtain ⟨C, hC, K, N, hb⟩ := hf n
-  obtain ⟨V, hV, M, hM, hm⟩ := hscale x hx
-  refine ⟨V, hV, C * M ^ K,
-    mul_nonneg (zero_le_one.trans hC) (pow_nonneg (zero_le_one.trans hM) _), N, ?_⟩
-  intro y hy δ hδ
-  have hp : (y, δ) ∈ edgeStrip U := ⟨hy.2, hδ⟩
-  have he := FlatCutoff.edge_pos c hδ.1
-  have hbase : 0 ≤ S (y, δ) := zero_le_one.trans (hS _ hp)
-  have hδinv : 0 ≤ δ⁻¹ := (inv_pos.mpr hδ.1).le
-  calc
-    ‖iteratedFDeriv ℝ n f (y, δ)‖ ≤
-        (C * S (y, δ) ^ K * (δ⁻¹) ^ N) * FlatCutoff.edge c δ :=
-      (div_le_iff₀ he).mp (hb (y, δ) hp)
-    _ ≤ (C * M ^ K * (δ⁻¹) ^ N) * FlatCutoff.edge c δ := by
-      gcongr
-      exact hm y hy δ hδ
-    _ = C * M ^ K * FlatCutoff.edge c δ / δ ^ N := by
-      simp only [div_eq_mul_inv, inv_pow]
-      ring
+
+
+
+
 
 
 

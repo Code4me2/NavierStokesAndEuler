@@ -1,6 +1,5 @@
 import Euler.PacketCrossProduct
 import Euler.AngleMeanZeroPrimitive
-import Euler.AnglePrimitiveBounds
 
 /-! The vector potential Q of a tangent, mean-zero, periodic high coefficient. -/
 
@@ -37,13 +36,5 @@ theorem potential_zero (P : ℝ) (m : Space) :
   simp [potential, primitive, rawPrimitive]
 
 
-theorem potential_bound (P M : ℝ) (hP : 0 < P) (hM : 0 ≤ M) (m : Space)
-    (A : ℝ → Space) (hA : ∀ θ ∈ Icc 0 P, ‖A θ‖ ≤ M) (θ : ℝ) (hθ : θ ∈ Icc 0 P) :
-    ‖potential P m A θ‖ ≤ 2*P*(‖potentialMultiplier m‖*M) := by
-  apply primitive_bound P (‖potentialMultiplier m‖*M) hP
-    (mul_nonneg (norm_nonneg _) hM) _ _ θ hθ
-  intro s hs
-  exact ((potentialMultiplier m).le_opNorm (A s)).trans
-    (mul_le_mul_of_nonneg_left (hA s hs) (norm_nonneg _))
 
 end EulerPacketAngularPotential

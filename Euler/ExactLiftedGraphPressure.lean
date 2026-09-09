@@ -87,8 +87,6 @@ theorem graphPressure_has_potential (k : ℝ) (hk : k*A.κ=1) (t : Icc (0 : ℝ)
 def graphPotential (k : ℝ) (t : Icc (0 : ℝ) T) : Vector3 → ℝ :=
   radialPotential (S.graphPressure k t)
 
-theorem graphPotential_zero (k : ℝ) (t : Icc (0 : ℝ) T) :
-    S.graphPotential k t 0 = 0 := radialPotential_zero _
 
 
 theorem graphPotential_smooth (k : ℝ) (hk : k*A.κ=1) (t : Icc (0 : ℝ) T) :

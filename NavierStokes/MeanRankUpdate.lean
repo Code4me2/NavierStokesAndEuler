@@ -291,34 +291,8 @@ theorem desiredAxialFamily_contDiffOn (lam a b : ℝ) {S : Set E} {ell U C : E �
     (H := fun p => FiveRowRank.gamma lam (C p.1) a b
       (normalizeDebt (ell p.1) (U p.1) (d p.1)) p.2) hl hU hln hR
 
-theorem angularFamily_contDiff (lam a b : ℝ) {ell U C : E → ℝ} {d : E → Debt}
-    (hl : ContDiff ℝ ∞ ell) (hU : ContDiff ℝ ∞ U)
-    (hC : ContDiff ℝ ∞ C) (hd : ContDiff ℝ ∞ d)
-    (hln : ∀ p, ell p ≠ 0) (hUn : ∀ p, U p ≠ 0) (hCn : ∀ p, C p ≠ 0) :
-    ContDiff ℝ ∞ (angularFamily lam a b ell U C d) := by
-  simpa only [univ_prod_univ, contDiffOn_univ] using
-    angularFamily_contDiffOn lam a b (S := univ) hl.contDiffOn hU.contDiffOn hC.contDiffOn hd.contDiffOn
-      (fun p _ => hln p) (fun p _ => hUn p) (fun p _ => hCn p)
 
-theorem desiredAxialFamily_contDiff (lam a b : ℝ) {ell U C : E → ℝ} {d : E → Debt}
-    (hl : ContDiff ℝ ∞ ell) (hU : ContDiff ℝ ∞ U)
-    (hC : ContDiff ℝ ∞ C) (hd : ContDiff ℝ ∞ d)
-    (hln : ∀ p, ell p ≠ 0) (hUn : ∀ p, U p ≠ 0) (hCn : ∀ p, C p ≠ 0) :
-    ContDiff ℝ ∞ (desiredAxialFamily lam a b ell U C d) := by
-  simpa only [univ_prod_univ, contDiffOn_univ] using
-    desiredAxialFamily_contDiffOn lam a b (S := univ) hl.contDiffOn hU.contDiffOn hC.contDiffOn hd.contDiffOn
-      (fun p _ => hln p) (fun p _ => hUn p) (fun p _ => hCn p)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- A common radial annulus follows from bounds on the physical length. -/
-theorem desiredAxialFamily_supported (lam a b : ℝ) {ell U C : E → ℝ} (d : E → Debt)
-    (hab : a < b) (hl : ∀ s, 0 < ell s) {lo hi : ℝ}
-    (hlo : ∀ s, lo ≤ ell s * a) (hhi : ∀ s, ell s * b ≤ hi) :
-    RadialAlias.RadiallySupported lo hi (desiredAxialFamily lam a b ell U C d) := by
-  intro p hp
-  have hs := desiredAxialIncrement_tsupport lam (C p.2) a b (U p.2) (hl p.2) hab (d p.2)
-    (subset_closure hp)
-  exact ⟨(hlo p.2).trans hs.1.le, hs.2.le.trans (hhi p.2)⟩
 
 
 end Families
@@ -393,18 +367,6 @@ theorem slow_streamGamma_eq_desired {a b d M : ℝ} (ha : 0 < a) (hab : a < b) (
   rw [he, slow_physicalAlias_zero ha hab hd v (PressureStream.weightedSource_contDiff hf)
     (PressureStream.weightedSource_supported hs) hm, zero_div, sub_zero]
 
-/-- The radial companion is the actual axial derivative of the same stream. -/
-theorem slow_stream_divergence_zero {a b d M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v : PressureStream.Plane) (w : E × PressureStream.Plane) {f : ℝ × E → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hs : RadialAlias.RadiallySupported a b f)
-    (p : PressureStream.Lift E) :
-    PressureStream.graphDivergence (PressureStream.physicalSpeed d M) ((0 : E), v) w
-      (PressureStream.streamBeta w
-        (PressureStream.streamPotential d a b M ((0 : E), v) (slowLift f)))
-      (PressureStream.streamGamma (PressureStream.physicalSpeed d M) ((0 : E), v)
-        (PressureStream.streamPotential d a b M ((0 : E), v) (slowLift f))) p = 0 :=
-  PressureStream.reconstructed_divergence_zero ha hab hd ((0 : E), v) w
-    (slowLift_contDiff hf) (slowLift_supported hs) p
 
 end SlowStream
 
@@ -934,15 +896,6 @@ end FinalClass
 
 section ShapedPatch
 
-theorem square_half_power (lam R : ℝ) (hR : 0 < R) :
-    (R ^ 2 / 2) ^ (-(1 / 2 + lam)) =
-      (2 : ℝ) ^ (1 / 2 + lam) * R ^ (-1 - 2 * lam) := by
-  have hX : 0 < R ^ 2 / 2 := by positivity
-  rw [Real.rpow_def_of_pos hX, Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2),
-    Real.rpow_def_of_pos hR, ← Real.exp_add,
-    Real.log_div (pow_ne_zero 2 hR.ne') (by norm_num), Real.log_pow]
-  congr 1
-  ring
 
 
 
@@ -974,78 +927,21 @@ structure SmoothFamily (E : Type) [NormedAddCommGroup E] [NormedSpace ℝ E] whe
 
 namespace SmoothFamily
 
-noncomputable def angular (F : SmoothFamily E) : ℝ × E → ℝ :=
-  angularFamily F.lam F.a F.b F.length F.velocity F.amplitude F.debt
-
-noncomputable def desired (F : SmoothFamily E) : ℝ × E → ℝ :=
-  desiredAxialFamily F.lam F.a F.b F.length F.velocity F.amplitude F.debt
-
-noncomputable def potential (F : SmoothFamily E) (power lo hi M : ℝ)
-    (v : PressureStream.Plane) : PressureStream.Lift E → ℝ :=
-  PressureStream.streamPotential power lo hi M ((0 : E), v) (slowLift F.desired)
-
-noncomputable def radial (F : SmoothFamily E) (power lo hi M : ℝ)
-    (v : PressureStream.Plane) (w : E × PressureStream.Plane) : PressureStream.Lift E → ℝ :=
-  PressureStream.streamBeta w (F.potential power lo hi M v)
-
-noncomputable def axial (F : SmoothFamily E) (power lo hi M : ℝ)
-    (v : PressureStream.Plane) : PressureStream.Lift E → ℝ :=
-  PressureStream.streamGamma (PressureStream.physicalSpeed power M) ((0 : E), v)
-    (F.potential power lo hi M v)
-
-theorem angular_smooth (F : SmoothFamily E) : ContDiff ℝ ∞ F.angular :=
-  angularFamily_contDiff _ _ _ F.length_smooth F.velocity_smooth F.amplitude_smooth F.debt_smooth
-    (fun s => (F.length_pos s).ne') F.velocity_ne F.amplitude_ne
-
-theorem desired_smooth (F : SmoothFamily E) : ContDiff ℝ ∞ F.desired :=
-  desiredAxialFamily_contDiff _ _ _ F.length_smooth F.velocity_smooth F.amplitude_smooth F.debt_smooth
-    (fun s => (F.length_pos s).ne') F.velocity_ne F.amplitude_ne
-
-theorem prescribed_five_rows (F : SmoothFamily E) (s : E) :
-    FiveRowRank.FiveRows (background F.lam (F.amplitude s) (F.length s) (F.velocity s)) (fun _ => 0)
-      (F.debt s) (fun r => F.angular (r, s)) (fun r => F.desired (r, s)) :=
-  physical_five_rows F.lam_pos (F.amplitude_ne s) F.a_pos F.ordered (F.length_pos s) (F.velocity_ne s) (F.debt s)
-
-theorem desired_supported (F : SmoothFamily E) {lo hi : ℝ}
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi) :
-    RadialAlias.RadiallySupported lo hi F.desired :=
-  desiredAxialFamily_supported _ _ _ _ F.ordered F.length_pos hlo hhi
-
-theorem desired_mass_zero (F : SmoothFamily E) (s : E) : (∫ r, r * F.desired (r, s)) = 0 :=
-  (F.prescribed_five_rows s).2.1
 
 
-theorem potential_smooth (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi) :
-    ContDiff ℝ ∞ (F.potential power lo hi M v) :=
-  PressureStream.streamPotential_contDiff hlo0 horder hp ((0 : E), v)
-    (slowLift_contDiff F.desired_smooth) (slowLift_supported (F.desired_supported hlo hhi))
-
-theorem radial_smooth (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (w : E × PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi) :
-    ContDiff ℝ ∞ (F.radial power lo hi M v w) :=
-  PressureStream.streamBeta_contDiff hlo0 horder hp ((0 : E), v) w
-    (slowLift_contDiff F.desired_smooth) (slowLift_supported (F.desired_supported hlo hhi))
-
-theorem axial_exact (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi)
-    (p : PressureStream.Lift E) : F.axial power lo hi M v p = F.desired (p.1, p.2.1) :=
-  slow_streamGamma_eq_desired hlo0 horder hp v F.desired_smooth (F.desired_supported hlo hhi)
-    F.desired_mass_zero p
 
 
-theorem divergence_zero (F : SmoothFamily E) {power lo hi M : ℝ}
-    (hlo0 : 0 < lo) (horder : lo < hi) (hp : 0 < power) (v : PressureStream.Plane)
-    (w : E × PressureStream.Plane)
-    (hlo : ∀ s, lo ≤ F.length s * F.a) (hhi : ∀ s, F.length s * F.b ≤ hi)
-    (p : PressureStream.Lift E) :
-    PressureStream.graphDivergence (PressureStream.physicalSpeed power M) ((0 : E), v) w
-      (F.radial power lo hi M v w) (F.axial power lo hi M v) p = 0 :=
-  slow_stream_divergence_zero hlo0 horder hp v w F.desired_smooth (F.desired_supported hlo hhi) p
+
+
+
+
+
+
+
+
+
+
+
 
 end SmoothFamily
 
@@ -1073,8 +969,6 @@ namespace SmoothFamily
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 
-noncomputable def supportSet (F : SmoothFamily E) : Set (PressureStream.Lift E) :=
-  {p | p.1 ∈ Icc (F.length p.2.1 * F.a) (F.length p.2.1 * F.b)}
 
 
 

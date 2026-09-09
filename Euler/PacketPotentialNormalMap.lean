@@ -12,7 +12,6 @@ open EulerSmoothLimit EulerTransverseGramInverse InnerProductSpace
 def normalVector : (Space →L[ℝ] ℝ) →L[ℝ] Space :=
   (ContinuousLinearMap.apply ℝ Space (1 : ℝ)).comp (realAdjoint (U := Space) (E := ℝ))
 
-@[simp] theorem normalVector_apply (N : Space →L[ℝ] ℝ) : normalVector N = N.adjoint 1 := rfl
 
 def normalPotentialMap : (Space →L[ℝ] ℝ) →L[ℝ] (Space →L[ℝ] Space) :=
   -(crossOperator.comp normalVector)

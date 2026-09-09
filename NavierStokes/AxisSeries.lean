@@ -156,9 +156,6 @@ theorem bessel_contiguous (k : ℕ) (t : ℝ) :
 
 
 
-theorem bessel_zero (k : ℕ) : bessel k 0 = 1 / (k.factorial : ℝ) := by
-  rw [bessel_eq_constant_add_tail]
-  simp [term]
 
 /-- The leading regular angular profile in the manuscript's scaled radius. -/
 def profile (χ Y : ℝ) : ℝ := bessel 1 ((χ / 2) * Y)
@@ -172,8 +169,6 @@ theorem profile_eq_tsum (χ Y : ℝ) :
   congr 2
   ring
 
-theorem profile_zero (χ : ℝ) : profile χ 0 = 1 := by
-  simp [profile, bessel_zero]
 
 theorem hasDerivAt_profile (χ Y : ℝ) :
     HasDerivAt (profile χ) (-(χ / 2) * bessel 2 ((χ / 2) * Y)) Y := by
@@ -278,10 +273,6 @@ theorem profile_gt_quarter (χ Y : ℝ) (hχ0 : 0 ≤ χ) (hχ1 : χ ≤ 1)
   · positivity
   · nlinarith [mul_nonneg (sub_nonneg.mpr hχ1) hY0]
 
-theorem profile_pos (χ Y : ℝ) (hχ0 : 0 ≤ χ) (hχ1 : χ ≤ 1)
-    (hY0 : 0 ≤ Y) (hY1 : Y ≤ 41 / 10) : 0 < profile χ Y := by
-  have h := profile_gt_quarter χ Y hχ0 hχ1 hY0 hY1
-  linarith
 
 /-- A convergent alternating tail beginning with its positive sign has
 nonnegative total, for every offset starting after at least one term. -/

@@ -35,17 +35,7 @@ theorem realHeatList_add (directions : List LiftTangent) (t : ℝ) (f g : LiftL2
   | cons a tail ih => simp only [realHeatList, ih, realLineHeat_add]
 
 
-@[simp] theorem realHeatList_zero_field (directions : List LiftTangent) (t : ℝ) :
-    realHeatList period directions t 0 = 0 := by
-  induction directions with
-  | nil => rfl
-  | cons a tail ih => simp only [realHeatList, ih, realLineHeat_eq_toNNReal, ← lineHeatOperator_apply, map_zero]
 
-@[simp] theorem realHeatList_zero_time (directions : List LiftTangent) (f : LiftL2 period) :
-    realHeatList period directions 0 f = f := by
-  induction directions with
-  | nil => rfl
-  | cons a tail ih => simp only [realHeatList, realLineHeat_zero, ih]
 
 theorem realHeatList_eq_toNNReal (directions : List LiftTangent) (t : ℝ) (f : LiftL2 period) :
     realHeatList period directions t f = heatList period directions t.toNNReal f := by

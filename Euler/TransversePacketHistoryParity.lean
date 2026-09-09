@@ -31,10 +31,6 @@ theorem velocityPath_reflection_neg (t : Icc (0 : ℝ) D.T) :
   B.coefficients.physicalVelocity_odd P (D.frame_even hF) (D.frameDerivative_even hF hM) hH
     (forcingPath G) (G.path_reflection_neg hraw) t
 
-theorem derivativePath_reflection_neg (t : Icc (0 : ℝ) D.T) :
-    reflection P (B.derivativePath G t) = -B.derivativePath G t :=
-  B.coefficients.physicalDerivative_odd P (D.frame_even hF) (D.frameDerivative_even hF hM) hH
-    (forcingPath G) (G.path_reflection_neg hraw) t
 
 theorem field_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
     B.field G t (-x,((-θ : ℝ) : AddCircle P)) = -B.field G t (x,(θ : AddCircle P)) := by

@@ -24,13 +24,7 @@ def L (h η : ℝ) : ℝ := 1 - 2 * h * η ^ 2
 
 
 
-theorem D_pos {h : ℝ} (hh : h < 1 / 2) : 0 < D h := by
-  unfold D
-  linarith
 
-theorem d_pos {η : ℝ} (hη : η ^ 2 < 1) : 0 < d η := by
-  unfold d
-  linarith
 
 /-- The explicit smallness condition needed for the manuscript's `L > 0`. -/
 theorem L_pos {h η : ℝ} (hh₀ : 0 ≤ h) (hh : h < 1 / 2)

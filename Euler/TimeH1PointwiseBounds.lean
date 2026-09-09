@@ -44,33 +44,7 @@ theorem increment_eq_integral (s t : ℝ) (hs : s ∈ Icc (0 : ℝ) T) (ht : t �
     _ = realPrimitive T g t-realPrimitive T g s := by abel
     _ = ∫ r in s..t, zeroExtension T g r := realPrimitive_increment T g s t
 
-include hT hη hder in
-/-- The exact square-root modulus follows from Bochner Cauchy--Schwarz. -/
-theorem increment_norm_sq_le (s t : ℝ) (hs : s ∈ Icc (0 : ℝ) T)
-    (ht : t ∈ Icc (0 : ℝ) T) (hst : s ≤ t) :
-    ‖η t-η s‖^2 ≤ (t-s)*‖g‖^2 := by
-  have hlocal := norm_integral_sq_le_length_mul (zeroExtension T g) hst
-    (zeroExtension_integrable T g).intervalIntegrable
-    (zeroExtension_norm_sq_integrable T g).intervalIntegrable
-  have hmono : (∫ r in s..t, ‖zeroExtension T g r‖^2) ≤ ‖g‖^2 := by
-    rw [intervalIntegral.integral_of_le hst]
-    exact (setIntegral_le_integral (zeroExtension_norm_sq_integrable T g)
-      (Filter.Eventually.of_forall (fun r => sq_nonneg ‖zeroExtension T g r‖))).trans_eq
-      (zeroExtension_norm_sq_integral T g)
-  calc
-    ‖η t-η s‖^2 = ‖∫ r in s..t, zeroExtension T g r‖^2 :=
-      congrArg (fun x : E => ‖x‖^2) (increment_eq_integral T hT g η hη hder s t hs ht)
-    _ ≤ (t-s)*(∫ r in s..t, ‖zeroExtension T g r‖^2) := hlocal
-    _ ≤ (t-s)*‖g‖^2 := mul_le_mul_of_nonneg_left hmono (sub_nonneg.mpr hst)
 
-include hT hη hder in
-/-- A genuine H¹ path has the quantitative square-root continuity bound. -/
-theorem increment_norm_le (s t : ℝ) (hs : s ∈ Icc (0 : ℝ) T)
-    (ht : t ∈ Icc (0 : ℝ) T) (hst : s ≤ t) :
-    ‖η t-η s‖ ≤ Real.sqrt (t-s)*‖g‖ := by
-  apply (sq_le_sq₀ (norm_nonneg _) (mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _))).1
-  rw [mul_pow, Real.sq_sqrt (sub_nonneg.mpr hst)]
-  exact increment_norm_sq_le T hT g η hη hder s t hs ht hst
 
 
 

@@ -188,11 +188,6 @@ theorem abs_jet_le (I : Window) (w : ℕ → ℕ → ℝ) (A : CoefficientSpace 
     (A.1.norm_coe_le_norm ((n, m), I.project x)) (abs_nonneg _)
 
 
-/-- Norm convergence controls every derivative uniformly in the parameter. -/
-theorem abs_jet_sub_le (I : Window) (w : ℕ → ℕ → ℝ) (A B : CoefficientSpace I w)
-    (n m : ℕ) (x : ℝ) :
-    |jet I w A.1 n m x - jet I w B.1 n m x| ≤ |w n m| * ‖A - B‖ := by
-  simpa only [Submodule.coe_sub, jet_sub] using abs_jet_le I w (A - B) n m x
 
 /-- For nonzero weights, the normalized actual derivative recovers exactly
 the stored bounded-continuous coordinate. -/

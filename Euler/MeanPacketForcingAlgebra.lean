@@ -32,14 +32,7 @@ def ofSlices (A : ℝ → SmoothL2Field Space)
   path_eq _ := rfl
   raw_eq := heq
 
-def zero (D : Data) : Forcing D (0 : VectorField) :=
-  ofSlices (fun _ => zeroField) (fun _ => continuous_const) (fun _ _ _ => rfl)
 
-def add (G : Forcing D raw) (H : Forcing D raw') : Forcing D (raw+raw') :=
-  ofSlices (fun t => addField (G.slices t) (H.slices t))
-    (continuous_jetLp_addField (fun t : Icc (0 : ℝ) D.T => G.slices t)
-      (fun t : Icc (0 : ℝ) D.T => H.slices t) G.jets_continuous H.jets_continuous)
-    (fun t x θ => by simp only [Pi.add_apply, G.raw_eq t x θ, H.raw_eq t x θ, addField_field])
 
 /-- Applying a genuine bounded linear map preserves every actual L² jet. -/
 def map (G : Forcing D raw) (L : Space →L[ℝ] Space) : Forcing D (fun z => L (raw z)) :=
@@ -50,18 +43,7 @@ def map (G : Forcing D raw) (L : Space →L[ℝ] Space) : Forcing D (fun z => L 
 def smul (G : Forcing D raw) (c : ℝ) : Forcing D (c • raw) :=
   G.map (c • ContinuousLinearMap.id ℝ Space)
 
-def neg (G : Forcing D raw) : Forcing D (-raw) := G.map (-ContinuousLinearMap.id ℝ Space)
 
-/-- The derivative is the ordinary derivative of the prescribed raw field at fixed time and angle. -/
-def spatialDerivative (G : Forcing D raw) (v : Space) :
-    Forcing D (fun z => fderiv ℝ (fun x => raw (z.1,(x,z.2.2))) z.2.1 v) :=
-  ofSlices (fun t => directionalField (G.slices t) v)
-    (continuous_jetLp_directionalField (fun t : Icc (0 : ℝ) D.T => G.slices t) G.jets_continuous v)
-    (fun t x θ => by
-      have he : (fun y => raw (t,(y,θ))) = (G.slices t).field :=
-        funext (fun y => G.raw_eq t y θ)
-      rw [he]
-      rfl)
 
 end Forcing
 

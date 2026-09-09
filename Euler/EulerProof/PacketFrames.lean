@@ -1542,9 +1542,6 @@ namespace EulerPacketStage
 open Real EulerPacketGrowth EulerPacketRay EulerPacketBridge EulerPacketFrameStability
   EulerPacketFrameRenewal EulerPacketFrameQuantitative EulerPacketExistence
 
-/-- Absolute relative-stability constant obtained from the propagator
-bound and the primary-solution lower comparison. -/
-noncomputable def stabilityConstant : ℝ := 320000000 * exp 6
 
 
 

@@ -1416,33 +1416,7 @@ private theorem radialCoordinate_transform (d : OutgoingTail.TailData) (amp : �
   rw [axial_eq_of_amplitude_eq d.core amp (fun _ => amp eta) eta y rfl]
   ring
 
-theorem radialEnergy_integrable (d : OutgoingTail.TailData) (amp : ℝ → ℝ)
-    (eta XR : ℝ) (hXR : 0 < XR) :
-    IntegrableOn (radialEnergyIntegrand d amp eta XR) (Ioi 0) := by
-  have hd : ∀ y ∈ (univ : Set ℝ), HasDerivWithinAt (fun y => XR * Real.exp y)
-      (XR * Real.exp y) univ y := fun y _ => ((Real.hasDerivAt_exp y).const_mul XR).hasDerivWithinAt
-  have hinj : InjOn (fun y : ℝ => XR * Real.exp y) univ := by
-    intro x _ y _ h
-    exact Real.exp_injective (mul_left_cancel₀ hXR.ne' h)
-  have h := integrableOn_image_iff_integrableOn_abs_deriv_smul MeasurableSet.univ hd hinj
-    (radialEnergyIntegrand d amp eta XR)
-  rw [radialCoordinate_image XR hXR, radialCoordinate_transform d amp eta XR hXR,
-    integrableOn_univ] at h
-  exact h.mpr ((energyIntegrand_integrable d (amp eta) eta).const_mul XR)
 
-theorem radialEnergy_integral (d : OutgoingTail.TailData) (amp : ℝ → ℝ)
-    (eta XR : ℝ) (hXR : 0 < XR) :
-    (∫ X in Ioi 0, radialEnergyIntegrand d amp eta XR X) = XR * totalEnergy d (amp eta) eta := by
-  have hd : ∀ y ∈ (univ : Set ℝ), HasDerivWithinAt (fun y => XR * Real.exp y)
-      (XR * Real.exp y) univ y := fun y _ => ((Real.hasDerivAt_exp y).const_mul XR).hasDerivWithinAt
-  have hinj : InjOn (fun y : ℝ => XR * Real.exp y) univ := by
-    intro x _ y _ h
-    exact Real.exp_injective (mul_left_cancel₀ hXR.ne' h)
-  have h := integral_image_eq_integral_abs_deriv_smul MeasurableSet.univ hd hinj
-    (radialEnergyIntegrand d amp eta XR)
-  rw [radialCoordinate_image XR hXR, radialCoordinate_transform d amp eta XR hXR,
-    setIntegral_univ, integral_const_mul] at h
-  exact h
 
 
 end NavierStokes.PulseAmplitude

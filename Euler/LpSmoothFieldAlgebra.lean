@@ -144,10 +144,5 @@ theorem continuous_jetLp_derivative (A : K → SmoothL2Field V)
   rw [he]
   exact ContinuousLinearMap.continuous _ |>.comp (hA (n+1))
 
-theorem continuous_jetLp_directionalField (A : K → SmoothL2Field V)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n)) (v : Space) (n : ℕ) :
-    Continuous (fun t => (directionalField (A t) v).jetLp n) :=
-  continuous_jetLp_mapField (ContinuousLinearMap.apply ℝ V v) (fun t => (A t).derivative)
-    (continuous_jetLp_derivative A hA) n
 
 end EulerLpTranslation.SmoothL2Field

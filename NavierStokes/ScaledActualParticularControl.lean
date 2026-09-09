@@ -294,15 +294,7 @@ theorem angle_transport_withSource (d : PrimaryODE.FrameData Slow) (χ : P →L[
     nativeFrame_transport d χ φ ψ hχ rate normal]
   rfl
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-@[simp] theorem withSource_real (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → HarmonicCalculus.ComplexVector) :
-    withSource t (fun x => realPart (f x)) = realData t f := rfl
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-@[simp] theorem withSource_imag (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → HarmonicCalculus.ComplexVector) :
-    withSource t (fun x => imagPart (f x)) = imagData t f := rfl
 
 noncomputable def transportedTangent
     (F : PhaseConstruction D) (χ : P →L[ℝ] Slow) (ψ : (Label × ℕ) → P → P)

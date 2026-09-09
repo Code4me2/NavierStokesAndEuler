@@ -71,11 +71,7 @@ def reparametrize (A : SmoothTimeField K E V) (r : C(L, K)) : SmoothTimeField L 
   jet n := (A.jet n).comp r
   jet_eq n t x := A.jet_eq n (r t) x
 
-@[simp] theorem reparametrize_apply (A : SmoothTimeField K E V) (r : C(L, K))
-    (t : L) (x : E) : (A.reparametrize r).field t x = A.field (r t) x := rfl
 
-@[simp] theorem reparametrize_jet_apply (A : SmoothTimeField K E V) (r : C(L, K))
-    (n : ℕ) (t : L) (x : E) : (A.reparametrize r).jet n t x = A.jet n (r t) x := rfl
 
 end SmoothTimeField
 
@@ -104,13 +100,6 @@ def ofCompactSupportJets (u : A × E → V) (hu : Continuous u)
     (fun t => (tsupport_iteratedFDeriv_subset n).trans (hsupp t))
   jet_eq _ _ _ := rfl
 
-@[simp] theorem ofCompactSupportJets_apply (u : A × E → V) (hu : Continuous u)
-    (hsmooth : ∀ t, ContDiff ℝ ∞ (fun x => u (t, x)))
-    (hjet : ∀ n : ℕ, Continuous
-      (fun z : A × E => iteratedFDeriv ℝ n (fun x => u (z.1, x)) z.2))
-    (K : Set E) (hK : IsCompact K)
-    (hsupp : ∀ t, tsupport (fun x => u (t, x)) ⊆ K) (t : A) (x : E) :
-    (ofCompactSupportJets u hu hsmooth hjet K hK hsupp).field t x = u (t, x) := rfl
 
 end SmoothTimeField
 
@@ -141,18 +130,6 @@ def ofContDiffOnCompactSupport (s : Set P) [CompactSpace s]
       (fun z => ⟨z.1.property, mem_univ _⟩))
     K hK (fun t => hsupp t t.property)
 
-@[simp] theorem ofContDiffOnCompactSupport_apply (s : Set P) [CompactSpace s]
-    (u : P × E → V) (hu : ContDiffOn ℝ ∞ u (s ×ˢ univ))
-    (K : Set E) (hK : IsCompact K)
-    (hsupp : ∀ t ∈ s, tsupport (fun x => u (t, x)) ⊆ K) (t : s) (x : E) :
-    (ofContDiffOnCompactSupport s u hu K hK hsupp).field t x = u (t, x) := rfl
 
-@[simp] theorem ofContDiffOnCompactSupport_jet_apply (s : Set P) [CompactSpace s]
-    (u : P × E → V) (hu : ContDiffOn ℝ ∞ u (s ×ˢ univ))
-    (K : Set E) (hK : IsCompact K)
-    (hsupp : ∀ t ∈ s, tsupport (fun x => u (t, x)) ⊆ K)
-    (n : ℕ) (t : s) (x : E) :
-    (ofContDiffOnCompactSupport s u hu K hK hsupp).jet n t x =
-      iteratedFDeriv ℝ n (fun y => u (t, y)) x := rfl
 
 end SmoothTimeField

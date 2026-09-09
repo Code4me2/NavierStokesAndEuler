@@ -80,19 +80,7 @@ theorem cutoff_one (P : Patch) {r : ℝ} (hr : P.right ≤ r) : cutoff P r = 1 :
   rw [TransportPrimitive.pastIntegral_eq_total_of_ge (densityLift_supported P) (r, 0) hr,
     cutoff_total]
 
-theorem cutoff_hasDerivAt (P : Patch) (r : ℝ) : HasDerivAt (cutoff P) (density P r) r := by
-  have hs := TransportPrimitive.pastIntegral_contDiff (M := 0) (v := (0 : ℝ))
-    (densityLift_contDiff P) (densityLift_supported P)
-  have hd := ((hs.differentiable (by simp)) (r, 0)).hasFDerivAt.comp_hasDerivAt r
-    ((hasDerivAt_id r).prodMk (hasDerivAt_const r (0 : ℝ)))
-  have ht := TransportPrimitive.transport_pastIntegral (M := 0) (v := (0 : ℝ))
-    (densityLift_contDiff P) (densityLift_supported P) (r, 0)
-  simp only [TransportPrimitive.fixedDeriv, zero_smul, densityLift] at ht
-  unfold cutoff
-  simpa only [ht, Function.comp_def, id_eq] using hd
 
-theorem cutoff_deriv (P : Patch) (r : ℝ) : deriv (cutoff P) r = density P r :=
-  (cutoff_hasDerivAt P r).deriv
 
 noncomputable def inversePower (P : Patch) (e : ℕ) (r : ℝ) : ℝ :=
   ((RadialPullback.positiveRadius (P.a / 4) r) ^ e)⁻¹
@@ -231,102 +219,12 @@ theorem sigma_eq_negative_primitive (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
 
 
 
-theorem primitive_hasDerivAt (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) (r : ℝ) :
-    HasDerivAt (fun t => primitive P e F (t, p)) (r ^ e * adjusted P e F (r, p)) r := by
-  have hp := primitive_contDiff P e hF hs
-  have hd := ((hp.differentiable (by simp)) (r, p)).hasFDerivAt.comp_hasDerivAt r
-    ((hasDerivAt_id r).prodMk (hasDerivAt_const r p))
-  have ht := TransportPrimitive.transport_compactIntegral (M := 0) (v := (0 : E))
-    (cutoff_contDiff P) (weightedSource_contDiff e hF) (weightedSource_supported e hs) (r, p)
-  simp only [TransportPrimitive.fixedDeriv, zero_smul, cutoff_deriv,
-    total_weightedSource P e hF.continuous hs, smul_eq_mul] at ht
-  have he : weightedSource e F (r, p) - density P r * mass e F p =
-      r ^ e * adjusted P e F (r, p) := by
-    dsimp [weightedSource, adjusted, bumpCorrection]
-    rw [mul_sub, ← mul_assoc, weighted_momentDensity]
-  rw [he] at ht
-  change fderiv ℝ (primitive P e F) (r, p) (1, 0) = _ at ht
-  simpa only [ht, Function.comp_def, id_eq] using hd
 
 
 
 
 
-/-- All fixed-order constants come from the proved weighted integral estimate
-and bounded radial multipliers on a fixed positive annulus. -/
-theorem sigma_finiteJets_uniform (P : Patch) (e : ℕ) {cL cR : ℝ}
-    (hcL : 0 < cL) (hcR : 0 < cR) (p m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ F : ℝ × E → ℝ, ContDiff ℝ ∞ F →
-      RadialAlias.RadiallySupported P.a P.b F → ∀ A : ℝ, 0 ≤ A →
-      (∀ i ≤ m, ∀ r ∈ Ioo P.a P.b, ∀ y : E,
-        ‖iteratedFDeriv ℝ i F (r, y)‖ ≤ A * WeightedRadialPrimitive.logWeight cL cR P.a P.b p r) →
-      ∀ z : ℝ × E, z.1 ∈ Ioo P.a P.b → ∀ j ≤ m,
-        ‖iteratedFDeriv ℝ j (sigma P e F) z‖ ≤
-          K * A * WeightedRadialPrimitive.logWeight cL cR P.a P.b p z.1 := by
-  obtain ⟨K1, hK1, h1⟩ := RadialPullback.radial_multiplier_finiteJets_uniform
-    (E := E) (V := ℝ) P.a P.b (contDiff_id.pow e) m
-  obtain ⟨K2, hK2, h2⟩ := WeightedRadialPrimitive.transport_compact_finiteJets_uniform
-    (E := E) (V := ℝ) P.a_pos P.a_lt_left P.left_lt_right P.right_lt_b hcL hcR p m
-    (cutoff P) (cutoff_contDiff P) (fun _ h => cutoff_zero P h) (fun _ h => cutoff_one P h)
-  obtain ⟨K3, hK3, h3⟩ := RadialPullback.radial_multiplier_finiteJets_uniform
-    (E := E) (V := ℝ) P.a P.b (inversePower_contDiff P e).neg m
-  refine ⟨K3 * K2 * K1, by positivity, ?_⟩
-  intro F hF hs A hA hFbound z hz j hj
-  have hweight (r : ℝ) (hr : r ∈ Ioo P.a P.b) :
-      0 ≤ WeightedRadialPrimitive.logWeight cL cR P.a P.b p r :=
-    (WeightedRadialPrimitive.weight_pos cL cR p (WeightedRadialPrimitive.logPosition_mem P.a_pos hr)).le
-  have hweighted : ∀ i ≤ m, ∀ r ∈ Ioo P.a P.b, ∀ y : E,
-      ‖iteratedFDeriv ℝ i (weightedSource e F) (r, y)‖ ≤
-        (K1 * A) * WeightedRadialPrimitive.logWeight cL cR P.a P.b p r := by
-    intro i hi r hr y
-    have h := h1 F hF (r, y) ⟨hr.1.le, hr.2.le⟩
-      (A * WeightedRadialPrimitive.logWeight cL cR P.a P.b p r) (mul_nonneg hA (hweight r hr))
-      (fun k hk => hFbound k hk r hr y) i hi
-    simp only [smul_eq_mul, mul_assoc, id_eq] at h ⊢
-    exact h
-  have hprimitive (i : ℕ) (hi : i ≤ m) :
-      ‖iteratedFDeriv ℝ i (primitive P e F) z‖ ≤
-        (K2 * (K1 * A)) * WeightedRadialPrimitive.logWeight cL cR P.a P.b p z.1 :=
-    h2 0 0 (weightedSource e F) (weightedSource_contDiff e hF) (weightedSource_supported e hs)
-      (K1 * A) (mul_nonneg hK1 hA) hweighted z hz i hi
-  have h := h3 (primitive P e F) (primitive_contDiff P e hF hs) z ⟨hz.1.le, hz.2.le⟩
-    ((K2 * (K1 * A)) * WeightedRadialPrimitive.logWeight cL cR P.a P.b p z.1)
-    (mul_nonneg (mul_nonneg hK2 (mul_nonneg hK1 hA)) (hweight z.1 hz)) hprimitive j hj
-  simp only [smul_eq_mul, mul_assoc] at h ⊢
-  exact h
 
-theorem meanClass_sigma (P : Patch) (e : ℕ) {cL cR : ℝ} (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε slow : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hε1 : ∀ n, ε n ≤ 1) (hslow : ∀ n, 1 ≤ slow n)
-    (α : ℝ) (F : ℕ → ℝ × E → ℝ) (hF : ∀ n, ContDiff ℝ ∞ (F n))
-    (hs : ∀ n, RadialAlias.RadiallySupported P.a P.b (F n))
-    (hclass : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow) α F) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow) α
-      (fun n => sigma P e (F n)) := by
-  refine ⟨hclass.weight_nonneg, fun n => (sigma_contDiff P e (hF n) (hs n)).contDiffOn, ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hsource⟩ := hclass.bounds m
-  obtain ⟨K, hK, hbound⟩ := sigma_finiteJets_uniform (E := E) P e hcL hcR p m
-  refine ⟨K * C, mul_nonneg hK hC, p, ?_⟩
-  intro n z hz j hj
-  change z.1 ∈ Ioo P.a P.b at hz
-  have hA : 0 ≤ C * (ε n) ^ α * (slow n) ^ p :=
-    mul_nonneg (mul_nonneg hC (Real.rpow_pos_of_pos (hε n) α).le)
-      (pow_nonneg (zero_le_one.trans (hslow n)) p)
-  have hinput : ∀ i ≤ m, ∀ r ∈ Ioo P.a P.b, ∀ y : E,
-      ‖iteratedFDeriv ℝ i (F n) (r, y)‖ ≤
-        (C * (ε n) ^ α * (slow n) ^ p) * WeightedRadialPrimitive.logWeight cL cR P.a P.b p r := by
-    intro i hi r hr y
-    have h := hsource n (r, y) hr i hi
-    rw [WeightedRadialPrimitive.logStrip_majorant_eq P.a_pos hcL hcR ε slow hε hε1 hslow
-      α C p n (r, y) hr] at h
-    exact h
-  have h := hbound (F n) (hF n) (hs n) _ hA hinput z hz j hj
-  rw [WeightedRadialPrimitive.logStrip_majorant_eq P.a_pos hcL hcR ε slow hε hε1 hslow
-    α (K * C) p n z hz]
-  simpa only [mul_assoc] using h
 
 /-- The constructed interior bump carries the full edge weight, because its
 support lies in a fixed compact subset of the active annulus. -/
@@ -370,41 +268,7 @@ theorem momentDensity_meanClass (P : Patch) (e : ℕ) {cL cR : ℝ} (hcL : 0 < c
     rw [hzj, norm_zero]
     exact mul_nonneg (div_nonneg hC hD.le) (s.zeta_nonneg z hz)
 
-theorem fderiv_lift (D : E → ℝ) (hD : ContDiff ℝ ∞ D) (z : ℝ × E) (v : E) :
-    fderiv ℝ (fun y : ℝ × E => D y.2) z (0, v) = fderiv ℝ D z.2 v := by
-  have h := ((hD.differentiable (by simp)) z.2).hasFDerivAt.comp z hasFDerivAt_snd
-  change fderiv ℝ (D ∘ Prod.snd) z (0, v) = _
-  rw [h.fderiv]
-  simp
 
-/-- The improved bump order follows from a proved residual-moment identity:
-one slow derivative comes with one additional factor of epsilon. -/
-theorem bump_improvedClass_of_moment_identity (P : Patch) (e : ℕ) {cL cR : ℝ}
-    (hcL : 0 < cL) (hcR : 0 < cR) (ε slow : ℕ → ℝ)
-    (hε : ∀ n, 0 < ε n) (hε1 : ∀ n, ε n ≤ 1) (hslow : ∀ n, 1 ≤ slow n)
-    (α : ℝ) (F : ℕ → ℝ × E → ℝ) (D : ℕ → E → ℝ) (v : E)
-    (hD : ∀ n, ContDiff ℝ ∞ (D n))
-    (hclass : WeightedClasses.UnweightedClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      α (fun n (z : ℝ × E) => D n z.2))
-    (hmoment : ∀ n p, mass e (F n) p = ε n * fderiv ℝ (D n) p v) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow)
-      (α + 1) (fun n => bumpCorrection P e (F n)) := by
-  let s := WeightedRadialPrimitive.logStripData (E := E) P.a P.b cL cR P.a_pos hcL hcR ε slow hε hε1 hslow
-  have hd := hclass.directional ((0 : ℝ), v)
-  have hb := (momentDensity_meanClass (E := E) P e hcL hcR ε slow hε hε1 hslow).mul hd
-  have hmean : WeightedClasses.MeanClass s α (fun n (z : ℝ × E) =>
-      momentDensity P e z.1 * fderiv ℝ (D n) z.2 v) := by
-    simpa only [WeightedClasses.MeanClass, zero_add, mul_one, fderiv_lift _ (hD _)] using hb
-  have hh := hmean.band_smul (WeightedClasses.bandBound_rpow s 1)
-  have heq : (fun n (z : ℝ × E) => s.epsilon n ^ (1 : ℝ) •
-      (momentDensity P e z.1 * fderiv ℝ (D n) z.2 v)) = fun n => bumpCorrection P e (F n) := by
-    funext n z
-    simp only [Real.rpow_one, smul_eq_mul, bumpCorrection, hmoment]
-    change ε n * (momentDensity P e z.1 * _) = momentDensity P e z.1 * (ε n * _)
-    ring
-  rwa [heq] at hh
 
 noncomputable def barSigma (P : Patch) (e : ℕ) (F : PressureStream.Lift E → ℝ) : ℝ × E → ℝ :=
   sigma P e (PressureStream.torusAverage F)
@@ -666,9 +530,6 @@ theorem physicalBarSigma_eq_negative_primitive (P : Patch) (e : ℕ) {q : E → 
   physicalSigma_eq_negative_primitive P e hq hpos (PressureStream.torusAverage_contDiff hF)
     (physical_torusAverage_supported P hs) z
 
-/-- Residual units in the q-chart: q^(2A+1/2) times the physical residual. -/
-noncomputable def normalizedResidual (q : E → ℝ) (A : ℝ) (F : ℝ × E → ℝ) (z : ℝ × E) : ℝ :=
-  q z.2 ^ (2 * A + 1 / 2) * nativeSource q F z
 
 
 

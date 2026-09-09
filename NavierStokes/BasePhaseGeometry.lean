@@ -38,9 +38,6 @@ theorem dampingDenominator_one_le (u : ℝ) : 1 ≤ dampingDenominator u := by
   unfold dampingDenominator
   nlinarith [sq_nonneg u, Real.sqrt_nonneg (1 + u ^ 2)]
 
-theorem referenceScale_pos {lam viscosity u : ℝ} (hlam : 0 < lam) (hv : 0 < viscosity) :
-    0 < referenceScale lam viscosity u :=
-  Real.sqrt_pos.mpr (div_pos hlam (mul_pos hv (dampingDenominator_pos u)))
 
 theorem referenceScale_normalization {lam viscosity u : ℝ}
     (hlam : 0 < lam) (hv : 0 < viscosity) :
@@ -922,28 +919,6 @@ theorem coefficientControl (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
   errors _ hv := a.modal_errors hh hr hM hu huM hL hslot i hn hq (a.interval_subset_slot hr i hv)
   viscosity _ hv := a.damping_error hh hr hM hu huM hL hslot i hn hq (a.interval_subset_slot hr i hv)
 
-/-- The actual modal energy bound holds with the same constants for every
-nonzero harmonic.  The damping discrepancy is not multiplied by `j²`. -/
-theorem energy_bound (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
-    (hu : 0 < u) (huM : u ≤ M) (hL : 1 / (2 * r0) ≤ M)
-    (hslot : 4 * r0 * ChartScales.Tg ≤ M)
-    (i : ι) (hn : LargeBand h M u (a.band i)) {q : Slow} (hq : q ∈ D.carrier i)
-    {v : ℝ} (hv : v ∈ a.slot i) {j : ℤ} (hj : j ≠ 0) (w : Plane) :
-    ⟪w, (a.frame i).coefficient j (q, v) w⟫_ℝ ≤
-      (ViscousPropagator.referenceEigenvalue (a.lam i) u (a.length i) v -
-        ViscousPropagator.referenceViscosity (a.lam i) u (a.length i) v +
-        (dampingConstant M + 4 * modalConstant M u) / D.scale i) * ‖w‖ ^ 2 := by
-  have hν : 0 ≤ (a.frame i).viscosity (q, v) := by
-    change 0 ≤ a.viscosity i * ‖a.phase.normal i (q, v)‖ ^ 2
-    exact mul_nonneg (zero_le_one.trans (ChartScales.carrier_viscosity_bounds h hh (a.band i)).1)
-      (sq_nonneg _)
-  have hl : 0 ≤ (a.frame i).eigenvalue (q, v) := by
-    change 0 ≤ a.lam i / Real.sqrt (1 + PulseGrowth.slotMagnitude u (a.length i) v ^ 2)
-    exact div_nonneg (a.lambda_pos hM i).le (Real.sqrt_nonneg _)
-  have hd := a.damping_error hh hr hM hu huM hL hslot i hn hq hv
-  apply (a.frame i).energy_bound (q, v) hj hl hν
-  · linarith [(abs_le.mp hd).1]
-  · exact a.modal_errors hh hr hM hu huM hL hslot i hn hq hv
 
 noncomputable def outputBound (M : ℝ) : ℝ := frequencyBound M + 3 * M + M ^ 2 + 4
 noncomputable def outputLower (M u : ℝ) : ℝ := min (normalLower M u / 2) (1 / M)
@@ -1053,14 +1028,6 @@ theorem frame_jets (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
     p.constants p.epsilon_ne p.radius p.slot p.lam_bound p.c0_bound p.u_bound p.rate_bound
     p.viscosity_bound p.B_bound p.K_unit p.slope_bound p.error_small p.normal_close
 
-theorem pulse_jets (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
-    (hu : 0 < u) (huM : u ≤ M) (hL : 1 / (2 * r0) ≤ M)
-    (hslot : 4 * r0 * ChartScales.Tg ≤ M) (hlarge : ∀ i, LargeBand h M u (a.band i)) :
-    PrimaryPulseBounds.EnvelopeJets
-      (PrimaryPulseBounds.productDomain D (fun _ => Ioo (0 : ℝ) 1) (fun _ => isOpen_Ioo))
-      (fun i z => PrimaryPulseBounds.referenceP (a.lam i) u (a.length i) (a.length i * z.2))
-      (fun i => PrimaryPulseBounds.normalizedPulse (a.frame i) (a.lam i) u (a.length i)) :=
-  (a.construction hh hr hM hu huM hL hslot hlarge).pulse_jets
 
 theorem coefficient_jets (hh : 0 ≤ h) (hr : 0 < r0) (hM : 1 ≤ M)
     (hu : 0 < u) (huM : u ≤ M) (hL : 1 / (2 * r0) ≤ M)
@@ -1086,68 +1053,6 @@ theorem normal_inner_shear {g : Plane} (hg : g ≠ 0) :
 
 
 
-/-- The actual selected mesh representatives and their derived compact
-eigenpairs instantiate the analytic phase data.  In particular, neither
-representative closeness nor eigenpair bounds are fields of the resulting
-construction that the caller must postulate independently. -/
-noncomputable def family {ι : Type*} (D : PhaseJetBounds.Domain ι Slow)
-    {K : Set Slow} (label : ι → ActiveLabel K) (U : Set Slow)
-    (F G : ι → Slow → ℝ) (F0 G0 : Slow → ℝ)
-    (h r0 u M : ℝ) (sigma theta : ι → ℝ) (hM : 1 ≤ M)
-    (hscale : ∀ i, D.scale i = ChartScales.S (label i).val.1)
-    (hgrid : ∀ i, D.carrier i ⊆ gridBox (label i).val.1 (label i).val.2 2)
-    (hinside : ∀ i, D.carrier i ⊆ U) (hKU : K ⊆ U)
-    (hbase : ∀ i, PhaseEstimates.LocalBaseBounds (F i) (G i) F0 G0 U M
-      (ChartScales.epsilon h (label i).val.1))
-    (hF : PhaseJetBounds.PolynomialJets D F) (hG : PhaseJetBounds.PolynomialJets D G)
-    (hradius : ∀ q ∈ U, 1 / M ≤ |q.1| ∧ |q.1| ≤ M)
-    (hR : ∀ q ∈ K, 0 < q.1)
-    (hc : ∀ q ∈ K, ReferenceCone (F0 q) (PhaseEstimates.shearVector F0 G0 q))
-    (hp : ∀ q ∈ K, ParameterBounds M q.1 (F0 q) (PhaseEstimates.shearVector F0 G0 q))
-    (hsigma : ∀ i, |sigma i| = 1) : FamilyData D h r0 u M := by
-  have hq i := representative_mem K (label i)
-  have hlow i := (hp _ (hq i)).positive_lower hM (hR _ (hq i)) (hc _ (hq i))
-  refine {
-    band := fun i => (label i).val.1
-    scale_eq := hscale
-    F := F
-    G := G
-    F0 := fun _ => F0
-    G0 := fun _ => G0
-    U := fun _ => U
-    q0 := fun i => representative K (label i)
-    K := fun i => transverseDirection (PhaseEstimates.shearVector F0 G0 (representative K (label i)))
-    lam := fun i => lambda0 (F0 (representative K (label i)))
-      (PhaseEstimates.shearVector F0 G0 (representative K (label i)))
-    c0 := fun i => c0 (F0 (representative K (label i)))
-      (PhaseEstimates.shearVector F0 G0 (representative K (label i)))
-    sigma := sigma
-    theta := theta
-    base := hbase
-    baseF := hF
-    baseG := hG
-    inside := hinside
-    representative_inside := fun i => hKU (hq i)
-    distance := ?_
-    radius := fun i q hq => hradius q (hinside i hq)
-    representative_radius := fun i => hradius _ (hKU (hq i))
-    unit := fun i => transverseDirection_unit (hc _ (hq i)).shear_ne_zero
-    orthogonal := fun _ => transverseDirection_inner_shear _
-    frequency_bound := fun i => (hp _ (hq i)).frequency
-    shear_bound := fun i => (hp _ (hq i)).shear
-    shear_inv := fun i => by simpa only [one_div] using (hlow i).2.1
-    lambda_bound := fun i => ⟨by simpa only [one_div] using (hlow i).2.2.1, (hp _ (hq i)).lambda⟩
-    ratio_bound := fun i => ⟨by simpa only [one_div] using (hlow i).2.2.2, (hp _ (hq i)).ratio⟩
-    eigen12 := ?_
-    eigen21 := ?_
-    sign := hsigma }
-  · intro i q hqi
-    simpa only [hscale i] using representative_enlarged_distance K (label i) (hgrid i hqi)
-  · intro i
-    simpa only [quarterTurn_transverseDirection] using (hc _ (hq i)).lambda0_div_c0
-  · intro i
-    simpa only [quarterTurn_transverseDirection, normal_inner_shear (hc _ (hq i)).shear_ne_zero]
-      using (hc _ (hq i)).lambda0_mul_c0
 
 end Representatives
 

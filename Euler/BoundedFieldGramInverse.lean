@@ -40,7 +40,6 @@ private local instance : NormedAlgebra ℝ (α →ᵇ U →L[ℝ] U) := inferIns
 def gramField (Q : α →ᵇ U →L[ℝ] E) : α →ᵇ U →L[ℝ] U :=
   compositionMap (adjointMap Q) Q
 
-@[simp] theorem gramField_apply (Q : α →ᵇ U →L[ℝ] E) (x : α) : gramField Q x = gram (Q x) := rfl
 
 variable (Q : α →ᵇ U →L[ℝ] E) (c : ℝ) (hc : 0 < c)
   (hQ : ∀ x v, c*‖v‖^2 ≤ ‖Q x v‖^2)
@@ -65,7 +64,6 @@ def inverseField : α →ᵇ U →L[ℝ] U :=
   BoundedContinuousFunction.ofNormedAddCommGroup (fun x => gramInverse (Q x) c hc (hQ x))
     (inverseField_continuous Q c hc hQ) c⁻¹ (fun x => gramInverse_norm (Q x) c hc (hQ x))
 
-@[simp] theorem inverseField_apply (x : α) : inverseField Q c hc hQ x = gramInverse (Q x) c hc (hQ x) := rfl
 
 theorem inverseField_norm : ‖inverseField Q c hc hQ‖ ≤ c⁻¹ :=
   BoundedContinuousFunction.norm_ofNormedAddCommGroup_le _ (inv_nonneg.mpr hc.le) _

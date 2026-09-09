@@ -102,17 +102,6 @@ theorem envelope_uniform_bound {lam0 u0 : ℝ} (_hlam0 : 0 < lam0) (hu0 : 0 < u0
     (ScaledActualParticularControl.length_pos F clock l n).le
   nlinarith
 
-theorem length_uniform_lower {ell : ℝ}
-    (hL : ∀ l n, ell * ChartScales.S n ≤ F.L (l, n)) (l : Label) (n : ℕ) :
-    (ell / clock.upper) * ChartScales.S n ≤ ScaledActualParticularControl.length F clock l n := by
-  have hu : 0 < clock.upper := zero_lt_one.trans_le clock.upper_one
-  have hs : 0 ≤ ChartScales.S n := sq_nonneg _
-  change (ell / clock.upper) * ChartScales.S n ≤ F.L (l, n) / clock.value l n
-  calc
-    _ = (ell * ChartScales.S n) / clock.upper := by ring
-    _ ≤ F.L (l, n) / clock.upper := div_le_div_of_nonneg_right (hL l n) hu.le
-    _ ≤ F.L (l, n) / clock.value l n :=
-      div_le_div_of_nonneg_left (F.L_pos (l, n)).le (clock.value_pos l n) (clock.bounds l n).2
 
 end ScaledEnvelope
 
@@ -309,20 +298,6 @@ theorem sourceFamily_zero_germ
   (HarmonicSourceSupport.residualSource_zero_germ_on ctx u b G A hU hK hs j n hx hn).comp_tendsto
     (continuous_fst.fst.prodMk continuous_snd).continuousAt
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem sourceSupport_mono
-    {U : Set (P × Plane)} {K T : ℕ → Set (P × Plane)}
-    {b : CorrectionState.HarmonicBlock (P × Plane)}
-    {G A : HarmonicResidual.BlockCoefficients (P × Plane)}
-    (hs : HarmonicSourceSupport.InputSupportOn U K b G A) (hKT : ∀ n, K n ⊆ T n) :
-    HarmonicSourceSupport.InputSupportOn U T b G A := by
-  have hm {f : HarmonicFields.Coefficients (P × Plane)} {n : ℕ}
-      (hf : HarmonicSourceSupport.NonzeroSupportedOn U (K n) f) :
-      HarmonicSourceSupport.NonzeroSupportedOn U (T n) f := by
-    intro j hj x hx hn
-    exact hf j hj x hx (fun h => hn (hKT n h))
-  exact ⟨fun n i => hm (hs.velocity n i), fun n => hm (hs.pressure n),
-    fun n i => hm (hs.gaussian n i), fun n i => hm (hs.aliasError n i)⟩
 
 end ActualSource
 
@@ -340,13 +315,6 @@ theorem transported_outer_injective (g : Geometry) (gap : ℕ) {r L c : ℝ}
     CopySolveCompatibility.refineGeometry, CopySolveCompatibility.timeGeometry,
     CommonCoverClass.scaledBasis_apply, zero_add, Prod.mk_zero_zero, map_zero, add_zero]
 
-theorem reference_outer_separated (g : Geometry) {r L : ℝ} (hr : 0 < r) (hL : 0 < L)
-    (hinj : InjOn TorusAverages.quotientPoint
-      ((fun z => g.center + g.basis z) '' (referenceWindow r L hr hL).outer)) :
-    WaveEnvelopeTransport.Separated g r L := by
-  apply hinj.mono
-  rintro _ ⟨z, hz, rfl⟩
-  exact ⟨z, (referenceWindow r L hr hL).core_subset_outer hz, rfl⟩
 
 /-! ## One literal family of scaled solves and cutoffs -/
 
@@ -358,22 +326,12 @@ variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   (reference : Label → ℕ → Geometry) (gap : Label → ℕ → ℕ)
   (r : Label → ℕ → ℝ) (hr : ∀ l n, 0 < r l n)
 
-noncomputable def cutoffFamily (l : Label) (n : ℕ) : Plane → ℝ :=
-  nativeCutoff (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n)) (clock.value l n)
 
-noncomputable def outerFamily (l : Label) (n : ℕ) : Set Plane :=
-  outerCell (r l n) (F.L (l,n)) (clock.value l n)
 
 noncomputable def sourceRegions (S : Label → ℕ → Set P) (l : Label) (n : ℕ) : Set (P × Plane) :=
   sourceRegion (S l n) (ScaledActualParticularControl.geometry reference gap clock l n)
     (r l n) (F.L (l,n)) (clock.value l n)
 
-noncomputable def analyticPatches (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow) :
-    Label → ℕ → Frequency → Set ((P × ℝ) × Plane) :=
-  ScaledActualParticularControl.patch (ActualParticularControl.angleStrip s) F
-    (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) φ clock
-    (ScaledActualParticularControl.geometry reference gap clock) r
 
 variable (base : Label → LinearWaveBounds.WaveCoefficients ((P × ℝ) × Plane))
   (tangent : Label → ℕ → TangentData (P × ℝ) ProblemStatement.Space)
@@ -381,38 +339,8 @@ variable (base : Label → LinearWaveBounds.WaveCoefficients ((P × ℝ) × Plan
   (b : Label → CorrectionState.HarmonicBlock (P × Plane))
   (G A : Label → HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
 
-/-- The same actual complex solve as the correction step, with entry zero,
-exit `Lref/clock`, and a single transported Gaussian-times-padding cutoff. -/
-noncomputable def data (l : Label) : CopyData ((P × ℝ) × Plane) Frequency :=
-  complexCopyData (base l) (tangent l)
-    (ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j)
-    (ScaledActualParticularControl.geometry reference gap clock l)
-    (fun _ => 0) (ScaledActualParticularControl.length F clock l)
-    (fun n => (ScaledActualParticularControl.length_pos F clock l n).le)
-    (cutoffFamily F clock r hr l)
 
-theorem data_cutoff_support (l : Label) (n : ℕ) (k : Frequency) :
-    support ((data F clock reference gap r hr base tangent ctx u b G A j l).cutoff n k) ⊆
-      nativeCell (ScaledActualParticularControl.geometry reference gap clock l n)
-        (outerFamily F clock r l n) k :=
-  native_cutoff_support _ (nativeCutoff_support (hr l n) (F.L_pos (l,n)) (clock.value_pos l n)) k
 
-theorem data_central (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
-    (l : Label) (n : ℕ) (k : Frequency) {x : (P × ℝ) × Plane}
-    (hx : x ∈ analyticPatches F clock reference gap r s χ φ l n k)
-    (hm : |theta F clock l n
-      ((ScaledActualParticularControl.geometry reference gap clock l n).coordinates k x.2).2 - 1 / 2| < 1 / 5) :
-    (data F clock reference gap r hr base tangent ctx u b G A j l).cutoff n k
-      =ᶠ[𝓝 x] fun _ => 1 := by
-  have hrect : (ScaledActualParticularControl.geometry reference gap clock l n).coordinates k x.2 ∈
-      WaveEnvelopeTransport.rectangle (r l n) (F.L (l,n) / clock.value l n) :=
-    ⟨hx.2, hx.1.2.2.1.le, hx.1.2.2.2.le⟩
-  have hg := nativeCutoff_central_germ (hr l n) (F.L_pos (l,n)) (clock.value_pos l n)
-    hrect (by simpa only [theta_eq, ScaledActualParticularControl.length] using hm)
-  exact hg.comp_tendsto
-    (((ScaledActualParticularControl.geometry reference gap clock l n).coordinates_contDiff k).continuous.comp
-      continuous_snd).continuousAt
 
 variable (s : StripData P) (S : Label → ℕ → Set P) (hS : ∀ l n, IsClosed (S l n))
   (hsupport : ∀ l, HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ)
@@ -420,105 +348,9 @@ variable (s : StripData P) (S : Label → ℕ → Set P) (hS : ∀ l n, IsClosed
 
 include hS hsupport
 
-theorem data_source_zero_germ (l : Label) (n : ℕ) {x : (P × ℝ) × Plane}
-    (hx : x.1.1 ∈ s.domain)
-    (hn : (x.1.1, x.2) ∉ sourceRegions F clock reference gap r S l n) :
-    (data F clock reference gap r hr base tangent ctx u b G A j l).source n =ᶠ[𝓝 x] fun _ => 0 :=
-  sourceFamily_zero_germ ctx u (b l) (G l) (A l) (s.isOpen_domain.prod isOpen_univ)
-    (fun n => sourceRegion_closed (hS l n) _ _ _ _) (hsupport l) j n ⟨hx, mem_univ _⟩ hn
 
-theorem data_amplitude_zero_germ (l : Label) (n : ℕ) (k : Frequency) {x : (P × ℝ) × Plane}
-    (hx : x.1.1 ∈ s.domain)
-    (hn : ∀ v ∈ Icc 0 (ScaledActualParticularControl.length F clock l n),
-      (x.1.1, (ScaledActualParticularControl.geometry reference gap clock l n).path k x.2 v) ∉
-        sourceRegions F clock reference gap r S l n) :
-    (data F clock reference gap r hr base tangent ctx u b G A j l).amplitude n k =ᶠ[𝓝 x] fun _ => 0 := by
-  apply complexCopyVelocity_zero_germ
-  intro v hv
-  exact data_source_zero_germ F clock reference gap r hr base tangent ctx u b G A j
-    s S hS hsupport l n (x := (x.1, _)) hx (hn v hv)
 
-/-- The source is supported in an actual closed slow core and in the
-Gaussian support rectangle.  On the rest of a padded copy, either the
-Gaussian cutoff is zero or the entire source path is zero. -/
-theorem data_outside (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
-    (hinside : ∀ l n p, p ∈ s.domain → p ∈ S l n → φ (l,n) (χ p) ∈ D.carrier (l,n))
-    (hinj : ∀ l n, InjOn TorusAverages.quotientPoint
-      ((fun z => (reference l n).center + (reference l n).basis z) ''
-        (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).outer))
-    (l : Label) (n : ℕ) (k : Frequency) {x : (P × ℝ) × Plane}
-    (hx : x ∈ (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).domain)
-    (hk : x ∈ nativeCell (ScaledActualParticularControl.geometry reference gap clock l n)
-      (outerFamily F clock r l n) k)
-    (hnot : x ∉ analyticPatches F clock reference gap r s χ φ l n k) :
-    (((data F clock reference gap r hr base tangent ctx u b G A j l).cutoff n k
-        =ᶠ[𝓝 x] fun _ => 0) ∧
-      ((data F clock reference gap r hr base tangent ctx u b G A j l).source n
-        =ᶠ[𝓝 x] fun _ => 0)) ∨
-    (((data F clock reference gap r hr base tangent ctx u b G A j l).amplitude n k
-        =ᶠ[𝓝 x] fun _ => 0) ∧
-      ((data F clock reference gap r hr base tangent ctx u b G A j l).source n
-        =ᶠ[𝓝 x] fun _ => 0)) := by
-  let g := ScaledActualParticularControl.geometry reference gap clock l n
-  have hi : InjOn TorusAverages.quotientPoint
-      ((fun z => g.center + g.basis z) '' outerCell (r l n) (F.L (l,n)) (clock.value l n)) :=
-    transported_outer_injective (reference l n) (gap l n) (hr l n) (F.L_pos (l,n))
-      (clock.value_pos l n) (hinj l n)
-  have hk' : g.coordinates k x.2 ∈ outerCell (r l n) (F.L (l,n)) (clock.value l n) := hk
-  have hx' : x.1.1 ∈ s.domain := hx
-  by_cases hp : φ (l,n) (χ x.1.1) ∈ D.carrier (l,n)
-  · by_cases hxi : (g.coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n)
-    · have hv : (g.coordinates k x.2).2 ∉ Ioo 0 (ScaledActualParticularControl.length F clock l n) := by
-        intro hv
-        exact hnot ⟨⟨hx, hp, hv⟩, hxi⟩
-      have hg := nativeCutoff_time_zero_germ (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hv
-      refine Or.inl ⟨hg.comp_tendsto ((g.coordinates_contDiff k).continuous.comp continuous_snd).continuousAt, ?_⟩
-      apply data_source_zero_germ F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport l n hx'
-      intro hs
-      obtain ⟨i, hi'⟩ := mem_iUnion.mp hs.2
-      exact (other_sourceCell_excluded g (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hi hk'
-        (fun h => hv (sourceCell_time (F.L_pos (l,n)) (clock.value_pos l n) h)) i) hi'
-    · refine Or.inr ⟨?_, ?_⟩
-      · apply data_amplitude_zero_germ F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport l n k hx'
-        intro v hv hs
-        obtain ⟨i, hi'⟩ := mem_iUnion.mp hs.2
-        exact path_sourceCell_excluded g (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hi hk' hxi v hv i hi'
-      · apply data_source_zero_germ F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport l n hx'
-        intro hs
-        obtain ⟨i, hi'⟩ := mem_iUnion.mp hs.2
-        exact (other_sourceCell_excluded g (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hi hk'
-          (fun h => hxi h.1) i) hi'
-  · have hp' : x.1.1 ∉ S l n := fun h => hp (hinside l n _ hx' h)
-    refine Or.inr ⟨?_, ?_⟩
-    · apply data_amplitude_zero_germ F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport l n k hx'
-      intro _ _ hs
-      exact hp' hs.1
-    · apply data_source_zero_germ F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport l n hx'
-      intro hs
-      exact hp' hs.1
 
-omit hS in
-theorem data_source_complement (β : ℝ) :
-    LocalizedGaussianBounds.UniformComplementJets
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) (fun _ _ _ => 1) β
-      (fun l n => nativeCell (ScaledActualParticularControl.geometry reference gap clock l n)
-        (outerFamily F clock r l n))
-      (fun l => (data F clock reference gap r hr base tangent ctx u b G A j l).source) := by
-  have hlarge l : HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ)
-      (fun n => HarmonicSourceSupport.nativeUnion
-        (ScaledActualParticularControl.geometry reference gap clock l n) (outerFamily F clock r l n))
-      (b l) (G l) (A l) := by
-    apply sourceSupport_mono (hsupport l)
-    intro n x hx
-    obtain ⟨k, hk⟩ := mem_iUnion.mp hx.2
-    exact mem_iUnion.mpr ⟨k, sourceCell_subset_outer (hr l n) (F.L_pos (l,n)) (clock.value_pos l n) hk⟩
-  exact LocalizedGaussianBounds.uniform_source_complement_of_harmonicSupport
-    (data F clock reference gap r hr base tangent ctx u b G A j)
-    ctx u b G A (ScaledActualParticularControl.geometry reference gap clock) (outerFamily F clock r)
-    (fun l n => outerCell_compact _ _ _) (s.isOpen_domain.prod isOpen_univ) hlarge
-    (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) (fun _ hx => ⟨hx, mem_univ _⟩)
-    (fun _ => j) (fun _ => rfl) β
 
 end Family
 
@@ -669,50 +501,7 @@ variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
   (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
 
-/-- On the analytic native cell the outer padding is identically one
-nearby, leaving exactly the normalized Gaussian profile. -/
-theorem data_cutoff_gaussian_germ (l : Label) (n : ℕ) (k : Frequency) {x : (P × ℝ) × Plane}
-    (hx : x ∈ analyticPatches F clock reference gap r s χ φ l n k) :
-    (data F clock reference gap r hr base tangent ctx u b G A j l).cutoff n k =ᶠ[𝓝 x]
-      fun y => GaussianTailFlat.profile (theta F clock l n
-        ((ScaledActualParticularControl.geometry reference gap clock l n).coordinates k y.2).2) := by
-  let g := ScaledActualParticularControl.geometry reference gap clock l n
-  have hm : CopySolveCompatibility.nativeTimeMap 0 (clock.value l n) (g.coordinates k x.2) ∈
-      (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).core := by
-    change (g.coordinates k x.2).1 ∈ Icc (-(r l n)) (r l n) ∧
-      0 + clock.value l n * (g.coordinates k x.2).2 ∈ Icc 0 (F.L (l,n))
-    simp only [zero_add]
-    exact And.intro hx.2 (ScaledActualParticularControl.clock_mem F clock
-        ⟨hx.1.2.2.1.le, hx.1.2.2.2.le⟩)
-  have hc : Continuous (fun y : (P × ℝ) × Plane =>
-      CopySolveCompatibility.nativeTimeMap 0 (clock.value l n) (g.coordinates k y.2)) :=
-    (CopySolveCompatibility.nativeTimeMap_continuous _ _).comp
-      ((g.coordinates_contDiff k).continuous.comp continuous_snd)
-  have he := ((referenceWindow (r l n) (F.L (l,n)) (hr l n)
-    (F.L_pos (l,n))).cutoff_germ hm).comp_tendsto hc.continuousAt
-  filter_upwards [he] with y hy
-  dsimp only [Function.comp_def] at hy
-  change (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).cutoff
-      (CopySolveCompatibility.nativeTimeMap 0 (clock.value l n) (g.coordinates k y.2)) * _ = _
-  rw [hy, one_mul]
-  rfl
 
-theorem data_cutoff_jets {u0 : ℝ} (hu0 : 0 < u0) (hu : ∀ l n, F.u (l,n) = u0)
-    (hcost : ∃ K : ℝ, 1 ≤ K ∧ ∃ p : ℕ, ∀ l n,
-      CommonCoverClass.argumentCost (ScaledActualParticularControl.geometry reference gap clock l n) ≤
-        K * s.slow n ^ p) :
-    UniformLocalJets (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun _ _ _ => 1) 0 (analyticPatches F clock reference gap r s χ φ)
-      (fun l => (data F clock reference gap r hr base tangent ctx u b G A j l).cutoff) := by
-  have hj := gaussian_clock_uniform_jets F clock
-    (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-    (analyticPatches F clock reference gap r s χ φ)
-    (ScaledActualParticularControl.geometry reference gap clock) hu0 hu hcost
-  apply LocalizedWaveBounds.LocalClass.to_uniformLocalJets
-  apply (LocalizedWaveBounds.LocalClass.of_uniformLocalJets (fun _ _ _ _ => zero_le_one) hj).congr_germ
-  intro n li x hx hi
-  exact (data_cutoff_gaussian_germ F clock reference gap r hr base tangent ctx u b G A j
-    s χ φ li.1 n li.2 hi).symm
 
 end CutoffJets
 
@@ -723,27 +512,6 @@ section ModalAmplitude
 variable {P Label : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [Countable Label] [Nonempty Label]
 
-theorem complex_amplitude_uniform_jets {s : StripData (P × Plane)} {α : ℝ}
-    (t : Label → ℕ → TangentData P ProblemStatement.Space)
-    (source : Label → ℕ → P × Plane → ComplexVector)
-    (g : Label → ℕ → Geometry) (L : Label → ℕ → ℝ) (hL : ∀ l n, 0 < L l n)
-    (envelope : Label → ℕ → ℝ → ℝ) (W : Label → ℕ → P × Plane → ℝ)
-    (d : Label → ℕ → PrimaryODE.FrameData (P × ℝ)) (harmonic : ℤ)
-    (C : Label → ℕ → Frequency → Set (P × Plane))
-    (hr : ParticularCopyBounds.UniformModalControl s α d
-      (fun l n => realData (t l n) (source l n)) harmonic g L envelope C)
-    (hi : ParticularCopyBounds.UniformModalControl s α d
-      (fun l n => imagData (t l n) (source l n)) harmonic g L envelope C)
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hcompare : ∀ l n k x, x ∈ s.domain → x ∈ C l n k →
-      envelope l n ((g l n).coordinates k x.2).2 ≤ W l n x) :
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α C
-      (fun l n k => complexCopyVelocity (t l n) (source l n) (g l n) (hL l n).le k) := by
-  have hw l n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hW l n x hx)
-  have hreal := LocalizedWaveBounds.LocalClass.of_uniformLocalJets hw (hr.localJets hL W hcompare)
-  have himag := LocalizedWaveBounds.LocalClass.of_uniformLocalJets hw (hi.localJets hL W hcompare)
-  exact ((hreal.map CurlClassBounds.complexify).add
-    (himag.map ((complexScale Complex.I).comp CurlClassBounds.complexify))).to_uniformLocalJets
 
 end ModalAmplitude
 
@@ -757,40 +525,9 @@ variable {Label P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   (reference : Label → ℕ → Geometry) (gap : Label → ℕ → ℕ)
   (r : Label → ℕ → ℝ) (hr : ∀ l n, 0 < r l n)
 
-noncomputable def fieldEnvelope : Label → ℕ → (P × ℝ) × Plane → ℝ :=
-  ActualParticularControl.groupedEnvelope
-    (ScaledActualParticularControl.geometry reference gap clock) r
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem fieldEnvelope_nonneg (l : Label) (n : ℕ) (x : (P × ℝ) × Plane) :
-    0 ≤ fieldEnvelope F clock reference gap r l n x :=
-  WaveEnvelopeTransport.copyEnvelope_nonneg _ _ _ (fun v =>
-    (referenceP_pos (F.lam (l,n)) (F.u (l,n)) (F.L (l,n)) (clock.value l n * v)).le) x.2
 
-theorem fieldEnvelope_eq (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
-    (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
-    (hinj : ∀ l n, InjOn TorusAverages.quotientPoint
-      ((fun z => (reference l n).center + (reference l n).basis z) ''
-        (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).outer))
-    {l : Label} {n : ℕ} {k : Frequency} {x : (P × ℝ) × Plane}
-    (hx : x ∈ analyticPatches F clock reference gap r s χ φ l n k) :
-    fieldEnvelope F clock reference gap r l n x =
-      ScaledActualParticularControl.envelope F clock l n
-        ((ScaledActualParticularControl.geometry reference gap clock l n).coordinates k x.2).2 :=
-  ScaledActualParticularControl.patch_envelope (ActualParticularControl.angleStrip s) F
-    (χ.comp (ContinuousLinearMap.fst ℝ P ℝ)) φ clock reference gap r
-    (fun l n => reference_outer_separated _ (hr l n) (F.L_pos (l,n)) (hinj l n)) hx
 
-noncomputable def cells
-    (hinj : ∀ l n, InjOn TorusAverages.quotientPoint
-      ((fun z => (reference l n).center + (reference l n).basis z) ''
-        (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).outer))
-    (l : Label) : Cells ((P × ℝ) × Plane) Frequency :=
-  nativeCells (ScaledActualParticularControl.geometry reference gap clock l)
-    (outerFamily F clock r l) (fun _ => outerCell_compact _ _ _)
-    (fun n => transported_outer_injective _ (gap l n) (hr l n) (F.L_pos (l,n))
-      (clock.value_pos l n) (hinj l n))
 
 variable [Countable Label] [Nonempty Label]
   (base : Label → LinearWaveBounds.WaveCoefficients ((P × ℝ) × Plane))
@@ -801,83 +538,6 @@ variable [Countable Label] [Nonempty Label]
   (s : StripData P) (χ : P →L[ℝ] PhaseCalculus.Slow)
   (φ : (Label × ℕ) → PhaseCalculus.Slow →L[ℝ] PhaseCalculus.Slow)
 
-/-- Every real power is gained by the literal global Gaussian error,
-including its uncovered-source term. The source support assumptions are
-on the incoming harmonic coefficients; all output zero germs and all
-cutoff estimates are derived. The modal controls are precisely those
-constructed by `ScaledActualParticularControl`. -/
-theorem globalGaussian_all_gains
-    (frame : Label → ℕ → PrimaryODE.FrameData ((P × ℝ) × ℝ))
-    {α lam0 u0 ell : ℝ} (hlam0 : 0 < lam0) (hu0 : 0 < u0) (hell : 0 < ell)
-    (hlam : ∀ l n, lam0 ≤ F.lam (l,n)) (hu : ∀ l n, F.u (l,n) = u0)
-    (hL : ∀ l n, ell * ChartScales.S n ≤ F.L (l,n))
-    (hinj : ∀ l n, InjOn TorusAverages.quotientPoint
-      ((fun z => (reference l n).center + (reference l n).basis z) ''
-        (referenceWindow (r l n) (F.L (l,n)) (hr l n) (F.L_pos (l,n))).outer))
-    (S : Label → ℕ → Set P) (hS : ∀ l n, IsClosed (S l n))
-    (hsupport : ∀ l, HarmonicSourceSupport.InputSupportOn (s.domain ×ˢ univ)
-      (sourceRegions F clock reference gap r S l) (b l) (G l) (A l))
-    (hinside : ∀ l n p, p ∈ s.domain → p ∈ S l n → φ (l,n) (χ p) ∈ D.carrier (l,n))
-    (hreal : ParticularCopyBounds.UniformModalControl
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) α frame
-      (fun l n => realData (tangent l n) (ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-      j (ScaledActualParticularControl.geometry reference gap clock)
-      (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
-      (analyticPatches F clock reference gap r s χ φ))
-    (himag : ParticularCopyBounds.UniformModalControl
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) α frame
-      (fun l n => imagData (tangent l n) (ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-      j (ScaledActualParticularControl.geometry reference gap clock)
-      (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.envelope F clock)
-      (analyticPatches F clock reference gap r s χ φ))
-    (hsource : UniformLocalJets
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun l n x => Real.sqrt (s.zeta x.1.1) * fieldEnvelope F clock reference gap r l n x) α
-      (analyticPatches F clock reference gap r s χ φ)
-      (fun l n _ => ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j n))
-    (dirs : LinearWaveBounds.GraphDirections ((P × ℝ) × Plane))
-    (hfast : BandBound (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)) 0 dirs.fastScale)
-    (edges : GaussianTailFlat.FlatEdges (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)))
-    (scales : GaussianTailFlat.BandScaleControl (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)))
-    (β : ℝ) :
-    LabelSumBounds.UniformClass (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
-      (fun _ _ _ => 1) β
-      (fun l => (data F clock reference gap r hr base tangent ctx u b G A j l).globalGaussian dirs) := by
-  have hw l n x (_ : x ∈ (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).domain) :=
-    fieldEnvelope_nonneg F clock reference gap r l n x
-  have he l n k x (_ : x ∈ (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s)).domain)
-      (hx : x ∈ analyticPatches F clock reference gap r s χ φ l n k) :=
-    (fieldEnvelope_eq F clock reference gap r hr s χ φ hinj hx).ge
-  have hamp := complex_amplitude_uniform_jets tangent
-    (fun l => ParticularWaveAssembly.sourceFamily ctx u (b l) (G l) (A l) j)
-    (ScaledActualParticularControl.geometry reference gap clock)
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.length_pos F clock)
-    (ScaledActualParticularControl.envelope F clock) (fieldEnvelope F clock reference gap r)
-    frame j (analyticPatches F clock reference gap r s χ φ) hreal himag hw he
-  apply LocalizedGaussianBounds.uniform_globalGaussian_all_gains_from_supported_native
-    (data F clock reference gap r hr base tangent ctx u b G A j)
-    (cells F clock reference gap r hr hinj)
-    (data_cutoff_support F clock reference gap r hr base tangent ctx u b G A j)
-    dirs (analyticPatches F clock reference gap r s χ φ) hw
-    (data_cutoff_jets F clock reference gap r hr base tangent ctx u b G A j s χ φ hu0 hu
-      ⟨hreal.constant, hreal.constant_ge_one, hreal.coordinate_power, hreal.coordinate_bound⟩)
-    hfast hamp hsource edges scales
-    (fun l n k x => theta F clock l n
-      ((ScaledActualParticularControl.geometry reference gap clock l n).coordinates k x.2).2)
-    (ScaledActualParticularControl.length F clock) (ScaledActualParticularControl.length_pos F clock)
-    (ell / clock.upper) (div_pos hell (zero_lt_one.trans_le clock.upper_one))
-    (length_uniform_lower F clock hL)
-    (mul_pos (gaussianRate_pos hlam0 hu0) clock.lower_pos)
-    ?_ ?_ ?_ β
-    (data_source_complement F clock reference gap r hr base tangent ctx u b G A j s S hsupport β)
-  · intro l n k x hx hc
-    rw [fieldEnvelope_eq F clock reference gap r hr s χ φ hinj hc]
-    exact envelope_uniform_bound F clock hlam0 hu0 hlam hu l n ⟨hc.1.2.2.1.le, hc.1.2.2.2.le⟩
-  · intro l n k x hx hc hm
-    exact Or.inl (data_central F clock reference gap r hr base tangent ctx u b G A j s χ φ l n k hc hm)
-  · intro l n k x hx hk hn
-    exact data_outside F clock reference gap r hr base tangent ctx u b G A j s S hS hsupport
-      χ φ hinside hinj l n k hx hk hn
 
 end AllGains
 
@@ -891,8 +551,6 @@ end CurrentSourceJets
 
 /-! ## Bindings to the selected reference window and primary family -/
 
-noncomputable def referenceCutoff (r L : ℝ) (hr : 0 < r) (hL : 0 < L) (z : Plane) : ℝ :=
-  (referenceWindow r L hr hL).cutoff z * GaussianTailFlat.slotCutoff L z.2
 
 
 

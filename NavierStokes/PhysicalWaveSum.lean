@@ -42,7 +42,6 @@ noncomputable def upLift (d : ℕ) : LiftPoint →L[ℝ] LiftPoint :=
     upLift d y = (y.1, CommonCoverSolve.coverPower d y.2) := rfl
 
 @[simp] theorem up_down (d : ℕ) (y : LiftPoint) : upLift d (downLift d y) = y := by simp
-@[simp] theorem down_up (d : ℕ) (y : LiftPoint) : downLift d (upLift d y) = y := by simp
 
 noncomputable def coverBound (Δ : ℕ) : ℝ := 1 + CommonCoverSolve.coveringBound Δ
 
@@ -615,37 +614,7 @@ theorem globalWave_eventually_common {a b h r0 : ℝ} (ha : 0 < a) (n d : ℕ)
   · simp only [globalWave, commonWave, hz, zero_mul]
   · exact commonWave_charts_agree ha h n d r0 c amp j y m hkp _ i (chooseChart_valid ha (hs y hz)) hy
 
-theorem globalWave_eventually_zero_off_annulus {a b h r0 : ℝ} {n d : ℕ}
-    (c : CarrierData) (amp : LiftPoint → ℂ) (j : ℤ)
-    (hs : ∀ y, amp (commonLift h n d y) ≠ 0 →
-      PhysicalGraphBounds.scaledRadial n y ∈ PhysicalGraphBounds.annulus a b)
-    {w : SpaceTime} (hw : PhysicalGraphBounds.scaledRadial n w ∉ PhysicalGraphBounds.annulus a b) :
-    globalWave a h n d r0 c amp j =ᶠ[𝓝 w] fun _ => 0 := by
-  filter_upwards [(PhysicalGraphBounds.scaledRadial n).continuous.continuousAt
-    ((PhysicalGraphBounds.isCompact_annulus a b).isClosed.isOpen_compl.mem_nhds hw)] with y hy
-  apply globalWave_eq_zero
-  by_contra hn
-  exact hy (hs y hn)
 
-theorem globalWave_smooth {a b h r0 : ℝ} (ha : 0 < a) (n d : ℕ)
-    (c : CarrierData) (amp : LiftPoint → ℂ) (j : ℤ) (m : ℤ)
-    (hkp : (ChartScales.carrier h n : ℝ) * c.angular = (m : ℝ))
-    (hamp : ContDiff ℝ ∞ amp) (hF : ContDiff ℝ ∞ c.F) (hG : ContDiff ℝ ∞ c.G)
-    (hs : ∀ y, amp (commonLift h n d y) ≠ 0 →
-      PhysicalGraphBounds.scaledRadial n y ∈ PhysicalGraphBounds.annulus a b) :
-    ContDiff ℝ ∞ (globalWave a h n d r0 c amp j) := by
-  apply contDiff_iff_contDiffAt.mpr
-  intro w
-  by_cases hw : PhysicalGraphBounds.scaledRadial n w ∈ PhysicalGraphBounds.annulus a b
-  · let i := chooseChart a (PhysicalGraphBounds.scaledRadial n w)
-    have hi : PhysicalGraphBounds.scaledRadial n w ∈ PolarCharts.chartDomain a i := chooseChart_valid ha hw
-    have he : globalWave a h n d r0 c amp j =ᶠ[𝓝 w] commonWave a h n d r0 (c.withChart i) amp j :=
-      globalWave_eventually_common (r0 := r0) ha n d c amp j m hkp hs i hi
-    have hc : ContDiffAt ℝ ∞ (commonWave a h n d r0 (c.withChart i) amp j) w :=
-      commonWave_smoothAt ha h n d r0 (c.withChart i) hamp hF hG j
-        (PhysicalGraphBounds.scaledRadial_ne_zero (PhysicalGraphBounds.annulus_axisFree ha hw))
-    exact hc.congr_of_eventuallyEq he
-  · exact contDiffAt_const.congr_of_eventuallyEq (globalWave_eventually_zero_off_annulus c amp j hs hw)
 
 theorem globalWave_ne_zero_amp {a h r0 : ℝ} {n d : ℕ} {c : CarrierData}
     {amp : LiftPoint → ℂ} {j : ℤ} {w : SpaceTime}
@@ -708,8 +677,6 @@ noncomputable def WaveFamily.term {H : ℕ} (f : WaveFamily H) (a h r0 : ℝ)
     (I : WaveIndex H) : SpaceTime → ℂ :=
   globalWave a h I.1.val.1 (f.gap I.1) r0 (f.carrier I.1) (f.amplitude I) I.2.val
 
-noncomputable def WaveFamily.sum {H : ℕ} (f : WaveFamily H) (a h r0 : ℝ) (w : SpaceTime) : ℂ :=
-  ∑ᶠ I : WaveIndex H, f.term a h r0 I w
 
 /-- Smooth coefficients, the genuine angular integrality condition, and
 input amplitude supports. No output derivative estimate is assumed. -/
@@ -731,34 +698,9 @@ structure RegularFamily {H : ℕ} (f : WaveFamily H) (a b h r0 Z : ℝ) (Δ : �
     f.amplitude I (commonLift h I.1.val.1 (f.gap I.1) y) ≠ 0 →
       physicalMask (CoordinateAlgebra.D h) I.1.val (physicalParams h y) ≠ 0
 
-theorem RegularFamily.commonLift_formula {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : RegularFamily f a b h r0 Z Δ) (L : BandLabel) (w : SpaceTime) :
-    commonLift h L.val.1 (f.gap L) w =
-      (PhysicalGraphBounds.physicalChart h L.val.1 w,
-        (SlotGeometry.cover ^ (ChartScales.nativeIndex h L.val.1 - f.gap L))
-          (PhysicalGraphBounds.radialProfile (ChartScales.radialExponent h)
-            (PhysicalGraphBounds.radialProjection w) + w.1 • PhysicalGraphBounds.timeDirection)) :=
-  PhysicalWaveSum.commonLift_formula h L.val.1 (f.gap L) (hf.gap_native L) w
 
-theorem RegularFamily.term_smooth {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : RegularFamily f a b h r0 Z Δ) (ha : 0 < a) (I : WaveIndex H) :
-    ContDiff ℝ ∞ (f.term a h r0 I) := by
-  obtain ⟨m, hm⟩ := hf.angular_integer I.1
-  exact globalWave_smooth ha I.1.val.1 (f.gap I.1) (f.carrier I.1) (f.amplitude I) I.2.val m hm
-    (hf.amplitude_smooth I) (hf.F_smooth I.1) (hf.G_smooth I.1)
-    (fun y hy => (hf.geometry_support I y hy).1)
 
-theorem RegularFamily.term_support {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : RegularFamily f a b h r0 Z Δ) (I : WaveIndex H) (w : SpaceTime)
-    (hw : w ∈ preterminal) (hn : f.term a h r0 I w ≠ 0) :
-    physicalParams h w ∈ labelRegion (CoordinateAlgebra.D h) I.1.val :=
-  physicalMask_support_subset _ _ (hf.mask_support I w hw (globalWave_ne_zero_amp hn))
 
-theorem RegularFamily.sum_smooth {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : RegularFamily f a b h r0 Z Δ) (ha : 0 < a) (hh : 0 < h) (hh1 : h < 1 / 2) :
-    ContDiffOn ℝ ∞ (f.sum a h r0) preterminal :=
-  masked_finsum_smooth hh hh1 (f.term a h r0)
-    (fun I _ _ => (hf.term_smooth ha I).contDiffAt) hf.term_support
 
 /-- Bounds on genuine input coefficient jets in common coordinates, and
 on the genuine base profiles entering the native phase. -/
@@ -790,67 +732,12 @@ structure StrippedClass {H : ℕ} (f : WaveFamily H)
         (ChartScales.timeCoefficient h I.1.val.1) (f.carrier I.1).center r0
         (PhysicalGraphBounds.physicalLift h I.1.val.1 w)).1‖ ≤ B * ChartScales.S I.1.val.1 ^ eBase
 
-/-- The full physical sum has exactly the same power loss as one native
-carrier. The number of harmonics, bounded cover gap, overlap count, and
-stripped-class degrees affect its constant only. -/
-theorem physical_sum_jet_bound {h a b Z r0 P B eBase : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a)
-    (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0) (hP : 1 ≤ P) (hB : 1 ≤ B) (heBase : 0 ≤ eBase)
-    (H Δ m : ℕ) (g eAmp A : ℝ) (hA : 0 ≤ A) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ f : WaveFamily H,
-      RegularFamily f a b h r0 Z Δ → StrippedClass f a b h r0 P A B g eAmp eBase m →
-      ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (f.sum a h r0) w‖ ≤
-        C * physicalQ h w ^ (g - PhysicalGraphBounds.waveLoss h m) := by
-  obtain ⟨C, hC, hpoint⟩ := common_carrier_physical_bound (b := b) hh.le hh1.le ha
-    hZ hr0 hP hB heBase Δ m g eAmp A (H : ℝ) hA (Nat.cast_nonneg H)
-  refine ⟨((2250 * (2 * H + 1) : ℕ) : ℝ) * C, mul_nonneg (Nat.cast_nonneg _) hC, ?_⟩
-  intro f hregular hclass w hw ht
-  have hq := physicalQ_pos hh hh1 hw
-  have hsum := masked_finsum_jet_bound hh hh1 (f.term a h r0)
-    (fun I _ _ => (hregular.term_smooth ha I).contDiffAt) hregular.term_support hw m
-    (B := C * physicalQ h w ^ (g - PhysicalGraphBounds.waveLoss h m)) (by positivity)
-  refine (hsum ?_).trans_eq (by ring)
-  · intro I hregion
-    by_cases hs : w ∈ tsupport (f.term a h r0 I)
-    · have hgeo := globalWave_tsupport_geometry (f.carrier I.1) (f.amplitude I) I.2.val
-        (hregular.geometry_support I) hs
-      obtain ⟨mode, hmode⟩ := hregular.angular_integer I.1
-      let chart := chooseChart a (PhysicalGraphBounds.scaledRadial I.1.val.1 w)
-      have hchart : PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PolarCharts.chartDomain a chart :=
-        chooseChart_valid ha hgeo.1
-      have he := globalWave_eventually_common (r0 := r0) ha I.1.val.1 (f.gap I.1)
-        (f.carrier I.1) (f.amplitude I) I.2.val mode hmode
-        (fun y hy => (hregular.geometry_support I y hy).1) chart hchart
-      change ‖iteratedFDeriv ℝ m (globalWave a h I.1.val.1 (f.gap I.1) r0
-        (f.carrier I.1) (f.amplitude I) I.2.val) w‖ ≤ _
-      rw [iteratedFDeriv_eq_of_eventuallyEq he m]
-      have hband := labelRegion_active_relation hregion
-      exact hpoint I.1.val.1 I.1.property (f.gap I.1) (hregular.gap_le I.1)
-        w hgeo.1 ht hgeo.2.1 (physicalQ h w) hq hband.1 hband.2
-        ((f.carrier I.1).withChart chart) (f.amplitude I) I.2.val
-        (hclass.parameters I.1).1 (hclass.parameters I.1).2.1 (hclass.parameters I.1).2.2 hgeo.2.2
-        (hregular.amplitude_smooth I) (hregular.F_smooth I.1) (hregular.G_smooth I.1) (harmonic_bound I.2)
-        (hclass.amplitude I w hw hregion hgeo.1)
-        (hclass.base_F I w hw hregion hgeo.1 chart hchart)
-        (hclass.base_G I w hw hregion hgeo.1 chart hchart)
-    · rw [jet_zero_off_tsupport _ _ hs, norm_zero]
-      positivity
-
-noncomputable def coverChange (d e : ℕ) : LiftPoint →L[ℝ] LiftPoint :=
-  (downLift e).comp (upLift d)
 
 
 
 
 
-theorem RegularFamily.sum_locally_finite {H : ℕ} {f : WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : RegularFamily f a b h r0 Z Δ) (hh : 0 < h) (hh1 : h < 1 / 2)
-    {w : SpaceTime} (hw : w ∈ preterminal) :
-    ∃ s : Finset (WaveIndex H), s.card ≤ 2250 * (2 * H + 1) ∧
-      f.sum a h r0 =ᶠ[𝓝 w] fun y => ∑ I ∈ s, f.term a h r0 I y := by
-  obtain ⟨s, hs, he⟩ := masked_finsum_eventually hh hh1 (f.term a h r0) hf.term_support hw
-  exact ⟨s, waveRegion_card_le (physicalQ_pos hh hh1 hw) s (fun I hI => (hs I).mp hI), he⟩
+
 
 
 noncomputable def realCoordinate (i : Fin 3) : ℂ →L[ℝ] Space :=
@@ -866,19 +753,7 @@ theorem norm_realCoordinate_le (i : Fin 3) : ‖realCoordinate i‖ ≤ 1 := by
     mul_one, one_mul]
   exact Complex.abs_re_le_norm z
 
-/-- Real Euclidean vector assembled from the three scalar carrier sums. -/
-noncomputable def vectorSum {H : ℕ} (f : Fin 3 → WaveFamily H) (a h r0 : ℝ)
-    (w : SpaceTime) : Space := ∑ i : Fin 3, realCoordinate i ((f i).sum a h r0 w)
 
-theorem vectorSum_smooth {H : ℕ} {f : Fin 3 → WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : ∀ i, RegularFamily (f i) a b h r0 Z Δ) (ha : 0 < a) (hh : 0 < h) (hh1 : h < 1 / 2) :
-    ContDiffOn ℝ ∞ (vectorSum f a h r0) preterminal := by
-  intro w hw
-  apply ContDiffAt.contDiffWithinAt
-  apply ContDiffAt.sum
-  intro i _
-  exact (realCoordinate i).contDiff.contDiffAt.comp w
-    (((hf i).sum_smooth ha hh hh1).contDiffAt (preterminal_open.mem_nhds hw))
 
 theorem norm_jet_linear_comp_at {E F G : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -888,25 +763,6 @@ theorem norm_jet_linear_comp_at {E F G : Type*}
   rw [L.iteratedFDeriv_comp_left hf le_rfl]
   exact L.norm_compContinuousMultilinearMap_le _
 
-theorem vectorSum_jet_bound {H : ℕ} {f : Fin 3 → WaveFamily H} {a b h r0 Z : ℝ} {Δ : ℕ}
-    (hf : ∀ i, RegularFamily (f i) a b h r0 Z Δ) (ha : 0 < a) (hh : 0 < h) (hh1 : h < 1 / 2)
-    {w : SpaceTime} (hw : w ∈ preterminal) (m : ℕ) {B : ℝ}
-    (hb : ∀ i, ‖iteratedFDeriv ℝ m ((f i).sum a h r0) w‖ ≤ B) :
-    ‖iteratedFDeriv ℝ m (vectorSum f a h r0) w‖ ≤ 3 * B := by
-  have hlocal (i : Fin 3) : ContDiffAt ℝ m ((f i).sum a h r0) w :=
-    (((hf i).sum_smooth ha hh hh1).contDiffAt (preterminal_open.mem_nhds hw)).of_le (natCast_le_infty m)
-  unfold vectorSum
-  rw [iteratedFDeriv_finset_sum_at (f := fun i y => realCoordinate i ((f i).sum a h r0 y)) Finset.univ
-    (fun i _ => (realCoordinate i).contDiff.contDiffAt.comp w (hlocal i))]
-  calc
-    _ ≤ ∑ i : Fin 3, ‖iteratedFDeriv ℝ m (fun y => realCoordinate i ((f i).sum a h r0 y)) w‖ :=
-      norm_sum_le _ _
-    _ ≤ ∑ _i : Fin 3, B := by
-      apply Finset.sum_le_sum
-      intro i _
-      exact (norm_jet_linear_comp_at (hlocal i) (realCoordinate i)).trans
-        ((mul_le_of_le_one_left (norm_nonneg _) (norm_realCoordinate_le i)).trans (hb i))
-    _ = _ := by simp
 
 
 end NavierStokes.PhysicalWaveSum

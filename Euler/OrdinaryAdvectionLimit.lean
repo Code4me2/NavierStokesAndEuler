@@ -66,9 +66,6 @@ def projectedRhsPath (A : Icc (0 : ℝ) T → SmoothL2Field Space)
     (hA : ∀ n, Continuous (fun t => (A t).jetLp n)) : C(Icc (0 : ℝ) T,L2) :=
   fieldPath (fun t => projectedRhs (A t)) (projectedRhs_continuous A hA)
 
-def pressurePath (A : Icc (0 : ℝ) T → SmoothL2Field Space)
-    (hA : ∀ n, Continuous (fun t => (A t).jetLp n)) : C(Icc (0 : ℝ) T,L2) :=
-  fieldPath (fun t => pressureField (A t)) (pressureField_continuous A hA)
 
 theorem projectedRhsPath_eq (A : Icc (0 : ℝ) T → SmoothL2Field Space)
     (hA : ∀ n, Continuous (fun t => (A t).jetLp n)) :

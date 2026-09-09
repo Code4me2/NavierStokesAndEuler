@@ -1,4 +1,6 @@
-import Euler.TransverseForwardRegularity
+import Euler.TransverseForwardInverse
+import Euler.LinearDuhamelParameter
+import Euler.ContinuousGramPath
 import Euler.ContinuousGramGevrey
 import Euler.GevreyFixedShift
 
@@ -19,7 +21,7 @@ namespace EulerTransverseForwardCoefficientGevrey
 open Set ContinuousLinearMap EulerGevrey EulerOperatorGevreyCalculus
   EulerContinuousPathCalculus EulerContinuousPathComposition EulerContinuousGramPath
   EulerContinuousGramGevrey EulerTimeLpGramGevrey EulerTransverseGramPath
-  EulerTransverseForwardInverse EulerTransverseForwardRegularity
+  EulerTransverseForwardInverse
 open scoped ContDiff
 
 theorem inverseRadius_bounds (c C Rc R : ℝ) (hc : 0 < c) (hRc : 0 ≤ Rc)
@@ -53,13 +55,6 @@ private local instance : NormedSpace ℝ C(Icc (0 : ℝ) T,V →L[ℝ] E) := inf
 private local instance : NormedAddCommGroup C(Icc (0 : ℝ) T,E →L[ℝ] V) := inferInstance
 private local instance : NormedSpace ℝ C(Icc (0 : ℝ) T,E →L[ℝ] V) := inferInstance
 
-include hQr hRc hC₀ hRi hbQ in
-/-- The genuine inverse becomes a shift-zero coefficient at radius `4 Ri`. -/
-theorem inversePath_coefficient_bound (n : ℕ) (x : P) :
-    ‖iteratedFDeriv ℝ n (fun y => gramInversePath T (Q y) c hc (hQ y)) x‖ ≤
-      Ri*majorant (4*Ri) 0 n := by
-  exact (inversePath_gevrey T Q c hc hQ hQr Rc C₀ hRc hC₀ hbQ Ri hRi n x).trans
-    (majorant_one_le_radius_four Ri (inverseRadius_bounds c C₀ Rc Ri hc hRc hRi).1 n)
 
 
 

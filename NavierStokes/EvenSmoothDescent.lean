@@ -260,10 +260,6 @@ theorem evenCutoff_eventually_one (r : ℝ) : evenCutoff r =ᶠ[𝓝 0] (fun _ =
     with x hx hn
   simp only [evenCutoff, hx, hn, mul_one]
 
-omit [CompleteSpace E] in
-theorem localized_eventuallyEq (r : ℝ) (f : ℝ → E) : localized r f =ᶠ[𝓝 0] f := by
-  filter_upwards [evenCutoff_eventually_one r] with x hx
-  simp only [localized, hx, one_smul]
 
 private theorem one_lt_scaled_abs {r x : ℝ} (hr : 0 < r) (hx : r ≤ |x|) :
     1 < |(2 / r) * x| := by
@@ -280,28 +276,7 @@ theorem localized_eventually_zero {r x : ℝ} (hr : 0 < r) (hx : r ≤ |x|) (f :
     with y hy
   simp only [localized, evenCutoff, hy, zero_mul, zero_smul]
 
-omit [CompleteSpace E] in
-theorem contDiff_localized {r : ℝ} (hr : 0 < r) {f : ℝ → E}
-    (hf : ContDiffOn ℝ ∞ f (Ioo (-r) r)) : ContDiff ℝ ∞ (localized r f) := by
-  rw [contDiff_iff_contDiffAt]
-  intro x
-  by_cases hx : |x| < r
-  · exact (contDiff_evenCutoff r).contDiffAt.smul
-      (hf.contDiffAt (isOpen_Ioo.mem_nhds (abs_lt.mp hx)))
-  · exact contDiffAt_const.congr_of_eventuallyEq
-      (localized_eventually_zero hr (le_of_not_gt hx) f)
 
-omit [CompleteSpace E] in
-theorem even_localized {r : ℝ} (hr : 0 < r) {f : ℝ → E}
-    (he : ∀ x ∈ Ioo (-r) r, f (-x) = f x) : Function.Even (localized r f) := by
-  intro x
-  by_cases hx : |x| < r
-  · change evenCutoff r (-x) • f (-x) = evenCutoff r x • f x
-    rw [even_evenCutoff r x, he x (abs_lt.mp hx)]
-  · have hx' : r ≤ |x| := le_of_not_gt hx
-    have hnx : r ≤ |-x| := by simpa only [abs_neg] using hx'
-    rw [(localized_eventually_zero hr hnx f).eq_of_nhds,
-      (localized_eventually_zero hr hx' f).eq_of_nhds]
 
 
 

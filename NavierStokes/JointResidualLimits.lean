@@ -139,13 +139,6 @@ theorem boundaryLimits_joint {f : SpaceTime → V} (hzero : VanishingJointJets f
     exact (Classical.choice (hext x hx)).jet_tendsto n
 
 
-theorem boundaryLimits_locallyUniform {f : SpaceTime → V} (hzero : VanishingJointJets f)
-    (hext : AwayExtensions f) (n : ℕ) :
-    TendstoLocallyUniformly (fun t x => iteratedFDeriv ℝ n f (t, x))
-      (fun x => boundaryLimits f hext x n) (𝓝[<] (1 : ℝ)) := by
-  apply locallyUniform_of_joint_limits (F := iteratedFDeriv ℝ n f)
-  intro x
-  simpa only [past_filter] using boundaryLimits_joint hzero hext n x
 
 
 theorem past_filter_neBot (x : Space) :
@@ -154,11 +147,6 @@ theorem past_filter_neBot (x : Space) :
   infer_instance
 
 
-theorem boundaryLimits_independent {f : SpaceTime → V} (hzero : VanishingJointJets f)
-    (h₁ h₂ : AwayExtensions f) : boundaryLimits f h₁ = boundaryLimits f h₂ := by
-  funext x n
-  let := past_filter_neBot x
-  exact tendsto_nhds_unique (boundaryLimits_joint hzero h₁ n x) (boundaryLimits_joint hzero h₂ n x)
 
 
 

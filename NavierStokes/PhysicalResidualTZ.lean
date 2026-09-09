@@ -16,7 +16,6 @@ namespace NavierStokes.PhysicalResidualTZ
 open Set Filter Function HarmonicCalculus
 open scoped Topology ContDiff
 
-abbrev Plane := PhysicalResidualBridge.Plane
 abbrev Lift := PhysicalResidualBridge.Lift
 abbrev Cylinder := PhysicalResidualBridge.Cylinder
 

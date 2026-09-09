@@ -42,8 +42,6 @@ private local instance : NormedSpace ℝ (C(K,F) →L[ℝ] C(K,G)) := inferInsta
 def pathBilinear (B : E →L[ℝ] F →L[ℝ] G) : C(K,E) →L[ℝ] C(K,F) →L[ℝ] C(K,G) :=
   coefficientMap.comp (B.compLeftContinuous ℝ K)
 
-@[simp] theorem pathBilinear_apply (B : E →L[ℝ] F →L[ℝ] G)
-    (p : C(K,E)) (q : C(K,F)) (t : K) : pathBilinear B p q t = B (p t) (q t) := rfl
 
 theorem pathBilinear_norm (B : E →L[ℝ] F →L[ℝ] G) :
     ‖pathBilinear (K := K) B‖ ≤ ‖B‖ :=

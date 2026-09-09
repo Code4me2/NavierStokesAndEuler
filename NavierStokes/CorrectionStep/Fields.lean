@@ -133,26 +133,13 @@ noncomputable def fullResidual (c : Context D) (u : State D) : Oscillation D := 
     (complexBase c n) (complexPerturbation u n) (complexPressure u n) x i).re +
     virtualDivergence c n x i + u.errors.base n x i
 
-noncomputable def fullGoodResidual (c : Context D) (u : State D) : Oscillation D :=
-  fullResidual c u - u.errors.total
 
 noncomputable def angularMeanVector (f : Oscillation D) : MeanVector D :=
   fun n x i => angularAverage (fun k p => f k p i) n x
 
-noncomputable def angularNonconstant (f : Oscillation D) : Oscillation D :=
-  fun n x i => f n x i - angularMeanVector f n x.1 i
-
-noncomputable def fullGoodWaveResidual (c : Context D) (u : State D) : Oscillation D :=
-  angularNonconstant (fullGoodResidual c u)
 
 
-theorem fullResidual_decomposition (c : Context D) (u : State D) :
-    fullResidual c u = fun n x i => fullGoodWaveResidual c u n x i +
-      angularMeanVector (fullGoodResidual c u) n x.1 i + u.errors.total n x i := by
-  funext n x i
-  simp only [fullGoodWaveResidual, angularNonconstant, fullGoodResidual,
-    Pi.sub_apply]
-  ring
+
 
 end FullFields
 
@@ -170,10 +157,6 @@ theorem AngularContinuous.add {u v : Oscillation D}
 
 
 
-/-- The actual covariance increment contains both cross terms and the
-entire square of the exact increment. -/
-noncomputable def covarianceIncrement (u v : Oscillation D) : Tensor D :=
-  bilinearCovariance u v + bilinearCovariance v u + bilinearCovariance v v
 
 
 
@@ -183,10 +166,6 @@ section ActualFullUpdate
 
 open CorrectionState HarmonicCalculus
 
-noncomputable def complexIncrement (m : Triple D) (v : Oscillation D)
-    (n : ℕ) (x : D × ℝ) : ComplexVector :=
-  ![(m.radial n x.1 + v n x 0 : ℝ), (m.angular n x.1 + v n x 1 : ℝ),
-    (m.axial n x.1 + v n x 2 : ℝ)]
 
 
 
@@ -236,22 +215,10 @@ structure PhysicalFields (P : Type) where
   gaussianError : P × ℝ → Fin 3 → ℝ
   aliasError : P × ℝ → Fin 3 → ℝ
 
-noncomputable def PhysicalFields.add (u v : PhysicalFields P) : PhysicalFields P where
-  mean := u.mean + v.mean
-  pressure := u.pressure + v.pressure
-  oscillation := u.oscillation + v.oscillation
-  oscillatoryPressure := u.oscillatoryPressure + v.oscillatoryPressure
-  baseError := u.baseError + v.baseError
-  gaussianError := u.gaussianError + v.gaussianError
-  aliasError := u.aliasError + v.aliasError
 
 noncomputable def meanComponents (m : Triple D) (n : ℕ) (x : D) : Fin 3 → ℝ :=
   ![m.radial n x, m.angular n x, m.axial n x]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem meanComponents_updated (m h : Triple D) (n : ℕ) (x : D) (i : Fin 3) :
-    meanComponents (updated m h) n x i = meanComponents m n x i + meanComponents h n x i := by
-  fin_cases i <;> rfl
 
 /-- `chart` includes the actual torus covering as well as spatial/time
 rescaling. `domain n` specifies where that band is active. -/
@@ -271,50 +238,6 @@ structure RepresentsPhysical (chart : ℕ → P → D) (domain : ℕ → Set P)
   aliasError : ∀ n x, x ∈ domain n → ∀ θ i,
     u.errors.aliasError n (chart n x, θ) i = Q n ^ (2 * A + 1 / 2) * v.aliasError (x, θ) i
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- Actual addition preserves the specified common physical realization.
-This does not manufacture a realization for a separately solved chart. -/
-theorem RepresentsPhysical.addIncrement {chart : ℕ → P → D} {domain : ℕ → Set P}
-    {Q : ℕ → ℝ} {A : ℝ} {u : State D} {v w : PhysicalFields P}
-    (hu : RepresentsPhysical chart domain Q A u v)
-    (m : Triple D) (p : ScalarField D) (osc : Oscillation D) (pr : OscillatoryScalar D)
-    (e : ExcludedErrors D)
-    (hw : RepresentsPhysical chart domain Q A (⟨m, p, osc, pr, e⟩ : State D) w) :
-    RepresentsPhysical chart domain Q A (u.addIncrement m p osc pr e) (v.add w) := by
-  constructor
-  · intro n x hx i
-    simp only [State.addIncrement, meanComponents_updated, PhysicalFields.add, Pi.add_apply]
-    rw [hu.mean n x hx i, hw.mean n x hx i]
-    ring
-  · intro n x hx
-    have hi : p n (chart n x) = Q n ^ (2 * A) * w.pressure x := hw.pressure n x hx
-    simp only [State.addIncrement, PhysicalFields.add, Pi.add_apply]
-    rw [hu.pressure n x hx, hi]
-    ring
-  · intro n x hx θ i
-    have hi : osc n (chart n x, θ) i = Q n ^ A * w.oscillation (x, θ) i :=
-      hw.oscillation n x hx θ i
-    simp only [State.addIncrement, PhysicalFields.add, Pi.add_apply]
-    rw [hu.oscillation n x hx θ i, hi]
-    ring
-  · intro n x hx θ
-    have hi : pr n (chart n x, θ) = Q n ^ (2 * A) * w.oscillatoryPressure (x, θ) :=
-      hw.oscillatoryPressure n x hx θ
-    simp only [State.addIncrement, PhysicalFields.add, Pi.add_apply]
-    rw [hu.oscillatoryPressure n x hx θ, hi]
-    ring
-  · intro n x hx θ i
-    simp only [State.addIncrement, ExcludedErrors.add, PhysicalFields.add, Pi.add_apply]
-    rw [hu.baseError n x hx θ i, hw.baseError n x hx θ i]
-    ring
-  · intro n x hx θ i
-    simp only [State.addIncrement, ExcludedErrors.add, PhysicalFields.add, Pi.add_apply]
-    rw [hu.gaussianError n x hx θ i, hw.gaussianError n x hx θ i]
-    ring
-  · intro n x hx θ i
-    simp only [State.addIncrement, ExcludedErrors.add, PhysicalFields.add, Pi.add_apply]
-    rw [hu.aliasError n x hx θ i, hw.aliasError n x hx θ i]
-    ring
 
 
 end PhysicalRepresentation
@@ -344,17 +267,6 @@ theorem angularMeanVector_add {f g : Oscillation D}
 
 end
 
-/-- The base error is restored and subtracted exactly once.  Gaussian and
-alias errors remain actual subtracted means, with no zero/flat substitution. -/
-theorem meanGoodResidual_exact_errors (c : Context D) (u : State D)
-    (hb : AngularContinuous u.errors.base) (hg : AngularContinuous u.errors.gaussian)
-    (ha : AngularContinuous u.errors.aliasError) :
-    u.meanGoodResidual c = u.reducedMeanResidual c - angularMeanVector u.errors.gaussian -
-      angularMeanVector u.errors.aliasError := by
-  change u.reducedMeanResidual c + angularMeanVector u.errors.base -
-    angularMeanVector (u.errors.base + u.errors.gaussian + u.errors.aliasError) = _
-  rw [angularMeanVector_add (hb.add hg) ha, angularMeanVector_add hb hg]
-  abel
 
 /-- The same cancellation only uses angular continuity on the selected
 fiber. No regularity outside the current physical domain is needed. -/
@@ -393,11 +305,6 @@ section ActualMeanAndDivergence
 
 open CorrectionState
 
-theorem angularMean_fullGoodResidual {U : Set D} {c : Context D} {u : State D}
-    (H : LiftedMeanResidual.MeanHypotheses U c u) (n : ℕ) {x : D}
-    (hx : x ∈ U) (i : Fin 3) :
-    angularMeanVector (fullGoodResidual c u) n x i = u.meanGoodResidual c n x i :=
-  LiftedMeanResidual.angularMean_fullGoodResidual H n hx i
 
 
 
@@ -620,12 +527,7 @@ export LabelSumBounds (symmetricCovariance subBlock subBlock_oscillation)
 section
 omit [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-theorem AngularContinuous.neg {u : Oscillation D} (hu : AngularContinuous u) :
-    AngularContinuous (-u) := fun n x i => (hu n x i).neg
 
-theorem AngularContinuous.sub {u v : Oscillation D}
-    (hu : AngularContinuous u) (hv : AngularContinuous v) : AngularContinuous (u - v) :=
-  fun n x i => (hu n x i).sub (hv n x i)
 
 theorem subBlock_band {a b : HarmonicBlock D} {N M : ℕ}
     (ha : a.BandLimited N) (hb : b.BandLimited M) :
@@ -662,56 +564,7 @@ theorem blockOfCoefficients_difference_mem
   split_ifs <;> simp only [map_sub, map_zero, sub_div] <;> ring
 
 
-theorem correctedBlock_split
-    (a : LinearWaveBounds.WaveCoefficients (D × ℝ)) (s : StripData (D × ℝ))
-    (d : LinearWaveBounds.GraphDirections (D × ℝ)) (ψ : ℕ → D × ℝ → ℝ) (kp : ℕ → ℤ) :
-    (blockOfCoefficients (a.corrected s d ψ) kp).oscillation =
-      (blockOfCoefficients (a.withCutoff ψ) kp).oscillation +
-        (subBlock (blockOfCoefficients (a.corrected s d ψ) kp)
-          (blockOfCoefficients (a.withCutoff ψ) kp)).oscillation := by
-  have h : SameCarrier (blockOfCoefficients (a.corrected s d ψ) kp)
-      (blockOfCoefficients (a.withCutoff ψ) kp) := ⟨rfl, rfl, rfl⟩
-  rw [subBlock_oscillation _ _ h]
-  abel
 
-/-- The tangent and curl-difference blocks used by the tensor estimate are
-the blocks of the actual signed quotient, homogeneous pressure, cutoff,
-and curl construction. Their classes are conclusions from primitive data. -/
-theorem constructedSignedBlock_bounds
-    {s : StripData (D × ℝ)} {d : LinearWaveBounds.GraphDirections (D × ℝ)}
-    {a : LinearWaveBounds.WaveCoefficients (D × ℝ)} {P₀ P : ℕ → D × ℝ → ℝ} {α₀ B κ : ℝ}
-    (hbase : LinearWaveBounds.InputBounds s P₀ α₀ κ d a) (hκ : κ ≤ 1 / 2)
-    {H : ℕ → D × ℝ → Mat2} {T R : ℕ → D × ℝ → Vec2} {mask ψ : ℕ → D × ℝ → ℝ}
-    {v Ndot : ℕ → D × ℝ → Space} {A : ℕ → D × ℝ → Space →L[ℝ] Space}
-    (hcov : CovarianceControl s H T)
-    (hR : ∀ i, MeanClass s (B - 1 / 2 - κ) (fun n x => R n x i))
-    (hm : UnweightedClass s 0 mask) (hv : MemClass s P 0 v)
-    (hN : PhaseJetBounds.PolynomialJets (CurlClassBounds.phaseDomain s) (a.normal s d))
-    (hNdot : UnweightedClass s 0 Ndot) (hA : UnweightedClass s 0 A)
-    {b M : ℝ} (hb : 0 < b)
-    (hlo : ∀ n x, x ∈ s.domain → b ≤ ‖a.normal s d n x‖)
-    (hhi : ∀ n x, x ∈ s.domain → ‖a.normal s d n x‖ ≤ M)
-    (hK : BandBound s (1 / 2) (fun n => 1 / a.frequency n))
-    {radius : D × ℝ → ℝ} (hradius : a.radius = fun _ => radius)
-    (hψ : UnweightedClass s 0 ψ) (kp : ℕ → ℤ) (j : Fin 2) :
-    let z := SignedWaveUpdate.coefficients a s d H T R mask v Ndot A j
-    let tangent := blockOfCoefficients (z.withCutoff ψ) kp
-    let exactBlock := blockOfCoefficients (z.corrected s d ψ) kp
-    tangent.WaveBounds (sectionStrip s) (fun n x => P n (x,0)) (B - κ) ∧
-      exactBlock.WaveBounds (sectionStrip s) (fun n x => P n (x,0)) (B - κ) ∧
-      exactBlock.PressureBounds (sectionStrip s) (fun n x => P n (x,0)) (B + 1 / 2 - κ) ∧
-      (subBlock exactBlock tangent).WaveBounds (sectionStrip s) (fun n x => P n (x,0))
-        (B + 1 / 2 - 2 * κ) := by
-  let z := SignedWaveUpdate.coefficients a s d H T R mask v Ndot A j
-  have hi : LinearWaveBounds.InputBounds s P (B - κ) κ d z := by
-    convert! coefficients_inputBounds hbase hcov hR hm hv hN hNdot hA hb hlo hhi hK j using 1
-    ring
-  have ht := blockOfCoefficients_classes (z.withCutoff ψ) kp
-    (LinearWaveBounds.component_classes (hi.with_cutoff hψ).amplitude) (hi.with_cutoff hψ).pressure
-  have he := signed_bounds hbase hκ hcov hR hm hv hN hNdot hA hb hlo hhi hK hradius hψ j
-  have hex := blockOfCoefficients_classes (z.corrected s d ψ) kp he.1 he.2.1
-  exact ⟨ht.1, hex.1, hex.2,
-    blockOfCoefficients_difference_mem (z.corrected s d ψ) (z.withCutoff ψ) kp he.2.2.1⟩
 
 end ConstructedSignedBlocks
 

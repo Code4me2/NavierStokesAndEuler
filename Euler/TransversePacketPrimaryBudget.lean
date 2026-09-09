@@ -1,6 +1,5 @@
 import Euler.TransversePacketBudget
 import Euler.CylinderEndpointUnitBounds
-import Euler.CylinderEndpointBounds
 
 /-!
 Additional source-only radius guards for the primary endpoint history.

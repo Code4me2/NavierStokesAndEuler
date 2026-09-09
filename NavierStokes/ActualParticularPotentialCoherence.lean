@@ -65,12 +65,6 @@ theorem potential_weight {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
   unfold CoordinateAlgebra.A
   ring
 
-theorem pressure_weight {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
-    pressureWeight h Q Qr = (velocityWeight h Q Qr) ^ 2 := by
-  rw [pow_two, velocityWeight, ratioPower_mul hQ hQr]
-  unfold pressureWeight
-  congr 1
-  ring
 
 variable {B N0 : ℕ}
 

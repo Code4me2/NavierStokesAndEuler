@@ -145,10 +145,6 @@ theorem support_subset_closedBall (hw : Continuous w) :
   rw [Metric.mem_closedBall, dist_zero_right]
   exact le_of_not_gt (fun hlt => hx (F.zero_outside hw x hlt))
 
-theorem hasCompactSupport (hw : Continuous w) : HasCompactSupport w := by
-  exact HasCompactSupport.intro (isCompact_closedBall (0 : ℝ³) supportRadius)
-    (fun x hx => F.zero_outside hw x (by
-      simpa only [Metric.mem_closedBall, dist_zero_right, not_le] using hx))
 
 end BackwardVorticityFlows
 end Euler.ComparatorBridge

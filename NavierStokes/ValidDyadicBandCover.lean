@@ -117,18 +117,6 @@ theorem field_jet_bound_at {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
   rw [field_jet_eq hh hh1 hf hn hband m]
   exact hb n hn hband hcomp
 
-/-- Select a comparable chart for the bound, independently of the chart
-chosen internally by `field`.  No chart-count factor is incurred. -/
-theorem field_jet_bound {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    {N : ℕ} {f : ℕ → SpaceTime → E} (hf : Compatible h N f)
-    (hqbig : qbig ≤ ChartScales.Q N) (m : ℕ) (B : SpaceTime → ℝ)
-    (hb : ∀ n, N ≤ n → ∀ w ∈ band h n, physicalQ h w ≤ ChartScales.Q n →
-      ‖iteratedFDeriv ℝ m (f n) w‖ ≤ B w) :
-    ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      ‖iteratedFDeriv ℝ m (field h N f) w‖ ≤ B w := by
-  intro w hw
-  exact field_jet_bound_at hh hh1 hf hw.1 (hw.2.le.trans hqbig) m
-    (fun n hn hband hcomp => hb n hn w hband hcomp)
 
 omit [NormedSpace ℝ E] in
 /-- A local support proof in any valid chart supplies the actual zero

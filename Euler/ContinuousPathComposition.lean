@@ -65,8 +65,6 @@ theorem compositionLift_norm : ‖compositionLift (K := K) (U := U) (E := E) (F 
 def compose (A : C(K,E →L[ℝ] F)) (B : C(K,U →L[ℝ] E)) : C(K,U →L[ℝ] F) :=
   multiplier (compositionLift A) B
 
-@[simp] theorem compose_apply (A : C(K,E →L[ℝ] F)) (B : C(K,U →L[ℝ] E)) (t : K) :
-    compose A B t = (A t).comp (B t) := rfl
 
 variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
 

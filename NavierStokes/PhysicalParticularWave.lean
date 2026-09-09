@@ -30,9 +30,6 @@ noncomputable def commonPotential (D : AssemblyData P) (j : ℤ) (n : ℕ) :
     ((P × ℝ) × Plane) → ComplexVector :=
   (rawCommon D j).curlPotential D.strip D.directions n
 
-noncomputable def commonPressure (D : AssemblyData P) (j : ℤ) (n : ℕ) :
-    ((P × ℝ) × Plane) → ℂ :=
-  mode ((rawCommon D j).frequency n) ((rawCommon D j).phase n) ((rawCommon D j).pressure n)
 
 section ActualInputs
 
@@ -344,9 +341,6 @@ noncomputable def referenceRaw (D : AssemblyData Parameter) (j : ℤ) : WaveSpac
   angleLift (referenceVelocity D.reference D.context D.state D.carrierBlock
     D.gaussianInput D.aliasInput j)
 
-noncomputable def referenceRawPressure (D : AssemblyData Parameter) (j : ℤ) : WaveSpace → ℂ :=
-  angleLift (ParticularWaveAssembly.referencePressure D.reference D.context D.state D.carrierBlock
-    D.gaussianInput D.aliasInput j)
 
 noncomputable def referenceFrequency (D : AssemblyData Parameter) (j : ℤ) : ℝ :=
   (j : ℝ) * D.carrierBlock.frequency D.reference.band
@@ -368,23 +362,9 @@ noncomputable def referencePotential (D : AssemblyData Parameter) (h Qr : ℝ) (
   PhysicalCurlCovariance.referencePotential (referenceFrequency D j)
     (physicalPhase D h Qr I j) (physicalRaw D h Qr I j)
 
-noncomputable def physicalPotential (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (j : ℤ) : VelocityField :=
-  PhysicalCurlCovariance.globalCartesianPotential delta (referencePotential D h Qr I j)
 
-noncomputable def physicalVelocity (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (j : ℤ) : VelocityField :=
-  SpatialCurl.spatialCurl (physicalPotential D h Qr I delta j)
 
-/-- The finite harmonic sum for a single original spatial label is one
-actual Cartesian potential, rather than a collection of bandwise fields. -/
-noncomputable def labelPotential (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (N : ℕ) : VelocityField :=
-  fun z => ∑ j ∈ modes N, physicalPotential D h Qr I delta j z
 
-noncomputable def labelVelocity (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (N : ℕ) : VelocityField :=
-  SpatialCurl.spatialCurl (labelPotential D h Qr I delta N)
 
 theorem nativeMap_add_angle (h Q : ℝ) (i : ℕ) (z : SpaceTime) (s : ℝ) :
     nativeMap h Q i (z + s • (0, coordinateVector 1)) =
@@ -392,14 +372,6 @@ theorem nativeMap_add_angle (h Q : ℝ) (i : ℕ) (z : SpaceTime) (s : ℝ) :
   ext <;> simp [nativeMap, waveEquiv_apply, PhysicalResidualBridge.ScaledGraph.map,
     coordinateVector, smul_eq_mul]
 
-theorem physicalPhase_affine (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ) :
-    AffinePhase ((0 : ℝ), coordinateVector 1)
-      ((D.carrierBlock.angularFrequency D.reference.band : ℝ) /
-        D.carrierBlock.frequency D.reference.band) (physicalPhase D h Qr I j) := by
-  intro z s
-  unfold physicalPhase referencePhase
-  rw [nativeMap_add_angle]
-  exact actualCarrier_affine D.background D.carrierBlock j D.reference.band (nativeMap h Qr I z) s
 
 
 theorem angle_translate_pack (t r theta z s : ℝ) :
@@ -523,29 +495,7 @@ theorem waveEquiv_cylinderChange (h Q Qr : ℝ) (gap : ℕ) (x : Cylinder) :
 noncomputable def referenceSource (D : AssemblyData Parameter) (j : ℤ) : Parameter × Plane → ComplexVector :=
   residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j D.reference.band
 
-noncomputable def bandAmplitude (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) : Parameter × Plane → ComplexVector :=
-  ParticularWaveBounds.commonVelocity
-    (ScaledTangentTransport.transportTangent (D.reference.tangent j) (parameterChange h Q Qr) gap 0
-      (clockWeight h Q Qr) (velocityWeight h Q Qr) (normalWeight Q Qr K (referenceFrequency D j)))
-    (ScaledTangentTransport.transportSource (referenceSource D j) (parameterChange h Q Qr) gap
-      (clockWeight h Q Qr) (velocityWeight h Q Qr))
-    (CopySolveCompatibility.transportGeometry D.reference.geometry gap 0 (clockWeight h Q Qr)
-      (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2)).ne')
-    (div_pos D.reference.length_pos (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2))).le
-    (D.reference.cutoff ∘ CopySolveCompatibility.nativeTimeMap 0 (clockWeight h Q Qr))
 
-noncomputable def bandPressure (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) : Parameter × Plane → ℂ :=
-  ParticularWaveBounds.commonPressure
-    (ScaledTangentTransport.transportTangent (D.reference.tangent j) (parameterChange h Q Qr) gap 0
-      (clockWeight h Q Qr) (velocityWeight h Q Qr) (normalWeight Q Qr K (referenceFrequency D j)))
-    (ScaledTangentTransport.transportSource (referenceSource D j) (parameterChange h Q Qr) gap
-      (clockWeight h Q Qr) (velocityWeight h Q Qr))
-    (CopySolveCompatibility.transportGeometry D.reference.geometry gap 0 (clockWeight h Q Qr)
-      (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2)).ne')
-    (div_pos D.reference.length_pos (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2))).le
-    (D.reference.cutoff ∘ CopySolveCompatibility.nativeTimeMap 0 (clockWeight h Q Qr)) K
 
 /-- Continuity of the actual primitive Volterra coefficients and source,
 and support inside the reference integration interval. -/
@@ -561,27 +511,13 @@ theorem normalWeight_ne {Q Qr K Kr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
 
 
 
-noncomputable def bandRaw (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) : Cylinder → ComplexVector :=
-  fun x => bandAmplitude D h hQ hQr gap K j ((waveEquiv x).1.1, (waveEquiv x).2)
 
 
 noncomputable def bandPhase (D : AssemblyData Parameter) (h Q Qr : ℝ) (gap : ℕ) (K : ℝ) (j : ℤ) :
     Cylinder → ℝ := fun x => (referenceFrequency D j / K) * liftPhase D j (cylinderChange h Q Qr gap x)
 
-noncomputable def bandVelocity (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (i gap : ℕ) (K : ℝ) (j : ℤ) : Cylinder → ComplexVector :=
-  let G := PhysicalResidualBridge.commonGraph Q h i
-  vectorMode K (bandPhase D h Q Qr gap K j)
-    (CurlClassBounds.realizedCoefficient K PhysicalResidualBridge.ScaledGraph.radius
-      G.radial PhysicalResidualBridge.ScaledGraph.angular G.axial (bandPhase D h Q Qr gap K j)
-      (bandRaw D h hQ hQr gap K j))
 
 
-noncomputable def bandDomain (D : AssemblyData Parameter) (h Q Qr : ℝ) (gap : ℕ)
-    (U : Set Parameter) : Set Cylinder :=
-  {x | 0 < x.1.1 ∧ cylinderChange h Q Qr gap x ∈ referenceDomain D ∧
-    parameterChange h Q Qr (waveEquiv x).1.1 ∈ U}
 
 
 theorem normalDot_scaled (s c : ℝ) (n : Space) (a : ComplexVector) :
@@ -610,22 +546,9 @@ end BandRealization
 
 /-! ## The pressure from the same reference solve -/
 
-noncomputable def physicalPressureCoefficient (D : AssemblyData Parameter) (h Qr : ℝ)
-    (I : ℕ) (j : ℤ) : SpaceTime → ℂ :=
-  fun z => (Qr ^ (-(2 * CoordinateAlgebra.A h)) : ℝ) • referenceRawPressure D j (nativeMap h Qr I z)
 
-noncomputable def complexPhysicalPressure (D : AssemblyData Parameter) (h Qr : ℝ)
-    (I : ℕ) (j : ℤ) : SpaceTime → ℂ :=
-  mode (referenceFrequency D j) (physicalPhase D h Qr I j) (physicalPressureCoefficient D h Qr I j)
 
-noncomputable def pressureVector (p : SpaceTime → ℂ) (z : SpaceTime) : ComplexVector := ![0, 0, p z]
 
-/-- A scalar is the axial component of its Cartesian coordinate lift;
-the frame fixes this component, so the construction has no extra rotation. -/
-noncomputable def physicalPressure (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (j : ℤ) : PressureField :=
-  fun z => PhysicalCurlCovariance.globalCartesianPotential delta
-    (pressureVector (complexPhysicalPressure D h Qr I j)) z 2
 
 
 theorem mode_fullTurn {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -643,44 +566,7 @@ theorem mode_fullTurn {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
       _ = _ := by rw [hc]
   rw [mode_translate ha hphi, he, Complex.exp_int_mul_two_pi_mul_I, one_mul]
 
-theorem complexPhysicalPressure_periodic (D : AssemblyData Parameter) (h Qr : ℝ)
-    (I : ℕ) (j : ℤ) (hk : D.carrierBlock.frequency D.reference.band ≠ 0) (t r z : ℝ) :
-    Periodic (fun theta => complexPhysicalPressure D h Qr I j
-      (t, AxisymmetricResidual.pack r theta z)) (2 * Real.pi) := by
-  intro theta
-  have hp : Invariant ((0 : ℝ), coordinateVector 1) (physicalPressureCoefficient D h Qr I j) := by
-    intro x s
-    unfold physicalPressureCoefficient
-    rw [nativeMap_add_angle]
-    congr 1
-    exact angleLift_invariant (ParticularWaveAssembly.referencePressure D.reference D.context D.state
-      D.carrierBlock D.gaussianInput D.aliasInput j) (nativeMap h Qr I x) s
-  have hf : referenceFrequency D j *
-      ((D.carrierBlock.angularFrequency D.reference.band : ℝ) / D.carrierBlock.frequency D.reference.band) =
-      ((j * D.carrierBlock.angularFrequency D.reference.band : ℤ) : ℝ) := by
-    unfold referenceFrequency
-    push_cast
-    field_simp [hk]
-  have he := mode_fullTurn (j * D.carrierBlock.angularFrequency D.reference.band)
-    (physicalPhase_affine D h Qr I j) hp hf (t, AxisymmetricResidual.pack r theta z)
-  simpa only [complexPhysicalPressure, angle_translate_pack] using he
 
-theorem physicalPressure_forward (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ)
-    (hk : D.carrierBlock.frequency D.reference.band ≠ 0) {delta : ℝ} (hdelta : 0 < delta)
-    (chart : PolarCharts.Index) {z : SpaceTime}
-    (hz : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    physicalPressure D h Qr I delta j (z.1, CylindricalResidual.chart z.2) =
-      (complexPhysicalPressure D h Qr I j z).re := by
-  have hper (t r z : ℝ) : Periodic (fun theta => pressureVector (complexPhysicalPressure D h Qr I j)
-      (t, AxisymmetricResidual.pack r theta z)) (2 * Real.pi) := by
-    intro theta
-    have hp := complexPhysicalPressure_periodic D h Qr I j hk t r z theta
-    simp only [pressureVector, hp]
-  have he := (PhysicalCurlCovariance.globalCartesianPotential_forward_germ hdelta chart
-    (pressureVector (complexPhysicalPressure D h Qr I j)) hper hz).eq_of_nhds
-  unfold physicalPressure
-  rw [he]
-  simp [CylindricalResidual.frame_apply, PhysicalCurlCovariance.realVector, pressureVector]
 
 
 

@@ -22,9 +22,6 @@ theorem realLineHeat_eq (a : LiftTangent) {t : ℝ} (ht : 0 ≤ t) (f : LiftL2 p
     realLineHeat period a t f = lineHeat period a ⟨t, ht⟩ f :=
   (lineHeat_eq_standardGaussian period a ⟨t, ht⟩ f).symm
 
-@[simp] theorem realLineHeat_zero (a : LiftTangent) (f : LiftL2 period) : realLineHeat period a 0 f = f := by
-  rw [realLineHeat_eq period a le_rfl]
-  exact lineHeat_zero period a f
 
 theorem realLineHeat_continuous (a : LiftTangent) (f : LiftL2 period) :
     Continuous (fun t : ℝ => realLineHeat period a t f) := by

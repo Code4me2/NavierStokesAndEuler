@@ -66,31 +66,7 @@ theorem covarianceIncrement_smooth [ProperSpace D] {Ω : Set D} (hΩ : IsOpen Ω
 
 /-! ## Smoothness from the actual local harmonic coefficients -/
 
-omit [NormedSpace ℝ D] in
-theorem field_zero_germ {c : Coefficients D} (k : ℝ) (Φ : D → ℝ) (kp : ℤ)
-    {x : D} (θ : ℝ) (hz : ∀ j, c j =ᶠ[𝓝 x] fun _ => 0) :
-    field c k Φ kp =ᶠ[𝓝 (x, θ)] fun _ => 0 := by
-  have hbase : ∀ᶠ y in 𝓝 x, ∀ j ∈ c.support, c j y = 0 :=
-    (Filter.eventually_all_finset c.support).2 (fun j _ => hz j)
-  have hlift := (continuous_fst.continuousAt :
-    Tendsto (Prod.fst : D × ℝ → D) (𝓝 (x, θ)) (𝓝 x)).eventually hbase
-  filter_upwards [hlift] with p hp
-  rw [show p = (p.1, p.2) from rfl, field_expansion]
-  exact Finset.sum_eq_zero (fun j hj => by rw [hp j hj]; simp)
 
-theorem field_smoothOn_of_germs {Ω C : Set D} (hΩ : IsOpen Ω) (hC : IsOpen C)
-    {c : Coefficients D} (hc : HarmonicResidual.SmoothCoefficients (Ω ∩ C) c)
-    {Φ : D → ℝ} (hΦ : ContDiffOn ℝ ∞ Φ (Ω ∩ C)) (k : ℝ) (kp : ℤ)
-    (hz : ∀ x, x ∈ Ω → x ∉ C → ∀ j, c j =ᶠ[𝓝 x] fun _ => 0) :
-    ContDiffOn ℝ ∞ (field c k Φ kp) (HarmonicResidual.liftDomain Ω) := by
-  intro p hp
-  classical
-  by_cases hi : p.1 ∈ C
-  · exact ((HarmonicResidual.field_smoothOn hc hΦ k kp).contDiffAt
-      ((HarmonicResidual.liftDomain_open (hΩ.inter hC)).mem_nhds
-        ⟨⟨hp.1, hi⟩, Set.mem_univ p.2⟩)).contDiffWithinAt
-  · exact (contDiffAt_const.congr_of_eventuallyEq
-      (field_zero_germ k Φ kp p.2 (hz p.1 hp.1 hi))).contDiffWithinAt
 
 /-- Primitive local data for every active block. Harmonics are the
 actual finite group-algebra coefficients, including harmonic zero. -/
@@ -108,32 +84,13 @@ namespace LocalData
 variable {Ω : Set D} {labels : ℕ → Finset ι} {blocks : ι → HarmonicBlock D}
   {C : ℕ → ι → Set D}
 
-theorem of_global
-    (hc : ∀ n l, l ∈ labels n → ∀ i, HarmonicResidual.SmoothCoefficients Ω ((blocks l).velocity n i))
-    (hΦ : ∀ n l, l ∈ labels n → ContDiffOn ℝ ∞ ((blocks l).phase n) Ω) :
-    LocalData Ω labels blocks (fun _ _ => Set.univ) :=
-  ⟨fun _ _ _ => isOpen_univ, fun n l hl i j => (hc n l hl i j).mono inter_subset_left,
-    fun n l hl => (hΦ n l hl).mono inter_subset_left,
-    fun _ _ _ _ _ hn => (hn (Set.mem_univ _)).elim⟩
 
-theorem block_smooth (h : LocalData Ω labels blocks C) (hΩ : IsOpen Ω)
-    (n : ℕ) (l : ι) (hl : l ∈ labels n) (i : Fin 3) :
-    ContDiffOn ℝ ∞ (fun p => (blocks l).oscillation n p i) (HarmonicResidual.liftDomain Ω) :=
-  Complex.reCLM.contDiff.comp_contDiffOn
-    (field_smoothOn_of_germs hΩ (h.patch_open n l hl) (h.coefficient n l hl i)
-      (h.phase n l hl) ((blocks l).frequency n) ((blocks l).angularFrequency n)
-      (fun x hx hC j => h.off_patch n l hl x hx hC i j))
 
-theorem fieldSum_smooth (h : LocalData Ω labels blocks C) (hΩ : IsOpen Ω) :
-    AngularSmooth Ω (LabelSumBounds.fieldSum labels (fun l => (blocks l).oscillation)) := by
-  intro n i
-  exact ContDiffOn.sum (fun l hl => h.block_smooth hΩ n l hl i)
 
 end LocalData
 
 /-! ## Actual support in the moving radial annulus -/
 
-abbrev Plane := GaugeDebtIncrement.Plane
 abbrev Point := GaugeDebtIncrement.Point
 
 noncomputable def WaveSupport {coord : ℝ} (U : LocalSignedRequest.SlowRegion coord)
@@ -192,13 +149,6 @@ theorem covarianceIncrement_regular {coord a b : ℝ} (U : LocalSignedRequest.Sl
   simp only [SignedMeanGain.covarianceIncrement, bilinearCovariance, angularAverage,
     Pi.sub_apply, Pi.add_apply, hz, add_zero, sub_self]
 
-/-- Geometric support of the actual complex coefficient functions.
-This includes the zero harmonic and imposes no covariance condition. -/
-noncomputable def CoefficientSupport {coord : ℝ} (U : LocalSignedRequest.SlowRegion coord)
-    (a b : ℝ) (labels : ℕ → Finset ι) (blocks : ι → HarmonicBlock Point) : Prop :=
-  ∀ n l, l ∈ labels n → ∀ i j x, x.2.1 ∈ U.carrier → (blocks l).velocity n i j x ≠ 0 →
-    x.1 ∈ Icc (VariableGaugeMean.qLength coord x.2.1 * a)
-      (VariableGaugeMean.qLength coord x.2.1 * b)
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem field_eq_zero_of_coefficients {c : Coefficients D} (k : ℝ) (Φ : D → ℝ)
@@ -206,22 +156,6 @@ theorem field_eq_zero_of_coefficients {c : Coefficients D} (k : ℝ) (Φ : D →
   rw [field_expansion]
   exact Finset.sum_eq_zero (fun j _ => by rw [hz j]; simp)
 
-theorem fieldSum_support_of_coefficients {coord a b : ℝ} {U : LocalSignedRequest.SlowRegion coord}
-    {labels : ℕ → Finset ι} {blocks : ι → HarmonicBlock Point}
-    (hs : CoefficientSupport U a b labels blocks) :
-    WaveSupport U a b (LabelSumBounds.fieldSum labels (fun l => (blocks l).oscillation)) := by
-  intro n θ i x hx hn
-  by_contra hout
-  have hz (l : ι) (hl : l ∈ labels n) (j : ℤ) : (blocks l).velocity n i j x = 0 := by
-    by_contra hne
-    exact hout (hs n l hl i j x hx hne)
-  apply hn
-  apply Finset.sum_eq_zero
-  intro l hl
-  have hf := field_eq_zero_of_coefficients ((blocks l).frequency n) ((blocks l).phase n)
-    ((blocks l).angularFrequency n) x θ (hz l hl)
-  change (field _ _ _ _ _).re = 0
-  rw [hf, Complex.zero_re]
 
 theorem fieldSum_support {coord a b : ℝ} {U : LocalSignedRequest.SlowRegion coord}
     {labels : ℕ → Finset ι} {u : ι → Oscillation Point}
@@ -245,59 +179,10 @@ variable {coord a b : ℝ} (U : LocalSignedRequest.SlowRegion coord)
   {labels₀ labels₁ : ℕ → Finset ι} {blocks₀ blocks₁ : ι → HarmonicBlock Point}
   {C₀ C₁ : ℕ → ι → Set Point}
 
-theorem fieldSum_covariance_regular
-    (h : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₀ blocks₀ C₀)
-    (hs : CoefficientSupport U a b labels₀ blocks₀) (i j : Fin 3) :
-    GaugeDebtIncrement.Regular U a b
-      (bilinearCovariance (LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation))
-        (LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation)) i j) :=
-  bilinearCovariance_regular U (h.fieldSum_smooth (PhysicalMeanDomain.slowDomain_open U.isOpen))
-    (h.fieldSum_smooth (PhysicalMeanDomain.slowDomain_open U.isOpen))
-    (fieldSum_support_of_coefficients hs) i j
 
-theorem fieldSum_covarianceIncrement_regular
-    (h₀ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₀ blocks₀ C₀)
-    (h₁ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₁ blocks₁ C₁)
-    (hs₁ : CoefficientSupport U a b labels₁ blocks₁) (i j : Fin 3) :
-    GaugeDebtIncrement.Regular U a b (SignedMeanGain.covarianceIncrement
-      (LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation))
-      (LabelSumBounds.fieldSum labels₁ (fun l => (blocks₁ l).oscillation)) i j) :=
-  covarianceIncrement_regular U (h₀.fieldSum_smooth (PhysicalMeanDomain.slowDomain_open U.isOpen))
-    (h₁.fieldSum_smooth (PhysicalMeanDomain.slowDomain_open U.isOpen))
-    (fieldSum_support_of_coefficients hs₁) i j
 
-theorem state_covariance_regular (u : State Point)
-    (hu : u.oscillation = LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation))
-    (h : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₀ blocks₀ C₀)
-    (hs : CoefficientSupport U a b labels₀ blocks₀) (i j : Fin 3) :
-    GaugeDebtIncrement.Regular U a b (u.covariance i j) := by
-  change GaugeDebtIncrement.Regular U a b (bilinearCovariance u.oscillation u.oscillation i j)
-  rw [hu]
-  exact fieldSum_covariance_regular U h hs i j
 
-theorem state_covarianceIncrement_regular (u : State Point)
-    (hu : u.oscillation = LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation))
-    (h₀ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₀ blocks₀ C₀)
-    (h₁ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₁ blocks₁ C₁)
-    (hs₁ : CoefficientSupport U a b labels₁ blocks₁) (i j : Fin 3) :
-    GaugeDebtIncrement.Regular U a b (SignedMeanGain.covarianceIncrement u.oscillation
-      (LabelSumBounds.fieldSum labels₁ (fun l => (blocks₁ l).oscillation)) i j) := by
-  rw [hu]
-  exact fieldSum_covarianceIncrement_regular U h₀ h₁ hs₁ i j
 
-theorem waveStage_covariance_regular (g : VariableGaugeMean.GaugeData Plane)
-    (c : Context Point) (u : State Point)
-    (hu : u.oscillation = LabelSumBounds.fieldSum labels₀ (fun l => (blocks₀ l).oscillation))
-    (h₀ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₀ blocks₀ C₀)
-    (h₁ : LocalData (PhysicalMeanDomain.slowDomain U.carrier) labels₁ blocks₁ C₁)
-    (hs₀ : CoefficientSupport U a b labels₀ blocks₀)
-    (hs₁ : CoefficientSupport U a b labels₁ blocks₁)
-    (q : OscillatoryScalar Point) (gaussian : Oscillation Point) (i j : Fin 3) :
-    GaugeDebtIncrement.Regular U a b ((SignedMeanGain.waveStage g c u
-      (LabelSumBounds.fieldSum labels₁ (fun l => (blocks₁ l).oscillation)) q gaussian).covariance i j) := by
-  rw [SignedMeanGain.waveStage_covariance]
-  exact (state_covariance_regular U u hu h₀ hs₀ i j).add
-    (state_covarianceIncrement_regular U u hu h₀ h₁ hs₁ i j)
 
 end State
 

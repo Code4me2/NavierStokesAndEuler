@@ -43,8 +43,6 @@ theorem zero_of_not_mem (hf : LocalShell a b U f) (n : ℕ) (x : Point P)
   by_contra hn
   exact hr (hf.supported n x hx hn)
 
-theorem zero : LocalShell a b U (0 : ScalarField (Point P)) :=
-  ⟨fun _ => contDiffOn_const, fun _ _ _ hn => (hn rfl).elim⟩
 
 theorem add (hf : LocalShell a b U f) (hg : LocalShell a b U g) :
     LocalShell a b U (f + g) := by
@@ -236,11 +234,6 @@ end FluxSupport
 
 open DefectIncrementBounds
 
-theorem LocalShell.barIntegrable {a b : ℝ} {U : Set P} {f : ScalarField (Point P)}
-    (hf : LocalShell a b U f) (hU : IsOpen U) (k n : ℕ) {p : P} (hp : p ∈ U) :
-    Integrable (fun r => r ^ k * PressureStream.torusAverage (f n) (r, p)) := by
-  simpa only [PressureStream.torusAverage, PressureStream.torusInner, PhysicalMeanDomain.freezeSlow] using
-    (hf.freeze hU hp).barIntegrable k n p
 
 theorem LocalShell.sliceIntegrable {a b : ℝ} {U : Set P} {f : ScalarField (Point P)}
     (hf : LocalShell a b U f) (hU : IsOpen U) (k n : ℕ) {p : P} (hp : p ∈ U) :
@@ -261,21 +254,6 @@ theorem barMoment_sub_on {a b : ℝ} {U : Set P} (hU : IsOpen U) {f g : ScalarFi
   simpa only [barMoment_apply, PressureStream.torusAverage, PressureStream.torusInner,
     PhysicalMeanDomain.freezeSlow, Pi.sub_apply] using h
 
-theorem barMoment_mem_local [FiniteDimensional ℝ P]
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set P) (hU : IsOpen U) {α : ℝ} {f : ScalarField (Point P)} (hf : LocalShell a b U f)
-    (hclass : MeanClass (PhysicalMeanDomain.localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (k : ℕ) :
-    UnweightedClass (PhysicalMeanDomain.localSlowStripData U hU ε L hε hεone hL) α (barMoment k f) := by
-  have h := PhysicalMeanDomain.meanClass_radialMoment ha hab hcL hcR ε L hε hεone hL U hU
-    hf.smooth hf.supported hclass k
-  have he : barMoment k f = fun n =>
-      IntegratedMeanBalances.radialMoment k (PressureStream.torusAverage (f n)) := by
-    funext n p
-    exact barMoment_apply k f n p
-  rw [he]
-  exact h
 
 section ExactMoments
 
@@ -360,25 +338,6 @@ variable [FiniteDimensional ℝ P]
   (hh : IncrementBounds (PhysicalMeanDomain.localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) H h)
   (hH : 9 / 10 ≤ H)
 
-include ha hab hcL hcR hop hbs hms hhs hW ho hb hm hh hH in
-/-- Integration uses actual local moments; the complete equation-(32)
-remainder is derived before integration. -/
-theorem remainders_mem_local (i : Fin 3) :
-    UnweightedClass (PhysicalMeanDomain.localSlowStripData U hU ε L hε hεone hL)
-      (H + 9 / 10 - 2 * κ) (fun n p => remainders o base m h W n p i) := by
-  have hrc := actualRadialError_mem ho hb hm hh hH W
-    (fun i j n => ((hW i j).smooth n).mono (fun _ hp => hp.2))
-  have hrs := actualRadialError_localShell ha hU hbs hms hhs hop W hW
-  have hr0 := barMoment_mem_local ha hab hcL hcR ε L hε hεone hL U hU hrs hrc 0
-  have hr2 := barMoment_mem_local ha hab hcL hcR ε L hε hεone hL U hU hrs hrc 2
-  have ht := barMoment_mem_local ha hab hcL hcR ε L hε hεone hL U hU
-    (thetaQuadratic_localShell hms hhs) (thetaQuadratic_mem ho hm hh hH) 2
-  have hz := barMoment_mem_local ha hab hcL hcR ε L hε hεone hL U hU
-    (axialQuadratic_localShell hms hhs) (axialQuadratic_mem ho hm hh hH) 1
-  fin_cases i
-  · exact hr0
-  · exact ht
-  · exact unweighted_sub hz (unweighted_smul hr2 (1 / 2))
 
 end IntegratedBounds
 
@@ -740,20 +699,6 @@ theorem axial_slow {a b : ℝ} (ha : 0 < a) (hab : a < b) (hU : IsOpen U)
   rw [hg.axial_exact ha hab hU hleft hright axial n hp,
     hg.axial_exact ha hab hU hleft hright axial n hp]
 
-theorem divergence_zero {a b : ℝ} (ha : 0 < a) (hab : a < b) (hU : IsOpen U)
-    (hleft : ∀ n x, x ∈ U → a ≤ r.length n x * r.inner)
-    (hright : ∀ n x, x ∈ U → r.length n x * r.outer ≤ b)
-    (axial : P × PressureStream.Plane) (n : ℕ) {p : Point P} (hp : p.2.1 ∈ U) (hr : p.1 ≠ 0) :
-    PressureStream.graphDivergence
-      (PressureStream.physicalSpeed g.radial.exponent (g.radial.frequency n))
-      ((0 : P), g.radial.radialDirection) (c.operators.epsilon n • axial)
-      ((VariableGaugeMean.rankIncrementState g r axial c u).radial n)
-      ((VariableGaugeMean.rankIncrementState g r axial c u).axial n) p = 0 := by
-  have hpot := ((hg.potential_localShell ha hab hU hleft hright).smooth n).contDiffAt
-    ((PhysicalMeanDomain.slowDomain_open hU).mem_nhds hp)
-  exact PressureStream.stream_divergence_zero _ _
-    (hpot.of_le (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le)
-    ((PressureStream.physicalSpeed_smooth _ _ hr).differentiableAt (by simp)) hr
 
 theorem fiveRows {a b : ℝ} (ha : 0 < a) (hab : a < b) (hU : IsOpen U)
     (hleft : ∀ n x, x ∈ U → a ≤ r.length n x * r.inner)
@@ -893,29 +838,7 @@ variable {κ : ℝ}
     (fun n => MeanRankUpdate.slowLift (CorrectionState.rankDesiredAxial r c u n)))
   (hH : 9 / 10 ≤ H)
 
-include ha hab hcL hcR hg hleft hright axial hop hbs hms hW hV hG ho hb hm hangular haxial hH in
-/-- The actual variable-gauge rank stage cancels the measured linear debt.
-Only local primitive/source bounds are inputs. -/
-theorem rankStage_defect_class (i : Fin 3) :
-    UnweightedClass (PhysicalMeanDomain.localSlowStripData U hU ε L hε hεone hL)
-      (H + 9 / 10 - 2 * κ)
-      (fun n x => CorrectionState.debt c (VariableGaugeMean.rankStageState g r axial c u) n x i) := by
-  have hhs := hg.increment_localTriple ha hab hU hleft hright axial
-  have hh := RankGeometry.increment_bounds ha hab hcL hcR ε L hε hεone hL U hU hg hleft hright
-    axial hangular haxial ho.epsilon
-  have hr := remainders_mem_local ha hab hcL hcR ε L hε hεone hL U hU hop hbs hms hhs
-    u.covariance hW ho hb hm hh hH i
-  apply class_congr hr
-  intro n x hx
-  exact congrFun (hg.debt_eq_remainders ha hab hU hleft hright axial hop hbs hms hW hV hG n hx) i
 
-include ha hab hcL hcR hg hleft hright axial hop hbs hms hW hV hG ho hb hm hangular haxial hH in
-theorem rankStage_defectBounds {σ : ℝ} (hσ : 1 + σ ≤ H + 9 / 10 - 2 * κ) :
-    CorrectionState.DefectBounds (PhysicalMeanDomain.localSlowStripData U hU ε L hε hεone hL) σ c
-      (VariableGaugeMean.rankStageState g r axial c u) := by
-  intro i
-  exact (rankStage_defect_class ha hab hcL hcR ε L hε hεone hL U hU hg hleft hright axial hop hbs hms hW
-    hV hG ho hb hm hangular haxial hH i).mono_exponent hσ
 
 end ConstructedBounds
 

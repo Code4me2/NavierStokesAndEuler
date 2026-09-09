@@ -11,10 +11,6 @@ open Set EulerSmoothLimit EulerLiftedGradientSpace EulerPacketProfileRecursion
 
 variable {P T : ℝ} [Fact (0 < P)] {raw : VectorField}
 
-@[simp] theorem highPart_path (G : Field P T raw) :
-    G.highPart.path = G.path-pathAverage P G.path := by
-  change G.path + -(pathAverage P G.path) = G.path-pathAverage P G.path
-  rw [sub_eq_add_neg]
 
 theorem wordBound_of_zero (G : Field P T raw)
     (hz : ∀ (t : Icc (0 : ℝ) T) x θ, raw (t,(x,θ)) = 0)
@@ -34,10 +30,6 @@ theorem wordBound_normalized_of_zero (G : Field P T raw)
 
 variable {G : Field P T raw} {q d : ℕ} {R A : ℝ}
 
-theorem WordBound.highPart (hG : G.WordBound q R A d) :
-    G.highPart.WordBound q R (2*A) d := by
-  have h := hG.sub hG.angleMean
-  simpa only [Field.highPart,two_mul] using h
 
 theorem WordBound.normalized_highPart (hT : 0 ≤ T)
     (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t)

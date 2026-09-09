@@ -50,14 +50,6 @@ def signedAmplitude (σ τ : ℝ) (κ : Vec2) (G : ℝ → Mat2)
     (T R : ℝ → Vec2) (x : ℝ) : Vec2 :=
   fun i => inverseCoefficients τ κ G R x i / (2 * primaryAmplitude σ κ G T x i)
 
-theorem sqrt_edge (c x : ℝ) : Real.sqrt (edge c x) = edge (c / 2) x := by
-  by_cases hx : x ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos c hx, FlatCutoff.edge_of_nonpos (c / 2) hx]
-  · have hp : 0 < x := lt_of_not_ge hx
-    rw [FlatCutoff.edge_of_pos c hp, FlatCutoff.edge_of_pos (c / 2) hp,
-      ← Real.exp_half]
-    congr 1
-    ring
 
 
 

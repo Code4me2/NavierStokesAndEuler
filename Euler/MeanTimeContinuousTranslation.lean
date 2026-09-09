@@ -54,12 +54,6 @@ theorem reconstruction_translation_contDiff (T : ℝ) (hT : 0 ≤ T)
       (fun a : Space => timeTranslation T a q) hp hq)
 
 
-/-- Time evaluation is a norm contraction on continuous ordinary-L² paths. -/
-theorem evaluation_norm_le (T : ℝ) (t : Icc (0 : ℝ) T) :
-    ‖(ContinuousMap.evalCLM ℝ t : C(Icc (0 : ℝ) T, L2) →L[ℝ] L2)‖ ≤ 1 := by
-  apply opNorm_le_bound _ zero_le_one
-  intro p
-  simpa only [ContinuousMap.evalCLM_apply, one_mul] using p.norm_coe_le_norm t
 
 /-- Every actual time value has a smooth ordinary spatial translation orbit. -/
 theorem pathTranslation_evaluation_contDiff (T : ℝ)

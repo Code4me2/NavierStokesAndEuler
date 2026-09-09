@@ -259,11 +259,6 @@ theorem nativePoint_absolute (n : ℕ) (z : ProblemStatement.SpaceTime) (hr : 0 
     ActualPrimaryCoherence.absoluteChart n (nativePoint n z) = ActualPrimaryCoherence.physicalLift z :=
   ActualPrimaryCoherence.absoluteChart_physical n hr
 
-theorem chart_nativePoint (n m k : ℕ)
-    (hi : CommonWindow.index h n + k = CommonWindow.index h m)
-    (z : ProblemStatement.SpaceTime) (hr : 0 < z.2 0) :
-    chart n m k (nativePoint n z) = nativePoint m z :=
-  chart_eq_of_absolute n m k hi _ _ ((nativePoint_absolute n z hr).trans (nativePoint_absolute m z hr).symm)
 
 theorem nativePoint_smoothAt (n : ℕ) (z : ProblemStatement.SpaceTime) (hr : 0 < z.2 0) :
     ContDiffAt ℝ ∞ (nativePoint n) z :=
@@ -283,15 +278,6 @@ noncomputable def cylindricalPressureMode (l : SignedLabel B N0) (u : Correction
 noncomputable def physicalDomain (n : ℕ) : Set ProblemStatement.SpaceTime :=
   {z | 0 < z.2 0 ∧ (nativePoint n z).1.2.1 ∈ standardRegion.carrier}
 
-theorem physicalDomain_open (n : ℕ) : IsOpen (physicalDomain n) := by
-  rw [isOpen_iff_mem_nhds]
-  intro z hz
-  have hr : {w : ProblemStatement.SpaceTime | 0 < w.2 0} ∈ 𝓝 z :=
-    (isOpen_lt continuous_const (PhysicalGraphBounds.coordinateProjection 0).continuous).mem_nhds hz.1
-  have hs : {w : ProblemStatement.SpaceTime | (nativePoint n w).1.2.1 ∈ standardRegion.carrier} ∈ 𝓝 z :=
-    (nativePoint_smoothAt n z hz.1).continuousAt.fst.snd.fst.preimage_mem_nhds
-      (standardRegion.isOpen.mem_nhds hz.2)
-  exact inter_mem hr hs
 
 
 theorem cylindrical_values_eq (l : SignedLabel B N0) (u : CorrectionState.State Point)

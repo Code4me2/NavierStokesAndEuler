@@ -206,9 +206,6 @@ noncomputable def nativeCylinderMap : Native →L[ℝ] PhysicalSignedWave.Cylind
 noncomputable def nativeToCommon {B N0 : ℕ} (l : Label B N0) : Native →L[ℝ] FullPoint :=
   (ActualSignedPhysicalBinding.toCommonCylinder l).toContinuousLinearMap.comp nativeCylinderMap
 
-theorem nativeToCommon_apply {B N0 : ℕ} (l : Label B N0) (y : Native) :
-    nativeToCommon l y = ActualSignedPhysicalBinding.toCommonCylinder l
-      (ActualSignedPhysicalData.nativeCylinder y) := rfl
 
 noncomputable def nativeQ (y : Native) : ℝ :=
   SimilarityCoordinates.coordinateQ (2 * ActualPrimary.h) y.2.1

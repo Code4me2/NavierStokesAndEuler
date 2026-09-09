@@ -73,19 +73,6 @@ theorem origin_eventually_eq_first {scales : ℕ → ℝ}
   exact velocitySum_eq_first hscales (hq t hbefore) (hpos t hbefore)
     (hzero t hbefore) ht
 
-theorem origin_blowup {scales : ℕ → ℝ}
-    (hscales : Tendsto scales atTop atTop) {q : SpaceTime → ℝ}
-    {A : ℕ → VelocityField}
-    (hq : ∀ t < 1, ContinuousAt q (t, 0))
-    (hpos : ∀ t < 1, 0 < q (t, 0))
-    (hzero : ∀ t < 1, ∀ j : ℕ, j ≠ 0 → A j =ᶠ[𝓝 (t, 0)] fun _ => 0)
-    (hlimit : Tendsto (fun t : ℝ => q (t, 0)) (𝓝[<] 1) (𝓝 0))
-    (hbase : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl (A 0) (t, 0)‖)
-      (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ => ‖velocitySum scales q A (t, 0)‖) (𝓝[<] 1) atTop := by
-  apply hbase.congr'
-  exact (origin_eventually_eq_first hscales hq hpos hzero hlimit).symm.mono
-    (fun _ ht => congrArg norm ht)
 
 theorem physicalQ_origin {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {t : ℝ} (ht : t < 1) : physicalQ h (t, 0) = 1 - t := by

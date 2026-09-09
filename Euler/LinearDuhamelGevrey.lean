@@ -1,7 +1,6 @@
 import Euler.LinearDuhamelParameter
 import Euler.LinearDuhamelWeighted
 import Euler.HilbertCoerciveGevrey
-import Euler.FrozenEvolutionGevrey
 
 /-!
 # Actual all-order profile estimates for the forward initial value problem
@@ -52,8 +51,6 @@ theorem weightedSolution_contDiff {n : ℕ∞ω} (hB : ContDiff ℝ n B)
     (E := C(Icc (0 : ℝ) T,E)) (F := C(Icc (0 : ℝ) T,E)) (normalize g hg)).comp hs
 
 
-/-- The fixed polynomial amplitude controlling the differentiated forward solve. -/
-def forwardCost (T C A D CB : ℝ) : ℝ := 1 + C*A + C*T*(D+CB)
 
 
 end EulerLinearDuhamel

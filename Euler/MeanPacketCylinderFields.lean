@@ -30,8 +30,6 @@ private local instance : NormedSpace ℝ C(Icc (0 : ℝ) T,LiftL2 P) := inferIns
 def spatialEmbeddingPath : C(Icc (0 : ℝ) T,L2) →L[ℝ] C(Icc (0 : ℝ) T,LiftL2 P) :=
   (embedding (V := Space) P).compLeftContinuous ℝ (Icc (0 : ℝ) T)
 
-@[simp] theorem spatialEmbeddingPath_apply (p : C(Icc (0 : ℝ) T,L2))
-    (t : Icc (0 : ℝ) T) : spatialEmbeddingPath P T p t = embedding P (p t) := rfl
 
 theorem spatialEmbeddingPath_translation (p : C(Icc (0 : ℝ) T,L2)) (a : LiftTangent) :
     pathTranslate P a (spatialEmbeddingPath P T p) =

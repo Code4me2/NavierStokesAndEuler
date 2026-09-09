@@ -30,15 +30,6 @@ def congr (G : Forcing D raw)
   path_eq := G.path_eq
   raw_eq t x θ := (heq t x θ).trans (G.raw_eq t x θ)
 
-/-- A literal bilinear product of two admissible fields is admissible. -/
-def bilinear (G : Forcing D raw) (H : Forcing D raw')
-    (B : Space →L[ℝ] Space →L[ℝ] Space) : Forcing D (fun z => B (raw z) (raw' z)) := by
-  let A := SmoothCoefficientPath.map B
-    (coefficientPath (fun t : Icc (0 : ℝ) D.T => G.slices t) G.jets_continuous)
-  apply (H.multiply A).congr
-  intro t x θ
-  simp only [A, Data.clamp_coe, SmoothCoefficientPath.map_apply, coefficientPath_apply,
-    G.raw_eq t x θ]
 
 end Forcing
 

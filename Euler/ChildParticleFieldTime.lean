@@ -55,33 +55,7 @@ theorem childAcceleration (t : Icc (0 : ℝ) T) (x : Space) :
 
 variable {hT : 0 ≤ T}
 
-theorem displacement_hasDerivWithinAt
-    (hP : SmoothTimeField.TimeDerivative T hT P P₁)
-    (hD : SmoothTimeField.TimeDerivative T hT D D₁)
-    (t : Icc (0 : ℝ) T) (x : Space) :
-    HasDerivWithinAt (fun s => (G (projIcc 0 T hT s)).childDisplacement.field x)
-      ((G t).childVelocity.field x) (Icc (0 : ℝ) T) t := by
-  have he : (fun s => (G (projIcc 0 T hT s)).childDisplacement.field x) =
-      (fun s => (EulerChildParticleTime.displacement P D).realField T hT s x) := by
-    funext s
-    exact H.childDisplacement (projIcc 0 T hT s) x
-  rw [he,H.childVelocity]
-  exact displacement_time hP hD t x
 
-theorem velocity_hasDerivWithinAt
-    (hP : SmoothTimeField.TimeDerivative T hT P P₁)
-    (hP₁ : SmoothTimeField.TimeDerivative T hT P₁ P₂)
-    (hD : SmoothTimeField.TimeDerivative T hT D D₁)
-    (hD₁ : SmoothTimeField.TimeDerivative T hT D₁ D₂)
-    (t : Icc (0 : ℝ) T) (x : Space) :
-    HasDerivWithinAt (fun s => (G (projIcc 0 T hT s)).childVelocity.field x)
-      ((G t).childAcceleration.field x) (Icc (0 : ℝ) T) t := by
-  have he : (fun s => (G (projIcc 0 T hT s)).childVelocity.field x) =
-      (fun s => (EulerChildParticleTime.velocity P P₁ D D₁).realField T hT s x) := by
-    funext s
-    exact H.childVelocity (projIcc 0 T hT s) x
-  rw [he,H.childAcceleration]
-  exact velocity_time hP hP₁ hD hD₁ t x
 
 
 end Representation

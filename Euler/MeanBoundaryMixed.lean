@@ -30,9 +30,6 @@ def Cutoff.translate (χ : Cutoff) (a : Space) : Cutoff :=
   ⟨fun x => χ.field (x+a), χ.smooth.comp (contDiff_id.add contDiff_const),
     χ.compact.comp_homeomorph (Homeomorph.addRight a)⟩
 
-def Cutoff.derivative (χ : Cutoff) (i : Fin 3) : Cutoff :=
-  ⟨partialDerivative χ.field i, contDiff_partialDerivative χ.field χ.smooth i,
-    χ.compact.fderiv_apply ℝ (EuclideanSpace.single i 1)⟩
 
 theorem testCurl_cutoff_add (χ ψ : Cutoff) (f : Test) :
     testCurl (χ.add ψ) f = testCurl χ f + testCurl ψ f := by

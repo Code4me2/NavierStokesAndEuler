@@ -42,14 +42,6 @@ theorem velocity_hasFDerivAt (t : ℝ) (ht : t ∈ Ioo 0 T) (x : Space) :
     inclusion.hasFDerivAt
   exact hu.comp (t,x) hi
 
-theorem velocity_joint_continuous : Continuous (velocity S) := by
-  have hc : Continuous (projIcc 0 T hT.le) := continuous_projIcc
-  change Continuous (fun q : ℝ × Space => S.velocity.pointField
-    (projIcc 0 T hT.le q.1) (coveringMap P (q.2,0)))
-  exact S.velocity.pointField_joint_continuous.comp
-    ((hc.comp continuous_fst).prodMk
-      ((EulerLiftedGradientSpace.coveringMap_isOpenQuotient P).continuous.comp
-        (continuous_snd.prodMk continuous_const)))
 
 theorem force_joint_continuous : Continuous (force S) := by
   have hc : Continuous (projIcc 0 T hT.le) := continuous_projIcc
@@ -69,8 +61,6 @@ theorem pressure_gradient (t : ℝ) (x : Space) :
   have h := S.rawGraphPotential_gradient 1 (by norm_num [data]) t x
   simpa only [data,pressure,force,one_smul,inner_zero_left,mul_zero] using h
 
-theorem pressure_zero (t : ℝ) : pressure S (t,0)=0 :=
-  S.graphPotential_zero 1 (projIcc 0 T hT.le t)
 
 theorem velocity_divergence (t : ℝ) (x : Space) :
     divergence (fun y => velocity S (t,y)) x=0 := by
@@ -117,10 +107,5 @@ theorem velocity_smooth (t : ℝ) : ContDiff ℝ ∞ (fun x => velocity S (t,x))
   simpa only [cylinderGraph,inner_zero_left,mul_zero,velocity,ExactLiftedPacket.rawVelocity,
     FieldTower.rawField,coveringMap] using h
 
-theorem force_smooth (t : ℝ) : ContDiff ℝ ∞ (fun x => force S (t,x)) := by
-  have h := S.pressure.physicalPointField_smooth 1 0 (projIcc 0 T hT.le t)
-  change ContDiff ℝ ∞ (fun x => S.pressure.pointField (projIcc 0 T hT.le t) (cylinderGraph P 1 0 x)) at h
-  simpa only [cylinderGraph,inner_zero_left,mul_zero,force,ExactLiftedPacket.rawPressure,
-    FieldTower.rawField,coveringMap] using h
 
 end EulerConstantEuler

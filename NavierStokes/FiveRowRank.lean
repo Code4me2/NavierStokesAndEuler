@@ -334,11 +334,7 @@ def gammaLinearMap (lam C a b : ℝ) : Debt →ₗ[ℝ] (ℝ → ℝ) :=
 
 
 
-@[simp] theorem deltaV_zero (lam C a b : ℝ) : deltaV lam C a b 0 = 0 :=
-  (deltaVLinearMap lam C a b).map_zero
 
-@[simp] theorem gamma_zero (lam C a b : ℝ) : gamma lam C a b 0 = 0 :=
-  (gammaLinearMap lam C a b).map_zero
 
 theorem angularDebt_rescale (C : ℝ) (d : Debt) :
     angularDebt C d = C⁻¹ • angularDebt 1 d := by

@@ -240,9 +240,6 @@ theorem nativeCutoff_invariant (θ : P) (g : Geometry) (κ : Plane → ℝ) (j :
     simp
   exact hY.map (fun Y => κ (g.coordinates j Y))
 
-noncomputable def commonPressure (d : TangentData P H) (g : Geometry) (hab : a ≤ b)
-    (κ : Plane → ℝ) (K : ℝ) (x : P × Plane) : ℂ :=
-  ∑' j : Frequency, (κ (g.coordinates j x.2) : ℂ) * copyPressure d g hab j K x
 
 
 

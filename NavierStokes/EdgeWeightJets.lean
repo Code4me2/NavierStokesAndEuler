@@ -214,9 +214,6 @@ variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 
 
-noncomputable def radialIterate (f : E × ℝ → ℝ) : ℕ → E × ℝ → ℝ
-  | 0 => f
-  | n + 1 => fun y => fderiv ℝ (radialIterate f n) y (0, 1)
 
 
 
@@ -306,14 +303,6 @@ theorem edge_smul_iteratedFDeriv_bound_on {c : ℝ} (hc : 0 < c) (j : ℕ)
             (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hi) hA.le)
             hD.le) he) (pow_nonneg hx.le N)
 
-theorem edge_smul_iteratedFDeriv_bound {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {B : E × ℝ → F} (hB : ContDiff ℝ ∞ B) {S : Set E} (hS : IsCompact S)
-    (n : ℕ) {d : ℝ} (hd : 0 < d) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ p ∈ S, ∀ x : ℝ, 0 < x → x ≤ d →
-      ‖iteratedFDeriv ℝ i (fun y : E × ℝ =>
-        (FlatCutoff.edge c y.2 / y.2 ^ j) • B y) (p, x)‖ ≤
-          C * FlatCutoff.edge c x / x ^ N :=
-  edge_smul_iteratedFDeriv_bound_on hc j isOpen_univ hB.contDiffOn hS n hd (subset_univ _)
 
 
 end VectorCoefficients

@@ -395,12 +395,6 @@ theorem extension_zero_of_one_le_abs {z : ℝ × X} (hz : 1 ≤ |z.1|) : extensi
         SmoothCutoffs.cutoff_zero_of_one_le_abs harg, zero_smul]
     _ = 0 := tsum_zero
 
-omit [CompleteSpace V] in
-theorem extension_time_support : tsupport (extension a ha) ⊆ Icc (-1 : ℝ) 1 ×ˢ (univ : Set X) := by
-  apply closure_minimal _ (isClosed_Icc.prod isClosed_univ)
-  intro z hz
-  have ht : |z.1| < 1 := lt_of_not_ge fun h => hz (extension_zero_of_one_le_abs a ha h)
-  exact ⟨abs_le.mp ht.le, mem_univ _⟩
 
 omit [CompleteSpace V] in
 /-- Spatial periods of every coefficient pass to the same actual series. -/
@@ -443,14 +437,6 @@ theorem rightExtension_zero_from (T : ℝ) {t : ℝ} (ht : T + 1 ≤ t) (x : X) 
   apply extension_zero_of_one_le_abs
   exact (show 1 ≤ t - T by linarith).trans (le_abs_self _)
 
-include ha in
-/-- Jointly smooth realization for arbitrary smooth spatial coefficients in
-a finite-dimensional space, with no global growth restriction. -/
-theorem exists_smooth_extension :
-    ∃ F : (ℝ × X) → V, ContDiff ℝ ∞ F ∧
-      tsupport F ⊆ Icc (-1 : ℝ) 1 ×ˢ (univ : Set X) ∧
-      (∀ k : ℕ, ∀ x : X, iteratedDeriv k (fun t : ℝ => F (t, x)) 0 = a k x) :=
-  ⟨extension a ha, extension_contDiff a ha, extension_time_support a ha, extension_time_jets a ha⟩
 
 end Complete
 end Family

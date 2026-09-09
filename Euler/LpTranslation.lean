@@ -51,10 +51,6 @@ theorem translation_hasFDerivAt_all (u : L2Space V) (D : Space →L[ℝ] L2Space
       ((translation a).toContinuousLinearMap.comp D) a :=
   EulerIsometricAction.hasFDerivAt_all translation translation_add u D h a
 
-theorem translation_orbits_tendstoUniformly {ι : Type*} {l : Filter ι}
-    (u : ι → L2Space V) (v : L2Space V) (hu : Tendsto u l (𝓝 v)) :
-    TendstoUniformly (fun n a => translation a (u n)) (fun a => translation a v) l :=
-  EulerIsometricAction.orbits_tendstoUniformly translation u v hu
 
 
 /-- Convergent ordinary L² fields and their actual translation derivatives have the expected derivative in the limit. -/

@@ -33,10 +33,6 @@ natural subtraction and defined smoothly at zero. -/
 def scale (c : ℝ) (j : ℕ) (x : ℝ) : ℝ :=
   (edge c x / x ^ j) * x ^ 3
 
-theorem integrand_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} {n : ℕ∞} (hb : ContDiff ℝ n b) :
-    ContDiff ℝ n (integrand c j b) :=
-  (edge_div_pow_contDiff hc j).mul hb
 
 theorem integrand_continuous {c : ℝ} (hc : 0 < c) (j : ℕ)
     {b : ℝ → ℝ} (hb : Continuous b) : Continuous (integrand c j b) :=
@@ -49,19 +45,7 @@ theorem primitive_hasDerivAt {c : ℝ} (hc : 0 < c) (j : ℕ)
   exact intervalIntegral.integral_hasDerivAt_right (hf.intervalIntegrable 0 x)
     hf.aestronglyMeasurable.stronglyMeasurableAtFilter hf.continuousAt
 
-theorem primitive_deriv {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : Continuous b) :
-    deriv (primitive c j b) = integrand c j b := by
-  funext x
-  exact (primitive_hasDerivAt hc j hb x).deriv
 
-theorem primitive_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : ℝ → ℝ} (hb : ContDiff ℝ ∞ b) : ContDiff ℝ ∞ (primitive c j b) := by
-  apply contDiff_infty_iff_deriv.mpr
-  constructor
-  · exact fun x => (primitive_hasDerivAt hc j hb.continuous x).differentiableAt
-  · rw [primitive_deriv hc j hb.continuous]
-    exact integrand_contDiff hc j hb
 
 @[simp] theorem primitive_zero (c : ℝ) (j : ℕ) (b : ℝ → ℝ) :
     primitive c j b 0 = 0 := by simp [primitive]
@@ -88,9 +72,6 @@ theorem edge_hasDerivAt {c : ℝ} (hc : 0 < c) (x : ℝ) :
   simp [polynomialEdge, derivativePolynomial, div_eq_mul_inv, inv_pow]
   ring
 
-theorem scale_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ) {n : ℕ∞} :
-    ContDiff ℝ n (scale c j) :=
-  (edge_div_pow_contDiff hc j).mul (contDiff_id.pow 3)
 
 @[simp] theorem scale_zero (c : ℝ) (j : ℕ) : scale c j 0 = 0 := by simp [scale]
 
@@ -119,9 +100,6 @@ theorem scale_hasDerivAt {c : ℝ} (hc : 0 < c) (j : ℕ) (x : ℝ) :
 
 
 
-/-- The natural primitive scale is strictly positive inside the active edge. -/
-theorem scale_pos (c : ℝ) (j : ℕ) {x : ℝ} (hx : 0 < x) : 0 < scale c j x :=
-  mul_pos (div_pos (edge_pos c hx) (pow_pos hx j)) (pow_pos hx 3)
 
 
 

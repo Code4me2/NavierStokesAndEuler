@@ -1008,13 +1008,7 @@ open ActiveAnnulusWeight
 variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     {d : ModulatedProfileAssembly.LoopData W} (v : ModulatedProfileAssembly.Witness d)
 
-/-- The actual product weight, with the two fixed physical attachment
-points and the same activation time used to construct the profile. -/
-noncomputable def zeta (_v : ModulatedProfileAssembly.Witness d) (X : ℝ) : ℝ :=
-  radialWeight (W.controls.activationTime ^ 2) (leftEdge W) (rightEdge W) X
 
-noncomputable def distance (_v : ModulatedProfileAssembly.Witness d) (X : ℝ) : ℝ :=
-  edgeDistance (leftEdge W) (rightEdge W) (Real.log X)
 
 
 

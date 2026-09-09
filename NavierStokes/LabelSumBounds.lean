@@ -688,10 +688,6 @@ theorem AngularContinuous.add {u v : Oscillation D} (hu : AngularContinuous u)
     (hv : AngularContinuous v) : AngularContinuous (u + v) :=
   fun n x i => (hu n x i).add (hv n x i)
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem AngularContinuous.sub {u v : Oscillation D} (hu : AngularContinuous u)
-    (hv : AngularContinuous v) : AngularContinuous (u - v) :=
-  fun n x i => (hu n x i).sub (hv n x i)
 
 omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem covariance_add_left {u v w : Oscillation D}
@@ -1040,41 +1036,6 @@ theorem harmonic_covariance_increment_sum_mem
 
 /-! ## Joint-index input estimates and native derivative supports -/
 
-/-- Joint `(band,label)` envelope estimates yield the required quantifier
-order directly. A uniform polynomial change of slow scale is allowed.
-Neither constants nor polynomial degrees are chosen after the label. -/
-theorem uniformClass_of_envelopeJets {s : StripData D}
-    {V : PhaseJetBounds.Domain (ℕ × ι) D} {W : (ℕ × ι) → D → ℝ}
-    {a : (ℕ × ι) → D → E} (ha : PrimaryPulseBounds.EnvelopeJets V W a)
-    {w : ι → ℕ → D → ℝ} {α K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hscale : ∀ n l, V.scale (n, l) ≤ K * s.slow n ^ q)
-    (hdom : ∀ n l, s.domain ⊆ V.carrier (n, l))
-    (hw : ∀ l n x, x ∈ s.domain → 0 ≤ w l n x)
-    (hW : ∀ l n x, x ∈ s.domain → W (n, l) x ≤ s.epsilon n ^ α * w l n x) :
-    UniformClass s w α (fun l n => a (n, l)) := by
-  refine ⟨hw, fun l n => (ha.smooth (n, l)).mono (hdom n l), ?_⟩
-  intro N
-  obtain ⟨C, hC, m, hb⟩ := ha.bound N
-  have hC0 : 0 ≤ C := zero_le_one.trans hC
-  have hK0 : 0 ≤ K := zero_le_one.trans hK
-  refine ⟨C * K ^ m, by positivity, q * m, ?_⟩
-  intro l n x hx j hj
-  have hp : V.scale (n, l) ^ m ≤ K ^ m * s.growth n x ^ (q * m) := by
-    calc
-      _ ≤ (K * s.slow n ^ q) ^ m :=
-        pow_le_pow_left₀ (zero_le_one.trans (V.one_le_scale _)) (hscale n l) m
-      _ = K ^ m * s.slow n ^ (q * m) := by rw [mul_pow, ← pow_mul]
-      _ ≤ _ := mul_le_mul_of_nonneg_left
-        (pow_le_pow_left₀ (zero_le_one.trans (s.one_le_slow n)) (s.slow_le_growth n x) _) (by positivity)
-  calc
-    _ ≤ C * V.scale (n, l) ^ m * W (n, l) x := hb (n, l) x (hdom n l hx) j hj
-    _ ≤ C * V.scale (n, l) ^ m * (s.epsilon n ^ α * w l n x) :=
-      mul_le_mul_of_nonneg_left (hW l n x hx) (mul_nonneg hC0
-        (pow_nonneg (zero_le_one.trans (V.one_le_scale _)) _))
-    _ ≤ C * (K ^ m * s.growth n x ^ (q * m)) * (s.epsilon n ^ α * w l n x) :=
-      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hp hC0)
-        (mul_nonneg (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le (hw l n x hx))
-    _ = _ := by unfold majorant; ring
 
 
 

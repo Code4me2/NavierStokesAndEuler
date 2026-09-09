@@ -59,9 +59,6 @@ variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 def pathReflection : C(K,CylinderL2 P V) →L[ℝ] C(K,CylinderL2 P V) :=
   (reflection P).toContinuousLinearMap.compLeftContinuous ℝ K
 
-omit [CompactSpace K] in
-@[simp] theorem pathReflection_apply (u : C(K,CylinderL2 P V)) (t : K) :
-    pathReflection P u t = reflection P (u t) := rfl
 
 end Basic
 
@@ -107,17 +104,12 @@ def supportedReflection : Supported P V S hS →L[ℝ] Supported P V S hS :=
   ((reflection P).toContinuousLinearMap.comp (Supported P V S hS).subtypeL).codRestrict
     (Supported P V S hS) (reflection_mem P S hS hSym)
 
-@[simp] theorem supportedReflection_coe (u : Supported P V S hS) :
-    (supportedReflection P S hS hSym u : CylinderL2 P V) = reflection P (u : CylinderL2 P V) := rfl
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 
 def supportedPathReflection : C(K,Supported P V S hS) →L[ℝ] C(K,Supported P V S hS) :=
   (supportedReflection P S hS hSym).compLeftContinuous ℝ K
 
-omit [CompactSpace K] in
-@[simp] theorem supportedPathReflection_apply (u : C(K,Supported P V S hS)) (t : K) :
-    supportedPathReflection P S hS hSym u t = supportedReflection P S hS hSym (u t) := rfl
 
 end Supported
 

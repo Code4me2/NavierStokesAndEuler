@@ -43,8 +43,6 @@ private local instance (n : ℕ) : NormedSpace ℝ
 def boundedCover : C(Icc (0 : ℝ) T, LiftTangent →ᵇ Space) :=
   coverPathMap P (A.realization 3)
 
-@[simp] theorem boundedCover_apply (t : Icc (0 : ℝ) T) (x : LiftTangent) :
-    A.boundedCover t x = A.pointField t (coveringMap P x) := rfl
 
 def boundedWord (n : ℕ) (w : Fin n → Fin 4) : C(Icc (0 : ℝ) T, LiftTangent →ᵇ Space) :=
   coverPathMap P ((wordAtLevel P 3 n w (le_refl (n+3))).compLeftContinuous ℝ (Icc (0 : ℝ) T)

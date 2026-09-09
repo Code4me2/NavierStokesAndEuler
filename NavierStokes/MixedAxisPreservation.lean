@@ -103,33 +103,8 @@ structure AngularSupport (Ω : Set SpaceTime) where
 noncomputable def AngularSupport.field {Ω : Set SpaceTime} (D : AngularSupport Ω) : VelocityField :=
   DirectAngularDiagonal.angularField D.scalar
 
-noncomputable def AngularSupport.zero (Ω : Set SpaceTime) : AngularSupport Ω where
-  scalar := 0
-  inner := fun _ => 1
-  inner_continuous := continuousOn_const
-  inner_pos _ _ := zero_lt_one
-  vanishes _ _ _ := rfl
 
-/-- Finite direct angular pieces can be combined without taking a radial
-or axial primitive.  The inner support radius is their positive minimum. -/
-noncomputable def AngularSupport.add {Ω : Set SpaceTime}
-    (D E : AngularSupport Ω) : AngularSupport Ω where
-  scalar := D.scalar + E.scalar
-  inner := fun s => min (D.inner s) (E.inner s)
-  inner_continuous := continuous_min.comp_continuousOn
-    (D.inner_continuous.prodMk E.inner_continuous)
-  inner_pos w hw := lt_min (D.inner_pos w hw) (E.inner_pos w hw)
-  vanishes w hw hr := by
-    change D.scalar _ + E.scalar _ = 0
-    rw [D.vanishes w hw (hr.trans_le (min_le_left _ _)),
-      E.vanishes w hw (hr.trans_le (min_le_right _ _)), add_zero]
 
-theorem AngularSupport.field_add {Ω : Set SpaceTime} (D E : AngularSupport Ω) :
-    (D.add E).field = fun w => D.field w + E.field w := by
-  funext w
-  simp only [AngularSupport.field, AngularSupport.add, DirectAngularDiagonal.angularField,
-    Pi.add_apply, mul_add, add_smul]
-  abel
 
 /-- Existing mean-field `AngularData` restricts to the required physical
 domain.  Its actual scalar, normalization, and graph are unchanged. -/
@@ -320,74 +295,19 @@ theorem origin_eventually_eq_base {h : ℝ} {Ω : Set SpaceTime}
       (fun t => SpatialCurl.spatialCurl base (t, 0)) :=
   (origin_eventually_base_germ base p D hh hh1 hs hΩ hΩaxis).mono fun _ ht => ht.self_of_nhds
 
-theorem origin_blowup {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (p : ℕ → PotentialStage.{u} h Ω)
-    (D : ℕ → AngularSupport Ω) (hh : 0 < h) (hh1 : h < 1 / 2)
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω)
-    (hbase : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl base (t, 0)‖) (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ => ‖mixedDiagonal base p D scales (t, 0)‖) (𝓝[<] 1) atTop := by
-  apply hbase.congr'
-  exact (origin_eventually_eq_base base p D hh hh1 hs hΩ hΩaxis).symm.mono
-    (fun _ ht => congrArg norm ht)
 
 /-! ## Finite initialization stays in stage zero -/
 
-noncomputable def initializedBase {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω) : VelocityField :=
-  fun w => base w + initial.field w
-
-/-- This is the manuscript's stage numbering: the finite initialization
-and base share cutoff zero; each subsequent stage has its own cutoff. -/
-noncomputable def initializedSeries {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) : ℕ → VelocityField :=
-  potentialSeries (initializedBase base initial) p
-
-noncomputable def initializedDiagonal {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω)
-    (scales : ℕ → ℝ) : VelocityField :=
-  mixedDiagonal (initializedBase base initial) p D scales
 
 
 
 
-theorem initializedBase_germ {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hΩ : IsOpen Ω) {w : SpaceTime}
-    (hw : w ∈ Ω) (ht : w ∈ PhysicalWaveSum.preterminal)
-    (haxis : PhysicalGraphBounds.radialProjection w = 0) :
-    initializedBase base initial =ᶠ[𝓝 w] base := by
-  filter_upwards [initial.zero_germ hh hh1 hΩ hw ht haxis] with y hy
-  simp only [initializedBase, hy, add_zero]
 
 
 
-theorem initialized_origin_eventually {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {scales : ℕ → ℝ}
-    (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω) :
-    ∀ᶠ t : ℝ in 𝓝[<] 1,
-      initializedDiagonal base initial p D scales =ᶠ[𝓝 (t, (0 : Space))] SpatialCurl.spatialCurl base := by
-  filter_upwards [origin_eventually_base_germ (initializedBase base initial) p D hh hh1 hs hΩ hΩaxis,
-    hΩaxis, self_mem_nhdsWithin (a := (1 : ℝ)) (s := Iio 1)] with t he ht ht1
-  exact he.trans (SolenoidalDiagonal.spatialCurl_eventuallyEq
-    (initializedBase_germ base initial hh hh1 hΩ ht ht1 (radialProjection_origin t)))
 
-theorem initialized_origin_blowup {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (D : ℕ → AngularSupport Ω)
-    (hh : 0 < h) (hh1 : h < 1 / 2) {scales : ℕ → ℝ}
-    (hs : Tendsto scales atTop atTop) (hΩ : IsOpen Ω)
-    (hΩaxis : ∀ᶠ t : ℝ in 𝓝[<] 1, (t, (0 : Space)) ∈ Ω)
-    (hbase : Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl base (t, 0)‖) (𝓝[<] 1) atTop) :
-    Tendsto (fun t : ℝ => ‖initializedDiagonal base initial p D scales (t, 0)‖) (𝓝[<] 1) atTop := by
-  apply hbase.congr'
-  exact (initialized_origin_eventually base initial p D hh hh1 hs hΩ hΩaxis).mono
-    (fun _ ht => congrArg norm ht.self_of_nhds.symm)
+
+
 
 /-! ## The actual small-similarity-parameter domain -/
 
@@ -419,31 +339,12 @@ variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
     (v : ModulatedProfileAssembly.Witness ld)
 
-theorem anchored_base_axis_tendsto (upper : ℝ) (B : ℕ) :
-    Tendsto (fun t : ℝ => ‖SpatialCurl.spatialCurl (TailGaugePotential.finalPotential H v upper B)
-      (t, 0)‖) (𝓝[<] 1) atTop := by
-  apply (FinalSlowBase.axis_tendsto H v upper B).congr'
-  filter_upwards [self_mem_nhdsWithin (a := (1 : ℝ)) (s := Iio 1)] with t ht
-  rw [TailGaugePotential.finalPotential_sameCurl H v upper B (w := (t, 0)) ht]
 
 
 
 
 
 
-theorem local_initialized_final_origin_blowup (upper : ℝ) (B : ℕ)
-    {qbig : ℝ} (hqbig : 0 < qbig)
-    (initial : PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (p : ℕ → PotentialStage.{u} F.data.h (localDomain F.data.h qbig))
-    (D : ℕ → AngularSupport (localDomain F.data.h qbig))
-    {scales : ℕ → ℝ} (hs : Tendsto scales atTop atTop) :
-    Tendsto (fun t : ℝ =>
-      ‖initializedDiagonal (TailGaugePotential.finalPotential H v upper B) initial p D scales (t, 0)‖)
-      (𝓝[<] 1) atTop :=
-  initialized_origin_blowup _ initial p D F.data.h_pos F.data.h_lt_half hs
-    (localDomain_open F.data.h_pos F.data.h_lt_half qbig)
-    (origin_eventually_localDomain F.data.h_pos F.data.h_lt_half hqbig)
-    (anchored_base_axis_tendsto H v upper B)
 
 
 end FinalBase

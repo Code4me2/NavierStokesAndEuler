@@ -1242,25 +1242,6 @@ noncomputable def goodWaveResidual {ι : Type*} (labels : Finset ι) (data : ι 
   goodResidual labels data g B M p virtual x i -
     realAngularMean (fun θ => goodResidual labels data g B M p virtual (x.1, θ) i)
 
-/-- Exact reconstruction of the good nonconstant PDE residual by native-label blocks. -/
-theorem goodWaveResidual_grouped {ι : Type*} (labels : Finset ι) (data : ι → LabelData D)
-    {U : Set D} (hU : IsOpen U) {g : Frame D} (hg : g.Regular U)
-    (B M : D → ComplexVector) (p : D → ℂ) (virtual : D → Fin 3 → ℝ)
-    (hB : ∀ i, ContDiffOn ℝ ∞ (fun y => B y i) U)
-    (hM : ∀ i, ContDiffOn ℝ ∞ (fun y => M y i) U) (hp : ContDiffOn ℝ ∞ p U)
-    (hd : ∀ l ∈ labels, (data l).Regular U)
-    (hdisj : ∀ l ∈ labels, ∀ j ∈ labels, l ≠ j →
-      Disjoint (tsupport (data l).wave) (tsupport (data j).wave))
-    (hkp : ∀ l ∈ labels, (data l).angularFrequency ≠ 0) {x : D × ℝ}
-    (hx : x ∈ liftDomain U) (i : Fin 3) :
-    goodWaveResidual labels data g B M p virtual x i =
-      ∑ l ∈ labels, (field ((data l).waveResidualCoefficients g B M i)
-        (data l).frequency (data l).phase (data l).angularFrequency x).re := by
-  rw [goodWaveResidual, goodResidual_grouped labels data hU hg B M p virtual hB hM hp hd hdisj hx i,
-    goodResidual_angularMean labels data hU hg B M p virtual hB hM hp hd hdisj hkp hx.1 i]
-  simp only [meanResidualValue, LabelData.waveResidualCoefficients, field_nonconstant, Complex.sub_re,
-    Finset.sum_sub_distrib]
-  ring
 
 /-! ## The stored correction state and its actual grouped residual -/
 
@@ -1448,19 +1429,6 @@ theorem ExtractionRegular.dataDisjoint {ι : Type*} {U : Set D} {c : CorrectionS
   intro l hl j hj hlj
   simpa only [ofBlock_tsupport_wave] using h.disjoint l hl j hj hlj
 
-/-- The forcing supplied to each copy solve consists of the actual nonconstant
-PDE coefficients. Finite active sets can change with `n`. -/
-theorem stateGoodWaveResidual_grouped {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : CorrectionState.Context D} {s : CorrectionState.State D} {labels : ℕ → Finset ι}
-    {blocks : ι → CorrectionState.HarmonicBlock D} {gaussian aliasError : ι → BlockCoefficients D}
-    (hrep : BlockRepresentation labels blocks gaussian aliasError s) {n : ℕ}
-    (h : ExtractionRegular U c s labels blocks gaussian aliasError n)
-    {x : D × ℝ} (hx : x ∈ liftDomain U) (i : Fin 3) :
-    stateGoodWaveResidual c s n x i =
-      ∑ l ∈ labels n, (residualBlock c s (blocks l) (gaussian l) (aliasError l)).oscillation n x i := by
-  rw [hrep.goodWaveResidual_eq c n x i]
-  exact goodWaveResidual_grouped (labels n) _ hU h.frame _ _ _ _ h.base h.mean
-    (Complex.ofRealCLM.contDiff.comp_contDiffOn h.pressure) h.blocks h.dataDisjoint h.angular_nonzero hx i
 
 noncomputable def stateMeanCoefficientValue {ι : Type*} (labels : ℕ → Finset ι)
     (blocks : ι → CorrectionState.HarmonicBlock D) (gaussian aliasError : ι → BlockCoefficients D)
@@ -1509,20 +1477,6 @@ theorem residualBlock_zero_mode (c : CorrectionState.Context D) (s : CorrectionS
 
 
 
-/-- Reconstruction of the full differentiated residual, with every excluded error restored once. -/
-theorem stateFullResidual_reconstructed {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : CorrectionState.Context D} {s : CorrectionState.State D} {labels : ℕ → Finset ι}
-    {blocks : ι → CorrectionState.HarmonicBlock D} {gaussian aliasError : ι → BlockCoefficients D}
-    (hrep : BlockRepresentation labels blocks gaussian aliasError s) {n : ℕ}
-    (h : ExtractionRegular U c s labels blocks gaussian aliasError n)
-    {x : D × ℝ} (hx : x ∈ liftDomain U) (i : Fin 3) :
-    stateFullResidual c s n x i =
-      (∑ l ∈ labels n, (residualBlock c s (blocks l) (gaussian l) (aliasError l)).oscillation n x i) +
-      stateMeanCoefficientValue labels blocks gaussian aliasError c s n x.1 i + s.errors.total n x i := by
-  rw [← stateGoodWaveResidual_grouped hU hrep h hx i,
-    stateMeanCoefficientValue_eq_average hU hrep h hx.1 i]
-  simp only [stateGoodWaveResidual, stateGoodResidual, Pi.sub_apply]
-  ring
 
 /-- The actual graph formula gives smooth directions whenever its primitive radius
 and radial profile are smooth on the annular domain. -/

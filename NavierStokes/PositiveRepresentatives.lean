@@ -535,17 +535,6 @@ theorem iteratedFDeriv_eq_of_eventuallyEq {E : Type*} [NormedAddCommGroup E] [No
 
 
 
-theorem compact_jet_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {K : Set Slow} (hK : IsCompact K) {f : Slow → E}
-    (hf : ∀ p ∈ K, ContDiffAt ℝ ∞ f p) (n : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ p ∈ K, ‖iteratedFDeriv ℝ n f p‖ ≤ C := by
-  have hc : ContinuousOn (iteratedFDeriv ℝ n f) K := by
-    intro p hp
-    apply ((hf p hp).iteratedFDeriv_right (m := 0) ?_).continuousAt.continuousWithinAt
-    simpa only [zero_add] using
-      (ENat.natCast_lt_of_coe_top_le_withTop le_rfl n).le
-  obtain ⟨C, hC, hb⟩ := (hK.image_of_continuousOn hc).isBounded.exists_pos_norm_le
-  exact ⟨C, hC, fun p hp => hb _ ⟨p, hp, rfl⟩⟩
 
 noncomputable def stablePullback (h exponent : ℝ) (f : (ℝ × ℝ) → ℝ) (p : Slow) : ℝ :=
   stableQ h p ^ exponent * f (stableInner h p)
@@ -562,12 +551,7 @@ theorem stablePullback_smoothAt {h : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 2)
 /-! ## Compact reference data are transferred only at positive time -/
 
 
-noncomputable def ActiveLabel.toClosed {K : Set Slow} (L : ActiveLabel K) :
-    PrimaryRepresentatives.ActiveLabel K :=
-  ⟨L.val, L.property.1, representative K L, representative_mem K L, representative_mem_tsupport K L⟩
 
-@[simp] theorem ActiveLabel.toClosed_val {K : Set Slow} (L : ActiveLabel K) :
-    L.toClosed.val = L.val := rfl
 
 /-- The reference functions on the compact closure are explicit extensions.
 Only their values at the positive representatives are identified with the

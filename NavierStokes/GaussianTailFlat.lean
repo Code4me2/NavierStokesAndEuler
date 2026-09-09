@@ -100,38 +100,8 @@ theorem slotCutoff_zero {L v : ℝ} (hL : 0 < L) (hv : L / 3 ≤ |v - L / 2|) :
 
 
 
-/-- The square root of the actual flat edge is another member of that family. -/
-theorem sqrt_edge (c x : ℝ) : Real.sqrt (FlatCutoff.edge c x) = FlatCutoff.edge (c / 2) x := by
-  by_cases hx : x ≤ 0
-  · simp [FlatCutoff.edge_of_nonpos _ hx]
-  · rw [FlatCutoff.edge_of_pos _ (lt_of_not_ge hx),
-      FlatCutoff.edge_of_pos _ (lt_of_not_ge hx)]
-    rw [← Real.exp_half]
-    congr 1
-    ring
 
-theorem sqrt_zeta (cL cR R x : ℝ) :
-    Real.sqrt (WeightedRadialPrimitive.zeta cL cR R x) =
-      WeightedRadialPrimitive.zeta (cL / 2) (cR / 2) R x := by
-  rw [WeightedRadialPrimitive.zeta, Real.sqrt_mul (FlatCutoff.edge_nonneg _ _),
-    sqrt_edge, sqrt_edge]
-  rfl
 
-/-- A single constant covers the entire slow shell, including approach to
-either edge.  This is derived from the constructed `FlatCutoff.edge`. -/
-theorem sqrt_zeta_inverse_power_bounded {cL cR : ℝ} (hcL : 0 < cL) (hcR : 0 < cR)
-    (R : ℝ) (k : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ Ioo (0 : ℝ) R,
-      Real.sqrt (WeightedRadialPrimitive.zeta cL cR R x) *
-        (max 1 (WeightedRadialPrimitive.delta R x)⁻¹) ^ k ≤ C := by
-  obtain ⟨C, hC, hb⟩ := WeightedRadialPrimitive.weight_uniform_bound
-    (cL := cL / 2) (cR := cR / 2)
-    (div_pos hcL (by norm_num)) (div_pos hcR (by norm_num)) R k
-  refine ⟨C, hC, fun x hx => ?_⟩
-  have hd := WeightedRadialPrimitive.delta_pos hx
-  have hm : (1 : ℝ) ≤ (WeightedRadialPrimitive.delta R x)⁻¹ :=
-    (one_le_inv₀ hd).2 (WeightedRadialPrimitive.delta_le_one R x)
-  rw [max_eq_right hm, sqrt_zeta]
-  simpa only [WeightedRadialPrimitive.weight, div_eq_mul_inv, inv_pow] using hb x hx
 
 /-! ## Exponential decay along the actual bands -/
 
@@ -202,30 +172,6 @@ theorem gaussian_length_comparison {c κ L S : ℝ} (hc : 0 ≤ c) (hL : κ * S 
   apply Real.exp_le_exp.2
   nlinarith [mul_le_mul_of_nonneg_left hL hc]
 
-/-- A fixed power loss consumes only half of a Gaussian tail. -/
-theorem fixed_power_gaussian_bound {c : ℝ} (hc : 0 < c) (r : ℝ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ,
-      ChartScales.Q n ^ r * Real.exp (-c * ChartScales.S n) ≤
-        C * Real.exp (-(c / 2) * ChartScales.S n) := by
-  obtain ⟨C, hC, hb⟩ := gaussian_beats_Q_power (by linarith : 0 < c / 2) 0 (-r)
-  refine ⟨C, hC, fun n => ?_⟩
-  have he : Real.exp (-c * ChartScales.S n) =
-      Real.exp (-(c / 2) * ChartScales.S n) * Real.exp (-(c / 2) * ChartScales.S n) := by
-    rw [← Real.exp_add]
-    congr 1
-    ring
-  have hb' : Real.exp (-(c / 2) * ChartScales.S n) ≤ C * ChartScales.Q n ^ (-r) := by
-    simpa only [pow_zero, one_mul] using hb n
-  have hQ := ChartScales.Q_pos n
-  calc
-    _ = (ChartScales.Q n ^ r * Real.exp (-(c / 2) * ChartScales.S n)) *
-        Real.exp (-(c / 2) * ChartScales.S n) := by rw [he]; ring
-    _ ≤ (ChartScales.Q n ^ r * (C * ChartScales.Q n ^ (-r))) *
-        Real.exp (-(c / 2) * ChartScales.S n) := by gcongr
-    _ = _ := by
-      rw [show ChartScales.Q n ^ r * (C * ChartScales.Q n ^ (-r)) =
-        C * (ChartScales.Q n ^ r * ChartScales.Q n ^ (-r)) by ring,
-        ← Real.rpow_add hQ, add_neg_cancel, Real.rpow_zero, mul_one]
 
 /-! ## The actual cutoff products and all their stripped derivatives -/
 
@@ -294,10 +240,6 @@ theorem affine_profile_memClass (s : StripData D) {g : ℝ → ℝ}
       simp only [majorant, Real.rpow_zero, mul_one, mul_pow, ← pow_mul]
       ring
 
-/-- The two excluded errors, retained as actual functions. `θ` is the
-normalized slot coordinate `v/L`. -/
-noncomputable def cutoffError (L : ℝ) (θ : D → ℝ) (u f : D → E) (x : D) : E :=
-  (L⁻¹ * deriv profile (θ x)) • u x + (1 - profile (θ x)) • f x
 
 
 
@@ -318,15 +260,6 @@ structure FlatEdges (s : StripData D) where
   zeta_le : ∀ x ∈ s.domain,
     s.zeta x ≤ WeightedRadialPrimitive.zeta leftDecay rightDecay width (position x)
 
-theorem FlatEdges.uniform_weight {s : StripData D} (e : FlatEdges s) (k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ s.domain,
-      Real.sqrt (s.zeta x) * (max 1 (s.delta x)⁻¹) ^ k ≤ C := by
-  obtain ⟨C, hC, hb⟩ := sqrt_zeta_inverse_power_bounded e.left_pos e.right_pos e.width k
-  refine ⟨C, hC, fun x hx => ?_⟩
-  rw [e.delta_eq x hx]
-  exact (mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (e.zeta_le x hx))
-    (pow_nonneg (zero_le_one.trans (le_max_left _ _)) k)).trans
-      (hb (e.position x) (e.position_mem x hx))
 
 /-- Only the actual scale identity and a polynomial slow-scale upper bound
 are used. The exponent may be any real number. -/
@@ -359,11 +292,7 @@ noncomputable def coordinate {s : StripData D} (g : SlotFamily s) (n : ℕ) (x :
 noncomputable def cutoff {s : StripData D} (g : SlotFamily s) (n : ℕ) (x : D) : ℝ :=
   profile (g.coordinate n x)
 
-noncomputable def error {s : StripData D} (g : SlotFamily s) (u f : ℕ → D → E)
-    (n : ℕ) : D → E := cutoffError (g.length n) (g.coordinate n) (u n) (f n)
 
-theorem coordinate_contDiff {s : StripData D} (g : SlotFamily s) (n : ℕ) :
-    ContDiff ℝ ∞ (g.coordinate n) := contDiff_const.add (g.linear n).contDiff
 
 theorem cutoff_memClass {s : StripData D} (g : SlotFamily s) :
     UnweightedClass s 0 g.cutoff :=
@@ -437,9 +366,6 @@ noncomputable def actualSlotFamily (s : StripData D) (r0 h : ℝ)
     apply le_trans _ (hκ.2 n)
     nlinarith [hκ.1]
 
-@[simp] theorem actualSlotFamily_length (s : StripData D) (r0 h : ℝ)
-    (hr0 : 0 < r0) (hh : 0 ≤ h) (η : D →L[ℝ] ℝ) (center : ℕ → ℝ) (n : ℕ) :
-    (actualSlotFamily s r0 h hr0 hh η center).length n = ChartScales.slotLength r0 h n := rfl
 
 theorem actualSlotFamily_coordinate (s : StripData D) (r0 h : ℝ)
     (hr0 : 0 < r0) (hh : 0 ≤ h) (η : D →L[ℝ] ℝ) (center : ℕ → ℝ) (n : ℕ) (x : D) :

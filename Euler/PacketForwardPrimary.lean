@@ -41,29 +41,12 @@ def regularity (O : Operators) (hcorrector : O.curlCorrector = D.curlCorrector P
     ProfileRegularity P D.T D.T_pos.le D.support (profile D Y O) :=
   homogeneousPrimaryRegularity D Y O hcorrector
 
-theorem equation (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    linearPart (D.strain (t,(x,θ))) (slicedJet (Icc (0 : ℝ) D.T) (vector D Y) (t,(x,θ)))+
-      fastPressure (D.normalField (t,(x,θ))) (pressureJet (scalar D Y) (t,(x,θ))) = 0 :=
-  (forcing D).jet_equation Y t x θ
 
-theorem tangent (t : ℝ) (x : Space) (θ : ℝ) :
-    inner ℝ (D.normalField (t,(x,θ))) (vector D Y (t,(x,θ))) = 0 :=
-  (forcing D).vector_tangent Y t x θ
 
-theorem mean_zero (t : ℝ) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, vector D Y (t,(x,θ))) = 0 :=
-  (forcing D).vector_mean_zero Y t x
 
 theorem pressure_smooth (t : ℝ) : ContDiff ℝ ∞ (fun y : Space × ℝ => scalar D Y (t,y)) :=
   (forcing D).scalar_spatial_smooth Y t
 
-theorem parity (O : Operators) (hcorrector : O.curlCorrector = D.curlCorrector P)
-    (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hM : ∀ t x, D.M.field t (-x) = D.M.field t x)
-    (hY : reflection P (Y.value : CylinderL2 P U) = -(Y.value : CylinderL2 P U)) :
-    ProfileParity D.T (profile D Y O) :=
-  homogeneousPrimaryParity D Y O hcorrector hSym hF hM hY
 
 end EulerPacketForwardPrimary
 

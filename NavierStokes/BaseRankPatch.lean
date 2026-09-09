@@ -19,7 +19,6 @@ namespace NavierStokes.BaseRankPatch
 open Set Filter Function BaseChartJets
 open scoped ContDiff Topology BigOperators
 
-abbrev Slow := PhaseCalculus.Slow
 
 theorem positive_before_mean (F : OutgoingProfile.Profile) {XR : ℝ} (hXR : 0 < XR) :
     ReservedPatches.right F XR .positive < ReservedPatches.left F XR .mean := by
@@ -296,27 +295,6 @@ theorem rank_fields (upper : ℝ) (B : ℕ) (Q : ℝ)
     simp only [SlowBorelBase.scaleMap_apply, coordinates_rankScale]
     rw [hv.2, mul_zero]
 
-/-- Five exact physical rows for the full final base, with the original
-mean-patch radii and the actual similarity length and velocity scales. -/
-theorem five_rows (upper : ℝ) (B : ℕ) (Q : ℝ)
-    {s : ℝ × ℝ} (hs : 0 < s.1) (debt : MeanRankUpdate.Debt) :
-    FiveRowRank.FiveRows (angularSlice H v upper B Q s) (axialSlice H v upper B Q s) debt
-      (MeanRankUpdate.angularIncrement F.data.core.lam (rankCoefficient F W.controls.radius s)
-        (ReservedPatches.radialSupportLeft F W.controls.radius .mean)
-        (ReservedPatches.radialSupportRight F W.controls.radius .mean)
-        (rankLength F.data.h s) (rankVelocity F.data.h s) debt)
-      (MeanRankUpdate.desiredAxialIncrement F.data.core.lam (rankCoefficient F W.controls.radius s)
-        (ReservedPatches.radialSupportLeft F W.controls.radius .mean)
-        (ReservedPatches.radialSupportRight F W.controls.radius .mean)
-        (rankLength F.data.h s) (rankVelocity F.data.h s) debt) :=
-  MeanRankUpdate.physical_rows_on_patch F.data.core.lam_pos
-    (rankCoefficient_pos F W.controls.radius s).ne'
-    (ReservedPatches.radialSupportLeft_pos F W.controls.radius W.controls.radius_pos .mean)
-    (ReservedPatches.radial_support_margins F W.controls.radius W.controls.radius_pos .mean).2.1
-    (rankLength_pos F.data.h_pos F.data.h_lt_half hs)
-    (rankVelocity_pos F.data.h_pos F.data.h_lt_half hs).ne' debt _ _
-    (fun _ hR => (rank_fields H v upper B Q hs hR).1)
-    (fun _ hR => (rank_fields H v upper B Q hs hR).2)
 
 end SummedBase
 

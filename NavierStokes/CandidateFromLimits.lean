@@ -132,20 +132,6 @@ theorem force_boundary_jets (n : ℕ) (x : Space) :
     _ = L x n := tracedResidual_boundary_jets u p hu hp L hlim n x
 
 
-/-- The same conclusion for every ordered choice of time/spatial coordinate
-directions and every output component. The constant is uniform in these choices. -/
-theorem force_mixed_derivative_decay
-    (huper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hpper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p)
-    (m : ℕ) (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space,
-      ∀ directions : Fin m → Fin 4, ∀ j : Fin 3,
-        |(iteratedFDeriv ℝ m (force u p hu hp L hlim) (t, x)
-          (fun i => CompactForceDecay.spacetimeCoordinate (directions i))) j| ≤
-          C * (1 + t) ^ (-K) :=
-  CompactForceDecay.mixed_coordinate_decay (force u p hu hp L hlim)
-    (force_smooth u p hu hp L hlim) (force_periodic u p hu hp L hlim huper hpper)
-    (force_time_support u p hu hp L hlim) m K hK
 
 /-- The constructed force and activated fields satisfy the original explicit
 candidate specification. No force or closed-side regularity is assumed. -/
@@ -166,31 +152,6 @@ theorem candidate_properties
   · intro t ht x
     exact (force_eq_activated_residual u p hu hp L hlim ht.1.le ht.2 x).symm
 
-/-- All force conclusions belong to the same constructed witness. The
-remaining hypotheses include the actual residual limits and singular velocity. -/
-theorem exists_candidate_force
-    (huper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) u)
-    (hpper : UnitSpatialPeriodsOn (Ico (0 : ℝ) 1) p)
-    (hdiv : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space, spatialDivergence u t x = 0)
-    (hunbounded : SpeedUnboundedAtOne u) :
-    ∃ F : VelocityField,
-      CandidateProperties (activatedVelocity u) (activatedPressure p) F ∧
-      ContDiff ℝ ∞ F ∧ UnitSpatialPeriodsOn univ F ∧
-      (∀ t : ℝ, 2 ≤ t → ∀ x : Space, F (t, x) = 0) ∧
-      (∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n F (1, x) = L x n) ∧
-      (∀ m : ℕ, ∀ K : ℝ, 0 ≤ K → ∃ C : ℝ, 0 < C ∧
-        ∀ t : ℝ, 0 ≤ t → ∀ x : Space, ∀ directions : Fin m → Fin 4, ∀ j : Fin 3,
-          |(iteratedFDeriv ℝ m F (t, x)
-            (fun i => CompactForceDecay.spacetimeCoordinate (directions i))) j| ≤
-            C * (1 + t) ^ (-K)) := by
-  refine ⟨force u p hu hp L hlim,
-    candidate_properties u p hu hp L hlim huper hpper hdiv hunbounded,
-    force_smooth u p hu hp L hlim, force_periodic u p hu hp L hlim huper hpper,
-    ?_, force_boundary_jets u p hu hp L hlim, ?_⟩
-  · intro t ht x
-    exact force_zero_from u p hu hp L hlim ht x
-  · intro m K hK
-    exact force_mixed_derivative_decay u p hu hp L hlim huper hpper m K hK
 
 
 end Construction

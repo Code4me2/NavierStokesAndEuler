@@ -767,12 +767,7 @@ open scoped ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
 
-/-- The bounded translation difference quotient with increment h. -/
-def differenceQuotient (τ : E →L[ℝ] E) (h : ℝ) : E →L[ℝ] E :=
-  h⁻¹ • (τ - ContinuousLinearMap.id ℝ E)
 
-/-- The operator commutator D T minus T D. -/
-def commutator (D T : E →L[ℝ] E) : E →L[ℝ] E := D.comp T - T.comp D
 
 
 

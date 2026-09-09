@@ -90,14 +90,5 @@ def FiniteFamily.pressureJet (F : FiniteFamily period hT A) (C : ComparisonData 
   exact EulerH6Pressure.SpatialJet.restrict
     (toJet period (F.signedPressurePath period (n+6) (by omega) t)) n (by omega)
 
-/-- The common correction satisfies the literal equation with its reconstructed actual signed pressure. -/
-theorem FiniteFamily.commonPath_pressure_equation (F : FiniteFamily period hT A)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT.le (F.commonPath period))
-      (-value period (F.rawSourcePath period 6 le_rfl ⟨t, ht.1.le, ht.2.le⟩) -
-        (A.metric.coefficient ⟨t, ht.1.le, ht.2.le⟩).operator
-          (F.commonPressure period ⟨t, ht.1.le, ht.2.le⟩)) t := by
-  have h := F.commonPath_hasDerivAt period t ht
-  rwa [(A.atOrder period 6).source_value period le_rfl] at h
 
 end EulerCorrectionAssembly

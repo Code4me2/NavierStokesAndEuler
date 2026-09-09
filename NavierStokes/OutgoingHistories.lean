@@ -284,11 +284,6 @@ noncomputable def angularSource (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : 
 
 noncomputable def Sq (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ := angularSource w Amp p / H w p
 
-noncomputable def Sn (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ :=
-  -W d Amp p * dY (U d Amp) p - velocityExponent d.h * (1 - 2 * p.2 * U d Amp p) * U d Amp p -
-    (axialExponent d.h * p.2 + coordinateFactor p.2 * U d Amp p) * dEta (U d Amp) p -
-      coordinateFactor p.2 * dEta (Pi w) p + 4 * velocityExponent d.h * p.2 * Pi w p +
-        2 * p.2 * dY (Pi w) p
 
 noncomputable def angularStock (w : ResetWitness d K) (Amp : ℝ → ℝ) (p : Point) : ℝ :=
   -(XW d Amp p * H w p) + (1 - d.h) * I w p - axialExponent d.h * p.2 * dEta (I w) p -
@@ -816,28 +811,11 @@ theorem Pi_eq_future_integral (w : ResetWitness d K) (y eta : ℝ) :
 
 
 
-theorem exponential_integral_left {f : ℝ → ℝ} (a b : ℝ) (hb : 0 < b)
-    (he : ∀ t ≤ 0, f t = a * Real.exp (b * t)) {y : ℝ} (hy : y ≤ 0) :
-    (∫ t in Iic y, f t) = (a / b) * Real.exp (b * y) := by
-  calc
-    _ = ∫ t in Iic y, a * Real.exp (b * t) :=
-      setIntegral_congr_fun measurableSet_Iic (fun t ht => he t (ht.trans hy))
-    _ = _ := by rw [integral_const_mul, integral_exp_mul_Iic hb]; ring
 
 
 
 
 
-theorem Pi_ideal (w : ResetWitness d K) (eta : ℝ) {y : ℝ} (hy : y ≤ 0) :
-    Pi w (y, eta) = SchedulePressure.axisPressure d eta +
-      (5 / 2) * d.core.P ^ 2 * shape eta ^ 2 * Real.exp (y / 5) := by
-  rw [Pi_eq_past_integral]
-  have he := exponential_integral_left (f := fun t => E w (t, eta) ^ 2 / 2)
-    (d.core.P ^ 2 * shape eta ^ 2 / 2) (1 / 5) (by norm_num) (by
-      intro t ht
-      simpa only [zero_mul, Real.exp_zero, one_mul, zero_add] using weighted_square_ideal w 0 eta ht) hy
-  rw [he, show (1 / 5 : ℝ) * y = y / 5 by ring]
-  ring
 
 noncomputable def shapeRate (eta : ℝ) : ℝ := 2 * eta / (1 + eta ^ 2)
 

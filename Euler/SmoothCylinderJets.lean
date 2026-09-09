@@ -45,8 +45,6 @@ theorem coverDisplacement_deck (t : ℝ) (c : AddSubgroup.zmultiples P) (z : Lif
   rw [forwardCover_deck P T hT A hA]
   apply Prod.ext <;> simp
 
-def displacement (t : ℝ) : LiftDomain P → LiftTangent :=
-  descend P (EulerSmoothBanachFlow.displacement T hT A t)
 
 def displacementJet (t : ℝ) (q : LiftDomain P) (n : ℕ) : LiftTangent [×n]→L[ℝ] LiftTangent :=
   jetSeries P (EulerSmoothBanachFlow.displacement T hT A t) q n

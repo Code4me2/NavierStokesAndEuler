@@ -54,8 +54,6 @@ def ofPath : SmoothTimeField K LiftTangent Space where
   jet := coverJet P p hp
   jet_eq := coverJet_eq P p hp
 
-@[simp] theorem ofPath_apply (t : K) (x : LiftTangent) :
-    (ofPath P p hp).field t x = pointField P p hp t (coveringMap P x) := rfl
 
 theorem ofPath_jet_norm_le (n : ℕ) (C : ℝ) (hC : 0 ≤ C)
     (hb : ∀ (t : K) (x : LiftTangent),

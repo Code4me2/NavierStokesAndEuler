@@ -68,11 +68,6 @@ variable (P : ℝ) [Fact (0 < P)]
 
 variable (g : C(Icc (0 : ℝ) T,ℝ)) (hg : ∀ t, 0 < g t)
 
-/-- The actual pressure path divided by g, written in terms of the normalized
-physical forcing and the already constructed normalized physical velocity. -/
-def normalizedPressure : C(Icc (0 : ℝ) T,CylinderL2 P ℝ) :=
-  sourcePressure P M m cm hcm hm (includePath P S hS f)
-    (includePath P S hS (normalizedVelocity P T hT S hS Q Q₁ c hc hQ g hg f a₀))
 
 
 

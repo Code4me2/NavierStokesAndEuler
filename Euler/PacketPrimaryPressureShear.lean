@@ -64,9 +64,6 @@ theorem scalar_second_deriv (a : ℝ) (t : Icc (0 : ℝ) D.T) (x : Space) (θ : 
   (scalar_deriv_hasDerivAt τ hτ hτT B δ hδ ξ hs a t x θ).deriv
 
 
-def physicalPressure (a k : ℝ) (t : Icc (0 : ℝ) D.T) (Y : Space → Space) (x : Space) : ℝ :=
-  k⁻¹^2 * scalar τ hτ hτT B (initialData D δ hδ (a • ξ) hs)
-    (t,(Y x,k*⟪D.m₀,Y x⟫_ℝ))
 
 
 

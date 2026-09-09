@@ -69,9 +69,6 @@ theorem cycle_representation (B N0 j : ℕ) :
 
 
 
-noncomputable def temporalAlias (B N0 j : ℕ) : Oscillation Point :=
-  CycleStateCoherence.temporalAliasAt (parameterSequence B N0) (commonContext B)
-    (ActualInitialization.initialCycleState B N0) j
 
 
 /-- One positive band floor is retained for every physical stage. -/
@@ -106,16 +103,7 @@ theorem twice_residual_scale (B N0 : ℕ) :
 noncomputable def physicalDomain (B N0 : ℕ) : Set SpaceTime :=
   CutStageEstimates.physicalSublevel h (qbig B N0)
 
-theorem physicalDomain_open (B N0 : ℕ) : IsOpen (physicalDomain B N0) :=
-  CutStageEstimates.physicalSublevel_open outgoing.data.h_pos outgoing.data.h_lt_half _
 
-theorem initial_invariant (B N0 : ℕ) :
-    CycleAnalyticInvariant ActualInitialization.geometry (commonContext B)
-      (ActualInitialization.tangentBlock (B := B) (N0 := N0))
-      ActualInitialization.envelope ActualInitialization.labelCarrier
-      (ActualIterationLedger.sigma 0) (cycle B N0 0) := by
-  simp only [ActualIterationLedger.sigma_zero]
-  exact ActualInitialization.initial_invariant B N0
 
 /-! ## One selected initialization -/
 
@@ -161,12 +149,6 @@ noncomputable def chartDirectStages (B N0 : ℕ) (a : ℝ) (i : PolarCharts.Inde
 chart on its open validity set. Finite summation and the genuine residual
 preserve precisely this local agreement. -/
 
-theorem uncutPrefix_eqOn {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {U : Set SpaceTime} {f g : ℕ → SpaceTime → V}
-    (hf : ∀ j, EqOn (f j) (g j) U) (N : ℕ) :
-    EqOn (DiagonalJetBounds.uncutPrefix f N) (DiagonalJetBounds.uncutPrefix g N) U := by
-  intro z hz
-  exact Finset.sum_congr rfl (fun j _ => hf j hz)
 
 
 
@@ -223,11 +205,6 @@ theorem angularNativeStages_succ (B N0 j : ℕ) :
   change (_ + _) + _ - _ = _
   abel
 
-theorem uncutPrefix_succ {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    (f : ℕ → SpaceTime → V) (N : ℕ) :
-    DiagonalJetBounds.uncutPrefix f (N + 1) = DiagonalJetBounds.uncutPrefix f N + f N := by
-  funext w
-  exact Finset.sum_range_succ (fun j => f j w) N
 
 
 

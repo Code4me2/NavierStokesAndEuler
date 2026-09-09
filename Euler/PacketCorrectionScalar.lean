@@ -21,8 +21,6 @@ theorem delta_pos (X : ℝ) : 0 < delta X := Real.exp_pos _
 theorem delta_le_one (X : ℝ) : delta X ≤ 1 :=
   Real.exp_le_one_iff.mpr (neg_nonpos.mpr (Real.sqrt_nonneg X))
 
-theorem residual_pos (k X : ℝ) : 0 < residual k X :=
-  mul_pos (by norm_num) (Real.exp_pos _)
 
 /-- One polynomial inverse radius meets both packet-series and pressure-
 inverse absorption requirements. -/

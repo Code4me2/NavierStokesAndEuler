@@ -1,4 +1,6 @@
-import Euler.CorrectionMildEnergy
+import Euler.CorrectionEnergyMajorants
+import Euler.CorrectionEnergyRestriction
+import Euler.MildMajorantEnergy
 import Euler.IntegralEnergyBootstrap
 
 /-! The actual correction energy right-hand side has the scalar shrinking-radius form, including its exact zero initial trace. -/
@@ -8,31 +10,15 @@ noncomputable section
 namespace EulerCorrectionEnergyScalar
 
 open MeasureTheory Set InnerProductSpace EulerLiftedGradientSpace EulerCylinderSobolevSpace
-  EulerCorrectionOperators EulerCorrectionEnergyData EulerCorrectionEnergyMajorants EulerCorrectionMildEnergy
-  EulerEnergyMetricPaths EulerGevreyMetricEstimate EulerNonlinearEnergyConstants EulerTimeLpSubintervalBound
-  EulerTimeLp EulerVolterraConvolution EulerSobolevHeat EulerGevreyMetricComparison EulerGevreyDifferentiatedEquation
-  EulerWeightedCylinderEnergy EulerFiniteMetricEnergy
+  EulerCorrectionOperators EulerCorrectionEnergyData EulerCorrectionEnergyMajorants
+  EulerEnergyMetricPaths EulerGevreyMetricEstimate EulerNonlinearEnergyConstants
+  EulerTimeLpSubintervalBound EulerTimeLp EulerVolterraConvolution EulerSobolevHeat
+  EulerGevreyMetricComparison EulerGevreyDifferentiatedEquation EulerWeightedCylinderEnergy
+  EulerFiniteMetricEnergy
 open scoped Topology
 
 variable (period : ℝ) [Fact (0 < period)]
 
-/-- The actual scalar correction right-hand side is bounded by the source's nonlinear shrinking-radius expression. -/
-theorem correctionRhs_bound {q : ℕ} {T : ℝ} {hq : 6 ≤ q+1}
-    {D : CorrectionData period (q+1) (Icc (0 : ℝ) T)} {N : ℕ} {R : C(Icc (0 : ℝ) T, ℝ)}
-    (S : SpatialBudget period hq D N R) (hN : N+6 ≤ q+1) {hT : 0 ≤ T} (K : MetricBudget period T hT D)
-    (Rdot : C(Icc (0 : ℝ) T, ℝ)) (e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1))) (t : Icc (0 : ℝ) T) :
-    let X := energyPath period N hN T R (K.operatorPath period) e t
-    let Y := lossPath period N hN T R (K.operatorPath period) e t
-    let C := combinedConstant period S K
-    correctionRhs period S hN K Rdot e t ≤ C*(X+X^2+S.residual)+
-      (Rdot t/R t+C*((R t)⁻¹+S.Rc)*(S.B0+X))*Y := by
-  obtain ⟨hg0,hg1,hk⟩ := K.constants_nonneg period S.B0 S.B0_nonneg
-  exact actual_scalar_bound period (K.growth0 period S.B0) (K.growth1 period) (K.multiplier period)
-    S.B S.M S.B0 S.B1 S.A0 S.A2 K.c S.Rc (R t) S.residual
-    (energyPath period N hN T R (K.operatorPath period) e t)
-    (lossPath period N hN T R (K.operatorPath period) e t) (Rdot t/R t)
-    hg0 hg1 hk S.B_nonneg (zero_le_one.trans S.M_one_le) S.B0_nonneg S.B1_nonneg S.A0_nonneg S.A2_nonneg K.c_pos
-    S.Rc_nonneg (S.radius_pos t) S.residual_pos.le (energy_nonneg period S hN K e t) (loss_nonneg period S hN K e t)
 
 /-- Zero is exactly zero in the genuine finite metric energy. -/
 theorem energyNorm_zero {q : ℕ} (N : ℕ) (hN : N+6 ≤ q) (ρ : ℝ)

@@ -166,106 +166,11 @@ variable {h : ℝ}
   {DP DS : Type} [NormedAddCommGroup DP] [NormedSpace ℝ DP]
   [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
 
-/-- The four actual potential contributions of one cycle. -/
-noncomputable def potentialIncrement
-    (WP : PhysicalStageBounds.WaveData h DP IP KP (Fin 3))
-    (WS : PhysicalStageBounds.WaveData h DS IS KS (Fin 3))
-    (MT MR : MeanInput h (CoordinateAlgebra.A h - 1 / 2)) : VelocityField :=
-  fun w => WP.vector w + WS.vector w + MT.family.angularField w + MR.family.angularField w
 
-noncomputable def pressureIncrement
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit)
-    (WS : PhysicalStageBounds.WaveData h DS IS KS Unit)
-    (MP : MeanInput h (2 * CoordinateAlgebra.A h)) : PressureField :=
-  fun w => WP.pressure w + WS.pressure w + MP.family.field w
 
-theorem potentialIncrement_smooth
-    (WP : PhysicalStageBounds.WaveData h DP IP KP (Fin 3))
-    (WS : PhysicalStageBounds.WaveData h DS IS KS (Fin 3))
-    (MT MR : MeanInput h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig : ℝ}
-    (hqT : qbig ≤ ChartScales.Q MT.firstBand) (hqR : qbig ≤ ChartScales.Q MR.firstBand) :
-    ContDiffOn ℝ ∞ (potentialIncrement WP WS MT MR) (CutStageEstimates.physicalSublevel h qbig) :=
-  ((((WP.vector_smooth hh hh1).mono inter_subset_left).add
-    ((WS.vector_smooth hh hh1).mono inter_subset_left)).add
-      (MT.angular_smooth hh hh1 hqT)).add (MR.angular_smooth hh hh1 hqR)
 
-theorem pressureIncrement_smooth
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit)
-    (WS : PhysicalStageBounds.WaveData h DS IS KS Unit)
-    (MP : MeanInput h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig : ℝ} (hq : qbig ≤ ChartScales.Q MP.firstBand) :
-    ContDiffOn ℝ ∞ (pressureIncrement WP WS MP) (CutStageEstimates.physicalSublevel h qbig) :=
-  (((WP.pressure_smooth hh hh1).mono inter_subset_left).add
-    ((WS.pressure_smooth hh hh1).mono inter_subset_left)).add (MP.field_smooth hh hh1 hq)
 
-theorem potentialIncrement_bound
-    (WP : PhysicalStageBounds.WaveData h DP IP KP (Fin 3))
-    (WS : PhysicalStageBounds.WaveData h DS IS KS (Fin 3))
-    (MT MR : MeanInput h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig g dw dm : ℝ}
-    (hqT : qbig ≤ ChartScales.Q MT.firstBand) (hqR : qbig ≤ ChartScales.Q MR.firstBand)
-    (hWP : g ≤ h * WP.alpha + WP.shift + dw) (hWS : g ≤ h * WS.alpha + WS.shift + dw)
-    (hMT : g ≤ h * MT.alpha + dm) (hMR : g ≤ h * MR.alpha + dm) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (potentialIncrement WP WS MT MR) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g - PhysicalStageBounds.potentialLoss h dw dm m) := by
-  have hp0 := WP.vector_bound_with_gain hh hh1 hWP m
-  have hs0 := WS.vector_bound_with_gain hh hh1 hWS m
-  have hp := weaken_bound (qbig := qbig) (s := g - PhysicalStageBounds.potentialLoss h dw dm m) hh hh1
-    (sub_le_sub_left (le_max_left _ _) g) (by
-      obtain ⟨C, hC, hb⟩ := hp0
-      exact ⟨C, hC, fun w hw hqw => hb w hw.1 hqw⟩)
-  have hs := weaken_bound (qbig := qbig) (s := g - PhysicalStageBounds.potentialLoss h dw dm m) hh hh1
-    (sub_le_sub_left (le_max_left _ _) g) (by
-      obtain ⟨C, hC, hb⟩ := hs0
-      exact ⟨C, hC, fun w hw hqw => hb w hw.1 hqw⟩)
-  have ht := weaken_bound (s := g - PhysicalStageBounds.potentialLoss h dw dm m)
-    hh hh1 (sub_le_sub_left (le_max_right _ _) g)
-    (MT.angular_bound_with_gain hh hh1 hqT hMT m)
-  have hr := weaken_bound (s := g - PhysicalStageBounds.potentialLoss h dw dm m)
-    hh hh1 (sub_le_sub_left (le_max_right _ _) g)
-    (MR.angular_bound_with_gain hh hh1 hqR hMR m)
-  have sp : ContDiffOn ℝ ∞ WP.vector (CutStageEstimates.physicalSublevel h qbig) :=
-    (WP.vector_smooth hh hh1).mono inter_subset_left
-  have ss : ContDiffOn ℝ ∞ WS.vector (CutStageEstimates.physicalSublevel h qbig) :=
-    (WS.vector_smooth hh hh1).mono inter_subset_left
-  have st := MT.angular_smooth hh hh1 hqT
-  exact add_bounds hh hh1 ((sp.add ss).add st) (MR.angular_smooth hh hh1 hqR)
-    (add_bounds hh hh1 (sp.add ss) st (add_bounds hh hh1 sp ss hp hs) ht) hr
 
-theorem pressureIncrement_bound
-    (WP : PhysicalStageBounds.WaveData h DP IP KP Unit)
-    (WS : PhysicalStageBounds.WaveData h DS IS KS Unit)
-    (MP : MeanInput h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) {qbig g dw dm : ℝ}
-    (hq : qbig ≤ ChartScales.Q MP.firstBand)
-    (hWP : g ≤ h * WP.alpha + WP.shift + dw) (hWS : g ≤ h * WS.alpha + WS.shift + dw)
-    (hMP : g ≤ h * MP.alpha + dm) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (pressureIncrement WP WS MP) w‖ ≤
-        C * PhysicalWaveSum.physicalQ h w ^ (g - PhysicalStageBounds.pressureLoss h dw dm m) := by
-  have hp0 := WP.pressure_bound_with_gain hh hh1 hWP m
-  have hs0 := WS.pressure_bound_with_gain hh hh1 hWS m
-  have hp := weaken_bound (qbig := qbig) (s := g - PhysicalStageBounds.pressureLoss h dw dm m) hh hh1
-    (sub_le_sub_left (le_max_left _ _) g) (by
-      obtain ⟨C, hC, hb⟩ := hp0
-      exact ⟨C, hC, fun w hw hqw => hb w hw.1 hqw⟩)
-  have hs := weaken_bound (qbig := qbig) (s := g - PhysicalStageBounds.pressureLoss h dw dm m) hh hh1
-    (sub_le_sub_left (le_max_left _ _) g) (by
-      obtain ⟨C, hC, hb⟩ := hs0
-      exact ⟨C, hC, fun w hw hqw => hb w hw.1 hqw⟩)
-  have hm := weaken_bound (s := g - PhysicalStageBounds.pressureLoss h dw dm m)
-    hh hh1 (sub_le_sub_left (le_max_right _ _) g)
-    (MP.field_bound_with_gain hh hh1 hq hMP m)
-  have sp : ContDiffOn ℝ ∞ WP.pressure (CutStageEstimates.physicalSublevel h qbig) :=
-    (WP.pressure_smooth hh hh1).mono inter_subset_left
-  have ss : ContDiffOn ℝ ∞ WS.pressure (CutStageEstimates.physicalSublevel h qbig) :=
-    (WS.pressure_smooth hh hh1).mono inter_subset_left
-  exact add_bounds hh hh1 (sp.add ss) (MP.field_smooth hh hh1 hq)
-    (add_bounds hh hh1 sp ss hp hs) hm
 
 end Increments
 
@@ -289,13 +194,8 @@ variable {h : ℝ}
   [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
   (D : CycleInputs h DP IP KP DS IS KS)
 
-noncomputable def potential (k : ℕ) : VelocityField :=
-  potentialIncrement (D.particularPotential k) (D.signedPotential k) (D.temporal k) (D.rank k)
 
-noncomputable def direct (k : ℕ) : VelocityField := (D.angular k).family.angularField
 
-noncomputable def pressureField (k : ℕ) : PressureField :=
-  pressureIncrement (D.particularPressure k) (D.signedPressure k) (D.pressure k)
 
 /-- Cycle `k` contributes physical stage `k+1`. These are native exponent
 and chart-degree comparisons, not physical estimates. -/
@@ -349,49 +249,11 @@ variable {h κ qbig : ℝ}
   [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
   (D : CycleInputs h DP IP KP DS IS KS)
 
-theorem potential_bound (H : D.Metadata κ) (Q : D.ValidScale qbig)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000) (k m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (D.potential k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
-        (ActualIterationLedger.gain h (k + 1) - PhysicalStageBounds.potentialLoss h h 0 m) :=
-  potentialIncrement_bound (D.particularPotential k) (D.signedPotential k) (D.temporal k) (D.rank k)
-    hh hh1 (Q.temporal k) (Q.rank k)
-    (potential_gain hh.le hκ k (H.particularPotential k) (H.particularPotentialShift k))
-    (potential_gain hh.le hκ k (H.signedPotential k) (H.signedPotentialShift k))
-    (mean_gain hh.le hκ k (H.temporal k)) (mean_gain hh.le hκ k (H.rank k)) m
 
-theorem direct_bound (H : D.Metadata κ) (Q : D.ValidScale qbig)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000) (k m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (D.direct k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
-        (ActualIterationLedger.gain h (k + 1) - PhysicalStageBounds.directLoss h 0 m) :=
-  (D.angular k).angular_bound_with_gain hh hh1 (Q.angular k) (mean_gain hh.le hκ k (H.angular k)) m
 
-theorem pressure_bound (H : D.Metadata κ) (Q : D.ValidScale qbig)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000) (k m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
-      PhysicalWaveSum.physicalQ h w ≤ 1 →
-      ‖iteratedFDeriv ℝ m (D.pressureField k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
-        (ActualIterationLedger.gain h (k + 1) - PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 m) :=
-  pressureIncrement_bound (D.particularPressure k) (D.signedPressure k) (D.pressure k)
-    hh hh1 (Q.pressure k)
-    (pressure_gain hh.le hκ k (H.particularPressure k) (H.particularPressureShift k))
-    (pressure_gain hh.le hκ k (H.signedPressure k) (H.signedPressureShift k))
-    (mean_gain hh.le hκ k (H.pressure k)) m
 
-theorem potential_smooth (Q : D.ValidScale qbig) (hh : 0 < h) (hh1 : h < 1 / 2) (k : ℕ) :
-    ContDiffOn ℝ ∞ (D.potential k) (CutStageEstimates.physicalSublevel h qbig) :=
-  potentialIncrement_smooth _ _ _ _ hh hh1 (Q.temporal k) (Q.rank k)
 
-theorem direct_smooth (Q : D.ValidScale qbig) (hh : 0 < h) (hh1 : h < 1 / 2) (k : ℕ) :
-    ContDiffOn ℝ ∞ (D.direct k) (CutStageEstimates.physicalSublevel h qbig) :=
-  (D.angular k).angular_smooth hh hh1 (Q.angular k)
 
-theorem pressure_smooth (Q : D.ValidScale qbig) (hh : 0 < h) (hh1 : h < 1 / 2) (k : ℕ) :
-    ContDiffOn ℝ ∞ (D.pressureField k) (CutStageEstimates.physicalSublevel h qbig) :=
-  pressureIncrement_smooth _ _ _ hh hh1 (Q.pressure k)
 
 end CycleInputs
 
@@ -444,32 +306,6 @@ variable {h κ qbig : ℝ}
   [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
   (D : CycleInputs h DP IP KP DS IS KS)
 
-/-- Literal sequence identities transfer the derived estimates to the
-actual potential/direct/pressure stages. Index zero is deliberately absent. -/
-theorem represented_raw_bounds (H : D.Metadata κ) (Q : D.ValidScale qbig)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000)
-    (A B : ℕ → VelocityField) (P : ℕ → PressureField)
-    (hA : ∀ k, EqOn (D.potential k) (A (k + 1)) (CutStageEstimates.physicalSublevel h qbig))
-    (hB : ∀ k, EqOn (D.direct k) (B (k + 1)) (CutStageEstimates.physicalSublevel h qbig))
-    (hP : ∀ k, EqOn (D.pressureField k) (P (k + 1)) (CutStageEstimates.physicalSublevel h qbig)) :
-    ∃ CA CB CP : ℕ → ℕ → ℝ,
-      (∀ j m, 0 ≤ CA j m ∧ 0 ≤ CB j m ∧ 0 ≤ CP j m) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) A (ActualIterationLedger.gain h)
-        (PhysicalStageBounds.potentialLoss h h 0) CA (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) B (ActualIterationLedger.gain h)
-        (PhysicalStageBounds.directLoss h 0) CB (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) P (ActualIterationLedger.gain h)
-        (PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0) CP (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  obtain ⟨CA, hCA, ha⟩ := raw_of_positive_bounds
-    (fun k m => bound_congr hh hh1 (hA k) (D.potential_bound H Q hh hh1 hκ k m))
-  obtain ⟨CB, hCB, hb⟩ := raw_of_positive_bounds
-    (fun k m => bound_congr hh hh1 (hB k) (D.direct_bound H Q hh hh1 hκ k m))
-  obtain ⟨CP, hCP, hp⟩ := raw_of_positive_bounds
-    (fun k m => bound_congr hh hh1 (hP k) (D.pressure_bound H Q hh hh1 hκ k m))
-  exact ⟨CA, CB, CP, fun j m => ⟨hCA j m, hCB j m, hCP j m⟩, ha, hb, hp⟩
 
 end CycleInputs
 

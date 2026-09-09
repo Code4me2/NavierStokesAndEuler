@@ -117,9 +117,6 @@ theorem carrier_contDiff (C : ℝ) (d : TailData) (y0 : ℝ) :
     (div_pos (sq_pos_of_pos (radius_pos d y0 y)) (by norm_num))).comp y
       (chartPoint_contDiff d y0).contDiffAt
 
-theorem carrier_pos {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) (y : EdgeParam × ℝ) :
-    0 < carrier C d y0 y :=
-  heatAmplitude_pos hC (by linarith [d.h_pos]) (timeOf_lt_one y.1) (radius_pos d y0 y)
 
 noncomputable def carrierRadial (C : ℝ) (d : TailData) (y0 : ℝ) (y : EdgeParam × ℝ) : ℝ :=
   radius d y0 y * SimilarityProfile.partialS (physicalHeat C (1 + d.h)) (chartPoint d y0 y)
@@ -1218,17 +1215,6 @@ theorem profileStressFactor_zero_ne {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : 
   have hzero := congrArg Prod.fst he
   exact (profileAngularFactor_zero_pos hC d y0 hη).ne' hzero
 
-/-- Actual full tensors, uniformly through both endpoints of the profile interval. -/
-theorem profileStress_jets (C : ℝ) (d : TailData) (y0 : ℝ) (n : ℕ) {b : ℝ} (hb : 0 < b) :
-    ∃ A : ℝ, 0 < A ∧ ∃ N : ℕ, ∀ i ≤ n, ∀ η ∈ Icc (-1 : ℝ) 1,
-      ∀ x : ℝ, 0 < x → x ≤ b →
-      ‖iteratedFDeriv ℝ i (profileStress C d y0) (η, x)‖ ≤ A * FlatCutoff.edge 4 x / x ^ N := by
-  have he : profileStress C d y0 = fun y =>
-      (FlatCutoff.edge 4 y.2 / y.2 ^ 3) • profileStressFactor C d y0 y :=
-    funext (profileStress_factorization C d y0)
-  rw [he]
-  exact EdgeWeightJets.edge_smul_iteratedFDeriv_bound (by norm_num) 3
-    (profileStressFactor_contDiff C d y0) isCompact_Icc n hb
 
 
 
@@ -1249,11 +1235,6 @@ theorem profileTilt_eq_ratio (C : ℝ) (d : TailData) (y0 η : ℝ) {x : ℝ} (h
 theorem profileTilt_zero (C : ℝ) (d : TailData) (y0 η : ℝ) : profileTilt C d y0 (η, 0) = 0 := by
   simp [profileTilt]
 
-theorem profileTilt_contDiffAt {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ)
-    {η : ℝ} (hη : η ∈ Icc (-1 : ℝ) 1) : ContDiffAt ℝ ∞ (profileTilt C d y0) (η, 0) :=
-  ((contDiffAt_snd.pow 6).mul (profileAxialFactor_contDiff C d y0).contDiffAt).div
-    (profileAngularFactor_contDiff C d y0).contDiffAt
-    (profileAngularFactor_zero_pos hC d y0 hη).ne'
 
 
 /-- The actual velocity shear ratio for the terminal product `K f_o`. -/
@@ -1274,9 +1255,6 @@ theorem profileSpeed_contDiffAt_of_ne (C : ℝ) (d : TailData) (y0 : ℝ)
       ((tailShape_contDiff d).comp (contDiff_const.sub contDiff_snd)).contDiffAt
       (tailShape_pos d _).ne'
 
-theorem profileSpeed_contDiffAt {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ)
-    {y : ℝ × ℝ} (hη : y.1 ^ 2 ≤ 1) : ContDiffAt ℝ ∞ (profileSpeed C d y0) y :=
-  profileSpeed_contDiffAt_of_ne C d y0 (profileCarrier_pos hC d y0 hη).ne'
 
 noncomputable def profileDomain (C : ℝ) (d : TailData) (y0 : ℝ) : Set (ℝ × ℝ) :=
   {y | profileCarrier C d y0 y ≠ 0}
@@ -1346,56 +1324,8 @@ theorem profileSpeed_zero_gt_two {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ
 noncomputable def profileConeGap (C : ℝ) (d : TailData) (y0 : ℝ) (y : ℝ × ℝ) : ℝ :=
   2 - (profileSpeed C d y0 y - 2) * profileTilt C d y0 y ^ 2
 
-theorem profileConeGap_zero (C : ℝ) (d : TailData) (y0 η : ℝ) :
-    profileConeGap C d y0 (η, 0) = 2 := by
-  simp [profileConeGap, profileTilt_zero]
 
-theorem compact_positive_collar {E : Type*} [NormedAddCommGroup E]
-    {K : Set E} (hK : IsCompact K) {f : E × ℝ → ℝ}
-    (hf : ∀ p ∈ K, ContinuousAt f (p, 0)) (hpos : ∀ p ∈ K, 0 < f (p, 0)) :
-    ∃ ε m : ℝ, 0 < ε ∧ 0 < m ∧ ∀ p ∈ K, ∀ x : ℝ, |x| < ε → m ≤ f (p, x) := by
-  have hc : ContinuousOn (fun p => f (p, 0)) K := by
-    intro p hp
-    exact ((hf p hp).comp (f := fun q : E => (q, (0 : ℝ)))
-      (continuousAt_id.prodMk continuousAt_const)).continuousWithinAt
-  obtain ⟨m, hm, hmb⟩ := UniformCone.positive_uniform_margin hK hc hpos
-  have hE : ∀ᶠ x in 𝓝 (0 : ℝ), ∀ p ∈ K, m / 2 < f (p, x) := by
-    apply hK.eventually_forall_of_forall_eventually
-    intro p hp
-    exact ((hf p hp).comp (f := fun q : ℝ × E => (q.2, q.1))
-      (continuousAt_snd.prodMk continuousAt_fst)).eventually
-      (Ioi_mem_nhds (lt_of_lt_of_le (show m / 2 < m by linarith) (hmb p hp)))
-  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hE
-  refine ⟨ε, m / 2, hε, by positivity, ?_⟩
-  intro p hp x hx
-  exact (hball (by simpa only [Metric.mem_ball, Real.dist_eq, sub_zero] using hx) p hp).le
 
-/-- One strict relative cone margin on a collar, uniformly for `-1 ≤ η ≤ 1`.
-The shear is the finite, actual terminal velocity shear; its value is proved
-strictly larger than two on the boundary. -/
-theorem profile_uniform_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
-    ∃ ε m : ℝ, 0 < ε ∧ 0 < m ∧ ∀ η ∈ Icc (-1 : ℝ) 1, ∀ x : ℝ, |x| < ε →
-      m ≤ profileAngularFactor C d y0 (η, x) ∧
-      m ≤ profileSpeed C d y0 (η, x) - 2 ∧ m ≤ profileConeGap C d y0 (η, x) := by
-  let f : ℝ × ℝ → ℝ := fun y => min (profileAngularFactor C d y0 y)
-    (min (profileSpeed C d y0 y - 2) (profileConeGap C d y0 y))
-  have hc : ∀ η ∈ Icc (-1 : ℝ) 1, ContinuousAt f (η, 0) := by
-    intro η hη
-    have hs := (profileSpeed_contDiffAt hC d y0 (y := (η, 0)) (eta_sq_le_one hη)).continuousAt
-    have ht := (profileTilt_contDiffAt hC d y0 hη).continuousAt
-    exact (profileAngularFactor_contDiff C d y0).continuous.continuousAt.min
-      ((hs.sub continuousAt_const).min
-        (continuousAt_const.sub ((hs.sub continuousAt_const).mul (ht.pow 2))))
-  have hp : ∀ η ∈ Icc (-1 : ℝ) 1, 0 < f (η, 0) := by
-    intro η hη
-    apply lt_min (profileAngularFactor_zero_pos hC d y0 hη)
-    apply lt_min (sub_pos.mpr (profileSpeed_zero_gt_two hC d y0 hη))
-    rw [profileConeGap_zero]
-    norm_num
-  obtain ⟨ε, m, hε, hm, hb⟩ := compact_positive_collar isCompact_Icc hc hp
-  refine ⟨ε, m, hε, hm, ?_⟩
-  intro η hη x hx
-  exact (le_min_iff.mp (hb η hη x hx)).imp_right (fun h => le_min_iff.mp h)
 
 /-! ## The shear formula is the derivative of the actual profile velocity -/
 
@@ -1462,28 +1392,6 @@ theorem profileSpeed_eq_log_deriv {C : ℝ} (hC : 0 < C) (d : TailData) (y0 η x
     (tailShape_pos d (3 - x)).ne']
   ring
 
-/-- The strict cone inequalities for the actual stress hold throughout one
-positive-width terminal collar, uniformly through the closed profile interval. -/
-theorem profile_relative_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ η ∈ Icc (-1 : ℝ) 1, ∀ x : ℝ, 0 < x → x < ε →
-      0 < profileAngularStress C d y0 (η, x) ∧ 2 < profileSpeed C d y0 (η, x) ∧
-      (profileSpeed C d y0 (η, x) - 2) * profileAxialStress C d y0 (η, x) ^ 2 <
-        2 * profileAngularStress C d y0 (η, x) ^ 2 := by
-  obtain ⟨ε, m, hε, hm, hb⟩ := profile_uniform_cone hC d y0
-  refine ⟨ε, hε, ?_⟩
-  intro η hη x hx hxε
-  obtain ⟨ha, hv, hg⟩ := hb η hη x (by simpa only [abs_of_pos hx] using hxε)
-  have hTa : 0 < profileAngularStress C d y0 (η, x) := by
-    rw [profileAngularStress_factorization]
-    exact mul_pos (div_pos (FlatCutoff.edge_pos 4 hx) (pow_pos hx _)) (hm.trans_le ha)
-  refine ⟨hTa, by linarith, ?_⟩
-  have hg' : (profileSpeed C d y0 (η, x) - 2) *
-      (profileAxialStress C d y0 (η, x) / profileAngularStress C d y0 (η, x)) ^ 2 < 2 := by
-    rw [profileTilt_eq_ratio C d y0 η hx]
-    change m ≤ 2 - (profileSpeed C d y0 (η, x) - 2) * profileTilt C d y0 (η, x) ^ 2 at hg
-    linarith
-  apply (div_lt_iff₀ (sq_pos_of_pos hTa)).mp
-  simpa only [div_pow, mul_div_assoc] using hg'
 
 /-! ## The same weighted estimates on compact physical parameter sets -/
 

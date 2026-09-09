@@ -354,13 +354,6 @@ theorem ParameterBounds.positive_lower {M R F : ℝ} {g : Plane}
     reciprocal_lower hM0 hc.lambda0_pos h.lambda_inv,
     reciprocal_lower hM0 (abs_pos.mpr hc.c0_neg.ne) h.ratio_inv⟩
 
-theorem representative_parameter_bounds {K : Set Slow} (hK : IsCompact K)
-    {F : Slow → ℝ} {g : Slow → Plane} (hF : ContinuousOn F K) (hg : ContinuousOn g K)
-    (hR : ∀ q ∈ K, 0 < q.1) (hc : ∀ q ∈ K, ReferenceCone (F q) (g q)) :
-    ∃ M : ℝ, 1 ≤ M ∧ ∀ L : ActiveLabel K,
-      ParameterBounds M (representative K L).1 (F (representative K L)) (g (representative K L)) := by
-  obtain ⟨M, hM, hb⟩ := compact_parameter_bounds hK hF hg hR hc
-  exact ⟨M, hM, fun L => hb _ (representative_mem K L)⟩
 
 /-! ## A fixed compact set from the actual normalized similarity range -/
 
@@ -671,22 +664,6 @@ theorem compact_mixed_target_margin {K : Set Slow} (hK : IsCompact K)
       add_le_add_right (half_le_self (sub_pos.mpr hgap).le) _
     _ = slopeRatio u := by ring
 
-theorem representative_target_margin {K : Set Slow} (hK : IsCompact K)
-    {F : Slow → ℝ} {g T : Slow → Plane}
-    (hF : ContinuousOn F K) (hg : ContinuousOn g K) (hT : ContinuousOn T K)
-    (hc : ∀ q ∈ K, ReferenceCone (F q) (g q))
-    (ht : ∀ q ∈ K, TargetCone (F q) (g q) (T q)) :
-    ∃ u η : ℝ, 0 < u ∧ 0 < η ∧ ∃ N : ℕ, ∀ L : ActiveLabel K, N ≤ L.val.1 →
-      ∀ q ∈ K, q ∈ gridBox L.val.1 L.val.2 2 →
-      ⟪T q, normalDirection (g (representative K L))⟫_ℝ ≤ -η ∧
-      |c0 (F (representative K L)) (g (representative K L)) *
-        ⟪T q, transverseDirection (g (representative K L))⟫_ℝ /
-        ⟪T q, normalDirection (g (representative K L))⟫_ℝ| + η ≤ slopeRatio u := by
-  obtain ⟨u, η, δ, hu, hη, hδ, hb⟩ := compact_mixed_target_margin hK hF hg hT hc ht
-  obtain ⟨N, hN⟩ := eventually_atTop.mp ((tendsto_order.1 grid_mesh_tendsto_zero).2 δ hδ)
-  refine ⟨u, η, hu, hη, N, fun L hL q hq hbox => hb _ (representative_mem K L) q hq ?_⟩
-  simpa only [dist_eq_norm] using
-    (representative_enlarged_distance K L hbox).trans_lt (hN _ hL)
 
 theorem targetRatio_smul (F : ℝ) (g T : Plane) {a : ℝ} (ha : a ≠ 0) :
     targetRatio F g (a • T) = targetRatio F g T := by

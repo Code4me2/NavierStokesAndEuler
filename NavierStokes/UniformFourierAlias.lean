@@ -53,48 +53,6 @@ theorem sourceJet_mem (G : (ℝ × E → F) → Prop) (J : (ℝ × E → F) → 
     rw [RadialAlias.sourceJet_succ]
     exact hclosed _ ih
 
-/-- A finite-loss estimate for an actual operator propagates through the
-successive slow derivatives used in radial integration by parts. This lemma
-is instantiated below with the constructed torus inverse. -/
-theorem sourceJet_uniform_finiteJets
-    (G : (ℝ × E → F) → Prop) (J : (ℝ × E → F) → ℝ × E → F)
-    (s : Set (ℝ × E)) (loss : ℕ)
-    (hclosed : ∀ f, G f → G (RadialAlias.slowDeriv (J f)))
-    (hsmooth : ∀ f, G f → ContDiff ℝ ∞ (J f))
-    (htame : ∀ m : ℕ, ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + loss) f s C → FiniteJetBound m (J f) s (K * C))
-    (p m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + (loss + 1) * p) f s C →
-      FiniteJetBound m (RadialAlias.sourceJet J f p) s (K * C) := by
-  have hgood : ∀ p : ℕ, ∀ f, G f → G (RadialAlias.sourceJet J f p) := by
-    intro p
-    induction p with
-    | zero => exact fun _ h => h
-    | succ p ih =>
-      intro f hf
-      rw [RadialAlias.sourceJet_succ]
-      exact hclosed _ (ih f hf)
-  induction p generalizing m with
-  | zero =>
-    refine ⟨1, zero_le_one, ?_⟩
-    intro f _ C _ hb
-    simpa only [Nat.mul_zero, Nat.add_zero, RadialAlias.sourceJet_zero, one_mul] using hb
-  | succ p ih =>
-    obtain ⟨A, hA, hAbound⟩ := ih (m + 1 + loss)
-    obtain ⟨B, hB, hBbound⟩ := htame (m + 1)
-    refine ⟨B * A, mul_nonneg hB hA, ?_⟩
-    intro f hf C hC hb
-    have hsource : FiniteJetBound (m + 1 + loss + (loss + 1) * p) f s C := by
-      convert! hb using 1
-      ring
-    have hprev := hAbound f hf C hC hsource
-    have hinverse := hBbound _ (hgood p f hf) (A * C) (mul_nonneg hA hC) hprev
-    have hderiv := finiteJetBound_fixedPartial (hsmooth _ (hgood p f hf)) hinverse
-      ((1 : ℝ), (0 : E)) (by simp)
-    rw [RadialAlias.sourceJet_succ]
-    unfold RadialAlias.slowDeriv
-    simpa only [mul_assoc] using hderiv
 
 end IterationBounds
 
@@ -109,136 +67,12 @@ noncomputable def exactAlias (χ : ℝ → ℝ) (M : ℝ) (v : E)
     (f : ℝ × E → F) (z : ℝ × E) : F :=
   deriv χ z.1 • TransportPrimitive.totalIntegral M v f z
 
-theorem exactAlias_smooth {a b M : ℝ} {v : E} {χ : ℝ → ℝ} {f : ℝ × E → F}
-    (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) :
-    ContDiff ℝ ∞ (exactAlias χ M v f) :=
-  (((contDiff_infty_iff_deriv.mp hχ).2).comp contDiff_fst).smul
-    (TransportPrimitive.totalIntegral_contDiff hf hs)
-
-omit [CompleteSpace F] in
-theorem exactAlias_supported {a b M : ℝ} {v : E} {χ : ℝ → ℝ} {f : ℝ × E → F}
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) :
-    RadialAlias.RadiallySupported a b (exactAlias χ M v f) := by
-  intro z hz
-  have hl : a ≤ z.1 := by
-    by_contra hn
-    have heq : χ =ᶠ[𝓝 z.1] (fun _ => 0) :=
-      (eventually_lt_nhds (lt_of_not_ge hn)).mono (fun u hu => hleft u hu.le)
-    have hd : deriv χ z.1 = 0 := by simpa using heq.deriv_eq
-    exact hz (by simp only [exactAlias, hd, zero_smul])
-  have hr : z.1 ≤ b := by
-    by_contra hn
-    have heq : χ =ᶠ[𝓝 z.1] (fun _ => 1) :=
-      (eventually_gt_nhds (lt_of_not_ge hn)).mono (fun u hu => hright u hu.le)
-    have hd : deriv χ z.1 = 0 := by simpa using heq.deriv_eq
-    exact hz (by simp only [exactAlias, hd, zero_smul])
-  exact ⟨hl, hr⟩
 
 
-/-- Repeated integration by parts for full derivative tensors. The last
-premise bounds genuine source jets, not the alias. -/
-theorem totalIntegral_sourceJet_bound {a b M C : ℝ} {v : E}
-    (J : (ℝ × E → F) → ℝ × E → F) (f : ℝ × E → F) (p m : ℕ)
-    (hab : a ≤ b) (hM : M ≠ 0)
-    (hf : ContDiff ℝ ∞ f) (hsf : RadialAlias.RadiallySupported a b f)
-    (hJ : ∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n)))
-    (hsJ : ∀ n < p, RadialAlias.RadiallySupported a b (J (RadialAlias.sourceJet J f n)))
-    (hr : ∀ n < p, RadialAlias.directionalDeriv v (J (RadialAlias.sourceJet J f n)) =
-      RadialAlias.sourceJet J f n)
-    (hbound : FiniteJetBound m (RadialAlias.sourceJet J f p) (Prod.fst ⁻¹' Icc a b) C)
-    (j : ℕ) (hj : j ≤ m) (z : ℝ × E) :
-    ‖iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M v f) z‖ ≤
-      (C * (b - a)) * (|M|⁻¹) ^ p := by
-  have hg : ContDiff ℝ ∞ (RadialAlias.sourceJet J f p) := by
-    cases p with
-    | zero => exact hf
-    | succ p =>
-      rw [RadialAlias.sourceJet_succ]
-      exact TransportPrimitive.fixedDeriv_contDiff (hJ p (Nat.lt_succ_self p)) (1, 0)
-  have hsg := RadialAlias.sourceJet_radiallySupported J f p hsf hsJ
-  have heq : TransportPrimitive.totalIntegral M v f = fun z =>
-      (-M⁻¹) ^ p • TransportPrimitive.totalIntegral M v (RadialAlias.sourceJet J f p) z := by
-    funext w
-    rw [TransportPrimitive.totalIntegral_eq_wholeAlias hf.continuous hsf,
-      TransportPrimitive.totalIntegral_eq_wholeAlias hg.continuous hsg]
-    exact RadialAlias.wholeAlias_sourceJet J f p hM
-      (fun n hn => (hJ n hn).of_le (by simp)) hsJ hr
-  rw [heq, iteratedFDeriv_const_smul_apply'
-    ((TransportPrimitive.totalIntegral_contDiff hg hsg).of_le (natCast_le_infty j)).contDiffAt]
-  have hn := norm_smul ((-M⁻¹) ^ p : ℝ)
-    (iteratedFDeriv ℝ j (TransportPrimitive.totalIntegral M v (RadialAlias.sourceJet J f p)) z)
-  rw [hn, Real.norm_eq_abs, abs_pow, abs_neg, abs_inv, mul_comm]
-  apply mul_le_mul_of_nonneg_right _ (by positivity)
-  exact TransportPrimitive.iteratedFDeriv_totalIntegral_norm_le hab hg hsg j
-    (fun u hu Y => hbound j hj (u, Y) hu) z
-
-/-- A source-independent constant for the compactification defect, retaining
-the entire cutoff Leibniz expansion. -/
-theorem exactAlias_sourceJet_bound {a b : ℝ} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (M : ℝ) (v : E) (J : (ℝ × E → F) → ℝ × E → F)
-      (f : ℝ × E → F) (p : ℕ) (C : ℝ), M ≠ 0 → 0 ≤ C →
-      ContDiff ℝ ∞ f → RadialAlias.RadiallySupported a b f →
-      (∀ n < p, ContDiff ℝ ∞ (J (RadialAlias.sourceJet J f n))) →
-      (∀ n < p, RadialAlias.RadiallySupported a b (J (RadialAlias.sourceJet J f n))) →
-      (∀ n < p, RadialAlias.directionalDeriv v (J (RadialAlias.sourceJet J f n)) =
-        RadialAlias.sourceJet J f n) →
-      FiniteJetBound m (RadialAlias.sourceJet J f p) (Prod.fst ⁻¹' Icc a b) C →
-      ∀ j ≤ m, ∀ z : ℝ × E,
-        ‖iteratedFDeriv ℝ j (exactAlias χ M v f) z‖ ≤ K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨B, hB, hcut⟩ := RadialPullback.radial_multiplier_finiteJets_uniform (E := E) (V := F)
-    a b (contDiff_infty_iff_deriv.mp hχ).2 m
-  have hL : 0 ≤ b - a := sub_nonneg.mpr hab
-  refine ⟨B * (b - a), mul_nonneg hB hL, ?_⟩
-  intro M v J f p C hM hC hf hs hJ hsJ hr hb j hj z
-  by_cases hz : z.1 ∈ Icc a b
-  · have h := hcut (TransportPrimitive.totalIntegral M v f)
-      (TransportPrimitive.totalIntegral_contDiff hf hs) z hz (C * (b - a) * (|M|⁻¹) ^ p)
-      (by positivity)
-      (fun i hi => totalIntegral_sourceJet_bound J f p m hab hM hf hs hJ hsJ hr hb i hi z)
-      j hj
-    convert! h using 1
-    ring
-  · have hsj := TransportPrimitive.iteratedFDeriv_supported
-      (exactAlias_supported (M := M) (v := v) (f := f) hleft hright) j
-    have heq : iteratedFDeriv ℝ j (exactAlias χ M v f) z = 0 := by
-      by_contra hnonzero
-      exact hz (hsj hnonzero)
-    rw [heq, norm_zero]
-    positivity
 
 
-theorem exactAlias_uniform_of_inverse {a b : ℝ} {v : E} {χ : ℝ → ℝ}
-    (G : (ℝ × E → F) → Prop) (J : (ℝ × E → F) → ℝ × E → F) (loss : ℕ)
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1)
-    (hregular : ∀ f, G f → ContDiff ℝ ∞ f ∧ RadialAlias.RadiallySupported a b f)
-    (hsmooth : ∀ f, G f → ContDiff ℝ ∞ (J f))
-    (hsupport : ∀ f, G f → RadialAlias.RadiallySupported a b (J f))
-    (hsolve : ∀ f, G f → RadialAlias.directionalDeriv v (J f) = f)
-    (hclosed : ∀ f, G f → G (RadialAlias.slowDeriv (J f)))
-    (htame : ∀ m : ℕ, ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + loss) f (Prod.fst ⁻¹' Icc a b) C →
-        FiniteJetBound m (J f) (Prod.fst ⁻¹' Icc a b) (K * C)) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ f, G f → ∀ C : ℝ, 0 ≤ C →
-      FiniteJetBound (m + (loss + 1) * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × E,
-        ‖iteratedFDeriv ℝ j (exactAlias χ M v f) z‖ ≤ K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨A, hA, hAbound⟩ := exactAlias_sourceJet_bound (E := E) (F := F)
-    hab hχ hleft hright m
-  obtain ⟨B, hB, hBbound⟩ := sourceJet_uniform_finiteJets G J (Prod.fst ⁻¹' Icc a b)
-    loss hclosed hsmooth htame p m
-  refine ⟨A * B, mul_nonneg hA hB, ?_⟩
-  intro f hf C hC hb M hM j hj z
-  have h := hAbound M v J f p (B * C) hM (mul_nonneg hB hC)
-    (hregular f hf).1 (hregular f hf).2
-    (fun n _ => hsmooth _ (sourceJet_mem G J hclosed n hf))
-    (fun n _ => hsupport _ (sourceJet_mem G J hclosed n hf))
-    (fun n _ => hsolve _ (sourceJet_mem G J hclosed n hf))
-    (hBbound f hf C hC hb) j hj z
-  simpa only [mul_assoc] using h
+
+
 
 end Integrals
 
@@ -280,20 +114,7 @@ theorem norm_iteratedFDeriv_totalIntegral_complexify {a b M : ℝ} {v : E}
   rw [totalIntegral_complexify]
   exact norm_iteratedFDeriv_complexify (TransportPrimitive.totalIntegral_contDiff hf hs) m z
 
-theorem exactAlias_complexify (χ : ℝ → ℝ) (M : ℝ) (v : E) (f : ℝ × E → ℝ) :
-    exactAlias χ M v (complexify f) = complexify (exactAlias χ M v f) := by
-  funext z
-  rw [exactAlias, totalIntegral_complexify]
-  exact (Complex.ofRealCLM.map_smul (deriv χ z.1)
-    (TransportPrimitive.totalIntegral M v f z)).symm
 
-theorem norm_iteratedFDeriv_exactAlias_complexify {a b M : ℝ} {v : E}
-    {χ : ℝ → ℝ} {f : ℝ × E → ℝ} (hχ : ContDiff ℝ ∞ χ) (hf : ContDiff ℝ ∞ f)
-    (hs : RadialAlias.RadiallySupported a b f) (m : ℕ) (z : ℝ × E) :
-    ‖iteratedFDeriv ℝ m (exactAlias χ M v (complexify f)) z‖ =
-      ‖iteratedFDeriv ℝ m (exactAlias χ M v f) z‖ := by
-  rw [exactAlias_complexify]
-  exact norm_iteratedFDeriv_complexify (exactAlias_smooth hχ hf hs) m z
 
 end RealTransfer
 
@@ -309,13 +130,7 @@ noncomputable def toProduct (f : ℝ × (S × Plane) → F) (z : (ℝ × S) × P
 noncomputable def fromProduct (f : (ℝ × S) × Plane → F) (z : ℝ × (S × Plane)) : F :=
   f ((z.1, z.2.1), z.2.2)
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] [NormedAddCommGroup F] [NormedSpace ℝ F] in
-@[simp] theorem fromProduct_toProduct (f : ℝ × (S × Plane) → F) :
-    fromProduct (toProduct f) = f := rfl
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] [NormedAddCommGroup F] [NormedSpace ℝ F] in
-@[simp] theorem toProduct_fromProduct (f : (ℝ × S) × Plane → F) :
-    toProduct (fromProduct f) = f := rfl
 
 theorem toProduct_smooth {f : ℝ × (S × Plane) → F} (hf : ContDiff ℝ ∞ f) :
     ContDiff ℝ ∞ (toProduct f) :=
@@ -343,8 +158,6 @@ noncomputable def sourceMean (f : ℝ × (S × Plane) → F) (p : ℝ × S) : F 
 noncomputable def SourcePeriodic (f : ℝ × (S × Plane) → F) : Prop :=
   ∀ U s, FourierAlias.TorusPeriodic (fun Y => f (U, (s, Y)))
 
-noncomputable def radialSlice (f : ℝ × (S × Plane) → F) (s : S) (z : ℝ × Plane) : F :=
-  f (z.1, (s, z.2))
 
 
 
@@ -643,46 +456,9 @@ theorem admissible_step (d : Direction) {a b : ℝ} {f : ℝ × (S × Plane) →
     exact SmoothFamilyTorusInverse.parameterPartial_zeroMean (toProduct_smooth hi)
       (familyInverse_zeroMean d hf.1 hf.2.1) (1, 0)
 
-theorem familyInverse_finiteJets (d : Direction) (a b : ℝ) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℂ) (C : ℝ),
-      ContDiff ℝ ∞ f → SmoothFamilyTorusInverse.Periodic (toProduct f) → 0 ≤ C →
-      FiniteJetBound (m + 5) f (Prod.fst ⁻¹' Icc a b) C →
-      FiniteJetBound m (familyInverse d f) (Prod.fst ⁻¹' Icc a b) (K * C) := by
-  obtain ⟨K, hK, hb⟩ := SmoothFamilyTorusInverse.inverse_finiteJets (P := ℝ × S) d m
-  refine ⟨K, hK, ?_⟩
-  intro f C hf hp hC hsource
-  have hin : SmoothFamilyTorusInverse.JetBound (toProduct f)
-      (Prod.fst ⁻¹' Icc a b) (m + 5) C := by
-    intro j hj p hpA Y
-    rw [norm_iteratedFDeriv_toProduct]
-    exact hsource j hj (p.1, (p.2, Y)) hpA
-  have hout := hb (toProduct f) (Prod.fst ⁻¹' Icc a b) C (toProduct_smooth hf) hp hC hin
-  intro j hj z hz
-  change ‖iteratedFDeriv ℝ j (fromProduct (SmoothFamilyTorusInverse.inverse d (toProduct f))) z‖ ≤ _
-  rw [norm_iteratedFDeriv_fromProduct]
-  exact hout j hj (z.1, z.2.1) hz z.2.2
 
 
 
-/-- The retained alias has the same arbitrary inverse-frequency gain, with
-all source dependence confined to a finite actual derivative bound. -/
-theorem exactAlias_finiteJets (d : Direction) {a b : ℝ} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℂ), Admissible a b f →
-      ∀ C : ℝ, 0 ≤ C → FiniteJetBound (m + 6 * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-        ‖iteratedFDeriv ℝ j (exactAlias χ M ((0 : S), vector d) f) z‖ ≤
-          K * C * (|M|⁻¹) ^ p := by
-  apply exactAlias_uniform_of_inverse (Admissible a b) (familyInverse d) 5 hab hχ hleft hright
-    (fun _ hf => ⟨hf.1, hf.2.2.2⟩)
-    (fun _ hf => familyInverse_smooth d hf.1 hf.2.1)
-    (fun _ hf => familyInverse_supported d hf.2.2.2)
-    (fun _ hf => familyInverse_solves d hf.1 hf.2.1 hf.2.2.1)
-    (fun _ hf => admissible_step d hf) _ m p
-  intro k
-  obtain ⟨K, hK, hb⟩ := familyInverse_finiteJets (S := S) d a b k
-  exact ⟨K, hK, fun f hf C hC hsource => hb f C hf.1 hf.2.1 hC hsource⟩
 
 end TransportInverse
 
@@ -693,84 +469,7 @@ open WeightedRadialPrimitive WeightedClasses
 variable {E F : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- The flat radial weight absorbs every fixed inverse-edge power, giving a
-global finite seminorm bound for a genuine mean-class family. -/
-theorem meanClass_global_finiteJets {a b cL cR : ℝ} (ha : 0 < a)
-    (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    {α : ℝ} {f : ℕ → ℝ × E → F}
-    (hf : MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α f)
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∃ q : ℕ, ∀ n,
-      FiniteJetBound m (f n) Set.univ (C * ε n ^ α * S n ^ q) := by
-  obtain ⟨C, hC, q, hb⟩ := hf.bounds m
-  obtain ⟨W, hW, hw⟩ := weight_uniform_bound hcL hcR (logLength a b) q
-  refine ⟨C * W, mul_nonneg hC hW, q, ?_⟩
-  intro n j hj z _
-  have hεα : 0 < ε n ^ α := Real.rpow_pos_of_pos (hε n) α
-  have hSn : 0 ≤ S n := zero_le_one.trans (hS n)
-  by_cases hz : z.1 ∈ Ioo a b
-  · have h := hb n z hz j hj
-    rw [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α C q n z hz] at h
-    calc
-      _ ≤ (C * ε n ^ α * S n ^ q) * logWeight cL cR a b q z.1 := h
-      _ ≤ (C * ε n ^ α * S n ^ q) * W :=
-        mul_le_mul_of_nonneg_left (hw _ (logPosition_mem ha hz))
-          (by positivity)
-      _ = (C * W) * ε n ^ α * S n ^ q := by ring
-  · have hsj := TransportPrimitive.iteratedFDeriv_supported (hs n) j
-    have heq : iteratedFDeriv ℝ j (f n) z = 0 := by
-      have hc : Continuous (fun u : ℝ => iteratedFDeriv ℝ j (f n) (u, z.2)) :=
-        (TransportPrimitive.iteratedFDeriv_contDiff (hfc n) j).continuous.comp
-          (continuous_id.prodMk continuous_const)
-      have hsupport : support (fun u : ℝ => iteratedFDeriv ℝ j (f n) (u, z.2)) ⊆ Ioo a b := by
-        simpa only [interior_Icc] using hc.isOpen_support.subset_interior_iff.mpr
-          (show support (fun u : ℝ => iteratedFDeriv ℝ j (f n) (u, z.2)) ⊆ Icc a b from
-            fun u hu => hsj hu)
-      by_contra hn
-      exact hz (hsupport hn)
-    rw [heq, norm_zero]
-    positivity
 
-/-- The actual power-chart normalization transports the source family class;
-all constants are uniform in the band and every auxiliary variable. -/
-theorem meanClass_normalizeSource {a b d cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hS : ∀ n, 1 ≤ S n)
-    {α : ℝ} {f : ℕ → ℝ × E → F}
-    (hf : MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) :
-    MeanClass (logStripData (a ^ d) (b ^ d) (d ^ 2 * cL) (d ^ 2 * cR)
-      (Real.rpow_pos_of_pos ha d) (mul_pos (sq_pos_of_pos hd) hcL) (mul_pos (sq_pos_of_pos hd) hcR)
-      ε S hε hεone hS) α (fun n => RadialPullback.normalizeSource d a (f n)) := by
-  let st := logStripData (E := E) (a ^ d) (b ^ d) (d ^ 2 * cL) (d ^ 2 * cR)
-    (Real.rpow_pos_of_pos ha d) (mul_pos (sq_pos_of_pos hd) hcL) (mul_pos (sq_pos_of_pos hd) hcR)
-    ε S hε hεone hS
-  refine ⟨fun n z hz => st.zeta_nonneg z hz, ?_, ?_⟩
-  · intro n
-    exact (RadialPullback.normalizeSource_contDiff ha hd (hfc n)).contDiffOn
-  · intro m
-    obtain ⟨C, hC, q, hb⟩ := hf.bounds m
-    obtain ⟨K, hK, hnorm⟩ := RadialPullback.normalizeSource_finiteJets_uniform (E := E) (V := F)
-      ha hab hd cL cR q m
-    refine ⟨K * C, mul_nonneg hK hC, q, ?_⟩
-    intro n z hz j hj
-    have hεα : 0 < ε n ^ α := Real.rpow_pos_of_pos (hε n) α
-    have hSn : 0 ≤ S n := zero_le_one.trans (hS n)
-    have hinput : ∀ i ≤ m, ∀ R ∈ Ioo a b, ∀ Y : E,
-        ‖iteratedFDeriv ℝ i (f n) (R, Y)‖ ≤
-          (C * ε n ^ α * S n ^ q) * logWeight cL cR a b q R := by
-      intro i hi R hR Y
-      have h := hb n (R, Y) hR i hi
-      rwa [logStrip_majorant_eq ha hcL hcR ε S hε hεone hS α C q n (R, Y) hR] at h
-    have h := hnorm (f n) (hfc n) (C * ε n ^ α * S n ^ q) (by positivity)
-      hinput z hz j hj
-    rw [logStrip_majorant_eq (Real.rpow_pos_of_pos ha d)
-      (mul_pos (sq_pos_of_pos hd) hcL) (mul_pos (sq_pos_of_pos hd) hcR)
-      ε S hε hεone hS α (K * C) q n z hz]
-    convert! h using 1
-    ring
 
 end MeanClassBounds
 
@@ -874,22 +573,6 @@ theorem admissible_complexify {a b : ℝ} {f : ℝ × (S × Plane) → ℝ}
     rw [mean_toProduct, sourceMean_complexify, hm p, Complex.ofReal_zero]
 
 
-theorem real_exactAlias_finiteJets (d : Direction) {a b : ℝ} {χ : ℝ → ℝ}
-    (hab : a ≤ b) (hχ : ContDiff ℝ ∞ χ)
-    (hleft : ∀ u ≤ a, χ u = 0) (hright : ∀ u, b ≤ u → χ u = 1) (m p : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ (f : ℝ × (S × Plane) → ℝ), ContDiff ℝ ∞ f → SourcePeriodic f →
-      (∀ q, sourceMean f q = 0) → RadialAlias.RadiallySupported a b f →
-      ∀ C : ℝ, 0 ≤ C → FiniteJetBound (m + 6 * p) f (Prod.fst ⁻¹' Icc a b) C →
-      ∀ M : ℝ, M ≠ 0 → ∀ j ≤ m, ∀ z : ℝ × (S × Plane),
-        ‖iteratedFDeriv ℝ j (exactAlias χ M ((0 : S), vector d) f) z‖ ≤ K * C * (|M|⁻¹) ^ p := by
-  obtain ⟨K, hK, hb⟩ := exactAlias_finiteJets (S := S) d hab hχ hleft hright m p
-  refine ⟨K, hK, ?_⟩
-  intro f hf hp hm hs C hC hsource M hM j hj z
-  rw [← norm_iteratedFDeriv_exactAlias_complexify hχ hf hs]
-  apply hb (complexify f) (admissible_complexify hf hp hm hs) C hC _ M hM j hj z
-  intro i hi x hx
-  rw [norm_iteratedFDeriv_complexify hf]
-  exact hsource i hi x hx
 
 
 

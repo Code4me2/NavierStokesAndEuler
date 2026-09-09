@@ -908,25 +908,6 @@ theorem native_cancellation {x : CycleState (Label B N0)} (Hc : PreservesCarrier
     (native_geometry x l j n hR hT).radial_radius (data x l j).source
     (native_principal Hc j hj Hs l n k hz)
 
-theorem native_realizes_curl {x : CycleState (Label B N0)} (Hc : PreservesCarriers x)
-    {α : ℝ} (j : ℤ) (hj : j ≠ 0)
-    (Hs : LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
-      nativeEnvelope α (currentSource x j))
-    (l : Label B N0) (n : ℕ) (k : Frequency) {z : Native}
-    (hz : z ∈ controlPatch l n k) :
-    CurlClassBounds.cylindricalCurl ((data x l j).background.radius n)
-      ((directions (B := B)).radialField n) (fun _ => (directions (B := B)).angular)
-      ((directions (B := B)).axialField (ParticularParameters.nativeStrip associatedStrip) n)
-      (((data x l j).localized k).curlPotential (ParticularParameters.nativeStrip associatedStrip)
-        (directions (B := B)) n) z =
-      vectorMode ((data x l j).background.frequency n) ((data x l j).background.phase n)
-        (((data x l j).corrected (ParticularParameters.nativeStrip associatedStrip)
-          (directions (B := B)) k).amplitude n) z :=
-  ClosedNativeWaveIdentities.native_realizes_curl_at (a := data x l j)
-    (s := ParticularParameters.nativeStrip associatedStrip) (d := directions (B := B)) n k z
-    (native_rawJets Hc j hj Hs l n k hz) (frequency_ne Hc l j hj n)
-    (native_tangency_germ Hc j hj Hs l n k hz).eq_of_nhds
 
 theorem native_divergence_zero {x : CycleState (Label B N0)} (Hc : PreservesCarriers x)
     {α : ℝ} (j : ℤ) (hj : j ≠ 0)
@@ -1014,26 +995,6 @@ theorem common_cancellation {x : CycleState (Label B N0)} (Hc : PreservesCarrier
     exact CorrectionStep.local_cancellation_of_zero_germs _ _ _ ha' hp'
       ((data x l j).localGaussian_zero_of_fields _ ha hf) hf
 
-theorem common_realizes_curl {x : CycleState (Label B N0)} (Hc : PreservesCarriers x)
-    {α : ℝ} (j : ℤ) (hj : j ≠ 0)
-    (Hs : LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
-      nativeEnvelope α (currentSource x j))
-    (l : Label B N0) (S : SupportData x l j) (n : ℕ) {z : Native}
-    (hz : z ∈ (ParticularParameters.nativeStrip associatedStrip).domain) :
-    CurlClassBounds.cylindricalCurl ((data x l j).background.radius n)
-      ((directions (B := B)).radialField n) (fun _ => (directions (B := B)).angular)
-      ((directions (B := B)).axialField (ParticularParameters.nativeStrip associatedStrip) n)
-      ((data x l j).common.curlPotential (ParticularParameters.nativeStrip associatedStrip)
-        (directions (B := B)) n) z =
-      vectorMode ((actualWave x l j).frequency n) ((actualWave x l j).phase n)
-        ((actualWave x l j).amplitude n) z := by
-  apply (data x l j).common_realizes_curl S.cells S.cutoff_support
-    (ParticularParameters.nativeStrip associatedStrip) (directions (B := B)) ?_ n hz
-  intro m k y hy hk
-  rcases S.localized_alternative hy hk with hc | ⟨ha,_⟩
-  · exact native_realizes_curl Hc j hj Hs l m k hc
-  · exact (LocalizedCurlRealization.native_identities_of_zero_germ _ _ _ ha).1
 
 theorem common_divergence_zero {x : CycleState (Label B N0)} (Hc : PreservesCarriers x)
     {α : ℝ} (j : ℤ) (hj : j ≠ 0)

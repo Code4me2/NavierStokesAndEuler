@@ -21,8 +21,6 @@ variable (k : ℝ) (m : Vector3) (T : ℝ) (hT : 0 ≤ T)
 def graphCoefficient : SmoothTimeField (Icc (0 : ℝ) T) Vector3 Vector3 :=
   (A.precompLinear (graphLinear k m)).map (fst ℝ Vector3 ℝ)
 
-@[simp] theorem graphCoefficient_apply (t : Icc (0 : ℝ) T) (x : Vector3) :
-    (graphCoefficient k m T A).field t x = (A.field t (graphLinear k m x)).1 := rfl
 
 theorem graphCoefficient_timeDerivative
     (A₁ : SmoothTimeField (Icc (0 : ℝ) T) LiftTangent LiftTangent)

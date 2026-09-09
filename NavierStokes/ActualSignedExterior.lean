@@ -317,9 +317,6 @@ theorem pressure_zero_germ {w : SpaceTime} (hw : w ∈ preterminal) (hout : w �
   filter_upwards [exterior_open.mem_nhds ⟨hw, hout⟩] with y hy
   exact pressure_zero s hy.1 hy.2
 
-theorem velocity_zero {w : SpaceTime} (hw : w ∈ preterminal) (hout : w ∉ active) :
-    SpatialCurl.spatialCurl (potential s) w = 0 :=
-  PhysicalCurlCovariance.spatialCurl_zero_of_zero_near (potential_zero_germ s hw hout)
 
 
 end Fields

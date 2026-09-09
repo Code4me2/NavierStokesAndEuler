@@ -281,12 +281,6 @@ theorem slice_continuous {Ω : Set ℂ} {F : CField} (hΩ : IsOpen Ω)
   exact ((hF.contDiffAt ((isOpen_univ.prod hΩ).mem_nhds ⟨mem_univ _,hz⟩)).comp x
     (contDiffAt_id.prodMk contDiffAt_const)).continuousAt
 
-theorem primitive_hasDerivAt {Ω : Set ℂ} {F : CField} (hΩ : IsOpen Ω)
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ Ω)) {p : CPoint} (hp : p.2 ∈ Ω) :
-    HasDerivAt (fun x => primitive F (x,p.2)) (F p) p.1 := by
-  have hc := slice_continuous hΩ hF hp
-  exact intervalIntegral.integral_hasDerivAt_right (hc.intervalIntegrable 0 p.1)
-    hc.aestronglyMeasurable.stronglyMeasurableAtFilter hc.continuousAt
 
 def dampedSlope (δ : ℝ) (G : CField) (p : CPoint) : ℂ :=
   (ReferencePath.slopeCutoff δ p.1 : ℂ) * radial G p
@@ -331,13 +325,6 @@ theorem regular_continuation {T δ : ℝ} (hT : 0 < T) (hδ : 0 < δ) (hδT : 2*
       exact hG.holomorphic 0 hT
   exact hzero.add hi
 
-theorem continuation_hasDerivAt {T δ : ℝ} (hδ : 0 < δ) (hδT : 2*δ < T)
-    {Ω : Set ℂ} (hΩ : IsOpen Ω) {G : CField} (hG : Regular (Iio T) Ω G)
-    {p : CPoint} (hp : p.2 ∈ Ω) :
-    HasDerivAt (fun x => continuation δ G (x,p.2)) (dampedSlope δ G p) p.1 := by
-  unfold continuation
-  simpa only [zero_add] using (hasDerivAt_const p.1 (G (0,p.2))).fun_add
-    (primitive_hasDerivAt hΩ (regular_dampedSlope hδ hδT hΩ hG).smooth hp)
 
 theorem continuation_eq_initial {T δ : ℝ} (_ : 0 < T) (hδ : 0 < δ) (hδT : 2*δ < T)
     {Ω : Set ℂ} (hΩ : IsOpen Ω) {G : CField} (hG : Regular (Iio T) Ω G)
@@ -548,8 +535,6 @@ theorem logU_real (t η : ℝ) : E.logU (t,(η : ℂ)) = (N.logU (t,η) : ℂ) :
 
 def refLog (δ : ℝ) : CField := continuation δ E.logF
 def refAxial (δ : ℝ) : CField := continuation δ E.logU
-def refF (δ : ℝ) : CField := attach N E.f (fun p => Complex.exp (E.refLog δ p))
-def refU (δ : ℝ) : CField := attach N E.U (E.refAxial δ)
 def actLog (T κ δ : ℝ) : CField := controlled T κ (E.refLog δ)
 def actAxial (T κ δ : ℝ) : CField := controlled T κ (E.refAxial δ)
 def actF (T κ δ : ℝ) : CField := attach N E.f (fun p => Complex.exp (E.actLog T κ δ p))
@@ -894,21 +879,8 @@ theorem exists_natural_extension (hΛ : 0 < Λ) (hsmall : NaturalAxisData.SmallP
 
 end NaturalConstruction
 
-def radialJet (F : CField) (k : ℕ) (p : CPoint) : ℂ :=
-  iteratedDeriv k (fun x => F (x,p.2)) p.1
 
-theorem radialJet_succ (F : CField) (k : ℕ) : radialJet F (k+1) = radial (radialJet F k) := by
-  funext p
-  simp only [radialJet,radial,iteratedDeriv_succ]
 
-theorem Regular.radialJet {S : Set ℝ} {Ω : Set ℂ} {F : CField}
-    (hF : Regular S Ω F) (hS : IsOpen S) (hΩ : IsOpen Ω) (k : ℕ) :
-    Regular S Ω (radialJet F k) := by
-  induction k with
-  | zero =>
-    unfold ActivationHolomorphic.radialJet
-    simpa only [iteratedDeriv_zero,Prod.eta] using hF
-  | succ k ih => rw [radialJet_succ]; exact ih.radial hS hΩ
 
 theorem scale_half_interval {R : ℝ} (hR : 0 < R) {x : ℝ} (hx : x ∈ Ioi (-R))
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) : t*x ∈ Ioi (-R) := by

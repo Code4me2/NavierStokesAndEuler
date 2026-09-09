@@ -209,12 +209,6 @@ theorem memClass_of_local_and_complement_germs
         ((majorant_mono_degree s w α hC₀ (le_max_right _ _) n x (hw n x hx)).trans
           (majorant_mono_constant s w α (le_add_of_nonneg_left hC) _ n x (hw n x hx)))
 
-omit [NormedSpace ℝ D] [NormedSpace ℝ E] in
-theorem source_zero_germ (K : Cells D I) {f : ℕ → D → E}
-    (hs : ∀ n, support (f n) ⊆ ⋃ i, K.carrier n i) {n : ℕ} {x : D}
-    (hx : ∀ i, x ∉ K.carrier n i) : f n =ᶠ[𝓝 x] fun _ => 0 :=
-  zero_germ_of_support ((K.locallyFinite n).isClosed_iUnion (K.closed n)) (hs n)
-    (by simpa only [mem_iUnion, not_exists] using hx)
 
 end LocalGluing
 
@@ -410,15 +404,6 @@ theorem add (hf : LocalJets s w α K f) (hg : LocalJets s w α K g)
         (majorant_mono_degree s w α hB (Nat.le_add_left _ _) n x (hw n x hx))
     _ = _ := by unfold majorant; ring
 
-theorem fderiv (hf : LocalJets s w α K f) :
-    LocalJets s w α K (fun n i => _root_.fderiv ℝ (f n i)) := by
-  refine ⟨fun n i x hx hi => (hf.smooth n i x hx hi).fderiv_right (by simp), ?_⟩
-  intro m
-  obtain ⟨C, hC, p, hb⟩ := hf.bounds (m + 1)
-  refine ⟨C, hC, p, ?_⟩
-  intro n i x hx hi j hj
-  rw [norm_iteratedFDeriv_fderiv]
-  exact hb n i x hx hi (j + 1) (Nat.add_le_add_right hj 1)
 
 theorem bilinear {u : ℕ → I → D → F} (hf : LocalJets s w α K f)
     (hu : LocalJets s v β K u) (L : E →L[ℝ] F →L[ℝ] G)
@@ -449,13 +434,6 @@ theorem smul {r : ℕ → I → D → ℝ} (hr : LocalJets s (fun _ _ => 1) 0 K 
   simp only [one_mul, zero_add] at h
   exact h
 
-theorem band_smul {r : ℕ → ℝ} (hf : LocalJets s w α K f)
-    (hr : BandBound s 0 r) (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x) :
-    LocalJets s w α K (fun n i x => r n • f n i x) := by
-  have hc : UnweightedClass s 0 (fun n (_ : D) => r n) := by
-    have h := (unweighted_const s (1 : ℝ)).band_smul hr
-    simpa using h
-  exact (LocalJets.of_memClass hc).smul hf hw
 
 end LocalJets
 
@@ -955,28 +933,6 @@ theorem globalGood_class_of_native (K : Cells D I)
 
 
 
-theorem localGaussian_wave_jets {s : StripData D} (d : GraphDirections D)
-    {K : ℕ → I → Set D} {w : ℕ → D → ℝ} {α : ℝ}
-    (hw : ∀ n x, x ∈ s.domain → 0 ≤ w n x)
-    (hψ : LocalJets s (fun _ _ => 1) 0 K a.cutoff)
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : LocalJets s w α K a.amplitude)
-    (hf : LocalJets s w α K (fun n _ => a.source n)) :
-    LocalJets s w α K (a.localGaussian d) := by
-  have hdir := (hψ.fderiv.map (ContinuousLinearMap.apply ℝ ℝ d.fast)).band_smul hfast
-    (fun _ _ _ => zero_le_one)
-  have hD : LocalJets s (fun _ _ => 1) 0 K
-      (fun n i => d.Dfast (fun n => a.cutoff n i) n) := by
-    convert! hdir using 1
-    funext n i x
-    simp [GraphDirections.Dfast, GraphDirections.fastField, HarmonicCalculus.along]
-  have hconst : LocalJets s (fun _ _ => 1) 0 K (fun _ _ (_ : D) => (1 : ℝ)) :=
-    LocalJets.of_memClass (unweighted_const s 1)
-  have hneg := hψ.map (-ContinuousLinearMap.id ℝ ℝ)
-  have hminus : LocalJets s (fun _ _ => 1) 0 K (fun n i x => 1 - a.cutoff n i x) := by
-    simpa only [_root_.neg_apply, ContinuousLinearMap.id_apply, sub_eq_add_neg] using
-      hconst.add hneg (fun _ _ _ => zero_le_one)
-  exact (hD.smul hu hw).add (hminus.smul hf hw) hw
 
 theorem localGaussian_zero_of_cutoff_one (d : GraphDirections D)
     {n : ℕ} {i : I} {x : D} (hψ : a.cutoff n i =ᶠ[𝓝 x] fun _ => 1) :
@@ -1162,18 +1118,6 @@ noncomputable def complexCopyData (base : WaveCoefficients (P × Plane))
 
 
 
-/-- The data-only binding to the actual fixed-reference particular solve.
-The source is the literal coefficient of the incoming harmonic residual;
-no inverse, output field, or residual witness is supplied separately. -/
-noncomputable def particularData (r : Reference P) (charts : BandCharts P)
-    (c : Context (P × Plane)) (u : State (P × Plane)) (b : HarmonicBlock (P × Plane))
-    (G A : HarmonicResidual.BlockCoefficients (P × Plane)) (j : ℤ)
-    (base : WaveCoefficients ((P × ℝ) × Plane)) : CopyData ((P × ℝ) × Plane) Frequency where
-  background := actualCarrier base b j
-  amplitude n k := (actualCopyCoefficients r charts c u b G A j base (fun _ => k)).amplitude n
-  pressure n k := (actualCopyCoefficients r charts c u b G A j base (fun _ => k)).pressure n
-  cutoff n k z := r.cutoff ((bandGeometry r charts n).coordinates k z.2)
-  source n := angleLift (residualSource c u b G A j n)
 
 
 

@@ -218,19 +218,7 @@ theorem pressure_support :
     rw [← hloc.mask_pullback ⟨I.1.val, I.1.property, hL⟩ w hw]
     exact hm
 
-omit hloc G hh0 hh1 hb in
-noncomputable def potentialCarrier (hp : NativeProfiles (h := h) f) (i : Fin 3) :
-    PhysicalCopyBounds.CarrierBounds (potentialCopies sys hh f i)
-      (potentialCells sys hh f i) (a / 4) (2 * b) h sys.radius :=
-  PositiveTimeCopyFamily.gateCarrier (localizedPotentialCells sys hh f i)
-    (ActualSignedPhysicalData.potentialCarrier sys hh f ha hp i)
 
-omit hloc G hh0 hh1 hb in
-noncomputable def pressureCarrier (hp : NativeProfiles (h := h) f) :
-    PhysicalCopyBounds.CarrierBounds (pressureCopies sys hh f)
-      (pressureCells sys hh f) (a / 4) (2 * b) h sys.radius :=
-  PositiveTimeCopyFamily.gateCarrier (localizedPressureCells sys hh f)
-    (ActualSignedPhysicalData.pressureCarrier sys hh f ha hp)
 
 omit hloc G hh0 hh1 hb in
 theorem potential_amplitude_smooth (hn : NativeRegular sys hh f)
@@ -392,75 +380,7 @@ variable (hp : NativeProfiles (h := h) f) (hn : NativeRegular sys hh f)
     |((f.primary L).pulse (f.column L)).phase.x0 L.val.1| ≤ P)
   {α : ℝ} {w : SourceIndex → ℕ → Native → ℝ}
 
-/-- A physical potential datum using the original source bounds and the
-proved positive-time support.  No off-past localization is required. -/
-noncomputable def potentialWaveData
-    (hs : LocalPhysicalCopyBounds.LocalSourceBounds s h α w
-      (nativePotentialSource sys hh f)) :
-    PhysicalStageBounds.WaveData h LiftPoint (Fin 3 × SourceIndex) Frequency (Fin 3) where
-  lowerRadius := a / 4
-  upperRadius := 2 * b
-  nativeWidth := sys.radius
-  slowBound := 2
-  frequencyBound := P
-  alpha := α
-  shift := -h
-  harmonics := 1
-  gapBound := 0
-  lower_pos := div_pos ha (by norm_num)
-  width_nonneg := sys.radius_pos.le
-  slow_nonneg := by norm_num
-  frequency_one_le := hP
-  strip := CartesianCopySource.pullStrip s (a / 4) (2 * b) (div_pos ha (by norm_num))
-  weight I n x := w I.2 n (PhysicalClassBounds.cylindricalMap x)
-  source I n x := CartesianCopySource.rotatedSource (nativePotentialSource sys hh f) I.2 n x I.1
-  source_bounds := componentSourceBounds (CartesianCopySource.sourceBounds_rotated
-    (b := 2 * b) (div_pos ha (by norm_num)) hs)
-  copies := potentialCopies sys hh f
-  cells := potentialCells sys hh f
-  chart i := identitySourceChart _ _ (div_pos ha (by norm_num))
-    (potential_support sys hh f hloc G hh0 hh1 ha hb i) _ _ (fun k I => (i, I, k))
-    (potential_amplitude_eq_source sys hh f i)
-    (potential_source_domain sys hh f hloc hh0 hh1 ha hb i)
-  chart_maps _ _ _ := fun _ hx => hx.1
-  carrier := potentialCarrier sys hh f ha hp
-  support := potential_support sys hh f hloc G hh0 hh1 ha hb
-  smooth := potentialSmooth sys hh f hloc G hh0 hh1 ha hb hp hn
-  frequencies _ := carrier_frequencies f hP hf
 
-noncomputable def pressureWaveData
-    (hs : LocalPhysicalCopyBounds.LocalSourceBounds s h α w
-      (nativePressureSource sys hh f)) :
-    PhysicalStageBounds.WaveData h LiftPoint SourceIndex Frequency Unit where
-  lowerRadius := a / 4
-  upperRadius := 2 * b
-  nativeWidth := sys.radius
-  slowBound := 2
-  frequencyBound := P
-  alpha := α
-  shift := -(2 * CoordinateAlgebra.A h)
-  harmonics := 1
-  gapBound := 0
-  lower_pos := div_pos ha (by norm_num)
-  width_nonneg := sys.radius_pos.le
-  slow_nonneg := by norm_num
-  frequency_one_le := hP
-  strip := CartesianCopySource.pullStrip s (a / 4) (2 * b) (div_pos ha (by norm_num))
-  weight I n x := w I n (PhysicalClassBounds.cylindricalMap x)
-  source I n x := nativePressureSource sys hh f I n (PhysicalClassBounds.cylindricalMap x)
-  source_bounds := CartesianCopySource.sourceBounds_pullback
-    (b := 2 * b) (div_pos ha (by norm_num)) hs
-  copies _ := pressureCopies sys hh f
-  cells _ := pressureCells sys hh f
-  chart _ := identitySourceChart _ _ (div_pos ha (by norm_num))
-    (pressure_support sys hh f hloc G hh0 hh1 ha hb) _ _ (fun k I => (I, k))
-    (pressure_amplitude_eq_source sys hh f)
-    (pressure_source_domain sys hh f hloc hh0 hh1 ha hb)
-  chart_maps _ _ _ := fun _ hx => hx.1
-  carrier _ := pressureCarrier sys hh f ha hp
-  support _ := pressure_support sys hh f hloc G hh0 hh1 ha hb
-  smooth _ := pressureSmooth sys hh f hloc G hh0 hh1 ha hb hp hn
-  frequencies _ := carrier_frequencies f hP hf
 
 variable
   (hpotential : LocalPhysicalCopyBounds.LocalSourceBounds s h α w

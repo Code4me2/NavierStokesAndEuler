@@ -149,19 +149,5 @@ theorem classicalBlockSize_eq (directions : ι → Space) (q : ℕ) (u : L2) (hu
   exact congrArg (fun g : Space → L2 => baseSize directions q g 0)
     (funext (ordinaryWord_translation directions u hu w))
 
-/-- Uniform time evaluation transfers all genuine classical Hq derivative
-words with constant one, and without a radius change. -/
-theorem path_classicalBlockSize_le (directions : ι → Space) (q : ℕ)
-    (T : ℝ) (p : C(Icc (0 : ℝ) T,L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p))
-    (t : Icc (0 : ℝ) T) (n : ℕ) :
-    classicalBlockSize directions q (p t) (pathTranslation_evaluation_contDiff T p hp t) n ≤
-      block directions q (fun a : Space => pathTranslation T a p) n 0 := by
-  rw [classicalBlockSize_eq]
-  have h := block_comp_clm_le directions q
-    (ContinuousMap.evalCLM ℝ t : C(Icc (0 : ℝ) T,L2) →L[ℝ] L2)
-    (fun a : Space => pathTranslation T a p) hp n 0
-  exact h.trans ((mul_le_mul_of_nonneg_right (evaluation_norm_le T t)
-    (block_nonneg directions q (fun a : Space => pathTranslation T a p) n 0)).trans_eq (one_mul _))
 
 end EulerMeanClassicalWordBounds

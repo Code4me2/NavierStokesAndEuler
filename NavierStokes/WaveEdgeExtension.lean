@@ -522,19 +522,7 @@ structure NativeRegularity {F : OutgoingProfile.Profile} (W : NominalProfile.Wit
       nativeRadius F.data.h x = PrimaryTargetBounds.rightRadius W) →
     iteratedFDeriv ℝ n (nativeExtension W f) x = 0
 
-theorem NativeRegularity.jet_inside {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {f : NativePoint → E} (h : NativeRegularity W f) (n : ℕ) {x : NativePoint}
-    (hx : x ∈ nativeSlowDomain)
-    (hi : nativeRadius F.data.h x ∈ Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)) :
-    iteratedFDeriv ℝ n (nativeExtension W f) x = iteratedFDeriv ℝ n f x := by
-  rw [h.jets n x hx, nativeExtension_inside W _ hi]
 
-theorem NativeRegularity.jet_outside {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {f : NativePoint → E} (h : NativeRegularity W f) (n : ℕ) {x : NativePoint}
-    (hx : x ∈ nativeSlowDomain)
-    (hi : nativeRadius F.data.h x ∉ Ioo (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)) :
-    iteratedFDeriv ℝ n (nativeExtension W f) x = 0 := by
-  rw [h.jets n x hx, nativeExtension_outside W _ hi]
 
 
 /-! ## The constructed primary pulse and its actual envelope -/
@@ -559,70 +547,19 @@ variable {X : Type} [NormedAddCommGroup X] [NormedSpace ℝ X] {ι : Type*}
 
 end ZeroGermCover
 
-/-- A domain for the literal localized field over the full open native
-annulus. Its growth allows the source chart scale and the given slow factor. -/
-noncomputable def nativeDomain {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    {ι : Type*} (V : JetDomain ι NativePoint) (S : ι → ℝ) (q : ℕ) : JetDomain ι NativePoint where
-  scale := V.scale
-  carrier := fun _ => windowDomain nativeSlowDomain (nativeRadius F.data.h)
-    (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W)
-  isOpen := fun _ => windowDomain_open nativeSlowDomain_open
-    (nativeRadius_smooth F.data.h_pos F.data.h_lt_half).continuousOn _ _
-  one_le_scale := V.one_le_scale
-  growth := fun i x => max (V.scale i) (S i) * edgeGrowth (nativeRadius F.data.h)
-    (PrimaryTargetBounds.leftRadius W) (PrimaryTargetBounds.rightRadius W) x ^ q
-  scale_le_growth := by
-    intro i x _
-    exact (le_max_left _ _).trans (le_mul_of_one_le_right
-      (zero_le_one.trans ((V.one_le_scale i).trans (le_max_left _ _)))
-      (one_le_pow₀ (edgeGrowth_one_le _ _ _ _)))
 
 
 
-/-- Extending by zero does not enlarge an interior tensor bound. This
-pointwise form keeps any constants already uniform in the external labels. -/
-theorem NativeRegularity.jet_bound {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {f : NativePoint → E} (h : NativeRegularity W f) (n : ℕ) {x : NativePoint}
-    (hx : x ∈ nativeSlowDomain) {B : ℝ} (hB : 0 ≤ B)
-    (hb : nativeRadius F.data.h x ∈ Ioo (PrimaryTargetBounds.leftRadius W)
-      (PrimaryTargetBounds.rightRadius W) → ‖iteratedFDeriv ℝ n f x‖ ≤ B) :
-    ‖iteratedFDeriv ℝ n (nativeExtension W f) x‖ ≤ B := by
-  by_cases hi : nativeRadius F.data.h x ∈ Ioo (PrimaryTargetBounds.leftRadius W)
-      (PrimaryTargetBounds.rightRadius W)
-  · rw [h.jet_inside n hx hi]
-    exact hb hi
-  · rw [h.jet_outside n hx hi, norm_zero]
-    exact hB
 
 
 /-! ## The same extension in the mean-field variable ordering -/
 
-/-- The actual permutation from `(R,((T,Z),Y))` to `((R,(Z,T)),Y)`. -/
-noncomputable def meanNative : LocalSignedRequest.Point ≃ₗᵢ[ℝ] NativePoint where
-  toLinearEquiv := {
-    toFun := fun x => ((x.1, (x.2.1.2, x.2.1.1)), x.2.2)
-    invFun := fun x => (x.1.1, ((x.1.2.2, x.1.2.1), x.2))
-    left_inv := fun _ => rfl
-    right_inv := fun _ => rfl
-    map_add' := fun _ _ => rfl
-    map_smul' := fun _ _ => rfl }
-  norm_map' := by
-    intro x
-    change max (max ‖x.1‖ (max ‖x.2.1.2‖ ‖x.2.1.1‖)) ‖x.2.2‖ =
-      max ‖x.1‖ (max (max ‖x.2.1.1‖ ‖x.2.1.2‖) ‖x.2.2‖)
-    rw [max_comm ‖x.2.1.2‖ ‖x.2.1.1‖, max_assoc]
 
 
 
-noncomputable def meanExtension {F : OutgoingProfile.Profile} (W : NominalProfile.Witness F)
-    (f : NativePoint → E) (x : LocalSignedRequest.Point) : E := nativeExtension W f (meanNative x)
 
 
 
-theorem NativeRegularity.mean_smooth {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    {f : NativePoint → E} (h : NativeRegularity W f) :
-    ContDiffOn ℝ ∞ (meanExtension W f) {x : LocalSignedRequest.Point | 0 < x.2.1.1} :=
-  h.smooth.comp meanNative.contDiff.contDiffOn (fun _ hx => hx)
 
 
 

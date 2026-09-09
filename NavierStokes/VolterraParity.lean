@@ -53,9 +53,6 @@ noncomputable def reflectCoeff (A : Coeff) : Coeff := fun r z => -A (-r) z
 
 noncomputable def reflectedForcing (f : Field) : Field := fun r z => -f (-r) z
 
-@[simp] theorem reflectField_twice (W : Field) : reflectField (reflectField W) = W := by
-  funext r z
-  simp [reflectField]
 
 @[simp] theorem reflectCoeff_twice (A : Coeff) : reflectCoeff (reflectCoeff A) = A := by
   funext r z
@@ -66,8 +63,6 @@ noncomputable def reflectedForcing (f : Field) : Field := fun r z => -f (-r) z
   funext r z
   simp [reflectedForcing]
 
-@[simp] theorem parameterDeriv_reflect (W : Field) :
-    parameterDeriv (reflectField W) = reflectField (parameterDeriv W) := rfl
 
 theorem equationRHS_reflect (A₀ A₁ : Coeff) (f W : Field) :
     equationRHS (reflectCoeff A₀) (reflectCoeff A₁) (reflectedForcing f) (reflectField W) =
@@ -468,13 +463,7 @@ noncomputable def parityPath (R : ℝ) :
     NilpotentVolterra.Path R →L[ℂ] NilpotentVolterra.Path R :=
   ContinuousLinearMap.compLeftContinuous ℂ (Icc (0 : ℝ) R) parityVec
 
-@[simp] theorem parityPath_apply {R : ℝ} (W : NilpotentVolterra.Path R)
-    (r : Icc (0 : ℝ) R) : parityPath R W r = parityVec (W r) := rfl
 
-@[simp] theorem parityPath_involutive {R : ℝ} (W : NilpotentVolterra.Path R) :
-    parityPath R (parityPath R W) = W := by
-  ext r i
-  exact congrFun (parityVec_involutive (W r)) i
 
 theorem parityPath_deriv {R : ℝ} {W : ℂ → NilpotentVolterra.Path R} {z : ℂ}
     (hW : DifferentiableAt ℂ W z) :

@@ -40,9 +40,6 @@ theorem growthProfile_pos (hhorizon : G.time G.H=G.t₀+D.T)
 
 def growthConstant : ℝ := 560*G.Θ^10/G.ε
 
-theorem growthConstant_pos : 0 < growthConstant G := by
-  unfold growthConstant
-  positivity [G.Theta_pos,G.epsilon_pos]
 
 theorem physicalGrowth_of_geometry
     (hinterval : G.S=Icc G.t₀ (G.t₀+D.T))

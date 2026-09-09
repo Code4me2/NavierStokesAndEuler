@@ -15,7 +15,6 @@ namespace NavierStokes.ActualCycleGeometry
 
 open CorrectionInitialization CorrectionStep WeightedClasses
 
-abbrev Point := ActualInitialization.Point
 
 /-- Initialization supplies all numerical hypotheses of the similarity
 estimates, including the actual finite-window common index. -/
@@ -53,56 +52,17 @@ theorem gauge_eq_geometry : similarityData.gauge = ActualInitialization.geometry
   gauge_eq
 
 
-theorem inner_eq : similarityData.inner = ActualInitialization.geometry.patch.a := rfl
-
-theorem outer_eq : similarityData.outer = ActualInitialization.geometry.patch.b := rfl
-
-theorem index_eq : similarityData.index = CommonWindow.index ActualPrimary.h := rfl
 
 
 
-theorem epsilon_eq : similarityData.strip.epsilon = ChartScales.epsilon ActualPrimary.h := rfl
 
-theorem fast_eq (B : ℕ) : (ActualPrimary.commonContext B).operators.fastCoefficient =
-    fun n => ChartScales.Tg ^ similarityData.index n *
-      ChartScales.Q n ^ (1 + similarityData.h) := rfl
 
-theorem temporal_eq (B : ℕ) : (ActualPrimary.commonContext B).operators.vT =
-    (0, (0, TorusInverse.vector .temporal)) := rfl
 
-/-- Changing either wave family leaves the entire similarity certificate
-unchanged.  The rank stage is the actual reserved rank construction. -/
-theorem compatible {ι : Type} (B : ℕ)
-    (particular : ι → ParticularParameters CycleSlow)
-    (signed : ι → PeriodizedSignedParameters CyclePoint TorusInverse.Frequency) :
-    ActualCycleExcluded.Compatible similarityData
-      (CycleParameters.ofGeometry ActualInitialization.geometry ActualPrimary.h
-        (CommonWindow.index ActualPrimary.h) ActualInitialization.axial
-        particular signed ActualPrimary.rankData)
-      (ActualPrimary.commonContext B) where
-  gauge := gauge_eq.symm
-  strip := strip_eq_geometry.symm
-  time := rfl
-  index := rfl
-  fast := fast_eq B
-  temporal := temporal_eq B
 
-/-- The actual operator bounds on precisely the strip in the certificate. -/
-theorem operators (B : ℕ) :
-    MeanIncrementBounds.OperatorBounds similarityData.strip
-      (ActualPrimary.commonContext B).operators ChartScales.kappa :=
-  ActualInitialization.operators B
 
-/-- These bounds concern the actual same-profile base in the common context. -/
-theorem base_bounds (B : ℕ) :
-    MeanIncrementBounds.BaseBounds similarityData.strip (ActualPrimary.commonContext B).base :=
-  ActualInitialization.base_bounds B
 
-theorem radius_pos (B : ℕ) (x : Point) (hx : x ∈ similarityData.strip.domain) :
-    0 < (ActualPrimary.commonContext B).operators.radius x :=
-  ActualInitialization.radius_pos B x hx
 
-theorem strip_time (x : Point) (hx : x ∈ similarityData.strip.domain) : 0 < x.2.1.1 :=
-  ActualInitialization.strip_time x hx
+
+
 
 end NavierStokes.ActualCycleGeometry

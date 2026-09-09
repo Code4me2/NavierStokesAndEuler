@@ -542,15 +542,6 @@ include R
 
 
 
-/-- The source class is derived from the stored residual invariant and
-the actual label/coordinate reindexing. -/
-theorem current_source_class (j : ℕ) (k : ℤ) (hk : k ≠ 0) :
-    LabelSumBounds.UniformWaveClass
-      (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip ActualParticularStageControls.slowStrip))
-      ActualParticularStageControls.nativeEnvelope (1 / 2 + ActualIterationLedger.sigma j)
-      (ActualParticularStageControls.currentSource
-        (ActualCycleParameters.particularState (ActualCyclePreservation.state B N0 j)) k) :=
-  ActualParticularCycleData.native_source_class (R.invariant j) k hk
 
 theorem current_compatible
     (C : ∀ j, ActualCycleCoherence.Coherent (ActualCyclePreservation.state B N0 j))

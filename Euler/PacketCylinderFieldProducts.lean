@@ -43,26 +43,7 @@ def scalarProduct (G : Field P T raw) (H : Field P T raw')
     rw [G.raw_eq,H.raw_eq]
     exact (pointField_scalarProductPath P L hL G.path H.path G.orbit H.orbit t (x,(θ : AddCircle P))).symm
 
-def bilinear (G : Field P T raw) (H : Field P T raw')
-    (B : Space →L[ℝ] Space →L[ℝ] Space) : Field P T (fun z => B (raw z) (raw' z)) where
-  path := bilinearProductPath P B G.path H.path G.orbit H.orbit
-  orbit := bilinearProductPath_orbit P B G.path H.path G.orbit H.orbit
-  raw_eq t x θ := by
-    rw [G.raw_eq,H.raw_eq]
-    exact (pointField_bilinearProductPath P B G.path H.path G.orbit H.orbit t (x,(θ : AddCircle P))).symm
 
-/-- Spatial advection is the literal ordinary derivative of the second raw field. -/
-def advection (G : Field P T raw) (H : Field P T raw') :
-    Field P T (fun z => fderiv ℝ (fun y : Space => raw' (z.1,(y,z.2.2))) z.2.1 (raw z)) where
-  path := advectionPath P G.path H.path G.orbit H.orbit
-  orbit := advectionPath_orbit P G.path H.path G.orbit H.orbit
-  raw_eq t x θ := by
-    have he : (fun y : Space => raw' (t,(y,θ))) =
-        fun y : Space => pointField P H.path H.orbit t (y,(θ : AddCircle P)) :=
-      funext (fun y => H.raw_eq t y θ)
-    rw [he,coverField_spatial_fderiv P _ (pointField_smooth P H.path H.orbit t),
-      G.raw_eq,comp_apply,inl_apply]
-    exact (pointField_advectionPath P G.path H.path G.orbit H.orbit t (x,(θ : AddCircle P))).symm
 
 private local instance : NormedAddCommGroup (Space →L[ℝ] Space) := inferInstance
 private local instance : NormedSpace ℝ (Space →L[ℝ] Space) := inferInstance

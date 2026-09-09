@@ -1,5 +1,6 @@
 import NavierStokes.HarmonicCalculus
-import NavierStokes.MeanResidual
+import NavierStokes.CylindricalResidual
+import NavierStokes.TransportPrimitive
 import Mathlib.Algebra.MonoidAlgebra.Support
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
@@ -200,11 +201,7 @@ theorem angularMean_field {α : Type*} (c : Coefficients α) (k : ℝ) (Φ : α 
   · have hc : c 0 = 0 := Finsupp.notMem_support_iff.mp h0
     simp [h0, hc]
 
-noncomputable def coefficientMass {α : Type*} (c : Coefficients α) (x : α) : ℝ :=
-  ∑ j ∈ c.support, ‖c j x‖
 
-theorem coefficientMass_nonneg {α : Type*} (c : Coefficients α) (x : α) :
-    0 ≤ coefficientMass c x := Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
 
 
@@ -311,19 +308,12 @@ theorem band_constantCoefficient {α : Type*} (a : α → ℂ) :
 
 
 
-noncomputable def quadraticEnvelope {α : Type*} (A B C : ℕ → α → ℂ)
-    (c : Coefficients α) (x : α) : ℕ → ℝ
-  | 0 => coefficientMass c x
-  | n + 1 => ‖A n x‖ + ‖B n x‖ * quadraticEnvelope A B C c x n +
-      ‖C n x‖ * quadraticEnvelope A B C c x n ^ 2
 
 
 section Derivatives
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-noncomputable def wave (c : Coefficients E) (k : ℝ) (Φ : E → ℝ) (x : E) : ℂ :=
-  c.sum (fun j a => HarmonicCalculus.mode (k * (j : ℝ)) Φ a x)
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem character_eq_carrier (j : ℤ) (k : ℝ) (Φ : E → ℝ) (x : E) :

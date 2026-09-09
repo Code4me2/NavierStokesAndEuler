@@ -345,13 +345,6 @@ theorem ZeroOrderBounds.weight_lower {R detGap entryBound inverseLower zeta : �
     inverseLower * zeta ≤ SmoothCovariance.weights H T j := by
   exact (mul_le_mul_of_nonneg_right (le_mul_of_one_le_right ha hR) hzeta).trans (h.weights j)
 
-theorem ZeroOrderBounds.det_ne_zero {R detGap entryBound inverseLower zeta : ℝ}
-    {H : Mat2} {T : Vec2} (h : ZeroOrderBounds R detGap entryBound inverseLower zeta H T)
-    (hgap : 0 < detGap) : H.det ≠ 0 := by
-  intro hz
-  have hd := h.determinant
-  rw [PrimaryPulseBounds.normalizedMatrix_det, hz, mul_zero, abs_zero] at hd
-  exact (not_le_of_gt hgap) hd
 
 theorem ZeroOrderBounds.weights_pos {R detGap entryBound inverseLower zeta : ℝ}
     {H : Mat2} {T : Vec2} (h : ZeroOrderBounds R detGap entryBound inverseLower zeta H T)

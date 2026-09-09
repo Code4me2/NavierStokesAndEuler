@@ -49,15 +49,6 @@ theorem inversePath_measurePreserving (t : K) :
   inverse_measurePreserving (X t) (Y t) (F t) (hX t) (hYX t) (hXY t)
     (Continuous.uncurry_left t hY) (hdet t)
 
-/-- No operator-norm continuity of composition is assumed. Joint strong
-continuity follows from actual continuity and preservation of volume. -/
-def transportPath (u : C(K,Lp E 2 (volume : Measure Vector3))) :
-    C(K,Lp E 2 (volume : Measure Vector3)) where
-  toFun t := Lp.compMeasurePreserving (inversePath Y hY t)
-    (inversePath_measurePreserving X Y F hX hYX hXY hY hdet t) (u t)
-  continuous_toFun := u.continuous.compMeasurePreservingLp
-    (inversePath Y hY).continuous
-    (inversePath_measurePreserving X Y F hX hYX hXY hY hdet) (by norm_num)
 
 
 

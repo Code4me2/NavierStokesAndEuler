@@ -64,108 +64,7 @@ open LocalizedWaveBounds
 variable {D E J : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The index may be the pair (spatial label, lattice copy).  Both the
-Gaussian envelope and the native length are allowed to depend on it. -/
-theorem indexed_gaussian_tail_bound {s : StripData D} {K : ℕ → J → Set D}
-    {W : ℕ → J → D → ℝ} {α c : ℝ} {f : ℕ → J → D → E}
-    (hf : LocalWave s K W α f) (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : ℕ → J → D → ℝ) (L : ℕ → J → ℝ) (hL : ∀ n i, 0 < L n i)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n i, ell * ChartScales.S n ≤ L n i) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      W n i x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n i))
-    (hzero : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      |θ n i x - 1 / 2| < 1 / 5 → f n i =ᶠ[𝓝 x] fun _ => 0)
-    (m : ℕ) : ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      ∀ j ≤ m, ‖iteratedFDeriv ℝ j (f n i) x‖ ≤
-        A * (1 + ChartScales.S n) ^ p * Real.exp (-(c * ell / 50) * ChartScales.S n) := by
-  obtain ⟨A, hA, p, hb⟩ := hf.bounds m
-  obtain ⟨B, hB, hweight⟩ := edges.uniform_weight p
-  have hconstant := scales.constant_one_le
-  have hdec : 0 < c * ell / 25 := by positivity
-  obtain ⟨C, hC, hgauss⟩ := fixed_power_gaussian_bound hdec (scales.power * α)
-  refine ⟨A * B * scales.constant ^ p * C, by positivity, scales.degree * p, ?_⟩
-  intro n i x hx hi j hj
-  have hQ := ChartScales.Q_pos n
-  by_cases hmid : |θ n i x - 1 / 2| < 1 / 5
-  · rw [jets_eq_of_germ (hzero n i x hx hi hmid) j]
-    simp only [iteratedFDeriv_fun_zero, Pi.zero_apply, norm_zero]
-    have hS : 0 ≤ ChartScales.S n := sq_nonneg _
-    positivity
-  have htail : 1 / 5 ≤ |θ n i x - 1 / 2| := le_of_not_gt hmid
-  have hsq : (1 / 25 : ℝ) ≤ (θ n i x - 1 / 2) ^ 2 := by
-    have hh := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 5) htail 2
-    norm_num [sq_abs] at hh ⊢
-    exact hh
-  have hPg : W n i x ≤ Real.exp (-(c * ell / 25) * ChartScales.S n) := by
-    apply (hW n i x hx hi).trans
-    apply (Real.exp_le_exp.2 ?_).trans (gaussian_length_comparison hc.le (hLell n i))
-    nlinarith [mul_le_mul_of_nonneg_left hsq (mul_nonneg hc.le (hL n i).le)]
-  have hslow0 : 0 ≤ s.slow n := zero_le_one.trans (s.one_le_slow n)
-  have hK0 : 0 ≤ scales.constant := zero_le_one.trans scales.constant_one_le
-  have hslowp : s.slow n ^ p ≤
-      scales.constant ^ p * (1 + ChartScales.S n) ^ (scales.degree * p) := by
-    simpa only [mul_pow, ← pow_mul] using pow_le_pow_left₀ hslow0 (scales.slow_le n) p
-  have hmajor : majorant s (fun n x => Real.sqrt (s.zeta x) * W n i x) α A p n x ≤
-      (A * B * scales.constant ^ p) * ChartScales.Q n ^ (scales.power * α) *
-        ((1 + ChartScales.S n) ^ (scales.degree * p) *
-          Real.exp (-(c * ell / 25) * ChartScales.S n)) := by
-    rw [majorant, StripData.growth, mul_pow, scales.epsilon_eq, ← Real.rpow_mul hQ.le]
-    calc
-      _ = (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) *
-          (Real.sqrt (s.zeta x) * max 1 (s.delta x)⁻¹ ^ p) * W n i x := by ring
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) *
-          (Real.sqrt (s.zeta x) * max 1 (s.delta x)⁻¹ ^ p) *
-            Real.exp (-(c * ell / 25) * ChartScales.S n) :=
-        mul_le_mul_of_nonneg_left hPg (by positivity)
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) * s.slow n ^ p) * B *
-            Real.exp (-(c * ell / 25) * ChartScales.S n) := by
-        gcongr
-        exact hweight x hx
-      _ ≤ (A * ChartScales.Q n ^ (scales.power * α) *
-          (scales.constant ^ p * (1 + ChartScales.S n) ^ (scales.degree * p))) * B *
-            Real.exp (-(c * ell / 25) * ChartScales.S n) := by gcongr
-      _ = _ := by ring
-  calc
-    _ ≤ majorant s (fun n x => Real.sqrt (s.zeta x) * W n i x) α A p n x := hb n i x hx hi j hj
-    _ ≤ _ := hmajor
-    _ = (A * B * scales.constant ^ p) * (1 + ChartScales.S n) ^ (scales.degree * p) *
-        (ChartScales.Q n ^ (scales.power * α) *
-          Real.exp (-(c * ell / 25) * ChartScales.S n)) := by ring
-    _ ≤ (A * B * scales.constant ^ p) * (1 + ChartScales.S n) ^ (scales.degree * p) *
-        (C * Real.exp (-((c * ell / 25) / 2) * ChartScales.S n)) := by
-      have hS : 0 ≤ ChartScales.S n := sq_nonneg _
-      exact mul_le_mul_of_nonneg_left (hgauss n) (by positivity)
-    _ = _ := by
-      rw [show c * ell / 25 / 2 = c * ell / 50 by ring]
-      ring
 
-theorem indexed_gaussian_all_gains {s : StripData D} {K : ℕ → J → Set D}
-    {W : ℕ → J → D → ℝ} {α c : ℝ} {f : ℕ → J → D → E}
-    (hf : LocalWave s K W α f) (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : ℕ → J → D → ℝ) (L : ℕ → J → ℝ) (hL : ∀ n i, 0 < L n i)
-    (ell : ℝ) (hell : 0 < ell) (hLell : ∀ n i, ell * ChartScales.S n ≤ L n i) (hc : 0 < c)
-    (hW : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      W n i x ≤ Real.exp (-c * (θ n i x - 1 / 2) ^ 2 * L n i))
-    (hzero : ∀ n i x, x ∈ s.domain → x ∈ K n i →
-      |θ n i x - 1 / 2| < 1 / 5 → f n i =ᶠ[𝓝 x] fun _ => 0)
-    (β : ℝ) : LocalUnweighted s K β f := by
-  refine ⟨fun _ _ _ _ => zero_le_one, hf.smooth, ?_⟩
-  intro m
-  obtain ⟨A, hA, p, hb⟩ := indexed_gaussian_tail_bound hf edges scales θ L hL
-    ell hell hLell hc hW hzero m
-  obtain ⟨B, hB, hflat⟩ := gaussian_beats_Q_power (by positivity : 0 < c * ell / 50) p (scales.power * β)
-  refine ⟨A * B, mul_nonneg hA hB.le, 0, ?_⟩
-  intro n i x hx hi j hj
-  have ht := (hb n i x hx hi j hj).trans
-    (show A * (1 + ChartScales.S n) ^ p * Real.exp (-(c * ell / 50) * ChartScales.S n) ≤
-      (A * B) * ChartScales.Q n ^ (scales.power * β) by
-        calc
-          _ = A * ((1 + ChartScales.S n) ^ p * Real.exp (-(c * ell / 50) * ChartScales.S n)) := by ring
-          _ ≤ A * (B * ChartScales.Q n ^ (scales.power * β)) :=
-            mul_le_mul_of_nonneg_left (hflat n) hA
-          _ = _ := by ring)
-  simpa only [majorant, pow_zero, mul_one, scales.epsilon_eq,
-    ← Real.rpow_mul (ChartScales.Q_pos n).le] using ht
 
 end IndexedEstimates
 
@@ -273,51 +172,6 @@ theorem indexedCutoffError_wave_class {s : StripData D} (d : GraphDirections D)
   simp only [zero_add] at he
   exact he
 
-theorem uniform_localGaussian_all_gains_from_supported_native
-    (a : L → CopyData D I) {s : StripData D} (d : GraphDirections D)
-    (C K : L → ℕ → I → Set D) {W : L → ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hψ : UniformLocalJets s (fun _ _ _ => 1) 0 C (fun l => (a l).cutoff))
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α C
-      (fun l => (a l).amplitude))
-    (hf : UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α C
-      (fun l n _ => (a l).source n))
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : L → ℕ → I → D → ℝ) (length : L → ℕ → ℝ)
-    (hL : ∀ l n, 0 < length l n) (ell : ℝ) (hell : 0 < ell)
-    (hLell : ∀ l n, ell * ChartScales.S n ≤ length l n) (hc : 0 < c)
-    (hW : ∀ l n i x, x ∈ s.domain → x ∈ C l n i →
-      W l n x ≤ Real.exp (-c * (θ l n i x - 1 / 2) ^ 2 * length l n))
-    (hcentral : ∀ l n i x, x ∈ s.domain → x ∈ C l n i → |θ l n i x - 1 / 2| < 1 / 5 →
-      ((a l).cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        (((a l).amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)))
-    (houtside : ∀ l n i x, x ∈ s.domain → x ∈ K l n i → x ∉ C l n i →
-      (((a l).cutoff n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)) ∨
-        (((a l).amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ) : UniformLocalJets s (fun _ _ _ => 1) β K (fun l => (a l).localGaussian d) := by
-  have hw l n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hWnonneg l n x hx)
-  have hψ' := LocalClass.of_uniformLocalJets (fun _ _ _ _ => zero_le_one) hψ
-  have hu' := LocalClass.of_uniformLocalJets hw hu
-  have hf' := LocalClass.of_uniformLocalJets hw hf
-  have he : LocalWave s (fun n (ji : L × I) => C ji.1 n ji.2)
-      (fun n ji x => W ji.1 n x) α (fun n ji => (a ji.1).localGaussian d n ji.2) :=
-    indexedCutoffError_wave_class d hψ' hfast hu' hf'
-  have hflat := indexed_gaussian_all_gains he edges scales
-    (fun n ji => θ ji.1 n ji.2) (fun n ji => length ji.1 n)
-    (fun n ji => hL ji.1 n) ell hell (fun n ji => hLell ji.1 n) hc
-    (fun n ji x hx hi => hW ji.1 n ji.2 x hx hi)
-    (fun n ji x hx hi hm => by
-      rcases hcentral ji.1 n ji.2 x hx hi hm with hOne | ⟨hU, hF⟩
-      · exact (a ji.1).localGaussian_zero_of_cutoff_one d hOne
-      · exact (a ji.1).localGaussian_zero_of_fields d hU hF) β
-  apply LocalClass.to_uniformLocalJets
-  apply hflat.enlarge
-  intro n ji x hx hi
-  by_cases hC : x ∈ C ji.1 n ji.2
-  · exact Or.inl hC
-  · exact Or.inr (localGaussian_zero_of_inactive (a ji.1) d
-      (houtside ji.1 n ji.2 x hx hi hC))
 
 theorem uniform_globalGaussian_class_with_complement
     (a : L → CopyData D I) (K : L → Cells D I)
@@ -331,40 +185,6 @@ theorem uniform_globalGaussian_class_with_complement
     (fun l n _ _ _ hx => (a l).globalGaussian_germ (K l) (hs l) d n hx)
     (fun l _ _ _ hx => (a l).globalGaussian_uncovered_germ (K l) (hs l) d hx)
 
-/-- The constants precede every spatial label, band and native copy.
-The uncovered source is included with its own equally uniform jet bound. -/
-theorem uniform_globalGaussian_all_gains_from_supported_native
-    (a : L → CopyData D I) (K : L → Cells D I)
-    (hs : ∀ l n i, support ((a l).cutoff n i) ⊆ (K l).carrier n i)
-    {s : StripData D} (d : GraphDirections D) (C : L → ℕ → I → Set D)
-    {W : L → ℕ → D → ℝ} {α c : ℝ}
-    (hWnonneg : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hψ : UniformLocalJets s (fun _ _ _ => 1) 0 C (fun l => (a l).cutoff))
-    (hfast : BandBound s 0 d.fastScale)
-    (hu : UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α C
-      (fun l => (a l).amplitude))
-    (hf : UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α C
-      (fun l n _ => (a l).source n))
-    (edges : FlatEdges s) (scales : BandScaleControl s)
-    (θ : L → ℕ → I → D → ℝ) (length : L → ℕ → ℝ)
-    (hL : ∀ l n, 0 < length l n) (ell : ℝ) (hell : 0 < ell)
-    (hLell : ∀ l n, ell * ChartScales.S n ≤ length l n) (hc : 0 < c)
-    (hW : ∀ l n i x, x ∈ s.domain → x ∈ C l n i →
-      W l n x ≤ Real.exp (-c * (θ l n i x - 1 / 2) ^ 2 * length l n))
-    (hcentral : ∀ l n i x, x ∈ s.domain → x ∈ C l n i → |θ l n i x - 1 / 2| < 1 / 5 →
-      ((a l).cutoff n i =ᶠ[𝓝 x] fun _ => 1) ∨
-        (((a l).amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)))
-    (houtside : ∀ l n i x, x ∈ s.domain → x ∈ (K l).carrier n i → x ∉ C l n i →
-      (((a l).cutoff n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)) ∨
-        (((a l).amplitude n i =ᶠ[𝓝 x] fun _ => 0) ∧ ((a l).source n =ᶠ[𝓝 x] fun _ => 0)))
-    (β : ℝ)
-    (hcomplement : UniformComplementJets s (fun _ _ _ => 1) β
-      (fun l => (K l).carrier) (fun l => (a l).source)) :
-    LabelSumBounds.UniformClass s (fun _ _ _ => 1) β (fun l => (a l).globalGaussian d) :=
-  uniform_globalGaussian_class_with_complement a K hs d (fun _ _ _ _ => zero_le_one)
-    (uniform_localGaussian_all_gains_from_supported_native a d C (fun l => (K l).carrier)
-      hWnonneg hψ hfast hu hf edges scales θ length hL ell hell hLell hc hW hcentral houtside β)
-    hcomplement
 
 
 
@@ -379,24 +199,6 @@ open CommonCoverSolve TorusInverse ParticularWaveAssembly HarmonicSourceSupport
 variable {P L : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
 
-theorem uniform_source_complement_of_harmonicSupport
-    (a : L → CopyData ((P × ℝ) × Plane) Frequency)
-    (c : CorrectionState.Context (P × Plane)) (u : CorrectionState.State (P × Plane))
-    (b : L → CorrectionState.HarmonicBlock (P × Plane))
-    (G A : L → HarmonicResidual.BlockCoefficients (P × Plane))
-    (g : L → ℕ → Geometry) (K : L → ℕ → Set Plane) (hK : ∀ l n, IsCompact (K l n))
-    {U : Set (P × Plane)} (hU : IsOpen U)
-    (hs : ∀ l, InputSupportOn U (fun n => nativeUnion (g l n) (K l n)) (b l) (G l) (A l))
-    (s : StripData ((P × ℝ) × Plane))
-    (hdom : ∀ x, x ∈ s.domain → (x.1.1, x.2) ∈ U)
-    (j : L → ℤ) (hsource : ∀ l, (a l).source = sourceFamily c u (b l) (G l) (A l) (j l))
-    (β : ℝ) : UniformComplementJets s (fun _ _ _ => 1) β
-      (fun l n => nativeCell (g l n) (K l n)) (fun l => (a l).source) := by
-  apply UniformComplementJets.of_zero_germs
-  intro l n x hx hn
-  rw [hsource l]
-  exact sourceFamily_zero_germ_on c u (b l) (G l) (A l) (g l) (K l) (hK l) hU
-    (hs l) (j l) n (hdom x hx) hn
 
 
 end HarmonicSource

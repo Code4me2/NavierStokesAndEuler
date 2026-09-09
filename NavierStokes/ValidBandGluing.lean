@@ -31,10 +31,6 @@ noncomputable def representative [Zero E] (U : ι → Set D) (f : ι → D → E
 theorem mem_domain_iff {U : ι → Set D} {x : D} : x ∈ domain U ↔ ∃ i, x ∈ U i :=
   mem_iUnion
 
-theorem representative_zero [Zero E] {U : ι → Set D} {f : ι → D → E}
-    {x : D} (hx : x ∉ domain U) : representative U f x = 0 := by
-  have hn : ¬ ∃ i, x ∈ U i := fun h => hx (mem_domain_iff.mpr h)
-  simp only [representative, dite_eq_right hn]
 
 theorem representative_eq_of_mem [Zero E] {U : ι → Set D} {f : ι → D → E}
     (hf : Compatible U f) {i : ι} {x : D} (hx : x ∈ U i) :
@@ -50,8 +46,6 @@ section Topology
 
 variable [TopologicalSpace D]
 
-theorem domain_open {U : ι → Set D} (hU : ∀ i, IsOpen (U i)) : IsOpen (domain U) :=
-  isOpen_iUnion hU
 
 theorem representative_germ [Zero E] {U : ι → Set D} {f : ι → D → E}
     (hU : ∀ i, IsOpen (U i)) (hf : Compatible U f) {i : ι} {x : D} (hx : x ∈ U i) :

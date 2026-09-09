@@ -74,61 +74,6 @@ theorem continuous_weightedCommutatorNorm {s : ℕ} (hs : 6 ≤ s) (N : ℕ) (hN
   exact (continuous_sumNorm period 6).comp
     (externalCommutator period hs n.val w (by have := n.isLt; omega) L hL).continuous₂
 
-/-- The external commutator bound for actual smooth representatives depends only on derivatives inside the energy cutoff. -/
-theorem weightedCommutator_smooth_bound {s : ℕ} (hs : 6 ≤ s) (N : ℕ) (hN : N+6 ≤ s)
-    (ρ : ℝ) (hρ : 0 < ρ) (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u v : SobolevSpace period (s+1)) (f g : LiftDomain period → Vector3)
-    (hu : (value period u : LiftDomain period → Vector3) =ᵐ[liftMeasure period] f)
-    (hv : (value period v : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x))
-    (hfL : ∀ j, ∀ w : Fin j → Fin 4, MemLp (iteratedFieldDerivative period w f) 2 (liftMeasure period))
-    (hgL : ∀ j, ∀ w : Fin j → Fin 4, MemLp (iteratedFieldDerivative period w g) 2 (liftMeasure period)) :
-    weightedCommutatorNorm period hs N hN ρ L hL u v ≤
-      (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ u*weightedLoss period 6 N ρ v := by
-  let b := velocityMap L ∘ f
-  have hb := postcomp_smooth period (velocityMap L) f hf
-  have hbL : ∀ j, ∀ w : Fin j → Fin 4, MemLp (iteratedFieldDerivative period w b) 2 (liftMeasure period) :=
-    fun j w => postcomp_word_memLp period (le_refl j) (velocityMap L) f hf (fun r _ a => hfL r a) w
-  have heq : weightedCommutatorNorm period hs N hN ρ L hL u v =
-      ∑ n ∈ Finset.range (N+1), weight ρ n*transportCommutatorNorm period n b g := by
-    rw [← Fin.sum_univ_eq_sum_range]
-    apply Finset.sum_congr rfl
-    intro n _
-    congr 1
-    apply Finset.sum_congr rfl
-    intro w _
-    exact externalCommutator_sumNorm period hs n.val w (by have := n.isLt; omega) L hL u v f g hu hv hf hg
-  rw [heq, weightedNorm_eq_classical period 6 N (by omega) ρ u f hu hf,
-    weightedLoss_eq_classical period 6 N (by omega) ρ v g hv hg]
-  have ht := transportCommutator_weighted_bound period N ρ hρ b g hb hg hbL hgL
-  have hbnd : (∑ n ∈ Finset.range (N+1), weight ρ n*wordSobolevNorm period 6 n b) ≤
-      4 * ∑ n ∈ Finset.range (N+1), weight ρ n*wordSobolevNorm period 6 n f := by
-    rw [Finset.mul_sum]
-    exact Finset.sum_le_sum fun n _ =>
-      (mul_le_mul_of_nonneg_left (velocityMap_word_bound period 6 n L hL f hf hfL) (weight_pos hρ n).le).trans_eq (by ring)
-  have hz : 0 ≤ ∑ n ∈ Finset.range (N+1), (n : ℝ)*weight ρ n*wordSobolevNorm period 6 n g :=
-    Finset.sum_nonneg fun n _ => mul_nonneg (mul_nonneg (Nat.cast_nonneg n) (weight_pos hρ n).le)
-      (wordSobolevNorm_nonneg period 6 n g)
-  have hcoef : 0 ≤ productConstant period 3*ρ⁻¹ := mul_nonneg (productConstant_nonneg period 3) (inv_nonneg.mpr hρ.le)
-  exact ht.trans ((mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hbnd hcoef) hz).trans_eq (by ring))
 
-/-- The genuine finite-Sobolev external transport commutator has the cutoff-independent radius-loss bound.
-One additional derivative is used only to define the individual terms; it does not occur in the bound. -/
-theorem weightedCommutator_bound {s : ℕ} (hs : 6 ≤ s) (N : ℕ) (hN : N+6 ≤ s)
-    (ρ : ℝ) (hρ : 0 < ρ) (L : Fin 4 → Vector3 →L[ℝ] ℝ) (hL : ∀ i, ‖L i‖ ≤ 1)
-    (u v : SobolevSpace period (s+1)) :
-    weightedCommutatorNorm period hs N hN ρ L hL u v ≤
-      (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ u*weightedLoss period 6 N ρ v := by
-  have hW : Continuous (weightedNorm period (s := s+1) 6 N ρ) := continuous_weighted_blockNorm period N (by omega) ρ
-  have hY : Continuous (weightedLoss period (s := s+1) 6 N ρ) := continuous_weightedLoss period 6 N (by omega) ρ
-  exact binary_le_of_smooth period
-    (fun p => weightedCommutatorNorm period hs N hN ρ L hL p.1 p.2)
-    (fun p => (4*productConstant period 3)*ρ⁻¹*weightedNorm period 6 N ρ p.1*
-      weightedLoss period 6 N ρ p.2)
-    (continuous_weightedCommutatorNorm period hs N hN ρ L hL)
-    (((hW.comp continuous_fst).const_mul ((4*productConstant period 3)*ρ⁻¹)).mul (hY.comp continuous_snd))
-    (fun a b f g hf hg hfs hgs hfL hgL =>
-      weightedCommutator_smooth_bound period hs N hN ρ hρ L hL a b f g hf hg hfs hgs hfL hgL) u v
 
 end EulerSobolevTransportCommutator

@@ -320,9 +320,6 @@ theorem qCoefficient_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :
     ContDiffOn ℝ ∞ (qCoefficient h) (positiveDomain preterminalSlow) :=
   fun _ hp => (SimilarityProfile.q_smoothAt hh hh1 hp.1).contDiffWithinAt
 
-theorem physicalQ_smooth {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2) :
-    ContDiffOn ℝ ∞ (PhysicalWaveSum.physicalQ h) (physicalDomain preterminalSlow) :=
-  fun _ hw => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hw).contDiffWithinAt
 
 
 
@@ -374,21 +371,9 @@ theorem spatialCut_angularSum_divergence {U : Set Slow} (hU : IsOpen U) (D : ℕ
 
 /-! ## Actual full-fiber means restricted to a physical graph -/
 
-abbrev Lift := PressureStream.Lift Slow
 
-/-- The time/axial variables in the actual mean-field convention `(T,Z)`. -/
-noncomputable def graphSlow (G : PhysicalResidualBridge.ScaledGraph) (s : Slow) : Slow :=
-  (G.velocityScale * G.radialScale * G.epsilon * (1 - s.1),
-    G.radialScale * G.epsilon * s.2)
 
-noncomputable def graphPoint (G : PhysicalResidualBridge.ScaledGraph) (p : CylPoint) : Lift :=
-  (G.radialScale * p.2.1, (graphSlow G (slowOfCyl p),
-    (G.frequency * (G.radialScale * p.2.1) ^ G.exponent) • G.radialVector +
-      (G.velocityScale * G.radialScale * G.fastCoefficient * p.1) • G.temporalVector))
 
-/-- The physical velocity normalization is included here. -/
-noncomputable def graphCoefficient (G : PhysicalResidualBridge.ScaledGraph) (f : Lift → ℝ) : Coefficient :=
-  fun p => G.velocityScale * f (graphPoint G p)
 
 
 

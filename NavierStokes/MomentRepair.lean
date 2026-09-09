@@ -36,11 +36,6 @@ def synthesize (b : ι → V) (c : ι → ℝ) : V := ∑ j, c j • b j
 def momentMatrix (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V) : Matrix ι ι ℝ :=
   fun i j => L i (b j)
 
-omit [DecidableEq ι] in
-theorem moments_synthesize (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V) (c : ι → ℝ) :
-    moments L (synthesize b c) = (momentMatrix L b).mulVec c := by
-  ext i
-  simp [moments, synthesize, momentMatrix, Matrix.mulVec, dotProduct, mul_comm]
 
 /-- Coefficients obtained using the actual matrix inverse. -/
 def coefficients (B : Matrix ι ι ℝ) (d : ι → ℝ) : ι → ℝ := B⁻¹.mulVec d
@@ -55,19 +50,6 @@ theorem matrix_mul_coefficients (B : Matrix ι ι ℝ) (hB : B.det ≠ 0)
 def repair (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V) (u : V) (target : ι → ℝ) : V :=
   u + synthesize b (coefficients (momentMatrix L b) (target - moments L u))
 
-/-- Exact moment matching follows from nonsingularity, with no smallness needed. -/
-theorem repair_exact (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V)
-    (hB : (momentMatrix L b).det ≠ 0) (u : V) (target : ι → ℝ) :
-    moments L (repair L b u target) = target := by
-  have h := matrix_mul_coefficients (momentMatrix L b) hB (target - moments L u)
-  rw [← moments_synthesize L b] at h
-  ext i
-  have hi := congrFun h i
-  change L i (u + synthesize b _) = target i
-  rw [map_add]
-  change L i u + moments L (synthesize b _) i = target i
-  rw [hi]
-  simp [moments]
 
 
 
@@ -84,19 +66,6 @@ theorem repair_eq_of_profiles_zero (L : ι → (X → ℝ) →ₗ[ℝ] ℝ) (b :
     repair L b u target x = u x := by
   simp [repair, synthesize, Finset.sum_apply, hb]
 
-/-- A common support set is preserved by finite moment repair. -/
-theorem repair_support_subset (L : ι → (X → ℝ) →ₗ[ℝ] ℝ) (b : ι → X → ℝ)
-    (u : X → ℝ) (target : ι → ℝ) (S : Set X)
-    (hb : ∀ j, Function.support (b j) ⊆ S) :
-    Function.support (repair L b u target - u) ⊆ S := by
-  intro x hx
-  by_contra hxs
-  have hzero : ∀ j, b j x = 0 := by
-    intro j
-    by_contra h
-    exact hxs (hb j h)
-  have h := repair_eq_of_profiles_zero L b u target x hzero
-  exact hx (by simpa using sub_eq_zero.mpr h)
 
 end Support
 

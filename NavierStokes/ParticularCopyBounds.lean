@@ -279,13 +279,6 @@ end ActualComplex
 
 section NativeEnvelope
 
-/-- The reference envelope of the unique active native copy.  This
-majorant need not be smooth; the actual fields carry the smoothness. -/
-noncomputable def nativeEnvelope (K : Cells (P × Plane) Frequency)
-    (g : ℕ → Geometry) (envelope : ℕ → ℝ → ℝ) (n : ℕ) (x : P × Plane) : ℝ := by
-  classical
-  exact if h : ∃ k, x ∈ K.carrier n k then
-    envelope n ((g n).coordinates (Classical.choose h) x.2).2 else 0
 
 
 

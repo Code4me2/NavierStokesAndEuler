@@ -76,18 +76,6 @@ theorem velocityDerivative_orbit_eq :
         timeTranslation T a (timeMultiplier T hT (solenoidalFrame T F) s.acceleration) :=
   funext (fun a => (timeTranslation T a).map_add _ _)
 
-theorem pressureResidual_orbit_eq :
-    (fun a : Space => timeTranslation T a s.pressureResidual) =
-      fun a : Space => timeTranslation T a f -
-        timeTranslation T a (timeMultiplier T hT (solenoidalFrame T F) s.acceleration) -
-        (2 : ℝ) • timeTranslation T a (timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp) := by
-  funext a
-  change timeTranslation T a (f-timeMultiplier T hT (solenoidalFrame T F) s.acceleration-
-    (2 : ℝ) • timeMultiplier T hT (solenoidalFrame T F₁) s.velocityLp) = _
-  exact ((timeTranslation T a).map_sub _ _).trans
-    (congrArg₂ (fun x y : TimeLp T L2 => x-y)
-      ((timeTranslation T a).map_sub _ _)
-      ((timeTranslation T a).map_smul (2 : ℝ) _))
 
 /-- The physical velocity has the genuine spatial regularity of the coordinate velocity. -/
 theorem velocityField_translation_contDiff {n : ℕ∞ω}
@@ -107,17 +95,6 @@ theorem velocityDerivative_translation_contDiff {n : ℕ∞ω}
     ((frameApply_translation_contDiff T hT F₁ s.velocityLp hF₁ hv).add
       (frameApply_translation_contDiff T hT F s.acceleration hF ha))
 
-/-- The actual gradient residual inherits the spatial regularity of the solved fields. -/
-theorem pressureResidual_translation_contDiff {n : ℕ∞ω}
-    (hF : ContDiff ℝ n (fun a : Space => translatePath T a F))
-    (hF₁ : ContDiff ℝ n (fun a : Space => translatePath T a F₁))
-    (hv : ContDiff ℝ n (fun a : Space => timeSolenoidalTranslation T a s.velocityLp))
-    (ha : ContDiff ℝ n (fun a : Space => timeSolenoidalTranslation T a s.acceleration))
-    (hf : ContDiff ℝ n (fun a : Space => timeTranslation T a f)) :
-    ContDiff ℝ n (fun a : Space => timeTranslation T a s.pressureResidual) :=
-  Eq.mpr (congrArg (fun g : Space → TimeLp T L2 => ContDiff ℝ n g) s.pressureResidual_orbit_eq)
-    ((hf.sub (frameApply_translation_contDiff T hT F s.acceleration hF ha)).sub
-      ((frameApply_translation_contDiff T hT F₁ s.velocityLp hF₁ hv).const_smul (2 : ℝ)))
 
 
 

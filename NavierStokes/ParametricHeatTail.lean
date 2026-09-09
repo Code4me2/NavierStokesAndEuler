@@ -296,10 +296,6 @@ noncomputable def squareCorrectionJet (h K : ℝ) (n : ℕ) (ν X : ℝ) : ℝ :
 noncomputable def squareCorrectionBound (h L : ℝ) (n : ℕ) : ℝ :=
   2 * correctionBound h L n + jetProduct (correctionBound h L) (correctionBound h L) n
 
-theorem squareCorrectionJet_zero (h K ν X : ℝ) :
-    squareCorrectionJet h K 0 ν X = multiplier h ν K X ^ 2 - 1 := by
-  simp only [squareCorrectionJet, jetProduct, correctionJet_zero]
-  ring
 
 theorem squareCorrectionJet_hasDerivWithinAt {h K ν X : ℝ} (hh : 0 < h)
     (hX : 0 < X) (hν : 0 ≤ ν) (n : ℕ) :
@@ -316,10 +312,6 @@ theorem squareCorrectionJet_continuousOn_X {h K ν : ℝ} (hh : 0 < h)
     (jetProduct_continuousOn (fun i => correctionJet_continuousOn_X hh hK hν i)
       (fun i => correctionJet_continuousOn_X hh hK hν i) n)
 
-theorem squareCorrectionBound_nonneg {h L : ℝ} (hh : 0 < h) (hL : 0 ≤ L) (n : ℕ) :
-    0 ≤ squareCorrectionBound h L n := by
-  exact add_nonneg (mul_nonneg (by norm_num) (correctionBound_nonneg hh hL n))
-    (jetProduct_nonneg (correctionBound_nonneg hh hL) (correctionBound_nonneg hh hL) n)
 
 theorem squareCorrectionJet_bound {h K L ν X : ℝ} (hh : 0 < h) (hX : 1 ≤ X)
     (hν : ν ∈ Icc (0 : ℝ) L) (n : ℕ) :
@@ -361,11 +353,6 @@ theorem editJet_continuousOn_X {h K ν : ℝ} (hh : 0 < h)
   · exact correctionJet_continuousOn_X hh hK hν n
   · exact squareCorrectionJet_continuousOn_X hh hK hν n
 
-theorem editBound_nonneg {h L : ℝ} (hh : 0 < h) (hL : 0 ≤ L) (square : Bool) (n : ℕ) :
-    0 ≤ editBound square h L n := by
-  cases square
-  · exact correctionBound_nonneg hh hL n
-  · exact squareCorrectionBound_nonneg hh hL n
 
 theorem editJet_bound {h K L ν X : ℝ} (hh : 0 < h) (hX : 1 ≤ X)
     (hν : ν ∈ Icc (0 : ℝ) L) (square : Bool) (n : ℕ) :
@@ -441,19 +428,6 @@ theorem weightedJet_dominated (square : Bool) :
   intro ν hν
   exact weightedJet_bound hh hK hB hweight square n hν hX
 
-omit hW in
-theorem weightedDebtJet_bound (square : Bool) (n : ℕ) {L ν : ℝ}
-    (_ : 0 < L) (hν : ν ∈ Icc (0 : ℝ) L) :
-    |weightedDebtJet W square h K q n ν| ≤
-      B * editBound square h L n * K ^ q / (-p - q) := by
-  have hi := (weightedKernel_integrable (lt_of_lt_of_le zero_lt_one hK) hpq).const_mul
-    (B * editBound square h L n)
-  have hb' := norm_integral_le_of_norm_le hi
-    (by
-      filter_upwards [ae_restrict_mem measurableSet_Ioi] with X hX
-      exact weightedJet_bound hh hK hB hweight square n hν hX)
-  simpa only [weightedDebtJet, Real.norm_eq_abs, integral_const_mul,
-    integral_weightedKernel (lt_of_lt_of_le zero_lt_one hK) hpq, mul_div_assoc] using hb'
 
 
 
@@ -464,11 +438,6 @@ theorem weightedDebtJet_eq_iteratedDerivWithin (square : Bool) (n : ℕ) {ν : �
     (weightedJet_measurable hh hK hW square)
     (weightedJet_dominated hh hK hB hweight hpq square) n hν
 
-theorem weightedDebt_contDiffOn (square : Bool) :
-    ContDiffOn ℝ ∞ (weightedDebtJet W square h K q 0) (Ici 0) :=
-  contDiffOn_integral_chain (weightedJet_derivative hh hK square)
-    (weightedJet_measurable hh hK hW square)
-    (weightedJet_dominated hh hK hB hweight hpq square)
 
 end Weighted
 
@@ -489,8 +458,6 @@ noncomputable def tailSize (d : TailData) (square : Bool) : ℝ :=
 noncomputable def nuDebtJet (d : TailData) (K : ℝ) (square : Bool) (q : ℝ)
     (n : ℕ) (ν : ℝ) : ℝ := weightedDebtJet (tailWeight d K square) square d.h K q n ν
 
-noncomputable def nuConstant (d : TailData) (square : Bool) (q : ℝ) (n : ℕ) : ℝ :=
-  tailSize d square * editBound square d.h 1 n / (-tailDecay d square - q)
 
 theorem tailSize_nonneg (d : TailData) (square : Bool) : 0 ≤ tailSize d square := by
   cases square
@@ -517,19 +484,8 @@ theorem tailWeight_bound (d : TailData) {K : ℝ} (hK : 0 < K) (square : Bool)
       powerTail_square_bound hK (outgoingAmplitude_pos d).le (show (0 : ℝ) ≤ 1 by norm_num)
         hX.le d.h (fun t _ => outgoingShape_bound d t)
 
-theorem nuConstant_nonneg (d : TailData) (square : Bool) {q : ℝ}
-    (hq : tailDecay d square + q < 0) (n : ℕ) : 0 ≤ nuConstant d square q n := by
-  exact div_nonneg (mul_nonneg (tailSize_nonneg d square)
-    (editBound_nonneg d.h_pos (by norm_num) square n)) (by linarith)
 
 
-theorem nuDebt_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) :
-    ContDiffOn ℝ ∞ (nuDebtJet d K square q 0) (Ici 0) :=
-  weightedDebt_contDiffOn d.h_pos hK
-    (tailWeight_continuousOn d (lt_of_lt_of_le zero_lt_one hK) square)
-    (tailSize_nonneg d square) (tailWeight_bound d (lt_of_lt_of_le zero_lt_one hK) square)
-    hq square
 
 theorem nuDebtJet_eq_iteratedDerivWithin (d : TailData) {K : ℝ} (hK : 1 ≤ K)
     (square : Bool) {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ)
@@ -541,14 +497,6 @@ theorem nuDebtJet_eq_iteratedDerivWithin (d : TailData) {K : ℝ} (hK : 1 ≤ K)
     (tailSize_nonneg d square) (tailWeight_bound d (lt_of_lt_of_le zero_lt_one hK) square)
     hq square n hν
 
-theorem nuDebtJet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) {ν : ℝ}
-    (hν : ν ∈ Icc (0 : ℝ) 1) :
-    |nuDebtJet d K square q n ν| ≤ nuConstant d square q n * K ^ q := by
-  have hb' := weightedDebtJet_bound d.h_pos hK
-    (tailSize_nonneg d square) (tailWeight_bound d (lt_of_lt_of_le zero_lt_one hK) square)
-    hq square n (by norm_num : (0 : ℝ) < 1) hν
-  convert! hb' using 1 ; unfold nuConstant ; ring
 
 noncomputable def diffusion (eta : ℝ) : ℝ := 1 - eta ^ 2
 
@@ -561,36 +509,8 @@ noncomputable def physicalEnergy (d : TailData) (K eta : ℝ) : ℝ :=
 noncomputable def physicalAngular (d : TailData) (K eta : ℝ) : ℝ :=
   angularDebt (outgoingProfile d K eta) d.h (diffusion eta) K
 
-theorem physicalPressure_eq (d : TailData) {K : ℝ} (hK : 0 < K) (eta : ℝ) :
-    physicalPressure d K eta = nuDebtJet d K true (-1) 0 (diffusion eta) := by
-  rw [physicalPressure, outgoing_pressureDebt_eq d (diffusion eta) eta hK, pressureDebt_eq]
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro X hX
-  simp only [weightedJet, tailWeight, editJet, ite_true]
-  rw [squareCorrectionJet_zero]
-  dsimp only [squareChange, edit]
-  ring
 
-theorem physicalEnergy_eq (d : TailData) {K : ℝ} (hK : 0 < K) (eta : ℝ) :
-    physicalEnergy d K eta = nuDebtJet d K true 0 0 (diffusion eta) := by
-  rw [physicalEnergy, outgoing_energyDebt_eq d (diffusion eta) eta hK]
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro X hX
-  simp only [weightedJet, tailWeight, editJet, ite_true]
-  rw [squareCorrectionJet_zero, Real.rpow_zero]
-  dsimp only [squareChange, edit]
-  ring
 
-theorem physicalAngular_eq (d : TailData) {K : ℝ} (hK : 0 < K) (eta : ℝ) :
-    physicalAngular d K eta = Real.sqrt 2 * nuDebtJet d K false (1 / 2) 0 (diffusion eta) := by
-  rw [physicalAngular, outgoing_angularDebt_eq d (diffusion eta) eta hK, angularDebt_eq]
-  congr 1
-  apply setIntegral_congr_fun measurableSet_Ioi
-  intro X hX
-  simp only [weightedJet, tailWeight, editJet, Bool.false_eq_true, ite_false]
-  rw [correctionJet_zero]
-  dsimp only [change, edit]
-  ring
 
 /-! ## Composition with the physical diffusion `1 - eta^2` -/
 
@@ -627,67 +547,12 @@ theorem diffusion_higher (n : ℕ) : iteratedDeriv (n + 3) diffusion = fun _ => 
       funext eta
       exact deriv_const eta (0 : ℝ)
 
-theorem diffusion_jet_bound {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1)
-    (n : ℕ) (hn : 1 ≤ n) :
-    ‖iteratedFDerivWithin ℝ n diffusion (Icc (-1 : ℝ) 1) eta‖ ≤ (2 : ℝ) ^ n := by
-  rw [iteratedFDerivWithin_eq_iteratedFDeriv (uniqueDiffOn_Icc (by norm_num))
-    ((diffusion_contDiff.of_le (WithTop.coe_le_coe.mpr le_top)).contDiffAt) hη,
-    norm_iteratedFDeriv_eq_norm_iteratedDeriv]
-  rcases n with _ | n
-  · omega
-  rcases n with _ | n
-  · rw [iteratedDeriv_one, diffusion_deriv, Real.norm_eq_abs, abs_mul]
-    norm_num
-    exact abs_le.mpr hη
-  rcases n with _ | n
-  · rw [diffusion_second]
-    norm_num
-  · rw [show n + 1 + 1 + 1 = n + 3 by omega, diffusion_higher]
-    simp only [norm_zero]
-    positivity
-
-noncomputable def etaDebt (d : TailData) (K : ℝ) (square : Bool) (q eta : ℝ) : ℝ :=
-  nuDebtJet d K square q 0 (diffusion eta)
-
-noncomputable def etaConstant (d : TailData) (square : Bool) (q : ℝ) (n : ℕ) : ℝ :=
-  (n.factorial : ℝ) * (∑ i ∈ Finset.range (n + 1), nuConstant d square q i) * 2 ^ n
-
-theorem etaConstant_nonneg (d : TailData) (square : Bool) {q : ℝ}
-    (hq : tailDecay d square + q < 0) (n : ℕ) : 0 ≤ etaConstant d square q n := by
-  unfold etaConstant
-  exact mul_nonneg (mul_nonneg (by positivity)
-    (Finset.sum_nonneg fun i _ => nuConstant_nonneg d square hq i)) (by positivity)
-
-theorem etaDebt_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) :
-    ContDiffOn ℝ ∞ (etaDebt d K square q) (Icc (-1 : ℝ) 1) :=
-  (nuDebt_contDiffOn d hK square hq).comp diffusion_contDiff.contDiffOn
-    (fun _ hη => (diffusion_mem hη).1)
 
 
-theorem etaDebt_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K) (square : Bool)
-    {q : ℝ} (hq : tailDecay d square + q < 0) (n : ℕ) {eta : ℝ}
-    (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    |iteratedDerivWithin n (etaDebt d K square q) (Icc (-1 : ℝ) 1) eta| ≤
-      etaConstant d square q n * K ^ q := by
-  have hKp : 0 < K := lt_of_lt_of_le zero_lt_one hK
-  have hb' := norm_iteratedFDerivWithin_comp_le (nuDebt_contDiffOn d hK square hq)
-    diffusion_contDiff.contDiffOn (WithTop.coe_le_coe.mpr le_top)
-    (uniqueDiffOn_Ici 0) (uniqueDiffOn_Icc (by norm_num))
-    (fun _ hη => (diffusion_mem hη).1) hη
-    (C := (∑ i ∈ Finset.range (n + 1), nuConstant d square q i) * K ^ q)
-    (D := 2) (n := n) ?_ ?_
-  · rw [norm_iteratedFDerivWithin_eq_norm_iteratedDerivWithin, Real.norm_eq_abs] at hb'
-    convert! hb' using 1 ; simp only [etaConstant] ; ring
-  · intro i hi
-    rw [norm_iteratedFDerivWithin_eq_norm_iteratedDerivWithin, Real.norm_eq_abs,
-      nuDebtJet_eq_iteratedDerivWithin d hK square hq i (diffusion_mem hη).1]
-    apply (nuDebtJet_bound d hK square hq i (diffusion_mem hη)).trans
-    apply mul_le_mul_of_nonneg_right _ (Real.rpow_nonneg hKp.le q)
-    exact Finset.single_le_sum (fun j _ => nuConstant_nonneg d square hq j)
-      (Finset.mem_range.mpr (by omega))
-  · intro i hi _
-    exact diffusion_jet_bound hη i hi
+
+
+
+
 
 theorem pressure_decay (d : TailData) : tailDecay d true + (-1) < 0 := by
   dsimp [tailDecay, exponent]
@@ -707,89 +572,10 @@ theorem angular_decay (d : TailData) : tailDecay d false + (1 / 2) < 0 := by
 
 
 
-theorem physicalPressure_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    (n : ℕ) {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    |iteratedDerivWithin n (physicalPressure d K) (Icc (-1 : ℝ) 1) eta| ≤
-      etaConstant d true (-1) n / K := by
-  have he : physicalPressure d K = etaDebt d K true (-1) :=
-    funext (physicalPressure_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  simpa only [Real.rpow_neg_one, div_eq_mul_inv] using
-    etaDebt_jet_bound d hK true (pressure_decay d) n hη
 
-theorem physicalEnergy_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    (n : ℕ) {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    |iteratedDerivWithin n (physicalEnergy d K) (Icc (-1 : ℝ) 1) eta| ≤
-      etaConstant d true 0 n := by
-  have he : physicalEnergy d K = etaDebt d K true 0 :=
-    funext (physicalEnergy_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  simpa only [Real.rpow_zero, mul_one] using
-    etaDebt_jet_bound d hK true (energy_decay d) n hη
 
-theorem physicalAngular_jet_bound (d : TailData) {K : ℝ} (hK : 1 ≤ K)
-    (n : ℕ) {eta : ℝ} (hη : eta ∈ Icc (-1 : ℝ) 1) :
-    |iteratedDerivWithin n (physicalAngular d K) (Icc (-1 : ℝ) 1) eta| ≤
-      (Real.sqrt 2 * etaConstant d false (1 / 2) n) * Real.sqrt K := by
-  have he : physicalAngular d K = fun eta => Real.sqrt 2 * etaDebt d K false (1 / 2) eta :=
-    funext (physicalAngular_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he, iteratedDerivWithin_const_mul hη (uniqueDiffOn_Icc (by norm_num)) _
-    ((etaDebt_contDiffOn d hK false (angular_decay d) eta hη).of_le
-      (WithTop.coe_le_coe.mpr le_top)), abs_mul, abs_of_nonneg (Real.sqrt_nonneg 2)]
-  have hb' := mul_le_mul_of_nonneg_left
-    (etaDebt_jet_bound d hK false (angular_decay d) n hη) (Real.sqrt_nonneg 2)
-  simpa only [← Real.sqrt_eq_rpow K, mul_assoc] using hb'
 
-/-- Every fixed genuine eta jet has the manuscript's three unnormalized scales. -/
-theorem exists_physical_debt_jet_bounds (d : TailData) (n : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ K : ℝ, 1 ≤ K → ∀ eta ∈ Icc (-1 : ℝ) 1,
-      |iteratedDerivWithin n (physicalPressure d K) (Icc (-1 : ℝ) 1) eta| ≤ C / K ∧
-      |iteratedDerivWithin n (physicalEnergy d K) (Icc (-1 : ℝ) 1) eta| ≤ C ∧
-      |iteratedDerivWithin n (physicalAngular d K) (Icc (-1 : ℝ) 1) eta| ≤ C * Real.sqrt K := by
-  let CP := etaConstant d true (-1) n
-  let CS := etaConstant d true 0 n
-  let CI := Real.sqrt 2 * etaConstant d false (1 / 2) n
-  have hp : 0 ≤ CP := etaConstant_nonneg d true (pressure_decay d) n
-  have hs : 0 ≤ CS := etaConstant_nonneg d true (energy_decay d) n
-  have hi : 0 ≤ CI := mul_nonneg (Real.sqrt_nonneg 2)
-    (etaConstant_nonneg d false (angular_decay d) n)
-  refine ⟨1 + CP + CS + CI, by linarith, ?_⟩
-  intro K hK eta hη
-  have hKp : 0 < K := lt_of_lt_of_le zero_lt_one hK
-  refine ⟨(physicalPressure_jet_bound d hK n hη).trans ?_,
-    (physicalEnergy_jet_bound d hK n hη).trans ?_,
-    (physicalAngular_jet_bound d hK n hη).trans ?_⟩
-  · exact div_le_div_of_nonneg_right (show CP ≤ 1 + CP + CS + CI by linarith) hKp.le
-  · change CS ≤ 1 + CP + CS + CI
-    linarith
-  · exact mul_le_mul_of_nonneg_right (show CI ≤ 1 + CP + CS + CI by linarith)
-      (Real.sqrt_nonneg K)
 
-/-- A single constant controls values and actual first within derivatives.
-This is the scalar input to the variable-debt nonlinear compensation theorem. -/
-theorem exists_physical_debt_C1_bounds (d : TailData) :
-    ∃ C : ℝ, 0 < C ∧ ∀ K : ℝ, 1 ≤ K → ∀ eta ∈ Icc (-1 : ℝ) 1,
-      |physicalPressure d K eta| ≤ C / K ∧
-      |derivWithin (physicalPressure d K) (Icc (-1 : ℝ) 1) eta| ≤ C / K ∧
-      |physicalEnergy d K eta| ≤ C ∧
-      |derivWithin (physicalEnergy d K) (Icc (-1 : ℝ) 1) eta| ≤ C ∧
-      |physicalAngular d K eta| ≤ C * Real.sqrt K ∧
-      |derivWithin (physicalAngular d K) (Icc (-1 : ℝ) 1) eta| ≤ C * Real.sqrt K := by
-  obtain ⟨C0, hC0, hb0⟩ := exists_physical_debt_jet_bounds d 0
-  obtain ⟨C1, hC1, hb1⟩ := exists_physical_debt_jet_bounds d 1
-  refine ⟨C0 + C1, by linarith, ?_⟩
-  intro K hK eta hη
-  have hKp : 0 < K := lt_of_lt_of_le zero_lt_one hK
-  rcases hb0 K hK eta hη with ⟨hp0, hs0, hi0⟩
-  rcases hb1 K hK eta hη with ⟨hp1, hs1, hi1⟩
-  simp only [iteratedDerivWithin_zero, iteratedDerivWithin_one] at hp0 hs0 hi0 hp1 hs1 hi1
-  refine ⟨hp0.trans ?_, hp1.trans ?_, hs0.trans ?_, hs1.trans ?_, hi0.trans ?_, hi1.trans ?_⟩
-  · exact div_le_div_of_nonneg_right (by linarith) hKp.le
-  · exact div_le_div_of_nonneg_right (by linarith) hKp.le
-  · linarith
-  · linarith
-  · exact mul_le_mul_of_nonneg_right (by linarith) (Real.sqrt_nonneg K)
-  · exact mul_le_mul_of_nonneg_right (by linarith) (Real.sqrt_nonneg K)
 
 /-! ## Endpoint jets and the velocity in physical units -/
 

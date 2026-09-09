@@ -54,10 +54,6 @@ structure StabilityBudget {q : ℕ} {T : ℝ} (hT : 0 ≤ T) (D : CorrectionData
   /-- The actual quadratic coefficients satisfy their common budget. -/
   quadratic_le : ∀ t, (∑ i : Fin 3, (((D.quadratic i).coefficient t).bound : ℝ)) ≤ quadratic
 
-/-- The actual continuous metric multiplier path determined by the concrete budget. -/
-def StabilityBudget.operatorPath {q : ℕ} {T : ℝ} {hT : 0 ≤ T}
-    {D : CorrectionData period q (Icc (0 : ℝ) T)} (B : StabilityBudget period hT D) :
-    C(Icc (0 : ℝ) T,LiftL2 period →L[ℝ] LiftL2 period) := ⟨fun t => (B.metric t).operator,B.continuous⟩
 
 /-- The fixed squared-energy growth coefficient obtained from the actual background path and a solution norm bound. -/
 def StabilityBudget.growth {q : ℕ} {T : ℝ} {hT : 0 ≤ T}

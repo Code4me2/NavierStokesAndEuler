@@ -203,8 +203,6 @@ noncomputable def graphDr (k : ℝ → ℝ) (v : E) (f : ℝ × E → ℝ) (p : 
 noncomputable def graphDz (w : E) (f : ℝ × E → ℝ) (p : ℝ × E) : ℝ :=
   fderiv ℝ f p (0, w)
 
-theorem graphDz_contDiff {f : ℝ × E → ℝ} (hf : ContDiff ℝ ∞ f) (w : E) :
-    ContDiff ℝ ∞ (graphDz w f) := fixedDeriv_contDiff hf (0, w)
 
 
 theorem radialVector_hasFDerivAt {k : ℝ → ℝ} (v : E) {p : ℝ × E}
@@ -438,11 +436,6 @@ theorem streamPotential_supported {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd
     (RadialPullback.physicalCompact_supported ha hab hd (weightedSource_contDiff hγ)
       (weightedSource_supported hs) M v)
 
-theorem streamBeta_contDiff {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (v w : E) {γd : ℝ × E → ℝ} (hγ : ContDiff ℝ ∞ γd)
-    (hs : RadialAlias.RadiallySupported a b γd) :
-    ContDiff ℝ ∞ (streamBeta w (streamPotential d a b M v γd)) :=
-  (graphDz_contDiff (streamPotential_contDiff ha hab hd v hγ hs) w).neg
 
 theorem streamGamma_contDiff {d a b M : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
     (v : E) {γd : ℝ × E → ℝ} (hγ : ContDiff ℝ ∞ γd)

@@ -162,11 +162,6 @@ def Atlas.StateOverlap {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
     StateOn (PhysicalMeanDomain.slowDomain (overlap h U n m))
       (bandChartEquiv h n m k) (bandVelocityScale h n m) (bandScale n m) u u n m
 
-theorem Atlas.StateOverlap.radial {h : ℝ} {N Δ : ℕ} {A : Atlas h N Δ}
-    {U : Set Plane} {u : CorrectionState.State Point} (H : A.StateOverlap U u) :
-    A.OverlapLaw U (CoordinateAlgebra.A h) u.mean.radial := by
-  intro n hn m hm k hk x hx
-  exact (H n hn m hm k hk).mean.radial x hx
 
 theorem Atlas.StateOverlap.angular {h : ℝ} {N Δ : ℕ} {A : Atlas h N Δ}
     {U : Set Plane} {u : CorrectionState.State Point} (H : A.StateOverlap U u) :

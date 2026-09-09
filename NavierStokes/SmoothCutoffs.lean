@@ -235,10 +235,6 @@ def timeSwitch (t : ℝ) : ℝ := 1 - scaledCutoff (4 / 3) t
 theorem timeSwitch_contDiff : ContDiff ℝ ∞ timeSwitch :=
   contDiff_const.sub (scaledCutoff_contDiff (4 / 3))
 
-theorem timeSwitch_mem_Icc (t : ℝ) : timeSwitch t ∈ Icc (0 : ℝ) 1 := by
-  obtain ⟨hlo, hhi⟩ := scaledCutoff_mem_Icc (4 / 3) t
-  unfold timeSwitch
-  constructor <;> linarith
 
 theorem timeSwitch_zero_of_abs_le {t : ℝ} (ht : |t| ≤ 3 / 8) : timeSwitch t = 0 := by
   have hs : |(4 / 3 : ℝ) * t| ≤ 1 / 2 := by

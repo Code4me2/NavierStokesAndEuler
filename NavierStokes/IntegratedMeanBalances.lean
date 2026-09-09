@@ -353,19 +353,6 @@ theorem fixedPartial_smooth (v : (P × ℝ) × ℝ) {F : (P × ℝ) × ℝ → �
     (hF : ContDiff ℝ ∞ F) : ContDiff ℝ ∞ (fixedPartial v F) :=
   (hF.fderiv_right (by simp)).clm_apply contDiff_const
 
-theorem fixedPartial_periodic (v : (P × ℝ) × ℝ) {F : (P × ℝ) × ℝ → ℝ}
-    (hp : TorusPeriodic F) : TorusPeriodic (fixedPartial v F) := by
-  constructor
-  · intro q
-    have he : (fun x => F (x + ((0, 0), 1))) = F := funext hp.first
-    have hd := congrArg (fun f => fderiv ℝ f q) he
-    rw [fderiv_comp_add_right] at hd
-    exact congrArg (fun L : ((P × ℝ) × ℝ) →L[ℝ] ℝ => L v) hd
-  · intro q
-    have he : (fun x => F (x + ((0, 1), 0))) = F := funext hp.second
-    have hd := congrArg (fun f => fderiv ℝ f q) he
-    rw [fderiv_comp_add_right] at hd
-    exact congrArg (fun L : ((P × ℝ) × ℝ) →L[ℝ] ℝ => L v) hd
 
 theorem torusInner_smooth {F : (P × ℝ) × ℝ → ℝ} (hF : ContDiff ℝ ∞ F) :
     ContDiff ℝ ∞ (torusInner F) :=
@@ -524,46 +511,17 @@ structure SmoothShell (a b : ℝ) (F : MeanField) : Prop where
   smooth : ContDiff ℝ ∞ F
   supported : RadialAlias.RadiallySupported a b F
 
-theorem SmoothShell.partial {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    (v : MeanParameter) : SmoothShell a b (parameterPartial v F) :=
-  ⟨parameterPartial_smooth v hF.smooth, parameterPartial_supported v hF.supported⟩
-
-theorem SmoothShell.add {a b : ℝ} {F G : MeanField}
-    (hF : SmoothShell a b F) (hG : SmoothShell a b G) :
-    SmoothShell a b (fun x => F x + G x) := by
-  refine ⟨hF.smooth.add hG.smooth, ?_⟩
-  intro x hx
-  by_contra hn
-  have hFx : F x = 0 := by
-    by_contra h
-    exact hn (hF.supported h)
-  have hGx : G x = 0 := by
-    by_contra h
-    exact hn (hG.supported h)
-  exact hx (by simp [hFx, hGx])
-
-theorem SmoothShell.slice_smooth {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    (p : MeanParameter) : ContDiff ℝ ∞ (fun r => F (r, p)) :=
-  radial_slice_smooth hF.smooth p
-
-theorem SmoothShell.slice_compact {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    (p : MeanParameter) : HasCompactSupport (fun r => F (r, p)) :=
-  radial_slice_compact hF.supported p
-
-theorem SmoothShell.weighted_integrable {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    (n : ℕ) (p : MeanParameter) : Integrable (fun r => r ^ n * F (r, p)) :=
-  IntegratedMeanBalances.weighted_integrable (hF.slice_smooth p).continuous (hF.slice_compact p) n
 
 
 
 
 
 
-noncomputable def pressureCoefficient (ρ : MeanField) (p : MeanParameter) : ℝ :=
-  radialMoment 2 ρ p / 2
 
-noncomputable def axialDefect (axialFlux gr : MeanField) (p : MeanParameter) : ℝ :=
-  radialMoment 1 axialFlux p - (1 / 2 : ℝ) * radialMoment 2 gr p
+
+
+
+
 
 
 
@@ -575,10 +533,6 @@ noncomputable def axialDefect (axialFlux gr : MeanField) (p : MeanParameter) : �
 
 
 
-theorem SmoothShell.zero_of_not_mem {a b : ℝ} {F : MeanField} (hF : SmoothShell a b F)
-    {x : MeanPoint} (hx : x.1 ∉ Icc a b) : F x = 0 := by
-  by_contra h
-  exact hx (hF.supported h)
 
 
 

@@ -43,14 +43,6 @@ theorem pastVelocity_reflection_neg (t : Icc (0 : ℝ) τ) :
       (fun s x => hM (initialInclusion D.T τ hτT.le s) x))
     hH Y.value hY t
 
-theorem pastDerivative_reflection_neg (t : Icc (0 : ℝ) τ) :
-    reflection P (pastDerivative τ hτ hτT B Y t) = -pastDerivative τ hτ hτT B Y t :=
-  B.coefficients.endpointDerivative_odd P
-    ((D.initial τ hτ hτT.le).frame_even (fun s x => hF (initialInclusion D.T τ hτT.le s) x))
-    ((D.initial τ hτ hτT.le).frameDerivative_even
-      (fun s x => hF (initialInclusion D.T τ hτT.le s) x)
-      (fun s x => hM (initialInclusion D.T τ hτT.le s) x))
-    hH Y.value hY t
 
 include hSym
 
@@ -62,13 +54,6 @@ theorem futureVelocity_reflection_neg (t : Icc (0 : ℝ) (D.T-τ)) :
     (by intro s x θ; simp only [Pi.zero_apply,neg_zero])
     (forwardInitial_reflection_neg τ hτ hτT B Y hF hM hH hY) t
 
-theorem futureDerivative_reflection_neg (t : Icc (0 : ℝ) (D.T-τ)) :
-    reflection P (futureDerivative τ hτ hτT B Y t) = -futureDerivative τ hτ hτT B Y t :=
-  (zeroForcing (D.tail τ hτ.le hτT)).derivativePath_reflection_neg (forwardInitial τ hτ hτT B Y) hSym
-    (fun s x => hF (tailInclusion D.T τ hτ.le s) x)
-    (fun s x => hM (tailInclusion D.T τ hτ.le s) x)
-    (by intro s x θ; simp only [Pi.zero_apply,neg_zero])
-    (forwardInitial_reflection_neg τ hτ hτT B Y hF hM hH hY) t
 
 theorem velocityPath_reflection_neg (t : Icc (0 : ℝ) D.T) :
     reflection P (velocityPath τ hτ hτT B Y t) = -velocityPath τ hτ hτT B Y t :=
@@ -76,10 +61,5 @@ theorem velocityPath_reflection_neg (t : Icc (0 : ℝ) D.T) :
     (pastVelocity_reflection_neg τ hτ hτT B Y hF hM hH hY)
     (futureVelocity_reflection_neg τ hτ hτT B Y hSym hF hM hH hY) t
 
-theorem derivativePath_reflection_neg (t : Icc (0 : ℝ) D.T) :
-    reflection P (derivativePath τ hτ hτT B Y t) = -derivativePath τ hτ hτT B Y t :=
-  join_mem D.T τ hτ.le hτT.le _ _ (derivative_match τ hτ hτT B Y) {u | reflection P u = -u}
-    (pastDerivative_reflection_neg τ hτ hτT B Y hF hM hH hY)
-    (futureDerivative_reflection_neg τ hτ hτT B Y hSym hF hM hH hY) t
 
 end EulerTransversePacketPrimary

@@ -26,15 +26,6 @@ theorem gluePath_left (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
     (fun r => u.val.2 (projIcc τ S hτS r)) t = _
   rw [glue_left τ _ _ t t.property.2, projIcc_of_mem hτ0 t.property]
 
-theorem gluePath_right (S τ : ℝ) (hτ0 : 0 ≤ τ) (hτS : τ ≤ S)
-    (u : Matching (E := E) S τ hτ0 hτS) (t : Icc τ S) :
-    gluePath S τ hτ0 hτS u ⟨t, hτ0.trans t.property.1, t.property.2⟩=u.val.2 t := by
-  change glue τ (fun r => u.val.1 (projIcc 0 τ hτ0 r))
-    (fun r => u.val.2 (projIcc τ S hτS r)) t = _
-  rw [glue_right τ _ _ (by
-    simpa only [projIcc_of_mem hτ0 ⟨hτ0,le_rfl⟩,
-      projIcc_of_mem hτS ⟨le_rfl,hτS⟩] using matching_values S τ hτ0 hτS u)
-    t t.property.1, projIcc_of_mem hτS t.property]
 
 
 

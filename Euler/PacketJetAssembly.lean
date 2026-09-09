@@ -11,13 +11,7 @@ open EulerFiniteGrades Finset
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem jet_zero (z : Domain) : jet (fun _ : Domain => (0 : E)) z = 0 := by
-  simp [jet]
 
-theorem jet_add (f g : Domain → E) (z : Domain)
-    (hf : DifferentiableAt ℝ f z) (hg : DifferentiableAt ℝ g z) :
-    jet (f+g) z = jet f z+jet g z := by
-  simp only [jet, Pi.add_apply, fderiv_add hf hg, Prod.mk_add_mk]
 
 
 

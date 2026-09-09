@@ -28,9 +28,6 @@ private local instance : NormedSpace ℝ C(K,PotentialField) := inferInstance
 def potentialPathMap : C(K,NormalField) →L[ℝ] C(K,PotentialField) :=
   (normalPotentialMap.compLeftContinuousBounded Space).compLeftContinuous ℝ K
 
-omit [CompactSpace K] in
-@[simp] theorem potentialPathMap_apply (N : C(K,NormalField)) (t : K) (x : Space) :
-    potentialPathMap N t x = normalPotentialMap (N t x) := rfl
 
 theorem potentialPathMap_norm : ‖potentialPathMap (K := K)‖ ≤ 1 := by
   apply opNorm_le_bound _ zero_le_one

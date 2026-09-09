@@ -2,7 +2,9 @@ import NavierStokes.ResidualCalculus
 import NavierStokes.ResidualRegularity
 import NavierStokes.SpatialCurl
 import NavierStokes.JetBounds
-import NavierStokes.Flatness
+import Mathlib.Analysis.Normed.Group.Continuity
+import Mathlib.Analysis.Normed.Field.Basic
+import Mathlib.Tactic.Ring
 import Mathlib.Analysis.Calculus.FDeriv.Prod
 
 /-!
@@ -24,23 +26,8 @@ section Scalar
 
 variable {X : Type*} {l : Filter X} {q f g : X → ℝ}
 
-theorem scalarFlat_mono (hf : Flatness.PowerFlat l q f)
-    (hgf : ∀ᶠ x in l, |g x| ≤ |f x|) : Flatness.PowerFlat l q g := by
-  intro N
-  obtain ⟨C, hC, hb⟩ := hf N
-  exact ⟨C, hC, by filter_upwards [hgf, hb] with x h₁ h₂; exact h₁.trans h₂⟩
 
-theorem scalarFlat_const_mul (c : ℝ) (hf : Flatness.PowerFlat l q f) :
-    Flatness.PowerFlat l q (fun x => c * f x) := by
-  intro N
-  obtain ⟨C, hC, hb⟩ := hf N
-  refine ⟨|c| * C, mul_nonneg (abs_nonneg c) hC, ?_⟩
-  filter_upwards [hb] with x hx
-  simpa only [abs_mul, mul_assoc] using mul_le_mul_of_nonneg_left hx (abs_nonneg c)
 
-theorem scalarFlat_zero : Flatness.PowerFlat l q (fun _ => 0) := by
-  intro N
-  exact ⟨0, le_rfl, Filter.Eventually.of_forall (fun _ => by simp)⟩
 
 
 end Scalar
@@ -53,31 +40,12 @@ variable {D E F G : Type*}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-/-- Every actual derivative decays faster than each fixed natural power. -/
-def AllJetsFlat (l : Filter D) (q : D → ℝ) (f : D → E) : Prop :=
-  ∀ m : ℕ, Flatness.PowerFlat l q (fun x => ‖iteratedFDeriv ℝ m f x‖)
 
-/-- Each actual derivative has a fixed inverse-power bound. The power and
-constant may depend on the derivative order, but not on the point. -/
-def AllJetsGrowth (l : Filter D) (q : D → ℝ) (f : D → E) : Prop :=
-  ∀ m : ℕ, ∃ K : ℕ, ∃ C : ℝ, 0 ≤ C ∧
-    ∀ᶠ x in l, ‖iteratedFDeriv ℝ m f x‖ ≤ C / |q x| ^ K
 
 variable {l : Filter D} {q : D → ℝ} {f : D → E} {g : D → F} {U : Set D}
 
-theorem AllJetsFlat.fderiv (hf : AllJetsFlat l q f) : AllJetsFlat l q (fderiv ℝ f) := by
-  intro m
-  simpa only [norm_iteratedFDeriv_fderiv] using hf (m + 1)
 
-theorem AllJetsGrowth.fderiv (hf : AllJetsGrowth l q f) :
-    AllJetsGrowth l q (fderiv ℝ f) := by
-  intro m
-  simpa only [norm_iteratedFDeriv_fderiv] using hf (m + 1)
 
-theorem AllJetsFlat.growth (hf : AllJetsFlat l q f) : AllJetsGrowth l q f := by
-  intro m
-  obtain ⟨C, hC, hb⟩ := hf m 0
-  exact ⟨0, C, hC, by simpa only [abs_norm, pow_zero, mul_one, div_one] using hb⟩
 
 theorem iteratedFDeriv_eqOn {f g : D → E} (hU : IsOpen U) (hfg : EqOn f g U)
     (m : ℕ) : EqOn (iteratedFDeriv ℝ m f) (iteratedFDeriv ℝ m g) U := by
@@ -89,22 +57,7 @@ theorem iteratedFDeriv_eqOn {f g : D → E} (hU : IsOpen U) (hfg : EqOn f g U)
   simpa only [iteratedFDerivWithin_univ] using
     h'.iteratedFDerivWithin_eq h.self_of_nhds m
 
-theorem AllJetsFlat.congr_on {g : D → E} (hf : AllJetsFlat l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hfg : EqOn f g U) :
-    AllJetsFlat l q g := by
-  intro m
-  apply scalarFlat_mono (hf m)
-  filter_upwards [hl] with x hx
-  rw [iteratedFDeriv_eqOn hU hfg m hx]
 
-theorem AllJetsGrowth.congr_on {g : D → E} (hf : AllJetsGrowth l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hfg : EqOn f g U) :
-    AllJetsGrowth l q g := by
-  intro m
-  obtain ⟨K, C, hC, hb⟩ := hf m
-  refine ⟨K, C, hC, ?_⟩
-  filter_upwards [hl, hb] with x hx hbound
-  rwa [iteratedFDeriv_eqOn hU hfg m hx] at hbound
 
 theorem norm_jet_linear_map (L : E →L[ℝ] F) (hU : IsOpen U)
     (hf : ContDiffOn ℝ ∞ f U) {x : D} (hx : x ∈ U) (m : ℕ) :
@@ -114,71 +67,12 @@ theorem norm_jet_linear_map (L : E →L[ℝ] F) (hU : IsOpen U)
     (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)]
   exact L.norm_compContinuousMultilinearMap_le _
 
-theorem AllJetsFlat.linear_map (hf : AllJetsFlat l q f) (L : E →L[ℝ] F)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsFlat l q (fun x => L (f x)) := by
-  intro m
-  apply scalarFlat_mono (scalarFlat_const_mul ‖L‖ (hf m))
-  filter_upwards [hl] with x hx
-  rw [abs_norm]
-  exact (norm_jet_linear_map L hU hs hx m).trans (le_abs_self _)
 
-theorem AllJetsGrowth.linear_map (hf : AllJetsGrowth l q f) (L : E →L[ℝ] F)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsGrowth l q (fun x => L (f x)) := by
-  intro m
-  obtain ⟨K, C, hC, hb⟩ := hf m
-  refine ⟨K, ‖L‖ * C, mul_nonneg (norm_nonneg _) hC, ?_⟩
-  filter_upwards [hl, hb] with x hx hbound
-  calc
-    _ ≤ ‖L‖ * ‖iteratedFDeriv ℝ m f x‖ := norm_jet_linear_map L hU hs hx m
-    _ ≤ ‖L‖ * (C / |q x| ^ K) := mul_le_mul_of_nonneg_left hbound (norm_nonneg _)
-    _ = (‖L‖ * C) / |q x| ^ K := by ring
 
-theorem AllJetsFlat.add {g : D → E} (hf : AllJetsFlat l q f) (hg : AllJetsFlat l q g)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U)
-    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
-    AllJetsFlat l q (fun x => f x + g x) := by
-  intro m
-  apply scalarFlat_mono ((hf m).add (hg m))
-  filter_upwards [hl] with x hx
-  have hfm := (hsf.contDiffAt (hU.mem_nhds hx)).of_le
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)
-  have hgm := (hsg.contDiffAt (hU.mem_nhds hx)).of_le
-    (ENat.natCast_le_of_coe_top_le_withTop le_rfl m)
-  rw [abs_norm, fun_iteratedFDeriv_add_apply hfm hgm]
-  exact (norm_add_le _ _).trans (le_abs_self _)
 
-theorem AllJetsFlat.neg (hf : AllJetsFlat l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsFlat l q (fun x => -f x) := by
-  simpa using hf.linear_map (-ContinuousLinearMap.id ℝ E) hU hl hs
 
-theorem AllJetsFlat.sub {g : D → E} (hf : AllJetsFlat l q f) (hg : AllJetsFlat l q g)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U)
-    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
-    AllJetsFlat l q (fun x => f x - g x) := by
-  simpa only [sub_eq_add_neg] using hf.add (hg.neg hU hl hsg) hU hl hsf hsg.neg
 
-theorem AllJetsFlat.zero : AllJetsFlat l q (fun _ : D => (0 : E)) := by
-  intro m
-  simpa only [iteratedFDeriv_fun_zero, Pi.zero_apply, norm_zero] using
-    (scalarFlat_zero (l := l) (q := q))
 
-theorem AllJetsFlat.sum {ι : Type*} (s : Finset ι) (f : ι → D → E)
-    (hU : IsOpen U) (hl : ∀ᶠ x in l, x ∈ U)
-    (hs : ∀ i ∈ s, ContDiffOn ℝ ∞ (f i) U) (hf : ∀ i ∈ s, AllJetsFlat l q (f i)) :
-    AllJetsFlat l q (fun x => ∑ i ∈ s, f i x) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using (AllJetsFlat.zero (l := l) (q := q) (E := E))
-  | @insert i s hi ih =>
-      simpa only [Finset.sum_insert hi] using
-        (hf i (Finset.mem_insert_self _ _)).add
-          (ih (fun j hj => hs j (Finset.mem_insert_of_mem hj))
-            (fun j hj => hf j (Finset.mem_insert_of_mem hj))) hU hl
-          (hs i (Finset.mem_insert_self _ _))
-          (ContDiffOn.sum (fun j hj => hs j (Finset.mem_insert_of_mem hj)))
 
 
 
@@ -210,63 +104,10 @@ theorem temporalDerivative_eq_full {f : VelocityField} {z : SpaceTime}
 
 variable {l : Filter SpaceTime} {q : SpaceTime → ℝ} {U : Set SpaceTime}
 
-theorem AllJetsFlat.space_fderiv {f : SpaceTime → V} (hf : AllJetsFlat l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsFlat l q (fun z => _root_.fderiv ℝ (fun y : Space => f (z.1, y)) z.2) := by
-  have hfull : ContDiffOn ℝ ∞ (_root_.fderiv ℝ f) U := hs.fderiv_of_isOpen hU (by simp)
-  apply (hf.fderiv.linear_map (spaceRestriction V) hU hl hfull).congr_on hU hl
-  intro z hz
-  exact (space_fderiv_eq_full ((hs.contDiffAt (hU.mem_nhds hz)).differentiableAt (by simp))).symm
 
-theorem AllJetsGrowth.space_fderiv {f : SpaceTime → V} (hf : AllJetsGrowth l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsGrowth l q (fun z => _root_.fderiv ℝ (fun y : Space => f (z.1, y)) z.2) := by
-  have hfull : ContDiffOn ℝ ∞ (_root_.fderiv ℝ f) U := hs.fderiv_of_isOpen hU (by simp)
-  apply (hf.fderiv.linear_map (spaceRestriction V) hU hl hfull).congr_on hU hl
-  intro z hz
-  exact (space_fderiv_eq_full ((hs.contDiffAt (hU.mem_nhds hz)).differentiableAt (by simp))).symm
 
-theorem AllJetsFlat.temporalDerivative {f : VelocityField} (hf : AllJetsFlat l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsFlat l q (fun z => temporalDerivative f z.1 z.2) := by
-  have hfull : ContDiffOn ℝ ∞ (_root_.fderiv ℝ f) U := hs.fderiv_of_isOpen hU (by simp)
-  apply (hf.fderiv.linear_map (ContinuousLinearMap.apply ℝ Space (1, 0)) hU hl hfull).congr_on hU hl
-  intro z hz
-  exact (temporalDerivative_eq_full
-    ((hs.contDiffAt (hU.mem_nhds hz)).differentiableAt (by simp))).symm
 
-theorem AllJetsFlat.pressureGradient {p : PressureField} (hp : AllJetsFlat l q p)
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hs : ContDiffOn ℝ ∞ p U) :
-    AllJetsFlat l q (fun z => pressureGradient p z.1 z.2) := by
-  have hD := ResidualRegularity.contDiffOn_space_fderiv hU hs (m := ∞) (by simp)
-  have hflatD := hp.space_fderiv hU hl hs
-  unfold ProblemStatement.pressureGradient
-  apply AllJetsFlat.sum Finset.univ _ hU hl
-  · intro i _
-    exact (hD.clm_apply contDiffOn_const).smul contDiffOn_const
-  · intro i _
-    have hi := hflatD.linear_map (ContinuousLinearMap.apply ℝ ℝ (coordinateVector i)) hU hl hD
-    exact hi.linear_map ((ContinuousLinearMap.id ℝ ℝ).smulRight (coordinateVector i))
-      hU hl (hD.clm_apply contDiffOn_const)
 
-theorem AllJetsFlat.spatialLaplacian {f : VelocityField} (hf : AllJetsFlat l q f)
-    (hU : IsOpen U) (hl : ∀ᶠ z in l, z ∈ U) (hs : ContDiffOn ℝ ∞ f U) :
-    AllJetsFlat l q (fun z => spatialLaplacian f z.1 z.2) := by
-  have hD := ResidualRegularity.contDiffOn_spatialDerivative hU hs
-  have hflatD := hf.space_fderiv hU hl hs
-  unfold ProblemStatement.spatialLaplacian
-  apply AllJetsFlat.sum Finset.univ _ hU hl
-  · intro i _
-    exact (ResidualRegularity.contDiffOn_space_fderiv hU
-      (hD.clm_apply contDiffOn_const) (m := ∞) (by simp)).clm_apply contDiffOn_const
-  · intro i _
-    have hi := hflatD.linear_map (ContinuousLinearMap.apply ℝ Space (coordinateVector i)) hU hl hD
-    have his : ContDiffOn ℝ ∞
-        (fun z => spatialDerivative f z.1 z.2 (coordinateVector i)) U :=
-      hD.clm_apply contDiffOn_const
-    exact (hi.space_fderiv hU hl his).linear_map
-      (ContinuousLinearMap.apply ℝ Space (coordinateVector i)) hU hl
-      (ResidualRegularity.contDiffOn_space_fderiv hU his (m := ∞) (by simp))
 
 theorem spatialSlice_differentiable {f : SpaceTime → V}
     (hU : IsOpen U) (hf : ContDiffOn ℝ ∞ f U) {z : SpaceTime} (hz : z ∈ U) :

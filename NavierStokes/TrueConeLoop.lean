@@ -403,34 +403,7 @@ theorem exists_family_choices {X : Type*} [TopologicalSpace X]
     dsimp [highSpeed]
     linarith
 
-theorem FamilyChoices.root_bound {X : Type*} {a m p₁ p₂ : X → ℝ} {K B : Set X}
-    (c : FamilyChoices a m p₁ p₂ K B) {x : X} (hx : x ∈ K) :
-    varianceRoot (a x) c.delta (nominalSpeed (a x) (m x)) ∈ Icc (0 : ℝ) c.radius := by
-  have ha : 0 < a x := lt_of_lt_of_le c.aMin_pos (c.aMin_le x hx)
-  rw [c.radius_eq]
-  exact ⟨varianceRoot_nonneg _ _ _, varianceRoot_bound c.aMin (a x) c.delta _
-    c.aMin_pos (c.aMin_le x hx) c.delta_pos c.delta_le_one (mul_pos ha (one_add_sq_pos _))⟩
 
-theorem FamilyChoices.amplitude_bound {X : Type*} {a m p₁ p₂ : X → ℝ} {K B : Set X}
-    (c : FamilyChoices a m p₁ p₂ K B) {x : X} (hx : x ∈ K) :
-    0 ≤ solveScale c.d (p₂ x) (varianceRoot (a x) c.delta (nominalSpeed (a x) (m x))) ∧
-      solveScale c.d (p₂ x) (varianceRoot (a x) c.delta (nominalSpeed (a x) (m x))) < c.maxAmplitude := by
-  let r := varianceRoot (a x) c.delta (nominalSpeed (a x) (m x))
-  have hr := c.root_bound hx
-  have hμ := solveScale_nonneg c.d (p₂ x) r c.d_pos hr.1
-  refine ⟨hμ, ?_⟩
-  have htarget : tiltVariance c.d (p₂ x) (solveScale c.d (p₂ x) r) ≤ 3 / c.aMin := by
-    rw [solveScale_variance _ _ _ (ne_of_gt c.d_pos)]
-    have hR := Real.sq_sqrt (div_nonneg (by norm_num : (0 : ℝ) ≤ 3) c.aMin_pos.le)
-    have hrle : r ≤ Real.sqrt (3 / c.aMin) := by simpa only [c.radius_eq] using hr.2
-    have hsqnonneg := Real.sqrt_nonneg (3 / c.aMin)
-    nlinarith [hr.1]
-  by_contra hn
-  have hμM : c.maxAmplitude ≤ solveScale c.d (p₂ x) r := le_of_not_gt hn
-  have hmono := (tiltVariance_strictMonoOn c.d (p₂ x) c.d_pos).monotoneOn
-    c.maxAmplitude_pos.le hμ hμM
-  have hlarge := c.amplitude_large x hx
-  linarith
 
 section SmoothFamily
 

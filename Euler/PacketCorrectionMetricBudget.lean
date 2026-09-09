@@ -118,17 +118,8 @@ def sourceMetricBudgetOfFields (κ : ℝ) (hκ : |κ| ≤ 1)
       ((correctionDataOfFields D P κ hκ Z G).atOrder P (q+1)) :=
   sourceMetricBudget D P κ hκ Z.toFieldTower G.toFieldTower q
 
-@[simp] theorem sourceMetricBudget_metric (κ : ℝ) (hκ : |κ| ≤ 1)
-    (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).metric = (inverseMetricTower D P).coefficient := rfl
 
-@[simp] theorem sourceMetricBudget_derivative (κ : ℝ) (hκ : |κ| ≤ 1)
-    (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).derivative = inverseMetricDerivativePath D P := rfl
 
-@[simp] theorem sourceMetricBudget_c (κ : ℝ) (hκ : |κ| ≤ 1)
-    (Z G : FieldTower P D.T) (q : ℕ) :
-    (sourceMetricBudget D P κ hκ Z G q).c = D.inverseBound⁻¹ := rfl
 
 
 

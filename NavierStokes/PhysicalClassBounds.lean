@@ -112,100 +112,12 @@ theorem UniformClass.edge_absorbed {s : StripData D} {cL cR L : ℝ} {ρ : D →
       mul_le_mul_of_nonneg_left (hKx x hx) (mul_nonneg (mul_nonneg hC he) hs)
     _ = _ := by ring
 
-/-- The support boundary is included by continuity of the actual jets.
-Outside it all jets vanish, because there is an actual zero neighborhood. -/
-theorem jets_bound_global_of_support {f : D → E} {U : Set D} {B : ℝ}
-    (hf : ContDiff ℝ ∞ f) (hB : 0 ≤ B) (hs : tsupport f ⊆ closure U)
-    (m : ℕ) (hb : ∀ x ∈ U, ‖iteratedFDeriv ℝ m f x‖ ≤ B) :
-    ∀ x, ‖iteratedFDeriv ℝ m f x‖ ≤ B := by
-  intro x
-  by_cases hx : x ∈ closure U
-  · exact (closure_minimal hb (isClosed_le
-      (hf.continuous_iteratedFDeriv (natCast_le_infty m)).norm continuous_const)) hx
-  · rw [PhysicalWaveSum.jet_zero_off_tsupport f m (fun ht => hx (hs ht)), norm_zero]
-    exact hB
 
 
-theorem UniformClass.edge_absorbed_global {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {c α : ℝ} (hc : 0 < c)
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : UniformClass s w α f)
-    (hw : ∀ l n x, x ∈ s.domain → w l n x ≤ s.zeta x ^ c)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ l n x, ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f l n) x‖ ≤ A * s.epsilon n ^ α * s.slow n ^ p := by
-  obtain ⟨A, hA, p, hb⟩ := UniformClass.edge_absorbed hg hc hf hw m
-  refine ⟨A, hA, p, ?_⟩
-  intro l n x j hj
-  have hp : 0 ≤ A * s.epsilon n ^ α * s.slow n ^ p :=
-    mul_nonneg (mul_nonneg hA (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le)
-      (pow_nonneg (zero_le_one.trans (s.one_le_slow n)) _)
-  apply jets_bound_global_of_support (hfc l n) hp (hs l n) j
-    (fun y hy => hb l n y hy j hj) x
 
-/-- Conversion to physical band powers is exact; no exponent is lost when
-the two flat edges are removed. -/
-theorem UniformClass.chart_bound {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {c α h K : ℝ} {q : ℕ}
-    (hc : 0 < c) (hK : 1 ≤ K)
-    (hε : ∀ n, s.epsilon n = ChartScales.epsilon h n)
-    (hslow : ∀ n, 4 ≤ n → s.slow n ≤ K * ChartScales.S n ^ q)
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : UniformClass s w α f)
-    (hw : ∀ l n x, x ∈ s.domain → w l n x ≤ s.zeta x ^ c)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ l n, 4 ≤ n → ∀ x, ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f l n) x‖ ≤
-        A * ChartScales.Q n ^ (h * α) * ChartScales.S n ^ p := by
-  obtain ⟨A, hA, p, hb⟩ := UniformClass.edge_absorbed_global hg hc hf hw hfc hs m
-  refine ⟨A * K ^ p, mul_nonneg hA (pow_nonneg (zero_le_one.trans hK) _), q * p, ?_⟩
-  intro l n hn x j hj
-  have he : s.epsilon n ^ α = ChartScales.Q n ^ (h * α) := by
-    rw [hε, ChartScales.epsilon, ← Real.rpow_mul (ChartScales.Q_pos n).le]
-  calc
-    _ ≤ A * s.epsilon n ^ α * s.slow n ^ p := hb l n x j hj
-    _ ≤ A * s.epsilon n ^ α * (K * ChartScales.S n ^ q) ^ p :=
-      mul_le_mul_of_nonneg_left
-        (pow_le_pow_left₀ (zero_le_one.trans (s.one_le_slow n)) (hslow n hn) p)
-        (mul_nonneg hA (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le)
-    _ = _ := by rw [he, mul_pow, ← pow_mul]; ring
 
-theorem waveWeight_le {s : StripData D} {P : ι → ℕ → D → ℝ}
-    (hP : ∀ l n x, x ∈ s.domain → P l n x ≤ 1) :
-    ∀ l n x, x ∈ s.domain → Real.sqrt (s.zeta x) * P l n x ≤ s.zeta x ^ (1 / 2 : ℝ) := by
-  intro l n x hx
-  rw [← Real.sqrt_eq_rpow]
-  exact mul_le_of_le_one_right (Real.sqrt_nonneg _) (hP l n x hx)
 
-theorem UniformWaveClass.chart_bound {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {α h K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hε : ∀ n, s.epsilon n = ChartScales.epsilon h n)
-    (hslow : ∀ n, 4 ≤ n → s.slow n ≤ K * ChartScales.S n ^ q)
-    {P : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : UniformWaveClass s P α f)
-    (hP : ∀ l n x, x ∈ s.domain → P l n x ≤ 1)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ l n, 4 ≤ n → ∀ x, ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f l n) x‖ ≤
-        A * ChartScales.Q n ^ (h * α) * ChartScales.S n ^ p :=
-  UniformClass.chart_bound hg (by norm_num : (0 : ℝ) < 1 / 2) hK hε hslow hf
-    (waveWeight_le hP) hfc hs m
 
-theorem UniformMeanClass.chart_bound {s : StripData D} {cL cR L : ℝ} {ρ : D → ℝ}
-    (hg : FlatGeometry s cL cR L ρ) {α h K : ℝ} {q : ℕ} (hK : 1 ≤ K)
-    (hε : ∀ n, s.epsilon n = ChartScales.epsilon h n)
-    (hslow : ∀ n, 4 ≤ n → s.slow n ≤ K * ChartScales.S n ^ q)
-    {f : ι → ℕ → D → E} (hf : UniformMeanClass s α f)
-    (hfc : ∀ l n, ContDiff ℝ ∞ (f l n))
-    (hs : ∀ l n, tsupport (f l n) ⊆ closure s.domain) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ l n, 4 ≤ n → ∀ x, ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f l n) x‖ ≤
-        A * ChartScales.Q n ^ (h * α) * ChartScales.S n ^ p :=
-  UniformClass.chart_bound hg (by norm_num : (0 : ℝ) < 1) hK hε hslow hf
-    (by intro l n x hx; rw [Real.rpow_one]) hfc hs m
 
 /-- Primitive input for the physical bridge.  In particular, `uniform`
 places its constants before the label, and `support` concerns the actual
@@ -221,32 +133,9 @@ structure SourceBounds (s : StripData D) (h α : ℝ)
   smooth : ∀ l n, ContDiff ℝ ∞ (f l n)
   support : ∀ l n, tsupport (f l n) ⊆ closure s.domain
 
-theorem SourceBounds.chart_bound {s : StripData D} {h α : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : SourceBounds s h α w f) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ l n, 4 ≤ n → ∀ x, ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (f l n) x‖ ≤
-        A * ChartScales.Q n ^ (h * α) * ChartScales.S n ^ p := by
-  obtain ⟨cL, cR, L, ρ, hg⟩ := hf.flat_geometry
-  obtain ⟨c, hc, hw⟩ := hf.weight_le
-  obtain ⟨K, hK, q, hq⟩ := hf.slow_le
-  exact UniformClass.chart_bound hg hc hK hf.epsilon_eq hq hf.uniform hw hf.smooth hf.support m
 
 
 
-theorem SourceBounds.map {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {s : StripData D} {h α : ℝ} {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → E}
-    (hf : SourceBounds s h α w f) (T : E →L[ℝ] V) :
-    SourceBounds s h α w (fun l n x => T (f l n x)) := by
-  refine ⟨hf.uniform.map T, hf.flat_geometry, hf.weight_le, hf.epsilon_eq, hf.slow_le,
-    fun l n => T.contDiff.comp (hf.smooth l n), ?_⟩
-  intro l n
-  apply closure_minimal _ isClosed_closure
-  intro x hx
-  apply hf.support l n
-  apply subset_tsupport (f l n)
-  intro he
-  exact hx (by change T (f l n x) = 0; rw [he, map_zero])
 
 section CommonCoordinates
 
@@ -294,46 +183,6 @@ structure CommonChart {H : ℕ} (F : PhysicalWaveSum.WaveFamily H)
     PhysicalGraphBounds.scaledRadial I.1.val.1 z ∈ PhysicalGraphBounds.annulus a b →
     PhysicalWaveSum.commonLift h I.1.val.1 (F.gap I.1) z ∈ domain I
 
-/-- Actual composition and the explicit band prefactor produce the
-stripped amplitude estimate.  Its exponent is `h*α+σ`, and its constants
-are independent of the label. -/
-theorem CommonChart.amplitude_bound {s : StripData D} {h α σ a b r0 : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H : ℕ} {F : PhysicalWaveSum.WaveFamily H}
-    (hc : CommonChart F a b h r0 σ f) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ p : ℕ, ∀ I x, x ∈ hc.domain I → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (F.amplitude I) x‖ ≤
-        A * ChartScales.Q I.1.val.1 ^ (h * α + σ) * ChartScales.S I.1.val.1 ^ p := by
-  obtain ⟨A, hA, p, hb⟩ := hf.chart_bound m
-  obtain ⟨B, hB, q, hq⟩ := hc.positive_jets m
-  refine ⟨(m.factorial : ℝ) * A * B ^ m, by positivity, p + q * m, ?_⟩
-  intro I x hx j hj
-  have hS : 1 ≤ ChartScales.S I.1.val.1 := PhysicalGraphBounds.S_ge_one (by have := I.1.property; omega)
-  have hQ := ChartScales.Q_pos I.1.val.1
-  have hS0 : 0 ≤ ChartScales.S I.1.val.1 := zero_le_one.trans hS
-  have hA0 : 0 ≤ A * ChartScales.Q I.1.val.1 ^ (h * α) * ChartScales.S I.1.val.1 ^ p := by positivity
-  have hB0 : 1 ≤ B * ChartScales.S I.1.val.1 ^ q :=
-    one_le_mul_of_one_le_of_one_le hB (one_le_pow₀ hS)
-  have hjb := composition_jet_bound (hf.smooth (hc.sourceIndex I) I.1.val.1)
-    (hc.open_domain I) (hc.smooth I) hx m hA0 hB0
-    (fun k hk => hb (hc.sourceIndex I) I.1.val.1 I.1.property (hc.map I x) k hk)
-    (fun k hk hkm => hq I x hx k hk hkm) j hj
-  have hcomp : ContDiffAt ℝ ∞ (f (hc.sourceIndex I) I.1.val.1 ∘ hc.map I) x :=
-    (hf.smooth (hc.sourceIndex I) I.1.val.1).contDiffAt.comp x
-      ((hc.smooth I).contDiffAt ((hc.open_domain I).mem_nhds hx))
-  rw [hc.amplitude_eq I]
-  change ‖iteratedFDeriv ℝ j (fun x => (ChartScales.Q I.1.val.1 ^ σ) •
-    (f (hc.sourceIndex I) I.1.val.1 ∘ hc.map I) x) x‖ ≤ _
-  rw [iteratedFDeriv_const_smul_apply' (hcomp.of_le (natCast_le_infty j)),
-    norm_smul (ChartScales.Q I.1.val.1 ^ σ)
-      (iteratedFDeriv ℝ j (f (hc.sourceIndex I) I.1.val.1 ∘ hc.map I) x),
-    Real.norm_of_nonneg (Real.rpow_pos_of_pos hQ σ).le]
-  calc
-    _ ≤ ChartScales.Q I.1.val.1 ^ σ * ((m.factorial : ℝ) *
-        (A * ChartScales.Q I.1.val.1 ^ (h * α) * ChartScales.S I.1.val.1 ^ p) *
-        (B * ChartScales.S I.1.val.1 ^ q) ^ m) :=
-      mul_le_mul_of_nonneg_left hjb (Real.rpow_pos_of_pos hQ σ).le
-    _ = _ := by rw [Real.rpow_add hQ, pow_add, mul_pow, ← pow_mul]; ring
 
 end CommonCoordinates
 
@@ -365,74 +214,13 @@ structure CarrierBounds {H : ℕ} (F : PhysicalWaveSum.WaveFamily H) (a b h r0 :
       (ChartScales.timeCoefficient h I.1.val.1) (F.carrier I.1).center r0
       (PhysicalGraphBounds.physicalLift h I.1.val.1 z)).1 ∈ region I.1
 
-theorem CarrierBounds.profile_bound {H : ℕ} {F : PhysicalWaveSum.WaveFamily H}
-    {a b h r0 : ℝ} (hb : CarrierBounds F a b h r0) (m : ℕ) :
-    ∃ B : ℝ, 1 ≤ B ∧ ∃ p : ℕ, ∀ L x, x ∈ hb.region L → ∀ j ≤ m,
-      ‖iteratedFDeriv ℝ j (F.carrier L).F x‖ ≤ B * ChartScales.S L.val.1 ^ p ∧
-      ‖iteratedFDeriv ℝ j (F.carrier L).G x‖ ≤ B * ChartScales.S L.val.1 ^ p := by
-  obtain ⟨B, hB, p, hp⟩ := hb.jets.bound m
-  refine ⟨B, hB, p, ?_⟩
-  intro L x hx j hj
-  have hpair := (hb.jets.smooth L).contDiffAt ((hb.open_region L).mem_nhds hx)
-  have he := hp L j hj x hx
-  rw [PhysicalGraphBounds.iteratedFDeriv_pair
-    (hpair.fst.of_le (natCast_le_infty j)) (hpair.snd.of_le (natCast_le_infty j)),
-    ContinuousMultilinearMap.opNorm_prod] at he
-  exact ⟨(le_max_left _ _).trans he, (le_max_right _ _).trans he⟩
 
-/-- The full `StrippedClass` is derived from the uniform weighted source,
-the primitive common-chart identity, and the actual base-profile jets. -/
-theorem strippedClass {s : StripData D} {h α σ a b r0 P : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H : ℕ} {F : PhysicalWaveSum.WaveFamily H}
-    (hc : CommonChart F a b h r0 σ f) (hb : CarrierBounds F a b h r0)
-    (hp : ∀ L, |(F.carrier L).angular| ≤ P ∧
-      |(F.carrier L).axial| ≤ P ∧ |(F.carrier L).radial| ≤ P) (m : ℕ) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∃ B : ℝ, 1 ≤ B ∧ ∃ p q : ℕ,
-      PhysicalWaveSum.StrippedClass F a b h r0 P A B (h * α + σ) p q m := by
-  obtain ⟨A, hA, p, hAp⟩ := hc.amplitude_bound hf m
-  obtain ⟨B, hB, q, hBq⟩ := hb.profile_bound m
-  refine ⟨A, hA, B, hB, p, q, hp, ?_, ?_, ?_⟩
-  · intro I z hz hregion hann j hj
-    simpa only [Real.rpow_natCast] using
-      hAp I _ (hc.contains I z hz hregion hann) j hj
-  · intro I z hz hregion hann chart hchart j hj
-    simpa only [Real.rpow_natCast] using
-      (hBq I.1 _ (hb.contains I z hz hregion hann chart hchart) j hj).1
-  · intro I z hz hregion hann chart hchart j hj
-    simpa only [Real.rpow_natCast] using
-      (hBq I.1 _ (hb.contains I z hz hregion hann chart hchart) j hj).2
 
 /-- The derivative loss includes the displayed physical field rescaling.
 It depends on the derivative order and fixed scaling parameters only. -/
 noncomputable def physicalLoss (h σ : ℝ) (m : ℕ) : ℝ :=
   PhysicalGraphBounds.waveLoss h m - σ
 
-/-- Full physical jets of the actual locally finite wave sum.  The
-derivative-loss function does not depend on the harmonic cutoff, cover gap,
-label, slow polynomial degrees, or correction stage. -/
-theorem physical_sum_jet_bound {s : StripData D} {h α σ a b r0 Z P : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H Δ : ℕ} {F : PhysicalWaveSum.WaveFamily H}
-    (hc : CommonChart F a b h r0 σ f) (hb : CarrierBounds F a b h r0)
-    (hr : PhysicalWaveSum.RegularFamily F a b h r0 Z Δ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0)
-    (hP : 1 ≤ P) (hp : ∀ L, |(F.carrier L).angular| ≤ P ∧
-      |(F.carrier L).axial| ≤ P ∧ |(F.carrier L).radial| ≤ P) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ z : ProblemStatement.SpaceTime,
-      z ∈ PhysicalWaveSum.preterminal → |z.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (F.sum a h r0) z‖ ≤
-        C * PhysicalWaveSum.physicalQ h z ^ (h * α - physicalLoss h σ m) := by
-  obtain ⟨A, hA, B, hB, p, q, hclass⟩ := strippedClass hf hc hb hp m
-  obtain ⟨C, hC, hbound⟩ := PhysicalWaveSum.physical_sum_jet_bound
-    (b := b) hh hh1 ha hZ hr0 hP hB (Nat.cast_nonneg q) H Δ m
-      (h * α + σ) p A hA
-  refine ⟨C, hC, ?_⟩
-  intro z hz ht
-  convert! hbound F hr hclass z hz ht using 1
-  congr 2
-  unfold physicalLoss
-  ring
 
 
 

@@ -17,17 +17,12 @@ open Set Function PartitionedCovariance HarmonicCalculus
 open scoped BigOperators Topology
 
 abbrev Vector := Fin 3 → ℝ
-abbrev SignedIndex := UnsignedLabel × Fin 2
 
 /-- The three components of one literal native pulse. -/
 noncomputable def pulseVector (P : Pulse) (r : ℝ) (z : Plane) : Vector :=
   Fin.cases (P.radialProfile r z) (fun i => P.tangentProfile r i z)
 
-@[simp] theorem pulseVector_zero (P : Pulse) (r : ℝ) (z : Plane) :
-    pulseVector P r z 0 = P.radialProfile r z := rfl
 
-@[simp] theorem pulseVector_succ (P : Pulse) (r : ℝ) (z : Plane) (i : Fin 2) :
-    pulseVector P r z i.succ = P.tangentProfile r i z := rfl
 
 private theorem compact_vector {f : Plane → Vector}
     (hf : ∀ i, HasCompactSupport (fun z => f z i)) : HasCompactSupport f := by
@@ -49,13 +44,7 @@ noncomputable def nativeVector {U : UnsignedLabel} (P : PairData sys U)
     (TorusAverages.transverseStretch (P.ci j) sys.radius
       (pulseVector (P.pulses j) sys.radius))
 
-@[simp] theorem nativeVector_zero {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2) (Y : Plane) :
-    nativeVector P hdet j Y 0 = P.rawRadial hdet j Y := rfl
 
-@[simp] theorem nativeVector_succ {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2) (Y : Plane) (i : Fin 2) :
-    nativeVector P hdet j Y i.succ = P.rawTangent hdet j i Y := rfl
 
 theorem nativeVector_compact {U : UnsignedLabel} (P : PairData sys U)
     (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (j : Fin 2) :
@@ -383,13 +372,6 @@ theorem actualVelocity_eq (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0)
 
 end SourcePair
 
-noncomputable def sourceField {N : ℕ}
-    (A : (U : UnsignedLabel) → SourcePair Q sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (T : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (Y : Plane) (θ : ℝ) : Vector :=
-  ∑ᶠ a : SignedIndex,
-    (A a.1).actualVelocity hdet (outer a.1) (ε a.1) (T a.1) q x a.2 Y θ
 
 
 

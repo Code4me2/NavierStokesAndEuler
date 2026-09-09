@@ -33,11 +33,6 @@ open scoped ContDiff
 variable (period : ℝ) [Fact (0 < period)]
 variable {T : ℝ} {hT : 0 < T} {A : Data period T}
 
-/-- The drift-aware finite solutions coincide under the actual Sobolev restriction. -/
-theorem Budget.solution_compatible (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) :
-    (truncateOperator period (q+1)).compLeftContinuous ℝ (Icc (0 : ℝ) T)
-      (B.solution period (q+1) (hq.trans (Nat.le_succ q))) = B.solution period q hq :=
-  (B.family period).compatible period (B.comparisonData period) q hq
 
 /-- The common continuous L² correction constructed by the small-drift solver. -/
 def Budget.commonPath (B : Budget period hT A) : C(Icc (0 : ℝ) T, LiftL2 period) :=
@@ -59,19 +54,7 @@ theorem Budget.commonPath_divergence (B : Budget period hT A) (t : Icc (0 : ℝ)
     B.commonPath period t ∈ divergenceFreeSpace period A.κ A.direction :=
   (B.family period).commonPath_divergence period t
 
-/-- The common L² path satisfies the actual projected correction equation. -/
-theorem Budget.commonPath_hasDerivAt (B : Budget period hT A)
-    (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (extendPath T hT.le (B.commonPath period))
-      (value period (((A.atOrder period 6).coefficients period le_rfl).apply
-        ⟨t, ht.1.le, ht.2.le⟩
-        (B.solution period 6 le_rfl ⟨t, ht.1.le, ht.2.le⟩))) t :=
-  (B.family period).commonPath_hasDerivAt period t ht
 
-/-- An actual strong spatial jet of every order for the constructed common field. -/
-def Budget.commonJet (B : Budget period hT A) (n : ℕ) (t : Icc (0 : ℝ) T) :
-    SpatialJet period standardDirection n (B.commonPath period t) :=
-  (B.family period).commonJet period (B.comparisonData period) n t
 
 /-- The common correction, with genuine continuous Sobolev realizations at all orders. -/
 def Budget.fieldTower (B : Budget period hT A) : FieldTower period T :=
@@ -178,12 +161,6 @@ theorem Budget.pointField_smooth (B : Budget period hT A)
     ContDiff ℝ ∞ (localFieldLift period (B.pointField period t) x) :=
   (B.family period).pointField_smooth period (B.comparisonData period) t x
 
-/-- Its lifted divergence vanishes pointwise. -/
-theorem Budget.pointField_divergence (B : Budget period hT A)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
-    (∑ i : Fin 3, (fieldDerivative period (coordinateDirection A.κ A.direction i)
-      (B.pointField period t) x) i) = 0 :=
-  (B.family period).pointField_divergence period (B.comparisonData period) t x
 
 /-- Odd input data give an odd common correction by the proved PDE uniqueness. -/
 theorem Budget.commonPath_odd (B : Budget period hT A) (P : ParityData period A)
@@ -192,21 +169,12 @@ theorem Budget.commonPath_odd (B : Budget period hT A) (P : ParityData period A)
   (B.family period).commonPath_odd period (B.comparisonData period) P t
 
 
-/-- The canonical spatially smooth correction is pointwise odd for odd input data. -/
-theorem Budget.pointField_odd (B : Budget period hT A) (P : ParityData period A)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
-    B.pointField period t (-x) = -B.pointField period t x :=
-  (B.family period).pointField_odd period (B.comparisonData period) P t x
 
 /-- The actual pointwise time derivative, obtained from the constructed Sobolev source. -/
 def Budget.pointTimeDerivative (B : Budget period hT A)
     (t : Icc (0 : ℝ) T) (x : LiftDomain period) : Vector3 :=
   (B.family period).pointTimeDerivative period t x
 
-/-- The correction's actual first time derivative is jointly continuous. -/
-theorem Budget.pointTimeDerivative_joint_continuous (B : Budget period hT A) :
-    Continuous (B.pointTimeDerivative period).uncurry :=
-  (B.family period).pointTimeDerivative_joint_continuous period
 
 /-- The actual time derivative equals the raw source and the signed pressure term. -/
 theorem Budget.pointTimeDerivative_eq_pressure (B : Budget period hT A)
@@ -215,49 +183,7 @@ theorem Budget.pointTimeDerivative_eq_pressure (B : Budget period hT A)
       (A.metric.coefficient t).coefficient x ((B.family period).pointPressure period t x) :=
   (B.family period).pointTimeDerivative_eq_pressure period t x
 
-/-- The canonical common field has its genuine first time derivative at interior times. -/
-theorem Budget.pointField_hasDerivAt (B : Budget period hT A)
-    (x : LiftDomain period) (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (fun r => B.pointField period (projIcc 0 T hT.le r) x)
-      (B.pointTimeDerivative period ⟨t, ht.1.le, ht.2.le⟩ x) t :=
-  (B.family period).pointField_hasDerivAt period x t ht
 
 
-/-- Genuine coherent input bounds, with radius loss determined only by the actual
-transport drift, construct one smooth spatial correction with all-cutoff energy
-bounds and its actual finite-Sobolev evolution.  Finite existence, compatibility,
-energy estimates and the correction equation are conclusions here. -/
-theorem exists_smooth_lifted_correction (B : Budget period hT A) :
-    ∃ (E : FieldTower period T)
-      (g v : Icc (0 : ℝ) T → LiftDomain period → Vector3),
-      E.field ⟨0, le_rfl, hT.le⟩ = 0 ∧
-      (∀ t, E.field t ∈ divergenceFreeSpace period A.κ A.direction) ∧
-      Continuous g.uncurry ∧
-      (∀ t x, ContDiff ℝ ∞ (localFieldLift period (g t) x)) ∧
-      (∀ t, (E.field t : LiftDomain period → Vector3) =ᵐ[liftMeasure period] g t) ∧
-      (∀ t x, (∑ i : Fin 3, (fieldDerivative period
-        (coordinateDirection A.κ A.direction i) (g t) x) i) = 0) ∧
-      Continuous v.uncurry ∧
-      (∀ x t (ht : t ∈ Ioo 0 T),
-        HasDerivAt (fun r => g (projIcc 0 T hT.le r) x)
-          (v ⟨t, ht.1.le, ht.2.le⟩ x) t) ∧
-      (∀ (P : ℕ) t,
-        energyNorm period P (by omega : P+6 ≤ (P+6)+1)
-            (B.radius t) (B.metric.operatorPath period t) (E.realization ((P+6)+1) t) ≤
-          2*(B.spatial (P+6) (by omega)).full.residual*
-            Real.exp (3*B.growthCoefficient*t.val) ∧
-        energyNorm period P (by omega : P+6 ≤ (P+6)+1)
-            (B.radius t) (B.metric.operatorPath period t) (E.realization ((P+6)+1) t) ≤
-          B.delta/2) ∧
-      ∀ (q : ℕ) (hq : 6 ≤ q) t (ht : t ∈ Ioo 0 T),
-        HasDerivAt (extendPath T hT.le (E.realization q))
-          (((A.atOrder period q).coefficients period hq).apply
-            ⟨t, ht.1.le, ht.2.le⟩ (E.realization (q+1) ⟨t, ht.1.le, ht.2.le⟩)) t := by
-  exact ⟨B.fieldTower period, B.pointField period, B.pointTimeDerivative period,
-    B.commonPath_initial period,
-    B.commonPath_divergence period, B.pointField_joint_continuous period,
-    B.pointField_smooth period, B.pointField_ae period, B.pointField_divergence period,
-    B.pointTimeDerivative_joint_continuous period, B.pointField_hasDerivAt period,
-    B.fieldTower_energy period, B.fieldTower_hasDerivAt period⟩
 
 end EulerAllOrderDriftCorrection

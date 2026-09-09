@@ -1036,30 +1036,8 @@ theorem affineProfile_jet_decomposition (c : Parameters) (q A : ℝ) (k : ℕ) (
   rw [affineCoefficients_decomposition c q A 0, affineCoefficients_decomposition c q A 1]
   ring
 
-noncomputable def correctionJet (c : Parameters) (amp : ℝ → ℝ) (k : ℕ) (eta y : ℝ) : ℝ :=
-  iteratedDeriv k (fun t => correction c amp eta (Real.exp t)) y
 
-theorem correctionJet_eq (c : Parameters) (amp : ℝ → ℝ) (k : ℕ) (eta y : ℝ) :
-    correctionJet c amp k eta y =
-      iteratedDeriv k (affineProfile c (parameterPolynomial eta) (amp eta)) y := by
-  unfold correctionJet
-  congr 2
-  funext t
-  exact correction_log_eq_affineProfile c amp eta t
 
-theorem correctionJet_bound (c : Parameters) (hsmall : c.lam ≤ 1 / 120)
-    (amp : ℝ → ℝ) (k : ℕ) {eta : ℝ} (heta : |eta| ≤ 1) (y : ℝ) :
-    |correctionJet c amp k eta y| ≤
-      (2 * correctionJetBound c.P c.m k) * Real.exp (-(1 / (4 * c.lam))) * (1 + |amp eta|) := by
-  rw [correctionJet_eq]
-  refine (affineProfile_jet_bound c hsmall _ _ k y).trans ?_
-  have hq := parameterPolynomial_bound heta
-  calc
-    _ ≤ (correctionJetBound c.P c.m k * Real.exp (-(1 / (4 * c.lam)))) *
-        (2 * (1 + |amp eta|)) :=
-      mul_le_mul_of_nonneg_left (by linarith [abs_nonneg (amp eta)])
-        (mul_nonneg (correctionJetBound_pos c.P_pos c.m k).le (Real.exp_pos _).le)
-    _ = _ := by ring
 
 
 

@@ -60,15 +60,6 @@ theorem normal_coordinate (k : ℝ) (W : VectorField) (z : Domain) :
     k*⟪(rawInverse D z).adjoint D.m₀,W z⟫_ℝ
   rw [inner_smul_right,adjoint_inner_left]
 
-theorem coordinate_hasDerivWithinAt (k : ℝ) (W Wt : VectorField)
-    (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ)
-    (hW : HasDerivWithinAt (fun r => W (r,(x,θ))) (Wt (t,(x,θ)))
-      (Icc (0 : ℝ) D.T) t) :
-    HasDerivWithinAt (fun r => coordinate D k W (r,(x,θ)))
-      (coordinateTime D k W Wt (t,(x,θ))) (Icc (0 : ℝ) D.T) t := by
-  have hi := D.inverse_hasDerivWithinAt t t.property x
-  have h := (hi.clm_apply hW).const_smul k
-  convert! h using 1
 
 
 section Fields

@@ -42,8 +42,6 @@ theorem displacementFamily_integral (x : E) :
   exact sub_eq_iff_eq_add.mpr (by
     simpa only [add_comm] using pathFamily_integral T hT A x)
 
-def jetPath (n : ℕ) (x : E) : C(Icc (0 : ℝ) T,E [×n]→L[ℝ] E) :=
-  tensorPathMap n (iteratedFDeriv ℝ n (pathFamily T hT A) x)
 
 def velocityJetPath (n : ℕ) (x : E) : C(Icc (0 : ℝ) T,E [×n]→L[ℝ] E) :=
   tensorPathMap n (iteratedFDeriv ℝ n (velocityFamily T hT A) x)

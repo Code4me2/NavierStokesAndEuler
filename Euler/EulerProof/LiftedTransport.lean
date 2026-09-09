@@ -596,15 +596,6 @@ def metricEnergy (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
     (e : LiftDomain period → Vector3) (x : LiftDomain period) : ℝ :=
   (1 / 2 : ℝ) * ⟪K x (e x), e x⟫_ℝ
 
-omit [Fact (0 < period)] in
-theorem metricEnergy_compact (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (he : HasCompactSupport e) :
-    HasCompactSupport (metricEnergy period K e) := by
-  apply he.mono
-  intro x hx
-  contrapose! hx
-  simp only [Function.mem_support, not_not] at hx
-  simp [Function.mem_support, metricEnergy, hx]
 
 omit [Fact (0 < period)] in
 theorem metricEnergy_smooth (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
@@ -643,134 +634,14 @@ theorem metricEnergy_fderiv (K : LiftDomain period → Vector3 →L[ℝ] Vector3
   rw [hs]
   ring
 
-omit [Fact (0 < period)] in
-theorem metricEnergy_gradient_transport (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    (x : LiftDomain period) (z : Vector3) :
-    ⟪liftedGradient period κ m (metricEnergy period K e) x, z⟫_ℝ =
-      ⟪K x (e x),
-        fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m z)⟫_ℝ +
-      (1 / 2 : ℝ) * ⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m z)) (e x), e x⟫_ℝ := by
-  rw [liftedGradient_eq_vectorOfLinear, vectorOfLinear_inner]
-  exact metricEnergy_fderiv period K e hK he hsym x _
 
-theorem metric_transport_zero (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (hec : HasCompactSupport e)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    {z : LiftL2 period} (hz : z ∈ divergenceFreeSpace period κ m) :
-    ∫ x, (⟪K x (e x),
-        fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m (z x))⟫_ℝ +
-      (1 / 2 : ℝ) * ⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x), e x⟫_ℝ) ∂liftMeasure period = 0 := by
-  have htest := weak_divergence_test_integral period κ m hz (metricEnergy period K e)
-    ⟨metricEnergy_compact period K e hec, metricEnergy_smooth period K e hK he⟩
-  convert htest using 1
-  apply integral_congr_ae
-  exact Filter.Eventually.of_forall fun x =>
-    (metricEnergy_gradient_transport period κ m K e hK he hsym x (z x)).symm
 
-/-- The compact vector coefficient whose pairing with velocity is the metric transport term. -/
-def transportFlux (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (x : LiftDomain period) : Vector3 :=
-  vectorOfLinear κ m ((innerSL ℝ (K x (e x))).comp
-    (fderiv ℝ (localFieldLift period e x) 0))
 
-omit [Fact (0 < period)] in
-theorem transportFlux_inner (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (x : LiftDomain period) (z : Vector3) :
-    ⟪transportFlux period κ m K e x, z⟫_ℝ =
-      ⟪K x (e x),
-        fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m z)⟫_ℝ := by
-  rw [transportFlux, vectorOfLinear_inner]
-  rfl
 
-omit [Fact (0 < period)] in
-theorem transportFlux_continuous (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x)) :
-    Continuous (transportFlux period κ m K e) := by
-  apply (PiLp.continuous_toLp 2 (fun _ : Fin 3 => ℝ)).comp
-  apply continuous_pi
-  intro i
-  exact ((smoothField_continuous period K hK).clm_apply
-    (smoothField_continuous period e he)).inner
-      ((localFDeriv_continuous period e he).clm_apply continuous_const)
 
-omit [Fact (0 < period)] in
-theorem transportFlux_compact (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (he : HasCompactSupport e) :
-    HasCompactSupport (transportFlux period κ m K e) := by
-  apply he.mono
-  intro x hx
-  contrapose! hx
-  simp only [Function.mem_support, not_not] at hx ⊢
-  apply PiLp.ext
-  intro i
-  simp [transportFlux, vectorOfLinear, hx]
 
-theorem compact_pairing_integrable (f : LiftDomain period → Vector3)
-    (hf : Continuous f) (hfc : HasCompactSupport f) (z : LiftL2 period) :
-    Integrable (fun x => ⟪f x, z x⟫_ℝ) (liftMeasure period) := by
-  have hlp : MemLp f 2 (liftMeasure period) := hf.memLp_of_hasCompactSupport hfc
-  apply (L2.integrable_inner (hlp.toLp f) z).congr
-  filter_upwards [hlp.coeFn_toLp] with x hx
-  rw [hx]
 
-theorem metric_transport_integrable (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (hec : HasCompactSupport e)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x)) (z : LiftL2 period) :
-    Integrable (fun x => ⟪K x (e x),
-      fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m (z x))⟫_ℝ)
-      (liftMeasure period) := by
-  simpa only [transportFlux_inner] using
-    compact_pairing_integrable period (transportFlux period κ m K e)
-      (transportFlux_continuous period κ m K e hK he)
-      (transportFlux_compact period κ m K e hec) z
 
-theorem metric_transport_by_parts (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (hec : HasCompactSupport e)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    {z : LiftL2 period} (hz : z ∈ divergenceFreeSpace period κ m) :
-    (∫ x, ⟪K x (e x),
-      fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m (z x))⟫_ℝ
-      ∂liftMeasure period) =
-    -(∫ x, (1 / 2 : ℝ) * ⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x), e x⟫_ℝ ∂liftMeasure period) := by
-  have ht := metric_transport_integrable period κ m K e hec hK he z
-  have hg := compact_pairing_integrable period
-    (liftedGradient period κ m (metricEnergy period K e))
-    (liftedGradient_continuous period κ m (metricEnergy period K e)
-      (metricEnergy_smooth period K e hK he))
-    (liftedGradient_hasCompactSupport period κ m (metricEnergy period K e)
-      (metricEnergy_compact period K e hec)) z
-  simp only [metricEnergy_gradient_transport period κ m K e hK he hsym] at hg
-  have hq : Integrable (fun x => (1 / 2 : ℝ) *
-      ⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x), e x⟫_ℝ) (liftMeasure period) := by
-    convert hg.sub ht using 1
-    funext x
-    simp
-  have hzint := metric_transport_zero period κ m K e hec hK he hsym hz
-  rw [integral_add ht hq] at hzint
-  exact eq_neg_of_add_eq_zero_left hzint
 
 theorem transportDirection_norm_le (κ : ℝ) (m v : Vector3) :
     ‖transportDirection κ m v‖ ≤ (|κ| + ‖m‖) * ‖v‖ := by
@@ -781,51 +652,6 @@ theorem transportDirection_norm_le (κ : ℝ) (m v : Vector3) :
   · exact (norm_inner_le_norm m v).trans
       (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left (abs_nonneg κ)) (norm_nonneg v))
 
-theorem metric_transport_bound (κ : ℝ) (m : Vector3)
-    (K : LiftDomain period → Vector3 →L[ℝ] Vector3)
-    (e : LiftDomain period → Vector3) (hec : HasCompactSupport e)
-    (hK : ∀ x, ContDiff ℝ ∞ (localFieldLift period K x))
-    (he : ∀ x, ContDiff ℝ ∞ (localFieldLift period e x))
-    (hsym : ∀ x v w, ⟪K x v, w⟫_ℝ = ⟪v, K x w⟫_ℝ)
-    {z : LiftL2 period} (hz : z ∈ divergenceFreeSpace period κ m)
-    (C B : ℝ≥0)
-    (hDK : ∀ x, ‖fderiv ℝ (localFieldLift period K x) 0‖ ≤ C)
-    (hb : ∀ᵐ x ∂liftMeasure period, ‖transportDirection κ m (z x)‖ ≤ B) :
-    |∫ x, ⟪K x (e x),
-      fderiv ℝ (localFieldLift period e x) 0 (transportDirection κ m (z x))⟫_ℝ
-      ∂liftMeasure period| ≤
-      (1 / 2 : ℝ) * C * B * ∫ x, ‖e x‖ ^ 2 ∂liftMeasure period := by
-  rw [metric_transport_by_parts period κ m K e hec hK he hsym hz, abs_neg]
-  have heLp : MemLp e 2 (liftMeasure period) :=
-    (smoothField_continuous period e he).memLp_of_hasCompactSupport hec
-  have heint := heLp.norm.integrable_sq
-  have hbound := norm_integral_le_of_norm_le
-    (heint.const_mul ((1 / 2 : ℝ) * C * B)) (f := fun x => (1 / 2 : ℝ) *
-      ⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x), e x⟫_ℝ) ?_
-  · simpa only [Real.norm_eq_abs, integral_const_mul] using hbound
-  filter_upwards [hb] with x hx
-  have hL : ‖fderiv ℝ (localFieldLift period K x) 0
-      (transportDirection κ m (z x))‖ ≤ (C : ℝ) * B :=
-    ((fderiv ℝ (localFieldLift period K x) 0).le_opNorm _).trans
-      (mul_le_mul (hDK x) hx (norm_nonneg _) C.coe_nonneg)
-  have hLe : ‖(fderiv ℝ (localFieldLift period K x) 0
-      (transportDirection κ m (z x))) (e x)‖ ≤ (C : ℝ) * B * ‖e x‖ :=
-    ((fderiv ℝ (localFieldLift period K x) 0
-      (transportDirection κ m (z x))).le_opNorm _).trans
-        (mul_le_mul_of_nonneg_right hL (norm_nonneg _))
-  calc
-    _ = (1 / 2 : ℝ) * ‖⟪(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x), e x⟫_ℝ‖ := by
-          rw [norm_mul]
-          norm_num
-    _ ≤ (1 / 2 : ℝ) * (‖(fderiv ℝ (localFieldLift period K x) 0
-        (transportDirection κ m (z x))) (e x)‖ * ‖e x‖) :=
-      mul_le_mul_of_nonneg_left (norm_inner_le_norm _ _) (by norm_num)
-    _ ≤ (1 / 2 : ℝ) * (((C : ℝ) * B * ‖e x‖) * ‖e x‖) :=
-      mul_le_mul_of_nonneg_left
-        (mul_le_mul_of_nonneg_right hLe (norm_nonneg _)) (by norm_num)
-    _ = _ := by ring
 
 
 end EulerMetricTransport

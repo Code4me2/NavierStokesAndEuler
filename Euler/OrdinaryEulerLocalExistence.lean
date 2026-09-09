@@ -149,9 +149,5 @@ theorem localEvolution_initial (A : SmoothL2Field Space) (hA : A.toLp ∈ soleno
   simp only [regularizedSolution_initial] at h
   exact tendsto_nhds_unique h tendsto_const_nhds
 
-theorem exists_local_evolution (A : SmoothL2Field Space) (hA : A.toLp ∈ solenoidalSpace) :
-    ∃ (T : ℝ) (hT : 0 < T), ∃ U : Evolution T hT.le,
-      U.velocity ⟨0,le_rfl,hT.le⟩=A :=
-  ⟨regularizedTime A,regularizedTime_pos A,localEvolution A hA,localEvolution_initial A hA⟩
 
 end EulerOrdinarySobolev

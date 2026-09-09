@@ -212,71 +212,6 @@ variable {P V H : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 variable [NormedAddCommGroup V] [NormedSpace ℝ V]
 variable [NormedAddCommGroup H] [InnerProductSpace ℝ H] [CompleteSpace H]
 
-/-- Full derivatives of the actual current copy field. In particular the
-scale `S` may be the frozen spatial growth/edge factor at `p`; no uniform
-distance from a cutoff edge is required. -/
-theorem copySolve_joint_jet_bound (d : LinearData P V H) (g : Geometry) (copy : Frequency)
-    {L S K μ w : ℝ} (hL : 0 < L) (hS : 1 ≤ S) (hK : 1 ≤ K) (hμ : 0 ≤ μ) (hw : 0 ≤ w)
-    (hslot : L ≤ K * S) (hExp : Real.exp (μ * L) ≤ K)
-    {U : Set P} (hU : IsOpen U)
-    (hA : ContDiffOn ℝ ∞ d.coefficient (U ×ˢ univ))
-    (hB : ContDiffOn ℝ ∞ d.forcingMap (U ×ˢ univ))
-    (hf : ContDiffOn ℝ ∞ d.source (U ×ˢ univ))
-    (W rate : ℝ → ℝ) (hW : ∀ t, 0 < W t) (hdW : ∀ t, HasDerivAt W (rate t * W t) t)
-    {p : P × Plane} (hp : p.1 ∈ U) (heta : (g.coordinates copy p.2).2 ∈ Ioo 0 L)
-    (henergy : ∀ v ∈ Icc 0 L, ∀ x : H,
-      ⟪x, d.coefficientAlong g copy (p, v) x⟫_ℝ ≤ (rate v + μ) * ‖x‖ ^ 2)
-    (m N : ℕ)
-    (hAj : ∀ j ≤ N, ∀ v ∈ Icc 0 L,
-      ‖iteratedFDeriv ℝ j (d.coefficientAlong g copy) (p, v)‖ ≤ K * S ^ m)
-    (hfj : ∀ j ≤ N, ∀ v ∈ Icc 0 L,
-      ‖iteratedFDeriv ℝ j (d.forcingAlong g copy) (p, v)‖ ≤ w * K * S ^ m * W v)
-    (j : ℕ) (hj : j ≤ N) :
-    ‖iteratedFDeriv ℝ j (d.copySolve g hL.le copy) p‖ ≤
-      w * ((2 : ℝ) ^ (N + 1) * rescaleConstant N K ^ 3) ^ (j + 1) *
-        S ^ ((m + 2) * (j + 1)) * W (g.coordinates copy p.2).2 *
-          CommonCoverClass.argumentCost g ^ j := by
-  let A := d.coefficientAlong g copy
-  let f := d.forcingAlong g copy
-  let r := JointODE.reparamSolution 0 A (fun _ => 0) f
-  let T := (U ×ˢ (univ : Set Plane)) ×ˢ Ioo 0 L
-  have hT : IsOpen T := (hU.prod isOpen_univ).prod isOpen_Ioo
-  have hAs : ContDiffOn ℝ ∞ A ((U ×ˢ univ) ×ˢ (univ : Set ℝ)) := d.coefficientAlong_contDiffOn g copy hA
-  have hfs : ContDiffOn ℝ ∞ f ((U ×ˢ univ) ×ˢ (univ : Set ℝ)) := d.forcingAlong_contDiffOn g copy hB hf
-  have hrs : ContDiffOn ℝ ∞ r T := by
-    intro z hz
-    exact (JointODE.reparamSolution_contDiffAt (U ×ˢ univ) univ (hU.prod isOpen_univ)
-      isOpen_univ (subset_univ _) A (fun _ => 0) f hAs contDiffOn_const hfs
-      (show z ∈ (U ×ˢ univ) ×ˢ Icc 0 L from ⟨hz.1, hz.2.1.le, hz.2.2.le⟩)).contDiffWithinAt
-  have hcur : CommonCoverClass.currentArgument g copy p ∈ T := ⟨⟨hp, mem_univ _⟩, heta⟩
-  have heq : (fun q => r (CommonCoverClass.currentArgument g copy q)) =ᶠ[𝓝 p]
-      d.copySolve g hL.le copy := by
-    filter_upwards [((CommonCoverClass.currentArgument_smooth (P := P) g copy).continuous.isOpen_preimage _ hT).mem_nhds hcur] with q hq
-    exact JointODE.reparamSolution_eq_actualSolution hL.le A (fun _ => 0) f
-      (hAs.continuousOn.mono (prod_mono Subset.rfl (subset_univ _)))
-      (hfs.continuousOn.mono (prod_mono Subset.rfl (subset_univ _)))
-      (show CommonCoverClass.currentArgument g copy q ∈ (U ×ˢ univ) ×ˢ Icc 0 L from
-        ⟨hq.1, hq.2.1.le, hq.2.2.le⟩)
-  have heq' : (fun q => r (CommonCoverClass.currentArgument g copy q)) =ᶠ[𝓝[univ] p]
-      d.copySolve g hL.le copy := by simpa only [nhdsWithin_univ] using heq
-  have hjet := heq'.iteratedFDerivWithin_eq (𝕜 := ℝ) heq.self_of_nhds j
-  simp only [iteratedFDerivWithin_univ] at hjet
-  rw [← hjet]
-  have haff := norm_jet_comp_affine hT hrs (CommonCoverClass.currentLinear P g)
-    (CommonCoverClass.currentArgument (P := P) g copy 0)
-    (by simpa only [← CommonCoverClass.currentArgument_affine] using hcur) j
-  simp_rw [← CommonCoverClass.currentArgument_affine] at haff
-  have hbnd := forced_joint_jet_bound hL hS hK hμ hw hslot hExp (U ×ˢ univ) univ
-    (hU.prod isOpen_univ) isOpen_univ (subset_univ _) A hAs W rate hW hdW f hfs
-    ⟨hp, mem_univ _⟩ ⟨heta.1.le, heta.2.le⟩ henergy m N hAj hfj j hj
-  apply haff.trans
-  exact mul_le_mul hbnd
-    (pow_le_pow_left₀ (norm_nonneg _) (CommonCoverClass.norm_currentLinear_le (P := P) g) j)
-    (pow_nonneg (norm_nonneg _) j)
-    (by
-      have := hW (g.coordinates copy p.2).2
-      have hR := hK.trans (le_rescaleConstant N K)
-      positivity)
 
 end CopyJointEstimate
 
@@ -288,98 +223,6 @@ variable {P V H : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 variable [NormedAddCommGroup V] [NormedSpace ℝ V]
 variable [NormedAddCommGroup H] [InnerProductSpace ℝ H] [CompleteSpace H]
 
-/-- The actual particular solution belongs to `W_α`. Input bounds are on
-the full joint derivatives of the pulled-back coefficient and source;
-the edge power may depend on the requested derivative order. -/
-theorem copySolve_waveClass
-    (s : StripData (P × Plane)) (α : ℝ)
-    (d : ℕ → LinearData P V H) (g : ℕ → Geometry) (copy : ℕ → Frequency)
-    (L μ : ℕ → ℝ) (hL : ∀ n, 0 < L n)
-    (W rate : ℕ → ℝ → ℝ) (hW : ∀ n t, 0 < W n t)
-    (hdW : ∀ n t, HasDerivAt (W n) (rate n t * W n t) t)
-    {U : Set P} (hU : IsOpen U) (hdom : ∀ p ∈ s.domain, p.1 ∈ U)
-    (hA : ∀ n, ContDiffOn ℝ ∞ (d n).coefficient (U ×ˢ univ))
-    (hB : ∀ n, ContDiffOn ℝ ∞ (d n).forcingMap (U ×ˢ univ))
-    (hf : ∀ n, ContDiffOn ℝ ∞ (d n).source (U ×ˢ univ))
-    (heta : ∀ n p, p ∈ s.domain → ((g n).coordinates (copy n) p.2).2 ∈ Ioo 0 (L n))
-    {K₀ : ℝ} {q : ℕ} (hK₀ : 1 ≤ K₀) (hμ : ∀ n, 0 ≤ μ n)
-    (hslot : ∀ n, L n ≤ K₀ * s.slow n) (hExp : ∀ n, Real.exp (μ n * L n) ≤ K₀)
-    (hcost : ∀ n, CommonCoverClass.argumentCost (g n) ≤ K₀ * s.slow n ^ q)
-    (henergy : ∀ n p, p ∈ s.domain → ∀ v ∈ Icc 0 (L n), ∀ x : H,
-      ⟪x, (d n).coefficientAlong (g n) (copy n) (p, v) x⟫_ℝ ≤
-        (rate n v + μ n) * ‖x‖ ^ 2)
-    (hinput : ∀ N : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∃ m : ℕ, ∀ n p, p ∈ s.domain →
-      ∀ j ≤ N, ∀ v ∈ Icc 0 (L n),
-        ‖iteratedFDeriv ℝ j ((d n).coefficientAlong (g n) (copy n)) (p, v)‖ ≤
-          C * s.growth n p ^ m ∧
-        ‖iteratedFDeriv ℝ j ((d n).forcingAlong (g n) (copy n)) (p, v)‖ ≤
-          (s.epsilon n ^ α * Real.sqrt (s.zeta p)) * C * s.growth n p ^ m * W n v) :
-    WaveClass s (fun n p => W n ((g n).coordinates (copy n) p.2).2) α
-      (fun n => (d n).copySolve (g n) (hL n).le (copy n)) := by
-  refine ⟨fun n p _ => mul_nonneg (Real.sqrt_nonneg _) (hW n _).le, ?_, ?_⟩
-  · intro n p hp
-    exact ((d n).copySolve_contDiffAt (g n) (hL n).le hU (copy n)
-      (hA n) (hB n) (hf n) (hdom p hp) (heta n p hp)).contDiffWithinAt
-  intro N
-  obtain ⟨C, hC, m, hm⟩ := hinput N
-  let K := C + K₀ + 1
-  have hK : 1 ≤ K := by dsimp [K]; linarith
-  have hCK : C ≤ K := by dsimp [K]; linarith
-  have hK₀K : K₀ ≤ K := by dsimp [K]; linarith
-  let B := (2 : ℝ) ^ (N + 1) * rescaleConstant N K ^ 3
-  have hB' : 1 ≤ B := one_le_mul_of_one_le_of_one_le (one_le_pow₀ (by norm_num))
-    (one_le_pow₀ (hK.trans (le_rescaleConstant N K)))
-  refine ⟨B ^ (N + 1) * K₀ ^ N, by positivity, (m + 2) * (N + 1) + q * N, ?_⟩
-  intro n p hp j hj
-  have hG := s.one_le_growth n p
-  have hG0 := s.growth_nonneg n p
-  have heps := (Real.rpow_pos_of_pos (s.epsilon_pos n) α).le
-  have hw : 0 ≤ s.epsilon n ^ α * Real.sqrt (s.zeta p) := mul_nonneg heps (Real.sqrt_nonneg _)
-  have hAj : ∀ k ≤ N, ∀ v ∈ Icc 0 (L n),
-      ‖iteratedFDeriv ℝ k ((d n).coefficientAlong (g n) (copy n)) (p, v)‖ ≤ K * s.growth n p ^ m := by
-    intro k hk v hv
-    exact ((hm n p hp k hk v hv).1).trans
-      (mul_le_mul_of_nonneg_right hCK (pow_nonneg hG0 _))
-  have hfj : ∀ k ≤ N, ∀ v ∈ Icc 0 (L n),
-      ‖iteratedFDeriv ℝ k ((d n).forcingAlong (g n) (copy n)) (p, v)‖ ≤
-        (s.epsilon n ^ α * Real.sqrt (s.zeta p)) * K * s.growth n p ^ m * W n v := by
-    intro k hk v hv
-    exact ((hm n p hp k hk v hv).2).trans
-      (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_left hCK hw) (pow_nonneg hG0 _)) (hW n v).le)
-  have hh := copySolve_joint_jet_bound (d n) (g n) (copy n) (hL n) hG hK (hμ n) hw
-    ((hslot n).trans (mul_le_mul hK₀K (s.slow_le_growth n p)
-      (zero_le_one.trans (s.one_le_slow n)) (zero_le_one.trans hK)))
-    ((hExp n).trans hK₀K) hU (hA n) (hB n) (hf n) (W n) (rate n) (hW n) (hdW n)
-    (hdom p hp) (heta n p hp) (henergy n p hp) m N hAj hfj j hj
-  have hcg : CommonCoverClass.argumentCost (g n) ≤ K₀ * s.growth n p ^ q :=
-    (hcost n).trans (mul_le_mul_of_nonneg_left
-      (pow_le_pow_left₀ (zero_le_one.trans (s.one_le_slow n)) (s.slow_le_growth n p) q)
-      (zero_le_one.trans hK₀))
-  have hcp : CommonCoverClass.argumentCost (g n) ^ j ≤ K₀ ^ N * s.growth n p ^ (q * N) := by
-    calc
-      _ ≤ (K₀ * s.growth n p ^ q) ^ j := pow_le_pow_left₀
-        (zero_le_one.trans (CommonCoverClass.one_le_argumentCost (g n))) hcg j
-      _ ≤ (K₀ * s.growth n p ^ q) ^ N := pow_le_pow_right₀
-        (one_le_mul_of_one_le_of_one_le hK₀ (one_le_pow₀ hG)) hj
-      _ = _ := by rw [mul_pow, pow_mul]
-  have hwp := (hW n ((g n).coordinates (copy n) p.2).2).le
-  calc
-    _ ≤ (s.epsilon n ^ α * Real.sqrt (s.zeta p)) * B ^ (j + 1) *
-        s.growth n p ^ ((m + 2) * (j + 1)) * W n ((g n).coordinates (copy n) p.2).2 *
-        CommonCoverClass.argumentCost (g n) ^ j := hh
-    _ ≤ (s.epsilon n ^ α * Real.sqrt (s.zeta p)) * B ^ (N + 1) *
-        s.growth n p ^ ((m + 2) * (N + 1)) * W n ((g n).coordinates (copy n) p.2).2 *
-        (K₀ ^ N * s.growth n p ^ (q * N)) := by
-      apply mul_le_mul _ hcp
-        (pow_nonneg (zero_le_one.trans (CommonCoverClass.one_le_argumentCost (g n))) _)
-        (by positivity)
-      apply mul_le_mul_of_nonneg_right _ hwp
-      exact mul_le_mul
-        (mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hB' (Nat.add_le_add_right hj 1)) hw)
-        (pow_le_pow_right₀ hG (Nat.mul_le_mul_left _ (Nat.add_le_add_right hj 1)))
-        (pow_nonneg hG0 _) (by positivity)
-    _ = _ := by unfold majorant; rw [pow_add]; ring
 
 end CopyClass
 
@@ -423,15 +266,6 @@ structure CopyControl (s : StripData (P × Plane)) (α : ℝ)
       ‖iteratedFDeriv ℝ j ((d n).forcingAlong (g n) (copy n)) (p, v)‖ ≤
         (s.epsilon n ^ α * Real.sqrt (s.zeta p)) * C * s.growth n p ^ m * W n v
 
-theorem CopyControl.waveClass {s : StripData (P × Plane)} {α : ℝ}
-    {d : ℕ → LinearData P V H} {g : ℕ → Geometry} {copy : ℕ → Frequency}
-    {L : ℕ → ℝ} {W : ℕ → ℝ → ℝ} (h : CopyControl s α d g copy L W)
-    (hL : ∀ n, 0 < L n) :
-    WaveClass s (fun n p => W n ((g n).coordinates (copy n) p.2).2) α
-      (fun n => (d n).copySolve (g n) (hL n).le (copy n)) :=
-  copySolve_waveClass s α d g copy L h.errorRate hL W h.rate h.envelope_pos h.envelope_deriv
-    h.open_slow h.domain h.coefficient_smooth h.forcingMap_smooth h.source_smooth h.current_slot
-    h.constant_ge_one h.errorRate_nonneg h.length_bound h.exponential_bound h.coordinate_bound h.energy h.input_jets
 
 end ControlData
 
@@ -1132,7 +966,6 @@ noncomputable def imagPart : ComplexVector →L[ℝ] ProblemStatement.Space :=
 noncomputable def complexScale (c : ℂ) : ComplexVector →L[ℝ] ComplexVector :=
   ContinuousLinearMap.pi fun i => ((ContinuousLinearMap.mul ℝ ℂ) c).comp (ContinuousLinearMap.proj i)
 
-@[simp] theorem complexScale_apply (c : ℂ) (a : ComplexVector) : complexScale c a = c • a := rfl
 
 theorem complex_parts (a : ComplexVector) :
     CurlClassBounds.complexify (realPart a) + Complex.I • CurlClassBounds.complexify (imagPart a) = a := by

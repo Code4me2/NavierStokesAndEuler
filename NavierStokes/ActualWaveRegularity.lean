@@ -57,52 +57,15 @@ variable {a : CopyData D I} {s : StripData D} {d : GraphDirections D}
 
 include h
 
-theorem common_velocity_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (vectorMode (a.background.frequency n) (a.background.phase n)
-      ((a.commonCorrected s d).amplitude n)) Ω :=
-  LocalizedCurlRealization.RawData.common_velocity_smooth h.raw h.cells h.cutoff_support h.cover n
 
 
 
 
-theorem native_normal_smooth (n : ℕ) (i : I) :
-    ContDiffOn ℝ ∞ (coefficient (a.background.radius n) (d.radialField n)
-      (fun _ => d.angular) (d.axialField s n) (a.background.phase n)
-      ((a.localized i).amplitude n)) (Ω ∩ h.patch n i) :=
-  normalCoefficient_contDiffOn (phaseNormal_contDiffOn (h.raw.geometry n i) (h.raw.phase n i))
-    (h.raw.localized_smooth n i) (h.raw.normal n i)
 
 
-theorem native_corrected_smooth (n : ℕ) (i : I) :
-    ContDiffOn ℝ ∞ ((a.corrected s d i).amplitude n) (Ω ∩ h.patch n i) := by
-  have G := h.raw.geometry n i
-  have hc := cylindricalCurl_contDiffOn G.isOpen (G.radius_smooth.inv G.radius_ne)
-    G.radial_smooth G.angular_smooth G.axial_smooth (h.native_normal_smooth n i)
-  exact (h.raw.localized_smooth n i).add
-    ((hc.const_smul Complex.I).const_smul (1 / a.background.frequency n))
 
 
-/-- Locally finite native zero germs give a zero germ for the common
-corrected amplitude, even if the phase or normal is singular at this point. -/
-theorem common_zero_germ {n : ℕ} {x : D}
-    (hz : ∀ i, x ∈ h.cells.carrier n i →
-      (a.localized i).amplitude n =ᶠ[𝓝 x] fun _ => 0) :
-    (a.commonCorrected s d).amplitude n =ᶠ[𝓝 x] fun _ => 0 := by
-  classical
-  by_cases hi : ∃ i, x ∈ h.cells.carrier n i
-  · obtain ⟨i, hi⟩ := hi
-    exact (a.commonCorrected_amplitude_germ h.cells h.cutoff_support s d n hi).trans
-      (LocalizedCurlRealization.native_zero_germs a s d (hz i hi)).2.1
-  · exact a.commonCorrected_zero_germ h.cells h.cutoff_support s d (not_exists.mp hi)
 
-theorem common_velocity_zero_germ {n : ℕ} {x : D}
-    (hz : ∀ i, x ∈ h.cells.carrier n i →
-      (a.localized i).amplitude n =ᶠ[𝓝 x] fun _ => 0) :
-    vectorMode (a.background.frequency n) (a.background.phase n)
-      ((a.commonCorrected s d).amplitude n) =ᶠ[𝓝 x] fun _ => 0 := by
-  filter_upwards [h.common_zero_germ hz] with y hy
-  ext j
-  simp only [vectorMode, mode, hy, Pi.zero_apply, zero_mul]
 
 end NativeData
 
@@ -256,27 +219,6 @@ structure ModalSmooth (t : ℕ → TangentData P ProblemStatement.Space)
 
 end Modal
 
-/-- The actual signed quotient is smooth from its matrix, target, request,
-mask and homogeneous fundamental, on the strict covariance cone. -/
-theorem signed_coefficients_smooth (s : StripData D) (d : GraphDirections D)
-    (a : WaveCoefficients D) (H : ℕ → D → SignedWaveUpdate.Mat2)
-    (T R : ℕ → D → SignedWaveUpdate.Vec2) (mask : ℕ → D → ℝ)
-    (v Ndot : ℕ → D → ProblemStatement.Space)
-    (A : ℕ → D → ProblemStatement.Space →L[ℝ] ProblemStatement.Space)
-    (j : Fin 2) (n : ℕ) {Ω : Set D}
-    (hH : ∀ i j, ContDiffOn ℝ ∞ (fun x => H n x i j) Ω)
-    (hT : ∀ i, ContDiffOn ℝ ∞ (fun x => T n x i) Ω)
-    (hR : ∀ i, ContDiffOn ℝ ∞ (fun x => R n x i) Ω)
-    (hm : ContDiffOn ℝ ∞ (mask n) Ω) (hv : ContDiffOn ℝ ∞ (v n) Ω)
-    (hc : ∀ x ∈ Ω, SmoothCovariance.StrictCone (H n x) (T n x)) :
-    ContDiffOn ℝ ∞ ((SignedWaveUpdate.coefficients a s d H T R mask v Ndot A j).amplitude n) Ω := by
-  have hnum := SmoothCovariance.contDiffOn_inverse_solution hH hR
-    (fun x hx => (hc x hx).det_ne_zero) j
-  have hden := SmoothCovariance.contDiffOn_amplitudes hH hT hc j
-  have hinc : ContDiffOn ℝ ∞ (fun x => SignedCovariance.increment (H n x) (T n x) (R n x) j) Ω :=
-    hnum.div (contDiffOn_const.mul hden)
-      (fun x hx => mul_ne_zero (by norm_num) ((hc x hx).amplitudes_pos j).ne')
-  exact complexify.contDiff.comp_contDiffOn ((contDiffOn_const.mul hinc |>.mul hm).smul hv)
 
 /-! ## One actual mode on the full physical slow domain -/
 
@@ -334,50 +276,9 @@ variable {a : CopyData D I} {s : StripData D} {d : GraphDirections D}
 
 include h
 
-theorem smooth : WaveStateRegularity.AngularSmooth
-    (PhysicalMeanDomain.slowDomain U.carrier) (modeOscillation a s d e) := by
-  intro n i
-  have hs := (h.native.common_velocity_smooth n).comp e.contDiff.contDiffOn
-    (show MapsTo e (fullDomain U) (nativeDomain e U) from fun x hx => by
-      simpa only [nativeDomain, mem_preimage, e.symm_apply_apply] using hx)
-  exact Complex.reCLM.contDiff.comp_contDiffOn
-    ((ContinuousLinearMap.proj i : ComplexVector →L[ℝ] ℂ).contDiff.comp_contDiffOn hs)
 
-theorem periodic : CorrectionStep.OscillationPeriodic U.carrier (modeOscillation a s d e) := by
-  intro n R t ht θ Y k
-  have hx : e ((R, (t, Y)), θ) ∈ nativeDomain e U := by
-    simpa only [nativeDomain, mem_preimage, e.symm_apply_apply, fullDomain,
-      HarmonicResidual.liftDomain, mem_prod, mem_univ, and_true,
-      PhysicalMeanDomain.slowDomain, Set.mem_ofPred_eq] using ht
-  have hp := common_velocity_translation a s d (nativeDomain_open e U) n
-    (h.radius_deck n k) (h.radial_deck n k) (h.phase_deck n k)
-    (common_amplitude_translation a n (h.reindex n k)
-      (h.cutoff_deck n k) (h.amplitude_deck n k)) (e ((R, (t, Y)), θ)) hx
-  have he : e ((R, (t, Y + ((k.1 : ℝ), (k.2 : ℝ)))), θ) =
-      e ((R, (t, Y)), θ) + e (deckShift k) := by
-    rw [← map_add]
-    congr 1
-    simp only [deckShift, Prod.add_def, add_zero]
-  funext i
-  change (vectorMode _ _ _ (e ((R, (t, Y + ((k.1 : ℝ), (k.2 : ℝ)))), θ)) i).re = _
-  rw [he, hp]
-  rfl
 
-theorem support : WaveStateRegularity.WaveSupport U r₀ r₁ (modeOscillation a s d e) := by
-  intro n θ i x hx hn
-  by_contra hout
-  have hz := (h.native.common_velocity_zero_germ (h.radial_zero n (x, θ) hx hout)).self_of_nhds
-  apply hn
-  change (vectorMode _ _ _ (e (x, θ)) i).re = 0
-  rw [hz]
-  rfl
 
-theorem regular :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (modeOscillation a s d e) ∧
-    CorrectionStep.OscillationPeriodic U.carrier (modeOscillation a s d e) ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (modeOscillation a s d e) :=
-  ⟨h.smooth, h.periodic, h.support⟩
 
 end ModeData
 
@@ -512,26 +413,7 @@ structure ParticularData {ι : Type} (p : CycleParameters ι) (v : CycleCoeffici
     ((p.particular l).directions.radialField n)
   frequency : ∀ l n, (v.blocks l).frequency n ≠ 0
 
-theorem ParticularData.block_regular {ι : Type} {p : CycleParameters ι} {v : CycleCoefficients ι}
-    {c : Context Point} {u : State Point} {coord r₀ r₁ : ℝ}
-    {U : LocalSignedRequest.SlowRegion coord} (h : ParticularData p v c u U r₀ r₁) (l : ι) :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (p.particularBlock v c u l).oscillation ∧
-    OscillationPeriodic U.carrier (p.particularBlock v c u l).oscillation ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (p.particularBlock v c u l).oscillation := by
-  rw [particularBlock_eq_modes p v c u l (h.radius_angular l) (h.radial_angular l) (h.frequency l)]
-  exact finset_regular _ _ (fun j hj => (h.mode l j hj).regular)
 
-theorem ParticularData.regular {ι : Type} {p : CycleParameters ι} {v : CycleCoefficients ι}
-    {c : Context Point} {u : State Point} {coord r₀ r₁ : ℝ}
-    {U : LocalSignedRequest.SlowRegion coord} (h : ParticularData p v c u U r₀ r₁) :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (p.particularVelocity v c u) ∧
-    OscillationPeriodic U.carrier (p.particularVelocity v c u) ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (p.particularVelocity v c u) :=
-  ⟨finite_smooth _ _ (fun l => (h.block_regular l).1),
-    finite_periodic _ _ (fun l => (h.block_regular l).2.1),
-    finite_support _ _ (fun l => (h.block_regular l).2.2)⟩
 
 end ParticularCycle
 
@@ -635,27 +517,7 @@ structure SignedData {ι : Type} (p : CycleParameters ι) (v : CycleCoefficients
       (LinearIsometryEquiv.refl ℝ Cylinder) U r₀ r₁
   angles : ∀ l, SignedAngles (p.signed l) p.strip (p.signedRequest v c u)
 
-theorem SignedData.block_regular {ι : Type} {p : CycleParameters ι} {v : CycleCoefficients ι}
-    {c : Context Point} {u : State Point} {coord r₀ r₁ : ℝ}
-    {U : LocalSignedRequest.SlowRegion coord} (h : SignedData p v c u U r₀ r₁) (l : ι) :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (p.signedBlock v c u l).oscillation ∧
-    OscillationPeriodic U.carrier (p.signedBlock v c u l).oscillation ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (p.signedBlock v c u l).oscillation := by
-  unfold CycleParameters.signedBlock
-  rw [(h.angles l).block_eq_mode]
-  exact (h.mode l).regular
 
-theorem SignedData.regular {ι : Type} {p : CycleParameters ι} {v : CycleCoefficients ι}
-    {c : Context Point} {u : State Point} {coord r₀ r₁ : ℝ}
-    {U : LocalSignedRequest.SlowRegion coord} (h : SignedData p v c u U r₀ r₁) :
-    WaveStateRegularity.AngularSmooth (PhysicalMeanDomain.slowDomain U.carrier)
-      (p.signedVelocity v c u) ∧
-    OscillationPeriodic U.carrier (p.signedVelocity v c u) ∧
-    WaveStateRegularity.WaveSupport U r₀ r₁ (p.signedVelocity v c u) :=
-  ⟨finite_smooth _ _ (fun l => (h.block_regular l).1),
-    finite_periodic _ _ (fun l => (h.block_regular l).2.1),
-    finite_support _ _ (fun l => (h.block_regular l).2.2)⟩
 
 end SignedCycle
 

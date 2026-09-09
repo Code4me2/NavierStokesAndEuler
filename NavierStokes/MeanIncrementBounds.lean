@@ -1,4 +1,5 @@
-import NavierStokes.MeanResidual
+import NavierStokes.CylindricalResidual
+import NavierStokes.TransportPrimitive
 import NavierStokes.WeightedClasses
 import NavierStokes.PressureStream
 import NavierStokes.MeanMomentBounds
@@ -803,12 +804,6 @@ open scoped Interval
 
 variable {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem radialSupport_sub {a b : ℝ} {f g : ℝ × P → ℝ}
-    (hf : RadialAlias.RadiallySupported a b f)
-    (hg : RadialAlias.RadiallySupported a b g) :
-    RadialAlias.RadiallySupported a b (fun x => f x - g x) :=
-  (support_sub f g).trans (union_subset hf hg)
 
 /-- An interior radial cutoff belongs to the same flat mean class. The
 constant comes from its actual jets and the positive weight on its support. -/
@@ -974,23 +969,6 @@ theorem meanClass_meanPressure
     (fun n => PressureStream.pressureSource_supported hab (hs n))
     (meanClass_pressureSource ha hab hcL hcR ε S hε hεone hS hf hs hclass)
 
-theorem meanClass_meanPressure_change
-    {a b d cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hd : 0 < d)
-    (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1)
-    (hS : ∀ n, 1 ≤ S n) {α : ℝ} {f g : ℕ → PressureStream.Lift P → ℝ}
-    (hf : ∀ n, ContDiff ℝ ∞ (f n)) (hg : ∀ n, ContDiff ℝ ∞ (g n))
-    (hsf : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    (hsg : ∀ n, RadialAlias.RadiallySupported a b (g n))
-    (hclass : MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α (f - g))
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α
-      (fun n x => PressureStream.meanPressure d a b (M n) hab (v n) (f n) x -
-        PressureStream.meanPressure d a b (M n) hab (v n) (g n) x) := by
-  apply class_congr (meanClass_meanPressure ha hab hd hcL hcR ε S hε hεone hS
-    (fun n => (hf n).sub (hg n)) (fun n => radialSupport_sub (hsf n) (hsg n)) hclass M v)
-  intro n x _
-  exact (congrFun (meanPressure_sub ha hab hd (hf n) (hg n) (hsf n) (hsg n) (M n) (v n)) x).symm
 
 
 
@@ -1024,7 +1002,6 @@ section PhysicalIdentification
 open ProblemStatement
 
 
-noncomputable def physicalField (f : MeanResidual.Scalar) : Field SpaceTime := fun _ => f
 
 
 

@@ -292,8 +292,6 @@ theorem mass_lower : lowerMassConstant a B * r ≤ mass ψ x := by
 theorem mass_pos : 0 < mass ψ x :=
   lt_of_lt_of_le (mul_pos h.lowerMassConstant_pos h.radius_pos) h.mass_lower
 
-theorem cutoff_compact : HasCompactSupport ψ :=
-  HasCompactSupport.intro isCompact_Icc h.cutoff_zero
 
 
 theorem weight_direction_integrable {q : ℝ → ℝ}
@@ -535,13 +533,8 @@ theorem signedModel_strictCone {c₀ u m t : ℝ} (hc₀ : c₀ < 0) (hu : 0 < u
     hu zero_lt_one zero_lt_one hcone
 
 
-abbrev SignedPulsePair (r a A b B c₀ u E : ℝ) :=
-  (j : Fin 2) → TangentPulse r a A b B c₀ (signedSlopes u j) (signedSlopes u j) E
 
 
-noncomputable def normalizedMatrix {r a A b B c₀ u E : ℝ}
-    (pulses : SignedPulsePair r a A b B c₀ u E) : Mat2 :=
-  fun i j => normalizedColumn (pulses j).cutoff (pulses j).component (pulses j).tangent i
 
 
 

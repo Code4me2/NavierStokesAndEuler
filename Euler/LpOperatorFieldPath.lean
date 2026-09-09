@@ -72,7 +72,6 @@ def supportedMap : (α →ᵇ E →L[ℝ] F) →L[ℝ]
     simpa only [one_mul] using
       supported_norm μ S hS A ‖A‖ (norm_nonneg _) (fun x _ => A.norm_coe_le_norm x))
 
-@[simp] theorem supportedMap_apply (A : α →ᵇ E →L[ℝ] F) : supportedMap μ S hS A = supported μ S hS A := rfl
 
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
@@ -93,28 +92,6 @@ section Derivative
 variable [CompleteSpace F]
   (T : ℝ) (hT : 0 ≤ T) (A A' : C(Icc (0 : ℝ) T,α →ᵇ E →L[ℝ] F))
 
-/-- Literal pointwise coefficient time derivatives give the genuine within-time
-operator derivative; no global time extension is assumed. -/
-theorem supportedPath_hasDerivWithinAt
-    (hpoint : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : α,
-      HasDerivWithinAt (fun s => extendPath T hT A s x)
-        (extendPath T hT A' t x) (Icc (0 : ℝ) T) t)
-    (t : Icc (0 : ℝ) T) :
-    HasDerivWithinAt (extendPath T hT (supportedPathMap μ S hS A))
-      (supportedPathMap μ S hS A' t) (Icc (0 : ℝ) T) t := by
-  have hfield := EulerBoundedFieldTimeDerivative.hasDerivWithinAt T hT A A' hpoint t t.property
-  have hlinear : HasFDerivAt
-      (fun B : α →ᵇ E →L[ℝ] F => supportedMap μ S hS B)
-      (supportedMap μ S hS) (extendPath T hT A t) :=
-    ContinuousLinearMap.hasFDerivAt (𝕜 := ℝ) (E := α →ᵇ E →L[ℝ] F)
-      (F := supportedSpace (V := E) μ S hS →L[ℝ] supportedSpace (V := F) μ S hS)
-      (supportedMap μ S hS)
-  have hd := hlinear.comp_hasDerivWithinAt (t : ℝ) hfield
-  change HasDerivWithinAt (fun s => supportedMap μ S hS (A (projIcc 0 T hT s)))
-    (supportedMap μ S hS (A' t)) (Icc (0 : ℝ) T) t
-  change HasDerivWithinAt (fun s => supportedMap μ S hS (A (projIcc 0 T hT s)))
-    (supportedMap μ S hS (A' (projIcc 0 T hT t))) (Icc (0 : ℝ) T) t at hd
-  rwa [projIcc_of_mem hT t.property] at hd
 
 end Derivative
 

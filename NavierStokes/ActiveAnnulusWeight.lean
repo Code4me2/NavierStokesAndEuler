@@ -77,10 +77,6 @@ theorem edgeDistance_le_left (a b y : ℝ) : edgeDistance a b y ≤ y-a :=
 theorem edgeDistance_le_right (a b y : ℝ) : edgeDistance a b y ≤ b-y :=
   (min_le_right _ _).trans (min_le_right _ _)
 
-theorem iteratedDeriv_zero_function (n : ℕ) : iteratedDeriv n (fun _ : ℝ => (0 : ℝ)) = fun _ => 0 := by
-  induction n with
-  | zero => rfl
-  | succ n ih => simp only [iteratedDeriv_succ,ih,deriv_const']
 
 
 

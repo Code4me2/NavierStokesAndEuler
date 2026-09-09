@@ -362,23 +362,7 @@ theorem profileAxialStress_le_angular (d : OutgoingTail.TailData) (hsmall : Smal
 
 /-! ## Uniform cone margin through the actual terminal edge -/
 
-theorem profileAngularFactor_pos {C : ℝ} (hC : 0 < C) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {δ eta : ℝ} (hδ : 0 ≤ δ) (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    0 < TerminalEdgeFactor.profileAngularFactor C d y0 (eta, δ) := by
-  rcases hδ.eq_or_lt with hzero | hpos
-  · rw [← hzero]
-    exact TerminalEdgeFactor.profileAngularFactor_zero_pos hC d y0 heta
-  · have hT := profileAngularStress_pos hC d y0 hpos heta
-    rw [TerminalEdgeFactor.profileAngularStress_factorization] at hT
-    exact (mul_pos_iff_of_pos_left (div_pos (FlatCutoff.edge_pos 4 hpos) (pow_pos hpos 3))).mp hT
 
-theorem profileTilt_contDiffAt {C : ℝ} (hC : 0 < C) (d : OutgoingTail.TailData) (y0 : ℝ)
-    {δ eta : ℝ} (hδ : 0 ≤ δ) (heta : eta ∈ Icc (-1 : ℝ) 1) :
-    ContDiffAt ℝ ∞ (TerminalEdgeFactor.profileTilt C d y0) (eta, δ) :=
-  ((contDiffAt_snd.pow 6).mul
-    (TerminalEdgeFactor.profileAxialFactor_contDiff C d y0).contDiffAt).div
-      (TerminalEdgeFactor.profileAngularFactor_contDiff C d y0).contDiffAt
-      (profileAngularFactor_pos hC d y0 hδ heta).ne'
 
 theorem profileTilt_abs_le_one (d : OutgoingTail.TailData) (hsmall : SmallTail d)
     {K δ eta : ℝ} (hK : 0 < K) (hδ : 0 ≤ δ) (hδ' : δ ≤ 5 / 2)

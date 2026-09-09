@@ -41,12 +41,6 @@ def TreeBound {s : ℕ} {A : SmoothCoefficient P} (K : CoefficientJet P dirs s A
   | .zero A => (A.bound : ℝ) ≤ B
   | .succ _ lower _ => (A.bound : ℝ) ≤ B ∧ ∀ i, TreeBound (lower i) B
 
-omit [Fact (0 < P)] in
-theorem TreeBound.root {s : ℕ} {A : SmoothCoefficient P} {K : CoefficientJet P dirs s A}
-    {B : ℝ} (hK : TreeBound K B) : (A.bound : ℝ) ≤ B := by
-  cases K with
-  | zero => exact hK
-  | succ => exact hK.1
 
 omit [Fact (0 < P)] in
 theorem treeBound_of_levels {s : ℕ} {A : SmoothCoefficient P} (K : CoefficientJet P dirs s A)
@@ -76,20 +70,6 @@ theorem TreeBound.truncate {s : ℕ} {A : SmoothCoefficient P}
       | succ dA lower hd =>
           exact ⟨hK.1,fun i => ih (hK.2 i)⟩
 
-omit [Fact (0 < P)] in
-theorem TreeBound.restrict {s : ℕ} {A : SmoothCoefficient P}
-    {K : CoefficientJet P dirs s A} {B : ℝ} (hK : TreeBound K B)
-    (q : ℕ) (hq : q ≤ s) : TreeBound (EulerH6Pressure.CoefficientJet.restrict K q hq) B := by
-  induction q generalizing s A with
-  | zero =>
-      rw [EulerH6Pressure.CoefficientJet.restrict,TreeBound]
-      exact hK.root
-  | succ q ih =>
-      cases K with
-      | zero => omega
-      | succ dA lower hd =>
-          rw [EulerH6Pressure.CoefficientJet.restrict,TreeBound]
-          exact ⟨hK.1,fun i => ih (hK.2 i) (by omega)⟩
 
 omit [Fact (0 < P)] in
 theorem TreeBound.productConstant_le {s : ℕ} {A : SmoothCoefficient P}

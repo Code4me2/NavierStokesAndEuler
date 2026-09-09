@@ -56,8 +56,6 @@ def rieszTestLinear (i j : Fin 3) : ComplexTest →ₗ[ℂ] (Space → ℂ) wher
   map_add' := rieszTest_add i j
   map_smul' := rieszTest_smul i j
 
-@[simp] theorem rieszTestLinear_apply (i j : Fin 3) (ψ : ComplexTest) :
-    rieszTestLinear i j ψ = rieszTest i j ψ := rfl
 
 @[simp] theorem rieszTest_zero (i j : Fin 3) : rieszTest i j 0 = 0 :=
   map_zero (rieszTestLinear i j)

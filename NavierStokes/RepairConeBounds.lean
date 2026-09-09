@@ -183,22 +183,7 @@ theorem freeJ_zero (F : Profile) {p : Point} (hp : p.1 ≤ 0) :
     simp only [freeE_zero_clean F (p := (y, p.2)) hy,
       freeU_zero_clean F (p := (y, p.2)) hy, sub_self, mul_zero]
 
-theorem freeS_zero (F : Profile) {p : Point} (hp : p.1 ≤ 0) :
-    freeS F (0, p) = OutgoingHistories.S F.reset F.amp p := by
-  unfold freeS
-  rw [finitePrefix_zero hp]
-  · simp
-  · intro y hy
-    simp only [freeE_zero_clean F (p := (y, p.2)) hy,
-      freeU_zero_clean F (p := (y, p.2)) hy, sub_self, mul_zero]
 
-theorem freePi_zero (F : Profile) {p : Point} (hp : p.1 ≤ 0) :
-    freePi F (0, p) = OutgoingHistories.Pi F.reset p := by
-  unfold freePi
-  rw [finitePrefix_zero hp]
-  · simp
-  · intro y hy
-    simp only [freeE_zero_clean F (p := (y, p.2)) hy, sub_self]
 
 theorem radialJet_hasDerivAt {f : Raw → ℝ} (hf : ContDiff ℝ ∞ f)
     (v : Control) (p : Point) :
@@ -1035,35 +1020,6 @@ theorem physical_field_radials {F : Profile} {A : NominalProfile.AxisStage F}
     intro y hy'
     exact (physical_field_values c hsep (p := (y, p.2)) hy' heta).2
 
-theorem physical_field_parameters {F : Profile} {A : NominalProfile.AxisStage F}
-    (c : NominalProfile.Controls A) (hsep : c.separation ≤ Real.exp (-8))
-    {p : Point} (hy : p.1 ∈ Icc (-8) (-5)) (heta : p.2 ∈ ReferencePath.parameterInterval)
-    (hs : NominalProfile.SmallDebt F c.debt p.2) :
-    ProfileHistories.parameterPartial (c.profiles hsep).U (chart c.radius p) =
-        parameterJet (freeU F) (controls c p.2, p) ∧
-      ProfileHistories.parameterPartial (c.profiles hsep).E (chart c.radius p) =
-        parameterJet (freeE F) (controls c p.2, p) := by
-  have hp := chart_mem c heta hs
-  have hn := parameter_admissible_eventually c heta hs
-  constructor
-  · have hd := parameter_of_germ (c.profiles hsep).U_smooth (freeU_contDiff F) c heta hs 1
-      (chart c.radius p).1 hp ?_
-    · simp only [one_mul] at hd
-      exact hd
-    · filter_upwards [hn] with e he
-      have hv := (physical_field_values c hsep (p := (p.1, e)) hy he.1).1
-      simp only [one_mul]
-      exact hv
-  · have hE := (physicalE_smoothAt (c.profiles hsep) hp
-        (mul_pos c.radius_pos (Real.exp_pos _))).differentiableAt (by simp)
-    have hd : HasDerivAt (fun e => (c.profiles hsep).E ((chart c.radius p).1, e))
-        (ProfileHistories.parameterPartial (c.profiles hsep).E (chart c.radius p)) p.2 := by
-      exact hE.hasFDerivAt.comp_hasDerivAt p.2
-          ((hasDerivAt_const p.2 (chart c.radius p).1).prodMk (hasDerivAt_id p.2))
-    apply hd.unique
-    apply (parameterJet_hasDerivAt (freeE_contDiff F) (dataParameter_hasDerivAt c heta hs) p.1).congr_of_eventuallyEq
-    filter_upwards [hn] with e he
-    exact (physical_field_values c hsep (p := (p.1, e)) hy he.1).2
 
 theorem shear_dilation_cancel {r z f : ℝ} (hr : r ≠ 0) (hz : z ≠ 0) (hf : f ≠ 0)
     (X df : ℝ) :
@@ -1145,48 +1101,7 @@ theorem physical_projection {F : Profile} {A : NominalProfile.AxisStage F}
   dsimp only [familyProjection, ActivationContinuation.projection]
   ring
 
-/-- These are actual field values, first radial and parameter jets, five
-normalized histories and their parameter derivatives, and integrated cone
-coordinates. The projection is divided by the physical matching radius. -/
-noncomputable def actualObservations {F : Profile} {A : NominalProfile.AxisStage F}
-    (c : NominalProfile.Controls A) (hsep : c.separation ≤ Real.exp (-8)) (p : Point) : Fin 22 → ℝ :=
-  let P := c.profiles hsep
-  let q := chart c.radius p
-  ![P.E q, P.U q,
-    deriv (fun y => P.E (c.radius * Real.exp y, p.2)) p.1,
-    deriv (fun y => P.U (c.radius * Real.exp y, p.2)) p.1,
-    ProfileHistories.parameterPartial P.E q, ProfileHistories.parameterPartial P.U q,
-    P.M q / c.radius, P.I q / angularScale c.radius, P.J q / angularScale c.radius,
-    P.S q / c.radius, P.pressure q,
-    ProfileHistories.parameterPartial P.M q / c.radius,
-    ProfileHistories.parameterPartial P.I q / angularScale c.radius,
-    ProfileHistories.parameterPartial P.J q / angularScale c.radius,
-    ProfileHistories.parameterPartial P.S q / c.radius, ProfileHistories.parameterPartial P.pressure q,
-    P.angularLag F.data.h q, P.axialLag F.data.h q,
-    ActivationContinuation.shearA P q, ActivationContinuation.shearB P q,
-    ActivationContinuation.shearSize (ActivationContinuation.shearA P q) (ActivationContinuation.shearB P q),
-    ActivationContinuation.projection (ReferenceBounds.p1 P F.data.h q) (ReferenceBounds.p2 P F.data.h q)
-      (ActivationContinuation.shearA P q) (ActivationContinuation.shearB P q) / c.radius]
 
-theorem actualObservations_eq {F : Profile} {A : NominalProfile.AxisStage F}
-    (c : NominalProfile.Controls A) (hsep : c.separation ≤ Real.exp (-8))
-    {p : Point} (hy : p.1 ∈ Icc (-8) (-5)) (heta : p.2 ∈ ReferencePath.parameterInterval)
-    (hs : NominalProfile.SmallDebt F c.debt p.2) :
-    actualObservations c hsep p = observations F (controls c p.2, p) := by
-  obtain ⟨hU, hE⟩ := physical_field_values c hsep hy heta
-  obtain ⟨hUy, hEy⟩ := physical_field_radials c hsep hy heta hs
-  obtain ⟨hUeta, hEeta⟩ := physical_field_parameters c hsep hy heta hs
-  obtain ⟨hM, hI, hJ, hS, hPi⟩ := physical_stock_values c hsep hy heta hs
-  obtain ⟨hM', hI', hJ', hS', hPi'⟩ := physical_stock_parameters c hsep hy heta hs
-  obtain ⟨hQ, hN⟩ := physical_lags c hsep hy heta hs
-  obtain ⟨ha, hb⟩ := physical_shears c hsep hy heta hs
-  have hp := physical_projection c hsep hy heta hs
-  dsimp only [actualObservations]
-  rw [hp, hU, hE, hUy, hEy, hUeta, hEeta, hM, hI, hJ, hS, hPi,
-    hM', hI', hJ', hS', hPi', hQ, hN, ha, hb]
-  simp only [mul_div_cancel_left₀ _ c.radius_pos.ne',
-    mul_div_cancel_left₀ _ (angularScale_pos c.radius_pos).ne']
-  rfl
 
 
 /-- The radius and first-jet tolerance are fixed before every incoming

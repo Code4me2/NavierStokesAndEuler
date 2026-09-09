@@ -371,12 +371,6 @@ theorem zero : NativeBounds N U gain loss (fun (_ : ι) _ _ => (0 : E)) := by
   intros
   simp [iteratedFDeriv_fun_zero]
 
-theorem reindex (hf : NativeBounds N U gain loss f) (a : κ → ι) :
-    NativeBounds N U gain loss (fun l => f (a l)) := by
-  refine ⟨fun l => hf.smooth (a l), ?_⟩
-  intro m
-  obtain ⟨A, hA, p, hb⟩ := hf.bounds m
-  exact ⟨A, hA, p, fun l => hb (a l)⟩
 
 theorem map (hf : NativeBounds N U gain loss f) (hU : IsOpen U) (L : E →L[ℝ] F) :
     NativeBounds N U gain loss (fun l n x => L (f l n x)) := by
@@ -672,18 +666,6 @@ noncomputable def residual (u : VelocityField) (p : PressureField) : SpaceTime �
 noncomputable def changedSupport (u u₀ : VelocityField) (p p₀ : PressureField) : Set SpaceTime :=
   tsupport (fun w => u w - u₀ w) ∪ tsupport (fun w => p w - p₀ w)
 
-theorem residual_germ_off_changedSupport {u u₀ : VelocityField} {p p₀ : PressureField}
-    {w : SpaceTime} (hw : w ∉ changedSupport u u₀ p p₀) :
-    residual u p =ᶠ[𝓝 w] residual u₀ p₀ := by
-  have hu : u =ᶠ[𝓝 w] u₀ := by
-    have hz := notMem_tsupport_iff_eventuallyEq.mp (fun h => hw (Or.inl h))
-    filter_upwards [hz] with y hy
-    exact sub_eq_zero.mp hy
-  have hp : p =ᶠ[𝓝 w] p₀ := by
-    have hz := notMem_tsupport_iff_eventuallyEq.mp (fun h => hw (Or.inr h))
-    filter_upwards [hz] with y hy
-    exact sub_eq_zero.mp hy
-  exact ResidualRegularity.residual_eventuallyEq hu hp
 
 /-- The loss contains the actual physical residual degree, graph derivative
 loss, one polynomial-in-band absorption, and the fixed phase loss. -/
@@ -736,35 +718,6 @@ structure ResidualChartData (a b h : ℝ) (N Δ : ℕ) (U : Set Cylinder)
     PhysicalGraphBounds.scaledRadial n w ∈ PolarCharts.chartDomain a j →
     polarGraph a h j n (gap n) w ∈ U
 
-/-- A comparable band is proved to exist at each supported point. Outside
-the correction support the actual finite residual has the base residual germ. -/
-theorem ResidualChartData.residual_jet_bound {a b h gain β : ℝ} {N Δ : ℕ} {U : Set Cylinder}
-    {F : ℕ → Cylinder → Components} {u u₀ : VelocityField} {p p₀ : PressureField}
-    (d : ResidualChartData a b h N Δ U F u u₀ p p₀)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hN : 4 ≤ N) (hU : IsOpen U)
-    (hF : NativeBounds N U gain (fun m => β * m) (fun (_ : Unit) => F)) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ w, w ∈ preterminal → |w.1| ≤ 1 → physicalQ h w ≤ ChartScales.Q N →
-      w ∈ d.active → ‖iteratedFDeriv ℝ m (residual u p) w‖ ≤
-        C * physicalQ h w ^ (gain - physicalLoss h β m) := by
-  obtain ⟨A, hA, e, hjet⟩ := hF.bounds m
-  obtain ⟨C, hC, hb⟩ := cartesianPull_jet_bound (b := b) hh.le hh1.le ha Δ m
-    (gain - β * m) (residualDegree h) e A hA
-  refine ⟨C, hC, ?_⟩
-  intro w hw ht hsmall hs
-  have hq := physicalQ_pos hh hh1 hw
-  obtain ⟨n, hn, hlo, hhi⟩ := PhysicalMeanJetBounds.exists_comparable_band N hq hsmall
-  have hlo' : physicalQ h w / 2 ≤ ChartScales.Q n := by linarith
-  have hann := d.annulus n hn w hw hlo' hhi.le hs
-  obtain ⟨j, hj⟩ := PolarCharts.annulus_covered ha hann
-  have hc := PolarCharts.sector_subset_chartDomain ha j hj
-  have hdom := d.in_domain n hn w hw hlo' hhi.le hs j hc
-  rw [iteratedFDeriv_eq_of_eventuallyEq (d.realization.germ ha hU hn j hw hann hc hdom) m]
-  have he := hb n (hN.trans hn) (d.gap n) (d.gap_le n hn) w hann ht (physicalQ h w) hq
-    hlo' hhi.le j (F n) (SmoothNear.of_open hU (hF.smooth () n hn) hdom)
-    (by simpa only [Real.rpow_natCast] using hjet () n hn _ hdom)
-  have hexp : gain - β * m - PhysicalMeanJetBounds.loss (residualDegree h) m =
-      gain - physicalLoss h β m := by unfold physicalLoss; ring
-  simpa only [hexp] using he
 
 theorem eventually_time_small (x : Space) :
     ∀ᶠ w : SpaceTime in 𝓝[SpacetimeEndpoint.openPast 1] (1, x), |w.1| ≤ 1 := by
@@ -776,37 +729,6 @@ theorem eventually_time_small (x : Space) :
   rw [abs_of_pos hpos]
   exact hpast.1.le
 
-/-- The finite-residual rate consumed by the diagonal assembly. The same
-`physicalLoss h β m` works for every stage and every native exponent `gain`. -/
-theorem ResidualChartData.residual_jetRate {a b h gain β : ℝ} {N Δ : ℕ} {U : Set Cylinder}
-    {F : ℕ → Cylinder → Components} {u u₀ : VelocityField} {p p₀ : PressureField}
-    (d : ResidualChartData a b h N Δ U F u u₀ p p₀)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hN : 4 ≤ N) (hU : IsOpen U)
-    (hF : NativeBounds N U gain (fun m => β * m) (fun (_ : Unit) => F)) (m : ℕ)
-    (hbase : DiagonalResidual.JetRate
-      ((𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space))) ⊓ 𝓟 d.activeᶜ)
-      (physicalQ h) (residual u₀ p₀) m (gain - physicalLoss h β m)) :
-    DiagonalResidual.JetRate (𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space)))
-      (physicalQ h) (residual u p) m (gain - physicalLoss h β m) := by
-  obtain ⟨C, hC, hb⟩ := d.residual_jet_bound hh hh1 ha hN hU hF m
-  obtain ⟨B, hB, hbase⟩ := hbase
-  rw [Filter.eventually_inf_principal] at hbase
-  have hsmall : ∀ᶠ w : SpaceTime in 𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space)),
-      physicalQ h w ≤ ChartScales.Q N :=
-    (AnnularEndpoint.physicalQ_tendsto_zero hh hh1 (by simp)).eventually
-      (eventually_le_nhds (ChartScales.Q_pos N))
-  refine ⟨B + C, add_nonneg hB hC, ?_⟩
-  filter_upwards [hbase, hsmall, eventually_time_small (0 : Space), self_mem_nhdsWithin]
-    with w hbw hsw ht hw
-  have hp : w ∈ preterminal := hw.1
-  have hq := physicalQ_pos hh hh1 hp
-  by_cases hs : w ∈ d.active
-  · exact (hb w hp ht hsw hs).trans (mul_le_mul_of_nonneg_right
-      (le_add_of_nonneg_left hB) (Real.rpow_pos_of_pos hq _).le)
-  · rw [iteratedFDeriv_eq_of_eventuallyEq
-      (residual_germ_off_changedSupport (fun hc => hs (d.changed_subset hc))) m]
-    exact (hbw hs).trans (mul_le_mul_of_nonneg_right
-      (le_add_of_nonneg_right hC) (Real.rpow_pos_of_pos hq _).le)
 
 /-! ## Primitive physical-state realization -/
 
@@ -943,21 +865,5 @@ theorem excluded_nativeBounds {N : ℕ} {U : Set Cylinder} {gain : ℝ} {loss : 
   exact he
 
 
-/-- One fixed loss function applies to the actual residual after every
-finite correction stage. Constants and the finite harmonic cutoff may vary
-with the stage; the band floor, cover gap and phase loss stay fixed. -/
-theorem finite_residual_rates {a b h β : ℝ} {N Δ : ℕ} {gain : ℕ → ℝ}
-    {U : ℕ → Set Cylinder} {F : ℕ → ℕ → Cylinder → Components}
-    {u : ℕ → VelocityField} {p : ℕ → PressureField} {u₀ : VelocityField} {p₀ : PressureField}
-    (d : ∀ J, ResidualChartData a b h N Δ (U J) (F J) (u J) u₀ (p J) p₀)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hN : 4 ≤ N) (hU : ∀ J, IsOpen (U J))
-    (hF : ∀ J, NativeBounds N (U J) (gain J) (fun m => β * m) (fun (_ : Unit) => F J))
-    (hbase : ∀ J m, DiagonalResidual.JetRate
-      ((𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space))) ⊓ 𝓟 (d J).activeᶜ)
-      (physicalQ h) (residual u₀ p₀) m (gain J - physicalLoss h β m)) :
-    ∀ J m, DiagonalResidual.JetRate (𝓝[SpacetimeEndpoint.openPast 1] (1, (0 : Space)))
-      (physicalQ h) (fun z => navierStokesResidual (u J) (p J) z.1 z.2)
-      m (gain J - physicalLoss h β m) :=
-  fun J m => (d J).residual_jetRate hh hh1 ha hN (hU J) (hF J) m (hbase J m)
 
 end NavierStokes.PhysicalResidualJetBounds

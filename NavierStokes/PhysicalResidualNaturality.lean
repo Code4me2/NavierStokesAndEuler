@@ -122,12 +122,6 @@ theorem mul {U : Set D} {e : D ≃L[ℝ] E} {a b : ℝ}
   simp only [Complex.real_smul, Complex.ofReal_mul]
   ring
 
-theorem scale {U : Set D} {e : D ≃L[ℝ] E} {a : ℝ}
-    {c : Coefficients D} {d : Coefficients E} (hc : CoefficientsOn U e a c d)
-    (b : ℝ) : CoefficientsOn U e (b*a) (b • c) d := by
-  intro j x hx
-  change b • c j x = (b*a) • d j (e x)
-  rw [hc j x hx, smul_smul]
 
 theorem angular {U : Set D} {e : D ≃L[ℝ] E} {a : ℝ}
     {c : Coefficients D} {d : Coefficients E} (hc : CoefficientsOn U e a c d)
@@ -656,16 +650,6 @@ structure PositiveSupport (b : CorrectionState.HarmonicBlock Associated)
   aliasError : ∀ i, HarmonicSourceSupport.NonzeroSupported supportSet
     (HarmonicResidual.realCoefficients (A n i))
 
-theorem PositiveSupport.source_zero
-    {b : CorrectionState.HarmonicBlock Associated}
-    {G A : HarmonicResidual.BlockCoefficients Associated} {n : ℕ}
-    (H : PositiveSupport b G A n) (C : CorrectionState.Context Associated)
-    (s : CorrectionState.State Associated) (j : ℤ) {x : Associated} (hx : x ∉ positiveLift) :
-    ParticularWaveAssembly.residualSource C s b G A j n x = 0 := by
-  have hs := HarmonicSourceSupport.residualSource_support_of_real C s b G A H.closed n
-    H.velocity H.pressure H.gaussian H.aliasError j
-  by_contra hn
-  exact hx (H.positive (hs hn))
 
 
 
@@ -749,33 +733,6 @@ structure StateOn (U : Set D) (e : D ≃L[ℝ] E) (c l : ℝ)
   aliasError : ∀ x ∈ U, ∀ theta i, s.errors.aliasError n (x,theta) i =
     (c*c*l) * r.errors.aliasError nr (e x,theta) i
 
-theorem StateOn.addIncrement {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
-    {s v : CorrectionState.State D} {r w : CorrectionState.State E} {n nr : ℕ}
-    (hs : StateOn U e c l s r n nr) (hv : StateOn U e c l v w n nr) :
-    StateOn U e c l
-      (s.addIncrement v.mean v.pressure v.oscillation v.oscillatoryPressure v.errors)
-      (r.addIncrement w.mean w.pressure w.oscillation w.oscillatoryPressure w.errors) n nr := by
-  refine ⟨hs.mean.updated hv.mean, hs.pressure.add hv.pressure, ?_, ?_, ?_, ?_, ?_⟩
-  · intro x hx theta i
-    change s.oscillation n (x,theta) i + v.oscillation n (x,theta) i = _
-    rw [hs.oscillation x hx theta i, hv.oscillation x hx theta i]
-    exact (mul_add _ _ _).symm
-  · intro x hx theta
-    change s.oscillatoryPressure n (x,theta) + v.oscillatoryPressure n (x,theta) = _
-    rw [hs.oscillatoryPressure x hx theta, hv.oscillatoryPressure x hx theta]
-    exact (mul_add _ _ _).symm
-  · intro x hx theta i
-    change s.errors.base n (x,theta) i + v.errors.base n (x,theta) i = _
-    rw [hs.baseError x hx theta i, hv.baseError x hx theta i]
-    exact (mul_add _ _ _).symm
-  · intro x hx theta i
-    change s.errors.gaussian n (x,theta) i + v.errors.gaussian n (x,theta) i = _
-    rw [hs.gaussian x hx theta i, hv.gaussian x hx theta i]
-    exact (mul_add _ _ _).symm
-  · intro x hx theta i
-    change s.errors.aliasError n (x,theta) i + v.errors.aliasError n (x,theta) i = _
-    rw [hs.aliasError x hx theta i, hv.aliasError x hx theta i]
-    exact (mul_add _ _ _).symm
 
 theorem StateOn.covariance {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
     {s : CorrectionState.State D} {r : CorrectionState.State E} {n nr : ℕ}
@@ -986,17 +943,7 @@ theorem gr (hU : IsOpen U) (hl : l ≠ 0) :
   simp only [neg_one_smul] at he
   exact he
 
-theorem radialResidual (hU : IsOpen U) (hl : l ≠ 0) :
-    ScalarOn U e (c*c*l) (s.radialResidual C n) (r.radialResidual Cr nr) :=
-  (G.frame.scalarDr hU H.pressure).sub (H.gr G hU hl)
 
-theorem reducedMeanResidual (hU : IsOpen U) (hl : l ≠ 0) (i : Fin 3) :
-    ScalarOn U e (c*c*l) (fun x => s.reducedMeanResidual C n x i)
-      (fun x => r.reducedMeanResidual Cr nr x i) := by
-  fin_cases i
-  · exact H.radialResidual G hU hl
-  · exact H.thetaResidual G hU hl
-  · exact H.axialResidual G hU hl
 
 theorem source (hU : IsOpen U) (hl : l ≠ 0)
     {b : CorrectionState.HarmonicBlock D} {br : CorrectionState.HarmonicBlock E}
@@ -1008,47 +955,10 @@ theorem source (hU : IsOpen U) (hl : l ≠ 0)
 
 end StateOn
 
-theorem angularAverage_on {U : Set D} {e : D ≃L[ℝ] E} {a : ℝ}
-    {f : CorrectionState.OscillatoryScalar D} {g : CorrectionState.OscillatoryScalar E} {n nr : ℕ}
-    (hf : ∀ x ∈ U, ∀ theta, f n (x,theta) = a * g nr (e x,theta)) :
-    ScalarOn U e a (CorrectionState.angularAverage f n) (CorrectionState.angularAverage g nr) := by
-  intro x hx
-  unfold CorrectionState.angularAverage
-  rw [show (fun theta => f n (x,theta)) = (fun theta => a*g nr (e x,theta)) from funext (hf x hx),
-    intervalIntegral.integral_const_mul]
-  ring
 
-theorem StateOn.meanBaseError {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
-    {s : CorrectionState.State D} {r : CorrectionState.State E} {n nr : ℕ}
-    (H : StateOn U e c l s r n nr) (i : Fin 3) :
-    ScalarOn U e (c*c*l) (fun x => s.meanBaseError n x i) (fun x => r.meanBaseError nr x i) :=
-  angularAverage_on (fun x hx theta => H.baseError x hx theta i)
 
-theorem StateOn.meanExcluded {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
-    {s : CorrectionState.State D} {r : CorrectionState.State E} {n nr : ℕ}
-    (H : StateOn U e c l s r n nr) (i : Fin 3) :
-    ScalarOn U e (c*c*l) (fun x => s.meanExcluded n x i) (fun x => r.meanExcluded nr x i) := by
-  apply angularAverage_on
-  intro x hx theta
-  simp only [CorrectionState.ExcludedErrors.total, Pi.add_apply,
-    H.baseError x hx theta i, H.gaussian x hx theta i, H.aliasError x hx theta i]
-  ring
 
-theorem StateOn.meanResidual {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
-    {C : CorrectionState.Context D} {Cr : CorrectionState.Context E}
-    {s : CorrectionState.State D} {r : CorrectionState.State E} {n nr : ℕ}
-    (H : StateOn U e c l s r n nr) (G : ContextOn U e c l C Cr n nr)
-    (hU : IsOpen U) (hl : l ≠ 0) (i : Fin 3) :
-    ScalarOn U e (c*c*l) (fun x => s.meanResidual C n x i) (fun x => r.meanResidual Cr nr x i) :=
-  (H.reducedMeanResidual G hU hl i).add (H.meanBaseError i)
 
-theorem StateOn.meanGoodResidual {U : Set D} {e : D ≃L[ℝ] E} {c l : ℝ}
-    {C : CorrectionState.Context D} {Cr : CorrectionState.Context E}
-    {s : CorrectionState.State D} {r : CorrectionState.State E} {n nr : ℕ}
-    (H : StateOn U e c l s r n nr) (G : ContextOn U e c l C Cr n nr)
-    (hU : IsOpen U) (hl : l ≠ 0) (i : Fin 3) :
-    ScalarOn U e (c*c*l) (fun x => s.meanGoodResidual C n x i) (fun x => r.meanGoodResidual Cr nr x i) :=
-  (H.meanResidual G hU hl i).sub (H.meanExcluded i)
 
 /-! ## Literal reference views of one state -/
 

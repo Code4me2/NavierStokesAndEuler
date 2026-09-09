@@ -65,8 +65,6 @@ theorem source_initial_tangent (x : Space) : ⟪sourceRay D x τ,A.sourceVelocit
   simpa only [sourceRay,sourceVelocity,hclamp] using
     uncutVelocity_tangent τ hτ hτT H A.terminal ⟨τ,hτ.le,hτT.le⟩ x
 
-theorem sourceVelocity_ne_zero (x : Space) (t : Icc (0 : ℝ) D.T) : A.sourceVelocity x t ≠ 0 :=
-  uncutVelocity_ne_zero τ hτ hτT H A.terminal A.terminal_properties.1 t x
 
 omit [CompleteSpace U] in
 theorem neighbor_components :

@@ -33,8 +33,6 @@ def derivativeCost (T C₀ C₁ : ℝ) : ℝ := T*C₁+C₀
 def formCost (T C₀ C₁ CH : ℝ) : ℝ :=
   9 * (derivativeCost T C₀ C₁)^2 * (1 + T^2*CH)
 
-/-- The polynomial cost of the actual weak forcing term. -/
-def forcingCost (T C₀ C₁ : ℝ) : ℝ := 3 * (T * derivativeCost T C₀ C₁)
 
 omit [CompleteSpace U] [CompleteSpace E] in
 /-- Every actual derivative of the fixed kinetic map has the same factorial bound. -/

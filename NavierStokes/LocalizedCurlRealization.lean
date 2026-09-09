@@ -176,16 +176,6 @@ variable {a : CopyData D I} {s : StripData D} {d : GraphDirections D}
 
 include h K hs hcover
 
-theorem common_realizes_curl (n : ℕ) {x : D} (hx : x ∈ s.domain) :
-    cylindricalCurl (a.background.radius n) (d.radialField n) (fun _ => d.angular)
-      (d.axialField s n) (a.common.curlPotential s d n) x =
-    vectorMode (a.background.frequency n) (a.background.phase n)
-      ((a.commonCorrected s d).amplitude n) x := by
-  apply a.common_realizes_curl K hs s d _ n hx
-  intro m i y hy hi
-  rcases hcover m i y hy hi with hC | hz
-  · exact h.native_realizes_curl m i ⟨hy, hC⟩
-  · exact (native_identities_of_zero_germ a s d hz).1
 
 theorem common_divergence_zero (n : ℕ) {x : D} (hx : x ∈ s.domain) :
     cylindricalDivergence (a.background.radius n) (d.radialField n) (fun _ => d.angular)

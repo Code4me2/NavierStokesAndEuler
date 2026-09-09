@@ -19,8 +19,6 @@ def scaleTimeMap (S T c : ℝ) (hc : 0 ≤ c) (hct : c*T ≤ S) :
     (mul_le_mul_of_nonneg_left t.property.2 hc).trans hct⟩
   continuous_toFun := (continuous_subtype_val.const_mul c).subtype_mk _
 
-@[simp] theorem scaleTimeMap_val (S T c : ℝ) (hc : 0 ≤ c) (hct : c*T ≤ S)
-    (t : Icc (0 : ℝ) T) : ((scaleTimeMap S T c hc hct t) : ℝ)=c*t := rfl
 
 namespace Evolution
 
