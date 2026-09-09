@@ -1,5 +1,6 @@
 import Euler.SolutionDefinitions
-import Euler.EulerSingularity
+import Euler.EulerC1Limsup
+import Euler.OrdinaryEulerBKM
 
 /-! The extended spatial suprema in the independent challenge agree with the
 ordinary development's bounded-function norms on every smooth Sobolev slice. -/

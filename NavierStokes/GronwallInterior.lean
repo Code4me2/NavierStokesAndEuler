@@ -1,23 +1,27 @@
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
+import Mathlib.Analysis.Calculus.Deriv.Shift
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
 /-!
-# Scalar closure of the whole-space comparison estimate
+# Gronwall's inequality with interior derivatives
 
-The localized energy may have derivatives only in the interior of the time
-interval. The integrating-factor argument below therefore uses continuity on
-the closed interval and the mean-value theorem on its interior. In particular,
-no energy inequality at a time endpoint is assumed.
+Both Navier--Stokes uniqueness proofs (`PeriodicUniqueness` on the torus,
+`R3/WholeSpaceEnergyLimit` on `ℝ³`) control a difference energy that is
+continuous on a closed time interval but differentiable only in its interior.
+Mathlib's `norm_le_gronwallBound_of_norm_deriv_right_le` asks for right
+derivatives on `Ico a b`, including at `a`, so it does not apply directly. The
+integrating-factor argument below is the one lemma both proofs use; the
+perturbed form `E' ≤ K E + ε` is the general one, the unperturbed
+`eq_zero_of_deriv_le` (zero initial energy, zero perturbation) is its instance.
 -/
-
 
 noncomputable section
 
 open Set
 
-namespace NavierStokesR3.ComparisonGronwall
+namespace NavierStokes.GronwallInterior
 
 /-- The weighted perturbed Gronwall estimate with a nonpositive initial value.
 Only interior derivatives of `E` are needed. -/
@@ -114,7 +118,32 @@ theorem le_div_radius_of_deriv_le {T K C R : ℝ} {E E' : ℝ → ℝ}
   convert! hle using 1
   ring
 
+/-- The unperturbed case on an arbitrary interval `[a, b]`: a nonnegative
+energy vanishing at `a` with `E' ≤ K E` in the interior vanishes throughout.
+This is the form the torus uniqueness proof uses; it is the shifted `ε = 0`
+instance of `exp_neg_mul_le_of_deriv_le`. -/
+theorem eq_zero_of_deriv_le {a b K : ℝ} {E E' : ℝ → ℝ} (hab : a ≤ b)
+    (hcont : ContinuousOn E (Icc a b)) (hinitial : E a = 0)
+    (hnonneg : ∀ t ∈ Icc a b, 0 ≤ E t)
+    (hderiv : ∀ t ∈ Ioo a b, HasDerivAt E (E' t) t)
+    (hbound : ∀ t ∈ Ioo a b, E' t ≤ K * E t) :
+    ∀ t ∈ Icc a b, E t = 0 := by
+  intro t ht
+  have hshift := exp_neg_mul_le_of_deriv_le (T := b - a) (K := max K 0) (ε := 0)
+    (E := fun s => E (a + s)) (E' := fun s => E' (a + s)) (by linarith)
+    (le_max_right _ _) le_rfl
+    (hcont.comp (continuous_const.add continuous_id).continuousOn
+      (fun s hs => ⟨by linarith [hs.1], by linarith [hs.2]⟩))
+    (by simp [hinitial])
+    (fun s hs => (hderiv (a + s) ⟨by linarith [hs.1], by linarith [hs.2]⟩).comp_const_add a s)
+    (fun s hs => by
+      have hs' : a + s ∈ Ioo a b := ⟨by linarith [hs.1], by linarith [hs.2]⟩
+      have hE := hnonneg (a + s) ⟨hs'.1.le, hs'.2.le⟩
+      linarith [hbound (a + s) hs', mul_le_mul_of_nonneg_right (le_max_left K 0) hE])
+    (t - a) ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  have hta : a + (t - a) = t := by ring
+  rw [hta, zero_mul] at hshift
+  have hE : E t ≤ 0 := by nlinarith [Real.exp_pos (-max K 0 * (t - a))]
+  exact le_antisymm hE (hnonneg t ht)
 
-
-
-end NavierStokesR3.ComparisonGronwall
+end NavierStokes.GronwallInterior

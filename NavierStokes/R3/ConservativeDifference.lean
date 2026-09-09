@@ -21,7 +21,7 @@ namespace NavierStokesR3.ConservativeDifference
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open Comparison (tensorDiff)
 
 /-- The ordinary scalar Laplacian, with the same coordinate directions as the

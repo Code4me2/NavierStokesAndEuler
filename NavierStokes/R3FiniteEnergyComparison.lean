@@ -3,12 +3,22 @@ import NavierStokes.R3CompactCandidate
 import NavierStokes.ComparatorR3Bridge
 
 /-!
-# Comparison with the compact candidate on all of R³
+# The whole-space exclusion: no global solution extends the compact candidate
 
-The whole-space uniqueness proof is ported from the verified R³ development.
-The competitor retains exactly the smoothness and finite-energy conditions
-of the comparator. The candidate's compact support supplies the reference
-solution's bounds on each closed interval before time one.
+This is the (C) branch of the delivered argument, steps two and three of the
+three-step chain described in `NavierStokes/ComparatorR3Theorem.lean`:
+
+* identification — a global finite-energy solution with the candidate's force
+  and zero datum agrees with the compact candidate on every `[0,t]`, `t < 1`
+  (`NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc`, ported
+  from the verified `ℝ³` development; the competitor retains exactly the
+  smoothness and finite-energy conditions of the comparator, the candidate's
+  compact support supplies the reference bounds);
+* contradiction — `R3CompactCandidate.Properties.not_global_agreement`.
+
+`compact_candidate_excludes_global_solution` is the composite consumed by the
+adapter; it has the same signature as the periodic exclusion
+`MaximalLifespan.candidate_excludes_global_solution`.
 -/
 
 noncomputable section
@@ -32,42 +42,43 @@ theorem GlobalSolutionRn.uniformFiniteEnergy {f v : VelocityField} {q : Pressure
     have hm := le_max_right 0 (E / 2)
     linarith
 
-/-- A compact candidate with unbounded speed excludes every global smooth
-solution having the comparator's finite-energy bound. -/
-theorem compact_candidate_excludes_global_solution
+/-- Step two of the whole-space argument: identification below time one, by
+whole-space uniqueness on each closed interval `[0, t]`. -/
+theorem compact_candidate_agree_on_overlap
     {u v f : VelocityField} {p q : PressureField}
-    (h : R3CompactCandidate.Properties u p f) (hv : GlobalSolutionRn f v q) : False := by
-  apply h.not_global_agreement hv.velocity_smooth
+    (h : R3CompactCandidate.Properties u p f) (hv : GlobalSolutionRn f v q) :
+    ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, u (t, x) = v (t, x) := by
   obtain ⟨K, hK, hs⟩ := h.velocity_support
   intro t ht x
   by_cases ht0 : t = 0
   · subst t
-    rw [h.zero_initial_velocity, hv.initial_velocity]
+    rw [h.zero_initial_velocity, hv.zero_initial_velocity]
   have hpos : 0 < t := lt_of_le_of_ne ht.1 (Ne.symm ht0)
-  have hpre : NavierStokesR3.Comparison.slab 0 t ⊆ preSingularDomain := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_lt ht.2⟩, hz.2⟩
-  have hfuture : NavierStokesR3.Comparison.slab 0 t ⊆ futureDomain := by
-    intro z hz
-    exact ⟨hz.1.1, hz.2⟩
+  have hI : Icc 0 t ⊆ Ico (0 : ℝ) 1 := Icc_subset_Ico_right ht.2
+  have hu' := h.toSolution.mono hI
+  have hv' := hv.toSolution.mono (Icc_subset_Ici_self : Icc (0 : ℝ) t ⊆ Ici 0)
   have hsupport : ∀ r ∈ Icc (0 : ℝ) t, tsupport (fun y => u (r, y)) ⊆ K := by
     intro r hr
     apply closure_minimal _ hK.isClosed
     intro y hy
     by_contra hyK
-    exact hy (hs r ⟨hr.1, hr.2.trans_lt ht.2⟩ y hyK)
-  have heq := NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc hpos
-    (h.velocity_smooth.mono hpre) (hv.velocity_smooth.mono hfuture)
-    (h.pressure_smooth.mono hpre) (hv.pressure_smooth.mono hfuture)
+    exact hy (hs r (hI hr) y hyK)
+  exact NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc hpos
+    hu'.velocity_smooth hv'.velocity_smooth hu'.pressure_smooth hv'.pressure_smooth
     hK hsupport (hv.uniformFiniteEnergy t)
-    (fun r hr => h.divergence_free r ⟨hr.1.le, hr.2.trans ht.2⟩)
-    (fun r hr => hv.divergence_free r hr.1.le)
-    (fun r hr y => by
-      simpa only [NavierStokesR3.ProblemStatement.navierStokesResidual,
-        navierStokesResidual, one_smul] using
-        (h.navier_stokes r ⟨hr.1, hr.2.trans ht.2⟩ y).trans
-          (hv.navier_stokes r hr.1 y).symm)
-    (fun y => (h.zero_initial_velocity y).trans (hv.initial_velocity y).symm)
-  exact heq t ⟨ht.1, le_rfl⟩ x
+    (fun r hr => hu'.divergence_free r ⟨hr.1.le, hr.2.le⟩)
+    (fun r hr => hv'.divergence_free r ⟨hr.1.le, hr.2.le⟩)
+    (fun r hr y => (hu'.navier_stokes r ⟨hr.1.le, hr.2.le⟩ hr.1 y).trans
+      (hv'.navier_stokes r ⟨hr.1.le, hr.2.le⟩ hr.1 y).symm)
+    (fun y => (h.zero_initial_velocity y).trans (hv.zero_initial_velocity y).symm)
+    t ⟨ht.1, le_rfl⟩ x
+
+/-- The whole-space exclusion, option (C): a compact candidate with unbounded
+speed excludes every global smooth solution having the comparator's
+finite-energy bound. -/
+theorem compact_candidate_excludes_global_solution
+    {u v f : VelocityField} {p q : PressureField}
+    (h : R3CompactCandidate.Properties u p f) (hv : GlobalSolutionRn f v q) : False :=
+  h.not_global_agreement hv.velocity_smooth (compact_candidate_agree_on_overlap h hv)
 
 end NavierStokes.ComparatorBridge

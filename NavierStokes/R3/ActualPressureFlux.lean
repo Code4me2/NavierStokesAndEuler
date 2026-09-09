@@ -17,7 +17,7 @@ open scoped BigOperators ContDiff
 namespace NavierStokesR3.ActualPressureFlux
 
 open NavierStokes.ProblemStatement
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open Comparison PressureRecovery PressureFluxIdentity
 
 theorem difference_slice_smooth {T t : ℝ} {u v : VelocityField} {p q : PressureField}

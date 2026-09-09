@@ -52,7 +52,7 @@ The Euler result is **unforced**. Everything is in the initial velocity.
   defined as `Stage.initialDataLimit packets` — the limit, in every Sobolev order `Hˢ`, of the
   initial velocities of a recursively constructed infinite family of *packet stages*. It is
   smooth, compactly supported, nonzero and divergence-free.
-* **Divergent quantity.** `Stage.activationGradient` (`Euler/PacketStageGrowth.lean`), defined
+* **Divergent quantity.** `GrowthData.activationGradient` (`Euler/PacketStageGrowth.lean`), defined
   as `‖fderiv ℝ (fun x => P.state.evolution.velocity (P.time, x)) 0‖` — the operator norm of the
   velocity gradient at the origin, at stage `P`'s own activation time. The key estimate is
 
@@ -66,10 +66,12 @@ The Euler result is **unforced**. Everything is in the initial velocity.
 * **What the divergence buys.** Each stage's gradient is attained on that stage's *own* short
   horizon, all of which sit inside one fixed base horizon
   (`baseHorizon J X = 6·J²·X^(-498)`, `Euler/PacketBaseGuardScales.lean`). A hypothetical smooth
-  Euler evolution on the whole base horizon starting from `initialDatum` would be `H³`-close at
-  time zero to every stage, and a no-gradient-escape lemma would then cap all the
-  `activationGradient`s — contradicting `gradient_atTop`. This is
-  `Stage.no_euler_evolution_of_initial_H3` (`Euler/PacketStageContradiction.lean`).
+  Euler evolution on a horizon that eventually dominates the packet horizons, starting from
+  `initialDatum`, would be `H³`-close at time zero to every stage, and a no-gradient-escape lemma
+  would then cap all the `activationGradient`s — contradicting `gradient_atTop`. This is
+  `GrowthData.no_evolution_of_eventually_covering` (`Euler/PacketStageContradiction.lean`);
+  applied to each packet horizon it gives `lifespan_le_iInf_horizon`
+  (`Euler/PacketFiniteLifespan.lean`): the maximal lifespan is at most `⨅ n, T_n`.
 
 ### 1.2 The scale hierarchy
 
@@ -95,11 +97,14 @@ inside `baseHorizon`, while the shear — and hence the gradient at the origin �
 
 ### 1.3 Layers
 
-**A. Submission surface — `Euler/Solution.lean` (75 lines).**
-`initialDatum_no_global_solution` is the hinge: one private theorem whose proof feeds the
-vorticity confinement, the local upgrade and the identification of the canonical solution with
-any Comparator-class solution into `finiteLifespan_contradiction_of_compact_vorticity`. The two
-delivered theorems are then packaging.
+**A. Submission surface — `Euler/Solution.lean` (74 lines).**
+`initialDatum_no_global_solution` is the hinge: one private theorem whose proof is the single
+application `no_global_solution_of_confined_vorticity lifespan canonicalVorticityBall
+canonicalVorticityBall_compact canonical_vorticity_confined` — the vorticity confinement of
+step 3 fed into the step-3 contradiction, which itself calls the identification of step 2. The
+two delivered theorems are then packaging. The unused showcase statements (`HasSmoothEulerSolution`,
+`MaximalTime`, `maximalC1Norm_limsup`, `maximalVorticity_integral_infinite`, …) live outside the
+deliverable closure in `Euler/Showcase.lean`.
 
 **B. Comparator ↔ development bridge (namespace `Euler.ComparatorBridge`, plus its analytic support modules).**
 This is analysis, not glue.
@@ -110,16 +115,17 @@ This is analysis, not glue.
   solenoidal test fields (`Euler/ProjectedEulerPairing.lean`, `Euler/CurlTimeDerivative.lean`,
   with the dense-test-to-strong-derivative upgrade isolated in `Euler/WeakHilbertODE.lean`) for
   the time derivative.
-* `maximalVelocity_eq_of_compactCurlLocalUpgrade` (`Euler/ComparatorIdentification.lean`) uses
+* `comparator_agrees_with_canonical` (`Euler/ComparatorLocalEvolution.lean`) uses
   ordinary uniqueness to identify the canonical maximal solution with every Comparator-class
   global solution below `T*`.
-* `canonical_vorticity_hasCompactSupport` (`Euler/CanonicalVorticityConfinement.lean`): the
+* `canonical_vorticity_confined` (`Euler/CanonicalVorticityConfinement.lean`): the
   canonical field's vorticity stays inside a fixed compact set `canonicalVorticityBall` for all
   `t < T*`, by `H³` stability against the packet horizons.
-* `finiteLifespan_contradiction_of_compact_vorticity`
-  (`Euler/CompactVorticityContradiction.lean`) is where `False` is actually produced: uniformly
-  confined vorticity gives a uniform bound `M` on `‖ω‖_∞`, hence `∫₀^{T*} ‖ω‖_∞ ≤ M·T*`, which
-  contradicts Beale–Kato–Majda.
+* `no_global_solution_of_confined_vorticity`
+  (`Euler/CompactVorticityContradiction.lean`), via `FiniteLifespan.false_of_vorticity_agree_on_compact`,
+  is where `False` is actually produced: a global solution agreeing with the canonical field on
+  the compact set gives, by joint continuity of its curl, a uniform bound `M` on `‖ω‖_∞`, hence
+  `∫₀^{T*} ‖ω‖_∞ ≤ M·T*`, which contradicts Beale–Kato–Majda.
 * Supporting: `Euler/FiniteEnergyTruncation.lean`, `Euler/TruncatedBackwardFlow.lean` and
   `Euler/FlowEscapeBound.lean` (short-time compact-vorticity persistence, via global flows of
   compact solenoidal truncations rather than trajectories of the untruncated velocity), reaching
@@ -145,7 +151,8 @@ This is analysis, not glue.
   the pullback of the left-neighbourhood filter rather than a chosen sequence of times.
 
 **D. The packet construction (the constructive core, and almost all of the code).**
-* `Euler/PacketInductionStage.lean` — `structure Stage`, the ~30-field induction invariant: the
+* `Euler/PacketInductionStage.lean` — `structure GrowthData` (the 10 fields the growth argument
+  reads) and `structure Stage extends GrowthData` with the 16 further induction-remainder fields: the
   parent map, the smooth state, low-frequency bounds (`low.Be`, `low.Bc`, `low.K`, `low.L`,
   `low.r`), the activation `time`, the horizon and support-scale identities, gradient and Hessian
   bounds against `previousShear`/`olderShear`, the geometric `frame` and its shear, error, tilt
@@ -203,7 +210,8 @@ for the whole development belongs there. In dependency order:
 | `Stage.gradient_lower` | `Euler/PacketStageGrowth.lean` | `previousShear n / 2 ≤ activationGradient` |
 | `Stage.gradient_atTop` | `Euler/PacketStageGrowth.lean` | the activation gradients diverge |
 | `stages` / `packets` | `Euler/PacketInfiniteConstruction.lean` | the infinite packet family exists |
-| `Stage.no_euler_evolution_of_initial_H3` | `Euler/PacketStageContradiction.lean` | no evolution on the base horizon from the limit datum |
+| `GrowthData.no_evolution_of_eventually_covering` | `Euler/PacketStageContradiction.lean` | no evolution from the limit datum on a horizon eventually covering the stages |
+| `lifespan_le_iInf_horizon` | `Euler/PacketFiniteLifespan.lean` | `lifespan ≤ ⨅ n, T_n` |
 | `initialDatum`, `lifespan` | `Euler/PacketFiniteLifespan.lean` | the datum and its finite maximal horizon |
 | `exists_local_evolution` | `Euler/OrdinaryEulerLocalExistence.lean` | local well-posedness |
 | `exists_finite_lifespan` | `Euler/OrdinaryEulerLifespan.lean` | maximal horizon as a supremum |
@@ -213,9 +221,9 @@ for the whole development belongs there. In dependency order:
 | `FiniteLifespan.vorticity_lintegral_eq_top` | `Euler/OrdinaryEulerBKM.lean` | `∫⁻ ‖ω‖_∞ = ⊤` |
 | `FiniteLifespan.maximalC1Norm_limsup` | `Euler/EulerC1Limsup.lean` | `limsup ‖v‖_{C¹} = ⊤` |
 | `compactCurlLocalUpgrade` | `Euler/ComparatorLocalEvolution.lean` | reference solution ⇒ ordinary evolution |
-| `maximalVelocity_eq_of_compactCurlLocalUpgrade` | `Euler/ComparatorIdentification.lean` | identification with the canonical solution |
-| `canonical_vorticity_hasCompactSupport` | `Euler/CanonicalVorticityConfinement.lean` | uniform vorticity confinement |
-| `finiteLifespan_contradiction_of_compact_vorticity` | `Euler/CompactVorticityContradiction.lean` | the contradiction |
+| `comparator_agrees_with_canonical` | `Euler/ComparatorLocalEvolution.lean` | identification with the canonical solution |
+| `canonical_vorticity_confined` | `Euler/CanonicalVorticityConfinement.lean` | uniform vorticity confinement |
+| `no_global_solution_of_confined_vorticity` | `Euler/CompactVorticityContradiction.lean` | the contradiction |
 
 ---
 
@@ -283,7 +291,11 @@ contains the challenge module. `NavierStokes/ComparatorBridge.lean` — the coor
 operator identifications (`divergence_eq`, `gradient_eq`, `laplacian_eq`,
 `temporalDerivative_eq`), the viscosity normalization `normalized_solution`, and
 `forceConditionPeriodic_of_decay`, which upgrades jet decay to the reference's all-exponent
-force condition.
+force condition. Both branches speak one solution vocabulary: `ProblemStatement.Solution I f u p`
+(smooth, divergence-free, zero datum, the equation at positive times of `I`), of which
+`MaximalLifespan.ClassicalSolution`, `GlobalSolutionOne` and `ComparatorBridge.GlobalSolutionRn`
+are instances; the manuscript corollaries of the maximal-lifespan analysis are off the delivered
+path in `NavierStokes/CandidateConsequences.lean`.
 
 **B. The two exclusion arguments.**
 * Periodic (D): `ComparatorBridge.option_D_of_candidate` (`NavierStokes/ComparatorTheorem.lean`)
@@ -291,10 +303,13 @@ force condition.
   solution with the same zero datum and force would be classical past time one; periodic
   uniqueness forces agreement with the candidate on `[0,1)`, contradicting `SpeedUnboundedAtOne`)
   → `PeriodicUniqueness.classical_uniqueness_on_Icc`, classical `L²` energy uniqueness on the
-  torus (closure: 4 modules — itself, `NavierStokes/PeriodicIntegration.lean`,
-  `NavierStokes/ProblemStatement.lean` and the shared `NavierStokes/WithTopLemmas.lean`). Force
-  conditions are discharged by `CandidateConsequences.futureJet_decay`.
-* Whole space (C): `ComparatorBridge.option_C_of_compact_candidate`
+  torus (closure: 6 modules — itself, the non-periodic difference algebra
+  `NavierStokes/SolutionDifference.lean`, the Mathlib-only `NavierStokes/GronwallInterior.lean`
+  shared with the `ℝ³` branch, `NavierStokes/PeriodicIntegration.lean`,
+  `NavierStokes/ProblemStatement.lean` and `NavierStokes/WithTopLemmas.lean`). Force
+  conditions are discharged by `PeriodicForceDecay.forceConditionPeriodic` (from
+  `PeriodicForceDecay.futureJet_decay`, an instance of `ComparatorBridge.decay_of_slab_bound`).
+* Whole space (C): `ComparatorBridge.option_C_of_candidate`
   (`NavierStokes/ComparatorR3Theorem.lean`) →
   `ComparatorBridge.compact_candidate_excludes_global_solution`
   (`NavierStokes/R3FiniteEnergyComparison.lean`) →
@@ -376,7 +391,7 @@ former single file gave. In dependency order:
 | `CoordinateAlgebra.A`, `D`, `d`, `L` | `NavierStokes/CoordinateAlgebra.lean` | the self-similar exponents, `A = 1/2 + h` |
 | `SimilarityCoordinates.forwardScalar` / `coordinateQ` | `NavierStokes/SimilarityCoordinates.lean` | `τ = q - z² q^{2h}`, and its positive inverse |
 | `TimeLocalization.activatedVelocity` | `NavierStokes/TimeLocalization.lean` | the time switch that zeroes the initial velocity |
-| `CandidateConsequences.futureJet_decay` | `NavierStokes/CandidateConsequences.lean` | force decay in every jet order |
+| `PeriodicForceDecay.futureJet_decay` | `NavierStokes/PeriodicForceDecay.lean` | force decay in every jet order |
 | `ComparatorBridge.normalized_solution` | `NavierStokes/ComparatorBridge.lean` | viscosity `ν` ⇒ viscosity one |
 | `MaximalLifespan.candidate_excludes_global_solution` | `NavierStokes/MaximalLifespan.lean` | the (D) exclusion |
 | `PeriodicUniqueness.classical_uniqueness_on_Icc` | `NavierStokes/PeriodicUniqueness.lean` | energy uniqueness on the torus |

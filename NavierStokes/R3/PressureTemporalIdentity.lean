@@ -20,7 +20,7 @@ namespace NavierStokesR3.PressureTemporalIdentity
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open ConservativeDifference
 open Comparison (tensorDiff)
 

@@ -1,111 +1,103 @@
 import NavierStokes.MaximalLifespan
 import NavierStokes.PeriodicSobolev
+import NavierStokes.PeriodicForceDecay
 import NavierStokes.CompactForceDecay
 import NavierStokes.CandidateFromLimits
 import NavierStokes.MixedPeriodicAssembly
 import NavierStokes.WithTopLemmas
 
 /-!
-# Consequences of the actual candidate fields
+# The manuscript's corollaries of the candidate contract
 
-No candidate existence is asserted here.  The first results use precisely
-`CandidateProperties`.  Force derivatives at initial time are taken within the
-physical future half-space.  For the actual globally smooth constructed force
-these are proved equal to its ordinary full derivatives.
+Everything here follows from `CandidateProperties` alone and none of it is on
+the delivered path: the two Comparator theorems use only `speed_unbounded`,
+through `MaximalLifespan.candidate_excludes_global_solution` and
+`ComparatorBridge.compact_candidate_excludes_global_solution`. The
+manuscript-facing statements — maximality of the classical lifespan, the set
+of admissible lifespans, a nonzero force before time one, the `H³` blow-up,
+and the full force-jet decay — are collected here so that a reader of the
+spine need not decide whether they are load-bearing (they are not).
+`Consequences` bundles them for the witness hub; `mixed_exists_force_with_consequences`
+post-composes the mixed assembly with that bundle.
 -/
 
 noncomputable section
 
 namespace NavierStokes.CandidateConsequences
 
-open Set Filter Function ProblemStatement
+open Set Filter Function ProblemStatement MaximalLifespan PeriodicForceDecay
 open scoped ContDiff Topology BigOperators Pointwise
 
-theorem future_uniqueDiff : UniqueDiffOn ℝ futureDomain :=
-  (uniqueDiffOn_Ici 0).prod uniqueDiffOn_univ
+/-! ### Maximality of the classical lifespan -/
 
-/-- The physical full spacetime jet, including its one-sided value at time zero. -/
-noncomputable def futureJet (f : VelocityField) (m : ℕ) :=
-  iteratedFDerivWithin ℝ m f futureDomain
+/-- An extension has a strictly larger time interval and preserves the
+velocity on the entire original interval. Its pressure may have a different
+time-dependent spatially constant normalization. -/
+noncomputable def HasClassicalExtension (f : VelocityField) (T : ℝ) (u : VelocityField) : Prop :=
+  ∃ S : ℝ, ∃ v : VelocityField, ∃ q : PressureField,
+    T < S ∧ ClassicalSolution f S v q ∧ VelocityAgreesOn T u v
 
-theorem futureJet_continuous {f : VelocityField}
-    (hf : ContDiffOn ℝ ∞ f futureDomain) (m : ℕ) :
-    ContinuousOn (futureJet f m) futureDomain :=
-  hf.continuousOn_iteratedFDerivWithin (natCast_le_infty m) future_uniqueDiff
+noncomputable def IsMaximalClassicalSolution (f : VelocityField) (T : ℝ) (u : VelocityField)
+    (p : PressureField) : Prop :=
+  ClassicalSolution f T u p ∧ ¬HasClassicalExtension f T u
 
-private theorem future_spatial_translate (e : Space) :
-    ((0, e) : SpaceTime) +ᵥ futureDomain = futureDomain := by
-  ext z
-  change z ∈ (fun w : SpaceTime => (0, e) + w) '' futureDomain ↔ z ∈ futureDomain
+/-- The actual set of finite positive times supported by classical solutions
+for the fixed force and zero datum. No existence is built into the definition. -/
+noncomputable def admissibleLifespans (f : VelocityField) : Set ℝ :=
+  {T | ∃ u : VelocityField, ∃ p : PressureField, ClassicalSolution f T u p}
+
+/-- The given lifespan-one solution is maximal under extension of its
+velocity. No literal equality between pressure representatives is required. -/
+theorem candidate_is_maximal {u : VelocityField} {p : PressureField}
+    {f : VelocityField} (h : CandidateProperties u p f) :
+    IsMaximalClassicalSolution f 1 u p := by
+  refine ⟨candidate_is_classical_solution h, ?_⟩
+  rintro ⟨T, v, q, hT, hv, _⟩
+  exact candidate_no_solution_after_one h hT hv
+
+/-- The entire set of finite admissible classical lifespans is `(0,1]`. -/
+theorem candidate_admissible_lifespans {u : VelocityField} {p : PressureField}
+    {f : VelocityField} (h : CandidateProperties u p f) :
+    admissibleLifespans f = Ioc (0 : ℝ) 1 := by
+  ext T
   constructor
-  · rintro ⟨w, hw, rfl⟩
-    simpa only [futureDomain, mem_prod, mem_Ici, mem_univ, and_true,
-      Prod.fst_add, Prod.fst_zero, zero_add] using hw
-  · intro hz
-    refine ⟨z - (0, e), ?_, ?_⟩
-    · simpa only [futureDomain, mem_prod, mem_Ici, mem_univ, and_true,
-        Prod.fst_sub, sub_zero] using hz
-    · simpa only [add_comm] using sub_add_cancel z ((0, e) : SpaceTime)
+  · rintro ⟨v, q, hv⟩
+    exact ⟨hv.lifespan_pos, candidate_all_lifespans_le_one h hv⟩
+  · intro ht
+    exact ⟨u, p, (candidate_is_classical_solution h).restrict ht.1 ht.2⟩
 
-theorem futureJet_periodic {f : VelocityField}
-    (hp : UnitSpatialPeriodsOn (Ici (0 : ℝ)) f) (m : ℕ) :
-    UnitSpatialPeriodsOn (Ici (0 : ℝ)) (futureJet f m) := by
-  intro t ht x i
-  have he : EqOn (fun z : SpaceTime => f (z + (0, coordinateVector i))) f futureDomain := by
-    rintro ⟨s,y⟩ hz
-    simpa only [Prod.mk_add_mk, add_zero] using hp s hz.1 y i
-  have hc := iteratedFDerivWithin_congr (𝕜 := ℝ) he (show (t, x) ∈ futureDomain from ⟨ht, mem_univ _⟩) m
-  have hs := iteratedFDerivWithin_comp_add_right (𝕜 := ℝ) (f := f)
-    (s := futureDomain) m (0, coordinateVector i) (t, x)
-  rw [future_spatial_translate] at hs
-  simpa only [futureJet, Prod.mk_add_mk, add_zero] using hs.symm.trans hc
+theorem zero_classical_solution_of_zero_force {f : VelocityField} {T : ℝ}
+    (hT : 0 < T) (hf : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x : Space, f (t, x) = 0) :
+    ClassicalSolution f T (fun _ => 0) (fun _ => 0) where
+  velocity_smooth := contDiffOn_const
+  pressure_smooth := contDiffOn_const
+  zero_initial_velocity := fun _ => rfl
+  divergence_free := fun _ _ x => by simp [spatialDivergence, spatialDerivative]
+  navier_stokes := fun t ht ht0 x => (zero_residual t x).trans (hf t ⟨ht0, ht.2⟩ x).symm
+  lifespan_pos := hT
+  velocity_periodic := fun _ _ _ _ => rfl
+  pressure_periodic := fun _ _ _ _ => rfl
 
-theorem futureJet_eq_full {f : VelocityField} {t : ℝ} (ht : 0 ≤ t) (x : Space)
-    (m : ℕ) (hf : ContDiffAt ℝ ∞ f (t, x)) :
-    futureJet f m (t, x) = iteratedFDeriv ℝ m f (t, x) :=
-  iteratedFDerivWithin_eq_iteratedFDeriv future_uniqueDiff (hf.of_le (natCast_le_infty m))
-    ⟨ht, mem_univ _⟩
-
-theorem futureJet_eq_full_of_pos {f : VelocityField}
-    (hf : ContDiffOn ℝ ∞ f futureDomain) {t : ℝ} (ht : 0 < t) (x : Space) (m : ℕ) :
-    futureJet f m (t, x) = iteratedFDeriv ℝ m f (t, x) :=
-  futureJet_eq_full ht.le x m
-    (hf.contDiffAt (prod_mem_nhds (Ici_mem_nhds ht) univ_mem))
-
-/-- Compact future time support gives arbitrary polynomial decay of the
-physical one-sided jets, using only future smoothness and future periodicity. -/
-theorem futureJet_decay {f : VelocityField}
-    (hf : ContDiffOn ℝ ∞ f futureDomain)
-    (hp : UnitSpatialPeriodsOn (Ici (0 : ℝ)) f) (hs : CompactFutureTimeSupport f)
-    (m : ℕ) (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space,
-      ‖futureJet f m (t, x)‖ ≤ C * (1 + t) ^ (-K) := by
-  obtain ⟨T, hT, hzero⟩ := hs
-  obtain ⟨M, hM, hb⟩ := MaximalLifespan.periodic_bound_on_slab
-    ((futureJet_continuous hf m).mono
-      (show Icc (0 : ℝ) (T + 1) ×ˢ (univ : Set Space) ⊆ futureDomain from
-        fun _ hz => ⟨hz.1.1, hz.2⟩))
-    (fun t ht x i => futureJet_periodic hp m t ht.1 x i)
-  let C : ℝ := M * (1 + (T + 1)) ^ K
-  have hbase : 0 < 1 + (T + 1) := by linarith
-  have hC : 0 < C := mul_pos hM (Real.rpow_pos_of_pos hbase K)
-  refine ⟨C, hC, ?_⟩
+/-- The specified force must be nonzero somewhere before the breakdown
+time. Otherwise uniqueness identifies the candidate with the zero solution. -/
+theorem candidate_force_nonzero_before_one {u : VelocityField} {p : PressureField}
+    {f : VelocityField} (h : CandidateProperties u p f) :
+    ∃ t ∈ Ioo (0 : ℝ) 1, ∃ x : Space, f (t, x) ≠ 0 := by
+  by_contra hnot
+  have hf : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x : Space, f (t, x) = 0 := by
+    intro t ht x
+    by_contra hnonzero
+    exact hnot ⟨t, ht, x, hnonzero⟩
+  have hz := zero_classical_solution_of_zero_force zero_lt_one hf
+  have hagree : VelocityAgreesOn 1 (fun _ => 0) u := by
+    simpa only [min_self] using candidate_agree_on_overlap h hz
+  apply unbounded_speed_excludes_uniform_bound h.speed_unbounded
+  refine ⟨0, ?_⟩
   intro t ht x
-  by_cases hsmall : t ≤ T + 1
-  · have hpow : (1 + (T + 1)) ^ (-K) ≤ (1 + t) ^ (-K) :=
-      Real.rpow_le_rpow_of_nonpos (by linarith) (by linarith) (neg_nonpos.mpr hK)
-    have hcancel : C * (1 + (T + 1)) ^ (-K) = M := by
-      dsimp [C]
-      rw [mul_assoc, ← Real.rpow_add hbase]
-      simp
-    calc
-      ‖futureJet f m (t, x)‖ ≤ M := hb t ⟨ht, hsmall⟩ x
-      _ = C * (1 + (T + 1)) ^ (-K) := hcancel.symm
-      _ ≤ C * (1 + t) ^ (-K) := mul_le_mul_of_nonneg_left hpow hC.le
-  · have htpos : 0 < t := by linarith
-    rw [futureJet_eq_full_of_pos hf htpos x m,
-      CompactForceDecay.iteratedFDeriv_eq_zero_after hzero m (by linarith : T < t) x, norm_zero]
-    exact mul_nonneg hC.le (Real.rpow_nonneg (by linarith) _)
+  rw [← hagree t ht x]
+  exact norm_zero.le
+
+/-! ### Full force-jet decay and the bundle -/
 
 /-- The ordinary tensor bound for the same force.  Global smoothness is
 provided by the actual force constructor; negative-time periodicity is not needed. -/
@@ -132,8 +124,8 @@ theorem full_forceMixed_decay {u : VelocityField} {p : PressureField} {f : Veloc
 
 /-- All conclusions here follow from the exact candidate properties alone. -/
 structure Consequences (u : VelocityField) (p : PressureField) (f : VelocityField) : Prop where
-  maximal : MaximalLifespan.IsMaximalClassicalSolution f (fun _ => 0) 1 u p
-  lifespans : MaximalLifespan.admissibleLifespans f (fun _ => 0) = Ioc (0 : ℝ) 1
+  maximal : IsMaximalClassicalSolution f 1 u p
+  lifespans : admissibleLifespans f = Ioc (0 : ℝ) 1
   h3_unbounded : PeriodicSobolev.DerivativeH3UnboundedAtOne u
   force_nonzero : ∃ t ∈ Ioo (0 : ℝ) 1, ∃ x : Space, f (t, x) ≠ 0
   force_jet_decay : ∀ m : ℕ, ∀ K : ℝ, 0 ≤ K → ∃ C : ℝ, 0 < C ∧
@@ -141,9 +133,9 @@ structure Consequences (u : VelocityField) (p : PressureField) (f : VelocityFiel
 
 theorem consequences_of_candidate {u : VelocityField} {p : PressureField} {f : VelocityField}
     (h : CandidateProperties u p f) : Consequences u p f :=
-  ⟨MaximalLifespan.candidate_is_maximal h, MaximalLifespan.candidate_admissible_lifespans h,
+  ⟨candidate_is_maximal h, candidate_admissible_lifespans h,
     PeriodicSobolev.candidate_derivativeH3_unbounded h,
-    MaximalLifespan.candidate_force_nonzero_before_one h,
+    candidate_force_nonzero_before_one h,
     futureJet_decay h.force_smooth h.force_periodic h.force_time_support⟩
 
 /-- Retaining one growing physical trajectory strengthens unboundedness to

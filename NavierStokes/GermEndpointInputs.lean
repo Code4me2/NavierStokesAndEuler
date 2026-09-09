@@ -19,7 +19,8 @@ namespace NavierStokes.GermEndpointInputs
 open Set Function Filter ProblemStatement
 open scoped Topology ContDiff
 
-/-- The three off-plane endpoint obligations of `candidate_of_finite_stages`.
+/-- The three off-plane endpoint obligations of
+`GermCandidateAssembly.exists_candidate_witness_of_finite_stages`.
 This is an output package; the construction below does not assume its fields. -/
 structure EndpointInputs (h qbig : ℝ) (A V : ℕ → VelocityField) (P : ℕ → PressureField) : Prop where
   potential : ∀ x : Space, x 2 ≠ 0 → EndpointCoordinates.endpointRoot (2 * h) (x 2) < qbig →

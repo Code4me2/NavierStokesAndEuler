@@ -1,7 +1,6 @@
 import Euler.PacketStageInputs
 import Euler.PacketSourceScaleShift
 import Euler.PacketInitialSmoothLimit
-import Euler.PacketStageContradiction
 
 /-! The literal initial increments of an actual stage family have one
 smooth L² limit in every Sobolev order. The finite exceptional prefix
@@ -102,13 +101,5 @@ theorem initialDataLimit_Hm (s : ℕ) :
     rw [Nat.add_comm n 1]
   rw [heq]
   exact ht
-
-theorem initialDataLimit_no_euler :
-    ¬ ∃ U : EulerOrdinarySobolev.Evolution (baseHorizon S.J S.X)
-        (baseHorizon_pos S.J S.j_one S.x_pos).le,
-      (U.velocity ⟨0,le_rfl,(baseHorizon_pos S.J S.j_one S.x_pos).le⟩).field=
-        (initialDataLimit P hq hB).field :=
-  no_euler_evolution_of_initial_H3 P (initialDataLimit P hq hB).field
-    (initialDataLimit_Hm P hq hB hstep 3)
 
 end EulerPacketInduction.Stage

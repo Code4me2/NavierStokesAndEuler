@@ -17,7 +17,7 @@ namespace NavierStokesR3.LocalizedDifferenceEnergy
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 
 /-- The divergence of a scalar-weighted vector field. -/
 theorem divergence_weighted {χ : Space → ℝ} {v : Space → Space}

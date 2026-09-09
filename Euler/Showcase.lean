@@ -1,70 +1,16 @@
-import Euler.EulerC1Limsup
-import Euler.OrdinaryEulerBKM
-import Euler.OrdinaryEulerClassicalClass
-import Euler.OrdinaryEulerNontriviality
+import Euler.Solution
 
 /-!
-The final statement for the concrete packet construction. The initial
-velocity is an ordinary compactly supported smooth field on Euclidean
-three-space. Its maximal solution has a positive finite lifespan, a
-divergent C¹ upper limit, and an infinite integral of the actual curl
-supremum. All packet, scale, local existence, continuation, and logarithmic
-estimate inputs have been constructed in the imported proofs.
+# Showcase statements outside the deliverable closure
 
-`Evolution.sobolevSolutionClass` supplies one continuous strong time
-derivative in every spatial Sobolev order for every shorter restriction. The
-quantities named in the statements below are the maximal-solution norms of
-`EulerOrdinarySobolev.FiniteLifespan`, whose own specification theorems identify
-them with the pointwise suprema of the actual velocity, derivative, and curl.
+Restatements of the Euler result in the development's own vocabulary, kept
+as documented provenance. None of them is consumed by `Euler.Solution`; this
+module imports it and is therefore outside the closure of the two delivered
+theorems. Every statement here was formerly in `Euler.EulerSingularity`,
+`Euler.EulerFiniteLifespan`, `Euler.EulerC1Breakdown` or `Euler.EulerC1Limsup`.
 -/
 
 noncomputable section
-
-namespace EulerOrdinarySobolev
-
-open Set EulerSmoothLimit EulerLpTranslation EulerLpTranslation.SmoothL2Field
-
-/-- Scalar-pressure Euler on the closed interval `[0,T]`, with the ordinary
-all-order spatial and strong time regularity. No pressure-force path or
-pressure norm is prescribed. The maximal solution itself is on `[0,T*)`. -/
-def HasScalarEulerEvolution (A : SmoothL2Field Space) (T : ℝ) : Prop :=
-  ∃ hT : 0 < T, ∃ u : Icc (0 : ℝ) T → SmoothL2Field Space,
-    IsSmoothScalarEuler (hT := hT.le) u ∧ u ⟨0,le_rfl,hT.le⟩=A
-
-theorem hasScalarEulerEvolution_iff (A : SmoothL2Field Space) (T : ℝ) :
-    HasScalarEulerEvolution A T ↔ HasEulerEvolution A T := by
-  constructor
-  · rintro ⟨hT,u,hu,hinit⟩
-    obtain ⟨U,hU⟩ := (exists_evolution_iff_scalar hT u).mpr hu
-    exact ⟨hT,U,by rw [hU]; exact hinit⟩
-  · rintro ⟨hT,U,hinit⟩
-    exact ⟨hT,U.velocity,(exists_evolution_iff_scalar hT U.velocity).mp ⟨U,rfl⟩,hinit⟩
-
-namespace FiniteLifespan
-
-variable {A : SmoothL2Field Space} (L : FiniteLifespan A)
-
-/-- The maximal duration is exactly the upper endpoint of the positive
-closed intervals on which an ordinary smooth Euler evolution exists. -/
-theorem hasEulerEvolution_iff (T : ℝ) :
-    HasEulerEvolution A T ↔ 0 < T ∧ T < L.duration := by
-  constructor
-  · intro h
-    refine ⟨h.choose,?_⟩
-    by_contra hn
-    rcases (le_of_not_gt hn).eq_or_lt with heq | hlt
-    · rw [← heq] at h
-      exact L.no_endpoint h
-    · exact L.maximal T hlt h
-  · rintro ⟨hT,hTL⟩
-    exact L.shorter T hT hTL
-
-theorem hasScalarEulerEvolution_iff (T : ℝ) :
-    HasScalarEulerEvolution A T ↔ 0 < T ∧ T < L.duration :=
-  (EulerOrdinarySobolev.hasScalarEulerEvolution_iff A T).trans (L.hasEulerEvolution_iff T)
-
-end FiniteLifespan
-end EulerOrdinarySobolev
 
 namespace EulerPacketInduction
 
@@ -72,9 +18,28 @@ open Set Filter MeasureTheory EulerSmoothLimit EulerLpTranslation
   EulerLpTranslation.SmoothL2Field EulerOrdinarySobolev
 open scoped ContDiff ENNReal Topology
 
-def maximalVorticityDensity (r : ℝ) : ℝ := lifespan.maximalVorticityDensity r
+def HasSmoothEulerSolution (u₀ : Space → Space) (T : ℝ) : Prop :=
+  ∃ hT : 0 < T, ∃ U : Evolution T hT.le,
+    (U.velocity ⟨0,le_rfl,hT.le⟩).field=u₀
 
-theorem initialDatum_nonzero : initialDatum.field ≠ 0 := lifespan.initial_nonzero
+theorem hasSmoothEulerSolution_iff (A : SmoothL2Field Space) (T : ℝ) :
+    HasSmoothEulerSolution A.field T ↔ HasEulerEvolution A T := by
+  constructor
+  · rintro ⟨hT,U,hU⟩
+    exact ⟨hT,U,field_ext hU⟩
+  · rintro ⟨hT,U,hU⟩
+    exact ⟨hT,U,congrArg SmoothL2Field.field hU⟩
+
+abbrev MaximalTime : Type := lifespan.Time
+
+def maximalC1Norm (t : MaximalTime) : ℝ := lifespan.maximalC1Norm t
+
+theorem maximalC1Norm_limsup :
+    Filter.limsup (fun t : MaximalTime => ENNReal.ofReal (maximalC1Norm t))
+      (Filter.comap (fun t : MaximalTime => (t : ℝ)) (𝓝[<] lifespan.duration))=⊤ :=
+  lifespan.maximalC1Norm_limsup
+
+def maximalVorticityDensity (r : ℝ) : ℝ := lifespan.maximalVorticityDensity r
 
 theorem initialDatum_existence_iff (T : ℝ) :
     HasSmoothEulerSolution initialDatum.field T ↔ 0 < T ∧ T < lifespan.duration :=

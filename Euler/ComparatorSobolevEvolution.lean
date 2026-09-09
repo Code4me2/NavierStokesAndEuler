@@ -1,10 +1,63 @@
 import Euler.SolutionDefinitions
-import Euler.EulerSingularity
+import Euler.OrdinaryEulerClassicalClass
+import Euler.OrdinaryEulerContinuation
 
 /-! Repackaging the reference's ordinary functions as the development's smooth
-L² fields. The scalar Euler equations and time-regularity hypotheses coincide. -/
+L² fields. The scalar Euler equations and time-regularity hypotheses coincide.
+
+The first section states the development's closed-interval solution notion
+with a scalar pressure, `HasScalarEulerEvolution`, and identifies it with
+`HasEulerEvolution`; a finite lifespan is then exactly the supremum of the
+horizons on which the reference's Sobolev class has a solution.
+Merged in from the former module `Euler.EulerSingularity`. -/
 
 noncomputable section
+
+namespace EulerOrdinarySobolev
+
+open Set EulerSmoothLimit EulerLpTranslation EulerLpTranslation.SmoothL2Field
+
+/-- Scalar-pressure Euler on the closed interval `[0,T]`, with the ordinary
+all-order spatial and strong time regularity. No pressure-force path or
+pressure norm is prescribed. The maximal solution itself is on `[0,T*)`. -/
+def HasScalarEulerEvolution (A : SmoothL2Field Space) (T : ℝ) : Prop :=
+  ∃ hT : 0 < T, ∃ u : Icc (0 : ℝ) T → SmoothL2Field Space,
+    IsSmoothScalarEuler (hT := hT.le) u ∧ u ⟨0,le_rfl,hT.le⟩=A
+
+theorem hasScalarEulerEvolution_iff (A : SmoothL2Field Space) (T : ℝ) :
+    HasScalarEulerEvolution A T ↔ HasEulerEvolution A T := by
+  constructor
+  · rintro ⟨hT,u,hu,hinit⟩
+    obtain ⟨U,hU⟩ := (exists_evolution_iff_scalar hT u).mpr hu
+    exact ⟨hT,U,by rw [hU]; exact hinit⟩
+  · rintro ⟨hT,U,hinit⟩
+    exact ⟨hT,U.velocity,(exists_evolution_iff_scalar hT U.velocity).mp ⟨U,rfl⟩,hinit⟩
+
+namespace FiniteLifespan
+
+variable {A : SmoothL2Field Space} (L : FiniteLifespan A)
+
+/-- The maximal duration is exactly the upper endpoint of the positive
+closed intervals on which an ordinary smooth Euler evolution exists. -/
+theorem hasEulerEvolution_iff (T : ℝ) :
+    HasEulerEvolution A T ↔ 0 < T ∧ T < L.duration := by
+  constructor
+  · intro h
+    refine ⟨h.choose,?_⟩
+    by_contra hn
+    rcases (le_of_not_gt hn).eq_or_lt with heq | hlt
+    · rw [← heq] at h
+      exact L.no_endpoint h
+    · exact L.maximal T hlt h
+  · rintro ⟨hT,hTL⟩
+    exact L.shorter T hT hTL
+
+theorem hasScalarEulerEvolution_iff (T : ℝ) :
+    HasScalarEulerEvolution A T ↔ 0 < T ∧ T < L.duration :=
+  (EulerOrdinarySobolev.hasScalarEulerEvolution_iff A T).trans (L.hasEulerEvolution_iff T)
+
+end FiniteLifespan
+end EulerOrdinarySobolev
 
 open Set Filter MeasureTheory EulerSmoothLimit EulerLpTranslation
   EulerLpTranslation.SmoothL2Field EulerOrdinarySobolev

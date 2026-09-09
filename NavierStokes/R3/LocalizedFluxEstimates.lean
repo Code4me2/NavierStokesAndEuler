@@ -51,7 +51,7 @@ theorem neg_coupling_le_weightedEnergy {χ : Space → ℝ} {u w : VelocityField
   intro x
   change -(χ x * ⟪w (t, x), spatialDerivative u t x (w (t, x))⟫_ℝ) ≤
     G * (χ x * ‖w (t, x)‖ ^ 2)
-  have h := NavierStokes.PeriodicUniqueness.nonlinear_energy_bound
+  have h := NavierStokes.SolutionDifference.nonlinear_energy_bound
     (spatialDerivative u t x) (w (t, x)) (hG x)
   nlinarith [mul_le_mul_of_nonneg_left h (hχ0 x)]
 
@@ -138,8 +138,8 @@ theorem continuous_laplacian {χ : Space → ℝ} (hχ : ContDiff ℝ ∞ χ) :
     Continuous (ComparisonCutoffs.laplacian χ) := by
   unfold ComparisonCutoffs.laplacian
   exact continuous_finsetSum _ fun i _ =>
-    (NavierStokes.PeriodicUniqueness.spatial_partial_contDiff
-      (NavierStokes.PeriodicUniqueness.spatial_partial_contDiff hχ i) i).continuous
+    (NavierStokes.SolutionDifference.spatial_partial_contDiff
+      (NavierStokes.SolutionDifference.spatial_partial_contDiff hχ i) i).continuous
 
 /-- A bounded Laplacian can be paired with any square-integrable field. -/
 theorem laplacian_flux_bound {χ : Space → ℝ} {w : Space → Space}

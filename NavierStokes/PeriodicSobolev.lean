@@ -149,7 +149,7 @@ theorem line_energy_bound {f : Space → Space} (hf : ContDiff ℝ ∞ f)
     exact (hf.differentiable (by simp) (replaceCoord i x s)).hasFDerivAt.comp_hasDerivAt s
       (hasDerivAt_replaceCoord i x s)
   have h := curve_energy_bound (hf.continuous.comp hc)
-    ((PeriodicUniqueness.spatial_partial_contDiff hf i).continuous.comp hc) hd hx
+    ((SolutionDifference.spatial_partial_contDiff hf i).continuous.comp hc) hd hx
   rw [average_eq_interval, average_eq_interval]
   simpa only [Function.comp_apply, replaceCoord_self, sqField, spatialPartial] using h
 
@@ -159,7 +159,7 @@ theorem averaged_line_energy_bound {f : Space → Space} (hf : ContDiff ℝ ∞ 
       (average i (average j (sqField f)) x +
         average i (average j (sqField (spatialPartial j f))) x) := by
   have hc := continuous_sqField hf.continuous
-  have hcd := continuous_sqField (PeriodicUniqueness.spatial_partial_contDiff hf j).continuous
+  have hcd := continuous_sqField (SolutionDifference.spatial_partial_contDiff hf j).continuous
   have ha := continuous_average hc j
   have hb := continuous_average hcd j
   have hm := average_mono_on_curve hc (continuous_const.fun_mul (ha.fun_add hb)) i x
@@ -175,7 +175,7 @@ theorem twice_averaged_line_energy_bound {f : Space → Space} (hf : ContDiff �
       (average i (average j (average k (sqField f))) x +
         average i (average j (average k (sqField (spatialPartial k f)))) x) := by
   have hc := continuous_sqField hf.continuous
-  have hcd := continuous_sqField (PeriodicUniqueness.spatial_partial_contDiff hf k).continuous
+  have hcd := continuous_sqField (SolutionDifference.spatial_partial_contDiff hf k).continuous
   have ha := continuous_average (continuous_average hc k) j
   have hb := continuous_average (continuous_average hcd k) j
   have hm := average_mono_on_curve (continuous_average hc j)
@@ -238,11 +238,11 @@ theorem norm_sq_le_eight_mixedEnergy_on_cube {f : Space → Space}
     (hf : ContDiff ℝ ∞ f) (x : Space) (hx : ∀ i : Fin 3, x i ∈ Icc (0 : ℝ) 1) :
     ‖f x‖ ^ 2 ≤ 8 * mixedEnergy f := by
   have hd0 : ContDiff ℝ ∞ (spatialPartial 0 f) :=
-    PeriodicUniqueness.spatial_partial_contDiff hf 0
+    SolutionDifference.spatial_partial_contDiff hf 0
   have hd1 : ContDiff ℝ ∞ (spatialPartial 1 f) :=
-    PeriodicUniqueness.spatial_partial_contDiff hf 1
+    SolutionDifference.spatial_partial_contDiff hf 1
   have hd10 : ContDiff ℝ ∞ (spatialPartial 1 (spatialPartial 0 f)) :=
-    PeriodicUniqueness.spatial_partial_contDiff hd0 1
+    SolutionDifference.spatial_partial_contDiff hd0 1
   have h0 := line_energy_bound hf 0 x (hx 0)
   have h1 := averaged_line_energy_bound hf 0 1 (by decide) x (hx 1)
   have h10 := averaged_line_energy_bound hd0 0 1 (by decide) x (hx 1)

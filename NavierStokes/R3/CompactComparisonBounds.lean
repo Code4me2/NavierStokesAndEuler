@@ -35,7 +35,7 @@ theorem exists_gradient_bound {T : ℝ} (hT : 0 < T) {u : VelocityField}
     (hsupp : ∀ t ∈ Icc (0 : ℝ) T, tsupport (fun x : Space => u (t, x)) ⊆ K) :
     ∃ G : ℝ, 0 ≤ G ∧ ∀ t ∈ Icc (0 : ℝ) T, ∀ x : Space,
       ‖spatialDerivative u t x‖ ≤ G := by
-  obtain ⟨G, hG, hbound⟩ := NavierStokes.PeriodicUniqueness.exists_gradient_bound hT hu hK
+  obtain ⟨G, hG, hbound⟩ := NavierStokes.SolutionDifference.exists_gradient_bound hT hu hK
   refine ⟨G, hG.le, ?_⟩
   intro t ht x
   by_cases hx : x ∈ K

@@ -1,4 +1,4 @@
-import Euler.CanonicalPacketHorizons
+import Euler.PacketFiniteLifespan
 import Euler.StageDisplacementBound
 import Euler.StageDisplacementConfinement
 import Euler.StageInitialSupport
@@ -7,13 +7,13 @@ import Euler.H3CurlConvergence
 import Euler.OrdinaryEulerMaximal
 
 /-!
-# Uniformly compact vorticity of the canonical packet solution
+# Uniformly compact vorticity of the canonical maximal solution
 
-All finite packet horizons contain the maximal open lifespan. H³ stability
-therefore passes their common vorticity support to every shorter ordinary
-Euler evolution, and hence to the canonical maximal field itself.
-
-Merged in from the former module `Euler.StageVorticityConfinement`: `packets_vorticity_support`.
+The compact set that step 3 of the top of the Euler argument needs. Every
+packet horizon contains the maximal lifespan (`lifespan_le_packet_horizon`),
+so H³ stability passes the common vorticity support of the packet stages to
+every shorter ordinary Euler evolution, and hence to the canonical maximal
+field itself: `canonical_vorticity_confined`.
 -/
 
 /-! Every selected finite packet has vorticity supported in one fixed ball
@@ -98,19 +98,12 @@ theorem evolution_vorticity_support (S : ℝ) (hS : 0 < S) (hSL : S < lifespan.d
     simpa only [hz] using (tendsto_const_nhds : Tendsto (fun _ : ℕ => (0 : Space)) atTop (𝓝 0))
   exact hx (tendsto_nhds_unique (U.curl_tendsto_of_initial_h3 V hinit t x) hzero)
 
-theorem canonical_vorticity_support (t : lifespan.Time) :
+/-- Step 3, the confinement: the vorticity of the canonical maximal solution
+stays in one fixed ball throughout the lifespan. -/
+theorem canonical_vorticity_confined (t : lifespan.Time) :
     tsupport (vectorCurl (lifespan.maximalVelocity t)) ⊆ canonicalVorticityBall :=
   evolution_vorticity_support (lifespan.intermediateHorizon t)
     (lifespan.intermediateHorizon_pos t) (lifespan.intermediateHorizon_lt t)
     (lifespan.intermediateTime t)
-
-theorem canonical_vorticity_eq_zero_outside (t : lifespan.Time) (x : Space)
-    (hx : x ∉ canonicalVorticityBall) : vectorCurl (lifespan.maximalVelocity t) x = 0 :=
-  image_eq_zero_of_notMem_tsupport (fun hm => hx (canonical_vorticity_support t hm))
-
-theorem canonical_vorticity_hasCompactSupport (t : lifespan.Time) :
-    HasCompactSupport (vectorCurl (lifespan.maximalVelocity t)) :=
-  canonicalVorticityBall_compact.of_isClosed_subset (isClosed_tsupport _)
-    (canonical_vorticity_support t)
 
 end EulerPacketInduction

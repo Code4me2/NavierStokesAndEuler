@@ -15,6 +15,8 @@ open Real Filter EulerScale EulerPacketSourceScales EulerPacketSourceTime
 
 open scoped Topology
 
+/-- The exponents of one cost `C·(J+n)^p·x_n^q·exp(-b·x_n/(J+n)^a + c·x_n/(J-d+n)^B)`
+along a scale sequence `x`; `a < B` makes the decaying factor win. -/
 structure CostSpec where
   d : ℕ
   B : ℕ
@@ -32,6 +34,7 @@ structure CostSpec where
   b_pos : 0 < b
   C_pos : 0 < C
 
+/-- The cost sequence of a `CostSpec` at stage `J` along the scale sequence `x`. -/
 def CostSpec.cost (s : CostSpec) (J : ℕ) (x : ℕ → ℝ) : ℕ → ℝ :=
   monomialCost J s.d s.B s.a s.b s.c s.C s.p s.q x
 
@@ -73,6 +76,8 @@ theorem finite_uniform_choice {ι : Type*} [Fintype ι] (s : ι → CostSpec) :
   exact monomialCost_nonneg J (s i).d (s i).B (s i).a (s i).b (s i).c (s i).C
     (s i).p (s i).q x m (s i).C_pos.le (hxp m).le
 
+/-- The seven families of source-scale costs chosen simultaneously by
+`finite_uniform_choice`. -/
 inductive SourceCost
   | shear | prior | neighbor | extra | width | parent | good
   deriving DecidableEq
@@ -81,6 +86,8 @@ instance : Fintype SourceCost where
   elems := {.shear, .prior, .neighbor, .extra, .width, .parent, .good}
   complete c := by cases c <;> simp
 
+/-- The cost exponents of each source family, with `C` the horizon constant,
+`c` the neighbor exponent and `A` the power of the horizon majorant. -/
 def sourceCostSpec (C c : ℝ) (hC : 1 ≤ C) (A : ℕ) : SourceCost → CostSpec
   | .shear => {
       d := 2, B := 9, N := 7, a := 7, b := 1/2, c := 2,
@@ -118,6 +125,8 @@ def sourceCostSpec (C c : ℝ) (hC : 1 ≤ C) (A : ℕ) : SourceCost → CostSpe
       d_le_two := by norm_num, a_nonneg := by norm_num, a_lt_B := by norm_num,
       a_le_N := by norm_num, b_pos := by norm_num, C_pos := by norm_num }
 
+/-- A nonnegative summable series with total at most `δ`: the form in which
+every per-stage cost enters the scale choice and the invariant. -/
 structure SmallSeries (f : ℕ → ℝ) (δ : ℝ) : Prop where
   nonneg : ∀ n, 0 ≤ f n
   summable : Summable f
@@ -134,20 +143,28 @@ theorem SmallSeries.mono {f g : ℕ → ℝ} {δ : ℝ} (h : SmallSeries f δ)
   have hs := h.summable.of_nonneg_of_le hg hle
   exact ⟨hg, hs, (hs.tsum_le_tsum hle h.summable).trans h.total_le⟩
 
+/-- The coefficient error of the normalized ray and velocity equations, weighted
+by the `A`-th power of the horizon majorant. -/
 def coefficientCost (J : ℕ) (C c : ℝ) (A : ℕ) (x : ℕ → ℝ) (n : ℕ) : ℝ :=
   sourceCoefficientError J C c x n * sourceTheta J C x n^A
 
+/-- The extra activation-time cost from a coupling `a ≤ 2`, weighted by the next
+time width and the `A`-th power of the horizon majorant. -/
 def extraTimeCost (J : ℕ) (C : ℝ) (A : ℕ) (x a : ℕ → ℝ) (n : ℕ) : ℝ :=
   2*sqrt (a n*exp (x n/((J-1+n : ℕ) : ℝ)^7))*sourceNextTimeWidth J x n*
     sourceTheta J C x n^A
 
+/-- The square of the previous shear (normal form `exp(x_n/(J-1+n)^7)`) divided by
+the new shear `exp(x_n/(J+n)^5)`. -/
 def parentSquareRatio (J : ℕ) (x : ℕ → ℝ) (n : ℕ) : ℝ :=
   exp (2*x n/((J-1+n : ℕ) : ℝ)^7)/exp (x n/((J+n : ℕ) : ℝ)^5)
 
+/-- The product `spike·shear·previousShear` at stage `n` in normal form. -/
 def goodCost (J : ℕ) (x : ℕ → ℝ) (n : ℕ) : ℝ :=
   exp (-x n/((J+n : ℕ) : ℝ)^3)*exp (x n/((J+n : ℕ) : ℝ)^5)*
     exp (x n/((J-1+n : ℕ) : ℝ)^7)
 
+/-- All source cost series at stage `J` along `x` are `SmallSeries` with total `δ`. -/
 structure UniformBounds (J : ℕ) (C c : ℝ) (A : ℕ) (x : ℕ → ℝ) (δ : ℝ) : Prop where
   coefficient : SmallSeries (coefficientCost J C c A x) δ
   extraTime : ∀ a : ℕ → ℝ, (∀ n, 0 ≤ a n) → (∀ n, a n ≤ 2) →
@@ -157,7 +174,8 @@ structure UniformBounds (J : ℕ) (C c : ℝ) (A : ℕ) (x : ℕ → ℝ) (δ : 
   good : SmallSeries (goodCost J x) δ
 
 
-/-- The sequence in (37), now constructed rather than supplied. -/
+/-- The scale sequence of (37), `x_0 = X`, `x_{n+1} = (J+n)²·x_n`, from which every
+stage scale below is a closed-form exponential. -/
 def scaleSequence (J : ℕ) (X : ℝ) : ℕ → ℝ
   | 0 => X
   | n+1 => ((J+n : ℕ) : ℝ)^2*scaleSequence J X n

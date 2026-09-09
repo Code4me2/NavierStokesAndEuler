@@ -6,10 +6,12 @@ import Mathlib.Topology.Order.IntermediateValue
 /-!
 # Identification after local regularity recovery
 
-The only analytic input of this module is a local conversion of a classical
-Comparator solution with compact initial vorticity into an ordinary smooth
-Euler evolution. Restarting that conversion at times of agreement, ordinary
-Euler uniqueness and continuity identify the entire maximal interval.
+The only analytic input of this module is the hypothesis `hlocal`: at every
+time where the classical Comparator solution has compact vorticity, some
+ordinary smooth Euler evolution represents it for a short while. Restarting
+that representation at times of agreement, ordinary Euler uniqueness and
+continuity identify the whole interval. `ComparatorLocalEvolution`
+discharges the hypothesis from compact initial vorticity.
 -/
 
 noncomputable section
@@ -24,37 +26,16 @@ namespace Euler.ComparatorBridge
 variable {A : SmoothL2Field Space}
   {v : Space → ℝ → Space} {p : Space → ℝ → ℝ}
 
-/-- Local recovery is needed only at compact-vorticity slices. It asks for
-an actual ordinary evolution representing the given velocity, so it contains
-no comparison or uniqueness conclusion. -/
-def HasLocalEvolutionAtCompactCurl (v : Space → ℝ → Space) : Prop :=
-  ∀ a : ℝ, 0 ≤ a → HasCompactSupport (vectorCurl (v · a)) →
-    ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ U : Evolution δ hδ.le,
-      ∀ t : Icc (0 : ℝ) δ, (U.velocity t).field = (v · (a + (t : ℝ)))
-
-/-- The reusable analytic conversion obligation, before any uniqueness
-argument: compact initial vorticity gives a short ordinary realization. -/
-def CompactCurlLocalUpgrade : Prop :=
-  ∀ (u₀ : Space → Space) (v : Space → ℝ → Space) (p : Space → ℝ → ℝ),
-    EulerExistenceAndSmoothnessR3 u₀ v p → HasCompactSupport (vectorCurl u₀) →
-      ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ U : Evolution δ hδ.le,
-        ∀ t : Icc (0 : ℝ) δ, (U.velocity t).field = (v · (t : ℝ))
-
-theorem hasLocalEvolutionAtCompactCurl_of_upgrade
-    (h : EulerExistenceAndSmoothnessR3 A.field v p)
-    (hupgrade : CompactCurlLocalUpgrade) : HasLocalEvolutionAtCompactCurl v := by
-  intro a ha hc
-  exact hupgrade (v · a) (fun x t => v x (a + t)) (fun x t => p x (a + t))
-    (h.shiftTime a ha) hc
-
-/-- A classical field locally recoverable as an ordinary evolution agrees
+/-- A classical field locally representable by ordinary evolutions agrees
 with every ordinary evolution from the same data whose vorticity stays compact. -/
 theorem evolution_field_eq_of_local_evolution
     {S : ℝ} {hS : 0 ≤ S} (U : Evolution S hS)
     (h : EulerExistenceAndSmoothnessR3 A.field v p)
     (hU : U.velocity ⟨0, le_rfl, hS⟩ = A)
     (hcompact : ∀ t, HasCompactSupport (vectorCurl (U.velocity t).field))
-    (hlocal : HasLocalEvolutionAtCompactCurl v) :
+    (hlocal : ∀ a : ℝ, 0 ≤ a → HasCompactSupport (vectorCurl (v · a)) →
+      ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ U : Evolution δ hδ.le,
+        ∀ t : Icc (0 : ℝ) δ, (U.velocity t).field = (v · (a + (t : ℝ)))) :
     ∀ t : Icc (0 : ℝ) S, (U.velocity t).field = (v · (t : ℝ)) := by
   let s : Set ℝ := {r | ∀ x, (U.velocity (projIcc 0 S hS r)).field x =
     v x (projIcc 0 S hS r)}

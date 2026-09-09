@@ -2,12 +2,12 @@ import NavierStokes.MixedCandidateAssembly
 import NavierStokes.CandidateConsequences
 
 /-!
-# Retaining the actual mixed candidate and its consequences
+# The selected schedule of the finite-stage hub
 
-The finite-stage inputs are exactly those of
-`MixedCandidateAssembly.candidate_of_finite_stages`. The same selected
-schedule supplies the actual velocity and pressure sums, their endpoint
-extensions, and the force with all proved consequences.
+`SelectedSchedule` records every property of the scale sequence that
+`GermCandidateAssembly.exists_candidate_witness_of_finite_stages` selects
+from the finite-stage estimates; `ActualCandidateAssembly.Witness` names it
+for the delivered fields.
 -/
 
 noncomputable section
@@ -29,14 +29,4 @@ noncomputable def SelectedSchedule (h qbig : ℝ) (A B : ℕ → VelocityField)
     MixedDiagonalSchedule.ThreeSmoothSums a h A B P ∧
     JointResidualLimits.VanishingJointJets
       (MixedDiagonalResidual.residual (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A B P)
-
-section ActualBase
-
-variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
-    (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
-    (v : ModulatedProfileAssembly.Witness ld)
-
-
-end ActualBase
-
 end NavierStokes.MixedCandidateWitness

@@ -1,6 +1,6 @@
 import NavierStokes.R3.ComparisonCutoffs
 import NavierStokes.R3.ComparisonFiniteEnergy
-import NavierStokes.R3.ComparisonGronwall
+import NavierStokes.GronwallInterior
 import NavierStokes.R3.LocalizedDifferenceEnergy
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.MeasureTheory.Measure.OpenPos
@@ -76,7 +76,7 @@ theorem eq_zero_of_weighted_rate_bound {w : VelocityField} {T K C R₀ : ℝ}
       weightedEnergyRate (weight R) w t ≤ K * weightedEnergy (weight R) w t + C / R) :
     ∀ t ∈ Icc (0 : ℝ) T, ∀ x : Space, w (t, x) = 0 := by
   intro t ht
-  have hs := NavierStokes.PeriodicUniqueness.spatial_smooth hw ht
+  have hs := NavierStokes.SolutionDifference.spatial_smooth hw ht
   apply eq_zero_of_radius_bound hs.continuous (hi t ht)
     (D := C * T * Real.exp (K * T)) (R₀ := R₀)
   intro R hR
@@ -85,7 +85,7 @@ theorem eq_zero_of_weighted_rate_bound {w : VelocityField} {T K C R₀ : ℝ}
     (weight_smooth R).continuous (weight_hasCompactSupport hRpos) hw
   have hinit : weightedEnergy (weight R) w 0 = 0 := by
     simp [weightedEnergy, hzero]
-  exact ComparisonGronwall.le_div_radius_of_deriv_le hT hK hC hRpos hcont hinit
+  exact NavierStokes.GronwallInterior.le_div_radius_of_deriv_le hT hK hC hRpos hcont hinit
     (fun s hs => LocalizedDifferenceEnergy.weightedEnergy_hasDerivAt
       (weight_smooth R) (weight_hasCompactSupport hRpos) hw hs)
     (hrate R hR) t ht

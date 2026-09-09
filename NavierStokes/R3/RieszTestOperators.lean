@@ -134,7 +134,7 @@ theorem norm_clm_le_sum_coordinate_norms {E : Type*} [NormedAddCommGroup E]
   intro v
   have hsplit : A v = ∑ k : Fin 3,
       v k • A (NavierStokes.ProblemStatement.coordinateVector k) := by
-    conv_lhs => rw [← NavierStokes.PeriodicUniqueness.sum_coordinates v]
+    conv_lhs => rw [← NavierStokes.SolutionDifference.sum_coordinates v]
     simp only [map_sum, map_smul]
   rw [hsplit]
   calc

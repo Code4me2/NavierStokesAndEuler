@@ -24,38 +24,11 @@ The zero neighborhood may depend on the point and on the stage. -/
 def AxisZeroOn (Ω : Set SpaceTime) (f : VelocityField) : Prop :=
   ∀ w ∈ Ω, PhysicalGraphBounds.radialProjection w = 0 → f =ᶠ[𝓝 w] fun _ => 0
 
-theorem AxisZeroOn.add {Ω : Set SpaceTime} {f g : VelocityField}
-    (hf : AxisZeroOn Ω f) (hg : AxisZeroOn Ω g) :
-    AxisZeroOn Ω (fun w => f w + g w) := by
-  intro w hw ha
-  filter_upwards [hf w hw ha, hg w hw ha] with y hy hz
-  rw [hy, hz, add_zero]
-
-/-- The original concrete potential-stage data supplies the new hypothesis
-directly.  No regularity assertion about its copy representation is added. -/
-theorem potentialStage_axisZeroOn {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (p : MixedAxisPreservation.PotentialStage h (MixedAxisPreservation.localDomain h qbig)) :
-    AxisZeroOn (MixedAxisPreservation.localDomain h qbig) p.field := by
-  intro w hw ha
-  exact p.zero_germ hh hh1 (MixedAxisPreservation.localDomain_open hh hh1 qbig)
-    hw hw.1 ha
-
-/-- Literal supported mean-stream potentials satisfy the same local property. -/
-theorem angularSupport_axisZeroOn {h qbig : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
-    (p : MixedAxisPreservation.AngularSupport (MixedAxisPreservation.localDomain h qbig)) :
-    AxisZeroOn (MixedAxisPreservation.localDomain h qbig) p.field := by
-  intro w hw ha
-  exact p.zero_germ (MixedAxisPreservation.localDomain_open hh hh1 qbig) hw
-    (MixedAxisPreservation.radius_zero_of_axis ha)
-
 /-- The base and finite initialization retain the same zeroth cutoff. -/
 noncomputable def initializedSeries (base initial : VelocityField)
     (stages : ℕ → VelocityField) : ℕ → VelocityField
   | 0 => fun w => base w + initial w
   | j + 1 => stages j
-
-
-
 
 /-- Local finiteness intersects only finitely many stage-dependent zero
 neighborhoods.  On the zeroth cutoff plateau the actual potential sum has
@@ -82,12 +55,60 @@ theorem potentialSum_eq_base_germ {scales : ℕ → ℝ} (hs : Tendsto scales at
   change SmoothCutoffs.scaledCutoff (scales 0) (q y) • (base y + initial y) = base y
   rw [hy, one_smul, hi, add_zero]
 
+/-- The diagonal sum of a raw stage sequence along an integer schedule, cut by the
+physical similarity variable.  The three sums of the hub's conclusion are all of this form. -/
+noncomputable abbrev scheduledSum {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (h : ℝ) (a : ℕ → ℕ) (A : ℕ → SpaceTime → V) : SpaceTime → V :=
+  SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ)) (PhysicalWaveSum.physicalQ h) A
+
+/-- Everything the finite-stage hub delivers for one raw stage triple `A`, `B`, `P`: the
+selected schedule, the away extensions of the three diagonal sums, and the smooth force
+with the full consequences for the localized periodic candidate built from those sums.
+`ActualCandidateAssembly.Witness` is this conclusion spelled out, as an existential, for the
+delivered fields; the adapters destructure that spelling. -/
+structure WitnessData (h qbig : ℝ) (A B : ℕ → VelocityField) (P : ℕ → PressureField) where
+  /-- The scale sequence selected from the finite-stage estimates. -/
+  schedule : ℕ → ℕ
+  selected : MixedCandidateWitness.SelectedSchedule h qbig A B P schedule
+  ea : JointResidualLimits.AwayExtensions (scheduledSum h schedule A)
+  eb : JointResidualLimits.AwayExtensions (scheduledSum h schedule B)
+  ep : JointResidualLimits.AwayExtensions (scheduledSum h schedule P)
+  forcing : VelocityField
+  candidate : CandidateProperties
+    (TimeLocalization.activatedVelocity
+      (MixedPeriodicAssembly.periodicVelocity (scheduledSum h schedule A) (scheduledSum h schedule B)))
+    (TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure (scheduledSum h schedule P)))
+    forcing
+  forcing_smooth : ContDiff ℝ ∞ forcing
+  consequences : CandidateConsequences.Consequences
+    (TimeLocalization.activatedVelocity
+      (MixedPeriodicAssembly.periodicVelocity (scheduledSum h schedule A) (scheduledSum h schedule B)))
+    (TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure (scheduledSum h schedule P)))
+    forcing
+  /-- The `H³` seminorm of the velocity blows up at the terminal time. -/
+  h3_blowup : Tendsto (fun t => PeriodicSobolev.derivativeH3Norm (fun x =>
+    TimeLocalization.activatedVelocity
+      (MixedPeriodicAssembly.periodicVelocity (scheduledSum h schedule A) (scheduledSum h schedule B))
+      (t, x))) (𝓝[<] (1 : ℝ)) atTop
+  /-- Every derivative of the force decays faster than any power of time. -/
+  forcing_decay : ∀ m : ℕ, ∀ K : ℝ, 0 ≤ K → ∃ C : ℝ, 0 < C ∧
+    ∀ t : ℝ, 0 ≤ t → ∀ x : Space, ∀ directions : Fin m → Fin 4, ∀ j : Fin 3,
+      |(iteratedFDeriv ℝ m forcing (t, x)
+        (fun i => CompactForceDecay.spacetimeCoordinate (directions i))) j| ≤
+          C * (1 + t) ^ (-K)
+  /-- The jets of the force at the terminal time are the boundary limits of the three sums. -/
+  boundary_jets : ∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n forcing (1, x) =
+    MixedPeriodicAssembly.boundaryLimits (scheduledSum h schedule A) (scheduledSum h schedule B)
+      (scheduledSum h schedule P) ea eb ep x n
+
 section ActualBase
 
 variable {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
     (H : NominalConeAssembly.Certificate W) {ld : ModulatedProfileAssembly.LoopData W}
     (v : ModulatedProfileAssembly.Witness ld)
 
+/-- The raw potential sequence of the hub: the slow-base gauge potential plus the finite
+initialization at index zero, then the positive stages. -/
 noncomputable def potentialStages (upper : ℝ) (bandFloor : ℕ)
     (initial : VelocityField) (stages : ℕ → VelocityField) : ℕ → VelocityField :=
   initializedSeries (TailGaugePotential.finalPotential H v upper bandFloor) initial stages
@@ -146,9 +167,10 @@ theorem origin_blowup (upper : ℝ) (bandFloor : ℕ) {qbig : ℝ}
   exact (origin_eventually_base H v upper bandFloor hqbig initial stages D hInitial hStages hs).symm.mono
     (fun _ ht => congrArg norm ht)
 
-/-- This has the original finite-stage obligations, with arbitrary physical
-potential increments and their primitive local axis zero germs.  It returns
-the same selected schedule, exact mixed fields and full force consequences. -/
+/-- The finite-stage hub.  From the finite-stage estimates, shrinking supports, off-plane
+endpoint extensions and local axis zero germs of arbitrary physical potential increments, it
+selects one schedule and returns the exact mixed fields with the force and all of its
+consequences. -/
 theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ)
     {qbig C : ℝ} (hqbig : 0 < qbig)
     (initial : VelocityField) (stages : ℕ → VelocityField)
@@ -174,37 +196,9 @@ theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ
       Nonempty (OneSidedExtension (pressureStages H v upper bandFloor pInitial pStages j) x))
     (hInitialAxis : AxisZeroOn (MixedAxisPreservation.localDomain F.data.h qbig) initial)
     (hStagesAxis : ∀ j, AxisZeroOn (MixedAxisPreservation.localDomain F.data.h qbig) (stages j)) :
-    let A := potentialStages H v upper bandFloor initial stages
-    let B := LocalAngularDiagonal.rawSeries D
-    let P := pressureStages H v upper bandFloor pInitial pStages
-    ∃ a : ℕ → ℕ, MixedCandidateWitness.SelectedSchedule F.data.h qbig A B P a ∧
-      let ASum := SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ))
-        (PhysicalWaveSum.physicalQ F.data.h) A
-      let BSum := SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ))
-        (PhysicalWaveSum.physicalQ F.data.h) B
-      let PSum := SolenoidalDiagonal.potentialSum (fun j => (a j : ℝ))
-        (PhysicalWaveSum.physicalQ F.data.h) P
-      ∃ (ea : JointResidualLimits.AwayExtensions ASum)
-        (eb : JointResidualLimits.AwayExtensions BSum)
-        (ep : JointResidualLimits.AwayExtensions PSum),
-      ∃ forcing : VelocityField,
-        CandidateProperties
-          (TimeLocalization.activatedVelocity (MixedPeriodicAssembly.periodicVelocity ASum BSum))
-          (TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure PSum)) forcing ∧
-        ContDiff ℝ ∞ forcing ∧
-        CandidateConsequences.Consequences
-          (TimeLocalization.activatedVelocity (MixedPeriodicAssembly.periodicVelocity ASum BSum))
-          (TimeLocalization.activatedPressure (SpatialLocalization.periodicPressure PSum)) forcing ∧
-        Tendsto (fun t => PeriodicSobolev.derivativeH3Norm (fun x =>
-          TimeLocalization.activatedVelocity (MixedPeriodicAssembly.periodicVelocity ASum BSum) (t, x)))
-          (𝓝[<] (1 : ℝ)) atTop ∧
-        (∀ m : ℕ, ∀ K : ℝ, 0 ≤ K → ∃ C : ℝ, 0 < C ∧
-          ∀ t : ℝ, 0 ≤ t → ∀ x : Space, ∀ directions : Fin m → Fin 4, ∀ j : Fin 3,
-            |(iteratedFDeriv ℝ m forcing (t, x)
-              (fun i => CompactForceDecay.spacetimeCoordinate (directions i))) j| ≤
-                C * (1 + t) ^ (-K)) ∧
-        (∀ n : ℕ, ∀ x : Space, iteratedFDeriv ℝ n forcing (1, x) =
-          MixedPeriodicAssembly.boundaryLimits ASum BSum PSum ea eb ep x n) := by
+    Nonempty (WitnessData F.data.h qbig
+      (potentialStages H v upper bandFloor initial stages) (LocalAngularDiagonal.rawSeries D)
+      (pressureStages H v upper bandFloor pInitial pStages)) := by
   let A := potentialStages H v upper bandFloor initial stages
   let B := LocalAngularDiagonal.rawSeries D
   let P := pressureStages H v upper bandFloor pInitial pStages
@@ -250,14 +244,15 @@ theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ
   have hcut := LocalAngularDiagonal.spatialCut_angularSum_divergence
     F.data.h_pos F.data.h_lt_half D hat ha0 hamin (hgap 0)
   have haxis := origin_blowup H v upper bandFloor hqbig initial stages D hInitialAxis hStagesAxis hat
-  refine ⟨a, ⟨hal, hap, had, ham, hat, hgap, hs, hz⟩, ea, eb, ep, ?_⟩
-  exact CandidateConsequences.mixed_exists_force_with_consequences
-    (A := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) A)
-    (v := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) B)
-    (p := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) P)
-    (hs.potential.mono (fun _ hx => hx.1)) (hs.direct.mono (fun _ hx => hx.1))
-    (hs.pressure.mono (fun _ hx => hx.1)) hcut hz ea eb ep haxis
-
+  obtain ⟨forcing, hc, hsmooth, hcons, hH3, hdecay, hjets⟩ :=
+    CandidateConsequences.mixed_exists_force_with_consequences
+      (A := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) A)
+      (v := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) B)
+      (p := SolenoidalDiagonal.potentialSum ar (PhysicalWaveSum.physicalQ F.data.h) P)
+      (hs.potential.mono (fun _ hx => hx.1)) (hs.direct.mono (fun _ hx => hx.1))
+      (hs.pressure.mono (fun _ hx => hx.1)) hcut hz ea eb ep haxis
+  exact ⟨⟨a, ⟨hal, hap, had, ham, hat, hgap, hs, hz⟩, ea, eb, ep, forcing, hc, hsmooth, hcons,
+    hH3, hdecay, hjets⟩⟩
 
 end ActualBase
 

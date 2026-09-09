@@ -1,5 +1,6 @@
 import NavierStokes.R3.ProblemStatement
-import NavierStokes.PeriodicUniqueness
+import NavierStokes.SolutionDifference
+import NavierStokes.PeriodicIntegration
 import Mathlib.MeasureTheory.Function.L2Space
 
 /-!

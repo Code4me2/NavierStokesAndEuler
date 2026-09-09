@@ -15,30 +15,46 @@ open Real Filter EulerScale EulerPacketSourceScales EulerPacketSourceTime
 
 open scoped Topology
 
+/-- The target shear of the packet added at stage `n`: `exp(x_n/(J+n)^5)`. -/
 def shear (J : ℕ) (X : ℝ) (n : ℕ) : ℝ :=
   exp (scaleSequence J X n/((J+n : ℕ) : ℝ)^5)
 
+/-- The wavenumber of the packet added at stage `n`: `exp(x_n/(J+n)^2)`, far above
+its shear. -/
 def frequency (J : ℕ) (X : ℝ) (n : ℕ) : ℝ :=
   exp (scaleSequence J X n/((J+n : ℕ) : ℝ)^2)
 
+/-- The spike `δ` (amplitude factor) of the packet added at stage `n`:
+`exp(-x_n/(J+n)^3)`. -/
 def spike (J : ℕ) (X : ℝ) (n : ℕ) : ℝ :=
   exp (-scaleSequence J X n/((J+n : ℕ) : ℝ)^3)
 
+/-- The parent scale `ℓ` at stage `n`, `exp(-x_n/(J+n)^(7/2))`; the next increment
+is supported in a ball of radius `ℓ/2`. -/
 def supportScale (J : ℕ) (X : ℝ) (n : ℕ) : ℝ :=
   exp (-scaleSequence J X n/((J+n : ℕ) : ℝ)^(7/2 : ℝ))
 
+/-- The shear present at stage `n`: the polynomial base shear `X^1000` at the base
+stage and `shear (n-1)` afterwards; the frame's leading shear coefficient. -/
 def previousShear (J : ℕ) (X : ℝ) : ℕ → ℝ
   | 0 => X^1000
   | n+1 => shear J X n
 
+/-- The frequency present at stage `n`: `X^D` at the base stage and
+`frequency (n-1)` afterwards; its 80th power is the label constant and its
+inverse fourth root the prior error. -/
 def previousFrequency (J D : ℕ) (X : ℝ) : ℕ → ℝ
   | 0 => X^D
   | n+1 => frequency J X n
 
+/-- The shear two stages back (`1`, then `X^1000`, then `shear (n-2)`); it bounds
+the background `B` of the frame and enters the Hessian bound. -/
 def olderShear (J : ℕ) (X : ℝ) : ℕ → ℝ
   | 0 => 1
   | n+1 => previousShear J X n
 
+/-- The time width `3·x_{n+1}·x_n/√(previousShear n)` by which the stage-`n`
+horizon exceeds its activation time. -/
 def timeWidth (J : ℕ) (X : ℝ) (n : ℕ) : ℝ :=
   3*scaleSequence J X (n+1)*scaleSequence J X n/sqrt (previousShear J X n)
 

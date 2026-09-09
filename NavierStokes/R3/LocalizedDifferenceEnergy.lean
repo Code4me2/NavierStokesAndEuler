@@ -22,7 +22,7 @@ namespace NavierStokesR3.LocalizedDifferenceEnergy
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open Comparison (weightedEnergy weightedEnergyRate weightedDissipation gradientSq)
 
 /-- A continuous factor needs no decay when multiplied by the compact cutoff. -/
@@ -84,8 +84,7 @@ theorem difference_energy_balance {χ : Space → ℝ} {u v : VelocityField}
     (htv : ∀ x : Space, DifferentiableAt ℝ (fun r => v (r, x)) t)
     (hdivu : ∀ x : Space, spatialDivergence u t x = 0)
     (hdivv : ∀ x : Space, spatialDivergence v t x = 0)
-    (hNS : ∀ x : Space, ProblemStatement.navierStokesResidual 1 u p t x =
-      ProblemStatement.navierStokesResidual 1 v q t x) :
+    (hNS : ∀ x : Space, navierStokesResidual u p t x = navierStokesResidual v q t x) :
     (1 / 2 : ℝ) * weightedEnergyRate χ (u - v) t + weightedDissipation χ (u - v) t =
       -(∫ x : Space, χ x * ⟪(u - v) (t, x), spatialDerivative u t x ((u - v) (t, x))⟫_ℝ) +
       (1 / 2 : ℝ) * (∫ x : Space, ‖(u - v) (t, x)‖ ^ 2 *

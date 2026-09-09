@@ -1,5 +1,6 @@
 import Euler.ComparatorEvolutionIdentification
 import Euler.ComparatorLocalCompactVorticity
+import Euler.OrdinaryEulerMaximal
 import Euler.ComparatorTruncationFamily
 import Euler.ComparatorUniformSpatialJets
 import Euler.DivCurlTensorRecovery
@@ -7,12 +8,17 @@ import Euler.CompactVorticityTimeUpgrade
 import Euler.CompactProjectedEulerLaw
 
 /-!
-# The concrete local Comparator-to-development conversion
+# Step 2: a Comparator solution agrees with the canonical maximal solution
 
-Compact initial vorticity remains in one compact set for a positive time.
-Elliptic recovery gives all spatial L² derivatives on that interval, and
-the genuine Euler pairings against dense compact solenoidal tests provide
-the time regularity needed for an ordinary Euler evolution.
+The local Comparator-to-development conversion: compact initial vorticity
+remains in one compact set for a positive time; elliptic recovery gives all
+spatial L² derivatives on that interval, and the genuine Euler pairings
+against dense compact solenoidal tests provide the time regularity of an
+ordinary Euler evolution (`compactCurlLocalUpgrade`). Restarting the
+conversion at every time of agreement, ordinary uniqueness identifies a
+global Comparator solution with the canonical maximal solution on the whole
+lifespan, provided the canonical vorticity stays compact
+(`comparator_agrees_with_canonical`).
 -/
 
 noncomputable section
@@ -88,12 +94,42 @@ theorem exists_evolution_of_commonCompactCurl
 /-- Compact initial vorticity alone supplies the complete local conversion:
 the truncations, support propagation, spatial recovery, and time regularity
 are all obtained from the actual Comparator solution assumptions. -/
-theorem compactCurlLocalUpgrade : CompactCurlLocalUpgrade := by
-  intro u₀ v p h hc
+theorem compactCurlLocalUpgrade (h : EulerExistenceAndSmoothnessR3 u₀ v p)
+    (hc : HasCompactSupport (vectorCurl u₀)) :
+    ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ U : Evolution δ hδ.le,
+      ∀ t : Icc (0 : ℝ) δ, (U.velocity t).field = (v · (t : ℝ)) := by
   obtain ⟨δ, B, hδ, hsupport⟩ :=
     h.local_compact_vorticity_of_truncationFamily h.finiteEnergyTruncationFamily hc
   obtain ⟨U, hU⟩ := exists_evolution_of_commonCompactCurl h δ hδ
     (Metric.closedBall (0 : Space) B) (isCompact_closedBall _ _) hsupport
   exact ⟨δ, hδ, U, hU⟩
+
+/-- The local conversion restarted at any later time of compact vorticity,
+through the time-shifted Comparator solution. -/
+theorem local_evolution_at_compact_curl (h : EulerExistenceAndSmoothnessR3 u₀ v p)
+    (a : ℝ) (ha : 0 ≤ a) (hc : HasCompactSupport (vectorCurl (v · a))) :
+    ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ U : Evolution δ hδ.le,
+      ∀ t : Icc (0 : ℝ) δ, (U.velocity t).field = (v · (a + (t : ℝ))) :=
+  compactCurlLocalUpgrade (h.shiftTime a ha) hc
+
+/-- Step 2 of the top of the Euler argument: a global Comparator solution from
+the datum of a finite lifespan whose canonical vorticity stays compact is the
+canonical maximal solution below the lifespan. -/
+theorem comparator_agrees_with_canonical {A : SmoothL2Field Space} (L : FiniteLifespan A)
+    (h : EulerExistenceAndSmoothnessR3 A.field v p)
+    (hcompact : ∀ t : L.Time, HasCompactSupport (vectorCurl (L.maximalVelocity t))) :
+    ∀ t : L.Time, L.maximalVelocity t = (v · (t : ℝ)) := by
+  intro t
+  let S := L.intermediateHorizon t
+  have hS : 0 < S := L.intermediateHorizon_pos t
+  have hSL : S < L.duration := L.intermediateHorizon_lt t
+  have hc : ∀ s, HasCompactSupport
+      (vectorCurl ((L.evolution S hS hSL).velocity s).field) := by
+    intro s
+    rw [← L.maximalVelocity_eq_evolution S hS hSL s]
+    exact hcompact _
+  have he := evolution_field_eq_of_local_evolution (L.evolution S hS hSL) h
+    (L.evolution_initial S hS hSL) hc (local_evolution_at_compact_curl h) (L.intermediateTime t)
+  rwa [← L.maximalVelocity_eq_evolution S hS hSL (L.intermediateTime t)] at he
 
 end Euler.ComparatorBridge

@@ -22,8 +22,8 @@ open scoped ContDiff
 namespace NavierStokesR3.WholeSpaceUniqueness
 
 open ProblemStatement Comparison
-open NavierStokes.ProblemStatement (spatialDivergence)
-open NavierStokes.PeriodicUniqueness (spatial_smooth)
+open NavierStokes.ProblemStatement (spatialDivergence navierStokesResidual)
+open NavierStokes.SolutionDifference (spatial_smooth)
 
 /-- Whole-space comparison on a positive closed time interval. Finite energy
 of the reference velocity is a consequence of its compact spatial support. -/
@@ -39,12 +39,12 @@ theorem classical_uniqueness_on_Icc {T : ℝ} (hT : 0 < T)
     (hdu : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, spatialDivergence u t x = 0)
     (hdv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, spatialDivergence v t x = 0)
     (hNS : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x,
-      navierStokesResidual 1 u p t x = navierStokesResidual 1 v q t x)
+      navierStokesResidual u p t x = navierStokesResidual v q t x)
     (hzero : ∀ x, u (0, x) = v (0, x)) :
     ∀ t ∈ Icc (0 : ℝ) T, ∀ x, u (t, x) = v (t, x) := by
   have heu := CompactComparisonBounds.uniformFiniteEnergy_of_compact_slab hu hK hsupp
   let H : PressureRecovery.Hypotheses T u v p q :=
-    ⟨hT, hu, hv, hp, hq, hdu, hdv, (fun t ht x => by simpa using hNS t ht x), heu, hev⟩
+    ⟨hT, hu, hv, hp, hq, hdu, hdv, hNS, heu, hev⟩
   have hum : ∀ t ∈ Icc (0 : ℝ) T,
       AEStronglyMeasurable (fun x => u (t, x)) volume :=
     fun t ht => (spatial_smooth hu ht).continuous.aestronglyMeasurable

@@ -25,7 +25,7 @@ namespace NavierStokesR3.PressureRecovery
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open Comparison ConservativeDifference HarmonicTestFunctionals PressureFunctionals
 
 /-- These are exactly the local smooth equation and uniform finite-energy

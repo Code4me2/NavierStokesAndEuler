@@ -118,8 +118,9 @@ structure CandidateProperties (u : VelocityField) (p : PressureField)
 /-- The primary existential content of Candidate Theorem 1.1.
 There is no proof, witness, or axiom asserting this proposition in this module;
 it is proved by `NavierStokes.ActualCandidateAssembly.selected_candidate`.
-Maximal lifespan, Sobolev blow-up, and force derivative decay require additional
-theorems and are not silently included as proved consequences. -/
+Maximal lifespan, Sobolev blow-up, and force derivative decay are corollaries
+proved in `NavierStokes/CandidateConsequences.lean`; they are not part of the
+delivered argument, which uses only `speed_unbounded`. -/
 def candidateStatement : Prop :=
   ∃ u : VelocityField, ∃ p : PressureField, ∃ f : VelocityField,
     CandidateProperties u p f
@@ -151,5 +152,71 @@ theorem unbounded_speed_excludes_uniform_bound {u : VelocityField}
   obtain ⟨t, x, ht, _, hlarge⟩ := h (max C 1) hpositive 1 zero_lt_one
   have hbound := (hC t ⟨ht.1.le, ht.2⟩ x).trans (le_max_left C 1)
   exact (not_lt_of_ge hbound) hlarge
+
+/-- The common last step of both exclusion arguments, (C) and (D). A
+competitor `v` continuous on `[0,1] × K` with `K` compact is bounded there. If
+the candidate `u` agrees with `v` on `K` before time one, and every value of
+`u` before time one is either zero or attained somewhere on `K`, then `u` is
+bounded before time one, which `SpeedUnboundedAtOne` forbids. On the torus `K`
+is the unit cube (periodicity); on `ℝ³` it is the candidate's spatial support. -/
+theorem SpeedUnboundedAtOne.false_of_agree {u v : VelocityField}
+    (h : SpeedUnboundedAtOne u) {K : Set Space} (hK : IsCompact K)
+    (hv : ContinuousOn v (Icc (0 : ℝ) 1 ×ˢ K))
+    (hagree : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x ∈ K, u (t, x) = v (t, x))
+    (hred : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x : Space,
+      u (t, x) = 0 ∨ ∃ y ∈ K, u (t, x) = u (t, y)) : False := by
+  obtain ⟨M, hM⟩ := (isCompact_Icc.prod hK).exists_bound_of_continuousOn hv
+  have hpos : 0 < max M 1 := lt_of_lt_of_le zero_lt_one (le_max_right _ _)
+  obtain ⟨t, x, ht, _, hlarge⟩ := h (max M 1) hpos 1 zero_lt_one
+  have ht' : t ∈ Ico (0 : ℝ) 1 := ⟨ht.1.le, ht.2⟩
+  rcases hred t ht' x with hzero | ⟨y, hy, hxy⟩
+  · rw [hzero, norm_zero] at hlarge
+    exact absurd hlarge (not_lt.mpr hpos.le)
+  · rw [hxy, hagree t ht' y hy] at hlarge
+    exact absurd hlarge
+      (not_lt.mpr ((hM (t, y) ⟨⟨ht.1.le, ht.2.le⟩, hy⟩).trans (le_max_left M 1)))
+
+/-! ### One solution vocabulary
+
+The candidate contract, the finite-lifespan classical solutions used for the
+periodic exclusion, and the global solutions obtained from a hypothetical
+comparator solution all share the same five conditions on a time set `I`.
+`Solution` names them once; the other notions extend or project to it. -/
+
+/-- A smooth solution of the viscosity-one equation with zero initial datum on
+the time set `I`. The equation is imposed at the positive times of `I`; the
+initial value separately at `t = 0`. -/
+structure Solution (I : Set ℝ) (f : VelocityField) (u : VelocityField)
+    (p : PressureField) : Prop where
+  velocity_smooth : ContDiffOn ℝ ∞ u (I ×ˢ univ)
+  pressure_smooth : ContDiffOn ℝ ∞ p (I ×ˢ univ)
+  zero_initial_velocity : ∀ x : Space, u (0, x) = 0
+  divergence_free : ∀ t ∈ I, ∀ x : Space, spatialDivergence u t x = 0
+  navier_stokes : ∀ t ∈ I, 0 < t → ∀ x : Space, navierStokesResidual u p t x = f (t, x)
+
+theorem Solution.mono {I J : Set ℝ} {f u : VelocityField} {p : PressureField}
+    (h : Solution I f u p) (hJ : J ⊆ I) : Solution J f u p where
+  velocity_smooth := h.velocity_smooth.mono (prod_mono hJ subset_rfl)
+  pressure_smooth := h.pressure_smooth.mono (prod_mono hJ subset_rfl)
+  zero_initial_velocity := h.zero_initial_velocity
+  divergence_free := fun t ht => h.divergence_free t (hJ ht)
+  navier_stokes := fun t ht => h.navier_stokes t (hJ ht)
+
+/-- The candidate contract, projected to the shared solution vocabulary. -/
+theorem CandidateProperties.toSolution {u : VelocityField} {p : PressureField}
+    {f : VelocityField} (h : CandidateProperties u p f) : Solution (Ico 0 1) f u p where
+  velocity_smooth := h.velocity_smooth
+  pressure_smooth := h.pressure_smooth
+  zero_initial_velocity := h.zero_initial_velocity
+  divergence_free := h.divergence_free
+  navier_stokes := fun t ht ht0 x => h.navier_stokes t ⟨ht0, ht.2⟩ x
+
+/-- A global smooth periodic solution of the viscosity-one equation with zero
+datum: what a hypothetical comparator solution for option (D) becomes after
+the coordinate swap and viscosity normalization of `ComparatorBridge`. -/
+structure GlobalSolutionOne (f : VelocityField) (v : VelocityField) (p : PressureField) : Prop
+    extends Solution (Ici 0) f v p where
+  velocity_periodic : UnitSpatialPeriodsOn (Ici 0) v
+  pressure_periodic : UnitSpatialPeriodsOn (Ici 0) p
 
 end NavierStokes.ProblemStatement

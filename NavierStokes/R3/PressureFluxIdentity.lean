@@ -21,7 +21,7 @@ namespace NavierStokesR3.PressureFluxIdentity
 
 open ProblemStatement Comparison PressureRecovery HarmonicTestFunctionals
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 
 theorem fluxFunction_smooth {χ : Space → ℝ} {w : Space → Space}
     (hχ : ContDiff ℝ ∞ χ) (hw : ContDiff ℝ ∞ w) :

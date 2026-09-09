@@ -18,7 +18,7 @@ namespace NavierStokesR3.LocalizedDifferenceEnergy
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 
 
 private theorem laplacian_partial_smul {χ : Space → ℝ} {w : Space → Space}

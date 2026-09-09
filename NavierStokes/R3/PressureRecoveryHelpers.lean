@@ -21,7 +21,7 @@ namespace NavierStokesR3.PressureRecovery
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 open Comparison (ComplexTest tensorDiff)
 open ConservativeDifference HarmonicTestFunctionals
 

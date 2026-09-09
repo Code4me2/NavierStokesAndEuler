@@ -40,56 +40,67 @@ def firstStage : Stage S 0 := by
     time_nonneg := le_rfl
     time_zero := fun _ => rfl
     time_lower := fun h => (h rfl).elim
-    horizon_eq := ?_
+    horizon_eq := ?horizon_eq
     horizon_le := le_rfl
     scale_eq := rfl
     label_eq := S.first.state_label S.j_one
-    gradient_bound := ?_
-    hessian_bound := ?_
-    exterior_bound := ?_
-    core_bound := ?_
-    pressure_bound := ?_
+    gradient_bound := ?gradient_bound
+    hessian_bound := ?hessian_bound
+    exterior_bound := ?exterior_bound
+    core_bound := ?core_bound
+    pressure_bound := ?pressure_bound
     boundary_eq := rfl
     radius_eq := hlow.2.2.1
     frame := P
     frame_shear := hparam.2.2
-    frame_bound := ?_
-    frame_error := ?_
-    coupling_error := ?_
-    tilt_lower := ?_
-    tilt_upper := ?_
+    frame_bound := ?frame_bound
+    frame_error := ?frame_error
+    coupling_error := ?coupling_error
+    tilt_lower := ?tilt_lower
+    tilt_upper := ?tilt_upper
     compression := fun h => (h rfl).elim }
-  · change baseHorizon S.J S.X=0+2*timeWidth S.J S.X 0
+  case horizon_eq =>
+    change baseHorizon S.J S.X=0+2*timeWidth S.J S.X 0
     rw [zero_add,baseHorizon_eq_timeWidth S.J S.x_pos]
-  · intro t x
+  case gradient_bound =>
+    intro t x
     have h := (F.physical_bounds S.first.spike_one S.first.shear_pos.le t x).1
     dsimp only [FirstScaleGuards.state, previousShear]
     exact h.trans hbounds.1
-  · intro t x
+  case hessian_bound =>
+    intro t x
     have h := (F.physical_bounds S.first.spike_one S.first.shear_pos.le t x).2
     dsimp only [FirstScaleGuards.state, previousShear, olderShear]
     simpa only [mul_one] using h.trans hbounds.2
-  · rw [hlow.1]
+  case exterior_bound =>
+    rw [hlow.1]
     simp only [sum_range_zero,add_zero,le_refl]
-  · rw [hlow.2.1]
+  case core_bound =>
+    rw [hlow.2.1]
     simpa only [sum_range_zero,add_zero] using hbounds.1
-  · rw [hlow.2.2.2]
+  case pressure_bound =>
+    rw [hlow.2.2.2]
     simp only [sum_range_zero,add_zero,le_refl]
-  · change P.G ≤ frameConstant*(1+1)
+  case frame_bound =>
+    change P.G ≤ frameConstant*(1+1)
     rw [show P.G=1+initialCoefficientCost from hcost.1]
     have hf := EulerPacketFirstLowBounds.firstRatio_pos
     have hm := gradient_properties.2.1
     have hc := frame_properties.2.1
     have h0 := frame_properties.1
     linarith only [hf,hm,hc,h0]
-  · exact le_of_eq hcost.2
-  · change |P.a-1| ≤ 2*∑ i ∈ range 0, renewalCost S.J S.D 4 c frameConstant S.X i
+  case frame_error =>
+    exact le_of_eq hcost.2
+  case coupling_error =>
+    change |P.a-1| ≤ 2*∑ i ∈ range 0, renewalCost S.J S.D 4 c frameConstant S.X i
     rw [show P.a=1 from hparam.1]
     simp only [sub_self,abs_zero,sum_range_zero,mul_zero,le_refl]
-  · change 1/2 ≤ P.sigma^2*S.X^2
+  case tilt_lower =>
+    change 1/2 ≤ P.sigma^2*S.X^2
     rw [htilt]
     norm_num
-  · change P.sigma^2*S.X^2 ≤ 2
+  case tilt_upper =>
+    change P.sigma^2*S.X^2 ≤ 2
     rw [htilt]
     norm_num
 

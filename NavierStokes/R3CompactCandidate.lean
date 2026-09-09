@@ -20,18 +20,17 @@ namespace NavierStokes.R3CompactCandidate
 open Set Filter ProblemStatement SpatialLocalization
 open scoped ContDiff Topology
 
-/-- The whole-space candidate conditions needed for option (C). -/
-structure Properties (u : VelocityField) (p : PressureField) (f : VelocityField) : Prop where
-  velocity_smooth : ContDiffOn ℝ ∞ u preSingularDomain
-  pressure_smooth : ContDiffOn ℝ ∞ p preSingularDomain
+/-- The whole-space candidate conditions needed for option (C): a
+`Solution` on `[0,1)` with compactly supported velocity and force, force
+support in future time, and unbounded speed at time one. This is the
+whole-space counterpart of `CandidateProperties`. -/
+structure Properties (u : VelocityField) (p : PressureField) (f : VelocityField) : Prop
+    extends Solution (Ico 0 1) f u p where
   force_smooth : ContDiffOn ℝ ∞ f futureDomain
   velocity_support : ∃ K : Set Space, IsCompact K ∧
     ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, x ∉ K → u (t, x) = 0
   force_support : ∃ K : Set Space, IsCompact K ∧ CompactSpatialForceDecay.SupportedIn K f
-  zero_initial_velocity : ∀ x, u (0, x) = 0
   force_time_support : CompactFutureTimeSupport f
-  divergence_free : ∀ t ∈ Ico (0 : ℝ) 1, ∀ x, spatialDivergence u t x = 0
-  navier_stokes : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x, navierStokesResidual u p t x = f (t, x)
   speed_unbounded : SpeedUnboundedAtOne u
 
 def outerCutoff (x : Space) : ℝ := spatialCutoff ((1 / 2 : ℝ) • x)
@@ -181,13 +180,14 @@ theorem of_periodic_local_model {u U : VelocityField} {p P : PressureField} {f :
     (heu : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → U =ᶠ[𝓝 z] u)
     (hep : ∀ z : SpaceTime, z.2 ∈ PeriodicLocalization.innerCube (1 / 4) → P =ᶠ[𝓝 z] p) :
     Properties u p (compactForce f) := by
-  refine ⟨local_model_smooth h.velocity_smooth hu heu,
-    local_model_smooth h.pressure_smooth hp hep, compactForce_smooth h.force_smooth,
-    ⟨supportCylinder, isCompact_supportCylinder, fun t _ => hu t⟩,
-    ⟨outerSupport, outerSupport_compact, compactForce_supported f⟩, ?_,
-    compactForce_time_support h.force_time_support,
+  refine ⟨⟨local_model_smooth h.velocity_smooth hu heu,
+    local_model_smooth h.pressure_smooth hp hep, ?_,
     fun t ht => local_model_divergence hu heu (h.divergence_free t ht),
-    fun t ht => local_model_equation hu hp heu hep (h.navier_stokes t ht),
+    fun t ht ht0 => local_model_equation hu hp heu hep (h.navier_stokes t ⟨ht0, ht.2⟩)⟩,
+    compactForce_smooth h.force_smooth,
+    ⟨supportCylinder, isCompact_supportCylinder, fun t _ => hu t⟩,
+    ⟨outerSupport, outerSupport_compact, compactForce_supported f⟩,
+    compactForce_time_support h.force_time_support,
     local_model_unbounded h.velocity_periodic heu h.speed_unbounded⟩
   intro x
   by_cases hx : x ∈ supportCylinder
@@ -248,24 +248,22 @@ theorem of_localized_fields {A B : VelocityField} {P : PressureField} {f : Veloc
   of_periodic_local_model h (velocity_supported A B) (pressure_supported P)
     (velocity_locally_eq A B) (pressure_locally_eq P)
 
-/-- After equality with the compact candidate has been proved, smoothness on
-a compact space-time neighborhood of time one gives the contradiction. -/
+/-- Step three of the whole-space argument: once agreement with the compact
+candidate below time one is known, a competitor smooth across time one is
+bounded on `[0,1] × K` for the candidate's support `K`, and the candidate
+vanishes off `K`, so `SpeedUnboundedAtOne` fails. This is the (C) instance of
+`SpeedUnboundedAtOne.false_of_agree`; the (D) instance is
+`MaximalLifespan.candidate_no_solution_after_one`. -/
 theorem Properties.not_global_agreement {u : VelocityField} {p : PressureField} {f : VelocityField}
     (h : Properties u p f) {v : VelocityField} (hv : ContDiffOn ℝ ∞ v futureDomain) :
     ¬ (∀ t ∈ Ico (0 : ℝ) 1, ∀ x, u (t, x) = v (t, x)) := by
   intro heq
   obtain ⟨K, hK, hs⟩ := h.velocity_support
-  have hsub : Icc (0 : ℝ) 1 ×ˢ K ⊆ futureDomain := fun _ hz => ⟨hz.1.1, mem_univ _⟩
-  obtain ⟨M, hM⟩ := (isCompact_Icc.prod hK).exists_bound_of_continuousOn
-    (hv.continuousOn.mono hsub)
-  have hpos : 0 < max M 1 := lt_of_lt_of_le zero_lt_one (le_max_right _ _)
-  obtain ⟨t, x, ht, _, hlarge⟩ := h.speed_unbounded (max M 1) hpos 1 zero_lt_one
-  have hx : x ∈ K := by
-    by_contra hnot
-    rw [hs t ⟨ht.1.le, ht.2⟩ x hnot, norm_zero] at hlarge
-    exact (not_lt_of_ge hpos.le) hlarge
-  have hb := hM (t, x) ⟨⟨ht.1.le, ht.2.le⟩, hx⟩
-  rw [heq t ⟨ht.1.le, ht.2⟩ x] at hlarge
-  exact (not_lt_of_ge (hb.trans (le_max_left M 1))) hlarge
+  refine h.speed_unbounded.false_of_agree hK
+    (hv.continuousOn.mono (fun _ hz => ⟨hz.1.1, mem_univ _⟩)) (fun t ht x _ => heq t ht x) ?_
+  intro t ht x
+  by_cases hx : x ∈ K
+  · exact Or.inr ⟨x, hx, rfl⟩
+  · exact Or.inl (hs t ht x hx)
 
 end NavierStokes.R3CompactCandidate

@@ -1,8 +1,7 @@
-import Euler.EulerFiniteLifespan
 import Euler.OrdinaryEulerMaximal
 import Euler.OrdinaryEulerContinuation
 
-/-! C¹ breakdown for the concrete compactly supported datum. The
+/-! C¹ breakdown at the maximal time of any finite lifespan. The
 infinite-limsup statement is expressed directly: after every time below
 the maximal time, the actual gradient supremum exceeds every real bound.
 The norms are bounded-continuous-function norms at individual times,
@@ -61,13 +60,3 @@ theorem maximalC1Norm_unbounded_near_endpoint (τ K : ℝ) (hτ : τ < L.duratio
   exact ⟨t,ht,hK.trans_le (le_add_of_nonneg_left (L.maximalVelocityNorm_nonneg t))⟩
 
 end EulerOrdinarySobolev.FiniteLifespan
-
-namespace EulerPacketInduction
-
-open EulerOrdinarySobolev
-
-abbrev MaximalTime : Type := lifespan.Time
-
-def maximalC1Norm (t : MaximalTime) : ℝ := lifespan.maximalC1Norm t
-
-end EulerPacketInduction

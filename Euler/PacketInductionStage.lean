@@ -3,9 +3,47 @@ import Euler.ParentStageHorizon
 import Euler.ParentStageDirection
 import Euler.BaseFirstPacketFrame
 
-/-! The invariant for a finite, actually constructed packet stage.
-All fields refer to its genuine Euler state, source guards and frame.
-The cumulative bounds use only earlier indices. -/
+/-! # The packet stage invariant
+
+A stage `n` is an Euler solution on `[0, parent.T]`, posed around the origin
+of its parent's coordinates, that has received `n` packets. What a packet is,
+read off the definitions the successor step uses:
+
+* **The increment.** Stage `n+1` (`PacketJoinedSuccessor`, or
+  `PacketForwardSuccessor` for `n = 0`) starts from stage `n`'s initial velocity
+  plus one field `high k + mean k` (`EulerPacketInitial.Input.high/mean`,
+  `stages_initial_step`), with wavenumber `k = frequency n` and parent scale
+  `ℓ = supportScale n` (`scale_eq`). The high part is `ℓ·h(x/ℓ, k⟨m₀, x/ℓ⟩)`
+  (`initializedInitialHigh`, `scale`): a smooth profile `h`, a finite power series
+  in `k⁻¹` truncated at order `truncation k`, oscillating in the phase
+  `k⟨m₀, x⟩/ℓ` and supported in the ball of radius `ℓ/2`; the mean part does not
+  oscillate and is supported in the ball of radius `2`. The profile's leading
+  amplitude is `δ·hchild/(‖r‖‖w‖)` (`primaryAmplitude`) with `δ = spike n` and
+  `hchild = shear n` (`joinedGuards_delta`, `joinedGuards_shear`).
+* **Where it sits.** The packet normal `m₀` is the activation normal
+  (`joinedNormal`, `activationNormal`): the unit vector along `Fᵀ(m̂ × v̂)`, where
+  `F` is the parent's deformation at the activation point `(time, 0)` and
+  `m̂ × v̂` is the direction orthogonal to the ray and velocity of the current
+  frame (the forward step at the base stage uses `m̂ × v̂` itself, `forwardNormal`).
+  The packet is
+  activated at `nextTime = time + step`, `step = x_{n+1}/√(σ²·a·previousShear n)`
+  (`stepLength`), and the new stage is restricted to the horizon
+  `nextTime + 2·timeWidth (n+1)`, strictly inside the current one (`nextHorizon_lt`).
+* **What the frame measures.** A `ParentFrame` decomposes the parent strain along
+  the centre trajectory as `B + shear·(v̂ ⊗ m̂) + remainder` (`remainder_bound`):
+  `B` is the background, bounded by `G`; `m`, `v` are the ray and velocity,
+  transported by `m' = -Bᵀm` and `v' = -Bv + 2⟨m,Bv⟩/‖m‖²·m`; `shear = c‖m‖‖v‖`
+  is the size of the leading rank-one term and `error` that of the remainder.
+  The renewed frame has `shear = shear n`, coupling `a = ⟨m̂, B v̂⟩ ≈ 1`, tilt
+  `σ = √(⟨m̂ × v̂, B v̂⟩/a) ≈ 1/x_{n+1}`, and compression `⟨B m̂, m̂⟩ < -priorError`:
+  since `(‖m‖²)' = -2⟨Bm, m⟩`, the background stretches the ray and so the
+  shear of the next packet grows. The growth argument (`gradient_lower`) reads
+  only the leading term: `‖∇u(time, 0)‖ ≥ previousShear n / 2`.
+
+The invariant is split in two. `GrowthData` holds the ten fields the growth
+argument and the contradiction read; `Stage` extends it by the sixteen fields
+that are induction hypotheses for the successor step only. All cumulative
+bounds use only earlier indices. -/
 
 noncomputable section
 
@@ -17,42 +55,133 @@ open Set Finset Real InnerProductSpace EulerSmoothLimit EulerParentPacketFrames
   EulerPacketSourceScaleSequence EulerPacketSourceScaleActual EulerPacketBaseGuardScales
   EulerParentRenewalScale EulerMeanHarmonic
 
+/-- The transverse packet data of a parent in the fixed reference plane: its
+frame, inverse frame and strain along the centre trajectory, against which a
+stage's `ParentFrame` is measured. -/
 def frameData (A : Parent) : EulerTransversePacketProvider.Data FirstPlane :=
   A.transverseData firstNormal firstNormal_unit firstFrame support compact
 
-structure Stage {c B : ℝ} (S : Scales c B) (n : ℕ) where
+/-- The part of a packet stage that the growth argument reads. `gradient_lower`
+uses the frame fields, the activation time and `horizon_eq`; the contradiction
+(`no_evolution_of_eventually_covering`) uses the parent's horizon, `horizon_le` and the Sobolev
+realisation of the state. Nothing here mentions the next step. -/
+structure GrowthData {c B : ℝ} (S : Scales c B) (n : ℕ) where
+  /-- The parent: the volume-preserving particle map, with its velocity and
+  acceleration, that carries the current Euler state on `[0, parent.T]`. Its
+  frame, strain and curvature are the coefficients every estimate reads. -/
   parent : Parent
+  /-- The current Euler solution on the parent: a pointwise classical
+  `Evolution`, its Sobolev realisation `regularity` (converted to an ordinary
+  evolution by the contradiction), its label bounds, and its odd symmetry, which
+  makes the strain at the origin equal to the velocity gradient there
+  (`strain_origin`). -/
   state : SmoothState parent
-  low : LowBounds parent
+  /-- The activation time of the most recently added packet (`0` at the base
+  stage). The divergent quantity `activationGradient` is the velocity gradient
+  at `(time, 0)`. -/
   time : ℝ
+  /-- The activation time is a time of the stage solution. -/
   time_nonneg : 0 ≤ time
-  time_zero : n=0 → time=0
-  time_lower : n ≠ 0 → baseHorizon S.J S.X/12 ≤ time
+  /-- The stage solution lives exactly `2·timeWidth n` beyond the activation.
+  This gives `time < parent.T`, so the activation is an interior time, and it
+  lets the next stage's horizon nest strictly inside this one. -/
   horizon_eq : parent.T=time+2*timeWidth S.J S.X n
+  /-- Every stage horizon lies inside the base horizon, so all stage solutions
+  can be compared with one hypothetical evolution on `[0, baseHorizon]`. -/
   horizon_le : parent.T ≤ baseHorizon S.J S.X
+  /-- The frame of the parent strain along the centre trajectory at the
+  activation time: background `B`, ray `m`, velocity `v`, shear coefficient,
+  and the bounds `G` on `B` and `error` on the remainder. -/
+  frame : ParentFrame (frameData parent) time
+  /-- The leading rank-one part of the strain at the centre has shear
+  `previousShear n`, the target shear of the latest packet. This is the term
+  the growth argument isolates. -/
+  frame_shear : frame.shear=previousShear S.J S.X n
+  /-- The background `B` is bounded one shear level lower, by
+  `frameConstant·(1 + olderShear n)`, so that the leading term dominates it. -/
+  frame_bound : frame.G ≤ frameConstant*(1+olderShear S.J S.X n)
+  /-- The remainder after `B` and the rank-one shear are removed is at most
+  `priorError n`, an inverse fourth root of the previous frequency, which is
+  negligible against the leading shear. -/
+  frame_error : frame.error ≤ priorError S.J S.D S.X n
+
+/-- A packet stage: a `GrowthData` plus what the next step needs. The extra
+fields are the induction hypotheses consumed by the successor pipeline
+(`PacketStageRestriction`, `-Geometry`, `-Guards`, `-Inputs`, `-Estimates`) and
+re-established for stage `n+1`; none of them enters the growth argument. -/
+structure Stage {c B : ℝ} (S : Scales c B) (n : ℕ) extends GrowthData S n where
+  /-- The low-frequency source bounds of the parent: exterior and core lower
+  bounds `Be`, `Bc` on the initial strain, the curvature bound `K`, the
+  localization length `L` and the core radius `r`. They feed the coercivity
+  guard `small` of the next parent. -/
+  low : LowBounds parent
+  /-- The base stage is activated at time `0`; the forward step poses its
+  packet there. -/
+  time_zero : n=0 → time=0
+  /-- After the first step the activation time is at least a twelfth of the
+  base horizon. This bounds `time⁻¹`, and through it the history terms of the
+  joined step (`history_layer`). -/
+  time_lower : n ≠ 0 → baseHorizon S.J S.X/12 ≤ time
+  /-- The parent's scale is `supportScale n`: the next increment is supported
+  in a ball of radius half this scale. -/
   scale_eq : parent.ell=supportScale S.J S.X n
+  /-- The label constant of the state (the Sobolev size of the parent's
+  displacement, velocity and acceleration) is `previousFrequency n ^ 80`; the
+  next packet's frequency guard must dominate it. -/
   label_eq : state.labels.K=(previousFrequency S.J S.D S.X n)^80
+  /-- The velocity gradient is bounded on the whole horizon by
+  `gradientConstant·previousShear n`: the upper bound matching the lower bound
+  at the centre, consumed by the next step's low bounds and history data. -/
   gradient_bound : ∀ (t : Icc (0 : ℝ) parent.T) x,
     ‖fderiv ℝ (fun y => state.evolution.velocity (t,y)) x‖ ≤
       gradientConstant*previousShear S.J S.X n
+  /-- The pressure Hessian (the gradient of the force) is bounded by
+  `hessianConstant·previousShear n·olderShear n`. -/
   hessian_bound : ∀ (t : Icc (0 : ℝ) parent.T) x,
     ‖fderiv ℝ (state.evolution.force t) x‖ ≤
       hessianConstant*previousShear S.J S.X n*olderShear S.J S.X n
+  /-- Cumulative bound on the exterior strain constant: the base cost plus the
+  summable per-stage increments of the scale choice. -/
   exterior_bound : low.Be ≤ initialCoefficientCost+∑ i ∈ range n, initialIncrement S.J S.X i
+  /-- Cumulative bound on the core strain constant, starting from the base
+  shear `X^1000`. -/
   core_bound : low.Bc ≤ gradientConstant*S.X^1000+∑ i ∈ range n, initialIncrement S.J S.X i
+  /-- Cumulative bound on the curvature constant, starting from the base
+  pressure cost. Together with the two bounds above it keeps the coercivity
+  guard `small` true at every stage. -/
   pressure_bound : low.K ≤ initialCoefficientCost+literalInitialPressureCost S.D S.X+
     ∑ i ∈ range n, pressureIncrement S.J S.X i
+  /-- The localization length is determined by the core bound. -/
   boundary_eq : low.L=boundaryLocalizationC1*low.Bc+1
+  /-- The core radius is the base radius `X^(-1000)` at every stage. -/
   radius_eq : low.r=baseRadius S.X
-  frame : ParentFrame (frameData parent) time
-  frame_shear : frame.shear=previousShear S.J S.X n
-  frame_bound : frame.G ≤ frameConstant*(1+olderShear S.J S.X n)
-  frame_error : frame.error ≤ priorError S.J S.D S.X n
+  /-- The normalised coupling `a = ⟨m̂, B v̂⟩` stays within a summable distance
+  of `1`; each renewal moves it by at most `renewalCost i`. This gives
+  `1/2 ≤ a ≤ 2` (`coupling_bounds`). -/
   coupling_error : |frame.a-1| ≤ 2*∑ i ∈ range n, renewalCost S.J S.D 4 c frameConstant S.X i
+  /-- The normalised tilt `σ² = ⟨m̂ × v̂, B v̂⟩/a` is at least `1/(2 x_n²)`. -/
   tilt_lower : 1/2 ≤ frame.sigma^2*(scaleSequence S.J S.X n)^2
+  /-- The normalised tilt is at most `2/x_n²`: the renewed frame is nearly
+  untilted, at the scale of the sequence. -/
   tilt_upper : frame.sigma^2*(scaleSequence S.J S.X n)^2 ≤ 2
+  /-- After the first step the background strain compresses along the ray with
+  a margin exceeding `priorError n`. Since `m' = -Bᵀm`, this makes `‖m‖`, and
+  with it the shear `c‖m‖‖v‖` of the next packet, grow; the joined guards take
+  it as input and the renewal re-establishes it. -/
   compression : n ≠ 0 →
     ⟪frame.B time (unit (frame.m time)),unit (frame.m time)⟫_ℝ+priorError S.J S.D S.X n < 0
+
+namespace GrowthData
+
+variable {c B : ℝ} {S : Scales c B} {n : ℕ} (P : GrowthData S n)
+
+theorem time_lt : P.time < P.parent.T := by
+  rw [P.horizon_eq]
+  exact lt_add_of_pos_right _ (mul_pos (by norm_num) (timeWidth_pos S.J S.j_one S.x_pos n))
+
+theorem time_one : P.time ≤ 1 := P.time_lt.le.trans (P.horizon_le.trans S.time_small)
+
+end GrowthData
 
 namespace Stage
 
@@ -71,12 +200,6 @@ theorem sigma_pos : 0 < P.frame.sigma := by
   have ht := P.tilt_lower
   rw [hz,zero_pow (by decide : 2 ≠ 0),zero_mul] at ht
   norm_num at ht
-
-theorem time_lt : P.time < P.parent.T := by
-  rw [P.horizon_eq]
-  exact lt_add_of_pos_right _ (mul_pos (by norm_num) (timeWidth_pos S.J S.j_one S.x_pos n))
-
-theorem time_one : P.time ≤ 1 := P.time_lt.le.trans (P.horizon_le.trans S.time_small)
 
 theorem horizon_lower : baseHorizon S.J S.X/12 < P.parent.T := by
   by_cases hn : n=0

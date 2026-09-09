@@ -2,12 +2,18 @@ import NavierStokes.ComparatorDefinitions
 import NavierStokes.ProblemStatement
 
 /-!
-# Coordinate and viscosity bridge to the periodic Clay statement
+# Coordinate and viscosity bridge to the comparator statements
 
 This module translates the project's physical differential operators to the
-comparator's operators, and normalizes any positive viscosity to one. It uses
-only the independent comparator definitions; no reference theorem is imported.
-The application to the constructed candidate is in `ComparatorTheorem`.
+comparator's operators, and normalizes any positive viscosity to one. Both
+adapters, periodic (D) and whole-space (C), share everything here: the
+rescaling of the operators, the identification of the comparator equation over
+the parent class `NavierStokesExistenceAndSmoothness`, the normalized
+solution core `normalized_solution_core`, and the compactness-to-decay lemma
+`decay_of_slab_bound` behind both force-decay conditions. The two adapters
+differ only in the add-ons — periodicity for (D), finite energy for (C) — and
+in where compactness comes from. It uses only the independent comparator
+definitions; no reference theorem is imported.
 -/
 
 noncomputable section
@@ -113,6 +119,26 @@ theorem toComparator_jet_norm (f : VelocityField) (m : ℕ) (x : Space)
     (LinearIsometryEquiv.prodComm ℝ Space ℝ).norm_iteratedFDerivWithin_comp_right f hs
       (x := (x, t)) ⟨ht, mem_univ _⟩ m
 
+/-- Polynomial decay of a jet `J` against a positive weight `w`, from one bound
+of the weighted jet on a closed time slab and vanishing after the slab. This is
+the shared compactness-to-decay step: for (D) the slab bound comes from
+periodicity (`PeriodicForceDecay.futureJet_decay`), for (C) from compact
+spatial support (`CompactSpatialForceDecay.jet_decay`). -/
+theorem decay_of_slab_bound {V : Type*} [NormedAddCommGroup V] {J : SpaceTime → V}
+    {w : SpaceTime → ℝ} (hw : ∀ t : ℝ, 0 ≤ t → ∀ x : Space, 0 < w (t, x)) {T : ℝ}
+    (hzero : ∀ t : ℝ, T < t → ∀ x : Space, J (t, x) = 0)
+    (hbound : ∃ M : ℝ, ∀ t ∈ Icc (0 : ℝ) T, ∀ x : Space, ‖J (t, x)‖ * w (t, x) ≤ M) :
+    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 0 ≤ t → ∀ x : Space, ‖J (t, x)‖ ≤ C / w (t, x) := by
+  obtain ⟨M, hM⟩ := hbound
+  refine ⟨max M 1, lt_of_lt_of_le zero_lt_one (le_max_right _ _), ?_⟩
+  intro t ht x
+  have hwpos := hw t ht x
+  by_cases htT : t ≤ T
+  · rw [le_div_iff₀ hwpos]
+    exact (hM t ⟨ht, htT⟩ x).trans (le_max_left _ _)
+  · rw [hzero t (lt_of_not_ge htT) x, norm_zero]
+    exact (div_pos (lt_of_lt_of_le zero_lt_one (le_max_right _ _)) hwpos).le
+
 /-- All real decay exponents follow from the nonnegative-exponent jet bounds. -/
 theorem forceConditionPeriodic_of_decay {f : VelocityField}
     (hf : ContDiffOn ℝ ∞ f futureDomain)
@@ -188,66 +214,72 @@ theorem differentiable_time_slice {v : VelocityField}
   exact (h.comp t (contDiffAt_id.prodMk contDiffAt_const)).differentiableAt
     (by simp)
 
-/-- The original project conventions for a global viscosity-one solution. -/
-structure GlobalSolutionOne (f : VelocityField) (v : VelocityField) (p : PressureField) : Prop where
-  velocity_smooth : ContDiffOn ℝ ∞ v futureDomain
-  pressure_smooth : ContDiffOn ℝ ∞ p futureDomain
-  velocity_periodic : UnitSpatialPeriodsOn (Ici 0) v
-  pressure_periodic : UnitSpatialPeriodsOn (Ici 0) p
-  initial_velocity : ∀ x : Space, v (0, x) = 0
-  divergence_free : ∀ t : ℝ, 0 ≤ t → ∀ x : Space, spatialDivergence v t x = 0
-  navier_stokes : ∀ t : ℝ, 0 < t → ∀ x : Space, navierStokesResidual v p t x = f (t, x)
+/-- The residual of the viscosity-normalized fields, through the viscosity-`ν`
+operator applied to the original fields at the rescaled time. -/
+theorem rescale_residual {ν : ℝ} (hν : 0 < ν) {v : VelocityField} {p : PressureField}
+    (hv : ContDiffOn ℝ ∞ v futureDomain) {t : ℝ} (ht : 0 < t) (x : Space) :
+    navierStokesResidual (rescale ν⁻¹ ν⁻¹ v) (rescale (ν⁻¹ ^ 2) ν⁻¹ p) t x =
+      ν⁻¹ ^ 2 • (temporalDerivative v (ν⁻¹ * t) x + advection v (ν⁻¹ * t) x -
+        ν • spatialLaplacian v (ν⁻¹ * t) x + pressureGradient p (ν⁻¹ * t) x) := by
+  have hc : 0 < ν⁻¹ := inv_pos.mpr hν
+  rw [navierStokesResidual, rescale_temporalDerivative _ _ _ _ _
+    (differentiable_time_slice hv (mul_pos hc ht) x),
+    rescale_advection, rescale_laplacian, rescale_gradient]
+  have hcoef : ν⁻¹ * ν⁻¹ * ν = ν⁻¹ := by field_simp
+  simp only [smul_add, smul_sub, smul_smul, pow_two, hcoef]
 
+/-- The comparator equation, over the parent class shared by the periodic and
+whole-space reference statements, in the project's operators. -/
 theorem comparator_equation {ν : ℝ} {u₀ : Space → Space} {f v : Space → ℝ → Space}
     {p : Space → ℝ → ℝ}
-    (h : Comparator.NavierStokesExistenceAndSmoothnessPeriodic ν u₀ f v p)
+    (h : Comparator.NavierStokesExistenceAndSmoothness ν u₀ f v p)
     {t : ℝ} (ht : 0 < t) (x : Space) :
     temporalDerivative (fromComparator v) t x + advection (fromComparator v) t x -
       ν • spatialLaplacian (fromComparator v) t x +
       pressureGradient (fromComparator p) t x = f x t := by
   have hv := smooth_space_slice (fromComparator_smooth h.velocity_smooth) ht.le
-  rw [temporalDerivative_eq _ ht, laplacian_eq _ _ _ (hv.of_le (by
-    exact (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le)), gradient_eq]
+  rw [temporalDerivative_eq _ ht, laplacian_eq _ _ _
+    (hv.of_le (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le), gradient_eq]
   change derivWithin (v x) (Ici 0) t + fderiv ℝ (v · t) x (v x t) -
     ν • Δ (v · t) x + gradient (p · t) x = f x t
   rw [h.navier_stokes x t ht.le]
   abel
 
-/-- Pull a hypothetical viscosity-`ν` solution back to viscosity one. -/
-theorem normalized_solution {ν : ℝ} (hν : 0 < ν) {f : VelocityField}
+/-- Pull a hypothetical viscosity-`ν` comparator solution back to a global
+viscosity-one solution in the project's vocabulary. This is the common core of
+both adapters; periodicity and finite energy are added separately. -/
+theorem normalized_solution_core {ν : ℝ} (hν : 0 < ν) {f : VelocityField}
     {v : Space → ℝ → Space} {p : Space → ℝ → ℝ}
-    (h : Comparator.NavierStokesExistenceAndSmoothnessPeriodic ν (fun _ => 0)
+    (h : Comparator.NavierStokesExistenceAndSmoothness ν (fun _ => 0)
       (toComparator (rescaledForce ν f)) v p) :
-    GlobalSolutionOne f (rescale ν⁻¹ ν⁻¹ (fromComparator v))
+    Solution (Ici 0) f (rescale ν⁻¹ ν⁻¹ (fromComparator v))
       (rescale (ν⁻¹ ^ 2) ν⁻¹ (fromComparator p)) := by
   have hc : 0 < ν⁻¹ := inv_pos.mpr hν
   have hv := fromComparator_smooth h.velocity_smooth
   have hp := fromComparator_smooth h.pressure_smooth
-  refine ⟨rescale_smooth hv _ hc.le, rescale_smooth hp _ hc.le, ?_, ?_, ?_, ?_, ?_⟩
-  · apply rescale_periodic (a := ν⁻¹) (c := ν⁻¹) ?_ hc.le
-    intro t ht x i
-    exact h.isOnePeriodic_velocity t ht x i
-  · apply rescale_periodic (a := ν⁻¹ ^ 2) (c := ν⁻¹) ?_ hc.le
-    intro t ht x i
-    exact h.isOnePeriodic_pressure t ht x i
+  refine ⟨rescale_smooth hv _ hc.le, rescale_smooth hp _ hc.le, ?_, ?_, ?_⟩
   · intro x
     simp [rescale, fromComparator, h.initial_condition]
   · intro t ht x
     rw [rescale_divergence, divergence_eq]
     change ν⁻¹ * Comparator.divergence (v · (ν⁻¹ * t)) x = 0
     rw [h.div_free x (ν⁻¹ * t) (mul_nonneg hc.le ht), mul_zero]
-  · intro t ht x
-    rw [navierStokesResidual, rescale_temporalDerivative _ _ _ _ _
-      (differentiable_time_slice hv (mul_pos hc ht) x),
-      rescale_advection, rescale_laplacian, rescale_gradient]
-    have he := congrArg (fun z : Space => ν⁻¹ ^ 2 • z)
-      (comparator_equation h (mul_pos hc ht) x)
-    have hcoef : ν⁻¹ ^ 2 * ν = ν⁻¹ := by field_simp
-    have hforce : ν⁻¹ ^ 2 • toComparator (rescaledForce ν f) x (ν⁻¹ * t) = f (t, x) := by
-      simp [toComparator, rescaledForce, rescale, smul_smul, hν.ne']
-    rw [hforce] at he
-    simp only [smul_add, smul_sub, smul_smul] at he
-    rw [hcoef] at he
-    simpa only [pow_two] using he
+  · intro t _ ht x
+    rw [rescale_residual hν hv ht x, comparator_equation h (mul_pos hc ht) x]
+    simp [toComparator, rescaledForce, rescale, smul_smul, hν.ne']
+
+/-- The periodic add-on: a hypothetical solution of the periodic comparator
+statement normalizes to a `GlobalSolutionOne`. -/
+theorem normalized_solution {ν : ℝ} (hν : 0 < ν) {f : VelocityField}
+    {v : Space → ℝ → Space} {p : Space → ℝ → ℝ}
+    (h : Comparator.NavierStokesExistenceAndSmoothnessPeriodic ν (fun _ => 0)
+      (toComparator (rescaledForce ν f)) v p) :
+    GlobalSolutionOne f (rescale ν⁻¹ ν⁻¹ (fromComparator v))
+      (rescale (ν⁻¹ ^ 2) ν⁻¹ (fromComparator p)) where
+  toSolution := normalized_solution_core hν h.toNavierStokesExistenceAndSmoothness
+  velocity_periodic :=
+    rescale_periodic (fun t ht x i => h.isOnePeriodic_velocity t ht x i) _ (inv_pos.mpr hν).le
+  pressure_periodic :=
+    rescale_periodic (fun t ht x i => h.isOnePeriodic_pressure t ht x i) _ (inv_pos.mpr hν).le
 
 end NavierStokes.ComparatorBridge

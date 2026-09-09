@@ -1,7 +1,11 @@
 import Euler.PacketInductionStage
 
-/-! The actual physical gradient at a stage's activation diverges with
-the stage index. This uses the invariant's true frame decomposition. -/
+/-! The velocity gradient at a stage's activation point diverges with the
+stage index. The argument is stated for `GrowthData`, the ten-field part of
+the invariant it reads: the frame's decomposition of the strain at the centre
+into a background, a rank-one shear of size `previousShear n`, and a remainder,
+and the scale fact that background and remainder are together at most half the
+shear (`activation_small`). -/
 
 noncomputable section
 
@@ -36,7 +40,7 @@ theorem previousShear_ge_index {c B : ℝ} (S : Scales c B) (n : ℕ) :
 end Scales
 end EulerPacketInductionScales
 
-namespace EulerPacketInduction.Stage
+namespace EulerPacketInduction
 
 open Set Real Filter InnerProductSpace ContinuousLinearMap EulerSmoothLimit
   EulerPacketInductionScales EulerPacketSourceGeometry EulerPacketNormalizedPrimary
@@ -44,11 +48,20 @@ open Set Real Filter InnerProductSpace ContinuousLinearMap EulerSmoothLimit
   EulerTransversePacketProvider
 open scoped Topology
 
-variable {c B : ℝ} {S : Scales c B} {n : ℕ} (P : Stage S n)
+namespace GrowthData
 
+variable {c B : ℝ} {S : Scales c B} {n : ℕ} (P : GrowthData S n)
+
+/-- The divergent quantity: the norm of the spatial velocity gradient of the
+stage solution at the packet centre `0` at the activation time. -/
 def activationGradient : ℝ :=
   ‖fderiv ℝ (fun x => P.state.evolution.velocity (P.time,x)) 0‖
 
+/-- The activation gradient is at least half the leading shear. At the centre
+the strain is the velocity gradient (`strain_origin`, using the odd symmetry),
+and the frame writes it as background plus `previousShear n · v̂ ⊗ m̂` plus a
+remainder; the background and the remainder are together at most half the
+shear by `frame_bound`, `frame_error` and `activation_small`. -/
 theorem gradient_lower (hn : n ≠ 0) : previousShear S.J S.X n/2 ≤ P.activationGradient := by
   let t : Icc (0 : ℝ) P.parent.T := ⟨P.time,P.time_nonneg,P.time_lt.le⟩
   let M := P.parent.strain.field t 0
@@ -79,7 +92,9 @@ theorem gradient_lower (hn : n ≠ 0) : previousShear S.J S.X n/2 ≤ P.activati
   rw [heq] at hM
   linarith only [hM,he]
 
-theorem gradient_atTop (P : ∀ n, Stage S n) :
+/-- Along any family of growth data the activation gradients diverge, since
+`previousShear n ≥ n+1`. -/
+theorem gradient_atTop (P : ∀ n, GrowthData S n) :
     Tendsto (fun n => (P n).activationGradient) atTop atTop := by
   apply tendsto_atTop.2
   intro b
@@ -91,4 +106,12 @@ theorem gradient_atTop (P : ∀ n, Stage S n) :
   have hg := (P n).gradient_lower hn0
   linarith only [hN,hi,hs,hg]
 
-end EulerPacketInduction.Stage
+end GrowthData
+
+/-- The divergence of the activation gradients along a family of full stages,
+read off their growth data. -/
+theorem Stage.gradient_atTop {c B : ℝ} {S : Scales c B} (P : ∀ n, Stage S n) :
+    Tendsto (fun n => (P n).activationGradient) atTop atTop :=
+  GrowthData.gradient_atTop fun n => (P n).toGrowthData
+
+end EulerPacketInduction

@@ -1,21 +1,21 @@
-import Mathlib.Analysis.Calculus.TangentCone.Prod
-import NavierStokes.ProblemStatement
+import NavierStokes.SolutionDifference
+import NavierStokes.GronwallInterior
 import NavierStokes.PeriodicIntegration
-import Mathlib.Analysis.InnerProductSpace.Calculus
-import Mathlib.Analysis.Calculus.Deriv.MeanValue
-import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Algebra.Ring.Periodic
 import Mathlib.Algebra.Order.Floor.Ring
-import Mathlib.Tactic.Abel
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.Ring
-import NavierStokes.WithTopLemmas
 
 /-!
 # Classical uniqueness for periodic Navier--Stokes fields
 
-The differential operators are those of `ProblemStatement`. The energy
-estimate is derived from the equations and periodic integration by parts.
+The `L²` energy method on the unit cube for the operators of
+`ProblemStatement`: periodic integration by parts kills the pressure and the
+transport term, the viscous term is dissipative, and the one indefinite term is
+bounded by the gradient of the reference solution. The difference algebra is
+shared with the whole-space proof (`SolutionDifference`); the Gronwall step is
+`GronwallInterior.eq_zero_of_deriv_le`. This module also holds the two
+periodicity facts the periodic exclusion needs: every point has a
+representative in the unit cube, and a continuous periodic field is bounded on
+a closed time slab.
 -/
 
 noncomputable section
@@ -25,205 +25,7 @@ open scoped Topology BigOperators ContDiff InnerProductSpace
 
 namespace NavierStokes.PeriodicUniqueness
 
-open ProblemStatement
-
-noncomputable def slab (a b : ℝ) : Set SpaceTime := Icc a b ×ˢ univ
-
-theorem spatial_smooth {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {a b t : ℝ} {u : SpaceTime → V} (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (ht : t ∈ Icc a b) : ContDiff ℝ ∞ (fun x : Space => u (t, x)) :=
-  hu.comp_contDiff (contDiff_const.prodMk contDiff_id)
-    (fun x => show (t, x) ∈ slab a b from ⟨ht, mem_univ x⟩)
-
-theorem smooth_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {a b t : ℝ} {u : SpaceTime → V} (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (ht : t ∈ Ioo a b) (x : Space) : ContDiffAt ℝ ∞ u (t, x) :=
-  hu.contDiffAt (prod_mem_nhds (Icc_mem_nhds ht.1 ht.2) Filter.univ_mem)
-
-theorem spatialDerivative_sub {u v : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hv : ContDiff ℝ ∞ (fun x : Space => v (t, x))) (x : Space) :
-    spatialDerivative (u - v) t x = spatialDerivative u t x - spatialDerivative v t x :=
-  fderiv_fun_sub (hu.differentiable (by simp) x)
-    (hv.differentiable (by simp) x)
-
-theorem spatialDivergence_sub {u v : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hv : ContDiff ℝ ∞ (fun x : Space => v (t, x))) (x : Space) :
-    spatialDivergence (u - v) t x = spatialDivergence u t x - spatialDivergence v t x := by
-  simp only [spatialDivergence, spatialDerivative_sub hu hv,
-    _root_.sub_apply, PiLp.sub_apply, Finset.sum_sub_distrib]
-
-theorem advection_difference {u v : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hv : ContDiff ℝ ∞ (fun x : Space => v (t, x))) (x : Space) :
-    advection u t x - advection v t x =
-      spatialDerivative u t x ((u - v) (t, x)) +
-        spatialDerivative (u - v) t x (v (t, x)) := by
-  simp only [advection, spatialDerivative_sub hu hv, Pi.sub_apply,
-    map_sub, _root_.sub_apply]
-  abel
-
-theorem spatialLaplacian_sub {u v : VelocityField} {t : ℝ}
-    (hu : ContDiff ℝ ∞ (fun x : Space => u (t, x)))
-    (hv : ContDiff ℝ ∞ (fun x : Space => v (t, x))) (x : Space) :
-    spatialLaplacian (u - v) t x = spatialLaplacian u t x - spatialLaplacian v t x := by
-  unfold spatialLaplacian
-  simp_rw [spatialDerivative_sub hu hv, _root_.sub_apply]
-  rw [← Finset.sum_sub_distrib]
-  apply Finset.sum_congr rfl
-  intro i _
-  have hdu := ((hu.fderiv_right infty_add_one_le_infty).clm_apply
-    (contDiff_const : ContDiff ℝ ∞ (fun _ : Space => coordinateVector i))).differentiable
-      (by simp) x
-  have hdv := ((hv.fderiv_right infty_add_one_le_infty).clm_apply
-    (contDiff_const : ContDiff ℝ ∞ (fun _ : Space => coordinateVector i))).differentiable
-      (by simp) x
-  dsimp only [spatialDerivative]
-  rw [fderiv_fun_sub hdu hdv]
-  rfl
-
-theorem pressureGradient_sub {p q : PressureField} {t : ℝ}
-    (hp : ContDiff ℝ ∞ (fun x : Space => p (t, x)))
-    (hq : ContDiff ℝ ∞ (fun x : Space => q (t, x))) (x : Space) :
-    pressureGradient (p - q) t x = pressureGradient p t x - pressureGradient q t x := by
-  unfold pressureGradient
-  have hderiv := fderiv_fun_sub (hp.differentiable (by simp) x)
-    (hq.differentiable (by simp) x)
-  simp only [Pi.sub_apply, hderiv, _root_.sub_apply, sub_smul,
-    Finset.sum_sub_distrib]
-
-theorem temporalDerivative_sub {u v : VelocityField} {t : ℝ} {x : Space}
-    (hu : DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t)
-    (hv : DifferentiableAt ℝ (fun s : ℝ => v (s, x)) t) :
-    temporalDerivative (u - v) t x = temporalDerivative u t x - temporalDerivative v t x := by
-  unfold temporalDerivative
-  rw [show (fun s => (u - v) (s, x)) = (fun s => u (s, x) - v (s, x)) from rfl,
-    fderiv_fun_sub hu hv]
-  rfl
-
-/-- Subtract the actual Navier--Stokes residuals, retaining the favorable
-transport decomposition `Du(w) + Dw(v)`. -/
-theorem difference_equation {u v : VelocityField} {p q : PressureField} {t : ℝ} {x : Space}
-    (hu : ContDiff ℝ ∞ (fun y : Space => u (t, y)))
-    (hv : ContDiff ℝ ∞ (fun y : Space => v (t, y)))
-    (hp : ContDiff ℝ ∞ (fun y : Space => p (t, y)))
-    (hq : ContDiff ℝ ∞ (fun y : Space => q (t, y)))
-    (htu : DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t)
-    (htv : DifferentiableAt ℝ (fun s : ℝ => v (s, x)) t)
-    (hNS : navierStokesResidual u p t x = navierStokesResidual v q t x) :
-    temporalDerivative (u - v) t x = spatialLaplacian (u - v) t x -
-      spatialDerivative u t x ((u - v) (t, x)) -
-      spatialDerivative (u - v) t x (v (t, x)) - pressureGradient (p - q) t x := by
-  have ha := advection_difference hu hv x
-  rw [temporalDerivative_sub htu htv, spatialLaplacian_sub hu hv,
-    pressureGradient_sub hp hq]
-  unfold navierStokesResidual at hNS
-  have heq := sub_eq_zero.mpr hNS
-  rw [show temporalDerivative u t x + advection u t x - spatialLaplacian u t x +
-      pressureGradient p t x -
-      (temporalDerivative v t x + advection v t x - spatialLaplacian v t x +
-        pressureGradient q t x) =
-      temporalDerivative u t x - temporalDerivative v t x +
-        (advection u t x - advection v t x) -
-        (spatialLaplacian u t x - spatialLaplacian v t x) +
-        (pressureGradient p t x - pressureGradient q t x) by abel, ha] at heq
-  apply sub_eq_zero.mp
-  convert! heq using 1
-  abel
-
-/-- The only indefinite energy term is controlled by the operator norm of
-the first velocity gradient. -/
-theorem nonlinear_energy_bound (A : Space →L[ℝ] Space) (w : Space) {B : ℝ}
-    (hB : ‖A‖ ≤ B) : -⟪w, A w⟫_ℝ ≤ B * ‖w‖ ^ 2 := by
-  calc
-    -⟪w, A w⟫_ℝ ≤ |⟪w, A w⟫_ℝ| := neg_le_abs _
-    _ ≤ ‖w‖ * ‖A w‖ := abs_real_inner_le_norm _ _
-    _ ≤ ‖w‖ * (‖A‖ * ‖w‖) := mul_le_mul_of_nonneg_left (A.le_opNorm w) (norm_nonneg w)
-    _ ≤ ‖w‖ * (B * ‖w‖) := mul_le_mul_of_nonneg_left
-      (mul_le_mul_of_nonneg_right hB (norm_nonneg w)) (norm_nonneg w)
-    _ = B * ‖w‖ ^ 2 := by ring
-
-/-- The zero-initial-data Gronwall conclusion, proved by the integrating
-factor and mean-value theorem. Only interior derivatives are required. -/
-theorem gronwall_zero {a b K : ℝ} {E E' : ℝ → ℝ} (hab : a ≤ b)
-    (hcont : ContinuousOn E (Icc a b)) (hinitial : E a = 0)
-    (hnonneg : ∀ t ∈ Icc a b, 0 ≤ E t)
-    (hderiv : ∀ t ∈ Ioo a b, HasDerivAt E (E' t) t)
-    (hbound : ∀ t ∈ Ioo a b, E' t ≤ K * E t) :
-    ∀ t ∈ Icc a b, E t = 0 := by
-  let G : ℝ → ℝ := fun t => Real.exp (-K * t) * E t
-  let G' : ℝ → ℝ := fun t => Real.exp (-K * t) * (E' t - K * E t)
-  have hgcont : ContinuousOn G (Icc a b) :=
-    (Real.continuous_exp.comp (continuous_const.mul continuous_id)).continuousOn.mul hcont
-  have hgderiv (t : ℝ) (ht : t ∈ Ioo a b) : HasDerivAt G (G' t) t := by
-    have hexp := ((hasDerivAt_id t).const_mul (-K)).exp
-    convert! hexp.mul (hderiv t ht) using 1
-    dsimp [G, G']
-    ring
-  have hG : AntitoneOn G (Icc a b) := by
-    apply antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc a b) hgcont
-    · intro t ht
-      exact (hgderiv t (by simpa only [interior_Icc] using ht)).hasDerivWithinAt
-    · intro t ht
-      exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le
-        (sub_nonpos.mpr (hbound t (by simpa only [interior_Icc] using ht)))
-  intro t ht
-  have hle := hG ⟨le_rfl, hab⟩ ht ht.1
-  have hGzero : G a = 0 := by simp [G, hinitial]
-  rw [hGzero] at hle
-  have hE : E t ≤ 0 := by
-    dsimp only [G] at hle
-    nlinarith [Real.exp_pos (-K * t)]
-  exact le_antisymm hE (hnonneg t ht)
-
-/-- The ordinary spatial derivative at a time endpoint is the restriction
-of the joint within-derivative to spatial directions. -/
-theorem spatialDerivative_eq_within_comp {a b t : ℝ} {u : VelocityField}
-    (hu : ContDiffOn ℝ ∞ u (slab a b)) (ht : t ∈ Icc a b) (x : Space) :
-    spatialDerivative u t x =
-      (fderivWithin ℝ u (slab a b) (t, x)).comp (ContinuousLinearMap.inr ℝ ℝ Space) := by
-  have hd := (hu.differentiableOn (by simp) (t, x) ⟨ht, mem_univ x⟩).hasFDerivWithinAt
-  have hs := hd.comp x (s := univ) (hasFDerivAt_prodMk_right t x).hasFDerivWithinAt
-    (fun y _ => show (t, y) ∈ slab a b from ⟨ht, mem_univ y⟩)
-  have hs' : HasFDerivAt (fun y : Space => u (t, y))
-      ((fderivWithin ℝ u (slab a b) (t, x)).comp
-        (ContinuousLinearMap.inr ℝ ℝ Space)) x := by
-    simpa only [Function.comp_def, hasFDerivWithinAt_univ] using hs
-  exact hs'.fderiv
-
-/-- Compactness supplies the spatial-gradient bound used by the energy
-estimate; it is a conclusion from smoothness, not an input to uniqueness. -/
-theorem exists_gradient_bound {a b : ℝ} (hab : a < b) {u : VelocityField}
-    (hu : ContDiffOn ℝ ∞ u (slab a b)) {K : Set Space} (hK : IsCompact K) :
-    ∃ B : ℝ, 0 < B ∧ ∀ t ∈ Icc a b, ∀ x ∈ K, ‖spatialDerivative u t x‖ ≤ B := by
-  have hs : UniqueDiffOn ℝ (slab a b) := (uniqueDiffOn_Icc hab).prod uniqueDiffOn_univ
-  have hD := (hu.fderivWithin hs infty_add_one_le_infty).continuousOn
-  have hDK : ContinuousOn (fderivWithin ℝ u (slab a b)) (Icc a b ×ˢ K) :=
-    hD.mono (fun z hz => ⟨hz.1, mem_univ z.2⟩)
-  obtain ⟨B, hBpos, hB⟩ := ((isCompact_Icc.prod hK).image_of_continuousOn hDK).isBounded.exists_pos_norm_le
-  refine ⟨B, hBpos, ?_⟩
-  intro t ht x hx
-  apply ContinuousLinearMap.opNorm_le_bound _ hBpos.le
-  intro w
-  rw [spatialDerivative_eq_within_comp hu ht x, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.inr_apply]
-  calc
-    ‖(fderivWithin ℝ u (slab a b) (t, x)) (0, w)‖ ≤
-        ‖fderivWithin ℝ u (slab a b) (t, x)‖ * ‖((0 : ℝ), w)‖ :=
-      (fderivWithin ℝ u (slab a b) (t, x)).le_opNorm _
-    _ ≤ B * ‖((0 : ℝ), w)‖ := mul_le_mul_of_nonneg_right
-      (hB _ ⟨(t, x), ⟨ht, hx⟩, rfl⟩) (norm_nonneg _)
-    _ = B * ‖w‖ := by simp
-
-/-- Reconstruction in the standard Euclidean coordinate basis. -/
-theorem sum_coordinates (x : Space) :
-    (∑ i : Fin 3, x i • coordinateVector i) = x := by
-  apply (EuclideanSpace.equiv (Fin 3) ℝ).injective
-  ext j
-  change (EuclideanSpace.proj j) (∑ i : Fin 3, x i • coordinateVector i) = x j
-  simp only [map_sum, map_smul]
-  simp [coordinateVector]
+open ProblemStatement SolutionDifference
 
 /-- Unit coordinate periods imply invariance under every integer lattice
 translation; no quotient or fundamental-domain claim is assumed. -/
@@ -263,58 +65,39 @@ theorem periodic_fderiv {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
   rw [← fderiv_comp_add_right (coordinateVector i)]
   exact congrArg (fun g : Space → V => fderiv ℝ g x) (funext (fun y => hp y i))
 
-theorem spatial_partial_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {f : Space → V} (hf : ContDiff ℝ ∞ f) (i : Fin 3) :
-    ContDiff ℝ ∞ (fun x => fderiv ℝ f x (coordinateVector i)) :=
-  (hf.fderiv_right infty_add_one_le_infty).clm_apply contDiff_const
-
-theorem component_contDiff {f : Space → Space} (hf : ContDiff ℝ ∞ f) (j : Fin 3) :
-    ContDiff ℝ ∞ (fun x => f x j) :=
-  (EuclideanSpace.proj j : Space →L[ℝ] ℝ).contDiff.comp hf
-
-theorem fderiv_component {f : Space → Space} (hf : ContDiff ℝ ∞ f)
-    (j : Fin 3) (x v : Space) :
-    fderiv ℝ (fun y => f y j) x v = fderiv ℝ f x v j := by
-  have h := ((EuclideanSpace.proj j : Space →L[ℝ] ℝ).hasFDerivAt.comp x
-    (hf.differentiable (by simp) x).hasFDerivAt).fderiv
-  exact congrArg (fun A : Space →L[ℝ] ℝ => A v) h
-
-theorem fderiv_apply_eq_sum (f : Space → ℝ) (x v : Space) :
-    fderiv ℝ f x v = ∑ i : Fin 3, v i * fderiv ℝ f x (coordinateVector i) := by
-  conv_lhs => rw [← sum_coordinates v]
-  simp only [map_sum, map_smul, smul_eq_mul]
-
-theorem fderiv_normsq {f : Space → Space} (hf : ContDiff ℝ ∞ f) (x v : Space) :
-    fderiv ℝ (fun y => ‖f y‖ ^ 2) x v = 2 * ⟪f x, fderiv ℝ f x v⟫_ℝ := by
-  rw [((hf.differentiable (by simp) x).hasFDerivAt.norm_sq).fderiv]
-  simp
-
-theorem fderiv_inner {f g : Space → Space} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
-    (x v : Space) :
-    fderiv ℝ (fun y => ⟪f y, g y⟫_ℝ) x v =
-      ⟪f x, fderiv ℝ g x v⟫_ℝ + ⟪fderiv ℝ f x v, g x⟫_ℝ := by
-  rw [((hf.differentiable (by simp) x).hasFDerivAt.inner ℝ
-    (hg.differentiable (by simp) x).hasFDerivAt).fderiv]
-  rfl
-
-/-- The pressure term paired with a vector is its scalar directional
-derivative. This uses exactly the gradient definition in the target. -/
-theorem inner_pressureGradient (p : PressureField) (t : ℝ) (x w : Space) :
-    ⟪w, pressureGradient p t x⟫_ℝ = fderiv ℝ (fun y => p (t, y)) x w := by
-  rw [fderiv_apply_eq_sum]
-  simp only [pressureGradient, inner_sum, inner_smul_right, coordinateVector,
-    EuclideanSpace.inner_single_right, RCLike.conj_to_real, one_mul]
-  apply Finset.sum_congr rfl
-  intro i _
-  ring
-
-theorem energy_density_derivative {u : VelocityField} {t : ℝ} {x : Space}
-    (hu : DifferentiableAt ℝ (fun s => u (s, x)) t) :
-    HasDerivAt (fun s : ℝ => ‖u (s, x)‖ ^ 2)
-      (2 * ⟪u (t, x), temporalDerivative u t x⟫_ℝ) t :=
-  hu.hasDerivAt.norm_sq
-
 open PeriodicIntegration
+
+/-- The closed unit cube as a compact subset of `Space`. -/
+def cubeImage : Set Space := toSpace '' cube
+
+theorem isCompact_cubeImage : IsCompact cubeImage :=
+  (show IsCompact cube from isCompact_Icc).image toSpace.continuous
+
+/-- `exists_cube_representative`, with the representative in `cubeImage`. -/
+theorem exists_cubeImage_representative {W : Type*} {f : Space → W}
+    (hf : ∀ i : Fin 3, Function.Periodic f (coordinateVector i)) (x : Space) :
+    ∃ y ∈ cubeImage, f y = f x := by
+  obtain ⟨y, hy, hfy⟩ := exists_cube_representative hf x
+  exact ⟨y, ⟨toSpace.symm y, ⟨fun i => (hy i).1, fun i => (hy i).2⟩,
+    toSpace.apply_symm_apply y⟩, hfy⟩
+
+/-- Compactness bounds a relatively continuous periodic field on an entire
+closed time slab, uniformly over all spatial points. -/
+theorem periodic_bound_on_slab {V : Type*} [NormedAddCommGroup V]
+    {g : SpaceTime → V} {a b : ℝ}
+    (hg : ContinuousOn g (Icc a b ×ˢ (univ : Set Space)))
+    (hperiod : UnitSpatialPeriodsOn (Icc a b) g) :
+    ∃ B : ℝ, 0 < B ∧ ∀ t ∈ Icc a b, ∀ x : Space, ‖g (t, x)‖ ≤ B := by
+  obtain ⟨B, hB⟩ := (isCompact_Icc.prod isCompact_cubeImage).exists_bound_of_continuousOn
+    (hg.mono (fun z hz => ⟨hz.1, mem_univ z.2⟩))
+  refine ⟨max B 1, lt_of_lt_of_le zero_lt_one (le_max_right _ _), ?_⟩
+  intro t ht x
+  obtain ⟨z, hz, hzx⟩ := exists_cubeImage_representative
+    (f := fun y : Space => g (t, y)) (fun i y => hperiod t ht y i) x
+  calc
+    ‖g (t, x)‖ = ‖g (t, z)‖ := congrArg norm hzx.symm
+    _ ≤ B := hB (t, z) ⟨ht, hz⟩
+    _ ≤ max B 1 := le_max_left _ _
 
 theorem component_periodic {f : Space → Space} (hf : UnitPeriods f) (j : Fin 3) :
     UnitPeriods (fun x => f x j) := by
@@ -441,20 +224,6 @@ theorem cubeIntegral_pressure_energy_zero {w : VelocityField} {p : PressureField
   rw [hfun]
   exact cubeIntegral_fderiv_apply_zero hp hw hpp hpw hdiv
 
-theorem spatialLaplacian_contDiff {w : VelocityField} {t : ℝ}
-    (hw : ContDiff ℝ ∞ (fun x : Space => w (t, x))) :
-    ContDiff ℝ ∞ (spatialLaplacian w t) := by
-  change ContDiff ℝ ∞ (fun x => ∑ i : Fin 3,
-    spatialPartial i (spatialPartial i (fun y => w (t, y))) x)
-  exact ContDiff.sum fun i _ => spatial_partial_contDiff (spatial_partial_contDiff hw i) i
-
-theorem pressureGradient_contDiff {p : PressureField} {t : ℝ}
-    (hp : ContDiff ℝ ∞ (fun x : Space => p (t, x))) :
-    ContDiff ℝ ∞ (pressureGradient p t) := by
-  change ContDiff ℝ ∞ (fun x => ∑ i : Fin 3,
-    spatialPartial i (fun y => p (t, y)) x • coordinateVector i)
-  exact ContDiff.sum fun i _ => (spatial_partial_contDiff hp i).smul contDiff_const
-
 theorem unitPeriods_sub {V : Type*} [Sub V] {f g : Space → V}
     (hf : UnitPeriods f) (hg : UnitPeriods g) : UnitPeriods (f - g) := by
   intro x i
@@ -566,13 +335,6 @@ theorem energy_rate_le {u v : VelocityField} {p q : PressureField} {t B : ℝ}
   have hd := dissipation_nonneg (u - v) t
   nlinarith
 
-theorem time_differentiable_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    {a b t : ℝ} {u : SpaceTime → V} (hu : ContDiffOn ℝ ∞ u (slab a b))
-    (ht : t ∈ Ioo a b) (x : Space) :
-    DifferentiableAt ℝ (fun s : ℝ => u (s, x)) t :=
-  ((smooth_at_interior hu ht x).comp t
-    (contDiffAt_id.prodMk contDiffAt_const)).differentiableAt (by simp)
-
 theorem energy_continuousOn {a b : ℝ} {u v : VelocityField}
     (hu : ContDiffOn ℝ ∞ u (slab a b)) (hv : ContDiffOn ℝ ∞ v (slab a b)) :
     ContinuousOn (energy u v) (Icc a b) := by
@@ -616,19 +378,9 @@ theorem eq_of_energy_zero {u v : VelocityField} {t : ℝ}
     (hzero : energy u v t = 0) (x : Space) : u (t, x) = v (t, x) := by
   have hc := eq_zero_on_cube_of_integral_norm_sq_eq_zero (hu.sub hv) hzero
   have hpw : UnitPeriods (fun z : Space => (u - v) (t, z)) := unitPeriods_sub hpu hpv
-  obtain ⟨z, hz, hzx⟩ := exists_cube_representative
+  obtain ⟨z, ⟨y, hy, rfl⟩, hzx⟩ := exists_cubeImage_representative
     (f := fun z : Space => (u - v) (t, z)) (fun i y => hpw y i) x
-  let y : Coords := toSpace.symm z
-  have hy : y ∈ cube := by
-    constructor
-    · intro i
-      exact (hz i).1
-    · intro i
-      exact (hz i).2
-  have hzy : toSpace y = z := toSpace.apply_symm_apply z
-  have hcz := hc y hy
-  rw [hzy] at hcz
-  exact sub_eq_zero.mp (hzx.symm.trans hcz)
+  exact sub_eq_zero.mp (hzx.symm.trans (hc y hy))
 
 /-- Classical uniqueness on a compact time interval for the exact periodic
 Navier--Stokes equation of `ProblemStatement`, with viscosity one. Both
@@ -664,7 +416,7 @@ theorem classical_uniqueness_on_Icc {a b : ℝ}
         (time_differentiable_at_interior hu ht) (time_differentiable_at_interior hv ht)
         (fun x => (hNSu t ht x).trans (hNSv t ht x).symm)
         (fun y hy => hB t ht' (toSpace y) ⟨y, hy, rfl⟩)
-    have hzero := gronwall_zero hab.le (energy_continuousOn hu hv)
+    have hzero := GronwallInterior.eq_zero_of_deriv_le hab.le (energy_continuousOn hu hv)
       (energy_initial_zero hinitial) (fun t _ => energy_nonneg u v t)
       (fun t ht => energy_hasDerivAt hu hv ht) hbound
     intro t ht x

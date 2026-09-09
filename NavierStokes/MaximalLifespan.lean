@@ -1,12 +1,26 @@
 import NavierStokes.PeriodicUniqueness
 
 /-!
-# Conditional maximal classical lifespan of the candidate
+# The periodic exclusion: no global solution extends the candidate
 
-An actual `CandidateProperties` witness has maximal classical lifespan one.
-The proof uses the proved periodic uniqueness theorem and a compactness bound
-for a continuous periodic field across time one. It assumes no general
-Navier--Stokes existence theorem and never identifies pressure gauges.
+This is the (D) branch of the delivered argument, steps two and three of the
+three-step chain described in `NavierStokes/ComparatorTheorem.lean`:
+
+* identification — a classical periodic solution with the candidate's force
+  and zero datum agrees with the candidate below time one
+  (`candidate_agree_on_overlap`, from `PeriodicUniqueness.classical_uniqueness_on_Icc`);
+* contradiction — a solution living past time one is continuous on
+  `[0,1] × cube`, and periodicity reduces every value of the candidate to the
+  cube, so `SpeedUnboundedAtOne` fails
+  (`candidate_no_solution_after_one`, via `SpeedUnboundedAtOne.false_of_agree`).
+
+`candidate_excludes_global_solution` is the composite consumed by the adapter;
+it has the same signature as the whole-space exclusion
+`ComparatorBridge.compact_candidate_excludes_global_solution`. The manuscript's
+corollaries about maximality of the lifespan live in
+`NavierStokes/CandidateConsequences.lean`, off this path. No general
+Navier--Stokes existence theorem is assumed and pressure gauges are never
+identified.
 -/
 
 noncomputable section
@@ -16,254 +30,104 @@ open scoped Topology ContDiff
 
 namespace NavierStokes.MaximalLifespan
 
-open ProblemStatement PeriodicIntegration
+open ProblemStatement PeriodicIntegration SolutionDifference
 
-noncomputable def lifespanDomain (T : ℝ) : Set SpaceTime := Ico 0 T ×ˢ univ
-
-/-- A finite, positive classical lifespan for the exact viscosity-one PDE.
-The initial datum is an actual spatial velocity field. Pressures are retained
-as witnesses but are never required to agree with a different gauge. -/
-structure ClassicalSolution (f : VelocityField) (initial : Space → Space)
-    (T : ℝ) (u : VelocityField) (p : PressureField) : Prop where
+/-- A classical periodic solution of the viscosity-one equation with zero
+datum on the finite positive lifespan `[0, T)`. Pressures are retained as
+witnesses but are never required to agree with a different gauge. -/
+structure ClassicalSolution (f : VelocityField) (T : ℝ) (u : VelocityField)
+    (p : PressureField) : Prop extends Solution (Ico 0 T) f u p where
   lifespan_pos : 0 < T
-  velocity_smooth : ContDiffOn ℝ ∞ u (lifespanDomain T)
-  pressure_smooth : ContDiffOn ℝ ∞ p (lifespanDomain T)
   velocity_periodic : UnitSpatialPeriodsOn (Ico (0 : ℝ) T) u
   pressure_periodic : UnitSpatialPeriodsOn (Ico (0 : ℝ) T) p
-  initial_velocity : ∀ x : Space, u (0, x) = initial x
-  divergence_free : ∀ t ∈ Ico (0 : ℝ) T, ∀ x : Space, spatialDivergence u t x = 0
-  navier_stokes : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x : Space,
-    navierStokesResidual u p t x = f (t, x)
 
 noncomputable def VelocityAgreesOn (T : ℝ) (u v : VelocityField) : Prop :=
   ∀ t ∈ Ico (0 : ℝ) T, ∀ x : Space, u (t, x) = v (t, x)
 
-/-- An extension has a strictly larger time interval and preserves the
-velocity on the entire original interval. Its pressure may have a different
-time-dependent spatially constant normalization. -/
-noncomputable def HasClassicalExtension (f : VelocityField) (initial : Space → Space)
-    (T : ℝ) (u : VelocityField) : Prop :=
-  ∃ S : ℝ, ∃ v : VelocityField, ∃ q : PressureField,
-    T < S ∧ ClassicalSolution f initial S v q ∧ VelocityAgreesOn T u v
+theorem ClassicalSolution.restrict {f : VelocityField} {S T : ℝ} {u : VelocityField}
+    {p : PressureField} (h : ClassicalSolution f T u p) (hS : 0 < S) (hST : S ≤ T) :
+    ClassicalSolution f S u p where
+  toSolution := h.toSolution.mono (Ico_subset_Ico_right hST)
+  lifespan_pos := hS
+  velocity_periodic := fun t ht => h.velocity_periodic t (Ico_subset_Ico_right hST ht)
+  pressure_periodic := fun t ht => h.pressure_periodic t (Ico_subset_Ico_right hST ht)
 
-noncomputable def IsMaximalClassicalSolution (f : VelocityField) (initial : Space → Space)
-    (T : ℝ) (u : VelocityField) (p : PressureField) : Prop :=
-  ClassicalSolution f initial T u p ∧ ¬HasClassicalExtension f initial T u
-
-/-- The actual set of finite positive times supported by classical solutions
-for the fixed force and initial datum. No existence is built into the definition. -/
-noncomputable def admissibleLifespans (f : VelocityField) (initial : Space → Space) : Set ℝ :=
-  {T | ∃ u : VelocityField, ∃ p : PressureField, ClassicalSolution f initial T u p}
-
-theorem ClassicalSolution.restrict {f : VelocityField} {initial : Space → Space}
-    {S T : ℝ} {u : VelocityField} {p : PressureField}
-    (h : ClassicalSolution f initial T u p) (hS : 0 < S) (hST : S ≤ T) :
-    ClassicalSolution f initial S u p := by
-  have hsub : lifespanDomain S ⊆ lifespanDomain T := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_le hST⟩, hz.2⟩
-  refine ⟨hS, h.velocity_smooth.mono hsub, h.pressure_smooth.mono hsub, ?_, ?_,
-    h.initial_velocity, ?_, ?_⟩
-  · intro t ht x i
-    exact h.velocity_periodic t ⟨ht.1, ht.2.trans_le hST⟩ x i
-  · intro t ht x i
-    exact h.pressure_periodic t ⟨ht.1, ht.2.trans_le hST⟩ x i
-  · intro t ht x
-    exact h.divergence_free t ⟨ht.1, ht.2.trans_le hST⟩ x
-  · intro t ht x
-    exact h.navier_stokes t ⟨ht.1, ht.2.trans_le hST⟩ x
-
-/-- Any two actual classical solutions agree on their common interval.
-This is derived by restriction to each compact subinterval and the proved
-energy uniqueness theorem. Only velocity equality is asserted. -/
-theorem ClassicalSolution.agree_on_overlap {f : VelocityField} {initial : Space → Space}
-    {T S : ℝ} {u v : VelocityField} {p q : PressureField}
-    (hu : ClassicalSolution f initial T u p) (hv : ClassicalSolution f initial S v q) :
+/-- Any two classical solutions agree on their common interval. This is
+derived by restriction to each compact subinterval and the proved energy
+uniqueness theorem. Only velocity equality is asserted. -/
+theorem ClassicalSolution.agree_on_overlap {f : VelocityField} {T S : ℝ}
+    {u v : VelocityField} {p q : PressureField}
+    (hu : ClassicalSolution f T u p) (hv : ClassicalSolution f S v q) :
     VelocityAgreesOn (min T S) u v := by
   intro t ht x
-  have htT : t < T := (lt_min_iff.mp ht.2).1
-  have htS : t < S := (lt_min_iff.mp ht.2).2
-  have hsubT : PeriodicUniqueness.slab 0 t ⊆ lifespanDomain T := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_lt htT⟩, hz.2⟩
-  have hsubS : PeriodicUniqueness.slab 0 t ⊆ lifespanDomain S := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_lt htS⟩, hz.2⟩
-  have hcompact : ∀ r ∈ Icc (0 : ℝ) t, ∀ y : Space, u (r, y) = v (r, y) := by
-    apply PeriodicUniqueness.classical_uniqueness_on_Icc
-      (hu.velocity_smooth.mono hsubT) (hv.velocity_smooth.mono hsubS)
-      (hu.pressure_smooth.mono hsubT) (hv.pressure_smooth.mono hsubS)
-    · intro r hr y i
-      exact hu.velocity_periodic r ⟨hr.1, hr.2.trans_lt htT⟩ y i
-    · intro r hr y i
-      exact hv.velocity_periodic r ⟨hr.1, hr.2.trans_lt htS⟩ y i
-    · intro r hr y i
-      exact hu.pressure_periodic r ⟨hr.1, hr.2.trans_lt htT⟩ y i
-    · intro r hr y i
-      exact hv.pressure_periodic r ⟨hr.1, hr.2.trans_lt htS⟩ y i
-    · intro r hr y
-      exact hu.divergence_free r ⟨hr.1.le, hr.2.trans htT⟩ y
-    · intro r hr y
-      exact hv.divergence_free r ⟨hr.1.le, hr.2.trans htS⟩ y
-    · intro r hr y
-      exact hu.navier_stokes r ⟨hr.1, hr.2.trans htT⟩ y
-    · intro r hr y
-      exact hv.navier_stokes r ⟨hr.1, hr.2.trans htS⟩ y
-    · intro y
-      exact (hu.initial_velocity y).trans (hv.initial_velocity y).symm
-  exact hcompact t ⟨ht.1, le_rfl⟩ x
+  have hT : Icc 0 t ⊆ Ico (0 : ℝ) T := Icc_subset_Ico_right (lt_min_iff.mp ht.2).1
+  have hS : Icc 0 t ⊆ Ico (0 : ℝ) S := Icc_subset_Ico_right (lt_min_iff.mp ht.2).2
+  have hu' := hu.toSolution.mono hT
+  have hv' := hv.toSolution.mono hS
+  refine PeriodicUniqueness.classical_uniqueness_on_Icc hu'.velocity_smooth hv'.velocity_smooth
+    hu'.pressure_smooth hv'.pressure_smooth
+    (fun r hr => hu.velocity_periodic r (hT hr)) (fun r hr => hv.velocity_periodic r (hS hr))
+    (fun r hr => hu.pressure_periodic r (hT hr)) (fun r hr => hv.pressure_periodic r (hS hr))
+    (fun r hr => hu'.divergence_free r ⟨hr.1.le, hr.2.le⟩)
+    (fun r hr => hv'.divergence_free r ⟨hr.1.le, hr.2.le⟩)
+    (fun r hr => hu'.navier_stokes r ⟨hr.1.le, hr.2.le⟩ hr.1)
+    (fun r hr => hv'.navier_stokes r ⟨hr.1.le, hr.2.le⟩ hr.1)
+    (fun y => (hu.zero_initial_velocity y).trans (hv.zero_initial_velocity y).symm)
+    t ⟨ht.1, le_rfl⟩ x
 
 theorem candidate_is_classical_solution {u : VelocityField} {p : PressureField}
     {f : VelocityField} (h : CandidateProperties u p f) :
-    ClassicalSolution f (fun _ => 0) 1 u p :=
-  ⟨zero_lt_one, h.velocity_smooth, h.pressure_smooth, h.velocity_periodic,
-    h.pressure_periodic, h.zero_initial_velocity, h.divergence_free, h.navier_stokes⟩
+    ClassicalSolution f 1 u p :=
+  ⟨h.toSolution, zero_lt_one, h.velocity_periodic, h.pressure_periodic⟩
 
+/-- Step two of the periodic argument: identification below time one. -/
 theorem candidate_agree_on_overlap {u v : VelocityField} {p q : PressureField}
     {f : VelocityField} {T : ℝ} (h : CandidateProperties u p f)
-    (hv : ClassicalSolution f (fun _ => 0) T v q) :
+    (hv : ClassicalSolution f T v q) :
     VelocityAgreesOn (min T 1) v u :=
   hv.agree_on_overlap (candidate_is_classical_solution h)
 
-/-- Compactness bounds a relatively continuous periodic field on an entire
-closed time slab, uniformly over all spatial points. -/
-theorem periodic_bound_on_slab {V : Type*} [NormedAddCommGroup V]
-    {g : SpaceTime → V} {a b : ℝ}
-    (hg : ContinuousOn g (Icc a b ×ˢ (univ : Set Space)))
-    (hperiod : UnitSpatialPeriodsOn (Icc a b) g) :
-    ∃ B : ℝ, 0 < B ∧ ∀ t ∈ Icc a b, ∀ x : Space, ‖g (t, x)‖ ≤ B := by
-  have hK : IsCompact (toSpace '' cube) :=
-    (show IsCompact cube from isCompact_Icc).image toSpace.continuous
-  have hgK : ContinuousOn g (Icc a b ×ˢ (toSpace '' cube)) :=
-    hg.mono (fun z hz => ⟨hz.1, mem_univ z.2⟩)
-  obtain ⟨B, hB⟩ := (isCompact_Icc.prod hK).exists_bound_of_continuousOn hgK
-  refine ⟨max B 1, lt_of_lt_of_le zero_lt_one (le_max_right _ _), ?_⟩
-  intro t ht x
-  obtain ⟨z, hz, hzx⟩ := PeriodicUniqueness.exists_cube_representative
-    (f := fun y : Space => g (t, y)) (fun i y => hperiod t ht y i) x
-  have hzK : z ∈ toSpace '' cube := by
-    refine ⟨toSpace.symm z, ?_, toSpace.apply_symm_apply z⟩
-    exact ⟨fun i => (hz i).1, fun i => (hz i).2⟩
-  calc
-    ‖g (t, x)‖ = ‖g (t, z)‖ := congrArg norm hzx.symm
-    _ ≤ B := hB (t, z) ⟨ht, hzK⟩
-    _ ≤ max B 1 := le_max_left _ _
-
-/-- Unbounded speed rules out even a continuous periodic extension through
-time one, once agreement with the original field is known. -/
-theorem unbounded_excludes_continuous_extension {u v : VelocityField}
-    (h : SpeedUnboundedAtOne u)
-    (hv : ContinuousOn v (Icc (0 : ℝ) 1 ×ˢ (univ : Set Space)))
-    (hpv : UnitSpatialPeriodsOn (Icc (0 : ℝ) 1) v)
-    (hagrees : VelocityAgreesOn 1 u v) : False := by
-  obtain ⟨B, _, hB⟩ := periodic_bound_on_slab hv hpv
-  apply unbounded_speed_excludes_uniform_bound h
-  refine ⟨B, ?_⟩
-  intro t ht x
-  rw [hagrees t ht x]
-  exact hB t ⟨ht.1, ht.2.le⟩ x
-
-/-- No classical solution for the same force and datum can have lifespan
-larger than one. Uniqueness supplies the required pre-one agreement. -/
+/-- Step three of the periodic argument: no classical solution for the same
+force and datum can have lifespan larger than one. It would be continuous on
+`[0,1] × cube`, and by periodicity every value of the candidate is attained on
+the cube, contradicting `SpeedUnboundedAtOne`. -/
 theorem candidate_no_solution_after_one {u v : VelocityField} {p q : PressureField}
     {f : VelocityField} {T : ℝ} (h : CandidateProperties u p f) (hT : 1 < T)
-    (hv : ClassicalSolution f (fun _ => 0) T v q) : False := by
-  have hsub : Icc (0 : ℝ) 1 ×ˢ (univ : Set Space) ⊆ lifespanDomain T := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_lt hT⟩, hz.2⟩
-  apply unbounded_excludes_continuous_extension h.speed_unbounded
-    (hv.velocity_smooth.continuousOn.mono hsub)
-  · intro t ht x i
-    exact hv.velocity_periodic t ⟨ht.1, ht.2.trans_lt hT⟩ x i
+    (hv : ClassicalSolution f T v q) : False := by
+  have hagree := candidate_agree_on_overlap h hv
+  refine h.speed_unbounded.false_of_agree PeriodicUniqueness.isCompact_cubeImage
+    (hv.velocity_smooth.continuousOn.mono
+      (prod_mono (Icc_subset_Ico_right hT) (subset_univ _))) ?_ ?_
+  · intro t ht x _
+    exact (hagree t ⟨ht.1, lt_min (ht.2.trans hT) ht.2⟩ x).symm
   · intro t ht x
-    exact (candidate_agree_on_overlap h hv t
-      ⟨ht.1, lt_min (ht.2.trans hT) ht.2⟩ x).symm
+    right
+    obtain ⟨y, hy, hyx⟩ := PeriodicUniqueness.exists_cubeImage_representative
+      (f := fun z : Space => u (t, z)) (fun i z => h.velocity_periodic t ht z i) x
+    exact ⟨y, hy, hyx.symm⟩
 
 theorem candidate_all_lifespans_le_one {u v : VelocityField} {p q : PressureField}
     {f : VelocityField} {T : ℝ} (h : CandidateProperties u p f)
-    (hv : ClassicalSolution f (fun _ => 0) T v q) : T ≤ 1 := by
+    (hv : ClassicalSolution f T v q) : T ≤ 1 := by
   by_contra hnot
   exact candidate_no_solution_after_one h (lt_of_not_ge hnot) hv
 
-/-- The given lifespan-one solution is maximal under extension of its
-velocity. No literal equality between pressure representatives is required. -/
-theorem candidate_is_maximal {u : VelocityField} {p : PressureField}
-    {f : VelocityField} (h : CandidateProperties u p f) :
-    IsMaximalClassicalSolution f (fun _ => 0) 1 u p := by
-  refine ⟨candidate_is_classical_solution h, ?_⟩
-  rintro ⟨T, v, q, hT, hv, _⟩
-  exact candidate_no_solution_after_one h hT hv
+/-- A global periodic solution restricts to a classical solution of every
+positive lifespan. -/
+theorem _root_.NavierStokes.ProblemStatement.GlobalSolutionOne.toClassicalSolution
+    {f v : VelocityField} {q : PressureField} (hv : GlobalSolutionOne f v q)
+    {T : ℝ} (hT : 0 < T) : ClassicalSolution f T v q where
+  toSolution := hv.toSolution.mono Ico_subset_Ici_self
+  lifespan_pos := hT
+  velocity_periodic := fun t ht => hv.velocity_periodic t ht.1
+  pressure_periodic := fun t ht => hv.pressure_periodic t ht.1
 
-
-
-
-/-- The entire set of finite admissible classical lifespans is `(0,1]`. -/
-theorem candidate_admissible_lifespans {u : VelocityField} {p : PressureField}
-    {f : VelocityField} (h : CandidateProperties u p f) :
-    admissibleLifespans f (fun _ => 0) = Ioc (0 : ℝ) 1 := by
-  ext T
-  constructor
-  · rintro ⟨v, q, hv⟩
-    exact ⟨hv.lifespan_pos, candidate_all_lifespans_le_one h hv⟩
-  · intro ht
-    exact ⟨u, p, (candidate_is_classical_solution h).restrict ht.1 ht.2⟩
-
-/-- A global classical solution would restrict to a forbidden lifespan
-greater than one. This makes the exclusion of infinite-time continuation
-explicit without assuming any existence theorem. -/
+/-- The periodic exclusion, option (D): the candidate excludes every global
+smooth periodic viscosity-one solution with its force and zero datum, because
+such a solution would restrict to a forbidden lifespan greater than one. -/
 theorem candidate_excludes_global_solution {u v : VelocityField} {p q : PressureField}
-    {f : VelocityField} (h : CandidateProperties u p f)
-    (hv : ContDiffOn ℝ ∞ v futureDomain) (hq : ContDiffOn ℝ ∞ q futureDomain)
-    (hpv : UnitSpatialPeriodsOn (Ici (0 : ℝ)) v)
-    (hpq : UnitSpatialPeriodsOn (Ici (0 : ℝ)) q)
-    (hvzero : ∀ x : Space, v (0, x) = 0)
-    (hdv : ∀ t : ℝ, 0 ≤ t → ∀ x : Space, spatialDivergence v t x = 0)
-    (hNSv : ∀ t : ℝ, 0 < t → ∀ x : Space, navierStokesResidual v q t x = f (t, x)) :
-    False := by
-  have hsub : lifespanDomain 2 ⊆ futureDomain := by
-    intro z hz
-    exact ⟨hz.1.1, hz.2⟩
-  apply candidate_no_solution_after_one h (T := 2) (by norm_num)
-  refine ⟨by norm_num, hv.mono hsub, hq.mono hsub, ?_, ?_, hvzero, ?_, ?_⟩
-  · intro t ht x i
-    exact hpv t ht.1 x i
-  · intro t ht x i
-    exact hpq t ht.1 x i
-  · intro t ht x
-    exact hdv t ht.1 x
-  · intro t ht x
-    exact hNSv t ht.1 x
-
-theorem zero_classical_solution_of_zero_force {f : VelocityField} {T : ℝ}
-    (hT : 0 < T) (hf : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x : Space, f (t, x) = 0) :
-    ClassicalSolution f (fun _ => 0) T (fun _ => 0) (fun _ => 0) := by
-  refine ⟨hT, contDiffOn_const, contDiffOn_const, ?_, ?_, fun _ => rfl, ?_, ?_⟩
-  · intro t ht x i
-    rfl
-  · intro t ht x i
-    rfl
-  · intro t ht x
-    simp [spatialDivergence, spatialDerivative]
-  · intro t ht x
-    exact (zero_residual t x).trans (hf t ht x).symm
-
-/-- The specified force must be nonzero somewhere before the breakdown
-time. Otherwise uniqueness identifies the candidate with the zero solution. -/
-theorem candidate_force_nonzero_before_one {u : VelocityField} {p : PressureField}
-    {f : VelocityField} (h : CandidateProperties u p f) :
-    ∃ t ∈ Ioo (0 : ℝ) 1, ∃ x : Space, f (t, x) ≠ 0 := by
-  by_contra hnot
-  have hf : ∀ t ∈ Ioo (0 : ℝ) 1, ∀ x : Space, f (t, x) = 0 := by
-    intro t ht x
-    by_contra hnonzero
-    exact hnot ⟨t, ht, x, hnonzero⟩
-  have hz := zero_classical_solution_of_zero_force zero_lt_one hf
-  have hagree : VelocityAgreesOn 1 (fun _ => 0) u := by
-    simpa only [min_self] using candidate_agree_on_overlap h hz
-  apply unbounded_speed_excludes_uniform_bound h.speed_unbounded
-  refine ⟨0, ?_⟩
-  intro t ht x
-  rw [← hagree t ht x]
-  exact norm_zero.le
+    {f : VelocityField} (h : CandidateProperties u p f) (hv : GlobalSolutionOne f v q) :
+    False :=
+  candidate_no_solution_after_one h one_lt_two (hv.toClassicalSolution two_pos)
 
 end NavierStokes.MaximalLifespan

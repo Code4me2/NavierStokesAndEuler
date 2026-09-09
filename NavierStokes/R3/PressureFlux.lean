@@ -555,8 +555,8 @@ theorem exists_uniform_actual_pressure_flux_bound {T : ℝ} {u v : VelocityField
   refine ⟨CP, hCP, ?_⟩
   intro R hR t ht
   have ht' : t ∈ Icc 0 T := Ioo_subset_Icc_self ht
-  have hu := NavierStokes.PeriodicUniqueness.spatial_smooth H.smooth_u ht'
-  have hv := NavierStokes.PeriodicUniqueness.spatial_smooth H.smooth_v ht'
+  have hu := NavierStokes.SolutionDifference.spatial_smooth H.smooth_u ht'
+  have hv := NavierStokes.SolutionDifference.spatial_smooth H.smooth_v ht'
   exact (actual_flux_integrable_and_le_canonicalNorm H ht (zero_lt_one.trans_le hR) hu hv).2.trans
     (hbound R hR u v t hu hv (hM t ht').1 (hU t ht').1 (fun i j => (hG t ht' i j).1)
       (hM t ht').2 (hU t ht').2 (fun i j => (hG t ht' i j).2))

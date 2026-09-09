@@ -116,52 +116,64 @@ def forwardNext : Stage S 1 := by
     horizon_le := P.nextHorizon_le_base
     scale_eq := rfl
     label_eq := (F).label_constant
-    gradient_bound := ?_
-    hessian_bound := ?_
-    exterior_bound := ?_
-    core_bound := ?_
-    pressure_bound := ?_
+    gradient_bound := ?gradient_bound
+    hessian_bound := ?hessian_bound
+    exterior_bound := ?exterior_bound
+    core_bound := ?core_bound
+    pressure_bound := ?pressure_bound
     boundary_eq := rfl
     radius_eq := P.radius_eq
     frame := P.forwardNextFrame hq hB
-    frame_shear := ?_
-    frame_bound := ?_
-    frame_error := ?_
-    coupling_error := ?_
-    tilt_lower := ?_
-    tilt_upper := ?_
-    compression := ?_ }
-  · intro t x
+    frame_shear := ?frame_shear
+    frame_bound := ?frame_bound
+    frame_error := ?frame_error
+    coupling_error := ?coupling_error
+    tilt_lower := ?tilt_lower
+    tilt_upper := ?tilt_upper
+    compression := ?compression }
+  case gradient_bound =>
+    intro t x
     exact ((F).physical_bounds symmetric _ _ P.restricted_gradient_bound P.restricted_hessian_bound t x).1.trans
       habsorb.1
-  · intro t x
+  case hessian_bound =>
+    intro t x
     have h := ((F).physical_bounds symmetric _ _ P.restricted_gradient_bound P.restricted_hessian_bound t x).2
     apply h.trans
     change hessianConstant*previousShear S.J S.X 0*olderShear S.J S.X 0+
       2*(gradientConstant*previousShear S.J S.X 0)*shear S.J S.X 0*(goodRatio+(G).earlyRatio)+
         k^(-(1/4 : ℝ)) ≤ hessianConstant*shear S.J S.X 0*previousShear S.J S.X 0
     nlinarith only [habsorb.2]
-  · exact (P.initial_step_bound _ (P.forward_initial_cost hq hB)).1
-  · exact (P.initial_step_bound _ (P.forward_initial_cost hq hB)).2
-  · have h := P.pressure_step_bound _ (P.forward_pressure_cost hq hB)
+  case exterior_bound =>
+    exact (P.initial_step_bound _ (P.forward_initial_cost hq hB)).1
+  case core_bound =>
+    exact (P.initial_step_bound _ (P.forward_initial_cost hq hB)).2
+  case pressure_bound =>
+    have h := P.pressure_step_bound _ (P.forward_pressure_cost hq hB)
     change P.low.K+2*(gradientConstant*previousShear S.J S.X 0)*(G).hchild*
       ((G).δ*goodRatio+(G).earlyRatio)+k^(-(1/4 : ℝ)) ≤ _
     convert h using 1; ring
-  · rw [forwardNextFrame,ParentFrame.changeActivation_shear]
+  case frame_shear =>
+    rw [forwardNextFrame,ParentFrame.changeActivation_shear]
     exact (P.forwardRenewal_matches hq hB).shear_eq (I).delta_pos
-  · change ((P.forwardRenewal hq hB).changeActivation _).G ≤ _
+  case frame_bound =>
+    change ((P.forwardRenewal hq hB).changeActivation _).G ≤ _
     rw [ParentFrame.changeActivation_G]
     exact le_rfl
-  · change ((P.forwardRenewal hq hB).changeActivation _).error ≤ _
+  case frame_error =>
+    change ((P.forwardRenewal hq hB).changeActivation _).error ≤ _
     rw [ParentFrame.changeActivation_error]
     exact le_rfl
-  · rw [forwardNextFrame,ParentFrame.changeActivation_a]
+  case coupling_error =>
+    rw [forwardNextFrame,ParentFrame.changeActivation_a]
     exact P.coupling_step _ hcoupling
-  · rw [forwardNextFrame,ParentFrame.changeActivation_sigma]
+  case tilt_lower =>
+    rw [forwardNextFrame,ParentFrame.changeActivation_sigma]
     exact hparams.2.1
-  · rw [forwardNextFrame,ParentFrame.changeActivation_sigma]
+  case tilt_upper =>
+    rw [forwardNextFrame,ParentFrame.changeActivation_sigma]
     exact hparams.2.2
-  · intro _
+  case compression =>
+    intro _
     have hc := (P.forwardRenewal_matches hq hB).background_compression_of_error_le_one
       (priorError S.J S.D S.X 1) (S.priorError_one 1)
     change ⟪((P.forwardRenewal hq hB).changeActivation _).B P.nextTime

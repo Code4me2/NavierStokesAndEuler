@@ -32,7 +32,7 @@ theorem partial_norm_le_sqrt_gradientSq (w : Space → Space) (x : Space)
 basis. -/
 theorem fderiv_apply_eq_sum (w : Space → Space) (x v : Space) :
     fderiv ℝ w x v = ∑ i : Fin 3, v i • partialD i w x := by
-  conv_lhs => rw [← NavierStokes.PeriodicUniqueness.sum_coordinates v]
+  conv_lhs => rw [← NavierStokes.SolutionDifference.sum_coordinates v]
   simp only [map_sum, map_smul]
   rfl
 

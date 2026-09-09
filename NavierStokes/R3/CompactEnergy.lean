@@ -1,4 +1,5 @@
-import NavierStokes.PeriodicUniqueness
+import NavierStokes.SolutionDifference
+import NavierStokes.PeriodicIntegration
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 import NavierStokes.R3.CompactTimeIntegral
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
@@ -29,7 +30,7 @@ namespace NavierStokesR3.CompactEnergy
 
 open NavierStokes.ProblemStatement
 open NavierStokes.PeriodicIntegration (spatialPartial)
-open NavierStokes.PeriodicUniqueness
+open NavierStokes.SolutionDifference
 
 theorem compact_inner_left {f g : Space → Space} (hf : HasCompactSupport f) :
     HasCompactSupport (fun x => ⟪f x, g x⟫_ℝ) := by

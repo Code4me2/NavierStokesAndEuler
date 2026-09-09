@@ -6,11 +6,12 @@ import Mathlib.Topology.Algebra.Support
 /-!
 # Whole-space vocabulary for the R³ comparison
 
-This module fixes the coordinates, residual, and finite-energy notions used by
-the whole-space half of the development, independently of the periodic target.
-The coordinates, Euclidean norm, and differential operators are those of
-`NavierStokes.ProblemStatement`; no periodicity assumption is made here. Time is
-the first coordinate of spacetime.
+This module fixes the coordinates and finite-energy notions used by the
+whole-space half of the development, independently of the periodic target.
+The coordinates, Euclidean norm, differential operators, and the viscosity-one
+residual `navierStokesResidual` are those of `NavierStokes.ProblemStatement`;
+no periodicity assumption is made here. Time is the first coordinate of
+spacetime.
 
 Smoothness of velocity and pressure at time zero is relative to the physical
 half-domain. The equation uses ordinary derivatives at positive times; zero
@@ -41,17 +42,6 @@ abbrev SpaceTime := NavierStokes.ProblemStatement.SpaceTime
 abbrev VelocityField := NavierStokes.ProblemStatement.VelocityField
 abbrev PressureField := NavierStokes.ProblemStatement.PressureField
 
-
-
-/-- The exact incompressible Navier--Stokes residual at viscosity `ν`.
-The viscosity multiplies only the spatial Laplacian. -/
-def navierStokesResidual (ν : ℝ) (u : VelocityField) (p : PressureField)
-    (t : ℝ) (x : Space) : Space :=
-  NavierStokes.ProblemStatement.temporalDerivative u t x +
-    NavierStokes.ProblemStatement.advection u t x -
-    ν • NavierStokes.ProblemStatement.spatialLaplacian u t x +
-    NavierStokes.ProblemStatement.pressureGradient p t x
-
 /-- Square integrability with respect to ordinary Lebesgue volume on R³.
 This condition is explicit because the real Bochner integral is totalized. -/
 def SquareIntegrableAtTime (u : VelocityField) (t : ℝ) : Prop :=
@@ -67,12 +57,5 @@ square integrability required at every such time. -/
 def UniformFiniteEnergy (times : Set ℝ) (u : VelocityField) : Prop :=
   ∃ E : ℝ, 0 ≤ E ∧ ∀ t ∈ times,
     SquareIntegrableAtTime u t ∧ kineticEnergy u t ≤ E
-
-/-- The unit-viscosity residual is exactly the existing differential expression. -/
-@[simp] theorem residual_at_viscosity_one (u : VelocityField) (p : PressureField)
-    (t : ℝ) (x : Space) :
-    navierStokesResidual 1 u p t x =
-      NavierStokes.ProblemStatement.navierStokesResidual u p t x := by
-  simp [navierStokesResidual, NavierStokes.ProblemStatement.navierStokesResidual]
 
 end NavierStokesR3.ProblemStatement

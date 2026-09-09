@@ -19,8 +19,8 @@ open scoped ContDiff BigOperators InnerProductSpace
 namespace NavierStokesR3.WholeSpaceComparisonClosure
 
 open ProblemStatement Comparison ComparisonCutoffs
-open NavierStokes.ProblemStatement (spatialDerivative spatialDivergence)
-open NavierStokes.PeriodicUniqueness (spatial_smooth time_differentiable_at_interior)
+open NavierStokes.ProblemStatement (spatialDerivative spatialDivergence navierStokesResidual)
+open NavierStokes.SolutionDifference (spatial_smooth time_differentiable_at_interior)
 
 def pressureEnvelope (R A B : ℝ) : ℝ :=
   (B ^ (1 / 2 : ℝ) + 1) * (A / R + 1 / R ^ 2) +
@@ -42,7 +42,7 @@ theorem eq_of_pressure_flux_bound {T M G CP R₀ : ℝ}
     (hdu : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, spatialDivergence u t x = 0)
     (hdv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x, spatialDivergence v t x = 0)
     (hNS : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x,
-      navierStokesResidual 1 u p t x = navierStokesResidual 1 v q t x)
+      navierStokesResidual u p t x = navierStokesResidual v q t x)
     (hzero : ∀ x, u (0, x) = v (0, x))
     (hvanish : ∀ R ≥ R₀, ∀ t ∈ Icc (0 : ℝ) T, ∀ x,
       fderiv ℝ (weight R) x (u (t, x)) = 0)

@@ -1,16 +1,32 @@
 import NavierStokes.ComparatorBridge
+import NavierStokes.MaximalLifespan
+import NavierStokes.PeriodicForceDecay
 import NavierStokes.ActualCandidateAssembly
-import NavierStokes.CandidateConsequences
 
 /-!
 # The constructed candidate implies option (D)
 
-For every positive viscosity `ν`, use zero initial velocity and the forcing
-`fν x t = ν² • f (ν * t, x)` supplied by the viscosity-one candidate. Its
-smoothness, periodicity, and compact future time support give every force-decay
-bound required by the comparator. A hypothetical global solution rescales to a
-global viscosity-one solution, contradicting the existing maximal-lifespan theorem.
+The periodic deliverable is a three-step chain, and this module is its top:
 
+1. **A reference solution with unbounded speed at time one.**
+   `ActualCandidateAssembly.selected_candidate` gives `(u, p, f)` with
+   `CandidateProperties u p f`: a smooth periodic viscosity-one solution on
+   `[0,1)` with zero datum, force smooth and vanishing after a finite time, and
+   `SpeedUnboundedAtOne u`.
+2. **Identification.** A hypothetical global comparator solution for viscosity
+   `ν` with datum `0` and force `fν x t = ν² • f (ν t, x)` rescales to a global
+   viscosity-one solution (`ComparatorBridge.normalized_solution`), which by
+   periodic uniqueness agrees with `u` below time one
+   (`MaximalLifespan.candidate_agree_on_overlap`).
+3. **Contradiction by compactness.** It is continuous on `[0,1] × cube`, so
+   `u` would be bounded before time one
+   (`MaximalLifespan.candidate_no_solution_after_one`, through the shared
+   `SpeedUnboundedAtOne.false_of_agree`).
+
+Steps 2 and 3 are `MaximalLifespan.candidate_excludes_global_solution`. The
+comparator's force-decay bounds come from `PeriodicForceDecay.forceConditionPeriodic`.
+The whole-space deliverable (`ComparatorR3Theorem`) has the same three steps
+with whole-space uniqueness and the candidate's support in place of the cube.
 No result here uses any of the comparator's unproved statements.
 -/
 
@@ -21,27 +37,20 @@ namespace NavierStokes.ComparatorBridge
 open Set ProblemStatement
 open scoped ContDiff
 
-/-- Any witness of the original candidate statement implies option (D), for
-every positive viscosity, with all comparator hypotheses discharged. -/
+/-- Any witness of the candidate contract implies option (D), for every
+positive viscosity, with all comparator hypotheses discharged. -/
 theorem option_D_of_candidate {u : VelocityField} {p : PressureField} {f : VelocityField}
     (h : CandidateProperties u p f) (ν : ℝ) (hν : 0 < ν) :
     ∃ (u₀ : Space → Space) (f : Space → ℝ → Space),
       Comparator.InitialVelocityConditionPeriodic u₀ ∧ Comparator.ForceConditionPeriodic f ∧
       ¬ (∃ v p, Comparator.NavierStokesExistenceAndSmoothnessPeriodic ν u₀ f v p) := by
-  have hFs : ContDiffOn ℝ ∞ (rescaledForce ν f) futureDomain :=
-    rescale_smooth h.force_smooth (ν ^ 2) hν.le
-  have hFp : UnitSpatialPeriodsOn (Ici 0) (rescaledForce ν f) :=
-    rescale_periodic h.force_periodic (ν ^ 2) hν.le
-  have hFt : CompactFutureTimeSupport (rescaledForce ν f) :=
-    rescale_support h.force_time_support (ν ^ 2) hν
-  have hFd := CandidateConsequences.futureJet_decay hFs hFp hFt
   refine ⟨fun _ => 0, toComparator (rescaledForce ν f), zero_initial_condition,
-    forceConditionPeriodic_of_decay hFs hFp hFd, ?_⟩
+    PeriodicForceDecay.forceConditionPeriodic
+      (rescale_smooth h.force_smooth (ν ^ 2) hν.le)
+      (rescale_periodic h.force_periodic (ν ^ 2) hν.le)
+      (rescale_support h.force_time_support (ν ^ 2) hν), ?_⟩
   rintro ⟨v, q, hv⟩
-  have hn := normalized_solution hν hv
-  exact MaximalLifespan.candidate_excludes_global_solution h
-    hn.velocity_smooth hn.pressure_smooth hn.velocity_periodic hn.pressure_periodic
-    hn.initial_velocity hn.divergence_free hn.navier_stokes
+  exact MaximalLifespan.candidate_excludes_global_solution h (normalized_solution hν hv)
 
 /-- Option (D), with exactly the comparator's quantifiers, from the project's
 closed candidate construction. -/

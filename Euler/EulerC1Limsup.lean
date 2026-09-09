@@ -56,15 +56,3 @@ theorem maximalC1Norm_limsup_atTop :
   exact L.maximalC1Norm_limsup
 
 end EulerOrdinarySobolev.FiniteLifespan
-
-namespace EulerPacketInduction
-
-open Filter
-open scoped Topology ENNReal
-
-theorem maximalC1Norm_limsup :
-    Filter.limsup (fun t : MaximalTime => ENNReal.ofReal (maximalC1Norm t))
-      (Filter.comap (fun t : MaximalTime => (t : ℝ)) (𝓝[<] lifespan.duration))=⊤ :=
-  lifespan.maximalC1Norm_limsup
-
-end EulerPacketInduction

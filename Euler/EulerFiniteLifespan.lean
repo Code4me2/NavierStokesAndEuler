@@ -1,10 +1,11 @@
 import Euler.PacketFiniteLifespan
 import Euler.PacketFirstStageSupport
 import Euler.PacketInitialDatumSupport
+import Euler.OrdinaryEulerNontriviality
 
-/-! A compactly supported, smooth, divergence-free initial velocity
-whose ordinary smooth Euler solutions have a finite maximal horizon.
-The separate continuation and vorticity criteria are not asserted here. -/
+/-! The canonical datum is compactly supported, nonzero, and its maximal
+lifespan is at most one. These are the facts about the datum that the
+delivered statements quote beside its finite lifespan. -/
 
 noncomputable section
 
@@ -24,17 +25,6 @@ theorem initialDatum_compact : HasCompactSupport initialDatum.field :=
 theorem lifespan_le_one : lifespan.duration ≤ 1 :=
   lifespan_le_base.trans constructionScales.time_small
 
-def HasSmoothEulerSolution (u₀ : Space → Space) (T : ℝ) : Prop :=
-  ∃ hT : 0 < T, ∃ U : Evolution T hT.le,
-    (U.velocity ⟨0,le_rfl,hT.le⟩).field=u₀
-
-theorem hasSmoothEulerSolution_iff (A : SmoothL2Field Space) (T : ℝ) :
-    HasSmoothEulerSolution A.field T ↔ HasEulerEvolution A T := by
-  constructor
-  · rintro ⟨hT,U,hU⟩
-    exact ⟨hT,U,field_ext hU⟩
-  · rintro ⟨hT,U,hU⟩
-    exact ⟨hT,U,congrArg SmoothL2Field.field hU⟩
-
+theorem initialDatum_nonzero : initialDatum.field ≠ 0 := lifespan.initial_nonzero
 
 end EulerPacketInduction

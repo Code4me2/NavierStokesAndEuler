@@ -1,6 +1,4 @@
 import Euler.InitialDataBridge
-import Euler.ComparatorLocalEvolution
-import Euler.ComparatorIdentification
 import Euler.CanonicalVorticityConfinement
 import Euler.CompactVorticityContradiction
 import Euler.EulerFiniteLifespan
@@ -21,14 +19,15 @@ open scoped ENNReal Topology
 
 local notation "ℝ³" => EuclideanSpace ℝ (Fin 3)
 
+/-- The three-step chain: the datum has a finite lifespan (`lifespan`), any
+global solution in the challenge's class agrees with the canonical maximal
+solution below it (`comparator_agrees_with_canonical`), and the canonical
+vorticity is confined to one compact ball (`canonical_vorticity_confined`),
+which contradicts blowup (`no_global_solution_of_confined_vorticity`). -/
 private theorem initialDatum_no_global_solution :
-    ¬ (∃ v p, EulerExistenceAndSmoothnessR3 initialDatum.field v p) := by
-  rintro ⟨v, p, h⟩
-  exact finiteLifespan_contradiction_of_compact_vorticity lifespan h
-    canonicalVorticityBall canonicalVorticityBall_compact
-    (maximalVelocity_eq_of_compactCurlLocalUpgrade lifespan h
-      canonical_vorticity_hasCompactSupport compactCurlLocalUpgrade)
-    canonical_vorticity_eq_zero_outside
+    ¬ (∃ v p, EulerExistenceAndSmoothnessR3 initialDatum.field v p) :=
+  no_global_solution_of_confined_vorticity lifespan canonicalVorticityBall
+    canonicalVorticityBall_compact canonical_vorticity_confined
 
 theorem euler_breakdown_R3 :
     ∃ u₀ : ℝ³ → ℝ³, InitialVelocityConditionDecay u₀ ∧
