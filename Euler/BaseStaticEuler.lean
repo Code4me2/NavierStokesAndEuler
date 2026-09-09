@@ -1,13 +1,39 @@
 import Euler.StaticEulerGevrey
 import Euler.StaticEulerParity
 import Euler.BaseEulerLabelData
-import Euler.BaseEulerParity
+import Euler.BaseEulerParent
+import Euler.ParentPacketParity
 import Euler.ParentEulerState
 
 /-! The locally constructed ordinary Euler solution supplies a concrete
 first parent, its label budget and its genuine particle inverse. All
 constants and the positive common horizon depend only on the input
-Gevrey envelope, not on the particular initial datum. -/
+Gevrey envelope, not on the particular initial datum.
+
+Merged in from the former module `Euler.BaseEulerParity`: `oddData`.
+-/
+
+/-! Oddness of the genuine base velocity propagates through its actual
+flow to the base parent, using ODE uniqueness. -/
+
+noncomputable section
+
+namespace EulerBaseEulerParent.Input
+
+open Set EulerSmoothLimit EulerSmoothBanachFlow EulerParentPacketFrames
+
+variable (I : Input)
+
+theorem oddData (hodd : ∀ t, Function.Odd (I.field.field t : Space → Space))
+    (ell : ℝ) (hell : 0 < ell) (hell1 : ell ≤ 1) : OddData (I.parent ell hell hell1) := by
+  have hd (t : Icc (0 : ℝ) I.T) : Function.Odd (I.displacement.field t : Space → Space) := by
+    intro x
+    rw [I.displacement_apply,I.displacement_apply,forward_odd I.T I.T_pos.le I.field hodd t]
+    abel
+  exact { displacement := hd }
+
+end EulerBaseEulerParent.Input
+end
 
 noncomputable section
 

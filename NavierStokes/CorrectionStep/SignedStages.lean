@@ -18,13 +18,10 @@ open scoped ContDiff BigOperators
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-section PhysicalResidualDecomposition
-
-open CorrectionState PhysicalResidualBridge ProblemStatement Filter
-open scoped Topology
-
-
-end PhysicalResidualDecomposition
+/-! The zero mean triple, its neutrality for `updated`, and the effect of a
+pressure change on the axial residual are declared in
+`NavierStokes.SignedMeanGain`; they are re-exported here. -/
+export SignedMeanGain (zeroTriple updated_zeroTriple axialResidual_pressure_change)
 
 section SourceCoefficientCompatibility
 
@@ -38,31 +35,9 @@ theorem angularMean_const_mul (a : ℂ) (f : ℝ → ℂ) :
 
 end SourceCoefficientCompatibility
 
-section AssembledSignedTensor
-
-open CorrectionState
-
-variable {ι : Type}
-
-
-end AssembledSignedTensor
-
-section WaveStageGain
-
-open CorrectionState
-
-
-end WaveStageGain
-
 section WaveMeanResidual
 
 open CorrectionState VariableGaugeMean
-
-noncomputable def zeroTriple : Triple D := ⟨0, 0, 0⟩
-
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem updated_zeroTriple (m : Triple D) : updated m zeroTriple = m := by
-  apply triple_ext <;> simp only [updated, zeroTriple, add_zero]
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
 
@@ -83,24 +58,6 @@ theorem gaugeWaveStage_mean (g : GaugeData S) (c : Context (PressureStream.Lift 
     (u : State (PressureStream.Lift S)) (w : Oscillation (PressureStream.Lift S))
     (q : OscillatoryScalar (PressureStream.Lift S)) (e : ExcludedErrors (PressureStream.Lift S)) :
     (gaugeWaveStage g c u w q e).mean = u.mean := updated_zeroTriple u.mean
-
-
-
-
-theorem axialResidual_pressure_change {U : Set D} (hU : IsOpen U) (o : Operators D)
-    {b m : Triple D} (hb : SmoothTriple U b) (hm : SmoothTriple U m)
-    (W : Tensor D) (hW : ∀ i j, SmoothOn U (W i j))
-    (p q T : ScalarField D) (hp : SmoothOn U p) (hq : SmoothOn U q) :
-    Agree U (MeanIncrementBounds.axialResidual o b m W (p + q) T -
-      MeanIncrementBounds.axialResidual o b m W p T) (o.dz q) := by
-  have he : axialAxial b m + W 2 2 + (p + q) = (axialAxial b m + W 2 2 + p) + q := by abel
-  intro n x hx
-  simp only [MeanIncrementBounds.axialResidual, Pi.sub_apply, Pi.add_apply]
-  rw [he, o.dz_add hU (((hb.axialAxial hm).add (hW 2 2)).add hp) hq n hx]
-  simp only [Pi.add_apply]
-  ring
-
-
 
 theorem gaugeWaveStage_cumulative {s : StripData (PressureStream.Lift S)} {α : ℝ}
     (g : GaugeData S) (c : Context (PressureStream.Lift S))
@@ -256,18 +213,6 @@ theorem SignedParameters.Control.bounds {p : SignedParameters D} {s : StripData 
     h.radius_eq h.cutoff
 
 end SignedParameters
-
-section ActualSignedStage
-
-open CorrectionState
-
-
-
-
-
-
-
-end ActualSignedStage
 
 section LinearCoefficientBridge
 
@@ -988,12 +933,13 @@ namespace GaugeSupported
 variable {a b : ℝ} {ell : S → ℝ} {U : Set S}
   {f g : ScalarField (PressureStream.Lift S)}
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
+section
+omit [NormedAddCommGroup S] [NormedSpace ℝ S]
+
 theorem zero : GaugeSupported a b ell U (0 : ScalarField (PressureStream.Lift S)) := by
   intro n x hx hn
   exact (hn rfl).elim
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem add (hf : GaugeSupported a b ell U f) (hg : GaugeSupported a b ell U g) :
     GaugeSupported a b ell U (f + g) := by
   intro n x hx hn
@@ -1001,33 +947,30 @@ theorem add (hf : GaugeSupported a b ell U f) (hg : GaugeSupported a b ell U g) 
   · exact hg n x hx (by simpa only [Pi.add_apply, hzero, zero_add] using hn)
   · exact hf n x hx hzero
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem neg (hf : GaugeSupported a b ell U f) : GaugeSupported a b ell U (-f) := by
   intro n x hx hn
   exact hf n x hx (neg_ne_zero.mp hn)
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem sub (hf : GaugeSupported a b ell U f) (hg : GaugeSupported a b ell U g) :
     GaugeSupported a b ell U (f - g) := by
   simpa only [sub_eq_add_neg] using hf.add hg.neg
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem mul_right (hf : GaugeSupported a b ell U f) (g : ScalarField (PressureStream.Lift S)) :
     GaugeSupported a b ell U (f * g) := by
   intro n x hx hn
   exact hf n x hx (left_ne_zero_of_mul hn)
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem mul_left (hf : GaugeSupported a b ell U f) (g : ScalarField (PressureStream.Lift S)) :
     GaugeSupported a b ell U (g * f) := by
   intro n x hx hn
   exact hf n x hx (right_ne_zero_of_mul hn)
 
-omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem smul (hf : GaugeSupported a b ell U f) (t : ℝ) :
     GaugeSupported a b ell U (t • f) := by
   intro n x hx hn
   exact hf n x hx (right_ne_zero_of_mul hn)
+
+end
 
 theorem directional (hf : GaugeSupported a b ell U f) (hU : IsOpen U)
     (hell : ContinuousOn ell U) (v : PressureStream.Lift S) :

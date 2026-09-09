@@ -47,16 +47,6 @@ noncomputable def reindexState {ι κ : Type} (e : κ ≃ ι)
   classical
   simp [reindexCoefficients]
 
-@[simp] theorem reindexState_state {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι) : (reindexState e x).state = x.state := rfl
-
-@[simp] theorem reindexState_axis {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι) : (reindexState e x).axisymmetricAlias = x.axisymmetricAlias := rfl
-
-@[simp] theorem reindexState_band {ι κ : Type} (e : κ ≃ ι)
-    (x : CycleState ι) :
-    (reindexState e x).coefficients.residualBand = x.coefficients.residualBand := rfl
-
 
 
 
@@ -70,9 +60,6 @@ noncomputable def swap (B N0 : ℕ) : Index B N0 ≃ ParticularIndex B N0 :=
   Equiv.prodComm _ _
 
 @[simp] theorem swap_apply {B N0 : ℕ} (l : Index B N0) : swap B N0 l = (l.2, l.1) := rfl
-
-@[simp] theorem swap_symm_apply {B N0 : ℕ} (l : ParticularIndex B N0) :
-    (swap B N0).symm l = (l.2, l.1) := rfl
 
 noncomputable def particularState {B N0 : ℕ} (x : CycleState (Index B N0)) :
     CycleState (ParticularIndex B N0) := reindexState (swap B N0).symm x
@@ -110,39 +97,6 @@ noncomputable def parameters {B N0 : ℕ} (x : CycleState (Index B N0)) :
     ActualSignedStageControls.parameters ActualPrimary.rankData
 
 
-
-@[simp] theorem parameters_gauge {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).gauge = ActualPrimary.commonGauge := rfl
-
-@[simp] theorem parameters_strip {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).strip = ActualInitialization.strip := rfl
-
-@[simp] theorem parameters_patch {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).patch = ActualInitialization.patch := rfl
-
-@[simp] theorem parameters_coordinate {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).coordinate = 2 * ActualPrimary.h := rfl
-
-@[simp] theorem parameters_timeExponent {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).timeExponent = ActualPrimary.h := rfl
-
-@[simp] theorem parameters_commonIndex {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).commonIndex = CommonWindow.index ActualPrimary.h := rfl
-
-@[simp] theorem parameters_axial {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).axial = ActualInitialization.axial := rfl
-
-@[simp] theorem parameters_rank {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (parameters x).rank = ActualPrimary.rankData := rfl
-
-@[simp] theorem parameters_particular {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (parameters x).particular l =
-      ActualParticularStageControls.parameters (particularState x) (swap B N0 l) := rfl
-
-@[simp] theorem parameters_signed {B N0 : ℕ} (x : CycleState (Index B N0))
-    (l : Index B N0) :
-    (parameters x).signed l = ActualSignedStageControls.parameters l := rfl
 
 
 

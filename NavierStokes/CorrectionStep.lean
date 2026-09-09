@@ -18,8 +18,10 @@ This module is an aggregator: the development lives in
 into six parts, each depending only on the ones before it.
 
 * `Fields` — the shared vocabulary (`ScalarField`, `Tensor`, `TensorClass`, the
-  covariance changes), the full differential residual, the physical chart
-  representation, the temporal construction and the gauge mean bookkeeping.
+  covariance changes) and the full differential residual, both re-exported from
+  `NavierStokes.SignedMeanGain` and `NavierStokes.HarmonicResidual.Actual`,
+  together with the physical chart representation, the temporal construction and
+  the gauge mean bookkeeping.
 * `SignedStages` — the physical residual decomposition, the signed stage
   parameters and their linear coefficient bridge, the gauge rank mean, and the
   moving-support, periodized and particular constructions.

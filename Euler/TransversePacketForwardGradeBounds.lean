@@ -74,19 +74,16 @@ theorem grade_fields :
     ((G.scalarGradientField I).normalized D.T_pos.le (c • L.g)
       (smul_profile_pos L.g L.positive c hc)).WordBound 6 L.R 1 e := by
   have ha := mul_nonneg hc.le W.data_nonneg
-  have hd : ∀ i : Fin 4, ‖standardDirection i‖ ≤ 1 := by
-    intro i
-    cases i using Fin.cases <;> simp [Prod.norm_def]
   have hv : ((G.vectorField I).normalized D.T_pos.le L.g L.positive).WordBound
       6 L.R ((L.commonCost*C)*c) (d+1) := by
     intro n
     simpa only [Field.normalized_path,Forcing.vectorField,mul_assoc,mul_left_comm,mul_comm] using
-      L.velocity_common_bound G I standardDirection hd (c*C) ha d hforce hinitial n
+      L.velocity_common_bound G I standardDirection standardDirection_norm_le_one (c*C) ha d hforce hinitial n
   have ht : ((G.vectorDerivativeField I).normalized D.T_pos.le L.g L.positive).WordBound
       6 L.R ((L.commonCost*C)*c) (d+1) := by
     intro n
     simpa only [Field.normalized_path,Forcing.vectorDerivativeField,mul_assoc,mul_left_comm,mul_comm] using
-      L.derivative_common_bound G I standardDirection hd (c*C) ha d hforce hinitial n
+      L.derivative_common_bound G I standardDirection standardDirection_norm_le_one (c*C) ha d hforce hinitial n
   have hC : ((G.curlCorrectorField I).normalized D.T_pos.le L.g L.positive).WordBound
       6 L.R ((L.correctorAmplitude (P := P) N*C)*c) (d+2) := by
     intro n

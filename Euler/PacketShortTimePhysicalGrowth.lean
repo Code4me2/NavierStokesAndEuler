@@ -1,8 +1,13 @@
-import Euler.PacketShortTimePropagator
+import Euler.ShortTimeLinearGrowth
+import Euler.PacketSourcePropagator
+import Euler.PacketParentForwardBudget
 
 /-! The source tangent equation is a reflection of the strain applied to
 the velocity. Its actual norm is therefore unchanged by the normal factor.
-A short interval controlled by the low strain norm supplies H3 with g=1. -/
+A short interval controlled by the low strain norm supplies H3 with g=1.
+
+Absorbed the former module `Euler.PacketShortTimePropagator`, which after the dead-code sweeps held no declarations, only its imports.
+-/
 
 noncomputable section
 

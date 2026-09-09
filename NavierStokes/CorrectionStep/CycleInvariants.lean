@@ -41,39 +41,6 @@ noncomputable def ofGeometry {ι : Type} (G : SignedMeanGain.Geometry)
   signed := signed
   rank := rank
 
-section ActualMean
-variable {ι : Type} (G : SignedMeanGain.Geometry) (B : SignedMeanGain.NativeData G)
-    (h : ℝ) (index : ℕ → ℕ) (axial : PressureStream.Plane × PressureStream.Plane)
-    (particular : ι → ParticularParameters CycleSlow)
-    (signed : ι → PeriodizedSignedParameters CyclePoint TorusInverse.Frequency)
-    (r : RankData PressureStream.Plane)
-    (v : CycleCoefficients ι) (c : Context CyclePoint) (u : State CyclePoint)
-    (primary : ι → HarmonicBlock CyclePoint) (P : ι → ℕ → CyclePoint → ℝ)
-    {σ κ : ℝ} (hσ : 1/5 ≤ σ) (N : ℕ)
-    (hprimary : ∀ l, (primary l).BandLimited N) (hband : CoefficientBands v)
-    (hcp : ∀ l, SameCarrier (v.blocks l) (primary l))
-
-
-variable (hcs : ∀ l, SameCarrier (v.blocks l) ((ofGeometry G h index axial particular signed r).signedBlock v c u l))
-    (hold : ∀ i j, LabelSumBounds.UniformWaveClass G.strip P (1/2)
-      (fun l n x => (v.blocks l).velocity n i j x))
-    (hdiff : ∀ i j, LabelSumBounds.UniformWaveClass G.strip P (17/25)
-      (fun l n x => (v.blocks l).velocity n i j x - (primary l).velocity n i j x))
-    (hpart : ∀ i j, LabelSumBounds.UniformWaveClass G.strip P (1/2+σ)
-      (fun l n x => ((ofGeometry G h index axial particular signed r).particularBlock v c u l).velocity n i j x))
-    (htangent : ∀ i j, LabelSumBounds.UniformWaveClass G.strip P (1/2+σ-κ)
-      (fun l n x => ((ofGeometry G h index axial particular signed r).signedTangent v c u l).velocity n i j x))
-    (hcurl : ∀ i j, LabelSumBounds.UniformWaveClass G.strip P (1+σ-2*κ)
-      (fun l n x => ((ofGeometry G h index axial particular signed r).signedCurl v c u l).velocity n i j x))
-    (hP0 : ∀ l n x, x ∈ G.strip.domain → 0 ≤ P l n x)
-    (hP1 : ∀ l n x, x ∈ G.strip.domain → P l n x ≤ 1)
-    (hkp : ∀ l n, (v.blocks l).angularFrequency n ≠ 0)
-
-local notation "F" => signedFamily (ofGeometry G h index axial particular signed r) v c u primary P hσ N hprimary hband hcp hcs
-  hold hdiff hpart htangent hcurl hP0 hP1 hkp
-
-
-end ActualMean
 end CycleParameters
 
 end ActualCycleMeanGain
@@ -145,23 +112,6 @@ theorem next_zeroMassesOn {coord : ℝ} (U : SlowRegion coord)
 end CycleParameters
 
 end CycleRegularityPreservation
-
-section CycleAssociationTransport
-
-open Set WeightedClasses CorrectionState
-open scoped BigOperators
-section Reindex
-variable {D E : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-
-
-
-
-
-
-end Reindex
-
-end CycleAssociationTransport
 
 section CycleResidualGrouping
 

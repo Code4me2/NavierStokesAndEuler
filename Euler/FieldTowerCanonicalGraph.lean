@@ -1,9 +1,12 @@
 import Euler.FieldTowerGraph
 import Euler.CylinderGraphRealization
-import Euler.FieldTowerTimeRestriction
+import Euler.FieldTowerRepresentative
 
 /-! Canonical graph restrictions need no additional representative or
-regularity assumptions beyond the actual all-order tower. -/
+regularity assumptions beyond the actual all-order tower.
+
+Absorbed the former module `Euler.FieldTowerTimeRestriction`, which after the dead-code sweeps held no declarations, only its imports.
+-/
 
 noncomputable section
 

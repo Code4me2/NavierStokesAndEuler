@@ -1,3 +1,4 @@
+import NavierStokes.WithTopLemmas
 import NavierStokes.HeatedOutgoing
 import NavierStokes.TerminalEdgeFactor
 import NavierStokes.LeadingStress
@@ -22,8 +23,6 @@ open Set Filter Function MeasureTheory
 open scoped Topology ContDiff
 open OutgoingProfile (Profile)
 open HeatedOutgoing (CompensationWitness Coeff)
-
-private theorem two_le_infty : (2 : WithTop ℕ∞) ≤ ∞ := WithTop.coe_le_coe.mpr le_top
 
 noncomputable def angularHistory (F : Profile) (XR : ℝ) (c : ℝ → Coeff)
     (η X : ℝ) : ℝ := ∫ u in Ioc 0 X, HeatedOutgoing.H F XR c (u,η)
@@ -623,7 +622,7 @@ theorem physicalLog_amplitudeOperator {h b XR : ℝ} (hh : 0 < h) (hh' : h < 1/2
   have hL := SimilarityProfile.L_pos hh hh' ht
   unfold amplitudeOperator physicalLog
   rw [SimilarityProfile.partialT_pullback hh hh' ht (hd.differentiableAt (by simp)),
-    SimilarityProfile.partialS_partialS_pullback hh hh' ht (hd.of_le two_le_infty),
+    SimilarityProfile.partialS_partialS_pullback hh hh' ht (hd.of_le (ofNat_le_infty 2)),
     SimilarityProfile.partialS_pullback hh hh' ht (hd.differentiableAt (by simp))]
   simp only [SimilarityProfile.pullback,SimilarityProfile.T,CoordinateAlgebra.timeCoeff]
   rw [radialLift_partialX hXR hG hx heta,radialLift_partialEta hXR hG hx heta,
@@ -722,9 +721,9 @@ theorem terminalAmplitude_operator (C : ℝ) (d : OutgoingTail.TailData) (y0 : �
     positivity
   have hf : ContDiffAt ℝ 2 (TerminalPressure.outgoingTaper d y0)
       (Real.log (SimilarityProfile.X d.h (TerminalStress.radiusPoint t r z))) :=
-    (TerminalPressure.outgoingTaper_contDiff d y0).contDiffAt.of_le two_le_infty
+    (TerminalPressure.outgoingTaper_contDiff d y0).contDiffAt.of_le (ofNat_le_infty 2)
   have hA : ContDiffAt ℝ 2 (terminalAmplitude C d y0) (TerminalStress.radiusPoint t r z) :=
-    ((TerminalStress.physicalHeat_contDiffAt C (by linarith [d.h_pos]) hp hs).of_le two_le_infty).mul
+    ((TerminalStress.physicalHeat_contDiffAt C (by linarith [d.h_pos]) hp hs).of_le (ofNat_le_infty 2)).mul
       (TerminalStress.flattening_contDiffAt d.h_pos d.h_lt_half hp hs hf)
   have he := TerminalStress.terminal_radial_residual C d.h_pos d.h_lt_half ht hr hf
   change deriv (fun u => terminalAmplitude C d y0 (TerminalStress.radiusPoint u r z)) t -

@@ -44,7 +44,7 @@ theorem velocity_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (velocityPath τ hτ hτT B G))) n 0 ≤
         (L.commonCost*A)*majorant L.R (d+3) n :=
-  (L.velocity_bound G standardDirection direction_norm_bound A hA d hforce n).trans
+  (L.velocity_bound G standardDirection standardDirection_norm_le_one A hA d hforce n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right L.velocityCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -52,7 +52,7 @@ theorem derivative_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (derivativePath τ hτ hτT B G))) n 0 ≤
         (L.commonCost*A)*majorant L.R (d+3) n :=
-  (L.derivative_bound G standardDirection direction_norm_bound A hA d hforce n).trans
+  (L.derivative_bound G standardDirection standardDirection_norm_le_one A hA d hforce n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right L.derivativeCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -65,7 +65,7 @@ theorem pressure_bound (n : ℕ) :
     (hforce j).trans (mul_le_mul_of_nonneg_left
       (majorant_mono_shift L.R L.radius_bounds.1 d (d+3) j (by omega)) hA)
   have h := source_pressure_bound τ hτ hτT B G L.fullProfile L.fullProfile_pos
-    standardDirection direction_norm_bound q N.Rc N.C N.C N.Ri L.R A (L.commonCost*A)
+    standardDirection standardDirection_norm_le_one q N.Rc N.C N.C N.Ri L.R A (L.commonCost*A)
     N.Rc_nonneg N.C_nonneg N.C_nonneg hA (mul_nonneg L.commonCost_nonneg hA)
     N.inverse_radius N.pressure_radius N.normal_bound N.strain_bound (d+3) hf
     (L.velocity_common_bound G A hA d hforce) n

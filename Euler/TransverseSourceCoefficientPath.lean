@@ -1,5 +1,5 @@
 import Euler.MeanCoefficientPathJets
-import Euler.TransverseSourceFrame
+import Euler.TransverseStrongEquation
 import Euler.OperatorGevreyCalculus
 
 /-!
@@ -10,7 +10,48 @@ smooth map from position to time paths. Restriction to the fixed orthonormal
 reference plane is a linear contraction. The pointwise source derivative
 bounds therefore imply exactly the time-path coefficient bounds required by
 the constructed transverse inverse.
+
+Merged in from the former module `Euler.TransverseSourceFrame`: `referenceEmbedding`.
 -/
+
+/-!
+# The source frame `Q = F R⊥`
+
+These coefficient lemmas discharge the moving-plane range and lower-frame
+hypotheses using the prescribed invertible deformation and orthonormal reference
+plane. No inverse solution or acceleration is supplied as input.
+-/
+
+noncomputable section
+
+namespace EulerTransverseSourceFrame
+
+open Set InnerProductSpace ContinuousLinearMap MeasureTheory
+  EulerTimeLp EulerTerminalTimePrimitive EulerVolterraConvolution
+  EulerTransverseFrameCoordinates EulerTransverseVariationalInverse
+  EulerTransverseCoordinateRegularity EulerTransverseStrongEquation
+  EulerTransverseGramInverse
+
+variable {U E : Type*}
+  [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
+  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
+
+variable (m₀ : E) (R : U ≃ₗᵢ[ℝ] referencePlane m₀)
+
+/-- The fixed orthonormal reference-plane embedding. -/
+def referenceEmbedding : U →L[ℝ] E :=
+  (referencePlane m₀).subtypeL.comp R.toContinuousLinearEquiv.toContinuousLinearMap
+
+
+
+
+
+
+
+
+
+end EulerTransverseSourceFrame
+end
 
 noncomputable section
 

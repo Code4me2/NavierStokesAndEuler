@@ -26,14 +26,6 @@ variable {D E F : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-theorem norm_iteratedFDeriv_map (L : E →L[ℝ] F) {f : D → E}
-    (hf : ContDiff ℝ ∞ f) (m : ℕ) (z : D) :
-    ‖iteratedFDeriv ℝ m (fun x => L (f x)) z‖ ≤ ‖L‖ * ‖iteratedFDeriv ℝ m f z‖ := by
-  have he := L.iteratedFDeriv_comp_left hf.contDiffAt (natCast_le_infty m) (x := z)
-  change iteratedFDeriv ℝ m (fun x => L (f x)) z = _ at he
-  rw [he]
-  exact L.norm_compContinuousMultilinearMap_le _
-
 theorem finiteJetBound_fixedPartial {f : D → E} (hf : ContDiff ℝ ∞ f)
     {s : Set D} {C : ℝ} {m : ℕ} (hb : FiniteJetBound (m + 1) f s C)
     (v : D) (hv : ‖v‖ ≤ 1) :
@@ -469,7 +461,7 @@ theorem norm_iteratedFDeriv_realInverse_le (d : Direction) {f : P × Plane → �
     apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
     intro c
     simpa only [Complex.reCLM_apply, Real.norm_eq_abs, one_mul] using Complex.abs_re_le_norm c
-  exact (norm_iteratedFDeriv_map Complex.reCLM hi m z).trans
+  exact (SmoothFamilyTorusInverse.norm_jet_linear Complex.reCLM hi m z).trans
     ((mul_le_mul_of_nonneg_right hnorm (norm_nonneg _)).trans_eq (one_mul _))
 
 theorem realInverse_finiteJets (d : Direction) (m : ℕ) :
@@ -539,18 +531,27 @@ theorem realCenterSource_zeroMean {f : ℝ × (S × Plane) → ℝ}
   realCentered_zeroMean (toProduct_smooth hf) (fun p => hp p.1 p.2)
 
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S] in
-theorem realCenterSource_supported {a b : ℝ} {f : ℝ × (S × Plane) → ℝ}
-    (hs : RadialAlias.RadiallySupported a b f) :
-    RadialAlias.RadiallySupported a b (realCenterSource f) := by
-  have hh : ∀ p : ℝ × S, p ∉ (Prod.fst ⁻¹' Icc a b) → ∀ Y : Plane,
-      toProduct f (p, Y) = 0 := by
-    intro p hp Y
-    by_contra hn
-    exact hp (@hs (p.1, (p.2, Y)) hn)
-  have hi := realCentered_preserves_parameter_support (toProduct f) (Prod.fst ⁻¹' Icc a b) hh
+/-- Radial support only constrains the regrouped parameter, so an operator
+preserving the parameter support of `toProduct f` preserves it. -/
+theorem radiallySupported_of_preserves {V W : Type}
+    [NormedAddCommGroup V] [NormedSpace ℝ V] [NormedAddCommGroup W] [NormedSpace ℝ W]
+    {a b : ℝ} {f : ℝ × (S × Plane) → V} {g : ℝ × (S × Plane) → W}
+    (hs : RadialAlias.RadiallySupported a b f)
+    (hpres : ∀ A : Set (ℝ × S), (∀ p, p ∉ A → ∀ Y : Plane, toProduct f (p, Y) = 0) →
+      ∀ p, p ∉ A → ∀ Y : Plane, toProduct g (p, Y) = 0) :
+    RadialAlias.RadiallySupported a b g := by
+  have hi := hpres (Prod.fst ⁻¹' Icc a b)
+    (fun p hp Y => by by_contra hn; exact hp (@hs (p.1, (p.2, Y)) hn))
   intro z hz
   by_contra hn
   exact hz (hi (z.1, z.2.1) hn z.2.2)
+
+omit [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S] in
+theorem realCenterSource_supported {a b : ℝ} {f : ℝ × (S × Plane) → ℝ}
+    (hs : RadialAlias.RadiallySupported a b f) :
+    RadialAlias.RadiallySupported a b (realCenterSource f) :=
+  radiallySupported_of_preserves hs
+    (fun A hA => realCentered_preserves_parameter_support (toProduct f) A hA)
 
 theorem totalIntegral_realCenterSource {a b M : ℝ} {v : Plane}
     {f : ℝ × (S × Plane) → ℝ} (hf : ContDiff ℝ ∞ f) (hp : SourcePeriodic f)
@@ -602,17 +603,9 @@ theorem familyInverse_zeroMean (d : Direction) {f : ℝ × (S × Plane) → ℂ}
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S] in
 theorem familyInverse_supported (d : Direction) {a b : ℝ} {f : ℝ × (S × Plane) → ℂ}
     (hs : RadialAlias.RadiallySupported a b f) :
-    RadialAlias.RadiallySupported a b (familyInverse d f) := by
-  have hh : ∀ p : ℝ × S, p ∉ (Prod.fst ⁻¹' Icc a b) → ∀ Y : Plane,
-      toProduct f (p, Y) = 0 := by
-    intro p hp Y
-    by_contra hn
-    exact hp (@hs (p.1, (p.2, Y)) hn)
-  have hi := SmoothFamilyTorusInverse.inverse_preserves_parameter_support d (toProduct f)
-    (Prod.fst ⁻¹' Icc a b) hh
-  intro z hz
-  by_contra hn
-  exact hz (hi (z.1, z.2.1) hn z.2.2)
+    RadialAlias.RadiallySupported a b (familyInverse d f) :=
+  radiallySupported_of_preserves hs
+    (fun A hA => SmoothFamilyTorusInverse.inverse_preserves_parameter_support d (toProduct f) A hA)
 
 omit [FiniteDimensional ℝ S] in
 theorem toProduct_slowDeriv {f : ℝ × (S × Plane) → ℂ} (hf : ContDiff ℝ ∞ f) :

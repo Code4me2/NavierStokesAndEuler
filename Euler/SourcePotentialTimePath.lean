@@ -1,6 +1,10 @@
-import Euler.SourcePotentialTime
+import Euler.SourcePotentialTimeCoefficient
+import Euler.CylinderPotentialTime
 
-/-! The potential time coefficient from an actual continuous, translation-smooth normal derivative path. -/
+/-! The potential time coefficient from an actual continuous, translation-smooth normal derivative path.
+
+Absorbed the former module `Euler.SourcePotentialTime`, which after the dead-code sweeps held no declarations, only its imports.
+-/
 
 noncomputable section
 

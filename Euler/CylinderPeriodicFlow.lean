@@ -1,8 +1,31 @@
 import Euler.CylinderCoverDescent
-import Euler.BoundedFlowPeriodicity
+import Euler.BoundedFlowContinuity
 
 /-! The actual flow of a periodic cover velocity descends to a genuine
-continuous cylinder flow with two-sided inverse. -/
+continuous cylinder flow with two-sided inverse.
+
+Merged in from the former module `Euler.BoundedFlowPeriodicity`: `flow_add_eq`.
+-/
+
+/-! Periodicity of the prescribed velocity gives exact translation
+equivariance of the constructed global flow, by ODE uniqueness. -/
+
+noncomputable section
+
+namespace EulerBoundedLipschitzFlow.Data
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+  (V : EulerBoundedLipschitzFlow.Data E)
+
+theorem flow_add_eq (c : E) (hc : ∀ t x, V.velocity t (x+c)=V.velocity t x)
+    (s t : ℝ) (x : E) : V.flow s t (x+c)=V.flow s t x+c := by
+  have h := V.flow_unique s (x+c) (fun r => V.flow s r x+c)
+    (fun r => by simpa only [hc] using (V.flow_hasDerivAt s r x).add_const c)
+    (by rw [V.flow_initial])
+  exact (congrFun h t).symm
+
+end EulerBoundedLipschitzFlow.Data
+end
 
 noncomputable section
 

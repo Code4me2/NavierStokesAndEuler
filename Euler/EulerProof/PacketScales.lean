@@ -1,94 +1,3 @@
-import Mathlib.Data.Nat.Choose.Sum
-import Mathlib.Data.Nat.Choose.Cast
-import Mathlib.Data.Real.Basic
-import Mathlib.Tactic
-import Mathlib.Analysis.Calculus.UniformLimitsDeriv
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Tactic.Choose
-import Mathlib.Tactic.FieldSimp
-import Mathlib.Tactic.Positivity
-import Mathlib.Tactic.Ring
-import Mathlib.Analysis.InnerProductSpace.LaxMilgram
-import Mathlib.Analysis.InnerProductSpace.Projection.Basic
-import Mathlib.Analysis.Calculus.Deriv.Comp
-import Mathlib.Analysis.Calculus.Deriv.Mul
-import Mathlib.Analysis.Calculus.FDeriv.Mul
-import Mathlib.Tactic.Abel
-import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.MeasureTheory.Group.Prod
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
-import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
-import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
-import Mathlib.Analysis.InnerProductSpace.Calculus
-import Mathlib.Analysis.Calculus.FDeriv.Symmetric
-import Mathlib.Analysis.Calculus.MeanValue
-import Mathlib.Analysis.Calculus.Deriv.Slope
-import Mathlib.MeasureTheory.Function.LpSpace.Indicator
-import Mathlib.Analysis.Calculus.BumpFunction.InnerProduct
-import Mathlib.MeasureTheory.Integral.DominatedConvergence
-import Mathlib.Analysis.SpecialFunctions.Sqrt
-import Mathlib.Analysis.Calculus.SmoothSeries
-import Mathlib.Analysis.Normed.Operator.Bilinear
-import Mathlib.LinearAlgebra.Trace
-import Mathlib.MeasureTheory.Function.L1Space.Integrable
-import Mathlib.Analysis.Distribution.Sobolev
-import Mathlib.MeasureTheory.Function.Holder
-import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
-import Mathlib.Analysis.Fourier.Convolution
-import Mathlib.MeasureTheory.Integral.MeanInequalities
-import Mathlib.Analysis.SpecialFunctions.Pow.Integral
-import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-import Mathlib.Algebra.Order.Chebyshev
-import Mathlib.MeasureTheory.Constructions.Pi
-import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
-import Mathlib.MeasureTheory.Function.LpSpace.ContinuousCompMeasurePreserving
-import Mathlib.Analysis.Calculus.BumpFunction.Convolution
-import Mathlib.Analysis.Calculus.ContDiff.Convolution
-import Mathlib.MeasureTheory.Function.AEEqOfIntegral
-import Mathlib.Topology.MetricSpace.Cauchy
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
-import Mathlib.Analysis.InnerProductSpace.Continuous
-import Mathlib.Tactic.Linarith
-import Mathlib.Analysis.InnerProductSpace.Positive
-import Mathlib.Algebra.QuadraticDiscriminant
-import Mathlib.Tactic.NormNum
-import Mathlib.Analysis.Calculus.Gradient.Basic
-import Mathlib.Analysis.Calculus.Deriv.Prod
-import Mathlib.Analysis.Calculus.FDeriv.Add
-import Mathlib.Analysis.InnerProductSpace.Adjoint
-import Mathlib.Analysis.Calculus.FDeriv.WithLp
-import Mathlib.Analysis.Complex.Liouville
-import Mathlib.Analysis.SpecialFunctions.SmoothTransition
-import Mathlib.Analysis.Calculus.ContDiff.RestrictScalars
-import Mathlib.Analysis.Calculus.ContDiff.Bounds
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
-import Mathlib.Analysis.ODE.Gronwall
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Analysis.Calculus.Deriv.Pow
-import Mathlib.Analysis.Calculus.Deriv.Add
-import Mathlib.MeasureTheory.Integral.CurveIntegral.Poincare
-import Mathlib.Analysis.Normed.Group.Bounded
-import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.LinearAlgebra.Matrix.Trace
-import Mathlib.MeasureTheory.Function.Jacobian
-import Mathlib.MeasureTheory.Integral.Prod
-import Mathlib.Analysis.Calculus.FDeriv.Prod
-import Mathlib.Tactic.Module
-import Mathlib.Analysis.Calculus.Deriv.Inv
-import Mathlib.Data.Matrix.Mul
-import Mathlib.Analysis.Calculus.Deriv.MeanValue
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-import Mathlib.Analysis.ODE.PicardLindelof
-import Mathlib.Analysis.ODE.ExistUnique
-import Mathlib.Analysis.SpecificLimits.Normed
-import Mathlib.Analysis.SpecialFunctions.Exp
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.Data.Fin.VecNotation
-import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 import Euler.EulerProof.PacketFrames
 
 /-!
@@ -842,13 +751,7 @@ theorem polynomial_scale_geometric_lower
 
 /-- A simple exact comparison between binary growth and the stage count. -/
 theorem stage_count_le_two_pow (n : ℕ) : (n : ℝ) + 1 ≤ (2 : ℝ) ^ n := by
-  induction n with
-  | zero => norm_num
-  | succ n ih =>
-      push_cast
-      rw [pow_succ]
-      have hn : (0 : ℝ) ≤ n := by positivity
-      nlinarith only [ih, hn]
+  exact_mod_cast Nat.lt_two_pow_self
 
 /-- Every term of the source exponential series is bounded by one
 explicit geometric series whose ratio depends only on the first scale. -/

@@ -1,6 +1,6 @@
 import Euler.PacketInfiniteConstruction
 import Euler.PacketFirstStageSupport
-import Euler.CurlSupport
+import Euler.MeanBoundaryOperator
 
 /-!
 # Common initial support of every constructed packet stage
@@ -8,7 +8,28 @@ import Euler.CurlSupport
 The selected forward and joined corrections retain the common initial
 support. Therefore every finite stage has initial velocity, all its spatial
 derivatives, and initial vorticity supported in the closed ball of radius two.
+
+Merged in from the former module `Euler.CurlSupport`: `tsupport_vectorCurl_subset`.
 -/
+
+/-! The curl of a differentiable field has support inside the support of that
+field. This elementary locality fact does not assume spatial norm bounds. -/
+
+namespace EulerMeanCutoffCurl
+
+open EulerSmoothLimit EulerMeanBoundary
+
+theorem tsupport_vectorCurl_subset (f : Space → Space) (hf : Differentiable ℝ f) :
+    tsupport (vectorCurl f) ⊆ tsupport f := by
+  have hcurl : vectorCurl f = curlMatrix ∘ fderiv ℝ f :=
+    funext (fun x => vectorCurl_eq_matrix f x (hf x))
+  have hzero : curlMatrix 0 = 0 := by
+    ext i
+    simp [curlMatrix]
+  rw [hcurl]
+  exact (tsupport_comp_subset hzero (fderiv ℝ f)).trans (tsupport_fderiv_subset ℝ)
+
+end EulerMeanCutoffCurl
 
 noncomputable section
 

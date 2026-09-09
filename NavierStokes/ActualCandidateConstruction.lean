@@ -41,9 +41,6 @@ noncomputable def cycle (B N0 : ℕ) : ℕ → CycleState (Index B N0) :=
   CycleState.iterate (parameterSequence B N0) (commonContext B)
     (ActualInitialization.initialCycleState B N0)
 
-@[simp] theorem cycle_zero (B N0 : ℕ) :
-    cycle B N0 0 = ActualInitialization.initialCycleState B N0 := rfl
-
 
 
 

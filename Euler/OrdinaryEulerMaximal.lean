@@ -130,12 +130,8 @@ theorem maximalVelocity_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duratio
     L.maximalVelocity (L.shorterTime S hSL t)=((L.evolution S hS hSL).velocity t).field := by
   exact congrArg SmoothL2Field.field (L.maximalField_eq_evolution S hS hSL t)
 
-
 theorem maximalVelocity_initial : L.maximalVelocity L.initialTime=A.field :=
   congrArg SmoothL2Field.field L.maximalField_initial
-
-
-
 
 theorem maximalVelocity_divergence (t : L.Time) (x : Space) :
     divergence (L.maximalVelocity t) x=0 :=

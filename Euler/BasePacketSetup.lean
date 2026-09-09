@@ -1,8 +1,33 @@
-import Euler.BaseSmoothState
+import Euler.BaseEulerState
+import Euler.ParentState
 import Euler.ParentPacketForwardInput
 
 /-! Concrete support, transverse coordinate and short-time source
-budgets for the first packet over the compact base Euler solution. -/
+budgets for the first packet over the compact base Euler solution.
+
+Merged in from the former module `Euler.BaseSmoothState`: `initialState`.
+-/
+
+/-! The concrete compactly supported datum supplies the full recursive
+state: the physical Euler solution, all Sobolev orders, particle labels,
+and odd symmetry all refer to the same solution. -/
+
+noncomputable section
+
+namespace EulerBaseDatum
+
+open EulerParentPacketFrames
+
+def initialState (β : ℝ) (hβ : |β| ≤ 1) (ell : ℝ)
+    (hell : 0 < ell) (hell1 : ell ≤ 1) :
+    SmoothState (initialParent β hβ ell hell hell1) where
+  evolution := initialEvolution β hβ ell hell hell1
+  regularity := initialSobolevData β hβ ell hell hell1
+  labels := initialLabelData β hβ ell hell hell1
+  odd := initialOddData β hβ ell hell hell1
+
+end EulerBaseDatum
+end
 
 noncomputable section
 

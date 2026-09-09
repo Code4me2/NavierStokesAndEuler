@@ -54,9 +54,10 @@ not treated as independent black-box state transitions.  Every old/new cross
 term is retained in the displayed residual differences.
 
 This is the first part of `NavierStokes.CorrectionStep`, which is now an
-aggregator over the parts under `NavierStokes/CorrectionStep/`.  It carries the
-shared vocabulary (`ScalarField`, `Tensor`, `TensorClass`, the covariance
-changes) together with the full differential residual, the physical chart
+aggregator over the parts under `NavierStokes/CorrectionStep/`.  It re-exports
+the shared vocabulary (`ScalarField`, `Tensor`, `TensorClass`, the covariance
+changes) from `NavierStokes.SignedMeanGain` and the full differential residual
+from `NavierStokes.HarmonicResidual.Actual`, and declares the physical chart
 representation, the temporal construction, and the gauge mean bookkeeping.
 -/
 
@@ -69,272 +70,29 @@ open scoped ContDiff BigOperators
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-abbrev ScalarField (D : Type) := MeanIncrementBounds.Field D
-abbrev Tensor (D : Type) := Fin 3 → Fin 3 → ScalarField D
+/-! ## Shared vocabulary and covariance changes
 
-/-- These are changes of the literal covariance terms in (32). -/
-noncomputable def thetaCovarianceChange (o : Operators D) (X : Tensor D) : ScalarField D :=
-  o.radialDiv 2 (X 0 1) + o.dz (X 2 1)
+The scalar-field and tensor abbreviations, the three literal covariance
+changes of (32), the smoothness of an updated mean, the agreement lemmas for
+those covariance changes and their mean-class bounds are all declared in
+`NavierStokes.SignedMeanGain`, which this file imports.  They are re-exported
+here, so one copy of each serves both modules. -/
+export SignedMeanGain (ScalarField Tensor thetaCovarianceChange
+  axialCovarianceChange radialCovarianceChange smooth_updated
+  thetaResidual_covariance_change axialResidual_covariance_change
+  gr_covariance_change TensorClass thetaCovarianceChange_mem
+  axialCovarianceChange_mem radialCovarianceChange_mem)
 
-noncomputable def axialCovarianceChange (o : Operators D) (X : Tensor D) : ScalarField D :=
-  o.radialDiv 1 (X 0 2) + o.dz (X 2 2)
+/-! ## The full differential residual, before angular averaging
 
-noncomputable def radialCovarianceChange (o : Operators D) (X : Tensor D) : ScalarField D :=
-  -o.radialDiv 1 (X 0 0) - o.dz (X 2 0) + o.invRadius * X 1 1
-
-theorem smooth_updated {U : Set D} {m h : Triple D}
-    (hm : SmoothTriple U m) (hh : SmoothTriple U h) : SmoothTriple U (updated m h) :=
-  ⟨hm.radial.add hh.radial, hm.angular.add hh.angular, hm.axial.add hh.axial⟩
-
-section CovarianceChanges
-
-variable {U : Set D} (hU : IsOpen U) (o : Operators D)
-  {b m : Triple D} (hb : SmoothTriple U b) (hm : SmoothTriple U m)
-  (W X : Tensor D) (hW : ∀ i j, SmoothOn U (W i j))
-  (hX : ∀ i j, SmoothOn U (X i j))
-
-include hU hb hm hW hX in
-theorem thetaResidual_covariance_change (T : ScalarField D) :
-    Agree U (thetaResidual o b m (W + X) T - thetaResidual o b m W T)
-      (thetaCovarianceChange o X) := by
-  have hr : thetaRadial b m + (W + X) 0 1 = (thetaRadial b m + W 0 1) + X 0 1 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  have hz : thetaAxial b m + (W + X) 2 1 = (thetaAxial b m + W 2 1) + X 2 1 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  simp only [Pi.add_apply] at hr hz
-  intro n x hx
-  simp only [thetaResidual, Pi.sub_apply, Pi.add_apply]
-  rw [hr, hz, o.radialDiv_add hU 2 ((hb.thetaRadial hm).add (hW 0 1)) (hX 0 1) n hx,
-    o.dz_add hU ((hb.thetaAxial hm).add (hW 2 1)) (hX 2 1) n hx]
-  simp only [thetaCovarianceChange, Pi.add_apply]
-  ring
-
-include hU hb hm hW hX in
-theorem axialResidual_covariance_change (p T : ScalarField D) (hp : SmoothOn U p) :
-    Agree U (axialResidual o b m (W + X) p T - axialResidual o b m W p T)
-      (axialCovarianceChange o X) := by
-  have hr : axialRadial b m + (W + X) 0 2 = (axialRadial b m + W 0 2) + X 0 2 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  have hz : axialAxial b m + (W + X) 2 2 + p = (axialAxial b m + W 2 2 + p) + X 2 2 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  simp only [Pi.add_apply] at hr hz
-  intro n x hx
-  simp only [axialResidual, Pi.sub_apply, Pi.add_apply]
-  rw [hr, hz, o.radialDiv_add hU 1 ((hb.axialRadial hm).add (hW 0 2)) (hX 0 2) n hx,
-    o.dz_add hU (((hb.axialAxial hm).add (hW 2 2)).add hp) (hX 2 2) n hx]
-  simp only [axialCovarianceChange, Pi.add_apply]
-  ring
-
-include hU hb hm hW hX in
-theorem gr_covariance_change :
-    Agree U (gr o b m (W + X) - gr o b m W) (radialCovarianceChange o X) := by
-  have hr : radialRadial b m + (W + X) 0 0 = (radialRadial b m + W 0 0) + X 0 0 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  have hz : axialRadial b m + (W + X) 2 0 = (axialRadial b m + W 2 0) + X 2 0 := by
-    funext n x
-    simp only [Pi.add_apply]
-    ring
-  simp only [Pi.add_apply] at hr hz
-  intro n x hx
-  simp only [gr, Pi.sub_apply, Pi.add_apply, Pi.neg_apply, Pi.mul_apply]
-  rw [hr, hz, o.radialDiv_add hU 1 ((hb.radialRadial hm).add (hW 0 0)) (hX 0 0) n hx,
-    o.dz_add hU ((hb.axialRadial hm).add (hW 2 0)) (hX 2 0) n hx]
-  simp only [radialCovarianceChange, Pi.add_apply, Pi.sub_apply, Pi.neg_apply, Pi.mul_apply]
-  ring
-
-end CovarianceChanges
-
-section JointChanges
-
-variable {U : Set D} (hU : IsOpen U) (o : Operators D)
-  (ha : ContDiffOn ℝ ∞ o.radialProfile U)
-  {b m h : Triple D} (hb : SmoothTriple U b) (hm : SmoothTriple U m)
-  (hh : SmoothTriple U h) (W X : Tensor D)
-  (hW : ∀ i j, SmoothOn U (W i j)) (hX : ∀ i j, SmoothOn U (X i j))
-
-
-
-
-end JointChanges
-
-/-- A bound on each actual tensor entry. It is not a bound on the resulting
-residual and contains no update-preservation assertion. -/
-def TensorClass (s : StripData D) (α : ℝ) (X : Tensor D) : Prop :=
-  ∀ i j, MeanClass s α (X i j)
-
-section CovarianceBounds
-
-variable {s : StripData D} {o : Operators D} {κ α : ℝ}
-  (ho : OperatorBounds s o κ) {X : Tensor D} (hX : TensorClass s α X)
-
-include ho hX in
-theorem thetaCovarianceChange_mem :
-    MeanClass s (α - κ) (thetaCovarianceChange o X) := by
-  exact (ho.radialDiv (hX 0 1) 2).add
-    ((ho.dz (hX 2 1)).mono_exponent (by linarith [ho.kappa_nonneg]))
-
-include ho hX in
-theorem axialCovarianceChange_mem :
-    MeanClass s (α - κ) (axialCovarianceChange o X) := by
-  exact (ho.radialDiv (hX 0 2) 1).add
-    ((ho.dz (hX 2 2)).mono_exponent (by linarith [ho.kappa_nonneg]))
-
-include ho hX in
-theorem radialCovarianceChange_mem :
-    MeanClass s (α - κ) (radialCovarianceChange o X) := by
-  exact (Class.sub (Class.neg (ho.radialDiv (hX 0 0) 1))
-    ((ho.dz (hX 2 0)).mono_exponent (by linarith [ho.kappa_nonneg]))).add
-    ((ho.inv_mul (hX 1 1)).mono_exponent (by linarith [ho.kappa_nonneg]))
-
-end CovarianceBounds
-
-/-! ## The full differential residual, before angular averaging -/
-
-section FullCalculus
-
-open HarmonicCalculus LinearWaveResidual
-
-theorem angularGenerator_add (a b : ComplexVector) :
-    angularGenerator (a + b) = angularGenerator a + angularGenerator b := by
-  ext i
-  fin_cases i <;> simp [angularGenerator]
-  abel
-
-theorem transport_add_left (R : D → ℝ) (Vr Vθ Vz : D → D)
-    (a b v : D → ComplexVector) (x : D) :
-    transport R Vr Vθ Vz (a + b) v x =
-      transport R Vr Vθ Vz a v x + transport R Vr Vθ Vz b v x := by
-  ext i
-  simp only [transport, Pi.add_apply]
-  ring
-
-theorem transport_add_right (R : D → ℝ) (Vr Vθ Vz : D → D)
-    (u a b : D → ComplexVector) {x : D}
-    (ha : ∀ i, DifferentiableAt ℝ (fun y => a y i) x)
-    (hb : ∀ i, DifferentiableAt ℝ (fun y => b y i) x) :
-    transport R Vr Vθ Vz u (a + b) x =
-      transport R Vr Vθ Vz u a x + transport R Vr Vθ Vz u b x := by
-  ext i
-  simp only [transport, Pi.add_apply, angularGenerator_add,
-    along_add _ (ha i) (hb i)]
-  ring
-
-theorem twiceAlong_add {U : Set D} (hU : IsOpen U) {V : D → D}
-    (hV : ContDiffOn ℝ ∞ V U) {f g : D → ℂ}
-    (hf : ContDiffOn ℝ ∞ f U) (hg : ContDiffOn ℝ ∞ g U)
-    {x : D} (hx : x ∈ U) :
-    along V (along V (f + g)) x = along V (along V f) x + along V (along V g) x := by
-  have heq : EqOn (along V (f + g)) (along V f + along V g) U := by
-    intro y hy
-    exact along_add V ((hf.contDiffAt (hU.mem_nhds hy)).differentiableAt (by simp))
-      ((hg.contDiffAt (hU.mem_nhds hy)).differentiableAt (by simp))
-  rw [along_congr hU heq hx]
-  exact along_add V
-    (((contDiffOn_along hU hV hf).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))
-    (((contDiffOn_along hU hV hg).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))
-
-theorem cylindricalLaplacian_add {U : Set D} (hU : IsOpen U) (R : D → ℝ)
-    {Vr Vθ Vz : D → D} (hr : ContDiffOn ℝ ∞ Vr U)
-    (hθ : ContDiffOn ℝ ∞ Vθ U) (hz : ContDiffOn ℝ ∞ Vz U)
-    {f g : D → ℂ} (hf : ContDiffOn ℝ ∞ f U) (hg : ContDiffOn ℝ ∞ g U)
-    {x : D} (hx : x ∈ U) :
-    cylindricalLaplacian R Vr Vθ Vz (f + g) x =
-      cylindricalLaplacian R Vr Vθ Vz f x + cylindricalLaplacian R Vr Vθ Vz g x := by
-  have df := (hf.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have dg := (hg.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have hfirst : along Vr (f + g) x = along Vr f x + along Vr g x := along_add Vr df dg
-  simp only [cylindricalLaplacian, twiceAlong_add hU hr hf hg hx,
-    twiceAlong_add hU hθ hf hg hx, twiceAlong_add hU hz hf hg hx,
-    hfirst, smul_add]
-  abel
-
-theorem cylindricalVectorLaplacian_add {U : Set D} (hU : IsOpen U) (R : D → ℝ)
-    {Vr Vθ Vz : D → D} (hr : ContDiffOn ℝ ∞ Vr U)
-    (hθ : ContDiffOn ℝ ∞ Vθ U) (hz : ContDiffOn ℝ ∞ Vz U)
-    {a b : D → ComplexVector}
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun y => a y i) U)
-    (hb : ∀ i, ContDiffOn ℝ ∞ (fun y => b y i) U)
-    {x : D} (hx : x ∈ U) :
-    cylindricalVectorLaplacian R Vr Vθ Vz (a + b) x =
-      cylindricalVectorLaplacian R Vr Vθ Vz a x +
-        cylindricalVectorLaplacian R Vr Vθ Vz b x := by
-  have hL i : cylindricalLaplacian R Vr Vθ Vz (fun y => a y i + b y i) x =
-      cylindricalLaplacian R Vr Vθ Vz (fun y => a y i) x +
-        cylindricalLaplacian R Vr Vθ Vz (fun y => b y i) x :=
-    cylindricalLaplacian_add hU R hr hθ hz (ha i) (hb i) hx
-  have hD i := along_add Vθ
-    (((ha i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))
-    (((hb i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp))
-  ext i
-  fin_cases i <;>
-    simp [cylindricalVectorLaplacian, angularGenerator, hL 0, hL 1, hL 2,
-      hD 0, hD 1, Complex.real_smul] <;> ring
-
-theorem gradient_add (R : D → ℝ) (Vr Vθ Vz : D → D)
-    {p q : D → ℂ} {x : D} (hp : DifferentiableAt ℝ p x)
-    (hq : DifferentiableAt ℝ q x) :
-      gradient R Vr Vθ Vz (p + q) x = gradient R Vr Vθ Vz p x + gradient R Vr Vθ Vz q x := by
-  have hd (V : D → D) : along V (p + q) x = along V p x + along V q x := along_add V hp hq
-  ext i
-  fin_cases i <;> simp [gradient, hd, smul_add]
-
-theorem linearResidual_add {U : Set D} (hU : IsOpen U) (ε : ℝ) (R : D → ℝ)
-    {Vr Vθ Vz : D → D} (Vt : D → D) (hr : ContDiffOn ℝ ∞ Vr U)
-    (hθ : ContDiffOn ℝ ∞ Vθ U) (hz : ContDiffOn ℝ ∞ Vz U)
-    (B a b : D → ComplexVector) (p q : D → ℂ)
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun y => a y i) U)
-    (hb : ∀ i, ContDiffOn ℝ ∞ (fun y => b y i) U)
-    (hp : ContDiffOn ℝ ∞ p U) (hq : ContDiffOn ℝ ∞ q U)
-    {x : D} (hx : x ∈ U) :
-    linearResidual ε R Vr Vθ Vz Vt B (a + b) (p + q) x =
-      linearResidual ε R Vr Vθ Vz Vt B a p x + linearResidual ε R Vr Vθ Vz Vt B b q x := by
-  have da i := ((ha i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have db i := ((hb i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have dp := (hp.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have dq := (hq.contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have hL := cylindricalVectorLaplacian_add hU R hr hθ hz ha hb hx
-  ext i
-  simp only [linearResidual, Pi.add_apply, along_add _ (da i) (db i),
-    transport_add_left, transport_add_right R Vr Vθ Vz B a b da db,
-    gradient_add R Vr Vθ Vz dp dq, hL]
-  ring
-
-/-- Exact residual of a perturbation of a fixed base, before the virtual
-stress and the separately retained base residual are added. -/
-noncomputable def nonlinearResidual (ε : ℝ) (R : D → ℝ) (Vr Vθ Vz Vt : D → D)
-    (B a : D → ComplexVector) (p : D → ℂ) (x : D) : ComplexVector :=
-  linearResidual ε R Vr Vθ Vz Vt B a p x + transport R Vr Vθ Vz a a x
-
-theorem nonlinearResidual_add_sub {U : Set D} (hU : IsOpen U) (ε : ℝ) (R : D → ℝ)
-    {Vr Vθ Vz : D → D} (Vt : D → D) (hr : ContDiffOn ℝ ∞ Vr U)
-    (hθ : ContDiffOn ℝ ∞ Vθ U) (hz : ContDiffOn ℝ ∞ Vz U)
-    (B a b : D → ComplexVector) (p q : D → ℂ)
-    (ha : ∀ i, ContDiffOn ℝ ∞ (fun y => a y i) U)
-    (hb : ∀ i, ContDiffOn ℝ ∞ (fun y => b y i) U)
-    (hp : ContDiffOn ℝ ∞ p U) (hq : ContDiffOn ℝ ∞ q U)
-    {x : D} (hx : x ∈ U) :
-    nonlinearResidual ε R Vr Vθ Vz Vt B (a + b) (p + q) x -
-        nonlinearResidual ε R Vr Vθ Vz Vt B a p x =
-      linearResidual ε R Vr Vθ Vz Vt B b q x + transport R Vr Vθ Vz a b x +
-        transport R Vr Vθ Vz b a x + transport R Vr Vθ Vz b b x := by
-  have da i := ((ha i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  have db i := ((hb i).contDiffAt (hU.mem_nhds hx)).differentiableAt (by simp)
-  rw [nonlinearResidual, linearResidual_add hU ε R Vt hr hθ hz B a b p q ha hb hp hq hx,
-    transport_add_left, transport_add_right R Vr Vθ Vz a a b da db,
-    transport_add_right R Vr Vθ Vz b a b da db, nonlinearResidual]
-  abel
-
-end FullCalculus
+`NavierStokes.HarmonicResidual.Actual` carries the whole additivity calculus
+for the exact residual — the generator, the transport terms, the cylindrical
+Laplacians, the gradient, the linear residual and the nonlinear residual of a
+perturbation of a fixed base.  It is imported here and re-exported unchanged. -/
+export HarmonicResidual.Actual (angularGenerator_add transport_add_left
+  transport_add_right twiceAlong_add cylindricalLaplacian_add
+  cylindricalVectorLaplacian_add gradient_add linearResidual_add
+  nonlinearResidual nonlinearResidual_add_sub)
 
 section FullFields
 
@@ -455,27 +213,6 @@ noncomputable def meanBar (f : ScalarField (PressureStream.Lift S)) :
 
 end TemporalComposition
 
-section TemporalAngularGain
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
-
-
-end TemporalAngularGain
-
-section TemporalPressureAndAxial
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
-
-
-
-
-
-end TemporalPressureAndAxial
-
 /-! ## One physical field behind the chart family
 
 The predicate below is deliberately stronger than an indexed collection of
@@ -582,24 +319,13 @@ theorem RepresentsPhysical.addIncrement {chart : ℕ → P → D} {domain : ℕ 
 
 end PhysicalRepresentation
 
-section RankMeanComposition
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-
-
-
-
-
-
-end RankMeanComposition
-
 section ExcludedMeanErrors
 
 open CorrectionState MeasureTheory
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
+section
+omit [NormedAddCommGroup D] [NormedSpace ℝ D]
+
 theorem angularAverage_add {f g : OscillatoryScalar D}
     (hf : ∀ n x, Continuous (fun θ : ℝ => f n (x, θ)))
     (hg : ∀ n x, Continuous (fun θ : ℝ => g n (x, θ))) :
@@ -610,12 +336,13 @@ theorem angularAverage_add {f g : OscillatoryScalar D}
     ((hg n x).intervalIntegrable _ _), add_div]
   rfl
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem angularMeanVector_add {f g : Oscillation D}
     (hf : AngularContinuous f) (hg : AngularContinuous g) :
     angularMeanVector (f + g) = angularMeanVector f + angularMeanVector g := by
   funext n x i
   exact congrFun (congrFun (angularAverage_add (fun n x => hf n x i) (fun n x => hg n x i)) n) x
+
+end
 
 /-- The base error is restored and subtracted exactly once.  Gaussian and
 alias errors remain actual subtracted means, with no zero/flat substitution. -/
@@ -651,41 +378,6 @@ theorem meanGoodResidual_at (c : Context D) (u : State D) (n : ℕ) (x : D) (i :
 
 end ExcludedMeanErrors
 
-section ConcreteRankConstruction
-
-open CorrectionState
-
-
-
-
-
-
-
-end ConcreteRankConstruction
-
-section RankPressureConstruction
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-
-
-
-end RankPressureConstruction
-
-section PressureAliasBookkeeping
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-
-
-
-
-
-
-end PressureAliasBookkeeping
-
 section ActualHarmonicForcing
 
 open CorrectionState
@@ -710,16 +402,6 @@ theorem fullGoodWaveResidual_grouped {ι : Type*} {U : Set D} (hU : IsOpen U)
 
 
 end ActualHarmonicForcing
-
-section TemporalMasses
-
-open CorrectionState MeasureTheory
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
-
-
-
-end TemporalMasses
 
 section ActualMeanAndDivergence
 
@@ -896,39 +578,33 @@ section HarmonicStateUpdates
 
 open CorrectionState
 
-/-- Add coefficient families on the same fixed label carrier. -/
-noncomputable def addBlock (a b : HarmonicBlock D) : HarmonicBlock D :=
-  { a with velocity := fun n i => a.velocity n i + b.velocity n i
-           pressure := fun n => a.pressure n + b.pressure n }
+/-! Adding coefficient families on a fixed label carrier, the carrier predicate
+itself, and the oscillation of such a sum all come from
+`NavierStokes.LabelSumBounds`; only the pressure and band statements below are
+proper to this file. -/
+export LabelSumBounds (SameCarrier addBlock addBlock_oscillation)
 
-structure SameCarrier (a b : HarmonicBlock D) : Prop where
-  frequency : b.frequency = a.frequency
-  phase : b.phase = a.phase
-  angular : b.angularFrequency = a.angularFrequency
+section
+omit [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem addBlock_oscillation (a b : HarmonicBlock D) (h : SameCarrier a b) :
-    (addBlock a b).oscillation = a.oscillation + b.oscillation := by
-  funext n x i
-  simp only [addBlock, HarmonicBlock.oscillation, HarmonicFields.field, HarmonicFields.evaluate_add,
-    Complex.add_re, Pi.add_apply, h.frequency, h.phase, h.angular]
-
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem addBlock_pressure (a b : HarmonicBlock D) (h : SameCarrier a b) :
     (addBlock a b).oscillatoryPressure = a.oscillatoryPressure + b.oscillatoryPressure := by
   funext n x
   simp only [addBlock, HarmonicBlock.oscillatoryPressure, HarmonicFields.field, HarmonicFields.evaluate_add,
     Complex.add_re, Pi.add_apply, h.frequency, h.phase, h.angular]
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem addBlock_band {a b : HarmonicBlock D} {N M : ℕ}
     (ha : a.BandLimited N) (hb : b.BandLimited M) :
     (addBlock a b).BandLimited (max N M) :=
   ⟨fun n i => (ha.1 n i |>.mono (le_max_left _ _)).add (hb.1 n i |>.mono (le_max_right _ _)),
     fun n => (ha.2 n |>.mono (le_max_left _ _)).add (hb.2 n |>.mono (le_max_right _ _))⟩
 
+theorem block_angularContinuous (b : HarmonicBlock D) : AngularContinuous b.oscillation :=
+  fun n x i => Complex.continuous_re.comp
+    (HarmonicFields.field_angular_continuous (b.velocity n i) (b.frequency n)
+      (b.phase n) (b.angularFrequency n) x)
 
-
+end
 
 theorem block_waveBounds_all {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
     (b : HarmonicBlock D) (hb : b.WaveBounds s P α)
@@ -945,67 +621,26 @@ theorem block_waveBounds_all {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ
     simp only [hzero, Pi.zero_apply]
   · exact hb i j hj
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem block_angularContinuous (b : HarmonicBlock D) : AngularContinuous b.oscillation :=
-  fun n x i => Complex.continuous_re.comp
-    (HarmonicFields.field_angular_continuous (b.velocity n i) (b.frequency n)
-      (b.phase n) (b.angularFrequency n) x)
-
 
 
 end HarmonicStateUpdates
-
-section MeanWaveComposition
-
-open CorrectionState
-
-
-
-end MeanWaveComposition
-
-section RankRetainedAlias
-
-open CorrectionState
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S]
-
-
-end RankRetainedAlias
 
 section SignedTensorRemainder
 
 open CorrectionState MeasureTheory
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
+export LabelSumBounds (symmetricCovariance subBlock subBlock_oscillation)
+
+section
+omit [NormedAddCommGroup D] [NormedSpace ℝ D]
+
 theorem AngularContinuous.neg {u : Oscillation D} (hu : AngularContinuous u) :
     AngularContinuous (-u) := fun n x i => (hu n x i).neg
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem AngularContinuous.sub {u v : Oscillation D}
     (hu : AngularContinuous u) (hv : AngularContinuous v) : AngularContinuous (u - v) :=
   fun n x i => (hu n x i).sub (hv n x i)
 
-
-
-
-
-noncomputable def symmetricCovariance (u v : Oscillation D) : Tensor D :=
-  bilinearCovariance u v + bilinearCovariance v u
-
-
-
-noncomputable def subBlock (a b : HarmonicBlock D) : HarmonicBlock D :=
-  { a with velocity := fun n i => a.velocity n i - b.velocity n i
-           pressure := fun n => a.pressure n - b.pressure n }
-
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem subBlock_oscillation (a b : HarmonicBlock D) (h : SameCarrier a b) :
-    (subBlock a b).oscillation = a.oscillation - b.oscillation := by
-  funext n x i
-  simp only [subBlock, HarmonicBlock.oscillation, HarmonicResidual.field_sub,
-    Complex.sub_re, Pi.sub_apply, h.frequency, h.phase, h.angular]
-
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
 theorem subBlock_band {a b : HarmonicBlock D} {N M : ℕ}
     (ha : a.BandLimited N) (hb : b.BandLimited M) :
     (subBlock a b).BandLimited (max N M) :=
@@ -1014,22 +649,8 @@ theorem subBlock_band {a b : HarmonicBlock D} {N M : ℕ}
     fun n => HarmonicResidual.band_sub (ha.2 n |>.mono (le_max_left _ _))
       (hb.2 n |>.mono (le_max_right _ _))⟩
 
-
-
-
+end
 end SignedTensorRemainder
-
-section LocalMeanConstruction
-
-open CorrectionState PhysicalMeanDomain
-
-variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
-
-
-
-
-
-end LocalMeanConstruction
 
 section ConstructedSignedBlocks
 

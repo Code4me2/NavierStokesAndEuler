@@ -3,10 +3,12 @@ import Euler.TransversePacketPrimaryBounds
 import Euler.TransversePacketNormalBudget
 import Euler.SourceCylinderPressureWeight
 import Euler.PacketCylinderScalarGradientWeight
-import Euler.CylinderSlowCurlWeight
-import Euler.CylinderPotentialTimeWeight
+import Euler.TransversePacketPathBounds
 
-/-! Same-radius estimates for the actual corrector, divided by the prescribed time profile. -/
+/-! Same-radius estimates for the actual corrector, divided by the prescribed time profile.
+
+The four corrector bounds are the generic `EulerTransversePacketPaths` estimates instantiated
+at the primary solution's own velocity path and its time derivative. -/
 
 noncomputable section
 
@@ -16,9 +18,6 @@ open Set EulerTransversePacketProvider EulerSmoothLimit EulerLiftedGradientSpace
   EulerPacketProfileRecursion EulerCylinderSobolev EulerParameterWordGevrey
   EulerCylinderSmoothOrbit EulerLpCylinderTranslation EulerContinuousTimeWeight
 open scoped ContDiff
-
-private theorem direction_norm_bound (i : Fin 4) : ‖standardDirection i‖ ≤ 1 := by
-  cases i using Fin.cases <;> simp [Prod.norm_def]
 
 variable {P : ℝ} [Fact (0 < P)]
   {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
@@ -46,56 +45,35 @@ theorem potentialPath_normalized_bound (n : ℕ) :
     block standardDirection q
       (fun a : LiftTangent => pathTranslate P a (normalize g hg (potentialPath τ hτ hτT B Y))) n 0 ≤
       (3*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d n :=
-  EulerCylinderPotential.normalized_potentialPath_block_bound P g (velocityPath τ hτ hτT B Y)
-    D.potentialCoefficientPath hg D.potentialCoefficientPath_orbit
-    (EulerCylinderPotential.weighted_orbit P (reciprocal g hg) (velocityPath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y))
-    standardDirection direction_norm_bound q Rc C R A hRc hC hA hR hbK d hbA n
+  EulerTransversePacketPaths.potential_block_bound (velocityPath τ hτ hτT B Y)
+    (velocityPath_orbit τ hτ hτT B Y) g hg q Rc C R A hRc hC hA hR d hbA hbK n
 
 include hRc hC hA hR hbA hbAt hbK hbKt in
 theorem potentialTimePath_normalized_bound (n : ℕ) :
     block standardDirection q
       (fun a : LiftTangent => pathTranslate P a (normalize g hg (potentialTimePath τ hτ hτT B Y))) n 0 ≤
       (6*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d n :=
-  EulerCylinderPotential.normalized_potentialDerivative_block_bound P D.T
-    D.potentialCoefficientPath D.potentialDerivative D.potentialCoefficientPath_orbit D.potentialDerivative_orbit
-    (velocityPath τ hτ hτT B Y) (derivativePath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y) (derivativePath_orbit τ hτ hτT B Y)
-    g hg standardDirection direction_norm_bound q Rc C R A hRc hC hA hR hbK hbKt d hbA hbAt n
+  EulerTransversePacketPaths.potentialTime_block_bound (velocityPath τ hτ hτT B Y)
+    (derivativePath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y)
+    (derivativePath_orbit τ hτ hτT B Y) g hg q Rc C R A hRc hC hA hR d hbA hbAt hbK hbKt n
 
 include hRc hC hA hR hbA hbK hbI in
 theorem correctorPath_normalized_bound (n : ℕ) :
     block standardDirection q
       (fun a : LiftTangent => pathTranslate P a (normalize g hg (correctorPath τ hτ hτT B Y))) n 0 ≤
-      (27*(sobolevCoefficientAmplitude (Fin 4) q Rc C)^2*(P*A))*majorant R (d+1) n := by
-  have hp : 0 ≤ P := (Fact.out : 0 < P).le
-  have ha := sobolevCoefficientAmplitude_nonneg (ι := Fin 4) q Rc C hRc hC
-  have h := EulerCylinderSlowCurl.normalized_path_block_bound P g D.FInv.field
-    (potentialPath τ hτ hτT B Y) (potentialPath_orbit τ hτ hτT B Y) hg D.FInv.translation_contDiff
-    q Rc C R (3*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A)) hRc hC (by positivity) hR hbI d
-    (potentialPath_normalized_bound τ hτ hτT B Y g hg q Rc C R A hRc hC hA hR d hbA hbK) n
-  exact h.trans_eq (by ring)
+      (27*(sobolevCoefficientAmplitude (Fin 4) q Rc C)^2*(P*A))*majorant R (d+1) n :=
+  EulerTransversePacketPaths.slowCurl_block_bound (velocityPath τ hτ hτT B Y)
+    (velocityPath_orbit τ hτ hτT B Y) g hg q Rc C R A hRc hC hA hR d hbA hbK hbI n
 
 include hRc hC hA hR hbA hbAt hbK hbKt hbI hbIt in
 theorem correctorTimePath_normalized_bound (n : ℕ) :
     block standardDirection q
       (fun a : LiftTangent => pathTranslate P a (normalize g hg (correctorTimePath τ hτ hτT B Y))) n 0 ≤
-      (108*(sobolevCoefficientAmplitude (Fin 4) q Rc C)^2*(P*A))*majorant R (d+1) n := by
-  have hp : 0 ≤ P := (Fact.out : 0 < P).le
-  have ha := sobolevCoefficientAmplitude_nonneg (ι := Fin 4) q Rc C hRc hC
-  have hRn : 0 ≤ R := (sobolevCoefficientRadius_nonneg (ι := Fin 4) Rc hRc).trans hR
-  have hQ (j : ℕ) : block standardDirection q
-      (fun a : LiftTangent => pathTranslate P a (normalize g hg (potentialPath τ hτ hτT B Y))) j 0 ≤
-        (6*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d j := by
-    apply (potentialPath_normalized_bound τ hτ hτT B Y g hg q Rc C R A hRc hC hA hR d hbA hbK j).trans
-    have hn := mul_nonneg
-      (show 0 ≤ sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A) by positivity)
-      (majorant_nonneg R hRn d j)
-    nlinarith
-  have h := EulerCylinderSlowCurl.normalized_derivative_block_bound P D.T g hg
-    D.FInv.field D.inverseDerivative (potentialPath τ hτ hτT B Y) (potentialTimePath τ hτ hτT B Y)
-    (potentialPath_orbit τ hτ hτT B Y) (potentialTimePath_orbit τ hτ hτT B Y) D.FInv.translation_contDiff D.inverseDerivative_orbit
-    q Rc C R (6*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A)) hRc hC (by positivity) hR
-    hbI hbIt d hQ (potentialTimePath_normalized_bound τ hτ hτT B Y g hg q Rc C R A hRc hC hA hR d hbA hbAt hbK hbKt) n
-  exact h.trans_eq (by ring)
+      (108*(sobolevCoefficientAmplitude (Fin 4) q Rc C)^2*(P*A))*majorant R (d+1) n :=
+  EulerTransversePacketPaths.slowCurlTime_block_bound (velocityPath τ hτ hτT B Y)
+    (derivativePath τ hτ hτT B Y) (velocityPath_orbit τ hτ hτT B Y)
+    (derivativePath_orbit τ hτ hτT B Y) g hg q Rc C R A hRc hC hA hR d
+    hbA hbAt hbK hbKt hbI hbIt n
 
 end EulerTransversePacketPrimary
 
@@ -182,7 +160,7 @@ theorem velocity_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (velocityPath τ hτ hτT B Y))) n 0 ≤
         (H.commonCost*A)*majorant L.R (d+3) n :=
-  (H.velocity_bound Y standardDirection direction_norm_bound A hA d hYb n).trans
+  (H.velocity_bound Y standardDirection standardDirection_norm_le_one A hA d hYb n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right H.velocityCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -190,7 +168,7 @@ theorem derivative_common_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a
       (normalize L.fullProfile L.fullProfile_pos (derivativePath τ hτ hτT B Y))) n 0 ≤
         (H.commonCost*A)*majorant L.R (d+3) n :=
-  (H.derivative_bound Y standardDirection direction_norm_bound A hA d hYb n).trans
+  (H.derivative_bound Y standardDirection standardDirection_norm_le_one A hA d hYb n).trans
     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right H.derivativeCost_le_common hA)
       (majorant_nonneg L.R (zero_le_one.trans L.radius_bounds.1) (d+3) n))
 
@@ -211,7 +189,7 @@ theorem pressure_bound (n : ℕ) :
       (fun _ : LiftTangent => (0 : C(Icc (0 : ℝ) D.T,LiftL2 P))))
   have h := sourcePressure_block_bound P D.M D.normal D.normalLower D.normalLower_pos D.normal_lower
     0 (normalize L.fullProfile L.fullProfile_pos (velocityPath τ hτ hτT B Y))
-    standardDirection direction_norm_bound q hzero
+    standardDirection standardDirection_norm_le_one q hzero
     (normalize_orbit_contDiff P L.fullProfile L.fullProfile_pos _ (velocityPath_orbit τ hτ hτT B Y))
     N.Rc N.C N.C N.Ri L.R 0 (H.commonCost*A) N.Rc_nonneg N.C_nonneg N.C_nonneg le_rfl
     (mul_nonneg H.commonCost_nonneg hA) N.inverse_radius N.pressure_radius N.normal_bound N.strain_bound

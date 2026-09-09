@@ -18,14 +18,6 @@ open scoped ContDiff BigOperators
 
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-section NativeSignedMeanComposition
-open Set WeightedClasses MeanIncrementBounds CorrectionState VariableGaugeMean LocalSignedRequest
-open scoped ContDiff BigOperators
-
-
-
-end NativeSignedMeanComposition
-
 section UniformPeriodizedCoefficients
 open Set Filter Function WeightedClasses CorrectionState
 open scoped ContDiff Topology
@@ -452,14 +444,6 @@ end ParticularParameters
 
 end UniformParticularGain
 
-section BandNativeSignedMeanComposition
-
-open Set WeightedClasses MeanIncrementBounds CorrectionState VariableGaugeMean LocalSignedRequest
-open scoped ContDiff BigOperators
-
-
-end BandNativeSignedMeanComposition
-
 section UniformSignedGain
 
 open Set Filter Function WeightedClasses MeanIncrementBounds CorrectionState
@@ -585,29 +569,6 @@ theorem uniform_residual_gain {B : ℝ}
 end PeriodizedSignedParameters
 
 end UniformSignedGain
-
-section FourStageMeanComposition
-
-open Set WeightedClasses MeanIncrementBounds CorrectionState VariableGaugeMean LocalSignedRequest
-open scoped ContDiff BigOperators
-
-section MeanCycle
-variable {ι : Type} (G : SignedMeanGain.Geometry) (B : SignedMeanGain.NativeData G)
-    (c : Context Point) (u : State Point)
-    (w₁ : Oscillation Point) (q₁ : OscillatoryScalar Point) (e₁ : Oscillation Point)
-    {P : ι → ℕ → Point → ℝ} {σ κ : ℝ}
-    (f : LabelSumBounds.SignedFamily G.strip P (1/2) (17/25) (1/2+σ-κ) (1+σ-2*κ))
-    (a : SignedMeanGain.Assembly f)
-    (q₂ : OscillatoryScalar Point) (e₂ : Oscillation Point)
-
-local notation "u₁" => SignedMeanGain.waveStage G.gauge c u w₁ q₁ e₁
-local notation "w₂" => SignedMeanGain.tangentField f a + SignedMeanGain.curlField f a
-local notation "u₂" => SignedMeanGain.waveStage G.gauge c u₁ w₂ q₂ e₂
-
-
-end MeanCycle
-
-end FourStageMeanComposition
 
 section CycleUniformComposition
 

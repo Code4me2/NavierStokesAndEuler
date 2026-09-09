@@ -1,6 +1,7 @@
 import NavierStokes.AngularMomentReset
 import NavierStokes.OutgoingTail
 import NavierStokes.ParametricFlatFactor
+import NavierStokes.TailEnergyBounds
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
@@ -819,12 +820,11 @@ theorem actual_debt_first_jet_bound (d : TailData) (hlam : d.core.lam ≤ 1 / 15
   have he := decayFactor_le d hlam
   constructor <;> nlinarith [hb.1, hb.2]
 
+/-- Restatement of `TailEnergyBounds.finalAngular_before_release` under this
+namespace, for the reset estimates below and their importers. -/
 theorem finalAngular_before_release (d : TailData) (eta : ℝ) {y : ℝ}
-    (hy : y ≤ d.releaseStart) : finalAngular d (y, eta) = flattened d (y, eta) := by
-  have hrel : y - d.releaseStart ≤ 0 := by linarith
-  have htail : y - tailStart d ≤ 1 := by linarith [tailStart_gt_release d]
-  have hden : 1 - d.rho ≠ 0 := by linarith [d.rho_lt_half]
-  simp [finalAngular, releaseAdjustment_early d hrel, tailShape_early d htail, hden]
+    (hy : y ≤ d.releaseStart) : finalAngular d (y, eta) = flattened d (y, eta) :=
+  TailEnergyBounds.finalAngular_before_release d eta hy
 
 /-- The angular history of the actual unedited full outgoing profile, divided
 by its common harmless factor `sqrt 2`. -/
@@ -843,10 +843,13 @@ theorem fullHistory_eq_flat (d : TailData) (eta : ℝ) {y : ℝ}
   rw [finalAngular_before_release d eta (ht'.trans hyR)]
   rfl
 
-theorem first_center_after_flatten (d : TailData) : d.flattenEnd ≤ d.releaseStart - 3 := by
+theorem last_four_after_flatten (d : TailData) : d.flattenEnd < d.releaseStart - 4 := by
   have h := uniformWait_gt_twentyseven d
   dsimp [TailData.releaseStart]
   linarith
+
+theorem first_center_after_flatten (d : TailData) : d.flattenEnd ≤ d.releaseStart - 3 := by
+  linarith [last_four_after_flatten d]
 
 /-- Identification with the literal endpoint discrepancy and first-center
 normalization of the actual full profile. -/
@@ -992,11 +995,6 @@ theorem reference_matches (d : TailData) {y : ℝ} (hy : d.flattenEnd ≤ y) :
       -(1 / 2 + d.core.lam) * (y - d.flattenEnd) := by ring
   rw [he]
   ring
-
-theorem last_four_after_flatten (d : TailData) : d.flattenEnd < d.releaseStart - 4 := by
-  have h := uniformWait_gt_twentyseven d
-  dsimp [TailData.releaseStart]
-  linarith
 
 theorem original_matches_reference (d : TailData) (eta : ℝ) {y : ℝ}
     (hy : y ∈ Icc (d.releaseStart - 4) d.releaseStart) :

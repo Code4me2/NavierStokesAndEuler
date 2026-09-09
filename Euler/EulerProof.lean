@@ -16,7 +16,10 @@ imported above; this module only re-exports them, so `import Euler.EulerProof`
 still brings the whole development into scope.
 
 The parts are strictly sequential -- each one imports its predecessor and may
-`open` namespaces introduced earlier -- and they are, in order:
+`open` namespaces introduced earlier.  Only part 1 lists the Mathlib imports of
+the original file; parts 2-8 inherit them through that chain, so a new Mathlib
+dependency needed anywhere in the development belongs in
+`Euler.EulerProof.Foundations`.  The parts are, in order:
 
 1. `Euler.EulerProof.Foundations` -- Gevrey factorial estimates, smooth uniform
    limits, packet weights, and the coercive projection and its inverse.

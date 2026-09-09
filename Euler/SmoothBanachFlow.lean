@@ -1,6 +1,6 @@
-import Euler.FiniteIntervalFlow
+import Euler.BoundedFlowContinuity
 import Euler.SmoothTimeSuperposition
-import Euler.SmoothImplicitLift
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Euler.LinearFundamentalPath
 import Euler.LinearDuhamelOperator
 
@@ -11,7 +11,87 @@ The actual Picard flow is a continuous family of paths. Its integral
 equation is inverted locally on the path Banach space: the derivative is
 the genuine Volterra operator, whose two-sided inverse was constructed
 from the linear ODE. This proves smooth label dependence at every order.
+
+Merged in from the former module `Euler.FiniteIntervalFlow`: `ofTimeInterval`.
+
+Merged in from the former module `Euler.SmoothImplicitLift`: `contDiffAt_of_identity`.
 -/
+
+/-! A continuous, already constructed solution of a smooth identity is
+smooth when the derivative in its value variable is invertible. The local
+inverse theorem proves regularity; no new solution is postulated. -/
+
+noncomputable section
+
+open Filter Function
+open scoped Topology ContDiff
+
+namespace EulerSmoothImplicitLift
+
+variable {P E F : Type*}
+  [NormedAddCommGroup P] [NormedSpace ℝ P]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+  [NormedAddCommGroup F] [NormedSpace ℝ F]
+
+theorem contDiffAt_of_identity
+    (Y : P → E) (G : E → F) (H : P → F) (x : P) (n : ℕ∞ω)
+    (hn : n ≠ 0) (hY : ContinuousAt Y x)
+    (hG : ContDiffAt ℝ n G (Y x)) (hH : ContDiffAt ℝ n H x)
+    (L : E ≃L[ℝ] F) (hL : HasFDerivAt G (L : E →L[ℝ] F) (Y x))
+    (heq : ∀ y, G (Y y) = H y) : ContDiffAt ℝ n Y x := by
+  let J := hG.localInverse hL hn
+  have hJ : ContDiffAt ℝ n J (H x) := by
+    rw [← heq x]
+    exact hG.to_localInverse hL hn
+  have hleft : ∀ᶠ z in 𝓝 (Y x), J (G z) = z :=
+    (hG.hasStrictFDerivAt' hL hn).eventually_left_inverse
+  have he : Y =ᶠ[𝓝 x] J ∘ H := by
+    filter_upwards [hY.tendsto.eventually hleft] with y hy
+    change Y y = J (H y)
+    rw [← heq y]
+    exact hy.symm
+  exact (hJ.comp x hH).congr_of_eventuallyEq he
+
+end EulerSmoothImplicitLift
+end
+
+/-! Construction of the flow and its continuous inverse from a genuine
+bounded continuous velocity on the prescribed finite time interval.
+Endpoint extension only defines the auxiliary velocity outside that
+interval; all stated ODE identities use the original velocity. -/
+
+noncomputable section
+
+open Set Metric
+open scoped Topology NNReal BoundedContinuousFunction
+
+namespace EulerBoundedLipschitzFlow
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
+def ofTimeInterval (T : ℝ) (hT : 0 ≤ T)
+    (u : C(Icc (0 : ℝ) T, E →ᵇ E)) (K : ℝ≥0)
+    (hLip : ∀ t, LipschitzWith K (u t)) : Data E where
+  velocity t x := u (projIcc 0 T hT t) x
+  continuous := by fun_prop
+  lipschitzConstant := K
+  lipschitz t := hLip (projIcc 0 T hT t)
+  speedBound := ‖u‖₊
+  speed t x := ((u (projIcc 0 T hT t)).norm_coe_le_norm x).trans
+    (u.norm_coe_le_norm (projIcc 0 T hT t))
+
+omit [NormedSpace ℝ E] in
+@[simp] theorem ofTimeInterval_velocity (T : ℝ) (hT : 0 ≤ T)
+    (u : C(Icc (0 : ℝ) T, E →ᵇ E)) (K : ℝ≥0)
+    (hLip : ∀ t, LipschitzWith K (u t)) (t : Icc (0 : ℝ) T) (x : E) :
+    (ofTimeInterval T hT u K hLip).velocity t x = u t x := by
+  simp only [ofTimeInterval, projIcc_of_mem _ t.property]
+
+variable [CompleteSpace E]
+
+
+end EulerBoundedLipschitzFlow
+end
 
 noncomputable section
 

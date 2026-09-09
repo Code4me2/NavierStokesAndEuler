@@ -1,8 +1,12 @@
 import Euler.CorrectionTime
-import Euler.QuadraticHeatConstraint
+import Euler.QuadraticHeatLocal
+import Euler.DivergenceFreeHeat
 import Euler.LiftedTransportComponents
 
-/-! A genuine local divergence-free viscous correction for the transformed Euler equation. -/
+/-! A genuine local divergence-free viscous correction for the transformed Euler equation.
+
+Absorbed the former module `Euler.QuadraticHeatConstraint`, which after the dead-code sweeps held no declarations, only its imports.
+-/
 
 noncomputable section
 
