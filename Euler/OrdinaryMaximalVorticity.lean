@@ -46,9 +46,6 @@ def maximalVorticityNorm (t : L.Time) : ℝ := vorticityNorm (L.maximalField t)
 theorem maximalVorticityNorm_nonneg (t : L.Time) : 0 ≤ L.maximalVorticityNorm t :=
   vorticityNorm_nonneg _
 
-theorem maximalVorticityNorm_le_iff (t : L.Time) (K : ℝ) :
-    L.maximalVorticityNorm t ≤ K ↔ ∀ x, ‖vectorCurl (L.maximalVelocity t) x‖ ≤ K :=
-  vorticityNorm_le_iff _ K
 
 
 theorem maximalVorticityNorm_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
@@ -89,18 +86,5 @@ theorem vorticityIntegral_eventually_large_of_unbounded
   exact ht.trans_le ((L.evolution S hS hSL).vorticityIntegral_mono
     ⟨t,t.property.1,t.property.2.trans hRS⟩ ⟨S,hS.le,le_rfl⟩ (t.property.2.trans hRS))
 
-theorem maximalVorticityIntegral_tendsto_atTop
-    (hunbounded : ∀ G : ℝ, ∃ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-      (t : Icc (0 : ℝ) S), G < (L.evolution S hS hSL).vorticityIntegral t) :
-    Tendsto L.maximalVorticityIntegral (atTop : Filter L.Time) atTop := by
-  apply tendsto_atTop.mpr
-  intro G
-  obtain ⟨R,hR,hRL,hlarge⟩ := L.vorticityIntegral_eventually_large_of_unbounded hunbounded G
-  filter_upwards [eventually_ge_atTop (⟨R,hR.le,hRL⟩ : L.Time)] with t ht
-  have htpos : 0 < (t : ℝ) := hR.trans_le ht
-  have he := L.maximalVorticityIntegral_eq_evolution t htpos t.property.2 ⟨t,t.property.1,le_rfl⟩
-  change L.maximalVorticityIntegral t=_ at he
-  rw [he]
-  exact (hlarge t htpos t.property.2 ht).le
 
 end EulerOrdinarySobolev.FiniteLifespan

@@ -127,7 +127,7 @@ theorem corrected_amplitude_invariant (j : ℤ)
   exact realizedCoefficient_invariant (B.radius_invariant n) (B.radial_invariant n)
     (Invariant.const _) (B.axial_invariant n) hphi ha ((j : ℝ) * D.carrierBlock.frequency n)
 
-theorem corrected_pressure_invariant (j : ℤ)
+theorem corrected_pressure_invariant {n : ℕ} (j : ℤ)
     (hK : (j : ℝ) * D.carrierBlock.frequency n ≠ 0) :
     Invariant (((0 : Parameter), (1 : ℝ)), (0 : Plane))
       ((corrected D s h gap j).pressure n) := by

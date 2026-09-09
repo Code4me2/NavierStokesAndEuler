@@ -75,10 +75,6 @@ theorem maximalVorticityDensity_integral_eq_evolution (S : ℝ) (hS : 0 < S)
   rw [projIcc_of_mem hS.le hrS]
   exact L.maximalVorticityDensity_eq_evolution S hS hSL ⟨r,hrS⟩
 
-theorem maximalVorticityDensity_integral_eq (t : L.Time) :
-    (∫ r in (0 : ℝ)..(t : ℝ), L.maximalVorticityDensity r)=L.maximalVorticityIntegral t :=
-  L.maximalVorticityDensity_integral_eq_evolution (L.intermediateHorizon t)
-    (L.intermediateHorizon_pos t) (L.intermediateHorizon_lt t) (L.intermediateTime t)
 
 /-- This is the improper integral as an extended nonnegative integral,
 not the totalized real Bochner integral at the singular endpoint. -/

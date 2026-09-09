@@ -572,7 +572,7 @@ theorem source_angle_reindex (s : StripData Parameter) (index : ℕ → ℕ) :
       (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip s))
       (fun n => (index n, ())) := rfl
 
-theorem selected_source_class (x : CycleState (Label B N0)) {α : ℝ}
+theorem selected_source_class {j : ℤ} (x : CycleState (Label B N0)) {α : ℝ}
     (H : LabelSumBounds.UniformWaveClass
       (CommonCoverClass.sourceStrip (ActualParticularControl.angleStrip slowStrip))
       nativeEnvelope α (currentSource x j)) (e : ℕ → ActivePair B N0) :

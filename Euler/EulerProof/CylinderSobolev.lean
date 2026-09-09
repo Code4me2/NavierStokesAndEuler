@@ -206,12 +206,6 @@ theorem besselWeight_neg_mul (d : ℕ) (s : ℝ) (ξ : Domain d) :
   have he : -s / 2 + s / 2 = 0 := by ring
   rw [he, Real.rpow_zero]
 
-theorem besselWeight_add (d : ℕ) (s t : ℝ) (ξ : Domain d) :
-    besselWeight d (s + t) ξ = besselWeight d s ξ * besselWeight d t ξ := by
-  unfold besselWeight
-  rw [← Real.rpow_add (by positivity)]
-  congr 1
-  ring
 
 /-- The reciprocal Bessel weight is in L² exactly in the range needed here. -/
 theorem reciprocal_weight_memLp (d : ℕ) (s : ℝ) (hs : (d : ℝ) < 2 * s) :

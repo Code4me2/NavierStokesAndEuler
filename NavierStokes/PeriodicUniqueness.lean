@@ -674,38 +674,5 @@ theorem classical_uniqueness_on_Icc {a b : ℝ}
     have ht' : t = a := le_antisymm (ht.2.trans (le_of_not_gt hab)) ht.1
     simpa only [ht'] using hinitial x
 
-/-- Direct application to the exact candidate specification: any other
-classical periodic solution with its force and zero initial velocity must
-agree on every compact interval strictly before time one. The comparison
-solution is not assumed to satisfy the candidate blow-up condition. -/
-theorem candidate_unique_on_Icc {u : VelocityField} {p : PressureField} {f : VelocityField}
-    (h : CandidateProperties u p f) {T : ℝ} (hT : T < 1)
-    {v : VelocityField} {q : PressureField}
-    (hv : ContDiffOn ℝ ∞ v (slab 0 T)) (hq : ContDiffOn ℝ ∞ q (slab 0 T))
-    (hpv : UnitSpatialPeriodsOn (Icc (0 : ℝ) T) v)
-    (hpq : UnitSpatialPeriodsOn (Icc (0 : ℝ) T) q)
-    (hdv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x : Space, spatialDivergence v t x = 0)
-    (hNSv : ∀ t ∈ Ioo (0 : ℝ) T, ∀ x : Space, navierStokesResidual v q t x = f (t, x))
-    (hvzero : ∀ x : Space, v (0, x) = 0) :
-    ∀ t ∈ Icc (0 : ℝ) T, ∀ x : Space, u (t, x) = v (t, x) := by
-  have hsub : slab 0 T ⊆ preSingularDomain := by
-    intro z hz
-    exact ⟨⟨hz.1.1, hz.1.2.trans_lt hT⟩, hz.2⟩
-  apply classical_uniqueness_on_Icc (h.velocity_smooth.mono hsub) hv
-    (h.pressure_smooth.mono hsub) hq
-  · intro t ht x i
-    exact h.velocity_periodic t ⟨ht.1, ht.2.trans_lt hT⟩ x i
-  · exact hpv
-  · intro t ht x i
-    exact h.pressure_periodic t ⟨ht.1, ht.2.trans_lt hT⟩ x i
-  · exact hpq
-  · intro t ht x
-    exact h.divergence_free t ⟨ht.1.le, ht.2.trans hT⟩ x
-  · exact hdv
-  · intro t ht x
-    exact h.navier_stokes t ⟨ht.1, ht.2.trans hT⟩ x
-  · exact hNSv
-  · intro x
-    exact (h.zero_initial_velocity x).trans (hvzero x).symm
 
 end NavierStokes.PeriodicUniqueness

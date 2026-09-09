@@ -134,17 +134,7 @@ theorem maximalVelocity_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duratio
 theorem maximalVelocity_initial : L.maximalVelocity L.initialTime=A.field :=
   congrArg SmoothL2Field.field L.maximalField_initial
 
-theorem maximalVelocity_smooth (t : L.Time) : ContDiff ℝ ∞ (L.maximalVelocity t) :=
-  (L.maximalField t).smooth
 
-theorem maximalVelocity_joint_continuous :
-    Continuous (fun z : L.Time × Space => L.maximalVelocity z.1 z.2) := by
-  have h : Continuous (fun z : L.Time × Space =>
-      EulerMeanSobolevBoundedField.finiteField (L.maximalField z.1)) :=
-    (EulerMeanSobolevBoundedField.continuous_finiteField L.maximalField
-      L.maximalField_jet_continuous).comp continuous_fst
-  simpa only [EulerMeanSobolevBoundedField.finiteField_apply,maximalVelocity] using
-    h.eval continuous_snd
 
 
 theorem maximalVelocity_divergence (t : L.Time) (x : Space) :

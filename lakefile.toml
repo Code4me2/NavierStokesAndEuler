@@ -16,6 +16,7 @@ rev = "v4.34.0-rc2"
 
 [[lean_lib]]
 name = "NavierStokes"
+leanOptions = { autoImplicit = false, warningAsError = true }
 globs = ["NavierStokes", "NavierStokes.+"]
 
 [[lean_lib]]
@@ -25,4 +26,5 @@ globs = ["Euler", "Euler.+"]
 
 [[lean_lib]]
 name = "ComparatorChallenges"
+leanOptions = { autoImplicit = false }
 globs = ["ComparatorChallenges.+"]

@@ -23,11 +23,6 @@ theorem vorticityIntegral_unbounded (G : ℝ) :
   vorticity_unbounded_of_logarithmic logarithmicGradientConstant
     logarithmicGradientConstant_nonneg logarithmic_gradient_bound_solenoidal L G
 
-/-- The actual partial integrals tend to infinity as time approaches the
-maximal lifespan from below. -/
-theorem vorticityIntegral_tendsto_atTop :
-    Tendsto L.maximalVorticityIntegral (atTop : Filter L.Time) atTop :=
-  L.maximalVorticityIntegral_tendsto_atTop L.vorticityIntegral_unbounded
 
 /-- The true nonnegative vorticity supremum has infinite integral on the
 half-open maximal lifespan. This is an extended integral, so divergence
