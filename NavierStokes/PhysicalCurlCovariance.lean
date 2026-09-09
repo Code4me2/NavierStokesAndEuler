@@ -135,8 +135,7 @@ theorem cylindricalCurl_pull {Γ : E → F} {R : F → ℝ} {r : E → ℝ}
   have hrc : (r x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hr
   ext i
   fin_cases i <;>
-    simp [CurlClassBounds.cylindricalCurl, Pi.smul_apply, smul_eq_mul, h1, h2, h3,
-      hR, Complex.real_smul] <;> (try field_simp [hlc, hrc])
+    simp [CurlClassBounds.cylindricalCurl, smul_eq_mul, h1, h2, h3, hR, Complex.real_smul] <;> (try field_simp [hlc, hrc])
 
 theorem phaseNormal_pull {Γ : E → F} {R : F → ℝ} {r : E → ℝ}
     {Vr Vθ Vz : F → F} {Sr Sθ Sz : E → E} {x : E} {l : ℝ}

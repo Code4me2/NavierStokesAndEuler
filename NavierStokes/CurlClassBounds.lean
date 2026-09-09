@@ -389,10 +389,9 @@ theorem cylindricalCurl_const_smul (R : D → ℝ) (Vr Vθ Vz : D → D) (c : �
     cylindricalCurl R Vr Vθ Vz (fun y => c • B y) x = c • cylindricalCurl R Vr Vθ Vz B x := by
   ext i
   fin_cases i <;>
-    simp [cylindricalCurl, Pi.smul_apply, smul_eq_mul,
-      HarmonicCalculus.along_const_mul _ c (hB 0),
-      HarmonicCalculus.along_const_mul _ c (hB 1),
-      HarmonicCalculus.along_const_mul _ c (hB 2), Complex.real_smul] <;> ring
+    simp [cylindricalCurl, smul_eq_mul, HarmonicCalculus.along_const_mul _ c (hB 0),
+      HarmonicCalculus.along_const_mul _ c (hB 1), HarmonicCalculus.along_const_mul _ c (hB 2),
+      Complex.real_smul] <;> ring
 
 end CurlIdentities
 

@@ -69,9 +69,7 @@ theorem streamPotential_congr_profile {d a b d' a' b' : ℝ}
     (v : Plane) (f : PressureStream.Lift S → ℝ) :
     VariableGaugeMean.streamPotential d a b M ell v f =
       VariableGaugeMean.streamPotential d' a' b' M ell v f := by
-  subst d'
-  subst a'
-  subst b'
+  subst_vars
   rfl
 
 theorem streamPotential_on {l : ℝ} (hl : 0 < l) (P : S ≃L[ℝ] T) (k : ℕ)

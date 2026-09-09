@@ -28,14 +28,12 @@ abbrev Index (B N0 : ℕ) := ActualPrimary.Label B N0 × Fin 2
 
 variable {B N0 : ℕ}
 
-noncomputable def primaryPiece (l : Index B N0) : PrimaryPiece (Point × ℝ) :=
-  ActualPrimary.piece ActualPrimary.standardRegion l.2 l.1
-
-noncomputable def phase (l : Index B N0) (n : ℕ) (x : Point) : ℝ :=
-  (primaryPiece l).coefficients.phase n (x, 0)
-
-noncomputable def angularMode (l : Index B N0) (_n : ℕ) : ℤ :=
-  PrimaryGeometryAssembly.angularMode ActualPrimary.certificate ActualPrimary.modulation (ActualPrimary.choice B N0).prepared l.2 l.1
+-- These are the literal declarations of `ActualInitialMean`, re-exported so that
+-- this module and its consumers keep the shorter names while there is only one
+-- definition of each.
+export NavierStokes.ActualInitialMean (strip slowStrip primaryPiece baseError axial phase
+  angularMode angularMode_ne_zero phase_split cutoff_smooth amplitude_angle cutoff_angle
+  exact_amplitude_angle tangent_amplitude_angle gaussian_mean_zero gaussian_angularContinuous)
 
 noncomputable def primaryBlock (l : Index B N0) : HarmonicBlock Point :=
   (primaryPiece l).harmonicBlock (phase l) (angularMode l)
@@ -49,44 +47,12 @@ noncomputable def curlBlock (l : Index B N0) : HarmonicBlock Point :=
 noncomputable def gaussianBlock (l : Index B N0) : HarmonicBlock Point :=
   (primaryPiece l).excludedBlock (phase l) (angularMode l)
 
-theorem angularMode_ne_zero (l : Index B N0) (n : ℕ) : angularMode l n ≠ 0 :=
-  PrimaryGeometryAssembly.angularMode_ne_zero ActualPrimary.certificate ActualPrimary.modulation (ActualPrimary.choice B N0).prepared l.2 l.1
-
-theorem phase_split (l : Index B N0) (n : ℕ) (x : Point) (theta : ℝ) :
-    (primaryPiece l).coefficients.frequency n * (primaryPiece l).coefficients.phase n (x, theta) =
-      (primaryPiece l).coefficients.frequency n * phase l n x + (angularMode l n : ℝ) * theta := by
-  change (ActualPrimary.chartCoefficients l.2 l.1).frequency n * (ActualPrimary.chartCoefficients l.2 l.1).phase n (x, theta) =
-    (ActualPrimary.chartCoefficients l.2 l.1).frequency n * (ActualPrimary.chartCoefficients l.2 l.1).phase n (x, 0) + _
-  rw [ActualPrimary.chartCoefficients_phase, ActualPrimary.chartCoefficients_phase]
-  simp only [ActualPrimary.absolutePhase, angularMode, mul_zero, zero_add]
-  ring
-
-theorem cutoff_smooth (l : Index B N0) (n : ℕ) : ContDiff ℝ ∞ ((primaryPiece l).cutoff n) :=
-  (ActualPrimary.periodicGaussian_smooth l.2 l.1).comp ((ActualPrimary.toAbsolute_smooth n).snd.comp contDiff_fst)
-
-theorem amplitude_angle (l : Index B N0) :
-    ErrorHarmonics.AngleIndependent (primaryPiece l).coefficients.amplitude := fun _ _ _ => rfl
-
-theorem cutoff_angle (l : Index B N0) :
-    ErrorHarmonics.AngleIndependent (primaryPiece l).cutoff := fun _ _ _ => rfl
-
-theorem exact_amplitude_angle (l : Index B N0) :
-    ErrorHarmonics.AngleIndependent (primaryPiece l).exactCoefficients.amplitude := by
-  intro n x theta
-  exact CopyAngularInvariance.invariant_eq_zeroSlice
-    ((ActualPrimary.chartCoefficients_angular l.2 l.1).corrected_amplitude
-      (BaseContextAssembly.nativeStrip ActualPrimary.nominal ActualPrimary.standardRegion) (ActualPrimary.commonContext B) n) x theta
-
 theorem exact_pressure_angle (l : Index B N0) :
     ErrorHarmonics.AngleIndependent (primaryPiece l).exactCoefficients.pressure := by
   intro n x theta
   exact CopyAngularInvariance.invariant_eq_zeroSlice
     ((ActualPrimary.chartCoefficients_angular l.2 l.1).corrected_pressure
       (BaseContextAssembly.nativeStrip ActualPrimary.nominal ActualPrimary.standardRegion) (ActualPrimary.commonContext B) n) x theta
-
-theorem tangent_amplitude_angle (l : Index B N0) :
-    ErrorHarmonics.AngleIndependent
-      ((primaryPiece l).coefficients.withCutoff (primaryPiece l).cutoff).amplitude := fun _ _ _ => rfl
 
 theorem primaryBlock_represents (l : Index B N0) :
     (primaryBlock l).oscillation = (primaryPiece l).velocity ∧
@@ -105,16 +71,6 @@ theorem tangentBlock_represents (l : Index B N0) :
 theorem gaussianBlock_represents (l : Index B N0) :
     (gaussianBlock l).oscillation = (primaryPiece l).excluded :=
   (primaryPiece l).excludedBlock_represents (phase l) (angularMode l)
-    (cutoff_smooth l) (cutoff_angle l) (amplitude_angle l) (phase_split l)
-
-theorem gaussian_mean_zero (l : Index B N0) :
-    CorrectionStep.angularMeanVector (primaryPiece l).excluded = 0 :=
-  (primaryPiece l).excluded_mean_zero (phase l) (angularMode l) (angularMode_ne_zero l)
-    (cutoff_smooth l) (cutoff_angle l) (amplitude_angle l) (phase_split l)
-
-theorem gaussian_angularContinuous (l : Index B N0) :
-    CorrectionStep.AngularContinuous (primaryPiece l).excluded :=
-  (primaryPiece l).excluded_angularContinuous (phase l) (angularMode l)
     (cutoff_smooth l) (cutoff_angle l) (amplitude_angle l) (phase_split l)
 
 theorem primaryBlock_band (l : Index B N0) : (primaryBlock l).BandLimited 1 :=
@@ -147,16 +103,11 @@ theorem gaussian_coefficientField (l : Index B N0) :
   rfl
 
 
-noncomputable def baseError (B : ℕ) : Oscillation Point :=
-  ActualBaseResidual.baseError ActualPrimary.certificate ActualPrimary.modulation ActualPrimary.upper B
-
 noncomputable def sourceState (B N0 : ℕ) : State Point :=
   bandSeed (coefficients B N0).labels primaryPiece (baseError B)
 
 noncomputable def primaryState (B N0 : ℕ) : State Point :=
   VariableGaugeMean.reconstructState ActualPrimary.commonGauge (ActualPrimary.commonContext B) (sourceState B N0)
-
-noncomputable def axial : TorusInverse.Plane × TorusInverse.Plane := ((0, 1), 0)
 
 noncomputable def temporalState (B N0 : ℕ) : State Point :=
   VariableGaugeMean.temporalStageState ActualPrimary.commonGauge ActualPrimary.h
@@ -363,16 +314,6 @@ namespace NavierStokes.ActualInitialization
 
 open Set Function Filter CorrectionState CorrectionInitialization WeightedClasses
 open scoped ContDiff Topology BigOperators
-
-noncomputable def strip : StripData Point :=
-  BaseContextAssembly.nativeStrip ActualPrimary.nominal ActualPrimary.standardRegion
-
-noncomputable def slowStrip : StripData TorusInverse.Plane :=
-  PhysicalMeanDomain.localSlowStripData ActualPrimary.standardRegion.carrier
-    ActualPrimary.standardRegion.isOpen (ChartScales.epsilon ActualPrimary.h)
-    BaseContextAssembly.slowScale (ChartScales.epsilon_pos ActualPrimary.h)
-    (ChartScales.epsilon_le_one ActualPrimary.h ActualPrimary.outgoing.data.h_pos.le)
-    BaseContextAssembly.one_le_slowScale
 
 noncomputable def envelope {B N0 : ℕ} (l : Index B N0) : ℕ → Point → ℝ :=
   ActualPrimaryBounds.meanEnvelope (l.2,l.1)

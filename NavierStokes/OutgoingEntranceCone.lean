@@ -165,6 +165,15 @@ theorem shapeGradient_contDiff : ContDiff ℝ ∞ shapeGradient :=
 theorem parameter_square_le_one {η : ℝ} (hη : |η| ≤ 1) : η ^ 2 ≤ 1 :=
   (sq_le_one_iff_abs_le_one η).mpr hη
 
+theorem d_mem_unit {η : ℝ} (hη : |η| ≤ 1) : 0 ≤ d η ∧ d η ≤ 1 := by
+  unfold d
+  constructor <;> nlinarith [parameter_square_le_one hη, sq_nonneg η]
+
+theorem four_A_bounds {h : ℝ} (hh : 0 < h) (hh1 : h ≤ 1 / 100) :
+    0 ≤ 4 * A h ∧ 4 * A h ≤ 3 := by
+  unfold A
+  constructor <;> linarith
+
 theorem eta_shapeGradient_bounds {η : ℝ} (hη : |η| ≤ 1) :
     η ^ 2 ≤ η * shapeGradient η ∧ η * shapeGradient η ≤ 1 := by
   have hsq := parameter_square_le_one hη
@@ -815,7 +824,7 @@ theorem geometricAxialLag_bound (c : Parameters) {h y η : ℝ} (hh : 0 ≤ h)
   have hW : |transportW c h y η| ≤ 3 := by
     exact abs_le.mpr (transportW_bounds c hh hh1 hy hη |>.imp_right (fun h => h.trans (by norm_num)))
   have hsq := parameter_square_le_one hη
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by unfold d; constructor <;> nlinarith [sq_nonneg η]
+  have hd : 0 ≤ d η ∧ d η ≤ 1 := d_mem_unit hη
   have hc : |4 * h * η ^ 2 - 2 * d η| ≤ 3 := by
     apply abs_le.mpr
     have hm := mul_le_mul_of_nonneg_left hsq hh
@@ -837,9 +846,7 @@ theorem geometricAxialLag_bound (c : Parameters) {h y η : ℝ} (hh : 0 ≤ h)
 
 theorem pressure_coefficient_bound {h η : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 100)
     (hη : |η| ≤ 1) : |2 * h * η + d η * shapeGradient η| ≤ 3 * |η| := by
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by
-    unfold d
-    constructor <;> nlinarith [parameter_square_le_one hη, sq_nonneg η]
+  have hd : 0 ≤ d η ∧ d η ≤ 1 := d_mem_unit hη
   calc
     _ ≤ |2 * h * η| + |d η * shapeGradient η| := abs_add_le _ _
     _ = 2 * h * |η| + d η * |shapeGradient η| := by
@@ -851,6 +858,36 @@ theorem pressure_coefficient_bound {h η : ℝ} (hh : 0 ≤ h) (hh1 : h ≤ 1 / 
         mul_le_mul hd.2 (abs_shapeGradient_le η) (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 1)
     _ ≤ _ := by nlinarith [abs_nonneg η, mul_le_mul_of_nonneg_right hh1 (abs_nonneg η)]
 
+/-- The three-term split of the axial pressure lag against an energy majorant `E`
+and a pressure majorant `Q`. Both `pressureAxialLag_bound` and
+`pressureAxialLag_le_envelope` are instances. -/
+theorem pressureAxialLag_le_of_majorants (v : TailData) {y η E Q : ℝ}
+    (hh1 : v.h ≤ 1 / 100) (hη : |η| ≤ 1)
+    (hE0 : 0 ≤ averagedEnergy v.core y η) (hE : averagedEnergy v.core y η ≤ E)
+    (hpe : |entrancePressure v y η| ≤ pressureBound * Q)
+    (hpg : |pressureGradient v y η| ≤ pressureBound * |η| * Q) :
+    |pressureAxialLag v y η| ≤
+      3 * |η| * E + 3 * |η| * (pressureBound * Q) + pressureBound * |η| * Q := by
+  have hd : 0 ≤ d η ∧ d η ≤ 1 := d_mem_unit hη
+  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := four_A_bounds v.h_pos hh1
+  have hcoef := pressure_coefficient_bound v.h_pos.le hh1 hη
+  unfold pressureAxialLag
+  calc
+    _ ≤ |-(2 * v.h * η + d η * shapeGradient η) * averagedEnergy v.core y η| +
+        |4 * A v.h * η * entrancePressure v y η| + |d η * pressureGradient v y η| :=
+      (abs_sub _ _).trans (add_le_add_left (abs_add_le _ _) _)
+    _ = |2 * v.h * η + d η * shapeGradient η| * averagedEnergy v.core y η +
+        (4 * A v.h * |η|) * |entrancePressure v y η| + d η * |pressureGradient v y η| := by
+      simp only [abs_mul, abs_neg, abs_of_nonneg hE0, abs_of_nonneg hd.1]
+      rw [← abs_mul 4 (A v.h), abs_of_nonneg hA.1]
+    _ ≤ _ := by
+      apply add_le_add
+      · exact add_le_add (mul_le_mul hcoef hE hE0 (by positivity))
+          (mul_le_mul (mul_le_mul_of_nonneg_right hA.2 (abs_nonneg η)) hpe
+            (abs_nonneg _) (by positivity))
+      · simpa only [one_mul] using
+          mul_le_mul hd.2 hpg (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 1)
+
 theorem pressureAxialLag_bound (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 / 100)
     (hy : 0 ≤ y) (hy' : y ≤ v.core.dropLength + 1) (hη : |η| ≤ 1) :
     |pressureAxialLag v y η| ≤ (3 * (y + 1) + 4 * pressureBound) * |η| *
@@ -861,37 +898,13 @@ theorem pressureAxialLag_bound (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 / 10
     dsimp [Parameters.endpoint, Parameters.holdStart] at *
     linarith
   have hp := actual_pressure_bounds v hy hend hη
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by
-    unfold d
-    constructor <;> nlinarith [parameter_square_le_one hη, sq_nonneg η]
-  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := by
-    unfold A
-    constructor <;> linarith [v.h_pos]
   have hE : 0 ≤ averagedEnergy v.core y η :=
     mul_nonneg (sq_nonneg _) (averagedClockEnergy_nonneg v.core hy)
-  have hEb : averagedEnergy v.core y η ≤ (y + 1) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-    exact (averagedEnergy_upper v.core hy hy' η).trans
+  have hEb : averagedEnergy v.core y η ≤
+      (y + 1) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 :=
+    (averagedEnergy_upper v.core hy hy' η).trans
       (mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg _))
-  have hcoef := pressure_coefficient_bound v.h_pos.le hh1 hη
-  unfold pressureAxialLag
-  calc
-    _ ≤ |-(2 * v.h * η + d η * shapeGradient η) * averagedEnergy v.core y η| +
-        |4 * A v.h * η * entrancePressure v y η| + |d η * pressureGradient v y η| :=
-      (abs_sub _ _).trans (add_le_add_left (abs_add_le _ _) _)
-    _ = |2 * v.h * η + d η * shapeGradient η| * averagedEnergy v.core y η +
-        (4 * A v.h * |η|) * |entrancePressure v y η| + d η * |pressureGradient v y η| := by
-      simp only [abs_mul, abs_neg, abs_of_nonneg hE, abs_of_nonneg hd.1]
-      rw [← abs_mul 4 (A v.h), abs_of_nonneg hA.1]
-    _ ≤ (3 * |η|) * ((y + 1) * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2) +
-        (3 * |η|) * (pressureBound * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2) +
-        pressureBound * |η| * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
-      apply add_le_add
-      · exact add_le_add (mul_le_mul hcoef hEb hE (by positivity))
-          (mul_le_mul (mul_le_mul_of_nonneg_right hA.2 (abs_nonneg η)) hp.1
-            (abs_nonneg _) (by positivity))
-      · simpa only [one_mul] using
-          mul_le_mul hd.2 hp.2.1 (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 1)
-    _ = _ := by ring
+  exact (pressureAxialLag_le_of_majorants v hh1 hη hE hEb hp.1 hp.2.1).trans (le_of_eq (by ring))
 
 noncomputable def axialBound : ℝ := 259 + 4 * pressureBound
 
@@ -1200,35 +1213,10 @@ theorem pressureAxialLag_le_envelope (v : TailData) {y T η : ℝ} (hh1 : v.h �
   have hB := averagedEnergy_le_envelope v.core hy hyT hη
   have hB0 : 0 ≤ averagedEnergy v.core y η :=
     mul_nonneg (sq_nonneg _) (averagedClockEnergy_nonneg v.core hy)
-  have hK : 0 ≤ energyEnvelope v.core.P T := by unfold energyEnvelope; positivity
   have hC := pressureBound_pos.le
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by
-    unfold d
-    constructor <;> nlinarith [parameter_square_le_one hη, sq_nonneg η]
-  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := by
-    unfold A
-    constructor <;> linarith [v.h_pos]
-  have hcoef := pressure_coefficient_bound v.h_pos.le hh1 hη
   have hp' := hp.1.trans (mul_le_mul_of_nonneg_left hEE hC)
   have hg' := hp.2.1.trans (mul_le_mul_of_nonneg_left hEE (mul_nonneg hC (abs_nonneg η)))
-  unfold pressureAxialLag
-  calc
-    _ ≤ |-(2 * v.h * η + d η * shapeGradient η) * averagedEnergy v.core y η| +
-        |4 * A v.h * η * entrancePressure v y η| + |d η * pressureGradient v y η| :=
-      (abs_sub _ _).trans (add_le_add_left (abs_add_le _ _) _)
-    _ = |2 * v.h * η + d η * shapeGradient η| * averagedEnergy v.core y η +
-        (4 * A v.h * |η|) * |entrancePressure v y η| + d η * |pressureGradient v y η| := by
-      simp only [abs_mul, abs_neg, abs_of_nonneg hB0, abs_of_nonneg hd.1]
-      rw [← abs_mul 4 (A v.h), abs_of_nonneg hA.1]
-    _ ≤ (3 * |η|) * energyEnvelope v.core.P T +
-        (3 * |η|) * (pressureBound * energyEnvelope v.core.P T) +
-        pressureBound * |η| * energyEnvelope v.core.P T := by
-      apply add_le_add
-      · exact add_le_add (mul_le_mul hcoef hB hB0 (by positivity))
-          (mul_le_mul (mul_le_mul_of_nonneg_right hA.2 (abs_nonneg η)) hp'
-            (abs_nonneg _) (by positivity))
-      · simpa only [one_mul] using mul_le_mul hd.2 hg' (abs_nonneg _) (by norm_num : (0 : ℝ) ≤ 1)
-    _ = _ := by ring
+  exact (pressureAxialLag_le_of_majorants v hh1 hη hB0 hB hp' hg').trans (le_of_eq (by ring))
 
 theorem axialLag_le_envelope (v : TailData) {y T η : ℝ} (hh1 : v.h ≤ 1 / 100)
     (hy : 0 ≤ y) (hyT : y ≤ T) (hyend : y ≤ v.core.endpoint) (hη : |η| ≤ 1) :
@@ -1610,12 +1598,8 @@ theorem pressureAxialSource_bound (v : TailData) {y η : ℝ} (hh1 : v.h ≤ 1 /
     |pressureAxialSource v y η| ≤ pressureSourceBound * |η| *
       angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
   have hp := actual_pressure_bounds v hy hyend hη
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by
-    unfold d
-    constructor <;> nlinarith [sq_nonneg η, parameter_square_le_one hη]
-  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := by
-    unfold A
-    constructor <;> linarith [v.h_pos]
+  have hd : 0 ≤ d η ∧ d η ≤ 1 := d_mem_unit hη
+  have hA : 0 ≤ 4 * A v.h ∧ 4 * A v.h ≤ 3 := four_A_bounds v.h_pos hh1
   have hfirst : |-d η * pressureGradient v y η| ≤
       pressureBound * |η| * angular v.core.P v.core.dropLength v.core.lam (y, η) ^ 2 := by
     rw [abs_mul, abs_neg, abs_of_nonneg hd.1]

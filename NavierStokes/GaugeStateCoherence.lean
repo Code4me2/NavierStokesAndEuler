@@ -64,9 +64,7 @@ theorem meanPressure_congr_profile {d a b d' a' b' : ℝ} {hab : a < b} {hab' : 
     (v : Plane) (f : PressureStream.Lift S → ℝ) :
     VariableGaugeMean.meanPressure d a b M hab ell v f =
       VariableGaugeMean.meanPressure d' a' b' M hab' ell v f := by
-  subst d'
-  subst a'
-  subst b'
+  subst_vars
   rfl
 
 /-- The scalar whose negative is the radial component of `pressureAliasState`. -/
@@ -96,8 +94,7 @@ theorem pressureAlias_congr_endpoints {a b a' b' : ℝ} {hab : a < b} {hab' : a'
     (f : PressureStream.Lift S → ℝ) (z : PressureStream.Lift S) :
     PressureStream.pressureAlias d a b M hab v f z =
       PressureStream.pressureAlias d a' b' M hab' v f z := by
-  subst a'
-  subst b'
+  subst_vars
   rfl
 
 /-! ## Recomputed pressure from transported primitive data -/
@@ -194,9 +191,7 @@ theorem pressureAlias_congr_profile {d a b d' a' b' : ℝ} {hab : a < b} {hab' :
     (hd : d = d') (ha : a = a') (hb : b = b') (M : ℝ) (ell : S → ℝ)
     (v : Plane) (f : PressureStream.Lift S → ℝ) :
     pressureAlias d a b M hab ell v f = pressureAlias d' a' b' M hab' ell v f := by
-  subst d'
-  subst a'
-  subst b'
+  subst_vars
   rfl
 
 /-- Naturality of the actual variable-gauge alias, including all nonpositive

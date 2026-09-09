@@ -205,7 +205,7 @@ theorem repair_eq_sum_coordinate (a l u d : Fin n → ℝ) :
     repair a l u d = fun t => ∑ j, d j * repair a l u (Pi.single j 1) t := by
   have hdecomp : (∑ j, d j • (Pi.single j (1 : ℝ) : Fin n → ℝ)) = d := by
     ext k
-    simp [Finset.sum_apply, Pi.smul_apply, Pi.single_apply]
+    simp [Finset.sum_apply, Pi.single_apply]
   have h := congrArg (repairLinearMap a l u) hdecomp
   rw [map_sum] at h
   simp only [map_smul] at h

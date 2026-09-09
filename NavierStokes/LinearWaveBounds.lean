@@ -600,8 +600,8 @@ theorem principal_add_curl (h : InputBounds s P α κ d a) {β : ℝ}
       along (d.fastField n) (fun y => a.amplitude n y i) x +
       along (d.fastField n) (fun y => f n y i) x from along_add _ (haD i) (hfD i)]
   fin_cases i <;>
-    simp [WaveCoefficients.principal, WaveCoefficients.principalVelocity, LinearWaveResidual.principal,
-      WaveCoefficients.addAmplitude, LinearWaveResidual.shear, Pi.add_apply] <;> ring
+    simp [WaveCoefficients.principal, WaveCoefficients.principalVelocity,
+      LinearWaveResidual.principal, WaveCoefficients.addAmplitude, LinearWaveResidual.shear] <;> ring
 
 
 end InputBounds
@@ -742,9 +742,8 @@ theorem principal_cutoff {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
   simp only [WaveCoefficients.principal, LinearWaveResidual.principal, Pi.add_apply]
   rw [hD i]
   fin_cases i <;>
-    simp [WaveCoefficients.withCutoff, LinearWaveResidual.principal,
-      LinearWaveResidual.shear, excludedSlotError,
-      Pi.add_apply, Pi.smul_apply, Complex.real_smul, Complex.ofReal_sub] <;> ring
+    simp [WaveCoefficients.withCutoff, LinearWaveResidual.principal, LinearWaveResidual.shear,
+      excludedSlotError, Complex.real_smul, Complex.ofReal_sub] <;> ring
 
 theorem principal_cutoff_of_solve {s : StripData D} {P : ℕ → D → ℝ} {α κ : ℝ}
     {d : GraphDirections D} {a : WaveCoefficients D} (h : InputBounds s P α κ d a)

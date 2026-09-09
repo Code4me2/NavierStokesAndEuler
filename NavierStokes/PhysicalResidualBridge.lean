@@ -118,11 +118,9 @@ theorem graphResidual_scaled_pull {Ω : Set E} {U : Set F} {Γ : E → F}
   have hPθ := along_scaled_pull (v ^ 2) 1 hdΓ hdp (hθ x hx)
   have hPz := along_scaled_pull (v ^ 2) l hdΓ hdp (G.axial x hx)
   fin_cases i <;>
-    simp [graphResidual, LinearWaveResidual.realTransport,
-      LinearWaveResidual.realFrameLaplacian, LinearWaveResidual.realAngularGenerator,
-      cylindricalLaplacian, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.cons_val_two, hAr, hAθ, hAz, hAt, hArr, hAθθ, hAzz, hPr, hPθ, hPz,
-      smul_eq_mul, G.radius x hx] <;>
+    simp [graphResidual, LinearWaveResidual.realTransport, LinearWaveResidual.realFrameLaplacian,
+      LinearWaveResidual.realAngularGenerator, cylindricalLaplacian, Matrix.cons_val_two, hAr, hAθ,
+      hAz, hAt, hArr, hAθθ, hAzz, hPr, hPθ, hPz, smul_eq_mul, G.radius x hx] <;>
     field_simp [hl, hr] <;> rw [hε] <;> ring
 
 theorem graphResidual_eq_cylindrical {U : Set SpaceTime}
@@ -575,8 +573,7 @@ theorem graphResidual_add {U : Set E} (hU : IsOpen U) (ε : ℝ) (R : E → ℝ)
   fin_cases i <;>
     simp [graphResidual, LinearWaveResidual.realComponentLinearResidual,
       LinearWaveResidual.realTransport, LinearWaveResidual.realFrameLaplacian,
-      LinearWaveResidual.realAngularGenerator, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.cons_val_two, hfirst, hLap, hP] <;> ring
+      LinearWaveResidual.realAngularGenerator, Matrix.cons_val_two, hfirst, hLap, hP] <;> ring
 
 theorem transport_realLift (R : E → ℝ) (Vr Vθ Vz : E → E)
     {a : E → Fin 3 → ℝ} {x : E}

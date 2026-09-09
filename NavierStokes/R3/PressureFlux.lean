@@ -367,14 +367,12 @@ theorem uniform_expression_bound {C₁ C₂ M₀ U₀ G₀ M U G A B R : ℝ}
       ((B ^ (1 / 2 : ℝ) + 1) * (A / R + 1 / R ^ 2) +
         R ^ (-(7 / 4 : ℝ)) * B ^ (3 / 4 : ℝ)) := by
   have hMp := Real.rpow_le_rpow hM hMM (by norm_num : 0 ≤ (3 / 2 : ℝ))
-  have hMp₄ := Real.rpow_le_rpow hM hMM (by norm_num : 0 ≤ (1 / 4 : ℝ))
   have hB₁ := Real.rpow_nonneg hB (1 / 2 : ℝ)
   have hB₃ := Real.rpow_nonneg hB (3 / 4 : ℝ)
   have hM₀p := Real.rpow_nonneg hM₀ (3 / 2 : ℝ)
   have hM₀p₄ := Real.rpow_nonneg hM₀ (1 / 4 : ℝ)
   have hRp := Real.rpow_nonneg hR.le (-(7 / 4 : ℝ))
-  have hMU : 2 * M * U ≤ 2 * M₀ * U₀ :=
-    mul_le_mul (mul_le_mul_of_nonneg_left hMM (by norm_num)) hUU hU (by positivity)
+  have hMU : 2 * M * U ≤ 2 * M₀ * U₀ := by gcongr
   have hT : M ^ (3 / 2 : ℝ) * B ^ (1 / 2 : ℝ) + 2 * M * U ≤
       (M₀ ^ (3 / 2 : ℝ) + 2 * M₀ * U₀) * (B ^ (1 / 2 : ℝ) + 1) := by
     have h := add_le_add (mul_le_mul_of_nonneg_right hMp hB₁) hMU
@@ -395,9 +393,7 @@ theorem uniform_expression_bound {C₁ C₂ M₀ U₀ G₀ M U G A B R : ℝ}
           ((M₀ + 1) * (A / R + 1 / R ^ 2)) :=
         mul_le_mul (mul_le_mul_of_nonneg_left hT hC₁) hD (by positivity) (by positivity)
       _ = _ := by ring
-  have hcoeff : C₂ * G * M ^ (1 / 4 : ℝ) ≤ C₂ * G₀ * M₀ ^ (1 / 4 : ℝ) :=
-    mul_le_mul (mul_le_mul_of_nonneg_left hGG hC₂) hMp₄
-      (Real.rpow_nonneg hM _) (mul_nonneg hC₂ hG₀)
+  have hcoeff : C₂ * G * M ^ (1 / 4 : ℝ) ≤ C₂ * G₀ * M₀ ^ (1 / 4 : ℝ) := by gcongr
   have hcomm : C₂ * G * M ^ (1 / 4 : ℝ) * R ^ (-(7 / 4 : ℝ)) * B ^ (3 / 4 : ℝ) ≤
       (C₂ * G₀ * M₀ ^ (1 / 4 : ℝ)) * (R ^ (-(7 / 4 : ℝ)) * B ^ (3 / 4 : ℝ)) := by
     calc

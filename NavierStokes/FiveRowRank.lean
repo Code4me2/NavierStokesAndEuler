@@ -298,20 +298,20 @@ def angularDebtLinearMap (C : ℝ) : Debt →ₗ[ℝ] (Fin 3 → ℝ) where
   toFun := angularDebt C
   map_add' d e := by
     ext i
-    fin_cases i <;> simp [angularDebt, Pi.add_apply] <;> ring
+    fin_cases i <;> simp [angularDebt] <;> ring
   map_smul' r d := by
     ext i
-    fin_cases i <;> simp [angularDebt, Pi.smul_apply, smul_eq_mul] <;> ring
+    fin_cases i <;> simp [angularDebt, smul_eq_mul] <;> ring
 
 def axialDebtLinearMap (C : ℝ) : Debt →ₗ[ℝ] (Fin 2 → ℝ) where
   toFun := axialDebt C
   map_add' d e := by
     ext i
-    fin_cases i <;> simp [axialDebt, Pi.add_apply]
+    fin_cases i <;> simp [axialDebt]
     ring
   map_smul' r d := by
     ext i
-    fin_cases i <;> simp [axialDebt, Pi.smul_apply, smul_eq_mul]
+    fin_cases i <;> simp [axialDebt, smul_eq_mul]
     ring
 
 /-- The concrete angular correction as a linear map in `(P,Jθ,Jz)`. -/
@@ -344,7 +344,7 @@ theorem angularDebt_rescale (C : ℝ) (d : Debt) :
     angularDebt C d = C⁻¹ • angularDebt 1 d := by
   ext i
   fin_cases i <;>
-    simp [angularDebt, Pi.smul_apply, smul_eq_mul, div_eq_mul_inv, mul_inv_rev] <;> ring
+    simp [angularDebt, smul_eq_mul, div_eq_mul_inv, mul_inv_rev] <;> ring
 
 
 

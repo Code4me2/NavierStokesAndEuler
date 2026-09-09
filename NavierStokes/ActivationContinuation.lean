@@ -540,23 +540,18 @@ theorem profileHistory_parameter_formula {D : RadialDomain} (P : Profiles D) (r 
     {p : Point} (hp : p ∈ D.carrier) :
     parameterPartial (profileHistory P r) p = deriv (profileInitial P r) p.2 +
       primitive (parameterPartial (profileDensity P r)) p := by
-  cases r with
-  | mass =>
-    simp only [profileHistory, profileInitial, deriv_const, zero_add]
-    exact parameterPartial_primitive D P.U_smooth hp
-  | angular =>
-    simp only [profileHistory, profileInitial, deriv_const, zero_add]
-    exact parameterPartial_primitive D P.H_smooth hp
-  | transport =>
-    simp only [profileHistory, profileInitial, deriv_const, zero_add]
-    exact parameterPartial_primitive D P.transportDensity_smooth hp
-  | energy =>
-    simp only [profileHistory, profileInitial, deriv_const, zero_add]
-    exact parameterPartial_primitive D P.energyDensity_smooth hp
-  | pressure =>
+  cases r
+  case pressure =>
     change parameterPartial P.pressure p = _
     rw [P.parameterPartial_pressure hp, parameterPartial_primitive D (P.f_smooth.pow 2) hp]
     rfl
+  all_goals
+    simp only [profileHistory, profileInitial, deriv_const, zero_add]
+    first
+      | exact parameterPartial_primitive D P.U_smooth hp
+      | exact parameterPartial_primitive D P.H_smooth hp
+      | exact parameterPartial_primitive D P.transportDensity_smooth hp
+      | exact parameterPartial_primitive D P.energyDensity_smooth hp
 
 theorem profileHistory_difference {D E : RadialDomain} (P : Profiles D) (Q : Profiles E)
     (h0 : P.pressure0 = Q.pressure0) (r : HistoryRow) {p : Point}

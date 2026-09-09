@@ -33,8 +33,7 @@ section QuotientAlgebra
 theorem weights_smul_target (H : Mat2) (T : Vec2) (a : ℝ) :
     SmoothCovariance.weights H (a • T) = a • SmoothCovariance.weights H T := by
   ext j
-  fin_cases j <;> simp [SmoothCovariance.weights, SmoothCovariance.cramerNumerator,
-    Pi.smul_apply, smul_eq_mul] <;> ring
+  fin_cases j <;> simp [SmoothCovariance.weights, SmoothCovariance.cramerNumerator, smul_eq_mul] <;> ring
 
 theorem inverse_smul_target (H : Mat2) (T : Vec2) (a : ℝ) :
     H⁻¹.mulVec (a • T) = a • H⁻¹.mulVec T := by
@@ -224,12 +223,10 @@ theorem fullRequest_chart (s sr : StripData Point) (P : SignedStressPrimitive.Pa
   ext j
   fin_cases j
   · simp [LocalSignedRequest.fullRequest, LocalSignedRequest.normalizedRequest,
-      LocalSignedRequest.requestedStress, Pi.smul_apply, smul_eq_mul,
-      Matrix.cons_val_zero, h1] ;
+    LocalSignedRequest.requestedStress, smul_eq_mul, h1] ;
     field_simp [hl.ne']
   · simp [LocalSignedRequest.fullRequest, LocalSignedRequest.normalizedRequest,
-      LocalSignedRequest.requestedStress, Pi.smul_apply, smul_eq_mul,
-      Matrix.cons_val_one, h2] ;
+    LocalSignedRequest.requestedStress, smul_eq_mul, h2] ;
     field_simp [hl.ne']
 
 theorem source_over_radial {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :

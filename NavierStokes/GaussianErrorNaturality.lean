@@ -160,8 +160,7 @@ theorem along_ne_zero_mem_closed {E : Type} [NormedAddCommGroup E] [NormedSpace 
 theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
     {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤ d) (ha : a = c) (hb : b = d) :
     F a b hab = F c d hcd := by
-  subst c
-  subst d
+  subst_vars
   rfl
 
 theorem complexCopyVelocity_zeroEntry

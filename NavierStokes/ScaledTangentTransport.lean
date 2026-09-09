@@ -441,11 +441,10 @@ section ZeroEntry
 variable {P Q : Type} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-private theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
+theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
     {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤ d) (ha : a = c) (hb : b = d) :
     F a b hab = F c d hcd := by
-  subst c
-  subst d
+  subst_vars
   rfl
 
 omit [NormedAddCommGroup Q] [NormedSpace ℝ Q] in

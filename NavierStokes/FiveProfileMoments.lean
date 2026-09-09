@@ -311,23 +311,23 @@ noncomputable def quadraticBilin (P : Patch) : Coeff →ₗ[ℝ] Coeff →ₗ[�
       map_add' := fun d f => by
         apply Prod.ext
         · ext i; simp
-        · ext i; fin_cases i <;> simp [Pi.add_apply, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
+        · ext i; fin_cases i <;> simp [Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
       map_smul' := fun r d => by
         apply Prod.ext
         · ext i; simp
-        · ext i; fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring }
+        · ext i; fin_cases i <;> simp [smul_eq_mul, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring }
   map_add' c d := by
     apply LinearMap.ext
     intro f
     apply Prod.ext
     · ext i; simp
-    · ext i; fin_cases i <;> simp [Pi.add_apply, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
+    · ext i; fin_cases i <;> simp [Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
   map_smul' r c := by
     apply LinearMap.ext
     intro f
     apply Prod.ext
     · ext i; simp
-    · ext i; fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
+    · ext i; fin_cases i <;> simp [smul_eq_mul, Fin.sum_univ_two, Fin.sum_univ_three] <;> ring
 
 noncomputable def quadraticCLM (P : Patch) : Coeff →L[ℝ] Coeff →L[ℝ] Coeff :=
   LinearMap.toContinuousLinearMap
@@ -571,7 +571,7 @@ theorem integrable_fin_vector {n : ℕ} (f : ℝ → Fin n → ℝ)
   classical
   have heq : f = fun x => ∑ i, f x i • (Pi.single i (1 : ℝ) : Fin n → ℝ) := by
     funext x j
-    simp [Finset.sum_apply, Pi.smul_apply, Pi.single_apply]
+    simp [Finset.sum_apply, Pi.single_apply]
   rw [heq]
   exact MeasureTheory.integrable_finsetSum _ (fun i _ => (hf i).smul_const (Pi.single i 1))
 
@@ -717,7 +717,7 @@ theorem normalizedDebt_eq_sum (A G : ℝ) (d : Debt) :
     normalizedDebt A G d = ∑ i, d i • normalizedDebt A G (Pi.single i 1) := by
   have h : (∑ i, d i • (Pi.single i (1 : ℝ) : Debt)) = d := by
     ext j
-    simp [Finset.sum_apply, Pi.smul_apply, Pi.single_apply]
+    simp [Finset.sum_apply, Pi.single_apply]
   have he := congrArg (normalizationLinearMap A G) h
   rw [map_sum] at he
   simp only [map_smul] at he
@@ -814,8 +814,8 @@ theorem smooth_solver_parameter_jets {g : Coeff → Coeff} {r C : ℝ}
 noncomputable def jetEval {n : ℕ} (P : Patch) (k : ℕ) (x : ℝ) : (Fin n → ℝ) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
     { toFun := fun c => ∑ i, c i * iteratedDeriv k (bump P i) x
-      map_add' := fun c d => by simp [Pi.add_apply, add_mul, Finset.sum_add_distrib]
-      map_smul' := fun r c => by simp [Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc] }
+      map_add' := fun c d => by simp [add_mul, Finset.sum_add_distrib]
+      map_smul' := fun r c => by simp [smul_eq_mul, Finset.mul_sum, mul_assoc] }
 
 noncomputable def uJetEval (P : Patch) (k : ℕ) (x : ℝ) : Coeff →L[ℝ] ℝ :=
   (jetEval P.leftHalf k x).comp (ContinuousLinearMap.fst ℝ _ _)

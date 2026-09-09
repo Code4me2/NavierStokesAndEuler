@@ -182,7 +182,7 @@ theorem geometric_coefficient_bounds {h eta : ℝ} (hh : 0 ≤ h) (hh' : h ≤ 1
     (heta : |eta| ≤ 1) :
     |2 * (1 / 2 - h) * eta - (1 - eta ^ 2) * shapeGradient eta| ≤ 3 ∧
       |1 - eta ^ 2| ≤ 1 ∧ |2 * h * eta + (1 - eta ^ 2) * shapeGradient eta| ≤ 3 := by
-  have hs : eta ^ 2 ≤ 1 := by nlinarith [sq_abs eta, sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1) |>.mpr heta]
+  have hs : eta ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one eta).mpr heta
   have hd : |1 - eta ^ 2| ≤ 1 := by rw [abs_of_nonneg (by linarith)]; nlinarith [sq_nonneg eta]
   have hD : |1 / 2 - h| ≤ 1 / 2 := by rw [abs_of_nonneg (by linarith)]; linarith
   have hg : |(1 - eta ^ 2) * shapeGradient eta| ≤ 2 := by
@@ -569,9 +569,7 @@ theorem corrected_Qs_endpoint_lower (w : ResetWitness d K) (hK : 0 < K)
     d.core.lam / 4 ≤ Qs w (CorrectedPulseAmplitude.amplitude d w.coefficients)
       (d.core.endpoint, eta) := by
   have hs := CorrectedPulseAmplitude.amplitude_spec w hK hsmall hwait hscale
-  have heta₂ : eta ^ 2 ≤ 1 := by
-    have h := (sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1)).mpr heta
-    nlinarith [sq_abs eta]
+  have heta₂ : eta ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one eta).mpr heta
   have hb := hs.2 eta heta₂
   apply Qs_endpoint_lower w hwait hsmall hpulse hh₁ hhT hs.1 heta
   · rw [abs_of_pos (CorrectedPulseAmplitude.amplitude_pos d w.coefficients eta)]
@@ -935,9 +933,7 @@ theorem eta_shapeGradient_bounds {eta : ℝ} (heta : |eta| ≤ 1) :
   have he : eta * shapeGradient eta = 2 * eta ^ 2 / (1 + eta ^ 2) := by
     unfold shapeGradient
     ring
-  have hs : eta ^ 2 ≤ 1 := by
-    have h := (sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1)).mpr heta
-    nlinarith [sq_abs eta]
+  have hs : eta ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one eta).mpr heta
   rw [he]
   constructor
   · apply (le_div_iff₀ (by positivity : 0 < 1 + eta ^ 2)).mpr
@@ -1884,9 +1880,7 @@ theorem corrected_pulse_cone (w : ResetWitness d K) (hK : 0 < K)
     PulseConeAt w (CorrectedPulseAmplitude.amplitude d w.coefficients)
       (d.core.pulseStart + y, eta) := by
   have hs := CorrectedPulseAmplitude.amplitude_spec w hK (by linarith) hwait hscale
-  have heta₂ : eta ^ 2 ≤ 1 := by
-    have h := (sq_le_sq₀ (abs_nonneg eta) (by norm_num : (0 : ℝ) ≤ 1)).mpr heta
-    nlinarith [sq_abs eta]
+  have heta₂ : eta ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one eta).mpr heta
   have hb := hs.2 eta heta₂
   have hamp : |CorrectedPulseAmplitude.amplitude d w.coefficients eta| ≤ 6 / 5 := by
     rw [abs_of_pos (CorrectedPulseAmplitude.amplitude_pos d w.coefficients eta)]

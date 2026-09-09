@@ -220,10 +220,10 @@ noncomputable def radiusRatioCLM (q : ℝ) : Coeff →L[ℝ] Coeff :=
     { toFun := fun v => ![v 0, v 1 / q, v 2 / (q * Real.sqrt q)]
       map_add' := fun u v => by
         ext i
-        fin_cases i <;> simp [Pi.add_apply, add_div]
+        fin_cases i <;> simp [add_div]
       map_smul' := fun r v => by
         ext i
-        fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul, mul_div_assoc] }
+        fin_cases i <;> simp [smul_eq_mul, mul_div_assoc] }
 
 theorem scaledDebt_radiusRatio (q K : ℝ) (hq : 0 < q) (d : Coeff) :
     scaledDebt (q * K) d = radiusRatioCLM q (scaledDebt K d) := by

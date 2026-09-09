@@ -54,7 +54,7 @@ theorem angularSource_abs_bound (c : Parameters) {h y η : ℝ} (hh : 0 ≤ h)
       (transportW_bounds c hh hh1 hy hη).2.trans (by norm_num)⟩
   have hk := dropCoefficient_bounds c.m y
   have hsq := parameter_square_le_one hη
-  have hd : 0 ≤ d η ∧ d η ≤ 1 := by unfold d; constructor <;> nlinarith [sq_nonneg η]
+  have hd : 0 ≤ d η ∧ d η ≤ 1 := d_mem_unit hη
   have hD : 0 ≤ D h ∧ D h ≤ 1 / 2 := by unfold D; constructor <;> linarith
   have hJ := eta_shapeGradient_bounds hη
   have hcoef : |1 - 2 * dropCoefficient c.m y * η ^ 2| ≤ 9 := by

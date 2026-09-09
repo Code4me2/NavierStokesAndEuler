@@ -103,19 +103,19 @@ def quadraticCoefficientsBilin (q : Coeff) : Coeff →ₗ[ℝ] Coeff →ₗ[ℝ]
     { toFun := fun d => ![0, q 0 * c 0 * d 0 + q 1 * c 1 * d 1]
       map_add' := fun d e => by
         ext i
-        fin_cases i <;> simp [Pi.add_apply]
+        fin_cases i <;> simp
         ring
       map_smul' := fun r d => by
         ext i
-        fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul]
+        fin_cases i <;> simp [smul_eq_mul]
         ring }
   map_add' c d := by
     ext e i
-    fin_cases i <;> simp [Pi.add_apply]
+    fin_cases i <;> simp
     ring
   map_smul' r c := by
     ext e i
-    fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul]
+    fin_cases i <;> simp [smul_eq_mul]
     ring
 
 def quadraticCoefficientMap : Coeff →ₗ[ℝ] (Coeff →L[ℝ] Coeff →L[ℝ] Coeff) where
@@ -128,7 +128,7 @@ def quadraticCoefficientMap : Coeff →ₗ[ℝ] (Coeff →L[ℝ] Coeff →L[ℝ]
     apply ContinuousLinearMap.ext
     intro d
     ext i
-    fin_cases i <;> simp [quadraticCoefficientsBilin, Pi.add_apply]
+    fin_cases i <;> simp [quadraticCoefficientsBilin]
     ring
   map_smul' r q := by
     apply ContinuousLinearMap.ext
@@ -136,7 +136,7 @@ def quadraticCoefficientMap : Coeff →ₗ[ℝ] (Coeff →L[ℝ] Coeff →L[ℝ]
     apply ContinuousLinearMap.ext
     intro d
     ext i
-    fin_cases i <;> simp [quadraticCoefficientsBilin, Pi.smul_apply, smul_eq_mul]
+    fin_cases i <;> simp [quadraticCoefficientsBilin, smul_eq_mul]
     ring
 
 theorem continuous_quadraticCLM : Continuous quadraticCLM := by
@@ -180,6 +180,26 @@ theorem quadraticMap_hasFDerivAt (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ
   change B x + A c x + A x c = B x + (A c x + A x c)
   abel
 
+/-- The contraction step shared by `tangent_lower_bound` and
+`quadratic_solution_distance`: `B` is invertible with norm bound `β`, the
+perturbation `z` is small relative to `x`, and the small-radius hypothesis
+absorbs it into half of `‖x‖`. -/
+theorem norm_le_two_mul_of_almost_inverse (B : E ≃L[ℝ] E) {β K r : ℝ} (hβ : 0 ≤ β)
+    (hinv : ∀ v, ‖B.symm v‖ ≤ β * ‖v‖) (hsmall : 4 * β * K * r ≤ 1)
+    {x y z : E} (hid : B x = y - z) (hrem : ‖z‖ ≤ (2 * K * r) * ‖x‖) :
+    ‖x‖ ≤ 2 * β * ‖y‖ := by
+  have hn : ‖x‖ ≤ β * ‖y‖ + (1 / 2 : ℝ) * ‖x‖ := by
+    calc
+      ‖x‖ = ‖B.symm (B x)‖ := by rw [B.symm_apply_apply]
+      _ ≤ β * ‖B x‖ := hinv _
+      _ = β * ‖y - z‖ := by rw [hid]
+      _ ≤ β * (‖y‖ + ‖z‖) := mul_le_mul_of_nonneg_left (norm_sub_le _ _) hβ
+      _ ≤ β * (‖y‖ + (2 * K * r) * ‖x‖) :=
+        mul_le_mul_of_nonneg_left (add_le_add_right hrem _) hβ
+      _ ≤ β * ‖y‖ + (1 / 2 : ℝ) * ‖x‖ := by
+        nlinarith [mul_le_mul_of_nonneg_right hsmall (norm_nonneg x)]
+  linarith
+
 theorem tangent_lower_bound (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ] E)
     (β K r : ℝ) (hβ : 0 ≤ β) (hK : 0 ≤ K)
     (hinv : ∀ x, ‖B.symm x‖ ≤ β * ‖x‖) (hA : ‖A‖ ≤ K)
@@ -199,18 +219,7 @@ theorem tangent_lower_bound (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ] E)
   have hid : B x = tangent B A c x - (A c x + A x c) := by
     change B x = B x + A c x + A x c - (A c x + A x c)
     abel
-  have hn : ‖x‖ ≤ β * ‖tangent B A c x‖ + (1 / 2 : ℝ) * ‖x‖ := by
-    calc
-      ‖x‖ = ‖B.symm (B x)‖ := by rw [B.symm_apply_apply]
-      _ ≤ β * ‖B x‖ := hinv _
-      _ = β * ‖tangent B A c x - (A c x + A x c)‖ := by rw [hid]
-      _ ≤ β * (‖tangent B A c x‖ + ‖A c x + A x c‖) :=
-        mul_le_mul_of_nonneg_left (norm_sub_le _ _) hβ
-      _ ≤ β * (‖tangent B A c x‖ + (2 * K * r) * ‖x‖) :=
-        mul_le_mul_of_nonneg_left (add_le_add_right hrem _) hβ
-      _ ≤ β * ‖tangent B A c x‖ + (1 / 2 : ℝ) * ‖x‖ := by
-        nlinarith [mul_le_mul_of_nonneg_right hsmall (norm_nonneg x)]
-  linarith
+  exact norm_le_two_mul_of_almost_inverse B hβ hinv hsmall hid hrem
 
 theorem tangent_invertible [FiniteDimensional ℝ E]
     (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[ℝ] E)
@@ -247,18 +256,7 @@ theorem quadratic_solution_distance (B : E ≃L[ℝ] E) (A : E →L[ℝ] E →L[
     rw [map_sub, ← hceq, ← heeq]
     unfold quadraticMap
     abel
-  have hn : ‖c - e‖ ≤ β * ‖d - f‖ + (1 / 2 : ℝ) * ‖c - e‖ := by
-    calc
-      ‖c - e‖ = ‖B.symm (B (c - e))‖ := by rw [B.symm_apply_apply]
-      _ ≤ β * ‖B (c - e)‖ := hinv _
-      _ = β * ‖(d - f) - (A c c - A e e)‖ := by rw [hid]
-      _ ≤ β * (‖d - f‖ + ‖A c c - A e e‖) :=
-        mul_le_mul_of_nonneg_left (norm_sub_le _ _) hβ
-      _ ≤ β * (‖d - f‖ + (2 * K * r) * ‖c - e‖) :=
-        mul_le_mul_of_nonneg_left (add_le_add_right hrem _) hβ
-      _ ≤ β * ‖d - f‖ + (1 / 2 : ℝ) * ‖c - e‖ := by
-        nlinarith [mul_le_mul_of_nonneg_right hsmall (norm_nonneg (c - e))]
-  linarith
+  exact norm_le_two_mul_of_almost_inverse B hβ hinv hsmall hid hrem
 
 /-- Contraction uniqueness patches the local smooth inverses throughout one
 uniform debt ball. The resulting smoothness radius is quantitative. -/

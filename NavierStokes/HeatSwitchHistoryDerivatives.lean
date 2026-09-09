@@ -257,8 +257,7 @@ theorem logI_eta_hasDerivAt (F : Profile) {XR C : ℝ}
   have hmem : p ∈ interiorDomain.carrier := ⟨mem_univ _, hp⟩
   have hd := history_parameter_mixed_within (logI_contDiffOn F w) (angularWeight_contDiffOn F w)
     (fun p hp => logI_hasDerivAt F w p (interior_to_band hp.2)) hmem
-  rw [angularWeight_parameter F w hmem] at hd
-  exact hd
+  simpa only [angularWeight_parameter F w hmem] using hd
 
 theorem logS_eta_hasDerivAt (F : Profile) {XR C : ℝ}
     (w : HeatedOutgoing.CompensationWitness F XR C) (p : Point) (hp : p.2 ∈ Ioo (-1) 1) :
@@ -271,8 +270,7 @@ theorem logS_eta_hasDerivAt (F : Profile) {XR C : ℝ}
   have hmem : p ∈ interiorDomain.carrier := ⟨mem_univ _, hp⟩
   have hd := history_parameter_mixed_within (logS_contDiffOn F w) (energyWeight_contDiffOn F w)
     (fun p hp => logS_hasDerivAt F w p (interior_to_band hp.2)) hmem
-  rw [energyWeight_parameter F w hmem] at hd
-  exact hd
+  simpa only [energyWeight_parameter F w hmem] using hd
 
 theorem logPi_eta_hasDerivAt (F : Profile) {XR C : ℝ}
     (w : HeatedOutgoing.CompensationWitness F XR C) (p : Point) (hp : p.2 ∈ Ioo (-1) 1) :
@@ -284,7 +282,6 @@ theorem logPi_eta_hasDerivAt (F : Profile) {XR C : ℝ}
   have hmem : p ∈ interiorDomain.carrier := ⟨mem_univ _, hp⟩
   have hd := history_parameter_mixed_within (logPi_contDiffOn F w) (pressureWeight_contDiffOn F w)
     (fun p hp => logPi_hasDerivAt F w p (interior_to_band hp.2)) hmem
-  rw [pressureWeight_parameter F w hmem] at hd
-  exact hd
+  simpa only [pressureWeight_parameter F w hmem] using hd
 
 end NavierStokes.HeatSwitchHistoryDerivatives

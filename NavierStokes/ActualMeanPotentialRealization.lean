@@ -123,10 +123,9 @@ theorem componentPotential_realCurl (G : ScaledGraph) (hl : 0 < G.radialScale) {
   have hZ := scalar_axial G hl hr hΨ
   fin_cases i <;> simp [PhysicalCurlCovariance.realCurl, componentPotential,
     AxisymmetricResidual.pack_zero, AxisymmetricResidual.pack_one, AxisymmetricResidual.pack_two,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, h0, hR, hZ,
-    meridional, PressureStream.streamBeta, PressureStream.streamGamma,
-    PressureStream.divideRadius, LinearWaveResidual.coordinateRadius,
-    mul_zero, zero_sub, sub_zero]
+    Matrix.cons_val_two, h0, hR, hZ, meridional, PressureStream.streamBeta,
+    PressureStream.streamGamma, PressureStream.divideRadius, LinearWaveResidual.coordinateRadius,
+    zero_sub]
   · exact Or.inl rfl
   · rw [show (PhysicalResidualTZ.graphMapTZ G z).1.1 = G.radialScale * z.2 0 from rfl]
     change G.velocityScale * _ + (z.2 0)⁻¹ * ((G.velocityScale / G.radialScale) * Ψ (chartPoint G z)) = _

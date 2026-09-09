@@ -427,17 +427,14 @@ theorem cartesianGradient_pullback {f : Space → ℝ} {q : Space}
   rw [dCoord_pullback hf 0, dCoord_pullback hf 1, dCoord_pullback hf 2]
   rw [dCoord_chart_zero, dCoord_chart_one, dCoord_chart_two]
   ext i
-  fin_cases i
-  · simp [euclideanGradient, Fin.sum_univ_three, frame_apply, pack, dCoord, coordinateVector]
-    field_simp [hr]
+  fin_cases i <;>
+    simp [euclideanGradient, Fin.sum_univ_three, frame_apply, pack, dCoord, coordinateVector]
+  · field_simp [hr]
     linear_combination -(fderiv ℝ f (chart q) (EuclideanSpace.single 0 1)) *
       Real.cos_sq_add_sin_sq (q 1)
-  · simp [euclideanGradient, Fin.sum_univ_three, frame_apply, pack, dCoord, coordinateVector]
-    field_simp [hr]
+  · field_simp [hr]
     linear_combination -(fderiv ℝ f (chart q) (EuclideanSpace.single 1 1)) *
       Real.cos_sq_add_sin_sq (q 1)
-  · simp [euclideanGradient, Fin.sum_univ_three, frame_apply,
-      pack, dCoord, coordinateVector]
 
 /-- Pullback of a time-dependent velocity into the moving cylindrical frame. -/
 noncomputable def velocityComponents (u : VelocityField) : VelocityField :=

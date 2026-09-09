@@ -400,9 +400,10 @@ theorem primary_fullDivergence (B N0 n : ℕ) {x : Full}
         (ActualInitialCoherence.seed B N0).oscillation n y := by
     funext y i
     fin_cases i <;> simp [State.totalVelocity, ActualInitialCoherence.primary,
-      CorrectionInitialization.GaugeInitialization.primaryBands, VariableGaugeMean.reconstructState,
-      ActualInitialCoherence.seed, CorrectionInitialization.bandSeed, LiftedMeanResidual.baseLift,
-      LiftedMeanResidual.tripleVector, Matrix.cons_val, Matrix.cons_val_zero, Matrix.cons_val_one]
+      CorrectionInitialization.GaugeInitialization.primaryBands,
+      VariableGaugeMean.reconstructState, ActualInitialCoherence.seed,
+      CorrectionInitialization.bandSeed, LiftedMeanResidual.baseLift,
+      LiftedMeanResidual.tripleVector, Matrix.cons_val]
   have hb (i : Fin 3) := (LiftedMeanResidual.liftScalar_smooth
     (LiftedMeanResidual.tripleVector_smooth (GaugeDebtIncrement.smoothTriple_mono
       (ActualInitialCoherence.common_base_data B).smooth (fun _ hx => strip_to_positive hx)) n i))

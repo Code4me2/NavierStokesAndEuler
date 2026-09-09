@@ -47,8 +47,7 @@ noncomputable def requestedStress (p : SignedStressPrimitive.Patch)
 theorem weights_smul (H : Mat2) (T : Vec2) (a : ℝ) (j : Fin 2) :
     SmoothCovariance.weights H (a • T) j = a * SmoothCovariance.weights H T j := by
   fin_cases j <;>
-    simp [SmoothCovariance.weights, SmoothCovariance.cramerNumerator,
-      Pi.smul_apply, smul_eq_mul] <;> ring
+    simp [SmoothCovariance.weights, SmoothCovariance.cramerNumerator, smul_eq_mul] <;> ring
 
 /-- Only primitive matrix/target jets and zeroth-order primary margins occur
 in this record. There is no assumption on an inverse or a signed output. -/

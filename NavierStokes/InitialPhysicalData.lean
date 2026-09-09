@@ -2214,7 +2214,7 @@ theorem potential_periodized_eq (l : SignedLabel B N0) (i : Fin 3)
   · have hp := potentialCoefficient_zero_off_annulus l w hw hann
     have hz := cartesianPotential_zero_of_common_zero l w hw hp
     rw [potential_periodized l i w hw, hp, hz]
-    simp [map_zero, smul_zero, zero_mul, Complex.zero_re]
+    simp [map_zero, smul_zero, Complex.zero_re]
 
 end GlobalPrimaryPotential
 

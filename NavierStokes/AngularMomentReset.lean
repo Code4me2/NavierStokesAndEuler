@@ -174,19 +174,19 @@ def quadraticBilin (lam : ℝ) : Coeff →ₗ[ℝ] Coeff →ₗ[ℝ] Coeff where
     { toFun := fun d => ![0, quadraticMoment lam 0 * c 0 * d 0 + quadraticMoment lam 1 * c 1 * d 1]
       map_add' := fun d e => by
         ext i
-        fin_cases i <;> simp [Pi.add_apply]
+        fin_cases i <;> simp
         ring
       map_smul' := fun r d => by
         ext i
-        fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul]
+        fin_cases i <;> simp [smul_eq_mul]
         ring }
   map_add' c d := by
     ext e i
-    fin_cases i <;> simp [Pi.add_apply]
+    fin_cases i <;> simp
     ring
   map_smul' r c := by
     ext e i
-    fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul]
+    fin_cases i <;> simp [smul_eq_mul]
     ring
 
 def quadraticCLM (lam : ℝ) : Coeff →L[ℝ] Coeff →L[ℝ] Coeff :=

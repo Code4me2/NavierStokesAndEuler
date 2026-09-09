@@ -291,19 +291,11 @@ theorem complexCopyPressure_transport (t : TangentData P ProblemStatement.Space)
   simp only [smul_add, Complex.real_smul]
   ring
 
-private theorem interval_congr {E : Type} (F : (a b : ℝ) → a ≤ b → E)
-    {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤ d) (ha : a = c) (hb : b = d) :
-    F a b hab = F c d hcd := by
-  subst c
-  subst d
-  rfl
-
 private theorem continuous_interval_congr {E : Type*} [TopologicalSpace E]
     (F : ℝ → E) {a b c d : ℝ} (ha : a = c) (hb : b = d)
     (hf : Continuous (fun s : Icc c d => F s)) :
     Continuous (fun s : Icc a b => F s) := by
-  subst c
-  subst d
+  subst_vars
   exact hf
 
 private theorem continuous_zeroEntry_interval {E : Type*} [TopologicalSpace E]
@@ -344,7 +336,7 @@ theorem complexCopyVelocity_zeroEntry (t : TangentData P ProblemStatement.Space)
     (continuous_zeroEntry_interval L rate hrate.ne'
       (fun s => (imagData t f).linearData.forcingAlong g copy ((parameter q, coverPower gap Y), s)) hImag) hslot
   refine he.trans (congrArg (fun z : HarmonicCalculus.ComplexVector => amplitude • z) ?_)
-  exact interval_congr (fun a b hab => complexCopyVelocity t f g (a := a) (b := b) hab copy
+  exact ScaledTangentTransport.interval_congr (fun a b hab => complexCopyVelocity t f g (a := a) (b := b) hab copy
     (parameter q, coverPower gap Y)) _ _ (by ring) (by simpa only [zero_add] using hlen)
 
 omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
@@ -379,7 +371,7 @@ theorem complexCopyPressure_zeroEntry (t : TangentData P ProblemStatement.Space)
       (fun s => (imagData t f).linearData.forcingAlong g copy ((parameter q, coverPower gap Y), s)) hImag) hslot
   refine he.trans (congrArg (fun z : ℂ =>
     ((rate * amplitude / normalScale) * (referenceFrequency / frequency)) • z) ?_)
-  exact interval_congr (fun a b hab => complexCopyPressure t f g (a := a) (b := b) hab copy
+  exact ScaledTangentTransport.interval_congr (fun a b hab => complexCopyPressure t f g (a := a) (b := b) hab copy
     referenceFrequency (parameter q, coverPower gap Y)) _ _ (by ring) (by simpa only [zero_add] using hlen)
 
 end ComplexPaths

@@ -40,41 +40,6 @@ abbrev LocalWave (s : StripData D) (K : ℕ → I → Set D)
 abbrev LocalUnweighted (s : StripData D) (K : ℕ → I → Set D)
     (α : ℝ) (f : ℕ → I → D → E) : Prop := LocalClass s K (fun _ _ _ => 1) α f
 
-private theorem bilinear_jet_at (L : E →L[ℝ] F →L[ℝ] G)
-    {u : D → E} {v : D → F} {x : D} (hu : ContDiffAt ℝ ∞ u x)
-    (hv : ContDiffAt ℝ ∞ v x) {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B)
-    {m j : ℕ} (hj : j ≤ m)
-    (hbu : ∀ k ≤ m, ‖iteratedFDeriv ℝ k u x‖ ≤ A)
-    (hbv : ∀ k ≤ m, ‖iteratedFDeriv ℝ k v x‖ ≤ B) :
-    ‖iteratedFDeriv ℝ j (fun y => L (u y) (v y)) x‖ ≤ ‖L‖ * (2 : ℝ) ^ m * A * B := by
-  obtain ⟨U, hU, huU⟩ := hu.contDiffOn (natCast_le_infty j) (by simp)
-  obtain ⟨V, hV, hvV⟩ := hv.contDiffOn (natCast_le_infty j) (by simp)
-  obtain ⟨O, hOsub, hO, hxO⟩ := mem_nhds_iff.mp (inter_mem hU hV)
-  have hle := JetBounds.norm_iteratedFDeriv_bilinear_le_on L hO
-    (huU.mono (hOsub.trans inter_subset_left))
-    (hvV.mono (hOsub.trans inter_subset_right)) hxO (le_refl (j : WithTop ℕ∞))
-  have hsum : (∑ k ∈ Finset.range (j + 1), (j.choose k : ℝ) *
-      ‖iteratedFDeriv ℝ k u x‖ * ‖iteratedFDeriv ℝ (j - k) v x‖) ≤ (2 : ℝ) ^ m * A * B := by
-    calc
-      _ ≤ ∑ k ∈ Finset.range (j + 1), (j.choose k : ℝ) * A * B := by
-        apply Finset.sum_le_sum
-        intro k hk
-        have hkj : k ≤ j := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
-        exact mul_le_mul (mul_le_mul_of_nonneg_left (hbu k (hkj.trans hj)) (Nat.cast_nonneg _))
-          (hbv (j - k) ((Nat.sub_le _ _).trans hj)) (norm_nonneg _)
-          (mul_nonneg (Nat.cast_nonneg _) hA)
-      _ = (2 : ℝ) ^ j * A * B := by
-        rw [← Finset.sum_mul, ← Finset.sum_mul]
-        have hchoose : (∑ k ∈ Finset.range (j + 1), (j.choose k : ℝ)) = (2 : ℝ) ^ j := by
-          exact_mod_cast Nat.sum_range_choose j
-        rw [hchoose]
-      _ ≤ _ := mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by norm_num) hj) hA) hB
-  exact hle.trans (by
-    calc
-      _ ≤ ‖L‖ * ((2 : ℝ) ^ m * A * B) := mul_le_mul_of_nonneg_left hsum (norm_nonneg L)
-      _ = _ := by ring)
-
 namespace LocalClass
 
 variable {s : StripData D} {K : ℕ → I → Set D} {w v : ℕ → I → D → ℝ}
@@ -229,7 +194,7 @@ theorem bilinear {u : ℕ → I → D → F} (hf : LocalClass s K w α f)
   calc
     _ ≤ ‖L‖ * (2 : ℝ) ^ m * majorant s (fun n x => w n i x) α A p n x *
         majorant s (fun n x => v n i x) β B q n x :=
-      bilinear_jet_at L (hf.smooth n i x hx hi) (hu.smooth n i x hx hi)
+      PeriodizedWaveBounds.bilinear_jet_at L (hf.smooth n i x hx hi) (hu.smooth n i x hx hi)
         (majorant_nonneg s _ α hA p n x (hf.weight_nonneg n i x hx))
         (majorant_nonneg s _ β hB q n x (hu.weight_nonneg n i x hx)) hj
         (fun k hk => ha n i x hx hi k hk) (fun k hk => hb n i x hx hi k hk)
@@ -1171,8 +1136,8 @@ theorem principal_add_at (a : WaveCoefficients D) (s : StripData D) (d : GraphDi
       along (d.fastField n) (fun y => a.amplitude n y j) x +
         along (d.fastField n) (fun y => f n y j) x from along_add _ (ha j) (hf j)]
   fin_cases j <;>
-    simp [WaveCoefficients.principal, WaveCoefficients.principalVelocity, LinearWaveResidual.principal,
-      WaveCoefficients.addAmplitude, LinearWaveResidual.shear, Pi.add_apply] <;> ring
+    simp [WaveCoefficients.principal, WaveCoefficients.principalVelocity,
+      LinearWaveResidual.principal, WaveCoefficients.addAmplitude, LinearWaveResidual.shear] <;> ring
 
 theorem principal_cutoff_at (a : WaveCoefficients D) (s : StripData D) (d : GraphDirections D)
     (ψ : ℕ → D → ℝ) (source : ℕ → D → ComplexVector) (n : ℕ) (x : D)
@@ -1194,9 +1159,8 @@ theorem principal_cutoff_at (a : WaveCoefficients D) (s : StripData D) (d : Grap
   simp only [WaveCoefficients.principal, LinearWaveResidual.principal, Pi.add_apply]
   rw [hD j]
   fin_cases j <;>
-    simp [WaveCoefficients.withCutoff, LinearWaveResidual.principal,
-      LinearWaveResidual.shear, LinearWaveBounds.excludedSlotError,
-      Pi.add_apply, Pi.smul_apply, Complex.real_smul, Complex.ofReal_sub] <;> ring
+    simp [WaveCoefficients.withCutoff, LinearWaveResidual.principal, LinearWaveResidual.shear,
+      LinearWaveBounds.excludedSlotError, Complex.real_smul, Complex.ofReal_sub] <;> ring
 
 theorem corrected_coefficient_eq_good_add_excluded_at
     (a : WaveCoefficients D) (s : StripData D) (d : GraphDirections D)

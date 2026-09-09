@@ -1065,32 +1065,26 @@ theorem meanExpression_state {U : Set D} {c : CorrectionState.Context D} {u : Co
   simp only [Pi.add_apply] at h11
   fin_cases i
   · simp [CorrectionState.State.reducedMeanResidual, CorrectionState.State.radialResidual,
-      CorrectionState.State.gr, MeanIncrementBounds.gr, Matrix.cons_val_zero, Pi.sub_apply, Pi.add_apply, Pi.mul_apply]
+    CorrectionState.State.gr, MeanIncrementBounds.gr]
     rw [← stateFlux_00, ← stateFlux_20, ← h11]
-    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq, dr_eq_along,
-      meanExpression, meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector,
-      virtualDivergence, LinearWaveResidual.realAngularGenerator,
-      Matrix.cons_val_zero, Matrix.cons_val_one,
-      MeanIncrementBounds.Operators.invRadius]
+    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq, dr_eq_along, meanExpression,
+      meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector, virtualDivergence,
+      LinearWaveResidual.realAngularGenerator, MeanIncrementBounds.Operators.invRadius]
     ring
 
   · simp [CorrectionState.State.reducedMeanResidual, CorrectionState.State.thetaResidual,
-      MeanIncrementBounds.thetaResidual, Matrix.cons_val_one, Matrix.cons_val_zero, Pi.sub_apply, Pi.add_apply]
+    MeanIncrementBounds.thetaResidual]
     rw [← stateFlux_01, ← stateFlux_21]
-    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq,
-      meanExpression, meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector,
-      virtualDivergence, LinearWaveResidual.realAngularGenerator,
-      Matrix.cons_val_zero, Matrix.cons_val_one]
+    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq, meanExpression,
+      meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector, virtualDivergence,
+      LinearWaveResidual.realAngularGenerator]
     ring
   · simp [CorrectionState.State.reducedMeanResidual, CorrectionState.State.axialResidual,
-      MeanIncrementBounds.axialResidual, Matrix.cons_val_two,
-      Matrix.head_cons, Matrix.tail_cons, Pi.sub_apply, Pi.add_apply]
+    MeanIncrementBounds.axialResidual, Matrix.cons_val_two]
     rw [← stateFlux_02, ← stateFlux_22, hz]
-    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq,
-      meanExpression, meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector,
-      virtualDivergence, LinearWaveResidual.realAngularGenerator,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
-      zero_mul, mul_zero, sub_zero, add_zero]
+    simp [time_eq_along, radialDiv_eq, dz_eq_along, viscosity_eq, meanExpression,
+      meanConservativeFlux, meanGradient, meanFrameLaplacian, tripleVector, virtualDivergence,
+      LinearWaveResidual.realAngularGenerator, Matrix.cons_val_two]
     ring
 
 noncomputable def nonlinearField (c : CorrectionState.Context D) (u : CorrectionState.State D) :

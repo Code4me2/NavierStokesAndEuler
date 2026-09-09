@@ -1301,23 +1301,10 @@ theorem ideal_rows_moments (F : Profile) {r : ℝ} (hr : 0 ≤ r) (eta : ℝ) :
     moments (fun p => idealU p.2) (idealE F) r eta = manuscriptIdealRows F r eta := by
   rcases ShapeTransition.ideal_rows_are_integrals hr idealU (idealAmplitude F) eta with
     ⟨hM, hI, hJ, hS, hP⟩
+  simp only [manuscriptIdealRows, idealU, intervalIntegral.integral_of_le hr] at hM hI hJ hS hP ⊢
   ext i
   fin_cases i
-  · simp only [moments, density, manuscriptIdealRows, idealU,
-      intervalIntegral.integral_of_le hr] at hM ⊢
-    exact hM.symm
-  · simp only [moments, density, manuscriptIdealRows, idealE,
-      intervalIntegral.integral_of_le hr] at hI ⊢
-    exact hI.symm
-  · simp only [moments, density, manuscriptIdealRows, idealE,
-      intervalIntegral.integral_of_le hr] at hJ ⊢
-    exact hJ.symm
-  · simp only [moments, density, manuscriptIdealRows, idealE,
-      intervalIntegral.integral_of_le hr] at hS ⊢
-    exact hS.symm
-  · simp only [moments, density, manuscriptIdealRows, idealE,
-      intervalIntegral.integral_of_le hr] at hP ⊢
-    exact hP.symm
+  exacts [hM.symm, hI.symm, hJ.symm, hS.symm, hP.symm]
 
 theorem outgoing_manuscript_rows (F : Profile) {r : ℝ} (hr : 0 ≤ r) (hr1 : r ≤ 1) (eta : ℝ) :
     moments F.U F.E r eta = manuscriptIdealRows F r eta := by

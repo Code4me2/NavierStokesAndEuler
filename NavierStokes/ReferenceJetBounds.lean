@@ -308,8 +308,7 @@ theorem exists_transition_control (N : ReferencePath.Input) {εU εF : ℝ}
     have hrU := (N.refU_smooth hδ hδT).contDiffAt (N.radialDomain.isOpen.mem_nhds hmem)
     have hnU := N.U_smooth.contDiffAt ((domain_isOpen N.scale).mem_nhds (endpoint_mem N hη))
     have hc := hU1 δ hδ hδu1 p.1 hX p.2 hη
-    rw [first_parameter_difference hrU hnU] at hc
-    exact hc
+    simpa only [first_parameter_difference hrU hnU] using hc
   · intro p hX hη
     have hXp := N.endpoint_pos.le.trans hX
     have hmem := reference_mem N hXp hη
@@ -326,8 +325,7 @@ theorem exists_transition_control (N : ReferencePath.Input) {εU εF : ℝ}
     have hrF := (N.refF_smooth hδ hδT).contDiffAt (N.radialDomain.isOpen.mem_nhds hmem)
     have hnF := N.f_smooth.contDiffAt ((domain_isOpen N.scale).mem_nhds (endpoint_mem N hη))
     have hc := hF1 δ hδ hδf1 p.1 hX p.2 hη
-    rw [first_parameter_difference hrF hnF] at hc
-    exact hc
+    simpa only [first_parameter_difference hrF hnF] using hc
 
 theorem reference_initial_eventually (N : ReferencePath.Input) {δ : ℝ}
     (hδ : 0 < δ) (hδT : 2 * δ < ReferencePath.rampLimit) {p : Point}

@@ -475,7 +475,7 @@ theorem defects_update :
   have hz := axialDefect_update ha hop hb hm hh W hW
   funext n p i
   fin_cases i <;>
-    simp [defects, linearRows, remainders, hp, ht, hz, Pi.add_apply, Pi.sub_apply, smul_eq_mul]
+    simp [defects, linearRows, remainders, hp, ht, hz, smul_eq_mul]
 
 include ha hop hb hm hh hW in
 theorem defects_after_solved_rows

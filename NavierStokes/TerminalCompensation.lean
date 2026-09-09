@@ -251,16 +251,16 @@ noncomputable def quadraticBilin (P : Patch) : Coeff →ₗ[ℝ] Coeff →ₗ[�
           (1 / 2) * ∑ j, squareMoment P 0 j * c j * d j, 0]
       map_add' := fun d e => by
         ext i
-        fin_cases i <;> simp [Pi.add_apply, Fin.sum_univ_three] <;> ring
+        fin_cases i <;> simp [Fin.sum_univ_three] <;> ring
       map_smul' := fun r d => by
         ext i
-        fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three] <;> ring }
+        fin_cases i <;> simp [smul_eq_mul, Fin.sum_univ_three] <;> ring }
   map_add' c d := by
     ext e i
-    fin_cases i <;> simp [Pi.add_apply, Fin.sum_univ_three] <;> ring
+    fin_cases i <;> simp [Fin.sum_univ_three] <;> ring
   map_smul' r c := by
     ext e i
-    fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three] <;> ring
+    fin_cases i <;> simp [smul_eq_mul, Fin.sum_univ_three] <;> ring
 
 noncomputable def quadraticCLM (P : Patch) : Coeff →L[ℝ] Coeff →L[ℝ] Coeff :=
   LinearMap.toContinuousLinearMap

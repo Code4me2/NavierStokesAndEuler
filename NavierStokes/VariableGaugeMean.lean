@@ -566,8 +566,7 @@ theorem meanPressure_congr_endpoints {a b a' b' : ℝ} {hab : a < b} {hab' : a' 
     (f : PressureStream.Lift S → ℝ) (z : PressureStream.Lift S) :
     PressureStream.meanPressure d a b M hab v f z =
       PressureStream.meanPressure d a' b' M hab' v f z := by
-  subst a'
-  subst b'
+  subst_vars
   rfl
 
 /-- Naturality on a single genuine slow fiber.  The source is only required

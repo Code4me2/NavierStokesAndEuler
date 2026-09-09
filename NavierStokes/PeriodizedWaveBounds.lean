@@ -329,7 +329,7 @@ variable {D E F G : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] {I : Type*}
 
-private theorem bilinear_jet_at (L : E →L[ℝ] F →L[ℝ] G)
+theorem bilinear_jet_at (L : E →L[ℝ] F →L[ℝ] G)
     {u : D → E} {v : D → F} {x : D} (hu : ContDiffAt ℝ ∞ u x)
     (hv : ContDiffAt ℝ ∞ v x) {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B)
     {m j : ℕ} (hj : j ≤ m)

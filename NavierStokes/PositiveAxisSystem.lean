@@ -659,6 +659,32 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   fin_cases i <;> simp [forcing, paritySign]
 
 
+/-- Discharge the leaf goals of a `ContDiffAt` pullback proof: `hd` is the data
+family, `hc` the real-coercion fact and `hl` the invertibility fact. -/
+local macro "cdAuto " hd:ident hc:ident hl:ident : tactic =>
+  `(tactic| repeat' first
+      | exact contDiffAt_const
+      | exact $hd _
+      | exact contDiffAt_snd
+      | exact $hc
+      | exact $hl
+      | apply ContDiffAt.add
+      | apply ContDiffAt.sub
+      | apply ContDiffAt.mul
+      | apply ContDiffAt.neg)
+
+/-- The `AnalyticAt` counterpart of `cdAuto`. -/
+local macro "anAuto " hf:ident hl:ident : tactic =>
+  `(tactic| repeat' first
+      | exact analyticAt_const
+      | exact $hf _
+      | exact analyticAt_id
+      | exact $hl
+      | apply AnalyticAt.fun_add
+      | apply AnalyticAt.fun_sub
+      | apply AnalyticAt.fun_mul
+      | apply AnalyticAt.fun_neg)
+
  theorem coefficient0_contDiffAt_of_pullback {n : WithTop ℕ∞} {h lam C : ℂ} {F : CoefficientData}
     {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (fun v : ℝ × ℂ => F i (v.1 ^ 2, v.2)) w)
     (hL : ell h w.2 ≠ 0) (i j : Fin 6) :
@@ -670,18 +696,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hcoe : ContDiffAt ℝ n (fun v : ℝ × ℂ => (v.1 : ℂ)) w :=
     Complex.ofRealCLM.contDiff.contDiffAt.comp w contDiffAt_fst
   fin_cases i <;> fin_cases j <;>
-    simp [coefficient0, A0, coefficientBase, axialValue, ell, edge,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact contDiffAt_const
-      | exact hdata _
-      | exact contDiffAt_snd
-      | exact hcoe
-      | exact hlinv
-      | apply ContDiffAt.add
-      | apply ContDiffAt.sub
-      | apply ContDiffAt.mul
-      | apply ContDiffAt.neg)
+    simp [coefficient0, A0, coefficientBase, axialValue, ell, edge, div_eq_mul_inv] <;>
+    cdAuto hdata hcoe hlinv
 
  theorem coefficient1_contDiffAt_of_pullback {n : WithTop ℕ∞} {h : ℂ} {F : CoefficientData}
     {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (fun v : ℝ × ℂ => F i (v.1 ^ 2, v.2)) w)
@@ -694,18 +710,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hcoe : ContDiffAt ℝ n (fun v : ℝ × ℂ => (v.1 : ℂ)) w :=
     Complex.ofRealCLM.contDiff.contDiffAt.comp w contDiffAt_fst
   fin_cases i <;> fin_cases j <;>
-    simp [coefficient1, A1, coefficientBase, ell, edge,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact contDiffAt_const
-      | exact hdata _
-      | exact contDiffAt_snd
-      | exact hcoe
-      | exact hlinv
-      | apply ContDiffAt.add
-      | apply ContDiffAt.sub
-      | apply ContDiffAt.mul
-      | apply ContDiffAt.neg)
+    simp [coefficient1, A1, coefficientBase, ell, edge, div_eq_mul_inv] <;>
+    cdAuto hdata hcoe hlinv
 
  theorem sourceField_contDiffAt_of_pullback {n : WithTop ℕ∞} {h C : ℂ} {F : CoefficientData}
     {w : ℝ × ℂ} (hF : ∀ i, ContDiffAt ℝ n (fun v : ℝ × ℂ => F i (v.1 ^ 2, v.2)) w)
@@ -718,17 +724,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hcoe : ContDiffAt ℝ n (fun v : ℝ × ℂ => (v.1 : ℂ)) w :=
     Complex.ofRealCLM.contDiff.contDiffAt.comp w contDiffAt_fst
   fin_cases i <;>
-    simp [sourceField, forcing, coefficientSource, pressureSource, ell,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact contDiffAt_const
-      | exact hdata _
-      | exact contDiffAt_snd
-      | exact hcoe
-      | exact hlinv
-      | apply ContDiffAt.add
-      | apply ContDiffAt.sub
-      | apply ContDiffAt.mul)
+    simp [sourceField, forcing, coefficientSource, pressureSource, ell, div_eq_mul_inv] <;>
+    cdAuto hdata hcoe hlinv
 
  theorem coefficient0_analyticAt {h lam C : ℂ} {F : CoefficientData} {r : ℝ} {z : ℂ}
     (hF : ∀ i, AnalyticAt ℂ (fun v => F i (r ^ 2, v)) z) (hL : ell h z ≠ 0) (i j : Fin 6) :
@@ -737,17 +734,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hlinv : AnalyticAt ℂ (fun v : ℂ => (1 - 2 * h * v ^ 2)⁻¹) z :=
     (analyticAt_const.sub (analyticAt_const.mul (analyticAt_id.pow 2))).inv hL
   fin_cases i <;> fin_cases j <;>
-    simp [coefficient0, A0, coefficientBase, axialValue, ell, edge,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact analyticAt_const
-      | exact hF _
-      | exact analyticAt_id
-      | exact hlinv
-      | apply AnalyticAt.fun_add
-      | apply AnalyticAt.fun_sub
-      | apply AnalyticAt.fun_mul
-      | apply AnalyticAt.fun_neg)
+    simp [coefficient0, A0, coefficientBase, axialValue, ell, edge, div_eq_mul_inv] <;>
+    anAuto hF hlinv
 
  theorem coefficient1_analyticAt {h : ℂ} {F : CoefficientData} {r : ℝ} {z : ℂ}
     (hF : ∀ i, AnalyticAt ℂ (fun v => F i (r ^ 2, v)) z) (hL : ell h z ≠ 0) (i j : Fin 6) :
@@ -756,17 +744,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hlinv : AnalyticAt ℂ (fun v : ℂ => (1 - 2 * h * v ^ 2)⁻¹) z :=
     (analyticAt_const.sub (analyticAt_const.mul (analyticAt_id.pow 2))).inv hL
   fin_cases i <;> fin_cases j <;>
-    simp [coefficient1, A1, coefficientBase, ell, edge,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact analyticAt_const
-      | exact hF _
-      | exact analyticAt_id
-      | exact hlinv
-      | apply AnalyticAt.fun_add
-      | apply AnalyticAt.fun_sub
-      | apply AnalyticAt.fun_mul
-      | apply AnalyticAt.fun_neg)
+    simp [coefficient1, A1, coefficientBase, ell, edge, div_eq_mul_inv] <;>
+    anAuto hF hlinv
 
  theorem sourceField_analyticAt {h C : ℂ} {F : CoefficientData} {r : ℝ} {z : ℂ}
     (hF : ∀ i, AnalyticAt ℂ (fun v => F i (r ^ 2, v)) z) (hL : ell h z ≠ 0) (i : Fin 6) :
@@ -775,16 +754,8 @@ theorem sourceField_parity (h C : ℂ) (F : CoefficientData) :
   have hlinv : AnalyticAt ℂ (fun v : ℂ => (1 - 2 * h * v ^ 2)⁻¹) z :=
     (analyticAt_const.sub (analyticAt_const.mul (analyticAt_id.pow 2))).inv hL
   fin_cases i <;>
-    simp [sourceField, forcing, coefficientSource, pressureSource, ell,
-      Matrix.cons_val_zero, Matrix.cons_val_one, div_eq_mul_inv] <;>
-    (repeat' first
-      | exact analyticAt_const
-      | exact hF _
-      | exact analyticAt_id
-      | exact hlinv
-      | apply AnalyticAt.fun_add
-      | apply AnalyticAt.fun_sub
-      | apply AnalyticAt.fun_mul)
+    simp [sourceField, forcing, coefficientSource, pressureSource, ell, div_eq_mul_inv] <;>
+    anAuto hF hlinv
 
 
 

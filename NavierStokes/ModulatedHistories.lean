@@ -864,16 +864,15 @@ theorem physical_mixed_edits_bound (P : FiveProfileMoments.Patch) (S : Set ℝ)
     funext e
     congr 1
     funext x
-    simp [editU, v, FiveProfileMoments.u, FiveProfileMoments.correction,
-      Pi.smul_apply, smul_eq_mul, mul_assoc]
+    simp [editU, v, FiveProfileMoments.u, FiveProfileMoments.correction, smul_eq_mul, mul_assoc]
     ring
   have hEfun : (fun e => iteratedDeriv k (fun x => editE P A c (x, e)) X) =
       fun e => iteratedDeriv k (FiveProfileMoments.e P (v e)) X := by
     funext e
     congr 1
     funext x
-    simp [editE, v, FiveProfileMoments.e, FiveProfileMoments.correction,
-      Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc]
+    simp [editE, v, FiveProfileMoments.e, FiveProfileMoments.correction, smul_eq_mul,
+      Finset.mul_sum, mul_assoc]
   rw [hUfun, hEfun]
   have hb := hjets k hk j v eta hv.contDiffAt X
   have hcost : J * ‖iteratedFDeriv ℝ j v eta‖ ≤ (J * (2 : ℝ) ^ q * B0) * eps := by
