@@ -2,6 +2,10 @@
 
 These thirteen modules were near-verbatim clones of live modules, created while investigating elaboration resource limits (`maxHeartbeats`) and whether the proofs go through without option overrides. They were unreachable from every theorem root, compiled only because the lakefile globs matched their names, and were removed in the simplification pass. Their module docstrings are preserved here for provenance.
 
+The docstrings are quoted unchanged, so they describe the tree as it stood while each investigation ran. Two things have since moved on. The overrides they discuss are gone: no `set_option` of any kind remains anywhere in the repository, so where a note speaks of "the original" file's `maxHeartbeats` or recursion-depth override, that override is no longer there. And the `NoOptions`/`Investigation` files themselves no longer exist, so the `lake env lean ... NoOptions.lean` check commands quoted below cannot be run; they are recorded as evidence of what was checked at the time.
+
+The live modules the notes refer to — `Euler/BaseFirstPacketChoice.lean`, `Euler/BaseFirstPacketEvolution.lean`, `Euler/BaseInductionStage.lean`, `Euler/GevreyGeneratingDerivatives.lean`, `Euler/LpCylinderCoefficientTime.lean`, `Euler/MeanPacketEnvelopeBounds.lean`, `Euler/PacketShiftArithmetic.lean`, `Euler/ParentGeometryForwardChoice.lean`, `Euler/ParentGeometryJoinedChoice.lean`, `Euler/TransversePacketCorrector.lean`, `NavierStokes/ActualParticularDynamics.lean`, `NavierStokes/CorrectionInitialization.lean` and `NavierStokes/DiagonalJetBounds.lean` — all still exist, as do the declarations the notes name in them.
+
 ## `NavierStokes/CorrectionInitializationNoOptions.lean`
 
 # Construction of the initial correction fields

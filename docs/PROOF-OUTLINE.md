@@ -5,10 +5,12 @@ the initial data and the forcing are, which quantity diverges and why, how the m
 layered, and where the load-bearing intermediate results live.
 
 It is an orientation document, not a proof. The Lean sources are the statement of record;
-where this text and a module disagree, the module is right. Declaration and file names below
-were checked against the tree at the time of writing, but the repository is under active
-simplification, so locate things by name (`grep -rn "theorem selected_candidate" NavierStokes/`)
-rather than by line number.
+where this text and a module disagree, the module is right. Every declaration and file name below
+was re-checked against the tree by grep, but the repository is under active simplification, so
+locate things by name (`grep -rn "theorem selected_candidate" NavierStokes/`) rather than by line
+number. Two former monoliths, `Euler.EulerProof` and `NavierStokes.CorrectionStep`, are now
+aggregator modules whose contents live in the like-named directories beside them (§1.3 E, §2.3 D);
+a grep for a declaration will land in a part, not in the aggregator.
 
 Both roadmaps were reconstructed from theorem statements, module docstrings and the import
 graph. The source manuscripts are referred to in about 90 module docstrings, by numbered result and
@@ -72,7 +74,9 @@ The Euler result is **unforced**. Everything is in the initial velocity.
 ### 1.2 The scale hierarchy
 
 `Euler/PacketSourceScaleSequence.lean` fixes the whole hierarchy in closed form, from one scalar
-sequence `scaleSequence J X n` and two parameters (an index offset `J : ℕ` and a base `X : ℝ`):
+sequence and two parameters (an index offset `J : ℕ` and a base `X : ℝ`). The sequence itself is
+`scaleSequence`, defined one module earlier in `Euler/PacketSourceScaleChoice.lean` by
+`scaleSequence J X 0 = X` and `scaleSequence J X (n+1) = (J+n)² · scaleSequence J X n`:
 
 ```
 shear        J X n = exp( scaleSequence J X n / (J+n)^5 )
@@ -92,9 +96,10 @@ inside `baseHorizon`, while the shear — and hence the gradient at the origin �
 ### 1.3 Layers
 
 **A. Submission surface — `Euler/Solution.lean` (75 lines).**
-`initialDatum_no_global_solution` is the hinge: three lines assembling the vorticity
-confinement, the identification of the canonical solution with any Comparator-class solution,
-and the compact-vorticity contradiction. The two delivered theorems are then packaging.
+`initialDatum_no_global_solution` is the hinge: one private theorem whose proof feeds the
+vorticity confinement, the local upgrade and the identification of the canonical solution with
+any Comparator-class solution into `finiteLifespan_contradiction_of_compact_vorticity`. The two
+delivered theorems are then packaging.
 
 **B. Comparator ↔ development bridge (namespace `Euler.ComparatorBridge`, plus its analytic support modules).**
 This is analysis, not glue.
@@ -155,11 +160,41 @@ This is analysis, not glue.
   `Euler/ParentGeometryJoinedChoice.lean` and on the all-order correction field
   `Euler/AllOrderDriftCorrection.lean`.
 * Below that sit the large analytic families consumed by the correction: `Gevrey*` (~46 modules),
-  `Sobolev*` (~52), `Correction*` (~39), `AllOrder*` (~17), `Cylinder*` (~110),
-  `Transverse*` (~119), `Mean*` (~148), with `Euler/EulerProof.lean` — a foundational library of
-  binomial/Gevrey majorants, Sobolev products, cylinder coordinates and pressure resolvents,
-  importing only Mathlib — at the base of the import DAG. Its name is historical: it is the
-  foundation, not the Euler proof.
+  `Sobolev*` (~49), `Correction*` (~39), `AllOrder*` (~17), `Cylinder*` (~110),
+  `Transverse*` (~119), `Mean*` (~147), with `Euler.EulerProof` — a foundational library of
+  binomial/Gevrey majorants, Sobolev products, cylinder coordinates and pressure resolvents — at
+  the base of the import DAG. Its name is historical: it is the foundation, not the Euler proof.
+
+**E. `Euler.EulerProof`, the foundation.**
+`Euler/EulerProof.lean` is now an aggregator: the 16k lines that used to sit in it were split,
+along the top-level namespace blocks they already had, into eight parts under
+`Euler/EulerProof/`, and the aggregator only re-exports them. The parts are strictly sequential —
+each imports its predecessor — and only part 1 lists Mathlib imports, so a new Mathlib dependency
+for the whole development belongs there. In dependency order:
+
+1. `Euler/EulerProof/Foundations.lean` — Gevrey factorial majorants, smoothness of uniform limits,
+   the geometric packet weights, and Lax–Milgram solvability for coercive operators with the
+   regularity of the resulting inverse.
+2. `Euler/EulerProof/LiftedTransport.lean` — the lifted `L²` and gradient space, the coercive
+   pressure solve on it, metric transport and its derivatives, spatial regularity and the jet
+   calculus, curl identities, and the metric energy evolution.
+3. `Euler/EulerProof/CylinderSobolev.lean` — Bessel-weighted Fourier Sobolev norms on `Domain d`
+   with their products and transport commutators, the chart identifying `Domain 4` with the lift
+   tangent space, and the Sobolev algebra on the cylinder.
+4. `Euler/EulerProof/Mollification.lean` — Sobolev norms and strong jet bounds for smooth tensor
+   fields, the cylinder mollifier and its cover/Fubini identities, and the smooth representatives,
+   tensors and pressures they produce.
+5. `Euler/EulerProof/CutoffsAndEnergy.lean` — terminal energy and interval traces, the diagonal
+   selection and Lagrangian formulations, vector calculus, the Gevrey cutoff family, the weighted
+   energy and pressure bounds, and the graph pullback and breakdown criterion.
+6. `Euler/EulerProof/PacketGrowth.lean` — the ODE core: the Riccati comparison driving one
+   packet's growth, its stability under perturbation, and the ray system.
+7. `Euler/EulerProof/PacketFrames.lean` — the bridge from ideal velocities to the ray system,
+   stability and renewal of the moving frame, a global Picard–Lindelöf existence theorem, and the
+   constants and coefficient control for a single stage.
+8. `Euler/EulerProof/PacketScales.lean` — the scale vocabulary and its limits, the base and source
+   scales and time widths, and the uniform, finite and activated scale choices that chain the
+   stages into the cascade.
 
 ### 1.4 Key intermediate results (Euler)
 
@@ -240,7 +275,7 @@ This is analysis, not glue.
 
 ### 2.3 Layers
 
-**A. Statement adapters (~700 lines).**
+**A. Statement adapters (~630 lines).**
 `NavierStokes/ComparatorSolution.lean` — the two delivered theorems in the reference's exact
 quantifiers, `∀ ν > 0`, with one-line bodies. `NavierStokes/ComparatorDefinitions.lean` — an
 independent copy of the reference definitions, so that the adapters' import closure never
@@ -256,8 +291,9 @@ force condition.
   solution with the same zero datum and force would be classical past time one; periodic
   uniqueness forces agreement with the candidate on `[0,1)`, contradicting `SpeedUnboundedAtOne`)
   → `PeriodicUniqueness.classical_uniqueness_on_Icc`, classical `L²` energy uniqueness on the
-  torus (closure: 3 modules). Force conditions are discharged by
-  `CandidateConsequences.futureJet_decay`.
+  torus (closure: 4 modules — itself, `NavierStokes/PeriodicIntegration.lean`,
+  `NavierStokes/ProblemStatement.lean` and the shared `NavierStokes/WithTopLemmas.lean`). Force
+  conditions are discharged by `CandidateConsequences.futureJet_decay`.
 * Whole space (C): `ComparatorBridge.option_C_of_compact_candidate`
   (`NavierStokes/ComparatorR3Theorem.lean`) →
   `ComparatorBridge.compact_candidate_excludes_global_solution`
@@ -265,16 +301,15 @@ force condition.
   `NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc`. That last theorem is the
   real analytic content of the C-branch: uniqueness on `ℝ³` where the reference velocity has
   compact spatial support but the competitor has only smoothness and a uniform finite-energy
-  bound. Its closure is essentially the `NavierStokes/R3/` directory (about 60 modules).
+  bound. Its closure is 66 modules, 62 of them the whole `NavierStokes/R3/` directory.
 
 **C. The candidate assembly (almost everything else).**
 * **Contract.** `ProblemStatement.CandidateProperties` / `candidateStatement`
   (`NavierStokes/ProblemStatement.lean`): smooth on `Ico 0 1 ×ˢ univ`, unit-periodic, zero
   initial velocity, divergence-free, exact `ν = 1` residual equal to a force with compact future
-  time support, and `SpeedUnboundedAtOne`. Note that this module's header still calls the
-  statement an OPEN target and says no witness is constructed *there*; the witness is constructed
-  in this repository, at `ActualCandidateAssembly.selected_candidate`, and consumed in
-  `NavierStokes/ComparatorTheorem.lean`.
+  time support, and `SpeedUnboundedAtOne`. Nothing is assumed or constructed in that module; it
+  names `ActualCandidateAssembly.selected_candidate` as the proof and
+  `NavierStokes/ComparatorTheorem.lean` as the consumer.
 * **Top.** `ActualCandidateAssembly.selected_candidate` ← `selected_witness` ← `witness` ← the
   `Witness` predicate (`NavierStokes/ActualCandidateAssembly.lean`).
 * **Hub.** `GermCandidateAssembly.exists_candidate_witness_of_finite_stages`
@@ -288,13 +323,41 @@ force condition.
   finite prefix wherever the continuous scale is positive, hence smooth; terminal-slice
   regularity comes from `NavierStokes/JointResidualLimits.lean`.
 * **Cycle.** `CorrectionState.State` (`NavierStokes/CorrectionState.lean`) →
-  `CorrectionStep.CycleParameters` / `CycleState` / `step` / `iterate`
-  (`NavierStokes/CorrectionStep.lean`) → `CorrectionAnalyticStep.step`
+  `CorrectionStep.CycleParameters` (`NavierStokes/CorrectionStep/CycleConstruction.lean`) and
+  `CorrectionStep.CycleState` / `.step` / `.iterate`
+  (`NavierStokes/CorrectionStep/WaveGains.lean`) → `CorrectionAnalyticStep.step`
   (`NavierStokes/CorrectionAnalyticStep.lean`, where the analytic invariant is shown to be
   preserved by every cycle) → `ActualCandidateConstruction.cycle`.
 * **Localization.** `NavierStokes/SpatialLocalization.lean` (cut the potential *before* taking
   the curl, then periodize by a lattice sum), `NavierStokes/TimeLocalization.lean` (the smooth
   time switch), combined in `NavierStokes/MixedPeriodicAssembly.lean`.
+
+**D. `NavierStokes.CorrectionStep`, the cycle bookkeeping.**
+`NavierStokes/CorrectionStep.lean` is now an aggregator over six parts under
+`NavierStokes/CorrectionStep/`, split along the original file's section boundaries, each part
+depending only on the ones before it. Importing the aggregator gives exactly what importing the
+former single file gave. In dependency order:
+
+1. `NavierStokes/CorrectionStep/Fields.lean` — the shared vocabulary (`ScalarField`, `Tensor`,
+   `TensorClass`, the covariance changes) and the full differential residual, `export`ed from
+   `NavierStokes/SignedMeanGain.lean` and from the `HarmonicResidual.Actual` namespace of
+   `NavierStokes/HarmonicResidual.lean`, plus the physical chart representation, the temporal
+   construction and the gauge mean bookkeeping.
+2. `NavierStokes/CorrectionStep/SignedStages.lean` — the physical residual decomposition, one
+   stage's wave/mean residual, the signed stage parameters and their linear coefficient bridge,
+   the gauge rank mean, and the moving-support, periodized and particular constructions.
+3. `NavierStokes/CorrectionStep/CycleConstruction.lean` — the cycle parameters, the constructed
+   temporal and rank stages, cycle mass preservation and mean completion, and the native equations
+   satisfied by the periodized and particular families.
+4. `NavierStokes/CorrectionStep/WaveGains.lean` — the linear wave theory of those families, the
+   supported wave gain, the cycle recurrence (`CycleState`, `step`, `iterate`), the periodized curl
+   identities, and the uniform and constructed wave gains.
+5. `NavierStokes/CorrectionStep/MeanComposition.lean` — uniform periodized coefficients, the
+   coherent reference particular family, the constructed mean stages and uniform gains, the
+   four-stage mean composition, and the moving covariance and Gaussian means.
+6. `NavierStokes/CorrectionStep/CycleInvariants.lean` — what one full cycle preserves: the cycle
+   mean gain, regularity preservation, association transport and residual grouping, the real
+   coefficient structure, the analytic invariant, and the wave cycle and derived request gains.
 
 ### 2.4 Key intermediate results (Navier–Stokes)
 
@@ -342,7 +405,7 @@ what the corresponding modules actually do.
 | **Primary** | NavierStokes. The leading tangent field of a correction: the native vector pulse, its periodization and its complex harmonic, before the curl correction and before any signed or particular adjustment. |
 | **Slow** | NavierStokes. The slow (self-similar, large-scale) variables and the slow base profile built from them; `Slow*` modules construct the asymptotic base series, its divergence, its residual matching and its stress support. |
 | **Correction** | Both. One step of the iterative scheme that removes the current residual: in Euler the all-order drift correction added to each new packet; in NavierStokes the fields, residuals and bookkeeping of one correction cycle. |
-| **Cycle** | NavierStokes. One full pass of the correction recurrence (`CorrectionStep.CycleState.step` / `iterate`), and the coherence statements that hold across it. |
+| **Cycle** | NavierStokes. One full pass of the correction recurrence (`CorrectionStep.CycleState.step` / `iterate`, in `NavierStokes/CorrectionStep/WaveGains.lean`), and the coherence statements that hold across it. |
 
 Two further conventions worth knowing: Euler module names concatenate their namespace path
 (`EulerPacketSourceScaleSequence` lives in `Euler/PacketSourceScaleSequence.lean`), and the

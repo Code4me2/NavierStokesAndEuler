@@ -72,7 +72,9 @@ lake exe cache get
 lake build
 ```
 
-`lake exe cache get` covers Mathlib only; everything in this repository is compiled locally.
-A cold build of all three libraries is about 11,250 jobs and takes roughly 15 minutes of wall
-clock on 20 cores. The only expected warnings are the four intentional `sorry` placeholders in
-the `ComparatorChallenges` reference statements.
+`lake exe cache get` covers Mathlib only; everything in this repository is compiled locally: the
+three libraries are 2,344 modules, roughly 11,100 Lake jobs, and a cold build takes about 15
+minutes of wall clock on 20 cores. The `NavierStokes` and `Euler` libraries are built with
+`autoImplicit = false` and `warningAsError = true`, so they have to compile warning-free. The
+only expected warnings are the four intentional `sorry` placeholders in the
+`ComparatorChallenges` reference statements, whose library does not set `warningAsError`.

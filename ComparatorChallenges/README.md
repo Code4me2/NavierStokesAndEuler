@@ -82,8 +82,9 @@ bash -c 'COMPARATOR_LANDRUN=/abs/path/landrun \
 ```
 
 Each run compiles the whole import closure of its solution module inside the sandbox, so expect
-tens of minutes per config: on 20 cores the Navier–Stokes config took about 13 minutes and the
-Euler config about 29. A successful run ends with `Your solution is okay!`.
+tens of minutes per config: on 20 cores the most recent runs took about 11 minutes for the
+Navier–Stokes config (9,345 jobs) and about 20 minutes for the Euler config (10,557 jobs). A
+successful run ends with `Your solution is okay!`.
 
 ## What each config checks
 
