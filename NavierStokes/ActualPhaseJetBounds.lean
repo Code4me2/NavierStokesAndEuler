@@ -518,41 +518,7 @@ theorem weightedPhase_eq_section (l : SignedLabel B N0) (n : ℕ) (x : ActualPri
 
 
 
-theorem phase_jet_le_weighted {n : ℕ} {i : CopyIndex B N0} {x : ActualPrimary.FullPoint}
-    (hx : x ∈ phaseCell n i) (j : ℕ) :
-    ‖iteratedFDeriv ℝ j ((ActualPrimary.chartCoefficients i.1.1 i.1.2).phase n) x‖ ≤
-      ‖iteratedFDeriv ℝ j (weightedPhase i.1 n) x‖ := by
-  have hk : 0 < (ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n :=
-    ActualPrimary.chartCoefficients_frequency_pos _ _ _
-  have hk' : 0 < (ChartScales.carrier ActualPrimary.h n : ℝ) := hk
-  have hkN : 0 < ChartScales.carrier ActualPrimary.h n := by exact_mod_cast hk'
-  have hk1 : 1 ≤ (ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n := by
-    change 1 ≤ (ChartScales.carrier ActualPrimary.h n : ℝ)
-    exact_mod_cast (Nat.succ_le_of_lt hkN)
-  have he : (ActualPrimary.chartCoefficients i.1.1 i.1.2).phase n =
-      (fun y => ((ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n)⁻¹ •
-        weightedPhase i.1 n y) := by
-    funext y
-    simp only [weightedPhase, smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ hk.ne', one_mul]
-  rw [he, iteratedFDeriv_const_smul_apply'
-    ((weightedPhase_smooth hx).of_le (natCast_le_infty j))]
-  have hnorm : ‖((ActualPrimary.chartCoefficients i.1.1 i.1.2).frequency n)⁻¹‖ ≤ 1 := by
-    rw [Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hk)]
-    exact (inv_le_one₀ hk).mpr hk1
-  exact (norm_smul_le _ _).trans
-    (by
-      simpa only [one_mul] using (mul_le_mul_of_nonneg_right hnorm
-        (norm_nonneg (iteratedFDeriv ℝ j (weightedPhase i.1 n) x))))
 
-/-- The literal normalized phase satisfies the same fixed-loss bound. -/
-theorem phase_positive_jets (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ n (i : CopyIndex B N0) x,
-      x ∈ phaseCell n i → ∀ j, 1 ≤ j → j ≤ m →
-      ‖iteratedFDeriv ℝ j ((ActualPrimary.chartCoefficients i.1.1 i.1.2).phase n) x‖ ≤
-        C * ChartScales.S n ^ p * ChartScales.Q n ^ (-(2 * ActualPrimary.h)) := by
-  obtain ⟨C,hC,p,hb⟩ := weightedPhase_positive_jets (B := B) (N0 := N0) m
-  exact ⟨C,hC,p,fun n i x hx j hj hjm =>
-    (phase_jet_le_weighted hx j).trans (hb n i x hx j hj hjm)⟩
 
 /-- A bounded set of harmonic multiples changes only the constant.
 The power of Q is independent of both harmonic and derivative order. -/

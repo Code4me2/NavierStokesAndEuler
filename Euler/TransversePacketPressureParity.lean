@@ -58,18 +58,5 @@ variable (P : ℝ) [Fact (0 < P)]
   {U : Type*} [NormedAddCommGroup U] [InnerProductSpace ℝ U] [CompleteSpace U]
   (D : Data U) (I : InitialData P D) (raw : VectorField) (h : Nonempty (Forcing P D raw))
 
-include h in
-theorem highSolve_parity (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hM : ∀ t x, D.M.field t (-x) = D.M.field t x)
-    (hraw : ∀ (t : Icc (0 : ℝ) D.T) x θ, raw (t,(-x,-θ)) = -raw (t,(x,θ)))
-    (hinit : reflection P (I.value : CylinderL2 P U) = -(I.value : CylinderL2 P U)) :
-    (∀ (t : Icc (0 : ℝ) D.T) x θ,
-      (highSolve P D I raw).1 (t,(-x,-θ)) = -(highSolve P D I raw).1 (t,(x,θ))) ∧
-    (∀ (t : Icc (0 : ℝ) D.T) x θ,
-      (highSolve P D I raw).2 (t,(-x,-θ)) = (highSolve P D I raw).2 (t,(x,θ))) := by
-  rw [highSolve_of_admissible D I raw h]
-  exact ⟨(Classical.choice h).vector_odd I hSym hF hM hraw hinit,
-    (Classical.choice h).scalar_even I hSym hF hM hraw hinit⟩
 
 end EulerTransversePacketProvider

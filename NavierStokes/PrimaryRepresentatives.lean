@@ -106,13 +106,6 @@ theorem representative_enlarged_distance (K : Set Slow) (L : ActiveLabel K)
   simpa only [show (2 : ℝ) + 1 = 3 by norm_num, SquaredPartition.nativeSpacing,
     div_eq_mul_inv] using gridBox_distance hq h₀
 
-theorem representative_support_distance (K : Set Slow) (L : ActiveLabel K)
-    {q : Slow} (hq : q ∈ tsupport (nativeMask L.val.1 L.val.2)) :
-    ‖q - representative K L‖ ≤ 2 / ChartScales.S L.val.1 ^ 3 := by
-  have h₀ := nativeMask_tsupport_subset L.property.1 L.val.2 (representative_mem_tsupport K L)
-  have hq' := nativeMask_tsupport_subset L.property.1 L.val.2 hq
-  simpa only [show (1 : ℝ) + 1 = 2 by norm_num, SquaredPartition.nativeSpacing,
-    div_eq_mul_inv] using gridBox_distance hq' h₀
 
 noncomputable def normalizedSlow (D : ℝ) (n : ℕ) (x : Position) : Slow :=
   slow (SquaredPartition.slowCoordinates D n x)

@@ -578,8 +578,6 @@ theorem physicalSource_radial_scaled (C : ℝ) (d : TailData) (y0 : ℝ)
   rfl
 
 
-noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 t z r : ℝ) : ℝ :=
-  backwardStress (fun u => physicalSource C d y0 (radiusPoint t u z)) r
 
 
 

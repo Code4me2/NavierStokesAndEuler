@@ -778,8 +778,6 @@ noncomputable def physicalToChartTZ (h : ℝ) (n i : ℕ) :
     PressureStream.Lift Plane →L[ℝ] PressureStream.Lift Plane :=
   chartLinear (chartScale n) ((slowToChartTZ h n).prodMap (TemporalMeanUpdate.coverMap i))
 
-theorem physicalToChartTZ_swap (h : ℝ) (n i : ℕ) (z : PressureStream.Lift Plane) :
-    physicalToChartTZ h n i (swapSlow z) = swapSlow (physicalToChart h n i z) := rfl
 
 noncomputable def fieldOnPhysicalTZ (h : ℝ) (n i : ℕ) (a : ℝ)
     (f : PressureStream.Lift Plane → ℝ) : PressureStream.Lift Plane → ℝ :=

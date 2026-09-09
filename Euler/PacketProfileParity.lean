@@ -49,8 +49,6 @@ include H
 
 
 
-theorem correctorDerivative_odd : JointOdd T G.corrector_t :=
-  G.corrector.timeDerivative_odd G.correctorDerivative hT G.corrector_time H.corrector
 
 end ProfileParity
 

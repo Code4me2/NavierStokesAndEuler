@@ -27,7 +27,6 @@ variable {P : ℝ} [Fact (0 < P)]
 
 def pressureAmplitude : ℝ := P*pressureCost (Fin 4) q N.Ri N.C N.C 1 L.commonCost
 def potentialAmplitude : ℝ := 3*N.blockAmplitude*(P*L.commonCost)
-def potentialTimeAmplitude : ℝ := 6*N.blockAmplitude*(P*L.commonCost)
 def correctorAmplitude : ℝ := 27*N.blockAmplitude^2*(P*L.commonCost)
 def correctorTimeAmplitude : ℝ := 108*N.blockAmplitude^2*(P*L.commonCost)
 
@@ -79,18 +78,6 @@ theorem potential_bound (n : ℕ) :
     (fun j a => (hc.2.2 j a).2.2.1) n
   exact h.trans_eq (by unfold potentialAmplitude EulerTransversePacketJoin.NormalBudget.blockAmplitude; ring)
 
-theorem potential_time_bound (n : ℕ) :
-    block standardDirection q (fun a => pathTranslate P a
-      (normalize L.g L.positive (G.potentialTimePath I))) n 0 ≤
-        (L.potentialTimeAmplitude (P := P) N*A)*majorant L.R (d+1) n := by
-  have hc := N.coefficient_bounds
-  have h := G.potentialTimePath_normalized_bound I L.g L.positive
-    q N.coefficientRadius N.coefficientAmplitude L.R (L.commonCost*A)
-    hc.1 hc.2.1 (mul_nonneg L.commonCost_nonneg hA) N.radius (d+1)
-    (L.velocity_common_bound G I standardDirection standardDirection_norm_le_one A hA d hforce hinitial)
-    (L.derivative_common_bound G I standardDirection standardDirection_norm_le_one A hA d hforce hinitial)
-    (fun j a => (hc.2.2 j a).2.2.1) (fun j a => (hc.2.2 j a).2.2.2) n
-  exact h.trans_eq (by unfold potentialTimeAmplitude EulerTransversePacketJoin.NormalBudget.blockAmplitude; ring)
 
 theorem corrector_bound (n : ℕ) :
     block standardDirection q (fun a => pathTranslate P a

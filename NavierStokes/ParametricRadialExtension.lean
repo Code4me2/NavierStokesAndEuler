@@ -181,12 +181,6 @@ theorem halfPlaneExtension_eq {g : Plane → E}
   rw [SpacetimeGluing.smoothExtension_eqOn_past (halfPlaneLift_contDiffOn hg) hmem]
   simp [halfPlaneLift, ProblemStatement.coordinateVector]
 
-omit [CompleteSpace E] in
-theorem halfPlaneExtension_zero {g : Plane → E}
-    (hg : ContDiffOn ℝ ∞ g (Ici 0 ×ˢ (univ : Set ℝ))) {p : Plane} (hp : p.1 ≤ -1) :
-    halfPlaneExtension g hg p = 0 := by
-  apply SpacetimeGluing.smoothExtension_zero_from
-  linarith
 
 /-- The global smooth extension.  The outer parameter cutoff and the
 negative radial support bound are independent of the input profile. -/
@@ -210,11 +204,6 @@ theorem extension_eq {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
   rw [extension, halfPlaneExtension_eq _ hX, w.bump_one heta, one_smul]
   simp only [descent, regularize, w.parameterMap_eq heta]
 
-theorem extension_zero_negative {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    {p : Plane} (hX : p.1 ≤ -1) : extension w F hF he p = 0 := by
-  rw [extension, halfPlaneExtension_zero _ hX, smul_zero]
 
 theorem extension_zero_parameter {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
     (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
@@ -256,31 +245,6 @@ theorem extension_zero_exterior {S : Set ℝ} (w : ParameterWindow S) {F : Plane
   change w.bump p.2 • F (Real.sqrt (2 * p.1), w.parameterMap p.2) = 0
   rw [hzero _ (w.parameterMap_mem p.2) _ hsqrt, smul_zero]
 
-/-- A uniform support rectangle for all profiles with the same exterior
-radius.  The negative extension occupies at most the fixed interval [-1,0]. -/
-theorem extension_tsupport {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    {B : ℝ} (hB : 0 ≤ B)
-    (hzero : ∀ eta ∈ S, ∀ r, B ≤ r → F (r, eta) = 0) :
-    tsupport (extension w F hF he) ⊆
-      Icc (-1 : ℝ) (B ^ 2 / 2) ×ˢ Icc (-w.outer) w.outer := by
-  apply closure_minimal _ (isClosed_Icc.prod isClosed_Icc)
-  intro p hp
-  have hlo : -1 < p.1 := lt_of_not_ge fun h => hp (extension_zero_negative w hF he h)
-  have hhi : p.1 < B ^ 2 / 2 :=
-    lt_of_not_ge fun h => hp (extension_zero_exterior w hF he hB hzero h)
-  have heta : |p.2| < w.outer :=
-    lt_of_not_ge fun h => hp (extension_zero_parameter w hF he h)
-  exact ⟨⟨hlo.le, hhi.le⟩, abs_le.mp heta.le⟩
 
-theorem extension_hasCompactSupport {S : Set ℝ} (w : ParameterWindow S) {F : Plane → E}
-    (hF : ContDiffOn ℝ ∞ F (univ ×ˢ S))
-    (he : ∀ eta ∈ S, ∀ r, F (-r, eta) = F (r, eta))
-    {B : ℝ} (hB : 0 ≤ B)
-    (hzero : ∀ eta ∈ S, ∀ r, B ≤ r → F (r, eta) = 0) :
-    HasCompactSupport (extension w F hF he) :=
-  (isCompact_Icc.prod isCompact_Icc).of_isClosed_subset isClosed_closure
-    (extension_tsupport w hF he hB hzero)
 
 end NavierStokes.ParametricRadialExtension

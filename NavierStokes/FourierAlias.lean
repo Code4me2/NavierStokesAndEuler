@@ -2,8 +2,11 @@ import NavierStokes.TransportPrimitive
 import NavierStokes.SmoothFourierData
 import NavierStokes.ParametricTorusInverse
 import NavierStokes.ChartScales
-import NavierStokes.Flatness
+import Mathlib.Analysis.Normed.Group.Continuity
+import Mathlib.Analysis.Normed.Field.Basic
+import Mathlib.Tactic.Ring
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
+import NavierStokes.Flatness
 
 /-!
 # Exact radial aliases and Fourier suppression
@@ -37,9 +40,6 @@ noncomputable def torusMean (f : Plane → F) : F :=
 
 noncomputable def sliceMean (f : State → F) (U : ℝ) : F := torusMean (fun Y => f (U, Y))
 
-/-- The exact defect in `D Ic = f - cutoffAlias`. -/
-noncomputable def cutoffAlias (χ : ℝ → ℝ) (M : ℝ) (v : Plane) (f : State → F) (z : State) : F :=
-  deriv χ z.1 • TransportPrimitive.totalIntegral M v f z
 
 omit [NormedAddCommGroup F] [NormedSpace ℝ F] in
 theorem torusPeriodic_first {f : Plane → F} (hp : TorusPeriodic f) (y : ℝ) :
@@ -178,10 +178,6 @@ theorem nonbarPart_smooth {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
     ContDiff ℝ ∞ (nonbarPart f) :=
   hf.sub ((coefficient_smooth hf 0).comp contDiff_fst)
 
-theorem nonbarPart_periodic {f : State → ℂ} (hp : ParametricTorusInverse.Periodic f) :
-    ParametricTorusInverse.Periodic (nonbarPart f) := by
-  intro U Y k
-  exact congrArg (fun q => q - mean f U) (hp U Y k)
 
 theorem nonbarPart_zeroMean {f : State → ℂ} (hf : ContDiff ℝ ∞ f) :
     ZeroMean (nonbarPart f) := by

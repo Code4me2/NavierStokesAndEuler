@@ -1,4 +1,5 @@
 import Euler.PacketCrossProduct
+import Euler.AngleMeanZeroPrimitive
 import Euler.AnglePrimitiveBounds
 
 /-! The vector potential Q of a tangent, mean-zero, periodic high coefficient. -/

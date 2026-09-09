@@ -58,30 +58,6 @@ variable {T : ℝ} {hT : 0 ≤ T}
 
 
 
-/-- The actual strong acceleration pays only the inverse Gram and coefficient norms. -/
-theorem acceleration_norm
-    (hInv : ∀ (t : Icc (0 : ℝ) T) (x : L2), FInv t (F t x) = x) :
-    ‖s.acceleration‖ ≤ (‖FInv‖+1)^2*‖F‖*(‖f‖+2*‖F₁‖*‖s.velocityLp‖) := by
-  have heq : ∀ᵐ t ∂timeMeasure T,
-      gram (extendPath T hT (solenoidalFrame T F) t) (s.acceleration t) =
-      (solenoidalFrame T F (projIcc 0 T hT t)).adjoint
-        (f t-(2 : ℝ) • solenoidalFrame T F₁ (projIcc 0 T hT t) (s.velocityLp t)) := by
-    filter_upwards [s.equation, s.velocity_ae] with t ht hv
-    have hh := congrArg (fun v : solenoidalSpace =>
-      solenoidalProjection ((F (projIcc 0 T hT t)).adjoint
-        (f t-(2 : ℝ) • F₁ (projIcc 0 T hT t) (v : L2)))) hv
-    exact gram_equation_of_ordinary (F (projIcc 0 T hT t)) (F₁ (projIcc 0 T hT t))
-      (f t) (s.acceleration t) (s.velocityLp t) (ht.trans hh.symm)
-  have h := EulerTransverseStrongEstimates.acceleration_norm T (solenoidalFrame T F)
-    (solenoidalFrame T F₁) (meanFrameCoercivity T FInv) (meanFrameCoercivity_pos T FInv)
-    (solenoidalFrame_lower T FInv F hInv) hT s.velocityLp s.acceleration f heq
-  have h' : ‖s.acceleration‖ ≤ (‖FInv‖+1)^2*‖solenoidalFrame T F‖*
-      (‖f‖+2*‖solenoidalFrame T F₁‖*‖s.velocityLp‖) := by
-    simpa only [meanFrameCoercivity, inv_inv] using h
-  apply h'.trans
-  gcongr
-  · exact solenoidalFrame_norm_le T F
-  · exact solenoidalFrame_norm_le T F₁
 
 
 

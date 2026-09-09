@@ -46,13 +46,6 @@ theorem gradeRadius_guards (hC : 0 ≤ C) (R' : ℝ)
   exact ⟨hC, hb.2.1.trans hR, hb.2.2.1.trans hR,
     hb.2.2.2.1.trans hR, hb.2.2.2.2.trans hR⟩
 
-/-- An arbitrary extra requirement can be included without changing any
-source cost or the primary time profile. -/
-theorem exists_grade_radius (hC : 0 ≤ C) (extra : ℝ) :
-    ∃ R' : ℝ, extra ≤ R' ∧ ∃ h : L.R ≤ R',
-      GradeGuards (P := P) (H.enlargeRadius R' h) (N.enlargeRadius R' h) C :=
-  ⟨max extra (H.gradeRadius (P := P) N C), le_max_left _ _,
-    H.gradeRadius_guards N C hC _ (le_max_right _ _)⟩
 
 namespace GradeGuards
 

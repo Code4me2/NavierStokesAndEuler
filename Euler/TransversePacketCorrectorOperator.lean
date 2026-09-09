@@ -1,5 +1,6 @@
 import Euler.TransversePacketCylinderFields
-import Euler.TransversePacketCorrectorMean
+import Euler.TransversePacketCorrector
+import Euler.CylinderCorrectorMeanZero
 
 /-! The literal raw-field corrector operator used by the recursive packet definition. -/
 
@@ -63,12 +64,6 @@ theorem curlCorrectorField_time :
     TimeDerivative D.T_pos.le (G.curlCorrectorField I) (G.correctorDerivativeField I) :=
   G.correctorPath_time I
 
-theorem curlCorrector_mean_zero (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, D.curlCorrector P (G.vector I) (t,(x,θ))) = 0 := by
-  have he : (fun θ => D.curlCorrector P (G.vector I) (t,(x,θ))) =
-      fun θ => G.corrector I (t,(x,θ)) := funext (fun θ => G.curlCorrector_eq I t x θ)
-  rw [he]
-  exact G.corrector_mean_zero I t x
 
 end Forcing
 end EulerTransversePacketProvider

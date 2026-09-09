@@ -774,10 +774,6 @@ def differenceQuotient (τ : E →L[ℝ] E) (h : ℝ) : E →L[ℝ] E :=
 /-- The operator commutator D T minus T D. -/
 def commutator (D T : E →L[ℝ] E) : E →L[ℝ] E := D.comp T - T.comp D
 
-/-- Repeated commutation with an operator, defined by its actual algebraic formula. -/
-def iteratedRingCommutator {R : Type*} [Ring R] (D T : R) : ℕ → R
-  | 0 => T
-  | n + 1 => D * iteratedRingCommutator D T n - iteratedRingCommutator D T n * D
 
 
 

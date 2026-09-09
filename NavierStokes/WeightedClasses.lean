@@ -364,34 +364,7 @@ theorem bandBound_rpow (s : StripData D) (β : ℝ) :
   intro n
   simp [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos (s.epsilon_pos n) β)]
 
-/-- Wave products have the mean weight. This uses the actual Leibniz estimate
-on coefficients, followed by `(sqrt ζ * P)^2 ≤ ζ`; no derivative identity for
-the envelope `P` is postulated. -/
-theorem WaveClass.bilinear_mean {s : StripData D} {P : ℕ → D → ℝ}
-    {α β : ℝ} {f : ℕ → D → E} {g : ℕ → D → F}
-    (hf : WaveClass s P α f) (hg : WaveClass s P β g)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (L : E →L[ℝ] F →L[ℝ] G) :
-    MeanClass s (α + β) (fun n x => L (f n x) (g n x)) := by
-  apply (MemClass.bilinear hf hg L).mono_weight (fun _ x hx => s.zeta_nonneg x hx)
-  intro n x hx
-  have hP2 : P n x * P n x ≤ 1 := by
-    nlinarith [hP0 n x hx, hP1 n x hx]
-  calc
-    _ = (Real.sqrt (s.zeta x)) ^ 2 * (P n x * P n x) := by ring
-    _ = s.zeta x * (P n x * P n x) := by rw [Real.sq_sqrt (s.zeta_nonneg x hx)]
-    _ ≤ s.zeta x * 1 := mul_le_mul_of_nonneg_left hP2 (s.zeta_nonneg x hx)
-    _ = _ := mul_one _
 
-theorem WaveClass.mul_mean {s : StripData D} {P : ℕ → D → ℝ}
-    {α β : ℝ} {f g : ℕ → D → ℝ}
-    (hf : WaveClass s P α f) (hg : WaveClass s P β g)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    MeanClass s (α + β) (fun n x => f n x * g n x) := by
-  simpa only [ContinuousLinearMap.lsmul_apply, smul_eq_mul] using
-    hf.bilinear_mean hg hP0 hP1 (ContinuousLinearMap.lsmul ℝ ℝ)
 
 /-- A normalized bounded radial weight makes the mean class an algebra. -/
 theorem MeanClass.bilinear {s : StripData D} {α β : ℝ}
@@ -404,15 +377,6 @@ theorem MeanClass.bilinear {s : StripData D} {α β : ℝ}
   simpa only [mul_one] using
     mul_le_mul_of_nonneg_left (hζ x hx) (s.zeta_nonneg x hx)
 
-theorem MeanClass.bilinear_wave {s : StripData D} {P : ℕ → D → ℝ}
-    {α β : ℝ} {f : ℕ → D → E} {g : ℕ → D → F}
-    (hf : MeanClass s α f) (hg : WaveClass s P β g)
-    (hζ : ∀ x ∈ s.domain, s.zeta x ≤ 1) (L : E →L[ℝ] F →L[ℝ] G) :
-    WaveClass s P (α + β) (fun n x => L (f n x) (g n x)) := by
-  apply (MemClass.bilinear hf hg L).mono_weight hg.weight_nonneg
-  intro n x hx
-  simpa only [one_mul] using
-    mul_le_mul_of_nonneg_right (hζ x hx) (hg.weight_nonneg n x hx)
 
 /-- An explicit radial graph operator with a band coefficient `M` and a
 spatial coefficient `a`. The two directions can be radial and auxiliary. -/
@@ -444,30 +408,7 @@ theorem MemClass.graphDerivative {s : StripData D} {w : ℕ → D → ℝ}
     simpa only [sub_eq_add_neg] using hv.band_smul hM
   exact he.add hmv
 
-noncomputable def graphIterate (M : ℕ → ℝ) (a : D → ℝ) (e v : D)
-    (f : ℕ → D → E) : ℕ → ℕ → D → E
-  | 0 => f
-  | j + 1 => graphDerivative M a e v (graphIterate M a e v f j)
 
-/-- Every finite number of explicit graph derivatives has its finite loss.
-Arbitrarily high *additional stripped jets* are still controlled at the same
-resulting exponent, as recorded by `MemClass`. -/
-theorem MemClass.graphIterate {s : StripData D} {w : ℕ → D → ℝ}
-    {α κ : ℝ} {f : ℕ → D → E} {M : ℕ → ℝ} {a : D → ℝ}
-    (hf : MemClass s w α f) (ha : UnweightedClass s 0 (fun _ => a))
-    (hM : BandBound s (-κ) M) (hκ : 0 ≤ κ) (e v : D) (j : ℕ) :
-    MemClass s w (α - (j : ℝ) * κ) (graphIterate M a e v f j) := by
-  induction j with
-  | zero =>
-    unfold WeightedClasses.graphIterate
-    simpa only [Nat.cast_zero, zero_mul, sub_zero] using hf
-  | succ j ih =>
-      have h := ih.graphDerivative ha hM hκ e v
-      have he : (α - (j : ℝ) * κ) - κ = α - ((j + 1 : ℕ) : ℝ) * κ := by
-        push_cast
-        ring
-      rw [he] at h
-      exact h
 
 end
 

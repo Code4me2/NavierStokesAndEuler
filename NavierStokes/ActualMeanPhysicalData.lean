@@ -192,8 +192,6 @@ theorem Atlas.StateOverlap.pressure {h : ℝ} {N Δ : ℕ} {A : Atlas h N Δ}
   intro n hn m hm k hk x hx
   simpa only [velocityScale_square] using (H n hn m hm k hk).pressure x hx
 
-noncomputable def Atlas.radialFamily {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
-    {U : Set Plane} {u : CorrectionState.State Point} (H : A.StateOverlap U u) := A.family H.radial
 
 noncomputable def Atlas.angularFamily {h : ℝ} {N Δ : ℕ} (A : Atlas h N Δ)
     {U : Set Plane} {u : CorrectionState.State Point} (H : A.StateOverlap U u) := A.family H.angular
@@ -635,7 +633,6 @@ theorem stage_transport (j : ℕ) (n : ℕ) (hn : N ≤ n) (m : ℕ) (hm : N ≤
   · exact D.rank_geometry j
   · exact D.waves n hn m hm k hk j
 
-noncomputable def radialFamily (j : ℕ) := D.atlas.radialFamily (D.state_overlap j)
 noncomputable def angularFamily (j : ℕ) := D.atlas.angularFamily (D.state_overlap j)
 noncomputable def axialFamily (j : ℕ) := D.atlas.axialFamily (D.state_overlap j)
 noncomputable def pressureFamily (j : ℕ) := D.atlas.pressureFamily (D.state_overlap j)

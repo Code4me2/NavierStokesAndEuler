@@ -534,56 +534,6 @@ open Set Filter WeightedClasses MeanIncrementBounds CorrectionState
 open scoped ContDiff Topology
 variable {D : Type} [NormedAddCommGroup D] [NormedSpace ℝ D]
 
-theorem waveStage_residual_mem_local {s : StripData D} {C : ℕ → Set D} {P : ℕ → D → ℝ} {κ α β H γ : ℝ}
-    (c : Context D) (ho : OperatorBounds s c.operators κ) (hκ : κ ≤ 1 / 2)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (u v : State D) (hmean : v.mean = u.mean)
-    (hm : IncrementBounds s H u.mean)
-    (hbase : SmoothTriple s.domain c.base)
-    (a b : HarmonicBlock D) {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : HarmonicWaveInteraction.ZeroMode a) (hb0 : HarmonicWaveInteraction.ZeroMode b)
-    (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hkp : ∀ n, a.angularFrequency n ≠ 0)
-    (hda : HarmonicWaveInteraction.ModeSolenoidal s c a)
-    (hdb : HarmonicWaveInteraction.ModeSolenoidal s c (HarmonicWaveInteraction.withCarrier a b))
-    (hNormal : ∀ i, LocalizedWaveBounds.LocalUnweighted s (fun n (_ : Unit) => C n) 0
-      (fun n _ x => HarmonicMeanInteraction.slowNormal c ho hR a.phase n x i))
-    (hFreq : BandBound s (-(1 / 2)) a.frequency)
-    (hAng : BandBound s (-(1 / 2)) (fun n => (a.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ C n →
-      ∀ i j, j ≠ 0 → b.velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (hpa : ∀ n, HarmonicResidual.SmoothCoefficients s.domain (a.pressure n))
-    (hpb : ∀ n, HarmonicResidual.SmoothCoefficients s.domain (b.pressure n))
-    (G g A₀ A₁ : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, HarmonicFields.BandLimited (A₁ n i - A₀ n i) 0)
-    (hlinear : ∀ i j, j ≠ 0 → WaveClass s P γ (fun n x =>
-      (HarmonicResidual.residualBlock c u a G A₀).velocity n i j x +
-        (HarmonicWaveInteraction.linearGoodBlock c a b g).velocity n i j x))
-    (hγm : γ ≤ β + H - 1 / 2) (hγc : γ ≤ α + β - κ) (hγs : γ ≤ β + β - κ) :
-    (HarmonicResidual.residualBlock c v (HarmonicWaveInteraction.addBlock a b) (G + g) A₁).WaveBounds
-      s P γ := by
-  have hnon := LocalizedMeanInteraction.interactionBlock_class c ho hκ hR hm ha hb ha0 hb0 hM hN
-    hΦ hk hda hdb hNormal hFreq hAng hz hP0 hP1
-  have hca := block_waveBounds_all a ha ha0 hP0
-  have hcb := block_waveBounds_all b hb hb0 hP0
-  intro i j hj
-  apply WaveInteractionBounds.class_congr
-    ((hlinear i j hj).add ((hnon i j hj).mono_exponent (le_min hγm (le_min hγc hγs))))
-  intro n x hx
-  have hr : ContDiffOn ℝ ∞ (HarmonicResidual.contextFrame c n).radial s.domain :=
-    contDiffOn_const.add ((contDiffOn_const.mul (ho.radialProfile.smooth 0)).smul contDiffOn_const)
-  have he := HarmonicWaveInteraction.residualBlock_wave_update_split s.isOpen_domain c u v hmean
-    a b G g A₀ A₁ hA n hr
-    contDiffOn_const (hΦ n) (hkp n)
-    (fun l => (HarmonicMeanInteraction.tripleField_smooth hbase n l))
-    (fun l => (HarmonicMeanInteraction.tripleField_smooth hm.smooth n l))
-    (fun l k => (hca l k).smooth n) (fun l k => (hcb l k).smooth n) (hpa n) (hpb n) hx j i
-  change _ = _ at he
-  linear_combination -he
 
 end SupportedWaveGain
 
@@ -1152,57 +1102,6 @@ namespace ParticularParameters
 open TorusInverse
 variable {Q : Type} [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-theorem residual_gain_local
-    (p : ParticularParameters Q) (s : StripData (Q × Plane))
-    (c : Context (Q × Plane)) (u v : State (Q × Plane)) (hmean : v.mean = u.mean)
-    (b : HarmonicBlock (Q × Plane)) (G A : HarmonicResidual.BlockCoefficients (Q × Plane))
-    {W : ℕ → (Q × ℝ) × Plane → ℝ} {α κ : ℝ} {M N : ℕ}
-    (C : ∀ j ∈ modes N, p.NativeControl s c u b G A j W α κ)
-    (dyn : ∀ j hj, NativeDynamics (C j hj))
-    (hα : 7/10 ≤ α) (hκ : κ ≤ 1/100000)
-    (ho : OperatorBounds s c.operators κ) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (hb : BaseBounds s c.base) (hu : MeanIncrementBounds.CumulativeBounds s u.mean)
-    (hW : ∀ n x, x ∈ (nativeStrip s).domain → 0 ≤ W n x)
-    (hWone : ∀ n x, x ∈ s.domain → W n (angleShuffle (x,0)) ≤ 1)
-    (hm : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s)
-      (reindexDirections angleShuffle p.directions) (reindexCoefficients angleShuffle p.background))
-    (hold : b.WaveBounds s (fun n x => W n (angleShuffle (x,0))) (1/2))
-    (hold0 : HarmonicWaveInteraction.ZeroMode b) (holdBand : b.BandLimited M)
-    (hsourceBand : (HarmonicResidual.residualBlock c u b G A).BandLimited N)
-    (hphase : ∀ n, ContDiffOn ℝ ∞ (b.phase n) s.domain)
-    (hk : ∀ n, b.frequency n ≠ 0) (hkp : ∀ n, b.angularFrequency n ≠ 0)
-    (hdiv : HarmonicWaveInteraction.ModeSolenoidal s c b)
-    (hpress : ∀ n, HarmonicResidual.SmoothCoefficients s.domain (b.pressure n))
-    {patch : ℕ → Set (Q × Plane)}
-    (hNormal : ∀ i, LocalizedWaveBounds.LocalUnweighted s (fun n (_ : Unit) => patch n) 0
-      (fun n _ x => HarmonicMeanInteraction.slowNormal c ho hR b.phase n x i))
-    (hFreq : BandBound s (-(1/2)) b.frequency)
-    (hAng : BandBound s (-(1/2)) (fun n => (b.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ patch n → ∀ i j, j ≠ 0 →
-      (p.updateBlock s c u b G A N).velocity n i j =ᶠ[𝓝 x] fun _ => 0) :
-    (HarmonicResidual.residualBlock c v
-      (HarmonicWaveInteraction.addBlock b (p.updateBlock s c u b G A N))
-      (G + (p.gaussianBlock c u b G A N).velocity) A).WaveBounds
-      s (fun n x => W n (angleShuffle (x,0))) (α + 1/10) := by
-  have hκhalf : κ ≤ 1/2 := by linarith
-  have hbounds := p.assembled_bounds s c u b G A N C hW hκhalf
-  have hzmode : HarmonicWaveInteraction.ZeroMode (p.updateBlock s c u b G A N) :=
-    (assembledBlock_zero _ _ _ _ _ _).1
-  have hzpress : ∀ n, (p.updateBlock s c u b G A N).pressure n 0 = 0 :=
-    (assembledBlock_zero _ _ _ _ _ _).2
-  have hnewdiv : HarmonicWaveInteraction.ModeSolenoidal s c
-      (HarmonicWaveInteraction.withCarrier b (p.updateBlock s c u b G A N)) := by
-    rw [withCarrier_of_same (show SameCarrier b (p.updateBlock s c u b G A N) from ⟨rfl,rfl,rfl⟩)]
-    exact p.modeSolenoidal s c u b G A N C dyn hκhalf hW hm hphase hkp
-  apply waveStage_residual_mem_local c ho hκhalf hR u v hmean (meanIncrement_of_cumulative hu)
-    hb.smooth b (p.updateBlock s c u b G A N) hold hbounds.1 hold0 hzmode holdBand
-    (p.updateBlock_band s c u b G A N) hphase hk hkp hdiv hnewdiv hNormal hFreq hAng hz
-    (fun n x hx => hW n _ hx) hWone hpress (pressureBounds_smooth hbounds.2.1 hzpress)
-    G (p.gaussianBlock c u b G A N).velocity A A
-    (fun n i => by rw [sub_self]; exact HarmonicResidual.band_zero _) _ (by linarith) (by linarith) (by linarith)
-  intro i j hj
-  exact (p.linearGood_bounds s c u b G A N C dyn hκhalf hsourceBand hb.smooth
-    (operator_radial_smooth ho) hm hphase hkp hW i j hj).mono_exponent (by linarith)
 
 end ParticularParameters
 
@@ -1211,56 +1110,6 @@ variable {I : Type} {p : PeriodizedSignedParameters D I} {s : StripData D}
   {P : ℕ → D → ℝ} {B κ : ℝ} {h : p.NativeControl s P κ}
   {request : ℕ → D × ℝ → SignedWaveUpdate.Vec2}
 
-theorem NativeDynamics.residual_gain_local (d : NativeDynamics h request) (i₀ : I)
-    (hB : 7/10 ≤ B) (hκ : κ ≤ 1/100000)
-    (hRquest : ∀ j, MeanClass (HarmonicWaveInteraction.productStrip s) (B-1/2-κ)
-      (fun n x => request n x j))
-    (geom : ∀ n, CurlClassBounds.CylindricalGeometry (HarmonicWaveInteraction.productStrip s).domain
-      (p.base.radius n) (p.directions.radialField n) (fun _ => p.directions.angular)
-      (p.directions.axialField (HarmonicWaveInteraction.productStrip s) n))
-    (ht : ∀ n i x, x ∈ (HarmonicWaveInteraction.productStrip s).domain → x ∈ h.phasePatch n i →
-      ⟪p.base.normal (HarmonicWaveInteraction.productStrip s) p.directions n x, p.fundamental i n x⟫_ℝ = 0)
-    (hkp : ∀ n, p.base.frequency n * d.slope n = (p.angularFrequency n : ℝ))
-    (hkpne : ∀ n, p.angularFrequency n ≠ 0)
-    (c : Context D) (u v : State D) (hmean : v.mean = u.mean)
-    (ho : OperatorBounds s c.operators κ) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (hbase : BaseBounds s c.base) (hu : MeanIncrementBounds.CumulativeBounds s u.mean)
-    (hm : WaveFrameMatch c (HarmonicWaveInteraction.productStrip s) p.directions p.base)
-    (a : HarmonicBlock D) (hcarrier : SameCarrier a (p.exactBlock s request))
-    (ha : a.WaveBounds s P (1/2)) (ha0 : HarmonicWaveInteraction.ZeroMode a)
-    {M : ℕ} (hM : a.BandLimited M)
-    (hphase : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hka : ∀ n, a.angularFrequency n ≠ 0)
-    (hdiv : HarmonicWaveInteraction.ModeSolenoidal s c a)
-    (hpress : ∀ n, HarmonicResidual.SmoothCoefficients s.domain (a.pressure n))
-    {patch : ℕ → Set D}
-    (hNormal : ∀ i, LocalizedWaveBounds.LocalUnweighted s (fun n (_ : Unit) => patch n) 0
-      (fun n _ x => HarmonicMeanInteraction.slowNormal c ho hR a.phase n x i))
-    (hFreq : BandBound s (-(1/2)) a.frequency)
-    (hAng : BandBound s (-(1/2)) (fun n => (a.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ patch n → ∀ i j, j ≠ 0 →
-      (p.exactBlock s request).velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1)
-    (G A : HarmonicResidual.BlockCoefficients D)
-    (hold : (HarmonicResidual.residualBlock c u a G A).WaveBounds s P (B+1/10)) :
-    (HarmonicResidual.residualBlock c v
-      (HarmonicWaveInteraction.addBlock a (p.exactBlock s request))
-      (G + (p.gaussianBlock s request).velocity) A).WaveBounds s P (B+1/10) := by
-  have hκhalf : κ ≤ 1/2 := by linarith
-  have hbounds := h.block_bounds hκhalf request hRquest
-  have hnewdiv : HarmonicWaveInteraction.ModeSolenoidal s c
-      (HarmonicWaveInteraction.withCarrier a (p.exactBlock s request)) := by
-    rw [withCarrier_of_same hcarrier]
-    exact d.modeSolenoidal i₀ hκhalf hRquest geom ht hkp hkpne c hm
-  apply waveStage_residual_mem_local c ho hκhalf hR u v hmean (meanIncrement_of_cumulative hu)
-    hbase.smooth a (p.exactBlock s request) ha hbounds.2.1 ha0 (p.exactBlock_zero s request)
-    hM (p.exactBlock_band s request) hphase hk hka hdiv hnewdiv hNormal hFreq hAng hz
-    h.envelope_nonneg hP1 hpress (pressureBounds_smooth hbounds.2.2.1 (p.exactBlock_pressure_zero s request))
-    G (p.gaussianBlock s request).velocity A A
-    (fun n i => by rw [sub_self]; exact HarmonicResidual.band_zero _) _ (by linarith) (by linarith) (by linarith)
-  intro i j hj
-  exact (hold i j hj).add ((d.linearGood_bounds i₀ hκhalf hRquest hkp hkpne c hbase.smooth
-    (operator_radial_smooth ho) hm a hcarrier i j hj).mono_exponent (by linarith))
 
 end PeriodizedSignedParameters
 

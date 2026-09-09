@@ -216,26 +216,6 @@ theorem actual_estimates {ι : Type*} {D : Domain ι Slow}
   · exact ((hF.to_polynomial hw).add h0.1).congr (fun _ _ _ => sub_add_cancel _ _)
   · exact ((hG.to_polynomial hw).add h0.2).congr (fun _ _ _ => sub_add_cancel _ _)
 
-/-- All fixed jets and the local first/second derivative base bounds
-share constants chosen before any band or label. -/
-theorem actual_localBase_and_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    (hconvex : ∀ i, Convex ℝ (D.carrier i))
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1) :
-    PolynomialJets D (fun i => frequency a h C d (Q i)) ∧
-    PolynomialJets D (fun i => axial a h d (Q i)) ∧
-    ∃ B : ℝ, 1 ≤ B ∧ ∀ i,
-      PhaseEstimates.LocalBaseBounds (frequency a h C d (Q i)) (axial a h d (Q i))
-        (leadingFrequency h C d) (leadingAxial h d) (D.carrier i) B (Q i ^ h) := by
-  have he := actual_estimates hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1
-  exact ⟨he.polynomial_fields.1, he.polynomial_fields.2,
-    he.localBaseBounds hh.le hQ hQ1 hconvex⟩
 
 open BaseRadialJets
 
@@ -328,89 +308,9 @@ theorem radial_envelope {ι : Type*} {D : Domain ι Slow}
   intro i p hp
   simpa only [smul_eq_mul] using (radial_eq ha.strictMono hh hh1 (hQ i) hd (H.time i p hp)).symm
 
-/-- All actual derivatives of `b/Q^h` are uniformly bounded. -/
-theorem radial_quotient_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1) :
-    PolynomialJets (unitScale D) (fun i p => radial a h C d (Q i) p / Q i ^ h) := by
-  apply (reducedRadial_polynomial hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1).congr
-  intro i p hp
-  change reducedRadial a h d (Q i) p = radial a h C d (Q i) p / Q i ^ h
-  rw [radial_eq (C := C) ha.strictMono hh hh1 (hQ i) hd (H.time i p hp)]
-  field_simp [(Real.rpow_pos_of_pos (hQ i) h).ne']
 
-/-- A direct finite-jet statement for the actual physical component. -/
-theorem radial_uniform_jets {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (N : ℕ) :
-    ∃ K : ℝ, 1 ≤ K ∧ ∀ i p, p ∈ D.carrier i → ∀ j, j ≤ N →
-      ‖iteratedFDeriv ℝ j (radial a h C d (Q i)) p‖ ≤ K * Q i ^ h :=
-  envelope_unit_bound (radial_envelope hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1) N
 
-/-- Fixed linear native/common coordinate changes preserve the genuine
-order-one class. Only the original small factor is used as a weight;
-there is no vanishing spatial `zeta` factor in this conclusion. -/
-theorem radial_uniform_pullback {ι : Type*} {E : Type}
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (s : WeightedClasses.StripData E) (L : E →L[ℝ] Slow)
-    {D : Domain (ℕ × ι) Slow} {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : (ℕ × ι) → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (heps : ∀ n l, Q (n, l) ^ h = s.epsilon n)
-    (hmap : ∀ n l, MapsTo L s.domain (D.carrier (n, l))) :
-    LabelSumBounds.UniformClass s (fun _ _ _ => 1) 1
-      (fun l n x => radial a h C d (Q (n, l)) (L x)) := by
-  let V : Domain (ℕ × ι) E := oneDomain (ℕ × ι) (fun _ => s.domain) (fun _ => s.isOpen_domain)
-  have he := radial_envelope hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1
-  have hp := he.precomp_linear (D := V) (fun _ => L) (fun _ => rfl)
-    (fun i => hmap i.1 i.2) (C := max 1 ‖L‖) (k := 0) (le_max_left _ _)
-    (fun _ => by simpa only [pow_zero, mul_one] using le_max_right 1 ‖L‖)
-  apply LabelSumBounds.uniformClass_of_envelopeJets hp (K := 1) (q := 0) le_rfl
-    (fun n l => by simp [V, oneDomain]) (fun _ _ => subset_rfl)
-    (fun _ _ _ _ => zero_le_one)
-  intro l n x hx
-  simp only [heps, Real.rpow_one, mul_one, le_refl]
 
-/-- Every original dyadic band is covered; the epsilon sequence is unchanged. -/
-theorem dyadic_actual_bounds {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    (hconvex : ∀ i, Convex ℝ (D.carrier i))
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (band : ι → ℕ) :
-    PolynomialJets D (fun i => frequency a h C d (ChartScales.Q (band i))) ∧
-    PolynomialJets D (fun i => axial a h d (ChartScales.Q (band i))) ∧
-    ∃ B : ℝ, 1 ≤ B ∧ ∀ i,
-      PhaseEstimates.LocalBaseBounds
-        (frequency a h C d (ChartScales.Q (band i)))
-        (axial a h d (ChartScales.Q (band i)))
-        (leadingFrequency h C d) (leadingAxial h d) (D.carrier i) B
-        (ChartScales.epsilon h (band i)) :=
-  actual_localBase_and_polynomial hh hh1 hr hM hqlo hqhi hlo H hconvex hd ha
-    (fun i => ChartScales.Q (band i)) (fun i => ChartScales.Q_pos (band i))
-    (fun i => ChartScales.Q_le_one (band i))
 
 section FinalBase
 

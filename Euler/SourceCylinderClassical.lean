@@ -38,10 +38,6 @@ def derivativeField (t : Icc (0 : ℝ) T) (x : LiftDomain period) : Space :=
   pointField period (includePath period S hS (velocityDerivative period S hS T hT Q Q₁ c hc hQ f a₀))
     (velocityDerivative_contDiff period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀) t x
 
-theorem field_joint_continuous :
-    Continuous (fun z : Icc (0 : ℝ) T × LiftDomain period =>
-      field period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ z.1 z.2) :=
-  pointField_joint_continuous period _ _
 
 theorem field_smooth (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
     ContDiff ℝ ∞ (localFieldLift period (field period S hS hSc T hT Q Q₁ c hc hQ f a₀ hf ha₀ t) x) :=

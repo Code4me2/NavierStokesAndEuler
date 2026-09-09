@@ -73,9 +73,6 @@ def forwardInitial (τ : ℝ) (hτ : 0 < τ) (hτT : τ < D.T) :
   orbit := ((B.initial τ hτ hτT.le).terminalInitial (G.initial τ hτ hτT.le)).orbit
   mean_zero := ((B.initial τ hτ hτT.le).terminalInitial (G.initial τ hτ hτT.le)).mean_zero
 
-theorem forwardInitial_eq (τ : ℝ) (hτ : 0 < τ) (hτT : τ < D.T) :
-    ((B.forwardInitial G τ hτ hτT).value : CylinderL2 P U) =
-      (B.initial τ hτ hτT.le).coordinatePath (G.initial τ hτ hτT.le) ⟨τ,hτ.le,le_rfl⟩ := rfl
 
 end HistoryData
 end EulerTransversePacketProvider

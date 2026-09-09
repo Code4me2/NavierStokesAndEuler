@@ -69,12 +69,6 @@ theorem vector_tangent (t : ℝ) (x : Space) (θ : ℝ) :
     D.frame D.frameDerivative D.frameLower D.frameLower_pos D.frame_lower G.path I.value
     G.path_orbit I.orbit D.normal D.frame_tangent (D.clamp t) (x,(θ : AddCircle P))
 
-theorem scalar_normalized (t : ℝ) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, G.scalar I (t,(x,θ))) = 0 :=
-  pressureField_mean_zero P D.support D.support_measurable D.support_compact D.T D.T_pos.le
-    D.frame D.frameDerivative D.frameLower D.frameLower_pos D.frame_lower G.path I.value
-    G.path_orbit I.orbit D.M D.normal D.normalLower D.normalLower_pos D.normal_lower
-    G.mean_zero I.mean_zero (D.clamp t) x
 
 theorem vector_mean_zero (t : ℝ) (x : Space) :
     (∫ θ in (0 : ℝ)..P, G.vector I (t,(x,θ))) = 0 := by
@@ -95,15 +89,6 @@ theorem vector_spatial_smooth (t : ℝ) :
     | rfl
     | (funext y; simp only [vector,localFieldLift,Prod.fst_zero,Prod.snd_zero,zero_add])
 
-theorem vectorDerivative_spatial_smooth (t : ℝ) :
-    ContDiff ℝ ∞ (fun y : Space × ℝ => G.vectorDerivative I (t,y)) := by
-  have h := derivativeField_smooth P D.support D.support_measurable D.support_compact D.T D.T_pos.le
-      D.frame D.frameDerivative D.frameLower D.frameLower_pos D.frame_lower G.path I.value
-      G.path_orbit I.orbit (D.clamp t) 0
-  convert h using 1
-  first
-    | rfl
-    | (funext y; simp only [vectorDerivative,localFieldLift,Prod.fst_zero,Prod.snd_zero,zero_add])
 
 theorem scalar_spatial_smooth (t : ℝ) :
     ContDiff ℝ ∞ (fun y : Space × ℝ => G.scalar I (t,y)) := by
@@ -134,9 +119,6 @@ theorem vector_periodic (t : ℝ) (x : Space) : Function.Periodic (fun θ => G.v
   intro θ
   simp only [vector,AddCircle.coe_add_period]
 
-theorem scalar_periodic (t : ℝ) (x : Space) : Function.Periodic (fun θ => G.scalar I (t,(x,θ))) P := by
-  intro θ
-  simp only [scalar,AddCircle.coe_add_period]
 
 end Forcing
 

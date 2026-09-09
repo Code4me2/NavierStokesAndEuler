@@ -1305,8 +1305,6 @@ noncomputable def copyData (s : StripData D) (request : ℕ → D × ℝ → Sig
   cutoff n i := p.cutoff i n
   source := fun _ _ => 0
 
-theorem copyData_raw (s : StripData D) (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) (i : I) :
-    (p.copyData s request).raw i = (p.native i).coefficients s request := rfl
 
 noncomputable def exactBlock (s : StripData D) (request : ℕ → D × ℝ → SignedWaveUpdate.Vec2) :
     HarmonicBlock D :=

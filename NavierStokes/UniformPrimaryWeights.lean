@@ -135,17 +135,6 @@ section WeightedOperations
 variable [Countable ι] [Nonempty ι]
   {s : StripData D} {w g r : ι → ℕ → D → ℝ} {β : ℝ}
 
-/-- Positivity is pointwise on the open strip. There is no positive
-minimum of the weight, even when it vanishes at the boundary. -/
-theorem sqrt_class (hw : ∀ l n x, x ∈ s.domain → 0 < w l n x)
-    (hp : ∀ l n x, x ∈ s.domain → 0 < g l n x)
-    (hg : UniformClass s w 0 g) (hlower : UniformInverseControl s w g) :
-    UniformClass s (fun l n x => Real.sqrt (w l n x)) 0 (fun l n x => Real.sqrt (g l n x)) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact SignedCovariance.sqrt_class
-    (fun k => hw (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hp (enumeration ι k).2 (enumeration ι k).1)
-    (pull_class hg (enumeration ι)) (pull_inverseControl hlower (enumeration ι))
 
 theorem signed_quotient_class (hw : ∀ l n x, x ∈ s.domain → 0 < w l n x)
     (hp : ∀ l n x, x ∈ s.domain → 0 < g l n x)
@@ -253,33 +242,6 @@ theorem covariance_weights_class
     (fun k => hdet (enumeration ι k).2 (enumeration ι k).1)
     (fun k => hentry (enumeration ι k).2 (enumeration ι k).1) j
 
-theorem covariance_amplitudes_class
-    (hr : PhaseJetBounds.PolynomialJets (jointDomain s) (fun q _ => r q.2 q.1))
-    (hrne : ∀ l n, r l n ≠ 0)
-    (hH : ∀ i j, PhaseJetBounds.PolynomialJets (jointDomain s) (fun q x => H q.2 q.1 x i j))
-    (hT : ∀ i, UniformClass s w 0 (fun l n x => T l n x i))
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ l n x, x ∈ s.domain → b ≤ |(PrimaryPulseBounds.normalizedMatrix (r l n) (H l n x)).det|)
-    (hentry : ∀ l n x, x ∈ s.domain → ∀ i j, |r l n * H l n x i j| ≤ M)
-    (hw : ∀ l n x, x ∈ s.domain → 0 < w l n x)
-    (hlower : ∀ l n x, x ∈ s.domain → ∀ j,
-      c * w l n x ≤ SmoothCovariance.weights (H l n x) (T l n x) j)
-    (j : Fin 2) :
-    UniformClass s (fun l n x => Real.sqrt (w l n x)) 0
-      (fun l n x => SmoothCovariance.amplitudes (H l n x) (T l n x) j) := by
-  apply uniform_of_pull (enumeration_surjective ι)
-  exact PrimaryPulseBounds.covariance_amplitudes_class
-    (s := reindexedStrip s (enumeration ι))
-    (r := fun k => r (enumeration ι k).2 (enumeration ι k).1)
-    (H := pull (enumeration ι) H) (T := pull (enumeration ι) T) (w := pull (enumeration ι) w)
-    (pull_polynomial (f := fun l n _ => r l n) hr (enumeration ι))
-    (fun k => hrne (enumeration ι k).2 (enumeration ι k).1)
-    (fun i j => pull_polynomial (f := fun l n x => H l n x i j) (hH i j) (enumeration ι))
-    (fun i => pull_class (hT i) (enumeration ι)) hb hM hc
-    (fun k => hdet (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hentry (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hw (enumeration ι k).2 (enumeration ι k).1)
-    (fun k => hlower (enumeration ι k).2 (enumeration ι k).1) j
 
 end Covariance
 
@@ -300,41 +262,6 @@ variable [Countable ι] [Nonempty ι] {s : StripData D}
   {T : ι → ℕ → D → SmoothCovariance.Vec2}
   {mask : ι → ℕ → D → ℝ} {v : ι → ℕ → D → ProblemStatement.Space}
 
-theorem primaryCoefficient_waveClass
-    (hH : ∀ i j, PhaseJetBounds.PolynomialJets (jointDomain s) (fun q x => H q.2 q.1 x i j))
-    (hT : ∀ i, UniformMeanClass s 0 (fun l n x => T l n x i))
-    (hmask : UniformClass s (fun _ _ _ => 1) 0 mask)
-    (hv : UniformClass s P 0 v)
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ l n x, x ∈ s.domain →
-      b ≤ |(PrimaryPulseBounds.normalizedMatrix (Real.sqrt (s.slow n)) (H l n x)).det|)
-    (hentry : ∀ l n x, x ∈ s.domain → ∀ i j, |Real.sqrt (s.slow n) * H l n x i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ l n x, x ∈ s.domain → ∀ j,
-      c * s.zeta x ≤ SmoothCovariance.weights (H l n x) (T l n x) j)
-    (j : Fin 2) :
-    UniformWaveClass s P (1 / 2)
-      (fun l => PrimaryPulseBounds.primaryCoefficient s (H l) (T l) (mask l) (v l) j) := by
-  have ha := covariance_amplitudes_class (sqrt_slow_polynomial s)
-    (fun _ n => (Real.sqrt_pos.mpr (zero_lt_one.trans_le (s.one_le_slow n))).ne')
-    hH hT hb hM hc hdet hentry (fun _ _ x hx => hζ x hx) hlower j
-  have ham : UniformWaveClass s P 0 (fun l n x =>
-      SmoothCovariance.amplitudes (H l n x) (T l n x) j • CurlClassBounds.complexify (v l n x)) := by
-    simpa only [zero_add] using smul_class ha (hv.map CurlClassBounds.complexify)
-  have hm : UniformWaveClass s P 0 (fun l n x => mask l n x •
-      (SmoothCovariance.amplitudes (H l n x) (T l n x) j • CurlClassBounds.complexify (v l n x))) := by
-    simpa only [zero_add] using real_smul_class hmask ham
-  have he : UniformBandBound (ι := ι) s (1 / 2) (fun _ n => Real.sqrt (s.epsilon n)) := by
-    refine ⟨1, zero_le_one, 0, fun l n => ?_⟩
-    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg (s.epsilon n)), Real.sqrt_eq_rpow]
-    simp only [pow_zero, mul_one, one_mul, le_refl]
-  apply (show UniformWaveClass s P (1 / 2) (fun l n x => Real.sqrt (s.epsilon n) •
-    (mask l n x • (SmoothCovariance.amplitudes (H l n x) (T l n x) j •
-      CurlClassBounds.complexify (v l n x)))) from by simpa only [zero_add] using band_smul_class hm he).congr
-  intro l n x hx
-  simp only [PrimaryPulseBounds.primaryCoefficient, PartitionedCovariance.amplitude, smul_smul]
-  congr 1
-  ring
 
 end Primary
 
@@ -486,23 +413,6 @@ noncomputable def phaseEnvelope (A : Fin 2 → PhaseConstruction U)
 
 
 
-/-- The matrix jets come from the actual parameter-dependent ODE and
-its actual middle-cutoff covariance integral, uniformly in both indices. -/
-theorem phaseMatrix_jets {s : StripData D} (A : Fin 2 → PhaseConstruction U)
-    (pref : Fin 2 → (ℕ × ι) → ℝ) (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ q, U.scale q = s.slow q.1)
-    (hχ : PolynomialJets (jointDomain s) χ)
-    (hmap : ∀ q x, x ∈ s.domain → (χ q x).1 ∈ U.carrier q)
-    (hpref : ∀ j, PolynomialJets U (fun q _ => pref j q)) (i j : Fin 2) :
-    PolynomialJets (jointDomain s) (fun q x => phaseMatrix A pref χ q.2 q.1 x i j) := by
-  apply ((EnvelopeJets.of_polynomial
-    (primaryCovariance_entry_polynomial U pref (fun j => (A j).frame)
-      (fun j => (A j).lam) (fun j => (A j).u) (fun j => (A j).L) hpref
-      (fun j => (A j).pulse_jets) (fun j => (A j).lam_pos) (fun j => (A j).u_pos)
-      (fun j => (A j).L_pos) i j)).comp
-        (hχ.clm (ContinuousLinearMap.fst ℝ PhaseCalculus.Slow ℝ)) hscale hmap).to_polynomial
-  intro q x hx
-  rfl
 
 theorem phaseFundamental_class {s : StripData D} (A : Fin 2 → PhaseConstruction U)
     (χ : (ℕ × ι) → D → PhaseCalculus.Slow × ℝ)

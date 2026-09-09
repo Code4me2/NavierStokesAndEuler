@@ -325,24 +325,6 @@ theorem phaseFundamental_class {s : StripData D}
   have hp := (F j).pulse_jets.comp hχ hscale hmap
   exact hp.memClass s (fun _ => rfl) (fun _ => rfl)
 
-theorem phaseMatrix_jets {s : StripData D}
-    {U : PhaseJetBounds.Domain ℕ PhaseCalculus.Slow}
-    (F : Fin 2 → PrimaryPulseBounds.PhaseConstruction U) (pref : Fin 2 → ℕ → ℝ)
-    (χ : ℕ → D → PhaseCalculus.Slow × ℝ)
-    (hscale : ∀ n, U.scale n = s.slow n)
-    (hχ : PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s) χ)
-    (hmap : ∀ n x, x ∈ s.domain → (χ n x).1 ∈ U.carrier n)
-    (hpref : ∀ j, PhaseJetBounds.PolynomialJets U (fun n _ => pref j n)) (i j : Fin 2) :
-    PhaseJetBounds.PolynomialJets (PrimaryPulseBounds.phaseDomain s)
-      (fun n x => phaseMatrix F pref χ n x i j) := by
-  apply ((PrimaryPulseBounds.EnvelopeJets.of_polynomial
-    (PrimaryPulseBounds.primaryCovariance_entry_polynomial U pref (fun j => (F j).frame)
-      (fun j => (F j).lam) (fun j => (F j).u) (fun j => (F j).L) hpref
-      (fun j => (F j).pulse_jets) (fun j => (F j).lam_pos) (fun j => (F j).u_pos)
-      (fun j => (F j).L_pos) i j)).comp
-        (hχ.clm (ContinuousLinearMap.fst ℝ PhaseCalculus.Slow ℝ)) hscale hmap).to_polynomial
-  intro n x hx
-  rfl
 
 
 
@@ -1031,36 +1013,8 @@ noncomputable def nativeTangentBlock {D h : ℝ} {vr vt : TorusInverse.Plane}
     (fun _ Y => CurlClassBounds.complexify
       ((outer * (Real.sqrt ε * a j * mask D U q x)) • nativeUnit P hdet j Y)) 0
 
-theorem real_character_one (a t : ℝ) :
-    ((a : ℂ) * HarmonicFields.character 1 t).re = a * Real.cos t := by
-  simp [HarmonicFields.character, Complex.mul_re, Complex.exp_re]
 
-theorem nativeTangentBlock_radial {D h : ℝ} {vr vt : TorusInverse.Plane}
-    {sys : SlotSystem D h vr vt} {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : ℝ) (a : Vec2)
-    (q : ℝ) (x : SlotColoring.Position) (j : Fin 2) (n : ℕ) (Y : TorusInverse.Plane) (θ : ℝ) :
-    (nativeTangentBlock P hdet outer ε a q x j).oscillation n (Y,θ) 0 =
-      SignedCovariance.radialWith P hdet outer ε a q x j Y θ := by
-  rw [nativeTangentBlock, coefficientBlock_velocity]
-  change ((outer * (Real.sqrt ε * a j * mask D U q x) *
-    covered (SlotColoring.nativeIndex h U.1) (P.rawRadial hdet j) Y : ℝ) *
-    HarmonicFields.character 1 (1 * P.phases j Y + (P.modes j : ℝ) * θ)).re = _
-  rw [real_character_one]
-  simp only [SignedCovariance.radialWith, wave, one_mul, add_comm]
 
-theorem nativeTangentBlock_tangent {D h : ℝ} {vr vt : TorusInverse.Plane}
-    {sys : SlotSystem D h vr vt} {U : UnsignedLabel} (P : PairData sys U)
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : ℝ) (a : Vec2)
-    (q : ℝ) (x : SlotColoring.Position) (j i : Fin 2) (n : ℕ) (Y : TorusInverse.Plane) (θ : ℝ) :
-    (nativeTangentBlock P hdet outer ε a q x j).oscillation n (Y,θ) i.succ =
-      SignedCovariance.tangentWith P hdet outer ε a q x j i Y θ := by
-  rw [nativeTangentBlock, coefficientBlock_velocity]
-  have hv : nativeUnit P hdet j Y i.succ =
-      covered (SlotColoring.nativeIndex h U.1) (P.rawTangent hdet j i) Y := by fin_cases i <;> rfl
-  simp only [ CurlClassBounds.complexify_apply, PiLp.smul_apply,
-    hv]
-  rw [real_character_one]
-  simp only [SignedCovariance.tangentWith, wave, one_mul, add_comm, smul_eq_mul]
 
 noncomputable def nativeAssembly {D h : ℝ} {vr vt : TorusInverse.Plane}
     {sys : SlotSystem D h vr vt} {N : ℕ}
@@ -1071,37 +1025,12 @@ noncomputable def nativeAssembly {D h : ℝ} {vr vt : TorusInverse.Plane}
   ∑ᶠ v : UnsignedLabel × Fin 2,
     (nativeTangentBlock (P v.1) hdet (outer v.1) (ε v.1) (a v.1) q x v.2).oscillation 0 (Y,θ) i
 
-theorem nativeAssembly_radial {D h : ℝ} {vr vt : TorusInverse.Plane}
-    {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (a : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position) (Y : TorusInverse.Plane) (θ : ℝ) :
-    nativeAssembly P hdet outer ε a q x Y θ 0 =
-      SignedCovariance.assembledRadialWith P hdet outer ε a q x Y θ := by
-  simp only [nativeAssembly, nativeTangentBlock_radial, SignedCovariance.assembledRadialWith]
 
-theorem nativeAssembly_tangent {D h : ℝ} {vr vt : TorusInverse.Plane}
-    {sys : SlotSystem D h vr vt} {N : ℕ}
-    (P : (U : UnsignedLabel) → PairData sys (tailLabel N U))
-    (hdet : vr.1 * vt.2 - vr.2 * vt.1 ≠ 0) (outer ε : UnsignedLabel → ℝ)
-    (a : UnsignedLabel → Vec2) (q : ℝ) (x : SlotColoring.Position)
-    (i : Fin 2) (Y : TorusInverse.Plane) (θ : ℝ) :
-    nativeAssembly P hdet outer ε a q x Y θ i.succ =
-      SignedCovariance.assembledTangentWith P hdet outer ε a q x i Y θ := by
-  simp only [nativeAssembly, nativeTangentBlock_tangent, SignedCovariance.assembledTangentWith]
 
 
 
 end NativeBlocks
 
-theorem signed_square_class {s : StripData D} {H : ℕ → D → Mat2} {T R : ℕ → D → Vec2}
-    (h : CovarianceControl s H T) (B κ : ℝ)
-    (hR : ∀ i, MeanClass s (B - 1 / 2 - κ) (fun n x => R n x i)) (i : Fin 2) :
-    MeanClass s (2 * B - 2 * κ)
-      (fun n x => s.epsilon n * SignedCovariance.squareColumn (H n x) (T n x) (R n x) i) :=
-  SignedCovariance.native_signed_square_class B κ i h.zeta_pos (fun n _ hx => h.cone n hx)
-    (h.inverse_class h.target_jets) (h.inverse_class hR) h.inverse_control
-    (fun j => PrimaryPulseBounds.polynomial_memClass s (h.matrix_jets i j))
 
 /-! ## Canonical pulse binding for the matrix and the native blocks -/
 

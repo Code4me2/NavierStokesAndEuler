@@ -274,37 +274,6 @@ theorem coefficients_jets
   have hpi := forced_projectedPressure hN hNd hA hui (hf.map imagPart) hweight hb hl hh hfrequency
   exact hpr.add (hpi.map ((ContinuousLinearMap.mul ℝ ℂ) Complex.I)) hweight
 
-/-- The common cutoff is applied once, before the periodized sum and the
-exact curl. These are the native hypotheses consumed by the whole-lift bounds
-in `PeriodizedWaveBounds`. -/
-theorem coefficients_localized_jets
-    (hr : ModalControl s α d (fun n => realData (t n) (source n)) harmonic g L envelope cells)
-    (hi : ModalControl s α d (fun n => imagData (t n) (source n)) harmonic g L envelope cells)
-    (hW : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hcompare : ∀ n k x, x ∈ s.domain → x ∈ cells n k →
-      envelope n ((g n).coordinates k x.2).2 ≤ W n x)
-    (hN : LocalJets s (fun _ _ => 1) 0 cells
-      (fun n k x => (t n).normal (nativePoint (g n) k x)))
-    (hNd : LocalJets s (fun _ _ => 1) 0 cells
-      (fun n k x => (t n).normalDot (nativePoint (g n) k x)))
-    (hA : LocalJets s (fun _ _ => 1) 0 cells
-      (fun n k x => (t n).action (nativePoint (g n) k x)))
-    (hf : LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α cells (fun n _ => source n))
-    {b M : ℝ} (hb : 0 < b)
-    (hl : ∀ n k x, x ∈ s.domain → x ∈ cells n k → b ≤ ‖(t n).normal (nativePoint (g n) k x)‖)
-    (hh : ∀ n k x, x ∈ s.domain → x ∈ cells n k → ‖(t n).normal (nativePoint (g n) k x)‖ ≤ M)
-    (hfrequency : BandBound s (1/2) (fun n => 1 / base.frequency n))
-    (cutoff : Frequency → ℕ → P × Plane → ℝ)
-    (hcutoff : LocalJets s (fun _ _ => 1) 0 cells (fun n k => cutoff k n)) :
-    LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) α cells
-      (fun n k => ((complexCopyCoefficients base t source g (fun _ => k) L hL).withCutoff (cutoff k)).amplitude n) ∧
-    LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) (α+1/2) cells
-      (fun n k => ((complexCopyCoefficients base t source g (fun _ => k) L hL).withCutoff (cutoff k)).pressure n) := by
-  obtain ⟨ha, hp⟩ := coefficients_jets base t source g L hL envelope W d harmonic cells
-    hr hi hW hcompare hN hNd hA hf hb hl hh hfrequency
-  have hw n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hW n x hx)
-  refine ⟨hcutoff.smul ha hw, ?_⟩
-  simpa only [WaveCoefficients.withCutoff, Complex.real_smul] using hcutoff.smul hp hw
 
 end ActualComplex
 
@@ -320,16 +289,6 @@ noncomputable def nativeEnvelope (K : Cells (P × Plane) Frequency)
 
 
 
-omit [NormedSpace ℝ P] in
-theorem nativeEnvelope_le_one (K : Cells (P × Plane) Frequency)
-    (g : ℕ → Geometry) (envelope : ℕ → ℝ → ℝ)
-    (he : ∀ n k x, x ∈ K.carrier n k → envelope n ((g n).coordinates k x.2).2 ≤ 1)
-    (n : ℕ) (x : P × Plane) : nativeEnvelope K g envelope n x ≤ 1 := by
-  classical
-  unfold nativeEnvelope
-  split_ifs with h
-  · exact he n _ x (Classical.choose_spec h)
-  · norm_num
 
 end NativeEnvelope
 
@@ -502,36 +461,6 @@ theorem uniform_coefficients_jets
     (UniformPrimaryWeights.pull_bandBound hfrequency e)
   exact ⟨uniform_local_of_pull he hboth.1, uniform_local_of_pull he hboth.2⟩
 
-theorem uniform_coefficients_localized_jets
-    (hr : UniformModalControl s α d (fun l n => realData (t l n) (source l n)) harmonic g L envelope cells)
-    (hi : UniformModalControl s α d (fun l n => imagData (t l n) (source l n)) harmonic g L envelope cells)
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hcompare : ∀ l n k x, x ∈ s.domain → x ∈ cells l n k →
-      envelope l n ((g l n).coordinates k x.2).2 ≤ W l n x)
-    (hN : UniformLocalJets s (fun _ _ _ => 1) 0 cells
-      (fun l n k x => (t l n).normal (nativePoint (g l n) k x)))
-    (hNd : UniformLocalJets s (fun _ _ _ => 1) 0 cells
-      (fun l n k x => (t l n).normalDot (nativePoint (g l n) k x)))
-    (hA : UniformLocalJets s (fun _ _ _ => 1) 0 cells
-      (fun l n k x => (t l n).action (nativePoint (g l n) k x)))
-    (hf : UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α cells (fun l n _ => source l n))
-    {b M : ℝ} (hb : 0 < b)
-    (hl : ∀ l n k x, x ∈ s.domain → x ∈ cells l n k → b ≤ ‖(t l n).normal (nativePoint (g l n) k x)‖)
-    (hh : ∀ l n k x, x ∈ s.domain → x ∈ cells l n k → ‖(t l n).normal (nativePoint (g l n) k x)‖ ≤ M)
-    (hfrequency : UniformPrimaryWeights.UniformBandBound s (1/2) (fun l n => 1 / (base l).frequency n))
-    (cutoff : Label → Frequency → ℕ → P × Plane → ℝ)
-    (hcutoff : UniformLocalJets s (fun _ _ _ => 1) 0 cells (fun l n k => cutoff l k n)) :
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) α cells
-      (fun l n k => ((complexCopyCoefficients (base l) (t l) (source l) (g l)
-        (fun _ => k) (L l) (hL l)).withCutoff (cutoff l k)).amplitude n) ∧
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) (α+1/2) cells
-      (fun l n k => ((complexCopyCoefficients (base l) (t l) (source l) (g l)
-        (fun _ => k) (L l) (hL l)).withCutoff (cutoff l k)).pressure n) := by
-  obtain ⟨ha, hp⟩ := uniform_coefficients_jets base t source g L hL envelope W d harmonic cells
-    hr hi hW hcompare hN hNd hA hf hb hl hh hfrequency
-  have hw l n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hW l n x hx)
-  refine ⟨uniform_smul hcutoff ha hw, ?_⟩
-  simpa only [WaveCoefficients.withCutoff, Complex.real_smul] using uniform_smul hcutoff hp hw
 
 end UniformLabels
 

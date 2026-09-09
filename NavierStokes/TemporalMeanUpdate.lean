@@ -528,11 +528,6 @@ theorem desiredIncrement_smooth (h : ℝ) (n : ℕ) {f : PressureStream.Lift S �
     ContDiff ℝ ∞ (desiredIncrement h n f) :=
   contDiff_const.mul (temporalInverse_smooth (centered_smooth hf) (centered_periodic hp))
 
-omit [FiniteDimensional ℝ S] [NormedAddCommGroup S] [NormedSpace ℝ S] in
-theorem desiredIncrement_periodic (h : ℝ) (n : ℕ) (f : PressureStream.Lift S → ℝ) :
-    PressureStream.TorusPeriodicLift (desiredIncrement h n f) := by
-  intro r s Y k
-  exact congrArg (-chartPrefactor h n * ·) (temporalInverse_periodic (centered f) r s Y k)
 
 omit [FiniteDimensional ℝ S] [NormedAddCommGroup S] [NormedSpace ℝ S] in
 theorem desiredIncrement_supported (h : ℝ) (n : ℕ) {a b : ℝ} {f : PressureStream.Lift S → ℝ}
@@ -597,14 +592,6 @@ noncomputable def radialUpdate (d a b M : ℝ) (v : Plane) (w : S × Plane) (h :
     (f : PressureStream.Lift S → ℝ) : PressureStream.Lift S → ℝ :=
   PressureStream.streamBeta w (axialPotential d a b M v h n f)
 
-omit [FiniteDimensional ℝ S] in
-theorem radialUpdate_smul_direction (d a b M : ℝ) (v : Plane) (w : S × Plane) (h c : ℝ) (n : ℕ)
-    (f : PressureStream.Lift S → ℝ) :
-    radialUpdate d a b M v (c • w) h n f = fun z => c * radialUpdate d a b M v w h n f z := by
-  funext z
-  have hv : ((0 : ℝ), c • w) = c • ((0 : ℝ), w) := by simp
-  simp only [radialUpdate, PressureStream.streamBeta, PressureStream.graphDz, hv, map_smul,
-    smul_eq_mul, mul_neg]
 
 /-- The retained compactification alias, with its physical `1/r` factor. -/
 noncomputable def axialAlias (d a b M : ℝ) (v : Plane) (h : ℝ) (n : ℕ)
@@ -814,17 +801,6 @@ section WeightedTemporal
 
 variable {S : Type} [NormedAddCommGroup S] [NormedSpace ℝ S] [FiniteDimensional ℝ S]
 
-theorem meanClass_temporalInverse {a b cL cR : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => temporalInverse (f n)) :=
-  UniformFourierAlias.meanClass_realInverse .temporal ha hcL hcR ε R hε hεone hR hf hfc hp
 
 theorem meanClass_centered {a b cL cR : ℝ}
     (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
@@ -838,90 +814,9 @@ theorem meanClass_centered {a b cL cR : ℝ}
       (fun n => centered (f n)) :=
   UniformFourierAlias.meanClass_realCenterSource ha hcL hcR ε R hε hεone hR hf hfc hp
 
-/-- The complete desired temporal update preserves the original exponent in
-every band, including the initial bands. No inverse estimate is assumed. -/
-theorem meanClass_desiredIncrement {a b cL cR h : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n)
-    {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => desiredIncrement h n (f n)) := by
-  have hc := meanClass_centered ha hcL hcR ε R hε hεone hR hf hfc hp
-  have hi := meanClass_temporalInverse ha hcL hcR ε R hε hεone hR hc
-    (fun n => centered_smooth (hfc n)) (fun n => centered_periodic (hp n))
-  have hm := (meanClass_chartPrefactor_all hh hscale hi).map (-ContinuousLinearMap.id ℝ ℝ)
-  change WeightedClasses.MeanClass _ α
-    (fun n z => -chartPrefactor h n * temporalInverse (centered (f n)) z)
-  unfold WeightedClasses.MeanClass
-  simpa only [desiredIncrement, _root_.neg_apply, ContinuousLinearMap.id_apply,
-    smul_eq_mul, neg_mul] using hm
 
-theorem meanClass_axialPotential {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n) (M : ℕ → ℝ) (v : ℕ → Plane)
-    {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => axialPotential d a b (M n) (v n) h n (f n)) :=
-  meanClass_streamPotential ha hab hd hcL hcR ε R hε hεone hR α M (fun n => (0, v n))
-    (fun n => desiredIncrement h n (f n)) (fun n => desiredIncrement_smooth h n (hfc n) (hp n))
-    (fun n => desiredIncrement_supported h n (hs n))
-    (meanClass_desiredIncrement ha hcL hcR hh ε R hε hεone hR hscale hf hfc hp)
 
-theorem meanClass_radialUpdate {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n) (M : ℕ → ℝ) (v : ℕ → Plane) (w : S × Plane)
-    {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => radialUpdate d a b (M n) (v n) w h n (f n)) :=
-  meanClass_streamBeta ha hab hd hcL hcR ε R hε hεone hR α M (fun n => (0, v n)) w
-    (fun n => desiredIncrement h n (f n)) (fun n => desiredIncrement_smooth h n (hfc n) (hp n))
-    (fun n => desiredIncrement_supported h n (hs n))
-    (meanClass_desiredIncrement ha hcL hcR hh ε R hε hεone hR hscale hf hfc hp)
 
-/-- The actual chart axial direction carries `ε`; its radial stream
-component therefore gains one full mean-class exponent. -/
-theorem meanClass_scaledRadialUpdate {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n) (M : ℕ → ℝ) (v : ℕ → Plane) (w : S × Plane)
-    {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) (α + 1)
-      (fun n => radialUpdate d a b (M n) (v n) (ε n • w) h n (f n)) := by
-  let st := WeightedRadialPrimitive.logStripData (E := S × Plane) a b cL cR ha hcL hcR ε R hε hεone hR
-  have hb : WeightedClasses.BandBound st 1 ε := by
-    have h := WeightedClasses.bandBound_rpow st 1
-    simp only [Real.rpow_one] at h
-    exact h
-  have hi := meanClass_radialUpdate ha hab hd hcL hcR hh ε R hε hεone hR hscale M v w hf hfc hp hs
-  have hout := hi.band_smul hb
-  have heq : (fun n => radialUpdate d a b (M n) (v n) (ε n • w) h n (f n)) =
-      (fun n z => ε n • radialUpdate d a b (M n) (v n) w h n (f n) z) := by
-    funext n z
-    exact congrFun (radialUpdate_smul_direction d a b (M n) (v n) w h (ε n) n (f n)) z
-  rw [heq]
-  exact hout
 
 end WeightedTemporal
 
@@ -1160,63 +1055,7 @@ theorem meanClass_dividedAlias {a b d cL cR α : ℝ}
   · exact fun n => hs (M n) (0, vector .radial) (g n)
   · exact dividedAlias_global_bounds ha hab hd hcL hcR ε R hε hεone hR M hM hg hgc hgp hgm hgs
 
-theorem meanClass_axialAlias {a b d cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n) (M : ℕ → ℝ) (hM : ∀ n, M n ≠ 0)
-    {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => axialAlias d a b (M n) (vector .radial) h n (f n)) := by
-  let st := WeightedRadialPrimitive.logStripData (E := S × Plane) a b cL cR ha hcL hcR ε R hε hεone hR
-  let g := fun n => desiredIncrement h n (f n)
-  have hg : WeightedClasses.MeanClass st α g :=
-    meanClass_desiredIncrement ha hcL hcR hh ε R hε hεone hR hscale hf hfc hp
-  have hgc := fun n => desiredIncrement_smooth h n (hfc n) (hp n)
-  have hgp := fun n => desiredIncrement_periodic h n (f n)
-  have hgs := fun n => desiredIncrement_supported h n (hs n)
-  have hw : WeightedClasses.MeanClass st α (fun n => PressureStream.weightedSource (g n)) := by
-    unfold PressureStream.weightedSource
-    simpa only [smul_eq_mul, id_eq] using
-      meanClass_radialMultiply a b (φ := id) contDiff_id
-        (s := st) (fun z hz => ⟨hz.1.le, hz.2.le⟩) hgc hg
-  have hwm : ∀ n p, PressureStream.torusAverage (PressureStream.weightedSource (g n)) p = 0 := by
-    intro n p
-    rw [PressureStream.torusAverage_weightedSource, desiredIncrement_zeroMean h n (hfc n) (hp n), mul_zero]
-  exact meanClass_dividedAlias ha hab hd hcL hcR ε R hε hεone hR M hM hw
-    (fun n => PressureStream.weightedSource_contDiff (hgc n))
-    (fun n => PressureStream.weightedSource_periodic (hgp n)) hwm
-    (fun n => PressureStream.weightedSource_supported (hgs n))
 
-/-- The reconstructed axial field, including its exact nonzero alias,
-has the original mean-class exponent. -/
-theorem meanClass_axialUpdate {a b d cL cR h α : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    (hscale : ∀ n, ChartScales.S n ≤ R n) (M : ℕ → ℝ) (hM : ∀ n, M n ≠ 0)
-    {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, PressureStream.TorusPeriodicLift (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n)) :
-    WeightedClasses.MeanClass
-      (WeightedRadialPrimitive.logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => axialUpdate d a b (M n) (vector .radial) h n (f n)) := by
-  have hi := meanClass_desiredIncrement ha hcL hcR hh ε R hε hεone hR hscale hf hfc hp
-  have hA := meanClass_axialAlias ha hab hd hcL hcR hh ε R hε hεone hR hscale M hM hf hfc hp hs
-  have hout := hi.add (hA.map (-ContinuousLinearMap.id ℝ ℝ))
-  have heq : (fun n => axialUpdate d a b (M n) (vector .radial) h n (f n)) =
-      fun n z => desiredIncrement h n (f n) z + -axialAlias d a b (M n) (vector .radial) h n (f n) z := by
-    funext n z
-    simpa only [sub_eq_add_neg] using congrFun
-      (axialUpdate_eq_desired_sub_alias ha hab hd (vector .radial) h n (hfc n) (hp n) (hs n)) z
-  rw [heq]
-  unfold WeightedClasses.MeanClass
-  simpa only [_root_.neg_apply, ContinuousLinearMap.id_apply] using hout
 
 end CompleteWeightedUpdate
 

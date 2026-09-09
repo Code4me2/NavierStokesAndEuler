@@ -385,20 +385,6 @@ open CorrectionState
 
 
 
-/-- The right-hand sides for the particular solves are obtained from the
-literal current nonlinear PDE residual, by differentiating and convolving
-its stored finite harmonics and then removing the zero harmonic. -/
-theorem fullGoodWaveResidual_grouped {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : Context D} {u : State D} {labels : ℕ → Finset ι}
-    {blocks : ι → HarmonicBlock D}
-    {gaussian aliasError : ι → HarmonicResidual.BlockCoefficients D}
-    (hrep : HarmonicResidual.BlockRepresentation labels blocks gaussian aliasError u) {n : ℕ}
-    (h : HarmonicResidual.ExtractionRegular U c u labels blocks gaussian aliasError n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    fullGoodWaveResidual c u n x i =
-      ∑ l ∈ labels n,
-        (HarmonicResidual.residualBlock c u (blocks l) (gaussian l) (aliasError l)).oscillation n x i :=
-  HarmonicResidual.stateGoodWaveResidual_grouped hU hrep h hx i
 
 
 end ActualHarmonicForcing

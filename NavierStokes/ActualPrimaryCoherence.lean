@@ -1776,13 +1776,6 @@ theorem cartesianPotential_smooth (j : Fin 2) (L : Label B N0) :
     (physicalPotential_smooth j L) (physicalPotential_periodic j L) (physicalPotential_zero_axis j L)).mono
       (fun _ hz => ⟨hz,trivial⟩)
 
-theorem cartesianVelocity_axis_zero (j : Fin 2) (L : Label B N0) (t : ℝ) (x : ProblemStatement.Space)
-    (hx : x 0 = 0) (hy : x 1 = 0) : cartesianVelocity j L (t,x) = 0 := by
-  apply PhysicalCurlCovariance.spatialCurl_zero_of_zero_near
-  apply PhysicalCurlCovariance.globalCartesianPotential_zero_germ (physicalAxisRadius_pos L)
-    (physicalPotential_zero_axis j L)
-  simpa only [PhysicalGraphBounds.radialProjection_apply,PolarCharts.radius,hx,hy,
-    zero_pow (by decide : 2 ≠ 0),zero_add,Real.sqrt_zero] using physicalAxisRadius_pos L
 
 /-- Every actual band velocity is the rotating-frame representation of
 the curl of the same constructed Cartesian potential.  This includes all
@@ -1826,11 +1819,5 @@ theorem piece_physical_pressure (U : LocalSignedRequest.SlowRegion (2*h))
   rfl
 
 
-theorem cartesianVelocity_divergence (j : Fin 2) (L : Label B N0) {t : ℝ}
-    (ht : t < 1) (x : ProblemStatement.Space) :
-    ProblemStatement.spatialDivergence (cartesianVelocity j L) t x = 0 := by
-  have ha : ContDiffOn ℝ 2 (cartesianPotential j L) ((Iio 1) ×ˢ (univ : Set ProblemStatement.Space)) :=
-    ((cartesianPotential_smooth j L).mono (fun _ hx => hx.1)).of_le (WithTop.coe_le_coe.mpr le_top)
-  exact SpatialCurl.spatialDivergence_spatialCurl_on ha ht x
 
 end NavierStokes.ActualPrimaryCoherence

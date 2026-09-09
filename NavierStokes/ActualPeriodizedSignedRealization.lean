@@ -371,8 +371,6 @@ noncomputable def copyData (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
   cutoff n k x := l.nativeGaussian reference k (V.map n x).1.2.2
   source := fun _ _ => 0
 
-theorem copyData_raw (request : ℕ → Cylinder → Vec2) (j : Fin 2) (k : Frequency) :
-    (copyData B l V request j).raw k = nativeCoefficients B l V request j k := rfl
 
 theorem common_amplitude (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : ℕ) (x : Cylinder) :
     (copyData B l V request j).common.amplitude n x =
@@ -392,38 +390,11 @@ theorem common_pressure (request : ℕ → Cylinder → Vec2) (j : Fin 2) (n : �
   simp_rw [native_pressure, ← Complex.real_smul]
   rw [l.gaussian_mask_sum, view_pressure]
 
-theorem common_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    (copyData B l V request j).common =
-      ((views B l V).coefficients request j).withCutoff (views B l V).cutoff := by
-  let a := copyData B l V request j
-  let b := ((views B l V).coefficients request j).withCutoff (views B l V).cutoff
-  have ha : a.common.amplitude = b.amplitude := funext fun n => funext fun x => common_amplitude B l V request j n x
-  have hp : a.common.pressure = b.pressure := funext fun n => funext fun x => common_pressure B l V request j n x
-  calc
-    a.common = {a.background with amplitude := a.common.amplitude, pressure := a.common.pressure} := rfl
-    _ = {a.background with amplitude := b.amplitude, pressure := b.pressure} := by rw [ha, hp]
-    _ = b := rfl
 
-/-- Exact coefficient equality precedes all differentiation.  In
-particular every derivative of the native cutoffs remains in the curl. -/
-theorem commonCorrected_eq (request : ℕ → Cylinder → Vec2) (j : Fin 2) :
-    (copyData B l V request j).commonCorrected V.strip V.directions =
-      (views B l V).exactCoefficients request j := by
-  unfold PeriodizedWaveBounds.CopyData.commonCorrected
-  rw [common_eq]
-  rfl
 
 /-! ## The literal current-state request and one physical reference -/
 
-/-- The native copies use the current state's actual signed request. -/
-noncomputable def actualCopyData (D : V.StateData) (j : Fin 2) :
-    PeriodizedWaveBounds.CopyData Cylinder Frequency :=
-  copyData B l V D.request j
 
-theorem actual_commonCorrected_eq (D : V.StateData) (j : Fin 2) :
-    (actualCopyData B l V D j).commonCorrected V.strip V.directions =
-      (views B l V).exactCoefficients (stateData B l D).request j :=
-  commonCorrected_eq B l V D.request j
 
 
 
@@ -440,55 +411,7 @@ noncomputable def physicalPressure (D : V.StateData) (j : Fin 2) (delta : ℝ) :
   (views B l V).physicalPressure D.referenceRequest j delta
 
 
-/-- The actual native-copy sum, corrected after cutoff and summation, is
-the band view of the single constructed Cartesian curl.  Analytic inputs
-concern the primitive reference data and coordinate charts. -/
-theorem actual_wave_physical (D : V.StateData) (j : Fin 2) (n : ℕ)
-    (R : (periodizedPrimary B l).Regular D.referenceRequest reference j)
-    (A : (periodizedPrimary B l).Angular D.referenceRequest reference)
-    (hK : B.base.frequency reference ≠ 0)
-    (G : PhysicalSignedWave.ChartGeometry B.base B.strip B.directions reference
-      V.exponent V.referenceScale V.referenceCover)
-    (H : PhysicalSignedWave.ChartGeometry
-      (B.viewBase V.background V.frequency (fun n => V.map n) reference)
-      V.strip V.directions n V.exponent (V.scale n) (V.cover n))
-    (hmap : MapsTo (V.map n) V.strip.domain B.strip.domain)
-    (hradius : ∀ x ∈ V.strip.domain, 0 < x.1.1)
-    {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (V.scale n) V.exponent (V.cover n)).source V.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) (component : Fin 3) :
-    (vectorMode (((actualCopyData B l V D j).commonCorrected V.strip V.directions).frequency n)
-      (((actualCopyData B l V D j).commonCorrected V.strip V.directions).phase n)
-      (((actualCopyData B l V D j).commonCorrected V.strip V.directions).amplitude n)
-      ((PhysicalResidualBridge.commonGraph (V.scale n) V.exponent (V.cover n)).map z) component).re =
-        V.scale n ^ CoordinateAlgebra.A V.exponent * CylindricalResidual.frame (-(z.2 1))
-          (physicalVelocity B l V D j delta (z.1, CylindricalResidual.chart z.2)) component := by
-  rw [actual_commonCorrected_eq]
-  exact (stateData B l D).actual_wave_physical j n R A hK G H hmap hradius hz hdelta chart hchart component
 
-theorem actual_pressure_physical (D : V.StateData) (j : Fin 2) (n : ℕ)
-    (R : (periodizedPrimary B l).Regular D.referenceRequest reference j)
-    (A : (periodizedPrimary B l).Angular D.referenceRequest reference)
-    (hK : B.base.frequency reference ≠ 0)
-    (G : PhysicalSignedWave.ChartGeometry B.base B.strip B.directions reference
-      V.exponent V.referenceScale V.referenceCover)
-    (H : PhysicalSignedWave.ChartGeometry
-      (B.viewBase V.background V.frequency (fun n => V.map n) reference)
-      V.strip V.directions n V.exponent (V.scale n) (V.cover n))
-    (hmap : MapsTo (V.map n) V.strip.domain B.strip.domain)
-    {z : SpaceTime}
-    (hz : z ∈ (PhysicalResidualBridge.commonGraph (V.scale n) V.exponent (V.cover n)).source V.strip.domain)
-    {delta : ℝ} (hdelta : 0 < delta) (chart : PolarCharts.Index)
-    (hchart : z ∈ PhysicalCurlCovariance.validCylindrical delta chart) :
-    (HarmonicCalculus.mode (((actualCopyData B l V D j).commonCorrected V.strip V.directions).frequency n)
-      (((actualCopyData B l V D j).commonCorrected V.strip V.directions).phase n)
-      (((actualCopyData B l V D j).commonCorrected V.strip V.directions).pressure n)
-      ((PhysicalResidualBridge.commonGraph (V.scale n) V.exponent (V.cover n)).map z)).re =
-        V.scale n ^ (2 * CoordinateAlgebra.A V.exponent) *
-          physicalPressure B l V D j delta (z.1, CylindricalResidual.chart z.2) := by
-  rw [actual_commonCorrected_eq]
-  exact (stateData B l D).actual_pressure_physical j n R A hK G H hmap hz hdelta chart hchart
 
 end Reference
 

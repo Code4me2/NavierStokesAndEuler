@@ -99,13 +99,6 @@ theorem parameterJet_smooth {f : Source} (hf : ContDiff ℝ ∞ f) (n : ℕ) :
       rw [parameterJet, Function.iterate_succ_apply']
       exact parameterPartial_smooth ih
 
-theorem parameterJet_periodic {f : Source} (hp : Periodic f) (n : ℕ) :
-    Periodic (parameterJet n f) := by
-  induction n with
-  | zero => exact hp
-  | succ n ih =>
-      rw [parameterJet, Function.iterate_succ_apply']
-      exact parameterPartial_periodic ih
 
 theorem swapTorus_smooth {f : Source} (hf : ContDiff ℝ ∞ f) :
     ContDiff ℝ ∞ (swapTorus f) :=
@@ -486,16 +479,7 @@ theorem inverse_smooth (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
     (hp : Periodic f) : ContDiff ℝ ∞ (inverse d f) :=
   applyMultiplier_smooth (inverseMultiplier_growth d) hf hp
 
-theorem parameterPartial_applyMultiplier {m : Frequency → ℂ} (hm : PolynomialGrowth m)
-    {f : Source} (hf : ContDiff ℝ ∞ f) (hp : Periodic f) :
-    parameterPartial (applyMultiplier m f) = applyMultiplier m (parameterPartial f) := by
-  funext z
-  simp [parameterPartial, fderiv_applyMultiplier hm hf hp, jointLiftP_apply,
-    jointLiftX_apply, jointLiftY_apply]
 
-theorem parameterPartial_inverse (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) : parameterPartial (inverse d f) = inverse d (parameterPartial f) :=
-  parameterPartial_applyMultiplier (inverseMultiplier_growth d) hf hp
 
 theorem inverse_periodic (d : Direction) (f : Source) : Periodic (inverse d f) := by
   intro p Y k
@@ -548,15 +532,6 @@ theorem parameterJet_succ (n : ℕ) (f : Source) :
   Function.iterate_succ_apply' _ _ _
 
 
-/-- All actual derivatives in the external parameter commute with inversion. -/
-theorem parameterJet_inverse (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (n : ℕ) :
-    parameterJet n (inverse d f) = inverse d (parameterJet n f) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      rw [parameterJet_succ, ih, parameterPartial_inverse d (parameterJet_smooth hf n)
-        (parameterJet_periodic hp n), parameterJet_succ]
 
 @[simp] theorem iterateInverse_zero (d : Direction) (f : Source) :
     iterateInverse d 0 f = f := rfl
@@ -572,48 +547,8 @@ theorem iterateInverse_succ (d : Direction) (n : ℕ) (f : Source) :
 
 
 
-/-- A genuine mixed coordinate jet: first actual parameter derivatives, then
-the indicated word of actual torus-coordinate derivatives. -/
-noncomputable def mixedJet (q : ℕ) (w : List Bool) (f : Source) (z : Point) : ℂ :=
-  derivativeWord w (slice (parameterJet q f) z.1) z.2
 
-noncomputable def mixedLossConstant (r : ℕ) : ℝ :=
-  ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ r) * 3 ^ (r + 5) *
-    ∑' k : Frequency, (weight k ^ 4)⁻¹
 
-theorem mixedLossConstant_nonneg (r : ℕ) : 0 ≤ mixedLossConstant r := by
-  unfold mixedLossConstant
-  positivity
 
-/-- Uniform finite loss: a mixed output jet with r torus derivatives requires
-only r+5 pure torus derivatives of the same parameter jet of the input.
-The constant is independent of the parameter set and the function. -/
-theorem mixedJet_inverse_bound (d : Direction) {f : Source} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (q : ℕ) (w : List Bool) (S : Set ℝ) {C : ℝ}
-    (hzero : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖parameterJet q f (p, (x, y))‖ ≤ C)
-    (hfirst : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5) (slice (parameterJet q f) p) (x, y)‖ ≤ C)
-    (hsecond : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5)
-        (SmoothFourierData.swapFunction (slice (parameterJet q f) p)) (x, y)‖ ≤ C)
-    (p : ℝ) (hps : p ∈ S) (Y : Plane) :
-    ‖mixedJet q w (inverse d f) (p, Y)‖ ≤ mixedLossConstant w.length * C := by
-  rw [mixedJet, parameterJet_inverse d hf hp]
-  have hq := slice_smooth (parameterJet_smooth hf q) p
-  have hpq := parameterJet_periodic hp q p
-  have hbound := SmoothFourierData.coefficient_seminorm_bound hq hpq (w.length + 1)
-    (hzero p hps) (by simpa only [Nat.add_assoc] using hfirst p hps)
-    (by simpa only [Nat.add_assoc] using hsecond p hps)
-  calc
-    _ ≤ ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) *
-        coeffSeminorm (w.length + 1) (coefficient (parameterJet q f) p) :=
-      inverse_derivativeWord_bound d (SmoothFourierData.rapid_coefficient hq hpq) w Y
-    _ ≤ ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) *
-        ((3 ^ ((w.length + 1) + 4) * C) * ∑' k : Frequency, (weight k ^ 4)⁻¹) :=
-      mul_le_mul_of_nonneg_left hbound (by positivity)
-    _ = mixedLossConstant w.length * C := by
-      simp only [mixedLossConstant, Nat.add_assoc]
-      ring
 
 end NavierStokes.ParametricTorusInverse

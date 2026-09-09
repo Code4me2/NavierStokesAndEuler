@@ -138,19 +138,6 @@ theorem error_jetRate (upper : ℝ) (B : ℕ)
     exact mul_nonneg hC (Real.rpow_nonneg
       (cartesian_q_pos F.data.h_pos F.data.h_lt_half htz).le r)
 
-theorem error_allJetsFlat (upper : ℝ) (B : ℕ)
-    (hupper : BaseExterior.nominalExteriorRadius W ≤ upper)
-    {l : Filter SpaceTime} {K : Set SpaceTime} (hK : IsCompact K)
-    (hcarrier : ∀ᶠ z in l, z ∈ K) (ht : ∀ᶠ z in l, z.1 < 1)
-    (hq : Tendsto (fun z => (cartesianChart F.data.h z).1) l (𝓝 0)) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1)
-      (FinalSlowBase.error H v upper B) := by
-  intro m N
-  obtain ⟨C, hC, hb⟩ := error_jetRate H v upper B hupper hK hcarrier ht hq m N (Nat.cast_nonneg N)
-  refine ⟨C, hC, ?_⟩
-  filter_upwards [ht, hb] with z htz hbz
-  simpa only [abs_norm, abs_of_pos (cartesian_q_pos F.data.h_pos F.data.h_lt_half htz),
-    Real.rpow_natCast] using hbz
 
 end FixedSchedule
 

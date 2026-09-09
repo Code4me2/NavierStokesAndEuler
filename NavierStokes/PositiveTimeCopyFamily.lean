@@ -117,10 +117,6 @@ theorem sum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
     (funext (fun I => periodized_eq f a h r0 I hw))
 
 
-theorem sum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    (gate f).sum a h r0 =ᶠ[𝓝 w] f.sum a h r0 := by
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
-  exact sum_eq f a h r0 hy
 
 
 end PhysicalFields
@@ -135,11 +131,6 @@ theorem vectorSum_eq {w : SpaceTime} (hw : w ∈ preterminal) :
   simp only [PhysicalCopyBounds.vectorSum, sum_eq (f _) a h r0 hw]
 
 
-theorem vectorSum_germ {w : SpaceTime} (hw : w ∈ preterminal) :
-    PhysicalCopyBounds.vectorSum (fun i => gate (f i)) a h r0 =ᶠ[𝓝 w]
-      PhysicalCopyBounds.vectorSum f a h r0 := by
-  filter_upwards [PhysicalWaveSum.preterminal_open.mem_nhds hw] with y hy
-  exact vectorSum_eq f a h r0 hy
 
 
 end VectorFields

@@ -305,16 +305,8 @@ noncomputable def constantCoefficient {α : Type*} (a : α → ℂ) : Coefficien
 theorem band_constantCoefficient {α : Type*} (a : α → ℂ) :
     BandLimited (constantCoefficient a) 0 := band_single_zero a
 
-/-- A literal quadratic update with arbitrary slow coefficient functions. -/
-noncomputable def quadraticStep {α : Type*} (A B C : α → ℂ) (c : Coefficients α) :
-    Coefficients α :=
-  constantCoefficient A + constantCoefficient B * c + constantCoefficient C * (c * c)
 
 
-noncomputable def quadraticIterate {α : Type*} (A B C : ℕ → α → ℂ) (c : Coefficients α) :
-    ℕ → Coefficients α
-  | 0 => c
-  | n + 1 => quadraticStep (A n) (B n) (C n) (quadraticIterate A B C c n)
 
 
 
@@ -415,14 +407,7 @@ theorem derivativeCoefficient_contDiffOn {U : Set E} (hU : IsOpen U)
       (HarmonicCalculus.contDiffOn_along hU hV hΦ))).mul ha)
 
 
-noncomputable def iteratedCoefficients (V : E → E) (k : ℝ) (Φ : E → ℝ) (c : Coefficients E) :
-    ℕ → Coefficients E
-  | 0 => c
-  | n + 1 => differentiate V k Φ (iteratedCoefficients V k Φ c n)
 
-noncomputable def iteratedAlong (V : E → E) : ℕ → (E → ℂ) → E → ℂ
-  | 0, f => f
-  | n + 1, f => HarmonicCalculus.along V (iteratedAlong V n f)
 
 
 

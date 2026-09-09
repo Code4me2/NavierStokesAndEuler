@@ -51,11 +51,6 @@ theorem contDiffOn_directional {U : Set P} (hU : IsOpen U) {f : P → E}
     ContDiffOn ℝ ∞ (directional f v) U := by
   exact ((contDiffOn_infty_iff_fderiv_of_isOpen hU).mp hf).2.clm_apply contDiffOn_const
 
-theorem contDiffOn_jet {U : Set P} (hU : IsOpen U) {f : P → E}
-    (hf : ContDiffOn ℝ ∞ f U) (l : List P) : ContDiffOn ℝ ∞ (jet f l) U := by
-  induction l generalizing f with
-  | nil => exact hf
-  | cons v l ih => exact ih (contDiffOn_directional hU hf v)
 
 theorem directional_congr {U : Set P} (hU : IsOpen U) {f g : P → E}
     (heq : EqOn f g U) (v : P) : EqOn (directional f v) (directional g v) U := by

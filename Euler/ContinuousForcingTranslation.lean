@@ -78,10 +78,5 @@ genuinely smooth translation orbit in the uniform time norm. -/
 theorem forcing_translation_contDiff : ContDiff ℝ ∞ (fun a : Space => translate a f) :=
   (forcingFamily A hA f hf).contDiff_field
 
-/-- Every actual orbit derivative is controlled by the original uniform-time
-ordinary L² spatial derivative with constant one. -/
-theorem forcing_translation_jet_bound (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => translate b f) a‖ ≤ ‖spatialJetPath A hA n‖ :=
-  (forcingFamily A hA f hf).norm_iteratedFDeriv_field_le n a
 
 end EulerContinuousForcing

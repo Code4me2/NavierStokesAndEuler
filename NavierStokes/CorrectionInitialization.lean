@@ -3680,25 +3680,7 @@ theorem coordinates_eq (j : Fin 2) (L : Label B N0) (k : TorusInverse.Frequency)
   abel
 
 
-theorem commonVelocity_periodic (j : Fin 2) (L : Label B N0) (p : PhaseCalculus.Slow)
-    (Y : TorusInverse.Plane) (k : TorusInverse.Frequency) :
-    commonVelocity j L p (Y + TorusAverages.latticePoint k) = commonVelocity j L p Y := by
-  change PeriodizedWaveBounds.copySum (fun l (Z : TorusInverse.Plane) => cutVelocity j L (p, (geometry j L).coordinates l Z)) (Y + TorusAverages.latticePoint k) =
-    PeriodizedWaveBounds.copySum (fun l (Z : TorusInverse.Plane) => cutVelocity j L (p, (geometry j L).coordinates l Z)) Y
-  apply PeriodizedWaveBounds.copySum_translate _ (fun Z => Z + TorusAverages.latticePoint k)
-    (Equiv.addRight (CommonCoverSolve.coverIndex (geometry j L).gap k))
-  intro l Z
-  exact congrArg (fun z => cutVelocity j L (p, z)) ((geometry j L).coordinates_deck l k Z)
 
-theorem commonPressure_periodic (j : Fin 2) (L : Label B N0) (p : PhaseCalculus.Slow)
-    (Y : TorusInverse.Plane) (k : TorusInverse.Frequency) :
-    commonPressure j L p (Y + TorusAverages.latticePoint k) = commonPressure j L p Y := by
-  change PeriodizedWaveBounds.copySum (fun l (Z : TorusInverse.Plane) => cutPressure j L (p, (geometry j L).coordinates l Z)) (Y + TorusAverages.latticePoint k) =
-    PeriodizedWaveBounds.copySum (fun l (Z : TorusInverse.Plane) => cutPressure j L (p, (geometry j L).coordinates l Z)) Y
-  apply PeriodizedWaveBounds.copySum_translate _ (fun Z => Z + TorusAverages.latticePoint k)
-    (Equiv.addRight (CommonCoverSolve.coverIndex (geometry j L).gap k))
-  intro l Z
-  exact congrArg (fun z => cutPressure j L (p, z)) ((geometry j L).coordinates_deck l k Z)
 
 end Coordinates
 

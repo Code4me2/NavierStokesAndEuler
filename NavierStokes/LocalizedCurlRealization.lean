@@ -197,21 +197,6 @@ theorem common_divergence_zero (n : ℕ) {x : D} (hx : x ∈ s.domain) :
   · exact h.native_divergence_zero m i ⟨hy, hC⟩
   · exact (native_identities_of_zero_germ a s d hz).2
 
-theorem common_potential_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (a.common.curlPotential s d n) s.domain := by
-  intro x hx
-  apply ContDiffAt.contDiffWithinAt
-  classical
-  by_cases hi : ∃ i, x ∈ K.carrier n i
-  · obtain ⟨i, hi⟩ := hi
-    have hg := a.common_potential_germ K hs s d n hi
-    rcases hcover n i x hx hi with hC | hz
-    · exact ((h.native_potential_smooth n i).contDiffAt
-        ((h.geometry n i).isOpen.mem_nhds ⟨hx, hC⟩)).congr_of_eventuallyEq hg
-    · exact contDiffAt_const.congr_of_eventuallyEq
-        (hg.trans (native_zero_germs a s d hz).1)
-  · exact contDiffAt_const.congr_of_eventuallyEq
-      (a.common_potential_zero_germ K hs s d (not_exists.mp hi))
 
 theorem common_velocity_smooth (n : ℕ) :
     ContDiffOn ℝ ∞ (vectorMode (a.background.frequency n) (a.background.phase n)

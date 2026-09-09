@@ -296,16 +296,6 @@ theorem boundaryLimits_joint {A v : VelocityField} {p : PressureField}
   exact hc.congr' ((periodicResidual_jets_locally_cut A v p x n).filter_mono
     nhdsWithin_le_nhds).symm
 
-theorem boundaryLimits_continuous {A v : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A v p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ev : JointResidualLimits.AwayExtensions v)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    Continuous (fun x => boundaryLimits A v p eA ev ep x n) := by
-  apply JointResidualLimits.continuous_of_joint_limits
-    (p := 𝓝[<] (1 : ℝ)) (F := iteratedFDeriv ℝ n (periodicResidual A v p))
-  intro x
-  simpa only [JointResidualLimits.past_filter] using boundaryLimits_joint hz eA ev ep n x
 
 theorem boundaryLimits_locallyUniform {A v : VelocityField} {p : PressureField}
     (hz : JointResidualLimits.VanishingJointJets (originalResidual A v p))

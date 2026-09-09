@@ -47,29 +47,6 @@ theorem velocity_average_zero
   rw [average_fullOperator, coordinates_average_zero P S hS T hT Q Q₁ c hc hQ f a₀ hf ha₀ t,
     map_zero]
 
-theorem coordinateDerivative_average_zero
-    (hf : ∀ t, average P (f t : CylinderL2 P E) = 0)
-    (ha₀ : average P (a₀ : CylinderL2 P U) = 0) (t : Icc (0 : ℝ) T) :
-    average P (coordinateDerivative P S hS T hT Q Q₁ c hc hQ f a₀ t : CylinderL2 P U) = 0 := by
-  change average P (fullOperatorMap P (sourceGenerator Q Q₁ c hc hQ t)
-      (coordinates P S hS T hT Q Q₁ c hc hQ f a₀ t : CylinderL2 P U) +
-    fullOperatorMap P (sourceForcing Q c hc hQ t) (f t : CylinderL2 P E)) = 0
-  rw [map_add, average_fullOperator, average_fullOperator,
-    coordinates_average_zero P S hS T hT Q Q₁ c hc hQ f a₀ hf ha₀ t, hf t,
-    map_zero, map_zero, add_zero]
 
-/-- The actual within-time derivative also has zero mean, as follows from its equation. -/
-theorem velocityDerivative_average_zero
-    (hf : ∀ t, average P (f t : CylinderL2 P E) = 0)
-    (ha₀ : average P (a₀ : CylinderL2 P U) = 0) (t : Icc (0 : ℝ) T) :
-    average P (velocityDerivative P S hS T hT Q Q₁ c hc hQ f a₀ t : CylinderL2 P E) = 0 := by
-  change average P (fullOperatorMap P (Q₁.field t)
-      (coordinates P S hS T hT Q Q₁ c hc hQ f a₀ t : CylinderL2 P U) +
-    fullOperatorMap P (Q.field t)
-      (coordinateDerivative P S hS T hT Q Q₁ c hc hQ f a₀ t : CylinderL2 P U)) = 0
-  rw [map_add, average_fullOperator, average_fullOperator,
-    coordinates_average_zero P S hS T hT Q Q₁ c hc hQ f a₀ hf ha₀ t,
-    coordinateDerivative_average_zero P S hS T hT Q Q₁ c hc hQ f a₀ hf ha₀ t,
-    map_zero, map_zero, add_zero]
 
 end EulerSourceCylinderEquation

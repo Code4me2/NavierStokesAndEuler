@@ -515,12 +515,6 @@ theorem extract_field (c : Coefficients D) (k : ℝ) (Φ : D → ℝ)
   rw [AddMonoidAlgebra.coeff_mul_single_apply]
   simp
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-/-- For a nonzero angular frequency the coefficients are uniquely determined by the field. -/
-theorem coefficients_unique {c d : Coefficients D} (k : ℝ) (Φ : D → ℝ)
-    {kp : ℤ} (hkp : kp ≠ 0) (he : field c k Φ kp = field d k Φ kp) : c = d := by
-  ext j x
-  rw [← extract_field c k Φ hkp j x, he, extract_field d k Φ hkp j x]
 
 noncomputable def nonconstant (c : Coefficients D) : Coefficients D := c.erase 0
 

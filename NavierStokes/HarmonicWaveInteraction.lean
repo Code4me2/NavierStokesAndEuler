@@ -104,10 +104,6 @@ noncomputable def liftedGeometry {s : StripData D} {κ : ℝ} (G : Geometry s κ
 noncomputable def fullPhase (b : CorrectionState.HarmonicBlock D) (n : ℕ) (p : D × ℝ) : ℝ :=
   b.phase n p.1 + ((b.angularFrequency n : ℝ) / b.frequency n) * p.2
 
-theorem fullPhase_smooth {s : StripData D} (b : CorrectionState.HarmonicBlock D)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (b.phase n) s.domain) (n : ℕ) :
-    ContDiffOn ℝ ∞ (fullPhase b n) (productStrip s).domain :=
-  ((hΦ n).comp contDiffOn_fst (fun _ hx => hx)).add (contDiffOn_const.mul contDiffOn_snd)
 
 noncomputable def amplitude (b : CorrectionState.HarmonicBlock D) (j : ℤ)
     (n : ℕ) (x : D) : ComplexVector := fun i => blockAmplitude b n i j x
@@ -230,48 +226,6 @@ theorem orderedKernel_eq_fullCoefficient {s : StripData D} {κ : ℝ}
   have hrc : (c.operators.radius x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (hR x hx).ne'
   field_simp ; ring
 
-/-- The first harmonic is used only through its genuine divergence equation.
-Its carrier cancels against the second harmonic with a bounded integer ratio. -/
-theorem orderedKernel_raw_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hdiv : ModeSolenoidal s c a)
-    {j l : ℤ} (hj : j ≠ 0) (hl : l ≠ 0) (i : Fin 3) :
-    MemClass s (fun n x => (Real.sqrt (s.zeta x) * P n x) *
-      (Real.sqrt (s.zeta x) * P n x)) (α + β - κ)
-      (fun n x => orderedKernel (HarmonicResidual.contextFrame c n) (a.frequency n)
-        (a.phase n) (a.angularFrequency n) l (amplitude a j n) (amplitude b l n) x i) := by
-  let G := liftedGeometry (slowGeometry c ho hR)
-  have ha' : WaveVector (productStrip s) (fun n p => P n p.1) α
-      (fun n p => amplitude a j n p.1) := fun r => class_lift (blockAmplitude_class ha hj r)
-  have hb' : WaveVector (productStrip s) (fun n p => P n p.1) β
-      (fun n p => amplitude b l n p.1) := fun r => class_lift (blockAmplitude_class hb hl r)
-  have hd : ∀ n p, p ∈ (productStrip s).domain → cylindricalDivergence
-      (G.radius n) (G.radial n) (G.angular n) (G.axial n)
-      (vectorMode (a.frequency n * (j : ℝ)) (fullPhase a n)
-        (fun q => amplitude a j n q.1)) p = 0 := by
-    intro n p hp
-    have hh := hdiv j hj n p hp
-    rw [singleMode_eq a j n (hk n)] at hh
-    exact hh
-  have hh := same_label_raw_bound G ho.kappa_nonneg ha' hb'
-    (fullPhase_smooth a hΦ)
-    (fun n => mul_ne_zero (hk n) (by exact_mod_cast hj))
-    (bandBound_frequency_ratio (productStrip s) hk (fun _ => hj)
-      (abs_nonneg (l : ℝ)) (fun _ => le_rfl))
-    (lifted_amplitude_angularIndependent (slowGeometry c ho hR) ha hj) hd i
-  have hs := class_slice (s := s) (w := fun n x =>
-    (Real.sqrt (s.zeta x) * P n x) * (Real.sqrt (s.zeta x) * P n x)) hh
-  apply class_congr hs
-  intro n x hx
-  exact (orderedKernel_eq_fullCoefficient c ho hR a (amplitude a j) (amplitude b l)
-    l n hx (hk n)
-    (((hΦ n).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp))
-    (fun r => ((((blockAmplitude_class hb hl r).smooth n).contDiffAt
-      (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp))) i).symm
 
 /-- Oscillatory input blocks have no stored velocity at harmonic zero. -/
 def ZeroMode (b : CorrectionState.HarmonicBlock D) : Prop :=
@@ -295,30 +249,6 @@ theorem orderedKernel_zero_right (g : HarmonicResidual.Frame D) (k : ℝ) (Φ : 
   simp only [orderedKernel, Pi.zero_apply, mul_zero]
   fin_cases i <;> simp [angularGenerator, derivativeCoefficient, along]
 
-theorem orderedKernel_raw_class_all {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hdiv : ModeSolenoidal s c a)
-    (j l : ℤ) (i : Fin 3) :
-    MemClass s (fun n x => (Real.sqrt (s.zeta x) * P n x) *
-      (Real.sqrt (s.zeta x) * P n x)) (α + β - κ)
-      (fun n x => orderedKernel (HarmonicResidual.contextFrame c n) (a.frequency n)
-        (a.phase n) (a.angularFrequency n) l (amplitude a j n) (amplitude b l n) x i) := by
-  by_cases hj : j = 0
-  · subst j
-    simpa only [amplitude_zero ha0, orderedKernel_zero_left] using
-      (MemClass.zero (s := s) (α := α + β - κ) (E := ℂ)
-        (fun n x _ => mul_self_nonneg (Real.sqrt (s.zeta x) * P n x)))
-  by_cases hl : l = 0
-  · subst l
-    simpa only [amplitude_zero hb0, orderedKernel_zero_right] using
-      (MemClass.zero (s := s) (α := α + β - κ) (E := ℂ)
-        (fun n x _ => mul_self_nonneg (Real.sqrt (s.zeta x) * P n x)))
-  exact orderedKernel_raw_class c ho hR ha hb hΦ hk hdiv hj hl i
 
 /-- A common finite range is fixed for the whole family, not chosen anew on
 each band. This is the finiteness needed by the uniform class estimates. -/
@@ -358,48 +288,7 @@ theorem transport_convolution (g : HarmonicResidual.Frame D) (k : ℝ) (Φ : D �
     differentiate_apply, rotate_apply, div_eq_mul_inv]
   ring
 
-theorem transport_raw_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hN : a.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hdiv : ModeSolenoidal s c a)
-    (m : ℤ) (i : Fin 3) :
-    MemClass s (fun n x => (Real.sqrt (s.zeta x) * P n x) *
-      (Real.sqrt (s.zeta x) * P n x)) (α + β - κ)
-      (fun n x => HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-        (a.frequency n) (a.phase n) (a.angularFrequency n)
-        (blockAmplitude a n) (blockAmplitude b n) i m x) := by
-  have hh := MemClass.sum (harmonicRange N)
-    (fun j n x => orderedKernel (HarmonicResidual.contextFrame c n) (a.frequency n)
-      (a.phase n) (a.angularFrequency n) (m - j) (amplitude a j n)
-      (amplitude b (m - j) n) x i)
-    (fun n x _ => mul_self_nonneg (Real.sqrt (s.zeta x) * P n x))
-    (fun j _ => orderedKernel_raw_class_all c ho hR ha hb ha0 hb0 hΦ hk hdiv j (m - j) i)
-  apply class_congr hh
-  intro n x _
-  exact (transport_convolution _ _ _ _ _ _ (harmonicRange N)
-    (fun r => band_support_range (HarmonicResidual.band_realCoefficients (hN.1 n r))) m x i).symm
 
-theorem transport_wave_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hN : a.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain)
-    (hk : ∀ n, a.frequency n ≠ 0) (hdiv : ModeSolenoidal s c a)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (m : ℤ) (i : Fin 3) :
-    WaveClass s P (α + β - κ)
-      (fun n x => HarmonicResidual.transport (HarmonicResidual.contextFrame c n)
-        (a.frequency n) (a.phase n) (a.angularFrequency n)
-        (blockAmplitude a n) (blockAmplitude b n) i m x) :=
-  wave_square_weight_wave
-    (transport_raw_class c ho hR ha hb ha0 hb0 hN hΦ hk hdiv m i)
-    ho.weight_le_one hP0 hP1
 
 
 /-- Coefficients evaluated using the original label's carrier. -/
@@ -452,55 +341,8 @@ noncomputable def nonlinearCoefficients (c : CorrectionState.Context D)
     (a b : CorrectionState.HarmonicBlock D) : HarmonicResidual.BlockCoefficients D :=
   blockTransport c a a b + blockTransport c a b a + blockTransport c a b b
 
-theorem mixed_wave_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hda : ModeSolenoidal s c a) (hdb : ModeSolenoidal s c (withCarrier a b))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (j : ℤ) (i : Fin 3) :
-    WaveClass s P (α + β - κ) (fun n x =>
-      blockTransport c a a b n i j x + blockTransport c a b a n i j x) := by
-  have hab := transport_wave_class c ho hR ha hb ha0 hb0 hM hΦ hk hda hP0 hP1 j i
-  have hba := transport_wave_class c ho hR (a := withCarrier a b) hb ha hb0 ha0 hN
-    hΦ hk hdb hP0 hP1 j i
-  have hba' : WaveClass s P (α + β - κ)
-      (fun n x => blockTransport c a b a n i j x) := by
-    simp only [blockTransport, withCarrier, add_comm β α] at hba ⊢
-    exact hba
-  exact hab.add hba'
 
-theorem square_wave_class {s : StripData D} {κ β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (a : CorrectionState.HarmonicBlock D) {b : CorrectionState.HarmonicBlock D} {N : ℕ}
-    (hb : b.WaveBounds s P β) (hb0 : ZeroMode b) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hdb : ModeSolenoidal s c (withCarrier a b))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (j : ℤ) (i : Fin 3) :
-    WaveClass s P (β + β - κ) (fun n x => blockTransport c a b b n i j x) :=
-  transport_wave_class c ho hR (a := withCarrier a b) hb hb hb0 hb0 hN
-    hΦ hk hdb hP0 hP1 j i
 
-theorem nonlinearCoefficients_wave_class {s : StripData D} {κ α β : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hda : ModeSolenoidal s c a) (hdb : ModeSolenoidal s c (withCarrier a b))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) (j : ℤ) (i : Fin 3) :
-    WaveClass s P (min (α + β - κ) (β + β - κ))
-      (fun n x => nonlinearCoefficients c a b n i j x) := by
-  exact ((mixed_wave_class c ho hR ha hb ha0 hb0 hM hN hΦ hk hda hdb hP0 hP1 j i).mono_exponent
-    (min_le_left _ _)).add ((square_wave_class c ho hR a hb hb0 hN hΦ hk hdb hP0 hP1 j i).mono_exponent
-      (min_le_right _ _))
 
 
 
@@ -809,35 +651,6 @@ theorem residualBlock_wave_update_split {U : Set D} (hU : IsOpen U)
     waveChange_projection_split c u₀ a b g A₀ A₁ hA n i]
   rfl
 
-/-- Mean-wave and wave-wave terms retain their separate gains until the
-final minimum. No class hypothesis is imposed on their output. -/
-theorem interactionBlock_class {s : StripData D} {κ α β H : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {u : CorrectionState.State D} (hm : MeanIncrementBounds.IncrementBounds s H u.mean)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : ZeroMode a) (hb0 : ZeroMode b) (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hda : ModeSolenoidal s c a) (hdb : ModeSolenoidal s c (withCarrier a b))
-    (hNormal : ∀ i, UnweightedClass s 0 (fun n x => slowNormal c ho hR a.phase n x i))
-    (hFreq : BandBound s (-(1 / 2)) a.frequency)
-    (hAng : BandBound s (-(1 / 2)) (fun n => (a.angularFrequency n : ℝ)))
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    (interactionBlock c u a b).WaveBounds s P
-      (min (β + H - 1 / 2) (min (α + β - κ) (β + β - κ))) := by
-  intro i j hj
-  have hmean := realMeanCross_class c ho hκ hR hm (b := withCarrier a b) hb hNormal hFreq hAng hP0 hj i
-  have hnon m := nonlinearCoefficients_wave_class c ho hR ha hb ha0 hb0 hM hN hΦ hk hda hdb hP0 hP1 m i
-  have hn := realCoefficient_class (fun n => nonlinearCoefficients c a b n i) j (hnon j) (hnon (-j))
-  apply class_congr ((hmean.mono_exponent (min_le_left _ _)).add
-    (hn.mono_exponent (min_le_right _ _)))
-  intro n x _
-  change _ = HarmonicResidual.nonconstant (HarmonicResidual.realCoefficients
-    (meanCross c u.mean (withCarrier a b) n i + nonlinearCoefficients c a b n i)) j x
-  rw [nonconstant_apply_of_ne _ hj, realCoefficients_add]
-  rfl
 
 /-! ## Extracting the actual divergence condition -/
 
@@ -950,46 +763,7 @@ theorem waveBounds_smooth {s : StripData D} {P : ℕ → D → ℝ} {α : ℝ}
 
 
 
-noncomputable def waveResidualDifferenceBlock (c : CorrectionState.Context D)
-    (u₀ u₁ : CorrectionState.State D) (a b : CorrectionState.HarmonicBlock D)
-    (G g A₀ A₁ : HarmonicResidual.BlockCoefficients D) : CorrectionState.HarmonicBlock D where
-  velocity := fun n i => (HarmonicResidual.residualBlock c u₁ (addBlock a b) (G + g) A₁).velocity n i -
-    (HarmonicResidual.residualBlock c u₀ a G A₀).velocity n i
-  pressure := fun _ => 0
-  frequency := a.frequency
-  phase := a.phase
-  angularFrequency := a.angularFrequency
 
-theorem waveResidualDifferenceBlock_field (c : CorrectionState.Context D)
-    (u₀ u₁ : CorrectionState.State D) (a b : CorrectionState.HarmonicBlock D)
-    (G g A₀ A₁ : HarmonicResidual.BlockCoefficients D) (n : ℕ) (x : D × ℝ) (i : Fin 3) :
-    (waveResidualDifferenceBlock c u₀ u₁ a b G g A₀ A₁).oscillation n x i =
-      (HarmonicResidual.residualBlock c u₁ (addBlock a b) (G + g) A₁).oscillation n x i -
-      (HarmonicResidual.residualBlock c u₀ a G A₀).oscillation n x i := by
-  simp only [waveResidualDifferenceBlock, CorrectionState.HarmonicBlock.oscillation,
-    HarmonicResidual.field_sub, Complex.sub_re]
-  rfl
 
-/-- The grouped difference is the change in the actual good nonconstant PDE
-residual. Cross-label products vanish by the disjoint supports contained in
-`ExtractionRegular`; finite sums alone are not used as uniform estimates. -/
-theorem grouped_wave_change {ι : Type*} {U : Set D} (hU : IsOpen U)
-    {c : CorrectionState.Context D} {u₀ u₁ : CorrectionState.State D}
-    {labels : ℕ → Finset ι} {a b : ι → CorrectionState.HarmonicBlock D}
-    {G g A₀ A₁ : ι → HarmonicResidual.BlockCoefficients D}
-    (hrep₀ : HarmonicResidual.BlockRepresentation labels a G A₀ u₀)
-    (hrep₁ : HarmonicResidual.BlockRepresentation labels (fun l => addBlock (a l) (b l))
-      (fun l => G l + g l) A₁ u₁) {n : ℕ}
-    (h₀ : HarmonicResidual.ExtractionRegular U c u₀ labels a G A₀ n)
-    (h₁ : HarmonicResidual.ExtractionRegular U c u₁ labels (fun l => addBlock (a l) (b l))
-      (fun l => G l + g l) A₁ n)
-    {x : D × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    HarmonicResidual.stateGoodWaveResidual c u₁ n x i -
-      HarmonicResidual.stateGoodWaveResidual c u₀ n x i =
-      ∑ l ∈ labels n, (waveResidualDifferenceBlock c u₀ u₁ (a l) (b l)
-        (G l) (g l) (A₀ l) (A₁ l)).oscillation n x i := by
-  rw [HarmonicResidual.stateGoodWaveResidual_grouped hU hrep₁ h₁ hx i,
-    HarmonicResidual.stateGoodWaveResidual_grouped hU hrep₀ h₀ hx i]
-  simp only [waveResidualDifferenceBlock_field, Finset.sum_sub_distrib]
 
 end NavierStokes.HarmonicWaveInteraction

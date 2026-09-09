@@ -142,15 +142,11 @@ end CurrentState
 
 /-! The actual label set is unchanged by every correction. -/
 
-theorem step_labels {B N0 : ℕ} (x : CycleState (Index B N0)) :
-    (x.step (ActualCycleParameters.fixedParameters B N0) (ActualPrimary.commonContext B)).coefficients.labels =
-      x.coefficients.labels := rfl
 
 noncomputable def state (B N0 : ℕ) : ℕ → CycleState (Index B N0) :=
   CycleState.iterate (fun _ => ActualCycleParameters.fixedParameters B N0)
     (ActualPrimary.commonContext B) (ActualInitialization.initialCycleState B N0)
 
-theorem state_zero (B N0 : ℕ) : state B N0 0 = ActualInitialization.initialCycleState B N0 := rfl
 
 theorem state_succ (B N0 n : ℕ) :
     state B N0 (n+1) = (state B N0 n).step (ActualCycleParameters.fixedParameters B N0)

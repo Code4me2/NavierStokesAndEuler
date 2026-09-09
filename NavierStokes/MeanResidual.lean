@@ -295,8 +295,6 @@ noncomputable def fluxDifference (base mean osc : Components) (i j : Fin 3) : Sc
 theorem covariance_smooth {osc : Components} (ho : ∀ i, ContDiff ℝ ∞ (osc i)) (i j : Fin 3) :
     ContDiff ℝ ∞ (covariance osc i j) := average_smooth ((ho i).mul (ho j))
 
-theorem covariance_symm (osc : Components) (i j : Fin 3) : covariance osc i j = covariance osc j i := by
-  simp only [covariance, mul_comm]
 
 
 

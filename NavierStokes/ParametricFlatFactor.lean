@@ -68,10 +68,6 @@ theorem coefficient_slice_contDiff {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞
   hb.comp (contDiff_const.prodMk contDiff_id)
 
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem factor_at_zero {c : ℝ} (hc : 0 < c) (j : ℕ) (b : E × ℝ → ℝ) (p : E) :
-    factor c j b (p, 0) = b (p, 0) / (2 * c) :=
-  FlatPrimitiveFactor.factor_at_zero hc j (fun u => b (p, u))
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
 theorem primitive_factorization (c : ℝ) (j : ℕ) (b : E × ℝ → ℝ)
@@ -224,12 +220,6 @@ theorem primitive_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ)
     (factor_contDiff hc j hb)
 
 
-theorem factor_sqrt_contDiffAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ)
-    {b : E × ℝ → ℝ} (hb : ContDiff ℝ ∞ b) (p : E) (hbp : 0 < b (p, 0)) :
-    ContDiffAt ℝ ∞ (fun y => Real.sqrt (factor c j b y)) (p, 0) := by
-  apply (factor_contDiff hc j hb).contDiffAt.sqrt
-  rw [factor_at_zero hc j b p]
-  exact (div_pos hbp (mul_pos (by norm_num) hc)).ne'
 
 end FiniteParameters
 

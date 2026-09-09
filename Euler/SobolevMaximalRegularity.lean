@@ -40,20 +40,6 @@ theorem maximal_limit_restriction {q : ℕ} (T : ℝ) (hT : 0 ≤ T)
   limit_restriction_ae T hT (restrictOperator period (by omega : q+1 ≤ 2+q))
     (fun n => maximalApproximation period q T n u) u U hU (maximalApproximation_low_tendsto period q T u)
 
-/-- Actual viscous mild solutions with continuous Hq forcing and H^(q+1) values possess full H^(q+2) regularity in Bochner L² time.
-The stronger field is constructed from genuine heat approximations and identified with the original field almost everywhere. -/
-theorem viscous_mild_maximal_regularity {q : ℕ} (ν : ℝ) (hν : 0 < ν) (T : ℝ) (hT : 0 ≤ T)
-    (u₀ : SobolevSpace period (q+1)) (f : C(Icc (0 : ℝ) T, SobolevSpace period q))
-    (u : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)))
-    (hsol : ∀ t : Icc (0 : ℝ) T,
-      u t = heatOperator period (q+1) (2*ν*t.val).toNNReal u₀ +
-        ∫ r in (0 : ℝ)..t.val, heatKernel period q ν hν r (extendPath T hT f (t.val-r))) :
-    ∃ U : TimeLp T (SobolevSpace period (2+q)),
-      ((fun t => restrictOperator period (by omega : q+1 ≤ 2+q) (U t)) =ᵐ[timeMeasure T] extendPath T hT u) ∧
-      Filter.Tendsto (fun n => pathLp T hT (maximalApproximation period q T n u)) Filter.atTop (𝓝 U) := by
-  refine (exists_maximal_mild_limit period ν hν T hT u₀ f u hsol).imp ?_
-  intro U hU
-  exact ⟨maximal_limit_restriction period T hT u U hU, hU⟩
 
 
 end EulerSobolevMaximalRegularity

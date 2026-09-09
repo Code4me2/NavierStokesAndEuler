@@ -596,22 +596,6 @@ theorem weight_viscosity {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr) (h : ℝ) :
       rw [← Real.rpow_add hQr, ha]
     _ = _ := by ring
 
-theorem commonFrame_chart (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
-    (i gap : ℕ) :
-    FrameOn {x : Lift | 0 < x.1} (chartEquiv h hQ hQr gap)
-      (velocityWeight h Q Qr) (ratioPower Q Qr (1/2))
-      (commonFrame h Q i) (commonFrame h Qr (i+gap)) := by
-  constructor
-  · intro x hx
-    exact congrArg Prod.fst (cylinderChange_radial hQ hQr h i gap (x := (x,0)) hx)
-  · intro x hx
-    exact congrArg Prod.fst (cylinderChange_axial hQ hQr h i gap (x,0))
-  · intro x hx
-    rw [weight_time hQ hQr]
-    exact congrArg Prod.fst (cylinderChange_temporal hQ hQr h i gap (x,0))
-  · intro x hx
-    rfl
-  · exact weight_viscosity hQ hQr h
 
 /-- Association and the `(T,Z)` order used by the correction state. -/
 noncomputable def associatedToLift : Associated ≃ₗᵢ[ℝ] Lift :=
@@ -632,39 +616,10 @@ noncomputable def associatedChart (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 <
 noncomputable def associatedFrame (h Q : ℝ) (i : ℕ) : HarmonicResidual.Frame Associated :=
   StateReindex.frame associatedToLift (commonFrame h Q i)
 
-theorem associatedFrame_chart (h : ℝ) {Q Qr : ℝ} (hQ : 0 < Q) (hQr : 0 < Qr)
-    (i gap : ℕ) :
-    FrameOn {x : Associated | 0 < x.1.1} (associatedChart h hQ hQr gap)
-      (velocityWeight h Q Qr) (ratioPower Q Qr (1/2))
-      (associatedFrame h Q i) (associatedFrame h Qr (i+gap)) := by
-  have H := commonFrame_chart h hQ hQr i gap
-  constructor
-  · intro x hx
-    apply associatedToLift.injective
-    simpa only [associatedChart, associatedFrame, StateReindex.frame, StateReindex.vector,
-      ParticularWaveBounds.reindexVector, ContinuousLinearEquiv.trans_apply,
-      LinearIsometryEquiv.coe_toContinuousLinearEquiv, LinearIsometryEquiv.apply_symm_apply,
-      LinearIsometryEquiv.map_smul] using H.radial (associatedToLift x) hx
-  · intro x hx
-    apply associatedToLift.injective
-    simpa only [associatedChart, associatedFrame, StateReindex.frame, StateReindex.vector,
-      ParticularWaveBounds.reindexVector, ContinuousLinearEquiv.trans_apply,
-      LinearIsometryEquiv.coe_toContinuousLinearEquiv, LinearIsometryEquiv.apply_symm_apply,
-      LinearIsometryEquiv.map_smul] using H.axial (associatedToLift x) hx
-  · intro x hx
-    apply associatedToLift.injective
-    simpa only [associatedChart, associatedFrame, StateReindex.frame, StateReindex.vector,
-      ParticularWaveBounds.reindexVector, ContinuousLinearEquiv.trans_apply,
-      LinearIsometryEquiv.coe_toContinuousLinearEquiv, LinearIsometryEquiv.apply_symm_apply,
-      LinearIsometryEquiv.map_smul] using H.time (associatedToLift x) hx
-  · intro x hx
-    rfl
-  · exact H.viscosity
 
 /-- The positive-radius free lift.  Every auxiliary variable remains free. -/
 def positiveLift : Set Associated := {x | 0 < x.1.1}
 
-theorem positiveLift_open : IsOpen positiveLift := isOpen_lt continuous_const continuous_fst.fst
 
 /-- Concrete primitive coherence needed by a band solve.  These are field,
 phase, and explicit operator identities, never an identity of residuals or
@@ -685,23 +640,6 @@ structure BandCoherence (D : ParticularWaveAssembly.AssemblyData PhysicalParticu
     D.carrierBlock D.carrierBlock D.gaussianInput D.aliasInput D.gaussianInput D.aliasInput
     n D.reference.band
 
-theorem BandCoherence.source_on
-    {D : ParticularWaveAssembly.AssemblyData PhysicalParticularWave.Parameter}
-    {h Q Qr : ℝ} {hQ : 0 < Q} {hQr : 0 < Qr} {i gap n : ℕ}
-    (H : BandCoherence D h hQ hQr i gap n) (j : ℤ) {x : Associated} (hx : x ∈ positiveLift) :
-    ParticularWaveAssembly.residualSource D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j n x = transportedResidualSource D h Q Qr gap j x := by
-  have hf : FrameOn positiveLift (associatedChart h hQ hQr gap)
-      (velocityWeight h Q Qr) (ratioPower Q Qr (1/2))
-      (HarmonicResidual.contextFrame D.context n)
-      (HarmonicResidual.contextFrame D.context D.reference.band) := by
-    rw [H.targetFrame, H.referenceFrame]
-    exact associatedFrame_chart h hQ hQr i gap
-  have he := residualSource_naturality positiveLift_open (ratioPower_pos hQ hQr (1/2)).ne'
-    hf H.base H.mean H.block j hx
-  rw [weight_source hQ hQr] at he
-  rw [transportedResidualSource_apply D h hQ hQr]
-  exact he
 
 /-- Primitive support assumptions, allowing arbitrary zero-mode aliases. -/
 structure PositiveSupport (b : CorrectionState.HarmonicBlock Associated)
@@ -729,47 +667,8 @@ theorem PositiveSupport.source_zero
   by_contra hn
   exact hx (H.positive (hs hn))
 
-/-- Full free-variable equality, including the complement of the annular
-cells, derived from primitive field coherence and primitive support. -/
-theorem BandCoherence.source_eq
-    {D : ParticularWaveAssembly.AssemblyData PhysicalParticularWave.Parameter}
-    {h Q Qr : ℝ} {hQ : 0 < Q} {hQr : 0 < Qr} {i gap n : ℕ}
-    (H : BandCoherence D h hQ hQr i gap n)
-    (hn : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band) (j : ℤ) :
-    ParticularWaveAssembly.residualSource D.context D.state D.carrierBlock
-      D.gaussianInput D.aliasInput j n = transportedResidualSource D h Q Qr gap j := by
-  funext x
-  by_cases hx : x ∈ positiveLift
-  · exact H.source_on j hx
-  · rw [hn.source_zero D.context D.state j hx, transportedResidualSource_apply D h hQ hQr]
-    have hyr : (parameterChange h Q Qr x.1, coverPower gap x.2) ∉ positiveLift := by
-      intro hy
-      apply hx
-      exact (mul_pos_iff_of_pos_left (ratioPower_pos hQ hQr (1/2))).mp hy
-    rw [referenceSource, hr.source_zero D.context D.state j hyr, smul_zero]
 
-/-- The actual target-source Volterra solve is the coherently transported
-one; no equality of outputs is supplied as an assumption. -/
-theorem BandCoherence.residualBandAmplitude_eq
-    {D : ParticularWaveAssembly.AssemblyData PhysicalParticularWave.Parameter}
-    {h Q Qr : ℝ} {hQ : 0 < Q} {hQr : 0 < Qr} {i gap n : ℕ}
-    (H : BandCoherence D h hQ hQr i gap n)
-    (hn : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    (K : ℝ) (j : ℤ) :
-    residualBandAmplitude D h hQ hQr gap K j n = bandAmplitude D h hQ hQr gap K j :=
-  PhysicalParticularWave.residualBandAmplitude_eq D h hQ hQr gap K j n (H.source_eq hn hr j)
 
-theorem BandCoherence.residualBandPressure_eq
-    {D : ParticularWaveAssembly.AssemblyData PhysicalParticularWave.Parameter}
-    {h Q Qr : ℝ} {hQ : 0 < Q} {hQr : 0 < Qr} {i gap n : ℕ}
-    (H : BandCoherence D h hQ hQr i gap n)
-    (hn : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput n)
-    (hr : PositiveSupport D.carrierBlock D.gaussianInput D.aliasInput D.reference.band)
-    (K : ℝ) (j : ℤ) :
-    residualBandPressure D h hQ hQr gap K j n = bandPressure D h hQ hQr gap K j :=
-  PhysicalParticularWave.residualBandPressure_eq D h hQ hQr gap K j n (H.source_eq hn hr j)
 
 /-! ## A lift-coherence invariant preserved by actual state addition -/
 

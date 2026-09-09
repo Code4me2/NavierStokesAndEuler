@@ -378,66 +378,16 @@ def logSlope (E : ℝ → ℝ) (y : ℝ) : ℝ := 1 / 2 + deriv E y / E y
 theorem baseE_contDiff (lam e0 : ℝ) : ContDiff ℝ ∞ (baseE lam e0) :=
   contDiff_const.mul (contDiff_const.mul contDiff_id).exp
 
-theorem modifiedE_contDiff (lam e0 y0 : ℝ) (c : Coeff) :
-    ContDiff ℝ ∞ (modifiedE lam e0 y0 c) :=
-  (baseE_contDiff lam e0).mul
-    (contDiff_const.add ((relative_contDiff c).comp (contDiff_id.sub contDiff_const)))
 
 theorem baseE_pos (lam e0 y : ℝ) (he0 : 0 < e0) : 0 < baseE lam e0 y :=
   mul_pos he0 (Real.exp_pos _)
 
-theorem modifiedE_sub_support (lam e0 y0 : ℝ) (c : Coeff) :
-    support (modifiedE lam e0 y0 c - baseE lam e0) ⊆
-      Icc (y0 - 3 / 20) (y0 + 43 / 20) := by
-  intro y hy
-  have hn : relative c (y - y0) ≠ 0 := by
-    intro hz
-    exact hy (by simp [modifiedE, hz])
-  have hs := relative_support c hn
-  constructor <;> linarith [hs.1, hs.2]
 
 
-/-- Choosing `y0 = T - 3` places the whole edit strictly inside `(T - 4, T)`. -/
-theorem modifiedE_sub_tsupport (lam e0 y0 : ℝ) (c : Coeff) :
-    tsupport (modifiedE lam e0 y0 c - baseE lam e0) ⊆ Ioo (y0 - 1) (y0 + 3) := by
-  apply (closure_minimal (modifiedE_sub_support lam e0 y0 c) isClosed_Icc).trans
-  intro y hy
-  constructor <;> linarith [hy.1, hy.2]
 
-theorem modifiedE_unchanged (lam e0 y0 : ℝ) (c : Coeff) {y : ℝ}
-    (hy : y ∉ Ioo (y0 - 1) (y0 + 3)) : modifiedE lam e0 y0 c y = baseE lam e0 y := by
-  by_contra hn
-  apply hy
-  apply modifiedE_sub_tsupport lam e0 y0 c
-  exact subset_closure (show (modifiedE lam e0 y0 c - baseE lam e0) y ≠ 0 from sub_ne_zero.mpr hn)
 
-theorem baseE_hasDerivAt (lam e0 y : ℝ) :
-    HasDerivAt (baseE lam e0) (baseE lam e0 y * (-1 / 2 - lam)) y := by
-  convert! (((hasDerivAt_id y).const_mul (-1 / 2 - lam)).exp).const_mul e0 using 1
-  simp [baseE]
-  ring
 
-theorem modifiedE_hasDerivAt (lam e0 y0 : ℝ) (c : Coeff) (y : ℝ) :
-    HasDerivAt (modifiedE lam e0 y0 c)
-      (baseE lam e0 y * (-1 / 2 - lam) * (1 + relative c (y - y0)) +
-        baseE lam e0 y * deriv (relative c) (y - y0)) y := by
-  have hr := (((relative_contDiff c).differentiable (by simp)).differentiableAt.hasDerivAt).comp y
-    ((hasDerivAt_id y).sub_const y0)
-  convert! (baseE_hasDerivAt lam e0 y).mul (hr.const_add 1) using 1
-  simp
 
-theorem modifiedE_logSlope (lam e0 y0 : ℝ) (c : Coeff) (y : ℝ) (he0 : e0 ≠ 0)
-    (hpos : 1 + relative c (y - y0) ≠ 0) :
-    logSlope (modifiedE lam e0 y0 c) y =
-      -lam + deriv (relative c) (y - y0) / (1 + relative c (y - y0)) := by
-  have hb : baseE lam e0 y ≠ 0 := mul_ne_zero he0 (Real.exp_ne_zero _)
-  unfold logSlope
-  rw [(modifiedE_hasDerivAt lam e0 y0 c y).deriv]
-  change 1 / 2 +
-    (baseE lam e0 y * (-1 / 2 - lam) * (1 + relative c (y - y0)) +
-      baseE lam e0 y * deriv (relative c) (y - y0)) /
-    (baseE lam e0 y * (1 + relative c (y - y0))) = _
-  field_simp ; ring
 
 theorem weighted_translate_integral (s y0 : ℝ) (f : ℝ → ℝ) :
     (∫ y, Real.exp (s * y) * f (y - y0)) =
@@ -541,13 +491,6 @@ theorem positive (hlam : 0 < lam) (e0 y0 δ y : ℝ) (he0 : 0 < e0)
   exact (positive_and_slope_of_small lam hlam (B.coefficients δ) (y - y0)
     (B.small_jets δ hδ (y - y0)).1 (B.small_jets δ hδ (y - y0)).2).1
 
-theorem logSlope_le (hlam : 0 < lam) (e0 y0 δ y : ℝ) (he0 : 0 < e0)
-    (hδ : δ ∈ Ioo (-B.radius) B.radius) :
-    logSlope (modifiedE lam e0 y0 (B.coefficients δ)) y ≤ -lam / 2 := by
-  have hp := positive_and_slope_of_small lam hlam (B.coefficients δ) (y - y0)
-    (B.small_jets δ hδ (y - y0)).1 (B.small_jets δ hδ (y - y0)).2
-  rw [modifiedE_logSlope lam e0 y0 (B.coefficients δ) y he0.ne' hp.1.ne']
-  exact hp.2
 
 
 end ResetBranch
@@ -557,34 +500,9 @@ end ResetBranch
 
 
 
-theorem outside_window {a b y0 y : ℝ} (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b)
-    (hy : y ∉ Icc a b) : y ∉ Ioo (y0 - 1) (y0 + 3) := by
-  intro h
-  exact hy ⟨ha.trans h.1.le, h.2.le.trans hb⟩
 
 
-theorem pressure_interval_change (lam e0 y0 a b : ℝ) (c : Coeff)
-    (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b) :
-    (∫ y in Icc a b, (modifiedE lam e0 y0 c y) ^ 2) -
-      (∫ y in Icc a b, (baseE lam e0 y) ^ 2) =
-      e0 ^ 2 * Real.exp (pressureSlope lam * y0) *
-        ∫ y, Real.exp (pressureSlope lam * y) * ((1 + relative c y) ^ 2 - 1) := by
-  have hm : IntegrableOn (fun y => (modifiedE lam e0 y0 c y) ^ 2) (Icc a b) :=
-    ((modifiedE_contDiff lam e0 y0 c).continuous.pow 2).continuousOn.integrableOn_Icc
-  have he : IntegrableOn (fun y => (baseE lam e0 y) ^ 2) (Icc a b) :=
-    ((baseE_contDiff lam e0).continuous.pow 2).continuousOn.integrableOn_Icc
-  rw [← integral_sub hm he, setIntegral_eq_integral_of_forall_compl_eq_zero]
-  · exact pressure_integral_formula lam e0 y0 c
-  · intro y hy
-    rw [modifiedE_unchanged lam e0 y0 c (outside_window ha hb hy), sub_self]
 
-theorem ResetBranch.pressure_interval_neutral {lam : ℝ} (B : ResetBranch lam)
-    (e0 y0 a b δ : ℝ) (ha : a ≤ y0 - 1) (hb : y0 + 3 ≤ b)
-    (hδ : δ ∈ Ioo (-B.radius) B.radius) :
-    (∫ y in Icc a b, (modifiedE lam e0 y0 (B.coefficients δ) y) ^ 2) =
-      ∫ y in Icc a b, (baseE lam e0 y) ^ 2 := by
-  apply sub_eq_zero.mp
-  rw [pressure_interval_change lam e0 y0 a b (B.coefficients δ) ha hb, B.pressure δ hδ, mul_zero]
 
 
 

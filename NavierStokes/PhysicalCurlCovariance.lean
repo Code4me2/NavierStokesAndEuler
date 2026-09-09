@@ -813,25 +813,7 @@ noncomputable def cartesianVelocity (a : ℝ) (B : SpaceTime → ComplexVector) 
   SpatialCurl.spatialCurl (globalCartesianPotential a B)
 
 
-theorem cartesianVelocity_divergence {a : ℝ} (ha : 0 < a)
-    {times : Set ℝ} (hTimes : IsOpen times) {B : SpaceTime → ComplexVector}
-    (hB : ContDiffOn ℝ ∞ B {z | z.1 ∈ times ∧ 0 < z.2 0})
-    (hper : ∀ t r z : ℝ, Periodic (fun θ => B (t, AxisymmetricResidual.pack r θ z)) (2 * Real.pi))
-    (hzero : ∀ z : SpaceTime, z.2 0 ≤ a → B z = 0)
-    {t : ℝ} (ht : t ∈ times) (x : Space) :
-    spatialDivergence (cartesianVelocity a B) t x = 0 :=
-  SpatialCurl.spatialDivergence_spatialCurl_on
-    ((globalCartesianPotential_smoothOn ha hTimes hB hper hzero).of_le
-      (ENat.natCast_lt_of_coe_top_le_withTop le_rfl 2).le) ht x
 
-theorem cartesianVelocity_axis_zero {a : ℝ} (ha : 0 < a)
-    {B : SpaceTime → ComplexVector}
-    (hzero : ∀ z : SpaceTime, z.2 0 ≤ a → B z = 0)
-    (t : ℝ) (x : Space) (hx₀ : x 0 = 0) (hx₁ : x 1 = 0) :
-    cartesianVelocity a B (t, x) = 0 := by
-  apply spatialCurl_zero_of_zero_near
-  apply globalCartesianPotential_zero_germ ha hzero
-  simpa [PolarCharts.radius, PhysicalGraphBounds.radialProjection_apply, hx₀, hx₁] using ha
 
 
 theorem globalCartesianPotential_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
@@ -846,19 +828,6 @@ theorem globalCartesianPotential_forward_germ {a : ℝ} (ha : 0 < a) (j : PolarC
     simpa [PhysicalGraphBounds.radialProjection_apply, CylindricalResidual.chart, PolarCharts.polar] using hy.2.2
   rw [globalCartesianPotential_eq_local ha B hper j hj, cartesianPotential_forward ha j B hy]
 
-theorem globalCartesianPotential_smoothAt_forward {a : ℝ} (ha : 0 < a) (j : PolarCharts.Index)
-    {B : SpaceTime → ComplexVector}
-    (hper : ∀ t r z : ℝ, Periodic (fun θ => B (t, AxisymmetricResidual.pack r θ z)) (2 * Real.pi))
-    {z : SpaceTime} (hz : z ∈ validCylindrical a j) (hB : ContDiffAt ℝ ∞ B z) :
-    ContDiffAt ℝ ∞ (globalCartesianPotential a B) (z.1, CylindricalResidual.chart z.2) := by
-  have hj : PhysicalGraphBounds.radialProjection (z.1, CylindricalResidual.chart z.2) ∈
-      PolarCharts.chartDomain a j := by
-    simpa [PhysicalGraphBounds.radialProjection_apply, CylindricalResidual.chart, PolarCharts.polar] using hz.2.2
-  have hb : ContDiffAt ℝ ∞ B (polarCoordinates a j (z.1, CylindricalResidual.chart z.2)) := by
-    rw [polarCoordinates_forward ha j hz]
-    exact hB
-  exact (cartesianPotential_smoothAt ha j hb).congr_of_eventuallyEq
-    (globalCartesianPotential_germ_local ha B hper j hj)
 
 /-- Integer angular frequency makes the complete potential periodic,
 including its normal coefficient and inverse carrier. -/
@@ -887,49 +856,6 @@ theorem vectorPotential_fullTurn {D : Type} [NormedAddCommGroup D] [NormedSpace 
   rw [CopyAngularInvariance.vectorMode_translate hc hΦ, he,
     Complex.exp_int_mul_two_pi_mul_I, one_smul]
 
-/-- The end-to-end band reconstruction uses a single explicitly constructed
-Cartesian potential. Only primitive phase/amplitude compatibility and
-periodicity are inputs; potential and curl compatibility are conclusions. -/
-theorem reference_correctedWave_constructed {Q : ℝ} (hQ : 0 < Q) (h : ℝ) (k : ℕ)
-    {U : Set Cylinder} (hU : IsOpen U) (hR : ∀ x ∈ U, x.1.1 ≠ 0)
-    {K L : ℝ} (hK : K ≠ 0) (hL : L ≠ 0)
-    {Φ : Cylinder → ℝ} {a : Cylinder → ComplexVector}
-    (hΦ : ContDiffOn ℝ ∞ Φ U) (ha : ContDiffOn ℝ ∞ a U)
-    (hn : ∀ x ∈ U, phaseNormal PhysicalResidualBridge.ScaledGraph.radius
-      (commonGraph Q h k).radial PhysicalResidualBridge.ScaledGraph.angular
-      (commonGraph Q h k).axial Φ x ≠ 0)
-    (ht : ∀ x ∈ U, normalDot (phaseNormal PhysicalResidualBridge.ScaledGraph.radius
-      (commonGraph Q h k).radial PhysicalResidualBridge.ScaledGraph.angular
-      (commonGraph Q h k).axial Φ x) (a x) = 0)
-    (Ψ : SpaceTime → ℝ) (v : SpaceTime → ComplexVector)
-    (hphase : ∀ z ∈ (commonGraph Q h k).source U,
-      K * Ψ z = L * Φ ((commonGraph Q h k).map z))
-    (hamplitude : ∀ z ∈ (commonGraph Q h k).source U,
-      v z = Q ^ (-CoordinateAlgebra.A h) • a ((commonGraph Q h k).map z))
-    (hper : ∀ t r z : ℝ, Periodic
-      (fun θ => referencePotential K Ψ v (t, AxisymmetricResidual.pack r θ z)) (2 * Real.pi))
-    {t : ℝ} {q : Space} (hz : (t, q) ∈ (commonGraph Q h k).source U)
-    {δ : ℝ} (hδ : 0 < δ) (j : PolarCharts.Index) (hchart : (t, q) ∈ validCylindrical δ j)
-    (i : Fin 3) :
-    (vectorMode L Φ (CurlClassBounds.realizedCoefficient L PhysicalResidualBridge.ScaledGraph.radius
-      (commonGraph Q h k).radial PhysicalResidualBridge.ScaledGraph.angular
-      (commonGraph Q h k).axial Φ a) ((commonGraph Q h k).map (t, q)) i).re =
-      Q ^ CoordinateAlgebra.A h * CylindricalResidual.frame (-(q 1))
-        (SpatialCurl.spatialCurl (globalCartesianPotential δ (referencePotential K Ψ v))
-          (t, CylindricalResidual.chart q)) i := by
-  let G := commonGraph Q h k
-  have hgeom := ScaledGraph.geometry G hU hR
-  have hBs := CurlClassBounds.vectorPotential_contDiffOn hgeom L hΦ ha hn
-  have hm : ContDiffAt ℝ ∞ G.map (t, q) := G.map_smoothAt
-    (mul_pos (Real.rpow_pos_of_pos hQ _) hz.1).ne'
-  have htarget := ((hBs.contDiffAt (hU.mem_nhds hz.2)).comp (t, q) hm).const_smul (Q ^ (-h))
-  have hEq := referencePotential_eq_on hQ h k hU hK hL hΦ a Ψ v hphase hamplitude
-  have hs : ContDiffAt ℝ ∞ (referencePotential K Ψ v) (t, q) :=
-    htarget.congr_of_eventuallyEq
-      (eventually_of_mem ((G.source_open (Real.rpow_pos_of_pos hQ _) hU).mem_nhds hz) hEq)
-  exact reference_correctedWave hQ h k hU hR hK hL hΦ ha hn ht Ψ v hphase hamplitude hz
-    ((globalCartesianPotential_smoothAt_forward hδ j hper hchart hs).differentiableAt (by simp))
-    (globalCartesianPotential_forward_germ hδ j (referencePotential K Ψ v) hper hchart) i
 
 end
 

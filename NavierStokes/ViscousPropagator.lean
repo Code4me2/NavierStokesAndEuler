@@ -198,36 +198,6 @@ theorem norm_le_envelope_mul_integral_on
   · intro t ht
     exact False.elim (hab (ht.1.trans ht.2))
 
-/-- A source bounded by `K * P` retains that envelope and costs at most the
-slot length. The scalar `K` may be any prescribed small-scale power times weights. -/
-theorem zero_initial_source_bound
-    {a b K : ℝ} {u f : ℝ → H} (A : ℝ → H →L[ℝ] H)
-    (rate P : ℝ → ℝ) {μ : ℝ} (hμ : 0 ≤ μ)
-    (hPpos : ∀ t, 0 < P t) (hP : ∀ t, HasDerivAt P (rate t * P t) t)
-    (hu : ContinuousOn u (Icc a b)) (hf : ContinuousOn f (Icc a b))
-    (hode : ∀ t ∈ Ico a b,
-      HasDerivWithinAt u (A t (u t) + f t) (Ici t) t)
-    (hA : ∀ t ∈ Ico a b, ∀ x : H,
-      ⟪x, A t x⟫_ℝ ≤ (rate t + μ) * ‖x‖ ^ 2)
-    (hinit : u a = 0) (hsource : ∀ t ∈ Icc a b, ‖f t‖ ≤ K * P t) :
-    ∀ t ∈ Icc a b,
-      ‖u t‖ ≤ Real.exp (μ * (t - a)) * P t * (K * (t - a)) := by
-  have hcP : Continuous P := continuous_iff_continuousAt.mpr fun t => (hP t).continuousAt
-  have hq : ContinuousOn (fun s => ‖f s‖ / P s) (Icc a b) :=
-    hf.norm.div hcP.continuousOn (fun s _ => ne_of_gt (hPpos s))
-  have h := norm_le_envelope_mul_integral_on A rate P hμ hPpos hP hu hf hode hA
-  intro t ht
-  have hint : (∫ s in a..t, ‖f s‖ / P s) ≤ K * (t - a) := by
-    have hsub : Icc a t ⊆ Icc a b := Icc_subset_Icc_right ht.2
-    have hi := intervalIntegral.integral_mono_on (μ := volume) ht.1
-      ((hq.mono hsub).intervalIntegrable_of_Icc ht.1)
-      (continuous_const.intervalIntegrable a t) (fun s hs =>
-        (div_le_iff₀ (hPpos s)).mpr (hsource s (hsub hs)))
-    simpa only [intervalIntegral.integral_const, smul_eq_mul, mul_comm] using hi
-  have hh := h t ht
-  simp only [hinit, norm_zero, zero_div, zero_add] at hh
-  exact hh.trans (mul_le_mul_of_nonneg_left hint
-    (mul_nonneg (Real.exp_pos _).le (hPpos t).le))
 
 
 /-- The two real modal coordinates with their Euclidean, not product-sup, norm. -/

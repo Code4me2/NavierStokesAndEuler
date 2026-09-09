@@ -173,8 +173,6 @@ variable (a : ℕ → X → V) (ha : ∀ j, ContDiff ℝ ∞ (a j))
 def boundSum (j : ℕ) : ℝ :=
   ∑ m ∈ Finset.range j, ∑ k ∈ Finset.range j, templateBound (ha j) m j k
 
-theorem boundSum_nonneg (j : ℕ) : 0 ≤ boundSum a ha j :=
-  Finset.sum_nonneg fun m _ => Finset.sum_nonneg fun k _ => templateBound_nonneg (ha j) m j k
 
 theorem templateBound_le_boundSum {m j k : ℕ} (hm : m < j) (hk : k < j) :
     templateBound (ha j) m j k ≤ boundSum a ha j := by
@@ -199,11 +197,7 @@ theorem scale_pos (j : ℕ) : 0 < scale a ha j :=
 theorem scale_ge_one (j : ℕ) : (1 : ℝ) ≤ scale a ha j := by
   exact_mod_cast scale_pos a ha j
 
-theorem scale_strictMono : StrictMono (scale a ha) :=
-  DiagonalScale.doublingEnvelope_strictMono (localScale a ha)
 
-theorem scale_doubling (j : ℕ) : 2 * scale a ha j ≤ scale a ha (j + 1) :=
-  DiagonalScale.doublingEnvelope_growth (localScale a ha) j
 
 theorem boundSum_le_scale (j : ℕ) : boundSum a ha j ≤ (1 / 2 : ℝ) ^ j * scale a ha j := by
   have hs : (2 : ℝ) ^ j * boundSum a ha j ≤ scale a ha j :=

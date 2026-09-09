@@ -176,14 +176,6 @@ theorem iteratedDerivWithin_coefficient (I : Window) (w : ℕ → ℕ → ℝ)
     iteratedDerivWithin m (coefficient I w A n) I.interval x = jet I w A.1 n m x := by
   simpa only [coefficient, Nat.zero_add] using iteratedDerivWithin_jet I w A n 0 m hx
 
-/-- Genuine infinite smoothness on the full compact interval. -/
-theorem contDiffOn_jet (I : Window) (w : ℕ → ℕ → ℝ)
-    (A : CoefficientSpace I w) (n q : ℕ) :
-    ContDiffOn ℝ ∞ (jet I w A.1 n q) I.interval := by
-  apply contDiffOn_of_differentiableOn_deriv
-  intro m hm x hx
-  exact ((hasDerivWithinAt_jet I w A n (q + m) hx).congr_of_mem
-    (fun y hy => iteratedDerivWithin_jet I w A n q m hy) hx).differentiableWithinAt
 
 
 

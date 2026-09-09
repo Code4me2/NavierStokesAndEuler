@@ -62,9 +62,6 @@ theorem common_velocity_smooth (n : ℕ) :
       ((a.commonCorrected s d).amplitude n)) Ω :=
   LocalizedCurlRealization.RawData.common_velocity_smooth h.raw h.cells h.cutoff_support h.cover n
 
-theorem common_potential_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (a.common.curlPotential s d n) Ω :=
-  LocalizedCurlRealization.RawData.common_potential_smooth h.raw h.cells h.cutoff_support h.cover n
 
 
 

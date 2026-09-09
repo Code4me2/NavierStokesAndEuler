@@ -42,12 +42,5 @@ theorem forward_measurePreserving (t : Icc (0 : ℝ) T) :
   · exact ((flowData T hT A).flowHomeomorph 0 t).bijective
   · exact jacobianEvolution_det_one T hT A hdiv t
 
-include hdiv in
-theorem backward_measurePreserving (t : Icc (0 : ℝ) T) :
-    MeasurePreserving ((flowData T hT A).backward t) μ μ := by
-  let e := (flowData T hT A).flowHomeomorph 0 t
-  have hm : MeasurePreserving e.toMeasurableEquiv μ μ :=
-    forward_measurePreserving T hT A hdiv μ t
-  exact MeasurePreserving.symm e.toMeasurableEquiv hm
 
 end EulerSmoothBanachFlow

@@ -356,10 +356,6 @@ theorem weightedDebtJet_bound (square : Bool) (n : ℕ) {L ν : ℝ}
   simpa only [weightedDebtJet, Real.norm_eq_abs, integral_const_mul,
     integral_weightedKernel (lt_of_lt_of_le zero_lt_one hK) hpq, mul_div_assoc] using hb'
 
-theorem weightedJet_integrable (square : Bool) (n : ℕ) (ν : ℝ) :
-    IntegrableOn (weightedJet W square h K q n ν) (Ioi K) :=
-  chain_integrable (weightedJet_measurable hh hK hW square)
-    (weightedJet_dominated hh hK hB hweight hpq square) n ν
 
 
 theorem weightedDebtJet_eq_iteratedDeriv (square : Bool) (n : ℕ) (ν : ℝ) :
@@ -993,18 +989,6 @@ theorem exists_normalized_C1_within_bounds (d : TailData) :
   rw [normalizedDebt_derivWithin d hK hη]
   exact hb K hK η hη
 
-theorem physicalEdit_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalEdit d K p.2 p.1)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) := by
-  have hs : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => switch K p.1)
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-    (switch_contDiffOn hK).comp contDiffOn_fst (fun _ hp => hp.1)
-  have hH : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ =>
-      HeatProfileExtension.scaledProfile (1 + d.h) p.1 (diffusion p.2))
-      (Ioi 0 ×ˢ (univ : Set ℝ)) :=
-    HeatProfileExtension.physicalProfile_contDiffOn (a := 1 + d.h) (by linarith [d.h_pos])
-  exact (outgoingProfile_joint_contDiffOn d hK).mul
-    (contDiffOn_const.add (hs.mul (hH.sub contDiffOn_const)))
 
 
 

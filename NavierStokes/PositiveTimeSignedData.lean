@@ -468,60 +468,9 @@ variable
   (hpressure : LocalPhysicalCopyBounds.LocalSourceBounds s h α w
     (nativePressureSource sys hh f))
 
-/-- Every preterminal potential germ is the germ of the original physical
-copy sum, including all spatial and time derivatives. -/
-theorem potentialWaveData_vector_germ {x : SpaceTime}
-    (hx : x ∈ PhysicalWaveSum.preterminal) :
-    (potentialWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential).vector
-      =ᶠ[𝓝 x] PhysicalCopyBounds.vectorSum
-        (ActualSignedPhysicalData.potentialFamily sys hh f) (a / 4) h sys.radius :=
-  PositiveTimeCopyFamily.vectorSum_germ
-    (ActualSignedPhysicalData.potentialFamily sys hh f) (a / 4) h sys.radius hx
 
-theorem pressureWaveData_pressure_germ {x : SpaceTime}
-    (hx : x ∈ PhysicalWaveSum.preterminal) :
-    (pressureWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure).pressure
-      =ᶠ[𝓝 x] fun y =>
-        ((ActualSignedPhysicalData.pressureFamily sys hh f).sum (a / 4) h sys.radius y).re := by
-  filter_upwards [PositiveTimeCopyFamily.sum_germ
-    (ActualSignedPhysicalData.pressureFamily sys hh f) (a / 4) h sys.radius hx] with y hy
-  exact congrArg Complex.re hy
 
-include G hp hn hP hf hpotential in
-/-- The physical estimate applies to the original preterminal potential,
-not just to its chosen positive-time representative. -/
-theorem potential_physical_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ PhysicalWaveSum.preterminal,
-      PhysicalWaveSum.physicalQ h x ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (PhysicalCopyBounds.vectorSum (ActualSignedPhysicalData.potentialFamily sys hh f)
-          (a / 4) h sys.radius) x‖ ≤
-        C * PhysicalWaveSum.physicalQ h x ^
-          (h * α - PhysicalClassBounds.physicalLoss h (-h) m) := by
-  obtain ⟨C, hC, hbound⟩ :=
-    (potentialWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential).vector_bound
-      hh0 hh1 m
-  refine ⟨C, hC, fun x hx hq => ?_⟩
-  rw [← PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq
-    (potentialWaveData_vector_germ sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential hx) m]
-  exact hbound x hx hq
 
-include G hp hn hP hf hpressure in
-theorem pressure_physical_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ PhysicalWaveSum.preterminal,
-      PhysicalWaveSum.physicalQ h x ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (fun y => ((ActualSignedPhysicalData.pressureFamily sys hh f).sum
-          (a / 4) h sys.radius y).re) x‖ ≤
-        C * PhysicalWaveSum.physicalQ h x ^
-          (h * α - PhysicalClassBounds.physicalLoss h (-(2 * CoordinateAlgebra.A h)) m) := by
-  obtain ⟨C, hC, hbound⟩ :=
-    (pressureWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure).pressure_bound
-      hh0 hh1 m
-  refine ⟨C, hC, fun x hx hq => ?_⟩
-  rw [← PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq
-    (pressureWaveData_pressure_germ sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure hx) m]
-  exact hbound x hx hq
 
 end WaveData
 

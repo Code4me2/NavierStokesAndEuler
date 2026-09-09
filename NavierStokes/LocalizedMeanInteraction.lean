@@ -285,13 +285,6 @@ theorem uniform_of_supported_local {s : StripData D} {C : ℕ → I → Set D}
   obtain ⟨A, hA, p, hb⟩ := hall.bounds m
   exact ⟨A, hA, p, fun l n x hx j hj => hb n l x hx (Set.mem_univ x) j hj⟩
 
-theorem uniform_constant {s : StripData D} {w : ℕ → D → ℝ} {α : ℝ}
-    {f : ℕ → D → E} (hf : MemClass s w α f) :
-    LabelSumBounds.UniformClass s (fun _ : I => w) α (fun _ : I => f) := by
-  refine ⟨fun _ => hf.weight_nonneg, fun _ => hf.smooth, ?_⟩
-  intro m
-  obtain ⟨A, hA, p, hb⟩ := hf.bounds m
-  exact ⟨A, hA, p, fun _ => hb⟩
 
 
 
@@ -325,124 +318,10 @@ theorem uniform_realMeanCross_class {s : StripData D} {C : ℕ → I → Set D}
   exact uniform_of_supported_local hr (fun n l x hx hC =>
     realMeanCross_zero_germ c h (b l) n hj (hz n l x hx hC) i)
 
-/-- The single-block endpoint on the original state domain. -/
-theorem realMeanCross_class {s : StripData D} {C : ℕ → Set D}
-    {P : ℕ → D → ℝ} {α H κ : ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {h : MeanIncrementBounds.Triple D} (hh : MeanIncrementBounds.IncrementBounds s H h)
-    {b : CorrectionState.HarmonicBlock D} (hb : b.WaveBounds s P α)
-    (hN : ∀ i, LocalUnweighted s (fun n (_ : Unit) => C n) 0
-      (fun n _ x => slowNormal c ho hR b.phase n x i))
-    (hk : BandBound s (-(1 / 2)) b.frequency)
-    (hkp : BandBound s (-(1 / 2)) (fun n => (b.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ C n →
-      ∀ i j, j ≠ 0 → b.velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    {j : ℤ} (hj : j ≠ 0) (i : Fin 3) :
-    WaveClass s P (α + H - 1 / 2)
-      (fun n x => HarmonicResidual.realCoefficients (meanCross c h b n i) j x) := by
-  have hu := uniform_realMeanCross_class (I := Unit) (P := fun n _ => P n)
-    c ho hκ hR hh (b := fun _ => b) (fun i j hj => uniform_constant (hb i j hj))
-    hN (LocalClass.band_const hk) (LocalClass.band_const hkp)
-    (fun n _ x hx hC => hz n x hx hC) hj i
-  exact hu.each ()
 
 /-! ## The literal residual and interaction blocks -/
 
-/-- The normal-free wave-wave estimate is combined with the newly
-localized mean-wave estimate, preserving both gains and their minimum. -/
-theorem interactionBlock_class {s : StripData D} {C : ℕ → Set D}
-    {κ α β H : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    {u : CorrectionState.State D} (hm : MeanIncrementBounds.IncrementBounds s H u.mean)
-    {a b : CorrectionState.HarmonicBlock D} {M N : ℕ}
-    (ha : a.WaveBounds s P α) (hb : b.WaveBounds s P β)
-    (ha0 : HarmonicWaveInteraction.ZeroMode a) (hb0 : HarmonicWaveInteraction.ZeroMode b)
-    (hM : a.BandLimited M) (hN : b.BandLimited N)
-    (hΦ : ∀ n, ContDiffOn ℝ ∞ (a.phase n) s.domain) (hk : ∀ n, a.frequency n ≠ 0)
-    (hda : HarmonicWaveInteraction.ModeSolenoidal s c a)
-    (hdb : HarmonicWaveInteraction.ModeSolenoidal s c (HarmonicWaveInteraction.withCarrier a b))
-    (hNormal : ∀ i, LocalUnweighted s (fun n (_ : Unit) => C n) 0
-      (fun n _ x => slowNormal c ho hR a.phase n x i))
-    (hFreq : BandBound s (-(1 / 2)) a.frequency)
-    (hAng : BandBound s (-(1 / 2)) (fun n => (a.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ C n →
-      ∀ i j, j ≠ 0 → b.velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    (hP0 : ∀ n x, x ∈ s.domain → 0 ≤ P n x)
-    (hP1 : ∀ n x, x ∈ s.domain → P n x ≤ 1) :
-    (HarmonicWaveInteraction.interactionBlock c u a b).WaveBounds s P
-      (min (β + H - 1 / 2) (min (α + β - κ) (β + β - κ))) := by
-  intro i j hj
-  have hmean := realMeanCross_class c ho hκ hR hm
-    (b := HarmonicWaveInteraction.withCarrier a b) hb hNormal hFreq hAng hz hj i
-  have hnon m := HarmonicWaveInteraction.nonlinearCoefficients_wave_class c ho hR
-    ha hb ha0 hb0 hM hN hΦ hk hda hdb hP0 hP1 m i
-  have hn := realCoefficient_class
-    (fun n => HarmonicWaveInteraction.nonlinearCoefficients c a b n i) j (hnon j) (hnon (-j))
-  apply class_congr ((hmean.mono_exponent (min_le_left _ _)).add
-    (hn.mono_exponent (min_le_right _ _)))
-  intro n x _
-  change _ = HarmonicResidual.nonconstant (HarmonicResidual.realCoefficients
-    (meanCross c u.mean (HarmonicWaveInteraction.withCarrier a b) n i +
-      HarmonicWaveInteraction.nonlinearCoefficients c a b n i)) j x
-  rw [nonconstant_apply_of_ne _ hj, realCoefficients_add]
-  rfl
 
-theorem residualBlock_mean_update_class {s : StripData D} {C : ℕ → Set D}
-    {κ α H : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (s₀ s₁ : CorrectionState.State D) (h : MeanIncrementBounds.Triple D)
-    (he : s₁.mean = MeanIncrementBounds.updated s₀.mean h)
-    (hbase : MeanIncrementBounds.SmoothTriple s.domain c.base)
-    (hmean : MeanIncrementBounds.SmoothTriple s.domain s₀.mean)
-    (hh : MeanIncrementBounds.IncrementBounds s H h)
-    (b : CorrectionState.HarmonicBlock D) (hb : b.WaveBounds s P α)
-    (hN : ∀ i, LocalUnweighted s (fun n (_ : Unit) => C n) 0
-      (fun n _ x => slowNormal c ho hR b.phase n x i))
-    (hk : BandBound s (-(1 / 2)) b.frequency)
-    (hkp : BandBound s (-(1 / 2)) (fun n => (b.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ C n →
-      ∀ i j, j ≠ 0 → b.velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, BandLimited (A₁ n i - A₀ n i) 0) {j : ℤ} (hj : j ≠ 0) (i : Fin 3) :
-    WaveClass s P (α + H - 1 / 2) (fun n x =>
-      (HarmonicResidual.residualBlock c s₁ b G A₁).velocity n i j x -
-      (HarmonicResidual.residualBlock c s₀ b G A₀).velocity n i j x) := by
-  apply class_congr (realMeanCross_class c ho hκ hR hh hb hN hk hkp hz hj i)
-  intro n x hx
-  symm
-  apply residualBlock_axisymmetric_alias_update c s₀ s₁ h he b G A₀ A₁ hA n
-  · intro t
-    exact ((tripleField_smooth hbase n t).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp)
-  · intro t
-    exact ((tripleField_smooth hmean n t).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp)
-  · intro t
-    exact ((tripleField_smooth hh.smooth n t).contDiffAt (s.isOpen_domain.mem_nhds hx)).differentiableAt (by simp)
-  · exact hj
 
-theorem residualDifferenceBlock_class {s : StripData D} {C : ℕ → Set D}
-    {κ α H : ℝ} {P : ℕ → D → ℝ}
-    (c : CorrectionState.Context D) (ho : MeanIncrementBounds.OperatorBounds s c.operators κ)
-    (hκ : κ ≤ 1 / 2) (hR : ∀ x ∈ s.domain, 0 < c.operators.radius x)
-    (s₀ s₁ : CorrectionState.State D) (h : MeanIncrementBounds.Triple D)
-    (he : s₁.mean = MeanIncrementBounds.updated s₀.mean h)
-    (hbase : MeanIncrementBounds.SmoothTriple s.domain c.base)
-    (hmean : MeanIncrementBounds.SmoothTriple s.domain s₀.mean)
-    (hh : MeanIncrementBounds.IncrementBounds s H h)
-    (b : CorrectionState.HarmonicBlock D) (hb : b.WaveBounds s P α)
-    (hN : ∀ i, LocalUnweighted s (fun n (_ : Unit) => C n) 0
-      (fun n _ x => slowNormal c ho hR b.phase n x i))
-    (hk : BandBound s (-(1 / 2)) b.frequency)
-    (hkp : BandBound s (-(1 / 2)) (fun n => (b.angularFrequency n : ℝ)))
-    (hz : ∀ n x, x ∈ s.domain → x ∉ C n →
-      ∀ i j, j ≠ 0 → b.velocity n i j =ᶠ[𝓝 x] fun _ => 0)
-    (G A₀ A₁ : HarmonicResidual.BlockCoefficients D)
-    (hA : ∀ n i, BandLimited (A₁ n i - A₀ n i) 0) :
-    (residualDifferenceBlock c s₀ s₁ b G A₀ A₁).WaveBounds s P (α + H - 1 / 2) := by
-  intro i j hj
-  exact residualBlock_mean_update_class c ho hκ hR s₀ s₁ h he hbase hmean hh b hb hN hk hkp hz
-    G A₀ A₁ hA hj i
 
 end NavierStokes.LocalizedMeanInteraction

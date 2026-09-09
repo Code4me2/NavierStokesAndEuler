@@ -477,9 +477,6 @@ theorem CycleTransport.step {ι : Type} {G : Geometry} {p : CycleParameters ι}
     StateBand G V n m k (x.step p c).state ∧
       AxisBand G V n m k (x.step p c).axisymmetricAlias := ⟨H.next, H.axis HA⟩
 
-/-- Stored labels and harmonic aliases are never reselected by a cycle. -/
-theorem step_labels {ι : Type} (p : CycleParameters ι) (c : Context Point) (x : CycleState ι) :
-    (x.step p c).coefficients.labels = x.coefficients.labels := rfl
 
 
 theorem iterate_labels {ι : Type} (p : ℕ → CycleParameters ι) (c : Context Point)

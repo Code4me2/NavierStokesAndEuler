@@ -204,19 +204,5 @@ theorem natural_axis_pressureData (d : TailData) (hP : 2 ≤ d.core.P) :
     (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy)
 
 
-/-- The pressure of the actual outgoing schedule supplies the natural-axis theorem. -/
-theorem exists_natural_profiles (d : TailData) {j : ℝ}
-    (hsmall : NaturalAxisData.SmallParameters d.h j) (hP : 2 ≤ d.core.P) :
-    ∃ δ σ Λ C : ℝ, 0 < δ ∧ 0 < σ ∧ 0 < Λ ∧ 0 < C ∧
-      ∃ f U V Pr : ℝ × ℝ → ℝ,
-        NaturalProfile.IsNaturalSolution d.h j Λ (axisPressure d)
-          (NaturalAxisCoefficients.realAmplitude d.h j σ Λ C) f U V Pr ∧
-        (∀ p ∈ NaturalProfile.domain Λ, 0 ≤ Λ * p.1 → Λ * p.1 ≤ 41 / 10 → 0 < f p) ∧
-        (∀ η ∈ Icc (-1 : ℝ) 1,
-          |NaturalAxisData.Z d.h j (axisPressure d) η| ≤ δ →
-            23 / 10 < -2 * (4 / Λ) * NaturalAxisBridge.partialY f (4 / Λ, η) / f (4 / Λ, η)) := by
-  rw [axisPressure_eq]
-  exact NaturalProfile.exists_natural_profiles hsmall (admissible d) hP
-    (fun _ hy => clockWeight_ideal d hy) (fun _ hy => shapeExponent_ideal d hy)
 
 end NavierStokes.SchedulePressure

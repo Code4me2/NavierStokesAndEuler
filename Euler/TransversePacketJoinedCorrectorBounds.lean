@@ -44,14 +44,6 @@ theorem potentialPath_normalized_bound (n : ℕ) :
   EulerTransversePacketPaths.potential_block_bound (velocityPath τ hτ hτT B G)
     (velocityPath_orbit τ hτ hτT B G) g hg q Rc C R A hRc hC hA hR d hbA hbK n
 
-include hRc hC hA hR hbA hbAt hbK hbKt in
-theorem potentialTimePath_normalized_bound (n : ℕ) :
-    block standardDirection q
-      (fun a : LiftTangent => pathTranslate P a (normalize g hg (potentialTimePath τ hτ hτT B G))) n 0 ≤
-      (6*sobolevCoefficientAmplitude (Fin 4) q Rc C*(P*A))*majorant R d n :=
-  EulerTransversePacketPaths.potentialTime_block_bound (velocityPath τ hτ hτT B G)
-    (derivativePath τ hτ hτT B G) (velocityPath_orbit τ hτ hτT B G)
-    (derivativePath_orbit τ hτ hτT B G) g hg q Rc C R A hRc hC hA hR d hbA hbAt hbK hbKt n
 
 include hRc hC hA hR hbA hbK hbI in
 theorem correctorPath_normalized_bound (n : ℕ) :

@@ -495,22 +495,6 @@ theorem meanClass_radialMoment
     (meanClass_radialWeighted ha hcL hcR ε S hε hεone hS hclass k)
   simpa only [pressureMass_radialWeighted_fun] using h
 
-theorem meanClass_radialMoment_lift
-    {a b cL cR : ℝ} (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε S : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1)
-    (hS : ∀ n, 1 ≤ S n) {α : ℝ} {f : ℕ → PressureStream.Lift P → ℝ}
-    (hf : ∀ n, ContDiff ℝ ∞ (f n))
-    (hs : ∀ n, RadialAlias.RadiallySupported a b (f n))
-    (hclass : MeanClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α f)
-    (k : ℕ) :
-    UnweightedClass (logStripData a b cL cR ha hcL hcR ε S hε hεone hS) α
-      (fun n (x : PressureStream.Lift P) => IntegratedMeanBalances.radialMoment k
-        (PressureStream.torusAverage (f n)) x.2.1) := by
-  have h := meanClass_pressureMass_lift ha hab hcL hcR ε S hε hεone hS
-    (fun n => radialWeighted_contDiff k (hf n))
-    (fun n => radialWeighted_supported k (hs n))
-    (meanClass_radialWeighted ha hcL hcR ε S hε hεone hS hclass k)
-  simpa only [pressureMass_radialWeighted] using h
 
 end WeightedMoments
 

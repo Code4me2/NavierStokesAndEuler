@@ -100,12 +100,5 @@ theorem initial_vector_support (θ : ℝ) :
     (G.initial_vector_ae θ)
 
 
-/-- The time-space representative is jointly continuous on the actual interval. -/
-theorem vector_joint_continuous :
-    Continuous (fun z : Icc (0 : ℝ) D.T × (Space × ℝ) => G.vector (z.1,z.2)) := by
-  have hmap : Continuous (fun z : Icc (0 : ℝ) D.T × (Space × ℝ) => (z.1,z.2.1)) :=
-    continuous_fst.prodMk (continuous_fst.comp continuous_snd)
-  have hc := (pathRepresentative_continuous D.T G.velocityPath G.velocityPath_orbit).comp hmap
-  simpa only [vector, Data.clamp_coe, Function.comp_def] using hc
 
 end EulerMeanPacketProvider.Forcing

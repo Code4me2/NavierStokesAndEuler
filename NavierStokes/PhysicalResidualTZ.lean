@@ -394,9 +394,6 @@ noncomputable def physicalToChartTZ (h : ℝ) (n k : ℕ) : Lift →L[ℝ] Lift 
     ((MeanChartCompatibility.physicalToChart h n k).comp
       swapSlow.toContinuousLinearEquiv.toContinuousLinearMap)
 
-theorem physicalToChartTZ_swap (h : ℝ) (n k : ℕ) (x : Lift) :
-    physicalToChartTZ h n k (swapSlow x) =
-      swapSlow (MeanChartCompatibility.physicalToChart h n k x) := rfl
 
 theorem physicalToChartTZ_eq_formula (h : ℝ) (n k : ℕ) :
     physicalToChartTZ h n k =

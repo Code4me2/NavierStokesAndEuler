@@ -876,31 +876,6 @@ theorem covariance_weights_class
   rw [normalizedMatrix_det, hz, mul_zero, abs_zero] at h
   linarith
 
-/-- The primary square root retains the edge factor. Positivity is derived
-from the positive edge weight and the order-zero lower bound. -/
-theorem covariance_amplitudes_class
-    {r : ℕ → ℝ} {H : ℕ → E → SmoothCovariance.Mat2}
-    {T : ℕ → E → SmoothCovariance.Vec2} {w : ℕ → E → ℝ}
-    (hr : PhaseJetBounds.PolynomialJets (phaseDomain s) (fun n _ => r n))
-    (hrne : ∀ n, r n ≠ 0)
-    (hH : ∀ i j, PhaseJetBounds.PolynomialJets (phaseDomain s) (fun n x => H n x i j))
-    (hT : ∀ i, MemClass s w 0 (fun n x => T n x i))
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ n x, x ∈ s.domain → b ≤ |(normalizedMatrix (r n) (H n x)).det|)
-    (hentry : ∀ n x, x ∈ s.domain → ∀ i j, |r n * H n x i j| ≤ M)
-    (hw : ∀ n x, x ∈ s.domain → 0 < w n x)
-    (hlower : ∀ n x, x ∈ s.domain → ∀ j,
-      c * w n x ≤ SmoothCovariance.weights (H n x) (T n x) j)
-    (j : Fin 2) :
-    MemClass s (fun n x => Real.sqrt (w n x)) 0
-      (fun n x => SmoothCovariance.amplitudes (H n x) (T n x) j) := by
-  have hpos : ∀ n x, x ∈ s.domain →
-      0 < SmoothCovariance.weights (H n x) (T n x) j :=
-    fun n x hx => (mul_pos hc (hw n x hx)).trans_le (hlower n x hx j)
-  exact SignedCovariance.sqrt_class hw hpos
-    (covariance_weights_class hr hrne hH hT hb hM hdet hentry j)
-    (SignedCovariance.inverseControl_of_lower hpos hc 0
-      (fun n x hx => by simpa only [pow_zero, div_one] using hlower n x hx j))
 
 /-- The manuscript's normalization r=√S is a frozen polynomial family. -/
 theorem sqrt_slow_polynomial (s : StripData E) :
@@ -921,53 +896,7 @@ open WeightedClasses
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The stripped coefficient uses exactly the positive inverse-weight
-amplitude of the physical covariance construction. -/
-noncomputable def primaryCoefficient (s : StripData E)
-    (H : ℕ → E → SmoothCovariance.Mat2) (T : ℕ → E → SmoothCovariance.Vec2)
-    (mask : ℕ → E → ℝ) (v : ℕ → E → Space) (j : Fin 2) :
-    ℕ → E → HarmonicCalculus.ComplexVector := fun n x =>
-  PartitionedCovariance.amplitude (s.epsilon n) (mask n x) (H n x) (T n x) j •
-    CurlClassBounds.complexify (v n x)
 
-/-- All stripped jets of the constructed amplitude retain √ζ P. The
-half-power comes from the actual √ε factor, not a bound assumed on it. -/
-theorem primaryCoefficient_waveClass
-    {s : StripData E} {P : ℕ → E → ℝ}
-    {H : ℕ → E → SmoothCovariance.Mat2} {T : ℕ → E → SmoothCovariance.Vec2}
-    {mask : ℕ → E → ℝ} {v : ℕ → E → Space}
-    (hH : ∀ i j, PhaseJetBounds.PolynomialJets (phaseDomain s) (fun n x => H n x i j))
-    (hT : ∀ i, MeanClass s 0 (fun n x => T n x i))
-    (hmask : PhaseJetBounds.PolynomialJets (phaseDomain s) mask)
-    (hv : MemClass s P 0 v)
-    {b M c : ℝ} (hb : 0 < b) (hM : 1 ≤ M) (hc : 0 < c)
-    (hdet : ∀ n x, x ∈ s.domain →
-      b ≤ |(normalizedMatrix (Real.sqrt (s.slow n)) (H n x)).det|)
-    (hentry : ∀ n x, x ∈ s.domain → ∀ i j,
-      |Real.sqrt (s.slow n) * H n x i j| ≤ M)
-    (hζ : ∀ x, x ∈ s.domain → 0 < s.zeta x)
-    (hlower : ∀ n x, x ∈ s.domain → ∀ j,
-      c * s.zeta x ≤ SmoothCovariance.weights (H n x) (T n x) j)
-    (j : Fin 2) : WaveClass s P (1 / 2) (primaryCoefficient s H T mask v j) := by
-  have ha := covariance_amplitudes_class (sqrt_slow_polynomial s)
-    (fun n => (Real.sqrt_pos.mpr (zero_lt_one.trans_le (s.one_le_slow n))).ne')
-    hH hT hb hM hc hdet hentry (fun _ x hx => hζ x hx) hlower j
-  have ham : WaveClass s P 0 (fun n x =>
-      SmoothCovariance.amplitudes (H n x) (T n x) j • CurlClassBounds.complexify (v n x)) := by
-    simpa only [zero_add] using ha.smul (hv.map CurlClassBounds.complexify)
-  have hm : WaveClass s P 0 (fun n x => mask n x •
-      (SmoothCovariance.amplitudes (H n x) (T n x) j • CurlClassBounds.complexify (v n x))) := by
-    simpa only [zero_add] using CurlClassBounds.class_mul_real (polynomial_memClass s hmask) ham
-  have hε : BandBound s (1 / 2) (fun n => Real.sqrt (s.epsilon n)) := by
-    simpa only [Real.sqrt_eq_rpow] using bandBound_rpow s (1 / 2)
-  apply CurlClassBounds.class_congr (show WaveClass s P (1 / 2)
-      (fun n x => Real.sqrt (s.epsilon n) • (mask n x •
-        (SmoothCovariance.amplitudes (H n x) (T n x) j • CurlClassBounds.complexify (v n x)))) from
-      by simpa only [zero_add] using hm.band_smul hε)
-  intro n x hx
-  simp only [primaryCoefficient, PartitionedCovariance.amplitude, smul_smul]
-  congr 1
-  ring
 
 /-- The actual normal-cross-product curl correction with the rounded
 carrier and any nonzero integer harmonic. -/

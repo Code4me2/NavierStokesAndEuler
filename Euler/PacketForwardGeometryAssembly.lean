@@ -133,13 +133,5 @@ theorem exists_geometry_and_growth (Ω : Set Space) (h0 : 0 ∈ Ω)
     change D.normal.field (D.clamp (0+t)) x=D.normal.field t x
     rw [zero_add,Data.clamp_coe]
 
-theorem halfBall_physicalGrowth (hball : (1/2 : ℝ) ≤ G.radius) :
-    ∃ g : C(Icc (0 : ℝ) D.T,ℝ), (∀ t, 0 < g t) ∧
-      g ⟨0,le_rfl,D.T_pos.le⟩=1 ∧
-      PhysicalGrowth D {x | ‖x‖ ≤ (1/2 : ℝ)} g (560*P.horizon^10/P.epsilon) := by
-  obtain ⟨F,F₁,Z,Z₁,J,hpos,hzero,hgrowth⟩ :=
-    G.exists_geometry_and_growth {x | ‖x‖ ≤ (1/2 : ℝ)} (by simp)
-      (fun _ hx => hx.trans hball)
-  exact ⟨_,hpos,hzero,hgrowth⟩
 
 end EulerPacketSourceGeometry.ForwardGuards

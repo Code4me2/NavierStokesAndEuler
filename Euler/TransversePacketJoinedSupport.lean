@@ -73,13 +73,6 @@ theorem vector_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : �
   exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
     _ _ (velocityPath_supported τ hτ hτT B G (D.clamp t)) (x,(θ : AddCircle P)) hx
 
-theorem vectorDerivative_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : ℝ) :
-    vectorDerivative τ hτ hτT B G (t,(x,θ)) = 0 := by
-  change pointField P (derivativePath τ hτ hτT B G) (derivativePath_orbit τ hτ hτT B G)
-    (D.clamp t) (x,(θ : AddCircle P)) = 0
-  rw [pointField_eq_representative]
-  exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
-    _ _ (derivativePath_supported τ hτ hτT B G (D.clamp t)) (x,(θ : AddCircle P)) hx
 
 theorem vector_mean_zero (t : ℝ) (x : Space) :
     (∫ θ in (0 : ℝ)..P, vector τ hτ hτT B G (t,(x,θ))) = 0 :=
@@ -97,28 +90,10 @@ theorem scalar_zero_outside (t : Icc (0 : ℝ) D.T) (x : Space) (hx : x ∉ D.su
     rw [scalar_right τ hτ hτT B G tr x θ]
     exact (G.tail τ hτ.le hτT).scalar_zero_outside (forwardInitial τ hτ hτT B G) _ x hx θ
 
-theorem scalar_normalized (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, scalar τ hτ hτT B G (t,(x,θ))) = 0 := by
-  by_cases ht : (t : ℝ) ≤ τ
-  · let th : Icc (0 : ℝ) τ := ⟨t,t.property.1,ht⟩
-    have he : (fun θ => scalar τ hτ hτT B G (t,(x,θ))) =
-        fun θ : ℝ => B.pressureField (G.initial τ hτ hτT.le) th (x,(θ : AddCircle P)) :=
-      funext (fun θ => scalar_left τ hτ hτT B G th x θ)
-    rw [he]
-    exact B.pressureField_mean_zero (G.initial τ hτ hτT.le) th x
-  · let tr : Icc τ D.T := ⟨t,(not_le.mp ht).le,t.property.2⟩
-    have he : (fun θ => scalar τ hτ hτT B G (t,(x,θ))) =
-        fun θ => (G.tail τ hτ.le hτT).scalar (forwardInitial τ hτ hτT B G) ((t : ℝ)-τ,(x,θ)) :=
-      funext (fun θ => scalar_right τ hτ hτT B G tr x θ)
-    rw [he]
-    exact (G.tail τ hτ.le hτT).scalar_normalized (forwardInitial τ hτ hτT B G) _ x
 
 theorem vector_periodic (t : ℝ) (x : Space) : Function.Periodic (fun θ => vector τ hτ hτT B G (t,(x,θ))) P := by
   intro θ
   simp only [vector,AddCircle.coe_add_period]
 
-theorem scalar_periodic (t : ℝ) (x : Space) : Function.Periodic (fun θ => scalar τ hτ hτT B G (t,(x,θ))) P := by
-  intro θ
-  simp only [scalar,AddCircle.coe_add_period]
 
 end EulerTransversePacketJoin

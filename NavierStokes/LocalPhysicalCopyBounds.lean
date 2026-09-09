@@ -463,18 +463,6 @@ theorem PatchData.sum_smooth (hp : PatchData f a h r0)
     (hh : 0 < h) (hh1 : h < 1 / 2) : ContDiffOn ℝ ∞ (f.sum a h r0) preterminal :=
   hr.sum_smooth (hp.smoothData hr ha) hc ha hh hh1
 
-/-- The actual full sum still has a supported-copy witness.  This statement
-needs no smoothness of the raw coefficient or phase totalizations. -/
-theorem SupportData.sum_support (hr : SupportData f a b h r0 Z Δ)
-    {w : SpaceTime} (hw : w ∈ preterminal) (hn : f.sum a h r0 w ≠ 0) :
-    ∃ (I : WaveIndex H) (k : K),
-      f.amplitude k I (commonLift h I.1.val.1 (f.gap I.1) w) ≠ 0 ∧
-      PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PhysicalGraphBounds.annulus a b ∧
-      physicalParams h w ∈ labelRegion (CoordinateAlgebra.D h) I.1.val := by
-  obtain ⟨I, k, hk⟩ := f.sum_nonzero_term hn
-  have ha := globalWave_ne_zero_amp hk
-  exact ⟨I, k, ha, (hr.geometry_support k I w ha).1,
-    physicalMask_support_subset _ _ (hr.mask_support k I w hw ha)⟩
 
 theorem SupportData.sum_locally_finite (hr : SupportData f a b h r0 Z Δ)
     (hh : 0 < h) (hh1 : h < 1 / 2) {w : SpaceTime} (hw : w ∈ preterminal) :
@@ -484,26 +472,7 @@ theorem SupportData.sum_locally_finite (hr : SupportData f a b h r0 Z Δ)
     hr.periodized_support hw
   exact ⟨s, waveRegion_card_le (physicalQ_pos hh hh1 hw) s (fun I hI => (hs I).mp hI), he⟩
 
-theorem SupportData.periodized_germ_of_cell (hr : SupportData f a b h r0 Z Δ)
-    (hc : SupportCells f) (ha : 0 < a) (I : WaveIndex H) (k : K) {w : SpaceTime}
-    (hk : commonLift h I.1.val.1 (f.gap I.1) w ∈ (hc.cells I.1).carrier I.1.val.1 k) :
-    f.periodized a h r0 I =ᶠ[𝓝 w] f.term a h r0 I k := by
-  classical
-  by_cases hann : PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PhysicalGraphBounds.annulus a b
-  · exact copySum_pullback_germ (hc.cells I.1) I.1.val.1
-      (commonLift h I.1.val.1 (f.gap I.1)) (f.term a h r0 I)
-      (hc.term_mem I) (commonLift_continuousAt_of_annulus ha _ _ hann) hk
-  · exact (hr.periodized_zero_off_annulus I hann).trans
-      (globalWave_eventually_zero_off_annulus (f.carrier k I.1) (f.amplitude k I) I.2.val
-        (fun y hy => (hr.geometry_support k I y hy).1) hann).symm
 
-theorem SupportData.periodized_jet_eq (hr : SupportData f a b h r0 Z Δ)
-    (hc : SupportCells f) (ha : 0 < a) (I : WaveIndex H) (k : K) {w : SpaceTime}
-    (hk : commonLift h I.1.val.1 (f.gap I.1) w ∈ (hc.cells I.1).carrier I.1.val.1 k)
-    (m : ℕ) :
-    iteratedFDeriv ℝ m (f.periodized a h r0 I) w =
-      iteratedFDeriv ℝ m (f.term a h r0 I k) w :=
-  iteratedFDeriv_eq_of_eventuallyEq (hr.periodized_germ_of_cell hc ha I k hk) m
 
 /-! ## Weighted bounds confined to the genuine native strip -/
 
@@ -737,23 +706,6 @@ theorem vectorSum_jet_bound {f : Fin 3 → CopyFamily H K}
         ((mul_le_of_le_one_left (norm_nonneg _) (norm_realCoordinate_le i)).trans (hb i))
     _ = 3 * B := by simp
 
-theorem physical_vector_sum_jet_bound {h a b Z r0 P B eBase : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a)
-    (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0) (hP : 1 ≤ P) (hB : 1 ≤ B) (heBase : 0 ≤ eBase)
-    (H Δ m : ℕ) (g eAmp A : ℝ) (hA : 0 ≤ A) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ f : Fin 3 → CopyFamily H K,
-      (∀ i, SupportData (f i) a b h r0 Z Δ) →
-      (∀ i, SmoothData (f i) a h r0) → ∀ hc : ∀ i, SupportCells (f i),
-      (∀ i, JetData (f i) (hc i) a b h r0 P A B g eAmp eBase m) →
-      ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (PhysicalCopyBounds.vectorSum f a h r0) w‖ ≤
-        C * physicalQ h w ^ (g - PhysicalGraphBounds.waveLoss h m) := by
-  obtain ⟨C, hC, hb⟩ := physical_sum_jet_bound (K := K) (b := b)
-    hh hh1 ha hZ hr0 hP hB heBase H Δ m g eAmp A hA
-  refine ⟨3 * C, by positivity, ?_⟩
-  intro f hr hs hc hclass w hw ht
-  exact (vectorSum_jet_bound hr hs hc ha hh hh1 hw m
-    (fun i => hb (f i) (hr i) (hs i) (hc i) (hclass i) w hw ht)).trans_eq (by ring)
 
 section WeightedVector
 

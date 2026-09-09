@@ -50,10 +50,6 @@ theorem matrix_mul_coefficients (B : Matrix ι ι ℝ) (hB : B.det ≠ 0)
   rw [coefficients, Matrix.mulVec_mulVec,
     Matrix.mul_nonsing_inv B (isUnit_iff_ne_zero.mpr hB), Matrix.one_mulVec]
 
-theorem coefficients_unique (B : Matrix ι ι ℝ) (hB : B.det ≠ 0)
-    (d c : ι → ℝ) (hc : B.mulVec c = d) : c = coefficients B d := by
-  rw [coefficients, ← hc, Matrix.mulVec_mulVec,
-    Matrix.nonsing_inv_mul B (isUnit_iff_ne_zero.mpr hB), Matrix.one_mulVec]
 
 /-- Add a finite correction which targets an arbitrary vector of moments. -/
 def repair (L : ι → V →ₗ[ℝ] ℝ) (b : ι → V) (u : V) (target : ι → ℝ) : V :=

@@ -64,18 +64,5 @@ theorem inviscid_correction_odd {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T
   intro t
   exact (congrArg (fun f => f t) he).symm
 
-/-- The actual signed coercive correction pressure has odd gradient parity
-at every time once the correction parity has been established. -/
-theorem inviscid_correction_pressure_odd {q : ℕ} (hq : 6 ≤ q) {T : Type*} [TopologicalSpace T]
-    (D : CorrectionData period q T) (t : T)
-    (hG : ∀ x, (D.metric.coefficient t).coefficient (-x) = (D.metric.coefficient t).coefficient x)
-    (hL : ∀ x, (D.linear.coefficient t).coefficient (-x) = (D.linear.coefficient t).coefficient x)
-    (hQ : ∀ i x, ((D.quadratic i).coefficient t).coefficient (-x) = -((D.quadratic i).coefficient t).coefficient x)
-    (hz : oddReflection period (q+1) (D.approximation t) = D.approximation t)
-    (hr : oddReflection period q (D.residual t) = D.residual t)
-    (u : SobolevSpace period (q+1)) (hu : oddReflection period (q+1) u = u) :
-    oddReflection period q (D.pressure period hq t u) = D.pressure period hq t u := by
-  have hh := correction_pressure_oddReflection period hq D t hG hL hQ hz hr u
-  rwa [hu] at hh
 
 end EulerInviscidCorrectionParity

@@ -244,13 +244,6 @@ noncomputable def commonPressure (d : TangentData P H) (g : Geometry) (hab : a �
     (κ : Plane → ℝ) (K : ℝ) (x : P × Plane) : ℂ :=
   ∑' j : Frequency, (κ (g.coordinates j x.2) : ℂ) * copyPressure d g hab j K x
 
-theorem TangentInvariant.commonPressure_invariant {θ : P} {d : TangentData P H}
-    (h : TangentInvariant θ d) (g : Geometry) (hab : a ≤ b) (κ : Plane → ℝ) (K : ℝ) :
-    Invariant (θ, (0 : Plane)) (commonPressure d g hab κ K) := by
-  apply Invariant.tsum_invariant
-  intro j
-  exact (nativeCutoff_invariant θ g κ j).map₂ (h.copyPressure_invariant g hab j K)
-    (fun r p => (r : ℂ) * p)
 
 
 end Tangent

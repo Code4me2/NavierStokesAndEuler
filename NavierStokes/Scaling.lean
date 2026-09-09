@@ -20,8 +20,6 @@ noncomputable section
 
 namespace NavierStokes.Scaling
 
-/-- The core velocity scale, with the fixed profile coefficient omitted. -/
-def coreVelocity (q h : ℝ) : ℝ := q ^ (-(1 / 2 + h))
 
 
 

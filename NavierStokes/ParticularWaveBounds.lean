@@ -1593,21 +1593,6 @@ noncomputable def periodizedCopies (g : Geometry) (κ : Plane → ℝ)
 
 
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace H] in
-theorem periodizedCopies_periodic (g : Geometry) (κ : Plane → ℝ)
-    (F : Frequency → P × Plane → H) (p : P)
-    (hF : ∀ k m Y, F (k + coverIndex g.gap m) (p, Y + TorusAverages.latticePoint m) = F k (p, Y)) :
-    PeriodicAt (periodizedCopies g κ F) p := by
-  intro Y m
-  unfold periodizedCopies
-  calc
-    _ = ∑' k : Frequency, κ (g.coordinates (k + coverIndex g.gap m) (Y + TorusAverages.latticePoint m)) •
-        F (k + coverIndex g.gap m) (p, Y + TorusAverages.latticePoint m) :=
-      ((Equiv.addRight (coverIndex g.gap m)).tsum_eq _).symm
-    _ = _ := by
-      apply tsum_congr
-      intro k
-      rw [g.coordinates_deck, hF k m Y]
 
 noncomputable def commonVelocity (t : TangentData P ProblemStatement.Space)
     (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Plane → ℝ) :
@@ -1617,15 +1602,7 @@ noncomputable def commonPressure (t : TangentData P ProblemStatement.Space)
     (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Plane → ℝ)
     (frequency : ℝ) : P × Plane → ℂ := periodizedCopies g κ (fun k => complexCopyPressure t f g hab k frequency)
 
-theorem commonVelocity_periodic (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Plane → ℝ)
-    (p : P) (hp : PeriodicAt f p) : PeriodicAt (commonVelocity t f g hab κ) p :=
-  periodizedCopies_periodic g κ _ p (fun k m Y => complexCopyVelocity_deck t f g hab k m p hp Y)
 
-theorem commonPressure_periodic (t : TangentData P ProblemStatement.Space)
-    (f : P × Plane → ComplexVector) (g : Geometry) {a b : ℝ} (hab : a ≤ b) (κ : Plane → ℝ)
-    (frequency : ℝ) (p : P) (hp : PeriodicAt f p) : PeriodicAt (commonPressure t f g hab κ frequency) p :=
-  periodizedCopies_periodic g κ _ p (fun k m Y => complexCopyPressure_deck t f g hab k m frequency p hp Y)
 
 end CommonTorus
 

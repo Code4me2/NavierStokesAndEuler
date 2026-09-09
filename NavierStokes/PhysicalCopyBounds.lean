@@ -169,27 +169,7 @@ theorem SupportCells.periodized_eq (hc : SupportCells f) (I : WaveIndex H) (k : 
   by_contra hn
   exact hj ((hc.cells I.1).unique _ j k _ (hc.term_mem I j w hn) hk)
 
-theorem RegularFamily.periodized_germ_of_cell (hr : RegularFamily f a b h r0 Z Δ)
-    (hc : SupportCells f) (ha : 0 < a) (I : WaveIndex H) (k : K) {w : SpaceTime}
-    (hk : commonLift h I.1.val.1 (f.gap I.1) w ∈ (hc.cells I.1).carrier I.1.val.1 k) :
-    f.periodized a h r0 I =ᶠ[𝓝 w] f.term a h r0 I k := by
-  classical
-  by_cases hann : PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PhysicalGraphBounds.annulus a b
-  · exact copySum_pullback_germ (hc.cells I.1) I.1.val.1
-      (commonLift h I.1.val.1 (f.gap I.1)) (f.term a h r0 I)
-      (hc.term_mem I) (commonLift_continuousAt_of_annulus ha _ _ hann) hk
-  · exact (hr.periodized_zero_off_annulus I hann).trans
-      (globalWave_eventually_zero_off_annulus (f.carrier k I.1) (f.amplitude k I) I.2.val
-        (fun y hy => ((hr.copy k).geometry_support I y hy).1) hann).symm
 
-/-- Actual full derivative tensors agree with the selected local copy. -/
-theorem RegularFamily.periodized_jet_eq (hr : RegularFamily f a b h r0 Z Δ)
-    (hc : SupportCells f) (ha : 0 < a) (I : WaveIndex H) (k : K) {w : SpaceTime}
-    (hk : commonLift h I.1.val.1 (f.gap I.1) w ∈ (hc.cells I.1).carrier I.1.val.1 k)
-    (m : ℕ) :
-    iteratedFDeriv ℝ m (f.periodized a h r0 I) w =
-      iteratedFDeriv ℝ m (f.term a h r0 I k) w :=
-  iteratedFDeriv_eq_of_eventuallyEq (hr.periodized_germ_of_cell hc ha I k hk) m
 
 theorem RegularFamily.periodized_support (hr : RegularFamily f a b h r0 Z Δ)
     (I : WaveIndex H) (w : SpaceTime) (hw : w ∈ preterminal)
@@ -544,18 +524,6 @@ theorem CopyFamily.sum_nonzero_term (f : CopyFamily H K) {a h r0 : ℝ} {w : Spa
     simp only [CopyFamily.periodized, hn, tsum_zero]
   exact hw (by simp only [CopyFamily.sum, hp, finsum_zero])
 
-/-- A nonzero full sum has a genuine supported copy witness.  This is the
-primitive support statement needed for the shrinking physical annulus. -/
-theorem RegularFamily.sum_support (hr : RegularFamily f a b h r0 Z Δ)
-    {w : SpaceTime} (hw : w ∈ preterminal) (hn : f.sum a h r0 w ≠ 0) :
-    ∃ (I : WaveIndex H) (k : K),
-      f.amplitude k I (commonLift h I.1.val.1 (f.gap I.1) w) ≠ 0 ∧
-      PhysicalGraphBounds.scaledRadial I.1.val.1 w ∈ PhysicalGraphBounds.annulus a b ∧
-      physicalParams h w ∈ labelRegion (CoordinateAlgebra.D h) I.1.val := by
-  obtain ⟨I, k, hk⟩ := f.sum_nonzero_term hn
-  have ha := globalWave_ne_zero_amp hk
-  exact ⟨I, k, ha, ((hr.copy k).geometry_support I w ha).1,
-    (hr.copy k).term_support I w hw hk⟩
 
 noncomputable def vectorSum (f : Fin 3 → CopyFamily H K) (a h r0 : ℝ)
     (w : SpaceTime) : Space := ∑ i : Fin 3, realCoordinate i ((f i).sum a h r0 w)
@@ -591,24 +559,6 @@ theorem vectorSum_jet_bound {f : Fin 3 → CopyFamily H K}
         ((mul_le_of_le_one_left (norm_nonneg _) (norm_realCoordinate_le i)).trans (hb i))
     _ = 3 * B := by simp
 
-/-- Uniform scalar input bounds give the actual real three-component
-physical estimate with the same loss exponent. -/
-theorem physical_vector_sum_jet_bound {h a b Z r0 P B eBase : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a)
-    (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0) (hP : 1 ≤ P) (hB : 1 ≤ B) (heBase : 0 ≤ eBase)
-    (H Δ m : ℕ) (g eAmp A : ℝ) (hA : 0 ≤ A) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ f : Fin 3 → CopyFamily H K,
-      (∀ i, RegularFamily (f i) a b h r0 Z Δ) → ∀ hc : ∀ i, SupportCells (f i),
-      (∀ i, LocalStrippedClass (f i) (hc i) a b h r0 P A B g eAmp eBase m) →
-      ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (vectorSum f a h r0) w‖ ≤
-        C * physicalQ h w ^ (g - PhysicalGraphBounds.waveLoss h m) := by
-  obtain ⟨C, hC, hb⟩ := physical_sum_jet_bound (K := K) (b := b)
-    hh hh1 ha hZ hr0 hP hB heBase H Δ m g eAmp A hA
-  refine ⟨3 * C, by positivity, ?_⟩
-  intro f hr hc hclass w hw ht
-  exact (vectorSum_jet_bound hr hc ha hh hh1 hw m
-    (fun i => hb (f i) (hr i) (hc i) (hclass i) w hw ht)).trans_eq (by ring)
 
 section WeightedVector
 

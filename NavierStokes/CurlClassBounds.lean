@@ -246,20 +246,6 @@ theorem cylindricalCurl_class (ha : MemClass s w α a) (hκ : 0 ≤ κ)
   · exact class_sub (hDz 0) (hDr 2)
   · exact class_sub ((hDr 1).add (hconn 1)) (hDθ 0)
 
-theorem strippedDivergence_class (ha : MemClass s w α a) (hκ : 0 ≤ κ)
-    (hr : UnweightedClass s (-κ) Vr) (hz : UnweightedClass s 1 Vz)
-    (hR : UnweightedClass s 0 (fun _ x => (R x)⁻¹)) :
-    MemClass s w (α - κ)
-      (fun n => HarmonicCalculus.strippedDivergence R (Vr n) (Vz n) (a n)) := by
-  have hDr : MemClass s w (α - κ)
-      (fun n => HarmonicCalculus.along (Vr n) (fun x => a n x 0)) := by
-    simpa only [sub_eq_add_neg] using class_along hr (class_component ha 0)
-  have hDz : MemClass s w (α - κ)
-      (fun n => HarmonicCalculus.along (Vz n) (fun x => a n x 2)) :=
-    (class_along hz (class_component ha 2)).mono_exponent (by linarith)
-  have hconn : MemClass s w (α - κ) (fun n x => (R x)⁻¹ • a n x 0) :=
-    (class_mul_real hR (class_component ha 0)).mono_exponent (by linarith)
-  exact (hDr.add hconn).add hDz
 
 end CurlClass
 

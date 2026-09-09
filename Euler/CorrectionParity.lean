@@ -51,15 +51,6 @@ theorem coefficient_oddReflection {q : ℕ} {A : SmoothCoefficient period}
       coefficientSobolevOperator period K (oddReflection period q u) := by
   simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (coefficient_reflection period K hA u)
 
-/-- The actual pressure inverse commutes with signed reflection for an even metric. -/
-theorem pressure_oddReflection {q : ℕ} {A : SmoothCoefficient period}
-    (K : CoefficientJet period standardDirection q A)
-    (hA : ∀ x, A.coefficient (-x) = A.coefficient x)
-    (κ : ℝ) (m : Vector3) (c : ℝ) (hc : 0 < c)
-    (hpos : ∀ x v, c * ‖v‖ ^ 2 ≤ ⟪A.coefficient x v,v⟫_ℝ) (u : SobolevSpace period q) :
-    oddReflection period q (pressureSobolevOperator period K κ m c hc hpos u) =
-      pressureSobolevOperator period K κ m c hc hpos (oddReflection period q u) := by
-  simpa only [oddReflection_apply, map_neg] using congrArg Neg.neg (pressureSobolev_reflection period K hA κ m c hc hpos u)
 
 /-- The actual pressure-corrected source commutes with signed reflection. -/
 theorem projectedSource_oddReflection {q : ℕ} {A : SmoothCoefficient period}
@@ -96,25 +87,6 @@ theorem rawSource_oddReflection {q : ℕ} (hq : 6 ≤ q) {T : Type*} [Topologica
   exact linearized_source_equivariant (oddReflection period (q+1)) (oddReflection period q) F C
     (D.approximation t) (D.residual t) hF hC hz hr e
 
-/-- The genuine correction pressure transforms by signed reflection,
-with its sign fixed by the actual pressure definition. -/
-theorem correction_pressure_oddReflection {q : ℕ} (hq : 6 ≤ q) {T : Type*} [TopologicalSpace T]
-    (D : CorrectionData period q T) (t : T)
-    (hG : ∀ x, (D.metric.coefficient t).coefficient (-x) = (D.metric.coefficient t).coefficient x)
-    (hL : ∀ x, (D.linear.coefficient t).coefficient (-x) = (D.linear.coefficient t).coefficient x)
-    (hQ : ∀ i x, ((D.quadratic i).coefficient t).coefficient (-x) = -((D.quadratic i).coefficient t).coefficient x)
-    (hz : oddReflection period (q+1) (D.approximation t) = D.approximation t)
-    (hr : oddReflection period q (D.residual t) = D.residual t)
-    (e : SobolevSpace period (q+1)) :
-    oddReflection period q (D.pressure period hq t e) =
-      D.pressure period hq t (oddReflection period (q+1) e) := by
-  change oddReflection period q (-(pressureSobolevOperator period (D.metric.jet t) D.κ D.direction
-    D.coercivity D.coercivity_pos (D.metric_pos t) (D.rawSource period hq t e))) = _
-  rw [map_neg]
-  exact congrArg Neg.neg ((pressure_oddReflection period (D.metric.jet t) hG D.κ D.direction
-    D.coercivity D.coercivity_pos (D.metric_pos t) (D.rawSource period hq t e)).trans
-    (congrArg (pressureSobolevOperator period (D.metric.jet t) D.κ D.direction D.coercivity D.coercivity_pos
-      (D.metric_pos t)) (rawSource_oddReflection period hq D t hL hQ hz hr e)))
 
 /-- The literal projected nonlinear correction equation has the required
 odd symmetry, derived from the concrete parity of its prescribed fields. -/

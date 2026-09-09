@@ -150,34 +150,6 @@ theorem acceleration_eq_inverse (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T 
   dsimp only [extendPath] at hinv
   rwa [inverse_gram_apply] at hinv
 
-include hc hQ in
-/-- The strong acceleration bound pays one inverse Gram factor and no derivative
-of the Hessian or extra undifferentiated time-growth factor. -/
-theorem acceleration_norm (hT : 0 ≤ T) (v a : TimeLp T U) (f : TimeLp T E)
-    (heq : ∀ᵐ t ∂timeMeasure T, gram (extendPath T hT Q t) (a t) =
-      (extendPath T hT Q t).adjoint (f t - (2 : ℝ) • extendPath T hT Q₁ t (v t))) :
-    ‖a‖ ≤ c⁻¹ * ‖Q‖ * (‖f‖ + 2 * ‖Q₁‖ * ‖v‖) := by
-  rw [acceleration_eq_inverse T Q Q₁ c hc hQ hT v a f heq]
-  let r := f - (2 : ℝ) • timeMultiplier T hT Q₁ v
-  have hM : ‖timeMultiplier T hT Q‖ ≤ ‖Q‖ :=
-    ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg Q) (timeApply_bound T hT Q)
-  have hp : ‖(timeMultiplier T hT Q).adjoint r‖ ≤ ‖Q‖ * ‖r‖ := by
-    apply ((timeMultiplier T hT Q).adjoint.le_opNorm r).trans
-    rw [LinearIsometryEquiv.norm_map]
-    exact mul_le_mul_of_nonneg_right hM (norm_nonneg r)
-  have hr : ‖r‖ ≤ ‖f‖ + 2 * ‖Q₁‖ * ‖v‖ := by
-    apply (norm_sub_le f ((2 : ℝ) • timeMultiplier T hT Q₁ v)).trans
-    rw [norm_smul, Real.norm_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
-    have hq : ‖timeMultiplier T hT Q₁ v‖ ≤ ‖Q₁‖ * ‖v‖ := timeApply_bound T hT Q₁ v
-    nlinarith only [hq]
-  calc
-    _ ≤ ‖gramInversePath T Q c hc hQ‖ * ‖(timeMultiplier T hT Q).adjoint r‖ :=
-      timeApply_bound T hT (gramInversePath T Q c hc hQ) _
-    _ ≤ c⁻¹ * (‖Q‖ * ‖r‖) := mul_le_mul (gramInversePath_norm T Q c hc hQ) hp
-      (norm_nonneg _) (inv_nonneg.mpr hc.le)
-    _ ≤ c⁻¹ * (‖Q‖ * (‖f‖ + 2 * ‖Q₁‖ * ‖v‖)) := by
-      gcongr
-    _ = _ := by ring
 
 
 end EulerTransverseStrongEstimates

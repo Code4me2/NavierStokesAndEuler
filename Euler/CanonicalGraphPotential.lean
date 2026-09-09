@@ -49,20 +49,5 @@ theorem radialPotential_gradient (V : Vector3 → Vector3) (hV : Continuous V)
   rw [he, gradient, fderiv_sub_const]
   exact hgrad x
 
-/-- A jointly continuous vector field has a jointly continuous radial scalar potential. -/
-theorem radialPotential_joint_continuous {T : Type*} [TopologicalSpace T]
-    [FirstCountableTopology T] [LocallyCompactSpace T]
-    (V : T → Vector3 → Vector3) (hV : Continuous V.uncurry) :
-    Continuous (fun p : T × Vector3 => radialPotential (V p.1) p.2) := by
-  have hc : Continuous (fun p : (T × Vector3) × ℝ =>
-      ⟪V p.1.1 (p.2 • p.1.2), p.1.2⟫_ℝ) := by
-    exact (hV.comp ((continuous_fst.fst).prodMk
-      (continuous_snd.smul continuous_fst.snd))).inner continuous_fst.snd
-  have hi := continuous_parametric_integral_of_continuous
-    (μ := volume)
-    (f := fun p : T × Vector3 => fun s : ℝ => ⟪V p.1 (s • p.2), p.2⟫_ℝ)
-    hc (isCompact_Icc : IsCompact (Icc (0 : ℝ) 1))
-  simpa only [radialPotential, intervalIntegral.integral_of_le (zero_le_one : (0 : ℝ) ≤ 1),
-    integral_Icc_eq_integral_Ioc] using hi
 
 end EulerCanonicalGraphPotential

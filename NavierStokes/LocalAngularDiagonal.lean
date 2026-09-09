@@ -100,29 +100,7 @@ theorem spatialCut_zero_germ {f : VelocityField} {w : SpaceTime}
 
 /-! ## Smoothness on the whole preterminal region -/
 
-theorem angularSum_smoothAt (hh : 0 < h) (hh1 : h < 1 / 2)
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig))
-    {a : ℕ → ℝ} (hat : Tendsto a atTop atTop) (ha0 : 0 < a 0)
-    (ham : ∀ j, a 0 ≤ a j) (hgap : 1 / a 0 < qbig)
-    {w : SpaceTime} (ht : w.1 < 1) :
-    ContDiffAt ℝ ∞
-      (DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar)) w := by
-  by_cases hq : PhysicalWaveSum.physicalQ h w < qbig
-  · exact (DirectAngularDiagonal.angularSum_smooth (localSlowDomain_open hh hh1 qbig) D hat
-      (fun _ hx => (PhysicalWaveSum.physicalQ_smoothAt hh hh1 hx.1).contDiffWithinAt)
-      (fun _ hx => PhysicalWaveSum.physicalQ_pos hh hh1 hx.1)).contDiffAt
-      ((MixedAxisPreservation.localDomain_open hh hh1 qbig).mem_nhds ⟨ht, hq⟩)
-  · exact contDiffAt_const.congr_of_eventuallyEq
-      (angularSum_zero_germ hh hh1 D ha0 ham hgap ht (le_of_not_gt hq))
 
-theorem angularSum_smooth (hh : 0 < h) (hh1 : h < 1 / 2)
-    (D : ℕ → DirectAngularDiagonal.AngularData (localSlowDomain h qbig))
-    {a : ℕ → ℝ} (hat : Tendsto a atTop atTop) (ha0 : 0 < a 0)
-    (ham : ∀ j, a 0 ≤ a j) (hgap : 1 / a 0 < qbig) :
-    ContDiffOn ℝ ∞
-      (DirectAngularDiagonal.angularSum a (PhysicalWaveSum.physicalQ h) (fun j => (D j).scalar))
-      PhysicalWaveSum.preterminal :=
-  fun _ ht => (angularSum_smoothAt hh hh1 D hat ha0 ham hgap ht).contDiffWithinAt
 
 theorem qCoefficient_smooth (hh : 0 < h) (hh1 : h < 1 / 2) :
     ContDiffOn ℝ ∞ (DirectAngularDiagonal.qCoefficient h)

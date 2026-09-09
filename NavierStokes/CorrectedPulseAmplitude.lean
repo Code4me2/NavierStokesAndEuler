@@ -421,46 +421,5 @@ theorem amplitude_spec {d : TailData} {K : ℝ} (w : ResetWitness d K) (hK : 0 <
     amplitude_derivative_bound d w.smooth eta (combinedScale d K) heta h hs.1 hscale hT hs.2,
     fun A hA hz => amplitude_unique d w.coefficients eta (combinedScale d K) heta h hs.1 hscale A hA hz⟩
 
-/-- The scheduled angular reset and pulse amplitude are constructed together.
-The exact radial energy uses the corrected angular profile. The common
-threshold is uniform over every terminal parameter `0 < h < lam/2`. -/
-theorem exists_corrected_amplitude (P m : ℝ) (hP : 0 < P) :
-    ∃ lam₀ K C : ℝ, 0 < lam₀ ∧ 0 < K ∧ 0 < C ∧ ∀ d : TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam₀ → ∃ w : ResetWitness d K,
-        ContDiff ℝ ∞ (amplitude d w.coefficients) ∧ ∀ eta : ℝ, eta ^ 2 ≤ 1 →
-          9 / 10 < amplitude d w.coefficients eta ∧ amplitude d w.coefficients eta < 6 / 5 ∧
-          totalEnergy d w.coefficients (amplitude d w.coefficients eta) eta = 0 ∧
-          |deriv (amplitude d w.coefficients) eta| ≤ C * d.core.lam * (1 + Real.log (1 / d.core.lam)) ∧
-          (∀ XR : ℝ, 0 < XR →
-            IntegrableOn (radialEnergyIntegrand d w.coefficients (amplitude d w.coefficients) eta XR) (Ioi 0) ∧
-            (∫ X in Ioi 0, radialEnergyIntegrand d w.coefficients (amplitude d w.coefficients) eta XR X) = 0) ∧
-          (∀ A ∈ Icc (9 / 10 : ℝ) (6 / 5), totalEnergy d w.coefficients A eta = 0 →
-            A = amplitude d w.coefficients eta) := by
-  obtain ⟨resetLam, K, hresetLam, hK, hreset⟩ := exists_scheduled_reset
-  obtain ⟨delta, hd, hsmall⟩ := PulseAmplitude.exists_rate_threshold (combinedConstant P m K)
-  refine ⟨min resetLam (min delta (1 / 120)), K, 128 * combinedConstant P m K,
-    lt_min hresetLam (lt_min hd (by norm_num)), hK,
-      mul_pos (by norm_num) (combinedConstant_pos hP m K hK), ?_⟩
-  intro d hdP hdm hwait hlam
-  have hr : d.core.lam < resetLam := lt_of_lt_of_le hlam (min_le_left _ _)
-  have hright : d.core.lam < min delta (1 / 120) := lt_of_lt_of_le hlam (min_le_right _ _)
-  have hl : d.core.lam ≤ 1 / 120 := (lt_of_lt_of_le hright (min_le_right _ _)).le
-  have hscale : combinedScale d K ≤ 1 / 1000 := by
-    unfold combinedScale
-    rw [hdP, hdm]
-    exact hsmall _ d.core.lam_pos (lt_of_lt_of_le hright (min_le_left _ _))
-  obtain ⟨w⟩ := hreset d hr
-  obtain ⟨hs, hspec⟩ := amplitude_spec w hK hl hwait hscale
-  refine ⟨w, hs, fun eta heta => ?_⟩
-  obtain ⟨ha, ha', hz, hderiv, huniq⟩ := hspec eta heta
-  refine ⟨ha, ha', hz, ?_, ?_, huniq⟩
-  · convert! hderiv using 1
-    unfold combinedScale PulseAmplitude.logarithmicRate
-    rw [hdP, hdm]
-    ring
-  · intro XR hXR
-    refine ⟨radialEnergy_integrable d w.coefficients (amplitude d w.coefficients) eta XR hXR, ?_⟩
-    rw [radialEnergy_integral d w.coefficients (amplitude d w.coefficients) eta XR hXR, hz, mul_zero]
 
 end NavierStokes.CorrectedPulseAmplitude

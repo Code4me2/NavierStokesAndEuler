@@ -669,32 +669,6 @@ theorem uniformMixedError_of_norm (I : Window) {ε : ℝ} (hε : 0 < ε)
       AxisContraction.evaluated_mixed_error I hε hR hR20 x.2 x₀.2 K
         ((norm_snd_le (x - x₀)).trans hK) k m hY hη
 
-/-- Actual smooth natural-axis profiles exist for every sufficiently large
-`Λ`, uniformly over all radially constant angular amplitudes in a fixed norm
-ball. The conclusion is a differential/integral system for real functions,
-and its error estimate concerns their ordinary derivatives of every order. -/
-theorem exists_scaled_profiles (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) (d : AxisContraction.AxisData (AxisSpace I ε))
-    (hd : CompatibleData I ε χ d) (M : ℝ) (hM : 0 ≤ M) :
-    ∃ Λ₀ : ℝ, 0 < Λ₀ ∧ ∀ Λ : ℝ, Λ₀ ≤ Λ →
-      ∀ a : AxisSpace I ε, ‖a‖ ≤ M → RadiallyConstant I ε a →
-      ∃ Φ u B P : ℝ × ℝ → ℝ,
-        IsScaledSolution I (parameters I ε χ d) (1 / Λ) (inputValue I ε a) Φ u B P ∧
-        UniformMixedError I ε (errorConstant I hε χ d M hM / (2 * Λ))
-          Φ u (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).1)
-          (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).2) := by
-  obtain ⟨Λ₀, hΛ₀, hexists⟩ := AxisContraction.natural_axis_profiles I hε χ d M hM
-  refine ⟨Λ₀, hΛ₀, ?_⟩
-  intro Λ hΛ a ha harad
-  obtain ⟨x, _, herr, hφ, hu, _, _⟩ := hexists Λ hΛ a ha
-  have hscale : 2 * (1 / (2 * Λ)) = 1 / Λ := by
-    field_simp [(hΛ₀.trans_le hΛ).ne']
-  refine ⟨AxisEvaluation.profile I ε x.1, AxisEvaluation.profile I ε x.2,
-    AxisEvaluation.profile I ε (AxisOperators.average I hε x.2),
-    AxisEvaluation.profile I ε (pressureCoefficient I hε a x.1),
-    integrated_solution I hε χ d hd (1 / Λ) (1 / (2 * Λ)) hscale a harad x hφ hu, ?_⟩
-  exact uniformMixedError_of_norm I hε x (referenceCoefficients I hε χ d)
-    (errorConstant I hε χ d M hM / (2 * Λ)) herr
 
 end NavierStokes.NaturalAxisBridge
 

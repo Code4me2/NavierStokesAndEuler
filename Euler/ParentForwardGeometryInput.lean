@@ -32,9 +32,6 @@ theorem sourceGrowthProfile_amplitude (t : Icc (0 : ℝ) D.T) :
     G.primaryAmplitude hball*G.sourceGrowthProfile hball t ≤ 8*Real.exp 6*G.δ*G.hchild :=
   (G.halfBall_controlledGrowth hball).choose_spec.2.2.2 t
 
-theorem primaryAmplitude_bound : G.primaryAmplitude hball ≤ 8*Real.exp 6*G.δ*G.hchild := by
-  have h := G.sourceGrowthProfile_amplitude hball ⟨0,le_rfl,D.T_pos.le⟩
-  simpa only [G.sourceGrowthProfile_initial hball,mul_one] using h
 
 omit [CompleteSpace U] in
 include G in

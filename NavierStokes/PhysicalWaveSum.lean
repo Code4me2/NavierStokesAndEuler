@@ -65,20 +65,6 @@ theorem norm_downLift_le {d Δ : ℕ} (hd : d ≤ Δ) : ‖downLift d‖ ≤ cov
         mul_le_mul hc (norm_snd_le y) (norm_nonneg _) (CommonCoverSolve.coveringBound_pos Δ).le
       _ ≤ _ := by unfold coverBound; nlinarith [norm_nonneg y]
 
-theorem norm_upLift_le {d Δ : ℕ} (hd : d ≤ Δ) : ‖upLift d‖ ≤ coverBound Δ := by
-  have hK := coverBound_ge_one Δ
-  have hc := CommonCoverSolve.coveringNorm_le_bound hd
-  refine ContinuousLinearMap.opNorm_le_bound _ (by linarith) ?_
-  intro y
-  rw [upLift_apply, Prod.norm_def]
-  apply max_le
-  · exact (norm_fst_le y).trans (le_mul_of_one_le_left (norm_nonneg y) hK)
-  · calc
-      _ ≤ ‖(CommonCoverSolve.coverPower d : Plane →L[ℝ] Plane)‖ * ‖y.2‖ :=
-        ContinuousLinearMap.le_opNorm _ _
-      _ ≤ CommonCoverSolve.coveringBound Δ * ‖y‖ :=
-        mul_le_mul hc (norm_snd_le y) (norm_nonneg _) (CommonCoverSolve.coveringBound_pos Δ).le
-      _ ≤ _ := by unfold coverBound; nlinarith [norm_nonneg y]
 
 noncomputable def commonLift (h : ℝ) (n d : ℕ) : SpaceTime → LiftPoint :=
   downLift d ∘ PhysicalGraphBounds.physicalLift h n
@@ -855,15 +841,6 @@ noncomputable def coverChange (d e : ℕ) : LiftPoint →L[ℝ] LiftPoint :=
   (downLift e).comp (upLift d)
 
 
-theorem norm_coverChange_le {d e Δ : ℕ} (hd : d ≤ Δ) (he : e ≤ Δ) :
-    ‖coverChange d e‖ ≤ coverBound Δ ^ 2 := by
-  unfold coverChange
-  calc
-    _ ≤ ‖downLift e‖ * ‖upLift d‖ := ContinuousLinearMap.opNorm_comp_le _ _
-    _ ≤ coverBound Δ * coverBound Δ :=
-      mul_le_mul (norm_downLift_le he) (norm_upLift_le hd) (norm_nonneg _) (by
-        have := coverBound_ge_one Δ; linarith)
-    _ = _ := (pow_two _).symm
 
 
 
@@ -931,22 +908,5 @@ theorem vectorSum_jet_bound {H : ℕ} {f : Fin 3 → WaveFamily H} {a b h r0 Z :
         ((mul_le_of_le_one_left (norm_nonneg _) (norm_realCoordinate_le i)).trans (hb i))
     _ = _ := by simp
 
-/-- The same stage-independent loss for an actual real Cartesian vector
-field. Passing from scalar components costs only a factor of three. -/
-theorem physical_vector_sum_jet_bound {h a b Z r0 P B eBase : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a)
-    (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0) (hP : 1 ≤ P) (hB : 1 ≤ B) (heBase : 0 ≤ eBase)
-    (H Δ m : ℕ) (g eAmp A : ℝ) (hA : 0 ≤ A) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ f : Fin 3 → WaveFamily H,
-      (∀ i, RegularFamily (f i) a b h r0 Z Δ) →
-      (∀ i, StrippedClass (f i) a b h r0 P A B g eAmp eBase m) →
-      ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (vectorSum f a h r0) w‖ ≤
-        C * physicalQ h w ^ (g - PhysicalGraphBounds.waveLoss h m) := by
-  obtain ⟨C, hC, hb⟩ := physical_sum_jet_bound (b := b) hh hh1 ha hZ hr0 hP hB heBase H Δ m g eAmp A hA
-  refine ⟨3 * C, by positivity, ?_⟩
-  intro f hreg hclass w hw ht
-  exact (vectorSum_jet_bound hreg ha hh hh1 hw m (fun i => hb (f i) (hreg i) (hclass i) w hw ht)).trans_eq
-    (by ring)
 
 end NavierStokes.PhysicalWaveSum

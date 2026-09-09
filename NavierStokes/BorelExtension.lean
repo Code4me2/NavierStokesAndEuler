@@ -164,8 +164,6 @@ private theorem power_ratio_le {b : ℝ} (hb : 1 ≤ b) {k j : ℕ} (hkj : k < j
 def boundSum (j : ℕ) (v : E) : ℝ :=
   ∑ k ∈ Finset.range j, templateBound j k v
 
-theorem boundSum_nonneg (j : ℕ) (v : E) : 0 ≤ boundSum j v :=
-  Finset.sum_nonneg fun k _ => templateBound_nonneg j k v
 
 theorem templateBound_le_boundSum {j k : ℕ} (hkj : k < j) (v : E) :
     templateBound j k v ≤ boundSum j v := by
@@ -185,11 +183,7 @@ def scale (a : ℕ → E) : ℕ → ℕ := DiagonalScale.doublingEnvelope (local
 theorem scale_pos (a : ℕ → E) (j : ℕ) : 0 < scale a j :=
   DiagonalScale.doublingEnvelope_pos (localScale a) j
 
-theorem scale_strictMono (a : ℕ → E) : StrictMono (scale a) :=
-  DiagonalScale.doublingEnvelope_strictMono (localScale a)
 
-theorem scale_doubling (a : ℕ → E) (j : ℕ) : 2 * scale a j ≤ scale a (j + 1) :=
-  DiagonalScale.doublingEnvelope_growth (localScale a) j
 
 theorem scale_ge_one (a : ℕ → E) (j : ℕ) : (1 : ℝ) ≤ scale a j := by
   exact_mod_cast scale_pos a j
@@ -304,19 +298,8 @@ theorem extension_zero_of_one_le_abs (a : ℕ → E) {s : ℝ} (hs : 1 ≤ |s|) 
       simp only [term, SmoothCutoffs.cutoff_zero_of_one_le_abs harg, zero_smul]
     _ = 0 := tsum_zero
 
-omit [CompleteSpace E] in
-theorem extension_support (a : ℕ → E) : support (extension a) ⊆ Ioo (-1 : ℝ) 1 := by
-  intro s hs
-  have habs : |s| < 1 := lt_of_not_ge fun h => hs (extension_zero_of_one_le_abs a h)
-  exact abs_lt.mp habs
 
-omit [CompleteSpace E] in
-theorem extension_tsupport (a : ℕ → E) : tsupport (extension a) ⊆ Icc (-1 : ℝ) 1 :=
-  closure_minimal ((extension_support a).trans Ioo_subset_Icc_self) isClosed_Icc
 
-omit [CompleteSpace E] in
-theorem extension_hasCompactSupport (a : ℕ → E) : HasCompactSupport (extension a) :=
-  isCompact_Icc.of_isClosed_subset isClosed_closure (extension_tsupport a)
 
 
 /-- Translate the constructed extension to any joining time. -/

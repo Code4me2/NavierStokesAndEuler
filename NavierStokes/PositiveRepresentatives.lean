@@ -53,10 +53,6 @@ theorem representative_enlarged_distance (K : Set Slow) (L : ActiveLabel K)
     ‖p - representative K L‖ ≤ 3 / ChartScales.S L.val.1 ^ 3 :=
   PrimaryRepresentatives.representative_enlarged_distance (positivePart K) L hp
 
-theorem representative_support_distance (K : Set Slow) (L : ActiveLabel K)
-    {p : Slow} (hp : p ∈ tsupport (PrimaryRepresentatives.nativeMask L.val.1 L.val.2)) :
-    ‖p - representative K L‖ ≤ 2 / ChartScales.S L.val.1 ^ 3 :=
-  PrimaryRepresentatives.representative_support_distance (positivePart K) L hp
 
 theorem physicalMask_has_positive_representative {h a b : ℝ} (L : Label) (hL : 1 ≤ L.1)
     {q : ℝ} {x : SlotColoring.Position} (hq : 0 < q) (hR : 0 ≤ x 0) (hT : 0 < x 2)

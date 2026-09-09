@@ -1,4 +1,6 @@
 import Euler.GevreyComposition
+import Euler.FlowL2Transport
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Euler.VolumeSobolevComposition
 
 /-! Gevrey-two composition with the outer derivatives in actual L².

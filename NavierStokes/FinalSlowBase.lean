@@ -307,15 +307,6 @@ theorem error_jetRate (upper : ℝ) (B : ℕ) {l : Filter ProblemStatement.Space
     v.finiteModification.contains F.data.h_pos F.data.h_lt_half P
     (scales_admissible_on H v upper B le_rfl hr) (finiteIdentities H v) m n hn
 
-theorem error_allJetsFlat (upper : ℝ) (B : ℕ) {l : Filter ProblemStatement.SpaceTime} {radius : ℝ}
-    (P : BaseResidual.PhysicalApproach l F.data.h 0 radius) (hr : radius ≤ boxRadius W upper) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1) (error H v upper B) :=
-  ConstructedSlowBase.repaired_allJetsFlat
-    (EntranceAlignedBase.smallLocalization W H v.profiles v.finiteModification ld.after_initial)
-    (EntranceAlignedBase.smallBaseAgreement W H v.profiles v.finiteModification ld.after_initial)
-    (EntranceAlignedBase.smallZeroOrder W H v.profiles v.finiteModification ld.after_initial)
-    v.finiteModification.contains F.data.h_pos F.data.h_lt_half P
-    (scales_admissible_on H v upper B le_rfl hr) (finiteIdentities H v)
 
 theorem leading_origin : (coefficients H v).axial 0 (0, 0) = W.axis.j := by
   have he := EntranceAlignedBase.modulated_leading_axis H v (eta := 0) (by constructor <;> norm_num)
@@ -341,9 +332,6 @@ theorem axis_tendsto (upper : ℝ) (B : ℕ) :
   rw [leading_origin]
   exact W.axis.small.j_pos
 
-theorem speedUnbounded (upper : ℝ) (B : ℕ) :
-    ProblemStatement.SpeedUnboundedAtOne (velocity H v upper B) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (axis_tendsto H v upper B)
 
 theorem weighted_jets (upper : ℝ) (B m : ℕ) :
     ∃ D : ℝ, 0 < D ∧ ∃ N : ℕ, ∀ q : ℝ, 0 < q → q ≤ 1 → ∀ w ∈ annulus W,

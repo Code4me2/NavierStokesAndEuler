@@ -145,10 +145,6 @@ theorem pressureField_angle (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
       (normalResidual τ hτ hτT B Y t (x,(θ : AddCircle P))) θ :=
   classicalPrimitive_angle P _ _ _ x θ
 
-theorem scalar_normalized (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, scalar τ hτ hτT B Y (t,(x,θ))) = 0 := by
-  simp_rw [scalar_eq_pressureField]
-  exact classicalPrimitive_mean_zero P _ _ _ x
 
 theorem normalResidual_zero_outside (t : Icc (0 : ℝ) D.T) (y : Space) (hy : y ∉ D.support)
     (θ : AddCircle P) : normalResidual τ hτ hτT B Y t (y,θ) = 0 := by

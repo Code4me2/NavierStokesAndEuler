@@ -459,36 +459,6 @@ variable {a b : ℝ}
 
 
 
-/-- Zero-initial source solves are constructed by the same operator, and retain
-every prescribed small amplitude factor in the source bound. -/
-theorem zero_initial_source_bound (hab : a ≤ b) (d : FrameData Q) {j : ℤ} (hj : j ≠ 0)
-    (f : Q × ℝ → Space) {U : Set Q}
-    (hA : ContinuousOn (d.coefficient j) (U ×ˢ Icc a b))
-    (hf : ContinuousOn (d.forcing f) (U ×ˢ Icc a b))
-    {p : Q} (hp : p ∈ U) (referenceDamping rate P : ℝ → ℝ)
-    {S C D K : ℝ} (hS : 0 < S) (hC : 0 ≤ C) (hD : 0 ≤ D)
-    (hPpos : ∀ v, 0 < P v) (hP : ∀ v, HasDerivAt P (rate v * P v) v)
-    (hreference : ∀ v ∈ Icc a b, rate v = d.eigenvalue (p, v) - referenceDamping v)
-    (hlam : ∀ v ∈ Icc a b, 0 ≤ d.eigenvalue (p, v))
-    (hν : ∀ v ∈ Icc a b, 0 ≤ d.viscosity (p, v))
-    (hνerr : ∀ v ∈ Icc a b, referenceDamping v - D / S ≤ d.viscosity (p, v))
-    (herr : ∀ v ∈ Icc a b,
-      |d.error11 (p, v)| ≤ C / S ∧ |d.error12 (p, v)| ≤ C / S ∧
-      |d.error21 (p, v)| ≤ C / S ∧ |d.error22 (p, v)| ≤ C / S)
-    (hsource : ∀ v ∈ Icc a b, ‖d.forcing f (p, v)‖ ≤ K * P v) :
-    ∀ v ∈ Icc a b, ‖solution hab d j (fun _ => 0) f p v‖ ≤
-      Real.exp (((D + 4 * C) / S) * (v - a)) * P v * (K * (v - a)) := by
-  have hode (v : ℝ) (hv : v ∈ Icc a b) := solution_hasDerivAt hab d j (fun _ => 0) f hA hf hp hv
-  apply ViscousPropagator.zero_initial_source_bound (fun v => d.coefficient j (p, v)) rate P
-    (div_nonneg (by positivity) hS.le) hPpos hP
-    (fun v hv => (hode v hv).continuousAt.continuousWithinAt)
-    (hf.comp (continuous_const.prodMk continuous_id).continuousOn (fun v hv => ⟨hp, hv⟩))
-    (fun v hv => (hode v (Ico_subset_Icc_self hv)).hasDerivWithinAt)
-    _ (solution_initial hab d j (fun _ => 0) f p) hsource
-  intro v hv w
-  have hv' := Ico_subset_Icc_self hv
-  rw [hreference v hv']
-  exact d.energy_bound (p, v) hj (hlam v hv') (hν v hv') (hνerr v hv') (herr v hv') w
 
 end Forward
 

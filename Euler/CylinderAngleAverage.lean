@@ -162,12 +162,6 @@ theorem average_fullOperator (A : Space →ᵇ E →L[ℝ] F) (u : CylinderL2 P 
 
 variable {K : Type*} [TopologicalSpace K] [CompactSpace K]
 
-theorem pathAverage_fullMultiplier (A : C(K,Space →ᵇ E →L[ℝ] F))
-    (u : C(K,CylinderL2 P E)) :
-    pathAverage P (fullMultiplierMap P A u) = fullMultiplierMap P A (pathAverage P u) := by
-  apply ContinuousMap.ext
-  intro t
-  exact average_fullOperator P (A t) (u t)
 
 end Coefficients
 

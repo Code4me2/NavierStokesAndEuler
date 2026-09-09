@@ -350,15 +350,7 @@ noncomputable def initializedDiagonal {h : ℝ} {Ω : Set SpaceTime}
     (scales : ℕ → ℝ) : VelocityField :=
   mixedDiagonal (initializedBase base initial) p D scales
 
-theorem initializedSeries_zero {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (w : SpaceTime) :
-    initializedSeries base initial p 0 w = base w + initial.field w := rfl
 
-theorem initializedSeries_succ {h : ℝ} {Ω : Set SpaceTime}
-    (base : VelocityField) (initial : PotentialStage.{u} h Ω)
-    (p : ℕ → PotentialStage.{u} h Ω) (j : ℕ) :
-    initializedSeries base initial p (j + 1) = (p j).field := rfl
 
 
 theorem initializedBase_germ {h : ℝ} {Ω : Set SpaceTime}

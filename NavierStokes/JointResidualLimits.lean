@@ -138,12 +138,6 @@ theorem boundaryLimits_joint {f : SpaceTime → V} (hzero : VanishingJointJets f
   · simp only [boundaryLimits, dite_eq_right hx]
     exact (Classical.choice (hext x hx)).jet_tendsto n
 
-theorem boundaryLimits_continuous {f : SpaceTime → V} (hzero : VanishingJointJets f)
-    (hext : AwayExtensions f) (n : ℕ) : Continuous (fun x => boundaryLimits f hext x n) := by
-  apply continuous_of_joint_limits (p := 𝓝[<] (1 : ℝ))
-    (F := iteratedFDeriv ℝ n f)
-  intro x
-  simpa only [past_filter] using boundaryLimits_joint hzero hext n x
 
 theorem boundaryLimits_locallyUniform {f : SpaceTime → V} (hzero : VanishingJointJets f)
     (hext : AwayExtensions f) (n : ℕ) :
@@ -153,11 +147,6 @@ theorem boundaryLimits_locallyUniform {f : SpaceTime → V} (hzero : VanishingJo
   intro x
   simpa only [past_filter] using boundaryLimits_joint hzero hext n x
 
-theorem boundaryLimits_uniformOn_compact {f : SpaceTime → V} (hzero : VanishingJointJets f)
-    (hext : AwayExtensions f) (n : ℕ) {K : Set Space} (hK : IsCompact K) :
-    TendstoUniformlyOn (fun t x => iteratedFDeriv ℝ n f (t, x))
-      (fun x => boundaryLimits f hext x n) (𝓝[<] (1 : ℝ)) K :=
-  (tendstoLocallyUniformly_iff_forall_isCompact.mp (boundaryLimits_locallyUniform hzero hext n)) K hK
 
 theorem past_filter_neBot (x : Space) :
     (𝓝[SpacetimeEndpoint.openPast 1] ((1 : ℝ), x)).NeBot := by
@@ -173,94 +162,16 @@ theorem boundaryLimits_independent {f : SpaceTime → V} (hzero : VanishingJoint
 
 
 
-/-- Actual derivative recurrence on the open past; the jet family is not
-independent input data. -/
-theorem actual_derivative_recurrence {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1)) (n : ℕ) (z : SpaceTime)
-    (hz : z.1 < 1) :
-    HasFDerivAt (iteratedFDeriv ℝ n f)
-      (iteratedFDeriv ℝ (n + 1) f z).curryLeft z := by
-  have hs : ContDiffAt ℝ ∞ f z := hf.contDiffAt
-    ((SpacetimeEndpoint.openPast_isOpen 1).mem_nhds ⟨hz, mem_univ z.2⟩)
-  have hi : ContDiffAt ℝ 1 (iteratedFDeriv ℝ n f) z :=
-    hs.iteratedFDeriv_right (by exact_mod_cast (le_top : 1 + (n : ℕ∞) ≤ ⊤))
-  have hd := (hi.differentiableAt (by simp)).hasFDerivAt
-  rw [fderiv_iteratedFDeriv] at hd
-  exact hd
-
-theorem boundaryLimits_smooth {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) (n : ℕ) :
-    ContDiff ℝ ∞ (fun x => boundaryLimits f hext x n) :=
-  SpacetimeEndpoint.boundary_tensors_contDiff (J := ftaylorSeries ℝ f)
-    (actual_derivative_recurrence hf) (boundaryLimits_locallyUniform hzero hext) n
-
-theorem extendedJets_compatible {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) (n : ℕ)
-    (z : SpaceTime) (hz : z ∈ SpacetimeEndpoint.closedPast 1) :
-    HasFDerivWithinAt
-      (fun y => SpacetimeEndpoint.extendJets 1 (ftaylorSeries ℝ f) (boundaryLimits f hext) y n)
-      (SpacetimeEndpoint.extendJets 1 (ftaylorSeries ℝ f) (boundaryLimits f hext) z (n + 1)).curryLeft
-      (SpacetimeEndpoint.closedPast 1) z :=
-  SpacetimeEndpoint.extendedJets_hasFDerivWithinAt (J := ftaylorSeries ℝ f)
-    (actual_derivative_recurrence hf) (boundaryLimits_locallyUniform hzero hext) n z hz
-
-/-- Spatial differentiation of a boundary tensor is restriction of the next
-full spacetime tensor to a spatial first argument. -/
-theorem boundaryLimits_hasFDerivAt {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) (n : ℕ) (x : Space) :
-    HasFDerivAt (fun y => boundaryLimits f hext y n)
-      ((boundaryLimits f hext x (n + 1)).curryLeft.comp (ContinuousLinearMap.inr ℝ ℝ Space)) x := by
-  have hd := extendedJets_compatible hf hzero hext n (1, x) ⟨le_refl (1 : ℝ), mem_univ x⟩
-  have hi : HasFDerivAt (fun y : Space => ((1 : ℝ), y))
-      (ContinuousLinearMap.inr ℝ ℝ Space) x :=
-    (hasFDerivAt_const (1 : ℝ) x).prodMk (hasFDerivAt_id x)
-  have hc := hd.comp x (hi.hasFDerivWithinAt (s := univ))
-    (fun y _ => show ((1 : ℝ), y) ∈ SpacetimeEndpoint.closedPast 1 from
-      ⟨le_refl (1 : ℝ), mem_univ y⟩)
-  simpa only [Function.comp_def, SpacetimeEndpoint.extendJets, SpacetimeEndpoint.extendTrace_at]
-    using hc.hasFDerivAt_of_univ
-
-/-- On `t < 1` this is the original function; on `t ≥ 1` this auxiliary
-closed-side extension is constant in time with the constructed boundary trace. -/
-noncomputable def extendedResidual (f : SpaceTime → V) (hext : AwayExtensions f) : SpaceTime → V :=
-  SpacetimeEndpoint.extendTrace 1 f (fun x => (boundaryLimits f hext x 0).curry0)
-
-theorem extendedResidual_agrees (f : SpaceTime → V) (hext : AwayExtensions f) :
-    EqOn (extendedResidual f hext) f (SpacetimeEndpoint.openPast 1) :=
-  fun _ hz => SpacetimeEndpoint.extendTrace_of_lt hz.1
-
-theorem extendedResidual_smooth {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) :
-    ContDiffOn ℝ ∞ (extendedResidual f hext) (SpacetimeEndpoint.closedPast 1) :=
-  SpacetimeEndpoint.contDiffOn_joint_extension (J := ftaylorSeries ℝ f)
-    (fun _ _ => rfl) (actual_derivative_recurrence hf) (boundaryLimits_locallyUniform hzero hext)
-
-theorem extendedResidual_boundary_jets {f : SpaceTime → V}
-    (hf : ContDiffOn ℝ ∞ f (SpacetimeEndpoint.openPast 1))
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) (n : ℕ) (x : Space) :
-    iteratedFDerivWithin ℝ n (extendedResidual f hext)
-      (SpacetimeEndpoint.closedPast 1) (1, x) = boundaryLimits f hext x n :=
-  SpacetimeEndpoint.boundary_jets_eq_limits (J := ftaylorSeries ℝ f)
-    (fun _ _ => rfl) (actual_derivative_recurrence hf) (boundaryLimits_locallyUniform hzero hext) n x
 
 
 
-/-- The limit portion of the `CandidateFromLimits` input is constructed
-solely from actual joint jet limits and one-sided local extensions. -/
-theorem exists_residual_limits {f : SpaceTime → V}
-    (hzero : VanishingJointJets f) (hext : AwayExtensions f) :
-    ∃ L : Space → FormalMultilinearSeries ℝ SpaceTime V,
-      (∀ n : ℕ, L 0 n = 0) ∧
-      (∀ n : ℕ, ∀ x : Space, Tendsto (iteratedFDeriv ℝ n f)
-        (𝓝[SpacetimeEndpoint.openPast 1] (1, x)) (𝓝 (L x n))) ∧
-      (∀ n : ℕ, TendstoLocallyUniformly (fun t x => iteratedFDeriv ℝ n f (t, x))
-        (fun x => L x n) (𝓝[<] (1 : ℝ))) :=
-  ⟨boundaryLimits f hext, boundaryLimits_zero f hext,
-    boundaryLimits_joint hzero hext, boundaryLimits_locallyUniform hzero hext⟩
+
+
+
+
+
+
+
 
 
 end ActualJets

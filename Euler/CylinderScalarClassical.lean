@@ -43,11 +43,6 @@ theorem classicalPrimitive_angle (y : Space) (θ : ℝ) :
   exact EulerAngleMeanZeroPrimitive.primitive_hasDerivAt P _
     (hf.comp (continuous_const.prodMk (AddCircle.continuous_mk' P))) θ
 
-theorem classicalPrimitive_mean_zero (y : Space) :
-    (∫ θ in (0 : ℝ)..P, classicalPrimitive P f hf hmean (y,(θ : AddCircle P))) = 0 := by
-  simp_rw [classicalPrimitive_cover]
-  exact EulerAngleMeanZeroPrimitive.primitive_mean_zero P (ne_of_gt (Fact.out : 0 < P)) _
-    (hf.comp (continuous_const.prodMk (AddCircle.continuous_mk' P)))
 
 /-- The actual normalized integral is smooth in all cylinder variables. -/
 theorem classicalPrimitive_smooth

@@ -79,10 +79,6 @@ theorem initial_support (hS : tsupport (fun x => S.evolution.velocity (0,x)) ⊆
   exact (tsupport_add _ _).trans
     (union_subset hS ((tsupport_add _ _).trans (union_subset h.1 h.2)))
 
-theorem initial_compact (hS : tsupport (fun x => S.evolution.velocity (0,x)) ⊆ Metric.closedBall 0 2) :
-    HasCompactSupport (fun x => (state I S k hk nextEll hnext hnext1 F hSym).evolution.velocity (0,x)) :=
-  (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _)
-    (initial_support I S k hk nextEll hnext hnext1 F hSym hS)
 
 end GeometryForwardChoice
 

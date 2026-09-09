@@ -92,10 +92,5 @@ theorem curlCorrector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   · exact vector_mean_zero τ hτ hτT B G t
   · exact vector_odd τ hτ hτT B G hSym hF hM hH hraw t
 
-theorem correctorDerivative_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    correctorDerivative τ hτ hτT B G (t,(-x,-θ)) =
-      -correctorDerivative τ hτ hτT B G (t,(x,θ)) :=
-  (correctorField τ hτ hτT B G).timeDerivative_odd (correctorDerivativeField τ hτ hτT B G)
-    D.T_pos (correctorField_time τ hτ hτT B G) (curlCorrector_odd τ hτ hτT B G hSym hF hM hH hraw) t x θ
 
 end EulerTransversePacketJoin

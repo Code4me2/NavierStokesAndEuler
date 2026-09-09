@@ -59,20 +59,5 @@ theorem forcing_translation_contDiff (T : ℝ) (A : ℝ → SmoothL2Field V)
   rw [he]
   exact (forcingFamily T A hA).contDiff_value
 
-/-- The true time-space derivative norm is bounded by the original ordinary spatial jet norm, without extra factors. -/
-theorem forcing_translation_jet_bound (T : ℝ) (A : ℝ → SmoothL2Field V)
-    (hA : ∀ n, MemLp (fun t => (A t).jetLp n) 2 (timeMeasure T))
-    (f : TimeLp T (L2Space V)) (hf : f =ᵐ[timeMeasure T] fun t => (A t).toLp)
-    (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n (fun b : Space => timeLiftIsometry T (translation b) f) a‖ ≤
-      ‖(hA n).toLp (fun t => (A t).jetLp n)‖ := by
-  have he : (fun b : Space => timeLiftIsometry T (translation b) f) = (forcingFamily T A hA).value :=
-    funext (fun b => (forcingFamily_value_eq T A hA f hf b).symm)
-  have h := (forcingFamily T A hA).norm_iteratedFDeriv_value_le n a
-  have hn : ‖(forcingFamily T A hA).bound n‖ = ‖(hA n).toLp (fun t => (A t).jetLp n)‖ := by
-    change ‖(hA n).norm.toLp (fun t => ‖(A t).jetLp n‖)‖ = _
-    simp only [Lp.norm_toLp, eLpNorm_norm]
-  exact (congrArg (fun g : Space → TimeLp T (L2Space V) =>
-    ‖iteratedFDeriv ℝ n g a‖) he).trans_le (h.trans_eq hn)
 
 end EulerMeanForcing

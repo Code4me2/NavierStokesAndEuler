@@ -1,6 +1,9 @@
-import Euler.PartialCorrectionBootstrap
+import Euler.CorrectionEnergyBootstrap
+import Euler.CorrectionBudgetRestriction
+import Euler.CorrectionContinuation
 import Euler.GevreyPathNorm
 import Euler.CorrectionMildEquation
+import Euler.PartialCorrectionBootstrap
 
 /-! Actual global-in-time viscous correction from concrete Gevrey coefficient and residual budgets. -/
 

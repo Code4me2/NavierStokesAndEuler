@@ -255,18 +255,6 @@ theorem advection_velocity {B F U : Profile} {t : ℝ} {x : Space}
     advectionRadial, advectionAngular, advectionAxial, profilePoint, radialEnergy,
     pack, coordinateVector] <;> ring
 
-theorem divergence_velocity {B F U : Profile} {t : ℝ} {x : Space}
-    (hB : DifferentiableAt ℝ B (profilePoint t x))
-    (hF : DifferentiableAt ℝ F (profilePoint t x))
-    (hU : DifferentiableAt ℝ U (profilePoint t x)) :
-    spatialDivergence (velocity B F U) t x =
-      partialZ U (profilePoint t x) - 2 * B (profilePoint t x) -
-        2 * radialEnergy x * partialS B (profilePoint t x) := by
-  unfold spatialDivergence spatialDerivative
-  rw [(hasFDerivAt_velocity hB hF hU).fderiv, Fin.sum_univ_three]
-  simp [velocityJacobian, packDerivative_apply, profileDerivative_apply,
-    coordinateVector, profilePoint, radialEnergy, lift]
-  ring
 
 /-- The physical vector Laplacian is local in all three profiles. In
 particular this applies to a radial quotient at any point where it is C². -/

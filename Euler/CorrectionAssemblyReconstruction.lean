@@ -74,15 +74,7 @@ def FiniteFamily.normalizedGraphPotential (F : FiniteFamily period hT A) (k : �
     (t : Icc (0 : ℝ) T) (x : Vector3) : ℝ :=
   radialPotential (F.graphPressure period k t) x
 
-/-- The reconstructed scalar pressure has zero value at the origin at every time. -/
-theorem FiniteFamily.normalizedGraphPotential_zero (F : FiniteFamily period hT A) (k : ℝ)
-    (t : Icc (0 : ℝ) T) : F.normalizedGraphPotential period k t 0 = 0 :=
-  radialPotential_zero _
 
-/-- The normalized scalar pressure is jointly continuous, including both endpoint time slices. -/
-theorem FiniteFamily.normalizedGraphPotential_joint_continuous (F : FiniteFamily period hT A) (k : ℝ) :
-    Continuous (F.normalizedGraphPotential period k).uncurry :=
-  radialPotential_joint_continuous _ (F.graphPressure_joint_continuous period k)
 
 /-- The normalized scalar pressure is spatially smooth at every time. -/
 theorem FiniteFamily.normalizedGraphPotential_smooth (F : FiniteFamily period hT A)

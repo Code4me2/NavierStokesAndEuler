@@ -293,17 +293,6 @@ theorem advection_velocity {B F U : Profile} {t : ℝ}
     advectionRadial, advectionAngular, advectionAxial, profilePoint, radialEnergy,
     pack, coordinateVector] <;> ring
 
-theorem divergence_velocity {B F U : Profile} {t : ℝ}
-    (hB : SliceDifferentiable B t) (hF : SliceDifferentiable F t)
-    (hU : SliceDifferentiable U t) (x : Space) :
-    spatialDivergence (velocity B F U) t x =
-      partialZ U (profilePoint t x) - 2 * B (profilePoint t x) -
-        2 * radialEnergy x * partialS B (profilePoint t x) := by
-  unfold spatialDivergence spatialDerivative
-  rw [(hasFDerivAt_velocity hB hF hU x).fderiv, Fin.sum_univ_three]
-  simp [velocityJacobian, packDerivative_apply, profileDerivative_apply,
-    coordinateVector, profilePoint, radialEnergy, lift]
-  ring
 
 theorem spatialLaplacian_velocity {B F U : Profile} {t : ℝ}
     (hB : SliceC2 B t) (hF : SliceC2 F t) (hU : SliceC2 U t) (x : Space) :

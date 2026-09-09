@@ -2343,27 +2343,6 @@ theorem baseResidual_jetRate_axis {l : Filter SpaceTime} {a : ℕ → ℕ} {h C 
     abel
   rwa [heq] at hsum
 
-theorem baseResidual_allJetsFlat_axis {l : Filter SpaceTime} {a : ℕ → ℕ} {h C hi r : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (A : PhysicalApproach l h 0 hi) (hr : 0 < r)
-    {d : Coefficients} (hd : SmoothCoefficients d) (hc : StressZeroCore d r)
-    (ha : AdmissibleScales h (coefficientBundle C d) (innerBox 0 hi) a)
-    (f : SlowProfiles) (hfinite : FiniteIdentities h C d f)
-    {O : Set Inner} (hO : IsOpen O) (hKO : innerBox 0 hi ⊆ O)
-    (phi u beta : ℕ → Inner → ℝ)
-    (hp : ∀ j, ContDiffOn ℝ ∞ (phi j) O)
-    (hu : ∀ j, ContDiffOn ℝ ∞ (u j) O)
-    (hb : ∀ j, ContDiffOn ℝ ∞ (beta j) O)
-    (hv : ∀ j, ∀ w ∈ O, 0 ≤ w.1 → f.flux j w = w.1 * beta j w)
-    (heu : ∀ j, ∀ w ∈ O, 0 ≤ w.1 → f.axial j w = u j w)
-    (hep : ∀ j, ∀ w ∈ O, 0 ≤ w.1 → f.phi j w = phi j w)
-    (hL : ∀ w ∈ O, CoordinateAlgebra.L h w.2 ≠ 0) :
-    AllJetsFlat l (fun z => (cartesianChart h z).1) (baseResidual a h C d) := by
-  intro m N
-  obtain ⟨K, hK, hb⟩ := baseResidual_jetRate_axis hh hh1 A hr hd hc ha f hfinite hO hKO
-    phi u beta hp hu hb hv heu hep hL m N (Nat.cast_nonneg N)
-  refine ⟨K, hK, ?_⟩
-  filter_upwards [A.positive_small hh hh1, hb] with z hz hbound
-  simpa only [abs_norm, abs_of_pos hz.1, Real.rpow_natCast] using hbound
 
 end FullNonlinearAssembly
 

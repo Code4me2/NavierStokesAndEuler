@@ -191,12 +191,6 @@ theorem Budget.commonPath_odd (B : Budget period hT A) (P : ParityData period A)
     -reflection period (B.commonPath period t) = B.commonPath period t :=
   (B.family period).commonPath_odd period (B.comparisonData period) P t
 
-/-- The actual common Sobolev realizations retain the prescribed odd parity. -/
-theorem Budget.fieldTower_odd (B : Budget period hT A) (P : ParityData period A)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    oddReflection period q ((B.fieldTower period).realization q t) =
-      (B.fieldTower period).realization q t :=
-  (B.family period).fieldTower_odd period (B.comparisonData period) P q t
 
 /-- The canonical spatially smooth correction is pointwise odd for odd input data. -/
 theorem Budget.pointField_odd (B : Budget period hT A) (P : ParityData period A)
@@ -228,14 +222,6 @@ theorem Budget.pointField_hasDerivAt (B : Budget period hT A)
       (B.pointTimeDerivative period ⟨t, ht.1.le, ht.2.le⟩ x) t :=
   (B.family period).pointField_hasDerivAt period x t ht
 
-/-- The pointwise correction equation contains the actual raw source and signed pressure. -/
-theorem Budget.pointField_hasDerivAt_pressure (B : Budget period hT A)
-    (x : LiftDomain period) (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (fun r => B.pointField period (projIcc 0 T hT.le r) x)
-      (-(B.family period).pointRawSource period ⟨t, ht.1.le, ht.2.le⟩ x -
-        (A.metric.coefficient ⟨t, ht.1.le, ht.2.le⟩).coefficient x
-          ((B.family period).pointPressure period ⟨t, ht.1.le, ht.2.le⟩ x)) t :=
-  (B.family period).pointField_hasDerivAt_pressure period x t ht
 
 /-- Genuine coherent input bounds, with radius loss determined only by the actual
 transport drift, construct one smooth spatial correction with all-cutoff energy

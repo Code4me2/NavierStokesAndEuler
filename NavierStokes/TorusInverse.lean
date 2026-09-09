@@ -417,88 +417,16 @@ theorem norm_series_le {a : Frequency → ℂ} (ha : Rapid a) (x : Plane) :
     norm_tsum_le_tsum_norm (summable_terms ha x).norm
 
 
-def coordinateCoeff (j : Bool) (a : Frequency → ℂ) : Frequency → ℂ :=
-  if j then derivY a else derivX a
 
-def coordinatePartial (j : Bool) (f : Plane → ℂ) (x : Plane) : ℂ :=
-  fderiv ℝ f x (if j then (0, 1) else (1, 0))
 
-def coefficientWord : List Bool → (Frequency → ℂ) → Frequency → ℂ
-  | [], a => a
-  | j :: js, a => coordinateCoeff j (coefficientWord js a)
 
-def derivativeWord : List Bool → (Plane → ℂ) → Plane → ℂ
-  | [], f => f
-  | j :: js, f => coordinatePartial j (derivativeWord js f)
 
-theorem Rapid.coordinateCoeff {a : Frequency → ℂ} (ha : Rapid a) (j : Bool) :
-    Rapid (coordinateCoeff j a) := by
-  cases j
-  · exact ha.derivX
-  · exact ha.derivY
 
-theorem Rapid.coefficientWord {a : Frequency → ℂ} (ha : Rapid a) (w : List Bool) :
-    Rapid (coefficientWord w a) := by
-  induction w with
-  | nil => exact ha
-  | cons j js ih => exact ih.coordinateCoeff j
 
-theorem coordinatePartial_series (j : Bool) {a : Frequency → ℂ} (ha : Rapid a) :
-    coordinatePartial j (series a) = series (coordinateCoeff j a) := by
-  funext x
-  cases j <;> simp [coordinatePartial, coordinateCoeff, fderiv_series ha,
-    liftX_apply, liftY_apply]
 
-theorem derivativeWord_series (w : List Bool) {a : Frequency → ℂ} (ha : Rapid a) :
-    derivativeWord w (series a) = series (coefficientWord w a) := by
-  induction w with
-  | nil => rfl
-  | cons j js ih =>
-    simp only [derivativeWord, coefficientWord, ih]
-    exact coordinatePartial_series j (ha.coefficientWord js)
 
-theorem norm_coordinateCoeff_le (j : Bool) (a : Frequency → ℂ) (k : Frequency) :
-    ‖coordinateCoeff j a k‖ ≤ (‖omega‖ * weight k) * ‖a k‖ := by
-  cases j
-  · exact (norm_mul _ _).le.trans (mul_le_mul_of_nonneg_right (norm_freqX_le k) (norm_nonneg _))
-  · exact (norm_mul _ _).le.trans (mul_le_mul_of_nonneg_right (norm_freqY_le k) (norm_nonneg _))
 
-theorem norm_coefficientWord_le (w : List Bool) (a : Frequency → ℂ) (k : Frequency) :
-    ‖coefficientWord w a k‖ ≤ (‖omega‖ * weight k) ^ w.length * ‖a k‖ := by
-  induction w with
-  | nil => simp [coefficientWord]
-  | cons j js ih =>
-    calc
-      ‖coefficientWord (j :: js) a k‖ ≤
-          (‖omega‖ * weight k) * ‖coefficientWord js a k‖ := norm_coordinateCoeff_le _ _ _
-      _ ≤ (‖omega‖ * weight k) * ((‖omega‖ * weight k) ^ js.length * ‖a k‖) :=
-        mul_le_mul_of_nonneg_left ih (mul_nonneg (norm_nonneg _) (weight_pos k).le)
-      _ = _ := by simp only [List.length_cons, pow_succ]; ring
 
-/-- A uniform bound for every actual mixed coordinate derivative of the inverse. -/
-theorem inverse_derivativeWord_bound (d : Direction) {a : Frequency → ℂ} (ha : Rapid a)
-    (w : List Bool) (x : Plane) :
-    ‖derivativeWord w (directionalInverse d a) x‖ ≤
-      ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) * coeffSeminorm (w.length + 1) a := by
-  have hr := (ha.inverseCoeff d).coefficientWord w
-  change ‖derivativeWord w (series (inverseCoeff d a)) x‖ ≤ _
-  rw [derivativeWord_series w (ha.inverseCoeff d)]
-  apply (norm_series_le hr x).trans
-  have hb : ∀ k, ‖coefficientWord w (inverseCoeff d a) k‖ ≤
-      ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) * (weight k ^ (w.length + 1) * ‖a k‖) := by
-    intro k
-    calc
-      ‖coefficientWord w (inverseCoeff d a) k‖ ≤
-          (‖omega‖ * weight k) ^ w.length * ‖inverseCoeff d a k‖ := norm_coefficientWord_le _ _ _
-      _ ≤ (‖omega‖ * weight k) ^ w.length * (((6 * ‖omega⁻¹‖) * weight k) * ‖a k‖) := by
-        apply mul_le_mul_of_nonneg_left _
-          (pow_nonneg (mul_nonneg (norm_nonneg _) (weight_pos k).le) _)
-        exact (norm_mul _ _).le.trans
-          (mul_le_mul_of_nonneg_right (norm_multiplier_le d k) (norm_nonneg _))
-      _ = _ := by rw [mul_pow, pow_succ]; ring
-  have hs := hr.summable_norm.tsum_le_tsum hb
-    ((ha (w.length + 1)).mul_left ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length))
-  simpa only [coeffSeminorm, pow_zero, one_mul, tsum_mul_left] using hs
 
 /-! ## Parameters and support -/
 

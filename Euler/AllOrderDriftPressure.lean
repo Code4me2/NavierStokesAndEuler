@@ -91,15 +91,7 @@ def Budget.normalizedGraphPotential (B : Budget period hT A) (k : ℝ)
     (t : Icc (0 : ℝ) T) (x : Vector3) : ℝ :=
   (B.family period).normalizedGraphPotential period k t x
 
-/-- The constructed scalar pressure vanishes at the origin at every time. -/
-theorem Budget.normalizedGraphPotential_zero (B : Budget period hT A)
-    (k : ℝ) (t : Icc (0 : ℝ) T) : B.normalizedGraphPotential period k t 0 = 0 :=
-  (B.family period).normalizedGraphPotential_zero period k t
 
-/-- Fixing the gauge by the same radial formula at every time preserves joint continuity. -/
-theorem Budget.normalizedGraphPotential_joint_continuous (B : Budget period hT A) (k : ℝ) :
-    Continuous (B.normalizedGraphPotential period k).uncurry :=
-  (B.family period).normalizedGraphPotential_joint_continuous period k
 
 /-- The actual normalized scalar pressure is spatially smooth on each time slice. -/
 theorem Budget.normalizedGraphPotential_smooth (B : Budget period hT A)
@@ -114,37 +106,10 @@ theorem Budget.normalizedGraphPotential_gradient (B : Budget period hT A)
       A.κ • B.pointPressure period t (cylinderGraph period k A.direction x) :=
   (B.family period).normalizedGraphPotential_gradient period (B.comparisonData period) k hk t x
 
-/-- No second normalized smooth potential can represent the same actual graph pressure. -/
-theorem Budget.normalizedGraphPotential_unique (B : Budget period hT A)
-    (k : ℝ) (t : Icc (0 : ℝ) T) (q : Vector3 → ℝ)
-    (hq : ContDiff ℝ ∞ q)
-    (hgrad : ∀ x, gradient q x = B.graphPressure period k t x) (hq0 : q 0 = 0) :
-    B.normalizedGraphPotential period k t = q :=
-  (B.family period).normalizedGraphPotential_unique period k t q hq hgrad hq0
 
-/-- Prescribed odd data produce an odd actual common pressure gradient. -/
-theorem Budget.commonPressure_odd (B : Budget period hT A) (P : ParityData period A)
-    (t : Icc (0 : ℝ) T) :
-    -reflection period (B.commonPressure period t) = B.commonPressure period t :=
-  (B.family period).commonPressure_odd period (B.comparisonData period) P t
 
-/-- Oddness holds pointwise for the canonical pressure representative. -/
-theorem Budget.pointPressure_odd (B : Budget period hT A) (P : ParityData period A)
-    (t : Icc (0 : ℝ) T) (x : LiftDomain period) :
-    B.pointPressure period t (-x) = -B.pointPressure period t x :=
-  (B.family period).pointPressure_odd period (B.comparisonData period) P t x
 
-/-- The signed pressure gradient remains odd after physical phase-graph restriction. -/
-theorem Budget.graphPressure_odd (B : Budget period hT A) (P : ParityData period A)
-    (k : ℝ) (t : Icc (0 : ℝ) T) (x : Vector3) :
-    B.graphPressure period k t (-x) = -B.graphPressure period k t x :=
-  (B.family period).graphPressure_odd period (B.comparisonData period) P k t x
 
-/-- The same canonical normalization makes the scalar graph pressure exactly even. -/
-theorem Budget.normalizedGraphPotential_even (B : Budget period hT A) (P : ParityData period A)
-    (k : ℝ) (t : Icc (0 : ℝ) T) (x : Vector3) :
-    B.normalizedGraphPotential period k t (-x) = B.normalizedGraphPotential period k t x :=
-  (B.family period).normalizedGraphPotential_even period (B.comparisonData period) P k t x
 
 
 

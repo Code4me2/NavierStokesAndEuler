@@ -544,10 +544,6 @@ theorem tsupport_curl_subset (ψ : Fin 3 → Space → ℝ) (K : Set Space)
       fderiv_of_notMem_tsupport ℝ h₂]
   exact hx hzero
 
-theorem hasCompactSupport_curl (ψ : Fin 3 → Space → ℝ) (K : Set Space)
-    (hK : IsCompact K) (hψ : ∀ i, tsupport (ψ i) ⊆ K) :
-    HasCompactSupport (curl ψ) :=
-  hK.of_isClosed_subset (isClosed_tsupport _) (tsupport_curl_subset ψ K hK.isClosed hψ)
 
 theorem partialDerivative_odd_of_even (f : Space → ℝ) (hf : Differentiable ℝ f)
     (heven : ∀ x, f (-x) = f x) (i : Fin 3) (x : Space) :

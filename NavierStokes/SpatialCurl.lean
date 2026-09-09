@@ -185,9 +185,6 @@ theorem tsupport_curl_subset (A : Space → Space) : tsupport (curl A) ⊆ tsupp
   by_contra h
   exact hx (curl_eq_zero_of_not_mem_tsupport h)
 
-theorem hasCompactSupport_curl {A : Space → Space} (hA : HasCompactSupport A) :
-    HasCompactSupport (curl A) :=
-  hA.fderiv ℝ |>.comp_left (g := curlLinear) (map_zero curlLinear)
 
 theorem tsupport_curl_cutoff_subset (χ : Space → ℝ) (A : Space → Space) :
     tsupport (curl (fun y => χ y • A y)) ⊆ tsupport χ :=

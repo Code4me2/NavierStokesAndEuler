@@ -52,10 +52,6 @@ theorem commutatorBlock_zero {s q : ℕ} {A : SmoothCoefficient period} {f : Lif
     (J : EulerSpatialSobolevInverse.SpatialJet period directions s f) : commutatorBlock K J q 0 = 0 := by
   simp [commutatorBlock]
 
-theorem commutatorBlock_nonneg {s q n : ℕ} {A : SmoothCoefficient period} {f : LiftL2 period}
-    (K : EulerSpatialSobolevInverse.CoefficientJet period directions s A)
-    (J : EulerSpatialSobolevInverse.SpatialJet period directions s f) : 0 ≤ commutatorBlock K J q n :=
-  Finset.sum_nonneg (fun _ _ => sobolevSize_nonneg _ _)
 
 
 /-- The external commutator recurrence uses a fixed Sobolev norm at every leaf. -/

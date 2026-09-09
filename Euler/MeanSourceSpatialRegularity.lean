@@ -125,14 +125,6 @@ theorem continuousVelocity_translation_contDiff
     hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
   exact s.continuousVelocity_translation_contDiff hp.1 hp.2.1
 
-/-- Every actual time slice, including the initial slice, has a smooth spatial
-translation orbit. -/
-theorem physicalPath_translation_contDiff (hTpos : 0 < T)
-    (hf : ContDiff ℝ ∞ (fun a : Space => timeTranslation T a f)) (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ ∞ (fun a : Space => translation a (s.physicalPath t)) := by
-  have hp := physical_translation_contDiff T hT ℓ hℓ F F₁ H M0 FInv Be Bc L r
-    hBe hBc hL hr hrquarter hext hcore hInv hF hRight K hK hF0 hH hsmall f s hf
-  exact s.physicalPath_translation_contDiff hTpos hF hp.1 hp.2.1 t
 
 
 end EulerMeanSourceSpatialRegularity

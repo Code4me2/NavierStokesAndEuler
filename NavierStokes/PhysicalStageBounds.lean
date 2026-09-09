@@ -416,39 +416,8 @@ theorem pressureStages_zero (base : PressureField)
     pressureStages base W M 0 = fun w => base w + ((W 0).pressure w + (M 0).family.field w) :=
   addBaseAtZero_zero _ _
 
-theorem potentialStages_smooth (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3)) (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hbase : ContDiffOn ℝ ∞ base (CutStageEstimates.physicalSublevel h qbig))
-    (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand) :
-    ∀ j, ContDiffOn ℝ ∞ (potentialStages base W M j) (CutStageEstimates.physicalSublevel h qbig) := by
-  intro j
-  have hs := potentialIncrement_smooth (W j) (M j) hh hh1 (hq j)
-  by_cases hj : j = 0
-  · subst j
-    exact hbase.add hs
-  · rw [potentialStages, addBaseAtZero_pos _ _ (by omega : 1 ≤ j)]
-    exact hs
 
-theorem pressureStages_smooth (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit) (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hbase : ContDiffOn ℝ ∞ base (CutStageEstimates.physicalSublevel h qbig))
-    (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand) :
-    ∀ j, ContDiffOn ℝ ∞ (pressureStages base W M j) (CutStageEstimates.physicalSublevel h qbig) := by
-  intro j
-  have hs := pressureIncrement_smooth (W j) (M j) hh hh1 (hq j)
-  by_cases hj : j = 0
-  · subst j
-    exact hbase.add hs
-  · rw [pressureStages, addBaseAtZero_pos _ _ (by omega : 1 ≤ j)]
-    exact hs
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem directStages_smooth (M : ℕ → MeanData h (CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand) :
-    ∀ j, ContDiffOn ℝ ∞ (directStages M j) (CutStageEstimates.physicalSublevel h qbig) :=
-  fun j => (M j).angular_smooth hh hh1 (hq j)
 
 private theorem exists_raw_constants {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     {F : ℕ → SpaceTime → V} {g L : ℕ → ℝ}
@@ -470,50 +439,8 @@ private theorem exists_raw_constants {V : Type*} [NormedAddCommGroup V] [NormedS
   refine ⟨C, hC, fun j hj m w hw hq => ?_⟩
   simpa only [Real.rpow_zero, mul_one] using hb j m hj w hw.2 hq
 
-/-- All potential-stage raw estimates are derived from the actual wave
-copies and azimuthal stream representations. -/
-theorem potentialStages_raw (base : VelocityField)
-    (W : ℕ → WaveData h D I K (Fin 3)) (M : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand)
-    (g : ℕ → ℝ) (waveOffset meanOffset : ℝ)
-    (hwave : ∀ j, 1 ≤ j → g j ≤ h * (W j).alpha + (W j).shift + waveOffset)
-    (hmean : ∀ j, 1 ≤ j → g j ≤ h * (M j).alpha + meanOffset) :
-    ∃ C : ℕ → ℕ → ℝ, (∀ j m, 0 ≤ C j m) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) (potentialStages base W M) g
-        (potentialLoss h waveOffset meanOffset) C (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  apply exists_raw_constants
-  intro j hj m
-  simpa only [potentialStages, addBaseAtZero_pos _ _ hj] using
-    potentialIncrement_bound (W j) (M j) hh hh1 (hq j) (hwave j hj) (hmean j hj) m
 
-theorem pressureStages_raw (base : PressureField)
-    (W : ℕ → WaveData h D I K Unit) (M : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand)
-    (g : ℕ → ℝ) (waveOffset meanOffset : ℝ)
-    (hwave : ∀ j, 1 ≤ j → g j ≤ h * (W j).alpha + (W j).shift + waveOffset)
-    (hmean : ∀ j, 1 ≤ j → g j ≤ h * (M j).alpha + meanOffset) :
-    ∃ C : ℕ → ℕ → ℝ, (∀ j m, 0 ≤ C j m) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) (pressureStages base W M) g
-        (pressureLoss h waveOffset meanOffset) C (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  apply exists_raw_constants
-  intro j hj m
-  simpa only [pressureStages, addBaseAtZero_pos _ _ hj] using
-    pressureIncrement_bound (W j) (M j) hh hh1 (hq j) (hwave j hj) (hmean j hj) m
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem directStages_raw (M : ℕ → MeanData h (CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hq : ∀ j, qbig ≤ ChartScales.Q (M j).firstBand)
-    (g : ℕ → ℝ) (meanOffset : ℝ)
-    (hmean : ∀ j, 1 ≤ j → g j ≤ h * (M j).alpha + meanOffset) :
-    ∃ C : ℕ → ℕ → ℝ, (∀ j m, 0 ≤ C j m) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h) (directStages M) g
-        (directLoss h meanOffset) C (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  apply exists_raw_constants
-  intro j hj m
-  exact (M j).angular_bound_with_gain hh hh1 (hq j) (hmean j hj) m
 
 end Sequences
 
@@ -523,50 +450,6 @@ variable {h qbig : ℝ}
   {DA DP : Type} [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP] {IA KA IP KP : Type*}
 
-/-- The six raw-stage inputs needed by the mixed diagonal construction,
-derived together for one gain sequence. The losses contain only the fixed
-five offsets and the derivative order. Initialization remains in stage zero.
-No finite-residual estimate or choice of the gain sequence is hidden here. -/
-theorem derived_stage_inputs (baseA : VelocityField) (baseP : PressureField)
-    (WA : ℕ → WaveData h DA IA KA (Fin 3))
-    (MA : ℕ → MeanData h (CoordinateAlgebra.A h - 1 / 2))
-    (MB : ℕ → MeanData h (CoordinateAlgebra.A h))
-    (WP : ℕ → WaveData h DP IP KP Unit)
-    (MP : ℕ → MeanData h (2 * CoordinateAlgebra.A h))
-    (hh : 0 < h) (hh1 : h < 1 / 2)
-    (hbaseA : ContDiffOn ℝ ∞ baseA (CutStageEstimates.physicalSublevel h qbig))
-    (hbaseP : ContDiffOn ℝ ∞ baseP (CutStageEstimates.physicalSublevel h qbig))
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand)
-    (g : ℕ → ℝ) (deltaWA deltaMA deltaB deltaWP deltaMP : ℝ)
-    (hWA : ∀ j, 1 ≤ j → g j ≤ h * (WA j).alpha + (WA j).shift + deltaWA)
-    (hMA : ∀ j, 1 ≤ j → g j ≤ h * (MA j).alpha + deltaMA)
-    (hMB : ∀ j, 1 ≤ j → g j ≤ h * (MB j).alpha + deltaB)
-    (hWP : ∀ j, 1 ≤ j → g j ≤ h * (WP j).alpha + (WP j).shift + deltaWP)
-    (hMP : ∀ j, 1 ≤ j → g j ≤ h * (MP j).alpha + deltaMP) :
-    ∃ CA CB CP : ℕ → ℕ → ℝ,
-      (∀ j, ContDiffOn ℝ ∞ (potentialStages baseA WA MA j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      (∀ j, ContDiffOn ℝ ∞ (directStages MB j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      (∀ j, ContDiffOn ℝ ∞ (pressureStages baseP WP MP j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (potentialStages baseA WA MA) g (potentialLoss h deltaWA deltaMA) CA (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (directStages MB) g (directLoss h deltaB) CB (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (pressureStages baseP WP MP) g (pressureLoss h deltaWP deltaMP) CP (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  obtain ⟨CA, _, hA⟩ := potentialStages_raw baseA WA MA hh hh1 hqA g deltaWA deltaMA hWA hMA
-  obtain ⟨CB, _, hB⟩ := directStages_raw MB hh hh1 hqB g deltaB hMB
-  obtain ⟨CP, _, hP⟩ := pressureStages_raw baseP WP MP hh hh1 hqP g deltaWP deltaMP hWP hMP
-  exact ⟨CA, CB, CP, potentialStages_smooth baseA WA MA hh hh1 hbaseA hqA,
-    directStages_smooth MB hh hh1 hqB,
-    pressureStages_smooth baseP WP MP hh hh1 hbaseP hqP, hA, hB, hP⟩
 
 end JointInputs
 

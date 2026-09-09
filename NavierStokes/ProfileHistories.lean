@@ -424,9 +424,6 @@ theorem E_mul_Eη {p : Point} (hX : 0 ≤ p.1) :
     _ = Real.sqrt (2 * p.1) ^ 2 * P.f p * parameterPartial P.f p := by ring
     _ = _ := by rw [hs]
 
-theorem Eη_hasDerivAt {p : Point} (hp : p ∈ D.carrier) :
-    HasDerivAt (fun η => P.E (p.1, η)) (P.Eη p) p.2 :=
-  (parameterPartial_hasDerivAt D P.f_smooth hp).const_mul (Real.sqrt (2 * p.1))
 
 theorem pressure_hasDerivAt {p : Point} (hp : p ∈ D.carrier) :
     HasDerivAt (fun x => P.pressure (x, p.2)) (P.f p ^ 2) p.1 := by
@@ -643,13 +640,6 @@ theorem angularLag_equation (h : ℝ) {p : Point} (hp : p ∈ D.carrier)
   unfold angularLag
   field_simp ; ring
 
-/-- The axial differential equation (6), with the actual primitive-defined N_s. -/
-theorem axialLag_equation (h : ℝ) {p : Point} (hp : p ∈ D.carrier) (hX : p.1 ≠ 0) :
-    p.1 * deriv (fun x => P.axialLag h (x, p.2)) p.1 + P.axialLag h p =
-      P.axialSource h p := by
-  rw [(P.axialLag_hasDerivAt h hp hX).deriv]
-  unfold axialLag
-  field_simp ; ring
 
 theorem H_ne_zero {p : Point} (hX : p.1 ≠ 0) (hf : P.f p ≠ 0) : P.H p ≠ 0 :=
   mul_ne_zero (mul_ne_zero (by norm_num) hX) hf

@@ -161,25 +161,6 @@ theorem repaired_jetRate {l : Filter ProblemStatement.SpaceTime} {a : ℕ → �
     (fun j _ hw hx => (regular_fields_eq hI j hw hx).1)
     (fun _ hw => hw.2) m n hn
 
-theorem repaired_allJetsFlat {l : Filter ProblemStatement.SpaceTime} {a : ℕ → ℕ} {hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (P : BaseResidual.PhysicalApproach l h 0 hi)
-    (ha : AdmissibleScales h (coefficientBundle C (coefficients L B0 Z0 hI)) (innerBox 0 hi) a)
-    (hf : BaseResidual.FiniteIdentities h C (coefficients L B0 Z0 hI) (asSlowProfiles s)) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart h z).1)
-      (BaseResidual.baseResidual a h C (coefficients L B0 Z0 hI)) := by
-  exact BaseResidual.baseResidual_allJetsFlat_axis hh hh1 P
-    (div_pos L.inner_pos (by norm_num)) (coefficients_smooth L B0 Z0 hI)
-    (repaired_stressZeroCore L B0 Z0 hI) ha (asSlowProfiles s) hf
-    (regularDomain_open hI) (innerBox_subset_regularDomain hI hh hh1 0 hi)
-    (fun j => extendedCoefficient s hI j 0) (fun j => extendedCoefficient s hI j 1)
-    (fun j => extendedCoefficient s hI j 2)
-    (fun j => (extendedCoefficient_contDiff s hI j 0).contDiffOn)
-    (fun j => (extendedCoefficient_contDiff s hI j 1).contDiffOn)
-    (fun j => (extendedCoefficient_contDiff s hI j 2).contDiffOn)
-    (fun j _ hw hx => (regular_fields_eq hI j hw hx).2.2)
-    (fun j _ hw hx => (regular_fields_eq hI j hw hx).2.1)
-    (fun j _ hw hx => (regular_fields_eq hI j hw hx).1)
-    (fun _ hw => hw.2)
 
 /-- Exterior confinement is a consequence of the five repaired rows, not
 an extra hypothesis on higher-order stress coefficients. -/
@@ -261,15 +242,6 @@ theorem modified_finiteIdentities :
 
 
 
-theorem modified_allJetsFlat {l : Filter ProblemStatement.SpaceTime} {a : ℕ → ℕ} {upper : ℝ}
-    (P : BaseResidual.PhysicalApproach l F.data.h 0 upper)
-    (ha : AdmissibleScales F.data.h
-      (coefficientBundle W.axis.normalization (modifiedCoefficients W Q M)) (innerBox 0 upper) a) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1)
-      (BaseResidual.baseResidual a F.data.h W.axis.normalization (modifiedCoefficients W Q M)) :=
-  repaired_allJetsFlat (modifiedLocalization W Q M) (modifiedBaseAgreement W Q M)
-    (modifiedZeroOrder W Q M) M.contains (height_pos W) (height_lt_half W) P ha
-    (modified_finiteIdentities W Q M)
 
 theorem modified_higherInteriorSupport {left right : ℝ}
     (hl : Real.exp left < nominalInner W / 8) (hr : nominalOuterX W < Real.exp right) :
@@ -301,20 +273,7 @@ theorem modified_origin {a : ℕ → ℕ} (ha : StrictMono a) {t : ℝ} (ht : t 
     (fun _ hn => (modifiedCoefficients_axis W Q M hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1) ht,
     modified_leading_origin]
 
-theorem modified_axis_tendsto {a : ℕ → ℕ} (ha : StrictMono a) :
-    Tendsto (fun t : ℝ =>
-      ‖baseVelocity a F.data.h W.axis.normalization (modifiedCoefficients W Q M) (t, 0)‖)
-      (𝓝[<] 1) atTop := by
-  apply BaseResidual.baseVelocity_axis_tendsto_atTop ha (height_pos W) (height_lt_half W)
-    (modifiedCoefficients_smooth W Q M) W.axis.normalization
-    (fun _ hn => (modifiedCoefficients_axis W Q M hn (by norm_num : |(0 : ℝ)| ≤ 1)).2.1)
-  rw [modified_leading_origin]
-  exact W.axis.small.j_pos
 
-theorem modified_speedUnbounded {a : ℕ → ℕ} (ha : StrictMono a) :
-    ProblemStatement.SpeedUnboundedAtOne
-      (baseVelocity a F.data.h W.axis.normalization (modifiedCoefficients W Q M)) :=
-  NaturalCore.speedUnbounded_of_axis_tendsto (modified_axis_tendsto W Q M ha)
 
 end Modified
 
@@ -481,13 +440,6 @@ theorem modifiedScales_admissible :
 theorem modifiedScales_strictMono : StrictMono (modifiedScales W c hc upper B Q M) :=
   (modifiedScales_spec W c hc upper B Q M).2.strictMono
 
-theorem modifiedScales_allJetsFlat {l : Filter ProblemStatement.SpaceTime} {radius : ℝ}
-    (P : PhysicalApproach l F.data.h 0 radius) (hr : radius ≤ scaleUpper W upper) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1)
-      (baseResidual (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-        (modifiedCoefficients W Q M)) :=
-  modified_allJetsFlat W Q M P (admissibleScales_mono (modifiedScales_admissible W c hc upper B Q M)
-    (fun _ hw => ⟨⟨hw.1.1, hw.1.2.trans hr⟩, hw.2⟩))
 
 theorem modifiedScales_origin {t : ℝ} (ht : t < 1) :
     baseVelocity (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
@@ -496,11 +448,6 @@ theorem modifiedScales_origin {t : ℝ} (ht : t < 1) :
         ProblemStatement.coordinateVector 2 :=
   modified_origin W Q M (modifiedScales_strictMono W c hc upper B Q M) ht
 
-theorem modifiedScales_speedUnbounded :
-    ProblemStatement.SpeedUnboundedAtOne
-      (baseVelocity (modifiedScales W c hc upper B Q M) F.data.h W.axis.normalization
-        (modifiedCoefficients W Q M)) :=
-  modified_speedUnbounded W Q M (modifiedScales_strictMono W c hc upper B Q M)
 
 
 theorem modifiedScales_potential_smooth :
@@ -608,9 +555,6 @@ theorem origin (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t 
       ((1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j) • ProblemStatement.coordinateVector 2 :=
   modifiedScales_origin W c hc upper B v.profiles v.finiteModification ht
 
-theorem speedUnbounded (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) :
-    ProblemStatement.SpeedUnboundedAtOne (velocity v c hc upper B) :=
-  modifiedScales_speedUnbounded W c hc upper B v.profiles v.finiteModification
 
 theorem finiteIdentities :
     BaseResidual.FiniteIdentities F.data.h W.axis.normalization (coefficients v)
@@ -622,11 +566,6 @@ theorem residual_identity (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ) (z : Pr
       stressForce v c hc upper B z + error v c hc upper B z :=
   BaseResidual.baseResidual_identity _ _ _ _ z
 
-theorem error_allJetsFlat (c : ℝ) (hc : 0 < c) (upper : ℝ) (B : ℕ)
-    {l : Filter ProblemStatement.SpaceTime} {radius : ℝ}
-    (P : BaseResidual.PhysicalApproach l F.data.h 0 radius) (hr : radius ≤ scaleUpper W upper) :
-    ResidualStability.AllJetsFlat l (fun z => (cartesianChart F.data.h z).1) (error v c hc upper B) :=
-  modifiedScales_allJetsFlat W c hc upper B v.profiles v.finiteModification P hr
 
 /-- Every finite identity and support input of this weighted estimate is
 proved for the same actual modulation witness. -/

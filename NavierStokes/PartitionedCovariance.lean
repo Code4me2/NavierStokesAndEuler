@@ -504,8 +504,6 @@ theorem signedLabel_injective (U : UnsignedLabel) : Function.Injective (signedLa
 noncomputable def mask (D : ℝ) (U : UnsignedLabel) (q : ℝ) (x : SlotColoring.Position) : ℝ :=
   physicalMask D (signedLabel U 0) q x
 
-theorem physicalMask_signedLabel (D : ℝ) (U : UnsignedLabel) (j : Fin 2) (q : ℝ)
-    (x : SlotColoring.Position) : physicalMask D (signedLabel U j) q x = mask D U q x := rfl
 
 structure PairData {D h : ℝ} {vr vt : Plane} (sys : SlotSystem D h vr vt) (U : UnsignedLabel) where
   pulses : Fin 2 → Pulse
@@ -661,21 +659,7 @@ noncomputable def velocityExponent (h : ℝ) : ℝ := 1 / 2 + h
 noncomputable def constructedSlotSystem (D h : ℝ) (hh : 0 ≤ h) (vr vt : Plane) : SlotSystem D h vr vt :=
   Classical.choice (exists_slotSystem D h hh vr vt)
 
-noncomputable def signedTailLabel (N : ℕ) (a : UnsignedLabel × Fin 2) : SlotColoring.Label :=
-  signedLabel (tailLabel N a.1) a.2
 
-theorem signedTailLabel_injective (N : ℕ) : Function.Injective (signedTailLabel N) := by
-  intro a b hab
-  have hu : a.1 = b.1 := by
-    apply tailLabel_injective N
-    apply Prod.ext
-    · simpa only [signedTailLabel, signedLabel] using
-        congrArg (fun L : SlotColoring.Label => L.1) hab
-    · simpa only [signedTailLabel, signedLabel] using
-        congrArg (fun L : SlotColoring.Label => L.2.1) hab
-  apply Prod.ext hu
-  apply signedLabel_injective (tailLabel N b.1)
-  simpa only [signedTailLabel, hu] using hab
 
 
 noncomputable def assembledRadial {D h : ℝ} {vr vt : Plane} {sys : SlotSystem D h vr vt} {N : ℕ}

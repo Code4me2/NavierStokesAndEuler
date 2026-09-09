@@ -214,15 +214,6 @@ theorem boundaryLimits_joint {A : VelocityField} {p : PressureField}
   exact hc.congr' ((periodicResidual_jets_locally_cut A p x n).filter_mono
     nhdsWithin_le_nhds).symm
 
-theorem boundaryLimits_continuous {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    Continuous (fun x => boundaryLimits A p eA ep x n) := by
-  apply JointResidualLimits.continuous_of_joint_limits
-    (p := 𝓝[<] (1 : ℝ)) (F := iteratedFDeriv ℝ n (periodicResidual A p))
-  intro x
-  simpa only [JointResidualLimits.past_filter] using boundaryLimits_joint hz eA ep n x
 
 /-- The locally uniform limits are a conclusion of joint convergence;
 neither uniform convergence nor continuity of the chosen representatives is input. -/
@@ -237,15 +228,6 @@ theorem boundaryLimits_locallyUniform {A : VelocityField} {p : PressureField}
   intro x
   simpa only [JointResidualLimits.past_filter] using boundaryLimits_joint hz eA ep n x
 
-theorem boundaryLimits_uniformOn_compact {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ)
-    {K : Set Space} (hK : IsCompact K) :
-    TendstoUniformlyOn (fun t x => iteratedFDeriv ℝ n (periodicResidual A p) (t, x))
-      (fun x => boundaryLimits A p eA ep x n) (𝓝[<] (1 : ℝ)) K :=
-  (tendstoLocallyUniformly_iff_forall_isCompact.mp (boundaryLimits_locallyUniform hz eA ep n))
-    K hK
 
 @[simp] theorem representative_integerShift (k : Fin 3 → ℤ) :
     representative (CompactForceDecay.integerShift k) = 0 := by
@@ -276,115 +258,16 @@ theorem boundaryLimits_independent {A : VelocityField} {p : PressureField}
     (boundaryLimits_joint hz eA' ep' n x)
 
 
-theorem periodicResidual_smooth {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1)) :
-    ContDiffOn ℝ ∞ (periodicResidual A p) (SpacetimeEndpoint.openPast 1) :=
-  ResidualRegularity.contDiffOn_residual (SpacetimeEndpoint.openPast_isOpen 1)
-    (SpatialLocalization.periodicVelocity_smoothOn hA)
-    (SpatialLocalization.periodicPressure_smoothOn hp)
-
-theorem boundaryLimits_smooth {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) :
-    ContDiff ℝ ∞ (fun x => boundaryLimits A p eA ep x n) :=
-  SpacetimeEndpoint.boundary_tensors_contDiff (J := ftaylorSeries ℝ (periodicResidual A p))
-    (JointResidualLimits.actual_derivative_recurrence (periodicResidual_smooth hA hp))
-    (boundaryLimits_locallyUniform hz eA ep) n
-
-theorem extendedJets_compatible {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ)
-    (z : SpaceTime) (h : z ∈ SpacetimeEndpoint.closedPast 1) :
-    HasFDerivWithinAt
-      (fun y => SpacetimeEndpoint.extendJets 1 (ftaylorSeries ℝ (periodicResidual A p))
-        (boundaryLimits A p eA ep) y n)
-      (SpacetimeEndpoint.extendJets 1 (ftaylorSeries ℝ (periodicResidual A p))
-        (boundaryLimits A p eA ep) z (n + 1)).curryLeft (SpacetimeEndpoint.closedPast 1) z :=
-  SpacetimeEndpoint.extendedJets_hasFDerivWithinAt
-    (J := ftaylorSeries ℝ (periodicResidual A p))
-    (JointResidualLimits.actual_derivative_recurrence (periodicResidual_smooth hA hp))
-    (boundaryLimits_locallyUniform hz eA ep) n z h
-
-theorem boundaryLimits_hasFDerivAt {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) (x : Space) :
-    HasFDerivAt (fun y => boundaryLimits A p eA ep y n)
-      ((boundaryLimits A p eA ep x (n + 1)).curryLeft.comp
-        (ContinuousLinearMap.inr ℝ ℝ Space)) x := by
-  have hd := extendedJets_compatible hA hp hz eA ep n (1, x) ⟨le_refl (1 : ℝ), mem_univ x⟩
-  have hi : HasFDerivAt (fun y : Space => ((1 : ℝ), y))
-      (ContinuousLinearMap.inr ℝ ℝ Space) x :=
-    (hasFDerivAt_const (1 : ℝ) x).prodMk (hasFDerivAt_id x)
-  have hc := hd.comp x (hi.hasFDerivWithinAt (s := univ))
-    (fun y _ => show ((1 : ℝ), y) ∈ SpacetimeEndpoint.closedPast 1 from
-      ⟨le_refl (1 : ℝ), mem_univ y⟩)
-  simpa only [Function.comp_def, SpacetimeEndpoint.extendJets, SpacetimeEndpoint.extendTrace_at]
-    using hc.hasFDerivAt_of_univ
-
-/-- Fill the terminal trace with the derived tensors. Only relative
-smoothness on the closed past is asserted for this auxiliary extension. -/
-noncomputable def extendedResidual (A : VelocityField) (p : PressureField)
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) : VelocityField :=
-  SpacetimeEndpoint.extendTrace 1 (periodicResidual A p)
-    (fun x => (boundaryLimits A p eA ep x 0).curry0)
-
-theorem extendedResidual_agrees (A : VelocityField) (p : PressureField)
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) :
-    EqOn (extendedResidual A p eA ep) (periodicResidual A p) (SpacetimeEndpoint.openPast 1) :=
-  fun _ hz => SpacetimeEndpoint.extendTrace_of_lt hz.1
-
-theorem extendedResidual_smooth {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) :
-    ContDiffOn ℝ ∞ (extendedResidual A p eA ep) (SpacetimeEndpoint.closedPast 1) :=
-  SpacetimeEndpoint.contDiffOn_joint_extension (J := ftaylorSeries ℝ (periodicResidual A p))
-    (fun _ _ => rfl)
-    (JointResidualLimits.actual_derivative_recurrence (periodicResidual_smooth hA hp))
-    (boundaryLimits_locallyUniform hz eA ep)
-
-theorem extendedResidual_boundary_jets {A : VelocityField} {p : PressureField}
-    (hA : ContDiffOn ℝ ∞ A (SpacetimeEndpoint.openPast 1))
-    (hp : ContDiffOn ℝ ∞ p (SpacetimeEndpoint.openPast 1))
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) (n : ℕ) (x : Space) :
-    iteratedFDerivWithin ℝ n (extendedResidual A p eA ep)
-      (SpacetimeEndpoint.closedPast 1) (1, x) = boundaryLimits A p eA ep x n :=
-  SpacetimeEndpoint.boundary_jets_eq_limits (J := ftaylorSeries ℝ (periodicResidual A p))
-    (fun _ _ => rfl)
-    (JointResidualLimits.actual_derivative_recurrence (periodicResidual_smooth hA hp))
-    (boundaryLimits_locallyUniform hz eA ep) n x
 
 
 
-/-- The entire family required by `CandidateFromLimits` is now derived
-from the original input fields and their local analytic data. -/
-theorem exists_residual_limits {A : VelocityField} {p : PressureField}
-    (hz : JointResidualLimits.VanishingJointJets (originalResidual A p))
-    (eA : JointResidualLimits.AwayExtensions A)
-    (ep : JointResidualLimits.AwayExtensions p) :
-    ∃ L : Space → FormalMultilinearSeries ℝ SpaceTime Space,
-      (∀ k : PeriodicLocalization.Lattice, ∀ n : ℕ, L (PeriodicLocalization.lattice k) n = 0) ∧
-      (∀ n : ℕ, TendstoLocallyUniformly
-        (fun t x => iteratedFDeriv ℝ n (periodicResidual A p) (t, x))
-        (fun x => L x n) (𝓝[<] (1 : ℝ))) :=
-  ⟨boundaryLimits A p eA ep, boundaryLimits_lattice A p eA ep,
-    boundaryLimits_locallyUniform hz eA ep⟩
+
+
+
+
+
+
+
 
 /-! ## Direct candidate bridge with only original local analytic inputs -/
 

@@ -123,19 +123,5 @@ theorem highSolve_equation (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   rw [highSolve_of_admissible τ hτ hτT B h]
   exact jet_equation τ hτ hτT B (Classical.choice h) t x θ
 
-include h in
-theorem highSolve_parity
-    (hSym : ∀ x, -x ∈ D.support ↔ x ∈ D.support)
-    (hF : ∀ t x, D.F.field t (-x) = D.F.field t x)
-    (hM : ∀ t x, D.M.field t (-x) = D.M.field t x)
-    (hH : ∀ t x, B.H.field t (-x) = B.H.field t x)
-    (hraw : ∀ (t : Icc (0 : ℝ) D.T) x θ, raw (t,(-x,-θ)) = -raw (t,(x,θ))) :
-    (∀ (t : Icc (0 : ℝ) D.T) x θ, (highSolve (P := P) τ hτ hτT B raw).1 (t,(-x,-θ)) =
-      -(highSolve (P := P) τ hτ hτT B raw).1 (t,(x,θ))) ∧
-    (∀ (t : Icc (0 : ℝ) D.T) x θ, (highSolve (P := P) τ hτ hτT B raw).2 (t,(-x,-θ)) =
-      (highSolve (P := P) τ hτ hτT B raw).2 (t,(x,θ))) := by
-  rw [highSolve_of_admissible τ hτ hτT B h]
-  exact ⟨vector_odd τ hτ hτT B (Classical.choice h) hSym hF hM hH hraw,
-    scalar_even τ hτ hτT B (Classical.choice h) hSym hF hM hH hraw⟩
 
 end EulerTransversePacketJoin

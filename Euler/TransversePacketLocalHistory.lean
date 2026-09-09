@@ -24,8 +24,5 @@ def forwardInitial : InitialData P (D.tail τ hτ.le hτT) where
   orbit := (B.terminalInitial (G.initial τ hτ hτT.le)).orbit
   mean_zero := (B.terminalInitial (G.initial τ hτ hτT.le)).mean_zero
 
-theorem forwardInitial_eq :
-    ((forwardInitial τ hτ hτT B G).value : CylinderL2 P U) =
-      B.coordinatePath (G.initial τ hτ hτT.le) ⟨τ,hτ.le,le_rfl⟩ := rfl
 
 end EulerTransversePacketJoin

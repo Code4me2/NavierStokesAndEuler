@@ -68,30 +68,7 @@ theorem meanSolver_weak (f : W) (v : V) :
       (meanOperator_coercive J R H C P Q K B hK hB hJ hR hH hC hsmall) (-J.adjoint f)), v⟫_ℝ = _
   rw [operator_inverse_apply, inner_neg_left, adjoint_inner_left]
 
-/-- Uniqueness holds in the same actual Hilbert displacement space. -/
-theorem meanSolver_unique (f : W) (u : V)
-    (hu : ∀ v, ⟪u, v⟫_ℝ-⟪H (J u), J v⟫_ℝ+⟪C (R u), R v⟫_ℝ = -⟪f, J v⟫_ℝ) :
-    u = meanSolver J R H C P Q K B hK hB hJ hR hH hC hsmall f := by
-  apply (coerciveEquiv (meanOperator J R H C) (1/2) (by norm_num)
-    (meanOperator_coercive J R H C P Q K B hK hB hJ hR hH hC hsmall)).injective
-  simp only [coerciveEquiv_apply]
-  apply ext_inner_right ℝ
-  intro v
-  rw [meanOperator_inner, hu, meanOperator_inner,
-    meanSolver_weak J R H C P Q K B hK hB hJ hR hH hC hsmall]
 
-/-- The derivative bound is polynomial in the primitive norm. -/
-theorem meanSolver_norm (f : W) :
-    ‖meanSolver J R H C P Q K B hK hB hJ hR hH hC hsmall f‖ ≤ 2*‖J‖*‖f‖ := by
-  have hi := coerciveInverse_apply_norm_le (meanOperator J R H C) (1/2) (by norm_num)
-    (meanOperator_coercive J R H C P Q K B hK hB hJ hR hH hC hsmall) (-J.adjoint f)
-  change ‖meanSolver J R H C P Q K B hK hB hJ hR hH hC hsmall f‖ ≤ _ at hi
-  have ha := J.adjoint.le_opNorm f
-  simp only [norm_neg, inv_div, div_one, LinearIsometryEquiv.norm_map] at hi ha
-  calc
-    _ ≤ 2*‖J.adjoint f‖ := hi
-    _ ≤ 2*(‖J‖*‖f‖) := mul_le_mul_of_nonneg_left ha (by norm_num)
-    _ = 2*‖J‖*‖f‖ := by ring
 
 
 end EulerMeanVariationalOperator

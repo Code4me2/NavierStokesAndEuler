@@ -134,10 +134,6 @@ noncomputable def meanGoodResidual (s : State D) (c : Context D) : MeanVector D 
   s.meanResidual c - s.meanExcluded
 
 
-omit [NormedAddCommGroup D] [NormedSpace ℝ D] in
-theorem covariance_symm (s : State D) (i j : Fin 3) :
-    s.covariance i j = s.covariance j i :=
-  bilinearCovariance_comm _ _ _ _
 
 /-- Addition of actual fields.  No estimate or cancellation is part of this definition. -/
 noncomputable def addIncrement (s : State D) (m : Triple D) (p : ScalarField D)

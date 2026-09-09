@@ -1,5 +1,8 @@
-import Euler.GlobalInviscidGevrey
+import Euler.GevreyInviscidEnergyCompactness
+import Euler.CorrectionLimitEquation
+import Euler.InviscidSobolevEvolution
 import Euler.InviscidCorrectionCompatibility
+import Euler.GlobalInviscidGevrey
 
 /-! Coherent prescribed cylinder data at every finite Sobolev order. -/
 

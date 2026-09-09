@@ -124,13 +124,6 @@ theorem withAxis (h : CycleRepresentation v u axis) :
     AxisymmetricResidualGrouping.Representation v.labels v.blocks v.gaussian v.aliasCoefficients u axis :=
   ⟨h.velocity, h.pressure, h.gaussian, h.aliasError⟩
 
-theorem fullGoodWaveResidual_grouped (h : CycleRepresentation v u axis)
-    {U : Set CyclePoint} (hU : IsOpen U) {c : Context CyclePoint} {n : ℕ}
-    (hr : HarmonicResidual.ExtractionRegular U c u v.labels v.blocks v.gaussian v.aliasCoefficients n)
-    {x : CyclePoint × ℝ} (hx : x ∈ HarmonicResidual.liftDomain U) (i : Fin 3) :
-    fullGoodWaveResidual c u n x i = ∑ l ∈ v.labels n,
-      (HarmonicResidual.residualBlock c u (v.blocks l) (v.gaussian l) (v.aliasCoefficients l)).oscillation n x i :=
-  AxisymmetricResidualGrouping.stateGoodWaveResidual_grouped hU h.withAxis hr hx i
 
 
 

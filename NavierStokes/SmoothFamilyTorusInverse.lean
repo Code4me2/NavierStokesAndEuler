@@ -297,50 +297,12 @@ section TorusWords
 variable {G H : Type} [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup H] [NormedSpace ℝ H]
 
-noncomputable def tensorTorusWord : List Bool → (Plane → G) → Plane → G
-  | [], g => g
-  | b :: w, g => fun Y => fderiv ℝ (tensorTorusWord w g) Y
-      (if b then (0, 1) else (1, 0))
 
-theorem tensorTorusWord_smooth {g : Plane → G} (hg : ContDiff ℝ ∞ g) (w : List Bool) :
-    ContDiff ℝ ∞ (tensorTorusWord w g) := by
-  induction w with
-  | nil => exact hg
-  | cons b w ih =>
-      have hd : ContDiff ℝ ∞ (fderiv ℝ (tensorTorusWord w g)) :=
-        ih.fderiv_right (by simp)
-      exact (ContinuousLinearMap.apply ℝ G (if b then (0, 1) else (1, 0))).contDiff.comp
-        hd
 
-theorem tensorTorusWord_map (L : G →L[ℝ] H) {g : Plane → G}
-    (hg : ContDiff ℝ ∞ g) (w : List Bool) :
-    tensorTorusWord w (fun Y => L (g Y)) = fun Y => L (tensorTorusWord w g Y) := by
-  induction w with
-  | nil => rfl
-  | cons b w ih =>
-      funext Y
-      simp only [tensorTorusWord, ih]
-      have hd := L.hasFDerivAt.comp Y
-        (((tensorTorusWord_smooth hg w).differentiable (by simp)) Y).hasFDerivAt
-      exact congrArg (fun M : Plane →L[ℝ] H => M (if b then (0, 1) else (1, 0))) hd.fderiv
 
 end TorusWords
 
-theorem tensorTorusWord_scalar (g : Plane → ℂ) (w : List Bool) :
-    tensorTorusWord w g = derivativeWord w g := by
-  induction w with
-  | nil => rfl
-  | cons b w ih =>
-      simp only [tensorTorusWord, derivativeWord, ih]
-      rfl
 
-theorem tensorTorusWord_replicate (g : Plane → ℂ) (n : ℕ) :
-    tensorTorusWord (List.replicate n false) g = SmoothFourierData.xJet n g := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      rw [List.replicate_succ, tensorTorusWord, SmoothFourierData.xJet_succ, ih]
-      rfl
 
 
 section FiniteDimensional
@@ -624,28 +586,7 @@ theorem inverse_preserves_parameter_support (d : Direction) (f : Source P) (S : 
   simp only [coefficient, SmoothFourierData.coefficient_eq_doubleIntegral, slice,
     hs p hp, mul_zero, intervalIntegral.integral_zero]
 
-theorem parameterPartial_applyMultiplier {m : Frequency → ℂ} (hm : PolynomialGrowth m)
-    {f : Source P} (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (v : P) :
-    parameterPartial v (applyMultiplier m f) = applyMultiplier m (parameterPartial v f) := by
-  funext z
-  have hlp : ParametricTorusInverse.Periodic (lineSource f z.1 v) :=
-    fun t => hp (z.1 + t • v)
-  have hh := congrFun (ParametricTorusInverse.parameterPartial_applyMultiplier hm
-    (lineSource_smooth hf z.1 v) hlp) (0, z.2)
-  change ParametricTorusInverse.parameterPartial
-    (lineSource (applyMultiplier m f) z.1 v) (0, z.2) =
-      ParametricTorusInverse.applyMultiplier m
-        (ParametricTorusInverse.parameterPartial (lineSource f z.1 v)) (0, z.2) at hh
-  rw [parameterPartial_lineSource (applyMultiplier_smooth hm hf hp) z.1 v,
-    parameterPartial_lineSource hf z.1 v] at hh
-  change parameterPartial v (applyMultiplier m f) (z.1 + (0 : ℝ) • v, z.2) =
-    applyMultiplier m (parameterPartial v f) (z.1 + (0 : ℝ) • v, z.2) at hh
-  simpa only [zero_smul, add_zero] using hh
 
-theorem parameterPartial_inverse (d : Direction) {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (v : P) :
-    parameterPartial v (inverse d f) = inverse d (parameterPartial v f) :=
-  parameterPartial_applyMultiplier (ParametricTorusInverse.inverseMultiplier_growth d) hf hp v
 
 /-- A prefix of actual full joint Fréchet-jet bounds on a parameter set.
 The torus argument ranges over the whole universal cover. -/
@@ -879,8 +820,6 @@ noncomputable def parameterJet (q : ℕ) (f : Source P) (z : Point P) :
   (iteratedFDeriv ℝ q f z).compContinuousLinearMap
     (fun _ => ContinuousLinearMap.inl ℝ P Plane)
 
-noncomputable def parameterJetApply (q : ℕ) (v : Fin q → P) (f : Source P) : Source P :=
-  fun z => parameterJet q f z v
 
 omit [FiniteDimensional ℝ P] in
 theorem parameterJet_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) (q : ℕ) :
@@ -891,53 +830,11 @@ theorem parameterJet_smooth {f : Source P} (hf : ContDiff ℝ ∞ f) (q : ℕ) :
     (fun _ : Fin q => ContinuousLinearMap.inl ℝ P Plane)).contDiff.comp
     hq
 
-omit [FiniteDimensional ℝ P] in
-theorem parameterJetApply_smooth {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (q : ℕ) (v : Fin q → P) : ContDiff ℝ ∞ (parameterJetApply q v f) :=
-  (ContinuousMultilinearMap.apply ℝ (fun _ : Fin q => P) ℂ v).contDiff.comp
-    (parameterJet_smooth hf q)
 
 
-omit [FiniteDimensional ℝ P] in
-theorem parameterJetApply_succ {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (q : ℕ) (v : Fin (q + 1) → P) :
-    parameterJetApply (q + 1) v f =
-      parameterPartial (v 0) (parameterJetApply q (Fin.tail v) f) := by
-  funext z
-  change iteratedFDeriv ℝ (q + 1) f z (fun i => (v i, 0)) =
-    fderiv ℝ (fun x => iteratedFDeriv ℝ q f x (fun i => (Fin.tail v i, 0))) z (v 0, 0)
-  have hq : ContDiff ℝ ∞ (iteratedFDeriv ℝ q f) :=
-    hf.iteratedFDeriv_right (by exact_mod_cast (le_top : (⊤ : ℕ∞) + (q : ℕ∞) ≤ ⊤))
-  rw [iteratedFDeriv_succ_apply_left,
-    fderiv_continuousMultilinear_apply_const_apply
-      (hq.differentiable (by simp) z)]
-  rfl
 
-omit [FiniteDimensional ℝ P] in
-theorem parameterJetApply_periodic {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (hp : Periodic f) (q : ℕ) (v : Fin q → P) : Periodic (parameterJetApply q v f) := by
-  induction q with
-  | zero => exact hp
-  | succ q ih =>
-      rw [parameterJetApply_succ hf]
-      exact parameterPartial_periodic (ih (Fin.tail v)) (v 0)
 
-theorem parameterJetApply_inverse (d : Direction) {f : Source P}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (q : ℕ) (v : Fin q → P) :
-    parameterJetApply q v (inverse d f) = inverse d (parameterJetApply q v f) := by
-  induction q with
-  | zero => rfl
-  | succ q ih =>
-      rw [parameterJetApply_succ (inverse_smooth d hf hp), ih,
-        parameterPartial_inverse d (parameterJetApply_smooth hf q (Fin.tail v))
-          (parameterJetApply_periodic hf hp q (Fin.tail v)),
-        parameterJetApply_succ hf]
 
-theorem parameterJet_inverse (d : Direction) {f : Source P}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (q : ℕ) (z : Point P) (v : Fin q → P) :
-    parameterJet q (inverse d f) z v =
-      inverse d (fun w => parameterJet q f w v) z :=
-  congrFun (parameterJetApply_inverse d hf hp q v) z
 
 noncomputable def nonzeroMultiplier (k : Frequency) : ℂ := if k = 0 then 0 else 1
 
@@ -983,11 +880,6 @@ theorem nonbarPart_smooth {f : Source P} (hf : ContDiff ℝ ∞ f)
   rw [nonbarPart_eq_applyMultiplier hf hp]
   exact applyMultiplier_smooth nonzeroMultiplier_growth hf hp
 
-omit [FiniteDimensional ℝ P] [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem nonbarPart_periodic {f : Source P} (hp : Periodic f) : Periodic (nonbarPart f) := by
-  intro p Y k
-  change f (p, Y + ((k.1 : ℝ), (k.2 : ℝ))) - mean f p = f (p, Y) - mean f p
-  rw [show f (p, Y + ((k.1 : ℝ), (k.2 : ℝ))) = f (p, Y) from hp p Y k]
 
 omit [FiniteDimensional ℝ P] in
 theorem nonbarPart_zeroMean {f : Source P} (hf : ContDiff ℝ ∞ f)
@@ -1020,101 +912,9 @@ theorem nonbarPart_preserves_parameter_support (f : Source P) (S : Set P)
   rw [nonbarPart, hs p hp Y, mean_eq_integral]
   simp only [hs p hp, intervalIntegral.integral_zero, sub_zero]
 
-noncomputable def mixedJet (q : ℕ) (w : List Bool) (f : Source P) (z : Point P) :
-    ContinuousMultilinearMap ℝ (fun _ : Fin q => P) ℂ :=
-  tensorTorusWord w (fun Y => parameterJet q f (z.1, Y)) z.2
 
-omit [FiniteDimensional ℝ P] in
-theorem mixedJet_apply {f : Source P} (hf : ContDiff ℝ ∞ f)
-    (q : ℕ) (w : List Bool) (z : Point P) (v : Fin q → P) :
-    mixedJet q w f z v =
-      derivativeWord w (slice (parameterJetApply q v f) z.1) z.2 := by
-  have hg : ContDiff ℝ ∞ (fun Y => parameterJet q f (z.1, Y)) :=
-    (parameterJet_smooth hf q).comp (contDiff_const.prodMk contDiff_id)
-  have h := congrFun (tensorTorusWord_map
-    (ContinuousMultilinearMap.apply ℝ (fun _ : Fin q => P) ℂ v) hg w) z.2
-  rw [tensorTorusWord_scalar] at h
-  exact h.symm
 
-omit [FiniteDimensional ℝ P] in
-theorem norm_derivativeWord_inverse_le (d : Direction) {f : Source P}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (w : List Bool) (p : P) (Y : Plane) {C : ℝ}
-    (hzero : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1, ‖f (p, (x, y))‖ ≤ C)
-    (hfirst : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5) (slice f p) (x, y)‖ ≤ C)
-    (hsecond : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5)
-        (SmoothFourierData.swapFunction (slice f p)) (x, y)‖ ≤ C) :
-    ‖derivativeWord w (slice (inverse d f) p) Y‖ ≤
-      ParametricTorusInverse.mixedLossConstant w.length * C := by
-  have hbound := SmoothFourierData.coefficient_seminorm_bound (slice_smooth hf p) (hp p)
-    (w.length + 1) hzero (by simpa only [Nat.add_assoc] using hfirst)
-    (by simpa only [Nat.add_assoc] using hsecond)
-  calc
-    _ ≤ ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) *
-        coeffSeminorm (w.length + 1) (coefficient f p) :=
-      inverse_derivativeWord_bound d
-        (SmoothFourierData.rapid_coefficient (slice_smooth hf p) (hp p)) w Y
-    _ ≤ ((6 * ‖omega⁻¹‖) * ‖omega‖ ^ w.length) *
-        ((3 ^ ((w.length + 1) + 4) * C) * ∑' k : Frequency, (weight k ^ 4)⁻¹) :=
-      mul_le_mul_of_nonneg_left hbound (by positivity)
-    _ = _ := by simp only [ParametricTorusInverse.mixedLossConstant, Nat.add_assoc]; ring
 
-theorem mixedJet_inverse_bound (d : Direction) {f : Source P}
-    (hf : ContDiff ℝ ∞ f) (hp : Periodic f) (q : ℕ) (w : List Bool)
-    (S : Set P) {C : ℝ} (hC : 0 ≤ C)
-    (hzero : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖parameterJet q f (p, (x, y))‖ ≤ C)
-    (hfirst : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖tensorTorusWord (List.replicate (w.length + 5) false)
-        (fun Y => parameterJet q f (p, Y)) (x, y)‖ ≤ C)
-    (hsecond : ∀ p ∈ S, ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖tensorTorusWord (List.replicate (w.length + 5) false)
-        (fun Y => parameterJet q f (p, (Y.2, Y.1))) (x, y)‖ ≤ C)
-    (p : P) (hps : p ∈ S) (Y : Plane) :
-    ‖mixedJet q w (inverse d f) (p, Y)‖ ≤
-      ParametricTorusInverse.mixedLossConstant w.length * C := by
-  apply ContinuousMultilinearMap.opNorm_le_bound
-    (mul_nonneg (ParametricTorusInverse.mixedLossConstant_nonneg w.length) hC)
-  intro v
-  rw [mixedJet_apply (inverse_smooth d hf hp),
-    parameterJetApply_inverse d hf hp]
-  have hg : ContDiff ℝ ∞ (fun Y => parameterJet q f (p, Y)) :=
-    (parameterJet_smooth hf q).comp (contDiff_const.prodMk contDiff_id)
-  have hgs : ContDiff ℝ ∞ (fun Y : Plane => parameterJet q f (p, (Y.2, Y.1))) :=
-    hg.comp (contDiff_snd.prodMk contDiff_fst)
-  let L := ContinuousMultilinearMap.apply ℝ (fun _ : Fin q => P) ℂ v
-  have hb0 : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖parameterJetApply q v f (p, (x, y))‖ ≤ C * ∏ i, ‖v i‖ := by
-    intro x hx y hy
-    exact ContinuousMultilinearMap.le_of_opNorm_le (hzero p hps x hx y hy) v
-  have hb1 : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5) (slice (parameterJetApply q v f) p) (x, y)‖ ≤
-        C * ∏ i, ‖v i‖ := by
-    intro x hx y hy
-    have he := congrFun (tensorTorusWord_map L hg (List.replicate (w.length + 5) false)) (x, y)
-    rw [tensorTorusWord_replicate] at he
-    change SmoothFourierData.xJet (w.length + 5)
-      (slice (parameterJetApply q v f) p) (x, y) =
-      (tensorTorusWord (List.replicate (w.length + 5) false)
-        (fun Y => parameterJet q f (p, Y)) (x, y)) v at he
-    rw [he]
-    exact ContinuousMultilinearMap.le_of_opNorm_le (hfirst p hps x hx y hy) v
-  have hb2 : ∀ x ∈ Icc (0 : ℝ) 1, ∀ y ∈ Icc (0 : ℝ) 1,
-      ‖SmoothFourierData.xJet (w.length + 5)
-        (SmoothFourierData.swapFunction (slice (parameterJetApply q v f) p)) (x, y)‖ ≤
-        C * ∏ i, ‖v i‖ := by
-    intro x hx y hy
-    have he := congrFun (tensorTorusWord_map L hgs (List.replicate (w.length + 5) false)) (x, y)
-    rw [tensorTorusWord_replicate] at he
-    change SmoothFourierData.xJet (w.length + 5)
-      (SmoothFourierData.swapFunction (slice (parameterJetApply q v f) p)) (x, y) =
-      (tensorTorusWord (List.replicate (w.length + 5) false)
-        (fun Y => parameterJet q f (p, (Y.2, Y.1))) (x, y)) v at he
-    rw [he]
-    exact ContinuousMultilinearMap.le_of_opNorm_le (hsecond p hps x hx y hy) v
-  exact (norm_derivativeWord_inverse_le d (parameterJetApply_smooth hf q v)
-    (parameterJetApply_periodic hf hp q v) w p Y hb0 hb1 hb2).trans_eq (by ring)
 
 
 end FiniteDimensional

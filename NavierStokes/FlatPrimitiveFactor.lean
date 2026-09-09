@@ -145,19 +145,7 @@ theorem primitive_eq_scale_mul_factor (c : ℝ) (j : ℕ) (b : ℝ → ℝ)
     _ = scale c j x * factor c j b x := integral_const_mul _ _
 
 
-theorem kernel_at_zero (c : ℝ) (j : ℕ) (b : ℝ → ℝ) (t : ℝ) :
-    kernel c j b 0 t = (b 0 / 2) * Real.exp (-c * t) := by
-  simp [kernel, denominator, coordinate]
-  ring
 
-/-- The transformed integral has the predicted endpoint value directly,
-without passing to the normalized primitive's limit. -/
-theorem factor_at_zero {c : ℝ} (hc : 0 < c) (j : ℕ) (b : ℝ → ℝ) :
-    factor c j b 0 = b 0 / (2 * c) := by
-  simp only [factor, kernel_at_zero]
-  rw [integral_const_mul, integral_exp_mul_Ioi (neg_lt_zero.mpr hc) 0]
-  simp
-  ring
 
 /-- Every fixed polynomial majorant is integrable against the decaying
 exponential on the transformed half-line. -/
@@ -243,11 +231,5 @@ theorem factor_contDiff {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
 
 
 
-theorem factor_sqrt_contDiffAt_zero {c : ℝ} (hc : 0 < c) (j : ℕ) {b : ℝ → ℝ}
-    (hb : ContDiff ℝ ∞ b) (hb0 : 0 < b 0) :
-    ContDiffAt ℝ ∞ (fun x => Real.sqrt (factor c j b x)) 0 := by
-  apply (factor_contDiff hc j hb).contDiffAt.sqrt
-  rw [factor_at_zero hc j b]
-  exact (div_pos hb0 (mul_pos (by norm_num) hc)).ne'
 
 end NavierStokes.FlatPrimitiveFactor

@@ -263,12 +263,6 @@ theorem angularSum_eventuallyEq_partial {a : ℕ → ℝ} (ha : Tendsto a atTop 
     ∃ N : ℕ, angularSum a q b =ᶠ[𝓝 x] angularPartial a q b N :=
   SolenoidalDiagonal.potentialSum_eventuallyEq_partial ha hq hx _
 
-theorem angularSum_smooth {U : Set Slow} (hU : IsOpen U) (D : ℕ → AngularData U)
-    {a : ℕ → ℝ} (ha : Tendsto a atTop atTop) {q : SpaceTime → ℝ}
-    (hq : ContDiffOn ℝ ∞ q (physicalDomain U)) (hpos : ∀ x ∈ physicalDomain U, 0 < q x) :
-    ContDiffOn ℝ ∞ (angularSum a q (fun j => (D j).scalar)) (physicalDomain U) :=
-  SolenoidalDiagonal.potentialSum_contDiffOn ha (physicalDomain_open hU) hpos hq
-    (fun j => (D j).field_smooth hU)
 
 
 

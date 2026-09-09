@@ -69,22 +69,7 @@ theorem exists_geometry_and_growth :
       (A.source_interval Ω h0 hΩ) (A.source_horizon Ω h0 hΩ)
       (A.source_strain Ω h0 hΩ) (A.source_normal Ω h0 hΩ)
 
-include A h0 hΩ in
-theorem exists_physicalGrowth :
-    ∃ g : C(Icc (0 : ℝ) (D.T-τ),ℝ),
-      (∀ t, 0 < g t) ∧ g ⟨0,le_rfl,(sub_pos.mpr hτT).le⟩=1 ∧
-        PhysicalGrowth (D.tail τ hτ.le hτT) Ω g
-          (560*P.horizon^10/P.epsilon) := by
-  obtain ⟨F,F₁,Z,Z₁,J,hpos,hzero,hg⟩ := A.exists_geometry_and_growth Ω h0 hΩ
-  exact ⟨growthProfile (D.tail τ hτ.le hτT) (A.geometryData Ω h0 hΩ) J,hpos,hzero,hg⟩
 
-theorem halfBall_physicalGrowth (hball : (1/2 : ℝ) ≤ A.radius) :
-    ∃ g : C(Icc (0 : ℝ) (D.T-τ),ℝ),
-      (∀ t, 0 < g t) ∧ g ⟨0,le_rfl,(sub_pos.mpr hτT).le⟩=1 ∧
-        PhysicalGrowth (D.tail τ hτ.le hτT) {x | ‖x‖ ≤ (1/2 : ℝ)} g
-          (560*P.horizon^10/P.epsilon) := by
-  exact A.exists_physicalGrowth {x | ‖x‖ ≤ (1/2 : ℝ)} (by norm_num)
-    (fun _ hx => hx.trans hball)
 
 omit [CompleteSpace U] in
 include A in

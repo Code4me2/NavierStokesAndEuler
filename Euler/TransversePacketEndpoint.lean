@@ -28,8 +28,6 @@ def displacementPath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
 def coordinatePath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
   B.coefficients.endpointCoordinate P (Y.value : CylinderL2 P U)
 
-def coordinateDerivativePath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
-  B.coefficients.endpointAcceleration P (Y.value : CylinderL2 P U)
 
 def velocityPath : C(Icc (0 : ℝ) D.T,CylinderL2 P Space) :=
   B.coefficients.endpointVelocity P (Y.value : CylinderL2 P U)
@@ -48,10 +46,6 @@ theorem coordinatePath_orbit :
   B.coefficients.endpointCoordinate_orbit_contDiff P D.frame.translation_contDiff
     D.frameDerivative.translation_contDiff B.H.translation_contDiff Y.value Y.orbit
 
-theorem coordinateDerivativePath_orbit :
-    ContDiff ℝ ∞ (fun a => pathTranslate P a (coordinateDerivativePath B Y)) :=
-  B.coefficients.endpointAcceleration_orbit_contDiff P D.frame.translation_contDiff
-    D.frameDerivative.translation_contDiff B.H.translation_contDiff Y.value Y.orbit
 
 theorem velocityPath_orbit :
     ContDiff ℝ ∞ (fun a => pathTranslate P a (velocityPath B Y)) :=
@@ -64,10 +58,6 @@ theorem derivativePath_orbit :
     D.frameDerivative.translation_contDiff B.H.translation_contDiff Y.value Y.orbit
 
 
-theorem coordinatePath_time (t : Icc (0 : ℝ) D.T) :
-    HasDerivWithinAt (extendPath D.T D.T_pos.le (coordinatePath B Y))
-      (coordinateDerivativePath B Y t) (Icc (0 : ℝ) D.T) t :=
-  B.coefficients.endpointCoordinate_hasDerivWithinAt P Y.value t
 
 theorem velocityPath_time (t : Icc (0 : ℝ) D.T) :
     HasDerivWithinAt (extendPath D.T D.T_pos.le (velocityPath B Y))
@@ -97,9 +87,6 @@ theorem velocityPath_mean_zero (t : Icc (0 : ℝ) D.T) :
     average P (velocityPath B Y t) = 0 :=
   B.coefficients.endpointVelocity_mean_zero P Y.value Y.mean_zero t
 
-theorem derivativePath_mean_zero (t : Icc (0 : ℝ) D.T) :
-    average P (derivativePath B Y t) = 0 :=
-  B.coefficients.endpointDerivative_mean_zero P Y.value Y.mean_zero t
 
 def terminalInitial : InitialData P D where
   value := ⟨coordinatePath B Y ⟨D.T,D.T_pos.le,le_rfl⟩,

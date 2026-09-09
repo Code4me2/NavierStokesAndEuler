@@ -73,17 +73,11 @@ theorem vector_angle_independent (t : ℝ) (x : Space) (θ η : ℝ) :
 theorem scalar_angle_independent (t : ℝ) (x : Space) (θ η : ℝ) :
     G.scalar (t,(x,θ)) = G.scalar (t,(x,η)) := rfl
 
-theorem scalar_normalized (t θ : ℝ) : G.scalar (t,(0,θ)) = 0 :=
-  (pressureScalar_spec D.T D.T_pos.le D.F D.F₁ D.opInv G.solution
-    D.frameLower D.frameLower_pos D.frame_lower G.path G.pressureForcePath_orbit (D.clamp t)).2.1
 
 /-- Actual spatial and angular regularity at every time. -/
 theorem vector_spatial_smooth (t : ℝ) : ContDiff ℝ ∞ (fun y : Space × ℝ => G.vector (t,y)) :=
   (pathRepresentative_smooth D.T G.velocityPath G.velocityPath_orbit (D.clamp t)).comp contDiff_fst
 
-theorem vectorDerivative_spatial_smooth (t : ℝ) :
-    ContDiff ℝ ∞ (fun y : Space × ℝ => G.vectorDerivative (t,y)) :=
-  (pathRepresentative_smooth D.T G.derivativePath G.derivativePath_orbit (D.clamp t)).comp contDiff_fst
 
 theorem scalar_spatial_smooth (t : ℝ) : ContDiff ℝ ∞ (fun y : Space × ℝ => G.scalar (t,y)) :=
   (pressureScalar_spec D.T D.T_pos.le D.F D.F₁ D.opInv G.solution

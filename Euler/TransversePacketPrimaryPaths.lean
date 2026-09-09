@@ -107,16 +107,5 @@ theorem velocityPath_mean_zero (t : Icc (0 : ℝ) D.T) :
       (zeroForcing (D.tail τ hτ.le hτT)).path (forwardInitial τ hτ hτT B Y).value
       (zeroForcing (D.tail τ hτ.le hτT)).mean_zero (forwardInitial τ hτ hτT B Y).mean_zero s
 
-theorem derivativePath_mean_zero (t : Icc (0 : ℝ) D.T) :
-    average P (derivativePath τ hτ hτT B Y t) = 0 := by
-  apply join_mem D.T τ hτ.le hτT.le _ _ (derivative_match τ hτ hτT B Y)
-    {u | average P u = 0} _ _ t
-  · exact EulerTransversePacketEndpoint.derivativePath_mean_zero B (endpointData τ hτ hτT Y)
-  · intro s
-    exact EulerSourceCylinderEquation.velocityDerivative_average_zero P D.support D.support_measurable
-      (D.T-τ) (sub_pos.mpr hτT).le (D.tail τ hτ.le hτT).frame (D.tail τ hτ.le hτT).frameDerivative
-      (D.tail τ hτ.le hτT).frameLower (D.tail τ hτ.le hτT).frameLower_pos (D.tail τ hτ.le hτT).frame_lower
-      (zeroForcing (D.tail τ hτ.le hτT)).path (forwardInitial τ hτ hτT B Y).value
-      (zeroForcing (D.tail τ hτ.le hτT)).mean_zero (forwardInitial τ hτ hτT B Y).mean_zero s
 
 end EulerTransversePacketPrimary

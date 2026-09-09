@@ -1,5 +1,6 @@
 import Euler.CorrectionEnergyTime
 import Euler.EnergyMetricPaths
+import Euler.GevreyMetricEstimate
 import Euler.GevreyMetricForcing
 
 /-! The actual nonlinear Bochner forcing is bounded by a continuous metric-energy polynomial, with constants independent of the external cutoff. -/

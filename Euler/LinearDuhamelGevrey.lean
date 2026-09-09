@@ -1,5 +1,6 @@
 import Euler.LinearDuhamelParameter
 import Euler.LinearDuhamelWeighted
+import Euler.HilbertCoerciveGevrey
 import Euler.FrozenEvolutionGevrey
 
 /-!

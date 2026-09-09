@@ -17,29 +17,7 @@ open scoped ContDiff Topology
 
 variable {A : SmoothL2Field Space} (L : FiniteLifespan A)
 
-theorem vorticityIntegral_agrees (S T : ℝ) (hS : 0 < S) (hT : 0 < T)
-    (hSL : S < L.duration) (hTL : T < L.duration) (hST : S ≤ T)
-    (t : Icc (0 : ℝ) S) :
-    (L.evolution S hS hSL).vorticityIntegral t=
-      (L.evolution T hT hTL).vorticityIntegral ⟨t,t.property.1,t.property.2.trans hST⟩ := by
-  apply intervalIntegral.integral_congr
-  intro r hr
-  have hrs : r ∈ Icc (0 : ℝ) (t : ℝ) := by simpa only [uIcc_of_le t.property.1] using hr
-  have hrS : r ∈ Icc (0 : ℝ) S := ⟨hrs.1,hrs.2.trans t.property.2⟩
-  have hrT : r ∈ Icc (0 : ℝ) T := ⟨hrs.1,hrS.2.trans hST⟩
-  change vorticityNorm ((L.evolution S hS hSL).velocity (projIcc 0 S hS.le r))=
-    vorticityNorm ((L.evolution T hT hTL).velocity (projIcc 0 T hT.le r))
-  rw [projIcc_of_mem hS.le hrS,projIcc_of_mem hT.le hrT,
-    L.evolution_agrees_at S T hS hT hSL hTL r hrs.1 hrS.2 hrT.2]
 
-theorem vorticityIntegral_agrees_at (S T : ℝ) (hS : 0 < S) (hT : 0 < T)
-    (hSL : S < L.duration) (hTL : T < L.duration) (t : ℝ)
-    (ht0 : 0 ≤ t) (htS : t ≤ S) (htT : t ≤ T) :
-    (L.evolution S hS hSL).vorticityIntegral ⟨t,ht0,htS⟩=
-      (L.evolution T hT hTL).vorticityIntegral ⟨t,ht0,htT⟩ := by
-  rcases le_total S T with hST | hTS
-  · exact L.vorticityIntegral_agrees S T hS hT hSL hTL hST ⟨t,ht0,htS⟩
-  · exact (L.vorticityIntegral_agrees T S hT hS hTL hSL hTS ⟨t,ht0,htT⟩).symm
 
 def maximalVorticityNorm (t : L.Time) : ℝ := vorticityNorm (L.maximalField t)
 
@@ -55,9 +33,6 @@ theorem maximalVorticityNorm_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.du
   rw [L.maximalField_eq_evolution S hS hSL t]
   rfl
 
-def maximalVorticityIntegral (t : L.Time) : ℝ :=
-  (L.evolution (L.intermediateHorizon t) (L.intermediateHorizon_pos t)
-    (L.intermediateHorizon_lt t)).vorticityIntegral (L.intermediateTime t)
 
 
 

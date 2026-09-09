@@ -583,10 +583,6 @@ theorem carrier_mul_angular_frequency (i : ι) :
   PhaseEstimates.roundedFrequency_integer
     (zero_lt_one.trans_le (PhaseEstimates.chart_carrier_ge_one h (a.band i))).ne' _
 
-theorem angular_rounding_error (i : ι) :
-    |a.phase.p i - a.target i| ≤ 1 / (ChartScales.carrier h (a.band i) : ℝ) :=
-  PhaseEstimates.roundedFrequency_error
-    (zero_lt_one.trans_le (PhaseEstimates.chart_carrier_ge_one h (a.band i))) _
 
 theorem lambda_pos (hM : 1 ≤ M) (i : ι) : 0 < a.lam i :=
   (one_div_pos.mpr (zero_lt_one.trans_le hM)).trans_le (a.lambda_bound i).1

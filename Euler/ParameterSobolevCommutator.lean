@@ -75,9 +75,6 @@ theorem commutatorBlock_zero (directions : ι → P) (q : ℕ) (A : P → E →L
     simp only [wordCommutator, Pi.sub_apply, wordDerivative_zero, sub_self]
   simp only [commutatorBlock, he, baseSize_zero_function, sum_const_zero]
 
-theorem commutatorBlock_nonneg (directions : ι → P) (q : ℕ) (A : P → E →L[ℝ] F) (f : P → E)
-    (n : ℕ) (x : P) : 0 ≤ commutatorBlock directions q A f n x :=
-  sum_nonneg (fun _ _ => baseSize_nonneg directions q _ x)
 
 theorem commutatorBlock_succ_le (directions : ι → P) (q : ℕ)
     (A : P → E →L[ℝ] F) (f : P → E) (hA : ContDiff ℝ ∞ A) (hf : ContDiff ℝ ∞ f)

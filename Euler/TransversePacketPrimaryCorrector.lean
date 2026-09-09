@@ -153,13 +153,6 @@ theorem potentialPath_supported (t : Icc (0 : ℝ) D.T) :
   EulerCylinderLocalSupport.potentialPath_supported P D.support D.support_measurable
     (velocityPath τ hτ hτT B Y) D.potentialCoefficientPath (velocityPath_supported τ hτ hτT B Y) t
 
-theorem potentialTimePath_supported (t : Icc (0 : ℝ) D.T) :
-    potentialTimePath τ hτ hτT B Y t ∈ Supported P Space D.support D.support_measurable := by
-  apply (Supported P Space D.support D.support_measurable).add_mem
-  · exact EulerCylinderLocalSupport.potentialPath_supported P D.support D.support_measurable
-      (velocityPath τ hτ hτT B Y) D.potentialDerivative (velocityPath_supported τ hτ hτT B Y) t
-  · exact EulerCylinderLocalSupport.potentialPath_supported P D.support D.support_measurable
-      (derivativePath τ hτ hτT B Y) D.potentialCoefficientPath (derivativePath_supported τ hτ hτT B Y) t
 
 theorem correctorPath_supported (t : Icc (0 : ℝ) D.T) :
     correctorPath τ hτ hτT B Y t ∈ Supported P Space D.support D.support_measurable :=
@@ -167,37 +160,10 @@ theorem correctorPath_supported (t : Icc (0 : ℝ) D.T) :
     (potentialPath_orbit τ hτ hτT B Y) D.FInv.field D.support_compact.isClosed
     (potentialPath_supported τ hτ hτT B Y) t
 
-theorem correctorTimePath_supported (t : Icc (0 : ℝ) D.T) :
-    correctorTimePath τ hτ hτT B Y t ∈ Supported P Space D.support D.support_measurable := by
-  apply (Supported P Space D.support D.support_measurable).add_mem
-  · exact slowCurlPath_supported P D.support D.support_measurable (potentialPath τ hτ hτT B Y)
-      (potentialPath_orbit τ hτ hτT B Y) D.inverseDerivative D.support_compact.isClosed
-      (potentialPath_supported τ hτ hτT B Y) t
-  · exact slowCurlPath_supported P D.support D.support_measurable (potentialTimePath τ hτ hτT B Y)
-      (potentialTimePath_orbit τ hτ hτT B Y) D.FInv.field D.support_compact.isClosed
-      (potentialTimePath_supported τ hτ hτT B Y) t
 
-theorem potentialPath_average_zero : pathAverage P (potentialPath τ hτ hτT B Y) = 0 :=
-  potentialPath_mean_zero P (velocityPath τ hτ hτT B Y) D.potentialCoefficientPath
-    (ContinuousMap.ext (velocityPath_mean_zero τ hτ hτT B Y))
 
-theorem potentialTimePath_average_zero : pathAverage P (potentialTimePath τ hτ hτT B Y) = 0 := by
-  rw [potentialTimePath,EulerCylinderPotential.potentialDerivative,map_add,
-    potentialPath_mean_zero P (velocityPath τ hτ hτT B Y) D.potentialDerivative
-      (ContinuousMap.ext (velocityPath_mean_zero τ hτ hτT B Y)),
-    potentialPath_mean_zero P (derivativePath τ hτ hτT B Y) D.potentialCoefficientPath
-      (ContinuousMap.ext (derivativePath_mean_zero τ hτ hτT B Y)),add_zero]
 
-theorem correctorPath_average_zero : pathAverage P (correctorPath τ hτ hτT B Y) = 0 :=
-  slowCurl_mean_zero P (potentialPath τ hτ hτT B Y) (potentialPath_orbit τ hτ hτT B Y)
-    D.FInv.field (potentialPath_average_zero τ hτ hτT B Y)
 
-theorem correctorTimePath_average_zero : pathAverage P (correctorTimePath τ hτ hτT B Y) = 0 := by
-  rw [correctorTimePath,EulerCylinderSlowCurl.derivative,map_add,
-    slowCurl_mean_zero P (potentialPath τ hτ hτT B Y) (potentialPath_orbit τ hτ hτT B Y)
-      D.inverseDerivative (potentialPath_average_zero τ hτ hτT B Y),
-    slowCurl_mean_zero P (potentialTimePath τ hτ hτT B Y) (potentialTimePath_orbit τ hτ hτT B Y)
-      D.FInv.field (potentialTimePath_average_zero τ hτ hτT B Y),add_zero]
 
 theorem corrector_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : ℝ) :
     corrector τ hτ hτT B Y (t,(x,θ)) = 0 :=
@@ -205,19 +171,7 @@ theorem corrector_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ 
     (correctorPath_orbit τ hτ hτT B Y) D.support_compact.isClosed
     (correctorPath_supported τ hτ hτT B Y) (D.clamp t) (x,(θ : AddCircle P)) hx
 
-theorem correctorDerivative_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : ℝ) :
-    correctorDerivative τ hτ hτT B Y (t,(x,θ)) = 0 :=
-  pointField_zero_outside P D.support D.support_measurable (correctorTimePath τ hτ hτT B Y)
-    (correctorTimePath_orbit τ hτ hτT B Y) D.support_compact.isClosed
-    (correctorTimePath_supported τ hτ hτT B Y) (D.clamp t) (x,(θ : AddCircle P)) hx
 
-theorem curlCorrector_mean_zero (t : Icc (0 : ℝ) D.T) (x : Space) :
-    (∫ θ in (0 : ℝ)..P, D.curlCorrector P (vector τ hτ hτT B Y) (t,(x,θ))) = 0 := by
-  have he : (fun θ => D.curlCorrector P (vector τ hτ hτT B Y) (t,(x,θ))) =
-      fun θ => corrector τ hτ hτT B Y (t,(x,θ)) := funext (curlCorrector_eq τ hτ hτT B Y t x)
-  rw [he]
-  exact (pathAverage_eq_zero_iff P (correctorPath τ hτ hτT B Y) (correctorPath_orbit τ hτ hτT B Y)).mp
-    (correctorPath_average_zero τ hτ hτT B Y) (D.clamp t) x
 
 end EulerTransversePacketPrimary
 
@@ -249,11 +203,5 @@ theorem curlCorrector_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
   · exact vector_mean_zero τ hτ hτT B Y t
   · exact vector_odd τ hτ hτT B Y hSym hF hM hH hY t
 
-theorem correctorDerivative_odd (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
-    correctorDerivative τ hτ hτT B Y (t,(-x,-θ)) =
-      -correctorDerivative τ hτ hτT B Y (t,(x,θ)) :=
-  (correctorField τ hτ hτT B Y).timeDerivative_odd (correctorDerivativeField τ hτ hτT B Y)
-    D.T_pos (correctorField_time τ hτ hτT B Y)
-    (curlCorrector_odd τ hτ hτT B Y hSym hF hM hH hY) t x θ
 
 end EulerTransversePacketPrimary

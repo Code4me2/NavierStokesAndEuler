@@ -34,8 +34,6 @@ abbrev forcingPath := includePath P D.support D.support_measurable G.path
 def coordinatePath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
   B.coefficients.velocityPath P (pathLp D.T D.T_pos.le (forcingPath G))
 
-def coordinateDerivativePath : C(Icc (0 : ℝ) D.T,CylinderL2 P U) :=
-  B.coefficients.accelerationPath P (forcingPath G)
 
 def velocityPath : C(Icc (0 : ℝ) D.T,CylinderL2 P Space) :=
   B.coefficients.physicalVelocity P (forcingPath G)
@@ -51,10 +49,6 @@ theorem coordinatePath_orbit : ContDiff ℝ ∞ (fun a => pathTranslate P a (B.c
   B.coefficients.velocityPath_orbit_contDiff P D.frame.translation_contDiff
     D.frameDerivative.translation_contDiff B.H.translation_contDiff (forcingPath G) G.path_orbit
 
-theorem coordinateDerivativePath_orbit :
-    ContDiff ℝ ∞ (fun a => pathTranslate P a (B.coordinateDerivativePath G)) :=
-  B.coefficients.accelerationPath_orbit_contDiff P D.frame.translation_contDiff
-    D.frameDerivative.translation_contDiff B.H.translation_contDiff (forcingPath G) G.path_orbit
 
 theorem velocityPath_orbit : ContDiff ℝ ∞ (fun a => pathTranslate P a (B.velocityPath G)) :=
   B.coefficients.physicalVelocity_orbit_contDiff P D.frame.translation_contDiff
@@ -68,10 +62,6 @@ theorem pressurePath_orbit : ContDiff ℝ ∞ (fun a => pathTranslate P a (B.pre
   sourcePressure_contDiff P D.M D.normal D.normalLower D.normalLower_pos D.normal_lower
     (forcingPath G) (B.velocityPath G) G.path_orbit (B.velocityPath_orbit G)
 
-theorem coordinatePath_time (t : Icc (0 : ℝ) D.T) :
-    HasDerivWithinAt (extendPath D.T D.T_pos.le (B.coordinatePath G))
-      (B.coordinateDerivativePath G t) (Icc (0 : ℝ) D.T) t :=
-  B.coefficients.velocity_hasDerivWithinAt P (forcingPath G) t
 
 theorem velocityPath_time (t : Icc (0 : ℝ) D.T) :
     HasDerivWithinAt (extendPath D.T D.T_pos.le (B.velocityPath G))
@@ -99,8 +89,6 @@ theorem coordinatePath_mean_zero (t : Icc (0 : ℝ) D.T) : average P (B.coordina
 theorem velocityPath_mean_zero (t : Icc (0 : ℝ) D.T) : average P (B.velocityPath G t) = 0 :=
   B.coefficients.physicalVelocity_mean_zero P (forcingPath G) G.mean_zero t
 
-theorem derivativePath_mean_zero (t : Icc (0 : ℝ) D.T) : average P (B.derivativePath G t) = 0 :=
-  B.coefficients.physicalDerivative_mean_zero P (forcingPath G) G.mean_zero t
 
 def field (t : Icc (0 : ℝ) D.T) : LiftDomain P → Space :=
   pointField P (B.velocityPath G) (B.velocityPath_orbit G) t

@@ -120,46 +120,11 @@ theorem scalar_second_deriv (a : ℝ) (t : Icc (0 : ℝ) D.T) (x : Space) (θ : 
       pressureCoefficient D ξ a t x * deriv (profile δ) θ :=
   (scalar_deriv_hasDerivAt D δ hδ ξ hs a t x θ).deriv
 
-theorem scalar_second_deriv_zero (a : ℝ) (t : Icc (0 : ℝ) D.T) (x : Space) :
-    deriv (deriv (fun s => scalar D (initialData D δ hδ (a • ξ) hs) (t,(x,s)))) 0 =
-      pressureCoefficient D ξ a t x / δ := by
-  rw [scalar_second_deriv,profile_deriv_zero δ hδ,div_eq_mul_inv]
 
 def physicalPressure (a k : ℝ) (t : Icc (0 : ℝ) D.T) (Y : Space → Space) (x : Space) : ℝ :=
   k⁻¹^2 * scalar D (initialData D δ hδ (a • ξ) hs) (t,(Y x,k*⟪D.m₀,Y x⟫_ℝ))
 
-def hessianRemainder (a k : ℝ) (t : Icc (0 : ℝ) D.T) (Y : Space → Space)
-    (x : Space) : Space →L[ℝ] Space :=
-  lowerHessian (fun z => scalar D (initialData D δ hδ (a • ξ) hs) (t,z))
-    k D.m₀ Y (fun y => D.FInv.field t (Y y)) x
 
-theorem physicalPressure_hessian (a k : ℝ) (hk : k ≠ 0) (t : Icc (0 : ℝ) D.T)
-    (Y : Space → Space) (hY : ∀ x, HasFDerivAt Y (D.FInv.field t (Y x)) x) (x : Space) :
-    fderiv ℝ (gradient (physicalPressure D δ hδ ξ hs a k t Y)) x =
-      (pressureCoefficient D ξ a t (Y x) * deriv (profile δ) (k*⟪D.m₀,Y x⟫_ℝ)) •
-        rankOne ℝ (D.normal.field t (Y x)) (D.normal.field t (Y x)) +
-      hessianRemainder D δ hδ ξ hs a k t Y x := by
-  let q : LiftTangent → ℝ := fun z => scalar D (initialData D δ hδ (a • ξ) hs) (t,z)
-  have hq : ContDiff ℝ ∞ q := pressure_smooth D _ t
-  have hJ : DifferentiableAt ℝ (fun y => D.FInv.field t (Y y)) x :=
-    ((D.FInv.smooth t).differentiable (by simp) (Y x)).comp x (hY x).differentiableAt
-  have hh := hessian_physical hq k hk D.m₀ Y (fun y => D.FInv.field t (Y y)) hY x hJ
-  have ha : angularDerivative (angularDerivative q) (graphMap k D.m₀ (Y x)) =
-      pressureCoefficient D ξ a t (Y x) * deriv (profile δ) (k*⟪D.m₀,Y x⟫_ℝ) := by
-    rw [angularSecond_eq_deriv hq]
-    exact scalar_second_deriv D δ hδ ξ hs a t (Y x) (k*⟪D.m₀,Y x⟫_ℝ)
-  rwa [ha] at hh
 
-theorem physicalPressure_hessian_of_inverse (a k : ℝ) (hk : k ≠ 0)
-    (X Y : Icc (0 : ℝ) D.T → Space → Space)
-    (hX : ∀ t x, HasFDerivAt (X t) (D.F.field t x) x)
-    (hXY : ∀ t x, X t (Y t x)=x) (hY : Continuous (Function.uncurry Y))
-    (t : Icc (0 : ℝ) D.T) (x : Space) :
-    fderiv ℝ (gradient (physicalPressure D δ hδ ξ hs a k t (Y t))) x =
-      (pressureCoefficient D ξ a t (Y t x) * deriv (profile δ) (k*⟪D.m₀,Y t x⟫_ℝ)) •
-        rankOne ℝ (D.normal.field t (Y t x)) (D.normal.field t (Y t x)) +
-      hessianRemainder D δ hδ ξ hs a k t (Y t) x :=
-  physicalPressure_hessian D δ hδ ξ hs a k hk t (Y t)
-    (continuousInverse_hasFDerivAt D X Y hX hXY hY t) x
 
 end EulerPacketForwardShear

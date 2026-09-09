@@ -354,15 +354,6 @@ theorem exists_compensation_for_switch_family (P : Patch) (lam : ℝ) (hlam : 0 
     (fun K hK => (hdata K hK).1) (fun K hK => (hdata K hK).2)
 
 
-theorem scaled_triple_contDiffOn {S : Set ℝ} (K : ℝ) {p e i : ℝ → ℝ}
-    (hp : ContDiffOn ℝ ∞ p S) (he : ContDiffOn ℝ ∞ e S) (hi : ContDiffOn ℝ ∞ i S) :
-    ContDiffOn ℝ ∞ (fun η => scaledDebt K ![p η, e η, i η]) S := by
-  apply contDiffOn_pi.mpr
-  intro j
-  fin_cases j
-  · exact hp
-  · exact he.div_const K
-  · exact hi.div_const (K * Real.sqrt (2 * K))
 
 theorem angular_scaling_bound {K B u : ℝ} (hK : 0 < K) (hB : 0 ≤ B)
     (hu : |u| ≤ B * Real.sqrt K) : |u / (K * Real.sqrt (2 * K))| ≤ B / K := by
@@ -388,34 +379,7 @@ theorem scaled_triple_norm_bound {K B p e i : ℝ} (hK : 0 < K) (hB : 0 ≤ B)
     exact div_le_div_of_nonneg_right he hK.le
   · exact angular_scaling_bound hK hB hi
 
-theorem scaled_triple_derivWithin {S : Set ℝ} (K : ℝ) {p e i : ℝ → ℝ} {η : ℝ}
-    (huniq : UniqueDiffWithinAt ℝ S η)
-    (hp : DifferentiableWithinAt ℝ p S η) (he : DifferentiableWithinAt ℝ e S η)
-    (hi : DifferentiableWithinAt ℝ i S η) :
-    derivWithin (fun θ => scaledDebt K ![p θ, e θ, i θ]) S η =
-      scaledDebt K ![derivWithin p S η, derivWithin e S η, derivWithin i S η] := by
-  apply HasDerivWithinAt.derivWithin _ huniq
-  apply hasDerivWithinAt_pi.mpr
-  intro j
-  fin_cases j
-  · exact hp.hasDerivWithinAt
-  · exact he.hasDerivWithinAt.div_const K
-  · exact hi.hasDerivWithinAt.div_const (K * Real.sqrt (2 * K))
 
-/-- Scalar physical estimates at their natural three scales give the vector
-estimate required by the compensation solver, including the actual derivative. -/
-theorem scaled_triple_first_jet_bound {S : Set ℝ} {K B : ℝ} {p e i : ℝ → ℝ} {η : ℝ}
-    (hK : 0 < K) (hB : 0 ≤ B) (huniq : UniqueDiffWithinAt ℝ S η)
-    (hp : DifferentiableWithinAt ℝ p S η) (he : DifferentiableWithinAt ℝ e S η)
-    (hi : DifferentiableWithinAt ℝ i S η)
-    (hpb : |p η| ≤ B / K ∧ |derivWithin p S η| ≤ B / K)
-    (heb : |e η| ≤ B ∧ |derivWithin e S η| ≤ B)
-    (hib : |i η| ≤ B * Real.sqrt K ∧ |derivWithin i S η| ≤ B * Real.sqrt K) :
-    ‖scaledDebt K ![p η, e η, i η]‖ ≤ B / K ∧
-      ‖derivWithin (fun θ => scaledDebt K ![p θ, e θ, i θ]) S η‖ ≤ B / K := by
-  refine ⟨scaled_triple_norm_bound hK hB hpb.1 heb.1 hib.1, ?_⟩
-  rw [scaled_triple_derivWithin K huniq hp he hi]
-  exact scaled_triple_norm_bound hK hB hpb.2 heb.2 hib.2
 
 /-- The actual three physical debts use the diffusion parameter `1-η²`. -/
 noncomputable def physicalDebt (T : OutgoingTail.TailData) (K η : ℝ) : Coeff :=
@@ -424,44 +388,7 @@ noncomputable def physicalDebt (T : OutgoingTail.TailData) (K η : ℝ) : Coeff 
     ParametricHeatTail.physicalAngular T K η]
 
 
-theorem physical_scaled_debt_contDiffOn (T : OutgoingTail.TailData) {K : ℝ} (hK : 1 ≤ K) :
-    ContDiffOn ℝ ∞ (fun η => scaledDebt K (physicalDebt T K η)) (Icc (-1 : ℝ) 1) :=
-  scaled_triple_contDiffOn K (ParametricHeatTail.physicalPressure_contDiffOn T hK)
-    (ParametricHeatTail.physicalEnergy_contDiffOn T hK)
-    (ParametricHeatTail.physicalAngular_contDiffOn T hK)
 
-/-- Both estimates concern the actual nonconstant physical debt. -/
-theorem physical_scaled_debt_C1_bounds (T : OutgoingTail.TailData) :
-    ∃ B : ℝ, 0 < B ∧ ∀ K : ℝ, 1 ≤ K → ∀ η ∈ Icc (-1 : ℝ) 1,
-      ‖scaledDebt K (physicalDebt T K η)‖ ≤ B / K ∧
-      ‖derivWithin (fun θ => scaledDebt K (physicalDebt T K θ)) (Icc (-1 : ℝ) 1) η‖ ≤ B / K := by
-  obtain ⟨B, hB, hb⟩ := ParametricHeatTail.exists_physical_debt_C1_bounds T
-  refine ⟨B, hB, ?_⟩
-  intro K hK η hη
-  rcases hb K hK η hη with ⟨hp, hp', he, he', hi, hi'⟩
-  exact scaled_triple_first_jet_bound (lt_of_lt_of_le zero_lt_one hK) hB.le
-    ((uniqueDiffOn_Icc (by norm_num)) η hη)
-    (((ParametricHeatTail.physicalPressure_contDiffOn T hK) η hη).differentiableWithinAt (by simp))
-    (((ParametricHeatTail.physicalEnergy_contDiffOn T hK) η hη).differentiableWithinAt (by simp))
-    (((ParametricHeatTail.physicalAngular_contDiffOn T hK) η hη).differentiableWithinAt (by simp))
-    ⟨hp, hp'⟩ ⟨he, he'⟩ ⟨hi, hi'⟩
 
-/-- The physical heat edit with diffusion `1-η²` allows exact three-moment
-compensation, including the closed parameter endpoints and uniform first jets. -/
-theorem exists_physical_heat_compensation (P : Patch) (lam : ℝ) (hlam : 0 ≤ lam)
-    (T : OutgoingTail.TailData) (q : ℝ) (hq : 0 < q)
-    (a : ℝ → ℝ) (ha : ContDiffOn ℝ ∞ a (Icc (-1 : ℝ) 1))
-    (hpos : ∀ η ∈ Icc (-1 : ℝ) 1, 0 < a η) :
-    ∃ K₀ C : ℝ, 0 < K₀ ∧ 0 < C ∧ ∀ K : ℝ, K₀ ≤ K →
-      ∃ c : ℝ → Coeff, ContDiffOn ℝ ∞ c (Icc (-1 : ℝ) 1) ∧
-        ∀ η ∈ Icc (-1 : ℝ) 1,
-          physicalMoments P lam (q * K) (a η) (c η) + physicalDebt T K η = 0 ∧
-          ‖c η‖ ≤ C / K ∧ ‖derivWithin c (Icc (-1 : ℝ) 1) η‖ ≤ C / K ∧
-          FirstJetWithinBound P a c (Icc (-1 : ℝ) 1) η (C / K) ∧
-          ∀ X : ℝ, 0 < X → 0 < physicalProfile P lam (q * K) (a η) (c η) X := by
-  obtain ⟨B, hB, hb⟩ := physical_scaled_debt_C1_bounds T
-  exact exists_compensation_for_switch_family P lam hlam q hq isCompact_Icc
-    (uniqueDiffOn_Icc (by norm_num)) a ha hpos (physicalDebt T) B hB
-    (fun K hK => physical_scaled_debt_contDiffOn T hK) hb
 
 end NavierStokes.ParametricTerminalCompensation

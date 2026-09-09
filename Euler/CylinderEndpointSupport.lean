@@ -90,23 +90,12 @@ theorem endpointCoordinate_mean_zero (t : Icc (0 : ℝ) T) :
   rw [D.endpointCoordinate_eq_const_sub P Y t,map_sub,map_smul,hY,smul_zero,
     D.velocityPath_mean_zero P (D.endpointForcing P Y) (D.endpointForcing_mean_zero P Y hY) t,sub_zero]
 
-theorem endpointAcceleration_mean_zero (t : Icc (0 : ℝ) T) :
-    average P (D.endpointAcceleration P Y t) = 0 := by
-  rw [D.endpointAcceleration_eq_forced P Y,ContinuousMap.neg_apply,map_neg,
-    D.accelerationPath_mean_zero P (D.endpointForcing P Y) (D.endpointForcing_mean_zero P Y hY) t,neg_zero]
 
 theorem endpointVelocity_mean_zero (t : Icc (0 : ℝ) T) :
     average P (D.endpointVelocity P Y t) = 0 := by
   change average P (fullOperatorMap P (D.Q t) (D.endpointCoordinate P Y t)) = 0
   rw [average_fullOperator,D.endpointCoordinate_mean_zero P Y hY t,map_zero]
 
-theorem endpointDerivative_mean_zero (t : Icc (0 : ℝ) T) :
-    average P (D.endpointDerivative P Y t) = 0 := by
-  change average P (fullOperatorMap P (D.Q₁ t) (D.endpointCoordinate P Y t)+
-    fullOperatorMap P (D.Q t) (D.endpointAcceleration P Y t)) = 0
-  rw [map_add,average_fullOperator,average_fullOperator,
-    D.endpointCoordinate_mean_zero P Y hY t,D.endpointAcceleration_mean_zero P Y hY t,
-    map_zero,map_zero,add_zero]
 
 end Mean
 

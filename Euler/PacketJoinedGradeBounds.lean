@@ -147,21 +147,9 @@ theorem grade_bounds :
   · exact (hπ.scale_profile D.T_pos.le L.fullProfile L.fullProfile_pos c hc).absorb_amplitude_to
       L.radius_bounds.1 (mul_nonneg (by norm_num) (L.pressureAmplitude_nonneg N)) W.pressureGradient hroom.2
 
-theorem vector_grade_bound :
-    ((vectorField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)
-      (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
-  (L.grade_bounds N W G F c hc p hp hforce).1
-
-theorem derivative_grade_bound :
-    ((vectorDerivativeField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)
-      (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
-  (L.grade_bounds N W G F c hc p hp hforce).2.1
 
 
 
-theorem pressure_gradient_grade_bound :
-    ((scalarGradientField τ hτ hτT B G).normalized D.T_pos.le (c • L.fullProfile)
-      (smul_profile_pos L.fullProfile L.fullProfile_pos c hc)).WordBound 6 L.R 1 (highShift p) :=
-  (L.grade_bounds N W G F c hc p hp hforce).2.2.2.2
+
 
 end EulerTransversePacketJoin.Budget

@@ -125,9 +125,6 @@ theorem weighted_momentDensity (P : Patch) (e : ℕ) (r : ℝ) :
   rw [momentDensity, inversePower_eq P e (P.a_lt_left.le.trans hr.1)]
   field_simp [hr0.ne']
 
-theorem momentDensity_moment (P : Patch) (e : ℕ) : (∫ r, r ^ e * momentDensity P e r) = 1 := by
-  simp_rw [weighted_momentDensity]
-  exact density_integral P
 
 
 
@@ -163,21 +160,8 @@ theorem mass_contDiff {P : Patch} (e : ℕ) {F : ℝ × E → ℝ} (hF : ContDif
     (hs : RadialAlias.RadiallySupported P.a P.b F) : ContDiff ℝ ∞ (mass e F) :=
   IntegratedMeanBalances.radialMoment_smooth hF hs e
 
-theorem bumpCorrection_contDiff (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : ContDiff ℝ ∞ F)
-    (hs : RadialAlias.RadiallySupported P.a P.b F) : ContDiff ℝ ∞ (bumpCorrection P e F) :=
-  ((momentDensity_contDiff P e).comp contDiff_fst).mul ((mass_contDiff e hF hs).comp contDiff_snd)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem bumpCorrection_supported (P : Patch) (e : ℕ) (F : ℝ × E → ℝ) :
-    RadialAlias.RadiallySupported P.left P.right (bumpCorrection P e F) :=
-  fun _ h => momentDensity_support P e (left_ne_zero_of_mul h)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-theorem bumpCorrection_moment (P : Patch) (e : ℕ) (F : ℝ × E → ℝ) (p : E) :
-    mass e (bumpCorrection P e F) p = mass e F p := by
-  change (∫ r, r ^ e * (momentDensity P e r * mass e F p)) = _
-  simp_rw [← mul_assoc]
-  rw [integral_mul_const, momentDensity_moment, one_mul]
 
 
 theorem primitive_contDiff (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : ContDiff ℝ ∞ F)
@@ -234,15 +218,6 @@ theorem primitive_eq_integral (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF :
     (weightedSource_supported e hs), total_weightedSource P e hF.continuous hs, cutoff_eq_integral]
   rfl
 
-theorem weighted_sigma_eq (P : Patch) (e : ℕ) {F : ℝ × E → ℝ} (hF : Continuous F)
-    (hs : RadialAlias.RadiallySupported P.a P.b F) (z : ℝ × E) :
-    z.1 ^ e * sigma P e F z = -primitive P e F z := by
-  by_cases h : primitive P e F z = 0
-  · simp [sigma, h]
-  have hr := primitive_supported P e hF hs h
-  have hz0 : z.1 ≠ 0 := (P.a_pos.trans_le hr.1).ne'
-  rw [sigma, inversePower_eq P e hr.1]
-  field_simp
 
 theorem sigma_eq_negative_primitive (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
     (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (z : ℝ × E) :
@@ -254,20 +229,6 @@ theorem sigma_eq_negative_primitive (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
   ring
 
 
-theorem adjusted_moment_zero (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) :
-    mass e (adjusted P e F) p = 0 := by
-  have hiF := IntegratedMeanBalances.weighted_integrable
-    (IntegratedMeanBalances.radial_slice_smooth hF p).continuous
-    (IntegratedMeanBalances.radial_slice_compact hs p) e
-  have hiB := IntegratedMeanBalances.weighted_integrable
-    (IntegratedMeanBalances.radial_slice_smooth (bumpCorrection_contDiff P e hF hs) p).continuous
-    (IntegratedMeanBalances.radial_slice_compact (bumpCorrection_supported P e F) p) e
-  change IntegratedMeanBalances.moment e
-    (fun r => F (r, p) - bumpCorrection P e F (r, p)) = 0
-  rw [IntegratedMeanBalances.moment_sub e hiF hiB]
-  change mass e F p - mass e (bumpCorrection P e F) p = 0
-  rw [bumpCorrection_moment, sub_self]
 
 
 theorem primitive_hasDerivAt (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
@@ -288,31 +249,9 @@ theorem primitive_hasDerivAt (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
   change fderiv ℝ (primitive P e F) (r, p) (1, 0) = _ at ht
   simpa only [ht, Function.comp_def, id_eq] using hd
 
-/-- The sign is the one required to cancel the adjusted residual by divergence. -/
-theorem weighted_sigma_hasDerivAt (P : Patch) (e : ℕ) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) (r : ℝ) :
-    HasDerivAt (fun t => t ^ e * sigma P e F (t, p)) (-r ^ e * adjusted P e F (r, p)) r := by
-  have he : (fun t => t ^ e * sigma P e F (t, p)) =
-      fun t => -primitive P e F (t, p) := funext (fun t => weighted_sigma_eq P e hF.continuous hs (t, p))
-  rw [he]
-  convert! (primitive_hasDerivAt P e hF hs p r).neg using 1
-  ring
 
 
 
-theorem axial_divergence (P : Patch) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : RadialAlias.RadiallySupported P.a P.b F) (p : E) {r : ℝ} (hr : 0 < r) :
-    IntegratedMeanBalances.radialDivergence 1 (fun t => sigma P 1 F (t, p)) r =
-      -adjusted P 1 F (r, p) := by
-  have hsD := ((IntegratedMeanBalances.radial_slice_smooth (sigma_contDiff P 1 hF hs) p).differentiable (by simp) r).hasDerivAt
-  have he := ((hasDerivAt_pow 1 r).mul hsD).unique (weighted_sigma_hasDerivAt P 1 hF hs p r)
-  norm_num at he
-  apply mul_left_cancel₀ hr.ne'
-  dsimp [IntegratedMeanBalances.radialDivergence]
-  calc
-    _ = sigma P 1 F (r, p) + r * deriv (fun t => sigma P 1 F (t, p)) r := by
-      field_simp ; ring
-    _ = _ := by nlinarith [he]
 
 /-- All fixed-order constants come from the proved weighted integral estimate
 and bounded radial multipliers on a fixed positive annulus. -/
@@ -631,18 +570,6 @@ theorem physicalSigma_eq_negative_primitive (P : Patch) (e : ℕ) {q : E → ℝ
 
 
 
-theorem physicalAdjusted_moment_zero (P : Patch) (e : ℕ) {q : E → ℝ}
-    (hq : ContDiff ℝ ∞ q) (hpos : ∀ p, 0 < q p) {F : ℝ × E → ℝ}
-    (hF : ContDiff ℝ ∞ F) (hs : PhysicalSupport P q F) (p : E) :
-    mass e (physicalAdjusted P e q F) p = 0 := by
-  have he : nativeSource q (physicalAdjusted P e q F) = adjusted P e (nativeSource q F) :=
-    funext fun z => (native_adjusted_eq P e hpos F z).symm
-  have hz := adjusted_moment_zero P e (nativeSource_contDiff hq hpos hF)
-    (nativeSource_supported P hpos hs) p
-  have hh := nativeSource_mass e hpos (physicalAdjusted P e q F) p
-  rw [he, hz] at hh
-  have hm := congrArg (fun t => t * lengthScale q p ^ (e + 1)) hh
-  simpa only [zero_mul, div_mul_cancel₀ _ (pow_ne_zero _ (lengthScale_pos hpos p).ne')] using hm.symm
 
 
 theorem physicalAdjusted_contDiff (P : Patch) (e : ℕ) {q : E → ℝ}

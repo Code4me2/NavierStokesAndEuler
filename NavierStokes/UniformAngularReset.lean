@@ -977,10 +977,6 @@ def referenceAmplitude (d : TailData) : ℝ :=
   (radialAmplitude d.core.P d.core.dropLength d.core.lam d.flattenEnd / 2) *
     Real.exp ((1 / 2 + d.core.lam) * d.flattenEnd)
 
-theorem referenceAmplitude_pos (d : TailData) : 0 < referenceAmplitude d := by
-  have hP := d.core.P_pos
-  unfold referenceAmplitude radialAmplitude
-  positivity
 
 theorem reference_matches (d : TailData) {y : ℝ} (hy : d.flattenEnd ≤ y) :
     baseE d.core.lam (referenceAmplitude d) y =
@@ -1076,24 +1072,6 @@ theorem positive (p : ℝ × ℝ) : 0 < correctedAngular d w.coefficients p := b
   have h := (abs_le.mp (w.small_jets p.2 (p.1 - correctionCenter d)).1).1
   linarith
 
-theorem logSlope_le (eta : ℝ) {y : ℝ} (hy : y ∈ Ioo (d.releaseStart - 4) d.releaseStart) :
-    logSlope (fun t => correctedAngular d w.coefficients (t, eta)) y ≤ -d.core.lam / 2 := by
-  have he : (fun t => correctedAngular d w.coefficients (t, eta)) =ᶠ[𝓝 y]
-      modifiedE d.core.lam (referenceAmplitude d) (correctionCenter d) (w.coefficients eta) := by
-    filter_upwards [isOpen_Ioo.mem_nhds hy] with t ht
-    exact corrected_matches_reference d w.coefficients eta ht
-  have hp := positive_and_slope_of_small d.core.lam d.core.lam_pos (w.coefficients eta)
-    (y - correctionCenter d) (w.small_jets eta (y - correctionCenter d)).1
-    (w.small_jets eta (y - correctionCenter d)).2
-  unfold logSlope
-  rw [he.deriv_eq]
-  dsimp only
-  rw [corrected_matches_reference d w.coefficients eta hy]
-  change logSlope (modifiedE d.core.lam (referenceAmplitude d) (correctionCenter d)
-    (w.coefficients eta)) y ≤ _
-  rw [modifiedE_logSlope d.core.lam (referenceAmplitude d) (correctionCenter d)
-    (w.coefficients eta) y (referenceAmplitude_pos d).ne' hp.1.ne']
-  exact hp.2
 
 theorem pressure_neutral (eta : ℝ) :
     (∫ y, (correctedAngular d w.coefficients (y, eta)) ^ 2 - (finalAngular d (y, eta)) ^ 2) = 0 := by
@@ -1177,21 +1155,6 @@ theorem exact_endpoint (eta : ℝ) : correctedHistory d w.coefficients eta =
   unfold correctedHistory fullHistory at *
   linarith
 
-theorem pressure_interval_neutral (eta : ℝ) :
-    (∫ y in (0 : ℝ)..d.releaseStart, (correctedAngular d w.coefficients (y, eta)) ^ 2) =
-      ∫ y in (0 : ℝ)..d.releaseStart, (finalAngular d (y, eta)) ^ 2 := by
-  have hm : IntervalIntegrable (fun y => (correctedAngular d w.coefficients (y, eta)) ^ 2)
-      volume 0 d.releaseStart :=
-    (((correctedAngular_contDiff d w.coefficients w.smooth).continuous.comp
-      (continuous_id.prodMk continuous_const)).pow 2).intervalIntegrable _ _
-  have ho : IntervalIntegrable (fun y => (finalAngular d (y, eta)) ^ 2)
-      volume 0 d.releaseStart :=
-    (((finalAngular_contDiff d).continuous.comp (continuous_id.prodMk continuous_const)).pow 2).intervalIntegrable _ _
-  apply sub_eq_zero.mp
-  rw [← intervalIntegral.integral_sub hm ho,
-    integral_edit_window d _ (fun y hy => by
-      rw [correctedAngular_unchanged d w.coefficients eta hy, sub_self])]
-  exact w.pressure_neutral eta
 
 
 end ResetWitness

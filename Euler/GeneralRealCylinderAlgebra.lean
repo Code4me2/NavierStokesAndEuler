@@ -54,26 +54,6 @@ theorem real_product_word_memLp {q n : ℕ} (hq : 6 ≤ q) (hn : n ≤ q) (w : F
   filter_upwards [] with x
   exact (Complex.norm_real _).ge
 
-/-- Every scalar-vector product derivative through order q is genuinely in L². -/
-theorem scalar_vector_product_word_memLp {q n : ℕ} (hq : 6 ≤ q) (hn : n ≤ q) (d : ℕ)
-    (w : Fin n → Fin 4) (f : LiftDomain period → ℝ) (g : LiftDomain period → Domain d)
-    (hf : ∀ x, ContDiff ℝ ∞ (localFieldLift period f x))
-    (hg : ∀ x, ContDiff ℝ ∞ (localFieldLift period g x))
-    (hfL2 : ∀ j ≤ q, ∀ v : Fin j → Fin 4, MemLp (iteratedFieldDerivative period v f) 2 (liftMeasure period))
-    (hgL2 : ∀ j ≤ q, ∀ v : Fin j → Fin 4, MemLp (iteratedFieldDerivative period v g) 2 (liftMeasure period)) :
-    MemLp (iteratedFieldDerivative period w (fun x => f x • g x)) 2 (liftMeasure period) := by
-  apply MemLp.of_eval_piLp
-  intro i
-  have h := real_product_word_memLp period hq hn w f (coordinate d i ∘ g) hf
-    (postcomp_smooth period _ g hg) hfL2
-    (fun j hj v => postcomp_word_memLp period hj _ g hg hgL2 v)
-  rw [← coordinate_smul period d i f g] at h
-  have he : (fun x => iteratedFieldDerivative period w (fun x => f x • g x) x i) =
-      iteratedFieldDerivative period w (coordinate d i ∘ (fun x => f x • g x)) := by
-    funext x
-    exact (coordinate_word period d i w (fun x => f x • g x) (fun x => (hf x).smul (hg x)) x).symm
-  rw [he]
-  exact h
 
 /-- Multiplication of an actual vector field by a scalar field is bounded in every Hq, q≥6. -/
 theorem cylinder_Hq_scalar_vector_product {q : ℕ} (hq : 6 ≤ q) (d : ℕ)

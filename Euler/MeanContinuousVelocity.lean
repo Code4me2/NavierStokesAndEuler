@@ -43,21 +43,6 @@ theorem continuousVelocity_translation_contDiff {n : ℕ∞ω}
     ContDiff ℝ n (fun a : Space => pathTranslation T a s.continuousVelocity) :=
   reconstruction_translation_contDiff T hT s.velocityField s.velocityDerivative hB hBt
 
-/-- The actual spatial orbit of B(t) is regular for every t, including both endpoints. -/
-theorem physicalPath_translation_contDiff (hTpos : 0 < T)
-    (hF : ∀ t : Icc (0 : ℝ) T,
-      HasDerivWithinAt (extendPath T hT F) (F₁ t) (Icc (0 : ℝ) T) t)
-    {n : ℕ∞ω}
-    (hB : ContDiff ℝ n (fun a : Space => timeTranslation T a s.velocityField))
-    (hBt : ContDiff ℝ n (fun a : Space => timeTranslation T a s.velocityDerivative))
-    (t : Icc (0 : ℝ) T) :
-    ContDiff ℝ n (fun a : Space => translation a (s.physicalPath t)) := by
-  have hp := pathTranslation_evaluation_contDiff T s.continuousVelocity
-    (s.continuousVelocity_translation_contDiff hB hBt) t
-  have heq : (fun a : Space => translation a (s.continuousVelocity t)) =
-      fun a : Space => translation a (s.physicalPath t) :=
-    funext (fun a => congrArg (translation a) (s.continuousVelocity_eq_physicalPath hTpos hF t))
-  exact Eq.mp (congrArg (fun g : Space → L2 => ContDiff ℝ n g) heq) hp
 
 
 

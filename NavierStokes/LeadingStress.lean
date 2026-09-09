@@ -102,52 +102,7 @@ theorem axial_smoothAt (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
 
 
 
-theorem partialX_axial (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
-    (hX : 0 < w.1) (hL : L h w.2 ≠ 0) :
-    partialX (axial P h) w =
-      (partialX P.U w + P.axialLag h w / (2 * L h w.2)) / Real.sqrt (2 * w.1) +
-      Real.sqrt (2 * w.1) * (partialX (partialX P.U) w +
-        partialX (P.axialLag h) w / (2 * L h w.2)) := by
-  have hux : HasDerivAt (fun x => partialX P.U (x, w.2))
-      (partialX (partialX P.U) w) w.1 := partialX_hasDerivAt
-    (((radialPartial_smooth Ω P.U_smooth).contDiffAt
-      (Ω.isOpen.mem_nhds hw)).differentiableAt (by simp))
-  have hn := partialX_hasDerivAt
-    ((P.axialLag_smoothAt h hw hX.ne').differentiableAt (by simp))
-  have hr := (Real.hasDerivAt_sqrt (show 2 * w.1 ≠ 0 by positivity)).comp w.1
-    ((hasDerivAt_id w.1).const_mul 2)
-  have hd := hr.fun_mul (hux.fun_add (hn.div_const (2 * L h w.2)))
-  have ht := partialX_hasDerivAt
-    ((axial_smoothAt P h hw hX.ne' hL).differentiableAt (by simp))
-  exact (ht.unique hd).trans (by
-    simp only [Prod.eta, mul_one, Function.comp_apply]
-    ring)
 
-/-- The axial profile divergence, obtained from the primitive-defined `N_s`. -/
-theorem axial_divergence (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)
-    (hX : 0 < w.1) (hL : L h w.2 ≠ 0) :
-    Real.sqrt (2 * w.1) * partialX (axial P h) w +
-        axial P h w / Real.sqrt (2 * w.1) =
-      sourceAxial P h w / L h w.2 +
-        2 * (w.1 * partialX (partialX P.U) w + partialX P.U w) := by
-  have hn := P.axialLag_smoothAt h hw hX.ne'
-  have he := P.axialLag_equation h hw hX.ne'
-  rw [(partialX_hasDerivAt (hn.differentiableAt (by simp))).deriv] at he
-  change w.1 * partialX (P.axialLag h) w + P.axialLag h w = sourceAxial P h w at he
-  have hr : Real.sqrt (2 * w.1) ≠ 0 := ne_of_gt (Real.sqrt_pos.2 (by positivity))
-  have hr2 : Real.sqrt (2 * w.1) ^ 2 = 2 * w.1 := Real.sq_sqrt (by positivity)
-  rw [partialX_axial P h hw hX hL, ← he]
-  unfold axial
-  generalize hrdef : Real.sqrt (2 * w.1) = r at *
-  have hr4 : r ^ 4 = 4 * w.1 ^ 2 := by
-    calc
-      r ^ 4 = (r ^ 2) ^ 2 := by ring
-      _ = (2 * w.1) ^ 2 := by rw [hr2]
-      _ = _ := by ring
-  field_simp
-  ring_nf
-  simp only [hr2]
-  ring
 
 /-- The coefficient of the angular inviscid residual is the negative lag source. -/
 theorem theta_transport_coefficient (h : ℝ) {w : Point} (hw : w ∈ Ω.carrier)

@@ -54,11 +54,7 @@ noncomputable def initializedSeries (base initial : VelocityField)
   | 0 => fun w => base w + initial w
   | j + 1 => stages j
 
-theorem initializedSeries_zero (base initial : VelocityField) (stages : ℕ → VelocityField)
-    (w : SpaceTime) : initializedSeries base initial stages 0 w = base w + initial w := rfl
 
-theorem initializedSeries_succ (base initial : VelocityField) (stages : ℕ → VelocityField)
-    (j : ℕ) : initializedSeries base initial stages (j + 1) = stages j := rfl
 
 
 /-- Local finiteness intersects only finitely many stage-dependent zero

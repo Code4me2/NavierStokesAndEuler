@@ -38,10 +38,6 @@ theorem sourceGrowthProfile_amplitude (t : Icc (0 : ℝ) (D.T-τ)) :
       8*Real.exp 6*J.δ*J.hchild/P.rayScale hτ hτT :=
   (J.halfBall_controlledGrowth hball).choose_spec.2.2.2 t
 
-theorem primaryAmplitude_bound : J.primaryAmplitude hball ≤
-    8*Real.exp 6*J.δ*J.hchild/P.rayScale hτ hτT := by
-  have h := J.sourceGrowthProfile_amplitude hball ⟨0,le_rfl,(sub_pos.mpr hτT).le⟩
-  simpa only [J.sourceGrowthProfile_initial hball,mul_one] using h
 
 def joinedBudget (q : ℕ)
     (A V : Icc (0 : ℝ) D.T → SmoothL2Field Space)

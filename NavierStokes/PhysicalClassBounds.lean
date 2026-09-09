@@ -434,34 +434,6 @@ theorem physical_sum_jet_bound {s : StripData D} {h α σ a b r0 Z P : ℝ}
   unfold physicalLoss
   ring
 
-theorem physical_vector_sum_jet_bound {s : StripData D} {h α σ a b r0 Z P : ℝ}
-    {w : ι → ℕ → D → ℝ} {f : ι → ℕ → D → ℂ}
-    (hf : SourceBounds s h α w f) {H Δ : ℕ} {F : Fin 3 → PhysicalWaveSum.WaveFamily H}
-    (hc : ∀ i, CommonChart (F i) a b h r0 σ f)
-    (hb : ∀ i, CarrierBounds (F i) a b h r0)
-    (hr : ∀ i, PhysicalWaveSum.RegularFamily (F i) a b h r0 Z Δ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hZ : 0 ≤ Z) (hr0 : 0 ≤ r0)
-    (hP : 1 ≤ P) (hp : ∀ i L, |((F i).carrier L).angular| ≤ P ∧
-      |((F i).carrier L).axial| ≤ P ∧ |((F i).carrier L).radial| ≤ P) (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ z : ProblemStatement.SpaceTime,
-      z ∈ PhysicalWaveSum.preterminal → |z.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (PhysicalWaveSum.vectorSum F a h r0) z‖ ≤
-        C * PhysicalWaveSum.physicalQ h z ^ (h * α - physicalLoss h σ m) := by
-  classical
-  have hs := fun i => physical_sum_jet_bound hf (hc i) (hb i) (hr i)
-    hh hh1 ha hZ hr0 hP (hp i) m
-  choose C hC hbound using hs
-  refine ⟨3 * ∑ i : Fin 3, C i,
-    mul_nonneg (by norm_num) (Finset.sum_nonneg (fun i _ => hC i)), ?_⟩
-  intro z hz ht
-  have hq := PhysicalWaveSum.physicalQ_pos hh hh1 hz
-  have hi (i : Fin 3) : C i ≤ ∑ j : Fin 3, C j :=
-    Finset.single_le_sum (fun j _ => hC j) (Finset.mem_univ i)
-  have he := PhysicalWaveSum.vectorSum_jet_bound hr ha hh hh1 hz m
-    (B := (∑ i : Fin 3, C i) * PhysicalWaveSum.physicalQ h z ^ (h * α - physicalLoss h σ m))
-    (fun i => (hbound i z hz ht).trans
-      (mul_le_mul_of_nonneg_right (hi i) (Real.rpow_pos_of_pos hq _).le))
-  exact he.trans_eq (by ring)
 
 
 /-- Inclusion of a spatial direction into a joint spacetime direction. -/
@@ -486,21 +458,6 @@ theorem spatialCurl_eq_joint {A : ProblemStatement.VelocityField} {z : ProblemSt
     SpatialCurl.curlLinear ((fderiv ℝ A z).comp spatialInclusion)
   exact congrArg SpatialCurl.curlLinear hd
 
-/-- Taking the actual spatial curl costs exactly one joint derivative
-and a fixed linear-operator norm. -/
-theorem spatialCurl_jet_bound {A : ProblemStatement.VelocityField}
-    {U : Set ProblemStatement.SpaceTime} (hU : IsOpen U) (hA : ContDiffOn ℝ ∞ A U)
-    {z : ProblemStatement.SpaceTime} (hz : z ∈ U) (m : ℕ) :
-    ‖iteratedFDeriv ℝ m (SpatialCurl.spatialCurl A) z‖ ≤
-      ‖jointCurl‖ * ‖iteratedFDeriv ℝ (m + 1) A z‖ := by
-  have he : SpatialCurl.spatialCurl A =ᶠ[𝓝 z] jointCurl ∘ fderiv ℝ A := by
-    filter_upwards [hU.mem_nhds hz] with y hy
-    exact spatialCurl_eq_joint ((hA.contDiffAt (hU.mem_nhds hy)).differentiableAt (by simp))
-  rw [PhysicalWaveSum.iteratedFDeriv_eq_of_eventuallyEq he m]
-  have hd : ContDiffAt ℝ ∞ (fderiv ℝ A) z :=
-    (hA.contDiffAt (hU.mem_nhds hz)).fderiv_right (by simp)
-  have hb := PhysicalWaveSum.norm_jet_linear_comp_at (hd.of_le (natCast_le_infty m)) jointCurl
-  simpa only [norm_iteratedFDeriv_fderiv] using hb
 
 
 @[simp] theorem physicalLoss_potential (h : ℝ) (m : ℕ) :

@@ -845,15 +845,6 @@ theorem physicalBarSigma_axial_divergence {coord : ℝ} (U : SlowRegion coord)
     (fun _ => U.qlo_pos.trans_le (U.q_mem s hsp).1)
     (frozenBar_smooth U.isOpen hsp hf) (frozenBar_supported P hsp hs) 0 hr
 
-theorem physicalAdjusted_moment_zero {coord : ℝ} (U : SlowRegion coord)
-    (P : SignedStressPrimitive.Patch) (e : ℕ) {f : Point → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (PhysicalMeanDomain.slowDomain U.carrier))
-    (hs : MovingSupport P.a P.b coord U.carrier f) {s : Plane} (hsp : s ∈ U.carrier) :
-    SignedStressPrimitive.mass e (SignedStressPrimitive.physicalAdjusted P e
-      (SimilarityCoordinates.coordinateQ coord) (PressureStream.torusAverage f)) s = 0 :=
-  SignedStressPrimitive.physicalAdjusted_moment_zero P e contDiff_const
-    (fun _ => U.qlo_pos.trans_le (U.q_mem s hsp).1)
-    (frozenBar_smooth U.isOpen hsp hf) (frozenBar_supported P hsp hs) 0
 
 
 

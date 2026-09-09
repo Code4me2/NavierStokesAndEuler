@@ -59,13 +59,5 @@ theorem FiniteFamily.pointField_hasDerivAt (F : FiniteFamily period hT A)
   simpa only [Function.comp_def, ContinuousLinearMap.comp_apply, restrictOperator_truncate,
     FiniteFamily.pointField, FiniteFamily.pointTimeDerivative, extendPath] using he
 
-/-- The actual pointwise correction equation uses the reconstructed signed pressure and literal matrix multiplication. -/
-theorem FiniteFamily.pointField_hasDerivAt_pressure (F : FiniteFamily period hT A)
-    (x : LiftDomain period) (t : ℝ) (ht : t ∈ Ioo 0 T) :
-    HasDerivAt (fun r => F.pointField period (projIcc 0 T hT.le r) x)
-      (-F.pointRawSource period ⟨t, ht.1.le, ht.2.le⟩ x -
-        (A.metric.coefficient ⟨t, ht.1.le, ht.2.le⟩).coefficient x
-          (F.pointPressure period ⟨t, ht.1.le, ht.2.le⟩ x)) t := by
-  simpa only [F.pointTimeDerivative_eq_pressure period] using F.pointField_hasDerivAt period x t ht
 
 end EulerCorrectionAssembly

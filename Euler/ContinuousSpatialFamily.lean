@@ -229,10 +229,6 @@ private theorem norm_iteratedFDeriv_field_aux (n : ℕ) :
       (derivativeBundling_norm_le_one (K := K) (V := V)) (norm_nonneg _)).trans
       (by simpa only [one_mul, derivative_bound] using ih (Space →L[ℝ] V) A.derivative a))
 
-/-- The original pointwise uniform derivative bound holds without any additional factor. -/
-theorem norm_iteratedFDeriv_field_le (A : SpatialFamily K V) (n : ℕ) (a : Space) :
-    ‖iteratedFDeriv ℝ n A.field a‖ ≤ A.bound n :=
-  norm_iteratedFDeriv_field_aux n V A a
 
 end SpatialFamily
 

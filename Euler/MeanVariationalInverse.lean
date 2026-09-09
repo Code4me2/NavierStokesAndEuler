@@ -116,18 +116,6 @@ theorem meanTrace_boundary (T : ℝ) (hT : 0 ≤ T)
   simpa only [add_apply, smul_apply, inner_add_left, real_inner_smul_left] using
     hboundary (meanTrace T hT FInv u) (meanTrace_mem T hT FInv hF0 u)
 
-/-- A polynomial operator bound for the actual terminal primitive. -/
-theorem meanPrimitive_norm_le (T : ℝ) (hT : 0 ≤ T)
-    (FInv : C(Icc (0 : ℝ) T, L2 →L[ℝ] L2)) : ‖meanPrimitive T hT FInv‖ ≤ T := by
-  apply ContinuousLinearMap.opNorm_le_bound _ hT
-  intro u
-  apply (sq_le_sq₀ (norm_nonneg _) (mul_nonneg hT (norm_nonneg u))).1
-  calc
-    _ ≤ T^2/2*‖u‖^2 := meanPrimitive_norm_sq T hT FInv u
-    _ ≤ T^2*‖u‖^2 := by
-      apply mul_le_mul_of_nonneg_right _ (sq_nonneg ‖u‖)
-      nlinarith only [sq_nonneg T]
-    _ = (T*‖u‖)^2 := by ring
 
 
 
@@ -174,37 +162,8 @@ theorem meanSolver_weak (f : TimeLp T L2) (v : meanDerivatives T hT FInv) :
       (timeMultiplier_quadratic_upper T hT H K hH)
       (meanTrace_boundary T hT FInv M0 A L B hF0 hboundary) hsmall f v
 
-/-- The solved mean derivative obeys a polynomial finite-time norm bound. -/
-theorem meanSolver_norm (f : TimeLp T L2) :
-    ‖meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f‖ ≤ 2*T*‖f‖ := by
-  apply (EulerMeanVariationalOperator.meanSolver_norm
-    (meanPrimitive T hT FInv) (meanTrace T hT FInv)
-    (timeMultiplier T hT H) (M0+L • A) (T^2/2) T K B hK hB
-    (meanPrimitive_norm_sq T hT FInv) (meanTrace_norm_sq T hT FInv)
-    (timeMultiplier_quadratic_upper T hT H K hH)
-    (meanTrace_boundary T hT FInv M0 A L B hF0 hboundary) hsmall f).trans
-  exact mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_left (meanPrimitive_norm_le T hT FInv) (by norm_num)) (norm_nonneg f)
 
 
-/-- No other admissible derivative solves this same genuine mean form. -/
-theorem meanSolver_unique (f : TimeLp T L2) (u : meanDerivatives T hT FInv)
-    (hu : ∀ v : meanDerivatives T hT FInv,
-      ⟪(u : TimeLp T L2), (v : TimeLp T L2)⟫_ℝ-
-        ⟪timeMultiplier T hT H (meanPrimitive T hT FInv u), meanPrimitive T hT FInv v⟫_ℝ+
-        ⟪M0 (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ+
-        L*⟪A (meanTrace T hT FInv u), meanTrace T hT FInv v⟫_ℝ =
-        -⟪f, meanPrimitive T hT FInv v⟫_ℝ) :
-    u = meanSolver T hT FInv H M0 A L K B hK hB hF0 hH hboundary hsmall f := by
-  apply EulerMeanVariationalOperator.meanSolver_unique
-    (meanPrimitive T hT FInv) (meanTrace T hT FInv)
-    (timeMultiplier T hT H) (M0+L • A) (T^2/2) T K B hK hB
-    (meanPrimitive_norm_sq T hT FInv) (meanTrace_norm_sq T hT FInv)
-    (timeMultiplier_quadratic_upper T hT H K hH)
-    (meanTrace_boundary T hT FInv M0 A L B hF0 hboundary) hsmall f u
-  intro v
-  simpa only [Submodule.coe_inner, add_apply, smul_apply, inner_add_left,
-    real_inner_smul_left, add_assoc] using hu v
 
 
 end EulerMeanVariationalInverse

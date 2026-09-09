@@ -263,40 +263,6 @@ theorem log_slope_of_uniformMixedError (I : Window) {ε K Λ : ℝ} (hε : 0 < �
     (radial_deriv_error_le I hε hK hΛ herr (p := (4, η)) (by norm_num) hη)
     hslope).2
 
-/-- One sufficiently large scale gives the actual smooth nonlinear
-profiles, all mixed-derivative estimates, uniform positivity, and the strict
-angular slope bound, simultaneously for the full amplitude norm ball. -/
-theorem exists_positive_scaled_profiles (I : Window) {ε : ℝ} (hε : 0 < ε)
-    (χ : AxisSpace I ε) (d : AxisContraction.AxisData (AxisSpace I ε))
-    (hd : CompatibleData I ε χ d)
-    (hχ : ∀ η ∈ I.interval, 0 ≤ inputValue I ε χ η ∧ inputValue I ε χ η ≤ 1)
-    (M : ℝ) (hM : 0 ≤ M) :
-    ∃ Λ₀ : ℝ, 0 < Λ₀ ∧ ∀ Λ : ℝ, Λ₀ ≤ Λ →
-      ∀ a : AxisSpace I ε, ‖a‖ ≤ M → RadiallyConstant I ε a →
-      ∃ Φ u B P : ℝ × ℝ → ℝ,
-        IsScaledSolution I (parameters I ε χ d) (1 / Λ) (inputValue I ε a) Φ u B P ∧
-        UniformMixedError I ε (errorConstant I hε χ d M hM / (2 * Λ))
-          Φ u (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).1)
-          (AxisEvaluation.profile I ε (referenceCoefficients I hε χ d).2) ∧
-        (∀ Y ∈ Icc (0 : ℝ) (41 / 10), ∀ η ∈ Ioo I.left I.right, 1 / 8 < Φ (Y, η)) ∧
-        (∀ η ∈ Ioo I.left I.right, 99 / 100 ≤ inputValue I ε χ η →
-          23 / 10 < -8 * partialY Φ (4, η) / Φ (4, η)) := by
-  obtain ⟨Λ₀, hΛ₀, hexists⟩ := exists_scaled_profiles I hε χ d hd M hM
-  refine ⟨max Λ₀ (stabilityScale ε (errorConstant I hε χ d M hM)),
-    hΛ₀.trans_le (le_max_left _ _), ?_⟩
-  intro Λ hΛ a ha harad
-  obtain ⟨Φ, u, B, P, hsol, herr⟩ := hexists Λ ((le_max_left _ _).trans hΛ) a ha harad
-  have hscale : stabilityScale ε (errorConstant I hε χ d M hM) ≤ Λ :=
-    (le_max_right _ _).trans hΛ
-  have hK := errorConstant_nonneg I hε χ d M hM
-  refine ⟨Φ, u, B, P, hsol, herr, ?_, ?_⟩
-  · intro Y hY η hη
-    have hχη := hχ η ⟨hη.1.le, hη.2.le⟩
-    exact positive_of_uniformMixedError I hε χ d hd hK hscale herr
-      hY.1 hY.2 hη hχη.1 hχη.2
-  · intro η hη hχ99
-    exact log_slope_of_uniformMixedError I hε χ d hd hK hscale herr hη hχ99
-      (hχ η ⟨hη.1.le, hη.2.le⟩).2
 
 end NavierStokes.AxisReference
 

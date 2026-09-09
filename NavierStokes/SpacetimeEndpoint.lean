@@ -280,58 +280,7 @@ theorem boundary_jets_eq_limits {T : ℝ} {f : SpaceTime → V}
   rw [iteratedFDerivWithin_extension hzero hderiv hlim n (T, x) ⟨le_refl T, mem_univ x⟩]
   exact extendTrace_at T _ _ x
 
-/-- Every extended mixed-derivative tensor is itself jointly smooth. -/
-theorem extendedJets_contDiffOn {T : ℝ}
-    {J : SpaceTime → FormalMultilinearSeries ℝ SpaceTime V}
-    {L : Space → FormalMultilinearSeries ℝ SpaceTime V}
-    (hderiv : ∀ n : ℕ, ∀ z : SpaceTime, z.1 < T →
-      HasFDerivAt (fun y => J y n) (J z (n + 1)).curryLeft z)
-    (hlim : ∀ n : ℕ, TendstoLocallyUniformly (fun t x => J (t, x) n)
-      (fun x => L x n) (𝓝[<] T)) (n : ℕ) :
-    ContDiffOn ℝ ∞ (fun z => extendJets T J L z n) (closedPast T) := by
-  have hfinite : ∀ m n : ℕ,
-      ContDiffOn ℝ (m : WithTop ℕ∞) (fun z => extendJets T J L z n) (closedPast T) := by
-    intro m
-    induction m with
-    | zero =>
-      intro n
-      apply contDiffOn_zero.mpr
-      intro z hz
-      exact (extendedJets_hasFDerivWithinAt hderiv hlim n z hz).continuousWithinAt
-    | succ m ih =>
-      intro n
-      let A : (SpaceTime[×(n + 1)]→L[ℝ] V) →L[ℝ]
-          (SpaceTime →L[ℝ] (SpaceTime[×n]→L[ℝ] V)) :=
-        (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => SpaceTime) V).toContinuousLinearEquiv.toContinuousLinearMap
-      have hA : ContDiff ℝ (m : WithTop ℕ∞) A :=
-        ContinuousLinearMap.contDiff (𝕜 := ℝ)
-          (E := SpaceTime[×(n + 1)]→L[ℝ] V)
-          (F := SpaceTime →L[ℝ] (SpaceTime[×n]→L[ℝ] V)) A
-      have hd : ContDiffOn ℝ (m : WithTop ℕ∞)
-          (fun z => (extendJets T J L z (n + 1)).curryLeft) (closedPast T) := by
-        exact hA.comp_contDiffOn (ih (n + 1))
-      have hsucc : ContDiffOn ℝ ((m : WithTop ℕ∞) + 1)
-          (fun z => extendJets T J L z n) (closedPast T) := by
-        apply (contDiffOn_succ_iff_hasFDerivWithinAt_of_uniqueDiffOn (closedPast_uniqueDiff T)).mpr
-        refine ⟨by simp, ?_⟩
-        exact ⟨_, hd, fun z hz => extendedJets_hasFDerivWithinAt hderiv hlim n z hz⟩
-      simpa only [Nat.cast_add, Nat.cast_one] using hsucc
-  exact contDiffOn_infty.mpr (fun m => hfinite m n)
 
-/-- The boundary limits are smooth spatial coefficient functions, as required
-for a spatial Taylor--Borel construction. This regularity is derived. -/
-theorem boundary_tensors_contDiff {T : ℝ}
-    {J : SpaceTime → FormalMultilinearSeries ℝ SpaceTime V}
-    {L : Space → FormalMultilinearSeries ℝ SpaceTime V}
-    (hderiv : ∀ n : ℕ, ∀ z : SpaceTime, z.1 < T →
-      HasFDerivAt (fun y => J y n) (J z (n + 1)).curryLeft z)
-    (hlim : ∀ n : ℕ, TendstoLocallyUniformly (fun t x => J (t, x) n)
-      (fun x => L x n) (𝓝[<] T)) (n : ℕ) :
-    ContDiff ℝ ∞ (fun x => L x n) := by
-  have h := (extendedJets_contDiffOn hderiv hlim n).comp_contDiff
-    (contDiff_const.prodMk contDiff_id : ContDiff ℝ ∞ (fun x : Space => (T, x)))
-    (fun x => show (T, x) ∈ closedPast T from ⟨le_refl T, mem_univ x⟩)
-  simpa only [Function.comp_def, extendJets, extendTrace_at] using h
 
 theorem field_locallyUniform_limit {T : ℝ} {f : SpaceTime → V}
     {J : SpaceTime → FormalMultilinearSeries ℝ SpaceTime V}

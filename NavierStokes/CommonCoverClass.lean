@@ -594,11 +594,6 @@ noncomputable def coverChange (forward : Bool) (d : ℕ) : Plane →L[ℝ] Plane
   if forward then (CommonCoverSolve.coverPower d : Plane →L[ℝ] Plane)
   else ((CommonCoverSolve.coverPower d).symm : Plane →L[ℝ] Plane)
 
-theorem norm_coverChange_le (forward : Bool) {d D : ℕ} (hd : d ≤ D) :
-    ‖coverChange forward d‖ ≤ CommonCoverSolve.coveringBound D := by
-  cases forward
-  · exact CommonCoverSolve.inverseCoveringNorm_le_bound hd
-  · exact CommonCoverSolve.coveringNorm_le_bound hd
 
 noncomputable def bandCommonChart (D : ℝ) (n m : ℕ) (forward : Bool) (gap : ℕ) :
     SlowPoint × Plane →L[ℝ] SlowPoint × Plane :=

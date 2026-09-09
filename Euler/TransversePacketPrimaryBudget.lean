@@ -1,4 +1,5 @@
 import Euler.TransversePacketBudget
+import Euler.CylinderEndpointUnitBounds
 import Euler.CylinderEndpointBounds
 
 /-!

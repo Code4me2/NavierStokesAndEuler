@@ -64,8 +64,5 @@ private theorem norm_iteratedFDeriv_value_aux (n : ℕ) :
       (derivativeBundling_norm_le_one (P := P) (V := V) μ) (norm_nonneg _)).trans
       (by simpa only [one_mul] using hi))
 
-/-- Each true L² derivative inherits its original fiberwise L² majorant with constant one. -/
-theorem norm_iteratedFDeriv_value_le (A : SmoothFamily μ P V) (n : ℕ) (a : P) :
-    ‖iteratedFDeriv ℝ n A.value a‖ ≤ ‖A.bound n‖ := norm_iteratedFDeriv_value_aux n V A a
 
 end EulerLpSmoothFamily.SmoothFamily

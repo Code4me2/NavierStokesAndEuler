@@ -579,79 +579,7 @@ structure Specification (F : Profile) (C : ℝ) : Prop where
   analytic_axis_datum : AnalyticOnNhd ℂ (SchedulePressure.complexAxisPressure F.data) PressureDatum.strip ∧
     ∀ eta : ℝ, SchedulePressure.complexAxisPressure F.data (eta : ℂ) = (F.axisDatum eta : ℂ)
 
-/-- Assemble the actual fields from the same witness returned by the corrected
-amplitude construction. The smallness threshold is uniform in the tail `h`. -/
-theorem exists_profile_for_data (P m : ℝ) (hP : 0 < P) :
-    ∃ lam₀ C : ℝ, 0 < lam₀ ∧ 0 < C ∧ ∀ d : TailData,
-      d.core.P = P → d.core.m = m → d.core.wait = 60 * Real.log (1 / d.core.lam) →
-      d.core.lam < lam₀ → ∃ F : Profile, F.data = d ∧ Specification F C := by
-  obtain ⟨lam₀, K, C, hlam₀, _hK, hC, hc⟩ :=
-    CorrectedPulseAmplitude.exists_corrected_amplitude P m hP
-  refine ⟨lam₀, C, hlam₀, hC, ?_⟩
-  intro d hdP hdm hwait hlam
-  obtain ⟨w, hs, hspec⟩ := hc d hdP hdm hwait hlam
-  let F : Profile := ⟨d, K, w⟩
-  refine ⟨F, rfl, {
-    amplitude_smooth := F.amp_contDiff
-    angular_smooth := F.E_contDiffOn
-    axial_smooth := F.U_contDiffOn
-    momentum_smooth := F.H_contDiffOn
-    pressure_smooth := F.Pi_contDiffOn
-    angular_positive := fun p _ => F.E_pos p
-    amplitude_bounds := ?_
-    mass_integrable := F.mass_integrable
-    angular_integrable := F.angular_integrable
-    mass_total_zero := F.mass_integral_zero
-    angular_total_zero := F.angular_integral_zero
-    after_pulse := fun eta X hX hfar => ⟨F.U_after eta hfar, F.moments_after eta hX hfar⟩
-    energy_integrable := F.energy_integrable
-    energy_zero := ?_
-    renormalized_integrable := F.renormalized_integrable
-    renormalized_zero := F.renormalized_angular_moment
-    eventual_power := fun eta X hX hfar =>
-      ⟨F.U_after eta (F.tailEnd_after_endpoint.trans hfar), F.E_eventual eta hX hfar,
-        F.angular_history_eventual eta hX hfar⟩
-    ideal_prefix := fun eta X hX hX' =>
-      ⟨F.E_ideal eta hX hX', F.U_ideal eta hX hX', F.Pi_ideal eta hX hX'⟩
-    pressure_integrable := F.canonicalKernel_integrable
-    pressure_canonical := fun eta X hX => F.Pi_canonical eta hX
-    same_axis_datum := F.axisDatum_eq
-    axis_limit := F.Pi_tendsto_axis
-    analytic_axis_datum := F.axisDatum_analytic_extension }⟩
-  · intro eta heta
-    obtain ⟨ha, ha', _, hd, _⟩ := hspec eta heta
-    exact ⟨ha, ha', hd⟩
-  · intro eta heta
-    rw [F.totalS_eq]
-    exact (hspec eta heta).2.2.1
 
-/-- Choose `lam` after the fixed prefix parameters, and then any permitted
-`h`. The actual outgoing profile has every exact pre-heat moment constraint. -/
-theorem exists_outgoing_profile (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam₀ C : ℝ, 0 < lam₀ ∧ 0 < C ∧ ∀ lam : ℝ,
-      0 < lam → lam < lam₀ → ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-        F.data.core.lam = lam ∧ F.data.h = h ∧
-        F.data.core.wait = 60 * Real.log (1 / lam) ∧ Specification F C := by
-  obtain ⟨lam₀, C, hlam₀, hC, hc⟩ := exists_profile_for_data P m hP
-  refine ⟨min lam₀ (1 / 10), C, lt_min hlam₀ (by norm_num), hC, ?_⟩
-  intro lam hlam hlam' h hh hsmall
-  have hl : lam < 1 / 10 := lt_of_lt_of_le hlam' (min_le_right _ _)
-  let d : TailData := ⟨paperParameters P m lam hP hm hlam hl, h, hh, hsmall⟩
-  obtain ⟨F, hF, hs⟩ := hc d rfl rfl rfl (lt_of_lt_of_le hlam' (min_le_left _ _))
-  refine ⟨F, ?_, ?_, ?_, ?_, ?_, hs⟩ <;> rw [hF] <;> rfl
 
-/-- A single positive schedule parameter works before the terminal parameter
-is selected. -/
-theorem exists_fixed_lambda (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam C : ℝ, 0 < lam ∧ 0 < C ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-        F.data.core.lam = lam ∧ F.data.h = h ∧ Specification F C := by
-  obtain ⟨lam₀, C, hlam₀, hC, hc⟩ := exists_outgoing_profile P m hP hm
-  refine ⟨lam₀ / 2, C, half_pos hlam₀, hC, ?_⟩
-  intro h hh hsmall
-  obtain ⟨F, hP', hm', hl', hh', _, hs⟩ :=
-    hc (lam₀ / 2) (half_pos hlam₀) (by linarith) h hh hsmall
-  exact ⟨F, hP', hm', hl', hh', hs⟩
 
 end NavierStokes.OutgoingProfile

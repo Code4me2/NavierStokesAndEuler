@@ -90,32 +90,8 @@ theorem FiniteFamily.pointField_odd (F : FiniteFamily period hT A)
   exact continuous_representative_odd period (F.commonPath period t) (F.pointField period t)
     (F.commonPath_odd period C P t) hc (F.pointField_ae period t) x
 
-/-- The actual signed coercive pressure is odd at every finite Sobolev order. -/
-theorem FiniteFamily.signedPressurePath_odd (F : FiniteFamily period hT A)
-    (C : ComparisonData period hT A) (P : ParityData period A)
-    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :
-    oddReflection period q (F.signedPressurePath period q hq t) =
-      F.signedPressurePath period q hq t := by
-  exact inviscid_correction_pressure_odd period hq (A.atOrder period q) t
-    (P.metric t) (P.linear t) (P.quadratic t)
-    (fieldTower_realization_odd period A.approximation P.approximation (q+1) t)
-    (fieldTower_realization_odd period A.residual P.residual q t)
-    (F.solution q hq t) (F.solution_odd period C P q hq t)
 
-/-- The actual assembled signed pressure gradient is odd in L². -/
-theorem FiniteFamily.commonPressure_odd (F : FiniteFamily period hT A)
-    (C : ComparisonData period hT A) (P : ParityData period A) (t : Icc (0 : ℝ) T) :
-    -reflection period (F.commonPressure period t) = F.commonPressure period t := by
-  have h := congrArg (value period (q := 6)) (F.signedPressurePath_odd period C P 6 le_rfl t)
-  rwa [value_oddReflection] at h
 
-/-- Every realization of the assembled correction tower is odd. -/
-theorem FiniteFamily.fieldTower_odd (F : FiniteFamily period hT A)
-    (C : ComparisonData period hT A) (P : ParityData period A)
-    (q : ℕ) (t : Icc (0 : ℝ) T) :
-    oddReflection period q ((F.fieldTower period C).realization q t) =
-      (F.fieldTower period C).realization q t :=
-  fieldTower_realization_odd period (F.fieldTower period C) (F.commonPath_odd period C P) q t
 
 
 end EulerCorrectionAssembly

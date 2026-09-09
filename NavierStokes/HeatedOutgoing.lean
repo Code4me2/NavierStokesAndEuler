@@ -316,40 +316,6 @@ structure CompensationWitness (F : Profile) (XR C : ℝ) where
     0 < TerminalCompensation.physicalProfile compensationPatch F.data.core.lam
       (patchRadius F XR) (shapedPatchAmplitude F eta) (coefficients eta) X
 
-theorem exists_compensation (F : Profile) :
-    ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR → Nonempty (CompensationWitness F XR C) := by
-  obtain ⟨K₀, C, hK₀, hC, hc⟩ := ParametricTerminalCompensation.exists_physical_heat_compensation
-    compensationPatch F.data.core.lam F.data.core.lam_pos.le F.data (patchRatio F)
-    (OutgoingDilation.patchRatio_pos F) (shapedPatchAmplitude F)
-    (OutgoingDilation.shapedPatchAmplitude_contDiff F).contDiffOn
-    (fun eta _ => OutgoingDilation.shapedPatchAmplitude_pos F eta)
-  let A : ℝ := Real.exp (HeatTailEdit.switchStart F.data)
-  have hA : 0 < A := Real.exp_pos _
-  let XR₀ : ℝ := max K₀ 1 / A
-  have hXR₀ : 0 < XR₀ := div_pos (lt_of_lt_of_le zero_lt_one (le_max_right _ _)) hA
-  refine ⟨XR₀, C, hXR₀, hC, ?_⟩
-  intro XR hlarge
-  have hXR : 0 < XR := hXR₀.trans_le hlarge
-  have hK : max K₀ 1 ≤ switchRadius F XR := by
-    exact (div_le_iff₀ hA).mp hlarge
-  obtain ⟨c, hs, hspec⟩ := hc (switchRadius F XR) ((le_max_left _ _).trans hK)
-  have hr := OutgoingDilation.patchRadius_eq_ratio F XR
-  refine ⟨{
-    radius_pos := hXR
-    switch_large := (le_max_right _ _).trans hK
-    coefficients := c
-    smooth := hs
-    moments := ?_
-    coefficient_bound := fun eta heta => (hspec eta heta).2.1
-    derivative_bound := fun eta heta => (hspec eta heta).2.2.1
-    first_jet := fun eta heta => (hspec eta heta).2.2.2.1
-    patch_positive := ?_ }⟩
-  · intro eta heta
-    rw [hr]
-    exact (hspec eta heta).1
-  · intro eta heta X hX
-    rw [hr]
-    exact (hspec eta heta).2.2.2.2 X hX
 
 namespace CompensationWitness
 
@@ -852,29 +818,6 @@ theorem CompensationWitness.specification {F : Profile} {XR B C : ℝ}
   terminal_heat := fun eta X hX htail => E_eventual_heat F XR w.coefficients eta X w.radius_pos hX htail
   patch_disjoint := OutgoingDilation.patch_switch_disjoint F XR w.radius_pos
 
-/-- For a single fixed outgoing profile, every sufficiently large entrance
-radius allows the actual physical heat continuation and its exact repair. -/
-theorem exists_heated_profile {F : Profile} {B : ℝ} (hF : OutgoingProfile.Specification F B) :
-    ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR →
-      ∃ w : CompensationWitness F XR C, Specification F XR w.coefficients := by
-  obtain ⟨XR₀, C, hXR₀, hC, hc⟩ := exists_compensation F
-  refine ⟨XR₀, C, hXR₀, hC, ?_⟩
-  intro XR hXR
-  obtain ⟨w⟩ := hc XR hXR
-  exact ⟨w, w.specification hF⟩
 
-/-- The order of choices is `P,m`, one positive `lam`, permitted `h`, one
-reset/amplitude profile, and then large `X_R` and its terminal coefficients. -/
-theorem exists_fixed_schedule (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam B : ℝ, 0 < lam ∧ 0 < B ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-        F.data.core.lam = lam ∧ F.data.h = h ∧ OutgoingProfile.Specification F B ∧
-        ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR →
-          ∃ w : CompensationWitness F XR C, Specification F XR w.coefficients := by
-  obtain ⟨lam, B, hlam, hB, hc⟩ := OutgoingProfile.exists_fixed_lambda P m hP hm
-  refine ⟨lam, B, hlam, hB, ?_⟩
-  intro h hh hsmall
-  obtain ⟨F, hP', hm', hlam', hh', hF⟩ := hc h hh hsmall
-  exact ⟨F, hP', hm', hlam', hh', hF, exists_heated_profile hF⟩
 
 end NavierStokes.HeatedOutgoing

@@ -596,15 +596,5 @@ theorem preserves_specification {F : Profile} {C : ℝ} (hF : Specification F C)
   patch_disjoint := patch_switch_disjoint F XR hXR
 
 
-theorem exists_fixed_schedule (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam C : ℝ, 0 < lam ∧ 0 < C ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧
-        F.data.core.lam = lam ∧ F.data.h = h ∧ Specification F C ∧
-        ∀ XR : ℝ, 0 < XR → DilatedSpecification F XR := by
-  obtain ⟨lam, C, hlam, hC, hc⟩ := OutgoingProfile.exists_fixed_lambda P m hP hm
-  refine ⟨lam, C, hlam, hC, ?_⟩
-  intro h hh hsmall
-  obtain ⟨F, hP', hm', hl', hh', hs⟩ := hc h hh hsmall
-  exact ⟨F, hP', hm', hl', hh', hs, fun XR hXR => preserves_specification hs XR hXR⟩
 
 end NavierStokes.OutgoingDilation

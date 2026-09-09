@@ -1068,23 +1068,6 @@ theorem meanClass_pressureMass {a b cL cR : ℝ}
     simpa only [majorant, StripData.growth, localSlowStripData, MeanMomentBounds.slowStripData,
       inv_one, max_self, mul_one] using h
 
-theorem meanClass_radialMoment_lift {a b cL cR : ℝ}
-    (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (k : ℕ) :
-    UnweightedClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n p => IntegratedMeanBalances.radialMoment k (PressureStream.torusAverage (f n)) p.2.1) := by
-  have h := meanClass_pressureMass_lift ha hab hcL hcR ε L hε hεone hL U hU
-    (fun n => (contDiffOn_fst.pow k).mul (hf n))
-    (fun n p hp hn => hs n p hp (right_ne_zero_of_mul hn))
-    (meanClass_radialMultiply ha hcL hcR ε L hε hεone hL U hU hclass (contDiff_id.pow k))
-  change UnweightedClass _ α (fun n (p : PressureStream.Lift S) =>
-    PressureStream.pressureMass (MeanMomentBounds.radialWeighted k (f n)) p.2.1) at h
-  simpa only [MeanMomentBounds.pressureMass_radialWeighted] using h
 
 theorem meanClass_radialMoment {a b cL cR : ℝ}
     (ha : 0 < a) (hab : a < b) (hcL : 0 < cL) (hcR : 0 < cR)
@@ -1201,40 +1184,6 @@ theorem temporalInverse_contDiffOn {U : Set S} (hU : IsOpen U)
   temporalInverse_fiberLocal.contDiffOn_of_periodic
     (fun _ h hp => TemporalMeanUpdate.temporalInverse_smooth h hp) hU hf hp
 
-theorem meanClass_temporalInverse {a b cL cR : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.temporalInverse (f n)) := by
-  let st := localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU
-  refine ⟨hclass.weight_nonneg,
-    fun n => (temporalInverse_contDiffOn hU (hf n) (hp n)).mono (fun _ hx => hx.2), ?_⟩
-  intro m
-  obtain ⟨K, hK, hbound⟩ := UniformFourierAlias.realInverse_finiteJets (P := ℝ × S) .temporal m
-  obtain ⟨C, hC, k, hb⟩ := hclass.bounds (m + 5)
-  refine ⟨K * C, mul_nonneg hK hC, k, ?_⟩
-  intro n p hpu j hj
-  obtain ⟨c, _, hcs, hcf, he⟩ := exists_fiber_localization hU hpu.2 (hf n)
-  let B := majorant st (fun _ x => st.zeta x) α C k n p
-  have hB : 0 ≤ B := majorant_nonneg st _ α hC k n p (st.zeta_nonneg p hpu)
-  have hin : ∀ i ≤ m + 5, ∀ q ∈ ({(p.1, p.2.1)} : Set (ℝ × S)), ∀ Y,
-      ‖iteratedFDeriv ℝ i (UniformFourierAlias.toProduct (localize c (f n))) (q, Y)‖ ≤ B := by
-    intro i hi q hq Y
-    rcases mem_singleton_iff.mp hq with rfl
-    rw [UniformFourierAlias.norm_iteratedFDeriv_toProduct, he.jet_eq i p.1 Y]
-    exact hb n (p.1, (p.2.1, Y)) hpu i hi
-  have hper : UniformFourierAlias.ParameterPeriodic
-      (UniformFourierAlias.toProduct (localize c (f n))) :=
-    fun q => localize_periodic hcs (hp n) q.1 q.2
-  have ho := hbound _ {(p.1, p.2.1)} B (UniformFourierAlias.toProduct_smooth hcf)
-    hper hB hin j hj (p.1, p.2.1) (mem_singleton _) p.2.2
-  rw [← UniformFourierAlias.norm_iteratedFDeriv_fromProduct] at ho
-  change ‖iteratedFDeriv ℝ j (TemporalMeanUpdate.temporalInverse (localize c (f n))) p‖ ≤ K * B at ho
-  rw [(temporalInverse_fiberLocal.germ he).jet_eq j p.1 p.2.2] at ho
-  exact ho.trans_eq (by dsimp [B, majorant]; ring)
 
 omit [FiniteDimensional ℝ S] in
 omit [NormedAddCommGroup S] [NormedSpace ℝ S] in
@@ -1251,31 +1200,7 @@ theorem desiredIncrement_contDiffOn (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpen
   (desiredIncrement_fiberLocal h n).contDiffOn_of_periodic
     (fun _ hf hp => TemporalMeanUpdate.desiredIncrement_smooth h n hf hp) hU hf hp
 
-theorem desiredIncrement_supportedOn (h : ℝ) (n : ℕ) {a b : ℝ}
-    {U : Set S} (hU : IsOpen U) {f : PressureStream.Lift S → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (slowDomain U)) (hs : SupportedOn a b U f) :
-    SupportedOn a b U (TemporalMeanUpdate.desiredIncrement h n f) :=
-  (desiredIncrement_fiberLocal h n).supportedOn
-    (fun _ _ hs => TemporalMeanUpdate.desiredIncrement_supported h n hs) hU hf hs
 
-theorem meanClass_desiredIncrement {a b cL cR h : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.desiredIncrement h n (f n)) := by
-  have hc := meanClass_centered ha hcL hcR ε L hε hεone hL U hU hf hclass
-  have hi := meanClass_temporalInverse ha hcL hcR ε L hε hεone hL U hU
-    (fun n => centered_contDiffOn hU (hf n)) (fun n => centered_periodicOn (hp n)) hc
-  have hm := (TemporalMeanUpdate.meanClass_chartPrefactor_all hh hscale hi).map
-    (-ContinuousLinearMap.id ℝ ℝ)
-  change MeanClass _ α (fun n z => -TemporalMeanUpdate.chartPrefactor h n *
-    TemporalMeanUpdate.temporalInverse (TemporalMeanUpdate.centered (f n)) z)
-  simpa only [TemporalMeanUpdate.desiredIncrement, _root_.neg_apply,
-    ContinuousLinearMap.id_apply, smul_eq_mul, neg_mul] using hm
 
 end TemporalClasses
 
@@ -1621,78 +1546,9 @@ theorem desiredIncrement_zeroMean_on (h : ℝ) (n : ℕ) {U : Set S} (hU : IsOpe
 
 
 
-theorem meanClass_axialPotential {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.axialPotential d a b (M n) (v n) h n (f n)) :=
-  meanClass_streamPotential ha hab hd hcL hcR ε L hε hεone hL U hU
-    (fun n => desiredIncrement_contDiffOn h n hU (hf n) (hp n))
-    (fun n => desiredIncrement_supportedOn h n hU (hf n) (hs n))
-    (meanClass_desiredIncrement ha hcL hcR hh ε L hε hεone hL hscale U hU hf hp hclass) M v
 
-theorem meanClass_radialUpdate {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (w : S × PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.radialUpdate d a b (M n) (v n) w h n (f n)) :=
-  meanClass_streamBeta ha hab hd hcL hcR ε L hε hεone hL U hU
-    (fun n => desiredIncrement_contDiffOn h n hU (hf n) (hp n))
-    (fun n => desiredIncrement_supportedOn h n hU (hf n) (hs n))
-    (meanClass_desiredIncrement ha hcL hcR hh ε L hε hεone hL hscale U hU hf hp hclass) M v w
 
-theorem meanClass_scaledRadialUpdate {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) (w : S × PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) (α + 1)
-      (fun n => TemporalMeanUpdate.radialUpdate d a b (M n) (v n) (ε n • w) h n (f n)) := by
-  let st := localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU
-  have hb : BandBound st 1 ε := by
-    have hb := bandBound_rpow st 1
-    simp only [Real.rpow_one] at hb
-    exact hb
-  have hi := meanClass_radialUpdate ha hab hd hcL hcR hh ε L hε hεone hL hscale U hU hf hp hs hclass M v w
-  have hout := hi.band_smul hb
-  have heq : (fun n => TemporalMeanUpdate.radialUpdate d a b (M n) (v n) (ε n • w) h n (f n)) =
-      (fun n z => ε n • TemporalMeanUpdate.radialUpdate d a b (M n) (v n) w h n (f n) z) := by
-    funext n z
-    exact congrFun (TemporalMeanUpdate.radialUpdate_smul_direction d a b (M n) (v n) w h (ε n) n (f n)) z
-  rw [heq]
-  exact hout
 
-theorem meanClass_axialUpdate {a b d cL cR h : ℝ}
-    (ha : 0 < a) (hab : a < b) (hd : 0 < d) (hcL : 0 < cL) (hcR : 0 < cR) (hh : 0 ≤ h)
-    (ε L : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hL : ∀ n, 1 ≤ L n)
-    (hscale : ∀ n, ChartScales.S n ≤ L n)
-    (U : Set S) (hU : IsOpen U) {α : ℝ} {f : ℕ → PressureStream.Lift S → ℝ}
-    (hf : ∀ n, ContDiffOn ℝ ∞ (f n) (slowDomain U)) (hp : ∀ n, PeriodicOn U (f n))
-    (hs : ∀ n, SupportedOn a b U (f n))
-    (hclass : MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α f)
-    (M : ℕ → ℝ) (v : ℕ → PressureStream.Plane) :
-    MeanClass (localStripData a b cL cR ha hcL hcR ε L hε hεone hL U hU) α
-      (fun n => TemporalMeanUpdate.axialUpdate d a b (M n) (v n) h n (f n)) :=
-  meanClass_streamGamma ha hab hd hcL hcR ε L hε hεone hL U hU
-    (fun n => desiredIncrement_contDiffOn h n hU (hf n) (hp n))
-    (fun n => desiredIncrement_supportedOn h n hU (hf n) (hs n))
-    (meanClass_desiredIncrement ha hcL hcR hh ε L hε hεone hL hscale U hU hf hp hclass) M v
 
 end ActualTemporalUpdate
 

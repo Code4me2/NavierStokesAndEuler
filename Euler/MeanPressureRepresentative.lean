@@ -39,10 +39,6 @@ theorem pathRepresentative_ae (T : ℝ) (p : C(Icc (0 : ℝ) T,L2))
     (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p)) (t : Icc (0 : ℝ) T) :
     (p t : Space → Space) =ᵐ[volume] pathRepresentative T p hp t := representative_ae _ _
 
-theorem pathRepresentative_continuous (T : ℝ) (p : C(Icc (0 : ℝ) T,L2))
-    (hp : ContDiff ℝ ∞ (fun a : Space => pathTranslation T a p)) :
-    Continuous (fun z : Icc (0 : ℝ) T × Space => pathRepresentative T p hp z.1 z.2) :=
-  path_representative_joint_continuous T p hp
 
 /-- An actual L² equation between continuous spatial representatives holds everywhere. -/
 theorem representative_equation (B D R f : L2)

@@ -1734,25 +1734,7 @@ theorem pressureWaveData_pressure :
 
 /- Every fixed physical jet is controlled by the supplied native exponent,
 with the physical potential scaling retained exactly. -/
-include G hp hn hP hf hpotential in
-theorem potential_physical_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ PhysicalWaveSum.preterminal,
-      PhysicalWaveSum.physicalQ h x ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (PhysicalCopyBounds.vectorSum (potentialFamily sys hh f) (a / 4) h sys.radius) x‖ ≤
-        C * PhysicalWaveSum.physicalQ h x ^
-          (h * α - PhysicalClassBounds.physicalLoss h (-h) m) :=
-  (potentialWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpotential).vector_bound hh0 hh1 m
 
-include G hp hn hP hf hpressure in
-theorem pressure_physical_bound (m : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ PhysicalWaveSum.preterminal,
-      PhysicalWaveSum.physicalQ h x ≤ 1 →
-      ‖iteratedFDeriv ℝ m
-        (fun y => ((pressureFamily sys hh f).sum (a / 4) h sys.radius y).re) x‖ ≤
-        C * PhysicalWaveSum.physicalQ h x ^
-          (h * α - PhysicalClassBounds.physicalLoss h (-(2 * CoordinateAlgebra.A h)) m) :=
-  (pressureWaveData sys hh f hloc G hh0 hh1 ha hb hp hn hP hf hpressure).pressure_bound hh0 hh1 m
 
 end WaveData
 
@@ -1805,8 +1787,6 @@ noncomputable def labelPotential (L : NativeLabel f.active) (a : ℝ) : Velocity
   fun x => PhysicalCurlCovariance.realVector (fun i =>
     (potentialFamily sys hh f i).periodized a h sys.radius (positiveIndex L) x)
 
-noncomputable def labelPressure (L : NativeLabel f.active) (a : ℝ) : PressureField :=
-  fun x => ((pressureFamily sys hh f).periodized a h sys.radius (positiveIndex L) x).re
 
 
 variable (G : ReferenceGeometry sys f) (L : NativeLabel f.active)

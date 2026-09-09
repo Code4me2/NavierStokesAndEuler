@@ -164,54 +164,10 @@ theorem angularField_smooth (D : CoherentFamily h degree N Δ U ℝ)
   intro w hw
   exact (angularField_smoothAt D hh hh1 ha hab hU hcover hsm hs hw.1 hw.2.le).contDiffWithinAt
 
-/-- Curl costs one actual derivative, with the same fixed PMJB loss. -/
-theorem curl_angularField_jet_bound (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {gain : ℝ} (hj : NativeJets N U gain D.native)
-    (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ w : SpaceTime, w ∈ physicalDomain h N → |w.1| ≤ 1 →
-      ‖iteratedFDeriv ℝ m (SpatialCurl.spatialCurl D.angularField) w‖ ≤
-        C * physicalQ h w ^ (gain - loss degree (m + 1)) := by
-  obtain ⟨C, hC, hb⟩ := angularField_jet_bound D hh hh1 ha hab hN hU hcover hsm hs hj (m + 1)
-  refine ⟨‖PhysicalClassBounds.jointCurl‖ * C,
-    mul_nonneg (norm_nonneg PhysicalClassBounds.jointCurl) hC, ?_⟩
-  intro w hw ht
-  exact (PhysicalClassBounds.spatialCurl_jet_bound (physicalDomain_open hh hh1 N)
-    (angularField_smooth D hh hh1 ha hab hU hcover hsm hs) hw m).trans
-    ((mul_le_mul_of_nonneg_left (hb w hw.1 ht hw.2.le)
-      (norm_nonneg PhysicalClassBounds.jointCurl)).trans_eq (by ring))
 
-theorem curl_angularField_smooth (D : CoherentFamily h degree N Δ U ℝ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) :
-    ContDiffOn ℝ ∞ (SpatialCurl.spatialCurl D.angularField) (physicalDomain h N) := by
-  intro w hw
-  exact (SpatialCurl.contDiffAt_spatialCurl
-    (angularField_smoothAt D hh hh1 ha hab hU hcover hsm hs hw.1 hw.2.le)
-    (by simp)).contDiffWithinAt
 
 /-! ## Native class inputs on the same region -/
 
-theorem field_jet_bound_of_localBandJets (D : CoherentFamily h degree N Δ U E)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (ha : 0 < a) (hab : a < b) (hN : 4 ≤ N)
-    (hU : IsOpen U)
-    (hcover : PhysicalMeanDomain.normalizedSlowDomain (2 * h) (1 / 2) 2 ⊆ U)
-    (hsm : ∀ n ≥ N, ContDiffOn ℝ ∞ (D.native n) (PhysicalMeanDomain.slowDomain U))
-    (hs : NativeSupport h a b N U D.native) {α : ℝ} {ε L : ℕ → ℝ}
-    (hj : PhysicalMeanDomain.LocalBandJets U ε L α D.native)
-    (hε : ∀ n ≥ N, ε n = ChartScales.epsilon h n)
-    (hL0 : ∀ n ≥ N, 0 ≤ L n) {C : ℝ} {p : ℕ} (hC : 1 ≤ C)
-    (hL : ∀ n ≥ N, L n ≤ C * ChartScales.S n ^ p) (m : ℕ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ w : SpaceTime, w ∈ preterminal → |w.1| ≤ 1 →
-      physicalQ h w ≤ ChartScales.Q N →
-      ‖iteratedFDeriv ℝ m D.field w‖ ≤ K * physicalQ h w ^ (h * α - loss degree m) :=
-  field_jet_bound D hh hh1 ha hab hN hU hcover hsm hs
-    (NativeJets.of_localBandJets hj hε hL0 hC hL) m
 
 
 

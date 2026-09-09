@@ -502,10 +502,6 @@ theorem carrier_mul_phase_p (c : Fin 2) (L : Index W a.N) :
         (construction H v a hr0 c).phase.p L = (angularMode H v a c L : ℝ) :=
   (family H v a c).carrier_mul_angular_frequency L
 
-theorem angular_rounding_error (c : Fin 2) (L : Index W a.N) :
-    |(construction H v a hr0 c).phase.p L - (family H v a c).target L| ≤
-      1 / (ChartScales.carrier F.data.h (BaseChartJets.cellBand L) : ℝ) :=
-  (family H v a c).angular_rounding_error L
 
 
 theorem common_bounds (c d : Fin 2) :

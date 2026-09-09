@@ -95,16 +95,7 @@ theorem grade_bounds :
   · exact (hπ.normalize_const D.T_pos.le (S.H0^(2*p-2)) hc).absorb_amplitude_to
       L.radius_bounds.1 L.costs_nonneg.2.2.2 W.pressureGradient hroom
 
-theorem vector_grade_bound :
-    ((G.vectorCylinderField P).normalized D.T_pos.le (S.mean p) (S.mean_pos p)).WordBound
-      6 R 1 (meanShift p) := (L.grade_bounds W S G F p hp hforce).1
 
-theorem derivative_grade_bound :
-    ((G.vectorDerivativeCylinderField P).normalized D.T_pos.le (S.mean p) (S.mean_pos p)).WordBound
-      6 R 1 (meanShift p) := (L.grade_bounds W S G F p hp hforce).2.1
 
-theorem pressure_gradient_grade_bound :
-    ((G.pressureGradientCylinderField P).normalized D.T_pos.le (S.mean p) (S.mean_pos p)).WordBound
-      6 R 1 (meanShift p) := (L.grade_bounds W S G F p hp hforce).2.2
 
 end EulerMeanPacketProvider.Budget

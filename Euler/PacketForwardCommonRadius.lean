@@ -42,11 +42,6 @@ theorem gradeRadius_guards (hC : 0 ≤ C) (R' : ℝ)
   refine ⟨hb.1.trans hR, ?_⟩
   exact ⟨hC,hb.2.1.trans hR,hb.2.2.1.trans hR,hb.2.2.2.1.trans hR,hb.2.2.2.2.trans hR⟩
 
-theorem exists_grade_radius (hC : 0 ≤ C) (extra : ℝ) :
-    ∃ R' : ℝ, extra ≤ R' ∧ ∃ h : L.R ≤ R',
-      GradeGuards (P := P) (L.enlargeRadius R' h) (N.enlargeRadius R' h) C :=
-  ⟨max extra (L.gradeRadius (P := P) N C),le_max_left _ _,
-    L.gradeRadius_guards N C hC _ (le_max_right _ _)⟩
 
 end EulerTransversePacketForward.Budget
 

@@ -39,15 +39,11 @@ noncomputable def profileDomain (h Λ : ℝ) : Set ProfilePoint :=
 noncomputable def radialPrimitive (f : ℝ × ℝ → ℝ) (p : ℝ × ℝ) : ℝ :=
   ∫ v in (0 : ℝ)..p.1, f (v, p.2)
 
-noncomputable def meridionalPotential (h : ℝ) (V : ℝ × ℝ → ℝ) : Profile := fun p =>
-  physicalQ h p ^ (-NaturalAxisData.A h) * V (similarityPoint h p)
 
 noncomputable def swirlPotential (h : ℝ) (f : ℝ × ℝ → ℝ) : Profile := fun p =>
   -(physicalQ h p ^ (-h)) * radialPrimitive f (similarityPoint h p)
 
 
-noncomputable def coreVelocity (h : ℝ) (f V : ℝ × ℝ → ℝ) : VelocityField :=
-  velocity (meridionalPotential h V) (swirlPotential h f)
 
 theorem physicalQ_pos {h : ℝ} (hh : 0 < h) (hh1 : h < 1 / 2)
     {p : ProfilePoint} (hp : p.1 < 1) : 0 < physicalQ h p :=
@@ -101,18 +97,6 @@ theorem physicalEta_at_zero_z (h t s : ℝ) : physicalEta h (t, (s, 0)) = 0 := b
 
 
 
-theorem speedUnbounded_of_axis_tendsto {u : VelocityField}
-    (hu : Tendsto (fun t : ℝ => ‖u (t, 0)‖) (𝓝[<] 1) atTop) :
-    SpeedUnboundedAtOne u := by
-  intro M hM δ hδ
-  have hlow : Ioi (max 0 (1 - δ)) ∈ 𝓝[<] (1 : ℝ) :=
-    mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds (max_lt (by norm_num) (by linarith)))
-  have hlarge : ∀ᶠ t in 𝓝[<] (1 : ℝ), M < ‖u (t, 0)‖ :=
-    hu.eventually (eventually_gt_atTop M)
-  have hbefore : ∀ᶠ t in 𝓝[<] (1 : ℝ), t < 1 := self_mem_nhdsWithin
-  obtain ⟨t, ht, hMt, hlo⟩ := (hbefore.and (hlarge.and hlow)).exists
-  exact ⟨t, 0, ⟨(le_max_left _ _).trans_lt hlo, ht⟩,
-    (le_max_right _ _).trans_lt hlo, hMt⟩
 
 
 

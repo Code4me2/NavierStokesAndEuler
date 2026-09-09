@@ -624,32 +624,6 @@ theorem coefficients_jets (h : NativeCovariance s K H T)
     local_projectedPressure hN hNdot hA hv'
       (fun n x hx => mul_nonneg (Real.sqrt_nonneg _) (hW n x hx)) hb hl hu hK
 
-/-- The cutoff is applied exactly once. These are the coefficients consumed
-by the whole-lift bounds for `PeriodizedWaveBounds.CopyData`. -/
-theorem coefficients_localized_jets (h : NativeCovariance s K H T)
-    (hR : ∀ q, LocalJets s (fun _ x => s.zeta x) β K (fun n i x => R i n x q))
-    (hm : LocalJets s (fun _ _ => 1) 0 K (fun n i => mask i n))
-    (hv : LocalJets s W 0 K (fun n i => v i n))
-    (hW : ∀ n x, x ∈ s.domain → 0 ≤ W n x)
-    (hN : LocalJets s (fun _ _ => 1) 0 K (fun n i => (a i).normal s (d i) n))
-    (hNdot : LocalJets s (fun _ _ => 1) 0 K (fun n i => Ndot i n))
-    (hA : LocalJets s (fun _ _ => 1) 0 K (fun n i => A i n))
-    {b M : ℝ} (hb : 0 < b)
-    (hl : ∀ n i x, x ∈ s.domain → x ∈ K n i → b ≤ ‖(a i).normal s (d i) n x‖)
-    (hu : ∀ n i x, x ∈ s.domain → x ∈ K n i → ‖(a i).normal s (d i) n x‖ ≤ M)
-    (hK : UniformPrimaryWeights.UniformBandBound s (1 / 2) (fun i n => 1 / (a i).frequency n))
-    {ψ : I → ℕ → D → ℝ}
-    (hψ : LocalJets s (fun _ _ => 1) 0 K (fun n i => ψ i n)) (j : Fin 2) :
-    LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) (β + 1 / 2) K
-      (fun n i => ((SignedWaveUpdate.coefficients (a i) s (d i) (H i) (T i) (R i)
-        (mask i) (v i) (Ndot i) (A i) j).withCutoff (ψ i)).amplitude n) ∧
-    LocalJets s (fun n x => Real.sqrt (s.zeta x) * W n x) (β + 1) K
-      (fun n i => ((SignedWaveUpdate.coefficients (a i) s (d i) (H i) (T i) (R i)
-        (mask i) (v i) (Ndot i) (A i) j).withCutoff (ψ i)).pressure n) := by
-  obtain ⟨ha, hp⟩ := coefficients_jets h hR hm hv hW hN hNdot hA hb hl hu hK j
-  have hw n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hW n x hx)
-  refine ⟨hψ.smul ha hw, ?_⟩
-  simpa only [LinearWaveBounds.WaveCoefficients.withCutoff, Complex.real_smul] using hψ.smul hp hw
 
 end ActualCoefficients
 
@@ -801,34 +775,6 @@ theorem uniform_coefficients_jets (h : UniformNativeCovariance s K H T)
     simp only [show β + 1 / 2 + 1 / 2 = β + 1 by ring] at hp
     exact hp
 
-/-- Uniform native data control the actual once-localized coefficients;
-the constants can be passed directly to uniform periodization. -/
-theorem uniform_coefficients_localized_jets (h : UniformNativeCovariance s K H T)
-    (hR : ∀ q, UniformLocalJets s (fun _ _ x => s.zeta x) β K (fun l n i x => R l i n x q))
-    (hm : UniformLocalJets s (fun _ _ _ => 1) 0 K (fun l n i => mask l i n))
-    (hv : UniformLocalJets s W 0 K (fun l n i => v l i n))
-    (hW : ∀ l n x, x ∈ s.domain → 0 ≤ W l n x)
-    (hN : UniformLocalJets s (fun _ _ _ => 1) 0 K (fun l n i => (a l i).normal s (d l i) n))
-    (hNdot : UniformLocalJets s (fun _ _ _ => 1) 0 K (fun l n i => Ndot l i n))
-    (hA : UniformLocalJets s (fun _ _ _ => 1) 0 K (fun l n i => A l i n))
-    {b M : ℝ} (hb : 0 < b)
-    (hl : ∀ l n i x, x ∈ s.domain → x ∈ K l n i → b ≤ ‖(a l i).normal s (d l i) n x‖)
-    (hu : ∀ l n i x, x ∈ s.domain → x ∈ K l n i → ‖(a l i).normal s (d l i) n x‖ ≤ M)
-    (hK : UniformPrimaryWeights.UniformBandBound s (1 / 2)
-      (fun li : L × I => fun n => 1 / (a li.1 li.2).frequency n))
-    {ψ : L → I → ℕ → D → ℝ}
-    (hψ : UniformLocalJets s (fun _ _ _ => 1) 0 K (fun l n i => ψ l i n)) (j : Fin 2) :
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) (β + 1 / 2) K
-      (fun l n i => ((SignedWaveUpdate.coefficients (a l i) s (d l i) (H l i) (T l i) (R l i)
-        (mask l i) (v l i) (Ndot l i) (A l i) j).withCutoff (ψ l i)).amplitude n) ∧
-    UniformLocalJets s (fun l n x => Real.sqrt (s.zeta x) * W l n x) (β + 1) K
-      (fun l n i => ((SignedWaveUpdate.coefficients (a l i) s (d l i) (H l i) (T l i) (R l i)
-        (mask l i) (v l i) (Ndot l i) (A l i) j).withCutoff (ψ l i)).pressure n) := by
-  obtain ⟨ha, hp⟩ := uniform_coefficients_jets h hR hm hv hW hN hNdot hA hb hl hu hK j
-  have hw l n x hx := mul_nonneg (Real.sqrt_nonneg (s.zeta x)) (hW l n x hx)
-  refine ⟨uniform_smul hψ ha hw, ?_⟩
-  simpa only [LinearWaveBounds.WaveCoefficients.withCutoff, Complex.real_smul] using
-    uniform_smul hψ hp hw
 
 end UniformActualCoefficients
 

@@ -196,15 +196,6 @@ variable {DP DS : Type} [NormedAddCommGroup DP] [NormedSpace ℝ DP]
     (fun _ => ActualCycleParameters.fixedParameters B N0))
   (hN : 4 ≤ N) (W : WaveInputs DP IP KP DS IS KS)
 
-noncomputable def cycleInputs : CycleInputs h DP (Fin 3 × IP) KP DS (Fin 3 × IS) KS where
-  particularPotential := W.particularPotential
-  signedPotential := W.signedPotential
-  particularPressure j := taggedSource (0 : Fin 3) (W.particularPressure j)
-  signedPressure j := taggedSource (0 : Fin 3) (W.signedPressure j)
-  temporal := temporalInput R M hN
-  rank := rankInput R M hN
-  angular := angularInput R M hN
-  pressure := pressureInput R M hN
 
 
 

@@ -1349,9 +1349,6 @@ theorem common_bounds (x : CycleState (Label B N0)) (hx : PreservesCarriers x)
 theorem meanEnvelope_eq_primary (l : Label B N0) (n : ℕ) (z : CyclePoint) :
     meanEnvelope l n z = ActualPrimaryBounds.meanEnvelope l n z := rfl
 
-theorem nativeEnvelope_le_one (l : Label B N0) (n : ℕ) (z : Native) :
-    nativeEnvelope l n z ≤ 1 :=
-  ActualPrimaryBounds.fullEnvelope_le_one l n (nativeToFull z)
 
 
 abbrev ResidualBounds (x : CycleState (Label B N0)) (α : ℝ) : Prop :=

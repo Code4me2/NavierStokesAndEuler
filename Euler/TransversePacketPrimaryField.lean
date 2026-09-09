@@ -77,13 +77,6 @@ theorem vector_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : �
   exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
     _ _ (velocityPath_supported τ hτ hτT B Y (D.clamp t)) (x,(θ : AddCircle P)) hx
 
-theorem vectorDerivative_zero_outside (t : ℝ) (x : Space) (hx : x ∉ D.support) (θ : ℝ) :
-    vectorDerivative τ hτ hτT B Y (t,(x,θ)) = 0 := by
-  change pointField P (derivativePath τ hτ hτT B Y) (derivativePath_orbit τ hτ hτT B Y)
-    (D.clamp t) (x,(θ : AddCircle P)) = 0
-  rw [pointField_eq_representative]
-  exact representative_zero_outside P D.support D.support_measurable D.support_compact.isClosed
-    _ _ (derivativePath_supported τ hτ hτT B Y (D.clamp t)) (x,(θ : AddCircle P)) hx
 
 theorem vector_mean_zero (t : ℝ) (x : Space) :
     (∫ θ in (0 : ℝ)..P, vector τ hτ hτT B Y (t,(x,θ))) = 0 :=
@@ -96,10 +89,6 @@ theorem vector_periodic (t : ℝ) (x : Space) :
   intro θ
   simp only [vector,AddCircle.coe_add_period]
 
-theorem scalar_periodic (t : ℝ) (x : Space) :
-    Function.Periodic (fun θ => scalar τ hτ hτT B Y (t,(x,θ))) P := by
-  intro θ
-  simp only [scalar,AddCircle.coe_add_period]
 
 theorem vector_tangent (t : Icc (0 : ℝ) D.T) (x : Space) (θ : ℝ) :
     ⟪D.normalField (t,(x,θ)),vector τ hτ hτT B Y (t,(x,θ))⟫_ℝ = 0 := by

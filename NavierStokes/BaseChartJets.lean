@@ -595,27 +595,6 @@ theorem Estimates.localBaseBounds {ι : Type*} {D : Domain ι Slow} {Q : ι → 
     rw [hsquare]
     exact he.trans (mul_le_mul_of_nonneg_right hCGK (Real.rpow_nonneg (hQ i).le _))
 
-/-- Primitive summed-coefficient hypotheses, not supplied base estimates,
-produce both interfaces needed by the actual phase construction. -/
-theorem actual_localBase_and_polynomial {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    (hconvex : ∀ i, Convex ℝ (D.carrier i))
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (Q : ι → ℝ) (hQ : ∀ i, 0 < Q i) (hQ1 : ∀ i, Q i ≤ 1)
-    (hsmall : ∀ i, Q i * qhi ≤ 1) :
-    PolynomialJets D (fun i => frequency a h C d (Q i)) ∧
-    PolynomialJets D (fun i => axial a h d (Q i)) ∧
-    ∃ B : ℝ, 1 ≤ B ∧ ∀ i,
-      PhaseEstimates.LocalBaseBounds (frequency a h C d (Q i)) (axial a h d (Q i))
-        (leadingFrequency h C d) (leadingAxial h d) (D.carrier i) B (Q i ^ h) := by
-  have he := actual_estimates hh hh1 hr hM hqlo hqhi hlo H hd ha Q hQ hQ1 hsmall
-  exact ⟨he.polynomial_fields.1, he.polynomial_fields.2,
-    he.localBaseBounds hh.le hQ hQ1 hconvex⟩
 
 /-- Exact homogeneity of the actual inverse chart under the physical band
 rescaling. The frozen summation variable is `Q*rho`. -/
@@ -739,30 +718,6 @@ theorem exists_dyadic_cutoff {qhi : ℝ} (hqhi : 0 < qhi) (N0 : ℕ) :
   simp only [ChartScales.epsilon, Real.rpow_zero, Real.rpow_one, one_mul] at hb
   exact ((lt_div_iff₀ hqhi).mp hb).le
 
-/-- Actual dyadic input interface. Indices may include every active label
-of every band above the one fixed cutoff. -/
-theorem dyadic_actual_bounds {ι : Type*} {D : Domain ι Slow}
-    {a : ℕ → ℕ} {h C r M qlo qhi lo hi : ℝ}
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hr : 0 < r) (hM : 1 ≤ M)
-    (hqlo : 0 < qlo) (hqhi : 0 < qhi) (hlo : 0 < lo)
-    (H : GeometryBounds D h r M qlo qhi lo hi)
-    (hconvex : ∀ i, Convex ℝ (D.carrier i))
-    {d : SlowBorelBase.Coefficients} (hd : SlowBorelBase.SmoothCoefficients d)
-    (ha : SlowBorelBase.AdmissibleScales h (SlowBorelBase.coefficientBundle C d)
-      (SlowBorelBase.innerBox lo hi) a)
-    (band : ι → ℕ) {N : ℕ} (hN : ∀ n ≥ N, ChartScales.Q n * qhi ≤ 1)
-    (hband : ∀ i, N ≤ band i) :
-    PolynomialJets D (fun i => frequency a h C d (ChartScales.Q (band i))) ∧
-    PolynomialJets D (fun i => axial a h d (ChartScales.Q (band i))) ∧
-    ∃ B : ℝ, 1 ≤ B ∧ ∀ i,
-      PhaseEstimates.LocalBaseBounds
-        (frequency a h C d (ChartScales.Q (band i)))
-        (axial a h d (ChartScales.Q (band i)))
-        (leadingFrequency h C d) (leadingAxial h d) (D.carrier i) B
-        (ChartScales.epsilon h (band i)) :=
-  actual_localBase_and_polynomial hh hh1 hr hM hqlo hqhi hlo H hconvex hd ha
-    (fun i => ChartScales.Q (band i)) (fun i => ChartScales.Q_pos (band i))
-    (fun i => ChartScales.Q_le_one (band i)) (fun i => hN (band i) (hband i))
 
 
 

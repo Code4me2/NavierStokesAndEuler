@@ -455,10 +455,6 @@ theorem weightedDebtJet_bound (square : Bool) (n : ℕ) {L ν : ℝ}
   simpa only [weightedDebtJet, Real.norm_eq_abs, integral_const_mul,
     integral_weightedKernel (lt_of_lt_of_le zero_lt_one hK) hpq, mul_div_assoc] using hb'
 
-theorem weightedJet_integrable (square : Bool) (n : ℕ) {ν : ℝ} (hν : 0 ≤ ν) :
-    IntegrableOn (weightedJet W square h K q n ν) (Ioi K) :=
-  chain_integrable (weightedJet_measurable hh hK hW square)
-    (weightedJet_dominated hh hK hB hweight hpq square) n hν
 
 
 theorem weightedDebtJet_eq_iteratedDerivWithin (square : Bool) (n : ℕ) {ν : ℝ} (hν : 0 ≤ ν) :
@@ -705,26 +701,8 @@ theorem angular_decay (d : TailData) : tailDecay d false + (1 / 2) < 0 := by
   dsimp [tailDecay, exponent]
   linarith [d.h_pos]
 
-theorem physicalPressure_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
-    ContDiffOn ℝ ∞ (physicalPressure d K) (Icc (-1 : ℝ) 1) := by
-  have he : physicalPressure d K = etaDebt d K true (-1) :=
-    funext (physicalPressure_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact etaDebt_contDiffOn d hK true (pressure_decay d)
 
-theorem physicalEnergy_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
-    ContDiffOn ℝ ∞ (physicalEnergy d K) (Icc (-1 : ℝ) 1) := by
-  have he : physicalEnergy d K = etaDebt d K true 0 :=
-    funext (physicalEnergy_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact etaDebt_contDiffOn d hK true (energy_decay d)
 
-theorem physicalAngular_contDiffOn (d : TailData) {K : ℝ} (hK : 1 ≤ K) :
-    ContDiffOn ℝ ∞ (physicalAngular d K) (Icc (-1 : ℝ) 1) := by
-  have he : physicalAngular d K = fun eta => Real.sqrt 2 * etaDebt d K false (1 / 2) eta :=
-    funext (physicalAngular_eq d (lt_of_lt_of_le zero_lt_one hK))
-  rw [he]
-  exact contDiffOn_const.mul (etaDebt_contDiffOn d hK false (angular_decay d))
 
 
 
@@ -853,23 +831,6 @@ noncomputable def physicalEdit (d : TailData) (K eta X : ℝ) : ℝ :=
 
 
 
-theorem physicalEdit_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => physicalEdit d K p.2 p.1)
-      (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) := by
-  have hE := (outgoingProfile_joint_contDiffOn d hK).mono
-    (show Ioi (0 : ℝ) ×ˢ Icc (-1 : ℝ) 1 ⊆ Ioi 0 ×ˢ univ from fun p hp => ⟨hp.1, mem_univ _⟩)
-  have hD : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => diffusion p.2)
-      (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) := diffusion_contDiff.comp_contDiffOn contDiffOn_snd
-  have hr : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => 2 * diffusion p.2 / p.1)
-      (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) :=
-    (contDiffOn_const.mul hD).div contDiffOn_fst (fun p hp => (show 0 < p.1 from hp.1).ne')
-  have hH := (RadialHeatProfile.profile_contDiffOn (a := 1 + d.h) (by linarith [d.h_pos])).comp
-    hr (show MapsTo (fun p : ℝ × ℝ => 2 * diffusion p.2 / p.1)
-      (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) (Ici 0) from fun p hp =>
-        div_nonneg (mul_nonneg (by norm_num) (diffusion_mem hp.2).1) (show 0 < p.1 from hp.1).le)
-  have hs := (switch_contDiffOn hK).comp contDiffOn_fst
-    (show MapsTo (Prod.fst : ℝ × ℝ → ℝ) (Ioi 0 ×ˢ Icc (-1 : ℝ) 1) (Ioi 0) from fun _ hp => hp.1)
-  exact hE.mul (contDiffOn_const.add (hs.mul (hH.sub contDiffOn_const)))
 
 
 theorem heat_ratio_physical {q s τ : ℝ} (hq : 0 < q) (hs : 0 < s) :

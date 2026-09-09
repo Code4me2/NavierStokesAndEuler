@@ -560,15 +560,6 @@ theorem complexCopyPressure_invariant {θ : P} {t : TangentData P ProblemStateme
     (hi.copyPressure_invariant g hab k frequency) (fun v w => v + Complex.I * w)
 
 
-theorem commonPressure_invariant {θ : P} {t : TangentData P ProblemStatement.Space}
-    {source : P × Plane → ComplexVector} (ht : TangentInvariant θ t)
-    (hs : Invariant (θ, (0 : Plane)) source) (g : Geometry) {a b : ℝ} (hab : a ≤ b)
-    (κ : Plane → ℝ) (frequency : ℝ) :
-    Invariant (θ, (0 : Plane)) (ParticularWaveBounds.commonPressure t source g hab κ frequency) := by
-  apply Invariant.tsum_invariant
-  intro k
-  exact (nativeCutoff_invariant θ g κ k).map₂
-    (complexCopyPressure_invariant ht hs g hab k frequency) (fun r v => r • v)
 
 noncomputable def angleLift {E : Type} (f : P × Plane → E) : (P × ℝ) × Plane → E :=
   fun z => f (z.1.1, z.2)

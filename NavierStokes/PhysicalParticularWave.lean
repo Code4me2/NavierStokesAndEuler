@@ -42,29 +42,9 @@ variable (D : AssemblyData P) {j : ℤ} {α κ : ℝ}
 
 include C
 
-theorem commonRaw_germ (n : ℕ) {x : (P × ℝ) × Plane} (hx : x ∈ D.strip.domain) :
-    (rawCommon D j).amplitude n =ᶠ[𝓝 x]
-      (fun y => C.slot.cutoff n y •
-        (actualCopyCoefficients D.reference D.charts D.context D.state D.carrierBlock
-          D.gaussianInput D.aliasInput j D.background D.copy).amplitude n y) := by
-  exact (actualCommon_raw_germ D.reference D.charts D.context D.state D.carrierBlock
-    D.gaussianInput D.aliasInput C.harmonic_ne C.frequency_ne D.background D.copy
-    C.slot.cutoff n x (C.patch_open n) (C.patch_injective n) (C.cutoff_support n)
-    (C.domain_patch n x hx) (C.cutoff_germ n hx)).1
-
-theorem commonRaw_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ ((rawCommon D j).amplitude n) D.strip.domain := by
-  intro x hx
-  have hs := ((C.slot.cutoff_memClass.smooth n).smul (C.local_result.1.smooth n)).contDiffAt
-    (D.strip.isOpen_domain.mem_nhds hx)
-  exact (hs.congr_of_eventuallyEq (commonRaw_germ D C n hx)).contDiffWithinAt
 
 
-theorem commonPotential_smooth (n : ℕ) :
-    ContDiffOn ℝ ∞ (commonPotential D j n) D.strip.domain := by
-  exact CurlClassBounds.vectorPotential_contDiffOn (C.background.cylindrical n)
-    ((j : ℝ) * D.carrierBlock.frequency n) (C.background.phase_smooth n)
-    (commonRaw_smooth D C n) (C.normal_nonzero n)
+
 
 
 
@@ -421,14 +401,6 @@ theorem physicalPhase_affine (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
   rw [nativeMap_add_angle]
   exact actualCarrier_affine D.background D.carrierBlock j D.reference.band (nativeMap h Qr I z) s
 
-theorem physicalRaw_invariant (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ) :
-    Invariant ((0 : ℝ), coordinateVector 1) (physicalRaw D h Qr I j) := by
-  intro z s
-  unfold physicalRaw
-  rw [nativeMap_add_angle]
-  congr 1
-  exact angleLift_invariant (referenceVelocity D.reference D.context D.state D.carrierBlock
-    D.gaussianInput D.aliasInput j) (nativeMap h Qr I z) s
 
 theorem angle_translate_pack (t r theta z s : ℝ) :
     (t, AxisymmetricResidual.pack r theta z) + s • ((0 : ℝ), coordinateVector 1) =
@@ -438,30 +410,6 @@ theorem angle_translate_pack (t r theta z s : ℝ) :
   · ext i
     fin_cases i <;> simp [coordinateVector]
 
-theorem referencePotential_periodic (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ) (j : ℤ)
-    (hk : D.carrierBlock.frequency D.reference.band ≠ 0) (t r z : ℝ) :
-    Periodic (fun theta => referencePotential D h Qr I j
-      (t, AxisymmetricResidual.pack r theta z)) (2 * Real.pi) := by
-  intro theta
-  have hR : Invariant ((0 : ℝ), coordinateVector 1) LinearWaveResidual.coordinateRadius := by
-    intro x s
-    simp [LinearWaveResidual.coordinateRadius, coordinateVector]
-  have hf : referenceFrequency D j *
-      ((D.carrierBlock.angularFrequency D.reference.band : ℝ) /
-        D.carrierBlock.frequency D.reference.band) =
-      ((j * D.carrierBlock.angularFrequency D.reference.band : ℤ) : ℝ) := by
-    unfold referenceFrequency
-    push_cast
-    field_simp [hk]
-  have he := PhysicalCurlCovariance.vectorPotential_fullTurn
-    (Vr := LinearWaveResidual.spaceDirection 0)
-    (Vθ := LinearWaveResidual.spaceDirection 1)
-    (Vz := LinearWaveResidual.spaceDirection 2)
-    (j * D.carrierBlock.angularFrequency D.reference.band) hR
-    (Invariant.const _) (Invariant.const _) (Invariant.const _)
-    (physicalPhase_affine D h Qr I j) (physicalRaw_invariant D h Qr I j) hf
-    (t, AxisymmetricResidual.pack r theta z)
-  simpa only [referencePotential, PhysicalCurlCovariance.referencePotential, angle_translate_pack] using he
 
 /-- These are identities of the input chart at its own reference band. -/
 structure ReferenceIdentity (D : AssemblyData Parameter) : Prop where
@@ -557,19 +505,6 @@ theorem referencePotential_eq_common (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.
   rw [liftPotential_eq D H C hx] at he
   exact he
 
-theorem referencePotential_smoothAt (hQr : 0 < Qr) {z : SpaceTime} (hz : 0 < z.2 0)
-    (hx : nativeMap h Qr I z ∈ D.strip.domain) :
-    ContDiffAt ℝ ∞ (referencePotential D h Qr I j) z := by
-  let G := PhysicalResidualBridge.commonGraph Qr h I
-  have hm : ContDiffAt ℝ ∞ (nativeMap h Qr I) z :=
-    waveEquiv.contDiff.contDiffAt.comp z (G.map_smoothAt (mul_pos (Real.rpow_pos_of_pos hQr _) hz).ne')
-  have hs := (((commonPotential_smooth D C D.reference.band).contDiffAt
-    (D.strip.isOpen_domain.mem_nhds hx)).comp z hm).const_smul (Qr ^ (-h))
-  have hn : {y : SpaceTime | 0 < y.2 0} ∩ (nativeMap h Qr I) ⁻¹' D.strip.domain ∈ 𝓝 z :=
-    inter_mem ((isOpen_lt continuous_const (PhysicalGraphBounds.coordinateProjection 0).continuous).mem_nhds hz)
-      (hm.continuousAt (D.strip.isOpen_domain.mem_nhds hx))
-  apply hs.congr_of_eventuallyEq
-  exact eventually_of_mem hn (fun y hy => referencePotential_eq_common D H C hQr hy.1 hy.2)
 
 
 end ReferenceRealization
@@ -754,9 +689,6 @@ theorem physicalPressure_forward (D : AssemblyData Parameter) (h Qr : ℝ) (I : 
 
 
 
-noncomputable def labelPressure (D : AssemblyData Parameter) (h Qr : ℝ) (I : ℕ)
-    (delta : ℝ) (N : ℕ) : PressureField :=
-  fun z => ∑ j ∈ modes N, physicalPressure D h Qr I delta j z
 
 theorem spatialCurl_finset_sum {ι : Type} (S : Finset ι) (A : ι → VelocityField)
     {z : SpaceTime} (hA : ∀ i ∈ S, DifferentiableAt ℝ (A i) z) :
@@ -792,11 +724,6 @@ variable (D : AssemblyData Parameter) {h Qr : ℝ} {I : ℕ} (H : ReferenceChart
 
 include H C hQr hz hx hdelta hchart
 
-theorem physicalPotential_smoothAt : ContDiffAt ℝ ∞ (physicalPotential D h Qr I delta j)
-    (z.1, CylindricalResidual.chart z.2) :=
-  PhysicalCurlCovariance.globalCartesianPotential_smoothAt_forward hdelta chart
-    (referencePotential_periodic D h Qr I j (C.frequency_ne D.reference.band)) hchart
-    (referencePotential_smoothAt D H C hQr hz hx)
 
 
 
@@ -809,59 +736,11 @@ end PhysicalRegularity
 
 /-! ## Substitution of the actual target-band residual source -/
 
-noncomputable def transportedResidualSource (D : AssemblyData Parameter) (h Q Qr : ℝ)
-    (gap : ℕ) (j : ℤ) : Parameter × Plane → ComplexVector :=
-  ScaledTangentTransport.transportSource (referenceSource D j) (parameterChange h Q Qr) gap
-    (clockWeight h Q Qr) (velocityWeight h Q Qr)
 
-noncomputable def residualBandAmplitude (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) (n : ℕ) :
-    Parameter × Plane → ComplexVector :=
-  ParticularWaveBounds.commonVelocity
-    (ScaledTangentTransport.transportTangent (D.reference.tangent j) (parameterChange h Q Qr) gap 0
-      (clockWeight h Q Qr) (velocityWeight h Q Qr) (normalWeight Q Qr K (referenceFrequency D j)))
-    (residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j n)
-    (CopySolveCompatibility.transportGeometry D.reference.geometry gap 0 (clockWeight h Q Qr)
-      (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2)).ne')
-    (div_pos D.reference.length_pos (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2))).le
-    (D.reference.cutoff ∘ CopySolveCompatibility.nativeTimeMap 0 (clockWeight h Q Qr))
 
-noncomputable def residualBandPressure (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) (n : ℕ) :
-    Parameter × Plane → ℂ :=
-  ParticularWaveBounds.commonPressure
-    (ScaledTangentTransport.transportTangent (D.reference.tangent j) (parameterChange h Q Qr) gap 0
-      (clockWeight h Q Qr) (velocityWeight h Q Qr) (normalWeight Q Qr K (referenceFrequency D j)))
-    (residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j n)
-    (CopySolveCompatibility.transportGeometry D.reference.geometry gap 0 (clockWeight h Q Qr)
-      (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2)).ne')
-    (div_pos D.reference.length_pos (ratioPower_pos hQ hQr (CoordinateAlgebra.A h + 1 / 2))).le
-    (D.reference.cutoff ∘ CopySolveCompatibility.nativeTimeMap 0 (clockWeight h Q Qr)) K
 
-theorem residualBandAmplitude_eq (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) (n : ℕ)
-    (hsource : residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j n =
-      transportedResidualSource D h Q Qr gap j) :
-    residualBandAmplitude D h hQ hQr gap K j n = bandAmplitude D h hQ hQr gap K j := by
-  unfold residualBandAmplitude bandAmplitude
-  rw [hsource]
-  rfl
 
-theorem residualBandPressure_eq (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (K : ℝ) (j : ℤ) (n : ℕ)
-    (hsource : residualSource D.context D.state D.carrierBlock D.gaussianInput D.aliasInput j n =
-      transportedResidualSource D h Q Qr gap j) :
-    residualBandPressure D h hQ hQr gap K j n = bandPressure D h hQ hQr gap K j := by
-  unfold residualBandPressure bandPressure
-  rw [hsource]
-  rfl
 
-theorem transportedResidualSource_apply (D : AssemblyData Parameter) (h : ℝ) {Q Qr : ℝ}
-    (hQ : 0 < Q) (hQr : 0 < Qr) (gap : ℕ) (j : ℤ) (x : Parameter × Plane) :
-    transportedResidualSource D h Q Qr gap j x =
-      sourceWeight h Q Qr • referenceSource D j (parameterChange h Q Qr x.1, coverPower gap x.2) := by
-  unfold transportedResidualSource ScaledTangentTransport.transportSource
-  rw [clock_mul_velocity hQ hQr]
 
 /-- Equality with the target block's literal carrier follows from the
 primitive unmodulated phase identity and its shared integer angular label. -/

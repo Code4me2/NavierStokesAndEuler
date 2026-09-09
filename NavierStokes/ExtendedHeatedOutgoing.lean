@@ -693,35 +693,6 @@ theorem Witness.energy_zero {F : Profile} {XR C : ℝ} (w : Witness F XR C)
   rw [w.totalS_eq eta heta.1]
   exact base_energy_zero F XR eta w.radius_pos heta
 
-/-- The quantitative schedule is chosen directly with one actual reset.
-The amplitude attached to the resulting `Profile` is unchanged thereafter. -/
-theorem exists_scheduled_profile (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam B : ℝ, 0 < lam ∧ 0 < B ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧ F.data.core.lam = lam ∧
-        F.data.h = h ∧ ScheduleBounds F ∧ OutgoingProfile.Specification F B := by
-  obtain ⟨resetLam, K, hresetLam, hK, hreset⟩ := UniformAngularReset.exists_scheduled_reset
-  obtain ⟨delta, hdelta, hrate⟩ := PulseAmplitude.exists_rate_threshold
-    (CorrectedPulseAmplitude.combinedConstant P m K)
-  let lam₀ := min resetLam (min delta (1 / 120 : ℝ))
-  have hlam₀ : 0 < lam₀ := lt_min hresetLam (lt_min hdelta (by norm_num))
-  let lam := lam₀ / 2
-  have hlam : 0 < lam := half_pos hlam₀
-  have hlam₀' : lam < lam₀ := half_lt_self hlam₀
-  have hreset' : lam < resetLam := hlam₀'.trans_le (min_le_left _ _)
-  have hdelta' : lam < delta := hlam₀'.trans_le ((min_le_right _ _).trans (min_le_left _ _))
-  have hsmall : lam < 1 / 120 := hlam₀'.trans_le ((min_le_right _ _).trans (min_le_right _ _))
-  refine ⟨lam, 128 * CorrectedPulseAmplitude.combinedConstant P m K, hlam,
-    mul_pos (by norm_num) (CorrectedPulseAmplitude.combinedConstant_pos hP m K hK), ?_⟩
-  intro h hh htail
-  let d : OutgoingTail.TailData := ⟨OutgoingSchedule.paperParameters P m lam hP hm hlam (by linarith), h, hh, htail⟩
-  obtain ⟨r⟩ := hreset d hreset'
-  let F : Profile := ⟨d, K, r⟩
-  have b : ScheduleBounds F := {
-    coefficient_pos := hK
-    lambda_small := hsmall.le
-    wait_eq := rfl
-    scale_small := hrate lam hlam hdelta' }
-  exact ⟨F, rfl, rfl, rfl, rfl, b, b.specification⟩
 
 theorem E_full_switch (F : Profile) (XR : ℝ) (c : ℝ → Coeff) (eta X : ℝ)
     (hXR : 0 < XR) (hX : 0 < X)
@@ -894,29 +865,6 @@ theorem Witness.specification {F : Profile} {XR C : ℝ} (w : Witness F XR C) (b
   terminal_extended_heat := fun eta X hX htail => E_eventual_extended_heat F XR w.coefficients eta X w.radius_pos hX htail
   physical_specification := w.physical_specification b
 
-theorem exists_open_profile {F : Profile} (b : ScheduleBounds F) :
-    ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR →
-      ∃ w : Witness F XR C, Specification F XR w.coefficients := by
-  obtain ⟨XR₀, C, hXR₀, hC, hc⟩ := exists_witness F
-  exact ⟨XR₀, C, hXR₀, hC, fun XR hXR => by
-    obtain ⟨w⟩ := hc XR hXR
-    exact ⟨w, w.specification b⟩⟩
 
-/-- One schedule and one reset/amplitude pair yield an open parameter
-interval and the actual compensated profile at every sufficiently large
-entrance radius. The physical witness is the constructed restriction. -/
-theorem exists_fixed_schedule (P m : ℝ) (hP : 0 < P) (hm : 0 < m) :
-    ∃ lam B : ℝ, 0 < lam ∧ 0 < B ∧ ∀ h : ℝ, 0 < h → 2 * h < lam →
-      ∃ F : Profile, F.data.core.P = P ∧ F.data.core.m = m ∧ F.data.core.lam = lam ∧
-        F.data.h = h ∧ ScheduleBounds F ∧ OutgoingProfile.Specification F B ∧
-        ∃ a : ℝ, 1 < a ∧ a < 3 / 2 ∧ Ioo (-a) a ⊆ energyDomain F ∧
-        ∃ XR₀ C : ℝ, 0 < XR₀ ∧ 0 < C ∧ ∀ XR : ℝ, XR₀ ≤ XR →
-          ∃ w : Witness F XR C, Specification F XR w.coefficients := by
-  obtain ⟨lam, B, hlam, hB, hc⟩ := exists_scheduled_profile P m hP hm
-  refine ⟨lam, B, hlam, hB, ?_⟩
-  intro h hh hsmall
-  obtain ⟨F, hP', hm', hlam', hh', b, hs⟩ := hc h hh hsmall
-  obtain ⟨a, ha, ha', hsub⟩ := b.exists_parameter_interval
-  exact ⟨F, hP', hm', hlam', hh', b, hs, a, ha, ha', hsub, exists_open_profile b⟩
 
 end NavierStokes.ExtendedHeatedOutgoing

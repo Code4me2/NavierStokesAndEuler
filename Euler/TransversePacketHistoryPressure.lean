@@ -130,9 +130,6 @@ theorem pressureField_angle (t : Icc (0 : ℝ) D.T) (y : Space) (θ : ℝ) :
       (B.normalResidual G t (y,(θ : AddCircle P))) θ :=
   classicalPrimitive_angle P _ _ _ y θ
 
-theorem pressureField_mean_zero (t : Icc (0 : ℝ) D.T) (y : Space) :
-    (∫ θ in (0 : ℝ)..P, B.pressureField G t (y,(θ : AddCircle P))) = 0 :=
-  classicalPrimitive_mean_zero P _ _ _ y
 
 theorem pressureField_smooth (t : Icc (0 : ℝ) D.T) (x : LiftDomain P) :
     ContDiff ℝ ∞ (localFieldLift P (B.pressureField G t) x) :=

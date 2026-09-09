@@ -135,18 +135,6 @@ theorem weightedPhase_positive_jets (m : ℕ) :
   rw [StateReindex.norm_iteratedFDeriv_pull]
   exact hb n i _ ((mem_cells_iff n i z).mp hz) r hr hrm
 
-theorem phase_positive_jets (m : ℕ) :
-    ∃ C : ℝ, 1 ≤ C ∧ ∃ p : ℕ, ∀ n (i : ActualPhaseJetBounds.CopyIndex B N0) z,
-      z ∈ ParticularPaddedBackground.cells n i → ∀ r, 1 ≤ r → r ≤ m →
-      ‖iteratedFDeriv ℝ r (phase i.1 n) z‖ ≤
-        C * ChartScales.S n ^ p * ChartScales.Q n ^ (-(2 * ActualPrimary.h)) := by
-  obtain ⟨C,hC,p,hb⟩ := ActualPhaseJetBounds.phase_positive_jets (B := B) (N0 := N0) m
-  refine ⟨C,hC,p,?_⟩
-  intro n i z hz r hr hrm
-  change ‖iteratedFDeriv ℝ r (fun y => (ActualPrimary.chartCoefficients i.1.1 i.1.2).phase n
-    (ActualParticularBackground.nativeToFull y)) z‖ ≤ _
-  rw [StateReindex.norm_iteratedFDeriv_pull]
-  exact hb n i _ ((mem_cells_iff n i z).mp hz) r hr hrm
 
 
 theorem weightedPhase_smoothNear_controlPatch (l : Label B N0) (n : ℕ)

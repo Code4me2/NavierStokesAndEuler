@@ -237,69 +237,7 @@ variable {WA : ℕ → WaveData h DA IA KA (Fin 3)}
   {WP : ℕ → WaveData h DP IP KP Unit}
   {MP : ℕ → MeanData h (2 * CoordinateAlgebra.A h)}
 
-theorem StageMetadata.gain_inequalities (H : StageMetadata WA MA MB WP MP κ)
-    (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) :
-    (∀ j, 1 ≤ j → gain h j ≤ h * (WA j).alpha + (WA j).shift + (offsets h).wavePotential) ∧
-    (∀ j, 1 ≤ j → gain h j ≤ h * (MA j).alpha + (offsets h).meanStream) ∧
-    (∀ j, 1 ≤ j → gain h j ≤ h * (MB j).alpha + (offsets h).directAngular) ∧
-    (∀ j, 1 ≤ j → gain h j ≤ h * (WP j).alpha + (WP j).shift + (offsets h).wavePressure) ∧
-    (∀ j, 1 ≤ j → gain h j ≤ h * (MP j).alpha + (offsets h).meanPressure) := by
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · intro j hj
-    have ha := mul_le_mul_of_nonneg_left (H.wavePotential j hj) hh
-    have hs := H.wavePotentialShift j hj
-    have hg := gain_le_wave hh hκ hj
-    dsimp only [offsets]
-    linarith
-  · intro j hj
-    have ha := mul_le_mul_of_nonneg_left (H.meanStream j hj) hh
-    simpa only [offsets, add_zero] using (gain_le_mean hh hκ hj).trans ha
-  · intro j hj
-    have ha := mul_le_mul_of_nonneg_left (H.directAngular j hj) hh
-    simpa only [offsets, add_zero] using (gain_le_mean hh hκ hj).trans ha
-  · intro j hj
-    have ha := mul_le_mul_of_nonneg_left (H.wavePressure j hj) hh
-    have hs := H.wavePressureShift j hj
-    have hg := gain_le_wavePressure hh hκ hj
-    dsimp only [offsets]
-    linarith
-  · intro j hj
-    have ha := mul_le_mul_of_nonneg_left (H.meanPressure j hj) hh
-    simpa only [offsets, add_zero] using (gain_le_mean hh hκ hj).trans ha
 
-/-- All five arithmetic premises of `derived_stage_inputs` are discharged
-for the one explicit gain sequence.  Analytic input data remain explicit. -/
-theorem StageMetadata.derived_stage_inputs (H : StageMetadata WA MA MB WP MP κ)
-    (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : 0 ≤ κ ∧ κ ≤ 1 / 100000)
-    (baseA : VelocityField) (baseP : PressureField)
-    (hbaseA : ContDiffOn ℝ ∞ baseA (CutStageEstimates.physicalSublevel h qbig))
-    (hbaseP : ContDiffOn ℝ ∞ baseP (CutStageEstimates.physicalSublevel h qbig))
-    (hqA : ∀ j, qbig ≤ ChartScales.Q (MA j).firstBand)
-    (hqB : ∀ j, qbig ≤ ChartScales.Q (MB j).firstBand)
-    (hqP : ∀ j, qbig ≤ ChartScales.Q (MP j).firstBand) :
-    ∃ CA CB CP : ℕ → ℕ → ℝ,
-      (∀ j, ContDiffOn ℝ ∞ (potentialStages baseA WA MA j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      (∀ j, ContDiffOn ℝ ∞ (directStages MB j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      (∀ j, ContDiffOn ℝ ∞ (pressureStages baseP WP MP j)
-        (CutStageEstimates.physicalSublevel h qbig)) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (potentialStages baseA WA MA) (gain h)
-        (potentialLoss h (offsets h).wavePotential (offsets h).meanStream) CA (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (directStages MB) (gain h) (directLoss h (offsets h).directAngular) CB (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) ∧
-      CutStageEstimates.RawStageBounds (PhysicalWaveSum.physicalQ h)
-        (pressureStages baseP WP MP) (gain h)
-        (pressureLoss h (offsets h).wavePressure (offsets h).meanPressure) CP (fun _ _ => 0)
-        (PhysicalWaveSum.preterminal ∩ CutStageEstimates.physicalSublevel h qbig) := by
-  obtain ⟨hWA, hMA, hMB, hWP, hMP⟩ := H.gain_inequalities hh.le hκ.2
-  exact PhysicalStageBounds.derived_stage_inputs baseA baseP WA MA MB WP MP hh hh1
-    hbaseA hbaseP hqA hqB hqP (gain h) (offsets h).wavePotential (offsets h).meanStream
-    (offsets h).directAngular (offsets h).wavePressure (offsets h).meanPressure
-    hWA hMA hMB hWP hMP
 
 end StageInputs
 

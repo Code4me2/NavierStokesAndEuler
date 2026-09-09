@@ -152,18 +152,6 @@ theorem velocity_two (H K : Profile) (t : ℝ) (x : Space)
   unfold radialEnergy
   ring
 
-/-- The Cartesian potential is smooth on all of space, including the axis. -/
-theorem contDiff_potential {H K : Profile} {n : WithTop ℕ∞}
-    (hH : ContDiff ℝ n H) (hK : ContDiff ℝ n K) : ContDiff ℝ n (potential H K) := by
-  have h0 : ContDiff ℝ n (fun w : SpaceTime => w.2 0) :=
-    (projection 0).contDiff.comp contDiff_snd
-  have h1 : ContDiff ℝ n (fun w : SpaceTime => w.2 1) :=
-    (projection 1).contDiff.comp contDiff_snd
-  have hHv := hH.comp contDiff_profilePoint
-  have hKv := hK.comp contDiff_profilePoint
-  exact (((contDiff_const.mul (h1.mul hHv)).smul contDiff_const).add
-    ((contDiff_const.mul (h0.mul hHv)).smul contDiff_const)).add
-    (hKv.smul contDiff_const)
 
 /-- Smoothness may be required only on a prescribed set of times. -/
 theorem contDiffOn_potential {H K : Profile} {times : Set ℝ} {n : WithTop ℕ∞}
@@ -192,11 +180,6 @@ theorem contDiffOn_velocity {H K : Profile} {times : Set ℝ} {m n : WithTop ℕ
     ContDiffOn ℝ m (velocity H K) (times ×ˢ (univ : Set Space)) :=
   SpatialCurl.contDiffOn_spatialCurl (contDiffOn_potential hH hK) hmn
 
-theorem divergence_velocity {H K : Profile}
-    (hH : ContDiff ℝ 2 H) (hK : ContDiff ℝ 2 K) (t : ℝ) (x : Space) :
-    spatialDivergence (velocity H K) t x = 0 :=
-  SpatialCurl.spatialDivergence_spatialCurl (potential H K) t x
-    (((contDiff_potential hH hK).comp (contDiff_const.prodMk contDiff_id)).contDiffAt)
 
 theorem divergence_velocity_on {H K : Profile} {times : Set ℝ}
     (hH : ContDiffOn ℝ 2 H (times ×ˢ (univ : Set (ℝ × ℝ))))

@@ -265,12 +265,6 @@ theorem fullPhase_periodic (g : Geometry) (χ : Plane → ℝ) (A B : P → ℝ)
       angularLift (phase g χ A B) angular ((p, θ), Y) := by
   simp only [angularLift, phase_periodic]
 
-omit [NormedAddCommGroup P] [NormedSpace ℝ P] in
-theorem carrier_periodic (g : Geometry) (χ : Plane → ℝ) (A B : P → ℝ)
-    (angular K : ℝ) (p : P) (θ : ℝ) (Y : Plane) (n : Frequency) :
-    HarmonicCalculus.carrier K (angularLift (phase g χ A B) angular) ((p, θ), Y + latticePoint n) =
-      HarmonicCalculus.carrier K (angularLift (phase g χ A B) angular) ((p, θ), Y) := by
-  simp only [HarmonicCalculus.carrier, fullPhase_periodic]
 
 
 

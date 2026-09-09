@@ -115,8 +115,6 @@ theorem correction_tsupport (P : Patch) (c : Fin n → ℝ) :
   obtain ⟨j, hj⟩ := mem_iUnion.mp hm
   exact ⟨(lower_gt_left P j).trans hj.1, hj.2.trans (upper_lt_right P j)⟩
 
-theorem correction_hasCompactSupport (P : Patch) (c : Fin n → ℝ) : HasCompactSupport (correction P c) :=
-  HasCompactSupport.of_support_subset_isCompact isCompact_Icc (correction_support P c)
 
 theorem weighted_integrable (P : Patch) (s : ℝ) (g : ℝ → ℝ)
     (hg : Continuous g) (hs : support g ⊆ Icc P.left P.right) :

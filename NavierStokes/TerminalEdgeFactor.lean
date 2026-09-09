@@ -1487,8 +1487,6 @@ theorem profile_relative_cone {C : ℝ} (hC : 0 < C) (d : TailData) (y0 : ℝ) :
 
 /-! ## The same weighted estimates on compact physical parameter sets -/
 
-noncomputable def physicalStress (C : ℝ) (d : TailData) (y0 : ℝ)
-    (y : EdgeParam × ℝ) : ℝ × ℝ := (angularStress C d y0 y, axialStress C d y0 y)
 
 
 

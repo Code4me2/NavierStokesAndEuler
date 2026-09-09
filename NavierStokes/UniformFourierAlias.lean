@@ -444,10 +444,6 @@ theorem realCentered_zeroMean {f : P × Plane → ℝ} (hf : ContDiff ℝ ∞ f)
   rw [familyMean_eq_parameterMean, ← complexify_realCentered, parameterMean_complexify] at hc
   exact Complex.ofReal_eq_zero.mp hc
 
-theorem realInverse_smooth (d : Direction) {f : P × Plane → ℝ}
-    (hf : ContDiff ℝ ∞ f) (hp : ParameterPeriodic f) : ContDiff ℝ ∞ (realInverse d f) :=
-  Complex.reCLM.contDiff.comp
-    (SmoothFamilyTorusInverse.inverse_smooth d (complexify_smooth hf) (complexify_parameterPeriodic hp))
 
 
 
@@ -834,17 +830,6 @@ theorem fiberOperator_preserves_meanClass
 
 variable [FiniteDimensional ℝ S]
 
-theorem meanClass_realInverse (d : Direction) {a b cL cR : ℝ}
-    (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)
-    (ε R : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hεone : ∀ n, ε n ≤ 1) (hR : ∀ n, 1 ≤ R n)
-    {α : ℝ} {f : ℕ → ℝ × (S × Plane) → ℝ}
-    (hf : MeanClass (logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α f)
-    (hfc : ∀ n, ContDiff ℝ ∞ (f n)) (hp : ∀ n, SourcePeriodic (f n)) :
-    MeanClass (logStripData a b cL cR ha hcL hcR ε R hε hεone hR) α
-      (fun n => fromProduct (realInverse d (toProduct (f n)))) :=
-  fiberOperator_preserves_meanClass (realInverse d) 5
-    (fun _ hf hp => realInverse_smooth d hf hp) (realInverse_finiteJets d)
-    ha hcL hcR ε R hε hεone hR hf hfc hp
 
 theorem meanClass_realCenterSource {a b cL cR : ℝ}
     (ha : 0 < a) (hcL : 0 < cL) (hcR : 0 < cR)

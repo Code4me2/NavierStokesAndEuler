@@ -58,10 +58,5 @@ theorem forward_measurePreserving (t : Icc (0 : ℝ) T) :
   EulerCylinderPeriodicFlow.flow_measurePreserving P (flowData T hT A) (velocity_deck P T hT A hA) 0 t
     (EulerSmoothBanachFlow.forward_measurePreserving T hT A hdiv volume t)
 
-include hA hdiv in
-theorem backward_measurePreserving (t : Icc (0 : ℝ) T) :
-    MeasurePreserving (backward P T hT A t) (liftMeasure P) (liftMeasure P) :=
-  EulerCylinderPeriodicFlow.flow_measurePreserving P (flowData T hT A) (velocity_deck P T hT A hA) t 0
-    (EulerSmoothBanachFlow.backward_measurePreserving T hT A hdiv volume t)
 
 end EulerSmoothCylinderFlow

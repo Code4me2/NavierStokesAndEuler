@@ -50,8 +50,6 @@ theorem initial_support :
     (packetBase_initial_support β hβ ell hell hell1 T hT hTB)
     (hd.trans (Metric.closedBall_subset_closedBall (by linarith only [hell1])))
 
-theorem initial_compact : HasCompactSupport (fun x => F.state.evolution.velocity (0,x)) :=
-  (isCompact_closedBall (0 : Space) 2).of_isClosed_subset (isClosed_tsupport _) F.initial_support
 
 end FirstPacketChoice
 end EulerBaseDatum

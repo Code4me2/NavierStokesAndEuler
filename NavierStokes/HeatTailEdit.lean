@@ -424,14 +424,6 @@ theorem outgoingProfile_eq_powerTail (d : TailData) {K X : ℝ}
   outgoingProfile_eq_powerTail_of_log d hK (hK.trans_le hX)
     (Real.log_nonneg ((one_le_div hK).mpr hX)) eta
 
-theorem outgoingProfile_joint_contDiffOn (d : TailData) {K : ℝ} (hK : 0 < K) :
-    ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => outgoingProfile d K p.2 p.1)
-      (Ioi 0 ×ˢ univ) := by
-  intro p hp
-  have hl : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => Real.log (p.1 / K)) p :=
-    (Real.contDiffAt_log.mpr (div_pos hp.1 hK).ne').comp p (contDiffAt_fst.div_const K)
-  exact ((finalAngular_contDiff d).contDiffAt.comp p
-    ((contDiffAt_const.add hl).prodMk contDiffAt_snd)).contDiffWithinAt
 
 
 
