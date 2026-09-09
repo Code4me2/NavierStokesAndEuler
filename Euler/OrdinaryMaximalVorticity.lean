@@ -59,32 +59,11 @@ def maximalVorticityIntegral (t : L.Time) : ℝ :=
   (L.evolution (L.intermediateHorizon t) (L.intermediateHorizon_pos t)
     (L.intermediateHorizon_lt t)).vorticityIntegral (L.intermediateTime t)
 
-theorem maximalVorticityIntegral_eq_evolution (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-    (t : Icc (0 : ℝ) S) :
-    L.maximalVorticityIntegral (L.shorterTime S hSL t)=
-      (L.evolution S hS hSL).vorticityIntegral t :=
-  L.vorticityIntegral_agrees_at (L.intermediateHorizon (L.shorterTime S hSL t)) S
-    (L.intermediateHorizon_pos (L.shorterTime S hSL t)) hS
-    (L.intermediateHorizon_lt (L.shorterTime S hSL t)) hSL t t.property.1
-    (L.time_lt_intermediateHorizon (L.shorterTime S hSL t)).le t.property.2
 
 
 
 
 
-theorem vorticityIntegral_eventually_large_of_unbounded
-    (hunbounded : ∀ G : ℝ, ∃ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration)
-      (t : Icc (0 : ℝ) S), G < (L.evolution S hS hSL).vorticityIntegral t)
-    (G : ℝ) :
-    ∃ (R : ℝ) (_hR : 0 < R) (_hRL : R < L.duration),
-      ∀ (S : ℝ) (hS : 0 < S) (hSL : S < L.duration), R ≤ S →
-        G < (L.evolution S hS hSL).vorticityIntegral ⟨S,hS.le,le_rfl⟩ := by
-  obtain ⟨R,hR,hRL,t,ht⟩ := hunbounded G
-  refine ⟨R,hR,hRL,?_⟩
-  intro S hS hSL hRS
-  rw [L.vorticityIntegral_agrees R S hR hS hRL hSL hRS t] at ht
-  exact ht.trans_le ((L.evolution S hS hSL).vorticityIntegral_mono
-    ⟨t,t.property.1,t.property.2.trans hRS⟩ ⟨S,hS.le,le_rfl⟩ (t.property.2.trans hRS))
 
 
 end EulerOrdinarySobolev.FiniteLifespan

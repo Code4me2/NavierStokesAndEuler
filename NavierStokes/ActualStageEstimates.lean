@@ -210,9 +210,6 @@ noncomputable def cycleInputs : CycleInputs h DP (Fin 3 × IP) KP DS (Fin 3 × I
 
 
 
-theorem cycleInputs_validScale {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N) :
-    (cycleInputs R M hN W).ValidScale qbig :=
-  ⟨fun _ => hq, fun _ => hq, fun _ => hq, fun _ => hq⟩
 
 end CycleInputs
 
