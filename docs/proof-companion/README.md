@@ -36,9 +36,11 @@ Exact endpoints: [NS submission](../../NavierStokes/ComparatorSolution.lean), [N
 
 1. Read the [scope chapter](01-scope.md), summary above and evidence key below. The [interface sheet](INTERFACES.md) defines selected construction inputs and identifies the still-unexpanded mathematical interfaces.
 2. [02 — NS construction](02-ns-construction.md): the coordinate and base, conditional correction-cycle bookkeeping, finite-band defects, coherent physical prefixes, one diagonal.
-3. [03 — NS analysis](03-ns-analysis.md): start from those very prefixes; follow tail estimates, residual flatness, localized force extension, comparison and nonextension. NSA-006 is an additional energy deduction, not an input to construction.
-4. [04 — Euler](04-euler.md): an independent branch. Read the forward/joined distinction before the summability and H4-dependent stability arguments.
-5. Use [SOURCE-MAP.md](SOURCE-MAP.md) to audit hypotheses and [VALIDATION.md](VALIDATION.md) to find open obligations and review assignments. [PLAN.md](PLAN.md) preserves the authoring contract and provenance; its initial directory-only restriction is superseded only by the user's explicit authorization for the minimal repository README discoverability link.
+3. For the particular-wave step, detour to [05 — Native weighted control](05-native-weighted-control.md): one selected copy, geometry-produced energy, full-path source jets, exact joint-jet bound and pressure. This supplemental chapter uses baseline `26e896e…`; its [separate ledger](native-control-validation.md) records remaining higher-order input debt and does not extend the historical 30-ID coverage.
+   For those primitive inputs, read [06 — Primitive derivative bounds](06-primitive-derivative-bounds.md): the same summed base, finite-order frame constants and numerical native pressure recurrence. Its [separate ledger](primitive-derivative-validation.md) retains the finite-profile and localization assumptions; chapter 05 and its historical ledger are unchanged.
+4. [03 — NS analysis](03-ns-analysis.md): start from those very prefixes; follow tail estimates, residual flatness, localized force extension, comparison and nonextension. NSA-006 is an additional energy deduction, not an input to construction.
+5. [04 — Euler](04-euler.md): an independent branch. Read the forward/joined distinction before the summability and H4-dependent stability arguments.
+6. Use [SOURCE-MAP.md](SOURCE-MAP.md) to audit hypotheses and [VALIDATION.md](VALIDATION.md) to find open obligations and review assignments. [PLAN.md](PLAN.md) preserves the authoring contract and provenance; its initial directory-only restriction is superseded only by the user's explicit authorization for the minimal repository README discoverability link.
 
 ## Dependency diagram
 
