@@ -1,0 +1,151 @@
+{
+  "root": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence-attempt2",
+  "evidence_manifest_sha256": "bdd49fb3cd2aabeadd7a9b757788928409fda2096acf28c151f2776570c1bf07",
+  "verified_all_manifest_entries": true,
+  "source_copies": [
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/actual-forcing-budget/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/actual-forcing-budget/Main.lean",
+      "sha256": "190613356966300c5238cf12faf1e84b2aeabc9834e73b2b78237eedd5154f5a"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/difference-equation/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/difference-equation/Main.lean",
+      "sha256": "1c5ea8920c64129ecbe814b70ce2fae38ed4dee48deb649fe87669be72ed309a"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/energy-comparison/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/energy-comparison/Main.lean",
+      "sha256": "f8a731c7768154f737fecf161cd0a2a7d1fdf84314b4ebc5f13ac6e3d4b2615a"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/gronwall-threshold/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/gronwall-threshold/Main.lean",
+      "sha256": "48b50ff2b26e32007b5c714a42f37e03fe798c8987e13c6080cbf5375a5eb753"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/local-theory-obstruction/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/local-theory-obstruction/Main.lean",
+      "sha256": "d9919bebd03e1618c0fe621eb12f93cb510b803a435c097fb3612d26e44f53f8"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/periodic-restart-data/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/periodic-restart-data/Main.lean",
+      "sha256": "95423d4e60624a11dcb95901f3e346e0cb8bebc03e3d8af4e670efdfd4f67cb7"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/pressure-absorption/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/pressure-absorption/Main.lean",
+      "sha256": "ed3fe773fc1b9d00998b583c2e0aa66295403f3921a852a715415333b5d3f8c9"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/r3-restart-data/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/r3-restart-data/Main.lean",
+      "sha256": "e80024b8013fcd2ff646da06613a307e51f72a7545ec60fedc37d415858d2d84"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/scaling-and-compactness/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/scaling-and-compactness/Main.lean",
+      "sha256": "451b85329629a3daeb6e5f9d97e23fa46868705799becfefbde6eeb93d6be9b0"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/smooth-force-cutoff/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/smooth-force-cutoff/Main.lean",
+      "sha256": "accd8d5d4a26244783173ccdf30fe95d0e4c36f2cffa9334dd8662a545cadf02"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/strong-norm-growth-transfer/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/strong-norm-growth-transfer/Main.lean",
+      "sha256": "6e5f145d0370b166d095253b9b88f868f7f35b0b1af34bf23db277b3872b1147"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/time-translation/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/time-translation/Main.lean",
+      "sha256": "48a1957d1b3ee79f9dc9660f3b7e96130f52c173b4ff60ec0ddd9cccc7faf99f"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round2/PeriodicSlab/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/Round2/PeriodicSlab/Main.lean",
+      "sha256": "88686796eb10831c214eab9179af31be7dbd8c1f139cc7ec1b9ebe5566b546d5"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round2/ActualForce/Main.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/Round2/ActualForce/Main.lean",
+      "sha256": "0d907dcfc428c23c5473e6ecfbcaeda6d6d783a9cdaeca95510e3372ff8a5efa"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/integration/Audit.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/integration/Audit.lean",
+      "sha256": "d6489c268378cb09988a9184efdc5c76941182349dc0bfc9deb63e6ed8431396"
+    },
+    {
+      "source": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round2/Integration/Audit.lean",
+      "destination": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/Research/UnforcedRestart/Round2/Integration/Audit.lean",
+      "sha256": "a50f6e7ef2050f9f9c86133e527fadbefbe80a167d7bd05bcedd1132380f3733"
+    }
+  ],
+  "success": {
+    "status": "SOURCE_BUILT_RESEARCH_CHECKS_PASS",
+    "targets": 16,
+    "mathematical_files": 14,
+    "audits": [
+      {
+        "round": 1,
+        "exports": 88,
+        "constants": 42929,
+        "research_constants": 103,
+        "modules": 11108
+      },
+      {
+        "round": 2,
+        "exports": 96,
+        "constants": 42939,
+        "research_constants": 113,
+        "modules": 11110
+      }
+    ],
+    "dependency_union": 11110,
+    "noncore_source_built_modules": 9261,
+    "original_preservation_files": 2877,
+    "library_sources": 12363,
+    "allowed_axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "limits": "Installed official Lean/core/compiler/runtime and OS/hardware trusted; no independent Comparator/kernel certification, local existence, strong norm growth, or mathematical A/B upgrade. External unused metaprogramming constants not blanket audited. Frozen historical cached statuses remain unchanged. Artifact hashes here establish only within-replay stability, not correspondence to old cached objects."
+  },
+  "resolver": {
+    "cwd": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z",
+    "explicit": [
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/research-replay-attempt2/lib",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/LeanSearchClient/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/Qq/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/aesop/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/batteries/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/importGraph/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/mathlib/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/plausible/.lake/build/lib/lean",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/proofwidgets/.lake/build/lib/lean"
+    ],
+    "implicit_core": "/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2/lib/lean",
+    "environment": {
+      "PATH": "/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2/bin:/usr/bin:/bin",
+      "HOME": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence-attempt2/home",
+      "XDG_CACHE_HOME": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence-attempt2/home/cache",
+      "GIT_CONFIG_NOSYSTEM": "1",
+      "GIT_CONFIG_GLOBAL": "/dev/null",
+      "GIT_TERMINAL_PROMPT": "0",
+      "MATHLIB_NO_CACHE_ON_UPDATE": "1",
+      "LEAN_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "CC_THREADS": "1",
+      "LEAN_SYSROOT": "/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2",
+      "LAKE_HOME": "/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2",
+      "LAKE_CACHE_DIR": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence-attempt2/home/lake-cache",
+      "LEAN_PATH": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/research-replay-attempt2/lib:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/Qq/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/aesop/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/batteries/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/importGraph/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/mathlib/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/plausible/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/proofwidgets/.lake/build/lib/lean"
+    }
+  }
+}

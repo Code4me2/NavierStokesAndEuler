@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_TOOL_TESTS_ONLY",
+  "tests": [
+    "reject sorry",
+    "reject admit",
+    "reject axiom",
+    "reject unsafe",
+    "reject native_decide",
+    "reject implemented_by",
+    "reject option override",
+    "reject unclosed nested comment",
+    "nested comments do not cause false construct rejection",
+    "exact imports ignore comments",
+    "nonempty accepted set and exact standard axioms"
+  ]
+}

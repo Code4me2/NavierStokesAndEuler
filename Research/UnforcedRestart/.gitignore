@@ -1,0 +1,26 @@
+# Generated validation artifacts remain in local hash-verified evidence archives.
+# See docs/unforced-restart/COMMIT-NOTES.md. Do not delete historical evidence.
+*.olean
+*.ilean
+*.pyc
+__pycache__/
+*.log
+*.exit
+*.lock
+*.stderr
+*.tsv
+out/
+runs/
+validation/
+strict-*/
+replay-*/
+aggregate-*/
+verification-*/
+chain-*/
+final-verification-*/
+attempt-*/
+# Large machine-local inventories/receipts: retained in the full local archive.
+workspace.json
+baseline.json
+preserved-before.json
+repair-verification.json

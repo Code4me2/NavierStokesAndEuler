@@ -1,0 +1,27 @@
+import NavierStokes.R3CompactCandidate
+import NavierStokes.R3FiniteEnergyComparison
+import NavierStokes.PeriodicUniqueness
+import NavierStokes.ComparatorBridge
+import NavierStokes.PeriodicForceDecay
+import NavierStokes.GronwallInterior
+
+set_option autoImplicit false
+set_option warningAsError true
+
+-- Setup-only import/signature probe; no new research theorem is claimed.
+#check NavierStokes.ProblemStatement.Solution
+#check NavierStokes.TimeLocalization.spatial_smooth_including_initial
+#check NavierStokes.Comparator.InitialVelocityConditionDecay
+#check NavierStokes.Comparator.InitialVelocityConditionPeriodic
+#check NavierStokes.ComparatorBridge.divergence_eq
+#check NavierStokes.ResidualCalculus.pressureGradient_add
+#check NavierStokes.SolutionDifference.difference_equation
+#check NavierStokes.PeriodicUniqueness.energy_balance
+#check NavierStokes.PeriodicUniqueness.classical_uniqueness_on_Icc
+#check NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc
+#check NavierStokes.GronwallInterior.le_uniform_exp_mul_of_deriv_le
+#print axioms NavierStokes.SolutionDifference.difference_equation
+#print axioms NavierStokes.PeriodicUniqueness.energy_balance
+#print axioms NavierStokes.PeriodicUniqueness.classical_uniqueness_on_Icc
+#print axioms NavierStokesR3.WholeSpaceUniqueness.classical_uniqueness_on_Icc
+#print axioms NavierStokes.GronwallInterior.le_uniform_exp_mul_of_deriv_le

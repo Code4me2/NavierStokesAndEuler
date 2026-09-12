@@ -1,0 +1,210 @@
+{
+  "status": "FROZEN_COMPLETE_MEAN_ZERO_ASSEMBLY",
+  "chain": "Research/UnforcedRestart/Round4/Integration/chain-p01zsnon/receipt.json",
+  "rows": [
+    {
+      "source": "Research/UnforcedRestart/Round4/PressureIntegral/Main.lean",
+      "source_sha256": "22cf707edd11b9d47f63ab7f9b3a6156095417749d92b075a3549caad98c6587",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/receipt.json",
+      "receipt_sha256": "d727d437ae53ded8eaca1ee4174190b69f544ed2ff20e4abb35b6341aa212b9c",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.olean": "4ac6aff45f40bdd3b0be95c03b376493bcf55b7ef67595a7fefb756c64bf4e5f",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.ilean": "925b39b699920a3c4d4d8b3517b245132d0f45f6a755d935b7f6d283a59cd7f4"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/PressureIntegral/Components.lean",
+      "source_sha256": "d97d9a17459dfeea998137ee648ca9feeb8fecff74c7b59fbf91e234c20a9e3a",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/receipt.json",
+      "receipt_sha256": "2b5b8c876dbb6c1f52bb434a0cb1f1bf11ccd622bdcb3469ff92ad12873bca2b",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/lib/Research/UnforcedRestart/Round4/PressureIntegral/Components.olean": "7030450cc750b44ad8478ede585c608645903115cd672578a1ab7b704113c3d2",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/lib/Research/UnforcedRestart/Round4/PressureIntegral/Components.ilean": "a00d55b80cf2c2c1c9d1a0881bb4e67b5c4e1d9a9dc4ff1a803c6bd816249079"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/LaplacianIntegral/Main.lean",
+      "source_sha256": "144115d91bca4a94f75cf9bc5647f6a58c1c76589c31e831c8628534008d6c71",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/receipt.json",
+      "receipt_sha256": "ba2113bd660432b0865e10a674b80ec184243e253b48a9e3d1fa0182f477118c",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.olean": "7141b2d641a9f6fba2e67d8275d3aa9418a4b2f0378246ca3c09aeb180f16b24",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.ilean": "5ff354fe04a993379b12bddd5661c3d1e09216ae3b4012560634f534b92cacb7"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.lean",
+      "source_sha256": "0e7cfabb0c9788386d4f57caccb83d33cd09696fd7d78863e5d04117082f4d6a",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/receipt.json",
+      "receipt_sha256": "ab0026ec5ef522c39e95ec1cc887c00c4671745d725a75e0a14d439741d84321",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.olean": "d97aa74f2f63e2aa80597208456adc463f2c40c5cc8836f86e1716d27bb6b980",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.ilean": "d97e658dfed779a640d972112d6e3d1481ad3ad090ed6ab035034541a601f8cf"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/PeriodizationTransport/Main.lean",
+      "source_sha256": "96bc286bd7f70c954f9e01a9fc1cf78c19b636da0b1503f93b803ed9381a93a1",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/receipt.json",
+      "receipt_sha256": "1230e8229ec122d95a12061d255f00e26b03ca4b52263005becc1a0fc86f6ab4",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.olean": "ce257c41522756c4ee57731da8c1659870655693f8eb21d05955cbb209994b04",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.ilean": "affb0d3e00c73b2030724632ec179b0c84adc933e05022b73e2dfc6b23e922a2"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.lean",
+      "source_sha256": "4f6c809757e3f770990e589e19af12641a79595ee76142752f9c3e9d8b688a92",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/receipt.json",
+      "receipt_sha256": "1b7cacf86e637ea1e2da625d33ea9a214257923c577eaf4a59440bfe207f652d",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.olean": "a6805f72038bae3ab4ed29f7a5ef7cf32ce6406d53df8f66c4dddb15cb407f91",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.ilean": "81e228162097cf0b85ebf8a96aa89037c6663a08fea936252d05db4e9faebd63"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.lean",
+      "source_sha256": "0189024dec8e2420825c7c5af602b963d419e61c285f70d05232ba15b17d85c8",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/receipt.json",
+      "receipt_sha256": "a4c957e17022fc81a8caf2f736b261a8eae2f5b4967b010a9153c2c5cd688f22",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.ilean": "178eeceadfcb4d1adb73237d81af45be43c403c87879868fbe0d7a69bbaee184",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.olean": "76028becb6d91a880ff52c668f22ff2dcbca924fcfb4c80a46a9069b4fa6277e"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/Integration/Main.lean",
+      "source_sha256": "0e755abb90fe5cd7b2a277f255da9081cdfe808ab0e2e60d7e245959c0462eda",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/receipt.json",
+      "receipt_sha256": "29218058fa668afd62b9db2bf8c7b1593e627e1b9442009662304883d0a83cb6",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/lib/Research/UnforcedRestart/Round4/Integration/Main.olean": "d5fe996de0f1ae71459cc27c8151c2a120c867ed7febdeee664d490231e11619",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/lib/Research/UnforcedRestart/Round4/Integration/Main.ilean": "640da9cb2e823427c4f0e728d86be376d8bf0857ae0b6358ff035acfbd75f65f"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/Integration/Assembly.lean",
+      "source_sha256": "0ece78ec9b0ac6a2ff21d9ad7af3d3978eab438148524af287bdc0767d4fd2fb",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/receipt.json",
+      "receipt_sha256": "c4602079765aea8c8f92aba37821d1277d927eebdff96f9566dd56ff150f9a20",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/lib/Research/UnforcedRestart/Round4/Integration/Assembly.ilean": "a5e8359faec31b27c5da09d60bd19b62ebab8144177c4248bde087937c4c8136",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/lib/Research/UnforcedRestart/Round4/Integration/Assembly.olean": "a23598acb69212e7fc7a18153ebd099df9c488fe0f6a4b85a0dad4809ae17693"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/Integration/Acceptance.lean",
+      "source_sha256": "46197a632535e13833c69664f74afdd92ef6114f114312f0a0cd7212171257e7",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/receipt.json",
+      "receipt_sha256": "e78c037f5b3351f12aaa205901b224e7d9d5ed6bc822f4f5d8a0585b7505a3da",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/lib/Research/UnforcedRestart/Round4/Integration/Acceptance.ilean": "4ed31de0185b1489bff5879a27a0da0a6e22b20fd699548c9cacd2e950d1554b",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/lib/Research/UnforcedRestart/Round4/Integration/Acceptance.olean": "01b1e266e7a56b4981ffb834f9a7c71dd8b7f2bb99364fa4634e8710409f1433"
+      }
+    },
+    {
+      "source": "Research/UnforcedRestart/Round4/Integration/FinalAudit.lean",
+      "source_sha256": "69c489caa53910d840ee7fe458920081d0747301d03d3a914936e22a2d869e6b",
+      "receipt": "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/receipt.json",
+      "receipt_sha256": "0a1cc394e71b3e1629b5f9cfc5643024f7d7bee6f48683d9a6b97bbb6056af19",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/lib/Research/UnforcedRestart/Round4/Integration/FinalAudit.ilean": "b2ee2a2583446c2d9541c4e3c94ff832d2af066a5950ad84141cd2b2763242af",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/lib/Research/UnforcedRestart/Round4/Integration/FinalAudit.olean": "89419cb09d82da8fc40d45dff3728aa9ac146f1a04ad650d749aecab02e0ac09"
+      }
+    }
+  ],
+  "files": {
+    "Research/UnforcedRestart/Round4/Integration/Acceptance.lean": "46197a632535e13833c69664f74afdd92ef6114f114312f0a0cd7212171257e7",
+    "Research/UnforcedRestart/Round4/Integration/Assembly.lean": "0ece78ec9b0ac6a2ff21d9ad7af3d3978eab438148524af287bdc0767d4fd2fb",
+    "Research/UnforcedRestart/Round4/Integration/FREEZE-1.json": "4454d2c8b89631192503d792b61c37d55701b33b0898d979ecd25ff8e6b77cc9",
+    "Research/UnforcedRestart/Round4/Integration/FREEZE-2.json": "ad5cef86e5352d6bc6b6c0f5bc26122c6d5117c5dd1116f958fe218c50438a5b",
+    "Research/UnforcedRestart/Round4/Integration/FinalAudit.lean": "69c489caa53910d840ee7fe458920081d0747301d03d3a914936e22a2d869e6b",
+    "Research/UnforcedRestart/Round4/Integration/Main.lean": "0e755abb90fe5cd7b2a277f255da9081cdfe808ab0e2e60d7e245959c0462eda",
+    "Research/UnforcedRestart/Round4/Integration/chain-p01zsnon/receipt.json": "28b14bf2568b9f7cf909580487c5c5fd2f5928bf6168d19b9cd53366fc9ac9cc",
+    "Research/UnforcedRestart/Round4/Integration/check.py": "62d75d352c439aa983cc8ee79a3c965d6bf87587955cf37c03386cb7d8198c38",
+    "Research/UnforcedRestart/Round4/Integration/record_final.py": "ae0569935b48bd50079061e9d4a371c13af915c83435d75265c35a654ec746db",
+    "Research/UnforcedRestart/Round4/Integration/replay.py": "809a558f78b441a292222e669f6f87dadeef7495c542557f2ff328ec8a0daca1",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/command.json": "95e282bb445f4fa06272b8d3480ee00bf3a46a417cc27ba0b1e90abef4e116e3",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/compile.log": "8b8b444f02be45b988f0f89ef723bc054cb2ee8a980d9d9d8d6b57f7a1917097",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/lib/Research/UnforcedRestart/Round4/Integration/Main.ilean": "640da9cb2e823427c4f0e728d86be376d8bf0857ae0b6358ff035acfbd75f65f",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/lib/Research/UnforcedRestart/Round4/Integration/Main.olean": "d5fe996de0f1ae71459cc27c8151c2a120c867ed7febdeee664d490231e11619",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/receipt.json": "29218058fa668afd62b9db2bf8c7b1593e627e1b9442009662304883d0a83cb6",
+    "Research/UnforcedRestart/Round4/Integration/strict-0q4jhlgx/source.lean": "0e755abb90fe5cd7b2a277f255da9081cdfe808ab0e2e60d7e245959c0462eda",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/command.json": "e259c0d1dbad6db34b051921bec56a53b8a597882def8f73255e51f1d8300b53",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/compile.log": "71af4cef3c3d2f2a148c841c509879119addf58366fe2b17b2cc885f515fdac6",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.ilean": "81e228162097cf0b85ebf8a96aa89037c6663a08fea936252d05db4e9faebd63",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.olean": "a6805f72038bae3ab4ed29f7a5ef7cf32ce6406d53df8f66c4dddb15cb407f91",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/receipt.json": "1b7cacf86e637ea1e2da625d33ea9a214257923c577eaf4a59440bfe207f652d",
+    "Research/UnforcedRestart/Round4/Integration/strict-5zcu1dhj/source.lean": "4f6c809757e3f770990e589e19af12641a79595ee76142752f9c3e9d8b688a92",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/command.json": "38fb869477672205ed84a5fce5469050adb32f95ae2361b81565c720cb903c90",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/compile.log": "4293da28d0fff998112e0b95179de287ca2e26e46a540e19ba99ebca8e2d005d",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.ilean": "925b39b699920a3c4d4d8b3517b245132d0f45f6a755d935b7f6d283a59cd7f4",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.olean": "4ac6aff45f40bdd3b0be95c03b376493bcf55b7ef67595a7fefb756c64bf4e5f",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/receipt.json": "d727d437ae53ded8eaca1ee4174190b69f544ed2ff20e4abb35b6341aa212b9c",
+    "Research/UnforcedRestart/Round4/Integration/strict-9_6fs6u8/source.lean": "22cf707edd11b9d47f63ab7f9b3a6156095417749d92b075a3549caad98c6587",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/command.json": "a6664c285bb91a17b2767ea477b776dee92cfe37b74bde046afadce63529e1ef",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/compile.log": "37152e2c762bc3871dacfd83e7e28e9628f912b1705dde7f72e2084df411e575",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/lib/Research/UnforcedRestart/Round4/Integration/Assembly.ilean": "a5e8359faec31b27c5da09d60bd19b62ebab8144177c4248bde087937c4c8136",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/lib/Research/UnforcedRestart/Round4/Integration/Assembly.olean": "a23598acb69212e7fc7a18153ebd099df9c488fe0f6a4b85a0dad4809ae17693",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/receipt.json": "c4602079765aea8c8f92aba37821d1277d927eebdff96f9566dd56ff150f9a20",
+    "Research/UnforcedRestart/Round4/Integration/strict-cq82w9r4/source.lean": "0ece78ec9b0ac6a2ff21d9ad7af3d3978eab438148524af287bdc0767d4fd2fb",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/command.json": "b4a9b9e7a9d26b1bb715e41208c540500588859dc4280bf756d138a9186a143f",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/compile.log": "368e5ca263d5707dfe5ef699736e662289fbe6ef48f7b758fe544d48f6ddc050",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/lib/Research/UnforcedRestart/Round4/Integration/Acceptance.ilean": "4ed31de0185b1489bff5879a27a0da0a6e22b20fd699548c9cacd2e950d1554b",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/lib/Research/UnforcedRestart/Round4/Integration/Acceptance.olean": "01b1e266e7a56b4981ffb834f9a7c71dd8b7f2bb99364fa4634e8710409f1433",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/receipt.json": "e78c037f5b3351f12aaa205901b224e7d9d5ed6bc822f4f5d8a0585b7505a3da",
+    "Research/UnforcedRestart/Round4/Integration/strict-f2z0lpmk/source.lean": "46197a632535e13833c69664f74afdd92ef6114f114312f0a0cd7212171257e7",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/command.json": "823e227ea6c20e47af4ba5a3172ca2cff53fe145a0eb8ea814806b7ce4095358",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/compile.log": "95a4c1764d4d8590e8e59b73632d8675e429480e0962790054aac728b599618d",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/lib/Research/UnforcedRestart/Round4/PressureIntegral/Components.ilean": "a00d55b80cf2c2c1c9d1a0881bb4e67b5c4e1d9a9dc4ff1a803c6bd816249079",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/lib/Research/UnforcedRestart/Round4/PressureIntegral/Components.olean": "7030450cc750b44ad8478ede585c608645903115cd672578a1ab7b704113c3d2",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/receipt.json": "2b5b8c876dbb6c1f52bb434a0cb1f1bf11ccd622bdcb3469ff92ad12873bca2b",
+    "Research/UnforcedRestart/Round4/Integration/strict-g1ou24v5/source.lean": "d97d9a17459dfeea998137ee648ca9feeb8fecff74c7b59fbf91e234c20a9e3a",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/command.json": "b63a9eeb42715454236125f2436a30997ec02ecaf4efd1bc9405fc77adc48f04",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/compile.log": "caa9f0a2e83468321a848273b6bb01cb5246218228f6a5f747af9882e07f6447",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.ilean": "affb0d3e00c73b2030724632ec179b0c84adc933e05022b73e2dfc6b23e922a2",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.olean": "ce257c41522756c4ee57731da8c1659870655693f8eb21d05955cbb209994b04",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/receipt.json": "1230e8229ec122d95a12061d255f00e26b03ca4b52263005becc1a0fc86f6ab4",
+    "Research/UnforcedRestart/Round4/Integration/strict-rmeiy0dw/source.lean": "96bc286bd7f70c954f9e01a9fc1cf78c19b636da0b1503f93b803ed9381a93a1",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/command.json": "97d2dd56caf4a47b366b6583ca968ae8a9e67bdaa2826a8c74da48e0b63b81e1",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/compile.log": "26377afaa33e1d2cfe3bb2ea31ed6786511a4113dff4ba28b77d115cc6f5c2e9",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/lib/Research/UnforcedRestart/Round4/Integration/FinalAudit.ilean": "b2ee2a2583446c2d9541c4e3c94ff832d2af066a5950ad84141cd2b2763242af",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/lib/Research/UnforcedRestart/Round4/Integration/FinalAudit.olean": "89419cb09d82da8fc40d45dff3728aa9ac146f1a04ad650d749aecab02e0ac09",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/receipt.json": "0a1cc394e71b3e1629b5f9cfc5643024f7d7bee6f48683d9a6b97bbb6056af19",
+    "Research/UnforcedRestart/Round4/Integration/strict-t0s23j3d/source.lean": "69c489caa53910d840ee7fe458920081d0747301d03d3a914936e22a2d869e6b",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/command.json": "516fbf1da46cb184ea7472251c083b3766bca22915c166174a34f1d9469d5f8c",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/compile.log": "d01fba7c71d1afaf10abe283fc33d6209ce894de516277a4c0849603a1bd8409",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.ilean": "d97e658dfed779a640d972112d6e3d1481ad3ad090ed6ab035034541a601f8cf",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.olean": "d97aa74f2f63e2aa80597208456adc463f2c40c5cc8836f86e1716d27bb6b980",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/receipt.json": "ab0026ec5ef522c39e95ec1cc887c00c4671745d725a75e0a14d439741d84321",
+    "Research/UnforcedRestart/Round4/Integration/strict-tbhi0iyz/source.lean": "0e7cfabb0c9788386d4f57caccb83d33cd09696fd7d78863e5d04117082f4d6a",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/command.json": "a79f0e423a35947066fc9d953cceb223aeea13a3974486078e790fdb8ad79761",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/compile.log": "4851b1e173cf963129fc9476c23f78131c0555bb33d28e1eee59fb6515bc21ab",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.ilean": "5ff354fe04a993379b12bddd5661c3d1e09216ae3b4012560634f534b92cacb7",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.olean": "7141b2d641a9f6fba2e67d8275d3aa9418a4b2f0378246ca3c09aeb180f16b24",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/receipt.json": "ba2113bd660432b0865e10a674b80ec184243e253b48a9e3d1fa0182f477118c",
+    "Research/UnforcedRestart/Round4/Integration/strict-vbtzde0t/source.lean": "144115d91bca4a94f75cf9bc5647f6a58c1c76589c31e831c8628534008d6c71",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/command.json": "630d3ffb549374d6b3bbe1a3b3bf0f97d1c7eaa9bca18e0a9e2e327efef21b38",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/compile.log": "c0734ba29cfba81953fe5437490e4a0e1f7c31c884614af2b4fc90cd0ca2fb16",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.ilean": "178eeceadfcb4d1adb73237d81af45be43c403c87879868fbe0d7a69bbaee184",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.olean": "76028becb6d91a880ff52c668f22ff2dcbca924fcfb4c80a46a9069b4fa6277e",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/receipt.json": "a4c957e17022fc81a8caf2f736b261a8eae2f5b4967b010a9153c2c5cd688f22",
+    "Research/UnforcedRestart/Round4/Integration/strict-ymgmxe52/source.lean": "0189024dec8e2420825c7c5af602b963d419e61c285f70d05232ba15b17d85c8",
+    "Research/UnforcedRestart/Round4/Integration/verify_final.py": "fea384e33a9a0dde02893d80755dab302b40138bcc28bbeb6491ff9b2ad2ad39",
+    "Research/UnforcedRestart/Round4/LaplacianIntegral/Main.lean": "144115d91bca4a94f75cf9bc5647f6a58c1c76589c31e831c8628534008d6c71",
+    "Research/UnforcedRestart/Round4/LaplacianIntegral/Regularity.lean": "0e7cfabb0c9788386d4f57caccb83d33cd09696fd7d78863e5d04117082f4d6a",
+    "Research/UnforcedRestart/Round4/PeriodizationTransport/Cell.lean": "0189024dec8e2420825c7c5af602b963d419e61c285f70d05232ba15b17d85c8",
+    "Research/UnforcedRestart/Round4/PeriodizationTransport/Main.lean": "96bc286bd7f70c954f9e01a9fc1cf78c19b636da0b1503f93b803ed9381a93a1",
+    "Research/UnforcedRestart/Round4/PeriodizationTransport/Residual.lean": "4f6c809757e3f770990e589e19af12641a79595ee76142752f9c3e9d8b688a92",
+    "Research/UnforcedRestart/Round4/PressureIntegral/Components.lean": "d97d9a17459dfeea998137ee648ca9feeb8fecff74c7b59fbf91e234c20a9e3a",
+    "Research/UnforcedRestart/Round4/PressureIntegral/Main.lean": "22cf707edd11b9d47f63ab7f9b3a6156095417749d92b075a3549caad98c6587",
+    "docs/unforced-restart/round4/ASSEMBLY.md": "1fc68c648771362dd92c4ec5d502a17daf03c3dee06afc647763e4ad1f6f90a0",
+    "docs/unforced-restart/round4/FINAL-REPORT.md": "e5129a5a839fdb51d3a1f9f8cc25ab0fc793f01872fe62016d23da5a582cbba2",
+    "docs/unforced-restart/round4/LaplacianIntegral.md": "dc194f859d16ff5caa173dbb8975b39203e4007a1f4111d1fc45ff54863f6ee2",
+    "docs/unforced-restart/round4/PLAN.md": "8ba501b6843db28cfc4c2cf37f39651e7035000bf0cbc38231ebf2adb21d82f6",
+    "docs/unforced-restart/round4/PRIOR-PARTIAL-REPORT.md": "f066d85799510509e12a5ad7fa56c77bad9e7a2f10caf71c076cbd9531abfd1b",
+    "docs/unforced-restart/round4/PeriodizationTransport.md": "afc75e1b588a2f0b25132a1465cb1e062dd0c02bf6cadaf7dd4d21ab765063d9",
+    "docs/unforced-restart/round4/PressureIntegral.md": "11d51934437350e62af4fe64f1d81d658ab8389ddce572a94ad40684fbb7ed4b"
+  },
+  "trust": "Hash freeze, not WORM. Historical imports checked against pinned source-built correspondence."
+}

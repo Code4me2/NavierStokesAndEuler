@@ -1,0 +1,12 @@
+$ python3 Research/UnforcedRestart/Round3/Integration/verify.py
+{
+  "preservation": "PASS",
+  "existing_files": 2878,
+  "snapshot": "e970490cf8f0cfb41fca101c62702fab7347c17c",
+  "snapshot_paths": 64,
+  "clean_targets_hash_matched": 16,
+  "external_evidence_manifest": "PASS",
+  "head_index_prior_refs": "unchanged",
+  "focused_witness_source_sha256": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+  "focused_status": "exit 0; not aggregate Round3 acceptance"
+}

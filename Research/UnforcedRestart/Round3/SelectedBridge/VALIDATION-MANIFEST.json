@@ -1,0 +1,235 @@
+{
+  "status": "PASS",
+  "decision": "3: neither absorption nor obstruction decided",
+  "substantive_result": "For every 0<t<1 and i:Fin 3, integral over R3 of (temporalDerivative MeanTopology.compactVelocity t x) i equals zero.",
+  "accepted_run": "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v",
+  "accepted_check": {
+    "command": [
+      "systemd-run",
+      "--user",
+      "--scope",
+      "--quiet",
+      "-p",
+      "CPUQuota=100%",
+      "-p",
+      "MemoryMax=6G",
+      "-p",
+      "MemorySwapMax=0",
+      "-p",
+      "TasksMax=32",
+      "timeout",
+      "600",
+      "env",
+      "-i",
+      "PATH=/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2/bin:/usr/bin:/bin",
+      "HOME=/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/home",
+      "LEAN_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "LEAN_PATH=/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/research-replay-attempt2/lib:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/Qq/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/aesop/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/batteries/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/importGraph/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/mathlib/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/plausible/.lake/build/lib/lean:/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/proofwidgets/.lake/build/lib/lean",
+      "/home/velvet/.elan/toolchains/leanprover--lean4---v4.34.0-rc2/bin/lean",
+      "-j1",
+      "-DautoImplicit=false",
+      "-DwarningAsError=true",
+      "-o",
+      "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.olean",
+      "-i",
+      "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.ilean",
+      "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round3/SelectedBridge/Main.lean"
+    ],
+    "cwd": "/home/velvet/worktrees/unforced-restart-20260909T202951Z",
+    "source": "Research/UnforcedRestart/Round3/SelectedBridge/Main.lean",
+    "source_sha256": "1db715d10a38f74df0bc294bbabd49c7b200b56388a9bb93a5c09b9c472603c5",
+    "compiler_sha256": "79fb1d26fa5a39385d59fdc48a711a14b0710ca6480271acce99b4d177cea085",
+    "inputs": {
+      "Research/UnforcedRestart/Round3/WitnessFeasibility/Main.lean": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean": "efca2412a90b964290fabffcfb34c255dcfd997f57c836a3a4119c2cd02a18f0",
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.ilean": "cfefe6cfb06e598cdb4ca216e159fbd4bb8cdd268dec9d4f0f032e33a33a02f8",
+      "Research/UnforcedRestart/Round3/MeanTopology/Main.lean": "0c106afc75bcfed595457f9a7f77fe1c9bd0699ba5e33caf694d86cc40cdb963",
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.olean": "95293d34794c0d29035f6d82fadc21700a2e16feb36db28b64cb399d5713e019",
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.ilean": "9db5509178e3a9a3f0c9a443c16f5b2f84446982f73c61b2bcd6f91236fb305d",
+      "NavierStokes/R3/CompactTimeIntegral.lean": "bbd470948e83c06d37e411d4a4862cda61db7f0e3566f3bd20ea4d8706e7dc5a",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean/NavierStokes/R3/CompactTimeIntegral.olean": "0c8677a970b6ec688660b4b3331ff1950b5caf9f2f692badaeedda3b6682fccc",
+      "NavierStokes/ProblemStatement.lean": "1538771ee5e3fc0a3a71a3c89809322fc41ec863032c7212aa91b60a538aef1f",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean/NavierStokes/ProblemStatement.olean": "e11d5476cbc34e39b09fff05b1d6c9696af276cf8a6d6e4db8f084e7772bb9bc",
+      "NavierStokes/SpatialLocalization.lean": "92db0f6046ec96de50cabbcc14acc9e93c7471f9801999b9e5d393793cea0234",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean/NavierStokes/SpatialLocalization.olean": "d5ef5ddcf47ab07108fc8f669651c49c31da53d8b20682bd6ac618cea1dc0503",
+      "NavierStokes/MixedPeriodicAssembly.lean": "e4c439cedcab7b2be25f493d558879fd761314de97130b74aa9828ebf92e6030",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean/NavierStokes/MixedPeriodicAssembly.olean": "58f3067d278b159c81ed29a47a8ca712f3aaa256f265cd529d83216e31959bc7",
+      "NavierStokes/TimeLocalization.lean": "ace658552a7578650ee6012752011afaf2b38a2246d4bb9bfcae840812aa0c73",
+      "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/build/lib/lean/NavierStokes/TimeLocalization.olean": "a136b84c453f728b1725277515d2ec11d678a1bb59945d168203d1844f5fdedb"
+    },
+    "manifest_sha256": "5a44b791ae19f37a7a78d2af5fa45a79f4e7b555c7e0a7a484e5c36e44206680",
+    "resolver_sha256": "333a7b32c2518a353afa67c0cc656865130766943918d08961ecc81999046409",
+    "source_snapshot_sha256": "29fb244021517fff0f8a446b2253a91ff031635ce9ac5b74cc389868de49179a",
+    "checker_sha256": "2965059b070610094babaa58728056463a59d5ee0bd6d26e76ff6f2e3478c757",
+    "scope": "All new named theorems: transitive axiom closures; not an aggregate imported helper audit",
+    "exit": 0,
+    "log": "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/compile.log",
+    "log_sha256": "6dcca7e18564b0f13a6e8341f5e8f6ad5eaec15d45d64ed1d670c55dc1162a76",
+    "outputs": {
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.olean": "dbcacec8f3f7e83e26a4e54eddc0361ca285aede12f9146d82278d4209a05fd8",
+      "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.ilean": "1320e36581a1e1d3225081d603f7e0bbaddb81dd3d22d163981389489310155f"
+    },
+    "exports": [
+      {
+        "name": "UnforcedRestart.Round3.SelectedBridge.compactVelocity_smoothAt",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      {
+        "name": "UnforcedRestart.Round3.SelectedBridge.compactVelocity_contDiffOn_slab",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      {
+        "name": "UnforcedRestart.Round3.SelectedBridge.compactVelocity_uniform_support",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      {
+        "name": "UnforcedRestart.Round3.SelectedBridge.compact_component_integral_hasDerivAt",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      {
+        "name": "UnforcedRestart.Round3.SelectedBridge.selected_compact_temporal_integral_zero",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    ]
+  },
+  "validation_command": [
+    "python3",
+    "Research/UnforcedRestart/Round3/SelectedBridge/validate.py"
+  ],
+  "prior_manifest": "docs/unforced-restart/round3/VALIDATION-MANIFEST.json",
+  "prior_manifest_sha256": "5a44b791ae19f37a7a78d2af5fa45a79f4e7b555c7e0a7a484e5c36e44206680",
+  "prior_printed_exports_reconciled": 36,
+  "new_printed_exports": 5,
+  "axiom_audit_scope": "Transitive closure of every new named theorem; not aggregate imported/helper re-audit",
+  "preservation": {
+    "preexisting_files": 3041,
+    "all_hashes_equal": true,
+    "head_refs_index": "unchanged",
+    "tracked_index_diffs": "empty",
+    "prior_verifier_command": [
+      "python3",
+      "Research/UnforcedRestart/Round3/Integration/verify.py"
+    ],
+    "prior_verifier_exit": 0,
+    "prior_verifier_result": {
+      "preservation": "PASS",
+      "existing_files": 2878,
+      "snapshot": "e970490cf8f0cfb41fca101c62702fab7347c17c",
+      "snapshot_paths": 64,
+      "clean_targets_hash_matched": 16,
+      "external_evidence_manifest": "PASS",
+      "head_index_prior_refs": "unchanged",
+      "focused_witness_source_sha256": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+      "focused_status": "exit 0; not aggregate Round3 acceptance"
+    }
+  },
+  "attempt_history": [
+    {
+      "run": "strict-2giy3tju",
+      "status": "REJECTED: first-root module resolution; source in QUARANTINED.md"
+    },
+    {
+      "run": "strict-rmmpxk96",
+      "status": "REJECTED: elaboration; diagnostic sorryAx not accepted; source in QUARANTINED.md; failed target objects removed"
+    },
+    {
+      "run": "strict-gohyv7l2",
+      "status": "PASS: superseded by final provenance-recording replay"
+    },
+    {
+      "run": "strict-bx6aiy6v",
+      "status": "ACCEPTED: strict exit 0, five allowed axiom closures"
+    }
+  ],
+  "trust_roots": [
+    "pinned installed Lean/core/compiler/runtime",
+    "host OS/hardware",
+    "frozen existing external clean source-built dependencies and their earlier evidence",
+    "hash-checked earlier Round3 accepted objects copied to phase-owned resolver"
+  ],
+  "operations_not_performed": [
+    "dependency rebuild",
+    "earlier-module compilation",
+    "Lake invocation",
+    "numerical experiment",
+    "baseline/earlier research/docs/config edit",
+    "commit",
+    "push",
+    "ref/index write"
+  ],
+  "open": [
+    "pressure and Laplacian integral adapters",
+    "cell/whole-space measure and periodization transport",
+    "force mean zero and endpoint composition",
+    "slab curl producer or actual nonzero jet",
+    "periodic potential sufficiency",
+    "absorption/obstruction",
+    "comparator lifespan and growth transfer"
+  ],
+  "artifact_sha256": {
+    "Research/UnforcedRestart/Round3/SelectedBridge/check.py": "2965059b070610094babaa58728056463a59d5ee0bd6d26e76ff6f2e3478c757",
+    "Research/UnforcedRestart/Round3/SelectedBridge/preserved-before.json": "1d3a5a8136b8956ef3b99247055204940e0a3870b8bba949665e9651e8522620",
+    "Research/UnforcedRestart/Round3/SelectedBridge/PRESERVATION.log": "2ae7ddaee5239f7b3e015f72eb6c69efd5d4e0b8c62250aea71c68d1c1ec4f12",
+    "Research/UnforcedRestart/Round3/SelectedBridge/REPORT.md": "ab8a93b22e9372c1585514febb53445ec1af6819df42a5183483017ecb948e45",
+    "Research/UnforcedRestart/Round3/SelectedBridge/Main.lean": "1db715d10a38f74df0bc294bbabd49c7b200b56388a9bb93a5c09b9c472603c5",
+    "Research/UnforcedRestart/Round3/SelectedBridge/validate.py": "aea92f6c103310e5b4980dee50aa017772ef4c50b502532cdfc1b57313bce154",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/QUARANTINED.md": "bca433c81aeee443b44939b439bac2b869d669c21e8a231e2172a8299586b28f",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/command.json": "0313b8b761447a15a470e65938c51a2fcc7b3146b17f68f17fa24bfb3db41a25",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/result.json": "6f52e17a996a55d5d08c4ef8ce17f4655d940b665f2da18028cc9a34a572d7c5",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/compile.log": "92b204b67bd865c15616831a7806ed079b482cde6452afd2318073d26ca3ed6e",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/command.json": "8eb406e172c472647308196351e922884ad486f88d0026ecc1a6ac47158c39cd",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/SOURCE.md": "29fb244021517fff0f8a446b2253a91ff031635ce9ac5b74cc389868de49179a",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/result.json": "fd955f78860d1757dd62ea584597dce17436c6c5a9d52d7f47c018c59979e61a",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/compile.log": "6dcca7e18564b0f13a6e8341f5e8f6ad5eaec15d45d64ed1d670c55dc1162a76",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/QUARANTINED.md": "bca433c81aeee443b44939b439bac2b869d669c21e8a231e2172a8299586b28f",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/command.json": "d2de6fdd580cd1a293e3ff420fbfc4b7316cb43ed2cdc629f67e8785d52afdb7",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/result.json": "5fb140e67cbd0a72b6982b92335c79b1b6d02084b9db6a7f847d5061aba8f010",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/compile.log": "0420d53488bb5481ed665c465117bf101e2f79d9495af5342b97b28c814fec2e",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/command.json": "1377505eddb53af7239eae83b422cbcce2c0e893bd0ed209f81ba86dac6b7124",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/SOURCE.md": "b73742d22462c624ffdb2374af90d4e20033de0916f987c27cdd4f09d445e5cf",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/result.json": "478d9a7fed495ca65aecd8a72394430284c24568ae6dd719a99d07de29270bb4",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/compile.log": "6dcca7e18564b0f13a6e8341f5e8f6ad5eaec15d45d64ed1d670c55dc1162a76",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.olean": "95293d34794c0d29035f6d82fadc21700a2e16feb36db28b64cb399d5713e019",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.ilean": "9db5509178e3a9a3f0c9a443c16f5b2f84446982f73c61b2bcd6f91236fb305d",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean": "efca2412a90b964290fabffcfb34c255dcfd997f57c836a3a4119c2cd02a18f0",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-rmmpxk96/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.ilean": "cfefe6cfb06e598cdb4ca216e159fbd4bb8cdd268dec9d4f0f032e33a33a02f8",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.olean": "95293d34794c0d29035f6d82fadc21700a2e16feb36db28b64cb399d5713e019",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.ilean": "9db5509178e3a9a3f0c9a443c16f5b2f84446982f73c61b2bcd6f91236fb305d",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.olean": "dbcacec8f3f7e83e26a4e54eddc0361ca285aede12f9146d82278d4209a05fd8",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.ilean": "1320e36581a1e1d3225081d603f7e0bbaddb81dd3d22d163981389489310155f",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean": "efca2412a90b964290fabffcfb34c255dcfd997f57c836a3a4119c2cd02a18f0",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-bx6aiy6v/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.ilean": "cfefe6cfb06e598cdb4ca216e159fbd4bb8cdd268dec9d4f0f032e33a33a02f8",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/frozen/Research/UnforcedRestart/Round3/MeanTopology/Main.olean": "95293d34794c0d29035f6d82fadc21700a2e16feb36db28b64cb399d5713e019",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/frozen/Research/UnforcedRestart/Round3/MeanTopology/Main.ilean": "9db5509178e3a9a3f0c9a443c16f5b2f84446982f73c61b2bcd6f91236fb305d",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/frozen/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean": "efca2412a90b964290fabffcfb34c255dcfd997f57c836a3a4119c2cd02a18f0",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-2giy3tju/frozen/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.ilean": "cfefe6cfb06e598cdb4ca216e159fbd4bb8cdd268dec9d4f0f032e33a33a02f8",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.olean": "95293d34794c0d29035f6d82fadc21700a2e16feb36db28b64cb399d5713e019",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/MeanTopology/Main.ilean": "9db5509178e3a9a3f0c9a443c16f5b2f84446982f73c61b2bcd6f91236fb305d",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.olean": "dbcacec8f3f7e83e26a4e54eddc0361ca285aede12f9146d82278d4209a05fd8",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/SelectedBridge/Main.ilean": "1320e36581a1e1d3225081d603f7e0bbaddb81dd3d22d163981389489310155f",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean": "efca2412a90b964290fabffcfb34c255dcfd997f57c836a3a4119c2cd02a18f0",
+    "Research/UnforcedRestart/Round3/SelectedBridge/out/strict-gohyv7l2/lib/Research/UnforcedRestart/Round3/WitnessFeasibility/Main.ilean": "cfefe6cfb06e598cdb4ca216e159fbd4bb8cdd268dec9d4f0f032e33a33a02f8"
+  }
+}

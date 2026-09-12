@@ -1,0 +1,26 @@
+$ git rev-parse HEAD
+exit=0
+597692fa5d55e07d810b2d96ead1a67972585425
+
+$ git branch --show-current
+exit=0
+research/unforced-restart-20260909T202951Z
+
+$ git diff --exit-code
+exit=0
+
+$ git status --short
+exit=0
+?? Research/
+?? docs/unforced-restart/
+
+Post-build: all 11 package HEADs still match pins; tracked dependency sources clean.
+
+Post-build: no .lake symlink resolves outside worktree.
+
+baseline-status.txt
+exit_code=0
+command=timeout 240s env LEAN_NUM_THREADS=2 lake --no-cache --rehash build
+
+import-probe-status.txt
+exit_code=0

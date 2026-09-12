@@ -1,0 +1,149 @@
+[
+  {
+    "document": "Research/UnforcedRestart/MANIFEST.md",
+    "link": "integration/validation/SUCCESS.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "Research/UnforcedRestart/MANIFEST.md",
+    "link": "integration/validation/dependencies.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/dependencies.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "Research/UnforcedRestart/MANIFEST.md",
+    "link": "integration/validation/declarations.tsv",
+    "resolved": "Research/UnforcedRestart/integration/validation/declarations.tsv",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/FINAL-REPORT.md",
+    "link": "../../Research/UnforcedRestart/integration/agent20-run.log",
+    "resolved": "Research/UnforcedRestart/integration/agent20-run.log",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/FINAL-REPORT.md",
+    "link": "../../Research/UnforcedRestart/integration/agent20-run.exit",
+    "resolved": "Research/UnforcedRestart/integration/agent20-run.exit",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/FINAL-REPORT.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/FINAL-REPORT.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/declarations.tsv",
+    "resolved": "Research/UnforcedRestart/integration/validation/declarations.tsv",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/FINAL-REPORT.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/dependencies.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/dependencies.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/README.md",
+    "link": "../../Research/UnforcedRestart/setup/dependency-audit.txt",
+    "resolved": "Research/UnforcedRestart/setup/dependency-audit.txt",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/README.md",
+    "link": "../../Research/UnforcedRestart/setup/baseline-status.txt",
+    "resolved": "Research/UnforcedRestart/setup/baseline-status.txt",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/README.md",
+    "link": "../../Research/UnforcedRestart/setup/baseline-build.log",
+    "resolved": "Research/UnforcedRestart/setup/baseline-build.log",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/README.md",
+    "link": "../../Research/UnforcedRestart/setup/import-probe.log",
+    "resolved": "Research/UnforcedRestart/setup/import-probe.log",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/SYNTHESIS.md",
+    "link": "../../Research/UnforcedRestart/integration/run.exit",
+    "resolved": "Research/UnforcedRestart/integration/run.exit",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/SYNTHESIS.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/SYNTHESIS.md",
+    "link": "../../Research/UnforcedRestart/integration/run.log",
+    "resolved": "Research/UnforcedRestart/integration/run.log",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/SYNTHESIS.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/declarations.tsv",
+    "resolved": "Research/UnforcedRestart/integration/validation/declarations.tsv",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/SYNTHESIS.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/dependencies.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/dependencies.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/VALIDATION.md",
+    "link": "../../Research/UnforcedRestart/integration/agent18-run.log",
+    "resolved": "Research/UnforcedRestart/integration/agent18-run.log",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/VALIDATION.md",
+    "link": "../../Research/UnforcedRestart/integration/agent18-run.exit",
+    "resolved": "Research/UnforcedRestart/integration/agent18-run.exit",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/VALIDATION.md",
+    "link": "../../Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "resolved": "Research/UnforcedRestart/integration/validation/SUCCESS.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  },
+  {
+    "document": "docs/unforced-restart/round2/REPORT.md",
+    "link": "DEPENDENCIES.json",
+    "resolved": "docs/unforced-restart/round2/DEPENDENCIES.json",
+    "disposition": "Historical/external evidence reference, not supplied by source snapshot; consult original worktree at identical relative path or external recovery evidence. Missing historical links are not acceptance evidence.",
+    "exists_in_preserved_worktree": true
+  }
+]

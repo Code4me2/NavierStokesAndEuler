@@ -1,0 +1,61 @@
+{
+  "scope": "focused named exports, not aggregate acceptance",
+  "command": "python3 Research/UnforcedRestart/Round3/LocalizedForce/manifest.py",
+  "source_sha256": "77570f73bccf5aa00987dacaabed688ddd2867b9137bab83d0ff913af033ebd7",
+  "input_hashes": {
+    "docs/unforced-restart/round3/PLAN.md": "d16063139c34a774f334dfd2e1277798e7ee3182a1e020fc457a8bb5ea9c095d",
+    "docs/unforced-restart/round3/REPORT.md": "d5f11f4ecd76afaac54565a0a7be2599ed37ca1fec0e24ffc13c982cdc206d19",
+    "Research/UnforcedRestart/Round3/WitnessFeasibility/Main.lean": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+    "Research/UnforcedRestart/Round3/Integration/focused.py": "28e1032c288cc29c0a1be7a71f6b19c1210e9ebfce945307ef49ea481270d8a0",
+    "NavierStokes/ActualCandidateAssembly.lean": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+    "NavierStokes/ActualCandidateConstruction.lean": "92a829e5397206ec189b323b63a9ec3de86f57c6ab5e9f5aa7c2c90faca28270",
+    "NavierStokes/AxisymmetricFields.lean": "0b9169367e4d17078fb0cf779d3c2be40562f1cf5e6b631d2682ec20d2580fe1",
+    "NavierStokes/TailGaugePotential.lean": "d73640debcec5dfa1c1c67a0ccf5a1119085ebc615ff67ad601d6ea814ed6662",
+    "NavierStokes/MixedPeriodicAssembly.lean": "e4c439cedcab7b2be25f493d558879fd761314de97130b74aa9828ebf92e6030",
+    "NavierStokes/SpatialLocalization.lean": "92db0f6046ec96de50cabbcc14acc9e93c7471f9801999b9e5d393793cea0234",
+    "NavierStokes/JointResidualLimits.lean": "b7f995192a881a593b4dd9b4c02e9fa723ec128a15d0cc6d478a17dcdca4964d",
+    "NavierStokes/TimeLocalization.lean": "ace658552a7578650ee6012752011afaf2b38a2246d4bb9bfcae840812aa0c73",
+    "NavierStokes/ResidualRegularity.lean": "6388bf130ae3d84a28a93885da76c18597b993757fee89e0f382418b60f4c800"
+  },
+  "declarations": [
+    "cutResidual_zero_outside",
+    "cutResidual_eventually_zero_outside",
+    "terminal_boundary_jets_zero_outside"
+  ],
+  "namespace": "UnforcedRestart.Round3.LocalizedForce",
+  "axiom_whitelist": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "source_triage": "PASS",
+  "runs": [
+    {
+      "directory": "Research/UnforcedRestart/Round3/LocalizedForce/out/strict-jjgf8wtb",
+      "exit": 1,
+      "evidence": {
+        "command.json": "c5d55f339ad1b0ce0410efc37d0af679f8fe65bcae51cd274a0435e9eccf3272",
+        "result.json": "6f426a00a284fe848024d947ef1513d355aecea60a11a9e106aeb0020b056396",
+        "compile.log": "ca37faa2b356a60ea638649d33da141bbd87baa06e49fd76560055383e3bdd65"
+      }
+    },
+    {
+      "directory": "Research/UnforcedRestart/Round3/LocalizedForce/out/strict-tiajf2yo",
+      "exit": 1,
+      "evidence": {
+        "command.json": "0c09ad1ae04bc55edf67edc89b8cc29e6242f694d2702222209a0b0b6c161c64",
+        "result.json": "4aabbf85b798869b2f3c5d5eac64ddc56544c52b667e11b374c1c60285fa79ef",
+        "compile.log": "cae43ba05f797539bf63ef08e94d8ac792f52874670d6ca49ce0d9553e0374f8"
+      }
+    },
+    {
+      "directory": "Research/UnforcedRestart/Round3/LocalizedForce/out/strict-_w9_cwc3",
+      "exit": 0,
+      "evidence": {
+        "command.json": "768ddecfadd8f4b3d1e58301421c64bd1d1a6cef5218851937ff890e9f8f3980",
+        "result.json": "14ca17a5ee258e50a3a932cadeda3b3f7ecf8e7bbd7d2f265e5688b1f946c1cb",
+        "compile.log": "bc5a0bae14f6db083273d59768441bbdb1255674b23f5792a38e4037ceb37278"
+      }
+    }
+  ]
+}

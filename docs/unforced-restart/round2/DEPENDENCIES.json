@@ -1,0 +1,30 @@
+{
+  "status_key": {"K1":"frozen checked; cached provenance", "K2":"new strict cached elaboration and semantic audit", "A":"ordinary analysis, not new Lean acceptance", "U":"unproved", "H":"heuristic diagnostic"},
+  "nodes": [
+    {"id":"datum_translation", "status":"K1", "requires":[], "source":"Research/UnforcedRestart/time-translation/Main.lean; periodic-restart-data/Main.lean"},
+    {"id":"energy_rate", "status":"K1", "requires":[], "source":"Research/UnforcedRestart/energy-comparison/Main.lean"},
+    {"id":"scalar_gronwall", "status":"K1", "requires":[], "source":"Research/UnforcedRestart/gronwall-threshold/Main.lean"},
+    {"id":"slab_ftc", "status":"K2", "requires":[], "source":"Research/UnforcedRestart/Round2/PeriodicSlab/Main.lean: primitive_on_slab"},
+    {"id":"O5", "status":"K2", "requires":["energy_rate","scalar_gronwall","slab_ftc"], "contract":"joint closed-slab smoothness, periodic velocities AND pressures, two interior PDEs, divergence-free, common arbitrary datum; derived gradient majorant"},
+    {"id":"cell_budget", "status":"K2", "requires":["slab_ftc"], "contract":"CandidateProperties; fixed nonnegative t0, fixed positive H; no comparator input", "source":"Research/UnforcedRestart/Round2/ActualForce/Main.lean"},
+    {"id":"strong_budget", "status":"A", "requires":[], "contract":"full candidate jets, spatial restrictions, Parseval and actual cell/support integrals; projected H3/H2 upper bounds"},
+    {"id":"embedding", "status":"K1", "requires":[], "source":"NavierStokes/PeriodicSobolev.lean: norm_le_three_derivativeH3Norm", "note":"baseline theorem, not a newly proved NS stability result"},
+    {"id":"norm_interfaces", "status":"A", "requires":["embedding","strong_budget"], "contract":"N_multiindex <= H3_Bessel; mixedEnergy <= N_multiindex squared; point evaluation <= 3N"},
+    {"id":"O1", "status":"U", "requires":["datum_translation"], "target":"full arbitrary-data Comparator field/domain/endpoints adapter"},
+    {"id":"O2", "status":"U", "requires":[], "target":"existence and horizon coverage by one comparator, or explicit hypothetical input"},
+    {"id":"O7", "status":"U", "requires":["norm_interfaces"], "target":"checked viscosity-one strong error estimate and nonlinear bootstrap"},
+    {"id":"O8", "status":"U", "requires":["O7","strong_budget"], "target":"actual horizon-wide weighted smallness, not just finite constants"},
+    {"id":"axis_value_wrapper", "status":"U", "requires":[], "target":"closed selected-field eventual axis growth specialization"},
+    {"id":"selected_axis_jet", "status":"U", "requires":[], "target":"match full germ theorem inputs to selected witness before differentiating"},
+    {"id":"O9", "status":"U", "requires":["O1","O2","O7","O8","axis_value_wrapper"], "target":"derived relative evaluation error and terminal contradiction"},
+    {"id":"mean_zero", "status":"A", "requires":[], "target":"actual presingular periodic force mean zero, via compact divergence and residual integration"},
+    {"id":"O3", "status":"U", "requires":["mean_zero"], "target":"whole-terminal-slab selected curl(f)=0, or direct force vanishing; periodic potential admissible"},
+    {"id":"O4", "status":"U", "requires":["O3","O1","O2","axis_value_wrapper"], "target":"p-minus-potential, boundary class, exact uniqueness and contradiction"},
+    {"id":"O6", "status":"U", "requires":[], "target":"whole-space error integrability and actual boundary flux closure"},
+    {"id":"O10", "status":"U", "requires":[], "target":"scaling covariance, compactness, nonlinear convergence, nontrivial limit"},
+    {"id":"coarse_envelope_failure", "status":"H", "requires":["selected_axis_jet"], "target":"diagnostic for a sufficient upper-bound test ONLY; no implication of actual error growth or impossibility"}
+  ],
+  "edge_semantics":"requires lists are AND dependencies for the stated target, not assertions that an open node follows from its predecessors alone",
+  "route_alternatives":[["O4"],["O9"],["O10"]],
+  "forbidden_inferences":["L2 control => point evaluation", "finite strong force norm => weighted smallness", "base point-value equality => selected jet equality", "failed upper envelope => actual error lower bound", "different restarts for different S => one comparator", "successful cached elaboration => clean provenance"]
+}

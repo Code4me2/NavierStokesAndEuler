@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python3",
+    "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round2/Integration/validate.py",
+    "--clean"
+  ],
+  "cwd": "/home/velvet/worktrees/unforced-restart-20260909T202951Z",
+  "exit": 1,
+  "log": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round2/Integration/evidence/review-20260909T225709Z/clean-negative.log",
+  "sha256": "b8355354443f81cb960ee933c870c9dbebef507b842b9b91b29eb1b0becffb55"
+}
