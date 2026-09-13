@@ -25,6 +25,10 @@ Each entry specifies the hypothesis boundary: a bundled record means **all its f
 
 [Chapter 06](06-primitive-derivative-bounds.md) supplies relative numerical base/frame/pressure producers for the same selected construction at baseline `26e896e…`. Its [separate claim and exact-file source ledger](primitive-derivative-validation.md) audits ten `primitive-*` claims without adding historical IDs or source-map lexical targets. Finite-profile certificates, incoming residual production and localization remain explicit inputs/debt; chapter 05 and its historical ledger/plan are unchanged.
 
+## Supplemental physical mechanism and reference-only library map
+
+[Chapter 07](07-physical-mechanism.md) and its [PM-01–11 ledger/dependency map](physical-mechanism-validation.md) distinguish the new paper and immutable upstream `f9e8bc5…` suppliers from retained `26e896e…` sources. They add no historical-ID validation, selected-array/domain closure, theorem rerouting or force-deletion result.
+
 <a id="delivered-statements"></a>
 ## Delivered statements and class hypotheses
 

@@ -42,6 +42,8 @@ Exact endpoints: [NS submission](../../NavierStokes/ComparatorSolution.lean), [N
 5. [04 — Euler](04-euler.md): an independent branch. Read the forward/joined distinction before the summability and H4-dependent stability arguments.
 6. Use [SOURCE-MAP.md](SOURCE-MAP.md) to audit hypotheses and [VALIDATION.md](VALIDATION.md) to find open obligations and review assignments. [PLAN.md](PLAN.md) preserves the authoring contract and provenance; its initial directory-only restriction is superseded only by the user's explicit authorization for the minimal repository README discoverability link.
 
+For the new paper's physical interpretation, read [07 — Shear-driven pulses](07-physical-mechanism.md) and its [separate claim ledger and bounded approximation/pressure map](physical-mechanism-validation.md). This upstream `f9e8bc5…` supplement clarifies “installed growth” without changing historical evidence, selected-domain obligations or theorem routes; no autonomous persistence is established.
+
 ## Dependency diagram
 
 Arrows mean mathematical inputs, **not completed review**. Bracketed obligations remain open.
