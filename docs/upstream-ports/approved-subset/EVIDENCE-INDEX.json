@@ -1,0 +1,59 @@
+{
+  "scope": "External historical reports/maps: hashed during documentary packaging, not rerun or recertified; no raw compiler artifacts copied.",
+  "entries": [
+    {
+      "external_path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/FINAL-OVERVIEW.md",
+      "sha256": "51906013e06787e4c834a3780cbda89bfed24f88f8cf562d02573996f9735345",
+      "bytes": 6279,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/PLAN.md",
+      "sha256": "e5fbd102c36e90ee10733a441a92fe3f06551e90f9064307c60dcde76d7498fa",
+      "bytes": 15189,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/REVIEW-DISPOSITIONS.md",
+      "sha256": "0d98fc6b5799d34b1f2e541108c82e3c0eb38302bd00e6c8d11d06760c654043",
+      "bytes": 24041,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/upstream-adoption-followup-8qxz5rka/FINAL-OVERVIEW.md",
+      "sha256": "6727afe68fdba0ed50ec3df4951e065623642d491ffb270938d7c0286f14624e",
+      "bytes": 4781,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/upstream-adoption-followup-8qxz5rka/port-map/PORT-MAP.md",
+      "sha256": "8578e5cbd7809b19511dae6bf4577a13f503620401e3533e0af06b0b77c7da96",
+      "bytes": 33514,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/upstream-adoption-followup-8qxz5rka/port-map/PORT-MAP.json",
+      "sha256": "618ff51f80aba5bfe29f05aa293bc8c528e3187ae6d7d4a6648ddcefe89c1bb8",
+      "bytes": 117206,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/h3-pressure-pilot-z7lj1we_/FINAL-REPORT.md",
+      "sha256": "8731a9b6eb2337df1fe1810d6c0039653a6e35315cd5d5b05b5fb3c9ddd97c73",
+      "bytes": 10674,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/h3-pressure-pilot-z7lj1we_/broader-validation/final-narrow-integration-SiMI7HBH/FINAL-REPORT.md",
+      "sha256": "4d76372292e006c4d365b8a7d31e23cb4c547cece8f7d48aa8693b2fdb326e31",
+      "bytes": 8003,
+      "copied_to_git": false
+    },
+    {
+      "external_path": "/home/velvet/h3-pressure-pilot-z7lj1we_/broader-validation/run-20260913T223724Z/independent-audit-readonly/AUDIT.md",
+      "sha256": "c5fdf8f49858548d125ae86a3ec1443e44dcaafdae85786846cd69b110b4785a",
+      "bytes": 9838,
+      "copied_to_git": false
+    }
+  ]
+}

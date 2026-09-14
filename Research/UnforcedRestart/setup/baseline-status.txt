@@ -1,0 +1,2 @@
+exit_code=0
+command=timeout 240s env LEAN_NUM_THREADS=2 lake --no-cache --rehash build

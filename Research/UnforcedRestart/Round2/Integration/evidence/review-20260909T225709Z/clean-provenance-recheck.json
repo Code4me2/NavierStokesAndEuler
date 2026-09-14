@@ -1,0 +1,196 @@
+{
+  "status": "BLOCKED_NOT_RETRIED",
+  "external": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z",
+  "pins": [
+    {
+      "url": "https://github.com/leanprover/comparator.git",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover",
+      "rev": "19e111e2141cf333c7daff0f64c5f24acc91dd2e",
+      "name": "Comparator",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "v4.34.0-rc2",
+      "inherited": false,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/mathlib4.git",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "85e3a25e006c35636f0e53b0e9296caca2685bc0",
+      "name": "mathlib",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "v4.34.0-rc2",
+      "inherited": false,
+      "configFile": "lakefile.lean"
+    },
+    {
+      "url": "https://github.com/leanprover/lean4export",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover",
+      "rev": "cacf989bd75f608700820f6afc595f32e7a99a4d",
+      "name": "lean4export",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "master",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/plausible",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "d9598f07b1bc701f1e3aae163d2681c1fd978793",
+      "name": "plausible",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "main",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/LeanSearchClient",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "ba67e212be1197b84c1f1f6299488a10a3002713",
+      "name": "LeanSearchClient",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "main",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/import-graph",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "d8823026ac7ef130c253089d95685f9877b95323",
+      "name": "importGraph",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "main",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/ProofWidgets4",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "a8acbfd87375ff4abe14ce09db5b7664d383bc7f",
+      "name": "proofwidgets",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "main",
+      "inherited": true,
+      "configFile": "lakefile.lean"
+    },
+    {
+      "url": "https://github.com/leanprover-community/aesop",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "18889deb9e83ea7420ef51c160d6f88552e744e3",
+      "name": "aesop",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "master",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/quote4",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "507746ab8f4b643ccdacb2ec4cdb5853fa9f8ab3",
+      "name": "Qq",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "master",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover-community/batteries",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover-community",
+      "rev": "d54dddc581e08be364c278052863524bff7a99a9",
+      "name": "batteries",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "main",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    },
+    {
+      "url": "https://github.com/leanprover/lean4-cli",
+      "type": "git",
+      "subDir": null,
+      "scope": "leanprover",
+      "rev": "ab3a82db9fea14cf0fd7f5a2de650f4b534640af",
+      "name": "Cli",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "v4.34.0-rc2",
+      "inherited": true,
+      "configFile": "lakefile.toml"
+    }
+  ],
+  "tracked_source_hashes_verified": 12363,
+  "evidence": [
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/CLEAN-VERDICT.json",
+      "sha256": "e6c035b482460ccf4168880164f1d9c20677da6f9402997e90a1b3fbfabe86db"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/acquisition-status.json",
+      "sha256": "2cf8d59fad8c2aa6ee77c2e505bd46f9057b8c19196921edddef9a26c56c9d3e"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/acquisition.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/acquisition.log",
+      "sha256": "6c195241aaaed7bf7aae3091d8c5982a6092ea4d82e2ac83f16b0bc5f066cacd"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/build-controls.json",
+      "sha256": "07e472fcb3d03284ed0b9edbd38a86d3a004a04abf6454b86d39b4bda56f7ae0"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/build-driver.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/build-driver.log",
+      "sha256": "8ae66ad322fd9df6a59e184924ec4c543c726e552fd4759b941c9f8ac4b284fb"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/controls.json",
+      "sha256": "07e472fcb3d03284ed0b9edbd38a86d3a004a04abf6454b86d39b4bda56f7ae0"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/environment.json",
+      "sha256": "992af25b8d4adffc6b1ba532e97b4cbdbde6241917ad7e216fe1c2ecac3a7372"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z-evidence/initial-inventory.json",
+      "sha256": "52c2f5ef9da333fb6bd5a8861a6ca859912f200094ec7ada5bb32d3adb479db4"
+    }
+  ],
+  "traces": [
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/proofwidgets/widget/package-lock.json.trace",
+      "tracked": "widget/package-lock.json.trace",
+      "sha256": "154a4f212697184548830b6bcca3fab192d93b6af145c64cd0ee9c996158fe1d"
+    },
+    {
+      "path": "/home/velvet/research-builds/unforced-round2-clean-20260909T221339Z/.lake/packages/proofwidgets/widget/js/lake.trace",
+      "tracked": "widget/js/lake.trace",
+      "sha256": "e17514aba9f6b1b04d2b84a124ace02c7485ee52d1441e0ee664f06f9c8b3245"
+    }
+  ],
+  "lake_invocations_this_pass": 0,
+  "source_build_compilations_this_pass": 0,
+  "policy": "No exemption or deletion authorized; successful pinned-source build chain absent."
+}

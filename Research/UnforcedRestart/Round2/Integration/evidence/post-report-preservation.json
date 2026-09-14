@@ -1,0 +1,19 @@
+{
+  "status": "POST_REPORT_PRESERVATION_PASS",
+  "baseline_files": 2335,
+  "archived_files": 114,
+  "snapshot_digest": "192e15dc0ff1cb79cae02a19941e0f816dc194e91123c205153ccf808322a488",
+  "frozen_manifest_sha256": "e01b6304a9b2be0494c3e8dba4baf16109adbff18b57e4a5af42edd66576afc1",
+  "round2_manifest_sha256": "40d0d0d6a76d514098430979860ac322ef76f62d9d58f91f02477bc3b452e4f5",
+  "graph_nodes": 22,
+  "graph": "acyclic, dependencies exist; source-only consistency check, not proof",
+  "reports": {
+    "docs/unforced-restart/round2/DEPENDENCIES.md": "c99a0811692173c2c1d163971c62afe2d34e73407170342de63cfc4d7f211f01",
+    "docs/unforced-restart/round2/PLAN.md": "ef26a6dbea03ca542452734cf4cd8b96b5712a39620039be8553321ed54aeac0",
+    "docs/unforced-restart/round2/growth-mechanism.md": "49d0bddce0cf8fee63a7b9aaeb4b7463cfe7f1eeea07d55068b1e4d336621dd0",
+    "docs/unforced-restart/round2/REPORT.md": "4c99d5d7f24e522f503473975da9a116b0062305c201b2ca0d184018cc2602d0",
+    "docs/unforced-restart/round2/actual-force.md": "2e5fb41e9fd54e95daf4b8f8fe4bcd76ab6f5dbde46bb7eb259b716e38f3011c",
+    "docs/unforced-restart/round2/periodic-slab.md": "da891dc0bcbbe37d9eb971a8fe396c2daff0e7a3829176d534a8518a8b5d7a4f",
+    "docs/unforced-restart/round2/clean-provenance.md": "236f3e2e97c67d90aa3dace4d74cd0d667cec65da51564ad2953ef46036cf0d1"
+  }
+}

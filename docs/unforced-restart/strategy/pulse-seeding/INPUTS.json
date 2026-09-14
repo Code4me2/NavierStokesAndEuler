@@ -1,0 +1,141 @@
+{
+  "owned_root": "/home/velvet/pulse-seeding-analysis-nM8ujEl7",
+  "scope": "Human paper/source mathematics only; no builds, simulations, Lean implementation, integration or git writes. Hashes identify inspected inputs, not kernel certification. Targeted reads, not whole-source audit.",
+  "source_pins": {
+    "upstream": {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream",
+      "commit": "f9e8bc5b38b6e212696e8a30e3e91517af887bbd",
+      "status": "export association inherited from REVIEW-INPUTS.json; not authenticated against Git objects"
+    },
+    "original": {
+      "path": "/home/velvet/Desktop/NavierStokesAndEuler",
+      "commit": "26e896edbdbe1215c0d50ddba24b2b6453646f5f",
+      "status": "provided pin; targeted literal body inspection"
+    },
+    "research": {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z",
+      "user_research_revision": "e46b6a4",
+      "historical_manifest_anchor": "1d16509bec4609ae418e64842e81b8b0ac07dcc7",
+      "status": "different historical anchors preserved; present file hashes control these reads; no assertion that they are the same revision"
+    },
+    "companion": {
+      "path": "/home/velvet/worktrees/proof-native-control-20260912T185404Z",
+      "historical_manifest_anchor": "6da0731071d900b7a1cf3fb9c009aa7cf6bc6c7f",
+      "status": "historical anchor only; current input bytes hashed"
+    }
+  },
+  "primary_paths": {
+    "paper_text": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/papers/navier-stokes.txt",
+    "paper_pdf": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/papers/navier-stokes.pdf",
+    "upstream_source": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream",
+    "original_source": "/home/velvet/Desktop/NavierStokesAndEuler",
+    "chapter07": "/home/velvet/worktrees/proof-native-control-20260912T185404Z/docs/proof-companion/07-physical-mechanism.md",
+    "software_handoff": "/home/velvet/h3-pressure-pilot-z7lj1we_/broader-validation/final-narrow-integration-SiMI7HBH/HANDOFF.md"
+  },
+  "inputs": [
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/papers/navier-stokes.txt",
+      "sha256": "2bc25d7e76b65611bc9d946708c71dc35b254a2e5b293eebc672c491a877b0f4"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/papers/navier-stokes.pdf",
+      "sha256": "0e779481c4da40bd28d1e642e1d8ca57447d129610df28dfa5a11e9af8ae228f"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/REVIEW-INPUTS.json",
+      "sha256": "2a409ee64ec3ee2119d745d2caa452c0a916d33a21f44d4395c1337868c465f5"
+    },
+    {
+      "path": "/home/velvet/worktrees/proof-native-control-20260912T185404Z/docs/proof-companion/07-physical-mechanism.md",
+      "sha256": "fb3158c4a6c85b98b66efdfbd07148f27d4b72aa7b6791fa4731f3bdb3a89c78"
+    },
+    {
+      "path": "/home/velvet/worktrees/proof-native-control-20260912T185404Z/docs/proof-companion/SOURCE-MAP.md",
+      "sha256": "03ee19f70916ae9af507f0a479c121cc8cbc194481cf5a057876f4d0b6d22f47"
+    },
+    {
+      "path": "/home/velvet/worktrees/proof-native-control-20260912T185404Z/docs/proof-companion/physical-mechanism-validation.md",
+      "sha256": "402a2b8dc2e9a376fcd1b52aca7bcc8def78e735605218e30f2eb5c6194fc70d"
+    },
+    {
+      "path": "/home/velvet/worktrees/proof-native-control-20260912T185404Z/docs/proof-companion/06-primitive-derivative-bounds.md",
+      "sha256": "5ba6e15e93adada4b827014e3b514146b03de0e125b719cdc7ba923aab17d026"
+    },
+    {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/docs/unforced-restart/strategy/CENTRAL-OBSTACLE.md",
+      "sha256": "f991919951bee0dd2d0b7568091b90c5babc447c41df43c518ad7163e2c511c2"
+    },
+    {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/docs/unforced-restart/strategy/force-response/FINAL-REPORT.md",
+      "sha256": "415748db4b3b68236b17379690c69f4dec73366b3a952f849923106f08739f6d"
+    },
+    {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/docs/unforced-restart/strategy/timing-response/OVERVIEW.md",
+      "sha256": "15589e36d2d943d0b7dd5e3f0f6fd0cdb4c4a2b02dab331f3b859ab4ea1fad6e"
+    },
+    {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/docs/unforced-restart/strategy/timing-response/pde-adversarial-verdict.md",
+      "sha256": "62811ac2b2e427755346c0c4bb22943af7ce3ccb4cfad7abf502cc290f7ea696"
+    },
+    {
+      "path": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/docs/unforced-restart/strategy/timing-response/source-and-strategy-adversarial-verdict.md",
+      "sha256": "15f43fd347ec9a33fa24b7a046d3798bc23728d0db9a770f1393e0b440861719"
+    },
+    {
+      "path": "/home/velvet/h3-pressure-pilot-z7lj1we_/broader-validation/final-narrow-integration-SiMI7HBH/HANDOFF.md",
+      "sha256": "9eb44aa4c03b39c0fb750e150bbce30f8f0466f57f05b13eeacc736389d819bf"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/PrimaryPulseBounds.lean",
+      "sha256": "c6f13688e93981dc7459532d3b030d233fde7d8eab698d44b059f8a28c2a3935"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/PrimaryODE.lean",
+      "sha256": "8952eec0456e15b311826e7d1a0ab42bf0974622a445d1adc02dc043d6cf6b82"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/PrimaryGeometryAssembly.lean",
+      "sha256": "ca704dcae58e7339d91758a0f5e0fd545628e24df4d3841ea3d118e542feceab"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/BasePhaseGeometry.lean",
+      "sha256": "9fd6839486f88c2b2f91387a092c9bd5d0386f1bbbf591ec6fd8546058a8afb4"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/CorrectionInitialization.lean",
+      "sha256": "de409e3e0ce7bba9ee567fa7e51143c7b5219c47622fe44ad7a04d48287e143b"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/ActualPrimaryDynamics.lean",
+      "sha256": "bac8db6ef2f8de2b35821d340f9cd68732768bd4ffc6dbee779a3dae2aaee222"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/ActualPrimaryCovariance.lean",
+      "sha256": "9acd63d2870909d9754fb88b320df86c92dc113522cfc6b5b0f1908c66b069fb"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/PulseGrowth.lean",
+      "sha256": "beccfa127913f2224b114a1f2a4f41983032c1666fb17c50ca04a1ed774d7277"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/PulseCovariance.lean",
+      "sha256": "b93b8ed06651c256254ea0751b12d9967b196415ab295ad8c102cb5aadf4634a"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/GaussianTailFlat.lean",
+      "sha256": "97a9c971088cb66beb7b58781d46e3a987fe4266d839889c43cfcbed1fce0635"
+    },
+    {
+      "path": "/home/velvet/upstream-strategy-f9e8bc5-9d96jtuy/upstream/NavierStokes/HarmonicWaveInteraction.lean",
+      "sha256": "52149d5832a6bc9c20fa8b693c80d01b071680eb2c58ec3bb3e9819155c69815"
+    },
+    {
+      "path": "/home/velvet/Desktop/NavierStokesAndEuler/NavierStokes/PrimaryPulseBounds.lean",
+      "sha256": "8a1bd2778c83c246015fd9a59a4c345877fb75e4bfe35a49e12f9f156320f84f"
+    },
+    {
+      "path": "/home/velvet/Desktop/NavierStokesAndEuler/NavierStokes/CorrectionInitialization.lean",
+      "sha256": "3aec41fd046ae4b6e0ee7f0e4163dc3997322c883a5ef321fac952551ce865bd"
+    }
+  ]
+}

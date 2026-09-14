@@ -1,0 +1,41 @@
+{
+  "scope": "Mechanical documentary and bounded exact rational checks only; not validation of the paper, PDE estimates, or Lean elaboration.",
+  "owned_root": "/home/velvet/pulse-seeding-analysis-nM8ujEl7",
+  "input_hashes_rechecked": 26,
+  "input_hash_mismatches": [],
+  "absolute_reference_targets_exist": 19,
+  "overview_words": 498,
+  "calculation_words": 4033,
+  "exact_checks": {
+    "damping_cubic_coefficient": "7/24",
+    "cutoff_intervals": [
+      "1/6",
+      "3/10",
+      "7/10",
+      "5/6"
+    ],
+    "cutoff_gaussian_exponent": "a_u L/50",
+    "riccati_upper_barrier_bound": "-39e/16",
+    "primary_quadratic_harmonics": [
+      -2,
+      0,
+      2
+    ],
+    "return_exponent": "3/2-2 kappa_s",
+    "small_singular_exponent": [
+      -1,
+      -1
+    ],
+    "singular_ratio_exponent": [
+      -2,
+      0
+    ]
+  },
+  "nonclaims": [
+    "No selected-field simulation",
+    "No independent mathematical/adversarial certification",
+    "No Lean build or kernel check",
+    "No git operation",
+    "Input-hash recheck is not a host-wide preservation audit"
+  ]
+}

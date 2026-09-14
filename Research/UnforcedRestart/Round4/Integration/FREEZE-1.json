@@ -1,0 +1,35 @@
+{
+  "status": "FROZEN_STRICT_PRODUCERS",
+  "rows": [
+    {
+      "receipt": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-pu_v_ph4/receipt.json",
+      "receipt_sha256": "42eb7844449d9897434f2ee213718d10a2e3699bc1becd67f87e6dd1db47d7bc",
+      "source": "Research/UnforcedRestart/Round4/PressureIntegral/Main.lean",
+      "source_sha256": "22cf707edd11b9d47f63ab7f9b3a6156095417749d92b075a3549caad98c6587",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-pu_v_ph4/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.olean": "4ac6aff45f40bdd3b0be95c03b376493bcf55b7ef67595a7fefb756c64bf4e5f",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-pu_v_ph4/lib/Research/UnforcedRestart/Round4/PressureIntegral/Main.ilean": "925b39b699920a3c4d4d8b3517b245132d0f45f6a755d935b7f6d283a59cd7f4"
+      }
+    },
+    {
+      "receipt": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-kq0n58kt/receipt.json",
+      "receipt_sha256": "db21417decf580e766ffde30c9fea61106b053d76879a2c6d610d90146c82b33",
+      "source": "Research/UnforcedRestart/Round4/LaplacianIntegral/Main.lean",
+      "source_sha256": "144115d91bca4a94f75cf9bc5647f6a58c1c76589c31e831c8628534008d6c71",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-kq0n58kt/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.olean": "7141b2d641a9f6fba2e67d8275d3aa9418a4b2f0378246ca3c09aeb180f16b24",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-kq0n58kt/lib/Research/UnforcedRestart/Round4/LaplacianIntegral/Main.ilean": "5ff354fe04a993379b12bddd5661c3d1e09216ae3b4012560634f534b92cacb7"
+      }
+    },
+    {
+      "receipt": "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-7pvbwp0j/receipt.json",
+      "receipt_sha256": "4ba5b225f70df653feee4fb5872678f4e475e6eabd85ee6e825a2253834c9208",
+      "source": "Research/UnforcedRestart/Round4/PeriodizationTransport/Main.lean",
+      "source_sha256": "96bc286bd7f70c954f9e01a9fc1cf78c19b636da0b1503f93b803ed9381a93a1",
+      "outputs": {
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-7pvbwp0j/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.olean": "ce257c41522756c4ee57731da8c1659870655693f8eb21d05955cbb209994b04",
+        "/home/velvet/worktrees/unforced-restart-20260909T202951Z/Research/UnforcedRestart/Round4/Integration/strict-7pvbwp0j/lib/Research/UnforcedRestart/Round4/PeriodizationTransport/Main.ilean": "affb0d3e00c73b2030724632ec179b0c84adc933e05022b73e2dfc6b23e922a2"
+      }
+    }
+  ]
+}

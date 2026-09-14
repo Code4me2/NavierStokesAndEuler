@@ -1,0 +1,747 @@
+[
+  {
+    "path": "Research/UnforcedRestart/actual-forcing-budget/Main.lean",
+    "sha256": "190613356966300c5238cf12faf1e84b2aeabc9834e73b2b78237eedd5154f5a",
+    "namespace": "UnforcedRestart.ActualForcingBudget",
+    "imports": [
+      "NavierStokes.R3CompactCandidate",
+      "NavierStokes.PeriodicForceDecay",
+      "Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic"
+    ],
+    "declarations": [
+      "UnforcedRestart.ActualForcingBudget.compact_jet_bound",
+      "UnforcedRestart.ActualForcingBudget.compact_jet_intervalIntegrable",
+      "UnforcedRestart.ActualForcingBudget.compact_time_integral_bound",
+      "UnforcedRestart.ActualForcingBudget.compact_short_budget"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.ActualForcingBudget.compact_jet_bound": {
+        "classification": "A",
+        "source_line": 14
+      },
+      "UnforcedRestart.ActualForcingBudget.compact_jet_intervalIntegrable": {
+        "classification": "A",
+        "source_line": 24
+      },
+      "UnforcedRestart.ActualForcingBudget.compact_time_integral_bound": {
+        "classification": "A",
+        "source_line": 38
+      },
+      "UnforcedRestart.ActualForcingBudget.compact_short_budget": {
+        "classification": "A",
+        "source_line": 56
+      }
+    },
+    "unforced_application_obligations": [
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/difference-equation/Main.lean",
+    "sha256": "1c5ea8920c64129ecbe814b70ce2fae38ed4dee48deb649fe87669be72ed309a",
+    "namespace": "UnforcedRestart.DifferenceEquation",
+    "imports": [
+      "NavierStokes.SolutionDifference"
+    ],
+    "declarations": [
+      "UnforcedRestart.DifferenceEquation.residual",
+      "UnforcedRestart.DifferenceEquation.residual_one",
+      "UnforcedRestart.DifferenceEquation.difference_forces",
+      "UnforcedRestart.DifferenceEquation.forced_unforced",
+      "UnforcedRestart.DifferenceEquation.unforced_forced",
+      "UnforcedRestart.DifferenceEquation.forced_unforced_on_slab",
+      "UnforcedRestart.DifferenceEquation.divergence_free_difference",
+      "UnforcedRestart.DifferenceEquation.restart_difference_zero"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.DifferenceEquation.residual": {
+        "classification": "B",
+        "source_line": 14
+      },
+      "UnforcedRestart.DifferenceEquation.residual_one": {
+        "classification": "B",
+        "source_line": 19
+      },
+      "UnforcedRestart.DifferenceEquation.difference_forces": {
+        "classification": "B",
+        "source_line": 25
+      },
+      "UnforcedRestart.DifferenceEquation.forced_unforced": {
+        "classification": "B",
+        "source_line": 58
+      },
+      "UnforcedRestart.DifferenceEquation.unforced_forced": {
+        "classification": "B",
+        "source_line": 78
+      },
+      "UnforcedRestart.DifferenceEquation.forced_unforced_on_slab": {
+        "classification": "B",
+        "source_line": 97
+      },
+      "UnforcedRestart.DifferenceEquation.divergence_free_difference": {
+        "classification": "B",
+        "source_line": 120
+      },
+      "UnforcedRestart.DifferenceEquation.restart_difference_zero": {
+        "classification": "C",
+        "source_line": 130
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O2",
+      "O5",
+      "O6",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/energy-comparison/Main.lean",
+    "sha256": "f8a731c7768154f737fecf161cd0a2a7d1fdf84314b4ebc5f13ac6e3d4b2615a",
+    "namespace": "UnforcedRestart.EnergyComparison",
+    "imports": [
+      "NavierStokes.PeriodicUniqueness"
+    ],
+    "declarations": [
+      "UnforcedRestart.EnergyComparison.forced_energy_balance",
+      "UnforcedRestart.EnergyComparison.forcing_work_le",
+      "UnforcedRestart.EnergyComparison.forced_energy_rate_le"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.EnergyComparison.forced_energy_balance": {
+        "classification": "B",
+        "source_line": 13
+      },
+      "UnforcedRestart.EnergyComparison.forcing_work_le": {
+        "classification": "B",
+        "source_line": 81
+      },
+      "UnforcedRestart.EnergyComparison.forced_energy_rate_le": {
+        "classification": "B",
+        "source_line": 99
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O2",
+      "O5",
+      "O6",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/gronwall-threshold/Main.lean",
+    "sha256": "48b50ff2b26e32007b5c714a42f37e03fe798c8987e13c6080cbf5375a5eb753",
+    "namespace": "UnforcedRestart.GronwallThreshold",
+    "imports": [
+      "NavierStokes.GronwallInterior"
+    ],
+    "declarations": [
+      "UnforcedRestart.GronwallThreshold.weighted_budget",
+      "UnforcedRestart.GronwallThreshold.threshold",
+      "UnforcedRestart.GronwallThreshold.zero_initial_threshold"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.GronwallThreshold.weighted_budget": {
+        "classification": "C",
+        "source_line": 16
+      },
+      "UnforcedRestart.GronwallThreshold.threshold": {
+        "classification": "C",
+        "source_line": 50
+      },
+      "UnforcedRestart.GronwallThreshold.zero_initial_threshold": {
+        "classification": "C",
+        "source_line": 68
+      }
+    },
+    "unforced_application_obligations": [
+      "O5",
+      "O6",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/local-theory-obstruction/Main.lean",
+    "sha256": "d9919bebd03e1618c0fe621eb12f93cb510b803a435c097fb3612d26e44f53f8",
+    "namespace": "UnforcedRestart.LocalTheoryObstruction",
+    "imports": [
+      "NavierStokes.MaximalLifespan"
+    ],
+    "declarations": [
+      "UnforcedRestart.LocalTheoryObstruction.nonzero_snapshot_not_solution",
+      "UnforcedRestart.LocalTheoryObstruction.unchanged_fields_force_rigidity",
+      "UnforcedRestart.LocalTheoryObstruction.zero_datum_unforced_periodic_is_zero"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.LocalTheoryObstruction.nonzero_snapshot_not_solution": {
+        "classification": "C",
+        "source_line": 15
+      },
+      "UnforcedRestart.LocalTheoryObstruction.unchanged_fields_force_rigidity": {
+        "classification": "B",
+        "source_line": 25
+      },
+      "UnforcedRestart.LocalTheoryObstruction.zero_datum_unforced_periodic_is_zero": {
+        "classification": "B",
+        "source_line": 34
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O2",
+      "O3",
+      "O7",
+      "O8"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/periodic-restart-data/Main.lean",
+    "sha256": "95423d4e60624a11dcb95901f3e346e0cb8bebc03e3d8af4e670efdfd4f67cb7",
+    "namespace": "UnforcedRestart.PeriodicRestartData",
+    "imports": [
+      "NavierStokes.TimeLocalization",
+      "NavierStokes.ComparatorBridge",
+      "NavierStokes.PeriodicLocalization"
+    ],
+    "declarations": [
+      "UnforcedRestart.PeriodicRestartData.snapshot_admissible",
+      "UnforcedRestart.PeriodicRestartData.candidate_snapshot",
+      "UnforcedRestart.PeriodicRestartData.candidate_pressure_snapshot",
+      "UnforcedRestart.PeriodicRestartData.periodize_snapshot",
+      "UnforcedRestart.PeriodicRestartData.pressure_gauge_periodic"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.PeriodicRestartData.snapshot_admissible": {
+        "classification": "A",
+        "source_line": 11
+      },
+      "UnforcedRestart.PeriodicRestartData.candidate_snapshot": {
+        "classification": "A",
+        "source_line": 24
+      },
+      "UnforcedRestart.PeriodicRestartData.candidate_pressure_snapshot": {
+        "classification": "A",
+        "source_line": 31
+      },
+      "UnforcedRestart.PeriodicRestartData.periodize_snapshot": {
+        "classification": "C",
+        "source_line": 40
+      },
+      "UnforcedRestart.PeriodicRestartData.pressure_gauge_periodic": {
+        "classification": "C",
+        "source_line": 46
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O2",
+      "O3",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/pressure-absorption/Main.lean",
+    "sha256": "ed3fe773fc1b9d00998b583c2e0aa66295403f3921a852a715415333b5d3f8c9",
+    "namespace": "UnforcedRestart.PressureAbsorption",
+    "imports": [
+      "NavierStokes.ResidualCalculus",
+      "NavierStokes.SolutionDifference"
+    ],
+    "declarations": [
+      "UnforcedRestart.PressureAbsorption.residual_sub_pressure",
+      "UnforcedRestart.PressureAbsorption.residual_after_correction",
+      "UnforcedRestart.PressureAbsorption.unforced_iff_gradient",
+      "UnforcedRestart.PressureAbsorption.corrected_pressure_smooth",
+      "UnforcedRestart.PressureAbsorption.corrected_pressure_periodic",
+      "UnforcedRestart.PressureAbsorption.absorb_on",
+      "UnforcedRestart.PressureAbsorption.time_gauge_gradient"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.PressureAbsorption.residual_sub_pressure": {
+        "classification": "B",
+        "source_line": 11
+      },
+      "UnforcedRestart.PressureAbsorption.residual_after_correction": {
+        "classification": "B",
+        "source_line": 21
+      },
+      "UnforcedRestart.PressureAbsorption.unforced_iff_gradient": {
+        "classification": "B",
+        "source_line": 29
+      },
+      "UnforcedRestart.PressureAbsorption.corrected_pressure_smooth": {
+        "classification": "B",
+        "source_line": 37
+      },
+      "UnforcedRestart.PressureAbsorption.corrected_pressure_periodic": {
+        "classification": "B",
+        "source_line": 42
+      },
+      "UnforcedRestart.PressureAbsorption.absorb_on": {
+        "classification": "B",
+        "source_line": 51
+      },
+      "UnforcedRestart.PressureAbsorption.time_gauge_gradient": {
+        "classification": "B",
+        "source_line": 62
+      }
+    },
+    "unforced_application_obligations": [
+      "O3",
+      "O4"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/r3-restart-data/Main.lean",
+    "sha256": "e80024b8013fcd2ff646da06613a307e51f72a7545ec60fedc37d415858d2d84",
+    "namespace": "UnforcedRestart.R3RestartData",
+    "imports": [
+      "NavierStokes.R3CompactCandidate",
+      "NavierStokes.TimeLocalization",
+      "NavierStokes.ActualCandidateAssembly"
+    ],
+    "declarations": [
+      "UnforcedRestart.R3RestartData.snapshot_smooth",
+      "UnforcedRestart.R3RestartData.snapshot_divergence",
+      "UnforcedRestart.R3RestartData.fixed_jet_support",
+      "UnforcedRestart.R3RestartData.compact_smooth_decay",
+      "UnforcedRestart.R3RestartData.snapshot_admissible",
+      "UnforcedRestart.R3RestartData.snapshot_compactSupport",
+      "UnforcedRestart.R3RestartData.snapshot_energy_integrable",
+      "UnforcedRestart.R3RestartData.actual_candidate_restart_data"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.R3RestartData.snapshot_smooth": {
+        "classification": "A",
+        "source_line": 13
+      },
+      "UnforcedRestart.R3RestartData.snapshot_divergence": {
+        "classification": "A",
+        "source_line": 18
+      },
+      "UnforcedRestart.R3RestartData.fixed_jet_support": {
+        "classification": "A",
+        "source_line": 26
+      },
+      "UnforcedRestart.R3RestartData.compact_smooth_decay": {
+        "classification": "C",
+        "source_line": 40
+      },
+      "UnforcedRestart.R3RestartData.snapshot_admissible": {
+        "classification": "A",
+        "source_line": 67
+      },
+      "UnforcedRestart.R3RestartData.snapshot_compactSupport": {
+        "classification": "A",
+        "source_line": 76
+      },
+      "UnforcedRestart.R3RestartData.snapshot_energy_integrable": {
+        "classification": "A",
+        "source_line": 87
+      },
+      "UnforcedRestart.R3RestartData.actual_candidate_restart_data": {
+        "classification": "A",
+        "source_line": 96
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O2",
+      "O3",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/scaling-and-compactness/Main.lean",
+    "sha256": "451b85329629a3daeb6e5f9d97e23fa46868705799becfefbde6eeb93d6be9b0",
+    "namespace": "UnforcedRestart.ScalingAndCompactness",
+    "imports": [
+      "NavierStokes.ComparatorBridge",
+      "NavierStokes.BaseResidual"
+    ],
+    "declarations": [
+      "UnforcedRestart.ScalingAndCompactness.zoomVelocity",
+      "UnforcedRestart.ScalingAndCompactness.zoomForce",
+      "UnforcedRestart.ScalingAndCompactness.viscosity_coefficient",
+      "UnforcedRestart.ScalingAndCompactness.zoomForce_norm_le",
+      "UnforcedRestart.ScalingAndCompactness.zoomForce_tendsto",
+      "UnforcedRestart.ScalingAndCompactness.axis_power",
+      "UnforcedRestart.ScalingAndCompactness.base_zoom_axis"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.ScalingAndCompactness.zoomVelocity": {
+        "classification": "C",
+        "source_line": 11
+      },
+      "UnforcedRestart.ScalingAndCompactness.zoomForce": {
+        "classification": "C",
+        "source_line": 15
+      },
+      "UnforcedRestart.ScalingAndCompactness.viscosity_coefficient": {
+        "classification": "C",
+        "source_line": 19
+      },
+      "UnforcedRestart.ScalingAndCompactness.zoomForce_norm_le": {
+        "classification": "C",
+        "source_line": 23
+      },
+      "UnforcedRestart.ScalingAndCompactness.zoomForce_tendsto": {
+        "classification": "C",
+        "source_line": 32
+      },
+      "UnforcedRestart.ScalingAndCompactness.axis_power": {
+        "classification": "C",
+        "source_line": 44
+      },
+      "UnforcedRestart.ScalingAndCompactness.base_zoom_axis": {
+        "classification": "B",
+        "source_line": 57
+      }
+    },
+    "unforced_application_obligations": [
+      "O10"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/smooth-force-cutoff/Main.lean",
+    "sha256": "accd8d5d4a26244783173ccdf30fe95d0e4c36f2cffa9334dd8662a545cadf02",
+    "namespace": "UnforcedRestart.SmoothForceCutoff",
+    "imports": [
+      "NavierStokes.SmoothCutoffs",
+      "NavierStokes.TimeLocalization",
+      "NavierStokes.CandidateFromLimits",
+      "NavierStokes.R3CompactCandidate"
+    ],
+    "declarations": [
+      "UnforcedRestart.SmoothForceCutoff.shutdown",
+      "UnforcedRestart.SmoothForceCutoff.shutdown_smooth",
+      "UnforcedRestart.SmoothForceCutoff.shutdown_bounds",
+      "UnforcedRestart.SmoothForceCutoff.shutdown_early",
+      "UnforcedRestart.SmoothForceCutoff.shutdown_late",
+      "UnforcedRestart.SmoothForceCutoff.shutdown_derivative_support",
+      "UnforcedRestart.SmoothForceCutoff.cutForce",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_smoothOn",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_early",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_late",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_support",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_periodic",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_time_support",
+      "UnforcedRestart.SmoothForceCutoff.cutForce_supportedIn",
+      "UnforcedRestart.SmoothForceCutoff.compact_candidate_cut_admissible",
+      "UnforcedRestart.SmoothForceCutoff.old_residual_defect",
+      "UnforcedRestart.SmoothForceCutoff.old_solves_cut_iff"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.SmoothForceCutoff.shutdown": {
+        "classification": "C",
+        "source_line": 14
+      },
+      "UnforcedRestart.SmoothForceCutoff.shutdown_smooth": {
+        "classification": "C",
+        "source_line": 17
+      },
+      "UnforcedRestart.SmoothForceCutoff.shutdown_bounds": {
+        "classification": "C",
+        "source_line": 21
+      },
+      "UnforcedRestart.SmoothForceCutoff.shutdown_early": {
+        "classification": "C",
+        "source_line": 26
+      },
+      "UnforcedRestart.SmoothForceCutoff.shutdown_late": {
+        "classification": "C",
+        "source_line": 32
+      },
+      "UnforcedRestart.SmoothForceCutoff.shutdown_derivative_support": {
+        "classification": "C",
+        "source_line": 38
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce": {
+        "classification": "B",
+        "source_line": 57
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_smoothOn": {
+        "classification": "B",
+        "source_line": 60
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_early": {
+        "classification": "B",
+        "source_line": 64
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_late": {
+        "classification": "B",
+        "source_line": 68
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_support": {
+        "classification": "B",
+        "source_line": 72
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_periodic": {
+        "classification": "B",
+        "source_line": 79
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_time_support": {
+        "classification": "B",
+        "source_line": 86
+      },
+      "UnforcedRestart.SmoothForceCutoff.cutForce_supportedIn": {
+        "classification": "B",
+        "source_line": 90
+      },
+      "UnforcedRestart.SmoothForceCutoff.compact_candidate_cut_admissible": {
+        "classification": "A",
+        "source_line": 97
+      },
+      "UnforcedRestart.SmoothForceCutoff.old_residual_defect": {
+        "classification": "B",
+        "source_line": 108
+      },
+      "UnforcedRestart.SmoothForceCutoff.old_solves_cut_iff": {
+        "classification": "B",
+        "source_line": 116
+      }
+    },
+    "unforced_application_obligations": [
+      "O2",
+      "O3",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/strong-norm-growth-transfer/Main.lean",
+    "sha256": "6e5f145d0370b166d095253b9b88f868f7f35b0b1af34bf23db277b3872b1147",
+    "namespace": "UnforcedRestart.StrongNormGrowthTransfer",
+    "imports": [
+      "NavierStokes.PeriodicUniqueness"
+    ],
+    "declarations": [
+      "UnforcedRestart.StrongNormGrowthTransfer.evaluation_budget",
+      "UnforcedRestart.StrongNormGrowthTransfer.speed_transfer",
+      "UnforcedRestart.StrongNormGrowthTransfer.no_periodic_continuous_comparator",
+      "UnforcedRestart.StrongNormGrowthTransfer.no_continuous_axis_comparator"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.StrongNormGrowthTransfer.evaluation_budget": {
+        "classification": "C",
+        "source_line": 9
+      },
+      "UnforcedRestart.StrongNormGrowthTransfer.speed_transfer": {
+        "classification": "C",
+        "source_line": 20
+      },
+      "UnforcedRestart.StrongNormGrowthTransfer.no_periodic_continuous_comparator": {
+        "classification": "C",
+        "source_line": 45
+      },
+      "UnforcedRestart.StrongNormGrowthTransfer.no_continuous_axis_comparator": {
+        "classification": "C",
+        "source_line": 58
+      }
+    },
+    "unforced_application_obligations": [
+      "O2",
+      "O7",
+      "O8",
+      "O9"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/time-translation/Main.lean",
+    "sha256": "48a1957d1b3ee79f9dc9660f3b7e96130f52c173b4ff60ec0ddd9cccc7faf99f",
+    "namespace": "UnforcedRestart.TimeTranslation",
+    "imports": [
+      "NavierStokes.SolutionDifference",
+      "NavierStokes.ComparatorBridge"
+    ],
+    "declarations": [
+      "UnforcedRestart.TimeTranslation.shift",
+      "UnforcedRestart.TimeTranslation.shift_initial",
+      "UnforcedRestart.TimeTranslation.horizon_pos",
+      "UnforcedRestart.TimeTranslation.shifted_time_interior",
+      "UnforcedRestart.TimeTranslation.shift_smooth",
+      "UnforcedRestart.TimeTranslation.shift_smooth_slab",
+      "UnforcedRestart.TimeTranslation.shift_spatialDerivative",
+      "UnforcedRestart.TimeTranslation.shift_divergence",
+      "UnforcedRestart.TimeTranslation.shift_advection",
+      "UnforcedRestart.TimeTranslation.shift_laplacian",
+      "UnforcedRestart.TimeTranslation.shift_gradient",
+      "UnforcedRestart.TimeTranslation.shift_hasDerivAt",
+      "UnforcedRestart.TimeTranslation.shift_temporalDerivative",
+      "UnforcedRestart.TimeTranslation.shift_derivWithin",
+      "UnforcedRestart.TimeTranslation.shift_residual",
+      "UnforcedRestart.TimeTranslation.old_time_differentiable",
+      "UnforcedRestart.TimeTranslation.candidate_shift_equation",
+      "UnforcedRestart.TimeTranslation.candidate_shift_within_equation",
+      "UnforcedRestart.TimeTranslation.candidate_shift_unforced"
+    ],
+    "declaration_metadata": {
+      "UnforcedRestart.TimeTranslation.shift": {
+        "classification": "B",
+        "source_line": 12
+      },
+      "UnforcedRestart.TimeTranslation.shift_initial": {
+        "classification": "C",
+        "source_line": 15
+      },
+      "UnforcedRestart.TimeTranslation.horizon_pos": {
+        "classification": "C",
+        "source_line": 18
+      },
+      "UnforcedRestart.TimeTranslation.shifted_time_interior": {
+        "classification": "C",
+        "source_line": 20
+      },
+      "UnforcedRestart.TimeTranslation.shift_smooth": {
+        "classification": "B",
+        "source_line": 24
+      },
+      "UnforcedRestart.TimeTranslation.shift_smooth_slab": {
+        "classification": "B",
+        "source_line": 32
+      },
+      "UnforcedRestart.TimeTranslation.shift_spatialDerivative": {
+        "classification": "B",
+        "source_line": 40
+      },
+      "UnforcedRestart.TimeTranslation.shift_divergence": {
+        "classification": "B",
+        "source_line": 43
+      },
+      "UnforcedRestart.TimeTranslation.shift_advection": {
+        "classification": "B",
+        "source_line": 46
+      },
+      "UnforcedRestart.TimeTranslation.shift_laplacian": {
+        "classification": "B",
+        "source_line": 49
+      },
+      "UnforcedRestart.TimeTranslation.shift_gradient": {
+        "classification": "B",
+        "source_line": 52
+      },
+      "UnforcedRestart.TimeTranslation.shift_hasDerivAt": {
+        "classification": "B",
+        "source_line": 56
+      },
+      "UnforcedRestart.TimeTranslation.shift_temporalDerivative": {
+        "classification": "B",
+        "source_line": 62
+      },
+      "UnforcedRestart.TimeTranslation.shift_derivWithin": {
+        "classification": "B",
+        "source_line": 68
+      },
+      "UnforcedRestart.TimeTranslation.shift_residual": {
+        "classification": "B",
+        "source_line": 75
+      },
+      "UnforcedRestart.TimeTranslation.old_time_differentiable": {
+        "classification": "B",
+        "source_line": 85
+      },
+      "UnforcedRestart.TimeTranslation.candidate_shift_equation": {
+        "classification": "A",
+        "source_line": 93
+      },
+      "UnforcedRestart.TimeTranslation.candidate_shift_within_equation": {
+        "classification": "A",
+        "source_line": 101
+      },
+      "UnforcedRestart.TimeTranslation.candidate_shift_unforced": {
+        "classification": "B",
+        "source_line": 111
+      }
+    },
+    "unforced_application_obligations": [
+      "O1",
+      "O3",
+      "O4"
+    ],
+    "proof_requires_external_local_theory": false
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/PeriodicSlab/Main.lean",
+    "sha256": "88686796eb10831c214eab9179af31be7dbd8c1f139cc7ec1b9ebe5566b546d5",
+    "namespace": "UnforcedRestart.Round2.PeriodicSlab",
+    "imports": [
+      "Research.UnforcedRestart.\u00abenergy-comparison\u00bb.Main",
+      "Research.UnforcedRestart.\u00abgronwall-threshold\u00bb.Main",
+      "Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus"
+    ],
+    "declarations": [
+      "UnforcedRestart.Round2.PeriodicSlab.force_energy_continuousOn",
+      "UnforcedRestart.Round2.PeriodicSlab.slab_energy_derivative_le",
+      "UnforcedRestart.Round2.PeriodicSlab.primitive_on_slab",
+      "UnforcedRestart.Round2.PeriodicSlab.periodic_slab_comparison"
+    ],
+    "classification": "conditional PDE composition; FTC helper generic; no existence or strong-norm growth",
+    "status": "strict cached pass including aggregate semantic audit; clean blocked"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/ActualForce/Main.lean",
+    "sha256": "0d907dcfc428c23c5473e6ecfbcaeda6d6d783a9cdaeca95510e3372ff8a5efa",
+    "namespace": "UnforcedRestart.Round2.ActualForce",
+    "imports": [
+      "Research.UnforcedRestart.Round2.PeriodicSlab.Main"
+    ],
+    "declarations": [
+      "UnforcedRestart.Round2.ActualForce.cubeIntegral_constant",
+      "UnforcedRestart.Round2.ActualForce.cell_energy_le",
+      "UnforcedRestart.Round2.ActualForce.candidate_shift_force_continuous",
+      "UnforcedRestart.Round2.ActualForce.candidate_cell_budget"
+    ],
+    "classification": "first two generic cell tools; last two candidate-contract actual L2 forcing interface; not closed selected-witness specialization",
+    "status": "strict focused cached pass; see final validator evidence"
+  },
+  {
+    "path": "Research/UnforcedRestart/integration/Audit.lean",
+    "sha256": "d6489c268378cb09988a9184efdc5c76941182349dc0bfc9deb63e6ed8431396"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/Integration/Audit.lean",
+    "sha256": "a50f6e7ef2050f9f9c86133e527fadbefbe80a167d7bd05bcedd1132380f3733",
+    "imports": [
+      "Research.UnforcedRestart.\u00abactual-forcing-budget\u00bb.Main",
+      "Research.UnforcedRestart.\u00abdifference-equation\u00bb.Main",
+      "Research.UnforcedRestart.\u00abenergy-comparison\u00bb.Main",
+      "Research.UnforcedRestart.\u00abgronwall-threshold\u00bb.Main",
+      "Research.UnforcedRestart.\u00ablocal-theory-obstruction\u00bb.Main",
+      "Research.UnforcedRestart.\u00abperiodic-restart-data\u00bb.Main",
+      "Research.UnforcedRestart.\u00abpressure-absorption\u00bb.Main",
+      "Research.UnforcedRestart.\u00abr3-restart-data\u00bb.Main",
+      "Research.UnforcedRestart.\u00abscaling-and-compactness\u00bb.Main",
+      "Research.UnforcedRestart.\u00absmooth-force-cutoff\u00bb.Main",
+      "Research.UnforcedRestart.\u00abstrong-norm-growth-transfer\u00bb.Main",
+      "Research.UnforcedRestart.\u00abtime-translation\u00bb.Main",
+      "Research.UnforcedRestart.Round2.PeriodicSlab.Main",
+      "Research.UnforcedRestart.Round2.ActualForce.Main",
+      "Lean.Util.CollectAxioms"
+    ]
+  }
+]

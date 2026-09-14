@@ -1,0 +1,33 @@
+{
+  "status": "CACHED_CHECKS_PASS_CLEAN_BLOCKED",
+  "compilations": 16,
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "exports": 96,
+  "constants": 42939,
+  "modules": 11110,
+  "compiler_input_artifacts": 72657,
+  "module_artifact_records": 53438,
+  "core_artifacts": 15127,
+  "baseline_files": 2335,
+  "archived_files": 114,
+  "pins": 11,
+  "external_tracked_source_hashes_verified": 12363,
+  "manifest_sha256": "631023189131a49280fd50367195025fdd07f0194c86568e6a1db2530282765f"
+}

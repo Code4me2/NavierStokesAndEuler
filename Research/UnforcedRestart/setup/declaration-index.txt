@@ -1,0 +1,245 @@
+=== NavierStokes/ProblemStatement.lean
+29:namespace NavierStokes.ProblemStatement
+32:abbrev Space := EuclideanSpace ℝ (Fin 3)
+35:abbrev SpaceTime := ℝ × Space
+37:abbrev VelocityField := SpaceTime → Space
+38:abbrev PressureField := SpaceTime → ℝ
+41:def coordinateVector (i : Fin 3) : Space := EuclideanSpace.single i 1
+44:def preSingularDomain : Set SpaceTime := Ico 0 1 ×ˢ univ
+47:def futureDomain : Set SpaceTime := Ici 0 ×ˢ univ
+51:def UnitSpatialPeriodsOn {V : Type*} (times : Set ℝ) (g : SpaceTime → V) : Prop :=
+57:def temporalDerivative (u : VelocityField) (t : ℝ) (x : Space) : Space :=
+61:def spatialDerivative (u : VelocityField) (t : ℝ) (x : Space) : Space →L[ℝ] Space :=
+65:def advection (u : VelocityField) (t : ℝ) (x : Space) : Space :=
+69:def spatialDivergence (u : VelocityField) (t : ℝ) (x : Space) : ℝ :=
+73:def pressureGradient (p : PressureField) (t : ℝ) (x : Space) : Space :=
+78:def spatialLaplacian (u : VelocityField) (t : ℝ) (x : Space) : Space :=
+84:def navierStokesResidual (u : VelocityField) (p : PressureField)
+91:def CompactFutureTimeSupport (f : VelocityField) : Prop :=
+96:def SpeedUnboundedAtOne (u : VelocityField) : Prop :=
+103:structure CandidateProperties (u : VelocityField) (p : PressureField)
+124:def candidateStatement : Prop :=
+130:theorem smooth_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+147:theorem unbounded_speed_excludes_uniform_bound {u : VelocityField}
+162:theorem SpeedUnboundedAtOne.false_of_agree {u v : VelocityField}
+189:structure Solution (I : Set ℝ) (f : VelocityField) (u : VelocityField)
+197:theorem Solution.mono {I J : Set ℝ} {f u : VelocityField} {p : PressureField}
+206:theorem CandidateProperties.toSolution {u : VelocityField} {p : PressureField}
+217:structure GlobalSolutionOne (f : VelocityField) (v : VelocityField) (p : PressureField) : Prop
+=== NavierStokes/ResidualCalculus.lean
+17:namespace NavierStokes.ResidualCalculus
+23:theorem temporalDerivative_add
+34:theorem spatialDerivative_add
+44:theorem pressureGradient_add
+59:theorem advection_add
+76:theorem spatialDerivative_const_smul
+84:theorem spatialDivergence_const_smul
+=== NavierStokes/SolutionDifference.lean
+24:namespace NavierStokes.SolutionDifference
+30:abbrev slab (a b : ℝ) : Set SpaceTime := Icc a b ×ˢ univ
+32:theorem spatial_smooth {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+38:theorem smooth_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+43:theorem spatialDerivative_sub {u v : VelocityField} {t : ℝ}
+50:theorem spatialDivergence_sub {u v : VelocityField} {t : ℝ}
+57:theorem advection_difference {u v : VelocityField} {t : ℝ}
+67:theorem spatialLaplacian_sub {u v : VelocityField} {t : ℝ}
+86:theorem pressureGradient_sub {p q : PressureField} {t : ℝ}
+96:theorem temporalDerivative_sub {u v : VelocityField} {t : ℝ} {x : Space}
+107:theorem difference_equation {u v : VelocityField} {p q : PressureField} {t : ℝ} {x : Space}
+137:theorem nonlinear_energy_bound (A : Space →L[ℝ] Space) (w : Space) {B : ℝ}
+149:theorem spatialDerivative_eq_within_comp {a b t : ℝ} {u : VelocityField}
+164:theorem exists_gradient_bound {a b : ℝ} (hab : a < b) {u : VelocityField}
+187:theorem sum_coordinates (x : Space) :
+195:theorem spatial_partial_contDiff {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+200:theorem component_contDiff {f : Space → Space} (hf : ContDiff ℝ ∞ f) (j : Fin 3) :
+204:theorem fderiv_component {f : Space → Space} (hf : ContDiff ℝ ∞ f)
+211:theorem fderiv_apply_eq_sum (f : Space → ℝ) (x v : Space) :
+216:theorem fderiv_normsq {f : Space → Space} (hf : ContDiff ℝ ∞ f) (x v : Space) :
+221:theorem fderiv_inner {f g : Space → Space} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
+229:theorem spatialLaplacian_contDiff {w : VelocityField} {t : ℝ}
+236:theorem pressureGradient_contDiff {p : PressureField} {t : ℝ}
+245:theorem inner_pressureGradient (p : PressureField) (t : ℝ) (x w : Space) :
+254:theorem energy_density_derivative {u : VelocityField} {t : ℝ} {x : Space}
+260:theorem time_differentiable_at_interior {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+=== NavierStokes/GronwallInterior.lean
+24:namespace NavierStokes.GronwallInterior
+28:theorem exp_neg_mul_le_of_deriv_le {T K ε : ℝ} {E E' : ℝ → ℝ}
+68:theorem le_exp_mul_of_deriv_le {T K ε : ℝ} {E E' : ℝ → ℝ}
+90:theorem le_uniform_exp_mul_of_deriv_le {T K ε : ℝ} {E E' : ℝ → ℝ}
+109:theorem le_div_radius_of_deriv_le {T K C R : ℝ} {E E' : ℝ → ℝ}
+125:theorem eq_zero_of_deriv_le {a b K : ℝ} {E E' : ℝ → ℝ} (hab : a ≤ b)
+=== NavierStokes/CompactSpatialForceDecay.lean
+13:namespace NavierStokes.CompactSpatialForceDecay
+19:def SupportedIn (K : Set Space) (f : VelocityField) : Prop :=
+22:theorem jet_zero_outside {K : Set Space} (hK : IsClosed K) {f : VelocityField}
+32:theorem jet_zero_after {f : VelocityField} {T : ℝ}
+44:theorem jet_decay {S : Set Space} (hS : IsCompact S) {f : VelocityField}
+80:theorem rescale_supported {S : Set Space} {f : VelocityField} (hf : SupportedIn S f)
+85:theorem forceConditionDecay {S : Set Space} (hS : IsCompact S) {f : VelocityField}
+=== NavierStokes/ComparatorBridge.lean
+21:namespace NavierStokes.ComparatorBridge
+27:def toComparator {V : Type*} (f : SpaceTime → V) : Space → ℝ → V :=
+31:def fromComparator {V : Type*} (f : Space → ℝ → V) : SpaceTime → V :=
+34:theorem divergence_eq (v : VelocityField) (t : ℝ) (x : Space) :
+40:theorem gradient_eq (p : PressureField) (t : ℝ) (x : Space) :
+47:theorem laplacian_eq (v : VelocityField) (t : ℝ) (x : Space)
+61:theorem temporalDerivative_eq (v : VelocityField) {t : ℝ} (ht : 0 < t) (x : Space) :
+67:def rescale {V : Type*} [SMul ℝ V] (a c : ℝ) (f : SpaceTime → V) : SpaceTime → V :=
+71:def rescaledForce (ν : ℝ) (f : VelocityField) : VelocityField := rescale (ν ^ 2) ν f
+73:theorem rescale_smooth {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+81:theorem rescale_periodic {V : Type*} [SMul ℝ V] {f : SpaceTime → V}
+87:theorem rescale_support {f : VelocityField} (hf : CompactFutureTimeSupport f)
+95:theorem fromComparator_smooth {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+101:theorem toComparator_smooth {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+107:theorem toComparator_jet_norm (f : VelocityField) (m : ℕ) (x : Space)
+127:theorem decay_of_slab_bound {V : Type*} [NormedAddCommGroup V] {J : SpaceTime → V}
+143:theorem forceConditionPeriodic_of_decay {f : VelocityField}
+162:theorem zero_initial_condition :
+170:theorem rescale_spatialDerivative (a c : ℝ) (v : VelocityField) (t : ℝ) (x : Space) :
+174:theorem rescale_divergence (a c : ℝ) (v : VelocityField) (t : ℝ) (x : Space) :
+178:theorem rescale_advection (a c : ℝ) (v : VelocityField) (t : ℝ) (x : Space) :
+182:theorem rescale_gradient (a c : ℝ) (p : PressureField) (t : ℝ) (x : Space) :
+188:theorem rescale_laplacian (a c : ℝ) (v : VelocityField) (t : ℝ) (x : Space) :
+194:theorem rescale_temporalDerivative (a c : ℝ) (v : VelocityField) (t : ℝ) (x : Space)
+202:theorem smooth_space_slice {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+209:theorem differentiable_time_slice {v : VelocityField}
+219:theorem rescale_residual {ν : ℝ} (hν : 0 < ν) {v : VelocityField} {p : PressureField}
+233:theorem comparator_equation {ν : ℝ} {u₀ : Space → Space} {f v : Space → ℝ → Space}
+251:theorem normalized_solution_core {ν : ℝ} (hν : 0 < ν) {f : VelocityField}
+273:theorem normalized_solution {ν : ℝ} (hν : 0 < ν) {f : VelocityField}
+=== NavierStokes/CandidateFromLimits.lean
+28:namespace NavierStokes.CandidateFromLimits
+34:def tracedResidual (u : VelocityField) (p : PressureField)
+42:def ResidualLimits (u : VelocityField) (p : PressureField)
+60:theorem tracedResidual_smooth :
+70:theorem tracedResidual_boundary_jets (n : ℕ) (x : Space) :
+83:def force : VelocityField :=
+87:theorem force_smooth : ContDiff ℝ ∞ (force u p hu hp L hlim) :=
+92:theorem force_eq_pastResidual {t : ℝ} (ht : t < 1) (x : Space) :
+101:theorem force_eq_activated_residual {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) (x : Space) :
+107:theorem force_zero_from {t : ℝ} (ht : 2 ≤ t) (x : Space) :
+113:theorem force_time_support : CompactFutureTimeSupport (force u p hu hp L hlim) :=
+117:theorem force_boundary_jets (n : ℕ) (x : Space) :
+141:theorem residual_zero_outside {z : SpaceTime} (hz : z.2 ∉ K) :
+152:theorem pastResidual_zero_outside {t : ℝ} {x : Space} (hx : x ∉ K) :
+169:theorem limits_zero_outside {x : Space} (hx : x ∉ K) (n : ℕ) : L x n = 0 := by
+195:theorem tracedResidual_zero_outside {x : Space} (hx : x ∉ K) (t : ℝ) :
+203:theorem normalTrace_zero_outside {x : Space} (hx : x ∉ K) (n : ℕ) :
+211:theorem force_zero_outside {x : Space} (hx : x ∉ K) (t : ℝ) :
+=== NavierStokes/R3FiniteEnergyComparison.lean
+26:namespace NavierStokes.ComparatorBridge
+31:theorem GlobalSolutionRn.uniformFiniteEnergy {f v : VelocityField} {q : PressureField}
+47:theorem compact_candidate_agree_on_overlap
+79:theorem compact_candidate_excludes_global_solution
+=== NavierStokes/PeriodicForceDecay.lean
+22:namespace NavierStokes.PeriodicForceDecay
+27:theorem future_uniqueDiff : UniqueDiffOn ℝ futureDomain :=
+34:theorem futureJet_continuous {f : VelocityField}
+53:theorem futureJet_periodic {f : VelocityField}
+66:theorem futureJet_eq_full {f : VelocityField} {t : ℝ} (ht : 0 ≤ t) (x : Space)
+74:theorem futureJet_decay {f : VelocityField}
+97:theorem forceConditionPeriodic {f : VelocityField}
+=== NavierStokes/SmoothCutoffs.lean
+25:namespace NavierStokes.SmoothCutoffs
+27:def cutoffBump : ContDiffBump (0 : ℝ) where
+33:def cutoff : ℝ → ℝ := cutoffBump
+35:theorem cutoff_contDiff : ContDiff ℝ ∞ cutoff := cutoffBump.contDiff
+37:theorem cutoff_mem_Icc (x : ℝ) : cutoff x ∈ Icc (0 : ℝ) 1 :=
+40:theorem cutoff_one_of_abs_le {x : ℝ} (hx : |x| ≤ 1 / 2) : cutoff x = 1 := by
+44:theorem cutoff_zero_of_one_le_abs {x : ℝ} (hx : 1 ≤ |x|) : cutoff x = 0 := by
+48:theorem cutoff_zero_of_one_le {x : ℝ} (hx : 1 ≤ x) : cutoff x = 0 :=
+51:theorem cutoff_support : support cutoff = Ioo (-1 : ℝ) 1 := by
+57:theorem cutoff_tsupport : tsupport cutoff = Icc (-1 : ℝ) 1 := by
+63:theorem cutoff_hasCompactSupport : HasCompactSupport cutoff :=
+66:theorem cutoff_eventually_one {x : ℝ} (hx : |x| < 1 / 2) :
+71:theorem cutoff_eventually_zero {x : ℝ} (hx : 1 < |x|) :
+79:theorem iteratedDeriv_const_succ (n : ℕ) (c : ℝ) :
+90:theorem cutoff_iteratedDeriv_zero_inside (n : ℕ) {x : ℝ} (hx : |x| < 1 / 2) :
+94:theorem cutoff_iteratedDeriv_zero_outside (n : ℕ) {x : ℝ} (hx : 1 < |x|) :
+99:theorem cutoff_iteratedDeriv_support (n : ℕ) :
+110:theorem cutoff_iteratedDeriv_hasCompactSupport (n : ℕ) :
+118:theorem cutoff_iteratedDeriv_bounded (n : ℕ) :
+127:def scaledCutoff (a : ℝ) : ℝ → ℝ := fun q => cutoff (a * q)
+129:theorem scaledCutoff_contDiff (a : ℝ) : ContDiff ℝ ∞ (scaledCutoff a) :=
+132:theorem scaledCutoff_mem_Icc (a q : ℝ) : scaledCutoff a q ∈ Icc (0 : ℝ) 1 :=
+135:theorem scaledCutoff_one_of_abs_le {a q : ℝ} (hq : |a * q| ≤ 1 / 2) :
+138:theorem scaledCutoff_zero_of_one_le_abs {a q : ℝ} (hq : 1 ≤ |a * q|) :
+141:theorem scaledCutoff_zero_of_inv_le {a q : ℝ} (ha : 0 < a) (hq : 1 / a ≤ q) :
+148:theorem scaledCutoff_eventually_one {a q : ℝ} (hq : |a * q| < 1 / 2) :
+153:theorem scaledCutoff_eventually_zero {a q : ℝ} (hq : 1 < |a * q|) :
+158:theorem scaledCutoff_eventually_one_at_zero (a : ℝ) :
+163:theorem finite_scaledCutoffs_eventually_one {ι : Type*} (s : Finset ι) (a : ι → ℝ) :
+177:theorem scaledCutoffs_zero_on_common_neighborhood (a : ℕ → ℝ)
+191:theorem scaledCutoff_iteratedDeriv (a : ℝ) (n : ℕ) :
+197:theorem scaledCutoff_iteratedDeriv_support (a : ℝ) (n : ℕ) :
+209:theorem scale_power_bound {a q : ℝ} (ha : 0 ≤ a) (hq : 0 < q) (n b : ℕ)
+217:theorem scaledCutoff_iteratedDeriv_bound (n : ℕ) :
+233:def timeSwitch (t : ℝ) : ℝ := 1 - scaledCutoff (4 / 3) t
+235:theorem timeSwitch_contDiff : ContDiff ℝ ∞ timeSwitch :=
+239:theorem timeSwitch_zero_of_abs_le {t : ℝ} (ht : |t| ≤ 3 / 8) : timeSwitch t = 0 := by
+245:theorem timeSwitch_one_of_three_quarters_le {t : ℝ} (ht : 3 / 4 ≤ t) :
+250:theorem timeSwitch_eventually_zero : timeSwitch =ᶠ[𝓝 0] (fun _ => 0) := by
+254:theorem timeSwitch_eventually_one {t : ℝ} (ht : 3 / 4 < t) :
+=== NavierStokes/MaximalLifespan.lean
+31:namespace NavierStokes.MaximalLifespan
+38:structure ClassicalSolution (f : VelocityField) (T : ℝ) (u : VelocityField)
+47:theorem ClassicalSolution.restrict {f : VelocityField} {S T : ℝ} {u : VelocityField}
+58:theorem ClassicalSolution.agree_on_overlap {f : VelocityField} {T S : ℝ}
+78:theorem candidate_is_classical_solution {u : VelocityField} {p : PressureField}
+84:theorem candidate_agree_on_overlap {u v : VelocityField} {p q : PressureField}
+94:theorem candidate_no_solution_after_one {u v : VelocityField} {p q : PressureField}
+109:theorem candidate_all_lifespans_le_one {u v : VelocityField} {p q : PressureField}
+117:theorem _root_.NavierStokes.ProblemStatement.GlobalSolutionOne.toClassicalSolution
+128:theorem candidate_excludes_global_solution {u v : VelocityField} {p q : PressureField}
+NavierStokes/PeriodicUniqueness.lean:26:namespace NavierStokes.PeriodicUniqueness
+NavierStokes/PeriodicUniqueness.lean:32:theorem periodic_lattice {W : Type*} {f : Space → W}
+NavierStokes/PeriodicUniqueness.lean:44:theorem exists_cube_representative {W : Type*} {f : Space → W}
+NavierStokes/PeriodicUniqueness.lean:61:theorem periodic_fderiv {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+NavierStokes/PeriodicUniqueness.lean:71:def cubeImage : Set Space := toSpace '' cube
+NavierStokes/PeriodicUniqueness.lean:73:theorem isCompact_cubeImage : IsCompact cubeImage :=
+NavierStokes/PeriodicUniqueness.lean:77:theorem exists_cubeImage_representative {W : Type*} {f : Space → W}
+NavierStokes/PeriodicUniqueness.lean:86:theorem periodic_bound_on_slab {V : Type*} [NormedAddCommGroup V]
+NavierStokes/PeriodicUniqueness.lean:102:theorem component_periodic {f : Space → Space} (hf : UnitPeriods f) (j : Fin 3) :
+NavierStokes/PeriodicUniqueness.lean:107:theorem spatial_partial_periodic {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+NavierStokes/PeriodicUniqueness.lean:112:theorem normsq_periodic {f : Space → Space} (hf : UnitPeriods f) :
+NavierStokes/PeriodicUniqueness.lean:119:theorem cubeIntegral_fderiv_apply {f : Space → ℝ} {v : Space → Space}
+NavierStokes/PeriodicUniqueness.lean:145:theorem cubeIntegral_fderiv_apply_zero {f : Space → ℝ} {v : Space → Space}
+NavierStokes/PeriodicUniqueness.lean:154:theorem cubeIntegral_transport_energy_zero {w v : Space → Space}
+NavierStokes/PeriodicUniqueness.lean:169:theorem cubeIntegral_inner_partial {f g : Space → Space}
+NavierStokes/PeriodicUniqueness.lean:192:theorem cubeIntegral_laplacian_energy {w : VelocityField} {t : ℝ}
+NavierStokes/PeriodicUniqueness.lean:213:theorem cubeIntegral_pressure_energy_zero {w : VelocityField} {p : PressureField} {t : ℝ}
+NavierStokes/PeriodicUniqueness.lean:227:theorem unitPeriods_sub {V : Type*} [Sub V] {f g : Space → V}
+NavierStokes/PeriodicUniqueness.lean:246:theorem energy_nonneg (u v : VelocityField) (t : ℝ) : 0 ≤ energy u v t :=
+NavierStokes/PeriodicUniqueness.lean:249:theorem dissipation_nonneg (w : VelocityField) (t : ℝ) : 0 ≤ dissipation w t :=
+NavierStokes/PeriodicUniqueness.lean:255:theorem energy_balance {u v : VelocityField} {p q : PressureField} {t : ℝ}
+NavierStokes/PeriodicUniqueness.lean:303:theorem neg_coupling_le_energy {u v : VelocityField} {t B : ℝ}
+NavierStokes/PeriodicUniqueness.lean:317:theorem energy_rate_le {u v : VelocityField} {p q : PressureField} {t B : ℝ}
+NavierStokes/PeriodicUniqueness.lean:338:theorem energy_continuousOn {a b : ℝ} {u v : VelocityField}
+NavierStokes/PeriodicUniqueness.lean:347:theorem energy_hasDerivAt {a b t : ℝ} {u v : VelocityField}
+NavierStokes/PeriodicUniqueness.lean:363:theorem energy_initial_zero {u v : VelocityField} {a : ℝ}
+NavierStokes/PeriodicUniqueness.lean:373:theorem eq_of_energy_zero {u v : VelocityField} {t : ℝ}
+NavierStokes/PeriodicUniqueness.lean:390:theorem classical_uniqueness_on_Icc {a b : ℝ}
+NavierStokes/R3/CompactComparisonBounds.lean:18:namespace NavierStokesR3.CompactComparisonBounds
+NavierStokes/R3/CompactComparisonBounds.lean:24:theorem hasCompactSupport_slice {T : ℝ} {u : VelocityField} {K : Set Space}
+NavierStokes/R3/CompactComparisonBounds.lean:33:theorem exists_gradient_bound {T : ℝ} (hT : 0 < T) {u : VelocityField}
+NavierStokes/R3/CompactComparisonBounds.lean:49:theorem memLp_three_slice {T : ℝ} {u : VelocityField}
+NavierStokes/R3/CompactComparisonBounds.lean:58:theorem continuousOn_integral_norm_cube {T : ℝ} {u : VelocityField}
+NavierStokes/R3/CompactComparisonBounds.lean:71:theorem lpNorm_three_eq_integral_norm_cube_rpow {f : Space → Space}
+NavierStokes/R3/CompactComparisonBounds.lean:85:theorem exists_lpNorm_three_bound {T : ℝ} {u : VelocityField}
+NavierStokes/R3/CompactComparisonBounds.lean:102:theorem weight_fderiv_eq_zero_of_norm_lt {R : ℝ} (hR : 0 < R)
+NavierStokes/R3/CompactComparisonBounds.lean:112:theorem exists_radius_weight_derivative_zero {T : ℝ} {u : VelocityField}
+NavierStokes/R3/CompactComparisonBounds.lean:133:theorem uniformFiniteEnergy_of_compact_slab {T : ℝ} {u : VelocityField}
+Euler/OrdinaryEulerVaryingHorizon.lean:8:namespace EulerOrdinarySobolev.Evolution
+Euler/OrdinaryEulerVaryingHorizon.lean:21:theorem restricted_exponential_le (n : ℕ) :
+Euler/OrdinaryEulerVaryingHorizon.lean:28:theorem eventually_h3_bound_varying
+Euler/OrdinaryEulerVaryingHorizon.lean:50:theorem sampled_h3_tendsto_zero_varying
+Euler/OrdinaryEulerVaryingHorizon.lean:61:theorem no_gradient_escape_varying
+Euler/OrdinaryEulerVaryingHorizon.lean:96:theorem no_gradient_escape_of_initial_tendsto_varying
+Euler/OrdinaryEulerStability.lean:9:namespace EulerOrdinarySobolev.Evolution
+Euler/OrdinaryEulerStability.lean:17:def referenceNormPath (U : Evolution T hT) : C(Icc (0 : ℝ) T,ℝ) :=
+Euler/OrdinaryEulerStability.lean:23:def referenceSize (U : Evolution T hT) : ℝ := ‖U.referenceNormPath‖
+Euler/OrdinaryEulerStability.lean:25:theorem referenceSize_nonneg (U : Evolution T hT) : 0 ≤ U.referenceSize := norm_nonneg _
+Euler/OrdinaryEulerStability.lean:27:theorem referenceWordBound (U : Evolution T hT) (t : Icc (0 : ℝ) T) :
+Euler/OrdinaryEulerStability.lean:35:theorem gradient_continuous (U : Evolution T hT) (x : Space) :
+Euler/OrdinaryEulerStability.lean:49:theorem eventually_h3_bound (U : Evolution T hT) (V : ℕ → Evolution T hT)
+Euler/OrdinaryEulerStability.lean:64:theorem sampled_h3_tendsto_zero (U : Evolution T hT) (V : ℕ → Evolution T hT)

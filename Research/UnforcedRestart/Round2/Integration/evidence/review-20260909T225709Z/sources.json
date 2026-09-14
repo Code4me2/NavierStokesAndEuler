@@ -1,0 +1,78 @@
+[
+  {
+    "path": "Research/UnforcedRestart/Round2/Integration/review-check.py",
+    "sha256": "e8563bcf2bd48d945da165fc85337cf91407ea6bb1eb6150be4c939f4af5e772"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/Integration/validate.py",
+    "sha256": "cbe404881d9f1f8cf27fdfc219c9e1a4430b68f377e06670a71d8578785d6b86"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/Integration/selftest.py",
+    "sha256": "3e6861a1b522f22796a446e16c79d5d938197dc368d2ef241a0079711481e8af"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/MANIFEST.json",
+    "sha256": "631023189131a49280fd50367195025fdd07f0194c86568e6a1db2530282765f"
+  },
+  {
+    "path": "Research/UnforcedRestart/actual-forcing-budget/Main.lean",
+    "sha256": "190613356966300c5238cf12faf1e84b2aeabc9834e73b2b78237eedd5154f5a"
+  },
+  {
+    "path": "Research/UnforcedRestart/difference-equation/Main.lean",
+    "sha256": "1c5ea8920c64129ecbe814b70ce2fae38ed4dee48deb649fe87669be72ed309a"
+  },
+  {
+    "path": "Research/UnforcedRestart/energy-comparison/Main.lean",
+    "sha256": "f8a731c7768154f737fecf161cd0a2a7d1fdf84314b4ebc5f13ac6e3d4b2615a"
+  },
+  {
+    "path": "Research/UnforcedRestart/gronwall-threshold/Main.lean",
+    "sha256": "48b50ff2b26e32007b5c714a42f37e03fe798c8987e13c6080cbf5375a5eb753"
+  },
+  {
+    "path": "Research/UnforcedRestart/local-theory-obstruction/Main.lean",
+    "sha256": "d9919bebd03e1618c0fe621eb12f93cb510b803a435c097fb3612d26e44f53f8"
+  },
+  {
+    "path": "Research/UnforcedRestart/periodic-restart-data/Main.lean",
+    "sha256": "95423d4e60624a11dcb95901f3e346e0cb8bebc03e3d8af4e670efdfd4f67cb7"
+  },
+  {
+    "path": "Research/UnforcedRestart/pressure-absorption/Main.lean",
+    "sha256": "ed3fe773fc1b9d00998b583c2e0aa66295403f3921a852a715415333b5d3f8c9"
+  },
+  {
+    "path": "Research/UnforcedRestart/r3-restart-data/Main.lean",
+    "sha256": "e80024b8013fcd2ff646da06613a307e51f72a7545ec60fedc37d415858d2d84"
+  },
+  {
+    "path": "Research/UnforcedRestart/scaling-and-compactness/Main.lean",
+    "sha256": "451b85329629a3daeb6e5f9d97e23fa46868705799becfefbde6eeb93d6be9b0"
+  },
+  {
+    "path": "Research/UnforcedRestart/smooth-force-cutoff/Main.lean",
+    "sha256": "accd8d5d4a26244783173ccdf30fe95d0e4c36f2cffa9334dd8662a545cadf02"
+  },
+  {
+    "path": "Research/UnforcedRestart/strong-norm-growth-transfer/Main.lean",
+    "sha256": "6e5f145d0370b166d095253b9b88f868f7f35b0b1af34bf23db277b3872b1147"
+  },
+  {
+    "path": "Research/UnforcedRestart/time-translation/Main.lean",
+    "sha256": "48a1957d1b3ee79f9dc9660f3b7e96130f52c173b4ff60ec0ddd9cccc7faf99f"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/PeriodicSlab/Main.lean",
+    "sha256": "88686796eb10831c214eab9179af31be7dbd8c1f139cc7ec1b9ebe5566b546d5"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/ActualForce/Main.lean",
+    "sha256": "0d907dcfc428c23c5473e6ecfbcaeda6d6d783a9cdaeca95510e3372ff8a5efa"
+  },
+  {
+    "path": "Research/UnforcedRestart/Round2/Integration/Audit.lean",
+    "sha256": "a50f6e7ef2050f9f9c86133e527fadbefbe80a167d7bd05bcedd1132380f3733"
+  }
+]

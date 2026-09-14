@@ -1,0 +1,195 @@
+{
+  "scope": "focused named exports only; no new aggregate/helper/imported-closure audit",
+  "accepted_source": {
+    "path": "Research/UnforcedRestart/Round3/MeanTopology/Main.lean",
+    "sha256": "0c106afc75bcfed595457f9a7f77fe1c9bd0699ba5e33caf694d86cc40cdb963"
+  },
+  "driver": {
+    "path": "Research/UnforcedRestart/Round3/MeanTopology/check.py",
+    "sha256": "49e6ee24bfa2b8119d03a1f878ee25670fdc68c94f1c519ceed69b00247f4170"
+  },
+  "cross_role_freeze": {
+    "path": "Research/UnforcedRestart/Round3/WitnessFeasibility/Main.lean",
+    "sha256": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+    "mode": "read-only source recompiled into unique owned output; no moving worker outputs"
+  },
+  "exports": [
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compact_component_integral_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_zero_outside",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_zero_germ",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_agreement",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_smooth_slice",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_divergence_free",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.compactVelocity_compact_support",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.selected_compact_momentum_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.selected_compact_transport_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.selected_force_mean_continuousOn",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "UnforcedRestart.Round3.MeanTopology.periodic_potential_component_mean_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "source_map": [
+    {
+      "path": "NavierStokes/ActualCandidateAssembly.lean",
+      "sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/ActualCandidateConstruction.lean",
+      "sha256": "92a829e5397206ec189b323b63a9ec3de86f57c6ab5e9f5aa7c2c90faca28270",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/CorrectionInitialization.lean",
+      "sha256": "3aec41fd046ae4b6e0ee7f0e4163dc3997322c883a5ef321fac952551ce865bd",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/MixedPeriodicAssembly.lean",
+      "sha256": "e4c439cedcab7b2be25f493d558879fd761314de97130b74aa9828ebf92e6030",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/SpatialLocalization.lean",
+      "sha256": "92db0f6046ec96de50cabbcc14acc9e93c7471f9801999b9e5d393793cea0234",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/TimeLocalization.lean",
+      "sha256": "ace658552a7578650ee6012752011afaf2b38a2246d4bb9bfcae840812aa0c73",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/ProblemStatement.lean",
+      "sha256": "1538771ee5e3fc0a3a71a3c89809322fc41ec863032c7212aa91b60a538aef1f",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/PeriodicIntegration.lean",
+      "sha256": "fd3e402346d4bfd2dd5394c1b3393ceae86fe98fc14e23d6c5520168a6e5734a",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/PeriodicLocalization.lean",
+      "sha256": "bbe02c859127cc4df8244650a7476f8c40a60161b1a9fee0d66957bdbe970208",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/R3/CompactEnergy.lean",
+      "sha256": "619938ae53a4c0c7eafc2f6bdd10680a6bf16f310b5c34fc939c0642a89ee2a1",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/SolutionDifference.lean",
+      "sha256": "c78f82ab97ea9e38f5abb91a1c855faa06b7d32686b7c042928adb5bfb06b1a8",
+      "matches_clean_checkout": true
+    },
+    {
+      "path": "NavierStokes/CandidateFromLimits.lean",
+      "sha256": "d51e5997466748271657aa7f137f662a48fc98226ee7afe2a44f47141ea4bc84",
+      "matches_clean_checkout": true
+    }
+  ],
+  "accepted_run": "Research/UnforcedRestart/Round3/MeanTopology/out/strict-mb_z5gut",
+  "evidence": {
+    "WitnessFeasibility.result.json": "c5e4e73c4cd16ddf50050c6ee5edaa8e0610ecb7139735ea47f3023c5647ab71",
+    "MeanTopology.source.lean": "0c106afc75bcfed595457f9a7f77fe1c9bd0699ba5e33caf694d86cc40cdb963",
+    "WitnessFeasibility.log": "60bd2a13cca20a97531d666f5501f6688a5724cf57c858be5d2891ceb8895151",
+    "MeanTopology.command.json": "70739e2a32cdd94fbd9d621fa4721c0da9c2cfd943c2b34c2cdc5224016c4444",
+    "WitnessFeasibility.command.json": "449fa2c72ab7e9ec55110d53e004efbf2bf1eff82fb4187df60d620a925637ad",
+    "WitnessFeasibility.source.lean": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+    "MeanTopology.result.json": "c954b4e586f7793280e7e80b53c5804caa2740c1e6d06551ea3b996ab319b7f4",
+    "MeanTopology.log": "fea151a235a4ac6bd053b0f3db6017f05fd89cdd1f486f5ba4f32a2680128bb3"
+  },
+  "rejected_runs": [
+    "strict-e9y08ksr",
+    "strict-x212rf_b",
+    "strict-68zv82m7",
+    "strict-1i2tl027",
+    "strict-10tzrj_u"
+  ],
+  "earlier_narrow_pass": "strict-f853krkn"
+}

@@ -1,0 +1,12 @@
+{
+  "ref": "refs/heads/research/unforced-validated-snapshot-20260912T175850171580Z",
+  "commit": "e970490cf8f0cfb41fca101c62702fab7347c17c",
+  "tree": "e7ef67fc559232989d772d44865f6ee3b79d332a",
+  "parent": "597692fa5d55e07d810b2d96ead1a67972585425",
+  "selected_paths": 64,
+  "accepted_mathematical_sources": 14,
+  "frozen_audits": 2,
+  "preserved_files": 2878,
+  "head_index_prior_refs_and_files_unchanged": true,
+  "receipt_is_post_snapshot": true
+}

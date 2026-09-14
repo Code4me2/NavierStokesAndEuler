@@ -1,0 +1,18 @@
+Comparator expected=19e111e2141cf333c7daff0f64c5f24acc91dd2e actual=19e111e2141cf333c7daff0f64c5f24acc91dd2e tracked_clean=True PASS=True
+mathlib expected=85e3a25e006c35636f0e53b0e9296caca2685bc0 actual=85e3a25e006c35636f0e53b0e9296caca2685bc0 tracked_clean=True PASS=True
+lean4export expected=cacf989bd75f608700820f6afc595f32e7a99a4d actual=cacf989bd75f608700820f6afc595f32e7a99a4d tracked_clean=True PASS=True
+plausible expected=d9598f07b1bc701f1e3aae163d2681c1fd978793 actual=d9598f07b1bc701f1e3aae163d2681c1fd978793 tracked_clean=True PASS=True
+LeanSearchClient expected=ba67e212be1197b84c1f1f6299488a10a3002713 actual=ba67e212be1197b84c1f1f6299488a10a3002713 tracked_clean=True PASS=True
+importGraph expected=d8823026ac7ef130c253089d95685f9877b95323 actual=d8823026ac7ef130c253089d95685f9877b95323 tracked_clean=True PASS=True
+proofwidgets expected=a8acbfd87375ff4abe14ce09db5b7664d383bc7f actual=a8acbfd87375ff4abe14ce09db5b7664d383bc7f tracked_clean=True PASS=True
+aesop expected=18889deb9e83ea7420ef51c160d6f88552e744e3 actual=18889deb9e83ea7420ef51c160d6f88552e744e3 tracked_clean=True PASS=True
+Qq expected=507746ab8f4b643ccdacb2ec4cdb5853fa9f8ab3 actual=507746ab8f4b643ccdacb2ec4cdb5853fa9f8ab3 tracked_clean=True PASS=True
+batteries expected=d54dddc581e08be364c278052863524bff7a99a9 actual=d54dddc581e08be364c278052863524bff7a99a9 tracked_clean=True PASS=True
+Cli expected=ab3a82db9fea14cf0fd7f5a2de650f4b534640af actual=ab3a82db9fea14cf0fd7f5a2de650f4b534640af tracked_clean=True PASS=True
+files_checked=162103
+shared_inodes=0
+symlinks=3
+.lake/packages/mathlib/scripts/bench/size/run.py -> /home/velvet/worktrees/unforced-restart-20260909T202951Z/.lake/packages/mathlib/scripts/bench/size/run
+.lake/packages/mathlib/scripts/bench/build/fake-root/bin/lean.py -> /home/velvet/worktrees/unforced-restart-20260909T202951Z/.lake/packages/mathlib/scripts/bench/build/fake-root/bin/lean
+.lake/packages/batteries/docs/README.md -> /home/velvet/worktrees/unforced-restart-20260909T202951Z/.lake/packages/batteries/README.md
+ISOLATION_AND_PINS_PASS=True

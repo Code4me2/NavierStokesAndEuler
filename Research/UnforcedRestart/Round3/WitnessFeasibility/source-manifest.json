@@ -1,0 +1,290 @@
+{
+  "scope": "WitnessFeasibility focused checking and read-only source audit only",
+  "accepted_sources": [
+    {
+      "path": "Research/UnforcedRestart/Round3/WitnessFeasibility/Main.lean",
+      "sha256": "7d77092a3da73faedebac0a052c6fd2ce6fc46d340f48f796dd5e45f926be8da",
+      "declarations": [
+        {
+          "name": "budget",
+          "line": 9
+        },
+        {
+          "name": "threshold",
+          "line": 10
+        },
+        {
+          "name": "geometry",
+          "line": 11
+        },
+        {
+          "name": "h",
+          "line": 12
+        },
+        {
+          "name": "potentialSum",
+          "line": 14
+        },
+        {
+          "name": "directSum",
+          "line": 17
+        },
+        {
+          "name": "pressureSum",
+          "line": 20
+        },
+        {
+          "name": "velocity",
+          "line": 23
+        },
+        {
+          "name": "pressure",
+          "line": 26
+        },
+        {
+          "name": "Data",
+          "line": 29
+        },
+        {
+          "name": "data_nonempty",
+          "line": 46
+        },
+        {
+          "name": "selected",
+          "line": 52
+        },
+        {
+          "name": "terminal_origin_jets",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "path": "Research/UnforcedRestart/Round3/WitnessFeasibility/Certificates.lean",
+      "sha256": "89f21ae88123d46f07eedaaf8c09216f98bbeb1111c73ae660c29dfc291a9d85",
+      "declarations": [
+        {
+          "name": "selected_force_eq_residual",
+          "line": 10
+        },
+        {
+          "name": "same_schedule_force_eq",
+          "line": 16
+        },
+        {
+          "name": "extension_jet_unique",
+          "line": 23
+        },
+        {
+          "name": "boundaryLimits_choice_independent",
+          "line": 31
+        },
+        {
+          "name": "selected_terminal_jet_eq_extension",
+          "line": 39
+        }
+      ]
+    }
+  ],
+  "audited_sources": [
+    {
+      "path": "NavierStokes/ActualCandidateAssembly.lean",
+      "sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/ActualCandidateConstruction.lean",
+      "sha256": "92a829e5397206ec189b323b63a9ec3de86f57c6ab5e9f5aa7c2c90faca28270",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/ActualCarrierGeometry.lean",
+      "sha256": "e5c0face17159470b9a8fd292b312913cd3d64a76d51ab32f753df661672834b",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/ActualCycleParameters.lean",
+      "sha256": "d4bd4977c998300d0488c5002f402c99c9774a65246cb63569c1aba1224e1046",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/CorrectionInitialization.lean",
+      "sha256": "3aec41fd046ae4b6e0ee7f0e4163dc3997322c883a5ef321fac952551ce865bd",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/FinalSlowBase.lean",
+      "sha256": "4d5e5d612c8a48e972943f1f1a6bc247e22d57aad2e162ce0ffe11f133b3b41f",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/EntranceAlignedBase.lean",
+      "sha256": "52f0f86b44aac47c2222fca76354822d618ebf4e42162820d11a8a2c8d16b685",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/GermCandidateAssembly.lean",
+      "sha256": "c945cd5335ff0837cd0208e224e1468b25b307967712da9021e2f4ce8ca6e0b9",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/MixedCandidateWitness.lean",
+      "sha256": "cecb858919406c55d2fa8dd2bff1745eb8415e718d837b2155b70fda991ba722",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/MixedDiagonalSchedule.lean",
+      "sha256": "20188a736f80f666f1a55dc2a6aaf06b1136bb287e57fc6a638f55b4035da549",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/CutStageEstimates.lean",
+      "sha256": "0f27c850f7b4802cf16867df59e78001a490d25d2d5d85c93216392a19a2e8d0",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/MixedPeriodicAssembly.lean",
+      "sha256": "e4c439cedcab7b2be25f493d558879fd761314de97130b74aa9828ebf92e6030",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/JointResidualLimits.lean",
+      "sha256": "b7f995192a881a593b4dd9b4c02e9fa723ec128a15d0cc6d478a17dcdca4964d",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/CandidateFromLimits.lean",
+      "sha256": "d51e5997466748271657aa7f137f662a48fc98226ee7afe2a44f47141ea4bc84",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SpacetimeGluing.lean",
+      "sha256": "2c90e5c33f4277a7f0f1aa73a4d3e649367bcfd907b63073052ec372513743a4",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SpatialBorelExtension.lean",
+      "sha256": "c7b60e1b0918540817c9ff9e5cbc1f1908f9ce8d072df257fd8c678a1dae68a7",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SlowBorelBase.lean",
+      "sha256": "fe8d1c41a23fc24d593d72bc446d0a1b4226c8ecd72771f409b3a0e6774839b0",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SolenoidalDiagonal.lean",
+      "sha256": "8b5581782f067884c9a4be5f3a74e8ad9e5ed37fca25dbb1155a1f4e82d525a2",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/PhysicalWaveSum.lean",
+      "sha256": "59cbd910c457d2f6770babb0b4b3307d47b66e01b71467d5fd6163a8ae9cc5bd",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SmoothCutoffs.lean",
+      "sha256": "5e2aae25c4b85955629c2bd0b60722cf2485236cdb3aa056bb337a27a04e878a",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/TimeLocalization.lean",
+      "sha256": "ace658552a7578650ee6012752011afaf2b38a2246d4bb9bfcae840812aa0c73",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SpatialLocalization.lean",
+      "sha256": "92db0f6046ec96de50cabbcc14acc9e93c7471f9801999b9e5d393793cea0234",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/ProblemStatement.lean",
+      "sha256": "1538771ee5e3fc0a3a71a3c89809322fc41ec863032c7212aa91b60a538aef1f",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    },
+    {
+      "path": "NavierStokes/SpatialCurl.lean",
+      "sha256": "914af8f078124a2b41d5fc7545b010f48d0cf3208e6fd74efff38e9ec37964e3",
+      "source_built_checkout_source_matches": true,
+      "scope": "read-only source audit, not complete transitive choice extraction"
+    }
+  ],
+  "compile_result": "Research/UnforcedRestart/Round3/WitnessFeasibility/out/certificates-v6ayi6z_/result.json",
+  "compile_result_sha256": "8296fafc84bf59f84fa22035f1388e1a6cdeac35c56483b40f40177e0c765ce1",
+  "axiom_whitelist": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "printed_new_exports": [
+    "selected_force_eq_residual",
+    "same_schedule_force_eq",
+    "extension_jet_unique",
+    "boundaryLimits_choice_independent",
+    "selected_terminal_jet_eq_extension"
+  ],
+  "tool": {
+    "path": "Research/UnforcedRestart/Round3/WitnessFeasibility/check.py",
+    "sha256": "94419514ec41ae51bbdd1666006014b5584ab2abc47eb632323db8f02d4dd27f"
+  },
+  "preservation_commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "597692fa5d55e07d810b2d96ead1a67972585425\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "597692fa5d55e07d810b2d96ead1a67972585425",
+        "--"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--exit-code"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "failed_run": "Research/UnforcedRestart/Round3/WitnessFeasibility/out/certificates-vcevkh_s",
+  "no_numerical_experiment": true
+}

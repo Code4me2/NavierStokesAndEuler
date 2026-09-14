@@ -1,0 +1,5 @@
+Command: python3 Research/UnforcedRestart/Round3/Integration/reconcile.py
+Exit: 1
+Scope: Python evidence reconciliation only, no Lean invocation or output writes before failure.
+Failure: FileNotFoundError while resolving MeanTopology result output key Research/UnforcedRestart/Round3/WitnessFeasibility/Main.olean under the run root instead of run/lib.
+Correction: MeanTopology result output paths are lib-relative; use m / 'lib' as output_root. No source, evidence, compiler setting or acceptance criterion was altered.
