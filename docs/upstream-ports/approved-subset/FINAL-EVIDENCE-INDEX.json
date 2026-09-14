@@ -1,0 +1,157 @@
+{
+  "validated_candidate": "df3d89147c13702971b71c04530642f423fbd12f",
+  "verdict": "QUALIFY \u2014 bounded integration accepted",
+  "authority": "Gate-specific NS/EULER receipts establish PASS; audit supplies completed qualified review. Assembly/preparation receipts remain historical, not current gate verdicts.",
+  "committed": "Only FINAL-VALIDATION-LEDGER.md and this index in the final documentary commit; earlier reports retain their original commits.",
+  "external_evidence": "All referenced raw logs, manifests, audit and finalization outputs remain outside Git. Absolute local paths are not portable hosting or external attestation.",
+  "entries": [
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/FINAL-RECEIPT.json",
+      "sha256": "8018cea1b1a48b627203b9614c2bb1c117b2816c7d7dbbfede4bf0a7d4feeb21"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/full-candidate-inventory.json",
+      "sha256": "41e45ee6627edfa7fd86277c9c22e0d8ce4bc7596ee0e98ffa67b7d81c3081fa"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/retained-production-and-config-inventory.json",
+      "sha256": "2da3cfa27a084f957e1a8a946eaad4cfb876e34f0e986f753805866c1dce2cf3"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/research-inventory.json",
+      "sha256": "0f14a36bed00dd012a3d83b2a46d5bd8902797c6919249837978d396207e56d7"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/added-h3-inventory.json",
+      "sha256": "436bd4c9db84e8b3475140b43d92aebd81d8c4db4069c1b92f51627035f78ee5"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/documentation-inventory.json",
+      "sha256": "19d21bf56cbf130790970786cde5bc159fe7be9682fbc617deeab5e9de7ee3ec"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/documentation-validator.log",
+      "sha256": "a7c545d9aed36dc958913d2d83f9a7af0fd603f6635053a9ed7fe57c4343500c"
+    },
+    {
+      "external_path": "/home/velvet/approved-subset-integration-OFtQxhwB/assembly-checks.json",
+      "sha256": "ef7c1e9e3c90a3091e3a32a8d4c414557e3c9ce6e8c470b7406caff93233e094"
+    },
+    {
+      "external_path": "/home/velvet/integration-launch-prep-44UA3CTj/FINAL-RECEIPT.json",
+      "sha256": "c2b0350a884541e6b2774085cba7464220a68c9a6c07ed28932afbeadab51895"
+    },
+    {
+      "external_path": "/home/velvet/integration-launch-prep-44UA3CTj/research-result.json",
+      "sha256": "35336c89d31fe89d0843be1b9ab892f1afcf6647a29c91f0c8d1c522c63ab4fd"
+    },
+    {
+      "external_path": "/home/velvet/integration-launch-prep-44UA3CTj/launch-diagnosis.json",
+      "sha256": "4304c1f22ff135fe76ba397429025bbed37d38e3d9e0f4c94e1c67538e3f6297"
+    },
+    {
+      "external_path": "/home/velvet/integration-launch-prep-44UA3CTj/NEW-EVIDENCE-SHA256.json",
+      "sha256": "79ddb11d2772ae9e657eba2a0caab2dd45c1276c8d216a9bfeba1fcaaad98564"
+    },
+    {
+      "external_path": "/home/velvet/integration-ns-gate-atcgzbwp/NS-RECEIPT.json",
+      "sha256": "93409f2ddaca47e732bc7fcd0167aeefb99eb62228737380298620fc982f5c6a"
+    },
+    {
+      "external_path": "/home/velvet/integration-ns-gate-atcgzbwp/NS-SEAL.json",
+      "sha256": "33c7a5c7193df804dca8907cd4d756d5c62ead2aaab79e12a3be759cd6afdcf8"
+    },
+    {
+      "external_path": "/home/velvet/integration-ns-gate-atcgzbwp/NS-EVIDENCE-SHA256.json",
+      "sha256": "a19a692a2f6c9b89bb6f2fa7bef0edd590ed41ae0bee71a013c35d8ab8c45bc5"
+    },
+    {
+      "external_path": "/home/velvet/integration-ns-gate-atcgzbwp/NS-HANDOFF.md",
+      "sha256": "cff06b897027b802dff22af762d132b4f05bc3976fbf6d06c057026ab810ed8d"
+    },
+    {
+      "external_path": "/home/velvet/integration-euler-gate-st0c9z7q/EULER-RECEIPT.json",
+      "sha256": "6f1136d6a6eabf88d01b992820df084d392c9e92f4c6121fad58e8a3d62c95fa"
+    },
+    {
+      "external_path": "/home/velvet/integration-euler-gate-st0c9z7q/EULER-SEAL.json",
+      "sha256": "8504084a2c5a88132c87b1bede35398df451e4e9b8c50124de512b02cc1cb8d8"
+    },
+    {
+      "external_path": "/home/velvet/integration-euler-gate-st0c9z7q/EULER-EVIDENCE-SHA256.json",
+      "sha256": "82ee358184c1706101788eacef635ab6bc5adfa621cf026097a72d5df9b7ca89"
+    },
+    {
+      "external_path": "/home/velvet/integration-euler-gate-st0c9z7q/EULER-HANDOFF.md",
+      "sha256": "90273500071714655daae5392cca349683bc34d2a59d2f14107253ebe1fdb7b0"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/AUDIT.md",
+      "sha256": "5777065a75a84d0b3c289340193b6936b415a4d880db63b48752868486f27642"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/FINAL-RECEIPT.json",
+      "sha256": "7a6de1d6b68b22fc1c0bf51019453e9aa10f2d2aa6190a5b3293438a504faec4"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/AUDIT-SEAL.json",
+      "sha256": "f8bc96447d4f0d3855e18f0110d69c78d017f726953409157d5366dd9654b905"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/AUDIT-SHA256.json",
+      "sha256": "fa5b37795e6c158976dfd436962db7c096e579eb5bf5fc9aeb40570870f33e21"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/checks.json",
+      "sha256": "744ec8e82c67c70def031faa5bbb81cc3546fbce62d736869cb5efe5d0c037e7"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/deep-checks.json",
+      "sha256": "b52c0c4a5dca02ea95d59147894d2d6f4c5d01342e3b48be6a07b7341b005384"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/history-checks.json",
+      "sha256": "06e8ba8aa37b81435ee736321cb36d86a55112f0d1dc137e422cd34d57cfe589"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/ns-raw-tail.txt",
+      "sha256": "b322abb4603252e59d03e003682c0596d6fd2a28fb2eb7951e021b7d1e4f350d"
+    },
+    {
+      "external_path": "/home/velvet/independent-source-evidence-audit-XbugZfMT/euler-raw-tail.txt",
+      "sha256": "85314353ca34027ee9ee6f1d265b11a5769a80033e46b15ab4765cb125c1b448"
+    },
+    {
+      "external_path": "/home/velvet/final-documentary-consolidation-jGgjxocV/check.py",
+      "sha256": "61ba880b247c52ecd790d8e3a1c1817e75b95c0353aaeffc50da8eed458705ca"
+    },
+    {
+      "external_path": "/home/velvet/final-documentary-consolidation-jGgjxocV/pre.json",
+      "sha256": "ba5430f9825a0516c502db64f6296a29d41af54edd28243e9f7d406e5d8bf914"
+    },
+    {
+      "external_path": "/home/velvet/final-documentary-consolidation-jGgjxocV/pre.log",
+      "sha256": "a74cf949ca8920434d55b2ebc270f21470ff04eef36de0cf0eb033942e869a0b"
+    },
+    {
+      "external_path": "/home/velvet/final-documentary-consolidation-jGgjxocV/pre-original-untracked-paths.txt",
+      "sha256": "4ed414d66db115a3176c1b315f03ca550e67242f35e508ed30f18d7935d92219"
+    }
+  ],
+  "post_commit_outputs": {
+    "root": "/home/velvet/final-documentary-consolidation-jGgjxocV",
+    "files": [
+      "post.json",
+      "post.log",
+      "post-original-untracked-paths.txt",
+      "commit.log",
+      "FINAL-RECEIPT.json"
+    ],
+    "note": "Written after this commit; deliberately not self-hashed or claimed executed on the validated candidate."
+  },
+  "gate_raw_logs": [
+    "/home/velvet/integration-launch-prep-44UA3CTj/gate-attempts/ns-initial",
+    "/home/velvet/integration-launch-prep-44UA3CTj/gate-attempts/euler-initial"
+  ],
+  "historical_failures": "Retained in preparation diagnosis and referenced historical evidence; no failure-limit attribution inferred from successful gates."
+}
