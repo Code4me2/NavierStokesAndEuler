@@ -6,6 +6,29 @@ Baseline: `597692fa5d55e07d810b2d96ead1a67972585425`. All 30 authored human IDs 
 
 Each entry specifies the hypothesis boundary: a bundled record means **all its fields**, together with enclosing section parameters and typeclass assumptions, not merely the informal selection listed here. Open independent source review must expand those records and check actual instantiations. Names below are author citations; integration adds lexical checks, not elaborated `#check` results. File links plus fully qualified names are the source anchors (no invented GitHub declaration fragments). Generated record projections are distinguished where needed.
 
+<a id="native-control-supplement"></a>
+## Supplemental native-control route (separate baseline and coverage)
+
+[Chapter 05](05-native-weighted-control.md) and its [claim/source/obligation ledger](native-control-validation.md) use baseline `26e896edbdbe1215c0d50ddba24b2b6453646f5f`. Its eight explicit `native-control-*` anchors are distinct from the historical 30 NSC/NSA/EUL IDs. The existing validator checks their links, not semantic claim coverage. No historical obligation is silently closed.
+
+- [BasePhaseGeometry.lean](../../NavierStokes/BasePhaseGeometry.lean) — `NavierStokes.BasePhaseGeometry.FamilyData.phase_estimates`; `NavierStokes.BasePhaseGeometry.FamilyData.modal_errors`; `NavierStokes.BasePhaseGeometry.FamilyData.damping_error`; `NavierStokes.BasePhaseGeometry.FamilyData.construction`.
+  Boundary: prepared normalized base/cone/representative data; chapter 05 expands the order-zero producer, not summed-profile existence or all-order base jets.
+- [ActualParticularControl.lean](../../NavierStokes/ActualParticularControl.lean) — `NavierStokes.ActualParticularControl.scaled_selected_copy_energy`; `NavierStokes.ActualParticularControl.source_path_bounds`; `NavierStokes.ActualParticularControl.frame_input_jets`.
+  Boundary: actual selected geometry, transported slot separation, incoming all-jet residual invariant and primitive frame jets; no assumed projected forcing bound.
+- [ParticularWaveBounds.lean](../../NavierStokes/ParticularWaveBounds.lean) — `NavierStokes.ParticularWaveBounds.forced_joint_jet_bound`; `NavierStokes.ParticularWaveBounds.copySolve_jet_bound_from_modal`; `NavierStokes.ParticularWaveBounds.pressure_class`.
+  Boundary: energy and input jets on the whole closed path with open-neighborhood smoothness. Numerical modal/ambient bounds are reconstructed; pressure remains class-level with named inverse-normal/frequency inputs.
+- [ActualParticularStageControls.lean](../../NavierStokes/ActualParticularStageControls.lean) — `NavierStokes.ActualParticularStageControls.selected_tangent_eq`; `NavierStokes.ActualParticularStageControls.selectedActualControl`; `NavierStokes.ActualParticularStageControls.selected_raw_jets`.
+  Boundary: the same initializer, arbitrary active selector and copy, nonzero harmonic, current residual and incoming frequency coherence; not an independently chosen frame or solved-wave premise.
+
+<a id="primitive-derivative-supplement"></a>
+## Supplemental primitive-derivative route
+
+[Chapter 06](06-primitive-derivative-bounds.md) supplies relative numerical base/frame/pressure producers for the same selected construction at baseline `26e896e…`. Its [separate claim and exact-file source ledger](primitive-derivative-validation.md) audits ten `primitive-*` claims without adding historical IDs or source-map lexical targets. Finite-profile certificates, incoming residual production and localization remain explicit inputs/debt; chapter 05 and its historical ledger/plan are unchanged.
+
+## Supplemental physical mechanism and reference-only library map
+
+[Chapter 07](07-physical-mechanism.md) and its [PM-01–11 ledger/dependency map](physical-mechanism-validation.md) distinguish the new paper and immutable upstream `f9e8bc5…` suppliers from retained `26e896e…` sources. They add no historical-ID validation, selected-array/domain closure, theorem rerouting or force-deletion result.
+
 <a id="delivered-statements"></a>
 ## Delivered statements and class hypotheses
 

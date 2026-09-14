@@ -198,6 +198,8 @@ Fix a cycle input of accuracy \(\sigma\ge1/5\). It stores a mean field, oscillat
 
 The following is one entire cycle, in the source order. We write \(U\) for the incoming physical velocity only when discussing the universal residual algebra; \(v\) denotes the oscillatory part in a fixed normalized chart.
 
+**Supplemental derivation:** [chapter 05](05-native-weighted-control.md) follows one actual selected native copy through geometry-to-energy, separated source paths, joint endpoint jets and pressure. Its [new ledger](native-control-validation.md) narrows part of OBL-NSC-004 but retains primitive higher-order jet and pressure-input debt; it does not close the cycle or change this chapter's historical evidence status.
+
 **1. Particular wave: remove the current nonzero-mode error.** Compute each mode source from the current residual block, including its current Gaussian error, with the per-label alias slot zero. Solve for the particular coefficients on their actual native cells, sum the finite modes and labels, and obtain \(w_P,\pi_P\). The native solve is a complex Volterra solve; both real and imaginary modal estimates are required. Its homogeneous frame, transported source, localization, pressure projection, and exact curl are part of the constructor, not adjustable output hypotheses.
 
 The sign to check is that the old source **plus** the particular linear-good residual is higher order:
