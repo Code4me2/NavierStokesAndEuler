@@ -1,0 +1,2451 @@
+{
+  "schema": "mechanism-atlas/v1",
+  "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "observed_head": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "source_root": "/home/velvet/Desktop/NavierStokesAndEuler",
+  "source_anchor_convention": "inclusive 1-based lines at immutable pin; sha256 of original range bytes including line terminators; declarations may be grouped; enclosing file is authoritative",
+  "evidence_legend": {
+    "I": "inherited local inspection, not newly audited closure",
+    "S": "current local source-body inspection",
+    "H": "human algebra conditional on named inputs",
+    "U": "unexpanded analytic producer",
+    "X": "stronger witness attribution unresolved"
+  },
+  "input_artifact_sha256": {
+    "Euler/MAP.json": "ec1bb0f0e7a6c37b79eb3eb6cd2bf473dc7679815c117a338a5e7c9e58f56dd9",
+    "Euler/NEXT-TARGET.md": "2009830d1d24a72cec2dcc855deb3803ea8790130b7ab2cb1f281e2e9575fd7f",
+    "Euler/MAP.md": "e305c0fc11ef2eca3f0330e0462609f869ee16a758f8e6eb4bb9890623f14f17",
+    "NavierStokes/MAP.json": "b446a0292e65ee9a2ab045881c53e7f183b967fee995716ed72f9184891ce93b",
+    "NavierStokes/NEXT-TARGET.md": "c608d70b9d39c91987d46fb35961bcd36e444fb461db226ae0a63220a2ebf696",
+    "NavierStokes/MAP.md": "d90976190775478b2dfdd1015ccaff334a2fc6f753238be191d89c58b3c37847",
+    "NavierStokes/Euler/MAP.json": "cca8570263ae6b71b7ff8e139237f60bd3f9b44a9de657e0fdfd326d24a56f83",
+    "NavierStokes/Euler/MAP.md": "eb12323bade620a5a9833ff3b49902027832d2c752231b0e78474f5343bfe230"
+  },
+  "companion_document_sha256": {
+    "SOURCE-MAP.md": "03ee19f70916ae9af507f0a479c121cc8cbc194481cf5a057876f4d0b6d22f47",
+    "INTERFACES.md": "85a9cef5d83d74ce37abfba8153278c761ae09c01ddda69e201d80a1e01e5592",
+    "VALIDATION.md": "27ce2df9f9ca5b646f897010f872837d4cbaab0d2172a5a6931dab1307fed899",
+    "native-control-validation.md": "ba7ae7d74acc0f07c8e6a5b8a7f7985e894a27944c164dffccdd3d6f64f240e7",
+    "primitive-derivative-validation.md": "1d5dfd60e1903fd16cfd85bc2a7f16f8e237736bc31326f2f01714b71c112ea1",
+    "physical-mechanism-validation.md": "402a2b8dc2e9a376fcd1b52aca7bcc8def78e735605218e30f2eb5c6194fc70d",
+    "07-physical-mechanism.md": "fb3158c4a6c85b98b66efdfbd07148f27d4b72aa7b6791fa4731f3bdb3a89c78"
+  },
+  "nodes": [
+    {
+      "id": "NS-01",
+      "branch": "NS",
+      "name": "Native cycle closes and retains coherence",
+      "inputs": "Fix selected profile h>0, B,N0 with geometricThreshold≤N0, κ=10^-5. For current x and σ≥1/5, RunInvariant σ x.",
+      "output": "RunInvariant (σ+1/10) (x.step fixedParameters commonContext); hence ∀J the literal initialized iterate has σJ=1/5+J/10.",
+      "identity": "particularData uses actual_data R.analytic R.periodic; not a new favorable source. stepResult_of_particular passes staticData and concrete StepData to CorrectionAnalyticStep.step.",
+      "domain_quantifiers": "Same B,N0 and fixedParameters at every J. RunInvariant has analytic, coherent, periodic fields; next_runInvariant_of_particular supplies these by analytic step, coherence step, periodicity step respectively.",
+      "anchors": [
+        "N1.producer",
+        "N1.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Complete signed/temporal/rank analytic StepData production not expanded here. Profile existence remains imported; these are exposition obligations, not identified proof gaps."
+    },
+    {
+      "id": "NS-02",
+      "branch": "NS",
+      "name": "Local particular control extends by zero germs, not global denominators",
+      "inputs": "Current native residual all-jet class of exponent α; same-carrier and input-support invariants; j∈Z nonzero. Actual raw coefficient jets on controlPatch.",
+      "output": "UniformWaveClass for literal strippedPotential at α+1/2, then current physical mode bounds and compatible glued particular fields.",
+      "identity": "actual_potential_coefficient_class → potential_local_class → common_potential_class; original source extraction and transported frame of chapters 05–06 retained.",
+      "domain_quantifiers": "raw_jets uses preserves_frequency hx; control cover is controlPatch OR actual amplitude zero germ. Common potential class enlarges local jets then uses common_amplitude_germ/common_zero_germs. Physical gluing uses same current state and compatible bands, not an unrelated copy-family representative.",
+      "anchors": [
+        "N2.producer",
+        "N2.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Current-mode pullback derivative proof is not fully reconstructed. Chapter 06 explicit numerical arrays still lack their selected full-domain bridge; no global selected certificate follows from this local-germ route."
+    },
+    {
+      "id": "NS-03",
+      "branch": "NS",
+      "name": "Central boundary: five-field physical identity certificate",
+      "inputs": "For all raw stages k: smooth A_k,D_k,P_k on t<1,q<qbig; StageRealizations on bands n≥Nr; ExteriorStages; 2Q_Nr≤qbig; CycleRepresentation of same iterate xJ.",
+      "output": "∀J PhysicalData B Nr xJ.state UJ pJ, where UJ=curl Σ[k≤J]A_k+Σ[k≤J]D_k and pJ=Σ[k≤J]P_k.",
+      "identity": "Literal suppliers are stageRealizations, exteriorStages, stages_smooth, twice_residual_scale, cycle_representation of ActualCandidateConstruction; see full field expansion below.",
+      "domain_quantifiers": "Nr=residualBand, not firstBand; prefix includes stage zero and J+1 summands. PhysicalData is PhysicalFields with U=ActualPolarCoverage.nativeDomain.",
+      "anchors": [
+        "N3.producer",
+        "N3.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Pointwise chart formulas for every native signed/mean constructor are not fully derived; actual suppliers are identified rather than their full analytic closure certified."
+    },
+    {
+      "id": "NS-04",
+      "branch": "NS",
+      "name": "Native residual transfers through one comparable band and radial closure",
+      "inputs": "Invariant σ x, unchanged base error, PhysicalData B N x.state u p, N≥4, N0 geometric. Native full residual bounds on lifted open strip.",
+      "output": "∀m, JetRate(originPast,q,R(u,p),m,h(1/2+σ)−fixedLoss(m)). For x=xJ weaken to gJ−fixedLoss(m), gJ=hJ/10.",
+      "identity": "native_residual sums source oscillations + meanGoodResidual + excluded base/Gaussian/alias errors via fullResidual_decomposition. Base error preserved by every cycle; Gaussian and axis alias bounds usable at requested exponent.",
+      "domain_quantifiers": "SelectedGeometry has gap_le, annulus, in_domain, in_closure: smoothness on nativeDomain U; bounds on open strip V; chosen graph point in U∩closure(V). Exterior separately uses actual base germs.",
+      "anchors": [
+        "N4.producer",
+        "N4.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "cartesianPull_jet_bound and native harmonic extraction still analytic next obligations; no assertion that mere smoothness gives quantitative bounds."
+    },
+    {
+      "id": "NS-05",
+      "branch": "NS",
+      "name": "Raw and prefix estimates on the identical three sequences",
+      "inputs": "Same RunData, mean input at firstBand N≥4, signed WaveData, coherence, ActualRepresentations, and PhysicalData at N+1.",
+      "output": "StageEstimates h qbig A D P: ∀j≥1,m raw bound Cjm(1+|log q|)^pjm q^(gj−L(m)); ∀J,m background/residual rates with losses independent of J.",
+      "identity": "representations_of_signed_eqOn rewrites three initial and three positive component identities; initial direct field is actual initialized angular mean, not globally zero.",
+      "domain_quantifiers": "Signed data remain native WaveData; particular is independently glued current-band field, then proved equal. N+1 residual floor relates to firstBand through actual construction, not a free extra domain.",
+      "anchors": [
+        "N5.producer",
+        "N5.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Complete component bound closure unexpanded. StageEstimates contains no infinite residual hypothesis."
+    },
+    {
+      "id": "NS-06",
+      "branch": "NS",
+      "name": "One diagonal produces residual flatness",
+      "inputs": "StageEstimates for fixed raw sequences, 0<h<1/2, qbig>0; lower bound for a0 fixed.",
+      "output": "∃one integer doubling schedule a common to A,D,P; smooth presingular sums; ∀m,r≥0 residual JetRate m r, hence zero joint jets at (1,0).",
+      "identity": "MixedDiagonalResidual.exists_physical_schedule_residual_zero selects once and weakens finite residual gain gJ to gJ/2; raw fields never reselected.",
+      "domain_quantifiers": "Fix m,r after a is selected, then choose J large. Laplacian needs m+2 velocity jets, curl another potential derivative. Constants/neighborhoods may depend on J,m,r. Raw stage zero is exempt from smallness.",
+      "anchors": [
+        "N6.producer",
+        "N6.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Six-term calculation already explained in chapter 03; new evidence here is literal constructor connection N3–N5, not a new flatness theorem."
+    },
+    {
+      "id": "NS-07",
+      "branch": "NS",
+      "name": "Same sums give localized smooth force and both candidates",
+      "inputs": "Same diagonal, local angular data, one shrinking-support constant, axis-zero correction germs, off-plane raw extensions on endpointRoot<qbig, anchored base extension.",
+      "output": "Compact activated velocity/pressure and smooth compact-space force; periodic lift candidate from same sums. Force equals activated residual for 0≤t<1 and vanishes for t≥2.",
+      "identity": "selected_witness specializes B,N0; existential schedule extracted for periodic and compact routes. Separate force outputs in Witness are not asserted definitionally identical.",
+      "domain_quantifiers": "GermCandidateAssembly passes ASum,BSum,PSum to mixed_exists_force_with_consequences and exists_compact_candidate. ea,eb,ep extend these exact sums; force traces are actual derivative limits.",
+      "anchors": [
+        "N7.producer",
+        "N7.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Taylor–Borel gluing and raw endpoint model production remain human exposition debt; no new full kernel verification."
+    },
+    {
+      "id": "NS-08",
+      "branch": "NS",
+      "name": "Small outer route to exact forced delivered statements",
+      "inputs": "Periodic CandidateProperties or compact R3 Properties extracted from selected_witness; fixed ν>0.",
+      "output": "NavierStokes.Comparator.navier_stokes_breakdown_periodic and navier_stokes_breakdown_R3, with zero datum and rescaled smooth forcing.",
+      "identity": "No H3 addition reroutes these bodies. No Research producer used. Compact and periodic candidates extracted from original witness route.",
+      "domain_quantifiers": "Periodic: ComparatorTheorem.navier_stokes_breakdown_periodic calls selected_candidate then option_D_of_candidate. ComparatorSolution forwards exact theorem names. Whole-space competitor timewise L2 plus one global energy bound; periodic velocity AND scalar pressure periodic.",
+      "anchors": [
+        "N8.producer",
+        "N8.consumer"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "debt": "Full pressure-recovery/class-bridge dependency audit not repeated. Existing four-target Nanoda+Lean evidence on df3d891 with final doc-only 5fdcfe3 delta is user-supplied prior evidence, not rerun."
+    },
+    {
+      "id": "EU-01",
+      "branch": "Euler",
+      "name": "Fix the hierarchy, then recursively choose exact stages",
+      "inputs_output": "For each c≥0 and real floor B, ∃ one `Scales c B`; its J,D,X,δ and all-n numerical guards precede the recursion. Delivered instantiation fixes c=`requiredExponent` and B=`commonThreshold gradientConstant hessianConstant`, then defines `packets n : Stage constructionScales n` for every n. This is not ∀n∃ a new hierarchy.",
+      "identity": "constructionScales := Classical.choice(exists_scales requiredExponent commonThreshold); packets := stages constructionScales le_rfl le_rfl; successor splits on n.",
+      "domain_quantifiers": "Fix c,B; choose one S=(J,D,X,delta) before n. At each n use actual Stage S n and prescribed k_n, not fresh scales after derivative order.",
+      "anchors": [
+        "EU.scale",
+        "EU.recursion",
+        "EU.joined",
+        "EU.forward"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M1"
+    },
+    {
+      "id": "EU-02",
+      "branch": "Euler",
+      "name": "Initialized parametrix: tangency gives small drift, truncation gives residual",
+      "inputs_output": "Fix mean/transverse data M,D with M.T=D.T; positive history 0<τ<D.T; one history B, primary amplitude α>0, spike 0<δ≤1, terminal ξ, supported cutoff; joined/primary/normal/mean budgets and grade guards on one common radius R, coefficient agreement and multiplier budget BC. Fix k≥4 and N≥1 satisfying the actual tail-base guard. Construct the literal packet Z=k·(initializedPacketField N k⁻¹), with time changed to D.T, and residual obtained by applying the joined inverse coefficient before multiplying by k. Outputs are `WordBound 6 (4R) Cv 0`, normal bound `Cn/k`, and, if N≥X−1, residual amplitude `exp(-0.7 X log k)`.",
+      "identity": "joinedTerminalPrimary and its tangent/equation witnesses -> initializedPacketField and initializedResidualField -> normalized A at k inverse.",
+      "domain_quantifiers": "Fix parent, positive history, terminal primary, common source budgets, k and N. All word orders use one normalized field and radius; constants Cv,Cn are independent of correction order.",
+      "anchors": [
+        "EU.normal",
+        "EU.initialized",
+        "EU.normalized",
+        "EU.norms",
+        "EU.spatial",
+        "EU.supply"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M2"
+    },
+    {
+      "id": "EU-03",
+      "branch": "Euler",
+      "name": "One exact all-order correction from finite solves (central boundary)",
+      "inputs_output": "Fix L>0, T>0 and coherent data A on R³×(R/LZ), κ and direction fixed, plus one `Budget L hT A`. For every q≥6 produce e_q∈C([0,T],H^(q+1)), e_q(0)=0, solenoidal, with its literal projected Euler correction equation. Then construct **one** common L² path e, one smooth spatial representative, one pressure tower, and ∀P,t the metric Gevrey energy bound",
+      "identity": "initializedUniformBudget constructs Q; finite_exists -> choose e_q -> family; compatible -> commonPath=value(e_6); pressure coherence through raw-source restriction, not another independent fluid.",
+      "domain_quantifiers": "Fix L,T,A,K,rho,C,Delta,rho0 before q>=6. Finite solves may be chosen separately; uniqueness identifies their L2 values. For each external cutoff P use q=P+6 and realization P+7 of the same field.",
+      "anchors": [
+        "EU.supply",
+        "EU.uniform",
+        "EU.finite",
+        "EU.compatible",
+        "EU.energy",
+        "EU.flow",
+        "EU.physical"
+      ],
+      "evidence": [
+        "I",
+        "U",
+        "S"
+      ],
+      "source_node": "Euler/MAP.json#M3",
+      "new_local_source_anchors": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C21",
+        "C22",
+        "C23",
+        "C24",
+        "C25",
+        "C26",
+        "C27",
+        "C28",
+        "C29",
+        "C30",
+        "C31",
+        "C32",
+        "C33",
+        "C34",
+        "C35",
+        "C36"
+      ],
+      "selected_contract": "RC-EU-FINITE-01"
+    },
+    {
+      "id": "EU-04",
+      "branch": "Euler",
+      "name": "Physical reconstruction, controlled errors, and a renewable child",
+      "inputs_output": "Fix the M3 correction Q for initialized A, inverse physical coordinates X,Y with X(t,Y(t,x))=x, DX=F and det F=1, frame Gevrey bounds CF,R, κ=k⁻¹, direction=m₀. Weighted norms for the same e and its signed pressure at ρ=Q.initialRadius/4 imply physical correction gradient/Hessian ≤`Kerr k Δ`. Combined with initialized approximation bounds and the single frequency comparison, construct one graph flow G, exact parent child and `SmoothState`, labels k^80, displacement ≤k^(-1/4), source gradient/Hessian errors ≤k^(-1/4). A renewed frame and low budgets give `Stage S (n+1)`.",
+      "identity": "In initialized_uniform_flow_and_shear Q is defined once, G=Q.physicalFlowData; coefficient equality and physical errors survive repackaging into GeometryJoinedChoice. chooseJoined selects the record, not necessarily that internal exhibit. SmoothState uses selected F.Q,F.flow,F.coefficient.",
+      "domain_quantifiers": "Fix k and actual initialized input before Q,G construction; error bounds uniform in all t in the child horizon and physical x. Selected GeometryJoinedChoice guarantees only its exported fields, not equality to the exhibited internal Q.",
+      "anchors": [
+        "EU.physical",
+        "EU.flow",
+        "EU.labels",
+        "EU.choice",
+        "EU.euler_child",
+        "EU.joined",
+        "EU.next",
+        "EU.tail"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M4",
+      "retained_submechanism": "NavierStokes/Euler/MAP.json E5: one-sided pressure cost delta*goodRatio+badRatio; not the absolute Hessian budget."
+    },
+    {
+      "id": "EU-05",
+      "branch": "Euler",
+      "name": "Common initial datum, not a limiting trajectory",
+      "inputs_output": "Fix the actual family P_n on one S, and for every n≠0 the literal identity `u_(n+1)(0)=u_n(0)+high(I_n,k_n)+mean(I_n,k_n)`. For each fixed m the increment norms are summable. Produce one smooth L² field u_init with all-order H_m convergence of u_n(0), solenoidal, and compact support after including the first datum.",
+      "identity": "joinedNext_initial_velocity -> stages_initial_step -> initial_velocity_partial -> initialDataLimit -> initialDatum; all physical increments of actual selected stages.",
+      "domain_quantifiers": "Fix one family and increment identity. For each fixed m choose summability constants and a tail threshold; same limit for all m. Joined tail starts at stage 1, with J+1,x1; forward prefix retained.",
+      "anchors": [
+        "EU.joined",
+        "EU.tail",
+        "EU.sum",
+        "EU.lifespan",
+        "EU.contradiction"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M5"
+    },
+    {
+      "id": "EU-06",
+      "branch": "Euler",
+      "name": "H4-reference-controlled H3 stability against sampled escape",
+      "inputs_output": "Fix ordinary Euler reference U on [0,T], T≥0. Let exact V_n have nonnegative durations T_n eventually≤T, same limiting initial datum in H3, and sample times t_n∈[0,T_n]. Then the gradients DV_n(t_n,0) cannot tend to infinity. No uniform stage H4 bound is assumed.",
+      "identity": "State.regularity.ordinaryEvolution supplies V_n; proof establishes hfield, hnorm and hactual before comparing; sampled gradient equals activationGradient of P_(n+N).",
+      "domain_quantifiers": "Fix hypothetical U,T and its H4 reference size before n and epsilon threshold. Restrict U to T_n but retain original constant. Only eventually T_n<=T needed; no uniform stage H4 bound.",
+      "anchors": [
+        "EU.h4",
+        "EU.h3",
+        "EU.varying",
+        "EU.contradiction",
+        "EU.lifespan"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M6"
+    },
+    {
+      "id": "EU-07",
+      "branch": "Euler",
+      "name": "Positive finite maximal lifespan",
+      "inputs_output": "M5 supplies smooth all-order solenoidal u_init. General local theory gives a positive evolution. M4/M6 rule out existence on each packet horizon; nesting supplies eventual coverage. Thus there is one finite lifespan L with `0<T*≤inf_n T_n≤T_0≤1`.",
+      "identity": "initialDatum_Hm -> closed solenoidal membership -> localEvolution; same initialDatum in no_packet_horizon and selected lifespan.",
+      "domain_quantifiers": "Local existence supplies a positive duration; for every fixed N exclusion at T_N uses eventually n>=N. One selected lifespan has duration<=every T_n.",
+      "anchors": [
+        "EU.lifespan",
+        "EU.confinement",
+        "EU.broad",
+        "EU.endpoints"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M7"
+    },
+    {
+      "id": "EU-08",
+      "branch": "Euler",
+      "name": "Small outer route to both exact delivered Euler statements",
+      "inputs_output": "Same `initialDatum` and `lifespan`. For every shorter S<T*, M4 displacement/initial support and Euler curl transport confine packet curls to one compact ball; M5/M6 pass that confinement to the canonical velocity. A hypothetical broad globally smooth finite-energy solution is upgraded to ordinary evolution using common compact curl; endpoint persistence past T* contradicts L.maximal. The scalar Sobolev adapters additionally give energy, local bounds, terminal C1 limsup and infinite vorticity integral.",
+      "identity": "canonicalVorticityBall fixed by constructionScales displacement cap; canonical_vorticity_confined passed with lifespan to private broad exclusion; public endpoints choose initialDatum.field and the same maximal extensions.",
+      "domain_quantifiers": "For each S<Tstar use S<Tstar<=T_n, restrict packets to S and pass curl confinement. Restart only the hypothetical globally smooth competitor at Tstar. Same datum and lifespan in both delivered endpoints.",
+      "anchors": [
+        "EU.confinement",
+        "EU.broad",
+        "EU.classes",
+        "EU.endpoints"
+      ],
+      "evidence": [
+        "I",
+        "U"
+      ],
+      "source_node": "Euler/MAP.json#M8"
+    }
+  ],
+  "edges": [
+    {
+      "source": "NS-01",
+      "target": "NS-02",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-02",
+      "target": "NS-03",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-03",
+      "target": "NS-04",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-04",
+      "target": "NS-05",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-05",
+      "target": "NS-06",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-06",
+      "target": "NS-07",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-07",
+      "target": "NS-08",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-01",
+      "target": "EU-02",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-02",
+      "target": "EU-03",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-03",
+      "target": "EU-04",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-04",
+      "target": "EU-05",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-05",
+      "target": "EU-06",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-06",
+      "target": "EU-07",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-07",
+      "target": "EU-08",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-01",
+      "target": "NS-04",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "NS-03",
+      "target": "NS-05",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-01",
+      "target": "EU-04",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-02",
+      "target": "EU-04",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-04",
+      "target": "EU-06",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-04",
+      "target": "EU-08",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-05",
+      "target": "EU-08",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    },
+    {
+      "source": "EU-06",
+      "target": "EU-08",
+      "type": "mathematical-use",
+      "evidence": "I",
+      "direct_call_claim": false
+    }
+  ],
+  "local_producer_consumer_edges": [
+    {
+      "source": "C06",
+      "target": "C03",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C08",
+      "target": "C33",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C14",
+      "target": "C31",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C31",
+      "target": "C32",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C16",
+      "target": "C32",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C32",
+      "target": "C33",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C33",
+      "target": "C03",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C18",
+      "target": "C03",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C22",
+      "target": "C04",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C23",
+      "target": "C04",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C25",
+      "target": "C04",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C24",
+      "target": "C05",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C03",
+      "target": "C01",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C04",
+      "target": "C01",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C05",
+      "target": "C01",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    },
+    {
+      "source": "C01",
+      "target": "C02",
+      "type": "actual-instantiation",
+      "evidence": "S",
+      "direct_call_claim": true
+    }
+  ],
+  "source_anchors": {
+    "C01": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftGlobalInviscidGevrey.lean",
+      "lines": [
+        21,
+        67
+      ],
+      "declarations": [
+        "EulerDriftGlobalInviscidGevrey.exists_global_inviscid_gevrey_PDE"
+      ],
+      "git_blob_oid": "c7e7820ce705f6ff5f1a09ef1e290707874415e1",
+      "file_sha256": "046dbca8a37e4cea56afb0d3e436612107289c6c9fdc38656cb4e2ff7712d565",
+      "range_sha256": "3b047b1e39eba4f318fb1134d3bd55419393e88038a95926f8a648680c228566",
+      "first_line": "theorem exists_global_inviscid_gevrey_PDE {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C02": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftFinite.lean",
+      "lines": [
+        19,
+        68
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.finite_exists",
+        "EulerAllOrderDriftCorrection.Budget.family"
+      ],
+      "git_blob_oid": "193af1e9e6eb1a63be4fb3de4de3e4a7191f85ec",
+      "file_sha256": "fcfc66048dfd2be54c38c3f9c0cbcd6c3bcd2557f0b3c127347a45b8e9c44a7f",
+      "range_sha256": "ecec26f3c345ffe40d6b0ec44f0ad3e85b69741af0d9a416b81192b34c458a7c",
+      "first_line": "theorem finite_exists {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C03": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftGevreyInviscidEnergyCompactness.lean",
+      "lines": [
+        28,
+        92
+      ],
+      "declarations": [
+        "EulerDriftGevreyInviscidEnergyCompactness.exists_gevrey_inviscid_energy_limit"
+      ],
+      "git_blob_oid": "78bc399164bb60f6f19235e1a679bfc7c22a91a2",
+      "file_sha256": "057ec4fa097ba7a97d9f6b7c88ad0b9ed173961df996275bdb46548444b9450e",
+      "range_sha256": "fa88587e1448000190ce1b7cb6ef4e51541376786d6a42bab553e56f53b1f718",
+      "first_line": "theorem exists_gevrey_inviscid_energy_limit {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C04": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionLimitEquation.lean",
+      "lines": [
+        34,
+        72
+      ],
+      "declarations": [
+        "EulerCorrectionLimitEquation.correction_limit_equation"
+      ],
+      "git_blob_oid": "f6257c4b531a44c4812d8e854826158cfbdac036",
+      "file_sha256": "937a6e7eefc3f6e4a74b9388af2eee577d95529a980dbdc7dba28aed0d1bb5d5",
+      "range_sha256": "acf934fdc5c32fb26d020cb4356c0b5d15cb792b3785cda69e04a94260ef5fab",
+      "first_line": "theorem correction_limit_equation {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C05": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/InviscidSobolevEvolution.lean",
+      "lines": [
+        24,
+        71
+      ],
+      "declarations": [
+        "EulerInviscidSobolevEvolution.sobolev_hasDerivAt",
+        "EulerInviscidSobolevEvolution.CorrectionData.source_sobolev",
+        "EulerInviscidSobolevEvolution.correction_sobolev_hasDerivAt"
+      ],
+      "git_blob_oid": "ebefcfff26113cd449074e20a7a38a3c498330be",
+      "file_sha256": "99c5ca233c899f05ea7c4d6ba0476662e766dd59e4851d41998896e63ada5862",
+      "range_sha256": "a0cd2d52dfbf22010bfa93cf055d130a6383ace0c333a58949118e3c7823eb21",
+      "first_line": "theorem sobolev_hasDerivAt {q : ℕ} (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C06": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftViscousCorrectionFamily.lean",
+      "lines": [
+        20,
+        53
+      ],
+      "declarations": [
+        "EulerDriftViscousCorrectionFamily.exists_viscous_correction_family"
+      ],
+      "git_blob_oid": "19bebdb8f02c6cd85432aae87ad13b032bd1e9cc",
+      "file_sha256": "caee1111cbb37a4167e45403d1acbbc0f2d588b40673485c02b278b31baa7bb8",
+      "range_sha256": "2e89e79b242296a1ec376d3fcd66243cde150a297ab3142bf2f7393b36bcac9c",
+      "first_line": "theorem exists_viscous_correction_family {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C07": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftGlobalGevreyCorrection.lean",
+      "lines": [
+        23,
+        80
+      ],
+      "declarations": [
+        "EulerDriftGlobalGevreyCorrection.exists_global_gevrey_correction"
+      ],
+      "git_blob_oid": "8074d273eb8b4575535166fa4525926f1a032fb1",
+      "file_sha256": "407c96eef15be2fb7344182de05403f93bc300208987d0b2f10883e71c082ba0",
+      "range_sha256": "65c270b8a4cd4700cd7bcf80b44de7f3a437f195e8ee0675ca9a3aa5803b9e7c",
+      "first_line": "theorem exists_global_gevrey_correction {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C08": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/GevreyStabilityBudget.lean",
+      "lines": [
+        36,
+        79
+      ],
+      "declarations": [
+        "EulerGevreyStabilityBudget.coefficient_bound_le_weighted",
+        "EulerGevreyStabilityBudget.stabilityBudgetLower"
+      ],
+      "git_blob_oid": "eac698d2fc397580a12b01128e0800ca36c43984",
+      "file_sha256": "ba0b5252e5e8a57c123c7bd42aca6bc98ad6ca7c21cd77369d995ef875998694",
+      "range_sha256": "49f6784c97aff53980827cdfd6ae146fec30b58279df11249dbdde07f39065e6",
+      "first_line": "theorem coefficient_bound_le_weighted {s : ℕ} {A : SmoothCoefficient period}",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C09": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionDifferencePDE.lean",
+      "lines": [
+        23,
+        75
+      ],
+      "declarations": [
+        "EulerCorrectionDifferencePDE.differenceRhs",
+        "EulerCorrectionDifferencePDE.differenceRhs_eq_sub",
+        "EulerCorrectionDifferencePDE.correction_difference_hasDerivAt"
+      ],
+      "git_blob_oid": "18e5e1c3e779da0a9e472c1ccf85b3a2494aeb0c",
+      "file_sha256": "4bdaa4f4152ce0ae6c1b730f346ba66ea69c3c6f4a0d18a7b2f0155455ac9bf2",
+      "range_sha256": "cc06f69cd684d50d475d3b191d9b25484926dca3728987a45e1e09c1a84c5110",
+      "first_line": "def differenceRhs {q : ℕ} {T : Type*} [TopologicalSpace T]",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C10": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionDifferenceMetric.lean",
+      "lines": [
+        25,
+        121
+      ],
+      "declarations": [
+        "EulerCorrectionDifferenceMetric.difference_metric_deriv_bound"
+      ],
+      "git_blob_oid": "b471fb3137f05f3bfc8caf3aa73abcdd8c1cd3b5",
+      "file_sha256": "efe908a5d2579784eae638c92b2702cf40c70ef4123d90d840191962bcba2d76",
+      "range_sha256": "a2bb9a5d27527b86cb9ecd81e45fd2ff40dd08a844f35736b1ab1d0687f1743d",
+      "first_line": "theorem difference_metric_deriv_bound {q : ℕ} {T : Type*} [TopologicalSpace T]",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C11": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionDifference.lean",
+      "lines": [
+        18,
+        109
+      ],
+      "declarations": [
+        "EulerCorrectionDifference.differenceRemainder",
+        "EulerCorrectionDifference.rawSource_sub",
+        "EulerCorrectionDifference.differenceRemainder_norm"
+      ],
+      "git_blob_oid": "796652a908958cfb7b9d2aedc4a93d033b4b5a21",
+      "file_sha256": "8fd9fa6de359388535d98e8e4d5404b75a57df338b104db9a7f680acf39c41dc",
+      "range_sha256": "7f2b17c7c08aa8d9219075f79aafeb38ce838f13cf90d37fad6cab9e7d128018",
+      "first_line": "def differenceRemainder {q : ℕ} {T : Type*} [TopologicalSpace T]",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C12": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionStabilityConstants.lean",
+      "lines": [
+        14,
+        67
+      ],
+      "declarations": [
+        "EulerCorrectionStabilityConstants.lowerConstant",
+        "EulerCorrectionStabilityConstants.velocityBound",
+        "EulerCorrectionStabilityConstants.growthConstant",
+        "EulerCorrectionStabilityConstants.defectConstant",
+        "EulerCorrectionStabilityConstants.differenceRemainder_uniform"
+      ],
+      "git_blob_oid": "fd65d53a7283bd921f7ef0246f7312057465d0c6",
+      "file_sha256": "0400e8dce20b06ca9ec52f2d9e1f4c12b441c93ce57e697a4b6f0d91122d9cc5",
+      "range_sha256": "390a2462bc7ac32c0d259bea50b8698a373bb7580a0d212c339181b6f12ef40e",
+      "first_line": "def lowerConstant (period : ℝ) [Fact (0 < period)] (q : ℕ) (A0 A2 Z R : ℝ) : ℝ :=",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C13": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SobolevDifferenceEnergy.lean",
+      "lines": [
+        26,
+        79
+      ],
+      "declarations": [
+        "EulerSobolevDifferenceEnergy.difference_transport_bound",
+        "EulerSobolevDifferenceEnergy.difference_heat_bound"
+      ],
+      "git_blob_oid": "ff9b5214f5ffc749e2243a3a9e08410705627f14",
+      "file_sha256": "40139fc246e9ac3433be3aa50260db327dd1219cd13f532038a5b5687a69fcfe",
+      "range_sha256": "b6982a9e1d89bc9af3f4044941dd904687f319a52c6f1502e21c2c96222188ab",
+      "first_line": "theorem difference_transport_bound {q : ℕ} {T : Type*} [TopologicalSpace T]",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C14": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionViscosityStability.lean",
+      "lines": [
+        24,
+        99
+      ],
+      "declarations": [
+        "EulerCorrectionViscosityStability.correction_viscosity_pointwise"
+      ],
+      "git_blob_oid": "3650c8314d19bd85bc2962fcb76f658411221676",
+      "file_sha256": "99ed2172ce1f11266985331d93ba0d17dda5aa134c8172794ea0867e99f915d5",
+      "range_sha256": "ce897bfca53982d4e01f8fa00f485525b391fafe2f9cb6dbc761b5bb1f5461e1",
+      "first_line": "theorem correction_viscosity_pointwise {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C15": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SobolevPathInterpolation.lean",
+      "lines": [
+        23,
+        140
+      ],
+      "declarations": [
+        "EulerSobolevInterpolation.word_square_le_parent",
+        "EulerSobolevPathInterpolation.wordPath_difference_square_bound",
+        "EulerSobolevPathInterpolation.wordPath_cauchy_step"
+      ],
+      "git_blob_oid": "dd86d40b4eecd94451cbfa870493fdd077326aa5",
+      "file_sha256": "e6b833bb87feb916628a32f700ee0f76e0c7c361f242fc968ea2caef967d36eb",
+      "range_sha256": "0b0723fbf312fef7b21e448b569c025f8c1c09cc96a5141f4ccbf08e1498e157",
+      "first_line": "theorem word_square_le_parent {s n : ℕ} (h : n+2 ≤ s) (u : SobolevSpace period s)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C16": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SobolevCauchyInterpolation.lean",
+      "lines": [
+        46,
+        94
+      ],
+      "declarations": [
+        "EulerSobolevCauchyInterpolation.pathCoordinates_norm",
+        "EulerSobolevCauchyInterpolation.cauchy_restrict_of_value",
+        "EulerSobolevCauchyInterpolation.exists_limit_restrict_of_value"
+      ],
+      "git_blob_oid": "d80e03c92ae2239e2dd6d68cebd87d2bc14d7981",
+      "file_sha256": "094490539777811d666b0cc2abbf33b18e0cd98808a2338d3b7702369efb95cb",
+      "range_sha256": "f6e2f0a30244344141e842233f0f5f1d837995a5f8a55759c72ac034ce5f8111",
+      "first_line": "theorem pathCoordinates_norm (q : ℕ) (T : ℝ) (u : C(Icc (0 : ℝ) T,SobolevSpace period q)) :",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C17": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SobolevPathLimits.lean",
+      "lines": [
+        21,
+        54
+      ],
+      "declarations": [
+        "EulerSobolevPathLimits.restrict_path_norm",
+        "EulerSobolevPathLimits.limit_norm_bound",
+        "EulerSobolevPathLimits.limit_zero_trace",
+        "EulerSobolevPathLimits.limit_divergenceFree"
+      ],
+      "git_blob_oid": "e5ecb88247932a3bdbf05f72d158f0e6d9dcad77",
+      "file_sha256": "47624e8ace187660dae0dfa66031251f12cf4a46358b34034611879af8fe770f",
+      "range_sha256": "dab23a6016c43e61e9ee515d2eab7a6bf339d7b9eb66a84e3e93e048b3717d57",
+      "first_line": "theorem restrict_path_norm {s q : ℕ} (hq : q ≤ s) (T : ℝ)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C18": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/GevreyEnergyPathLimit.lean",
+      "lines": [
+        16,
+        31
+      ],
+      "declarations": [
+        "EulerGevreyEnergyPathLimit.energyNorm_path_limit_bound"
+      ],
+      "git_blob_oid": "8f89bd01973af9d68cedada804897a6705e6b285",
+      "file_sha256": "57478f24935448065904828d5caaa8354d3dd561981fea1dfe95bd6c86a1b9e1",
+      "range_sha256": "333956eb25ceb67087612d5959ed508a68a3b0f98234c085bc66ae9c8a5f6d6f",
+      "first_line": "theorem energyNorm_path_limit_bound {p q N : ℕ} (hqp : q ≤ p) (hN : N+6 ≤ p) (T : ℝ)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C19": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionSourceRestriction.lean",
+      "lines": [
+        19,
+        74
+      ],
+      "declarations": [
+        "EulerCorrectionSourceRestriction.truncate_transport",
+        "EulerCorrectionSourceRestriction.truncate_rawSource",
+        "EulerCorrectionSourceRestriction.truncate_source"
+      ],
+      "git_blob_oid": "6c716436783516793abb8cfcb4c3cc63c1e5bedd",
+      "file_sha256": "4591db3df21a8fd92babe24193e58fbb46e04c541f2edf279015c84a31ea44b4",
+      "range_sha256": "c062a269e356d2746489ac0228cc871bc3ad0ac5b8ccb3cea97cf92aee69a5cf",
+      "first_line": "theorem truncate_transport {q : ℕ} (hq : 6 ≤ q)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C20": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/QuadraticSourceLimit.lean",
+      "lines": [
+        21,
+        37
+      ],
+      "declarations": [
+        "EulerQuadraticSourceLimit.sourcePath_sub_bound",
+        "EulerQuadraticSourceLimit.sourcePath_tendsto"
+      ],
+      "git_blob_oid": "687d2270428f868b3e9a6bd9f6d45cae37b8092a",
+      "file_sha256": "c187edd21fccc19bc57675faa005243e6b3d844a9699d0d51a71ae0959f9b203",
+      "range_sha256": "02398d852793634d21be0325173f881ac96dd66da98a0403be0051d365eb2b0d",
+      "first_line": "theorem sourcePath_sub_bound {T : ℝ} (C : Coefficients (Icc (0 : ℝ) T) X Y)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C21": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ViscosityDefect.lean",
+      "lines": [
+        14,
+        63
+      ],
+      "declarations": [
+        "EulerViscosityDefect.viscositySequence",
+        "EulerViscosityDefect.viscousDefect_bound",
+        "EulerViscosityDefect.viscousDefect_tendsto_zero"
+      ],
+      "git_blob_oid": "efb927e5db811ed1c75853dba5b8caea58fd5461",
+      "file_sha256": "35a76c4cf1c7c03592a5ae526b030f5ed46b4daf24eaa3bd21b31dffb4d72011",
+      "range_sha256": "58473f379588a14201276763f7a62367ac190bda1f47908d13c0e2d5386f32f9",
+      "first_line": "def viscositySequence (n : ℕ) : ℝ := 1/((n : ℝ)+1)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C22": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ViscousSourcePathLimit.lean",
+      "lines": [
+        33,
+        50
+      ],
+      "declarations": [
+        "EulerViscousSourcePathLimit.viscousSourcePath_tendsto"
+      ],
+      "git_blob_oid": "bb124b99f0312fc5b42c79ad109fdfca43416e24",
+      "file_sha256": "0540293e2995b8c398a62b766b36f63ac89bbee2236f170f30512e73089b3faf",
+      "range_sha256": "fa1d950d645826574a80655fe1ef1659648f74b83e8196cc1d762fdbcf404262",
+      "first_line": "theorem viscousSourcePath_tendsto {q : ℕ} (hq : 2 ≤ (q+1)+1) (T : ℝ)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C23": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/IntegralPathLimit.lean",
+      "lines": [
+        16,
+        74
+      ],
+      "declarations": [
+        "EulerIntegralPathLimit.pathIntegralOperator",
+        "EulerIntegralPathLimit.integral_equation_limit",
+        "EulerIntegralPathLimit.hasDerivAt_of_integral_equation"
+      ],
+      "git_blob_oid": "e9d741d2ad14f4932add56eb1be3aaa09dfa5193",
+      "file_sha256": "561518dafc5fc42172a01280d8ece5898e8f50b6d3fe9af849bf230c06e96b0b",
+      "range_sha256": "990bae05fba30a693df5f56d6ea8c098b8f339be78f9992a3fa52c8a3d047f72",
+      "first_line": "def pathIntegralOperator (T : ℝ) (hT : 0 ≤ T) (a b : ℝ) : C(Icc (0 : ℝ) T,E) →L[ℝ] E :=",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C24": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/InjectivePathDerivative.lean",
+      "lines": [
+        23,
+        40
+      ],
+      "declarations": [
+        "EulerInjectivePathDerivative.integral_equation_of_injective_map",
+        "EulerInjectivePathDerivative.hasDerivAt_of_injective_map"
+      ],
+      "git_blob_oid": "23d835f1c13dd0893aaf71f6211a9c4bb0172fd0",
+      "file_sha256": "3e6010649fc1cff0cfe4a4973e88b666b953b614afcd43cb2915623c69d72a8d",
+      "range_sha256": "a3321e50c04573ee778309da4a0ad4de9d38b0d228dfcc545f504774bb5e97ae",
+      "first_line": "theorem integral_equation_of_injective_map (L : E →L[ℝ] F) (hL : Function.Injective L)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C25": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionLimitPathDerivative.lean",
+      "lines": [
+        28,
+        47
+      ],
+      "declarations": [
+        "EulerCorrectionLimitPathDerivative.lower_mild_path_derivative"
+      ],
+      "git_blob_oid": "ea4734a6d450c9a8fcaa9fb556a7b7e69f79e3b0",
+      "file_sha256": "d5053f6380997b913e560354d6e3adf7b9928586c0a6340178b161014db96e08",
+      "range_sha256": "f60475998f18b8c3bfd1f4ccbd5fd7f681b6d5e9a456517a91c3c3238038b11f",
+      "first_line": "theorem lower_mild_path_derivative {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C26": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedAllOrderBudget.lean",
+      "lines": [
+        64,
+        132
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedAllOrderBudget"
+      ],
+      "git_blob_oid": "4a59e24cdbe204e182a35aadf6937d87491bb219",
+      "file_sha256": "99283623a272020825779462307b01257c6a15540117a08261c18fb99b26af3c",
+      "range_sha256": "2d4559e6fbe1a52438063881018e8ac448df1071c754aabe8587432272f37734",
+      "first_line": "def initializedAllOrderBudget (k : ℝ) (hk : 4 ≤ k)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C27": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedUniformBudget.lean",
+      "lines": [
+        39,
+        61
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedUniformBudget"
+      ],
+      "git_blob_oid": "fa510903149c6c308b3b29efaaeb7f3c38638ceb",
+      "file_sha256": "1b529dfa70617253199c06dd1d4cf6ec689bcd32ba6f9e46c63a10f1a5514bee",
+      "range_sha256": "0d67b2a5c3b3b9c76059e047dc1e60a4cc3e834b1fdcb0f10d5ff3df5c112242",
+      "first_line": "def initializedUniformBudget : EulerAllOrderDriftCorrection.Budget period D.T_pos",
+      "evidence": "I-supplied-map; byte-pinned-here",
+      "closure_audited": false
+    },
+    "C28": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedCorrectionData.lean",
+      "lines": [
+        32,
+        55
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedCorrectionData"
+      ],
+      "git_blob_oid": "ecd617fd1102c385a4b3fccc8e79239ef6f3faf7",
+      "file_sha256": "6248945adb4bc4183a0d2db024359e765c59a1d6c30645bee9057f97a903fcba",
+      "range_sha256": "45b360877678170c2d3677f46060718ef969d8b7a5a577ae7b042e2a41424dbf",
+      "first_line": "def initializedCorrectionData (Cagree : SourceCoefficientAgreement M D)",
+      "evidence": "I-supplied-map; byte-pinned-here",
+      "closure_audited": false
+    },
+    "C29": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderCorrectionData.lean",
+      "lines": [
+        56,
+        130
+      ],
+      "declarations": [
+        "EulerAllOrderCorrectionData.Data",
+        "EulerAllOrderCorrectionData.Data.atOrder",
+        "EulerAllOrderCorrectionData.Data.metricBudget"
+      ],
+      "git_blob_oid": "1ead36f3b1e2b3489f1140449b6e5e2f19d2093f",
+      "file_sha256": "b516a790f8053364320207299b484e8c15e6786bd5395634c83ef7917ac97a9e",
+      "range_sha256": "db084813a4efc1647a709255f9cb57125b96b62121c808e11a4f07e7c0fa628d",
+      "first_line": "structure Data (T : ℝ) where",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C30": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderCorrectionCoherence.lean",
+      "lines": [
+        14,
+        25
+      ],
+      "declarations": [
+        "EulerAllOrderCorrectionData.Data.lower_twice"
+      ],
+      "git_blob_oid": "6a9be926774dcbbec64e788a6fe97cf6664c40df",
+      "file_sha256": "92b31857eab73941e5928d081439840a163ee8879406595d59c2d662f7f5a4b1",
+      "range_sha256": "d22c4b30475939562b44ad0b38aaed6456251339f6e4589dd798838ef1e38947",
+      "first_line": "theorem Data.lower_twice {T : ℝ} (A : Data period T) (q : ℕ) :",
+      "evidence": "I-supplied-map; byte-pinned-here",
+      "closure_audited": false
+    },
+    "C31": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ViscosityCauchy.lean",
+      "lines": [
+        42,
+        70
+      ],
+      "declarations": [
+        "EulerViscosityCauchy.correction_viscosity_norm",
+        "EulerViscosityCauchy.correction_family_cauchy"
+      ],
+      "git_blob_oid": "8730ce7c4fecf569d6cfb0b039e9b8e53f31affe",
+      "file_sha256": "3cd868bf504f2cc8182da38c9f50ef45b82729bec9fe10ba90770bf5d11eced7",
+      "range_sha256": "4c34477701bf89b9870a61e46d33a592b4cc2216ef15405b2b3948194fb42c96",
+      "first_line": "theorem correction_viscosity_norm {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C32": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionFamilyCompactness.lean",
+      "lines": [
+        31,
+        66
+      ],
+      "declarations": [
+        "EulerCorrectionFamilyCompactness.exists_limit_with_constraints",
+        "EulerCorrectionFamilyCompactness.exists_correction_family_limit"
+      ],
+      "git_blob_oid": "9996712fc899e5cb0f492110938a0613de336bbe",
+      "file_sha256": "054dde0a85257a3be4d1b56c6eab12b86e2734d28517b8edb2b99ee62ff99313",
+      "range_sha256": "f447434f94aa03748f8dee15623f5b50edbc0d2d0acba802e1f491fffaa9b2af",
+      "first_line": "theorem exists_limit_with_constraints {s q : ℕ} (hqs : q < s) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C33": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/GevreyFamilyCompactness.lean",
+      "lines": [
+        18,
+        44
+      ],
+      "declarations": [
+        "EulerGevreyFamilyCompactness.exists_limit_of_gevrey_family"
+      ],
+      "git_blob_oid": "c72b36183db8d8485b19d88f73ddc3322b4f0be9",
+      "file_sha256": "6a998dad516de758292100f523f14855fb3e181beaf9a949744c5d4539e0f134",
+      "range_sha256": "ad2302fc7b12e8d5af2d5350baf7675d7220e4592fd4dd0b7fc9e4ccd42fd5ee",
+      "first_line": "theorem exists_limit_of_gevrey_family {q : ℕ} (hq : 6 ≤ q) (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C34": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionStabilityBudget.lean",
+      "lines": [
+        16,
+        67
+      ],
+      "declarations": [
+        "EulerCorrectionStabilityBudget.StabilityBudget",
+        "EulerCorrectionStabilityBudget.StabilityBudget.growth",
+        "EulerCorrectionStabilityBudget.StabilityBudget.comparisonConstant"
+      ],
+      "git_blob_oid": "7283e1e1da38dd7aa53ebe187d15b6c0625f132d",
+      "file_sha256": "a09e0b4199e60b83d8baa4451642a5d1cdbaa97d79bd7923c18841ab70cbcf7a",
+      "range_sha256": "e0a8fdddc238a5440d356d4a3031edf69ff5525e599bbc8d2675ff2fc4849187",
+      "first_line": "structure StabilityBudget {q : ℕ} {T : ℝ} (hT : 0 ≤ T) (D : CorrectionData period q (Icc (0 : ℝ) T)) where",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C35": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/QuadraticCoefficients.lean",
+      "lines": [
+        16,
+        73
+      ],
+      "declarations": [
+        "EulerQuadraticSource.Coefficients",
+        "EulerQuadraticSource.Coefficients.ballLipschitz",
+        "EulerQuadraticSource.Coefficients.apply_sub_bound"
+      ],
+      "git_blob_oid": "ff535d106d6d0143ebd183e40533b44ba4f2d448",
+      "file_sha256": "d4ff847e0211d4302f44da4dfde6d57987a62a693b9322c08a3e375aec38f57f",
+      "range_sha256": "5d508c17c0cdef64828b7c6e297187c5db10cd1f94eab04ef91c0476e93911a9",
+      "first_line": "structure Coefficients (T : Type*) [TopologicalSpace T] (X Y : Type*)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "C36": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/GevreyEnergyCutoff.lean",
+      "lines": [
+        45,
+        55
+      ],
+      "declarations": [
+        "EulerGevreyEnergyCutoff.energyNorm_cutoff_mono"
+      ],
+      "git_blob_oid": "60ef42af61b611d7db98b5afbcaa58c141ac6dda",
+      "file_sha256": "b9976cb8951ea88ec83566b4906cd29e36872691f3ca4b87bbb3bf12a89784bb",
+      "range_sha256": "234996bd9850ebf0f990e6c5c0c310d2f3a439a23bf597b3d9ef9367c79162c4",
+      "first_line": "theorem energyNorm_cutoff_mono {s N M : ℕ} (hNM : N ≤ M) (hM : M+6 ≤ s)",
+      "evidence": "S-local-body; U-analytic-reconstruction",
+      "closure_audited": false
+    },
+    "EU.scale": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInductionScales.lean",
+      "lines": [
+        122,
+        192
+      ],
+      "declarations": [
+        "EulerPacketInductionScales.exists_scales"
+      ],
+      "git_blob_oid": "b43e910f375ffe3cb6df1c2245ad549f70d8633a",
+      "file_sha256": "9704b60a6d829abcbc45f8b1a1368b2cce66be672c827bde0480fbf132249852",
+      "range_sha256": "b155fadd65eb36d186ff91a6539bff8c1b4072be75b7b03923599bc45baa6601",
+      "first_line": "theorem exists_scales (c B : ℝ) (hc : 0 ≤ c) : Nonempty (Scales c B) := by",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.recursion": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInfiniteConstruction.lean",
+      "lines": [
+        21,
+        66
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.successor",
+        "EulerPacketInduction.stages",
+        "EulerPacketInduction.constructionScales",
+        "EulerPacketInduction.packets"
+      ],
+      "git_blob_oid": "eb63099ab4e5c7d324512e36588946dc6ba9e191",
+      "file_sha256": "a57dba765372c50d9778bd295fcdb1aba8a6d8ec03322a9ad4cd48560cc14a35",
+      "range_sha256": "516fb8b0be077a0e3862facdae77f58411e52ff1ca7b5e632ecae9ccb83c21f3",
+      "first_line": "def successor {n : ℕ} (P : Stage S n) (hq : requiredExponent ≤ q)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.normal": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketJoinedApproximationBounds.lean",
+      "lines": [
+        51,
+        75
+      ],
+      "declarations": [
+        "EulerPacketCylinderField.joinedPacket_normal_bound"
+      ],
+      "git_blob_oid": "2a28ce36cd9bd613c64642aaf1730ea5be1d1d4c",
+      "file_sha256": "f29001d12b05ff9be541eb5aa1a6c86064f235c1c29f460fba59e2bf6deb8117",
+      "range_sha256": "bb9d582e76da54cf54e245397def6a10f26cb75d71e806004fde17c88ef61cfa",
+      "first_line": "theorem joinedPacket_normal_bound (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : 4 ≤ k)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.initialized": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedBounds.lean",
+      "lines": [
+        24,
+        98
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedPacketField",
+        "EulerPacketTerminalDatum.initializedResidualField",
+        "EulerPacketTerminalDatum.initializedPacket_normal_bound",
+        "EulerPacketTerminalDatum.initializedResidual_normalized_bound"
+      ],
+      "git_blob_oid": "5e64d88fd0640163cc8e1613e7261efc49d1de88",
+      "file_sha256": "dc185eb10f6087a6288f1aa0873e10ba18d9e749114fade32fab586799448af5",
+      "range_sha256": "ffaccfdab176cebf0da9ecf2cf7c1d77fdef9fa27eeafd3e6400d44ab3e195ae",
+      "first_line": "def initializedPacketField (N : ℕ) (κ : ℝ) :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.normalized": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedCorrectionData.lean",
+      "lines": [
+        23,
+        79
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedCorrectionData",
+        "EulerPacketTerminalDatum.initializedNormalizedField_normal_bound"
+      ],
+      "git_blob_oid": "ecd617fd1102c385a4b3fccc8e79239ef6f3faf7",
+      "file_sha256": "6248945adb4bc4183a0d2db024359e765c59a1d6c30645bee9057f97a903fcba",
+      "range_sha256": "34ef7e1e390a03da65c3d3e95aba44282179f4c1f0fac13986d75800e0de82b2",
+      "first_line": "def initializedNormalizedField (N : ℕ) (k : ℝ) :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.drift": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketFieldDrift.lean",
+      "lines": [
+        19,
+        71
+      ],
+      "declarations": [
+        "EulerPacketCylinderField.Field.toFieldTower_weightedDrift_le",
+        "EulerPacketCylinderField.Field.WordBound.toFieldTower_weightedDrift_le_two"
+      ],
+      "git_blob_oid": "43e7589b2e2858cdbb1505fad768945b856e3b20",
+      "file_sha256": "0ce07b12eaea39c92c57f1bfd9c5bad891843c10515706f144f38b482a784bb0",
+      "range_sha256": "325c1998d98ec8a7779ea67aa37ea4632f755331348a4057e473b975f1575bf6",
+      "first_line": "theorem toFieldTower_driftLevel_le (G : Field P T raw) (κ : ℝ) (m : Space)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.norms": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedCorrectionNorms.lean",
+      "lines": [
+        41,
+        90
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedCorrection_background",
+        "EulerPacketTerminalDatum.initializedCorrection_background_derivative",
+        "EulerPacketTerminalDatum.initializedCorrection_drift",
+        "EulerPacketTerminalDatum.initializedCorrection_residual"
+      ],
+      "git_blob_oid": "7424c895c3bc142956aff7168c589aefa87cc708",
+      "file_sha256": "973b5403b584a9123753f113dbd1be478c00874ad54fb864585fb38efb781887",
+      "range_sha256": "def039f33be2aeb7e622f3545304a466859b7ba2681e67439f4901e05429dd24",
+      "first_line": "theorem initializedCorrection_background (s Q : ℕ) (hQ : Q+6 ≤ s)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.spatial": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedSpatialBudget.lean",
+      "lines": [
+        26,
+        122
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedMetricBudget",
+        "EulerPacketTerminalDatum.initializedSpatialBudget",
+        "EulerPacketTerminalDatum.initializedDriftBudget",
+        "EulerPacketTerminalDatum.initializedDriftBudget_growth"
+      ],
+      "git_blob_oid": "83cc66c4be87999d879b7bec09f495d0c0445f53",
+      "file_sha256": "e42619491bc8fc2bb0c931ceb8d9b22a6d6f2b3cf721b42cb3cde48e69084594",
+      "range_sha256": "f7bf8dcdb8fe35024e9dd0177e6acea1c6cd28d66818e2e56d6ec41747abe939",
+      "first_line": "def initializedMetricBudget (q : ℕ) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.budget": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftBudget.lean",
+      "lines": [
+        19,
+        60
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.Budget",
+        "EulerAllOrderDriftCorrection.Budget.comparisonData"
+      ],
+      "git_blob_oid": "ba0398573705760c4accfcee2420b7d2699bae4b",
+      "file_sha256": "269dc7283d1735aec66b0a4a68dc660158fded5c36fcc45d7964ca3a9615e879",
+      "range_sha256": "878110741f366e2eeba4d92f0e571d26003dc87274066b0201197ff91011db6c",
+      "first_line": "structure Budget {T : ℝ} (hT : 0 < T) (A : Data period T) where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.supply": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedAllOrderBudget.lean",
+      "lines": [
+        64,
+        132
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedAllOrderBudget"
+      ],
+      "git_blob_oid": "4a59e24cdbe204e182a35aadf6937d87491bb219",
+      "file_sha256": "99283623a272020825779462307b01257c6a15540117a08261c18fb99b26af3c",
+      "range_sha256": "2d4559e6fbe1a52438063881018e8ac448df1071c754aabe8587432272f37734",
+      "first_line": "def initializedAllOrderBudget (k : ℝ) (hk : 4 ≤ k)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.uniform": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedUniformBudget.lean",
+      "lines": [
+        39,
+        60
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedUniformBudget"
+      ],
+      "git_blob_oid": "fa510903149c6c308b3b29efaaeb7f3c38638ceb",
+      "file_sha256": "1b529dfa70617253199c06dd1d4cf6ec689bcd32ba6f9e46c63a10f1a5514bee",
+      "range_sha256": "eee9535cdb122479c804756b8d3d4070e4b3efb291c8b6dc7f7c2fc4716d98fc",
+      "first_line": "def initializedUniformBudget : EulerAllOrderDriftCorrection.Budget period D.T_pos",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.finite": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftFinite.lean",
+      "lines": [
+        19,
+        68
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.finite_exists",
+        "EulerAllOrderDriftCorrection.Budget.solution",
+        "EulerAllOrderDriftCorrection.Budget.family"
+      ],
+      "git_blob_oid": "193af1e9e6eb1a63be4fb3de4de3e4a7191f85ec",
+      "file_sha256": "fcfc66048dfd2be54c38c3f9c0cbcd6c3bcd2557f0b3c127347a45b8e9c44a7f",
+      "range_sha256": "ecec26f3c345ffe40d6b0ec44f0ad3e85b69741af0d9a416b81192b34c458a7c",
+      "first_line": "theorem finite_exists {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.finite_solver": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftGlobalInviscidGevrey.lean",
+      "lines": [
+        21,
+        67
+      ],
+      "declarations": [
+        "EulerDriftGlobalInviscidGevrey.exists_global_inviscid_gevrey_PDE"
+      ],
+      "git_blob_oid": "c7e7820ce705f6ff5f1a09ef1e290707874415e1",
+      "file_sha256": "046dbca8a37e4cea56afb0d3e436612107289c6c9fdc38656cb4e2ff7712d565",
+      "range_sha256": "3b047b1e39eba4f318fb1134d3bd55419393e88038a95926f8a648680c228566",
+      "first_line": "theorem exists_global_inviscid_gevrey_PDE {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.comparison": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyData.lean",
+      "lines": [
+        18,
+        78
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.stabilityBudgetOfBase",
+        "EulerCorrectionAssembly.ComparisonData",
+        "EulerCorrectionAssembly.FiniteFamily"
+      ],
+      "git_blob_oid": "80388af4b064c1134aa5a8a5dd22db64848bb5cb",
+      "file_sha256": "45fc56bc7ee57345ff89aa040fec45e84f08b84e9724ec782af157e46bc1bf9a",
+      "range_sha256": "0d17d6f62e02cd98ec4c930071cc61db18d50d324323c7d5ab67066b72e4a68a",
+      "first_line": "def stabilityBudgetOfBase {T : ℝ} (hT : 0 < T) (A : Data period T)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.compatible": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyCompatibility.lean",
+      "lines": [
+        18,
+        55
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.compatible",
+        "EulerCorrectionAssembly.FiniteFamily.value_base"
+      ],
+      "git_blob_oid": "2e9f28546b5122061e735801a6d934cdfbe97134",
+      "file_sha256": "980c96ae43739f1a1cc7c1670d5ca457547c3406cba94ad01c457718fe0ebe9d",
+      "range_sha256": "85fc852020427a01863f58429967a342652d0e142ef842b9fe550a94a518f00b",
+      "first_line": "theorem FiniteFamily.compatible (F : FiniteFamily period hT A) (C : ComparisonData period hT A)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.common": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyCommon.lean",
+      "lines": [
+        22,
+        78
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.commonPath",
+        "EulerCorrectionAssembly.FiniteFamily.pointField",
+        "EulerCorrectionAssembly.FiniteFamily.pointField_smooth"
+      ],
+      "git_blob_oid": "6b6c26249fcffa361af96e19c2f719210769006e",
+      "file_sha256": "27c3b75c2f4c6272a176a6889310a4ae710938764b0a27ce0508507f6c6f5083",
+      "range_sha256": "9d295f9885ee8d8017ef623d47f9c6dc8812c09d7aa4d29e4965010ac87c5eb1",
+      "first_line": "def FiniteFamily.commonPath (F : FiniteFamily period hT A) : C(Icc (0 : ℝ) T, LiftL2 period) :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.pressure": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyPressure.lean",
+      "lines": [
+        29,
+        90
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.rawSourcePath_truncate",
+        "EulerCorrectionAssembly.FiniteFamily.signedPressurePath_value_succ",
+        "EulerCorrectionAssembly.FiniteFamily.commonPressure"
+      ],
+      "git_blob_oid": "1f9e2b2441b03f1f2d404a8d8b7980cd3b2d061f",
+      "file_sha256": "386349eab06425d102dcc3ee275b177a4c231a1297ffa668d3b826ac16d2d488",
+      "range_sha256": "cc06c7193b647c36b65ed7e452a2804ed16f3fe8a3d44d99bb2d91c59a13ed43",
+      "first_line": "theorem FiniteFamily.rawSourcePath_truncate (F : FiniteFamily period hT A) (C : ComparisonData period hT A)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.tower": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyRealizations.lean",
+      "lines": [
+        15,
+        38
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.fieldTower",
+        "EulerCorrectionAssembly.FiniteFamily.solution_eq_realization"
+      ],
+      "git_blob_oid": "cb7f8478a8d01c2fe9d080d9401d4512bada81cd",
+      "file_sha256": "743c5f733800c2eb71c0bdf2427b7b671f0dd47c5dbf8c32874914bf293bc565",
+      "range_sha256": "cc943eaed9b888562944fe3edae956a98a0b542a26a89199ec64297dad99412b",
+      "first_line": "def FiniteFamily.fieldTower (F : FiniteFamily period hT A) (C : ComparisonData period hT A) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.energy": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftCorrection.lean",
+      "lines": [
+        76,
+        132
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.Budget.solution_eq_realization",
+        "EulerAllOrderDriftCorrection.Budget.fieldTower_energy",
+        "EulerAllOrderDriftCorrection.Budget.fieldTower_hasDerivAt_pressure"
+      ],
+      "git_blob_oid": "0f3bf41b75f94b513ad199aef18a146df4ef7d26",
+      "file_sha256": "2b6e29442e686e5fa8420f2107c88e2313d37315c377f4200d67d7c13259efa4",
+      "range_sha256": "c1c1dd8b3e5a7efa8320692bc1312cd666032b40e9047727125c4272970290bf",
+      "first_line": "theorem Budget.solution_eq_realization (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.scalar": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketCorrectionScalar.lean",
+      "lines": [
+        13,
+        87
+      ],
+      "declarations": [
+        "EulerPacketCorrectionScalar.initialRadius_bounds",
+        "EulerPacketCorrectionScalar.residual_small",
+        "EulerPacketCorrectionScalar.radius_decay",
+        "EulerPacketCorrectionScalar.radius_bounds"
+      ],
+      "git_blob_oid": "ba46fa226761ac205d2e62db220794c79c0760d9",
+      "file_sha256": "23b282ff365ffd13dbedea17c28db96bc35a546c41db1dcea90a6177025f63f8",
+      "range_sha256": "0fd902a6b85bc22b58ea1819faca5bbb9f28331838543d56af17a32e05d67d2f",
+      "first_line": "def delta (X : ℝ) : ℝ := Real.exp (-Real.sqrt X)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.frequency": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketSourceFrequency.lean",
+      "lines": [
+        13,
+        87
+      ],
+      "declarations": [
+        "EulerPacketSourceFrequency.tailBase_frequency",
+        "EulerPacketSourceFrequency.correction_guards"
+      ],
+      "git_blob_oid": "b57694e1b0fc38831fd20b6ad32335c6da80300c",
+      "file_sha256": "036d479f4b19b1bcca6c1ea8c651f5099e8f7591daccc643cc45b6ab75ffa4fd",
+      "range_sha256": "e7589964e807242f45b2da63e473d2306f4c60277c0fa365ae27ad2a52a99821",
+      "first_line": "def theta : ℝ := 1/1000000",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.physical": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketWeightedPhysicalErrors.lean",
+      "lines": [
+        33,
+        110
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.weightedPhysicalGradientCost",
+        "EulerAllOrderDriftCorrection.Budget.physical_gradient_hessian_of_weighted"
+      ],
+      "git_blob_oid": "10f90875796eac3726ab18923eea47c131dee0fd",
+      "file_sha256": "cfa38e5199931b792224327f614c7edb265ce4209d94d81ab73aa55e53e4a60a",
+      "range_sha256": "b32c4b0b9a6960ef054f5bc678dad45533ee7537d09836eb047e9f32dea0a936",
+      "first_line": "def weightedPhysicalGradientCost (R CF ρ Cw : ℝ) : ℝ :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.physical_loss": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketPhysicalFrequencyBounds.lean",
+      "lines": [
+        29,
+        91
+      ],
+      "declarations": [
+        "EulerPacketPhysicalGevrey.physicalRadius_le_linear",
+        "EulerPacketPhysicalGevrey.physicalReconstruction_power_bound"
+      ],
+      "git_blob_oid": "4dca22dd6662dc106f6c81384cc23e72a2112d77",
+      "file_sha256": "38eba07ed618b05357aa240b6cb14a48db33bf16ebf74d89a71b27dffe4334c1",
+      "range_sha256": "61718cd707e20a9a6a8a3d162970abe77d1c2839cb561db060e4ae7b24d015c7",
+      "first_line": "theorem physicalRadius_le_linear (k R C S : ℝ) (hk : 1 ≤ k) (hR : 0 ≤ R) (hS : 0 ≤ S) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.margin": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketUniformFrequencyMargin.lean",
+      "lines": [
+        17,
+        89
+      ],
+      "declarations": [
+        "EulerPacketSourceFrequency.physical_error_le_inverse_quarter",
+        "EulerPacketSourceFrequency.liftedAmplitude_small_of_costs"
+      ],
+      "git_blob_oid": "05198cfab198fdf01feb50db8afd36241ca06864",
+      "file_sha256": "79964eb6191d18976806db8aa5d87ccf2b3283c673d2ce029676d267253e4ef8",
+      "range_sha256": "97627ac0d9eac0e97a0d5ffea9af6d338120a01378e805c3eed6223a8babbe1a",
+      "first_line": "theorem cost_div_le_inverse_half (C k : ℝ) (hk : 1 ≤ k) (hC : C ≤ smallPower k) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.flow": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedUniformFlow.lean",
+      "lines": [
+        73,
+        257
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initialized_uniform_flow_and_shear"
+      ],
+      "git_blob_oid": "efeb9a621aeca452d0105630000c35599b4add36",
+      "file_sha256": "4328e10a8f3f9b3113e12a52f3d45a4b28226042a78bb29cc6bca391125028fe",
+      "range_sha256": "bdecbf1942de8326dd3b684ff3b86db99b660b4beda6885b2d7c18bf54e6b7e1",
+      "first_line": "theorem initialized_uniform_flow_and_shear :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.labels": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentUniformJoinedChild.lean",
+      "lines": [
+        62,
+        110
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.LabelData.joined_uniform_child"
+      ],
+      "git_blob_oid": "c0154ab1fbcb6099823358bbc6cb6bfc9f9d8ba0",
+      "file_sha256": "ebacf6dcc54bd2d896d4f9e7c5ad66c7af9a95aef3d50038deff0817f4352be9",
+      "range_sha256": "eb710efe270591ecd44287f50db60605511a6c3605b4d90bcad32924ce08b3f6",
+      "first_line": "theorem joined_uniform_child :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.choice": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentGeometryJoinedChoice.lean",
+      "lines": [
+        26,
+        84
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.GeometryJoinedChoice",
+        "EulerParentPacketFrames.exists_geometryJoinedChoice",
+        "EulerParentPacketFrames.GeometryJoinedChoice.state"
+      ],
+      "git_blob_oid": "e06ac6f216d71c04102ac08ecb990baf67571b96",
+      "file_sha256": "5f81097e95f454151179c05a023012e106340a2702410804a9e48bd766c63b72",
+      "range_sha256": "c17571c2ac81c0dcb1ad25259dbf72031a39cf2e61d14aa080bcc296b26a304d",
+      "first_line": "structure GeometryJoinedChoice where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.joined": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketJoinedSuccessor.lean",
+      "lines": [
+        33,
+        118
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.chooseJoined",
+        "EulerPacketInduction.Stage.joinedState",
+        "EulerPacketInduction.Stage.joinedStep",
+        "EulerPacketInduction.Stage.joinedNext",
+        "EulerPacketInduction.Stage.joinedNext_initial_velocity"
+      ],
+      "git_blob_oid": "6a8724d6f681ce2814828b67711d1743d81f4378",
+      "file_sha256": "0fb90ae4204249d31162152f03a6391126d619d796fdd716134ed6d4b9a3a601",
+      "range_sha256": "d322224ea76f6b8e5d16643b441b56953420ac32fb5afeb36ed2a9922b59c02f",
+      "first_line": "def chooseJoined : P.JoinedChoice hn hq hB := by",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.forward": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketForwardSuccessor.lean",
+      "lines": [
+        29,
+        108
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.chooseForward",
+        "EulerPacketInduction.Stage.forwardStep",
+        "EulerPacketInduction.Stage.forwardNext"
+      ],
+      "git_blob_oid": "e9e4a1cf15691d9b48185020eac8f082801aac53",
+      "file_sha256": "f93dd61bae1e1c815960e54bf1b2b8d7c995c0552f3b2cd4e278bcac5a18a7a5",
+      "range_sha256": "e2523ca1a1e6e3f3af44cf9d0942e42fc7cb77a16a9f859f458ddcd5d54bf549",
+      "first_line": "def chooseForward : P.ForwardChoice hq hB := by",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.next": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageSuccessor.lean",
+      "lines": [
+        61,
+        195
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.Step",
+        "EulerPacketInduction.Stage.next"
+      ],
+      "git_blob_oid": "5260520cde8fdc24e26ef4f9e6f49e0b70f9b981",
+      "file_sha256": "841618695011098b46ab4b26a47aa8b7492503c52af3d02a4aea0c8e2dafb4f0",
+      "range_sha256": "ed1ec3f491c8a237a6a0e62beaa306c5ade521ad9d8a072c6d7d0eb508903297",
+      "first_line": "structure Step where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.state": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentState.lean",
+      "lines": [
+        18,
+        57
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.SmoothState",
+        "EulerParentPacketFrames.SmoothState.packetChild"
+      ],
+      "git_blob_oid": "dd90173ec20f1bdf06112f5b0e552406b8bb09b7",
+      "file_sha256": "858f5990403034f3717c7088c6ee123b9b08a585fc3f2ffb4173a6e9d92cf917",
+      "range_sha256": "6bd34896b9b1fbbc5a0be454ad2bcc57de65ded9cabbc60dbda1947ace194805",
+      "first_line": "structure SmoothState (A : Parent) where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.residual_supplier": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentInitializedState.lean",
+      "lines": [
+        75,
+        96
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.SmoothState.joinedChild"
+      ],
+      "git_blob_oid": "7725d9403165c3c7c62f36d348ead9485557f7f2",
+      "file_sha256": "3ab1d56a2aceb380ecd0e9f3b9b0ddb3e60a46e9a71963407e88ce0fe891e6ef",
+      "range_sha256": "b38f0ce7a0b207c2574ebf27ea9740660c809d59a2b720c84fea8b7eb6c6f4d3",
+      "first_line": "def joinedChild (τ : ℝ) (hτ : 0 < τ) (hτT : τ < A.T)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.euler_child": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentEulerChild.lean",
+      "lines": [
+        31,
+        57
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.Evolution.child"
+      ],
+      "git_blob_oid": "a4bf78707369067ee29eb1b719b00f93abbc69a1",
+      "file_sha256": "597e508e0c0deb1493e190350f3426477d22c649ff771f94fa36e80aae6523e3",
+      "range_sha256": "afef71c1e76d046db660d2a35b8d7c594ca6c2adc0df0f6aab7ebfe560e4f6ec",
+      "first_line": "def child : Evolution (A.child G k m hgraph nextEll hnext hnext1) where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.tail": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageInitialLimit.lean",
+      "lines": [
+        23,
+        103
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.initialTailInput",
+        "EulerPacketInduction.Stage.initialDataLimit",
+        "EulerPacketInduction.Stage.initial_velocity_partial",
+        "EulerPacketInduction.Stage.initialDataLimit_Hm"
+      ],
+      "git_blob_oid": "d19bbe870a65c686e5da001ea25160607f4396eb",
+      "file_sha256": "376feb413df5ed2f2261fe34c22da7a131512e264118e73894ddd6d6485fcda9",
+      "range_sha256": "5ad47acd99d06c939d578afdbd3eddcc47bdf34ab3487f5f07a91b5d65a44262",
+      "first_line": "def initialTailInput (i : ℕ) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.sum": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitialSmoothLimit.lean",
+      "lines": [
+        21,
+        94
+      ],
+      "declarations": [
+        "EulerPacketInitial.Input.increment",
+        "EulerPacketInitial.actual_increment_summable",
+        "EulerPacketInitial.initialLimit",
+        "EulerPacketInitial.initialLimit_support",
+        "EulerPacketInitial.fullInitialLimit_Hm"
+      ],
+      "git_blob_oid": "18190a3f0d4e6569fa10f219e00fbd5e668d4edb",
+      "file_sha256": "974764c7f1c474de3103263a099ad5fdf36e29cce34130835e9aa40d0186327f",
+      "range_sha256": "7e8f091ddc7233d067bab255509640c126fb8960cb59a5c77b666c76ed064ad1",
+      "first_line": "def increment (k : ℝ) : SmoothL2Field Space := addField (A.highField k) (A.meanField k)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.h4": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryEulerStability.lean",
+      "lines": [
+        17,
+        33
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.referenceNormPath",
+        "EulerOrdinarySobolev.Evolution.referenceSize",
+        "EulerOrdinarySobolev.Evolution.referenceWordBound"
+      ],
+      "git_blob_oid": "499242d10a98505109365c9a184a9c11075fa75e",
+      "file_sha256": "1359ef7cce0957b0947537d72ecb833758b5b1b9eba4b44d9de77d5793c984fe",
+      "range_sha256": "26ab1099e3fcc6c945c3513b49bc91d4cc3f1dcc1b3b22c01febd001dea0c357",
+      "first_line": "def referenceNormPath (U : Evolution T hT) : C(Icc (0 : ℝ) T,ℝ) :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.h3": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryH3Envelope.lean",
+      "lines": [
+        115,
+        138
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.h3_stability"
+      ],
+      "git_blob_oid": "45f6b52682847ca7d97f8fbb9615a0567f55e69a",
+      "file_sha256": "a8746bd207cab86e79df1e5188b3be797e26e275d67b12d9b30cc8cffe9649ee",
+      "range_sha256": "c2640c2523887677717d6493f2cc6d383d0d7747de871ca1cef20c55b4aecea6",
+      "first_line": "theorem h3_stability (U V : Evolution T hT) (M ε : ℝ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.varying": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryEulerVaryingHorizon.lean",
+      "lines": [
+        28,
+        107
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.eventually_h3_bound_varying",
+        "EulerOrdinarySobolev.Evolution.no_gradient_escape_of_initial_tendsto_varying"
+      ],
+      "git_blob_oid": "d658013bee659266a2d03745f8079142d413d74c",
+      "file_sha256": "1e7a7ed4267d2f31f1147c5c11b906daa6cf1eb530733b724890c905f9baa073",
+      "range_sha256": "6173c727f92c2c6a9f53fb2c2b31fbeb8ef8eda68568009fd30105cb5109ff42",
+      "first_line": "theorem eventually_h3_bound_varying",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.contradiction": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageContradiction.lean",
+      "lines": [
+        32,
+        72
+      ],
+      "declarations": [
+        "EulerPacketInduction.GrowthData.no_evolution_of_eventually_covering"
+      ],
+      "git_blob_oid": "04e821b787b8448365e1a037a91c026f39b2a1e7",
+      "file_sha256": "13946e58994a22b652c1d4e4a6b276fd5fc201abdc99333d77ed6233461f4116",
+      "range_sha256": "cb43ef015b787e42bb3c4a6d34211b0357ee3faf07b0ae99d44d9d73a6fb89f4",
+      "first_line": "theorem no_evolution_of_eventually_covering (T : ℝ) (hT : 0 ≤ T)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.lifespan": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketFiniteLifespan.lean",
+      "lines": [
+        28,
+        111
+      ],
+      "declarations": [
+        "EulerPacketInduction.initialDatum",
+        "EulerPacketInduction.initialDatum_Hm",
+        "EulerPacketInduction.initialDatum_solenoidal",
+        "EulerPacketInduction.initialDatum_no_packet_horizon",
+        "EulerPacketInduction.initialDatum_finite_lifespan",
+        "EulerPacketInduction.lifespan_le_iInf_horizon"
+      ],
+      "git_blob_oid": "3b88a9e040652c5e1866c2163c475baa9f4994d5",
+      "file_sha256": "bc0ace02c1986e24c07c555fdd1065f82305382842c8efdaaacced99fc00a576",
+      "range_sha256": "7ddedecb730f124e81c9df338f39f9fccfe475daf0b6fb849d6b5cac01f8f7d6",
+      "first_line": "def initialDatum : SmoothL2Field Space := Stage.initialDataLimit packets le_rfl le_rfl",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.confinement": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CanonicalVorticityConfinement.lean",
+      "lines": [
+        29,
+        107
+      ],
+      "declarations": [
+        "EulerPacketInduction.packets_vorticity_support",
+        "EulerPacketInduction.evolution_vorticity_support",
+        "EulerPacketInduction.canonical_vorticity_confined"
+      ],
+      "git_blob_oid": "5db23cd23ac16655898794b20deda49679949a2d",
+      "file_sha256": "912d38063bcb1e164625c54b747521f6a826cdd842527ca243cbea63664dbe09",
+      "range_sha256": "703c842ef05add977bd04b01fd2015c13ded745d7f1bf1245c5ba377eef14288",
+      "first_line": "theorem packets_vorticity_support (n : ℕ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.broad": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CompactVorticityContradiction.lean",
+      "lines": [
+        70,
+        107
+      ],
+      "declarations": [
+        "Euler.ComparatorBridge.no_global_solution_of_confined_vorticity"
+      ],
+      "git_blob_oid": "79a3d9131137adaf72c36dcfe515970a9677782f",
+      "file_sha256": "bc02c8d8b21f041d7647c7d507316a6f5c91e09326776dab71c4c32aade09b07",
+      "range_sha256": "7d5fb10a5b62b0d9b15ff53258bb3a811dde13a86ddb924c170d978bd35e062f",
+      "first_line": "theorem no_global_solution_of_confined_vorticity {A : SmoothL2Field Space}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.endpoints": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/Solution.lean",
+      "lines": [
+        27,
+        68
+      ],
+      "declarations": [
+        "Euler.initialDatum_no_global_solution (private)",
+        "Euler.euler_breakdown_R3",
+        "Euler.exists_compact_smooth_euler_singularity"
+      ],
+      "git_blob_oid": "57a893e64ff06494d6fd1183e163ebc44ce0ef72",
+      "file_sha256": "dd7d441f201eac83068979e4b3fb021a5795ae46acbb7af25ce0fea14d36a0ff",
+      "range_sha256": "0eb35136552622ac4ce033341b6b543c17384ad4c51733b996e787cd623520c3",
+      "first_line": "private theorem initialDatum_no_global_solution :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.records": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionEnergyData.lean",
+      "lines": [
+        24,
+        120
+      ],
+      "declarations": [
+        "EulerCorrectionEnergyData.SpatialBudget",
+        "EulerCorrectionEnergyData.MetricBudget"
+      ],
+      "git_blob_oid": "97e45adeb4568adfa73cb5b61846a0bb025ff99e",
+      "file_sha256": "0f835763f6ba4216ada15696985dc11026026f22c0f6eb3e77ee53103b7c7349",
+      "range_sha256": "663acfd7c89a58ab659b93be791e1a40a698134505ec0531a1e6e522af722b31",
+      "first_line": "structure SpatialBudget {q : ℕ} {T : ℝ} (hq : 6 ≤ q+1)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.data": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderCorrectionData.lean",
+      "lines": [
+        28,
+        130
+      ],
+      "declarations": [
+        "EulerAllOrderCorrectionData.CoefficientTower",
+        "EulerAllOrderCorrectionData.FieldTower",
+        "EulerAllOrderCorrectionData.Data",
+        "EulerAllOrderCorrectionData.Data.atOrder",
+        "EulerAllOrderCorrectionData.Data.metricBudget"
+      ],
+      "git_blob_oid": "1ead36f3b1e2b3489f1140449b6e5e2f19d2093f",
+      "file_sha256": "b516a790f8053364320207299b484e8c15e6786bd5395634c83ef7917ac97a9e",
+      "range_sha256": "6070f92a6c478950ca7ce1e46a70c9d8b2ec51858144aa5f7daee1e32346a26b",
+      "first_line": "structure CoefficientTower (T : ℝ) where",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "EU.classes": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SolutionDefinitions.lean",
+      "lines": [
+        64,
+        120
+      ],
+      "declarations": [
+        "Euler.EulerExistenceAndSmoothness",
+        "Euler.EulerExistenceAndSmoothnessR3",
+        "Euler.SobolevSmoothOn",
+        "Euler.EulerSobolevExistenceAndSmoothnessR3On"
+      ],
+      "git_blob_oid": "346be3e2fc21f3e726530ac196c18d4cfed9cbed",
+      "file_sha256": "91f8c7287fda0f4cdbedf8b97b21a9020c46b9225a9cd70fd69ff68c3f642a70",
+      "range_sha256": "d7f3c6286cb05ee1af0532e090a848d92347594cad6ef90546a59a154e4d8839",
+      "first_line": "structure EulerExistenceAndSmoothness",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N1.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCyclePreservation.lean",
+      "lines": [
+        768,
+        776
+      ],
+      "declarations": [
+        "next_runInvariant"
+      ],
+      "git_blob_oid": "a80577c56330021a881cab84b35bcb0e1976beda",
+      "file_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a",
+      "range_sha256": "94044fb9c16d42487ed1c054a47ecf13655361c9a0a51a3dbafa2e66c5367e17",
+      "first_line": "theorem next_runInvariant {B N0 : ℕ} {σ : ℝ} {x : CycleState (Index B N0)}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N1.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCyclePreservation.lean",
+      "lines": [
+        777,
+        785
+      ],
+      "declarations": [
+        "state_runInvariant"
+      ],
+      "git_blob_oid": "a80577c56330021a881cab84b35bcb0e1976beda",
+      "file_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a",
+      "range_sha256": "1d4d88743953cb8dd4a1c0d1d2097ba76518b21ddb02f4838e6669affc8999e1",
+      "first_line": "theorem state_runInvariant (B N0 : ℕ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N2.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCurrentParticularBounds.lean",
+      "lines": [
+        150,
+        179
+      ],
+      "declarations": [
+        "actual_potential_coefficient_class"
+      ],
+      "git_blob_oid": "469d70c651e6a0c8dd07c7e2a0f3cd49885e0fb6",
+      "file_sha256": "a867e862b66b61a077feedfabad96422265d1f7f785cb689d7d2d7de93f5114f",
+      "range_sha256": "139daa87ae12b9b545eb1aa3957c2d29acc316cf691a5850885a90f5bb5a5e0f",
+      "first_line": "theorem actual_potential_coefficient_class (x : CycleState (Label B N0))",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N2.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/GluedStageEstimates.lean",
+      "lines": [
+        601,
+        620
+      ],
+      "declarations": [
+        "current_potential_bound"
+      ],
+      "git_blob_oid": "5919714beaf6f2917323fda1a2b24d2ee3bd253c",
+      "file_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6",
+      "range_sha256": "c237ef91492cd67b28701dea92fcadaac8ff6bf5f08d60141b07c2b5020d70c3",
+      "first_line": "theorem current_potential_bound",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N3.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualPhysicalPrefixFields.lean",
+      "lines": [
+        438,
+        474
+      ],
+      "declarations": [
+        "physicalFields_of_stages"
+      ],
+      "git_blob_oid": "2a81b1f8f596f8afe5172bb73c9e79c690189fd1",
+      "file_sha256": "3f03223ea715627a2eb2ea80218edaf99a9e9e2f937a8e896cfe7015b6df0b32",
+      "range_sha256": "a5507ca15d41a3c1a6442599c91ffcb4b4f1d3d27b4757fa023ba9323d5c1f5e",
+      "first_line": "theorem physicalFields_of_stages {B N0 Nr : ℕ}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N3.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCandidateAssembly.lean",
+      "lines": [
+        974,
+        984
+      ],
+      "declarations": [
+        "physicalData"
+      ],
+      "git_blob_oid": "09c325899c00792f1355e8b6fdae552c27a25006",
+      "file_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+      "range_sha256": "3a0aba86a8d81cbd3b503095500b5a6003c1a8c14ed1d800875afab9041e2aca",
+      "first_line": "theorem physicalData (B N0 : ℕ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N4.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCycleResidualBounds.lean",
+      "lines": [
+        909,
+        949
+      ],
+      "declarations": [
+        "selected_residual_jet_bound"
+      ],
+      "git_blob_oid": "e70c410f3a273b04f00baf77a842dbd586a36bb3",
+      "file_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965",
+      "range_sha256": "224ed3cd334a49bb163ea47a3e0df1ed716206515939ad3bd0fb2c39c56ec105",
+      "first_line": "theorem selected_residual_jet_bound {a b h gain β : ℝ} {N Δ : ℕ} {gap : ℕ → ℕ}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N4.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCycleResidualBounds.lean",
+      "lines": [
+        1179,
+        1197
+      ],
+      "declarations": [
+        "finite_residual_rates"
+      ],
+      "git_blob_oid": "e70c410f3a273b04f00baf77a842dbd586a36bb3",
+      "file_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965",
+      "range_sha256": "96f9f20403300df61a49fe45365d68d40d6e0ac39a4324d00dc9e40882d19119",
+      "first_line": "theorem finite_residual_rates {B N0 N : ℕ}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N5.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/GluedStageEstimates.lean",
+      "lines": [
+        658,
+        704
+      ],
+      "declarations": [
+        "actualStageEstimates"
+      ],
+      "git_blob_oid": "5919714beaf6f2917323fda1a2b24d2ee3bd253c",
+      "file_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6",
+      "range_sha256": "03f9f05c999f03cfa36c9d946767ab8f20e7a68c796e4211964941f0c1290791",
+      "first_line": "noncomputable def actualStageEstimates",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N5.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCandidateAssembly.lean",
+      "lines": [
+        985,
+        994
+      ],
+      "declarations": [
+        "estimates"
+      ],
+      "git_blob_oid": "09c325899c00792f1355e8b6fdae552c27a25006",
+      "file_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+      "range_sha256": "ea0a6845b0e3ead74cfe0382c1b91787b5bdf41cdd30ea0d17169ba3ac9ec931",
+      "first_line": "noncomputable def estimates (B N0 : ℕ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N6.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/MixedCandidateAssembly.lean",
+      "lines": [
+        67,
+        101
+      ],
+      "declarations": [
+        "StageEstimates.exists_schedule"
+      ],
+      "git_blob_oid": "2f6c4bbd9a2c07f3b9b94469b9406a3f7fbde4f4",
+      "file_sha256": "2a0c8e096de0d4dfb1f025242569eff03fa0fc0f9843f5fb8bce85ae6f855991",
+      "range_sha256": "63569dca7b6588da678af7575ba0b06175c1b63296c006ec1a9217bc617d99d6",
+      "first_line": "theorem StageEstimates.exists_schedule {h qbig : ℝ}",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N6.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/GermCandidateAssembly.lean",
+      "lines": [
+        180,
+        282
+      ],
+      "declarations": [
+        "exists_candidate_witness_of_finite_stages"
+      ],
+      "git_blob_oid": "9a011c7952987b69b157d14f90c55c0c3b1ea393",
+      "file_sha256": "c945cd5335ff0837cd0208e224e1468b25b307967712da9021e2f4ce8ca6e0b9",
+      "range_sha256": "8dd5763fdd1fc2fe1cd6dea4d4eb7ec2036d0a2a69ed706b5bb3721d07ce34b1",
+      "first_line": "theorem exists_candidate_witness_of_finite_stages (upper : ℝ) (bandFloor : ℕ)",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N7.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/CandidateFromLimits.lean",
+      "lines": [
+        83,
+        86
+      ],
+      "declarations": [
+        "force"
+      ],
+      "git_blob_oid": "2a4ab4d22e5224945779b0d359c0a0734ea25b67",
+      "file_sha256": "d51e5997466748271657aa7f137f662a48fc98226ee7afe2a44f47141ea4bc84",
+      "range_sha256": "3f88970d96732b2a9da7d9586854b57dc4360cf1dc77d8911c1be4eae646bb26",
+      "first_line": "def force : VelocityField :=",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N7.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ActualCandidateAssembly.lean",
+      "lines": [
+        1053,
+        1069
+      ],
+      "declarations": [
+        "witness"
+      ],
+      "git_blob_oid": "09c325899c00792f1355e8b6fdae552c27a25006",
+      "file_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006",
+      "range_sha256": "5d7a4497aba1ad2e896aef58ca371917cdce93fe84900f1c6721f4112f61d1bc",
+      "first_line": "theorem witness (B N0 : ℕ) (hN : ActualCarrierGeometry.geometricThreshold ≤ N0) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N8.producer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/R3ActualCandidate.lean",
+      "lines": [
+        18,
+        24
+      ],
+      "declarations": [
+        "selected_compact_candidate"
+      ],
+      "git_blob_oid": "6ddc9e3e44fbbc5bfee6363cc79c7eac7cebea00",
+      "file_sha256": "9c66073a9b2f0181f7997576c2ae09c14259d43d09fb4f7bd751bf2b3a9db7a5",
+      "range_sha256": "be9aa049a59d3e35ca32534778b53d78ee13e1f8bd4794a23537353694d6350e",
+      "first_line": "theorem selected_compact_candidate :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    },
+    "N8.consumer": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "NavierStokes/ComparatorR3Theorem.lean",
+      "lines": [
+        53,
+        61
+      ],
+      "declarations": [
+        "navier_stokes_breakdown_R3"
+      ],
+      "git_blob_oid": "b92b280b38bd8077d44316d623c967ea456a0ae9",
+      "file_sha256": "e4983971f5996cbaa293e989fea3f18a348f4cbe0f787ac32c10b506bfd57aab",
+      "range_sha256": "103d39de04dcf7b374bb3081188045b0283037af8a053992da71046122098fd1",
+      "first_line": "theorem navier_stokes_breakdown_R3 (ν : ℝ) (hν : ν > 0) :",
+      "evidence": "I-supplied-map",
+      "closure_audited": false
+    }
+  },
+  "selected_contract": {
+    "id": "RC-EU-FINITE-01",
+    "path": "RECONSTRUCTION-CONTRACT.md",
+    "node": "EU-03",
+    "input": "C06 output, with matching coefficient and metric inputs",
+    "output": "C01 finite inviscid output and C02 exact consumer match",
+    "accepted_upstream_debt": [
+      "C07 viscous existence and energy bootstrap",
+      "foundational Sobolev, heat, integration-by-parts and coercive pressure theory with explicit contracts"
+    ],
+    "completed": false
+  },
+  "deferred_boundaries": [
+    "EU-04 physical transfer and renewal",
+    "NS-01/04 incoming residual and physical transfer"
+  ],
+  "verification": {
+    "source_byte_anchors": "checked against pinned git objects",
+    "kernel": "not run",
+    "builds": "not run",
+    "dependency_closure_audit": false,
+    "human_reconstruction": "contract only; not completed"
+  }
+}

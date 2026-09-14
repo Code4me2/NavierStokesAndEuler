@@ -1,0 +1,111 @@
+{
+  "source_root": "/home/velvet/interpretability-producer-map-DMEgiB7x",
+  "source_pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "external_only": [
+    {
+      "path": "FINAL-mechanical-check.log",
+      "sha256": "98b71f9ba5065f3e78b2cb65807cf7f6f9372eeb0d81f747182bfa4745a2cf44"
+    },
+    {
+      "path": "FINAL-mechanical-check.py",
+      "sha256": "ca11af00cbdfac2d82be2f1a72093d60b8dd9ab77dcb37d7e2457041b9f50f03"
+    },
+    {
+      "path": "FINAL-start-snapshot.json",
+      "sha256": "baf530ec22650c441136675f3c52980a6552dfbbd14ac7633b69816aeea5e1a7"
+    },
+    {
+      "path": "NavierStokes/produce.py",
+      "sha256": "897dea7df8b4778f58397a7081644fd3e60aba6616ae590ff8483ed36e7882c0"
+    },
+    {
+      "path": "exact-check.log",
+      "sha256": "b262c07c8abd70f9d6e6ea204d8c9ff0d8744cb5b8a0488c4d37a2cf1b784e18"
+    },
+    {
+      "path": "exact-check.py",
+      "sha256": "e56b87dbc3f919af6e59d00491d1165eedbdf6f7a1c1503a2ba290440be2447c"
+    }
+  ],
+  "policy": "Final addenda govern historical drafts; no historical receipts rewritten; source inspection/human reconstruction, not new kernel validation.",
+  "copied_reports": [
+    {
+      "path": "Euler/MAP.json",
+      "sha256": "ec1bb0f0e7a6c37b79eb3eb6cd2bf473dc7679815c117a338a5e7c9e58f56dd9"
+    },
+    {
+      "path": "Euler/MAP.md",
+      "sha256": "e305c0fc11ef2eca3f0330e0462609f869ee16a758f8e6eb4bb9890623f14f17"
+    },
+    {
+      "path": "Euler/NEXT-TARGET.md",
+      "sha256": "2009830d1d24a72cec2dcc855deb3803ea8790130b7ab2cb1f281e2e9575fd7f"
+    },
+    {
+      "path": "FINAL-MAP.json",
+      "sha256": "5a43345a28777f3d4ef08a095faf3e16180339b78068742be89d757035395666"
+    },
+    {
+      "path": "FINAL-MECHANISM-ATLAS.md",
+      "sha256": "d36c89293e053dde2ee132d496d355e28b01a236f775f304de5a95c45d88bb14"
+    },
+    {
+      "path": "FINAL-OVERVIEW.md",
+      "sha256": "f0b642274f3f0a8f961057c0db9015b11938d56b9164998b4e3a3cd4e62e5223"
+    },
+    {
+      "path": "FINAL-RECONSTRUCTION.md",
+      "sha256": "e9bd8fc2a76003989563ec8bec63afdb42fa76d8615df1e3628e4372e6acef6e"
+    },
+    {
+      "path": "MECHANISM-ATLAS.json",
+      "sha256": "b3ffe88437686950747b559486bfd12635582e746a6ca8b9eab4f0445663604a"
+    },
+    {
+      "path": "MECHANISM-ATLAS.md",
+      "sha256": "93b23fc86352ac87bd823ef0c5533a13390862f26c09424ef895156159129f6a"
+    },
+    {
+      "path": "NavierStokes/Euler/MAP.json",
+      "sha256": "cca8570263ae6b71b7ff8e139237f60bd3f9b44a9de657e0fdfd326d24a56f83"
+    },
+    {
+      "path": "NavierStokes/Euler/MAP.md",
+      "sha256": "eb12323bade620a5a9833ff3b49902027832d2c752231b0e78474f5343bfe230",
+      "published_sha256": "d322dd6ab2e2decbe66be5dbf7b4866ced96e38c7c9765d7ef549a9be3ff81f1",
+      "adaptation": "Wrap mathematical expressions on lines87 and90 in inline code to prevent four unintended Markdown links; no mathematical text change."
+    },
+    {
+      "path": "NavierStokes/MAP.json",
+      "sha256": "b446a0292e65ee9a2ab045881c53e7f183b967fee995716ed72f9184891ce93b"
+    },
+    {
+      "path": "NavierStokes/MAP.md",
+      "sha256": "d90976190775478b2dfdd1015ccaff334a2fc6f753238be191d89c58b3c37847"
+    },
+    {
+      "path": "NavierStokes/NEXT-TARGET.md",
+      "sha256": "c608d70b9d39c91987d46fb35961bcd36e444fb461db226ae0a63220a2ebf696"
+    },
+    {
+      "path": "RECONSTRUCTION-CONTRACT.md",
+      "sha256": "2632579d2f0275739f1fc8e9316624cef49438c762c0a934affeb779ae77fb66"
+    },
+    {
+      "path": "RECONSTRUCTION.md",
+      "sha256": "70e22494cec527c2810abad380637d42e6ff4da6e7348e76a364898cdc24b0be"
+    },
+    {
+      "path": "REVIEW-DISPOSITIONS.md",
+      "sha256": "17c16602182c8024100f5a727839cd53186ce1157ad2ceba99e3a549b60b79a8"
+    },
+    {
+      "path": "REVIEW-mathematical-and-quantifier-audit.md",
+      "sha256": "23946a913c09a87670a57d03bac7c644cce07216f968c037d01899888a6692b6"
+    },
+    {
+      "path": "REVIEW-source-lineage-and-explanatory-value.md",
+      "sha256": "78733dae02c2301ba62664c6003d6795c756bbf52bf28c54356a30de31ba3363"
+    }
+  ]
+}

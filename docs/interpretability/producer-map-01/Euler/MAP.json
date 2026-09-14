@@ -1,0 +1,1661 @@
+{
+  "schema": "interpretability-producer-map/v1",
+  "branch": "Euler",
+  "baseline": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "observed_head": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "source_root": "/home/velvet/Desktop/NavierStokesAndEuler",
+  "write_root": "/home/velvet/interpretability-producer-map-DMEgiB7x/Euler",
+  "validation_claim": "Source inspection and human calculations only. Prior supplied authentic Nanoda+Lean gates on df3d891/final doc-only delta are not rerun.",
+  "historical_map_reauthored": false,
+  "macrograph": {
+    "nodes": [
+      {
+        "id": "M1",
+        "name": "Fix the hierarchy, then recursively choose exact stages",
+        "mathematical_input_output": "For each c≥0 and real floor B, ∃ one `Scales c B`; its J,D,X,δ and all-n numerical guards precede the recursion. Delivered instantiation fixes c=`requiredExponent` and B=`commonThreshold gradientConstant hessianConstant`, then defines `packets n : Stage constructionScales n` for every n. This is not ∀n∃ a new hierarchy.",
+        "representative_equation_or_estimate": "`Σ k_n^(-1/4) ≤ δ`, renewal series ≤1/4, base horizon ≤1; actual source scales satisfy `x_(n+1)=(J+n)^2 x_n`. The common choice theorem chooses D, then J, then X from an intersection of eventual conditions.",
+        "fixed_before_existence_after": "Fix c,B; choose one S=(J,D,X,delta) before n. At each n use actual Stage S n and prescribed k_n, not fresh scales after derivative order.",
+        "construction_identity_selected_witness_lineage": "constructionScales := Classical.choice(exists_scales requiredExponent commonThreshold); packets := stages constructionScales le_rfl le_rfl; successor splits on n.",
+        "classification": [
+          "construction-specific requirement"
+        ],
+        "producer_citations": [
+          "scale",
+          "recursion"
+        ],
+        "actual_consumer_citations": [
+          "joined",
+          "forward"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded"
+        ],
+        "necessity_and_domain_analysis": "### M1 — Fix the hierarchy, then recursively choose exact stages\n\n**Input/output.** For each c≥0 and real floor B, ∃ one `Scales c B`; its J,D,X,δ and all-n numerical guards precede the recursion. Delivered instantiation fixes c=`requiredExponent` and B=`commonThreshold gradientConstant hessianConstant`, then defines `packets n : Stage constructionScales n` for every n. This is not ∀n∃ a new hierarchy.\n\n**Representative estimates.** `Σ k_n^(-1/4) ≤ δ`, renewal series ≤1/4, base horizon ≤1; actual source scales satisfy `x_(n+1)=(J+n)^2 x_n`. The common choice theorem chooses D, then J, then X from an intersection of eventual conditions.\n\n**Producer → actual consumer.** `EulerPacketInductionScales.exists_scales`, `PacketInductionScales.lean:122–192` (record at 83–112), is used by `EulerPacketInduction.constructionScales`, `PacketInfiniteConstruction.lean:59–66`. `stages` at 39–41 recurses through `Stage.successor` at 21–25: stage 0 uses `forwardNext`, positive stages use `joinedNext`. `chooseJoined`, `PacketJoinedSuccessor.lean:33–37`, consumes `S.secondary_frequency` with the actual restricted state's label bound and rewrites the actual input scale to supply the inverse-length guard. Forward counterpart: `PacketForwardSuccessor.lean:29–33`.\n\n**Why this route needs it.** Summable low/pressure/renewal debts must coexist with large frequencies on the same future stages. A frequency chosen only after fixing one derivative order would not support the prescribed recursion. **Construction-specific requirement**; common-threshold numerical closure below `exists_common_guards` is **unexpanded**, not reproved by exponential-growth intuition. Record and caller bodies **source-inspected**.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M2",
+        "name": "Initialized parametrix: tangency gives small drift, truncation gives residual",
+        "mathematical_input_output": "Fix mean/transverse data M,D with M.T=D.T; positive history 0<τ<D.T; one history B, primary amplitude α>0, spike 0<δ≤1, terminal ξ, supported cutoff; joined/primary/normal/mean budgets and grade guards on one common radius R, coefficient agreement and multiplier budget BC. Fix k≥4 and N≥1 satisfying the actual tail-base guard. Construct the literal packet Z=k·(initializedPacketField N k⁻¹), with time changed to D.T, and residual obtained by applying the joined inverse coefficient before multiplying by k. Outputs are `WordBound 6 (4R) Cv 0`, normal bound `Cn/k`, and, if N≥X−1, residual amplitude `exp(-0.7 X log k)`.",
+        "representative_equation_or_estimate": "`⟨(F⁻¹)*m₀,a₁⟩=0 ⇒ ⟨m₀,F⁻¹a₁⟩=0`; therefore `||b_Z||weighted ≤ 2(3Cv+Cn)/k`, while `||Z||weighted ≤2Cv`. The precise calculation is B1 below.",
+        "fixed_before_existence_after": "Fix parent, positive history, terminal primary, common source budgets, k and N. All word orders use one normalized field and radius; constants Cv,Cn are independent of correction order.",
+        "construction_identity_selected_witness_lineage": "joinedTerminalPrimary and its tangent/equation witnesses -> initializedPacketField and initializedResidualField -> normalized A at k inverse.",
+        "classification": [
+          "core analytic mechanism",
+          "construction-specific requirement"
+        ],
+        "producer_citations": [
+          "normal",
+          "initialized",
+          "normalized",
+          "norms"
+        ],
+        "actual_consumer_citations": [
+          "spatial",
+          "supply"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded",
+          "human-derived"
+        ],
+        "necessity_and_domain_analysis": "### M2 — Initialized parametrix: tangency gives small drift, truncation gives residual\n\n**Input/output.** Fix mean/transverse data M,D with M.T=D.T; positive history 0<τ<D.T; one history B, primary amplitude α>0, spike 0<δ≤1, terminal ξ, supported cutoff; joined/primary/normal/mean budgets and grade guards on one common radius R, coefficient agreement and multiplier budget BC. Fix k≥4 and N≥1 satisfying the actual tail-base guard. Construct the literal packet Z=k·(initializedPacketField N k⁻¹), with time changed to D.T, and residual obtained by applying the joined inverse coefficient before multiplying by k. Outputs are `WordBound 6 (4R) Cv 0`, normal bound `Cn/k`, and, if N≥X−1, residual amplitude `exp(-0.7 X log k)`.\n\n**Producer → actual consumer.** `EulerPacketCylinderField.joinedPacket_normal_bound`, `PacketJoinedApproximationBounds.lean:51–75`, uses zero first mean and primary tangency to eliminate the first normal term. It is literally instantiated with `joinedTerminalPrimary`, its witness, budget and tangency in `EulerPacketTerminalDatum.initializedPacket_normal_bound`, `PacketInitializedBounds.lean:69–79`. `initializedNormalizedField_normal_bound`, `PacketInitializedCorrectionData.lean:64–70`, transports that statement to the actual all-order input. `initializedCorrection_drift`, `PacketInitializedCorrectionNorms.lean:63–78`, feeds it and the full bound into the weighted drift inequality; `initializedDriftBudget`, `PacketInitializedSpatialBudget.lean:101–113`, stores the result for M3.\n\n**Equation.** `⟨(F⁻¹)*m₀,a₁⟩=0 ⇒ ⟨m₀,F⁻¹a₁⟩=0`; therefore `||b_Z||weighted ≤ 2(3Cv+Cn)/k`, while `||Z||weighted ≤2Cv`. The precise calculation is B1 below.\n\n**Identity/need/classification.** The same initialized primary supplies the field, residual and tangent witness; normalized residual is not an arbitrary small function. **Core analytic cancellation plus construction-specific finite-profile recursion.** Profile recurrence, terminal-primary budget and high-order residual cancellations below `joinedSource_profile_budgets` / `joinedResidual_normalized_bound` remain **unexpanded**. Tangency transfer and the actual drift substitution are **source-inspected/human-derived**.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M3",
+        "name": "One exact all-order correction from finite solves (central boundary)",
+        "mathematical_input_output": "Fix L>0, T>0 and coherent data A on R³×(R/LZ), κ and direction fixed, plus one `Budget L hT A`. For every q≥6 produce e_q∈C([0,T],H^(q+1)), e_q(0)=0, solenoidal, with its literal projected Euler correction equation. Then construct **one** common L² path e, one smooth spatial representative, one pressure tower, and ∀P,t the metric Gevrey energy bound",
+        "representative_equation_or_estimate": "For all P>=0 and t in [0,T], metric Gevrey E_P(e(t)) <= 2 residual_(P+6) exp(3Ct) <= Delta/2; use realization P+7.",
+        "fixed_before_existence_after": "Fix L,T,A,K,rho,C,Delta,rho0 before q>=6. Finite solves may be chosen separately; uniqueness identifies their L2 values. For each external cutoff P use q=P+6 and realization P+7 of the same field.",
+        "construction_identity_selected_witness_lineage": "initializedUniformBudget constructs Q; finite_exists -> choose e_q -> family; compatible -> commonPath=value(e_6); pressure coherence through raw-source restriction, not another independent fluid.",
+        "classification": [
+          "core analytic mechanism",
+          "formalization adapter"
+        ],
+        "producer_citations": [
+          "supply",
+          "uniform",
+          "finite",
+          "compatible",
+          "energy"
+        ],
+        "actual_consumer_citations": [
+          "flow",
+          "physical"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded",
+          "human-derived"
+        ],
+        "necessity_and_domain_analysis": "### M3 — One exact all-order correction from finite solves (central boundary)\n\n**Input/output.** Fix L>0, T>0 and coherent data A on R³×(R/LZ), κ and direction fixed, plus one `Budget L hT A`. For every q≥6 produce e_q∈C([0,T],H^(q+1)), e_q(0)=0, solenoidal, with its literal projected Euler correction equation. Then construct **one** common L² path e, one smooth spatial representative, one pressure tower, and ∀P,t the metric Gevrey energy bound\n\n`E_(P,ρ(t),K(t))(e) ≤ 2 R_(P+6) exp(3Ct) ≤ Δ/2`.\n\nThis is not a physical H^P norm. The base block contains all words through six; external weights are ρ^j/(j!)². A cutoff P needs derivatives through P+6; the source uses realization P+7.\n\n**Producer → actual consumer.** `EulerPacketTerminalDatum.initializedAllOrderBudget`, `PacketInitializedAllOrderBudget.lean:64–132`, fills every Budget field. Actual constructor `initializedUniformBudget`, `PacketInitializedUniformBudget.lean:39–60`, inserts common-radius joined/primary/normal/mean budgets and `L.correctionCoefficients NB period`; five polynomial costs supply its five frequency guards. `EulerAllOrderDriftCorrection.finite_exists`, `AllOrderDriftFinite.lean:19–47`, calls `exists_global_inviscid_gevrey_PDE` with A at order q+2, N=q−4 and B's literal fields, then rewrites `A.lower_twice`. `Budget.family` at 63–68 selects the finite paths and their equations. `Budget.fieldTower_energy`, `AllOrderDriftCorrection.lean:82–92`, rewrites equality to the finite solution at q=P+6.\n\n**Identity/need/classification.** `Classical.choose` at each finite order does not preserve witness identity by fiat: `FiniteFamily.compatible`, `CorrectionAssemblyCompatibility.lean:18–40`, invokes inviscid uniqueness on restrictions of the **same** A, zero initial data and divergence. `commonPath` is the L² value of the q=6 solve; evaluation fixes its representative. **Core analytic existence/uniqueness**, with **formalization adapters** for coherent Sobolev realizations. All-order existence is **unexpanded** below the finite solver's compactness/limit-equation call; field coherence is **source-inspected**. Full field-use expansion follows below.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M4",
+        "name": "Physical reconstruction, controlled errors, and a renewable child",
+        "mathematical_input_output": "Fix the M3 correction Q for initialized A, inverse physical coordinates X,Y with X(t,Y(t,x))=x, DX=F and det F=1, frame Gevrey bounds CF,R, κ=k⁻¹, direction=m₀. Weighted norms for the same e and its signed pressure at ρ=Q.initialRadius/4 imply physical correction gradient/Hessian ≤`Kerr k Δ`. Combined with initialized approximation bounds and the single frequency comparison, construct one graph flow G, exact parent child and `SmoothState`, labels k^80, displacement ≤k^(-1/4), source gradient/Hessian errors ≤k^(-1/4). A renewed frame and low budgets give `Stage S (n+1)`.",
+        "representative_equation_or_estimate": "Physical correction is `k⁻¹ F(t,Y) e(t,graph(k,m₀,Y))`. Pressure force uses `(F⁻¹)*` and the signed pressure tower; `kκ=1` is used to identify the potential Hessian. `GeometryJoinedChoice.coefficient` ties flow.A to Q's lifted packet coefficient. `SmoothState.packetChild`, `ParentState.lean:50–57`, passes the same B, residual,V,G to evolution and Sobolev regularity; oddness additionally needs parity. `Evolution.child`, `ParentEulerChild.lean:31–57`, assigns both scalar-pressure-gradient and zero-momentum proofs from the exact packet producers. A Budget alone does **not** assert its prescribed residual is the approximation's actual Euler residual: `ApproximationResidual` is separately supplied by `SmoothState.joinedChild`, `ParentInitializedState.lean:75–96`.",
+        "fixed_before_existence_after": "Fix k and actual initialized input before Q,G construction; error bounds uniform in all t in the child horizon and physical x. Selected GeometryJoinedChoice guarantees only its exported fields, not equality to the exhibited internal Q.",
+        "construction_identity_selected_witness_lineage": "In initialized_uniform_flow_and_shear Q is defined once, G=Q.physicalFlowData; coefficient equality and physical errors survive repackaging into GeometryJoinedChoice. chooseJoined selects the record, not necessarily that internal exhibit. SmoothState uses selected F.Q,F.flow,F.coefficient.",
+        "classification": [
+          "core analytic mechanism",
+          "construction-specific requirement",
+          "formalization adapter"
+        ],
+        "producer_citations": [
+          "physical",
+          "flow",
+          "labels",
+          "choice",
+          "euler_child"
+        ],
+        "actual_consumer_citations": [
+          "joined",
+          "next",
+          "tail"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded",
+          "human-derived"
+        ],
+        "necessity_and_domain_analysis": "### M4 — Physical reconstruction, controlled errors, and a renewable child\n\n**Input/output.** Fix the M3 correction Q for initialized A, inverse physical coordinates X,Y with X(t,Y(t,x))=x, DX=F and det F=1, frame Gevrey bounds CF,R, κ=k⁻¹, direction=m₀. Weighted norms for the same e and its signed pressure at ρ=Q.initialRadius/4 imply physical correction gradient/Hessian ≤`Kerr k Δ`. Combined with initialized approximation bounds and the single frequency comparison, construct one graph flow G, exact parent child and `SmoothState`, labels k^80, displacement ≤k^(-1/4), source gradient/Hessian errors ≤k^(-1/4). A renewed frame and low budgets give `Stage S (n+1)`.\n\n**Producer → actual consumer.** `Budget.physical_gradient_hessian_of_weighted`, `PacketWeightedPhysicalErrors.lean:47–110`, is called on Q in `initialized_uniform_flow_and_shear`, `PacketInitializedUniformFlow.lean:231–237`; final error combination is 238–254. That body's Q is `initializedUniformBudget` (143–144); G is built from **Q** by `physicalFlowData` (212–219), not selected afresh from an unrelated existence theorem. `ParentUniformJoinedChild.lean:91–110` obtains Q,G,E and uses q=6 in `initialized_uniform_child_label_bounds`, hence label exponent 10(6+2)=80. `exists_geometryJoinedChoice`, `ParentGeometryJoinedChoice.lean:46–70`, repackages that output; `chooseJoined` supplies actual stage parameters. `joinedState`, `joinedStep`, `joinedNext`, `PacketJoinedSuccessor.lean:43–110`, use the same selected F.\n\n**Equation/identity.** Physical correction is `k⁻¹ F(t,Y) e(t,graph(k,m₀,Y))`. Pressure force uses `(F⁻¹)*` and the signed pressure tower; `kκ=1` is used to identify the potential Hessian. `GeometryJoinedChoice.coefficient` ties flow.A to Q's lifted packet coefficient. `SmoothState.packetChild`, `ParentState.lean:50–57`, passes the same B, residual,V,G to evolution and Sobolev regularity; oddness additionally needs parity. `Evolution.child`, `ParentEulerChild.lean:31–57`, assigns both scalar-pressure-gradient and zero-momentum proofs from the exact packet producers. A Budget alone does **not** assert its prescribed residual is the approximation's actual Euler residual: `ApproximationResidual` is separately supplied by `SmoothState.joinedChild`, `ParentInitializedState.lean:75–96`.\n\n**Why/classification.** Small cylinder L² error alone cannot control graph restriction or preserve amplified strain. Graph evaluation, inverse-map derivatives, pressure identification and frame renewal are **core analytic/construction-specific** requirements. `Step.next` is already shared; casts/changeActivation are **formalization adapters**. Full renewal and the residual-to-physical Euler theorem below these calls remain **unexpanded**, not absent. Local identity chain and budget arithmetic **source-inspected/human-derived**.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M5",
+        "name": "Common initial datum, not a limiting trajectory",
+        "mathematical_input_output": "Fix the actual family P_n on one S, and for every n≠0 the literal identity `u_(n+1)(0)=u_n(0)+high(I_n,k_n)+mean(I_n,k_n)`. For each fixed m the increment norms are summable. Produce one smooth L² field u_init with all-order H_m convergence of u_n(0), solenoidal, and compact support after including the first datum.",
+        "representative_equation_or_estimate": "High majorant `ell_n^(-m) k_n^m K_m P_n^N_m exp(-x_n/8)` and mean majorant `ell_n^(-m) k_n^(-2) K_m P_n^N_m` have stage-independent constants for fixed m, not constants uniform over m. These majorant productions are inherited from `actual_high_summable` / `actual_mean_summable`, not independently reconstructed here.",
+        "fixed_before_existence_after": "Fix one family and increment identity. For each fixed m choose summability constants and a tail threshold; same limit for all m. Joined tail starts at stage 1, with J+1,x1; forward prefix retained.",
+        "construction_identity_selected_witness_lineage": "joinedNext_initial_velocity -> stages_initial_step -> initial_velocity_partial -> initialDataLimit -> initialDatum; all physical increments of actual selected stages.",
+        "classification": [
+          "core analytic mechanism",
+          "construction-specific requirement",
+          "formalization adapter"
+        ],
+        "producer_citations": [
+          "joined",
+          "tail",
+          "sum"
+        ],
+        "actual_consumer_citations": [
+          "lifespan",
+          "contradiction"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded"
+        ],
+        "necessity_and_domain_analysis": "### M5 — Common initial datum, not a limiting trajectory\n\n**Input/output.** Fix the actual family P_n on one S, and for every n≠0 the literal identity `u_(n+1)(0)=u_n(0)+high(I_n,k_n)+mean(I_n,k_n)`. For each fixed m the increment norms are summable. Produce one smooth L² field u_init with all-order H_m convergence of u_n(0), solenoidal, and compact support after including the first datum.\n\n**Representative estimate.** High majorant `ell_n^(-m) k_n^m K_m P_n^N_m exp(-x_n/8)` and mean majorant `ell_n^(-m) k_n^(-2) K_m P_n^N_m` have stage-independent constants for fixed m, not constants uniform over m. These majorant productions are inherited from `actual_high_summable` / `actual_mean_summable`, not independently reconstructed here.\n\n**Producer → actual consumer.** `joinedNext_initial_velocity`, `PacketJoinedSuccessor.lean:114–118`, is used by `stages_initial_step`, `PacketInfiniteConstruction.lean:49–56`. `Stage.initialTailInput`, `PacketStageInitialLimit.lean:23–50`, uses **P_(1+i)** and exact scale shifts J'=J+1, X'=x₁; parameter envelope is `(sourceConstant 4,320,20,1000)`. `initialBase` at 52 retains all of u₁(0). `initial_velocity_partial` at 68–81 telescopes the actual hstep; `initialDataLimit_Hm` at 83–103 removes the finite index shift. `PacketInitialSmoothLimit.lean:48–79` sums high+mean in `SmoothL2Field`, identifies partial fields and passes common closed support to the sum. `initialDatum_Hm`, `PacketFiniteLifespan.lean:30–35`, supplies the literal recursion's hstep, not merely a family of matching norm estimates.\n\n**Why/classification.** Identifying one representative across H_m and retaining the forward prefix is necessary for the same datum in M6. **Core summability**, **construction-specific amplitude gains**, **formalization adapter** for smooth representatives. Local telescoping/source instantiation **source-inspected**; physical majorants and smooth-series theorem **unexpanded**. No pointwise-in-time limit of the full packet family is asserted.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M6",
+        "name": "H4-reference-controlled H3 stability against sampled escape",
+        "mathematical_input_output": "Fix ordinary Euler reference U on [0,T], T≥0. Let exact V_n have nonnegative durations T_n eventually≤T, same limiting initial datum in H3, and sample times t_n∈[0,T_n]. Then the gradients DV_n(t_n,0) cannot tend to infinity. No uniform stage H4 bound is assumed.",
+        "representative_equation_or_estimate": "`M=||t↦H4(U(t))||C`, `C_U=1+1800 Cprod(1+M)`. For positive ε_n→0 dominating initial H3 error, eventually `640 ε_n exp(3 C_U T)≤1/2` and `sup_(t≤T_n) H3(V_n−U)≤640 ε_n exp(3 C_U T)`.",
+        "fixed_before_existence_after": "Fix hypothetical U,T and its H4 reference size before n and epsilon threshold. Restrict U to T_n but retain original constant. Only eventually T_n<=T needed; no uniform stage H4 bound.",
+        "construction_identity_selected_witness_lineage": "State.regularity.ordinaryEvolution supplies V_n; proof establishes hfield, hnorm and hactual before comparing; sampled gradient equals activationGradient of P_(n+N).",
+        "classification": [
+          "core analytic mechanism"
+        ],
+        "producer_citations": [
+          "h4",
+          "h3",
+          "varying"
+        ],
+        "actual_consumer_citations": [
+          "contradiction",
+          "lifespan"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded"
+        ],
+        "necessity_and_domain_analysis": "### M6 — H4-reference-controlled H3 stability against sampled escape\n\n**Input/output.** Fix ordinary Euler reference U on [0,T], T≥0. Let exact V_n have nonnegative durations T_n eventually≤T, same limiting initial datum in H3, and sample times t_n∈[0,T_n]. Then the gradients DV_n(t_n,0) cannot tend to infinity. No uniform stage H4 bound is assumed.\n\n**Estimate.** `M=||t↦H4(U(t))||C`, `C_U=1+1800 Cprod(1+M)`. For positive ε_n→0 dominating initial H3 error, eventually `640 ε_n exp(3 C_U T)≤1/2` and `sup_(t≤T_n) H3(V_n−U)≤640 ε_n exp(3 C_U T)`.\n\n**Producer → actual consumer.** `referenceWordBound`, `OrdinaryEulerStability.lean:17–33`, derives WordBound 4 from the same reference's norm path. `Evolution.h3_stability`, `OrdinaryH3Envelope.lean:115–138`, uses regularized actual difference energy and quadratic stability. `eventually_h3_bound_varying`, `OrdinaryEulerVaryingHorizon.lean:28–48`, calls it on `U.restrictTime` but passes **U.referenceSize**, not the restricted norm or a stage-dependent constant. `GrowthData.no_evolution_of_eventually_covering`, `PacketStageContradiction.lean:32–72`, reindexes n↦n+N, converts each actual state's regularity to ordinary evolution, and proves both initial-norm and sampled-gradient identities before applying no-escape.\n\n**Why/classification.** Three commuted derivatives of `(w·∇)U` include `w D⁴U`: H4 belongs to the reference. This is **core analytic derivative loss**, not a record artifact. The H4 explanation and envelope were already expanded in chapter 04; new evidence here is the actual restriction/representative binding. Product/pressure estimates beneath `energyDerivative_bound` remain **unexpanded**. Inspected consumers **source-inspected**.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M7",
+        "name": "Positive finite maximal lifespan",
+        "mathematical_input_output": "M5 supplies smooth all-order solenoidal u_init. General local theory gives a positive evolution. M4/M6 rule out existence on each packet horizon; nesting supplies eventual coverage. Thus there is one finite lifespan L with `0<T*≤inf_n T_n≤T_0≤1`.",
+        "representative_equation_or_estimate": "0<Tstar<=inf_n T_n<=T_0<=1; no equality with activation limit.",
+        "fixed_before_existence_after": "Local existence supplies a positive duration; for every fixed N exclusion at T_N uses eventually n>=N. One selected lifespan has duration<=every T_n.",
+        "construction_identity_selected_witness_lineage": "initialDatum_Hm -> closed solenoidal membership -> localEvolution; same initialDatum in no_packet_horizon and selected lifespan.",
+        "classification": [
+          "core analytic mechanism"
+        ],
+        "producer_citations": [
+          "lifespan"
+        ],
+        "actual_consumer_citations": [
+          "confinement",
+          "broad",
+          "endpoints"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded"
+        ],
+        "necessity_and_domain_analysis": "### M7 — Positive finite maximal lifespan\n\n**Input/output.** M5 supplies smooth all-order solenoidal u_init. General local theory gives a positive evolution. M4/M6 rule out existence on each packet horizon; nesting supplies eventual coverage. Thus there is one finite lifespan L with `0<T*≤inf_n T_n≤T_0≤1`.\n\n**Producer → actual consumer.** `initialDatum_solenoidal`, `PacketFiniteLifespan.lean:39–54`, passes L² convergence to the closed solenoidal space, with explicit toLp/field-subtraction identity. `initialDatum_local` at 61–64 uses general `localEvolution`. `initialDatum_no_packet_horizon` at 82–88 calls M6 on `(packets n).toGrowthData` and `initialDatum_Hm 3`, coverage coming from `packets_horizon_antitone`. `initialDatum_finite_lifespan` at 90–93 supplies local existence and exclusion to `exists_finite_lifespan`; `lifespan` at 96 is its choice; 98–107 prove the upper bound by contradiction using L.shorter.\n\n**Need/classification.** **Core local theory and maximality**, but not the construction producer. No equality of T* with the activation limit, and no claim t_n<T*. Packet existence, not any global minimality claim, motivates all M1–M4 inputs. The comment near the infimum is not used as a theorem identifying activation and horizon limits. Local existence/maximal theory below the calls **unexpanded**; assembly **source-inspected**.\n",
+        "no_global_minimality_claim": true
+      },
+      {
+        "id": "M8",
+        "name": "Small outer route to both exact delivered Euler statements",
+        "mathematical_input_output": "Same `initialDatum` and `lifespan`. For every shorter S<T*, M4 displacement/initial support and Euler curl transport confine packet curls to one compact ball; M5/M6 pass that confinement to the canonical velocity. A hypothetical broad globally smooth finite-energy solution is upgraded to ordinary evolution using common compact curl; endpoint persistence past T* contradicts L.maximal. The scalar Sobolev adapters additionally give energy, local bounds, terminal C1 limsup and infinite vorticity integral.",
+        "representative_equation_or_estimate": "For all canonical t<Tstar, tsupport(curl u(t)) subset K compact; competitor upgrade beyond Tstar contradicts L.maximal.",
+        "fixed_before_existence_after": "For each S<Tstar use S<Tstar<=T_n, restrict packets to S and pass curl confinement. Restart only the hypothetical globally smooth competitor at Tstar. Same datum and lifespan in both delivered endpoints.",
+        "construction_identity_selected_witness_lineage": "canonicalVorticityBall fixed by constructionScales displacement cap; canonical_vorticity_confined passed with lifespan to private broad exclusion; public endpoints choose initialDatum.field and the same maximal extensions.",
+        "classification": [
+          "formalization adapter",
+          "core analytic mechanism"
+        ],
+        "producer_citations": [
+          "confinement",
+          "broad",
+          "classes"
+        ],
+        "actual_consumer_citations": [
+          "endpoints"
+        ],
+        "evidence": [
+          "source-inspected",
+          "unexpanded"
+        ],
+        "necessity_and_domain_analysis": "### M8 — Small outer route to both exact delivered Euler statements\n\n**Input/output.** Same `initialDatum` and `lifespan`. For every shorter S<T*, M4 displacement/initial support and Euler curl transport confine packet curls to one compact ball; M5/M6 pass that confinement to the canonical velocity. A hypothetical broad globally smooth finite-energy solution is upgraded to ordinary evolution using common compact curl; endpoint persistence past T* contradicts L.maximal. The scalar Sobolev adapters additionally give energy, local bounds, terminal C1 limsup and infinite vorticity integral.\n\n**Producer → actual consumer.** `packets_vorticity_support` and `evolution_vorticity_support`, `CanonicalVorticityConfinement.lean:29–42,60–99`, use actual inverse particle maps and `S<T*≤T_n` (opposite restriction direction from M6's contradiction). `canonical_vorticity_confined` at 103–107 is passed literally to `no_global_solution_of_confined_vorticity`, `CompactVorticityContradiction.lean:70–107`, by the private assembly in `Solution.lean:27–30`. That body uses comparator agreement, continuity to T*, shifted competitor persistence and common-compact-curl upgrade; **BKM is not its final contradiction**.\n\n**Exact endpoints.** `Euler.euler_breakdown_R3`, `Solution.lean:32–37`, chooses `initialDatum.field`. `Euler.exists_compact_smooth_euler_singularity`, 42–68, chooses the same field, `lifespan.duration`, `maximalVelocityExtension lifespan`, `maximalPressureExtension lifespan`, and explicitly invokes `maximal_sobolev_existence_iff`. Its class is all-order Sobolev on [0,T*), whereas broad exclusion uses jointly future-smooth velocity/scalar pressure, timewise L² and one global energy bound. `SolutionDefinitions.lean:64–80,87–120` supplies the complete class distinction: broad Euler has equation, divergence, trace, joint velocity/pressure smoothness, timewise MemLp and one global energy bound; Sobolev Euler has divergence, trace, SobolevSmoothOn velocity, interior spatial pressure differentiability and an existential SobolevSmoothOn strong time-derivative witness satisfying the interior law. SobolevSmoothOn explicitly carries spatial smoothness, velocity/jet MemLp and velocity/jet L² continuity. Its `toL2` fallback outside MemLp is not a substitute for these integrability fields. Neither smoothness nor finite energy alone supplies all spatial L² derivatives. **Formalization/class adapter with substantial analytic input**; adapter calls inspected, compact-curl upgrade and endpoint-criterion dependency closures **unexpanded**.\n",
+        "no_global_minimality_claim": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "M1",
+        "to": "M2",
+        "type": "actual-instantiation",
+        "citations": [
+          "joined",
+          "forward"
+        ],
+        "parameter_domain_relation": "S.normal_frequency n plus actual input guard and restricted-parent secondary bounds; joined n!=0.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M1",
+        "to": "M4",
+        "type": "actual-instantiation",
+        "citations": [
+          "recursion",
+          "joined",
+          "forward",
+          "next"
+        ],
+        "parameter_domain_relation": "One S throughout stages; exact next scale/horizon and label exponent.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M2",
+        "to": "M3",
+        "type": "actual-instantiation",
+        "citations": [
+          "uniform",
+          "supply",
+          "spatial"
+        ],
+        "parameter_domain_relation": "Same initializedCorrectionData at k inverse, time change M.T=D.T; common source budgets inserted at every q.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M3",
+        "to": "M4",
+        "type": "actual-instantiation",
+        "citations": [
+          "flow",
+          "physical",
+          "choice"
+        ],
+        "parameter_domain_relation": "Q built once with its own correction, pressure, time towers and G; selected record retains coefficient identity and physical errors.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M2",
+        "to": "M4",
+        "type": "mathematical-use",
+        "citations": [
+          "residual_supplier",
+          "state",
+          "euler_child"
+        ],
+        "parameter_domain_relation": "ApproximationResidual separately identifies prescribed residual with actual approximation error; Budget alone insufficient.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M4",
+        "to": "M5",
+        "type": "actual-instantiation",
+        "citations": [
+          "joined",
+          "recursion",
+          "tail"
+        ],
+        "parameter_domain_relation": "n!=0 initial identity telescoped; P1 base, joined tail P_(1+i).",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M4",
+        "to": "M6",
+        "type": "actual-instantiation",
+        "citations": [
+          "contradiction"
+        ],
+        "parameter_domain_relation": "Actual state.regularity converted to ordinary evolution; hactual matches sampled activation gradient.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M5",
+        "to": "M6",
+        "type": "actual-instantiation",
+        "citations": [
+          "lifespan",
+          "contradiction"
+        ],
+        "parameter_domain_relation": "initialDatum_Hm 3 and tensorNorm/derivativeSum identity on actual representatives.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M5",
+        "to": "M7",
+        "type": "actual-instantiation",
+        "citations": [
+          "lifespan"
+        ],
+        "parameter_domain_relation": "initialDatum_Hm 0 establishes convergence to the closed solenoidal subspace; local evolution from same datum.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M6",
+        "to": "M7",
+        "type": "actual-instantiation",
+        "citations": [
+          "lifespan"
+        ],
+        "parameter_domain_relation": "Reference T=T_N; eventual packet horizons<=T_N from antitonicity.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M4",
+        "to": "M8",
+        "type": "actual-instantiation",
+        "citations": [
+          "confinement",
+          "broad",
+          "endpoints"
+        ],
+        "parameter_domain_relation": "Same family/datum/lifespan; on S<Tstar restrict packets using S<Tstar<=T_n and pass common curl support.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M5",
+        "to": "M8",
+        "type": "actual-instantiation",
+        "citations": [
+          "confinement",
+          "broad",
+          "endpoints"
+        ],
+        "parameter_domain_relation": "Same family/datum/lifespan; on S<Tstar restrict packets using S<Tstar<=T_n and pass common curl support.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M6",
+        "to": "M8",
+        "type": "actual-instantiation",
+        "citations": [
+          "confinement",
+          "broad",
+          "endpoints"
+        ],
+        "parameter_domain_relation": "Same family/datum/lifespan; on S<Tstar restrict packets using S<Tstar<=T_n and pass common curl support.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M7",
+        "to": "M8",
+        "type": "actual-instantiation",
+        "citations": [
+          "confinement",
+          "broad",
+          "endpoints"
+        ],
+        "parameter_domain_relation": "Same family/datum/lifespan; on S<Tstar restrict packets using S<Tstar<=T_n and pass common curl support.",
+        "evidence": "source-inspected"
+      },
+      {
+        "from": "M3",
+        "to": "M3",
+        "type": "proposed-explanatory",
+        "citations": [
+          "budget",
+          "comparison",
+          "compatible"
+        ],
+        "parameter_domain_relation": "Separate finite-existence presentation from coherence, whose projection needs only common metric,radius,base spatial budget and divergence; not a code change.",
+        "evidence": "human-derived"
+      }
+    ],
+    "node_count": 8
+  },
+  "import_only_evidence": [
+    {
+      "from": "Euler.AllOrderDriftCorrection",
+      "to": "Euler.CorrectionAssemblyParity",
+      "type": "mere-import",
+      "citation": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "Euler/AllOrderDriftCorrection.lean",
+        "lines": [
+          4,
+          4
+        ]
+      },
+      "limit": "Import itself supplies no independent claim of hypothesis use; local commonPath_odd call was read, imported parity proof was not reconstructed."
+    }
+  ],
+  "central_boundary": {
+    "declaration": "EulerAllOrderDriftCorrection.Budget",
+    "citations": [
+      "budget",
+      "supply",
+      "uniform",
+      "spatial",
+      "records",
+      "data",
+      "finite",
+      "comparison",
+      "compatible"
+    ],
+    "all_top_level_fields": [
+      {
+        "field": "metric",
+        "literal_supplier": "initializedMetricBudget ... 0; sourceMetricBudgetOfFields on actual normalized field and residual",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists",
+          "Budget.comparisonData"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": false
+      },
+      {
+        "field": "radius",
+        "literal_supplier": "rho=radius T cg dg rho_g k (expansion k)",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists",
+          "Budget.comparisonData"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": false
+      },
+      {
+        "field": "growthCoefficient",
+        "literal_supplier": "cg=growthCoefficient D period Kc (2 Cv) (12 Cv (4R))",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "delta",
+        "literal_supplier": "exp(-sqrt(expansion k))",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "initialRadius",
+        "literal_supplier": "1/(1+8R+4M Rc+Rc)",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "spatial",
+        "literal_supplier": "for q>=6 initializedDriftBudget ... q, on A.atOrder(q+2), cutoff q-4",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists",
+          "Budget.comparisonData (only q=6, .full)"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": false
+      },
+      {
+        "field": "growth_bound",
+        "literal_supplier": "initializedDriftBudget_growth.le; equality rfl after substitution",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "delta_pos",
+        "literal_supplier": "delta_pos",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "delta_le_one",
+        "literal_supplier": "delta_le_one",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "radius_pos",
+        "literal_supplier": "initialRadius_bounds.1",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "decay",
+        "literal_supplier": "correction_guards.2",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "scale",
+        "literal_supplier": "initialRadius_bounds.2.2.2",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "small",
+        "literal_supplier": "correction_guards.1",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "radius_eq",
+        "literal_supplier": "rfl",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": true
+      },
+      {
+        "field": "divergence",
+        "literal_supplier": "initializedCorrectionData_divergence with Xi, DXi=F and det F=1",
+        "supplier_citations": [
+          "supply",
+          "spatial",
+          "uniform"
+        ],
+        "consumers": [
+          "finite_exists",
+          "Budget.comparisonData"
+        ],
+        "consumer_citations": [
+          "finite",
+          "budget"
+        ],
+        "use_status": "consumed in finite construction; not claimed minimally necessary",
+        "incidental_for_comparison_projection": false
+      }
+    ],
+    "nested_drift_fields": [
+      "full",
+      "drift",
+      "drift_nonneg",
+      "drift_bound"
+    ],
+    "nested_spatial_fields": [
+      "Rc",
+      "M",
+      "B",
+      "B0",
+      "B1",
+      "A0",
+      "A2",
+      "residual",
+      "Rc_nonneg",
+      "M_one_le",
+      "B_nonneg",
+      "B0_nonneg",
+      "B1_nonneg",
+      "A0_nonneg",
+      "A2_nonneg",
+      "residual_pos",
+      "radius_pos",
+      "inverse_five",
+      "inverse_six",
+      "radius_small",
+      "metric_derivatives",
+      "metric_base",
+      "background",
+      "background_derivative",
+      "linear",
+      "quadratic",
+      "residual_bound"
+    ],
+    "nested_metric_fields": [
+      "metric",
+      "continuous",
+      "derivative",
+      "hasDeriv",
+      "c",
+      "c_pos",
+      "symmetric",
+      "coercive",
+      "inverse",
+      "bound",
+      "first",
+      "time",
+      "bound_nonneg",
+      "first_nonneg",
+      "time_nonneg",
+      "bound_le",
+      "first_le",
+      "time_le"
+    ],
+    "analysis_and_worked_calculations": "## Central bundled boundary: actual all-order `Budget`\n\nChosen boundary: `EulerAllOrderDriftCorrection.Budget` (`AllOrderDriftBudget.lean:19–51`), consumed by `finite_exists` and `Budget.comparisonData`. We expand its producers rather than treating its name as an analytic explanation.\n\n### B0. Ambient inputs are not hidden solvability assumptions\n\nEnclosing parameters are L>0 (`Fact`), T>0, and `EulerAllOrderCorrectionData.Data L T`. Its complete fields (`AllOrderCorrectionData.lean:56–82`) are κ,direction, their bounds; metric coefficient tower plus L² continuity, coercivity/positivity; linear tower; three quadratic towers; approximation tower; residual tower. Each coefficient tower has **coefficient, jet, continuous** (28–34); each field tower has **field, realization, value_eq** (37–43). These concern prescribed functions, not correction solutions. `atOrder` takes approximation realization q+1 and residual realization q (85–97). `lower_atOrder` / `lower_twice` use actual truncation identities, not merely equal-looking coefficients.\n\nThe packet instantiation is `initializedCorrectionData`, `PacketInitializedCorrectionData.lean:23–38`: normalized packet `k·packet(N,k⁻¹)`, normalized residual `k·inverseCoefficient·actualResidual`, and κ=k⁻¹. Exact physical cancellation also needs the separate `ApproximationResidual` input discussed in M4; no assertion that arbitrary Data.residual is already the true residual.\n\n### B1. Why the drift is small when the normalized field is not\n\nWrite Cv=`velocity R H Cmul`, Cn=`normal R H Cmul`, Dg=`2(3Cv+Cn)` (`PacketCorrectionConstants.lean:11–16`). In `joinedPacket_normal_bound` the proof constructs the *actual* profile array a, then obtains:\n\n- a₀=0 from `profiles_zero`;\n- a₁.mean=0 from `profiles_one` and primary.mean=0;\n- primary tangency against normal `(F⁻¹)*m₀`;\n- by adjoint identity, `⟨m₀,F⁻¹ a₁.high⟩=0` (lines 63–72).\n\nThus the leading normalized O(1) term contributes **no** normal transport. `normalizedNormal_bound` bounds the surviving higher profiles by Cn/k. The full field only has bound Cv. For the actual lifted transport map, `PacketFieldDrift.lean:19–55` proves at each word, then block, then weighted sum:\n\n`||velocityMap(κ,m₀) Z||weighted ≤ 3|κ| ||Z||weighted + ||m₀·Z||weighted`.\n\nThe two geometric-series estimates with ρ(4R)≤1/2 give 2Cv and 2Cn/k, hence\n\n`||b_Z||weighted ≤ 6Cv/k+2Cn/k = Dg/k`.\n\n`initializedCorrection_drift` makes precisely this substitution. No differentiation of a small order-zero normal bound is used: the normal estimate is itself a word bound. **Next genuine analytic obligation:** derive the recursive `joinedSource_profile_budgets` and `normalizedNormal_bound` with their support/grade constants from terminal-primary equations. They were called with actual primary data; their proofs are not reconstructed here. This is exposition debt, not a new missing Euler theorem.\n\n### B2. Complete top-level field-use ledger\n\nLiteral supplier is `initializedAllOrderBudget` (lines 83–132 particularly); consumer is `finite_exists` (lines 32–47), unless separately stated.\n\n| Budget field(s), all fields accounted for | Literal supplier / use |\n|---|---|\n| metric | `initializedMetricBudget ... 0`; repackaged by `A.metricBudget ... (q+1)` for finite existence, and unchanged for comparison. |\n| radius | continuous scalar path `ρ := radius T cg dg ρg k (expansion k)`; same path every q. |\n| growthCoefficient | cg=`growthCoefficient D L Kc (2Cv) (12Cv(4R))`; not dg/k. |\n| delta | `exp(-sqrt(expansion k))`, call it Δ to distinguish packet spike δ. |\n| initialRadius | ρg=`1/(1+8R+4M Rc+Rc)`. |\n| spatial | for each q≥6, `initializedDriftBudget ... q hq` for A.atOrder(q+2), cutoff q−4, the same ρ. |\n| growth_bound | `initializedDriftBudget_growth ... .le`; equality proof is rfl (`PacketInitializedSpatialBudget:115–122`). |\n| delta_pos, delta_le_one | `delta_pos`, `delta_le_one`; finite solver target error admissibility. |\n| radius_pos | `initialRadius_bounds ... .1`. |\n| decay | `hscalar.2` from `correction_guards`; identical scalar inequality for every q. |\n| scale | `initialRadius_bounds ... .2.2.2`, i.e. ρg Rc≤1. |\n| small | `hscalar.1`: 2 Rres exp(3cg T)≤Δ/2. |\n| radius_eq | rfl: drift is dg/k at every q. |\n| divergence | `initializedCorrectionData_divergence` with actual Ξ, DΞ=F and det F=1; used for finite solenoidality and compatibility. |\n\n**No top-level Budget field is declared globally unused.** All are passed into finite construction, directly or in its bundles. The narrower comparison projection (`AllOrderDriftBudget:55–60`) reads only metric, radius, `(spatial 6).full`, divergence. Growth/smallness/radius-decay are incidental to **that projection**, not to the existing route. Comparison itself uses the base spatial radius positivity and linear/quadratic bounds; its whole spatial input is not evidence that every estimate in that record is essential to uniqueness.\n\n### B3. One layer lower: all fields of the finite budgets\n\n`EulerDriftCorrectionBudget.Budget` (`DriftCorrectionBudget.lean:17–27`) contains exactly **full, drift, drift_nonneg, drift_bound**. The supplier sets drift=dg/k and uses B1. `full` is `SpatialBudget` (`CorrectionEnergyData.lean:24–79`), filled in `PacketInitializedSpatialBudget.lean:57–98`:\n\n| Spatial fields | Literal supplier and mathematical role |\n|---|---|\n| Rc,M,B,A0,A2 | copied from Kc=`L.correctionCoefficients NB period` (actual caller in `PacketInitializedUniformBudget:54`). Coefficient series, H5/H6 pressure inverse and multiplier bounds. |\n| B0,B1,residual | 2Cv, 12Cv(4R), `2 exp(-0.7 X log k)`, independent of q. |\n| Rc_nonneg,M_one_le,B_nonneg,A0_nonneg,A2_nonneg | Kc fields, unchanged. |\n| B0_nonneg,B1_nonneg,residual_pos | scalar positivity from actual Cv,R and exp. |\n| radius_pos,radius_small | hρ and hpressure from ρg/2≤ρ≤ρg and `4M ρg Rc≤1`. |\n| inverse_five,inverse_six | Kc inverse bounds at realization q+2, restricted to fixed base 5 and 6. |\n| metric_derivatives,metric_base | Kc bounds at realization q+2, higher blocks `Rc^l(l!)²`, base r≤6. |\n| background,background_derivative | `initializedCorrection_background` / `_background_derivative`, deriving weighted bounds from the actual normalized Field.WordBound; realization/cutoff relation q−4+6=q+2, extra realization for differentiation. |\n| linear,quadratic | Kc.linear / Kc.quadratic; quadratic supplied actual κ=k⁻¹ and scale_bound. |\n| residual_bound | `initializedCorrection_residual` with same N,k,X and actual initialized residual. |\n\nThe `MetricBudget` below metric has **metric, continuous, derivative, hasDeriv, c, c_pos, symmetric, coercive, inverse, bound, first, time, bound_nonneg, first_nonneg, time_nonneg, bound_le, first_le, time_le** (`CorrectionEnergyData:82–120`). `initializedMetricBudget` calls `sourceMetricBudgetOfFields D period k⁻¹ ...` on the **same normalized field and residual** (`PacketInitializedSpatialBudget:26–33`). `Data.metricBudget` copies every field unchanged at all q (`AllOrderCorrectionData:110–130`). The inverse metric's coercivity is c², not the forward coefficient's coercivity. Its first/time bounds feed growth constants; its inverse identity is needed for the pressure/energy structure.\n\nThe metric and Kc analytic suppliers beneath these calls are **unexpanded**, not silently replaced by arbitrary constants. Full nested record fields were read, but their internal estimate-use closure in the nonlinear energy theorem is **unknown here**; passing a record is not proof of minimal dependence of each field. This is the stopping boundary for pressure inversion and variable-metric commutators.\n\n### B4. Worked scalar budget: no per-order shrinking radius\n\nLet X=k^θ, θ=10⁻⁶, N=floor X; define εpow=k^(θ/100), Δ=e^(−√X), Rres=2e^(−0.7X log k). The five fixed costs are tail polynomial, coefficient multiplier, 12cgT, 8cgT·dg/ρg, 8cgT/ρg; each ≤εpow. `initializedUniformBudget:55–60` obtains these from one polynomial bound, not a new eventual threshold for each q.\n\n1. **Truncation cost:** `tailBase ≤ Ctail N^222 ≤ k^(θ/100+222θ) ≤ k^(1/100)` (`PacketSourceFrequency:38–53`). Numerically θ/100+222θ=0.00022201<0.01. N is fixed by k, independent of correction Sobolev order q.\n2. **Residual wins:** X≥64, log k≥1, 3cgT≤X/4. Since √X≤X/8 and log 8≤X/8,\n   `log 8 −0.7X log k+3cgT ≤ (1/8−7/10+1/4)X = −13X/40 ≤ −√X`.\n   Hence `2Rres e^(3cgT)=4e^(−0.7X log k+3cgT)≤Δ/2`. This is `residual_small`, `PacketCorrectionScalar:44–58`.\n3. **Separate drift and error losses:** from `8cgT·dg≤ρg k`, `8cgT≤ρg e^√X`, obtain `2cgT(dg/k)≤ρg/4` and `2cgTΔ≤ρg/4`. Therefore `ρ(t)=ρg−2cg(dg/k+Δ)t≥ρg/2` on [0,T]. The denominator of ρg simultaneously gives `ρg(4R)≤1/2`, `4MρgRc≤1`, `ρgRc≤1` (`PacketCorrectionScalar:27–41,62–87`).\n\nThis calculation is **newly connected to every literal scalar supplier**; chapter 04 displayed abstract all-order inequalities but did not expose this common-order substitution or the normal cancellation that makes it feasible. It is not a fresh proof of the nonlinear Gevrey energy theorem.\n\n### B5. Finite-order choices, pressure and physical-error lineage\n\nFinite existence calls the inviscid solver at input q+2, retained q+1, equation q; its proof first obtains a Gevrey inviscid limit, then passes the actual correction equation (`DriftGlobalInviscidGevrey.lean:54–67`). This is where the next analytic obligation becomes visible: viscosity-regularized compactness with retained energy and convergence of the nonlinear projected source. We did not unfold that compactness proof.\n\nThe all-order assembly is **not** another compactness extraction: compatibility restricts e_(q+1) and invokes uniqueness against e_q. It uses equal equations after `A.lower_atOrder`, zero initial traces, and divergence of approximation and both corrections. `FiniteFamily.commonPath` is literally value(e₆), not a new limit choice. Realization order s is restriction of solve s+6; `solution_eq_realization` proves that the original solve at q already equals the tower at q+1, allowing the sharper P+7 energy realization. (`CorrectionAssemblyCommon:22–29,53–78`; `CorrectionAssemblyRealizations:15–38`.)\n\nPressure coherence is not a second arbitrary selection: rawSourcePath truncates by source restriction and correction compatibility; both pressure values reduce to the same coercive L² pressure operator on the same raw source (`CorrectionAssemblyPressure:29–60`). Signed pressure belongs to a lifted gradient space, not a scalar pressure function until the physical-potential bridge.\n\nFinally weighted e/pressure estimates at common radius ρg/4 yield all pointwise word sums `(Cemb Cw Δ)ρ^(−n)(n!)²`. Inverse-coordinate reconstruction has `physicalRadius≤physicalRadiusCost·k`, so one physical derivative costs k (`PacketPhysicalFrequencyBounds:29–47,73–91`). `PacketWeightedPhysicalErrors:63–108` explicitly invokes these word bounds and the scalar potential Hessian identity; the common constant Kerr dominates both velocity and pressure losses.\n\nWith Kv,Kp,Kerr≤εpow≤k^(1/2) and Δ≤k^(−3),\n\n`Kv/k + Kerr k Δ ≤ k^(−1/2)+k^(−3/2) ≤ 2k^(−1/2) ≤ k^(−1/4)`\n\nwhen k^(1/4)≥2, and likewise for pressure. Source uses the slightly coarser two inverse-half bounds (`PacketUniformFrequencyMargin:17–60`). It separately needs k^(1/4)≥16 for flow smallness, not just this error inequality. Parent physical scaling ell reappears in flow jet radius `ell⁻¹ k^(5/4)` and label bounds; one must not apply the normalized-coordinate estimate as if ell disappeared from every derivative theorem.\n\n**Choice barrier:** the body of `exists_geometryJoinedChoice` exhibits a Q with this derivation. `chooseJoined` later uses `Classical.choice` of the exported record. Its guaranteed fields are exactly hn,Q,flow,graph,coefficient,labels,label_constant,displacement_bound,errors (`ParentGeometryJoinedChoice:26–40`). Their consumers are respectively typed correction data/state; child construction; flow constraints and matching; next label/renewal guard; confinement; low/physical/renewal bounds. The errors field certifies both physical estimates for the very Q in the selected record. The exported record does **not** equate selected Q to `initializedUniformBudget`, nor export its concrete radius/Δ formulas. These formulas explain existence; they may not be attached to the selected Q without an additional theorem. No all-domain selected certificate is invented here.\n\n",
+    "unknown_use": "Internal minimal dependency of each Kc/MetricBudget bound in the nonlinear energy theorem not audited; forwarding a complete record does not prove every field indispensable.",
+    "selected_witness_barrier": "GeometryJoinedChoice guarantees its own Q, coefficient identity and physical errors. Its contract does not identify selected Q with initializedUniformBudget or retain its concrete radius/Delta formula."
+  },
+  "citations": {
+    "scale": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInductionScales.lean",
+      "lines": [
+        122,
+        192
+      ],
+      "declarations": [
+        "EulerPacketInductionScales.exists_scales"
+      ],
+      "git_blob": "b43e910f375ffe3cb6df1c2245ad549f70d8633a",
+      "range_sha256": "eadae7974b5172e58d96ab88a4702786f04a92076532cb12cf3e2a95f2de826f",
+      "opening_excerpt": "theorem exists_scales (c B : ℝ) (hc : 0 ≤ c) : Nonempty (Scales c B) := by\n  obtain ⟨D,hD,hDfreq⟩ := exists_base_power\n  obtain ⟨J,hJ,hchoice⟩ := EulerPacketCommonScaleChoice.exists_common_guards extraCost D\n    (by omega) 4 c geometryConstant gradientConstant gradientConstant hessianConstant 80",
+      "body_excerpt": "    frequency_series := hdata.2.1 (Sum.inl ()),\n    activation_series := hdata.2.1 (Sum.inr false),\n    correction_series := hcorrection, bad_series := hdata.2.2.1,\n    good_series := hdata.2.2.2.1,\n    renewal_series := renewal_series_small (by omega) (by linarith only [hX]) hδ.le\n      (by norm_num) hdata.1 (by norm_num; exact hlarge) hδrenew,\n    time_small := htime, localized := hlocalized }⟩",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "recursion": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInfiniteConstruction.lean",
+      "lines": [
+        21,
+        66
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.successor",
+        "EulerPacketInduction.stages",
+        "EulerPacketInduction.constructionScales",
+        "EulerPacketInduction.packets"
+      ],
+      "git_blob": "eb63099ab4e5c7d324512e36588946dc6ba9e191",
+      "range_sha256": "1d314d394f98f619e89da3e75b8a41b04d66c88846f5151b5059b1959d460997",
+      "opening_excerpt": "def successor {n : ℕ} (P : Stage S n) (hq : requiredExponent ≤ q)\n    (hB : commonThreshold gradientConstant hessianConstant ≤ B) : Stage S (n+1) := by\n  cases n with\n  | zero => exact P.forwardNext hq hB",
+      "body_excerpt": "  Scales (requiredExponent : ℝ) (commonThreshold gradientConstant hessianConstant)\n\ndef constructionScales : ConstructionScales :=\n  Classical.choice (exists_scales (requiredExponent : ℝ)\n    (commonThreshold gradientConstant hessianConstant) (Nat.cast_nonneg _))\n\ndef packets (n : ℕ) : Stage constructionScales n := stages constructionScales le_rfl le_rfl n",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "normal": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketJoinedApproximationBounds.lean",
+      "lines": [
+        51,
+        75
+      ],
+      "declarations": [
+        "EulerPacketCylinderField.joinedPacket_normal_bound"
+      ],
+      "git_blob": "2a28ce36cd9bd613c64642aaf1730ea5be1d1d4c",
+      "range_sha256": "ae12d8c606b2101763a4fd9f7b6c402d23996f1cfbb140ab0af6a532ab7c5c00",
+      "opening_excerpt": "theorem joinedPacket_normal_bound (N : ℕ) (hN : 1 ≤ N) (k : ℝ) (hk : 4 ≤ k)\n    (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ)) :\n    (((joinedPacketPullbackField P M D hTime τ hτ hτT B primary hprimary N k⁻¹).smul k).map\n      (normalComponentMap D.m₀)).WordBound 6 (4*L.R)",
+      "body_excerpt": "    change inner ℝ ((D.FInv.field (D.clamp t) x).adjoint D.m₀) (primary.high (t,(x,θ)))=0 at h\n    rw [ContinuousLinearMap.adjoint_inner_left] at h\n    change inner ℝ D.m₀ (D.FInv.field (D.clamp t) x ((a 1).high (t,(x,θ))))=0\n    simpa only [a,joinedSourceProfiles,profiles_one] using h\n  have h := ProfileRegularity.normalizedNormal_bound M.T_pos G hG L.radius_bounds.1\n    (profiles_zero _ _) hb hN BC hRc D.m₀ D.m₀_unit.le ht k hk hbase\n  exact h.of_raw_eq _ (fun _ _ _ => rfl)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "initialized": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedBounds.lean",
+      "lines": [
+        24,
+        98
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedPacketField",
+        "EulerPacketTerminalDatum.initializedResidualField",
+        "EulerPacketTerminalDatum.initializedPacket_normal_bound",
+        "EulerPacketTerminalDatum.initializedResidual_normalized_bound"
+      ],
+      "git_blob": "5e64d88fd0640163cc8e1613e7261efc49d1de88",
+      "range_sha256": "4a69918eb5b988741ba2a8a6cbc2bfc7127d9ed1171c4b995c036dc7a3406635",
+      "opening_excerpt": "def initializedPacketField (N : ℕ) (κ : ℝ) :=\n  joinedPacketPullbackField period M D hTime τ hτ hτT B\n    (joinedTerminalPrimary period M D τ hτ hτT B (initialData D δ hδ (α • ξ) hs))\n    (joinedTerminalPrimaryWitness period M D hTime τ hτ hτT B (initialData D δ hδ (α • ξ) hs)) N κ",
+      "body_excerpt": "    (joinedTerminalPrimaryWitness period M D hTime τ hτ hτT B (initialData D δ hδ (α • ξ) hs))\n    (joinedTerminalPrimary_budget M D hTime τ hτ hτT B L H NB δ hδ hδ1 ξ hs α hα hR WP S hgrowth)\n    (fun t => joinedTerminalPrimary_pressure_smooth period M D τ hτ hτT B\n      (initialData D δ hδ (α • ξ) hs) t.val)\n    (joinedTerminalPrimary_tangent period M D hTime τ hτ hτT B (initialData D δ hδ (α • ξ) hs))\n    (joinedTerminalPrimary_equation period M D hTime τ hτ hτT B (initialData D δ hδ (α • ξ) hs))\n    Cagree N hN k X hk hbase hcoef hX hNX",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "normalized": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedCorrectionData.lean",
+      "lines": [
+        23,
+        79
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedCorrectionData",
+        "EulerPacketTerminalDatum.initializedNormalizedField_normal_bound"
+      ],
+      "git_blob": "ecd617fd1102c385a4b3fccc8e79239ef6f3faf7",
+      "range_sha256": "91aec3e41a16854a06be3e03a1a568b9b12e10a6a1f780d0c4ba0d0e28adc68c",
+      "opening_excerpt": "def initializedNormalizedField (N : ℕ) (k : ℝ) :=\n  ((initializedPacketField M D hTime τ hτ hτT B δ hδ ξ hs α N k⁻¹).smul k).changeTime hTime\n\ndef initializedNormalizedResidualField (Cagree : SourceCoefficientAgreement M D)",
+      "body_excerpt": "    (N : ℕ) (hN : 1 ≤ N) (k X : ℝ) (hk : 4 ≤ k)\n    (hbase : tailBase L.R S.H0 BC.termCost N ≤ k^(1/100 : ℝ))\n    (hcoef : BC.multiplierCost ≤ k^(1/100 : ℝ)) (hX : 6 ≤ X) (hNX : X-1 ≤ (N : ℝ)) :\n    (initializedNormalizedResidualField M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk).WordBound\n      6 (4*L.R) (Real.exp (-(7/10)*X*Real.log k)) 0 :=\n  (initializedResidual_normalized_bound M D hTime τ hτ hτT B δ hδ ξ hs α L H NB W LM WM BC\n    hRc hcost hδ1 hα hR WP S hgrowth Cagree N hN k X hk hbase hcoef hX hNX).changeTime hTime",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "drift": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketFieldDrift.lean",
+      "lines": [
+        19,
+        71
+      ],
+      "declarations": [
+        "EulerPacketCylinderField.Field.toFieldTower_weightedDrift_le",
+        "EulerPacketCylinderField.Field.WordBound.toFieldTower_weightedDrift_le_two"
+      ],
+      "git_blob": "43e7589b2e2858cdbb1505fad768945b856e3b20",
+      "range_sha256": "ee49db95d190d225c392f8dad83700020e6a464259ebd9821d97872dfc73a01b",
+      "opening_excerpt": "theorem toFieldTower_driftLevel_le (G : Field P T raw) (κ : ℝ) (m : Space)\n    (s n : ℕ) (hn : n ≤ s) (t : Icc (0 : ℝ) T) :\n    driftLevelNorm P n (velocityMap (velocityComponents κ m)) (G.toFieldTower.realization s t) ≤\n      3 * |κ| * levelNorm P (toJet P (G.toFieldTower.realization s t)) n +",
+      "body_excerpt": "    (t : Icc (0 : ℝ) T) :\n    weightedDriftNorm P q N ρ (velocityMap (velocityComponents κ m))\n      (G.toFieldTower.realization s t) ≤ 2 * (3 * |κ| * A₀ + A₁) := by\n  have hz := hG.toFieldTower_weightedNorm_le_two hR hA₀ s N hN ρ hρ hsmall t\n  have hn := hNrm.toFieldTower_weightedNorm_le_two hR hA₁ s N hN ρ hρ hsmall t\n  exact (G.toFieldTower_weightedDrift_le κ m s q N hN ρ hρ t).trans\n    ((add_le_add (mul_le_mul_of_nonneg_left hz (by positivity)) hn).trans_eq (by ring))",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "norms": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedCorrectionNorms.lean",
+      "lines": [
+        41,
+        90
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedCorrection_background",
+        "EulerPacketTerminalDatum.initializedCorrection_background_derivative",
+        "EulerPacketTerminalDatum.initializedCorrection_drift",
+        "EulerPacketTerminalDatum.initializedCorrection_residual"
+      ],
+      "git_blob": "7424c895c3bc142956aff7168c589aefa87cc708",
+      "range_sha256": "ee7434a770e3b1fd3f41d71d50b2ab0ad7919914a3a47a518b71c33cb4cc88ce",
+      "opening_excerpt": "theorem initializedCorrection_background (s Q : ℕ) (hQ : Q+6 ≤ s)\n    (ρ : ℝ) (hρ : 0 < ρ) (hsmall : ρ*(4*L.R) ≤ 1/2) (t : Icc (0 : ℝ) D.T) :\n    weightedNorm period 6 Q ρ\n      ((initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk).approximation.realization s t)",
+      "body_excerpt": "    weightedNorm period 6 Q ρ\n      ((initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk).residual.realization s t)\n        ≤ 2*Real.exp (-(7/10)*X*Real.log k) := by\n  have hr := initializedNormalizedResidualField_bound M D hTime τ hτ hτT B δ hδ ξ hs α\n    L H NB W LM WM BC hRc hcost hδ1 hα hR WP S hgrowth Cagree N hN k X hk hbase hcoef hX hNX\n  exact hr.toFieldTower_weightedNorm_le_two (by have := L.radius_bounds.1; linarith)\n    (Real.exp_pos _).le s Q hQ ρ hρ hsmall t",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "spatial": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedSpatialBudget.lean",
+      "lines": [
+        26,
+        122
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedMetricBudget",
+        "EulerPacketTerminalDatum.initializedSpatialBudget",
+        "EulerPacketTerminalDatum.initializedDriftBudget",
+        "EulerPacketTerminalDatum.initializedDriftBudget_growth"
+      ],
+      "git_blob": "83cc66c4be87999d879b7bec09f495d0c0445f53",
+      "range_sha256": "71c3814bc8ad578a4288341fe3e3a98136cb0589bbdad4d50a6da9e59e501cc3",
+      "opening_excerpt": "def initializedMetricBudget (q : ℕ) :\n    MetricBudget period D.T D.T_pos.le\n      ((initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk).atOrder period (q+1)) :=\n  sourceMetricBudgetOfFields D period k⁻¹",
+      "body_excerpt": "    combinedConstant period\n      (initializedDriftBudget M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk\n        L H NB W LM WM BC hRc hcost hδ1 hα hR WP S hgrowth hbase X hcoef hX hNX Kc ρ hρ hpacket hpressure q hq).full\n      ((initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk).metricBudget period D.T_pos.le\n        (initializedMetricBudget M D hTime τ hτ hτT B δ hδ ξ hs α Cagree N hN k hk 0) (q+1)) =\n      growthCoefficient D period Kc (2*velocity L.R S.H0 BC.multiplierCost)\n        (12*velocity L.R S.H0 BC.multiplierCost*(4*L.R)) := rfl",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "budget": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftBudget.lean",
+      "lines": [
+        19,
+        60
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.Budget",
+        "EulerAllOrderDriftCorrection.Budget.comparisonData"
+      ],
+      "git_blob": "ba0398573705760c4accfcee2420b7d2699bae4b",
+      "range_sha256": "94ece930ca815e319e5c7530b4438420d42a00c4769718bf8a9278f4f71c05dc",
+      "opening_excerpt": "structure Budget {T : ℝ} (hT : 0 < T) (A : Data period T) where\n  /-- The actual common inverse metric and its genuine time derivative. -/\n  metric : MetricBudget period T hT.le (A.atOrder period 1)\n  /-- The common positive shrinking radius. -/",
+      "body_excerpt": "/-- The drift-aware input budget provides the genuine comparison data required by finite-order uniqueness. -/\ndef Budget.comparisonData {T : ℝ} {hT : 0 < T} {A : Data period T}\n    (B : Budget period hT A) : ComparisonData period hT A where\n  metric := B.metric\n  radius := B.radius\n  spatial := (B.spatial 6 le_rfl).full\n  divergence := B.divergence",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "supply": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedAllOrderBudget.lean",
+      "lines": [
+        64,
+        132
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedAllOrderBudget"
+      ],
+      "git_blob": "4a59e24cdbe204e182a35aadf6937d87491bb219",
+      "range_sha256": "79f0b630800257efaf189f7d92305f7f3312b3f9812caf42a8be2ab2aa320d52",
+      "opening_excerpt": "def initializedAllOrderBudget (k : ℝ) (hk : 4 ≤ k)\n    (hX : 64 ≤ expansion k) (hlog : 1 ≤ Real.log k)\n    (htail : tailPolynomialConstant L.R S.H0 BC.termCost ≤ smallPower k)\n    (hcoefficient : BC.multiplierCost ≤ smallPower k)",
+      "body_excerpt": "    exact hinit.2.2.2\n  · intro q hq\n    exact hscalar.1\n  · intro q hq t\n    rfl\n  · exact initializedCorrectionData_divergence M D hTime τ hτ hτT B δ hδ ξ hs α Cagree\n      (truncation k) hn k hk Ξ hΞ hF hdet",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "uniform": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedUniformBudget.lean",
+      "lines": [
+        39,
+        60
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initializedUniformBudget"
+      ],
+      "git_blob": "fa510903149c6c308b3b29efaaeb7f3c38638ceb",
+      "range_sha256": "06a36945a08606d15f011914c37851b23d6b93a129ced6be381eb0b9dbfc6cff",
+      "opening_excerpt": "def initializedUniformBudget : EulerAllOrderDriftCorrection.Budget period D.T_pos\n    (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree\n      (truncation k) (truncation_bounds k (by linarith)).1 k hk) := by\n  let BC := joinedCoefficientBudget period M D hTime τ hτ hτT B NB",
+      "body_excerpt": "  let Kc := L.correctionCoefficients NB period\n  have costs := EulerPacketInitializedCost.initialized_five_costs_bound\n    LM L NB BC δ ξ W S.H0 hδ hW S.H0_pos.le hH0\n  exact initializedAllOrderBudget M D hTime τ hτ hτT B δ hδ ξ hs α Cagree\n    L' H' NB' guards.1 LM' guards.2.1 BC guards.2.2.2.2.2 guards.2.2.2.2.1\n    hδ1 hα guards.2.2.2.1 guards.2.2.1 S hprofile' Kc k hk hX hlog\n    (costs.1.trans hfrequency) (costs.2.1.trans hfrequency) (costs.2.2.1.trans hfrequency)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "finite": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftFinite.lean",
+      "lines": [
+        19,
+        68
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.finite_exists",
+        "EulerAllOrderDriftCorrection.Budget.solution",
+        "EulerAllOrderDriftCorrection.Budget.family"
+      ],
+      "git_blob": "193af1e9e6eb1a63be4fb3de4de3e4a7191f85ec",
+      "range_sha256": "709a31c28dccf185f1b9efb09d6040d42560e5cfd1b94986a089ba0a20ade057",
+      "opening_excerpt": "theorem finite_exists {T : ℝ} (hT : 0 < T) (A : Data period T) (B : Budget period hT A)\n    (q : ℕ) (hq : 6 ≤ q) :\n    ∃ e : C(Icc (0 : ℝ) T, SobolevSpace period (q+1)),\n      e ⟨0, le_rfl, hT.le⟩ = 0 ∧",
+      "body_excerpt": "/-- Actual drift-aware data construct the complete finite correction family; no finite-existence hypothesis is supplied. -/\ndef Budget.family {T : ℝ} {hT : 0 < T} {A : Data period T} (B : Budget period hT A) :\n    FiniteFamily period hT A where\n  solution := B.solution period\n  initial q hq := (Classical.choose_spec (finite_exists period hT A B q hq)).1\n  divergence q hq := (Classical.choose_spec (finite_exists period hT A B q hq)).2.1\n  equation q hq := (Classical.choose_spec (finite_exists period hT A B q hq)).2.2.2",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "finite_solver": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/DriftGlobalInviscidGevrey.lean",
+      "lines": [
+        21,
+        67
+      ],
+      "declarations": [
+        "EulerDriftGlobalInviscidGevrey.exists_global_inviscid_gevrey_PDE"
+      ],
+      "git_blob": "c7e7820ce705f6ff5f1a09ef1e290707874415e1",
+      "range_sha256": "5025e0477ecf7939ec02e9f78313a640d48245c375900da1a11ab612a304818c",
+      "opening_excerpt": "theorem exists_global_inviscid_gevrey_PDE {q : ℕ} (hq : 6 ≤ q) (S : ℝ) (hS : 0 < S)\n    (D : CorrectionData period ((q+1)+1) (Icc (0 : ℝ) S))\n    (KG1 : ∀ t, CoefficientJet period standardDirection (q+1) (D.metric.coefficient t))\n    (KL1 : ∀ t, CoefficientJet period standardDirection (q+1) (D.linear.coefficient t))",
+      "body_excerpt": "  refine ⟨e,hi,hd,hM,hE,?_⟩\n  apply correction_sobolev_hasDerivAt period hq S hS.le\n    (lowerData period (lowerData period D KG1 KL1 KQ1 hG1 hL1 hQ1)\n      KG0 KL0 KQ0 hG0 hL0 hQ0) e\n  exact correction_limit_equation period hq S hS.le (lowerData period D KG1 KL1 KQ1 hG1 hL1 hQ1)\n    KG0 KL0 KQ0 hG0 hL0 hQ0 u e (metricAmplification K.c*(Δ/2)/weight (min (ρ0/2) 1) N)\n    (fun n => (hu n).2.2.2) hconv (fun n => (hu n).2.2.1)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "comparison": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyData.lean",
+      "lines": [
+        18,
+        78
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.stabilityBudgetOfBase",
+        "EulerCorrectionAssembly.ComparisonData",
+        "EulerCorrectionAssembly.FiniteFamily"
+      ],
+      "git_blob": "80388af4b064c1134aa5a8a5dd22db64848bb5cb",
+      "range_sha256": "a04ddb6ced073f0c506ae23bab2985658ace47ff91d0da7e40f9c1427090c3aa",
+      "opening_excerpt": "def stabilityBudgetOfBase {T : ℝ} (hT : 0 < T) (A : Data period T)\n    (K : MetricBudget period T hT.le (A.atOrder period 1))\n    (R : C(Icc (0 : ℝ) T, ℝ))\n    (S : SpatialBudget period (by norm_num : 6 ≤ 8) (A.atOrder period 8) 2 R)",
+      "body_excerpt": "  divergence : ∀ q hq t, value period (solution q hq t) ∈ divergenceFreeSpace period A.κ A.direction\n  /-- Every correction satisfies the literal projected inviscid equation at interior times. -/\n  equation : ∀ q hq t (ht : t ∈ Ioo 0 T),\n    HasDerivAt (fun r => value period (extendPath T hT.le (solution q hq) r))\n      (value period (((A.atOrder period q).coefficients period hq).apply\n        ⟨t, ht.1.le, ht.2.le⟩ (solution q hq ⟨t, ht.1.le, ht.2.le⟩))) t\n",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "compatible": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyCompatibility.lean",
+      "lines": [
+        18,
+        55
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.compatible",
+        "EulerCorrectionAssembly.FiniteFamily.value_base"
+      ],
+      "git_blob": "2e9f28546b5122061e735801a6d934cdfbe97134",
+      "range_sha256": "c431696adab4c956c53127880a6a4035ea59464969a16075600c2cac32906548",
+      "opening_excerpt": "theorem FiniteFamily.compatible (F : FiniteFamily period hT A) (C : ComparisonData period hT A)\n    (q : ℕ) (hq : 6 ≤ q) :\n    (truncateOperator period (q+1)).compLeftContinuous ℝ (Icc (0 : ℝ) T)\n      (F.solution (q+1) (hq.trans (Nat.le_succ q))) = F.solution q hq := by",
+      "body_excerpt": "/-- All supplied finite corrections have the same actual base L² field. -/\ntheorem FiniteFamily.value_base (F : FiniteFamily period hT A) (C : ComparisonData period hT A)\n    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :\n    value period (F.solution q hq t) = value period (F.solution 6 le_rfl t) := by\n  exact Nat.le_induction (P := fun n hn => value period (F.solution n hn t) =\n      value period (F.solution 6 le_rfl t)) rfl\n    (fun n hn ih => (F.value_succ period C n hn t).trans ih) q hq",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "common": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyCommon.lean",
+      "lines": [
+        22,
+        78
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.commonPath",
+        "EulerCorrectionAssembly.FiniteFamily.pointField",
+        "EulerCorrectionAssembly.FiniteFamily.pointField_smooth"
+      ],
+      "git_blob": "6b6c26249fcffa361af96e19c2f719210769006e",
+      "range_sha256": "bfeacdc163dba572b54355f2800db72a3a4f41aed3352710bcc74a7134364e47",
+      "opening_excerpt": "def FiniteFamily.commonPath (F : FiniteFamily period hT A) : C(Icc (0 : ℝ) T, LiftL2 period) :=\n  (valueOperator period 7).compLeftContinuous ℝ (Icc (0 : ℝ) T) (F.solution 6 le_rfl)\n\n/-- Every supplied finite correction realizes the common actual L² path. -/",
+      "body_excerpt": "    ContDiff ℝ ∞ (localFieldLift period (F.pointField period t) x) := by\n  obtain ⟨g, hg, ha⟩ := exists_smooth_representative period (F.commonPath period t)\n    (fun n => F.commonJet period C n t)\n  have he : F.pointField period t = g :=\n    representative_eq period _ g (smoothField_continuous period g hg) ha\n  rw [he]\n  exact hg x",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "pressure": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyPressure.lean",
+      "lines": [
+        29,
+        90
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.rawSourcePath_truncate",
+        "EulerCorrectionAssembly.FiniteFamily.signedPressurePath_value_succ",
+        "EulerCorrectionAssembly.FiniteFamily.commonPressure"
+      ],
+      "git_blob": "1f9e2b2441b03f1f2d404a8d8b7980cd3b2d061f",
+      "range_sha256": "9a57c24ca502a709df24553edb9806dfef938672dae098d0aed657bec69ef15c",
+      "opening_excerpt": "theorem FiniteFamily.rawSourcePath_truncate (F : FiniteFamily period hT A) (C : ComparisonData period hT A)\n    (q : ℕ) (hq : 6 ≤ q) (t : Icc (0 : ℝ) T) :\n    truncateOperator period q (F.rawSourcePath period (q+1) (hq.trans (Nat.le_succ q)) t) =\n      F.rawSourcePath period q hq t := by",
+      "body_excerpt": "  (A.atOrder period 6).pressure_mem_gradient period le_rfl t (F.solution 6 le_rfl t)\n\n/-- The actual common pressure has genuine strong spatial jets of every order. -/\ndef FiniteFamily.pressureJet (F : FiniteFamily period hT A) (C : ComparisonData period hT A)\n    (n : ℕ) (t : Icc (0 : ℝ) T) : SpatialJet period standardDirection n (F.commonPressure period t) := by\n  rw [← F.signedPressurePath_value_common period C (n+6) (by omega) t]\n  exact EulerH6Pressure.SpatialJet.restrict",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "tower": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionAssemblyRealizations.lean",
+      "lines": [
+        15,
+        38
+      ],
+      "declarations": [
+        "EulerCorrectionAssembly.FiniteFamily.fieldTower",
+        "EulerCorrectionAssembly.FiniteFamily.solution_eq_realization"
+      ],
+      "git_blob": "cb7f8478a8d01c2fe9d080d9401d4512bada81cd",
+      "range_sha256": "998d39dd15f25e693199bee670b524a2d295632566aa759e6eb95900fb65ecae",
+      "opening_excerpt": "def FiniteFamily.fieldTower (F : FiniteFamily period hT A) (C : ComparisonData period hT A) :\n    FieldTower period T where\n  field := F.commonPath period\n  realization q := (restrictOperator period (by omega : q ≤ (q+6)+1)).compLeftContinuous ℝ",
+      "body_excerpt": "    (q : ℕ) (hq : 6 ≤ q) :\n    F.solution q hq = (F.fieldTower period C).realization (q+1) := by\n  apply ContinuousMap.ext\n  intro t\n  apply value_injective period\n  exact (F.value_common period C q hq t).trans\n    ((F.fieldTower period C).value_eq (q+1) t).symm",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "energy": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderDriftCorrection.lean",
+      "lines": [
+        76,
+        132
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.Budget.solution_eq_realization",
+        "EulerAllOrderDriftCorrection.Budget.fieldTower_energy",
+        "EulerAllOrderDriftCorrection.Budget.fieldTower_hasDerivAt_pressure"
+      ],
+      "git_blob": "0f3bf41b75f94b513ad199aef18a146df4ef7d26",
+      "range_sha256": "e08c374de1700efe57310f1f84c154680dcf8dc1cccfc5777845fcff922aef82",
+      "opening_excerpt": "theorem Budget.solution_eq_realization (B : Budget period hT A) (q : ℕ) (hq : 6 ≤ q) :\n    B.solution period q hq = (B.fieldTower period).realization (q+1) :=\n  (B.family period).solution_eq_realization period (B.comparisonData period) q hq\n",
+      "body_excerpt": "      (-(A.atOrder period q).rawSource period hq ⟨t, ht.1.le, ht.2.le⟩\n          ((B.fieldTower period).realization (q+1) ⟨t, ht.1.le, ht.2.le⟩) -\n        coefficientSobolevOperator period (A.metric.jet q ⟨t, ht.1.le, ht.2.le⟩)\n          ((A.atOrder period q).pressure period hq ⟨t, ht.1.le, ht.2.le⟩\n            ((B.fieldTower period).realization (q+1) ⟨t, ht.1.le, ht.2.le⟩))) t := by\n  simpa only [CorrectionData.source_sobolev, Data.atOrder] using\n    B.fieldTower_hasDerivAt period q hq t ht",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "scalar": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketCorrectionScalar.lean",
+      "lines": [
+        13,
+        87
+      ],
+      "declarations": [
+        "EulerPacketCorrectionScalar.initialRadius_bounds",
+        "EulerPacketCorrectionScalar.residual_small",
+        "EulerPacketCorrectionScalar.radius_decay",
+        "EulerPacketCorrectionScalar.radius_bounds"
+      ],
+      "git_blob": "ba46fa226761ac205d2e62db220794c79c0760d9",
+      "range_sha256": "5fa9f776b120d46b729b573402503d6cae340f25ed93c76f62a51813383d6551",
+      "opening_excerpt": "def delta (X : ℝ) : ℝ := Real.exp (-Real.sqrt X)\n\ndef residual (k X : ℝ) : ℝ := 2*Real.exp (-(7/10)*X*Real.log k)\n",
+      "body_excerpt": "    ρ0/2 ≤ radius T C D ρ0 k X t ∧ radius T C D ρ0 k X t ≤ ρ0 := by\n  have hs : 0 ≤ 2*C*(D/k+delta X) := by\n    exact mul_nonneg (mul_nonneg (by norm_num) hC)\n      (add_nonneg (div_nonneg hD hk.le) (delta_pos X).le)\n  have hu := mul_nonneg hs t.property.1\n  have hl := (mul_le_mul_of_nonneg_left t.property.2 hs).trans hdecay\n  change ρ0/2 ≤ ρ0-2*C*(D/k+delta X)*t.val ∧ ρ0-2*C*(D/k+delta X)*t.val ≤ ρ0",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "frequency": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketSourceFrequency.lean",
+      "lines": [
+        13,
+        87
+      ],
+      "declarations": [
+        "EulerPacketSourceFrequency.tailBase_frequency",
+        "EulerPacketSourceFrequency.correction_guards"
+      ],
+      "git_blob": "b57694e1b0fc38831fd20b6ad32335c6da80300c",
+      "range_sha256": "e553a048c265b6bec8a3c3b0520ac032b0d1ccef44fa76e66b441766b8751d4f",
+      "opening_excerpt": "def theta : ℝ := 1/1000000\ndef expansion (k : ℝ) : ℝ := k^theta\ndef truncation (k : ℝ) : ℕ := Nat.floor (expansion k)\ndef smallPower (k : ℝ) : ℝ := k^(theta/100)",
+      "body_excerpt": "    linarith\n  · apply radius_decay C T D ρ0 k (expansion k) hk0\n    · have hh := (div_le_iff₀ hρ).mp (hdrift.trans (smallPower_le_frequency k hk))\n      nlinarith only [hh]\n    · have hh := (div_le_iff₀ hρ).mp (herror.trans (smallPower_le_exp_sqrt k hk0))\n      nlinarith only [hh]\n",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "physical": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketWeightedPhysicalErrors.lean",
+      "lines": [
+        33,
+        110
+      ],
+      "declarations": [
+        "EulerAllOrderDriftCorrection.weightedPhysicalGradientCost",
+        "EulerAllOrderDriftCorrection.Budget.physical_gradient_hessian_of_weighted"
+      ],
+      "git_blob": "10f90875796eac3726ab18923eea47c131dee0fd",
+      "range_sha256": "30069c907df1f0e603872b1df2afeccbd5cf8e4a13ca445dafcdfaed78056297",
+      "opening_excerpt": "def weightedPhysicalGradientCost (R CF ρ Cw : ℝ) : ℝ :=\n  ((1+9*CF)*physicalFixedCost D R CF ρ⁻¹ 1)*(sobolevEmbeddingConstant P 3*Cw)\n\n",
+      "body_excerpt": "    simpa only [norm_iteratedFDeriv_one,pow_one] using hv\n  · have hscale : k*A.κ=1 := by rw [hκ]; exact mul_inv_cancel₀ hk0.ne'\n    rw [Q.physicalPotential_hessian_norm D P X Y hX hXY hY k hscale t x,hκ,hm]\n    apply absorb _ _ _ hcp\n    change ‖iteratedFDeriv ℝ 1 (fun y => k⁻¹ • (D.FInv.field t (Y t y)).adjoint\n      (Q.pointPressure P t (cylinderGraph P k D.m₀ (Y t y)))) x‖ ≤ _ at hpr\n    simpa only [pow_one] using hpr",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "physical_loss": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketPhysicalFrequencyBounds.lean",
+      "lines": [
+        29,
+        91
+      ],
+      "declarations": [
+        "EulerPacketPhysicalGevrey.physicalRadius_le_linear",
+        "EulerPacketPhysicalGevrey.physicalReconstruction_power_bound"
+      ],
+      "git_blob": "4dca22dd6662dc106f6c81384cc23e72a2112d77",
+      "range_sha256": "dc80adb9183ecf4db7b3cfc30d84bc0b387641f2ea3e72d56f445f29f3fd379b",
+      "opening_excerpt": "theorem physicalRadius_le_linear (k R C S : ℝ) (hk : 1 ≤ k) (hR : 0 ≤ R) (hS : 0 ≤ S) :\n    physicalRadius D k R C S ≤ physicalRadiusCost D R C S*k := by\n  let χ := ‖coordinateEquiv.symm.toContinuousLinearMap‖*(1+‖D.m₀‖)\n  have hχ := frequencyFactor_le_linear k hk D.m₀",
+      "body_excerpt": "    simpa only [one_mul,mul_assoc] using\n      mul_le_mul_of_nonneg_right hκ (by positivity : 0 ≤ 3*C*A)\n  have hbnd := mul_le_mul ha\n    (pow_le_pow_left₀ hr (physicalRadius_le_linear D k R C S hk hR hS) n)\n    (pow_nonneg hr n) (by positivity)\n  exact h.trans ((mul_le_mul_of_nonneg_right hbnd (sq_nonneg (n.factorial : ℝ))).trans_eq\n    (by unfold physicalFixedCost; rw [mul_pow]; ring))",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "margin": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketUniformFrequencyMargin.lean",
+      "lines": [
+        17,
+        89
+      ],
+      "declarations": [
+        "EulerPacketSourceFrequency.physical_error_le_inverse_quarter",
+        "EulerPacketSourceFrequency.liftedAmplitude_small_of_costs"
+      ],
+      "git_blob": "05198cfab198fdf01feb50db8afd36241ca06864",
+      "range_sha256": "3d8e6fb93f631dee70bfd25a253de1a17759cb83c227a935d229ecded2ae3567",
+      "opening_excerpt": "theorem cost_div_le_inverse_half (C k : ℝ) (hk : 1 ≤ k) (hC : C ≤ smallPower k) :\n    C/k ≤ k^(-(1/2 : ℝ)) := by\n  have hk0 : 0 < k := zero_lt_one.trans_le hk\n  apply (div_le_iff₀ hk0).mpr",
+      "body_excerpt": "      calc\n        _ = 2*(k^(-(1/2 : ℝ))*(k^(1/8 : ℝ)*k^(1/8 : ℝ))) := by ring\n        _ = _ := by rw [← Real.rpow_add hk0,← Real.rpow_add hk0]; norm_num\n    _ ≤ 1/8 := by\n      rw [Real.rpow_neg hk0.le,← div_eq_mul_inv]\n      exact (div_le_iff₀ (Real.rpow_pos_of_pos hk0 _)).mpr (by linarith)\n",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "flow": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitializedUniformFlow.lean",
+      "lines": [
+        73,
+        257
+      ],
+      "declarations": [
+        "EulerPacketTerminalDatum.initialized_uniform_flow_and_shear"
+      ],
+      "git_blob": "efeb9a621aeca452d0105630000c35599b4add36",
+      "range_sha256": "1cd33b7003dd398b5dc1c7303c4d24f568fed701f1b4a042112000f450540d66",
+      "opening_excerpt": "theorem initialized_uniform_flow_and_shear :\n    ∃ (hn : 1 ≤ truncation k)\n      (Q : EulerAllOrderDriftCorrection.Budget period D.T_pos\n        (initializedCorrectionData M D hTime τ hτ hτT B δ hδ ξ hs α Cagree",
+      "body_excerpt": "    · have h := initializedExactPhysicalPressure_hessian_error M D hTime τ hτ hτT B δ hδ ξ hs α\n        Cagree (truncation k) hn k hk Q X Y hXd hXY hY L' H' N' wj M' wm BC hrc hcost\n        hδ1 hα hterminal wp S hgrowth hbase hdet t x\n      exact (h.trans (add_le_add le_rfl (hcorrection t x).2)).trans hpErr\n  · intro ell hell hell1 t\n    exact ⟨(hflow ell hell hell1 t).1,(hflow ell hell hell1 t).2.1,\n      (hflow ell hell hell1 t).2.2,(hsup ell hell hell1 t).1,(hsup ell hell hell1 t).2⟩",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "labels": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentUniformJoinedChild.lean",
+      "lines": [
+        62,
+        110
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.LabelData.joined_uniform_child"
+      ],
+      "git_blob": "c0154ab1fbcb6099823358bbc6cb6bfc9f9d8ba0",
+      "range_sha256": "1ee23ccb6c32476e14075d118ed3ab605ccf4e62433c00a4cc8b006f13ace616",
+      "opening_excerpt": "theorem joined_uniform_child :\n    ∃ (hn : 1 ≤ truncation k)\n      (Q : Budget period A.T_pos\n        (initializedCorrectionData (A.meanData H) (A.transverseData m hm R S hS)",
+      "body_excerpt": "      hk.child_bound hKk hk.embedding_bound hk.derivative_bound hinv\n  let LC := L.child G k m hgraph nextEll hnext hnext1 E\n    (fun t => (hmatch t).1) (fun t => (hmatch t).2.1) (fun t => (hmatch t).2.2.1)\n    (fun t => (hmatch t).2.2.2.1) (fun t => (hmatch t).2.2.2.2.1)\n    (fun t => (hmatch t).2.2.2.2.2.1)\n    (k^80) (one_le_pow₀ hk.one_le) hlabel\n  exact ⟨hn,Q,G,hgraph,hG,herror,hdisplacement,LC,rfl⟩",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "choice": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentGeometryJoinedChoice.lean",
+      "lines": [
+        26,
+        84
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.GeometryJoinedChoice",
+        "EulerParentPacketFrames.exists_geometryJoinedChoice",
+        "EulerParentPacketFrames.GeometryJoinedChoice.state"
+      ],
+      "git_blob": "e06ac6f216d71c04102ac08ecb990baf67571b96",
+      "range_sha256": "033b0aae9eb70e880fbb8709a78c52bb3692fb1eca44e6e168678fed9fa64445",
+      "opening_excerpt": "structure GeometryJoinedChoice where\n  hn : 1 ≤ truncation k\n  Q : I.correctionBudget k hk.four hn\n  flow : EulerPhysicalGraphFlowBounds.Data period I.parent.T",
+      "body_excerpt": "def parent : Parent := I.parent.child F.flow k I.normal F.graph nextEll hnext hnext1\n\ndef state (hSym : ∀ x, -x ∈ I.support ↔ x ∈ I.support) : SmoothState F.parent :=\n  S.joinedChild I.low I.normal I.normal_unit I.coordinates I.support I.support_compact hSym\n    I.geometry.δ I.delta_pos I.terminal I.cutoff_support I.alpha (truncation k) F.hn k hk.four\n    I.historyTime I.history_pos I.history_lt F.Q F.flow F.coefficient F.graph nextEll hnext hnext1 F.labels\n",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "joined": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketJoinedSuccessor.lean",
+      "lines": [
+        33,
+        118
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.chooseJoined",
+        "EulerPacketInduction.Stage.joinedState",
+        "EulerPacketInduction.Stage.joinedStep",
+        "EulerPacketInduction.Stage.joinedNext",
+        "EulerPacketInduction.Stage.joinedNext_initial_velocity"
+      ],
+      "git_blob": "6a8724d6f681ce2814828b67711d1743d81f4378",
+      "range_sha256": "738b042f04e1883d92d71a5812a898917c565bf350af0c690e0ffd10e4f7557c",
+      "opening_excerpt": "def chooseJoined : P.JoinedChoice hn hq hB := by\n  have hsec := S.secondary_frequency n P.restrictedState.labels.K P.label_eq.le\n  exact Classical.choice (exists_geometryJoinedChoice I P.restrictedState k hk ell\n    (S.support_pos (n+1)) (S.support_one (n+1)) rfl (P.joinedInput_frequency hn hq hB) hsec.1",
+      "body_excerpt": "theorem joinedNext_time : (P.joinedNext hn hq hB).time=P.nextTime := rfl\n\ntheorem joinedNext_initial_velocity :\n    (fun x => (P.joinedNext hn hq hB).state.evolution.velocity (0,x)) =\n      (fun x => P.state.evolution.velocity (0,x))+((I).high k+(I).mean k) :=\n  GeometryJoinedChoice.state_velocity_initial I P.restrictedState k hk ell\n    (S.support_pos (n+1)) (S.support_one (n+1)) F symmetric",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "forward": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketForwardSuccessor.lean",
+      "lines": [
+        29,
+        108
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.chooseForward",
+        "EulerPacketInduction.Stage.forwardStep",
+        "EulerPacketInduction.Stage.forwardNext"
+      ],
+      "git_blob": "e9e4a1cf15691d9b48185020eac8f082801aac53",
+      "range_sha256": "b61d7499b70722f109f9bb26671a75a48b1a6837f2769065165eca17a88c63d7",
+      "opening_excerpt": "def chooseForward : P.ForwardChoice hq hB := by\n  have hsec := S.secondary_frequency 0 P.restrictedState.labels.K P.label_eq.le\n  exact Classical.choice (exists_geometryForwardChoice I P.restrictedState k hk ell\n    (S.support_pos 1) (S.support_one 1) (P.forwardInput_frequency hq hB) hsec.1",
+      "body_excerpt": "    firstNormal firstNormal_unit firstFrame support compact\n  renewal_G := rfl\n  renewal_error := rfl\n\ndef forwardNext : Stage S 1 := P.next (P.forwardStep hq hB)\n\ntheorem forwardNext_time : (P.forwardNext hq hB).time=P.nextTime := rfl",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "next": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageSuccessor.lean",
+      "lines": [
+        61,
+        195
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.Step",
+        "EulerPacketInduction.Stage.next"
+      ],
+      "git_blob": "5260520cde8fdc24e26ef4f9e6f49e0b70f9b981",
+      "range_sha256": "d54146380082c3231780e5fe95e9215607a0a6ca8c5826b491836e56fe205821",
+      "opening_excerpt": "structure Step where\n  parent : Parent\n  state : SmoothState parent\n  hchild : ℝ",
+      "body_excerpt": "    exact hparams.2.2\n  case compression =>\n    intro _\n    have hc := D.renewal_matches.background_compression_of_error_le_one\n      (priorError S.J S.D S.X (n+1)) (S.priorError_one (n+1))\n    rw [ParentFrame.changeActivation_B,ParentFrame.changeActivation_m]\n    simpa only [← D.geometry_targetTime] using hc",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "state": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentState.lean",
+      "lines": [
+        18,
+        57
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.SmoothState",
+        "EulerParentPacketFrames.SmoothState.packetChild"
+      ],
+      "git_blob": "dd90173ec20f1bdf06112f5b0e552406b8bb09b7",
+      "range_sha256": "c22417d94b3acbf631da5aa97c242e015530d9009ff93788f79e09d35fd90375",
+      "opening_excerpt": "structure SmoothState (A : Parent) where\n  evolution : Evolution A\n  regularity : SobolevData evolution\n  labels : LabelData A",
+      "body_excerpt": "    SmoothState (A.child G k m hgraph nextEll hnext hnext1) where\n  evolution := S.evolution.child m hm J support hSupport B residual V hV G hG k hk hgraph\n    nextEll hnext hnext1\n  regularity := S.regularity.child S.labels m hm J support hSupport B residual V hV G hG k hk hgraph\n    nextEll hnext hnext1\n  labels := labels\n  odd := S.odd.childOfPacket B symmetry V hV G hG k hgraph nextEll hnext hnext1",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "residual_supplier": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentInitializedState.lean",
+      "lines": [
+        75,
+        96
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.SmoothState.joinedChild"
+      ],
+      "git_blob": "7725d9403165c3c7c62f36d348ead9485557f7f2",
+      "range_sha256": "cc0e304b57943e3d50a16043326158cda37d59746af94899ff4165b5e32bf54d",
+      "opening_excerpt": "def joinedChild (τ : ℝ) (hτ : 0 < τ) (hτT : τ < A.T)\n    (Q : Budget period A.T_pos\n      (initializedCorrectionData (A.meanData H) (A.transverseData m hm J support hSupport)\n        rfl τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α",
+      "body_excerpt": "      rfl τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α\n      (A.sourceAgreement m hm J support hSupport H) N hN k hk)\n    (initializedNormalizedField (A.meanData H) (A.transverseData m hm J support hSupport)\n      rfl τ hτ hτT (A.historyOn H m hm J support hSupport τ hτ hτT) δ hδ ξ hs α N k) rfl\n    (S.odd.joinedCorrectionParity H m hm J support hSupport hSym δ hδ ξ hs α\n      τ hτ hτT N hN k hk)\n    G hG k (mul_inv_cancel₀ (by linarith : k ≠ 0)) hgraph nextEll hnext hnext1 labels",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "euler_child": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/ParentEulerChild.lean",
+      "lines": [
+        31,
+        57
+      ],
+      "declarations": [
+        "EulerParentPacketFrames.Evolution.child"
+      ],
+      "git_blob": "a4bf78707369067ee29eb1b719b00f93abbc69a1",
+      "range_sha256": "e99fbea86740c0aa6adb86b1cf0ae6ce2ae3114ec8c98ac0792c70328f3d5ea0",
+      "opening_excerpt": "def child : Evolution (A.child G k m hgraph nextEll hnext hnext1) where\n  inverse := E.inverse.child G k m hgraph nextEll hnext hnext1\n  velocity := A.exactPacketVelocity m hm J support hSupport B residual k E.inverse.field E.velocity\n  pressure := A.exactPacketPressure m hm J support hSupport B residual k E.inverse.field E.pressure",
+      "body_excerpt": "  momentum_zero := A.exactPacket_momentum m hm J support hSupport B residual k hk E.inverse.field\n    E.inverse.left_inverse E.inverse.right_inverse E.inverse.continuous E.velocity E.pressure\n    E.velocity_match E.velocity_differentiable E.pressure_differentiable E.momentum_zero\n  divergence_zero t ht x :=\n    (A.exactPacket_euler m hm J support hSupport B residual k hk E.inverse.field\n      E.inverse.left_inverse E.inverse.right_inverse E.inverse.continuous E.velocity E.pressure\n      E.velocity_match E.velocity_differentiable E.pressure_differentiable E.momentum_zero",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "tail": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageInitialLimit.lean",
+      "lines": [
+        23,
+        103
+      ],
+      "declarations": [
+        "EulerPacketInduction.Stage.initialTailInput",
+        "EulerPacketInduction.Stage.initialDataLimit",
+        "EulerPacketInduction.Stage.initial_velocity_partial",
+        "EulerPacketInduction.Stage.initialDataLimit_Hm"
+      ],
+      "git_blob": "d19bbe870a65c686e5da001ea25160607f4396eb",
+      "range_sha256": "691d8633105d49b10e8a8d8b86ef6c6621490606fd09848772e917134290c00f",
+      "opening_excerpt": "def initialTailInput (i : ℕ) :\n    EulerPacketInitial.Input (referencePlane ((P (1+i)).joinedNormal (by omega))) :=\n  (P (1+i)).joinedInput (by omega) hq hB\n",
+      "body_excerpt": "      ((fun x => (P (n+1)).state.evolution.velocity (0,x))-(initialDataLimit P hq hB).field)) =\n      (fun n => derivativeSum s\n        ((fun x => (P (1+n)).state.evolution.velocity (0,x))-(initialDataLimit P hq hB).field)) := by\n    funext n\n    rw [Nat.add_comm n 1]\n  rw [heq]\n  exact ht",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "sum": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketInitialSmoothLimit.lean",
+      "lines": [
+        21,
+        94
+      ],
+      "declarations": [
+        "EulerPacketInitial.Input.increment",
+        "EulerPacketInitial.actual_increment_summable",
+        "EulerPacketInitial.initialLimit",
+        "EulerPacketInitial.initialLimit_support",
+        "EulerPacketInitial.fullInitialLimit_Hm"
+      ],
+      "git_blob": "18190a3f0d4e6569fa10f219e00fbd5e668d4edb",
+      "range_sha256": "c4f66d1b00d07c13407667c022fcdec83e292c16f9b2251be103071e2aafa126",
+      "opening_excerpt": "def increment (k : ℝ) : SmoothL2Field Space := addField (A.highField k) (A.meanField k)\n\ntheorem increment_field (k : ℝ) : (A.increment k).field=A.high k+A.mean k := rfl\n",
+      "body_excerpt": "      (fullInitialLimit A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency base).field=\n      initialPartial A J X N-(V).field := by\n    funext x\n    change (base.field x+initialPartial A J X N x)-(base.field x+(V).field x)=\n      initialPartial A J X N x-(V).field x\n    abel\n  simpa only [he] using initialLimit_Hm A J hJ C c hC hc p q X hX hparameter hscale hσ hk hfrequency s",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "h4": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryEulerStability.lean",
+      "lines": [
+        17,
+        33
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.referenceNormPath",
+        "EulerOrdinarySobolev.Evolution.referenceSize",
+        "EulerOrdinarySobolev.Evolution.referenceWordBound"
+      ],
+      "git_blob": "499242d10a98505109365c9a184a9c11075fa75e",
+      "range_sha256": "5cfe665b605f62c7d5ee0ee9f0fd761bc7f261d0b46ff178bff8402675c0d47e",
+      "opening_excerpt": "def referenceNormPath (U : Evolution T hT) : C(Icc (0 : ℝ) T,ℝ) :=\n  ⟨fun t => tensorNorm 4 (U.velocity t),by\n    apply continuous_finsetSum\n    intro n _",
+      "body_excerpt": "theorem referenceWordBound (U : Evolution T hT) (t : Icc (0 : ℝ) T) :\n    WordBound 4 U.referenceSize (U.velocity t) := by\n  have h := (U.referenceNormPath).norm_coe_le_norm t\n  change ‖tensorNorm 4 (U.velocity t)‖ ≤ U.referenceSize at h\n  rw [Real.norm_of_nonneg (tensorNorm_nonneg 4 (U.velocity t))] at h\n  intro n hn w\n  exact (wordBound_tensorNorm 4 (U.velocity t) n hn w).trans h",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "h3": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryH3Envelope.lean",
+      "lines": [
+        115,
+        138
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.h3_stability"
+      ],
+      "git_blob": "45f6b52682847ca7d97f8fbb9615a0567f55e69a",
+      "range_sha256": "b921cb260ec0ce07436ea3c1ca2db4a70e924bbd322636039d1964f6971be88d",
+      "opening_excerpt": "theorem h3_stability (U V : Evolution T hT) (M ε : ℝ)\n    (hM : ∀ t, WordBound 4 M (U.velocity t)) (hε : 0 < ε)\n    (hinit : tensorNorm 3 (U.difference V ⟨0,le_rfl,hT⟩) ≤ ε)\n    (hsmall : 640*ε*exp (3*stabilityConstant M*T) ≤ 1/2)",
+      "body_excerpt": "      simpa only [extendPath,projIcc_of_mem hT ⟨hr.1,hr.2.le⟩] using\n        U.envelopeDerivative_bound V M ε hM hε ⟨r,hr.1,hr.2.le⟩)\n    t t.property\n  apply (U.normEnvelope_majorizes V ε t).trans\n  have hb' : U.normEnvelope V ε t ≤ 2*(320*ε)*exp (3*stabilityConstant M*T) := by\n    simpa only [extendPath,projIcc_of_mem hT t.property] using hb\n  exact hb'.trans_eq (by ring)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "varying": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/OrdinaryEulerVaryingHorizon.lean",
+      "lines": [
+        28,
+        107
+      ],
+      "declarations": [
+        "EulerOrdinarySobolev.Evolution.eventually_h3_bound_varying",
+        "EulerOrdinarySobolev.Evolution.no_gradient_escape_of_initial_tendsto_varying"
+      ],
+      "git_blob": "d658013bee659266a2d03745f8079142d413d74c",
+      "range_sha256": "1511aab5a12e985da1d3aedef9c20b0c87c4c6330968162cf2fa162b9d650aab",
+      "opening_excerpt": "theorem eventually_h3_bound_varying\n    (ε : ℕ → ℝ) (hε : ∀ n, 0 < ε n) (hlim : Tendsto ε atTop (𝓝 0))\n    (hinit : ∀ n, tensorNorm 3 ((R n).difference (V n) ⟨0,le_rfl,hD n⟩) ≤ ε n) :\n    ∀ᶠ n in atTop, ∀ t : Icc (0 : ℝ) (durations n),",
+      "body_excerpt": "  have hp (n : ℕ) : 0 < ε n :=\n    add_pos_of_nonneg_of_pos (tensorNorm_nonneg 3 _) (by positivity)\n  have he : Tendsto ε atTop (𝓝 0) := by\n    simpa only [add_zero] using hinit.add\n      (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ))\n  exact U.no_gradient_escape_varying durations hD hDT V ε hp he\n    (fun n => le_add_of_nonneg_right (by positivity)) times",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "contradiction": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketStageContradiction.lean",
+      "lines": [
+        32,
+        72
+      ],
+      "declarations": [
+        "EulerPacketInduction.GrowthData.no_evolution_of_eventually_covering"
+      ],
+      "git_blob": "04e821b787b8448365e1a037a91c026f39b2a1e7",
+      "range_sha256": "82aaf82a2ca3cfb0db70791268f6e5752feede669ab04c7a67ecdb9f702e350c",
+      "opening_excerpt": "theorem no_evolution_of_eventually_covering (T : ℝ) (hT : 0 ≤ T)\n    (hcover : ∀ᶠ n in atTop, (P n).parent.T ≤ T) :\n    ¬ ∃ U : Evolution T hT, (U.velocity ⟨0,le_rfl,hT⟩).field=u₀ := by\n  rintro ⟨U,hU₀⟩",
+      "body_excerpt": "  have heq : (fun n => ‖fderiv ℝ ((V n).velocity (times n)).field 0‖) =\n      fun n => (P (n+N)).activationGradient := by\n    funext n\n    rw [hactual]\n    rfl\n  rw [heq]\n  exact (gradient_atTop P).comp (tendsto_add_atTop_nat N)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "lifespan": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/PacketFiniteLifespan.lean",
+      "lines": [
+        28,
+        111
+      ],
+      "declarations": [
+        "EulerPacketInduction.initialDatum",
+        "EulerPacketInduction.initialDatum_Hm",
+        "EulerPacketInduction.initialDatum_solenoidal",
+        "EulerPacketInduction.initialDatum_no_packet_horizon",
+        "EulerPacketInduction.initialDatum_finite_lifespan",
+        "EulerPacketInduction.lifespan_le_iInf_horizon"
+      ],
+      "git_blob": "3b88a9e040652c5e1866c2163c475baa9f4994d5",
+      "range_sha256": "e84adcf318cfe9ab676a9d059013f591aaf56d1227942ac12ca42738b3bf1562",
+      "opening_excerpt": "def initialDatum : SmoothL2Field Space := Stage.initialDataLimit packets le_rfl le_rfl\n\ntheorem initialDatum_Hm (s : ℕ) :\n    Tendsto (fun n => derivativeSum s",
+      "body_excerpt": "is, at most the accumulation time of the activations. -/\ntheorem lifespan_le_iInf_horizon : lifespan.duration ≤ ⨅ n, (packets n).parent.T :=\n  le_ciInf lifespan_le_packet_horizon\n\ntheorem lifespan_le_base :\n    lifespan.duration ≤ baseHorizon constructionScales.J constructionScales.X :=\n  (lifespan_le_packet_horizon 0).trans (packets 0).horizon_le",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "confinement": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CanonicalVorticityConfinement.lean",
+      "lines": [
+        29,
+        107
+      ],
+      "declarations": [
+        "EulerPacketInduction.packets_vorticity_support",
+        "EulerPacketInduction.evolution_vorticity_support",
+        "EulerPacketInduction.canonical_vorticity_confined"
+      ],
+      "git_blob": "5db23cd23ac16655898794b20deda49679949a2d",
+      "range_sha256": "a698794af12a7a6fc5994021de974a70b6267e4712b50dd014418617fcc9848f",
+      "opening_excerpt": "theorem packets_vorticity_support (n : ℕ)\n    (t : Icc (0 : ℝ) (packets n).parent.T) :\n    tsupport (vectorCurl (fun x => (packets n).state.evolution.velocity (t,x))) ⊆\n      Metric.closedBall 0 (2 + particleDisplacementCap constructionScales le_rfl le_rfl) := by",
+      "body_excerpt": "/-- Step 3, the confinement: the vorticity of the canonical maximal solution\nstays in one fixed ball throughout the lifespan. -/\ntheorem canonical_vorticity_confined (t : lifespan.Time) :\n    tsupport (vectorCurl (lifespan.maximalVelocity t)) ⊆ canonicalVorticityBall :=\n  evolution_vorticity_support (lifespan.intermediateHorizon t)\n    (lifespan.intermediateHorizon_pos t) (lifespan.intermediateHorizon_lt t)\n    (lifespan.intermediateTime t)",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "broad": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CompactVorticityContradiction.lean",
+      "lines": [
+        70,
+        107
+      ],
+      "declarations": [
+        "Euler.ComparatorBridge.no_global_solution_of_confined_vorticity"
+      ],
+      "git_blob": "79a3d9131137adaf72c36dcfe515970a9677782f",
+      "range_sha256": "6e7559166d67bd0ac803c7f0e8e7b637a68b0b16fe3d86abcd47d7e5fb56ec7e",
+      "opening_excerpt": "theorem no_global_solution_of_confined_vorticity {A : SmoothL2Field Space}\n    (L : FiniteLifespan A) (K : Set Space) (hK : IsCompact K)\n    (hconf : ∀ t : L.Time, tsupport (vectorCurl (L.maximalVelocity t)) ⊆ K) :\n    ¬ ∃ v p, EulerExistenceAndSmoothnessR3 A.field v p := by",
+      "body_excerpt": "  obtain ⟨U, hU⟩ := exists_evolution_of_commonCompactCurl h (L.duration + δ) (by linarith)\n    (K ∪ Metric.closedBall 0 B) (hK.union (isCompact_closedBall _ _)) hsupport\n  refine L.maximal (L.duration + δ) (by linarith) ⟨by linarith, U, ?_⟩\n  apply field_ext\n  rw [hU]\n  funext x\n  exact h.initial_condition x",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "endpoints": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/Solution.lean",
+      "lines": [
+        27,
+        68
+      ],
+      "declarations": [
+        "Euler.initialDatum_no_global_solution (private)",
+        "Euler.euler_breakdown_R3",
+        "Euler.exists_compact_smooth_euler_singularity"
+      ],
+      "git_blob": "57a893e64ff06494d6fd1183e163ebc44ce0ef72",
+      "range_sha256": "daa5c9fb66cd34915dc61d7f737a89779b82164374daed698c9c1be06b006b45",
+      "opening_excerpt": "private theorem initialDatum_no_global_solution :\n    ¬ (∃ v p, EulerExistenceAndSmoothnessR3 initialDatum.field v p) :=\n  no_global_solution_of_confined_vorticity lifespan canonicalVorticityBall\n    canonicalVorticityBall_compact canonical_vorticity_confined",
+      "body_excerpt": "  · exact initialVelocityConditionDecay_of_compact initialDatum.field initialDatum.smooth\n      initialDatum_compact initialDatum_divergence\n  · intro T hT\n    exact maximal_sobolev_existence_iff lifespan T hT\n  · intro T hT\n    exact ⟨maximalVelocityExtension_c1_locally_bounded lifespan T hT.1 hT.2,\n      maximalVelocityExtension_vorticity_locally_integrable lifespan T hT.1 hT.2⟩",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "records": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/CorrectionEnergyData.lean",
+      "lines": [
+        24,
+        120
+      ],
+      "declarations": [
+        "EulerCorrectionEnergyData.SpatialBudget",
+        "EulerCorrectionEnergyData.MetricBudget"
+      ],
+      "git_blob": "97e45adeb4568adfa73cb5b61846a0bb025ff99e",
+      "range_sha256": "bc1279bd67ba59857f8848fa2887b989ac392cd0feb42703602efb69818b985c",
+      "opening_excerpt": "structure SpatialBudget {q : ℕ} {T : ℝ} (hq : 6 ≤ q+1)\n    (D : CorrectionData period (q+1) (Icc (0 : ℝ) T)) (N : ℕ) (R : C(Icc (0 : ℝ) T, ℝ)) where\n  /-- Coefficient derivative radius. -/\n  Rc : ℝ",
+      "body_excerpt": "  time_nonneg : 0 ≤ time\n  /-- The actual multiplier witness is bounded uniformly. -/\n  bound_le : ∀ t, ((metric t).bound : ℝ) ≤ bound\n  /-- The actual first derivative witness is bounded uniformly. -/\n  first_le : ∀ t, ((metric t).firstBound : ℝ) ≤ first\n  /-- The actual time derivative is bounded uniformly. -/\n  time_le : ∀ t, ‖derivative t‖ ≤ time",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "data": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/AllOrderCorrectionData.lean",
+      "lines": [
+        28,
+        130
+      ],
+      "declarations": [
+        "EulerAllOrderCorrectionData.CoefficientTower",
+        "EulerAllOrderCorrectionData.FieldTower",
+        "EulerAllOrderCorrectionData.Data",
+        "EulerAllOrderCorrectionData.Data.atOrder",
+        "EulerAllOrderCorrectionData.Data.metricBudget"
+      ],
+      "git_blob": "1ead36f3b1e2b3489f1140449b6e5e2f19d2093f",
+      "range_sha256": "336d52d704840b6050fa8020a3bc4910695a2843e9ea98bdd4bcc38c08f2f6a0",
+      "opening_excerpt": "structure CoefficientTower (T : ℝ) where\n  /-- The actual smooth bounded coefficient at each time. -/\n  coefficient : Icc (0 : ℝ) T → SmoothCoefficient period\n  /-- Genuine strong derivative jets of this same coefficient. -/",
+      "body_excerpt": "  time := K.time\n  bound_nonneg := K.bound_nonneg\n  first_nonneg := K.first_nonneg\n  time_nonneg := K.time_nonneg\n  bound_le := K.bound_le\n  first_le := K.first_le\n  time_le := K.time_le",
+      "evidence": "source-inspected",
+      "limit": "Local body and enclosing parameters inspected; imported closure not certified."
+    },
+    "classes": {
+      "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+      "path": "Euler/SolutionDefinitions.lean",
+      "lines": [
+        64,
+        120
+      ],
+      "declarations": [
+        "Euler.EulerExistenceAndSmoothness",
+        "Euler.EulerExistenceAndSmoothnessR3",
+        "Euler.SobolevSmoothOn",
+        "Euler.EulerSobolevExistenceAndSmoothnessR3On"
+      ],
+      "git_blob": "346be3e2fc21f3e726530ac196c18d4cfed9cbed",
+      "range_sha256": "cfb70716f90b8483e3d28182cd51ee8d1c1c273dbfd75d667069c3aefbbf4ddb",
+      "opening_excerpt": "structure EulerExistenceAndSmoothness\n    (u₀ : ℝ³ → ℝ³) (v : ℝ³ → ℝ → ℝ³) (p : ℝ³ → ℝ → ℝ) : Prop where\n  /-- `∂ₜv + (v · ∇)v = -∇p`: viscosity and external force are both zero. -/\n  euler : ∀ x, ∀ t ≥ 0,",
+      "body_excerpt": "  initial_condition : ∀ x, v x 0 = u₀ x\n  velocity_smooth : SobolevSmoothOn I v\n  pressure_differentiable : ∀ t ∈ interior I, Differentiable ℝ (p · t)\n  euler : ∃ w : ℝ³ → ℝ → ℝ³,\n    SobolevSmoothOn I w ∧\n      (∀ t ∈ interior I,\n        HasDerivAt (fun s => toL2 (v · s)) (toL2 (w · t)) t) ∧\n      (∀ x, ∀ t ∈ interior I,\n        w x t + fderiv ℝ (v · t) x (v x t) = -gradient (p · t) x)",
+      "evidence": "source-inspected",
+      "limit": "Complete solution-class fields read; adapter proof closure not audited."
+    }
+  },
+  "debt_classification": {
+    "exposition_gap": [
+      "recursive terminal-primary/profile budgets",
+      "variable-metric inverse and commutator energy bounds",
+      "finite inviscid compactness and nonlinear limit passage",
+      "renewed-frame analytic estimates",
+      "physical initial Hm majorants",
+      "ordinary local/continuation theory",
+      "finite-energy compact-curl upgrade"
+    ],
+    "export_gap": [
+      "No concrete-radius identity exported for the selected GeometryJoinedChoice.Q; not required by inspected downstream consumers."
+    ],
+    "actual_mathematical_gap_established": [],
+    "new_research_used": false
+  },
+  "scope_failures": [
+    "NS branch map not delivered: only Euler external directory authorized.",
+    "Not a full imported dependency-closure audit or full human reconstruction.",
+    "Full chapters 05-07 not re-audited; their supplement ledgers were read as context, not Euler source evidence.",
+    "Broad-class upgrades and endpoint analytic criteria mapped at outer calls only."
+  ],
+  "next_target": "NEXT-TARGET.md",
+  "next_target_kind": "bounded full human reconstruction of the finite drift-aware inviscid correction theorem; exposition gap, not missing formal theorem",
+  "document_checks": {
+    "json_parse": true,
+    "macro_nodes": 8,
+    "typed_macro_edges": 15,
+    "cited_source_files_match_pinned_objects": 46,
+    "evidence_limit": "Structural/document-byte checks only; no Lean execution or dependency-closure certification."
+  }
+}

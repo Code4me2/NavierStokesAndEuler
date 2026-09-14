@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "branch": "NavierStokes",
+  "baseline": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "observed_head": "5fdcfe346d399f68f19a820526b59b5326f28939",
+  "validation": "source-only; no fresh kernel verification",
+  "nodes": [
+    {
+      "id": "N1",
+      "title": "Native cycle closes and retains coherence",
+      "input": "Fix selected profile h>0, B,N0 with geometricThreshold≤N0, κ=10^-5. For current x and σ≥1/5, RunInvariant σ x.",
+      "output": "RunInvariant (σ+1/10) (x.step fixedParameters commonContext); hence ∀J the literal initialized iterate has σJ=1/5+J/10.",
+      "indispensable_in_existing_route": "Native residual size without field/coefficient coherence cannot identify physical prefixes; periodicity also feeds the next particular source.",
+      "equation": "x[J+1]=step(x[J]); σ[J+1]=σ[J]+1/10.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCyclePreservation.lean",
+        "declaration": "next_runInvariant",
+        "lines": [
+          768,
+          776
+        ],
+        "body_quote": "next_runInvariant_of_particular R hN hσ (particularData R hN hσ)",
+        "quote_line": 773,
+        "blob_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCyclePreservation.lean",
+        "declaration": "state_runInvariant",
+        "lines": [
+          777,
+          785
+        ],
+        "body_quote": "exact next_runInvariant ih hN (ActualIterationLedger.sigma_admissible j)",
+        "quote_line": 784,
+        "blob_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a"
+      },
+      "parameter_domain_relation": "Same B,N0 and fixedParameters at every J. RunInvariant has analytic, coherent, periodic fields; next_runInvariant_of_particular supplies these by analytic step, coherence step, periodicity step respectively.",
+      "witness_lineage": "particularData uses actual_data R.analytic R.periodic; not a new favorable source. stepResult_of_particular passes staticData and concrete StepData to CorrectionAnalyticStep.step.",
+      "complexity": "core analytic mechanism + construction-specific carrier/alias bookkeeping",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Complete signed/temporal/rank analytic StepData production not expanded here. Profile existence remains imported; these are exposition obligations, not identified proof gaps."
+    },
+    {
+      "id": "N2",
+      "title": "Local particular control extends by zero germs, not global denominators",
+      "input": "Current native residual all-jet class of exponent α; same-carrier and input-support invariants; j∈Z nonzero. Actual raw coefficient jets on controlPatch.",
+      "output": "UniformWaveClass for literal strippedPotential at α+1/2, then current physical mode bounds and compatible glued particular fields.",
+      "indispensable_in_existing_route": "This is how the local selected solver enters physical estimates without asserting nonvanishing normal on every totalized point.",
+      "equation": "A_coeff=(i/ω) normalCoefficient(N,a); |ω^-1|≤sqrt(ε). Outside control cells the localized amplitude is zero as a germ.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCurrentParticularBounds.lean",
+        "declaration": "actual_potential_coefficient_class",
+        "lines": [
+          150,
+          179
+        ],
+        "body_quote": "have hr := ActualParticularStageControls.raw_jets x",
+        "quote_line": 159,
+        "blob_sha256": "a867e862b66b61a077feedfabad96422265d1f7f785cb689d7d2d7de93f5114f"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GluedStageEstimates.lean",
+        "declaration": "current_potential_bound",
+        "lines": [
+          601,
+          620
+        ],
+        "body_quote": "(fun k hk => ActualCurrentParticularBounds.current_potential_mode_bound",
+        "quote_line": 608,
+        "blob_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6"
+      },
+      "parameter_domain_relation": "raw_jets uses preserves_frequency hx; control cover is controlPatch OR actual amplitude zero germ. Common potential class enlarges local jets then uses common_amplitude_germ/common_zero_germs. Physical gluing uses same current state and compatible bands, not an unrelated copy-family representative.",
+      "witness_lineage": "actual_potential_coefficient_class → potential_local_class → common_potential_class; original source extraction and transported frame of chapters 05–06 retained.",
+      "complexity": "core inverse-carrier gain; construction-specific support cover; formalization adapter for local totalizations",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Current-mode pullback derivative proof is not fully reconstructed. Chapter 06 explicit numerical arrays still lack their selected full-domain bridge; no global selected certificate follows from this local-germ route."
+    },
+    {
+      "id": "N3",
+      "title": "Central boundary: five-field physical identity certificate",
+      "input": "For all raw stages k: smooth A_k,D_k,P_k on t<1,q<qbig; StageRealizations on bands n≥Nr; ExteriorStages; 2Q_Nr≤qbig; CycleRepresentation of same iterate xJ.",
+      "output": "∀J PhysicalData B Nr xJ.state UJ pJ, where UJ=curl Σ[k≤J]A_k+Σ[k≤J]D_k and pJ=Σ[k≤J]P_k.",
+      "indispensable_in_existing_route": "The residual theorem estimates a native state. These exact local identities make that state the same physical prefix later subtracted from the diagonal.",
+      "equation": "q(forward z)<2Q_n≤2Q_Nr≤qbig; θbranch=θ+2πk ⇒ f(θbranch)=f(θ).",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualPhysicalPrefixFields.lean",
+        "declaration": "physicalFields_of_stages",
+        "lines": [
+          438,
+          474
+        ],
+        "body_quote": "exact H.velocity_germ hfloor hA J Hrep n hn ht hz",
+        "quote_line": 467,
+        "blob_sha256": "3f03223ea715627a2eb2ea80218edaf99a9e9e2f937a8e896cfe7015b6df0b32"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "physicalData",
+        "lines": [
+          974,
+          984
+        ],
+        "body_quote": "ActualPhysicalPrefixFields.physicalFields_all (stageRealizations B N0 hN) (exteriorStages B N0 hN)",
+        "quote_line": 980,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "parameter_domain_relation": "Nr=residualBand, not firstBand; prefix includes stage zero and J+1 summands. PhysicalData is PhysicalFields with U=ActualPolarCoverage.nativeDomain.",
+      "witness_lineage": "Literal suppliers are stageRealizations, exteriorStages, stages_smooth, twice_residual_scale, cycle_representation of ActualCandidateConstruction; see full field expansion below.",
+      "complexity": "formalization adapter with indispensable domain and periodicity identities",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Pointwise chart formulas for every native signed/mean constructor are not fully derived; actual suppliers are identified rather than their full analytic closure certified."
+    },
+    {
+      "id": "N4",
+      "title": "Native residual transfers through one comparable band and radial closure",
+      "input": "Invariant σ x, unchanged base error, PhysicalData B N x.state u p, N≥4, N0 geometric. Native full residual bounds on lifted open strip.",
+      "output": "∀m, JetRate(originPast,q,R(u,p),m,h(1/2+σ)−fixedLoss(m)). For x=xJ weaken to gJ−fixedLoss(m), gJ=hJ/10.",
+      "indispensable_in_existing_route": "Fixed loss before J permits arbitrary target flatness later; radial-edge closure avoids losing estimates precisely at active-annulus boundaries.",
+      "equation": "q≤Q_n<2q; gain−βm−meanLoss(residualDegree,m)=gain−physicalLoss(h,β,m), β=2h.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCycleResidualBounds.lean",
+        "declaration": "selected_residual_jet_bound",
+        "lines": [
+          909,
+          949
+        ],
+        "body_quote": "exact jet_bound_at_closure (hsmooth.contDiffAt (r.domain_open.mem_nhds hdom)) hcl k",
+        "quote_line": 938,
+        "blob_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCycleResidualBounds.lean",
+        "declaration": "finite_residual_rates",
+        "lines": [
+          1179,
+          1197
+        ],
+        "body_quote": "have he := (H J).residual_jetRate hGeom hN (actual_iterate_base_error p J) (d J) m",
+        "quote_line": 1191,
+        "blob_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965"
+      },
+      "parameter_domain_relation": "SelectedGeometry has gap_le, annulus, in_domain, in_closure: smoothness on nativeDomain U; bounds on open strip V; chosen graph point in U∩closure(V). Exterior separately uses actual base germs.",
+      "witness_lineage": "native_residual sums source oscillations + meanGoodResidual + excluded base/Gaussian/alias errors via fullResidual_decomposition. Base error preserved by every cycle; Gaussian and axis alias bounds usable at requested exponent.",
+      "complexity": "core analytic fixed-loss transfer + construction-specific polar cover",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "cartesianPull_jet_bound and native harmonic extraction still analytic next obligations; no assertion that mere smoothness gives quantitative bounds."
+    },
+    {
+      "id": "N5",
+      "title": "Raw and prefix estimates on the identical three sequences",
+      "input": "Same RunData, mean input at firstBand N≥4, signed WaveData, coherence, ActualRepresentations, and PhysicalData at N+1.",
+      "output": "StageEstimates h qbig A D P: ∀j≥1,m raw bound Cjm(1+|log q|)^pjm q^(gj−L(m)); ∀J,m background/residual rates with losses independent of J.",
+      "indispensable_in_existing_route": "Diagonal cutoffs require raw bounds; nonlinear subtraction also needs background bounds. Neither can be replaced by residual accuracy alone.",
+      "equation": "Lpotential=max(Lcurrent,LsignedMean); actual constructor simplifies max(L,L)=L.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GluedStageEstimates.lean",
+        "declaration": "actualStageEstimates",
+        "lines": [
+          658,
+          704
+        ],
+        "body_quote": "let E := stageEstimates_of_component_bounds R M hN W",
+        "quote_line": 669,
+        "blob_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "estimates",
+        "lines": [
+          985,
+          994
+        ],
+        "body_quote": "(representations B N0 hN) (physicalData B N0 hN)",
+        "quote_line": 993,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "parameter_domain_relation": "Signed data remain native WaveData; particular is independently glued current-band field, then proved equal. N+1 residual floor relates to firstBand through actual construction, not a free extra domain.",
+      "witness_lineage": "representations_of_signed_eqOn rewrites three initial and three positive component identities; initial direct field is actual initialized angular mean, not globally zero.",
+      "complexity": "core norm/loss bookkeeping + adapters; max-self normalization is not new analysis",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Complete component bound closure unexpanded. StageEstimates contains no infinite residual hypothesis."
+    },
+    {
+      "id": "N6",
+      "title": "One diagonal produces residual flatness",
+      "input": "StageEstimates for fixed raw sequences, 0<h<1/2, qbig>0; lower bound for a0 fixed.",
+      "output": "∃one integer doubling schedule a common to A,D,P; smooth presingular sums; ∀m,r≥0 residual JetRate m r, hence zero joint jets at (1,0).",
+      "indispensable_in_existing_route": "Same schedule and finite-prefix plateau let tail and finite residual estimates concern one subtraction, not three independently selected approximants.",
+      "equation": "|D^m[χ(a_jq)F_j]|≤2^-j q^(gj/2−Lcut(m)), m≤j+2. R(UJ+w,pJ+r)−R(UJ,pJ)=wt−Δw+∇r+UJ·∇w+w·∇UJ+w·∇w.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/MixedCandidateAssembly.lean",
+        "declaration": "StageEstimates.exists_schedule",
+        "lines": [
+          67,
+          101
+        ],
+        "body_quote": "E.gain_zero E.gain_pos E.gain_mono E.gain_top E.finite_background E.finite_residual lower",
+        "quote_line": 90,
+        "blob_sha256": "2a0c8e096de0d4dfb1f025242569eff03fa0fc0f9843f5fb8bce85ae6f855991"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GermCandidateAssembly.lean",
+        "declaration": "exists_candidate_witness_of_finite_stages",
+        "lines": [
+          180,
+          282
+        ],
+        "body_quote": "E.exists_schedule F.data.h_pos F.data.h_lt_half hqbig 1",
+        "quote_line": 212,
+        "blob_sha256": "c945cd5335ff0837cd0208e224e1468b25b307967712da9021e2f4ce8ca6e0b9"
+      },
+      "parameter_domain_relation": "Fix m,r after a is selected, then choose J large. Laplacian needs m+2 velocity jets, curl another potential derivative. Constants/neighborhoods may depend on J,m,r. Raw stage zero is exempt from smallness.",
+      "witness_lineage": "MixedDiagonalResidual.exists_physical_schedule_residual_zero selects once and weakens finite residual gain gJ to gJ/2; raw fields never reselected.",
+      "complexity": "core diagonal analytic mechanism",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Six-term calculation already explained in chapter 03; new evidence here is literal constructor connection N3–N5, not a new flatness theorem."
+    },
+    {
+      "id": "N7",
+      "title": "Same sums give localized smooth force and both candidates",
+      "input": "Same diagonal, local angular data, one shrinking-support constant, axis-zero correction germs, off-plane raw extensions on endpointRoot<qbig, anchored base extension.",
+      "output": "Compact activated velocity/pressure and smooth compact-space force; periodic lift candidate from same sums. Force equals activated residual for 0≤t<1 and vanishes for t≥2.",
+      "indispensable_in_existing_route": "Flat origin jets alone cannot extend the residual at every spatial endpoint or preserve compact force support; anchored potential matters after cutting off.",
+      "equation": "curl(ρA)=ρ curl A+∇ρ×A; f= smoothExtension(traced actual residual), not an assumed force.",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/CandidateFromLimits.lean",
+        "declaration": "force",
+        "lines": [
+          83,
+          86
+        ],
+        "body_quote": "SpacetimeGluing.smoothExtension 1 (tracedResidual u p L)",
+        "quote_line": 84,
+        "blob_sha256": "d51e5997466748271657aa7f137f662a48fc98226ee7afe2a44f47141ea4bc84"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "witness",
+        "lines": [
+          1053,
+          1069
+        ],
+        "body_quote": "w.h3_blowup, w.forcing_decay, w.boundary_jets, w.compact_forcing,",
+        "quote_line": 1065,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "parameter_domain_relation": "GermCandidateAssembly passes ASum,BSum,PSum to mixed_exists_force_with_consequences and exists_compact_candidate. ea,eb,ep extend these exact sums; force traces are actual derivative limits.",
+      "witness_lineage": "selected_witness specializes B,N0; existential schedule extracted for periodic and compact routes. Separate force outputs in Witness are not asserted definitionally identical.",
+      "complexity": "core extension/locality + construction-specific gauge and angular support",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Taylor–Borel gluing and raw endpoint model production remain human exposition debt; no new full kernel verification."
+    },
+    {
+      "id": "N8",
+      "title": "Small outer route to exact forced delivered statements",
+      "input": "Periodic CandidateProperties or compact R3 Properties extracted from selected_witness; fixed ν>0.",
+      "output": "NavierStokes.Comparator.navier_stokes_breakdown_periodic and navier_stokes_breakdown_R3, with zero datum and rescaled smooth forcing.",
+      "indispensable_in_existing_route": "Uniqueness on shorter slabs identifies a global competitor; compact continuity through one contradicts candidate speed. Whole-space bridge additionally uses finite energy.",
+      "equation": "uν(t,x)=νu(νt,x), pν=ν²p(νt,x), fν=ν²f(νt,x).",
+      "producer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/R3ActualCandidate.lean",
+        "declaration": "selected_compact_candidate",
+        "lines": [
+          18,
+          24
+        ],
+        "body_quote": "exact ⟨_, _, compactForcing, hcompact⟩",
+        "quote_line": 22,
+        "blob_sha256": "9c66073a9b2f0181f7997576c2ae09c14259d43d09fb4f7bd751bf2b3a9db7a5"
+      },
+      "consumer": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ComparatorR3Theorem.lean",
+        "declaration": "navier_stokes_breakdown_R3",
+        "lines": [
+          53,
+          61
+        ],
+        "body_quote": "exact option_C_of_candidate h ν hν",
+        "quote_line": 59,
+        "blob_sha256": "e4983971f5996cbaa293e989fea3f18a348f4cbe0f787ac32c10b506bfd57aab"
+      },
+      "parameter_domain_relation": "Periodic: ComparatorTheorem.navier_stokes_breakdown_periodic calls selected_candidate then option_D_of_candidate. ComparatorSolution forwards exact theorem names. Whole-space competitor timewise L2 plus one global energy bound; periodic velocity AND scalar pressure periodic.",
+      "witness_lineage": "No H3 addition reroutes these bodies. No Research producer used. Compact and periodic candidates extracted from original witness route.",
+      "complexity": "formalization class/scaling adapter plus standard comparison mechanism",
+      "evidence": "source-inspected",
+      "unexpanded_or_unresolved": "Full pressure-recovery/class-bridge dependency audit not repeated. Existing four-target Nanoda+Lean evidence on df3d891 with final doc-only 5fdcfe3 delta is user-supplied prior evidence, not rerun."
+    }
+  ],
+  "edges": [
+    {
+      "source": "N1",
+      "target": "N2",
+      "type": "mathematical-use",
+      "relation": "Current native residual all-jet class of exponent α; same-carrier and input-support invariants; j∈Z nonzero. Actual raw coefficient jets on controlPatch.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N2",
+      "target": "N3",
+      "type": "mathematical-use",
+      "relation": "For all raw stages k: smooth A_k,D_k,P_k on t<1,q<qbig; StageRealizations on bands n≥Nr; ExteriorStages; 2Q_Nr≤qbig; CycleRepresentation of same iterate xJ.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N3",
+      "target": "N4",
+      "type": "mathematical-use",
+      "relation": "Invariant σ x, unchanged base error, PhysicalData B N x.state u p, N≥4, N0 geometric. Native full residual bounds on lifted open strip.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N4",
+      "target": "N5",
+      "type": "mathematical-use",
+      "relation": "Same RunData, mean input at firstBand N≥4, signed WaveData, coherence, ActualRepresentations, and PhysicalData at N+1.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N5",
+      "target": "N6",
+      "type": "mathematical-use",
+      "relation": "StageEstimates for fixed raw sequences, 0<h<1/2, qbig>0; lower bound for a0 fixed.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N6",
+      "target": "N7",
+      "type": "mathematical-use",
+      "relation": "Same diagonal, local angular data, one shrinking-support constant, axis-zero correction germs, off-plane raw extensions on endpointRoot<qbig, anchored base extension.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    },
+    {
+      "source": "N7",
+      "target": "N8",
+      "type": "mathematical-use",
+      "relation": "Periodic CandidateProperties or compact R3 Properties extracted from selected_witness; fixed ν>0.",
+      "evidence": "source-inspected",
+      "scope": "mechanism dependency; exact local call evidence is separately recorded"
+    }
+  ],
+  "producer_consumer_relations": [
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCyclePreservation.lean",
+        "declaration": "next_runInvariant",
+        "lines": [
+          768,
+          776
+        ],
+        "body_quote": "next_runInvariant_of_particular R hN hσ (particularData R hN hσ)",
+        "quote_line": 773,
+        "blob_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCyclePreservation.lean",
+        "declaration": "state_runInvariant",
+        "lines": [
+          777,
+          785
+        ],
+        "body_quote": "exact next_runInvariant ih hN (ActualIterationLedger.sigma_admissible j)",
+        "quote_line": 784,
+        "blob_sha256": "86ae865efbf35259f8349490c6c63223186647b4967bb227d08a9e38d9041e3a"
+      },
+      "type": "actual-instantiation",
+      "relation": "Same B,N0 and fixedParameters at every J. RunInvariant has analytic, coherent, periodic fields; next_runInvariant_of_particular supplies these by analytic step, coherence step, periodicity step respectively.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCurrentParticularBounds.lean",
+        "declaration": "actual_potential_coefficient_class",
+        "lines": [
+          150,
+          179
+        ],
+        "body_quote": "have hr := ActualParticularStageControls.raw_jets x",
+        "quote_line": 159,
+        "blob_sha256": "a867e862b66b61a077feedfabad96422265d1f7f785cb689d7d2d7de93f5114f"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GluedStageEstimates.lean",
+        "declaration": "current_potential_bound",
+        "lines": [
+          601,
+          620
+        ],
+        "body_quote": "(fun k hk => ActualCurrentParticularBounds.current_potential_mode_bound",
+        "quote_line": 608,
+        "blob_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6"
+      },
+      "type": "mathematical-use",
+      "relation": "raw_jets uses preserves_frequency hx; control cover is controlPatch OR actual amplitude zero germ. Common potential class enlarges local jets then uses common_amplitude_germ/common_zero_germs. Physical gluing uses same current state and compatible bands, not an unrelated copy-family representative.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualPhysicalPrefixFields.lean",
+        "declaration": "physicalFields_of_stages",
+        "lines": [
+          438,
+          474
+        ],
+        "body_quote": "exact H.velocity_germ hfloor hA J Hrep n hn ht hz",
+        "quote_line": 467,
+        "blob_sha256": "3f03223ea715627a2eb2ea80218edaf99a9e9e2f937a8e896cfe7015b6df0b32"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "physicalData",
+        "lines": [
+          974,
+          984
+        ],
+        "body_quote": "ActualPhysicalPrefixFields.physicalFields_all (stageRealizations B N0 hN) (exteriorStages B N0 hN)",
+        "quote_line": 980,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "type": "actual-instantiation",
+      "relation": "Nr=residualBand, not firstBand; prefix includes stage zero and J+1 summands. PhysicalData is PhysicalFields with U=ActualPolarCoverage.nativeDomain.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCycleResidualBounds.lean",
+        "declaration": "selected_residual_jet_bound",
+        "lines": [
+          909,
+          949
+        ],
+        "body_quote": "exact jet_bound_at_closure (hsmooth.contDiffAt (r.domain_open.mem_nhds hdom)) hcl k",
+        "quote_line": 938,
+        "blob_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCycleResidualBounds.lean",
+        "declaration": "finite_residual_rates",
+        "lines": [
+          1179,
+          1197
+        ],
+        "body_quote": "have he := (H J).residual_jetRate hGeom hN (actual_iterate_base_error p J) (d J) m",
+        "quote_line": 1191,
+        "blob_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965"
+      },
+      "type": "actual-instantiation",
+      "relation": "SelectedGeometry has gap_le, annulus, in_domain, in_closure: smoothness on nativeDomain U; bounds on open strip V; chosen graph point in U∩closure(V). Exterior separately uses actual base germs.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GluedStageEstimates.lean",
+        "declaration": "actualStageEstimates",
+        "lines": [
+          658,
+          704
+        ],
+        "body_quote": "let E := stageEstimates_of_component_bounds R M hN W",
+        "quote_line": 669,
+        "blob_sha256": "a7dc2d68171af0c0c0ede0ad7fc21ee9f4b8e1a3dbe8260db9a8d381ea0412d6"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "estimates",
+        "lines": [
+          985,
+          994
+        ],
+        "body_quote": "(representations B N0 hN) (physicalData B N0 hN)",
+        "quote_line": 993,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "type": "actual-instantiation",
+      "relation": "Signed data remain native WaveData; particular is independently glued current-band field, then proved equal. N+1 residual floor relates to firstBand through actual construction, not a free extra domain.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/MixedCandidateAssembly.lean",
+        "declaration": "StageEstimates.exists_schedule",
+        "lines": [
+          67,
+          101
+        ],
+        "body_quote": "E.gain_zero E.gain_pos E.gain_mono E.gain_top E.finite_background E.finite_residual lower",
+        "quote_line": 90,
+        "blob_sha256": "2a0c8e096de0d4dfb1f025242569eff03fa0fc0f9843f5fb8bce85ae6f855991"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/GermCandidateAssembly.lean",
+        "declaration": "exists_candidate_witness_of_finite_stages",
+        "lines": [
+          180,
+          282
+        ],
+        "body_quote": "E.exists_schedule F.data.h_pos F.data.h_lt_half hqbig 1",
+        "quote_line": 212,
+        "blob_sha256": "c945cd5335ff0837cd0208e224e1468b25b307967712da9021e2f4ce8ca6e0b9"
+      },
+      "type": "actual-instantiation",
+      "relation": "Fix m,r after a is selected, then choose J large. Laplacian needs m+2 velocity jets, curl another potential derivative. Constants/neighborhoods may depend on J,m,r. Raw stage zero is exempt from smallness.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/CandidateFromLimits.lean",
+        "declaration": "force",
+        "lines": [
+          83,
+          86
+        ],
+        "body_quote": "SpacetimeGluing.smoothExtension 1 (tracedResidual u p L)",
+        "quote_line": 84,
+        "blob_sha256": "d51e5997466748271657aa7f137f662a48fc98226ee7afe2a44f47141ea4bc84"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateAssembly.lean",
+        "declaration": "witness",
+        "lines": [
+          1053,
+          1069
+        ],
+        "body_quote": "w.h3_blowup, w.forcing_decay, w.boundary_jets, w.compact_forcing,",
+        "quote_line": 1065,
+        "blob_sha256": "d3ce8e53d9d3a099a6fe59543f9c1f82fa9f4b05a8a69c72b8430cbf2c094006"
+      },
+      "type": "mathematical-use",
+      "relation": "GermCandidateAssembly passes ASum,BSum,PSum to mixed_exists_force_with_consequences and exists_compact_candidate. ea,eb,ep extend these exact sums; force traces are actual derivative limits.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    },
+    {
+      "source": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/R3ActualCandidate.lean",
+        "declaration": "selected_compact_candidate",
+        "lines": [
+          18,
+          24
+        ],
+        "body_quote": "exact ⟨_, _, compactForcing, hcompact⟩",
+        "quote_line": 22,
+        "blob_sha256": "9c66073a9b2f0181f7997576c2ae09c14259d43d09fb4f7bd751bf2b3a9db7a5"
+      },
+      "target": {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ComparatorR3Theorem.lean",
+        "declaration": "navier_stokes_breakdown_R3",
+        "lines": [
+          53,
+          61
+        ],
+        "body_quote": "exact option_C_of_candidate h ν hν",
+        "quote_line": 59,
+        "blob_sha256": "e4983971f5996cbaa293e989fea3f18a348f4cbe0f787ac32c10b506bfd57aab"
+      },
+      "type": "actual-instantiation",
+      "relation": "Periodic: ComparatorTheorem.navier_stokes_breakdown_periodic calls selected_candidate then option_D_of_candidate. ComparatorSolution forwards exact theorem names. Whole-space competitor timewise L2 plus one global energy bound; periodic velocity AND scalar pressure periodic.",
+      "scope": "may pass through explicitly named intermediate producers; not necessarily a direct call"
+    }
+  ],
+  "central_boundary": {
+    "node": "N3",
+    "evidence": [
+      "source-inspected",
+      "human-derived",
+      "unexpanded"
+    ],
+    "expanded_markdown": "## Expanded central boundary: `PhysicalData` is identity-only\n\nPinned definition: `ActualCycleResidualBounds.lean:1009–1032`, abbreviation at 1137. All five fields are consumed; none is incidental to the residual route. It is **not** a record of physical bounds.\n\n| Complete field | Literal supplier in `physicalFields_of_stages` (ActualPhysicalPrefixFields.lean) | Actual use |\n|---|---|---|\n| velocity_smooth: for n≥Nr and cylindrical z in preterminal graph source, C² at forward z | `uncutVelocity_smooth` from hA,hD, using `source_sublevel` | `Invariant.stateRealization` passes to physical residual identity |\n| pressure_differentiable: same domain, differentiability at forward z | finite sum of hP, `source_sublevel` | same `stateRealization` |\n| velocity_germ: u∘forward equals frame(θ) times scaled base+increment in a neighborhood | `StageRealizations.velocity_germ`, then `velocity_prefix` and `velocity_pullback_germ` | residual derivatives transferred by chart-identity germ |\n| pressure_germ: pressure pullback equals scaled actual base pressure+totalPressureIncrement locally | `StageRealizations.pressure_germ`, `pressure_prefix`, `pressure_pullback_germ` | same residual identity, with actual pressure |\n| exterior: u,p equal selected base for t<1,q<Q_Nr outside active annulus | `HE.prefix_exterior` | `PhysicalFields.exterior_germs`, then exterior branch of `selected_residual_jetRate` |\n\nNo claim of unused nested fields follows from this table. `StageRealizations` has exactly potential/direct/pressure stagewise EqOn fields; `ExteriorStages` has exactly potential_zero, potential_succ, direct_zero (all k), pressure_zero, pressure_succ. Their full definitions and consumers were read. Direct zero here means **exterior zero**, including stage zero, not globally zero initialized direct field.\n\n### Literal suppliers one layer further down\n\n`ActualCandidateAssembly.stageRealizations` (954 onward) splits potential/pressure k=0 versus k=j+1. Zeroth suppliers add gauged base, initial primary wave and initialized stream/pressure. Positive suppliers add current particular, signed and mean pieces. Direct uses `direct_on_chart(meanCycleInput...)` at every k. `firstBand_le_residualBand` converts the band requirement. In `physicalData` (974 onward), all raw fields, qbig, parameterSequence, stage realization and cycle representation are from the same B,N0.\n\nFor the particular part, `particularPotential_on_chart` (628 onward) first uses `ActualValidBandWaves.potential_curl_germ` on the actual compatible glued field, then `ActualCurrentParticularAssembly.localPotential_curl_eqOn`. For the signed part, `signedPotential_on_chart` (861 onward) calls `ActualSignedPhysicalCoherence.cyclePotential_curl` with the **post-particular** primitive/reconstructed pressure, post-particular coherence, incoming labels, and the amplitude bound from `CurrentSignedCurl.amplitudeBound_of_mean`. These are different constructor obligations, not interchangeable WaveData bundles.\n\n`exteriorStages` (603 onward) uses `initialPotential_stage`, `positive_stage`, `direct_stage`, `initialPressure_stage`. `positive_stage` is addition of actual particular, signed and stream/mean-pressure exterior germs. `PhysicalStage.exterior` also separately produces shrinking support and axis-zero germs; this existing shared predicate is already a successful simplification, not new duplication to eliminate.\n\n### Worked domain/identity calculation: the honest extra residual band\n\nLet N=firstBand and Nr=N+1, qbig=Q_N in this assembly. For a point in the residual chart, the normalized carrier supplies q/Q_n<2, hence\n\n    q<2 Q_n≤2 Q_Nr≤qbig.\n\nThe strict first inequality gives an open physical neighborhood. Thus stage smoothness and stagewise EqOn, only known on q<qbig, really apply there. Replacing Nr by N would only give q<2qbig, insufficient. This is a construction-domain requirement, not a norm-loss estimate. The theorem accepts the more general contract `2Q_Nr≤qbig`.\n\nA polar branch gives θ'=θ+2πk, not θ'=θ. `polarInput_cos_sin` derives equal sine/cosine from inverse-chart reconstruction; `periodic_eq_of_cos_sin` obtains integer k and invokes periodicity. `represented_oscillation_periodic` and `represented_pressure_periodic` derive that periodicity from the **stored harmonic representation**, then velocityTZ/pressureTZ preserve it. Since frames also agree under 2πk, the resulting physical germs are equal. This is why a native representation invariant is needed even after coefficient bounds are known.\n\nFinally UJ=curl(sum k<J+1 A_k)+sum k<J+1 D_k matches xJ, not x[J+1]. Exterior finite sums reduce to A_base and p_base. Curl sees a germ, then `finalPotential_sameCurl` identifies velocity. No derivative of a globally arbitrary totalized raw field is justified outside the open domain.\n\n### Next analytic obligation exposed by the identity boundary\n\n`Invariant.native_residual` (ActualCycleResidualBounds.lean:839 onward) is independent quantitative work. It assembles the literal source sum, meanGoodResidual and all excluded errors. `selected_residual_jet_bound` selects n with q≤Q_n<2q, puts the graph point in nativeDomain **and closure of the bounded strip**, then uses smoothness to pass native jet estimates to that closure. Only then does `cartesianPull_jet_bound` transfer to physical jets with β=2h. Outside the active set, the base exterior residual is used instead. A future reconstruction must derive that pullback estimate and extraction/weighted-sum bounds, not repackage PhysicalData again.\n\n## What is new relative to chapters 05–07\n\nNot the modal energy calculation, reciprocal arrays, pulse interpretation or six-term flatness algebra. New inspected evidence is: local controlPatch-to-common potential transfer by a zero-germ alternative; all five PhysicalData suppliers and uses; angular branch periodicity from actual stored representation; the extra residual-band domain budget; separate U/closure(V) roles in residual transfer; and the literal calls connecting these identities to fixed-loss StageEstimates and one schedule.\n\nThe selected full-domain numerical-array assertion of chapter 06 remains unresolved as an export/exposition strengthening, not disproved and not a demonstrated formal theorem gap. Its eventual upstream construction cannot identify a classically selected preparation with the exhibited one. N2's local support alternative does not silently close that assertion.\n",
+    "fields": [
+      {
+        "field": "velocity_smooth",
+        "supplier": "physicalFields_of_stages: uncutVelocity_smooth + source_sublevel",
+        "consumer": "Invariant.stateRealization",
+        "use": "consumed",
+        "evidence": "source-inspected"
+      },
+      {
+        "field": "pressure_differentiable",
+        "supplier": "physicalFields_of_stages: ContDiffOn.sum + source_sublevel",
+        "consumer": "Invariant.stateRealization",
+        "use": "consumed",
+        "evidence": "source-inspected"
+      },
+      {
+        "field": "velocity_germ",
+        "supplier": "StageRealizations.velocity_germ → velocity_prefix + velocity_pullback_germ",
+        "consumer": "Invariant.stateRealization → selected_residual_jet_bound",
+        "use": "consumed",
+        "evidence": "source-inspected"
+      },
+      {
+        "field": "pressure_germ",
+        "supplier": "StageRealizations.pressure_germ → pressure_prefix + pressure_pullback_germ",
+        "consumer": "Invariant.stateRealization → selected_residual_jet_bound",
+        "use": "consumed",
+        "evidence": "source-inspected"
+      },
+      {
+        "field": "exterior",
+        "supplier": "ActualExteriorPrefix.ExteriorStages.prefix_exterior",
+        "consumer": "PhysicalFields.exterior_germs → selected_residual_jetRate",
+        "use": "consumed",
+        "evidence": "source-inspected"
+      }
+    ],
+    "supporting_citations": [
+      {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCycleResidualBounds.lean",
+        "declaration": "PhysicalFields",
+        "lines": [
+          1009,
+          1034
+        ],
+        "body_quote": "structure PhysicalFields (B N : ℕ)",
+        "quote_line": 1009,
+        "blob_sha256": "8445a2a328be213d5c7041a33c5b20bcd8b85bb09526d0738bcb67b2d52a0965"
+      },
+      {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualPhysicalPrefixFields.lean",
+        "declaration": "StageRealizations",
+        "lines": [
+          342,
+          357
+        ],
+        "body_quote": "structure StageRealizations (B N0 Nr : ℕ)",
+        "quote_line": 342,
+        "blob_sha256": "3f03223ea715627a2eb2ea80218edaf99a9e9e2f937a8e896cfe7015b6df0b32"
+      },
+      {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualPhysicalPrefixFields.lean",
+        "declaration": "StageRealizations.velocity_germ",
+        "lines": [
+          386,
+          412
+        ],
+        "body_quote": "obtain ⟨a, ha, i, hi⟩ := exists_validChart hfloor hn ht hz",
+        "quote_line": 405,
+        "blob_sha256": "3f03223ea715627a2eb2ea80218edaf99a9e9e2f937a8e896cfe7015b6df0b32"
+      },
+      {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualExteriorPrefix.lean",
+        "declaration": "ExteriorStages",
+        "lines": [
+          56,
+          70
+        ],
+        "body_quote": "structure ExteriorStages (B Nr : ℕ)",
+        "quote_line": 56,
+        "blob_sha256": "85a554d8c36f2892de2f62d16ae87d9d2253bca0abd99cc0ac1fc7ff1ec0747c"
+      },
+      {
+        "pin": "5fdcfe346d399f68f19a820526b59b5326f28939",
+        "path": "NavierStokes/ActualCandidateConstruction.lean",
+        "declaration": "twice_residual_scale",
+        "lines": [
+          94,
+          102
+        ],
+        "body_quote": "2 * ChartScales.Q (residualBand B N0) = qbig B N0 := by",
+        "quote_line": 95,
+        "blob_sha256": "92a829e5397206ec189b323b63a9ec3de86f57c6ab5e9f5aa7c2c90faca28270"
+      }
+    ]
+  },
+  "excluded": [
+    "unforced NS campaigns",
+    "Research routes",
+    "H3 additions as delivered-route inputs",
+    "upstream witness substitution"
+  ],
+  "scope_failures": [
+    "No complete analytic dependency-closure audit",
+    "No independent PDE review",
+    "No fresh Lean or Nanoda verification"
+  ]
+}
