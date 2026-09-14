@@ -1,0 +1,56 @@
+[
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/CALCULATION-FINAL.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/CALCULATION-FINAL.md",
+    "sha256": "48ddb7b69ad271b31969d0f08638c095c1907b3e99e820708c39851f41799b1a",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/CALCULATION.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/CALCULATION.md",
+    "sha256": "d45cd18665ac68a965bb145c37fe65120e334f31476ce94b074e6c50d23a299d",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/CHECKS.json",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/CHECKS.json",
+    "sha256": "568aaa427b926e96a64288f7e98d2565c86db32e428f34712da8318681154e01",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/FINAL-OVERVIEW.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/FINAL-OVERVIEW.md",
+    "sha256": "f858208006a77c02710f8e8428ce4b7ad31c56a93fd13385d7da509d29c7c7c5",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/INPUTS.json",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/INPUTS.json",
+    "sha256": "9555b00ba3744127ab68ece12b4d501da9f9d1d816ded0bffdd81de403a2a075",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/OVERVIEW.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/OVERVIEW.md",
+    "sha256": "bb1907fb8e778acb56bfc99767e7970b1bee162cd3b4bfb50834ba7df5e88ee6",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/REVIEW-DISPOSITIONS.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/REVIEW-DISPOSITIONS.md",
+    "sha256": "4e65f6ebf4cba7f0243e3d3a8a98aef73ad479b4971ef6ce9770af067054b7f7",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/REVIEW-analytic-seed-and-smoothness-0a461a437dca41b58700c6afab1a64a6.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/REVIEW-analytic-seed-and-smoothness-0a461a437dca41b58700c6afab1a64a6.md",
+    "sha256": "6cbd3b081020c6e25165fce2fbc7e0b159300244b7ad7cd3d3cc830d8905bee0",
+    "adaptations": []
+  },
+  {
+    "source": "/home/velvet/pulse-seeding-analysis-nM8ujEl7/REVIEW-nonlinear-source-fidelity-7c4e91b2.md",
+    "committed_copy": "docs/unforced-restart/strategy/pulse-seeding/REVIEW-nonlinear-source-fidelity-7c4e91b2.md",
+    "sha256": "91ecb0ddcb6f0f32b49067721bf8c4bc3d5f943e075fb58a6f8016baf354b0e0",
+    "adaptations": []
+  }
+]
